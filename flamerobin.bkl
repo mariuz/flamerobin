@@ -65,8 +65,10 @@
         <runtime-libs>$(RTL_TYPE)</runtime-libs>
         <threading>multi</threading>
 
-        <include>$(WXDIR)/include</include>
-        <include>$(WXDIR)/contrib/include</include>
+        <if cond="FORMAT!='autoconf'">
+            <include>$(WXDIR)/include</include>
+            <include>$(WXDIR)/contrib/include</include>
+        </if>
 
         <!-- Set debug info here -->
         <set var="WXDEBUG">
@@ -427,8 +429,20 @@
         <app-type>gui</app-type>
         <cxx-rtti>on</cxx-rtti>
         <cxx-exceptions>on</cxx-exceptions>
-        <precomp-headers>on</precomp-headers>
         <warnings>max</warnings>
+
+        <headers>$(HEADERFILES)</headers>
+        <sources>$(SOURCEFILES)</sources>
+
+        <!-- the precompiled header file is created in $(BUILDDIR), when
+             the first source file is compiled - all other source files 
+             only *use* the PCH file
+             ideally a new source file should be used, but main.cpp is
+             sufficiently stable (changes will cause a full rebuild) -->
+        <precomp-headers-header>wx/wxprec.h</precomp-headers-header>
+        <precomp-headers>on</precomp-headers>
+        <precomp-headers-file>$(id)</precomp-headers-file>
+        <precomp-headers-gen>$(SOURCEDIR)/main.cpp</precomp-headers-gen>
 
         <define>$(IBPPCOMPILERDEFINE)</define>
         <define>$(IBPPPLATFORMDEFINE)</define>
@@ -441,9 +455,6 @@
             <include>res</include>
         </if>
         <include>$(DOLLAR)(IBPP)</include>
-
-        <headers>$(HEADERFILES)</headers>
-        <sources>$(SOURCEFILES)</sources>
 
         <win32-res>$(RESDIR)/flamerobin.rc</win32-res>
         <lib-path>$(IBPPLIBPATH)</lib-path>
