@@ -18,6 +18,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): Nando Dessena
 */
 
@@ -46,6 +48,13 @@
 #include "ExecuteSqlFrame.h"
 #include "config.h"
 #include "dberror.h"
+
+// TODO: USE_MYDATAGRID
+#ifndef USE_MYDATAGRID
+#include "frDataGrid.h"
+#include "frDataGridTable.h"
+#endif
+
 #include "metadata/server.h"
 #include "metadata/procedure.h"
 #include "metadata/view.h"
@@ -303,7 +312,13 @@ void ExecuteSqlFrame::set_properties()
     for(int i = 0; i < statusbar_1->GetFieldsCount(); ++i) {
         statusbar_1->SetStatusText(statusbar_fields[i], i);
     }
+// TODO: USE_MYDATAGRID
+#ifdef USE_MYDATAGRID
     grid_data = new myDataGrid(notebook_pane_2, ID_grid_data, statementM, statusbar_1);
+#else
+    grid_data = new DataGrid(notebook_pane_2, ID_grid_data);
+    grid_data->SetTable(new GridTable(statementM), true);
+#endif
     splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
 
 	button_new->SetToolTip(_("New window"));
@@ -395,6 +410,11 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
 	EVT_BUTTON(ExecuteSqlFrame::ID_button_rollback, ExecuteSqlFrame::OnButtonRollbackClick)
 	EVT_BUTTON(ExecuteSqlFrame::ID_button_toggle, ExecuteSqlFrame::OnButtonToggleClick)
 	EVT_BUTTON(ExecuteSqlFrame::ID_button_wrap, ExecuteSqlFrame::OnButtonWrapClick)
+// TODO: USE_MYDATAGRID
+#ifndef USE_MYDATAGRID
+    EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_ROWCOUNT_CHANGED, \
+        ExecuteSqlFrame::OnGridRowCountChanged)
+#endif
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 //! display editor col:row in StatusBar and do highlighting of braces ()
@@ -866,6 +886,16 @@ void ExecuteSqlFrame::OnButtonToggleClick(wxCommandEvent& WXUNUSED(event))
 		splitter_window_1->Unsplit(panel_splitter_bottom);
 	}
 }
+// TODO: USE_MYDATAGRID
+#ifndef USE_MYDATAGRID
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent &event)
+{
+    wxString s;
+    s.Printf(_("%d rows fetched"), event.GetExtraLong());
+    statusbar_1->SetStatusText(s, 1);
+}
+#endif
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::update()
 {
