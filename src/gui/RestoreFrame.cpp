@@ -70,7 +70,7 @@ private:
     void logProgress(wxString& msg);
 };
 //-----------------------------------------------------------------------------
-RestoreThread::RestoreThread(RestoreFrame* frame, std::string server, std::string username, std::string password, 
+RestoreThread::RestoreThread(RestoreFrame* frame, std::string server, std::string username, std::string password,
         std::string bkfilename, std::string dbfilename, int pagesize, IBPP::BRF flags):
     wxThread()
 {
@@ -264,8 +264,9 @@ void RestoreFrame::do_layout()
     wxBoxSizer* sizerMain = new wxBoxSizer(wxVERTICAL);
     sizerMain->Add(panel_controls, 0, wxEXPAND);
     sizerMain->Add(text_ctrl_log, 1, wxEXPAND);
-    // show at least one line of text
-    sizerMain->SetItemMinSize(text_ctrl_log, -1, text_ctrl_filename->GetSize().GetHeight());
+
+	// show at least 3 lines of text since it is default size too
+    sizerMain->SetItemMinSize(text_ctrl_log, -1, 3 * text_ctrl_filename->GetSize().GetHeight());
     SetSizerAndFit(sizerMain);
 }
 //-----------------------------------------------------------------------------
