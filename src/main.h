@@ -24,6 +24,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#define FR_VERSION "0.2.4"
 //-----------------------------------------------------------------------------
 class FRApp: public wxApp {
 public:

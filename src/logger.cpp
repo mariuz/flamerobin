@@ -38,6 +38,7 @@
 
 #include "ugly.h"
 #include "config.h"
+#include "main.h"
 #include "metadata/database.h"
 #include "logger.h"
 //-----------------------------------------------------------------------------
@@ -89,7 +90,7 @@ bool Logger::log2file(const executedStatement& st, YDatabase *db, const std::str
 	{
 		wxString header = wxString::Format(
 			_("\n/* Logged by FlameRobin %s at %s\n   User: %s    Database: %s */\n"),
-			wxT("[TODO: insert version here]"),
+			wxT(FR_VERSION),
 			wxDateTime::Now().Format(),
 			std2wx(db->getUsername()),
 			std2wx(db->getPath())

@@ -51,6 +51,7 @@
 #include "treeitem.h"
 #include "ugly.h"
 #include "dberror.h"
+#include "main.h"
 #include "urihandler.h"
 
 //-----------------------------------------------------------------------------
@@ -173,7 +174,8 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 		wxRELEASE_NUMBER
 	);
 
-	wxString msg(_("FlameRobin v0.2.3"));
+	wxString msg(_("FlameRobin v"));
+	msg += wxT(FR_VERSION);
 	msg += wxT("\n");
  	msg += _("Database administration tool for Firebird RDBMS");
 	msg += wxT("\n\n");
