@@ -130,8 +130,6 @@
 			$(SOURCEDIR)BaseFrame.cpp
 			$(SOURCEDIR)config.cpp
 			$(SOURCEDIR)converters.cpp
-			$(SOURCEDIR)DatabaseRegistrationInfoFrame.cpp
-			$(SOURCEDIR)DatabaseRegistrationInfoFrameImpl.cpp
 			$(SOURCEDIR)dberror.cpp
 			$(SOURCEDIR)ExecuteSqlFrame.cpp
 			$(SOURCEDIR)ExecuteSqlFrameImpl.cpp
@@ -140,6 +138,8 @@
 			$(SOURCEDIR)frutils.cpp
 			$(SOURCEDIR)gui/BackupFrame.cpp
 			$(SOURCEDIR)gui/BackupRestoreBaseFrame.cpp
+			$(SOURCEDIR)gui/DatabaseRegistrationDialog.cpp
+			$(SOURCEDIR)gui/MultilineEnterDialog.cpp
 			$(SOURCEDIR)gui/RestoreFrame.cpp
 			$(SOURCEDIR)gui/ServerRegistrationDialog.cpp
 			$(SOURCEDIR)images.cpp
@@ -165,7 +165,6 @@
 			$(SOURCEDIR)metadata/view.cpp
 			$(SOURCEDIR)MetadataItemPropertiesDialog.cpp
 			$(SOURCEDIR)MetadataItemPropertiesDialogImpl.cpp
-			$(SOURCEDIR)MultilineEnterDialog.cpp
 			$(SOURCEDIR)myDataGrid.cpp
 			$(SOURCEDIR)myTreeCtrl.cpp
 			$(SOURCEDIR)objectdescriptionhandler.cpp

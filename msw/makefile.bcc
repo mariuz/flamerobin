@@ -74,8 +74,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_BaseFrame.obj \
 	flamerobin_config.obj \
 	flamerobin_converters.obj \
-	flamerobin_DatabaseRegistrationInfoFrame.obj \
-	flamerobin_DatabaseRegistrationInfoFrameImpl.obj \
 	flamerobin_dberror.obj \
 	flamerobin_ExecuteSqlFrame.obj \
 	flamerobin_ExecuteSqlFrameImpl.obj \
@@ -84,6 +82,8 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_frutils.obj \
 	flamerobin_BackupFrame.obj \
 	flamerobin_BackupRestoreBaseFrame.obj \
+	flamerobin_DatabaseRegistrationDialog.obj \
+	flamerobin_MultilineEnterDialog.obj \
 	flamerobin_RestoreFrame.obj \
 	flamerobin_ServerRegistrationDialog.obj \
 	flamerobin_images.obj \
@@ -109,7 +109,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_view.obj \
 	flamerobin_MetadataItemPropertiesDialog.obj \
 	flamerobin_MetadataItemPropertiesDialogImpl.obj \
-	flamerobin_MultilineEnterDialog.obj \
 	flamerobin_myDataGrid.obj \
 	flamerobin_myTreeCtrl.obj \
 	flamerobin_objectdescriptionhandler.obj \
@@ -197,12 +196,6 @@ flamerobin_config.obj: .\..\src\config.cpp
 flamerobin_converters.obj: .\..\src\converters.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_DatabaseRegistrationInfoFrame.obj: .\..\src\DatabaseRegistrationInfoFrame.cpp
-	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
-
-flamerobin_DatabaseRegistrationInfoFrameImpl.obj: .\..\src\DatabaseRegistrationInfoFrameImpl.cpp
-	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
-
 flamerobin_dberror.obj: .\..\src\dberror.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
@@ -225,6 +218,12 @@ flamerobin_BackupFrame.obj: .\..\src\gui\BackupFrame.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 flamerobin_BackupRestoreBaseFrame.obj: .\..\src\gui\BackupRestoreBaseFrame.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+flamerobin_DatabaseRegistrationDialog.obj: .\..\src\gui\DatabaseRegistrationDialog.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+flamerobin_MultilineEnterDialog.obj: .\..\src\gui\MultilineEnterDialog.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 flamerobin_RestoreFrame.obj: .\..\src\gui\RestoreFrame.cpp
@@ -300,9 +299,6 @@ flamerobin_MetadataItemPropertiesDialog.obj: .\..\src\MetadataItemPropertiesDial
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 flamerobin_MetadataItemPropertiesDialogImpl.obj: .\..\src\MetadataItemPropertiesDialogImpl.cpp
-	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
-
-flamerobin_MultilineEnterDialog.obj: .\..\src\MultilineEnterDialog.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 flamerobin_myDataGrid.obj: .\..\src\myDataGrid.cpp

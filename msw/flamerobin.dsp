@@ -268,11 +268,7 @@ SOURCE=.\..\src\BaseFrame.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\..\src\DatabaseRegistrationInfoFrame.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\..\src\DatabaseRegistrationInfoFrameImpl.cpp
+SOURCE=.\..\src\gui\DatabaseRegistrationDialog.cpp
 # End Source File
 # Begin Source File
 
@@ -308,7 +304,7 @@ SOURCE=.\..\src\MetadataItemPropertiesDialogImpl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\..\src\MultilineEnterDialog.cpp
+SOURCE=.\..\src\gui\MultilineEnterDialog.cpp
 # End Source File
 # Begin Source File
 
