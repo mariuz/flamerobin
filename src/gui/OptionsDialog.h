@@ -40,9 +40,9 @@ namespace opt
 	class Option
 	{
 	public:
-		wxString value;
+		wxString value;					// not used currently
 		wxString text;
-		wxString description;
+		wxString description;			// not used currently
 	};
 
 	class Setting
