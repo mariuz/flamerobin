@@ -108,6 +108,11 @@ void Setting::loadFromConfig()
 	wxControl *control = *(controls.begin());
 
 	std::string skey = wx2std(key);
+
+	// set default value is needed
+	if (!config().keyExists(skey))
+		config().setValue(skey, wx2std(defaultValue));
+
 	if (type == wxT("checkbox"))
 	{
 		wxCheckBox *c = dynamic_cast<wxCheckBox *>(control);
@@ -363,6 +368,11 @@ void OptionsDialog::load()
 		{
 			if (st)
 				st->key = str;
+		}
+		else if (key == wxT("default"))
+		{
+			if (st)
+				st->defaultValue = str;
 		}
 		else if (key == wxT("enables"))
 		{

@@ -56,6 +56,12 @@ YConfig& config()
 }
 //-----------------------------------------------------------------------------
 //! return true if value exists, false if not
+bool YConfig::keyExists(const std::string& key) const
+{
+	return (dataM.find(key) != dataM.end());
+}
+//-----------------------------------------------------------------------------
+//! return true if value exists, false if not
 bool YConfig::getValue(string key, string& value)
 {
 	if (dataM.find(key) == dataM.end())

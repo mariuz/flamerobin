@@ -46,6 +46,7 @@ public:
 	bool load();
 
 	// return true if value exists, false if not
+	bool keyExists(const std::string& key) const;
 	bool getValue(std::string key, std::string& value);
 	bool getValue(std::string key, int& value);
 	bool getValue(std::string key, double& value);

@@ -8,10 +8,12 @@
 			<name>Remember window positions and sizes</name>
 			<key>FrameStorage</key>
 			<description>Newly created windows get previous size and position</description>
+			<default>0</default>
 			<enables>
 				<type>radio</type>
 				<name>Metadata properties windows</name>
 				<key>MetadataFrameStorageGranularity</key>
+				<default>0</default>
 				<option>
 					<value>0</value>
 					<text>Same setting for all</text>
@@ -31,12 +33,14 @@
 			<name>Confirm quit</name>
 			<key>ConfirmQuit</key>
 			<description>Asks the "Are you sure you wish to exit FlameRobin?" question when closing.</description>
+			<default>0</default>
 		</setting>
 		<setting>
 			<type>checkbox</type>
 			<name>Minimize to system tray</name>
 			<key>MinimizeToTray</key>
 			<description>Minimizes to system tray instead of taskbar.</description>
+			<default>0</default>
 		</setting>
 	</page>
 	<page>
@@ -46,6 +50,7 @@
 			<type>radio</type>
 			<name>When column has an user defined domain</name>
 			<key>ShowDomains</key>
+			<default>2</default>
 			<option>
 				<value>datatype</value>
 				<text>Only show datatype</text>
@@ -63,6 +68,7 @@
 			<type>radio</type>
 			<name>When table, view or stored procedure is activated</name>
 			<key>OnTreeActivate</key>
+			<default>0</default>
 			<option>
 				<value>properties</value>
 				<text>Open Properties page</text>
@@ -80,6 +86,7 @@
 			<type>checkbox</type>
 			<name>Wrap long lines by default</name>
 			<key>SQLEditorWrap</key>
+			<default>0</default>
 		</setting>
 		<setting>
 			<type>number</type>
@@ -87,30 +94,35 @@
 			<max>10</max>
 			<name>Zoom level</name>
 			<key>SQLEditorZoom</key>
+			<default>0</default>
 		</setting>
 		<setting>
 			<type>string</type>
 			<name>Date format</name>
 			<key>DateFormat</key>
 			<description>The format contains the following letters:<br />d - day of month, 1-31<br />D - day of month, 01-31<br />m - month, 1-12<br />M - month, 01-12<br />y - year, 00-99<br />Y - year, 0000-9999<br />All other characters are copied</description>
+			<default>d.m.Y</default>
 		</setting>
 		<setting>
 			<type>string</type>
 			<name>Time format</name>
 			<key>TimeFormat</key>
 			<description>The format contains the following letters:<br />h - hour, 0-24<br />H - hour, 00-24<br />m - minute, 0-59<br />M - minute, 00-59<br />s - second, 0-59<br />S - second, 00-59<br />All other characters are copied</description>
+			<default>H:M:S</default>
 		</setting>
 		<setting>
 			<type>checkbox</type>
 			<name>Re-format numbers</name>
 			<key>ReformatNumbers</key>
 			<description>If uncheked, prints decimal numbers as returned from server.</description>
+			<default>0</default>
 			<enables>
 				<type>number</type>
 				<min>0</min>
 				<max>18</max>
 				<name>Number of decimals</name>
 				<key>NumberPrecision</key>
+				<default>2</default>
 			</enables>
 		</setting>
 		<setting>
@@ -132,6 +144,7 @@
 			<name>Enable logging to file</name>
 			<key>LogToFile</key>
 			<description>Logs all successful DDL statements to file</description>
+			<default>0</default>
 			<enables>
 				<type>file</type>
 				<name>Log file</name>
@@ -141,6 +154,7 @@
 				<type>radio</type>
 				<name>Multiple files</name>
 				<key>LogToFileType</key>
+				<default>0</default>
 				<description>To use incremental file numbers, place # character<br />where you want numbers to be inserted.</description>
 				<option>
 					<value>single</value>
@@ -156,6 +170,7 @@
 			<type>checkbox</type>
 			<name>Enable logging to database</name>
 			<key>LogToDatabase</key>
+			<default>0</default>
 			<description>Logs all successful DDL statements to database.<br />This will create a table named FLAMEROBIN_LOG into your databases.</description>
 			<enables>
 				<type>checkbox</type>

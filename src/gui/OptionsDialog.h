@@ -52,6 +52,7 @@ namespace opt
 		wxString name;
 		wxString type;
 		wxString key;
+		wxString defaultValue;
 		Setting *enabledBy;
 		std::list<Setting *>enables;
 		wxString description;
