@@ -50,9 +50,10 @@ FLAMEROBIN_CXXFLAGS = /M$(__RTL_TYPE_2)$(____flamerobin_DEBUGINFO_6) /DWIN32 \
 	/Fdvc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.pdb $(____flamerobin_OPTIMIZE_7) \
 	/D_WINDOWS /D__WINDOWS__ /DWINVER=0x400 /DWIN32 /D__WIN32__ /D__WIN95__ \
 	/DSTRICT /D__WXMSW__ /DwxUSE_GUI=1 /DWIN32_LEAN_AND_MEAN \
-	/I$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(D_OPT) /D_WINDOWS /W4 \
-	/DIBPP_MSVC /DIBPP_WINDOWS /I.\src /I.\res /I$(IBPP) /GR /GX /Yu"wx/wxprec.h" \
-	/Fp"vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.pch" $(CPPFLAGS) $(CXXFLAGS)
+	/I$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(U_OPT)$(D_OPT) /D_WINDOWS \
+	/W4 /DIBPP_MSVC /DIBPP_WINDOWS /I.\src /I.\res /I$(IBPP) /GR /GX \
+	/Yu"wx/wxprec.h" /Fp"vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.pch" \
+	$(CPPFLAGS) $(CXXFLAGS)
 FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseDialog.obj \
@@ -387,5 +388,5 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_urihandler.obj: .\src\urihandler.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin.res: .\res\flamerobin.rc
-	rc /fo$@  /d WIN32 /i $(WXDIR)\include /i $(WXDIR)\contrib\include $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) $(______flamerobin_DEBUGINFO_5_p_1) /d _WINDOWS /d __WINDOWS__ /d WINVER=0x400 /d WIN32 /d __WIN32__ /d __WIN95__ /d STRICT /d __WXMSW__ /d wxUSE_GUI=1 /d WIN32_LEAN_AND_MEAN /i $(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(D_OPT) /d _WINDOWS /d IBPP_MSVC /d IBPP_WINDOWS /i .\src /i .\res /i $(IBPP) $**
+	rc /fo$@  /d WIN32 /i $(WXDIR)\include /i $(WXDIR)\contrib\include $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) $(______flamerobin_DEBUGINFO_5_p_1) /d _WINDOWS /d __WINDOWS__ /d WINVER=0x400 /d WIN32 /d __WIN32__ /d __WIN95__ /d STRICT /d __WXMSW__ /d wxUSE_GUI=1 /d WIN32_LEAN_AND_MEAN /i $(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(U_OPT)$(D_OPT) /d _WINDOWS /d IBPP_MSVC /d IBPP_WINDOWS /i .\src /i .\res /i $(IBPP) $**
 
