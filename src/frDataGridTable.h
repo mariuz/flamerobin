@@ -60,6 +60,7 @@ public:
     wxString getCellValueForInsert(int row, int col);
     IBPP::SDT getColumnType(int col);
     wxString getTableName();
+    void initialFetch();
     bool isNumericColumn(int col);
     bool needsMoreRowsFetched();
 

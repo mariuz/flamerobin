@@ -99,8 +99,7 @@ void DataGrid::fill()
 
     wxBusyCursor bc;
     BeginBatch();
-    table->Clear();
-    table->fetch();
+    table->initialFetch();
 
     for (int i = 1; i <= table->GetNumberCols(); i++)
     {

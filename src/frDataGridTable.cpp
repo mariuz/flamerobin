@@ -66,6 +66,9 @@ bool GridTable::canFetchMoreRows()
 {
     if (allRowsFetchedM || statementM->Type() != IBPP::stSelect)
         return false;
+    // could this really happen?
+    if (statementM.intf() == 0)
+        return false;
     // there should be a better way here...
     IBPP::ITransaction* tran = statementM->Transaction();
     return (tran && tran->Started());
@@ -76,9 +79,8 @@ void GridTable::Clear()
     int oldrf = rowsFetchedM;
     int oldcc = columnCountM;
 
-    allRowsFetchedM = false;
+    allRowsFetchedM = true;
     columnCountM = 0;
-    maxRowToFetchM = 100;
     rowsFetchedM = 0;
 
     for (size_t i = 0; i < dataM.size(); i++)
@@ -107,11 +109,8 @@ void GridTable::Clear()
 //-----------------------------------------------------------------------------
 void GridTable::fetch()
 {
-    if (statementM.intf() == 0)
+    if (!canFetchMoreRows())
         return;
-    if (allRowsFetchedM || rowsFetchedM >= maxRowToFetchM)
-        return;
-
     if (columnCountM == 0 && GetView())
     {
         columnCountM = statementM->Columns();
@@ -255,6 +254,14 @@ wxString GridTable::GetValue(int row, int col)
         return cell->getValue();
     else
         return wxT("[null]");
+}
+//-----------------------------------------------------------------------------
+void GridTable::initialFetch()
+{
+    Clear();
+    allRowsFetchedM = false;
+    maxRowToFetchM = 100;
+    fetch();
 }
 //-----------------------------------------------------------------------------
 bool GridTable::IsEmptyCell(int row, int col)
