@@ -367,6 +367,58 @@
         ok.png
         view.png
     </set>
+    
+    <define-tag name="mac-app-bundle" rules="exe">
+        <!-- bundle directory: -->
+        <set var="BUNDLE">$(id).app/Contents</set>
+        <set var="BUNDLE_TGT">$(BUNDLE)/PkgInfo</set>
+        <set var="BUNDLE_TGT_REF">
+            <if cond="PLATFORM_MACOSX=='1'">$(BUNDLE)/PkgInfo</if>
+        </set>
+
+        <set var="BUNDLE_PLIST">$(DOLLAR)(srcdir)/res/$(id).Info.plist</set>
+        <set var="BUNDLE_ICONS">$(DOLLAR)(srcdir)/res/$(id).icns</set>
+
+        <add-target target="$(BUNDLE_TGT)" type="action"/>
+        <modify-target target="$(BUNDLE_TGT)">
+            <!-- required data: -->
+            <depends>$(id)</depends>
+            <depends-on-file>$(BUNDLE_PLIST)</depends-on-file>
+            <depends-on-file>$(BUNDLE_ICONS)</depends-on-file>
+
+            <command>
+                <!-- create the directories: -->
+                mkdir -p $(BUNDLE)
+                mkdir -p $(BUNDLE)/MacOS
+                mkdir -p $(BUNDLE)/Resources
+
+                <!-- PkgInfo: -->
+                echo -n "APPL????" >$(BUNDLE)/PkgInfo
+
+                <!-- make a hardlink to the binary: -->
+                ln -f $(ref("__targetdir",id))$(ref("__targetname",id)) $(BUNDLE)/MacOS/$(id)
+
+                <!-- and copy resources, icons and support files -->
+                cp -f $(BUNDLE_PLIST) $(BUNDLE)/Info.plist
+                cp -f $(BUNDLE_ICONS) $(BUNDLE)/Resources
+                    <!-- NOTE: only a temporary solution -->
+                cp -R $(HTMLTEMPLATEDIR) $(BUNDLE)/MacOS
+            </command>            
+        </modify-target>
+        
+        <!-- add pseudo target id_bundle: -->
+        <add-target target="$(id)_bundle" type="phony"
+                    cond="PLATFORM_MACOSX=='1'"/>
+        <modify-target target="$(id)_bundle">
+            <dependency-of>all</dependency-of>
+            <depends>$(BUNDLE_TGT_REF)</depends>
+        </modify-target>
+
+        <!-- "make clean" should delete the bundle: -->
+        <modify-target target="clean">
+            <command>rm -rf $(id).app</command>
+        </modify-target>
+    </define-tag>
 
     <exe id="flamerobin" template="wx">
         <app-type>gui</app-type>
@@ -395,6 +447,10 @@
         <ldlibs>$(IBPPSTATICLIBRARY)</ldlibs>
         <ldlibs>$(FIREBIRDFRAMEWORK)</ldlibs>
         <sys-lib>$(FIREBIRDLIBRARY)</sys-lib>
+        
+        <if cond="FORMAT=='autoconf'">
+            <mac-app-bundle>$(id)</mac-app-bundle>
+        </if>
     </exe>
 
     <copy-files id="templates">
