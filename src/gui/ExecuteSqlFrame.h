@@ -28,10 +28,6 @@
 #ifndef EXECUTESQLFRAME_H
 #define EXECUTESQLFRAME_H
 
-// TODO: USE_MYDATAGRID
-// uncomment the next line to use the myDataGrid class
-// #define USE_MYDATAGRID
-
 #include <wx/wx.h>
 #include <wx/image.h>
 #include <wx/stc/stc.h>
@@ -47,13 +43,8 @@
 #include "logger.h"
 #include "BaseFrame.h"
 
-// TODO: USE_MYDATAGRID
-#ifdef USE_MYDATAGRID
-#include "myDataGrid.h"
-#else
 // no need to include frDataGrid.h
 class DataGrid;
-#endif
 
 class ExecuteSqlFrame;
 //-----------------------------------------------------------------------------
@@ -144,10 +135,7 @@ private:
     void OnButtonToggleClick(wxCommandEvent &event);
     void OnButtonWrapClick(wxCommandEvent &event);
     void OnButtonPlanClick(wxCommandEvent &event);
-// TODO: USE_MYDATAGRID
-#ifndef USE_MYDATAGRID
     void OnGridRowCountChanged(wxCommandEvent &event);
-#endif
 
     // begin wxGlade: ExecuteSqlFrame::methods
     void set_properties();
@@ -177,12 +165,7 @@ protected:
     wxNotebook* notebook_1;
     wxPanel* notebook_pane_1;
     wxPanel* notebook_pane_2;
-// TODO: USE_MYDATAGRID
-#ifdef USE_MYDATAGRID
-    myDataGrid* grid_data;
-#else
     DataGrid* grid_data;
-#endif
 	wxStyledTextCtrl* styled_text_ctrl_stats;
 
     wxStatusBar* statusbar_1;

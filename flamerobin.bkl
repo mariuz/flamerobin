@@ -268,7 +268,6 @@
         $(SOURCEDIR)/metadata/trigger.h
         $(SOURCEDIR)/metadata/view.h
         $(SOURCEDIR)/simpleparser.h
-        $(SOURCEDIR)/myDataGrid.h
         $(SOURCEDIR)/myTreeCtrl.h
         $(SOURCEDIR)/observer.h
         $(SOURCEDIR)/styleguide.h
@@ -335,7 +334,6 @@
         $(SOURCEDIR)/metadata/table.cpp
         $(SOURCEDIR)/metadata/trigger.cpp
         $(SOURCEDIR)/metadata/view.cpp
-        $(SOURCEDIR)/myDataGrid.cpp
         $(SOURCEDIR)/myTreeCtrl.cpp
         $(SOURCEDIR)/objectdescriptionhandler.cpp
         $(SOURCEDIR)/observer.cpp

@@ -618,10 +618,6 @@ SOURCE=.\src\metadata\metadataitemwithcolumns.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\myDataGrid.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\myTreeCtrl.cpp
 # End Source File
 # Begin Source File
@@ -831,10 +827,6 @@ SOURCE=.\src\metadata\metadataitem.h
 # Begin Source File
 
 SOURCE=.\src\metadata\metadataitemwithcolumns.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\myDataGrid.h
 # End Source File
 # Begin Source File
 

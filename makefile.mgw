@@ -95,7 +95,6 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_table.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_trigger.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_view.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_myDataGrid.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_myTreeCtrl.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_observer.o \
@@ -322,9 +321,6 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_trigger.o: ./src/metadata/trigger.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_view.o: ./src/metadata/view.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
-
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_myDataGrid.o: ./src/myDataGrid.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_myTreeCtrl.o: ./src/myTreeCtrl.cpp

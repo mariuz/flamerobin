@@ -122,7 +122,6 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_table.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_trigger.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_view.obj \
-	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_myDataGrid.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_myTreeCtrl.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_observer.obj \
@@ -363,9 +362,6 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_trigger.obj: .\src\metadata\trigger.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_view.obj: .\src\metadata\view.cpp
-	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
-
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_myDataGrid.obj: .\src\myDataGrid.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_myTreeCtrl.obj: .\src\myTreeCtrl.cpp

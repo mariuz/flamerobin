@@ -73,7 +73,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_table.o \
 	flamerobin_trigger.o \
 	flamerobin_view.o \
-	flamerobin_myDataGrid.o \
 	flamerobin_myTreeCtrl.o \
 	flamerobin_objectdescriptionhandler.o \
 	flamerobin_observer.o \
@@ -334,9 +333,6 @@ flamerobin_trigger.o: $(srcdir)/src/metadata/trigger.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_view.o: $(srcdir)/src/metadata/view.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/view.cpp
-
-flamerobin_myDataGrid.o: $(srcdir)/src/myDataGrid.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/myDataGrid.cpp
 
 flamerobin_myTreeCtrl.o: $(srcdir)/src/myTreeCtrl.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/myTreeCtrl.cpp
