@@ -34,6 +34,7 @@
     #include "wx/wx.h"
 #endif
 
+#include <algorithm>
 #include <sstream>
 
 #include "dberror.h"
