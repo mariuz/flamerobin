@@ -183,3 +183,30 @@ std::string::size_type Parser::getTableNames(std::vector<std::string>& list, std
 	//return retval;
 }
 //-----------------------------------------------------------------------------
+//! removes comments from sql statements, with taking care of single quotes
+void Parser::removeComments(std::string& sql, const std::string startComment, const std::string endComment)
+{
+	using namespace std;
+	string::size_type oldpos = 0;
+	while (true)
+	{
+		string::size_type pos = sql.find(startComment, oldpos);
+		if (pos == string::npos)
+			break;
+
+		string::size_type quote = sql.find("'", oldpos);
+		if (quote != string::npos && quote < pos)	// move to the next quote
+		{
+			oldpos = 1 + sql.find("'", quote+1);	// end quote
+			continue;
+		}
+
+		oldpos = sql.find(endComment, pos+startComment.length());
+		if (oldpos == string::npos)	// unclosed comment
+			break;
+
+		sql.erase(pos, oldpos-pos+endComment.length());
+		oldpos = pos;
+	}
+}
+//-----------------------------------------------------------------------------

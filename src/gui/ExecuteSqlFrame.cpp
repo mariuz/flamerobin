@@ -900,6 +900,26 @@ void ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
 //! when autoexecute is TRUE, program just waits user to click Commit/Rollback and closes window
 bool ExecuteSqlFrame::execute(std::string sql, bool prepareOnly)
 {
+	// check if sql only contains comments
+	std::string sqlclean(sql);
+	sqlclean += "\n";											// just in case -- comment is on last line
+	Parser::removeComments(sqlclean, "/*", "*/");
+	Parser::removeComments(sqlclean, "--", "\n");
+	while (true)
+	{
+		std::string::size_type pos = sqlclean.find(";");		// remove ;
+		if (pos == std::string::npos)
+			break;
+		sqlclean.erase(pos, 1);
+	}
+	sqlclean.erase(sqlclean.find_last_not_of(" \n\t\r") + 1);	// trim
+	if (sqlclean.empty())
+	{
+		log(_("Parsed query: " + std2wx(sql)), ttSql);
+		log(_("Empty statement detected, bailing out..."));
+		return true;
+	}
+
 	if (styled_text_ctrl_sql->AutoCompActive())
 		styled_text_ctrl_sql->AutoCompCancel();	// remove the list if needed
 	wxDateTime start = wxDateTime::Now();
