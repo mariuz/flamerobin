@@ -42,10 +42,10 @@
 
 #include "MainFrame.h"
 #include "DatabaseRegistrationInfoFrame.h"
-#include "ServerRegistrationInfoFrame.h"
 #include "ExecuteSqlFrame.h"
 #include "gui/BackupFrame.h"
 #include "gui/RestoreFrame.h"
+#include "gui/ServerRegistrationDialog.h"
 #include "MetadataItemPropertiesDialog.h"
 #include "treeitem.h"
 #include "ugly.h"
@@ -381,9 +381,9 @@ void MainFrame::OnMenuServerProperties(wxCommandEvent& WXUNUSED(event))
 	YServer *s = dynamic_cast<YServer *>(tree_ctrl_1->getSelectedMetadataItem());
 	if (!s)
 		return;
-    ServerRegistrationInfoFrame sri_frame(this, -1, _("Server Registration Info"));
-	sri_frame.setServer(s);
-	sri_frame.ShowModal();
+    ServerRegistrationDialog dlg(this, -1, _("Server Registration Info"));
+	dlg.setServer(s);
+	dlg.ShowModal();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
@@ -392,9 +392,9 @@ void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
 	if (!r)
 		return;
 	YServer s;
-    ServerRegistrationInfoFrame sri_frame(this, -1, _("Register New Server"));
-	sri_frame.setServer(&s);
-	if (wxOK == sri_frame.ShowModal())
+    ServerRegistrationDialog dlg(this, -1, _("Register New Server"));
+	dlg.setServer(&s);
+	if (wxOK == dlg.ShowModal())
 		tree_ctrl_1->selectMetadataItem(r->addServer(s));
 }
 //-----------------------------------------------------------------------------

@@ -70,6 +70,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_BackupFrame.obj \
 	flamerobin_BackupRestoreBaseFrame.obj \
 	flamerobin_RestoreFrame.obj \
+	flamerobin_ServerRegistrationDialog.obj \
 	flamerobin_images.obj \
 	flamerobin_main.obj \
 	flamerobin_MainFrame.obj \
@@ -100,8 +101,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_observer.obj \
 	flamerobin_ReorderFieldsDialog.obj \
 	flamerobin_ReorderFieldsDialogImpl.obj \
-	flamerobin_ServerRegistrationInfoFrame.obj \
-	flamerobin_ServerRegistrationInfoFrameImpl.obj \
 	flamerobin_styleguide.obj \
 	flamerobin_styleguidemsw.obj \
 	flamerobin_subject.obj \
@@ -256,6 +255,9 @@ flamerobin_BackupRestoreBaseFrame.obj: .\..\src\gui\BackupRestoreBaseFrame.cpp
 flamerobin_RestoreFrame.obj: .\..\src\gui\RestoreFrame.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
+flamerobin_ServerRegistrationDialog.obj: .\..\src\gui\ServerRegistrationDialog.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
 flamerobin_images.obj: .\..\src\images.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
@@ -344,12 +346,6 @@ flamerobin_ReorderFieldsDialog.obj: .\..\src\ReorderFieldsDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 flamerobin_ReorderFieldsDialogImpl.obj: .\..\src\ReorderFieldsDialogImpl.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
-
-flamerobin_ServerRegistrationInfoFrame.obj: .\..\src\ServerRegistrationInfoFrame.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
-
-flamerobin_ServerRegistrationInfoFrameImpl.obj: .\..\src\ServerRegistrationInfoFrameImpl.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 flamerobin_styleguide.obj: .\..\src\styleguide.cpp

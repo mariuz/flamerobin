@@ -324,11 +324,7 @@ SOURCE=.\..\src\gui\RestoreFrame.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\..\src\ServerRegistrationInfoFrame.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\..\src\ServerRegistrationInfoFrameImpl.cpp
+SOURCE=.\..\src\gui\ServerRegistrationDialog.cpp
 # End Source File
 # Begin Source File
 

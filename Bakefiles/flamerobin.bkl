@@ -141,6 +141,7 @@
 			$(SOURCEDIR)gui/BackupFrame.cpp
 			$(SOURCEDIR)gui/BackupRestoreBaseFrame.cpp
 			$(SOURCEDIR)gui/RestoreFrame.cpp
+			$(SOURCEDIR)gui/ServerRegistrationDialog.cpp
 			$(SOURCEDIR)images.cpp
 			$(SOURCEDIR)main.cpp
 			$(SOURCEDIR)MainFrame.cpp
@@ -171,8 +172,6 @@
 			$(SOURCEDIR)observer.cpp
 			$(SOURCEDIR)ReorderFieldsDialog.cpp
 			$(SOURCEDIR)ReorderFieldsDialogImpl.cpp
-			$(SOURCEDIR)ServerRegistrationInfoFrame.cpp
-			$(SOURCEDIR)ServerRegistrationInfoFrameImpl.cpp
 			$(SOURCEDIR)styleguide.cpp
 			$(STYLEGUIDEIMPLEMENTATION)
 			$(SOURCEDIR)subject.cpp
