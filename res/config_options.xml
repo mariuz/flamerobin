@@ -206,6 +206,13 @@
 				<key>LogFile</key>
 			</enables>
 			<enables>
+				<type>checkbox</type>
+				<name>Add header to each statement</name>
+				<key>LoggingAddHeader</key>
+				<description>Should logging add a header showing the context in which statement was run:<br />FlameRobin version, database, username, timestamp</description>
+				<default>1</default>
+			</enables>
+			<enables>
 				<type>radio</type>
 				<name>Multiple files</name>
 				<key>LogToFileType</key>
@@ -221,11 +228,13 @@
 				</option>
 			</enables>
 			<enables>
-				<type>checkbox</type>
-				<name>Add header</name>
-				<key>LoggingAddHeader</key>
-				<description>Should logging add a header showing the context in which statement was run:<br />FlameRobin version, database, username, timestamp</description>
+				<type>number</type>
+				<min>0</min>
+				<max>10000</max>
+				<name>Incremental file numbers start at</name>
+				<key>IncrementalLogFileStart</key>
 				<default>1</default>
+				<description>In case you want to start from some arbitrary number</description>
 			</enables>
 		</setting>
 		<setting>

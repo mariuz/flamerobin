@@ -68,7 +68,9 @@ bool Logger::log2file(const executedStatement& st, YDatabase *db, const std::str
 		if (filename.find_last_of("%d") == std::string::npos)		// %d not found, bail out
 			return false;
 		wxString test;
-		for (int i=1; i < 100000; ++i)								// dummy test for 100000
+		int start = 1;
+		config().getValue("IncrementalLogFileStart", start);
+		for (int i=start; i < 100000; ++i)							// dummy test for 100000
 		{
 			test.Printf(std2wx(filename), i);
 			if (!wxFileExists(test))
