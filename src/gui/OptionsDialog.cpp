@@ -443,14 +443,30 @@ void OptionsDialog::load()
 // browse through all page and create controls
 void OptionsDialog::createPages()
 {
+	int minw = 0, minh = 0;
 	for (std::list<Page *>::iterator it = pages.begin(); it != pages.end(); ++it)
 	{
-		listbook1->AddPage(createPanel(*it), (*it)->name, false, (*it)->image);
+		wxPanel *p = createPanel(*it);
+		listbook1->AddPage(p, (*it)->name, false, (*it)->image);
+
+		wxSize s = p->GetMinSize();		// find minimal size needed to fit all pages
+		int w = s.GetWidth();
+		int h = s.GetHeight();
+		if (w > minw)
+			minw = w;
+		if (h > minh)
+			minh = h;
 
 		// initial values
 		for (std::list<Setting *>::iterator i2 = (*it)->settings.begin(); i2 != (*it)->settings.end(); ++i2)
 			(*i2)->loadFromConfig();
 	}
+
+    if (listbook1->HasFlag(wxNB_LEFT))	// tabs left
+        minw += 100;
+    else 								// tabs on top
+        minh += 50;
+	SetSizeHints(minw, minh);
 }
 //-----------------------------------------------------------------------------
 wxPanel *OptionsDialog::createPanel(Page* pg)
