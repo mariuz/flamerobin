@@ -49,7 +49,7 @@ FLAMEROBIN_CXXFLAGS = -I$(WXDIR)\include -I$(WXDIR)\contrib\include \
 	-DWINVER=0x400 -DWIN32 -D__WIN32__ -D__WIN95__ -DSTRICT -D__WXMSW__ \
 	-DwxUSE_GUI=1 -DWIN32_LEAN_AND_MEAN \
 	-I$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(D_OPT) -W -Wall -DIBPP_GCC \
-	-DIBPP_WINDOWS -Isrc -Ires -I$(IBPP) $(CPPFLAGS) $(CXXFLAGS)
+	-DIBPP_WINDOWS -I.\src -I.\res -I$(IBPP) $(CPPFLAGS) $(CXXFLAGS)
 FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseDialog.o \
@@ -354,7 +354,7 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_urihandler.o: ./src/urihandler.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o: ./res/flamerobin.rc
-	windres --use-temp-file -i$< -o$@ --include-dir $(WXDIR)/include --include-dir $(WXDIR)/contrib/include $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) --define HAVE_W32API_H --define _WINDOWS --define __WINDOWS__ --define WINVER=0x400 --define WIN32 --define __WIN32__ --define __WIN95__ --define STRICT --define __WXMSW__ --define wxUSE_GUI=1 --define WIN32_LEAN_AND_MEAN --include-dir $(__flamerobin_WX_LIB_DIR)/msw$(D_OPT) --define IBPP_GCC --define IBPP_WINDOWS --include-dir src --include-dir res --include-dir $(IBPP)
+	windres --use-temp-file -i$< -o$@ --include-dir $(WXDIR)/include --include-dir $(WXDIR)/contrib/include $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) --define HAVE_W32API_H --define _WINDOWS --define __WINDOWS__ --define WINVER=0x400 --define WIN32 --define __WIN32__ --define __WIN95__ --define STRICT --define __WXMSW__ --define wxUSE_GUI=1 --define WIN32_LEAN_AND_MEAN --include-dir $(__flamerobin_WX_LIB_DIR)/msw$(D_OPT) --define IBPP_GCC --define IBPP_WINDOWS --include-dir ./src --include-dir ./res --include-dir $(IBPP)
 
 .PHONY: all clean templates config-options
 
