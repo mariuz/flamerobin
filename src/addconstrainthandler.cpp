@@ -158,7 +158,7 @@ bool AddConstraintHandler::handleURI(std::string& uriStr)
 		wxString source;
 		if (!GetMultilineTextFromUser(_("Enter check condition"), source, w))
 			return true;
-		sql += "\ncheck (" + source + ")";
+		sql += "\ncheck (" + wx2std(source) + ")";
 	}
 	else if (type == "UNQ")
 	{
