@@ -52,6 +52,7 @@ public:
     virtual int getCheckboxSpacing();
     virtual int getControlLabelMargin();
     virtual int getDialogMargin(wxDirection direction);
+    virtual int getEditorFontSize();
     virtual int getFrameMargin(wxDirection direction);
     virtual int getRelatedControlMargin(wxOrientation orientation);
     virtual int getUnrelatedControlMargin(wxOrientation orientation);
@@ -108,6 +109,11 @@ int YStyleGuideMAC::getDialogMargin(wxDirection direction)
         default:
             return 0;
     }
+}
+//------------------------------------------------------------------------------
+int YStyleGuideMAC::getEditorFontSize()
+{
+    return 12;
 }
 //------------------------------------------------------------------------------
 int YStyleGuideMAC::getFrameMargin(wxDirection direction)
