@@ -231,16 +231,14 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel)
 	}
 	else if (type == wxT("radio"))
 	{
-		int size = options.size();
-		wxString *opts = new wxString[size];
-		int cnt = 0;
-		for (std::list<Option *>::iterator it = options.begin(); it != options.end(); ++it)
-			opts[cnt++] = (*it)->text;
-		wxRadioBox *r = new wxRadioBox(panel, -1, name, wxDefaultPosition, wxDefaultSize, size, opts, 1, wxRA_SPECIFY_COLS);
-		delete [] opts;
-		sz->Add(r, 0, wxALL|wxFIXED_MINSIZE, border);
-		r->SetToolTip(description);
-		controls.push_back(r);
+        wxArrayString opts;
+        for (std::list<Option *>::iterator it = options.begin(); it != options.end(); ++it)
+            opts.Add((*it)->text);
+        wxRadioBox *rb = new wxRadioBox(panel, -1, name, wxDefaultPosition, wxDefaultSize, 
+            opts, 1, wxRA_SPECIFY_COLS);
+        sz->Add(rb, 0, wxALL|wxFIXED_MINSIZE, border);
+        rb->SetToolTip(description);
+        controls.push_back(rb);
 	}
 
 	// add controls to it
