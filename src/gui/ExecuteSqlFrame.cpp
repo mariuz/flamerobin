@@ -778,6 +778,9 @@ void ExecuteSqlFrame::commitTransaction()
 
 		executedStatementsM.clear();
 		styled_text_ctrl_stats->ClearAll();
+        // workaround for STC bug with 100% CPU load during Idle(),
+        // can be removed for wxWidgets versions 2.5.4 and later
+        styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
 		styled_text_ctrl_sql->SetFocus();
 
 		if (closeWhenTransactionDoneM)
@@ -843,8 +846,8 @@ void ExecuteSqlFrame::OnButtonRollbackClick(wxCommandEvent& WXUNUSED(event))
 //! wraps/unwraps text in editor
 void ExecuteSqlFrame::OnButtonWrapClick(wxCommandEvent& WXUNUSED(event))
 {
-	int mode = styled_text_ctrl_sql->GetWrapMode();
-	styled_text_ctrl_sql->SetWrapMode(mode == wxSTC_WRAP_WORD ? wxSTC_WRAP_NONE : wxSTC_WRAP_WORD);
+    int mode = styled_text_ctrl_sql->GetWrapMode();
+    styled_text_ctrl_sql->SetWrapMode(mode == wxSTC_WRAP_WORD ? wxSTC_WRAP_NONE : wxSTC_WRAP_WORD);
 }
 //-----------------------------------------------------------------------------
 //! toggle the views in the following order:
