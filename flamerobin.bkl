@@ -352,6 +352,9 @@
         <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/res</if>
         <if cond="FORMAT!='autoconf'">res</if>
     </set>
+    <set var="CONFIGOPTIONSFILES">
+        config_options.xml
+    </set>
 
     <set var="HTMLTEMPLATEDIR">
         <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/html-templates</if>
@@ -410,6 +413,7 @@
                 cp -f $(BUNDLE_ICONS) $(BUNDLE)/Resources
                     <!-- NOTE: only a temporary solution -->
                 cp -R $(HTMLTEMPLATEDIR) $(BUNDLE)/MacOS
+                cp -R $(CONFIGOPTIONSDIR)/$(CONFIGOPTIONSFILES) $(BUNDLE)/MacOS
             </command>
         </modify-target>
 
@@ -481,7 +485,7 @@
         <dependency-of>all</dependency-of>
         <srcdir>$(CONFIGOPTIONSDIR)</srcdir>
         <dstdir>$(BUILDDIR)</dstdir>
-        <files>config_options.xml</files>
+        <files>$(CONFIGOPTIONSFILES)</files>
     </copy-files>
 
 </makefile>

@@ -175,6 +175,7 @@ flamerobin.app/Contents/PkgInfo: flamerobin$(EXEEXT) $(srcdir)/res/flamerobin.In
 	cp -f $(srcdir)/res/flamerobin.icns flamerobin.app/Contents/Resources
 	
 	cp -R $(srcdir)/html-templates flamerobin.app/Contents/MacOS
+	cp -R $(srcdir)/res/config_options.xml flamerobin.app/Contents/MacOS
 
 @COND_PLATFORM_MACOSX_1@flamerobin_bundle: $(____flamerobin_BUNDLE_TGT_REF_DEP)
 
