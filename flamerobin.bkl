@@ -239,6 +239,7 @@
         $(SOURCEDIR)/gui/ReorderFieldsDialog.h
         $(SOURCEDIR)/gui/RestoreFrame.h
         $(SOURCEDIR)/gui/ServerRegistrationDialog.h
+        $(SOURCEDIR)/gui/OptionsDialog.h
         $(SOURCEDIR)/images.h
         $(SOURCEDIR)/main.h
         $(SOURCEDIR)/MainFrame.h
@@ -302,6 +303,7 @@
         $(SOURCEDIR)/gui/ReorderFieldsDialog.cpp
         $(SOURCEDIR)/gui/RestoreFrame.cpp
         $(SOURCEDIR)/gui/ServerRegistrationDialog.cpp
+        $(SOURCEDIR)/gui/OptionsDialog.cpp
         $(SOURCEDIR)/images.cpp
         $(SOURCEDIR)/main.cpp
         $(SOURCEDIR)/MainFrame.cpp
@@ -357,7 +359,7 @@
         ok.png
         view.png
     </set>
-    
+
     <define-tag name="mac-app-bundle" rules="exe">
         <!-- bundle directory: -->
         <set var="BUNDLE">$(id).app/Contents</set>
@@ -393,9 +395,9 @@
                 cp -f $(BUNDLE_ICONS) $(BUNDLE)/Resources
                     <!-- NOTE: only a temporary solution -->
                 cp -R $(HTMLTEMPLATEDIR) $(BUNDLE)/MacOS
-            </command>            
+            </command>
         </modify-target>
-        
+
         <!-- add pseudo target id_bundle: -->
         <add-target target="$(id)_bundle" type="phony"
                     cond="PLATFORM_MACOSX=='1'"/>
@@ -438,7 +440,7 @@
         <ldlibs>$(IBPPSTATICLIBRARY)</ldlibs>
         <ldlibs>$(FIREBIRDFRAMEWORK)</ldlibs>
         <sys-lib>$(FIREBIRDLIBRARY)</sys-lib>
-        
+
         <if cond="FORMAT=='autoconf'">
             <mac-app-bundle>$(id)</mac-app-bundle>
         </if>

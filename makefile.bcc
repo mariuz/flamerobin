@@ -95,6 +95,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_OptionsDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.obj \
@@ -274,6 +275,9 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.obj: .\src\gui\RestoreFrame.
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.obj: .\src\gui\ServerRegistrationDialog.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_OptionsDialog.obj: .\src\gui\OptionsDialog.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.obj: .\src\images.cpp

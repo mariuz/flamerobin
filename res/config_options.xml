@@ -1,0 +1,188 @@
+<?xml version='1.0' encoding='ISO-8859-2'?>
+<root>
+	<page>
+		<pagename>General</pagename>
+		<image>0</image>
+		<setting>
+			<type>checkbox</type>
+			<name>Remember window positions and sizes</name>
+			<key>FrameStorage</key>
+			<enables>
+				<type>radio</type>
+				<name>Metadata properties windows</name>
+				<key>MetadataFrameStorageGranularity</key>
+				<option>
+					<value>0</value>
+					<text>Same setting for all</text>
+					<description>All property pages share the same setting.</description>
+				</option>
+				<option>
+					<value>1</value>
+					<text>Same setting for all object of same type</text>
+					<description>For example, property pages for all tables share the same setting.</description>
+				</option>
+				<option>
+					<value>2</value>
+					<text>Separate for each individual object</text>
+					<description>For example, each table has its own setting.</description>
+				</option>
+			</enables>
+		</setting>
+		<setting>
+			<type>checkbox</type>
+			<name>Confirm quit</name>
+			<key>ConfirmQuit</key>
+			<description>Asks the "Are you sure you wish to exit FlameRobin?" question when closing.</description>
+		</setting>
+		<setting>
+			<type>checkbox</type>
+			<name>Minimize to system tray</name>
+			<key>MinimizeToTray</key>
+			<description>Minimizes to system tray instead of taskbar.</description>
+		</setting>
+	</page>
+	<page>
+		<pagename>Tree view</pagename>
+		<setting>
+			<type>radio</type>
+			<name>When column has an user defined domain</name>
+			<key>ShowDomains</key>
+			<option>
+				<value>datatype</value>
+				<text>Only show datatype</text>
+			</option>
+			<option>
+				<value>domain</value>
+				<text>Only show domain</text>
+			</option>
+			<option>
+				<value>both</value>
+				<text>Show both domain and datatype</text>
+			</option>
+		</setting>
+		<setting>
+			<type>radio</type>
+			<name>When table, view or stored procedure is activated</name>
+			<key>OnTreeActivate</key>
+			<option>
+				<value>properties</value>
+				<text>Open Properties page</text>
+			</option>
+			<option>
+				<value>columns</value>
+				<text>Show column info</text>
+			</option>
+		</setting>
+	</page>
+	<page>
+		<pagename>SQL Editor</pagename>
+		<setting>
+			<type>checkbox</type>
+			<name>Wrap long lines by default</name>
+			<key>SQLEditorWrap</key>
+		</setting>
+		<setting>
+			<type>number</type>
+			<range>-10,10</range>
+			<name>Zoom level</name>
+			<key>SQLEditorZoom</key>
+		</setting>
+		<setting>
+			<type>string</type>
+			<name>Date format</name>
+			<key>DateFormat</key>
+			<description>The format contains the following letters:
+				d - day of month, 1-31
+				D - day of month, 01-31
+				m - month, 1-12
+				M - month, 01-12
+				y - year, 00-99
+				Y - year, 0000-9999
+				All other characters are copied
+			</description>
+		</setting>
+		<setting>
+			<type>string</type>
+			<name>Time format</name>
+			<key>TimeFormat</key>
+			<description>The format contains the following letters:
+				h - hour, 0-24
+				H - hour, 00-24
+				m - minute, 0-59
+				M - minute, 00-59
+				s - second, 0-59
+				S - second, 00-59
+				All other characters are copied
+			</description>
+		</setting>
+		<setting>
+			<type>checkbox</type>
+			<name>Re-format numbers</name>
+			<key>ReformatNumbers</key>
+			<description>If uncheked, prints decimal numbers as returned from server.</description>
+			<enables>
+				<type>number</type>
+				<range>0,18</range>
+				<name>Number of decimals</name>
+				<key>NumberPrecision</key>
+			</enables>
+		</setting>
+		<setting>
+			<type>font</type>
+			<name>Font for editor</name>
+			<key>SQLEditorFont</key>
+		</setting>
+		<setting>
+			<type>font</type>
+			<name>Font for grid</name>
+			<key>DataGridFont</key>
+		</setting>
+	</page>
+	<page>
+		<pagename>Logging</pagename>
+		<setting>
+			<type>checkbox</type>
+			<name>Enable logging to file</name>
+			<key>LogToFile</key>
+			<description>Logs all successful DDL statements to file</description>
+			<enables>
+				<type>file</type>
+				<name>Log file</name>
+				<key>LogFile</key>
+			</enables>
+			<enables>
+				<type>radio</type>
+				<name>Multiple files</name>
+				<key>LogToFileType</key>
+				<option>
+					<value>single</value>
+					<text>Log everything to a single file</text>
+				</option>
+				<option>
+					<value>incremental</value>
+					<text>Use incremental file numbers</text>
+					<description>Place # character where you want numbers to be inserted.</description>
+				</option>
+			</enables>
+		</setting>
+		<setting>
+			<type>checkbox</type>
+			<name>Enable logging to database</name>
+			<key>LogToDatabase</key>
+			<description>
+				Logs all successful DDL statements to database.
+				This will create a table named FLAMEROBIN_LOG into your databases.
+			</description>
+			<enables>
+				<type>checkbox</type>
+				<name>Use generator instead of 1+max(id)</name>
+				<key>LoggingUsesGenerator</key>
+				<description>
+					If not checked, logging will do a "select max(id)+1" to create keys for
+					flamerobin_log table. This can be slow if there is a huge amount of	records in it.
+				</description>
+			</enables>
+		</setting>
+	</page>
+</root>
+
