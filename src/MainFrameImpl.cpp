@@ -571,7 +571,7 @@ void MainFrame::showGeneratorValue(YGenerator* g)
 	if (!g)
 		return;
 	if (!g->loadValue(true))
-		wxMessageBox(std2wx(lastError().getMessage()), _T("Error!"), wxOK | wxICON_ERROR);
+		wxMessageBox(std2wx(lastError().getMessage()), _("Error!"), wxOK | wxICON_ERROR);
 	else
 		g->notify();
 }

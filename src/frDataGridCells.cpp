@@ -58,6 +58,6 @@ wxString DataGridCell::getValue()
 // DataNAGridCell class
 wxString DataNAGridCell::getValue()
 {
-    return wxString(_T("[...]"));
+    return wxString(wxT("[...]"));
 }
 //----------------------------------------------------------------------

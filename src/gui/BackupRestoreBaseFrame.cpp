@@ -44,7 +44,7 @@ Contributor(s): Milan Babuskov
 
 //-----------------------------------------------------------------------------
 BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, YDatabase* db):
-    BaseFrame(parent, -1, _T(""), wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE|wxNO_FULL_REPAINT_ON_RESIZE)
+    BaseFrame(parent, -1, _(""), wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE|wxNO_FULL_REPAINT_ON_RESIZE)
 {
     databaseM = db;
     serverM = reinterpret_cast<YServer*>(db->getParent());
