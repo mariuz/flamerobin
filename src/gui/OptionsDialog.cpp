@@ -248,7 +248,7 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel)
 	return sz;
 }
 //-----------------------------------------------------------------------------
-//! recursively enable/disable controls do that multiple levels of depth are possible
+//! recursively enable/disable controls so that multiple levels of depth are possible
 void Setting::enableControls()
 {
 	if (type != wxT("checkbox") || controls.empty())	// only checkboxes can enable other controls
@@ -612,7 +612,6 @@ void OptionsDialog::OnCheckbox(wxCommandEvent& event)
 	Setting *s = findSetting(event);		// find the setting for this checkbox
 	if (!s)
 		return;
-	//s->enableControls(event.IsChecked());
 	s->enableControls();
 }
 //-----------------------------------------------------------------------------
