@@ -51,8 +51,9 @@
 #include "treeitem.h"
 #include "ugly.h"
 #include "dberror.h"
-#include "main.h"
+#include "config.h"
 #include "urihandler.h"
+#include "main.h"
 
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
@@ -110,41 +111,52 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
 		return;
 
 	bool expanded = tree_ctrl_1->IsExpanded(item);
-
-	// has to be declared outside, since local cannot be initialized inside switch...case
-	MetadataItemPropertiesFrame *mipf;
-
-	// do default action for the node, depending on the type
 	NodeType nt = m->getType();
-	switch (nt)
+
+	enum { showProperties = 0, showColumnInfo };
+	int treeActivateAction = showProperties;
+	config().getValue("OnTreeActivate", treeActivateAction);
+	if (treeActivateAction == showColumnInfo && (nt == ntTable || nt == ntView || nt == ntProcedure))
 	{
-		//case ntServer:	// pehaps it is better to leave default double-click action: "collapse the tree branch"
-		//	ServerProperties(dynamic_cast<YServer *>(m));
-		//	break;
-		case ntDatabase:
-			connect(false);						// false = don't warn if already connected
-			break;
-		case ntTable:
-		case ntView:
-			if (!((YxMetadataItemWithColumns *)m)->checkAndLoadColumns())
-				::wxMessageBox(std2wx(lastError().getMessage()), _("An error occurred"), wxICON_ERROR);
-			break;
-		case ntProcedure:
+		if (nt == ntProcedure)
+		{
 			if (!((YProcedure *)m)->checkAndLoadParameters())
 				::wxMessageBox(std2wx(lastError().getMessage()), _("An error occurred"), wxICON_ERROR);
-			break;
-		case ntGenerator:
-      		showGeneratorValue(dynamic_cast<YGenerator*>(m));
-			break;
-		case ntDomain:
-		case ntFunction:
-		case ntTrigger:
-			mipf = new MetadataItemPropertiesFrame(this, m);
-			mipf->Show();
-			break;
-		default:
-			return;
-	};
+		}
+		else
+		{
+			if (!((YxMetadataItemWithColumns *)m)->checkAndLoadColumns())
+				::wxMessageBox(std2wx(lastError().getMessage()), _("An error occurred"), wxICON_ERROR);
+		}
+	}
+	else
+	{
+		// has to be declared outside, since local cannot be initialized inside switch...case
+		MetadataItemPropertiesFrame *mipf;
+		switch (nt)
+		{
+			//case ntServer:	// pehaps it is better to leave default double-click action: "collapse the tree branch"
+			//	ServerProperties(dynamic_cast<YServer *>(m));
+			//	break;
+			case ntDatabase:
+				connect(false);						// false = don't warn if already connected
+				break;
+			case ntGenerator:
+				showGeneratorValue(dynamic_cast<YGenerator*>(m));
+				break;
+			case ntTable:
+			case ntView:
+			case ntProcedure:
+			case ntDomain:
+			case ntFunction:
+			case ntTrigger:
+				mipf = new MetadataItemPropertiesFrame(this, m);
+				mipf->Show();
+				break;
+			default:
+				return;
+		};
+	}
 
 	if (!expanded)						// tree's event will happen later and contract it
 		tree_ctrl_1->Collapse(item);	// so an ugly hack to fix it.
