@@ -91,7 +91,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(myTreeCtrl::Menu_ObjectProperties, MainFrame::OnMenuObjectProperties)
 	EVT_MENU(myTreeCtrl::Menu_DropObject, MainFrame::OnMenuDropObject)
 
-	EVT_TREE_ITEM_ACTIVATED(MainFrame::ID_tree_ctrl_1, MainFrame::OnTreeItemActivate)
+	EVT_TREE_ITEM_ACTIVATED(myTreeCtrl::ID_tree_ctrl, MainFrame::OnTreeItemActivate)
 	EVT_CLOSE(MainFrame::OnClose)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------

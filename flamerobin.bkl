@@ -12,7 +12,7 @@
         <default-value></default-value>
     </option>
 
-    <!-- these options allow the application to build with options for 
+    <!-- these options allow the application to build with options for
          Unicode/ANSI, Debug/Release, and Static/DLL configs
          of wxWidgets -->
     <option name="USEDLL">
@@ -41,7 +41,7 @@
     <set var="D_OPT">
         <if cond="FINAL=='0'">d</if>
     </set>
-    
+
     <template id="wx">
         <if cond="FORMAT!='autoconf'">
             <set var="WXDIR">$(DOLLAR)(WXDIR)</set>
@@ -64,7 +64,7 @@
         <set var="UNICODE_DEFINE">
             <if cond="FORMAT!='autoconf' and UNICODE=='1'">_UNICODE</if>
         </set>
-    
+
         <define>$(UNICODE_DEFINE)</define>
         <define>$(WXDEBUG)</define>
         <define>$(DEBUGFLAG)</define>
@@ -129,14 +129,14 @@
 
             <define>__WXMSW__</define>
             <define>wxUSE_GUI=1</define>
-            <define>WIN32_LEAN_AND_MEAN</define> 
+            <define>WIN32_LEAN_AND_MEAN</define>
 
             <set var="WX_PORT">wxmsw</set>
             <set var="WX_VERSION">25</set>
 
             <include>$(WX_LIB_DIR)/msw$(D_OPT)</include>
             <lib-path>$(WX_LIB_DIR)</lib-path>
-            
+
             <!-- another nice thing that wx-config will take care of
                  on Unix... -->
             <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_stc</sys-lib>
@@ -146,25 +146,25 @@
             <sys-lib>wxbase$(WX_VERSION)$(U_OPT)$(D_OPT)</sys-lib>
             <sys-lib>wxtiff$(D_OPT)</sys-lib>
             <sys-lib>wxjpeg$(D_OPT)</sys-lib>
-            <sys-lib>wxpng$(D_OPT)</sys-lib>            
-            <sys-lib>wxzlib$(D_OPT)</sys-lib>           
+            <sys-lib>wxpng$(D_OPT)</sys-lib>
+            <sys-lib>wxzlib$(D_OPT)</sys-lib>
 
             <sys-lib>kernel32</sys-lib>
-            <sys-lib>user32</sys-lib> 
-            <sys-lib>gdi32</sys-lib> 
+            <sys-lib>user32</sys-lib>
+            <sys-lib>gdi32</sys-lib>
             <sys-lib>winspool</sys-lib>
             <sys-lib>comdlg32</sys-lib>
             <sys-lib>advapi32</sys-lib>
             <sys-lib>shell32</sys-lib>
             <sys-lib>ole32</sys-lib>
             <sys-lib>oleaut32</sys-lib>
-            <sys-lib>uuid</sys-lib> 
+            <sys-lib>uuid</sys-lib>
             <sys-lib>comctl32</sys-lib>
             <sys-lib>rpcrt4</sys-lib>
             <sys-lib>wsock32</sys-lib>
         </if>
     </template>
-    
+
     <define-tag name="headers" rules="dll,lib,exe">
         <if cond="FORMAT=='msvc6prj'">
             <msvc-project-files>
@@ -178,7 +178,7 @@
         <if cond="TOOLSET!='win32'">.</if>
     </set>
 
-    <set var="SOURCEDIR">src</set>  
+    <set var="SOURCEDIR">src</set>
     <set var="RESDIR">res</set>
 
     <!-- IBPP needs one of these defined -->
@@ -264,6 +264,7 @@
         $(SOURCEDIR)/metadata/table.h
         $(SOURCEDIR)/metadata/trigger.h
         $(SOURCEDIR)/metadata/view.h
+        $(SOURCEDIR)/simpleparser.h
         $(SOURCEDIR)/myDataGrid.h
         $(SOURCEDIR)/myTreeCtrl.h
         $(SOURCEDIR)/observer.h
@@ -326,6 +327,7 @@
         $(SOURCEDIR)/metadata/table.cpp
         $(SOURCEDIR)/metadata/trigger.cpp
         $(SOURCEDIR)/metadata/view.cpp
+        $(SOURCEDIR)/simpleparser.cpp
         $(SOURCEDIR)/myDataGrid.cpp
         $(SOURCEDIR)/myTreeCtrl.cpp
         $(SOURCEDIR)/objectdescriptionhandler.cpp
@@ -366,5 +368,5 @@
         <ldlibs>$(IBPPSTATICLIBRARY)</ldlibs>
         <sys-lib>$(FIREBIRDLIBRARY)</sys-lib>
     </exe>
-    
+
 </makefile>

@@ -40,6 +40,8 @@ protected:
     short m_spacing;	// fix wxWidgets bug (or lack of feature)
 
 public:
+    enum { ID_tree_ctrl = 101 };
+
     short GetSpacing() const { return m_spacing; }
     void SetSpacing(short spacing);
 
@@ -54,16 +56,20 @@ public:
 	// end PHP enum
 	};
 
+	void OnBeginDrag(wxTreeEvent &event);
     void OnContextMenu(wxContextMenuEvent& event);
+
 	// Returns the observed metadata item based on the specified tree item
 	YxMetadataItem *getMetadataItem(wxTreeItemId item);
+
 	// Returns the observed metadata item based on the currently selected tree item
 	YxMetadataItem *getSelectedMetadataItem();
+
     // Selects the tree item represented by the metadata item
     bool selectMetadataItem(YxMetadataItem* item);
 	int getItemImage(NodeType t);
 
-    myTreeCtrl(wxWindow* parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTR_HAS_BUTTONS);
+    myTreeCtrl(wxWindow* parent, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTR_HAS_BUTTONS);
 
     DECLARE_EVENT_TABLE()
 };

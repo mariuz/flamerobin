@@ -47,7 +47,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     BaseFrame(parent, id, title, pos, size, style)
 {
     // begin wxGlade: MainFrame::MainFrame
-    tree_ctrl_1 = new myTreeCtrl(this, ID_tree_ctrl_1, wxDefaultPosition, wxDefaultSize, wxTR_HAS_BUTTONS|wxSUNKEN_BORDER);
+    tree_ctrl_1 = new myTreeCtrl(this, wxDefaultPosition, wxDefaultSize, wxTR_HAS_BUTTONS|wxSUNKEN_BORDER);
 
     set_properties();
     do_layout();

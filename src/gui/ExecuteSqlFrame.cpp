@@ -39,7 +39,10 @@
 
 #include <sstream>
 #include <string>
+#include <algorithm>
+#include <vector>
 
+#include "simpleparser.h"
 #include "ExecuteSqlFrame.h"
 #include "config.h"
 #include "dberror.h"
@@ -49,6 +52,117 @@
 #include "styleguide.h"
 #include "ugly.h"
 #include "urihandler.h"
+//-----------------------------------------------------------------------------
+bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
+{
+	if (text.Mid(0, 7) != wxT("OBJECT:"))
+		return true;
+	long address;
+	if (!text.Mid(7).ToLong(&address))
+		return true;
+	YxMetadataItem *m = (YxMetadataItem *)address;
+
+	YDatabase *db = m->getDatabase();
+	if (db != databaseM)
+	{
+		wxMessageBox(_("Cannot use objects from different databases."), _("Wrong database."), wxOK|wxICON_WARNING);
+		return true;
+	}
+
+	YTable *t = 0;
+	std::string column_list;
+	if (m->getType() == ntColumn)
+	{
+		t = dynamic_cast<YTable *>(m->getParent());
+		column_list = t->getName() + "." + m->getName();
+	}
+	if (m->getType() == ntTable)
+	{
+		t = dynamic_cast<YTable *>(m);
+		column_list = t->getName() + ".*";
+	}
+	if (t == 0)
+	{
+		wxMessageBox(_("Only tables and table columns can be dropped."), _("Object type not supported."), wxOK|wxICON_WARNING);
+		return true;
+	}
+
+	// setup complete. now the actual stuff:
+	std::string sql = wx2std(ownerM->GetText().Upper());
+
+	// currently we don't support having comments and quotes (it's complicated)
+	//if (!Parser::stripSql(sql))
+	//	return true;
+
+	std::string::size_type psel, pfrom;
+	psel = sql.find("SELECT");
+	if (psel == std::string::npos)							// simple select statement
+	{
+		sql = "SELECT " + column_list + "\nFROM " + t->getName();
+		ownerM->SetText(std2wx(sql));
+		return true;
+	}
+
+	pfrom = sql.find("FROM", psel);
+	if (pfrom == std::string::npos)
+	{
+		wxMessageBox(_("SELECT present, but FROM missing."), _("Unable to parse the statement"), wxOK|wxICON_WARNING);
+		return true;
+	}
+
+	// read in the table names, and find position where FROM clause ends
+	std::vector<std::string> tableNames;
+	std::string::size_type from_end = pfrom + Parser::getTableNames(tableNames, sql.substr(pfrom));
+
+	// if table is not there, add it
+	if (std::find(tableNames.begin(), tableNames.end(), t->getName()) == tableNames.end())
+	{
+		//         table_name    join_clause
+		std::vector<Join> relatedTables;
+		if (YTable::tablesRelate(tableNames, t, relatedTables))	// foreign keys
+		{
+			std::string join_list;
+			if (relatedTables.size() > 1)	// let the user decide
+			{
+				wxArrayString as;
+				for (std::vector<Join>::iterator it = relatedTables.begin(); it != relatedTables.end(); ++it)
+					as.Add(std2wx((*it).table));
+				int selected = ::wxGetSingleChoiceIndex(_("Multiple foreign keys found"),
+					_("Select the desired table"), as);
+				if (selected == -1)
+					return true;
+				join_list = relatedTables[selected].fields;
+			}
+			else
+				join_list = relatedTables[0].fields;
+
+			// find fields that connect the tables
+			// can_be_null = (check if any of the FK fields can be null)
+
+			// FIXME: dummy test value
+			bool can_be_null = true;
+
+			std::string insert = (can_be_null?" LEFT":"");
+			insert += " JOIN " + t->getName() + " ON " + join_list;
+			insert = "\n" + insert + " ";
+			sql.insert(from_end, insert);
+		}
+		else
+		{
+			sql.insert(pfrom + 5, " ");
+			if (!tableNames.empty())
+				sql.insert(pfrom+5, ",");
+			sql.insert(pfrom + 5, t->getName());
+		}
+	}
+
+	// add columns to SELECT (either psel+8 or pfrom - 1)
+	sql.insert(pfrom, ",\n");
+	sql.insert(pfrom+1, column_list);
+
+	ownerM->SetText(std2wx(sql));
+    return true;
+}
 //-----------------------------------------------------------------------------
 //! included xpm files, so that icons are compiled into executable
 namespace sql_icons {
@@ -770,6 +884,9 @@ void ExecuteSqlFrame::setDatabase(YDatabase *db)
 	executedStatementsM.clear();
 	InTransaction(false);	// enable/disable controls
 	setKeywords();			// set words for autocomplete feature
+
+	// set drop target for DnD
+    styled_text_ctrl_sql->SetDropTarget(new DnDText(styled_text_ctrl_sql, databaseM));
 }
 //-----------------------------------------------------------------------------
 //! closes window if database is removed (unregistered)

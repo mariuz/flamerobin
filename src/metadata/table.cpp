@@ -333,7 +333,7 @@ bool YTable::loadForeignKeys()
 			"from rdb$relation_constraints r, rdb$index_segments i, rdb$ref_constraints c "
 			"where r.rdb$relation_name=? and r.rdb$index_name=i.rdb$index_name  "
 			"and r.rdb$constraint_name = c.rdb$constraint_name "
-			"and (r.rdb$constraint_type='FOREIGN KEY') order by 1, 2"
+			"and (r.rdb$constraint_type='FOREIGN KEY') order by 1, i.rdb$field_position"
 		);
 
 		st2->Prepare(
@@ -341,6 +341,7 @@ bool YTable::loadForeignKeys()
 			" from rdb$relation_constraints r"
 			" join rdb$index_segments i on i.rdb$index_name = r.rdb$index_name "
 			" where r.rdb$constraint_name = ?"
+			" order by i.rdb$field_position "
 		);
 
 		st1->Set(1, getName());
@@ -467,4 +468,74 @@ const std::string YTable::getTypeName() const
 {
 	return "TABLE";
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// find all tables from "tables" which have foreign keys with "table"
+// and return them in "list"
+bool YTable::tablesRelate(std::vector<std::string>& tables, YTable *table, std::vector<Join>& list)
+{
+	// see if "table" references some of the "tables"
+	std::vector<ForeignKey> *fks = table->getForeignKeys();
+	for (std::vector<ForeignKey>::iterator it = fks->begin(); it != fks->end(); ++it)
+	{
+		ForeignKey& fk = (*it);
+		for (std::vector<std::string>::iterator i2 = tables.begin(); i2 != tables.end(); ++i2)
+		{
+			if ((*i2) == fk.referencedTableM)
+			{
+				std::string join;
+				for (unsigned int i=0; i < fk.referencedColumnsM.size(); ++i)
+				{
+					if (i > 0)
+						join += " AND ";
+					join += fk.referencedTableM + "." + fk.referencedColumnsM[i] + " = " +
+						table->getName() + "." + fk.columnsM[i];
+				}
+				list.push_back(Join(fk.referencedTableM, join));
+
+			}
+		}
+	}
+
+	// see if some of the "tables" reference the "table"
+	std::vector<Dependency> deplist;
+	table->getDependencies(deplist, false);
+	for (std::vector<Dependency>::iterator it = deplist.begin(); it != deplist.end(); ++it)
+	{
+		if ((*it).getType() == ntTable)
+		{
+			for (std::vector<std::string>::iterator i2 = tables.begin(); i2 != tables.end(); ++i2)
+			{
+				if ((*i2) == (*it).getName())
+				{
+					// find foreign keys for that table
+					YDatabase *d = table->getDatabase();
+					YTable *other_table = dynamic_cast<YTable *>(d->findByNameAndType(ntTable, (*i2)));
+					if (!other_table)
+						break;
+
+					std::vector<ForeignKey> *fks = other_table->getForeignKeys();
+					for (std::vector<ForeignKey>::iterator it = fks->begin(); it != fks->end(); ++it)
+					{
+						ForeignKey& fk = (*it);
+						if (table->getName() == fk.referencedTableM)
+						{
+							std::string join;
+							for (unsigned int i=0; i < fk.referencedColumnsM.size(); ++i)
+							{
+								if (i > 0)
+									join += " AND ";
+								join += fk.referencedTableM + "." + fk.referencedColumnsM[i] + " = " +
+									(*i2) + "." + fk.columnsM[i];
+							}
+							list.push_back(Join(fk.referencedTableM, join));
+							break;	// no need for more
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return !list.empty();
+}
+//-----------------------------------------------------------------------------

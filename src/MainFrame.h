@@ -43,12 +43,6 @@
 //-----------------------------------------------------------------------------
 class MainFrame: public BaseFrame {
 public:
-    // begin wxGlade: MainFrame::ids
-    enum {
-        ID_tree_ctrl_1 = 101
-    };
-    // end wxGlade
-
 	// menu handling events
     void OnMenuRegisterServer(wxCommandEvent& event);
     void OnMenuQuit(wxCommandEvent& event);

@@ -110,6 +110,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(D_OPT)\flamerobin_table.obj \
 	bcc$(D_OPT)\flamerobin_trigger.obj \
 	bcc$(D_OPT)\flamerobin_view.obj \
+	bcc$(D_OPT)\flamerobin_simpleparser.obj \
 	bcc$(D_OPT)\flamerobin_myDataGrid.obj \
 	bcc$(D_OPT)\flamerobin_myTreeCtrl.obj \
 	bcc$(D_OPT)\flamerobin_objectdescriptionhandler.obj \
@@ -311,6 +312,9 @@ bcc$(D_OPT)\flamerobin_trigger.obj: .\src\metadata\trigger.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(D_OPT)\flamerobin_view.obj: .\src\metadata\view.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+bcc$(D_OPT)\flamerobin_simpleparser.obj: .\src\simpleparser.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(D_OPT)\flamerobin_myDataGrid.obj: .\src\myDataGrid.cpp

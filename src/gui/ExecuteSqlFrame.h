@@ -30,11 +30,10 @@
 #ifndef EXECUTESQLFRAME_H
 #define EXECUTESQLFRAME_H
 
-// begin wxGlade: dependencies
 #include <wx/splitter.h>
 #include <wx/notebook.h>
 #include <wx/grid.h>
-// end wxGlade
+#include <wx/dnd.h>
 
 #include "ibpp.h"
 #include "metadata/database.h"
@@ -140,6 +139,17 @@ protected:
 	virtual const wxRect getDefaultRect() const;
 
     DECLARE_EVENT_TABLE()
+};
+
+class DnDText : public wxTextDropTarget
+{
+public:
+    DnDText(wxStyledTextCtrl *owner, YDatabase *db) { ownerM = owner; databaseM = db; }
+    virtual bool OnDropText(wxCoord x, wxCoord y, const wxString& text);
+
+private:
+    wxStyledTextCtrl *ownerM;
+	YDatabase *databaseM;
 };
 
 #endif // EXECUTESQLFRAME_H

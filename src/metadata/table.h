@@ -35,6 +35,15 @@
 #include "trigger.h"
 #include "metadataitemwithcolumns.h"
 //------------------------------------------------------------------------------
+//! small helper class
+class Join
+{
+public:
+	std::string table;
+	std::string fields;
+	Join(std::string a, std::string b): table(a), fields(b) { };
+};
+//------------------------------------------------------------------------------
 class YTable: public YxMetadataItemWithColumns
 {
 private:
@@ -55,6 +64,8 @@ private:
 	bool loadUniqueConstraints();
 
 public:
+	static bool tablesRelate(std::vector<std::string>& tables, YTable *table, std::vector<Join>& list);
+
 	virtual std::string getCreateSqlTemplate() const;
 
 	virtual bool loadColumns();			// update the keys info too

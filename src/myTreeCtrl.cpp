@@ -39,6 +39,9 @@
 //
 //
 #include <wx/imaglist.h>
+#include <wx/dataobj.h>
+#include <wx/dnd.h>
+
 #include "treeitem.h"
 #include "images.h"
 #include "metadata/root.h"
@@ -47,19 +50,39 @@
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(myTreeCtrl, wxTreeCtrl)
     EVT_CONTEXT_MENU(myTreeCtrl::OnContextMenu)
+	EVT_TREE_BEGIN_DRAG(myTreeCtrl::ID_tree_ctrl, myTreeCtrl::OnBeginDrag)
 END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+void myTreeCtrl::OnBeginDrag(wxTreeEvent& event)
+{
+	wxTreeItemId item = event.GetItem();
+	if (item.IsOk())
+	{
+		SelectItem(item);
+		YxMetadataItem *m = getMetadataItem(item);
+		if (!m)
+			return;
+		wxString test;
+		test.Printf(wxT("OBJECT:%d"), (int)m);
+		wxTextDataObject textData(test);
+		wxDropSource source(textData, this);
+		source.DoDragDrop(wxDrag_AllowMove);
+	}
+	else
+		event.Skip();
+}
 //-----------------------------------------------------------------------------
 //! Creates context menu
 void myTreeCtrl::OnContextMenu(wxContextMenuEvent& event)
 {
     // select item under the mouse first, since right-click doesn't change selection under GTK
     wxPoint pos = ScreenToClient(event.GetPosition());
-	int flags;	
+	int flags;
 	wxTreeItemId item = HitTest(pos, flags);
 	if (item.IsOk() && (flags & (wxTREE_HITTEST_ONITEMBUTTON|wxTREE_HITTEST_ONITEMICON|wxTREE_HITTEST_ONITEMLABEL)))
 		SelectItem(item);
 	else
-	{	
+	{
 		item = GetSelection();
 		wxRect r;
 		if (item.IsOk() && GetBoundingRect(item, r, true))
@@ -164,8 +187,8 @@ void myTreeCtrl::OnContextMenu(wxContextMenuEvent& event)
 	PopupMenu(&MyMenu, pos);
 }
 //-----------------------------------------------------------------------------
-myTreeCtrl::myTreeCtrl(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style):
-    wxTreeCtrl(parent, id, pos, size, style)
+myTreeCtrl::myTreeCtrl(wxWindow* parent, const wxPoint& pos, const wxSize& size, long style):
+    wxTreeCtrl(parent, ID_tree_ctrl, pos, size, style)
 {
 	loadImages();
 }
@@ -233,14 +256,14 @@ bool myTreeCtrl::selectMetadataItem(YxMetadataItem* item)
 	{
 		metaitems.push(parent);
         parent = parent->getParent();
-	} 
+	}
     // walk stack of metadata items to find item in treenode hierarchy
     wxTreeItemId parentNode = GetRootItem();
     while (!metaitems.empty())
     {
         parent = metaitems.top();
         wxTreeItemIdValue cookie;
-        for (wxTreeItemId node = GetFirstChild(parentNode, cookie); 
+        for (wxTreeItemId node = GetFirstChild(parentNode, cookie);
              node.IsOk(); node = GetNextChild(parentNode, cookie))
         {
 			YxMetadataItem* nodeItem = getMetadataItem(node);
