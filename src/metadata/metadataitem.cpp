@@ -121,15 +121,10 @@ void YxMetadataItem::drop()
 //------------------------------------------------------------------------------
 YDatabase *YxMetadataItem::getDatabase() const
 {
-	if (getParent())
-	{
-		if (getParent()->getType() == ntDatabase)
-			return dynamic_cast<YDatabase *>(getParent());
-		else
-			return getParent()->getDatabase();
-	}
-	else
-		return 0;
+	YxMetadataItem *m = const_cast<YxMetadataItem *>(this);
+	while (m && m->getType() != ntDatabase)
+		m = m->getParent();
+	return (YDatabase *)m;
 }
 //------------------------------------------------------------------------------
 //! virtual so it can eventually be delegated to YTable, YView, etc.

@@ -58,6 +58,7 @@ public:
 
 	void OnBeginDrag(wxTreeEvent &event);
     void OnContextMenu(wxContextMenuEvent& event);
+	void OnItemGetTooltip(wxTreeEvent& event);
 
 	// Returns the observed metadata item based on the specified tree item
 	YxMetadataItem *getMetadataItem(wxTreeItemId item);
