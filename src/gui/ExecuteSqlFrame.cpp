@@ -690,9 +690,14 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
 		commitTransaction();
 	if (key == WXK_F8)
 		OnButtonRollbackClick(e);
-	if (event.ControlDown() && key == WXK_SPACE)
-		autoComplete(true);
 
+	if (wxWindow::FindFocus() == styled_text_ctrl_sql)
+	{
+		if (event.ControlDown() && key == WXK_SPACE)
+			autoComplete(true);
+		if (key == WXK_RETURN && styled_text_ctrl_sql->AutoCompActive())
+			styled_text_ctrl_sql->AutoCompCancel();
+	}
 	event.Skip();
 }
 //-----------------------------------------------------------------------------
@@ -886,6 +891,8 @@ void ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
 //! when autoexecute is TRUE, program just waits user to click Commit/Rollback and closes window
 bool ExecuteSqlFrame::execute(std::string sql)
 {
+	if (styled_text_ctrl_sql->AutoCompActive())
+		styled_text_ctrl_sql->AutoCompCancel();	// remove the list if needed
 	wxDateTime start = wxDateTime::Now();
 	notebook_1->SetSelection(0);
 	bool retval = true;
