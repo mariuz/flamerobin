@@ -92,7 +92,7 @@ void* RestoreThread::Entry()
 
     try
     {
-        msg.Printf(_("Connecting to server %s..."), serverM.c_str());
+        msg.Printf(_("Connecting to server %s..."), std2wx(serverM).c_str());
         logImportant(msg);
         IBPP::Service svc = IBPP::ServiceFactory(serverM, usernameM, passwordM);
         svc->Connect();
@@ -171,7 +171,7 @@ RestoreFrame::RestoreFrame(wxWindow* parent, YDatabase* db):
 {
     wxString s;
     s.Printf(_("Restore Database \"%s:%s\""),
-        serverM->getName().c_str(), databaseM->getName().c_str());
+        std2wx(serverM->getName()).c_str(), std2wx(databaseM->getName()).c_str());
     SetTitle(s);
 
     panel_controls = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize,
@@ -370,7 +370,7 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     if (password.empty())
     {
         wxString msg;
-        msg.Printf(_("Enter password for user %s:"), databaseM->getUsername().c_str());
+        msg.Printf(_("Enter password for user %s:"), std2wx(databaseM->getUsername()).c_str());
         password = wx2std(::wxGetPasswordFromUser(msg, _("Connecting To Server")));
         if (password.empty())
             return;
