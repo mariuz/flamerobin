@@ -561,12 +561,12 @@ void OptionsDialog::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 	Close();
 }
 //-----------------------------------------------------------------------------
-// load settings from config
+//! revert to settings from config
 void OptionsDialog::OnCancelButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-	//for (std::list<Page *>::iterator pit = pages.begin(); pit != pages.end(); ++pit)
-	//	for (std::list<Setting *>::iterator it = (*pit)->settings.begin(); it != (*pit)->settings.end(); ++it)
-	//		(*it)->loadFromConfig();
+	for (std::list<Page *>::iterator pit = pages.begin(); pit != pages.end(); ++pit)
+		for (std::list<Setting *>::iterator it = (*pit)->settings.begin(); it != (*pit)->settings.end(); ++it)
+			(*it)->loadFromConfig();
 	Close();
 }
 //-----------------------------------------------------------------------------

@@ -209,7 +209,7 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
 {
-    OptionsDialog *d = new OptionsDialog(this);
+    static OptionsDialog *d = new OptionsDialog(this);
 	d->ShowModal();
 }
 //-----------------------------------------------------------------------------
