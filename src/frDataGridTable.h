@@ -55,6 +55,7 @@ public:
 	GridTable(IBPP::Statement& s);
 	~GridTable();
 
+    bool allRowsFetched();
     void fetch();
     IBPP::SDT getColumnType(int col);
     bool isNumericColumn(int col);

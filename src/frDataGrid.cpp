@@ -81,6 +81,15 @@ void DataGrid::fill()
     }
 	AutoSizeColumns();
 	EndBatch();
+
+    // event handler is only needed if not all rows have already been
+    // fetched
+    if (!table->allRowsFetched())
+    {
+        Connect(wxID_ANY, wxEVT_IDLE, 
+            (wxObjectEventFunction) (wxEventFunction)
+            (wxIdleEventFunction)&DataGrid::OnIdle);
+    }
 }
 //-----------------------------------------------------------------------------
 void DataGrid::showPopMenu(wxPoint cursorPos)
@@ -95,7 +104,6 @@ BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_CONTEXT_MENU(DataGrid::OnContextMenu)
     EVT_GRID_CELL_RIGHT_CLICK(DataGrid::OnGridCellRightClick)
     EVT_GRID_LABEL_RIGHT_CLICK(DataGrid::OnGridLabelRightClick)
-    EVT_IDLE(DataGrid::OnIdle)
     EVT_MENU(DataGrid::ID_MENU_CELLFONT, DataGrid::OnMenuCellFont)
     EVT_MENU(DataGrid::ID_MENU_LABELFONT, DataGrid::OnMenuLabelFont)
 
@@ -119,12 +127,17 @@ void DataGrid::OnGridLabelRightClick(wxGridEvent& WXUNUSED(event))
 void DataGrid::OnIdle(wxIdleEvent& event)
 {
     GridTable* table = dynamic_cast<GridTable*>(GetTable());
-    if (!table || !table->needsMoreRowsFetched())
-        return;
-
-    table->fetch();
-    if (table->needsMoreRowsFetched())
-        event.RequestMore();
+    if (table && table->needsMoreRowsFetched())
+    {
+        table->fetch();
+        // as long as more rows are to be fetched *now* we want more events
+        if (table->needsMoreRowsFetched())
+            event.RequestMore();
+        // only unregister the event handler after all rows have been fetched
+        if (!table->allRowsFetched())
+            return;
+    }
+    Disconnect(wxID_ANY, wxEVT_IDLE);
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnMenuCellFont(wxCommandEvent& WXUNUSED(event))

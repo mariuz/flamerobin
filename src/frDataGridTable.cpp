@@ -62,6 +62,11 @@ GridTable::~GridTable()
 }
 //-----------------------------------------------------------------------------
 // implementation methods
+bool GridTable::allRowsFetched()
+{
+    return allRowsFetchedM;
+}
+//-----------------------------------------------------------------------------
 void GridTable::Clear()
 {
 	int oldrf = rowsFetchedM;
