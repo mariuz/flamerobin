@@ -33,7 +33,7 @@ AM_PATH_WXCONFIG([2.4.0], [], [
      	   where wxWindows libraries are installed (returned by
      	   'wx-config --libs' command) is in LD_LIBRARY_PATH or
      	   equivalent variable and wxWindows version is 2.4.0 or above.
-        ])])
+        ])], [stc,std])
         
 CPPFLAGS="$CPPFLAGS $WX_CXXFLAGS"
 LDFLAGS="$LDFLAGS $WX_LDFLAGS $WX_LIBS"
