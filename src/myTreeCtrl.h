@@ -54,7 +54,7 @@ public:
 	// end PHP enum
 	};
 
-    void OnRightDown(wxMouseEvent& event);
+    void OnContextMenu(wxContextMenuEvent& event);
 	// Returns the observed metadata item based on the specified tree item
 	YxMetadataItem *getMetadataItem(wxTreeItemId item);
 	// Returns the observed metadata item based on the currently selected tree item

@@ -46,31 +46,30 @@
 #include <stack>
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(myTreeCtrl, wxTreeCtrl)
-    EVT_RIGHT_DOWN(myTreeCtrl::OnRightDown)
+    EVT_CONTEXT_MENU(myTreeCtrl::OnContextMenu)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 //! Creates context menu
-void myTreeCtrl::OnRightDown(wxMouseEvent& event)
+void myTreeCtrl::OnContextMenu(wxContextMenuEvent& event)
 {
-    wxMenu MyMenu(0);	// create context menu, depending on type of clicked item
-
-	wxPoint pos = event.GetPosition();
-	int flags;	// first select item under the mouse since right-click doesn't change selection
+    // select item under the mouse first, since right-click doesn't change selection under GTK
+    wxPoint pos = ScreenToClient(event.GetPosition());
+	int flags;	
 	wxTreeItemId item = HitTest(pos, flags);
 	if (item.IsOk() && (flags & (wxTREE_HITTEST_ONITEMBUTTON|wxTREE_HITTEST_ONITEMICON|wxTREE_HITTEST_ONITEMLABEL)))
 		SelectItem(item);
-	else						// Using the keyboard. Mouse can get in the way here if pointer is on some item
-	{							// I tried to fix it by checking properties of wxMouseEvent via: RightIsDown(),
-		item = GetSelection();	// RightDown, IsButton(), GetButton(), m_rightDown. But none of it works. Even if
-		wxRect r;				// users doesn't use the mouse, all these still return true. So I gave it up for now.
+	else
+	{	
+		item = GetSelection();
+		wxRect r;
 		if (item.IsOk() && GetBoundingRect(item, r, true))
 		{
 			pos = r.GetPosition();
-			pos.x += r.width/2;				// looks nicer if moved a little bit down and right
 			pos.y += r.height/2;
 		}
 	}
 
+    wxMenu MyMenu(0);	// create context menu, depending on type of clicked item
 	if (!item.IsOk() || item == GetRootItem())	// root item or no item selected, show default menu
 	{
 		if (item == GetRootItem())
