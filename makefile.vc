@@ -201,7 +201,7 @@ vc$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS) vc$(D_OPT)\flamerobin_flamerobi
 
 templates: 
 	if not exist vc$(D_OPT)\html-templates mkdir vc$(D_OPT)\html-templates
-	for %f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TRIGGER.html VIEW.html dependencies.html drop.png files ok.png view.png) do if not exist vc$(D_OPT)\html-templates\%f copy html-templates\%f vc$(D_OPT)\html-templates
+	for %f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TRIGGER.html VIEW.html dependencies.html drop.png ok.png view.png) do if not exist vc$(D_OPT)\html-templates\%f copy html-templates\%f vc$(D_OPT)\html-templates
 
 vc$(D_OPT)\flamerobin_addconstrainthandler.obj: .\src\addconstrainthandler.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**

@@ -224,8 +224,10 @@
         <if cond="PLATFORM_UNIX=='1'">$(IBPPLIBPATH)/libibpp.a</if>
     </set>
 
+    <set var="FIREBIRDFRAMEWORK">
+        <if cond="PLATFORM_MACOSX=='1'">-framework Firebird</if>  -->
+    </set>
     <set var="FIREBIRDLIBRARY">
-        <if cond="PLATFORM_MACOSX=='1'">Firebird</if>
         <if cond="PLATFORM_UNIX=='1'">fbclient</if>
         <!-- PLATFORM_WIN32: ibpp library loads firebird DLL dynamically -->
     </set>
@@ -344,7 +346,11 @@
         $(SOURCEDIR)/urihandler.cpp
     </set>
 
-    <set var="HTMLTEMPLATES">
+    <set var="HTMLTEMPLATEDIR">
+        <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/html-templates</if>
+        <if cond="FORMAT!='autoconf'">html-templates</if>
+    </set>
+    <set var="HTMLTEMPLATEFILES">
         DOMAIN.html
         EXCEPTION.html
         FUNCTION.html
@@ -358,7 +364,6 @@
         VIEW.html
         dependencies.html
         drop.png
-        files
         ok.png
         view.png
     </set>
@@ -384,19 +389,19 @@
         <headers>$(HEADERFILES)</headers>
         <sources>$(SOURCEFILES)</sources>
 
-        <mac-res>$(RESDIR)/FlameRobin.icns</mac-res>
         <win32-res>$(RESDIR)/flamerobin.rc</win32-res>
         <lib-path>$(IBPPLIBPATH)</lib-path>
         <sys-lib>$(IBPPDYNLIBRARY)</sys-lib>
         <ldlibs>$(IBPPSTATICLIBRARY)</ldlibs>
+        <ldlibs>$(FIREBIRDFRAMEWORK)</ldlibs>
         <sys-lib>$(FIREBIRDLIBRARY)</sys-lib>
     </exe>
 
     <copy-files id="templates">
         <dependency-of>all</dependency-of>
-        <srcdir>html-templates</srcdir>
+        <srcdir>$(HTMLTEMPLATEDIR)</srcdir>
         <dstdir>$(BUILDDIR)/html-templates</dstdir>
-        <files>$(HTMLTEMPLATES)</files>
+        <files>$(HTMLTEMPLATEFILES)</files>
     </copy-files>
 
 </makefile>

@@ -96,19 +96,12 @@ FLAMEROBIN_ODEP =  $(___pch__gch___depname)
 @COND_PLATFORM_MACOSX_1@	$(IBPP)/$(IBPPLIBVERSION)/$(IBPPPLATFORM)/libibpp.a
 @COND_PLATFORM_UNIX_1@IBPPSTATICLIBRARY = \
 @COND_PLATFORM_UNIX_1@	$(IBPP)/$(IBPPLIBVERSION)/$(IBPPPLATFORM)/libibpp.a
+@COND_PLATFORM_MACOSX_1@FIREBIRDFRAMEWORK = -framework Firebird
 @COND_PLATFORM_MAC_1@__flamerobin___mac_setfilecmd = \
-@COND_PLATFORM_MAC_1@	$(SETFILE) -a C flamerobin$(EXEEXT)
-COND_PLATFORM_MAC_1___flamerobin___mac_rezcmd = $(RESCOMP) -d __DARWIN__ -t APPL \
-	-i $(WXDIR)/include -i $(WXDIR)/contrib/include \
-	$(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) -d IBPP_GCC \
-	$(__IBPPPLATFORMDEFINE_p_1) -i $(srcdir)/src -i $(srcdir)/res -i $(IBPP) -o \
-	flamerobin$(EXEEXT) res/FlameRobin.icns
-@COND_PLATFORM_MAC_1@__flamerobin___mac_rezcmd = $(COND_PLATFORM_MAC_1___flamerobin___mac_rezcmd)
+@COND_PLATFORM_MAC_1@	$(SETFILE) -t APPL flamerobin$(EXEEXT)
 @COND_FINAL_0@____flamerobin_WXDEBUG_p = -D__WXDEBUG__
-@COND_FINAL_0@____flamerobin_WXDEBUG_p_1 = -d __WXDEBUG__
 @COND_FINAL_0@____flamerobin_WXDEBUG_p_2 = --define __WXDEBUG__
 @COND_FINAL_0@____flamerobin_DEBUGFLAG_p = -D_DEBUG
-@COND_FINAL_0@____flamerobin_DEBUGFLAG_p_1 = -d _DEBUG
 @COND_FINAL_0@____flamerobin_DEBUGFLAG_p_2 = --define _DEBUG
 COND_PLATFORM_OS2_1___flamerobin___os2_emxbindcmd = $(NM) flamerobin$(EXEEXT) \
 	| if grep -q pmwin.763 ; then emxbind -ep flamerobin$(EXEEXT) ; fi
@@ -118,9 +111,6 @@ COND_PLATFORM_OS2_1___flamerobin___os2_emxbindcmd = $(NM) flamerobin$(EXEEXT) \
 @COND_PLATFORM_MACOSX_1@__IBPPPLATFORMDEFINE_p = -DIBPP_DARWIN
 @COND_PLATFORM_UNIX_1@__IBPPPLATFORMDEFINE_p = -DIBPP_LINUX
 @COND_PLATFORM_WIN32_1@__IBPPPLATFORMDEFINE_p = -DIBPP_WINDOWS
-@COND_PLATFORM_MACOSX_1@__IBPPPLATFORMDEFINE_p_1 = -d IBPP_DARWIN
-@COND_PLATFORM_UNIX_1@__IBPPPLATFORMDEFINE_p_1 = -d IBPP_LINUX
-@COND_PLATFORM_WIN32_1@__IBPPPLATFORMDEFINE_p_1 = -d IBPP_WINDOWS
 @COND_PLATFORM_MACOSX_1@__IBPPPLATFORMDEFINE_p_2 = --define IBPP_DARWIN
 @COND_PLATFORM_UNIX_1@__IBPPPLATFORMDEFINE_p_2 = --define IBPP_LINUX
 @COND_PLATFORM_WIN32_1@__IBPPPLATFORMDEFINE_p_2 = --define IBPP_WINDOWS
@@ -132,7 +122,6 @@ COND_PLATFORM_OS2_1___flamerobin___os2_emxbindcmd = $(NM) flamerobin$(EXEEXT) \
 @COND_PLATFORM_WIN32_1@	= flamerobin_styleguidemsw.o
 @COND_PLATFORM_WIN32_1@__flamerobin___win32rc = flamerobin_flamerobin_rc.o
 @COND_PLATFORM_WIN32_1@__IBPPDYNLIBRARY_p = -libpp
-@COND_PLATFORM_MACOSX_1@__FIREBIRDLIBRARY_p = -lFirebird
 @COND_PLATFORM_UNIX_1@__FIREBIRDLIBRARY_p = -lfbclient
 
 ### Targets: ###
@@ -154,8 +143,8 @@ distclean: clean
 	rm -f configure config.cache config.log config.status bk-deps bk-make-pch shared-ld-sh Makefile
 
 flamerobin$(EXEEXT): $(FLAMEROBIN_OBJECTS) $(__flamerobin___win32rc)
-	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) $(LDFLAGS)   $(LDFLAGS_GUI) -L$(IBPP)/$(IBPPLIBVERSION)/$(IBPPPLATFORM)  $(__IBPPDYNLIBRARY_p) $(IBPPSTATICLIBRARY) $(__FIREBIRDLIBRARY_p)
-	$(__flamerobin___mac_rezcmd)
+	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) $(LDFLAGS)   $(LDFLAGS_GUI) -L$(IBPP)/$(IBPPLIBVERSION)/$(IBPPPLATFORM)  $(__IBPPDYNLIBRARY_p) $(IBPPSTATICLIBRARY) $(FIREBIRDFRAMEWORK) $(__FIREBIRDLIBRARY_p)
+	
 	$(__flamerobin___mac_setfilecmd)
 	$(__flamerobin___os2_emxbindcmd)
 
@@ -164,9 +153,9 @@ flamerobin$(EXEEXT): $(FLAMEROBIN_OBJECTS) $(__flamerobin___win32rc)
 
 templates: 
 	@mkdir -p ./html-templates
-	@for f in DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TRIGGER.html VIEW.html dependencies.html drop.png files ok.png view.png; do \
-	if test \( ! -s ./html-templates/$$f \) -o \( html-templates/$$f -nt ./html-templates/$$f  \) ; then \
-	cp -pRf html-templates/$$f ./html-templates ; \
+	@for f in DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TRIGGER.html VIEW.html dependencies.html drop.png ok.png view.png; do \
+	if test \( ! -s ./html-templates/$$f \) -o \( $(srcdir)/html-templates/$$f -nt ./html-templates/$$f  \) ; then \
+	cp -pRf $(srcdir)/html-templates/$$f ./html-templates ; \
 	fi; \
 	done
 

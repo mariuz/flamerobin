@@ -175,7 +175,7 @@ gcc$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS) gcc$(D_OPT)\flamerobin_flamero
 
 templates: 
 	if not exist gcc$(D_OPT)\html-templates mkdir gcc$(D_OPT)\html-templates
-	for %%f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TRIGGER.html VIEW.html dependencies.html drop.png files ok.png view.png) do if not exist gcc$(D_OPT)\html-templates\%%f copy html-templates\%%f gcc$(D_OPT)\html-templates
+	for %%f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TRIGGER.html VIEW.html dependencies.html drop.png ok.png view.png) do if not exist gcc$(D_OPT)\html-templates\%%f copy html-templates\%%f gcc$(D_OPT)\html-templates
 
 gcc$(D_OPT)\flamerobin_addconstrainthandler.o: ./src/addconstrainthandler.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
