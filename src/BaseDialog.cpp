@@ -103,6 +103,12 @@ void BaseDialog::readConfigSettings()
             config().getValue(itemPrefix + "::centerOnParent", centered);
             if (centered)
                 CenterOnParent();
+			else					// if we don't want it centered, let's restore the position
+			{
+				config().getValue(itemPrefix + "::x", r.x);
+				config().getValue(itemPrefix + "::y", r.y);
+				SetSize(r);
+			}
         }
     }
 }
@@ -123,6 +129,14 @@ void BaseDialog::writeConfigSettings() const
             wxRect r = GetRect();
             config().setValue(itemPrefix + "::width", r.width);
             config().setValue(itemPrefix + "::height", r.height);
+
+            bool centered = true;
+            config().getValue(itemPrefix + "::centerOnParent", centered);
+			if (!centered)
+			{
+				config().setValue(itemPrefix + "::x", r.x);
+				config().setValue(itemPrefix + "::y", r.y);
+			}
             doWriteConfigSettings(itemPrefix);
         }
     }
