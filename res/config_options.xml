@@ -2,7 +2,7 @@
 <root>
 	<page>
 		<pagename>General</pagename>
-		<image>0</image>
+		<image>3</image>
 		<setting>
 			<type>checkbox</type>
 			<name>Remember window positions and sizes</name>
@@ -43,6 +43,7 @@
 	</page>
 	<page>
 		<pagename>Tree view</pagename>
+		<image>2</image>
 		<setting>
 			<type>radio</type>
 			<name>When column has an user defined domain</name>
@@ -76,6 +77,7 @@
 	</page>
 	<page>
 		<pagename>SQL Editor</pagename>
+		<image>0</image>
 		<setting>
 			<type>checkbox</type>
 			<name>Wrap long lines by default</name>
@@ -83,7 +85,8 @@
 		</setting>
 		<setting>
 			<type>number</type>
-			<range>-10,10</range>
+			<min>-10</min>
+			<max>10</max>
 			<name>Zoom level</name>
 			<key>SQLEditorZoom</key>
 		</setting>
@@ -122,7 +125,8 @@
 			<description>If uncheked, prints decimal numbers as returned from server.</description>
 			<enables>
 				<type>number</type>
-				<range>0,18</range>
+				<min>0</min>
+				<max>18</max>
 				<name>Number of decimals</name>
 				<key>NumberPrecision</key>
 			</enables>
@@ -140,6 +144,7 @@
 	</page>
 	<page>
 		<pagename>Logging</pagename>
+		<image>1</image>
 		<setting>
 			<type>checkbox</type>
 			<name>Enable logging to file</name>

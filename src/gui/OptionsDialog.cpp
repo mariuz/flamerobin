@@ -1,6 +1,48 @@
+/*
+  The contents of this file are subject to the Initial Developer's Public
+  License Version 1.0 (the "License"); you may not use this file except in
+  compliance with the License. You may obtain a copy of the License here:
+  http://www.flamerobin.org/license.html.
+
+  Software distributed under the License is distributed on an "AS IS"
+  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+  License for the specific language governing rights and limitations under
+  the License.
+
+  The Original Code is FlameRobin (TM).
+
+  The Initial Developer of the Original Code is Milan Babuskov.
+
+  Portions created by the original developer
+  are Copyright (C) 2005 Milan Babuskov.
+
+  All Rights Reserved.
+
+  Contributor(s):
+*/
+
+// For compilers that support precompilation, includes "wx/wx.h".
+#include "wx/wxprec.h"
+
+#ifdef __BORLANDC__
+    #pragma hdrstop
+#endif
+
+// for all others, include the necessary headers (this file is usually all you
+// need because it includes almost all "standard" wxWindows headers
+#ifndef WX_PRECOMP
+    #include "wx/wx.h"
+#endif
+//-----------------------------------------------------------------------------
+#include "images.h"
 #include "OptionsDialog.h"
 
 using namespace opt;
+//-----------------------------------------------------------------------------
+Page::Page()
+{
+	image = -1;
+}
 //-----------------------------------------------------------------------------
 Page::~Page()
 {
@@ -8,30 +50,98 @@ Page::~Page()
 		delete (*it);
 }
 //-----------------------------------------------------------------------------
-int getNewId() { return 1; };
-
-wxBoxSizer *Setting::addToPanel(wxPanel *panel)
+Setting::Setting()
 {
+	enabledBy = 0;
+	name = type = key = description = wxEmptyString;
+	min = max = 0;
+}
+//-----------------------------------------------------------------------------
+wxBoxSizer *Setting::addToPanel(wxPanel *panel, int id)
+{
+	int border = 3;
+
 	// add horizontal boxSizer
     wxBoxSizer* sz = new wxBoxSizer(wxHORIZONTAL);
 
-	wxWindow *temp = 0;
-	if (type == "checkbox")
-		temp = new wxCheckBox(panel, getNewId(), name);
-	else
-		return 0;
+	// add indentation
+	int depth = 0;
+	for (Setting *st = this; st->enabledBy; st = st->enabledBy)
+		depth++;
+	sz->Add(15*depth, 5);
+
+	// add controls
+	if (type == wxT("checkbox"))
+	{
+		wxCheckBox *temp = new wxCheckBox(panel, id, name);
+		sz->Add(temp, 0, wxALL|wxFIXED_MINSIZE, border);
+	}
+
+	else if (type == wxT("number"))
+	{
+		wxStaticText *t = new wxStaticText(panel, -1, name);
+		sz->Add(t, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
+		sz->Add(10, 5);
+		wxSpinCtrl *temp = new wxSpinCtrl(panel, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, min, max);
+		sz->Add(temp, 0, wxALL|wxFIXED_MINSIZE, border);
+	}
+	else if (type == wxT("string"))
+	{
+		wxStaticText *t = new wxStaticText(panel, -1, name);
+		sz->Add(t, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
+		sz->Add(10, 5);
+		wxTextCtrl *temp = new wxTextCtrl(panel, id);
+		sz->Add(temp, 0, wxALL|wxFIXED_MINSIZE, border);
+	}
+	else if (type == wxT("file"))
+	{
+		wxStaticText *t = new wxStaticText(panel, -1, name);
+		sz->Add(t, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
+		sz->Add(10, 5);
+		wxTextCtrl *temp = new wxTextCtrl(panel, -1);
+		sz->Add(temp, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
+		wxButton *b = new wxButton(panel, id, _("Browse..."));
+		sz->Add(b, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, 1);
+	}
+	else if (type == wxT("font"))
+	{
+		wxStaticText *t = new wxStaticText(panel, -1, name);
+		sz->Add(t, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
+		sz->Add(10, 5);
+		wxTextCtrl *temp = new wxTextCtrl(panel, -1);
+		sz->Add(temp, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
+		wxButton *b = new wxButton(panel, id, _("Change"));
+		sz->Add(b, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, 1);
+	}
+	else if (type == wxT("radio"))
+	{
+		int size = options.size();
+		wxString *opts = new wxString[size];
+		int cnt = 0;
+		for (std::list<Option *>::iterator it = options.begin(); it != options.end(); ++it)
+			opts[cnt++] = (*it)->text;
+		wxRadioBox *r = new wxRadioBox(panel, id, name, wxDefaultPosition, wxDefaultSize, size, opts, 0, wxRA_SPECIFY_ROWS);
+		delete [] opts;
+		sz->Add(r, 0, wxALL|wxFIXED_MINSIZE, border);
+	}
 
 	// add controls to it
-	sz->Add(temp, 0, wxALL|wxFIXED_MINSIZE, 3);
-    temp->SetAutoLayout(true);
-    temp->SetSizer(sz);
 	return sz;
 }
 //-----------------------------------------------------------------------------
 OptionsDialog::OptionsDialog(wxWindow* parent):
     BaseDialog(parent, -1, wxEmptyString)
 {
-    listbook1 = new wxListbook(this, ID_listbook, wxDefaultPosition, wxDefaultSize, wxNB_LEFT);
+	listbook1 = new wxListbook(this, ID_listbook, wxDefaultPosition, wxDefaultSize, wxNB_LEFT);
+	idGenerator = 200;	// give IDs to new controls starting from 200
+
+	imageList.Create(32, 32);
+	imageList.Add(getImage32(ntColumn));
+	imageList.Add(getImage32(ntProcedure));
+	imageList.Add(getImage32(ntTrigger));
+	imageList.Add(getImage32(ntUnknown));
+
+	listbook1->SetImageList(&imageList);
 
     set_properties();
     do_layout();
@@ -53,7 +163,7 @@ const std::string OptionsDialog::getName() const
 void OptionsDialog::set_properties()
 {
     SetTitle(wxT("Options"));
-    SetSize(wxSize(522, 382));
+    SetSize(wxSize(530, 400));
 }
 //-----------------------------------------------------------------------------
 void OptionsDialog::do_layout()
@@ -134,7 +244,7 @@ void OptionsDialog::load()
 		else if (key == wxT("key"))
 		{
 			if (st)
-				st->name = key;
+				st->key = str;
 		}
 		else if (key == wxT("enables"))
 		{
@@ -151,6 +261,20 @@ void OptionsDialog::load()
 		{
 			if (st && st->enabledBy)
 				st = st->enabledBy;
+		}
+
+		/* number type specific */
+		else if (key == wxT("min"))
+		{
+			unsigned long val;
+			if (str.ToULong(&val) && st)
+				st->min = (int)val;
+		}
+		else if (key == wxT("max"))
+		{
+			unsigned long val;
+			if (str.ToULong(&val) && st)
+				st->max = (int)val;
 		}
 
 		/* options - of radio buttons */
@@ -192,10 +316,7 @@ void OptionsDialog::createPages()
 {
 	int cnt = 0;
 	for (std::list<Page *>::iterator it = pages.begin(); it != pages.end(); ++it)
-	{
-		int imageId = -1;
-		listbook1->InsertPage(cnt++, createPanel(*it), (*it)->name, false, imageId);
-	}
+		listbook1->InsertPage(cnt++, createPanel(*it), (*it)->name, false, (*it)->image);
 }
 //-----------------------------------------------------------------------------
 wxPanel *OptionsDialog::createPanel(Page* pg)
@@ -209,10 +330,21 @@ wxPanel *OptionsDialog::createPanel(Page* pg)
 	// add controls
 	for (std::list<Setting *>::iterator it = pg->settings.begin(); it != pg->settings.end(); ++it)
 	{
-		wxBoxSizer *s = (*it)->addToPanel(panel);
+		wxBoxSizer *s = (*it)->addToPanel(panel, idGenerator++);
 		if (s)
-			sz->Add((wxSizer *)s, 0, wxALL|wxEXPAND, 5);
+			sz->Add(s, 0, wxALL|wxEXPAND, 5);
 	}
+
+	// apply and reset buttons
+	wxPanel *spacer = new wxPanel(panel);
+	sz->Add(spacer, 1, wxEXPAND, 0);
+
+    wxBoxSizer* sb = new wxBoxSizer(wxHORIZONTAL);
+	sz->Add(sb, 0, wxALL|wxALIGN_RIGHT|wxALIGN_BOTTOM, 3);
+	wxButton *apply = new wxButton(panel, ID_button_apply, _("Apply"));
+	wxButton *reset = new wxButton(panel, ID_button_reset, _("Reset"));
+	sb->Add(apply, 0, wxALL, 5);
+	sb->Add(reset, 0, wxALL, 5);
 
 	// layout
     panel->SetAutoLayout(true);
