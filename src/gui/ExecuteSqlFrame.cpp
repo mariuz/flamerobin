@@ -749,14 +749,7 @@ void ExecuteSqlFrame::OnButtonSaveClick(wxCommandEvent& WXUNUSED(event))
 void ExecuteSqlFrame::InTransaction(bool started)
 {
 	inTransactionM = started;
-
-	if (!splitter_window_1->IsSplit())		// make sure window is split
-	{								// needed in each case
-		panel_splitter_top->Show();
-		panel_splitter_bottom->Show();
-		splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
-	}
-
+	SplitScreen();
 	if (started)
 		statusbar_1->SetStatusText(_("Transaction started"), 3);
 	else
@@ -765,7 +758,6 @@ void ExecuteSqlFrame::InTransaction(bool started)
 		grid_data->ClearGrid();
 		statusbar_1->SetStatusText(wxEmptyString, 1);
 	}
-
 	button_commit->Enable(started);
 	button_rollback->Enable(started);
 }
@@ -975,6 +967,14 @@ bool ExecuteSqlFrame::execute(std::string sql, bool prepareOnly)
 												// vanish, then we can test if this is the solution
 			notebook_1->SetSelection(1);
 			grid_data->SetFocus();
+
+			bool selectMaximizeGrid = false;	// FIXME: this should only be done when MaximizeGridRowsNeeded is zero
+			config().getValue("SelectMaximizeGrid", selectMaximizeGrid);
+			if (selectMaximizeGrid)
+			{
+				SplitScreen();
+				splitter_window_1->Unsplit(panel_splitter_top);		// show grid only
+			}
 		}
 		else								// for other statements: show rows affected
 		{
