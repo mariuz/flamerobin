@@ -63,6 +63,7 @@ namespace opt
 		wxBoxSizer *addToPanel(wxPanel *panel);
 		void loadFromConfig();
 		void saveToConfig();
+		void enableControls();
 		Setting();
 		~Setting();
 	};

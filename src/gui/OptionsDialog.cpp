@@ -105,7 +105,7 @@ void Setting::saveToConfig()
 //-----------------------------------------------------------------------------
 void Setting::loadFromConfig()
 {
-	if (controls.begin() == controls.end())
+	if (controls.empty())
 		return;
 	wxControl *control = *(controls.begin());
 
@@ -149,6 +149,7 @@ void Setting::loadFromConfig()
 	}
 }
 //-----------------------------------------------------------------------------
+//! be careful when using controls.push_back, since controls[0] must be the main control (containing the setting)
 wxBoxSizer *Setting::addToPanel(wxPanel *panel)
 {
 	// add horizontal boxSizer
@@ -177,13 +178,13 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel)
 		wxStaticText *st = new wxStaticText(panel, -1, name);
 		sz->Add(st, 0, wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL);
         sz->Add(styleguide().getControlLabelMargin(), 0);
-		wxSpinCtrl *sc = new wxSpinCtrl(panel, -1, wxEmptyString, 
+		wxSpinCtrl *sc = new wxSpinCtrl(panel, -1, wxEmptyString,
             wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, min, max);
 		sz->Add(sc, 0, wxFIXED_MINSIZE);
 		st->SetToolTip(description);
 		sc->SetToolTip(description);
-		controls.push_back(st);
 		controls.push_back(sc);
+		controls.push_back(st);
 	}
 	else if (type == wxT("string"))
 	{
@@ -194,8 +195,8 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel)
 		sz->Add(tc, 0, wxFIXED_MINSIZE);
 		st->SetToolTip(description);
 		tc->SetToolTip(description);
-		controls.push_back(st);
 		controls.push_back(tc);
+		controls.push_back(st);
 	}
 	else if (type == wxT("file"))
 	{
@@ -210,8 +211,8 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel)
 		st->SetToolTip(description);
 		tc->SetToolTip(description);
 		btn->SetToolTip(description);
-		controls.push_back(st);
 		controls.push_back(tc);
+		controls.push_back(st);
 		controls.push_back(btn);
 	}
 	else if (type == wxT("font"))
@@ -227,8 +228,8 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel)
 		st->SetToolTip(description);
 		tc->SetToolTip(description);
 		btn->SetToolTip(description);
-		controls.push_back(st);
 		controls.push_back(tc);
+		controls.push_back(st);
 		controls.push_back(btn);
 	}
 	else if (type == wxT("radio"))
@@ -236,7 +237,7 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel)
         wxArrayString opts;
         for (std::list<Option *>::iterator it = options.begin(); it != options.end(); ++it)
             opts.Add((*it)->text);
-        wxRadioBox *rb = new wxRadioBox(panel, -1, name, wxDefaultPosition, wxDefaultSize, 
+        wxRadioBox *rb = new wxRadioBox(panel, -1, name, wxDefaultPosition, wxDefaultSize,
             opts, 1, wxRA_SPECIFY_COLS);
         sz->Add(rb, 0, wxFIXED_MINSIZE);
         rb->SetToolTip(description);
@@ -247,6 +248,23 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel)
 	return sz;
 }
 //-----------------------------------------------------------------------------
+//! recursively enable/disable controls do that multiple levels of depth are possible
+void Setting::enableControls()
+{
+	if (type != wxT("checkbox") || controls.empty())	// only checkboxes can enable other controls
+		return;
+
+	wxCheckBox *cb = dynamic_cast<wxCheckBox *>(*(controls.begin()));
+	if (!cb)
+		return;
+	for (std::list<Setting *>::iterator it = enables.begin(); it != enables.end(); ++it)
+	{
+		(*it)->enableControls();	// recursively
+		for (std::list<wxControl *>::iterator i2 = (*it)->controls.begin(); i2 != (*it)->controls.end(); ++i2)
+			(*i2)->Enable(cb->IsChecked());
+	}
+}
+//-----------------------------------------------------------------------------
 OptionsDialog::OptionsDialog(wxWindow* parent):
     BaseDialog(parent, -1, wxEmptyString)
 {
@@ -254,7 +272,7 @@ OptionsDialog::OptionsDialog(wxWindow* parent):
 	// some parents (ex. main frame) could even be smaller
 	config().setValue(getName() + "::centerOnParent", false);
 
-	listbook1 = new wxListbook(panel_controls, ID_listbook, 
+	listbook1 = new wxListbook(panel_controls, ID_listbook,
         wxDefaultPosition, wxDefaultSize, wxLB_DEFAULT);
 	imageList.Create(32, 32);
 	imageList.Add(getImage32(ntColumn));
@@ -504,9 +522,9 @@ wxPanel *OptionsDialog::createHeadline(wxPanel *parentPanel, const wxString& tex
 Setting *OptionsDialog::findSetting(wxCommandEvent& event)
 {
 	Setting *s = 0;
-	for (std::list<Page *>::iterator pit = pages.begin(); pit != pages.end(); ++pit)
-		for (std::list<Setting *>::iterator it = (*pit)->settings.begin(); it != (*pit)->settings.end(); ++it)
-			for (std::list<wxControl *>::iterator i2 = (*it)->controls.begin(); i2 != (*it)->controls.end(); ++i2)
+	for (std::list<Page *>::iterator pit = pages.begin(); pit != pages.end() && !s; ++pit)
+		for (std::list<Setting *>::iterator it = (*pit)->settings.begin(); it != (*pit)->settings.end() && !s; ++it)
+			for (std::list<wxControl *>::iterator i2 = (*it)->controls.begin(); i2 != (*it)->controls.end() && !s; ++i2)
 				if ((*i2) == event.GetEventObject())
 					s = (*it);
 	return s;
@@ -594,9 +612,7 @@ void OptionsDialog::OnCheckbox(wxCommandEvent& event)
 	Setting *s = findSetting(event);		// find the setting for this checkbox
 	if (!s)
 		return;
-	bool enabled = event.IsChecked();
-	for (std::list<Setting *>::iterator it = s->enables.begin(); it != s->enables.end(); ++it)
-		for (std::list<wxControl *>::iterator i2 = (*it)->controls.begin(); i2 != (*it)->controls.end(); ++i2)
-			(*i2)->Enable(enabled);
+	//s->enableControls(event.IsChecked());
+	s->enableControls();
 }
 //-----------------------------------------------------------------------------
