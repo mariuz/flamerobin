@@ -56,17 +56,18 @@
 bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
 {
 	if (text.Mid(0, 7) != wxT("OBJECT:"))
-		return true;
+		return false;
+
 	long address;
 	if (!text.Mid(7).ToLong(&address))
-		return true;
+		return false;
 	YxMetadataItem *m = (YxMetadataItem *)address;
 
 	YDatabase *db = m->getDatabase();
 	if (db != databaseM)
 	{
 		wxMessageBox(_("Cannot use objects from different databases."), _("Wrong database."), wxOK|wxICON_WARNING);
-		return true;
+		return false;
 	}
 
 	YTable *t = 0;
@@ -84,7 +85,7 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
 	if (t == 0)
 	{
 		wxMessageBox(_("Only tables and table columns can be dropped."), _("Object type not supported."), wxOK|wxICON_WARNING);
-		return true;
+		return false;
 	}
 
 	// setup complete. now the actual stuff:
@@ -117,7 +118,6 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
 	// if table is not there, add it
 	if (std::find(tableNames.begin(), tableNames.end(), t->getName()) == tableNames.end())
 	{
-		//         table_name    join_clause
 		std::vector<Join> relatedTables;
 		if (YTable::tablesRelate(tableNames, t, relatedTables))	// foreign keys
 		{
@@ -130,16 +130,14 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
 				int selected = ::wxGetSingleChoiceIndex(_("Multiple foreign keys found"),
 					_("Select the desired table"), as);
 				if (selected == -1)
-					return true;
+					return false;
 				join_list = relatedTables[selected].fields;
 			}
 			else
 				join_list = relatedTables[0].fields;
 
-			// find fields that connect the tables
-			// can_be_null = (check if any of the FK fields can be null)
-
 			// FIXME: dummy test value
+			// can_be_null = (check if any of the FK fields can be null)
 			bool can_be_null = true;
 
 			std::string insert = (can_be_null?" LEFT":"");
@@ -156,7 +154,7 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
 		}
 	}
 
-	// add columns to SELECT (either psel+8 or pfrom - 1)
+	// add columns to SELECT. Possible solutions include either psel+8 or pfrom + 1. I picked pfrom + 1.
 	sql.insert(pfrom, ",\n");
 	sql.insert(pfrom+1, column_list);
 
@@ -460,6 +458,7 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
 	// It should also work with aliases by parsing the FROM clause
 	// FROM [object_name] [alias]
 	// (left|right|outer...) JOIN [object_name] [alias]
+	// Parser used for DnD could be used here once it supports table aliases
 
 	int pos = styled_text_ctrl_sql->GetCurrentPos();
 	int start = styled_text_ctrl_sql->WordStartPosition(pos, true);
