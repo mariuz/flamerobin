@@ -90,10 +90,10 @@ bool Logger::log2file(const executedStatement& st, YDatabase *db, const std::str
 	{
 		wxString header = wxString::Format(
 			_("\n/* Logged by FlameRobin %s at %s\n   User: %s    Database: %s */\n"),
-			wxT(FR_VERSION),
-			wxDateTime::Now().Format(),
-			std2wx(db->getUsername()),
-			std2wx(db->getPath())
+			wxString(wxT(FR_VERSION)).c_str(),
+			wxDateTime::Now().Format().c_str(),
+			std2wx(db->getUsername()).c_str(),
+			std2wx(db->getPath()).c_str()
 		);
 		f.Write(header);
 	}
@@ -117,8 +117,7 @@ bool Logger::logStatement(const executedStatement& st, YDatabase *db)
 		config().getValue("LogFile", logFilename);
 		if (logFilename.empty())
 		{
-			// TODO: this message should be shown only once during session
-			//::wxMessageBox(_("Logging to file enabled, but log filename not set"), _("Warning, no filename"), wxICON_WARNING);
+			::wxMessageBox(_("Logging to file enabled, but log filename not set"), _("Warning, no filename"), wxICON_WARNING);
 			return false;
 		}
 		return log2file(st, db, logFilename);

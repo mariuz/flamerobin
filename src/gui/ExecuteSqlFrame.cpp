@@ -1053,7 +1053,8 @@ void ExecuteSqlFrame::commitTransaction()
 
 		// log statements, done before parsing in case parsing crashes FR
 		for (std::vector<executedStatement>::const_iterator it = executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
-			Logger::logStatement(*it, databaseM);
+			if (!Logger::logStatement(*it, databaseM))
+				break;
 
 		// parse all successfully executed statements
 		for (std::vector<executedStatement>::const_iterator it = executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
