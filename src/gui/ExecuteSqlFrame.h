@@ -102,6 +102,7 @@ public:
 
 	void executeAllStatements(bool autoExecute = false);
 	bool execute(std::string sql);
+	void parseStatements(const wxString& statements, bool autoExecute = false);
 	void setSql(wxString sql);
 
     ExecuteSqlFrame(wxWindow* parent, int id, wxString title, const wxPoint& pos=wxDefaultPosition,

@@ -84,23 +84,30 @@
 		<image>0</image>
 		<setting>
 			<type>checkbox</type>
-			<name>Wrap long lines by default</name>
-			<key>SQLEditorWrap</key>
-			<default>0</default>
-		</setting>
-		<setting>
-			<type>checkbox</type>
 			<name>Automatically copy successfully executed statements to clipboard</name>
 			<key>SQLEditorAutoCopy</key>
 			<default>0</default>
 		</setting>
 		<setting>
-			<type>number</type>
-			<min>-10</min>
-			<max>10</max>
-			<name>Zoom level</name>
-			<key>SQLEditorZoom</key>
+			<type>radio</type>
+			<name>When text is selected in editor, doing Execute should</name>
+			<key>OnlyExecuteSelected</key>
 			<default>0</default>
+			<option>
+				<value>0</value>
+				<text>Execute the entire buffer</text>
+			</option>
+			<option>
+				<value>1</value>
+				<text>Execute only the selection</text>
+			</option>
+		</setting>
+		<setting>
+			<type>checkbox</type>
+			<name>Treat selected text as a single statement</name>
+			<key>TreatAsSingleStatement</key>
+			<default>0</default>
+			<description>If unchecked the parser will search the selected text for multiple statements</description>
 		</setting>
 		<setting>
 			<type>string</type>

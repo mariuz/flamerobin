@@ -366,7 +366,12 @@ void SqlEditor::OnMenuSelectStatement(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void SqlEditor::OnMenuExecuteSelected(wxCommandEvent& WXUNUSED(event))
 {
-	frameM->execute(wx2std(GetSelectedText()));
+	bool single = false;
+	config().getValue("TreatAsSingleStatement", single);
+	if (single)
+		frameM->execute(wx2std(GetSelectedText()));
+	else
+		frameM->parseStatements(GetSelectedText());
 }
 //-----------------------------------------------------------------------------
 void SqlEditor::OnMenuWrap(wxCommandEvent& WXUNUSED(event))
@@ -743,19 +748,38 @@ void ExecuteSqlFrame::setSql(wxString sql)
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonExecuteClick(wxCommandEvent& WXUNUSED(event))
 {
-	executeAllStatements();
+	bool hasSelection = styled_text_ctrl_sql->GetSelectionStart() != styled_text_ctrl_sql->GetSelectionEnd();
+	bool only = false;
+	config().getValue("OnlyExecuteSelected", only);
+	if (only && hasSelection)	// something is selected
+	{
+		bool single = false;
+		config().getValue("TreatAsSingleStatement", single);
+		if (single)
+			execute(wx2std(styled_text_ctrl_sql->GetSelectedText()));
+		else
+			parseStatements(styled_text_ctrl_sql->GetSelectedText());
+	}
+	else
+		executeAllStatements();
+}
+//-----------------------------------------------------------------------------
+//! adapted so we don't have to change all the other code that utilizes SQL editor
+void ExecuteSqlFrame::executeAllStatements(bool closeWhenDone)
+{
+	parseStatements(styled_text_ctrl_sql->GetText(), closeWhenDone);
 }
 //-----------------------------------------------------------------------------
 //! Parses all sql statements in STC
 //! when autoexecute is TRUE, program just waits user to click Commit/Rollback and closes window
-void ExecuteSqlFrame::executeAllStatements(bool autoExecute)
+void ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhenDone)
 {
 	wxBusyCursor cr;
 	styled_text_ctrl_stats->Clear();
 
 	using namespace std;
 	string terminator = ";";
-	string commands = wx2std(styled_text_ctrl_sql->GetText());
+	string commands = wx2std(statements);
 
 	// find terminator, and execute the statement
 	string::size_type oldpos = 0;
@@ -834,7 +858,7 @@ void ExecuteSqlFrame::executeAllStatements(bool autoExecute)
 		searchpos = oldpos = lastpos + terminator.length();
 	}
 
-	if (autoExecute)
+	if (closeWhenDone)
 	{
 		closeWhenTransactionDoneM = true;
 		button_execute->Disable();
