@@ -1,5 +1,6 @@
 // This file is required to build the executable
 // please don't remove it
+// TODO: add all 4-letter word to the list, since autocomplete code has changed
 	as.Add(wxT("ACTION"));
 	as.Add(wxT("ACTIVE"));
 	as.Add(wxT("ADMIN"));
@@ -130,6 +131,7 @@
 	as.Add(wxT("NATURAL"));
 	as.Add(wxT("NCHAR"));
 	as.Add(wxT("NOAUTO"));
+	as.Add(wxT("NULL"));
 	as.Add(wxT("NULLIF"));
 	as.Add(wxT("NULLS"));
 	as.Add(wxT("NUMERIC"));
