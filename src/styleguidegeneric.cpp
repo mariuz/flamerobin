@@ -88,7 +88,7 @@ int YStyleGuideGeneric::getBrowseButtonMargin()
 //------------------------------------------------------------------------------
 int YStyleGuideGeneric::getCheckboxSpacing()
 {
-    return 10;
+    return 4;
 }
 //------------------------------------------------------------------------------
 int YStyleGuideGeneric::getControlLabelMargin()
@@ -103,7 +103,7 @@ int YStyleGuideGeneric::getDialogMargin(wxDirection WXUNUSED(direction))
 //------------------------------------------------------------------------------
 int YStyleGuideGeneric::getFrameMargin(wxDirection direction)
 {
-    return 15;
+    return 10;
 }
 //------------------------------------------------------------------------------
 int YStyleGuideGeneric::getRelatedControlMargin(wxOrientation WXUNUSED(orientation))
