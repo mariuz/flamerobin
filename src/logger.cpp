@@ -42,7 +42,7 @@
 #include "metadata/database.h"
 #include "logger.h"
 //-----------------------------------------------------------------------------
-bool Logger::log2database(const executedStatement& st, YDatabase *db)
+bool Logger::log2database(const executedStatement& /*st*/, YDatabase* /*db*/)
 {
 	return true;
 }

@@ -423,14 +423,16 @@ void SqlEditor::OnMenuSetFont(wxCommandEvent& WXUNUSED(event))
 	sets["CHARSET_VIETNAMESE"] = 163;
 	sets["CHARSET_THAI"] = 222;
 	#endif
-	wxArrayString slist;					// copy to wxArrayString
-	for (std::map<std::string, int>::iterator it = sets.begin(); it != sets.end(); ++it)
+	wxArrayString slist;  // copy to wxArrayString
+    slist.Alloc(sets.size());
+    std::map<std::string, int>::iterator it;
+	for (it = sets.begin(); it != sets.end(); ++it)
 		slist.Add(std2wx((*it).first));
 
 	wxString c = wxGetSingleChoice(_("Select charset to use"), _("Setting font for editor"), slist, this);
 	if (c.IsEmpty())	// Canceled
 		return;
-	std::map<std::string, int>::iterator it = sets.find(wx2std(c));
+	it = sets.find(wx2std(c));
 	if (it == sets.end())
 		return;		// should never happen
 
