@@ -85,6 +85,9 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_dberror.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrameImpl.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGrid.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridCells.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridTable.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupRestoreBaseFrame.obj \
@@ -249,6 +252,15 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrame.obj: .\src\FieldProp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrameImpl.obj: .\src\FieldPropertiesFrameImpl.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGrid.obj: .\src\frDataGrid.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridCells.obj: .\src\frDataGridCells.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridTable.obj: .\src\frDataGridTable.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.obj: .\src\frutils.cpp

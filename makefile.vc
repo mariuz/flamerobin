@@ -62,6 +62,9 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_dberror.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrame.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrameImpl.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGrid.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridCells.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridTable.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupFrame.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupRestoreBaseFrame.obj \
@@ -72,6 +75,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_OptionsDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.obj \
@@ -174,17 +178,17 @@ __IBPPLIBVERSION_FILENAMES = debug
 !if "$(FINAL)" == "1"
 __IBPPLIBVERSION_FILENAMES = release
 !endif
-!if "$(UNICODE)" == "1"
-U_OPT = u
-!endif
-!if "$(STATICRTL)" == "1"
-R_OPT = s
-!endif
 !if "$(USEDLL)" == "0"
 ____flamerobin_WX_LIB_DIR_FILENAMES = $(WXDIR)\lib\vc_lib
 !endif
 !if "$(USEDLL)" == "1"
 ____flamerobin_WX_LIB_DIR_FILENAMES = $(WXDIR)\lib\vc_dll
+!endif
+!if "$(UNICODE)" == "1"
+U_OPT = u
+!endif
+!if "$(STATICRTL)" == "1"
+R_OPT = s
 !endif
 !if "$(FINAL)" == "0"
 D_OPT = d
@@ -197,7 +201,7 @@ vc$(U_OPT)$(R_OPT)$(D_OPT):
 
 ### Targets: ###
 
-all: vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe templates
+all: vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe templates config-options
 
 clean: 
 	-if exist vc$(U_OPT)$(R_OPT)$(D_OPT)\*.obj del vc$(U_OPT)$(R_OPT)$(D_OPT)\*.obj
@@ -214,6 +218,10 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS) vc$(U_OPT)$(R_O
 templates: 
 	if not exist vc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates mkdir vc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
 	for %f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TRIGGER.html VIEW.html dependencies.html drop.png ok.png view.png) do if not exist vc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates\%f copy html-templates\%f vc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
+
+config-options: 
+	if not exist vc$(U_OPT)$(R_OPT)$(D_OPT) mkdir vc$(U_OPT)$(R_OPT)$(D_OPT)
+	for %f in (config_options.xml) do if not exist vc$(U_OPT)$(R_OPT)$(D_OPT)\%f copy res\%f vc$(U_OPT)$(R_OPT)$(D_OPT)
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.obj: .\src\addconstrainthandler.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
@@ -237,6 +245,15 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrame.obj: .\src\FieldPrope
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrameImpl.obj: .\src\FieldPropertiesFrameImpl.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGrid.obj: .\src\frDataGrid.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridCells.obj: .\src\frDataGridCells.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridTable.obj: .\src\frDataGridTable.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.obj: .\src\frutils.cpp
@@ -267,6 +284,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.obj: .\src\gui\RestoreFrame.c
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.obj: .\src\gui\ServerRegistrationDialog.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_OptionsDialog.obj: .\src\gui\OptionsDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.obj: .\src\images.cpp

@@ -39,6 +39,9 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_dberror.o \
 	flamerobin_FieldPropertiesFrame.o \
 	flamerobin_FieldPropertiesFrameImpl.o \
+	flamerobin_frDataGrid.o \
+	flamerobin_frDataGridCells.o \
+	flamerobin_frDataGridTable.o \
 	flamerobin_frutils.o \
 	flamerobin_BackupFrame.o \
 	flamerobin_BackupRestoreBaseFrame.o \
@@ -49,6 +52,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_ReorderFieldsDialog.o \
 	flamerobin_RestoreFrame.o \
 	flamerobin_ServerRegistrationDialog.o \
+	flamerobin_OptionsDialog.o \
 	flamerobin_images.o \
 	flamerobin_main.o \
 	flamerobin_MainFrame.o \
@@ -129,7 +133,7 @@ COND_PLATFORM_OS2_1___flamerobin___os2_emxbindcmd = $(NM) flamerobin$(EXEEXT) \
 
 ### Targets: ###
 
-all: flamerobin$(EXEEXT) $(__flamerobin_bundle___depname) templates
+all: flamerobin$(EXEEXT) $(__flamerobin_bundle___depname) templates config-options
 
 install: all
 
@@ -182,6 +186,14 @@ templates:
 	fi; \
 	done
 
+config-options: 
+	@mkdir -p .
+	@for f in config_options.xml; do \
+	if test \( ! -s ./$$f \) -o \( $(srcdir)/res/$$f -nt ./$$f  \) ; then \
+	cp -pRf $(srcdir)/res/$$f . ; \
+	fi; \
+	done
+
 flamerobin_addconstrainthandler.o: $(srcdir)/src/addconstrainthandler.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
@@ -204,6 +216,15 @@ flamerobin_FieldPropertiesFrame.o: $(srcdir)/src/FieldPropertiesFrame.cpp $(FLAM
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 flamerobin_FieldPropertiesFrameImpl.o: $(srcdir)/src/FieldPropertiesFrameImpl.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+flamerobin_frDataGrid.o: $(srcdir)/src/frDataGrid.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+flamerobin_frDataGridCells.o: $(srcdir)/src/frDataGridCells.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+flamerobin_frDataGridTable.o: $(srcdir)/src/frDataGridTable.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 flamerobin_frutils.o: $(srcdir)/src/frutils.cpp $(FLAMEROBIN_ODEP)
@@ -234,6 +255,9 @@ flamerobin_RestoreFrame.o: $(srcdir)/src/gui/RestoreFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 flamerobin_ServerRegistrationDialog.o: $(srcdir)/src/gui/ServerRegistrationDialog.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+flamerobin_OptionsDialog.o: $(srcdir)/src/gui/OptionsDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 flamerobin_images.o: $(srcdir)/src/images.cpp $(FLAMEROBIN_ODEP)
@@ -345,4 +369,4 @@ flamerobin_flamerobin_rc.o: $(srcdir)/res/flamerobin.rc $(FLAMEROBIN_ODEP)
 # Include dependency info, if present:
 @IF_GNU_MAKE@-include .deps/*.d
 
-.PHONY: all install uninstall clean distclean flamerobin_bundle templates
+.PHONY: all install uninstall clean distclean flamerobin_bundle templates config-options

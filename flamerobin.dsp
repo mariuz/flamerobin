@@ -516,6 +516,10 @@ SOURCE=.\src\gui\MultilineEnterDialog.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\OptionsDialog.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\ReorderFieldsDialog.cpp
 # End Source File
 # Begin Source File
@@ -565,6 +569,18 @@ SOURCE=.\src\metadata\exception.cpp
 # Begin Source File
 
 SOURCE=.\res\flamerobin.rc
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\frDataGrid.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\frDataGridCells.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\frDataGridTable.cpp
 # End Source File
 # Begin Source File
 
@@ -716,6 +732,10 @@ SOURCE=.\src\gui\MultilineEnterDialog.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\OptionsDialog.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\ReorderFieldsDialog.h
 # End Source File
 # Begin Source File
@@ -761,6 +781,18 @@ SOURCE=.\src\metadata\domain.h
 # Begin Source File
 
 SOURCE=.\src\metadata\exception.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\frDataGrid.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\frDataGridCells.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\frDataGridTable.h
 # End Source File
 # Begin Source File
 

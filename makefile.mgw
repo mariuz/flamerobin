@@ -59,6 +59,9 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_dberror.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrameImpl.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGrid.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridCells.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridTable.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupRestoreBaseFrame.o \
@@ -69,6 +72,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_OptionsDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.o \
@@ -141,12 +145,6 @@ endif
 ifeq ($(FINAL),1)
 __IBPPLIBVERSION_FILENAMES = release
 endif
-ifeq ($(UNICODE),1)
-U_OPT = u
-endif
-ifeq ($(STATICRTL),1)
-R_OPT = s
-endif
 ifeq ($(FINAL),0)
 ____flamerobin_DEBUGINFO = -g
 endif
@@ -159,6 +157,12 @@ endif
 ifeq ($(USEDLL),1)
 ____flamerobin_WX_LIB_DIR_FILENAMES = $(WXDIR)\lib\gcc_dll
 endif
+ifeq ($(UNICODE),1)
+U_OPT = u
+endif
+ifeq ($(STATICRTL),1)
+R_OPT = s
+endif
 ifeq ($(FINAL),0)
 D_OPT = d
 endif
@@ -170,7 +174,7 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT):
 
 ### Targets: ###
 
-all: gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe templates
+all: gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe templates config-options
 
 clean: 
 	-if exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\*.o del gcc$(U_OPT)$(R_OPT)$(D_OPT)\*.o
@@ -182,6 +186,10 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS) gcc$(U_OPT)$(R
 templates: 
 	if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates mkdir gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
 	for %%f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TRIGGER.html VIEW.html dependencies.html drop.png ok.png view.png) do if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates\%%f copy html-templates\%%f gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
+
+config-options: 
+	if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT) mkdir gcc$(U_OPT)$(R_OPT)$(D_OPT)
+	for %%f in (config_options.xml) do if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\%%f copy res\%%f gcc$(U_OPT)$(R_OPT)$(D_OPT)
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.o: ./src/addconstrainthandler.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
@@ -205,6 +213,15 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrame.o: ./src/FieldProper
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrameImpl.o: ./src/FieldPropertiesFrameImpl.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGrid.o: ./src/frDataGrid.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridCells.o: ./src/frDataGridCells.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridTable.o: ./src/frDataGridTable.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.o: ./src/frutils.cpp
@@ -235,6 +252,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.o: ./src/gui/RestoreFrame.cp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.o: ./src/gui/ServerRegistrationDialog.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_OptionsDialog.o: ./src/gui/OptionsDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.o: ./src/images.cpp
@@ -336,4 +356,4 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_urihandler.o: ./src/urihandler.cpp
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o: ./res/flamerobin.rc
 	windres --use-temp-file -i$< -o$@ --include-dir $(WXDIR)/include --include-dir $(WXDIR)/contrib/include $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) --define HAVE_W32API_H --define _WINDOWS --define __WINDOWS__ --define WINVER=0x400 --define WIN32 --define __WIN32__ --define __WIN95__ --define STRICT --define __WXMSW__ --define wxUSE_GUI=1 --define WIN32_LEAN_AND_MEAN --include-dir $(__flamerobin_WX_LIB_DIR)/msw$(D_OPT) --define IBPP_GCC --define IBPP_WINDOWS --include-dir src --include-dir res --include-dir $(IBPP)
 
-.PHONY: all clean templates
+.PHONY: all clean templates config-options
