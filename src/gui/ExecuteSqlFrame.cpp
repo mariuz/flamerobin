@@ -454,6 +454,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title, const
     button_execute = new wxButton(panel_contents, ID_button_execute, _("Execute (F9)"));
     button_commit = new wxButton(panel_contents, ID_button_commit, _("Commit (F5)"));
     button_rollback = new wxButton(panel_contents, ID_button_rollback, _("Rollback (F8)"));
+    button_plan = new wxButton(panel_contents, ID_button_plan, _("Show plan"));
     button_toggle = new wxButton(panel_contents, ID_button_toggle, _("Toggle view"));
 
     splitter_window_1 = new wxSplitterWindow(panel_contents, -1);
@@ -503,6 +504,7 @@ void ExecuteSqlFrame::set_properties()
 	button_execute->SetToolTip(_("F9 - Execute SQL statement"));
 	button_commit->SetToolTip(_("F5 - Commit transaction"));
 	button_rollback->SetToolTip(_("F8 - Rollback transaction"));
+	button_plan->SetToolTip(_("Show execution plan for query"));
 
 	splitter_window_1->Unsplit();
 
@@ -532,6 +534,7 @@ void ExecuteSqlFrame::do_layout()
     sizer_3->Add(button_execute, 0, wxALL, 3);
     sizer_3->Add(button_commit, 0, wxALL, 3);
     sizer_3->Add(button_rollback, 0, wxALL, 3);
+    sizer_3->Add(button_plan, 0, wxALL, 3);
     sizer_3->Add(10, 5, 0, 0, 0);
     sizer_3->Add(button_toggle, 0, wxALL, 3);
     sizer_2->Add(sizer_3, 0, wxALL|wxEXPAND, 2);
@@ -582,6 +585,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
 	EVT_BUTTON(ExecuteSqlFrame::ID_button_execute, ExecuteSqlFrame::OnButtonExecuteClick)
 	EVT_BUTTON(ExecuteSqlFrame::ID_button_commit, ExecuteSqlFrame::OnButtonCommitClick)
 	EVT_BUTTON(ExecuteSqlFrame::ID_button_rollback, ExecuteSqlFrame::OnButtonRollbackClick)
+	EVT_BUTTON(ExecuteSqlFrame::ID_button_plan, ExecuteSqlFrame::OnButtonPlanClick)
 	EVT_BUTTON(ExecuteSqlFrame::ID_button_toggle, ExecuteSqlFrame::OnButtonToggleClick)
 // TODO: USE_MYDATAGRID
 #ifndef USE_MYDATAGRID
@@ -770,6 +774,11 @@ void ExecuteSqlFrame::setSql(wxString sql)
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonExecuteClick(wxCommandEvent& WXUNUSED(event))
 {
+	prepareAndExecute(false);
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
+{
 	bool hasSelection = styled_text_ctrl_sql->GetSelectionStart() != styled_text_ctrl_sql->GetSelectionEnd();
 	bool only = false;
 	config().getValue("OnlyExecuteSelected", only);
@@ -778,12 +787,12 @@ void ExecuteSqlFrame::OnButtonExecuteClick(wxCommandEvent& WXUNUSED(event))
 		bool single = false;
 		config().getValue("TreatAsSingleStatement", single);
 		if (single)
-			execute(wx2std(styled_text_ctrl_sql->GetSelectedText()));
+			execute(wx2std(styled_text_ctrl_sql->GetSelectedText()), prepareOnly);
 		else
-			parseStatements(styled_text_ctrl_sql->GetSelectedText());
+			parseStatements(styled_text_ctrl_sql->GetSelectedText(), false, prepareOnly);
 	}
 	else
-		executeAllStatements();
+		parseStatements(styled_text_ctrl_sql->GetText(), false, prepareOnly);
 }
 //-----------------------------------------------------------------------------
 //! adapted so we don't have to change all the other code that utilizes SQL editor
@@ -794,7 +803,7 @@ void ExecuteSqlFrame::executeAllStatements(bool closeWhenDone)
 //-----------------------------------------------------------------------------
 //! Parses all sql statements in STC
 //! when autoexecute is TRUE, program just waits user to click Commit/Rollback and closes window
-void ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhenDone)
+void ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhenDone, bool prepareOnly)
 {
 	wxBusyCursor cr;
 	styled_text_ctrl_stats->Clear();
@@ -867,7 +876,7 @@ void ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
 			}
 			continue;
 		}
-		else if (sql.length() && !execute(sql))
+		else if (sql.length() && !execute(sql, prepareOnly))
 		{
 			styled_text_ctrl_sql->SetSelectionStart((int)oldpos);		// select the text in STC
 			styled_text_ctrl_sql->SetSelectionEnd((int)lastpos);		// that failed to execute
@@ -889,7 +898,7 @@ void ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
 }
 //-----------------------------------------------------------------------------
 //! when autoexecute is TRUE, program just waits user to click Commit/Rollback and closes window
-bool ExecuteSqlFrame::execute(std::string sql)
+bool ExecuteSqlFrame::execute(std::string sql, bool prepareOnly)
 {
 	if (styled_text_ctrl_sql->AutoCompActive())
 		styled_text_ctrl_sql->AutoCompCancel();	// remove the list if needed
@@ -925,8 +934,11 @@ bool ExecuteSqlFrame::execute(std::string sql)
 			log(_("Plan not available."));
 		}
 
-		log(wxT(""));
-  		log(wxT(""));
+		if (prepareOnly)
+			return true;
+
+		log(wxEmptyString);
+  		log(wxEmptyString);
   		log(_("Executing..."));
 		statementM->Execute();
 		log(_("Done."));
@@ -991,6 +1003,11 @@ void ExecuteSqlFrame::SplitScreen()
 void ExecuteSqlFrame::OnButtonCommitClick(wxCommandEvent& WXUNUSED(event))
 {
 	commitTransaction();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnButtonPlanClick(wxCommandEvent& WXUNUSED(event))
+{
+	prepareAndExecute(true);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::commitTransaction()

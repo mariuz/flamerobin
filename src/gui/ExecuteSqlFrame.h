@@ -95,14 +95,17 @@ public:
         ID_button_commit = 105,
         ID_button_rollback = 106,
 		ID_button_toggle = 107,
+		ID_button_plan = 108,
         ID_grid_data = 200,
 		ID_stc_sql = 201
     };
     // end wxGlade
 
+	// query parsing and execution
 	void executeAllStatements(bool autoExecute = false);
-	bool execute(std::string sql);
-	void parseStatements(const wxString& statements, bool autoExecute = false);
+	void prepareAndExecute(bool prepareOnly = false);
+	void parseStatements(const wxString& statements, bool autoExecute = false, bool prepareOnly = false);
+	bool execute(std::string sql, bool prepareOnly = false);
 	void setSql(wxString sql);
 
     ExecuteSqlFrame(wxWindow* parent, int id, wxString title, const wxPoint& pos=wxDefaultPosition,
@@ -139,6 +142,7 @@ private:
     void OnButtonRollbackClick(wxCommandEvent &event);
     void OnButtonToggleClick(wxCommandEvent &event);
     void OnButtonWrapClick(wxCommandEvent &event);
+    void OnButtonPlanClick(wxCommandEvent &event);
 // TODO: USE_MYDATAGRID
 #ifndef USE_MYDATAGRID
     void OnGridRowCountChanged(wxCommandEvent &event);
@@ -162,6 +166,7 @@ protected:
     wxButton* button_execute;
     wxButton* button_commit;
     wxButton* button_rollback;
+    wxButton* button_plan;
     wxButton* button_toggle;
 
     wxSplitterWindow* splitter_window_1;
