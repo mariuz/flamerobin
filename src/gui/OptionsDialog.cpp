@@ -34,7 +34,11 @@
     #include "wx/wx.h"
 #endif
 //-----------------------------------------------------------------------------
+#include "wx/filename.h"
+#include "wx/fontdlg.h"
 #include "images.h"
+#include "config.h"
+#include "ugly.h"
 #include "OptionsDialog.h"
 
 using namespace opt;
@@ -63,7 +67,81 @@ Setting::~Setting()
 		delete (*it);
 }
 //-----------------------------------------------------------------------------
-wxBoxSizer *Setting::addToPanel(wxPanel *panel, int id)
+void Setting::saveToConfig()
+{
+	if (controls.begin() == controls.end())
+		return;
+	wxControl *control = *(controls.begin());
+
+	std::string skey = wx2std(key);
+	if (type == wxT("checkbox"))
+	{
+		wxCheckBox *c = dynamic_cast<wxCheckBox *>(control);
+		if (c)
+			config().setValue(skey, c->IsChecked(), false);
+	}
+	else if (type == wxT("radio"))
+	{
+		wxRadioBox *r = dynamic_cast<wxRadioBox *>(control);
+		if (r)
+			config().setValue(skey, r->GetSelection(), false);
+	}
+	else if (type == wxT("number"))
+	{
+		wxSpinCtrl *s = dynamic_cast<wxSpinCtrl *>(control);
+		if (s)
+			config().setValue(skey, s->GetValue(), false);
+	}
+	else	// string
+	{
+		wxTextCtrl *t = dynamic_cast<wxTextCtrl *>(control);
+		if (t)
+			config().setValue(skey, wx2std(t->GetValue()), false);
+	}
+}
+//-----------------------------------------------------------------------------
+void Setting::loadFromConfig()
+{
+	if (controls.begin() == controls.end())
+		return;
+	wxControl *control = *(controls.begin());
+
+	std::string skey = wx2std(key);
+	if (type == wxT("checkbox"))
+	{
+		wxCheckBox *c = dynamic_cast<wxCheckBox *>(control);
+		bool value;
+		if (c && config().getValue(skey, value))
+			c->SetValue(value);
+		value = c->IsChecked();
+		for (std::list<Setting *>::iterator it = enables.begin(); it != enables.end(); ++it)
+			for (std::list<wxControl *>::iterator i2 = (*it)->controls.begin(); i2 != (*it)->controls.end(); ++i2)
+				(*i2)->Enable(value);
+	}
+	else if (type == wxT("radio"))
+	{
+		wxRadioBox *r = dynamic_cast<wxRadioBox *>(control);
+		int value;
+		if (r && config().getValue(skey, value))
+			r->SetSelection(value);
+	}
+	else if (type == wxT("number"))
+	{
+		wxSpinCtrl *s = dynamic_cast<wxSpinCtrl *>(control);
+		std::string value;
+		if (s && config().getValue(skey, value))
+			s->SetValue(std2wx(value));
+	}
+	else	// string
+	{
+		wxTextCtrl *t = dynamic_cast<wxTextCtrl *>(control);
+		std::string value;
+		if (t && config().getValue(skey, value))
+			t->SetValue(std2wx(value));
+	}
+}
+//-----------------------------------------------------------------------------
+wxBoxSizer *Setting::addToPanel(wxPanel *panel)
 {
 	int border = 3;
 	int space = 8;
@@ -83,9 +161,10 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel, int id)
 	// add controls
 	if (type == wxT("checkbox"))
 	{
-		wxCheckBox *temp = new wxCheckBox(panel, id, name);
+		wxCheckBox *temp = new wxCheckBox(panel, OptionsDialog::ID_checkbox, name);
 		sz->Add(temp, 0, wxALL|wxFIXED_MINSIZE, border);
 		temp->SetToolTip(description);
+		controls.push_back(temp);
 	}
 
 	else if (type == wxT("number"))
@@ -93,20 +172,24 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel, int id)
 		wxStaticText *t = new wxStaticText(panel, -1, name);
 		sz->Add(t, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
 		sz->Add(space, 5);
-		wxSpinCtrl *temp = new wxSpinCtrl(panel, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, min, max);
+		wxSpinCtrl *temp = new wxSpinCtrl(panel, -1, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, min, max);
 		sz->Add(temp, 0, wxALL|wxFIXED_MINSIZE, border);
 		temp->SetToolTip(description);
 		t->SetToolTip(description);
+		controls.push_back(temp);
+		controls.push_back(t);
 	}
 	else if (type == wxT("string"))
 	{
 		wxStaticText *t = new wxStaticText(panel, -1, name);
 		sz->Add(t, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
 		sz->Add(space, 5);
-		wxTextCtrl *temp = new wxTextCtrl(panel, id);
+		wxTextCtrl *temp = new wxTextCtrl(panel, -1);
 		sz->Add(temp, 0, wxALL|wxFIXED_MINSIZE, border);
 		temp->SetToolTip(description);
 		t->SetToolTip(description);
+		controls.push_back(temp);
+		controls.push_back(t);
 	}
 	else if (type == wxT("file"))
 	{
@@ -115,11 +198,14 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel, int id)
 		sz->Add(space, 5);
 		wxTextCtrl *temp = new wxTextCtrl(panel, -1);
 		sz->Add(temp, 1, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
-		wxButton *b = new wxButton(panel, id, _("Browse..."));
+		wxButton *b = new wxButton(panel, OptionsDialog::ID_button_browse, _("Browse..."));
 		sz->Add(b, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, 1);
 		temp->SetToolTip(description);
 		t->SetToolTip(description);
 		b->SetToolTip(description);
+		controls.push_back(temp);
+		controls.push_back(t);
+		controls.push_back(b);
 	}
 	else if (type == wxT("font"))
 	{
@@ -128,11 +214,14 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel, int id)
 		sz->Add(space, 5);
 		wxTextCtrl *temp = new wxTextCtrl(panel, -1);
 		sz->Add(temp, 1, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
-		wxButton *b = new wxButton(panel, id, _("Change"));
+		wxButton *b = new wxButton(panel, OptionsDialog::ID_button_font, _("Change"));
 		sz->Add(b, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, 1);
 		t->SetToolTip(description);
 		temp->SetToolTip(description);
 		b->SetToolTip(description);
+		controls.push_back(temp);
+		controls.push_back(t);
+		controls.push_back(b);
 	}
 	else if (type == wxT("radio"))
 	{
@@ -141,10 +230,11 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel, int id)
 		int cnt = 0;
 		for (std::list<Option *>::iterator it = options.begin(); it != options.end(); ++it)
 			opts[cnt++] = (*it)->text;
-		wxRadioBox *r = new wxRadioBox(panel, id, name, wxDefaultPosition, wxDefaultSize, size, opts, 1, wxRA_SPECIFY_COLS);
+		wxRadioBox *r = new wxRadioBox(panel, -1, name, wxDefaultPosition, wxDefaultSize, size, opts, 1, wxRA_SPECIFY_COLS);
 		delete [] opts;
 		sz->Add(r, 0, wxALL|wxFIXED_MINSIZE, border);
 		r->SetToolTip(description);
+		controls.push_back(r);
 	}
 
 	// add controls to it
@@ -155,14 +245,11 @@ OptionsDialog::OptionsDialog(wxWindow* parent):
     BaseDialog(parent, -1, wxEmptyString)
 {
 	listbook1 = new wxListbook(this, ID_listbook, wxDefaultPosition, wxDefaultSize, wxNB_LEFT);
-	idGenerator = 200;	// give IDs to new controls starting from 200
-
 	imageList.Create(32, 32);
 	imageList.Add(getImage32(ntColumn));
 	imageList.Add(getImage32(ntProcedure));
 	imageList.Add(getImage32(ntTrigger));
 	imageList.Add(getImage32(ntUnknown));
-
 	listbook1->SetImageList(&imageList);
 
     set_properties();
@@ -185,7 +272,6 @@ const std::string OptionsDialog::getName() const
 void OptionsDialog::set_properties()
 {
     SetTitle(wxT("Preferences"));
-    //SetSize(wxSize(530, 230));
 }
 //-----------------------------------------------------------------------------
 void OptionsDialog::do_layout()
@@ -339,7 +425,13 @@ void OptionsDialog::load()
 void OptionsDialog::createPages()
 {
 	for (std::list<Page *>::iterator it = pages.begin(); it != pages.end(); ++it)
+	{
 		listbook1->AddPage(createPanel(*it), (*it)->name, false, (*it)->image);
+
+		// initial values
+		for (std::list<Setting *>::iterator i2 = (*it)->settings.begin(); i2 != (*it)->settings.end(); ++i2)
+			(*i2)->loadFromConfig();
+	}
 }
 //-----------------------------------------------------------------------------
 wxPanel *OptionsDialog::createPanel(Page* pg)
@@ -353,7 +445,7 @@ wxPanel *OptionsDialog::createPanel(Page* pg)
 	// add controls
 	for (std::list<Setting *>::iterator it = pg->settings.begin(); it != pg->settings.end(); ++it)
 	{
-		wxBoxSizer *s = (*it)->addToPanel(panel, idGenerator++);
+		wxBoxSizer *s = (*it)->addToPanel(panel);
 		if (s)
 			sz->Add(s, 0, wxALL|wxEXPAND, 5);
 	}
@@ -364,8 +456,10 @@ wxPanel *OptionsDialog::createPanel(Page* pg)
 
     wxBoxSizer* sb = new wxBoxSizer(wxHORIZONTAL);
 	sz->Add(sb, 0, wxALL|wxALIGN_RIGHT|wxALIGN_BOTTOM, 3);
+	wxButton *appcl = new wxButton(panel, ID_button_close, _("Apply && Close"));
 	wxButton *apply = new wxButton(panel, ID_button_apply, _("Apply"));
 	wxButton *reset = new wxButton(panel, ID_button_reset, _("Reset"));
+	sb->Add(appcl, 0, wxALL, 5);
 	sb->Add(apply, 0, wxALL, 5);
 	sb->Add(reset, 0, wxALL, 5);
 
@@ -391,21 +485,108 @@ wxPanel *OptionsDialog::createHeadline(wxPanel *parentPanel, wxString text)
 	return temp;
 }
 //-----------------------------------------------------------------------------
+// finds setting for which the event took place
+Setting *OptionsDialog::findSetting(wxCommandEvent& event)
+{
+	Setting *s = 0;
+	for (std::list<Page *>::iterator pit = pages.begin(); pit != pages.end(); ++pit)
+		for (std::list<Setting *>::iterator it = (*pit)->settings.begin(); it != (*pit)->settings.end(); ++it)
+			for (std::list<wxControl *>::iterator i2 = (*it)->controls.begin(); i2 != (*it)->controls.end(); ++i2)
+				if ((*i2) == event.GetEventObject())
+					s = (*it);
+	return s;
+}
+//-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(OptionsDialog, wxDialog)
+    EVT_BUTTON(OptionsDialog::ID_button_close, OptionsDialog::OnApplyCloseButtonClick)
+    EVT_BUTTON(OptionsDialog::ID_button_apply, OptionsDialog::OnApplyButtonClick)
+    EVT_BUTTON(OptionsDialog::ID_button_reset, OptionsDialog::OnResetButtonClick)
+    EVT_BUTTON(OptionsDialog::ID_button_browse, OptionsDialog::OnBrowseButtonClick)
+    EVT_BUTTON(OptionsDialog::ID_button_font, OptionsDialog::OnFontButtonClick)
+	EVT_CHECKBOX(OptionsDialog::ID_checkbox, OptionsDialog::OnCheckbox)
+
     EVT_LISTBOOK_PAGE_CHANGING(ID_listbook, OptionsDialog::OnPageChanging)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
-void OptionsDialog::OnPageChanging(wxListbookEvent& event)
+void OptionsDialog::OnPageChanging(wxListbookEvent& WXUNUSED(event))
 {
-	if (false /* TODO: check if there are unsaved changes */)
-	{
-		int res = wxMessageBox(_("Do you wish to apply changes?"), _("There are unsaved changes"), wxYES_NO|wxCANCEL|wxICON_QUESTION);
-		if (res == wxID_CANCEL)
-			event.Veto();
-		else if (res == wxID_YES)
-		{
-			//apply();
-		}
-	}
+	/* maybe put something here? */
+}
+//-----------------------------------------------------------------------------
+// save settings to config
+void OptionsDialog::OnApplyButtonClick(wxCommandEvent& WXUNUSED(event))
+{
+	for (std::list<Page *>::iterator pit = pages.begin(); pit != pages.end(); ++pit)
+		for (std::list<Setting *>::iterator it = (*pit)->settings.begin(); it != (*pit)->settings.end(); ++it)
+			(*it)->saveToConfig();
+	config().save();
+	wxMessageBox(_(
+		"Some changes will only work on newly opened windows.\n"
+		"Also, some changes won't take effect until program is restarted."),
+		_("Preferences saved"),
+		wxOK|wxICON_INFORMATION
+	);
+}
+//-----------------------------------------------------------------------------
+// load settings from config
+void OptionsDialog::OnResetButtonClick(wxCommandEvent& WXUNUSED(event))
+{
+	for (std::list<Page *>::iterator pit = pages.begin(); pit != pages.end(); ++pit)
+		for (std::list<Setting *>::iterator it = (*pit)->settings.begin(); it != (*pit)->settings.end(); ++it)
+			(*it)->loadFromConfig();
+}
+//-----------------------------------------------------------------------------
+void OptionsDialog::OnApplyCloseButtonClick(wxCommandEvent& event)
+{
+	OnApplyButtonClick(event);
+	Close();
+}
+//-----------------------------------------------------------------------------
+void OptionsDialog::OnBrowseButtonClick(wxCommandEvent& event)
+{
+	Setting *s = findSetting(event);		// find the setting for this button
+	if (!s)
+		return;
+
+	wxTextCtrl *t = dynamic_cast<wxTextCtrl *>(*(s->controls.begin()));
+	if (!t)
+		return;
+	wxString path;
+	wxFileName::SplitPath(t->GetValue(), &path, 0, 0);
+
+	// browse for file and update textbox
+    wxString filename = ::wxFileSelector(_("Select File"), path, wxEmptyString,
+		wxEmptyString, _("All files (*.*)|*.*"), 0, this);
+    if (!filename.empty())
+			t->SetValue(filename);
+}
+//-----------------------------------------------------------------------------
+void OptionsDialog::OnFontButtonClick(wxCommandEvent& event)
+{
+	Setting *s = findSetting(event);		// find the setting for this button
+	if (!s)
+		return;
+
+	wxTextCtrl *t = dynamic_cast<wxTextCtrl *>(*(s->controls.begin()));
+	if (!t)
+		return;
+	wxFont f;
+	wxString info = t->GetValue();
+	if (!info.IsEmpty())
+		f.SetNativeFontInfo(info);
+	wxFont f2 = ::wxGetFontFromUser(this, f);
+	if (f2.Ok())
+		t->SetValue(f2.GetNativeFontInfoDesc());
+}
+//-----------------------------------------------------------------------------
+void OptionsDialog::OnCheckbox(wxCommandEvent& event)
+{
+	Setting *s = findSetting(event);		// find the setting for this checkbox
+	if (!s)
+		return;
+	bool enabled = event.IsChecked();
+	for (std::list<Setting *>::iterator it = s->enables.begin(); it != s->enables.end(); ++it)
+		for (std::list<wxControl *>::iterator i2 = (*it)->controls.begin(); i2 != (*it)->controls.end(); ++i2)
+			(*i2)->Enable(enabled);
 }
 //-----------------------------------------------------------------------------

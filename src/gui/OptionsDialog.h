@@ -60,6 +60,7 @@ namespace opt
 	class Setting
 	{
 	public:
+		std::list<wxControl *> controls;
 		wxString name;
 		wxString type;
 		wxString key;
@@ -70,7 +71,9 @@ namespace opt
 		std::list<Option *> options;	// for "radio" type
 		int min, max;					// for "number" type
 
-		wxBoxSizer *addToPanel(wxPanel *panel, int id);
+		wxBoxSizer *addToPanel(wxPanel *panel);
+		void loadFromConfig();
+		void saveToConfig();
 		Setting();
 		~Setting();
 	};
@@ -89,23 +92,33 @@ namespace opt
 class OptionsDialog: public BaseDialog {
 public:
     enum {
-        ID_listbook = 100,
-		ID_button_apply = 101,
-		ID_button_reset = 102
+        ID_listbook      = 100,
+		ID_button_apply  = 101,
+		ID_button_reset  = 102,
+		ID_button_close  = 103,
+		ID_button_browse = 104,
+		ID_button_font   = 105,
+		ID_checkbox      = 106
     };
 
 	std::list<opt::Page *> pages;
     OptionsDialog(wxWindow* parent);
-	void OnPageChanging(wxListbookEvent& event);
 
+	void OnPageChanging(wxListbookEvent& event);
+	void OnApplyButtonClick(wxCommandEvent& event);
+	void OnApplyCloseButtonClick(wxCommandEvent& event);
+	void OnResetButtonClick(wxCommandEvent& event);
+	void OnBrowseButtonClick(wxCommandEvent& event);
+	void OnFontButtonClick(wxCommandEvent& event);
+	void OnCheckbox(wxCommandEvent& event);
 private:
-	int idGenerator;
 	wxImageList imageList;
 
 	void load();
 	void createPages();
 	wxPanel *createPanel(opt::Page* pg);
 	wxPanel *createHeadline(wxPanel *parentPanel, wxString text);
+	opt::Setting *findSetting(wxCommandEvent& event);
 
     void set_properties();
     void do_layout();
