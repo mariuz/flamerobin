@@ -37,14 +37,16 @@ Contributor(s): Michael Hieke
 #endif
 
 #include <wx/clipbrd.h>
-#include <wx/grid.h>
 #include <wx/fontdlg.h>
+#include <wx/grid.h>
+#include <wx/textbuf.h>
 
 #include <string>
-#include "ugly.h"
+
 #include "config.h"
 #include "frDataGrid.h"
 #include "frDataGridTable.h"
+#include "ugly.h"
 
 //-----------------------------------------------------------------------------
 DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
@@ -136,13 +138,6 @@ void DataGrid::showPopMenu(wxPoint cursorPos)
     PopupMenu(&m, cursorPos);
 }
 //-----------------------------------------------------------------------------
-/*
-void DataGrid::stopFetching()
-{
-    Disconnect(wxID_ANY, wxEVT_IDLE);
-}
-*/
-//-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_CONTEXT_MENU(DataGrid::OnContextMenu)
     EVT_GRID_CELL_RIGHT_CLICK(DataGrid::OnGridCellRightClick)
@@ -219,16 +214,7 @@ void DataGrid::OnMenuCopyToCB(wxCommandEvent& WXUNUSED(event))
             }
         }
         if (!sRow.IsEmpty())
-		{
-            sRows += sRow +					// perhaps we should move this to styleguide?
-			#if defined(__WXMSW__)
-				wxT("\r\n");
-			#elif defined (__WXMAC__)
-				wxT("\r");
-			#else
-				wxT("\n");
-			#endif
-		}
+            sRows += sRow + wxTextBuffer::GetEOL();
     }
     if (!sRows.IsEmpty())
         copyToClipboard(sRows);
@@ -272,7 +258,8 @@ void DataGrid::OnMenuCopyToCBAsInsert(wxCommandEvent& WXUNUSED(event))
             sRows += sCols;
             sRows += wxT(") VALUES (");
             sRows += sValues;
-            sRows += wxT(");\n");
+            sRows += wxT(");");
+            sRows += wxTextBuffer::GetEOL();
         }
     }
     if (!sRows.IsEmpty())
