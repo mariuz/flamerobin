@@ -260,6 +260,7 @@ OptionsDialog::OptionsDialog(wxWindow* parent):
 	imageList.Add(getImage32(ntProcedure));
 	imageList.Add(getImage32(ntTrigger));
 	imageList.Add(getImage32(ntUnknown));
+	imageList.Add(getImage32(ntTable));
 	listbook1->SetImageList(&imageList);
 
     set_properties();

@@ -122,6 +122,7 @@ private:
 	void InTransaction(bool started);		// changes controls (enable/disable)
 	void commitTransaction();
 
+	void autoComplete(bool force);
 	void OnSqlEditUpdateUI(wxStyledTextEvent &event);
 	void OnSqlEditCharAdded(wxStyledTextEvent &event);		// autocomplete stuff
 	wxString keywordsM;		// text used for autocomplete

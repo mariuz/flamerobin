@@ -110,6 +110,19 @@
 			<description>If unchecked the parser will search the selected text for multiple statements</description>
 		</setting>
 		<setting>
+			<type>number</type>
+			<min>0</min>
+			<max>10</max>
+			<name>Characters needed for autocomplete</name>
+			<key>AutocompleteChars</key>
+			<default>3</default>
+			<description>If set to zero, user has to manually invoke the autocomplete list with Ctrl+Space</description>
+		</setting>
+	</page>
+	<page>
+		<pagename>Data grid</pagename>
+		<image>4</image>
+		<setting>
 			<type>string</type>
 			<name>Date format</name>
 			<key>DateFormat</key>
