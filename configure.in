@@ -14,11 +14,13 @@ AC_ARG_ENABLE(debug,
 
 if test $USE_DEBUG = yes ; then 
   DEBUG=1
+  FINAL=0
   dnl Bakefile doesn't touch {C,CPP,CXX,LD}FLAGS in autoconf format, we
   dnl have to do it ourselves. (Incorrectly) assuming GCC here:
   CFLAGS="$CFLAGS -g"
 else
   DEBUG=0
+  FINAL=1
 fi
 
 # Check for wxWindows
