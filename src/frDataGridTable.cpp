@@ -173,14 +173,14 @@ void GridTable::fetch()
 }
 //-----------------------------------------------------------------------------
 wxGridCellAttr* GridTable::GetAttr(int row, int col, 
-    wxGridCellAttr::wxAttrKind WXUNUSED(kind))
+    wxGridCellAttr::wxAttrKind kind)
 {
     if (row < rowsFetchedM && col < columnCountM && !dataM[row][col])
     {
         nullAttrM->IncRef();
         return nullAttrM;
     }
-    return 0;
+    return wxGridTableBase::GetAttr(row, col, kind);
 }
 //-----------------------------------------------------------------------------
 wxString GridTable::GetColLabelValue(int col)
