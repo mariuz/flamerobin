@@ -40,6 +40,9 @@ Contributor(s): Michael Hieke
 #include <wx/grid.h>
 #include <wx/fontdlg.h>
 
+#include <string>
+#include "ugly.h"
+#include "config.h"
 #include "frDataGrid.h"
 #include "frDataGridTable.h"
 
@@ -54,6 +57,21 @@ DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
     DisableDragRowSize();
     SetGridLineColour(*wxLIGHT_GREY);
     SetRowLabelAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
+
+	std::string s;
+	wxFont f;
+	if (config().getValue("DataGridFont", s) && !s.empty())
+	{
+		f.SetNativeFontInfo(std2wx(s));
+		if (f.Ok())
+			SetDefaultCellFont(f);
+	}
+	if (config().getValue("DataGridHeaderFont", s) && !s.empty())
+	{
+		f.SetNativeFontInfo(std2wx(s));
+		if (f.Ok())
+			SetLabelFont(f);
+	}
 }
 //-----------------------------------------------------------------------------
 DataGrid::~DataGrid()
@@ -100,7 +118,7 @@ void DataGrid::fill()
     // fetched
     if (table->canFetchMoreRows())
     {
-        Connect(wxID_ANY, wxEVT_IDLE, 
+        Connect(wxID_ANY, wxEVT_IDLE,
             (wxObjectEventFunction) (wxEventFunction)
             (wxIdleEventFunction)&DataGrid::OnIdle);
     }
@@ -156,14 +174,14 @@ void DataGrid::OnGridLabelRightClick(wxGridEvent& WXUNUSED(event))
 void DataGrid::OnIdle(wxIdleEvent& event)
 {
     GridTable* table = dynamic_cast<GridTable*>(GetTable());
-    // disconnect event handler if nothing more to be done, will be 
+    // disconnect event handler if nothing more to be done, will be
     // re-registered on next successfull execution of select statement
     if (!table || !table->canFetchMoreRows())
     {
         Disconnect(wxID_ANY, wxEVT_IDLE);
         return;
     }
-    // fetch more rows until row cache is filled or timeslice is spent, and 
+    // fetch more rows until row cache is filled or timeslice is spent, and
     // request another wxEVT_IDLE event if row cache has not been filled
     if (table->needsMoreRowsFetched())
     {
