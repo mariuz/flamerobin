@@ -54,6 +54,32 @@
 class DataGrid;
 #endif
 
+class ExecuteSqlFrame;
+//-----------------------------------------------------------------------------
+class SqlEditor: public wxStyledTextCtrl
+{
+private:
+	ExecuteSqlFrame *frameM;
+public:
+	enum { ID_MENU_UNDO = 300, ID_MENU_REDO, ID_MENU_CUT, ID_MENU_COPY, ID_MENU_PASTE, ID_MENU_DELETE,
+		ID_MENU_SELECT_ALL, ID_MENU_SELECT_STATEMENT, ID_MENU_EXECUTE_SELECTED, ID_MENU_WRAP
+	};
+
+	SqlEditor(wxWindow *parent, wxWindowID id, ExecuteSqlFrame *frame);
+	void OnContextMenu(wxContextMenuEvent& event);
+	void OnMenuUndo(wxCommandEvent& event);
+	void OnMenuRedo(wxCommandEvent& event);
+	void OnMenuCut(wxCommandEvent& event);
+	void OnMenuCopy(wxCommandEvent& event);
+	void OnMenuPaste(wxCommandEvent& event);
+	void OnMenuDelete(wxCommandEvent& event);
+	void OnMenuSelectAll(wxCommandEvent& event);
+	void OnMenuSelectStatement(wxCommandEvent& event);
+	void OnMenuExecuteSelected(wxCommandEvent& event);
+	void OnMenuWrap(wxCommandEvent& event);
+    DECLARE_EVENT_TABLE()
+};
+//-----------------------------------------------------------------------------
 class ExecuteSqlFrame: public BaseFrame, public YxObserver {
 public:
 	void setDatabase(YDatabase *db);
@@ -67,13 +93,13 @@ public:
         ID_button_commit = 105,
         ID_button_rollback = 106,
 		ID_button_toggle = 107,
-		ID_button_wrap = 108,
         ID_grid_data = 200,
 		ID_stc_sql = 201
     };
     // end wxGlade
 
 	void executeAllStatements(bool autoExecute = false);
+	bool execute(std::string sql);
 	void setSql(wxString sql);
 
     ExecuteSqlFrame(wxWindow* parent, int id, wxString title, const wxPoint& pos=wxDefaultPosition,
@@ -87,16 +113,13 @@ private:
 	void SplitScreen();
 	YDatabase *databaseM;
 
-	bool execute(std::string sql);
 	bool inTransactionM;
 	IBPP::Transaction transactionM;
 	IBPP::Statement statementM;
 	void InTransaction(bool started);		// changes controls (enable/disable)
 	void commitTransaction();
 
-	void setupEditor();		// Setup the Scintilla editor
 	void OnSqlEditUpdateUI(wxStyledTextEvent &event);
-
 	void OnSqlEditCharAdded(wxStyledTextEvent &event);		// autocomplete stuff
 	wxString keywordsM;		// text used for autocomplete
 	void setKeywords();
@@ -136,12 +159,11 @@ protected:
     wxButton* button_commit;
     wxButton* button_rollback;
     wxButton* button_toggle;
-    wxButton* button_wrap;
 
     wxSplitterWindow* splitter_window_1;
     wxPanel* panel_splitter_top;
     wxPanel* panel_splitter_bottom;
-    wxStyledTextCtrl* styled_text_ctrl_sql;
+    SqlEditor* styled_text_ctrl_sql;
     wxNotebook* notebook_1;
     wxPanel* notebook_pane_1;
     wxPanel* notebook_pane_2;
@@ -162,7 +184,7 @@ protected:
 
     DECLARE_EVENT_TABLE()
 };
-
+//-----------------------------------------------------------------------------
 class DnDText : public wxTextDropTarget
 {
 public:
@@ -173,5 +195,5 @@ private:
     wxStyledTextCtrl *ownerM;
 	YDatabase *databaseM;
 };
-
+//-----------------------------------------------------------------------------
 #endif // EXECUTESQLFRAME_H
