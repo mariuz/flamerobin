@@ -451,8 +451,8 @@
             <include>$(DOLLAR)(srcdir)/res</include>
         </if>
         <if cond="FORMAT!='autoconf'">
-            <include>src</include>
-            <include>res</include>
+            <include>./src</include>
+            <include>./res</include>
         </if>
         <include>$(DOLLAR)(IBPP)</include>
 
