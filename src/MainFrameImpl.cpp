@@ -164,7 +164,14 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnClose(wxCloseEvent& event)
 {
-	// OPTION: Are you sure you want to close FlameRobin?
+	bool confirm = false;
+	config().getValue("ConfirmQuit", confirm);
+	if (confirm && event.CanVeto() && wxNO ==
+		wxMessageBox(_("Are you sure you wish to exit?"), wxT("FlameRobin"), wxYES_NO|wxICON_QUESTION))
+	{
+		event.Veto();
+		return;
+	}
 	BaseFrame::OnClose(event);
 }
 //-----------------------------------------------------------------------------
