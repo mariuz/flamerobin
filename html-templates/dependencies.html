@@ -1,0 +1,40 @@
+<html>
+<head>
+  <title>Dependencies</title>
+</head>
+<body>
+<a
+ href="fr://page?type=summary&amp;parent_window={%parent_window%}">Summary</a>
+<br><br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=0 width="97%">
+  <tbody>
+    <tr bgcolor="navy">
+      <td width="40%"><b><font color=white>{%object_name%} depends on...</font></b></td>
+      <td><b><font color=white>Fields</font></b></td>
+    </tr>
+	{%depends_on:
+    <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
+      <td valign="top">{%object_type%} <a
+		  href="fr://properties?object_type={%object_type%}&amp;object_name={%object_name%}&amp;parent_window={%parent_window%}">{%object_name%}</a></td>
+      <td valign="top"><font size="-1">{%dependency_columns%}</font></td>
+    </tr>%}
+  </tbody>
+</table>
+<br><br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=0 width="97%">
+  <tbody>
+    <tr bgcolor="navy">
+      <td width="40%"><b><font color=white>Objects that depend on {%object_name%}</font></b></td>
+      <td><b><font color=white>Fields</font></b></td>
+    </tr>
+	{%depend_of:
+    <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
+      <td valign="top">{%object_type%} <a
+		  href="fr://properties?object_type={%object_type%}&amp;object_name={%object_name%}&amp;parent_window={%parent_window%}">{%object_name%}</a></td>
+      <td valign="top"><font size="-1">{%dependency_columns%}</font></td>
+    </tr>%}
+  </tbody>
+</table>
+<br>
+</body>
+</html>

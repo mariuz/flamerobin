@@ -1,0 +1,92 @@
+/*
+  The contents of this file are subject to the Initial Developer's Public
+  License Version 1.0 (the "License"); you may not use this file except in
+  compliance with the License. You may obtain a copy of the License here:
+  http://www.flamerobin.org/license.html.
+
+  Software distributed under the License is distributed on an "AS IS"
+  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+  License for the specific language governing rights and limitations under
+  the License.
+
+  The Original Code is FlameRobin (TM).
+
+  The Initial Developer of the Original Code is Milan Babuskov.
+
+  Portions created by the original developer
+  are Copyright (C) 2004 Milan Babuskov.
+
+  All Rights Reserved.
+
+  Contributor(s):
+*/
+
+/* XPM */
+static char * folder_xpm[] = {
+"16 16 50 1",
+" 	c None",
+".	c #000000",
+"+	c #E4E5DE",
+"@	c #D3D5CA",
+"#	c #A5A797",
+"$	c #F3F4F0",
+"%	c #ABAE99",
+"&	c #BDC0AD",
+"*	c #BCBEAA",
+"=	c #B1B49F",
+"-	c #6E715C",
+";	c #E6E7DD",
+">	c #F5F6F3",
+",	c #E4E5DB",
+"'	c #E2E4D9",
+")	c #E1E3D8",
+"!	c #DFE1D6",
+"~	c #C4C6B6",
+"{	c #F7F7F6",
+"]	c #D3D6C5",
+"^	c #D3D6C4",
+"/	c #D2D4C2",
+"(	c #D0D2C0",
+"_	c #CED1BD",
+":	c #CCCEBA",
+"<	c #CACDB9",
+"[	c #C8CBB6",
+"}	c #C6C9B3",
+"|	c #C4C8B1",
+"1	c #93967C",
+"2	c #F0F0EB",
+"3	c #F0F1EC",
+"4	c #C3C6AF",
+"5	c #C1C4AD",
+"6	c #909478",
+"7	c #EFF0EB",
+"8	c #BFC2AB",
+"9	c #BDC1A8",
+"0	c #8E9175",
+"a	c #EDEEE8",
+"b	c #BBBEA5",
+"c	c #BABDA3",
+"d	c #8B8F72",
+"e	c #ECEEE7",
+"f	c #B7BAA0",
+"g	c #E8E8E0",
+"h	c #C6C9BA",
+"i	c #8E9276",
+"j	c #8C9073",
+"k	c #646751",
+"                ",
+"                ",
+"   ....         ",
+"  .+@@#.        ",
+" .$%&*=-....... ",
+" .;>;;;,;''))!~.",
+" .{]^/(_:<<[}|1.",
+" .2]^/(_:<<[}|1.",
+" .3/(_:<[}}|456.",
+" .7_:<[}|445890.",
+" .a<[}|45889bcd.",
+" .e}|4589bbcffd.",
+" .g4589bcfffffd.",
+" .h6i0jdddddddk.",
+"  ............. ",
+"                "};

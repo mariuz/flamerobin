@@ -1,0 +1,22 @@
+Some of the images in this directory are taken from Ximian project,
+which released them under LGPL licence. See file LGPL for licence itself.
+
+Images covered with LGPL are:
+column.xpm
+database.xpm
+domain.xpm
+function.xpm
+generator.xpm
+generators.xpm
+object.xpm
+procedure.xpm
+procedures.xpm
+root.xpm
+table.xpm
+tables.xpm
+trigger.xpm
+view.xpm
+up.xpm
+down.xpm
+
+All other images, are licenced as the rest of FlameRobin project.

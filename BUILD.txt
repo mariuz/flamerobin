@@ -1,0 +1,53 @@
+flamerobin Build Instructions
+-------------------------------
+Below are build instructions for flamerobin on all supported build environments.
+
+-------------------------------
+-- MSW - Visual C++ Build Instructions
+-------------------------------
+There are two ways to build using Microsoft Visual C++. One is via the dsp/dsw
+project files, and the other is via the makefile.vc command line makefile.
+
+* Using the dsp/dsw projects *
+Before building, you MUST set a WXDIR environment variable which points to 
+your wxWidgets root directory. To do this, go to 
+Start->Control Panel->System and select the "Advanced" tab. Then, click the
+"Environment Variables" button and add WXDIR to the user or system env vars.
+
+Once that is finished, double click on <Project folder>\msw\flamerobin.dsw, select
+a build configuration by going to the Build menu, selecting 
+"Set build configuration" and then picking a config, then build!
+
+* Using the makefiles *
+To use the makefiles, start up a command line and navigate to the
+<Project folder>\msw directory. There, run the following command:
+
+nmake -f makefile.vc <BUILD OPTIONS>
+
+Build options can be any of the following:
+
+WXDIR=<dir> - tells the makefile where to find the root wxWidgets directory
+DEBUG=<0,1> - tells whether to build debug (0) or release (1) build
+USEDLL=<0,1> - tells whether to link against wx static or dynamic libs
+UNICODE=<0,1> - tells whether to link against wx ansi or unicode build       
+
+WXDIR *must* be specified (or set as an environment variable), but the rest
+default to 0 and are optional.
+
+-------------------------------
+-- Unix - Autoconf Build Instructions
+-------------------------------
+To build on Unix, simply open a command line, cd into the <Project folder> 
+root directory, and execute the following commands:
+
+mkdir bld
+cd bld
+../configure <--with-wx-config=/my/path/to/wx-config>
+make
+make install
+
+You only need to specify wx-config if you do not have a wx-config that can
+be found on the PATH, or if you want to use a wx-config other than the
+default one.
+
+OTHER BUILD INSTRUCTIONS - TODO!

@@ -1,0 +1,116 @@
+<?xml version="1.0" ?>
+<!-- $Id$ -->
+<makefile>
+	<template id="wx">
+		<if cond="FORMAT=='msvc'">
+			<set var="MYWXDIR">$(WXDIR)</set>
+		</if>
+		<if cond="FORMAT in ['msvc6prj','msevc4prj']">
+			<set var="WXDIR">$(DOLLAR)(WXDIR)</set>
+		</if>
+
+        <threading>multi</threading>
+        	
+        <if cond="FORMAT!='autoconf'">
+			<include>$(WXDIR)/include</include>
+		</if>
+		<!-- Set debug info here -->
+		<set var="WXDEBUG">
+			<if cond="FINAL=='0'">__WXDEBUG__</if>
+		</set>
+
+		<set var="DEBUGFLAG">
+			<if cond="FINAL=='0'">_DEBUG</if>
+		</set>
+
+    	<set var="UNICODE_DEFINE">
+        	<if cond="FORMAT!='autoconf' and UNICODE=='1'">_UNICODE</if>
+    	</set>
+    
+        <define>$(UNICODE_DEFINE)</define>
+		<define>$(WXDEBUG)</define>
+		<define>$(DEBUGFLAG)</define>
+
+		<set var="DEBUGINFO">
+			<if cond="FINAL=='0'">on</if>
+			<if cond="FINAL=='1'">off</if>
+		</set>
+		<set var="OPTIMIZE">
+			<if cond="FINAL=='0'">off</if>
+			<if cond="FINAL=='1'">speed</if>
+		</set>
+
+		<debug-info>$(DEBUGINFO)</debug-info>
+        <optimize>$(OPTIMIZE)</optimize>
+
+		<if cond="FORMAT in ['msvc6prj','msevc4prj', 'msvc']">
+			<set var="D_OPT">
+				<if cond="FINAL=='0'">d</if>
+			</set>
+			<set var="U_OPT">
+				<if cond="UNICODE=='1'">u</if>
+			</set>
+			<set var="WX_LIB_DIR" make_var="1">
+				<if cond="USEDLL=='1'">$(WXDIR)/lib/vc_dll</if>
+				<if cond="USEDLL=='0'">$(WXDIR)/lib/vc_lib</if>
+			</set>
+			
+			<set var="WXUSINGDLL">
+			 	<if cond="USEDLL=='1'">WXUSINGDLL</if>
+			</set>
+
+			<define>$(WXUSINGDLL)</define>
+			<include>$(WX_LIB_DIR)/msw$(D_OPT)</include>
+			<lib-path>$(WX_LIB_DIR)</lib-path>
+
+			<if cond="PLATFORM_WIN32=='1'">
+				<!-- Windows only defines -->
+				<set var="WX_PORT">wxmsw</set>
+				<set var="WX_VERSION">25</set>
+				<define>_WINDOWS</define>
+				<define>__WINDOWS__</define>
+				<define>WINVER=0x400</define>
+				<define>STRICT</define>
+		    	<define>WIN32</define>
+				<define>WINVER=0x400</define>
+				<define>wxUSE_GUI=1</define>
+				<define>__WXMSW__</define>
+				<define>__WIN32__</define>
+				<define>__WIN95__</define>
+		    	<define>WIN32_LEAN_AND_MEAN</define> 
+
+				<!-- Windows only linker flags -->
+				<ldflags>/nologo</ldflags>
+				<ldflags>/subsystem:windows</ldflags>
+				<ldflags>/machine:I386</ldflags>
+
+				<!-- Windows only libraries -->
+				<sys-lib>kernel32</sys-lib>
+				<sys-lib>user32</sys-lib> 
+				<sys-lib>gdi32</sys-lib> 
+				<sys-lib>winspool</sys-lib>
+				<sys-lib>comdlg32</sys-lib>
+				<sys-lib>advapi32</sys-lib>
+				<sys-lib>shell32</sys-lib>
+				<sys-lib>ole32</sys-lib>
+				<sys-lib>oleaut32</sys-lib>
+				<sys-lib>uuid</sys-lib> 
+				<sys-lib>comctl32</sys-lib>
+				<sys-lib>rpcrt4</sys-lib>
+				<sys-lib>wsock32</sys-lib>
+			</if>
+			
+			<!-- another nice thing that wx-config will take care of
+				 on Unix... -->
+			<sys-lib>wxbase$(WX_VERSION)$(U_OPT)$(D_OPT)</sys-lib>
+			<sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_adv</sys-lib>
+			<sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_core</sys-lib>
+			<sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_html</sys-lib>
+			<sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_stc</sys-lib>
+			<sys-lib>wxtiff$(D_OPT)</sys-lib>
+			<sys-lib>wxjpeg$(D_OPT)</sys-lib>
+			<sys-lib>wxpng$(D_OPT)</sys-lib>			
+			<sys-lib>wxzlib$(D_OPT)</sys-lib>			
+		</if>
+	</template>
+</makefile>

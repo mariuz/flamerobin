@@ -1,0 +1,55 @@
+<html>
+<head>
+  <title>Stored procedure properties</title>
+</head>
+<body>
+<a
+ href="fr://privileges?object_type=PROCEDURE&amp;object_name={%object_name%}">Privileges</a> | <a
+ href="fr://page?type=dependencies&amp;parent_window={%parent_window%}">Dependencies</a> | <a
+ href="fr://extract_ddl?object_type=PROCEDURE&amp;object_name={%object_name%}">Metadata
+(DDL)</a><br><br><font size=+2>{%object_name%}</font><br>
+{%object_description%} [<a
+ href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=PROCEDURE&amp;object_name={%object_name%}">edit</a>]
+<br><br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=0 width="98%">
+  <tbody>
+    <tr bgcolor="navy">
+      <td width="25%"><b><font color=white>Input parameter</font></b></td>
+      <td width="25%"><b><font color=white>Type</font></b></td>
+      <td width="50%"><b><font color=white>Description</font></b></td>
+    </tr>
+	{%input_parameters:
+    <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
+      <td valign="top">{%object_name%}</td>
+      <td valign="top">{%column_datatype%}</td>
+      <td valign="top"><font size=-1>{%object_description%} [<a
+		href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>
+    </tr>%}
+  </tbody>
+</table>
+<br><br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=0 width="98%">
+  <tbody>
+    <tr bgcolor="navy">
+      <td width="25%"><b><font color=white>Output parameter</font></b></td>
+      <td width="25%"><b><font color=white>Type</font></b></td>
+      <td width="50%"><b><font color=white>Description</font></b></td>
+    </tr>
+	{%output_parameters:
+    <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
+      <td valign="top">{%object_name%}</td>
+      <td valign="top">{%column_datatype%}</td>
+      <td valign="top"><font size=-1>{%object_description%} [<a
+		href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>
+    </tr>%}
+  </tbody>
+</table>
+<br><br>
+<table cellspacing=1 cellpadding=3 border=0 width="98%">
+<tr><td bgcolor="navy"><font color=white><b>Source</b> [<a href="fr://edit_procedure?parent_window={%parent_window%}&amp;object_address={%object_address%}"><font color="yellow">edit</font></a>] [<a
+	href="fr://rebuild_procedure?parent_window={%parent_window%}&amp;object_address={%object_address%}"><font color="yellow">rebuild</font></a>]</font></td>
+</tr>
+<tr><td bgcolor="#DDDDFF"><font size=-1><pre>{%procedure_source%}</pre></font></td></tr>
+</table>
+</body>
+</html>

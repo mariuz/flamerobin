@@ -1,0 +1,189 @@
+<?xml version="1.0" ?>
+<makefile>
+	<!-- really only needed on MSW, on Unix wx-config will find this
+	 	 for us -->
+	<option name="WXDIR" category="path" never_empty="1">
+		<values></values>
+		<default-value></default-value>
+	</option>
+
+	<!-- used to find IBPP header file and libraries -->
+	<option name="IBPP" category="path" never_empty="1">
+		<values></values>
+		<default-value></default-value>
+	</option>
+
+	<!-- these options allow the application to build with options for 
+		 Unicode/ANSI, Debug/Release, and Static/DLL configs
+		 of wxWidgets -->
+	<option name="USEDLL">
+		<values>0,1</values>
+		<values-description>,DLL</values-description>
+		<default-value>0</default-value>
+	</option>
+
+	<option name="UNICODE">
+		<values>0,1</values>
+		<values-description>,Unicode</values-description>
+		<default-value>0</default-value>
+	</option>
+
+	<option name="FINAL">
+		<values>0,1</values>
+		<values-description>Debug,Release</values-description>
+		<default-value>0</default-value>
+	</option>
+
+	<!-- this will only get set for MSVC, but we use it everywhere for ibpp.lib -->
+	<set var="D_OPT"></set>
+	<include file="wxtemplate.bkl"/>
+	
+	
+	<!-- we do this because on Unix the makefiles are usually
+		 in the root directory of the package, whereas for other
+		 formats (like MSW), typically they are in subfolders(?) -->
+	<set var="SOURCEDIR">
+		<if cond="FORMAT=='autoconf'">
+			./src/
+		</if>
+		<if cond="FORMAT!='autoconf'">
+			..\src\
+		</if>
+	</set>	
+	
+	<set var="INCLDIR">
+		<if cond="FORMAT=='autoconf'">
+			./src
+		</if>
+		<if cond="FORMAT!='autoconf'">
+			..\src
+		</if>
+	</set>
+
+	<set var="RESDIR">
+		<if cond="FORMAT=='autoconf'">
+			./res/
+		</if>
+		<if cond="FORMAT!='autoconf'">
+			..\res\
+		</if>
+	</set>
+
+	<!-- IBPP needs one of these defined -->
+	<set var="IBPPCOMPILERDEFINE">
+		<if cond="FORMAT=='autoconf'">IBPP_GCC</if>
+		<if cond="FORMAT=='borland'">IBPP_BCC</if>
+		<if cond="FORMAT=='msvc'">IBPP_MSVC</if>
+		<if cond="FORMAT=='msvc6prj'">IBPP_MSVC</if>
+	</set>
+
+	<!-- IBPP needs one of these defined -->
+	<set var="IBPPPLATFORMDEFINE">
+		<if cond="PLATFORM_MACOSX=='1'">IBPP_DARWIN</if>
+		<if cond="PLATFORM_UNIX=='1'">IBPP_LINUX</if>
+		<if cond="PLATFORM_WIN32=='1'">IBPP_WINDOWS</if>
+	</set>
+
+	<!-- path of IBPP library depends on platform and DEBUG setting -->
+	<set var="IBPPPLATFORM">
+		<if cond="PLATFORM_MACOSX=='1'">darwin</if>
+		<if cond="PLATFORM_UNIX=='1'">linux</if>
+		<if cond="PLATFORM_WIN32=='1' and FORMAT=='borland'">win32_bcc</if>
+		<if cond="PLATFORM_WIN32=='1' and FORMAT=='msvc'">win32_msvc</if>
+		<if cond="PLATFORM_WIN32=='1' and FORMAT=='msvc6prj'">win32_msvc</if>
+	</set>
+	<set var="IBPPLIBVERSION">
+		<if cond="FINAL=='0'">debug</if>
+		<if cond="FINAL=='1'">release</if>
+	</set>
+	<set var="IBPPLIBPATH">$(DOLLAR)(IBPP)/$(IBPPLIBVERSION)/$(IBPPPLATFORM)</set>
+
+	<set var="STYLEGUIDEIMPLEMENTATION">
+		<if cond="PLATFORM_MACOSX=='0' and PLATFORM_WIN32=='0'">
+			$(SOURCEDIR)styleguidegeneric.cpp
+		</if>
+		<if cond="PLATFORM_MACOSX=='1'">
+			$(SOURCEDIR)styleguidemac.cpp
+		</if>
+		<if cond="PLATFORM_WIN32=='1'">
+			$(SOURCEDIR)styleguidemsw.cpp
+		</if>
+	</set>
+
+	<exe id="flamerobin" template="wx">
+		<app-type>gui</app-type>
+		<cxx-rtti>on</cxx-rtti>
+		<cxx-exceptions>on</cxx-exceptions>
+		<precomp-headers>on</precomp-headers>
+		<threading>multi</threading>
+		<warnings>max</warnings>
+		<define>$(IBPPCOMPILERDEFINE)</define>
+		<define>$(IBPPPLATFORMDEFINE)</define>
+		<include>$(INCLDIR)</include>
+		<include>$(RESDIR)</include>
+		<include>$(DOLLAR)(IBPP)</include>
+		<include>$(DOLLAR)(WXDIR)/include</include>
+		<include>$(DOLLAR)(WXDIR)/contrib/include</include>
+		<sources>
+			$(SOURCEDIR)addconstrainthandler.cpp
+			$(SOURCEDIR)BaseDialog.cpp
+			$(SOURCEDIR)BaseFrame.cpp
+			$(SOURCEDIR)config.cpp
+			$(SOURCEDIR)converters.cpp
+			$(SOURCEDIR)DatabaseRegistrationInfoFrame.cpp
+			$(SOURCEDIR)DatabaseRegistrationInfoFrameImpl.cpp
+			$(SOURCEDIR)dberror.cpp
+			$(SOURCEDIR)ExecuteSqlFrame.cpp
+			$(SOURCEDIR)ExecuteSqlFrameImpl.cpp
+			$(SOURCEDIR)FieldPropertiesFrame.cpp
+			$(SOURCEDIR)FieldPropertiesFrameImpl.cpp
+			$(SOURCEDIR)frutils.cpp
+			$(SOURCEDIR)gui/BackupFrame.cpp
+			$(SOURCEDIR)gui/BackupRestoreBaseFrame.cpp
+			$(SOURCEDIR)gui/RestoreFrame.cpp
+			$(SOURCEDIR)images.cpp
+			$(SOURCEDIR)main.cpp
+			$(SOURCEDIR)MainFrame.cpp
+			$(SOURCEDIR)MainFrameImpl.cpp
+			$(SOURCEDIR)metadata/column.cpp
+			$(SOURCEDIR)metadata/constraints.cpp
+			$(SOURCEDIR)metadata/database.cpp
+			$(SOURCEDIR)metadata/domain.cpp
+			$(SOURCEDIR)metadata/exception.cpp
+			$(SOURCEDIR)metadata/function.cpp
+			$(SOURCEDIR)metadata/generator.cpp
+			$(SOURCEDIR)metadata/metadataitem.cpp
+			$(SOURCEDIR)metadata/metadataitemwithcolumns.cpp
+			$(SOURCEDIR)metadata/parameter.cpp
+			$(SOURCEDIR)metadata/procedure.cpp
+			$(SOURCEDIR)metadata/role.cpp
+			$(SOURCEDIR)metadata/root.cpp
+			$(SOURCEDIR)metadata/server.cpp
+			$(SOURCEDIR)metadata/table.cpp
+			$(SOURCEDIR)metadata/trigger.cpp
+			$(SOURCEDIR)metadata/view.cpp
+			$(SOURCEDIR)MetadataItemPropertiesDialog.cpp
+			$(SOURCEDIR)MetadataItemPropertiesDialogImpl.cpp
+			$(SOURCEDIR)MultilineEnterDialog.cpp
+			$(SOURCEDIR)myDataGrid.cpp
+			$(SOURCEDIR)myTreeCtrl.cpp
+			$(SOURCEDIR)objectdescriptionhandler.cpp
+			$(SOURCEDIR)observer.cpp
+			$(SOURCEDIR)ReorderFieldsDialog.cpp
+			$(SOURCEDIR)ReorderFieldsDialogImpl.cpp
+			$(SOURCEDIR)ServerRegistrationInfoFrame.cpp
+			$(SOURCEDIR)ServerRegistrationInfoFrameImpl.cpp
+			$(SOURCEDIR)styleguide.cpp
+			$(STYLEGUIDEIMPLEMENTATION)
+			$(SOURCEDIR)subject.cpp
+			$(SOURCEDIR)treeitem.cpp
+			$(SOURCEDIR)ugly.cpp
+			$(SOURCEDIR)urihandler.cpp
+		</sources>
+		<mac-res>$(RESDIR)FlameRobin.icns</mac-res>
+		<win32-res>$(RESDIR)flamerobin.rc</win32-res>
+		<lib-path>$(IBPPLIBPATH)</lib-path>
+		<sys-lib>ibpp$(D_OPT)</sys-lib>
+	</exe>
+	
+</makefile>

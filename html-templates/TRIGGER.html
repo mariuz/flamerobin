@@ -1,0 +1,21 @@
+<html>
+<head>
+  <title>Trigger properties</title>
+</head>
+<body>
+<a
+ href="fr://page?type=dependencies&amp;parent_window={%parent_window%}">Dependencies</a> | <a
+ href="fr://extract_ddl?object_type=TRIGGER&amp;object_name={%object_name%}">Metadata
+(DDL)</a><br><br><font size=+2>{%object_name%}</font><br>
+{%object_description%} [<a
+ href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=TRIGGER&amp;object_name={%object_name%}">edit</a>]
+<br><br>
+<b>{%trigger_info%}</b>
+<br><br>
+<table cellspacing=1 cellpadding=3 border=0 width="98%">
+<tr><td bgcolor="navy"><font color=white><b>Source</b> [<a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_address={%object_address%}"><font color="yellow">edit</font></a>]</font></td>
+</tr>
+<tr><td bgcolor="#DDDDFF"><font size=-1><pre>{%trigger_source%}</pre></font></td></tr>
+</table>
+</body>
+</html>
