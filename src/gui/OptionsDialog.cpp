@@ -57,6 +57,12 @@ Setting::Setting()
 	min = max = 0;
 }
 //-----------------------------------------------------------------------------
+Setting::~Setting()
+{
+	for (std::list<Option *>::iterator it = options.begin(); it != options.end(); ++it)
+		delete (*it);
+}
+//-----------------------------------------------------------------------------
 wxBoxSizer *Setting::addToPanel(wxPanel *panel, int id)
 {
 	int border = 3;
@@ -179,13 +185,14 @@ const std::string OptionsDialog::getName() const
 void OptionsDialog::set_properties()
 {
     SetTitle(wxT("Preferences"));
-    SetSize(wxSize(530, 230));
+    //SetSize(wxSize(530, 230));
 }
 //-----------------------------------------------------------------------------
 void OptionsDialog::do_layout()
 {
     wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
     sizer_1->Add(listbook1, 1, wxEXPAND, 0);
+	sizer_1->SetSizeHints(listbook1);
     SetAutoLayout(true);
     SetSizer(sizer_1);
     Layout();
@@ -331,9 +338,8 @@ void OptionsDialog::load()
 // browse through all page and create controls
 void OptionsDialog::createPages()
 {
-	int cnt = 0;
 	for (std::list<Page *>::iterator it = pages.begin(); it != pages.end(); ++it)
-		listbook1->InsertPage(cnt++, createPanel(*it), (*it)->name, false, (*it)->image);
+		listbook1->AddPage(createPanel(*it), (*it)->name, false, (*it)->image);
 }
 //-----------------------------------------------------------------------------
 wxPanel *OptionsDialog::createPanel(Page* pg)

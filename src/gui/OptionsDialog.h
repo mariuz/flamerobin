@@ -72,6 +72,7 @@ namespace opt
 
 		wxBoxSizer *addToPanel(wxPanel *panel, int id);
 		Setting();
+		~Setting();
 	};
 
 	class Page
