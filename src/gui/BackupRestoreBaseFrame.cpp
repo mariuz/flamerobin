@@ -1,39 +1,39 @@
 /*
-  The contents of this file are subject to the Initial Developer's Public
-  License Version 1.0 (the "License"); you may not use this file except in
-  compliance with the License. You may obtain a copy of the License here:
-  http://www.flamerobin.org/license.html.
+The contents of this file are subject to the Initial Developer's Public
+License Version 1.0 (the "License"); you may not use this file except in
+compliance with the License. You may obtain a copy of the License here:
+http://www.flamerobin.org/license.html.
 
-  Software distributed under the License is distributed on an "AS IS"
-  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-  License for the specific language governing rights and limitations under
-  the License.
+Software distributed under the License is distributed on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+License for the specific language governing rights and limitations under
+the License.
 
-  The Original Code is FlameRobin (TM).
+The Original Code is FlameRobin (TM).
 
-  The Initial Developer of the Original Code is Michael Hieke.
+The Initial Developer of the Original Code is Michael Hieke.
 
-  Portions created by the original developer
-  are Copyright (C) 2004 Michael Hieke.
+Portions created by the original developer
+are Copyright (C) 2004 Michael Hieke.
 
-  All Rights Reserved.
+All Rights Reserved.
 
-  $Id$
+$Id$
 
-  Contributor(s): Milan Babuskov
+Contributor(s): Milan Babuskov
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
 // need because it includes almost all "standard" wxWindows headers
 #ifndef WX_PRECOMP
-    #include "wx/wx.h"
+#include "wx/wx.h"
 #endif
 
 #include <wx/timer.h>
@@ -49,7 +49,7 @@ BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, YDatabase* db):
     databaseM = db;
     serverM = reinterpret_cast<YServer*>(db->getParent());
 
-	threadM = 0;
+    threadM = 0;
     threadMsgTimeMillisM = 0;
     verboseMsgsM = true;
     storageNameM = "unassigned";
@@ -64,7 +64,7 @@ BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, YDatabase* db):
     button_cancel = 0;
     text_ctrl_log = 0;
 
-	#include "backup.xpm"
+#include "backup.xpm"
     wxBitmap bmp(backup_xpm);
     wxIcon icon;
     icon.CopyFromBitmap(bmp);
@@ -74,10 +74,10 @@ BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, YDatabase* db):
 //! some controls need additional setup after descendant frame's controls are created
 void BackupRestoreBaseFrame::setupControls()
 {
-	text_ctrl_log->StyleSetForeground(1, *wxBLUE);
-	text_ctrl_log->StyleSetForeground(2, *wxRED);
-	text_ctrl_log->SetMarginWidth(1, 0);
-	text_ctrl_log->SetWrapMode(wxSTC_WRAP_WORD);
+    text_ctrl_log->StyleSetForeground(1, *wxBLUE);
+    text_ctrl_log->StyleSetForeground(2, *wxRED);
+    text_ctrl_log->SetMarginWidth(1, 0);
+    text_ctrl_log->SetWrapMode(wxSTC_WRAP_WORD);
 }
 //-----------------------------------------------------------------------------
 //! implementation details
@@ -121,10 +121,10 @@ bool BackupRestoreBaseFrame::Destroy()
 //-----------------------------------------------------------------------------
 void BackupRestoreBaseFrame::doReadConfigSettings(const std::string& prefix)
 {
-   	BaseFrame::doReadConfigSettings(prefix);
+    BaseFrame::doReadConfigSettings(prefix);
 
     bool verbose;
-	if (!config().getValue(prefix + "::verboselog", verbose))
+    if (!config().getValue(prefix + "::verboselog", verbose))
         verbose = true;
     combobox_showlog->SetValue(verbose);
 
@@ -135,31 +135,31 @@ void BackupRestoreBaseFrame::doReadConfigSettings(const std::string& prefix)
 //-----------------------------------------------------------------------------
 void BackupRestoreBaseFrame::doWriteConfigSettings(const std::string& prefix) const
 {
-	BaseFrame::doWriteConfigSettings(prefix);
-	config().setValue(prefix + "::verboselog", combobox_showlog->GetValue());
+    BaseFrame::doWriteConfigSettings(prefix);
+    config().setValue(prefix + "::verboselog", combobox_showlog->GetValue());
     config().setValue(prefix + "::backupfilename", wx2std(text_ctrl_filename->GetValue()));
 }
 //-----------------------------------------------------------------------------
 const std::string BackupRestoreBaseFrame::getStorageName() const
 {
-	if (storageNameM == "unassigned")
+    if (storageNameM == "unassigned")
     {
         StorageGranularity g;
-	    if (!config().getValue(getName() + "StorageGranularity", g))
-		    g = sgFrame;
+        if (!config().getValue(getName() + "StorageGranularity", g))
+            g = sgFrame;
 
-    	switch (g)
-	    {
-     	    case sgFrame:
-          	    storageNameM = getName();
-                break;
-		    case sgObject:
-                storageNameM = getName() + "::" + databaseM->getItemPath();
-                break;
-		    default:
-			    storageNameM = "";
-                break;
-	    }
+        switch (g)
+        {
+        case sgFrame:
+            storageNameM = getName();
+            break;
+        case sgObject:
+            storageNameM = getName() + "::" + databaseM->getItemPath();
+            break;
+        default:
+            storageNameM = "";
+            break;
+        }
     }
     return storageNameM;
 }
@@ -188,18 +188,18 @@ void BackupRestoreBaseFrame::threadOutputMsg(const wxString msg, MsgKind kind)
     wxString s(msg);
     switch (kind)
     {
-        case error_message:
-            s.Prepend(wxT("e"));
-            break;
-        case important_message:
-            s.Prepend(wxT("i"));
-            break;
-        case progress_message:
-            s.Prepend(wxT("p"));
-            break;
-        default:
-            wxASSERT(false);
-            return;
+    case error_message:
+        s.Prepend(wxT("e"));
+        break;
+    case important_message:
+        s.Prepend(wxT("i"));
+        break;
+    case progress_message:
+        s.Prepend(wxT("p"));
+        break;
+    default:
+        wxASSERT(false);
+        return;
     }
     bool doPostMsg = false;
     addThreadMsg(s, doPostMsg);
@@ -217,30 +217,30 @@ void BackupRestoreBaseFrame::updateMessages(size_t firstmsg, size_t lastmsg)
     bool added = false;
     for (size_t i = firstmsg; i < lastmsg; i++)
     {
-		int style = 0;
+        int style = 0;
         switch ((MsgKind)msgKindsM[i])
         {
-            case progress_message:
-                if (!verboseMsgsM)
-                    continue;
-                break;
-            case important_message:
-				style = 1;
-                break;
-            case error_message:
-				style = 2;
-                break;
+        case progress_message:
+            if (!verboseMsgsM)
+                continue;
+            break;
+        case important_message:
+            style = 1;
+            break;
+        case error_message:
+            style = 2;
+            break;
         }
-		int startpos = text_ctrl_log->GetLength();
-		text_ctrl_log->AddText(msgsM[i] + wxT("\n"));
-		int endpos = text_ctrl_log->GetLength();
-		text_ctrl_log->StartStyling(startpos, 255);
-		text_ctrl_log->SetStyling(endpos-startpos-1, style);
+        int startpos = text_ctrl_log->GetLength();
+        text_ctrl_log->AddText(msgsM[i] + wxT("\n"));
+        int endpos = text_ctrl_log->GetLength();
+        text_ctrl_log->StartStyling(startpos, 255);
+        text_ctrl_log->SetStyling(endpos-startpos-1, style);
         added = true;
     }
 
     if (added)
-		text_ctrl_log->GotoPos(text_ctrl_log->GetLength());
+        text_ctrl_log->GotoPos(text_ctrl_log->GetLength());
 }
 //-----------------------------------------------------------------------------
 //! event handlers
@@ -260,8 +260,8 @@ void BackupRestoreBaseFrame::OnCancelButtonClick(wxCommandEvent& WXUNUSED(event)
 //-----------------------------------------------------------------------------
 void BackupRestoreBaseFrame::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
 {
-	if (IsShown())
-		updateControls();
+    if (IsShown())
+        updateControls();
 }
 //-----------------------------------------------------------------------------
 void BackupRestoreBaseFrame::OnThreadFinished(wxCommandEvent& event)
@@ -284,15 +284,15 @@ void BackupRestoreBaseFrame::OnThreadOutput(wxCommandEvent& WXUNUSED(event))
             continue;
         switch (s.GetChar(0))
         {
-            case 'e':
-                msgKindsM.Add((int)error_message);
-                break;
-            case 'i':
-                msgKindsM.Add((int)important_message);
-                break;
-            case 'p':
-                msgKindsM.Add((int)progress_message);
-                break;
+        case 'e':
+            msgKindsM.Add((int)error_message);
+            break;
+        case 'i':
+            msgKindsM.Add((int)important_message);
+            break;
+        case 'p':
+            msgKindsM.Add((int)progress_message);
+            break;
         }
         // this depends on server type, so just in case...
         if (s.Last() == '\n')
@@ -306,7 +306,7 @@ void BackupRestoreBaseFrame::OnThreadOutput(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void BackupRestoreBaseFrame::OnVerboseLogChange(wxCommandEvent& WXUNUSED(event))
 {
-	wxBusyCursor wait;
+    wxBusyCursor wait;
     verboseMsgsM = combobox_showlog->IsChecked();
 
     text_ctrl_log->Freeze();

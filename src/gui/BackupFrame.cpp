@@ -1,39 +1,39 @@
 /*
-  The contents of this file are subject to the Initial Developer's Public
-  License Version 1.0 (the "License"); you may not use this file except in
-  compliance with the License. You may obtain a copy of the License here:
-  http://www.flamerobin.org/license.html.
+The contents of this file are subject to the Initial Developer's Public
+License Version 1.0 (the "License"); you may not use this file except in
+compliance with the License. You may obtain a copy of the License here:
+http://www.flamerobin.org/license.html.
 
-  Software distributed under the License is distributed on an "AS IS"
-  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-  License for the specific language governing rights and limitations under
-  the License.
+Software distributed under the License is distributed on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+License for the specific language governing rights and limitations under
+the License.
 
-  The Original Code is FlameRobin (TM).
+The Original Code is FlameRobin (TM).
 
-  The Initial Developer of the Original Code is Michael Hieke.
+The Initial Developer of the Original Code is Michael Hieke.
 
-  Portions created by the original developer
-  are Copyright (C) 2004 Michael Hieke.
+Portions created by the original developer
+are Copyright (C) 2004 Michael Hieke.
 
-  All Rights Reserved.
+All Rights Reserved.
 
-  $Id$
+$Id$
 
-  Contributor(s): Milan Babuskov
+Contributor(s): Milan Babuskov
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
 // need because it includes almost all "standard" wxWindows headers
 #ifndef WX_PRECOMP
-    #include "wx/wx.h"
+#include "wx/wx.h"
 #endif
 
 #include <algorithm>
@@ -68,8 +68,8 @@ private:
     void logProgress(wxString& msg);
 };
 //-----------------------------------------------------------------------------
-BackupThread::BackupThread(BackupFrame* frame, std::string server, std::string username,
-    std::string password, std::string dbfilename, std::string bkfilename, IBPP::BRF flags):
+BackupThread::BackupThread(BackupFrame* frame, std::string server, std::string username, std::string password, 
+        std::string dbfilename, std::string bkfilename, IBPP::BRF flags):
     wxThread()
 {
     frameM = frame;
@@ -92,7 +92,7 @@ void* BackupThread::Entry()
         msg.Printf(_("Connecting to server %s..."), serverM.c_str());
         logImportant(msg);
         IBPP::Service svc = IBPP::ServiceFactory(serverM, usernameM, passwordM);
-		svc->Connect();
+        svc->Connect();
 
         now = wxDateTime::Now();
         msg.Printf(_("Database backup started %s"), now.FormatTime().c_str());
@@ -169,7 +169,7 @@ BackupFrame::BackupFrame(wxWindow* parent, YDatabase* db):
     wxString s;
     s.Printf(_("Backup Database \"%s:%s\""),
         serverM->getName().c_str(), databaseM->getName().c_str());
-	SetTitle(s);
+    SetTitle(s);
 
     panel_controls = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize,
         wxTAB_TRAVERSAL|wxCLIP_CHILDREN|wxNO_FULL_REPAINT_ON_RESIZE);
@@ -193,7 +193,7 @@ BackupFrame::BackupFrame(wxWindow* parent, YDatabase* db):
 
     do_layout();
     updateControls();
-	setupControls();
+    setupControls();
 }
 //-----------------------------------------------------------------------------
 //! implementation details
@@ -204,7 +204,7 @@ void BackupFrame::do_layout()
 
     wxBoxSizer* sizerFilename = new wxBoxSizer(wxHORIZONTAL);
     sizerFilename->Add(label_filename, 0, wxALIGN_CENTER_VERTICAL);
-	sizerFilename->Add(styleguide().getControlLabelMargin(), 0);
+    sizerFilename->Add(styleguide().getControlLabelMargin(), 0);
     sizerFilename->Add(text_ctrl_filename, 1, wxALIGN_CENTER_VERTICAL);
     sizerFilename->Add(styleguide().getBrowseButtonMargin(), 0);
     sizerFilename->Add(button_browse, 0, wxALIGN_CENTER_VERTICAL);
@@ -317,10 +317,10 @@ END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void BackupFrame::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-	wxString filename = ::wxFileSelector(_("Select Backup File"), wxT(""), wxT(""),
+    wxString filename = ::wxFileSelector(_("Select Backup File"), wxT(""), wxT(""),
         wxT(""), _("All files (*.*)|*.*"), 0, this);
-	if (!filename.empty())
-		text_ctrl_filename->SetValue(filename);
+    if (!filename.empty())
+        text_ctrl_filename->SetValue(filename);
 }
 //-----------------------------------------------------------------------------
 void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
@@ -328,18 +328,18 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     verboseMsgsM = combobox_showlog->IsChecked();
     clearLog();
 
-// TODO: create a global helper function
-//   bool getDatabasePassword(wxFrame* parent, YDatabase* db, wxString password);
-// this would simplify the next lines to
-//   if (!getDatabasePassword(this, databaseM, password))
-//       return;
+    // TODO: create a global helper function
+    //   bool getDatabasePassword(wxFrame* parent, YDatabase* db, wxString password);
+    // this would simplify the next lines to
+    //   if (!getDatabasePassword(this, databaseM, password))
+    //       return;
 
     std::string password = databaseM->getPassword();
     if (password.empty())
     {
-		wxString msg;
+        wxString msg;
         msg.Printf(_("Enter password for user %s:"), databaseM->getUsername().c_str());
-		password = wx2std(::wxGetPasswordFromUser(msg, _("Connecting To Server")));
+        password = wx2std(::wxGetPasswordFromUser(msg, _("Connecting To Server")));
         if (password.empty())
             return;
     }
