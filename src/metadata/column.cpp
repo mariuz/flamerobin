@@ -31,6 +31,7 @@
 #include <sstream>
 #include <string>
 
+#include "config.h"
 #include "database.h"
 #include "collection.h"
 #include "domain.h"
@@ -77,16 +78,23 @@ bool YColumn::isPrimaryKey() const
 std::string YColumn::getPrintableName()
 {
 	YDomain *d = getDomain();
-	std::string domain_name;
+	std::string datatype;
  	if (d)
-		domain_name = d->getDatatypeAsString();
+		datatype = d->getDatatypeAsString();
 	else
-		domain_name = sourceM;
+		datatype = sourceM;
 
-	std::string ret = nameM + " " + domain_name;
-	// OPTION: ability to show domain name together with data type.
-	if (d && !d->isSystem())
-		ret += " (" + d->getPrintableName() + ")";
+	std::string ret = nameM;
+
+	enum { showDatatype=0, showDomain, showBoth };
+	int show = showBoth;
+ 	config().getValue("ShowDomains", show);
+
+	if (!d || d->isSystem() || show == showBoth || show == showDatatype)
+		ret += " " + datatype;
+
+	if (d && !d->isSystem() && (show == showBoth || show == showDomain))
+		ret += " (" + d->getName() + ")";
 	if (notnullM)
 		ret += " not null";
 	return ret;

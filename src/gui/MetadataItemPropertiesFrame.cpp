@@ -355,12 +355,8 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 		YColumn *c = dynamic_cast<YColumn *>(object);
 		if (c)
 		{
-			YDomain *d = c->getDomain();
-			htmlpage += d->getDatatypeAsString();
-        	// TODO: ability to show domain name together with data type. Make it an option?
-			if (!d->isSystem())
-				// TODO: make the domain name a link to the domain's property page?
-				htmlpage += " (" + d->getPrintableName() + ")";
+			htmlpage += c->getPrintableName();
+			// TODO: make the domain name (if any) a link to the domain's property page?
 		}
 	}
 
