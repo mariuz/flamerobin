@@ -110,7 +110,7 @@ void Setting::loadFromConfig()
 	std::string skey = wx2std(key);
 
 	// set default value if needed
-	if (!config().keyExists(skey))
+	if (!config().keyExists(skey) && !defaultValue.IsEmpty())
 		config().setValue(skey, wx2std(defaultValue));
 
 	if (type == wxT("checkbox"))
@@ -512,7 +512,7 @@ wxPanel *OptionsDialog::createPanel(Page* pg)
 //-----------------------------------------------------------------------------
 wxPanel *OptionsDialog::createHeadline(wxPanel *parentPanel, wxString text)
 {
-    wxPanel *temp = new wxPanel(parentPanel, -1, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL);
+    wxPanel *temp = new wxPanel(parentPanel, -1, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
     wxStaticText *headline = new wxStaticText(temp, -1, text);
 	headline->SetFont(wxFont(16, wxDEFAULT, wxNORMAL, wxNORMAL, 0, wxT("")));
     wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
