@@ -109,7 +109,7 @@ void Setting::loadFromConfig()
 
 	std::string skey = wx2std(key);
 
-	// set default value is needed
+	// set default value if needed
 	if (!config().keyExists(skey))
 		config().setValue(skey, wx2std(defaultValue));
 
