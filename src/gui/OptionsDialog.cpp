@@ -18,7 +18,7 @@
 
   All Rights Reserved.
 
-  Contributor(s):
+  Contributor(s): Michael Hieke
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -36,10 +36,12 @@
 //-----------------------------------------------------------------------------
 #include "wx/filename.h"
 #include "wx/fontdlg.h"
-#include "images.h"
+
 #include "config.h"
-#include "ugly.h"
 #include "frutils.h"
+#include "images.h"
+#include "styleguide.h"
+#include "ugly.h"
 #include "OptionsDialog.h"
 
 using namespace opt;
@@ -149,9 +151,6 @@ void Setting::loadFromConfig()
 //-----------------------------------------------------------------------------
 wxBoxSizer *Setting::addToPanel(wxPanel *panel)
 {
-	int border = 3;
-	int space = 8;
-
 	// add horizontal boxSizer
     wxBoxSizer* sz = new wxBoxSizer(wxHORIZONTAL);
 
@@ -159,7 +158,7 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel)
 	int depth = 0;
 	for (Setting *st = this; st->enabledBy; st = st->enabledBy)
 		depth++;
-	sz->Add(15*depth, 5);
+    sz->Add(2 * depth * styleguide().getRelatedControlMargin(wxHORIZONTAL), 0);
 
 	if (description.IsEmpty())
 		description = name;
@@ -167,67 +166,70 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel)
 	// add controls
 	if (type == wxT("checkbox"))
 	{
-		wxCheckBox *temp = new wxCheckBox(panel, OptionsDialog::ID_checkbox, name);
-		sz->Add(temp, 0, wxALL|wxFIXED_MINSIZE, border);
-		temp->SetToolTip(description);
-		controls.push_back(temp);
+		wxCheckBox *cb = new wxCheckBox(panel, OptionsDialog::ID_checkbox, name);
+		sz->Add(cb, 0, wxFIXED_MINSIZE);
+		cb->SetToolTip(description);
+		controls.push_back(cb);
 	}
 
 	else if (type == wxT("number"))
 	{
-		wxStaticText *t = new wxStaticText(panel, -1, name);
-		sz->Add(t, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
-		sz->Add(space, 5);
-		wxSpinCtrl *temp = new wxSpinCtrl(panel, -1, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, min, max);
-		sz->Add(temp, 0, wxALL|wxFIXED_MINSIZE, border);
-		temp->SetToolTip(description);
-		t->SetToolTip(description);
-		controls.push_back(temp);
-		controls.push_back(t);
+		wxStaticText *st = new wxStaticText(panel, -1, name);
+		sz->Add(st, 0, wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL);
+        sz->Add(styleguide().getControlLabelMargin(), 0);
+		wxSpinCtrl *sc = new wxSpinCtrl(panel, -1, wxEmptyString, 
+            wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, min, max);
+		sz->Add(sc, 0, wxFIXED_MINSIZE);
+		st->SetToolTip(description);
+		sc->SetToolTip(description);
+		controls.push_back(st);
+		controls.push_back(sc);
 	}
 	else if (type == wxT("string"))
 	{
-		wxStaticText *t = new wxStaticText(panel, -1, name);
-		sz->Add(t, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
-		sz->Add(space, 5);
-		wxTextCtrl *temp = new wxTextCtrl(panel, -1);
-		sz->Add(temp, 0, wxALL|wxFIXED_MINSIZE, border);
-		temp->SetToolTip(description);
-		t->SetToolTip(description);
-		controls.push_back(temp);
-		controls.push_back(t);
+		wxStaticText *st = new wxStaticText(panel, -1, name);
+		sz->Add(st, 0, wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL);
+        sz->Add(styleguide().getControlLabelMargin(), 0);
+		wxTextCtrl *tc = new wxTextCtrl(panel, -1);
+		sz->Add(tc, 0, wxFIXED_MINSIZE);
+		st->SetToolTip(description);
+		tc->SetToolTip(description);
+		controls.push_back(st);
+		controls.push_back(tc);
 	}
 	else if (type == wxT("file"))
 	{
-		wxStaticText *t = new wxStaticText(panel, -1, name);
-		sz->Add(t, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
-		sz->Add(space, 5);
-		wxTextCtrl *temp = new wxTextCtrl(panel, -1);
-		sz->Add(temp, 1, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
-		wxButton *b = new wxButton(panel, OptionsDialog::ID_button_browse, _("Browse..."));
-		sz->Add(b, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, 1);
-		temp->SetToolTip(description);
-		t->SetToolTip(description);
-		b->SetToolTip(description);
-		controls.push_back(temp);
-		controls.push_back(t);
-		controls.push_back(b);
+		wxStaticText *st = new wxStaticText(panel, -1, name);
+		sz->Add(st, 0, wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL);
+        sz->Add(styleguide().getControlLabelMargin(), 0);
+		wxTextCtrl *tc = new wxTextCtrl(panel, -1);
+		sz->Add(tc, 1, wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL);
+        sz->Add(styleguide().getBrowseButtonMargin(), 0);
+		wxButton *btn = new wxButton(panel, OptionsDialog::ID_button_browse, _("Select..."));
+		sz->Add(btn, 0, wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL);
+		st->SetToolTip(description);
+		tc->SetToolTip(description);
+		btn->SetToolTip(description);
+		controls.push_back(st);
+		controls.push_back(tc);
+		controls.push_back(btn);
 	}
 	else if (type == wxT("font"))
 	{
-		wxStaticText *t = new wxStaticText(panel, -1, name);
-		sz->Add(t, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
-		sz->Add(space, 5);
-		wxTextCtrl *temp = new wxTextCtrl(panel, -1);
-		sz->Add(temp, 1, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
-		wxButton *b = new wxButton(panel, OptionsDialog::ID_button_font, _("Change"));
-		sz->Add(b, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, 1);
-		t->SetToolTip(description);
-		temp->SetToolTip(description);
-		b->SetToolTip(description);
-		controls.push_back(temp);
-		controls.push_back(t);
-		controls.push_back(b);
+		wxStaticText *st = new wxStaticText(panel, -1, name);
+		sz->Add(st, 0, wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL);
+        sz->Add(styleguide().getControlLabelMargin(), 0);
+		wxTextCtrl *tc = new wxTextCtrl(panel, -1);
+		sz->Add(tc, 1, wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL);
+        sz->Add(styleguide().getBrowseButtonMargin(), 0);
+		wxButton *btn = new wxButton(panel, OptionsDialog::ID_button_font, _("Select..."));
+		sz->Add(btn, 0, wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL);
+		st->SetToolTip(description);
+		tc->SetToolTip(description);
+		btn->SetToolTip(description);
+		controls.push_back(st);
+		controls.push_back(tc);
+		controls.push_back(btn);
 	}
 	else if (type == wxT("radio"))
 	{
@@ -236,7 +238,7 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel)
             opts.Add((*it)->text);
         wxRadioBox *rb = new wxRadioBox(panel, -1, name, wxDefaultPosition, wxDefaultSize, 
             opts, 1, wxRA_SPECIFY_COLS);
-        sz->Add(rb, 0, wxALL|wxFIXED_MINSIZE, border);
+        sz->Add(rb, 0, wxFIXED_MINSIZE);
         rb->SetToolTip(description);
         controls.push_back(rb);
 	}
@@ -252,7 +254,8 @@ OptionsDialog::OptionsDialog(wxWindow* parent):
 	// some parents (ex. main frame) could even be smaller
 	config().setValue(getName() + "::centerOnParent", false);
 
-	listbook1 = new wxListbook(this, ID_listbook, wxDefaultPosition, wxDefaultSize, wxLB_DEFAULT);
+	listbook1 = new wxListbook(panel_controls, ID_listbook, 
+        wxDefaultPosition, wxDefaultSize, wxLB_DEFAULT);
 	imageList.Create(32, 32);
 	imageList.Add(getImage32(ntColumn));
 	imageList.Add(getImage32(ntProcedure));
@@ -261,9 +264,13 @@ OptionsDialog::OptionsDialog(wxWindow* parent):
 	imageList.Add(getImage32(ntTable));
 	listbook1->SetImageList(&imageList);
 
-    set_properties();
 	load();
 	createPages();
+
+    button_save = new wxButton(panel_controls, ID_button_save, _("Save"));
+    button_cancel = new wxButton(panel_controls, ID_button_cancel, _("Cancel"));
+
+    set_properties();
     do_layout();
 }
 //-----------------------------------------------------------------------------
@@ -281,18 +288,17 @@ const std::string OptionsDialog::getName() const
 void OptionsDialog::set_properties()
 {
     SetTitle(wxT("Preferences"));
+    button_save->SetDefault();
 }
 //-----------------------------------------------------------------------------
 void OptionsDialog::do_layout()
 {
-    wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
-    sizer_1->Add(listbook1, 1, wxEXPAND, 0);
-	sizer_1->SetSizeHints(listbook1);
-    //SetAutoLayout(true);
-    SetSizer(sizer_1);
-    Layout();
-
-	Fit();	// this seems to fix the stuff for MSW
+    wxBoxSizer* sizerControls = new wxBoxSizer(wxHORIZONTAL);
+    sizerControls->Add(listbook1, 1, wxEXPAND, 0);
+    // create sizer for buttons -> styleguide class will align it correctly
+    wxSizer* sizerButtons = styleguide().createButtonSizer(button_save, button_cancel);
+    // use method in base class to set everything up
+    layoutSizers(sizerControls, sizerButtons, true);
 }
 //-----------------------------------------------------------------------------
 void OptionsDialog::load()
@@ -330,7 +336,7 @@ void OptionsDialog::load()
 			pg = new Page;
 			pages.push_back(pg);
 		}
-		else if (key == wxT("page"))
+		else if (key == wxT("/page"))
 			pg = 0;
 		else if (key == wxT("pagename"))
 		{
@@ -444,32 +450,13 @@ void OptionsDialog::load()
 // browse through all page and create controls
 void OptionsDialog::createPages()
 {
-	int minw = 0, minh = 0;
 	for (std::list<Page *>::iterator it = pages.begin(); it != pages.end(); ++it)
 	{
-		wxPanel *p = createPanel(*it);
-		listbook1->AddPage(p, (*it)->name, false, (*it)->image);
-
-		wxSize s = p->GetMinSize();		// find minimal size needed to fit all pages
-		int w = s.GetWidth();
-		int h = s.GetHeight();
-		if (w > minw)
-			minw = w;
-		if (h > minh)
-			minh = h;
-
+		listbook1->AddPage(createPanel(*it), (*it)->name, false, (*it)->image);
 		// initial values
 		for (std::list<Setting *>::iterator i2 = (*it)->settings.begin(); i2 != (*it)->settings.end(); ++i2)
 			(*i2)->loadFromConfig();
 	}
-
-	minw += 70;
-	minh += 20;
-    if (listbook1->HasFlag(wxLB_LEFT))	// tabs left
-        minw += 100;
-    else 								// tabs on top
-        minh += 50;
-	SetSizeHints(minw, minh);
 }
 //-----------------------------------------------------------------------------
 wxPanel *OptionsDialog::createPanel(Page* pg)
@@ -477,48 +464,40 @@ wxPanel *OptionsDialog::createPanel(Page* pg)
     wxPanel *panel = new wxPanel(listbook1);
     wxBoxSizer* sz = new wxBoxSizer(wxVERTICAL);
 
-	// add headline
-    sz->Add(createHeadline(panel, pg->name), 0, wxALL|wxEXPAND, 5);
+    // add headline only when category list is on left side
+    if (!listbook1->IsVertical())
+        sz->Add(createHeadline(panel, pg->name), 0, wxEXPAND);
 
 	// add controls
 	for (std::list<Setting *>::iterator it = pg->settings.begin(); it != pg->settings.end(); ++it)
 	{
 		wxBoxSizer *s = (*it)->addToPanel(panel);
 		if (s)
-			sz->Add(s, 0, wxALL|wxEXPAND, 5);
+        {
+            int margin = styleguide().getUnrelatedControlMargin(wxVERTICAL);
+            sz->Add(0, margin);
+			sz->Add(s, 0, wxEXPAND);
+        }
 	}
-
-	// apply and reset buttons
-	wxPanel *spacer = new wxPanel(panel);
-	sz->Add(spacer, 1, wxEXPAND, 0);
-
-    wxBoxSizer* sb = new wxBoxSizer(wxHORIZONTAL);
-	sz->Add(sb, 0, wxALL|wxALIGN_RIGHT|wxALIGN_BOTTOM, 3);
-	wxButton *appcl = new wxButton(panel, ID_button_save, _("Save"));
-	wxButton *reset = new wxButton(panel, ID_button_cancel, _("Cancel"));
-	sb->Add(appcl, 0, wxALL, 5);
-	sb->Add(reset, 0, wxALL, 5);
-
 	// layout
-    panel->SetAutoLayout(true);
     panel->SetSizer(sz);
     sz->Fit(panel);
     sz->SetSizeHints(panel);
     return panel;
 }
 //-----------------------------------------------------------------------------
-wxPanel *OptionsDialog::createHeadline(wxPanel *parentPanel, wxString text)
+wxPanel *OptionsDialog::createHeadline(wxPanel *parentPanel, const wxString& text)
 {
     wxPanel *temp = new wxPanel(parentPanel, -1, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
     wxStaticText *headline = new wxStaticText(temp, -1, text);
-	headline->SetFont(wxFont(16, wxDEFAULT, wxNORMAL, wxNORMAL, 0, wxT("")));
+    headline->SetFont(wxFont(16, wxDEFAULT, wxNORMAL, wxNORMAL, 0, wxT("")));
     wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
     sizer3->Add(headline, 0, wxALL|wxFIXED_MINSIZE, 3);
     temp->SetAutoLayout(true);
     temp->SetSizer(sizer3);
     sizer3->Fit(temp);
     sizer3->SetSizeHints(temp);
-	return temp;
+    return temp;
 }
 //-----------------------------------------------------------------------------
 // finds setting for which the event took place

@@ -18,7 +18,7 @@
 
   All Rights Reserved.
 
-  Contributor(s):
+  Contributor(s): Michael Hieke
 */
 
 //-----------------------------------------------------------------------------
@@ -81,15 +81,14 @@ namespace opt
 class OptionsDialog: public BaseDialog {
 public:
     enum {
-        ID_listbook      = 100,
-		ID_button_save   = 101,
-		ID_button_cancel = 103,
-		ID_button_browse = 104,
-		ID_button_font   = 105,
-		ID_checkbox      = 106
+        ID_listbook = 100,
+        ID_button_save,
+        ID_button_cancel,
+        ID_button_browse,
+        ID_button_font,
+        ID_checkbox
     };
 
-	std::list<opt::Page *> pages;
     OptionsDialog(wxWindow* parent);
 
 	void OnPageChanging(wxListbookEvent& event);
@@ -100,19 +99,23 @@ public:
 	void OnCheckbox(wxCommandEvent& event);
 private:
 	wxImageList imageList;
+	std::list<opt::Page *> pages;
 
-	void load();
+    wxListbook* listbook1;
+    wxButton* button_save;
+    wxButton* button_cancel;
+
+	wxPanel *createHeadline(wxPanel *parentPanel, const wxString& text);
 	void createPages();
 	wxPanel *createPanel(opt::Page* pg);
-	wxPanel *createHeadline(wxPanel *parentPanel, wxString text);
+    void do_layout();
+	void load();
 	opt::Setting *findSetting(wxCommandEvent& event);
 
     void set_properties();
-    void do_layout();
 
 protected:
 	virtual const std::string getName() const;
-    wxListbook* listbook1;
 
 	~OptionsDialog();
     DECLARE_EVENT_TABLE()
