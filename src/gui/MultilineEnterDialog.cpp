@@ -44,7 +44,7 @@ bool GetMultilineTextFromUser(const wxString& caption, wxString& value, wxWindow
 {
     wxString result(value);
     MultilineEnterDialog med(parent, caption, result);
-    if (wxOK != med.ShowModal())
+    if (wxID_OK != med.ShowModal())
         return false;
     value = med.getText();
     return true;
