@@ -32,7 +32,7 @@
 #include <wx/wx.h>
 
 //---------------------------------------------------------------------------------------
-//! There will be exactly one static object of descendent class, returned by 
+//! There will be exactly one static object of descendent class, returned by
 //! styleguide() (see below).
 class YxStyleGuide
 {
@@ -46,6 +46,7 @@ public:
     virtual int getFrameMargin(wxDirection direction) = 0;
     virtual int getRelatedControlMargin(wxOrientation orientation) = 0;
     virtual int getUnrelatedControlMargin(wxOrientation orientation) = 0;
+	virtual int getEditorFontSize() = 0;
 protected:
     YxStyleGuide();
     virtual ~YxStyleGuide();

@@ -55,6 +55,7 @@ public:
     virtual int getFrameMargin(wxDirection direction);
     virtual int getRelatedControlMargin(wxOrientation orientation);
     virtual int getUnrelatedControlMargin(wxOrientation orientation);
+	virtual int getEditorFontSize();
 };
 //------------------------------------------------------------------------------
 YStyleGuideGeneric::YStyleGuideGeneric()
@@ -114,6 +115,11 @@ int YStyleGuideGeneric::getRelatedControlMargin(wxOrientation WXUNUSED(orientati
 int YStyleGuideGeneric::getUnrelatedControlMargin(wxOrientation WXUNUSED(orientation))
 {
     return 15;
+}
+//------------------------------------------------------------------------------
+int YStyleGuideGeneric::getEditorFontSize()
+{
+	return 12;
 }
 //------------------------------------------------------------------------------
 YxStyleGuide& styleguide()

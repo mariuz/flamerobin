@@ -133,11 +133,6 @@
 		</setting>
 		<setting>
 			<type>font</type>
-			<name>Font for editor</name>
-			<key>SQLEditorFont</key>
-		</setting>
-		<setting>
-			<type>font</type>
 			<name>Font for grid header</name>
 			<key>DataGridHeaderFont</key>
 		</setting>

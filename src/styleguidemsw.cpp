@@ -65,6 +65,7 @@ public:
     virtual int getFrameMargin(wxDirection direction);
     virtual int getRelatedControlMargin(wxOrientation orientation);
     virtual int getUnrelatedControlMargin(wxOrientation orientation);
+	virtual int getEditorFontSize();
 };
 //------------------------------------------------------------------------------
 YStyleGuideMSW::YStyleGuideMSW()
@@ -122,7 +123,7 @@ wxSizer* YStyleGuideMSW::createButtonSizer(wxButton* button_ok, wxButton* button
 //------------------------------------------------------------------------------
 int YStyleGuideMSW::getBetweenButtonsMargin(wxOrientation orientation)
 {
-    switch (orientation) 
+    switch (orientation)
     {
         case wxHORIZONTAL:
             return dbuToPixelHorz(4);
@@ -150,7 +151,7 @@ int YStyleGuideMSW::getControlLabelMargin()
 //------------------------------------------------------------------------------
 int YStyleGuideMSW::getDialogMargin(wxDirection direction)
 {
-    switch (direction) 
+    switch (direction)
     {
         case wxLEFT:
         case wxRIGHT:
@@ -165,7 +166,7 @@ int YStyleGuideMSW::getDialogMargin(wxDirection direction)
 //------------------------------------------------------------------------------
 int YStyleGuideMSW::getFrameMargin(wxDirection direction)
 {
-    switch (direction) 
+    switch (direction)
     {
         case wxLEFT:
         case wxRIGHT:
@@ -180,7 +181,7 @@ int YStyleGuideMSW::getFrameMargin(wxDirection direction)
 //------------------------------------------------------------------------------
 int YStyleGuideMSW::getRelatedControlMargin(wxOrientation orientation)
 {
-    switch (orientation) 
+    switch (orientation)
     {
         case wxHORIZONTAL:
             return dbuToPixelHorz(4);
@@ -193,7 +194,7 @@ int YStyleGuideMSW::getRelatedControlMargin(wxOrientation orientation)
 //------------------------------------------------------------------------------
 int YStyleGuideMSW::getUnrelatedControlMargin(wxOrientation orientation)
 {
-    switch (orientation) 
+    switch (orientation)
     {
         case wxHORIZONTAL:
             return dbuToPixelHorz(7);
@@ -204,8 +205,14 @@ int YStyleGuideMSW::getUnrelatedControlMargin(wxOrientation orientation)
     }
 }
 //------------------------------------------------------------------------------
+int YStyleGuideMSW::getEditorFontSize()
+{
+	return 10;
+}
+//------------------------------------------------------------------------------
 YxStyleGuide& styleguide()
 {
     static YStyleGuideMSW guide;
     return guide;
 }
+//------------------------------------------------------------------------------

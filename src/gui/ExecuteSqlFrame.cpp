@@ -38,11 +38,13 @@
 #include <wx/file.h>
 #include <wx/datetime.h>
 #include <wx/tokenzr.h>
+#include <wx/fontdlg.h>
 
 #include <sstream>
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <map>
 
 #include "simpleparser.h"
 #include "ExecuteSqlFrame.h"
@@ -184,17 +186,30 @@ SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id, ExecuteSqlFrame *frame)
 	: wxStyledTextCtrl(parent, id)
 {
 	frameM = frame;
+	std::string s;
+	if (config().getValue("SqlEditorFont", s) && !s.empty())
+	{
+		wxFont f;
+		f.SetNativeFontInfo(std2wx(s));
+		if (f.Ok())
+			StyleSetFont(wxSTC_STYLE_DEFAULT, f);
+	}
+	else
+	{
+		wxFont font(styleguide().getEditorFontSize(), wxMODERN, wxNORMAL, wxNORMAL);
+		StyleSetFont(wxSTC_STYLE_DEFAULT, font);
+	}
 
-    // Default font (12 is perhaps better for GTK, 10 is ok for MSW)
-	// User can change it with Ctrl+ and Ctrl-
-	#ifdef __WXGTK__
-	int fontsize = 12;
-	#else
-	int fontsize = 10;
-	#endif
-    wxFont font(fontsize, wxMODERN, wxNORMAL, wxNORMAL);
-    StyleSetFont(wxSTC_STYLE_DEFAULT, font);
+	int charset;
+	if (config().getValue("SqlEditorCharset", charset))
+		StyleSetCharacterSet(wxSTC_STYLE_DEFAULT, charset);
 
+	setup();
+}
+//-----------------------------------------------------------------------------
+//! This code has to be called each time the font has changed, so that the control updates
+void SqlEditor::setup()
+{
     StyleClearAll();
     StyleSetForeground(0,  wxColour(0x80, 0x00, 0x00));
     StyleSetForeground(1,  wxColour(0x00, 0xa0, 0x00));		// multiline comment
@@ -273,6 +288,7 @@ BEGIN_EVENT_TABLE(SqlEditor, wxStyledTextCtrl)
     EVT_MENU(SqlEditor::ID_MENU_SELECT_STATEMENT, SqlEditor::OnMenuSelectStatement)
     EVT_MENU(SqlEditor::ID_MENU_EXECUTE_SELECTED, SqlEditor::OnMenuExecuteSelected)
     EVT_MENU(SqlEditor::ID_MENU_WRAP,             SqlEditor::OnMenuWrap)
+    EVT_MENU(SqlEditor::ID_MENU_SET_FONT,         SqlEditor::OnMenuSetFont)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
@@ -290,6 +306,7 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
     m.Append(ID_MENU_SELECT_STATEMENT, _("Select statement"));
     m.Append(ID_MENU_EXECUTE_SELECTED, _("Execute selected"));
     m.AppendSeparator();
+    m.Append(ID_MENU_SET_FONT,      _("Set Font"));
     m.AppendCheckItem(ID_MENU_WRAP, _("Wrap"));
 	if (wxSTC_WRAP_WORD == GetWrapMode())
 		m.Check(ID_MENU_WRAP, true);
@@ -355,6 +372,71 @@ void SqlEditor::OnMenuExecuteSelected(wxCommandEvent& WXUNUSED(event))
 void SqlEditor::OnMenuWrap(wxCommandEvent& WXUNUSED(event))
 {
     SetWrapMode(GetWrapMode() == wxSTC_WRAP_WORD ? wxSTC_WRAP_NONE : wxSTC_WRAP_WORD);
+}
+//-----------------------------------------------------------------------------
+void SqlEditor::OnMenuSetFont(wxCommandEvent& WXUNUSED(event))
+{
+	// step 1 of 2: set font
+	wxFont f, f2;
+	std::string s;		// since we can't get the font from control we ask config() for it
+	if (config().getValue("SqlEditorFont", s) && !s.empty())
+	{
+		f.SetNativeFontInfo(std2wx(s));
+		f2 = ::wxGetFontFromUser(this, f);
+	}
+	else				// if config() doesn't have it, we'll use the default
+	{
+		wxFont font(styleguide().getEditorFontSize(), wxMODERN, wxNORMAL, wxNORMAL);
+		f2 = ::wxGetFontFromUser(this, font);
+	}
+
+	if (!f2.Ok())	// user Canceled
+		return;
+	StyleSetFont(wxSTC_STYLE_DEFAULT, f2);
+
+	// step 2 of 2: set charset
+	std::map<std::string, int> sets;		// create human-readable names from wxSTC charsets
+	sets["CHARSET_ANSI"] = 0;
+	sets["CHARSET_EASTEUROPE"] = 238;
+	sets["CHARSET_GB2312"] = 134;
+	sets["CHARSET_HANGUL"] = 129;
+	sets["CHARSET_HEBREW"] = 177;
+	sets["CHARSET_SHIFTJIS"] = 128;
+	#ifdef __WXMSW__
+	sets["CHARSET_DEFAULT"] = 1;		// according to scintilla docs these only work on Windows
+	sets["CHARSET_BALTIC"] = 186;		// so we won't offer them
+	sets["CHARSET_CHINESEBIG5"] = 136;
+	sets["CHARSET_GREEK"] = 161;
+	sets["CHARSET_MAC"] = 77;
+	sets["CHARSET_OEM"] = 255;
+	sets["CHARSET_RUSSIAN"] = 204;
+	sets["CHARSET_SYMBOL"] = 2;
+	sets["CHARSET_TURKISH"] = 162;
+	sets["CHARSET_JOHAB"] = 130;
+	sets["CHARSET_ARABIC"] = 178;
+	sets["CHARSET_VIETNAMESE"] = 163;
+	sets["CHARSET_THAI"] = 222;
+	#endif
+	wxArrayString slist;					// copy to wxArrayString
+	for (std::map<std::string, int>::iterator it = sets.begin(); it != sets.end(); ++it)
+		slist.Add(std2wx((*it).first));
+
+	wxString c = wxGetSingleChoice(_("Select charset to use"), _("Setting font for editor"), slist, this);
+	if (c.IsEmpty())	// Canceled
+		return;
+	std::map<std::string, int>::iterator it = sets.find(wx2std(c));
+	if (it == sets.end())
+		return;		// should never happen
+
+	StyleSetCharacterSet(wxSTC_STYLE_DEFAULT, (*it).second);
+	if (wxYES == wxMessageBox(_("Would you like to keep these settings permanently?"), _("SQL Editor"), wxYES_NO|wxICON_QUESTION))
+	{
+		wxString fontdesc = f2.GetNativeFontInfoDesc();
+		if (!fontdesc.IsEmpty())
+			config().setValue("SqlEditorFont", wx2std(fontdesc));
+		config().setValue("SqlEditorCharset", (*it).second);
+	}
+	setup();	// make control accept new settings
 }
 //-----------------------------------------------------------------------------
 ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title, const wxPoint& pos, const wxSize& size, long style):

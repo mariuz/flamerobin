@@ -60,9 +60,10 @@ class SqlEditor: public wxStyledTextCtrl
 {
 private:
 	ExecuteSqlFrame *frameM;
+	void setup();
 public:
 	enum { ID_MENU_UNDO = 300, ID_MENU_REDO, ID_MENU_CUT, ID_MENU_COPY, ID_MENU_PASTE, ID_MENU_DELETE,
-		ID_MENU_SELECT_ALL, ID_MENU_SELECT_STATEMENT, ID_MENU_EXECUTE_SELECTED, ID_MENU_WRAP
+		ID_MENU_SELECT_ALL, ID_MENU_SELECT_STATEMENT, ID_MENU_EXECUTE_SELECTED, ID_MENU_WRAP, ID_MENU_SET_FONT
 	};
 
 	SqlEditor(wxWindow *parent, wxWindowID id, ExecuteSqlFrame *frame);
@@ -76,6 +77,7 @@ public:
 	void OnMenuSelectAll(wxCommandEvent& event);
 	void OnMenuSelectStatement(wxCommandEvent& event);
 	void OnMenuExecuteSelected(wxCommandEvent& event);
+	void OnMenuSetFont(wxCommandEvent& event);
 	void OnMenuWrap(wxCommandEvent& event);
     DECLARE_EVENT_TABLE()
 };
