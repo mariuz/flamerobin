@@ -465,7 +465,7 @@ void OptionsDialog::createPages()
 	}
 
 	minw += 70;
-	minh += 50;
+	minh += 20;
     if (listbook1->HasFlag(wxNB_LEFT))	// tabs left
         minw += 100;
     else 								// tabs on top
