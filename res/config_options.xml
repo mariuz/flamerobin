@@ -168,6 +168,21 @@
 			<name>Font for grid cells</name>
 			<key>DataGridFont</key>
 		</setting>
+		<setting>
+			<type>checkbox</type>
+			<name>When SELECT statement is executed, maximize the area that data grid occupies</name>
+			<key>SelectMaximizeGrid</key>
+			<default>0</default>
+			<enables>
+				<type>number</type>
+				<min>0</min>
+				<max>10000</max>
+				<name>Records needed</name>
+				<key>MaximizeGridRowsNeeded</key>
+				<default>10</default>
+				<description>Maximizing will only happen when result set has that many records (or more)</description>
+			</enables>
+		</setting>
 	</page>
 	<page>
 		<pagename>Logging</pagename>
