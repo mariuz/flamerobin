@@ -74,6 +74,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_OptionsDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrameImpl.o \
@@ -258,6 +259,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_OptionsDialog.o: ./src/gui/OptionsDialog.
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.o: ./src/images.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.o: ./src/logger.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.o: ./src/main.cpp

@@ -600,6 +600,10 @@ SOURCE=.\src\images.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\logger.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\main.cpp
 # ADD BASE CPP /Yc"wx/wxprec.h"
 # ADD CPP /Yc"wx/wxprec.h"
@@ -811,6 +815,10 @@ SOURCE=.\src\metadata\generator.h
 # Begin Source File
 
 SOURCE=.\src\images.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\logger.h
 # End Source File
 # Begin Source File
 

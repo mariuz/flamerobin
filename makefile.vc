@@ -78,6 +78,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_OptionsDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrameImpl.obj \
@@ -292,6 +293,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_OptionsDialog.obj: .\src\gui\OptionsDialog
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.obj: .\src\images.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.obj: .\src\logger.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.obj: .\src\main.cpp

@@ -228,7 +228,6 @@
         $(SOURCEDIR)/BaseDialog.h
         $(SOURCEDIR)/BaseFrame.h
         $(SOURCEDIR)/config.h
-        $(SOURCEDIR)/logger.h
         $(SOURCEDIR)/converters.h
         $(SOURCEDIR)/dberror.h
         $(SOURCEDIR)/FieldPropertiesFrame.h
@@ -247,6 +246,7 @@
         $(SOURCEDIR)/gui/ServerRegistrationDialog.h
         $(SOURCEDIR)/gui/OptionsDialog.h
         $(SOURCEDIR)/images.h
+        $(SOURCEDIR)/logger.h
         $(SOURCEDIR)/main.h
         $(SOURCEDIR)/MainFrame.h
         $(SOURCEDIR)/metadata/collection.h
@@ -295,7 +295,6 @@
         $(SOURCEDIR)/BaseDialog.cpp
         $(SOURCEDIR)/BaseFrame.cpp
         $(SOURCEDIR)/config.cpp
-        $(SOURCEDIR)/logger.cpp
         $(SOURCEDIR)/converters.cpp
         $(SOURCEDIR)/dberror.cpp
         $(SOURCEDIR)/FieldPropertiesFrame.cpp
@@ -315,6 +314,7 @@
         $(SOURCEDIR)/gui/ServerRegistrationDialog.cpp
         $(SOURCEDIR)/gui/OptionsDialog.cpp
         $(SOURCEDIR)/images.cpp
+        $(SOURCEDIR)/logger.cpp
         $(SOURCEDIR)/main.cpp
         $(SOURCEDIR)/MainFrame.cpp
         $(SOURCEDIR)/MainFrameImpl.cpp
