@@ -167,6 +167,38 @@ std::vector<std::string> YDatabase::getCollations(std::string charset)
 	return temp;
 }
 //------------------------------------------------------------------------------
+//! small helper function, reads sql and fills the vector with values
+// this can be made template function in future
+bool YDatabase::fillVector(std::vector<std::string>& list, std::string sql)
+{
+	try
+	{
+		IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
+		tr1->Start();
+		IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
+		st1->Prepare(sql);
+		st1->Execute();
+		while (st1->Fetch())
+		{
+			std::string s;
+			st1->Get(1, s);
+			s.erase(s.find_last_not_of(" ")+1);	// trim
+			list.push_back(s);
+		}
+		tr1->Commit();
+		return true;
+	}
+	catch (IBPP::Exception &e)
+	{
+		lastError().setMessage(e.ErrorMessage());
+	}
+	catch (...)
+	{
+		lastError().setMessage(_("System error."));
+	}
+	return false;
+}
+//-----------------------------------------------------------------------------
 //! load charset-collation pairs if needed
 void YDatabase::loadCollations()
 {

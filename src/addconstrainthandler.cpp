@@ -34,6 +34,8 @@
     #include "wx/wx.h"
 #endif
 
+#include <sstream>
+
 #include "dberror.h"
 #include "gui/ExecuteSqlFrame.h"
 #include "gui/MultilineEnterDialog.h"
@@ -66,7 +68,8 @@ std::string AddConstraintHandler::selectTableColumns(YTable *t, wxWindow *parent
 		columns.Add(std2wx((*it)->getName()));
 
 	wxArrayInt selected_columns;
-	::wxGetMultipleChoices(selected_columns, _("Select one or more fields... (use ctrl key)"),  _("Table fields"), columns, parent);
+	if (!::wxGetMultipleChoices(selected_columns, _("Select one or more fields... (use ctrl key)"),  _("Table fields"), columns, parent))
+		return "";
 
 	std::string retval;
 	for (size_t i=0; i<selected_columns.GetCount(); ++i)
@@ -95,6 +98,7 @@ YTable *AddConstraintHandler::selectTable(YDatabase *d, wxWindow *parent) const
 std::string AddConstraintHandler::selectAction(const wxString& label, wxWindow *parent) const
 {
 	wxArrayString actions;
+	actions.Add(wxT("RESTRICT"));
 	actions.Add(wxT("NO ACTION"));
 	actions.Add(wxT("CASCADE"));
 	actions.Add(wxT("SET DEFAULT"));
@@ -102,7 +106,7 @@ std::string AddConstraintHandler::selectAction(const wxString& label, wxWindow *
 	int index = ::wxGetSingleChoiceIndex(wxString::Format(_("Select action for %s"), label.c_str()),
 		_("Creating foreign key"), actions, parent);
 	if (index == -1)
-		return "NO ACTION";
+		return "CANCEL";
 	return wx2std(actions[index]);
 }
 //-----------------------------------------------------------------------------
@@ -128,8 +132,29 @@ bool AddConstraintHandler::handleURI(std::string& uriStr)
 	if (!t || !w)
 		return true;
 
-	// TODO: maybe we could count number of constraints and give the next number or something
-	std::string default_value = type + "_" + t->getName();
+	// Find first available constraint name:
+	YDatabase *db = t->getDatabase();
+	std::string default_value;
+	std::string prefix = type + "_" + t->getName();
+	std::vector<std::string> cnames;
+	if (db->fillVector(cnames,
+		"select rdb$constraint_name from rdb$relation_constraints "
+		"where rdb$relation_name = '" + t->getName()
+		+ "' and rdb$constraint_name starting with '" + prefix + "' order by 1"))
+	{
+		int i=0;
+		do
+		{
+			i++;
+			std::ostringstream ss;
+			ss << i;
+			default_value = prefix + "_" + ss.str();
+		}
+		while (std::find(cnames.begin(), cnames.end(), default_value) != cnames.end());
+	}
+	else
+		default_value = prefix;
+
 	wxString cname = ::wxGetTextFromUser(_("Enter constraint name"),
 		_("Adding new table constraint"), std2wx(default_value), w);
 	if (cname == wxT(""))	// cancel
@@ -145,13 +170,26 @@ bool AddConstraintHandler::handleURI(std::string& uriStr)
 	else if (type == "FK")
 	{
 		std::string columnlist = selectTableColumns(t, w);
+		if (columnlist == "")
+			return true;
 		YTable *ref = selectTable(t->getDatabase(), w);
 		if (!ref)
 			return true;
 		std::string refcolumnlist = selectTableColumns(ref, w);
+		if (refcolumnlist == "")
+			return true;
 		sql += "\nforeign key (" + columnlist + ") \nreferences " + ref->getName() + " (" + refcolumnlist + ")";
-		sql += "\non update " + selectAction(_("update"), w) + " ";
-		sql += "\non delete " + selectAction(_("delete"), w) + " ";
+		std::string action = selectAction(_("update"), w);
+		if (action == "CANCEL")
+			return true;
+		else if (action != "RESTRICT")
+			sql += "\non update " + action + " ";
+
+		action = selectAction(_("delete"), w);
+		if (action == "CANCEL")
+			return true;
+		else if (action != "RESTRICT")
+			sql += "\non delete " + action + " ";
 	}
 	else if (type == "CHK")
 	{
@@ -172,7 +210,7 @@ bool AddConstraintHandler::handleURI(std::string& uriStr)
 	}
 
 	ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, wxT(""));
-	eff->setDatabase(t->getDatabase());
+	eff->setDatabase(db);
 	eff->Show();
 	eff->setSql(std2wx(sql));
 	eff->executeAllStatements(true);		// true = user must commit/rollback + frame is closed at once

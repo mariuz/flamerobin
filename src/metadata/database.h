@@ -107,6 +107,9 @@ public:
 	//! fill vector with names of all tables, views, etc.
 	void getIdentifiers(std::vector<std::string>& temp);
 
+	//! fill vector with result of sql statement
+	bool fillVector(std::vector<std::string>& list, std::string sql);
+
 	std::string getPath() const;
 	std::string getCharset() const;
 	std::string getUsername() const;
