@@ -194,7 +194,7 @@ bool CreateString(IBPP::Statement& st, int col, std::string& value)
 
 		default:
 			value = "[...]";
-			return false;
+			return true;
 	};
 
 	//return true;
