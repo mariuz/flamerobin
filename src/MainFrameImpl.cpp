@@ -47,6 +47,7 @@
 #include "gui/MetadataItemPropertiesFrame.h"
 #include "gui/RestoreFrame.h"
 #include "gui/ServerRegistrationDialog.h"
+#include "gui/OptionsDialog.h"
 #include "treeitem.h"
 #include "ugly.h"
 #include "dberror.h"
@@ -57,6 +58,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(myTreeCtrl::Menu_RegisterServer, MainFrame::OnMenuRegisterServer)
 	EVT_MENU(myTreeCtrl::Menu_Quit, MainFrame::OnMenuQuit)
 	EVT_MENU(myTreeCtrl::Menu_About, MainFrame::OnMenuAbout)
+	EVT_MENU(myTreeCtrl::Menu_Configure, MainFrame::OnMenuConfigure)
 	EVT_MENU(myTreeCtrl::Menu_RegisterDatabase, MainFrame::OnMenuRegisterDatabase)
 	EVT_MENU(myTreeCtrl::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuDatabaseRegistrationInfo)
 	EVT_MENU(myTreeCtrl::Menu_CreateDatabase, MainFrame::OnMenuCreateDatabase)
@@ -182,6 +184,12 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 	msg += _("http://www.flamerobin.org");
 
 	::wxMessageBox(msg, _("About FlameRobin"), wxOK | wxICON_INFORMATION);
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
+{
+    OptionsDialog *d = new OptionsDialog(this);
+	d->ShowModal();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuInsert(wxCommandEvent& WXUNUSED(event))

@@ -127,6 +127,7 @@ void myTreeCtrl::OnContextMenu(wxContextMenuEvent& event)
 			MyMenu.AppendSeparator();
 		}
 		MyMenu.Append(Menu_About, _("About FlameRobin..."));
+		MyMenu.Append(Menu_Configure, _("Configuration options..."));
 		MyMenu.AppendSeparator();
 		MyMenu.Append(Menu_Quit, _("Quit"));
 	}
