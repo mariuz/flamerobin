@@ -341,10 +341,14 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
     {
         if (createM)	// create new database
         {
-            int dialect = 1 + (2 * combo_box_dialect->GetSelection());	// 0/1 => 1/3
-            wxString ps(wxT("PAGE_SIZE "));
-            ps += combo_box_pagesize->GetStringSelection();
-            serverM->createDatabase(databaseM, wx2std(ps), dialect);
+            long ps = 0;
+            combo_box_pagesize->GetValue().ToLong(&ps);
+
+            int dialect = 3;
+            if (combo_box_dialect->GetSelection() == 0)
+                dialect = 1;
+
+            serverM->createDatabase(databaseM, (ps) ? ps : 4096, dialect);
         }
         EndModal(wxID_OK);
     }

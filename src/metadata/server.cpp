@@ -61,11 +61,19 @@ void YServer::removeDatabase(YDatabase *db)
 	notify();
 }
 //------------------------------------------------------------------------------
-void YServer::createDatabase(YDatabase *db, std::string extra_params, int dialect)
+void YServer::createDatabase(YDatabase *db, int pagesize, int dialect)
 {
+	std::ostringstream extra_params;
+    if (pagesize)
+        extra_params << "PAGE_SIZE " << pagesize << " ";
+
+    std::string charset = db->getCharset();
+    if (!charset.empty())
+        extra_params << "DEFAULT CHARACTER SET " << charset << " ";
+
 	IBPP::Database db1;
-	db1 = IBPP::DatabaseFactory( hostnameM, db->getPath(), db->getUsername(), db->getPassword(),
-		"", db->getCharset(), extra_params);
+	db1 = IBPP::DatabaseFactory(hostnameM, db->getPath(), db->getUsername(), 
+        db->getPassword(), "", charset, extra_params.str());
 	db1->Create(dialect);
 }
 //------------------------------------------------------------------------------

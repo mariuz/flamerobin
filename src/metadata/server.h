@@ -51,7 +51,7 @@ public:
 	void removeDatabase(YDatabase*);
 	const YMetadataCollection<YDatabase> *getDatabases() const;
 
-	void createDatabase(YDatabase *db, std::string extra_params, int dialect = 3);
+	void createDatabase(YDatabase *db, int pagesize = 4096, int dialect = 3);
 
 	// setters/getters
 	std::string getHostname() const;
