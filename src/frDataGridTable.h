@@ -61,6 +61,7 @@ public:
     IBPP::SDT getColumnType(int col);
     wxString getTableName();
     void initialFetch();
+    bool isNullCell(int row, int col);
     bool isNumericColumn(int col);
     bool needsMoreRowsFetched();
 

@@ -269,6 +269,15 @@ bool GridTable::IsEmptyCell(int row, int col)
     return row >= rowsFetchedM || col >= columnCountM;
 }
 //-----------------------------------------------------------------------------
+bool GridTable::isNullCell(int row, int col)
+{
+    if (row >= (int)dataM.size())
+        return false;
+    if (col >= (int)dataM[row].size())
+        return false;
+    return (0 == dataM[row][col]);
+}
+//-----------------------------------------------------------------------------
 bool GridTable::isNumericColumn(int col)
 {
     switch (getColumnType(col))

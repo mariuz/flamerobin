@@ -38,8 +38,10 @@ Contributor(s): Michael Hieke
 
 #include <wx/clipbrd.h>
 #include <wx/fontdlg.h>
+#include <wx/wfstream.h>
 #include <wx/grid.h>
 #include <wx/textbuf.h>
+#include <wx/txtstrm.h>
 
 #include <string>
 
@@ -130,7 +132,7 @@ void DataGrid::showPopMenu(wxPoint cursorPos)
     wxMenu m(0);
     m.Append(ID_MENU_COPYTOCLIPBOARD, _("Copy"));
     m.Append(ID_MENU_COPYTOCLIPBOARDASINSERT, _("Copy as INSERT statements"));
-    //	m.Append(Menu_Save2Html, _("Save selection into HTML file"));
+    m.Append(ID_MENU_SAVEASHTML, _("Save as HTML file..."));
     m.AppendSeparator();
 
     m.Append(ID_MENU_LABELFONT, _("Set header font"));
@@ -148,6 +150,8 @@ BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_MENU(DataGrid::ID_MENU_COPYTOCLIPBOARDASINSERT, DataGrid::OnMenuCopyToCBAsInsert)
     EVT_UPDATE_UI(DataGrid::ID_MENU_COPYTOCLIPBOARDASINSERT, DataGrid::OnMenuUpdateIfHasSelection)
     EVT_MENU(DataGrid::ID_MENU_LABELFONT, DataGrid::OnMenuLabelFont)
+    EVT_MENU(DataGrid::ID_MENU_SAVEASHTML, DataGrid::OnMenuSaveAsHTML)
+    EVT_UPDATE_UI(DataGrid::ID_MENU_SAVEASHTML, DataGrid::OnMenuUpdateIfHasSelection)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void DataGrid::OnContextMenu(wxContextMenuEvent& event)
@@ -275,6 +279,95 @@ void DataGrid::OnMenuLabelFont(wxCommandEvent& WXUNUSED(event))
         AutoSizeColumns();
         ForceRefresh();
     }
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnMenuSaveAsHTML(wxCommandEvent& WXUNUSED(event))
+{
+    wxString fname = ::wxFileSelector(_("Save data in selected cells as"),
+        wxEmptyString, wxEmptyString, wxT(".html"), 
+        _("HTML files (*.htm*)|*.htm*|All files (*.*)|*.*"),
+        wxSAVE|wxCHANGE_DIR, this);
+    if (fname.empty())
+        return;
+
+    // find all columns that have at least one cell selected
+    std::vector<bool> selCols;
+    int cols = GetNumberCols();
+    selCols.reserve(cols);
+    for (int i = 0; i < cols; i++)
+        selCols.push_back(false);
+
+    int rows = GetNumberRows();
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            if (IsInSelection(i, j))
+                selCols[j] = true;
+        }
+    }
+
+    // write HTML file
+    wxFileOutputStream fos(fname);
+    if (!fos.Ok()) // TODO: report error
+        return;
+    wxTextOutputStream outStr(fos);
+
+    outStr.WriteString(wxT("<html><body><table bgcolor=black cellspacing=1 cellpadding=3 border=0><tr>\n"));
+    // write table header
+    outStr.WriteString(wxT("<tr>"));
+    for (int i = 0; i < cols; i++)
+    {
+        if (selCols[i])
+        {
+            outStr.WriteString(wxT("<td nowrap><font color=white><b>"));
+            outStr.WriteString(GetColLabelValue(i));
+            outStr.WriteString(wxT("</b></font></td>"));
+        }
+    }
+    outStr.WriteString(wxT("</tr>\n"));
+
+    GridTable* table = dynamic_cast<GridTable*>(GetTable());
+    // write table data
+    for (int i = 0; i < rows; i++)
+    {
+        // check if at least one cell in this row selected
+        int selcnt = 0;
+        std::vector<bool> selCells(selCols);
+        for (int j = 0; j < cols; j++)
+        {
+            if (IsInSelection(i, j))
+                selcnt++;
+            else // skip cell even if selection contains this column
+                selCells[j] = false;
+        }
+        if (!selcnt)
+            continue;
+
+        outStr.WriteString(wxT("<tr bgcolor=white>"));
+        // write data for selected grid cells only
+        for (int j = 0; j < cols; j++)
+        {
+            if (!selCols[j])
+                continue;
+            if (!selCells[j])
+                outStr.WriteString(wxT("<td bgcolor=silver>"));
+            else if (table->isNullCell(i, j))
+                outStr.WriteString(wxT("<td><font color=red>NULL</font>"));
+            else 
+            {
+                outStr.WriteString(wxT("<td"));
+                int halign, valign;
+                GetCellAlignment(i, j, &halign, &valign);
+                if (halign == wxALIGN_RIGHT)
+                    outStr.WriteString(wxT(" align=right"));
+                outStr.WriteString(wxT(" nowrap>") + GetCellValue(i, j));
+            }
+            outStr.WriteString(wxT("</td>"));
+        }
+        outStr.WriteString(wxT("</tr>\n"));
+    }
+    outStr.WriteString(wxT("</table></body></html>\n"));
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnMenuUpdateIfHasSelection(wxUpdateUIEvent& event)

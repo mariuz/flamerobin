@@ -50,6 +50,7 @@ public:
     void OnMenuCopyToCB(wxCommandEvent& event);
     void OnMenuCopyToCBAsInsert(wxCommandEvent& event);
     void OnMenuLabelFont(wxCommandEvent& event);
+    void OnMenuSaveAsHTML(wxCommandEvent& event);
     void OnMenuUpdateIfHasSelection(wxUpdateUIEvent& event);
 private:
     void copyToClipboard(const wxString cbText);
