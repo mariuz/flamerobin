@@ -795,7 +795,8 @@ void ExecuteSqlFrame::executeAllStatements(bool autoExecute)
 			}
 		}
 
-		string sql = commands.substr(oldpos, pos-oldpos);
+		std::string::size_type lastpos = (pos == std::string::npos ? commands.length()-1 : pos);
+		string sql = commands.substr(oldpos, lastpos-oldpos);
 		sql.erase(sql.find_last_not_of("\n\r\t ")+1);	// right-trim the statement
 
 		stringstream strstrm;			// Search and intercept
@@ -807,23 +808,30 @@ void ExecuteSqlFrame::executeAllStatements(bool autoExecute)
 
 		if (first == "COMMIT")
 			commitTransaction();
-		else if (first == "SET" && second == "TERM")
+		else if (first == "SET" && (second == "TERM" || second == "TERMINATOR"))
 		{
-			searchpos = oldpos = pos + terminator.length();	// has to be here since terminator length can change
+			searchpos = oldpos = lastpos + terminator.length();	// has to be here since terminator length can change
 			terminator = third;
+			if (terminator.empty())
+			{
+				::wxMessageBox(_("SET TERM command found without terminator.\nStopping further execution."),
+					_("Warning."), wxOK|wxICON_WARNING);
+				terminator = ";";
+				break;
+			}
 			continue;
 		}
 		else if (sql.length() && !execute(sql))
 		{
-			styled_text_ctrl_sql->SetSelectionStart((int)oldpos);	// select the text in STC
-			styled_text_ctrl_sql->SetSelectionEnd((int)pos);		// that failed to execute
+			styled_text_ctrl_sql->SetSelectionStart((int)oldpos);		// select the text in STC
+			styled_text_ctrl_sql->SetSelectionEnd((int)lastpos);		// that failed to execute
 			return;
 		}
 
-		if (pos == string::npos)
+		if (pos == string::npos)	// last statement
 			break;
 
-		searchpos = oldpos = pos + terminator.length();
+		searchpos = oldpos = lastpos + terminator.length();
 	}
 
 	if (autoExecute)
