@@ -205,6 +205,13 @@
 					<text>Use incremental file numbers</text>
 				</option>
 			</enables>
+			<enables>
+				<type>checkbox</type>
+				<name>Add header</name>
+				<key>LoggingAddHeader</key>
+				<description>Should logging add a header showing the context in which statement was run:<br />FlameRobin version, database, username, timestamp</description>
+				<default>1</default>
+			</enables>
 		</setting>
 		<setting>
 			<type>checkbox</type>

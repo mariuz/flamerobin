@@ -48,14 +48,6 @@ bool Logger::log2database(const executedStatement& st, YDatabase *db)
 //-----------------------------------------------------------------------------
 bool Logger::log2file(const executedStatement& st, YDatabase *db, const std::string& filename)
 {
-	wxString header = wxString::Format(
-		_("\n/* Logged by FlameRobin %s at %s\n   User: %s    Database: %s */\n"),
-		wxT("[TODO: insert version here]"),
-		wxDateTime::Now().Format(),
-		std2wx(db->getUsername()),
-		std2wx(db->getPath())
-	);
-
 	enum { singleFile=0, multiFile };
 	int logToFileType;
 	config().getValue("LogToFileType", logToFileType);
@@ -91,7 +83,19 @@ bool Logger::log2file(const executedStatement& st, YDatabase *db, const std::str
 		if (!f.Open(std2wx(filename), wxFile::write_append ))		// cannot open file
 			return false;
 
-	f.Write(header);
+	bool loggingAddHeader = true;
+	config().getValue("LoggingAddHeader", loggingAddHeader);
+	if (loggingAddHeader)
+	{
+		wxString header = wxString::Format(
+			_("\n/* Logged by FlameRobin %s at %s\n   User: %s    Database: %s */\n"),
+			wxT("[TODO: insert version here]"),
+			wxDateTime::Now().Format(),
+			std2wx(db->getUsername()),
+			std2wx(db->getPath())
+		);
+		f.Write(header);
+	}
 	f.Write(std2wx(sql));
 	f.Close();
 	return true;
