@@ -65,18 +65,25 @@
 			</option>
 		</setting>
 		<setting>
-			<type>radio</type>
-			<name>When table, view or stored procedure is activated</name>
-			<key>OnTreeActivate</key>
-			<default>0</default>
-			<option>
-				<value>properties</value>
-				<text>Open Properties page</text>
-			</option>
-			<option>
-				<value>columns</value>
-				<text>Show column info</text>
-			</option>
+			<type>checkbox</type>
+			<name>Show columns and parameters in tree</name>
+			<key>ShowColumnsInTree</key>
+			<default>1</default>
+			<description>If checked the table and view columns and stored procedure parameters will be shown in tree</description>
+			<enables>
+				<type>radio</type>
+				<name>When table, view or stored procedure is activated</name>
+				<key>OnTreeActivate</key>
+				<default>0</default>
+				<option>
+					<value>properties</value>
+					<text>Open Properties page</text>
+				</option>
+				<option>
+					<value>columns</value>
+					<text>Show column info</text>
+				</option>
+			</enables>
 		</setting>
 	</page>
 	<page>
