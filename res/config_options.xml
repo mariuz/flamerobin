@@ -134,10 +134,30 @@
 			<type>number</type>
 			<min>0</min>
 			<max>10</max>
-			<name>Characters needed for autocomplete</name>
+			<name>Characters needed for auto-complete</name>
 			<key>AutocompleteChars</key>
 			<default>3</default>
-			<description>If set to zero, user has to manually invoke the autocomplete list with Ctrl+Space</description>
+			<description>If set to zero, user has to manually invoke the auto-complete list</description>
+		</setting>
+		<setting>
+			<type>radio</type>
+			<name>Manually invoke auto-complete list with</name>
+			<key>AutoCompleteKey</key>
+			<default>0</default>
+			<option>
+				<value>0</value>
+				<text>Ctrl + Space</text>
+			</option>
+			<option>
+				<value>1</value>
+				<text>Tab</text>
+			</option>
+		</setting>
+		<setting>
+			<type>checkbox</type>
+			<name>Allow auto-completion with Enter</name>
+			<key>AutoCompleteWithEnter</key>
+			<default>0</default>
 		</setting>
 	</page>
 	<page>

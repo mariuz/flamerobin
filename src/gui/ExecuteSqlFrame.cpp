@@ -692,10 +692,36 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
 
 	if (wxWindow::FindFocus() == styled_text_ctrl_sql)
 	{
-		if (event.ControlDown() && key == WXK_SPACE)
-			autoComplete(true);
-		if (key == WXK_RETURN && styled_text_ctrl_sql->AutoCompActive())
-			styled_text_ctrl_sql->AutoCompCancel();
+		if (!styled_text_ctrl_sql->AutoCompActive())
+		{
+			enum { acSpace=0, acTab };
+			int acc = acSpace;
+			config().getValue("AutoCompleteKey", acc);
+			if (acc == acSpace && event.ControlDown() && key == WXK_SPACE)
+				autoComplete(true);
+
+			// TAB completion works when there is no white space before cursor and there is no selection
+			if (acc == acTab && key == WXK_TAB && styled_text_ctrl_sql->GetSelectionStart() == styled_text_ctrl_sql->GetSelectionEnd())
+			{
+				int p = styled_text_ctrl_sql->GetCurrentPos();
+				if (p > 0)
+				{
+					int ch = styled_text_ctrl_sql->GetCharAt(p-1);
+					if (ch != ' ' && (ch < 0x09 || ch > 0x0d))		// <- as taken from scintilla/src/Document.cxx
+					{
+						autoComplete(true);
+						return;					// don't Skip the event
+					}
+				}
+			}
+		}
+		else if (key == WXK_RETURN)
+		{
+			bool acEnter = false;
+			config().getValue("AutoCompleteWithEnter", acEnter);
+			if (!acEnter)
+				styled_text_ctrl_sql->AutoCompCancel();
+		}
 	}
 	event.Skip();
 }
