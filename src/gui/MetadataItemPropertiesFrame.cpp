@@ -53,7 +53,7 @@
 #include "MetadataItemPropertiesFrame.h"
 //-----------------------------------------------------------------------------
 //! converts chars that have special meaning in HTML, so they get displayed
-std::string& escapeHtmlChars(std::string& s, bool processNewlines = true)
+std::string escapeHtmlChars(std::string s, bool processNewlines = true)
 {
 	typedef std::pair<char, std::string> par;
 	std::vector<par> symbol_table;
@@ -434,8 +434,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 		text += type + " trigger for " + object + " at position ";
 		std::stringstream s;
 		s << text << position;
-		text = s.str();
-		htmlpage += escapeHtmlChars(text, false);
+		htmlpage += escapeHtmlChars(s.str(), false);
 	}
 
     else if (cmd == "generator_value")
@@ -445,8 +444,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 			return;
 		std::ostringstream ss;
         ss << g->getValue();
-        std::string s = ss.str();
-        htmlpage += escapeHtmlChars(s, false);
+        htmlpage += escapeHtmlChars(ss.str(), false);
     }
 
 	else if (cmd == "exception_number")
@@ -456,8 +454,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 			return;
         std::ostringstream ss;
         ss << e->getNumber();
-        std::string s = ss.str();
-		htmlpage += escapeHtmlChars(s, false);
+		htmlpage += escapeHtmlChars(ss.str(), false);
 	}
 
 	else if (cmd == "exception_message")
@@ -465,8 +462,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 		YException *e = dynamic_cast<YException *>(object);
 		if (!e)
 			return;
-        std::string s = e->getMessage();
-		htmlpage += escapeHtmlChars(s, false);
+		htmlpage += escapeHtmlChars(e->getMessage(), false);
 	}
 
     else if (cmd == "varcolor")
