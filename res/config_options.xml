@@ -15,17 +15,14 @@
 				<option>
 					<value>0</value>
 					<text>Same setting for all</text>
-					<description>All property pages share the same setting.</description>
 				</option>
 				<option>
 					<value>1</value>
 					<text>Same setting for all objects of same type</text>
-					<description>For example, property pages for all tables share the same setting.</description>
 				</option>
 				<option>
 					<value>2</value>
 					<text>Separate for each individual object</text>
-					<description>For example, each table has its own setting.</description>
 				</option>
 			</enables>
 		</setting>
@@ -144,6 +141,7 @@
 				<type>radio</type>
 				<name>Multiple files</name>
 				<key>LogToFileType</key>
+				<description>To use incremental file numbers, place # character<br />where you want numbers to be inserted.</description>
 				<option>
 					<value>single</value>
 					<text>Log everything to a single file</text>
@@ -151,7 +149,6 @@
 				<option>
 					<value>incremental</value>
 					<text>Use incremental file numbers</text>
-					<description>Place # character where you want numbers to be inserted.</description>
 				</option>
 			</enables>
 		</setting>
