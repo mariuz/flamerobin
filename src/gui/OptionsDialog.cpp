@@ -60,6 +60,7 @@ Setting::Setting()
 wxBoxSizer *Setting::addToPanel(wxPanel *panel, int id)
 {
 	int border = 3;
+	int space = 8;
 
 	// add horizontal boxSizer
     wxBoxSizer* sz = new wxBoxSizer(wxHORIZONTAL);
@@ -75,43 +76,54 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel, int id)
 	{
 		wxCheckBox *temp = new wxCheckBox(panel, id, name);
 		sz->Add(temp, 0, wxALL|wxFIXED_MINSIZE, border);
+		temp->SetToolTip(description);
 	}
 
 	else if (type == wxT("number"))
 	{
 		wxStaticText *t = new wxStaticText(panel, -1, name);
 		sz->Add(t, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
-		sz->Add(10, 5);
+		sz->Add(space, 5);
 		wxSpinCtrl *temp = new wxSpinCtrl(panel, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, min, max);
 		sz->Add(temp, 0, wxALL|wxFIXED_MINSIZE, border);
+		temp->SetToolTip(description);
+		t->SetToolTip(description);
 	}
 	else if (type == wxT("string"))
 	{
 		wxStaticText *t = new wxStaticText(panel, -1, name);
 		sz->Add(t, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
-		sz->Add(10, 5);
+		sz->Add(space, 5);
 		wxTextCtrl *temp = new wxTextCtrl(panel, id);
 		sz->Add(temp, 0, wxALL|wxFIXED_MINSIZE, border);
+		temp->SetToolTip(description);
+		t->SetToolTip(description);
 	}
 	else if (type == wxT("file"))
 	{
 		wxStaticText *t = new wxStaticText(panel, -1, name);
 		sz->Add(t, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
-		sz->Add(10, 5);
+		sz->Add(space, 5);
 		wxTextCtrl *temp = new wxTextCtrl(panel, -1);
-		sz->Add(temp, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
+		sz->Add(temp, 1, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
 		wxButton *b = new wxButton(panel, id, _("Browse..."));
 		sz->Add(b, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, 1);
+		temp->SetToolTip(description);
+		t->SetToolTip(description);
+		b->SetToolTip(description);
 	}
 	else if (type == wxT("font"))
 	{
 		wxStaticText *t = new wxStaticText(panel, -1, name);
 		sz->Add(t, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
-		sz->Add(10, 5);
+		sz->Add(space, 5);
 		wxTextCtrl *temp = new wxTextCtrl(panel, -1);
-		sz->Add(temp, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
+		sz->Add(temp, 1, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, border);
 		wxButton *b = new wxButton(panel, id, _("Change"));
 		sz->Add(b, 0, wxALL|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL, 1);
+		t->SetToolTip(description);
+		temp->SetToolTip(description);
+		b->SetToolTip(description);
 	}
 	else if (type == wxT("radio"))
 	{
@@ -123,6 +135,7 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel, int id)
 		wxRadioBox *r = new wxRadioBox(panel, id, name, wxDefaultPosition, wxDefaultSize, size, opts, 0, wxRA_SPECIFY_ROWS);
 		delete [] opts;
 		sz->Add(r, 0, wxALL|wxFIXED_MINSIZE, border);
+		r->SetToolTip(description);
 	}
 
 	// add controls to it
@@ -163,7 +176,7 @@ const std::string OptionsDialog::getName() const
 void OptionsDialog::set_properties()
 {
     SetTitle(wxT("Options"));
-    SetSize(wxSize(530, 400));
+    SetSize(wxSize(530, 430));
 }
 //-----------------------------------------------------------------------------
 void OptionsDialog::do_layout()
@@ -302,6 +315,7 @@ void OptionsDialog::load()
 		/* both options & settings */
 		else if (key == wxT("description"))
 		{
+			str.Replace(wxT("<br>"), wxT("\n"));
 			if (op)
 				op->description = str;
 			else

@@ -7,6 +7,7 @@
 			<type>checkbox</type>
 			<name>Remember window positions and sizes</name>
 			<key>FrameStorage</key>
+			<description>Newly created windows get previous size and position</description>
 			<enables>
 				<type>radio</type>
 				<name>Metadata properties windows</name>
@@ -18,7 +19,7 @@
 				</option>
 				<option>
 					<value>1</value>
-					<text>Same setting for all object of same type</text>
+					<text>Same setting for all objects of same type</text>
 					<description>For example, property pages for all tables share the same setting.</description>
 				</option>
 				<option>
@@ -94,29 +95,13 @@
 			<type>string</type>
 			<name>Date format</name>
 			<key>DateFormat</key>
-			<description>The format contains the following letters:
-				d - day of month, 1-31
-				D - day of month, 01-31
-				m - month, 1-12
-				M - month, 01-12
-				y - year, 00-99
-				Y - year, 0000-9999
-				All other characters are copied
-			</description>
+			<description>The format contains the following letters:<br>d - day of month, 1-31<br>D - day of month, 01-31<br>m - month, 1-12<br>M - month, 01-12<br>y - year, 00-99<br>Y - year, 0000-9999<br>All other characters are copied</description>
 		</setting>
 		<setting>
 			<type>string</type>
 			<name>Time format</name>
 			<key>TimeFormat</key>
-			<description>The format contains the following letters:
-				h - hour, 0-24
-				H - hour, 00-24
-				m - minute, 0-59
-				M - minute, 00-59
-				s - second, 0-59
-				S - second, 00-59
-				All other characters are copied
-			</description>
+			<description>The format contains the following letters:<br>h - hour, 0-24<br>H - hour, 00-24<br>m - minute, 0-59<br>M - minute, 00-59<br>s - second, 0-59<br>S - second, 00-59<br>All other characters are copied</description>
 		</setting>
 		<setting>
 			<type>checkbox</type>
@@ -174,18 +159,12 @@
 			<type>checkbox</type>
 			<name>Enable logging to database</name>
 			<key>LogToDatabase</key>
-			<description>
-				Logs all successful DDL statements to database.
-				This will create a table named FLAMEROBIN_LOG into your databases.
-			</description>
+			<description>Logs all successful DDL statements to database.<br>This will create a table named FLAMEROBIN_LOG into your databases.</description>
 			<enables>
 				<type>checkbox</type>
 				<name>Use generator instead of 1+max(id)</name>
 				<key>LoggingUsesGenerator</key>
-				<description>
-					If not checked, logging will do a "select max(id)+1" to create keys for
-					flamerobin_log table. This can be slow if there is a huge amount of	records in it.
-				</description>
+				<description>If not checked, logging will do a "select max(id)+1" to create<br>keys for flamerobin_log table. This can be slow if<br>there is a huge amount of records in it.</description>
 			</enables>
 		</setting>
 	</page>
