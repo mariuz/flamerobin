@@ -795,7 +795,7 @@ void ExecuteSqlFrame::executeAllStatements(bool autoExecute)
 			}
 		}
 
-		std::string::size_type lastpos = (pos == std::string::npos ? commands.length()-1 : pos);
+		std::string::size_type lastpos = (pos == std::string::npos ? commands.length() : pos);
 		string sql = commands.substr(oldpos, lastpos-oldpos);
 		sql.erase(sql.find_last_not_of("\n\r\t ")+1);	// right-trim the statement
 
