@@ -59,7 +59,9 @@ bool FRApp::OnInit()
 {
 	// Uncomment this before building a release
 	// I don't use it while developing since I cannot catch some errors with debugger then
-	::wxHandleFatalExceptions();
+#if wxUSE_ON_FATAL_EXCEPTION
+    ::wxHandleFatalExceptions();
+#endif
 
     // initialize IBPP library - if it fails: exit
     if (! IBPP::CheckVersion(IBPP::Version))
