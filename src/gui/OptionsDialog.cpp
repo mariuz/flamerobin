@@ -254,7 +254,7 @@ OptionsDialog::OptionsDialog(wxWindow* parent):
 	// some parents (ex. main frame) could even be smaller
 	config().setValue(getName() + "::centerOnParent", false);
 
-	listbook1 = new wxListbook(this, ID_listbook, wxDefaultPosition, wxDefaultSize, wxNB_LEFT);
+	listbook1 = new wxListbook(this, ID_listbook, wxDefaultPosition, wxDefaultSize, wxLB_DEFAULT);
 	imageList.Create(32, 32);
 	imageList.Add(getImage32(ntColumn));
 	imageList.Add(getImage32(ntProcedure));
@@ -466,7 +466,7 @@ void OptionsDialog::createPages()
 
 	minw += 70;
 	minh += 20;
-    if (listbook1->HasFlag(wxNB_LEFT))	// tabs left
+    if (listbook1->HasFlag(wxLB_LEFT))	// tabs left
         minw += 100;
     else 								// tabs on top
         minh += 50;
@@ -495,11 +495,9 @@ wxPanel *OptionsDialog::createPanel(Page* pg)
 
     wxBoxSizer* sb = new wxBoxSizer(wxHORIZONTAL);
 	sz->Add(sb, 0, wxALL|wxALIGN_RIGHT|wxALIGN_BOTTOM, 3);
-	wxButton *appcl = new wxButton(panel, ID_button_close, _("Apply && Close"));
-	wxButton *apply = new wxButton(panel, ID_button_apply, _("Apply"));
-	wxButton *reset = new wxButton(panel, ID_button_reset, _("Reset"));
+	wxButton *appcl = new wxButton(panel, ID_button_save, _("Save"));
+	wxButton *reset = new wxButton(panel, ID_button_cancel, _("Cancel"));
 	sb->Add(appcl, 0, wxALL, 5);
-	sb->Add(apply, 0, wxALL, 5);
 	sb->Add(reset, 0, wxALL, 5);
 
 	// layout
@@ -537,9 +535,8 @@ Setting *OptionsDialog::findSetting(wxCommandEvent& event)
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(OptionsDialog, wxDialog)
-    EVT_BUTTON(OptionsDialog::ID_button_close, OptionsDialog::OnApplyCloseButtonClick)
-    EVT_BUTTON(OptionsDialog::ID_button_apply, OptionsDialog::OnApplyButtonClick)
-    EVT_BUTTON(OptionsDialog::ID_button_reset, OptionsDialog::OnResetButtonClick)
+    EVT_BUTTON(OptionsDialog::ID_button_save, OptionsDialog::OnSaveButtonClick)
+    EVT_BUTTON(OptionsDialog::ID_button_cancel, OptionsDialog::OnCancelButtonClick)
     EVT_BUTTON(OptionsDialog::ID_button_browse, OptionsDialog::OnBrowseButtonClick)
     EVT_BUTTON(OptionsDialog::ID_button_font, OptionsDialog::OnFontButtonClick)
 	EVT_CHECKBOX(OptionsDialog::ID_checkbox, OptionsDialog::OnCheckbox)
@@ -552,8 +549,8 @@ void OptionsDialog::OnPageChanging(wxListbookEvent& WXUNUSED(event))
 	/* maybe put something here? */
 }
 //-----------------------------------------------------------------------------
-// save settings to config
-void OptionsDialog::OnApplyButtonClick(wxCommandEvent& WXUNUSED(event))
+// save settings to config and close dialog
+void OptionsDialog::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 {
 	for (std::list<Page *>::iterator pit = pages.begin(); pit != pages.end(); ++pit)
 		for (std::list<Setting *>::iterator it = (*pit)->settings.begin(); it != (*pit)->settings.end(); ++it)
@@ -565,19 +562,15 @@ void OptionsDialog::OnApplyButtonClick(wxCommandEvent& WXUNUSED(event))
 		_("Preferences saved"),
 		wxOK|wxICON_INFORMATION
 	);
+	Close();
 }
 //-----------------------------------------------------------------------------
 // load settings from config
-void OptionsDialog::OnResetButtonClick(wxCommandEvent& WXUNUSED(event))
+void OptionsDialog::OnCancelButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-	for (std::list<Page *>::iterator pit = pages.begin(); pit != pages.end(); ++pit)
-		for (std::list<Setting *>::iterator it = (*pit)->settings.begin(); it != (*pit)->settings.end(); ++it)
-			(*it)->loadFromConfig();
-}
-//-----------------------------------------------------------------------------
-void OptionsDialog::OnApplyCloseButtonClick(wxCommandEvent& event)
-{
-	OnApplyButtonClick(event);
+	//for (std::list<Page *>::iterator pit = pages.begin(); pit != pages.end(); ++pit)
+	//	for (std::list<Setting *>::iterator it = (*pit)->settings.begin(); it != (*pit)->settings.end(); ++it)
+	//		(*it)->loadFromConfig();
 	Close();
 }
 //-----------------------------------------------------------------------------
