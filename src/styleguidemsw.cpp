@@ -81,10 +81,10 @@ void YStyleGuideMSW::dbuNeeded()
         HDC dc = GetDC(0);
         HFONT fnt = (HFONT)SelectObject(dc, (HFONT)GetStockObject(DEFAULT_GUI_FONT));
 
-        static const char c[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-        int len = strlen(c);
+        wxString s(wxT("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"));
+        int len = s.Length();
         SIZE sz;
-        GetTextExtentPoint32(dc, c, len, &sz);
+        GetTextExtentPoint32(dc, s.c_str(), len, &sz);
         SelectObject(dc, fnt);
         ReleaseDC(0, dc);
 
