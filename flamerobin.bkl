@@ -44,13 +44,25 @@
         <if cond="FINAL=='0'">d</if>
     </set>
 
+    <option name="STATICRTL">
+        <values>0,1</values>
+        <values-description>Dynamic,Static</values-description>
+        <default-value>0</default-value>
+    </option>
+    <set var="R_OPT">
+        <if cond="STATICRTL=='1'">s</if>
+    </set>
+    <set var="RTL_TYPE">
+        <if cond="STATICRTL=='0'">dynamic</if>
+        <if cond="STATICRTL=='1'">static</if>
+    </set>
+
     <template id="wx">
         <if cond="FORMAT!='autoconf'">
             <set var="WXDIR">$(DOLLAR)(WXDIR)</set>
         </if>
 
-        <!-- use "static" or "dynamic" -->
-        <runtime-libs>dynamic</runtime-libs>
+        <runtime-libs>$(RTL_TYPE)</runtime-libs>
         <threading>multi</threading>
 
         <include>$(WXDIR)/include</include>
@@ -85,33 +97,6 @@
         <debug-info>$(DEBUGINFO)</debug-info>
         <optimize>$(OPTIMIZE)</optimize>
 
-        <if cond="FORMAT!='autoconf'">
-            <set var="OBJS" make_var="1">
-                <if cond="FINAL=='0'">debug</if>
-                <if cond="FINAL=='1'">release</if>
-            </set>
-            <set var="BUILDDIR">$(OBJS)</set>
-        </if>
-
-        <if cond="FORMAT in ['borland']">
-            <set var="WX_LIB_DIR" make_var="1">
-                <if cond="USEDLL=='1'">$(WXDIR)/lib/bcc_dll</if>
-                <if cond="USEDLL=='0'">$(WXDIR)/lib/bcc_lib</if>
-            </set>
-        </if>
-        <if cond="FORMAT in ['mingw']">
-            <set var="WX_LIB_DIR" make_var="1">
-                <if cond="USEDLL=='1'">$(WXDIR)/lib/gcc_dll</if>
-                <if cond="USEDLL=='0'">$(WXDIR)/lib/gcc_lib</if>
-            </set>
-        </if>
-        <if cond="FORMAT in ['msvc6prj','msvc']">
-            <set var="WX_LIB_DIR" make_var="1">
-                <if cond="USEDLL=='1'">$(WXDIR)/lib/vc_dll</if>
-                <if cond="USEDLL=='0'">$(WXDIR)/lib/vc_lib</if>
-            </set>
-        </if>
-
         <if cond="FORMAT in ['msvc6prj','msvc']">
             <ldflags>/nologo</ldflags>
             <ldflags>/subsystem:windows</ldflags>
@@ -137,6 +122,11 @@
 
             <set var="WX_PORT">wxmsw</set>
             <set var="WX_VERSION">25</set>
+
+            <set var="WX_LIB_DIR" make_var="1">
+                <if cond="USEDLL=='1'">$(WXDIR)/lib/$(COMPILER)_dll</if>
+                <if cond="USEDLL=='0'">$(WXDIR)/lib/$(COMPILER)_lib</if>
+            </set>
 
             <include>$(WX_LIB_DIR)/msw$(D_OPT)</include>
             <lib-path>$(WX_LIB_DIR)</lib-path>
@@ -178,7 +168,7 @@
     </define-tag>
 
     <set var="BUILDDIR">
-        <if cond="TOOLSET=='win32'">$(COMPILER)$(D_OPT)</if>
+        <if cond="TOOLSET=='win32'">$(COMPILER)$(U_OPT)$(R_OPT)$(D_OPT)</if>
         <if cond="TOOLSET!='win32'">.</if>
     </set>
 
@@ -426,6 +416,7 @@
         <cxx-exceptions>on</cxx-exceptions>
         <precomp-headers>on</precomp-headers>
         <warnings>max</warnings>
+
         <define>$(IBPPCOMPILERDEFINE)</define>
         <define>$(IBPPPLATFORMDEFINE)</define>
         <if cond="FORMAT=='autoconf'">

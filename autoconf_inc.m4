@@ -7,18 +7,6 @@ AC_BAKEFILE_PRECOMP_HEADERS
 
 dnl Conditions:
 
-dnl ### begin block 1_COND_DEBUG_0 ###
-    COND_DEBUG_0="#"
-    if test "x$DEBUG" = "x0" ; then
-        COND_DEBUG_0=""
-    fi
-    AC_SUBST(COND_DEBUG_0)
-dnl ### begin block 1_COND_DEBUG_1 ###
-    COND_DEBUG_1="#"
-    if test "x$DEBUG" = "x1" ; then
-        COND_DEBUG_1=""
-    fi
-    AC_SUBST(COND_DEBUG_1)
 dnl ### begin block 1_COND_DEPS_TRACKING_0 ###
     COND_DEPS_TRACKING_0="#"
     if test "x$DEPS_TRACKING" = "x0" ; then
@@ -79,6 +67,30 @@ dnl ### begin block 1_COND_PLATFORM_WIN32_1 ###
         COND_PLATFORM_WIN32_1=""
     fi
     AC_SUBST(COND_PLATFORM_WIN32_1)
+dnl ### begin block 1_COND_STATICRTL_0 ###
+    COND_STATICRTL_0="#"
+    if test "x$STATICRTL" = "x0" ; then
+        COND_STATICRTL_0=""
+    fi
+    AC_SUBST(COND_STATICRTL_0)
+dnl ### begin block 1_COND_STATICRTL_1 ###
+    COND_STATICRTL_1="#"
+    if test "x$STATICRTL" = "x1" ; then
+        COND_STATICRTL_1=""
+    fi
+    AC_SUBST(COND_STATICRTL_1)
+dnl ### begin block 1_COND_STATIC_0 ###
+    COND_STATIC_0="#"
+    if test "x$STATIC" = "x0" ; then
+        COND_STATIC_0=""
+    fi
+    AC_SUBST(COND_STATIC_0)
+dnl ### begin block 1_COND_STATIC_1 ###
+    COND_STATIC_1="#"
+    if test "x$STATIC" = "x1" ; then
+        COND_STATIC_1=""
+    fi
+    AC_SUBST(COND_STATIC_1)
 dnl ### begin block 1_COND_UNICODE_1 ###
     COND_UNICODE_1="#"
     if test "x$UNICODE" = "x1" ; then

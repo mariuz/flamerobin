@@ -4,7 +4,7 @@
 
 # TARGTYPE "Win32 (x86) Application" 0x0101
 
-CFG=flamerobin - Win32 Debug
+CFG=flamerobin - Win32 Debug Dynamic
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
@@ -13,18 +13,26 @@ CFG=flamerobin - Win32 Debug
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "flamerobin.mak" CFG="flamerobin - Win32 Debug"
+!MESSAGE NMAKE /f "flamerobin.mak" CFG="flamerobin - Win32 Debug Dynamic"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "flamerobin - Win32 DLL Unicode Release" (based on "Win32 (x86) Application")
-!MESSAGE "flamerobin - Win32 DLL Unicode Debug" (based on "Win32 (x86) Application")
-!MESSAGE "flamerobin - Win32 DLL Release" (based on "Win32 (x86) Application")
-!MESSAGE "flamerobin - Win32 DLL Debug" (based on "Win32 (x86) Application")
-!MESSAGE "flamerobin - Win32 Unicode Release" (based on "Win32 (x86) Application")
-!MESSAGE "flamerobin - Win32 Unicode Debug" (based on "Win32 (x86) Application")
-!MESSAGE "flamerobin - Win32 Release" (based on "Win32 (x86) Application")
-!MESSAGE "flamerobin - Win32 Debug" (based on "Win32 (x86) Application")
+!MESSAGE "flamerobin - Win32 DLL Unicode Release Static" (based on "Win32 (x86) Application")
+!MESSAGE "flamerobin - Win32 DLL Unicode Release Dynamic" (based on "Win32 (x86) Application")
+!MESSAGE "flamerobin - Win32 DLL Unicode Debug Static" (based on "Win32 (x86) Application")
+!MESSAGE "flamerobin - Win32 DLL Unicode Debug Dynamic" (based on "Win32 (x86) Application")
+!MESSAGE "flamerobin - Win32 DLL Release Static" (based on "Win32 (x86) Application")
+!MESSAGE "flamerobin - Win32 DLL Release Dynamic" (based on "Win32 (x86) Application")
+!MESSAGE "flamerobin - Win32 DLL Debug Static" (based on "Win32 (x86) Application")
+!MESSAGE "flamerobin - Win32 DLL Debug Dynamic" (based on "Win32 (x86) Application")
+!MESSAGE "flamerobin - Win32 Unicode Release Static" (based on "Win32 (x86) Application")
+!MESSAGE "flamerobin - Win32 Unicode Release Dynamic" (based on "Win32 (x86) Application")
+!MESSAGE "flamerobin - Win32 Unicode Debug Static" (based on "Win32 (x86) Application")
+!MESSAGE "flamerobin - Win32 Unicode Debug Dynamic" (based on "Win32 (x86) Application")
+!MESSAGE "flamerobin - Win32 Release Static" (based on "Win32 (x86) Application")
+!MESSAGE "flamerobin - Win32 Release Dynamic" (based on "Win32 (x86) Application")
+!MESSAGE "flamerobin - Win32 Debug Static" (based on "Win32 (x86) Application")
+!MESSAGE "flamerobin - Win32 Debug Dynamic" (based on "Win32 (x86) Application")
 !MESSAGE 
 
 # Begin Project
@@ -35,20 +43,20 @@ CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "flamerobin - Win32 DLL Unicode Release"
+!IF  "$(CFG)" == "flamerobin - Win32 DLL Unicode Release Static"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "vc"
-# PROP BASE Intermediate_Dir "vc\flamerobin"
+# PROP BASE Output_Dir "vcus"
+# PROP BASE Intermediate_Dir "vcus\flamerobin"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "vc"
-# PROP Intermediate_Dir "vc\flamerobin"
+# PROP Output_Dir "vcus"
+# PROP Intermediate_Dir "vcus\flamerobin"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MD /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Fdvc\flamerobin.pdb /O1 /I "$(WXDIR)\lib\vc_dll\msw" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MD /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Fdvc\flamerobin.pdb /O1 /I "$(WXDIR)\lib\vc_dll\msw" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MT /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Fdvcus\flamerobin.pdb /O1 /I "$(WXDIR)\lib\vc_dll\msw" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MT /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Fdvcus\flamerobin.pdb /O1 /I "$(WXDIR)\lib\vc_dll\msw" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
 # ADD BASE MTL /nologo /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
 # ADD MTL /nologo /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
 # ADD BASE RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "_UNICODE" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_dll\msw" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
@@ -57,23 +65,48 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 wxmsw25u_stc.lib wxmsw25u_html.lib wxmsw25u_adv.lib wxmsw25u_core.lib wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vc\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
-# ADD LINK32 wxmsw25u_stc.lib wxmsw25u_html.lib wxmsw25u_adv.lib wxmsw25u_core.lib wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vc\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
+# ADD BASE LINK32 wxmsw25u_stc.lib wxmsw25u_html.lib wxmsw25u_adv.lib wxmsw25u_core.lib wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcus\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
+# ADD LINK32 wxmsw25u_stc.lib wxmsw25u_html.lib wxmsw25u_adv.lib wxmsw25u_core.lib wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcus\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
 
-!ELSEIF  "$(CFG)" == "flamerobin - Win32 DLL Unicode Debug"
+!ELSEIF  "$(CFG)" == "flamerobin - Win32 DLL Unicode Release Dynamic"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "vcu"
+# PROP BASE Intermediate_Dir "vcu\flamerobin"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "vcu"
+# PROP Intermediate_Dir "vcu\flamerobin"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /FD /MD /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Fdvcu\flamerobin.pdb /O1 /I "$(WXDIR)\lib\vc_dll\msw" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MD /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Fdvcu\flamerobin.pdb /O1 /I "$(WXDIR)\lib\vc_dll\msw" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE MTL /nologo /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
+# ADD MTL /nologo /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
+# ADD BASE RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "_UNICODE" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_dll\msw" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
+# ADD RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "_UNICODE" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_dll\msw" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 wxmsw25u_stc.lib wxmsw25u_html.lib wxmsw25u_adv.lib wxmsw25u_core.lib wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcu\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
+# ADD LINK32 wxmsw25u_stc.lib wxmsw25u_html.lib wxmsw25u_adv.lib wxmsw25u_core.lib wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcu\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
+
+!ELSEIF  "$(CFG)" == "flamerobin - Win32 DLL Unicode Debug Static"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "vcd"
-# PROP BASE Intermediate_Dir "vcd\flamerobin"
+# PROP BASE Output_Dir "vcusd"
+# PROP BASE Intermediate_Dir "vcusd\flamerobin"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "vcd"
-# PROP Intermediate_Dir "vcd\flamerobin"
+# PROP Output_Dir "vcusd"
+# PROP Intermediate_Dir "vcusd\flamerobin"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MDd /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Zi /Gm /GZ /Fdvcd\flamerobin.pdb /Od /I "$(WXDIR)\lib\vc_dll\mswd" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MDd /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Zi /Gm /GZ /Fdvcd\flamerobin.pdb /Od /I "$(WXDIR)\lib\vc_dll\mswd" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MTd /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Zi /Gm /GZ /Fdvcusd\flamerobin.pdb /Od /I "$(WXDIR)\lib\vc_dll\mswd" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MTd /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Zi /Gm /GZ /Fdvcusd\flamerobin.pdb /Od /I "$(WXDIR)\lib\vc_dll\mswd" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
 # ADD BASE MTL /nologo /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
 # ADD MTL /nologo /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
 # ADD BASE RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "_UNICODE" /d "__WXDEBUG__" /d "_DEBUG" /d "_DEBUG" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_dll\mswd" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
@@ -82,10 +115,60 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 wxmsw25ud_stc.lib wxmsw25ud_html.lib wxmsw25ud_adv.lib wxmsw25ud_core.lib wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcd\flamerobin.exe" /debug /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\debug\win32_msvc"
-# ADD LINK32 wxmsw25ud_stc.lib wxmsw25ud_html.lib wxmsw25ud_adv.lib wxmsw25ud_core.lib wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcd\flamerobin.exe" /debug /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\debug\win32_msvc"
+# ADD BASE LINK32 wxmsw25ud_stc.lib wxmsw25ud_html.lib wxmsw25ud_adv.lib wxmsw25ud_core.lib wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcusd\flamerobin.exe" /debug /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\debug\win32_msvc"
+# ADD LINK32 wxmsw25ud_stc.lib wxmsw25ud_html.lib wxmsw25ud_adv.lib wxmsw25ud_core.lib wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcusd\flamerobin.exe" /debug /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\debug\win32_msvc"
 
-!ELSEIF  "$(CFG)" == "flamerobin - Win32 DLL Release"
+!ELSEIF  "$(CFG)" == "flamerobin - Win32 DLL Unicode Debug Dynamic"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 1
+# PROP BASE Output_Dir "vcud"
+# PROP BASE Intermediate_Dir "vcud\flamerobin"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 1
+# PROP Output_Dir "vcud"
+# PROP Intermediate_Dir "vcud\flamerobin"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /FD /MDd /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Zi /Gm /GZ /Fdvcud\flamerobin.pdb /Od /I "$(WXDIR)\lib\vc_dll\mswd" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MDd /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Zi /Gm /GZ /Fdvcud\flamerobin.pdb /Od /I "$(WXDIR)\lib\vc_dll\mswd" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE MTL /nologo /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
+# ADD MTL /nologo /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
+# ADD BASE RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "_UNICODE" /d "__WXDEBUG__" /d "_DEBUG" /d "_DEBUG" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_dll\mswd" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
+# ADD RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "_UNICODE" /d "__WXDEBUG__" /d "_DEBUG" /d "_DEBUG" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_dll\mswd" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 wxmsw25ud_stc.lib wxmsw25ud_html.lib wxmsw25ud_adv.lib wxmsw25ud_core.lib wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcud\flamerobin.exe" /debug /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\debug\win32_msvc"
+# ADD LINK32 wxmsw25ud_stc.lib wxmsw25ud_html.lib wxmsw25ud_adv.lib wxmsw25ud_core.lib wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcud\flamerobin.exe" /debug /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\debug\win32_msvc"
+
+!ELSEIF  "$(CFG)" == "flamerobin - Win32 DLL Release Static"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "vcs"
+# PROP BASE Intermediate_Dir "vcs\flamerobin"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "vcs"
+# PROP Intermediate_Dir "vcs\flamerobin"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /FD /MT /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Fdvcs\flamerobin.pdb /O1 /I "$(WXDIR)\lib\vc_dll\msw" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MT /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Fdvcs\flamerobin.pdb /O1 /I "$(WXDIR)\lib\vc_dll\msw" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE MTL /nologo /D "WIN32" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
+# ADD MTL /nologo /D "WIN32" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
+# ADD BASE RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_dll\msw" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
+# ADD RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_dll\msw" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 wxmsw25_stc.lib wxmsw25_html.lib wxmsw25_adv.lib wxmsw25_core.lib wxbase25.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcs\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
+# ADD LINK32 wxmsw25_stc.lib wxmsw25_html.lib wxmsw25_adv.lib wxmsw25_core.lib wxbase25.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcs\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
+
+!ELSEIF  "$(CFG)" == "flamerobin - Win32 DLL Release Dynamic"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -110,7 +193,32 @@ LINK32=link.exe
 # ADD BASE LINK32 wxmsw25_stc.lib wxmsw25_html.lib wxmsw25_adv.lib wxmsw25_core.lib wxbase25.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vc\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
 # ADD LINK32 wxmsw25_stc.lib wxmsw25_html.lib wxmsw25_adv.lib wxmsw25_core.lib wxbase25.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vc\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
 
-!ELSEIF  "$(CFG)" == "flamerobin - Win32 DLL Debug"
+!ELSEIF  "$(CFG)" == "flamerobin - Win32 DLL Debug Static"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 1
+# PROP BASE Output_Dir "vcsd"
+# PROP BASE Intermediate_Dir "vcsd\flamerobin"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 1
+# PROP Output_Dir "vcsd"
+# PROP Intermediate_Dir "vcsd\flamerobin"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /FD /MTd /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Zi /Gm /GZ /Fdvcsd\flamerobin.pdb /Od /I "$(WXDIR)\lib\vc_dll\mswd" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MTd /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Zi /Gm /GZ /Fdvcsd\flamerobin.pdb /Od /I "$(WXDIR)\lib\vc_dll\mswd" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE MTL /nologo /D "WIN32" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
+# ADD MTL /nologo /D "WIN32" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
+# ADD BASE RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "__WXDEBUG__" /d "_DEBUG" /d "_DEBUG" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_dll\mswd" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
+# ADD RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "__WXDEBUG__" /d "_DEBUG" /d "_DEBUG" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_dll\mswd" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 wxmsw25d_stc.lib wxmsw25d_html.lib wxmsw25d_adv.lib wxmsw25d_core.lib wxbase25d.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcsd\flamerobin.exe" /debug /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\debug\win32_msvc"
+# ADD LINK32 wxmsw25d_stc.lib wxmsw25d_html.lib wxmsw25d_adv.lib wxmsw25d_core.lib wxbase25d.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcsd\flamerobin.exe" /debug /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\debug\win32_msvc"
+
+!ELSEIF  "$(CFG)" == "flamerobin - Win32 DLL Debug Dynamic"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -135,20 +243,20 @@ LINK32=link.exe
 # ADD BASE LINK32 wxmsw25d_stc.lib wxmsw25d_html.lib wxmsw25d_adv.lib wxmsw25d_core.lib wxbase25d.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcd\flamerobin.exe" /debug /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\debug\win32_msvc"
 # ADD LINK32 wxmsw25d_stc.lib wxmsw25d_html.lib wxmsw25d_adv.lib wxmsw25d_core.lib wxbase25d.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcd\flamerobin.exe" /debug /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_dll" /subsystem:windows /libpath:"$(IBPP)\debug\win32_msvc"
 
-!ELSEIF  "$(CFG)" == "flamerobin - Win32 Unicode Release"
+!ELSEIF  "$(CFG)" == "flamerobin - Win32 Unicode Release Static"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "vc"
-# PROP BASE Intermediate_Dir "vc\flamerobin"
+# PROP BASE Output_Dir "vcus"
+# PROP BASE Intermediate_Dir "vcus\flamerobin"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "vc"
-# PROP Intermediate_Dir "vc\flamerobin"
+# PROP Output_Dir "vcus"
+# PROP Intermediate_Dir "vcus\flamerobin"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MD /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Fdvc\flamerobin.pdb /O1 /I "$(WXDIR)\lib\vc_lib\msw" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MD /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Fdvc\flamerobin.pdb /O1 /I "$(WXDIR)\lib\vc_lib\msw" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MT /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Fdvcus\flamerobin.pdb /O1 /I "$(WXDIR)\lib\vc_lib\msw" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MT /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Fdvcus\flamerobin.pdb /O1 /I "$(WXDIR)\lib\vc_lib\msw" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
 # ADD BASE MTL /nologo /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
 # ADD MTL /nologo /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
 # ADD BASE RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "_UNICODE" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_lib\msw" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
@@ -157,23 +265,48 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 wxmsw25u_stc.lib wxmsw25u_html.lib wxmsw25u_adv.lib wxmsw25u_core.lib wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vc\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_lib" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
-# ADD LINK32 wxmsw25u_stc.lib wxmsw25u_html.lib wxmsw25u_adv.lib wxmsw25u_core.lib wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vc\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_lib" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
+# ADD BASE LINK32 wxmsw25u_stc.lib wxmsw25u_html.lib wxmsw25u_adv.lib wxmsw25u_core.lib wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcus\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_lib" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
+# ADD LINK32 wxmsw25u_stc.lib wxmsw25u_html.lib wxmsw25u_adv.lib wxmsw25u_core.lib wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcus\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_lib" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
 
-!ELSEIF  "$(CFG)" == "flamerobin - Win32 Unicode Debug"
+!ELSEIF  "$(CFG)" == "flamerobin - Win32 Unicode Release Dynamic"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "vcu"
+# PROP BASE Intermediate_Dir "vcu\flamerobin"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "vcu"
+# PROP Intermediate_Dir "vcu\flamerobin"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /FD /MD /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Fdvcu\flamerobin.pdb /O1 /I "$(WXDIR)\lib\vc_lib\msw" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MD /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Fdvcu\flamerobin.pdb /O1 /I "$(WXDIR)\lib\vc_lib\msw" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE MTL /nologo /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
+# ADD MTL /nologo /D "WIN32" /D "_UNICODE" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
+# ADD BASE RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "_UNICODE" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_lib\msw" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
+# ADD RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "_UNICODE" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_lib\msw" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 wxmsw25u_stc.lib wxmsw25u_html.lib wxmsw25u_adv.lib wxmsw25u_core.lib wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcu\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_lib" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
+# ADD LINK32 wxmsw25u_stc.lib wxmsw25u_html.lib wxmsw25u_adv.lib wxmsw25u_core.lib wxbase25u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcu\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_lib" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
+
+!ELSEIF  "$(CFG)" == "flamerobin - Win32 Unicode Debug Static"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "vcd"
-# PROP BASE Intermediate_Dir "vcd\flamerobin"
+# PROP BASE Output_Dir "vcusd"
+# PROP BASE Intermediate_Dir "vcusd\flamerobin"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "vcd"
-# PROP Intermediate_Dir "vcd\flamerobin"
+# PROP Output_Dir "vcusd"
+# PROP Intermediate_Dir "vcusd\flamerobin"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MDd /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Zi /Gm /GZ /Fdvcd\flamerobin.pdb /Od /I "$(WXDIR)\lib\vc_lib\mswd" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MDd /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Zi /Gm /GZ /Fdvcd\flamerobin.pdb /Od /I "$(WXDIR)\lib\vc_lib\mswd" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MTd /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Zi /Gm /GZ /Fdvcusd\flamerobin.pdb /Od /I "$(WXDIR)\lib\vc_lib\mswd" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MTd /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Zi /Gm /GZ /Fdvcusd\flamerobin.pdb /Od /I "$(WXDIR)\lib\vc_lib\mswd" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
 # ADD BASE MTL /nologo /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
 # ADD MTL /nologo /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
 # ADD BASE RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "_UNICODE" /d "__WXDEBUG__" /d "_DEBUG" /d "_DEBUG" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_lib\mswd" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
@@ -182,10 +315,60 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 wxmsw25ud_stc.lib wxmsw25ud_html.lib wxmsw25ud_adv.lib wxmsw25ud_core.lib wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcd\flamerobin.exe" /debug /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_lib" /subsystem:windows /libpath:"$(IBPP)\debug\win32_msvc"
-# ADD LINK32 wxmsw25ud_stc.lib wxmsw25ud_html.lib wxmsw25ud_adv.lib wxmsw25ud_core.lib wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcd\flamerobin.exe" /debug /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_lib" /subsystem:windows /libpath:"$(IBPP)\debug\win32_msvc"
+# ADD BASE LINK32 wxmsw25ud_stc.lib wxmsw25ud_html.lib wxmsw25ud_adv.lib wxmsw25ud_core.lib wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcusd\flamerobin.exe" /debug /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_lib" /subsystem:windows /libpath:"$(IBPP)\debug\win32_msvc"
+# ADD LINK32 wxmsw25ud_stc.lib wxmsw25ud_html.lib wxmsw25ud_adv.lib wxmsw25ud_core.lib wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcusd\flamerobin.exe" /debug /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_lib" /subsystem:windows /libpath:"$(IBPP)\debug\win32_msvc"
 
-!ELSEIF  "$(CFG)" == "flamerobin - Win32 Release"
+!ELSEIF  "$(CFG)" == "flamerobin - Win32 Unicode Debug Dynamic"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 1
+# PROP BASE Output_Dir "vcud"
+# PROP BASE Intermediate_Dir "vcud\flamerobin"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 1
+# PROP Output_Dir "vcud"
+# PROP Intermediate_Dir "vcud\flamerobin"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /FD /MDd /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Zi /Gm /GZ /Fdvcud\flamerobin.pdb /Od /I "$(WXDIR)\lib\vc_lib\mswd" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MDd /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Zi /Gm /GZ /Fdvcud\flamerobin.pdb /Od /I "$(WXDIR)\lib\vc_lib\mswd" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE MTL /nologo /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
+# ADD MTL /nologo /D "WIN32" /D "_UNICODE" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
+# ADD BASE RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "_UNICODE" /d "__WXDEBUG__" /d "_DEBUG" /d "_DEBUG" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_lib\mswd" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
+# ADD RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "_UNICODE" /d "__WXDEBUG__" /d "_DEBUG" /d "_DEBUG" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_lib\mswd" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 wxmsw25ud_stc.lib wxmsw25ud_html.lib wxmsw25ud_adv.lib wxmsw25ud_core.lib wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcud\flamerobin.exe" /debug /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_lib" /subsystem:windows /libpath:"$(IBPP)\debug\win32_msvc"
+# ADD LINK32 wxmsw25ud_stc.lib wxmsw25ud_html.lib wxmsw25ud_adv.lib wxmsw25ud_core.lib wxbase25ud.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcud\flamerobin.exe" /debug /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_lib" /subsystem:windows /libpath:"$(IBPP)\debug\win32_msvc"
+
+!ELSEIF  "$(CFG)" == "flamerobin - Win32 Release Static"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "vcs"
+# PROP BASE Intermediate_Dir "vcs\flamerobin"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "vcs"
+# PROP Intermediate_Dir "vcs\flamerobin"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /FD /MT /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Fdvcs\flamerobin.pdb /O1 /I "$(WXDIR)\lib\vc_lib\msw" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MT /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Fdvcs\flamerobin.pdb /O1 /I "$(WXDIR)\lib\vc_lib\msw" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE MTL /nologo /D "WIN32" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
+# ADD MTL /nologo /D "WIN32" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
+# ADD BASE RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_lib\msw" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
+# ADD RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_lib\msw" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 wxmsw25_stc.lib wxmsw25_html.lib wxmsw25_adv.lib wxmsw25_core.lib wxbase25.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcs\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_lib" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
+# ADD LINK32 wxmsw25_stc.lib wxmsw25_html.lib wxmsw25_adv.lib wxmsw25_core.lib wxbase25.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcs\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_lib" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
+
+!ELSEIF  "$(CFG)" == "flamerobin - Win32 Release Dynamic"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -210,7 +393,32 @@ LINK32=link.exe
 # ADD BASE LINK32 wxmsw25_stc.lib wxmsw25_html.lib wxmsw25_adv.lib wxmsw25_core.lib wxbase25.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vc\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_lib" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
 # ADD LINK32 wxmsw25_stc.lib wxmsw25_html.lib wxmsw25_adv.lib wxmsw25_core.lib wxbase25.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vc\flamerobin.exe" /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_lib" /subsystem:windows /libpath:"$(IBPP)\release\win32_msvc"
 
-!ELSEIF  "$(CFG)" == "flamerobin - Win32 Debug"
+!ELSEIF  "$(CFG)" == "flamerobin - Win32 Debug Static"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 1
+# PROP BASE Output_Dir "vcsd"
+# PROP BASE Intermediate_Dir "vcsd\flamerobin"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 1
+# PROP Output_Dir "vcsd"
+# PROP Intermediate_Dir "vcsd\flamerobin"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /FD /MTd /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Zi /Gm /GZ /Fdvcsd\flamerobin.pdb /Od /I "$(WXDIR)\lib\vc_lib\mswd" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MTd /I "$(WXDIR)\include" /I "$(WXDIR)\contrib\include" /Zi /Gm /GZ /Fdvcsd\flamerobin.pdb /Od /I "$(WXDIR)\lib\vc_lib\mswd" /GR /GX /YX /W4 /I "src" /I "res" /I "$(IBPP)" /D "WIN32" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE MTL /nologo /D "WIN32" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
+# ADD MTL /nologo /D "WIN32" /D "__WXDEBUG__" /D "_DEBUG" /D "_DEBUG" /D "_WINDOWS" /D "__WINDOWS__" /D WINVER=0x400 /D "WIN32" /D "__WIN32__" /D "__WIN95__" /D "STRICT" /D "__WXMSW__" /D wxUSE_GUI=1 /D "WIN32_LEAN_AND_MEAN" /D "_WINDOWS" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /mktyplib203 /win32
+# ADD BASE RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "__WXDEBUG__" /d "_DEBUG" /d "_DEBUG" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_lib\mswd" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
+# ADD RSC /l 0x405 /i "$(WXDIR)\include" /i "$(WXDIR)\contrib\include" /d "__WXDEBUG__" /d "_DEBUG" /d "_DEBUG" /d "_WINDOWS" /d "__WINDOWS__" /d WINVER=0x400 /d "WIN32" /d "__WIN32__" /d "__WIN95__" /d "STRICT" /d "__WXMSW__" /d wxUSE_GUI=1 /d "WIN32_LEAN_AND_MEAN" /i "$(WXDIR)\lib\vc_lib\mswd" /d "_WINDOWS" /d "IBPP_MSVC" /d "IBPP_WINDOWS" /i "src" /i "res" /i $(IBPP)
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 wxmsw25d_stc.lib wxmsw25d_html.lib wxmsw25d_adv.lib wxmsw25d_core.lib wxbase25d.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcsd\flamerobin.exe" /debug /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_lib" /subsystem:windows /libpath:"$(IBPP)\debug\win32_msvc"
+# ADD LINK32 wxmsw25d_stc.lib wxmsw25d_html.lib wxmsw25d_adv.lib wxmsw25d_core.lib wxbase25d.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib /nologo /machine:i386 /out:"vcsd\flamerobin.exe" /debug /nologo /subsystem:windows /machine:I386 /libpath:"$(WXDIR)\lib\vc_lib" /subsystem:windows /libpath:"$(IBPP)\debug\win32_msvc"
+
+!ELSEIF  "$(CFG)" == "flamerobin - Win32 Debug Dynamic"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -239,14 +447,22 @@ LINK32=link.exe
 
 # Begin Target
 
-# Name "flamerobin - Win32 DLL Unicode Release"
-# Name "flamerobin - Win32 DLL Unicode Debug"
-# Name "flamerobin - Win32 DLL Release"
-# Name "flamerobin - Win32 DLL Debug"
-# Name "flamerobin - Win32 Unicode Release"
-# Name "flamerobin - Win32 Unicode Debug"
-# Name "flamerobin - Win32 Release"
-# Name "flamerobin - Win32 Debug"
+# Name "flamerobin - Win32 DLL Unicode Release Static"
+# Name "flamerobin - Win32 DLL Unicode Release Dynamic"
+# Name "flamerobin - Win32 DLL Unicode Debug Static"
+# Name "flamerobin - Win32 DLL Unicode Debug Dynamic"
+# Name "flamerobin - Win32 DLL Release Static"
+# Name "flamerobin - Win32 DLL Release Dynamic"
+# Name "flamerobin - Win32 DLL Debug Static"
+# Name "flamerobin - Win32 DLL Debug Dynamic"
+# Name "flamerobin - Win32 Unicode Release Static"
+# Name "flamerobin - Win32 Unicode Release Dynamic"
+# Name "flamerobin - Win32 Unicode Debug Static"
+# Name "flamerobin - Win32 Unicode Debug Dynamic"
+# Name "flamerobin - Win32 Release Static"
+# Name "flamerobin - Win32 Release Dynamic"
+# Name "flamerobin - Win32 Debug Static"
+# Name "flamerobin - Win32 Debug Dynamic"
 # Begin Group "Source Files"
 
 # PROP Default_Filter ""
