@@ -289,9 +289,11 @@ void OptionsDialog::do_layout()
     wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
     sizer_1->Add(listbook1, 1, wxEXPAND, 0);
 	sizer_1->SetSizeHints(listbook1);
-    SetAutoLayout(true);
+    //SetAutoLayout(true);
     SetSizer(sizer_1);
     Layout();
+
+	Fit();	// this seems to fix the stuff for MSW
 }
 //-----------------------------------------------------------------------------
 void OptionsDialog::load()
@@ -462,6 +464,8 @@ void OptionsDialog::createPages()
 			(*i2)->loadFromConfig();
 	}
 
+	minw += 70;
+	minh += 50;
     if (listbook1->HasFlag(wxNB_LEFT))	// tabs left
         minw += 100;
     else 								// tabs on top
