@@ -18,8 +18,6 @@
 
   All Rights Reserved.
 
-  File: $Id$
-
   Contributor(s): Nando Dessena, Michael Hieke
 */
 
@@ -35,42 +33,24 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
-//-----------------------------------------------------------------------------
+
 #include <string>
 #include <fstream>
 #include <sstream>
-#include "ugly.h"
+
 #include "config.h"
 #include "dberror.h"
+#include "frutils.h"
+#include "images.h"
+#include "metadata/database.h"
+#include "metadata/exception.h"
 #include "metadata/metadataitem.h"
 #include "metadata/table.h"
 #include "metadata/view.h"
-#include "metadata/database.h"
-#include "metadata/exception.h"
+#include "ugly.h"
 #include "urihandler.h"
-#include "MetadataItemPropertiesDialog.h"
-#include "frutils.h"
-//-----------------------------------------------------------------------------
-myHtmlWindow::myHtmlWindow(wxWindow *parent, wxWindowID id)
-	: wxHtmlWindow(parent, id)
-{
-}
-//-----------------------------------------------------------------------------
-//! Link is in format: "protocol://action?name=value&amp;name=value...etc.
-void myHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
-{
-	std::string addr = wx2std(link.GetHref());
-	YURI uri(addr);
 
-	if (uri.protocol != "fr")		// call default handler for other protocols
-	{
-		wxHtmlWindow::OnLinkClicked(link);
-		return;
-	}
-
-	if (!getURIProcessor().handleURI(addr))
-		::wxMessageBox(_("Feature not yet implemented."), _("Information"), wxICON_INFORMATION | wxOK);
-}
+#include "MetadataItemPropertiesFrame.h"
 //-----------------------------------------------------------------------------
 //! converts chars that have special meaning in HTML, so they get displayed
 std::string& escapeHtmlChars(std::string& s, bool processNewlines = true)
@@ -98,26 +78,106 @@ std::string& escapeHtmlChars(std::string& s, bool processNewlines = true)
 	return s;
 }
 //-----------------------------------------------------------------------------
-void MetadataItemPropertiesDialog::setPage(const std::string& type)
+//! MetadataItemPropertiesFrame class
+MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent, YxMetadataItem *object, int id):
+    BaseFrame(parent, id, wxT(""))
 {
-	if (type == "constraints")
-		pageTypeM = ptConstraints;
-	else if (type == "dependencies")
-		pageTypeM = ptDependencies;
-	else if (type == "triggers")
-		pageTypeM = ptTableTriggers;
-	// add more page types here
-	// when needed
-	else
-		pageTypeM = ptSummary;
-	loadPage();
+	pageTypeM = ptSummary;
+    storageNameM = "unassigned";
+
+	if (!object)
+	{
+		::wxMessageBox(wxT("MIPF::ctor, Object == 0"), _("Error"), wxOK);
+		return;
+	}
+
+    window_1 = new myHtmlWindow(this);
+	objectM = object;
+	objectM->attach(this);
+
+	CreateStatusBar();
+	wxString title = std2wx(objectM->getName()).c_str();
+	window_1->SetRelatedFrame(this, title + wxT(": %s"));
+	window_1->SetRelatedStatusBar(0);
+	SetTitle(wxString::Format(_("%s: properties"), std2wx(objectM->getName()).c_str()));
+
+	update();	// initial rendering
+
+    wxBitmap bmp = getImage32(objectM->getType());
+    wxIcon icon;
+    icon.CopyFromBitmap(bmp);
+    SetIcon(icon);
+}
+//-----------------------------------------------------------------------------
+const wxRect MetadataItemPropertiesFrame::getDefaultRect() const
+{
+	return wxRect(-1, -1, 600, 420);
+}
+//-----------------------------------------------------------------------------
+const std::string MetadataItemPropertiesFrame::getName() const
+{
+	return "MIPFrame";
+}
+//-----------------------------------------------------------------------------
+const YxMetadataItem *MetadataItemPropertiesFrame::getObservedObject() const
+{
+	return objectM;
+}
+//-----------------------------------------------------------------------------
+const std::string MetadataItemPropertiesFrame::getStorageName() const
+{
+	if (storageNameM == "unassigned")
+    {
+        StorageGranularity g;
+        if (!config().getValue("MetadataFrameStorageGranularity", g))
+		    g = sgFrame;
+
+    	switch (g)
+	    {
+     	    case sgFrame:
+          	    storageNameM = getName();
+                break;
+		    case sgObjectType:
+			    storageNameM = getName() + "::" + objectM->getTypeName();
+                break;
+		    case sgObject:
+      		    storageNameM = getName() + "::" + objectM->getItemPath();
+                break;
+		    default:
+			    storageNameM = "";
+                break;
+	    }
+    }
+    return storageNameM;
+}
+//-----------------------------------------------------------------------------
+//! determine the path, load and display html page
+void MetadataItemPropertiesFrame::loadPage()
+{
+	std::string htmlpage = config().getHtmlTemplatesPath();
+	switch (pageTypeM)
+	{
+		case ptSummary:
+			htmlpage += objectM->getTypeName() + ".html";
+			break;
+		case ptConstraints:
+			htmlpage += objectM->getTypeName() + "constraints.html";
+			break;
+		case ptTableTriggers:
+			htmlpage += "TABLEtriggers.html";
+			break;
+		case ptDependencies:
+			htmlpage += "dependencies.html";
+			break;
+	}
+	processHtmlFile(htmlpage);	// load HTML template, parse, and fill the wxHTML control: window_1
 }
 //-----------------------------------------------------------------------------
 //! processes commands found in HTML template
-
+//
 //! command is in format:   {%action:data%}
 //! data field can be empty
-void MetadataItemPropertiesDialog::processCommand(std::string cmd, YxMetadataItem *object, std::string& htmlpage)
+void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem *object, std::string& htmlpage)
 {
 	std::string::size_type pos = cmd.find(':');
 	std::string suffix;
@@ -425,97 +485,8 @@ void MetadataItemPropertiesDialog::processCommand(std::string cmd, YxMetadataIte
 	}
 }
 //-----------------------------------------------------------------------------
-//! recreate html page if something changes
-void MetadataItemPropertiesDialog::update()
-{
-	// if table or view columns change, we need to reattach
-	if (objectM->getType() == ntTable || objectM->getType() == ntView)	// also observe columns
-	{
-		YxMetadataItemWithColumns *t = dynamic_cast<YxMetadataItemWithColumns *>(objectM);
-		if (!t)
-			return;
-		t->checkAndLoadColumns();		// load column data if needed
-		std::vector<YxMetadataItem *> temp;
-		objectM->getChildren(temp);
-		for (std::vector<YxMetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
-			(*it)->attach(this);
-	}
-
-	// if description of procedure params change, we need to reattach
-	if (objectM->getType() == ntProcedure)
-	{
-		YProcedure *p = dynamic_cast<YProcedure *>(objectM);
-		if (!p)
-			return;
-		p->lockSubject();
-		p->checkAndLoadParameters();		// load column data if needed
-		std::vector<YxMetadataItem *> temp;
-		objectM->getChildren(temp);
-		for (std::vector<YxMetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
-			(*it)->attach(this);
-		p->unlockSubject(false, false);
-	}
-
-	loadPage();
-}
-//-----------------------------------------------------------------------------
-//! determine the path, load and display html page
-void MetadataItemPropertiesDialog::loadPage()
-{
-	std::string htmlpage = config().getHtmlTemplatesPath();
-	switch (pageTypeM)
-	{
-		case ptSummary:
-			htmlpage += objectM->getTypeName() + ".html";
-			break;
-		case ptConstraints:
-			htmlpage += objectM->getTypeName() + "constraints.html";
-			break;
-		case ptTableTriggers:
-			htmlpage += "TABLEtriggers.html";
-			break;
-		case ptDependencies:
-			htmlpage += "dependencies.html";
-			break;
-	}
-	processHtmlFile(htmlpage);	// load HTML template, parse, and fill the wxHTML control: window_1
-}
-//-----------------------------------------------------------------------------
-//! closes window if observed object gets removed (disconnecting, dropping, etc)
-void MetadataItemPropertiesDialog::removeObservedObject(YxSubject *object)
-{
-	YxObserver::removeObservedObject(object);
-	if (object == objectM)	// main observed object is getting destoryed
-		Close();
-}
-//-----------------------------------------------------------------------------
-//! processes the given html template file
-void MetadataItemPropertiesDialog::processHtmlFile(std::string filename)
-{
-	using namespace std;
-	string htmlpage;		// create html page into variable
-
-	ifstream file(filename.c_str());			// read entire file into string buffer
-	if (!file)
-	{
-		::wxMessageBox(std2wx(filename), _("File not found"), wxICON_WARNING);
-		return;
-	}
-	stringstream ss;
-	ss << file.rdbuf();
-	string s(ss.str());
-	file.close();
-
-	processHtmlCode(htmlpage, s);
-
-	int x = 0, y = 0;
-	window_1->GetViewStart(&x, &y);			// save scroll position
-	window_1->SetPage(std2wx(htmlpage));
-	window_1->Scroll(x, y);					// restore scroll position
-}
-//-----------------------------------------------------------------------------
 //! processes html template code given in the htmlsource string
-void MetadataItemPropertiesDialog::processHtmlCode(std::string& htmlpage, std::string htmlsource, YxMetadataItem *object)
+void MetadataItemPropertiesFrame::processHtmlCode(std::string& htmlpage, std::string htmlsource, YxMetadataItem *object)
 {
 	if (object == 0)
 		object = objectM;
@@ -563,48 +534,110 @@ void MetadataItemPropertiesDialog::processHtmlCode(std::string& htmlpage, std::s
 	}
 }
 //-----------------------------------------------------------------------------
-const std::string MetadataItemPropertiesDialog::getName() const
+//! processes the given html template file
+void MetadataItemPropertiesFrame::processHtmlFile(std::string filename)
 {
-	return "MIPDialog";
-}
-//-----------------------------------------------------------------------------
-const std::string MetadataItemPropertiesDialog::getStorageName() const
-{
-	if (storageNameM == "unassigned")
-    {
-        StorageGranularity g;
-        if (!config().getValue("MetadataFrameStorageGranularity", g))
-		    g = sgFrame;
+	using namespace std;
+	string htmlpage;		// create html page into variable
 
-    	switch (g)
-	    {
-     	    case sgFrame:
-          	    storageNameM = getName();
-                break;
-		    case sgObjectType:
-			    storageNameM = getName() + "::" + objectM->getTypeName();
-                break;
-		    case sgObject:
-      		    storageNameM = getName() + "::" + objectM->getItemPath();
-                break;
-		    default:
-			    storageNameM = "";
-                break;
-	    }
-    }
-    return storageNameM;
+	ifstream file(filename.c_str());			// read entire file into string buffer
+	if (!file)
+	{
+		::wxMessageBox(std2wx(filename), _("File not found"), wxICON_WARNING);
+		return;
+	}
+	stringstream ss;
+	ss << file.rdbuf();
+	string s(ss.str());
+	file.close();
+
+	processHtmlCode(htmlpage, s);
+
+	int x = 0, y = 0;
+	window_1->GetViewStart(&x, &y);			// save scroll position
+	window_1->SetPage(std2wx(htmlpage));
+	window_1->Scroll(x, y);					// restore scroll position
 }
 //-----------------------------------------------------------------------------
-const YxMetadataItem *MetadataItemPropertiesDialog::getObservedObject() const
+//! closes window if observed object gets removed (disconnecting, dropping, etc)
+void MetadataItemPropertiesFrame::removeObservedObject(YxSubject *object)
 {
-	return objectM;
+	YxObserver::removeObservedObject(object);
+	if (object == objectM)	// main observed object is getting destoryed
+		Close();
 }
 //-----------------------------------------------------------------------------
-const wxRect MetadataItemPropertiesDialog::getDefaultRect() const
+void MetadataItemPropertiesFrame::setPage(const std::string& type)
 {
-	return wxRect(-1, -1, 600, 420);
+	if (type == "constraints")
+		pageTypeM = ptConstraints;
+	else if (type == "dependencies")
+		pageTypeM = ptDependencies;
+	else if (type == "triggers")
+		pageTypeM = ptTableTriggers;
+	// add more page types here when needed
+	else
+		pageTypeM = ptSummary;
+	loadPage();
 }
 //-----------------------------------------------------------------------------
+//! recreate html page if something changes
+void MetadataItemPropertiesFrame::update()
+{
+	// if table or view columns change, we need to reattach
+	if (objectM->getType() == ntTable || objectM->getType() == ntView)	// also observe columns
+	{
+		YxMetadataItemWithColumns *t = dynamic_cast<YxMetadataItemWithColumns *>(objectM);
+		if (!t)
+			return;
+		t->checkAndLoadColumns();		// load column data if needed
+		std::vector<YxMetadataItem *> temp;
+		objectM->getChildren(temp);
+		for (std::vector<YxMetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
+			(*it)->attach(this);
+	}
+
+	// if description of procedure params change, we need to reattach
+	if (objectM->getType() == ntProcedure)
+	{
+		YProcedure *p = dynamic_cast<YProcedure *>(objectM);
+		if (!p)
+			return;
+		p->lockSubject();
+		p->checkAndLoadParameters();		// load column data if needed
+		std::vector<YxMetadataItem *> temp;
+		objectM->getChildren(temp);
+		for (std::vector<YxMetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
+			(*it)->attach(this);
+		p->unlockSubject(false, false);
+	}
+
+	loadPage();
+}
+//-----------------------------------------------------------------------------
+//! myHtmlWindow class
+myHtmlWindow::myHtmlWindow(wxWindow *parent)
+	: wxHtmlWindow(parent, -1)
+{
+}
+//-----------------------------------------------------------------------------
+//! Link is in format: "protocol://action?name=value&amp;name=value...etc.
+void myHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
+{
+	std::string addr = wx2std(link.GetHref());
+	YURI uri(addr);
+
+	if (uri.protocol != "fr")		// call default handler for other protocols
+	{
+		wxHtmlWindow::OnLinkClicked(link);
+		return;
+	}
+
+	if (!getURIProcessor().handleURI(addr))
+		::wxMessageBox(_("Feature not yet implemented."), _("Information"), wxICON_INFORMATION|wxOK);
+}
+//-----------------------------------------------------------------------------
+//! PageHandler class
 class PageHandler: public YxURIHandler
 {
 public:
@@ -624,13 +657,14 @@ bool PageHandler::handleURI(std::string& uriStr)
 	unsigned long mo;
 	if (!std2wx(ms).ToULong(&mo))
 		return true;
-	MetadataItemPropertiesDialog *m = (MetadataItemPropertiesDialog *)mo;
+	MetadataItemPropertiesFrame *m = (MetadataItemPropertiesFrame *)mo;
 
 	if (m)
 		m->setPage(uriObj.getParam("type"));
 	return true;
 }
 //-----------------------------------------------------------------------------
+//! PropertiesHandler class
 class PropertiesHandler: public YxURIHandler
 {
 public:
@@ -650,7 +684,7 @@ bool PropertiesHandler::handleURI(std::string& uriStr)
 	unsigned long mo;
 	if (!std2wx(ms).ToULong(&mo))
 		return true;
-	MetadataItemPropertiesDialog *parent = (MetadataItemPropertiesDialog *)mo;
+	MetadataItemPropertiesFrame *parent = (MetadataItemPropertiesFrame *)mo;
 
 	NodeType n = getTypeByName(uriObj.getParam("object_type"));
 	YDatabase *d = parent->getObservedObject()->getDatabase();
@@ -664,14 +698,14 @@ bool PropertiesHandler::handleURI(std::string& uriStr)
 	}
 
 	// check if window with properties of that object is already open and show it
-	MetadataItemPropertiesDialog *mip;
+	MetadataItemPropertiesFrame *mip;
 	wxWindow *mainFrame = parent->GetParent();
 	if (!mainFrame)
 		return true;
     for (wxWindowListNode *node = mainFrame->GetChildren().GetFirst(); node; node = node->GetNext())
     {
 		wxWindow *child = node->GetData();
-		mip = dynamic_cast<MetadataItemPropertiesDialog *>(child);
+		mip = dynamic_cast<MetadataItemPropertiesFrame *>(child);
 		if (mip && mip->getObservedObject() == object)
 		{
 			mip->Raise();
@@ -679,7 +713,7 @@ bool PropertiesHandler::handleURI(std::string& uriStr)
 		}
     }
 
-	mip = new MetadataItemPropertiesDialog(mainFrame, object);
+	mip = new MetadataItemPropertiesFrame(mainFrame, object);
 	mip->Show();
 	return true;
 }

@@ -41,12 +41,12 @@
 #include "ibpp.h"
 
 #include "MainFrame.h"
-#include "ExecuteSqlFrame.h"
 #include "gui/BackupFrame.h"
+#include "gui/ExecuteSqlFrame.h"
 #include "gui/DatabaseRegistrationDialog.h"
+#include "gui/MetadataItemPropertiesFrame.h"
 #include "gui/RestoreFrame.h"
 #include "gui/ServerRegistrationDialog.h"
-#include "MetadataItemPropertiesDialog.h"
 #include "treeitem.h"
 #include "ugly.h"
 #include "dberror.h"
@@ -109,7 +109,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
 	bool expanded = tree_ctrl_1->IsExpanded(item);
 
 	// has to be declared outside, since local cannot be initialized inside switch...case
-	MetadataItemPropertiesDialog *mip;
+	MetadataItemPropertiesFrame *mipf;
 
 	// do default action for the node, depending on the type
 	NodeType nt = m->getType();
@@ -136,8 +136,8 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
 		case ntDomain:
 		case ntFunction:
 		case ntTrigger:
-			mip = new MetadataItemPropertiesDialog(this, m);
-			mip->Show();
+			mipf = new MetadataItemPropertiesFrame(this, m);
+			mipf->Show();
 			break;
 		default:
 			return;
@@ -672,8 +672,8 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
 	if (!m)
 		return;
 
-    MetadataItemPropertiesDialog *mip = new MetadataItemPropertiesDialog(this, m);
-	mip->Show();
+    MetadataItemPropertiesFrame *mipf = new MetadataItemPropertiesFrame(this, m);
+	mipf->Show();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))

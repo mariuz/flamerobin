@@ -100,7 +100,7 @@ NodeType getTypeByName(std::string name)
 		return ntUnknown;
 }
 //------------------------------------------------------------------------------
-bool YxMetadataItem::getChildren(std::vector<YxMetadataItem *>& temp)
+bool YxMetadataItem::getChildren(std::vector<YxMetadataItem*>& /*temp*/)
 {
 	return false;
 }

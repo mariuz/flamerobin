@@ -40,7 +40,7 @@
 #include "metadata/database.h"
 #include "ugly.h"
 #include "dberror.h"
-#include "ExecuteSqlFrame.h"
+#include "gui/ExecuteSqlFrame.h"
 #include "FieldPropertiesFrame.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------

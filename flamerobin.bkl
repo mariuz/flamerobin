@@ -20,18 +20,27 @@
         <values-description>,DLL</values-description>
         <default-value>0</default-value>
     </option>
+    <set var="WXUSINGDLL">
+        <if cond="USEDLL=='1'">WXUSINGDLL</if>
+    </set>
 
     <option name="UNICODE">
         <values>0,1</values>
         <values-description>,Unicode</values-description>
         <default-value>0</default-value>
     </option>
+    <set var="U_OPT">
+        <if cond="UNICODE=='1'">u</if>
+    </set>
 
     <option name="FINAL">
         <values>0,1</values>
         <values-description>Debug,Release</values-description>
         <default-value>0</default-value>
     </option>
+    <set var="D_OPT">
+        <if cond="FINAL=='0'">d</if>
+    </set>
     
     <template id="wx">
         <if cond="FORMAT!='autoconf'">
@@ -71,16 +80,6 @@
 
         <debug-info>$(DEBUGINFO)</debug-info>
         <optimize>$(OPTIMIZE)</optimize>
-
-        <set var="D_OPT">
-            <if cond="FINAL=='0'">d</if>
-        </set>
-        <set var="U_OPT">
-            <if cond="UNICODE=='1'">u</if>
-        </set>
-        <set var="WXUSINGDLL">
-            <if cond="USEDLL=='1'">WXUSINGDLL</if>
-        </set>
 
         <if cond="FORMAT!='autoconf'">
             <set var="OBJS" make_var="1">
@@ -174,6 +173,11 @@
         </if>
     </define-tag>
 
+    <set var="BUILDDIR">
+        <if cond="TOOLSET=='win32'">$(COMPILER)$(D_OPT)</if>
+        <if cond="TOOLSET!='win32'">.</if>
+    </set>
+
     <set var="SOURCEDIR">src</set>  
     <set var="RESDIR">res</set>
 
@@ -228,13 +232,15 @@
         $(SOURCEDIR)/config.h
         $(SOURCEDIR)/converters.h
         $(SOURCEDIR)/dberror.h
-        $(SOURCEDIR)/ExecuteSqlFrame.h
         $(SOURCEDIR)/FieldPropertiesFrame.h
         $(SOURCEDIR)/frutils.h
         $(SOURCEDIR)/gui/BackupFrame.h
         $(SOURCEDIR)/gui/BackupRestoreBaseFrame.h
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.h
+        $(SOURCEDIR)/gui/ExecuteSqlFrame.h
+        $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.h
         $(SOURCEDIR)/gui/MultilineEnterDialog.h
+        $(SOURCEDIR)/gui/ReorderFieldsDialog.h
         $(SOURCEDIR)/gui/RestoreFrame.h
         $(SOURCEDIR)/gui/ServerRegistrationDialog.h
         $(SOURCEDIR)/images.h
@@ -258,11 +264,9 @@
         $(SOURCEDIR)/metadata/table.h
         $(SOURCEDIR)/metadata/trigger.h
         $(SOURCEDIR)/metadata/view.h
-        $(SOURCEDIR)/MetadataItemPropertiesDialog.h
         $(SOURCEDIR)/myDataGrid.h
         $(SOURCEDIR)/myTreeCtrl.h
         $(SOURCEDIR)/observer.h
-        $(SOURCEDIR)/ReorderFieldsDialog.h
         $(SOURCEDIR)/styleguide.h
         $(SOURCEDIR)/subject.h
         $(SOURCEDIR)/treeitem.h
@@ -289,15 +293,16 @@
         $(SOURCEDIR)/config.cpp
         $(SOURCEDIR)/converters.cpp
         $(SOURCEDIR)/dberror.cpp
-        $(SOURCEDIR)/ExecuteSqlFrame.cpp
-        $(SOURCEDIR)/ExecuteSqlFrameImpl.cpp
         $(SOURCEDIR)/FieldPropertiesFrame.cpp
         $(SOURCEDIR)/FieldPropertiesFrameImpl.cpp
         $(SOURCEDIR)/frutils.cpp
         $(SOURCEDIR)/gui/BackupFrame.cpp
         $(SOURCEDIR)/gui/BackupRestoreBaseFrame.cpp
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.cpp
+        $(SOURCEDIR)/gui/ExecuteSqlFrame.cpp
+        $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.cpp
         $(SOURCEDIR)/gui/MultilineEnterDialog.cpp
+        $(SOURCEDIR)/gui/ReorderFieldsDialog.cpp
         $(SOURCEDIR)/gui/RestoreFrame.cpp
         $(SOURCEDIR)/gui/ServerRegistrationDialog.cpp
         $(SOURCEDIR)/images.cpp
@@ -321,14 +326,10 @@
         $(SOURCEDIR)/metadata/table.cpp
         $(SOURCEDIR)/metadata/trigger.cpp
         $(SOURCEDIR)/metadata/view.cpp
-        $(SOURCEDIR)/MetadataItemPropertiesDialog.cpp
-        $(SOURCEDIR)/MetadataItemPropertiesDialogImpl.cpp
         $(SOURCEDIR)/myDataGrid.cpp
         $(SOURCEDIR)/myTreeCtrl.cpp
         $(SOURCEDIR)/objectdescriptionhandler.cpp
         $(SOURCEDIR)/observer.cpp
-        $(SOURCEDIR)/ReorderFieldsDialog.cpp
-        $(SOURCEDIR)/ReorderFieldsDialogImpl.cpp
         $(SOURCEDIR)/styleguide.cpp
         $(PLATFORMSPECIFICSOURCES)
         $(SOURCEDIR)/subject.cpp

@@ -34,15 +34,14 @@
     #include "wx/wx.h"
 #endif
 
-//-----------------------------------------------------------------------------
-#include "metadata/metadataitem.h"
-#include "metadata/database.h"
-#include "ugly.h"
 #include "dberror.h"
+#include "gui/ExecuteSqlFrame.h"
 #include "gui/MultilineEnterDialog.h"
-#include "ExecuteSqlFrame.h"
+#include "metadata/database.h"
+#include "metadata/metadataitem.h"
+#include "ugly.h"
 #include "urihandler.h"
-
+//-----------------------------------------------------------------------------
 class AddConstraintHandler: public YxURIHandler
 {
 public:
@@ -180,4 +179,3 @@ bool AddConstraintHandler::handleURI(std::string& uriStr)
 	return true;
 }
 //-----------------------------------------------------------------------------
-

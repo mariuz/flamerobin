@@ -37,15 +37,16 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_config.o \
 	flamerobin_converters.o \
 	flamerobin_dberror.o \
-	flamerobin_ExecuteSqlFrame.o \
-	flamerobin_ExecuteSqlFrameImpl.o \
 	flamerobin_FieldPropertiesFrame.o \
 	flamerobin_FieldPropertiesFrameImpl.o \
 	flamerobin_frutils.o \
 	flamerobin_BackupFrame.o \
 	flamerobin_BackupRestoreBaseFrame.o \
 	flamerobin_DatabaseRegistrationDialog.o \
+	flamerobin_ExecuteSqlFrame.o \
+	flamerobin_MetadataItemPropertiesFrame.o \
 	flamerobin_MultilineEnterDialog.o \
+	flamerobin_ReorderFieldsDialog.o \
 	flamerobin_RestoreFrame.o \
 	flamerobin_ServerRegistrationDialog.o \
 	flamerobin_images.o \
@@ -69,14 +70,10 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_table.o \
 	flamerobin_trigger.o \
 	flamerobin_view.o \
-	flamerobin_MetadataItemPropertiesDialog.o \
-	flamerobin_MetadataItemPropertiesDialogImpl.o \
 	flamerobin_myDataGrid.o \
 	flamerobin_myTreeCtrl.o \
 	flamerobin_objectdescriptionhandler.o \
 	flamerobin_observer.o \
-	flamerobin_ReorderFieldsDialog.o \
-	flamerobin_ReorderFieldsDialogImpl.o \
 	flamerobin_styleguide.o \
 	$(__PLATFORMSPECIFICSOURCES_OBJECTS) \
 	flamerobin_subject.o \
@@ -182,12 +179,6 @@ flamerobin_converters.o: $(srcdir)/src/converters.cpp $(FLAMEROBIN_ODEP)
 flamerobin_dberror.o: $(srcdir)/src/dberror.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_ExecuteSqlFrame.o: $(srcdir)/src/ExecuteSqlFrame.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
-
-flamerobin_ExecuteSqlFrameImpl.o: $(srcdir)/src/ExecuteSqlFrameImpl.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
-
 flamerobin_FieldPropertiesFrame.o: $(srcdir)/src/FieldPropertiesFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
@@ -206,7 +197,16 @@ flamerobin_BackupRestoreBaseFrame.o: $(srcdir)/src/gui/BackupRestoreBaseFrame.cp
 flamerobin_DatabaseRegistrationDialog.o: $(srcdir)/src/gui/DatabaseRegistrationDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
+flamerobin_ExecuteSqlFrame.o: $(srcdir)/src/gui/ExecuteSqlFrame.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+flamerobin_MetadataItemPropertiesFrame.o: $(srcdir)/src/gui/MetadataItemPropertiesFrame.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
 flamerobin_MultilineEnterDialog.o: $(srcdir)/src/gui/MultilineEnterDialog.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+flamerobin_ReorderFieldsDialog.o: $(srcdir)/src/gui/ReorderFieldsDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 flamerobin_RestoreFrame.o: $(srcdir)/src/gui/RestoreFrame.cpp $(FLAMEROBIN_ODEP)
@@ -278,12 +278,6 @@ flamerobin_trigger.o: $(srcdir)/src/metadata/trigger.cpp $(FLAMEROBIN_ODEP)
 flamerobin_view.o: $(srcdir)/src/metadata/view.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_MetadataItemPropertiesDialog.o: $(srcdir)/src/MetadataItemPropertiesDialog.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
-
-flamerobin_MetadataItemPropertiesDialogImpl.o: $(srcdir)/src/MetadataItemPropertiesDialogImpl.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
-
 flamerobin_myDataGrid.o: $(srcdir)/src/myDataGrid.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
@@ -294,12 +288,6 @@ flamerobin_objectdescriptionhandler.o: $(srcdir)/src/objectdescriptionhandler.cp
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 flamerobin_observer.o: $(srcdir)/src/observer.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
-
-flamerobin_ReorderFieldsDialog.o: $(srcdir)/src/ReorderFieldsDialog.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
-
-flamerobin_ReorderFieldsDialogImpl.o: $(srcdir)/src/ReorderFieldsDialogImpl.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 flamerobin_styleguide.o: $(srcdir)/src/styleguide.cpp $(FLAMEROBIN_ODEP)

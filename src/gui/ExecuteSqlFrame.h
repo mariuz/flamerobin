@@ -56,8 +56,8 @@ public:
         ID_button_rollback = 106,
 		ID_button_toggle = 107,
 		ID_button_wrap = 108,
-        ID_my_data_grid = 200,
-		ID_sql_edit = 201
+        ID_grid_data = 200,
+		ID_stc_sql = 201
     };
     // end wxGlade
 
@@ -111,35 +111,35 @@ protected:
 	void update();
 	bool closeWhenTransactionDoneM;
 
-    // begin wxGlade: ExecuteSqlFrame::attributes
-    wxStatusBar* execute_sql_frame_statusbar;
+    wxPanel* panel_contents;
+
     wxBitmapButton* button_new;
     wxBitmapButton* button_load;
     wxBitmapButton* button_save;
-
     wxButton* button_execute;
     wxButton* button_commit;
     wxButton* button_rollback;
     wxButton* button_toggle;
     wxButton* button_wrap;
-    wxStyledTextCtrl* sql_edit;
-    wxPanel* window_1_pane_1;
-	wxStyledTextCtrl* stats_text_ctrl;
-    wxPanel* notebook_pane_1;
-    myDataGrid* data_grid;
-    wxPanel* notebook_1_pane_2;
-    wxNotebook* notebook_1;
-    wxPanel* window_1_pane_2;
-    wxSplitterWindow* window_1;
-    wxPanel* panel_1;
-    // end wxGlade
 
-    DECLARE_EVENT_TABLE()
+    wxSplitterWindow* splitter_window_1;
+    wxPanel* panel_splitter_top;
+    wxPanel* panel_splitter_bottom;
+    wxStyledTextCtrl* styled_text_ctrl_sql;
+    wxNotebook* notebook_1;
+    wxPanel* notebook_pane_1;
+    wxPanel* notebook_pane_2;
+    myDataGrid* grid_data;
+	wxStyledTextCtrl* styled_text_ctrl_stats;
+
+    wxStatusBar* statusbar_1;
+
 	virtual const std::string getName() const;
 	virtual void doReadConfigSettings(const std::string& prefix);
 	virtual void doWriteConfigSettings(const std::string& prefix) const;
 	virtual const wxRect getDefaultRect() const;
-};
 
+    DECLARE_EVENT_TABLE()
+};
 
 #endif // EXECUTESQLFRAME_H
