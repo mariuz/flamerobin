@@ -173,7 +173,7 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 		wxRELEASE_NUMBER
 	);
 
-	wxString msg(_("FlameRobin v0.2.2"));
+	wxString msg(_("FlameRobin v0.2.3"));
 	msg += wxT("\n");
  	msg += _("Database administration tool for Firebird RDBMS");
 	msg += wxT("\n\n");
