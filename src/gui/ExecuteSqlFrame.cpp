@@ -698,6 +698,9 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
 	if (key == WXK_F8)
 		OnButtonRollbackClick(e);
 
+	// TODO: we might need Ctrl+N for new window, Ctrl+S for Save, etc. but it cannot be catched from here
+	//       since OnKeyDown() doesn't seem to catch letters, only special keys
+
 	if (wxWindow::FindFocus() == styled_text_ctrl_sql)
 	{
 		if (event.ControlDown() && key == WXK_SPACE)
@@ -967,14 +970,6 @@ bool ExecuteSqlFrame::execute(std::string sql, bool prepareOnly)
 												// vanish, then we can test if this is the solution
 			notebook_1->SetSelection(1);
 			grid_data->SetFocus();
-
-			bool selectMaximizeGrid = false;	// FIXME: this should only be done when MaximizeGridRowsNeeded is zero
-			config().getValue("SelectMaximizeGrid", selectMaximizeGrid);
-			if (selectMaximizeGrid)
-			{
-				SplitScreen();
-				splitter_window_1->Unsplit(panel_splitter_top);		// show grid only
-			}
 		}
 		else								// for other statements: show rows affected
 		{
@@ -1162,8 +1157,27 @@ void ExecuteSqlFrame::OnButtonToggleClick(wxCommandEvent& WXUNUSED(event))
 void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent &event)
 {
     wxString s;
-    s.Printf(_("%d rows fetched"), event.GetExtraLong());
+	long rowsFetched = event.GetExtraLong();
+    s.Printf(_("%d rows fetched"), rowsFetched);
     statusbar_1->SetStatusText(s, 1);
+
+	// TODO: we could make some bool flag, so that this happens only once per execute()
+	//       to fix the problem when user does the select, unsplits the window
+	//       and then browses the grid, which fetches more records and unsplits again
+	if (!splitter_window_1->IsSplit())	// already ok
+		return;
+	bool selectMaximizeGrid = false;
+	config().getValue("SelectMaximizeGrid", selectMaximizeGrid);
+	if (selectMaximizeGrid)
+	{
+		int rowsNeeded = 10;	// default
+		config().getValue("MaximizeGridRowsNeeded", rowsNeeded);
+		if (rowsFetched >= rowsNeeded)
+		{
+			//SplitScreen();	// not needed atm, might be later (see TODO above)
+			splitter_window_1->Unsplit(panel_splitter_top);		// show grid only
+		}
+	}
 }
 #endif
 //-----------------------------------------------------------------------------
