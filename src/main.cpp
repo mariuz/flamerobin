@@ -46,13 +46,16 @@ IMPLEMENT_APP(FRApp)
 //-----------------------------------------------------------------------------
 void FRApp::OnFatalException()
 {
-    ::wxMessageBox(::wxGetTranslation(
-		wxT("A fatal error has occured, the program will be closed.\n\n")
-		wxT("If you know how to reproduce the problem,\n")
-		wxT("please submit the bug report at:\n")
-		wxT("http://sourceforge.net/tracker/?group_id=73595&atid=538266")),
-		_("Fatal error"), wxOK | wxICON_ERROR
-	);
+    if (wxYES == ::wxMessageBox(::wxGetTranslation(
+		wxT("A fatal error has occured. If you know how to\n")
+		wxT("reproduce the problem, please submit the bug report at:\n")
+		wxT("http://sourceforge.net/tracker/?group_id=124340&atid=699234\n\n")
+		wxT("The program can try to keep running so that you\n")
+		wxT("can save your data. Do you wish to try?\n")),
+		_("Fatal error"), wxYES_NO | wxICON_ERROR))
+	{
+		MainLoop();
+	}
 }
 //-----------------------------------------------------------------------------
 bool FRApp::OnInit()
