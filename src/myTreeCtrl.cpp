@@ -62,13 +62,10 @@ END_EVENT_TABLE()
 #if wxCHECK_VERSION(2, 5, 4)
 void myTreeCtrl::OnItemMenu(wxTreeEvent& event)
 {
-	::wxMessageBox("MENUITEM");
 	wxTreeItemId id = event.GetItem();
 	wxRect r;
 	GetBoundingRect(id, r);
 	wxPoint pos(r.x + r.width/2, r.y + r.height/2);
-
-    //wxPoint pos = ScreenToClient(event.GetPosition());
 	wxContextMenuEvent e;
 	e.SetPosition(pos);
 	OnContextMenu(e);
