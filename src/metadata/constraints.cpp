@@ -28,12 +28,6 @@
     #pragma hdrstop
 #endif
 
-// for all others, include the necessary headers (this file is usually all you
-// need because it includes almost all "standard" wxWindows headers
-#ifndef WX_PRECOMP
-    #include "wx/wx.h"
-#endif
-
 #include <string>
 #include <vector>
 #include "metadataitem.h"
