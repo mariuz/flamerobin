@@ -39,7 +39,7 @@
 #include "metadata/database.h"
 #include "ugly.h"
 #include "dberror.h"
-#include "MultilineEnterDialog.h"
+#include "gui/MultilineEnterDialog.h"
 #include "urihandler.h"
 
 class ObjectDescriptionHandler: public YxURIHandler
