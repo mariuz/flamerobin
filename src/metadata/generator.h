@@ -43,7 +43,7 @@ public:
 	bool loadValue(bool force = false);
 	int getValue();
 
-	virtual std::string getPrintableName() const;
+	virtual std::string getPrintableName();
 	YGenerator();
 	virtual const std::string getTypeName() const;
 };

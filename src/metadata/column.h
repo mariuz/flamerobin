@@ -37,7 +37,7 @@ class YColumn: public YxMetadataItem
 public:
 	YColumn();
 	void Init(bool notnull, std::string source, std::string collation = "");
-	virtual std::string getPrintableName() const;
+	virtual std::string getPrintableName();
 
 	bool isNullable() const;
 	bool isPrimaryKey() const;

@@ -48,6 +48,7 @@ public:
 	std::string getCharset();
 	virtual const std::string getTypeName() const;
 	virtual std::string getCreateSqlTemplate() const;
+	virtual std::string getPrintableName();
 };
 //------------------------------------------------------------------------------
 #endif

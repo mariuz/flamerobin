@@ -201,6 +201,11 @@ std::string YDomain::getCharset()
 	return charsetM;
 }
 //------------------------------------------------------------------------------
+std::string YDomain::getPrintableName()
+{
+	return nameM + " " + getDatatypeAsString();
+}
+//------------------------------------------------------------------------------
 std::string YDomain::getCreateSqlTemplate() const
 {
 	return	"CREATE DOMAIN domain_name\n"

@@ -50,7 +50,7 @@ YParameter::YParameter()
 	parameterTypeM = ptInput;
 }
 //------------------------------------------------------------------------------
-std::string YParameter::getPrintableName() const
+std::string YParameter::getPrintableName()
 {
 	std::string ret;
 	ret = (parameterTypeM == ptInput ? "in " : "out ") + nameM + " " + getDomain()->getDatatypeAsString();

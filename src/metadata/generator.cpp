@@ -87,7 +87,7 @@ bool YGenerator::loadValue(bool force)
 	return false;
 }
 //------------------------------------------------------------------------------
-std::string YGenerator::getPrintableName() const
+std::string YGenerator::getPrintableName()
 {
 	if (!valueLoadedM)
 		return nameM;

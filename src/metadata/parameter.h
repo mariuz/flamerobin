@@ -39,7 +39,7 @@ class YParameter: public YColumn
 public:
 	YParameter(std::string source, int parameterType);
 	YParameter();
-	std::string getPrintableName() const;
+	std::string getPrintableName();
 	ParameterType getParameterType() const;
 
 private:

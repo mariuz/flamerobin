@@ -146,7 +146,7 @@ public:
 		return dummy.getCreateSqlTemplate();		// object to call the function on.
 	}
 
-	virtual std::string getPrintableName() const
+	virtual std::string getPrintableName()
 	{
 		if (typeM != ntDomains)
 			return YxMetadataItem::getPrintableName();

@@ -74,7 +74,7 @@ bool YColumn::isPrimaryKey() const
 	return false;
 }
 //------------------------------------------------------------------------------
-std::string YColumn::getPrintableName() const
+std::string YColumn::getPrintableName()
 {
 	YDomain *d = getDomain();
 	std::string domain_name;

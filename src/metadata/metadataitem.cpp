@@ -424,7 +424,7 @@ void YxMetadataItem::setParent(YxMetadataItem *parent)
 	parentM = parent;
 }
 //------------------------------------------------------------------------------
-std::string YxMetadataItem::getPrintableName() const
+std::string YxMetadataItem::getPrintableName()
 {
 	size_t n = getChildrenCount();
  	if (n)

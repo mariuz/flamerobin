@@ -78,7 +78,7 @@ public:
 	virtual YxMetadataItem *getParent() const;
 	void setParent(YxMetadataItem *parent);
 	virtual const std::string& getName() const;
-	virtual std::string getPrintableName() const;
+	virtual std::string getPrintableName();
 	void setName(std::string name);
 	virtual NodeType getType() const;
 	void setType(NodeType type);
