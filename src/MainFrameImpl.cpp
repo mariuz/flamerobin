@@ -41,9 +41,9 @@
 #include "ibpp.h"
 
 #include "MainFrame.h"
-#include "DatabaseRegistrationInfoFrame.h"
 #include "ExecuteSqlFrame.h"
 #include "gui/BackupFrame.h"
+#include "gui/DatabaseRegistrationDialog.h"
 #include "gui/RestoreFrame.h"
 #include "gui/ServerRegistrationDialog.h"
 #include "MetadataItemPropertiesDialog.h"
@@ -305,10 +305,10 @@ void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 		return;
 
 	YDatabase db;
-    DatabaseRegistrationInfoFrame dri_frame(this, -1, _("Register Existing Database"));
-	dri_frame.setDatabase(&db);
+    DatabaseRegistrationDialog drd(this, -1, _("Register Existing Database"));
+	drd.setDatabase(&db);
 
-    if (dri_frame.ShowModal() == wxOK)
+    if (drd.ShowModal() == wxOK)
 		tree_ctrl_1->selectMetadataItem(s->addDatabase(db));
 }
 //-----------------------------------------------------------------------------
@@ -318,9 +318,9 @@ void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
 	if (!d)
 		return;
 
-    DatabaseRegistrationInfoFrame dri_frame(this, -1, _("Database Registration Info"));
-	dri_frame.setDatabase(d);
-	dri_frame.ShowModal();
+    DatabaseRegistrationDialog drd(this, -1, _("Database Registration Info"));
+	drd.setDatabase(d);
+	drd.ShowModal();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
@@ -330,11 +330,11 @@ void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
 		return;
 
 	YDatabase db;
-    DatabaseRegistrationInfoFrame dri_frame(this, -1, _("Create New Database"), true);
-	dri_frame.setDatabase(&db);
-	dri_frame.setServer(s);
+    DatabaseRegistrationDialog drd(this, -1, _("Create New Database"), true);
+	drd.setDatabase(&db);
+	drd.setServer(s);
 
-    if (dri_frame.ShowModal() == wxOK)
+    if (drd.ShowModal() == wxOK)
         tree_ctrl_1->selectMetadataItem(s->addDatabase(db));
 }
 //-----------------------------------------------------------------------------
@@ -381,9 +381,9 @@ void MainFrame::OnMenuServerProperties(wxCommandEvent& WXUNUSED(event))
 	YServer *s = dynamic_cast<YServer *>(tree_ctrl_1->getSelectedMetadataItem());
 	if (!s)
 		return;
-    ServerRegistrationDialog dlg(this, -1, _("Server Registration Info"));
-	dlg.setServer(s);
-	dlg.ShowModal();
+    ServerRegistrationDialog srd(this, -1, _("Server Registration Info"));
+	srd.setServer(s);
+	srd.ShowModal();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
@@ -392,9 +392,9 @@ void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
 	if (!r)
 		return;
 	YServer s;
-    ServerRegistrationDialog dlg(this, -1, _("Register New Server"));
-	dlg.setServer(&s);
-	if (wxOK == dlg.ShowModal())
+    ServerRegistrationDialog srd(this, -1, _("Register New Server"));
+	srd.setServer(&s);
+	if (wxOK == srd.ShowModal())
 		tree_ctrl_1->selectMetadataItem(r->addServer(s));
 }
 //-----------------------------------------------------------------------------
