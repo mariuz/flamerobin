@@ -338,6 +338,11 @@
         $(SOURCEDIR)/urihandler.cpp
     </set>
 
+    <set var="CONFIGOPTIONSDIR">
+        <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/res</if>
+        <if cond="FORMAT!='autoconf'">res</if>
+    </set>
+
     <set var="HTMLTEMPLATEDIR">
         <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/html-templates</if>
         <if cond="FORMAT!='autoconf'">html-templates</if>
@@ -451,6 +456,13 @@
         <srcdir>$(HTMLTEMPLATEDIR)</srcdir>
         <dstdir>$(BUILDDIR)/html-templates</dstdir>
         <files>$(HTMLTEMPLATEFILES)</files>
+    </copy-files>
+
+    <copy-files id="config-options">
+        <dependency-of>all</dependency-of>
+        <srcdir>$(CONFIGOPTIONSDIR)</srcdir>
+        <dstdir>$(BUILDDIR)</dstdir>
+        <files>config_options.xml</files>
     </copy-files>
 
 </makefile>

@@ -173,12 +173,6 @@ __IBPPLIBVERSION_FILENAMES = debug
 !if "$(FINAL)" == "1"
 __IBPPLIBVERSION_FILENAMES = release
 !endif
-!if "$(UNICODE)" == "1"
-U_OPT = u
-!endif
-!if "$(STATICRTL)" == "1"
-R_OPT = s
-!endif
 !if "$(FINAL)" == "0"
 ____flamerobin_DEBUGINFO = -v
 !endif
@@ -191,6 +185,12 @@ ____flamerobin_WX_LIB_DIR_FILENAMES = $(WXDIR)\lib\bcc_lib
 !if "$(USEDLL)" == "1"
 ____flamerobin_WX_LIB_DIR_FILENAMES = $(WXDIR)\lib\bcc_dll
 !endif
+!if "$(UNICODE)" == "1"
+U_OPT = u
+!endif
+!if "$(STATICRTL)" == "1"
+R_OPT = s
+!endif
 !if "$(FINAL)" == "0"
 D_OPT = d
 !endif
@@ -202,7 +202,7 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT):
 
 ### Targets: ###
 
-all: bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe templates
+all: bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe templates config-options
 
 clean: 
 	-if exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\*.obj del bcc$(U_OPT)$(R_OPT)$(D_OPT)\*.obj
@@ -222,6 +222,10 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS)  bcc$(U_OPT)$(
 templates: 
 	if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates mkdir bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
 	for %f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TRIGGER.html VIEW.html dependencies.html drop.png ok.png view.png) do if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates\%f copy html-templates\%f bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
+
+config-options: 
+	if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT) mkdir bcc$(U_OPT)$(R_OPT)$(D_OPT)
+	for %f in (config_options.xml) do if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\%f copy res\%f bcc$(U_OPT)$(R_OPT)$(D_OPT)
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.obj: .\src\addconstrainthandler.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**

@@ -71,6 +71,9 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel, int id)
 		depth++;
 	sz->Add(15*depth, 5);
 
+	if (description.IsEmpty())
+		description = name;
+
 	// add controls
 	if (type == wxT("checkbox"))
 	{
@@ -132,7 +135,7 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel, int id)
 		int cnt = 0;
 		for (std::list<Option *>::iterator it = options.begin(); it != options.end(); ++it)
 			opts[cnt++] = (*it)->text;
-		wxRadioBox *r = new wxRadioBox(panel, id, name, wxDefaultPosition, wxDefaultSize, size, opts, 0, wxRA_SPECIFY_ROWS);
+		wxRadioBox *r = new wxRadioBox(panel, id, name, wxDefaultPosition, wxDefaultSize, size, opts, 1, wxRA_SPECIFY_COLS);
 		delete [] opts;
 		sz->Add(r, 0, wxALL|wxFIXED_MINSIZE, border);
 		r->SetToolTip(description);
@@ -157,8 +160,8 @@ OptionsDialog::OptionsDialog(wxWindow* parent):
 	listbook1->SetImageList(&imageList);
 
     set_properties();
-    do_layout();
 	load();
+    do_layout();
 	createPages();
 }
 //-----------------------------------------------------------------------------
@@ -175,8 +178,8 @@ const std::string OptionsDialog::getName() const
 //-----------------------------------------------------------------------------
 void OptionsDialog::set_properties()
 {
-    SetTitle(wxT("Options"));
-    SetSize(wxSize(530, 430));
+    SetTitle(wxT("Preferences"));
+    SetSize(wxSize(530, 230));
 }
 //-----------------------------------------------------------------------------
 void OptionsDialog::do_layout()
