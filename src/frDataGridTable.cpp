@@ -62,9 +62,9 @@ GridTable::~GridTable()
 }
 //-----------------------------------------------------------------------------
 // implementation methods
-bool GridTable::allRowsFetched()
+bool GridTable::canFetchMoreRows()
 {
-    return allRowsFetchedM;
+    return (!allRowsFetchedM && statementM->Type() == IBPP::stSelect);
 }
 //-----------------------------------------------------------------------------
 void GridTable::Clear()

@@ -36,6 +36,7 @@ public:
     ~DataGrid();
 
     void fill();
+    void stopFetching();
 
 public:
     enum { ID_MENU_CELLFONT, ID_MENU_LABELFONT };

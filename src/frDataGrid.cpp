@@ -84,7 +84,7 @@ void DataGrid::fill()
 
     // event handler is only needed if not all rows have already been
     // fetched
-    if (!table->allRowsFetched())
+    if (table->canFetchMoreRows())
     {
         Connect(wxID_ANY, wxEVT_IDLE, 
             (wxObjectEventFunction) (wxEventFunction)
@@ -98,6 +98,11 @@ void DataGrid::showPopMenu(wxPoint cursorPos)
     m.Append(ID_MENU_LABELFONT, _("Set header font"));
     m.Append(ID_MENU_CELLFONT, _("Set cell font"));
     PopupMenu(&m, cursorPos);
+}
+//-----------------------------------------------------------------------------
+void DataGrid::stopFetching()
+{
+    Disconnect(wxID_ANY, wxEVT_IDLE);
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(DataGrid, wxGrid)
@@ -129,7 +134,7 @@ void DataGrid::OnIdle(wxIdleEvent& event)
     GridTable* table = dynamic_cast<GridTable*>(GetTable());
     // disconnect event handler if nothing more to be done, will be 
     // re-registered on next successfull execution of select statement
-    if (!table || table->allRowsFetched())
+    if (!table || !table->canFetchMoreRows())
     {
         Disconnect(wxID_ANY, wxEVT_IDLE);
         return;

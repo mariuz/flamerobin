@@ -772,6 +772,8 @@ void ExecuteSqlFrame::OnButtonCommitClick(wxCommandEvent& WXUNUSED(event))
 void ExecuteSqlFrame::commitTransaction()
 {
 	wxBusyCursor cr;
+
+    grid_data->stopFetching();
 	if (!transactionM->Started())	// check
 	{
 		InTransaction(false);
@@ -826,6 +828,8 @@ void ExecuteSqlFrame::commitTransaction()
 void ExecuteSqlFrame::OnButtonRollbackClick(wxCommandEvent& WXUNUSED(event))
 {
 	wxBusyCursor cr;
+
+    grid_data->stopFetching();
 	if (!transactionM->Started())	// check
 	{
 		executedStatementsM.clear();
