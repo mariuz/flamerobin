@@ -343,7 +343,7 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
         {
             int dialect = 1 + (2 * combo_box_dialect->GetSelection());	// 0/1 => 1/3
             wxString ps(wxT("PAGE_SIZE "));
-            ps += combo_box_pagesize->GetValue();
+            ps += combo_box_pagesize->GetStringSelection();
             serverM->createDatabase(databaseM, wx2std(ps), dialect);
         }
         EndModal(wxID_OK);
