@@ -204,6 +204,13 @@ bool YRoot::getChildren(std::vector<YxMetadataItem *>& temp)
 	return serversM.getChildren(temp);
 }
 //------------------------------------------------------------------------------
+bool YRoot::orderedChildren() const
+{
+    bool ordered = false;
+    config().getValue("OrderServersInTree", ordered);
+    return ordered;
+}
+//------------------------------------------------------------------------------
 const std::string YRoot::getItemPath() const
 {
 	// Root is root, don't make the path strings any longer than needed.

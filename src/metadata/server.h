@@ -47,6 +47,7 @@ private:
 public:
 	YServer();
 	virtual bool getChildren(std::vector<YxMetadataItem *>& temp);
+    virtual bool orderedChildren() const;
 	YDatabase* addDatabase(YDatabase&);
 	void removeDatabase(YDatabase*);
 	const YMetadataCollection<YDatabase> *getDatabases() const;

@@ -167,5 +167,8 @@ void YTreeItem::update()
 	}
 	else
 		treeM->SetItemBold(id, false);
+
+    if (object->orderedChildren())
+        treeM->SortChildren(id);
 }
 //------------------------------------------------------------------------------

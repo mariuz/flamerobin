@@ -47,6 +47,20 @@
 		<pagename>Tree view</pagename>
 		<image>2</image>
 		<setting>
+			<type>checkbox</type>
+			<name>Order server entries alphabetically</name>
+			<key>OrderServersInTree</key>
+			<description>If unchecked the server entries will be shown in registration order.</description>
+			<default>0</default>
+		</setting>
+		<setting>
+			<type>checkbox</type>
+			<name>Order database entries alphabetically</name>
+			<key>OrderDatabasesInTree</key>
+			<description>If unchecked the database entries will be shown in registration order.</description>
+			<default>0</default>
+		</setting>
+		<setting>
 			<type>radio</type>
 			<name>When column has an user defined domain</name>
 			<key>ShowDomains</key>

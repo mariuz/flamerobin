@@ -28,6 +28,7 @@
     #pragma hdrstop
 #endif
 
+#include "config.h"
 #include "server.h"
 //------------------------------------------------------------------------------
 YServer::YServer()
@@ -44,6 +45,13 @@ YServer::YServer()
 bool YServer::getChildren(std::vector<YxMetadataItem *>& temp)
 {
 	return databasesM.getChildren(temp);
+}
+//------------------------------------------------------------------------------
+bool YServer::orderedChildren() const
+{
+    bool ordered = false;
+    config().getValue("OrderDatabasesInTree", ordered);
+    return ordered;
 }
 //------------------------------------------------------------------------------
 // returns pointer to object in vector

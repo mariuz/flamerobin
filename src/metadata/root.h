@@ -39,6 +39,7 @@ public:
 	void removeServer(YServer* server);
 
 	virtual bool getChildren(std::vector<YxMetadataItem *>& temp);
+    virtual bool orderedChildren() const;
 	YRoot();
 	~YRoot();
 
