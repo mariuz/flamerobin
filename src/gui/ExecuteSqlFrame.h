@@ -44,6 +44,7 @@
 #include "ibpp.h"
 #include "metadata/database.h"
 #include "observer.h"
+#include "logger.h"
 #include "BaseFrame.h"
 
 // TODO: USE_MYDATAGRID
@@ -112,7 +113,7 @@ public:
 		const wxSize& size=wxDefaultSize, long style=wxDEFAULT_FRAME_STYLE);
 
 private:
-	std::vector<std::string> executedStatementsM;
+	std::vector<executedStatement> executedStatementsM;
 
 	typedef enum { ttNormal, ttSql, ttError } TextType;
 	void log(wxString s, TextType type = ttNormal);		// write messages to textbox

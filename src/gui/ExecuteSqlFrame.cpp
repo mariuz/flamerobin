@@ -49,6 +49,7 @@
 #include "simpleparser.h"
 #include "ExecuteSqlFrame.h"
 #include "config.h"
+#include "logger.h"
 #include "dberror.h"
 
 // TODO: USE_MYDATAGRID
@@ -980,16 +981,17 @@ bool ExecuteSqlFrame::execute(std::string sql, bool prepareOnly)
 				sql.erase(0, p);
 			bool changeNull = (sql.substr(0,44) == "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG");
 			bool setGenerator = (sql.substr(0,13) == "SET GENERATOR");
+			if (changeNull || setGenerator)
+				type = IBPP::stDDL;
 
 			if (type == IBPP::stInsert || type == IBPP::stDelete || type == IBPP::stExecProcedure
-				|| type == IBPP::stUpdate && !changeNull && !setGenerator)
+				|| type == IBPP::stUpdate)
 			{
 				wxString s = wxString::Format(_("%d row(s) affected."), statementM->AffectedRows());
 				log(wxT("") + s);
 				statusbar_1->SetStatusText(s, 1);
 			}
-			else if (type == IBPP::stDDL || changeNull || setGenerator)
-				executedStatementsM.push_back(sql);
+			executedStatementsM.push_back(executedStatement(sql, type));
 		}
 	}
 	catch (IBPP::Exception &e)
@@ -1049,10 +1051,17 @@ void ExecuteSqlFrame::commitTransaction()
 		statusbar_1->SetStatusText(_("Transaction commited"), 3);
 		InTransaction(false);
 
+		// log statements, done before parsing in case parsing crashes FR
+		for (std::vector<executedStatement>::const_iterator it = executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
+			Logger::logStatement(*it, databaseM);
+
 		// parse all successfully executed statements
-		for (std::vector<std::string>::const_iterator it = executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
-			if (!databaseM->parseCommitedSql(*it))
-				::wxMessageBox(std2wx(lastError().getMessage()), _("A non-fatal error occurred."), wxOK|wxICON_INFORMATION);
+		for (std::vector<executedStatement>::const_iterator it = executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
+		{
+			if ((*it).type == IBPP::stDDL)
+				if (!databaseM->parseCommitedSql((*it).statement))
+					::wxMessageBox(std2wx(lastError().getMessage()), _("A non-fatal error occurred."), wxOK|wxICON_INFORMATION);
+		}
 
 		// possible future version (see database.cpp file for details: ONLY IF FIRST solution is used from database.cpp)
 		//for (std::vector<std::string>::const_iterator it = executedStatementsM.begin(); it != executedStatementsM.end(); ++it)

@@ -228,6 +228,7 @@
         $(SOURCEDIR)/BaseDialog.h
         $(SOURCEDIR)/BaseFrame.h
         $(SOURCEDIR)/config.h
+        $(SOURCEDIR)/logger.h
         $(SOURCEDIR)/converters.h
         $(SOURCEDIR)/dberror.h
         $(SOURCEDIR)/FieldPropertiesFrame.h
@@ -294,6 +295,7 @@
         $(SOURCEDIR)/BaseDialog.cpp
         $(SOURCEDIR)/BaseFrame.cpp
         $(SOURCEDIR)/config.cpp
+        $(SOURCEDIR)/logger.cpp
         $(SOURCEDIR)/converters.cpp
         $(SOURCEDIR)/dberror.cpp
         $(SOURCEDIR)/FieldPropertiesFrame.cpp
@@ -435,7 +437,7 @@
         <sources>$(SOURCEFILES)</sources>
 
         <!-- the precompiled header file is created in $(BUILDDIR), when
-             the first source file is compiled - all other source files 
+             the first source file is compiled - all other source files
              only *use* the PCH file
              ideally a new source file should be used, but main.cpp is
              sufficiently stable (changes will cause a full rebuild) -->
