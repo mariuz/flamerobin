@@ -14,24 +14,24 @@
 {%object_description%} [<a
  href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=TABLE&amp;object_name={%object_name%}">edit</a>]
 <br><br>
-<table cellspacing=1 cellpadding=2 border=0 bgcolor=0 width="97%">
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=0>
   <tbody>
     <tr bgcolor="navy">
-      <td width="36"></td>
-      <td width="22%"><b><font color=white>Field</font></b></td>
-      <td width="18%"><b><font color=white>Type</font></b></td>
-      <td width="12%"><b><font color=white>NULL</font></b></td>
-      <td width="38%"><b><font color=white>Description</font></b></td>
+      <td></td>
+      <td><b><font color=white>Field</font></b></td>
+      <td><b><font color=white>Type</font></b></td>
+      <td><b><font color=white>NULL</font></b></td>
+      <td><b><font color=white>Description</font></b></td>
     </tr>
 	{%columns:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
-      <td valign="top">
+      <td valign="top" nowrap>
 		  <a href="fr://drop_field?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%app_path%}/html-templates/drop.png"></a>
 		  <a href="fr://edit_field?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%app_path%}/html-templates/view.png"></a>
 	  </td>
-      <td valign="top">{%object_name%}</td>
-      <td valign="top">{%column_datatype%}</td>
-      <td align="center" valign="top">{%column_nulloption%}</td>
+      <td nowrap valign="top">{%object_name%}</td>
+      <td nowrap valign="top">{%column_datatype%}</td>
+      <td nowrap valign="top">{%column_nulloption%}</td>
       <td valign="top"><font size=-1>{%object_description%} [<a
 		href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>
     </tr>%}

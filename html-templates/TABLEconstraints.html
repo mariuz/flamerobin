@@ -12,87 +12,87 @@
 <br><br>
 <font size=+2>{%object_name%}</font>
 <br><br>
-<table cellspacing=1 cellpadding=2 border=0 bgcolor=0 width="97%">
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=0>
   <tbody>
     <tr bgcolor="navy">
-      <td width="20">&nbsp;</td>
-      <td><b><font color=white>Primary key</font></b></td>
-      <td><b><font color=white>On field(s)</font></b></td>
+      <td width=20>&nbsp;</td>
+      <td nowrap><b><font color=white>Primary key</font></b></td>
+      <td nowrap><b><font color=white>On field(s)</font></b></td>
     </tr>
 	{%primary_key:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
       <td valign="top">
 		  <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%app_path%}/html-templates/drop.png"></a>
 	  </td>
-      <td valign="top">{%object_name%}</td>
-      <td valign="top">{%constraint_columns%}</td>
+      <td nowrap valign="top">{%object_name%}</td>
+      <td nowrap valign="top">{%constraint_columns%}</td>
     </tr>%}
   </tbody>
 </table>
 <br>
 <a href="fr://add_constraint?type=PK&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">Add primary key</a>
 <br><br>
-<table cellspacing=1 cellpadding=2 border=0 bgcolor=0 width="97%">
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=0>
   <tbody>
     <tr bgcolor="navy">
       <td width="20">&nbsp;</td>
-      <td><b><font color=white>Foreign key</font></b></td>
-      <td><b><font color=white>On field(s)</font></b></td>
+      <td nowrap><b><font color=white>Foreign key</font></b></td>
+      <td nowrap><b><font color=white>On field(s)</font></b></td>
       <td colspan=2><b><font color=white>References</font></b></td>
-      <td><b><font color=white>On update</font></b></td>
-      <td><b><font color=white>On delete</font></b></td>
+      <td nowrap><b><font color=white>On update</font></b></td>
+      <td nowrap><b><font color=white>On delete</font></b></td>
     </tr>
 	{%foreign_keys:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
-      <td valign="top">
+      <td nowrap valign="top">
 		  <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%app_path%}/html-templates/drop.png"></a>
 	  </td>
-      <td valign="top">{%object_name%}</td>
-      <td valign="top">{%constraint_columns%}</td>
-      <td valign="top"><a href="fr://properties?object_type=TABLE&amp;object_name={%fk_table%}&amp;parent_window={%parent_window%}&amp;helper_object={%object_address%}">{%fk_table%}</a></td>
-      <td valign="top">{%fk_referenced_columns%}</td>
-      <td valign="top">{%fk_update%}</td>
-      <td valign="top">{%fk_delete%}</td>
+      <td nowrap valign="top">{%object_name%}</td>
+      <td nowrap valign="top">{%constraint_columns%}</td>
+      <td nowrap valign="top"><a href="fr://properties?object_type=TABLE&amp;object_name={%fk_table%}&amp;parent_window={%parent_window%}&amp;helper_object={%object_address%}">{%fk_table%}</a></td>
+      <td nowrap valign="top">{%fk_referenced_columns%}</td>
+      <td nowrap valign="top">{%fk_update%}</td>
+      <td nowrap valign="top">{%fk_delete%}</td>
     </tr>%}
   </tbody>
 </table>
 <br>
 <a href="fr://add_constraint?type=FK&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">Add foreign key</a>
 <br><br>
-<table cellspacing=1 cellpadding=2 border=0 bgcolor=0 width="97%">
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=0>
   <tbody>
     <tr bgcolor="navy">
       <td width="20"></td>
-      <td><b><font color=white>Unique constraint</font></b></td>
-      <td><b><font color=white>On field(s)</font></b></td>
+      <td nowrap><b><font color=white>Unique constraint</font></b></td>
+      <td nowrap><b><font color=white>On field(s)</font></b></td>
     </tr>
 	{%unique_constraints:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
-      <td valign="top">
+      <td nowrap valign="top">
 		  <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%app_path%}/html-templates/drop.png"></a>
 	  </td>
-      <td valign="top">{%object_name%}</td>
-      <td valign="top">{%constraint_columns%}</td>
+      <td nowrap valign="top">{%object_name%}</td>
+      <td nowrap valign="top">{%constraint_columns%}</td>
     </tr>%}
   </tbody>
 </table>
 <br>
 <a href="fr://add_constraint?type=UNQ&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">Add unique</a>
 <br><br>
-<table cellspacing=1 cellpadding=2 border=0 bgcolor=0 width="97%">
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=0>
   <tbody>
     <tr bgcolor="navy">
       <td width="20"></td>
-      <td><b><font color=white>Check constraint</font></b></td>
-      <td><b><font color=white>Source</font></b></td>
+      <td nowrap><b><font color=white>Check constraint</font></b></td>
+      <td nowrap><b><font color=white>Source</font></b></td>
     </tr>
 	{%check_constraints:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
-      <td valign="top">
+      <td nowrap valign="top">
 		  <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%app_path%}/html-templates/drop.png"></a>
 	  </td>
-      <td valign="top">{%object_name%}</td>
-      <td valign="top">{%check_source%}</td>
+      <td nowrap valign="top">{%object_name%}</td>
+      <td nowrap valign="top">{%check_source%}</td>
     </tr>%}
   </tbody>
 </table>
