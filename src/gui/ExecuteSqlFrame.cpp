@@ -220,36 +220,36 @@ void ExecuteSqlFrame::setupEditor()
 	styled_text_ctrl_sql->StyleSetItalic(2, TRUE);
 	styled_text_ctrl_sql->StyleSetItalic(1, TRUE);
 	styled_text_ctrl_sql->SetLexer(wxSTC_LEX_SQL);
-    styled_text_ctrl_sql->SetKeyWords(0, wxT(
-			"abs action active add admin after all alter and any as asc ascending at auto autoddl "
-			"avg based basename base_name before begin between bigint blob blobedit boolean both "
-			"break buffer by cache cascade case cast char character character_length char_length "
-			"check check_point_len check_point_length close coalesce collate collation column "
-			"commit committed compiletime computed conditional connect constraint containing "
-			"continue count create cstring current current_connection current_date current_role "
-			"current_time current_timestamp current_transaction current_user cursor database date day "
-			"db_key debug dec decimal declare default delete deleting desc descending describe "
-			"descriptor disconnect display distinct do domain double drop echo edit else end entry_point "
-			"escape event exception execute exists exit extern external extract false fetch file "
-			"filter first float for foreign found free_it from full function gdscode generator gen_id "
-			"global goto grant group group_commit_ group_commit_wait having help hour if iif "
-			"immediate in inactive index indicator init inner input input_type insert inserting int "
-			"integer into is isolation isql join key last lc_messages lc_type leading leave left length "
-			"lev level like lock logfile log_buffer_size log_buf_size long manual max maximum "
-			"maximum_segment max_segment merge message min minimum minute module_name month names national "
-			"natural nchar no noauto not null nullif nulls numeric num_log_buffers num_log_bufs "
-			"octet_length of on only open option or order outer output output_type overflow page pagelength "
-			"pages page_size parameter password percent plan position post_event precision "
-			"prepare preserve primary privileges procedure protected public quit raw_partitions "
-			"rdb$db_key read real record_version recreate references release reserv reserving restrict "
-			"retain return returning_values returns revoke right role rollback rows row_count "
-			"runtime savepoint schema second segment select set shadow shared shell show singular size "
-			"skip smallint snapshot some sort sqlcode sqlerror sqlwarning stability starting "
-			"starts statement static statistics substring sub_type sum suspend table temporary "
-			"terminator then ties time timestamp to trailing transaction translate translation trigger "
-			"trim true type uncommitted union unique unknown update updating upper user using value "
-			"values varchar variable varying version view wait wait_time weekday when whenever where "
-			"while with work write year yearday" )
+    styled_text_ctrl_sql->SetKeyWords(0, 
+			wxT("abs action active add admin after all alter and any as asc ascending at auto autoddl ")
+			wxT("avg based basename base_name before begin between bigint blob blobedit boolean both ")
+			wxT("break buffer by cache cascade case cast char character character_length char_length ")
+			wxT("check check_point_len check_point_length close coalesce collate collation column ")
+			wxT("commit committed compiletime computed conditional connect constraint containing ")
+			wxT("continue count create cstring current current_connection current_date current_role ")
+			wxT("current_time current_timestamp current_transaction current_user cursor database date day ")
+			wxT("db_key debug dec decimal declare default delete deleting desc descending describe ")
+			wxT("descriptor disconnect display distinct do domain double drop echo edit else end entry_point ")
+			wxT("escape event exception execute exists exit extern external extract false fetch file ")
+			wxT("filter first float for foreign found free_it from full function gdscode generator gen_id ")
+			wxT("global goto grant group group_commit_ group_commit_wait having help hour if iif ")
+			wxT("immediate in inactive index indicator init inner input input_type insert inserting int ")
+			wxT("integer into is isolation isql join key last lc_messages lc_type leading leave left length ")
+			wxT("lev level like lock logfile log_buffer_size log_buf_size long manual max maximum ")
+			wxT("maximum_segment max_segment merge message min minimum minute module_name month names national ")
+			wxT("natural nchar no noauto not null nullif nulls numeric num_log_buffers num_log_bufs ")
+			wxT("octet_length of on only open option or order outer output output_type overflow page pagelength ")
+			wxT("pages page_size parameter password percent plan position post_event precision ")
+			wxT("prepare preserve primary privileges procedure protected public quit raw_partitions ")
+			wxT("rdb$db_key read real record_version recreate references release reserv reserving restrict ")
+			wxT("retain return returning_values returns revoke right role rollback rows row_count ")
+			wxT("runtime savepoint schema second segment select set shadow shared shell show singular size ")
+			wxT("skip smallint snapshot some sort sqlcode sqlerror sqlwarning stability starting ")
+			wxT("starts statement static statistics substring sub_type sum suspend table temporary ")
+			wxT("terminator then ties time timestamp to trailing transaction translate translation trigger ")
+			wxT("trim true type uncommitted union unique unknown update updating upper user using value ")
+			wxT("values varchar variable varying version view wait wait_time weekday when whenever where ")
+			wxT("while with work write year yearday" )
 	);
 
 	styled_text_ctrl_sql->SetTabWidth(4);
@@ -378,7 +378,7 @@ void ExecuteSqlFrame::do_layout()
     sizer_7->SetSizeHints(notebook_pane_2);
     notebook_1->AddPage(notebook_pane_1, _("Statistics"));
     notebook_1->AddPage(notebook_pane_2, _("Data"));
-    sizer_5->Add(new wxNotebookSizer(notebook_1), 1, wxEXPAND, 0);
+    sizer_5->Add(/* new wxNotebookSizer(notebook_1)*/ notebook_1, 1, wxEXPAND, 0);
     panel_splitter_bottom->SetAutoLayout(true);
     panel_splitter_bottom->SetSizer(sizer_5);
     sizer_5->Fit(panel_splitter_bottom);

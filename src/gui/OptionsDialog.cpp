@@ -514,7 +514,7 @@ wxPanel *OptionsDialog::createHeadline(wxPanel *parentPanel, wxString text)
 {
     wxPanel *temp = new wxPanel(parentPanel, -1, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER|wxTAB_TRAVERSAL);
     wxStaticText *headline = new wxStaticText(temp, -1, text);
-	headline->SetFont(wxFont(16, wxDEFAULT, wxNORMAL, wxNORMAL, 0, ""));
+	headline->SetFont(wxFont(16, wxDEFAULT, wxNORMAL, wxNORMAL, 0, wxT("")));
     wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
     sizer3->Add(headline, 0, wxALL|wxFIXED_MINSIZE, 3);
     temp->SetAutoLayout(true);
@@ -559,9 +559,9 @@ void OptionsDialog::OnApplyButtonClick(wxCommandEvent& WXUNUSED(event))
 		for (std::list<Setting *>::iterator it = (*pit)->settings.begin(); it != (*pit)->settings.end(); ++it)
 			(*it)->saveToConfig();
 	config().save();
-	wxMessageBox(_(
-		"Some changes will only work on newly opened windows.\n"
-		"Also, some changes won't take effect until program is restarted."),
+	wxMessageBox(wxGetTranslation(
+		wxT("Some changes will only work on newly opened windows.\n")
+		wxT("Also, some changes won't take effect until program is restarted.")),
 		_("Preferences saved"),
 		wxOK|wxICON_INFORMATION
 	);
