@@ -75,8 +75,10 @@ bool YColumn::isPrimaryKey() const
 	return false;
 }
 //------------------------------------------------------------------------------
-std::string YColumn::getPrintableName()
+//! retrieve datatype from domain if possible
+std::string YColumn::getDatatype()
 {
+	std::string ret;
 	YDomain *d = getDomain();
 	std::string datatype;
  	if (d)
@@ -84,17 +86,26 @@ std::string YColumn::getPrintableName()
 	else
 		datatype = sourceM;
 
-	std::string ret = nameM;
-
 	enum { showDatatype=0, showDomain, showBoth };
 	int show = showBoth;
  	config().getValue("ShowDomains", show);
 
 	if (!d || d->isSystem() || show == showBoth || show == showDatatype)
-		ret += " " + datatype;
+		ret += datatype;
 
 	if (d && !d->isSystem() && (show == showBoth || show == showDomain))
-		ret += " (" + d->getName() + ")";
+	{
+		if (!ret.empty())
+			ret += " ";
+		ret += "(" + d->getName() + ")";
+	}
+	return ret;
+}
+//------------------------------------------------------------------------------
+//! printable name = column_name + column_datatype [+ not null]
+std::string YColumn::getPrintableName()
+{
+	std::string ret = nameM + " " + getDatatype();
 	if (notnullM)
 		ret += " not null";
 	return ret;

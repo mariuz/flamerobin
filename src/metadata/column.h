@@ -38,6 +38,7 @@ public:
 	YColumn();
 	void Init(bool notnull, std::string source, std::string collation = "");
 	virtual std::string getPrintableName();
+	std::string getDatatype();
 
 	bool isNullable() const;
 	bool isPrimaryKey() const;

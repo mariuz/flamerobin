@@ -355,7 +355,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 		YColumn *c = dynamic_cast<YColumn *>(object);
 		if (c)
 		{
-			htmlpage += c->getPrintableName();
+			htmlpage += c->getDatatype();
 			// TODO: make the domain name (if any) a link to the domain's property page?
 		}
 	}
