@@ -229,6 +229,9 @@
         $(SOURCEDIR)/converters.h
         $(SOURCEDIR)/dberror.h
         $(SOURCEDIR)/FieldPropertiesFrame.h
+        $(SOURCEDIR)/frDataGrid.h
+        $(SOURCEDIR)/frDataGridCells.h
+        $(SOURCEDIR)/frDataGridTable.h
         $(SOURCEDIR)/frutils.h
         $(SOURCEDIR)/gui/BackupFrame.h
         $(SOURCEDIR)/gui/BackupRestoreBaseFrame.h
@@ -293,6 +296,9 @@
         $(SOURCEDIR)/dberror.cpp
         $(SOURCEDIR)/FieldPropertiesFrame.cpp
         $(SOURCEDIR)/FieldPropertiesFrameImpl.cpp
+        $(SOURCEDIR)/frDataGrid.cpp
+        $(SOURCEDIR)/frDataGridCells.cpp
+        $(SOURCEDIR)/frDataGridTable.cpp
         $(SOURCEDIR)/frutils.cpp
         $(SOURCEDIR)/gui/BackupFrame.cpp
         $(SOURCEDIR)/gui/BackupRestoreBaseFrame.cpp
