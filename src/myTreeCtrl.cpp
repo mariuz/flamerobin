@@ -52,12 +52,28 @@
 BEGIN_EVENT_TABLE(myTreeCtrl, wxTreeCtrl)
 #if wxCHECK_VERSION(2, 5, 4)
 	// this is needed so context menu can be invoked with keyboard with wx2.5.4
-	EVT_TREE_ITEM_MENU(myTreeCtrl::ID_tree_ctrl, myTreeCtrl::OnContextMenu)
+	EVT_TREE_ITEM_MENU(myTreeCtrl::ID_tree_ctrl, myTreeCtrl::OnItemMenu)
 #endif
     EVT_CONTEXT_MENU(myTreeCtrl::OnContextMenu)
 	EVT_TREE_BEGIN_DRAG(myTreeCtrl::ID_tree_ctrl, myTreeCtrl::OnBeginDrag)
 	EVT_TREE_ITEM_GETTOOLTIP(myTreeCtrl::ID_tree_ctrl, myTreeCtrl::OnItemGetTooltip)
 END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+#if wxCHECK_VERSION(2, 5, 4)
+void myTreeCtrl::OnItemMenu(wxTreeEvent& event)
+{
+	::wxMessageBox("MENUITEM");
+	wxTreeItemId id = event.GetItem();
+	wxRect r;
+	GetBoundingRect(id, r);
+	wxPoint pos(r.x + r.width/2, r.y + r.height/2);
+
+    //wxPoint pos = ScreenToClient(event.GetPosition());
+	wxContextMenuEvent e;
+	e.SetPosition(pos);
+	OnContextMenu(e);
+}
+#endif
 //-----------------------------------------------------------------------------
 void myTreeCtrl::OnItemGetTooltip(wxTreeEvent& event)
 {
