@@ -1,353 +1,369 @@
 <?xml version="1.0" ?>
 <makefile>
-	<!-- only needed on MSW, on Unix wx-config will find this for us -->
-	<option name="WXDIR" category="path" never_empty="1">
-		<values></values>
-		<default-value></default-value>
-	</option>
+    <!-- only needed on MSW, on Unix wx-config will find this for us -->
+    <option name="WXDIR" category="path" never_empty="1">
+        <values></values>
+        <default-value></default-value>
+    </option>
 
-	<!-- used to find IBPP header file and libraries -->
-	<option name="IBPP" category="path" never_empty="1">
-		<values></values>
-		<default-value></default-value>
-	</option>
+    <!-- used to find IBPP header file and libraries -->
+    <option name="IBPP" category="path" never_empty="1">
+        <values></values>
+        <default-value></default-value>
+    </option>
 
-	<!-- these options allow the application to build with options for 
-		 Unicode/ANSI, Debug/Release, and Static/DLL configs
-		 of wxWidgets -->
-	<option name="USEDLL">
-		<values>0,1</values>
-		<values-description>,DLL</values-description>
-		<default-value>0</default-value>
-	</option>
+    <!-- these options allow the application to build with options for 
+         Unicode/ANSI, Debug/Release, and Static/DLL configs
+         of wxWidgets -->
+    <option name="USEDLL">
+        <values>0,1</values>
+        <values-description>,DLL</values-description>
+        <default-value>0</default-value>
+    </option>
 
-	<option name="UNICODE">
-		<values>0,1</values>
-		<values-description>,Unicode</values-description>
-		<default-value>0</default-value>
-	</option>
+    <option name="UNICODE">
+        <values>0,1</values>
+        <values-description>,Unicode</values-description>
+        <default-value>0</default-value>
+    </option>
 
-	<option name="FINAL">
-		<values>0,1</values>
-		<values-description>Debug,Release</values-description>
-		<default-value>0</default-value>
-	</option>
-	
-	<template id="wx">
-		<if cond="FORMAT!='autoconf'">
-			<set var="WXDIR">$(DOLLAR)(WXDIR)</set>
-		</if>
+    <option name="FINAL">
+        <values>0,1</values>
+        <values-description>Debug,Release</values-description>
+        <default-value>0</default-value>
+    </option>
+    
+    <template id="wx">
+        <if cond="FORMAT!='autoconf'">
+            <set var="WXDIR">$(DOLLAR)(WXDIR)</set>
+        </if>
 
         <threading>multi</threading>
 
-		<include>$(WXDIR)/include</include>
-		<include>$(WXDIR)/contrib/include</include>
+        <include>$(WXDIR)/include</include>
+        <include>$(WXDIR)/contrib/include</include>
 
-		<!-- Set debug info here -->
-		<set var="WXDEBUG">
-			<if cond="FINAL=='0'">__WXDEBUG__</if>
-		</set>
+        <!-- Set debug info here -->
+        <set var="WXDEBUG">
+            <if cond="FINAL=='0'">__WXDEBUG__</if>
+        </set>
 
-		<set var="DEBUGFLAG">
-			<if cond="FINAL=='0'">_DEBUG</if>
-		</set>
+        <set var="DEBUGFLAG">
+            <if cond="FINAL=='0'">_DEBUG</if>
+        </set>
 
-    	<set var="UNICODE_DEFINE">
-        	<if cond="FORMAT!='autoconf' and UNICODE=='1'">_UNICODE</if>
-    	</set>
+        <set var="UNICODE_DEFINE">
+            <if cond="FORMAT!='autoconf' and UNICODE=='1'">_UNICODE</if>
+        </set>
     
         <define>$(UNICODE_DEFINE)</define>
-		<define>$(WXDEBUG)</define>
-		<define>$(DEBUGFLAG)</define>
+        <define>$(WXDEBUG)</define>
+        <define>$(DEBUGFLAG)</define>
 
-		<set var="DEBUGINFO">
-			<if cond="FINAL=='0'">on</if>
-			<if cond="FINAL=='1'">off</if>
-		</set>
-		<set var="OPTIMIZE">
-			<if cond="FINAL=='0'">off</if>
-			<if cond="FINAL=='1'">speed</if>
-		</set>
+        <set var="DEBUGINFO">
+            <if cond="FINAL=='0'">on</if>
+            <if cond="FINAL=='1'">off</if>
+        </set>
+        <set var="OPTIMIZE">
+            <if cond="FINAL=='0'">off</if>
+            <if cond="FINAL=='1'">speed</if>
+        </set>
 
-		<debug-info>$(DEBUGINFO)</debug-info>
+        <debug-info>$(DEBUGINFO)</debug-info>
         <optimize>$(OPTIMIZE)</optimize>
 
-		<set var="D_OPT">
-			<if cond="FINAL=='0'">d</if>
-		</set>
-		<set var="U_OPT">
-			<if cond="UNICODE=='1'">u</if>
-		</set>
-		<set var="WXUSINGDLL">
-		 	<if cond="USEDLL=='1'">WXUSINGDLL</if>
-		</set>
+        <set var="D_OPT">
+            <if cond="FINAL=='0'">d</if>
+        </set>
+        <set var="U_OPT">
+            <if cond="UNICODE=='1'">u</if>
+        </set>
+        <set var="WXUSINGDLL">
+            <if cond="USEDLL=='1'">WXUSINGDLL</if>
+        </set>
 
-		<if cond="FORMAT!='autoconf'">
-			<set var="OBJS" make_var="1">
-				<if cond="FINAL=='0'">debug</if>
-				<if cond="FINAL=='1'">release</if>
-			</set>
-			<set var="BUILDDIR">$(OBJS)</set>
-		</if>
+        <if cond="FORMAT!='autoconf'">
+            <set var="OBJS" make_var="1">
+                <if cond="FINAL=='0'">debug</if>
+                <if cond="FINAL=='1'">release</if>
+            </set>
+            <set var="BUILDDIR">$(OBJS)</set>
+        </if>
 
-		<if cond="FORMAT in ['borland']">
-			<set var="WX_LIB_DIR" make_var="1">
-				<if cond="USEDLL=='1'">$(WXDIR)/lib/bcc_dll</if>
-				<if cond="USEDLL=='0'">$(WXDIR)/lib/bcc_lib</if>
-			</set>
-		</if>
-		<if cond="FORMAT in ['mingw']">
-			<set var="WX_LIB_DIR" make_var="1">
-				<if cond="USEDLL=='1'">$(WXDIR)/lib/gcc_dll</if>
-				<if cond="USEDLL=='0'">$(WXDIR)/lib/gcc_lib</if>
-			</set>
-		</if>
-		<if cond="FORMAT in ['msvc6prj','msevc4prj','msvc']">
-			<set var="WX_LIB_DIR" make_var="1">
-				<if cond="USEDLL=='1'">$(WXDIR)/lib/vc_dll</if>
-				<if cond="USEDLL=='0'">$(WXDIR)/lib/vc_lib</if>
-			</set>
-		</if>
+        <if cond="FORMAT in ['borland']">
+            <set var="WX_LIB_DIR" make_var="1">
+                <if cond="USEDLL=='1'">$(WXDIR)/lib/bcc_dll</if>
+                <if cond="USEDLL=='0'">$(WXDIR)/lib/bcc_lib</if>
+            </set>
+        </if>
+        <if cond="FORMAT in ['mingw']">
+            <set var="WX_LIB_DIR" make_var="1">
+                <if cond="USEDLL=='1'">$(WXDIR)/lib/gcc_dll</if>
+                <if cond="USEDLL=='0'">$(WXDIR)/lib/gcc_lib</if>
+            </set>
+        </if>
+        <if cond="FORMAT in ['msvc6prj','msevc4prj','msvc']">
+            <set var="WX_LIB_DIR" make_var="1">
+                <if cond="USEDLL=='1'">$(WXDIR)/lib/vc_dll</if>
+                <if cond="USEDLL=='0'">$(WXDIR)/lib/vc_lib</if>
+            </set>
+        </if>
 
-		<if cond="FORMAT in ['msvc6prj','msevc4prj','msvc']">
-			<ldflags>/nologo</ldflags>
-			<ldflags>/subsystem:windows</ldflags>
-			<ldflags>/machine:I386</ldflags>
-		</if>
+        <if cond="FORMAT in ['msvc6prj','msevc4prj','msvc']">
+            <ldflags>/nologo</ldflags>
+            <ldflags>/subsystem:windows</ldflags>
+            <ldflags>/machine:I386</ldflags>
+        </if>
 
-		<if cond="FORMAT in ['mingw']">
-			<define>HAVE_W32API_H</define>
-		</if>
+        <if cond="FORMAT in ['mingw']">
+            <define>HAVE_W32API_H</define>
+        </if>
 
-		<if cond="FORMAT in ['borland','mingw','msvc6prj','msevc4prj','msvc']">
-			<define>_WINDOWS</define>
-			<define>__WINDOWS__</define>
-			<define>WINVER=0x400</define>
-			<define>WIN32</define>
-			<define>__WIN32__</define>
-			<define>__WIN95__</define>
-			<define>STRICT</define>
+        <if cond="FORMAT in ['borland','mingw','msvc6prj','msevc4prj','msvc']">
+            <define>_WINDOWS</define>
+            <define>__WINDOWS__</define>
+            <define>WINVER=0x400</define>
+            <define>WIN32</define>
+            <define>__WIN32__</define>
+            <define>__WIN95__</define>
+            <define>STRICT</define>
 
-			<define>__WXMSW__</define>
-			<define>wxUSE_GUI=1</define>
-			<define>WIN32_LEAN_AND_MEAN</define> 
+            <define>__WXMSW__</define>
+            <define>wxUSE_GUI=1</define>
+            <define>WIN32_LEAN_AND_MEAN</define> 
 
-			<set var="WX_PORT">wxmsw</set>
-			<set var="WX_VERSION">25</set>
+            <set var="WX_PORT">wxmsw</set>
+            <set var="WX_VERSION">25</set>
 
-			<include>$(WX_LIB_DIR)/msw$(D_OPT)</include>
-			<lib-path>$(WX_LIB_DIR)</lib-path>
-			
-			<!-- another nice thing that wx-config will take care of
-				 on Unix... -->
-			<sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_stc</sys-lib>
-			<sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_html</sys-lib>
-			<sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_adv</sys-lib>
-			<sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_core</sys-lib>
-			<sys-lib>wxbase$(WX_VERSION)$(U_OPT)$(D_OPT)</sys-lib>
-			<sys-lib>wxtiff$(D_OPT)</sys-lib>
-			<sys-lib>wxjpeg$(D_OPT)</sys-lib>
-			<sys-lib>wxpng$(D_OPT)</sys-lib>			
-			<sys-lib>wxzlib$(D_OPT)</sys-lib>			
+            <include>$(WX_LIB_DIR)/msw$(D_OPT)</include>
+            <lib-path>$(WX_LIB_DIR)</lib-path>
+            
+            <!-- another nice thing that wx-config will take care of
+                 on Unix... -->
+            <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_stc</sys-lib>
+            <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_html</sys-lib>
+            <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_adv</sys-lib>
+            <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_core</sys-lib>
+            <sys-lib>wxbase$(WX_VERSION)$(U_OPT)$(D_OPT)</sys-lib>
+            <sys-lib>wxtiff$(D_OPT)</sys-lib>
+            <sys-lib>wxjpeg$(D_OPT)</sys-lib>
+            <sys-lib>wxpng$(D_OPT)</sys-lib>            
+            <sys-lib>wxzlib$(D_OPT)</sys-lib>           
 
-			<sys-lib>kernel32</sys-lib>
-			<sys-lib>user32</sys-lib> 
-			<sys-lib>gdi32</sys-lib> 
-			<sys-lib>winspool</sys-lib>
-			<sys-lib>comdlg32</sys-lib>
-			<sys-lib>advapi32</sys-lib>
-			<sys-lib>shell32</sys-lib>
-			<sys-lib>ole32</sys-lib>
-			<sys-lib>oleaut32</sys-lib>
-			<sys-lib>uuid</sys-lib> 
-			<sys-lib>comctl32</sys-lib>
-			<sys-lib>rpcrt4</sys-lib>
-			<sys-lib>wsock32</sys-lib>
-		</if>
-	</template>
-	
-	<define-tag name="headers" rules="dll,lib,exe">
-		<if cond="FORMAT=='msvc6prj'">
-			<msvc-project-files>
-				$(value)
-			</msvc-project-files>
-		</if>
-	</define-tag>
+            <sys-lib>kernel32</sys-lib>
+            <sys-lib>user32</sys-lib> 
+            <sys-lib>gdi32</sys-lib> 
+            <sys-lib>winspool</sys-lib>
+            <sys-lib>comdlg32</sys-lib>
+            <sys-lib>advapi32</sys-lib>
+            <sys-lib>shell32</sys-lib>
+            <sys-lib>ole32</sys-lib>
+            <sys-lib>oleaut32</sys-lib>
+            <sys-lib>uuid</sys-lib> 
+            <sys-lib>comctl32</sys-lib>
+            <sys-lib>rpcrt4</sys-lib>
+            <sys-lib>wsock32</sys-lib>
+        </if>
+    </template>
+    
+    <define-tag name="headers" rules="dll,lib,exe">
+        <if cond="FORMAT=='msvc6prj'">
+            <msvc-project-files>
+                $(value)
+            </msvc-project-files>
+        </if>
+    </define-tag>
 
-	<set var="SOURCEDIR">src</set>	
-	<set var="RESDIR">res</set>
+    <set var="SOURCEDIR">src</set>  
+    <set var="RESDIR">res</set>
 
-	<!-- IBPP needs one of these defined -->
-	<set var="IBPPCOMPILERDEFINE">
-		<if cond="FORMAT=='autoconf'">IBPP_GCC</if>
-		<if cond="FORMAT=='borland'">IBPP_BCC</if>
-		<if cond="FORMAT=='mingw'">IBPP_GCC</if>
-		<if cond="FORMAT=='msvc'">IBPP_MSVC</if>
-		<if cond="FORMAT=='msvc6prj'">IBPP_MSVC</if>
-	</set>
+    <!-- IBPP needs one of these defined -->
+    <set var="IBPPCOMPILERDEFINE">
+        <if cond="FORMAT=='autoconf'">IBPP_GCC</if>
+        <if cond="FORMAT=='borland'">IBPP_BCC</if>
+        <if cond="FORMAT=='mingw'">IBPP_GCC</if>
+        <if cond="FORMAT=='msvc'">IBPP_MSVC</if>
+        <if cond="FORMAT=='msvc6prj'">IBPP_MSVC</if>
+    </set>
 
-	<!-- IBPP needs one of these defined -->
-	<set var="IBPPPLATFORMDEFINE">
-		<if cond="PLATFORM_MACOSX=='1'">IBPP_DARWIN</if>
-		<if cond="PLATFORM_UNIX=='1'">IBPP_LINUX</if>
-		<if cond="PLATFORM_WIN32=='1'">IBPP_WINDOWS</if>
-	</set>
+    <!-- IBPP needs one of these defined -->
+    <set var="IBPPPLATFORMDEFINE">
+        <if cond="PLATFORM_MACOSX=='1'">IBPP_DARWIN</if>
+        <if cond="PLATFORM_UNIX=='1'">IBPP_LINUX</if>
+        <if cond="PLATFORM_WIN32=='1'">IBPP_WINDOWS</if>
+    </set>
 
-	<!-- path of IBPP library depends on platform and DEBUG setting -->
-	<set var="IBPPPLATFORM">
-		<if cond="PLATFORM_MACOSX=='1'">darwin</if>
-		<if cond="PLATFORM_UNIX=='1'">linux</if>
-		<if cond="FORMAT=='borland'">win32_bcc</if>
-		<if cond="FORMAT=='mingw'">win32_mingw</if>
-		<if cond="FORMAT=='msvc'">win32_msvc</if>
-		<if cond="FORMAT=='msvc6prj'">win32_msvc</if>
-	</set>
-	<set var="IBPPLIBVERSION">
-		<if cond="FINAL=='0'">debug</if>
-		<if cond="FINAL=='1'">release</if>
-	</set>
-	<set var="IBPPLIBPATH">$(DOLLAR)(IBPP)/$(IBPPLIBVERSION)/$(IBPPPLATFORM)</set>
+    <!-- path of IBPP library depends on platform and DEBUG setting -->
+    <set var="IBPPPLATFORM">
+        <if cond="PLATFORM_MACOSX=='1'">darwin</if>
+        <if cond="PLATFORM_UNIX=='1'">linux</if>
+        <if cond="FORMAT=='borland'">win32_bcc</if>
+        <if cond="FORMAT=='mingw'">win32_mingw</if>
+        <if cond="FORMAT=='msvc'">win32_msvc</if>
+        <if cond="FORMAT=='msvc6prj'">win32_msvc</if>
+    </set>
+    <set var="IBPPLIBVERSION">
+        <if cond="FINAL=='0'">debug</if>
+        <if cond="FINAL=='1'">release</if>
+    </set>
+    <set var="IBPPLIBPATH">$(DOLLAR)(IBPP)/$(IBPPLIBVERSION)/$(IBPPPLATFORM)</set>
 
-	<set var="HEADERFILES">
-		$(SOURCEDIR)/BaseDialog.h
-		$(SOURCEDIR)/BaseFrame.h
-		$(SOURCEDIR)/config.h
-		$(SOURCEDIR)/converters.h
-		$(SOURCEDIR)/dberror.h
-		$(SOURCEDIR)/ExecuteSqlFrame.h
-		$(SOURCEDIR)/FieldPropertiesFrame.h
-		$(SOURCEDIR)/frutils.h
-		$(SOURCEDIR)/gui/BackupFrame.h
-		$(SOURCEDIR)/gui/BackupRestoreBaseFrame.h
-		$(SOURCEDIR)/gui/DatabaseRegistrationDialog.h
-		$(SOURCEDIR)/gui/MultilineEnterDialog.h
-		$(SOURCEDIR)/gui/RestoreFrame.h
-		$(SOURCEDIR)/gui/ServerRegistrationDialog.h
-		$(SOURCEDIR)/images.h
-		$(SOURCEDIR)/main.h
-		$(SOURCEDIR)/MainFrame.h
-		$(SOURCEDIR)/metadata/collection.h
-		$(SOURCEDIR)/metadata/column.h
-		$(SOURCEDIR)/metadata/constraints.h
-		$(SOURCEDIR)/metadata/database.h
-		$(SOURCEDIR)/metadata/domain.h
-		$(SOURCEDIR)/metadata/exception.h
-		$(SOURCEDIR)/metadata/function.h
-		$(SOURCEDIR)/metadata/generator.h
-		$(SOURCEDIR)/metadata/metadataitem.h
-		$(SOURCEDIR)/metadata/metadataitemwithcolumns.h
-		$(SOURCEDIR)/metadata/parameter.h
-		$(SOURCEDIR)/metadata/procedure.h
-		$(SOURCEDIR)/metadata/role.h
-		$(SOURCEDIR)/metadata/root.h
-		$(SOURCEDIR)/metadata/server.h
-		$(SOURCEDIR)/metadata/table.h
-		$(SOURCEDIR)/metadata/trigger.h
-		$(SOURCEDIR)/metadata/view.h
-		$(SOURCEDIR)/MetadataItemPropertiesDialog.h
-		$(SOURCEDIR)/myDataGrid.h
-		$(SOURCEDIR)/myTreeCtrl.h
-		$(SOURCEDIR)/observer.h
-		$(SOURCEDIR)/ReorderFieldsDialog.h
-		$(SOURCEDIR)/styleguide.h
-		$(SOURCEDIR)/subject.h
-		$(SOURCEDIR)/treeitem.h
-		$(SOURCEDIR)/ugly.h
-		$(SOURCEDIR)/urihandler.h
-	</set>
+    <set var="IBPPDYNLIBRARY">
+        <if cond="PLATFORM_WIN32=='1'">ibpp</if>
+    </set>
+    <set var="IBPPSTATICLIBRARY">
+        <if cond="PLATFORM_MACOSX=='1'">$(IBPPLIBPATH)/libibpp.a</if>
+        <if cond="PLATFORM_UNIX=='1'">$(IBPPLIBPATH)/libibpp.a</if>
+    </set>
 
-	<set var="PLATFORMSPECIFICSOURCES">
-		<if cond="PLATFORM_UNIX=='1'">
-			$(SOURCEDIR)/styleguidegeneric.cpp
-		</if>
-		<if cond="PLATFORM_MACOSX=='1'">
-			$(SOURCEDIR)/styleguidemac.cpp
-		</if>
-		<if cond="PLATFORM_WIN32=='1'">
-			$(SOURCEDIR)/styleguidemsw.cpp
-		</if>
-	</set>
+    <set var="FIREBIRDLIBRARY">
+        <if cond="PLATFORM_MACOSX=='1'">Firebird</if>
+        <if cond="PLATFORM_UNIX=='1'">fbclient</if>
+        <!-- PLATFORM_WIN32: ibpp library loads firebird DLL dynamically -->
+    </set>
 
-	<set var="SOURCEFILES">
-		$(SOURCEDIR)/addconstrainthandler.cpp
-		$(SOURCEDIR)/BaseDialog.cpp
-		$(SOURCEDIR)/BaseFrame.cpp
-		$(SOURCEDIR)/config.cpp
-		$(SOURCEDIR)/converters.cpp
-		$(SOURCEDIR)/dberror.cpp
-		$(SOURCEDIR)/ExecuteSqlFrame.cpp
-		$(SOURCEDIR)/ExecuteSqlFrameImpl.cpp
-		$(SOURCEDIR)/FieldPropertiesFrame.cpp
-		$(SOURCEDIR)/FieldPropertiesFrameImpl.cpp
-		$(SOURCEDIR)/frutils.cpp
-		$(SOURCEDIR)/gui/BackupFrame.cpp
-		$(SOURCEDIR)/gui/BackupRestoreBaseFrame.cpp
-		$(SOURCEDIR)/gui/DatabaseRegistrationDialog.cpp
-		$(SOURCEDIR)/gui/MultilineEnterDialog.cpp
-		$(SOURCEDIR)/gui/RestoreFrame.cpp
-		$(SOURCEDIR)/gui/ServerRegistrationDialog.cpp
-		$(SOURCEDIR)/images.cpp
-		$(SOURCEDIR)/main.cpp
-		$(SOURCEDIR)/MainFrame.cpp
-		$(SOURCEDIR)/MainFrameImpl.cpp
-		$(SOURCEDIR)/metadata/column.cpp
-		$(SOURCEDIR)/metadata/constraints.cpp
-		$(SOURCEDIR)/metadata/database.cpp
-		$(SOURCEDIR)/metadata/domain.cpp
-		$(SOURCEDIR)/metadata/exception.cpp
-		$(SOURCEDIR)/metadata/function.cpp
-		$(SOURCEDIR)/metadata/generator.cpp
-		$(SOURCEDIR)/metadata/metadataitem.cpp
-		$(SOURCEDIR)/metadata/metadataitemwithcolumns.cpp
-		$(SOURCEDIR)/metadata/parameter.cpp
-		$(SOURCEDIR)/metadata/procedure.cpp
-		$(SOURCEDIR)/metadata/role.cpp
-		$(SOURCEDIR)/metadata/root.cpp
-		$(SOURCEDIR)/metadata/server.cpp
-		$(SOURCEDIR)/metadata/table.cpp
-		$(SOURCEDIR)/metadata/trigger.cpp
-		$(SOURCEDIR)/metadata/view.cpp
-		$(SOURCEDIR)/MetadataItemPropertiesDialog.cpp
-		$(SOURCEDIR)/MetadataItemPropertiesDialogImpl.cpp
-		$(SOURCEDIR)/myDataGrid.cpp
-		$(SOURCEDIR)/myTreeCtrl.cpp
-		$(SOURCEDIR)/objectdescriptionhandler.cpp
-		$(SOURCEDIR)/observer.cpp
-		$(SOURCEDIR)/ReorderFieldsDialog.cpp
-		$(SOURCEDIR)/ReorderFieldsDialogImpl.cpp
-		$(SOURCEDIR)/styleguide.cpp
-		$(PLATFORMSPECIFICSOURCES)
-		$(SOURCEDIR)/subject.cpp
-		$(SOURCEDIR)/treeitem.cpp
-		$(SOURCEDIR)/ugly.cpp
-		$(SOURCEDIR)/urihandler.cpp
-	</set>
+    <set var="HEADERFILES">
+        $(SOURCEDIR)/BaseDialog.h
+        $(SOURCEDIR)/BaseFrame.h
+        $(SOURCEDIR)/config.h
+        $(SOURCEDIR)/converters.h
+        $(SOURCEDIR)/dberror.h
+        $(SOURCEDIR)/ExecuteSqlFrame.h
+        $(SOURCEDIR)/FieldPropertiesFrame.h
+        $(SOURCEDIR)/frutils.h
+        $(SOURCEDIR)/gui/BackupFrame.h
+        $(SOURCEDIR)/gui/BackupRestoreBaseFrame.h
+        $(SOURCEDIR)/gui/DatabaseRegistrationDialog.h
+        $(SOURCEDIR)/gui/MultilineEnterDialog.h
+        $(SOURCEDIR)/gui/RestoreFrame.h
+        $(SOURCEDIR)/gui/ServerRegistrationDialog.h
+        $(SOURCEDIR)/images.h
+        $(SOURCEDIR)/main.h
+        $(SOURCEDIR)/MainFrame.h
+        $(SOURCEDIR)/metadata/collection.h
+        $(SOURCEDIR)/metadata/column.h
+        $(SOURCEDIR)/metadata/constraints.h
+        $(SOURCEDIR)/metadata/database.h
+        $(SOURCEDIR)/metadata/domain.h
+        $(SOURCEDIR)/metadata/exception.h
+        $(SOURCEDIR)/metadata/function.h
+        $(SOURCEDIR)/metadata/generator.h
+        $(SOURCEDIR)/metadata/metadataitem.h
+        $(SOURCEDIR)/metadata/metadataitemwithcolumns.h
+        $(SOURCEDIR)/metadata/parameter.h
+        $(SOURCEDIR)/metadata/procedure.h
+        $(SOURCEDIR)/metadata/role.h
+        $(SOURCEDIR)/metadata/root.h
+        $(SOURCEDIR)/metadata/server.h
+        $(SOURCEDIR)/metadata/table.h
+        $(SOURCEDIR)/metadata/trigger.h
+        $(SOURCEDIR)/metadata/view.h
+        $(SOURCEDIR)/MetadataItemPropertiesDialog.h
+        $(SOURCEDIR)/myDataGrid.h
+        $(SOURCEDIR)/myTreeCtrl.h
+        $(SOURCEDIR)/observer.h
+        $(SOURCEDIR)/ReorderFieldsDialog.h
+        $(SOURCEDIR)/styleguide.h
+        $(SOURCEDIR)/subject.h
+        $(SOURCEDIR)/treeitem.h
+        $(SOURCEDIR)/ugly.h
+        $(SOURCEDIR)/urihandler.h
+    </set>
 
-	<exe id="flamerobin" template="wx">
-		<app-type>gui</app-type>
-		<cxx-rtti>on</cxx-rtti>
-		<cxx-exceptions>on</cxx-exceptions>
-		<precomp-headers>on</precomp-headers>
-		<warnings>max</warnings>
-		<define>$(IBPPCOMPILERDEFINE)</define>
-		<define>$(IBPPPLATFORMDEFINE)</define>
-		<if cond="FORMAT=='autoconf'">
-			<include>$(DOLLAR)(srcdir)/src</include>
-			<include>$(DOLLAR)(srcdir)/res</include>
-		</if>
-		<if cond="FORMAT!='autoconf'">
-			<include>src</include>
-			<include>res</include>
-		</if>
-		<include>$(DOLLAR)(IBPP)</include>
+    <set var="PLATFORMSPECIFICSOURCES">
+        <if cond="PLATFORM_UNIX=='1'">
+            $(SOURCEDIR)/styleguidegeneric.cpp
+        </if>
+        <if cond="PLATFORM_MACOSX=='1'">
+            $(SOURCEDIR)/styleguidemac.cpp
+        </if>
+        <if cond="PLATFORM_WIN32=='1'">
+            $(SOURCEDIR)/styleguidemsw.cpp
+        </if>
+    </set>
 
-		<headers>$(HEADERFILES)</headers>
-		<sources>$(SOURCEFILES)</sources>
+    <set var="SOURCEFILES">
+        $(SOURCEDIR)/addconstrainthandler.cpp
+        $(SOURCEDIR)/BaseDialog.cpp
+        $(SOURCEDIR)/BaseFrame.cpp
+        $(SOURCEDIR)/config.cpp
+        $(SOURCEDIR)/converters.cpp
+        $(SOURCEDIR)/dberror.cpp
+        $(SOURCEDIR)/ExecuteSqlFrame.cpp
+        $(SOURCEDIR)/ExecuteSqlFrameImpl.cpp
+        $(SOURCEDIR)/FieldPropertiesFrame.cpp
+        $(SOURCEDIR)/FieldPropertiesFrameImpl.cpp
+        $(SOURCEDIR)/frutils.cpp
+        $(SOURCEDIR)/gui/BackupFrame.cpp
+        $(SOURCEDIR)/gui/BackupRestoreBaseFrame.cpp
+        $(SOURCEDIR)/gui/DatabaseRegistrationDialog.cpp
+        $(SOURCEDIR)/gui/MultilineEnterDialog.cpp
+        $(SOURCEDIR)/gui/RestoreFrame.cpp
+        $(SOURCEDIR)/gui/ServerRegistrationDialog.cpp
+        $(SOURCEDIR)/images.cpp
+        $(SOURCEDIR)/main.cpp
+        $(SOURCEDIR)/MainFrame.cpp
+        $(SOURCEDIR)/MainFrameImpl.cpp
+        $(SOURCEDIR)/metadata/column.cpp
+        $(SOURCEDIR)/metadata/constraints.cpp
+        $(SOURCEDIR)/metadata/database.cpp
+        $(SOURCEDIR)/metadata/domain.cpp
+        $(SOURCEDIR)/metadata/exception.cpp
+        $(SOURCEDIR)/metadata/function.cpp
+        $(SOURCEDIR)/metadata/generator.cpp
+        $(SOURCEDIR)/metadata/metadataitem.cpp
+        $(SOURCEDIR)/metadata/metadataitemwithcolumns.cpp
+        $(SOURCEDIR)/metadata/parameter.cpp
+        $(SOURCEDIR)/metadata/procedure.cpp
+        $(SOURCEDIR)/metadata/role.cpp
+        $(SOURCEDIR)/metadata/root.cpp
+        $(SOURCEDIR)/metadata/server.cpp
+        $(SOURCEDIR)/metadata/table.cpp
+        $(SOURCEDIR)/metadata/trigger.cpp
+        $(SOURCEDIR)/metadata/view.cpp
+        $(SOURCEDIR)/MetadataItemPropertiesDialog.cpp
+        $(SOURCEDIR)/MetadataItemPropertiesDialogImpl.cpp
+        $(SOURCEDIR)/myDataGrid.cpp
+        $(SOURCEDIR)/myTreeCtrl.cpp
+        $(SOURCEDIR)/objectdescriptionhandler.cpp
+        $(SOURCEDIR)/observer.cpp
+        $(SOURCEDIR)/ReorderFieldsDialog.cpp
+        $(SOURCEDIR)/ReorderFieldsDialogImpl.cpp
+        $(SOURCEDIR)/styleguide.cpp
+        $(PLATFORMSPECIFICSOURCES)
+        $(SOURCEDIR)/subject.cpp
+        $(SOURCEDIR)/treeitem.cpp
+        $(SOURCEDIR)/ugly.cpp
+        $(SOURCEDIR)/urihandler.cpp
+    </set>
 
-		<mac-res>$(RESDIR)/FlameRobin.icns</mac-res>
-		<win32-res>$(RESDIR)/flamerobin.rc</win32-res>
-		<lib-path>$(IBPPLIBPATH)</lib-path>
-		<sys-lib>ibpp</sys-lib>
-	</exe>
-	
+    <exe id="flamerobin" template="wx">
+        <app-type>gui</app-type>
+        <cxx-rtti>on</cxx-rtti>
+        <cxx-exceptions>on</cxx-exceptions>
+        <precomp-headers>on</precomp-headers>
+        <warnings>max</warnings>
+        <define>$(IBPPCOMPILERDEFINE)</define>
+        <define>$(IBPPPLATFORMDEFINE)</define>
+        <if cond="FORMAT=='autoconf'">
+            <include>$(DOLLAR)(srcdir)/src</include>
+            <include>$(DOLLAR)(srcdir)/res</include>
+        </if>
+        <if cond="FORMAT!='autoconf'">
+            <include>src</include>
+            <include>res</include>
+        </if>
+        <include>$(DOLLAR)(IBPP)</include>
+
+        <headers>$(HEADERFILES)</headers>
+        <sources>$(SOURCEFILES)</sources>
+
+        <mac-res>$(RESDIR)/FlameRobin.icns</mac-res>
+        <win32-res>$(RESDIR)/flamerobin.rc</win32-res>
+        <lib-path>$(IBPPLIBPATH)</lib-path>
+        <sys-lib>$(IBPPDYNLIBRARY)</sys-lib>
+        <ldlibs>$(IBPPSTATICLIBRARY)</ldlibs>
+        <sys-lib>$(FIREBIRDLIBRARY)</sys-lib>
+    </exe>
+    
 </makefile>

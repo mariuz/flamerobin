@@ -94,6 +94,10 @@ FLAMEROBIN_ODEP =  $(___pch__gch___depname)
 @COND_PLATFORM_UNIX_1@IBPPPLATFORM = linux
 @COND_FINAL_0@IBPPLIBVERSION = debug
 @COND_FINAL_1@IBPPLIBVERSION = release
+@COND_PLATFORM_MACOSX_1@IBPPSTATICLIBRARY = \
+@COND_PLATFORM_MACOSX_1@	$(IBPP)/$(IBPPLIBVERSION)/$(IBPPPLATFORM)/libibpp.a
+@COND_PLATFORM_UNIX_1@IBPPSTATICLIBRARY = \
+@COND_PLATFORM_UNIX_1@	$(IBPP)/$(IBPPLIBVERSION)/$(IBPPPLATFORM)/libibpp.a
 @COND_PLATFORM_MAC_1@__flamerobin___mac_setfilecmd = \
 @COND_PLATFORM_MAC_1@	$(SETFILE) -a C flamerobin$(EXEEXT)
 COND_PLATFORM_MAC_1___flamerobin___mac_rezcmd = $(RESCOMP) -d __DARWIN__ -t APPL \
@@ -129,6 +133,9 @@ COND_PLATFORM_OS2_1___flamerobin___os2_emxbindcmd = $(NM) flamerobin$(EXEEXT) \
 @COND_PLATFORM_WIN32_1@__PLATFORMSPECIFICSOURCES_OBJECTS \
 @COND_PLATFORM_WIN32_1@	= flamerobin_styleguidemsw.o
 @COND_PLATFORM_WIN32_1@__flamerobin___win32rc = flamerobin_flamerobin_rc.o
+@COND_PLATFORM_WIN32_1@__IBPPDYNLIBRARY_p = -libpp
+@COND_PLATFORM_MACOSX_1@__FIREBIRDLIBRARY_p = -lFirebird
+@COND_PLATFORM_UNIX_1@__FIREBIRDLIBRARY_p = -lfbclient
 
 ### Targets: ###
 
@@ -149,7 +156,7 @@ distclean: clean
 	rm -f configure config.cache config.log config.status bk-deps bk-make-pch shared-ld-sh Makefile
 
 flamerobin$(EXEEXT): $(FLAMEROBIN_OBJECTS) $(__flamerobin___win32rc)
-	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) $(LDFLAGS)   $(LDFLAGS_GUI) -L$(IBPP)/$(IBPPLIBVERSION)/$(IBPPPLATFORM)  -libpp
+	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) $(LDFLAGS)   $(LDFLAGS_GUI) -L$(IBPP)/$(IBPPLIBVERSION)/$(IBPPPLATFORM)  $(__IBPPDYNLIBRARY_p) $(IBPPSTATICLIBRARY) $(__FIREBIRDLIBRARY_p)
 	$(__flamerobin___mac_rezcmd)
 	$(__flamerobin___mac_setfilecmd)
 	$(__flamerobin___os2_emxbindcmd)

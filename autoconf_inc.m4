@@ -7,6 +7,18 @@ AC_BAKEFILE_PRECOMP_HEADERS
 
 dnl Conditions:
 
+dnl ### begin block 1_COND_DEBUG_0 ###
+    COND_DEBUG_0="#"
+    if test "x$DEBUG" = "x0" ; then
+        COND_DEBUG_0=""
+    fi
+    AC_SUBST(COND_DEBUG_0)
+dnl ### begin block 1_COND_DEBUG_1 ###
+    COND_DEBUG_1="#"
+    if test "x$DEBUG" = "x1" ; then
+        COND_DEBUG_1=""
+    fi
+    AC_SUBST(COND_DEBUG_1)
 dnl ### begin block 1_COND_DEPS_TRACKING_0 ###
     COND_DEPS_TRACKING_0="#"
     if test "x$DEPS_TRACKING" = "x0" ; then
