@@ -50,12 +50,13 @@ bool GetMultilineTextFromUser(const wxString& caption, wxString& value, wxWindow
     return true;
 }
 //-----------------------------------------------------------------------------
-MultilineEnterDialog::MultilineEnterDialog(wxWindow* parent, const wxString& title, const wxString& initialText):
-    BaseDialog(parent, -1, title)
+MultilineEnterDialog::MultilineEnterDialog(wxWindow* parent, const wxString& title, const wxString& initialText)
+    : BaseDialog(parent, -1, title)
 {
-    text_ctrl_value = new wxTextCtrl(this, -1, initialText, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
-    button_ok = new wxButton(this, ID_button_ok, _("Save"));
-    button_cancel = new wxButton(this, ID_button_cancel, _("Cancel"));
+    text_ctrl_value = new wxTextCtrl(panel_controls, -1, initialText, 
+        wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
+    button_ok = new wxButton(panel_controls, ID_button_ok, _("Save"));
+    button_cancel = new wxButton(panel_controls, ID_button_cancel, _("Cancel"));
     do_layout();
     button_ok->SetDefault();
 }

@@ -57,18 +57,17 @@ ReorderFieldsDialog::ReorderFieldsDialog(wxWindow* parent, YTable *table):
     const wxString fields_choices[] = {
         _("List of fields")
     };
-    list_box_fields = new wxListBox(this, ID_list_box_fields, wxDefaultPosition, wxDefaultSize, 
-        1, fields_choices, wxLB_SINGLE);
-    button_first = new wxBitmapButton(this, ID_button_first, wxBitmap(reorder_icons::up_xpm));
-    button_up = new wxBitmapButton(this, ID_button_up, wxBitmap(reorder_icons::up_xpm));
-    button_down = new wxBitmapButton(this, ID_button_down, wxBitmap(reorder_icons::down_xpm));
-    button_last = new wxBitmapButton(this, ID_button_last, wxBitmap(reorder_icons::down_xpm));
-    button_ok = new wxButton(this, ID_button_ok, _("OK"));
-    button_cancel = new wxButton(this, ID_button_cancel, _("Cancel"));
+    list_box_fields = new wxListBox(panel_controls, ID_list_box_fields, wxDefaultPosition,
+        wxDefaultSize, 1, fields_choices, wxLB_SINGLE);
+    button_first = new wxBitmapButton(panel_controls, ID_button_first, wxBitmap(reorder_icons::up_xpm));
+    button_up = new wxBitmapButton(panel_controls, ID_button_up, wxBitmap(reorder_icons::up_xpm));
+    button_down = new wxBitmapButton(panel_controls, ID_button_down, wxBitmap(reorder_icons::down_xpm));
+    button_last = new wxBitmapButton(panel_controls, ID_button_last, wxBitmap(reorder_icons::down_xpm));
+    button_ok = new wxButton(panel_controls, ID_button_ok, _("Reorder"));
+    button_cancel = new wxButton(panel_controls, ID_button_cancel, _("Cancel"));
 
     set_properties();
     do_layout();
-    // end wxGlade
 
     SetTitle(_("Reordering fields of table ") + std2wx(table->getName()));
 	update();

@@ -39,6 +39,8 @@ public:
     virtual bool Show(bool show = TRUE);
     virtual ~BaseDialog();
 protected:
+    wxPanel* panel_controls;
+
     void layoutSizers(wxSizer* controls, wxSizer* buttons, bool expandControls = false);
 
     // Reads any settings from config. The predefined implementation reads

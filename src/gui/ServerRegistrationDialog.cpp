@@ -42,15 +42,16 @@ Contributor(s): Michael Hieke
 #include "ugly.h"
 
 //-----------------------------------------------------------------------------
-ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
-    BaseDialog(parent, id, title, pos, size, style)
+ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent, int id, 
+        const wxString& title, const wxPoint& pos, const wxSize& size, long style)
+    : BaseDialog(parent, id, title, pos, size, style)
 {
-    label_hostname = new wxStaticText(this, -1, _("Hostname:"));
-    text_ctrl_hostname = new wxTextCtrl(this, ID_textctrl_hostname, wxT("localhost"));
-    label_portnumber = new wxStaticText(this, -1, _("Port number:"));
-    text_ctrl_portnumber = new wxTextCtrl(this, -1, wxT("3050"));
-    button_ok = new wxButton(this, ID_button_ok, _("Save"));
-    button_cancel = new wxButton(this, ID_button_cancel, _("Cancel"));
+    label_hostname = new wxStaticText(panel_controls, -1, _("Hostname:"));
+    text_ctrl_hostname = new wxTextCtrl(panel_controls, ID_textctrl_hostname, wxT("localhost"));
+    label_portnumber = new wxStaticText(panel_controls, -1, _("Port number:"));
+    text_ctrl_portnumber = new wxTextCtrl(panel_controls, -1, wxT("3050"));
+    button_ok = new wxButton(panel_controls, ID_button_ok, _("Save"));
+    button_cancel = new wxButton(panel_controls, ID_button_cancel, _("Cancel"));
 
     set_properties();
     do_layout();

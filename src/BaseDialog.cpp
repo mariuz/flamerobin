@@ -41,9 +41,12 @@ Contributor(s): Nando Dessena
 #include "config.h"
 #include "styleguide.h"
 //-----------------------------------------------------------------------------
-BaseDialog::BaseDialog(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
-    wxDialog(parent, id, title, pos, size, style|wxNO_FULL_REPAINT_ON_RESIZE)
+BaseDialog::BaseDialog(wxWindow* parent, int id, const wxString& title, 
+        const wxPoint& pos, const wxSize& size, long style)
+    : wxDialog(parent, id, title, pos, size, style|wxNO_FULL_REPAINT_ON_RESIZE)
 {
+    panel_controls = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+        wxTAB_TRAVERSAL|wxCLIP_CHILDREN|wxNO_BORDER|wxNO_FULL_REPAINT_ON_RESIZE);
 }
 //-----------------------------------------------------------------------------
 void BaseDialog::layoutSizers(wxSizer* controls, wxSizer* buttons, bool expandControls)
@@ -64,11 +67,9 @@ void BaseDialog::layoutSizers(wxSizer* controls, wxSizer* buttons, bool expandCo
     wxBoxSizer* sizerAll = new wxBoxSizer(wxHORIZONTAL);
     sizerAll->Add(sizerHorz, 1, wxEXPAND);
 
-    SetAutoLayout(true);
-    SetSizer(sizerAll);
+    panel_controls->SetSizer(sizerAll);
     sizerAll->Fit(this);
     sizerAll->SetSizeHints(this);
-    Layout();
 }
 //-----------------------------------------------------------------------------
 bool BaseDialog::Show(bool show)
@@ -103,12 +104,12 @@ void BaseDialog::readConfigSettings()
             config().getValue(itemPrefix + "::centerOnParent", centered);
             if (centered)
                 CenterOnParent();
-			else					// if we don't want it centered, let's restore the position
-			{
-				config().getValue(itemPrefix + "::x", r.x);
-				config().getValue(itemPrefix + "::y", r.y);
-				SetSize(r);
-			}
+            else            // if we don't want it centered, let's restore the position
+            {
+                config().getValue(itemPrefix + "::x", r.x);
+                config().getValue(itemPrefix + "::y", r.y);
+                SetSize(r);
+            }
         }
     }
 }
@@ -132,11 +133,11 @@ void BaseDialog::writeConfigSettings() const
 
             bool centered = true;
             config().getValue(itemPrefix + "::centerOnParent", centered);
-			if (!centered)
-			{
-				config().setValue(itemPrefix + "::x", r.x);
-				config().setValue(itemPrefix + "::y", r.y);
-			}
+            if (!centered)
+            {
+                config().setValue(itemPrefix + "::x", r.x);
+                config().setValue(itemPrefix + "::y", r.y);
+            }
             doWriteConfigSettings(itemPrefix);
         }
     }

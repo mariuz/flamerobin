@@ -49,15 +49,17 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
     BaseDialog(parent, id, title, pos, size, style)
 {
     createM = createDB;
-    label_dbpath = new wxStaticText(this, -1, _("Database path:"));
-    text_ctrl_dbpath = new wxTextCtrl(this, ID_textcontrol_dbpath, wxT(""));
-    button_browse = new wxButton(this, ID_button_browse, _("..."), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-    label_username = new wxStaticText(this, -1, _("Username:"));
-    text_ctrl_username = new wxTextCtrl(this, ID_textcontrol_username, wxT("SYSDBA"));
-    label_password = new wxStaticText(this, -1, _("Password:"));
-    text_ctrl_password = new wxTextCtrl(this, -1, wxT("masterkey"), wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
+    label_dbpath = new wxStaticText(panel_controls, -1, _("Database path:"));
+    text_ctrl_dbpath = new wxTextCtrl(panel_controls, ID_textcontrol_dbpath, wxT(""));
+    button_browse = new wxButton(panel_controls, ID_button_browse, _("..."), 
+        wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+    label_username = new wxStaticText(panel_controls, -1, _("Username:"));
+    text_ctrl_username = new wxTextCtrl(panel_controls, ID_textcontrol_username, wxT("SYSDBA"));
+    label_password = new wxStaticText(panel_controls, -1, _("Password:"));
+    text_ctrl_password = new wxTextCtrl(panel_controls, -1, wxT("masterkey"), 
+        wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
     text_ctrl_password->SetToolTip(_("Leave empty if you wish to be prompted for password every time"));
-    label_charset = new wxStaticText(this, -1, _("Charset:"));
+    label_charset = new wxStaticText(panel_controls, -1, _("Charset:"));
     const wxString charset_choices[] = {
         wxT("NONE"),
         wxT("ASCII"),
@@ -86,14 +88,14 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
         wxT("WIN1253"),
         wxT("WIN1254")
     };
-    combo_box_charset = new wxComboBox(this, -1, wxT(""), wxDefaultPosition, wxDefaultSize,
+    combo_box_charset = new wxComboBox(panel_controls, -1, wxT(""), wxDefaultPosition, wxDefaultSize,
         sizeof(charset_choices) / sizeof(wxString), charset_choices, wxCB_DROPDOWN|wxCB_READONLY);
-    label_role = new wxStaticText(this, -1, _("Role:"));
-    text_ctrl_role = new wxTextCtrl(this, -1, wxT(""));
+    label_role = new wxStaticText(panel_controls, -1, _("Role:"));
+    text_ctrl_role = new wxTextCtrl(panel_controls, -1, wxT(""));
 
     if (createM)
     {
-        label_pagesize = new wxStaticText(this, -1, _("Page size:"));
+        label_pagesize = new wxStaticText(panel_controls, -1, _("Page size:"));
         const wxString pagesize_choices[] = {
             wxT("1024"),
             wxT("2048"),
@@ -101,19 +103,19 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
             wxT("8192"),
             wxT("16384")
         };
-        combo_box_pagesize = new wxComboBox(this, -1, wxT(""), wxDefaultPosition, wxDefaultSize,
+        combo_box_pagesize = new wxComboBox(panel_controls, -1, wxT(""), wxDefaultPosition, wxDefaultSize,
             sizeof(pagesize_choices) / sizeof(wxString), pagesize_choices, wxCB_DROPDOWN|wxCB_READONLY);
-        label_dialect = new wxStaticText(this, -1, _("SQL Dialect:"));
+        label_dialect = new wxStaticText(panel_controls, -1, _("SQL Dialect:"));
         const wxString dialect_choices[] = {
             wxT("1"),
             wxT("3")
         };
-        combo_box_dialect = new wxComboBox(this, -1, wxT(""), wxDefaultPosition, wxDefaultSize,
+        combo_box_dialect = new wxComboBox(panel_controls, -1, wxT(""), wxDefaultPosition, wxDefaultSize,
             sizeof(dialect_choices) / sizeof(wxString), dialect_choices, wxCB_DROPDOWN|wxCB_READONLY);
     }
 
-    button_ok = new wxButton(this, ID_button_ok, (createM ? _("Create") : _("Save")));
-    button_cancel = new wxButton(this, ID_button_cancel, _("Cancel"));
+    button_ok = new wxButton(panel_controls, ID_button_ok, (createM ? _("Create") : _("Save")));
+    button_cancel = new wxButton(panel_controls, ID_button_cancel, _("Cancel"));
 
     set_properties();
     do_layout();
