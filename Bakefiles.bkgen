@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<!-- $Id$ -->
+
+<bakefile-gen>
+
+    <disable-formats>dmars,dmars_smake,cbx_unix,cbuilderx,msevc4prj</disable-formats>
+    
+    <input>
+        flamerobin.bkl
+    </input>
+
+    <!-- List of output formats to generate: -->
+    <add-formats>
+        autoconf,borland,mingw,msvc,msvc6prj
+    </add-formats>
+
+    <!-- Default flags (for all formats and bakefiles): -->
+    <add-flags>-Iformats</add-flags>    
+
+    <add-flags files="flamerobin.bkl" formats="autoconf">
+        -o./Makefile.in
+    </add-flags>
+    <add-flags files="flamerobin.bkl" formats="borland">
+        -o./makefile.bcc
+    </add-flags>
+    <add-flags files="flamerobin.bkl" formats="mingw">
+        -o./makefile.mgw
+    </add-flags>
+    <add-flags files="flamerobin.bkl" formats="msvc">
+        -o./makefile.vc
+    </add-flags>
+    <add-flags files="flamerobin.bkl" formats="msvc6prj">
+        -o./flamerobin.dsw
+    </add-flags>
+
+    <!-- Personal customizations (not in CVS): -->
+    <include file="Bakefiles.local.bkgen" ignore_missing="1"/>
+
+</bakefile-gen>

@@ -21,14 +21,15 @@ CXX = @CXX@
 CXXFLAGS = @CXXFLAGS@
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
+WXDIR = @WXDIR@
 
 ### Variables: ###
 
 DESTDIR = 
-FLAMEROBIN_CXXFLAGS = $(__flamerobin_PCH_INC) $(____flamerobin_WXDEBUG_p) \
-	$(____flamerobin_DEBUGFLAG_p) -DIBPP_GCC $(__IBPPPLATFORMDEFINE_p) -I./src \
-	-I./res/ -I$(IBPP) -I$(WXDIR)/include -I$(WXDIR)/contrib/include $(CPPFLAGS) \
-	$(CXXFLAGS)
+FLAMEROBIN_CXXFLAGS = $(__flamerobin_PCH_INC) -I$(WXDIR)/include \
+	-I$(WXDIR)/contrib/include $(____flamerobin_WXDEBUG_p) \
+	$(____flamerobin_DEBUGFLAG_p) -DIBPP_GCC $(__IBPPPLATFORMDEFINE_p) \
+	-I$(srcdir)/src -I$(srcdir)/res -I$(IBPP) $(CPPFLAGS) $(CXXFLAGS)
 FLAMEROBIN_OBJECTS =  \
 	flamerobin_addconstrainthandler.o \
 	flamerobin_BaseDialog.o \
@@ -96,9 +97,10 @@ FLAMEROBIN_ODEP =  $(___pch__gch___depname)
 @COND_PLATFORM_MAC_1@__flamerobin___mac_setfilecmd = \
 @COND_PLATFORM_MAC_1@	$(SETFILE) -a C flamerobin$(EXEEXT)
 COND_PLATFORM_MAC_1___flamerobin___mac_rezcmd = $(RESCOMP) -d __DARWIN__ -t APPL \
+	-i $(WXDIR)/include -i $(WXDIR)/contrib/include \
 	$(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) -d IBPP_GCC \
-	$(__IBPPPLATFORMDEFINE_p_1) -i ./src -i ./res/ -i $(IBPP) -i $(WXDIR)/include -i \
-	$(WXDIR)/contrib/include -o flamerobin$(EXEEXT) ./res/FlameRobin.icns
+	$(__IBPPPLATFORMDEFINE_p_1) -i $(srcdir)/src -i $(srcdir)/res -i $(IBPP) -o \
+	flamerobin$(EXEEXT) res/FlameRobin.icns
 @COND_PLATFORM_MAC_1@__flamerobin___mac_rezcmd = $(COND_PLATFORM_MAC_1___flamerobin___mac_rezcmd)
 @COND_FINAL_0@____flamerobin_WXDEBUG_p = -D__WXDEBUG__
 @COND_FINAL_0@____flamerobin_WXDEBUG_p_1 = -d __WXDEBUG__
@@ -155,170 +157,170 @@ flamerobin$(EXEEXT): $(FLAMEROBIN_OBJECTS) $(__flamerobin___win32rc)
 @COND_GCC_PCH_1@.pch/.gch: 
 @COND_GCC_PCH_1@	$(top_builddir)./bk-make-pch .pch/.gch  $(CXX) $(FLAMEROBIN_CXXFLAGS)
 
-flamerobin_addconstrainthandler.o: $(srcdir)/./src/addconstrainthandler.cpp $(FLAMEROBIN_ODEP)
+flamerobin_addconstrainthandler.o: $(srcdir)/src/addconstrainthandler.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_BaseDialog.o: $(srcdir)/./src/BaseDialog.cpp $(FLAMEROBIN_ODEP)
+flamerobin_BaseDialog.o: $(srcdir)/src/BaseDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_BaseFrame.o: $(srcdir)/./src/BaseFrame.cpp $(FLAMEROBIN_ODEP)
+flamerobin_BaseFrame.o: $(srcdir)/src/BaseFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_config.o: $(srcdir)/./src/config.cpp $(FLAMEROBIN_ODEP)
+flamerobin_config.o: $(srcdir)/src/config.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_converters.o: $(srcdir)/./src/converters.cpp $(FLAMEROBIN_ODEP)
+flamerobin_converters.o: $(srcdir)/src/converters.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_dberror.o: $(srcdir)/./src/dberror.cpp $(FLAMEROBIN_ODEP)
+flamerobin_dberror.o: $(srcdir)/src/dberror.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_ExecuteSqlFrame.o: $(srcdir)/./src/ExecuteSqlFrame.cpp $(FLAMEROBIN_ODEP)
+flamerobin_ExecuteSqlFrame.o: $(srcdir)/src/ExecuteSqlFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_ExecuteSqlFrameImpl.o: $(srcdir)/./src/ExecuteSqlFrameImpl.cpp $(FLAMEROBIN_ODEP)
+flamerobin_ExecuteSqlFrameImpl.o: $(srcdir)/src/ExecuteSqlFrameImpl.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_FieldPropertiesFrame.o: $(srcdir)/./src/FieldPropertiesFrame.cpp $(FLAMEROBIN_ODEP)
+flamerobin_FieldPropertiesFrame.o: $(srcdir)/src/FieldPropertiesFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_FieldPropertiesFrameImpl.o: $(srcdir)/./src/FieldPropertiesFrameImpl.cpp $(FLAMEROBIN_ODEP)
+flamerobin_FieldPropertiesFrameImpl.o: $(srcdir)/src/FieldPropertiesFrameImpl.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_frutils.o: $(srcdir)/./src/frutils.cpp $(FLAMEROBIN_ODEP)
+flamerobin_frutils.o: $(srcdir)/src/frutils.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_BackupFrame.o: $(srcdir)/./src/gui/BackupFrame.cpp $(FLAMEROBIN_ODEP)
+flamerobin_BackupFrame.o: $(srcdir)/src/gui/BackupFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_BackupRestoreBaseFrame.o: $(srcdir)/./src/gui/BackupRestoreBaseFrame.cpp $(FLAMEROBIN_ODEP)
+flamerobin_BackupRestoreBaseFrame.o: $(srcdir)/src/gui/BackupRestoreBaseFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_DatabaseRegistrationDialog.o: $(srcdir)/./src/gui/DatabaseRegistrationDialog.cpp $(FLAMEROBIN_ODEP)
+flamerobin_DatabaseRegistrationDialog.o: $(srcdir)/src/gui/DatabaseRegistrationDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_MultilineEnterDialog.o: $(srcdir)/./src/gui/MultilineEnterDialog.cpp $(FLAMEROBIN_ODEP)
+flamerobin_MultilineEnterDialog.o: $(srcdir)/src/gui/MultilineEnterDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_RestoreFrame.o: $(srcdir)/./src/gui/RestoreFrame.cpp $(FLAMEROBIN_ODEP)
+flamerobin_RestoreFrame.o: $(srcdir)/src/gui/RestoreFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_ServerRegistrationDialog.o: $(srcdir)/./src/gui/ServerRegistrationDialog.cpp $(FLAMEROBIN_ODEP)
+flamerobin_ServerRegistrationDialog.o: $(srcdir)/src/gui/ServerRegistrationDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_images.o: $(srcdir)/./src/images.cpp $(FLAMEROBIN_ODEP)
+flamerobin_images.o: $(srcdir)/src/images.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_main.o: $(srcdir)/./src/main.cpp $(FLAMEROBIN_ODEP)
+flamerobin_main.o: $(srcdir)/src/main.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_MainFrame.o: $(srcdir)/./src/MainFrame.cpp $(FLAMEROBIN_ODEP)
+flamerobin_MainFrame.o: $(srcdir)/src/MainFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_MainFrameImpl.o: $(srcdir)/./src/MainFrameImpl.cpp $(FLAMEROBIN_ODEP)
+flamerobin_MainFrameImpl.o: $(srcdir)/src/MainFrameImpl.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_column.o: $(srcdir)/./src/metadata/column.cpp $(FLAMEROBIN_ODEP)
+flamerobin_column.o: $(srcdir)/src/metadata/column.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_constraints.o: $(srcdir)/./src/metadata/constraints.cpp $(FLAMEROBIN_ODEP)
+flamerobin_constraints.o: $(srcdir)/src/metadata/constraints.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_database.o: $(srcdir)/./src/metadata/database.cpp $(FLAMEROBIN_ODEP)
+flamerobin_database.o: $(srcdir)/src/metadata/database.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_domain.o: $(srcdir)/./src/metadata/domain.cpp $(FLAMEROBIN_ODEP)
+flamerobin_domain.o: $(srcdir)/src/metadata/domain.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_exception.o: $(srcdir)/./src/metadata/exception.cpp $(FLAMEROBIN_ODEP)
+flamerobin_exception.o: $(srcdir)/src/metadata/exception.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_function.o: $(srcdir)/./src/metadata/function.cpp $(FLAMEROBIN_ODEP)
+flamerobin_function.o: $(srcdir)/src/metadata/function.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_generator.o: $(srcdir)/./src/metadata/generator.cpp $(FLAMEROBIN_ODEP)
+flamerobin_generator.o: $(srcdir)/src/metadata/generator.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_metadataitem.o: $(srcdir)/./src/metadata/metadataitem.cpp $(FLAMEROBIN_ODEP)
+flamerobin_metadataitem.o: $(srcdir)/src/metadata/metadataitem.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_metadataitemwithcolumns.o: $(srcdir)/./src/metadata/metadataitemwithcolumns.cpp $(FLAMEROBIN_ODEP)
+flamerobin_metadataitemwithcolumns.o: $(srcdir)/src/metadata/metadataitemwithcolumns.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_parameter.o: $(srcdir)/./src/metadata/parameter.cpp $(FLAMEROBIN_ODEP)
+flamerobin_parameter.o: $(srcdir)/src/metadata/parameter.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_procedure.o: $(srcdir)/./src/metadata/procedure.cpp $(FLAMEROBIN_ODEP)
+flamerobin_procedure.o: $(srcdir)/src/metadata/procedure.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_role.o: $(srcdir)/./src/metadata/role.cpp $(FLAMEROBIN_ODEP)
+flamerobin_role.o: $(srcdir)/src/metadata/role.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_root.o: $(srcdir)/./src/metadata/root.cpp $(FLAMEROBIN_ODEP)
+flamerobin_root.o: $(srcdir)/src/metadata/root.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_server.o: $(srcdir)/./src/metadata/server.cpp $(FLAMEROBIN_ODEP)
+flamerobin_server.o: $(srcdir)/src/metadata/server.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_table.o: $(srcdir)/./src/metadata/table.cpp $(FLAMEROBIN_ODEP)
+flamerobin_table.o: $(srcdir)/src/metadata/table.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_trigger.o: $(srcdir)/./src/metadata/trigger.cpp $(FLAMEROBIN_ODEP)
+flamerobin_trigger.o: $(srcdir)/src/metadata/trigger.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_view.o: $(srcdir)/./src/metadata/view.cpp $(FLAMEROBIN_ODEP)
+flamerobin_view.o: $(srcdir)/src/metadata/view.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_MetadataItemPropertiesDialog.o: $(srcdir)/./src/MetadataItemPropertiesDialog.cpp $(FLAMEROBIN_ODEP)
+flamerobin_MetadataItemPropertiesDialog.o: $(srcdir)/src/MetadataItemPropertiesDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_MetadataItemPropertiesDialogImpl.o: $(srcdir)/./src/MetadataItemPropertiesDialogImpl.cpp $(FLAMEROBIN_ODEP)
+flamerobin_MetadataItemPropertiesDialogImpl.o: $(srcdir)/src/MetadataItemPropertiesDialogImpl.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_myDataGrid.o: $(srcdir)/./src/myDataGrid.cpp $(FLAMEROBIN_ODEP)
+flamerobin_myDataGrid.o: $(srcdir)/src/myDataGrid.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_myTreeCtrl.o: $(srcdir)/./src/myTreeCtrl.cpp $(FLAMEROBIN_ODEP)
+flamerobin_myTreeCtrl.o: $(srcdir)/src/myTreeCtrl.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_objectdescriptionhandler.o: $(srcdir)/./src/objectdescriptionhandler.cpp $(FLAMEROBIN_ODEP)
+flamerobin_objectdescriptionhandler.o: $(srcdir)/src/objectdescriptionhandler.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_observer.o: $(srcdir)/./src/observer.cpp $(FLAMEROBIN_ODEP)
+flamerobin_observer.o: $(srcdir)/src/observer.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_ReorderFieldsDialog.o: $(srcdir)/./src/ReorderFieldsDialog.cpp $(FLAMEROBIN_ODEP)
+flamerobin_ReorderFieldsDialog.o: $(srcdir)/src/ReorderFieldsDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_ReorderFieldsDialogImpl.o: $(srcdir)/./src/ReorderFieldsDialogImpl.cpp $(FLAMEROBIN_ODEP)
+flamerobin_ReorderFieldsDialogImpl.o: $(srcdir)/src/ReorderFieldsDialogImpl.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_styleguide.o: $(srcdir)/./src/styleguide.cpp $(FLAMEROBIN_ODEP)
+flamerobin_styleguide.o: $(srcdir)/src/styleguide.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_styleguidegeneric.o: $(srcdir)/./src/styleguidegeneric.cpp $(FLAMEROBIN_ODEP)
+flamerobin_styleguidegeneric.o: $(srcdir)/src/styleguidegeneric.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_styleguidemac.o: $(srcdir)/./src/styleguidemac.cpp $(FLAMEROBIN_ODEP)
+flamerobin_styleguidemac.o: $(srcdir)/src/styleguidemac.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_styleguidemsw.o: $(srcdir)/./src/styleguidemsw.cpp $(FLAMEROBIN_ODEP)
+flamerobin_styleguidemsw.o: $(srcdir)/src/styleguidemsw.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_subject.o: $(srcdir)/./src/subject.cpp $(FLAMEROBIN_ODEP)
+flamerobin_subject.o: $(srcdir)/src/subject.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_treeitem.o: $(srcdir)/./src/treeitem.cpp $(FLAMEROBIN_ODEP)
+flamerobin_treeitem.o: $(srcdir)/src/treeitem.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_ugly.o: $(srcdir)/./src/ugly.cpp $(FLAMEROBIN_ODEP)
+flamerobin_ugly.o: $(srcdir)/src/ugly.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_urihandler.o: $(srcdir)/./src/urihandler.cpp $(FLAMEROBIN_ODEP)
+flamerobin_urihandler.o: $(srcdir)/src/urihandler.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_flamerobin_rc.o: $(srcdir)/./res/flamerobin.rc $(FLAMEROBIN_ODEP)
-	$(RESCOMP) -i$< -o$@  $(____flamerobin_WXDEBUG_p_2) $(____flamerobin_DEBUGFLAG_p_2) --define IBPP_GCC $(__IBPPPLATFORMDEFINE_p_2) --include-dir ./src --include-dir ./res/ --include-dir $(IBPP) --include-dir $(WXDIR)/include --include-dir $(WXDIR)/contrib/include
+flamerobin_flamerobin_rc.o: $(srcdir)/res/flamerobin.rc $(FLAMEROBIN_ODEP)
+	$(RESCOMP) -i$< -o$@ --include-dir $(WXDIR)/include --include-dir $(WXDIR)/contrib/include  $(____flamerobin_WXDEBUG_p_2) $(____flamerobin_DEBUGFLAG_p_2) --define IBPP_GCC $(__IBPPPLATFORMDEFINE_p_2) --include-dir $(srcdir)/src --include-dir $(srcdir)/res --include-dir $(IBPP)
 
 
 # Include dependency info, if present:

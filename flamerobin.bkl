@@ -1,7 +1,6 @@
 <?xml version="1.0" ?>
 <makefile>
-	<!-- really only needed on MSW, on Unix wx-config will find this
-	 	 for us -->
+	<!-- only needed on MSW, on Unix wx-config will find this for us -->
 	<option name="WXDIR" category="path" never_empty="1">
 		<values></values>
 		<default-value></default-value>
@@ -33,8 +32,139 @@
 		<values-description>Debug,Release</values-description>
 		<default-value>0</default-value>
 	</option>
+	
+	<template id="wx">
+		<if cond="FORMAT!='autoconf'">
+			<set var="WXDIR">$(DOLLAR)(WXDIR)</set>
+		</if>
 
-	<include file="wxtemplate.bkl"/>
+        <threading>multi</threading>
+
+		<include>$(WXDIR)/include</include>
+		<include>$(WXDIR)/contrib/include</include>
+
+		<!-- Set debug info here -->
+		<set var="WXDEBUG">
+			<if cond="FINAL=='0'">__WXDEBUG__</if>
+		</set>
+
+		<set var="DEBUGFLAG">
+			<if cond="FINAL=='0'">_DEBUG</if>
+		</set>
+
+    	<set var="UNICODE_DEFINE">
+        	<if cond="FORMAT!='autoconf' and UNICODE=='1'">_UNICODE</if>
+    	</set>
+    
+        <define>$(UNICODE_DEFINE)</define>
+		<define>$(WXDEBUG)</define>
+		<define>$(DEBUGFLAG)</define>
+
+		<set var="DEBUGINFO">
+			<if cond="FINAL=='0'">on</if>
+			<if cond="FINAL=='1'">off</if>
+		</set>
+		<set var="OPTIMIZE">
+			<if cond="FINAL=='0'">off</if>
+			<if cond="FINAL=='1'">speed</if>
+		</set>
+
+		<debug-info>$(DEBUGINFO)</debug-info>
+        <optimize>$(OPTIMIZE)</optimize>
+
+		<set var="D_OPT">
+			<if cond="FINAL=='0'">d</if>
+		</set>
+		<set var="U_OPT">
+			<if cond="UNICODE=='1'">u</if>
+		</set>
+		<set var="WXUSINGDLL">
+		 	<if cond="USEDLL=='1'">WXUSINGDLL</if>
+		</set>
+
+		<if cond="FORMAT!='autoconf'">
+			<set var="OBJS" make_var="1">
+				<if cond="FINAL=='0'">debug</if>
+				<if cond="FINAL=='1'">release</if>
+			</set>
+			<set var="BUILDDIR">$(OBJS)</set>
+		</if>
+
+		<if cond="FORMAT in ['borland']">
+			<set var="WX_LIB_DIR" make_var="1">
+				<if cond="USEDLL=='1'">$(WXDIR)/lib/bcc_dll</if>
+				<if cond="USEDLL=='0'">$(WXDIR)/lib/bcc_lib</if>
+			</set>
+		</if>
+		<if cond="FORMAT in ['mingw']">
+			<set var="WX_LIB_DIR" make_var="1">
+				<if cond="USEDLL=='1'">$(WXDIR)/lib/gcc_dll</if>
+				<if cond="USEDLL=='0'">$(WXDIR)/lib/gcc_lib</if>
+			</set>
+		</if>
+		<if cond="FORMAT in ['msvc6prj','msevc4prj','msvc']">
+			<set var="WX_LIB_DIR" make_var="1">
+				<if cond="USEDLL=='1'">$(WXDIR)/lib/vc_dll</if>
+				<if cond="USEDLL=='0'">$(WXDIR)/lib/vc_lib</if>
+			</set>
+		</if>
+
+		<if cond="FORMAT in ['msvc6prj','msevc4prj','msvc']">
+			<ldflags>/nologo</ldflags>
+			<ldflags>/subsystem:windows</ldflags>
+			<ldflags>/machine:I386</ldflags>
+		</if>
+
+		<if cond="FORMAT in ['mingw']">
+			<define>HAVE_W32API_H</define>
+		</if>
+
+		<if cond="FORMAT in ['borland','mingw','msvc6prj','msevc4prj','msvc']">
+			<define>_WINDOWS</define>
+			<define>__WINDOWS__</define>
+			<define>WINVER=0x400</define>
+			<define>WIN32</define>
+			<define>__WIN32__</define>
+			<define>__WIN95__</define>
+			<define>STRICT</define>
+
+			<define>__WXMSW__</define>
+			<define>wxUSE_GUI=1</define>
+			<define>WIN32_LEAN_AND_MEAN</define> 
+
+			<set var="WX_PORT">wxmsw</set>
+			<set var="WX_VERSION">25</set>
+
+			<include>$(WX_LIB_DIR)/msw$(D_OPT)</include>
+			<lib-path>$(WX_LIB_DIR)</lib-path>
+			
+			<!-- another nice thing that wx-config will take care of
+				 on Unix... -->
+			<sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_stc</sys-lib>
+			<sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_html</sys-lib>
+			<sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_adv</sys-lib>
+			<sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_core</sys-lib>
+			<sys-lib>wxbase$(WX_VERSION)$(U_OPT)$(D_OPT)</sys-lib>
+			<sys-lib>wxtiff$(D_OPT)</sys-lib>
+			<sys-lib>wxjpeg$(D_OPT)</sys-lib>
+			<sys-lib>wxpng$(D_OPT)</sys-lib>			
+			<sys-lib>wxzlib$(D_OPT)</sys-lib>			
+
+			<sys-lib>kernel32</sys-lib>
+			<sys-lib>user32</sys-lib> 
+			<sys-lib>gdi32</sys-lib> 
+			<sys-lib>winspool</sys-lib>
+			<sys-lib>comdlg32</sys-lib>
+			<sys-lib>advapi32</sys-lib>
+			<sys-lib>shell32</sys-lib>
+			<sys-lib>ole32</sys-lib>
+			<sys-lib>oleaut32</sys-lib>
+			<sys-lib>uuid</sys-lib> 
+			<sys-lib>comctl32</sys-lib>
+			<sys-lib>rpcrt4</sys-lib>
+			<sys-lib>wsock32</sys-lib>
+		</if>
+	</template>
 	
 	<define-tag name="headers" rules="dll,lib,exe">
 		<if cond="FORMAT=='msvc6prj'">
@@ -44,32 +174,14 @@
 		</if>
 	</define-tag>
 
-
-	<!-- we do this because on Unix the makefiles are usually
-		 in the root directory of the package, whereas for other
-		 formats (like MSW), typically they are in subfolders(?) -->
-	<set var="SOURCEDIR">
-		<if cond="FORMAT=='autoconf'">
-			./src
-		</if>
-		<if cond="FORMAT!='autoconf'">
-			..\src
-		</if>
-	</set>	
-	
-	<set var="RESDIR">
-		<if cond="FORMAT=='autoconf'">
-			./res/
-		</if>
-		<if cond="FORMAT!='autoconf'">
-			..\res\
-		</if>
-	</set>
+	<set var="SOURCEDIR">src</set>	
+	<set var="RESDIR">res</set>
 
 	<!-- IBPP needs one of these defined -->
 	<set var="IBPPCOMPILERDEFINE">
 		<if cond="FORMAT=='autoconf'">IBPP_GCC</if>
 		<if cond="FORMAT=='borland'">IBPP_BCC</if>
+		<if cond="FORMAT=='mingw'">IBPP_GCC</if>
 		<if cond="FORMAT=='msvc'">IBPP_MSVC</if>
 		<if cond="FORMAT=='msvc6prj'">IBPP_MSVC</if>
 	</set>
@@ -85,9 +197,10 @@
 	<set var="IBPPPLATFORM">
 		<if cond="PLATFORM_MACOSX=='1'">darwin</if>
 		<if cond="PLATFORM_UNIX=='1'">linux</if>
-		<if cond="PLATFORM_WIN32=='1' and FORMAT=='borland'">win32_bcc</if>
-		<if cond="PLATFORM_WIN32=='1' and FORMAT=='msvc'">win32_msvc</if>
-		<if cond="PLATFORM_WIN32=='1' and FORMAT=='msvc6prj'">win32_msvc</if>
+		<if cond="FORMAT=='borland'">win32_bcc</if>
+		<if cond="FORMAT=='mingw'">win32_mingw</if>
+		<if cond="FORMAT=='msvc'">win32_msvc</if>
+		<if cond="FORMAT=='msvc6prj'">win32_msvc</if>
 	</set>
 	<set var="IBPPLIBVERSION">
 		<if cond="FINAL=='0'">debug</if>
@@ -218,17 +331,21 @@
 		<warnings>max</warnings>
 		<define>$(IBPPCOMPILERDEFINE)</define>
 		<define>$(IBPPPLATFORMDEFINE)</define>
-		<include>$(SOURCEDIR)</include>
-		<include>$(RESDIR)</include>
+		<if cond="FORMAT=='autoconf'">
+			<include>$(DOLLAR)(srcdir)/src</include>
+			<include>$(DOLLAR)(srcdir)/res</include>
+		</if>
+		<if cond="FORMAT!='autoconf'">
+			<include>src</include>
+			<include>res</include>
+		</if>
 		<include>$(DOLLAR)(IBPP)</include>
-		<include>$(DOLLAR)(WXDIR)/include</include>
-		<include>$(DOLLAR)(WXDIR)/contrib/include</include>
 
 		<headers>$(HEADERFILES)</headers>
 		<sources>$(SOURCEFILES)</sources>
 
-		<mac-res>$(RESDIR)FlameRobin.icns</mac-res>
-		<win32-res>$(RESDIR)flamerobin.rc</win32-res>
+		<mac-res>$(RESDIR)/FlameRobin.icns</mac-res>
+		<win32-res>$(RESDIR)/flamerobin.rc</win32-res>
 		<lib-path>$(IBPPLIBPATH)</lib-path>
 		<sys-lib>ibpp</sys-lib>
 	</exe>

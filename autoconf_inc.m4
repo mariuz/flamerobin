@@ -67,3 +67,15 @@ dnl ### begin block 1_COND_PLATFORM_WIN32_1 ###
         COND_PLATFORM_WIN32_1=""
     fi
     AC_SUBST(COND_PLATFORM_WIN32_1)
+dnl ### begin block 1_COND_UNICODE_1 ###
+    COND_UNICODE_1="#"
+    if test "x$UNICODE" = "x1" ; then
+        COND_UNICODE_1=""
+    fi
+    AC_SUBST(COND_UNICODE_1)
+dnl ### begin block 1_COND_USEDLL_1 ###
+    COND_USEDLL_1="#"
+    if test "x$USEDLL" = "x1" ; then
+        COND_USEDLL_1=""
+    fi
+    AC_SUBST(COND_USEDLL_1)

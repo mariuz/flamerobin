@@ -63,16 +63,13 @@ FINAL = 0
 ### Variables: ###
 
 FLAMEROBIN_CXXFLAGS = -I$(BCCDIR)\include -tWM -I$(WXDIR)\include \
-	$(____flamerobin_UNICODE_DEFINE_p) $(____flamerobin_WXDEBUG_p) \
-	$(____flamerobin_DEBUGFLAG_p) $(____flamerobin_DEBUGINFO) \
-	$(____flamerobin_OPTIMIZE_5) $(____flamerobin_WXUSINGDLL_p) \
-	-I$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(____flamerobin_D_OPT_FILENAMES) \
-	$(____flamerobin_WXUSINGDLL_p_2) \
-	-I$(____flamerobin_WX_LIB_DIR_FILENAMES_6)\msw$(flamerobin_D_OPT) \
-	-D_WINDOWS -D__WINDOWS__ -DWINVER=0x400 -DSTRICT -DWIN32 -DWINVER=0x400 \
-	-DwxUSE_GUI=1 -D__WXMSW__ -D__WIN32__ -D__WIN95__ -DWIN32_LEAN_AND_MEAN \
-	-DIBPP_BCC -DIBPP_WINDOWS -I..\src -I..\res\ -I$(IBPP) -I$(WXDIR)\include \
-	-I$(WXDIR)\contrib\include -Hu $(CPPFLAGS) $(CXXFLAGS)
+	-I$(WXDIR)\contrib\include $(____flamerobin_UNICODE_DEFINE_p) \
+	$(____flamerobin_WXDEBUG_p) $(____flamerobin_DEBUGFLAG_p) \
+	$(____flamerobin_DEBUGINFO) $(____flamerobin_OPTIMIZE_5) -D_WINDOWS \
+	-D__WINDOWS__ -DWINVER=0x400 -DWIN32 -D__WIN32__ -D__WIN95__ -DSTRICT \
+	-D__WXMSW__ -DwxUSE_GUI=1 -DWIN32_LEAN_AND_MEAN \
+	-I$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(flamerobin_D_OPT) \
+	-DIBPP_BCC -DIBPP_WINDOWS -Isrc -Ires -I$(IBPP) -Hu $(CPPFLAGS) $(CXXFLAGS)
 FLAMEROBIN_OBJECTS =  \
 	flamerobin_addconstrainthandler.obj \
 	flamerobin_BaseDialog.obj \
@@ -156,27 +153,6 @@ ____flamerobin_OPTIMIZE_5 = -O2
 !if "$(UNICODE)" == "1"
 __flamerobin_U_OPT = u
 !endif
-!if "$(UNICODE)" == "1"
-__flamerobin_U_OPT = u
-!endif
-!if "$(USEDLL)" == "1"
-____flamerobin_WXUSINGDLL_p = -DWXUSINGDLL
-!endif
-!if "$(USEDLL)" == "1"
-____flamerobin_WXUSINGDLL_p_1 = -dWXUSINGDLL
-!endif
-!if "$(USEDLL)" == "1"
-____flamerobin_WXUSINGDLL_p_2 = -DWXUSINGDLL
-!endif
-!if "$(USEDLL)" == "1"
-____flamerobin_WXUSINGDLL_p_2 = -DWXUSINGDLL
-!endif
-!if "$(USEDLL)" == "1"
-____flamerobin_WXUSINGDLL_p_3 = -dWXUSINGDLL
-!endif
-!if "$(USEDLL)" == "1"
-____flamerobin_WXUSINGDLL_p_3 = -dWXUSINGDLL
-!endif
 !if "$(FINAL)" == "0"
 __IBPPLIBVERSION_FILENAMES = debug
 !endif
@@ -190,31 +166,13 @@ ____flamerobin_DEBUGINFO = -v
 ____flamerobin_DEBUGINFO = -v-
 !endif
 !if "$(FINAL)" == "0"
-____flamerobin_D_OPT_FILENAMES = d
-!endif
-!if "$(USEDLL)" == "0"
-____flamerobin_WX_LIB_DIR_FILENAMES = $(WXDIR)\lib\vc_lib
-!endif
-!if "$(USEDLL)" == "1"
-____flamerobin_WX_LIB_DIR_FILENAMES = $(WXDIR)\lib\vc_dll
-!endif
-!if "$(FINAL)" == "0"
-flamerobin_D_OPT = d
-!endif
-!if "$(FINAL)" == "0"
 flamerobin_D_OPT = d
 !endif
 !if "$(USEDLL)" == "0"
-____flamerobin_WX_LIB_DIR_FILENAMES_6 = $(WXDIR)\lib\vc_lib
-!endif
-!if "$(USEDLL)" == "0"
-____flamerobin_WX_LIB_DIR_FILENAMES_6 = $(WXDIR)\lib\bcc_lib
+____flamerobin_WX_LIB_DIR_FILENAMES = $(WXDIR)\lib\bcc_lib
 !endif
 !if "$(USEDLL)" == "1"
-____flamerobin_WX_LIB_DIR_FILENAMES_6 = $(WXDIR)\lib\vc_dll
-!endif
-!if "$(USEDLL)" == "1"
-____flamerobin_WX_LIB_DIR_FILENAMES_6 = $(WXDIR)\lib\bcc_dll
+____flamerobin_WX_LIB_DIR_FILENAMES = $(WXDIR)\lib\bcc_dll
 !endif
 
 
@@ -233,165 +191,165 @@ clean:
 	-if exist flamerobin.ils del flamerobin.ils
 
 flamerobin.exe: $(FLAMEROBIN_OBJECTS)  flamerobin_flamerobin.res
-	ilink32 -Tpe -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk  $(____flamerobin_DEBUGINFO) -L$(____flamerobin_WX_LIB_DIR_FILENAMES) -L$(____flamerobin_WX_LIB_DIR_FILENAMES_6) /nologo /subsystem:windows /machine:I386 -aa -L$(IBPP)\$(__IBPPLIBVERSION_FILENAMES)\win32_bcc @&&|
-	c0w32.obj $(FLAMEROBIN_OBJECTS),$@,, kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib wxbase25$(__flamerobin_U_OPT)$(flamerobin_D_OPT).lib wxmsw25$(__flamerobin_U_OPT)$(flamerobin_D_OPT)_adv.lib wxmsw25$(__flamerobin_U_OPT)$(flamerobin_D_OPT)_core.lib wxmsw25$(__flamerobin_U_OPT)$(flamerobin_D_OPT)_html.lib wxmsw25$(__flamerobin_U_OPT)$(flamerobin_D_OPT)_stc.lib wxtiff$(flamerobin_D_OPT).lib wxjpeg$(flamerobin_D_OPT).lib wxpng$(flamerobin_D_OPT).lib wxzlib$(flamerobin_D_OPT).lib ibpp.lib import32.lib cw32mt.lib,, flamerobin_flamerobin.res
+	ilink32 -Tpe -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk  $(____flamerobin_DEBUGINFO) -L$(____flamerobin_WX_LIB_DIR_FILENAMES) -aa -L$(IBPP)\$(__IBPPLIBVERSION_FILENAMES)\win32_bcc @&&|
+	c0w32.obj $(FLAMEROBIN_OBJECTS),$@,, wxmsw25$(__flamerobin_U_OPT)$(flamerobin_D_OPT)_stc.lib wxmsw25$(__flamerobin_U_OPT)$(flamerobin_D_OPT)_html.lib wxmsw25$(__flamerobin_U_OPT)$(flamerobin_D_OPT)_adv.lib wxmsw25$(__flamerobin_U_OPT)$(flamerobin_D_OPT)_core.lib wxbase25$(__flamerobin_U_OPT)$(flamerobin_D_OPT).lib wxtiff$(flamerobin_D_OPT).lib wxjpeg$(flamerobin_D_OPT).lib wxpng$(flamerobin_D_OPT).lib wxzlib$(flamerobin_D_OPT).lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib import32.lib cw32mt.lib,, flamerobin_flamerobin.res
 |
 
-flamerobin_addconstrainthandler.obj: .\..\src\addconstrainthandler.cpp
+flamerobin_addconstrainthandler.obj: .\src\addconstrainthandler.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_BaseDialog.obj: .\..\src\BaseDialog.cpp
+flamerobin_BaseDialog.obj: .\src\BaseDialog.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_BaseFrame.obj: .\..\src\BaseFrame.cpp
+flamerobin_BaseFrame.obj: .\src\BaseFrame.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_config.obj: .\..\src\config.cpp
+flamerobin_config.obj: .\src\config.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_converters.obj: .\..\src\converters.cpp
+flamerobin_converters.obj: .\src\converters.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_dberror.obj: .\..\src\dberror.cpp
+flamerobin_dberror.obj: .\src\dberror.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_ExecuteSqlFrame.obj: .\..\src\ExecuteSqlFrame.cpp
+flamerobin_ExecuteSqlFrame.obj: .\src\ExecuteSqlFrame.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_ExecuteSqlFrameImpl.obj: .\..\src\ExecuteSqlFrameImpl.cpp
+flamerobin_ExecuteSqlFrameImpl.obj: .\src\ExecuteSqlFrameImpl.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_FieldPropertiesFrame.obj: .\..\src\FieldPropertiesFrame.cpp
+flamerobin_FieldPropertiesFrame.obj: .\src\FieldPropertiesFrame.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_FieldPropertiesFrameImpl.obj: .\..\src\FieldPropertiesFrameImpl.cpp
+flamerobin_FieldPropertiesFrameImpl.obj: .\src\FieldPropertiesFrameImpl.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_frutils.obj: .\..\src\frutils.cpp
+flamerobin_frutils.obj: .\src\frutils.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_BackupFrame.obj: .\..\src\gui\BackupFrame.cpp
+flamerobin_BackupFrame.obj: .\src\gui\BackupFrame.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_BackupRestoreBaseFrame.obj: .\..\src\gui\BackupRestoreBaseFrame.cpp
+flamerobin_BackupRestoreBaseFrame.obj: .\src\gui\BackupRestoreBaseFrame.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_DatabaseRegistrationDialog.obj: .\..\src\gui\DatabaseRegistrationDialog.cpp
+flamerobin_DatabaseRegistrationDialog.obj: .\src\gui\DatabaseRegistrationDialog.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_MultilineEnterDialog.obj: .\..\src\gui\MultilineEnterDialog.cpp
+flamerobin_MultilineEnterDialog.obj: .\src\gui\MultilineEnterDialog.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_RestoreFrame.obj: .\..\src\gui\RestoreFrame.cpp
+flamerobin_RestoreFrame.obj: .\src\gui\RestoreFrame.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_ServerRegistrationDialog.obj: .\..\src\gui\ServerRegistrationDialog.cpp
+flamerobin_ServerRegistrationDialog.obj: .\src\gui\ServerRegistrationDialog.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_images.obj: .\..\src\images.cpp
+flamerobin_images.obj: .\src\images.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_main.obj: .\..\src\main.cpp
+flamerobin_main.obj: .\src\main.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_MainFrame.obj: .\..\src\MainFrame.cpp
+flamerobin_MainFrame.obj: .\src\MainFrame.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_MainFrameImpl.obj: .\..\src\MainFrameImpl.cpp
+flamerobin_MainFrameImpl.obj: .\src\MainFrameImpl.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_column.obj: .\..\src\metadata\column.cpp
+flamerobin_column.obj: .\src\metadata\column.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_constraints.obj: .\..\src\metadata\constraints.cpp
+flamerobin_constraints.obj: .\src\metadata\constraints.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_database.obj: .\..\src\metadata\database.cpp
+flamerobin_database.obj: .\src\metadata\database.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_domain.obj: .\..\src\metadata\domain.cpp
+flamerobin_domain.obj: .\src\metadata\domain.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_exception.obj: .\..\src\metadata\exception.cpp
+flamerobin_exception.obj: .\src\metadata\exception.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_function.obj: .\..\src\metadata\function.cpp
+flamerobin_function.obj: .\src\metadata\function.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_generator.obj: .\..\src\metadata\generator.cpp
+flamerobin_generator.obj: .\src\metadata\generator.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_metadataitem.obj: .\..\src\metadata\metadataitem.cpp
+flamerobin_metadataitem.obj: .\src\metadata\metadataitem.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_metadataitemwithcolumns.obj: .\..\src\metadata\metadataitemwithcolumns.cpp
+flamerobin_metadataitemwithcolumns.obj: .\src\metadata\metadataitemwithcolumns.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_parameter.obj: .\..\src\metadata\parameter.cpp
+flamerobin_parameter.obj: .\src\metadata\parameter.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_procedure.obj: .\..\src\metadata\procedure.cpp
+flamerobin_procedure.obj: .\src\metadata\procedure.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_role.obj: .\..\src\metadata\role.cpp
+flamerobin_role.obj: .\src\metadata\role.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_root.obj: .\..\src\metadata\root.cpp
+flamerobin_root.obj: .\src\metadata\root.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_server.obj: .\..\src\metadata\server.cpp
+flamerobin_server.obj: .\src\metadata\server.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_table.obj: .\..\src\metadata\table.cpp
+flamerobin_table.obj: .\src\metadata\table.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_trigger.obj: .\..\src\metadata\trigger.cpp
+flamerobin_trigger.obj: .\src\metadata\trigger.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_view.obj: .\..\src\metadata\view.cpp
+flamerobin_view.obj: .\src\metadata\view.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_MetadataItemPropertiesDialog.obj: .\..\src\MetadataItemPropertiesDialog.cpp
+flamerobin_MetadataItemPropertiesDialog.obj: .\src\MetadataItemPropertiesDialog.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_MetadataItemPropertiesDialogImpl.obj: .\..\src\MetadataItemPropertiesDialogImpl.cpp
+flamerobin_MetadataItemPropertiesDialogImpl.obj: .\src\MetadataItemPropertiesDialogImpl.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_myDataGrid.obj: .\..\src\myDataGrid.cpp
+flamerobin_myDataGrid.obj: .\src\myDataGrid.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_myTreeCtrl.obj: .\..\src\myTreeCtrl.cpp
+flamerobin_myTreeCtrl.obj: .\src\myTreeCtrl.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_objectdescriptionhandler.obj: .\..\src\objectdescriptionhandler.cpp
+flamerobin_objectdescriptionhandler.obj: .\src\objectdescriptionhandler.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_observer.obj: .\..\src\observer.cpp
+flamerobin_observer.obj: .\src\observer.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_ReorderFieldsDialog.obj: .\..\src\ReorderFieldsDialog.cpp
+flamerobin_ReorderFieldsDialog.obj: .\src\ReorderFieldsDialog.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_ReorderFieldsDialogImpl.obj: .\..\src\ReorderFieldsDialogImpl.cpp
+flamerobin_ReorderFieldsDialogImpl.obj: .\src\ReorderFieldsDialogImpl.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_styleguide.obj: .\..\src\styleguide.cpp
+flamerobin_styleguide.obj: .\src\styleguide.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_styleguidemsw.obj: .\..\src\styleguidemsw.cpp
+flamerobin_styleguidemsw.obj: .\src\styleguidemsw.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_subject.obj: .\..\src\subject.cpp
+flamerobin_subject.obj: .\src\subject.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_treeitem.obj: .\..\src\treeitem.cpp
+flamerobin_treeitem.obj: .\src\treeitem.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_ugly.obj: .\..\src\ugly.cpp
+flamerobin_ugly.obj: .\src\ugly.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_urihandler.obj: .\..\src\urihandler.cpp
+flamerobin_urihandler.obj: .\src\urihandler.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-flamerobin_flamerobin.res: .\..\res\flamerobin.rc
-	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include -i$(WXDIR)\include $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) $(____flamerobin_WXUSINGDLL_p_1) -i$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(____flamerobin_D_OPT_FILENAMES) $(____flamerobin_WXUSINGDLL_p_3) -i$(____flamerobin_WX_LIB_DIR_FILENAMES_6)\msw$(flamerobin_D_OPT) -d_WINDOWS -d__WINDOWS__ -dWINVER=0x400 -dSTRICT -dWIN32 -dWINVER=0x400 -dwxUSE_GUI=1 -d__WXMSW__ -d__WIN32__ -d__WIN95__ -dWIN32_LEAN_AND_MEAN -dIBPP_BCC -dIBPP_WINDOWS -i..\src -i..\res\ -i$(IBPP) -i$(WXDIR)\include -i$(WXDIR)\contrib\include $**
+flamerobin_flamerobin.res: .\res\flamerobin.rc
+	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include -i$(WXDIR)\include -i$(WXDIR)\contrib\include $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) -d_WINDOWS -d__WINDOWS__ -dWINVER=0x400 -dWIN32 -d__WIN32__ -d__WIN95__ -dSTRICT -d__WXMSW__ -dwxUSE_GUI=1 -dWIN32_LEAN_AND_MEAN -i$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(flamerobin_D_OPT) -dIBPP_BCC -dIBPP_WINDOWS -isrc -ires -i$(IBPP) $**
