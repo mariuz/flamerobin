@@ -64,7 +64,7 @@ GridTable::~GridTable()
 // implementation methods
 bool GridTable::canFetchMoreRows()
 {
-    if (allRowsFetchedM || statementM->Type() == IBPP::stSelect)
+    if (allRowsFetchedM || statementM->Type() != IBPP::stSelect)
         return false;
     // there should be a better way here...
     IBPP::ITransaction* tran = statementM->Transaction();
