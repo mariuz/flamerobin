@@ -127,17 +127,21 @@ void DataGrid::OnGridLabelRightClick(wxGridEvent& WXUNUSED(event))
 void DataGrid::OnIdle(wxIdleEvent& event)
 {
     GridTable* table = dynamic_cast<GridTable*>(GetTable());
-    if (table && table->needsMoreRowsFetched())
+    // disconnect event handler if nothing more to be done, will be 
+    // re-registered on next successfull execution of select statement
+    if (!table || table->allRowsFetched())
+    {
+        Disconnect(wxID_ANY, wxEVT_IDLE);
+        return;
+    }
+    // fetch more rows until row cache is filled or timeslice is spent, and 
+    // request another wxEVT_IDLE event if row cache has not been filled
+    if (table->needsMoreRowsFetched())
     {
         table->fetch();
-        // as long as more rows are to be fetched *now* we want more events
         if (table->needsMoreRowsFetched())
             event.RequestMore();
-        // only unregister the event handler after all rows have been fetched
-        if (!table->allRowsFetched())
-            return;
     }
-    Disconnect(wxID_ANY, wxEVT_IDLE);
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnMenuCellFont(wxCommandEvent& WXUNUSED(event))
