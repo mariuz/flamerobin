@@ -110,7 +110,7 @@ void BaseFrame::writeConfigSettings() const
 		}
 	    node = node->GetNext();
 	}
- 	
+
 	bool enabled = false;
 	if (config().getValue("FrameStorage", enabled) && enabled)
 	{
@@ -123,7 +123,7 @@ void BaseFrame::writeConfigSettings() const
 #ifdef __WIN32__
             WINDOWPLACEMENT wp;
             wp.length = sizeof(WINDOWPLACEMENT);
-            if (::GetWindowPlacement((HWND)GetHandle(), &wp))
+            if (::GetWindowPlacement((HWND)GetHandle(), &wp) && IsMaximized())
             {
                 r.SetLeft(wp.rcNormalPosition.left);
                 r.SetTop(wp.rcNormalPosition.top);
