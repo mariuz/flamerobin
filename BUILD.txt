@@ -62,6 +62,9 @@ library names, e.g. the /path/to/wxWidgets/debug/lib/libwx_gtk_xrc-2.5.a,
 paste it into the linker command line and replace "xrc" with "stc".
 This is hopefully only a temporary problem, but wx-config does not return
 the necessary information yet to link contrib libraries.
+[TODO: Check whether the form
+  --with-wx-config='/my/path/to/wx-config --libs stc,std'
+works as expected!!!]
 
 Save the Makefile, and run the command
 
