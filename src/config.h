@@ -28,6 +28,7 @@
 #define FR_CONFIG_H
 
 #include <map>
+#include <string>
 #include <vector>
 
 enum StorageGranularity
