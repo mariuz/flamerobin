@@ -411,7 +411,7 @@ void OptionsDialog::load()
 		/* both options & settings */
 		else if (key == wxT("description"))
 		{
-			str.Replace(wxT("<br>"), wxT("\n"));
+			str.Replace(wxT("<br />"), wxT("\n"));
 			if (op)
 				op->description = str;
 			else
