@@ -212,16 +212,24 @@ void DataGrid::OnMenuCopyToCB(wxCommandEvent& WXUNUSED(event))
         {
             if (IsInSelection(i, j))
             {
-                // TODO: - (optionally) use \t as delimiter ?
-                //       - align fields in columns ?
+                // TODO: - align fields in columns ?
                 //       - fields with multiline strings don't really work...
                 if (!sRow.IsEmpty())
-                    sRow += wxT(" ");
+                    sRow += wxT("\t");
                 sRow += GetCellValue(i, j);
             }
         }
         if (!sRow.IsEmpty())
-            sRows += sRow + wxT("\n");
+		{
+            sRows += sRow +					// perhaps we should move this to styleguide?
+			#if defined(__WXMSW__)
+				wxT("\r\n");
+			#elif defined (__WXMAC__)
+				wxT("\r");
+			#else
+				wxT("\n");
+			#endif
+		}
     }
     if (!sRows.IsEmpty())
         copyToClipboard(sRows);
