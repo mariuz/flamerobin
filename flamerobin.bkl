@@ -1,5 +1,7 @@
 <?xml version="1.0" ?>
 <makefile>
+    <using module="datafiles"/>
+
     <!-- only needed on MSW, on Unix wx-config will find this for us -->
     <option name="WXDIR" category="path" never_empty="1">
         <values></values>
@@ -340,6 +342,25 @@
         $(SOURCEDIR)/urihandler.cpp
     </set>
 
+    <set var="HTMLTEMPLATES">
+        DOMAIN.html
+        EXCEPTION.html
+        FUNCTION.html
+        GENERATOR.html
+        PROCEDURE.html
+        ROLE.html
+        TABLE.html
+        TABLEconstraints.html
+        TABLEtriggers.html
+        TRIGGER.html
+        VIEW.html
+        dependencies.html
+        drop.png
+        files
+        ok.png
+        view.png
+    </set>
+
     <exe id="flamerobin" template="wx">
         <app-type>gui</app-type>
         <cxx-rtti>on</cxx-rtti>
@@ -368,5 +389,12 @@
         <ldlibs>$(IBPPSTATICLIBRARY)</ldlibs>
         <sys-lib>$(FIREBIRDLIBRARY)</sys-lib>
     </exe>
+
+    <copy-files id="templates">
+        <dependency-of>all</dependency-of>
+        <srcdir>html-templates</srcdir>
+        <dstdir>$(BUILDDIR)/html-templates</dstdir>
+        <files>$(HTMLTEMPLATES)</files>
+    </copy-files>
 
 </makefile>

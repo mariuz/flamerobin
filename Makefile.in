@@ -70,6 +70,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_table.o \
 	flamerobin_trigger.o \
 	flamerobin_view.o \
+	flamerobin_simpleparser.o \
 	flamerobin_myDataGrid.o \
 	flamerobin_myTreeCtrl.o \
 	flamerobin_objectdescriptionhandler.o \
@@ -136,7 +137,7 @@ COND_PLATFORM_OS2_1___flamerobin___os2_emxbindcmd = $(NM) flamerobin$(EXEEXT) \
 
 ### Targets: ###
 
-all: flamerobin$(EXEEXT)
+all: flamerobin$(EXEEXT) templates
 
 install: all
 
@@ -160,6 +161,14 @@ flamerobin$(EXEEXT): $(FLAMEROBIN_OBJECTS) $(__flamerobin___win32rc)
 
 @COND_GCC_PCH_1@.pch/.gch: 
 @COND_GCC_PCH_1@	$(top_builddir)./bk-make-pch .pch/.gch  $(CXX) $(FLAMEROBIN_CXXFLAGS)
+
+templates: 
+	@mkdir -p ./html-templates
+	@for f in DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TRIGGER.html VIEW.html dependencies.html drop.png files ok.png view.png; do \
+	if test \( ! -s ./html-templates/$$f \) -o \( html-templates/$$f -nt ./html-templates/$$f  \) ; then \
+	cp -pRf html-templates/$$f ./html-templates ; \
+	fi; \
+	done
 
 flamerobin_addconstrainthandler.o: $(srcdir)/src/addconstrainthandler.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
@@ -278,6 +287,9 @@ flamerobin_trigger.o: $(srcdir)/src/metadata/trigger.cpp $(FLAMEROBIN_ODEP)
 flamerobin_view.o: $(srcdir)/src/metadata/view.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
+flamerobin_simpleparser.o: $(srcdir)/src/simpleparser.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
 flamerobin_myDataGrid.o: $(srcdir)/src/myDataGrid.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
@@ -321,4 +333,4 @@ flamerobin_flamerobin_rc.o: $(srcdir)/res/flamerobin.rc $(FLAMEROBIN_ODEP)
 # Include dependency info, if present:
 @IF_GNU_MAKE@-include .deps/*.d
 
-.PHONY: all install uninstall clean distclean
+.PHONY: all install uninstall clean distclean templates

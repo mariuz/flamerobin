@@ -87,6 +87,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(D_OPT)\flamerobin_table.o \
 	gcc$(D_OPT)\flamerobin_trigger.o \
 	gcc$(D_OPT)\flamerobin_view.o \
+	gcc$(D_OPT)\flamerobin_simpleparser.o \
 	gcc$(D_OPT)\flamerobin_myDataGrid.o \
 	gcc$(D_OPT)\flamerobin_myTreeCtrl.o \
 	gcc$(D_OPT)\flamerobin_objectdescriptionhandler.o \
@@ -141,9 +142,6 @@ ifeq ($(FINAL),1)
 __IBPPLIBVERSION_FILENAMES = release
 endif
 ifeq ($(FINAL),0)
-D_OPT = d
-endif
-ifeq ($(FINAL),0)
 ____flamerobin_DEBUGINFO = -g
 endif
 ifeq ($(FINAL),1)
@@ -155,6 +153,9 @@ endif
 ifeq ($(USEDLL),1)
 ____flamerobin_WX_LIB_DIR_FILENAMES = $(WXDIR)\lib\gcc_dll
 endif
+ifeq ($(FINAL),0)
+D_OPT = d
+endif
 
 
 all: gcc$(D_OPT)
@@ -163,7 +164,7 @@ gcc$(D_OPT):
 
 ### Targets: ###
 
-all: gcc$(D_OPT)\flamerobin.exe
+all: gcc$(D_OPT)\flamerobin.exe templates
 
 clean: 
 	-if exist gcc$(D_OPT)\*.o del gcc$(D_OPT)\*.o
@@ -171,6 +172,10 @@ clean:
 
 gcc$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS) gcc$(D_OPT)\flamerobin_flamerobin_rc.o
 	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) $(LDFLAGS) -mthreads $(____flamerobin_DEBUGINFO) -L$(____flamerobin_WX_LIB_DIR_FILENAMES) -Wl,--subsystem,windows -mwindows -L$(IBPP)\$(__IBPPLIBVERSION_FILENAMES)\win32_mingw  -lwxmsw25$(U_OPT)$(D_OPT)_stc -lwxmsw25$(U_OPT)$(D_OPT)_html -lwxmsw25$(U_OPT)$(D_OPT)_adv -lwxmsw25$(U_OPT)$(D_OPT)_core -lwxbase25$(U_OPT)$(D_OPT) -lwxtiff$(D_OPT) -lwxjpeg$(D_OPT) -lwxpng$(D_OPT) -lwxzlib$(D_OPT) -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lcomctl32 -lrpcrt4 -lwsock32 -libpp
+
+templates: 
+	if not exist gcc$(D_OPT)\html-templates mkdir gcc$(D_OPT)\html-templates
+	for %%f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TRIGGER.html VIEW.html dependencies.html drop.png files ok.png view.png) do if not exist gcc$(D_OPT)\html-templates\%%f copy html-templates\%%f gcc$(D_OPT)\html-templates
 
 gcc$(D_OPT)\flamerobin_addconstrainthandler.o: ./src/addconstrainthandler.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
@@ -289,6 +294,9 @@ gcc$(D_OPT)\flamerobin_trigger.o: ./src/metadata/trigger.cpp
 gcc$(D_OPT)\flamerobin_view.o: ./src/metadata/view.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
+gcc$(D_OPT)\flamerobin_simpleparser.o: ./src/simpleparser.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
 gcc$(D_OPT)\flamerobin_myDataGrid.o: ./src/myDataGrid.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
@@ -322,4 +330,4 @@ gcc$(D_OPT)\flamerobin_urihandler.o: ./src/urihandler.cpp
 gcc$(D_OPT)\flamerobin_flamerobin_rc.o: ./res/flamerobin.rc
 	windres --use-temp-file -i$< -o$@ --include-dir $(WXDIR)/include --include-dir $(WXDIR)/contrib/include $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) --define HAVE_W32API_H --define _WINDOWS --define __WINDOWS__ --define WINVER=0x400 --define WIN32 --define __WIN32__ --define __WIN95__ --define STRICT --define __WXMSW__ --define wxUSE_GUI=1 --define WIN32_LEAN_AND_MEAN --include-dir $(__flamerobin_WX_LIB_DIR)/msw$(D_OPT) --define IBPP_GCC --define IBPP_WINDOWS --include-dir src --include-dir res --include-dir $(IBPP)
 
-.PHONY: all clean
+.PHONY: all clean templates

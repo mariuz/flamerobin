@@ -163,14 +163,14 @@ ____flamerobin_DEBUGINFO = -v
 !if "$(FINAL)" == "1"
 ____flamerobin_DEBUGINFO = -v-
 !endif
-!if "$(FINAL)" == "0"
-D_OPT = d
-!endif
 !if "$(USEDLL)" == "0"
 ____flamerobin_WX_LIB_DIR_FILENAMES = $(WXDIR)\lib\bcc_lib
 !endif
 !if "$(USEDLL)" == "1"
 ____flamerobin_WX_LIB_DIR_FILENAMES = $(WXDIR)\lib\bcc_dll
+!endif
+!if "$(FINAL)" == "0"
+D_OPT = d
 !endif
 
 
@@ -180,7 +180,7 @@ bcc$(D_OPT):
 
 ### Targets: ###
 
-all: bcc$(D_OPT)\flamerobin.exe
+all: bcc$(D_OPT)\flamerobin.exe templates
 
 clean: 
 	-if exist bcc$(D_OPT)\*.obj del bcc$(D_OPT)\*.obj
@@ -196,6 +196,10 @@ bcc$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS)  bcc$(D_OPT)\flamerobin_flamer
 	ilink32 -Tpe -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk  $(____flamerobin_DEBUGINFO) -L$(____flamerobin_WX_LIB_DIR_FILENAMES) -aa -L$(IBPP)\$(__IBPPLIBVERSION_FILENAMES)\win32_bcc @&&|
 	c0w32.obj $(FLAMEROBIN_OBJECTS),$@,, wxmsw25$(U_OPT)$(D_OPT)_stc.lib wxmsw25$(U_OPT)$(D_OPT)_html.lib wxmsw25$(U_OPT)$(D_OPT)_adv.lib wxmsw25$(U_OPT)$(D_OPT)_core.lib wxbase25$(U_OPT)$(D_OPT).lib wxtiff$(D_OPT).lib wxjpeg$(D_OPT).lib wxpng$(D_OPT).lib wxzlib$(D_OPT).lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib   import32.lib cw32mt.lib,, bcc$(D_OPT)\flamerobin_flamerobin.res
 |
+
+templates: 
+	if not exist bcc$(D_OPT)\html-templates mkdir bcc$(D_OPT)\html-templates
+	for %f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TRIGGER.html VIEW.html dependencies.html drop.png files ok.png view.png) do if not exist bcc$(D_OPT)\html-templates\%f copy html-templates\%f bcc$(D_OPT)\html-templates
 
 bcc$(D_OPT)\flamerobin_addconstrainthandler.obj: .\src\addconstrainthandler.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**

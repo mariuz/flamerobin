@@ -416,6 +416,10 @@ SOURCE=.\src\metadata\server.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\simpleparser.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\styleguide.cpp
 # End Source File
 # Begin Source File
@@ -601,6 +605,10 @@ SOURCE=.\src\metadata\root.h
 # Begin Source File
 
 SOURCE=.\src\metadata\server.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\simpleparser.h
 # End Source File
 # Begin Source File
 

@@ -90,6 +90,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(D_OPT)\flamerobin_table.obj \
 	vc$(D_OPT)\flamerobin_trigger.obj \
 	vc$(D_OPT)\flamerobin_view.obj \
+	vc$(D_OPT)\flamerobin_simpleparser.obj \
 	vc$(D_OPT)\flamerobin_myDataGrid.obj \
 	vc$(D_OPT)\flamerobin_myTreeCtrl.obj \
 	vc$(D_OPT)\flamerobin_objectdescriptionhandler.obj \
@@ -167,14 +168,14 @@ __IBPPLIBVERSION_FILENAMES = debug
 !if "$(FINAL)" == "1"
 __IBPPLIBVERSION_FILENAMES = release
 !endif
-!if "$(FINAL)" == "0"
-D_OPT = d
-!endif
 !if "$(USEDLL)" == "0"
 ____flamerobin_WX_LIB_DIR_FILENAMES = $(WXDIR)\lib\vc_lib
 !endif
 !if "$(USEDLL)" == "1"
 ____flamerobin_WX_LIB_DIR_FILENAMES = $(WXDIR)\lib\vc_dll
+!endif
+!if "$(FINAL)" == "0"
+D_OPT = d
 !endif
 
 
@@ -184,7 +185,7 @@ vc$(D_OPT):
 
 ### Targets: ###
 
-all: vc$(D_OPT)\flamerobin.exe
+all: vc$(D_OPT)\flamerobin.exe templates
 
 clean: 
 	-if exist vc$(D_OPT)\*.obj del vc$(D_OPT)\*.obj
@@ -197,6 +198,10 @@ vc$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS) vc$(D_OPT)\flamerobin_flamerobi
 	link /NOLOGO /OUT:$@ $(LDFLAGS)  $(____flamerobin_DEBUGINFO_3) /nologo /subsystem:windows /machine:I386 /LIBPATH:$(____flamerobin_WX_LIB_DIR_FILENAMES) /SUBSYSTEM:WINDOWS /LIBPATH:$(IBPP)\$(__IBPPLIBVERSION_FILENAMES)\win32_msvc @<<
 	$(FLAMEROBIN_OBJECTS)  wxmsw25$(U_OPT)$(D_OPT)_stc.lib wxmsw25$(U_OPT)$(D_OPT)_html.lib wxmsw25$(U_OPT)$(D_OPT)_adv.lib wxmsw25$(U_OPT)$(D_OPT)_core.lib wxbase25$(U_OPT)$(D_OPT).lib wxtiff$(D_OPT).lib wxjpeg$(D_OPT).lib wxpng$(D_OPT).lib wxzlib$(D_OPT).lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib
 <<
+
+templates: 
+	if not exist vc$(D_OPT)\html-templates mkdir vc$(D_OPT)\html-templates
+	for %f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TRIGGER.html VIEW.html dependencies.html drop.png files ok.png view.png) do if not exist vc$(D_OPT)\html-templates\%f copy html-templates\%f vc$(D_OPT)\html-templates
 
 vc$(D_OPT)\flamerobin_addconstrainthandler.obj: .\src\addconstrainthandler.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
@@ -313,6 +318,9 @@ vc$(D_OPT)\flamerobin_trigger.obj: .\src\metadata\trigger.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(D_OPT)\flamerobin_view.obj: .\src\metadata\view.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(D_OPT)\flamerobin_simpleparser.obj: .\src\simpleparser.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(D_OPT)\flamerobin_myDataGrid.obj: .\src\myDataGrid.cpp
