@@ -504,7 +504,7 @@ void ExecuteSqlFrame::OnButtonLoadClick(wxCommandEvent& WXUNUSED(event))
 		_("SQL Scripts (*.sql)|*.sql|All files (*.*)|*.*"),
 		wxOPEN|wxCHANGE_DIR);
 
-	if (wxOK != fd.ShowModal())
+	if (wxID_OK != fd.ShowModal())
 		return;
 
 	styled_text_ctrl_sql->LoadFile(fd.GetPath());
@@ -516,7 +516,7 @@ void ExecuteSqlFrame::OnButtonSaveClick(wxCommandEvent& WXUNUSED(event))
 		_("SQL Scripts (*.sql)|*.sql|All files (*.*)|*.*"),
 		wxSAVE |wxCHANGE_DIR);
 
-	if (wxOK != fd.ShowModal())
+	if (wxID_OK != fd.ShowModal())
 		return;
 
 	styled_text_ctrl_sql->SaveFile(fd.GetPath());

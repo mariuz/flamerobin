@@ -308,7 +308,7 @@ void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
     DatabaseRegistrationDialog drd(this, -1, _("Register Existing Database"));
 	drd.setDatabase(&db);
 
-    if (drd.ShowModal() == wxOK)
+    if (drd.ShowModal() == wxID_OK)
 		tree_ctrl_1->selectMetadataItem(s->addDatabase(db));
 }
 //-----------------------------------------------------------------------------
@@ -334,7 +334,7 @@ void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
 	drd.setDatabase(&db);
 	drd.setServer(s);
 
-    if (drd.ShowModal() == wxOK)
+    if (drd.ShowModal() == wxID_OK)
         tree_ctrl_1->selectMetadataItem(s->addDatabase(db));
 }
 //-----------------------------------------------------------------------------
@@ -394,7 +394,7 @@ void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
 	YServer s;
     ServerRegistrationDialog srd(this, -1, _("Register New Server"));
 	srd.setServer(&s);
-	if (wxOK == srd.ShowModal())
+	if (wxID_OK == srd.ShowModal())
 		tree_ctrl_1->selectMetadataItem(r->addServer(s));
 }
 //-----------------------------------------------------------------------------

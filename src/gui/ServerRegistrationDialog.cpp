@@ -62,7 +62,7 @@ void ServerRegistrationDialog::do_layout()
 {
 #if wxCHECK_VERSION(2, 5, 3)
     // create sizer for controls
-    wxFlexGridSizer* sizerControls = new wxFlexGridSizer(2, 2, 
+    wxFlexGridSizer* sizerControls = new wxFlexGridSizer(2, 2,
         styleguide().getRelatedControlMargin(wxVERTICAL),
         styleguide().getControlLabelMargin());
     sizerControls->AddGrowableCol(1);
@@ -136,7 +136,7 @@ void ServerRegistrationDialog::setServer(YServer *s)
 //-----------------------------------------------------------------------------
 void ServerRegistrationDialog::updateButtons()
 {
-    button_ok->Enable(text_ctrl_hostname->IsEditable() 
+    button_ok->Enable(text_ctrl_hostname->IsEditable()
         && !text_ctrl_hostname->GetValue().IsEmpty());
 }
 //-----------------------------------------------------------------------------
@@ -158,7 +158,7 @@ void ServerRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     serverM->setHostname(wx2std(text_ctrl_hostname->GetValue()));
     serverM->setPort(wx2std(text_ctrl_portnumber->GetValue()));
-    EndModal(wxOK);
+    EndModal(wxID_OK);
 }
 //-----------------------------------------------------------------------------
 void ServerRegistrationDialog::OnCancelButtonClick(wxCommandEvent& WXUNUSED(event))

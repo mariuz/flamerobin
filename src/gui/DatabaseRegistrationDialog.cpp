@@ -86,7 +86,7 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
         wxT("WIN1253"),
         wxT("WIN1254")
     };
-    combo_box_charset = new wxComboBox(this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, 
+    combo_box_charset = new wxComboBox(this, -1, wxT(""), wxDefaultPosition, wxDefaultSize,
         sizeof(charset_choices) / sizeof(wxString), charset_choices, wxCB_DROPDOWN|wxCB_READONLY);
     label_role = new wxStaticText(this, -1, _("Role:"));
     text_ctrl_role = new wxTextCtrl(this, -1, wxT(""));
@@ -101,14 +101,14 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
             wxT("8192"),
             wxT("16384")
         };
-        combo_box_pagesize = new wxComboBox(this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, 
+        combo_box_pagesize = new wxComboBox(this, -1, wxT(""), wxDefaultPosition, wxDefaultSize,
             sizeof(pagesize_choices) / sizeof(wxString), pagesize_choices, wxCB_DROPDOWN|wxCB_READONLY);
         label_dialect = new wxStaticText(this, -1, _("SQL Dialect:"));
         const wxString dialect_choices[] = {
             wxT("1"),
             wxT("3")
         };
-        combo_box_dialect = new wxComboBox(this, -1, wxT(""), wxDefaultPosition, wxDefaultSize, 
+        combo_box_dialect = new wxComboBox(this, -1, wxT(""), wxDefaultPosition, wxDefaultSize,
             sizeof(dialect_choices) / sizeof(wxString), dialect_choices, wxCB_DROPDOWN|wxCB_READONLY);
     }
 
@@ -306,7 +306,7 @@ void DatabaseRegistrationDialog::updateButtons()
 {
     if (button_ok->IsShown())
     {
-        button_ok->Enable(text_ctrl_dbpath->IsEditable() 
+        button_ok->Enable(text_ctrl_dbpath->IsEditable()
             && !text_ctrl_dbpath->GetValue().IsEmpty()
             && !text_ctrl_username->GetValue().IsEmpty());
     }
@@ -346,7 +346,7 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
             ps += combo_box_pagesize->GetValue();
             serverM->createDatabase(databaseM, wx2std(ps), dialect);
         }
-        EndModal(wxOK);
+        EndModal(wxID_OK);
     }
     catch (IBPP::Exception &e)
     {
