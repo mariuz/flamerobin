@@ -30,7 +30,7 @@
 
 // TODO: USE_MYDATAGRID
 // uncomment the next line to use the myDataGrid class
-//#define USE_MYDATAGRID
+// #define USE_MYDATAGRID
 
 #include <wx/wx.h>
 #include <wx/image.h>
