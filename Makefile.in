@@ -70,11 +70,11 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_table.o \
 	flamerobin_trigger.o \
 	flamerobin_view.o \
-	flamerobin_simpleparser.o \
 	flamerobin_myDataGrid.o \
 	flamerobin_myTreeCtrl.o \
 	flamerobin_objectdescriptionhandler.o \
 	flamerobin_observer.o \
+	flamerobin_simpleparser.o \
 	flamerobin_styleguide.o \
 	$(__PLATFORMSPECIFICSOURCES_OBJECTS) \
 	flamerobin_subject.o \
@@ -287,9 +287,6 @@ flamerobin_trigger.o: $(srcdir)/src/metadata/trigger.cpp $(FLAMEROBIN_ODEP)
 flamerobin_view.o: $(srcdir)/src/metadata/view.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-flamerobin_simpleparser.o: $(srcdir)/src/simpleparser.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
-
 flamerobin_myDataGrid.o: $(srcdir)/src/myDataGrid.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
@@ -300,6 +297,9 @@ flamerobin_objectdescriptionhandler.o: $(srcdir)/src/objectdescriptionhandler.cp
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 flamerobin_observer.o: $(srcdir)/src/observer.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+flamerobin_simpleparser.o: $(srcdir)/src/simpleparser.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 flamerobin_styleguide.o: $(srcdir)/src/styleguide.cpp $(FLAMEROBIN_ODEP)

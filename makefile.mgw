@@ -87,11 +87,11 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(D_OPT)\flamerobin_table.o \
 	gcc$(D_OPT)\flamerobin_trigger.o \
 	gcc$(D_OPT)\flamerobin_view.o \
-	gcc$(D_OPT)\flamerobin_simpleparser.o \
 	gcc$(D_OPT)\flamerobin_myDataGrid.o \
 	gcc$(D_OPT)\flamerobin_myTreeCtrl.o \
 	gcc$(D_OPT)\flamerobin_objectdescriptionhandler.o \
 	gcc$(D_OPT)\flamerobin_observer.o \
+	gcc$(D_OPT)\flamerobin_simpleparser.o \
 	gcc$(D_OPT)\flamerobin_styleguide.o \
 	gcc$(D_OPT)\flamerobin_styleguidemsw.o \
 	gcc$(D_OPT)\flamerobin_subject.o \
@@ -294,9 +294,6 @@ gcc$(D_OPT)\flamerobin_trigger.o: ./src/metadata/trigger.cpp
 gcc$(D_OPT)\flamerobin_view.o: ./src/metadata/view.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-gcc$(D_OPT)\flamerobin_simpleparser.o: ./src/simpleparser.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
-
 gcc$(D_OPT)\flamerobin_myDataGrid.o: ./src/myDataGrid.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
@@ -307,6 +304,9 @@ gcc$(D_OPT)\flamerobin_objectdescriptionhandler.o: ./src/objectdescriptionhandle
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(D_OPT)\flamerobin_observer.o: ./src/observer.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+gcc$(D_OPT)\flamerobin_simpleparser.o: ./src/simpleparser.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(D_OPT)\flamerobin_styleguide.o: ./src/styleguide.cpp

@@ -39,12 +39,12 @@ FINAL = 0
 
 ### Variables: ###
 
-FLAMEROBIN_CXXFLAGS = /MD$(____flamerobin_DEBUGINFO_5) /DWIN32 \
+FLAMEROBIN_CXXFLAGS = /MD$(____flamerobin_DEBUGINFO_6) /DWIN32 \
 	/I$(WXDIR)\include /I$(WXDIR)\contrib\include \
 	$(____flamerobin_UNICODE_DEFINE_p) $(____flamerobin_WXDEBUG_p) \
-	$(____flamerobin_DEBUGFLAG_p) $(____flamerobin_DEBUGINFO_2) \
-	$(______flamerobin_DEBUGINFO_4_p) /Fdvc$(D_OPT)\flamerobin.pdb \
-	$(____flamerobin_OPTIMIZE_6) /D_WINDOWS /D__WINDOWS__ /DWINVER=0x400 /DWIN32 \
+	$(____flamerobin_DEBUGFLAG_p) $(____flamerobin_DEBUGINFO_3) \
+	$(______flamerobin_DEBUGINFO_5_p) /Fdvc$(D_OPT)\flamerobin.pdb \
+	$(____flamerobin_OPTIMIZE_7) /D_WINDOWS /D__WINDOWS__ /DWINVER=0x400 /DWIN32 \
 	/D__WIN32__ /D__WIN95__ /DSTRICT /D__WXMSW__ /DwxUSE_GUI=1 \
 	/DWIN32_LEAN_AND_MEAN \
 	/I$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(D_OPT) /D_WINDOWS /W4 \
@@ -90,11 +90,11 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(D_OPT)\flamerobin_table.obj \
 	vc$(D_OPT)\flamerobin_trigger.obj \
 	vc$(D_OPT)\flamerobin_view.obj \
-	vc$(D_OPT)\flamerobin_simpleparser.obj \
 	vc$(D_OPT)\flamerobin_myDataGrid.obj \
 	vc$(D_OPT)\flamerobin_myTreeCtrl.obj \
 	vc$(D_OPT)\flamerobin_objectdescriptionhandler.obj \
 	vc$(D_OPT)\flamerobin_observer.obj \
+	vc$(D_OPT)\flamerobin_simpleparser.obj \
 	vc$(D_OPT)\flamerobin_styleguide.obj \
 	vc$(D_OPT)\flamerobin_styleguidemsw.obj \
 	vc$(D_OPT)\flamerobin_subject.obj \
@@ -127,40 +127,40 @@ ____flamerobin_DEBUGFLAG_p = /D_DEBUG
 ____flamerobin_DEBUGFLAG_p_1 = /d _DEBUG
 !endif
 !if "$(FINAL)" == "0"
-____flamerobin_DEBUGINFO_2 = /Zi
-!endif
-!if "$(FINAL)" == "1"
-____flamerobin_DEBUGINFO_2 = 
-!endif
-!if "$(FINAL)" == "0"
-____flamerobin_DEBUGINFO_3 = /DEBUG
+____flamerobin_DEBUGINFO_3 = /Zi
 !endif
 !if "$(FINAL)" == "1"
 ____flamerobin_DEBUGINFO_3 = 
 !endif
 !if "$(FINAL)" == "0"
-______flamerobin_DEBUGINFO_4_p = /D_DEBUG
+____flamerobin_DEBUGINFO_4 = /DEBUG
 !endif
 !if "$(FINAL)" == "1"
-______flamerobin_DEBUGINFO_4_p = 
+____flamerobin_DEBUGINFO_4 = 
 !endif
 !if "$(FINAL)" == "0"
-______flamerobin_DEBUGINFO_4_p_1 = /d _DEBUG
+______flamerobin_DEBUGINFO_5_p = /D_DEBUG
 !endif
 !if "$(FINAL)" == "1"
-______flamerobin_DEBUGINFO_4_p_1 = 
+______flamerobin_DEBUGINFO_5_p = 
 !endif
 !if "$(FINAL)" == "0"
-____flamerobin_DEBUGINFO_5 = d
+______flamerobin_DEBUGINFO_5_p_1 = /d _DEBUG
 !endif
 !if "$(FINAL)" == "1"
-____flamerobin_DEBUGINFO_5 = 
+______flamerobin_DEBUGINFO_5_p_1 = 
 !endif
 !if "$(FINAL)" == "0"
-____flamerobin_OPTIMIZE_6 = /Od
+____flamerobin_DEBUGINFO_6 = d
 !endif
 !if "$(FINAL)" == "1"
-____flamerobin_OPTIMIZE_6 = /O2
+____flamerobin_DEBUGINFO_6 = 
+!endif
+!if "$(FINAL)" == "0"
+____flamerobin_OPTIMIZE_7 = /Od
+!endif
+!if "$(FINAL)" == "1"
+____flamerobin_OPTIMIZE_7 = /O2
 !endif
 !if "$(FINAL)" == "0"
 __IBPPLIBVERSION_FILENAMES = debug
@@ -195,7 +195,7 @@ clean:
 	-if exist vc$(D_OPT)\flamerobin.pdb del vc$(D_OPT)\flamerobin.pdb
 
 vc$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS) vc$(D_OPT)\flamerobin_flamerobin.res
-	link /NOLOGO /OUT:$@ $(LDFLAGS)  $(____flamerobin_DEBUGINFO_3) /nologo /subsystem:windows /machine:I386 /LIBPATH:$(____flamerobin_WX_LIB_DIR_FILENAMES) /SUBSYSTEM:WINDOWS /LIBPATH:$(IBPP)\$(__IBPPLIBVERSION_FILENAMES)\win32_msvc @<<
+	link /NOLOGO /OUT:$@ $(LDFLAGS)  $(____flamerobin_DEBUGINFO_4) /nologo /subsystem:windows /machine:I386 /LIBPATH:$(____flamerobin_WX_LIB_DIR_FILENAMES) /SUBSYSTEM:WINDOWS /LIBPATH:$(IBPP)\$(__IBPPLIBVERSION_FILENAMES)\win32_msvc @<<
 	$(FLAMEROBIN_OBJECTS)  wxmsw25$(U_OPT)$(D_OPT)_stc.lib wxmsw25$(U_OPT)$(D_OPT)_html.lib wxmsw25$(U_OPT)$(D_OPT)_adv.lib wxmsw25$(U_OPT)$(D_OPT)_core.lib wxbase25$(U_OPT)$(D_OPT).lib wxtiff$(D_OPT).lib wxjpeg$(D_OPT).lib wxpng$(D_OPT).lib wxzlib$(D_OPT).lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib
 <<
 
@@ -320,9 +320,6 @@ vc$(D_OPT)\flamerobin_trigger.obj: .\src\metadata\trigger.cpp
 vc$(D_OPT)\flamerobin_view.obj: .\src\metadata\view.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-vc$(D_OPT)\flamerobin_simpleparser.obj: .\src\simpleparser.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
-
 vc$(D_OPT)\flamerobin_myDataGrid.obj: .\src\myDataGrid.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
@@ -333,6 +330,9 @@ vc$(D_OPT)\flamerobin_objectdescriptionhandler.obj: .\src\objectdescriptionhandl
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(D_OPT)\flamerobin_observer.obj: .\src\observer.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(D_OPT)\flamerobin_simpleparser.obj: .\src\simpleparser.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(D_OPT)\flamerobin_styleguide.obj: .\src\styleguide.cpp
@@ -354,4 +354,4 @@ vc$(D_OPT)\flamerobin_urihandler.obj: .\src\urihandler.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(D_OPT)\flamerobin_flamerobin.res: .\res\flamerobin.rc
-	rc /fo$@  /d WIN32 /i $(WXDIR)\include /i $(WXDIR)\contrib\include $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) $(______flamerobin_DEBUGINFO_4_p_1) /d _WINDOWS /d __WINDOWS__ /d WINVER=0x400 /d WIN32 /d __WIN32__ /d __WIN95__ /d STRICT /d __WXMSW__ /d wxUSE_GUI=1 /d WIN32_LEAN_AND_MEAN /i $(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(D_OPT) /d _WINDOWS /d IBPP_MSVC /d IBPP_WINDOWS /i src /i res /i $(IBPP) $**
+	rc /fo$@  /d WIN32 /i $(WXDIR)\include /i $(WXDIR)\contrib\include $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) $(______flamerobin_DEBUGINFO_5_p_1) /d _WINDOWS /d __WINDOWS__ /d WINVER=0x400 /d WIN32 /d __WIN32__ /d __WIN95__ /d STRICT /d __WXMSW__ /d wxUSE_GUI=1 /d WIN32_LEAN_AND_MEAN /i $(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(D_OPT) /d _WINDOWS /d IBPP_MSVC /d IBPP_WINDOWS /i src /i res /i $(IBPP) $**

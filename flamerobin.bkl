@@ -49,6 +49,8 @@
             <set var="WXDIR">$(DOLLAR)(WXDIR)</set>
         </if>
 
+        <!-- use "static" or "dynamic" -->
+        <runtime-libs>dynamic</runtime-libs>
         <threading>multi</threading>
 
         <include>$(WXDIR)/include</include>
@@ -103,14 +105,14 @@
                 <if cond="USEDLL=='0'">$(WXDIR)/lib/gcc_lib</if>
             </set>
         </if>
-        <if cond="FORMAT in ['msvc6prj','msevc4prj','msvc']">
+        <if cond="FORMAT in ['msvc6prj','msvc']">
             <set var="WX_LIB_DIR" make_var="1">
                 <if cond="USEDLL=='1'">$(WXDIR)/lib/vc_dll</if>
                 <if cond="USEDLL=='0'">$(WXDIR)/lib/vc_lib</if>
             </set>
         </if>
 
-        <if cond="FORMAT in ['msvc6prj','msevc4prj','msvc']">
+        <if cond="FORMAT in ['msvc6prj','msvc']">
             <ldflags>/nologo</ldflags>
             <ldflags>/subsystem:windows</ldflags>
             <ldflags>/machine:I386</ldflags>
@@ -120,7 +122,7 @@
             <define>HAVE_W32API_H</define>
         </if>
 
-        <if cond="FORMAT in ['borland','mingw','msvc6prj','msevc4prj','msvc']">
+        <if cond="FORMAT in ['borland','mingw','msvc6prj','msvc']">
             <define>_WINDOWS</define>
             <define>__WINDOWS__</define>
             <define>WINVER=0x400</define>
@@ -329,11 +331,11 @@
         $(SOURCEDIR)/metadata/table.cpp
         $(SOURCEDIR)/metadata/trigger.cpp
         $(SOURCEDIR)/metadata/view.cpp
-        $(SOURCEDIR)/simpleparser.cpp
         $(SOURCEDIR)/myDataGrid.cpp
         $(SOURCEDIR)/myTreeCtrl.cpp
         $(SOURCEDIR)/objectdescriptionhandler.cpp
         $(SOURCEDIR)/observer.cpp
+        $(SOURCEDIR)/simpleparser.cpp
         $(SOURCEDIR)/styleguide.cpp
         $(PLATFORMSPECIFICSOURCES)
         $(SOURCEDIR)/subject.cpp
