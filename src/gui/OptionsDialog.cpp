@@ -39,6 +39,7 @@
 #include "images.h"
 #include "config.h"
 #include "ugly.h"
+#include "frutils.h"
 #include "OptionsDialog.h"
 
 using namespace opt;
@@ -244,6 +245,10 @@ wxBoxSizer *Setting::addToPanel(wxPanel *panel)
 OptionsDialog::OptionsDialog(wxWindow* parent):
     BaseDialog(parent, -1, wxEmptyString)
 {
+	// we don't want this dialog centered on parent since it is very big, and
+	// some parents (ex. main frame) could even be smaller
+	config().setValue(getName() + "::centerOnParent", false);
+
 	listbook1 = new wxListbook(this, ID_listbook, wxDefaultPosition, wxDefaultSize, wxNB_LEFT);
 	imageList.Create(32, 32);
 	imageList.Add(getImage32(ntColumn));
@@ -254,8 +259,8 @@ OptionsDialog::OptionsDialog(wxWindow* parent):
 
     set_properties();
 	load();
-    do_layout();
 	createPages();
+    do_layout();
 }
 //-----------------------------------------------------------------------------
 OptionsDialog::~OptionsDialog()
@@ -286,7 +291,11 @@ void OptionsDialog::do_layout()
 //-----------------------------------------------------------------------------
 void OptionsDialog::load()
 {
-	wxTextFile file(wxT("config_options.xml"));
+	std::string path = getApplicationPath();
+	if (!path.empty())
+		path += "/";
+	path += "config_options.xml";
+	wxTextFile file(std2wx(path));
 	if (!file.Open(wxConvUTF8))
 	{
 		wxMessageBox(_("Cannot load config_options.xml file"), _("Error."), wxICON_ERROR|wxOK);
