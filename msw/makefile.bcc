@@ -39,9 +39,9 @@ CPPFLAGS = -a8 -g0
 LDFLAGS = 
 !endif
 
-#  []
-!ifndef WXDIR
-WXDIR = 
+#  [0,1]
+!ifndef USEDLL
+USEDLL = 0
 !endif
 
 #  [0,1]
@@ -62,12 +62,17 @@ FINAL = 0
 
 ### Variables: ###
 
-FLAMEROBIN_CXXFLAGS = -I$(BCCDIR)\include -I\include \
+FLAMEROBIN_CXXFLAGS = -I$(BCCDIR)\include -tWM -I$(WXDIR)\include \
 	$(____flamerobin_UNICODE_DEFINE_p) $(____flamerobin_WXDEBUG_p) \
 	$(____flamerobin_DEBUGFLAG_p) $(____flamerobin_DEBUGINFO) \
-	$(____flamerobin_OPTIMIZE_2) -tWM -DIBPP_BCC -DIBPP_WINDOWS -I..\src \
-	-I..\res\ -I$(IBPP) -I$(WXDIR)\include -I$(WXDIR)\contrib\include -Hu \
-	$(CPPFLAGS) $(CXXFLAGS)
+	$(____flamerobin_OPTIMIZE_5) $(____flamerobin_WXUSINGDLL_p) \
+	-I$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(____flamerobin_D_OPT_FILENAMES) \
+	$(____flamerobin_WXUSINGDLL_p_2) \
+	-I$(____flamerobin_WX_LIB_DIR_FILENAMES_6)\msw$(flamerobin_D_OPT) \
+	-D_WINDOWS -D__WINDOWS__ -DWINVER=0x400 -DSTRICT -DWIN32 -DWINVER=0x400 \
+	-DwxUSE_GUI=1 -D__WXMSW__ -D__WIN32__ -D__WIN95__ -DWIN32_LEAN_AND_MEAN \
+	-DIBPP_BCC -DIBPP_WINDOWS -I..\src -I..\res\ -I$(IBPP) -I$(WXDIR)\include \
+	-I$(WXDIR)\contrib\include -Hu $(CPPFLAGS) $(CXXFLAGS)
 FLAMEROBIN_OBJECTS =  \
 	flamerobin_addconstrainthandler.obj \
 	flamerobin_BaseDialog.obj \
@@ -143,10 +148,34 @@ ____flamerobin_DEBUGFLAG_p = -D_DEBUG
 ____flamerobin_DEBUGFLAG_p_1 = -d_DEBUG
 !endif
 !if "$(FINAL)" == "0"
-____flamerobin_OPTIMIZE_2 = -Od
+____flamerobin_OPTIMIZE_5 = -Od
 !endif
 !if "$(FINAL)" == "1"
-____flamerobin_OPTIMIZE_2 = -O2
+____flamerobin_OPTIMIZE_5 = -O2
+!endif
+!if "$(UNICODE)" == "1"
+__flamerobin_U_OPT = u
+!endif
+!if "$(UNICODE)" == "1"
+__flamerobin_U_OPT = u
+!endif
+!if "$(USEDLL)" == "1"
+____flamerobin_WXUSINGDLL_p = -DWXUSINGDLL
+!endif
+!if "$(USEDLL)" == "1"
+____flamerobin_WXUSINGDLL_p_1 = -dWXUSINGDLL
+!endif
+!if "$(USEDLL)" == "1"
+____flamerobin_WXUSINGDLL_p_2 = -DWXUSINGDLL
+!endif
+!if "$(USEDLL)" == "1"
+____flamerobin_WXUSINGDLL_p_2 = -DWXUSINGDLL
+!endif
+!if "$(USEDLL)" == "1"
+____flamerobin_WXUSINGDLL_p_3 = -dWXUSINGDLL
+!endif
+!if "$(USEDLL)" == "1"
+____flamerobin_WXUSINGDLL_p_3 = -dWXUSINGDLL
 !endif
 !if "$(FINAL)" == "0"
 __IBPPLIBVERSION_FILENAMES = debug
@@ -159,6 +188,33 @@ ____flamerobin_DEBUGINFO = -v
 !endif
 !if "$(FINAL)" == "1"
 ____flamerobin_DEBUGINFO = -v-
+!endif
+!if "$(FINAL)" == "0"
+____flamerobin_D_OPT_FILENAMES = d
+!endif
+!if "$(USEDLL)" == "0"
+____flamerobin_WX_LIB_DIR_FILENAMES = $(WXDIR)\lib\vc_lib
+!endif
+!if "$(USEDLL)" == "1"
+____flamerobin_WX_LIB_DIR_FILENAMES = $(WXDIR)\lib\vc_dll
+!endif
+!if "$(FINAL)" == "0"
+flamerobin_D_OPT = d
+!endif
+!if "$(FINAL)" == "0"
+flamerobin_D_OPT = d
+!endif
+!if "$(USEDLL)" == "0"
+____flamerobin_WX_LIB_DIR_FILENAMES_6 = $(WXDIR)\lib\vc_lib
+!endif
+!if "$(USEDLL)" == "0"
+____flamerobin_WX_LIB_DIR_FILENAMES_6 = $(WXDIR)\lib\bcc_lib
+!endif
+!if "$(USEDLL)" == "1"
+____flamerobin_WX_LIB_DIR_FILENAMES_6 = $(WXDIR)\lib\vc_dll
+!endif
+!if "$(USEDLL)" == "1"
+____flamerobin_WX_LIB_DIR_FILENAMES_6 = $(WXDIR)\lib\bcc_dll
 !endif
 
 
@@ -177,8 +233,8 @@ clean:
 	-if exist flamerobin.ils del flamerobin.ils
 
 flamerobin.exe: $(FLAMEROBIN_OBJECTS)  flamerobin_flamerobin.res
-	ilink32 -Tpe -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk $(____flamerobin_DEBUGINFO) -aa  -L$(IBPP)\$(__IBPPLIBVERSION_FILENAMES)\win32_bcc @&&|
-	c0w32.obj $(FLAMEROBIN_OBJECTS),$@,, ibpp.lib import32.lib cw32mt.lib,, flamerobin_flamerobin.res
+	ilink32 -Tpe -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk  $(____flamerobin_DEBUGINFO) -L$(____flamerobin_WX_LIB_DIR_FILENAMES) -L$(____flamerobin_WX_LIB_DIR_FILENAMES_6) /nologo /subsystem:windows /machine:I386 -aa -L$(IBPP)\$(__IBPPLIBVERSION_FILENAMES)\win32_bcc @&&|
+	c0w32.obj $(FLAMEROBIN_OBJECTS),$@,, kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib wxbase25$(__flamerobin_U_OPT)$(flamerobin_D_OPT).lib wxmsw25$(__flamerobin_U_OPT)$(flamerobin_D_OPT)_adv.lib wxmsw25$(__flamerobin_U_OPT)$(flamerobin_D_OPT)_core.lib wxmsw25$(__flamerobin_U_OPT)$(flamerobin_D_OPT)_html.lib wxmsw25$(__flamerobin_U_OPT)$(flamerobin_D_OPT)_stc.lib wxtiff$(flamerobin_D_OPT).lib wxjpeg$(flamerobin_D_OPT).lib wxpng$(flamerobin_D_OPT).lib wxzlib$(flamerobin_D_OPT).lib ibpp.lib import32.lib cw32mt.lib,, flamerobin_flamerobin.res
 |
 
 flamerobin_addconstrainthandler.obj: .\..\src\addconstrainthandler.cpp
@@ -338,4 +394,4 @@ flamerobin_urihandler.obj: .\..\src\urihandler.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 flamerobin_flamerobin.res: .\..\res\flamerobin.rc
-	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include -i\include $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) -dIBPP_BCC -dIBPP_WINDOWS -i..\src -i..\res\ -i$(IBPP) -i$(WXDIR)\include -i$(WXDIR)\contrib\include $**
+	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include -i$(WXDIR)\include $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) $(____flamerobin_WXUSINGDLL_p_1) -i$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(____flamerobin_D_OPT_FILENAMES) $(____flamerobin_WXUSINGDLL_p_3) -i$(____flamerobin_WX_LIB_DIR_FILENAMES_6)\msw$(flamerobin_D_OPT) -d_WINDOWS -d__WINDOWS__ -dWINVER=0x400 -dSTRICT -dWIN32 -dWINVER=0x400 -dwxUSE_GUI=1 -d__WXMSW__ -d__WIN32__ -d__WIN95__ -dWIN32_LEAN_AND_MEAN -dIBPP_BCC -dIBPP_WINDOWS -i..\src -i..\res\ -i$(IBPP) -i$(WXDIR)\include -i$(WXDIR)\contrib\include $**

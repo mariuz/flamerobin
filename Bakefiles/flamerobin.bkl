@@ -34,32 +34,29 @@
 		<default-value>0</default-value>
 	</option>
 
-	<!-- this will only get set for MSVC, but we use it everywhere for ibpp.lib -->
-	<set var="D_OPT"></set>
 	<include file="wxtemplate.bkl"/>
 	
-	
+	<define-tag name="headers" rules="dll,lib,exe">
+		<if cond="FORMAT=='msvc6prj'">
+			<msvc-project-files>
+				$(value)
+			</msvc-project-files>
+		</if>
+	</define-tag>
+
+
 	<!-- we do this because on Unix the makefiles are usually
 		 in the root directory of the package, whereas for other
 		 formats (like MSW), typically they are in subfolders(?) -->
 	<set var="SOURCEDIR">
-		<if cond="FORMAT=='autoconf'">
-			./src/
-		</if>
-		<if cond="FORMAT!='autoconf'">
-			..\src\
-		</if>
-	</set>	
-	
-	<set var="INCLDIR">
 		<if cond="FORMAT=='autoconf'">
 			./src
 		</if>
 		<if cond="FORMAT!='autoconf'">
 			..\src
 		</if>
-	</set>
-
+	</set>	
+	
 	<set var="RESDIR">
 		<if cond="FORMAT=='autoconf'">
 			./res/
@@ -98,16 +95,119 @@
 	</set>
 	<set var="IBPPLIBPATH">$(DOLLAR)(IBPP)/$(IBPPLIBVERSION)/$(IBPPPLATFORM)</set>
 
-	<set var="STYLEGUIDEIMPLEMENTATION">
-		<if cond="PLATFORM_MACOSX=='0' and PLATFORM_WIN32=='0'">
-			$(SOURCEDIR)styleguidegeneric.cpp
+	<set var="HEADERFILES">
+		$(SOURCEDIR)/BaseDialog.h
+		$(SOURCEDIR)/BaseFrame.h
+		$(SOURCEDIR)/config.h
+		$(SOURCEDIR)/converters.h
+		$(SOURCEDIR)/dberror.h
+		$(SOURCEDIR)/ExecuteSqlFrame.h
+		$(SOURCEDIR)/FieldPropertiesFrame.h
+		$(SOURCEDIR)/frutils.h
+		$(SOURCEDIR)/gui/BackupFrame.h
+		$(SOURCEDIR)/gui/BackupRestoreBaseFrame.h
+		$(SOURCEDIR)/gui/DatabaseRegistrationDialog.h
+		$(SOURCEDIR)/gui/MultilineEnterDialog.h
+		$(SOURCEDIR)/gui/RestoreFrame.h
+		$(SOURCEDIR)/gui/ServerRegistrationDialog.h
+		$(SOURCEDIR)/images.h
+		$(SOURCEDIR)/main.h
+		$(SOURCEDIR)/MainFrame.h
+		$(SOURCEDIR)/metadata/collection.h
+		$(SOURCEDIR)/metadata/column.h
+		$(SOURCEDIR)/metadata/constraints.h
+		$(SOURCEDIR)/metadata/database.h
+		$(SOURCEDIR)/metadata/domain.h
+		$(SOURCEDIR)/metadata/exception.h
+		$(SOURCEDIR)/metadata/function.h
+		$(SOURCEDIR)/metadata/generator.h
+		$(SOURCEDIR)/metadata/metadataitem.h
+		$(SOURCEDIR)/metadata/metadataitemwithcolumns.h
+		$(SOURCEDIR)/metadata/parameter.h
+		$(SOURCEDIR)/metadata/procedure.h
+		$(SOURCEDIR)/metadata/role.h
+		$(SOURCEDIR)/metadata/root.h
+		$(SOURCEDIR)/metadata/server.h
+		$(SOURCEDIR)/metadata/table.h
+		$(SOURCEDIR)/metadata/trigger.h
+		$(SOURCEDIR)/metadata/view.h
+		$(SOURCEDIR)/MetadataItemPropertiesDialog.h
+		$(SOURCEDIR)/myDataGrid.h
+		$(SOURCEDIR)/myTreeCtrl.h
+		$(SOURCEDIR)/observer.h
+		$(SOURCEDIR)/ReorderFieldsDialog.h
+		$(SOURCEDIR)/styleguide.h
+		$(SOURCEDIR)/subject.h
+		$(SOURCEDIR)/treeitem.h
+		$(SOURCEDIR)/ugly.h
+		$(SOURCEDIR)/urihandler.h
+	</set>
+
+	<set var="PLATFORMSPECIFICSOURCES">
+		<if cond="PLATFORM_UNIX=='1'">
+			$(SOURCEDIR)/styleguidegeneric.cpp
 		</if>
 		<if cond="PLATFORM_MACOSX=='1'">
-			$(SOURCEDIR)styleguidemac.cpp
+			$(SOURCEDIR)/styleguidemac.cpp
 		</if>
 		<if cond="PLATFORM_WIN32=='1'">
-			$(SOURCEDIR)styleguidemsw.cpp
+			$(SOURCEDIR)/styleguidemsw.cpp
 		</if>
+	</set>
+
+	<set var="SOURCEFILES">
+		$(SOURCEDIR)/addconstrainthandler.cpp
+		$(SOURCEDIR)/BaseDialog.cpp
+		$(SOURCEDIR)/BaseFrame.cpp
+		$(SOURCEDIR)/config.cpp
+		$(SOURCEDIR)/converters.cpp
+		$(SOURCEDIR)/dberror.cpp
+		$(SOURCEDIR)/ExecuteSqlFrame.cpp
+		$(SOURCEDIR)/ExecuteSqlFrameImpl.cpp
+		$(SOURCEDIR)/FieldPropertiesFrame.cpp
+		$(SOURCEDIR)/FieldPropertiesFrameImpl.cpp
+		$(SOURCEDIR)/frutils.cpp
+		$(SOURCEDIR)/gui/BackupFrame.cpp
+		$(SOURCEDIR)/gui/BackupRestoreBaseFrame.cpp
+		$(SOURCEDIR)/gui/DatabaseRegistrationDialog.cpp
+		$(SOURCEDIR)/gui/MultilineEnterDialog.cpp
+		$(SOURCEDIR)/gui/RestoreFrame.cpp
+		$(SOURCEDIR)/gui/ServerRegistrationDialog.cpp
+		$(SOURCEDIR)/images.cpp
+		$(SOURCEDIR)/main.cpp
+		$(SOURCEDIR)/MainFrame.cpp
+		$(SOURCEDIR)/MainFrameImpl.cpp
+		$(SOURCEDIR)/metadata/column.cpp
+		$(SOURCEDIR)/metadata/constraints.cpp
+		$(SOURCEDIR)/metadata/database.cpp
+		$(SOURCEDIR)/metadata/domain.cpp
+		$(SOURCEDIR)/metadata/exception.cpp
+		$(SOURCEDIR)/metadata/function.cpp
+		$(SOURCEDIR)/metadata/generator.cpp
+		$(SOURCEDIR)/metadata/metadataitem.cpp
+		$(SOURCEDIR)/metadata/metadataitemwithcolumns.cpp
+		$(SOURCEDIR)/metadata/parameter.cpp
+		$(SOURCEDIR)/metadata/procedure.cpp
+		$(SOURCEDIR)/metadata/role.cpp
+		$(SOURCEDIR)/metadata/root.cpp
+		$(SOURCEDIR)/metadata/server.cpp
+		$(SOURCEDIR)/metadata/table.cpp
+		$(SOURCEDIR)/metadata/trigger.cpp
+		$(SOURCEDIR)/metadata/view.cpp
+		$(SOURCEDIR)/MetadataItemPropertiesDialog.cpp
+		$(SOURCEDIR)/MetadataItemPropertiesDialogImpl.cpp
+		$(SOURCEDIR)/myDataGrid.cpp
+		$(SOURCEDIR)/myTreeCtrl.cpp
+		$(SOURCEDIR)/objectdescriptionhandler.cpp
+		$(SOURCEDIR)/observer.cpp
+		$(SOURCEDIR)/ReorderFieldsDialog.cpp
+		$(SOURCEDIR)/ReorderFieldsDialogImpl.cpp
+		$(SOURCEDIR)/styleguide.cpp
+		$(PLATFORMSPECIFICSOURCES)
+		$(SOURCEDIR)/subject.cpp
+		$(SOURCEDIR)/treeitem.cpp
+		$(SOURCEDIR)/ugly.cpp
+		$(SOURCEDIR)/urihandler.cpp
 	</set>
 
 	<exe id="flamerobin" template="wx">
@@ -115,73 +215,22 @@
 		<cxx-rtti>on</cxx-rtti>
 		<cxx-exceptions>on</cxx-exceptions>
 		<precomp-headers>on</precomp-headers>
-		<threading>multi</threading>
 		<warnings>max</warnings>
 		<define>$(IBPPCOMPILERDEFINE)</define>
 		<define>$(IBPPPLATFORMDEFINE)</define>
-		<include>$(INCLDIR)</include>
+		<include>$(SOURCEDIR)</include>
 		<include>$(RESDIR)</include>
 		<include>$(DOLLAR)(IBPP)</include>
 		<include>$(DOLLAR)(WXDIR)/include</include>
 		<include>$(DOLLAR)(WXDIR)/contrib/include</include>
-		<sources>
-			$(SOURCEDIR)addconstrainthandler.cpp
-			$(SOURCEDIR)BaseDialog.cpp
-			$(SOURCEDIR)BaseFrame.cpp
-			$(SOURCEDIR)config.cpp
-			$(SOURCEDIR)converters.cpp
-			$(SOURCEDIR)dberror.cpp
-			$(SOURCEDIR)ExecuteSqlFrame.cpp
-			$(SOURCEDIR)ExecuteSqlFrameImpl.cpp
-			$(SOURCEDIR)FieldPropertiesFrame.cpp
-			$(SOURCEDIR)FieldPropertiesFrameImpl.cpp
-			$(SOURCEDIR)frutils.cpp
-			$(SOURCEDIR)gui/BackupFrame.cpp
-			$(SOURCEDIR)gui/BackupRestoreBaseFrame.cpp
-			$(SOURCEDIR)gui/DatabaseRegistrationDialog.cpp
-			$(SOURCEDIR)gui/MultilineEnterDialog.cpp
-			$(SOURCEDIR)gui/RestoreFrame.cpp
-			$(SOURCEDIR)gui/ServerRegistrationDialog.cpp
-			$(SOURCEDIR)images.cpp
-			$(SOURCEDIR)main.cpp
-			$(SOURCEDIR)MainFrame.cpp
-			$(SOURCEDIR)MainFrameImpl.cpp
-			$(SOURCEDIR)metadata/column.cpp
-			$(SOURCEDIR)metadata/constraints.cpp
-			$(SOURCEDIR)metadata/database.cpp
-			$(SOURCEDIR)metadata/domain.cpp
-			$(SOURCEDIR)metadata/exception.cpp
-			$(SOURCEDIR)metadata/function.cpp
-			$(SOURCEDIR)metadata/generator.cpp
-			$(SOURCEDIR)metadata/metadataitem.cpp
-			$(SOURCEDIR)metadata/metadataitemwithcolumns.cpp
-			$(SOURCEDIR)metadata/parameter.cpp
-			$(SOURCEDIR)metadata/procedure.cpp
-			$(SOURCEDIR)metadata/role.cpp
-			$(SOURCEDIR)metadata/root.cpp
-			$(SOURCEDIR)metadata/server.cpp
-			$(SOURCEDIR)metadata/table.cpp
-			$(SOURCEDIR)metadata/trigger.cpp
-			$(SOURCEDIR)metadata/view.cpp
-			$(SOURCEDIR)MetadataItemPropertiesDialog.cpp
-			$(SOURCEDIR)MetadataItemPropertiesDialogImpl.cpp
-			$(SOURCEDIR)myDataGrid.cpp
-			$(SOURCEDIR)myTreeCtrl.cpp
-			$(SOURCEDIR)objectdescriptionhandler.cpp
-			$(SOURCEDIR)observer.cpp
-			$(SOURCEDIR)ReorderFieldsDialog.cpp
-			$(SOURCEDIR)ReorderFieldsDialogImpl.cpp
-			$(SOURCEDIR)styleguide.cpp
-			$(STYLEGUIDEIMPLEMENTATION)
-			$(SOURCEDIR)subject.cpp
-			$(SOURCEDIR)treeitem.cpp
-			$(SOURCEDIR)ugly.cpp
-			$(SOURCEDIR)urihandler.cpp
-		</sources>
+
+		<headers>$(HEADERFILES)</headers>
+		<sources>$(SOURCEFILES)</sources>
+
 		<mac-res>$(RESDIR)FlameRobin.icns</mac-res>
 		<win32-res>$(RESDIR)flamerobin.rc</win32-res>
 		<lib-path>$(IBPPLIBPATH)</lib-path>
-		<sys-lib>ibpp$(D_OPT)</sys-lib>
+		<sys-lib>ibpp</sys-lib>
 	</exe>
 	
 </makefile>

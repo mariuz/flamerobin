@@ -37,12 +37,6 @@ dnl ### begin block 1_COND_GCC_PCH_1 ###
         COND_GCC_PCH_1=""
     fi
     AC_SUBST(COND_GCC_PCH_1)
-dnl ### begin block 1_COND_PLATFORM_MACOSX_0_PLATFORM_WIN32_0 ###
-    COND_PLATFORM_MACOSX_0_PLATFORM_WIN32_0="#"
-    if test "x$PLATFORM_MACOSX" = "x0" -a "x$PLATFORM_WIN32" = "x0" ; then
-        COND_PLATFORM_MACOSX_0_PLATFORM_WIN32_0=""
-    fi
-    AC_SUBST(COND_PLATFORM_MACOSX_0_PLATFORM_WIN32_0)
 dnl ### begin block 1_COND_PLATFORM_MACOSX_1 ###
     COND_PLATFORM_MACOSX_1="#"
     if test "x$PLATFORM_MACOSX" = "x1" ; then

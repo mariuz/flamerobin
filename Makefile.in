@@ -35,8 +35,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_BaseFrame.o \
 	flamerobin_config.o \
 	flamerobin_converters.o \
-	flamerobin_DatabaseRegistrationInfoFrame.o \
-	flamerobin_DatabaseRegistrationInfoFrameImpl.o \
 	flamerobin_dberror.o \
 	flamerobin_ExecuteSqlFrame.o \
 	flamerobin_ExecuteSqlFrameImpl.o \
@@ -45,6 +43,8 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_frutils.o \
 	flamerobin_BackupFrame.o \
 	flamerobin_BackupRestoreBaseFrame.o \
+	flamerobin_DatabaseRegistrationDialog.o \
+	flamerobin_MultilineEnterDialog.o \
 	flamerobin_RestoreFrame.o \
 	flamerobin_ServerRegistrationDialog.o \
 	flamerobin_images.o \
@@ -70,7 +70,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_view.o \
 	flamerobin_MetadataItemPropertiesDialog.o \
 	flamerobin_MetadataItemPropertiesDialogImpl.o \
-	flamerobin_MultilineEnterDialog.o \
 	flamerobin_myDataGrid.o \
 	flamerobin_myTreeCtrl.o \
 	flamerobin_objectdescriptionhandler.o \
@@ -78,7 +77,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_ReorderFieldsDialog.o \
 	flamerobin_ReorderFieldsDialogImpl.o \
 	flamerobin_styleguide.o \
-	$(__STYLEGUIDEIMPLEMENTATION_OBJECTS) \
+	$(__PLATFORMSPECIFICSOURCES_OBJECTS) \
 	flamerobin_subject.o \
 	flamerobin_treeitem.o \
 	flamerobin_ugly.o \
@@ -121,11 +120,11 @@ COND_PLATFORM_OS2_1___flamerobin___os2_emxbindcmd = $(NM) flamerobin$(EXEEXT) \
 @COND_PLATFORM_MACOSX_1@__IBPPPLATFORMDEFINE_p_2 = --define IBPP_DARWIN
 @COND_PLATFORM_UNIX_1@__IBPPPLATFORMDEFINE_p_2 = --define IBPP_LINUX
 @COND_PLATFORM_WIN32_1@__IBPPPLATFORMDEFINE_p_2 = --define IBPP_WINDOWS
-@COND_PLATFORM_MACOSX_0_PLATFORM_WIN32_0@__STYLEGUIDEIMPLEMENTATION_OBJECTS \
-@COND_PLATFORM_MACOSX_0_PLATFORM_WIN32_0@	= flamerobin_styleguidegeneric.o
-@COND_PLATFORM_MACOSX_1@__STYLEGUIDEIMPLEMENTATION_OBJECTS \
+@COND_PLATFORM_MACOSX_1@__PLATFORMSPECIFICSOURCES_OBJECTS \
 @COND_PLATFORM_MACOSX_1@	= flamerobin_styleguidemac.o
-@COND_PLATFORM_WIN32_1@__STYLEGUIDEIMPLEMENTATION_OBJECTS \
+@COND_PLATFORM_UNIX_1@__PLATFORMSPECIFICSOURCES_OBJECTS \
+@COND_PLATFORM_UNIX_1@	= flamerobin_styleguidegeneric.o
+@COND_PLATFORM_WIN32_1@__PLATFORMSPECIFICSOURCES_OBJECTS \
 @COND_PLATFORM_WIN32_1@	= flamerobin_styleguidemsw.o
 @COND_PLATFORM_WIN32_1@__flamerobin___win32rc = flamerobin_flamerobin_rc.o
 
@@ -148,7 +147,7 @@ distclean: clean
 	rm -f configure config.cache config.log config.status bk-deps bk-make-pch shared-ld-sh Makefile
 
 flamerobin$(EXEEXT): $(FLAMEROBIN_OBJECTS) $(__flamerobin___win32rc)
-	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) $(LDFLAGS)  $(LDFLAGS_GUI)  -L$(IBPP)/$(IBPPLIBVERSION)/$(IBPPPLATFORM)  -libpp
+	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) $(LDFLAGS)   $(LDFLAGS_GUI) -L$(IBPP)/$(IBPPLIBVERSION)/$(IBPPPLATFORM)  -libpp
 	$(__flamerobin___mac_rezcmd)
 	$(__flamerobin___mac_setfilecmd)
 	$(__flamerobin___os2_emxbindcmd)
@@ -169,12 +168,6 @@ flamerobin_config.o: $(srcdir)/./src/config.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 flamerobin_converters.o: $(srcdir)/./src/converters.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
-
-flamerobin_DatabaseRegistrationInfoFrame.o: $(srcdir)/./src/DatabaseRegistrationInfoFrame.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
-
-flamerobin_DatabaseRegistrationInfoFrameImpl.o: $(srcdir)/./src/DatabaseRegistrationInfoFrameImpl.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 flamerobin_dberror.o: $(srcdir)/./src/dberror.cpp $(FLAMEROBIN_ODEP)
@@ -199,6 +192,12 @@ flamerobin_BackupFrame.o: $(srcdir)/./src/gui/BackupFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 flamerobin_BackupRestoreBaseFrame.o: $(srcdir)/./src/gui/BackupRestoreBaseFrame.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+flamerobin_DatabaseRegistrationDialog.o: $(srcdir)/./src/gui/DatabaseRegistrationDialog.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+flamerobin_MultilineEnterDialog.o: $(srcdir)/./src/gui/MultilineEnterDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 flamerobin_RestoreFrame.o: $(srcdir)/./src/gui/RestoreFrame.cpp $(FLAMEROBIN_ODEP)
@@ -274,9 +273,6 @@ flamerobin_MetadataItemPropertiesDialog.o: $(srcdir)/./src/MetadataItemPropertie
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 flamerobin_MetadataItemPropertiesDialogImpl.o: $(srcdir)/./src/MetadataItemPropertiesDialogImpl.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
-
-flamerobin_MultilineEnterDialog.o: $(srcdir)/./src/MultilineEnterDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 flamerobin_myDataGrid.o: $(srcdir)/./src/myDataGrid.cpp $(FLAMEROBIN_ODEP)
