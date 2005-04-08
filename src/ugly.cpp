@@ -46,7 +46,7 @@
 //! converts wxString to std::string
 std::string wx2std(const wxString& input)
 {
-	#if (wxUSE_UNICODE)
+#if (wxUSE_UNICODE)
 	int size = input.Length() + 1;
 	char *buffer = new char[size];
 	wxEncodingConverter wxec;
@@ -55,15 +55,15 @@ std::string wx2std(const wxString& input)
 	std::string temp(buffer);
 	delete buffer;
 	return temp;
-	#else
+#else
 	return std::string(input.c_str());
-	#endif
+#endif
 }
 //-----------------------------------------------------------------------------
 //! converts std::string to wxString
 wxString std2wx(std::string input)
 {
-	#if (wxUSE_UNICODE)
+#if (wxUSE_UNICODE)
 	int size = input.size() + 1;
 	wchar_t *buffer = new wchar_t[size*4];	// to make sure if we have 32-bit characters
 	wxEncodingConverter wxec;
@@ -72,9 +72,9 @@ wxString std2wx(std::string input)
 	wxString temp(buffer);
 	delete buffer;
 	return temp;
-	#else
+#else
 	return wxString(input.c_str());
-	#endif
+#endif
 }
 //-----------------------------------------------------------------------------
 //! Changes given std::string to uppercase
@@ -84,5 +84,19 @@ std::string upcase(std::string str)
 	for (std::string::size_type p = 0; p < s.length(); ++p)
 		s[p] = toupper(s[p]);
 	return s;
+}
+//-----------------------------------------------------------------------------
+//! return string for comparison, used to limit features to certain platforms
+wxString getPlatformName()
+{
+#ifdef __WINDOWS__
+    return wxT("win");
+#elif defined(__MAC__) || defined(__APPLE__)
+    return wxT("mac");
+#elif defined(__UNIX__)
+    return wxT("unix");
+#elif 
+    return wxT("undefined");
+#endif
 }
 //-----------------------------------------------------------------------------

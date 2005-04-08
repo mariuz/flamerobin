@@ -34,5 +34,7 @@ std::string wx2std(const wxString& input);
 wxString std2wx(std::string input);
 
 std::string upcase(std::string str);
+
+wxString getPlatformName();
 //-----------------------------------------------------------------------------
 #endif // UGLY_H
