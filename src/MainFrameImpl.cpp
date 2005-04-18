@@ -45,9 +45,9 @@
 #include "gui/ExecuteSqlFrame.h"
 #include "gui/DatabaseRegistrationDialog.h"
 #include "gui/MetadataItemPropertiesFrame.h"
+#include "gui/PreferencesDialog.h"
 #include "gui/RestoreFrame.h"
 #include "gui/ServerRegistrationDialog.h"
-#include "gui/OptionsDialog.h"
 #include "treeitem.h"
 #include "ugly.h"
 #include "dberror.h"
@@ -209,8 +209,15 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
 {
-    static OptionsDialog *d = new OptionsDialog(this);
-	d->ShowModal();
+    PreferencesDialog pd(this, _("Preferences"), config(), 
+        wxT("config_options.xml"));
+    if (pd.isOk() && pd.loadFromConfig())
+    {
+        static int pdSelection = 0;
+        pd.selectPage(pdSelection);
+        pd.ShowModal();
+        pdSelection = pd.getSelectedPage();
+    }
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuInsert(wxCommandEvent& WXUNUSED(event))
