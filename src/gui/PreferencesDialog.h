@@ -98,7 +98,7 @@ public:
     };
 
     PreferencesDialog(wxWindow* parent, const wxString& title, 
-        YConfig& config, const wxString& descriptionfilename);
+        YConfig& config, const wxString& descriptionFileName);
     ~PreferencesDialog();
 
     int getSelectedPage();

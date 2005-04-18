@@ -295,7 +295,7 @@ void Optionbook::OnSize(wxSizeEvent& event)
 //-----------------------------------------------------------------------------
 // PreferencesDialog class
 PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title, 
-        YConfig& config, const wxString& descriptionfilename)
+        YConfig& config, const wxString& descriptionFileName)
     : BaseDialog(parent, -1, title), configM(config)
 {
     // we don't want this dialog centered on parent since it is very big, and
@@ -316,7 +316,7 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
 
     // order of these is important: first create all controls, then set 
     // their properties (may affect min size), then create sizer layout
-    loadDescriptionFile(descriptionfilename);
+    loadDescriptionFile(descriptionFileName);
     setProperties();
     layout();
     // do this last, otherwise default button style may be lost on MSW
