@@ -361,7 +361,10 @@ bool PreferencesDialog::createControlsAndAddToSizer(wxPanel* page, wxSizer* size
             std::list<PrefDlgSetting*>::iterator it2;
             int left = 0;
             for (it2 = it; pageSettings.end() != it2; ++it2)
-                left = std::max(left, (*it2)->getControlLeft());
+            {
+                if ((*it2)->getControlAlignmentGroup() == group)
+                    left = std::max(left, (*it2)->getControlLeft());
+            }
             // set maximum left coordinate of controls in this group
             for (it2 = it; pageSettings.end() != it2; ++it2)
             {
