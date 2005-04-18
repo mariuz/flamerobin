@@ -1,289 +1,267 @@
-<?xml version='1.0' encoding='ISO-8859-2'?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <root>
-	<page>
-		<pagename>General</pagename>
+	<debug />
+	<node>
+		<caption>General</caption>
 		<image>3</image>
-		<setting>
-			<type>checkbox</type>
-			<name>Remember window positions and sizes</name>
-			<key>FrameStorage</key>
+		<setting type="checkbox">
+			<caption>Remember window positions and sizes</caption>
 			<description>Newly created windows get previous size and position</description>
+			<key>FrameStorage</key>
 			<default>0</default>
 			<enables>
-				<type>radio</type>
-				<name>Metadata properties windows</name>
-				<key>MetadataFrameStorageGranularity</key>
-				<default>0</default>
-				<option>
-					<value>0</value>
-					<text>Same setting for all</text>
-				</option>
-				<option>
-					<value>1</value>
-					<text>Same setting for all objects of same type</text>
-				</option>
-				<option>
-					<value>2</value>
-					<text>Separate for each individual object</text>
-				</option>
+				<setting type="radiobox">
+					<caption>Metadata properties windows</caption>
+					<description>Select how size and position of metadata properties windows should be stored</description>
+					<key>MetadataFrameStorageGranularity</key>
+					<default>0</default>
+					<option>
+						<caption>Same settings for all objects</caption>
+					</option>
+					<option>
+						<caption>Same settings for all objects of same type</caption>
+					</option>
+					<option>
+						<caption>Separate settings for individual objects</caption>
+					</option>
+				</setting>
 			</enables>
 		</setting>
-		<setting>
-			<type>checkbox</type>
-			<name>Confirm quit</name>
+		<setting type="checkbox">
+			<caption>Confirm quit</caption>
+			<description>Asks the "Are you sure you wish to exit FlameRobin?" question when closing</description>
 			<key>ConfirmQuit</key>
-			<description>Asks the "Are you sure you wish to exit FlameRobin?" question when closing.</description>
 			<default>0</default>
 		</setting>
-		<setting>
-			<type>checkbox</type>
-			<name>Minimize to system tray</name>
+		<setting type="checkbox" platform="win">
+			<caption>Minimize to system tray</caption>
+			<description>Minimizes to system tray instead of taskbar</description>
 			<key>MinimizeToTray</key>
-			<description>Minimizes to system tray instead of taskbar.</description>
 			<default>0</default>
 		</setting>
-	</page>
-	<page>
-		<pagename>Tree view</pagename>
+	</node>
+	<node>
+		<caption>Main Tree View</caption>
 		<image>2</image>
-		<setting>
-			<type>checkbox</type>
-			<name>Order server entries alphabetically</name>
-			<key>OrderServersInTree</key>
+		<setting type="checkbox">
+			<caption>Order server entries alphabetically</caption>
 			<description>If unchecked the server entries will be shown in registration order.</description>
+			<key>OrderServersInTree</key>
 			<default>0</default>
 		</setting>
-		<setting>
-			<type>checkbox</type>
-			<name>Order database entries alphabetically</name>
-			<key>OrderDatabasesInTree</key>
+		<setting type="checkbox">
+			<caption>Order database entries alphabetically</caption>
 			<description>If unchecked the database entries will be shown in registration order.</description>
+			<key>OrderDatabasesInTree</key>
 			<default>0</default>
+			<related /><!-- this moves the checkbox closer to the previous one -->
 		</setting>
-		<setting>
-			<type>radio</type>
-			<name>When column has an user defined domain</name>
+		<setting type="radiobox">
+			<caption>When a column has a user-defined domain</caption>
 			<key>ShowDomains</key>
 			<default>2</default>
 			<option>
-				<value>datatype</value>
-				<text>Only show datatype</text>
+				<caption>Only show datatype</caption>
 			</option>
 			<option>
-				<value>domain</value>
-				<text>Only show domain</text>
+				<caption>Only show domain</caption>
 			</option>
 			<option>
-				<value>both</value>
-				<text>Show both domain and datatype</text>
+				<caption>Show both domain and datatype</caption>
 			</option>
 		</setting>
-		<setting>
-			<type>checkbox</type>
-			<name>Show columns and parameters in tree</name>
+		<setting type="checkbox">
+			<caption>Show columns and parameters in tree</caption>
+			<description>If checked the table and view columns and stored procedure parameters will be shown in the tree</description>
 			<key>ShowColumnsInTree</key>
 			<default>1</default>
-			<description>If checked the table and view columns and stored procedure parameters will be shown in tree</description>
 			<enables>
-				<type>radio</type>
-				<name>When table, view or stored procedure is activated</name>
-				<key>OnTreeActivate</key>
-				<default>0</default>
-				<option>
-					<value>properties</value>
-					<text>Open Properties page</text>
-				</option>
-				<option>
-					<value>columns</value>
-					<text>Show column info</text>
-				</option>
+				<setting type="radiobox">
+					<caption>When table, view or stored procedure is activated</caption>
+					<key>OnTreeActivate</key>
+					<default>0</default>
+					<option>
+						<caption>Open Properties page</caption>
+					</option>
+					<option>
+						<caption>Show column info</caption>
+					</option>
+				</setting>
 			</enables>
 		</setting>
-	</page>
-	<page>
-		<pagename>SQL Editor</pagename>
+	</node>
+	<node>
+		<caption>SQL Editor</caption>
 		<image>0</image>
-		<setting>
-			<type>checkbox</type>
-			<name>Automatically copy successfully executed statements to clipboard</name>
-			<key>SQLEditorAutoCopy</key>
-			<default>0</default>
-		</setting>
-		<setting>
-			<type>radio</type>
-			<name>When text is selected in editor, doing Execute should</name>
+		<setting type="radiobox">
+			<caption>When text is selected in editor</caption>
 			<key>OnlyExecuteSelected</key>
 			<default>0</default>
 			<option>
-				<value>0</value>
-				<text>Execute the entire buffer</text>
+				<caption>Execute the entire buffer</caption>
 			</option>
 			<option>
-				<value>1</value>
-				<text>Execute only the selection</text>
+				<caption>Execute only the selection</caption>
 			</option>
 		</setting>
-		<setting>
-			<type>checkbox</type>
-			<name>Treat selected text as a single statement</name>
+		<setting type="checkbox">
+			<caption>Treat selected text as one single statement</caption>
+			<description>If unchecked the parser will search the selected text for multiple statements</description>
 			<key>TreatAsSingleStatement</key>
 			<default>0</default>
-			<description>If unchecked the parser will search the selected text for multiple statements</description>
 		</setting>
-		<setting>
-			<type>number</type>
-			<min>0</min>
-			<max>10</max>
-			<name>Characters needed for auto-complete</name>
-			<key>AutocompleteChars</key>
-			<default>3</default>
-			<description>If set to zero, user has to manually invoke the auto-complete list</description>
-		</setting>
-		<setting>
-			<type>radio</type>
-			<name>Manually invoke auto-complete list with</name>
-			<key>AutoCompleteKey</key>
-			<default>0</default>
-			<option>
-				<value>0</value>
-				<text>Ctrl + Space</text>
-			</option>
-			<option>
-				<value>1</value>
-				<text>Tab</text>
-			</option>
-		</setting>
-		<setting>
-			<type>checkbox</type>
-			<name>Allow auto-completion with Enter</name>
-			<key>AutoCompleteWithEnter</key>
+		<setting type="checkbox">
+			<caption>Automatically copy successfully executed statements to clipboard</caption>
+			<key>SQLEditorAutoCopy</key>
 			<default>0</default>
 		</setting>
-	</page>
-	<page>
-		<pagename>Data grid</pagename>
+		<node>
+			<caption>Code Completion</caption>
+			<description>SQL Code Completion</description>
+			<image>0</image>
+			<setting type="checkbox">
+				<caption>Enable automatic invocation of completion list</caption>
+				<key>AutocompleteEnabled</key>
+				<default>1</default>
+				<enables>
+					<setting type="int">
+						<caption>Show completion list after [VALUE] chars</caption>
+						<key>AutocompleteChars</key>
+						<minvalue>1</minvalue>
+						<maxvalue>10</maxvalue>
+						<default>3</default>
+					</setting>
+				</enables>
+			</setting>
+			<setting type="radiobox">
+				<caption>Manually invoke auto-complete list on</caption>
+				<key>AutoCompleteKey</key>
+				<default>0</default>
+				<option>
+					<caption>Ctrl + Space</caption>
+				</option>
+				<option>
+					<caption>Tab</caption>
+			</option>
+			</setting>
+			<setting type="checkbox">
+				<caption>Allow auto-completion with Enter</caption>
+				<key>AutoCompleteWithEnter</key>
+				<default>0</default>
+			</setting>
+		</node>
+	</node>
+	<node>
+		<caption>Data Grid</caption>
 		<image>4</image>
-		<setting>
-			<type>string</type>
-			<name>Date format</name>
+		<setting type="string">
+			<caption>Date format:</caption>
+			<description>The following letters will be replaced:<br />d - day of month, 1-31<br />D - day of month, 01-31<br />m - month, 1-12<br />M - month, 01-12<br />y - year, 00-99<br />Y - year, 0000-9999<br />All other characters are copied.</description>
 			<key>DateFormat</key>
-			<description>The format contains the following letters:<br />d - day of month, 1-31<br />D - day of month, 01-31<br />m - month, 1-12<br />M - month, 01-12<br />y - year, 00-99<br />Y - year, 0000-9999<br />All other characters are copied</description>
 			<default>d.m.Y</default>
+			<aligngroup>1</aligngroup>
 		</setting>
-		<setting>
-			<type>string</type>
-			<name>Time format</name>
+		<setting type="string">
+			<caption>Time format:</caption>
+			<description>The following letters will be replaced:<br />h - hour, 0-24<br />H - hour, 00-24<br />m - minute, 0-59<br />M - minute, 00-59<br />s - second, 0-59<br />S - second, 00-59<br />All other characters are copied.</description>
 			<key>TimeFormat</key>
-			<description>The format contains the following letters:<br />h - hour, 0-24<br />H - hour, 00-24<br />m - minute, 0-59<br />M - minute, 00-59<br />s - second, 0-59<br />S - second, 00-59<br />All other characters are copied</description>
 			<default>H:M:S</default>
+			<aligngroup>1</aligngroup>
 		</setting>
-		<setting>
-			<type>checkbox</type>
-			<name>Re-format numbers</name>
+		<setting type="font">
+			<caption>Grid header font:</caption>
+			<key>DataGridHeaderFont</key>
+			<aligngroup>1</aligngroup>
+		</setting>
+		<setting type="font">
+			<caption>Grid cell font:</caption>
+			<key>DataGridFont</key>
+			<aligngroup>1</aligngroup>
+		</setting>
+		<setting type="checkbox">
+			<caption>Re-format numbers</caption>
+			<description>If unchecked, prints decimal numbers as returned from server</description>
 			<key>ReformatNumbers</key>
-			<description>If uncheked, prints decimal numbers as returned from server.</description>
 			<default>0</default>
 			<enables>
-				<type>number</type>
-				<min>0</min>
-				<max>18</max>
-				<name>Number of decimals</name>
-				<key>NumberPrecision</key>
-				<default>2</default>
+				<setting type="int">
+					<caption>Number of decimals:</caption>
+					<key>NumberPrecision</key>
+					<minvalue>0</minvalue>
+					<maxvalue>18</maxvalue>
+					<default>2</default>
+				</setting>
 			</enables>
 		</setting>
-		<setting>
-			<type>font</type>
-			<name>Font for grid header</name>
-			<key>DataGridHeaderFont</key>
-		</setting>
-		<setting>
-			<type>font</type>
-			<name>Font for grid cells</name>
-			<key>DataGridFont</key>
-		</setting>
-		<setting>
-			<type>checkbox</type>
-			<name>When SELECT statement is executed, maximize the area that data grid occupies</name>
+		<setting type="checkbox">
+			<caption>Maximize data grid after execution of SELECT statement</caption>
 			<key>SelectMaximizeGrid</key>
 			<default>0</default>
 			<enables>
-				<type>number</type>
-				<min>0</min>
-				<max>10000</max>
-				<name>Records needed</name>
-				<key>MaximizeGridRowsNeeded</key>
-				<default>10</default>
-				<description>Maximizing will only happen when result set has that many records (or more)</description>
+				<setting type="int">
+					<caption>Only when result set has more than [VALUE] records</caption>
+					<key>MaximizeGridRowsNeeded</key>
+					<minvalue>0</minvalue>
+					<maxvalue>10000</maxvalue>
+					<default>10</default>
+				</setting>
 			</enables>
 		</setting>
-	</page>
-	<page>
-		<pagename>Logging</pagename>
+	</node>
+	<node>
+		<caption>Logging</caption>
 		<image>1</image>
-		<setting>
-			<type>checkbox</type>
-			<name>Log DML statements</name>
+		<setting type="checkbox">
+			<caption>Log DML statements</caption>
+			<description>Should the logging work for DML statements too.<br />If unchecked only DDL statements are logged.</description>
 			<key>LogDML</key>
 			<default>0</default>
-			<description>Should the logging work for DML statements too.<br />If unchecked only DDL statements are logged.</description>
 		</setting>
-		<setting>
-			<type>checkbox</type>
-			<name>Enable logging to file</name>
-			<key>LogToFile</key>
+		<setting type="checkbox">
+			<caption>Enable logging to file</caption>
 			<description>Logs all successful DDL statements to file</description>
+			<key>LogToFile</key>
 			<default>0</default>
 			<enables>
-				<type>file</type>
-				<name>Log file</name>
-				<key>LogFile</key>
-			</enables>
-			<enables>
-				<type>checkbox</type>
-				<name>Add header to each statement</name>
-				<key>LoggingAddHeader</key>
-				<description>Should logging add a header showing the context in which statement was run:<br />FlameRobin version, database, username, timestamp</description>
-				<default>1</default>
-			</enables>
-			<enables>
-				<type>radio</type>
-				<name>Multiple files</name>
-				<key>LogToFileType</key>
-				<default>0</default>
-				<description>To use incremental file numbers, place %d mark<br />where you want numbers to be inserted.<br />If you wish leading zeros use %0xd, where x is a number of digits (ex. %02d)</description>
-				<option>
-					<value>single</value>
-					<text>Log everything to a single file</text>
-				</option>
-				<option>
-					<value>incremental</value>
-					<text>Use incremental file numbers</text>
-				</option>
-			</enables>
-			<enables>
-				<type>number</type>
-				<min>0</min>
-				<max>10000</max>
-				<name>Incremental file numbers start at</name>
-				<key>IncrementalLogFileStart</key>
-				<default>1</default>
-				<description>In case you want to start from some arbitrary number</description>
+				<setting type="file">
+					<caption>Log file name:</caption>
+					<description>For multiple files place %d mark where you want numbers to be inserted.<br />If you wish leading zeros use %0xd, where x is a number of digits (ex. %02d)</description>
+					<key>LogFile</key>
+				</setting>
+				<setting type="checkbox">
+					<caption>Use multiple files</caption>
+					<key>LogToFileType</key>
+					<default>0</default>
+					<enables>
+						<setting type="int">
+							<caption>Incremental file numbers start at:</caption>
+							<key>IncrementalLogFileStart</key>
+							<minvalue>0</minvalue>
+							<maxvalue>10000</maxvalue>
+							<default>1</default>
+						</setting>
+					</enables>
+				</setting>
+				<setting type="checkbox">
+					<caption>Add header to each statement</caption>
+					<description>Should logging add a header showing the context in which statement was run:<br />FlameRobin version, database, username, timestamp</description>
+					<key>LoggingAddHeader</key>
+					<default>1</default>
+				</setting>
 			</enables>
 		</setting>
-		<setting>
-			<type>checkbox</type>
-			<name>Enable logging to database</name>
+		<setting type="checkbox">
+			<caption>Enable logging to database</caption>
+			<description>Logs all successful DDL statements to database.<br />This will create a table named FLAMEROBIN_LOG into your databases.</description>
 			<key>LogToDatabase</key>
 			<default>0</default>
-			<description>Logs all successful DDL statements to database.<br />This will create a table named FLAMEROBIN_LOG into your databases.</description>
 			<enables>
-				<type>checkbox</type>
-				<name>Use generator instead of 1+max(id)</name>
-				<key>LoggingUsesGenerator</key>
-				<description>If not checked, logging will do a "select max(id)+1" to create<br />keys for flamerobin_log table. This can be slow if<br />there is a huge amount of records in it.</description>
+				<setting type="checkbox">
+					<caption>Use generator instead of 1+max(id)</caption>
+					<description>If not checked, logging will do a "select max(id)+1" to create<br />keys for flamerobin_log table. This can be slow if<br />there is a huge amount of records in it.</description>
+					<key>LoggingUsesGenerator</key>
+				</setting>
 			</enables>
 		</setting>
-	</page>
+	</node>
 </root>
-
