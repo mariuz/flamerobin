@@ -139,7 +139,9 @@
             <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_html</sys-lib>
             <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_adv</sys-lib>
             <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_core</sys-lib>
+            <sys-lib>wxbase$(WX_VERSION)$(U_OPT)$(D_OPT)_xml</sys-lib>
             <sys-lib>wxbase$(WX_VERSION)$(U_OPT)$(D_OPT)</sys-lib>
+            <sys-lib>wxexpat$(D_OPT)</sys-lib>
             <sys-lib>wxtiff$(D_OPT)</sys-lib>
             <sys-lib>wxjpeg$(D_OPT)</sys-lib>
             <sys-lib>wxpng$(D_OPT)</sys-lib>
@@ -241,10 +243,10 @@
         $(SOURCEDIR)/gui/ExecuteSqlFrame.h
         $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.h
         $(SOURCEDIR)/gui/MultilineEnterDialog.h
+        $(SOURCEDIR)/gui/PreferencesDialog.h
         $(SOURCEDIR)/gui/ReorderFieldsDialog.h
         $(SOURCEDIR)/gui/RestoreFrame.h
         $(SOURCEDIR)/gui/ServerRegistrationDialog.h
-        $(SOURCEDIR)/gui/OptionsDialog.h
         $(SOURCEDIR)/images.h
         $(SOURCEDIR)/logger.h
         $(SOURCEDIR)/main.h
@@ -308,10 +310,11 @@
         $(SOURCEDIR)/gui/ExecuteSqlFrame.cpp
         $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.cpp
         $(SOURCEDIR)/gui/MultilineEnterDialog.cpp
+        $(SOURCEDIR)/gui/PreferencesDialog.cpp
+        $(SOURCEDIR)/gui/PreferencesDialogSettings.cpp
         $(SOURCEDIR)/gui/ReorderFieldsDialog.cpp
         $(SOURCEDIR)/gui/RestoreFrame.cpp
         $(SOURCEDIR)/gui/ServerRegistrationDialog.cpp
-        $(SOURCEDIR)/gui/OptionsDialog.cpp
         $(SOURCEDIR)/images.cpp
         $(SOURCEDIR)/logger.cpp
         $(SOURCEDIR)/main.cpp
