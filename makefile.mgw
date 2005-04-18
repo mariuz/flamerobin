@@ -69,10 +69,11 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ExecuteSqlFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemPropertiesFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MultilineEnterDialog.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_OptionsDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.o \
@@ -181,7 +182,7 @@ clean:
 	-if exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe del gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS) gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o
-	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) $(LDFLAGS) -mthreads $(____flamerobin_DEBUGINFO) -L$(____flamerobin_WX_LIB_DIR_FILENAMES) -Wl,--subsystem,windows -mwindows -L$(IBPP)\$(__IBPPLIBVERSION_FILENAMES)\win32_mingw  -lwxmsw25$(U_OPT)$(D_OPT)_stc -lwxmsw25$(U_OPT)$(D_OPT)_html -lwxmsw25$(U_OPT)$(D_OPT)_adv -lwxmsw25$(U_OPT)$(D_OPT)_core -lwxbase25$(U_OPT)$(D_OPT) -lwxtiff$(D_OPT) -lwxjpeg$(D_OPT) -lwxpng$(D_OPT) -lwxzlib$(D_OPT) -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lcomctl32 -lrpcrt4 -lwsock32 -libpp
+	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) $(LDFLAGS) -mthreads $(____flamerobin_DEBUGINFO) -L$(____flamerobin_WX_LIB_DIR_FILENAMES) -Wl,--subsystem,windows -mwindows -L$(IBPP)\$(__IBPPLIBVERSION_FILENAMES)\win32_mingw  -lwxmsw25$(U_OPT)$(D_OPT)_stc -lwxmsw25$(U_OPT)$(D_OPT)_html -lwxmsw25$(U_OPT)$(D_OPT)_adv -lwxmsw25$(U_OPT)$(D_OPT)_core -lwxbase25$(U_OPT)$(D_OPT)_xml -lwxbase25$(U_OPT)$(D_OPT) -lwxexpat$(D_OPT) -lwxtiff$(D_OPT) -lwxjpeg$(D_OPT) -lwxpng$(D_OPT) -lwxzlib$(D_OPT) -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lcomctl32 -lrpcrt4 -lwsock32 -libpp
 
 templates: 
 	if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates mkdir gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
@@ -245,6 +246,12 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemPropertiesFrame.o: ./src/gui/
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MultilineEnterDialog.o: ./src/gui/MultilineEnterDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.o: ./src/gui/PreferencesDialog.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.o: ./src/gui/PreferencesDialogSettings.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.o: ./src/gui/ReorderFieldsDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
@@ -252,9 +259,6 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.o: ./src/gui/RestoreFrame.cp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.o: ./src/gui/ServerRegistrationDialog.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
-
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_OptionsDialog.o: ./src/gui/OptionsDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.o: ./src/images.cpp

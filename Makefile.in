@@ -47,10 +47,11 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_ExecuteSqlFrame.o \
 	flamerobin_MetadataItemPropertiesFrame.o \
 	flamerobin_MultilineEnterDialog.o \
+	flamerobin_PreferencesDialog.o \
+	flamerobin_PreferencesDialogSettings.o \
 	flamerobin_ReorderFieldsDialog.o \
 	flamerobin_RestoreFrame.o \
 	flamerobin_ServerRegistrationDialog.o \
-	flamerobin_OptionsDialog.o \
 	flamerobin_images.o \
 	flamerobin_logger.o \
 	flamerobin_main.o \
@@ -256,6 +257,12 @@ flamerobin_MetadataItemPropertiesFrame.o: $(srcdir)/src/gui/MetadataItemProperti
 flamerobin_MultilineEnterDialog.o: $(srcdir)/src/gui/MultilineEnterDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/MultilineEnterDialog.cpp
 
+flamerobin_PreferencesDialog.o: $(srcdir)/src/gui/PreferencesDialog.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/PreferencesDialog.cpp
+
+flamerobin_PreferencesDialogSettings.o: $(srcdir)/src/gui/PreferencesDialogSettings.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/PreferencesDialogSettings.cpp
+
 flamerobin_ReorderFieldsDialog.o: $(srcdir)/src/gui/ReorderFieldsDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/ReorderFieldsDialog.cpp
 
@@ -264,9 +271,6 @@ flamerobin_RestoreFrame.o: $(srcdir)/src/gui/RestoreFrame.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_ServerRegistrationDialog.o: $(srcdir)/src/gui/ServerRegistrationDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/ServerRegistrationDialog.cpp
-
-flamerobin_OptionsDialog.o: $(srcdir)/src/gui/OptionsDialog.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/OptionsDialog.cpp
 
 flamerobin_images.o: $(srcdir)/src/images.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/images.cpp
