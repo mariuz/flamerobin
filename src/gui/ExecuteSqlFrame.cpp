@@ -869,7 +869,10 @@ void ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
 
 		stringstream strstrm;			// Search and intercept
 		string first, second, third;	// SET TERM and COMMIT statements
-		strstrm << upcase(sql);
+		std::string strippedSql(sql);
+		Parser::removeComments(strippedSql, "/*", "*/");
+		Parser::removeComments(strippedSql, "--", "\n");
+		strstrm << upcase(strippedSql);
 		strstrm >> first;
 		strstrm >> second;
 		strstrm >> third;
