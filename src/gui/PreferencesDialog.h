@@ -30,6 +30,7 @@
 #include <wx/wx.h>
 #include <wx/event.h>
 #include <wx/treectrl.h>
+#include <wx/imaglist.h>
 
 #include <list>
 #include <string>
@@ -85,7 +86,7 @@ private:
     int alignmentGroupM;
 };
 
-PrefDlgSetting* createPrefDlgSetting(wxPanel* page, wxString& type, 
+PrefDlgSetting* createPrefDlgSetting(wxPanel* page, wxString& type,
     PrefDlgSetting* parent);
 //-----------------------------------------------------------------------------
 class PreferencesDialog: public BaseDialog {
@@ -97,7 +98,7 @@ public:
         ID_button_cancel = wxID_CANCEL
     };
 
-    PreferencesDialog(wxWindow* parent, const wxString& title, 
+    PreferencesDialog(wxWindow* parent, const wxString& title,
         YConfig& config, const wxString& descriptionFileName);
     ~PreferencesDialog();
 
@@ -117,7 +118,7 @@ private:
     wxImageList imageListM;
     wxArrayTreeItemIds treeItemsM;
     std::list<PrefDlgSetting*> settingsM;
-    
+
     wxTreeCtrl* treectrl_1;
     wxPanel* panel_categ;
     wxStaticText* static_text_categ;
@@ -130,7 +131,7 @@ private:
     void layout();
     void loadDescriptionFile(const wxString& filename);
     bool parseDescriptionNode(wxTreeItemId parent, wxXmlNode* xmln);
-    bool parseDescriptionSetting(wxPanel* page, wxXmlNode* xmln, 
+    bool parseDescriptionSetting(wxPanel* page, wxXmlNode* xmln,
         PrefDlgSetting* enabledby);
     void setProperties();
 protected:
