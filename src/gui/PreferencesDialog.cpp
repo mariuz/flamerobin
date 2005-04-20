@@ -304,7 +304,7 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
 
     treectrl_1 = new wxTreeCtrl(panel_controls, ID_treectrl_panes, 
         wxDefaultPosition, wxDefaultSize, 
-        wxTR_DEFAULT_STYLE | wxTR_HAS_BUTTONS | wxTR_HIDE_ROOT);
+        wxSUNKEN_BORDER|wxTR_DEFAULT_STYLE|wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT);
     panel_categ = new wxPanel(panel_controls, wxID_ANY, wxDefaultPosition, 
         wxDefaultSize, wxSUNKEN_BORDER);
     static_text_categ = new wxStaticText(panel_categ, wxID_ANY, wxEmptyString);
