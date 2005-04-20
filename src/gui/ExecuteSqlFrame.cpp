@@ -635,11 +635,17 @@ bool HasWord(wxString word, wxString& wordlist)
 //! autocomplete stuff
 void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
 {
-	autoComplete(false);
+    bool autoCompleteEnabled = true;
+    config().getValue("AutocompleteEnabled", autoCompleteEnabled);
+    if (autoCompleteEnabled)
+    	autoComplete(false);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::autoComplete(bool force)
 {
+    if (styled_text_ctrl_sql->AutoCompActive())
+        return;
+
 	// TODO: we can add support for . here
 	// Like this: user types name of some table (ex. EMPLOYEE) and when he types
 	// the dot (.), autocomplete shows list of all columns for Employee table
@@ -654,19 +660,18 @@ void ExecuteSqlFrame::autoComplete(bool force)
 	// (left|right|outer...) JOIN [object_name] [alias]
 	// Parser used for DnD could be used here once it supports table aliases
 
-	int autoCompleteChars = 3;
-	if (force)
-		autoCompleteChars = 1;
-	else
+	int autoCompleteChars = 1;
+	if (!force)
 	{
+        autoCompleteChars = 3;
 		config().getValue("AutocompleteChars", autoCompleteChars);
-		if (autoCompleteChars == 0)
+		if (autoCompleteChars <= 0)
 			return;
 	}
 
 	int pos = styled_text_ctrl_sql->GetCurrentPos();
 	int start = styled_text_ctrl_sql->WordStartPosition(pos, true);
-	if (start != -1 && pos - start >= autoCompleteChars && !styled_text_ctrl_sql->AutoCompActive())
+	if (start != -1 && pos - start >= autoCompleteChars)
 	{
 		// GTK version crashes if nothing matches, so this check must be made for GTK
 		// For MSW, it doesn't crash but it flashes on the screen (also not very nice)
