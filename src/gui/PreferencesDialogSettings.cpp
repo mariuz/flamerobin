@@ -209,6 +209,8 @@ bool PrefDlgSetting::parseProperty(wxXmlNode* xmln)
             descriptionM = value;
         else if (name == wxT("key"))
             keyM = wx2std(value);
+        else if (name == wxT("default"))
+            setDefault(value);
         else if (name == wxT("related"))
             relatedM = true;
         else if (name == wxT("aligngroup"))
@@ -219,6 +221,10 @@ bool PrefDlgSetting::parseProperty(wxXmlNode* xmln)
         }
     }
     return true;
+}
+//-----------------------------------------------------------------------------
+void PrefDlgSetting::setDefault(const wxString& WXUNUSED(defValue))
+{
 }
 //-----------------------------------------------------------------------------
 // PrefDlgCheckboxSetting class
@@ -237,8 +243,10 @@ protected:
     virtual void addControlsToSizer(wxSizer* sizer);
     virtual void enableControls(bool enabled);
     virtual bool hasControls() const;
+    virtual void setDefault(const wxString& defValue);
 private:
     wxCheckBox* checkboxM;
+    bool defaultM;
 
     DECLARE_EVENT_TABLE()
 };
@@ -247,6 +255,7 @@ PrefDlgCheckboxSetting::PrefDlgCheckboxSetting(wxPanel* page, PrefDlgSetting* pa
     : PrefDlgSetting(page, parent)
 {
     checkboxM = 0;
+    defaultM = false;
 }
 //-----------------------------------------------------------------------------
 PrefDlgCheckboxSetting::~PrefDlgCheckboxSetting()
@@ -285,10 +294,12 @@ bool PrefDlgCheckboxSetting::loadFromConfig(YConfig& config)
 {
     if (!checkConfigProperties())
         return false;
-    bool checked = false;
-    config.getValue(keyM, checked);
+    bool checked = defaultM;
     if (checkboxM)
+    {
+        config.getValue(keyM, checked);
         checkboxM->SetValue(checked);
+    }
     enableEnabledSettings(checked);
     return true;
 }
@@ -300,6 +311,14 @@ bool PrefDlgCheckboxSetting::saveToConfig(YConfig& config)
     if (checkboxM)
         config.setValue(keyM, checkboxM->GetValue());
     return true;
+}
+//-----------------------------------------------------------------------------
+void PrefDlgCheckboxSetting::setDefault(const wxString& defValue)
+{
+    defaultM = (defValue == wxT("on") || defValue == wxT("yes"));
+    long l;
+    if (defValue.ToLong(&l) && l != 0)
+        defaultM = true;
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(PrefDlgCheckboxSetting, wxEvtHandler)
@@ -325,15 +344,18 @@ protected:
     virtual void addControlsToSizer(wxSizer* sizer);
     virtual void enableControls(bool enabled);
     virtual bool hasControls() const;
+    virtual void setDefault(const wxString& defValue);
 private:
     wxRadioBox* radioboxM;
     wxArrayString choicesM;
+    int defaultM;
 };
 //-----------------------------------------------------------------------------
 PrefDlgRadioboxSetting::PrefDlgRadioboxSetting(wxPanel* page, PrefDlgSetting* parent)
     : PrefDlgSetting(page, parent)
 {
     radioboxM = 0;
+    defaultM = wxNOT_FOUND;
 }
 //-----------------------------------------------------------------------------
 void PrefDlgRadioboxSetting::addControlsToSizer(wxSizer* sizer)
@@ -372,9 +394,10 @@ bool PrefDlgRadioboxSetting::loadFromConfig(YConfig& config)
 {
     if (!checkConfigProperties())
         return false;
-    int value;
-    if (radioboxM && config.getValue(keyM, value))
+    if (radioboxM)
     {
+        int value = defaultM;
+        config.getValue(keyM, value);
         if (value >= 0 && value < (int)choicesM.GetCount())
             radioboxM->SetSelection(value);
     }
@@ -416,6 +439,13 @@ bool PrefDlgRadioboxSetting::saveToConfig(YConfig& config)
     return true;
 }
 //-----------------------------------------------------------------------------
+void PrefDlgRadioboxSetting::setDefault(const wxString& defValue)
+{
+    long l;
+    if (defValue.ToLong(&l) && l >= 0 && l < long(choicesM.GetCount()))
+        defaultM = l;
+}
+//-----------------------------------------------------------------------------
 // PrefDlgIntEditSetting class
 class PrefDlgIntEditSetting: public PrefDlgSetting
 {
@@ -431,12 +461,14 @@ protected:
     virtual void enableControls(bool enabled);
     virtual wxStaticText* getLabel();
     virtual bool hasControls() const;
+    virtual void setDefault(const wxString& defValue);
 private:
     wxStaticText* captionAfterM;
     wxStaticText* captionBeforeM;
     wxSpinCtrl* spinctrlM;
     int maxValueM;
     int minValueM;
+    int defaultM;
 };
 //-----------------------------------------------------------------------------
 PrefDlgIntEditSetting::PrefDlgIntEditSetting(wxPanel* page, PrefDlgSetting* parent)
@@ -447,6 +479,7 @@ PrefDlgIntEditSetting::PrefDlgIntEditSetting(wxPanel* page, PrefDlgSetting* pare
     spinctrlM = 0;
     maxValueM = 100;
     minValueM = 0;
+    defaultM = 0;
 }
 //-----------------------------------------------------------------------------
 void PrefDlgIntEditSetting::addControlsToSizer(wxSizer* sizer)
@@ -518,9 +551,17 @@ bool PrefDlgIntEditSetting::loadFromConfig(YConfig& config)
 {
     if (!checkConfigProperties())
         return false;
-    int value;
-    if (spinctrlM && config.getValue(keyM, value))
-        spinctrlM->SetValue(value);
+    if (spinctrlM)
+    {
+        int value = defaultM;
+        config.getValue(keyM, value);
+        if (value < minValueM)
+            spinctrlM->SetValue(minValueM);
+        else if (value > maxValueM)
+            spinctrlM->SetValue(maxValueM);
+        else
+            spinctrlM->SetValue(value);
+    }
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -554,6 +595,13 @@ bool PrefDlgIntEditSetting::saveToConfig(YConfig& config)
     return true;
 }
 //-----------------------------------------------------------------------------
+void PrefDlgIntEditSetting::setDefault(const wxString& defValue)
+{
+    long l;
+    if (defValue.ToLong(&l))
+        defaultM = l;
+}
+//-----------------------------------------------------------------------------
 // PrefDlgStringEditSetting class
 class PrefDlgStringEditSetting: public PrefDlgSetting
 {
@@ -568,10 +616,12 @@ protected:
     virtual void enableControls(bool enabled);
     virtual wxStaticText* getLabel();
     virtual bool hasControls() const;
+    virtual void setDefault(const wxString& defValue);
 private:
     wxStaticText* captionAfterM;
     wxStaticText* captionBeforeM;
     wxTextCtrl* textctrlM;
+    std::string defaultM;
 };
 //-----------------------------------------------------------------------------
 PrefDlgStringEditSetting::PrefDlgStringEditSetting(wxPanel* page, PrefDlgSetting* parent)
@@ -650,9 +700,12 @@ bool PrefDlgStringEditSetting::loadFromConfig(YConfig& config)
 {
     if (!checkConfigProperties())
         return false;
-    std::string value;
-    if (textctrlM && config.getValue(keyM, value))
+    if (textctrlM)
+    {
+        std::string value = defaultM;
+        config.getValue(keyM, value);
         textctrlM->SetValue(std2wx(value));
+    }
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -663,6 +716,11 @@ bool PrefDlgStringEditSetting::saveToConfig(YConfig& config)
     if (textctrlM)
         config.setValue(keyM, wx2std(textctrlM->GetValue()));
     return true;
+}
+//-----------------------------------------------------------------------------
+void PrefDlgStringEditSetting::setDefault(const wxString& defValue)
+{
+    defaultM = wx2std(defValue);
 }
 //-----------------------------------------------------------------------------
 // PrefDlgChooserSetting class
@@ -684,11 +742,13 @@ protected:
     virtual void enableControls(bool enabled);
     virtual wxStaticText* getLabel();
     virtual bool hasControls() const;
+    virtual void setDefault(const wxString& defValue);
 private:
     const int styleM;
     wxButton* browsebtnM;
     wxStaticText* captionBeforeM;
     wxTextCtrl* textctrlM;
+    std::string defaultM;
 
     void chooseFile();
     void chooseFont();
@@ -792,9 +852,12 @@ bool PrefDlgChooserSetting::loadFromConfig(YConfig& config)
 {
     if (!checkConfigProperties())
         return false;
-    std::string value;
-    if (textctrlM && config.getValue(keyM, value))
+    if (textctrlM)
+    {
+        std::string value = defaultM;
+        config.getValue(keyM, value);
         textctrlM->SetValue(std2wx(value));
+    }
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -805,6 +868,11 @@ bool PrefDlgChooserSetting::saveToConfig(YConfig& config)
     if (textctrlM)
         config.setValue(keyM, wx2std(textctrlM->GetValue()));
     return true;
+}
+//-----------------------------------------------------------------------------
+void PrefDlgChooserSetting::setDefault(const wxString& defValue)
+{
+    defaultM = wx2std(defValue);
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(PrefDlgChooserSetting, wxEvtHandler)

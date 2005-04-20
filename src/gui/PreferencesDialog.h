@@ -78,6 +78,7 @@ protected:
     int getLevel() const;
     virtual bool hasControls() const = 0;
     virtual bool isRelatedTo(PrefDlgSetting* prevSetting) const;
+    virtual void setDefault(const wxString& defValue);
 private:
     wxPanel* pageM;
     PrefDlgSetting* parentM;
