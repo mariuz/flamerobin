@@ -822,7 +822,7 @@ void PrefDlgChooserSetting::OnBrowseButton(wxCommandEvent& WXUNUSED(event))
 }
 //-----------------------------------------------------------------------------
 // PrefDlgSetting factory
-PrefDlgSetting* createPrefDlgSetting(wxPanel* page, wxString& type, 
+PrefDlgSetting* createPrefDlgSetting(wxPanel* page, const wxString& type, 
     PrefDlgSetting* parent)
 {
     if (type == wxT("checkbox"))

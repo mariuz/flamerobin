@@ -86,7 +86,7 @@ private:
     int alignmentGroupM;
 };
 
-PrefDlgSetting* createPrefDlgSetting(wxPanel* page, wxString& type,
+PrefDlgSetting* createPrefDlgSetting(wxPanel* page, const wxString& type,
     PrefDlgSetting* parent);
 //-----------------------------------------------------------------------------
 class PreferencesDialog: public BaseDialog {
