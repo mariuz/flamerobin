@@ -1211,7 +1211,7 @@ void ExecuteSqlFrame::setDatabase(YDatabase *db)
 {
 	databaseM = db;
 
-	std::string s = db->getUsername() + "@" + db->getPath();
+	std::string s = db->getUsername() + "@" + db->getParent()->getName() + ":" + db->getPath();
 	statusbar_1->SetStatusText(std2wx(s), 0);
 
 	transactionM = IBPP::TransactionFactory(databaseM->getDatabase());
