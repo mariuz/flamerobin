@@ -251,7 +251,10 @@ void DatabaseRegistrationDialog::do_layout()
 //-----------------------------------------------------------------------------
 const std::string DatabaseRegistrationDialog::getName() const
 {
-    return "DatabaseRegistrationInfoFrame";
+    if (createM)
+        return "CreateDatabaseDialog";
+    else
+        return "DatabaseRegistrationDialog";
 }
 //-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::set_properties()
