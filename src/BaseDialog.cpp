@@ -87,6 +87,10 @@ BaseDialog::~BaseDialog()
 //-----------------------------------------------------------------------------
 void BaseDialog::readConfigSettings()
 {
+    // default to centered dialogs
+    bool centered = true;
+    config().getValue("centerDialogsOnParent", centered);
+
     bool enabled = false;
     if (config().getValue("FrameStorage", enabled) && enabled)
     {
@@ -99,12 +103,10 @@ void BaseDialog::readConfigSettings()
             doReadConfigSettings(itemPrefix);
             if (r.width > 0 && r.height > 0)
                 SetSize(r.width, r.height);
-            // default to centered dialogs, set to 0 to disable
-            bool centered = true;
+            // default to global setting, set to 0 to disable
+            // restore the position if we don't want it centered
             config().getValue(itemPrefix + "::centerOnParent", centered);
-            if (centered)
-                CenterOnParent();
-            else            // if we don't want it centered, let's restore the position
+            if (!centered)
             {
                 config().getValue(itemPrefix + "::x", r.x);
                 config().getValue(itemPrefix + "::y", r.y);
@@ -112,6 +114,8 @@ void BaseDialog::readConfigSettings()
             }
         }
     }
+    if (centered)
+        CenterOnParent();
 }
 //-----------------------------------------------------------------------------
 void BaseDialog::doReadConfigSettings(const std::string& WXUNUSED(prefix))
@@ -132,6 +136,7 @@ void BaseDialog::writeConfigSettings() const
             config().setValue(itemPrefix + "::height", r.height);
 
             bool centered = true;
+            config().getValue("centerDialogsOnParent", centered);
             config().getValue(itemPrefix + "::centerOnParent", centered);
             if (!centered)
             {
