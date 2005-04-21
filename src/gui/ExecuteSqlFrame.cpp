@@ -608,6 +608,10 @@ void ExecuteSqlFrame::OnSqlEditUpdateUI(wxStyledTextEvent& WXUNUSED(event))
 			styled_text_ctrl_sql->BraceBadLight(sp);
 		else
 			styled_text_ctrl_sql->BraceHighlight(sp, q);
+
+		// remove calltip if needed
+		if (styled_text_ctrl_sql->CallTipActive() && (c1==')' || c2==')') && q == styled_text_ctrl_sql->CallTipPosAtStart() - 1)
+			styled_text_ctrl_sql->CallTipCancel();
 	}
 	else
 		styled_text_ctrl_sql->BraceBadLight(wxSTC_INVALID_POSITION);	// remove light
@@ -635,10 +639,50 @@ bool HasWord(wxString word, wxString& wordlist)
 //! autocomplete stuff
 void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
 {
-    bool autoCompleteEnabled = true;
-    config().getValue("AutocompleteEnabled", autoCompleteEnabled);
-    if (autoCompleteEnabled)
-    	autoComplete(false);
+	int pos = styled_text_ctrl_sql->GetCurrentPos();
+	if (pos > 0)
+	{
+		int c = styled_text_ctrl_sql->GetCharAt(pos-1);
+		if (c == '(')
+		{
+			// TODO: add a config option to disable calltips
+			int start = styled_text_ctrl_sql->WordStartPosition(pos-2, true);
+			if (start != -1 && start != pos-2)
+			{
+				wxString word = styled_text_ctrl_sql->GetTextRange(start, pos-1).Upper();
+				std::string calltip;
+				YProcedure *p = dynamic_cast<YProcedure *>(databaseM->findByNameAndType(ntProcedure, wx2std(word)));
+				if (p)
+					calltip = p->getDefinition();
+				// TODO: check for UDF
+				// YFunction *f = db->getFunction(word);
+				// if (f)
+				//     calltip = f->getDefinition();
+				if (!calltip.empty())
+				{
+					styled_text_ctrl_sql->CallTipShow(pos-1, std2wx(calltip));
+					styled_text_ctrl_sql->CallTipSetHighlight(0, pos-1-start);	// start, end
+				}
+			}
+		}
+		else
+		{
+			bool autoCompleteEnabled = true;
+			config().getValue("AutocompleteEnabled", autoCompleteEnabled);
+			if (autoCompleteEnabled)
+			{
+				if (styled_text_ctrl_sql->CallTipActive())
+				{
+					bool disableIt = true;
+					config().getValue("AutoCompleteDisableWhenCalltipShown", disableIt);
+					if (!disableIt)
+						autoComplete(false);
+				}
+				else
+					autoComplete(false);
+			}
+		}
+	}
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::autoComplete(bool force)

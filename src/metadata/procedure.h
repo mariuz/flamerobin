@@ -51,6 +51,7 @@ public:
 	bool checkAndLoadParameters();
 	bool getSource(std::string& source);
 	std::string getAlterSql();
+	std::string getDefinition();
 
 	YProcedure();
 	virtual const std::string getTypeName() const;

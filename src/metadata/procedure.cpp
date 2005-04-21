@@ -225,6 +225,31 @@ bool YProcedure::getSource(std::string& source)
 	return false;
 }
 //------------------------------------------------------------------------------
+std::string YProcedure::getDefinition()
+{
+	checkAndLoadParameters();
+	std::string collist, parlist;
+	for (YMetadataCollection <YParameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
+	{
+		if ((*it).getParameterType() == ptInput)
+		{
+			if (!parlist.empty())
+				parlist += ", ";
+			parlist += (*it).getName() + " " + (*it).getDomain()->getDatatypeAsString();
+		}
+		else
+		{
+			if (!collist.empty())
+				collist += ", ";
+			collist += (*it).getName() + " " + (*it).getDomain()->getDatatypeAsString();
+		}
+	}
+	std::string retval = nameM + "(" + parlist + ")";
+	if (!collist.empty())
+		retval += "\nreturns: " + collist;
+	return retval;
+}
+//------------------------------------------------------------------------------
 std::string YProcedure::getAlterSql()
 {
 	if (!parametersLoadedM)

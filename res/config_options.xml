@@ -137,6 +137,11 @@
 						<maxvalue>10</maxvalue>
 						<default>3</default>
 					</setting>
+					<setting type="checkbox">
+						<caption>Disable while calltip is shown</caption>
+						<key>AutoCompleteDisableWhenCalltipShown</key>
+						<default>1</default>
+					</setting>
 				</enables>
 			</setting>
 			<setting type="radiobox">
