@@ -646,22 +646,27 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
 		if (c == '(')
 		{
 			// TODO: add a config option to disable calltips
-			int start = styled_text_ctrl_sql->WordStartPosition(pos-2, true);
-			if (start != -1 && start != pos-2)
+			bool showCalltips = true;
+			config().getValue("SQLEditorCalltips", showCalltips);
+			if (showCalltips)
 			{
-				wxString word = styled_text_ctrl_sql->GetTextRange(start, pos-1).Upper();
-				std::string calltip;
-				YProcedure *p = dynamic_cast<YProcedure *>(databaseM->findByNameAndType(ntProcedure, wx2std(word)));
-				if (p)
-					calltip = p->getDefinition();
-				// TODO: check for UDF
-				// YFunction *f = db->getFunction(word);
-				// if (f)
-				//     calltip = f->getDefinition();
-				if (!calltip.empty())
+				int start = styled_text_ctrl_sql->WordStartPosition(pos-2, true);
+				if (start != -1 && start != pos-2)
 				{
-					styled_text_ctrl_sql->CallTipShow(pos-1, std2wx(calltip));
-					styled_text_ctrl_sql->CallTipSetHighlight(0, pos-1-start);	// start, end
+					wxString word = styled_text_ctrl_sql->GetTextRange(start, pos-1).Upper();
+					std::string calltip;
+					YProcedure *p = dynamic_cast<YProcedure *>(databaseM->findByNameAndType(ntProcedure, wx2std(word)));
+					if (p)
+						calltip = p->getDefinition();
+					// TODO: check for UDF
+					// YFunction *f = db->getFunction(word);
+					// if (f)
+					//     calltip = f->getDefinition();
+					if (!calltip.empty())
+					{
+						styled_text_ctrl_sql->CallTipShow(start, std2wx(calltip));
+						styled_text_ctrl_sql->CallTipSetHighlight(0, pos-1-start);	// start, end
+					}
 				}
 			}
 		}

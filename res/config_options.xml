@@ -121,6 +121,12 @@
 			<key>SQLEditorAutoCopy</key>
 			<default>0</default>
 		</setting>
+		<setting type="checkbox">
+			<caption>Enable call-tips for procedures and functions</caption>
+			<description>Shows call-tips for stored procedures and UDFs when bracket is opened</description>
+			<key>SQLEditorCalltips</key>
+			<default>1</default>
+		</setting>
 		<node>
 			<caption>Code Completion</caption>
 			<description>SQL Code Completion</description>

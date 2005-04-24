@@ -229,24 +229,37 @@ std::string YProcedure::getDefinition()
 {
 	checkAndLoadParameters();
 	std::string collist, parlist;
+	YMetadataCollection <YParameter>::const_iterator lastInput, lastOutput;
+	for (YMetadataCollection <YParameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
+	{
+		if ((*it).getParameterType() == ptInput)
+			lastInput = it;
+		else
+			lastOutput = it;
+	}
 	for (YMetadataCollection <YParameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
 	{
 		if ((*it).getParameterType() == ptInput)
 		{
-			if (!parlist.empty())
-				parlist += ", ";
-			parlist += (*it).getName() + " " + (*it).getDomain()->getDatatypeAsString();
+			parlist += "    " + (*it).getName() + " " + (*it).getDomain()->getDatatypeAsString();
+			if (it != lastInput)
+				parlist += ",";
+			parlist += "\n";
 		}
 		else
 		{
-			if (!collist.empty())
-				collist += ", ";
-			collist += (*it).getName() + " " + (*it).getDomain()->getDatatypeAsString();
+			collist += "    " + (*it).getName() + " " + (*it).getDomain()->getDatatypeAsString();
+			if (it != lastOutput)
+				collist += ",";
+			collist += "\n";
 		}
 	}
-	std::string retval = nameM + "(" + parlist + ")";
+	std::string retval = nameM;
+	if (!parlist.empty())
+		retval += "(\n" + parlist + ")";
+	retval += "\n";
 	if (!collist.empty())
-		retval += "\nreturns: " + collist;
+		retval += "returns:\n" + collist;
 	return retval;
 }
 //------------------------------------------------------------------------------
