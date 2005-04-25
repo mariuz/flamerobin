@@ -37,7 +37,6 @@ Contributor(s): Michael Hieke
 #endif
 
 #include "DatabaseRegistrationDialog.h"
-#include "frutils.h"
 #include "styleguide.h"
 #include "ugly.h"
 
@@ -125,7 +124,6 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
 //! implementation details
 void DatabaseRegistrationDialog::do_layout()
 {
-#if wxCHECK_VERSION(2, 5, 3)
     // create sizer for controls
     wxGridBagSizer* sizerControls = new wxGridBagSizer(styleguide().getRelatedControlMargin(wxVERTICAL),
         styleguide().getControlLabelMargin());
@@ -160,91 +158,9 @@ void DatabaseRegistrationDialog::do_layout()
 
     sizerControls->AddGrowableCol(1);
     sizerControls->AddGrowableCol(3);
-#else
-    // make all labels and controls have the same width to simulate a grid
-    std::list<wxWindow*> controls;
-    controls.push_back(label_dbpath);
-    controls.push_back(label_username);
-    controls.push_back(label_charset);
-    if (createM)
-        controls.push_back(label_pagesize);
-    adjustControlsMinWidth(controls);
-    controls.clear();
-
-    controls.push_back(label_password);
-    controls.push_back(label_role);
-    if (createM)
-        controls.push_back(label_dialect);
-    adjustControlsMinWidth(controls);
-    controls.clear();
-
-    controls.push_back(text_ctrl_username);
-    controls.push_back(text_ctrl_password);
-    controls.push_back(combo_box_charset);
-    controls.push_back(text_ctrl_role);
-    if (createM)
-    {
-        controls.push_back(combo_box_pagesize);
-        controls.push_back(combo_box_dialect);
-    }
-    adjustControlsMinWidth(controls);
-    controls.clear();
-
-    // create sizers hierarchy for controls
-    wxBoxSizer* sizerRow1 = new wxBoxSizer(wxHORIZONTAL);
-    sizerRow1->Add(label_dbpath, 0, wxALIGN_CENTER_VERTICAL);
-    sizerRow1->Add(styleguide().getControlLabelMargin(), 0);
-    sizerRow1->Add(text_ctrl_dbpath, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
-    sizerRow1->Add(styleguide().getBrowseButtonMargin(), 0);
-    sizerRow1->Add(button_browse, 0, wxALIGN_CENTER_VERTICAL);
-
-    wxBoxSizer* sizerRow2 = new wxBoxSizer(wxHORIZONTAL);
-    sizerRow2->Add(label_username, 0, wxALIGN_CENTER_VERTICAL);
-    sizerRow2->Add(styleguide().getControlLabelMargin(), 0);
-    sizerRow2->Add(text_ctrl_username, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
-    sizerRow2->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 0);
-    sizerRow2->Add(label_password, 0, wxALIGN_CENTER_VERTICAL);
-    sizerRow2->Add(styleguide().getControlLabelMargin(), 0);
-    sizerRow2->Add(text_ctrl_password, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
-
-    wxBoxSizer* sizerRow3 = new wxBoxSizer(wxHORIZONTAL);
-    sizerRow3->Add(label_charset, 0, wxALIGN_CENTER_VERTICAL);
-    sizerRow3->Add(styleguide().getControlLabelMargin(), 0);
-    sizerRow3->Add(combo_box_charset, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
-    sizerRow3->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 0);
-    sizerRow3->Add(label_role, 0, wxALIGN_CENTER_VERTICAL);
-    sizerRow3->Add(styleguide().getControlLabelMargin(), 0);
-    sizerRow3->Add(text_ctrl_role, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
-
-    wxBoxSizer* sizerRow4 = 0;
-    if (createM)
-    {
-        sizerRow4 = new wxBoxSizer(wxHORIZONTAL);
-        sizerRow4->Add(label_pagesize, 0, wxALIGN_CENTER_VERTICAL);
-        sizerRow4->Add(styleguide().getControlLabelMargin(), 0);
-        sizerRow4->Add(combo_box_pagesize, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
-        sizerRow4->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 0);
-        sizerRow4->Add(label_dialect, 0, wxALIGN_CENTER_VERTICAL);
-        sizerRow4->Add(styleguide().getControlLabelMargin(), 0);
-        sizerRow4->Add(combo_box_dialect, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
-    }
-
-    wxBoxSizer* sizerControls = new wxBoxSizer(wxVERTICAL);
-    sizerControls->Add(sizerRow1, 0, wxEXPAND);
-    sizerControls->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
-    sizerControls->Add(sizerRow2, 0, wxEXPAND);
-    sizerControls->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
-    sizerControls->Add(sizerRow3, 0, wxEXPAND);
-    if (createM)
-    {
-        sizerControls->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
-        sizerControls->Add(sizerRow4, 0, wxEXPAND);
-    }
-#endif
 
     // create sizer for buttons -> styleguide class will align it correctly
     wxSizer* sizerButtons = styleguide().createButtonSizer(button_ok, button_cancel);
-
     // use method in base class to set everything up
     layoutSizers(sizerControls, sizerButtons);
 }
