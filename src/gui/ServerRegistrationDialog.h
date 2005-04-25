@@ -30,7 +30,6 @@ Contributor(s): Michael Hieke, Nando Dessena
 #include "metadata/server.h"
 #include "BaseDialog.h"
 
-
 class ServerRegistrationDialog: public BaseDialog {
 public:
     enum {
@@ -44,7 +43,6 @@ public:
     // events
     void OnSettingsChange(wxCommandEvent& event);
     void OnOkButtonClick(wxCommandEvent& event);
-    void OnCancelButtonClick(wxCommandEvent& event);
 
     ServerRegistrationDialog(wxWindow* parent, int id, const wxString& title, 
         const wxPoint& pos=wxDefaultPosition, const wxSize& size=wxDefaultSize, 
