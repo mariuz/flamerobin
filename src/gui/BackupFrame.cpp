@@ -180,9 +180,9 @@ BackupFrame::BackupFrame(wxWindow* parent, YDatabase* db):
 
     checkbox_checksum = new wxCheckBox(panel_controls, -1, _("Ignore Checksums"));
     checkbox_limbo = new wxCheckBox(panel_controls, -1, _("Ignore Limbo Transactions"));
+    checkbox_transport = new wxCheckBox(panel_controls, -1, _("Use non-transportable format"));
     checkbox_metadata = new wxCheckBox(panel_controls, -1, _("Only backup metadata"));
     checkbox_garbage = new wxCheckBox(panel_controls, -1, _("Don't do garbage collection"));
-    checkbox_transport = new wxCheckBox(panel_controls, -1, _("Use non-transportable format"));
     checkbox_extern = new wxCheckBox(panel_controls, -1, _("Convert external tables"));
 
     combobox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog, _("Show complete log"));

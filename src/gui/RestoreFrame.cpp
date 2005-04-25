@@ -182,11 +182,12 @@ RestoreFrame::RestoreFrame(wxWindow* parent, YDatabase* db):
         wxDefaultSize, wxBU_EXACTFIT);
 
     checkbox_replace = new wxCheckBox(panel_controls, -1, _("Replace existing database"));
-    checkbox_deactivate = new wxCheckBox(panel_controls, -1, _("Deactivate indices"));
     checkbox_noshadow = new wxCheckBox(panel_controls, -1, _("Don't restore shadow files"));
-    checkbox_validity = new wxCheckBox(panel_controls, -1, _("Ignore validity constraints"));
     checkbox_commit = new wxCheckBox(panel_controls, -1, _("Commit per table"));
+    checkbox_deactivate = new wxCheckBox(panel_controls, -1, _("Deactivate indices"));
+    checkbox_validity = new wxCheckBox(panel_controls, -1, _("Ignore validity constraints"));
     checkbox_space = new wxCheckBox(panel_controls, -1, _("Use all space"));
+
     label_pagesize = new wxStaticText(panel_controls, -1, _("Page size:"));
     const wxString pagesize_choices[] = {
         wxT("1024"), wxT("2048"), wxT("4096"), wxT("8192"), wxT("16384")
