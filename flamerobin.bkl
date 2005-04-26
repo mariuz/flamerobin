@@ -123,7 +123,7 @@
             <define>WIN32_LEAN_AND_MEAN</define>
 
             <set var="WX_PORT">wxmsw</set>
-            <set var="WX_VERSION">25</set>
+            <set var="WX_VERSION">26</set>
 
             <set var="WX_LIB_DIR" make_var="1">
                 <if cond="USEDLL=='1'">$(WXDIR)/lib/$(COMPILER)_dll</if>

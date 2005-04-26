@@ -182,7 +182,7 @@ clean:
 	-if exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe del gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS) gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o
-	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) $(LDFLAGS) -mthreads $(____flamerobin_DEBUGINFO) -L$(____flamerobin_WX_LIB_DIR_FILENAMES) -Wl,--subsystem,windows -mwindows -L$(IBPP)\$(__IBPPLIBVERSION_FILENAMES)\win32_mingw  -lwxmsw25$(U_OPT)$(D_OPT)_stc -lwxmsw25$(U_OPT)$(D_OPT)_html -lwxmsw25$(U_OPT)$(D_OPT)_adv -lwxmsw25$(U_OPT)$(D_OPT)_core -lwxbase25$(U_OPT)$(D_OPT)_xml -lwxbase25$(U_OPT)$(D_OPT) -lwxexpat$(D_OPT) -lwxtiff$(D_OPT) -lwxjpeg$(D_OPT) -lwxpng$(D_OPT) -lwxzlib$(D_OPT) -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lcomctl32 -lrpcrt4 -lwsock32 -libpp
+	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) $(LDFLAGS) -mthreads $(____flamerobin_DEBUGINFO) -L$(____flamerobin_WX_LIB_DIR_FILENAMES) -Wl,--subsystem,windows -mwindows -L$(IBPP)\$(__IBPPLIBVERSION_FILENAMES)\win32_mingw  -lwxmsw26$(U_OPT)$(D_OPT)_stc -lwxmsw26$(U_OPT)$(D_OPT)_html -lwxmsw26$(U_OPT)$(D_OPT)_adv -lwxmsw26$(U_OPT)$(D_OPT)_core -lwxbase26$(U_OPT)$(D_OPT)_xml -lwxbase26$(U_OPT)$(D_OPT) -lwxexpat$(D_OPT) -lwxtiff$(D_OPT) -lwxjpeg$(D_OPT) -lwxpng$(D_OPT) -lwxzlib$(D_OPT) -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lcomctl32 -lrpcrt4 -lwsock32 -libpp
 
 templates: 
 	if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates mkdir gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
