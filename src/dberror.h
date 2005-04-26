@@ -24,6 +24,10 @@
 #ifndef FR_DBERROR_H
 #define FR_DBERROR_H
 
+#if (wxUSE_UNICODE)
+#include <wx/wx.h>
+#endif
+
 #include <string>
 //-----------------------------------------------------------------------------
 class YError
@@ -34,9 +38,9 @@ private:
 public:
 	std::string getMessage() const;
 	void setMessage(std::string message);
-	#if (wxUSE_UNICODE)
+#if (wxUSE_UNICODE)
 	void setMessage(wxString message);	// makes things easier for unicode builds
-	#endif
+#endif
 };
 //-----------------------------------------------------------------------------
 YError& lastError();
