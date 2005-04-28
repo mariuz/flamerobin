@@ -72,7 +72,7 @@ std::string YTable::getInsertStatement()
 			valist += "*";
 		valist += (*i).getName();
 	}
-	sql += collist + ") VALUES (\n" + valist + "\n)";
+	sql += collist + ")\n VALUES (\n" + valist + "\n)";
 	return sql;
 }
 //------------------------------------------------------------------------------
