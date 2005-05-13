@@ -24,7 +24,12 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#define FR_VERSION "0.2.5"
+#if wxUSE_UNICODE
+    #define FR_VERSION "0.2.5 Unicode"
+#else
+    #define FR_VERSION "0.2.5"
+#endif
+
 //-----------------------------------------------------------------------------
 class FRApp: public wxApp {
 public:
