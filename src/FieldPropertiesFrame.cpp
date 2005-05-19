@@ -84,7 +84,7 @@ FieldPropertiesFrame::FieldPropertiesFrame(wxWindow* parent, int id, wxString ti
         wxT("Blob")
     };
 
-    cb_datatypes = new wxComboBox(panel_1, -1, wxT(""), wxDefaultPosition, wxDefaultSize, 13, cb_datatypes_choices, wxCB_DROPDOWN|wxCB_READONLY );
+    cb_datatypes = new wxComboBox(panel_1, ID_cb_datatypes, wxT(""), wxDefaultPosition, wxDefaultSize, 13, cb_datatypes_choices, wxCB_DROPDOWN|wxCB_READONLY );
     label_3 = new wxStaticText(panel_1, -1, _("Size"));
     textctrl_size = new wxTextCtrl(panel_1, -1, wxT(""));
     label_4 = new wxStaticText(panel_1, -1, _("Scale"));

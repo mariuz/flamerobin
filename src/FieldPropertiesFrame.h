@@ -52,7 +52,8 @@ public:
         ID_cb_generators = 115,
         ID_cb_charset = 118,
         ID_cb_trigger = 110,
-		ID_cb_domains = 116
+		ID_cb_domains = 116,
+		ID_cb_datatypes = 119
     };
     // end wxGlade
 
@@ -66,6 +67,7 @@ public:
     void OnCbTriggerClick(wxCommandEvent &event);
     void OnCbDomainsClick(wxCommandEvent &event);
     void OnCbCharsetClick(wxCommandEvent &event);
+    void OnCbDatatypesClick(wxCommandEvent &event);
     void OnTextctrlGeneratornameChange(wxCommandEvent &event);
     void OnTextctrlFieldnameChange(wxCommandEvent &event);
 
@@ -77,6 +79,7 @@ public:
 private:
 	void loadCollations(std::string desired);
 	void updateSqlWindow();
+	void updateEditBoxes();
 	YColumn *fieldM;		// needed when field is edited
 	YTable *tableM;			// needed when new field is added
 

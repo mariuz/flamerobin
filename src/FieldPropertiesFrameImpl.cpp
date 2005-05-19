@@ -55,6 +55,7 @@ BEGIN_EVENT_TABLE(FieldPropertiesFrame, wxFrame)
 	EVT_COMBOBOX(FieldPropertiesFrame::ID_cb_generators, FieldPropertiesFrame::OnCbGeneratorsClick)
 	EVT_COMBOBOX(FieldPropertiesFrame::ID_cb_domains, FieldPropertiesFrame::OnCbDomainsClick)
 	EVT_COMBOBOX(FieldPropertiesFrame::ID_cb_charset, FieldPropertiesFrame::OnCbCharsetClick)
+	EVT_COMBOBOX(FieldPropertiesFrame::ID_cb_datatypes, FieldPropertiesFrame::OnCbDatatypesClick)
 	EVT_CHECKBOX(FieldPropertiesFrame::ID_cb_trigger, FieldPropertiesFrame::OnCbTriggerClick)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
@@ -118,18 +119,48 @@ void FieldPropertiesFrame::loadCollations(std::string desired)
 }
 //-----------------------------------------------------------------------------
 //! enable/disable datatype properties
+void FieldPropertiesFrame::OnCbDatatypesClick(wxCommandEvent& WXUNUSED(event))
+{
+	updateEditBoxes();
+}
+//-----------------------------------------------------------------------------
+//! enable/disable datatype properties
 void FieldPropertiesFrame::OnCbDomainsClick(wxCommandEvent& WXUNUSED(event))
 {
-	wxString domain = cb_domains->GetValue();
+	wxString domain = cb_domains->GetStringSelection();
+	if (domain != wxT("[new]"))
+		updateDomainInfo(wx2std(cb_domains->GetValue()));
+	updateEditBoxes();
+
 	bool allowEdit = (domain == wxT("[new]") || domain.Mid(0, 4) == wxT("RDB$"));
 	cb_datatypes->Enable(allowEdit);
 	textctrl_size->Enable(allowEdit);
 	textctrl_scale->Enable(allowEdit);
 
 	cb_charset->Enable(fieldM == 0 && domain == wxT("[new]"));	// only for new fields with new domain
-
-	if (domain != wxT("[new]"))
-		updateDomainInfo(wx2std(cb_domains->GetValue()));
+}
+//-----------------------------------------------------------------------------
+bool datatypeHasSize(const wxString& type)
+{
+	return (type == wxT("Char") || type == wxT("Varchar") || type == wxT("Numeric") || type == wxT("Decimal"));
+}
+//-----------------------------------------------------------------------------
+bool datatypeHasScale(const wxString& type)
+{
+	return (type == wxT("Numeric") || type == wxT("Decimal"));
+}
+//-----------------------------------------------------------------------------
+bool datatypeHasCollate(const wxString& type)
+{
+	return (type == wxT("Char") || type == wxT("Varchar"));
+}
+//-----------------------------------------------------------------------------
+void FieldPropertiesFrame::updateEditBoxes()
+{
+	wxString type = cb_datatypes->GetStringSelection();
+	textctrl_size->Enable(datatypeHasSize(type));
+	textctrl_scale->Enable(datatypeHasScale(type));
+	cb_collate->Enable(datatypeHasCollate(type));
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::OnCbTriggerClick(wxCommandEvent& WXUNUSED(event))
@@ -143,6 +174,12 @@ void FieldPropertiesFrame::OnButtonOkClick(wxCommandEvent& WXUNUSED(event))
 
 	wxString selectedDomain = cb_domains->GetStringSelection();
 	wxString selectedDatatype = cb_datatypes->GetStringSelection();
+	wxString tsize = textctrl_size->GetValue();
+	wxString tscale = textctrl_scale->GetValue();
+	if (!datatypeHasSize(selectedDatatype))
+		tsize = wxEmptyString;
+	if (!datatypeHasScale(selectedDatatype))
+		tscale = wxEmptyString;
 	wxString fieldName = textctrl_fieldname->GetValue();
 
 	std::string sql;
@@ -165,18 +202,18 @@ void FieldPropertiesFrame::OnButtonOkClick(wxCommandEvent& WXUNUSED(event))
 			sql += "ALTER TABLE " + tableM->getName() + " ALTER " + wx2std(fieldName) + " TYPE "
 				+ wx2std(selectedDomain) + ";\n\n";
 		}
-		else if (selectedDomain == wxT("[new]")	&&			// changed datatype,size or scale
+		else if (/*selectedDomain == wxT("[new]")	&&	*/		// changed datatype,size or scale
 			( std2wx(type) != selectedDatatype
-			|| std2wx(size) != textctrl_size->GetValue()
-			|| std2wx(scale) != textctrl_scale->GetValue()))
+			|| std2wx(size) != tsize
+			|| std2wx(scale) != tscale))
 		{
 			sql += "ALTER TABLE " + tableM->getName() + " ALTER " + wx2std(fieldName) + " TYPE ";
 			sql += wx2std(selectedDatatype);
-			if (textctrl_size->GetValue().Trim() != wxEmptyString)
+			if (!tsize.IsEmpty())
 			{
-				sql += "(" + wx2std(textctrl_size->GetValue());
-				if (textctrl_scale->GetValue().Trim() != wxEmptyString)
-					sql += "," + wx2std(textctrl_scale->GetValue());
+				sql += "(" + wx2std(tsize);
+				if (!tscale.IsEmpty())
+					sql += "," + wx2std(tscale);
 				sql += ")";
 			}
 			sql += ";\n\n";
@@ -209,11 +246,11 @@ void FieldPropertiesFrame::OnButtonOkClick(wxCommandEvent& WXUNUSED(event))
 		if (selectedDomain == _("[new]"))
 		{
 			sql += wx2std(selectedDatatype);
-			if (textctrl_size->GetValue().Trim() != wxEmptyString)
+			if (!tsize.IsEmpty())
 			{
-				sql += "(" + wx2std(textctrl_size->GetValue());
-				if (textctrl_scale->GetValue().Trim() != wxEmptyString)
-					sql += "," + wx2std(textctrl_scale->GetValue());
+				sql += "(" + wx2std(tsize);
+				if (!tscale.IsEmpty())
+					sql += "," + wx2std(tscale);
 				sql += ")";
 			}
 		}
