@@ -50,7 +50,7 @@
 #include <stack>
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(myTreeCtrl, wxTreeCtrl)
-#if wxCHECK_VERSION(2, 5, 4)
+#if wxCHECK_VERSION(2, 5, 4) && !wxCHECK_VERSION(2, 5, 5)
 	// this is needed so context menu can be invoked with keyboard with wx2.5.4
 	EVT_TREE_ITEM_MENU(myTreeCtrl::ID_tree_ctrl, myTreeCtrl::OnItemMenu)
 #endif
@@ -59,7 +59,7 @@ BEGIN_EVENT_TABLE(myTreeCtrl, wxTreeCtrl)
 	EVT_TREE_ITEM_GETTOOLTIP(myTreeCtrl::ID_tree_ctrl, myTreeCtrl::OnItemGetTooltip)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
-#if wxCHECK_VERSION(2, 5, 4)
+#if wxCHECK_VERSION(2, 5, 4) && !wxCHECK_VERSION(2, 5, 5)
 void myTreeCtrl::OnItemMenu(wxTreeEvent& event)
 {
 	wxTreeItemId id = event.GetItem();
