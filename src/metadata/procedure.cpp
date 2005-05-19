@@ -98,12 +98,14 @@ std::string YProcedure::getSelectStatement(bool withColumns)
 	return sql;
 }
 //------------------------------------------------------------------------------
-bool YProcedure::checkAndLoadParameters()
+bool YProcedure::checkAndLoadParameters(bool force)
 {
-	bool ret = (parametersLoadedM || loadParameters());
-	if (ret)
+	if (force || !parametersLoadedM)
+	{
+		loadParameters();
 		notify();
-	return ret;
+	}
+	return parametersLoadedM;
 }
 //------------------------------------------------------------------------------
 //! returns false if error occurs, and places the error text in error variable

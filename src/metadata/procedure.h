@@ -48,7 +48,7 @@ public:
 	std::string getSelectStatement(bool withColumns);
 	bool isSelectable();
 
-	bool checkAndLoadParameters();
+	bool checkAndLoadParameters(bool force = false);
 	bool getSource(std::string& source);
 	std::string getAlterSql();
 	std::string getDefinition();

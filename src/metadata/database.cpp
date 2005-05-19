@@ -481,7 +481,7 @@ bool YDatabase::parseCommitedSql(std::string sql)
 			if (t == ntTable || t == ntView)
 				result = ((YxMetadataItemWithColumns *)object)->loadColumns();
 			else if (t == ntProcedure)
-				result = ((YProcedure *)object)->checkAndLoadParameters();
+				result = ((YProcedure *)object)->checkAndLoadParameters(true);	// force reload
             else if (t == ntException)
                 ((YException *)object)->loadProperties(true);
 			else if (t == ntTrigger)
@@ -537,7 +537,7 @@ bool YDatabase::connect(std::string password)
 		if (databaseM.intf() == 0)		// database object needs to be created
 		{
 			std::string hostname = getParent()->getName();
-            databaseM = IBPP::DatabaseFactory(hostname, pathM, usernameM, 
+            databaseM = IBPP::DatabaseFactory(hostname, pathM, usernameM,
                 password, roleM, charsetM, "");
 		}
 
