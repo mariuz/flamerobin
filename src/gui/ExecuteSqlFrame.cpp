@@ -851,6 +851,11 @@ void ExecuteSqlFrame::setSql(wxString sql)
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonExecuteClick(wxCommandEvent& WXUNUSED(event))
 {
+	bool clearMessages = false;
+	config().getValue("SQLEditorExecuteClears", clearMessages);
+	if (clearMessages)
+		styled_text_ctrl_stats->ClearAll();
+
 	prepareAndExecute(false);
 }
 //-----------------------------------------------------------------------------
