@@ -36,6 +36,7 @@ Contributor(s): Michael Hieke, Nando Dessena
 #include "wx/wx.h"
 #endif
 
+#include <wx/clipbrd.h>
 #include <string>
 #include "MultilineEnterDialog.h"
 #include "styleguide.h"
@@ -53,8 +54,7 @@ bool GetMultilineTextFromUser(const wxString& caption, wxString& value, wxWindow
 MultilineEnterDialog::MultilineEnterDialog(wxWindow* parent, const wxString& title, const wxString& initialText)
     : BaseDialog(parent, -1, title)
 {
-    text_ctrl_value = new wxTextCtrl(panel_controls, -1, initialText, 
-        wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
+	text_ctrl_value = new TextCtrlWithContextMenu(panel_controls, initialText);
     button_ok = new wxButton(panel_controls, ID_button_ok, _("Save"));
     button_cancel = new wxButton(panel_controls, ID_button_cancel, _("Cancel"));
     do_layout();
@@ -78,6 +78,98 @@ const std::string MultilineEnterDialog::getName() const
 //-----------------------------------------------------------------------------
 wxString MultilineEnterDialog::getText() const
 {
-    return text_ctrl_value->GetValue();
+    return text_ctrl_value->GetText();
+}
+//-----------------------------------------------------------------------------
+TextCtrlWithContextMenu::TextCtrlWithContextMenu(wxWindow* parent, const wxString& initialText)
+	:wxStyledTextCtrl(parent, myId, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER)
+{
+	SetMarginWidth(1, 0);			// turn off the margins
+	SetMarginWidth(0, 0);
+    SetWrapMode(wxSTC_WRAP_WORD);
+	
+	SetText(initialText);
+}
+//-----------------------------------------------------------------------------
+BEGIN_EVENT_TABLE(TextCtrlWithContextMenu, wxStyledTextCtrl)
+    EVT_CONTEXT_MENU(TextCtrlWithContextMenu::OnContextMenu)
+	EVT_STC_START_DRAG(TextCtrlWithContextMenu::myId, TextCtrlWithContextMenu::OnStartDrag)
+    EVT_MENU(TextCtrlWithContextMenu::ID_MENU_UNDO,             TextCtrlWithContextMenu::OnMenuUndo)
+    EVT_MENU(TextCtrlWithContextMenu::ID_MENU_REDO,             TextCtrlWithContextMenu::OnMenuRedo)
+    EVT_MENU(TextCtrlWithContextMenu::ID_MENU_CUT,              TextCtrlWithContextMenu::OnMenuCut)
+    EVT_MENU(TextCtrlWithContextMenu::ID_MENU_COPY,             TextCtrlWithContextMenu::OnMenuCopy)
+    EVT_MENU(TextCtrlWithContextMenu::ID_MENU_PASTE,            TextCtrlWithContextMenu::OnMenuPaste)
+    EVT_MENU(TextCtrlWithContextMenu::ID_MENU_DELETE,           TextCtrlWithContextMenu::OnMenuDelete)
+    EVT_MENU(TextCtrlWithContextMenu::ID_MENU_SELECT_ALL,       TextCtrlWithContextMenu::OnMenuSelectAll)
+END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+// Avoiding the annoying thing that you cannot click inside the selection and have it deselected and have caret there
+void TextCtrlWithContextMenu::OnStartDrag(wxStyledTextEvent& WXUNUSED(event))
+{
+	wxPoint mp = ::wxGetMousePosition();
+    int p = PositionFromPoint(ScreenToClient(mp));
+	SetSelectionStart(p);	// deselect text
+	SetSelectionEnd(p);
+}
+//-----------------------------------------------------------------------------
+void TextCtrlWithContextMenu::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
+{
+    wxMenu m(0);
+    m.Append(ID_MENU_UNDO, _("Undo"));
+    m.Append(ID_MENU_REDO, _("Redo"));
+    m.AppendSeparator();
+    m.Append(ID_MENU_CUT,    _("Cut"));
+    m.Append(ID_MENU_COPY,   _("Copy"));
+    m.Append(ID_MENU_PASTE,  _("Paste"));
+    m.Append(ID_MENU_DELETE, _("Delete"));
+    m.AppendSeparator();
+    m.Append(ID_MENU_SELECT_ALL,       _("Select All"));
+
+	// disable stuff
+	m.Enable(ID_MENU_UNDO, CanUndo());
+	m.Enable(ID_MENU_REDO, CanRedo());
+	if (GetSelectionStart() == GetSelectionEnd())		// nothing is selected
+	{
+		m.Enable(ID_MENU_CUT,              false);
+		m.Enable(ID_MENU_COPY,             false);
+		m.Enable(ID_MENU_DELETE,           false);
+	}
+
+    PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
+}
+//-----------------------------------------------------------------------------
+void TextCtrlWithContextMenu::OnMenuUndo(wxCommandEvent& WXUNUSED(event))
+{
+	Undo();
+}
+//-----------------------------------------------------------------------------
+void TextCtrlWithContextMenu::OnMenuRedo(wxCommandEvent& WXUNUSED(event))
+{
+	Redo();
+}
+//-----------------------------------------------------------------------------
+void TextCtrlWithContextMenu::OnMenuCut(wxCommandEvent& WXUNUSED(event))
+{
+	Cut();
+}
+//-----------------------------------------------------------------------------
+void TextCtrlWithContextMenu::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
+{
+	Copy();
+}
+//-----------------------------------------------------------------------------
+void TextCtrlWithContextMenu::OnMenuPaste(wxCommandEvent& WXUNUSED(event))
+{
+	Paste();
+}
+//-----------------------------------------------------------------------------
+void TextCtrlWithContextMenu::OnMenuDelete(wxCommandEvent& WXUNUSED(event))
+{
+	Clear();
+}
+//-----------------------------------------------------------------------------
+void TextCtrlWithContextMenu::OnMenuSelectAll(wxCommandEvent& WXUNUSED(event))
+{
+	SelectAll();
 }
 //-----------------------------------------------------------------------------

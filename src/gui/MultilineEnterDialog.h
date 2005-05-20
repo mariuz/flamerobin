@@ -27,10 +27,34 @@ Contributor(s): Michael Hieke, Nando Dessena
 #define MULTILINEENTERDIALOG_H
 
 #include <wx/wx.h>
+#include <wx/stc/stc.h>
 #include "BaseDialog.h"
 
 //-----------------------------------------------------------------------------
 bool GetMultilineTextFromUser(const wxString& caption, wxString& value, wxWindow* parent=0);
+//-----------------------------------------------------------------------------
+class TextCtrlWithContextMenu: public wxStyledTextCtrl
+{
+private:
+	enum { myId = 500 };
+public:
+	TextCtrlWithContextMenu(wxWindow* parent, const wxString& initialText = wxEmptyString);
+
+	// standard context menu for edit controls. Needed since wxTextCtrl on GTK1 does not provide it
+	enum { 
+		ID_MENU_UNDO = 300, ID_MENU_REDO, ID_MENU_CUT, ID_MENU_COPY, ID_MENU_PASTE, ID_MENU_DELETE, ID_MENU_SELECT_ALL
+	};
+	void OnStartDrag(wxStyledTextEvent& event);
+	void OnContextMenu(wxContextMenuEvent& event);
+	void OnMenuUndo(wxCommandEvent& event);
+	void OnMenuRedo(wxCommandEvent& event);
+	void OnMenuCut(wxCommandEvent& event);
+	void OnMenuCopy(wxCommandEvent& event);
+	void OnMenuPaste(wxCommandEvent& event);
+	void OnMenuDelete(wxCommandEvent& event);
+	void OnMenuSelectAll(wxCommandEvent& event);
+    DECLARE_EVENT_TABLE()
+};
 //-----------------------------------------------------------------------------
 //! normally you shouldn't need to create objects of this class, just use the GetMultilineTextFromUser function
 class MultilineEnterDialog: public BaseDialog {
@@ -39,6 +63,7 @@ public:
         ID_button_ok = wxID_OK,
         ID_button_cancel = wxID_CANCEL
     };
+	
     wxString getText() const;
     MultilineEnterDialog(wxWindow* parent, const wxString& title, const wxString& initialText);
 
@@ -47,7 +72,7 @@ private:
     void set_properties();
 
 protected:
-    wxTextCtrl* text_ctrl_value;
+    TextCtrlWithContextMenu* text_ctrl_value;
     wxButton* button_ok;
     wxButton* button_cancel;
     virtual const std::string getName() const;
