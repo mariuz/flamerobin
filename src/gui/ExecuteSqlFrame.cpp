@@ -350,7 +350,7 @@ void SqlEditor::OnMenuPaste(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void SqlEditor::OnMenuDelete(wxCommandEvent& WXUNUSED(event))
 {
-	DeleteBackNotLine();
+	Clear();
 }
 //-----------------------------------------------------------------------------
 void SqlEditor::OnMenuSelectAll(wxCommandEvent& WXUNUSED(event))
@@ -571,6 +571,7 @@ void ExecuteSqlFrame::do_layout()
 BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
 	EVT_STC_UPDATEUI(ExecuteSqlFrame::ID_stc_sql, ExecuteSqlFrame::OnSqlEditUpdateUI)
 	EVT_STC_CHARADDED(ExecuteSqlFrame::ID_stc_sql, ExecuteSqlFrame::OnSqlEditCharAdded)
+	EVT_STC_START_DRAG(ExecuteSqlFrame::ID_stc_sql, ExecuteSqlFrame::OnSqlEditStartDrag)
 	EVT_CHAR_HOOK(ExecuteSqlFrame::OnKeyDown)
 	EVT_CLOSE(ExecuteSqlFrame::OnClose)
 
@@ -585,6 +586,15 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_ROWCOUNT_CHANGED, \
         ExecuteSqlFrame::OnGridRowCountChanged)
 END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+// Avoiding the annoying thing that you cannot click inside the selection and have it deselected and have caret there
+void ExecuteSqlFrame::OnSqlEditStartDrag(wxStyledTextEvent& WXUNUSED(event))
+{
+	wxPoint mp = ::wxGetMousePosition();
+    int p = styled_text_ctrl_sql->PositionFromPoint(styled_text_ctrl_sql->ScreenToClient(mp));
+	styled_text_ctrl_sql->SetSelectionStart(p);	// deselect text
+	styled_text_ctrl_sql->SetSelectionEnd(p);
+}
 //-----------------------------------------------------------------------------
 //! display editor col:row in StatusBar and do highlighting of braces ()
 void ExecuteSqlFrame::OnSqlEditUpdateUI(wxStyledTextEvent& WXUNUSED(event))
