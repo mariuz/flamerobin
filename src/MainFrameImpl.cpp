@@ -153,13 +153,24 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
 				mipf = new MetadataItemPropertiesFrame(this, m);
 				mipf->Show();
 				break;
+			#ifdef __WXMSW__
 			default:
 				return;
+			#endif
 		};
 	}
 
-	if (!expanded)						// tree's event will happen later and contract it
-		tree_ctrl_1->Collapse(item);	// so an ugly hack to fix it.
+	#ifdef __WXGTK__
+	if (expanded)						// on GTK the tree control does nothing by itself, so we have to tell it
+		tree_ctrl_1->Collapse(item);
+	else
+		tree_ctrl_1->Expand(item);
+	#endif
+
+	#ifdef __WXMSW__
+	if (!expanded)						// on MSW the tree control toggles the branch automatically
+		tree_ctrl_1->Collapse(item);	// so an ugly hack to trick it.
+	#endif
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnClose(wxCloseEvent& event)
