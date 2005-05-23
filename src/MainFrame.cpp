@@ -44,7 +44,7 @@
 
 //-----------------------------------------------------------------------------
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
-    BaseFrame(parent, id, title, pos, size, style)
+    BaseFrame(parent, id, title, pos, size, style, wxT("FlameRobin_main"))
 {
     // begin wxGlade: MainFrame::MainFrame
     tree_ctrl_1 = new myTreeCtrl(this, wxDefaultPosition, wxDefaultSize, wxTR_HAS_BUTTONS|wxSUNKEN_BORDER);
@@ -62,8 +62,6 @@ void MainFrame::set_properties()
 	#ifndef __WXMSW__
 	tree_ctrl_1->SetIndent(10);
 	#endif
-
-	//tree_ctrl_1->SetSpacing(-5); // FIXME: Uncomment this when we get nice images for tree items
 
 	YTreeItem *rootdata = new YTreeItem(tree_ctrl_1);
 	wxTreeItemId root = tree_ctrl_1->AddRoot(_("Firebird Servers"), tree_ctrl_1->getItemImage(ntRoot), -1, rootdata);

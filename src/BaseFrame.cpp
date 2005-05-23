@@ -47,8 +47,8 @@ BEGIN_EVENT_TABLE(BaseFrame, wxFrame)
 	EVT_CLOSE(BaseFrame::OnClose)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
-BaseFrame::BaseFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
-    wxFrame(parent, id, title, pos, size, style|wxNO_FULL_REPAINT_ON_RESIZE)
+BaseFrame::BaseFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style, const wxString& name):
+    wxFrame(parent, id, title, pos, size, style|wxNO_FULL_REPAINT_ON_RESIZE, name)
 {
 }
 //-----------------------------------------------------------------------------

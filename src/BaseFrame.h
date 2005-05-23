@@ -32,7 +32,7 @@
 class BaseFrame: public wxFrame {
 public:
     BaseFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos = wxDefaultPosition,
-		const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE);
+		const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE, const wxString& name = wxT("FlameRobin"));
 	virtual bool Show(bool show = TRUE);
 	virtual bool Destroy();
 	virtual ~BaseFrame();
