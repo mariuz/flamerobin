@@ -47,7 +47,7 @@ public:
 
 	// adding new item to this enum enables PHP code to generate code (devel/menuevents.php)
 	// begin PHP enum
-    enum {	Menu_RegisterServer, Menu_Quit, Menu_About, Menu_Configure,
+    enum {	Menu_RegisterServer = 100, Menu_Quit, Menu_About, Menu_Configure,
 			Menu_DatabaseRegistrationInfo, Menu_RegisterDatabase, Menu_CreateDatabase, Menu_ManageUsers, Menu_RestartServer,
 			Menu_StopServer, Menu_UnRegisterServer, Menu_ServerProperties, Menu_Reconnect,
 			Menu_UnRegisterDatabase, Menu_Backup, Menu_Restore, Menu_Connect, Menu_Disconnect, Menu_Query, Menu_ShowConnectedUsers,
