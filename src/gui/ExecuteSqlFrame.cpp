@@ -1156,13 +1156,12 @@ void ExecuteSqlFrame::commitTransaction()
 		executedStatementsM.clear();
 		styled_text_ctrl_stats->ClearAll();
 		
-		#if !wxCHECK_VERSION(2, 5, 4)
         // workaround for STC bug with 100% CPU load during Idle(),
-        // can be removed for wxWidgets versions 2.5.4 and later
+        // it was supposed to be fixed in wxWidgets versions 2.5.4 and later,
+		// but it looks like it is not (at least for gtk1)
         styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
-		#endif
+		
 		styled_text_ctrl_sql->SetFocus();
-
 		if (closeWhenTransactionDoneM)
 		{
 			Close();
