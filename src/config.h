@@ -55,6 +55,17 @@ public:
     bool getValue(std::string key, StorageGranularity& value);
     bool getValue(std::string key, std::vector<std::string>& value);
 
+	// returns the value for key if it exists, or default value if it doesn't
+	template <typename T>
+	T get(std::string key, const T& defaultValue)
+	{
+		T temp;
+		if (getValue(key, temp))
+			return temp;
+		else
+			return defaultValue;
+	}
+	
 	// returns the path from which to load the HTML templates.
 	std::string getHtmlTemplatesPath();
 	// returns the file name with full path of servers.xml.
