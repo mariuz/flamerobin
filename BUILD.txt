@@ -2,6 +2,9 @@ flamerobin Build Instructions
 -------------------------------
 Below are build instructions for flamerobin on all supported build environments.
 
+Instructions assume that you have already compiled wxWidgets and IBPP library.
+There are some tips regarding that at the end of this file.
+
 -------------------------------
 -- MSW - Visual C++ Build Instructions
 -------------------------------
@@ -9,13 +12,13 @@ There are two ways to build using Microsoft Visual C++. One is via the dsp/dsw
 project files, and the other is via the makefile.vc command line makefile.
 
 * Using the dsp/dsw projects *
-Before building, you MUST set a WXDIR environment variable which points to 
-your wxWidgets root directory. To do this, go to 
+Before building, you MUST set a WXDIR environment variable which points to
+your wxWidgets root directory. To do this, go to
 Start->Control Panel->System and select the "Advanced" tab. Then, click the
 "Environment Variables" button and add WXDIR to the user or system env vars.
 
 Once that is finished, double click on flamerobin\flamerobin.dsw, select
-a build configuration by going to the Build menu, selecting 
+a build configuration by going to the Build menu, selecting
 "Set build configuration" and then picking a config, then build!
 
 * Using the makefiles *
@@ -27,12 +30,35 @@ nmake -f makefile.vc <BUILD OPTIONS>
 Build options can be any of the following:
 
 WXDIR=<dir> - tells the makefile where to find the root wxWidgets directory
-DEBUG=<0,1> - tells whether to build debug (0) or release (1) build
+DEBUG=<0,1> - tells whether to build debug (1) or release (0) build
 USEDLL=<0,1> - tells whether to link against wx static or dynamic libs
-UNICODE=<0,1> - tells whether to link against wx ansi or unicode build       
+UNICODE=<0,1> - tells whether to link against wx ansi or unicode build
 
 WXDIR *must* be specified (or set as an environment variable), but the rest
 default to 0 and are optional.
+
+-------------------------------
+-- MSW - Borland's Free C++ Build Instructions
+-------------------------------
+Assuming that you have IBPP installed in c:\ibpp2 and wxWidgets installed
+in c:\wxwin260, you should open MS-DOS prompt, cd to flamerobin root
+directory, and execute:
+
+set WXDIR=c:\wxwin260
+make -f makefile.bcc STATICRTL=1 FINAL=1 IBPP=c:\path\to\ibpp2
+
+for release build, or
+
+set WXDIR=c:\wxwin260
+make -f makefile.bcc STATICRTL=1 FINAL=0 IBPP=c:\path\to\ibpp2
+
+for debug build. Explanantion:
+
+IBPP=<dir>		- tells the makefile where to find the root IBPP directory
+WXDIR=<dir>     - tells the makefile where to find the root wxWidgets directory
+FINAL=<0,1>     - tells whether to build debug (0) or release (1) build
+STATICRTL=<0,1> - tells whether to link against wx static(1) or dynamic(0) libs
+
 
 -------------------------------
 -- Unix - Autoconf Build Instructions
@@ -61,6 +87,45 @@ Running the command
 make <IBPP=/my/path/to/ibpp>
 
 should build the flamerobin executable. You need to specify IBPP only
-if you do not have this variable set in your environment. 
+if you do not have this variable set in your environment.
 If you experience any problems, please check the flamerobin developer
 mailing list archive, or ask a question there.
+
+
+
+-------------------------------
+-- MSW - Building wxWidgets with Borland's Free C++ Compiler
+-------------------------------
+
+Unpack the archive somewhere, for example c:\wxWin260, open MS-DOS prompt
+and go into "build\msw" directory:
+
+set WXWIN=c:\wxWin260
+set WXDIR=c:\wxWin260
+make -f makefile.bcc BUILD=release RUNTIME_LIBS=static
+cd ..\..
+cd contrib\build\stc
+make -f makefile.bcc BUILD=release RUNTIME_LIBS=static
+
+As you can see, it is important to build STC package too. It is for
+wxStyledTextControl which is used in many places in FlameRobin.
+
+
+-------------------------------
+-- Unix - Building wxWidgets with configure
+-------------------------------
+
+Unpack the sources, enter "build" directory and run "./configure". There
+are many options you may like to set, run "./configure --help" to find about
+them. We assume Gtk2 static release build with Unicode support:
+
+./configure --disable-shared --disable-debug
+make
+make install
+
+Now, you have to compile STC library. It is for wxStyledTextControl which
+is used in many places in FlameRobin. Enter "contrib/src/stc" directory:
+
+make
+make install
+
