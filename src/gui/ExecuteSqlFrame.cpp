@@ -364,9 +364,7 @@ void SqlEditor::OnMenuSelectStatement(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void SqlEditor::OnMenuExecuteSelected(wxCommandEvent& WXUNUSED(event))
 {
-	bool single = false;
-	config().getValue("TreatAsSingleStatement", single);
-	if (single)
+	if (config().get("TreatAsSingleStatement", false))
 		frameM->execute(wx2std(GetSelectedText()));
 	else
 		frameM->parseStatements(GetSelectedText());
@@ -655,10 +653,7 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
 		int c = styled_text_ctrl_sql->GetCharAt(pos-1);
 		if (c == '(')
 		{
-			// TODO: add a config option to disable calltips
-			bool showCalltips = true;
-			config().getValue("SQLEditorCalltips", showCalltips);
-			if (showCalltips)
+			if (config().get("SQLEditorCalltips", true))
 			{
 				int start = styled_text_ctrl_sql->WordStartPosition(pos-2, true);
 				if (start != -1 && start != pos-2)
@@ -682,15 +677,11 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
 		}
 		else
 		{
-			bool autoCompleteEnabled = true;
-			config().getValue("AutocompleteEnabled", autoCompleteEnabled);
-			if (autoCompleteEnabled)
+			if (config().get("AutocompleteEnabled", true))
 			{
 				if (styled_text_ctrl_sql->CallTipActive())
 				{
-					bool disableIt = true;
-					config().getValue("AutoCompleteDisableWhenCalltipShown", disableIt);
-					if (!disableIt)
+					if (!config().get("AutoCompleteDisableWhenCalltipShown", true))
 						autoComplete(false);
 				}
 				else
@@ -722,8 +713,7 @@ void ExecuteSqlFrame::autoComplete(bool force)
 	int autoCompleteChars = 1;
 	if (!force)
 	{
-        autoCompleteChars = 3;
-		config().getValue("AutocompleteChars", autoCompleteChars);
+        autoCompleteChars = config().get("AutocompleteChars", 3);
 		if (autoCompleteChars <= 0)
 			return;
 	}
