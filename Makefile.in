@@ -52,6 +52,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_ReorderFieldsDialog.o \
 	flamerobin_RestoreFrame.o \
 	flamerobin_ServerRegistrationDialog.o \
+	flamerobin_FindDialog.o \
 	flamerobin_images.o \
 	flamerobin_logger.o \
 	flamerobin_main.o \
@@ -271,6 +272,9 @@ flamerobin_RestoreFrame.o: $(srcdir)/src/gui/RestoreFrame.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_ServerRegistrationDialog.o: $(srcdir)/src/gui/ServerRegistrationDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/ServerRegistrationDialog.cpp
+
+flamerobin_FindDialog.o: $(srcdir)/src/gui/FindDialog.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/FindDialog.cpp
 
 flamerobin_images.o: $(srcdir)/src/images.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/images.cpp

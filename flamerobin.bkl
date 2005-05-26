@@ -247,6 +247,7 @@
         $(SOURCEDIR)/gui/ReorderFieldsDialog.h
         $(SOURCEDIR)/gui/RestoreFrame.h
         $(SOURCEDIR)/gui/ServerRegistrationDialog.h
+        $(SOURCEDIR)/gui/FindDialog.h
         $(SOURCEDIR)/images.h
         $(SOURCEDIR)/logger.h
         $(SOURCEDIR)/main.h
@@ -315,6 +316,7 @@
         $(SOURCEDIR)/gui/ReorderFieldsDialog.cpp
         $(SOURCEDIR)/gui/RestoreFrame.cpp
         $(SOURCEDIR)/gui/ServerRegistrationDialog.cpp
+        $(SOURCEDIR)/gui/FindDialog.cpp
         $(SOURCEDIR)/images.cpp
         $(SOURCEDIR)/logger.cpp
         $(SOURCEDIR)/main.cpp

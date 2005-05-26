@@ -181,7 +181,7 @@ namespace sql_icons {
 //-----------------------------------------------------------------------------
 // Setup the Scintilla editor
 SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id, ExecuteSqlFrame *frame)
-	: wxStyledTextCtrl(parent, id)
+	: SearchableEditor(parent, id)
 {
 	frameM = frame;
 	std::string s;
@@ -285,6 +285,7 @@ BEGIN_EVENT_TABLE(SqlEditor, wxStyledTextCtrl)
     EVT_MENU(SqlEditor::ID_MENU_SELECT_ALL,       SqlEditor::OnMenuSelectAll)
     EVT_MENU(SqlEditor::ID_MENU_SELECT_STATEMENT, SqlEditor::OnMenuSelectStatement)
     EVT_MENU(SqlEditor::ID_MENU_EXECUTE_SELECTED, SqlEditor::OnMenuExecuteSelected)
+    EVT_MENU(SqlEditor::ID_MENU_FIND,             SqlEditor::OnMenuFind)
     EVT_MENU(SqlEditor::ID_MENU_WRAP,             SqlEditor::OnMenuWrap)
     EVT_MENU(SqlEditor::ID_MENU_SET_FONT,         SqlEditor::OnMenuSetFont)
 END_EVENT_TABLE()
@@ -304,6 +305,7 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
     m.Append(ID_MENU_SELECT_STATEMENT, _("Select statement"));
     m.Append(ID_MENU_EXECUTE_SELECTED, _("Execute selected"));
     m.AppendSeparator();
+    m.Append(ID_MENU_FIND,          _("Find and replace"));
     m.Append(ID_MENU_SET_FONT,      _("Set Font"));
     m.AppendCheckItem(ID_MENU_WRAP, _("Wrap"));
 	if (wxSTC_WRAP_WORD == GetWrapMode())
@@ -360,6 +362,7 @@ void SqlEditor::OnMenuSelectAll(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void SqlEditor::OnMenuSelectStatement(wxCommandEvent& WXUNUSED(event))
 {
+	wxMessageBox(_("This feature is not yet implemented."), _("Sorry."), wxICON_INFORMATION);
 }
 //-----------------------------------------------------------------------------
 void SqlEditor::OnMenuExecuteSelected(wxCommandEvent& WXUNUSED(event))
@@ -368,6 +371,11 @@ void SqlEditor::OnMenuExecuteSelected(wxCommandEvent& WXUNUSED(event))
 		frameM->execute(wx2std(GetSelectedText()));
 	else
 		frameM->parseStatements(GetSelectedText());
+}
+//-----------------------------------------------------------------------------
+void SqlEditor::OnMenuFind(wxCommandEvent& WXUNUSED(event))
+{
+	find(true);		// calls SearchableEditor::find(), true means that new search is needed
 }
 //-----------------------------------------------------------------------------
 void SqlEditor::OnMenuWrap(wxCommandEvent& WXUNUSED(event))
@@ -740,6 +748,8 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
 		commitTransaction();
 	if (key == WXK_F8)
 		OnButtonRollbackClick(e);
+	if (key == WXK_F3)
+		styled_text_ctrl_sql->find(false);
 
 	// TODO: we might need Ctrl+N for new window, Ctrl+S for Save, etc. but it cannot be catched from here
 	//       since OnKeyDown() doesn't seem to catch letters, only special keys
