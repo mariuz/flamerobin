@@ -23,6 +23,19 @@
   Contributor(s): _____________________
 */
 
+// For compilers that support precompilation, includes "wx/wx.h".
+#include "wx/wxprec.h"
+
+#ifdef __BORLANDC__
+#pragma hdrstop
+#endif
+
+// for all others, include the necessary headers (this file is usually all you
+// need because it includes almost all "standard" wxWindows headers
+#ifndef WX_PRECOMP
+#include "wx/wx.h"
+#endif
+
 #include "styleguide.h"
 #include "FindDialog.h"
 //-----------------------------------------------------------------------------
@@ -60,19 +73,19 @@ int FindFlags::asStc() const			// returns "flags" converted to wxSTC search flag
 //-----------------------------------------------------------------------------
 void FindFlags::show() const
 {
-	wxString retval(wxString::Format("Flags (%d) contains:\n", flags));
+	wxString retval(wxString::Format(wxT("Flags (%d) contains:\n"), flags));
 	if (has(se::WHOLE_WORD))
-		retval += "se::WHOLE_WORD\n";
+		retval += wxT("se::WHOLE_WORD\n");
 	if (has(se::MATCH_CASE))
-		retval += "se::MATCH_CASE\n";
+		retval += wxT("se::MATCH_CASE\n");
 	if (has(se::REGULAR_EXPRESSION))
-		retval += "se::REGULAR_EXPRESSION\n";
+		retval += wxT("se::REGULAR_EXPRESSION\n");
 	if (has(se::FROM_TOP))
-		retval += "se::FROM_TOP\n";
+		retval += wxT("se::FROM_TOP\n");
 	if (has(se::WRAP))
-		retval += "se::WRAP\n";
+		retval += wxT("se::WRAP\n");
 	if (has(se::CONVERT_BACKSLASH))
-		retval += "se::CONVERT_BACKSLASH\n";
+		retval += wxT("se::CONVERT_BACKSLASH\n");
 	wxMessageBox(retval);
 }
 //-----------------------------------------------------------------------------
@@ -92,7 +105,7 @@ SearchableEditor::SearchableEditor(wxWindow *parent, wxWindowID id)
 wxString SearchableEditor::convertBackslashes(const wxString& source)
 {
 	wxString result(source);
-	result.Replace("%", "%%");			// remove chance to get %s or similar stuff
+	result.Replace(wxT("%"), wxT("%%"));        // remove chance to get %s or similar stuff
 	return wxString::Format(result);
 }
 //-----------------------------------------------------------------------------
@@ -358,25 +371,25 @@ BEGIN_EVENT_TABLE(FindDialog, BaseDialog)
 	EVT_BUTTON(FindDialog::ID_button_replace_in_selection, FindDialog::OnReplaceInSelectionButtonClick)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
-void FindDialog::OnFindButtonClick(wxCommandEvent &event)
+void FindDialog::OnFindButtonClick(wxCommandEvent& WXUNUSED(event))
 {
 	setup();
 	parentEditorM->find(false);
 }
 //-----------------------------------------------------------------------------
-void FindDialog::OnReplaceButtonClick(wxCommandEvent &event)
+void FindDialog::OnReplaceButtonClick(wxCommandEvent& WXUNUSED(event))
 {
 	setup();
 	parentEditorM->replace();
 }
 //-----------------------------------------------------------------------------
-void FindDialog::OnReplaceAllButtonClick(wxCommandEvent &event)
+void FindDialog::OnReplaceAllButtonClick(wxCommandEvent& WXUNUSED(event))
 {
 	setup();
 	parentEditorM->replaceAll();
 }
 //-----------------------------------------------------------------------------
-void FindDialog::OnReplaceInSelectionButtonClick(wxCommandEvent &event)
+void FindDialog::OnReplaceInSelectionButtonClick(wxCommandEvent& WXUNUSED(event))
 {
 	setup();
 	parentEditorM->replaceInSelection();
