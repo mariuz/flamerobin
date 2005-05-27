@@ -127,7 +127,7 @@ void SearchableEditor::setupSearch(const wxString& findText, const wxString& rep
 bool SearchableEditor::find(bool newSearch)
 {
 	if (!fd)
-		fd = new FindDialog(this, this);
+        fd = new FindDialog(this, ::wxGetTopLevelParent(this));
 	if (newSearch || findTextM.IsEmpty())
 	{
 		fd->Show();
@@ -256,11 +256,9 @@ FindDialog::FindDialog(SearchableEditor *editor, wxWindow* parent, const wxStrin
 	if (allowedFlags)
 		flags = *allowedFlags;	// copy settings
 
-    panel_controls = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize,
-        wxTAB_TRAVERSAL|wxCLIP_CHILDREN|wxNO_FULL_REPAINT_ON_RESIZE);
     label_find    = new wxStaticText(panel_controls, -1, _("Find:"));
-    label_replace = new wxStaticText(panel_controls, -1, _("Replace with:"));
     text_ctrl_find    = new wxTextCtrl(panel_controls, -1);
+    label_replace = new wxStaticText(panel_controls, -1, _("Replace with:"));
     text_ctrl_replace = new wxTextCtrl(panel_controls, -1);
 
 	checkbox_wholeword = checkbox_matchcase = checkbox_regexp = checkbox_convertbs = checkbox_wrap = checkbox_fromtop = 0;
@@ -287,25 +285,15 @@ FindDialog::FindDialog(SearchableEditor *editor, wxWindow* parent, const wxStrin
 //-----------------------------------------------------------------------------
 void FindDialog::do_layout()
 {
-    wxFlexGridSizer* sizerFind = new wxFlexGridSizer(2, 2,
-        styleguide().getUnrelatedControlMargin(wxVERTICAL),
+    wxFlexGridSizer* sizerEdits = new wxFlexGridSizer(2, 2,
+        styleguide().getRelatedControlMargin(wxVERTICAL),
         styleguide().getControlLabelMargin());
 	
-    sizerFind->Add(label_find, 0, wxALIGN_CENTER_VERTICAL);
-    sizerFind->Add(text_ctrl_find, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
-    sizerFind->Add(label_replace, 0, wxALIGN_CENTER_VERTICAL);
-    sizerFind->Add(text_ctrl_replace, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
-	sizerFind->AddGrowableCol(1, 1);
-	
-    wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
-    sizerButtons->Add(0, 0, 1, wxEXPAND);
-    sizerButtons->Add(button_find);
-    sizerButtons->Add(styleguide().getBetweenButtonsMargin(wxHORIZONTAL), 0);
-    sizerButtons->Add(button_replace);
-    sizerButtons->Add(styleguide().getBetweenButtonsMargin(wxHORIZONTAL), 0);
-    sizerButtons->Add(button_replace_all);
-    sizerButtons->Add(styleguide().getBetweenButtonsMargin(wxHORIZONTAL), 0);
-    sizerButtons->Add(button_replace_in_selection);
+    sizerEdits->Add(label_find, 0, wxALIGN_CENTER_VERTICAL);
+    sizerEdits->Add(text_ctrl_find, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
+    sizerEdits->Add(label_replace, 0, wxALIGN_CENTER_VERTICAL);
+    sizerEdits->Add(text_ctrl_replace, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
+	sizerEdits->AddGrowableCol(1, 1);
 	
     wxGridSizer* sizerChecks = new wxGridSizer(2, 2,
         styleguide().getCheckboxSpacing(),
@@ -322,23 +310,24 @@ void FindDialog::do_layout()
 		sizerChecks->Add(checkbox_wrap);
 	if (checkbox_fromtop)
 		sizerChecks->Add(checkbox_fromtop);
+
+    wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
+    sizerButtons->Add(0, 0, 1, wxEXPAND);
+    sizerButtons->Add(button_find);
+    sizerButtons->Add(styleguide().getBetweenButtonsMargin(wxHORIZONTAL), 0);
+    sizerButtons->Add(button_replace);
+    sizerButtons->Add(styleguide().getBetweenButtonsMargin(wxHORIZONTAL), 0);
+    sizerButtons->Add(button_replace_all);
+    sizerButtons->Add(styleguide().getBetweenButtonsMargin(wxHORIZONTAL), 0);
+    sizerButtons->Add(button_replace_in_selection);
 	
-    wxBoxSizer* sizerPanelV = new wxBoxSizer(wxVERTICAL);
-    sizerPanelV->Add(0, styleguide().getFrameMargin(wxTOP));
-    sizerPanelV->Add(sizerFind, 1, wxEXPAND);
-    sizerPanelV->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
-    sizerPanelV->Add(sizerChecks);
-    sizerPanelV->Add(0, styleguide().getUnrelatedControlMargin(wxVERTICAL));
-    sizerPanelV->Add(sizerButtons, 0, wxEXPAND);
-    sizerPanelV->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
-	
-    wxBoxSizer* sizerPanelH = new wxBoxSizer(wxHORIZONTAL);
-    sizerPanelH->Add(styleguide().getFrameMargin(wxLEFT), 0);
-    sizerPanelH->Add(sizerPanelV, 1, wxEXPAND);
-    sizerPanelH->Add(styleguide().getFrameMargin(wxRIGHT), 0);
-    panel_controls->SetSizerAndFit(sizerPanelH);
-	
-    SetSizerAndFit(sizerPanelH);
+    wxBoxSizer* sizerControls = new wxBoxSizer(wxVERTICAL);
+    sizerControls->Add(sizerEdits, 1, wxEXPAND);
+    sizerControls->Add(0, styleguide().getUnrelatedControlMargin(wxVERTICAL));
+    sizerControls->Add(sizerChecks);
+
+    // use method in base class to set everything up
+    layoutSizers(sizerControls, sizerButtons);
 }
 //-----------------------------------------------------------------------------
 void FindDialog::setup()
