@@ -94,13 +94,13 @@ void GridTable::Clear()
     {
         if (oldrf)
         {
-            wxGridTableMessage rowMsg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED, 
+            wxGridTableMessage rowMsg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED,
                 0, oldrf);
             GetView()->ProcessTableMessage(rowMsg);
         }
         if (oldcc)
         {
-            wxGridTableMessage colMsg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED, 
+            wxGridTableMessage colMsg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED,
                 0, oldcc);
             GetView()->ProcessTableMessage(colMsg);
         }
@@ -114,7 +114,7 @@ void GridTable::fetch()
     if (columnCountM == 0 && GetView())
     {
         columnCountM = statementM->Columns();
-        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED, 
+        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED,
             columnCountM);
         GetView()->ProcessTableMessage(msg);
     }
@@ -124,7 +124,7 @@ void GridTable::fetch()
     bool initial = !rowsFetchedM;
     // fetch more rows until maxRowToFetchM reached or 100 ms elapsed
     wxLongLong startms = ::wxGetLocalTimeMillis();
-    do 
+    do
     {
         try
         {
@@ -134,7 +134,7 @@ void GridTable::fetch()
         catch (IBPP::Exception& e)
         {
             allRowsFetchedM = true;
-            ::wxMessageBox(std2wx(e.ErrorMessage()), 
+            ::wxMessageBox(std2wx(e.ErrorMessage()),
                 _("An IBPP error occurred."));
         }
         catch (...)
@@ -160,12 +160,12 @@ void GridTable::fetch()
 
         if (!initial && (::wxGetLocalTimeMillis() - startms > 100))
             break;
-    } 
+    }
     while (rowsFetchedM < maxRowToFetchM);
 
     if (rowsFetchedM > oldrf && GetView())		// notify the grid
     {
-        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, 
+        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED,
             rowsFetchedM - oldrf);
         GetView()->ProcessTableMessage(msg);
         // used in frame to update status bar
@@ -175,7 +175,7 @@ void GridTable::fetch()
     }
 }
 //-----------------------------------------------------------------------------
-wxGridCellAttr* GridTable::GetAttr(int row, int col, 
+wxGridCellAttr* GridTable::GetAttr(int row, int col,
     wxGridCellAttr::wxAttrKind kind)
 {
     if (row < rowsFetchedM && col < columnCountM && !dataM[row][col])
@@ -198,7 +198,7 @@ wxString GridTable::getCellValueForInsert(int row, int col)
         return wxT("NULL");
     // return quoted text, but escape embedded quotes
     wxString s(cell->getValue());
-    s.Replace(wxT("'"), wxT("''"));		
+    s.Replace(wxT("'"), wxT("''"));
     return wxT("'") + s + wxT("'");
 }
 //-----------------------------------------------------------------------------
@@ -215,7 +215,19 @@ IBPP::SDT GridTable::getColumnType(int col)
     if (col > columnCountM || statementM.intf() == 0)
         return IBPP::sdString;	// I wish there is sdUnknown :)
     else
-        return statementM->ColumnType(col);
+	{
+		try
+		{
+			return statementM->ColumnType(col);
+		}
+        catch (IBPP::Exception& e)
+        {
+			// perhaps we should clear the statement, since something is obviously wrong
+            columnCountM = col-1;
+            ::wxMessageBox(std2wx(e.ErrorMessage()), _("An IBPP error occurred."));
+			return IBPP::sdString;
+        }
+	}
 }
 //-----------------------------------------------------------------------------
 int GridTable::GetNumberCols()
@@ -230,7 +242,7 @@ int GridTable::GetNumberRows()
 //-----------------------------------------------------------------------------
 wxString GridTable::getTableName()
 {
-    // TODO: using one table is not correct for JOINs or sub-SELECTs, so it 
+    // TODO: using one table is not correct for JOINs or sub-SELECTs, so it
     //       should take e.g. the one that occurs most often
     if (statementM.intf() == 0 || columnCountM == 0)
         return wxEmptyString;
@@ -299,7 +311,7 @@ bool GridTable::needsMoreRowsFetched()
     return (rowsFetchedM < maxRowToFetchM && !allRowsFetchedM);
 }
 //-----------------------------------------------------------------------------
-void GridTable::SetValue(int WXUNUSED(row), int WXUNUSED(col), 
+void GridTable::SetValue(int WXUNUSED(row), int WXUNUSED(col),
     const wxString& WXUNUSED(value))
 {
     // needs to be implemented for editable grid
