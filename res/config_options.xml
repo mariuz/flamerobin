@@ -39,12 +39,14 @@
 			<key>ConfirmQuit</key>
 			<default>0</default>
 		</setting>
+		<!--
 		<setting type="checkbox" platform="win">
 			<caption>Minimize to system tray</caption>
 			<description>Minimizes to system tray instead of taskbar</description>
 			<key>MinimizeToTray</key>
 			<default>0</default>
 		</setting>
+		-->
 	</node>
 	<node>
 		<caption>Main Tree View</caption>
@@ -116,11 +118,13 @@
 			<key>TreatAsSingleStatement</key>
 			<default>0</default>
 		</setting>
+		<!--
 		<setting type="checkbox">
 			<caption>Automatically copy successfully executed statements to clipboard</caption>
 			<key>SQLEditorAutoCopy</key>
 			<default>0</default>
 		</setting>
+		-->
 		<setting type="checkbox">
 			<caption>Clear the messages when executing new statements</caption>
 			<key>SQLEditorExecuteClears</key>
@@ -176,6 +180,7 @@
 	<node>
 		<caption>Data Grid</caption>
 		<image>4</image>
+		<!--
 		<setting type="string">
 			<caption>Date format:</caption>
 			<description>The following letters will be replaced:<br />d - day of month, 1-31<br />D - day of month, 01-31<br />m - month, 1-12<br />M - month, 01-12<br />y - year, 00-99<br />Y - year, 0000-9999<br />All other characters are copied.</description>
@@ -190,6 +195,7 @@
 			<default>H:M:S</default>
 			<aligngroup>1</aligngroup>
 		</setting>
+		-->
 		<setting type="font">
 			<caption>Grid header font:</caption>
 			<key>DataGridHeaderFont</key>
@@ -272,6 +278,7 @@
 				</setting>
 			</enables>
 		</setting>
+		<!--
 		<setting type="checkbox">
 			<caption>Enable logging to database</caption>
 			<description>Logs all successful DDL statements to database.<br />This will create a table named FLAMEROBIN_LOG into your databases.</description>
@@ -285,5 +292,6 @@
 				</setting>
 			</enables>
 		</setting>
+		-->
 	</node>
 </root>
