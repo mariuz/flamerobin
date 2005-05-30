@@ -118,6 +118,9 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
 	enum { showProperties = 0, showColumnInfo };
 	int treeActivateAction = showProperties;
 	config().getValue("OnTreeActivate", treeActivateAction);
+	if (!config().get("ShowColumnsInTree", true))	// if no columns in tree, then only Properties can be shown
+		treeActivateAction = showProperties;
+
 	if (treeActivateAction == showColumnInfo && (nt == ntTable || nt == ntView || nt == ntProcedure))
 	{
 		if (nt == ntProcedure)
