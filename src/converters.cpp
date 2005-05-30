@@ -38,6 +38,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include "config.h"
 #include "converters.h"
 //---------------------------------------------------------------------------------------
 //! formats date according to DateFormat string
@@ -123,6 +124,12 @@ bool CreateString(IBPP::Statement& st, int col, std::string& value)
 	if (st->IsNull(col))
 		return false;
 
+	// some defaults
+	bool reformatNumbers = config().get("ReformatNumbers", false);
+	int numberPrecision = config().get("NumberPrecision", 2);	// defaults to 2 decimal digits
+	std::string dateFormat = config().get("DateFormat", std::string("D.M.Y"));
+	std::string timeFormat = config().get("TimeFormat", std::string("H:M:S"));
+
 	double dval;
 	float fval;
 	__int64 int64val;
@@ -151,16 +158,16 @@ bool CreateString(IBPP::Statement& st, int col, std::string& value)
 		case IBPP::sdDate:
 			st->Get(col, d);
 			dtoi(d, &year, &month, &day);
-			value = GetHumanDate(year, month, day, "D.M.Y");
+			value = GetHumanDate(year, month, day, dateFormat);
 			return true;
 		case IBPP::sdTime:
 			st->Get(col, t);
 			ttoi(t, &hour, &minute, &second);
-			value = GetHumanTime(hour, minute, second, "H:M:S");
+			value = GetHumanTime(hour, minute, second, timeFormat);
 			return true;
 		case IBPP::sdTimestamp:
 			st->Get(col, ts);
-			value = GetHumanTimestamp(ts, "D.M.Y", "H:M:S");
+			value = GetHumanTimestamp(ts, dateFormat, timeFormat);
 			return true;
 		case IBPP::sdFloat:
 			st->Get(col, &fval);
@@ -172,11 +179,10 @@ bool CreateString(IBPP::Statement& st, int col, std::string& value)
 			if (st->ColumnScale(col))
 				svalue << std::fixed << std::setprecision(st->ColumnScale(col)) << dval;
 			else
-			{	// TODO: make some global configuration screen to set up thing like this, and uncomment this code then
-				//int prec;
-				//if (config().getValue("globals:numberformat-precision", prec))
-				//	svalue << std::fixed << std::setprecision(prec) << dval;
-				//else
+			{
+				if (reformatNumbers)
+					svalue << std::fixed << std::setprecision(numberPrecision) << dval;
+				else
 					svalue << std::fixed << dval;
 			}
 			value = svalue.str();
