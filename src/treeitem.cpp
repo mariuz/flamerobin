@@ -36,6 +36,7 @@
 
 #include "ugly.h"
 #include "metadata/column.h"
+#include "config.h"
 #include "treeitem.h"
 //------------------------------------------------------------------------------
 YTreeItem::YTreeItem(myTreeCtrl *tree)
@@ -82,9 +83,13 @@ void YTreeItem::update()
 	if (treeM->GetItemText(id) != std2wx(object->getPrintableName()))
 		treeM->SetItemText(id, std2wx(object->getPrintableName()));
 
+	NodeType ndt = object->getType();
+	bool affectedBySetting = (ndt == ntTable || ndt == ntView || ndt == ntProcedure);
+	bool showColumns = !affectedBySetting || config().get("ShowColumnsInTree", true);
+
 	// check subitems
 	std::vector<YxMetadataItem *>temp;
-	if (object->getChildren(temp))							// check if some tree node has to be added
+	if (showColumns && object->getChildren(temp))					// check if some tree node has to be added
 	{
 		wxTreeItemId previous;
 		for (std::vector<YxMetadataItem *>::iterator i = temp.begin(); i != temp.end(); ++i)
