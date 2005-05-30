@@ -113,7 +113,7 @@
 			</option>
 		</setting>
 		<setting type="checkbox">
-			<caption>Treat selected text as one single statement</caption>
+			<caption>Treat selected text as a single statement</caption>
 			<description>If unchecked the parser will search the selected text for multiple statements</description>
 			<key>TreatAsSingleStatement</key>
 			<default>0</default>
