@@ -435,7 +435,10 @@ bool YDatabase::parseCommitedSql(std::string sql)
 				if (maybe_type == "TYPE")		// domain is either created/modified/deleted or none
 				{								// if we'd only know what was there before... life would be easier
 					strstrm >> domain_or_datatype;
-					domain_or_datatype.erase(domain_or_datatype.find("("));	// remove if it has size/scale
+					std::string::size_type pos = domain_or_datatype.find("(");
+					if (pos != std::string::npos)
+						domain_or_datatype.erase(pos);		// remove if it has size/scale
+
 					std::vector<std::string> typenames;				// I first tried a simple array of strings
 					typenames.push_back("CHAR");					// but program kept crashing
 					typenames.push_back("VARCHAR");
@@ -468,10 +471,13 @@ bool YDatabase::parseCommitedSql(std::string sql)
 						}
 						((YDomain *)m)->loadInfo();
 					}
-					else	// there is an extra RDB$domain in domainsM, reload domain info
-					{							// TODO: this is very expensive operation (esp. on large databases)
-						loadObjects(ntDomain);	// we could rewrite it to select domain for given column of table
-					}							// and only load its info and add it
+					else
+					{
+						// there is (maybe) an extra RDB$domain in domainsM, but we can leave it there
+						// as it is not going to hurt anyone
+						// Besides, it appears that domain is left in database too (not cleared)
+						// so we won't call this: loadObjects(ntDomain);
+					}
 				}
 			}
 
