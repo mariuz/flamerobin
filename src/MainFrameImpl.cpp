@@ -48,6 +48,7 @@
 #include "gui/PreferencesDialog.h"
 #include "gui/RestoreFrame.h"
 #include "gui/ServerRegistrationDialog.h"
+#include "FieldPropertiesFrame.h"
 #include "treeitem.h"
 #include "ugly.h"
 #include "dberror.h"
@@ -220,7 +221,7 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
 {
-    PreferencesDialog pd(this, _("Preferences"), config(), 
+    PreferencesDialog pd(this, _("Preferences"), config(),
         wxT("config_options.xml"));
     if (pd.isOk() && pd.loadFromConfig())
     {
@@ -719,8 +720,23 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
 	if (!m)
 		return;
 
-    MetadataItemPropertiesFrame *mipf = new MetadataItemPropertiesFrame(this, m);
-	mipf->Show();
+	YColumn *c = dynamic_cast<YColumn *>(m);
+	if (c)
+	{
+		YTable *t = dynamic_cast<YTable *>(c->getParent());
+		if (!t)		// dummy check
+			return;
+		FieldPropertiesFrame *f = new FieldPropertiesFrame(this, -1,
+			wxString::Format(_("TABLE: %s"), std2wx(t->getName()).c_str()),
+			t);
+		f->setField(c);
+		f->Show();
+	}
+	else
+	{
+		MetadataItemPropertiesFrame *mipf = new MetadataItemPropertiesFrame(this, m);
+		mipf->Show();
+	}
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
@@ -729,7 +745,7 @@ void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
 	if (!m)
 		return;
 
-	YDatabase *d = dynamic_cast<YDatabase *>(m->getParent());
+	YDatabase *d = m->getDatabase();
 	if (!d)
 		return;
 

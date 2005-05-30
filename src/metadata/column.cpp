@@ -142,3 +142,8 @@ std::string YColumn::getCollation() const
 	return collationM;
 }
 //------------------------------------------------------------------------------
+std::string YColumn::getDropSqlStatement() const
+{
+	return "ALTER TABLE " + getParent()->getName() + " DROP " + nameM;
+}
+//------------------------------------------------------------------------------

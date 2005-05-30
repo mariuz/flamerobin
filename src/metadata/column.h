@@ -39,6 +39,7 @@ public:
 	void Init(bool notnull, std::string source, std::string collation = "");
 	virtual std::string getPrintableName();
 	std::string getDatatype();
+    virtual std::string getDropSqlStatement() const;
 
 	bool isNullable() const;
 	bool isPrimaryKey() const;

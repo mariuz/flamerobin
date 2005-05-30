@@ -223,6 +223,14 @@ void myTreeCtrl::OnContextMenu(wxContextMenuEvent& event)
 				MyMenu.Append(Menu_ObjectProperties, _("Properties..."));
 				break;
 
+			case ntColumn:
+				if (dynamic_cast<YTable *>(i->getParent()))		// only for table columns
+				{
+					MyMenu.Append(Menu_DropObject, _("Drop"));
+					MyMenu.Append(Menu_ObjectProperties, _("Properties..."));
+				}
+				break;
+
 			default:
 				break;
 		}
