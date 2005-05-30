@@ -39,9 +39,8 @@ public:
     virtual bool Show(bool show = TRUE);
     virtual ~BaseDialog();
 protected:
-    wxPanel* panel_controls;
-
     void layoutSizers(wxSizer* controls, wxSizer* buttons, bool expandControls = false);
+    wxPanel* getControlsPanel();
 
     // Reads any settings from config. The predefined implementation reads
     // the size of the dialog based on getStorageName(). No need to call
@@ -70,6 +69,8 @@ protected:
     // readConfigSettings() to get first-time default position and size.
     // The predefined implementation returns -1 for all 4 items.
     virtual const wxRect getDefaultRect() const;
+private:
+    wxPanel* panel_controls;
 };
 //-----------------------------------------------------------------------------
 #endif // BASEDIALOG_H

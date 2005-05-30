@@ -302,17 +302,17 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
     // some parents (ex. main frame) could even be smaller
     configM.setValue(getName() + "::centerOnParent", false);
 
-    treectrl_1 = new wxTreeCtrl(panel_controls, ID_treectrl_panes, 
+    treectrl_1 = new wxTreeCtrl(getControlsPanel(), ID_treectrl_panes, 
         wxDefaultPosition, wxDefaultSize, 
         wxSUNKEN_BORDER|wxTR_DEFAULT_STYLE|wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT);
-    panel_categ = new wxPanel(panel_controls, wxID_ANY, wxDefaultPosition, 
+    panel_categ = new wxPanel(getControlsPanel(), wxID_ANY, wxDefaultPosition, 
         wxDefaultSize, wxSUNKEN_BORDER);
     static_text_categ = new wxStaticText(panel_categ, wxID_ANY, wxEmptyString);
-    bookctrl_1 = new Optionbook(panel_controls, ID_bookctrl_panes,
+    bookctrl_1 = new Optionbook(getControlsPanel(), ID_bookctrl_panes,
         wxDefaultPosition, wxDefaultSize);
 
-    button_save = new wxButton(panel_controls, ID_button_save, _("Save"));
-    button_cancel = new wxButton(panel_controls, ID_button_cancel, _("Cancel"));
+    button_save = new wxButton(getControlsPanel(), ID_button_save, _("Save"));
+    button_cancel = new wxButton(getControlsPanel(), ID_button_cancel, _("Cancel"));
 
     // order of these is important: first create all controls, then set 
     // their properties (may affect min size), then create sizer layout

@@ -45,12 +45,12 @@ ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent, int id,
         const wxString& title, const wxPoint& pos, const wxSize& size, long style)
     : BaseDialog(parent, id, title, pos, size, style)
 {
-    label_hostname = new wxStaticText(panel_controls, -1, _("Hostname:"));
-    text_ctrl_hostname = new wxTextCtrl(panel_controls, ID_textctrl_hostname, wxT("localhost"));
-    label_portnumber = new wxStaticText(panel_controls, -1, _("Port number:"));
-    text_ctrl_portnumber = new wxTextCtrl(panel_controls, -1, wxT("3050"));
-    button_ok = new wxButton(panel_controls, ID_button_ok, _("Save"));
-    button_cancel = new wxButton(panel_controls, ID_button_cancel, _("Cancel"));
+    label_hostname = new wxStaticText(getControlsPanel(), -1, _("Hostname:"));
+    text_ctrl_hostname = new wxTextCtrl(getControlsPanel(), ID_textctrl_hostname, wxT("localhost"));
+    label_portnumber = new wxStaticText(getControlsPanel(), -1, _("Port number:"));
+    text_ctrl_portnumber = new wxTextCtrl(getControlsPanel(), -1, wxT("3050"));
+    button_ok = new wxButton(getControlsPanel(), ID_button_ok, _("Save"));
+    button_cancel = new wxButton(getControlsPanel(), ID_button_cancel, _("Cancel"));
 
     set_properties();
     do_layout();

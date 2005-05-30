@@ -54,9 +54,9 @@ bool GetMultilineTextFromUser(const wxString& caption, wxString& value, wxWindow
 MultilineEnterDialog::MultilineEnterDialog(wxWindow* parent, const wxString& title, const wxString& initialText)
     : BaseDialog(parent, -1, title)
 {
-	text_ctrl_value = new TextCtrlWithContextMenu(panel_controls, initialText);
-    button_ok = new wxButton(panel_controls, ID_button_ok, _("Save"));
-    button_cancel = new wxButton(panel_controls, ID_button_cancel, _("Cancel"));
+	text_ctrl_value = new TextCtrlWithContextMenu(getControlsPanel(), initialText);
+    button_ok = new wxButton(getControlsPanel(), ID_button_ok, _("Save"));
+    button_cancel = new wxButton(getControlsPanel(), ID_button_cancel, _("Cancel"));
     do_layout();
     button_ok->SetDefault();
 }

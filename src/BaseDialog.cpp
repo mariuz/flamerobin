@@ -49,6 +49,11 @@ BaseDialog::BaseDialog(wxWindow* parent, int id, const wxString& title,
         wxTAB_TRAVERSAL|wxCLIP_CHILDREN|wxNO_BORDER|wxNO_FULL_REPAINT_ON_RESIZE);
 }
 //-----------------------------------------------------------------------------
+wxPanel* BaseDialog::getControlsPanel()
+{
+    return panel_controls;
+}
+//-----------------------------------------------------------------------------
 void BaseDialog::layoutSizers(wxSizer* controls, wxSizer* buttons, bool expandControls)
 {
     wxBoxSizer* sizerVert = new wxBoxSizer(wxVERTICAL);
