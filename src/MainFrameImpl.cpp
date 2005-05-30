@@ -93,6 +93,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(myTreeCtrl::Menu_SetGeneratorValue, MainFrame::OnMenuSetGeneratorValue)
 	EVT_MENU(myTreeCtrl::Menu_CreateObject, MainFrame::OnMenuCreateObject)
 	EVT_MENU(myTreeCtrl::Menu_LoadColumnsInfo, MainFrame::OnMenuLoadColumnsInfo)
+	EVT_MENU(myTreeCtrl::Menu_AddColumn, MainFrame::OnMenuAddColumn)
 	EVT_MENU(myTreeCtrl::Menu_ObjectProperties, MainFrame::OnMenuObjectProperties)
 	EVT_MENU(myTreeCtrl::Menu_DropObject, MainFrame::OnMenuDropObject)
 
@@ -712,6 +713,22 @@ void MainFrame::OnMenuLoadColumnsInfo(wxCommandEvent& WXUNUSED(event))
 		if (temp.empty())
 			::wxMessageBox(_("This procedure doesn't have any input or output parameters."), _("No parameters."), wxOK | wxICON_INFORMATION);
 	}
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))
+{
+	YxMetadataItem *i = tree_ctrl_1->getSelectedMetadataItem();
+	if (!i)
+		return;
+	YTable *t = dynamic_cast<YTable *>(i);
+	if (!t)
+		return;
+
+	FieldPropertiesFrame *f = new FieldPropertiesFrame(this, -1,
+		wxString::Format(_("TABLE: %s"), std2wx(t->getName()).c_str()),
+		t);
+	f->setProperties();
+	f->Show();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))

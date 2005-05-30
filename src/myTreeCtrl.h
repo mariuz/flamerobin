@@ -45,15 +45,13 @@ public:
     short GetSpacing() const { return m_spacing; }
     void SetSpacing(short spacing);
 
-	// adding new item to this enum enables PHP code to generate code (devel/menuevents.php)
-	// begin PHP enum
     enum {	Menu_RegisterServer = 600, Menu_Quit, Menu_About, Menu_Configure,
 			Menu_DatabaseRegistrationInfo, Menu_RegisterDatabase, Menu_CreateDatabase, Menu_ManageUsers, Menu_RestartServer,
 			Menu_StopServer, Menu_UnRegisterServer, Menu_ServerProperties, Menu_Reconnect,
 			Menu_UnRegisterDatabase, Menu_Backup, Menu_Restore, Menu_Connect, Menu_Disconnect, Menu_Query, Menu_ShowConnectedUsers,
 			Menu_CreateObject, Menu_ShowAllGeneratorValues, Menu_Browse, Menu_BrowseColumns, Menu_Insert,
-			Menu_LoadColumnsInfo, Menu_ObjectProperties, Menu_DropObject, Menu_ShowGeneratorValue, Menu_SetGeneratorValue
-	// end PHP enum
+			Menu_LoadColumnsInfo, Menu_ObjectProperties, Menu_DropObject, Menu_ShowGeneratorValue,
+			Menu_SetGeneratorValue, Menu_AddColumn
 	};
 
 	void OnBeginDrag(wxTreeEvent &event);

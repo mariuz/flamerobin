@@ -207,6 +207,8 @@ void myTreeCtrl::OnContextMenu(wxContextMenuEvent& event)
 				MyMenu.Append(Menu_BrowseColumns, _("Select col1, col2, ... from ..."));
 				MyMenu.AppendSeparator();
 				MyMenu.Append(Menu_LoadColumnsInfo, _("Show columns info"));
+				MyMenu.Append(Menu_AddColumn, _("Add column..."));
+				MyMenu.AppendSeparator();
 			case ntTrigger:
 			case ntRole:
 			case ntDomain:

@@ -69,6 +69,7 @@ public:
 	void OnMenuSetGeneratorValue(wxCommandEvent& event);
 	void OnMenuCreateObject(wxCommandEvent& event);
     void OnMenuLoadColumnsInfo(wxCommandEvent& event);
+    void OnMenuAddColumn(wxCommandEvent& event);
     void OnMenuObjectProperties(wxCommandEvent& event);
     void OnMenuDropObject(wxCommandEvent& event);
     void OnMenuDisconnect(wxCommandEvent& event);
