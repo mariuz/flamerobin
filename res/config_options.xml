@@ -184,7 +184,7 @@
 			<caption>Date format:</caption>
 			<description>The following letters will be replaced:<br />d - day of month, 1-31<br />D - day of month, 01-31<br />m - month, 1-12<br />M - month, 01-12<br />y - year, 00-99<br />Y - year, 0000-9999<br />All other characters are copied.</description>
 			<key>DateFormat</key>
-			<default>d.m.Y</default>
+			<default>D.M.Y</default>
 			<aligngroup>1</aligngroup>
 		</setting>
 		<setting type="string">
