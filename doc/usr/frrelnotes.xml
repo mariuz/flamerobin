@@ -1,0 +1,570 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For standalone validation, uncomment the following DOCTYPE declaration. -->
+<!--
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+-->
+<article id="frrelnotes">
+  <articleinfo>
+    <title><application>FlameRobin</application> 0.2.5 ALPHA Release
+    Notes</title>
+
+    <author>
+      <firstname>Nando</firstname>
+
+      <surname>Dessena</surname>
+    </author>
+  </articleinfo>
+
+  <section id="frrelnotes-alphatest">
+    <title>About the ALPHA test program</title>
+
+    <para>Welcome to the FlameRobin Alpha test! We thank you for evaluating
+    this software and encourage you to send comments, bug reports and feature
+    requests back to us so we can make a better product. We remind you that
+    this is Alpha quality software so you shouldn't expect it to work
+    flawlessly (although we use it for daily work already). The main purpose
+    of this very early release is finding bugs and tune the user interface,
+    for which we need feedback from the prospect users.</para>
+  </section>
+
+  <section id="frrelnotes-what-fr-is">
+    <title>What FlameRobin is</title>
+
+    <para>FlameRobin is a GUI administration and data manipulation tool for
+    Firebird servers and databases. It is designed to be small, simple and
+    cross-platform, yet offer all the basic features needed to administer
+    Firebird servers and create/maintain databases. FlameRobin is Open Source
+    software and binaries are currently available for Windows, several
+    GNU/Linux flavours and MacOS X. Ports to other platforms are possible,
+    subject to the availability of maintainers for those platforms.</para>
+  </section>
+
+  <section id="frrelnotes-what-fr-is-not">
+    <title>What FlameRobin is NOT</title>
+
+    <para>Currently FlameRobin is not a full-featured administration tool, as
+    there are plenty available for Firebird from several different parties.
+    Our first goal with FlameRobin is to provide people not used to the
+    command line with a GUI tool to get started with Firebird. Our longer-term
+    goal is to develop a richer tool mainly for the Linux market; while there
+    are several rich and mature GUI tools under Windows, some of them
+    available for free or for a modest price, there isn't any for Linux.
+    Another goal for the "lite" edition of FlameRobin is to be bundled with
+    the Firebird server to serve as a starting kit for new users - this is
+    subject to approval by the Firebird Project, which may have alternative
+    tools at hand.</para>
+  </section>
+
+  <section id="frrelnotes-who-we-are">
+    <title>Who we are</title>
+
+    <para>The home page of the FlameRobin project is located at <ulink
+    url="http://www.flamerobin.org">http://www.flamerobin.org</ulink>. The
+    project itself is hosted on <ulink
+    url="http://sourceforge.net/projects/flamerobin">SourceForge</ulink>.
+    Please use our mailing list (flamerobin-devel) to contact the developers.
+    Details and archives available <ulink
+    url="http://sourceforge.net/mail/?group_id=124340">here</ulink>. You are
+    also encouraged to use our <ulink
+    url="http://sourceforge.net/tracker/?group_id=124340&amp;atid=699234">bugs</ulink>
+    and <ulink
+    url="http://sourceforge.net/tracker/?group_id=124340&amp;atid=699237">feature
+    requests</ulink> trackers to report back to us the results of your alpha
+    testing. If you are a developer interested in joining the FlameRobin
+    project, let us know. We always welcomelooking for contributors.</para>
+  </section>
+
+  <section id="frrelnotes-license">
+    <title>License</title>
+
+    <para>FlameRobin is released under the Initial Developer's Public License.
+    You can find the complete license text in the file license.html, or <ulink
+    url="http://www.flamerobin.org/license.html">here</ulink>.</para>
+  </section>
+
+  <section id="frrelnotes-changes">
+    <title>What's new?</title>
+
+    <para>Please refer to changes.txt for a detailed history of all the
+    changes since the previous alpha release.</para>
+  </section>
+
+  <section id="frrelnotes-installation">
+    <title>Installation</title>
+
+    <para>If you want to build FlameRobin from sources, please find
+    instructions on our web site or CVS. In this section we talk about
+    installing the pre-built version of FlameRobin under all currently
+    supported platforms.</para>
+
+    <section>
+      <title>Windows (Win32)</title>
+
+      <para>To install FlameRobin under Windows you need to have the Firebird
+      client (gds32.dll for Firebird 1.0, fbclient.dll for Firebird 1.5 and
+      up) installed and available, then just run the automatic installer of
+      FlameRobin which will copy all required files in a directory of your
+      choice and optionally create desktop and start menu shortcuts. If you
+      have installed a previous alpha version of FlameRobin, it is recommended
+      that you remove it before installing this version. You might be able to
+      keep your servers.xml and config.ini files, but at this early stage of
+      development we cannot guarantee that.</para>
+
+      <para>Here are the files used by FlameRobin to store configuration
+      information:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>servers.xml is the list of Firebird servers and databases you
+          work with; FlameRobin will create it (and automatically add the
+          "localhost" server) when you run it for the first time; then you can
+          register new servers and databases (see documentation).</para>
+        </listitem>
+
+        <listitem>
+          <para>config.ini stores FlameRobin's configuration information, like
+          the position and size of the main program window. You don't need to
+          edit it by hand except when wanting to turn on/off some special
+          features (see documentation).</para>
+        </listitem>
+      </itemizedlist>
+
+      <note>
+        <para>The name, structure and location of these files is going to
+        change in a future release, certainly before release 1.0.</para>
+      </note>
+
+      <para>If you need to uninstall FlameRobin you can do so from the start
+      menu icon (unless you told the installation program not to create one)
+      or from the Control Panel.</para>
+    </section>
+
+    <section>
+      <title>Linux</title>
+
+      <para>For the time being, unpacking the supplied archive into a
+      directory of your choice will do.</para>
+    </section>
+
+    <section>
+      <title>MacOS X</title>
+
+      <para>N/A.</para>
+    </section>
+  </section>
+
+  <section id="frrelnotes-getting-started">
+    <title>Getting started</title>
+
+    <para>Upon first startup, FlameRobin will present a "Firebird Servers"
+    tree containing only the local server (localhost), and will invite you to
+    create new servers and databases as required. Here is a brief how-to for
+    getting started with FlameRobin.</para>
+
+    <section>
+      <title>Adding a server</title>
+
+      <para>You can add a server by righ-clicking in "Firebird Servers" and
+      choosing "Register server...". You will have to specify the host name
+      and the TCP port number (default 3050) on which it listens. Once you
+      have added a server, you can register databases under its node.</para>
+    </section>
+
+    <section>
+      <title>Adding an existing database</title>
+
+      <para>To access an existing database from FlameRobin you have to
+      register it. Registration will make FlameRobin remember the database
+      connection properties so you don't have to re-enter them every time.
+      Locate the correct server in the tree, right click it and choose
+      "Register existing database...". You will have to enter the database
+      path (or alias name), the user name and password (note: the password is
+      stored as plain text in servers.xml. For security reasons, we recommend
+      you to NOT specify it in this dialog: FlameRobin will then prompt you
+      for the password each time you connect to the database). You can also
+      optionally specify a connection charset and role.</para>
+    </section>
+
+    <section>
+      <title>Creating a new database</title>
+
+      <para>To create a new, empty database, locate the desired server in the
+      tree, right click it and choose "Create new database...". You will then
+      need to input the database file or alias name, the user name and
+      password for the owner of the new database (use SYSDBA as the user name
+      and masterkey if you don't know what to put in these fields), the
+      character set, the role, the page size (the default value of 4096 is
+      just fine) and the SQL dialect (leave it set at 3 if you don't know what
+      a SQL dialect is). The new database will be created and registered
+      (which means it is available in FlameRobin).</para>
+    </section>
+
+    <section>
+      <title>Connecting to a registered database</title>
+
+      <para>Just double click on the database name in the tree, or right click
+      it and choose "Connect". Choose "Disconnect" to close the connection to
+      the database.</para>
+    </section>
+
+    <section>
+      <title>Browsing metadata</title>
+
+      <para>Upon connection, the sub-tree under the database name is populated
+      with a description of the database structure (metadata). Browse the tree
+      to explore the metadata.</para>
+    </section>
+
+    <section>
+      <title>Editing objects</title>
+
+      <para>You can view and/or change the properties of every object you see
+      in the tree by choosing the "Properties..." option. Please note that
+      currently not all object types are supported. Trying to show the
+      property page for an object of an unsupported type will result in a
+      blank page. The property page is a HTML window with a summary of the
+      object's properties and links which open other pages or specific
+      editors. Some of the options are not yet available, but you can f. ex.
+      edit almost all aspects of the most common objects (tables, views,
+      stored procedures, and so on). Please have a look at changes.txt to see
+      what's new.<note>
+          <para>Although we try to test the features as much as we can, this
+          is ALPHA software and you should only use it to work on backup
+          copies of your databases, or perform backup copies before using
+          FlameRobin on them. Having said that, we have to add that many of us
+          use FlameRobin in their everyday Firebird development without a
+          problem.</para>
+        </note></para>
+    </section>
+
+    <section>
+      <title>Browsing data</title>
+
+      <para>After connecting to a database, locate a table, view or selectable
+      stored procedure of your interest in the tree and right-click it.
+      Choosing either "Select ... from ..." option will open the SQL editor
+      with the table/view data shown in the lower grid. In the case of
+      selectable stored procedures with parameters, just the select statement
+      appears in the SQL editor, so you should fill the parameter values (if
+      you have any) and click the Execute button to see the data.</para>
+    </section>
+
+    <section>
+      <title>Running SQL statements and scripts</title>
+
+      <para>Of course you can use the SQL editor window to execute arbitrary
+      SQL statements. You can open a SQL editor window by right clicking on a
+      database node and choosing "Run a query". The SQL editor tool offers
+      script execution capabilities (including SET TERM support), load/save
+      buttons, auto-completion and call-tip features, commit/rollback, some
+      execution statistics (including but not limited to the query PLAN), and
+      a data export tool: to activate it, right click on the data grid. The
+      data export tool is currently able to copy the data to the clipboard,
+      generate SQL INSERT statements or export the data to a HTML file. All
+      options work on the whole grid contents or just the selected parts. You
+      can also multiple-select several different grid "islands" and have the
+      tool export them.</para>
+    </section>
+
+    <section>
+      <title>Advanced tools</title>
+
+      <para>You can perform a database backup by right clicking on a database
+      and choosing "Backup database...". Choose "Restore database..." to
+      restore a backup file over the current database (you will have to
+      disconnect first). Note: it is usually considered bad practice to
+      restore a backup file over an existing database. Future versions of
+      FlameRobin will probably provide a way to restore under a different file
+      name. For the time being, you can do that by registering a new (non
+      existing) database in FlameRobin and restore over it. The Backup and
+      Restore features work in background, so you are allowed to continue
+      working with FlameRobin while they proceed.</para>
+    </section>
+  </section>
+
+  <section id="frrelnotes-configuration">
+    <title>Configuration</title>
+
+    <para>This section documents the options you can set to tune FlameRobin's
+    behaviour to your liking. You can set the options by means of the
+    Preferences dialog, which is invoked through the "Preferences..." menu
+    command in the local menu of the tree's root node. The Preferences are
+    organized in categories; here is a description of each category. Please
+    read the tooltip that appears when you move the mouse cursor over each
+    option to know more about it.</para>
+
+    <section>
+      <title>General</title>
+
+      <para>Here you can find options to tune the visual appearance and
+      behaviour of FlameRobin. You can choose whether FlameRobin will remember
+      the size and position of opened windows between sessions or not, whether
+      FlameRobin will ask for quit confirmation or not, and other such
+      things.</para>
+
+      <para>Set this option to 1 to enable storing size and position of each
+      window (frame) on closing. Set it to 0 to disable the feature.</para>
+
+      <note>
+        <para>The object properties frame's storage option can be further
+        customized, see MetadataFrameStorageGranularity.</para>
+      </note>
+
+      <section>
+        <title>Center dialogs on their parent window</title>
+
+        <para>Set this option to always have dialogs displayed at the center
+        of their parent window. Otherwise dialogs are displayed at a
+        system-defined position.</para>
+      </section>
+
+      <section>
+        <title>Remember window positions and sizes</title>
+
+        <para>If you enable this option, FlameRobin will remember the position
+        and size of each window you open and will open the same window at the
+        same position and with the same time the next time. You can also
+        choose the granularity of this option for property pages and
+        backup/restore dialogs:</para>
+
+        <para><itemizedlist>
+            <listitem>
+              <para>Choose "Same settings for all objects" to store a single
+              set of values; this means that whenever an Object Properties
+              dialog is opened it will have the position and size of the last
+              Object Properties dialog used.</para>
+            </listitem>
+
+            <listitem>
+              <para>Select "Same settings for all objects of same type" to
+              store a set of values for each object type. This means that a
+              Table Properties dialog will have different settings than a
+              Trigger Properties dialog, but two Table Properties dialog will
+              share the same set of values.</para>
+            </listitem>
+
+            <listitem>
+              <para>The third option, "Separate settings for individual
+              objects", will make it so that every object's property page will
+              have a set of options of its own. This mode is the most
+              flexible, but consumes more disk space and memory.</para>
+            </listitem>
+          </itemizedlist></para>
+      </section>
+
+      <section>
+        <title>Confirm quit</title>
+
+        <para>Set this option to have FlameRobin ask you for quit
+        confirmation.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Main Tree View</title>
+
+      <para>Here you can tune the appearance and behaviour of FlameRobin's
+      metadata navigation tool, the main tree.</para>
+
+      <section>
+        <title>Order server entries alphabetically</title>
+
+        <para>Set this option to have your servers displayed in alphabetical
+        order, otherwise they are displayed in the order they appear in
+        servers.xml.</para>
+      </section>
+
+      <section>
+        <title>Order database entries alphabetically</title>
+
+        <para>Set this option to have your databases displayed in alphabetical
+        order, otherwise they are displayed in the order they appear in
+        servers.xml.</para>
+      </section>
+
+      <section>
+        <title>When a column has a user-defined domain</title>
+
+        <para>In this case you can choose to see only the domain, only the
+        datatype or both domain and datatype in the tree item's
+        caption.</para>
+
+        <note>
+          <para>This option only applies when columns are displayed in the
+          tree (see the folowwing option).</para>
+        </note>
+      </section>
+
+      <section>
+        <title>Show columns and parameters in tree</title>
+
+        <para>Enable this option to have table/view columns and procedure
+        parameters displayed as tree nodes; otherwise, the tree stops at the
+        table/view or procedure level. In case you choose to have columns and
+        parameters displayed as tree nodes, you can also indicate whether you
+        wish that a double click on a table/view or procedure node opens the
+        relevant property page or expands the subtree.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>SQL Editor</title>
+
+      <para>Use these options to customize the behaviour of the SQL Editor,
+      which is used in FlameRobin to execute any kind of system-generated or
+      user-supplied query.</para>
+
+      <section>
+        <title>When text is selected in editor</title>
+
+        <para>This options turns on and off a useful feature of the SQL
+        Editor: you can type in or paste several SQL statements and execute
+        just one of them by selecting it before hitting the Execute button. If
+        for some reason you'd like to always execute the content of the whole
+        editor buffer, then disable this option.</para>
+
+        <section>
+          <title>Treat selected text as a single statement</title>
+
+          <para>If you only ever select a single statement at a time, then you
+          can save FlameRobin's parser some work by enabling this option. When
+          this option is disabled, FlameRobin will parse the selected text
+          before executing it, break it into several statements if necessary
+          and send them to Firebird one at a time; this is necessary since
+          Firebird does not support executing more than one statement (i.e. a
+          script) at a time.</para>
+        </section>
+
+        <section>
+          <title>Clear the messages when executing new statements</title>
+
+          <para>The SQL Editor has a message pane that shows information about
+          each executed statement. By default this pane is never cleared
+          automatically. Set this option to have FlameRobin clear it before
+          executing a statement.</para>
+        </section>
+
+        <section>
+          <title>Enable call-tips for procedures and functions</title>
+
+          <para>When this option is enabled, then each time you type an open
+          round bracket after a stored procedure or UDF name in the SQL
+          Editor, a floating tooltip (called a call-tip) will appear reminding
+          you what the input parameters of the stored procedure or UDF
+          are.</para>
+        </section>
+
+        <section>
+          <title>SQL Code Completion</title>
+
+          <para>This page contains options to customize FlameRobin's code
+          completion feature.</para>
+
+          <section>
+            <title>Enable automatic invocation of completion list</title>
+
+            <para>This is the general switch to turn automatic code completion
+            in the SQL Editor on or off. Disable it if you don't like code
+            completion windows that pop up while you write SQL code. If you
+            keep it enabled, then you can set a certain number of characters
+            you'll have to type before code completion kicks in (default 5),
+            and choose to disable code completion when a call-tip is
+            displayed.</para>
+          </section>
+
+          <section>
+            <title>Manually invoke auto-complete list on</title>
+
+            <para>Code completion may also be invoked manually. Here you
+            select how (Ctrl+Space or Tab key).</para>
+          </section>
+
+          <section>
+            <title>Allow auto-completion with Enter</title>
+
+            <para>Set this option to have the currently selected item in the
+            code completion window copied to the text buffer when you hit
+            Enter.</para>
+          </section>
+        </section>
+      </section>
+    </section>
+
+    <section>
+      <title>Data Grid</title>
+
+      <para>When you issue a SQL SELECT statement in the SQL Editor, then the
+      Data Grid comes into play to show the results. Here you customize its
+      appearance and behaviour.</para>
+
+      <section>
+        <title>Date format</title>
+
+        <para>Choose the format you'd like for showing date and timestamp
+        values in the grid.</para>
+      </section>
+
+      <section>
+        <title>Time format</title>
+
+        <para>Choose the format you'd like for showing time and timestamp
+        values in the grid.</para>
+      </section>
+
+      <section>
+        <title>Grid header font</title>
+
+        <para>Choose a character font for the grid header (the column
+        names).</para>
+      </section>
+
+      <section>
+        <title>Grid cell font</title>
+
+        <para>Choose a character font for the grid cells (the data).</para>
+      </section>
+
+      <section>
+        <title>Re-format float and double precision numbers</title>
+
+        <para>If unchecked, decimal numbers are displayed as returned from
+        server; otherwise, they are formatted according to the specified
+        number of decimal digits.</para>
+      </section>
+
+      <section>
+        <title>Maximize data grid after execution of SELECT statement</title>
+
+        <para>Here you can turn off an useful feature that will enlarge the
+        data grid to the maximum available size when a SQL SELECT statement
+        returns more than a specified number of rows.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Logging</title>
+
+      <para>The SQL Editor can log all executed statements to a text file
+      (and, in a future release, to a database table). Here you set the
+      options to tune this feature.</para>
+
+      <section>
+        <title>Log DML statements</title>
+
+        <para>When logging is enabled, by default only DDL (data definition)
+        statements are logged. Turn this option on to enable logging of DML
+        (data manipulation) statements as well.</para>
+
+        <section>
+          <title>Enable logging to file</title>
+
+          <para>Here you choose whether you want to log statements or not,
+          select the log file name(s), and choose if you want to output for
+          each statement also a comment with the version of FlameRobin,
+          database and user name, and execution date and time.</para>
+        </section>
+      </section>
+    </section>
+  </section>
+</article>

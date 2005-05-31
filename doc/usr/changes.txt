@@ -1,0 +1,125 @@
+Changes in FlameRobin 0.2.5 ALPHA
+---------------------------------
+
+Highlights:
+
+- Brand new Preferences dialog through which the user can configure FlameRobin. This removes the need to edit config.ini file manually.
+- Many improvements to the SQL Editor (autocomplete code, bug fixes...).
+- You can drag & drop columns/tables from tree to SQL editor to create queries. Foreign keys are automatically used to make joins.
+- Many bug fixes.
+- Project home moved to http://flamerobin.sourceforge.net.
+
+New features:
+
+- New Preferences dialog.
+- Option to show/hide datatype and/or domain name in tree.
+- Ability to keep working after fatal errors.
+- Ability to prepare a statement (and show its PLAN) without actually executing it.
+- New context menu for the SQL Editor and new "Execute selected" command.
+- Ability to set a custom font for the SQL Editor.
+- Ability to set a custom font for the data grid header and cells.
+- Option to maximize the data grid when a certain number of rows has been fetched.
+- SQL Editor: auto-completion can be disabled and invoked manually.
+- Calltips for stored procedures in the SQL Editor.
+- Basic drag & drop stuff (drag columns/tables from the tree to the SQL Editor).
+- SQL Editor: new Option to clear old messages when executing new statements.
+- You can set up logging of DDL (and optionally DML) statements to user defined log file(s).
+- Configurable double-click action for tables, views and SPs in main tree.
+- Option to prompt on exit.
+- Option to alphabetically sort server and database entries in tree.
+- Option to center dialogs on the screen.
+- SQL Editor: new Search & replace tool (with support for regular expressions).
+- Ability to add a new column to a table directly from the tree.
+- Option to disallow showing table/view columns and stored procedure parameters as tree nodes.
+- Option to make it so that a double click on a tree item shows the properties dialog instead of expanding the subtree.
+- Added context menu for table columns in tree.
+
+Enhancements and Bug fixes:
+
+- Data grid: tabs used as separators instead of spaces when copying data to the clipboard.
+- Added server name (beside user@host) to the SQL Editor status bar.
+- "Insert into" command now puts VALUES clause on a new line.
+- Data grid: fixed display issue for non-null blobs.
+- Better automatic name suggestion for constraints (avoids duplicate names).
+- Fixed bug that caused FR to consume 100% CPU while doing nothing.
+- Databases couldn't be created if Page size was left to the default value.
+- SQL Editor: FR did hang when "set term" was issued without terminator.
+- SQL Editor: fixed bug when statement consisting solely of comments is executed.
+- SQL Editor: comments before SET statements were not handled correctly.
+- Data grid: platform-standard line breaks are now used when copying data to the clipboard.
+- Undo/redo/cut/copy/paste now work properly in the SQL Editor.
+- The Data grid is now much more responsive even with a lot of NULLs in it.
+- SQl Editor: added NULL to autocomplete list (solves known NULLIF problem).
+- Fixed constant 1-pixel frame growth for Windows 98.
+- Made database connections actually respect the charset.
+- Maintain separate size for database creation/registration info dialogs.
+- ALTER PROCEDURE now correctly reloads procedure parameters.
+- Changing column datatype for field editor now works.
+- Tree nodes can now be activated with double-click/Enter key on Linux too.
+- Enabled clicking inside selection in the SQL Editor.
+- Copy/paste of descriptions now works on Linux too.
+- Fixed crash when changing field type from one to another user defined domain.
+- Fixed known issue: if the connection credentials (username and password) of a registered database were modified, the new credentials were not used until FlameRobin was restarted.
+
+Known issues:
+
+Please see our bug tracker here: http://sourceforge.net/tracker/?group_id=124340&atid=699234
+
+Changes in FlameRobin 0.2.0 ALPHA
+---------------------------------
+
+New features:
+
+- Brand new Backup/Restore dialogs that work in background, let you suppress the output messages and store their settings among invocations. Plus, the output messages can be copied to the clipboard.
+- Many dialogs have been redesigned and now feature a cleaner GUI.
+- "Show value" and "Show all values" context menu commands implemented for generators.
+- Exceptions are now shown in the tree view and have Create/Drop menu commands and a property page.
+- Property pages for triggers, table constraints, dependencies (all objects), generators were added. Plus, a special empty property page now appears for not yet supported object types, instead of an error message.
+- Ability to view/add/drop table constraints.
+- Reconnect menu command for databases will physically disconnect and reconnect a database in one shot.
+- "Create new" and "Drop" commands added for external functions.
+- New MacOS X port.
+
+Enhancements and Bug fixes:
+
+- When new objects are added to the database through a "CREATE" DDL statement, they are inserted in the right place in the tree view, instead of at the end of the lists.
+- The tree view shows primary key table fields with a different icon.
+- It is now possible to edit triggers.
+- User-defined domain names appear together with column datatypes in the property pages.
+- Improved startup speed.
+- config.ini entry "FrameStorage=1" now works for all frames and dialogs (it only stores size - not position - for dialogs).
+- New multi-format program icon that looks OK at all sizes (16x16, 32x32, 48x48 and 128x128).
+- In the SQL Window you can press Ctrl + "+" and Ctrl + "-" to increase and decrease the font size. The setting is remembered across sessions of FlameRobin.
+- In the Server Registration dialog the controls are now read-only if any database is connected.
+- New program icon.
+- Assorted bug fixes.
+
+Known issues:
+
+- If you modify the connection credentials (username and password) of a registered database, the new credentials will not be used until you restart FlameRobin.
+
+Changes in FlameRobin 0.1.5 ALPHA
+---------------------------------
+
+The changes in this release, from a user perspective, are:
+
+- Properties window added for tables, views and stored procedures. You can now see and change the structure of tables and views, and you can see and change the source of stored procedures. Not all options are currently active; for tables you can:
+  - add, remove and edit field definitions
+  - reorder fields
+  - see and edit table and fields descriptions
+For views, you can:
+  - see the view definition (source)
+  - see and edit view and fields descriptions
+For stored procedures, you can:
+  - see the input and output parameters
+  - see the definition (source)
+  - edit the source
+All changes are applied in the form of a DDL script that is run in the SQL window and that you can see, commit or rollback.
+
+- Faster loading of metadata upon connection.
+
+- Many bugfixes and enhancements.
+
+- New icons. Tell us how you like them!
+
+- An automated installation program for Windows.

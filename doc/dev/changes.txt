@@ -1,0 +1,28 @@
+This file will list all important changes to the code chronologically.
+Whenever anyone does some non-minor change, he should just add to this file.
+That way it would be much easier to make "changes" file for releases.
+Changes prior to version 0.1.5 are not recorded.
+
+Changes after version 0.1.5
+
+- backup/restore of large databases is faster on Linux (about the same speed as command-line gbak)
+- adding new db objects (with CREATE DDL) now inserts into right position (instead of "at end")
+- primary keys of tables are shown in tree view
+- "Show value" and "Show all values" context menu commands implemented for generators
+- properties page for triggers works
+- editing triggers works
+- user defined domain names appear together with column datatypes
+- ability to view/add/drop table constraints
+- improved startup speed
+- reconnect option for databases
+- basic generator property page
+- "unavailable" property page for unavailable items (avoids run-time errors)
+- support for exceptions (tree commands and basic property page)
+- "Create new" and "Drop" commands for external functions
+- ability to view dependencies for all database objects
+- backup/restore work in separate thread so flamerobin is not "stuck" until action completes
+- backup/restore log can be copied to clipboard
+- remembering the backup/restore options
+- config.ini entry "FrameStorage=1" activates the persistent storing of dialog sizes and of frame sizes and positions
+- control layout for dialogs updated
+- ServerRegistrationInfoFrame: read-only controls if any database connected
