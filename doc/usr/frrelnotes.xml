@@ -72,7 +72,7 @@
     url="http://sourceforge.net/tracker/?group_id=124340&amp;atid=699237">feature
     requests</ulink> trackers to report back to us the results of your alpha
     testing. If you are a developer interested in joining the FlameRobin
-    project, let us know. We always welcomelooking for contributors.</para>
+    project, let us know. We always welcome contributors.</para>
   </section>
 
   <section id="frrelnotes-license">
@@ -392,7 +392,7 @@
 
         <note>
           <para>This option only applies when columns are displayed in the
-          tree (see the folowwing option).</para>
+          tree (see the folowing option).</para>
         </note>
       </section>
 
@@ -433,16 +433,18 @@
           before executing it, break it into several statements if necessary
           and send them to Firebird one at a time; this is necessary since
           Firebird does not support executing more than one statement (i.e. a
-          script) at a time.</para>
+          script) at a time. It can also be used if you have CREATE PROCEDURE or
+		  CREATE TRIGGER statement with SET TERM. This way, you can select and
+		  execute the statement, and you don't need SET TERM at all.</para>
         </section>
 
         <section>
           <title>Clear the messages when executing new statements</title>
 
           <para>The SQL Editor has a message pane that shows information about
-          each executed statement. By default this pane is never cleared
-          automatically. Set this option to have FlameRobin clear it before
-          executing a statement.</para>
+          each executed statement. By default this pane is cleared automatically
+          only when you end transaction. Set this option to have FlameRobin
+          clear it before executing a statement.</para>
         </section>
 
         <section>
@@ -451,8 +453,8 @@
           <para>When this option is enabled, then each time you type an open
           round bracket after a stored procedure or UDF name in the SQL
           Editor, a floating tooltip (called a call-tip) will appear reminding
-          you what the input parameters of the stored procedure or UDF
-          are.</para>
+          you what the input and output parameters of the stored procedure or
+          UDF are.</para>
         </section>
 
         <section>
@@ -470,7 +472,7 @@
             keep it enabled, then you can set a certain number of characters
             you'll have to type before code completion kicks in (default 5),
             and choose to disable code completion when a call-tip is
-            displayed.</para>
+            displayed as it would close the call-tip.</para>
           </section>
 
           <section>
@@ -485,7 +487,7 @@
 
             <para>Set this option to have the currently selected item in the
             code completion window copied to the text buffer when you hit
-            Enter.</para>
+            Enter. Otherwise you can use Tab key for that.</para>
           </section>
         </section>
       </section>
@@ -562,7 +564,13 @@
           <para>Here you choose whether you want to log statements or not,
           select the log file name(s), and choose if you want to output for
           each statement also a comment with the version of FlameRobin,
-          database and user name, and execution date and time.</para>
+          database and user name, and execution date and time. Each statement
+		  can go into separate file, and it uses incremental numbers for
+		  filenames. You can format your own filenames by using %d as a
+		  placeholder for number. If you wish numbers with fixed number of
+		  digits, like 0003 instead of 3, then use %04d as placeholder, where
+		  4 means four digits, and 0 means that it should be padded with
+		  zeroes.</para>
         </section>
       </section>
     </section>
