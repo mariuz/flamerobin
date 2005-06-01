@@ -43,7 +43,7 @@ Compression=lzma
 OutputBaseFilename=flamerobin-{#VERSION}-setup
 #endif
 SolidCompression=true
-OutputDir=.\Output
+OutputDir=.\output
 InfoBeforeFile=..\..\doc\usr\output\text\frrelnotes.txt
 InternalCompressLevel=ultra
 ShowLanguageDialog=yes
