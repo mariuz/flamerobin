@@ -540,13 +540,8 @@ bool YDatabase::connect(std::string password)
 
 	try
 	{
-		if (databaseM.intf() == 0)		// database object needs to be created
-		{
-			std::string hostname = getParent()->getName();
-            databaseM = IBPP::DatabaseFactory(hostname, pathM, usernameM,
-                password, roleM, charsetM, "");
-		}
-
+        databaseM = IBPP::DatabaseFactory(getParent()->getName(), pathM, usernameM,
+            password, roleM, charsetM, "");
 		databaseM->Connect();
 		connectedM = true;
 		validPasswordM = password;	// successful
