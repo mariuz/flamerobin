@@ -119,14 +119,13 @@
           <para>servers.xml is the list of Firebird servers and databases you
           work with; FlameRobin will create it (and automatically add the
           "localhost" server) when you run it for the first time; then you can
-          register new servers and databases (see documentation).</para>
+          register new servers and databases.</para>
         </listitem>
 
         <listitem>
           <para>config.ini stores FlameRobin's configuration information, like
           the position and size of the main program window. You don't need to
-          edit it by hand except when wanting to turn on/off some special
-          features (see documentation).</para>
+          edit it by hand.</para>
         </listitem>
       </itemizedlist>
 
@@ -150,7 +149,10 @@
     <section>
       <title>MacOS X</title>
 
-      <para>N/A.</para>
+      <para>Installation on Mac OS X is an absolute no-brainer: just drag the
+      icon from the installation package to the folder you want the
+      application to live in. Unpacking is handled via double clicking the
+      downloaded file.</para>
     </section>
   </section>
 
@@ -392,7 +394,7 @@
 
         <note>
           <para>This option only applies when columns are displayed in the
-          tree (see the folowing option).</para>
+          tree (see the following option).</para>
         </note>
       </section>
 
@@ -433,18 +435,19 @@
           before executing it, break it into several statements if necessary
           and send them to Firebird one at a time; this is necessary since
           Firebird does not support executing more than one statement (i.e. a
-          script) at a time. It can also be used if you have CREATE PROCEDURE or
-		  CREATE TRIGGER statement with SET TERM. This way, you can select and
-		  execute the statement, and you don't need SET TERM at all.</para>
+          script) at a time. It can also be used if you have CREATE PROCEDURE
+          or CREATE TRIGGER statement with SET TERM. This way, you can select
+          and execute the statement, and you don't need SET TERM at
+          all.</para>
         </section>
 
         <section>
           <title>Clear the messages when executing new statements</title>
 
           <para>The SQL Editor has a message pane that shows information about
-          each executed statement. By default this pane is cleared automatically
-          only when you end transaction. Set this option to have FlameRobin
-          clear it before executing a statement.</para>
+          each executed statement. By default this pane is cleared
+          automatically only when you end transaction. Set this option to have
+          FlameRobin clear it before executing a statement.</para>
         </section>
 
         <section>
@@ -471,8 +474,8 @@
             completion windows that pop up while you write SQL code. If you
             keep it enabled, then you can set a certain number of characters
             you'll have to type before code completion kicks in (default 5),
-            and choose to disable code completion when a call-tip is
-            displayed as it would close the call-tip.</para>
+            and choose to disable code completion when a call-tip is displayed
+            as it would close the call-tip.</para>
           </section>
 
           <section>
@@ -565,12 +568,12 @@
           select the log file name(s), and choose if you want to output for
           each statement also a comment with the version of FlameRobin,
           database and user name, and execution date and time. Each statement
-		  can go into separate file, and it uses incremental numbers for
-		  filenames. You can format your own filenames by using %d as a
-		  placeholder for number. If you wish numbers with fixed number of
-		  digits, like 0003 instead of 3, then use %04d as placeholder, where
-		  4 means four digits, and 0 means that it should be padded with
-		  zeroes.</para>
+          can go into separate file, and it uses incremental numbers for
+          filenames. You can format your own filenames by using %d as a
+          placeholder for number. If you wish numbers with fixed number of
+          digits, like 0003 instead of 3, then use %04d as placeholder, where
+          4 means four digits, and 0 means that it should be padded with
+          zeroes.</para>
         </section>
       </section>
     </section>
