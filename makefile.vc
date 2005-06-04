@@ -63,6 +63,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_dberror.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrame.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrameImpl.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_framemanager.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGrid.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridCells.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridTable.obj \
@@ -249,6 +250,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrame.obj: .\src\FieldPrope
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrameImpl.obj: .\src\FieldPropertiesFrameImpl.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_framemanager.obj: .\src\framemanager.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGrid.obj: .\src\frDataGrid.cpp

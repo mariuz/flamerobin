@@ -59,6 +59,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_dberror.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrameImpl.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_framemanager.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGrid.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridCells.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridTable.o \
@@ -215,6 +216,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrame.o: ./src/FieldProper
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrameImpl.o: ./src/FieldPropertiesFrameImpl.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_framemanager.o: ./src/framemanager.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGrid.o: ./src/frDataGrid.cpp

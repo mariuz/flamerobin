@@ -592,6 +592,10 @@ SOURCE=.\src\frDataGridTable.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\framemanager.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\frutils.cpp
 # End Source File
 # Begin Source File
@@ -807,6 +811,10 @@ SOURCE=.\src\frDataGridCells.h
 # Begin Source File
 
 SOURCE=.\src\frDataGridTable.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\framemanager.h
 # End Source File
 # Begin Source File
 

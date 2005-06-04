@@ -233,6 +233,7 @@
         $(SOURCEDIR)/converters.h
         $(SOURCEDIR)/dberror.h
         $(SOURCEDIR)/FieldPropertiesFrame.h
+        $(SOURCEDIR)/framemanager.h
         $(SOURCEDIR)/frDataGrid.h
         $(SOURCEDIR)/frDataGridCells.h
         $(SOURCEDIR)/frDataGridTable.h
@@ -301,6 +302,7 @@
         $(SOURCEDIR)/dberror.cpp
         $(SOURCEDIR)/FieldPropertiesFrame.cpp
         $(SOURCEDIR)/FieldPropertiesFrameImpl.cpp
+        $(SOURCEDIR)/framemanager.cpp
         $(SOURCEDIR)/frDataGrid.cpp
         $(SOURCEDIR)/frDataGridCells.cpp
         $(SOURCEDIR)/frDataGridTable.cpp
