@@ -42,6 +42,7 @@
 
 #include "BaseFrame.h"
 #include "config.h"
+#include "framemanager.h"
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(BaseFrame, wxFrame)
 	EVT_CLOSE(BaseFrame::OnClose)
@@ -65,6 +66,7 @@ BaseFrame::~BaseFrame()
 //-----------------------------------------------------------------------------
 bool BaseFrame::Destroy()
 {
+    frameManager().removeFrame(this);
 	writeConfigSettings();
 	return wxFrame::Destroy();
 }

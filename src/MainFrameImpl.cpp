@@ -44,7 +44,6 @@
 #include "gui/BackupFrame.h"
 #include "gui/ExecuteSqlFrame.h"
 #include "gui/DatabaseRegistrationDialog.h"
-#include "gui/MetadataItemPropertiesFrame.h"
 #include "gui/PreferencesDialog.h"
 #include "gui/RestoreFrame.h"
 #include "gui/ServerRegistrationDialog.h"
@@ -53,6 +52,7 @@
 #include "ugly.h"
 #include "dberror.h"
 #include "config.h"
+#include "framemanager.h"
 #include "urihandler.h"
 #include "main.h"
 
@@ -136,8 +136,6 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
 	}
 	else
 	{
-		// has to be declared outside, since local cannot be initialized inside switch...case
-		MetadataItemPropertiesFrame *mipf;
 		switch (nt)
 		{
 			//case ntServer:	// pehaps it is better to leave default double-click action: "collapse the tree branch"
@@ -155,8 +153,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
 			case ntDomain:
 			case ntFunction:
 			case ntTrigger:
-				mipf = new MetadataItemPropertiesFrame(this, m);
-				mipf->Show();
+                frameManager().showMetadataPropertyFrame(this, m, true);
 				break;
 			#ifdef __WXMSW__
 			default:
@@ -753,10 +750,7 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
 		f->Show();
 	}
 	else
-	{
-		MetadataItemPropertiesFrame *mipf = new MetadataItemPropertiesFrame(this, m);
-		mipf->Show();
-	}
+        frameManager().showMetadataPropertyFrame(this, m);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
