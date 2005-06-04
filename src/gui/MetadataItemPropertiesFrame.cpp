@@ -40,6 +40,7 @@
 
 #include "config.h"
 #include "dberror.h"
+#include "framemanager.h"
 #include "frutils.h"
 #include "images.h"
 #include "metadata/database.h"
@@ -690,23 +691,9 @@ bool PropertiesHandler::handleURI(std::string& uriStr)
 	}
 
 	// check if window with properties of that object is already open and show it
-	MetadataItemPropertiesFrame *mip;
 	wxWindow *mainFrame = parent->GetParent();
-	if (!mainFrame)
-		return true;
-    for (wxWindowListNode *node = mainFrame->GetChildren().GetFirst(); node; node = node->GetNext())
-    {
-		wxWindow *child = node->GetData();
-		mip = dynamic_cast<MetadataItemPropertiesFrame *>(child);
-		if (mip && mip->getObservedObject() == object)
-		{
-			mip->Raise();
-			return true;
-		}
-    }
-
-	mip = new MetadataItemPropertiesFrame(mainFrame, object);
-	mip->Show();
+	if (mainFrame)
+        frameManager().showMetadataPropertyFrame(mainFrame, object);
 	return true;
 }
 //-----------------------------------------------------------------------------
