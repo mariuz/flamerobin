@@ -431,6 +431,8 @@ bool YDatabase::parseCommitedSql(std::string sql)
 				std::string alter, field_name, maybe_type, domain_or_datatype;
 				strstrm >> alter;
 				strstrm >> field_name;
+				if (field_name == "COLUMN")	// ALTER TABLE xyz ALTER COLUMN field TYPE {domain or datatype}
+					strstrm >> field_name;
 				strstrm >> maybe_type;
 				if (maybe_type == "TYPE")		// domain is either created/modified/deleted or none
 				{								// if we'd only know what was there before... life would be easier
