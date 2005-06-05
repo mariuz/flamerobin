@@ -49,11 +49,11 @@ public:
         ID_radio_existing = 112,
         ID_textctrl_generatorname = 114,
         ID_textctrl_fieldname = 117,
-        ID_cb_generators = 115,
-        ID_cb_charset = 118,
+        ID_ch_generators = 115,
+        ID_ch_charset = 118,
         ID_cb_trigger = 110,
-		ID_cb_domains = 116,
-		ID_cb_datatypes = 119
+		ID_ch_domains = 116,
+		ID_ch_datatypes = 119
     };
     // end wxGlade
 
@@ -63,11 +63,11 @@ public:
 
     void OnRadioNewClick(wxCommandEvent &event);
     void OnRadioExistingClick(wxCommandEvent &event);
-    void OnCbGeneratorsClick(wxCommandEvent &event);
     void OnCbTriggerClick(wxCommandEvent &event);
-    void OnCbDomainsClick(wxCommandEvent &event);
-    void OnCbCharsetClick(wxCommandEvent &event);
-    void OnCbDatatypesClick(wxCommandEvent &event);
+    void OnChGeneratorsClick(wxCommandEvent &event);
+    void OnChDomainsClick(wxCommandEvent &event);
+    void OnChCharsetClick(wxCommandEvent &event);
+    void OnChDatatypesClick(wxCommandEvent &event);
     void OnTextctrlGeneratornameChange(wxCommandEvent &event);
     void OnTextctrlFieldnameChange(wxCommandEvent &event);
 
@@ -98,25 +98,25 @@ protected:
     wxStaticText* label_8;
     wxTextCtrl* textctrl_fieldname;
     wxStaticText* label_1;
-    wxComboBox* cb_domains;
+    wxChoice* ch_domains;
     wxButton* button_edit_domain;
     wxStaticText* label_2;
-    wxComboBox* cb_datatypes;
+    wxChoice* ch_datatypes;
     wxStaticText* label_3;
     wxTextCtrl* textctrl_size;
     wxStaticText* label_4;
     wxTextCtrl* textctrl_scale;
     wxCheckBox* cb_notnull;
     wxStaticText* label_5;
-    wxComboBox* cb_charset;
+    wxChoice* ch_charset;
     wxStaticText* label_6;
-    wxComboBox *cb_collate;
+    wxChoice *ch_collate;
     wxStaticLine* static_line_1;
     wxStaticText* label_7;
     wxRadioButton* radio_new;
     wxTextCtrl* textctrl_generatorname;
     wxRadioButton* radio_existing;
-    wxComboBox* cb_generators;
+    wxChoice* ch_generators;
     wxCheckBox* cb_trigger;
     wxTextCtrl* textctrl_sql;
     wxButton* button_ok;

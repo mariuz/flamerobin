@@ -53,7 +53,7 @@ FieldPropertiesFrame::FieldPropertiesFrame(wxWindow* parent, int id, wxString ti
     label_8 = new wxStaticText(panel_1, -1, _("Field"));
     textctrl_fieldname = new wxTextCtrl(panel_1, ID_textctrl_fieldname, wxT(""));
     label_1 = new wxStaticText(panel_1, -1, _("Domain"));
-    const wxString cb_domains_choices[] = {
+    const wxString ch_domains_choices[] = {
         wxT(""),	// ugly hack. The control doesn't want to show big list for selection if initial list is short
         wxT(""),	//            so it looks really ugly on the screen
         wxT(""),
@@ -65,10 +65,11 @@ FieldPropertiesFrame::FieldPropertiesFrame(wxWindow* parent, int id, wxString ti
         wxT(""),
         wxT("")
     };
-    cb_domains = new wxComboBox(panel_1, ID_cb_domains, wxT(""), wxDefaultPosition, wxDefaultSize, 10, cb_domains_choices, wxCB_DROPDOWN | wxCB_READONLY );
+
+    ch_domains = new wxChoice(panel_1, ID_ch_domains, wxDefaultPosition, wxDefaultSize, 10, ch_domains_choices);
     button_edit_domain = new wxButton(panel_1, ID_button_edit_domain, _("Edit domain"));
     label_2 = new wxStaticText(panel_1, -1, _("Datatype"));
-    const wxString cb_datatypes_choices[] = {
+    const wxString ch_datatypes_choices[] = {
         wxT("Char"),
         wxT("Varchar"),
         wxT("Integer"),
@@ -84,14 +85,14 @@ FieldPropertiesFrame::FieldPropertiesFrame(wxWindow* parent, int id, wxString ti
         wxT("Blob")
     };
 
-    cb_datatypes = new wxComboBox(panel_1, ID_cb_datatypes, wxT(""), wxDefaultPosition, wxDefaultSize, 13, cb_datatypes_choices, wxCB_DROPDOWN|wxCB_READONLY );
+    ch_datatypes = new wxChoice(panel_1, ID_ch_datatypes, wxDefaultPosition, wxDefaultSize, 13, ch_datatypes_choices);
     label_3 = new wxStaticText(panel_1, -1, _("Size"));
     textctrl_size = new wxTextCtrl(panel_1, -1, wxT(""));
     label_4 = new wxStaticText(panel_1, -1, _("Scale"));
     textctrl_scale = new wxTextCtrl(panel_1, -1, wxT(""));
     cb_notnull = new wxCheckBox(panel_1, -1, _("Not null"));
     label_5 = new wxStaticText(panel_1, -1, _("Charset"));
-    const wxString cb_charset_choices[] = {
+    const wxString ch_charset_choices[] = {
 		wxT("NONE"),
 		wxT("ASCII"),
 		wxT("BIG_5"),
@@ -119,9 +120,9 @@ FieldPropertiesFrame::FieldPropertiesFrame(wxWindow* parent, int id, wxString ti
 		wxT("WIN1253"),
 		wxT("WIN1254")
     };
-    cb_charset = new wxComboBox(panel_1, ID_cb_charset, wxT(""), wxDefaultPosition, wxDefaultSize, 26, cb_charset_choices, wxCB_DROPDOWN | wxCB_READONLY);
+    ch_charset = new wxChoice(panel_1, ID_ch_charset, wxDefaultPosition, wxDefaultSize, 26, ch_charset_choices);
     label_6 = new wxStaticText(panel_1, -1, _("Collate"));
-    const wxString cb_collate_choices[] = {
+    const wxString ch_collate_choices[] = {
         wxT(""),	// ugly hack. The control doesn't want to show big list for selection if initial list is short
         wxT(""),	//            so it looks really ugly on the screen
         wxT(""),
@@ -133,13 +134,13 @@ FieldPropertiesFrame::FieldPropertiesFrame(wxWindow* parent, int id, wxString ti
         wxT(""),
         wxT("")
     };
-    cb_collate = new wxComboBox(panel_1, -1, wxT(""), wxDefaultPosition, wxDefaultSize, 10, cb_collate_choices, wxCB_DROPDOWN|wxCB_READONLY );
+    ch_collate = new wxChoice(panel_1, -1, wxDefaultPosition, wxDefaultSize, 10, ch_collate_choices);
     static_line_1 = new wxStaticLine(panel_1, -1);
     label_7 = new wxStaticText(panel_1, -1, _("Autoincrement"));
     radio_new = new wxRadioButton(panel_1, ID_radio_new, _("Create new generator, named: "));
     textctrl_generatorname = new wxTextCtrl(panel_1, ID_textctrl_generatorname, wxT(""));
     radio_existing = new wxRadioButton(panel_1, ID_radio_existing, _("Use existing generator"));
-    const wxString cb_generators_choices[] = {
+    const wxString ch_generators_choices[] = {
         wxT(""),	// ugly hack. The control doesn't want to show big list for selection if initial list is short
         wxT(""),	//            so it looks really ugly on the screen
         wxT(""),
@@ -151,7 +152,7 @@ FieldPropertiesFrame::FieldPropertiesFrame(wxWindow* parent, int id, wxString ti
         wxT(""),
         wxT("")
     };
-    cb_generators = new wxComboBox(panel_1, ID_cb_generators, wxT(""), wxDefaultPosition, wxDefaultSize, 10, cb_generators_choices, wxCB_DROPDOWN|wxCB_READONLY );
+    ch_generators = new wxChoice(panel_1, ID_ch_generators, wxDefaultPosition, wxDefaultSize, 10, ch_generators_choices);
     cb_trigger = new wxCheckBox(panel_1, ID_cb_trigger, _("Create trigger"));
     textctrl_sql = new wxTextCtrl(panel_1, -1, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
     button_ok = new wxButton(panel_1, ID_button_ok, _("OK"));
@@ -173,12 +174,12 @@ void FieldPropertiesFrame::set_properties()
 {
     // begin wxGlade: FieldPropertiesFrame::set_properties
     SetSize(wxSize(397, 386));
-    cb_domains->SetSelection(0);
-    cb_datatypes->SetSelection(0);
-    cb_charset->SetSelection(0);
+    ch_domains->SetSelection(0);
+    ch_datatypes->SetSelection(0);
+    ch_charset->SetSelection(0);
     label_7->SetFont(wxFont(9, wxDEFAULT, wxNORMAL, wxBOLD, 0, wxT("")));
     radio_existing->SetValue(1);
-    cb_generators->SetSelection(0);
+    ch_generators->SetSelection(0);
     textctrl_sql->SetSize(wxSize(383, 150));
     // end wxGlade
 }
@@ -200,11 +201,11 @@ void FieldPropertiesFrame::do_layout()
     sizer_4->Add(textctrl_fieldname, 1, wxALL, 3);
     sizer_2->Add(sizer_4, 0, wxALL|wxEXPAND, 2);
     sizer_5->Add(label_1, 0, wxALL, 4);
-    sizer_5->Add(cb_domains, 0, wxALL, 1);
+    sizer_5->Add(ch_domains, 0, wxALL, 1);
     sizer_5->Add(button_edit_domain, 0, wxLEFT, 2);
     sizer_2->Add(sizer_5, 0, wxALL, 2);
     sizer_6->Add(label_2, 0, wxALL, 4);
-    sizer_6->Add(cb_datatypes, 0, 0, 0);
+    sizer_6->Add(ch_datatypes, 0, 0, 0);
     sizer_6->Add(label_3, 0, wxALL, 4);
     sizer_6->Add(textctrl_size, 0, 0, 0);
     sizer_6->Add(label_4, 0, wxALL, 4);
@@ -213,9 +214,9 @@ void FieldPropertiesFrame::do_layout()
     sizer_7->Add(cb_notnull, 0, wxALL, 4);
     sizer_7->Add(35, 10, 0, 0, 0);
     sizer_7->Add(label_5, 0, wxALL, 4);
-    sizer_7->Add(cb_charset, 0, wxRIGHT, 10);
+    sizer_7->Add(ch_charset, 0, wxRIGHT, 10);
     sizer_7->Add(label_6, 0, wxALL, 4);
-    sizer_7->Add(cb_collate, 0, 0, 0);
+    sizer_7->Add(ch_collate, 0, 0, 0);
     sizer_2->Add(sizer_7, 0, wxALL, 2);
     sizer_2->Add(static_line_1, 0, wxALL|wxEXPAND, 5);
     sizer_2->Add(label_7, 0, wxALL, 4);
@@ -223,7 +224,7 @@ void FieldPropertiesFrame::do_layout()
     sizer_10->Add(textctrl_generatorname, 1, 0, 0);
     sizer_2->Add(sizer_10, 0, wxALL|wxEXPAND, 2);
     sizer_9->Add(radio_existing, 0, wxALL, 3);
-    sizer_9->Add(cb_generators, 1, 0, 0);
+    sizer_9->Add(ch_generators, 1, 0, 0);
     sizer_2->Add(sizer_9, 0, wxALL|wxEXPAND, 2);
     sizer_8->Add(cb_trigger, 0, wxLEFT, 3);
     sizer_2->Add(sizer_8, 0, wxALL, 2);

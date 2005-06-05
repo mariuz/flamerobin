@@ -46,16 +46,16 @@
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(FieldPropertiesFrame, wxFrame)
 	EVT_BUTTON(FieldPropertiesFrame::ID_button_edit_domain, FieldPropertiesFrame::OnButtonEditDomainClick)
-	EVT_BUTTON(FieldPropertiesFrame::ID_button_ok, FieldPropertiesFrame::OnButtonOkClick)
-	EVT_BUTTON(FieldPropertiesFrame::ID_button_cancel, FieldPropertiesFrame::OnButtonCancelClick)
-	EVT_RADIOBUTTON(FieldPropertiesFrame::ID_radio_new, FieldPropertiesFrame::OnRadioNewClick)
+	EVT_BUTTON(FieldPropertiesFrame::ID_button_ok,          FieldPropertiesFrame::OnButtonOkClick)
+	EVT_BUTTON(FieldPropertiesFrame::ID_button_cancel,      FieldPropertiesFrame::OnButtonCancelClick)
+	EVT_RADIOBUTTON(FieldPropertiesFrame::ID_radio_new,      FieldPropertiesFrame::OnRadioNewClick)
 	EVT_RADIOBUTTON(FieldPropertiesFrame::ID_radio_existing, FieldPropertiesFrame::OnRadioExistingClick)
 	EVT_TEXT(FieldPropertiesFrame::ID_textctrl_generatorname, FieldPropertiesFrame::OnTextctrlGeneratornameChange)
-	EVT_TEXT(FieldPropertiesFrame::ID_textctrl_fieldname, FieldPropertiesFrame::OnTextctrlFieldnameChange)
-	EVT_COMBOBOX(FieldPropertiesFrame::ID_cb_generators, FieldPropertiesFrame::OnCbGeneratorsClick)
-	EVT_COMBOBOX(FieldPropertiesFrame::ID_cb_domains, FieldPropertiesFrame::OnCbDomainsClick)
-	EVT_COMBOBOX(FieldPropertiesFrame::ID_cb_charset, FieldPropertiesFrame::OnCbCharsetClick)
-	EVT_COMBOBOX(FieldPropertiesFrame::ID_cb_datatypes, FieldPropertiesFrame::OnCbDatatypesClick)
+	EVT_TEXT(FieldPropertiesFrame::ID_textctrl_fieldname,     FieldPropertiesFrame::OnTextctrlFieldnameChange)
+	EVT_CHOICE(FieldPropertiesFrame::ID_ch_generators, FieldPropertiesFrame::OnChGeneratorsClick)
+	EVT_CHOICE(FieldPropertiesFrame::ID_ch_domains,    FieldPropertiesFrame::OnChDomainsClick)
+	EVT_CHOICE(FieldPropertiesFrame::ID_ch_charset,    FieldPropertiesFrame::OnChCharsetClick)
+	EVT_CHOICE(FieldPropertiesFrame::ID_ch_datatypes,  FieldPropertiesFrame::OnChDatatypesClick)
 	EVT_CHECKBOX(FieldPropertiesFrame::ID_cb_trigger, FieldPropertiesFrame::OnCbTriggerClick)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
@@ -86,15 +86,15 @@ void FieldPropertiesFrame::OnRadioExistingClick(wxCommandEvent& WXUNUSED(event))
 	updateSqlWindow();
 }
 //-----------------------------------------------------------------------------
-void FieldPropertiesFrame::OnCbGeneratorsClick(wxCommandEvent& WXUNUSED(event))
+void FieldPropertiesFrame::OnChGeneratorsClick(wxCommandEvent& WXUNUSED(event))
 {
 	updateSqlWindow();
 }
 //-----------------------------------------------------------------------------
 //! change collation list
-void FieldPropertiesFrame::OnCbCharsetClick(wxCommandEvent& WXUNUSED(event))
+void FieldPropertiesFrame::OnChCharsetClick(wxCommandEvent& WXUNUSED(event))
 {
-	loadCollations(wx2std(cb_collate->GetValue()));
+	loadCollations(wx2std(ch_collate->GetStringSelection()));
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::loadCollations(std::string desired)
@@ -103,41 +103,41 @@ void FieldPropertiesFrame::loadCollations(std::string desired)
 	if (!d)
 		return;
 
-	std::vector<std::string> list = d->getCollations(wx2std(cb_charset->GetValue()));
+	std::vector<std::string> list = d->getCollations(wx2std(ch_charset->GetStringSelection()));
 	int to_select = 0;
 	int counter = 0;
-	cb_collate->Clear();
+	ch_collate->Clear();
 	for (std::vector<std::string>::iterator it = list.begin(); it != list.end(); ++it)
 	{
-		cb_collate->Append(std2wx(*it));
+		ch_collate->Append(std2wx(*it));
 		if ((*it) == desired)
 			to_select = counter;
 		counter++;
 	}
 
-	cb_collate->SetSelection(to_select);
+	ch_collate->SetSelection(to_select);
 }
 //-----------------------------------------------------------------------------
 //! enable/disable datatype properties
-void FieldPropertiesFrame::OnCbDatatypesClick(wxCommandEvent& WXUNUSED(event))
+void FieldPropertiesFrame::OnChDatatypesClick(wxCommandEvent& WXUNUSED(event))
 {
 	updateEditBoxes();
 }
 //-----------------------------------------------------------------------------
 //! enable/disable datatype properties
-void FieldPropertiesFrame::OnCbDomainsClick(wxCommandEvent& WXUNUSED(event))
+void FieldPropertiesFrame::OnChDomainsClick(wxCommandEvent& WXUNUSED(event))
 {
-	wxString domain = cb_domains->GetStringSelection();
+	wxString domain = ch_domains->GetStringSelection();
 	if (domain != wxT("[new]"))
-		updateDomainInfo(wx2std(cb_domains->GetValue()));
+		updateDomainInfo(wx2std(ch_domains->GetStringSelection()));
 	updateEditBoxes();
 
 	bool allowEdit = (domain == wxT("[new]") || domain.Mid(0, 4) == wxT("RDB$"));
-	cb_datatypes->Enable(allowEdit);
+	ch_datatypes->Enable(allowEdit);
 	textctrl_size->Enable(allowEdit);
 	textctrl_scale->Enable(allowEdit);
 
-	cb_charset->Enable(fieldM == 0 && domain == wxT("[new]"));	// only for new fields with new domain
+	ch_charset->Enable(fieldM == 0 && domain == wxT("[new]"));	// only for new fields with new domain
 }
 //-----------------------------------------------------------------------------
 bool datatypeHasSize(const wxString& type)
@@ -157,10 +157,10 @@ bool datatypeHasCollate(const wxString& type)
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::updateEditBoxes()
 {
-	wxString type = cb_datatypes->GetStringSelection();
+	wxString type = ch_datatypes->GetStringSelection();
 	textctrl_size->Enable(datatypeHasSize(type));
 	textctrl_scale->Enable(datatypeHasScale(type));
-	cb_collate->Enable(datatypeHasCollate(type));
+	ch_collate->Enable(fieldM == 0 && datatypeHasCollate(type));
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::OnCbTriggerClick(wxCommandEvent& WXUNUSED(event))
@@ -172,8 +172,8 @@ void FieldPropertiesFrame::OnButtonOkClick(wxCommandEvent& WXUNUSED(event))
 {
 	updateSqlWindow();	// just in case, so we can copy from it
 
-	wxString selectedDomain = cb_domains->GetStringSelection();
-	wxString selectedDatatype = cb_datatypes->GetStringSelection();
+	wxString selectedDomain = ch_domains->GetStringSelection();
+	wxString selectedDatatype = ch_datatypes->GetStringSelection();
 	wxString tsize = textctrl_size->GetValue();
 	wxString tscale = textctrl_scale->GetValue();
 	if (!datatypeHasSize(selectedDatatype))
@@ -301,35 +301,36 @@ void FieldPropertiesFrame::setProperties()
 	YDatabase *d = dynamic_cast<YDatabase *>(tableM->getDatabase());
 	if (!d)
 		return;
-	cb_generators->Clear();
+	ch_generators->Clear();
 	for (YMetadataCollection<YGenerator>::const_iterator it = d->generatorsBegin(); it != d->generatorsEnd(); ++it)
-		cb_generators->Append(std2wx((*it).getName()));
-	cb_domains->Clear();
+		ch_generators->Append(std2wx((*it).getName()));
+	ch_domains->Clear();
 	if (fieldM == 0 || fieldM->getSource().substr(0,4) != "RDB$")
 	{
-		cb_domains->Append(wxT("[new]"));
+		ch_domains->Append(wxT("[new]"));
 		if (fieldM == 0)
-			cb_domains->SetSelection(0);
+			ch_domains->SetSelection(0);
 	}
 	for (YMetadataCollection<YDomain>::const_iterator it = d->domainsBegin(); it != d->domainsEnd(); ++it)
 	{
 		std::string name = (*it).getName();
 		if (!fieldM && name.substr(0, 4) == "RDB$")		// when new column is added to the table
 			continue;									// only offer user-created domains
-		cb_domains->Append(std2wx(name));
+		ch_domains->Append(std2wx(name));
 	}
 
-	if (!fieldM)
-		return;
+	if (fieldM)
+	{
+		// editing existing field...
+		textctrl_fieldname->SetValue(std2wx(fieldM->getName()));
+		cb_notnull->SetValue(!fieldM->isNullable());
+		ch_domains->SetSelection(ch_domains->FindString(std2wx(fieldM->getSource())));
 
-	// editing existing field...
-	textctrl_fieldname->SetValue(std2wx(fieldM->getName()));
-	cb_notnull->SetValue(!fieldM->isNullable());
-	cb_domains->SetSelection(cb_domains->FindString(std2wx(fieldM->getSource())));
-
-	wxCommandEvent dummy;
-	OnCbDomainsClick(dummy);	// loads list of domains
-	loadCollations(fieldM->getCollation());
+		wxCommandEvent dummy;
+		OnChDomainsClick(dummy);	// loads list of domains
+		loadCollations(fieldM->getCollation());
+	}
+	updateEditBoxes();
 }
 //-----------------------------------------------------------------------------
 bool FieldPropertiesFrame::getDomainInfo(std::string domain, std::string& type, std::string& size,
@@ -358,8 +359,8 @@ void FieldPropertiesFrame::updateDomainInfo(std::string domain)
 		return;
 	textctrl_scale->SetValue(std2wx(scale));
 	textctrl_size->SetValue(std2wx(size));
-	cb_datatypes->SetSelection(cb_datatypes->FindString(std2wx(type)));
-	cb_charset->SetSelection(cb_charset->FindString(std2wx(charset)));
+	ch_datatypes->SetSelection(ch_datatypes->FindString(std2wx(type)));
+	ch_charset->SetSelection(ch_charset->FindString(std2wx(charset)));
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::update()
@@ -380,7 +381,7 @@ void FieldPropertiesFrame::updateSqlWindow()
 	std::string table = tableM->getName();
 	std::string field = wx2std(textctrl_fieldname->GetValue());
 	std::string sql;
-	std::string generator = wx2std(cb_generators->GetStringSelection());
+	std::string generator = wx2std(ch_generators->GetStringSelection());
 	if (radio_new->GetValue())
 	{
 		generator = wx2std(textctrl_generatorname->GetValue());
