@@ -183,6 +183,7 @@ void FieldPropertiesFrame::OnButtonOkClick(wxCommandEvent& WXUNUSED(event))
 	wxString fieldName = textctrl_fieldname->GetValue();
 
 	std::string sql;
+	enum unn { unnNone, unnBefore, unnAfter } update_not_null = unnNone;
 	if (fieldM)			// detect changes and do appropriate SQL actions
 	{
 		if (std2wx(fieldM->getName()) != fieldName)		// field name changed
@@ -223,13 +224,7 @@ void FieldPropertiesFrame::OnButtonOkClick(wxCommandEvent& WXUNUSED(event))
 		if (cb_notnull->IsChecked() == fieldM->isNullable())	// watch for double negation!
 		{
 			if (cb_notnull->IsChecked())	// change from NULL to NOT NULL
-			{
-				wxString s = ::wxGetTextFromUser(_("Enter value for existing columns with NULLs"),
-					_("Changing field from NULL to NOT NULL"), wxT(""), this);
-				sql += "UPDATE " + tableM->getName() + " \nSET "
-					+ wx2std(fieldName) + " = '" + wx2std(s) + "' \nWHERE "
-					+ wx2std(fieldName) + " IS NULL;\n";
-			}
+				update_not_null = unnBefore;
 
 			sql += "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = ";
 			if (cb_notnull->IsChecked())
@@ -258,8 +253,24 @@ void FieldPropertiesFrame::OnButtonOkClick(wxCommandEvent& WXUNUSED(event))
 			sql += wx2std(selectedDomain);
 
 		if (cb_notnull->IsChecked())
+		{
 			sql += " not null";
+			update_not_null = unnAfter;
+		}
 		sql += ";\n\n";
+	}
+
+	if (update_not_null != unnNone)
+	{
+		wxString s = ::wxGetTextFromUser(_("Enter value for existing fields with NULLs"),
+			_("NOT NULL field"), wxT(""), this);
+		std::string sqladd = "UPDATE " + tableM->getName() + " \nSET "
+			+ wx2std(fieldName) + " = '" + wx2std(s) + "' \nWHERE "
+			+ wx2std(fieldName) + " IS NULL;\n";
+		if (update_not_null == unnBefore)
+			sql = sqladd + sql;
+		else
+			sql += "COMMIT;\n" + sqladd;
 	}
 
 	wxString wxsql = std2wx(sql);
@@ -268,7 +279,6 @@ void FieldPropertiesFrame::OnButtonOkClick(wxCommandEvent& WXUNUSED(event))
 	ExecuteSqlFrame *eff = 0;
 	if (!wxsql.Trim().IsEmpty())
 	{
-		// create ExecuteSqlFrame with option to close at once
 		eff = new ExecuteSqlFrame(GetParent(), -1, _("Executing change script"));
 		eff->setDatabase(tableM->getDatabase());
 	}
