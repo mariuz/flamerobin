@@ -54,7 +54,7 @@ protected:
     wxCheckBox* checkbox_commit;
     wxCheckBox* checkbox_space;
     wxStaticText* label_pagesize;
-    wxComboBox* combobox_pagesize;
+    wxChoice* choice_pagesize;
     DECLARE_EVENT_TABLE()
 };
 #endif // RESTOREFRAME_H

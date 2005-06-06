@@ -49,8 +49,8 @@ public:
     void OnOkButtonClick(wxCommandEvent& event);
     void OnBrowseButtonClick(wxCommandEvent& event);
 
-    DatabaseRegistrationDialog(wxWindow* parent, int id, const wxString& title, bool createDB = false, 
-        const wxPoint& pos=wxDefaultPosition, const wxSize& size=wxDefaultSize, 
+    DatabaseRegistrationDialog(wxWindow* parent, int id, const wxString& title, bool createDB = false,
+        const wxPoint& pos=wxDefaultPosition, const wxSize& size=wxDefaultSize,
         long style=wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER);
 
 private:
@@ -74,13 +74,13 @@ protected:
     wxStaticText* label_password;
     wxTextCtrl* text_ctrl_password;
     wxStaticText* label_charset;
-    wxComboBox* combo_box_charset;
+    wxChoice* choice_charset;
     wxStaticText* label_role;
     wxTextCtrl* text_ctrl_role;
     wxStaticText* label_pagesize;
-    wxComboBox* combo_box_pagesize;
+    wxChoice* choice_pagesize;
     wxStaticText* label_dialect;
-    wxComboBox* combo_box_dialect;
+    wxChoice* choice_dialect;
     wxButton* button_ok;
     wxButton* button_cancel;
 

@@ -94,7 +94,7 @@ protected:
     wxStaticText* label_filename;
     wxTextCtrl* text_ctrl_filename;
     wxButton* button_browse;
-    wxCheckBox* combobox_showlog;
+    wxCheckBox* checkbox_showlog;
     wxButton* button_start;
     wxButton* button_cancel;
     wxStyledTextCtrl* text_ctrl_log;

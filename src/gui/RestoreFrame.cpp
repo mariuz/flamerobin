@@ -192,10 +192,10 @@ RestoreFrame::RestoreFrame(wxWindow* parent, YDatabase* db):
     const wxString pagesize_choices[] = {
         wxT("1024"), wxT("2048"), wxT("4096"), wxT("8192"), wxT("16384")
     };
-    combobox_pagesize = new wxComboBox(panel_controls, -1, wxT(""), wxDefaultPosition, wxDefaultSize,
-        sizeof(pagesize_choices) / sizeof(wxString), pagesize_choices, wxCB_DROPDOWN|wxCB_READONLY);
+    choice_pagesize = new wxChoice(panel_controls, -1, wxDefaultPosition, wxDefaultSize,
+        sizeof(pagesize_choices) / sizeof(wxString), pagesize_choices);
 
-    combobox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog, _("Show complete log"));
+    checkbox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog, _("Show complete log"));
     button_start = new wxButton(panel_controls, ID_button_start, _("Restore"));
     button_cancel = new wxButton(panel_controls, ID_button_cancel, _("Cancel"));
 
@@ -237,10 +237,10 @@ void RestoreFrame::do_layout()
     wxBoxSizer* sizerCombo = new wxBoxSizer(wxHORIZONTAL);
     sizerCombo->Add(label_pagesize, 0, wxALIGN_CENTER_VERTICAL);
     sizerCombo->Add(styleguide().getControlLabelMargin(), 0);
-    sizerCombo->Add(combobox_pagesize, 1, wxEXPAND);
+    sizerCombo->Add(choice_pagesize, 1, wxEXPAND);
 
     wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
-    sizerButtons->Add(combobox_showlog, 0, wxALIGN_CENTER_VERTICAL);
+    sizerButtons->Add(checkbox_showlog, 0, wxALIGN_CENTER_VERTICAL);
     sizerButtons->Add(0, 0, 1, wxEXPAND);
     sizerButtons->Add(button_start);
     sizerButtons->Add(styleguide().getBetweenButtonsMargin(wxHORIZONTAL), 0);
@@ -278,9 +278,9 @@ void RestoreFrame::doReadConfigSettings(const std::string& prefix)
     std::string pagesize;
     int selindex = -1;
     if (config().getValue(prefix + "::pagesize", pagesize) && !pagesize.empty())
-        selindex = combobox_pagesize->FindString(std2wx(pagesize));
+        selindex = choice_pagesize->FindString(std2wx(pagesize));
     // select default pagesize of 1024 if invalid selindex
-    combobox_pagesize->SetSelection(selindex >= 0 ? selindex : 0);
+    choice_pagesize->SetSelection(selindex >= 0 ? selindex : 0);
 
     std::vector<std::string> flags;
     if (config().getValue(prefix + "::options", flags) && !flags.empty())
@@ -304,7 +304,7 @@ void RestoreFrame::doReadConfigSettings(const std::string& prefix)
 void RestoreFrame::doWriteConfigSettings(const std::string& prefix) const
 {
     BackupRestoreBaseFrame::doWriteConfigSettings(prefix);
-    config().setValue(prefix + "::pagesize", wx2std(combobox_pagesize->GetStringSelection()));
+    config().setValue(prefix + "::pagesize", wx2std(choice_pagesize->GetStringSelection()));
 
     std::vector<std::string> flags;
     if (checkbox_replace->IsChecked())
@@ -338,7 +338,7 @@ void RestoreFrame::updateControls()
     checkbox_validity->Enable(!running);
     checkbox_commit->Enable(!running);
     checkbox_space->Enable(!running);
-    combobox_pagesize->Enable(!running);
+    choice_pagesize->Enable(!running);
     button_start->Enable(!running && !text_ctrl_filename->GetValue().empty());
     button_cancel->Enable(running);
 }
@@ -358,7 +358,7 @@ void RestoreFrame::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    verboseMsgsM = combobox_showlog->IsChecked();
+    verboseMsgsM = checkbox_showlog->IsChecked();
     clearLog();
 
     // TODO: create a global helper function
@@ -392,7 +392,7 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
         flags |= (int)IBPP::brUseAllSpace;
 
     unsigned long pagesize;
-    if (!combobox_pagesize->GetValue().ToULong(&pagesize))
+    if (!choice_pagesize->GetStringSelection().ToULong(&pagesize))
         pagesize = 0;
 
     RestoreThread* thread = new RestoreThread(this, serverM->getName(), databaseM->getUsername(),

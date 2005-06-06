@@ -59,7 +59,7 @@ BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, YDatabase* db):
     label_filename = 0;
     text_ctrl_filename = 0;
     button_browse = 0;
-    combobox_showlog = 0;
+    checkbox_showlog = 0;
     button_start = 0;
     button_cancel = 0;
     text_ctrl_log = 0;
@@ -126,7 +126,7 @@ void BackupRestoreBaseFrame::doReadConfigSettings(const std::string& prefix)
     bool verbose;
     if (!config().getValue(prefix + "::verboselog", verbose))
         verbose = true;
-    combobox_showlog->SetValue(verbose);
+    checkbox_showlog->SetValue(verbose);
 
     std::string bkfile;
     if (config().getValue(prefix + "::backupfilename", bkfile) && !bkfile.empty())
@@ -136,7 +136,7 @@ void BackupRestoreBaseFrame::doReadConfigSettings(const std::string& prefix)
 void BackupRestoreBaseFrame::doWriteConfigSettings(const std::string& prefix) const
 {
     BaseFrame::doWriteConfigSettings(prefix);
-    config().setValue(prefix + "::verboselog", combobox_showlog->GetValue());
+    config().setValue(prefix + "::verboselog", checkbox_showlog->GetValue());
     config().setValue(prefix + "::backupfilename", wx2std(text_ctrl_filename->GetValue()));
 }
 //-----------------------------------------------------------------------------
@@ -307,7 +307,7 @@ void BackupRestoreBaseFrame::OnThreadOutput(wxCommandEvent& WXUNUSED(event))
 void BackupRestoreBaseFrame::OnVerboseLogChange(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor wait;
-    verboseMsgsM = combobox_showlog->IsChecked();
+    verboseMsgsM = checkbox_showlog->IsChecked();
 
     text_ctrl_log->Freeze();
     text_ctrl_log->ClearAll();

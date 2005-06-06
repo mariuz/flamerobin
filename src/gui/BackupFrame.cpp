@@ -185,7 +185,7 @@ BackupFrame::BackupFrame(wxWindow* parent, YDatabase* db):
     checkbox_garbage = new wxCheckBox(panel_controls, -1, _("Don't do garbage collection"));
     checkbox_extern = new wxCheckBox(panel_controls, -1, _("Convert external tables"));
 
-    combobox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog, _("Show complete log"));
+    checkbox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog, _("Show complete log"));
     button_start = new wxButton(panel_controls, ID_button_start, _("Backup"));
     button_cancel = new wxButton(panel_controls, ID_button_cancel, _("Cancel"));
 
@@ -220,7 +220,7 @@ void BackupFrame::do_layout()
     sizerChecks->Add(checkbox_extern);
 
     wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
-    sizerButtons->Add(combobox_showlog, 0, wxALIGN_CENTER_VERTICAL);
+    sizerButtons->Add(checkbox_showlog, 0, wxALIGN_CENTER_VERTICAL);
     sizerButtons->Add(0, 0, 1, wxEXPAND);
     sizerButtons->Add(button_start);
     sizerButtons->Add(styleguide().getBetweenButtonsMargin(wxHORIZONTAL), 0);
@@ -326,7 +326,7 @@ void BackupFrame::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    verboseMsgsM = combobox_showlog->IsChecked();
+    verboseMsgsM = checkbox_showlog->IsChecked();
     clearLog();
 
     // TODO: create a global helper function

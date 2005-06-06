@@ -50,12 +50,12 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
     createM = createDB;
     label_dbpath = new wxStaticText(getControlsPanel(), -1, _("Database path:"));
     text_ctrl_dbpath = new wxTextCtrl(getControlsPanel(), ID_textcontrol_dbpath, wxT(""));
-    button_browse = new wxButton(getControlsPanel(), ID_button_browse, _("..."), 
+    button_browse = new wxButton(getControlsPanel(), ID_button_browse, _("..."),
         wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
     label_username = new wxStaticText(getControlsPanel(), -1, _("Username:"));
     text_ctrl_username = new wxTextCtrl(getControlsPanel(), ID_textcontrol_username, wxT("SYSDBA"));
     label_password = new wxStaticText(getControlsPanel(), -1, _("Password:"));
-    text_ctrl_password = new wxTextCtrl(getControlsPanel(), -1, wxT("masterkey"), 
+    text_ctrl_password = new wxTextCtrl(getControlsPanel(), -1, wxT("masterkey"),
         wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
     text_ctrl_password->SetToolTip(_("Leave empty if you wish to be prompted for password every time"));
     label_charset = new wxStaticText(getControlsPanel(), -1, _("Charset:"));
@@ -87,8 +87,8 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
         wxT("WIN1253"),
         wxT("WIN1254")
     };
-    combo_box_charset = new wxComboBox(getControlsPanel(), -1, wxT(""), wxDefaultPosition, wxDefaultSize,
-        sizeof(charset_choices) / sizeof(wxString), charset_choices, wxCB_DROPDOWN|wxCB_READONLY);
+    choice_charset = new wxChoice(getControlsPanel(), -1, wxDefaultPosition, wxDefaultSize,
+        sizeof(charset_choices) / sizeof(wxString), charset_choices);
     label_role = new wxStaticText(getControlsPanel(), -1, _("Role:"));
     text_ctrl_role = new wxTextCtrl(getControlsPanel(), -1, wxT(""));
 
@@ -102,15 +102,15 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
             wxT("8192"),
             wxT("16384")
         };
-        combo_box_pagesize = new wxComboBox(getControlsPanel(), -1, wxT(""), wxDefaultPosition, wxDefaultSize,
-            sizeof(pagesize_choices) / sizeof(wxString), pagesize_choices, wxCB_DROPDOWN|wxCB_READONLY);
+        choice_pagesize = new wxChoice(getControlsPanel(), -1, wxDefaultPosition, wxDefaultSize,
+            sizeof(pagesize_choices) / sizeof(wxString), pagesize_choices);
         label_dialect = new wxStaticText(getControlsPanel(), -1, _("SQL Dialect:"));
         const wxString dialect_choices[] = {
             wxT("1"),
             wxT("3")
         };
-        combo_box_dialect = new wxComboBox(getControlsPanel(), -1, wxT(""), wxDefaultPosition, wxDefaultSize,
-            sizeof(dialect_choices) / sizeof(wxString), dialect_choices, wxCB_DROPDOWN|wxCB_READONLY);
+        choice_dialect = new wxChoice(getControlsPanel(), -1, wxDefaultPosition, wxDefaultSize,
+            sizeof(dialect_choices) / sizeof(wxString), dialect_choices);
     }
 
     button_ok = new wxButton(getControlsPanel(), ID_button_ok, (createM ? _("Create") : _("Save")));
@@ -144,16 +144,16 @@ void DatabaseRegistrationDialog::do_layout()
     sizerControls->Add(text_ctrl_password, wxGBPosition(1, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
 
     sizerControls->Add(label_charset, wxGBPosition(2, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-    sizerControls->Add(combo_box_charset, wxGBPosition(2, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
+    sizerControls->Add(choice_charset, wxGBPosition(2, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
     sizerControls->Add(label_role, wxGBPosition(2, 2), wxDefaultSpan, wxLEFT|wxALIGN_CENTER_VERTICAL, dx);
     sizerControls->Add(text_ctrl_role, wxGBPosition(2, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
 
     if (createM)
     {
         sizerControls->Add(label_pagesize, wxGBPosition(3, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-        sizerControls->Add(combo_box_pagesize, wxGBPosition(3, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
+        sizerControls->Add(choice_pagesize, wxGBPosition(3, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
         sizerControls->Add(label_dialect, wxGBPosition(3, 2), wxDefaultSpan, wxLEFT|wxALIGN_CENTER_VERTICAL, dx);
-        sizerControls->Add(combo_box_dialect, wxGBPosition(3, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
+        sizerControls->Add(choice_dialect, wxGBPosition(3, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
     }
 
     sizerControls->AddGrowableCol(1);
@@ -179,8 +179,8 @@ void DatabaseRegistrationDialog::set_properties()
     button_browse->SetSize(wh, wh);
     if (createM)
     {
-        combo_box_pagesize->SetSelection(2);
-        combo_box_dialect->SetSelection(1);
+        choice_pagesize->SetSelection(2);
+        choice_dialect->SetSelection(1);
     }
     button_ok->SetDefault();
 }
@@ -196,9 +196,9 @@ void DatabaseRegistrationDialog::setDatabase(YDatabase *db)
     text_ctrl_username->SetValue(std2wx(databaseM->getUsername()));
     text_ctrl_password->SetValue(std2wx(databaseM->getPassword()));
     text_ctrl_role->SetValue(std2wx(databaseM->getRole()));
-    combo_box_charset->SetSelection(combo_box_charset->FindString(std2wx(databaseM->getCharset())));
-    if (combo_box_charset->GetSelection() < 0)
-        combo_box_charset->SetSelection(combo_box_charset->FindString(wxT("NONE")));
+    choice_charset->SetSelection(choice_charset->FindString(std2wx(databaseM->getCharset())));
+    if (choice_charset->GetSelection() < 0)
+        choice_charset->SetSelection(choice_charset->FindString(wxT("NONE")));
 
     // enable controls depending on operation and database connection status
     // use SetEditable() for edit controls to allow copying text to clipboard
@@ -207,7 +207,7 @@ void DatabaseRegistrationDialog::setDatabase(YDatabase *db)
     button_browse->Enable(!isConnected);
     text_ctrl_username->SetEditable(!isConnected);
     text_ctrl_password->SetEditable(!isConnected);
-    combo_box_charset->Enable(!isConnected);
+    choice_charset->Enable(!isConnected);
     text_ctrl_role->SetEditable(!isConnected);
     button_ok->Enable(!isConnected);
     if (isConnected)
@@ -255,7 +255,7 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
     databaseM->setPath(wx2std(text_ctrl_dbpath->GetValue()));
     databaseM->setUsername(wx2std(text_ctrl_username->GetValue()));
     databaseM->setPassword(wx2std(text_ctrl_password->GetValue()));
-    databaseM->setCharset(wx2std(combo_box_charset->GetValue()));
+    databaseM->setCharset(wx2std(choice_charset->GetStringSelection()));
     databaseM->setRole(wx2std(text_ctrl_role->GetValue()));
 
     try
@@ -263,10 +263,10 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
         if (createM)	// create new database
         {
             long ps = 0;
-            combo_box_pagesize->GetValue().ToLong(&ps);
+            choice_pagesize->GetStringSelection().ToLong(&ps);
 
             int dialect = 3;
-            if (combo_box_dialect->GetSelection() == 0)
+            if (choice_dialect->GetSelection() == 0)
                 dialect = 1;
 
             serverM->createDatabase(databaseM, (ps) ? ps : 4096, dialect);
