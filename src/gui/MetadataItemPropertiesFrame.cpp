@@ -69,13 +69,14 @@ std::string escapeHtmlChars(std::string s, bool processNewlines = true)
 
 	for (std::vector<par>::iterator it = symbol_table.begin(); it != symbol_table.end(); ++it)
 	{
-		std::string::size_type pos;
-		while (true)
+		std::string::size_type pos = 0;
+		while (pos < s.length())
 		{
-			pos = s.find((*it).first);
+			pos = s.find((*it).first, pos);
 			if (pos == std::string::npos)
 				break;
 			s.replace(pos, 1, (*it).second);
+			pos++;
 		}
 	}
 	return s;
