@@ -87,7 +87,7 @@ TextCtrlWithContextMenu::TextCtrlWithContextMenu(wxWindow* parent, const wxStrin
 	SetMarginWidth(1, 0);			// turn off the margins
 	SetMarginWidth(0, 0);
     SetWrapMode(wxSTC_WRAP_WORD);
-	
+
 	SetText(initialText);
 }
 //-----------------------------------------------------------------------------
@@ -115,15 +115,15 @@ void TextCtrlWithContextMenu::OnStartDrag(wxStyledTextEvent& WXUNUSED(event))
 void TextCtrlWithContextMenu::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
 {
     wxMenu m(0);
-    m.Append(ID_MENU_UNDO, _("Undo"));
-    m.Append(ID_MENU_REDO, _("Redo"));
+    m.Append(ID_MENU_UNDO, _("&Undo"));
+    m.Append(ID_MENU_REDO, _("&Redo"));
     m.AppendSeparator();
-    m.Append(ID_MENU_CUT,    _("Cut"));
-    m.Append(ID_MENU_COPY,   _("Copy"));
-    m.Append(ID_MENU_PASTE,  _("Paste"));
-    m.Append(ID_MENU_DELETE, _("Delete"));
+    m.Append(ID_MENU_CUT,    _("Cu&t"));
+    m.Append(ID_MENU_COPY,   _("&Copy"));
+    m.Append(ID_MENU_PASTE,  _("&Paste"));
+    m.Append(ID_MENU_DELETE, _("&Delete"));
     m.AppendSeparator();
-    m.Append(ID_MENU_SELECT_ALL,       _("Select All"));
+    m.Append(ID_MENU_SELECT_ALL,       _("Select &All"));
 
 	// disable stuff
 	m.Enable(ID_MENU_UNDO, CanUndo());
