@@ -41,7 +41,7 @@ Contributor(s): Nando Dessena
 #include "config.h"
 #include "styleguide.h"
 //-----------------------------------------------------------------------------
-BaseDialog::BaseDialog(wxWindow* parent, int id, const wxString& title, 
+BaseDialog::BaseDialog(wxWindow* parent, int id, const wxString& title,
         const wxPoint& pos, const wxSize& size, long style)
     : wxDialog(parent, id, title, pos, size, style|wxNO_FULL_REPAINT_ON_RESIZE)
 {
@@ -93,11 +93,8 @@ BaseDialog::~BaseDialog()
 void BaseDialog::readConfigSettings()
 {
     // default to centered dialogs
-    bool centered = true;
-    config().getValue("centerDialogsOnParent", centered);
-
-    bool enabled = false;
-    if (config().getValue("FrameStorage", enabled) && enabled)
+    bool centered = config().get("centerDialogsOnParent", true);
+    if (config().get("FrameStorage", false))
     {
         std::string itemPrefix = getStorageName();
         if (!itemPrefix.empty())
@@ -129,8 +126,7 @@ void BaseDialog::doReadConfigSettings(const std::string& WXUNUSED(prefix))
 //-----------------------------------------------------------------------------
 void BaseDialog::writeConfigSettings() const
 {
-    bool enabled = false;
-    if (config().getValue("FrameStorage", enabled) && enabled)
+    if (config().get("FrameStorage", false) && !IsIconized())
     {
         // save window size to config.
         std::string itemPrefix = getStorageName();

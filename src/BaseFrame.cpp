@@ -113,8 +113,7 @@ void BaseFrame::writeConfigSettings() const
 	    node = node->GetNext();
 	}
 
-	bool enabled = false;
-	if (config().getValue("FrameStorage", enabled) && enabled)
+	if (config().get("FrameStorage", false) && !IsIconized())	// don't save for minimized windows
 	{
 		// save window position and size to config.
 		std::string itemPrefix = getStorageName();
