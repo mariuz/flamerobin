@@ -743,9 +743,9 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
 	wxCommandEvent e;
 	int key = event.GetKeyCode();
 	if (key == WXK_F9)
-		executeAllStatements();
+		OnButtonExecuteClick(e);
 	if (key == WXK_F5)
-		commitTransaction();
+		OnButtonCommitClick(e);
 	if (key == WXK_F8)
 		OnButtonRollbackClick(e);
 	if (key == WXK_F3)
