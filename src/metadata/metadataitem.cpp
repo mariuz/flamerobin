@@ -33,6 +33,7 @@
 #include "metadataitem.h"
 #include "database.h"
 #include "dberror.h"
+#include "frutils.h"
 
 YxMetadataItem::YxMetadataItem()
 	: YxSubject()
@@ -332,10 +333,10 @@ std::string YxMetadataItem::getDescription()
 		descriptionLoadedM = true;
         if (st1->IsNull(1))
             return "";
+		/*
 		IBPP::Blob b = IBPP::BlobFactory(st1->Database(), st1->Transaction());
 		st1->Get(1, b);
 		b->Open();
-		std::string desc;
 		char buffer[8192];		// 8K block
         while (true)
 		{
@@ -346,6 +347,10 @@ std::string YxMetadataItem::getDescription()
 			descriptionM += buffer;
 		}
 		b->Close();
+		*/
+
+		readBlob(st1, 1, descriptionM);
+
 		tr1->Commit();
 		descriptionLoadedM = true;
 		return descriptionM;

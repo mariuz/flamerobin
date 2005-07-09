@@ -30,6 +30,7 @@
 
 #include <ibpp.h>
 #include "dberror.h"
+#include "frutils.h"
 #include "database.h"
 #include "collection.h"
 #include "metadataitemwithcolumns.h"
@@ -71,7 +72,8 @@ bool YxMetadataItemWithColumns::loadColumns()
 		tr1->Start();
 		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
 		st1->Prepare(
-			"select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source, l.rdb$collation_name, f.rdb$computed_blr "
+			"select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source, l.rdb$collation_name, f.rdb$computed_blr, "
+			" f.rdb$computed_source "
 			" from rdb$fields f"
 			" join rdb$relation_fields r on f.rdb$field_name=r.rdb$field_source"
 			" left outer join rdb$collations l on l.rdb$collation_id = r.rdb$collation_id and l.rdb$character_set_id = f.rdb$character_set_id"
@@ -83,15 +85,16 @@ bool YxMetadataItemWithColumns::loadColumns()
 		st1->Execute();
 		while (st1->Fetch())
 		{
-			std::string name, source, collation;
+			std::string name, source, collation, computedSrc;
 			st1->Get(1, name);
 			st1->Get(3, source);
 			st1->Get(4, collation);
+			readBlob(st1, 6, computedSrc);
 
 			YColumn *cc = columnsM.add();
 			cc->setName(name);
 			cc->setParent(this);
-			cc->Init(!st1->IsNull(2), source, !st1->IsNull(5), collation);
+			cc->Init(!st1->IsNull(2), source, !st1->IsNull(5), computedSrc, collation);
 		}
 
 		tr1->Commit();

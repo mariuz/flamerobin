@@ -36,7 +36,7 @@ class YColumn: public YxMetadataItem
 {
 public:
 	YColumn();
-	void Init(bool notnull, std::string source, bool computed, std::string collation);
+	void Init(bool notnull, std::string source, bool computed, std::string computedSource, std::string collation);
 	virtual std::string getPrintableName();
 	std::string getDatatype();
     virtual std::string getDropSqlStatement() const;
@@ -50,7 +50,7 @@ public:
 
 protected:
 	bool notnullM, computedM;
-	std::string sourceM, collationM;
+	std::string sourceM, computedSourceM, collationM;
 };
 //------------------------------------------------------------------------------
 #endif

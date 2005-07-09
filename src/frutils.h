@@ -29,12 +29,16 @@
 #include <string>
 #include <list>
 #include <wx/wx.h>
+#include "ibpp.h"
 //-----------------------------------------------------------------------------
 //! Returns the absolute application path, if possible, or an empty string in case of failure.
 std::string getApplicationPath();
 //-----------------------------------------------------------------------------
 //! sets all controls to width of widest control
 void adjustControlsMinWidth(std::list<wxWindow*> controls);
+//-----------------------------------------------------------------------------
+//! reads blob from statement into std::string
+void readBlob(IBPP::Statement &st, int column, std::string& result);
 //-----------------------------------------------------------------------------
 #endif // FRUTILS_H
 

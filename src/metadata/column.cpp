@@ -47,13 +47,14 @@ YColumn::YColumn()
 }
 //------------------------------------------------------------------------------
 //! initialize properties
-void YColumn::Init(bool notnull, std::string source, bool computed, std::string collation)
+void YColumn::Init(bool notnull, std::string source, bool computed, std::string computedSource, std::string collation)
 {
 	source.erase(source.find_last_not_of(" ")+1);		// right trim everything
 	collation.erase(collation.find_last_not_of(" ")+1);
 	notnullM = notnull;
 	sourceM = source;
 	computedM = computed;
+	computedSourceM = computedSource;
 	collationM = collation;
 }
 //------------------------------------------------------------------------------
@@ -84,6 +85,9 @@ bool YColumn::isPrimaryKey() const
 //! retrieve datatype from domain if possible
 std::string YColumn::getDatatype()
 {
+	if (computedM)
+		return computedSourceM;
+
 	std::string ret;
 	YDomain *d = getDomain();
 	std::string datatype;

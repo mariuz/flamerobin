@@ -34,6 +34,7 @@
 #include <ibpp.h>
 #include "metadataitem.h"
 #include "dberror.h"
+#include "frutils.h"
 #include "database.h"
 #include "trigger.h"
 //------------------------------------------------------------------------------
@@ -131,30 +132,7 @@ bool YTrigger::getSource(std::string& source) const
 		st1->Set(1, getName());
 		st1->Execute();
 		st1->Fetch();
-		IBPP::Blob b = IBPP::BlobFactory(st1->Database(), st1->Transaction());
-		st1->Get(1, b);
-
-		try				// if blob is empty the exception is thrown
-		{				// I tried to check st1->IsNull(1) but it doesn't work
-			b->Open();	// to this hack is the only way (for the time being)
-		}
-		catch (...)
-		{
-			source = "";
-			return true;
-		}
-
-		std::string desc;
-		char buffer[8192];		// 8K block
-		while (true)
-		{
-			int size = b->Read(buffer, 8192);
-			if (size <= 0)
-				break;
-			buffer[size] = 0;
-			source += buffer;
-		}
-		b->Close();
+		readBlob(st1, 1, source);
 		tr1->Commit();
 		return true;
 	}

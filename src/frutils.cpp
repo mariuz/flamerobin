@@ -104,4 +104,33 @@ void adjustControlsMinWidth(std::list<wxWindow*> controls)
     }
 }
 //-----------------------------------------------------------------------------
+void readBlob(IBPP::Statement &st, int column, std::string& result)
+{
+	result = "";
+	if (st->IsNull(column))
+		return;
 
+	IBPP::Blob b = IBPP::BlobFactory(st->Database(), st->Transaction());
+	st->Get(column, b);
+
+	try				// if blob is empty the exception is thrown
+	{				// I tried to check st1->IsNull(1) but it doesn't work
+		b->Open();	// to this hack is the only way (for the time being)
+	}
+	catch (...)
+	{
+		return;
+	}
+
+	char buffer[8192];		// 8K block
+	while (true)
+	{
+		int size = b->Read(buffer, 8192);
+		if (size <= 0)
+			break;
+		buffer[size] = 0;
+		result += buffer;
+	}
+	b->Close();
+}
+//-----------------------------------------------------------------------------
