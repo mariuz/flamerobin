@@ -44,7 +44,13 @@ YDomain::YDomain():
 //------------------------------------------------------------------------------
 bool YDomain::loadInfo()
 {
-	IBPP::Database& db = getDatabase()->getDatabase();
+	YDatabase *d = getDatabase();
+	if (!d)
+	{
+		//wxMessageBox(_("Domain::loadInfo, database = 0"), _("WARNING"), wxICON_WARNING|wxOK);
+		return false;
+	}
+	IBPP::Database& db = d->getDatabase();
 
 	try
 	{
@@ -61,9 +67,13 @@ bool YDomain::loadInfo()
 			" and t.rdb$field_name='RDB$FIELD_TYPE'"
 		);
 
-		st1->Set(1, getName());
+		st1->Set(1, nameM);
 		st1->Execute();
-		st1->Fetch();
+		if (!st1->Fetch())
+		{
+			//wxMessageBox(_("Domain not found."), _("Warning."), wxICON_WARNING|wxOK);
+			return false;
+		}
 		st1->Get(1, &datatypeM);
 		if (st1->IsNull(2))
 			subtypeM = 0;
@@ -87,7 +97,8 @@ bool YDomain::loadInfo()
 		}
 
 		tr1->Commit();
-		notify();
+		if (nameM.substr(0, 4) != "RDB$")
+			notify();
 		infoLoadedM = true;
 		return true;
 	}

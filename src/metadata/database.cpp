@@ -108,7 +108,7 @@ std::string getLoadingSql(NodeType type)
 
 		case ntDomain:		return "select f.rdb$field_name from rdb$fields f "
 			"left outer join rdb$types t on f.rdb$field_type=t.rdb$type "
-			"where t.rdb$field_name='RDB$FIELD_TYPE' order by 1";
+			"where t.rdb$field_name='RDB$FIELD_TYPE' and f.rdb$field_name not starting with 'RDB$' order by 1";
 		case ntException:   return "select RDB$EXCEPTION_NAME from RDB$EXCEPTIONS ORDER BY 1";
 		default:			return "";
 	};
@@ -159,6 +159,45 @@ std::vector<std::string> YDatabase::getCollations(std::string charset)
 	for (low = collationsM.lower_bound(charset); low != high; ++low)
 		temp.push_back((*low).second);
 	return temp;
+}
+//------------------------------------------------------------------------------
+YDomain *YDatabase::loadMissingDomain(std::string name)
+{
+	try
+	{
+		IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
+		tr1->Start();
+		IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
+		st1->Prepare(
+			"select count(*) from rdb$fields f left outer join rdb$types t on f.rdb$field_type=t.rdb$type "
+			"where t.rdb$field_name='RDB$FIELD_TYPE' and f.rdb$field_name = ?"
+		);
+		st1->Set(1, name);
+		st1->Execute();
+		if (st1->Fetch())
+		{
+			int c;
+			st1->Get(1, c);
+			if (c > 0)
+			{
+				YDomain *d = domainsM.add(name);	// add domain to collection
+				d->setParent(this);
+				if (name.substr(0, 4) != "RDB$")
+					refreshByType(ntDomain);
+				return d;
+			}
+		}
+		tr1->Commit();
+	}
+	catch (IBPP::Exception &e)
+	{
+		lastError().setMessage(e.ErrorMessage());
+	}
+	catch (...)
+	{
+		lastError().setMessage(_("System error."));
+	}
+	return 0;
 }
 //------------------------------------------------------------------------------
 //! small helper function, reads sql and fills the vector with values

@@ -324,8 +324,8 @@ void FieldPropertiesFrame::setProperties()
 	for (YMetadataCollection<YDomain>::const_iterator it = d->domainsBegin(); it != d->domainsEnd(); ++it)
 	{
 		std::string name = (*it).getName();
-		if (!fieldM && name.substr(0, 4) == "RDB$")		// when new column is added to the table
-			continue;									// only offer user-created domains
+		if (name.substr(0, 4) == "RDB$" && (!fieldM || fieldM->getSource() != name))
+			continue;
 		ch_domains->Append(std2wx(name));
 	}
 

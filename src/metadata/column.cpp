@@ -120,16 +120,8 @@ YDomain *YColumn::getDomain() const
 		if ((*it).getName() == sourceM)
 			return (YDomain *)&(*it);
 
-	// since we haven't find the domain, reload domains from database
-	// possible causes: creating tables, creating new table fields, etc.
-	d->loadObjects(ntDomain);
-
-	// repeat the search
-	for (YMetadataCollection<YDomain>::const_iterator it = d->domainsBegin(); it != d->domainsEnd(); ++it)
-		if ((*it).getName() == sourceM)
-			return (YDomain *)&(*it);
-
-	return 0;
+	// since we haven't find the domain, check the database
+	return d->loadMissingDomain(sourceM);
 }
 //------------------------------------------------------------------------------
 std::string YColumn::getSource() const

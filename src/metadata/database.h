@@ -92,7 +92,8 @@ public:
 	bool disconnect();
 	bool reconnect() const;
 
-	std::string YDatabase::loadDomainNameForColumn(std::string table, std::string field);
+	std::string loadDomainNameForColumn(std::string table, std::string field);
+	YDomain *loadMissingDomain(std::string name);
 	bool loadObjects(NodeType type);
 	//std::string getLoadingSql(NodeType type);
 

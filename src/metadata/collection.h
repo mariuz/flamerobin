@@ -70,6 +70,7 @@ public:
 	{
 		T item;
 		item.setParent(this);
+		item.setName(name);
 
 		iterator pos = itemsM.begin();		// find the place
 		for (; pos != itemsM.end(); ++pos)
