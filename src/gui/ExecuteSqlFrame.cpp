@@ -818,7 +818,7 @@ void ExecuteSqlFrame::OnButtonSaveClick(wxCommandEvent& WXUNUSED(event))
 {
 	wxFileDialog fd(this, _("Select file to save"), wxT(""), wxT(""),
 		_("SQL Scripts (*.sql)|*.sql|All files (*.*)|*.*"),
-		wxSAVE |wxCHANGE_DIR);
+		wxSAVE |wxCHANGE_DIR | wxOVERWRITE_PROMPT);
 
 	if (wxID_OK != fd.ShowModal())
 		return;
@@ -1155,12 +1155,12 @@ void ExecuteSqlFrame::commitTransaction()
 
 		executedStatementsM.clear();
 		styled_text_ctrl_stats->ClearAll();
-		
+
         // workaround for STC bug with 100% CPU load during Idle(),
         // it was supposed to be fixed in wxWidgets versions 2.5.4 and later,
 		// but it looks like it is not (at least for gtk1)
         styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
-		
+
 		styled_text_ctrl_sql->SetFocus();
 		if (closeWhenTransactionDoneM)
 		{
