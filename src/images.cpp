@@ -86,6 +86,7 @@ wxBitmap getImage(NodeType type)
 	map[ntDomain] 		= domain_xpm;
 	map[ntParameter] 	= column_xpm;
 	map[ntPrimaryKey]	= key_xpm;
+	map[ntComputed] 	= function_xpm;
 
 	wxBitmap ret = wxBitmap(map[type]);
 

@@ -38,7 +38,7 @@
 YParameter::YParameter(std::string source, int parameterType)
 	: YColumn()
 {
-	YColumn::Init(true, source, "");
+	YColumn::Init(true, source, false, "");
 	typeM = ntParameter;
 	parameterTypeM = (parameterType == 0 ? ptInput : ptOutput);
 }

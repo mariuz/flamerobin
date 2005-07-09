@@ -111,6 +111,8 @@ void YTreeItem::update()
 					YColumn *c = (YColumn *)(*i);
 					if (c->isPrimaryKey())
 						image = treeM->getItemImage(ntPrimaryKey);
+					else if (c->isComputed())
+						image = treeM->getItemImage(ntComputed);
 				}
 
 				if (previous.IsOk())

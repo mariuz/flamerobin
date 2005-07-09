@@ -61,6 +61,8 @@ std::string YTable::getInsertStatement()
 	std::string collist, valist;
 	for (YMetadataCollection<YColumn>::const_iterator i = columnsM.begin(); i != columnsM.end(); ++i)
 	{
+		if ((*i).isComputed())
+			continue;
 		if (!collist.empty())
 		{
 			valist += ", \n";

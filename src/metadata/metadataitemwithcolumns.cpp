@@ -71,7 +71,7 @@ bool YxMetadataItemWithColumns::loadColumns()
 		tr1->Start();
 		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
 		st1->Prepare(
-			"select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source, l.rdb$collation_name"
+			"select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source, l.rdb$collation_name, f.rdb$computed_blr "
 			" from rdb$fields f"
 			" join rdb$relation_fields r on f.rdb$field_name=r.rdb$field_source"
 			" left outer join rdb$collations l on l.rdb$collation_id = r.rdb$collation_id and l.rdb$character_set_id = f.rdb$character_set_id"
@@ -91,7 +91,7 @@ bool YxMetadataItemWithColumns::loadColumns()
 			YColumn *cc = columnsM.add();
 			cc->setName(name);
 			cc->setParent(this);
-			cc->Init(!st1->IsNull(2), source, collation);
+			cc->Init(!st1->IsNull(2), source, !st1->IsNull(5), collation);
 		}
 
 		tr1->Commit();

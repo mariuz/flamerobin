@@ -36,19 +36,20 @@ class YColumn: public YxMetadataItem
 {
 public:
 	YColumn();
-	void Init(bool notnull, std::string source, std::string collation = "");
+	void Init(bool notnull, std::string source, bool computed, std::string collation);
 	virtual std::string getPrintableName();
 	std::string getDatatype();
     virtual std::string getDropSqlStatement() const;
 
 	bool isNullable() const;
 	bool isPrimaryKey() const;
+	bool isComputed() const;
 	std::string getSource() const;
 	std::string getCollation() const;
 	YDomain *getDomain() const;
 
 protected:
-	bool notnullM;
+	bool notnullM, computedM;
 	std::string sourceM, collationM;
 };
 //------------------------------------------------------------------------------

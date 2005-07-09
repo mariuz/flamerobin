@@ -42,8 +42,10 @@ class Dependency;
 typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
 	ntTable, ntView, ntProcedure, ntTrigger, ntGenerator, ntFunction,	ntSysTable,			// each item
 	ntTables, ntViews, ntProcedures, ntTriggers, ntGenerators,	ntFunctions, ntSysTables,	// ^^^ parent of those
-	ntColumn, ntDomains, ntRole, ntRoles, ntDomain, ntParameter, ntPrimaryKey,              // pk is used for images
-    ntException, ntExceptions, ntLastType
+	ntColumn, ntDomains, ntRole, ntRoles, ntDomain, ntParameter,
+    ntException, ntExceptions,
+	ntPrimaryKey, ntComputed,		// these are used only for images
+	ntLastType
 } NodeType;
 //------------------------------------------------------------------------------
 NodeType getTypeByName(std::string name);

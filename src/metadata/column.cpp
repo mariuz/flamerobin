@@ -47,18 +47,24 @@ YColumn::YColumn()
 }
 //------------------------------------------------------------------------------
 //! initialize properties
-void YColumn::Init(bool notnull, std::string source, std::string collation)
+void YColumn::Init(bool notnull, std::string source, bool computed, std::string collation)
 {
 	source.erase(source.find_last_not_of(" ")+1);		// right trim everything
 	collation.erase(collation.find_last_not_of(" ")+1);
 	notnullM = notnull;
 	sourceM = source;
+	computedM = computed;
 	collationM = collation;
 }
 //------------------------------------------------------------------------------
 bool YColumn::isNullable() const
 {
 	return !notnullM;
+}
+//------------------------------------------------------------------------------
+bool YColumn::isComputed() const
+{
+	return computedM;
 }
 //------------------------------------------------------------------------------
 bool YColumn::isPrimaryKey() const
