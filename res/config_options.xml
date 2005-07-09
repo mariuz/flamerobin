@@ -64,20 +64,6 @@
 			<default>0</default>
 			<related /><!-- this moves the checkbox closer to the previous one -->
 		</setting>
-		<setting type="radiobox">
-			<caption>When a column has a user-defined domain</caption>
-			<key>ShowDomains</key>
-			<default>2</default>
-			<option>
-				<caption>Only show datatype</caption>
-			</option>
-			<option>
-				<caption>Only show domain</caption>
-			</option>
-			<option>
-				<caption>Show both domain and datatype</caption>
-			</option>
-		</setting>
 		<setting type="checkbox">
 			<caption>Show columns and parameters in tree</caption>
 			<description>If checked the table and view columns and stored procedure parameters will be shown in the tree</description>
@@ -232,6 +218,38 @@
 					<default>10</default>
 				</setting>
 			</enables>
+		</setting>
+	</node>
+	<node>
+		<caption>Fields</caption>
+		<image>5</image>
+		<setting type="radiobox">
+			<caption>When a column has a user-defined domain</caption>
+			<key>ShowDomains</key>
+			<default>2</default>
+			<option>
+				<caption>Only show datatype</caption>
+			</option>
+			<option>
+				<caption>Only show domain</caption>
+			</option>
+			<option>
+				<caption>Show both domain and datatype</caption>
+			</option>
+		</setting>
+		<setting type="radiobox">
+			<caption>When a table column is computed</caption>
+			<key>ShowComputed</key>
+			<default>1</default>
+			<option>
+				<caption>Only show datatype</caption>
+			</option>
+			<option>
+				<caption>Only show computation formula</caption>
+			</option>
+			<option>
+				<caption>Show both datatype and formula</caption>
+			</option>
 		</setting>
 	</node>
 	<node>

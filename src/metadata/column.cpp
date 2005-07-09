@@ -85,7 +85,10 @@ bool YColumn::isPrimaryKey() const
 //! retrieve datatype from domain if possible
 std::string YColumn::getDatatype()
 {
-	if (computedM)
+	enum { showType=0, showFormula, showAll };
+	int flag = showFormula;
+	config().getValue("ShowComputed", flag);
+	if (computedM && flag == showFormula)
 		return computedSourceM;
 
 	std::string ret;
@@ -109,6 +112,9 @@ std::string YColumn::getDatatype()
 			ret += " ";
 		ret += "(" + d->getName() + ")";
 	}
+
+	if (computedM && flag == showAll)
+		ret += " (" + computedSourceM + ")";
 	return ret;
 }
 //------------------------------------------------------------------------------

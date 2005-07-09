@@ -66,7 +66,7 @@ static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
 {
     for (wxXmlNode* n = node->GetChildren(); (n); n = n->GetNext())
     {
-        if (n->GetType() == wxXML_TEXT_NODE 
+        if (n->GetType() == wxXML_TEXT_NODE
             || n->GetType() == wxXML_CDATA_SECTION_NODE)
         {
             return n->GetContent();
@@ -115,12 +115,12 @@ static void processPlatformProperty(wxXmlNode *node)
 // Optionbook class
 class Optionbook: public wxBookCtrlBase {
 public:
-    Optionbook() 
-    { 
-        Init(); 
+    Optionbook()
+    {
+        Init();
     }
     Optionbook(wxWindow *parent, wxWindowID id,
-        const wxPoint& pos = wxDefaultPosition, 
+        const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = 0, const wxString& name = wxEmptyString)
     {
@@ -159,12 +159,12 @@ private:
     DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
-bool Optionbook::Create(wxWindow *parent, wxWindowID id, const wxPoint& pos, 
+bool Optionbook::Create(wxWindow *parent, wxWindowID id, const wxPoint& pos,
     const wxSize& size, long style, const wxString& name)
 {
     style &= ~wxBORDER_MASK;
     style |= wxBORDER_NONE;
-    return wxControl::Create(parent, id, pos, size, style, 
+    return wxControl::Create(parent, id, pos, size, style,
         wxDefaultValidator, name);
 }
 //-----------------------------------------------------------------------------
@@ -198,7 +198,7 @@ wxString Optionbook::GetPageText(size_t n) const
     if (n < GetPageCount())
         return pageTextsM[n];
     else
-        return wxEmptyString;    
+        return wxEmptyString;
 }
 //-----------------------------------------------------------------------------
 void Optionbook::Init()
@@ -206,7 +206,7 @@ void Optionbook::Init()
     m_selection = wxNOT_FOUND;
 }
 //-----------------------------------------------------------------------------
-bool Optionbook::InsertPage(size_t n, wxWindow *page, const wxString& text, 
+bool Optionbook::InsertPage(size_t n, wxWindow *page, const wxString& text,
     bool bSelect, int imageId)
 {
     if (!wxBookCtrlBase::InsertPage(n, page, text, bSelect, imageId))
@@ -294,7 +294,7 @@ void Optionbook::OnSize(wxSizeEvent& event)
 }
 //-----------------------------------------------------------------------------
 // PreferencesDialog class
-PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title, 
+PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
         YConfig& config, const wxString& descriptionFileName)
     : BaseDialog(parent, -1, title), configM(config)
 {
@@ -302,10 +302,10 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
     // some parents (ex. main frame) could even be smaller
     configM.setValue(getName() + "::centerOnParent", false);
 
-    treectrl_1 = new wxTreeCtrl(getControlsPanel(), ID_treectrl_panes, 
-        wxDefaultPosition, wxDefaultSize, 
+    treectrl_1 = new wxTreeCtrl(getControlsPanel(), ID_treectrl_panes,
+        wxDefaultPosition, wxDefaultSize,
         wxSUNKEN_BORDER|wxTR_DEFAULT_STYLE|wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT);
-    panel_categ = new wxPanel(getControlsPanel(), wxID_ANY, wxDefaultPosition, 
+    panel_categ = new wxPanel(getControlsPanel(), wxID_ANY, wxDefaultPosition,
         wxDefaultSize, wxSUNKEN_BORDER);
     static_text_categ = new wxStaticText(panel_categ, wxID_ANY, wxEmptyString);
     bookctrl_1 = new Optionbook(getControlsPanel(), ID_bookctrl_panes,
@@ -314,7 +314,7 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
     button_save = new wxButton(getControlsPanel(), ID_button_save, _("Save"));
     button_cancel = new wxButton(getControlsPanel(), ID_button_cancel, _("Cancel"));
 
-    // order of these is important: first create all controls, then set 
+    // order of these is important: first create all controls, then set
     // their properties (may affect min size), then create sizer layout
     loadDescriptionFile(descriptionFileName);
     setProperties();
@@ -353,7 +353,7 @@ bool PreferencesDialog::createControlsAndAddToSizer(wxPanel* page, wxSizer* size
     for (it = pageSettings.begin(); pageSettings.end() != it; ++it)
     {
         int group = (*it)->getControlAlignmentGroup();
-        if (group > 0 
+        if (group > 0
             && std::find(groups.begin(), groups.end(), group) == groups.end())
         {
             groups.push_back(group);
@@ -405,7 +405,7 @@ void PreferencesDialog::layout()
     sizerCateg->Add(static_text_categ, 1, wxEXPAND|wxALL|wxFIXED_MINSIZE, 5);
     panel_categ->SetAutoLayout(true);
     panel_categ->SetSizerAndFit(sizerCateg);
-    
+
     wxBoxSizer* sizerRight = new wxBoxSizer(wxVERTICAL);
     sizerRight->Add(panel_categ, 0, wxEXPAND);
     sizerRight->Add(0, styleguide().getUnrelatedControlMargin(wxVERTICAL));
@@ -415,7 +415,7 @@ void PreferencesDialog::layout()
     sizerControls->Add(treectrl_1, 2, wxEXPAND);
     sizerControls->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 0);
     sizerControls->Add(sizerRight, 5, wxEXPAND);
-    
+
     // create sizer for buttons -> styleguide class will align it correctly
     wxSizer* sizerButtons = styleguide().createButtonSizer(button_save, button_cancel);
     // use method in base class to set everything up
@@ -452,7 +452,7 @@ void PreferencesDialog::loadDescriptionFile(const wxString& filename)
     for (wxXmlNode* xmln = doc.GetRoot()->GetChildren();
         (xmln); xmln = xmln->GetNext())
     {
-        if (xmln->GetType() == wxXML_ELEMENT_NODE 
+        if (xmln->GetType() == wxXML_ELEMENT_NODE
             && xmln->GetName() == wxT("node"))
         {
             if (!parseDescriptionNode(root, xmln))
@@ -524,14 +524,14 @@ bool PreferencesDialog::parseDescriptionNode(wxTreeItemId parent, wxXmlNode* xml
     bool controlsok = createControlsAndAddToSizer(page, sizerPage);
     page->SetSizerAndFit(sizerPage);
 
-    // add this page to the bookctrl, and use the tree item index 
+    // add this page to the bookctrl, and use the tree item index
     // in treeItemsM to select the page (see OnTreeSelChanged() )
     bookctrl_1->AddPage(page, description);
     treeItemsM.Add(item);
     return controlsok;
 }
 //-----------------------------------------------------------------------------
-bool PreferencesDialog::parseDescriptionSetting(wxPanel* page, wxXmlNode* xmln, 
+bool PreferencesDialog::parseDescriptionSetting(wxPanel* page, wxXmlNode* xmln,
     PrefDlgSetting* enabledby)
 {
     wxString type(xmln->GetPropVal(wxT("type"), wxEmptyString));
@@ -541,7 +541,7 @@ bool PreferencesDialog::parseDescriptionSetting(wxPanel* page, wxXmlNode* xmln,
     {
         if (!debugDescriptionM)
             return true;
-        wxLogError(_("Unknown config setting \"%s\" in description"), 
+        wxLogError(_("Unknown config setting \"%s\" in description"),
             type.c_str());
         return false;
     }
@@ -553,10 +553,10 @@ bool PreferencesDialog::parseDescriptionSetting(wxPanel* page, wxXmlNode* xmln,
             continue;
         if (xmln->GetName() == wxT("enables"))
         {
-            for (wxXmlNode* xmlc = xmln->GetChildren(); 
+            for (wxXmlNode* xmlc = xmln->GetChildren();
                 (xmlc); xmlc = xmlc->GetNext())
             {
-                if (xmlc->GetType() == wxXML_ELEMENT_NODE 
+                if (xmlc->GetType() == wxXML_ELEMENT_NODE
                     && xmlc->GetName() == wxT("setting"))
                 {
                     if (!parseDescriptionSetting(page, xmlc, setting))
@@ -602,6 +602,7 @@ void PreferencesDialog::setProperties()
     imageListM.Add(getImage(ntTrigger));
     imageListM.Add(getImage(ntUnknown));
     imageListM.Add(getImage(ntTable));
+    imageListM.Add(getImage(ntDomain));
     treectrl_1->SetImageList(&imageListM);
 
     // show category description in colors for highlighted text
@@ -618,7 +619,7 @@ void PreferencesDialog::setProperties()
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(PreferencesDialog, wxDialog)
     EVT_BUTTON(PreferencesDialog::ID_button_save, PreferencesDialog::OnSaveButtonClick)
-    EVT_TREE_SEL_CHANGED(PreferencesDialog::ID_treectrl_panes, 
+    EVT_TREE_SEL_CHANGED(PreferencesDialog::ID_treectrl_panes,
         PreferencesDialog::OnTreeSelChanged)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
