@@ -104,6 +104,16 @@ public:
 		return itemsM.end();
 	};
 
+	inline iterator begin()
+	{
+		return itemsM.begin();
+	};
+
+	inline iterator end()
+	{
+		return itemsM.end();
+	};
+
 	inline bool empty() const
 	{
 		return itemsM.empty();

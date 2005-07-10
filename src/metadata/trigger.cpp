@@ -56,6 +56,15 @@ bool YTrigger::getTriggerInfo(std::string& object, bool& active, int& position, 
 	return true;
 }
 //------------------------------------------------------------------------------
+bool YTrigger::getRelation(std::string& relation)
+{
+	if (!infoIsLoadedM)
+		if (!loadInfo())
+			return false;
+	relation = objectM;
+	return true;
+}
+//------------------------------------------------------------------------------
 bool YTrigger::loadInfo(bool force)
 {
 	infoIsLoadedM = false;
@@ -80,24 +89,32 @@ bool YTrigger::loadInfo(bool force)
 
 		st1->Set(1, getName());
 		st1->Execute();
-		st1->Fetch();
-		st1->Get(1, objectM);
-		st1->Get(2, &positionM);
+		if (st1->Fetch())
+		{
+			st1->Get(1, objectM);
+			objectM.erase(objectM.find_last_not_of(" ")+1);
+			st1->Get(2, &positionM);
 
-		short temp;
-		if (st1->IsNull(3))
-			temp = 0;
-		else
-			st1->Get(3, &temp);
-		activeM = (temp == 0);
+			short temp;
+			if (st1->IsNull(3))
+				temp = 0;
+			else
+				st1->Get(3, &temp);
+			activeM = (temp == 0);
 
-		int ttype;
-		st1->Get(4, &ttype);
-		triggerTypeM = getTriggerType(ttype);
-		tr1->Commit();
-		infoIsLoadedM = true;
-		if (force)
-			notify();
+			int ttype;
+			st1->Get(4, &ttype);
+			triggerTypeM = getTriggerType(ttype);
+			tr1->Commit();
+			infoIsLoadedM = true;
+			if (force)
+				notify();
+		}
+		else	// maybe trigger was dropped?
+		{
+			//wxMessageBox("Trigger does not exist in database");
+			return false;
+		}
 		return true;
 	}
 	catch (IBPP::Exception &e)

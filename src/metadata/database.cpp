@@ -462,6 +462,23 @@ bool YDatabase::parseCommitedSql(std::string sql)
 		if (action == "DROP")
 		{
 			dropObject(object);
+			if (t == ntTable || t == ntView)	// remove related triggers
+			{
+				while (true)
+				{
+					YTrigger *todrop = 0;
+					for (YMetadataCollection<YTrigger>::iterator it = triggersM.begin(); it != triggersM.end(); ++it)
+					{
+						std::string relname;			// trigger already gone => cannot fetch relation name
+						if (!(*it).getRelation(relname)	|| relname == name)
+							todrop = &(*it);
+					}
+					if (todrop)
+						dropObject(todrop);
+					else
+						break;
+				}
+			}
 		}
 		else						// ALTER
 		{

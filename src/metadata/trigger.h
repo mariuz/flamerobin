@@ -47,6 +47,7 @@ public:
 	bool loadInfo(bool force = false);
 	bool getTriggerInfo(std::string& object, bool& active, int& position, std::string& type);
 	bool getSource(std::string& source) const;
+	bool getRelation(std::string& relation);
 	static std::string getTriggerType(int flags);
 	firingTimeType getFiringTime();
 	std::string getAlterSql();
