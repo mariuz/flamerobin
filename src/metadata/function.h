@@ -34,13 +34,16 @@
 class YFunction: public YxMetadataItem
 {
 private:
+	std::string libraryNameM, entryPointM, definitionM;
+	bool infoLoadedM;
+	void loadInfo(bool force = false);
 
 public:
 	virtual const std::string getTypeName() const;
     virtual std::string getCreateSqlTemplate() const;
     virtual std::string getDropSqlStatement() const;
 	std::string getDefinition();
-
+	std::string getHtmlHeader();
 	YFunction();
 };
 //------------------------------------------------------------------------------

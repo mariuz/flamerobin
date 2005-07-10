@@ -37,6 +37,7 @@
 YFunction::YFunction()
 {
 	typeM = ntFunction;
+	infoLoadedM = false;
 }
 //------------------------------------------------------------------------------
 std::string YFunction::getCreateSqlTemplate() const
@@ -59,12 +60,24 @@ std::string YFunction::getDropSqlStatement() const
 //------------------------------------------------------------------------------
 std::string YFunction::getDefinition()
 {
+	loadInfo();
+	return definitionM;
+}
+//------------------------------------------------------------------------------
+void YFunction::loadInfo(bool force)
+{
+	if (infoLoadedM && !force)
+		return;
+
 	YDatabase *d = getDatabase();
 	if (!d)
-		return "Error";
+	{
+		definitionM = "Error";
+		return;
+	}
 
 	IBPP::Database& db = d->getDatabase();
-	std::string retval = nameM + "(\n";
+	definitionM = nameM + "(\n";
 	try
 	{
 		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
@@ -72,7 +85,8 @@ std::string YFunction::getDefinition()
 		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
 		st1->Prepare(
 			"SELECT f.RDB$RETURN_ARGUMENT, a.RDB$MECHANISM, a.RDB$ARGUMENT_POSITION, "
-			" a.RDB$FIELD_TYPE, a.RDB$FIELD_SCALE, a.RDB$FIELD_LENGTH, a.RDB$FIELD_SUB_TYPE, a.RDB$FIELD_PRECISION"
+			" a.RDB$FIELD_TYPE, a.RDB$FIELD_SCALE, a.RDB$FIELD_LENGTH, a.RDB$FIELD_SUB_TYPE, a.RDB$FIELD_PRECISION,"
+			" f.RDB$MODULE_NAME, f.RDB$ENTRYPOINT "
 			" FROM RDB$FUNCTIONS f"
 			" LEFT OUTER JOIN RDB$FUNCTION_ARGUMENTS a ON f.RDB$FUNCTION_NAME = a.RDB$FUNCTION_NAME"
 			" WHERE f.RDB$FUNCTION_NAME = ?"
@@ -81,6 +95,7 @@ std::string YFunction::getDefinition()
 		st1->Set(1, nameM);
 		st1->Execute();
 		std::string retstr;
+		bool first = true;
 		while (st1->Fetch())
 		{
 			short returnarg, mechanism, type, scale, length, subtype, precision, retpos;
@@ -92,23 +107,38 @@ std::string YFunction::getDefinition()
 			st1->Get(6, length);
 			st1->Get(7, subtype);
 			st1->Get(8, precision);
+			st1->Get(9, libraryNameM);
+			st1->Get(10, entryPointM);
 			std::string param = "    " + YDomain::datatype2string(type, scale, precision, subtype, length)
 				+ " by " + (mechanism ? "value":"reference");
 			if (returnarg == retpos)	// output
 				retstr = param;
 			else
-				retval += param + ",\n";
+			{
+				if (first)
+					first = false;
+				else
+					definitionM += ",\n";
+				definitionM += param;
+			}
 		}
-		retval += ")\nreturns:\n" + retstr;
+		definitionM += "\n)\nreturns:\n" + retstr;
+		infoLoadedM = true;
+		tr1->Commit();
 	}
 	catch (IBPP::Exception &e)
 	{
-		return e.ErrorMessage();
+		definitionM = e.ErrorMessage();
 	}
 	catch (...)
 	{
-		return "System error.";
+		definitionM = "System error.";
 	}
-	return retval;
+}
+//------------------------------------------------------------------------------
+std::string YFunction::getHtmlHeader()
+{
+	loadInfo();
+	return "<B>Library name:</B> " + libraryNameM + "<BR><B>Entry point:</B>  " + entryPointM + "<BR><BR>";
 }
 //------------------------------------------------------------------------------

@@ -469,6 +469,15 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 		htmlpage += escapeHtmlChars(e->getMessage(), false);
 	}
 
+	else if (cmd == "udf_info")
+	{
+		YFunction *f = dynamic_cast<YFunction *>(object);
+		if (!f)
+			return;
+		std::string src = f->getDefinition();
+		htmlpage += f->getHtmlHeader() + escapeHtmlChars(src, false);
+	}
+
     else if (cmd == "varcolor")
 	{
 		static bool first = false;

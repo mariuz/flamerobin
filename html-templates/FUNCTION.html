@@ -1,9 +1,21 @@
 <html>
 <head>
-  <title>Function properties</title>
+  <title>User defined function properties</title>
 </head>
 <body>
-  <font size=+2>{%object_name%}</font>
-  <br>Property page not yet available.
+<a
+ href="fr://page?type=dependencies&amp;parent_window={%parent_window%}">Dependencies</a> | <a
+ href="fr://extract_ddl?object_type=FUNCTION&amp;object_name={%object_name%}">Metadata
+(DDL)</a><br><br><font size=+2>{%object_name%}</font><br>
+{%object_description%} [<a
+ href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=FUNCTION&amp;object_name={%object_name%}">edit</a>]
+<br><br>
+<table cellspacing=1 cellpadding=3 border=0 width="98%">
+<tr><td bgcolor="navy"><font color=white><b>UDF info</b></font></td>
+</tr>
+<tr><td bgcolor="#DDDDFF"><font size=-1>
+<pre>{%udf_info%}
+</pre></font></td></tr>
+</table>
 </body>
 </html>
