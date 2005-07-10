@@ -18,7 +18,7 @@
 
   All Rights Reserved.
 
-  Contributor(s):
+  Contributor(s): Milan Babuskov.
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -29,7 +29,15 @@
 #endif
 
 #include <string>
+#include "ibpp.h"
 #include "function.h"
+#include "database.h"
+#include "domain.h"
+//------------------------------------------------------------------------------
+YFunction::YFunction()
+{
+	typeM = ntFunction;
+}
 //------------------------------------------------------------------------------
 std::string YFunction::getCreateSqlTemplate() const
 {
@@ -47,5 +55,60 @@ const std::string YFunction::getTypeName() const
 std::string YFunction::getDropSqlStatement() const
 {
     return "DROP EXTERNAL FUNCTION " + getName() + ";";
+}
+//------------------------------------------------------------------------------
+std::string YFunction::getDefinition()
+{
+	YDatabase *d = getDatabase();
+	if (!d)
+		return "Error";
+
+	IBPP::Database& db = d->getDatabase();
+	std::string retval = nameM + "(\n";
+	try
+	{
+		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+		tr1->Start();
+		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+		st1->Prepare(
+			"SELECT f.RDB$RETURN_ARGUMENT, a.RDB$MECHANISM, a.RDB$ARGUMENT_POSITION, "
+			" a.RDB$FIELD_TYPE, a.RDB$FIELD_SCALE, a.RDB$FIELD_LENGTH, a.RDB$FIELD_SUB_TYPE, a.RDB$FIELD_PRECISION"
+			" FROM RDB$FUNCTIONS f"
+			" LEFT OUTER JOIN RDB$FUNCTION_ARGUMENTS a ON f.RDB$FUNCTION_NAME = a.RDB$FUNCTION_NAME"
+			" WHERE f.RDB$FUNCTION_NAME = ?"
+			" ORDER BY a.RDB$ARGUMENT_POSITION"
+		);
+		st1->Set(1, nameM);
+		st1->Execute();
+		std::string retstr;
+		while (st1->Fetch())
+		{
+			short returnarg, mechanism, type, scale, length, subtype, precision, retpos;
+			st1->Get(1, returnarg);
+			st1->Get(2, mechanism);
+			st1->Get(3, retpos);
+			st1->Get(4, type);
+			st1->Get(5, scale);
+			st1->Get(6, length);
+			st1->Get(7, subtype);
+			st1->Get(8, precision);
+			std::string param = "    " + YDomain::datatype2string(type, scale, precision, subtype, length)
+				+ " by " + (mechanism ? "value":"reference");
+			if (returnarg == retpos)	// output
+				retstr = param;
+			else
+				retval += param + ",\n";
+		}
+		retval += ")\nreturns:\n" + retstr;
+	}
+	catch (IBPP::Exception &e)
+	{
+		return e.ErrorMessage();
+	}
+	catch (...)
+	{
+		return "System error.";
+	}
+	return retval;
 }
 //------------------------------------------------------------------------------

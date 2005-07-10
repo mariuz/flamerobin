@@ -33,10 +33,15 @@
 
 class YFunction: public YxMetadataItem
 {
+private:
+
 public:
 	virtual const std::string getTypeName() const;
     virtual std::string getCreateSqlTemplate() const;
     virtual std::string getDropSqlStatement() const;
+	std::string getDefinition();
+
+	YFunction();
 };
 //------------------------------------------------------------------------------
 #endif

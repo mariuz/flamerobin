@@ -119,35 +119,40 @@ std::string YDomain::getDatatypeAsString()
 	if (!infoLoadedM)
 		loadInfo();
 
+	return datatype2string(datatypeM, scaleM, precisionM, subtypeM, lengthM);
+}
+//------------------------------------------------------------------------------
+std::string YDomain::datatype2string(short datatype, short scale, short precision, short subtype, short length)
+{
 	std::ostringstream retval;		// this will be returned
 
 	// special case (mess that some tools (ex. IBExpert) make by only setting scale and not changing type)
-	if (datatypeM == 27 && scaleM < 0)
+	if (datatype == 27 && scale < 0)
 	{
-		retval << "Numeric(15," << -scaleM << ")";
+		retval << "Numeric(15," << -scale << ")";
 		return retval.str();
 	}
 
-	// LONG&INT64: INT/SMALLINT (prec=0), DECIMAL(sub_type=2), NUMERIC(sub_type=1)
-	if (datatypeM == 7 || datatypeM == 8 || datatypeM == 16)
+	// LONG&INT64: INT/SALLINT (prec=0), DECIAL(sub_type=2), NUERIC(sub_type=1)
+	if (datatype == 7 || datatype == 8 || datatype == 16)
 	{
-		if (scaleM == 0)
+		if (scale == 0)
 		{
-			if (datatypeM == 7)
+			if (datatype == 7)
 				return "Smallint";
-			else if (datatypeM == 8)
+			else if (datatype == 8)
 				return "Integer";
 			else
 				return "Numeric(18,0)";
 		}
 		else
 		{
-			retval << (subtypeM == 2 ? "Decimal(" : "Numeric(");
-			if (precisionM <= 0 || precisionM > 18)
+			retval << (subtype == 2 ? "Decimal(" : "Numeric(");
+			if (precision <= 0 || precision > 18)
 				retval << 18;
 			else
-				retval << precisionM;
-			retval << "," << -scaleM << ")";
+				retval << precision;
+			retval << "," << -scale << ")";
 			return retval.str();
 		}
 	}
@@ -160,24 +165,25 @@ std::string YDomain::getDatatypeAsString()
 		"Varchar",
 		"Blob",
 		"Date",
-		"Time"
+		"Time",
+		"CSTRING"
 	};
-	short mapper[8] = { 14, 10, 27, 35, 37, 261, 12, 13 };
+	short mapper[9] = { 14, 10, 27, 35, 37, 261, 12, 13, 40 };
 
-	for (int i=0; i<8; ++i)
+	for (int i=0; i<9; ++i)
 	{
-		if (mapper[i] == datatypeM)
+		if (mapper[i] == datatype)
 		{
 			retval << names[i];
 			break;
 		}
 	}
 
-	if (datatypeM == 14 || datatypeM == 37)	// char & varchar, add (length)
-		retval << "(" << lengthM << ")";
+	if (datatype == 14 || datatype == 37 || datatype == 40)	// char, varchar & cstring, add (length)
+		retval << "(" << length << ")";
 
-	if (datatypeM == 261)	// blob
-		retval << " sub_type " << subtypeM;
+	if (datatype == 261)	// blob
+		retval << " sub_type " << subtype;
 
 	return retval.str();
 }

@@ -42,6 +42,7 @@ private:
 public:
 	YDomain();
 
+	static std::string datatype2string(short datatype, short scale, short precision, short subtype, short length);
 	bool loadInfo();
 	std::string getDatatypeAsString();
 	void getDatatypeParts(std::string& type, std::string& size, std::string& scale);

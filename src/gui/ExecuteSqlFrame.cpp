@@ -671,10 +671,9 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
 					YProcedure *p = dynamic_cast<YProcedure *>(databaseM->findByNameAndType(ntProcedure, wx2std(word)));
 					if (p)
 						calltip = p->getDefinition();
-					// TODO: check for UDF
-					// YFunction *f = db->getFunction(word);
-					// if (f)
-					//     calltip = f->getDefinition();
+					YFunction *f = dynamic_cast<YFunction *>(databaseM->findByNameAndType(ntFunction, wx2std(word)));
+					if (f)
+					    calltip = f->getDefinition();
 					if (!calltip.empty())
 					{
 						styled_text_ctrl_sql->CallTipShow(start, std2wx(calltip));
