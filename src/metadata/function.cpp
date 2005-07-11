@@ -110,7 +110,9 @@ void YFunction::loadInfo(bool force)
 			st1->Get(9, libraryNameM);
 			st1->Get(10, entryPointM);
 			std::string param = "    " + YDomain::datatype2string(type, scale, precision, subtype, length)
-				+ " by " + (mechanism ? "value":"reference");
+				+ " by " + (mechanism == 0 ? "value":"reference");
+			if (mechanism == -1)
+				param += " [FREE_IT]";
 			if (returnarg == retpos)	// output
 				retstr = param;
 			else
