@@ -78,6 +78,7 @@ private:
 public:
 	YDatabase();
 	virtual bool getChildren(std::vector<YxMetadataItem *>& temp);
+	void getCollections(std::vector<YxMetadataItem *>& temp);
 
 	YMetadataCollection<YGenerator>::const_iterator generatorsBegin();
 	YMetadataCollection<YGenerator>::const_iterator generatorsEnd();

@@ -65,6 +65,11 @@ YDatabase::YDatabase()
 
 	viewsM.setName("Views");
 	viewsM.setType(ntViews);
+
+	std::vector<YxMetadataItem *> temp;
+	getCollections(temp);
+	for (std::vector<YxMetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
+		(*it)->setParent(this);
 }
 //------------------------------------------------------------------------------
 void YDatabase::getIdentifiers(std::vector<std::string>& temp)
@@ -683,12 +688,18 @@ bool YDatabase::isConnected() const
 	return connectedM;
 }
 //------------------------------------------------------------------------------
-// retuns vector of all subitems
 bool YDatabase::getChildren(std::vector<YxMetadataItem *>& temp)
 {
 	if (!connectedM)
 		return false;
 
+	getCollections(temp);
+	return true;
+}
+//------------------------------------------------------------------------------
+// returns vector of all subitems
+void YDatabase::getCollections(std::vector<YxMetadataItem *>& temp)
+{
 	temp.push_back(&domainsM);
     temp.push_back(&exceptionsM);
 	temp.push_back(&functionsM);
@@ -698,7 +709,6 @@ bool YDatabase::getChildren(std::vector<YxMetadataItem *>& temp)
 	temp.push_back(&tablesM);
 	temp.push_back(&triggersM);
 	temp.push_back(&viewsM);
-	return true;
 }
 //------------------------------------------------------------------------------
 YMetadataCollection<YGenerator>::const_iterator YDatabase::generatorsBegin()
