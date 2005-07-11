@@ -66,10 +66,13 @@ YDatabase::YDatabase()
 	viewsM.setName("Views");
 	viewsM.setType(ntViews);
 
+	/* this does not seem to work right, so I'll comment it out until I got more time to
+	   find out why
 	std::vector<YxMetadataItem *> temp;
 	getCollections(temp);
 	for (std::vector<YxMetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
 		(*it)->setParent(this);
+	*/
 }
 //------------------------------------------------------------------------------
 void YDatabase::getIdentifiers(std::vector<std::string>& temp)
