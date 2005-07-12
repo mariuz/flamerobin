@@ -51,6 +51,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_PreferencesDialog.o \
 	flamerobin_PreferencesDialogSettings.o \
 	flamerobin_ReorderFieldsDialog.o \
+	flamerobin_TriggerWizardDialog.o \
 	flamerobin_RestoreFrame.o \
 	flamerobin_ServerRegistrationDialog.o \
 	flamerobin_FindDialog.o \
@@ -270,6 +271,9 @@ flamerobin_PreferencesDialogSettings.o: $(srcdir)/src/gui/PreferencesDialogSetti
 
 flamerobin_ReorderFieldsDialog.o: $(srcdir)/src/gui/ReorderFieldsDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/ReorderFieldsDialog.cpp
+
+flamerobin_TriggerWizardDialog.o: $(srcdir)/src/gui/TriggerWizardDialog.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/TriggerWizardDialog.cpp
 
 flamerobin_RestoreFrame.o: $(srcdir)/src/gui/RestoreFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/RestoreFrame.cpp
