@@ -246,6 +246,7 @@
         $(SOURCEDIR)/gui/MultilineEnterDialog.h
         $(SOURCEDIR)/gui/PreferencesDialog.h
         $(SOURCEDIR)/gui/ReorderFieldsDialog.h
+        $(SOURCEDIR)/gui/TriggerWizardDialog.h
         $(SOURCEDIR)/gui/RestoreFrame.h
         $(SOURCEDIR)/gui/ServerRegistrationDialog.h
         $(SOURCEDIR)/gui/FindDialog.h
@@ -316,6 +317,7 @@
         $(SOURCEDIR)/gui/PreferencesDialog.cpp
         $(SOURCEDIR)/gui/PreferencesDialogSettings.cpp
         $(SOURCEDIR)/gui/ReorderFieldsDialog.cpp
+        $(SOURCEDIR)/gui/TriggerWizardDialog.cpp
         $(SOURCEDIR)/gui/RestoreFrame.cpp
         $(SOURCEDIR)/gui/ServerRegistrationDialog.cpp
         $(SOURCEDIR)/gui/FindDialog.cpp

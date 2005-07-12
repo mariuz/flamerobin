@@ -72,6 +72,7 @@ public:
     void OnMenuAddColumn(wxCommandEvent& event);
     void OnMenuObjectProperties(wxCommandEvent& event);
     void OnMenuDropObject(wxCommandEvent& event);
+    void OnMenuCreateTrigger(wxCommandEvent& event);
     void OnMenuDisconnect(wxCommandEvent& event);
     void OnMenuConnect(wxCommandEvent& event);
     void OnMenuReconnect(wxCommandEvent& event);

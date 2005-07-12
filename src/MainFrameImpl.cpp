@@ -47,6 +47,7 @@
 #include "gui/PreferencesDialog.h"
 #include "gui/RestoreFrame.h"
 #include "gui/ServerRegistrationDialog.h"
+#include "gui/TriggerWizardDialog.h"
 #include "FieldPropertiesFrame.h"
 #include "treeitem.h"
 #include "ugly.h"
@@ -96,6 +97,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(myTreeCtrl::Menu_AddColumn, MainFrame::OnMenuAddColumn)
 	EVT_MENU(myTreeCtrl::Menu_ObjectProperties, MainFrame::OnMenuObjectProperties)
 	EVT_MENU(myTreeCtrl::Menu_DropObject, MainFrame::OnMenuDropObject)
+	EVT_MENU(myTreeCtrl::Menu_CreateTrigger, MainFrame::OnMenuCreateTrigger)
 
 	EVT_TREE_ITEM_ACTIVATED(myTreeCtrl::ID_tree_ctrl, MainFrame::OnTreeItemActivate)
 	EVT_CLOSE(MainFrame::OnClose)
@@ -249,6 +251,15 @@ void MainFrame::OnMenuInsert(wxCommandEvent& WXUNUSED(event))
 	eff->setDatabase(d);
 	eff->setSql(sql);
 	eff->Show();
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuCreateTrigger(wxCommandEvent& WXUNUSED(event))
+{
+	YxMetadataItem *i = tree_ctrl_1->getSelectedMetadataItem();
+	if (!i)
+		return;
+	TriggerWizardDialog *t = new TriggerWizardDialog(this, i);
+	t->Show();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuBrowse(wxCommandEvent& WXUNUSED(event))

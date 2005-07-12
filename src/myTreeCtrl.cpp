@@ -219,6 +219,8 @@ void myTreeCtrl::OnContextMenu(wxContextMenuEvent& event)
 			case ntDomain:
             case ntException:
 			case ntFunction:
+				if (i->getType() == ntTable || i->getType() == ntView)
+					MyMenu.Append(Menu_CreateTrigger, _("Create new trigger..."));
 				MyMenu.Append(Menu_DropObject, _("Drop"));
 				MyMenu.Append(Menu_ObjectProperties, _("Properties..."));
 				break;
