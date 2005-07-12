@@ -33,6 +33,7 @@
 #include "database.h"
 #include "table.h"
 #include "collection.h"
+#include "indices.h"
 #include "metadataitemwithcolumns.h"
 //------------------------------------------------------------------------------
 YTable::YTable()
@@ -43,6 +44,7 @@ YTable::YTable()
 	foreignKeysLoadedM = false;
 	checkConstraintsLoadedM = false;
 	uniqueConstraintsLoadedM = false;
+	indicesLoadedM = false;
 }
 //------------------------------------------------------------------------------
 bool YTable::loadColumns()			// update the keys info too
@@ -51,6 +53,7 @@ bool YTable::loadColumns()			// update the keys info too
 	foreignKeysLoadedM = false;
 	checkConstraintsLoadedM = false;
 	uniqueConstraintsLoadedM = false;
+	indicesLoadedM = false;
 	return YxMetadataItemWithColumns::loadColumns();
 }
 //------------------------------------------------------------------------------
@@ -303,6 +306,13 @@ std::vector<ColumnConstraint> *YTable::getUniqueConstraints()
 	return &uniqueConstraintsM;
 }
 //------------------------------------------------------------------------------
+std::vector<Index> *YTable::getIndices()
+{
+	if (!loadIndices())
+		return 0;
+	return &indicesM;
+}
+//------------------------------------------------------------------------------
 //! reads foreign keys info from database
 bool YTable::loadForeignKeys()
 {
@@ -385,6 +395,84 @@ bool YTable::loadForeignKeys()
 		}
 		tr1->Commit();
 		foreignKeysLoadedM = true;
+		return true;
+	}
+	catch (IBPP::Exception &e)
+	{
+		lastError().setMessage(e.ErrorMessage());
+	}
+	catch (...)
+	{
+		lastError().setMessage("System error.");
+	}
+	return false;
+}
+//------------------------------------------------------------------------------
+//! reads indices from database
+bool YTable::loadIndices()
+{
+	if (indicesLoadedM)
+		return true;
+
+	indicesM.clear();
+	YDatabase *d = getDatabase();
+	if (!d)
+	{
+		lastError().setMessage("database not set");
+		return false;
+	}
+
+	IBPP::Database& db = d->getDatabase();
+	try
+	{
+		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+		tr1->Start();
+		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+		st1->Prepare(
+			"SELECT i.rdb$index_name, i.rdb$unique_flag, i.rdb$index_inactive, "
+			" i.rdb$index_type, i.rdb$statistics, s.rdb$field_name"
+			" from rdb$indices i"
+			" join rdb$index_segments s on i.rdb$index_name = s.rdb$index_name"
+			" where i.rdb$relation_name = ?"
+			" order by i.rdb$index_id, s.rdb$field_position "
+		);
+
+		st1->Set(1, getName());
+		st1->Execute();
+		Index *i = 0;
+		while (st1->Fetch())
+		{
+			std::string name, fname;
+			short unq, inactive, type;
+			double statistics;
+			st1->Get(1, name);
+			st1->Get(2, unq);
+			st1->Get(3, inactive);
+			st1->Get(4, type);
+			st1->Get(5, statistics);
+			st1->Get(6, fname);
+			name.erase(name.find_last_not_of(" ") + 1);
+			fname.erase(fname.find_last_not_of(" ") + 1);
+
+			if (i && i->getName() == name)
+				i->getSegments()->push_back(fname);
+			else
+			{
+				Index x(
+					!st1->IsNull(2) && unq == 1,
+					st1->IsNull(3) || inactive == 0,
+					type == 0,
+					statistics
+				);
+				indicesM.push_back(x);
+				i = &indicesM.back();
+				i->setName(name);
+				i->getSegments()->push_back(fname);
+				i->setParent(this);
+			}
+		}
+		tr1->Commit();
+		indicesLoadedM = true;
 		return true;
 	}
 	catch (IBPP::Exception &e)

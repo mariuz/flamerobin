@@ -33,6 +33,7 @@
 #include "column.h"
 #include "constraints.h"
 #include "trigger.h"
+#include "indices.h"
 #include "metadataitemwithcolumns.h"
 //------------------------------------------------------------------------------
 //! small helper class
@@ -63,6 +64,10 @@ private:
 	bool uniqueConstraintsLoadedM;
 	bool loadUniqueConstraints();
 
+	std::vector<Index> indicesM;
+	bool indicesLoadedM;
+	bool loadIndices();
+
 public:
 	static bool tablesRelate(std::vector<std::string>& tables, YTable *table, std::vector<Join>& list);
 
@@ -75,6 +80,7 @@ public:
 	std::vector<ForeignKey> *getForeignKeys();
 	std::vector<CheckConstraint> *getCheckConstraints();
 	std::vector<ColumnConstraint> *getUniqueConstraints();
+	std::vector<Index> *getIndices();
 
 	std::string getInsertStatement();
 	//std::string getUpdateStatement();		// use primary key info

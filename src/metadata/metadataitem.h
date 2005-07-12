@@ -42,7 +42,7 @@ class Dependency;
 typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
 	ntTable, ntView, ntProcedure, ntTrigger, ntGenerator, ntFunction,	ntSysTable,			// each item
 	ntTables, ntViews, ntProcedures, ntTriggers, ntGenerators,	ntFunctions, ntSysTables,	// ^^^ parent of those
-	ntColumn, ntDomains, ntRole, ntRoles, ntDomain, ntParameter,
+	ntColumn, ntDomains, ntRole, ntRoles, ntDomain, ntParameter, ntIndex,
     ntException, ntExceptions,
 	ntPrimaryKey, ntComputed,		// these are used only for images
 	ntLastType

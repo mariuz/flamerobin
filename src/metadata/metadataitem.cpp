@@ -132,6 +132,7 @@ std::string YxMetadataItem::getDescriptionSql() const
 		case ntParameter:	return "select rdb$description from rdb$procedure_parameters where rdb$parameter_name=? and rdb$procedure_name=?";
 		case ntDomain:		return "select rdb$description from rdb$fields where rdb$field_name=?";
         case ntException:   return "select RDB$DESCRIPTION from RDB$EXCEPTIONS where RDB$EXCEPTION_NAME = ?";
+		case ntIndex:		return "select rdb$description from rdb$indices where RDB$INDEX_NAME = ?";
         default:			return "";
 	};
 }
@@ -150,6 +151,7 @@ std::string YxMetadataItem::getChangeDescriptionSql() const
 		case ntParameter:	return "update rdb$procedure_parameters set rdb$description = ? where rdb$parameter_name = ? and rdb$procedure_name=?";
 		case ntDomain:		return "update rdb$fields set rdb$description = ? where rdb$field_name=?";
         case ntException:   return "update RDB$EXCEPTIONS set RDB$DESCRIPTION = ? where RDB$EXCEPTION_NAME = ?";
+        case ntIndex:		return "update rdb$indices set rdb$description = ? where RDB$INDEX_NAME = ?";
 		default:			return "";
 	};
 }
