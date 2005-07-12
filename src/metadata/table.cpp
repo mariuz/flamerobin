@@ -446,8 +446,14 @@ bool YTable::loadIndices()
 			short unq, inactive, type;
 			double statistics;
 			st1->Get(1, name);
-			st1->Get(2, unq);
-			st1->Get(3, inactive);
+			if (st1->IsNull(2))
+				unq = 0;
+			else
+				st1->Get(2, unq);
+			if (st1->IsNull(3))
+				inactive = 0;
+			else
+				st1->Get(3, inactive);
 			st1->Get(4, type);
 			st1->Get(5, statistics);
 			st1->Get(6, fname);
@@ -459,8 +465,8 @@ bool YTable::loadIndices()
 			else
 			{
 				Index x(
-					!st1->IsNull(2) && unq == 1,
-					st1->IsNull(3) || inactive == 0,
+					unq == 1,
+					inactive == 0,
 					type == 0,
 					statistics
 				);

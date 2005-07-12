@@ -39,6 +39,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <iomanip>
 
 #include "config.h"
 #include "dberror.h"
@@ -169,6 +170,9 @@ void MetadataItemPropertiesFrame::loadPage()
 			break;
 		case ptTableTriggers:
 			htmlpage += "TABLEtriggers.html";
+			break;
+		case ptTableIndices:
+			htmlpage += "TABLEindices.html";
 			break;
 		case ptDependencies:
 			htmlpage += "dependencies.html";
@@ -488,6 +492,40 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 		else
 			htmlpage += suffix.substr(pos + 1);
 	}
+
+	else if (cmd == "indices")
+	{
+		YTable *t = dynamic_cast<YTable *>(object);
+		if (!t)
+			return;
+		std::vector<Index> *ix = t->getIndices();
+		if (!ix)
+			return;
+		for (std::vector<Index>::iterator it = ix->begin(); it != ix->end(); ++it)
+			processHtmlCode(htmlpage, suffix, &(*it));
+	}
+
+	else if (cmd.substr(0, 5) == "index")
+	{
+		std::string okimage = "<img src=\"" + getApplicationPath() + "/html-templates/ok.png\">";
+		Index *i = dynamic_cast<Index *>(object);
+		if (!i)
+			return;
+		if (cmd == "index_type")
+			htmlpage += (i->getIndexType() == Index::itAscending ? "ASC" : "DESC");
+		if (cmd == "index_active" && i->isActive())
+			htmlpage += okimage;
+		if (cmd == "index_unique" && i->isUnique())
+			htmlpage += okimage;
+		else if (cmd == "index_stats")
+		{
+			std::ostringstream ss;
+			ss << std::fixed << std::setprecision(6) << i->getStatistics();
+			htmlpage += ss.str();
+		}
+		else if (cmd == "index_fields")
+			htmlpage += i->getFieldsAsString();
+	}
 }
 //-----------------------------------------------------------------------------
 //! processes html template code given in the htmlsource string
@@ -580,6 +618,8 @@ void MetadataItemPropertiesFrame::setPage(const std::string& type)
 		pageTypeM = ptDependencies;
 	else if (type == "triggers")
 		pageTypeM = ptTableTriggers;
+	else if (type == "indices")
+		pageTypeM = ptTableIndices;
 	// add more page types here when needed
 	else
 		pageTypeM = ptSummary;

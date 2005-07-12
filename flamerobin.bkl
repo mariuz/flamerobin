@@ -379,6 +379,7 @@
         TABLE.html
         TABLEconstraints.html
         TABLEtriggers.html
+		TABLEindices.html
         TRIGGER.html
         VIEW.html
         dependencies.html
