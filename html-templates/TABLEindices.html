@@ -28,12 +28,13 @@
 	{%indices:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
       <td valign="top" nowrap>
-		  <a href="fr://drop_index?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%app_path%}/html-templates/drop.png"></a>
-		  <a href="fr://recompute_index?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%app_path%}/html-templates/compute.png"></a>
+		  <a href="fr://index_action?type=DROP&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%app_path%}/html-templates/drop.png"></a>
+		  <a href="fr://index_action?type=RECOMPUTE&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%app_path%}/html-templates/compute.png"></a>
 	  </td>
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top" align="center">{%index_type%}</td>
-      <td nowrap valign="top" align="center"><b>{%index_active%}</b></td>
+      <td nowrap valign="top" align="center"><a 
+		href="fr://index_action?type=TOGGLE_ACTIVE&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">{%index_active%}</a></td>
       <td nowrap valign="top" align="center">{%index_unique%}</td>
       <td nowrap valign="top">{%index_fields%}</td>
       <td nowrap valign="top" align="right">{%index_stats%}</td>
@@ -48,7 +49,15 @@ href="fr://add_index?parent_window={%parent_window%}&amp;object_address={%object
 href="fr://recompute_all?parent_window={%parent_window%}&amp;object_address={%object_address%}">Recompute
 statistics for all indices</a>
 <br><br>
-<img src="{%app_path%}/html-templates/drop.png"> Drop index<br>
-<img src="{%app_path%}/html-templates/compute.png"> Recompute statistics for index<br>
+<table border=0 bgcolor="white" cellspacing=1 cellpadding=2>
+	<tr bgcolor="#CCCCFF">
+		<td><B>Icon</B></td>
+		<td nowrap><B>Click to...</B></td>
+	</tr>
+	<tr><td><img src="{%app_path%}/html-templates/drop.png"></td><td>Drop index</td></tr>
+	<tr><td><img src="{%app_path%}/html-templates/compute.png"></td><td>Recompute statistics for index</td></tr>
+	<tr><td><img src="{%app_path%}/html-templates/ok.png"></td><td>Make index inactive</td></tr>
+	<tr><td><img src="{%app_path%}/html-templates/redx.png"></td><td>Make index active</td></tr>
+</table>
 </body>
 </html>

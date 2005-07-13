@@ -59,6 +59,7 @@
 #include "metadata/procedure.h"
 #include "metadata/view.h"
 #include "styleguide.h"
+#include "frutils.h"
 #include "ugly.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
@@ -1619,6 +1620,124 @@ bool EditExceptionHandler::handleURI(std::string& uriStr)
 		eff->Show();
 		eff->setSql(std2wx(e->getAlterSql()));
 	}
+	return true;
+}
+//-----------------------------------------------------------------------------
+class IndexActionHandler: public YxURIHandler
+{
+public:
+	bool handleURI(std::string& uriStr);
+private:
+    // singleton; registers itself on creation.
+    static const IndexActionHandler handlerInstance;
+};
+//-----------------------------------------------------------------------------
+const IndexActionHandler IndexActionHandler::handlerInstance;
+//-----------------------------------------------------------------------------
+bool IndexActionHandler::handleURI(std::string& uriStr)
+{
+    YURI uriObj(uriStr);
+	if (uriObj.action != "index_action")
+		return false;
+
+	std::string ms = uriObj.getParam("object_address");		// object
+	unsigned long mo;
+	if (!std2wx(ms).ToULong(&mo))
+		return true;
+	Index *i = (Index *)mo;
+	
+	ms = uriObj.getParam("parent_window");		// window
+	if (!std2wx(ms).ToULong(&mo))
+		return true;
+	wxWindow *w = (wxWindow *)mo;
+
+	std::string sql;
+	std::string type = uriObj.getParam("type");		// type of operation
+	if (type == "DROP")
+		sql = "DROP INDEX " + i->getName();
+	else if (type == "RECOMPUTE")
+		sql = "SET STATISTICS INDEX " + i->getName();
+	else if (type == "TOGGLE_ACTIVE")
+		sql = "ALTER INDEX " + i->getName() + (i->isActive() ? " INACTIVE" : " ACTIVE");
+	
+	ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, wxEmptyString);
+	eff->setDatabase(i->getDatabase());
+	eff->Show();
+	eff->setSql(std2wx(sql));
+	eff->executeAllStatements(true);		// true = user must commit/rollback + frame is closed at once
+	return true;
+}
+//-----------------------------------------------------------------------------
+class TableIndicesHandler: public YxURIHandler
+{
+public:
+	bool handleURI(std::string& uriStr);
+private:
+    // singleton; registers itself on creation.
+    static const TableIndicesHandler handlerInstance;
+};
+//-----------------------------------------------------------------------------
+const TableIndicesHandler TableIndicesHandler::handlerInstance;
+//-----------------------------------------------------------------------------
+bool TableIndicesHandler::handleURI(std::string& uriStr)
+{
+    YURI uriObj(uriStr);
+	if (uriObj.action != "add_index" && uriObj.action != "recompute_all")
+		return false;
+
+	std::string ms = uriObj.getParam("object_address");		// object
+	unsigned long mo;
+	if (!std2wx(ms).ToULong(&mo))
+		return true;
+	YTable *t = (YTable *)mo;
+	
+	ms = uriObj.getParam("parent_window");		// window
+	if (!std2wx(ms).ToULong(&mo))
+		return true;
+	wxWindow *w = (wxWindow *)mo;
+
+	std::string sql;
+	std::vector<Index> *ix = t->getIndices();
+	if (uriObj.action == "recompute_all")
+	{
+		for (std::vector<Index>::iterator it = ix->begin(); it != ix->end(); ++it)
+			sql += "SET STATISTICS INDEX " + (*it).getName() + ";\n";
+	}
+	else	// add_index
+	{
+		wxString indexname = ::wxGetTextFromUser(_("Enter index name"),	_("Adding new index"), 
+			wxT("IDX_") + std2wx(t->getName()) + wxString::Format(wxT("%d"), 1 + ix->size()), 
+			w);
+		if (indexname.IsEmpty())	// cancel
+			return true;
+		
+		bool unique = (wxYES == wxMessageBox(_("Would you like to create UNIQUE index?"), 
+			_("Creating new index"), wxYES_NO|wxICON_QUESTION));
+		
+		std::string columns = selectTableColumns(t, w);
+		if (columns == "")
+			return true;
+		
+		wxArrayString types;
+		types.Add(wxT("ASCENDING"));
+		types.Add(wxT("DESCENDING"));
+		int sort = ::wxGetSingleChoiceIndex(_("Select sort order"), _("Creating new index"), types, w);
+		if (sort == -1)
+			return true;
+		
+		sql = "CREATE ";
+		if (unique)
+			sql += "UNIQUE ";
+		if (sort == 1)
+			sql += "DESCENDING ";
+		sql += " \nINDEX " + wx2std(indexname) + " ON " + t->getName() + " (" + columns + ");\n";
+	}
+
+	ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, wxEmptyString);
+	eff->setDatabase(t->getDatabase());
+	eff->Show();
+	eff->setSql(std2wx(sql));
+	eff->executeAllStatements(true);		// true = user must commit/rollback + frame is closed at once
 	return true;
 }
 //-----------------------------------------------------------------------------

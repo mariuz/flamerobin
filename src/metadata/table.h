@@ -74,6 +74,7 @@ public:
 	virtual std::string getCreateSqlTemplate() const;
 
 	virtual bool loadColumns();			// update the keys info too
+	void invalidateIndices();
 	bool getTriggers(std::vector<YTrigger *>& list, YTrigger::firingTimeType beforeOrAfter);
 
 	ColumnConstraint *getPrimaryKey();

@@ -74,7 +74,10 @@ private:
 
 	std::multimap<std::string, std::string> collationsM;
 	void loadCollations();
-
+	
+	// small help for parser
+	std::string getTableForIndex(std::string indexName);
+	
 public:
 	YDatabase();
 	virtual bool getChildren(std::vector<YxMetadataItem *>& temp);

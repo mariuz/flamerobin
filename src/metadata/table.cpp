@@ -47,6 +47,15 @@ YTable::YTable()
 	indicesLoadedM = false;
 }
 //------------------------------------------------------------------------------
+void YTable::invalidateIndices()
+{
+	if (indicesLoadedM)
+	{
+		indicesLoadedM = false;
+		notify();
+	}
+}
+//------------------------------------------------------------------------------
 bool YTable::loadColumns()			// update the keys info too
 {
 	primaryKeyLoadedM = false;			// force info to be reloaded if asked

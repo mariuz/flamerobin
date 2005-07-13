@@ -278,6 +278,37 @@ void YDatabase::loadCollations()
 	::wxMessageBox(std2wx(lastError().getMessage()), _("Error while loading collations."), wxICON_WARNING);
 }
 //------------------------------------------------------------------------------
+std::string YDatabase::getTableForIndex(std::string indexName)
+{
+	try
+	{
+		IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
+		tr1->Start();
+		IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
+		st1->Prepare("SELECT rdb$relation_name from rdb$indices where rdb$index_name = ?");
+		st1->Set(1, indexName);
+		st1->Execute();
+		if (st1->Fetch())
+		{
+			std::string retval;
+			st1->Get(1, retval);
+			retval.erase(retval.find_last_not_of(" ") + 1);
+			return retval;
+		}
+	}
+	catch (IBPP::Exception &e)
+	{
+		lastError().setMessage(e.ErrorMessage());
+	}
+	catch (...)
+	{
+		lastError().setMessage(_("System error."));
+	}
+
+	::wxMessageBox(std2wx(lastError().getMessage()), _("Error while loading table for index."), wxICON_WARNING);
+	return "";
+}
+//------------------------------------------------------------------------------
 //! load list of objects of type "type" from database, and fill the DBH
 bool YDatabase::loadObjects(NodeType type)
 {
@@ -439,6 +470,86 @@ bool YDatabase::parseCommitedSql(std::string sql)
 		action = "ALTER";		// behaves like "alter"
 	}
 
+	if (action == "DROP" && object_type == "INDEX")
+	{
+		// We cannot know which table is affected, so the only solution is that all tables reload their indices
+		for (YMetadataCollection<YTable>::iterator it = tablesM.begin(); it != tablesM.end(); ++it)
+			(*it).invalidateIndices();
+		return true;
+	}
+
+	if (action == "ALTER" && object_type == "INDEX" || action == "SET" && object_type == "STATISTICS")	// refresh table
+	{
+		if (action == "SET") 	// move by 1
+			strstrm >> name;
+		std::string tableName = getTableForIndex(name);
+		YTable *t = dynamic_cast<YTable *>(findByNameAndType(ntTable, tableName));
+		if (t)
+			t->invalidateIndices();
+		return true;
+	}
+	
+	bool isIndex = false;
+	if (action == "CREATE")							// looking for CREATE INDEX
+	{
+		if (object_type == "INDEX")					// CREATE [UNIQUE] [ASC[ENDING] | DESC[ENDING]] INDEX name ON table ...
+			isIndex = true;
+		else
+		{
+			bool found = false;
+			std::string words[] = { "UNIQUE", "ASC", "ASCENDING", "DESC", "DESCENDING" };
+			for (int i=0; i<sizeof(words) / sizeof(std::string); ++i)
+			{
+				if (words[i] == object_type)
+				{
+					found = true;
+					break;
+				}
+			}			
+			if (found)
+			{
+				if (name == "INDEX")
+				{
+					isIndex = true;
+					strstrm >> name;
+				}
+				else
+				{
+					for (int i=0; i<sizeof(words) / sizeof(std::string); ++i)
+					{
+						if (words[i] == name)
+						{
+							found = true;
+							break;
+						}
+					}
+					if (found)
+					{
+						strstrm >> name;
+						if (name == "INDEX")
+						{
+							isIndex = true;
+							strstrm >> name;
+						}
+					}
+				}
+			}
+		}
+	}
+	if (isIndex)
+	{
+		strstrm >> name;	// ON
+		strstrm >> name;	// table name
+		std::string::size_type p = name.find("(");
+		if (p != std::string::npos)
+			name.erase(p);
+		YTable *t = dynamic_cast<YTable *>(findByNameAndType(ntTable, name));
+		if (t)
+			t->invalidateIndices();
+		return true;
+	}
+	
+	
 	// convert change in NULL flag to ALTER TABLE (since it should be processed like that)
 	if (sql.substr(0, 44) == "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG")
 	{

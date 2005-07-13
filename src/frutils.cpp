@@ -37,6 +37,8 @@
 #endif
 
 #include <string>
+#include "metadata/metadataitem.h"
+#include "metadata/table.h"
 #include "frutils.h"
 #include "ugly.h"
 #include "main.h"
@@ -132,5 +134,28 @@ void readBlob(IBPP::Statement &st, int column, std::string& result)
 		result += buffer;
 	}
 	b->Close();
+}
+//-----------------------------------------------------------------------------
+std::string selectTableColumns(YTable *t, wxWindow *parent)
+{
+	t->checkAndLoadColumns();
+	std::vector<YxMetadataItem *> temp;
+	t->getChildren(temp);
+	wxArrayString columns;
+	for (std::vector<YxMetadataItem *>::const_iterator it = temp.begin(); it != temp.end(); ++it)
+		columns.Add(std2wx((*it)->getName()));
+
+	wxArrayInt selected_columns;
+	if (!::wxGetMultipleChoices(selected_columns, _("Select one or more fields... (use ctrl key)"),  _("Table fields"), columns, parent))
+		return "";
+
+	std::string retval;
+	for (size_t i=0; i<selected_columns.GetCount(); ++i)
+	{
+		if (i)
+			retval += ", ";
+		retval += wx2std(columns[selected_columns[i]]);
+	}
+	return retval;
 }
 //-----------------------------------------------------------------------------

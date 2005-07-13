@@ -43,6 +43,7 @@
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
 #include "ugly.h"
+#include "frutils.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
 class AddConstraintHandler: public YxURIHandler
@@ -52,35 +53,11 @@ public:
 private:
     static const AddConstraintHandler handlerInstance;	// singleton; registers itself on creation.
 
-	std::string selectTableColumns(YTable *t, wxWindow *parent) const;
 	YTable *selectTable(YDatabase *d, wxWindow *parent) const;
 	std::string selectAction(const wxString& label, wxWindow *parent) const;
 };
 //-----------------------------------------------------------------------------
 const AddConstraintHandler AddConstraintHandler::handlerInstance;
-//-----------------------------------------------------------------------------
-std::string AddConstraintHandler::selectTableColumns(YTable *t, wxWindow *parent) const
-{
-	t->checkAndLoadColumns();
-	std::vector<YxMetadataItem *> temp;
-	t->getChildren(temp);
-	wxArrayString columns;
-	for (std::vector<YxMetadataItem *>::const_iterator it = temp.begin(); it != temp.end(); ++it)
-		columns.Add(std2wx((*it)->getName()));
-
-	wxArrayInt selected_columns;
-	if (!::wxGetMultipleChoices(selected_columns, _("Select one or more fields... (use ctrl key)"),  _("Table fields"), columns, parent))
-		return "";
-
-	std::string retval;
-	for (size_t i=0; i<selected_columns.GetCount(); ++i)
-	{
-		if (i)
-			retval += ", ";
-		retval += wx2std(columns[selected_columns[i]]);
-	}
-	return retval;
-}
 //-----------------------------------------------------------------------------
 YTable *AddConstraintHandler::selectTable(YDatabase *d, wxWindow *parent) const
 {

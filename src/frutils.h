@@ -30,6 +30,8 @@
 #include <list>
 #include <wx/wx.h>
 #include "ibpp.h"
+
+class YTable;
 //-----------------------------------------------------------------------------
 //! Returns the absolute application path, if possible, or an empty string in case of failure.
 std::string getApplicationPath();
@@ -39,6 +41,9 @@ void adjustControlsMinWidth(std::list<wxWindow*> controls);
 //-----------------------------------------------------------------------------
 //! reads blob from statement into std::string
 void readBlob(IBPP::Statement &st, int column, std::string& result);
+//-----------------------------------------------------------------------------
+//! displays a list of table columns and lets user select some
+std::string selectTableColumns(YTable *t, wxWindow *parent);
 //-----------------------------------------------------------------------------
 #endif // FRUTILS_H
 

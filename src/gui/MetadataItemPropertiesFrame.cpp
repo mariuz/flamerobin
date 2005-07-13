@@ -508,13 +508,14 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 	else if (cmd.substr(0, 5) == "index")
 	{
 		std::string okimage = "<img src=\"" + getApplicationPath() + "/html-templates/ok.png\">";
+		std::string ximage = "<img src=\"" + getApplicationPath() + "/html-templates/redx.png\">";
 		Index *i = dynamic_cast<Index *>(object);
 		if (!i)
 			return;
 		if (cmd == "index_type")
 			htmlpage += (i->getIndexType() == Index::itAscending ? "ASC" : "DESC");
-		if (cmd == "index_active" && i->isActive())
-			htmlpage += okimage;
+		if (cmd == "index_active")
+			htmlpage += (i->isActive() ? okimage : ximage);
 		if (cmd == "index_unique" && i->isUnique())
 			htmlpage += okimage;
 		else if (cmd == "index_stats")
