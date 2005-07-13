@@ -386,6 +386,7 @@
         drop.png
         ok.png
         view.png
+		compute.png
     </set>
 
     <define-tag name="mac-app-bundle" rules="exe">

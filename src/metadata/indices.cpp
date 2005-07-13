@@ -35,6 +35,7 @@
 //------------------------------------------------------------------------------
 Index::Index(bool unique, bool active, bool ascending, double statistics)
 {
+	typeM = ntIndex;
 	uniqueFlagM = unique;
 	activeM = active;
 	indexTypeM = (ascending ? itAscending : itDescending);

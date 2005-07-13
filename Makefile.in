@@ -67,6 +67,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_exception.o \
 	flamerobin_function.o \
 	flamerobin_generator.o \
+	flamerobin_indices.o \
 	flamerobin_metadataitem.o \
 	flamerobin_metadataitemwithcolumns.o \
 	flamerobin_parameter.o \
@@ -184,7 +185,7 @@ flamerobin.app/Contents/PkgInfo: flamerobin$(EXEEXT) $(srcdir)/res/flamerobin.In
 
 templates: 
 	@mkdir -p ./html-templates
-	@for f in DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TRIGGER.html VIEW.html dependencies.html drop.png ok.png view.png; do \
+	@for f in DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TRIGGER.html VIEW.html dependencies.html drop.png ok.png view.png compute.png; do \
 	if test ! -e ./html-templates/$$f ; \
 	then x=yep ; \
 	else x=`find $(srcdir)/html-templates/$$f -newer ./html-templates/$$f -print` ; \
@@ -319,6 +320,9 @@ flamerobin_function.o: $(srcdir)/src/metadata/function.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_generator.o: $(srcdir)/src/metadata/generator.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/generator.cpp
+
+flamerobin_indices.o: $(srcdir)/src/metadata/indices.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/indices.cpp
 
 flamerobin_metadataitem.o: $(srcdir)/src/metadata/metadataitem.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/metadataitem.cpp
