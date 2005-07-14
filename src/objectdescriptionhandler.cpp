@@ -59,26 +59,17 @@ bool ObjectDescriptionHandler::handleURI(std::string& uriStr)
 	if (uriObj.action != "edit_description")
 		return false;
 
-	std::string ms = uriObj.getParam("object_address");		// object
-	unsigned long mo;
-	if (!std2wx(ms).ToULong(&mo))
+	YxMetadataItem *m = (YxMetadataItem *)getObject(uriObj);
+	wxWindow *w = getWindow(uriObj);
+	if (!m || !w)
 		return true;
-	YxMetadataItem *m = (YxMetadataItem *)mo;
 
-	ms = uriObj.getParam("parent_window");		// window
-	if (!std2wx(ms).ToULong(&mo))
-		return true;
-	wxWindow *w = (wxWindow *)mo;
-
-	if (m)
+	wxString desc = std2wx(m->getDescription());
+	if (GetMultilineTextFromUser(wxString::Format(_("Description of %s"), std2wx(uriObj.getParam("object_name")).c_str()), desc, w))
 	{
-		wxString desc = std2wx(m->getDescription());
-		if (GetMultilineTextFromUser(wxString::Format(_("Description of %s"), std2wx(uriObj.getParam("object_name")).c_str()), desc, w))
-		{
-			wxBusyCursor wait;
-			if (!m->setDescription(wx2std(desc)))
-				wxMessageBox(std2wx(lastError().getMessage()), _("Error while writing description."));
-		}
+		wxBusyCursor wait;
+		if (!m->setDescription(wx2std(desc)))
+			wxMessageBox(std2wx(lastError().getMessage()), _("Error while writing description."));
 	}
 	return true;
 }

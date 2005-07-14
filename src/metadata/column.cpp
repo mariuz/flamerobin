@@ -88,7 +88,8 @@ std::string YColumn::getDatatype()
 	enum { showType=0, showFormula, showAll };
 	int flag = showFormula;
 	config().getValue("ShowComputed", flag);
-	if (computedM && flag == showFormula)
+	// view columns are all computed and have their source empty
+	if (computedM && flag == showFormula && !computedSourceM.empty())
 		return computedSourceM;
 
 	std::string ret;
@@ -113,7 +114,7 @@ std::string YColumn::getDatatype()
 		ret += "(" + d->getName() + ")";
 	}
 
-	if (computedM && flag == showAll)
+	if (computedM && flag == showAll && !computedSourceM.empty())
 		ret += " (" + computedSourceM + ")";
 	return ret;
 }

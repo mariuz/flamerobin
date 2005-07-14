@@ -639,7 +639,6 @@ void MainFrame::OnMenuSetGeneratorValue(wxCommandEvent& WXUNUSED(event))
 	if (!g)
 		return;
 
-    std::ostringstream uriStream;
     std::string uriStr = "fr://edit_generator_value?parent_window=" + wx2std(wxString::Format(wxT("%d"), (int)this))
         + "&object_address=" + wx2std(wxString::Format(wxT("%d"), (int)g));
     getURIProcessor().handleURI(uriStr);

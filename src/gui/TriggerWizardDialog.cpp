@@ -38,6 +38,7 @@
 #include "ExecuteSqlFrame.h"
 #include "ugly.h"
 #include "styleguide.h"
+#include "urihandler.h"
 #include "TriggerWizardDialog.h"
 //-----------------------------------------------------------------------------
 TriggerWizardDialog::TriggerWizardDialog(wxWindow* parent, YxMetadataItem *item):
@@ -46,12 +47,12 @@ TriggerWizardDialog::TriggerWizardDialog(wxWindow* parent, YxMetadataItem *item)
 	relationM = item;
     label_1 = new wxStaticText(getControlsPanel(), -1, _("Trigger name"));
     text_ctrl_1 = new wxTextCtrl(getControlsPanel(), -1, wxT(""));
-    checkbox_1_copy = new wxCheckBox(getControlsPanel(), -1, _("Active trigger"));
-    const wxString radio_box_1_copy_choices[] = { _("Before trigger"), _("After trigger") };
+    checkbox_1_copy = new wxCheckBox(getControlsPanel(), -1, wxT("Active"));
+    const wxString radio_box_1_copy_choices[] = { wxT("Before"), wxT("After") };
     radio_box_1_copy = new wxRadioBox(getControlsPanel(), -1, _("Trigger type"), wxDefaultPosition, wxDefaultSize, 2, radio_box_1_copy_choices, 0, wxRA_SPECIFY_ROWS);
-    checkbox_insert = new wxCheckBox(getControlsPanel(), -1, wxT("INSERT trigger"));
-    checkbox_update = new wxCheckBox(getControlsPanel(), -1, wxT("UPDATE trigger"));
-    checkbox_delete = new wxCheckBox(getControlsPanel(), -1, wxT("DELETE trigger"));
+    checkbox_insert = new wxCheckBox(getControlsPanel(), -1, wxT("INSERT"));
+    checkbox_update = new wxCheckBox(getControlsPanel(), -1, wxT("UPDATE"));
+    checkbox_delete = new wxCheckBox(getControlsPanel(), -1, wxT("DELETE"));
     label_2 = new wxStaticText(getControlsPanel(), -1, _("Position"));
     spin_ctrl_1 = new wxSpinCtrl(getControlsPanel(), -1, wxT("0"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100);
     button_ok = new wxButton(getControlsPanel(), wxID_OK, _("&OK"));
@@ -155,5 +156,31 @@ void TriggerWizardDialog::OnOkButtonClick(wxCommandEvent& event)
 	eff->setSql(sql);
 	eff->Show();
 	event.Skip();	// let the dialog close
+}
+//-----------------------------------------------------------------------------
+class CreateTriggerHandler: public YxURIHandler
+{
+public:
+	bool handleURI(std::string& uriStr);
+private:
+    static const CreateTriggerHandler handlerInstance;
+};
+//-----------------------------------------------------------------------------
+const CreateTriggerHandler CreateTriggerHandler::handlerInstance;
+//-----------------------------------------------------------------------------
+bool CreateTriggerHandler::handleURI(std::string& uriStr)
+{
+    YURI uriObj(uriStr);
+	if (uriObj.action != "create_trigger")
+		return false;
+
+	YTable *t = (YTable *)getObject(uriObj);
+	wxWindow *w = getWindow(uriObj);
+	if (!t || !w)
+		return true;
+
+	TriggerWizardDialog *tw = new TriggerWizardDialog(w, t);
+	tw->Show();
+	return true;
 }
 //-----------------------------------------------------------------------------

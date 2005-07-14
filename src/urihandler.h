@@ -60,7 +60,7 @@ private:
 	std::list<YxURIHandler*> handlersM;
     bool handlerListSortedM;
     void checkHandlerListSorted();
-    
+
     // only getURIProcessor() may instantiate an object of this class.
     friend YURIProcessor& getURIProcessor();
 
@@ -97,6 +97,11 @@ protected:
         */
         return 1024;
     }
+
+	// some helper functions
+	wxWindow *YxURIHandler::getWindow(YURI& uriObj);
+	void *getObject(YURI& uriObj);
+
 private:
     YURIProcessor* processorM;
     void setProcessor(YURIProcessor* const processor);

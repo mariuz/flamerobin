@@ -37,6 +37,7 @@
 #include <string>
 #include <list>
 #include <algorithm>
+#include "ugly.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
 YURI::YURI()
@@ -177,5 +178,23 @@ YxURIHandler::~YxURIHandler()
 {
     if (processorM)
         processorM->removeHandler(this);
+}
+//-----------------------------------------------------------------------------
+wxWindow *YxURIHandler::getWindow(YURI& uriObj)
+{
+	std::string ms = uriObj.getParam("parent_window");		// window
+	unsigned long mo;
+	if (!std2wx(ms).ToULong(&mo))
+		return 0;
+	return (wxWindow *)mo;
+}
+//-----------------------------------------------------------------------------
+void *YxURIHandler::getObject(YURI& uriObj)
+{
+	std::string ms = uriObj.getParam("object_address");		// object
+	unsigned long mo;
+	if (!std2wx(ms).ToULong(&mo))
+		return 0;
+	return (void *)mo;
 }
 //-----------------------------------------------------------------------------

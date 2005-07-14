@@ -726,16 +726,13 @@ bool PropertiesHandler::handleURI(std::string& uriStr)
 	if (uriObj.action != "properties")
 		return false;
 
-	std::string ms = uriObj.getParam("parent_window");		// window
-	unsigned long mo;
-	if (!std2wx(ms).ToULong(&mo))
+	MetadataItemPropertiesFrame *parent = dynamic_cast<MetadataItemPropertiesFrame *>(getWindow(uriObj));
+	if (!parent)
 		return true;
-	MetadataItemPropertiesFrame *parent = (MetadataItemPropertiesFrame *)mo;
-
-	NodeType n = getTypeByName(uriObj.getParam("object_type"));
 	YDatabase *d = parent->getObservedObject()->getDatabase();
 	if (!d)
 		return true;
+	NodeType n = getTypeByName(uriObj.getParam("object_type"));
 	YxMetadataItem *object = d->findByNameAndType(n, uriObj.getParam("object_name"));
 	if (!object)
 	{

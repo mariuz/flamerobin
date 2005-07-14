@@ -95,18 +95,8 @@ bool AddConstraintHandler::handleURI(std::string& uriStr)
 		return false;
 
 	std::string type = uriObj.getParam("type");	// pk, fk, check, unique
-
-	std::string ms = uriObj.getParam("object_address");		// object
-	unsigned long mo;
-	if (!std2wx(ms).ToULong(&mo))
-		return true;
-	YTable *t = (YTable *)mo;
-
-	ms = uriObj.getParam("parent_window");		// window
-	if (!std2wx(ms).ToULong(&mo))
-		return true;
-	wxWindow *w = (wxWindow *)mo;
-
+	YTable *t = (YTable *)getObject(uriObj);
+	wxWindow *w = getWindow(uriObj);
 	if (!t || !w)
 		return true;
 

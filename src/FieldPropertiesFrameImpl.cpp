@@ -444,14 +444,13 @@ bool ColumnPropertiesHandler::handleURI(std::string& uriStr)
 	if (uriObj.action != "edit_field" && uriObj.action != "add_field")
 		return false;
 
-	std::string ms = uriObj.getParam("object_address");		// object
-	unsigned long mo;
-	if (!std2wx(ms).ToULong(&mo))
+	wxWindow *w = getWindow(uriObj);
+	void *mo = getObject(uriObj);
+	if (!mo || !w)
 		return true;
 
 	YColumn *c = 0;
 	YTable *t;
-
 	if (uriObj.action == "add_field")
 		t = (YTable *)mo;
 	else
@@ -459,11 +458,6 @@ bool ColumnPropertiesHandler::handleURI(std::string& uriStr)
 		c = (YColumn *)mo;
 		t = (YTable *)c->getParent();
 	}
-
-	ms = uriObj.getParam("parent_window");		// window
-	if (!std2wx(ms).ToULong(&mo))
-		return true;
-	wxWindow *w = (wxWindow *)mo;
 
 	FieldPropertiesFrame *f = new FieldPropertiesFrame(w, -1, wxString::Format(_("TABLE: %s"), std2wx(t->getName()).c_str()), t);
 	if (c)

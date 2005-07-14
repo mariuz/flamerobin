@@ -387,6 +387,7 @@
         ok.png
         view.png
 		compute.png
+		redx.png
     </set>
 
     <define-tag name="mac-app-bundle" rules="exe">

@@ -231,7 +231,7 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerob
 
 templates: 
 	if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates mkdir bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
-	for %f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TRIGGER.html VIEW.html dependencies.html drop.png ok.png view.png compute.png) do if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates\%f copy html-templates\%f bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
+	for %f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TRIGGER.html VIEW.html dependencies.html drop.png ok.png view.png compute.png redx.png) do if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates\%f copy html-templates\%f bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
 
 config-options: 
 	if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT) mkdir bcc$(U_OPT)$(R_OPT)$(D_OPT)

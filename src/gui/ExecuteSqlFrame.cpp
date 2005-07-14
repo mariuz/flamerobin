@@ -1379,7 +1379,6 @@ class DropColumnHandler: public YxURIHandler
 public:
 	bool handleURI(std::string& uriStr);
 private:
-    // singleton; registers itself on creation.
     static const DropColumnHandler handlerInstance;
 };
 //-----------------------------------------------------------------------------
@@ -1391,29 +1390,20 @@ bool DropColumnHandler::handleURI(std::string& uriStr)
 	if (uriObj.action != "drop_field" && uriObj.action != "drop_constraint")
 		return false;
 
-	std::string ms = uriObj.getParam("object_address");		// object
-	unsigned long mo;
-	if (!std2wx(ms).ToULong(&mo))
+	YxMetadataItem *c = (YxMetadataItem *)getObject(uriObj);
+	wxWindow *w = getWindow(uriObj);
+	if (!c || !w)
 		return true;
-	YxMetadataItem *c = (YxMetadataItem *)mo;
 
-	ms = uriObj.getParam("parent_window");		// window
-	if (!std2wx(ms).ToULong(&mo))
-		return true;
-	wxWindow *w = (wxWindow *)mo;
-
-	if (c)
-	{
-		std::string sql = "ALTER TABLE " + c->getParent()->getName() + " DROP ";
-		if (uriObj.action == "drop_constraint")
-			sql += "CONSTRAINT ";
-		sql += c->getName();
-		ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, _("Dropping field"));
-		eff->setDatabase(c->getDatabase());
-		eff->Show();
-		eff->setSql(std2wx(sql));
-		eff->executeAllStatements(true);		// true = user must commit/rollback + frame is closed at once
-	}
+	std::string sql = "ALTER TABLE " + c->getParent()->getName() + " DROP ";
+	if (uriObj.action == "drop_constraint")
+		sql += "CONSTRAINT ";
+	sql += c->getName();
+	ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, _("Dropping field"));
+	eff->setDatabase(c->getDatabase());
+	eff->Show();
+	eff->setSql(std2wx(sql));
+	eff->executeAllStatements(true);		// true = user must commit/rollback + frame is closed at once
 	return true;
 }
 //-----------------------------------------------------------------------------
@@ -1434,24 +1424,15 @@ bool EditProcedureHandler::handleURI(std::string& uriStr)
 	if (uriObj.action != "edit_procedure")
 		return false;
 
-	std::string ms = uriObj.getParam("object_address");		// object
-	unsigned long mo;
-	if (!std2wx(ms).ToULong(&mo))
+	YProcedure *p = (YProcedure *)getObject(uriObj);
+	wxWindow *w = getWindow(uriObj);
+	if (!p || !w)
 		return true;
-	YProcedure *p = (YProcedure *)mo;
 
-	ms = uriObj.getParam("parent_window");		// window
-	if (!std2wx(ms).ToULong(&mo))
-		return true;
-	wxWindow *w = (wxWindow *)mo;
-
-	if (p)
-	{
-		ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing stored procedure"));
-		eff->setDatabase(p->getDatabase());
-		eff->Show();
-		eff->setSql(std2wx(p->getAlterSql()));
-	}
+	ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing stored procedure"));
+	eff->setDatabase(p->getDatabase());
+	eff->Show();
+	eff->setSql(std2wx(p->getAlterSql()));
 	return true;
 }
 //-----------------------------------------------------------------------------
@@ -1472,24 +1453,15 @@ bool EditViewHandler::handleURI(std::string& uriStr)
 	if (uriObj.action != "edit_view")
 		return false;
 
-	std::string ms = uriObj.getParam("object_address");		// object
-	unsigned long mo;
-	if (!std2wx(ms).ToULong(&mo))
+	YView *v = (YView *)getObject(uriObj);
+	wxWindow *w = getWindow(uriObj);
+	if (!v || !w)
 		return true;
-	YView *v = (YView *)mo;
 
-	ms = uriObj.getParam("parent_window");		// window
-	if (!std2wx(ms).ToULong(&mo))
-		return true;
-	wxWindow *w = (wxWindow *)mo;
-
-	if (v)
-	{
-		ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing view"));
-		eff->setDatabase(v->getDatabase());
-		eff->Show();
-		eff->setSql(std2wx(v->getAlterSql()));
-	}
+	ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing view"));
+	eff->setDatabase(v->getDatabase());
+	eff->Show();
+	eff->setSql(std2wx(v->getAlterSql()));
 	return true;
 }
 //-----------------------------------------------------------------------------
@@ -1510,24 +1482,15 @@ bool EditTriggerHandler::handleURI(std::string& uriStr)
 	if (uriObj.action != "edit_trigger")
 		return false;
 
-	std::string ms = uriObj.getParam("object_address");		// object
-	unsigned long mo;
-	if (!std2wx(ms).ToULong(&mo))
+	YTrigger *t = (YTrigger *)getObject(uriObj);
+	wxWindow *w = getWindow(uriObj);
+	if (!t || !w)
 		return true;
-	YTrigger *t = (YTrigger *)mo;
 
-	ms = uriObj.getParam("parent_window");		// window
-	if (!std2wx(ms).ToULong(&mo))
-		return true;
-	wxWindow *w = (wxWindow *)mo;
-
-	if (t)
-	{
-		ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing trigger"));
-		eff->setDatabase(t->getDatabase());
-		eff->Show();
-		eff->setSql(std2wx(t->getAlterSql()));
-	}
+	ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing trigger"));
+	eff->setDatabase(t->getDatabase());
+	eff->Show();
+	eff->setSql(std2wx(t->getAlterSql()));
 	return true;
 }
 //-----------------------------------------------------------------------------
@@ -1548,39 +1511,30 @@ bool EditGeneratorValueHandler::handleURI(std::string& uriStr)
 	if (uriObj.action != "edit_generator_value")
 		return false;
 
-	std::string ms = uriObj.getParam("object_address");		// object
-	unsigned long mo;
-	if (!std2wx(ms).ToULong(&mo))
+	YGenerator *g = (YGenerator *)getObject(uriObj);
+	wxWindow *w = getWindow(uriObj);
+	if (!g || !w)
 		return true;
-	YGenerator *g = (YGenerator *)mo;
 
-	ms = uriObj.getParam("parent_window");		// window
-	if (!std2wx(ms).ToULong(&mo))
-		return true;
-	wxWindow *w = (wxWindow *)mo;
-
-	if (g)
+	g->loadValue(true);	// force reload of value from database
+	int oldvalue = g->getValue();
+	YDatabase *db = g->getDatabase();
+	if (!db)
 	{
-    	g->loadValue(true);	// force reload of value from database
-	    int oldvalue = g->getValue();
-	    YDatabase *db = g->getDatabase();
-	    if (!db)
-	    {
-		    wxMessageBox(_("No database assigned"), _("Warning"), wxOK | wxICON_ERROR);
-		    return true;
-	    }
+		wxMessageBox(_("No database assigned"), _("Warning"), wxOK | wxICON_ERROR);
+		return true;
+	}
 
-	    wxString value = wxGetTextFromUser(_("Changing generator value"), _("Enter new value"),
-		    wxString::Format(wxT("%d"), oldvalue), w);
-	    if (value != wxT(""))
-	    {
-		    std::string sql = "SET GENERATOR " + g->getName() + " TO " + wx2std(value) + ";";
-		    ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1, wxString(std2wx(sql)));
-		    esf->setDatabase(db);
-		    esf->Show();
-		    esf->setSql(std2wx(sql));
-		    esf->executeAllStatements(true);		// true = user must commit/rollback + frame is closed at once
-	    }
+	wxString value = wxGetTextFromUser(_("Changing generator value"), _("Enter new value"),
+		wxString::Format(wxT("%d"), oldvalue), w);
+	if (value != wxT(""))
+	{
+		std::string sql = "SET GENERATOR " + g->getName() + " TO " + wx2std(value) + ";";
+		ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1, wxString(std2wx(sql)));
+		esf->setDatabase(db);
+		esf->Show();
+		esf->setSql(std2wx(sql));
+		esf->executeAllStatements(true);		// true = user must commit/rollback + frame is closed at once
 	}
 	return true;
 }
@@ -1602,24 +1556,15 @@ bool EditExceptionHandler::handleURI(std::string& uriStr)
 	if (uriObj.action != "edit_exception")
 		return false;
 
-	std::string ms = uriObj.getParam("object_address");		// object
-	unsigned long mo;
-	if (!std2wx(ms).ToULong(&mo))
+	YException *e = (YException *)getObject(uriObj);
+	wxWindow *w = getWindow(uriObj);
+	if (!e || !w)
 		return true;
-	YException *e = (YException *)mo;
 
-	ms = uriObj.getParam("parent_window");		// window
-	if (!std2wx(ms).ToULong(&mo))
-		return true;
-	wxWindow *w = (wxWindow *)mo;
-
-	if (e)
-	{
-		ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing exception"));
-		eff->setDatabase(e->getDatabase());
-		eff->Show();
-		eff->setSql(std2wx(e->getAlterSql()));
-	}
+	ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing exception"));
+	eff->setDatabase(e->getDatabase());
+	eff->Show();
+	eff->setSql(std2wx(e->getAlterSql()));
 	return true;
 }
 //-----------------------------------------------------------------------------
@@ -1640,16 +1585,10 @@ bool IndexActionHandler::handleURI(std::string& uriStr)
 	if (uriObj.action != "index_action")
 		return false;
 
-	std::string ms = uriObj.getParam("object_address");		// object
-	unsigned long mo;
-	if (!std2wx(ms).ToULong(&mo))
+	Index *i = (Index *)getObject(uriObj);
+	wxWindow *w = getWindow(uriObj);
+	if (!i || !w)
 		return true;
-	Index *i = (Index *)mo;
-	
-	ms = uriObj.getParam("parent_window");		// window
-	if (!std2wx(ms).ToULong(&mo))
-		return true;
-	wxWindow *w = (wxWindow *)mo;
 
 	std::string sql;
 	std::string type = uriObj.getParam("type");		// type of operation
@@ -1659,7 +1598,7 @@ bool IndexActionHandler::handleURI(std::string& uriStr)
 		sql = "SET STATISTICS INDEX " + i->getName();
 	else if (type == "TOGGLE_ACTIVE")
 		sql = "ALTER INDEX " + i->getName() + (i->isActive() ? " INACTIVE" : " ACTIVE");
-	
+
 	ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, wxEmptyString);
 	eff->setDatabase(i->getDatabase());
 	eff->Show();
@@ -1685,16 +1624,10 @@ bool TableIndicesHandler::handleURI(std::string& uriStr)
 	if (uriObj.action != "add_index" && uriObj.action != "recompute_all")
 		return false;
 
-	std::string ms = uriObj.getParam("object_address");		// object
-	unsigned long mo;
-	if (!std2wx(ms).ToULong(&mo))
+	YTable *t = (YTable *)getObject(uriObj);
+	wxWindow *w = getWindow(uriObj);
+	if (!t || !w)
 		return true;
-	YTable *t = (YTable *)mo;
-	
-	ms = uriObj.getParam("parent_window");		// window
-	if (!std2wx(ms).ToULong(&mo))
-		return true;
-	wxWindow *w = (wxWindow *)mo;
 
 	std::string sql;
 	std::vector<Index> *ix = t->getIndices();
@@ -1705,32 +1638,83 @@ bool TableIndicesHandler::handleURI(std::string& uriStr)
 	}
 	else	// add_index
 	{
-		wxString indexname = ::wxGetTextFromUser(_("Enter index name"),	_("Adding new index"), 
-			wxT("IDX_") + std2wx(t->getName()) + wxString::Format(wxT("%d"), 1 + ix->size()), 
-			w);
+		int nr = 1;
+		wxString newname;
+		while (true)		// find first available name
+		{
+			bool found = false;
+			newname = wxT("IDX_") + std2wx(t->getName()) + wxString::Format(wxT("%d"), nr++);
+			for (std::vector<Index>::iterator it = ix->begin(); it != ix->end(); ++it)
+				if ((*it).getName() == wx2std(newname))
+					found = true;
+			if (!found)
+				break;
+		}
+		wxString indexname = ::wxGetTextFromUser(_("Enter index name"),	_("Adding new index"), newname, w);
 		if (indexname.IsEmpty())	// cancel
 			return true;
-		
-		bool unique = (wxYES == wxMessageBox(_("Would you like to create UNIQUE index?"), 
+
+		bool unique = (wxYES == wxMessageBox(_("Would you like to create UNIQUE index?"),
 			_("Creating new index"), wxYES_NO|wxICON_QUESTION));
-		
+
 		std::string columns = selectTableColumns(t, w);
 		if (columns == "")
 			return true;
-		
+
 		wxArrayString types;
 		types.Add(wxT("ASCENDING"));
 		types.Add(wxT("DESCENDING"));
 		int sort = ::wxGetSingleChoiceIndex(_("Select sort order"), _("Creating new index"), types, w);
 		if (sort == -1)
 			return true;
-		
+
 		sql = "CREATE ";
 		if (unique)
 			sql += "UNIQUE ";
 		if (sort == 1)
 			sql += "DESCENDING ";
 		sql += " \nINDEX " + wx2std(indexname) + " ON " + t->getName() + " (" + columns + ");\n";
+	}
+
+	ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, wxEmptyString);
+	eff->setDatabase(t->getDatabase());
+	eff->Show();
+	eff->setSql(std2wx(sql));
+	eff->executeAllStatements(true);		// true = user must commit/rollback + frame is closed at once
+	return true;
+}
+//-----------------------------------------------------------------------------
+class ActivateTriggersHandler: public YxURIHandler
+{
+public:
+	bool handleURI(std::string& uriStr);
+private:
+    static const ActivateTriggersHandler handlerInstance;
+};
+//-----------------------------------------------------------------------------
+const ActivateTriggersHandler ActivateTriggersHandler::handlerInstance;
+//-----------------------------------------------------------------------------
+bool ActivateTriggersHandler::handleURI(std::string& uriStr)
+{
+    YURI uriObj(uriStr);
+	if (uriObj.action != "activate_triggers" && uriObj.action != "deactivate_triggers")
+		return false;
+
+	YTable *t = (YTable *)getObject(uriObj);
+	wxWindow *w = getWindow(uriObj);
+	if (!t || !w)
+		return true;
+
+	std::vector<YTrigger *> list;
+	t->getTriggers(list, YTrigger::afterTrigger);
+	t->getTriggers(list, YTrigger::beforeTrigger);
+	std::string sql;
+	for (std::vector<YTrigger *>::iterator it = list.begin(); it != list.end(); ++it)
+	{
+		sql += "ALTER TRIGGER " + (*it)->getName() + " ";
+		if (uriObj.action == "deactivate_triggers")
+			sql += "IN";
+		sql += "ACTIVE;\n";
 	}
 
 	ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, wxEmptyString);

@@ -228,16 +228,10 @@ bool ReorderFieldsHandler::handleURI(std::string& uriStr)
 	if (uriObj.action != "reorder_fields")
 		return false;
 
-	std::string ms = uriObj.getParam("object_address");		// object
-	unsigned long mo;
-	if (!std2wx(ms).ToULong(&mo))
+	YTable *t = (YTable *)getObject(uriObj);
+	wxWindow *w = getWindow(uriObj);
+	if (!t || !w)
 		return true;
-	YTable *t = (YTable *)mo;
-
-	ms = uriObj.getParam("parent_window");		// window
-	if (!std2wx(ms).ToULong(&mo))
-		return true;
-	wxWindow *w = (wxWindow *)mo;
 
 	ReorderFieldsDialog rfd(w, t);
 	rfd.ShowModal();
