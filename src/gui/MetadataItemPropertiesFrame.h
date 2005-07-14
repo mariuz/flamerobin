@@ -50,7 +50,7 @@ public:
 
     MetadataItemPropertiesFrame(wxWindow* parent, YxMetadataItem *object, int id = -1);
 private:
-	enum { ptSummary, ptConstraints, ptDependencies, ptTableTriggers, ptTableIndices } pageTypeM;
+	enum { ptSummary, ptConstraints, ptDependencies, ptTriggers, ptTableIndices } pageTypeM;
 
 	YxMetadataItem *objectM;
 	void removeObservedObject(YxSubject *object);

@@ -34,7 +34,7 @@
 #include "constraints.h"
 #include "trigger.h"
 #include "indices.h"
-#include "metadataitemwithcolumns.h"
+#include "relation.h"
 //------------------------------------------------------------------------------
 //! small helper class
 class Join
@@ -45,7 +45,7 @@ public:
 	Join(std::string a, std::string b): table(a), fields(b) { };
 };
 //------------------------------------------------------------------------------
-class YTable: public YxMetadataItemWithColumns
+class YTable: public Relation
 {
 private:
 	ColumnConstraint primaryKeyM;			// table can have only one pk
@@ -75,7 +75,6 @@ public:
 
 	virtual bool loadColumns();			// update the keys info too
 	void invalidateIndices();
-	bool getTriggers(std::vector<YTrigger *>& list, YTrigger::firingTimeType beforeOrAfter);
 
 	ColumnConstraint *getPrimaryKey();
 	std::vector<ForeignKey> *getForeignKeys();

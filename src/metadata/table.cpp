@@ -31,13 +31,13 @@
 #include <ibpp.h>
 #include "dberror.h"
 #include "database.h"
-#include "table.h"
 #include "collection.h"
 #include "indices.h"
-#include "metadataitemwithcolumns.h"
+#include "relation.h"
+#include "table.h"
 //------------------------------------------------------------------------------
 YTable::YTable()
-	:YxMetadataItemWithColumns()
+	:Relation()
 {
 	typeM = ntTable;
 	primaryKeyLoadedM = false;
@@ -63,7 +63,7 @@ bool YTable::loadColumns()			// update the keys info too
 	checkConstraintsLoadedM = false;
 	uniqueConstraintsLoadedM = false;
 	indicesLoadedM = false;
-	return YxMetadataItemWithColumns::loadColumns();
+	return Relation::loadColumns();
 }
 //------------------------------------------------------------------------------
 std::string YTable::getInsertStatement()
@@ -488,52 +488,6 @@ bool YTable::loadIndices()
 		}
 		tr1->Commit();
 		indicesLoadedM = true;
-		return true;
-	}
-	catch (IBPP::Exception &e)
-	{
-		lastError().setMessage(e.ErrorMessage());
-	}
-	catch (...)
-	{
-		lastError().setMessage("System error.");
-	}
-	return false;
-}
-//------------------------------------------------------------------------------
-//! load list of triggers for table
-//! link them to triggers in database's collection
-bool YTable::getTriggers(std::vector<YTrigger *>& list, YTrigger::firingTimeType beforeOrAfter)
-{
-	YDatabase *d = getDatabase();
-	if (!d)
-	{
-		lastError().setMessage("database not set");
-		return false;
-	}
-
-	IBPP::Database& db = d->getDatabase();
-	try
-	{
-		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-		tr1->Start();
-		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-		st1->Prepare(
-			"select rdb$trigger_name from rdb$triggers where rdb$relation_name = ? "
-			"order by rdb$trigger_sequence"
-		);
-		st1->Set(1, getName());
-		st1->Execute();
-		while (st1->Fetch())
-		{
-			std::string name;
-			st1->Get(1, name);
-			name.erase(name.find_last_not_of(" ") + 1);
-			YTrigger *t = dynamic_cast<YTrigger *>(d->findByNameAndType(ntTrigger, name));
-			if (t && t->getFiringTime() == beforeOrAfter)
-				list.push_back(t);
-		}
-		tr1->Commit();
 		return true;
 	}
 	catch (IBPP::Exception &e)

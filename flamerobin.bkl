@@ -264,9 +264,9 @@
         $(SOURCEDIR)/metadata/generator.h
         $(SOURCEDIR)/metadata/indices.h
         $(SOURCEDIR)/metadata/metadataitem.h
-        $(SOURCEDIR)/metadata/metadataitemwithcolumns.h
         $(SOURCEDIR)/metadata/parameter.h
         $(SOURCEDIR)/metadata/procedure.h
+        $(SOURCEDIR)/metadata/relation.h
         $(SOURCEDIR)/metadata/role.h
         $(SOURCEDIR)/metadata/root.h
         $(SOURCEDIR)/metadata/server.h
@@ -336,9 +336,9 @@
         $(SOURCEDIR)/metadata/generator.cpp
         $(SOURCEDIR)/metadata/indices.cpp
         $(SOURCEDIR)/metadata/metadataitem.cpp
-        $(SOURCEDIR)/metadata/metadataitemwithcolumns.cpp
         $(SOURCEDIR)/metadata/parameter.cpp
         $(SOURCEDIR)/metadata/procedure.cpp
+        $(SOURCEDIR)/metadata/relation.cpp
         $(SOURCEDIR)/metadata/role.cpp
         $(SOURCEDIR)/metadata/root.cpp
         $(SOURCEDIR)/metadata/server.cpp
@@ -382,6 +382,7 @@
 		TABLEindices.html
         TRIGGER.html
         VIEW.html
+        VIEWtriggers.html
         dependencies.html
         drop.png
         ok.png

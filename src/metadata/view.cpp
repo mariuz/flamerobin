@@ -33,10 +33,10 @@
 #include "database.h"
 #include "view.h"
 #include "collection.h"
-#include "metadataitemwithcolumns.h"
+#include "relation.h"
 //------------------------------------------------------------------------------
 YView::YView()
-	:YxMetadataItemWithColumns()
+	:Relation()
 {
 	typeM = ntView;
 }

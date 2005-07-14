@@ -168,8 +168,8 @@ void MetadataItemPropertiesFrame::loadPage()
 		case ptConstraints:
 			htmlpage += objectM->getTypeName() + "constraints.html";
 			break;
-		case ptTableTriggers:
-			htmlpage += "TABLEtriggers.html";
+		case ptTriggers:
+			htmlpage += objectM->getTypeName() + "triggers.html";
 			break;
 		case ptTableIndices:
 			htmlpage += "TABLEindices.html";
@@ -220,7 +220,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 
 	else if (cmd == "columns")	// table and view columns
 	{
-		YxMetadataItemWithColumns *m = dynamic_cast<YxMetadataItemWithColumns *>(object);
+		Relation *m = dynamic_cast<Relation *>(object);
 		if (!m)
 			return;
 		std::vector<YxMetadataItem *> tmp;
@@ -231,15 +231,15 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 
 	else if (cmd == "triggers")	// table triggers,  triggers:after or triggers:befor  <- not a typo
 	{
-		YTable *t = dynamic_cast<YTable *>(object);
-		if (!t)
+		Relation *r = dynamic_cast<Relation *>(object);
+		if (!r)
 			return;
 		std::vector<YTrigger *> tmp;
 		bool result;
 		if (suffix.substr(0, 5) == "after")
-			result = t->getTriggers(tmp, YTrigger::afterTrigger);
+			result = r->getTriggers(tmp, YTrigger::afterTrigger);
 		else
-			result = t->getTriggers(tmp, YTrigger::beforeTrigger);
+			result = r->getTriggers(tmp, YTrigger::beforeTrigger);
 		suffix.erase(0, 5);
 		if (result)
 		{
@@ -618,7 +618,7 @@ void MetadataItemPropertiesFrame::setPage(const std::string& type)
 	else if (type == "dependencies")
 		pageTypeM = ptDependencies;
 	else if (type == "triggers")
-		pageTypeM = ptTableTriggers;
+		pageTypeM = ptTriggers;
 	else if (type == "indices")
 		pageTypeM = ptTableIndices;
 	// add more page types here when needed
@@ -633,7 +633,7 @@ void MetadataItemPropertiesFrame::update()
 	// if table or view columns change, we need to reattach
 	if (objectM->getType() == ntTable || objectM->getType() == ntView)	// also observe columns
 	{
-		YxMetadataItemWithColumns *t = dynamic_cast<YxMetadataItemWithColumns *>(objectM);
+		Relation *t = dynamic_cast<Relation *>(objectM);
 		if (!t)
 			return;
 		t->checkAndLoadColumns();		// load column data if needed

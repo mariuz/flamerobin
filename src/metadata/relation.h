@@ -26,20 +26,26 @@
 //
 //
 //------------------------------------------------------------------------------
-#ifndef FR_VIEW_H
-#define FR_VIEW_H
+#ifndef FR_METADATAITEMWITHCOLUMNS_H
+#define FR_METADATAITEMWITHCOLUMNS_H
 
-#include "relation.h"
-
-class YView: public Relation
+#include <vector>
+#include "metadataitem.h"
+#include "collection.h"
+#include "column.h"
+class Trigger;
+//------------------------------------------------------------------------------
+class Relation: public YxMetadataItem
 {
+protected:
+	YMetadataCollection <YColumn>columnsM;
 public:
-	std::string getCreateSqlTemplate() const;	// overrides YxMetadataItem::getCreateSqlTemplate()
-
-	bool getSource(std::string& source);
-	std::string getAlterSql();
-	YView();
-	virtual const std::string getTypeName() const;
+	bool getChildren(std::vector<YxMetadataItem *>& temp);
+	bool checkAndLoadColumns();
+	virtual bool loadColumns();
+	YColumn *addColumn(YColumn &c);
+	bool getTriggers(std::vector<YTrigger *>& list, YTrigger::firingTimeType beforeOrAfter);
+	Relation();
 };
 //------------------------------------------------------------------------------
 #endif

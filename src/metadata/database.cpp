@@ -470,6 +470,7 @@ bool YDatabase::parseCommitedSql(std::string sql)
 		action = "ALTER";		// behaves like "alter"
 	}
 
+	// indices update tables
 	if (action == "DROP" && object_type == "INDEX")
 	{
 		// We cannot know which table is affected, so the only solution is that all tables reload their indices
@@ -477,7 +478,6 @@ bool YDatabase::parseCommitedSql(std::string sql)
 			(*it).invalidateIndices();
 		return true;
 	}
-
 	if (action == "ALTER" && object_type == "INDEX" || action == "SET" && object_type == "STATISTICS")	// refresh table
 	{
 		if (action == "SET") 	// move by 1
@@ -488,7 +488,16 @@ bool YDatabase::parseCommitedSql(std::string sql)
 			t->invalidateIndices();
 		return true;
 	}
-	
+
+	// triggers update tables and views
+	if (action == "DROP" && object_type == "TRIGGER")	// update all tables
+	{
+		for (YMetadataCollection<YTable>::iterator it = tablesM.begin(); it != tablesM.end(); ++it)
+			(*it).notify();
+		for (YMetadataCollection<YView>::iterator it = viewsM.begin(); it != viewsM.end(); ++it)
+			(*it).notify();
+	}
+
 	bool isIndex = false;
 	if (action == "CREATE")							// looking for CREATE INDEX
 	{
@@ -505,7 +514,7 @@ bool YDatabase::parseCommitedSql(std::string sql)
 					found = true;
 					break;
 				}
-			}			
+			}
 			if (found)
 			{
 				if (name == "INDEX")
@@ -548,8 +557,8 @@ bool YDatabase::parseCommitedSql(std::string sql)
 			t->invalidateIndices();
 		return true;
 	}
-	
-	
+
+
 	// convert change in NULL flag to ALTER TABLE (since it should be processed like that)
 	if (sql.substr(0, 44) == "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG")
 	{
@@ -571,6 +580,20 @@ bool YDatabase::parseCommitedSql(std::string sql)
 	{
 		if (addObject(t, name))		// inserts object into collection
 			refreshByType(t);
+		if (object_type == "TRIGGER")		// new trigger created, alert tables/views
+		{									// to update their property pages
+			std::string relation;
+			strstrm >> relation;	// FOR
+			strstrm >> relation;	// relation_name
+			Relation *m = dynamic_cast<Relation *>(findByNameAndType(ntTable, relation));
+			if (!m)
+			{
+				m = dynamic_cast<Relation *>(findByNameAndType(ntView, relation));
+				if (!m)
+					return true;
+			}
+			m->notify();
+		}
 	}
 	else if (action == "DROP" || action == "ALTER")
 	{
@@ -662,13 +685,27 @@ bool YDatabase::parseCommitedSql(std::string sql)
 			// and object would do wherever it needs to
 			bool result = true;
 			if (t == ntTable || t == ntView)
-				result = ((YxMetadataItemWithColumns *)object)->loadColumns();
+				result = ((Relation *)object)->loadColumns();
 			else if (t == ntProcedure)
 				result = ((YProcedure *)object)->checkAndLoadParameters(true);	// force reload
             else if (t == ntException)
                 ((YException *)object)->loadProperties(true);
 			else if (t == ntTrigger)
+			{
 				((YTrigger *)object)->loadInfo(true);
+				std::string relation;					// alert table/view
+				YTrigger *tr = dynamic_cast<YTrigger *>(findByNameAndType(ntTrigger, name));
+				if (!tr || !tr->getRelation(relation))
+					return true;
+				Relation *m = dynamic_cast<Relation *>(findByNameAndType(ntTable, relation));
+				if (!m)
+				{
+					m = dynamic_cast<Relation *>(findByNameAndType(ntView, relation));
+					if (!m)
+						return true;
+				}
+				m->notify();
+			}
 			else
 				object->notify();
 

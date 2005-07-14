@@ -118,9 +118,9 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_generator.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_indices.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitem.obj \
-	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitemwithcolumns.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_parameter.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_procedure.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_relation.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_role.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_root.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_server.obj \
@@ -231,7 +231,7 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerob
 
 templates: 
 	if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates mkdir bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
-	for %f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TRIGGER.html VIEW.html dependencies.html drop.png ok.png view.png compute.png redx.png) do if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates\%f copy html-templates\%f bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
+	for %f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TRIGGER.html VIEW.html VIEWtriggers.html dependencies.html drop.png ok.png view.png compute.png redx.png) do if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates\%f copy html-templates\%f bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
 
 config-options: 
 	if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT) mkdir bcc$(U_OPT)$(R_OPT)$(D_OPT)
@@ -357,13 +357,13 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_indices.obj: .\src\metadata\indices.cpp
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitem.obj: .\src\metadata\metadataitem.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitemwithcolumns.obj: .\src\metadata\metadataitemwithcolumns.cpp
-	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
-
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_parameter.obj: .\src\metadata\parameter.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_procedure.obj: .\src\metadata\procedure.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_relation.obj: .\src\metadata\relation.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_role.obj: .\src\metadata\role.cpp

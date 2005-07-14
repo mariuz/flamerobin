@@ -132,7 +132,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
 		}
 		else
 		{
-			if (!((YxMetadataItemWithColumns *)m)->checkAndLoadColumns())
+			if (!((Relation *)m)->checkAndLoadColumns())
 				::wxMessageBox(std2wx(lastError().getMessage()), _("An error occurred"), wxICON_ERROR);
 		}
 	}
@@ -705,7 +705,7 @@ void MainFrame::OnMenuLoadColumnsInfo(wxCommandEvent& WXUNUSED(event))
 	switch (t->getType())
 	{
 		case ntTable:
-		case ntView:		success = ((YxMetadataItemWithColumns *)t)->checkAndLoadColumns();	break;
+		case ntView:		success = ((Relation *)t)->checkAndLoadColumns();	break;
 		case ntProcedure:	success = ((YProcedure *)t)->checkAndLoadParameters();				break;
 		default:			break;
 	};
