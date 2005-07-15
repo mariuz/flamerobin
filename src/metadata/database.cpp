@@ -574,6 +574,10 @@ bool YDatabase::parseCommitedSql(std::string sql)
 		name = sql.substr(pos, end-pos);
 	}
 
+	std::string::size_type pbr = name.find("(");		// CREATE PROCEDURE NAME(    <- remove colon
+	if (pbr != std::string::npos)
+		name.erase(pbr);
+
 	// process the action...
 	NodeType t = getTypeByName(object_type);
 	if (action == "CREATE" || action == "DECLARE")
