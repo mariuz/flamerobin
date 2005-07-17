@@ -62,6 +62,7 @@
 #include "frutils.h"
 #include "ugly.h"
 #include "urihandler.h"
+#include "framemanager.h"
 //-----------------------------------------------------------------------------
 bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
 {
@@ -284,8 +285,8 @@ BEGIN_EVENT_TABLE(SqlEditor, wxStyledTextCtrl)
     EVT_MENU(SqlEditor::ID_MENU_PASTE,            SqlEditor::OnMenuPaste)
     EVT_MENU(SqlEditor::ID_MENU_DELETE,           SqlEditor::OnMenuDelete)
     EVT_MENU(SqlEditor::ID_MENU_SELECT_ALL,       SqlEditor::OnMenuSelectAll)
-    EVT_MENU(SqlEditor::ID_MENU_SELECT_STATEMENT, SqlEditor::OnMenuSelectStatement)
     EVT_MENU(SqlEditor::ID_MENU_EXECUTE_SELECTED, SqlEditor::OnMenuExecuteSelected)
+    EVT_MENU(SqlEditor::ID_MENU_FIND_SELECTED,    SqlEditor::OnMenuFindSelected)
     EVT_MENU(SqlEditor::ID_MENU_FIND,             SqlEditor::OnMenuFind)
     EVT_MENU(SqlEditor::ID_MENU_WRAP,             SqlEditor::OnMenuWrap)
     EVT_MENU(SqlEditor::ID_MENU_SET_FONT,         SqlEditor::OnMenuSetFont)
@@ -303,8 +304,17 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
     m.Append(ID_MENU_DELETE, _("Delete"));
     m.AppendSeparator();
     m.Append(ID_MENU_SELECT_ALL,       _("Select All"));
-    m.Append(ID_MENU_SELECT_STATEMENT, _("Select statement"));
     m.Append(ID_MENU_EXECUTE_SELECTED, _("Execute selected"));
+
+	if (GetSelectionStart() != GetSelectionEnd())		// semething is selected
+	{
+		wxString sel = GetSelectedText();
+		int p = sel.Find(wxT(" "));
+		if (p != -1)
+			sel.Remove(p);
+		m.Append(ID_MENU_FIND_SELECTED, _("Show properties for ") + sel);
+	}
+
     m.AppendSeparator();
     m.Append(ID_MENU_FIND,          _("Find and replace"));
     m.Append(ID_MENU_SET_FONT,      _("Set Font"));
@@ -361,9 +371,13 @@ void SqlEditor::OnMenuSelectAll(wxCommandEvent& WXUNUSED(event))
 	SelectAll();
 }
 //-----------------------------------------------------------------------------
-void SqlEditor::OnMenuSelectStatement(wxCommandEvent& WXUNUSED(event))
+void SqlEditor::OnMenuFindSelected(wxCommandEvent& WXUNUSED(event))
 {
-	wxMessageBox(_("This feature is not yet implemented."), _("Sorry."), wxICON_INFORMATION);
+	wxString sel = GetSelectedText();
+	int p = sel.Find(wxT(" "));
+	if (p != -1)
+		sel.Remove(p);
+	frameM->showProperties(sel);
 }
 //-----------------------------------------------------------------------------
 void SqlEditor::OnMenuExecuteSelected(wxCommandEvent& WXUNUSED(event))
@@ -573,6 +587,23 @@ void ExecuteSqlFrame::do_layout()
     Layout();
 
 	styled_text_ctrl_sql->SetFocus();
+}
+//-----------------------------------------------------------------------------
+// This function should probably go somewhere else, but we don't want SQL editor
+// to know about database class
+void ExecuteSqlFrame::showProperties(wxString objectName)
+{
+	YxMetadataItem *m = databaseM->findByName(wx2std(objectName));
+	if (!m)
+	{
+		wxMessageBox(
+			wxString::Format(_("Object %s has not been found in this database."), objectName.c_str()),
+			_("Search failed."),
+			wxID_OK|wxICON_INFORMATION
+		);
+		return;
+	}
+	frameManager().showMetadataPropertyFrame(GetParent(), m);
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)

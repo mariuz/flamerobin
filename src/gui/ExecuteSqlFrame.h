@@ -56,7 +56,7 @@ private:
 	void setup();
 public:
 	enum { ID_MENU_UNDO = 300, ID_MENU_REDO, ID_MENU_CUT, ID_MENU_COPY, ID_MENU_PASTE, ID_MENU_DELETE,
-		ID_MENU_SELECT_ALL, ID_MENU_SELECT_STATEMENT, ID_MENU_EXECUTE_SELECTED, ID_MENU_WRAP, ID_MENU_SET_FONT,
+		ID_MENU_SELECT_ALL, ID_MENU_EXECUTE_SELECTED, ID_MENU_FIND_SELECTED, ID_MENU_WRAP, ID_MENU_SET_FONT,
 		ID_MENU_FIND
 	};
 
@@ -69,7 +69,7 @@ public:
 	void OnMenuPaste(wxCommandEvent& event);
 	void OnMenuDelete(wxCommandEvent& event);
 	void OnMenuSelectAll(wxCommandEvent& event);
-	void OnMenuSelectStatement(wxCommandEvent& event);
+	void OnMenuFindSelected(wxCommandEvent& event);
 	void OnMenuExecuteSelected(wxCommandEvent& event);
 	void OnMenuFind(wxCommandEvent& event);
 	void OnMenuSetFont(wxCommandEvent& event);
@@ -80,6 +80,7 @@ public:
 class ExecuteSqlFrame: public BaseFrame, public YxObserver {
 public:
 	void setDatabase(YDatabase *db);
+	void showProperties(wxString objectName);
 
     // begin wxGlade: ExecuteSqlFrame::ids
     enum {

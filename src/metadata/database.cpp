@@ -372,6 +372,17 @@ void YDatabase::refreshByType(NodeType type)
 	};
 }
 //------------------------------------------------------------------------------
+YxMetadataItem *YDatabase::findByName(std::string name)
+{
+	for (NodeType n = ntTable; n < ntLastType; ++n)
+	{
+		YxMetadataItem *m = findByNameAndType(n, name);
+		if (m)
+			return m;
+	}
+	return 0;
+}
+//------------------------------------------------------------------------------
 YxMetadataItem *YDatabase::findByNameAndType(NodeType nt, std::string name)
 {
 	switch (nt)
