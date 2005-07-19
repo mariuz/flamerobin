@@ -374,9 +374,9 @@ void YDatabase::refreshByType(NodeType type)
 //------------------------------------------------------------------------------
 YxMetadataItem *YDatabase::findByName(std::string name)
 {
-	for (NodeType n = ntTable; n < ntLastType; ++n)
+	for (int n = (int)ntTable; n < (int)ntLastType; n++)
 	{
-		YxMetadataItem *m = findByNameAndType(n, name);
+		YxMetadataItem *m = findByNameAndType((NodeType)n, name);
 		if (m)
 			return m;
 	}
