@@ -69,9 +69,9 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_generator.o \
 	flamerobin_indices.o \
 	flamerobin_metadataitem.o \
-	flamerobin_metadataitemwithcolumns.o \
 	flamerobin_parameter.o \
 	flamerobin_procedure.o \
+	flamerobin_relation.o \
 	flamerobin_role.o \
 	flamerobin_root.o \
 	flamerobin_server.o \
@@ -185,7 +185,7 @@ flamerobin.app/Contents/PkgInfo: flamerobin$(EXEEXT) $(srcdir)/res/flamerobin.In
 
 templates: 
 	@mkdir -p ./html-templates
-	@for f in DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TRIGGER.html VIEW.html dependencies.html drop.png ok.png view.png compute.png; do \
+	@for f in DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TRIGGER.html VIEW.html VIEWtriggers.html dependencies.html drop.png ok.png view.png compute.png redx.png; do \
 	if test ! -e ./html-templates/$$f ; \
 	then x=yep ; \
 	else x=`find $(srcdir)/html-templates/$$f -newer ./html-templates/$$f -print` ; \
@@ -327,14 +327,14 @@ flamerobin_indices.o: $(srcdir)/src/metadata/indices.cpp $(FLAMEROBIN_ODEP)
 flamerobin_metadataitem.o: $(srcdir)/src/metadata/metadataitem.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/metadataitem.cpp
 
-flamerobin_metadataitemwithcolumns.o: $(srcdir)/src/metadata/metadataitemwithcolumns.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/metadataitemwithcolumns.cpp
-
 flamerobin_parameter.o: $(srcdir)/src/metadata/parameter.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/parameter.cpp
 
 flamerobin_procedure.o: $(srcdir)/src/metadata/procedure.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/procedure.cpp
+
+flamerobin_relation.o: $(srcdir)/src/metadata/relation.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/relation.cpp
 
 flamerobin_role.o: $(srcdir)/src/metadata/role.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/role.cpp
