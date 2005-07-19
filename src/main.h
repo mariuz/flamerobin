@@ -25,9 +25,9 @@
 #define MAIN_H
 
 #if wxUSE_UNICODE
-    #define FR_VERSION "0.2.5 Unicode"
+    #define FR_VERSION "0.2.6 Unicode"
 #else
-    #define FR_VERSION "0.2.5"
+    #define FR_VERSION "0.2.6"
 #endif
 
 //-----------------------------------------------------------------------------
