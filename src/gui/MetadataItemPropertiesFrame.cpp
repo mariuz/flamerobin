@@ -36,6 +36,9 @@
     #include "wx/wx.h"
 #endif
 
+#include <wx/clipbrd.h>
+#include <wx/file.h>
+#include <wx/filedlg.h>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -81,6 +84,23 @@ std::string escapeHtmlChars(std::string s, bool processNewlines = true)
 		}
 	}
 	return s;
+}
+//-----------------------------------------------------------------------------
+HtmlPrinter::HtmlPrinter()
+{
+	prnM = new wxHtmlEasyPrinting(_("Printing"));
+}
+//-----------------------------------------------------------------------------
+wxHtmlEasyPrinting *HtmlPrinter::getHEP()
+{
+	static HtmlPrinter instance;
+	return instance.prnM;
+}
+//-----------------------------------------------------------------------------
+HtmlPrinter::~HtmlPrinter()
+{
+	delete prnM;
+	prnM = 0;
 }
 //-----------------------------------------------------------------------------
 //! MetadataItemPropertiesFrame class
@@ -599,7 +619,7 @@ void MetadataItemPropertiesFrame::processHtmlFile(std::string filename)
 
 	int x = 0, y = 0;
 	window_1->GetViewStart(&x, &y);			// save scroll position
-	window_1->SetPage(std2wx(htmlpage));
+	window_1->setPageSource(std2wx(htmlpage));
 	window_1->Scroll(x, y);					// restore scroll position
 }
 //-----------------------------------------------------------------------------
@@ -665,6 +685,83 @@ void MetadataItemPropertiesFrame::update()
 myHtmlWindow::myHtmlWindow(wxWindow *parent)
 	: wxHtmlWindow(parent, -1)
 {
+}
+//-----------------------------------------------------------------------------
+BEGIN_EVENT_TABLE(myHtmlWindow, wxHtmlWindow)
+	EVT_RIGHT_UP(myHtmlWindow::OnRightUp)
+	EVT_MENU(myHtmlWindow::ID_MENU_COPY, myHtmlWindow::OnMenuCopy)
+	EVT_MENU(myHtmlWindow::ID_MENU_DUPLICATE, myHtmlWindow::OnMenuDuplicate)
+	EVT_MENU(myHtmlWindow::ID_MENU_BROWSER, myHtmlWindow::OnMenuBrowser)
+	EVT_MENU(myHtmlWindow::ID_MENU_SAVE, myHtmlWindow::OnMenuSave)
+	EVT_MENU(myHtmlWindow::ID_MENU_PRINT, myHtmlWindow::OnMenuPrint)
+END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+void myHtmlWindow::OnRightUp(wxMouseEvent& WXUNUSED(event))
+{
+    wxMenu m(0);
+    m.Append(ID_MENU_COPY,   	_("&Copy"));
+    m.Append(ID_MENU_DUPLICATE,	_("&Duplicate window"));
+    m.AppendSeparator();
+    m.Append(ID_MENU_BROWSER,	_("&Open in web browser"));
+    m.Append(ID_MENU_SAVE,		_("&Save as HTML file..."));
+    m.Append(ID_MENU_PRINT,		_("&Print..."));
+	if (SelectionToText().IsEmpty())
+		m.Enable(ID_MENU_COPY,             false);
+    PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
+}
+//-----------------------------------------------------------------------------
+void myHtmlWindow::setPageSource(const wxString& html)
+{
+	pageSourceM = html;
+	SetPage(pageSourceM);
+}
+//-----------------------------------------------------------------------------
+void myHtmlWindow::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
+{
+	if (wxTheClipboard->Open())
+	{
+		wxTheClipboard->SetData( new wxTextDataObject(SelectionToText()) );
+		wxTheClipboard->Close();
+	}
+}
+//-----------------------------------------------------------------------------
+void myHtmlWindow::OnMenuDuplicate(wxCommandEvent& WXUNUSED(event))
+{
+}
+//-----------------------------------------------------------------------------
+void myHtmlWindow::OnMenuBrowser(wxCommandEvent& WXUNUSED(event))
+{
+}
+//-----------------------------------------------------------------------------
+void myHtmlWindow::OnMenuSave(wxCommandEvent& WXUNUSED(event))
+{
+	wxString filename = wxFileSelector(_("Save as HTML..."), wxEmptyString, GetOpenedPageTitle(), wxT("*.html"),
+		_("HTML files (*.html)|*.html|All files (*.*)|*.*"), wxSAVE|wxOVERWRITE_PROMPT);
+	if (!filename.IsEmpty())
+	{
+		wxFile f;
+		if (f.Open(filename, wxFile::write))
+		{
+			wxString ns(pageSourceM);
+			while (true)	// remove links
+			{
+				int p1 = ns.Upper().find(wxT("<A"));
+				int p2 = ns.Upper().find(wxT("</A>"), p1);
+				if (p1 == -1 || p2 == -1)
+					break;
+				ns.Remove(p1, p2 - p1 + 4);
+			}
+			f.Write(ns);
+			f.Close();
+		}
+	}
+}
+//-----------------------------------------------------------------------------
+void myHtmlWindow::OnMenuPrint(wxCommandEvent& WXUNUSED(event))
+{
+	HtmlPrinter::getHEP()->SetHeader(GetOpenedPageTitle());
+	HtmlPrinter::getHEP()->SetFooter(_("Printed from FlameRobin - www.flamerobin.org"));
+	HtmlPrinter::getHEP()->PreviewText(pageSourceM);
 }
 //-----------------------------------------------------------------------------
 //! Link is in format: "protocol://action?name=value&amp;name=value...etc.

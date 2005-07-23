@@ -32,13 +32,35 @@
 #ifndef METADATAITEMPROPERTIESFRAME_H
 #define METADATAITEMPROPERTIESFRAME_H
 
+class wxHtmlEasyPrinting;
+//-----------------------------------------------------------------------------
+class HtmlPrinter
+{
+private:
+	wxHtmlEasyPrinting *prnM;
+	HtmlPrinter();
+public:
+	static wxHtmlEasyPrinting *getHEP();
+	~HtmlPrinter();
+};
 //-----------------------------------------------------------------------------
 class myHtmlWindow: public wxHtmlWindow
 {
+private:
+	wxString pageSourceM;
 public:
 	myHtmlWindow(wxWindow *parent);
+	void setPageSource(const wxString& html);
+	enum {  ID_MENU_COPY=500, ID_MENU_DUPLICATE, ID_MENU_BROWSER, ID_MENU_SAVE, ID_MENU_PRINT };
 protected:
 	void OnLinkClicked(const wxHtmlLinkInfo& link);
+	void OnRightUp(wxMouseEvent& event);
+    void OnMenuCopy(wxCommandEvent& event);
+    void OnMenuDuplicate(wxCommandEvent& event);
+    void OnMenuBrowser(wxCommandEvent& event);
+    void OnMenuSave(wxCommandEvent& event);
+    void OnMenuPrint(wxCommandEvent& event);
+    DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
 class MetadataItemPropertiesFrame: public BaseFrame, public YxObserver
