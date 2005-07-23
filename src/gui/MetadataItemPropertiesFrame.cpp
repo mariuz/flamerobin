@@ -694,6 +694,7 @@ BEGIN_EVENT_TABLE(myHtmlWindow, wxHtmlWindow)
 	EVT_MENU(myHtmlWindow::ID_MENU_BROWSER, myHtmlWindow::OnMenuBrowser)
 	EVT_MENU(myHtmlWindow::ID_MENU_SAVE, myHtmlWindow::OnMenuSave)
 	EVT_MENU(myHtmlWindow::ID_MENU_PRINT, myHtmlWindow::OnMenuPrint)
+	EVT_MENU(myHtmlWindow::ID_MENU_PREVIEW, myHtmlWindow::OnMenuPreview)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void myHtmlWindow::OnRightUp(wxMouseEvent& WXUNUSED(event))
@@ -704,6 +705,7 @@ void myHtmlWindow::OnRightUp(wxMouseEvent& WXUNUSED(event))
     m.AppendSeparator();
     m.Append(ID_MENU_BROWSER,	_("&Open in web browser"));
     m.Append(ID_MENU_SAVE,		_("&Save as HTML file..."));
+    m.Append(ID_MENU_PREVIEW,	_("Print pre&view..."));
     m.Append(ID_MENU_PRINT,		_("&Print..."));
 	if (SelectionToText().IsEmpty())
 		m.Enable(ID_MENU_COPY,             false);
@@ -757,11 +759,18 @@ void myHtmlWindow::OnMenuSave(wxCommandEvent& WXUNUSED(event))
 	}
 }
 //-----------------------------------------------------------------------------
-void myHtmlWindow::OnMenuPrint(wxCommandEvent& WXUNUSED(event))
+void myHtmlWindow::OnMenuPreview(wxCommandEvent& WXUNUSED(event))
 {
 	HtmlPrinter::getHEP()->SetHeader(GetOpenedPageTitle());
 	HtmlPrinter::getHEP()->SetFooter(_("Printed from FlameRobin - www.flamerobin.org"));
 	HtmlPrinter::getHEP()->PreviewText(pageSourceM);
+}
+//-----------------------------------------------------------------------------
+void myHtmlWindow::OnMenuPrint(wxCommandEvent& WXUNUSED(event))
+{
+	HtmlPrinter::getHEP()->SetHeader(GetOpenedPageTitle());
+	HtmlPrinter::getHEP()->SetFooter(_("Printed from FlameRobin - www.flamerobin.org"));
+	HtmlPrinter::getHEP()->PrintText(pageSourceM);
 }
 //-----------------------------------------------------------------------------
 //! Link is in format: "protocol://action?name=value&amp;name=value...etc.

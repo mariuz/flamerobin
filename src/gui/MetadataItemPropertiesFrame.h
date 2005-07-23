@@ -51,7 +51,7 @@ private:
 public:
 	myHtmlWindow(wxWindow *parent);
 	void setPageSource(const wxString& html);
-	enum {  ID_MENU_COPY=500, ID_MENU_DUPLICATE, ID_MENU_BROWSER, ID_MENU_SAVE, ID_MENU_PRINT };
+	enum {  ID_MENU_COPY=500, ID_MENU_DUPLICATE, ID_MENU_BROWSER, ID_MENU_SAVE, ID_MENU_PRINT, ID_MENU_PREVIEW };
 protected:
 	void OnLinkClicked(const wxHtmlLinkInfo& link);
 	void OnRightUp(wxMouseEvent& event);
@@ -60,6 +60,7 @@ protected:
     void OnMenuBrowser(wxCommandEvent& event);
     void OnMenuSave(wxCommandEvent& event);
     void OnMenuPrint(wxCommandEvent& event);
+    void OnMenuPreview(wxCommandEvent& event);
     DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
