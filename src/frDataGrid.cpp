@@ -284,9 +284,9 @@ void DataGrid::OnMenuLabelFont(wxCommandEvent& WXUNUSED(event))
 void DataGrid::OnMenuSaveAsHTML(wxCommandEvent& WXUNUSED(event))
 {
     wxString fname = ::wxFileSelector(_("Save data in selected cells as"),
-        wxEmptyString, wxEmptyString, wxT(".html"), 
-        _("HTML files (*.htm*)|*.htm*|All files (*.*)|*.*"),
-        wxSAVE|wxCHANGE_DIR, this);
+        wxEmptyString, wxEmptyString, wxT("*.html"),
+        _("HTML files (*.html)|*.html|All files (*.*)|*.*"),
+        wxSAVE|wxCHANGE_DIR|wxOVERWRITE_PROMPT, this);
     if (fname.empty())
         return;
 
@@ -354,7 +354,7 @@ void DataGrid::OnMenuSaveAsHTML(wxCommandEvent& WXUNUSED(event))
                 outStr.WriteString(wxT("<td bgcolor=silver>"));
             else if (table->isNullCell(i, j))
                 outStr.WriteString(wxT("<td><font color=red>NULL</font>"));
-            else 
+            else
             {
                 outStr.WriteString(wxT("<td"));
                 int halign, valign;
