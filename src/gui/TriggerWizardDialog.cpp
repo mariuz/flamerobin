@@ -161,16 +161,15 @@ void TriggerWizardDialog::OnOkButtonClick(wxCommandEvent& event)
 class CreateTriggerHandler: public YxURIHandler
 {
 public:
-	bool handleURI(std::string& uriStr);
+	bool handleURI(const YURI& uriObj);
 private:
     static const CreateTriggerHandler handlerInstance;
 };
 //-----------------------------------------------------------------------------
 const CreateTriggerHandler CreateTriggerHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool CreateTriggerHandler::handleURI(std::string& uriStr)
+bool CreateTriggerHandler::handleURI(const YURI& uriObj)
 {
-    YURI uriObj(uriStr);
 	if (uriObj.action != "create_trigger")
 		return false;
 

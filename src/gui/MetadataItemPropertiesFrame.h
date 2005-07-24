@@ -48,16 +48,17 @@ class myHtmlWindow: public wxHtmlWindow
 {
 private:
 	wxString pageSourceM;
+	wxString tempLinkM;		// set before context menu pops up, and used in handler for menu item
 public:
 	myHtmlWindow(wxWindow *parent);
 	void setPageSource(const wxString& html);
-	enum {  ID_MENU_COPY=500, ID_MENU_DUPLICATE, ID_MENU_BROWSER, ID_MENU_SAVE, ID_MENU_PRINT, ID_MENU_PREVIEW };
+	enum {  ID_MENU_COPY=500, ID_MENU_NEW_WINDOW, ID_MENU_SAVE, ID_MENU_PRINT, ID_MENU_PREVIEW };
 protected:
-	void OnLinkClicked(const wxHtmlLinkInfo& link);
+	virtual void OnLinkClicked(const wxHtmlLinkInfo& link);
+
 	void OnRightUp(wxMouseEvent& event);
     void OnMenuCopy(wxCommandEvent& event);
-    void OnMenuDuplicate(wxCommandEvent& event);
-    void OnMenuBrowser(wxCommandEvent& event);
+    void OnMenuNewWindow(wxCommandEvent& event);
     void OnMenuSave(wxCommandEvent& event);
     void OnMenuPrint(wxCommandEvent& event);
     void OnMenuPreview(wxCommandEvent& event);
@@ -67,7 +68,7 @@ protected:
 class MetadataItemPropertiesFrame: public BaseFrame, public YxObserver
 {
 public:
-	const YxMetadataItem *getObservedObject() const;
+	YxMetadataItem *getObservedObject() const;
 	void processHtmlFile(std::string filename);
 	void setPage(const std::string& type);
 

@@ -1408,16 +1408,15 @@ const wxRect ExecuteSqlFrame::getDefaultRect() const
 class DropColumnHandler: public YxURIHandler
 {
 public:
-	bool handleURI(std::string& uriStr);
+	bool handleURI(const YURI& uriObj);
 private:
     static const DropColumnHandler handlerInstance;
 };
 //-----------------------------------------------------------------------------
 const DropColumnHandler DropColumnHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool DropColumnHandler::handleURI(std::string& uriStr)
+bool DropColumnHandler::handleURI(const YURI& uriObj)
 {
-    YURI uriObj(uriStr);
 	if (uriObj.action != "drop_field" && uriObj.action != "drop_constraint")
 		return false;
 
@@ -1441,7 +1440,7 @@ bool DropColumnHandler::handleURI(std::string& uriStr)
 class EditProcedureHandler: public YxURIHandler
 {
 public:
-	bool handleURI(std::string& uriStr);
+	bool handleURI(const YURI& uriObj);
 private:
     // singleton; registers itself on creation.
     static const EditProcedureHandler handlerInstance;
@@ -1449,9 +1448,8 @@ private:
 //-----------------------------------------------------------------------------
 const EditProcedureHandler EditProcedureHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool EditProcedureHandler::handleURI(std::string& uriStr)
+bool EditProcedureHandler::handleURI(const YURI& uriObj)
 {
-    YURI uriObj(uriStr);
 	if (uriObj.action != "edit_procedure")
 		return false;
 
@@ -1470,7 +1468,7 @@ bool EditProcedureHandler::handleURI(std::string& uriStr)
 class EditViewHandler: public YxURIHandler
 {
 public:
-	bool handleURI(std::string& uriStr);
+	bool handleURI(const YURI& uriObj);
 private:
     // singleton; registers itself on creation.
     static const EditViewHandler handlerInstance;
@@ -1478,9 +1476,8 @@ private:
 //-----------------------------------------------------------------------------
 const EditViewHandler EditViewHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool EditViewHandler::handleURI(std::string& uriStr)
+bool EditViewHandler::handleURI(const YURI& uriObj)
 {
-    YURI uriObj(uriStr);
 	if (uriObj.action != "edit_view")
 		return false;
 
@@ -1499,7 +1496,7 @@ bool EditViewHandler::handleURI(std::string& uriStr)
 class EditTriggerHandler: public YxURIHandler
 {
 public:
-	bool handleURI(std::string& uriStr);
+	bool handleURI(const YURI& uriObj);
 private:
     // singleton; registers itself on creation.
     static const EditTriggerHandler handlerInstance;
@@ -1507,9 +1504,8 @@ private:
 //-----------------------------------------------------------------------------
 const EditTriggerHandler EditTriggerHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool EditTriggerHandler::handleURI(std::string& uriStr)
+bool EditTriggerHandler::handleURI(const YURI& uriObj)
 {
-    YURI uriObj(uriStr);
 	if (uriObj.action != "edit_trigger")
 		return false;
 
@@ -1528,7 +1524,7 @@ bool EditTriggerHandler::handleURI(std::string& uriStr)
 class EditGeneratorValueHandler: public YxURIHandler
 {
 public:
-	bool handleURI(std::string& uriStr);
+	bool handleURI(const YURI& uriObj);
 private:
     // singleton; registers itself on creation.
     static const EditGeneratorValueHandler handlerInstance;
@@ -1536,9 +1532,8 @@ private:
 //-----------------------------------------------------------------------------
 const EditGeneratorValueHandler EditGeneratorValueHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool EditGeneratorValueHandler::handleURI(std::string& uriStr)
+bool EditGeneratorValueHandler::handleURI(const YURI& uriObj)
 {
-    YURI uriObj(uriStr);
 	if (uriObj.action != "edit_generator_value")
 		return false;
 
@@ -1573,7 +1568,7 @@ bool EditGeneratorValueHandler::handleURI(std::string& uriStr)
 class EditExceptionHandler: public YxURIHandler
 {
 public:
-	bool handleURI(std::string& uriStr);
+	bool handleURI(const YURI& uriObj);
 private:
     // singleton; registers itself on creation.
     static const EditExceptionHandler handlerInstance;
@@ -1581,9 +1576,8 @@ private:
 //-----------------------------------------------------------------------------
 const EditExceptionHandler EditExceptionHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool EditExceptionHandler::handleURI(std::string& uriStr)
+bool EditExceptionHandler::handleURI(const YURI& uriObj)
 {
-    YURI uriObj(uriStr);
 	if (uriObj.action != "edit_exception")
 		return false;
 
@@ -1602,7 +1596,7 @@ bool EditExceptionHandler::handleURI(std::string& uriStr)
 class IndexActionHandler: public YxURIHandler
 {
 public:
-	bool handleURI(std::string& uriStr);
+	bool handleURI(const YURI& uriObj);
 private:
     // singleton; registers itself on creation.
     static const IndexActionHandler handlerInstance;
@@ -1610,9 +1604,8 @@ private:
 //-----------------------------------------------------------------------------
 const IndexActionHandler IndexActionHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool IndexActionHandler::handleURI(std::string& uriStr)
+bool IndexActionHandler::handleURI(const YURI& uriObj)
 {
-    YURI uriObj(uriStr);
 	if (uriObj.action != "index_action")
 		return false;
 
@@ -1641,7 +1634,7 @@ bool IndexActionHandler::handleURI(std::string& uriStr)
 class TableIndicesHandler: public YxURIHandler
 {
 public:
-	bool handleURI(std::string& uriStr);
+	bool handleURI(const YURI& uriObj);
 private:
     // singleton; registers itself on creation.
     static const TableIndicesHandler handlerInstance;
@@ -1649,9 +1642,8 @@ private:
 //-----------------------------------------------------------------------------
 const TableIndicesHandler TableIndicesHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool TableIndicesHandler::handleURI(std::string& uriStr)
+bool TableIndicesHandler::handleURI(const YURI& uriObj)
 {
-    YURI uriObj(uriStr);
 	if (uriObj.action != "add_index" && uriObj.action != "recompute_all")
 		return false;
 
@@ -1718,16 +1710,15 @@ bool TableIndicesHandler::handleURI(std::string& uriStr)
 class ActivateTriggersHandler: public YxURIHandler
 {
 public:
-	bool handleURI(std::string& uriStr);
+	bool handleURI(const YURI& uriObj);
 private:
     static const ActivateTriggersHandler handlerInstance;
 };
 //-----------------------------------------------------------------------------
 const ActivateTriggersHandler ActivateTriggersHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool ActivateTriggersHandler::handleURI(std::string& uriStr)
+bool ActivateTriggersHandler::handleURI(const YURI& uriObj)
 {
-    YURI uriObj(uriStr);
 	if (uriObj.action != "activate_triggers" && uriObj.action != "deactivate_triggers")
 		return false;
 

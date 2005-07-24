@@ -45,7 +45,7 @@
 class ObjectDescriptionHandler: public YxURIHandler
 {
 public:
-	bool handleURI(std::string& uriStr);
+	bool handleURI(const YURI& uriObj);
 private:
     // singleton; registers itself on creation.
     static const ObjectDescriptionHandler handlerInstance;
@@ -53,9 +53,8 @@ private:
 //-----------------------------------------------------------------------------
 const ObjectDescriptionHandler ObjectDescriptionHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool ObjectDescriptionHandler::handleURI(std::string& uriStr)
+bool ObjectDescriptionHandler::handleURI(const YURI& uriObj)
 {
-    YURI uriObj(uriStr);
 	if (uriObj.action != "edit_description")
 		return false;
 

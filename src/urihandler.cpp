@@ -138,9 +138,15 @@ void YURIProcessor::checkHandlerListSorted()
 //! returns false if no suitable handler found
 bool YURIProcessor::handleURI(std::string& uriStr)
 {
+	YURI uriObj(uriStr);
+	return handleURI(uriObj);
+}
+//-----------------------------------------------------------------------------
+bool YURIProcessor::handleURI(const YURI& uriObj)
+{
     checkHandlerListSorted();
     for (std::list<YxURIHandler*>::iterator it = handlersM.begin(); it != handlersM.end(); ++it)
-		if ((*it)->handleURI(uriStr))
+		if ((*it)->handleURI(uriObj))
 			return true;
     return false;
 }
@@ -180,7 +186,7 @@ YxURIHandler::~YxURIHandler()
         processorM->removeHandler(this);
 }
 //-----------------------------------------------------------------------------
-wxWindow *YxURIHandler::getWindow(YURI& uriObj)
+wxWindow *YxURIHandler::getWindow(const YURI& uriObj)
 {
 	std::string ms = uriObj.getParam("parent_window");		// window
 	unsigned long mo;
@@ -189,7 +195,7 @@ wxWindow *YxURIHandler::getWindow(YURI& uriObj)
 	return (wxWindow *)mo;
 }
 //-----------------------------------------------------------------------------
-void *YxURIHandler::getObject(YURI& uriObj)
+void *YxURIHandler::getObject(const YURI& uriObj)
 {
 	std::string ms = uriObj.getParam("object_address");		// object
 	unsigned long mo;

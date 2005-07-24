@@ -430,7 +430,7 @@ const std::string FieldPropertiesFrame::getName() const
 class ColumnPropertiesHandler: public YxURIHandler
 {
 public:
-	bool handleURI(std::string& uriStr);
+	bool handleURI(const YURI& uriObj);
 private:
     // singleton; registers itself on creation.
     static const ColumnPropertiesHandler handlerInstance;
@@ -438,9 +438,8 @@ private:
 //-----------------------------------------------------------------------------
 const ColumnPropertiesHandler ColumnPropertiesHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool ColumnPropertiesHandler::handleURI(std::string& uriStr)
+bool ColumnPropertiesHandler::handleURI(const YURI& uriObj)
 {
-    YURI uriObj(uriStr);
 	if (uriObj.action != "edit_field" && uriObj.action != "add_field")
 		return false;
 

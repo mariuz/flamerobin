@@ -18,7 +18,7 @@
 
   All Rights Reserved.
 
-  Contributor(s):
+  Contributor(s): Milan Babuskov.
 */
 
 #ifndef FR_FRAMEMANAGER_H
@@ -32,7 +32,7 @@
 #include "gui/MetadataItemPropertiesFrame.h"
 #include "metadata/metadataitem.h"
 
-typedef std::map<YxMetadataItem*, BaseFrame*> ItemFrameMap;
+typedef std::multimap<YxMetadataItem*, BaseFrame*> ItemFrameMap;
 
 class FrameManager: public wxEvtHandler
 {
@@ -41,8 +41,8 @@ public:
     ~FrameManager();
 
     void removeFrame(BaseFrame* frame);
-    void showMetadataPropertyFrame(wxWindow* parent, YxMetadataItem* item, 
-        bool delayed = false);
+    MetadataItemPropertiesFrame* showMetadataPropertyFrame(wxWindow* parent, YxMetadataItem* item,
+        bool delayed = false, bool force_new = false);
 
     void OnCommandEvent(wxCommandEvent& event);
 protected:

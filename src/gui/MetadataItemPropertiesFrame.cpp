@@ -144,7 +144,7 @@ const std::string MetadataItemPropertiesFrame::getName() const
 	return "MIPFrame";
 }
 //-----------------------------------------------------------------------------
-const YxMetadataItem *MetadataItemPropertiesFrame::getObservedObject() const
+YxMetadataItem *MetadataItemPropertiesFrame::getObservedObject() const
 {
 	return objectM;
 }
@@ -690,25 +690,43 @@ myHtmlWindow::myHtmlWindow(wxWindow *parent)
 BEGIN_EVENT_TABLE(myHtmlWindow, wxHtmlWindow)
 	EVT_RIGHT_UP(myHtmlWindow::OnRightUp)
 	EVT_MENU(myHtmlWindow::ID_MENU_COPY, myHtmlWindow::OnMenuCopy)
-	EVT_MENU(myHtmlWindow::ID_MENU_DUPLICATE, myHtmlWindow::OnMenuDuplicate)
-	EVT_MENU(myHtmlWindow::ID_MENU_BROWSER, myHtmlWindow::OnMenuBrowser)
+	EVT_MENU(myHtmlWindow::ID_MENU_NEW_WINDOW, myHtmlWindow::OnMenuNewWindow)
 	EVT_MENU(myHtmlWindow::ID_MENU_SAVE, myHtmlWindow::OnMenuSave)
 	EVT_MENU(myHtmlWindow::ID_MENU_PRINT, myHtmlWindow::OnMenuPrint)
 	EVT_MENU(myHtmlWindow::ID_MENU_PREVIEW, myHtmlWindow::OnMenuPreview)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
-void myHtmlWindow::OnRightUp(wxMouseEvent& WXUNUSED(event))
+void myHtmlWindow::OnRightUp(wxMouseEvent& event)
 {
     wxMenu m(0);
-    m.Append(ID_MENU_COPY,   	_("&Copy"));
-    m.Append(ID_MENU_DUPLICATE,	_("&Duplicate window"));
+	m.Append(ID_MENU_NEW_WINDOW, _("&Open link in a new window"));
+    m.Append(ID_MENU_COPY,   	 _("&Copy"));
     m.AppendSeparator();
-    m.Append(ID_MENU_BROWSER,	_("&Open in web browser"));
     m.Append(ID_MENU_SAVE,		_("&Save as HTML file..."));
     m.Append(ID_MENU_PREVIEW,	_("Print pre&view..."));
     m.Append(ID_MENU_PRINT,		_("&Print..."));
+
+	bool isLink = false;
+    if (m_Cell)	// taken from wx's htmlwin.cpp
+    {
+        wxPoint pos = CalcUnscrolledPosition(event.GetPosition());
+        wxHtmlCell *cell = m_Cell->FindCellByPos(pos.x, pos.y);
+        if (cell)
+		{
+			int ix = cell->GetPosX();
+			int iy = cell->GetPosY();
+			wxHtmlLinkInfo *i = cell->GetLink(pos.x-ix, pos.y-iy);
+			if (i)
+			{
+				tempLinkM = i->GetHref();
+				isLink = true;
+			}
+		}
+    }
+
+	m.Enable(ID_MENU_NEW_WINDOW, isLink);
 	if (SelectionToText().IsEmpty())
-		m.Enable(ID_MENU_COPY,             false);
+		m.Enable(ID_MENU_COPY, false);
     PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
 }
 //-----------------------------------------------------------------------------
@@ -727,12 +745,15 @@ void myHtmlWindow::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
 	}
 }
 //-----------------------------------------------------------------------------
-void myHtmlWindow::OnMenuDuplicate(wxCommandEvent& WXUNUSED(event))
+void myHtmlWindow::OnMenuNewWindow(wxCommandEvent& WXUNUSED(event))
 {
-}
-//-----------------------------------------------------------------------------
-void myHtmlWindow::OnMenuBrowser(wxCommandEvent& WXUNUSED(event))
-{
+	std::string addr = wx2std(tempLinkM);
+	YURI uri(addr);
+	if (uri.protocol != "fr")				// we don't support "new window" for non-fr protocols
+		return;
+	uri.addParam("target=new");
+	if (!getURIProcessor().handleURI(uri))
+		::wxMessageBox(_("Feature not yet implemented."), _("Information"), wxICON_INFORMATION|wxOK);
 }
 //-----------------------------------------------------------------------------
 void myHtmlWindow::OnMenuSave(wxCommandEvent& WXUNUSED(event))
@@ -778,13 +799,11 @@ void myHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
 {
 	std::string addr = wx2std(link.GetHref());
 	YURI uri(addr);
-
 	if (uri.protocol != "fr")		// call default handler for other protocols
 	{
 		wxHtmlWindow::OnLinkClicked(link);
 		return;
 	}
-
 	if (!getURIProcessor().handleURI(addr))
 		::wxMessageBox(_("Feature not yet implemented."), _("Information"), wxICON_INFORMATION|wxOK);
 }
@@ -793,15 +812,14 @@ void myHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
 class PageHandler: public YxURIHandler
 {
 public:
-	bool handleURI(std::string& uriStr);
+	bool handleURI(const YURI& uriObj);
 private:
     static const PageHandler handlerInstance;	// singleton; registers itself on creation.
 };
 const PageHandler PageHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool PageHandler::handleURI(std::string& uriStr)
+bool PageHandler::handleURI(const YURI& uriObj)
 {
-    YURI uriObj(uriStr);
 	if (uriObj.action != "page")
 		return false;
 
@@ -810,6 +828,12 @@ bool PageHandler::handleURI(std::string& uriStr)
 	if (!std2wx(ms).ToULong(&mo))
 		return true;
 	MetadataItemPropertiesFrame *m = (MetadataItemPropertiesFrame *)mo;
+	if (uriObj.getParam("target") == "new")
+	{
+		wxWindow *mainFrame = m->GetParent();
+		if (mainFrame)
+			m = frameManager().showMetadataPropertyFrame(mainFrame, m->getObservedObject(), false, true);
+	}
 
 	if (m)
 		m->setPage(uriObj.getParam("type"));
@@ -820,15 +844,14 @@ bool PageHandler::handleURI(std::string& uriStr)
 class PropertiesHandler: public YxURIHandler
 {
 public:
-	bool handleURI(std::string& uriStr);
+	bool handleURI(const YURI& uriObj);
 private:
     static const PropertiesHandler handlerInstance;	// singleton; registers itself on creation.
 };
 const PropertiesHandler PropertiesHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool PropertiesHandler::handleURI(std::string& uriStr)
+bool PropertiesHandler::handleURI(const YURI& uriObj)
 {
-    YURI uriObj(uriStr);
 	if (uriObj.action != "properties")
 		return false;
 
@@ -849,7 +872,7 @@ bool PropertiesHandler::handleURI(std::string& uriStr)
 	// check if window with properties of that object is already open and show it
 	wxWindow *mainFrame = parent->GetParent();
 	if (mainFrame)
-        frameManager().showMetadataPropertyFrame(mainFrame, object);
+        frameManager().showMetadataPropertyFrame(mainFrame, object, false, uriObj.getParam("target") == "new");
 	return true;
 }
 //-----------------------------------------------------------------------------

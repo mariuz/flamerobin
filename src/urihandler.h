@@ -54,6 +54,7 @@ public:
 
     // interface for consumers.
 	bool handleURI(std::string& uriStr);
+	bool handleURI(const YURI& uriObj);
 
     virtual ~YURIProcessor();
 private:
@@ -79,7 +80,7 @@ class YxURIHandler
 public:
     YxURIHandler();
     virtual ~YxURIHandler();
-	virtual bool handleURI(std::string& uriStr) = 0;
+	virtual bool handleURI(const YURI& uriObj) = 0;
 	bool operator<(const YxURIHandler& right) const
 	{
         return getPosition() < right.getPosition();
@@ -99,8 +100,8 @@ protected:
     }
 
 	// some helper functions
-	wxWindow *YxURIHandler::getWindow(YURI& uriObj);
-	void *getObject(YURI& uriObj);
+	wxWindow *YxURIHandler::getWindow(const YURI& uriObj);
+	void *getObject(const YURI& uriObj);
 
 private:
     YURIProcessor* processorM;

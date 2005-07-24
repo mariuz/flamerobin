@@ -49,7 +49,7 @@
 class AddConstraintHandler: public YxURIHandler
 {
 public:
-	bool handleURI(std::string& uriStr);
+	bool handleURI(const YURI& uriObj);
 private:
     static const AddConstraintHandler handlerInstance;	// singleton; registers itself on creation.
 
@@ -88,9 +88,8 @@ std::string AddConstraintHandler::selectAction(const wxString& label, wxWindow *
 	return wx2std(actions[index]);
 }
 //-----------------------------------------------------------------------------
-bool AddConstraintHandler::handleURI(std::string& uriStr)
+bool AddConstraintHandler::handleURI(const YURI& uriObj)
 {
-    YURI uriObj(uriStr);
 	if (uriObj.action != "add_constraint")
 		return false;
 

@@ -214,7 +214,7 @@ void ReorderFieldsDialog::OnUpButtonClick(wxCommandEvent& WXUNUSED(event))
 class ReorderFieldsHandler: public YxURIHandler
 {
 public:
-	bool handleURI(std::string& uriStr);
+	bool handleURI(const YURI& uriObj);
 private:
     // singleton; registers itself on creation.
     static const ReorderFieldsHandler handlerInstance;
@@ -222,9 +222,8 @@ private:
 //-----------------------------------------------------------------------------
 const ReorderFieldsHandler ReorderFieldsHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool ReorderFieldsHandler::handleURI(std::string& uriStr)
+bool ReorderFieldsHandler::handleURI(const YURI& uriObj)
 {
-    YURI uriObj(uriStr);
 	if (uriObj.action != "reorder_fields")
 		return false;
 

@@ -18,7 +18,7 @@
 
   All Rights Reserved.
 
-  Contributor(s):
+  Contributor(s): Milan Babuskov.
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -75,15 +75,17 @@ void FrameManager::removeFrame(BaseFrame* frame, ItemFrameMap& frames)
     }
 }
 //-----------------------------------------------------------------------------
-void FrameManager::showMetadataPropertyFrame(wxWindow* parent, 
-    YxMetadataItem* item, bool delayed)
+MetadataItemPropertiesFrame* FrameManager::showMetadataPropertyFrame(wxWindow* parent,
+    YxMetadataItem* item, bool delayed, bool force_new)
 {
-    MetadataItemPropertiesFrame* mipf = 
-        dynamic_cast<MetadataItemPropertiesFrame*>(mipFramesM[item]);
-    if (!mipf)
+	MetadataItemPropertiesFrame* mipf = 0;
+	ItemFrameMap::iterator it = mipFramesM.find(item);
+	if (it != mipFramesM.end())
+        mipf = dynamic_cast<MetadataItemPropertiesFrame *>((*it).second);
+    if (!mipf || force_new)
     {
         mipf = new MetadataItemPropertiesFrame(parent, item);
-        mipFramesM[item] = mipf;
+        mipFramesM.insert(mipFramesM.begin(), std::pair<YxMetadataItem*, BaseFrame*>(item, mipf));
     }
     if (delayed)
     {
@@ -96,6 +98,7 @@ void FrameManager::showMetadataPropertyFrame(wxWindow* parent,
         mipf->Show();
         mipf->Raise();
     }
+	return mipf;
 }
 //-----------------------------------------------------------------------------
 //! event handlers
