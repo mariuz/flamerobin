@@ -182,6 +182,8 @@ bool YxMetadataItem::getDependencies(std::vector<Dependency>& list, bool ofObjec
 		lastError().setMessage("Unsupported type");
 		return false;
 	}
+	if (mytype == 1 && !ofObject)	// views count as relations(tables) when other object refer to them
+		mytype = 0;
 
 	try
 	{
@@ -193,13 +195,31 @@ bool YxMetadataItem::getDependencies(std::vector<Dependency>& list, bool ofObjec
 		std::string o1 = (ofObject ? "DEPENDENT" : "DEPENDED_ON");
 		std::string o2 = (ofObject ? "DEPENDED_ON" : "DEPENDENT");
 		std::string sql =
-			"select RDB$" + o2 + "_TYPE, RDB$" + o2 + "_NAME, RDB$FIELD_NAME "
-			" from RDB$DEPENDENCIES "
-			" where RDB$" + o1 + "_TYPE = ? and RDB$" + o1 + "_NAME = ? "
-			" order by 1, 2, 3";
+			"select RDB$" + o2 + "_TYPE, RDB$" + o2 + "_NAME, RDB$FIELD_NAME \n "
+			" from RDB$DEPENDENCIES \n "
+			" where RDB$" + o1 + "_TYPE = ? and RDB$" + o1 + "_NAME = ? \n ";
+		if ((typeM == ntTable || typeM == ntView) && ofObject)	// get deps for computed columns
+		{														// view needed to bind with generators
+			sql += " union all \n"
+				" SELECT DISTINCT d.rdb$depended_on_type, d.rdb$depended_on_name, d.rdb$field_name \n"
+				" FROM rdb$relation_fields f \n"
+				" LEFT JOIN rdb$dependencies d ON d.rdb$dependent_name = f.rdb$field_source \n"
+				" WHERE d.rdb$dependent_type = 3 AND f.rdb$relation_name = ? \n";
+		}
+		if (!ofObject)						// find tables that have calculated columns based on "this" object
+		{
+			sql += "union all \n"
+				" SELECT distinct cast(0 as smallint), f.rdb$relation_name, d.rdb$field_name \n"
+				" from rdb$relation_fields f \n"
+				" left join rdb$dependencies d on d.rdb$dependent_name = f.rdb$field_source \n"
+				" where d.rdb$dependent_type = 3 and d.rdb$depended_on_name = ? ";
+		}
+		sql += " order by 1, 2, 3";
 		st1->Prepare(sql);
 		st1->Set(1, mytype);
 		st1->Set(2, nameM);
+		if (!ofObject || typeM == ntTable || typeM == ntView)
+			st1->Set(3, nameM);
 		st1->Execute();
 		YxMetadataItem *last = 0;
 		Dependency *dep = 0;
@@ -209,10 +229,7 @@ bool YxMetadataItem::getDependencies(std::vector<Dependency>& list, bool ofObjec
 			int object_type;
 			st1->Get(1, &object_type);
 			st1->Get(2, object_name);
-			if (!st1->IsNull(3))
-				st1->Get(3, field_name);
 			object_name.erase(object_name.find_last_not_of(" ")+1);		// trim
-			field_name.erase(field_name.find_last_not_of(" ")+1);		// trim
 
 			if (object_type > type_count)	// some system object, not interesting for us
 				continue;
@@ -235,12 +252,16 @@ bool YxMetadataItem::getDependencies(std::vector<Dependency>& list, bool ofObjec
 				last = current;
 			}
 			if (!st1->IsNull(3))
+			{
+				st1->Get(3, field_name);
+				field_name.erase(field_name.find_last_not_of(" ")+1);		// trim
 				dep->addField(field_name);
+			}
 		}
 
 		// TODO: perhaps this could be moved to YTable?
 		//       call YxMetadataItem::getDependencies() and then add this
-		if (typeM == ntTable && ofObject)	// foreign keys of this table
+		if (typeM == ntTable && ofObject)	// foreign keys of this table + computed columns
 		{
 			YTable *t = dynamic_cast<YTable *>(this);
 			std::vector<ForeignKey> *f = t->getForeignKeys();
