@@ -455,15 +455,18 @@ bool YTable::loadIndices()
 			short unq, inactive, type;
 			double statistics;
 			st1->Get(1, name);
-			if (st1->IsNull(2))
+			if (st1->IsNull(2))		// null = non-unique
 				unq = 0;
 			else
 				st1->Get(2, unq);
-			if (st1->IsNull(3))
+			if (st1->IsNull(3))		// null = active
 				inactive = 0;
 			else
 				st1->Get(3, inactive);
-			st1->Get(4, type);
+			if (st1->IsNull(4))		// null = ascending
+				type = 0;
+			else
+				st1->Get(4, type);
 			st1->Get(5, statistics);
 			st1->Get(6, fname);
 			name.erase(name.find_last_not_of(" ") + 1);
