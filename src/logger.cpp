@@ -99,6 +99,8 @@ bool Logger::log2file(const executedStatement& st, YDatabase *db, const std::str
 		);
 		f.Write(header);
 	}
+	else
+		f.Write(wxT("\n"));
 	f.Write(std2wx(sql));
 	f.Close();
 	return true;
