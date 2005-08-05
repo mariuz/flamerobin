@@ -68,13 +68,13 @@ root directory, and execute the following commands:
 
 mkdir debug
 cd debug
-../configure <--with-wx-config=/my/path/to/wx-config> --enable-debug
+../configure --with-wx-config=/my/path/to/wx-config --enable-debug
 
 for a build in debug configuration, and the following commands
 
 mkdir release
 cd release
-../configure <--with-wx-config=/my/path/to/wx-config> --disable-debug
+../configure --with-wx-config=/my/path/to/wx-config --disable-debug
 
 for a build in release configuration.
 
