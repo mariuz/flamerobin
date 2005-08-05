@@ -11,7 +11,7 @@ Noet: Since gcc is executable name for GNU C Compiler, GNU C++ Compiler's execut
 
 I have used versions 3.2.2 and 3.3.1. All versions from 3.2 and above are good.
 
-To build FlameRobin you have to check-out the flamerobin1 module from the projects's CVS tree, and get some tools apart from GCC:
+To build FlameRobin you have to check-out the mghie module from the projects's CVS tree, and get some tools apart from GCC:
 
 1. IBPP library (for database access)
 2. wxWidgets for GUI
@@ -26,11 +26,11 @@ Time for the GUI subsystem. FlameRobin needs at least version 2.4.2 of wxWidgets
 
 Once all the pieces are in place, you should edit the Makefile to setup the path to IBPP library, a possibly STC library.
 
-First line to setup:
-IBPP_PATH=/root/razno/program/ibpp-cvs/release/linux
+First line to setup (where is ibpp is checked out):
+IBPP_PATH=/home/user/ibpp-cvs/release/linux
 
 Second line to setup:
-EXTRA_LIBS=/usr/local/lib/libwx_gtk_stc-2.4.a
+EXTRA_LIBS=/usr/lib/libwx_gtk_stc-2.4.a
 
 Just point these to the right directories.
 
