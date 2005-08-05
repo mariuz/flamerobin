@@ -119,7 +119,7 @@ Unpack the sources, enter "build" directory and run "./configure". There
 are many options you may like to set, run "./configure --help" to find about
 them. We assume Gtk2 static release build with Unicode support:
 
-./configure --disable-shared --disable-debug
+./configure --disable-shared --disable-debug --prefix=/opt/wxwidgets
 make
 make install
 
