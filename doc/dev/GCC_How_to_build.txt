@@ -10,6 +10,8 @@ http://gcc.gnu.org/
 Noet: Since gcc is executable name for GNU C Compiler, GNU C++ Compiler's executable is named g++ (on most system I know)
 
 I have used versions 3.2.2 and 3.3.1. All versions from 3.2 and above are good.
+Check version with: g++ -v , if you don't have it in debian (for example) can be installed 
+by: apt-get install g++
 
 To build FlameRobin you have to check-out the mghie module from the projects's CVS tree, and get some tools apart from GCC:
 
@@ -34,7 +36,7 @@ EXTRA_LIBS=/usr/lib/libwx_gtk_stc-2.4.a
 
 Just point these to the right directories.
 
-If you have any questions about this, feel free to ask at our fbmanager-devel mailing list at sourceforge.net.
+If you have any questions about this, feel free to ask at our flamerobin-devel mailing list at sourceforge.net.
 
 Milan Babuskov
 mbabuskov@yahoo.com
