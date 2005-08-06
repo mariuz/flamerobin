@@ -113,7 +113,13 @@ void MainFrame::OnMenuOpen(wxMenuEvent& event)	// build windowMenu before it sho
 
 	while (windowMenu->GetMenuItemCount() > 0)
 		windowMenu->Destroy(windowMenu->FindItemByPosition(0));
+
 	// TODO: framemanager job
+	// It would be ideal if framemanager could add/remove items whenever it adds/removes a frame,
+	// But, it does not know anything about MainMenu. It does know that frame's parent, but
+	// that is not enough
+
+
 	menuBarM->EnableTop(3, windowMenu->GetMenuItemCount() > 0);	// disable empty menus
 }
 //-----------------------------------------------------------------------------
