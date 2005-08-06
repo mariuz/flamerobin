@@ -39,41 +39,33 @@ YDatabase::YDatabase()
 {
 	typeM = ntDatabase;
 	connectedM = false;
-
+}
+//------------------------------------------------------------------------------
+void YDatabase::initChildren()
+{
 	domainsM.setName("Domains");
 	domainsM.setType(ntDomains);
-
 	exceptionsM.setName("Exceptions");
 	exceptionsM.setType(ntExceptions);
-
     functionsM.setName("Functions");
 	functionsM.setType(ntFunctions);
-
 	generatorsM.setName("Generators");
 	generatorsM.setType(ntGenerators);
-
 	proceduresM.setName("Procedures");
 	proceduresM.setType(ntProcedures);
-
 	rolesM.setName("Roles");
 	rolesM.setType(ntRoles);
-
 	tablesM.setName("Tables");
 	tablesM.setType(ntTables);
-
 	triggersM.setName("Triggers");
 	triggersM.setType(ntTriggers);
-
 	viewsM.setName("Views");
 	viewsM.setType(ntViews);
 
-	/* this does not seem to work right, so I'll comment it out until I got more time to
-	   find out why
 	std::vector<YxMetadataItem *> temp;
 	getCollections(temp);
 	for (std::vector<YxMetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
 		(*it)->setParent(this);
-	*/
 }
 //------------------------------------------------------------------------------
 void YDatabase::getIdentifiers(std::vector<std::string>& temp)
@@ -776,6 +768,9 @@ bool YDatabase::connect(std::string password)
 		connectedM = true;
 		validPasswordM = password;	// successful
 		notify();
+
+		tablesM.setParent(this);
+
 		return true;
 	}
 	catch (IBPP::Exception &e)
@@ -933,7 +928,7 @@ std::string YDatabase::getRole() const
 	return roleM;
 }
 //------------------------------------------------------------------------------
-IBPP::Database& YDatabase::getDatabase()
+IBPP::Database& YDatabase::getIBPPDatabase()
 {
 	return databaseM;
 }

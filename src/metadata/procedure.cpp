@@ -122,7 +122,7 @@ bool YProcedure::loadParameters()
 		return false;
 	}
 
-	IBPP::Database& db = d->getDatabase();
+	IBPP::Database& db = d->getIBPPDatabase();
 
 	try
 	{
@@ -179,7 +179,7 @@ bool YProcedure::getSource(std::string& source)
 		return false;
 	}
 
-	IBPP::Database& db = d->getDatabase();
+	IBPP::Database& db = d->getIBPPDatabase();
 
 	try
 	{

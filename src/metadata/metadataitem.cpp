@@ -188,7 +188,7 @@ bool YxMetadataItem::getDependencies(std::vector<Dependency>& list, bool ofObjec
 
 	try
 	{
-		IBPP::Database& db = d->getDatabase();
+		IBPP::Database& db = d->getIBPPDatabase();
 		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
 		tr1->Start();
 		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
@@ -344,7 +344,7 @@ std::string YxMetadataItem::getDescription()
 	descriptionM = "";
 	try
 	{
-		IBPP::Database& db = d->getDatabase();
+		IBPP::Database& db = d->getIBPPDatabase();
 		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
 		tr1->Start();
 		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
@@ -406,7 +406,7 @@ bool YxMetadataItem::setDescription(std::string description)
 
 	try
 	{
-		IBPP::Database& db = d->getDatabase();
+		IBPP::Database& db = d->getIBPPDatabase();
 		IBPP::Transaction tr1 = IBPP::TransactionFactory(db);
 		tr1->Start();
 		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);

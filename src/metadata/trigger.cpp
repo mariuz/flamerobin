@@ -76,7 +76,7 @@ bool YTrigger::loadInfo(bool force)
 		return false;
 	}
 
-	IBPP::Database& db = d->getDatabase();
+	IBPP::Database& db = d->getIBPPDatabase();
 
 	try
 	{
@@ -139,7 +139,7 @@ bool YTrigger::getSource(std::string& source) const
 		return false;
 	}
 
-	IBPP::Database& db = d->getDatabase();
+	IBPP::Database& db = d->getIBPPDatabase();
 
 	try
 	{

@@ -64,7 +64,7 @@ bool Relation::loadColumns()
 		return false;
 	}
 
-	IBPP::Database& db = d->getDatabase();
+	IBPP::Database& db = d->getIBPPDatabase();
 
 	try
 	{
@@ -124,7 +124,7 @@ bool Relation::getTriggers(std::vector<YTrigger *>& list, YTrigger::firingTimeTy
 		return false;
 	}
 
-	IBPP::Database& db = d->getDatabase();
+	IBPP::Database& db = d->getIBPPDatabase();
 	try
 	{
 		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);

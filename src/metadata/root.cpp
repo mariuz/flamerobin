@@ -120,6 +120,7 @@ bool YRoot::load()
 		{
 			YDatabase temp;
 			database = server->addDatabase(temp);		// add it to the list
+			database->initChildren();
 		}
 
 		if (option == "path" && database)

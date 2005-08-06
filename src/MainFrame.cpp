@@ -46,12 +46,35 @@
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
     BaseFrame(parent, id, title, pos, size, style, wxT("FlameRobin_main"))
 {
-    // begin wxGlade: MainFrame::MainFrame
     tree_ctrl_1 = new myTreeCtrl(this, wxDefaultPosition, wxDefaultSize, wxTR_HAS_BUTTONS|wxSUNKEN_BORDER);
+	menuBarM = new wxMenuBar();
 
+	// build menuBarM
+    wxMenu* fileMenu = new wxMenu();
+    fileMenu->Append(myTreeCtrl::Menu_Configure, _("&Preferences"), wxEmptyString, wxITEM_NORMAL);
+    fileMenu->AppendSeparator();
+    fileMenu->Append(myTreeCtrl::Menu_Quit, _("&Quit"), wxEmptyString, wxITEM_NORMAL);
+    menuBarM->Append(fileMenu, _("&File"));
+
+    databaseMenu = new wxMenu();					// dynamic menus, created at runtime
+    menuBarM->Append(databaseMenu, _("&Database"));
+    objectMenu = new wxMenu();
+    menuBarM->Append(objectMenu, _("&Object"));
+    windowMenu = new wxMenu();
+    menuBarM->Append(windowMenu, _("&Window"));
+
+    wxMenu* helpMenu = new wxMenu();
+    helpMenu->Append(wxNewId(), _("&Manual"), wxEmptyString, wxITEM_NORMAL);
+    helpMenu->Append(wxNewId(), _("&What's new"), wxEmptyString, wxITEM_NORMAL);
+    helpMenu->AppendSeparator();
+    helpMenu->Append(wxNewId(), _("&License"), wxEmptyString, wxITEM_NORMAL);
+    helpMenu->Append(myTreeCtrl::Menu_About, _("&About"), wxEmptyString, wxITEM_NORMAL);
+    menuBarM->Append(helpMenu, _("&Help"));
+	SetMenuBar(menuBarM);
+
+	statusBarM = CreateStatusBar();
     set_properties();
     do_layout();
-    // end wxGlade
 }
 //-----------------------------------------------------------------------------
 void MainFrame::set_properties()

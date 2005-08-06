@@ -51,7 +51,7 @@ bool YDomain::loadInfo()
 		//wxMessageBox(_("Domain::loadInfo, database = 0"), _("WARNING"), wxICON_WARNING|wxOK);
 		return false;
 	}
-	IBPP::Database& db = d->getDatabase();
+	IBPP::Database& db = d->getIBPPDatabase();
 
 	try
 	{

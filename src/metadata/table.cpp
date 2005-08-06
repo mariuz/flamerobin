@@ -105,7 +105,7 @@ bool YTable::loadCheckConstraints()
 		return false;
 	}
 
-	IBPP::Database& db = d->getDatabase();
+	IBPP::Database& db = d->getIBPPDatabase();
 	try
 	{
 		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
@@ -181,7 +181,7 @@ bool YTable::loadPrimaryKey()
 		return false;
 	}
 
-	IBPP::Database& db = d->getDatabase();
+	IBPP::Database& db = d->getIBPPDatabase();
 	try
 	{
 		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
@@ -237,7 +237,7 @@ bool YTable::loadUniqueConstraints()
 		return false;
 	}
 
-	IBPP::Database& db = d->getDatabase();
+	IBPP::Database& db = d->getIBPPDatabase();
 	try
 	{
 		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
@@ -337,7 +337,7 @@ bool YTable::loadForeignKeys()
 		return false;
 	}
 
-	IBPP::Database& db = d->getDatabase();
+	IBPP::Database& db = d->getIBPPDatabase();
 	try
 	{
 		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
@@ -432,7 +432,7 @@ bool YTable::loadIndices()
 		return false;
 	}
 
-	IBPP::Database& db = d->getDatabase();
+	IBPP::Database& db = d->getIBPPDatabase();
 	try
 	{
 		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);

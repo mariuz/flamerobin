@@ -55,10 +55,12 @@
 #include "config.h"
 #include "framemanager.h"
 #include "urihandler.h"
+#include "contextmenuvisitor.h"
 #include "main.h"
 
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
+	EVT_MENU_OPEN(MainFrame::OnMenuOpen)
 	EVT_MENU(myTreeCtrl::Menu_RegisterServer, MainFrame::OnMenuRegisterServer)
 	EVT_MENU(myTreeCtrl::Menu_Quit, MainFrame::OnMenuQuit)
 	EVT_MENU(myTreeCtrl::Menu_About, MainFrame::OnMenuAbout)
@@ -99,9 +101,52 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(myTreeCtrl::Menu_DropObject, MainFrame::OnMenuDropObject)
 	EVT_MENU(myTreeCtrl::Menu_CreateTrigger, MainFrame::OnMenuCreateTrigger)
 
+	EVT_TREE_SEL_CHANGED(myTreeCtrl::ID_tree_ctrl, MainFrame::OnTreeSelectionChanged)
 	EVT_TREE_ITEM_ACTIVATED(myTreeCtrl::ID_tree_ctrl, MainFrame::OnTreeItemActivate)
 	EVT_CLOSE(MainFrame::OnClose)
 END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuOpen(wxMenuEvent& event)	// build windowMenu before it shows
+{
+	if (event.IsPopup())	// don't do anything for popup menus
+		return;
+
+	while (windowMenu->GetMenuItemCount() > 0)
+		windowMenu->Destroy(windowMenu->FindItemByPosition(0));
+	// TODO: framemanager job
+	menuBarM->EnableTop(3, windowMenu->GetMenuItemCount() > 0);	// disable empty menus
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
+{
+	// Clear dynamic menus
+	while (objectMenu->GetMenuItemCount() > 0)
+		objectMenu->Destroy(objectMenu->FindItemByPosition(0));
+	while (databaseMenu->GetMenuItemCount() > 0)
+		databaseMenu->Destroy(databaseMenu->FindItemByPosition(0));
+
+	std::string s = "-";
+	wxTreeItemId item = tree_ctrl_1->GetSelection();
+	if (item.IsOk())
+	{
+		YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+		if (m)
+		{
+			ContextMenuVisitor cmv(objectMenu);
+			m->accept(&cmv);
+			YDatabase *d = m->getDatabase();
+			if (d)
+			{
+				ContextMenuVisitor cmvd(databaseMenu);
+				d->accept(&cmvd);
+				s = d->getUsername() + "@" + d->getParent()->getName() + ":" + d->getPath() + " (" + d->getCharset() + ")";
+			}
+		}
+	}
+	menuBarM->EnableTop(1, databaseMenu->GetMenuItemCount() > 0);		// disable empty menus
+	menuBarM->EnableTop(2, objectMenu->GetMenuItemCount() > 0);			// disable empty menus
+	statusBarM->SetStatusText(std2wx(s));
+}
 //-----------------------------------------------------------------------------
 //! handle double-click on item (or press Enter)
 void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
@@ -374,7 +419,10 @@ void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
 {
-	YDatabase *d = dynamic_cast<YDatabase *>(tree_ctrl_1->getSelectedMetadataItem());
+	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	if (!m)
+		return;
+	YDatabase *d = m->getDatabase();
 	if (!d)
 		return;
 
@@ -460,10 +508,12 @@ void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 {
-	YDatabase *d = dynamic_cast<YDatabase *>(tree_ctrl_1->getSelectedMetadataItem());
+	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	if (!m)
+		return;
+	YDatabase *d = m->getDatabase();
 	if (!d)
 		return;
-
 	if (d->isConnected())
 	{
 		::wxMessageBox(_("Cannot remove connected database.\nPlease disconnect first"), _("Database connected."), wxOK | wxICON_EXCLAMATION );
@@ -480,7 +530,10 @@ void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
 {
-	YDatabase *d = dynamic_cast<YDatabase *>(tree_ctrl_1->getSelectedMetadataItem());
+	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	if (!m)
+		return;
+	YDatabase *d = m->getDatabase();
 	if (!d)
 		return;
 /*
@@ -498,7 +551,7 @@ void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
 */
 	wxArrayString as;
 	std::vector<std::string> users;
-	d->getDatabase()->Users(users);
+	d->getIBPPDatabase()->Users(users);
 	for (std::vector<std::string>::const_iterator i = users.begin(); i != users.end(); ++i)
 		as.Add(std2wx(*i));
 
@@ -507,17 +560,22 @@ void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuBackup(wxCommandEvent& WXUNUSED(event))
 {
-	YDatabase *db = dynamic_cast<YDatabase *>(tree_ctrl_1->getSelectedMetadataItem());
+	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	if (!m)
+		return;
+	YDatabase *db = m->getDatabase();
 	if (!db)
 		return;
-
     BackupFrame* f = new BackupFrame(this, db);
     f->Show();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRestore(wxCommandEvent& WXUNUSED(event))
 {
-	YDatabase *db = dynamic_cast<YDatabase *>(tree_ctrl_1->getSelectedMetadataItem());
+	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	if (!m)
+		return;
+	YDatabase *db = m->getDatabase();
 	if (!db)
 		return;
 
@@ -527,7 +585,10 @@ void MainFrame::OnMenuRestore(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuReconnect(wxCommandEvent& WXUNUSED(event))
 {
-	YDatabase *db = dynamic_cast<YDatabase *>(tree_ctrl_1->getSelectedMetadataItem());
+	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	if (!m)
+		return;
+	YDatabase *db = m->getDatabase();
 	if (!db)
 		return;
 /*
@@ -552,7 +613,10 @@ void MainFrame::OnMenuConnect(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::connect(bool warn)
 {
-	YDatabase *db = dynamic_cast<YDatabase *>(tree_ctrl_1->getSelectedMetadataItem());
+	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	if (!m)
+		return;
+	YDatabase *db = m->getDatabase();
 	if (!db)
 		return;
 
@@ -604,7 +668,10 @@ void MainFrame::connect(bool warn)
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDisconnect(wxCommandEvent& WXUNUSED(event))
 {
-	YDatabase *db = dynamic_cast<YDatabase *>(tree_ctrl_1->getSelectedMetadataItem());
+	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	if (!m)
+		return;
+	YDatabase *db = m->getDatabase();
 	if (!db)
 		return;
 /*
@@ -788,7 +855,10 @@ void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
 //! create new ExecuteSqlFrame and attach database object to it
 void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
 {
-	YDatabase *d = dynamic_cast<YDatabase *>(tree_ctrl_1->getSelectedMetadataItem());
+	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	if (!m)
+		return;
+	YDatabase *d = m->getDatabase();
 	if (!d)
 		return;
 

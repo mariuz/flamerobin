@@ -1052,7 +1052,7 @@ bool ExecuteSqlFrame::execute(std::string sql, bool prepareOnly)
 		}
 
 		grid_data->ClearGrid(); // statement object will be invalidated, so clear the grid
-		statementM = IBPP::StatementFactory(databaseM->getDatabase(), transactionM);
+		statementM = IBPP::StatementFactory(databaseM->getIBPPDatabase(), transactionM);
 		log(_("Preparing query: " + std2wx(sql)), ttSql);
 		statementM->Prepare(sql);
 
@@ -1311,7 +1311,7 @@ void ExecuteSqlFrame::setDatabase(YDatabase *db)
 	std::string s = db->getUsername() + "@" + db->getParent()->getName() + ":" + db->getPath();
 	statusbar_1->SetStatusText(std2wx(s), 0);
 
-	transactionM = IBPP::TransactionFactory(databaseM->getDatabase());
+	transactionM = IBPP::TransactionFactory(databaseM->getIBPPDatabase());
 	db->attach(this);	// observe database object
 
 	executedStatementsM.clear();

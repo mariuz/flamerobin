@@ -82,6 +82,7 @@ public:
     virtual void accept(Visitor *v);
 
 	YDatabase();
+	void initChildren();
 	virtual bool getChildren(std::vector<YxMetadataItem *>& temp);
 	void getCollections(std::vector<YxMetadataItem *>& temp);
 
@@ -123,7 +124,7 @@ public:
 	std::string getUsername() const;
 	std::string getPassword() const;
 	std::string getRole() const;
-	IBPP::Database& getDatabase();
+	IBPP::Database& getIBPPDatabase();
 	void setPath(std::string value);
 	void setCharset(std::string value);
 	void setUsername(std::string value);

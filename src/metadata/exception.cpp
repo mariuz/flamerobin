@@ -75,7 +75,7 @@ void YException::loadProperties(bool force)
     numberM = 0;
 	try
 	{
-		IBPP::Database& db = d->getDatabase();
+		IBPP::Database& db = d->getIBPPDatabase();
 		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
 		tr1->Start();
 		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);

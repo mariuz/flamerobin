@@ -77,7 +77,7 @@ void YFunction::loadInfo(bool force)
 		return;
 	}
 
-	IBPP::Database& db = d->getDatabase();
+	IBPP::Database& db = d->getIBPPDatabase();
 	definitionM = nameM + "(\n";
 	try
 	{

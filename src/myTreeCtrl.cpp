@@ -58,7 +58,6 @@ BEGIN_EVENT_TABLE(myTreeCtrl, wxTreeCtrl)
 #endif
     EVT_CONTEXT_MENU(myTreeCtrl::OnContextMenu)
 	EVT_TREE_BEGIN_DRAG(myTreeCtrl::ID_tree_ctrl, myTreeCtrl::OnBeginDrag)
-	EVT_TREE_ITEM_GETTOOLTIP(myTreeCtrl::ID_tree_ctrl, myTreeCtrl::OnItemGetTooltip)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 #if wxCHECK_VERSION(2, 5, 4) && !wxCHECK_VERSION(2, 5, 5)
@@ -73,30 +72,6 @@ void myTreeCtrl::OnItemMenu(wxTreeEvent& event)
 	OnContextMenu(e);
 }
 #endif
-//-----------------------------------------------------------------------------
-void myTreeCtrl::OnItemGetTooltip(wxTreeEvent& event)
-{
-	wxTreeItemId item = event.GetItem();
-	if (item.IsOk())
-	{
-		YxMetadataItem *m = getMetadataItem(item);
-		if (!m)
-		{
-			event.SetToolTip(wxEmptyString);
-			return;
-		}
-
-		YDatabase *d = m->getDatabase();
-		if (d)
-		{
-			std::string s = d->getUsername() + "@" + d->getParent()->getName() + ":" +
-				d->getPath() + " (" + d->getCharset() + ")";
-			event.SetToolTip(std2wx(s));
-		}
-		else
-			event.SetToolTip(wxEmptyString);
-	}
-}
 //-----------------------------------------------------------------------------
 void myTreeCtrl::OnBeginDrag(wxTreeEvent& event)
 {

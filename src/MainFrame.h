@@ -43,6 +43,8 @@
 //-----------------------------------------------------------------------------
 class MainFrame: public BaseFrame {
 public:
+	void OnMenuOpen(wxMenuEvent& event);	// build menu before it shows
+
 	// menu handling events
     void OnMenuRegisterServer(wxCommandEvent& event);
     void OnMenuQuit(wxCommandEvent& event);
@@ -76,12 +78,14 @@ public:
     void OnMenuDisconnect(wxCommandEvent& event);
     void OnMenuConnect(wxCommandEvent& event);
     void OnMenuReconnect(wxCommandEvent& event);
+
 	// enabled menu items
 	void OnMenuUpdateUnRegisterServer(wxUpdateUIEvent& event);
 	void OnMenuUpdateIfDatabaseConnected(wxUpdateUIEvent& event);
 	void OnMenuUpdateIfDatabaseNotConnected(wxUpdateUIEvent& event);
 
 	// other events
+	void OnTreeSelectionChanged(wxTreeEvent& event);
 	void OnTreeItemActivate(wxTreeEvent& event);
 	void OnClose(wxCloseEvent& event);
 
@@ -99,9 +103,13 @@ private:
     // end wxGlade
 
 protected:
-    // begin wxGlade: MainFrame::attributes
     myTreeCtrl* tree_ctrl_1;
-    // end wxGlade
+	wxStatusBar* statusBarM;
+    wxMenuBar* menuBarM;
+	wxMenu* databaseMenu;	// dynamic menus
+	wxMenu* objectMenu;
+	wxMenu* windowMenu;
+
 	virtual const std::string getName() const;
 	virtual const wxRect getDefaultRect() const;
     DECLARE_EVENT_TABLE()

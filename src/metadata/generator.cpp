@@ -62,7 +62,7 @@ bool YGenerator::loadValue(bool force)
 		return false;
 	}
 
-	IBPP::Database& db = d->getDatabase();
+	IBPP::Database& db = d->getIBPPDatabase();
 
 	try
 	{
