@@ -39,10 +39,7 @@ YDatabase::YDatabase()
 {
 	typeM = ntDatabase;
 	connectedM = false;
-}
-//------------------------------------------------------------------------------
-void YDatabase::initChildren()
-{
+	
 	domainsM.setName("Domains");
 	domainsM.setType(ntDomains);
 	exceptionsM.setName("Exceptions");
@@ -61,7 +58,10 @@ void YDatabase::initChildren()
 	triggersM.setType(ntTriggers);
 	viewsM.setName("Views");
 	viewsM.setType(ntViews);
-
+}
+//------------------------------------------------------------------------------
+void YDatabase::initChildren()
+{
 	std::vector<YxMetadataItem *> temp;
 	getCollections(temp);
 	for (std::vector<YxMetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
