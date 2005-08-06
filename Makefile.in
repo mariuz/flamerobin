@@ -68,6 +68,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_function.o \
 	flamerobin_generator.o \
 	flamerobin_indices.o \
+	flamerobin_item.o \
 	flamerobin_metadataitem.o \
 	flamerobin_parameter.o \
 	flamerobin_procedure.o \
@@ -81,6 +82,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_myTreeCtrl.o \
 	flamerobin_objectdescriptionhandler.o \
 	flamerobin_observer.o \
+	flamerobin_contextmenuvisitor.o \
 	flamerobin_simpleparser.o \
 	flamerobin_styleguide.o \
 	$(__PLATFORMSPECIFICSOURCES_OBJECTS) \
@@ -324,6 +326,9 @@ flamerobin_generator.o: $(srcdir)/src/metadata/generator.cpp $(FLAMEROBIN_ODEP)
 flamerobin_indices.o: $(srcdir)/src/metadata/indices.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/indices.cpp
 
+flamerobin_item.o: $(srcdir)/src/metadata/item.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/item.cpp
+
 flamerobin_metadataitem.o: $(srcdir)/src/metadata/metadataitem.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/metadataitem.cpp
 
@@ -362,6 +367,9 @@ flamerobin_objectdescriptionhandler.o: $(srcdir)/src/objectdescriptionhandler.cp
 
 flamerobin_observer.o: $(srcdir)/src/observer.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/observer.cpp
+
+flamerobin_contextmenuvisitor.o: $(srcdir)/src/contextmenuvisitor.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/contextmenuvisitor.cpp
 
 flamerobin_simpleparser.o: $(srcdir)/src/simpleparser.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/simpleparser.cpp
