@@ -30,6 +30,7 @@
 
 #include <string>
 #include <vector>
+#include "visitor.h"
 #include "metadataitem.h"
 #include "indices.h"
 //------------------------------------------------------------------------------
@@ -77,5 +78,10 @@ std::string Index::getFieldsAsString()
 Index::IndexType Index::getIndexType()
 {
 	return indexTypeM;
+}
+//------------------------------------------------------------------------------
+void Index::accept(Visitor *v)
+{
+	v->visit(*this);
 }
 //------------------------------------------------------------------------------

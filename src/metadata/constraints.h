@@ -32,7 +32,8 @@
 //
 class Constraint: public YxMetadataItem
 {
-// nothing needed yet, but it may be once
+	// nothing needed yet, but it may be once
+    virtual void accept(Visitor *v);
 };
 //------------------------------------------------------------------------------
 //! primary keys and uniques

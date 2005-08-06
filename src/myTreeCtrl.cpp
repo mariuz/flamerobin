@@ -46,6 +46,7 @@
 #include "config.h"
 #include "treeitem.h"
 #include "images.h"
+#include "contextmenuvisitor.h"
 #include "metadata/root.h"
 #include "myTreeCtrl.h"
 #include <stack>
@@ -139,6 +140,7 @@ void myTreeCtrl::OnContextMenu(wxContextMenuEvent& event)
     wxMenu MyMenu(0);	// create context menu, depending on type of clicked item
 	if (!item.IsOk() || item == GetRootItem())	// root item or no item selected, show default menu
 	{
+		// let's leave it like this until we implement the main menu
 		if (item == GetRootItem())
 		{
 			MyMenu.Append(Menu_RegisterServer, _("Register server..."));
@@ -154,97 +156,9 @@ void myTreeCtrl::OnContextMenu(wxContextMenuEvent& event)
 		YxMetadataItem *i = getMetadataItem(item);
 		if (!i)
 			return;
-
-		switch (i->getType())
-		{
-			case ntServer:
-				MyMenu.Append(Menu_RegisterDatabase, _("Register existing database..."));
-				MyMenu.Append(Menu_CreateDatabase, _("Create new database..."));
-				MyMenu.Append(Menu_ManageUsers, _("Manage users..."));
-				//MyMenu.AppendSeparator();
-				//MyMenu.Append(Menu_RestartServer, _("Restart server"));
-				//MyMenu.Append(Menu_StopServer, _("Stop server"));
-				MyMenu.AppendSeparator();
-				MyMenu.Append(Menu_UnRegisterServer, _("Unregister server"));
-				MyMenu.Append(Menu_ServerProperties, _("Server registration info..."));
-				break;
-
-			case ntDatabase:
-				MyMenu.Append(Menu_Connect, _("Connect"));
-				MyMenu.Append(Menu_Disconnect, _("Disconnect"));
-				MyMenu.Append(Menu_Reconnect, _("Reconnect"));
-				MyMenu.Append(Menu_Query, _("Run a query..."));
-				MyMenu.AppendSeparator();
-				MyMenu.Append(Menu_ShowConnectedUsers, _("Show connected users"));
-				MyMenu.Append(Menu_DatabaseRegistrationInfo, _("Database registration info..."));
-				MyMenu.Append(Menu_UnRegisterDatabase, _("Unregister database"));
-				MyMenu.AppendSeparator();
-				MyMenu.Append(Menu_Backup, _("Backup database..."));
-				MyMenu.Append(Menu_Restore, _("Restore database..."));
-				break;
-
-			case ntGenerators:
-				MyMenu.Append(Menu_ShowAllGeneratorValues, _("Show all values"));
-			case ntTables:
-			case ntViews:
-			case ntProcedures:
-			case ntTriggers:
-			case ntDomains:
-			case ntRoles:
-            case ntExceptions:
-				MyMenu.Append(Menu_CreateObject, _("Create new..."));
-				break;
-
-			case ntFunctions:
-				MyMenu.Append(Menu_CreateObject, _("Declare new..."));
-				break;
-
-			case ntTable:
-			case ntSysTable:
-				MyMenu.Append(Menu_Insert, _("Insert into ..."));
-			case ntView:
-			case ntProcedure:
-				MyMenu.Append(Menu_Browse, _("Select * from ..."));
-				MyMenu.Append(Menu_BrowseColumns, _("Select col1, col2, ... from ..."));
-				MyMenu.AppendSeparator();
-				if (config().get("ShowColumnsInTree", true))
-				{
-					MyMenu.Append(Menu_LoadColumnsInfo, _("Show columns info"));
-					if (i->getType() == ntTable)
-						MyMenu.Append(Menu_AddColumn, _("Add column..."));
-					MyMenu.AppendSeparator();
-				}
-			case ntTrigger:
-			case ntRole:
-			case ntDomain:
-            case ntException:
-			case ntFunction:
-				if (i->getType() == ntTable || i->getType() == ntView)
-					MyMenu.Append(Menu_CreateTrigger, _("Create new trigger..."));
-				MyMenu.Append(Menu_DropObject, _("Drop"));
-				MyMenu.Append(Menu_ObjectProperties, _("Properties..."));
-				break;
-
-			case ntGenerator:
-				MyMenu.Append(Menu_ShowGeneratorValue, _("Show value"));
-				MyMenu.Append(Menu_SetGeneratorValue, _("Set value"));
-				MyMenu.Append(Menu_DropObject, _("Drop"));
-				MyMenu.Append(Menu_ObjectProperties, _("Properties..."));
-				break;
-
-			case ntColumn:
-				if (dynamic_cast<YTable *>(i->getParent()))		// only for table columns
-				{
-					MyMenu.Append(Menu_DropObject, _("Drop"));
-					MyMenu.Append(Menu_ObjectProperties, _("Properties..."));
-				}
-				break;
-
-			default:
-				break;
-		}
+		ContextMenuVisitor cmv(&MyMenu);
+		i->accept(&cmv);
 	}
-
 	PopupMenu(&MyMenu, pos);
 }
 //-----------------------------------------------------------------------------

@@ -263,6 +263,7 @@
         $(SOURCEDIR)/metadata/function.h
         $(SOURCEDIR)/metadata/generator.h
         $(SOURCEDIR)/metadata/indices.h
+        $(SOURCEDIR)/metadata/item.h
         $(SOURCEDIR)/metadata/metadataitem.h
         $(SOURCEDIR)/metadata/parameter.h
         $(SOURCEDIR)/metadata/procedure.h
@@ -276,6 +277,8 @@
         $(SOURCEDIR)/simpleparser.h
         $(SOURCEDIR)/myTreeCtrl.h
         $(SOURCEDIR)/observer.h
+        $(SOURCEDIR)/visitor.h
+        $(SOURCEDIR)/contextmenuvisitor.h
         $(SOURCEDIR)/styleguide.h
         $(SOURCEDIR)/subject.h
         $(SOURCEDIR)/treeitem.h
@@ -335,6 +338,7 @@
         $(SOURCEDIR)/metadata/function.cpp
         $(SOURCEDIR)/metadata/generator.cpp
         $(SOURCEDIR)/metadata/indices.cpp
+        $(SOURCEDIR)/metadata/item.cpp
         $(SOURCEDIR)/metadata/metadataitem.cpp
         $(SOURCEDIR)/metadata/parameter.cpp
         $(SOURCEDIR)/metadata/procedure.cpp
@@ -348,6 +352,7 @@
         $(SOURCEDIR)/myTreeCtrl.cpp
         $(SOURCEDIR)/objectdescriptionhandler.cpp
         $(SOURCEDIR)/observer.cpp
+        $(SOURCEDIR)/contextmenuvisitor.cpp
         $(SOURCEDIR)/simpleparser.cpp
         $(SOURCEDIR)/styleguide.cpp
         $(PLATFORMSPECIFICSOURCES)

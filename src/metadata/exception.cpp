@@ -29,6 +29,7 @@
 #endif
 
 #include <string>
+#include "visitor.h"
 #include "exception.h"
 #include <ibpp.h>
 #include "dberror.h"
@@ -102,3 +103,9 @@ std::string YException::getAlterSql()
 {
 	return "ALTER EXCEPTION " + getName() + " '" + getMessage() + "';";
 }
+//------------------------------------------------------------------------------
+void YException::accept(Visitor *v)
+{
+	v->visit(*this);
+}
+//------------------------------------------------------------------------------

@@ -32,7 +32,7 @@
 #include <string>
 #include <vector>
 
-#include "subject.h"
+#include "item.h"
 
 // forward declarations
 class YDatabase;
@@ -50,7 +50,7 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
 //------------------------------------------------------------------------------
 NodeType getTypeByName(std::string name);
 //------------------------------------------------------------------------------
-class YxMetadataItem: public YxSubject
+class YxMetadataItem: public Item
 {
 protected:
 	YxMetadataItem *parentM;
@@ -59,6 +59,8 @@ protected:
 	bool descriptionLoadedM;
 	NodeType typeM;
 public:
+    virtual void accept(Visitor *v);
+
 	bool getDependencies(std::vector<Dependency>& list, bool ofObject);	// load from db
 
 	YxMetadataItem();

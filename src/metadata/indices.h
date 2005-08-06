@@ -31,6 +31,8 @@
 class Index: public YxMetadataItem
 {
 public:
+    virtual void accept(Visitor *v);
+
 	enum IndexType { itAscending, itDescending };
 	Index(bool unique, bool active, bool ascending, double statistics);
 

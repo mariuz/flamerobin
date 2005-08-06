@@ -32,6 +32,7 @@
 #include "dberror.h"
 #include "database.h"
 #include "collection.h"
+#include "visitor.h"
 #include "indices.h"
 #include "relation.h"
 #include "table.h"
@@ -595,3 +596,8 @@ bool YTable::tablesRelate(std::vector<std::string>& tables, YTable *table, std::
 	return !list.empty();
 }
 //-----------------------------------------------------------------------------
+void YTable::accept(Visitor *v)
+{
+	v->visit(*this);
+}
+//------------------------------------------------------------------------------

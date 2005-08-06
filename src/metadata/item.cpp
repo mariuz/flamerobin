@@ -1,3 +1,4 @@
+//------------------------------------------------------------------------------
 /*
   The contents of this file are subject to the Initial Developer's Public
   License Version 1.0 (the "License"); you may not use this file except in
@@ -14,38 +15,18 @@
   The Initial Developer of the Original Code is Milan Babuskov.
 
   Portions created by the original developer
-  are Copyright (C) 2004 Milan Babuskov.
+  are Copyright (C) 2005 Milan Babuskov.
 
   All Rights Reserved.
 
-  Contributor(s):
+  Contributor(s): .
 */
-
-//
-//
-//
-//
 //------------------------------------------------------------------------------
-#ifndef FR_PARAMETER_H
-#define FR_PARAMETER_H
-
-#include "column.h"
-#include "metadataitem.h"
-
-typedef enum { ptInput, ptOutput } ParameterType;
-
-class YParameter: public YColumn
+#include "item.h"
+#include "visitor.h"
+//------------------------------------------------------------------------------
+void Item::accept(Visitor *v)
 {
-public:
-    virtual void accept(Visitor *v);
-
-	YParameter(std::string source, int parameterType);
-	YParameter();
-	std::string getPrintableName();
-	ParameterType getParameterType() const;
-
-private:
-	ParameterType parameterTypeM;
-};
+	v->visit(*this);
+}
 //------------------------------------------------------------------------------
-#endif

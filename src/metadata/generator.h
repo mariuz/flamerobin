@@ -38,6 +38,8 @@ private:
 	bool valueLoadedM;
 
 public:
+    virtual void accept(Visitor *v);
+
 	std::string getCreateSqlTemplate() const;	// overrides YxMetadataItem::getCreateSqlTemplate()
 
 	bool loadValue(bool force = false);

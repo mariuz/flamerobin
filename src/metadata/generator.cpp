@@ -34,6 +34,7 @@
 #include "dberror.h"
 #include "database.h"
 #include "metadataitem.h"
+#include "visitor.h"
 #include "generator.h"
 //------------------------------------------------------------------------------
 YGenerator::YGenerator():
@@ -107,6 +108,11 @@ std::string YGenerator::getCreateSqlTemplate() const
 const std::string YGenerator::getTypeName() const
 {
 	return "GENERATOR";
+}
+//------------------------------------------------------------------------------
+void YGenerator::accept(Visitor *v)
+{
+	v->visit(*this);
 }
 //------------------------------------------------------------------------------
 

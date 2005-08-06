@@ -37,6 +37,7 @@
 #include "domain.h"
 #include "constraints.h"
 #include "ugly.h"
+#include "visitor.h"
 #include "column.h"
 //------------------------------------------------------------------------------
 //! new undefined column
@@ -154,5 +155,10 @@ std::string YColumn::getCollation() const
 std::string YColumn::getDropSqlStatement() const
 {
 	return "ALTER TABLE " + getParent()->getName() + " DROP " + nameM;
+}
+//------------------------------------------------------------------------------
+void YColumn::accept(Visitor *v)
+{
+	v->visit(*this);
 }
 //------------------------------------------------------------------------------

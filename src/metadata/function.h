@@ -39,6 +39,8 @@ private:
 	void loadInfo(bool force = false);
 
 public:
+    virtual void accept(Visitor *v);
+
 	virtual const std::string getTypeName() const;
     virtual std::string getCreateSqlTemplate() const;
     virtual std::string getDropSqlStatement() const;

@@ -30,6 +30,7 @@
 
 #include <string>
 #include <vector>
+#include "visitor.h"
 #include "metadataitem.h"
 #include "constraints.h"
 //------------------------------------------------------------------------------
@@ -56,4 +57,9 @@ std::string ForeignKey::getReferencedColumnList() const
 	}
 	return result;
 };
+//------------------------------------------------------------------------------
+void Constraint::accept(Visitor *v)
+{
+	v->visit(*this);
+}
 //------------------------------------------------------------------------------

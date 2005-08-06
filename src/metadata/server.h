@@ -45,6 +45,8 @@ private:
 
 	void createName();		// creates name for the node using hostname and port values
 public:
+    virtual void accept(Visitor *v);
+
 	YServer();
 	virtual bool getChildren(std::vector<YxMetadataItem *>& temp);
     virtual bool orderedChildren() const;

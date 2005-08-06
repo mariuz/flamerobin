@@ -29,6 +29,7 @@
 #endif
 
 #include <string>
+#include "visitor.h"
 #include "role.h"
 //------------------------------------------------------------------------------
 std::string YRole::getCreateSqlTemplate() const
@@ -39,6 +40,11 @@ std::string YRole::getCreateSqlTemplate() const
 const std::string YRole::getTypeName() const
 {
 	return "ROLE";
+}
+//------------------------------------------------------------------------------
+void YRole::accept(Visitor *v)
+{
+	v->visit(*this);
 }
 //------------------------------------------------------------------------------
 

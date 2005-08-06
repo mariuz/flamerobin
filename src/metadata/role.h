@@ -34,6 +34,8 @@
 class YRole: public YxMetadataItem
 {
 public:
+    virtual void accept(Visitor *v);
+
     virtual std::string getCreateSqlTemplate() const;
     virtual const std::string getTypeName() const;
 };

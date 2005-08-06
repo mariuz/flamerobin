@@ -29,6 +29,7 @@
 #endif
 
 #include <sstream>
+#include "visitor.h"
 #include "parameter.h"
 #include "database.h"
 #include "ugly.h"
@@ -966,5 +967,10 @@ void YDatabase::setRole(std::string value)
 const std::string YDatabase::getTypeName() const
 {
 	return "DATABASE";
+}
+//------------------------------------------------------------------------------
+void YDatabase::accept(Visitor *v)
+{
+	v->visit(*this);
 }
 //------------------------------------------------------------------------------

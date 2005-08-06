@@ -41,6 +41,8 @@ private:
 	std::string triggerTypeM;
 
 public:
+    virtual void accept(Visitor *v);
+
 	enum firingTimeType { afterTrigger, beforeTrigger };
 	std::string getCreateSqlTemplate() const;	// overrides YxMetadataItem::getCreateSqlTemplate()
 

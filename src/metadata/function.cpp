@@ -30,6 +30,7 @@
 
 #include <string>
 #include "ibpp.h"
+#include "visitor.h"
 #include "function.h"
 #include "database.h"
 #include "domain.h"
@@ -142,5 +143,10 @@ std::string YFunction::getHtmlHeader()
 {
 	loadInfo();
 	return "<B>Library name:</B> " + libraryNameM + "<BR><B>Entry point:</B>  " + entryPointM + "<BR><BR>";
+}
+//------------------------------------------------------------------------------
+void YFunction::accept(Visitor *v)
+{
+	v->visit(*this);
 }
 //------------------------------------------------------------------------------

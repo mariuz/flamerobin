@@ -31,12 +31,13 @@
 //------------------------------------------------------------------------------
 #include <sstream>
 #include "metadataitem.h"
+#include "visitor.h"
 #include "database.h"
 #include "dberror.h"
 #include "frutils.h"
 
 YxMetadataItem::YxMetadataItem()
-	: YxSubject()
+	: Item()
 {
 	parentM = 0;
 	typeM = ntUnknown;
@@ -495,5 +496,10 @@ bool YxMetadataItem::isSystem() const
 std::string YxMetadataItem::getDropSqlStatement() const
 {
     return "DROP " + getTypeName() + " " + getName() + ";";
+}
+//------------------------------------------------------------------------------
+void YxMetadataItem::accept(Visitor *v)
+{
+	v->visit(*this);
 }
 //------------------------------------------------------------------------------

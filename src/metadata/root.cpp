@@ -32,6 +32,7 @@
 #include <sstream>
 #include <string>
 #include "config.h"
+#include "visitor.h"
 #include "root.h"
 #include "server.h"
 #include "database.h"
@@ -223,4 +224,10 @@ std::string YRoot::getFileName()
 		fileNameM = config().getDBHFileName();
 	return fileNameM;
 }
+//------------------------------------------------------------------------------
+void YRoot::accept(Visitor *v)
+{
+	v->visit(*this);
+}
+//------------------------------------------------------------------------------
 

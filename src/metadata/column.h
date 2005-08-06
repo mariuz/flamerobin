@@ -35,6 +35,8 @@
 class YColumn: public YxMetadataItem
 {
 public:
+    virtual void accept(Visitor *v);
+
 	YColumn();
 	void Init(bool notnull, std::string source, bool computed, std::string computedSource, std::string collation);
 	virtual std::string getPrintableName();

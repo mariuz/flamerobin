@@ -79,6 +79,8 @@ private:
 	std::string getTableForIndex(std::string indexName);
 
 public:
+    virtual void accept(Visitor *v);
+
 	YDatabase();
 	virtual bool getChildren(std::vector<YxMetadataItem *>& temp);
 	void getCollections(std::vector<YxMetadataItem *>& temp);

@@ -34,6 +34,8 @@
 class YView: public Relation
 {
 public:
+    virtual void accept(Visitor *v);
+
 	std::string getCreateSqlTemplate() const;	// overrides YxMetadataItem::getCreateSqlTemplate()
 
 	bool getSource(std::string& source);

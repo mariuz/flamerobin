@@ -32,6 +32,7 @@
 //------------------------------------------------------------------------------
 #include <sstream>
 #include <ibpp.h>
+#include "visitor.h"
 #include "metadataitem.h"
 #include "dberror.h"
 #include "frutils.h"
@@ -247,6 +248,11 @@ std::string YTrigger::getCreateSqlTemplate() const
 const std::string YTrigger::getTypeName() const
 {
 	return "TRIGGER";
+}
+//------------------------------------------------------------------------------
+void YTrigger::accept(Visitor *v)
+{
+	v->visit(*this);
 }
 //------------------------------------------------------------------------------
 

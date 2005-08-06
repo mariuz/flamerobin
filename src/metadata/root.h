@@ -35,6 +35,8 @@
 class YRoot: public YxMetadataItem
 {
 public:
+    virtual void accept(Visitor *v);
+
 	YServer *addServer(YServer& server);
 	void removeServer(YServer* server);
 

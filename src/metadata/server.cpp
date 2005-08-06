@@ -29,6 +29,7 @@
 #endif
 
 #include "config.h"
+#include "visitor.h"
 #include "server.h"
 //------------------------------------------------------------------------------
 YServer::YServer()
@@ -80,7 +81,7 @@ void YServer::createDatabase(YDatabase *db, int pagesize, int dialect)
         extra_params << "DEFAULT CHARACTER SET " << charset << " ";
 
 	IBPP::Database db1;
-	db1 = IBPP::DatabaseFactory(hostnameM, db->getPath(), db->getUsername(), 
+	db1 = IBPP::DatabaseFactory(hostnameM, db->getPath(), db->getUsername(),
         db->getPassword(), "", charset, extra_params.str());
 	db1->Create(dialect);
 }
@@ -111,7 +112,7 @@ std::string YServer::getPort() const
 //------------------------------------------------------------------------------
 bool YServer::hasConnectedDatabase() const
 {
-	for (YMetadataCollection<YDatabase>::const_iterator it = databasesM.begin(); 
+	for (YMetadataCollection<YDatabase>::const_iterator it = databasesM.begin();
 		it != databasesM.end(); ++it)
 	{
 		if ((*it).isConnected())
@@ -135,6 +136,11 @@ void YServer::setPort(std::string port)
 const std::string YServer::getTypeName() const
 {
 	return "SERVER";
+}
+//------------------------------------------------------------------------------
+void YServer::accept(Visitor *v)
+{
+	v->visit(*this);
 }
 //------------------------------------------------------------------------------
 

@@ -69,6 +69,8 @@ private:
 	bool loadIndices();
 
 public:
+    virtual void accept(Visitor *v);
+
 	static bool tablesRelate(std::vector<std::string>& tables, YTable *table, std::vector<Join>& list);
 
 	virtual std::string getCreateSqlTemplate() const;

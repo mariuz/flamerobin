@@ -32,6 +32,7 @@
 #include "dberror.h"
 #include "frutils.h"
 #include "database.h"
+#include "visitor.h"
 #include "collection.h"
 #include "parameter.h"
 #include "procedure.h"
@@ -307,6 +308,11 @@ std::string YProcedure::getCreateSqlTemplate() const
 const std::string YProcedure::getTypeName() const
 {
 	return "PROCEDURE";
+}
+//------------------------------------------------------------------------------
+void YProcedure::accept(Visitor *v)
+{
+	v->visit(*this);
 }
 //------------------------------------------------------------------------------
 

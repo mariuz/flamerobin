@@ -40,6 +40,8 @@ private:
 	YMetadataCollection <YParameter> parametersM;
 
 public:
+    virtual void accept(Visitor *v);
+
 	std::string getCreateSqlTemplate() const;	// overrides YxMetadataItem::getCreateSqlTemplate()
 
 	bool getChildren(std::vector<YxMetadataItem *>& temp);

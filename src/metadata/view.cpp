@@ -32,6 +32,7 @@
 #include "dberror.h"
 #include "database.h"
 #include "view.h"
+#include "visitor.h"
 #include "collection.h"
 #include "relation.h"
 //------------------------------------------------------------------------------
@@ -139,6 +140,11 @@ std::string YView::getCreateSqlTemplate() const
 const std::string YView::getTypeName() const
 {
 	return "VIEW";
+}
+//------------------------------------------------------------------------------
+void YView::accept(Visitor *v)
+{
+	v->visit(*this);
 }
 //------------------------------------------------------------------------------
 

@@ -31,6 +31,7 @@
 #include <sstream>
 #include <string>
 
+#include "visitor.h"
 #include "column.h"
 #include "domain.h"
 #include "parameter.h"
@@ -60,5 +61,10 @@ std::string YParameter::getPrintableName()
 ParameterType YParameter::getParameterType() const
 {
 	return parameterTypeM;
+}
+//------------------------------------------------------------------------------
+void YParameter::accept(Visitor *v)
+{
+	v->visit(*this);
 }
 //------------------------------------------------------------------------------

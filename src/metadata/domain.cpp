@@ -31,6 +31,7 @@
 #include <sstream>
 #include <string>
 #include <ibpp.h>
+#include "visitor.h"
 #include "dberror.h"
 #include "database.h"
 #include "domain.h"
@@ -236,6 +237,11 @@ std::string YDomain::getCreateSqlTemplate() const
 const std::string YDomain::getTypeName() const
 {
 	return "DOMAIN";
+}
+//------------------------------------------------------------------------------
+void YDomain::accept(Visitor *v)
+{
+	v->visit(*this);
 }
 //------------------------------------------------------------------------------
 

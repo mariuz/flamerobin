@@ -40,6 +40,8 @@ private:
 	bool infoLoadedM;
 
 public:
+    virtual void accept(Visitor *v);
+
 	YDomain();
 
 	static std::string datatype2string(short datatype, short scale, short precision, short subtype, short length);
