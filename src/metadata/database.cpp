@@ -40,6 +40,7 @@ YDatabase::YDatabase()
 	typeM = ntDatabase;
 	connectedM = false;
 	
+	// has to be here, since notify() might be called before initChildren()
 	domainsM.setName("Domains");
 	domainsM.setType(ntDomains);
 	exceptionsM.setName("Exceptions");
