@@ -43,8 +43,6 @@
 //-----------------------------------------------------------------------------
 class MainFrame: public BaseFrame {
 public:
-	void OnMenuOpen(wxMenuEvent& event);	// build menu before it shows
-
 	// menu handling events
     void OnMenuRegisterServer(wxCommandEvent& event);
     void OnMenuQuit(wxCommandEvent& event);

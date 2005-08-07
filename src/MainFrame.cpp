@@ -63,7 +63,6 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     menuBarM->Append(objectMenu, _("&Object"));
     windowMenu = new wxMenu();
     menuBarM->Append(windowMenu, _("&Window"));
-	frameManager().setWindowMenu(windowMenu);
 
     wxMenu* helpMenu = new wxMenu();
     helpMenu->Append(wxNewId(), _("&Manual"), wxEmptyString, wxITEM_NORMAL);
@@ -74,6 +73,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     menuBarM->Append(helpMenu, _("&Help"));
 	SetMenuBar(menuBarM);
 	menuBarM->EnableTop(3, false);	// disable "window" menu at startup
+	frameManager().setWindowMenu(windowMenu, menuBarM);
 
 	statusBarM = CreateStatusBar();
     set_properties();

@@ -60,7 +60,6 @@
 
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
-	EVT_MENU_OPEN(MainFrame::OnMenuOpen)
 	EVT_MENU(myTreeCtrl::Menu_RegisterServer, MainFrame::OnMenuRegisterServer)
 	EVT_MENU(myTreeCtrl::Menu_Quit, MainFrame::OnMenuQuit)
 	EVT_MENU(myTreeCtrl::Menu_About, MainFrame::OnMenuAbout)
@@ -110,13 +109,6 @@ END_EVENT_TABLE()
 void MainFrame::OnWindowMenuItem(wxCommandEvent& event)
 {
 	frameManager().bringOnTop(event.GetId());
-}
-//-----------------------------------------------------------------------------
-void MainFrame::OnMenuOpen(wxMenuEvent& event)	// build windowMenu before it shows
-{
-	if (event.IsPopup())	// don't do anything for popup menus
-		return;
-	menuBarM->EnableTop(3, windowMenu->GetMenuItemCount() > 0);	// disable empty menus
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
@@ -234,7 +226,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
 		event.Veto();
 		return;
 	}
-	frameManager().setWindowMenu(0);	// tell it not to update menus anymore
+	frameManager().setWindowMenu(0, 0);	// tell it not to update menus anymore
 	BaseFrame::OnClose(event);
 }
 //-----------------------------------------------------------------------------
@@ -895,13 +887,21 @@ void MainFrame::OnMenuUpdateUnRegisterServer(wxUpdateUIEvent& event)
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateIfDatabaseConnected(wxUpdateUIEvent& event)
 {
-	YDatabase *db = dynamic_cast<YDatabase *>(tree_ctrl_1->getSelectedMetadataItem());
-	event.Enable(db != 0 && db->isConnected());
+	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	if (m)
+	{
+		YDatabase *db = m->getDatabase();
+		event.Enable(db != 0 && db->isConnected());
+	}
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateIfDatabaseNotConnected(wxUpdateUIEvent& event)
 {
-	YDatabase *db = dynamic_cast<YDatabase *>(tree_ctrl_1->getSelectedMetadataItem());
-	event.Enable(db != 0 && !db->isConnected());
+	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	if (m)
+	{
+		YDatabase *db = m->getDatabase();
+		event.Enable(db != 0 && !db->isConnected());
+	}
 }
 //-----------------------------------------------------------------------------

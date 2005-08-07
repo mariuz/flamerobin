@@ -49,7 +49,7 @@ public:
     FrameManager();
     ~FrameManager();
 
-	void setWindowMenu(wxMenu *m);
+	void setWindowMenu(wxMenu *windowMenu, wxMenuBar *menuBar);
 	void rebuildMenu();
 	void bringOnTop(int id);
 
@@ -64,6 +64,7 @@ protected:
 private:
     ItemFrameMap mipFramesM;
 	wxMenu* windowMenuM;
+	wxMenuBar* menuBarM;
 
     void removeFrame(BaseFrame* frame, ItemFrameMap& frames);
 };

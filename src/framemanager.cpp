@@ -29,7 +29,7 @@
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
-// need because it includes almost all "standard" wxWindows headers
+// need because it includes almost all "standard" wxWindows headers)
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
@@ -52,16 +52,17 @@ FrameManager::~FrameManager()
 {
 }
 //-----------------------------------------------------------------------------
-void FrameManager::setWindowMenu(wxMenu *m)
+void FrameManager::setWindowMenu(wxMenu *windowMenu, wxMenuBar *menuBar)
 {
-	windowMenuM = m;
+	windowMenuM = windowMenu;
+	menuBarM = menuBar;
 }
 //-----------------------------------------------------------------------------
 // TODO: currently we just clear and rebuild from scratch
 //       we could implement more efficient algorithm later (find the one that is gone and remove, etc)
 void FrameManager::rebuildMenu()
 {
-	if (windowMenuM == 0)
+	if (windowMenuM == 0 || menuBarM == 0)
 		return;
 
 	// remove all items
@@ -75,6 +76,11 @@ void FrameManager::rebuildMenu()
 		(*it).second.id = id;
 		++id;
 	}
+
+	int index = -1;
+	while (++index < menuBarM->GetMenuCount())
+		if (menuBarM->GetMenu(index) == windowMenuM)
+			menuBarM->EnableTop(index, windowMenuM->GetMenuItemCount() > 0);
 }
 //-----------------------------------------------------------------------------
 void FrameManager::bringOnTop(int id)
