@@ -86,23 +86,6 @@ std::string escapeHtmlChars(std::string s, bool processNewlines = true)
 	return s;
 }
 //-----------------------------------------------------------------------------
-HtmlPrinter::HtmlPrinter()
-{
-	prnM = new wxHtmlEasyPrinting(_("Printing"));
-}
-//-----------------------------------------------------------------------------
-wxHtmlEasyPrinting *HtmlPrinter::getHEP()
-{
-	static HtmlPrinter instance;
-	return instance.prnM;
-}
-//-----------------------------------------------------------------------------
-HtmlPrinter::~HtmlPrinter()
-{
-	delete prnM;
-	prnM = 0;
-}
-//-----------------------------------------------------------------------------
 //! MetadataItemPropertiesFrame class
 MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent, YxMetadataItem *object, int id):
     BaseFrame(parent, id, wxT(""))
@@ -116,7 +99,7 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent, YxMet
 		return;
 	}
 
-    window_1 = new myHtmlWindow(this);
+    window_1 = new PrintableHtmlWindow(this);
 	objectM = object;
 	objectM->attach(this);
 
@@ -681,133 +664,6 @@ void MetadataItemPropertiesFrame::update()
 	loadPage();
 }
 //-----------------------------------------------------------------------------
-//! myHtmlWindow class
-myHtmlWindow::myHtmlWindow(wxWindow *parent)
-	: wxHtmlWindow(parent, -1)
-{
-}
-//-----------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(myHtmlWindow, wxHtmlWindow)
-	EVT_RIGHT_UP(myHtmlWindow::OnRightUp)
-	EVT_MENU(myHtmlWindow::ID_MENU_COPY, myHtmlWindow::OnMenuCopy)
-	EVT_MENU(myHtmlWindow::ID_MENU_NEW_WINDOW, myHtmlWindow::OnMenuNewWindow)
-	EVT_MENU(myHtmlWindow::ID_MENU_SAVE, myHtmlWindow::OnMenuSave)
-	EVT_MENU(myHtmlWindow::ID_MENU_PRINT, myHtmlWindow::OnMenuPrint)
-	EVT_MENU(myHtmlWindow::ID_MENU_PREVIEW, myHtmlWindow::OnMenuPreview)
-END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
-void myHtmlWindow::OnRightUp(wxMouseEvent& event)
-{
-    wxMenu m(0);
-	m.Append(ID_MENU_NEW_WINDOW, _("&Open link in a new window"));
-    m.Append(ID_MENU_COPY,   	 _("&Copy"));
-    m.AppendSeparator();
-    m.Append(ID_MENU_SAVE,		_("&Save as HTML file..."));
-    m.Append(ID_MENU_PREVIEW,	_("Print pre&view..."));
-    m.Append(ID_MENU_PRINT,		_("&Print..."));
-
-	bool isLink = false;
-    if (m_Cell)	// taken from wx's htmlwin.cpp
-    {
-        wxPoint pos = CalcUnscrolledPosition(event.GetPosition());
-        wxHtmlCell *cell = m_Cell->FindCellByPos(pos.x, pos.y);
-        if (cell)
-		{
-			int ix = cell->GetPosX();
-			int iy = cell->GetPosY();
-			wxHtmlLinkInfo *i = cell->GetLink(pos.x-ix, pos.y-iy);
-			if (i)
-			{
-				tempLinkM = i->GetHref();
-				isLink = true;
-			}
-		}
-    }
-
-	m.Enable(ID_MENU_NEW_WINDOW, isLink);
-	if (SelectionToText().IsEmpty())
-		m.Enable(ID_MENU_COPY, false);
-    PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
-}
-//-----------------------------------------------------------------------------
-void myHtmlWindow::setPageSource(const wxString& html)
-{
-	pageSourceM = html;
-	SetPage(pageSourceM);
-}
-//-----------------------------------------------------------------------------
-void myHtmlWindow::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
-{
-	if (wxTheClipboard->Open())
-	{
-		wxTheClipboard->SetData( new wxTextDataObject(SelectionToText()) );
-		wxTheClipboard->Close();
-	}
-}
-//-----------------------------------------------------------------------------
-void myHtmlWindow::OnMenuNewWindow(wxCommandEvent& WXUNUSED(event))
-{
-	std::string addr = wx2std(tempLinkM);
-	YURI uri(addr);
-	if (uri.protocol != "fr")				// we don't support "new window" for non-fr protocols
-		return;
-	uri.addParam("target=new");
-	if (!getURIProcessor().handleURI(uri))
-		::wxMessageBox(_("Feature not yet implemented."), _("Information"), wxICON_INFORMATION|wxOK);
-}
-//-----------------------------------------------------------------------------
-void myHtmlWindow::OnMenuSave(wxCommandEvent& WXUNUSED(event))
-{
-	wxString filename = wxFileSelector(_("Save as HTML..."), wxEmptyString, GetOpenedPageTitle(), wxT("*.html"),
-		_("HTML files (*.html)|*.html|All files (*.*)|*.*"), wxSAVE|wxOVERWRITE_PROMPT);
-	if (!filename.IsEmpty())
-	{
-		wxFile f;
-		if (f.Open(filename, wxFile::write))
-		{
-			wxString ns(pageSourceM);
-			while (true)	// remove links
-			{
-				int p1 = ns.Upper().find(wxT("<A"));
-				int p2 = ns.Upper().find(wxT("</A>"), p1);
-				if (p1 == -1 || p2 == -1)
-					break;
-				ns.Remove(p1, p2 - p1 + 4);
-			}
-			f.Write(ns);
-			f.Close();
-		}
-	}
-}
-//-----------------------------------------------------------------------------
-void myHtmlWindow::OnMenuPreview(wxCommandEvent& WXUNUSED(event))
-{
-	HtmlPrinter::getHEP()->SetHeader(GetOpenedPageTitle());
-	HtmlPrinter::getHEP()->SetFooter(_("Printed from FlameRobin - www.flamerobin.org"));
-	HtmlPrinter::getHEP()->PreviewText(pageSourceM);
-}
-//-----------------------------------------------------------------------------
-void myHtmlWindow::OnMenuPrint(wxCommandEvent& WXUNUSED(event))
-{
-	HtmlPrinter::getHEP()->SetHeader(GetOpenedPageTitle());
-	HtmlPrinter::getHEP()->SetFooter(_("Printed from FlameRobin - www.flamerobin.org"));
-	HtmlPrinter::getHEP()->PrintText(pageSourceM);
-}
-//-----------------------------------------------------------------------------
-//! Link is in format: "protocol://action?name=value&amp;name=value...etc.
-void myHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
-{
-	std::string addr = wx2std(link.GetHref());
-	YURI uri(addr);
-	if (uri.protocol != "fr")		// call default handler for other protocols
-	{
-		wxHtmlWindow::OnLinkClicked(link);
-		return;
-	}
-	if (!getURIProcessor().handleURI(addr))
-		::wxMessageBox(_("Feature not yet implemented."), _("Information"), wxICON_INFORMATION|wxOK);
-}
-//-----------------------------------------------------------------------------
 //! PageHandler class
 class PageHandler: public YxURIHandler
 {
@@ -828,17 +684,22 @@ bool PageHandler::handleURI(const YURI& uriObj)
 	if (!std2wx(ms).ToULong(&mo))
 		return true;
 	MetadataItemPropertiesFrame *m = (MetadataItemPropertiesFrame *)mo;
+	bool skip = false;
 	if (uriObj.getParam("target") == "new")
 	{
 		wxWindow *mainFrame = m->GetParent();
 		if (mainFrame)
+		{
 			m = frameManager().showMetadataPropertyFrame(mainFrame, m->getObservedObject(), false, true);
+			skip = true;
+		}
 	}
 
 	if (m)
 	{
 		m->setPage(uriObj.getParam("type"));
-		frameManager().rebuildMenu();
+		if (!skip)
+			frameManager().rebuildMenu();
 	}
 	return true;
 }

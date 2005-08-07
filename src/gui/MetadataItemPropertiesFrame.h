@@ -27,43 +27,11 @@
 #include <string>
 #include "BaseFrame.h"
 #include "metadata/metadataitem.h"
+#include "PrintableHtmlWindow.h"
 #include "observer.h"
 
 #ifndef METADATAITEMPROPERTIESFRAME_H
 #define METADATAITEMPROPERTIESFRAME_H
-
-class wxHtmlEasyPrinting;
-//-----------------------------------------------------------------------------
-class HtmlPrinter
-{
-private:
-	wxHtmlEasyPrinting *prnM;
-	HtmlPrinter();
-public:
-	static wxHtmlEasyPrinting *getHEP();
-	~HtmlPrinter();
-};
-//-----------------------------------------------------------------------------
-class myHtmlWindow: public wxHtmlWindow
-{
-private:
-	wxString pageSourceM;
-	wxString tempLinkM;		// set before context menu pops up, and used in handler for menu item
-public:
-	myHtmlWindow(wxWindow *parent);
-	void setPageSource(const wxString& html);
-	enum {  ID_MENU_COPY=500, ID_MENU_NEW_WINDOW, ID_MENU_SAVE, ID_MENU_PRINT, ID_MENU_PREVIEW };
-protected:
-	virtual void OnLinkClicked(const wxHtmlLinkInfo& link);
-
-	void OnRightUp(wxMouseEvent& event);
-    void OnMenuCopy(wxCommandEvent& event);
-    void OnMenuNewWindow(wxCommandEvent& event);
-    void OnMenuSave(wxCommandEvent& event);
-    void OnMenuPrint(wxCommandEvent& event);
-    void OnMenuPreview(wxCommandEvent& event);
-    DECLARE_EVENT_TABLE()
-};
 //-----------------------------------------------------------------------------
 class MetadataItemPropertiesFrame: public BaseFrame, public YxObserver
 {
@@ -88,7 +56,7 @@ private:
     // it's not possible to access objectM (see getStorageName()) after detaching from it.
     mutable std::string storageNameM;
 protected:
-    myHtmlWindow* window_1;
+    PrintableHtmlWindow* window_1;
 	virtual const std::string getName() const;
 	virtual const std::string getStorageName() const;
 	virtual const wxRect getDefaultRect() const;

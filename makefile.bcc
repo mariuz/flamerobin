@@ -99,6 +99,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MultilineEnterDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TriggerWizardDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.obj \
@@ -300,6 +301,9 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.obj: .\src\gui\Preferen
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.obj: .\src\gui\PreferencesDialogSettings.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.obj: .\src\gui\PrintableHtmlWindow.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.obj: .\src\gui\ReorderFieldsDialog.cpp
