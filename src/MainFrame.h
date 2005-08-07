@@ -47,6 +47,9 @@ public:
     void OnMenuRegisterServer(wxCommandEvent& event);
     void OnMenuQuit(wxCommandEvent& event);
     void OnMenuAbout(wxCommandEvent& event);
+    void OnMenuManual(wxCommandEvent& event);
+    void OnMenuRelNotes(wxCommandEvent& event);
+    void OnMenuLicense(wxCommandEvent& event);
     void OnMenuConfigure(wxCommandEvent& event);
     void OnMenuRegisterDatabase(wxCommandEvent& event);
     void OnMenuDatabaseRegistrationInfo(wxCommandEvent& event);

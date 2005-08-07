@@ -48,6 +48,7 @@
 #include "gui/RestoreFrame.h"
 #include "gui/ServerRegistrationDialog.h"
 #include "gui/TriggerWizardDialog.h"
+#include "gui/SimpleHtmlFrame.h"
 #include "FieldPropertiesFrame.h"
 #include "treeitem.h"
 #include "ugly.h"
@@ -63,6 +64,9 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(myTreeCtrl::Menu_RegisterServer, MainFrame::OnMenuRegisterServer)
 	EVT_MENU(myTreeCtrl::Menu_Quit, MainFrame::OnMenuQuit)
 	EVT_MENU(myTreeCtrl::Menu_About, MainFrame::OnMenuAbout)
+	EVT_MENU(myTreeCtrl::Menu_Manual, MainFrame::OnMenuManual)
+	EVT_MENU(myTreeCtrl::Menu_RelNotes, MainFrame::OnMenuRelNotes)
+	EVT_MENU(myTreeCtrl::Menu_License, MainFrame::OnMenuLicense)
 	EVT_MENU(myTreeCtrl::Menu_Configure, MainFrame::OnMenuConfigure)
 	EVT_MENU(myTreeCtrl::Menu_RegisterDatabase, MainFrame::OnMenuRegisterDatabase)
 	EVT_MENU(myTreeCtrl::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuDatabaseRegistrationInfo)
@@ -179,9 +183,6 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
 	{
 		switch (nt)
 		{
-			//case ntServer:	// pehaps it is better to leave default double-click action: "collapse the tree branch"
-			//	ServerProperties(dynamic_cast<YServer *>(m));
-			//	break;
 			case ntDatabase:
 				connect(false);						// false = don't warn if already connected
 				break;
@@ -260,6 +261,24 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 	msg += _("http://www.flamerobin.org");
 
 	::wxMessageBox(msg, _("About FlameRobin"), wxOK | wxICON_INFORMATION);
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuManual(wxCommandEvent& WXUNUSED(event))
+{
+	SimpleHtmlFrame *s = new SimpleHtmlFrame(this, wxT("frrelnotes.html"));
+	s->Show();
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuRelNotes(wxCommandEvent& WXUNUSED(event))
+{
+	SimpleHtmlFrame *s = new SimpleHtmlFrame(this, wxT("changes.html"));
+	s->Show();
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuLicense(wxCommandEvent& WXUNUSED(event))
+{
+	SimpleHtmlFrame *s = new SimpleHtmlFrame(this, wxT("license.html"));
+	s->Show();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))

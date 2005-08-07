@@ -65,10 +65,10 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     menuBarM->Append(windowMenu, _("&Window"));
 
     wxMenu* helpMenu = new wxMenu();
-    helpMenu->Append(wxNewId(), _("&Manual"), wxEmptyString, wxITEM_NORMAL);
-    helpMenu->Append(wxNewId(), _("&What's new"), wxEmptyString, wxITEM_NORMAL);
+    helpMenu->Append(myTreeCtrl::Menu_Manual, _("&Manual"), wxEmptyString, wxITEM_NORMAL);
+    helpMenu->Append(myTreeCtrl::Menu_RelNotes, _("&What's new"), wxEmptyString, wxITEM_NORMAL);
     helpMenu->AppendSeparator();
-    helpMenu->Append(wxNewId(), _("&License"), wxEmptyString, wxITEM_NORMAL);
+    helpMenu->Append(myTreeCtrl::Menu_License, _("&License"), wxEmptyString, wxITEM_NORMAL);
     helpMenu->Append(myTreeCtrl::Menu_About, _("&About"), wxEmptyString, wxITEM_NORMAL);
     menuBarM->Append(helpMenu, _("&Help"));
 	SetMenuBar(menuBarM);

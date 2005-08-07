@@ -250,6 +250,7 @@
         $(SOURCEDIR)/gui/TriggerWizardDialog.h
         $(SOURCEDIR)/gui/RestoreFrame.h
         $(SOURCEDIR)/gui/ServerRegistrationDialog.h
+        $(SOURCEDIR)/gui/SimpleHtmlFrame.h
         $(SOURCEDIR)/gui/FindDialog.h
         $(SOURCEDIR)/images.h
         $(SOURCEDIR)/logger.h
@@ -326,6 +327,7 @@
         $(SOURCEDIR)/gui/TriggerWizardDialog.cpp
         $(SOURCEDIR)/gui/RestoreFrame.cpp
         $(SOURCEDIR)/gui/ServerRegistrationDialog.cpp
+        $(SOURCEDIR)/gui/SimpleHtmlFrame.cpp
         $(SOURCEDIR)/gui/FindDialog.cpp
         $(SOURCEDIR)/images.cpp
         $(SOURCEDIR)/logger.cpp
@@ -499,6 +501,13 @@
         <srcdir>$(HTMLTEMPLATEDIR)</srcdir>
         <dstdir>$(BUILDDIR)/html-templates</dstdir>
         <files>$(HTMLTEMPLATEFILES)</files>
+    </copy-files>
+
+    <copy-files id="documents">
+        <dependency-of>all</dependency-of>
+        <srcdir>$(DOCUSRDIR)</srcdir>
+        <dstdir>$(BUILDDIR)/html-templates</dstdir>
+        <files>$(DOCUMENTS)</files>
     </copy-files>
 
     <copy-files id="config-options">
