@@ -40,6 +40,7 @@
 #include "metadata/metadataitem.h"
 #include "metadata/root.h"
 #include "treeitem.h"
+#include "framemanager.h"
 #include "myTreeCtrl.h"
 
 //-----------------------------------------------------------------------------
@@ -62,6 +63,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     menuBarM->Append(objectMenu, _("&Object"));
     windowMenu = new wxMenu();
     menuBarM->Append(windowMenu, _("&Window"));
+	frameManager().setWindowMenu(windowMenu);
 
     wxMenu* helpMenu = new wxMenu();
     helpMenu->Append(wxNewId(), _("&Manual"), wxEmptyString, wxITEM_NORMAL);
@@ -71,6 +73,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     helpMenu->Append(myTreeCtrl::Menu_About, _("&About"), wxEmptyString, wxITEM_NORMAL);
     menuBarM->Append(helpMenu, _("&Help"));
 	SetMenuBar(menuBarM);
+	menuBarM->EnableTop(3, false);	// disable "window" menu at startup
 
 	statusBarM = CreateStatusBar();
     set_properties();

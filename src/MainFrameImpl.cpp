@@ -101,25 +101,21 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(myTreeCtrl::Menu_DropObject, MainFrame::OnMenuDropObject)
 	EVT_MENU(myTreeCtrl::Menu_CreateTrigger, MainFrame::OnMenuCreateTrigger)
 
+	EVT_MENU_RANGE(5000, 6000, MainFrame::OnWindowMenuItem)
 	EVT_TREE_SEL_CHANGED(myTreeCtrl::ID_tree_ctrl, MainFrame::OnTreeSelectionChanged)
 	EVT_TREE_ITEM_ACTIVATED(myTreeCtrl::ID_tree_ctrl, MainFrame::OnTreeItemActivate)
 	EVT_CLOSE(MainFrame::OnClose)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
+void MainFrame::OnWindowMenuItem(wxCommandEvent& event)
+{
+	frameManager().bringOnTop(event.GetId());
+}
+//-----------------------------------------------------------------------------
 void MainFrame::OnMenuOpen(wxMenuEvent& event)	// build windowMenu before it shows
 {
 	if (event.IsPopup())	// don't do anything for popup menus
 		return;
-
-	while (windowMenu->GetMenuItemCount() > 0)
-		windowMenu->Destroy(windowMenu->FindItemByPosition(0));
-
-	// TODO: framemanager job
-	// It would be ideal if framemanager could add/remove items whenever it adds/removes a frame,
-	// But, it does not know anything about MainMenu. It does know that frame's parent, but
-	// that is not enough
-
-
 	menuBarM->EnableTop(3, windowMenu->GetMenuItemCount() > 0);	// disable empty menus
 }
 //-----------------------------------------------------------------------------
@@ -238,6 +234,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
 		event.Veto();
 		return;
 	}
+	frameManager().setWindowMenu(0);	// tell it not to update menus anymore
 	BaseFrame::OnClose(event);
 }
 //-----------------------------------------------------------------------------

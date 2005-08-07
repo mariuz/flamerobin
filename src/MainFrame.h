@@ -85,6 +85,7 @@ public:
 	void OnMenuUpdateIfDatabaseNotConnected(wxUpdateUIEvent& event);
 
 	// other events
+    void OnWindowMenuItem(wxCommandEvent& event);
 	void OnTreeSelectionChanged(wxTreeEvent& event);
 	void OnTreeItemActivate(wxTreeEvent& event);
 	void OnClose(wxCloseEvent& event);

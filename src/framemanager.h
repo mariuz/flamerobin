@@ -31,14 +31,27 @@
 #include "BaseFrame.h"
 #include "gui/MetadataItemPropertiesFrame.h"
 #include "metadata/metadataitem.h"
-
-typedef std::multimap<YxMetadataItem*, BaseFrame*> ItemFrameMap;
-
+//---------------------------------------------------------------------------------------
+class FrameAndId
+{
+public:
+	BaseFrame *frame;
+	int id;
+	FrameAndId(BaseFrame *f, int i)
+		:frame(f), id(i) {};
+};
+//---------------------------------------------------------------------------------------
+typedef std::multimap<YxMetadataItem*, FrameAndId> ItemFrameMap;
+//---------------------------------------------------------------------------------------
 class FrameManager: public wxEvtHandler
 {
 public:
     FrameManager();
     ~FrameManager();
+
+	void setWindowMenu(wxMenu *m);
+	void rebuildMenu();
+	void bringOnTop(int id);
 
     void removeFrame(BaseFrame* frame);
     MetadataItemPropertiesFrame* showMetadataPropertyFrame(wxWindow* parent, YxMetadataItem* item,
@@ -50,6 +63,7 @@ protected:
     DECLARE_EVENT_TABLE()
 private:
     ItemFrameMap mipFramesM;
+	wxMenu* windowMenuM;
 
     void removeFrame(BaseFrame* frame, ItemFrameMap& frames);
 };

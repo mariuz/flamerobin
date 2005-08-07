@@ -52,6 +52,48 @@ FrameManager::~FrameManager()
 {
 }
 //-----------------------------------------------------------------------------
+void FrameManager::setWindowMenu(wxMenu *m)
+{
+	windowMenuM = m;
+}
+//-----------------------------------------------------------------------------
+// TODO: currently we just clear and rebuild from scratch
+//       we could implement more efficient algorithm later (find the one that is gone and remove, etc)
+void FrameManager::rebuildMenu()
+{
+	if (windowMenuM == 0)
+		return;
+
+	// remove all items
+	while (windowMenuM->GetMenuItemCount() > 0)
+		windowMenuM->Destroy(windowMenuM->FindItemByPosition(0));
+
+	int id = 5000;	// these menu IDs start from "safe" 5000 and upwards to 6000 (let's hope users won't open 1001 windows)
+    for (ItemFrameMap::iterator it = mipFramesM.begin(); it != mipFramesM.end(); ++it)
+	{
+		windowMenuM->Append(id, ((*it).second.frame)->GetTitle());
+		(*it).second.id = id;
+		++id;
+	}
+}
+//-----------------------------------------------------------------------------
+void FrameManager::bringOnTop(int id)
+{
+    for (ItemFrameMap::iterator it = mipFramesM.begin(); it != mipFramesM.end(); ++it)
+	{
+		if ((*it).second.id == id)
+		{
+			MetadataItemPropertiesFrame* mipf = dynamic_cast<MetadataItemPropertiesFrame *>((*it).second.frame);
+			if (mipf)
+			{
+				mipf->Show();
+				mipf->Raise();
+			}
+			break;
+		}
+	}
+}
+//-----------------------------------------------------------------------------
 void FrameManager::removeFrame(BaseFrame* frame)
 {
     if (frame)
@@ -65,7 +107,7 @@ void FrameManager::removeFrame(BaseFrame* frame, ItemFrameMap& frames)
     ItemFrameMap::iterator it;
     for (it = frames.begin(); it != frames.end();)
     {
-        if ((*it).second == frame)
+        if ((*it).second.frame == frame)
         {
             mipFramesM.erase(it);
             it = frames.begin();
@@ -73,6 +115,7 @@ void FrameManager::removeFrame(BaseFrame* frame, ItemFrameMap& frames)
         else
             it++;
     }
+	rebuildMenu();
 }
 //-----------------------------------------------------------------------------
 MetadataItemPropertiesFrame* FrameManager::showMetadataPropertyFrame(wxWindow* parent,
@@ -81,11 +124,12 @@ MetadataItemPropertiesFrame* FrameManager::showMetadataPropertyFrame(wxWindow* p
 	MetadataItemPropertiesFrame* mipf = 0;
 	ItemFrameMap::iterator it = mipFramesM.find(item);
 	if (it != mipFramesM.end())
-        mipf = dynamic_cast<MetadataItemPropertiesFrame *>((*it).second);
+        mipf = dynamic_cast<MetadataItemPropertiesFrame *>((*it).second.frame);
     if (!mipf || force_new)
     {
         mipf = new MetadataItemPropertiesFrame(parent, item);
-        mipFramesM.insert(mipFramesM.begin(), std::pair<YxMetadataItem*, BaseFrame*>(item, mipf));
+		FrameAndId fai(mipf, 0);
+        mipFramesM.insert(mipFramesM.begin(), std::pair<YxMetadataItem*, FrameAndId>(item, fai));
     }
     if (delayed)
     {
@@ -98,6 +142,7 @@ MetadataItemPropertiesFrame* FrameManager::showMetadataPropertyFrame(wxWindow* p
         mipf->Show();
         mipf->Raise();
     }
+	rebuildMenu();
 	return mipf;
 }
 //-----------------------------------------------------------------------------

@@ -836,7 +836,10 @@ bool PageHandler::handleURI(const YURI& uriObj)
 	}
 
 	if (m)
+	{
 		m->setPage(uriObj.getParam("type"));
+		frameManager().rebuildMenu();
+	}
 	return true;
 }
 //-----------------------------------------------------------------------------
