@@ -54,7 +54,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     wxMenu* fileMenu = new wxMenu();
     fileMenu->Append(myTreeCtrl::Menu_Configure, _("&Preferences"), wxEmptyString, wxITEM_NORMAL);
     fileMenu->AppendSeparator();
-    fileMenu->Append(myTreeCtrl::Menu_Quit, _("&Quit"), wxEmptyString, wxITEM_NORMAL);
+    fileMenu->Append(wxID_EXIT, _("&Quit"), wxEmptyString, wxITEM_NORMAL);
     menuBarM->Append(fileMenu, _("&File"));
 
     databaseMenu = new wxMenu();					// dynamic menus, created at runtime
@@ -69,7 +69,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     helpMenu->Append(myTreeCtrl::Menu_RelNotes, _("&What's new"), wxEmptyString, wxITEM_NORMAL);
     helpMenu->AppendSeparator();
     helpMenu->Append(myTreeCtrl::Menu_License, _("&License"), wxEmptyString, wxITEM_NORMAL);
-    helpMenu->Append(myTreeCtrl::Menu_About, _("&About"), wxEmptyString, wxITEM_NORMAL);
+    helpMenu->Append(wxID_ABOUT, _("&About"), wxEmptyString, wxITEM_NORMAL);
     menuBarM->Append(helpMenu, _("&Help"));
 	SetMenuBar(menuBarM);
 	menuBarM->EnableTop(3, false);	// disable "window" menu at startup

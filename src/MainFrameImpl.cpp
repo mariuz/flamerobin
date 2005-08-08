@@ -62,8 +62,8 @@
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(myTreeCtrl::Menu_RegisterServer, MainFrame::OnMenuRegisterServer)
-	EVT_MENU(myTreeCtrl::Menu_Quit, MainFrame::OnMenuQuit)
-	EVT_MENU(myTreeCtrl::Menu_About, MainFrame::OnMenuAbout)
+	EVT_MENU(wxID_EXIT, MainFrame::OnMenuQuit)
+	EVT_MENU(wxID_ABOUT, MainFrame::OnMenuAbout)
 	EVT_MENU(myTreeCtrl::Menu_Manual, MainFrame::OnMenuManual)
 	EVT_MENU(myTreeCtrl::Menu_RelNotes, MainFrame::OnMenuRelNotes)
 	EVT_MENU(myTreeCtrl::Menu_License, MainFrame::OnMenuLicense)

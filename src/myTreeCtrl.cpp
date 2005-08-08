@@ -121,10 +121,10 @@ void myTreeCtrl::OnContextMenu(wxContextMenuEvent& event)
 			MyMenu.Append(Menu_RegisterServer, _("Register server..."));
 			MyMenu.AppendSeparator();
 		}
-		MyMenu.Append(Menu_About, _("About FlameRobin..."));
+		MyMenu.Append(wxID_ABOUT, _("About FlameRobin..."));
 		MyMenu.Append(Menu_Configure, _("Preferencess..."));
 		MyMenu.AppendSeparator();
-		MyMenu.Append(Menu_Quit, _("Quit"));
+		MyMenu.Append(wxID_EXIT, _("Quit"));
 	}
 	else
 	{	// read item data to find out what is the type of item
