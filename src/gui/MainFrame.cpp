@@ -18,9 +18,7 @@
 
   All Rights Reserved.
 
-  $Id$
-
-  Contributor(s): Nando Dessena, Michael Hieke
+  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -36,29 +34,113 @@
     #include "wx/wx.h"
 #endif
 
-#include <wx/progdlg.h>
-#include <wx/version.h>
-#include "ibpp.h"
-
-#include "MainFrame.h"
+#include "config.h"
+#include "contextmenuvisitor.h"
+#include "dberror.h"
+#include "framemanager.h"
 #include "gui/BackupFrame.h"
-#include "gui/ExecuteSqlFrame.h"
 #include "gui/DatabaseRegistrationDialog.h"
+#include "gui/ExecuteSqlFrame.h"
+#include "gui/FieldPropertiesFrame.h"
+#include "gui/MainFrame.h"
 #include "gui/PreferencesDialog.h"
 #include "gui/RestoreFrame.h"
 #include "gui/ServerRegistrationDialog.h"
-#include "gui/TriggerWizardDialog.h"
 #include "gui/SimpleHtmlFrame.h"
-#include "FieldPropertiesFrame.h"
+#include "gui/TriggerWizardDialog.h"
+#include "main.h"
+#include "metadata/metadataitem.h"
+#include "metadata/root.h"
+#include "myTreeCtrl.h"
 #include "treeitem.h"
 #include "ugly.h"
-#include "dberror.h"
-#include "config.h"
-#include "framemanager.h"
 #include "urihandler.h"
-#include "contextmenuvisitor.h"
-#include "main.h"
+#include "wx/progdlg.h"
 
+//-----------------------------------------------------------------------------
+MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
+    BaseFrame(parent, id, title, pos, size, style, wxT("FlameRobin_main"))
+{
+    tree_ctrl_1 = new myTreeCtrl(this, wxDefaultPosition, wxDefaultSize, wxTR_HAS_BUTTONS|wxSUNKEN_BORDER);
+	menuBarM = new wxMenuBar();
+
+	// build menuBarM
+    wxMenu* fileMenu = new wxMenu();
+    fileMenu->Append(myTreeCtrl::Menu_Configure, _("&Preferences"), wxEmptyString, wxITEM_NORMAL);
+    fileMenu->AppendSeparator();
+    fileMenu->Append(wxID_EXIT, _("&Quit"), wxEmptyString, wxITEM_NORMAL);
+    menuBarM->Append(fileMenu, _("&File"));
+
+    databaseMenu = new wxMenu();					// dynamic menus, created at runtime
+    menuBarM->Append(databaseMenu, _("&Database"));
+    objectMenu = new wxMenu();
+    menuBarM->Append(objectMenu, _("&Object"));
+    windowMenu = new wxMenu();
+    menuBarM->Append(windowMenu, _("&Window"));
+
+    wxMenu* helpMenu = new wxMenu();
+    helpMenu->Append(myTreeCtrl::Menu_Manual, _("&Manual"), wxEmptyString, wxITEM_NORMAL);
+    helpMenu->Append(myTreeCtrl::Menu_RelNotes, _("&What's new"), wxEmptyString, wxITEM_NORMAL);
+    helpMenu->AppendSeparator();
+    helpMenu->Append(myTreeCtrl::Menu_License, _("&License"), wxEmptyString, wxITEM_NORMAL);
+    helpMenu->Append(wxID_ABOUT, _("&About"), wxEmptyString, wxITEM_NORMAL);
+    menuBarM->Append(helpMenu, _("&Help"));
+	SetMenuBar(menuBarM);
+	menuBarM->EnableTop(3, false);	// disable "window" menu at startup
+	frameManager().setWindowMenu(windowMenu, menuBarM);
+
+	statusBarM = CreateStatusBar();
+    set_properties();
+    do_layout();
+}
+//-----------------------------------------------------------------------------
+void MainFrame::set_properties()
+{
+    SetTitle(_("FlameRobin Database Admin"));
+
+	// Default tree looks pretty ugly on non-Windows platforms(GTK)
+	#ifndef __WXMSW__
+	tree_ctrl_1->SetIndent(10);
+	#endif
+
+	TreeItem *rootdata = new TreeItem(tree_ctrl_1);
+	wxTreeItemId root = tree_ctrl_1->AddRoot(_("Firebird Servers"), tree_ctrl_1->getItemImage(ntRoot), -1, rootdata);
+	getGlobalRoot().attach(rootdata);									// link wxTree root node with rootNodeM
+
+	getGlobalRoot().load();
+	if (tree_ctrl_1->GetCount() <= 1)
+	{
+		wxMessageBox(_("You may register a new server and databases."), _("File servers.xml not found"));
+
+		Server s; 					// add localhost
+		s.setHostname("localhost");
+		s.setPort("3050");
+		getGlobalRoot().addServer(s);
+	}
+	tree_ctrl_1->Expand(root);
+
+	#include "fricon.xpm"
+    wxBitmap bmp(fricon_xpm);
+    wxIcon icon;
+    icon.CopyFromBitmap(bmp);
+    SetIcon(icon);
+}
+//-----------------------------------------------------------------------------
+void MainFrame::do_layout()
+{
+    // begin wxGlade: MainFrame::do_layout
+    wxBoxSizer* sizer_1 = new wxBoxSizer(wxVERTICAL);
+    sizer_1->Add(tree_ctrl_1, 1, wxEXPAND, 0);
+    SetAutoLayout(true);
+    SetSizer(sizer_1);
+    Layout();
+    // end wxGlade
+}
+//-----------------------------------------------------------------------------
+const wxRect MainFrame::getDefaultRect() const
+{
+	return wxRect(-1, -1, 257, 367);
+}
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(myTreeCtrl::Menu_RegisterServer, MainFrame::OnMenuRegisterServer)
@@ -117,28 +199,32 @@ void MainFrame::OnWindowMenuItem(wxCommandEvent& event)
 //-----------------------------------------------------------------------------
 void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 {
-	// Clear dynamic menus
-	while (objectMenu->GetMenuItemCount() > 0)
-		objectMenu->Destroy(objectMenu->FindItemByPosition(0));
-	while (databaseMenu->GetMenuItemCount() > 0)
-		databaseMenu->Destroy(databaseMenu->FindItemByPosition(0));
-
+	static Database *lastDatabase = 0;		// remember the last database/node type, so menus don't
+	static NodeType lastType = ntUnknown;	// get rebuilt when it is not needed
 	std::string s = "-";
-	wxTreeItemId item = tree_ctrl_1->GetSelection();
-	if (item.IsOk())
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	if (m)
 	{
-		YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
-		if (m)
+		if (m->getType() != lastType)
 		{
+			while (objectMenu->GetMenuItemCount() > 0)
+				objectMenu->Destroy(objectMenu->FindItemByPosition(0));
 			ContextMenuVisitor cmv(objectMenu);
 			m->accept(&cmv);
-			YDatabase *d = m->getDatabase();
+			lastType = m->getType();
+		}
+		Database *d = m->getDatabase();
+		if (d != lastDatabase)
+		{
+			while (databaseMenu->GetMenuItemCount() > 0)
+				databaseMenu->Destroy(databaseMenu->FindItemByPosition(0));
 			if (d)
 			{
 				ContextMenuVisitor cmvd(databaseMenu);
 				d->accept(&cmvd);
-				s = d->getUsername() + "@" + d->getParent()->getName() + ":" + d->getPath() + " (" + d->getCharset() + ")";
+				s = d->getUsername() + "@" + d->getConnectionString() + " (" + d->getCharset() + ")";
 			}
+			lastDatabase = d;
 		}
 	}
 	menuBarM->EnableTop(1, databaseMenu->GetMenuItemCount() > 0);		// disable empty menus
@@ -147,13 +233,13 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 }
 //-----------------------------------------------------------------------------
 //! handle double-click on item (or press Enter)
-void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
+void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
 {
 	wxTreeItemId item = tree_ctrl_1->GetSelection();
 	if (!item.IsOk())
 		return;
 
-	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
 	if (!m)
 		return;
 
@@ -170,7 +256,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
 	{
 		if (nt == ntProcedure)
 		{
-			if (!((YProcedure *)m)->checkAndLoadParameters())
+			if (!((Procedure *)m)->checkAndLoadParameters())
 				::wxMessageBox(std2wx(lastError().getMessage()), _("An error occurred"), wxICON_ERROR);
 		}
 		else
@@ -187,7 +273,10 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
 				connect(false);						// false = don't warn if already connected
 				break;
 			case ntGenerator:
-				showGeneratorValue(dynamic_cast<YGenerator*>(m));
+				showGeneratorValue(dynamic_cast<Generator*>(m));
+				break;
+			case ntColumn:
+				OnMenuObjectProperties(event);
 				break;
 			case ntTable:
 			case ntView:
@@ -195,6 +284,8 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
 			case ntDomain:
 			case ntFunction:
 			case ntTrigger:
+            case ntException:
+            case ntRole:
                 frameManager().showMetadataPropertyFrame(this, m, true);
 				break;
 			#ifdef __WXMSW__
@@ -296,11 +387,11 @@ void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuInsert(wxCommandEvent& WXUNUSED(event))
 {
-	YTable *t = dynamic_cast<YTable *>(tree_ctrl_1->getSelectedMetadataItem());
+	Table *t = dynamic_cast<Table *>(tree_ctrl_1->getSelectedMetadataItem());
 	if (!t)
 		return;
 
-	YDatabase *d = dynamic_cast<YDatabase *>(t->getParent());
+	Database *d = dynamic_cast<Database *>(t->getParent());
 	if (!d)
 		return;
 
@@ -314,7 +405,7 @@ void MainFrame::OnMenuInsert(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateTrigger(wxCommandEvent& WXUNUSED(event))
 {
-	YxMetadataItem *i = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *i = tree_ctrl_1->getSelectedMetadataItem();
 	if (!i)
 		return;
 	TriggerWizardDialog *t = new TriggerWizardDialog(this, i);
@@ -323,7 +414,7 @@ void MainFrame::OnMenuCreateTrigger(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuBrowse(wxCommandEvent& WXUNUSED(event))
 {
-	YxMetadataItem *i = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *i = tree_ctrl_1->getSelectedMetadataItem();
 	if (!i)
 		return;
 
@@ -331,7 +422,7 @@ void MainFrame::OnMenuBrowse(wxCommandEvent& WXUNUSED(event))
 	if (t != ntTable && t != ntView && t != ntSysTable && t != ntProcedure)
 		return;
 
-	YDatabase *d = dynamic_cast<YDatabase *>(i->getParent());
+	Database *d = dynamic_cast<Database *>(i->getParent());
 	if (!d)
 		return;
 
@@ -340,7 +431,7 @@ void MainFrame::OnMenuBrowse(wxCommandEvent& WXUNUSED(event))
 
 	if (t == ntProcedure)
 	{
-		YProcedure *p = dynamic_cast<YProcedure *>(i);
+		Procedure *p = dynamic_cast<Procedure *>(i);
 		if (!p)
 			return;
 
@@ -362,7 +453,7 @@ void MainFrame::OnMenuBrowse(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
 {
-	YxMetadataItem *i = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *i = tree_ctrl_1->getSelectedMetadataItem();
 	if (!i)
 		return;
 
@@ -370,14 +461,14 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
 	if (t != ntTable && t != ntView && t != ntSysTable && t != ntProcedure)
 		return;
 
-	YDatabase *d = dynamic_cast<YDatabase *>(i->getParent());
+	Database *d = dynamic_cast<Database *>(i->getParent());
 	if (!d)
 		return;
 
 	std::string sql;
 	if (t == ntProcedure)
 	{
-		YProcedure *p = dynamic_cast<YProcedure *>(i);
+		Procedure *p = dynamic_cast<Procedure *>(i);
 		if (!p)
 			return;
 
@@ -391,14 +482,14 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
 	else
 	{
 		if (t == ntTable)
-			((YTable *)i)->checkAndLoadColumns();
+			((Table *)i)->checkAndLoadColumns();
 		else
-			((YView *)i)->checkAndLoadColumns();
+			((View *)i)->checkAndLoadColumns();
 		sql = "SELECT ";
-		std::vector<YxMetadataItem *> temp;
+		std::vector<MetadataItem *> temp;
 		i->getChildren(temp);
 		bool first = true;
-		for (std::vector<YxMetadataItem *>::const_iterator it = temp.begin(); it != temp.end(); ++it)
+		for (std::vector<MetadataItem *>::const_iterator it = temp.begin(); it != temp.end(); ++it)
 		{
 			if (first)
 				first = false;
@@ -419,11 +510,11 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 {
-	YServer *s = dynamic_cast<YServer *>(tree_ctrl_1->getSelectedMetadataItem());
+	Server *s = dynamic_cast<Server *>(tree_ctrl_1->getSelectedMetadataItem());
 	if (!s)
 		return;
 
-	YDatabase db;
+	Database db;
     DatabaseRegistrationDialog drd(this, -1, _("Register Existing Database"));
 	drd.setDatabase(&db);
 
@@ -433,10 +524,10 @@ void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
 {
-	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
 	if (!m)
 		return;
-	YDatabase *d = m->getDatabase();
+	Database *d = m->getDatabase();
 	if (!d)
 		return;
 
@@ -447,11 +538,11 @@ void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
 {
-	YServer *s = dynamic_cast<YServer *>(tree_ctrl_1->getSelectedMetadataItem());
+	Server *s = dynamic_cast<Server *>(tree_ctrl_1->getSelectedMetadataItem());
 	if (!s)
 		return;
 
-	YDatabase db;
+	Database db;
     DatabaseRegistrationDialog drd(this, -1, _("Create New Database"), true);
 	drd.setDatabase(&db);
 	drd.setServer(s);
@@ -484,7 +575,7 @@ void MainFrame::OnMenuUnRegisterServer(wxCommandEvent& WXUNUSED(event))
 	if (!item.IsOk())
 		return;
 
-	YServer *s = dynamic_cast<YServer *>(tree_ctrl_1->getSelectedMetadataItem());
+	Server *s = dynamic_cast<Server *>(tree_ctrl_1->getSelectedMetadataItem());
 	if (!s)
 		return;
 
@@ -493,14 +584,14 @@ void MainFrame::OnMenuUnRegisterServer(wxCommandEvent& WXUNUSED(event))
 	if (wxCANCEL == wxMessageBox(_("Are you sure?"), _("Unregister server"), wxOK | wxCANCEL | wxICON_QUESTION))
 		return;
 
-	YRoot *r = dynamic_cast<YRoot *>(s->getParent());
+	Root *r = dynamic_cast<Root *>(s->getParent());
 	if (r)
 		r->removeServer(s);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuServerProperties(wxCommandEvent& WXUNUSED(event))
 {
-	YServer *s = dynamic_cast<YServer *>(tree_ctrl_1->getSelectedMetadataItem());
+	Server *s = dynamic_cast<Server *>(tree_ctrl_1->getSelectedMetadataItem());
 	if (!s)
 		return;
     ServerRegistrationDialog srd(this, -1, _("Server Registration Info"));
@@ -510,10 +601,10 @@ void MainFrame::OnMenuServerProperties(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
 {
-	YRoot *r = dynamic_cast<YRoot *>(tree_ctrl_1->getSelectedMetadataItem());
+	Root *r = dynamic_cast<Root *>(tree_ctrl_1->getSelectedMetadataItem());
 	if (!r)
 		return;
-	YServer s;
+	Server s;
     ServerRegistrationDialog srd(this, -1, _("Register New Server"));
 	srd.setServer(&s);
 	if (wxID_OK == srd.ShowModal())
@@ -522,10 +613,10 @@ void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 {
-	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
 	if (!m)
 		return;
-	YDatabase *d = m->getDatabase();
+	Database *d = m->getDatabase();
 	if (!d)
 		return;
 	if (d->isConnected())
@@ -537,17 +628,17 @@ void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 	if (wxCANCEL == wxMessageBox(_("Are you sure?"), _("Unregister database"), wxOK | wxCANCEL | wxICON_QUESTION))
 		return;
 
-	YServer *s = dynamic_cast<YServer *>(d->getParent());
+	Server *s = dynamic_cast<Server *>(d->getParent());
 	if (s)
 		s->removeDatabase(d);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
 {
-	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
 	if (!m)
 		return;
-	YDatabase *d = m->getDatabase();
+	Database *d = m->getDatabase();
 	if (!d)
 		return;
 /*
@@ -574,10 +665,10 @@ void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuBackup(wxCommandEvent& WXUNUSED(event))
 {
-	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
 	if (!m)
 		return;
-	YDatabase *db = m->getDatabase();
+	Database *db = m->getDatabase();
 	if (!db)
 		return;
     BackupFrame* f = new BackupFrame(this, db);
@@ -586,10 +677,10 @@ void MainFrame::OnMenuBackup(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRestore(wxCommandEvent& WXUNUSED(event))
 {
-	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
 	if (!m)
 		return;
-	YDatabase *db = m->getDatabase();
+	Database *db = m->getDatabase();
 	if (!db)
 		return;
 
@@ -599,10 +690,10 @@ void MainFrame::OnMenuRestore(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuReconnect(wxCommandEvent& WXUNUSED(event))
 {
-	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
 	if (!m)
 		return;
-	YDatabase *db = m->getDatabase();
+	Database *db = m->getDatabase();
 	if (!db)
 		return;
 /*
@@ -627,10 +718,10 @@ void MainFrame::OnMenuConnect(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::connect(bool warn)
 {
-	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
 	if (!m)
 		return;
-	YDatabase *db = m->getDatabase();
+	Database *db = m->getDatabase();
 	if (!db)
 		return;
 
@@ -682,10 +773,10 @@ void MainFrame::connect(bool warn)
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDisconnect(wxCommandEvent& WXUNUSED(event))
 {
-	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
 	if (!m)
 		return;
-	YDatabase *db = m->getDatabase();
+	Database *db = m->getDatabase();
 	if (!db)
 		return;
 /*
@@ -699,7 +790,7 @@ void MainFrame::OnMenuDisconnect(wxCommandEvent& WXUNUSED(event))
 		wxMessageBox(std2wx(lastError().getMessage()), _("Error!"), wxOK | wxICON_ERROR);
 }
 //-----------------------------------------------------------------------------
-void MainFrame::showGeneratorValue(YGenerator* g)
+void MainFrame::showGeneratorValue(Generator* g)
 {
 	if (!g)
 		return;
@@ -711,33 +802,33 @@ void MainFrame::showGeneratorValue(YGenerator* g)
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuShowGeneratorValue(wxCommandEvent& WXUNUSED(event))
 {
-	showGeneratorValue(dynamic_cast<YGenerator *>(tree_ctrl_1->getSelectedMetadataItem()));
+	showGeneratorValue(dynamic_cast<Generator *>(tree_ctrl_1->getSelectedMetadataItem()));
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuSetGeneratorValue(wxCommandEvent& WXUNUSED(event))
 {
-    YGenerator *g = dynamic_cast<YGenerator *>(tree_ctrl_1->getSelectedMetadataItem());
+    Generator *g = dynamic_cast<Generator *>(tree_ctrl_1->getSelectedMetadataItem());
 	if (!g)
 		return;
 
-    std::string uriStr = "fr://edit_generator_value?parent_window=" + wx2std(wxString::Format(wxT("%d"), (int)this))
-        + "&object_address=" + wx2std(wxString::Format(wxT("%d"), (int)g));
-    getURIProcessor().handleURI(uriStr);
+    URI uri = URI("fr://edit_generator_value?parent_window=" + wx2std(wxString::Format(wxT("%d"), (int)this))
+        + "&object_address=" + wx2std(wxString::Format(wxT("%d"), (int)g)));
+    getURIProcessor().handleURI(uri);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuShowAllGeneratorValues(wxCommandEvent& WXUNUSED(event))
 {
 	wxTreeItemId item = tree_ctrl_1->GetItemParent(tree_ctrl_1->GetSelection());
-	YDatabase *db = dynamic_cast<YDatabase *>(tree_ctrl_1->getMetadataItem(item));
+	Database *db = dynamic_cast<Database *>(tree_ctrl_1->getMetadataItem(item));
 	if (!db)
 	{
 		wxMessageBox(_("No database assigned"), _("Warning"), wxOK | wxICON_ERROR);
 		return;
 	}
 
-	for (YMetadataCollection<YGenerator>::const_iterator it = db->generatorsBegin(); it != db->generatorsEnd(); ++it)
+	for (MetadataCollection<Generator>::const_iterator it = db->generatorsBegin(); it != db->generatorsEnd(); ++it)
 	{
-		YGenerator *g = const_cast<YGenerator *>(&(*it));
+		Generator *g = const_cast<Generator *>(&(*it));
 		if (!g->loadValue())
 			wxMessageBox(std2wx(lastError().getMessage()), _("Error!"), wxOK|wxICON_ERROR);
 	}
@@ -746,12 +837,12 @@ void MainFrame::OnMenuShowAllGeneratorValues(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateObject(wxCommandEvent& WXUNUSED(event))
 {
-	YxMetadataItem *t = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *t = tree_ctrl_1->getSelectedMetadataItem();
 	if (!t)
 		return;
 
 	wxTreeItemId item = tree_ctrl_1->GetItemParent(tree_ctrl_1->GetSelection());
-	YDatabase *db = dynamic_cast<YDatabase *>(tree_ctrl_1->getMetadataItem(item));
+	Database *db = dynamic_cast<Database *>(tree_ctrl_1->getMetadataItem(item));
 	if (!db)
 	{
 		wxMessageBox(_("No database assigned"), _("Warning"), wxOK | wxICON_ERROR);
@@ -778,7 +869,7 @@ void MainFrame::OnMenuCreateObject(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuLoadColumnsInfo(wxCommandEvent& WXUNUSED(event))
 {
-	YxMetadataItem *t = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *t = tree_ctrl_1->getSelectedMetadataItem();
 	if (!t)
 		return;
 
@@ -787,7 +878,7 @@ void MainFrame::OnMenuLoadColumnsInfo(wxCommandEvent& WXUNUSED(event))
 	{
 		case ntTable:
 		case ntView:		success = ((Relation *)t)->checkAndLoadColumns();	break;
-		case ntProcedure:	success = ((YProcedure *)t)->checkAndLoadParameters();				break;
+		case ntProcedure:	success = ((Procedure *)t)->checkAndLoadParameters();				break;
 		default:			break;
 	};
 
@@ -799,8 +890,8 @@ void MainFrame::OnMenuLoadColumnsInfo(wxCommandEvent& WXUNUSED(event))
 
 	if (t->getType() == ntProcedure)
 	{
-		std::vector<YxMetadataItem *> temp;
-		((YProcedure *)t)->getChildren(temp);
+		std::vector<MetadataItem *> temp;
+		((Procedure *)t)->getChildren(temp);
 		if (temp.empty())
 			::wxMessageBox(_("This procedure doesn't have any input or output parameters."), _("No parameters."), wxOK | wxICON_INFORMATION);
 	}
@@ -808,10 +899,10 @@ void MainFrame::OnMenuLoadColumnsInfo(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))
 {
-	YxMetadataItem *i = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *i = tree_ctrl_1->getSelectedMetadataItem();
 	if (!i)
 		return;
-	YTable *t = dynamic_cast<YTable *>(i);
+	Table *t = dynamic_cast<Table *>(i);
 	if (!t)
 		return;
 
@@ -824,14 +915,14 @@ void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
 {
-	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
 	if (!m)
 		return;
 
-	YColumn *c = dynamic_cast<YColumn *>(m);
+	Column *c = dynamic_cast<Column *>(m);
 	if (c)
 	{
-		YTable *t = dynamic_cast<YTable *>(c->getParent());
+		Table *t = dynamic_cast<Table *>(c->getParent());
 		if (!t)		// dummy check
 			return;
 		FieldPropertiesFrame *f = new FieldPropertiesFrame(this, -1,
@@ -846,11 +937,11 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
 {
-	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
 	if (!m)
 		return;
 
-	YDatabase *d = m->getDatabase();
+	Database *d = m->getDatabase();
 	if (!d)
 		return;
 
@@ -869,10 +960,10 @@ void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
 //! create new ExecuteSqlFrame and attach database object to it
 void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
 {
-	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
 	if (!m)
 		return;
-	YDatabase *d = m->getDatabase();
+	Database *d = m->getDatabase();
 	if (!d)
 		return;
 
@@ -900,26 +991,26 @@ const std::string MainFrame::getName() const
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateUnRegisterServer(wxUpdateUIEvent& event)
 {
-	YServer *s = dynamic_cast<YServer *>(tree_ctrl_1->getSelectedMetadataItem());
+	Server *s = dynamic_cast<Server *>(tree_ctrl_1->getSelectedMetadataItem());
 	event.Enable(s != 0 && !s->hasConnectedDatabase());
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateIfDatabaseConnected(wxUpdateUIEvent& event)
 {
-	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
 	if (m)
 	{
-		YDatabase *db = m->getDatabase();
+		Database *db = m->getDatabase();
 		event.Enable(db != 0 && db->isConnected());
 	}
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateIfDatabaseNotConnected(wxUpdateUIEvent& event)
 {
-	YxMetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
 	if (m)
 	{
-		YDatabase *db = m->getDatabase();
+		Database *db = m->getDatabase();
 		event.Enable(db != 0 && !db->isConnected());
 	}
 }

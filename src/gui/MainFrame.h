@@ -97,7 +97,7 @@ public:
 private:
 	void connect(bool warn);
 
-	void showGeneratorValue(YGenerator* g);
+	void showGeneratorValue(Generator* g);
 
     // begin wxGlade: MainFrame::methods
     void set_properties();

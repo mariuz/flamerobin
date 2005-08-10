@@ -38,7 +38,7 @@
 #include "observer.h"
 #include "BaseFrame.h"
 
-class FieldPropertiesFrame: public BaseFrame, public YxObserver {
+class FieldPropertiesFrame: public BaseFrame, public Observer {
 public:
     // begin wxGlade: FieldPropertiesFrame::ids
     enum {
@@ -71,17 +71,17 @@ public:
     void OnTextctrlGeneratornameChange(wxCommandEvent &event);
     void OnTextctrlFieldnameChange(wxCommandEvent &event);
 
-	// YDatabase is required so that domains, charsets, generators can be loaded
-    FieldPropertiesFrame(wxWindow* parent, int id, wxString title, YTable *table, const wxPoint& pos=wxDefaultPosition, const wxSize& size=wxDefaultSize, long style=wxDEFAULT_FRAME_STYLE);
-	void setField(YColumn *field);
+	// Database is required so that domains, charsets, generators can be loaded
+    FieldPropertiesFrame(wxWindow* parent, int id, wxString title, Table *table, const wxPoint& pos=wxDefaultPosition, const wxSize& size=wxDefaultSize, long style=wxDEFAULT_FRAME_STYLE);
+	void setField(Column *field);
 	void setProperties();
 
 private:
 	void loadCollations(std::string desired);
 	void updateSqlWindow();
 	void updateEditBoxes();
-	YColumn *fieldM;		// needed when field is edited
-	YTable *tableM;			// needed when new field is added
+	Column *fieldM;		// needed when field is edited
+	Table *tableM;			// needed when new field is added
 
     // begin wxGlade: FieldPropertiesFrame::methods
     void set_properties();
@@ -89,7 +89,7 @@ private:
     // end wxGlade
 
 protected:
-	void removeObservedObject(YxSubject *object);
+	void removeObservedObject(Subject *object);
 	void updateDomainInfo(std::string domain);
 	bool getDomainInfo(std::string domain, std::string& type, std::string& size, std::string& scale, std::string& charset);
 	void update();
