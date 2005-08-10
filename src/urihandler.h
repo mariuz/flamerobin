@@ -29,59 +29,58 @@
 #include <map>
 //-----------------------------------------------------------------------------
 //! almost like a struct, but with few helper functions
-class YURI
+class URI
 {
 public:
 	std::string protocol;
 	std::string action;
 	std::map<std::string, std::string> params;
 
-	YURI();
-	YURI(const std::string& uri);
+	URI();
+	URI(const std::string& uri);
 	bool parseURI(const std::string& uri);
 	void addParam(const std::string& pair);
 	std::string getParam(const std::string& name) const;
 };
 //-----------------------------------------------------------------------------
-class YxURIHandler;
+class URIHandler;
 //-----------------------------------------------------------------------------
-class YURIProcessor
+class URIProcessor
 {
 public:
     // interface for handler providers.
-	void addHandler(YxURIHandler *handler);
-	void removeHandler(YxURIHandler *handler);
+	void addHandler(URIHandler *handler);
+	void removeHandler(URIHandler *handler);
 
     // interface for consumers.
-	bool handleURI(std::string& uriStr);
-	bool handleURI(const YURI& uriObj);
+	bool handleURI(URI& uri);
 
-    virtual ~YURIProcessor();
+    virtual ~URIProcessor();
 private:
-	std::list<YxURIHandler*> handlersM;
+	std::list<URIHandler*> handlersM;
     bool handlerListSortedM;
     void checkHandlerListSorted();
 
     // only getURIProcessor() may instantiate an object of this class.
-    friend YURIProcessor& getURIProcessor();
+    friend URIProcessor& getURIProcessor();
 
     // Disable construction, copy-construction and assignment.
-    YURIProcessor();
-    YURIProcessor(const YURIProcessor&) {};
-    YURIProcessor operator==(const YURIProcessor&);
+    URIProcessor();
+    URIProcessor(const URIProcessor&) {};
+    URIProcessor operator==(const URIProcessor&);
 };
 //-----------------------------------------------------------------------------
-YURIProcessor& getURIProcessor();
+URIProcessor& getURIProcessor();
 //-----------------------------------------------------------------------------
 //! pure virtual class, specific handlers should be derived from it
-class YxURIHandler
+class URIHandler
 {
-    friend class YURIProcessor;
+    friend class URIProcessor;
 public:
-    YxURIHandler();
-    virtual ~YxURIHandler();
-	virtual bool handleURI(const YURI& uriObj) = 0;
-	bool operator<(const YxURIHandler& right) const
+    URIHandler();
+    virtual ~URIHandler();
+	virtual bool handleURI(URI& uri) = 0;
+	bool operator<(const URIHandler& right) const
 	{
         return getPosition() < right.getPosition();
     }
@@ -100,12 +99,12 @@ protected:
     }
 
 	// some helper functions
-	wxWindow *YxURIHandler::getWindow(const YURI& uriObj);
-	void *getObject(const YURI& uriObj);
+	wxWindow *URIHandler::getWindow(const URI& uri);
+	void *getObject(const URI& uri);
 
 private:
-    YURIProcessor* processorM;
-    void setProcessor(YURIProcessor* const processor);
+    URIProcessor* processorM;
+    void setProcessor(URIProcessor* const processor);
 };
 //-----------------------------------------------------------------------------
 

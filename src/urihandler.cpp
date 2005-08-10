@@ -40,17 +40,17 @@
 #include "ugly.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
-YURI::YURI()
+URI::URI()
 {
 }
 //-----------------------------------------------------------------------------
-YURI::YURI(const std::string& uri)
+URI::URI(const std::string& uri)
 {
 	parseURI(uri);
 }
 //-----------------------------------------------------------------------------
 //! pair has format: name=value
-void YURI::addParam(const std::string& pair)
+void URI::addParam(const std::string& pair)
 {
 	std::string::size_type p = pair.find("=");
 	if (p == std::string::npos)
@@ -59,7 +59,7 @@ void YURI::addParam(const std::string& pair)
 		params[pair.substr(0,p)] = pair.substr(p+1);
 }
 //-----------------------------------------------------------------------------
-std::string YURI::getParam(const std::string& name) const
+std::string URI::getParam(const std::string& name) const
 {
 	std::map<std::string, std::string>::const_iterator it = params.find(name);
 	if (it == params.end())
@@ -68,7 +68,7 @@ std::string YURI::getParam(const std::string& name) const
 		return (*it).second;
 }
 //-----------------------------------------------------------------------------
-bool YURI::parseURI(const std::string& uri)
+bool URI::parseURI(const std::string& uri)
 {
 	using namespace std;
 	string::size_type p = uri.find("://");				// find ://
@@ -102,31 +102,31 @@ bool YURI::parseURI(const std::string& uri)
 	return true;
 }
 //-----------------------------------------------------------------------------
-YURIProcessor& getURIProcessor()
+URIProcessor& getURIProcessor()
 {
-	static YURIProcessor uriProcessor;
+	static URIProcessor uriProcessor;
 	return uriProcessor;
 }
 //-----------------------------------------------------------------------------
 //! needed to disallow instantiation
-YURIProcessor::YURIProcessor() :
+URIProcessor::URIProcessor() :
     handlerListSortedM(false)
 {
 }
 //-----------------------------------------------------------------------------
-YURIProcessor::~YURIProcessor()
+URIProcessor::~URIProcessor()
 {
     while (!handlersM.empty())
         removeHandler(handlersM.front());
 }
 //-----------------------------------------------------------------------------
 //! needed in checkHandlerListSorted() to sort on objects instead of pointers
-bool uriHandlerPointerLT(const YxURIHandler* left, const YxURIHandler* right)
+bool uriHandlerPointerLT(const URIHandler* left, const URIHandler* right)
 {
     return *left < *right;
 }
 //-----------------------------------------------------------------------------
-void YURIProcessor::checkHandlerListSorted()
+void URIProcessor::checkHandlerListSorted()
 {
     if (!handlerListSortedM)
     {
@@ -136,68 +136,62 @@ void YURIProcessor::checkHandlerListSorted()
 }
 //-----------------------------------------------------------------------------
 //! returns false if no suitable handler found
-bool YURIProcessor::handleURI(std::string& uriStr)
-{
-	YURI uriObj(uriStr);
-	return handleURI(uriObj);
-}
-//-----------------------------------------------------------------------------
-bool YURIProcessor::handleURI(const YURI& uriObj)
+bool URIProcessor::handleURI(URI& uri)
 {
     checkHandlerListSorted();
-    for (std::list<YxURIHandler*>::iterator it = handlersM.begin(); it != handlersM.end(); ++it)
-		if ((*it)->handleURI(uriObj))
+    for (std::list<URIHandler*>::iterator it = handlersM.begin(); it != handlersM.end(); ++it)
+		if ((*it)->handleURI(uri))
 			return true;
     return false;
 }
 //-----------------------------------------------------------------------------
-void YURIProcessor::addHandler(YxURIHandler* handler)
+void URIProcessor::addHandler(URIHandler* handler)
 {
     // can't do ordered insert here, since the getPosition() function that
-    // serves YxURIHandler::operator< is virtual, and this function (addHandler)
-    // is called in the constructor of YxURIHandler.
+    // serves URIHandler::operator< is virtual, and this function (addHandler)
+    // is called in the constructor of URIHandler.
     // The list will be sorted on demand (see checkHandlerListSorted()).
 	handlersM.push_back(handler);
 	handler->setProcessor(this);
 	handlerListSortedM = false;
 }
 //-----------------------------------------------------------------------------
-void YURIProcessor::removeHandler(YxURIHandler* handler)
+void URIProcessor::removeHandler(URIHandler* handler)
 {
 	handlersM.erase(std::find(handlersM.begin(), handlersM.end(), handler));
 	handler->setProcessor(0);
 }
 //-----------------------------------------------------------------------------
-YxURIHandler::YxURIHandler() :
+URIHandler::URIHandler() :
     processorM(0)
 {
     getURIProcessor().addHandler(this);
 }
 //-----------------------------------------------------------------------------
-void YxURIHandler::setProcessor(YURIProcessor* const processor)
+void URIHandler::setProcessor(URIProcessor* const processor)
 {
     processorM = processor;
 }
 //-----------------------------------------------------------------------------
 //! this is currently only called on program termination
-YxURIHandler::~YxURIHandler()
+URIHandler::~URIHandler()
 {
     if (processorM)
         processorM->removeHandler(this);
 }
 //-----------------------------------------------------------------------------
-wxWindow *YxURIHandler::getWindow(const YURI& uriObj)
+wxWindow *URIHandler::getWindow(const URI& uri)
 {
-	std::string ms = uriObj.getParam("parent_window");		// window
+	std::string ms = uri.getParam("parent_window");		// window
 	unsigned long mo;
 	if (!std2wx(ms).ToULong(&mo))
 		return 0;
 	return (wxWindow *)mo;
 }
 //-----------------------------------------------------------------------------
-void *YxURIHandler::getObject(const YURI& uriObj)
+void *URIHandler::getObject(const URI& uri)
 {
-	std::string ms = uriObj.getParam("object_address");		// object
+	std::string ms = uri.getParam("object_address");		// object
 	unsigned long mo;
 	if (!std2wx(ms).ToULong(&mo))
 		return 0;

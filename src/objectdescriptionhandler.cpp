@@ -42,10 +42,10 @@
 #include "gui/MultilineEnterDialog.h"
 #include "urihandler.h"
 
-class ObjectDescriptionHandler: public YxURIHandler
+class ObjectDescriptionHandler: public URIHandler
 {
 public:
-	bool handleURI(const YURI& uriObj);
+	bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
     static const ObjectDescriptionHandler handlerInstance;
@@ -53,18 +53,18 @@ private:
 //-----------------------------------------------------------------------------
 const ObjectDescriptionHandler ObjectDescriptionHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool ObjectDescriptionHandler::handleURI(const YURI& uriObj)
+bool ObjectDescriptionHandler::handleURI(URI& uri)
 {
-	if (uriObj.action != "edit_description")
+	if (uri.action != "edit_description")
 		return false;
 
-	YxMetadataItem *m = (YxMetadataItem *)getObject(uriObj);
-	wxWindow *w = getWindow(uriObj);
+	MetadataItem *m = (MetadataItem *)getObject(uri);
+	wxWindow *w = getWindow(uri);
 	if (!m || !w)
 		return true;
 
 	wxString desc = std2wx(m->getDescription());
-	if (GetMultilineTextFromUser(wxString::Format(_("Description of %s"), std2wx(uriObj.getParam("object_name")).c_str()), desc, w))
+	if (GetMultilineTextFromUser(wxString::Format(_("Description of %s"), std2wx(uri.getParam("object_name")).c_str()), desc, w))
 	{
 		wxBusyCursor wait;
 		if (!m->setDescription(wx2std(desc)))

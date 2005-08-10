@@ -46,30 +46,30 @@
 #include "frutils.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
-class AddConstraintHandler: public YxURIHandler
+class AddConstraintHandler: public URIHandler
 {
 public:
-	bool handleURI(const YURI& uriObj);
+	bool handleURI(URI& uri);
 private:
     static const AddConstraintHandler handlerInstance;	// singleton; registers itself on creation.
 
-	YTable *selectTable(YDatabase *d, wxWindow *parent) const;
+	Table *selectTable(Database *d, wxWindow *parent) const;
 	std::string selectAction(const wxString& label, wxWindow *parent) const;
 };
 //-----------------------------------------------------------------------------
 const AddConstraintHandler AddConstraintHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-YTable *AddConstraintHandler::selectTable(YDatabase *d, wxWindow *parent) const
+Table *AddConstraintHandler::selectTable(Database *d, wxWindow *parent) const
 {
 	wxArrayString tables;
-	for (YMetadataCollection<YTable>::const_iterator it = d->tablesBegin(); it != d->tablesEnd(); ++it)
+	for (MetadataCollection<Table>::const_iterator it = d->tablesBegin(); it != d->tablesEnd(); ++it)
 		tables.Add(std2wx((*it).getName()));
 	int index = ::wxGetSingleChoiceIndex(_("Select table to reference"), _("Creating foreign key"), tables, parent);
 	if (index == -1)
 		return 0;
-	for (YMetadataCollection<YTable>::const_iterator it = d->tablesBegin(); it != d->tablesEnd(); ++it)
+	for (MetadataCollection<Table>::const_iterator it = d->tablesBegin(); it != d->tablesEnd(); ++it)
 		if ((*it).getName() == wx2std(tables[index]))
-			return const_cast<YTable *>(&(*it));
+			return const_cast<Table *>(&(*it));
 	return 0;
 }
 //-----------------------------------------------------------------------------
@@ -88,19 +88,19 @@ std::string AddConstraintHandler::selectAction(const wxString& label, wxWindow *
 	return wx2std(actions[index]);
 }
 //-----------------------------------------------------------------------------
-bool AddConstraintHandler::handleURI(const YURI& uriObj)
+bool AddConstraintHandler::handleURI(URI& uri)
 {
-	if (uriObj.action != "add_constraint")
+	if (uri.action != "add_constraint")
 		return false;
 
-	std::string type = uriObj.getParam("type");	// pk, fk, check, unique
-	YTable *t = (YTable *)getObject(uriObj);
-	wxWindow *w = getWindow(uriObj);
+	std::string type = uri.getParam("type");	// pk, fk, check, unique
+	Table *t = (Table *)getObject(uri);
+	wxWindow *w = getWindow(uri);
 	if (!t || !w)
 		return true;
 
 	// Find first available constraint name:
-	YDatabase *db = t->getDatabase();
+	Database *db = t->getDatabase();
 	std::string default_value;
 	std::string prefix = type + "_" + t->getName();
 	std::vector<std::string> cnames;
@@ -139,7 +139,7 @@ bool AddConstraintHandler::handleURI(const YURI& uriObj)
 		std::string columnlist = selectTableColumns(t, w);
 		if (columnlist == "")
 			return true;
-		YTable *ref = selectTable(t->getDatabase(), w);
+		Table *ref = selectTable(t->getDatabase(), w);
 		if (!ref)
 			return true;
 		std::string refcolumnlist = selectTableColumns(ref, w);
