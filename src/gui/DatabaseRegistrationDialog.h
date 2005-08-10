@@ -41,8 +41,8 @@ public:
         ID_button_cancel = wxID_CANCEL
     };
 
-    void setDatabase(YDatabase *db);
-    void setServer(YServer *s);			// needed to create new db
+    void setDatabase(Database *db);
+    void setServer(Server *s);			// needed to create new db
 
     // events
     void OnSettingsChange(wxCommandEvent& event);
@@ -54,8 +54,8 @@ public:
         long style=wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER);
 
 private:
-    YDatabase *databaseM;
-    YServer *serverM;
+    Database *databaseM;
+    Server *serverM;
     bool createM;
 
     void do_layout();
@@ -66,6 +66,8 @@ protected:
     virtual const std::string getName() const;
 
 protected:
+    wxStaticText* label_name;
+    wxTextCtrl* text_ctrl_name;
     wxStaticText* label_dbpath;
     wxTextCtrl* text_ctrl_dbpath;
     wxButton* button_browse;

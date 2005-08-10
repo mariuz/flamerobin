@@ -20,7 +20,7 @@ All Rights Reserved.
 
 $Id$
 
-Contributor(s): Michael Hieke
+Contributor(s): Michael Hieke, Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -41,14 +41,16 @@ Contributor(s): Michael Hieke
 #include "ugly.h"
 
 //-----------------------------------------------------------------------------
-ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent, int id, 
+ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent, int id,
         const wxString& title, const wxPoint& pos, const wxSize& size, long style)
     : BaseDialog(parent, id, title, pos, size, style)
 {
+    label_name = new wxStaticText(getControlsPanel(), -1, _("Display name:"));
+    text_ctrl_name = new wxTextCtrl(getControlsPanel(), ID_textctrl_name, wxT("localhost"));
     label_hostname = new wxStaticText(getControlsPanel(), -1, _("Hostname:"));
     text_ctrl_hostname = new wxTextCtrl(getControlsPanel(), ID_textctrl_hostname, wxT("localhost"));
     label_portnumber = new wxStaticText(getControlsPanel(), -1, _("Port number:"));
-    text_ctrl_portnumber = new wxTextCtrl(getControlsPanel(), -1, wxT("3050"));
+    text_ctrl_portnumber = new wxTextCtrl(getControlsPanel(), ID_textctrl_portnumber, wxT("3050"));
     button_ok = new wxButton(getControlsPanel(), ID_button_ok, _("Save"));
     button_cancel = new wxButton(getControlsPanel(), ID_button_cancel, _("Cancel"));
 
@@ -61,11 +63,13 @@ ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent, int id,
 void ServerRegistrationDialog::do_layout()
 {
     // create sizer for controls
-    wxFlexGridSizer* sizerControls = new wxFlexGridSizer(2, 2,
+    wxFlexGridSizer* sizerControls = new wxFlexGridSizer(3, 2,
         styleguide().getRelatedControlMargin(wxVERTICAL),
         styleguide().getControlLabelMargin());
     sizerControls->AddGrowableCol(1);
 
+    sizerControls->Add(label_name, 0, wxALIGN_CENTER_VERTICAL);
+    sizerControls->Add(text_ctrl_name, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
     sizerControls->Add(label_hostname, 0, wxALIGN_CENTER_VERTICAL);
     sizerControls->Add(text_ctrl_hostname, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
     sizerControls->Add(label_portnumber, 0, wxALIGN_CENTER_VERTICAL);
@@ -87,10 +91,11 @@ void ServerRegistrationDialog::set_properties()
     button_ok->SetDefault();
 }
 //-----------------------------------------------------------------------------
-void ServerRegistrationDialog::setServer(YServer *s)
+void ServerRegistrationDialog::setServer(Server *s)
 {
     serverM = s;
 
+    text_ctrl_name->SetValue(std2wx(serverM->getName()));
     text_ctrl_hostname->SetValue(std2wx(serverM->getHostname()));
     text_ctrl_portnumber->SetValue(std2wx(serverM->getPort()));
 
@@ -110,27 +115,53 @@ void ServerRegistrationDialog::setServer(YServer *s)
 //-----------------------------------------------------------------------------
 void ServerRegistrationDialog::updateButtons()
 {
-    button_ok->Enable(text_ctrl_hostname->IsEditable()
-        && !text_ctrl_hostname->GetValue().IsEmpty());
+    button_ok->Enable(text_ctrl_name->IsEditable()
+        && !text_ctrl_name->GetValue().IsEmpty());
 }
 //-----------------------------------------------------------------------------
 //! event handling
 BEGIN_EVENT_TABLE(ServerRegistrationDialog, BaseDialog)
+    EVT_TEXT(ServerRegistrationDialog::ID_textctrl_name, ServerRegistrationDialog::OnNameChange)
     EVT_TEXT(ServerRegistrationDialog::ID_textctrl_hostname, ServerRegistrationDialog::OnSettingsChange)
+    EVT_TEXT(ServerRegistrationDialog::ID_textctrl_portnumber, ServerRegistrationDialog::OnSettingsChange)
     EVT_BUTTON(ServerRegistrationDialog::ID_button_ok, ServerRegistrationDialog::OnOkButtonClick)
 END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+void ServerRegistrationDialog::OnNameChange(wxCommandEvent& WXUNUSED(event))
+{
+    // will allready be called in constructor!
+    if (IsShown())
+    {
+        if (text_ctrl_name->GetValue() != buildName(text_ctrl_hostname->GetValue(), text_ctrl_portnumber->GetValue()))
+            defaultNameM = false;
+        updateButtons();
+    }
+}
 //-----------------------------------------------------------------------------
 void ServerRegistrationDialog::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
 {
     // will allready be called in constructor!
     if (IsShown())
+    {
+        if (defaultNameM)
+            text_ctrl_name->SetValue(buildName(text_ctrl_hostname->GetValue(), text_ctrl_portnumber->GetValue()));
         updateButtons();
+    }
 }
 //-----------------------------------------------------------------------------
 void ServerRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
+    serverM->setName(wx2std(text_ctrl_name->GetValue()));
     serverM->setHostname(wx2std(text_ctrl_hostname->GetValue()));
     serverM->setPort(wx2std(text_ctrl_portnumber->GetValue()));
     EndModal(wxID_OK);
+}
+//-----------------------------------------------------------------------------
+const wxString ServerRegistrationDialog::buildName(const wxString& hostName, const wxString& portNumber) const
+{
+    Server helper;
+    helper.setHostname(wx2std(hostName));
+    helper.setPort(wx2std(portNumber));
+    return std2wx(helper.getConnectionString());
 }
 //-----------------------------------------------------------------------------

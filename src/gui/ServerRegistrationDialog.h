@@ -33,15 +33,18 @@ Contributor(s): Michael Hieke, Nando Dessena
 class ServerRegistrationDialog: public BaseDialog {
 public:
     enum {
-        ID_textctrl_hostname = 100,
+        ID_textctrl_name = 100,
+        ID_textctrl_hostname = 101,
+        ID_textctrl_portnumber = 102,
         ID_button_ok = wxID_OK ,
         ID_button_cancel = wxID_CANCEL
     };
 
-    void setServer(YServer *s);
+    void setServer(Server *s);
 
     // events
     void OnSettingsChange(wxCommandEvent& event);
+    void OnNameChange(wxCommandEvent& event);
     void OnOkButtonClick(wxCommandEvent& event);
 
     ServerRegistrationDialog(wxWindow* parent, int id, const wxString& title, 
@@ -49,13 +52,15 @@ public:
         long style=wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER);
 
 private:
-    YServer* serverM;
-
+    Server* serverM;
+    bool defaultNameM;
     void do_layout();
     void set_properties();
     void updateButtons();
-
+    const wxString buildName(const wxString& hostName, const wxString& portNumber) const;
 protected:
+    wxStaticText* label_name;
+    wxTextCtrl* text_ctrl_name;
     wxStaticText* label_hostname;
     wxTextCtrl* text_ctrl_hostname;
     wxStaticText* label_portnumber;

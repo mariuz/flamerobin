@@ -20,7 +20,7 @@ All Rights Reserved.
 
 $Id$
 
-Contributor(s): Michael Hieke
+Contributor(s): Michael Hieke, Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -48,6 +48,8 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
     BaseDialog(parent, id, title, pos, size, style)
 {
     createM = createDB;
+    label_name = new wxStaticText(getControlsPanel(), -1, _("Display name:"));
+    text_ctrl_name = new wxTextCtrl(getControlsPanel(), -1, wxT(""));
     label_dbpath = new wxStaticText(getControlsPanel(), -1, _("Database path:"));
     text_ctrl_dbpath = new wxTextCtrl(getControlsPanel(), ID_textcontrol_dbpath, wxT(""));
     button_browse = new wxButton(getControlsPanel(), ID_button_browse, _("..."),
@@ -107,6 +109,7 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
         label_dialect = new wxStaticText(getControlsPanel(), -1, _("SQL Dialect:"));
         const wxString dialect_choices[] = {
             wxT("1"),
+            wxT("2"),
             wxT("3")
         };
         choice_dialect = new wxChoice(getControlsPanel(), -1, wxDefaultPosition, wxDefaultSize,
@@ -128,32 +131,35 @@ void DatabaseRegistrationDialog::do_layout()
     wxGridBagSizer* sizerControls = new wxGridBagSizer(styleguide().getRelatedControlMargin(wxVERTICAL),
         styleguide().getControlLabelMargin());
 
-    sizerControls->Add(label_dbpath, wxGBPosition(0, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+    sizerControls->Add(label_name, wxGBPosition(0, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+    sizerControls->Add(text_ctrl_name, wxGBPosition(0, 1), wxGBSpan(1, 3), wxALIGN_CENTER_VERTICAL|wxEXPAND);
+
+    sizerControls->Add(label_dbpath, wxGBPosition(1, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
     wxBoxSizer* sizer_r1c1_3 = new wxBoxSizer(wxHORIZONTAL);
     sizer_r1c1_3->Add(text_ctrl_dbpath, 1, wxALIGN_CENTER_VERTICAL);
     sizer_r1c1_3->Add(button_browse, 0, wxLEFT|wxALIGN_CENTER_VERTICAL, styleguide().getBrowseButtonMargin());
-    sizerControls->Add(sizer_r1c1_3, wxGBPosition(0, 1), wxGBSpan(1, 3), wxEXPAND);
+    sizerControls->Add(sizer_r1c1_3, wxGBPosition(1, 1), wxGBSpan(1, 3), wxEXPAND);
 
     int dx = styleguide().getUnrelatedControlMargin(wxHORIZONTAL) - styleguide().getControlLabelMargin();
     if (dx < 0)
         dx = 0;
 
-    sizerControls->Add(label_username, wxGBPosition(1, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-    sizerControls->Add(text_ctrl_username, wxGBPosition(1, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
-    sizerControls->Add(label_password, wxGBPosition(1, 2), wxDefaultSpan, wxLEFT|wxALIGN_CENTER_VERTICAL, dx);
-    sizerControls->Add(text_ctrl_password, wxGBPosition(1, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
+    sizerControls->Add(label_username, wxGBPosition(2, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+    sizerControls->Add(text_ctrl_username, wxGBPosition(2, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
+    sizerControls->Add(label_password, wxGBPosition(2, 2), wxDefaultSpan, wxLEFT|wxALIGN_CENTER_VERTICAL, dx);
+    sizerControls->Add(text_ctrl_password, wxGBPosition(2, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
 
-    sizerControls->Add(label_charset, wxGBPosition(2, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-    sizerControls->Add(choice_charset, wxGBPosition(2, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
-    sizerControls->Add(label_role, wxGBPosition(2, 2), wxDefaultSpan, wxLEFT|wxALIGN_CENTER_VERTICAL, dx);
-    sizerControls->Add(text_ctrl_role, wxGBPosition(2, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
+    sizerControls->Add(label_charset, wxGBPosition(3, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+    sizerControls->Add(choice_charset, wxGBPosition(3, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
+    sizerControls->Add(label_role, wxGBPosition(3, 2), wxDefaultSpan, wxLEFT|wxALIGN_CENTER_VERTICAL, dx);
+    sizerControls->Add(text_ctrl_role, wxGBPosition(3, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
 
     if (createM)
     {
-        sizerControls->Add(label_pagesize, wxGBPosition(3, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-        sizerControls->Add(choice_pagesize, wxGBPosition(3, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
-        sizerControls->Add(label_dialect, wxGBPosition(3, 2), wxDefaultSpan, wxLEFT|wxALIGN_CENTER_VERTICAL, dx);
-        sizerControls->Add(choice_dialect, wxGBPosition(3, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
+        sizerControls->Add(label_pagesize, wxGBPosition(4, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+        sizerControls->Add(choice_pagesize, wxGBPosition(4, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
+        sizerControls->Add(label_dialect, wxGBPosition(4, 2), wxDefaultSpan, wxLEFT|wxALIGN_CENTER_VERTICAL, dx);
+        sizerControls->Add(choice_dialect, wxGBPosition(4, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
     }
 
     sizerControls->AddGrowableCol(1);
@@ -180,18 +186,19 @@ void DatabaseRegistrationDialog::set_properties()
     if (createM)
     {
         choice_pagesize->SetSelection(2);
-        choice_dialect->SetSelection(1);
+        choice_dialect->SetSelection(2);
     }
     button_ok->SetDefault();
 }
 //-----------------------------------------------------------------------------
-void DatabaseRegistrationDialog::setDatabase(YDatabase *db)
+void DatabaseRegistrationDialog::setDatabase(Database *db)
 {
     databaseM = db;
     /* this could be reactivated if there is a dialog with "Don't show me again"
     if (databaseM->isConnected())
     ::wxMessageBox(_("Properties of connected database cannot be changed."), _("Warning"), wxOK |wxICON_INFORMATION );
     */
+    text_ctrl_name->SetValue(std2wx(databaseM->getName()));
     text_ctrl_dbpath->SetValue(std2wx(databaseM->getPath()));
     text_ctrl_username->SetValue(std2wx(databaseM->getUsername()));
     text_ctrl_password->SetValue(std2wx(databaseM->getPassword()));
@@ -209,7 +216,7 @@ void DatabaseRegistrationDialog::setDatabase(YDatabase *db)
     text_ctrl_password->SetEditable(!isConnected);
     choice_charset->Enable(!isConnected);
     text_ctrl_role->SetEditable(!isConnected);
-    button_ok->Enable(!isConnected);
+    //button_ok->Enable(!isConnected);
     if (isConnected)
     {
         button_cancel->SetLabel(_("Close"));
@@ -218,7 +225,7 @@ void DatabaseRegistrationDialog::setDatabase(YDatabase *db)
     updateButtons();
 }
 //-----------------------------------------------------------------------------
-void DatabaseRegistrationDialog::setServer(YServer *s)
+void DatabaseRegistrationDialog::setServer(Server *s)
 {
     serverM = s;
 }
@@ -227,8 +234,7 @@ void DatabaseRegistrationDialog::updateButtons()
 {
     if (button_ok->IsShown())
     {
-        button_ok->Enable(text_ctrl_dbpath->IsEditable()
-            && !text_ctrl_dbpath->GetValue().IsEmpty()
+        button_ok->Enable(!text_ctrl_dbpath->GetValue().IsEmpty()
             && !text_ctrl_username->GetValue().IsEmpty());
     }
 }
@@ -252,6 +258,7 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
 void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor wait;
+    databaseM->setName(wx2std(text_ctrl_name->GetValue()));
     databaseM->setPath(wx2std(text_ctrl_dbpath->GetValue()));
     databaseM->setUsername(wx2std(text_ctrl_username->GetValue()));
     databaseM->setPassword(wx2std(text_ctrl_password->GetValue()));
