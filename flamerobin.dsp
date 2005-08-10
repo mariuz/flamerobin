@@ -492,11 +492,7 @@ SOURCE=.\src\gui\ExecuteSqlFrame.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\FieldPropertiesFrame.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\FieldPropertiesFrameImpl.cpp
+SOURCE=.\src\gui\FieldPropertiesFrame.cpp
 # End Source File
 # Begin Source File
 
@@ -504,11 +500,7 @@ SOURCE=.\src\gui\FindDialog.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\MainFrame.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\MainFrameImpl.cpp
+SOURCE=.\src\gui\MainFrame.cpp
 # End Source File
 # Begin Source File
 
@@ -528,6 +520,10 @@ SOURCE=.\src\gui\PreferencesDialogSettings.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\PrintableHtmlWindow.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\ReorderFieldsDialog.cpp
 # End Source File
 # Begin Source File
@@ -537,6 +533,10 @@ SOURCE=.\src\gui\RestoreFrame.cpp
 # Begin Source File
 
 SOURCE=.\src\gui\ServerRegistrationDialog.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\SimpleHtmlFrame.cpp
 # End Source File
 # Begin Source File
 
@@ -557,6 +557,10 @@ SOURCE=.\src\config.cpp
 # Begin Source File
 
 SOURCE=.\src\metadata\constraints.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\contextmenuvisitor.cpp
 # End Source File
 # Begin Source File
 
@@ -617,6 +621,10 @@ SOURCE=.\src\images.cpp
 # Begin Source File
 
 SOURCE=.\src\metadata\indices.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\metadata\item.cpp
 # End Source File
 # Begin Source File
 
@@ -738,7 +746,7 @@ SOURCE=.\src\gui\ExecuteSqlFrame.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\FieldPropertiesFrame.h
+SOURCE=.\src\gui\FieldPropertiesFrame.h
 # End Source File
 # Begin Source File
 
@@ -746,7 +754,7 @@ SOURCE=.\src\gui\FindDialog.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\MainFrame.h
+SOURCE=.\src\gui\MainFrame.h
 # End Source File
 # Begin Source File
 
@@ -762,6 +770,10 @@ SOURCE=.\src\gui\PreferencesDialog.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\PrintableHtmlWindow.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\ReorderFieldsDialog.h
 # End Source File
 # Begin Source File
@@ -771,6 +783,10 @@ SOURCE=.\src\gui\RestoreFrame.h
 # Begin Source File
 
 SOURCE=.\src\gui\ServerRegistrationDialog.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\SimpleHtmlFrame.h
 # End Source File
 # Begin Source File
 
@@ -791,6 +807,10 @@ SOURCE=.\src\config.h
 # Begin Source File
 
 SOURCE=.\src\metadata\constraints.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\contextmenuvisitor.h
 # End Source File
 # Begin Source File
 
@@ -847,6 +867,10 @@ SOURCE=.\src\images.h
 # Begin Source File
 
 SOURCE=.\src\metadata\indices.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\metadata\item.h
 # End Source File
 # Begin Source File
 
@@ -927,6 +951,10 @@ SOURCE=.\src\urihandler.h
 # Begin Source File
 
 SOURCE=.\src\metadata\view.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\visitor.h
 # End Source File
 # End Group
 # End Target
