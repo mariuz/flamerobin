@@ -79,7 +79,7 @@ void myTreeCtrl::OnBeginDrag(wxTreeEvent& event)
 	if (item.IsOk())
 	{
 		SelectItem(item);
-		YxMetadataItem *m = getMetadataItem(item);
+		MetadataItem *m = getMetadataItem(item);
 		if (!m)
 			return;
 		wxString test;
@@ -128,7 +128,7 @@ void myTreeCtrl::OnContextMenu(wxContextMenuEvent& event)
 	}
 	else
 	{	// read item data to find out what is the type of item
-		YxMetadataItem *i = getMetadataItem(item);
+		MetadataItem *i = getMetadataItem(item);
 		if (!i)
 			return;
 		ContextMenuVisitor cmv(&MyMenu);
@@ -151,18 +151,18 @@ void myTreeCtrl::SetSpacing(short spacing)
 }
 //-----------------------------------------------------------------------------
 //! returns the object that selected wxTree node observes
-YxMetadataItem *myTreeCtrl::getSelectedMetadataItem()
+MetadataItem *myTreeCtrl::getSelectedMetadataItem()
 {
 	return getMetadataItem(GetSelection());
 }
 //-----------------------------------------------------------------------------
 //! returns the object that some wxTree node observes
-YxMetadataItem *myTreeCtrl::getMetadataItem(wxTreeItemId item)
+MetadataItem *myTreeCtrl::getMetadataItem(wxTreeItemId item)
 {
 	if (!item.IsOk())
 		return 0;
 
-	YTreeItem *d = (YTreeItem *)(GetItemData(item));
+	TreeItem *d = (TreeItem *)(GetItemData(item));
 	if (!d)
 		return 0;
 
@@ -194,14 +194,14 @@ void myTreeCtrl::loadImages()
 	AssignImageList(imageList);	// autodeleted
 }
 //-----------------------------------------------------------------------------
-bool myTreeCtrl::selectMetadataItem(YxMetadataItem* item)
+bool myTreeCtrl::selectMetadataItem(MetadataItem* item)
 {
     if (item == 0)
         return false;
     // create a stack of parent metadata items (break before root node)
-    std::stack<YxMetadataItem*> metaitems;
+    std::stack<MetadataItem*> metaitems;
 	metaitems.push(item);
-	YxMetadataItem* parent = item->getParent();
+	MetadataItem* parent = item->getParent();
 	while (parent != 0 && parent->getParent() != 0)
 	{
 		metaitems.push(parent);
@@ -216,7 +216,7 @@ bool myTreeCtrl::selectMetadataItem(YxMetadataItem* item)
         for (wxTreeItemId node = GetFirstChild(parentNode, cookie);
              node.IsOk(); node = GetNextChild(parentNode, cookie))
         {
-			YxMetadataItem* nodeItem = getMetadataItem(node);
+			MetadataItem* nodeItem = getMetadataItem(node);
             if (parent == nodeItem)
             {
 				if (item == nodeItem)

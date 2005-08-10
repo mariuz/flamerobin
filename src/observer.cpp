@@ -44,13 +44,13 @@
 #include "observer.h"
 #include "subject.h"
 
-YxObserver::YxObserver()
+Observer::Observer()
 {
 }
 //-----------------------------------------------------------------------------
-YxObserver::~YxObserver()
+Observer::~Observer()
 {
-	std::list<YxSubject *>::iterator it;
+	std::list<Subject *>::iterator it;
 	while (true)
 	{
 		it = observedObjectsM.begin();
@@ -60,7 +60,7 @@ YxObserver::~YxObserver()
 	}
 }
 //-----------------------------------------------------------------------------
-YxSubject *YxObserver::getFirstObservedObject()
+Subject *Observer::getFirstObservedObject()
 {
 	if (observedObjectsM.empty())
 		return 0;
@@ -68,12 +68,12 @@ YxSubject *YxObserver::getFirstObservedObject()
 		return *(observedObjectsM.begin());
 }
 //-----------------------------------------------------------------------------
-void YxObserver::addObservedObject(YxSubject *object)
+void Observer::addObservedObject(Subject *object)
 {
 	observedObjectsM.push_back(object);
 }
 //-----------------------------------------------------------------------------
-void YxObserver::removeObservedObject(YxSubject *object)
+void Observer::removeObservedObject(Subject *object)
 {
 	observedObjectsM.erase(std::find(observedObjectsM.begin(), observedObjectsM.end(), object));
 }

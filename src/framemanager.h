@@ -41,7 +41,7 @@ public:
 		:frame(f), id(i) {};
 };
 //---------------------------------------------------------------------------------------
-typedef std::multimap<YxMetadataItem*, FrameAndId> ItemFrameMap;
+typedef std::multimap<MetadataItem*, FrameAndId> ItemFrameMap;
 //---------------------------------------------------------------------------------------
 class FrameManager: public wxEvtHandler
 {
@@ -54,7 +54,7 @@ public:
 	void bringOnTop(int id);
 
     void removeFrame(BaseFrame* frame);
-    MetadataItemPropertiesFrame* showMetadataPropertyFrame(wxWindow* parent, YxMetadataItem* item,
+    MetadataItemPropertiesFrame* showMetadataPropertyFrame(wxWindow* parent, MetadataItem* item,
         bool delayed = false, bool force_new = false);
 
     void OnCommandEvent(wxCommandEvent& event);

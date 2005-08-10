@@ -55,20 +55,20 @@ protected:
 	virtual void defaultAction() {};
 
 public:
-    virtual void visit(YColumn&) { defaultAction(); };
-    virtual void visit(YDatabase&) { defaultAction(); };
-    virtual void visit(YDomain&) { defaultAction(); };
-    virtual void visit(YException&) { defaultAction(); };
-    virtual void visit(YFunction&) { defaultAction(); };
-    virtual void visit(YGenerator&) { defaultAction(); };
-    virtual void visit(YProcedure&) { defaultAction(); };
-    virtual void visit(YParameter&) { defaultAction(); };
-    virtual void visit(YRole&) { defaultAction(); };
-    virtual void visit(YServer&) { defaultAction(); };
-    virtual void visit(YTable&) { defaultAction(); };
-    virtual void visit(YTrigger&) { defaultAction(); };
-    virtual void visit(YView&) { defaultAction(); };
-	virtual void visit(YxMetadataItem&) { defaultAction(); };
+    virtual void visit(Column&) { defaultAction(); };
+    virtual void visit(Database&) { defaultAction(); };
+    virtual void visit(Domain&) { defaultAction(); };
+    virtual void visit(Exception&) { defaultAction(); };
+    virtual void visit(Function&) { defaultAction(); };
+    virtual void visit(Generator&) { defaultAction(); };
+    virtual void visit(Procedure&) { defaultAction(); };
+    virtual void visit(Parameter&) { defaultAction(); };
+    virtual void visit(Role&) { defaultAction(); };
+    virtual void visit(Server&) { defaultAction(); };
+    virtual void visit(Table&) { defaultAction(); };
+    virtual void visit(Trigger&) { defaultAction(); };
+    virtual void visit(View&) { defaultAction(); };
+	virtual void visit(MetadataItem&) { defaultAction(); };
 
 	virtual void visit(Item&) { defaultAction(); };
 public:

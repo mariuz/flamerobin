@@ -42,10 +42,10 @@
 
 #include "styleguide.h"
 //------------------------------------------------------------------------------
-class YStyleGuideMAC: public YxStyleGuide
+class StyleGuideMAC: public YxStyleGuide
 {
 public:
-    YStyleGuideMAC();
+    StyleGuideMAC();
     virtual wxSizer* createButtonSizer(wxButton* button_ok, wxButton* button_cancel);
     virtual int getBetweenButtonsMargin(wxOrientation orientation);
     virtual int getBrowseButtonMargin();
@@ -58,11 +58,11 @@ public:
     virtual int getUnrelatedControlMargin(wxOrientation orientation);
 };
 //------------------------------------------------------------------------------
-YStyleGuideMAC::YStyleGuideMAC()
+StyleGuideMAC::StyleGuideMAC()
 {
 }
 //------------------------------------------------------------------------------
-wxSizer* YStyleGuideMAC::createButtonSizer(wxButton* button_ok, wxButton* button_cancel)
+wxSizer* StyleGuideMAC::createButtonSizer(wxButton* button_ok, wxButton* button_cancel)
 {
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
     // right-align
@@ -76,27 +76,27 @@ wxSizer* YStyleGuideMAC::createButtonSizer(wxButton* button_ok, wxButton* button
     return sizer;
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMAC::getBetweenButtonsMargin(wxOrientation WXUNUSED(orientation))
+int StyleGuideMAC::getBetweenButtonsMargin(wxOrientation WXUNUSED(orientation))
 {
     return 12;
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMAC::getBrowseButtonMargin()
+int StyleGuideMAC::getBrowseButtonMargin()
 {
     return 10;
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMAC::getCheckboxSpacing()
+int StyleGuideMAC::getCheckboxSpacing()
 {
     return 7;
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMAC::getControlLabelMargin()
+int StyleGuideMAC::getControlLabelMargin()
 {
     return 5;
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMAC::getDialogMargin(wxDirection direction)
+int StyleGuideMAC::getDialogMargin(wxDirection direction)
 {
     switch (direction) 
     {
@@ -111,28 +111,28 @@ int YStyleGuideMAC::getDialogMargin(wxDirection direction)
     }
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMAC::getEditorFontSize()
+int StyleGuideMAC::getEditorFontSize()
 {
     return 12;
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMAC::getFrameMargin(wxDirection direction)
+int StyleGuideMAC::getFrameMargin(wxDirection direction)
 {
     return 16;
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMAC::getRelatedControlMargin(wxOrientation WXUNUSED(orientation))
+int StyleGuideMAC::getRelatedControlMargin(wxOrientation WXUNUSED(orientation))
 {
     return 12;
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMAC::getUnrelatedControlMargin(wxOrientation WXUNUSED(orientation))
+int StyleGuideMAC::getUnrelatedControlMargin(wxOrientation WXUNUSED(orientation))
 {
     return 16;
 }
 //------------------------------------------------------------------------------
-YxStyleGuide& styleguide()
+StyleGuide& styleguide()
 {
-    static YStyleGuideMAC guide;
+    static StyleGuideMAC guide;
     return guide;
 }

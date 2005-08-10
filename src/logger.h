@@ -40,10 +40,10 @@ public:
 class Logger			// maybe we'll extend this later
 {
 private:
-	static bool log2database(const executedStatement& st, YDatabase *db);
-	static bool log2file(const executedStatement& st, YDatabase *db, const std::string& filename);
+	static bool log2database(const executedStatement& st, Database *db);
+	static bool log2file(const executedStatement& st, Database *db, const std::string& filename);
 public:
-	static bool logStatement(const executedStatement& st, YDatabase *db);
+	static bool logStatement(const executedStatement& st, Database *db);
 };
 //------------------------------------------------------------------------------
 #endif

@@ -42,12 +42,12 @@
 #include "metadata/database.h"
 #include "logger.h"
 //-----------------------------------------------------------------------------
-bool Logger::log2database(const executedStatement& /*st*/, YDatabase* /*db*/)
+bool Logger::log2database(const executedStatement& /*st*/, Database* /*db*/)
 {
 	return true;
 }
 //-----------------------------------------------------------------------------
-bool Logger::log2file(const executedStatement& st, YDatabase *db, const std::string& filename)
+bool Logger::log2file(const executedStatement& st, Database *db, const std::string& filename)
 {
 	enum { singleFile=0, multiFile };
 	int logToFileType;
@@ -106,7 +106,7 @@ bool Logger::log2file(const executedStatement& st, YDatabase *db, const std::str
 	return true;
 }
 //-----------------------------------------------------------------------------
-bool Logger::logStatement(const executedStatement& st, YDatabase *db)
+bool Logger::logStatement(const executedStatement& st, Database *db)
 {
 	bool logDML = false;
 	config().getValue("LogDML", logDML);

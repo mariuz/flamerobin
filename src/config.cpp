@@ -49,20 +49,20 @@
 using namespace std;
 
 //-----------------------------------------------------------------------------
-YConfig& config()
+Config& config()
 {
-	static YConfig c;
+	static Config c;
 	return c;
 }
 //-----------------------------------------------------------------------------
 //! return true if value exists, false if not
-bool YConfig::keyExists(const std::string& key) const
+bool Config::keyExists(const std::string& key) const
 {
 	return (dataM.find(key) != dataM.end());
 }
 //-----------------------------------------------------------------------------
 //! return true if value exists, false if not
-bool YConfig::getValue(string key, string& value)
+bool Config::getValue(string key, string& value)
 {
 	if (dataM.find(key) == dataM.end())
 		return false;
@@ -71,7 +71,7 @@ bool YConfig::getValue(string key, string& value)
 	return true;
 }
 //-----------------------------------------------------------------------------
-bool YConfig::getValue(string key, int& value)
+bool Config::getValue(string key, int& value)
 {
 	string s;
 	if (!getValue(key, s))
@@ -83,7 +83,7 @@ bool YConfig::getValue(string key, int& value)
 	return true;
 }
 //-----------------------------------------------------------------------------
-bool YConfig::getValue(string key, double& value)
+bool Config::getValue(string key, double& value)
 {
 	string s;
 	if (!getValue(key, s))
@@ -95,7 +95,7 @@ bool YConfig::getValue(string key, double& value)
 	return true;
 }
 //-----------------------------------------------------------------------------
-bool YConfig::getValue(string key, bool& value)
+bool Config::getValue(string key, bool& value)
 {
 	string s;
 	if (!getValue(key, s))
@@ -105,7 +105,7 @@ bool YConfig::getValue(string key, bool& value)
 	return true;
 }
 //-----------------------------------------------------------------------------
-bool YConfig::getValue(std::string key, StorageGranularity& value)
+bool Config::getValue(std::string key, StorageGranularity& value)
 {
 	int intValue = 0;
 	bool ret = getValue(key, intValue);
@@ -114,7 +114,7 @@ bool YConfig::getValue(std::string key, StorageGranularity& value)
 	return ret;
 }
 //-----------------------------------------------------------------------------
-bool YConfig::getValue(std::string key, std::vector<std::string>& value)
+bool Config::getValue(std::string key, std::vector<std::string>& value)
 {
 	string s;
 	if (!getValue(key, s))
@@ -136,7 +136,7 @@ bool YConfig::getValue(std::string key, std::vector<std::string>& value)
 }
 //-----------------------------------------------------------------------------
 //! return true if value existed, false if not
-bool YConfig::setValue(string key, string value, bool saveIt)
+bool Config::setValue(string key, string value, bool saveIt)
 {
 	bool ret = (dataM.end() != dataM.find(key));
 	if (ret)
@@ -147,21 +147,21 @@ bool YConfig::setValue(string key, string value, bool saveIt)
 	return ret;
 }
 //-----------------------------------------------------------------------------
-bool YConfig::setValue(string key, int value, bool saveIt)
+bool Config::setValue(string key, int value, bool saveIt)
 {
 	stringstream ss;
 	ss << value;
 	return setValue(key, ss.str(), saveIt);
 }
 //-----------------------------------------------------------------------------
-bool YConfig::setValue(string key, double value, bool saveIt)
+bool Config::setValue(string key, double value, bool saveIt)
 {
 	stringstream ss;
 	ss << value;
 	return setValue(key, ss.str(), saveIt);
 }
 //-----------------------------------------------------------------------------
-bool YConfig::setValue(string key, bool value, bool saveIt)
+bool Config::setValue(string key, bool value, bool saveIt)
 {
 	if (value)
 		return setValue(key, string("1"), saveIt);
@@ -169,12 +169,12 @@ bool YConfig::setValue(string key, bool value, bool saveIt)
 		return setValue(key, string("0"), saveIt);
 }
 //-----------------------------------------------------------------------------
-bool YConfig::setValue(string key, StorageGranularity value, bool saveIt)
+bool Config::setValue(string key, StorageGranularity value, bool saveIt)
 {
 	return setValue(key, int(value), saveIt);
 }
 //-----------------------------------------------------------------------------
-bool YConfig::setValue(string key, vector<string> value, bool saveIt)
+bool Config::setValue(string key, vector<string> value, bool saveIt)
 {
     string s;
     for (vector<string>::iterator it = value.begin(); it != value.end(); it++)
@@ -189,18 +189,18 @@ bool YConfig::setValue(string key, vector<string> value, bool saveIt)
     return setValue(key, s, saveIt);
 }
 //-----------------------------------------------------------------------------
-YConfig::YConfig()
+Config::Config()
 	: configFileNameM("")
 {
 	load();
 }
 //-----------------------------------------------------------------------------
-YConfig::~YConfig()
+Config::~Config()
 {
 	save();
 }
 //-----------------------------------------------------------------------------
-std::string YConfig::getConfigFileName()
+std::string Config::getConfigFileName()
 {
 	if (configFileNameM.empty())
 	{
@@ -213,7 +213,7 @@ std::string YConfig::getConfigFileName()
 	return configFileNameM;
 }
 //-----------------------------------------------------------------------------
-bool YConfig::save()
+bool Config::save()
 {
 	std::string path(getConfigFileName());
 
@@ -231,7 +231,7 @@ bool YConfig::save()
 }
 //-----------------------------------------------------------------------------
 // this gets called from main() so we're sure config.ini is in the right place
-bool YConfig::load()
+bool Config::load()
 {
 	std::string path(getConfigFileName());
 
@@ -269,7 +269,7 @@ bool YConfig::load()
 	return true;
 }
 //-----------------------------------------------------------------------------
-std::string YConfig::getHtmlTemplatesPath()
+std::string Config::getHtmlTemplatesPath()
 {
 	std::string ret(getApplicationPath());
 	if (ret.empty())
@@ -279,7 +279,7 @@ std::string YConfig::getHtmlTemplatesPath()
 	return ret;
 }
 //-----------------------------------------------------------------------------
-std::string YConfig::getDBHFileName()
+std::string Config::getDBHFileName()
 {
 	std::string ret(getApplicationPath());
 	if (ret.empty())

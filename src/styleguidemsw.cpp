@@ -45,7 +45,7 @@
 #include "windows.h"
 #endif
 //------------------------------------------------------------------------------
-class YStyleGuideMSW: public YxStyleGuide
+class StyleGuideMSW: public StyleGuide
 {
 private:
     int dbuHorzM;
@@ -55,7 +55,7 @@ private:
     int dbuToPixelHorz(int dbu);
     int dbuToPixelVert(int dbu);
 public:
-    YStyleGuideMSW();
+    StyleGuideMSW();
     virtual wxSizer* createButtonSizer(wxButton* button_ok, wxButton* button_cancel);
     virtual int getBetweenButtonsMargin(wxOrientation orientation);
     virtual int getBrowseButtonMargin();
@@ -68,14 +68,14 @@ public:
 	virtual int getEditorFontSize();
 };
 //------------------------------------------------------------------------------
-YStyleGuideMSW::YStyleGuideMSW()
+StyleGuideMSW::StyleGuideMSW()
 {
     dbuHorzM = 0;
     dbuVertM = 0;
     dbuValidM = false;
 }
 //------------------------------------------------------------------------------
-void YStyleGuideMSW::dbuNeeded()
+void StyleGuideMSW::dbuNeeded()
 {
     if (!dbuValidM)
     {
@@ -95,19 +95,19 @@ void YStyleGuideMSW::dbuNeeded()
     }
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMSW::dbuToPixelHorz(int dbu)
+int StyleGuideMSW::dbuToPixelHorz(int dbu)
 {
     dbuNeeded();
     return dbu * dbuHorzM / 4;
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMSW::dbuToPixelVert(int dbu)
+int StyleGuideMSW::dbuToPixelVert(int dbu)
 {
     dbuNeeded();
     return dbu * dbuVertM / 8;
 }
 //------------------------------------------------------------------------------
-wxSizer* YStyleGuideMSW::createButtonSizer(wxButton* button_ok, wxButton* button_cancel)
+wxSizer* StyleGuideMSW::createButtonSizer(wxButton* button_ok, wxButton* button_cancel)
 {
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
     // right-align
@@ -121,7 +121,7 @@ wxSizer* YStyleGuideMSW::createButtonSizer(wxButton* button_ok, wxButton* button
     return sizer;
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMSW::getBetweenButtonsMargin(wxOrientation orientation)
+int StyleGuideMSW::getBetweenButtonsMargin(wxOrientation orientation)
 {
     switch (orientation)
     {
@@ -134,22 +134,22 @@ int YStyleGuideMSW::getBetweenButtonsMargin(wxOrientation orientation)
     }
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMSW::getBrowseButtonMargin()
+int StyleGuideMSW::getBrowseButtonMargin()
 {
 	return dbuToPixelHorz(1);
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMSW::getCheckboxSpacing()
+int StyleGuideMSW::getCheckboxSpacing()
 {
     return dbuToPixelVert(3);
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMSW::getControlLabelMargin()
+int StyleGuideMSW::getControlLabelMargin()
 {
     return dbuToPixelHorz(3);
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMSW::getDialogMargin(wxDirection direction)
+int StyleGuideMSW::getDialogMargin(wxDirection direction)
 {
     switch (direction)
     {
@@ -164,7 +164,7 @@ int YStyleGuideMSW::getDialogMargin(wxDirection direction)
     }
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMSW::getFrameMargin(wxDirection direction)
+int StyleGuideMSW::getFrameMargin(wxDirection direction)
 {
     switch (direction)
     {
@@ -179,7 +179,7 @@ int YStyleGuideMSW::getFrameMargin(wxDirection direction)
     }
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMSW::getRelatedControlMargin(wxOrientation orientation)
+int StyleGuideMSW::getRelatedControlMargin(wxOrientation orientation)
 {
     switch (orientation)
     {
@@ -192,7 +192,7 @@ int YStyleGuideMSW::getRelatedControlMargin(wxOrientation orientation)
     }
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMSW::getUnrelatedControlMargin(wxOrientation orientation)
+int StyleGuideMSW::getUnrelatedControlMargin(wxOrientation orientation)
 {
     switch (orientation)
     {
@@ -205,14 +205,14 @@ int YStyleGuideMSW::getUnrelatedControlMargin(wxOrientation orientation)
     }
 }
 //------------------------------------------------------------------------------
-int YStyleGuideMSW::getEditorFontSize()
+int StyleGuideMSW::getEditorFontSize()
 {
 	return 10;
 }
 //------------------------------------------------------------------------------
-YxStyleGuide& styleguide()
+StyleGuide& styleguide()
 {
-    static YStyleGuideMSW guide;
+    static StyleGuideMSW guide;
     return guide;
 }
 //------------------------------------------------------------------------------

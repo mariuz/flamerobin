@@ -34,7 +34,7 @@
 //---------------------------------------------------------------------------------------
 //! There will be exactly one static object of descendent class, returned by
 //! styleguide() (see below).
-class YxStyleGuide
+class StyleGuide
 {
 public:
     virtual wxSizer* createButtonSizer(wxButton* button_ok, wxButton* button_cancel) = 0;
@@ -48,10 +48,10 @@ public:
     virtual int getUnrelatedControlMargin(wxOrientation orientation) = 0;
 	virtual int getEditorFontSize() = 0;
 protected:
-    YxStyleGuide();
-    virtual ~YxStyleGuide();
+    StyleGuide();
+    virtual ~StyleGuide();
 };
 //---------------------------------------------------------------------------------------
-YxStyleGuide& styleguide();
+StyleGuide& styleguide();
 //---------------------------------------------------------------------------------------
 #endif

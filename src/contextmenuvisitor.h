@@ -35,19 +35,19 @@ public:
     explicit ContextMenuVisitor(wxMenu* menu);
     virtual ~ContextMenuVisitor();
 
-    virtual void visit(YColumn&);
-    virtual void visit(YDatabase&);
-    virtual void visit(YDomain&);
-    virtual void visit(YException&);
-    virtual void visit(YFunction&);
-    virtual void visit(YGenerator&);
-    virtual void visit(YProcedure&);
-    virtual void visit(YRole&);
-    virtual void visit(YServer&);
-    virtual void visit(YTable&);
-    virtual void visit(YTrigger&);
-    virtual void visit(YView&);
-	virtual void visit(YxMetadataItem&);
+    virtual void visit(Column&);
+    virtual void visit(Database&);
+    virtual void visit(Domain&);
+    virtual void visit(Exception&);
+    virtual void visit(Function&);
+    virtual void visit(Generator&);
+    virtual void visit(Procedure&);
+    virtual void visit(Role&);
+    virtual void visit(Server&);
+    virtual void visit(Table&);
+    virtual void visit(Trigger&);
+    virtual void visit(View&);
+	virtual void visit(MetadataItem&);
 
 private:
     wxMenu* menuM;

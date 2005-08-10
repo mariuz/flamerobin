@@ -37,26 +37,26 @@
 #include "ugly.h"
 #include "dberror.h"
 //-----------------------------------------------------------------------------
-std::string YError::getMessage() const
+std::string Error::getMessage() const
 {
 	return messageM;
 }
 //-----------------------------------------------------------------------------
-void YError::setMessage(std::string message)
+void Error::setMessage(std::string message)
 {
 	messageM = message;
 }
 //-----------------------------------------------------------------------------
 #if (wxUSE_UNICODE)
-void YError::setMessage(wxString message)	// makes things easier for unicode builds
+void Error::setMessage(wxString message)	// makes things easier for unicode builds
 {
 	setMessage(wx2std(message));
 }
 #endif
 //-----------------------------------------------------------------------------
-YError& lastError()
+Error& lastError()
 {
-	static YError e;
+	static Error e;
 	return e;
 }
 //-----------------------------------------------------------------------------

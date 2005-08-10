@@ -45,17 +45,17 @@
 #include "observer.h"
 
 //------------------------------------------------------------------------------
-YxSubject::YxSubject()
+Subject::Subject()
 {
 	locksCountM = 0;
 }
 //------------------------------------------------------------------------------
-YxSubject::~YxSubject()
+Subject::~Subject()
 {
 	detachAllObservers();
 }
 //------------------------------------------------------------------------------
-void YxSubject::attach(YxObserver* observer)
+void Subject::attach(Observer* observer)
 {
     if(observer && std::find(observersM.begin(), observersM.end(), observer)
             == observersM.end())
@@ -65,7 +65,7 @@ void YxSubject::attach(YxObserver* observer)
 	}
 }
 //------------------------------------------------------------------------------
-void YxSubject::detach(YxObserver* observer)
+void Subject::detach(Observer* observer)
 {
     if(!observer)
 		return;
@@ -77,27 +77,27 @@ void YxSubject::detach(YxObserver* observer)
 		locksCountM = 0;
 }
 //------------------------------------------------------------------------------
-void YxSubject::detachAllObservers()
+void Subject::detachAllObservers()
 {
-	for (std::list<YxObserver *>::iterator i = observersM.begin(); i != observersM.end(); ++i)
+	for (std::list<Observer *>::iterator i = observersM.begin(); i != observersM.end(); ++i)
 		(*i)->removeObservedObject(this);
 	observersM.clear();
 	locksCountM = 0;
 }
 //------------------------------------------------------------------------------
-void YxSubject::notify()
+void Subject::notify()
 {
     if(!locksCountM)
-        for(std::list<YxObserver *>::iterator it = observersM.begin(); it != observersM.end(); ++it)
+        for(std::list<Observer *>::iterator it = observersM.begin(); it != observersM.end(); ++it)
             (*it)->update();
 }
 //------------------------------------------------------------------------------
-void YxSubject::lockSubject()
+void Subject::lockSubject()
 {
     ++locksCountM;
 }
 //------------------------------------------------------------------------------
-void YxSubject::unlockSubject(bool wantFullUnlock, bool doNotify)
+void Subject::unlockSubject(bool wantFullUnlock, bool doNotify)
 {
     if(!locksCountM)
 		return;

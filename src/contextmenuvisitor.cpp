@@ -47,16 +47,16 @@ ContextMenuVisitor::~ContextMenuVisitor()
 {
 }
 //------------------------------------------------------------------------------
-void ContextMenuVisitor::visit(YColumn& item)
+void ContextMenuVisitor::visit(Column& item)
 {
-	if (dynamic_cast<YTable *>(item.getParent()))		// only for table columns
+	if (dynamic_cast<Table *>(item.getParent()))		// only for table columns
 	{
 		menuM->Append(myTreeCtrl::Menu_DropObject, _("Drop"));
 		menuM->Append(myTreeCtrl::Menu_ObjectProperties, _("Properties..."));
 	}
 }
 //------------------------------------------------------------------------------
-void ContextMenuVisitor::visit(YDatabase&)
+void ContextMenuVisitor::visit(Database&)
 {
     menuM->Append(myTreeCtrl::Menu_Connect, _("Connect"));
 	menuM->Append(myTreeCtrl::Menu_Disconnect, _("Disconnect"));
@@ -71,22 +71,22 @@ void ContextMenuVisitor::visit(YDatabase&)
 	menuM->Append(myTreeCtrl::Menu_Restore, _("Restore database..."));
 }
 //------------------------------------------------------------------------------
-void ContextMenuVisitor::visit(YDomain&)
+void ContextMenuVisitor::visit(Domain&)
 {
 	addRegularObjectMenu();
 }
 //------------------------------------------------------------------------------
-void ContextMenuVisitor::visit(YException&)
+void ContextMenuVisitor::visit(Exception&)
 {
 	addRegularObjectMenu();
 }
 //------------------------------------------------------------------------------
-void ContextMenuVisitor::visit(YFunction&)
+void ContextMenuVisitor::visit(Function&)
 {
 	addRegularObjectMenu();
 }
 //------------------------------------------------------------------------------
-void ContextMenuVisitor::visit(YGenerator&)
+void ContextMenuVisitor::visit(Generator&)
 {
 	menuM->Append(myTreeCtrl::Menu_ShowGeneratorValue, _("Show value"));
 	menuM->Append(myTreeCtrl::Menu_SetGeneratorValue, _("Set value"));
@@ -94,18 +94,18 @@ void ContextMenuVisitor::visit(YGenerator&)
 	menuM->Append(myTreeCtrl::Menu_ObjectProperties, _("Properties..."));
 }
 //------------------------------------------------------------------------------
-void ContextMenuVisitor::visit(YProcedure&)
+void ContextMenuVisitor::visit(Procedure&)
 {
 	addSelectMenu(false);	// false = not a table
 	addRegularObjectMenu();
 }
 //------------------------------------------------------------------------------
-void ContextMenuVisitor::visit(YRole&)
+void ContextMenuVisitor::visit(Role&)
 {
 	addRegularObjectMenu();
 }
 //------------------------------------------------------------------------------
-void ContextMenuVisitor::visit(YServer&)
+void ContextMenuVisitor::visit(Server&)
 {
 	menuM->Append(myTreeCtrl::Menu_RegisterDatabase, _("Register existing database..."));
 	menuM->Append(myTreeCtrl::Menu_CreateDatabase, _("Create new database..."));
@@ -115,7 +115,7 @@ void ContextMenuVisitor::visit(YServer&)
 	menuM->Append(myTreeCtrl::Menu_ServerProperties, _("Server registration info..."));
 }
 //------------------------------------------------------------------------------
-void ContextMenuVisitor::visit(YTable&)
+void ContextMenuVisitor::visit(Table&)
 {
 	menuM->Append(myTreeCtrl::Menu_Insert, _("Insert into ..."));
 	addSelectMenu(true);
@@ -123,18 +123,18 @@ void ContextMenuVisitor::visit(YTable&)
 	addRegularObjectMenu();
 }
 //------------------------------------------------------------------------------
-void ContextMenuVisitor::visit(YTrigger&)
+void ContextMenuVisitor::visit(Trigger&)
 {
 	addRegularObjectMenu();
 }
 //------------------------------------------------------------------------------
-void ContextMenuVisitor::visit(YView&)
+void ContextMenuVisitor::visit(View&)
 {
 	addSelectMenu(false);	// false = not a table
 	addRegularObjectMenu();
 }
 //------------------------------------------------------------------------------
-void ContextMenuVisitor::visit(YxMetadataItem &item)
+void ContextMenuVisitor::visit(MetadataItem &item)
 {
 	NodeType type = item.getType();
 	if (type == ntFunctions)

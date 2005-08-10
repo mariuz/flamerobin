@@ -33,20 +33,20 @@
 #include <vector>
 #include <list>
 
-class YxObserver;
+class Observer;
 //------------------------------------------------------------------------------
-class YxSubject
+class Subject
 {
 protected:
-    std::list<YxObserver *> observersM;
+    std::list<Observer *> observersM;
     int locksCountM;
 
 public:
-	YxSubject();
-	virtual ~YxSubject();
+	Subject();
+	virtual ~Subject();
 
-    void attach(YxObserver*);
-    void detach(YxObserver*);
+    void attach(Observer*);
+    void detach(Observer*);
 	void detachAllObservers();
     void notify();
     void lockSubject();

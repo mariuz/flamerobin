@@ -40,7 +40,7 @@ enum StorageGranularity
 
 //---------------------------------------------------------------------------------------
 //! Do not instantiate objects of this class. Use config() function (see below).
-class YConfig
+class Config
 {
 public:
 	bool save();
@@ -81,14 +81,14 @@ public:
     bool setValue(std::string key, StorageGranularity value, bool saveIt = true);
     bool setValue(std::string key, std::vector<std::string> value, bool saveIt = true);
 
-	YConfig();
-	~YConfig();
+	Config();
+	~Config();
 private:
 	std::map<std::string, std::string> dataM;		//! key -> value
 	std::string getConfigFileName();
 	std::string configFileNameM;
 };
 
-YConfig& config();
+Config& config();
 //---------------------------------------------------------------------------------------
 #endif

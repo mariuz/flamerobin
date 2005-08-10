@@ -42,10 +42,10 @@
 
 #include "styleguide.h"
 //------------------------------------------------------------------------------
-class YStyleGuideGeneric: public YxStyleGuide
+class StyleGuideGeneric: public StyleGuide
 {
 public:
-    YStyleGuideGeneric();
+    StyleGuideGeneric();
     virtual wxSizer* createButtonSizer(wxButton* button_ok, wxButton* button_cancel);
     virtual int getBetweenButtonsMargin(wxOrientation orientation);
     virtual int getBrowseButtonMargin();
@@ -58,11 +58,11 @@ public:
 	virtual int getEditorFontSize();
 };
 //------------------------------------------------------------------------------
-YStyleGuideGeneric::YStyleGuideGeneric()
+StyleGuideGeneric::StyleGuideGeneric()
 {
 }
 //------------------------------------------------------------------------------
-wxSizer* YStyleGuideGeneric::createButtonSizer(wxButton* button_ok, wxButton* button_cancel)
+wxSizer* StyleGuideGeneric::createButtonSizer(wxButton* button_ok, wxButton* button_cancel)
 {
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
     // center-align
@@ -77,54 +77,54 @@ wxSizer* YStyleGuideGeneric::createButtonSizer(wxButton* button_ok, wxButton* bu
     return sizer;
 }
 //------------------------------------------------------------------------------
-int YStyleGuideGeneric::getBetweenButtonsMargin(wxOrientation WXUNUSED(orientation))
+int StyleGuideGeneric::getBetweenButtonsMargin(wxOrientation WXUNUSED(orientation))
 {
     return 12;
 }
 //------------------------------------------------------------------------------
-int YStyleGuideGeneric::getBrowseButtonMargin()
+int StyleGuideGeneric::getBrowseButtonMargin()
 {
     return 5;
 }
 //------------------------------------------------------------------------------
-int YStyleGuideGeneric::getCheckboxSpacing()
+int StyleGuideGeneric::getCheckboxSpacing()
 {
     return 4;
 }
 //------------------------------------------------------------------------------
-int YStyleGuideGeneric::getControlLabelMargin()
+int StyleGuideGeneric::getControlLabelMargin()
 {
     return 5;
 }
 //------------------------------------------------------------------------------
-int YStyleGuideGeneric::getDialogMargin(wxDirection WXUNUSED(direction))
+int StyleGuideGeneric::getDialogMargin(wxDirection WXUNUSED(direction))
 {
     return 20;
 }
 //------------------------------------------------------------------------------
-int YStyleGuideGeneric::getFrameMargin(wxDirection direction)
+int StyleGuideGeneric::getFrameMargin(wxDirection direction)
 {
     return 10;
 }
 //------------------------------------------------------------------------------
-int YStyleGuideGeneric::getRelatedControlMargin(wxOrientation WXUNUSED(orientation))
+int StyleGuideGeneric::getRelatedControlMargin(wxOrientation WXUNUSED(orientation))
 {
     return 10;
 }
 //------------------------------------------------------------------------------
-int YStyleGuideGeneric::getUnrelatedControlMargin(wxOrientation WXUNUSED(orientation))
+int StyleGuideGeneric::getUnrelatedControlMargin(wxOrientation WXUNUSED(orientation))
 {
     return 15;
 }
 //------------------------------------------------------------------------------
-int YStyleGuideGeneric::getEditorFontSize()
+int StyleGuideGeneric::getEditorFontSize()
 {
 	return 12;
 }
 //------------------------------------------------------------------------------
-YxStyleGuide& styleguide()
+StyleGuide& styleguide()
 {
-    static YStyleGuideGeneric guide;
+    static StyleGuideGeneric guide;
     return guide;
 }
 //------------------------------------------------------------------------------

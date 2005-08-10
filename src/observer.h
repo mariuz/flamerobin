@@ -31,20 +31,20 @@
 
 #include <list>
 
-class YxSubject;
+class Subject;
 //-----------------------------------------------------------------------------
-class YxObserver
+class Observer
 {
 private:
-	std::list<YxSubject *> observedObjectsM;			// pointer to objects that it is watching
+	std::list<Subject *> observedObjectsM;			// pointer to objects that it is watching
 public:
-	YxObserver();
-	virtual ~YxObserver();
+	Observer();
+	virtual ~Observer();
 	virtual void update() = 0;
 
-	YxSubject *getFirstObservedObject();
-	void addObservedObject(YxSubject *object);
-	virtual void removeObservedObject(YxSubject *object);	// virtual so some controls can do something extra
+	Subject *getFirstObservedObject();
+	void addObservedObject(Subject *object);
+	virtual void removeObservedObject(Subject *object);	// virtual so some controls can do something extra
 };
 //-----------------------------------------------------------------------------
 #endif

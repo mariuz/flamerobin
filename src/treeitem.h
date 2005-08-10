@@ -36,17 +36,17 @@
 #include "observer.h"
 #include "myTreeCtrl.h"
 //------------------------------------------------------------------------------
-// YTreeItem is a special kind of observer, which observes special kind of subjects: YxMetadataItems
-class YTreeItem: public wxTreeItemData, public YxObserver
+// TreeItem is a special kind of observer, which observes special kind of subjects: YxMetadataItems
+class TreeItem: public wxTreeItemData, public Observer
 {
 private:
 	myTreeCtrl *treeM;
 
 public:
-	YxMetadataItem *getObservedMetadata();
+	MetadataItem *getObservedMetadata();
 
-	wxTreeItemId findSubNode(YxMetadataItem *item);
-	YTreeItem(myTreeCtrl *tree);
+	wxTreeItemId findSubNode(MetadataItem *item);
+	TreeItem(myTreeCtrl *tree);
 
 	virtual void update();
 };

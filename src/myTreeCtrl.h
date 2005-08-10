@@ -61,13 +61,13 @@ public:
 	#endif
 
 	// Returns the observed metadata item based on the specified tree item
-	YxMetadataItem *getMetadataItem(wxTreeItemId item);
+	MetadataItem *getMetadataItem(wxTreeItemId item);
 
 	// Returns the observed metadata item based on the currently selected tree item
-	YxMetadataItem *getSelectedMetadataItem();
+	MetadataItem *getSelectedMetadataItem();
 
     // Selects the tree item represented by the metadata item
-    bool selectMetadataItem(YxMetadataItem* item);
+    bool selectMetadataItem(MetadataItem* item);
 	int getItemImage(NodeType t);
 
     myTreeCtrl(wxWindow* parent, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTR_HAS_BUTTONS);

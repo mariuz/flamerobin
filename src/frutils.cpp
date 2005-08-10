@@ -136,13 +136,13 @@ void readBlob(IBPP::Statement &st, int column, std::string& result)
 	b->Close();
 }
 //-----------------------------------------------------------------------------
-std::string selectTableColumns(YTable *t, wxWindow *parent)
+std::string selectTableColumns(Table *t, wxWindow *parent)
 {
 	t->checkAndLoadColumns();
-	std::vector<YxMetadataItem *> temp;
+	std::vector<MetadataItem *> temp;
 	t->getChildren(temp);
 	wxArrayString columns;
-	for (std::vector<YxMetadataItem *>::const_iterator it = temp.begin(); it != temp.end(); ++it)
+	for (std::vector<MetadataItem *>::const_iterator it = temp.begin(); it != temp.end(); ++it)
 		columns.Add(std2wx((*it)->getName()));
 
 	wxArrayInt selected_columns;

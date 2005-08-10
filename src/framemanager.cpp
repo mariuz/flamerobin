@@ -77,10 +77,9 @@ void FrameManager::rebuildMenu()
 		++id;
 	}
 
-	int index = -1;
-	while (++index < menuBarM->GetMenuCount())
-		if (menuBarM->GetMenu(index) == windowMenuM)
-			menuBarM->EnableTop(index, windowMenuM->GetMenuItemCount() > 0);
+    for (unsigned int i = 0; i < menuBarM->GetMenuCount(); i++)
+		if (menuBarM->GetMenu(i) == windowMenuM)
+			menuBarM->EnableTop(i, windowMenuM->GetMenuItemCount() > 0);
 }
 //-----------------------------------------------------------------------------
 void FrameManager::bringOnTop(int id)
@@ -125,7 +124,7 @@ void FrameManager::removeFrame(BaseFrame* frame, ItemFrameMap& frames)
 }
 //-----------------------------------------------------------------------------
 MetadataItemPropertiesFrame* FrameManager::showMetadataPropertyFrame(wxWindow* parent,
-    YxMetadataItem* item, bool delayed, bool force_new)
+    MetadataItem* item, bool delayed, bool force_new)
 {
 	MetadataItemPropertiesFrame* mipf = 0;
 	ItemFrameMap::iterator it = mipFramesM.find(item);
@@ -135,7 +134,7 @@ MetadataItemPropertiesFrame* FrameManager::showMetadataPropertyFrame(wxWindow* p
     {
         mipf = new MetadataItemPropertiesFrame(parent, item);
 		FrameAndId fai(mipf, 0);
-        mipFramesM.insert(mipFramesM.begin(), std::pair<YxMetadataItem*, FrameAndId>(item, fai));
+        mipFramesM.insert(mipFramesM.begin(), std::pair<MetadataItem*, FrameAndId>(item, fai));
     }
     if (delayed)
     {
