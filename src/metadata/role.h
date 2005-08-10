@@ -31,7 +31,7 @@
 
 #include "metadataitem.h"
 
-class YRole: public YxMetadataItem
+class Role: public MetadataItem
 {
 public:
     virtual void accept(Visitor *v);

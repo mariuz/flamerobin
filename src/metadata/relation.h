@@ -35,16 +35,16 @@
 #include "column.h"
 class Trigger;
 //------------------------------------------------------------------------------
-class Relation: public YxMetadataItem
+class Relation: public MetadataItem
 {
 protected:
-	YMetadataCollection <YColumn>columnsM;
+	MetadataCollection <Column>columnsM;
 public:
-	bool getChildren(std::vector<YxMetadataItem *>& temp);
+	bool getChildren(std::vector<MetadataItem *>& temp);
 	bool checkAndLoadColumns();
 	virtual bool loadColumns();
-	YColumn *addColumn(YColumn &c);
-	bool getTriggers(std::vector<YTrigger *>& list, YTrigger::firingTimeType beforeOrAfter);
+	Column *addColumn(Column &c);
+	bool getTriggers(std::vector<Trigger *>& list, Trigger::firingTimeType beforeOrAfter);
 	Relation();
 };
 //------------------------------------------------------------------------------

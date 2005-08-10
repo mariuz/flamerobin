@@ -41,14 +41,14 @@
 #include "column.h"
 //------------------------------------------------------------------------------
 //! new undefined column
-YColumn::YColumn()
+Column::Column()
+    : MetadataItem()
 {
 	typeM = ntColumn;
-	parentM = 0;
 }
 //------------------------------------------------------------------------------
 //! initialize properties
-void YColumn::Init(bool notnull, std::string source, bool computed, std::string computedSource, std::string collation)
+void Column::Init(bool notnull, std::string source, bool computed, std::string computedSource, std::string collation)
 {
 	source.erase(source.find_last_not_of(" ")+1);		// right trim everything
 	collation.erase(collation.find_last_not_of(" ")+1);
@@ -59,32 +59,32 @@ void YColumn::Init(bool notnull, std::string source, bool computed, std::string 
 	collationM = collation;
 }
 //------------------------------------------------------------------------------
-bool YColumn::isNullable() const
+bool Column::isNullable() const
 {
 	return !notnullM;
 }
 //------------------------------------------------------------------------------
-bool YColumn::isComputed() const
+bool Column::isComputed() const
 {
 	return computedM;
 }
 //------------------------------------------------------------------------------
-bool YColumn::isPrimaryKey() const
+bool Column::isPrimaryKey() const
 {
-	YTable *t = dynamic_cast<YTable *>(parentM);
+	Table *t = dynamic_cast<Table *>(getParent());
 	if (!t)	// view/SP
 		return false;
 	ColumnConstraint *key = t->getPrimaryKey();
 	if (!key)
 		return false;
 	for (ColumnConstraint::const_iterator it = key->begin(); it != key->end(); ++it)
-		if ((*it) == nameM)
+		if ((*it) == getName())
 			return true;
 	return false;
 }
 //------------------------------------------------------------------------------
 //! retrieve datatype from domain if possible
-std::string YColumn::getDatatype()
+std::string Column::getDatatype()
 {
 	enum { showType=0, showFormula, showAll };
 	int flag = showFormula;
@@ -94,7 +94,7 @@ std::string YColumn::getDatatype()
 		return computedSourceM;
 
 	std::string ret;
-	YDomain *d = getDomain();
+	Domain *d = getDomain();
 	std::string datatype;
  	if (d)
 		datatype = d->getDatatypeAsString();
@@ -121,43 +121,43 @@ std::string YColumn::getDatatype()
 }
 //------------------------------------------------------------------------------
 //! printable name = column_name + column_datatype [+ not null]
-std::string YColumn::getPrintableName()
+std::string Column::getPrintableName()
 {
-	std::string ret = nameM + " " + getDatatype();
+	std::string ret = getName() + " " + getDatatype();
 	if (notnullM)
 		ret += " not null";
 	return ret;
 }
 //------------------------------------------------------------------------------
-YDomain *YColumn::getDomain() const
+Domain *Column::getDomain() const
 {
-	YDatabase *d = getDatabase();
+	Database *d = getDatabase();
 	if (!d)
 		return 0;
-	for (YMetadataCollection<YDomain>::const_iterator it = d->domainsBegin(); it != d->domainsEnd(); ++it)
+	for (MetadataCollection<Domain>::const_iterator it = d->domainsBegin(); it != d->domainsEnd(); ++it)
 		if ((*it).getName() == sourceM)
-			return (YDomain *)&(*it);
+			return (Domain *)&(*it);
 
 	// since we haven't find the domain, check the database
 	return d->loadMissingDomain(sourceM);
 }
 //------------------------------------------------------------------------------
-std::string YColumn::getSource() const
+std::string Column::getSource() const
 {
 	return sourceM;
 }
 //------------------------------------------------------------------------------
-std::string YColumn::getCollation() const
+std::string Column::getCollation() const
 {
 	return collationM;
 }
 //------------------------------------------------------------------------------
-std::string YColumn::getDropSqlStatement() const
+std::string Column::getDropSqlStatement() const
 {
-	return "ALTER TABLE " + getParent()->getName() + " DROP " + nameM;
+	return "ALTER TABLE " + getParent()->getName() + " DROP " + getName();
 }
 //------------------------------------------------------------------------------
-void YColumn::accept(Visitor *v)
+void Column::accept(Visitor *v)
 {
 	v->visit(*this);
 }

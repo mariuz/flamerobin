@@ -31,7 +31,7 @@ class Visitor;
 //! Base Item class, currently metadataitems are only descendants, but in the future
 //! those could be other things that need Visitor pattern implemented on them.
 //! (Database Folders and other visual stuff comes to mind as a possibility)
-class Item: public YxSubject
+class Item: public Subject
 {
 public:
     virtual void accept(Visitor *v);

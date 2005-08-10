@@ -34,13 +34,13 @@
 
 typedef enum { ptInput, ptOutput } ParameterType;
 
-class YParameter: public YColumn
+class Parameter: public Column
 {
 public:
     virtual void accept(Visitor *v);
 
-	YParameter(std::string source, int parameterType);
-	YParameter();
+	Parameter(std::string source, int parameterType);
+	Parameter();
 	std::string getPrintableName();
 	ParameterType getParameterType() const;
 

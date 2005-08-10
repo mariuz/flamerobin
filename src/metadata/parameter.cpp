@@ -36,34 +36,34 @@
 #include "domain.h"
 #include "parameter.h"
 //------------------------------------------------------------------------------
-YParameter::YParameter(std::string source, int parameterType)
-	: YColumn()
+Parameter::Parameter(std::string source, int parameterType)
+	: Column()
 {
-	YColumn::Init(true, source, false, "", "");
+	Column::Init(true, source, false, "", "");
 	typeM = ntParameter;
 	parameterTypeM = (parameterType == 0 ? ptInput : ptOutput);
 }
 //------------------------------------------------------------------------------
-YParameter::YParameter()
-	: YColumn()
+Parameter::Parameter()
+	: Column()
 {
 	typeM = ntParameter;
 	parameterTypeM = ptInput;
 }
 //------------------------------------------------------------------------------
-std::string YParameter::getPrintableName()
+std::string Parameter::getPrintableName()
 {
 	std::string ret;
-	ret = (parameterTypeM == ptInput ? "in " : "out ") + nameM + " " + getDomain()->getDatatypeAsString();
+	ret = (parameterTypeM == ptInput ? "in " : "out ") + getName() + " " + getDomain()->getDatatypeAsString();
 	return ret;
 }
 //------------------------------------------------------------------------------
-ParameterType YParameter::getParameterType() const
+ParameterType Parameter::getParameterType() const
 {
 	return parameterTypeM;
 }
 //------------------------------------------------------------------------------
-void YParameter::accept(Visitor *v)
+void Parameter::accept(Visitor *v)
 {
 	v->visit(*this);
 }

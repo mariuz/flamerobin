@@ -31,7 +31,7 @@
 
 #include "metadataitem.h"
 
-class YFunction: public YxMetadataItem
+class Function: public MetadataItem
 {
 private:
 	std::string libraryNameM, entryPointM, definitionM;
@@ -46,7 +46,7 @@ public:
     virtual std::string getDropSqlStatement() const;
 	std::string getDefinition();
 	std::string getHtmlHeader();
-	YFunction();
+	Function();
 };
 //------------------------------------------------------------------------------
 #endif

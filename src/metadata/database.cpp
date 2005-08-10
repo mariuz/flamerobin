@@ -35,7 +35,8 @@
 #include "ugly.h"
 #include "dberror.h"
 //------------------------------------------------------------------------------
-YDatabase::YDatabase()
+Database::Database()
+    : MetadataItem()
 {
 	typeM = ntDatabase;
 	connectedM = false;
@@ -61,15 +62,15 @@ YDatabase::YDatabase()
 	viewsM.setType(ntViews);
 }
 //------------------------------------------------------------------------------
-void YDatabase::initChildren()
+void Database::initChildren()
 {
-	std::vector<YxMetadataItem *> temp;
+	std::vector<MetadataItem *> temp;
 	getCollections(temp);
-	for (std::vector<YxMetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
+	for (std::vector<MetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
 		(*it)->setParent(this);
 }
 //------------------------------------------------------------------------------
-void YDatabase::getIdentifiers(std::vector<std::string>& temp)
+void Database::getIdentifiers(std::vector<std::string>& temp)
 {
 	tablesM.getChildrenNames(temp);
 	viewsM.getChildrenNames(temp);
@@ -116,8 +117,8 @@ std::string getLoadingSql(NodeType type)
 	};
 }
 //------------------------------------------------------------------------------
-// This could be moved to YColumn class
-std::string YDatabase::loadDomainNameForColumn(std::string table, std::string field)
+// This could be moved to Column class
+std::string Database::loadDomainNameForColumn(std::string table, std::string field)
 {
 	try
 	{
@@ -151,7 +152,7 @@ std::string YDatabase::loadDomainNameForColumn(std::string table, std::string fi
 }
 //------------------------------------------------------------------------------
 //! returns all collations for a given charset
-std::vector<std::string> YDatabase::getCollations(std::string charset)
+std::vector<std::string> Database::getCollations(std::string charset)
 {
 	loadCollations();
 	std::vector<std::string> temp;
@@ -163,7 +164,7 @@ std::vector<std::string> YDatabase::getCollations(std::string charset)
 	return temp;
 }
 //------------------------------------------------------------------------------
-YDomain *YDatabase::loadMissingDomain(std::string name)
+Domain *Database::loadMissingDomain(std::string name)
 {
 	try
 	{
@@ -182,7 +183,7 @@ YDomain *YDatabase::loadMissingDomain(std::string name)
 			st1->Get(1, c);
 			if (c > 0)
 			{
-				YDomain *d = domainsM.add(name);	// add domain to collection
+				Domain *d = domainsM.add(name);	// add domain to collection
 				d->setParent(this);
 				if (name.substr(0, 4) != "RDB$")
 					refreshByType(ntDomain);
@@ -204,7 +205,7 @@ YDomain *YDatabase::loadMissingDomain(std::string name)
 //------------------------------------------------------------------------------
 //! small helper function, reads sql and fills the vector with values
 // this can be made template function in future
-bool YDatabase::fillVector(std::vector<std::string>& list, std::string sql)
+bool Database::fillVector(std::vector<std::string>& list, std::string sql)
 {
 	try
 	{
@@ -235,7 +236,7 @@ bool YDatabase::fillVector(std::vector<std::string>& list, std::string sql)
 }
 //-----------------------------------------------------------------------------
 //! load charset-collation pairs if needed
-void YDatabase::loadCollations()
+void Database::loadCollations()
 {
 	if (!collationsM.empty())
 		return;
@@ -272,7 +273,7 @@ void YDatabase::loadCollations()
 	::wxMessageBox(std2wx(lastError().getMessage()), _("Error while loading collations."), wxICON_WARNING);
 }
 //------------------------------------------------------------------------------
-std::string YDatabase::getTableForIndex(std::string indexName)
+std::string Database::getTableForIndex(std::string indexName)
 {
 	try
 	{
@@ -304,7 +305,7 @@ std::string YDatabase::getTableForIndex(std::string indexName)
 }
 //------------------------------------------------------------------------------
 //! load list of objects of type "type" from database, and fill the DBH
-bool YDatabase::loadObjects(NodeType type)
+bool Database::loadObjects(NodeType type)
 {
 	switch (type)
 	{
@@ -349,7 +350,7 @@ bool YDatabase::loadObjects(NodeType type)
 }
 //------------------------------------------------------------------------------
 //! Notify the observers that collection has changed
-void YDatabase::refreshByType(NodeType type)
+void Database::refreshByType(NodeType type)
 {
 	switch (type)
 	{
@@ -366,18 +367,18 @@ void YDatabase::refreshByType(NodeType type)
 	};
 }
 //------------------------------------------------------------------------------
-YxMetadataItem *YDatabase::findByName(std::string name)
+MetadataItem *Database::findByName(std::string name)
 {
 	for (int n = (int)ntTable; n < (int)ntLastType; n++)
 	{
-		YxMetadataItem *m = findByNameAndType((NodeType)n, name);
+		MetadataItem *m = findByNameAndType((NodeType)n, name);
 		if (m)
 			return m;
 	}
 	return 0;
 }
 //------------------------------------------------------------------------------
-YxMetadataItem *YDatabase::findByNameAndType(NodeType nt, std::string name)
+MetadataItem *Database::findByNameAndType(NodeType nt, std::string name)
 {
 	switch (nt)
 	{
@@ -395,7 +396,7 @@ YxMetadataItem *YDatabase::findByNameAndType(NodeType nt, std::string name)
 	};
 }
 //------------------------------------------------------------------------------
-void YDatabase::dropObject(YxMetadataItem *object)
+void Database::dropObject(MetadataItem *object)
 {
 	object->drop();		// alert the children if any
 
@@ -403,23 +404,23 @@ void YDatabase::dropObject(YxMetadataItem *object)
 	NodeType nt = object->getType();
 	switch (nt)
 	{
-		case ntTable:		tablesM.remove((YTable *)object);			break;
-		case ntView:		viewsM.remove((YView *)object);				break;
-		case ntTrigger:		triggersM.remove((YTrigger *)object);		break;
-		case ntProcedure:	proceduresM.remove((YProcedure *)object);	break;
-		case ntFunction:	functionsM.remove((YFunction *)object);		break;
-		case ntGenerator:	generatorsM.remove((YGenerator *)object);	break;
-		case ntRole:		rolesM.remove((YRole *)object);				break;
-		case ntDomain:		domainsM.remove((YDomain *)object);			break;
-        case ntException:   exceptionsM.remove((YException *)object);   break;
+		case ntTable:		tablesM.remove((Table *)object);			break;
+		case ntView:		viewsM.remove((View *)object);				break;
+		case ntTrigger:		triggersM.remove((Trigger *)object);		break;
+		case ntProcedure:	proceduresM.remove((Procedure *)object);	break;
+		case ntFunction:	functionsM.remove((Function *)object);		break;
+		case ntGenerator:	generatorsM.remove((Generator *)object);	break;
+		case ntRole:		rolesM.remove((Role *)object);				break;
+		case ntDomain:		domainsM.remove((Domain *)object);			break;
+        case ntException:   exceptionsM.remove((Exception *)object);   break;
 		default:
 			return;
 	};
 }
 //------------------------------------------------------------------------------
-bool YDatabase::addObject(NodeType type, std::string name)
+bool Database::addObject(NodeType type, std::string name)
 {
-	YxMetadataItem *m;
+	MetadataItem *m;
 	switch (type)
 	{
 		case ntTable:		m = tablesM.add(name);		break;
@@ -450,7 +451,7 @@ bool YDatabase::addObject(NodeType type, std::string name)
 // alter table [name] alter [column] type [domain or datatype]
 // declare external function [name]
 // set null flag via system tables update
-bool YDatabase::parseCommitedSql(std::string sql)
+bool Database::parseCommitedSql(std::string sql)
 {
 	sql = upcase(sql);				// make sql UpperCase for easier handling
 	std::stringstream strstrm;		// parse statement into tokens
@@ -468,7 +469,7 @@ bool YDatabase::parseCommitedSql(std::string sql)
 
 	if (action == "SET" && object_type == "GENERATOR")
 	{
-		YGenerator *g = dynamic_cast<YGenerator *>(findByNameAndType(ntGenerator, name));
+		Generator *g = dynamic_cast<Generator *>(findByNameAndType(ntGenerator, name));
 		if (!g)
 			return true;
 		g->loadValue(true);		// force (re)load of generator value
@@ -479,7 +480,7 @@ bool YDatabase::parseCommitedSql(std::string sql)
 	if (action == "DROP" && object_type == "INDEX")
 	{
 		// We cannot know which table is affected, so the only solution is that all tables reload their indices
-		for (YMetadataCollection<YTable>::iterator it = tablesM.begin(); it != tablesM.end(); ++it)
+		for (MetadataCollection<Table>::iterator it = tablesM.begin(); it != tablesM.end(); ++it)
 			(*it).invalidateIndices();
 		return true;
 	}
@@ -488,7 +489,7 @@ bool YDatabase::parseCommitedSql(std::string sql)
 		if (action == "SET") 	// move by 1
 			strstrm >> name;
 		std::string tableName = getTableForIndex(name);
-		YTable *t = dynamic_cast<YTable *>(findByNameAndType(ntTable, tableName));
+		Table *t = dynamic_cast<Table *>(findByNameAndType(ntTable, tableName));
 		if (t)
 			t->invalidateIndices();
 		return true;
@@ -497,9 +498,9 @@ bool YDatabase::parseCommitedSql(std::string sql)
 	// triggers update tables and views
 	if (action == "DROP" && object_type == "TRIGGER")	// update all tables
 	{
-		for (YMetadataCollection<YTable>::iterator it = tablesM.begin(); it != tablesM.end(); ++it)
+		for (MetadataCollection<Table>::iterator it = tablesM.begin(); it != tablesM.end(); ++it)
 			(*it).notify();
-		for (YMetadataCollection<YView>::iterator it = viewsM.begin(); it != viewsM.end(); ++it)
+		for (MetadataCollection<View>::iterator it = viewsM.begin(); it != viewsM.end(); ++it)
 			(*it).notify();
 	}
 
@@ -557,7 +558,7 @@ bool YDatabase::parseCommitedSql(std::string sql)
 		std::string::size_type p = name.find("(");
 		if (p != std::string::npos)
 			name.erase(p);
-		YTable *t = dynamic_cast<YTable *>(findByNameAndType(ntTable, name));
+		Table *t = dynamic_cast<Table *>(findByNameAndType(ntTable, name));
 		if (t)
 			t->invalidateIndices();
 		return true;
@@ -606,7 +607,7 @@ bool YDatabase::parseCommitedSql(std::string sql)
 	}
 	else if (action == "DROP" || action == "ALTER")
 	{
-		YxMetadataItem *object = findByNameAndType(t, name);
+		MetadataItem *object = findByNameAndType(t, name);
 		if (!object)
 			return true;
 
@@ -617,8 +618,8 @@ bool YDatabase::parseCommitedSql(std::string sql)
 			{
 				while (true)
 				{
-					YTrigger *todrop = 0;
-					for (YMetadataCollection<YTrigger>::iterator it = triggersM.begin(); it != triggersM.end(); ++it)
+					Trigger *todrop = 0;
+					for (MetadataCollection<Trigger>::iterator it = triggersM.begin(); it != triggersM.end(); ++it)
 					{
 						std::string relname;			// trigger already gone => cannot fetch relation name
 						if (!(*it).getRelation(relname)	|| relname == name)
@@ -670,7 +671,7 @@ bool YDatabase::parseCommitedSql(std::string sql)
 					if (is_datatype)		// either existing domain is changing, or new is created
 					{
 						std::string domain_name = loadDomainNameForColumn(name, field_name);
-						YxMetadataItem *m = domainsM.findByName(domain_name);
+						MetadataItem *m = domainsM.findByName(domain_name);
 						if (m == 0)		// domain does not exist in DBH
 						{
 							m = domainsM.add();
@@ -678,7 +679,7 @@ bool YDatabase::parseCommitedSql(std::string sql)
 							m->setParent(this);
 							m->setType(ntDomain);	// just in case
 						}
-						((YDomain *)m)->loadInfo();
+						((Domain *)m)->loadInfo();
 					}
 					else
 					{
@@ -696,14 +697,14 @@ bool YDatabase::parseCommitedSql(std::string sql)
 			if (t == ntTable || t == ntView)
 				result = ((Relation *)object)->loadColumns();
 			else if (t == ntProcedure)
-				result = ((YProcedure *)object)->checkAndLoadParameters(true);	// force reload
+				result = ((Procedure *)object)->checkAndLoadParameters(true);	// force reload
             else if (t == ntException)
-                ((YException *)object)->loadProperties(true);
+                ((Exception *)object)->loadProperties(true);
 			else if (t == ntTrigger)
 			{
-				((YTrigger *)object)->loadInfo(true);
+				((Trigger *)object)->loadInfo(true);
 				std::string relation;					// alert table/view
-				YTrigger *tr = dynamic_cast<YTrigger *>(findByNameAndType(ntTrigger, name));
+				Trigger *tr = dynamic_cast<Trigger *>(findByNameAndType(ntTrigger, name));
 				if (!tr || !tr->getRelation(relation))
 					return true;
 				Relation *m = dynamic_cast<Relation *>(findByNameAndType(ntTable, relation));
@@ -734,7 +735,7 @@ bool YDatabase::parseCommitedSql(std::string sql)
 	return true;
 }
 //------------------------------------------------------------------------------
-bool YDatabase::reconnect() const
+bool Database::reconnect() const
 {
 	try
 	{
@@ -756,14 +757,14 @@ bool YDatabase::reconnect() const
 // the caller of this function should check whether the database object has the
 // password set, and if it does not, it should provide the password
 //               and if it does, just provide that password
-bool YDatabase::connect(std::string password)
+bool Database::connect(std::string password)
 {
 	if (connectedM)
 		return true;
 
 	try
 	{
-        databaseM = IBPP::DatabaseFactory(getParent()->getName(), pathM, usernameM,
+        databaseM = IBPP::DatabaseFactory("", getConnectionString(), usernameM,
             password, roleM, charsetM, "");
 		databaseM->Connect();
 		connectedM = true;
@@ -787,7 +788,7 @@ bool YDatabase::connect(std::string password)
 	return false;
 }
 //------------------------------------------------------------------------------
-bool YDatabase::disconnect()
+bool Database::disconnect()
 {
 	if (!connectedM)
 		return true;
@@ -808,7 +809,7 @@ bool YDatabase::disconnect()
 		viewsM.clear();
         exceptionsM.clear();
 
-		// this a special case for YDatabase only since it doesn't destroy its subitems
+		// this a special case for Database only since it doesn't destroy its subitems
 		// but only hides them (i.e. getChildren returns nothing, but items are present)
 		// so observers must get removed
 		domainsM.detachAllObservers();
@@ -836,7 +837,7 @@ bool YDatabase::disconnect()
 	return false;
 }
 //------------------------------------------------------------------------------
-void YDatabase::clear()
+void Database::clear()
 {
 	pathM = "";
 	charsetM = "";
@@ -846,12 +847,12 @@ void YDatabase::clear()
 	roleM = "";
 }
 //------------------------------------------------------------------------------
-bool YDatabase::isConnected() const
+bool Database::isConnected() const
 {
 	return connectedM;
 }
 //------------------------------------------------------------------------------
-bool YDatabase::getChildren(std::vector<YxMetadataItem *>& temp)
+bool Database::getChildren(std::vector<MetadataItem *>& temp)
 {
 	if (!connectedM)
 		return false;
@@ -861,7 +862,7 @@ bool YDatabase::getChildren(std::vector<YxMetadataItem *>& temp)
 }
 //------------------------------------------------------------------------------
 // returns vector of all subitems
-void YDatabase::getCollections(std::vector<YxMetadataItem *>& temp)
+void Database::getCollections(std::vector<MetadataItem *>& temp)
 {
 	temp.push_back(&domainsM);
     temp.push_back(&exceptionsM);
@@ -874,99 +875,112 @@ void YDatabase::getCollections(std::vector<YxMetadataItem *>& temp)
 	temp.push_back(&viewsM);
 }
 //------------------------------------------------------------------------------
-YMetadataCollection<YGenerator>::const_iterator YDatabase::generatorsBegin()
+MetadataCollection<Generator>::const_iterator Database::generatorsBegin()
 {
 	return generatorsM.begin();
 }
 //------------------------------------------------------------------------------
-YMetadataCollection<YGenerator>::const_iterator YDatabase::generatorsEnd()
+MetadataCollection<Generator>::const_iterator Database::generatorsEnd()
 {
 	return generatorsM.end();
 }
 //------------------------------------------------------------------------------
-YMetadataCollection<YDomain>::const_iterator YDatabase::domainsBegin()
+MetadataCollection<Domain>::const_iterator Database::domainsBegin()
 {
 	return domainsM.begin();
 }
 //------------------------------------------------------------------------------
-YMetadataCollection<YDomain>::const_iterator YDatabase::domainsEnd()
+MetadataCollection<Domain>::const_iterator Database::domainsEnd()
 {
 	return domainsM.end();
 }
 //------------------------------------------------------------------------------
-YMetadataCollection<YTable>::const_iterator YDatabase::tablesBegin()
+MetadataCollection<Table>::const_iterator Database::tablesBegin()
 {
 	return tablesM.begin();
 }
 //------------------------------------------------------------------------------
-YMetadataCollection<YTable>::const_iterator YDatabase::tablesEnd()
+MetadataCollection<Table>::const_iterator Database::tablesEnd()
 {
 	return tablesM.end();
 }
 //------------------------------------------------------------------------------
-std::string YDatabase::getPath() const
+std::string Database::getPath() const
 {
 	return pathM;
 }
 //------------------------------------------------------------------------------
-std::string YDatabase::getCharset() const
+std::string Database::getCharset() const
 {
 	return charsetM;
 }
 //------------------------------------------------------------------------------
-std::string YDatabase::getUsername() const
+std::string Database::getUsername() const
 {
 	return usernameM;
 }
 //------------------------------------------------------------------------------
-std::string YDatabase::getPassword() const
+std::string Database::getPassword() const
 {
 	return passwordM;
 }
 //------------------------------------------------------------------------------
-std::string YDatabase::getRole() const
+std::string Database::getRole() const
 {
 	return roleM;
 }
 //------------------------------------------------------------------------------
-IBPP::Database& YDatabase::getIBPPDatabase()
+IBPP::Database& Database::getIBPPDatabase()
 {
 	return databaseM;
 }
 //------------------------------------------------------------------------------
-void YDatabase::setPath(std::string value)
+void Database::setPath(std::string value)
 {
 	pathM = value;
-	setName(value);
 }
 //------------------------------------------------------------------------------
-void YDatabase::setCharset(std::string value)
+void Database::setCharset(std::string value)
 {
 	charsetM = value;
 }
 //------------------------------------------------------------------------------
-void YDatabase::setUsername(std::string value)
+void Database::setUsername(std::string value)
 {
 	usernameM = value;
 }
 //------------------------------------------------------------------------------
-void YDatabase::setPassword(std::string value)
+void Database::setPassword(std::string value)
 {
 	passwordM = value;
 }
 //------------------------------------------------------------------------------
-void YDatabase::setRole(std::string value)
+void Database::setRole(std::string value)
 {
 	roleM = value;
 }
 //------------------------------------------------------------------------------
-const std::string YDatabase::getTypeName() const
+const std::string Database::getTypeName() const
 {
 	return "DATABASE";
 }
 //------------------------------------------------------------------------------
-void YDatabase::accept(Visitor *v)
+void Database::accept(Visitor *v)
 {
 	v->visit(*this);
+}
+//------------------------------------------------------------------------------
+Server *Database::getServer() const
+{
+    return dynamic_cast<Server *>(getParent());
+}
+//------------------------------------------------------------------------------
+std::string Database::getConnectionString() const
+{
+    std::string serverConnStr = getServer()->getConnectionString();
+    if (!serverConnStr.empty())
+        return serverConnStr + ":" + pathM;
+    else
+        return pathM;
 }
 //------------------------------------------------------------------------------

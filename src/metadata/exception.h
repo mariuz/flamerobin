@@ -31,7 +31,7 @@
 
 #include "metadataitem.h"
 
-class YException: public YxMetadataItem
+class Exception: public MetadataItem
 {
 public:
     virtual void accept(Visitor *v);
@@ -42,7 +42,7 @@ public:
     std::string getMessage();
     int getNumber();
     std::string getAlterSql();
-    YException();
+    Exception();
     void loadProperties(bool force = false);
 private:
     bool propertiesLoadedM;

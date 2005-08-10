@@ -45,7 +45,7 @@ public:
 	Join(std::string a, std::string b): table(a), fields(b) { };
 };
 //------------------------------------------------------------------------------
-class YTable: public Relation
+class Table: public Relation
 {
 private:
 	ColumnConstraint primaryKeyM;			// table can have only one pk
@@ -71,7 +71,7 @@ private:
 public:
     virtual void accept(Visitor *v);
 
-	static bool tablesRelate(std::vector<std::string>& tables, YTable *table, std::vector<Join>& list);
+	static bool tablesRelate(std::vector<std::string>& tables, Table *table, std::vector<Join>& list);
 
 	virtual std::string getCreateSqlTemplate() const;
 
@@ -87,7 +87,7 @@ public:
 	std::string getInsertStatement();
 	//std::string getUpdateStatement();		// use primary key info
 	//std::string getDeleteStatement();
-	YTable();
+	Table();
 	virtual const std::string getTypeName() const;
 };
 //------------------------------------------------------------------------------

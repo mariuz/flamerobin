@@ -31,16 +31,16 @@
 
 #include "relation.h"
 
-class YView: public Relation
+class View: public Relation
 {
 public:
     virtual void accept(Visitor *v);
 
-	std::string getCreateSqlTemplate() const;	// overrides YxMetadataItem::getCreateSqlTemplate()
+	std::string getCreateSqlTemplate() const;	// overrides MetadataItem::getCreateSqlTemplate()
 
 	bool getSource(std::string& source);
 	std::string getAlterSql();
-	YView();
+	View();
 	virtual const std::string getTypeName() const;
 };
 //------------------------------------------------------------------------------

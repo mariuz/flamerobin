@@ -34,7 +34,7 @@
 #include "metadataitem.h"
 //------------------------------------------------------------------------------
 template <class T>
-class YMetadataCollection: public YxMetadataItem
+class MetadataCollection: public MetadataItem
 {
 public:
 	typedef typename std::list<T> ContainerType;
@@ -75,7 +75,7 @@ public:
 		iterator pos = itemsM.begin();		// find the place
 		for (; pos != itemsM.end(); ++pos)
 		{
-			YxMetadataItem *p = &(*pos);
+			MetadataItem *p = &(*pos);
 			if (!p)
 				continue;
 			if (p->getName() > name)
@@ -125,11 +125,11 @@ public:
 		notify();
 	};
 
-	virtual YxMetadataItem *findByName(std::string name)
+	virtual MetadataItem *findByName(std::string name)
 	{
 		for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
 		{
-			YxMetadataItem *p = &(*it);
+			MetadataItem *p = &(*it);
 			if (!p)
 				continue;
 			if (p->getName() == name)
@@ -138,7 +138,7 @@ public:
 		return 0;
 	};
 
-	virtual bool getChildren(std::vector<YxMetadataItem *>& temp)			// returns vector of all subnodes
+	virtual bool getChildren(std::vector<MetadataItem *>& temp)			// returns vector of all subnodes
 	{
 		for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
 			temp.push_back(&(*it));
@@ -160,7 +160,7 @@ public:
 	virtual std::string getPrintableName()
 	{
 		if (typeM != ntDomains)
-			return YxMetadataItem::getPrintableName();
+			return MetadataItem::getPrintableName();
 
 		unsigned int n = 0;
 		for (const_iterator it = itemsM.begin(); it != itemsM.end(); ++it)
@@ -169,11 +169,11 @@ public:
 		if (n)
 		{
 			std::ostringstream ss;
-			ss << nameM << " (" << n << ")";
+			ss << getName() << " (" << n << ")";
 			return ss.str();
 		}
 		else
-			return nameM;
+			return getName();
 	}
 
 	virtual size_t getChildrenCount() const
@@ -189,7 +189,7 @@ private:
 /* FIXME: from some yet unknown reason, this doesn't compile on g++ 3.3
 //! specific for domains since system-generated domains should not be counted
 template<>
-std::string YMetadataCollection<YDomain>::getPrintableName() const
+std::string MetadataCollection<Domain>::getPrintableName() const
 {
 	unsigned int n = 0;
 	for (const_iterator it = itemsM.begin(); it != itemsM.end(); ++it)

@@ -28,7 +28,7 @@
 #include <string>
 #include "metadataitem.h"
 //------------------------------------------------------------------------------
-class Index: public YxMetadataItem
+class Index: public MetadataItem
 {
 public:
     virtual void accept(Visitor *v);

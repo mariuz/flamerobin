@@ -37,7 +37,7 @@
 #include "relation.h"
 #include "table.h"
 //------------------------------------------------------------------------------
-YTable::YTable()
+Table::Table()
 	:Relation()
 {
 	typeM = ntTable;
@@ -48,7 +48,7 @@ YTable::YTable()
 	indicesLoadedM = false;
 }
 //------------------------------------------------------------------------------
-void YTable::invalidateIndices()
+void Table::invalidateIndices()
 {
 	if (indicesLoadedM)
 	{
@@ -57,7 +57,7 @@ void YTable::invalidateIndices()
 	}
 }
 //------------------------------------------------------------------------------
-bool YTable::loadColumns()			// update the keys info too
+bool Table::loadColumns()			// update the keys info too
 {
 	primaryKeyLoadedM = false;			// force info to be reloaded if asked
 	foreignKeysLoadedM = false;
@@ -67,12 +67,12 @@ bool YTable::loadColumns()			// update the keys info too
 	return Relation::loadColumns();
 }
 //------------------------------------------------------------------------------
-std::string YTable::getInsertStatement()
+std::string Table::getInsertStatement()
 {
 	checkAndLoadColumns();
-	std::string sql = "INSERT INTO " + nameM + " (";
+	std::string sql = "INSERT INTO " + getName() + " (";
 	std::string collist, valist;
-	for (YMetadataCollection<YColumn>::const_iterator i = columnsM.begin(); i != columnsM.end(); ++i)
+	for (MetadataCollection<Column>::const_iterator i = columnsM.begin(); i != columnsM.end(); ++i)
 	{
 		if ((*i).isComputed())
 			continue;
@@ -92,13 +92,13 @@ std::string YTable::getInsertStatement()
 }
 //------------------------------------------------------------------------------
 //! reads checks info from database
-bool YTable::loadCheckConstraints()
+bool Table::loadCheckConstraints()
 {
 	if (checkConstraintsLoadedM)
 		return true;
 
 	checkConstraintsM.clear();
-	YDatabase *d = getDatabase();
+	Database *d = getDatabase();
 	if (!d)
 	{
 		lastError().setMessage("database not set");
@@ -168,13 +168,13 @@ bool YTable::loadCheckConstraints()
 }
 //------------------------------------------------------------------------------
 //! reads primary key info from database
-bool YTable::loadPrimaryKey()
+bool Table::loadPrimaryKey()
 {
 	if (primaryKeyLoadedM)
 		return true;
 
 	primaryKeyM.columnsM.clear();
-	YDatabase *d = getDatabase();
+	Database *d = getDatabase();
 	if (!d)
 	{
 		lastError().setMessage("database not set");
@@ -224,13 +224,13 @@ bool YTable::loadPrimaryKey()
 }
 //------------------------------------------------------------------------------
 //! reads uniques from database
-bool YTable::loadUniqueConstraints()
+bool Table::loadUniqueConstraints()
 {
 	if (uniqueConstraintsLoadedM)
 		return true;
 
 	uniqueConstraintsM.clear();
-	YDatabase *d = getDatabase();
+	Database *d = getDatabase();
 	if (!d)
 	{
 		lastError().setMessage("database not set");
@@ -288,35 +288,35 @@ bool YTable::loadUniqueConstraints()
 	return false;
 }
 //------------------------------------------------------------------------------
-ColumnConstraint *YTable::getPrimaryKey()
+ColumnConstraint *Table::getPrimaryKey()
 {
 	if (!loadPrimaryKey() || primaryKeyM.columnsM.empty())	// no primary key on table
 		return 0;
 	return &primaryKeyM;
 }
 //------------------------------------------------------------------------------
-std::vector<ForeignKey> *YTable::getForeignKeys()
+std::vector<ForeignKey> *Table::getForeignKeys()
 {
 	if (!loadForeignKeys())
 		return 0;
 	return &foreignKeysM;
 }
 //------------------------------------------------------------------------------
-std::vector<CheckConstraint> *YTable::getCheckConstraints()
+std::vector<CheckConstraint> *Table::getCheckConstraints()
 {
 	if (!loadCheckConstraints())
 		return 0;
 	return &checkConstraintsM;
 }
 //------------------------------------------------------------------------------
-std::vector<ColumnConstraint> *YTable::getUniqueConstraints()
+std::vector<ColumnConstraint> *Table::getUniqueConstraints()
 {
 	if (!loadUniqueConstraints())
 		return 0;
 	return &uniqueConstraintsM;
 }
 //------------------------------------------------------------------------------
-std::vector<Index> *YTable::getIndices()
+std::vector<Index> *Table::getIndices()
 {
 	if (!loadIndices())
 		return 0;
@@ -324,13 +324,13 @@ std::vector<Index> *YTable::getIndices()
 }
 //------------------------------------------------------------------------------
 //! reads foreign keys info from database
-bool YTable::loadForeignKeys()
+bool Table::loadForeignKeys()
 {
 	if (foreignKeysLoadedM)
 		return true;
 
 	foreignKeysM.clear();
-	YDatabase *d = getDatabase();
+	Database *d = getDatabase();
 	if (!d)
 	{
 		lastError().setMessage("database not set");
@@ -419,13 +419,13 @@ bool YTable::loadForeignKeys()
 }
 //------------------------------------------------------------------------------
 //! reads indices from database
-bool YTable::loadIndices()
+bool Table::loadIndices()
 {
 	if (indicesLoadedM)
 		return true;
 
 	indicesM.clear();
-	YDatabase *d = getDatabase();
+	Database *d = getDatabase();
 	if (!d)
 	{
 		lastError().setMessage("database not set");
@@ -505,7 +505,7 @@ bool YTable::loadIndices()
 	return false;
 }
 //------------------------------------------------------------------------------
-std::string YTable::getCreateSqlTemplate() const
+std::string Table::getCreateSqlTemplate() const
 {
 	return	"CREATE TABLE table_name\n"
 			"(\n"
@@ -521,14 +521,14 @@ std::string YTable::getCreateSqlTemplate() const
 			");\n";
 }
 //------------------------------------------------------------------------------
-const std::string YTable::getTypeName() const
+const std::string Table::getTypeName() const
 {
 	return "TABLE";
 }
 //-----------------------------------------------------------------------------
 // find all tables from "tables" which have foreign keys with "table"
 // and return them in "list"
-bool YTable::tablesRelate(std::vector<std::string>& tables, YTable *table, std::vector<Join>& list)
+bool Table::tablesRelate(std::vector<std::string>& tables, Table *table, std::vector<Join>& list)
 {
 	// see if "table" references some of the "tables"
 	std::vector<ForeignKey> *fks = table->getForeignKeys();
@@ -565,8 +565,8 @@ bool YTable::tablesRelate(std::vector<std::string>& tables, YTable *table, std::
 				if ((*i2) == (*it).getName())
 				{
 					// find foreign keys for that table
-					YDatabase *d = table->getDatabase();
-					YTable *other_table = dynamic_cast<YTable *>(d->findByNameAndType(ntTable, (*i2)));
+					Database *d = table->getDatabase();
+					Table *other_table = dynamic_cast<Table *>(d->findByNameAndType(ntTable, (*i2)));
 					if (!other_table)
 						break;
 
@@ -596,7 +596,7 @@ bool YTable::tablesRelate(std::vector<std::string>& tables, YTable *table, std::
 	return !list.empty();
 }
 //-----------------------------------------------------------------------------
-void YTable::accept(Visitor *v)
+void Table::accept(Visitor *v)
 {
 	v->visit(*this);
 }

@@ -18,7 +18,7 @@
 
   All Rights Reserved.
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
 //
@@ -33,32 +33,34 @@
 #include "collection.h"
 #include "database.h"
 //------------------------------------------------------------------------------
-// this is a coupled node (in visual sense). YServer equals collection of YDatabases in wxTree
-// that's why getChildren() method just copies, since wxTree item will have pointer to YServer.
-class YServer: public YxMetadataItem
+// this is a coupled node (in visual sense). Server equals collection of YDatabases in wxTree
+// that's why getChildren() method just copies, since wxTree item will have pointer to Server.
+class Server: public MetadataItem
 {
 private:
 	std::string hostnameM;
 	std::string portM;
 
-	YMetadataCollection<YDatabase> databasesM;
+	MetadataCollection<Database> databasesM;
 
-	void createName();		// creates name for the node using hostname and port values
 public:
     virtual void accept(Visitor *v);
 
-	YServer();
-	virtual bool getChildren(std::vector<YxMetadataItem *>& temp);
+	Server();
+	virtual bool getChildren(std::vector<MetadataItem *>& temp);
     virtual bool orderedChildren() const;
-	YDatabase* addDatabase(YDatabase&);
-	void removeDatabase(YDatabase*);
-	const YMetadataCollection<YDatabase> *getDatabases() const;
+	Database* addDatabase(Database&);
+	void removeDatabase(Database*);
+	const MetadataCollection<Database> *getDatabases() const;
 
-	void createDatabase(YDatabase *db, int pagesize = 4096, int dialect = 3);
+	void createDatabase(Database *db, int pagesize = 4096, int dialect = 3);
 
 	// setters/getters
 	std::string getHostname() const;
 	std::string getPort() const;
+	// returns the server-related portion of the connection string,
+    // that is server name and port number if specified.
+    std::string getConnectionString() const;
 
 	void setHostname(std::string hostname);
 	void setPort(std::string port);

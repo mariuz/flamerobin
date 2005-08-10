@@ -32,20 +32,20 @@
 #include "metadataitem.h"
 #include "parameter.h"
 
-class YProcedure: public YxMetadataItem
+class Procedure: public MetadataItem
 {
 private:
 	bool parametersLoadedM;
 	bool loadParameters();
-	YMetadataCollection <YParameter> parametersM;
+	MetadataCollection <Parameter> parametersM;
 
 public:
     virtual void accept(Visitor *v);
 
-	std::string getCreateSqlTemplate() const;	// overrides YxMetadataItem::getCreateSqlTemplate()
+	std::string getCreateSqlTemplate() const;	// overrides MetadataItem::getCreateSqlTemplate()
 
-	bool getChildren(std::vector<YxMetadataItem *>& temp);
-	YParameter *addParameter(YParameter &c);
+	bool getChildren(std::vector<MetadataItem *>& temp);
+	Parameter *addParameter(Parameter &c);
 
 	std::string getSelectStatement(bool withColumns);
 	bool isSelectable();
@@ -55,7 +55,7 @@ public:
 	std::string getAlterSql();
 	std::string getDefinition();
 
-	YProcedure();
+	Procedure();
 	virtual const std::string getTypeName() const;
 };
 //------------------------------------------------------------------------------

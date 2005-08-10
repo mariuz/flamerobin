@@ -32,17 +32,17 @@
 #include "visitor.h"
 #include "role.h"
 //------------------------------------------------------------------------------
-std::string YRole::getCreateSqlTemplate() const
+std::string Role::getCreateSqlTemplate() const
 {
 	return	"CREATE ROLE role_name;\n";
 }
 //------------------------------------------------------------------------------
-const std::string YRole::getTypeName() const
+const std::string Role::getTypeName() const
 {
 	return "ROLE";
 }
 //------------------------------------------------------------------------------
-void YRole::accept(Visitor *v)
+void Role::accept(Visitor *v)
 {
 	v->visit(*this);
 }

@@ -32,28 +32,28 @@
 #include "server.h"
 #include "metadataitem.h"
 //------------------------------------------------------------------------------
-class YRoot: public YxMetadataItem
+class Root: public MetadataItem
 {
 public:
     virtual void accept(Visitor *v);
 
-	YServer *addServer(YServer& server);
-	void removeServer(YServer* server);
+	Server *addServer(Server& server);
+	void removeServer(Server* server);
 
-	virtual bool getChildren(std::vector<YxMetadataItem *>& temp);
+	virtual bool getChildren(std::vector<MetadataItem *>& temp);
     virtual bool orderedChildren() const;
-	YRoot();
-	~YRoot();
+	Root();
+	~Root();
 
 	bool load();
 	bool save();
 	virtual const std::string getItemPath() const;
 private:
-	YMetadataCollection<YServer> serversM;
+	MetadataCollection<Server> serversM;
 	std::string fileNameM;
 	std::string getFileName();
 };
 //------------------------------------------------------------------------------
-YRoot& getGlobalRoot();
+Root& getGlobalRoot();
 //------------------------------------------------------------------------------
 #endif

@@ -32,12 +32,15 @@
 #include "metadataitem.h"
 #include "domain.h"
 
-class YColumn: public YxMetadataItem
+class Column: public MetadataItem
 {
+private:
+	bool notnullM, computedM;
+	std::string sourceM, computedSourceM, collationM;
 public:
     virtual void accept(Visitor *v);
 
-	YColumn();
+	Column();
 	void Init(bool notnull, std::string source, bool computed, std::string computedSource, std::string collation);
 	virtual std::string getPrintableName();
 	std::string getDatatype();
@@ -48,11 +51,7 @@ public:
 	bool isComputed() const;
 	std::string getSource() const;
 	std::string getCollation() const;
-	YDomain *getDomain() const;
-
-protected:
-	bool notnullM, computedM;
-	std::string sourceM, computedSourceM, collationM;
+	Domain *getDomain() const;
 };
 //------------------------------------------------------------------------------
 #endif

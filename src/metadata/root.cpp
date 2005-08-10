@@ -42,9 +42,9 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 //! access to the singleton root of the DBH.
-YRoot& getGlobalRoot()
+Root& getGlobalRoot()
 {
-	static YRoot globalRoot;
+	static Root globalRoot;
 	return globalRoot;
 }
 //------------------------------------------------------------------------------
@@ -54,7 +54,7 @@ YRoot& getGlobalRoot()
 //! creates database nodes for server nodes, fills their properties
 //! returns: false if file cannot be loaded, true otherwise
 //
-bool YRoot::load()
+bool Root::load()
 {
 	std::ifstream file(getFileName().c_str());
 	if (!file)
@@ -64,8 +64,8 @@ bool YRoot::load()
 	// so in order to set the right Parent for database objects, we need to know its exact
 	// address (that's returned by function add()).
 	// Also, we want ctor to be called for every object in vector
-	YServer *server = 0;			// current server
-	YDatabase *database = 0;		// current db
+	Server *server = NULL;			// current server
+	Database *database = NULL;		// current db
 
 	// I had to do it this way, since standard line << file, doesn't work good if data has spaces in it.
 	std::stringstream ss;			// read entire file into string buffer
@@ -101,28 +101,42 @@ bool YRoot::load()
 		else
 			value.empty();
 
-		if (option == "server")				// new server
+		// server start and end tags
+        if (option == "server")
 		{
-			YServer temp;
+			Server temp;
 			server = addServer(temp);
 			server->lockSubject();
 		}
-
 		if (option == "/server" && server)
-			server->unlockSubject();
-
-		if (option == "host" && server)
+        {
+			// backward compatibility with FR < 0.3.0
+            if (server->getName().empty())
+				server->setName(server->getConnectionString());
+            server->unlockSubject();
+            server = NULL;
+        }
+        // database start and end tag
+		if (option == "database" && server)
+		{
+			Database temp;
+			database = server->addDatabase(temp);
+			database->initChildren();
+		}
+		if (option == "/database" && database)
+            database = NULL;
+        // common subtags
+		if (option == "name" && server)
+            if (database)
+                database->setName(value);
+            else
+			    server->setName(value);
+		// server-specific subtags
+        if (option == "host" && server)
 			server->setHostname(value);
 		if (option == "port" && server)
 			server->setPort(value);
-
-		if (option == "database" && server)	// database definition complete
-		{
-			YDatabase temp;
-			database = server->addDatabase(temp);		// add it to the list
-			database->initChildren();
-		}
-
+        // database-specific subtags
 		if (option == "path" && database)
 			database->setPath(value);
 		if (option == "charset" && database)
@@ -140,15 +154,15 @@ bool YRoot::load()
 	return true;
 }
 //------------------------------------------------------------------------------
-YServer *YRoot::addServer(YServer& server)
+Server *Root::addServer(Server& server)
 {
-	YServer *temp = serversM.add(server);
+	Server *temp = serversM.add(server);
 	temp->setParent(this);					// grab it from collection
 	notify();
 	return temp;
 }
 //------------------------------------------------------------------------------
-void YRoot::removeServer(YServer* server)
+void Root::removeServer(Server* server)
 {
 	serversM.remove(server);
 	notify();
@@ -158,21 +172,23 @@ void YRoot::removeServer(YServer* server)
 // saves everything to servers.xml file
 // returns: false if file cannot be opened for writing, true otherwise
 //
-bool YRoot::save()
+bool Root::save()
 {
 	std::ofstream file(getFileName().c_str());
 	if (!file)
 		return false;
 	file << "<?xml version='1.0' encoding='ISO-8859-2'?>\n";
-	for (std::list<YServer>::const_iterator it = serversM.begin(); it != serversM.end(); ++it)
+	for (std::list<Server>::const_iterator it = serversM.begin(); it != serversM.end(); ++it)
 	{
 		file << "<server>\n";
+		file << "\t<name>" << it->getName() << "</name>\n";
 		file << "\t<host>" << it->getHostname() << "</host>\n";
 		file << "\t<port>" << it->getPort() << "</port>\n";
 
-		for (std::list<YDatabase>::const_iterator it2 = it->getDatabases()->begin(); it2 != it->getDatabases()->end(); ++it2)
+		for (std::list<Database>::const_iterator it2 = it->getDatabases()->begin(); it2 != it->getDatabases()->end(); ++it2)
 		{
 			file << "\t<database>\n";
+			file << "\t\t<name>" << it2->getName() << "</name>\n";
 			file << "\t\t<path>" << it2->getPath() << "</path>\n";
 			file << "\t\t<charset>" << it2->getCharset() << "</charset>\n";
 			file << "\t\t<username>" << it2->getUsername() << "</username>\n";
@@ -188,45 +204,44 @@ bool YRoot::save()
 	return true;
 }
 //------------------------------------------------------------------------------
-YRoot::YRoot()
-	: fileNameM("")
+Root::Root()
+    : MetadataItem(), fileNameM("")
 {
-	parentM = 0;
-	nameM = "Firebird Servers";
+	setName("Firebird Servers");
 	typeM = ntRoot;
 }
 //------------------------------------------------------------------------------
-YRoot::~YRoot()
+Root::~Root()
 {
 	save();
 }
 //------------------------------------------------------------------------------
-bool YRoot::getChildren(std::vector<YxMetadataItem *>& temp)
+bool Root::getChildren(std::vector<MetadataItem *>& temp)
 {
 	return serversM.getChildren(temp);
 }
 //------------------------------------------------------------------------------
-bool YRoot::orderedChildren() const
+bool Root::orderedChildren() const
 {
     bool ordered = false;
     config().getValue("OrderServersInTree", ordered);
     return ordered;
 }
 //------------------------------------------------------------------------------
-const std::string YRoot::getItemPath() const
+const std::string Root::getItemPath() const
 {
 	// Root is root, don't make the path strings any longer than needed.
 	return "";
 }
 //------------------------------------------------------------------------------
-std::string YRoot::getFileName()
+std::string Root::getFileName()
 {
 	if (fileNameM.empty())
 		fileNameM = config().getDBHFileName();
 	return fileNameM;
 }
 //------------------------------------------------------------------------------
-void YRoot::accept(Visitor *v)
+void Root::accept(Visitor *v)
 {
 	v->visit(*this);
 }

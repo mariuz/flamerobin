@@ -48,8 +48,12 @@
 #include <wx/wx.h>
 #include <wx/thread.h>
 
+// ND: for some reason including server.h doesn't work, probably a cyclic
+// dependency issue.
+class Server;
+
 //------------------------------------------------------------------------------
-class YDatabase: public YxMetadataItem
+class Database: public MetadataItem
 {
 private:
 	IBPP::Database databaseM;
@@ -62,15 +66,15 @@ private:
 	std::string passwordM;
 	std::string validPasswordM;		// set when connection successful
 
-	YMetadataCollection<YDomain> domainsM;
-    YMetadataCollection<YException> exceptionsM;
-    YMetadataCollection<YFunction> functionsM;
-    YMetadataCollection<YGenerator> generatorsM;
-    YMetadataCollection<YProcedure> proceduresM;
-    YMetadataCollection<YRole> rolesM;
-    YMetadataCollection<YTable> tablesM;
-    YMetadataCollection<YTrigger> triggersM;
-    YMetadataCollection<YView> viewsM;
+	MetadataCollection<Domain> domainsM;
+    MetadataCollection<Exception> exceptionsM;
+    MetadataCollection<Function> functionsM;
+    MetadataCollection<Generator> generatorsM;
+    MetadataCollection<Procedure> proceduresM;
+    MetadataCollection<Role> rolesM;
+    MetadataCollection<Table> tablesM;
+    MetadataCollection<Trigger> triggersM;
+    MetadataCollection<View> viewsM;
 
 	std::multimap<std::string, std::string> collationsM;
 	void loadCollations();
@@ -81,17 +85,17 @@ private:
 public:
     virtual void accept(Visitor *v);
 
-	YDatabase();
+	Database();
 	void initChildren();
-	virtual bool getChildren(std::vector<YxMetadataItem *>& temp);
-	void getCollections(std::vector<YxMetadataItem *>& temp);
+	virtual bool getChildren(std::vector<MetadataItem *>& temp);
+	void getCollections(std::vector<MetadataItem *>& temp);
 
-	YMetadataCollection<YGenerator>::const_iterator generatorsBegin();
-	YMetadataCollection<YGenerator>::const_iterator generatorsEnd();
-	YMetadataCollection<YDomain>::const_iterator domainsBegin();
-	YMetadataCollection<YDomain>::const_iterator domainsEnd();
-	YMetadataCollection<YTable>::const_iterator tablesBegin();
-	YMetadataCollection<YTable>::const_iterator tablesEnd();
+	MetadataCollection<Generator>::const_iterator generatorsBegin();
+	MetadataCollection<Generator>::const_iterator generatorsEnd();
+	MetadataCollection<Domain>::const_iterator domainsBegin();
+	MetadataCollection<Domain>::const_iterator domainsEnd();
+	MetadataCollection<Table>::const_iterator tablesBegin();
+	MetadataCollection<Table>::const_iterator tablesEnd();
 
 	void clear();				// sets all values to empty string
 	bool isConnected() const;
@@ -100,14 +104,14 @@ public:
 	bool reconnect() const;
 
 	std::string loadDomainNameForColumn(std::string table, std::string field);
-	YDomain *loadMissingDomain(std::string name);
+	Domain *loadMissingDomain(std::string name);
 	bool loadObjects(NodeType type);
 	//std::string getLoadingSql(NodeType type);
 
-	YxMetadataItem *findByNameAndType(NodeType nt, std::string name);
-	YxMetadataItem *findByName(std::string name);
+	MetadataItem *findByNameAndType(NodeType nt, std::string name);
+	MetadataItem *findByName(std::string name);
 	void refreshByType(NodeType type);
-	void dropObject(YxMetadataItem *object);
+	void dropObject(MetadataItem *object);
 	bool addObject(NodeType type, std::string name);
 	bool parseCommitedSql(std::string sql);		// reads a DDL statement and does accordingly
 
@@ -131,6 +135,9 @@ public:
 	void setPassword(std::string value);
 	void setRole(std::string value);
 	virtual const std::string getTypeName() const;
+    Server *getServer() const;
+	// returns the complete connection string.
+    std::string getConnectionString() const;
 };
 //----------------------------------------------------------------------------
 #endif

@@ -36,16 +36,16 @@
 #include "database.h"
 #include "domain.h"
 //------------------------------------------------------------------------------
-YDomain::YDomain():
-	YxMetadataItem()
+Domain::Domain():
+	MetadataItem()
 {
 	typeM = ntDomain;
 	infoLoadedM = false;	// I had a 2 hour session with debugger to found out that this was missing
 }
 //------------------------------------------------------------------------------
-bool YDomain::loadInfo()
+bool Domain::loadInfo()
 {
-	YDatabase *d = getDatabase();
+	Database *d = getDatabase();
 	if (!d)
 	{
 		//wxMessageBox(_("Domain::loadInfo, database = 0"), _("WARNING"), wxICON_WARNING|wxOK);
@@ -68,7 +68,7 @@ bool YDomain::loadInfo()
 			" and t.rdb$field_name='RDB$FIELD_TYPE'"
 		);
 
-		st1->Set(1, nameM);
+		st1->Set(1, getName());
 		st1->Execute();
 		if (!st1->Fetch())
 		{
@@ -98,7 +98,7 @@ bool YDomain::loadInfo()
 		}
 
 		tr1->Commit();
-		if (nameM.substr(0, 4) != "RDB$")
+		if (!isSystem())
 			notify();
 		infoLoadedM = true;
 		return true;
@@ -115,7 +115,7 @@ bool YDomain::loadInfo()
 }
 //------------------------------------------------------------------------------
 //! returns column's datatype as human readable string. It can also be used to construct DDL for tables
-std::string YDomain::getDatatypeAsString()
+std::string Domain::getDatatypeAsString()
 {
 	if (!infoLoadedM)
 		loadInfo();
@@ -123,7 +123,7 @@ std::string YDomain::getDatatypeAsString()
 	return datatype2string(datatypeM, scaleM, precisionM, subtypeM, lengthM);
 }
 //------------------------------------------------------------------------------
-std::string YDomain::datatype2string(short datatype, short scale, short precision, short subtype, short length)
+std::string Domain::datatype2string(short datatype, short scale, short precision, short subtype, short length)
 {
 	std::ostringstream retval;		// this will be returned
 
@@ -189,7 +189,7 @@ std::string YDomain::datatype2string(short datatype, short scale, short precisio
 	return retval.str();
 }
 //------------------------------------------------------------------------------
-void YDomain::getDatatypeParts(std::string& type, std::string& size, std::string& scale)
+void Domain::getDatatypeParts(std::string& type, std::string& size, std::string& scale)
 {
 	using namespace std;
 	string datatype = getDatatypeAsString();
@@ -211,7 +211,7 @@ void YDomain::getDatatypeParts(std::string& type, std::string& size, std::string
 		type = datatype;
 }
 //------------------------------------------------------------------------------
-std::string YDomain::getCharset()
+std::string Domain::getCharset()
 {
 	if (!infoLoadedM)
 		loadInfo();
@@ -219,12 +219,12 @@ std::string YDomain::getCharset()
 	return charsetM;
 }
 //------------------------------------------------------------------------------
-std::string YDomain::getPrintableName()
+std::string Domain::getPrintableName()
 {
-	return nameM + " " + getDatatypeAsString();
+	return getName() + " " + getDatatypeAsString();
 }
 //------------------------------------------------------------------------------
-std::string YDomain::getCreateSqlTemplate() const
+std::string Domain::getCreateSqlTemplate() const
 {
 	return	"CREATE DOMAIN domain_name\n"
             "AS datatype\n"
@@ -234,12 +234,12 @@ std::string YDomain::getCreateSqlTemplate() const
             "COLLATE collation;\n";
 }
 //------------------------------------------------------------------------------
-const std::string YDomain::getTypeName() const
+const std::string Domain::getTypeName() const
 {
 	return "DOMAIN";
 }
 //------------------------------------------------------------------------------
-void YDomain::accept(Visitor *v)
+void Domain::accept(Visitor *v)
 {
 	v->visit(*this);
 }

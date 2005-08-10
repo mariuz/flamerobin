@@ -30,7 +30,7 @@
 //------------------------------------------------------------------------------
 // These could all be simple "struct"s but we want to add some functionality later
 //
-class Constraint: public YxMetadataItem
+class Constraint: public MetadataItem
 {
 	// nothing needed yet, but it may be once
     virtual void accept(Visitor *v);

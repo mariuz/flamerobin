@@ -31,7 +31,7 @@
 
 #include "metadataitem.h"
 
-class YTrigger: public YxMetadataItem
+class Trigger: public MetadataItem
 {
 private:
 	bool infoIsLoadedM;
@@ -44,7 +44,7 @@ public:
     virtual void accept(Visitor *v);
 
 	enum firingTimeType { afterTrigger, beforeTrigger };
-	std::string getCreateSqlTemplate() const;	// overrides YxMetadataItem::getCreateSqlTemplate()
+	std::string getCreateSqlTemplate() const;	// overrides MetadataItem::getCreateSqlTemplate()
 
 	bool loadInfo(bool force = false);
 	bool getTriggerInfo(std::string& object, bool& active, int& position, std::string& type);
@@ -54,7 +54,7 @@ public:
 	firingTimeType getFiringTime();
 	std::string getAlterSql();
 
-	YTrigger();
+	Trigger();
 	virtual const std::string getTypeName() const;
 };
 //------------------------------------------------------------------------------

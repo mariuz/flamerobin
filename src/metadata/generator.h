@@ -31,7 +31,7 @@
 
 #include "metadataitem.h"
 
-class YGenerator: public YxMetadataItem
+class Generator: public MetadataItem
 {
 private:
 	int valueM;
@@ -40,13 +40,13 @@ private:
 public:
     virtual void accept(Visitor *v);
 
-	std::string getCreateSqlTemplate() const;	// overrides YxMetadataItem::getCreateSqlTemplate()
+	std::string getCreateSqlTemplate() const;	// overrides MetadataItem::getCreateSqlTemplate()
 
 	bool loadValue(bool force = false);
 	int getValue();
 
 	virtual std::string getPrintableName();
-	YGenerator();
+	Generator();
 	virtual const std::string getTypeName() const;
 };
 //------------------------------------------------------------------------------

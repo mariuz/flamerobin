@@ -1,4 +1,4 @@
-/*
+    /*
   The contents of this file are subject to the Initial Developer's Public
   License Version 1.0 (the "License"); you may not use this file except in
   compliance with the License. You may obtain a copy of the License here:
@@ -32,7 +32,7 @@
 #include <string>
 #include "metadataitem.h"
 
-class YDomain: public YxMetadataItem
+class Domain: public MetadataItem
 {
 private:
 	short datatypeM, subtypeM, lengthM, precisionM, scaleM;
@@ -42,7 +42,7 @@ private:
 public:
     virtual void accept(Visitor *v);
 
-	YDomain();
+	Domain();
 
 	static std::string datatype2string(short datatype, short scale, short precision, short subtype, short length);
 	bool loadInfo();

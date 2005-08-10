@@ -37,43 +37,43 @@
 #include "parameter.h"
 #include "procedure.h"
 //------------------------------------------------------------------------------
-YProcedure::YProcedure()
+Procedure::Procedure()
 {
 	typeM = ntProcedure;
 	parametersM.setParent(this);
 	parametersLoadedM = false;
 }
 //------------------------------------------------------------------------------
-YParameter *YProcedure::addParameter(YParameter &c)
+Parameter *Procedure::addParameter(Parameter &c)
 {
 	if (!parametersLoadedM)
 		loadParameters();
-	YParameter *cc = parametersM.add(c);
+	Parameter *cc = parametersM.add(c);
 	cc->setParent(this);
 	return cc;
 }
 //------------------------------------------------------------------------------
-bool YProcedure::getChildren(std::vector<YxMetadataItem *>& temp)
+bool Procedure::getChildren(std::vector<MetadataItem *>& temp)
 {
 	return parametersM.getChildren(temp);
 }
 //------------------------------------------------------------------------------
-bool YProcedure::isSelectable()
+bool Procedure::isSelectable()
 {
 	if (!parametersLoadedM)
 		loadParameters();
-	for (YMetadataCollection <YParameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
+	for (MetadataCollection <Parameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
 		if ((*it).getParameterType() == ptOutput)
 			return true;
 	return false;
 }
 //------------------------------------------------------------------------------
-std::string YProcedure::getSelectStatement(bool withColumns)
+std::string Procedure::getSelectStatement(bool withColumns)
 {
 	if (!parametersLoadedM)
 		loadParameters();
 	std::string collist, parlist;
-	for (YMetadataCollection <YParameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
+	for (MetadataCollection <Parameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
 	{
 		if ((*it).getParameterType() == ptInput)
 		{
@@ -94,13 +94,13 @@ std::string YProcedure::getSelectStatement(bool withColumns)
 		sql += collist;
 	else
 		sql += "* ";
-	sql += "\nFROM " + nameM;
+	sql += "\nFROM " + getName();
 	if (!parlist.empty())
 		sql += "(" + parlist + ")";
 	return sql;
 }
 //------------------------------------------------------------------------------
-bool YProcedure::checkAndLoadParameters(bool force)
+bool Procedure::checkAndLoadParameters(bool force)
 {
 	if (force || !parametersLoadedM)
 	{
@@ -111,10 +111,10 @@ bool YProcedure::checkAndLoadParameters(bool force)
 }
 //------------------------------------------------------------------------------
 //! returns false if error occurs, and places the error text in error variable
-bool YProcedure::loadParameters()
+bool Procedure::loadParameters()
 {
 	parametersM.clear();
-	YDatabase *d = static_cast<YDatabase *>(getParent());
+	Database *d = static_cast<Database *>(getParent());
 	if (!d)
 	{
 		lastError().setMessage("database not set");
@@ -146,9 +146,9 @@ bool YProcedure::loadParameters()
 			st1->Get(2, source);
 			st1->Get(3, &partype);
 
-			YParameter p(source, partype);
+			Parameter p(source, partype);
 			p.setName(column_name);
-			YParameter *pp = parametersM.add(p);
+			Parameter *pp = parametersM.add(p);
 			pp->setParent(this);
 		}
 
@@ -170,9 +170,9 @@ bool YProcedure::loadParameters()
 }
 //------------------------------------------------------------------------------
 //! returns false if an error occurs
-bool YProcedure::getSource(std::string& source)
+bool Procedure::getSource(std::string& source)
 {
-	YDatabase *d = static_cast<YDatabase *>(getParent());
+	Database *d = static_cast<Database *>(getParent());
 	if (!d)
 	{
 		lastError().setMessage("Database not set.");
@@ -206,19 +206,19 @@ bool YProcedure::getSource(std::string& source)
 	return false;
 }
 //------------------------------------------------------------------------------
-std::string YProcedure::getDefinition()
+std::string Procedure::getDefinition()
 {
 	checkAndLoadParameters();
 	std::string collist, parlist;
-	YMetadataCollection <YParameter>::const_iterator lastInput, lastOutput;
-	for (YMetadataCollection <YParameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
+	MetadataCollection <Parameter>::const_iterator lastInput, lastOutput;
+	for (MetadataCollection <Parameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
 	{
 		if ((*it).getParameterType() == ptInput)
 			lastInput = it;
 		else
 			lastOutput = it;
 	}
-	for (YMetadataCollection <YParameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
+	for (MetadataCollection <Parameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
 	{
 		if ((*it).getParameterType() == ptInput)
 		{
@@ -235,7 +235,7 @@ std::string YProcedure::getDefinition()
 			collist += "\n";
 		}
 	}
-	std::string retval = nameM;
+	std::string retval = getName();
 	if (!parlist.empty())
 		retval += "(\n" + parlist + ")";
 	retval += "\n";
@@ -244,7 +244,7 @@ std::string YProcedure::getDefinition()
 	return retval;
 }
 //------------------------------------------------------------------------------
-std::string YProcedure::getAlterSql()
+std::string Procedure::getAlterSql()
 {
 	if (!parametersLoadedM)
 		if (loadParameters())
@@ -254,11 +254,11 @@ std::string YProcedure::getAlterSql()
 	if (!getSource(source))
 		return lastError().getMessage();
 
-	std::string sql = "SET TERM ^ ;\nALTER PROCEDURE " + nameM;
+	std::string sql = "SET TERM ^ ;\nALTER PROCEDURE " + getName();
 	if (!parametersM.empty())
 	{
 		std::string input, output;
-		for (YMetadataCollection <YParameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
+		for (MetadataCollection <Parameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
 		{
 			if ((*it).getParameterType() == ptInput)
 			{
@@ -289,7 +289,7 @@ std::string YProcedure::getAlterSql()
 	return sql;
 }
 //------------------------------------------------------------------------------
-std::string YProcedure::getCreateSqlTemplate() const
+std::string Procedure::getCreateSqlTemplate() const
 {
 	std::string s("SET TERM ^ ;\n\n"
 			"CREATE PROCEDURE name \n"
@@ -305,12 +305,12 @@ std::string YProcedure::getCreateSqlTemplate() const
 	return s;
 }
 //------------------------------------------------------------------------------
-const std::string YProcedure::getTypeName() const
+const std::string Procedure::getTypeName() const
 {
 	return "PROCEDURE";
 }
 //------------------------------------------------------------------------------
-void YProcedure::accept(Visitor *v)
+void Procedure::accept(Visitor *v)
 {
 	v->visit(*this);
 }

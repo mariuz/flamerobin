@@ -39,14 +39,14 @@
 #include "database.h"
 #include "trigger.h"
 //------------------------------------------------------------------------------
-YTrigger::YTrigger():
-	YxMetadataItem()
+Trigger::Trigger():
+	MetadataItem()
 {
 	typeM = ntTrigger;
 	infoIsLoadedM = false;
 }
 //------------------------------------------------------------------------------
-bool YTrigger::getTriggerInfo(std::string& object, bool& active, int& position, std::string& type)
+bool Trigger::getTriggerInfo(std::string& object, bool& active, int& position, std::string& type)
 {
 	if (!infoIsLoadedM && !loadInfo())
 		return false;
@@ -57,7 +57,7 @@ bool YTrigger::getTriggerInfo(std::string& object, bool& active, int& position, 
 	return true;
 }
 //------------------------------------------------------------------------------
-bool YTrigger::getRelation(std::string& relation)
+bool Trigger::getRelation(std::string& relation)
 {
 	if (!infoIsLoadedM)
 		if (!loadInfo())
@@ -66,10 +66,10 @@ bool YTrigger::getRelation(std::string& relation)
 	return true;
 }
 //------------------------------------------------------------------------------
-bool YTrigger::loadInfo(bool force)
+bool Trigger::loadInfo(bool force)
 {
 	infoIsLoadedM = false;
-	YDatabase *d = getDatabase();
+	Database *d = getDatabase();
 	if (!d)
 	{
 		lastError().setMessage("database not set");
@@ -130,9 +130,9 @@ bool YTrigger::loadInfo(bool force)
 	return false;
 }
 //------------------------------------------------------------------------------
-bool YTrigger::getSource(std::string& source) const
+bool Trigger::getSource(std::string& source) const
 {
-	YDatabase *d = getDatabase();
+	Database *d = getDatabase();
 	if (!d)
 	{
 		lastError().setMessage("database not set");
@@ -166,7 +166,7 @@ bool YTrigger::getSource(std::string& source) const
 	return false;
 }
 //------------------------------------------------------------------------------
-std::string YTrigger::getTriggerType(int type)
+std::string Trigger::getTriggerType(int type)
 {
 	std::string res;
 
@@ -197,7 +197,7 @@ std::string YTrigger::getTriggerType(int type)
 	return result;
 }
 //------------------------------------------------------------------------------
-YTrigger::firingTimeType YTrigger::getFiringTime()
+Trigger::firingTimeType Trigger::getFiringTime()
 {
 	if (!infoIsLoadedM)
 		loadInfo();
@@ -207,7 +207,7 @@ YTrigger::firingTimeType YTrigger::getFiringTime()
 		return afterTrigger;
 }
 //------------------------------------------------------------------------------
-std::string YTrigger::getAlterSql()
+std::string Trigger::getAlterSql()
 {
 	std::string object, source, type;
 	bool active;
@@ -217,7 +217,7 @@ std::string YTrigger::getAlterSql()
 		return lastError().getMessage();
 
 	std::ostringstream sql;
-	sql << "SET TERM ^ ;\nALTER TRIGGER " << nameM;
+	sql << "SET TERM ^ ;\nALTER TRIGGER " << getName();
 	if (active)
 		sql << " ACTIVE\n";
 	else
@@ -231,7 +231,7 @@ std::string YTrigger::getAlterSql()
 	return sql.str();
 }
 //------------------------------------------------------------------------------
-std::string YTrigger::getCreateSqlTemplate() const
+std::string Trigger::getCreateSqlTemplate() const
 {
 	return	"SET TERM ^ ;\n\n"
 			"CREATE TRIGGER name FOR table/view \n"
@@ -245,12 +245,12 @@ std::string YTrigger::getCreateSqlTemplate() const
 			"SET TERM ; ^\n";
 }
 //------------------------------------------------------------------------------
-const std::string YTrigger::getTypeName() const
+const std::string Trigger::getTypeName() const
 {
 	return "TRIGGER";
 }
 //------------------------------------------------------------------------------
-void YTrigger::accept(Visitor *v)
+void Trigger::accept(Visitor *v)
 {
 	v->visit(*this);
 }

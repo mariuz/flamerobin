@@ -36,16 +36,16 @@
 #include "collection.h"
 #include "relation.h"
 //------------------------------------------------------------------------------
-YView::YView()
+View::View()
 	:Relation()
 {
 	typeM = ntView;
 }
 //------------------------------------------------------------------------------
 //! returns false if an error occurs
-bool YView::getSource(std::string& source)
+bool View::getSource(std::string& source)
 {
-	YDatabase *d = static_cast<YDatabase *>(getParent());
+	Database *d = static_cast<Database *>(getParent());
 	if (!d)
 	{
 		lastError().setMessage("Database not set.");
@@ -102,7 +102,7 @@ bool YView::getSource(std::string& source)
 	return false;
 }
 //------------------------------------------------------------------------------
-std::string YView::getAlterSql()
+std::string View::getAlterSql()
 {
 	if (!checkAndLoadColumns())
 		return lastError().getMessage();
@@ -110,11 +110,11 @@ std::string YView::getAlterSql()
 	if (!getSource(src))
 		return lastError().getMessage();
 
-	std::string sql = "DROP VIEW " + nameM + ";\n";
-	sql += "CREATE VIEW " + nameM + " (";
+	std::string sql = "DROP VIEW " + getName() + ";\n";
+	sql += "CREATE VIEW " + getName() + " (";
 
 	bool first = true;
-	for (YMetadataCollection <YColumn>::const_iterator it = columnsM.begin(); it != columnsM.end(); ++it)
+	for (MetadataCollection <Column>::const_iterator it = columnsM.begin(); it != columnsM.end(); ++it)
 	{
 		if (first)
 			first = false;
@@ -127,7 +127,7 @@ std::string YView::getAlterSql()
 	return sql;
 }
 //------------------------------------------------------------------------------
-std::string YView::getCreateSqlTemplate() const
+std::string View::getCreateSqlTemplate() const
 {
 	std::string sql(
 		"CREATE VIEW name ( view_column, ...)\n"
@@ -137,12 +137,12 @@ std::string YView::getCreateSqlTemplate() const
 	return sql;
 }
 //------------------------------------------------------------------------------
-const std::string YView::getTypeName() const
+const std::string View::getTypeName() const
 {
 	return "VIEW";
 }
 //------------------------------------------------------------------------------
-void YView::accept(Visitor *v)
+void View::accept(Visitor *v)
 {
 	v->visit(*this);
 }

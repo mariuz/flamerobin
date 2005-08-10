@@ -35,39 +35,39 @@
 #include "dberror.h"
 #include "database.h"
 //------------------------------------------------------------------------------
-YException::YException()
+Exception::Exception()
 {
     propertiesLoadedM = false;
 }
 //------------------------------------------------------------------------------
-std::string YException::getCreateSqlTemplate() const
+std::string Exception::getCreateSqlTemplate() const
 {
 	return	"CREATE EXCEPTION name 'exception message';\n";
 }
 //------------------------------------------------------------------------------
-const std::string YException::getTypeName() const
+const std::string Exception::getTypeName() const
 {
 	return "EXCEPTION";
 }
 //------------------------------------------------------------------------------
-std::string YException::getMessage()
+std::string Exception::getMessage()
 {
     loadProperties();
     return messageM;
 }
 //------------------------------------------------------------------------------
-int YException::getNumber()
+int Exception::getNumber()
 {
     loadProperties();
     return numberM;
 }
 //------------------------------------------------------------------------------
-void YException::loadProperties(bool force)
+void Exception::loadProperties(bool force)
 {
     if (!force && propertiesLoadedM)
         return;
 
-	YDatabase *d = getDatabase();
+	Database *d = getDatabase();
 	if (!d)
 		return; // should signal an error here.
 
@@ -80,7 +80,7 @@ void YException::loadProperties(bool force)
 		tr1->Start();
 		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
 		st1->Prepare("select RDB$MESSAGE, RDB$EXCEPTION_NUMBER from RDB$EXCEPTIONS where RDB$EXCEPTION_NAME = ?");
-		st1->Set(1, nameM);
+		st1->Set(1, getName());
 		st1->Execute();
 		st1->Fetch();
 		st1->Get(1, messageM);
@@ -99,12 +99,12 @@ void YException::loadProperties(bool force)
     notify();
 }
 //------------------------------------------------------------------------------
-std::string YException::getAlterSql()
+std::string Exception::getAlterSql()
 {
 	return "ALTER EXCEPTION " + getName() + " '" + getMessage() + "';";
 }
 //------------------------------------------------------------------------------
-void YException::accept(Visitor *v)
+void Exception::accept(Visitor *v)
 {
 	v->visit(*this);
 }

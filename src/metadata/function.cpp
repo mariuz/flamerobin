@@ -35,13 +35,13 @@
 #include "database.h"
 #include "domain.h"
 //------------------------------------------------------------------------------
-YFunction::YFunction()
+Function::Function()
 {
 	typeM = ntFunction;
 	infoLoadedM = false;
 }
 //------------------------------------------------------------------------------
-std::string YFunction::getCreateSqlTemplate() const
+std::string Function::getCreateSqlTemplate() const
 {
 	return "DECLARE EXTERNAL FUNCTION name [datatype | CSTRING (int) [, datatype | CSTRING (int) ...]]\n"
            "RETURNS {datatype [BY VALUE] | CSTRING (int)} [FREE_IT]\n"
@@ -49,28 +49,28 @@ std::string YFunction::getCreateSqlTemplate() const
            "MODULE_NAME 'modulename';\n";
 }
 //------------------------------------------------------------------------------
-const std::string YFunction::getTypeName() const
+const std::string Function::getTypeName() const
 {
 	return "FUNCTION";
 }
 //------------------------------------------------------------------------------
-std::string YFunction::getDropSqlStatement() const
+std::string Function::getDropSqlStatement() const
 {
     return "DROP EXTERNAL FUNCTION " + getName() + ";";
 }
 //------------------------------------------------------------------------------
-std::string YFunction::getDefinition()
+std::string Function::getDefinition()
 {
 	loadInfo();
 	return definitionM;
 }
 //------------------------------------------------------------------------------
-void YFunction::loadInfo(bool force)
+void Function::loadInfo(bool force)
 {
 	if (infoLoadedM && !force)
 		return;
 
-	YDatabase *d = getDatabase();
+	Database *d = getDatabase();
 	if (!d)
 	{
 		definitionM = "Error";
@@ -78,7 +78,7 @@ void YFunction::loadInfo(bool force)
 	}
 
 	IBPP::Database& db = d->getIBPPDatabase();
-	definitionM = nameM + "(\n";
+	definitionM = getName() + "(\n";
 	try
 	{
 		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
@@ -93,7 +93,7 @@ void YFunction::loadInfo(bool force)
 			" WHERE f.RDB$FUNCTION_NAME = ?"
 			" ORDER BY a.RDB$ARGUMENT_POSITION"
 		);
-		st1->Set(1, nameM);
+		st1->Set(1, getName());
 		st1->Execute();
 		std::string retstr;
 		bool first = true;
@@ -110,7 +110,7 @@ void YFunction::loadInfo(bool force)
 			st1->Get(8, precision);
 			st1->Get(9, libraryNameM);
 			st1->Get(10, entryPointM);
-			std::string param = "    " + YDomain::datatype2string(type, scale, precision, subtype, length)
+			std::string param = "    " + Domain::datatype2string(type, scale, precision, subtype, length)
 				+ " by " + (mechanism == 0 ? "value":"reference");
 			if (mechanism == -1)
 				param += " [FREE_IT]";
@@ -139,13 +139,13 @@ void YFunction::loadInfo(bool force)
 	}
 }
 //------------------------------------------------------------------------------
-std::string YFunction::getHtmlHeader()
+std::string Function::getHtmlHeader()
 {
 	loadInfo();
 	return "<B>Library name:</B> " + libraryNameM + "<BR><B>Entry point:</B>  " + entryPointM + "<BR><BR>";
 }
 //------------------------------------------------------------------------------
-void YFunction::accept(Visitor *v)
+void Function::accept(Visitor *v)
 {
 	v->visit(*this);
 }

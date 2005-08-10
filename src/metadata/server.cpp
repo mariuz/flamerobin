@@ -32,7 +32,8 @@
 #include "visitor.h"
 #include "server.h"
 //------------------------------------------------------------------------------
-YServer::YServer()
+Server::Server()
+    : MetadataItem()
 {
 	typeM = ntServer;
 
@@ -43,12 +44,12 @@ YServer::YServer()
 	databasesM.setType(ntServer);
 }
 //------------------------------------------------------------------------------
-bool YServer::getChildren(std::vector<YxMetadataItem *>& temp)
+bool Server::getChildren(std::vector<MetadataItem *>& temp)
 {
 	return databasesM.getChildren(temp);
 }
 //------------------------------------------------------------------------------
-bool YServer::orderedChildren() const
+bool Server::orderedChildren() const
 {
     bool ordered = false;
     config().getValue("OrderDatabasesInTree", ordered);
@@ -56,21 +57,21 @@ bool YServer::orderedChildren() const
 }
 //------------------------------------------------------------------------------
 // returns pointer to object in vector
-YDatabase* YServer::addDatabase(YDatabase& db)
+Database* Server::addDatabase(Database& db)
 {
-	YDatabase *temp = databasesM.add(db);
+	Database *temp = databasesM.add(db);
 	temp->setParent(this);					// grab it from collection
 	notify();
 	return temp;
 }
 //------------------------------------------------------------------------------
-void YServer::removeDatabase(YDatabase *db)
+void Server::removeDatabase(Database *db)
 {
 	databasesM.remove(db);
 	notify();
 }
 //------------------------------------------------------------------------------
-void YServer::createDatabase(YDatabase *db, int pagesize, int dialect)
+void Server::createDatabase(Database *db, int pagesize, int dialect)
 {
 	std::ostringstream extra_params;
     if (pagesize)
@@ -86,33 +87,24 @@ void YServer::createDatabase(YDatabase *db, int pagesize, int dialect)
 	db1->Create(dialect);
 }
 //------------------------------------------------------------------------------
-const YMetadataCollection<YDatabase> *YServer::getDatabases() const
+const MetadataCollection<Database> *Server::getDatabases() const
 {
 	return &databasesM;
 };
 //------------------------------------------------------------------------------
-void YServer::createName()		// creates name for the node using hostname and port values
-{
-	nameM = hostnameM;
-	if (portM != "3050")
-		nameM += "/" + portM;
-	databasesM.setName(nameM);
-	notify();
-}
-//------------------------------------------------------------------------------
-std::string YServer::getHostname() const
+std::string Server::getHostname() const
 {
 	return hostnameM;
 }
 //------------------------------------------------------------------------------
-std::string YServer::getPort() const
+std::string Server::getPort() const
 {
 	return portM;
 }
 //------------------------------------------------------------------------------
-bool YServer::hasConnectedDatabase() const
+bool Server::hasConnectedDatabase() const
 {
-	for (YMetadataCollection<YDatabase>::const_iterator it = databasesM.begin();
+	for (MetadataCollection<Database>::const_iterator it = databasesM.begin();
 		it != databasesM.end(); ++it)
 	{
 		if ((*it).isConnected())
@@ -121,26 +113,33 @@ bool YServer::hasConnectedDatabase() const
 	return false;
 }
 //------------------------------------------------------------------------------
-void YServer::setHostname(std::string hostname)
+void Server::setHostname(std::string hostname)
 {
-	hostnameM = hostname;
-	createName();
+	hostnameM = hostname;	
 }
 //------------------------------------------------------------------------------
-void YServer::setPort(std::string port)
+void Server::setPort(std::string port)
 {
-	portM = port;
-	createName();
+	portM = port;	
 }
 //------------------------------------------------------------------------------
-const std::string YServer::getTypeName() const
+const std::string Server::getTypeName() const
 {
 	return "SERVER";
 }
 //------------------------------------------------------------------------------
-void YServer::accept(Visitor *v)
+void Server::accept(Visitor *v)
 {
 	v->visit(*this);
 }
 //------------------------------------------------------------------------------
-
+std::string Server::getConnectionString() const
+{
+    std::string hostname = getHostname();
+    std::string port = getPort();
+    if (!hostname.empty() && !port.empty())
+        return hostname + "/" + port;
+    else
+        return hostname;
+}
+//------------------------------------------------------------------------------

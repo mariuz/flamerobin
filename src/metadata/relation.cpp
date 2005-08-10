@@ -40,10 +40,10 @@ Relation::Relation()
 	columnsM.setParent(this);
 }
 //------------------------------------------------------------------------------
-YColumn *Relation::addColumn(YColumn &c)
+Column *Relation::addColumn(Column &c)
 {
 	checkAndLoadColumns();
-	YColumn *cc = columnsM.add(c);
+	Column *cc = columnsM.add(c);
 	cc->setParent(this);
 	return cc;
 }
@@ -57,7 +57,7 @@ bool Relation::checkAndLoadColumns()
 bool Relation::loadColumns()
 {
 	columnsM.clear();
-	YDatabase *d = static_cast<YDatabase *>(getParent());
+	Database *d = static_cast<Database *>(getParent());
 	if (!d)
 	{
 		lastError().setMessage("database not set");
@@ -91,7 +91,7 @@ bool Relation::loadColumns()
 			st1->Get(4, collation);
 			readBlob(st1, 6, computedSrc);
 
-			YColumn *cc = columnsM.add();
+			Column *cc = columnsM.add();
 			cc->setName(name);
 			cc->setParent(this);
 			cc->Init(!st1->IsNull(2), source, !st1->IsNull(5), computedSrc, collation);
@@ -115,9 +115,9 @@ bool Relation::loadColumns()
 //------------------------------------------------------------------------------
 //! load list of triggers for relation
 //! link them to triggers in database's collection
-bool Relation::getTriggers(std::vector<YTrigger *>& list, YTrigger::firingTimeType beforeOrAfter)
+bool Relation::getTriggers(std::vector<Trigger *>& list, Trigger::firingTimeType beforeOrAfter)
 {
-	YDatabase *d = getDatabase();
+	Database *d = getDatabase();
 	if (!d)
 	{
 		lastError().setMessage("database not set");
@@ -141,7 +141,7 @@ bool Relation::getTriggers(std::vector<YTrigger *>& list, YTrigger::firingTimeTy
 			std::string name;
 			st1->Get(1, name);
 			name.erase(name.find_last_not_of(" ") + 1);
-			YTrigger *t = dynamic_cast<YTrigger *>(d->findByNameAndType(ntTrigger, name));
+			Trigger *t = dynamic_cast<Trigger *>(d->findByNameAndType(ntTrigger, name));
 			if (t && t->getFiringTime() == beforeOrAfter)
 				list.push_back(t);
 		}
@@ -159,7 +159,7 @@ bool Relation::getTriggers(std::vector<YTrigger *>& list, YTrigger::firingTimeTy
 	return false;
 }
 //------------------------------------------------------------------------------
-bool Relation::getChildren(std::vector<YxMetadataItem *>& temp)
+bool Relation::getChildren(std::vector<MetadataItem *>& temp)
 {
 	return columnsM.getChildren(temp);
 }

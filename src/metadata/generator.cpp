@@ -37,25 +37,25 @@
 #include "visitor.h"
 #include "generator.h"
 //------------------------------------------------------------------------------
-YGenerator::YGenerator():
-	YxMetadataItem()
+Generator::Generator():
+	MetadataItem()
 {
 	typeM = ntGenerator;
 	valueLoadedM = false;
 }
 //------------------------------------------------------------------------------
-int YGenerator::getValue()
+int Generator::getValue()
 {
 	loadValue();
 	return valueM;
 }
 //------------------------------------------------------------------------------
-bool YGenerator::loadValue(bool force)
+bool Generator::loadValue(bool force)
 {
 	if (!force && valueLoadedM)
 		return true;
 
-	YDatabase *d = getDatabase();
+	Database *d = getDatabase();
 	if (!d)
 	{
 		lastError().setMessage("Database not set.");
@@ -69,7 +69,7 @@ bool YGenerator::loadValue(bool force)
 		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
 		tr1->Start();
 		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-		st1->Prepare("select gen_id(" + nameM + ", 0) from rdb$database");
+		st1->Prepare("select gen_id(" + getName() + ", 0) from rdb$database");
 		st1->Execute();
 		st1->Fetch();
 		st1->Get(1, &valueM);
@@ -88,29 +88,29 @@ bool YGenerator::loadValue(bool force)
 	return false;
 }
 //------------------------------------------------------------------------------
-std::string YGenerator::getPrintableName()
+std::string Generator::getPrintableName()
 {
 	if (!valueLoadedM)
-		return nameM;
+		return getName();
 
 	std::ostringstream s;
-	s << nameM;
+	s << getName();
 	s << " = ";
 	s << valueM;
 	return s.str();
 }
 //------------------------------------------------------------------------------
-std::string YGenerator::getCreateSqlTemplate() const
+std::string Generator::getCreateSqlTemplate() const
 {
 	return "CREATE GENERATOR name;\nSET GENERATOR name TO value;\n";
 }
 //------------------------------------------------------------------------------
-const std::string YGenerator::getTypeName() const
+const std::string Generator::getTypeName() const
 {
 	return "GENERATOR";
 }
 //------------------------------------------------------------------------------
-void YGenerator::accept(Visitor *v)
+void Generator::accept(Visitor *v)
 {
 	v->visit(*this);
 }

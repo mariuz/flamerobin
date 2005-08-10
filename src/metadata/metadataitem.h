@@ -35,7 +35,7 @@
 #include "item.h"
 
 // forward declarations
-class YDatabase;
+class Database;
 class Dependency;
 
 //------------------------------------------------------------------------------
@@ -50,25 +50,26 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
 //------------------------------------------------------------------------------
 NodeType getTypeByName(std::string name);
 //------------------------------------------------------------------------------
-class YxMetadataItem: public Item
+class MetadataItem: public Item
 {
-protected:
-	YxMetadataItem *parentM;
+private:
 	std::string nameM;
+	MetadataItem *parentM;
 	std::string descriptionM;
 	bool descriptionLoadedM;
+protected:
 	NodeType typeM;
 public:
     virtual void accept(Visitor *v);
 
 	bool getDependencies(std::vector<Dependency>& list, bool ofObject);	// load from db
 
-	YxMetadataItem();
-	virtual ~YxMetadataItem() {};
+	MetadataItem();
+	virtual ~MetadataItem() {};
 
-	YDatabase *getDatabase() const;
+	Database *getDatabase() const;
 
-	virtual bool getChildren(std::vector<YxMetadataItem *>& temp);
+	virtual bool getChildren(std::vector<MetadataItem *>& temp);
 	virtual size_t getChildrenCount() const { return 0; };
 	void drop();	// removes its children (by calling drop() for each) and notifies it's parent
     virtual bool orderedChildren() const { return false; };
@@ -80,8 +81,8 @@ public:
     virtual std::string getDropSqlStatement() const;
 
 	// getters/setters
-	virtual YxMetadataItem *getParent() const;
-	void setParent(YxMetadataItem *parent);
+	virtual MetadataItem *getParent() const;
+	void setParent(MetadataItem *parent);
 	virtual const std::string& getName() const;
 	virtual std::string getPrintableName();
 	void setName(std::string name);
@@ -110,18 +111,18 @@ public:
 };
 //------------------------------------------------------------------------------
 //! masks the object it points to so others see it transparently
-class Dependency: public YxMetadataItem
+class Dependency: public MetadataItem
 {
 private:
-	YxMetadataItem *objectM;
+	MetadataItem *objectM;
 	std::string fieldsM;
 public:
-	virtual YxMetadataItem *getParent() const { return objectM->getParent(); };
+	virtual MetadataItem *getParent() const { return objectM->getParent(); };
 	virtual const std::string& getName() const { return objectM->getName(); };
 	virtual NodeType getType() const { return objectM->getType(); };
 	virtual const std::string getTypeName() const { return objectM->getTypeName(); };
 
-	Dependency(YxMetadataItem *object) { objectM = object; };
+	Dependency(MetadataItem *object) { objectM = object; };
 	std::string getFields() const { return fieldsM; };
 	void addField(const std::string& name) { if (!fieldsM.empty()) fieldsM += ","; fieldsM += name; };
 	void setFields(const std::string& fields) { fieldsM = fields; };

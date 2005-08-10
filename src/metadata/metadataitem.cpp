@@ -36,7 +36,7 @@
 #include "dberror.h"
 #include "frutils.h"
 
-YxMetadataItem::YxMetadataItem()
+MetadataItem::MetadataItem()
 	: Item()
 {
 	parentM = 0;
@@ -44,12 +44,12 @@ YxMetadataItem::YxMetadataItem()
 	descriptionLoadedM = false;
 }
 //------------------------------------------------------------------------------
-const std::string YxMetadataItem::getTypeName() const
+const std::string MetadataItem::getTypeName() const
 {
 	return "";
 }
 //------------------------------------------------------------------------------
-const std::string YxMetadataItem::getItemPath() const
+const std::string MetadataItem::getItemPath() const
 {
 	std::string ret = getTypeName() + "(" + getPathName() + ")";
  	if (parentM)
@@ -61,7 +61,7 @@ const std::string YxMetadataItem::getItemPath() const
 	return ret;
 }
 //------------------------------------------------------------------------------
-const std::string YxMetadataItem::getPathName() const
+const std::string MetadataItem::getPathName() const
 {
 	return getName();
 }
@@ -92,35 +92,35 @@ NodeType getTypeByName(std::string name)
 		return ntUnknown;
 }
 //------------------------------------------------------------------------------
-bool YxMetadataItem::getChildren(std::vector<YxMetadataItem*>& /*temp*/)
+bool MetadataItem::getChildren(std::vector<MetadataItem*>& /*temp*/)
 {
 	return false;
 }
 //------------------------------------------------------------------------------
 //! removes its children (by calling drop() for each) and notifies it's parent
-void YxMetadataItem::drop()
+void MetadataItem::drop()
 {
-	std::vector<YxMetadataItem *>temp;
+	std::vector<MetadataItem *>temp;
 	if (getChildren(temp))
-		for (std::vector<YxMetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
+		for (std::vector<MetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
 			(*it)->drop();
 
 	// TODO: prehaps the whole DBH needs to be reconsidered
 	// we could write: if (parentM) parentM->remove(this);
 	// but we can't, since parent might not be a collection!
-	// ie. currently it is a YDatabase object
+	// ie. currently it is a Database object
 }
 //------------------------------------------------------------------------------
-YDatabase *YxMetadataItem::getDatabase() const
+Database *MetadataItem::getDatabase() const
 {
-	YxMetadataItem *m = const_cast<YxMetadataItem *>(this);
+	MetadataItem *m = const_cast<MetadataItem *>(this);
 	while (m && m->getType() != ntDatabase)
 		m = m->getParent();
-	return (YDatabase *)m;
+	return (Database *)m;
 }
 //------------------------------------------------------------------------------
-//! virtual so it can eventually be delegated to YTable, YView, etc.
-std::string YxMetadataItem::getDescriptionSql() const
+//! virtual so it can eventually be delegated to Table, View, etc.
+std::string MetadataItem::getDescriptionSql() const
 {
 	switch (typeM)
 	{
@@ -138,8 +138,8 @@ std::string YxMetadataItem::getDescriptionSql() const
 	};
 }
 //------------------------------------------------------------------------------
-//! virtual so it can eventually be delegated to YTable, YView, etc.
-std::string YxMetadataItem::getChangeDescriptionSql() const
+//! virtual so it can eventually be delegated to Table, View, etc.
+std::string MetadataItem::getChangeDescriptionSql() const
 {
 	switch (typeM)
 	{
@@ -159,9 +159,9 @@ std::string YxMetadataItem::getChangeDescriptionSql() const
 //------------------------------------------------------------------------------
 //! ofObject = true   => returns list of objects this object depends on
 //! ofObject = false  => returns list of objects that depend on this object
-bool YxMetadataItem::getDependencies(std::vector<Dependency>& list, bool ofObject)
+bool MetadataItem::getDependencies(std::vector<Dependency>& list, bool ofObject)
 {
-	YDatabase *d = getDatabase();
+	Database *d = getDatabase();
 	if (!d)
 	{
 		lastError().setMessage("Database not set");
@@ -222,7 +222,7 @@ bool YxMetadataItem::getDependencies(std::vector<Dependency>& list, bool ofObjec
 		if (!ofObject || typeM == ntTable || typeM == ntView)
 			st1->Set(3, nameM);
 		st1->Execute();
-		YxMetadataItem *last = 0;
+		MetadataItem *last = 0;
 		Dependency *dep = 0;
 		while (st1->Fetch())
 		{
@@ -237,7 +237,7 @@ bool YxMetadataItem::getDependencies(std::vector<Dependency>& list, bool ofObjec
 			NodeType t = dep_types[object_type];
 			if (t == ntUnknown)				// ditto
 				continue;
-			YxMetadataItem *current = d->findByNameAndType(t, object_name);
+			MetadataItem *current = d->findByNameAndType(t, object_name);
 			if (!current)
 			{								// maybe it's a view masked as table
 				if (t == ntTable)
@@ -260,15 +260,15 @@ bool YxMetadataItem::getDependencies(std::vector<Dependency>& list, bool ofObjec
 			}
 		}
 
-		// TODO: perhaps this could be moved to YTable?
-		//       call YxMetadataItem::getDependencies() and then add this
+		// TODO: perhaps this could be moved to Table?
+		//       call MetadataItem::getDependencies() and then add this
 		if (typeM == ntTable && ofObject)	// foreign keys of this table + computed columns
 		{
-			YTable *t = dynamic_cast<YTable *>(this);
+			Table *t = dynamic_cast<Table *>(this);
 			std::vector<ForeignKey> *f = t->getForeignKeys();
 			for (std::vector<ForeignKey>::const_iterator it = f->begin(); it != f->end(); ++it)
 			{
-				YxMetadataItem *table = d->findByNameAndType(ntTable, (*it).referencedTableM);
+				MetadataItem *table = d->findByNameAndType(ntTable, (*it).referencedTableM);
 				if (!table)
 				{
 					lastError().setMessage("Table " + (*it).referencedTableM + " not found.");
@@ -280,7 +280,7 @@ bool YxMetadataItem::getDependencies(std::vector<Dependency>& list, bool ofObjec
 			}
 		}
 
-		// TODO: perhaps this could be moved to YTable?
+		// TODO: perhaps this could be moved to Table?
 		if (typeM == ntTable && !ofObject)	// foreign keys of other tables
 		{
 			st1->Prepare(
@@ -305,7 +305,7 @@ bool YxMetadataItem::getDependencies(std::vector<Dependency>& list, bool ofObjec
 				field_name.erase(field_name.find_last_not_of(" ")+1);		// trim
 				if (table_name != lasttable)	// new
 				{
-					YxMetadataItem *table = d->findByNameAndType(ntTable, table_name);
+					MetadataItem *table = d->findByNameAndType(ntTable, table_name);
 					if (!table)
 						continue;			// dummy check
 					Dependency de(table);
@@ -331,12 +331,12 @@ bool YxMetadataItem::getDependencies(std::vector<Dependency>& list, bool ofObjec
 	return false;
 }
 //------------------------------------------------------------------------------
-std::string YxMetadataItem::getDescription()
+std::string MetadataItem::getDescription()
 {
 	if (descriptionLoadedM)
 		return descriptionM;
 
-	YDatabase *d = getDatabase();
+	Database *d = getDatabase();
 	std::string sql = getDescriptionSql();
 	if (!d || sql == "")
 		return "N/A";
@@ -391,9 +391,9 @@ std::string YxMetadataItem::getDescription()
 	return lastError().getMessage();
 }
 //------------------------------------------------------------------------------
-bool YxMetadataItem::setDescription(std::string description)
+bool MetadataItem::setDescription(std::string description)
 {
-	YDatabase *d = getDatabase();
+	Database *d = getDatabase();
 	if (!d)
 		return false;
 
@@ -443,17 +443,17 @@ bool YxMetadataItem::setDescription(std::string description)
 	return false;
 }
 //------------------------------------------------------------------------------
-YxMetadataItem *YxMetadataItem::getParent() const
+MetadataItem *MetadataItem::getParent() const
 {
 	return parentM;
 }
 //------------------------------------------------------------------------------
-void YxMetadataItem::setParent(YxMetadataItem *parent)
+void MetadataItem::setParent(MetadataItem *parent)
 {
 	parentM = parent;
 }
 //------------------------------------------------------------------------------
-std::string YxMetadataItem::getPrintableName()
+std::string MetadataItem::getPrintableName()
 {
 	size_t n = getChildrenCount();
  	if (n)
@@ -466,39 +466,39 @@ std::string YxMetadataItem::getPrintableName()
 		return nameM;
 }
 //------------------------------------------------------------------------------
-const std::string& YxMetadataItem::getName() const
+const std::string& MetadataItem::getName() const
 {
 	return nameM;
 }
 //------------------------------------------------------------------------------
-void YxMetadataItem::setName(std::string name)
+void MetadataItem::setName(std::string name)
 {
 	name.erase(name.find_last_not_of(' ')+1);		// right trim
 	nameM = name;
 	notify();
 }
 //------------------------------------------------------------------------------
-NodeType YxMetadataItem::getType() const
+NodeType MetadataItem::getType() const
 {
 	return typeM;
 }
 //------------------------------------------------------------------------------
-void YxMetadataItem::setType(NodeType type)
+void MetadataItem::setType(NodeType type)
 {
 	typeM = type;
 }
 //------------------------------------------------------------------------------
-bool YxMetadataItem::isSystem() const
+bool MetadataItem::isSystem() const
 {
 	return getName().substr(0, 4) == "RDB$";
 }
 //------------------------------------------------------------------------------
-std::string YxMetadataItem::getDropSqlStatement() const
+std::string MetadataItem::getDropSqlStatement() const
 {
     return "DROP " + getTypeName() + " " + getName() + ";";
 }
 //------------------------------------------------------------------------------
-void YxMetadataItem::accept(Visitor *v)
+void MetadataItem::accept(Visitor *v)
 {
 	v->visit(*this);
 }
