@@ -7,18 +7,19 @@ Files needed by FR:
 - $templ - the html-templates directory
 - $confdef - the main config settings definition file (config_options.xml, which I propose to rename fr_settings.confdef)
 - possibly other confdef files for scoped (database-level, for example) configuration (preferences) dialogs
+- $docfiles - the files doc/fr_manual.html, doc/fr_changes.html and doc/fr_license.html that are displayed from the main menu
 
 It is advisable to define a directory for $confdef, in case we need more files of that kind. In that case, the main file may be named fr_settings.confdef to match the main config file.
 
 Locations:
 
-- $frhome - FR will find $templ and $confdef (which are immutable and integral part of the FR distribution) in its home path. The home path is computed by getApplicationPath() in frutils.cpp, to be renamed to getFRHomePath. Note: does that function need to fall back to something different than "" in case of failure?
-Note: passing -home <path> on FR's command line will override this path.
+- $frhome - FR will find $templ, $confdef and $docfiles (which are immutable and integral part of the FR distribution) in its home path. The home path is computed by getApplicationPath() in frutils.cpp, to be renamed to getFRHomePath. Note: does that function need to fall back to something different than "" in case of failure?
+Note: passing -h <path> on FR's command line will override this path.
 
 - $fruserhome - FR will find $conf and $db (which are user settings files) in its user home path. This path has to be writable and may be common to all users on the machine or different for each user. The user home path is computer by getFRUserHomePath(), to be written, and it will default to wxStandardPaths::GetUserLocalDataDir().
-Note: passing -userhome <path> or -home <path> on FR's command line will override this path.
+Note: passing -uh <path> or -h <path> on FR's command line will override this path.
 
-Additional note: the <path> specification in the command line parameters may be "$app", which translates to wxStandardPaths::GetLocalDataDir() for both -home and -userhome, or "$user", which translates to wxStandardPaths::GetUserLocalDataDir() for both -home and -userhome.
+Additional note: the <path> specification in the command line parameters may be "$app", which translates to wxStandardPaths::GetLocalDataDir() for both -h and -uh, or "$user", which translates to wxStandardPaths::GetUserLocalDataDir() for both -h and -uh.
 
 FR will only ever write to files in $conf and $db. If these files are shared by several users, then no precaution is taken to avoid overwriting other users' changes.
 
@@ -28,38 +29,34 @@ Use:
 
 $conf will contain all FR settings that are managed by a singleton instance of YConfig (to be renamed to Config), which is a wrapper around wxFileConfig, and which also handles a set of hardwired defaults. A call to Config::getValue() will always yeld a value, even if the config file is not found or the key doesn't exist (defaults apply).
 
-$db is managed internally by the DBH using custom code or possibly wxXmlDocument.
+$db is managed internally by the DBH using custom code (as it is now) or possibly wxXmlDocument.
 
-The locations of $templ and $confdef are returned by functions in Config. Thus, not all services that Config exposes are directly related to the config file.
+The locations of $templ, $confdef and $docfiles are returned by functions in Config. Thus, not all services that Config exposes are directly related to the config file.
 
-Scoping:
+Scoping (might come later):
 
 Each config setting has a name (ex. NumberPrecision) and a value. The value is retrieved based on scoping rules:
 
 getValue("NumberPrecision", n)
 will search for a value to assign to n in the NumberPrecision config key.
 
-getValue("/DB[SomeDatabase]/TB[SomeTable]/NumberPrecision", n)
+getValue("::DB[SomeDatabase]::TB[SomeTable]::NumberPrecision", n)
 will search in the following config keys:
-- /DB[SomeDatabase]/TB[SomeTable]/NumberPrecision
-- /DB[SomeDatabase]/NumberPrecision
+- ::DB[SomeDatabase]::TB[SomeTable]::NumberPrecision
+- ::DB[SomeDatabase]::NumberPrecision
 - NumberPrecision
 
 getValue("::DB[SomeDatabase]::TB[SomeTable]::CL[SomeColumn]::NumberPrecision", n)
 will search in the following config keys:
-- /DB[SomeDatabase]/TB[SomeTable]/CL[SomeColumn]/NumberPrecision
-- /DB[SomeDatabase]/TB[SomeTable]/NumberPrecision
-- /DB[SomeDatabase]/NumberPrecision
+- ::DB[SomeDatabase]::TB[SomeTable]::CL[SomeColumn]::NumberPrecision
+- ::DB[SomeDatabase]::TB[SomeTable]::NumberPrecision
+- ::DB[SomeDatabase]::NumberPrecision
 - NumberPrecision
 
-The caller of getValue will retrieve the "/DB[SomeDatabase]/" or "/DB[SomeDatabase]/TB[SomeTable]/" or "/DB[SomeDatabase]/TB[SomeTable]/CL[SomeColumn]/" prefix by calling the getItemPath() function (perhaps to be renamed to getPath()) of the relevant metadata item.
+The caller of getValue will retrieve the "::DB[SomeDatabase]/" or "::DB[SomeDatabase]::TB[SomeTable]::" or "::DB[SomeDatabase]::TB[SomeTable]::CL[SomeColumn]::" prefix by calling the getItemPath() function (perhaps to be renamed to getPath()) of the relevant metadata item.
 
 Note: wxFileConfig will resolve the scoped setting names by using different [sections] in the pseudo-INI file, but that's not relevant to the users of FR's Config.
 
 Note: instead of DB, TB, CL, etc. the full type names (as returned by getTypeName() may be used, at the cost of using more memory and disk space for the config file.
 
-Note: databases should have a symbolic name / id, which can be computed automatically from the connection string (by deleting all non-allowed characters) and can be changed by the user. Those who use Firebird aliases will work more comfortably. Names are necessary to shorten the config key names and to avoid escaping (see below). Perhaps we could opt for a generated, invisible id, which will uniquely identify a database in the config file, but this has two drawbacks:
-- the config file is not human-readable
-- deleting and recreating a database looses all its settings and leaves garbage in the config file, unless a table of database connection strings / ids is also maintained.
-
-Note: if databases don't have symbolic names, then the path names will have to be escaped somehow since / (Config's path separator) may appear in a database connection string.
+Note: we should make sure that database names are not allowed to contain the characters ":", "[" and "]", as it will ease parsing. Also, while we are undecided whether to keep of remove the YServer/Server class, a database name will be compound: serverName:databaseName to gain uniqueness. We should also prevent the user from inserting duplicate database names.
