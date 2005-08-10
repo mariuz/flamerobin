@@ -38,7 +38,7 @@ public:
     void OnBrowseButtonClick(wxCommandEvent& event);
     void OnStartButtonClick(wxCommandEvent& event);
 
-    BackupFrame(wxWindow* parent, YDatabase* db);
+    BackupFrame(wxWindow* parent, Database* db);
 private:
     void do_layout();
     virtual void updateControls();

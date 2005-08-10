@@ -87,7 +87,7 @@ std::string escapeHtmlChars(std::string s, bool processNewlines = true)
 }
 //-----------------------------------------------------------------------------
 //! MetadataItemPropertiesFrame class
-MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent, YxMetadataItem *object, int id):
+MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent, MetadataItem *object, int id):
     BaseFrame(parent, id, wxT(""))
 {
 	pageTypeM = ptSummary;
@@ -127,7 +127,7 @@ const std::string MetadataItemPropertiesFrame::getName() const
 	return "MIPFrame";
 }
 //-----------------------------------------------------------------------------
-YxMetadataItem *MetadataItemPropertiesFrame::getObservedObject() const
+MetadataItem *MetadataItemPropertiesFrame::getObservedObject() const
 {
 	return objectM;
 }
@@ -188,7 +188,7 @@ void MetadataItemPropertiesFrame::loadPage()
 //
 //! command is in format:   {%action:data%}
 //! data field can be empty
-void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem *object, std::string& htmlpage)
+void MetadataItemPropertiesFrame::processCommand(std::string cmd, MetadataItem *object, std::string& htmlpage)
 {
 	std::string::size_type pos = cmd.find(':');
 	std::string suffix;
@@ -226,9 +226,9 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 		Relation *m = dynamic_cast<Relation *>(object);
 		if (!m)
 			return;
-		std::vector<YxMetadataItem *> tmp;
+		std::vector<MetadataItem *> tmp;
 		if (m->checkAndLoadColumns() && m->getChildren(tmp))
-			for (std::vector<YxMetadataItem *>::iterator it = tmp.begin(); it != tmp.end(); ++it)
+			for (std::vector<MetadataItem *>::iterator it = tmp.begin(); it != tmp.end(); ++it)
 				processHtmlCode(htmlpage, suffix, *it);
 	}
 
@@ -237,16 +237,16 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 		Relation *r = dynamic_cast<Relation *>(object);
 		if (!r)
 			return;
-		std::vector<YTrigger *> tmp;
+		std::vector<Trigger *> tmp;
 		bool result;
 		if (suffix.substr(0, 5) == "after")
-			result = r->getTriggers(tmp, YTrigger::afterTrigger);
+			result = r->getTriggers(tmp, Trigger::afterTrigger);
 		else
-			result = r->getTriggers(tmp, YTrigger::beforeTrigger);
+			result = r->getTriggers(tmp, Trigger::beforeTrigger);
 		suffix.erase(0, 5);
 		if (result)
 		{
-			for (std::vector<YTrigger *>::iterator it = tmp.begin(); it != tmp.end(); ++it)
+			for (std::vector<Trigger *>::iterator it = tmp.begin(); it != tmp.end(); ++it)
 				processHtmlCode(htmlpage, suffix, *it);
 		}
 		else
@@ -255,7 +255,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 
 	else if (cmd == "depends_on" || cmd == "depend_of")
 	{
-		YxMetadataItem *m = dynamic_cast<YxMetadataItem *>(object);
+		MetadataItem *m = dynamic_cast<MetadataItem *>(object);
 		if (!m)
 			return;
 		std::vector<Dependency> tmp;
@@ -278,7 +278,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 
 	else if (cmd == "primary_key")
 	{
-		YTable *t = dynamic_cast<YTable *>(object);
+		Table *t = dynamic_cast<Table *>(object);
 		if (!t)
 			return;
 		ColumnConstraint *pk = t->getPrimaryKey();
@@ -289,7 +289,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 
 	else if (cmd == "foreign_keys")
 	{
-		YTable *t = dynamic_cast<YTable *>(object);
+		Table *t = dynamic_cast<Table *>(object);
 		if (!t)
 			return;
 		std::vector<ForeignKey> *fk = t->getForeignKeys();
@@ -301,7 +301,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 
 	else if (cmd == "check_constraints")
 	{
-		YTable *t = dynamic_cast<YTable *>(object);
+		Table *t = dynamic_cast<Table *>(object);
 		if (!t)
 			return;
 		std::vector<CheckConstraint> *c = t->getCheckConstraints();
@@ -313,7 +313,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 
 	else if (cmd == "unique_constraints")
 	{
-		YTable *t = dynamic_cast<YTable *>(object);
+		Table *t = dynamic_cast<Table *>(object);
 		if (!t)
 			return;
 		std::vector<ColumnConstraint> *c = t->getUniqueConstraints();
@@ -363,7 +363,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 
 	else if (cmd == "column_datatype")
 	{
-		YColumn *c = dynamic_cast<YColumn *>(object);
+		Column *c = dynamic_cast<Column *>(object);
 		if (c)
 		{
 			htmlpage += c->getDatatype();
@@ -373,42 +373,42 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 
 	else if (cmd == "column_nulloption")
 	{
-		YColumn *c = dynamic_cast<YColumn *>(object);
+		Column *c = dynamic_cast<Column *>(object);
 		if (c)
 			htmlpage += (c->isNullable() ? "" : "<b>not null</b>");
 	}
 
 	else if (cmd == "input_parameters")	// SP params
 	{
-		YProcedure *p = dynamic_cast<YProcedure *>(object);
+		Procedure *p = dynamic_cast<Procedure *>(object);
 		if (!p)
 			return;
-		std::vector<YxMetadataItem *> tmp;
+		std::vector<MetadataItem *> tmp;
 		p->lockSubject();
 		if (p->checkAndLoadParameters() && p->getChildren(tmp))
-			for (std::vector<YxMetadataItem *>::iterator it = tmp.begin(); it != tmp.end(); ++it)
-				if (((YParameter *)(*it))->getParameterType() == ptInput)
+			for (std::vector<MetadataItem *>::iterator it = tmp.begin(); it != tmp.end(); ++it)
+				if (((Parameter *)(*it))->getParameterType() == ptInput)
 					processHtmlCode(htmlpage, suffix, *it);
 		p->unlockSubject(true, false);
 	}
 
 	else if (cmd == "output_parameters")	// SP params
 	{
-		YProcedure *p = dynamic_cast<YProcedure *>(object);
+		Procedure *p = dynamic_cast<Procedure *>(object);
 		if (!p)
 			return;
-		std::vector<YxMetadataItem *> tmp;
+		std::vector<MetadataItem *> tmp;
 		p->lockSubject();
 		if (p->checkAndLoadParameters() && p->getChildren(tmp))
-			for (std::vector<YxMetadataItem *>::iterator it = tmp.begin(); it != tmp.end(); ++it)
-				if (((YParameter *)(*it))->getParameterType() == ptOutput)
+			for (std::vector<MetadataItem *>::iterator it = tmp.begin(); it != tmp.end(); ++it)
+				if (((Parameter *)(*it))->getParameterType() == ptOutput)
 					processHtmlCode(htmlpage, suffix, *it);
 		p->unlockSubject(true, false);
 	}
 
 	else if (cmd == "view_source")
 	{
-		YView *v = dynamic_cast<YView *>(object);
+		View *v = dynamic_cast<View *>(object);
 		std::string src;
 		if (!v || !v->getSource(src))
 			return;
@@ -417,7 +417,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 
 	else if (cmd == "procedure_source")
 	{
-		YProcedure *p = dynamic_cast<YProcedure *>(object);
+		Procedure *p = dynamic_cast<Procedure *>(object);
 		std::string src;
 		if (!p || !p->getSource(src))
 			return;
@@ -426,7 +426,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 
 	else if (cmd == "trigger_source")
 	{
-		YTrigger *t = dynamic_cast<YTrigger *>(object);
+		Trigger *t = dynamic_cast<Trigger *>(object);
 		std::string src;
 		if (!t || !t->getSource(src))
 			return;
@@ -435,7 +435,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 
 	else if (cmd == "trigger_info")
 	{
-		YTrigger *t = dynamic_cast<YTrigger *>(object);
+		Trigger *t = dynamic_cast<Trigger *>(object);
 		std::string object, type;
 		bool active;
 		int position;
@@ -450,7 +450,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 
     else if (cmd == "generator_value")
     {
-		YGenerator *g = dynamic_cast<YGenerator *>(object);
+		Generator *g = dynamic_cast<Generator *>(object);
 		if (!g)
 			return;
 		std::ostringstream ss;
@@ -460,7 +460,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 
 	else if (cmd == "exception_number")
 	{
-		YException *e = dynamic_cast<YException *>(object);
+		Exception *e = dynamic_cast<Exception *>(object);
 		if (!e)
 			return;
         std::ostringstream ss;
@@ -470,7 +470,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 
 	else if (cmd == "exception_message")
 	{
-		YException *e = dynamic_cast<YException *>(object);
+		Exception *e = dynamic_cast<Exception *>(object);
 		if (!e)
 			return;
 		htmlpage += escapeHtmlChars(e->getMessage(), false);
@@ -478,7 +478,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 
 	else if (cmd == "udf_info")
 	{
-		YFunction *f = dynamic_cast<YFunction *>(object);
+		Function *f = dynamic_cast<Function *>(object);
 		if (!f)
 			return;
 		std::string src = f->getDefinition();
@@ -498,7 +498,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 
 	else if (cmd == "indices")
 	{
-		YTable *t = dynamic_cast<YTable *>(object);
+		Table *t = dynamic_cast<Table *>(object);
 		if (!t)
 			return;
 		std::vector<Index> *ix = t->getIndices();
@@ -533,7 +533,7 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, YxMetadataItem
 }
 //-----------------------------------------------------------------------------
 //! processes html template code given in the htmlsource string
-void MetadataItemPropertiesFrame::processHtmlCode(std::string& htmlpage, std::string htmlsource, YxMetadataItem *object)
+void MetadataItemPropertiesFrame::processHtmlCode(std::string& htmlpage, std::string htmlsource, MetadataItem *object)
 {
 	if (object == 0)
 		object = objectM;
@@ -607,9 +607,9 @@ void MetadataItemPropertiesFrame::processHtmlFile(std::string filename)
 }
 //-----------------------------------------------------------------------------
 //! closes window if observed object gets removed (disconnecting, dropping, etc)
-void MetadataItemPropertiesFrame::removeObservedObject(YxSubject *object)
+void MetadataItemPropertiesFrame::removeObservedObject(Subject *object)
 {
-	YxObserver::removeObservedObject(object);
+	Observer::removeObservedObject(object);
 	if (object == objectM)	// main observed object is getting destoryed
 		Close();
 }
@@ -640,23 +640,23 @@ void MetadataItemPropertiesFrame::update()
 		if (!t)
 			return;
 		t->checkAndLoadColumns();		// load column data if needed
-		std::vector<YxMetadataItem *> temp;
+		std::vector<MetadataItem *> temp;
 		objectM->getChildren(temp);
-		for (std::vector<YxMetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
+		for (std::vector<MetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
 			(*it)->attach(this);
 	}
 
 	// if description of procedure params change, we need to reattach
 	if (objectM->getType() == ntProcedure)
 	{
-		YProcedure *p = dynamic_cast<YProcedure *>(objectM);
+		Procedure *p = dynamic_cast<Procedure *>(objectM);
 		if (!p)
 			return;
 		p->lockSubject();
 		p->checkAndLoadParameters();		// load column data if needed
-		std::vector<YxMetadataItem *> temp;
+		std::vector<MetadataItem *> temp;
 		objectM->getChildren(temp);
-		for (std::vector<YxMetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
+		for (std::vector<MetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
 			(*it)->attach(this);
 		p->unlockSubject(false, false);
 	}
@@ -665,27 +665,27 @@ void MetadataItemPropertiesFrame::update()
 }
 //-----------------------------------------------------------------------------
 //! PageHandler class
-class PageHandler: public YxURIHandler
+class PageHandler: public URIHandler
 {
 public:
-	bool handleURI(const YURI& uriObj);
+	bool handleURI(URI& uri);
 private:
     static const PageHandler handlerInstance;	// singleton; registers itself on creation.
 };
 const PageHandler PageHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool PageHandler::handleURI(const YURI& uriObj)
+bool PageHandler::handleURI(URI& uri)
 {
-	if (uriObj.action != "page")
+	if (uri.action != "page")
 		return false;
 
-	std::string ms = uriObj.getParam("parent_window");		// window
+	std::string ms = uri.getParam("parent_window");		// window
 	unsigned long mo;
 	if (!std2wx(ms).ToULong(&mo))
 		return true;
 	MetadataItemPropertiesFrame *m = (MetadataItemPropertiesFrame *)mo;
 	bool skip = false;
-	if (uriObj.getParam("target") == "new")
+	if (uri.getParam("target") == "new")
 	{
 		wxWindow *mainFrame = m->GetParent();
 		if (mainFrame)
@@ -697,7 +697,7 @@ bool PageHandler::handleURI(const YURI& uriObj)
 
 	if (m)
 	{
-		m->setPage(uriObj.getParam("type"));
+		m->setPage(uri.getParam("type"));
 		if (!skip)
 			frameManager().rebuildMenu();
 	}
@@ -705,28 +705,28 @@ bool PageHandler::handleURI(const YURI& uriObj)
 }
 //-----------------------------------------------------------------------------
 //! PropertiesHandler class
-class PropertiesHandler: public YxURIHandler
+class PropertiesHandler: public URIHandler
 {
 public:
-	bool handleURI(const YURI& uriObj);
+	bool handleURI(URI& uri);
 private:
     static const PropertiesHandler handlerInstance;	// singleton; registers itself on creation.
 };
 const PropertiesHandler PropertiesHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool PropertiesHandler::handleURI(const YURI& uriObj)
+bool PropertiesHandler::handleURI(URI& uri)
 {
-	if (uriObj.action != "properties")
+	if (uri.action != "properties")
 		return false;
 
-	MetadataItemPropertiesFrame *parent = dynamic_cast<MetadataItemPropertiesFrame *>(getWindow(uriObj));
+	MetadataItemPropertiesFrame *parent = dynamic_cast<MetadataItemPropertiesFrame *>(getWindow(uri));
 	if (!parent)
 		return true;
-	YDatabase *d = parent->getObservedObject()->getDatabase();
+	Database *d = parent->getObservedObject()->getDatabase();
 	if (!d)
 		return true;
-	NodeType n = getTypeByName(uriObj.getParam("object_type"));
-	YxMetadataItem *object = d->findByNameAndType(n, uriObj.getParam("object_name"));
+	NodeType n = getTypeByName(uri.getParam("object_type"));
+	MetadataItem *object = d->findByNameAndType(n, uri.getParam("object_name"));
 	if (!object)
 	{
 		::wxMessageBox(_("Cannot find destination object\nThis should never happen."), _("Error"), wxICON_ERROR);
@@ -736,7 +736,7 @@ bool PropertiesHandler::handleURI(const YURI& uriObj)
 	// check if window with properties of that object is already open and show it
 	wxWindow *mainFrame = parent->GetParent();
 	if (mainFrame)
-        frameManager().showMetadataPropertyFrame(mainFrame, object, false, uriObj.getParam("target") == "new");
+        frameManager().showMetadataPropertyFrame(mainFrame, object, false, uri.getParam("target") == "new");
 	return true;
 }
 //-----------------------------------------------------------------------------

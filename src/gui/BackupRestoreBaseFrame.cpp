@@ -43,11 +43,11 @@ Contributor(s): Milan Babuskov
 #include "ugly.h"
 
 //-----------------------------------------------------------------------------
-BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, YDatabase* db):
+BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, Database* db):
     BaseFrame(parent, -1, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE|wxNO_FULL_REPAINT_ON_RESIZE)
 {
     databaseM = db;
-    serverM = reinterpret_cast<YServer*>(db->getParent());
+    serverM = reinterpret_cast<Server*>(db->getParent());
 
     threadM = 0;
     threadMsgTimeMillisM = 0;

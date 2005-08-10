@@ -41,7 +41,7 @@
 #include "urihandler.h"
 #include "TriggerWizardDialog.h"
 //-----------------------------------------------------------------------------
-TriggerWizardDialog::TriggerWizardDialog(wxWindow* parent, YxMetadataItem *item):
+TriggerWizardDialog::TriggerWizardDialog(wxWindow* parent, MetadataItem *item):
     BaseDialog(parent, -1, wxEmptyString)
 {
 	relationM = item;
@@ -158,23 +158,23 @@ void TriggerWizardDialog::OnOkButtonClick(wxCommandEvent& event)
 	event.Skip();	// let the dialog close
 }
 //-----------------------------------------------------------------------------
-class CreateTriggerHandler: public YxURIHandler
+class CreateTriggerHandler: public URIHandler
 {
 public:
-	bool handleURI(const YURI& uriObj);
+	bool handleURI(URI& uri);
 private:
     static const CreateTriggerHandler handlerInstance;
 };
 //-----------------------------------------------------------------------------
 const CreateTriggerHandler CreateTriggerHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool CreateTriggerHandler::handleURI(const YURI& uriObj)
+bool CreateTriggerHandler::handleURI(URI& uri)
 {
-	if (uriObj.action != "create_trigger")
+	if (uri.action != "create_trigger")
 		return false;
 
-	YTable *t = (YTable *)getObject(uriObj);
-	wxWindow *w = getWindow(uriObj);
+	Table *t = (Table *)getObject(uri);
+	wxWindow *w = getWindow(uri);
 	if (!t || !w)
 		return true;
 

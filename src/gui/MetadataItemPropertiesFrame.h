@@ -33,24 +33,24 @@
 #ifndef METADATAITEMPROPERTIESFRAME_H
 #define METADATAITEMPROPERTIESFRAME_H
 //-----------------------------------------------------------------------------
-class MetadataItemPropertiesFrame: public BaseFrame, public YxObserver
+class MetadataItemPropertiesFrame: public BaseFrame, public Observer
 {
 public:
-	YxMetadataItem *getObservedObject() const;
+	MetadataItem *getObservedObject() const;
 	void processHtmlFile(std::string filename);
 	void setPage(const std::string& type);
 
-    MetadataItemPropertiesFrame(wxWindow* parent, YxMetadataItem *object, int id = -1);
+    MetadataItemPropertiesFrame(wxWindow* parent, MetadataItem *object, int id = -1);
 private:
 	enum { ptSummary, ptConstraints, ptDependencies, ptTriggers, ptTableIndices } pageTypeM;
 
-	YxMetadataItem *objectM;
-	void removeObservedObject(YxSubject *object);
+	MetadataItem *objectM;
+	void removeObservedObject(Subject *object);
 
     void do_layout();
 	void loadPage();	// force reload from outside
-	void processCommand(std::string cmd, YxMetadataItem *object, std::string& htmlpage);
-	void processHtmlCode(std::string& htmlpage, std::string htmlsource, YxMetadataItem *object = 0);
+	void processCommand(std::string cmd, MetadataItem *object, std::string& htmlpage);
+	void processHtmlCode(std::string& htmlpage, std::string htmlsource, MetadataItem *object = 0);
 	void update();
     // used to remember the value among calls to getStorageName(), needed because
     // it's not possible to access objectM (see getStorageName()) after detaching from it.

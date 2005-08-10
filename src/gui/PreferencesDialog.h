@@ -60,9 +60,9 @@ public:
     int getControlLeft();
     // parent for created controls
     wxPanel* getPage() const;
-    virtual bool loadFromConfig(YConfig& config) = 0;
+    virtual bool loadFromConfig(Config& config) = 0;
     virtual bool parseProperty(wxXmlNode* xmln);
-    virtual bool saveToConfig(YConfig& config) = 0;
+    virtual bool saveToConfig(Config& config) = 0;
 protected:
     wxString captionM;
     wxString descriptionM;
@@ -100,7 +100,7 @@ public:
     };
 
     PreferencesDialog(wxWindow* parent, const wxString& title,
-        YConfig& config, const wxString& descriptionFileName);
+        Config& config, const wxString& descriptionFileName);
     ~PreferencesDialog();
 
     int getSelectedPage();
@@ -114,7 +114,7 @@ public:
 private:
     bool debugDescriptionM;
     bool loadSuccessM;
-    YConfig& configM;
+    Config& configM;
 
     wxImageList imageListM;
     wxArrayTreeItemIds treeItemsM;

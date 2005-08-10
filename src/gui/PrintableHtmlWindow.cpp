@@ -130,7 +130,7 @@ void PrintableHtmlWindow::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
 void PrintableHtmlWindow::OnMenuNewWindow(wxCommandEvent& WXUNUSED(event))
 {
 	std::string addr = wx2std(tempLinkM);
-	YURI uri(addr);
+	URI uri(addr);
 	if (uri.protocol != "fr")				// we don't support "new window" for non-fr protocols
 		return;
 	uri.addParam("target=new");
@@ -180,13 +180,13 @@ void PrintableHtmlWindow::OnMenuPrint(wxCommandEvent& WXUNUSED(event))
 void PrintableHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
 {
 	std::string addr = wx2std(link.GetHref());
-	YURI uri(addr);
+	URI uri(addr);
 	if (uri.protocol != "fr")		// call default handler for other protocols
 	{
 		wxHtmlWindow::OnLinkClicked(link);
 		return;
 	}
-	if (!getURIProcessor().handleURI(addr))
+	if (!getURIProcessor().handleURI(uri))
 		::wxMessageBox(_("Feature not yet implemented."), _("Information"), wxICON_INFORMATION|wxOK);
 }
 //-----------------------------------------------------------------------------

@@ -47,7 +47,7 @@ namespace reorder_icons {
     #include "down.xpm"
 };
 //-----------------------------------------------------------------------------
-ReorderFieldsDialog::ReorderFieldsDialog(wxWindow* parent, YTable *table):
+ReorderFieldsDialog::ReorderFieldsDialog(wxWindow* parent, Table *table):
     BaseDialog(parent, -1, wxEmptyString)
 {
 	tableM = table;
@@ -125,9 +125,9 @@ void ReorderFieldsDialog::moveSelected(int moveby)
 }
 //-----------------------------------------------------------------------------
 //! closes window if table is removed (dropped/disconnected,etc.)
-void ReorderFieldsDialog::removeObservedObject(YxSubject *object)
+void ReorderFieldsDialog::removeObservedObject(Subject *object)
 {
-	YxObserver::removeObservedObject(object);
+	Observer::removeObservedObject(object);
 	if (object == tableM)
 		Close();
 }
@@ -139,11 +139,11 @@ void ReorderFieldsDialog::set_properties()
 //-----------------------------------------------------------------------------
 void ReorderFieldsDialog::update()
 {
-	std::vector<YxMetadataItem *> temp;
+	std::vector<MetadataItem *> temp;
 	tableM->getChildren(temp);
 
 	list_box_fields->Clear();
-    for (std::vector<YxMetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
+    for (std::vector<MetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
 		list_box_fields->Append(std2wx((*it)->getName()));
     updateButtons();
 }
@@ -211,10 +211,10 @@ void ReorderFieldsDialog::OnUpButtonClick(wxCommandEvent& WXUNUSED(event))
     moveSelected(-1);
 }
 //-----------------------------------------------------------------------------
-class ReorderFieldsHandler: public YxURIHandler
+class ReorderFieldsHandler: public URIHandler
 {
 public:
-	bool handleURI(const YURI& uriObj);
+	bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
     static const ReorderFieldsHandler handlerInstance;
@@ -222,13 +222,13 @@ private:
 //-----------------------------------------------------------------------------
 const ReorderFieldsHandler ReorderFieldsHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool ReorderFieldsHandler::handleURI(const YURI& uriObj)
+bool ReorderFieldsHandler::handleURI(URI& uri)
 {
-	if (uriObj.action != "reorder_fields")
+	if (uri.action != "reorder_fields")
 		return false;
 
-	YTable *t = (YTable *)getObject(uriObj);
-	wxWindow *w = getWindow(uriObj);
+	Table *t = (Table *)getObject(uri);
+	wxWindow *w = getWindow(uri);
 	if (!t || !w)
 		return true;
 

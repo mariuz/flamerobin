@@ -32,7 +32,7 @@
 #include "observer.h"
 #include "metadata/table.h"
 
-class ReorderFieldsDialog: public BaseDialog, public YxObserver {
+class ReorderFieldsDialog: public BaseDialog, public Observer {
 public:
     enum {
         ID_list_box_fields = 100,
@@ -51,10 +51,10 @@ public:
     void OnLastButtonClick(wxCommandEvent& event);
     void OnUpButtonClick(wxCommandEvent& event);
 
-    ReorderFieldsDialog(wxWindow* parent, YTable *table);
+    ReorderFieldsDialog(wxWindow* parent, Table *table);
 
 private:
-	YTable *tableM;
+	Table *tableM;
 
     void do_layout();
     void moveSelected(int moveby);
@@ -69,7 +69,7 @@ protected:
     wxButton* button_cancel;
 
     virtual const std::string getName() const;
-	void removeObservedObject(YxSubject *object);
+	void removeObservedObject(Subject *object);
 	void update();
     void updateButtons();
 

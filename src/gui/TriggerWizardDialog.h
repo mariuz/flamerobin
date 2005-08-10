@@ -28,16 +28,16 @@
 #include <wx/image.h>
 #include <wx/spinctrl.h>
 #include "BaseDialog.h"
-class YxMetadataItem;
+class MetadataItem;
 //-----------------------------------------------------------------------------
 class TriggerWizardDialog: public BaseDialog
 {
 public:
-    TriggerWizardDialog(wxWindow* parent, YxMetadataItem *item);
+    TriggerWizardDialog(wxWindow* parent, MetadataItem *item);
     void OnOkButtonClick(wxCommandEvent& event);
 
 private:
-	YxMetadataItem *relationM;
+	MetadataItem *relationM;
     void set_properties();
     void do_layout();
 

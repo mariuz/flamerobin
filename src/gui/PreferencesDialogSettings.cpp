@@ -235,8 +235,8 @@ public:
     ~PrefDlgCheckboxSetting();
 
     virtual bool createControl(bool ignoreerrors);
-    virtual bool loadFromConfig(YConfig& config);
-    virtual bool saveToConfig(YConfig& config);
+    virtual bool loadFromConfig(Config& config);
+    virtual bool saveToConfig(Config& config);
 
     void OnCheckbox(wxCommandEvent& event);
 protected:
@@ -290,7 +290,7 @@ bool PrefDlgCheckboxSetting::hasControls() const
     return checkboxM != 0;
 }
 //-----------------------------------------------------------------------------
-bool PrefDlgCheckboxSetting::loadFromConfig(YConfig& config)
+bool PrefDlgCheckboxSetting::loadFromConfig(Config& config)
 {
     if (!checkConfigProperties())
         return false;
@@ -304,7 +304,7 @@ bool PrefDlgCheckboxSetting::loadFromConfig(YConfig& config)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool PrefDlgCheckboxSetting::saveToConfig(YConfig& config)
+bool PrefDlgCheckboxSetting::saveToConfig(Config& config)
 {
     if (!checkConfigProperties())
         return false;
@@ -337,9 +337,9 @@ public:
     PrefDlgRadioboxSetting(wxPanel* page, PrefDlgSetting* parent);
 
     virtual bool createControl(bool ignoreerrors);
-    virtual bool loadFromConfig(YConfig& config);
+    virtual bool loadFromConfig(Config& config);
     virtual bool parseProperty(wxXmlNode* xmln);
-    virtual bool saveToConfig(YConfig& config);
+    virtual bool saveToConfig(Config& config);
 protected:
     virtual void addControlsToSizer(wxSizer* sizer);
     virtual void enableControls(bool enabled);
@@ -390,7 +390,7 @@ bool PrefDlgRadioboxSetting::hasControls() const
     return radioboxM != 0;
 }
 //-----------------------------------------------------------------------------
-bool PrefDlgRadioboxSetting::loadFromConfig(YConfig& config)
+bool PrefDlgRadioboxSetting::loadFromConfig(Config& config)
 {
     if (!checkConfigProperties())
         return false;
@@ -430,7 +430,7 @@ bool PrefDlgRadioboxSetting::parseProperty(wxXmlNode* xmln)
     return PrefDlgSetting::parseProperty(xmln);
 }
 //-----------------------------------------------------------------------------
-bool PrefDlgRadioboxSetting::saveToConfig(YConfig& config)
+bool PrefDlgRadioboxSetting::saveToConfig(Config& config)
 {
     if (!checkConfigProperties())
         return false;
@@ -453,9 +453,9 @@ public:
     PrefDlgIntEditSetting(wxPanel* page, PrefDlgSetting* parent);
 
     virtual bool createControl(bool ignoreerrors);
-    virtual bool loadFromConfig(YConfig& config);
+    virtual bool loadFromConfig(Config& config);
     virtual bool parseProperty(wxXmlNode* xmln);
-    virtual bool saveToConfig(YConfig& config);
+    virtual bool saveToConfig(Config& config);
 protected:
     virtual void addControlsToSizer(wxSizer* sizer);
     virtual void enableControls(bool enabled);
@@ -547,7 +547,7 @@ bool PrefDlgIntEditSetting::hasControls() const
     return (captionBeforeM) || (spinctrlM) || (captionAfterM);
 }
 //-----------------------------------------------------------------------------
-bool PrefDlgIntEditSetting::loadFromConfig(YConfig& config)
+bool PrefDlgIntEditSetting::loadFromConfig(Config& config)
 {
     if (!checkConfigProperties())
         return false;
@@ -586,7 +586,7 @@ bool PrefDlgIntEditSetting::parseProperty(wxXmlNode* xmln)
     return PrefDlgSetting::parseProperty(xmln);
 }
 //-----------------------------------------------------------------------------
-bool PrefDlgIntEditSetting::saveToConfig(YConfig& config)
+bool PrefDlgIntEditSetting::saveToConfig(Config& config)
 {
     if (!checkConfigProperties())
         return false;
@@ -609,8 +609,8 @@ public:
     PrefDlgStringEditSetting(wxPanel* page, PrefDlgSetting* parent);
 
     virtual bool createControl(bool ignoreerrors);
-    virtual bool loadFromConfig(YConfig& config);
-    virtual bool saveToConfig(YConfig& config);
+    virtual bool loadFromConfig(Config& config);
+    virtual bool saveToConfig(Config& config);
 protected:
     virtual void addControlsToSizer(wxSizer* sizer);
     virtual void enableControls(bool enabled);
@@ -696,7 +696,7 @@ bool PrefDlgStringEditSetting::hasControls() const
     return (captionBeforeM) || (textctrlM) || (captionAfterM);
 }
 //-----------------------------------------------------------------------------
-bool PrefDlgStringEditSetting::loadFromConfig(YConfig& config)
+bool PrefDlgStringEditSetting::loadFromConfig(Config& config)
 {
     if (!checkConfigProperties())
         return false;
@@ -709,7 +709,7 @@ bool PrefDlgStringEditSetting::loadFromConfig(YConfig& config)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool PrefDlgStringEditSetting::saveToConfig(YConfig& config)
+bool PrefDlgStringEditSetting::saveToConfig(Config& config)
 {
     if (!checkConfigProperties())
         return false;
@@ -733,8 +733,8 @@ public:
     ~PrefDlgChooserSetting();
 
     virtual bool createControl(bool ignoreerrors);
-    virtual bool loadFromConfig(YConfig& config);
-    virtual bool saveToConfig(YConfig& config);
+    virtual bool loadFromConfig(Config& config);
+    virtual bool saveToConfig(Config& config);
 
     void OnBrowseButton(wxCommandEvent& event);
 protected:
@@ -848,7 +848,7 @@ bool PrefDlgChooserSetting::hasControls() const
     return (captionM) || (textctrlM) ||(browsebtnM);
 }
 //-----------------------------------------------------------------------------
-bool PrefDlgChooserSetting::loadFromConfig(YConfig& config)
+bool PrefDlgChooserSetting::loadFromConfig(Config& config)
 {
     if (!checkConfigProperties())
         return false;
@@ -861,7 +861,7 @@ bool PrefDlgChooserSetting::loadFromConfig(YConfig& config)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool PrefDlgChooserSetting::saveToConfig(YConfig& config)
+bool PrefDlgChooserSetting::saveToConfig(Config& config)
 {
     if (!checkConfigProperties())
         return false;

@@ -72,25 +72,25 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
 	long address;
 	if (!text.Mid(7).ToLong(&address))
 		return false;
-	YxMetadataItem *m = (YxMetadataItem *)address;
+	MetadataItem *m = (MetadataItem *)address;
 
-	YDatabase *db = m->getDatabase();
+	Database *db = m->getDatabase();
 	if (db != databaseM)
 	{
 		wxMessageBox(_("Cannot use objects from different databases."), _("Wrong database."), wxOK|wxICON_WARNING);
 		return false;
 	}
 
-	YTable *t = 0;
+	Table *t = 0;
 	std::string column_list;
 	if (m->getType() == ntColumn)
 	{
-		t = dynamic_cast<YTable *>(m->getParent());
+		t = dynamic_cast<Table *>(m->getParent());
 		column_list = t->getName() + "." + m->getName();
 	}
 	if (m->getType() == ntTable)
 	{
-		t = dynamic_cast<YTable *>(m);
+		t = dynamic_cast<Table *>(m);
 		column_list = t->getName() + ".*";
 	}
 	if (t == 0)
@@ -130,7 +130,7 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
 	if (std::find(tableNames.begin(), tableNames.end(), t->getName()) == tableNames.end())
 	{
 		std::vector<Join> relatedTables;
-		if (YTable::tablesRelate(tableNames, t, relatedTables))	// foreign keys
+		if (Table::tablesRelate(tableNames, t, relatedTables))	// foreign keys
 		{
 			std::string join_list;
 			if (relatedTables.size() > 1)	// let the user decide
@@ -466,7 +466,7 @@ void SqlEditor::OnMenuSetFont(wxCommandEvent& WXUNUSED(event))
 }
 //-----------------------------------------------------------------------------
 ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title, const wxPoint& pos, const wxSize& size, long style):
-    BaseFrame(parent, id, title, pos, size, style), YxObserver()
+    BaseFrame(parent, id, title, pos, size, style), Observer()
 {
     panel_contents = new wxPanel(this, -1);
     button_new = new wxBitmapButton(panel_contents, ID_button_new, wxBitmap(sql_icons::new_xpm));
@@ -593,7 +593,7 @@ void ExecuteSqlFrame::do_layout()
 // to know about database class
 void ExecuteSqlFrame::showProperties(wxString objectName)
 {
-	YxMetadataItem *m = databaseM->findByName(wx2std(objectName));
+	MetadataItem *m = databaseM->findByName(wx2std(objectName));
 	if (!m)
 	{
 		wxMessageBox(
@@ -700,10 +700,10 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
 				{
 					wxString word = styled_text_ctrl_sql->GetTextRange(start, pos-1).Upper();
 					std::string calltip;
-					YProcedure *p = dynamic_cast<YProcedure *>(databaseM->findByNameAndType(ntProcedure, wx2std(word)));
+					Procedure *p = dynamic_cast<Procedure *>(databaseM->findByNameAndType(ntProcedure, wx2std(word)));
 					if (p)
 						calltip = p->getDefinition();
-					YFunction *f = dynamic_cast<YFunction *>(databaseM->findByNameAndType(ntFunction, wx2std(word)));
+					Function *f = dynamic_cast<Function *>(databaseM->findByNameAndType(ntFunction, wx2std(word)));
 					if (f)
 					    calltip = f->getDefinition();
 					if (!calltip.empty())
@@ -1304,7 +1304,7 @@ void ExecuteSqlFrame::update()
 		Close();
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::setDatabase(YDatabase *db)
+void ExecuteSqlFrame::setDatabase(Database *db)
 {
 	databaseM = db;
 
@@ -1323,9 +1323,9 @@ void ExecuteSqlFrame::setDatabase(YDatabase *db)
 }
 //-----------------------------------------------------------------------------
 //! closes window if database is removed (unregistered)
-void ExecuteSqlFrame::removeObservedObject(YxSubject *object)
+void ExecuteSqlFrame::removeObservedObject(Subject *object)
 {
-	YxObserver::removeObservedObject(object);
+	Observer::removeObservedObject(object);
 	if (object == databaseM)
 		Close();
 }
@@ -1405,28 +1405,28 @@ const wxRect ExecuteSqlFrame::getDefaultRect() const
 }
 //-----------------------------------------------------------------------------
 //! also used to drop constraints
-class DropColumnHandler: public YxURIHandler
+class DropColumnHandler: public URIHandler
 {
 public:
-	bool handleURI(const YURI& uriObj);
+	bool handleURI(URI& uri);
 private:
     static const DropColumnHandler handlerInstance;
 };
 //-----------------------------------------------------------------------------
 const DropColumnHandler DropColumnHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool DropColumnHandler::handleURI(const YURI& uriObj)
+bool DropColumnHandler::handleURI(URI& uri)
 {
-	if (uriObj.action != "drop_field" && uriObj.action != "drop_constraint")
+	if (uri.action != "drop_field" && uri.action != "drop_constraint")
 		return false;
 
-	YxMetadataItem *c = (YxMetadataItem *)getObject(uriObj);
-	wxWindow *w = getWindow(uriObj);
+	MetadataItem *c = (MetadataItem *)getObject(uri);
+	wxWindow *w = getWindow(uri);
 	if (!c || !w)
 		return true;
 
 	std::string sql = "ALTER TABLE " + c->getParent()->getName() + " DROP ";
-	if (uriObj.action == "drop_constraint")
+	if (uri.action == "drop_constraint")
 		sql += "CONSTRAINT ";
 	sql += c->getName();
 	ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, _("Dropping field"));
@@ -1437,10 +1437,10 @@ bool DropColumnHandler::handleURI(const YURI& uriObj)
 	return true;
 }
 //-----------------------------------------------------------------------------
-class EditProcedureHandler: public YxURIHandler
+class EditProcedureHandler: public URIHandler
 {
 public:
-	bool handleURI(const YURI& uriObj);
+	bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
     static const EditProcedureHandler handlerInstance;
@@ -1448,13 +1448,13 @@ private:
 //-----------------------------------------------------------------------------
 const EditProcedureHandler EditProcedureHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool EditProcedureHandler::handleURI(const YURI& uriObj)
+bool EditProcedureHandler::handleURI(URI& uri)
 {
-	if (uriObj.action != "edit_procedure")
+	if (uri.action != "edit_procedure")
 		return false;
 
-	YProcedure *p = (YProcedure *)getObject(uriObj);
-	wxWindow *w = getWindow(uriObj);
+	Procedure *p = (Procedure *)getObject(uri);
+	wxWindow *w = getWindow(uri);
 	if (!p || !w)
 		return true;
 
@@ -1465,10 +1465,10 @@ bool EditProcedureHandler::handleURI(const YURI& uriObj)
 	return true;
 }
 //-----------------------------------------------------------------------------
-class EditViewHandler: public YxURIHandler
+class EditViewHandler: public URIHandler
 {
 public:
-	bool handleURI(const YURI& uriObj);
+	bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
     static const EditViewHandler handlerInstance;
@@ -1476,13 +1476,13 @@ private:
 //-----------------------------------------------------------------------------
 const EditViewHandler EditViewHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool EditViewHandler::handleURI(const YURI& uriObj)
+bool EditViewHandler::handleURI(URI& uri)
 {
-	if (uriObj.action != "edit_view")
+	if (uri.action != "edit_view")
 		return false;
 
-	YView *v = (YView *)getObject(uriObj);
-	wxWindow *w = getWindow(uriObj);
+	View *v = (View *)getObject(uri);
+	wxWindow *w = getWindow(uri);
 	if (!v || !w)
 		return true;
 
@@ -1493,10 +1493,10 @@ bool EditViewHandler::handleURI(const YURI& uriObj)
 	return true;
 }
 //-----------------------------------------------------------------------------
-class EditTriggerHandler: public YxURIHandler
+class EditTriggerHandler: public URIHandler
 {
 public:
-	bool handleURI(const YURI& uriObj);
+	bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
     static const EditTriggerHandler handlerInstance;
@@ -1504,13 +1504,13 @@ private:
 //-----------------------------------------------------------------------------
 const EditTriggerHandler EditTriggerHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool EditTriggerHandler::handleURI(const YURI& uriObj)
+bool EditTriggerHandler::handleURI(URI& uri)
 {
-	if (uriObj.action != "edit_trigger")
+	if (uri.action != "edit_trigger")
 		return false;
 
-	YTrigger *t = (YTrigger *)getObject(uriObj);
-	wxWindow *w = getWindow(uriObj);
+	Trigger *t = (Trigger *)getObject(uri);
+	wxWindow *w = getWindow(uri);
 	if (!t || !w)
 		return true;
 
@@ -1521,10 +1521,10 @@ bool EditTriggerHandler::handleURI(const YURI& uriObj)
 	return true;
 }
 //-----------------------------------------------------------------------------
-class EditGeneratorValueHandler: public YxURIHandler
+class EditGeneratorValueHandler: public URIHandler
 {
 public:
-	bool handleURI(const YURI& uriObj);
+	bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
     static const EditGeneratorValueHandler handlerInstance;
@@ -1532,19 +1532,19 @@ private:
 //-----------------------------------------------------------------------------
 const EditGeneratorValueHandler EditGeneratorValueHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool EditGeneratorValueHandler::handleURI(const YURI& uriObj)
+bool EditGeneratorValueHandler::handleURI(URI& uri)
 {
-	if (uriObj.action != "edit_generator_value")
+	if (uri.action != "edit_generator_value")
 		return false;
 
-	YGenerator *g = (YGenerator *)getObject(uriObj);
-	wxWindow *w = getWindow(uriObj);
+	Generator *g = (Generator *)getObject(uri);
+	wxWindow *w = getWindow(uri);
 	if (!g || !w)
 		return true;
 
 	g->loadValue(true);	// force reload of value from database
 	int oldvalue = g->getValue();
-	YDatabase *db = g->getDatabase();
+	Database *db = g->getDatabase();
 	if (!db)
 	{
 		wxMessageBox(_("No database assigned"), _("Warning"), wxOK | wxICON_ERROR);
@@ -1565,10 +1565,10 @@ bool EditGeneratorValueHandler::handleURI(const YURI& uriObj)
 	return true;
 }
 //-----------------------------------------------------------------------------
-class EditExceptionHandler: public YxURIHandler
+class EditExceptionHandler: public URIHandler
 {
 public:
-	bool handleURI(const YURI& uriObj);
+	bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
     static const EditExceptionHandler handlerInstance;
@@ -1576,13 +1576,13 @@ private:
 //-----------------------------------------------------------------------------
 const EditExceptionHandler EditExceptionHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool EditExceptionHandler::handleURI(const YURI& uriObj)
+bool EditExceptionHandler::handleURI(URI& uri)
 {
-	if (uriObj.action != "edit_exception")
+	if (uri.action != "edit_exception")
 		return false;
 
-	YException *e = (YException *)getObject(uriObj);
-	wxWindow *w = getWindow(uriObj);
+	Exception *e = (Exception *)getObject(uri);
+	wxWindow *w = getWindow(uri);
 	if (!e || !w)
 		return true;
 
@@ -1593,10 +1593,10 @@ bool EditExceptionHandler::handleURI(const YURI& uriObj)
 	return true;
 }
 //-----------------------------------------------------------------------------
-class IndexActionHandler: public YxURIHandler
+class IndexActionHandler: public URIHandler
 {
 public:
-	bool handleURI(const YURI& uriObj);
+	bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
     static const IndexActionHandler handlerInstance;
@@ -1604,18 +1604,18 @@ private:
 //-----------------------------------------------------------------------------
 const IndexActionHandler IndexActionHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool IndexActionHandler::handleURI(const YURI& uriObj)
+bool IndexActionHandler::handleURI(URI& uri)
 {
-	if (uriObj.action != "index_action")
+	if (uri.action != "index_action")
 		return false;
 
-	Index *i = (Index *)getObject(uriObj);
-	wxWindow *w = getWindow(uriObj);
+	Index *i = (Index *)getObject(uri);
+	wxWindow *w = getWindow(uri);
 	if (!i || !w)
 		return true;
 
 	std::string sql;
-	std::string type = uriObj.getParam("type");		// type of operation
+	std::string type = uri.getParam("type");		// type of operation
 	if (type == "DROP")
 		sql = "DROP INDEX " + i->getName();
 	else if (type == "RECOMPUTE")
@@ -1631,10 +1631,10 @@ bool IndexActionHandler::handleURI(const YURI& uriObj)
 	return true;
 }
 //-----------------------------------------------------------------------------
-class TableIndicesHandler: public YxURIHandler
+class TableIndicesHandler: public URIHandler
 {
 public:
-	bool handleURI(const YURI& uriObj);
+	bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
     static const TableIndicesHandler handlerInstance;
@@ -1642,19 +1642,19 @@ private:
 //-----------------------------------------------------------------------------
 const TableIndicesHandler TableIndicesHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool TableIndicesHandler::handleURI(const YURI& uriObj)
+bool TableIndicesHandler::handleURI(URI& uri)
 {
-	if (uriObj.action != "add_index" && uriObj.action != "recompute_all")
+	if (uri.action != "add_index" && uri.action != "recompute_all")
 		return false;
 
-	YTable *t = (YTable *)getObject(uriObj);
-	wxWindow *w = getWindow(uriObj);
+	Table *t = (Table *)getObject(uri);
+	wxWindow *w = getWindow(uri);
 	if (!t || !w)
 		return true;
 
 	std::string sql;
 	std::vector<Index> *ix = t->getIndices();
-	if (uriObj.action == "recompute_all")
+	if (uri.action == "recompute_all")
 	{
 		for (std::vector<Index>::iterator it = ix->begin(); it != ix->end(); ++it)
 			sql += "SET STATISTICS INDEX " + (*it).getName() + ";\n";
@@ -1707,34 +1707,34 @@ bool TableIndicesHandler::handleURI(const YURI& uriObj)
 	return true;
 }
 //-----------------------------------------------------------------------------
-class ActivateTriggersHandler: public YxURIHandler
+class ActivateTriggersHandler: public URIHandler
 {
 public:
-	bool handleURI(const YURI& uriObj);
+	bool handleURI(URI& uri);
 private:
     static const ActivateTriggersHandler handlerInstance;
 };
 //-----------------------------------------------------------------------------
 const ActivateTriggersHandler ActivateTriggersHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool ActivateTriggersHandler::handleURI(const YURI& uriObj)
+bool ActivateTriggersHandler::handleURI(URI& uri)
 {
-	if (uriObj.action != "activate_triggers" && uriObj.action != "deactivate_triggers")
+	if (uri.action != "activate_triggers" && uri.action != "deactivate_triggers")
 		return false;
 
-	YTable *t = (YTable *)getObject(uriObj);
-	wxWindow *w = getWindow(uriObj);
+	Table *t = (Table *)getObject(uri);
+	wxWindow *w = getWindow(uri);
 	if (!t || !w)
 		return true;
 
-	std::vector<YTrigger *> list;
-	t->getTriggers(list, YTrigger::afterTrigger);
-	t->getTriggers(list, YTrigger::beforeTrigger);
+	std::vector<Trigger *> list;
+	t->getTriggers(list, Trigger::afterTrigger);
+	t->getTriggers(list, Trigger::beforeTrigger);
 	std::string sql;
-	for (std::vector<YTrigger *>::iterator it = list.begin(); it != list.end(); ++it)
+	for (std::vector<Trigger *>::iterator it = list.begin(); it != list.end(); ++it)
 	{
 		sql += "ALTER TRIGGER " + (*it)->getName() + " ";
-		if (uriObj.action == "deactivate_triggers")
+		if (uri.action == "deactivate_triggers")
 			sql += "IN";
 		sql += "ACTIVE;\n";
 	}

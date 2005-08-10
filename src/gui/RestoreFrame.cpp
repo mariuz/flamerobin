@@ -166,7 +166,7 @@ void RestoreThread::logProgress(wxString& msg)
         frameM->threadOutputMsg(msg, BackupRestoreBaseFrame::progress_message);
 }
 //-----------------------------------------------------------------------------
-RestoreFrame::RestoreFrame(wxWindow* parent, YDatabase* db):
+RestoreFrame::RestoreFrame(wxWindow* parent, Database* db):
     BackupRestoreBaseFrame(parent, db)
 {
     wxString s;
@@ -362,7 +362,7 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     clearLog();
 
     // TODO: create a global helper function
-    //   bool getDatabasePassword(wxFrame* parent, YDatabase* db, wxString password);
+    //   bool getDatabasePassword(wxFrame* parent, Database* db, wxString password);
     // this would simplify the next lines to
     //   if (!getDatabasePassword(this, databaseM, password))
     //       return;

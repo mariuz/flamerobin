@@ -77,9 +77,9 @@ public:
     DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
-class ExecuteSqlFrame: public BaseFrame, public YxObserver {
+class ExecuteSqlFrame: public BaseFrame, public Observer {
 public:
-	void setDatabase(YDatabase *db);
+	void setDatabase(Database *db);
 	void showProperties(wxString objectName);
 
     // begin wxGlade: ExecuteSqlFrame::ids
@@ -113,7 +113,7 @@ private:
 	typedef enum { ttNormal, ttSql, ttError } TextType;
 	void log(wxString s, TextType type = ttNormal);		// write messages to textbox
 	void SplitScreen();
-	YDatabase *databaseM;
+	Database *databaseM;
 
 	bool inTransactionM;
 	IBPP::Transaction transactionM;
@@ -148,7 +148,7 @@ private:
     // end wxGlade
 
 protected:
-	void removeObservedObject(YxSubject *object);
+	void removeObservedObject(Subject *object);
 	void update();
 	bool closeWhenTransactionDoneM;
 
@@ -186,12 +186,12 @@ protected:
 class DnDText : public wxTextDropTarget
 {
 public:
-    DnDText(wxStyledTextCtrl *owner, YDatabase *db) { ownerM = owner; databaseM = db; }
+    DnDText(wxStyledTextCtrl *owner, Database *db) { ownerM = owner; databaseM = db; }
     virtual bool OnDropText(wxCoord x, wxCoord y, const wxString& text);
 
 private:
     wxStyledTextCtrl *ownerM;
-	YDatabase *databaseM;
+	Database *databaseM;
 };
 //-----------------------------------------------------------------------------
 #endif // EXECUTESQLFRAME_H

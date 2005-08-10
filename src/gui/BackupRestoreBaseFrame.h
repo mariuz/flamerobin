@@ -65,8 +65,8 @@ public:
 protected:
     mutable std::string storageNameM;
 
-    YServer* serverM;
-    YDatabase *databaseM;
+    Server* serverM;
+    Database *databaseM;
 
     wxThread* threadM;
     wxArrayString msgsM;
@@ -82,7 +82,7 @@ protected:
     bool startThread(wxThread* thread);
     void threadOutputMsg(const wxString msg, MsgKind kind);
     virtual void updateControls() = 0;
-    BackupRestoreBaseFrame(wxWindow* parent, YDatabase* db);
+    BackupRestoreBaseFrame(wxWindow* parent, Database* db);
 private:
     wxCriticalSection critsectM;
     wxArrayString threadMsgsM;

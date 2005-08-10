@@ -295,7 +295,7 @@ void Optionbook::OnSize(wxSizeEvent& event)
 //-----------------------------------------------------------------------------
 // PreferencesDialog class
 PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
-        YConfig& config, const wxString& descriptionFileName)
+        Config& config, const wxString& descriptionFileName)
     : BaseDialog(parent, -1, title), configM(config)
 {
     // we don't want this dialog centered on parent since it is very big, and
