@@ -84,7 +84,6 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_config.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_converters.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_dberror.obj \
-	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_framemanager.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGrid.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridCells.obj \
@@ -94,6 +93,8 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupRestoreBaseFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseRegistrationDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ExecuteSqlFrame.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrame.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemPropertiesFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MultilineEnterDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.obj \
@@ -108,7 +109,6 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.obj \
-	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_column.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_constraints.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_database.obj \
@@ -257,9 +257,6 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_converters.obj: .\src\converters.cpp
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_dberror.obj: .\src\dberror.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrame.obj: .\src\gui\FieldPropertiesFrame.cpp
-	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
-
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_framemanager.obj: .\src\framemanager.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
@@ -285,6 +282,12 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseRegistrationDialog.obj: .\src\gui
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ExecuteSqlFrame.obj: .\src\gui\ExecuteSqlFrame.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrame.obj: .\src\gui\FieldPropertiesFrame.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.obj: .\src\gui\MainFrame.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemPropertiesFrame.obj: .\src\gui\MetadataItemPropertiesFrame.cpp
@@ -328,9 +331,6 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.obj: .\src\logger.cpp
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.obj: .\src\main.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) -H $**
-
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.obj: .\src\gui\MainFrame.cpp
-	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_column.obj: .\src\metadata\column.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**

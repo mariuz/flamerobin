@@ -232,7 +232,6 @@
         $(SOURCEDIR)/config.h
         $(SOURCEDIR)/converters.h
         $(SOURCEDIR)/dberror.h
-        $(SOURCEDIR)/gui/FieldPropertiesFrame.h
         $(SOURCEDIR)/framemanager.h
         $(SOURCEDIR)/frDataGrid.h
         $(SOURCEDIR)/frDataGridCells.h
@@ -242,6 +241,8 @@
         $(SOURCEDIR)/gui/BackupRestoreBaseFrame.h
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.h
         $(SOURCEDIR)/gui/ExecuteSqlFrame.h
+        $(SOURCEDIR)/gui/FieldPropertiesFrame.h
+        $(SOURCEDIR)/gui/MainFrame.h
         $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.h
         $(SOURCEDIR)/gui/MultilineEnterDialog.h
         $(SOURCEDIR)/gui/PreferencesDialog.h
@@ -255,7 +256,6 @@
         $(SOURCEDIR)/images.h
         $(SOURCEDIR)/logger.h
         $(SOURCEDIR)/main.h
-        $(SOURCEDIR)/gui/MainFrame.h
         $(SOURCEDIR)/metadata/collection.h
         $(SOURCEDIR)/metadata/column.h
         $(SOURCEDIR)/metadata/constraints.h
@@ -307,7 +307,6 @@
         $(SOURCEDIR)/config.cpp
         $(SOURCEDIR)/converters.cpp
         $(SOURCEDIR)/dberror.cpp
-        $(SOURCEDIR)/gui/FieldPropertiesFrame.cpp        
         $(SOURCEDIR)/framemanager.cpp
         $(SOURCEDIR)/frDataGrid.cpp
         $(SOURCEDIR)/frDataGridCells.cpp
@@ -317,6 +316,8 @@
         $(SOURCEDIR)/gui/BackupRestoreBaseFrame.cpp
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.cpp
         $(SOURCEDIR)/gui/ExecuteSqlFrame.cpp
+        $(SOURCEDIR)/gui/FieldPropertiesFrame.cpp
+        $(SOURCEDIR)/gui/MainFrame.cpp
         $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.cpp
         $(SOURCEDIR)/gui/MultilineEnterDialog.cpp
         $(SOURCEDIR)/gui/PreferencesDialog.cpp
@@ -331,7 +332,6 @@
         $(SOURCEDIR)/images.cpp
         $(SOURCEDIR)/logger.cpp
         $(SOURCEDIR)/main.cpp
-        $(SOURCEDIR)/gui/MainFrame.cpp
         $(SOURCEDIR)/metadata/column.cpp
         $(SOURCEDIR)/metadata/constraints.cpp
         $(SOURCEDIR)/metadata/database.cpp
