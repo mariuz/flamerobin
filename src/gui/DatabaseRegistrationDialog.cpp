@@ -40,6 +40,7 @@ Contributor(s): Michael Hieke, Nando Dessena
 #include "styleguide.h"
 #include "ugly.h"
 
+#include <wx/filename.h>
 #if wxCHECK_VERSION(2, 5, 3)
 #include "wx/gbsizer.h"
 #endif
@@ -49,7 +50,7 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
 {
     createM = createDB;
     label_name = new wxStaticText(getControlsPanel(), -1, _("Display name:"));
-    text_ctrl_name = new wxTextCtrl(getControlsPanel(), -1, wxT(""));
+    text_ctrl_name = new wxTextCtrl(getControlsPanel(), ID_textcontrol_name, wxT(""));
     label_dbpath = new wxStaticText(getControlsPanel(), -1, _("Database path:"));
     text_ctrl_dbpath = new wxTextCtrl(getControlsPanel(), ID_textcontrol_dbpath, wxT(""));
     button_browse = new wxButton(getControlsPanel(), ID_button_browse, _("..."),
@@ -207,6 +208,8 @@ void DatabaseRegistrationDialog::setDatabase(Database *db)
     if (choice_charset->GetSelection() < 0)
         choice_charset->SetSelection(choice_charset->FindString(wxT("NONE")));
 
+	hasNameM = !(databaseM->getName().empty());
+	
     // enable controls depending on operation and database connection status
     // use SetEditable() for edit controls to allow copying text to clipboard
     bool isConnected = databaseM->isConnected();
@@ -235,7 +238,8 @@ void DatabaseRegistrationDialog::updateButtons()
     if (button_ok->IsShown())
     {
         button_ok->Enable(!text_ctrl_dbpath->GetValue().IsEmpty()
-            && !text_ctrl_username->GetValue().IsEmpty());
+            && !text_ctrl_username->GetValue().IsEmpty()
+            && !text_ctrl_name->GetValue().IsEmpty());
     }
 }
 //-----------------------------------------------------------------------------
@@ -244,6 +248,7 @@ BEGIN_EVENT_TABLE(DatabaseRegistrationDialog, BaseDialog)
     EVT_BUTTON(DatabaseRegistrationDialog::ID_button_browse, DatabaseRegistrationDialog::OnBrowseButtonClick)
     EVT_BUTTON(DatabaseRegistrationDialog::ID_button_ok, DatabaseRegistrationDialog::OnOkButtonClick)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_dbpath, DatabaseRegistrationDialog::OnSettingsChange)
+    EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_name, DatabaseRegistrationDialog::OnNameChange)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_username, DatabaseRegistrationDialog::OnSettingsChange)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
@@ -293,6 +298,24 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
 void DatabaseRegistrationDialog::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
 {
     if (IsShown())
+	{
+		if (!hasNameM)
+		{
+			wxFileName fn(text_ctrl_dbpath->GetValue());
+			text_ctrl_name->SetValue(fn.GetName());
+		}
         updateButtons();
+	}
+}
+//-----------------------------------------------------------------------------
+void DatabaseRegistrationDialog::OnNameChange(wxCommandEvent& WXUNUSED(event))
+{
+    if (IsShown())
+	{
+        updateButtons();
+		wxFileName fn(text_ctrl_dbpath->GetValue());
+		if (text_ctrl_name->GetValue() != fn.GetName())
+			hasNameM = true;
+	}
 }
 //-----------------------------------------------------------------------------

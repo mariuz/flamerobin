@@ -113,6 +113,7 @@ void MainFrame::set_properties()
 		wxMessageBox(_("You may register a new server and databases."), _("File servers.xml not found"));
 
 		Server s; 					// add localhost
+		s.setName("Localhost");
 		s.setHostname("localhost");
 		s.setPort("3050");
 		getGlobalRoot().addServer(s);

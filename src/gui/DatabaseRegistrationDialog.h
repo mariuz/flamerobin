@@ -35,6 +35,7 @@ class DatabaseRegistrationDialog: public BaseDialog {
 public:
     enum {
         ID_textcontrol_dbpath = 101,
+        ID_textcontrol_name = 102,
         ID_textcontrol_username,
         ID_button_browse,
         ID_button_ok,
@@ -46,6 +47,7 @@ public:
 
     // events
     void OnSettingsChange(wxCommandEvent& event);
+    void OnNameChange(wxCommandEvent& event);
     void OnOkButtonClick(wxCommandEvent& event);
     void OnBrowseButtonClick(wxCommandEvent& event);
 
@@ -57,6 +59,7 @@ private:
     Database *databaseM;
     Server *serverM;
     bool createM;
+	bool hasNameM;
 
     void do_layout();
     void set_properties();
