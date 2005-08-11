@@ -52,12 +52,11 @@ NodeType getTypeByName(std::string name);
 //------------------------------------------------------------------------------
 class MetadataItem: public Item
 {
-private:
+protected:
 	std::string nameM;
 	MetadataItem *parentM;
 	std::string descriptionM;
 	bool descriptionLoadedM;
-protected:
 	NodeType typeM;
 public:
     virtual void accept(Visitor *v);

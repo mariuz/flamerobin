@@ -35,7 +35,7 @@ class Subject;
 //-----------------------------------------------------------------------------
 class Observer
 {
-private:
+protected:
 	std::list<Subject *> observedObjectsM;			// pointer to objects that it is watching
 public:
 	Observer();
