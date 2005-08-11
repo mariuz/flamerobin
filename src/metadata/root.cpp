@@ -114,7 +114,7 @@ bool Root::load()
             if (server->getName().empty())
 				server->setName(server->getConnectionString());
             server->unlockSubject();
-            server = NULL;
+            server = 0;
         }
         // database start and end tag
 		if (option == "database" && server)
@@ -124,13 +124,15 @@ bool Root::load()
 			database->initChildren();
 		}
 		if (option == "/database" && database)
-            database = NULL;
+            database = 0;
         // common subtags
 		if (option == "name" && server)
+		{
             if (database)
                 database->setName(value);
             else
 			    server->setName(value);
+		}
 		// server-specific subtags
         if (option == "host" && server)
 			server->setHostname(value);
