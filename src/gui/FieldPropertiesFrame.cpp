@@ -34,8 +34,8 @@
     #include "wx/wx.h"
 #endif
 
-#include "gui/ExecuteSqlFrame.h"
-#include "gui/FieldPropertiesFrame.h"
+#include "ExecuteSqlFrame.h"
+#include "FieldPropertiesFrame.h"
 #include "images.h"
 #include "metadata/database.h"
 #include "ugly.h"
