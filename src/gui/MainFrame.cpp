@@ -204,8 +204,8 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 {
 	static Database *lastDatabase = 0;		// remember the last database/node type, so menus don't
 	static NodeType lastType = ntUnknown;	// get rebuilt when it is not needed
-	std::string s = "-";
 	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	Database *d = tree_ctrl_1->getSelectedDatabase();
 	if (m)
 	{
 		if (m->getType() != lastType)
@@ -216,23 +216,24 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 			m->accept(&cmv);
 			lastType = m->getType();
 		}
-		Database *d = m->getDatabase();
-		if (d != lastDatabase)
+	}
+	if (d != lastDatabase)
+	{
+		while (databaseMenu->GetMenuItemCount() > 0)
+			databaseMenu->Destroy(databaseMenu->FindItemByPosition(0));
+		if (d)
 		{
-			while (databaseMenu->GetMenuItemCount() > 0)
-				databaseMenu->Destroy(databaseMenu->FindItemByPosition(0));
-			if (d)
-			{
-				ContextMenuVisitor cmvd(databaseMenu);
-				d->accept(&cmvd);
-				s = d->getUsername() + "@" + d->getConnectionString() + " (" + d->getCharset() + ")";
-			}
-			lastDatabase = d;
+			ContextMenuVisitor cmvd(databaseMenu);
+			d->accept(&cmvd);
+			std::string s = d->getUsername() + "@" + d->getConnectionString() + " (" + d->getCharset() + ")";
+			statusBarM->SetStatusText(std2wx(s));
 		}
+		else
+			statusBarM->SetStatusText(wxT("-"));
+		lastDatabase = d;
 	}
 	menuBarM->EnableTop(1, databaseMenu->GetMenuItemCount() > 0);		// disable empty menus
 	menuBarM->EnableTop(2, objectMenu->GetMenuItemCount() > 0);			// disable empty menus
-	statusBarM->SetStatusText(std2wx(s));
 }
 //-----------------------------------------------------------------------------
 //! handle double-click on item (or press Enter)
