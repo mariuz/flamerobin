@@ -716,19 +716,7 @@ void MainFrame::OnMenuReconnect(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuConnectAs(wxCommandEvent& WXUNUSED(event))
 {
-	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
-	if (!m)
-		return;
-	Database *d = m->getDatabase();
-	if (!d)
-		return;
-
-	// TODO: create a copy or something?
-    DatabaseRegistrationDialog drd(this, -1, _("Connect as..."))
-	drd.setDatabase(d);
-	drd.ShowModal();
-
-	connect();
+	wxMessageBox(_("The feature is not yet available."), _("Not yet implemented"), wxOK | wxICON_INFORMATION);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuConnect(wxCommandEvent& WXUNUSED(event))
