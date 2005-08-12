@@ -95,34 +95,22 @@ FieldPropertiesFrame::FieldPropertiesFrame(wxWindow* parent, int id, wxString ti
     cb_notnull = new wxCheckBox(panel_1, -1, _("Not null"));
     label_5 = new wxStaticText(panel_1, -1, _("Charset"));
     const wxString ch_charset_choices[] = {
-		wxT("NONE"),
-		wxT("ASCII"),
-		wxT("BIG_5"),
-		wxT("CYRL"),
-		wxT("DOS437"),
-		wxT("DOS850"),
-		wxT("DOS852"),
-		wxT("DOS857"),
-		wxT("DOS860"),
-		wxT("DOS861"),
-		wxT("DOS863"),
-		wxT("DOS865"),
-		wxT("EUCJ_0208"),
-		wxT("GB_2312"),
-		wxT("ISO8859_1"),
-		wxT("ISO8859_2"),
-		wxT("KSC_5601"),
-		wxT("NEXT"),
-		wxT("OCTETS"),
-		wxT("SJIS_0208"),
-		wxT("UNICODE_FSS"),
-		wxT("WIN1250"),
-		wxT("WIN1251"),
-		wxT("WIN1252"),
-		wxT("WIN1253"),
-		wxT("WIN1254")
+		wxT("NONE")
     };
-    ch_charset = new wxChoice(panel_1, ID_ch_charset, wxDefaultPosition, wxDefaultSize, 26, ch_charset_choices);
+    ch_charset = new wxChoice(panel_1, ID_ch_charset, wxDefaultPosition, wxDefaultSize, 1, ch_charset_choices);
+    Database *d = table->getDatabase();
+    if (d)
+    {
+        std::vector<std::string> charsets;
+        d->fillVector(charsets, "select rdb$character_set_name from rdb$character_sets order by 1");
+        for (std::vector<std::string>::iterator it = charsets.begin(); it != charsets.end(); ++it)
+        {
+            if ((*it) == "NONE")
+                continue;
+            ch_charset->Append(std2wx(*it));
+        }
+    }
+    
     label_6 = new wxStaticText(panel_1, -1, _("Collate"));
     const wxString ch_collate_choices[] = {
         wxT(""),	// ugly hack. The control doesn't want to show big list for selection if initial list is short
