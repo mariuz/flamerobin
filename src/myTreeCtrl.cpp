@@ -156,6 +156,15 @@ MetadataItem *myTreeCtrl::getSelectedMetadataItem()
 	return getMetadataItem(GetSelection());
 }
 //-----------------------------------------------------------------------------
+//! returns the database of the object that selected wxTree node observes
+Database *myTreeCtrl::getSelectedDatabase()
+{
+	MetadataItem *m = getSelectedMetadataItem();
+	if (!m)
+		return 0;
+	return m->getDatabase();
+}
+//-----------------------------------------------------------------------------
 //! returns the object that some wxTree node observes
 MetadataItem *myTreeCtrl::getMetadataItem(wxTreeItemId item)
 {

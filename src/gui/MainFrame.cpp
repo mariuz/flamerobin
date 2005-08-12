@@ -391,15 +391,11 @@ void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuInsert(wxCommandEvent& WXUNUSED(event))
 {
 	Table *t = dynamic_cast<Table *>(tree_ctrl_1->getSelectedMetadataItem());
-	if (!t)
-		return;
-
-	Database *d = dynamic_cast<Database *>(t->getParent());
-	if (!d)
+	Database *d = tree_ctrl_1->getSelectedDatabase();
+	if (!t || !d)
 		return;
 
 	wxString sql = std2wx(t->getInsertStatement());
-
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(this, -1, wxString(_("Execute SQL statements")));
 	eff->setDatabase(d);
 	eff->setSql(sql);
@@ -425,7 +421,7 @@ void MainFrame::OnMenuBrowse(wxCommandEvent& WXUNUSED(event))
 	if (t != ntTable && t != ntView && t != ntSysTable && t != ntProcedure)
 		return;
 
-	Database *d = dynamic_cast<Database *>(i->getParent());
+	Database *d = i->getDatabase();
 	if (!d)
 		return;
 
@@ -464,7 +460,7 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
 	if (t != ntTable && t != ntView && t != ntSysTable && t != ntProcedure)
 		return;
 
-	Database *d = dynamic_cast<Database *>(i->getParent());
+	Database *d = i->getDatabase();
 	if (!d)
 		return;
 
@@ -527,10 +523,7 @@ void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
 {
-	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
-	if (!m)
-		return;
-	Database *d = m->getDatabase();
+	Database *d = tree_ctrl_1->getSelectedDatabase();
 	if (!d)
 		return;
 
@@ -574,10 +567,6 @@ void MainFrame::OnMenuStopServer(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUnRegisterServer(wxCommandEvent& WXUNUSED(event))
 {
-	wxTreeItemId item = tree_ctrl_1->GetSelection();
-	if (!item.IsOk())
-		return;
-
 	Server *s = dynamic_cast<Server *>(tree_ctrl_1->getSelectedMetadataItem());
 	if (!s)
 		return;
@@ -616,10 +605,7 @@ void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 {
-	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
-	if (!m)
-		return;
-	Database *d = m->getDatabase();
+	Database *d = tree_ctrl_1->getSelectedDatabase();
 	if (!d)
 		return;
 	if (d->isConnected())
@@ -638,25 +624,9 @@ void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
 {
-	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
-	if (!m)
-		return;
-	Database *d = m->getDatabase();
+	Database *d = tree_ctrl_1->getSelectedDatabase();
 	if (!d)
 		return;
-/*
-	if (!d->isConnected())
-	{
-		if (wxYES == ::wxMessageBox(_("Do you want to connect?"), _("Not connected."), wxYES_NO|wxICON_QUESTION ))
-		{
-			connect(false);
-			if (!d->isConnected())
-				return;
-		}
-		else
-			return;
-	}
-*/
 	wxArrayString as;
 	std::vector<std::string> users;
 	d->getIBPPDatabase()->Users(users);
@@ -668,47 +638,29 @@ void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuBackup(wxCommandEvent& WXUNUSED(event))
 {
-	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
-	if (!m)
+	Database *d = tree_ctrl_1->getSelectedDatabase();
+	if (!d)
 		return;
-	Database *db = m->getDatabase();
-	if (!db)
-		return;
-    BackupFrame* f = new BackupFrame(this, db);
+    BackupFrame* f = new BackupFrame(this, d);
     f->Show();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRestore(wxCommandEvent& WXUNUSED(event))
 {
-	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
-	if (!m)
+	Database *d = tree_ctrl_1->getSelectedDatabase();
+	if (!d)
 		return;
-	Database *db = m->getDatabase();
-	if (!db)
-		return;
-
-    RestoreFrame* f = new RestoreFrame(this, db);
+    RestoreFrame* f = new RestoreFrame(this, d);
     f->Show();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuReconnect(wxCommandEvent& WXUNUSED(event))
 {
-	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
-	if (!m)
+	Database *d = tree_ctrl_1->getSelectedDatabase();
+	if (!d)
 		return;
-	Database *db = m->getDatabase();
-	if (!db)
-		return;
-/*
-	if (!db->isConnected())
-	{
-		if (wxYES == ::wxMessageBox(_("Do you want to connect?"), _("Not connected."), wxYES_NO|wxICON_QUESTION ))
-			connect(false);
-		return;
-	}
-*/
 	::wxBeginBusyCursor();
-	bool ok = db->reconnect();
+	bool ok = d->reconnect();
 	::wxEndBusyCursor();
 	if (!ok)
 		wxMessageBox(std2wx(lastError().getMessage()), _("Error!"), wxOK | wxICON_ERROR);
@@ -726,13 +678,9 @@ void MainFrame::OnMenuConnect(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::connect(bool warn)
 {
-	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
-	if (!m)
-		return;
-	Database *db = m->getDatabase();
+	Database *db = tree_ctrl_1->getSelectedDatabase();
 	if (!db)
 		return;
-
 	if (db->isConnected())
 	{
 		if (warn)
@@ -781,20 +729,10 @@ void MainFrame::connect(bool warn)
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDisconnect(wxCommandEvent& WXUNUSED(event))
 {
-	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
-	if (!m)
+	Database *d = tree_ctrl_1->getSelectedDatabase();
+	if (!d)
 		return;
-	Database *db = m->getDatabase();
-	if (!db)
-		return;
-/*
-	if (!db->isConnected())
-	{
-		wxMessageBox(_("Not connected"), _("Warning"), wxOK | wxICON_WARNING);
-		return;
-	}
-*/
-	if (!db->disconnect())
+	if (!d->disconnect())
 		wxMessageBox(std2wx(lastError().getMessage()), _("Error!"), wxOK | wxICON_ERROR);
 }
 //-----------------------------------------------------------------------------
@@ -826,8 +764,7 @@ void MainFrame::OnMenuSetGeneratorValue(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuShowAllGeneratorValues(wxCommandEvent& WXUNUSED(event))
 {
-	wxTreeItemId item = tree_ctrl_1->GetItemParent(tree_ctrl_1->GetSelection());
-	Database *db = dynamic_cast<Database *>(tree_ctrl_1->getMetadataItem(item));
+	Database *db = tree_ctrl_1->getSelectedDatabase();
 	if (!db)
 	{
 		wxMessageBox(_("No database assigned"), _("Warning"), wxOK | wxICON_ERROR);
@@ -848,9 +785,7 @@ void MainFrame::OnMenuCreateObject(wxCommandEvent& WXUNUSED(event))
 	MetadataItem *t = tree_ctrl_1->getSelectedMetadataItem();
 	if (!t)
 		return;
-
-	wxTreeItemId item = tree_ctrl_1->GetItemParent(tree_ctrl_1->GetSelection());
-	Database *db = dynamic_cast<Database *>(tree_ctrl_1->getMetadataItem(item));
+	Database *db = t->getDatabase();
 	if (!db)
 	{
 		wxMessageBox(_("No database assigned"), _("Warning"), wxOK | wxICON_ERROR);
@@ -946,11 +881,8 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
 {
 	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
-	if (!m)
-		return;
-
-	Database *d = m->getDatabase();
-	if (!d)
+	Database *d = tree_ctrl_1->getSelectedDatabase();
+	if (!m || !d)
 		return;
 
 	// TODO: We could first check if there are some dependant objects, and offer the user to
@@ -968,13 +900,9 @@ void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
 //! create new ExecuteSqlFrame and attach database object to it
 void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
 {
-	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
-	if (!m)
-		return;
-	Database *d = m->getDatabase();
+	Database *d = tree_ctrl_1->getSelectedDatabase();
 	if (!d)
 		return;
-
 	if (!d->isConnected())
 	{
 		if (wxYES == ::wxMessageBox(_("Do you want to connect?"), _("Not connected."), wxYES_NO | wxICON_QUESTION ))
@@ -986,7 +914,6 @@ void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
 		else
 			return;
 	}
-
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(this, -1, wxString(_("Execute SQL statements")));
 	eff->setDatabase(d);
 	eff->Show();
@@ -1005,21 +932,13 @@ void MainFrame::OnMenuUpdateUnRegisterServer(wxUpdateUIEvent& event)
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateIfDatabaseConnected(wxUpdateUIEvent& event)
 {
-	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
-	if (m)
-	{
-		Database *db = m->getDatabase();
-		event.Enable(db != 0 && db->isConnected());
-	}
+	Database *db = tree_ctrl_1->getSelectedDatabase();
+	event.Enable(db != 0 && db->isConnected());
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateIfDatabaseNotConnected(wxUpdateUIEvent& event)
 {
-	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
-	if (m)
-	{
-		Database *db = m->getDatabase();
-		event.Enable(db != 0 && !db->isConnected());
-	}
+	Database *db = tree_ctrl_1->getSelectedDatabase();
+	event.Enable(db != 0 && !db->isConnected());
 }
 //-----------------------------------------------------------------------------
