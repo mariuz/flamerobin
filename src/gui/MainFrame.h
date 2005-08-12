@@ -78,6 +78,7 @@ public:
     void OnMenuCreateTrigger(wxCommandEvent& event);
     void OnMenuDisconnect(wxCommandEvent& event);
     void OnMenuConnect(wxCommandEvent& event);
+    void OnMenuConnectAs(wxCommandEvent& event);
     void OnMenuReconnect(wxCommandEvent& event);
 
 	// enabled menu items
