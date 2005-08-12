@@ -2,36 +2,33 @@ FlameRobin: support & config file paths roundup
 
 Files needed by FR:
 
-- $conf - a config file (config.ini, which I propose to rename fr_settings.conf)
-- $db - a database connection definition file (servers.xml, which I propose to rename fr_databases.conf)
+- $conf - a config file (config.ini, to be renamed fr_settings.conf)
+- $db - a database connection definition file (servers.xml, to be renamed fr_databases.conf)
 - $templ - the html-templates directory
-- $confdef - the main config settings definition file (config_options.xml, which I propose to rename fr_settings.confdef)
-- possibly other confdef files for scoped (database-level, for example) configuration (preferences) dialogs
-- $docfiles - the files doc/fr_manual.html, doc/fr_changes.html and doc/fr_license.html that are displayed from the main menu
-
-It is advisable to define a directory for $confdef, in case we need more files of that kind. In that case, the main file may be named fr_settings.confdef to match the main config file.
+- $confdef - the confdefs directory, containing the main config settings definition file (now config_options.xml, to be renamed fr_settings.confdef) and possibly other confdef files for scoped (database-level, for example, to be named database_settings.confdef) configuration (preferences) dialogs
+- $docfiles - the files docs/fr_manual.html, docs/fr_changes.html and docs/fr_license.html that are displayed from the main menu
 
 Locations:
 
-- $frhome - FR will find $templ, $confdef and $docfiles (which are immutable and integral part of the FR distribution) in its home path. The home path is computed by getApplicationPath() in frutils.cpp, to be renamed to getFRHomePath. Note: does that function need to fall back to something different than "" in case of failure?
+- $frhome - FR will find $templ, $confdef and $docfiles (which are immutable and integral part of the FR distribution) in its home path. The home path is returned by config()::getHomePath(), usually the application folder.
 Note: passing -h <path> on FR's command line will override this path.
 
-- $fruserhome - FR will find $conf and $db (which are user settings files) in its user home path. This path has to be writable and may be common to all users on the machine or different for each user. The user home path is computer by getFRUserHomePath(), to be written, and it will default to wxStandardPaths::GetUserLocalDataDir().
-Note: passing -uh <path> or -h <path> on FR's command line will override this path.
+- $fruserhome - FR will find $conf and $db (which are user settings files) in its user home path. This path has to be writable and may be common to all users on the machine or different for each user. The user home path is config()::getUserHomePath(), and it defaults to wxStandardPaths::GetUserLocalDataDir().
+Note: passing -uh <path> on FR's command line will override this path.
 
-Additional note: the <path> specification in the command line parameters may be "$app", which translates to wxStandardPaths::GetLocalDataDir() for both -h and -uh, or "$user", which translates to wxStandardPaths::GetUserLocalDataDir() for both -h and -uh.
+Additional note: the <path> specification in the command line parameters -h and -uh may be "$app", which translates to wxStandardPaths::GetLocalDataDir(), or "$user", which translates to wxStandardPaths::GetUserLocalDataDir(). Otherwise, it has to be a path.
 
-FR will only ever write to files in $conf and $db. If these files are shared by several users, then no precaution is taken to avoid overwriting other users' changes.
+FR will only ever write to files in $fruserhome. If FR is configured so that these files are shared by several users, then no precaution is taken to avoid overwriting other users' changes.
 
-The installer might ask the user whether he intends to share FR settings among all users of the system or not and produce a different command line (a Start Menu or Desktop link under Windows). Not sure about the other platforms.
+The installer will use the default settings and not allow customization, for the time being.
 
 Use:
 
-$conf will contain all FR settings that are managed by a singleton instance of YConfig (to be renamed to Config), which is a wrapper around wxFileConfig, and which also handles a set of hardwired defaults. A call to Config::getValue() will always yeld a value, even if the config file is not found or the key doesn't exist (defaults apply).
+$conf contains all FR settings that are managed by a singleton instance of Config, which is a wrapper around one or more instances of wxFileConfig, and which also handles a set of hardwired defaults. A call to Config::getValue() will always yield a value, even if the config file is not found or the key doesn't exist (defaults apply).
 
-$db is managed internally by the DBH using custom code (as it is now) or possibly wxXmlDocument.
+$db is managed internally by the DBH using custom XML-parsing code (as it is now), or possibly wxXmlDocument.
 
-The locations of $templ, $confdef and $docfiles are returned by functions in Config. Thus, not all services that Config exposes are directly related to the config file.
+The locations of $templ, $confdef and $docfiles are returned by functions in Config. This means that not all services that Config exposes are directly related to the config file(s).
 
 Scoping (might come later):
 
@@ -53,10 +50,34 @@ will search in the following config keys:
 - ::DB[SomeDatabase]::NumberPrecision
 - NumberPrecision
 
-The caller of getValue will retrieve the "::DB[SomeDatabase]/" or "::DB[SomeDatabase]::TB[SomeTable]::" or "::DB[SomeDatabase]::TB[SomeTable]::CL[SomeColumn]::" prefix by calling the getItemPath() function (perhaps to be renamed to getPath()) of the relevant metadata item.
+The caller of getValue will retrieve the "::DB[SomeDatabase]/" or "::DB[SomeDatabase]::TB[SomeTable]::" or "::DB[SomeDatabase]::TB[SomeTable]::CL[SomeColumn]::" prefix by calling the getItemPath() member function of the relevant metadata item. A shortcut membed function in MetadataItem will shorten the code; for example, assuming a Database db named "foo", this code:
 
-Note: wxFileConfig will resolve the scoped setting names by using different [sections] in the pseudo-INI file, but that's not relevant to the users of FR's Config.
+int numPrec = db.getConfigValue("NumberPrecision");
 
-Note: instead of DB, TB, CL, etc. the full type names (as returned by getTypeName() may be used, at the cost of using more memory and disk space for the config file.
+is equivalent to:
 
-Note: we should make sure that database names are not allowed to contain the characters ":", "[" and "]", as it will ease parsing. Also, while we are undecided whether to keep of remove the YServer/Server class, a database name will be compound: serverName:databaseName to gain uniqueness. We should also prevent the user from inserting duplicate database names.
+config().GetValue("::DB[SomeDatabase]::NumberPrecision", numPrec);
+
+Note: wxFileConfig will resolve the scoped setting names by using different [sections] in the pseudo-INI file, but that's not relevant to the users of FR's Config. Config might also split the settings in different files (one for each database) for better efficiency and manageability.
+
+Note: the names DB, TB, CL, etc. are used in place of the full type names (as returned by getTypeName() to save memory and disk space for the config file(s). We might use a numeric value in place of the database as well (see below).
+
+Note: we should make sure that database names are not allowed to contain the characters ":", "[" and "]", as it will ease parsing. Also, while we are undecided whether to keep of remove the Server class, a database name will be compound: serverName:databaseName to gain uniqueness. We should also prevent the user from inserting duplicate database names.
+
+The database rename issue:
+
+Tables, columns and other metadata objects don't get renamed very frequently, but since we allow to change the name of a database quite easily, if we use it as a path identifier then once you rename it you loose all config stuff about it (and the data stays there forever cluttering the config file. Even worse, if you later define a database with the same name then the old config applies...). I can see several solutions:
+
+a) when a database is renamed, do a search & replace over the whole config file. This might be heavy.
+b) don't use the database name but a "generator" instead. Store its value in the config file and use it to generate unique and invisible IDs for databases. This is light and should work well.
+c) store the config for each database in a separate file, then just rename the file when the database is renamed. This is going to require some tricky code in Config, and it has the potential to get messy(*) if we later want to define per-table, per-column, etc. config.
+
+(*) meaning we won't be treating all objects in the same fashion, but have special regards for Database instead.
+
+The preferred solution is c) for efficiency and manageability reasons, perhaps with a shot of b).
+
+Possible extensions:
+
+We might want to let the installers allow the user to choose whether to share the config files among all users of the machine or not, and generate different command lines as required.
+
+We might add an environment variable as further customization possibility.
