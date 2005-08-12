@@ -62,54 +62,22 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
         wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
     text_ctrl_password->SetToolTip(_("Leave empty if you wish to be prompted for password every time"));
     label_charset = new wxStaticText(getControlsPanel(), -1, _("Charset:"));
+	
     const wxString charset_choices[] = {
-        wxT("NONE"),
-        wxT("ASCII"),
-        wxT("BIG_5"),
-        wxT("CYRL"),
-        wxT("DOS437"),
-        wxT("DOS737"),
-        wxT("DOS775"),
-        wxT("DOS850"),
-        wxT("DOS852"),
-        wxT("DOS857"),
-        wxT("DOS858"),
-        wxT("DOS860"),
-        wxT("DOS861"),
-        wxT("DOS862"),
-        wxT("DOS863"),
-        wxT("DOS864"),
-        wxT("DOS865"),
-        wxT("DOS866"),
-        wxT("DOS869"),
-        wxT("EUCJ_0208"),
-        wxT("GB_2312"),
-        wxT("ISO8859_1"),
-        wxT("ISO8859_2"),
-        wxT("ISO8859_3"),
-        wxT("ISO8859_4"),
-        wxT("ISO8859_5"),
-        wxT("ISO8859_6"),
-        wxT("ISO8859_7"),
-        wxT("ISO8859_8"),
-        wxT("ISO8859_9"),
-        wxT("ISO8859_13"),
-        wxT("KSC_5601"),
-        wxT("NEXT"),
-        wxT("OCTETS"),
-        wxT("SJIS_0208"),
-        wxT("UNICODE_FSS"),
-        wxT("WIN1250"),
-        wxT("WIN1251"),
-        wxT("WIN1252"),
-        wxT("WIN1253"),
-        wxT("WIN1254"),
-        wxT("WIN1255"),
-        wxT("WIN1256"),
-        wxT("WIN1257")
+        wxT("NONE"),        wxT("ASCII"),        wxT("BIG_5"),        wxT("CYRL"),        wxT("DOS437"),
+        wxT("DOS737"),      wxT("DOS775"),       wxT("DOS850"),       wxT("DOS852"),      wxT("DOS857"),
+        wxT("DOS858"),      wxT("DOS860"),       wxT("DOS861"),       wxT("DOS862"),      wxT("DOS863"),
+        wxT("DOS864"),      wxT("DOS865"),       wxT("DOS866"),       wxT("DOS869"),      wxT("EUCJ_0208"),
+        wxT("GB_2312"),     wxT("ISO8859_1"),    wxT("ISO8859_2"),    wxT("ISO8859_3"),   wxT("ISO8859_4"),
+        wxT("ISO8859_5"),   wxT("ISO8859_6"),    wxT("ISO8859_7"),    wxT("ISO8859_8"),   wxT("ISO8859_9"),
+        wxT("ISO8859_13"),  wxT("KSC_5601"),     wxT("NEXT"),         wxT("OCTETS"),      wxT("SJIS_0208"),
+        wxT("UNICODE_FSS"), wxT("WIN1250"),      wxT("WIN1251"),      wxT("WIN1252"),     wxT("WIN1253"),
+        wxT("WIN1254"),     wxT("WIN1255"),      wxT("WIN1256"),      wxT("WIN1257")
     };
-    choice_charset = new wxChoice(getControlsPanel(), -1, wxDefaultPosition, wxDefaultSize,
-        sizeof(charset_choices) / sizeof(wxString), charset_choices);
+    
+    combobox_charset = new wxComboBox(getControlsPanel(), -1, wxT("NONE"), wxDefaultPosition, wxDefaultSize, 
+        sizeof(charset_choices) / sizeof(wxString), charset_choices, wxCB_DROPDOWN|wxCB_SORT);    
+    
     label_role = new wxStaticText(getControlsPanel(), -1, _("Role:"));
     text_ctrl_role = new wxTextCtrl(getControlsPanel(), -1, wxT(""));
 
@@ -169,7 +137,7 @@ void DatabaseRegistrationDialog::do_layout()
     sizerControls->Add(text_ctrl_password, wxGBPosition(2, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
 
     sizerControls->Add(label_charset, wxGBPosition(3, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-    sizerControls->Add(choice_charset, wxGBPosition(3, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
+    sizerControls->Add(combobox_charset, wxGBPosition(3, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
     sizerControls->Add(label_role, wxGBPosition(3, 2), wxDefaultSpan, wxLEFT|wxALIGN_CENTER_VERTICAL, dx);
     sizerControls->Add(text_ctrl_role, wxGBPosition(3, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
 
@@ -222,9 +190,9 @@ void DatabaseRegistrationDialog::setDatabase(Database *db)
     text_ctrl_username->SetValue(std2wx(databaseM->getUsername()));
     text_ctrl_password->SetValue(std2wx(databaseM->getPassword()));
     text_ctrl_role->SetValue(std2wx(databaseM->getRole()));
-    choice_charset->SetSelection(choice_charset->FindString(std2wx(databaseM->getCharset())));
-    if (choice_charset->GetSelection() < 0)
-        choice_charset->SetSelection(choice_charset->FindString(wxT("NONE")));
+    combobox_charset->SetSelection(combobox_charset->FindString(std2wx(databaseM->getCharset())));
+    if (combobox_charset->GetSelection() < 0)
+        combobox_charset->SetSelection(combobox_charset->FindString(wxT("NONE")));
 
 	hasNameM = !(databaseM->getName().empty());
 	
@@ -235,7 +203,7 @@ void DatabaseRegistrationDialog::setDatabase(Database *db)
     button_browse->Enable(!isConnected);
     text_ctrl_username->SetEditable(!isConnected);
     text_ctrl_password->SetEditable(!isConnected);
-    choice_charset->Enable(!isConnected);
+    combobox_charset->Enable(!isConnected);
     text_ctrl_role->SetEditable(!isConnected);
     //button_ok->Enable(!isConnected);
     if (isConnected)
@@ -285,7 +253,7 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
     databaseM->setPath(wx2std(text_ctrl_dbpath->GetValue()));
     databaseM->setUsername(wx2std(text_ctrl_username->GetValue()));
     databaseM->setPassword(wx2std(text_ctrl_password->GetValue()));
-    databaseM->setCharset(wx2std(choice_charset->GetStringSelection()));
+    databaseM->setCharset(wx2std(combobox_charset->GetStringSelection()));
     databaseM->setRole(wx2std(text_ctrl_role->GetValue()));
 
     try

@@ -79,7 +79,7 @@ protected:
     wxStaticText* label_password;
     wxTextCtrl* text_ctrl_password;
     wxStaticText* label_charset;
-    wxChoice* choice_charset;
+    wxComboBox* combobox_charset;
     wxStaticText* label_role;
     wxTextCtrl* text_ctrl_role;
     wxStaticText* label_pagesize;
