@@ -40,7 +40,7 @@ Database::Database()
 {
 	typeM = ntDatabase;
 	connectedM = false;
-	
+
 	// has to be here, since notify() might be called before initChildren()
 	domainsM.setName("Domains");
 	domainsM.setType(ntDomains);
@@ -768,7 +768,6 @@ bool Database::connect(std::string password)
             password, roleM, charsetM, "");
 		databaseM->Connect();
 		connectedM = true;
-		validPasswordM = password;	// successful
 		notify();
 
 		tablesM.setParent(this);
@@ -843,7 +842,6 @@ void Database::clear()
 	charsetM = "";
 	usernameM = "";
 	passwordM = "";
-	validPasswordM = "";
 	roleM = "";
 }
 //------------------------------------------------------------------------------

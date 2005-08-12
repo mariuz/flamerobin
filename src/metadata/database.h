@@ -64,7 +64,6 @@ private:
 	std::string roleM;
 	std::string usernameM;
 	std::string passwordM;
-	std::string validPasswordM;		// set when connection successful
 
 	MetadataCollection<Domain> domainsM;
     MetadataCollection<Exception> exceptionsM;
