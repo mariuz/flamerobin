@@ -51,7 +51,7 @@ public:
     virtual bool orderedChildren() const;
 	Database* addDatabase(Database&);
 	void removeDatabase(Database*);
-	const MetadataCollection<Database> *getDatabases() const;
+	MetadataCollection<Database> *getDatabases();
 
 	void createDatabase(Database *db, int pagesize = 4096, int dialect = 3);
 

@@ -51,7 +51,25 @@
 // ND: for some reason including server.h doesn't work, probably a cyclic
 // dependency issue.
 class Server;
+//------------------------------------------------------------------------------
+class Credentials
+{
+private:
+	std::string charsetM;
+	std::string roleM;
+	std::string usernameM;
+	std::string passwordM;
 
+public:
+	std::string getCharset() const;
+	std::string getUsername() const;
+	std::string getPassword() const;
+	std::string getRole() const;
+	void setCharset(std::string value);
+	void setUsername(std::string value);
+	void setPassword(std::string value);
+	void setRole(std::string value);
+};
 //------------------------------------------------------------------------------
 class Database: public MetadataItem
 {
@@ -60,10 +78,8 @@ private:
 	bool connectedM;
 
 	std::string pathM;
-	std::string charsetM;
-	std::string roleM;
-	std::string usernameM;
-	std::string passwordM;
+	Credentials credentials;
+	Credentials *connectionCredentials;
 
 	MetadataCollection<Domain> domainsM;
     MetadataCollection<Exception> exceptionsM;
@@ -101,6 +117,8 @@ public:
 	bool connect(std::string password);
 	bool disconnect();
 	bool reconnect() const;
+	void prepareTemporaryCredentials();
+	void resetCredentials();
 
 	std::string loadDomainNameForColumn(std::string table, std::string field);
 	Domain *loadMissingDomain(std::string name);

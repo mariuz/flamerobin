@@ -35,11 +35,52 @@
 #include "ugly.h"
 #include "dberror.h"
 //------------------------------------------------------------------------------
+void Credentials::setCharset(std::string value)
+{
+	charsetM = value;
+}
+//------------------------------------------------------------------------------
+void Credentials::setUsername(std::string value)
+{
+	usernameM = value;
+}
+//------------------------------------------------------------------------------
+void Credentials::setPassword(std::string value)
+{
+	passwordM = value;
+}
+//------------------------------------------------------------------------------
+void Credentials::setRole(std::string value)
+{
+	roleM = value;
+}
+//------------------------------------------------------------------------------
+std::string Credentials::getCharset() const
+{
+	return charsetM;
+}
+//------------------------------------------------------------------------------
+std::string Credentials::getUsername() const
+{
+	return usernameM;
+}
+//------------------------------------------------------------------------------
+std::string Credentials::getPassword() const
+{
+	return passwordM;
+}
+//------------------------------------------------------------------------------
+std::string Credentials::getRole() const
+{
+	return roleM;
+}
+//------------------------------------------------------------------------------
 Database::Database()
     : MetadataItem()
 {
 	typeM = ntDatabase;
 	connectedM = false;
+	connectionCredentials = 0;
 
 	// has to be here, since notify() might be called before initChildren()
 	domainsM.setName("Domains");
@@ -68,6 +109,21 @@ void Database::initChildren()
 	getCollections(temp);
 	for (std::vector<MetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
 		(*it)->setParent(this);
+}
+//------------------------------------------------------------------------------
+void Database::prepareTemporaryCredentials()
+{
+	resetCredentials();
+	connectionCredentials = new Credentials;
+}
+//------------------------------------------------------------------------------
+void Database::resetCredentials()
+{
+	if (connectionCredentials)	// i.e. there is some other
+	{
+		delete connectionCredentials;
+		connectionCredentials = 0;
+	}
 }
 //------------------------------------------------------------------------------
 void Database::getIdentifiers(std::vector<std::string>& temp)
@@ -764,8 +820,8 @@ bool Database::connect(std::string password)
 
 	try
 	{
-        databaseM = IBPP::DatabaseFactory("", getConnectionString(), usernameM,
-            password, roleM, charsetM, "");
+        databaseM = IBPP::DatabaseFactory("", getConnectionString(), getUsername(),
+            getPassword(), getRole(), getCharset(), "");
 		databaseM->Connect();
 		connectedM = true;
 		notify();
@@ -795,6 +851,7 @@ bool Database::disconnect()
 	try
 	{
 		databaseM->Disconnect();
+		resetCredentials();		// "forget" temporary username/password
 		connectedM = false;
 
 		// remove entire DBH beneath
@@ -838,11 +895,11 @@ bool Database::disconnect()
 //------------------------------------------------------------------------------
 void Database::clear()
 {
-	pathM = "";
-	charsetM = "";
-	usernameM = "";
-	passwordM = "";
-	roleM = "";
+	setPath("");
+	setCharset("");
+	setUsername("");
+	setPassword("");
+	setRole("");
 }
 //------------------------------------------------------------------------------
 bool Database::isConnected() const
@@ -910,22 +967,34 @@ std::string Database::getPath() const
 //------------------------------------------------------------------------------
 std::string Database::getCharset() const
 {
-	return charsetM;
+	if (connectionCredentials)
+		return connectionCredentials->getCharset();
+	else
+		return credentials.getCharset();
 }
 //------------------------------------------------------------------------------
 std::string Database::getUsername() const
 {
-	return usernameM;
+	if (connectionCredentials)
+		return connectionCredentials->getUsername();
+	else
+		return credentials.getUsername();
 }
 //------------------------------------------------------------------------------
 std::string Database::getPassword() const
 {
-	return passwordM;
+	if (connectionCredentials)
+		return connectionCredentials->getPassword();
+	else
+		return credentials.getPassword();
 }
 //------------------------------------------------------------------------------
 std::string Database::getRole() const
 {
-	return roleM;
+	if (connectionCredentials)
+		return connectionCredentials->getRole();
+	else
+		return credentials.getRole();
 }
 //------------------------------------------------------------------------------
 IBPP::Database& Database::getIBPPDatabase()
@@ -940,22 +1009,34 @@ void Database::setPath(std::string value)
 //------------------------------------------------------------------------------
 void Database::setCharset(std::string value)
 {
-	charsetM = value;
+	if (connectionCredentials)
+		connectionCredentials->setCharset(value);
+	else
+		credentials.setCharset(value);
 }
 //------------------------------------------------------------------------------
 void Database::setUsername(std::string value)
 {
-	usernameM = value;
+	if (connectionCredentials)
+		connectionCredentials->setUsername(value);
+	else
+		credentials.setUsername(value);
 }
 //------------------------------------------------------------------------------
 void Database::setPassword(std::string value)
 {
-	passwordM = value;
+	if (connectionCredentials)
+		connectionCredentials->setPassword(value);
+	else
+		credentials.setPassword(value);
 }
 //------------------------------------------------------------------------------
 void Database::setRole(std::string value)
 {
-	roleM = value;
+	if (connectionCredentials)
+		connectionCredentials->setRole(value);
+	else
+		credentials.setRole(value);
 }
 //------------------------------------------------------------------------------
 const std::string Database::getTypeName() const

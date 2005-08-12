@@ -668,7 +668,22 @@ void MainFrame::OnMenuReconnect(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuConnectAs(wxCommandEvent& WXUNUSED(event))
 {
-	wxMessageBox(_("The feature is not yet available."), _("Not yet implemented"), wxOK | wxICON_INFORMATION);
+	Database *d = tree_ctrl_1->getSelectedDatabase();
+	if (!d)
+		return;
+	if (d->isConnected())
+	{
+		wxMessageBox(_("Please disconnect first."), _("Already connected"), wxOK | wxICON_WARNING);
+		return;
+	}
+
+    DatabaseRegistrationDialog drd(this, -1, _("Connect as..."));
+	d->prepareTemporaryCredentials();
+	drd.setDatabase(d);
+	if (wxID_OK == drd.ShowModal())
+		connect(false);
+	else
+		d->resetCredentials();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuConnect(wxCommandEvent& WXUNUSED(event))

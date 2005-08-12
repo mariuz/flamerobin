@@ -124,7 +124,12 @@ bool Root::load()
 			database->initChildren();
 		}
 		if (option == "/database" && database)
+		{
+			// backward compatibility with FR < 0.3.0
+            if (database->getName().empty())
+				database->setName(database->getPath());
             database = 0;
+		}
         // common subtags
 		if (option == "name" && server)
 		{
@@ -180,15 +185,16 @@ bool Root::save()
 	if (!file)
 		return false;
 	file << "<?xml version='1.0' encoding='ISO-8859-2'?>\n";
-	for (std::list<Server>::const_iterator it = serversM.begin(); it != serversM.end(); ++it)
+	for (std::list<Server>::iterator it = serversM.begin(); it != serversM.end(); ++it)
 	{
 		file << "<server>\n";
 		file << "\t<name>" << it->getName() << "</name>\n";
 		file << "\t<host>" << it->getHostname() << "</host>\n";
 		file << "\t<port>" << it->getPort() << "</port>\n";
 
-		for (std::list<Database>::const_iterator it2 = it->getDatabases()->begin(); it2 != it->getDatabases()->end(); ++it2)
+		for (std::list<Database>::iterator it2 = it->getDatabases()->begin(); it2 != it->getDatabases()->end(); ++it2)
 		{
+			it2->resetCredentials();	// clean up eventual extra credentials
 			file << "\t<database>\n";
 			file << "\t\t<name>" << it2->getName() << "</name>\n";
 			file << "\t\t<path>" << it2->getPath() << "</path>\n";

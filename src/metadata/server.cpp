@@ -87,7 +87,7 @@ void Server::createDatabase(Database *db, int pagesize, int dialect)
 	db1->Create(dialect);
 }
 //------------------------------------------------------------------------------
-const MetadataCollection<Database> *Server::getDatabases() const
+MetadataCollection<Database> *Server::getDatabases()
 {
 	return &databasesM;
 };
