@@ -38,7 +38,7 @@ Server::Server()
 	typeM = ntServer;
 
 	hostnameM = "";
-	portM = "3050";
+	portM = "";
 
 	databasesM.setParent(this);
 	databasesM.setType(ntServer);
@@ -115,12 +115,12 @@ bool Server::hasConnectedDatabase() const
 //------------------------------------------------------------------------------
 void Server::setHostname(std::string hostname)
 {
-	hostnameM = hostname;	
+	hostnameM = hostname;
 }
 //------------------------------------------------------------------------------
 void Server::setPort(std::string port)
 {
-	portM = port;	
+	portM = port;
 }
 //------------------------------------------------------------------------------
 const std::string Server::getTypeName() const

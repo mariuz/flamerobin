@@ -50,7 +50,7 @@ ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent, int id,
     label_hostname = new wxStaticText(getControlsPanel(), -1, _("Hostname:"));
     text_ctrl_hostname = new wxTextCtrl(getControlsPanel(), ID_textctrl_hostname, wxT("localhost"));
     label_portnumber = new wxStaticText(getControlsPanel(), -1, _("Port number:"));
-    text_ctrl_portnumber = new wxTextCtrl(getControlsPanel(), ID_textctrl_portnumber, wxT("3050"));
+    text_ctrl_portnumber = new wxTextCtrl(getControlsPanel(), ID_textctrl_portnumber, wxEmptyString);
     button_ok = new wxButton(getControlsPanel(), ID_button_ok, _("Save"));
     button_cancel = new wxButton(getControlsPanel(), ID_button_cancel, _("Cancel"));
 
@@ -98,6 +98,7 @@ void ServerRegistrationDialog::setServer(Server *s)
     text_ctrl_name->SetValue(std2wx(serverM->getName()));
     text_ctrl_hostname->SetValue(std2wx(serverM->getHostname()));
     text_ctrl_portnumber->SetValue(std2wx(serverM->getPort()));
+	defaultNameM = (text_ctrl_name->GetValue() == buildName(text_ctrl_hostname->GetValue(), text_ctrl_portnumber->GetValue()));
 
     // enable controls depending on operation and database connection status
     // use SetEditable() for edit controls to allow copying text to clipboard
