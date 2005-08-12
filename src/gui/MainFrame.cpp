@@ -115,7 +115,7 @@ void MainFrame::set_properties()
 		Server s; 					// add localhost
 		s.setName("Localhost");
 		s.setHostname("localhost");
-		s.setPort("3050");
+		s.setPort("");
 		getGlobalRoot().addServer(s);
 	}
 	tree_ctrl_1->Expand(root);
@@ -169,6 +169,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_UPDATE_UI(myTreeCtrl::Menu_Restore, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
 	EVT_MENU(myTreeCtrl::Menu_Connect, MainFrame::OnMenuConnect)
 	EVT_UPDATE_UI(myTreeCtrl::Menu_Connect, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
+	EVT_MENU(myTreeCtrl::Menu_ConnectAs, MainFrame::OnMenuConnectAs)
+	EVT_UPDATE_UI(myTreeCtrl::Menu_ConnectAs, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
 	EVT_MENU(myTreeCtrl::Menu_Disconnect, MainFrame::OnMenuDisconnect)
 	EVT_UPDATE_UI(myTreeCtrl::Menu_Disconnect, MainFrame::OnMenuUpdateIfDatabaseConnected)
 	EVT_MENU(myTreeCtrl::Menu_Reconnect, MainFrame::OnMenuReconnect)
@@ -710,6 +712,23 @@ void MainFrame::OnMenuReconnect(wxCommandEvent& WXUNUSED(event))
 	::wxEndBusyCursor();
 	if (!ok)
 		wxMessageBox(std2wx(lastError().getMessage()), _("Error!"), wxOK | wxICON_ERROR);
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuConnectAs(wxCommandEvent& WXUNUSED(event))
+{
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	if (!m)
+		return;
+	Database *d = m->getDatabase();
+	if (!d)
+		return;
+
+	// TODO: create a copy or something?
+    DatabaseRegistrationDialog drd(this, -1, _("Connect as..."))
+	drd.setDatabase(d);
+	drd.ShowModal();
+
+	connect();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuConnect(wxCommandEvent& WXUNUSED(event))
