@@ -103,9 +103,9 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
         wxT("WIN1251"),
         wxT("WIN1252"),
         wxT("WIN1253"),
-        wxT("WIN1254")
-        wxT("WIN1255")
-        wxT("WIN1256")
+        wxT("WIN1254"),
+        wxT("WIN1255"),
+        wxT("WIN1256"),
         wxT("WIN1257")
     };
     choice_charset = new wxChoice(getControlsPanel(), -1, wxDefaultPosition, wxDefaultSize,
