@@ -681,9 +681,7 @@ void MainFrame::OnMenuConnectAs(wxCommandEvent& WXUNUSED(event))
     DatabaseRegistrationDialog drd(this, -1, _("Connect as..."), false, true);
 	d->prepareTemporaryCredentials();
 	drd.setDatabase(d);
-	if (wxID_OK == drd.ShowModal())
-		connect(false);
-	else
+	if (wxID_OK != drd.ShowModal() || !connect(false))
 		d->resetCredentials();
 }
 //-----------------------------------------------------------------------------
@@ -692,16 +690,16 @@ void MainFrame::OnMenuConnect(wxCommandEvent& WXUNUSED(event))
 	connect(true);	// true = warn if already connected
 }
 //-----------------------------------------------------------------------------
-void MainFrame::connect(bool warn)
+bool MainFrame::connect(bool warn)
 {
 	Database *db = tree_ctrl_1->getSelectedDatabase();
 	if (!db)
-		return;
+		return false;
 	if (db->isConnected())
 	{
 		if (warn)
 			wxMessageBox(_("Already connected"), _("Warning"), wxOK | wxICON_WARNING);
-		return;
+		return false;
 	}
 
 	wxString pass;
@@ -711,7 +709,7 @@ void MainFrame::connect(bool warn)
 		message += std2wx(db->getUsername());
 		pass = ::wxGetPasswordFromUser(message, _("Connecting to database"));
 		if (pass.IsEmpty())
-			return;
+			return false;
 	}
 	else
 		pass = std2wx(db->getPassword());
@@ -720,7 +718,7 @@ void MainFrame::connect(bool warn)
 	if (!db->connect(wx2std(pass)))
 	{
 		wxMessageBox(std2wx(lastError().getMessage()), _("Error!"), wxOK | wxICON_ERROR);
-		return;
+		return false;
 	}
 
 	NodeType types[9] = { ntTable, ntView, ntProcedure, ntTrigger, ntRole, ntDomain,
@@ -735,12 +733,13 @@ void MainFrame::connect(bool warn)
 		{
 			wxMessageBox(std2wx(lastError().getMessage()),
    				wxString::Format(_("Error loading %s."), names[i].c_str()), wxOK | wxICON_ERROR);
-			return;
+			break;
 		}
 	}
 
 	wxTreeItemId id = tree_ctrl_1->GetSelection();
 	tree_ctrl_1->Expand(id);
+	return true;
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDisconnect(wxCommandEvent& WXUNUSED(event))

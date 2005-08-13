@@ -96,7 +96,7 @@ public:
     	const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE);
 
 private:
-	void connect(bool warn);
+	bool connect(bool warn);
 
 	void showGeneratorValue(Generator* g);
 
