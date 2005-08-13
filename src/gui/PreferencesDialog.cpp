@@ -625,6 +625,7 @@ END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void PreferencesDialog::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 {
+	wxBusyCursor wait;
     if (saveToConfig())
         EndModal(wxID_OK);
 }
