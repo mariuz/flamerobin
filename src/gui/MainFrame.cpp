@@ -678,7 +678,7 @@ void MainFrame::OnMenuConnectAs(wxCommandEvent& WXUNUSED(event))
 		return;
 	}
 
-    DatabaseRegistrationDialog drd(this, -1, _("Connect as..."));
+    DatabaseRegistrationDialog drd(this, -1, _("Connect as..."), false, true);
 	d->prepareTemporaryCredentials();
 	drd.setDatabase(d);
 	if (wxID_OK == drd.ShowModal())

@@ -115,6 +115,7 @@ void Database::prepareTemporaryCredentials()
 {
 	resetCredentials();
 	connectionCredentials = new Credentials;
+	connectionCredentials->setCharset(credentials.getCharset());	// default to database charset
 }
 //------------------------------------------------------------------------------
 void Database::resetCredentials()

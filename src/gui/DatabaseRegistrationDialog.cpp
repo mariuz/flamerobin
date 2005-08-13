@@ -45,24 +45,26 @@ Contributor(s): Michael Hieke, Nando Dessena
 #include "wx/gbsizer.h"
 #endif
 //-----------------------------------------------------------------------------
-DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id, const wxString& title, bool createDB, const wxPoint& pos, const wxSize& size, long style):
+DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id, const wxString& title,
+	bool createDB, bool connectAs, const wxPoint& pos, const wxSize& size, long style):
     BaseDialog(parent, id, title, pos, size, style)
 {
     createM = createDB;
+	connectAsM = connectAs;
     label_name = new wxStaticText(getControlsPanel(), -1, _("Display name:"));
-    text_ctrl_name = new wxTextCtrl(getControlsPanel(), ID_textcontrol_name, wxT(""));
+    text_ctrl_name = new wxTextCtrl(getControlsPanel(), ID_textcontrol_name, wxEmptyString);
     label_dbpath = new wxStaticText(getControlsPanel(), -1, _("Database path:"));
-    text_ctrl_dbpath = new wxTextCtrl(getControlsPanel(), ID_textcontrol_dbpath, wxT(""));
-    button_browse = new wxButton(getControlsPanel(), ID_button_browse, _("..."),
+    text_ctrl_dbpath = new wxTextCtrl(getControlsPanel(), ID_textcontrol_dbpath, wxEmptyString);
+    button_browse = new wxButton(getControlsPanel(), ID_button_browse, wxT("..."),
         wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
     label_username = new wxStaticText(getControlsPanel(), -1, _("Username:"));
-    text_ctrl_username = new wxTextCtrl(getControlsPanel(), ID_textcontrol_username, wxT("SYSDBA"));
+    text_ctrl_username = new wxTextCtrl(getControlsPanel(), ID_textcontrol_username, wxEmptyString);
     label_password = new wxStaticText(getControlsPanel(), -1, _("Password:"));
-    text_ctrl_password = new wxTextCtrl(getControlsPanel(), -1, wxT("masterkey"),
+    text_ctrl_password = new wxTextCtrl(getControlsPanel(), ID_textcontrol_password, wxEmptyString,
         wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
     text_ctrl_password->SetToolTip(_("Leave empty if you wish to be prompted for password every time"));
     label_charset = new wxStaticText(getControlsPanel(), -1, _("Charset:"));
-	
+
     const wxString charset_choices[] = {
         wxT("NONE"),        wxT("ASCII"),        wxT("BIG_5"),        wxT("CYRL"),        wxT("DOS437"),
         wxT("DOS737"),      wxT("DOS775"),       wxT("DOS850"),       wxT("DOS852"),      wxT("DOS857"),
@@ -74,10 +76,10 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
         wxT("UNICODE_FSS"), wxT("WIN1250"),      wxT("WIN1251"),      wxT("WIN1252"),     wxT("WIN1253"),
         wxT("WIN1254"),     wxT("WIN1255"),      wxT("WIN1256"),      wxT("WIN1257")
     };
-    
-    combobox_charset = new wxComboBox(getControlsPanel(), -1, wxT("NONE"), wxDefaultPosition, wxDefaultSize, 
-        sizeof(charset_choices) / sizeof(wxString), charset_choices, wxCB_DROPDOWN|wxCB_SORT);    
-    
+
+    combobox_charset = new wxComboBox(getControlsPanel(), -1, wxT("NONE"), wxDefaultPosition, wxDefaultSize,
+        sizeof(charset_choices) / sizeof(wxString), charset_choices, wxCB_DROPDOWN|wxCB_SORT);
+
     label_role = new wxStaticText(getControlsPanel(), -1, _("Role:"));
     text_ctrl_role = new wxTextCtrl(getControlsPanel(), -1, wxT(""));
 
@@ -195,12 +197,13 @@ void DatabaseRegistrationDialog::setDatabase(Database *db)
         combobox_charset->SetSelection(combobox_charset->FindString(wxT("NONE")));
 
 	hasNameM = !(databaseM->getName().empty());
-	
+
     // enable controls depending on operation and database connection status
     // use SetEditable() for edit controls to allow copying text to clipboard
     bool isConnected = databaseM->isConnected();
-    text_ctrl_dbpath->SetEditable(!isConnected);
-    button_browse->Enable(!isConnected);
+    text_ctrl_dbpath->SetEditable(!connectAsM && !isConnected);
+    button_browse->Enable(!connectAsM && !isConnected);
+	text_ctrl_name->SetEditable(!connectAsM);
     text_ctrl_username->SetEditable(!isConnected);
     text_ctrl_password->SetEditable(!isConnected);
     combobox_charset->Enable(!isConnected);
@@ -211,6 +214,8 @@ void DatabaseRegistrationDialog::setDatabase(Database *db)
         button_cancel->SetLabel(_("Close"));
         button_cancel->SetDefault();
     };
+	if (connectAsM)
+		button_ok->SetLabel(_("Connect"));
     updateButtons();
 }
 //-----------------------------------------------------------------------------
@@ -225,7 +230,9 @@ void DatabaseRegistrationDialog::updateButtons()
     {
         button_ok->Enable(!text_ctrl_dbpath->GetValue().IsEmpty()
             && !text_ctrl_username->GetValue().IsEmpty()
-            && !text_ctrl_name->GetValue().IsEmpty());
+            && !text_ctrl_name->GetValue().IsEmpty()
+			&& (!connectAsM || !text_ctrl_password->GetValue().IsEmpty())
+		);
     }
 }
 //-----------------------------------------------------------------------------
@@ -235,6 +242,7 @@ BEGIN_EVENT_TABLE(DatabaseRegistrationDialog, BaseDialog)
     EVT_BUTTON(DatabaseRegistrationDialog::ID_button_ok, DatabaseRegistrationDialog::OnOkButtonClick)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_dbpath, DatabaseRegistrationDialog::OnSettingsChange)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_name, DatabaseRegistrationDialog::OnNameChange)
+    EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_password, DatabaseRegistrationDialog::OnSettingsChange)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_username, DatabaseRegistrationDialog::OnSettingsChange)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------

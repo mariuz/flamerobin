@@ -37,6 +37,7 @@ public:
         ID_textcontrol_dbpath = 101,
         ID_textcontrol_name = 102,
         ID_textcontrol_username,
+		ID_textcontrol_password,
         ID_button_browse,
         ID_button_ok,
         ID_button_cancel = wxID_CANCEL
@@ -52,6 +53,7 @@ public:
     void OnBrowseButtonClick(wxCommandEvent& event);
 
     DatabaseRegistrationDialog(wxWindow* parent, int id, const wxString& title, bool createDB = false,
+		bool connectAs = false,		// a temporary solution, as we'll change the entire login scheme soon
         const wxPoint& pos=wxDefaultPosition, const wxSize& size=wxDefaultSize,
         long style=wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER);
 
@@ -59,6 +61,7 @@ private:
     Database *databaseM;
     Server *serverM;
     bool createM;
+	bool connectAsM;
 	bool hasNameM;
 
     void do_layout();
