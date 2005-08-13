@@ -822,7 +822,7 @@ bool Database::connect(std::string password)
 	try
 	{
         databaseM = IBPP::DatabaseFactory("", getConnectionString(), getUsername(),
-            getPassword(), getRole(), getCharset(), "");
+            password, getRole(), getCharset(), "");
 		databaseM->Connect();
 		connectedM = true;
 		notify();
