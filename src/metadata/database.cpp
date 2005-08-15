@@ -34,6 +34,7 @@
 #include "database.h"
 #include "ugly.h"
 #include "dberror.h"
+#include "simpleparser.h"
 //------------------------------------------------------------------------------
 void Credentials::setCharset(std::string value)
 {
@@ -510,6 +511,9 @@ bool Database::addObject(NodeType type, std::string name)
 // set null flag via system tables update
 bool Database::parseCommitedSql(std::string sql)
 {
+	sql += "\n";	// if last line starts with --
+	Parser::removeComments(sql, "/*", "*/");
+	Parser::removeComments(sql, "--", "\n");
 	sql = upcase(sql);				// make sql UpperCase for easier handling
 	std::stringstream strstrm;		// parse statement into tokens
 	std::string action, object_type, name;

@@ -976,7 +976,6 @@ void ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
 		strstrm >> first;
 		strstrm >> second;
 		strstrm >> third;
-
 		if (first == "COMMIT")
 			commitTransaction();
 		else if (first == "SET" && (second == "TERM" || second == "TERMINATOR"))
