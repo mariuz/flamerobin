@@ -36,6 +36,8 @@
 
 #include <algorithm>
 
+#include "ugly.h"
+#include "metadata/database.h"
 #include "framemanager.h"
 //-----------------------------------------------------------------------------
 FrameManager& frameManager()
@@ -69,13 +71,33 @@ void FrameManager::rebuildMenu()
 	while (windowMenuM->GetMenuItemCount() > 0)
 		windowMenuM->Destroy(windowMenuM->FindItemByPosition(0));
 
+	// each database has it's submenu
+	std::map<Database *, wxMenu *> dmm;
+
+	// build submenus
 	int id = 5000;	// these menu IDs start from "safe" 5000 and upwards to 6000 (let's hope users won't open 1001 windows)
     for (ItemFrameMap::iterator it = mipFramesM.begin(); it != mipFramesM.end(); ++it)
 	{
-		windowMenuM->Append(id, ((*it).second.frame)->GetTitle());
+		MetadataItemPropertiesFrame *mf = dynamic_cast<MetadataItemPropertiesFrame *>((*it).second.frame);
+		if (!mf)
+			continue;
+		MetadataItem *m = mf->getObservedObject();
+		if (!m)
+			continue;
+		Database *db = m->getDatabase();
+		if (!db)
+			continue;
+
+		if (dmm.find(db) == dmm.end())		// add database if not already there
+			dmm.insert(dmm.begin(), std::pair<Database*, wxMenu*>(db, new wxMenu));
+		(dmm[db])->Append(id, ((*it).second.frame)->GetTitle());
 		(*it).second.id = id;
 		++id;
 	}
+
+	// wxWidgets manual says that we should insert the submenus at end
+	for (std::map<Database *, wxMenu *>::iterator it = dmm.begin(); it != dmm.end(); ++it)
+		windowMenuM->Append(-1, std2wx((*it).first->getName()), (*it).second);
 
     for (unsigned int i = 0; i < menuBarM->GetMenuCount(); i++)
 		if (menuBarM->GetMenu(i) == windowMenuM)
