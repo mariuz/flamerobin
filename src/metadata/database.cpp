@@ -34,7 +34,10 @@
 #include "database.h"
 #include "ugly.h"
 #include "dberror.h"
+#include "root.h"
 #include "simpleparser.h"
+//------------------------------------------------------------------------------
+using namespace std;
 //------------------------------------------------------------------------------
 void Credentials::setCharset(std::string value)
 {
@@ -77,7 +80,7 @@ std::string Credentials::getRole() const
 }
 //------------------------------------------------------------------------------
 Database::Database()
-    : MetadataItem()
+    : MetadataItem(), idM(0)
 {
 	typeM = ntDatabase;
 	connectedM = false;
@@ -1066,5 +1069,26 @@ std::string Database::getConnectionString() const
         return serverConnStr + ":" + pathM;
     else
         return pathM;
+}
+//------------------------------------------------------------------------------
+std::string Database::extractNameFromConnectionString() const
+{
+    string name = pathM;
+    string::size_type p = name.find_last_of("/\\:");
+    if (p != string::npos)
+        name.erase(0, p + 1);
+    p = name.find_last_of(".");
+    if (p != string::npos)
+        name.erase(p, name.length());
+    return name;
+}
+//------------------------------------------------------------------------------
+const string Database::getId() const
+{
+    if (idM == 0)
+        idM = getRoot()->getNextId();
+    ostringstream oss;
+    oss << idM;
+    return oss.str();
 }
 //------------------------------------------------------------------------------
