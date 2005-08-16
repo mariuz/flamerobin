@@ -123,9 +123,8 @@ void MainFrame::set_properties()
 		wxMessageBox(_("You may register a new server and databases."), _("File servers.xml not found"));
 
 		Server s; 					// add localhost
-		s.setName("Localhost");
+		s.setName("localhost");
 		s.setHostname("localhost");
-		s.setPort("");
 		getGlobalRoot().addServer(s);
 	}
 	tree_ctrl_1->Expand(root);
@@ -354,26 +353,26 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuManual(wxCommandEvent& WXUNUSED(event))
 {
-	SimpleHtmlFrame *s = new SimpleHtmlFrame(this, wxT("frrelnotes.html"));
+    SimpleHtmlFrame *s = new SimpleHtmlFrame(this, wxT(std2wx(config().getDocsPath() + "frrelnotes.html")));
 	s->Show();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRelNotes(wxCommandEvent& WXUNUSED(event))
 {
-	SimpleHtmlFrame *s = new SimpleHtmlFrame(this, wxT("changes.html"));
+	SimpleHtmlFrame *s = new SimpleHtmlFrame(this, wxT(std2wx(config().getDocsPath() + "changes.html")));
 	s->Show();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuLicense(wxCommandEvent& WXUNUSED(event))
 {
-	SimpleHtmlFrame *s = new SimpleHtmlFrame(this, wxT("license.html"));
+	SimpleHtmlFrame *s = new SimpleHtmlFrame(this, wxT(std2wx(config().getDocsPath() + "license.html")));
 	s->Show();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
 {
     PreferencesDialog pd(this, _("Preferences"), config(),
-        wxT("config_options.xml"));
+        wxT("fr_settings.confdef"));
     if (pd.isOk() && pd.loadFromConfig())
     {
         static int pdSelection = 0;

@@ -277,13 +277,13 @@ void RestoreFrame::doReadConfigSettings(const std::string& prefix)
 
     std::string pagesize;
     int selindex = -1;
-    if (config().getValue(prefix + "::pagesize", pagesize) && !pagesize.empty())
+    if (config().getValue(prefix + Config::pathSeparator + "pagesize", pagesize) && !pagesize.empty())
         selindex = choice_pagesize->FindString(std2wx(pagesize));
     // select default pagesize of 1024 if invalid selindex
     choice_pagesize->SetSelection(selindex >= 0 ? selindex : 0);
 
     std::vector<std::string> flags;
-    if (config().getValue(prefix + "::options", flags) && !flags.empty())
+    if (config().getValue(prefix + Config::pathSeparator + "options", flags) && !flags.empty())
     {
         checkbox_replace->SetValue(
             flags.end() != std::find(flags.begin(), flags.end(), "replace"));
@@ -304,7 +304,7 @@ void RestoreFrame::doReadConfigSettings(const std::string& prefix)
 void RestoreFrame::doWriteConfigSettings(const std::string& prefix) const
 {
     BackupRestoreBaseFrame::doWriteConfigSettings(prefix);
-    config().setValue(prefix + "::pagesize", wx2std(choice_pagesize->GetStringSelection()));
+    config().setValue(prefix + Config::pathSeparator + "pagesize", wx2std(choice_pagesize->GetStringSelection()));
 
     std::vector<std::string> flags;
     if (checkbox_replace->IsChecked())
@@ -319,7 +319,7 @@ void RestoreFrame::doWriteConfigSettings(const std::string& prefix) const
         flags.push_back("commit_per_table");
     if (checkbox_space->IsChecked())
         flags.push_back("use_all_space");
-    config().setValue(prefix + "::options", flags);
+    config().setValue(prefix + Config::pathSeparator + "options", flags);
 }
 //-----------------------------------------------------------------------------
 const std::string RestoreFrame::getName() const

@@ -20,7 +20,7 @@ All Rights Reserved.
 
 $Id$
 
-Contributor(s): Milan Babuskov
+Contributor(s): Milan Babuskov, Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -124,20 +124,20 @@ void BackupRestoreBaseFrame::doReadConfigSettings(const std::string& prefix)
     BaseFrame::doReadConfigSettings(prefix);
 
     bool verbose;
-    if (!config().getValue(prefix + "::verboselog", verbose))
+    if (!config().getValue(prefix + Config::pathSeparator + "verboselog", verbose))
         verbose = true;
     checkbox_showlog->SetValue(verbose);
 
     std::string bkfile;
-    if (config().getValue(prefix + "::backupfilename", bkfile) && !bkfile.empty())
+    if (config().getValue(prefix + Config::pathSeparator + "backupfilename", bkfile) && !bkfile.empty())
         text_ctrl_filename->SetValue(std2wx(bkfile));
 }
 //-----------------------------------------------------------------------------
 void BackupRestoreBaseFrame::doWriteConfigSettings(const std::string& prefix) const
 {
     BaseFrame::doWriteConfigSettings(prefix);
-    config().setValue(prefix + "::verboselog", checkbox_showlog->GetValue());
-    config().setValue(prefix + "::backupfilename", wx2std(text_ctrl_filename->GetValue()));
+    config().setValue(prefix + Config::pathSeparator + "verboselog", checkbox_showlog->GetValue());
+    config().setValue(prefix + Config::pathSeparator + "backupfilename", wx2std(text_ctrl_filename->GetValue()));
 }
 //-----------------------------------------------------------------------------
 const std::string BackupRestoreBaseFrame::getStorageName() const
@@ -154,7 +154,7 @@ const std::string BackupRestoreBaseFrame::getStorageName() const
             storageNameM = getName();
             break;
         case sgObject:
-            storageNameM = getName() + "::" + databaseM->getItemPath();
+            storageNameM = getName() + Config::pathSeparator + databaseM->getItemPath();
             break;
         default:
             storageNameM = "";

@@ -1388,14 +1388,14 @@ void ExecuteSqlFrame::doReadConfigSettings(const std::string& prefix)
 {
 	BaseFrame::doReadConfigSettings(prefix);
 	int zoom;
-	if (config().getValue(prefix + "::zoom", zoom))
+	if (config().getValue(prefix + Config::pathSeparator + "zoom", zoom))
 		styled_text_ctrl_sql->SetZoom(zoom);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::doWriteConfigSettings(const std::string& prefix) const
 {
 	BaseFrame::doWriteConfigSettings(prefix);
-	config().setValue(prefix + "::zoom", styled_text_ctrl_sql->GetZoom());
+	config().setValue(prefix + Config::pathSeparator + "zoom", styled_text_ctrl_sql->GetZoom());
 }
 //-----------------------------------------------------------------------------
 const wxRect ExecuteSqlFrame::getDefaultRect() const

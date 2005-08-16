@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -300,7 +300,7 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
 {
     // we don't want this dialog centered on parent since it is very big, and
     // some parents (ex. main frame) could even be smaller
-    configM.setValue(getName() + "::centerOnParent", false);
+    configM.setValue(getName() + Config::pathSeparator + "centerDialogOnParent", false);
 
     treectrl_1 = new wxTreeCtrl(getControlsPanel(), ID_treectrl_panes,
         wxDefaultPosition, wxDefaultSize,
@@ -316,7 +316,7 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
 
     // order of these is important: first create all controls, then set
     // their properties (may affect min size), then create sizer layout
-    loadDescriptionFile(descriptionFileName);
+    loadDescriptionFile(std2wx(configM.getConfDefsPath()) + descriptionFileName);
     setProperties();
     layout();
     // do this last, otherwise default button style may be lost on MSW
@@ -386,7 +386,7 @@ bool PreferencesDialog::createControlsAndAddToSizer(wxPanel* page, wxSizer* size
 //-----------------------------------------------------------------------------
 const std::string PreferencesDialog::getName() const
 {
-    return "ConfigurationPreferencesDialog";
+    return "PreferencesDialog";
 }
 //-----------------------------------------------------------------------------
 int PreferencesDialog::getSelectedPage()
@@ -426,12 +426,7 @@ void PreferencesDialog::loadDescriptionFile(const wxString& filename)
 {
     loadSuccessM = false;
 
-    wxString path = std2wx(getApplicationPath());
-    if (!path.IsEmpty())
-        path += wxT("/");
-    path += filename;
-
-    wxFileInputStream stream(path);
+    wxFileInputStream stream(filename);
     if (!stream.Ok())
         return;
 
@@ -442,7 +437,7 @@ void PreferencesDialog::loadDescriptionFile(const wxString& filename)
     if (xmlr->GetName() != wxT("root"))
     {
         wxLogError(_("Invalid root node in description file \"%s\""),
-            path.c_str());
+            filename.c_str());
         return;
     }
     processPlatformProperty(xmlr);

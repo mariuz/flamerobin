@@ -146,10 +146,10 @@ const std::string MetadataItemPropertiesFrame::getStorageName() const
           	    storageNameM = getName();
                 break;
 		    case sgObjectType:
-			    storageNameM = getName() + "::" + objectM->getTypeName();
+			    storageNameM = getName() + Config::pathSeparator + objectM->getTypeName();
                 break;
 		    case sgObject:
-      		    storageNameM = getName() + "::" + objectM->getItemPath();
+      		    storageNameM = getName() + Config::pathSeparator + objectM->getItemPath();
                 break;
 		    default:
 			    storageNameM = "";
@@ -510,8 +510,8 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, MetadataItem *
 
 	else if (cmd.substr(0, 5) == "index")
 	{
-		std::string okimage = "<img src=\"" + getApplicationPath() + "/html-templates/ok.png\">";
-		std::string ximage = "<img src=\"" + getApplicationPath() + "/html-templates/redx.png\">";
+        std::string okimage = "<img src=\"" + config().getHtmlTemplatesPath() + "ok.png\">";
+        std::string ximage = "<img src=\"" + config().getHtmlTemplatesPath() + "redx.png\">";
 		Index *i = dynamic_cast<Index *>(object);
 		if (!i)
 			return;

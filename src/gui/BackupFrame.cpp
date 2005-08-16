@@ -253,7 +253,7 @@ void BackupFrame::doReadConfigSettings(const std::string& prefix)
 {
     BackupRestoreBaseFrame::doReadConfigSettings(prefix);
     std::vector<std::string> flags;
-    if (config().getValue(prefix + "::options", flags) && !flags.empty())
+    if (config().getValue(prefix + Config::pathSeparator + "options", flags) && !flags.empty())
     {
         checkbox_checksum->SetValue(
             flags.end() != std::find(flags.begin(), flags.end(), "ignore_checksums"));
@@ -287,7 +287,7 @@ void BackupFrame::doWriteConfigSettings(const std::string& prefix) const
         flags.push_back("no_transportable");
     if (checkbox_extern->IsChecked())
         flags.push_back("external_tables");
-    config().setValue(prefix + "::options", flags);
+    config().setValue(prefix + Config::pathSeparator + "options", flags);
 }
 //-----------------------------------------------------------------------------
 const std::string BackupFrame::getName() const

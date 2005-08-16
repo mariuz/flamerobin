@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): .
+  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -37,7 +37,6 @@
 #endif
 
 #include "ugly.h"
-#include "config.h"
 #include "images.h"
 #include "SimpleHtmlFrame.h"
 //-----------------------------------------------------------------------------
@@ -48,9 +47,8 @@ SimpleHtmlFrame::SimpleHtmlFrame(wxWindow* parent, const wxString& pageName):
 	CreateStatusBar();
 	window_1->SetRelatedFrame(this, wxT("%s"));
 	window_1->SetRelatedStatusBar(0);
-
-	wxString htmlpage = std2wx(config().getHtmlTemplatesPath()) + wxT("/") + pageName;
-	window_1->LoadPage(htmlpage);
+	
+	window_1->LoadPage(pageName);
 
 	#include "fricon.xpm"
     wxBitmap bmp(fricon_xpm);
