@@ -5,18 +5,20 @@ Files needed by FR:
 - $conf - a config file (config.ini, to be renamed fr_settings.conf)
 - $db - a database connection definition file (servers.xml, to be renamed fr_databases.conf)
 - $templ - the html-templates directory
-- $confdef - the confdefs directory, containing the main config settings definition file (now config_options.xml, to be renamed fr_settings.confdef) and possibly other confdef files for scoped (database-level, for example, to be named database_settings.confdef) configuration (preferences) dialogs
+- $confdef - the confdefs directory, containing the main config settings definition file (config_options.xml, to be renamed fr_settings.confdef) and possibly other confdef files for scoped (database-level, for example, to be named database_settings.confdef or DATABASE_settings.confdef) configuration (preferences) dialogs
 - $docfiles - the files docs/fr_manual.html, docs/fr_changes.html and docs/fr_license.html that are displayed from the main menu
 
 Locations:
 
 - $frhome - FR will find $templ, $confdef and $docfiles (which are immutable and integral part of the FR distribution) in its home path. The home path is returned by config()::getHomePath(), usually the application folder.
-Note: passing -h <path> on FR's command line will override this path.
+Note: defining the environment variable FR_HOME will override this path.
+Note: passing -h <path> on FR's command line will override this path and the environment variable as well.
 
 - $fruserhome - FR will find $conf and $db (which are user settings files) in its user home path. This path has to be writable and may be common to all users on the machine or different for each user. The user home path is config()::getUserHomePath(), and it defaults to wxStandardPaths::GetUserLocalDataDir().
-Note: passing -uh <path> on FR's command line will override this path.
+Note: defining the environment variable FR_USER_HOME will override this path.
+Note: passing -uh <path> on FR's command line will override this path and the environment variable as well.
 
-Additional note: the <path> specification in the command line parameters -h and -uh may be "$app", which translates to wxStandardPaths::GetLocalDataDir(), or "$user", which translates to wxStandardPaths::GetUserLocalDataDir(). Otherwise, it has to be a path.
+Additional note: the <path> specification in the command line parameters -h and -uh, or the value of the environment variables FR_HOME and FR_USER_HOME may be "$app", which translates to wxStandardPaths::GetLocalDataDir(), or "$user", which translates to wxStandardPaths::GetUserLocalDataDir(). Otherwise, it has to be a path (without the trailing path delimiter).
 
 FR will only ever write to files in $fruserhome. If FR is configured so that these files are shared by several users, then no precaution is taken to avoid overwriting other users' changes.
 
@@ -37,32 +39,28 @@ Each config setting has a name (ex. NumberPrecision) and a value. The value is r
 getValue("NumberPrecision", n)
 will search for a value to assign to n in the NumberPrecision config key.
 
-getValue("::DB[SomeDatabase]::TB[SomeTable]::NumberPrecision", n)
+getValue("DATABASE_SomeDatabase/TABLE_SomeTable/NumberPrecision", n)
 will search in the following config keys:
-- ::DB[SomeDatabase]::TB[SomeTable]::NumberPrecision
-- ::DB[SomeDatabase]::NumberPrecision
+- DATABASE_SomeDatabase/TABLE_SomeTable/NumberPrecision
+- DATABASE_SomeDatabase/NumberPrecision
 - NumberPrecision
 
-getValue("::DB[SomeDatabase]::TB[SomeTable]::CL[SomeColumn]::NumberPrecision", n)
+getValue("DATABASE_SomeDatabase/TABLE_SomeTable/COLUMN_SomeColumn/NumberPrecision", n)
 will search in the following config keys:
-- ::DB[SomeDatabase]::TB[SomeTable]::CL[SomeColumn]::NumberPrecision
-- ::DB[SomeDatabase]::TB[SomeTable]::NumberPrecision
-- ::DB[SomeDatabase]::NumberPrecision
+- DATABASE_SomeDatabase/TABLE_SomeTable/COLUMN_SomeColumn/NumberPrecision
+- DATABASE_SomeDatabase/TABLE_SomeTable/NumberPrecision
+- DATABASE_SomeDatabase/NumberPrecision
 - NumberPrecision
 
-The caller of getValue will retrieve the "::DB[SomeDatabase]/" or "::DB[SomeDatabase]::TB[SomeTable]::" or "::DB[SomeDatabase]::TB[SomeTable]::CL[SomeColumn]::" prefix by calling the getItemPath() member function of the relevant metadata item. A shortcut membed function in MetadataItem will shorten the code; for example, assuming a Database db named "foo", this code:
+The caller of getValue will retrieve the prefix by calling the getItemPath() member function of the relevant metadata item. A shortcut member function in MetadataItem will shorten the code; for example, assuming a Database db named "foo", this code:
 
 int numPrec = db.getConfigValue("NumberPrecision");
 
 is equivalent to:
 
-config().GetValue("::DB[SomeDatabase]::NumberPrecision", numPrec);
+config().GetValue(DATABASE_SomeDatabase/NumberPrecision", numPrec);
 
 Note: wxFileConfig will resolve the scoped setting names by using different [sections] in the pseudo-INI file, but that's not relevant to the users of FR's Config. Config might also split the settings in different files (one for each database) for better efficiency and manageability.
-
-Note: the names DB, TB, CL, etc. are used in place of the full type names (as returned by getTypeName() to save memory and disk space for the config file(s). We might use a numeric value in place of the database as well (see below).
-
-Note: we should make sure that database names are not allowed to contain the characters ":", "[" and "]", as it will ease parsing. Also, while we are undecided whether to keep of remove the Server class, a database name will be compound: serverName:databaseName to gain uniqueness. We should also prevent the user from inserting duplicate database names.
 
 The database rename issue:
 
@@ -79,5 +77,3 @@ The preferred solution is c) for efficiency and manageability reasons, perhaps w
 Possible extensions:
 
 We might want to let the installers allow the user to choose whether to share the config files among all users of the machine or not, and generate different command lines as required.
-
-We might add an environment variable as further customization possibility.
