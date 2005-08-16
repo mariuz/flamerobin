@@ -64,32 +64,42 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     tree_ctrl_1 = new myTreeCtrl(this, wxDefaultPosition, wxDefaultSize, wxTR_HAS_BUTTONS|wxSUNKEN_BORDER);
 	menuBarM = new wxMenuBar();
 
-	// build menuBarM
-    wxMenu* fileMenu = new wxMenu();
-    fileMenu->Append(myTreeCtrl::Menu_Configure, _("&Preferences"), wxEmptyString, wxITEM_NORMAL);
-    fileMenu->AppendSeparator();
-    fileMenu->Append(wxID_EXIT, _("&Quit"), wxEmptyString, wxITEM_NORMAL);
-    menuBarM->Append(fileMenu, _("&File"));
-
-    databaseMenu = new wxMenu();					// dynamic menus, created at runtime
+	// Build MenuBar
+    wxMenu *databaseMenu = new wxMenu();					// dynamic menus, created at runtime
+	ContextMenuVisitor cmvd(databaseMenu);
+	Database dummy;
+	dummy.accept(&cmvd);
+    databaseMenu->AppendSeparator();
+    databaseMenu->Append(wxID_EXIT, _("&Quit"));
     menuBarM->Append(databaseMenu, _("&Database"));
-    objectMenu = new wxMenu();
-    menuBarM->Append(objectMenu, _("&Object"));
+
+	wxMenu *editMenu = new wxMenu();
+    editMenu->Append(myTreeCtrl::Menu_Cut, _("Cu&t"));
+    editMenu->Append(myTreeCtrl::Menu_Copy, _("&Copy"));
+    editMenu->Append(myTreeCtrl::Menu_Paste, _("&Paste"));
+    editMenu->Append(myTreeCtrl::Menu_Delete, _("&Delete"));
+    editMenu->AppendSeparator();
+    editMenu->Append(myTreeCtrl::Menu_Configure, _("P&references..."));
+	menuBarM->Append(editMenu, _("&Edit"));
+
     windowMenu = new wxMenu();
     menuBarM->Append(windowMenu, _("&Window"));
 
     wxMenu* helpMenu = new wxMenu();
-    helpMenu->Append(myTreeCtrl::Menu_Manual, _("&Manual"), wxEmptyString, wxITEM_NORMAL);
-    helpMenu->Append(myTreeCtrl::Menu_RelNotes, _("&What's new"), wxEmptyString, wxITEM_NORMAL);
+    helpMenu->Append(myTreeCtrl::Menu_Manual, _("&Manual"));
+    helpMenu->Append(myTreeCtrl::Menu_RelNotes, _("&What's new"));
     helpMenu->AppendSeparator();
-    helpMenu->Append(myTreeCtrl::Menu_License, _("&License"), wxEmptyString, wxITEM_NORMAL);
-    helpMenu->Append(wxID_ABOUT, _("&About"), wxEmptyString, wxITEM_NORMAL);
+    helpMenu->Append(myTreeCtrl::Menu_License, _("&License"));
+    helpMenu->Append(wxID_ABOUT, _("&About"));
     menuBarM->Append(helpMenu, _("&Help"));
 	SetMenuBar(menuBarM);
-	menuBarM->EnableTop(3, false);	// disable "window" menu at startup
+	menuBarM->EnableTop(2, false);	// disable "window" menu at startup
 	frameManager().setWindowMenu(windowMenu, menuBarM);
 
+	//statusBarM = new wxStatusBar(0, -1);
+	//SetStatusBar(statusBarM);
 	statusBarM = CreateStatusBar();
+	SetStatusBarPane(-1);	// disable automatic fill
     set_properties();
     do_layout();
 }
@@ -202,29 +212,15 @@ void MainFrame::OnWindowMenuItem(wxCommandEvent& event)
 //-----------------------------------------------------------------------------
 void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 {
+	if (!statusBarM)
+		return;
+
 	static Database *lastDatabase = 0;		// remember the last database/node type, so menus don't
-	static NodeType lastType = ntUnknown;	// get rebuilt when it is not needed
-	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
 	Database *d = tree_ctrl_1->getSelectedDatabase();
-	if (m)
-	{
-		if (m->getType() != lastType)
-		{
-			while (objectMenu->GetMenuItemCount() > 0)
-				objectMenu->Destroy(objectMenu->FindItemByPosition(0));
-			ContextMenuVisitor cmv(objectMenu);
-			m->accept(&cmv);
-			lastType = m->getType();
-		}
-	}
 	if (d != lastDatabase)
 	{
-		while (databaseMenu->GetMenuItemCount() > 0)
-			databaseMenu->Destroy(databaseMenu->FindItemByPosition(0));
 		if (d)
 		{
-			ContextMenuVisitor cmvd(databaseMenu);
-			d->accept(&cmvd);
 			std::string s = d->getUsername() + "@" + d->getConnectionString() + " (" + d->getCharset() + ")";
 			statusBarM->SetStatusText(std2wx(s));
 		}
@@ -232,8 +228,6 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 			statusBarM->SetStatusText(wxT("-"));
 		lastDatabase = d;
 	}
-	menuBarM->EnableTop(1, databaseMenu->GetMenuItemCount() > 0);		// disable empty menus
-	menuBarM->EnableTop(2, objectMenu->GetMenuItemCount() > 0);			// disable empty menus
 }
 //-----------------------------------------------------------------------------
 //! handle double-click on item (or press Enter)

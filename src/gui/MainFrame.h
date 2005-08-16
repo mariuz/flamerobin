@@ -109,9 +109,7 @@ protected:
     myTreeCtrl* tree_ctrl_1;
 	wxStatusBar* statusBarM;
     wxMenuBar* menuBarM;
-	wxMenu* databaseMenu;	// dynamic menus
-	wxMenu* objectMenu;
-	wxMenu* windowMenu;
+	wxMenu* windowMenu;		// dynamic menu
 
 	virtual const std::string getName() const;
 	virtual const wxRect getDefaultRect() const;
