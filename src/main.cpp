@@ -18,7 +18,7 @@
 
   All Rights Reserved.
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -34,11 +34,14 @@
 
 #include <vector>
 #include <string>
+#include "config.h"
 #include "gui/MainFrame.h"
 #include "ibpp.h"
 #include "main.h"
 #include "ugly.h"
-
+#include "wx/cmdline.h"
+#include "wx/stdpaths.h"
+#include "wx/utils.h"
 //-----------------------------------------------------------------------------
 IMPLEMENT_APP(FRApp)
 //-----------------------------------------------------------------------------
@@ -62,6 +65,9 @@ bool FRApp::OnInit()
     ::wxHandleFatalExceptions();
 #endif
 
+    checkEnvironment();
+    parseCommandLine();
+
     // initialize IBPP library - if it fails: exit
 	try
 	{
@@ -84,5 +90,40 @@ bool FRApp::OnInit()
     main_frame->Show();
 
     return true;
+}
+//-----------------------------------------------------------------------------
+void FRApp::checkEnvironment()
+{
+    wxString envVar;
+    if (wxGetEnv("FR_HOME", &envVar))
+        config().setHomePath(translatePathMacros(wx2std(envVar)));
+    if (wxGetEnv("FR_USER_HOME", &envVar))
+        config().setUserHomePath(translatePathMacros(wx2std(envVar)));
+}
+//-----------------------------------------------------------------------------
+void FRApp::parseCommandLine()
+{
+    wxCmdLineParser parser(wxGetApp().argc, wxGetApp().argv);
+    parser.AddOption("h", "home");
+    parser.AddOption("uh", "user-home");
+    if (parser.Parse() == 0)
+    {
+        wxString paramValue;
+        if (parser.Found("home", &paramValue))
+            config().setHomePath(translatePathMacros(wx2std(paramValue)));
+
+        if (parser.Found("user-home", &paramValue))
+            config().setUserHomePath(translatePathMacros(wx2std(paramValue)));
+    }
+}
+//-----------------------------------------------------------------------------
+const string FRApp::translatePathMacros(const string path) const
+{
+    if (path == "$app")
+        return wx2std(wxStandardPaths::Get().GetLocalDataDir());
+    else if (path == "$user")
+        return wx2std(wxStandardPaths::Get().GetUserLocalDataDir());
+    else
+        return path;
 }
 //-----------------------------------------------------------------------------

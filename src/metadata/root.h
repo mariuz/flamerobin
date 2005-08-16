@@ -48,10 +48,15 @@ public:
 	bool load();
 	bool save();
 	virtual const std::string getItemPath() const;
+
+    // increments the Id generator and returns the value.
+    const unsigned int getNextId();
 private:
 	MetadataCollection<Server> serversM;
 	std::string fileNameM;
 	std::string getFileName();
+    bool dirtyM;
+    unsigned int nextIdM;
 };
 //------------------------------------------------------------------------------
 Root& getGlobalRoot();

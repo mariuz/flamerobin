@@ -34,41 +34,76 @@
     #include "wx/wx.h"
 #endif
 
-//
-//
-//
-//
 //------------------------------------------------------------------------------
 #include <string>
 #include <fstream>
 #include <sstream>
 #include "config.h"
 #include "frutils.h"
+#include "ugly.h"
+#include "wx/stdpaths.h"
 //------------------------------------------------------------------------------
-// This code should be wx and IBPP clean. Only std library
 using namespace std;
-
 //-----------------------------------------------------------------------------
+const string Config::pathSeparator = "/";
+//------------------------------------------------------------------------------
 Config& config()
 {
 	static Config c;
 	return c;
 }
 //-----------------------------------------------------------------------------
-//! return true if value exists, false if not
-bool Config::keyExists(const std::string& key) const
+Config::Config()
+	: homePathM(""), userHomePathM(""), configM(0)
 {
-	return (dataM.find(key) != dataM.end());
+}
+//-----------------------------------------------------------------------------
+Config::~Config()
+{
+    delete configM;
+}
+//-----------------------------------------------------------------------------
+wxFileConfig* Config::getConfig() const
+{
+    if (!configM)
+        configM = new wxFileConfig("", "", std2wx(getConfigFileName()));
+    return configM;
+}
+//-----------------------------------------------------------------------------
+//! return true if value exists, false if not
+bool Config::keyExists(const string& key) const
+{
+	return getConfig()->HasEntry(std2wx(key));
 }
 //-----------------------------------------------------------------------------
 //! return true if value exists, false if not
 bool Config::getValue(string key, string& value)
 {
-	if (dataM.find(key) == dataM.end())
-		return false;
-
-	value = dataM[key];
-	return true;
+    // if complete key is found, then return (recursion exit condition).
+    wxString configValue;
+    if (getConfig()->Read(std2wx(key), &configValue))
+    {
+        value = wx2std(configValue);
+        return true;
+    }
+    // does key contain a separator? If not, then the key is not found and
+    // we're done.
+    string::size_type separatorPos = key.rfind(pathSeparator);
+    if (separatorPos == string::npos)
+        return false;
+    else
+    {
+        // split key into keyPart and pathPart; remove last component of
+        // pathPart and recurse.
+        string keyPart = key.substr(separatorPos + 1, key.length());
+        string pathPart = key.substr(0, separatorPos);
+        string::size_type separatorPosInPath = pathPart.rfind(pathSeparator);
+        if (separatorPosInPath == string::npos)
+            return getValue(keyPart, value);
+        else
+            return getValue(pathPart.substr(0, separatorPosInPath) +
+                pathSeparator + keyPart, value);
+    }
 }
 //-----------------------------------------------------------------------------
 bool Config::getValue(string key, int& value)
@@ -105,7 +140,7 @@ bool Config::getValue(string key, bool& value)
 	return true;
 }
 //-----------------------------------------------------------------------------
-bool Config::getValue(std::string key, StorageGranularity& value)
+bool Config::getValue(string key, StorageGranularity& value)
 {
 	int intValue = 0;
 	bool ret = getValue(key, intValue);
@@ -114,7 +149,7 @@ bool Config::getValue(std::string key, StorageGranularity& value)
 	return ret;
 }
 //-----------------------------------------------------------------------------
-bool Config::getValue(std::string key, std::vector<std::string>& value)
+bool Config::getValue(string key, vector<string>& value)
 {
 	string s;
 	if (!getValue(key, s))
@@ -136,45 +171,41 @@ bool Config::getValue(std::string key, std::vector<std::string>& value)
 }
 //-----------------------------------------------------------------------------
 //! return true if value existed, false if not
-bool Config::setValue(string key, string value, bool saveIt)
+bool Config::setValue(string key, string value)
 {
-	bool ret = (dataM.end() != dataM.find(key));
-	if (ret)
-		dataM.erase(key);
-	dataM[key] = value;
-	if (saveIt)
-		save();
-	return ret;
+	bool result = getConfig()->Write(std2wx(key), std2wx(value));
+    getConfig()->Flush();
+    return result;
 }
 //-----------------------------------------------------------------------------
-bool Config::setValue(string key, int value, bool saveIt)
+bool Config::setValue(string key, int value)
 {
 	stringstream ss;
 	ss << value;
-	return setValue(key, ss.str(), saveIt);
+	return setValue(key, ss.str());
 }
 //-----------------------------------------------------------------------------
-bool Config::setValue(string key, double value, bool saveIt)
+bool Config::setValue(string key, double value)
 {
 	stringstream ss;
 	ss << value;
-	return setValue(key, ss.str(), saveIt);
+	return setValue(key, ss.str());
 }
 //-----------------------------------------------------------------------------
-bool Config::setValue(string key, bool value, bool saveIt)
+bool Config::setValue(string key, bool value)
 {
 	if (value)
-		return setValue(key, string("1"), saveIt);
+		return setValue(key, string("1"));
 	else
-		return setValue(key, string("0"), saveIt);
+		return setValue(key, string("0"));
 }
 //-----------------------------------------------------------------------------
-bool Config::setValue(string key, StorageGranularity value, bool saveIt)
+bool Config::setValue(string key, StorageGranularity value)
 {
-	return setValue(key, int(value), saveIt);
+	return setValue(key, int(value));
 }
 //-----------------------------------------------------------------------------
-bool Config::setValue(string key, vector<string> value, bool saveIt)
+bool Config::setValue(string key, vector<string> value)
 {
     string s;
     for (vector<string>::iterator it = value.begin(); it != value.end(); it++)
@@ -186,107 +217,57 @@ bool Config::setValue(string key, vector<string> value, bool saveIt)
         wxASSERT((*it).find(',') == string::npos);
         s += *it;
     }
-    return setValue(key, s, saveIt);
+    return setValue(key, s);
 }
 //-----------------------------------------------------------------------------
-Config::Config()
-	: configFileNameM("")
+string Config::getHomePath() const
 {
-	load();
+    if (!homePathM.empty())
+        return homePathM + "/";
+    else
+        return getApplicationPath() + "/";
 }
 //-----------------------------------------------------------------------------
-Config::~Config()
+string Config::getHtmlTemplatesPath() const
 {
-	save();
+	return getHomePath() + "html-templates/";
 }
 //-----------------------------------------------------------------------------
-std::string Config::getConfigFileName()
+string Config::getDocsPath() const
 {
-	if (configFileNameM.empty())
-	{
-		configFileNameM = getApplicationPath();
-		if (configFileNameM.empty())
-			configFileNameM = "config.ini";
-		else
-			configFileNameM += "/config.ini";
-	}
-	return configFileNameM;
+	return getHomePath() + "doc/";
 }
 //-----------------------------------------------------------------------------
-bool Config::save()
+string Config::getConfDefsPath() const
 {
-	std::string path(getConfigFileName());
-
-	std::ofstream file(path.c_str());
-	if (!file)
-		return false;
-
-	file << "; FlameRobin configuration file." << endl << endl << "[Settings]" << endl;
-	for (map<string, string>::const_iterator it = dataM.begin(); it != dataM.end(); ++it)
-	{
-		file << (*it).first << "=" << (*it).second << endl;
-	}
-	file.close();
-	return true;
+	return getHomePath() + "confdefs/";
 }
 //-----------------------------------------------------------------------------
-// this gets called from main() so we're sure config.ini is in the right place
-bool Config::load()
+string Config::getUserHomePath() const
 {
-	std::string path(getConfigFileName());
-
-	std::ifstream file(path.c_str());
-	if (!file)
-		return false;
-
-	// I had to do it this way, since standard line << file, doesn't work good if data has spaces in it.
-	std::stringstream ss;		// read entire file into string buffer
-	ss << file.rdbuf();
-	std::string s(ss.str());
-
-	dataM.clear();
-	while (true)
-	{
-		string::size_type t = s.find('\n');
-		if (t == string::npos)
-			break;
-
-		string line = s.substr(0, t);
-		s.erase(0, t+1);
-
-		string::size_type p = line.find('=');
-		if (p == string::npos)
-			continue;
-
-		string key = line.substr(0, p);
-		line.erase(0, p + 1);
-		line.erase(line.find_last_not_of(" \t\n\r")+1);	// right trim
-
-		setValue(key, line, false);
-	}
-
-	file.close();
-	return true;
+    if (!userHomePathM.empty())
+        return userHomePathM + "/";
+    else
+        return wx2std(wxStandardPaths::Get().GetUserLocalDataDir()) + "/";
 }
 //-----------------------------------------------------------------------------
-std::string Config::getHtmlTemplatesPath()
+string Config::getDBHFileName() const
 {
-	std::string ret(getApplicationPath());
-	if (ret.empty())
-		ret = "html-templates/";
-	else
-		ret += "/html-templates/";
-	return ret;
+	return getUserHomePath() + "fr_databases.conf";
 }
 //-----------------------------------------------------------------------------
-std::string Config::getDBHFileName()
+string Config::getConfigFileName() const
 {
-	std::string ret(getApplicationPath());
-	if (ret.empty())
-		ret = "servers.xml";
-	else
-		ret += "/servers.xml";
-	return ret;
+	return getUserHomePath() + "fr_settings.conf";
 }
 //-----------------------------------------------------------------------------
-
+void Config::setHomePath(const string& homePath)
+{
+    homePathM = homePath;
+}
+//-----------------------------------------------------------------------------
+void Config::setUserHomePath(const string& userHomePath)
+{
+    userHomePathM = userHomePath;
+}
+//-----------------------------------------------------------------------------

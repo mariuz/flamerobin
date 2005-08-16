@@ -31,13 +31,22 @@
 #endif
 
 //-----------------------------------------------------------------------------
+using namespace std;
+//-----------------------------------------------------------------------------
 class FRApp: public wxApp {
 public:
     bool OnInit();
 	void OnFatalException();
+private:
+    // reads the environment variables that influence FR's behaviour.
+    void FRApp::checkEnvironment();
+    // reads the command line params that influence FR's behaviour.
+    void FRApp::parseCommandLine();
+    // Translates the supported macros (like $app and $user) in path
+    // specifications coming from the command line or the environment.
+    const string translatePathMacros(const string path) const;
 };
 //-----------------------------------------------------------------------------
 DECLARE_APP(FRApp)
 //-----------------------------------------------------------------------------
 #endif // MAIN_H
-

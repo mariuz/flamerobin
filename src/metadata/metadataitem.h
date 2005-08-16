@@ -35,9 +35,12 @@
 #include "item.h"
 
 // forward declarations
+class Root;
 class Database;
 class Dependency;
 
+//------------------------------------------------------------------------------
+using namespace std;
 //------------------------------------------------------------------------------
 typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
 	ntTable, ntView, ntProcedure, ntTrigger, ntGenerator, ntFunction,	ntSysTable,			// each item
@@ -48,66 +51,72 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
 	ntLastType
 } NodeType;
 //------------------------------------------------------------------------------
-NodeType getTypeByName(std::string name);
+NodeType getTypeByName(string name);
 //------------------------------------------------------------------------------
 class MetadataItem: public Item
 {
 private:
-	std::string nameM;
+	string nameM;
 	MetadataItem *parentM;
-	std::string descriptionM;
+	string descriptionM;
 	bool descriptionLoadedM;
 protected:
 	NodeType typeM;
 public:
     virtual void accept(Visitor *v);
 
-	bool getDependencies(std::vector<Dependency>& list, bool ofObject);	// load from db
+	bool getDependencies(vector<Dependency>& list, bool ofObject);	// load from db
 
 	MetadataItem();
 	virtual ~MetadataItem() {};
 
 	Database *getDatabase() const;
+    Root* getRoot() const;
 
-	virtual bool getChildren(std::vector<MetadataItem *>& temp);
+	virtual bool getChildren(vector<MetadataItem *>& temp);
 	virtual size_t getChildrenCount() const { return 0; };
 	void drop();	// removes its children (by calling drop() for each) and notifies it's parent
     virtual bool orderedChildren() const { return false; };
 
 	// returns CREATE SQL statement template
-	virtual std::string getCreateSqlTemplate() const { return ""; };
+	virtual string getCreateSqlTemplate() const { return ""; };
 
     // returns complete DROP SQL statement
-    virtual std::string getDropSqlStatement() const;
+    virtual string getDropSqlStatement() const;
 
 	// getters/setters
 	virtual MetadataItem *getParent() const;
 	void setParent(MetadataItem *parent);
-	virtual const std::string& getName() const;
-	virtual std::string getPrintableName();
-	void setName(std::string name);
+	virtual const string& getName() const;
+	virtual string getPrintableName();
+	void setName(string name);
 	virtual NodeType getType() const;
 	void setType(NodeType type);
 
 	// returns the name of the data type (f. ex. TABLE)
-	virtual const std::string getTypeName() const;
+	virtual const string getTypeName() const;
 
 	// returns the item path, currently only used to store settings in config().
 	// It could also be used to locate items in the DBH tree.
-	virtual const std::string getItemPath() const;
+	virtual const string getItemPath() const;
 
-	// returns the name of the metadata item that contributes to the path. The
-	// predefined implementation just returns getName().
-	virtual const std::string getPathName() const;
+	// returns the id string of the metadata item that contributes to the path. The
+	// predefined implementation just returns getId().
+	virtual const string getPathId() const;
+    // returns the id of the item (to be saved in config files, etc.).
+    // The predefined implementation just returns getName().
+    virtual const string getId() const;
 
 	// items description (in database)
-	std::string getDescription();
-	bool setDescription(std::string description);
-	virtual std::string getDescriptionSql() const;
-	virtual std::string getChangeDescriptionSql() const;
+	string getDescription();
+	bool setDescription(string description);
+	virtual string getDescriptionSql() const;
+	virtual string getChangeDescriptionSql() const;
 
 	// returns true if the metadata item is a system (as opposed to user-defined) item.
 	virtual bool isSystem() const;
+
+    static const string pathSeparator;
 };
 //------------------------------------------------------------------------------
 //! masks the object it points to so others see it transparently
@@ -115,17 +124,17 @@ class Dependency: public MetadataItem
 {
 private:
 	MetadataItem *objectM;
-	std::string fieldsM;
+	string fieldsM;
 public:
 	virtual MetadataItem *getParent() const { return objectM->getParent(); };
-	virtual const std::string& getName() const { return objectM->getName(); };
+	virtual const string& getName() const { return objectM->getName(); };
 	virtual NodeType getType() const { return objectM->getType(); };
-	virtual const std::string getTypeName() const { return objectM->getTypeName(); };
+	virtual const string getTypeName() const { return objectM->getTypeName(); };
 
 	Dependency(MetadataItem *object) { objectM = object; };
-	std::string getFields() const { return fieldsM; };
-	void addField(const std::string& name) { if (!fieldsM.empty()) fieldsM += ","; fieldsM += name; };
-	void setFields(const std::string& fields) { fieldsM = fields; };
+	string getFields() const { return fieldsM; };
+	void addField(const string& name) { if (!fieldsM.empty()) fieldsM += ","; fieldsM += name; };
+	void setFields(const string& fields) { fieldsM = fields; };
 };
 //------------------------------------------------------------------------------
 #endif

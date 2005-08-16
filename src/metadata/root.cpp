@@ -36,6 +36,8 @@
 #include "root.h"
 #include "server.h"
 #include "database.h"
+#include "ugly.h"
+#include "wx/filefn.h"
 //------------------------------------------------------------------------------
 // This code should be wx-clean. Only std library
 using namespace std;
@@ -48,6 +50,19 @@ Root& getGlobalRoot()
 	return globalRoot;
 }
 //------------------------------------------------------------------------------
+Root::Root()
+    : MetadataItem(), fileNameM(""), dirtyM(false), nextIdM(1)
+{
+	setName("Firebird Servers");
+	typeM = ntRoot;
+}
+//------------------------------------------------------------------------------
+Root::~Root()
+{
+    if (dirtyM)
+        save();
+}
+//------------------------------------------------------------------------------
 //! loads servers.xml file and:
 
 //! creates server nodes, fills their properties
@@ -56,7 +71,7 @@ Root& getGlobalRoot()
 //
 bool Root::load()
 {
-	std::ifstream file(getFileName().c_str());
+	ifstream file(getFileName().c_str());
 	if (!file)
 		return false;
 
@@ -68,21 +83,21 @@ bool Root::load()
 	Database *database = NULL;		// current db
 
 	// I had to do it this way, since standard line << file, doesn't work good if data has spaces in it.
-	std::stringstream ss;			// read entire file into string buffer
+	stringstream ss;			// read entire file into string buffer
 	ss << file.rdbuf();
-	std::string s(ss.str());
+	string s(ss.str());
 	// skip xml encoding
-	std::string::size_type t = s.find('\n');
-	std::string line = s.substr(0, t);
+	string::size_type t = s.find('\n');
+	string line = s.substr(0, t);
 	s.erase(0, t);
 
 	while (true)
 	{
-		std::string::size_type t = s.find('\n');
-		if (t == std::string::npos)
+		string::size_type t = s.find('\n');
+		if (t == string::npos)
 			break;
 
-		std::string line = s.substr(0, t);
+		string line = s.substr(0, t);
 		s.erase(0, t+1);
 
 		string::size_type start = line.find('<');
@@ -94,14 +109,24 @@ bool Root::load()
 			continue;
 
 		string::size_type start2 = line.find("</");
-		std::string option = line.substr(start+1, end-start-1);
-		std::string value;
+		string option = line.substr(start+1, end-start-1);
+		string value;
 		if (start2 != string::npos && start2-end-1 > 0)
 			value = line.substr(end+1, start2-end-1);
-		else
-			value.empty();
 
-		// server start and end tags
+        // root tags
+        bool isRoot = false;
+        if (option == "root")
+            isRoot = true;
+        if (option == "nextId" && isRoot)
+        {
+            stringstream ss;
+	        ss << value;
+	        ss >> nextIdM;
+        }
+        if (option == "/root")
+            isRoot = false;
+        // server start and end tags
         if (option == "server")
 		{
 			Server temp;
@@ -122,14 +147,18 @@ bool Root::load()
 			Database temp;
 			database = server->addDatabase(temp);
 			database->initChildren();
+            // make sure the database has an Id before Root::save() is called,
+            // otherwise a new Id will be generated then, but the generator value
+            // will not be stored because it's at the beginning of the file.
+            database->getId();
 		}
 		if (option == "/database" && database)
 		{
 			// backward compatibility with FR < 0.3.0
             if (database->getName().empty())
-				database->setName(database->getPath());
+				database->setName(database->extractNameFromConnectionString());
             database = 0;
-		}
+        }
         // common subtags
 		if (option == "name" && server)
 		{
@@ -157,7 +186,6 @@ bool Root::load()
 	}
 
 	file.close();
-	//notify();
 	return true;
 }
 //------------------------------------------------------------------------------
@@ -165,6 +193,7 @@ Server *Root::addServer(Server& server)
 {
 	Server *temp = serversM.add(server);
 	temp->setParent(this);					// grab it from collection
+	dirtyM = true;
 	notify();
 	return temp;
 }
@@ -172,6 +201,7 @@ Server *Root::addServer(Server& server)
 void Root::removeServer(Server* server)
 {
 	serversM.remove(server);
+	dirtyM = true;
 	notify();
 }
 //------------------------------------------------------------------------------
@@ -181,50 +211,45 @@ void Root::removeServer(Server* server)
 //
 bool Root::save()
 {
-	std::ofstream file(getFileName().c_str());
+    // create directory if it doesn't exist yet.
+    wxString dir = wxPathOnly(std2wx(getFileName()));
+    if (!wxDirExists(dir))
+        wxMkdir(dir);
+    ofstream file(getFileName().c_str());
 	if (!file)
 		return false;
 	file << "<?xml version='1.0' encoding='ISO-8859-2'?>\n";
+    file << "<root>\n";
+    file << "\t<nextId>" << nextIdM << "</nextId>\n";
 	for (std::list<Server>::iterator it = serversM.begin(); it != serversM.end(); ++it)
 	{
-		file << "<server>\n";
-		file << "\t<name>" << it->getName() << "</name>\n";
-		file << "\t<host>" << it->getHostname() << "</host>\n";
-		file << "\t<port>" << it->getPort() << "</port>\n";
+		file << "\t<server>\n";
+		file << "\t\t<name>" << it->getName() << "</name>\n";
+		file << "\t\t<host>" << it->getHostname() << "</host>\n";
+		file << "\t\t<port>" << it->getPort() << "</port>\n";
 
 		for (std::list<Database>::iterator it2 = it->getDatabases()->begin(); it2 != it->getDatabases()->end(); ++it2)
 		{
 			it2->resetCredentials();	// clean up eventual extra credentials
-			file << "\t<database>\n";
-			file << "\t\t<name>" << it2->getName() << "</name>\n";
-			file << "\t\t<path>" << it2->getPath() << "</path>\n";
-			file << "\t\t<charset>" << it2->getCharset() << "</charset>\n";
-			file << "\t\t<username>" << it2->getUsername() << "</username>\n";
-			file << "\t\t<password>" << it2->getPassword() << "</password>\n";
-			file << "\t\t<role>" << it2->getRole() << "</role>\n";
-			file << "\t</database>\n";
+			file << "\t\t<database>\n";
+			file << "\t\t\t<id>" << it2->getId() << "</id>\n";
+			file << "\t\t\t<name>" << it2->getName() << "</name>\n";
+			file << "\t\t\t<path>" << it2->getPath() << "</path>\n";
+			file << "\t\t\t<charset>" << it2->getCharset() << "</charset>\n";
+			file << "\t\t\t<username>" << it2->getUsername() << "</username>\n";
+			file << "\t\t\t<password>" << it2->getPassword() << "</password>\n";
+			file << "\t\t\t<role>" << it2->getRole() << "</role>\n";
+			file << "\t\t</database>\n";
 		}
-
-		file << "</server>\n";
+		file << "\t</server>\n";
 	}
+	file << "</root>\n";
 
 	file.close();
 	return true;
 }
 //------------------------------------------------------------------------------
-Root::Root()
-    : MetadataItem(), fileNameM("")
-{
-	setName("Firebird Servers");
-	typeM = ntRoot;
-}
-//------------------------------------------------------------------------------
-Root::~Root()
-{
-	save();
-}
-//------------------------------------------------------------------------------
-bool Root::getChildren(std::vector<MetadataItem *>& temp)
+bool Root::getChildren(vector<MetadataItem *>& temp)
 {
 	return serversM.getChildren(temp);
 }
@@ -236,13 +261,13 @@ bool Root::orderedChildren() const
     return ordered;
 }
 //------------------------------------------------------------------------------
-const std::string Root::getItemPath() const
+const string Root::getItemPath() const
 {
 	// Root is root, don't make the path strings any longer than needed.
 	return "";
 }
 //------------------------------------------------------------------------------
-std::string Root::getFileName()
+string Root::getFileName()
 {
 	if (fileNameM.empty())
 		fileNameM = config().getDBHFileName();
@@ -254,4 +279,8 @@ void Root::accept(Visitor *v)
 	v->visit(*this);
 }
 //------------------------------------------------------------------------------
-
+const unsigned int Root::getNextId()
+{
+    return nextIdM++;
+}
+//------------------------------------------------------------------------------

@@ -32,6 +32,8 @@
 #include "visitor.h"
 #include "server.h"
 //------------------------------------------------------------------------------
+using namespace std;
+//------------------------------------------------------------------------------
 Server::Server()
     : MetadataItem()
 {
@@ -44,7 +46,7 @@ Server::Server()
 	databasesM.setType(ntServer);
 }
 //------------------------------------------------------------------------------
-bool Server::getChildren(std::vector<MetadataItem *>& temp)
+bool Server::getChildren(vector<MetadataItem *>& temp)
 {
 	return databasesM.getChildren(temp);
 }
@@ -73,11 +75,11 @@ void Server::removeDatabase(Database *db)
 //------------------------------------------------------------------------------
 void Server::createDatabase(Database *db, int pagesize, int dialect)
 {
-	std::ostringstream extra_params;
+	ostringstream extra_params;
     if (pagesize)
         extra_params << "PAGE_SIZE " << pagesize << " ";
 
-    std::string charset = db->getCharset();
+    string charset = db->getCharset();
     if (!charset.empty())
         extra_params << "DEFAULT CHARACTER SET " << charset << " ";
 
@@ -92,12 +94,12 @@ MetadataCollection<Database> *Server::getDatabases()
 	return &databasesM;
 };
 //------------------------------------------------------------------------------
-std::string Server::getHostname() const
+string Server::getHostname() const
 {
 	return hostnameM;
 }
 //------------------------------------------------------------------------------
-std::string Server::getPort() const
+string Server::getPort() const
 {
 	return portM;
 }
@@ -113,17 +115,17 @@ bool Server::hasConnectedDatabase() const
 	return false;
 }
 //------------------------------------------------------------------------------
-void Server::setHostname(std::string hostname)
+void Server::setHostname(string hostname)
 {
 	hostnameM = hostname;
 }
 //------------------------------------------------------------------------------
-void Server::setPort(std::string port)
+void Server::setPort(string port)
 {
 	portM = port;
 }
 //------------------------------------------------------------------------------
-const std::string Server::getTypeName() const
+const string Server::getTypeName() const
 {
 	return "SERVER";
 }
@@ -133,13 +135,21 @@ void Server::accept(Visitor *v)
 	v->visit(*this);
 }
 //------------------------------------------------------------------------------
-std::string Server::getConnectionString() const
+string Server::getConnectionString() const
 {
-    std::string hostname = getHostname();
-    std::string port = getPort();
+    string hostname = getHostname();
+    string port = getPort();
     if (!hostname.empty() && !port.empty())
         return hostname + "/" + port;
     else
         return hostname;
+}
+//------------------------------------------------------------------------------
+const string Server::getItemPath() const
+{
+    // Since database Ids are already unique, let's shorten the item paths
+    // by not including the server part. Even more so if this class is bound
+    // to disappear in the future.
+    return "";
 }
 //------------------------------------------------------------------------------

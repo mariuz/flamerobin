@@ -30,7 +30,10 @@
 #include <map>
 #include <string>
 #include <vector>
-
+#include "wx/fileconf.h"
+//---------------------------------------------------------------------------------------
+using namespace std;
+//---------------------------------------------------------------------------------------
 enum StorageGranularity
 {
 	sgFrame,		// Store settings per frame type.
@@ -43,21 +46,18 @@ enum StorageGranularity
 class Config
 {
 public:
-	bool save();
-	bool load();
-
 	// return true if value exists, false if not
-	bool keyExists(const std::string& key) const;
-	bool getValue(std::string key, std::string& value);
-	bool getValue(std::string key, int& value);
-	bool getValue(std::string key, double& value);
-	bool getValue(std::string key, bool& value);
-    bool getValue(std::string key, StorageGranularity& value);
-    bool getValue(std::string key, std::vector<std::string>& value);
+	bool keyExists(const string& key) const;
+	bool getValue(string key, string& value);
+	bool getValue(string key, int& value);
+	bool getValue(string key, double& value);
+	bool getValue(string key, bool& value);
+    bool getValue(string key, StorageGranularity& value);
+    bool getValue(string key, vector<string>& value);
 
 	// returns the value for key if it exists, or default value if it doesn't
 	template <typename T>
-	T get(std::string key, const T& defaultValue)
+	T get(string key, const T& defaultValue)
 	{
 		T temp;
 		if (getValue(key, temp))
@@ -65,30 +65,47 @@ public:
 		else
 			return defaultValue;
 	}
-	
+
+    // these should be called before calling the get* functions below,
+    // otherwise defaults apply.
+    void setHomePath(const string& homePath);
+    void setUserHomePath(const string& userHomePath);
+
+    // returns the home path to use as the basis for the following calls.
+    string getHomePath() const;
 	// returns the path from which to load the HTML templates.
-	std::string getHtmlTemplatesPath();
-	// returns the file name with full path of servers.xml.
-	std::string getDBHFileName();
+	string getHtmlTemplatesPath() const;
+    // returns the path containing the docs.
+	string getDocsPath() const;
+    // returns the path containing the confdefs.
+	string getConfDefsPath() const;
 
-	// return true if value existed, false if not. Pass false in saveIt
-	// to prevent saving the config file before setValue() returns (f. ex.
-	// when a number of items are being stored at one time).
-	bool setValue(std::string key, std::string value, bool saveIt = true);
-	bool setValue(std::string key, int value, bool saveIt = true);
-	bool setValue(std::string key, double value, bool saveIt = true);
-	bool setValue(std::string key, bool value, bool saveIt = true);
-    bool setValue(std::string key, StorageGranularity value, bool saveIt = true);
-    bool setValue(std::string key, std::vector<std::string> value, bool saveIt = true);
+    // returns the home path to use as the basis for the following call.
+    string getUserHomePath() const;
+    // returns the file name with full path of servers.xml.
+	string getDBHFileName() const;
 
-	Config();
+	// return true if value existed, false if not.
+	bool setValue(string key, string value);
+	bool setValue(string key, int value);
+	bool setValue(string key, double value);
+	bool setValue(string key, bool value);
+    bool setValue(string key, StorageGranularity value);
+    bool setValue(string key, vector<string> value);
+
+    static const string pathSeparator;
+
+    Config();
 	~Config();
 private:
-	std::map<std::string, std::string> dataM;		//! key -> value
-	std::string getConfigFileName();
-	std::string configFileNameM;
+	mutable wxFileConfig* configM;
+    // performs lazy initialization of configM.
+    wxFileConfig* getConfig() const;
+	string getConfigFileName() const;
+    string homePathM;
+    string userHomePathM;
 };
-
+//---------------------------------------------------------------------------------------
 Config& config();
 //---------------------------------------------------------------------------------------
 #endif

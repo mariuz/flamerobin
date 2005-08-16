@@ -67,6 +67,7 @@ public:
 	virtual const std::string getTypeName() const;
 
 	bool hasConnectedDatabase() const;
+	virtual const string getItemPath() const;
 };
 //------------------------------------------------------------------------------
 #endif

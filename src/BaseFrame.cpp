@@ -82,11 +82,11 @@ void BaseFrame::readConfigSettings()
 		std::string itemPrefix = getStorageName();
 		if (!itemPrefix.empty())
 		{
-            config().getValue(itemPrefix + "::maximized", maximized);
-			config().getValue(itemPrefix + "::x", r.x);
-			config().getValue(itemPrefix + "::y", r.y);
-			config().getValue(itemPrefix + "::width", r.width);
-			config().getValue(itemPrefix + "::height", r.height);
+            config().getValue(itemPrefix + Config::pathSeparator + "maximized", maximized);
+			config().getValue(itemPrefix + Config::pathSeparator + "x", r.x);
+			config().getValue(itemPrefix + Config::pathSeparator + "y", r.y);
+			config().getValue(itemPrefix + Config::pathSeparator + "width", r.width);
+			config().getValue(itemPrefix + Config::pathSeparator + "height", r.height);
 			doReadConfigSettings(itemPrefix);
 		}
 	}
@@ -131,12 +131,12 @@ void BaseFrame::writeConfigSettings() const
                 r.SetRight(wp.rcNormalPosition.right);
                 r.SetBottom(wp.rcNormalPosition.bottom);
             }
-            config().setValue(itemPrefix + "::maximized", IsMaximized());
+            config().setValue(itemPrefix + Config::pathSeparator + "maximized", IsMaximized());
 #endif
-			config().setValue(itemPrefix + "::x", r.x);
-			config().setValue(itemPrefix + "::y", r.y);
-			config().setValue(itemPrefix + "::width", r.width);
-			config().setValue(itemPrefix + "::height", r.height);
+			config().setValue(itemPrefix + Config::pathSeparator + "x", r.x);
+			config().setValue(itemPrefix + Config::pathSeparator + "y", r.y);
+			config().setValue(itemPrefix + Config::pathSeparator + "width", r.width);
+			config().setValue(itemPrefix + Config::pathSeparator + "height", r.height);
 			doWriteConfigSettings(itemPrefix);
 		}
 	}

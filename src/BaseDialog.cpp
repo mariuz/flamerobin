@@ -93,25 +93,25 @@ BaseDialog::~BaseDialog()
 void BaseDialog::readConfigSettings()
 {
     // default to centered dialogs
-    bool centered = config().get("centerDialogsOnParent", true);
+    bool centered = config().get("centerDialogOnParent", true);
     if (config().get("FrameStorage", false))
     {
         std::string itemPrefix = getStorageName();
         if (!itemPrefix.empty())
         {
             wxRect r = getDefaultRect();
-            config().getValue(itemPrefix + "::width", r.width);
-            config().getValue(itemPrefix + "::height", r.height);
+            config().getValue(itemPrefix + Config::pathSeparator + "width", r.width);
+            config().getValue(itemPrefix + Config::pathSeparator + "height", r.height);
             doReadConfigSettings(itemPrefix);
             if (r.width > 0 && r.height > 0)
                 SetSize(r.width, r.height);
             // default to global setting, set to 0 to disable
             // restore the position if we don't want it centered
-            config().getValue(itemPrefix + "::centerOnParent", centered);
+            config().getValue(itemPrefix + Config::pathSeparator + "centerDialogOnParent", centered);
             if (!centered)
             {
-                config().getValue(itemPrefix + "::x", r.x);
-                config().getValue(itemPrefix + "::y", r.y);
+                config().getValue(itemPrefix + Config::pathSeparator + "x", r.x);
+                config().getValue(itemPrefix + Config::pathSeparator + "y", r.y);
                 SetSize(r);
             }
         }
@@ -133,16 +133,15 @@ void BaseDialog::writeConfigSettings() const
         if (!itemPrefix.empty())
         {
             wxRect r = GetRect();
-            config().setValue(itemPrefix + "::width", r.width);
-            config().setValue(itemPrefix + "::height", r.height);
+            config().setValue(itemPrefix + Config::pathSeparator + "width", r.width);
+            config().setValue(itemPrefix + Config::pathSeparator + "height", r.height);
 
             bool centered = true;
-            config().getValue("centerDialogsOnParent", centered);
-            config().getValue(itemPrefix + "::centerOnParent", centered);
+            config().getValue(itemPrefix + Config::pathSeparator + "centerDialogOnParent", centered);
             if (!centered)
             {
-                config().setValue(itemPrefix + "::x", r.x);
-                config().setValue(itemPrefix + "::y", r.y);
+                config().setValue(itemPrefix + Config::pathSeparator + "x", r.x);
+                config().setValue(itemPrefix + Config::pathSeparator + "y", r.y);
             }
             doWriteConfigSettings(itemPrefix);
         }

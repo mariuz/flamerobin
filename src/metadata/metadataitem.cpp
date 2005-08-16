@@ -30,12 +30,17 @@
 
 //------------------------------------------------------------------------------
 #include <sstream>
+#include "config.h"
 #include "metadataitem.h"
 #include "visitor.h"
 #include "database.h"
 #include "dberror.h"
 #include "frutils.h"
-
+//------------------------------------------------------------------------------
+using namespace std;
+//------------------------------------------------------------------------------
+const string MetadataItem::pathSeparator = "/";
+//------------------------------------------------------------------------------
 MetadataItem::MetadataItem()
 	: Item()
 {
@@ -44,29 +49,34 @@ MetadataItem::MetadataItem()
 	descriptionLoadedM = false;
 }
 //------------------------------------------------------------------------------
-const std::string MetadataItem::getTypeName() const
+const string MetadataItem::getTypeName() const
 {
 	return "";
 }
 //------------------------------------------------------------------------------
-const std::string MetadataItem::getItemPath() const
+const string MetadataItem::getItemPath() const
 {
-	std::string ret = getTypeName() + "(" + getPathName() + ")";
+	string result = getTypeName() + "_" + getPathId();
  	if (parentM)
- 	{
-		std::string parentItemPath = parentM->getItemPath();
+	{
+		string parentItemPath = parentM->getItemPath();
 		if (parentItemPath != "")
-			ret = parentItemPath + "::" + ret;
+			result = parentItemPath + pathSeparator + result;
 	}
-	return ret;
+	return result;
 }
 //------------------------------------------------------------------------------
-const std::string MetadataItem::getPathName() const
+const string MetadataItem::getPathId() const
+{
+	return getId();
+}
+//------------------------------------------------------------------------------
+const string MetadataItem::getId() const
 {
 	return getName();
 }
 //------------------------------------------------------------------------------
-NodeType getTypeByName(std::string name)
+NodeType getTypeByName(string name)
 {
 	if (name == "TABLE")
 		return ntTable;
@@ -92,7 +102,7 @@ NodeType getTypeByName(std::string name)
 		return ntUnknown;
 }
 //------------------------------------------------------------------------------
-bool MetadataItem::getChildren(std::vector<MetadataItem*>& /*temp*/)
+bool MetadataItem::getChildren(vector<MetadataItem*>& /*temp*/)
 {
 	return false;
 }
@@ -100,9 +110,9 @@ bool MetadataItem::getChildren(std::vector<MetadataItem*>& /*temp*/)
 //! removes its children (by calling drop() for each) and notifies it's parent
 void MetadataItem::drop()
 {
-	std::vector<MetadataItem *>temp;
+	vector<MetadataItem *>temp;
 	if (getChildren(temp))
-		for (std::vector<MetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
+		for (vector<MetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
 			(*it)->drop();
 
 	// TODO: prehaps the whole DBH needs to be reconsidered
@@ -119,8 +129,16 @@ Database *MetadataItem::getDatabase() const
 	return (Database *)m;
 }
 //------------------------------------------------------------------------------
+Root* MetadataItem::getRoot() const
+{
+	MetadataItem* m = const_cast<MetadataItem*>(this);
+	while (m->getParent())
+		m = m->getParent();
+	return (Root*)m;
+}
+//------------------------------------------------------------------------------
 //! virtual so it can eventually be delegated to Table, View, etc.
-std::string MetadataItem::getDescriptionSql() const
+string MetadataItem::getDescriptionSql() const
 {
 	switch (typeM)
 	{
@@ -139,7 +157,7 @@ std::string MetadataItem::getDescriptionSql() const
 }
 //------------------------------------------------------------------------------
 //! virtual so it can eventually be delegated to Table, View, etc.
-std::string MetadataItem::getChangeDescriptionSql() const
+string MetadataItem::getChangeDescriptionSql() const
 {
 	switch (typeM)
 	{
@@ -159,7 +177,7 @@ std::string MetadataItem::getChangeDescriptionSql() const
 //------------------------------------------------------------------------------
 //! ofObject = true   => returns list of objects this object depends on
 //! ofObject = false  => returns list of objects that depend on this object
-bool MetadataItem::getDependencies(std::vector<Dependency>& list, bool ofObject)
+bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
 {
 	Database *d = getDatabase();
 	if (!d)
@@ -193,9 +211,9 @@ bool MetadataItem::getDependencies(std::vector<Dependency>& list, bool ofObject)
 		tr1->Start();
 		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
 
-		std::string o1 = (ofObject ? "DEPENDENT" : "DEPENDED_ON");
-		std::string o2 = (ofObject ? "DEPENDED_ON" : "DEPENDENT");
-		std::string sql =
+		string o1 = (ofObject ? "DEPENDENT" : "DEPENDED_ON");
+		string o2 = (ofObject ? "DEPENDED_ON" : "DEPENDENT");
+		string sql =
 			"select RDB$" + o2 + "_TYPE, RDB$" + o2 + "_NAME, RDB$FIELD_NAME \n "
 			" from RDB$DEPENDENCIES \n "
 			" where RDB$" + o1 + "_TYPE = ? and RDB$" + o1 + "_NAME = ? \n ";
@@ -226,7 +244,7 @@ bool MetadataItem::getDependencies(std::vector<Dependency>& list, bool ofObject)
 		Dependency *dep = 0;
 		while (st1->Fetch())
 		{
-			std::string object_name, field_name;
+			string object_name, field_name;
 			int object_type;
 			st1->Get(1, &object_type);
 			st1->Get(2, object_name);
@@ -265,8 +283,8 @@ bool MetadataItem::getDependencies(std::vector<Dependency>& list, bool ofObject)
 		if (typeM == ntTable && ofObject)	// foreign keys of this table + computed columns
 		{
 			Table *t = dynamic_cast<Table *>(this);
-			std::vector<ForeignKey> *f = t->getForeignKeys();
-			for (std::vector<ForeignKey>::const_iterator it = f->begin(); it != f->end(); ++it)
+			vector<ForeignKey> *f = t->getForeignKeys();
+			for (vector<ForeignKey>::const_iterator it = f->begin(); it != f->end(); ++it)
 			{
 				MetadataItem *table = d->findByNameAndType(ntTable, (*it).referencedTableM);
 				if (!table)
@@ -294,11 +312,11 @@ bool MetadataItem::getDependencies(std::vector<Dependency>& list, bool ofObject)
 			);
 			st1->Set(1, nameM);
 			st1->Execute();
-			std::string lasttable;
+			string lasttable;
 			Dependency *dep = 0;
 			while (st1->Fetch())
 			{
-				std::string table_name, field_name;
+				string table_name, field_name;
 				st1->Get(1, table_name);
 				st1->Get(2, field_name);
 				table_name.erase(table_name.find_last_not_of(" ")+1);		// trim
@@ -331,13 +349,13 @@ bool MetadataItem::getDependencies(std::vector<Dependency>& list, bool ofObject)
 	return false;
 }
 //------------------------------------------------------------------------------
-std::string MetadataItem::getDescription()
+string MetadataItem::getDescription()
 {
 	if (descriptionLoadedM)
 		return descriptionM;
 
 	Database *d = getDatabase();
-	std::string sql = getDescriptionSql();
+	string sql = getDescriptionSql();
 	if (!d || sql == "")
 		return "N/A";
 
@@ -391,13 +409,13 @@ std::string MetadataItem::getDescription()
 	return lastError().getMessage();
 }
 //------------------------------------------------------------------------------
-bool MetadataItem::setDescription(std::string description)
+bool MetadataItem::setDescription(string description)
 {
 	Database *d = getDatabase();
 	if (!d)
 		return false;
 
-	std::string sql = getChangeDescriptionSql();
+	string sql = getChangeDescriptionSql();
 	if (sql == "")
 	{
 		lastError().setMessage("The object does not support descriptions");
@@ -453,12 +471,12 @@ void MetadataItem::setParent(MetadataItem *parent)
 	parentM = parent;
 }
 //------------------------------------------------------------------------------
-std::string MetadataItem::getPrintableName()
+string MetadataItem::getPrintableName()
 {
 	size_t n = getChildrenCount();
  	if (n)
 	{
-		std::ostringstream ss;
+		ostringstream ss;
 		ss << nameM << " (" << n << ")";
 		return ss.str();
 	}
@@ -466,12 +484,12 @@ std::string MetadataItem::getPrintableName()
 		return nameM;
 }
 //------------------------------------------------------------------------------
-const std::string& MetadataItem::getName() const
+const string& MetadataItem::getName() const
 {
 	return nameM;
 }
 //------------------------------------------------------------------------------
-void MetadataItem::setName(std::string name)
+void MetadataItem::setName(string name)
 {
 	name.erase(name.find_last_not_of(' ')+1);		// right trim
 	nameM = name;
@@ -493,7 +511,7 @@ bool MetadataItem::isSystem() const
 	return getName().substr(0, 4) == "RDB$";
 }
 //------------------------------------------------------------------------------
-std::string MetadataItem::getDropSqlStatement() const
+string MetadataItem::getDropSqlStatement() const
 {
     return "DROP " + getTypeName() + " " + getName() + ";";
 }
