@@ -62,12 +62,13 @@ private:
     Server *serverM;
     bool createM;
 	bool connectAsM;
-	bool hasNameM;
+	bool defaultNameM;
 
     void do_layout();
     void set_properties();
     void updateButtons();
-
+    const wxString buildName(const wxString& dbPath) const;
+    void setDefaultName();
 protected:
     virtual const std::string getName() const;
 

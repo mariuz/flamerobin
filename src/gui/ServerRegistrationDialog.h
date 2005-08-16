@@ -58,6 +58,7 @@ private:
     void set_properties();
     void updateButtons();
     const wxString buildName(const wxString& hostName, const wxString& portNumber) const;
+    void setDefaultName();
 protected:
     wxStaticText* label_name;
     wxTextCtrl* text_ctrl_name;

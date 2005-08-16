@@ -195,9 +195,10 @@ void DatabaseRegistrationDialog::setDatabase(Database *db)
     combobox_charset->SetSelection(combobox_charset->FindString(std2wx(databaseM->getCharset())));
     if (combobox_charset->GetSelection() < 0)
         combobox_charset->SetSelection(combobox_charset->FindString(wxT("NONE")));
-
-	hasNameM = !(databaseM->getName().empty());
-
+    // see whether the database has an empty or default name; knowing that will be
+    // useful to keep the name in sync when other attributes change.
+    setDefaultName();
+	
     // enable controls depending on operation and database connection status
     // use SetEditable() for edit controls to allow copying text to clipboard
     bool isConnected = databaseM->isConnected();
@@ -293,11 +294,9 @@ void DatabaseRegistrationDialog::OnSettingsChange(wxCommandEvent& WXUNUSED(event
 {
     if (IsShown())
 	{
-		if (!hasNameM)
-		{
-			wxFileName fn(text_ctrl_dbpath->GetValue());
-			text_ctrl_name->SetValue(fn.GetName());
-		}
+        if (defaultNameM)
+            text_ctrl_name->SetValue(buildName(text_ctrl_dbpath->GetValue()));
+        setDefaultName();
         updateButtons();
 	}
 }
@@ -306,10 +305,21 @@ void DatabaseRegistrationDialog::OnNameChange(wxCommandEvent& WXUNUSED(event))
 {
     if (IsShown())
 	{
+        setDefaultName();
         updateButtons();
-		wxFileName fn(text_ctrl_dbpath->GetValue());
-		if (text_ctrl_name->GetValue() != fn.GetName())
-			hasNameM = true;
 	}
+}
+//-----------------------------------------------------------------------------
+const wxString DatabaseRegistrationDialog::buildName(const wxString& dbPath) const
+{
+    Database helper;
+    helper.setPath(wx2std(dbPath));
+    return std2wx(helper.extractNameFromConnectionString());
+}
+//-----------------------------------------------------------------------------
+void DatabaseRegistrationDialog::setDefaultName()
+{
+    defaultNameM = ((text_ctrl_name->GetValue().IsEmpty() ||
+        text_ctrl_name->GetValue() == buildName(text_ctrl_dbpath->GetValue())));
 }
 //-----------------------------------------------------------------------------

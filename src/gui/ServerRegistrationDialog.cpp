@@ -46,7 +46,7 @@ ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent, int id,
     : BaseDialog(parent, id, title, pos, size, style)
 {
     label_name = new wxStaticText(getControlsPanel(), -1, _("Display name:"));
-    text_ctrl_name = new wxTextCtrl(getControlsPanel(), ID_textctrl_name, wxT("localhost"));
+    text_ctrl_name = new wxTextCtrl(getControlsPanel(), ID_textctrl_name, wxT(""));
     label_hostname = new wxStaticText(getControlsPanel(), -1, _("Hostname:"));
     text_ctrl_hostname = new wxTextCtrl(getControlsPanel(), ID_textctrl_hostname, wxT("localhost"));
     label_portnumber = new wxStaticText(getControlsPanel(), -1, _("Port number:"));
@@ -100,6 +100,10 @@ void ServerRegistrationDialog::setServer(Server *s)
     text_ctrl_portnumber->SetValue(std2wx(serverM->getPort()));
 	defaultNameM = (text_ctrl_name->GetValue() == buildName(text_ctrl_hostname->GetValue(), text_ctrl_portnumber->GetValue()));
 
+    // see whether the server has an empty or default name; knowing that will be
+    // useful to keep the name in sync when other attributes change.
+    setDefaultName();
+
     // enable controls depending on operation and database connection status
     // use SetEditable() for edit controls to allow copying text to clipboard
     bool isConnected = serverM->hasConnectedDatabase();
@@ -133,8 +137,7 @@ void ServerRegistrationDialog::OnNameChange(wxCommandEvent& WXUNUSED(event))
     // will allready be called in constructor!
     if (IsShown())
     {
-        if (text_ctrl_name->GetValue() != buildName(text_ctrl_hostname->GetValue(), text_ctrl_portnumber->GetValue()))
-            defaultNameM = false;
+        setDefaultName();
         updateButtons();
     }
 }
@@ -146,6 +149,7 @@ void ServerRegistrationDialog::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
     {
         if (defaultNameM)
             text_ctrl_name->SetValue(buildName(text_ctrl_hostname->GetValue(), text_ctrl_portnumber->GetValue()));
+        setDefaultName();
         updateButtons();
     }
 }
@@ -164,5 +168,11 @@ const wxString ServerRegistrationDialog::buildName(const wxString& hostName, con
     helper.setHostname(wx2std(hostName));
     helper.setPort(wx2std(portNumber));
     return std2wx(helper.getConnectionString());
+}
+//-----------------------------------------------------------------------------
+void ServerRegistrationDialog::setDefaultName()
+{
+    defaultNameM = ((text_ctrl_name->GetValue().IsEmpty() ||
+        text_ctrl_name->GetValue() == buildName(text_ctrl_hostname->GetValue(), text_ctrl_portnumber->GetValue())));
 }
 //-----------------------------------------------------------------------------
