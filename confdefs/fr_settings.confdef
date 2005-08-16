@@ -6,7 +6,7 @@
 		<image>3</image>
 		<setting type="checkbox">
 			<caption>Center dialogs on their parent window</caption>
-			<key>centerDialogsOnParent</key>
+			<key>centerDialogOnParent</key>
 			<default>1</default>
 		</setting>
 		<setting type="checkbox">
