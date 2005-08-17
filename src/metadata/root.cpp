@@ -249,6 +249,12 @@ bool Root::save()
 	return true;
 }
 //------------------------------------------------------------------------------
+void Root::notifyAllServers()
+{
+	for (MetadataCollection<Server>::iterator it = serversM.begin(); it != serversM.end(); ++it)
+		(*it).notify();
+}
+//------------------------------------------------------------------------------
 bool Root::getChildren(vector<MetadataItem *>& temp)
 {
 	return serversM.getChildren(temp);

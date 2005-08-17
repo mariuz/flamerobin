@@ -49,6 +49,8 @@ public:
 	bool save();
 	virtual const std::string getItemPath() const;
 
+	void notifyAllServers();	// updates all servers (observer pattern)
+
     // increments the Id generator and returns the value.
     const unsigned int getNextId();
 private:

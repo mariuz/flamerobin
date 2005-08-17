@@ -71,6 +71,7 @@ public:
 	void OnMenuShowGeneratorValue(wxCommandEvent& event);
 	void OnMenuSetGeneratorValue(wxCommandEvent& event);
 	void OnMenuToggleStatusBar(wxCommandEvent& event);
+	void OnMenuToggleDisconnected(wxCommandEvent& event);
 	void OnMenuCreateObject(wxCommandEvent& event);
     void OnMenuLoadColumnsInfo(wxCommandEvent& event);
     void OnMenuAddColumn(wxCommandEvent& event);

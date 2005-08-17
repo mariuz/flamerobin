@@ -36,6 +36,7 @@
 
 #include "ugly.h"
 #include "metadata/column.h"
+#include "metadata/database.h"
 #include "config.h"
 #include "treeitem.h"
 //------------------------------------------------------------------------------
@@ -69,6 +70,7 @@ wxTreeItemId TreeItem::findSubNode(MetadataItem *item)
 //! node is responsible for "update"
 void TreeItem::update()
 {
+	bool hideDisconnected = config().get("HideDisconnectedDatabases", false);
 	wxTreeItemId id = GetId();
 	if (!id.IsOk())
 		return;
@@ -98,8 +100,15 @@ void TreeItem::update()
 			if ((*i)->getType() == ntDomain && (*i)->isSystem())
 				continue;
 
-			wxString dbh_name = std2wx((*i)->getPrintableName());
+			/*
+			if (hideDisconnected)		// don't add it
+			{
+				Database *d = dynamic_cast<Database *>(*i);
+				if (d && !d->isConnected())
+					continue;
+			}*/
 
+			wxString dbh_name = std2wx((*i)->getPrintableName());
 			wxTreeItemId item = findSubNode(*i);
 			if (!item.IsOk())											// add if needed
 			{
@@ -127,33 +136,44 @@ void TreeItem::update()
 				previous = item;
 			}
 		}
-	}
 
-	// something strange is going on here, so a little strange approach to fix it
-	bool has_deleted;
-	do
-	{
-		// iterate through nodes of tree to see if something has to be removed
-		has_deleted = false;
-		wxTreeItemIdValue cookie;
-		for (wxTreeItemId item = treeM->GetFirstChild(id, cookie); item.IsOk(); item = treeM->GetNextChild(id, cookie))
+		// remove delete items - one by one
+		bool has_deleted;
+		do
 		{
-			bool ok = false;		// check if item exists in vector
-			for (std::vector<MetadataItem *>::iterator i = temp.begin(); i != temp.end(); ++i)
-				if (*i == treeM->getMetadataItem(item))
-					ok = true;
-
-			if (!ok)
+			// iterate through nodes of tree to see if something has to be removed
+			has_deleted = false;
+			wxTreeItemIdValue cookie;
+			for (wxTreeItemId item = treeM->GetFirstChild(id, cookie); item.IsOk(); item = treeM->GetNextChild(id, cookie))
 			{
-				has_deleted = true;
-				treeM->DeleteChildren(item);
-				treeM->Delete(item);
-				break;
+				bool ok = false;		// check if item exists in vector
+				for (std::vector<MetadataItem *>::iterator i = temp.begin(); i != temp.end(); ++i)
+				{
+					if (*i == treeM->getMetadataItem(item))
+					{
+						ok = true;
+						if (hideDisconnected)	// remove if it's there
+						{
+							Database *d = dynamic_cast<Database *>(*i);
+							if (d && !d->isConnected())
+							{
+								ok = false;
+								break;
+							}
+						}
+					}
+				}
+				if (!ok)
+				{
+					has_deleted = true;
+					treeM->DeleteChildren(item);
+					treeM->Delete(item);
+					break;
+				}
 			}
 		}
+		while (has_deleted);
 	}
-	while (has_deleted);
-
 
 	if (treeM->ItemHasChildren(id))		// cosmetics
 	{
@@ -167,10 +187,8 @@ void TreeItem::update()
 				was = true;
 			}
 		}
-
 		if (!was && !itemHadChildren)
 			treeM->SetItemBold(id, true);
-
 	}
 	else
 		treeM->SetItemBold(id, false);

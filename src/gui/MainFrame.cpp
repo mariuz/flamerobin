@@ -84,6 +84,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
 
 	wxMenu *viewMenu = new wxMenu();
     viewMenu->AppendCheckItem(myTreeCtrl::Menu_ToggleStatusBar, _("&Status bar"));
+    viewMenu->AppendCheckItem(myTreeCtrl::Menu_ToggleDisconnected, _("&Disconnected databases"));
 	menuBarM->Append(viewMenu, _("&View"));
 
     windowMenu = new wxMenu();
@@ -100,6 +101,9 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
 	menuBarM->EnableTop(3, false);	// disable "window" menu at startup
 	frameManager().setWindowMenu(windowMenu, menuBarM);
 
+	// update checkboxes
+	config().setValue("HideDisconnectedDatabases", false);
+	viewMenu->Check(myTreeCtrl::Menu_ToggleDisconnected, true);
     if (config().get("showStatusBar", true))
     {
         CreateStatusBar();
@@ -205,6 +209,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(myTreeCtrl::Menu_DropObject, MainFrame::OnMenuDropObject)
 	EVT_MENU(myTreeCtrl::Menu_CreateTrigger, MainFrame::OnMenuCreateTrigger)
 	EVT_MENU(myTreeCtrl::Menu_ToggleStatusBar, MainFrame::OnMenuToggleStatusBar)
+	EVT_MENU(myTreeCtrl::Menu_ToggleDisconnected, MainFrame::OnMenuToggleDisconnected)
 
 	EVT_MENU_RANGE(5000, 6000, MainFrame::OnWindowMenuItem)
 	EVT_TREE_SEL_CHANGED(myTreeCtrl::ID_tree_ctrl, MainFrame::OnTreeSelectionChanged)
@@ -870,6 +875,12 @@ void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))
 		t);
 	f->setProperties();
 	f->Show();
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuToggleDisconnected(wxCommandEvent& event)
+{
+	config().setValue("HideDisconnectedDatabases", !event.IsChecked());
+	getGlobalRoot().notifyAllServers();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuToggleStatusBar(wxCommandEvent& event)

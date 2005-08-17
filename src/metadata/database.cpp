@@ -29,6 +29,7 @@
 #endif
 
 #include <sstream>
+#include "config.h"
 #include "visitor.h"
 #include "parameter.h"
 #include "database.h"
@@ -886,6 +887,8 @@ bool Database::disconnect()
 		viewsM.detachAllObservers();
         exceptionsM.detachAllObservers();
 
+		if (config().get("HideDisconnectedDatabases", false))
+			getParent()->notify();
 		notify();
 		return true;
 	}
