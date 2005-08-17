@@ -57,8 +57,6 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_config.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_converters.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_dberror.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrame.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrameImpl.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_framemanager.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGrid.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridCells.o \
@@ -68,19 +66,22 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupRestoreBaseFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseRegistrationDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ExecuteSqlFrame.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrame.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemPropertiesFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MultilineEnterDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TriggerWizardDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleHtmlFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FindDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrameImpl.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_column.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_constraints.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_database.o \
@@ -88,10 +89,12 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_exception.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_function.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_generator.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_indices.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_item.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitem.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitemwithcolumns.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_parameter.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_procedure.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_relation.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_role.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_root.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_server.o \
@@ -101,6 +104,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_myTreeCtrl.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_observer.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_contextmenuvisitor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_simpleparser.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_styleguide.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_styleguidemsw.o \
@@ -188,7 +192,7 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS) gcc$(U_OPT)$(R
 
 templates: 
 	if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates mkdir gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
-	for %%f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TRIGGER.html VIEW.html dependencies.html drop.png ok.png view.png) do if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates\%%f copy html-templates\%%f gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
+	for %%f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TRIGGER.html VIEW.html VIEWtriggers.html dependencies.html drop.png ok.png view.png compute.png redx.png) do if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates\%%f copy html-templates\%%f gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
 
 config-options: 
 	if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT) mkdir gcc$(U_OPT)$(R_OPT)$(D_OPT)
@@ -210,12 +214,6 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_converters.o: ./src/converters.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_dberror.o: ./src/dberror.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
-
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrame.o: ./src/FieldPropertiesFrame.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
-
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrameImpl.o: ./src/FieldPropertiesFrameImpl.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_framemanager.o: ./src/framemanager.cpp
@@ -245,6 +243,12 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseRegistrationDialog.o: ./src/gui/D
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ExecuteSqlFrame.o: ./src/gui/ExecuteSqlFrame.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesFrame.o: ./src/gui/FieldPropertiesFrame.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.o: ./src/gui/MainFrame.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemPropertiesFrame.o: ./src/gui/MetadataItemPropertiesFrame.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
@@ -257,13 +261,22 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.o: ./src/gui/Preference
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.o: ./src/gui/PreferencesDialogSettings.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.o: ./src/gui/PrintableHtmlWindow.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.o: ./src/gui/ReorderFieldsDialog.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TriggerWizardDialog.o: ./src/gui/TriggerWizardDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.o: ./src/gui/RestoreFrame.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.o: ./src/gui/ServerRegistrationDialog.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleHtmlFrame.o: ./src/gui/SimpleHtmlFrame.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FindDialog.o: ./src/gui/FindDialog.cpp
@@ -276,12 +289,6 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.o: ./src/logger.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.o: ./src/main.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
-
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.o: ./src/MainFrame.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
-
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrameImpl.o: ./src/MainFrameImpl.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_column.o: ./src/metadata/column.cpp
@@ -305,16 +312,22 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_function.o: ./src/metadata/function.cpp
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_generator.o: ./src/metadata/generator.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitem.o: ./src/metadata/metadataitem.cpp
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_indices.o: ./src/metadata/indices.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitemwithcolumns.o: ./src/metadata/metadataitemwithcolumns.cpp
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_item.o: ./src/metadata/item.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitem.o: ./src/metadata/metadataitem.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_parameter.o: ./src/metadata/parameter.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_procedure.o: ./src/metadata/procedure.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_relation.o: ./src/metadata/relation.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_role.o: ./src/metadata/role.cpp
@@ -342,6 +355,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.o: ./src/objectd
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_observer.o: ./src/observer.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_contextmenuvisitor.o: ./src/contextmenuvisitor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_simpleparser.o: ./src/simpleparser.cpp

@@ -35,7 +35,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_config.o \
 	flamerobin_converters.o \
 	flamerobin_dberror.o \
-	flamerobin_FieldPropertiesFrame.o \
 	flamerobin_framemanager.o \
 	flamerobin_frDataGrid.o \
 	flamerobin_frDataGridCells.o \
@@ -45,6 +44,8 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_BackupRestoreBaseFrame.o \
 	flamerobin_DatabaseRegistrationDialog.o \
 	flamerobin_ExecuteSqlFrame.o \
+	flamerobin_FieldPropertiesFrame.o \
+	flamerobin_MainFrame.o \
 	flamerobin_MetadataItemPropertiesFrame.o \
 	flamerobin_MultilineEnterDialog.o \
 	flamerobin_PreferencesDialog.o \
@@ -59,7 +60,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_images.o \
 	flamerobin_logger.o \
 	flamerobin_main.o \
-	flamerobin_MainFrame.o \
 	flamerobin_column.o \
 	flamerobin_constraints.o \
 	flamerobin_database.o \
@@ -227,9 +227,6 @@ flamerobin_converters.o: $(srcdir)/src/converters.cpp $(FLAMEROBIN_ODEP)
 flamerobin_dberror.o: $(srcdir)/src/dberror.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/dberror.cpp
 
-flamerobin_FieldPropertiesFrame.o: $(srcdir)/src/gui/FieldPropertiesFrame.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/FieldPropertiesFrame.cpp
-
 flamerobin_framemanager.o: $(srcdir)/src/framemanager.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/framemanager.cpp
 
@@ -256,6 +253,12 @@ flamerobin_DatabaseRegistrationDialog.o: $(srcdir)/src/gui/DatabaseRegistrationD
 
 flamerobin_ExecuteSqlFrame.o: $(srcdir)/src/gui/ExecuteSqlFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/ExecuteSqlFrame.cpp
+
+flamerobin_FieldPropertiesFrame.o: $(srcdir)/src/gui/FieldPropertiesFrame.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/FieldPropertiesFrame.cpp
+
+flamerobin_MainFrame.o: $(srcdir)/src/gui/MainFrame.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/MainFrame.cpp
 
 flamerobin_MetadataItemPropertiesFrame.o: $(srcdir)/src/gui/MetadataItemPropertiesFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/MetadataItemPropertiesFrame.cpp
@@ -298,9 +301,6 @@ flamerobin_logger.o: $(srcdir)/src/logger.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_main.o: $(srcdir)/src/main.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/main.cpp
-
-flamerobin_MainFrame.o: $(srcdir)/src/gui/MainFrame.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/MainFrame.cpp
 
 flamerobin_column.o: $(srcdir)/src/metadata/column.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/column.cpp
