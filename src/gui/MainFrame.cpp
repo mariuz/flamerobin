@@ -131,7 +131,7 @@ void MainFrame::set_properties()
 	getGlobalRoot().load();
 	if (tree_ctrl_1->GetCount() <= 1)
 	{
-		wxMessageBox(_("You may register a new server and databases."), _("File servers.xml not found"));
+		wxMessageBox(_("You may register a new server and databases."), _("File fr_databases.conf not found"));
 
 		Server s; 					// add localhost
 		s.setName("localhost");
