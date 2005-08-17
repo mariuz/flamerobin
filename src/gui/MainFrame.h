@@ -70,6 +70,7 @@ public:
 	void OnMenuShowAllGeneratorValues(wxCommandEvent& event);
 	void OnMenuShowGeneratorValue(wxCommandEvent& event);
 	void OnMenuSetGeneratorValue(wxCommandEvent& event);
+	void OnMenuToggleStatusBar(wxCommandEvent& event);
 	void OnMenuCreateObject(wxCommandEvent& event);
     void OnMenuLoadColumnsInfo(wxCommandEvent& event);
     void OnMenuAddColumn(wxCommandEvent& event);
@@ -107,7 +108,6 @@ private:
 
 protected:
     myTreeCtrl* tree_ctrl_1;
-	wxStatusBar* statusBarM;
     wxMenuBar* menuBarM;
 	wxMenu* windowMenu;		// dynamic menu
 

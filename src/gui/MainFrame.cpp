@@ -82,6 +82,10 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     editMenu->Append(myTreeCtrl::Menu_Configure, _("P&references..."));
 	menuBarM->Append(editMenu, _("&Edit"));
 
+	wxMenu *viewMenu = new wxMenu();
+    viewMenu->AppendCheckItem(myTreeCtrl::Menu_ToggleStatusBar, _("&Status bar"));
+	menuBarM->Append(viewMenu, _("&View"));
+
     windowMenu = new wxMenu();
     menuBarM->Append(windowMenu, _("&Window"));
 
@@ -93,12 +97,15 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     helpMenu->Append(wxID_ABOUT, _("&About"));
     menuBarM->Append(helpMenu, _("&Help"));
 	SetMenuBar(menuBarM);
-	menuBarM->EnableTop(2, false);	// disable "window" menu at startup
+	menuBarM->EnableTop(3, false);	// disable "window" menu at startup
 	frameManager().setWindowMenu(windowMenu, menuBarM);
 
-	//statusBarM = new wxStatusBar(0, -1);
-	//SetStatusBar(statusBarM);
-	statusBarM = CreateStatusBar();
+    if (config().get("showStatusBar", true))
+    {
+        CreateStatusBar();
+        viewMenu->Check(myTreeCtrl::Menu_ToggleStatusBar, true);
+    }
+
 	SetStatusBarPane(-1);	// disable automatic fill
     set_properties();
     do_layout();
@@ -197,6 +204,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(myTreeCtrl::Menu_ObjectProperties, MainFrame::OnMenuObjectProperties)
 	EVT_MENU(myTreeCtrl::Menu_DropObject, MainFrame::OnMenuDropObject)
 	EVT_MENU(myTreeCtrl::Menu_CreateTrigger, MainFrame::OnMenuCreateTrigger)
+	EVT_MENU(myTreeCtrl::Menu_ToggleStatusBar, MainFrame::OnMenuToggleStatusBar)
 
 	EVT_MENU_RANGE(5000, 6000, MainFrame::OnWindowMenuItem)
 	EVT_TREE_SEL_CHANGED(myTreeCtrl::ID_tree_ctrl, MainFrame::OnTreeSelectionChanged)
@@ -211,7 +219,7 @@ void MainFrame::OnWindowMenuItem(wxCommandEvent& event)
 //-----------------------------------------------------------------------------
 void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 {
-	if (!statusBarM)
+	if (!GetStatusBar())
 		return;
 
 	static Database *lastDatabase = 0;		// remember the last database/node type, so menus don't
@@ -221,10 +229,10 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 		if (d)
 		{
 			std::string s = d->getUsername() + "@" + d->getConnectionString() + " (" + d->getCharset() + ")";
-			statusBarM->SetStatusText(std2wx(s));
+			GetStatusBar()->SetStatusText(std2wx(s));
 		}
 		else
-			statusBarM->SetStatusText(wxT("-"));
+			GetStatusBar()->SetStatusText(wxT("-"));
 		lastDatabase = d;
 	}
 }
@@ -862,6 +870,18 @@ void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))
 		t);
 	f->setProperties();
 	f->Show();
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuToggleStatusBar(wxCommandEvent& event)
+{
+    wxStatusBar *s = GetStatusBar();
+    if (!s)
+        s = CreateStatusBar();
+
+    bool show = event.IsChecked();
+    config().setValue("showStatusBar", show);
+    s->Show(show);
+    SendSizeEvent();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
