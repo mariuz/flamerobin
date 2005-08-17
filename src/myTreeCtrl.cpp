@@ -222,8 +222,8 @@ bool myTreeCtrl::selectMetadataItem(MetadataItem* item)
     {
         parent = metaitems.top();
         wxTreeItemIdValue cookie;
-        for (wxTreeItemId node = GetFirstChild(parentNode, cookie);
-             node.IsOk(); node = GetNextChild(parentNode, cookie))
+        wxTreeItemId node = GetFirstChild(parentNode, cookie);
+		while (node.IsOk())
         {
 			MetadataItem* nodeItem = getMetadataItem(node);
             if (parent == nodeItem)
@@ -238,7 +238,10 @@ bool myTreeCtrl::selectMetadataItem(MetadataItem* item)
                 parentNode = node;
                 break;
             }
+			node = GetNextChild(parentNode, cookie);
         }
+		if (!node.IsOk())	// not found
+			break;
     }
     return false;
 }
