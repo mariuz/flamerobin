@@ -146,7 +146,6 @@ bool Root::load()
 		{
 			Database temp;
 			database = server->addDatabase(temp);
-			database->initChildren();
             // make sure the database has an Id before Root::save() is called,
             // otherwise a new Id will be generated then, but the generator value
             // will not be stored because it's at the beginning of the file.

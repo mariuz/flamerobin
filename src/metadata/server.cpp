@@ -63,6 +63,7 @@ Database* Server::addDatabase(Database& db)
 {
 	Database *temp = databasesM.add(db);
 	temp->setParent(this);					// grab it from collection
+	temp->initChildren();
 	notify();
 	return temp;
 }
