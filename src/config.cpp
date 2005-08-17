@@ -66,7 +66,7 @@ Config::~Config()
 wxFileConfig* Config::getConfig() const
 {
     if (!configM)
-        configM = new wxFileConfig("", "", std2wx(getConfigFileName()));
+        configM = new wxFileConfig(wxT(""), wxT(""), std2wx(getConfigFileName()));
     return configM;
 }
 //-----------------------------------------------------------------------------

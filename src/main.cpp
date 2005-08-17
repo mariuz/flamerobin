@@ -95,24 +95,24 @@ bool FRApp::OnInit()
 void FRApp::checkEnvironment()
 {
     wxString envVar;
-    if (wxGetEnv("FR_HOME", &envVar))
+    if (wxGetEnv(wxT("FR_HOME"), &envVar))
         config().setHomePath(translatePathMacros(wx2std(envVar)));
-    if (wxGetEnv("FR_USER_HOME", &envVar))
+    if (wxGetEnv(wxT("FR_USER_HOME"), &envVar))
         config().setUserHomePath(translatePathMacros(wx2std(envVar)));
 }
 //-----------------------------------------------------------------------------
 void FRApp::parseCommandLine()
 {
     wxCmdLineParser parser(wxGetApp().argc, wxGetApp().argv);
-    parser.AddOption("h", "home");
-    parser.AddOption("uh", "user-home");
+    parser.AddOption(wxT("h"), wxT("home"));
+    parser.AddOption(wxT("uh"), wxT("user-home"));
     if (parser.Parse() == 0)
     {
         wxString paramValue;
-        if (parser.Found("home", &paramValue))
+        if (parser.Found(wxT("home"), &paramValue))
             config().setHomePath(translatePathMacros(wx2std(paramValue)));
 
-        if (parser.Found("user-home", &paramValue))
+        if (parser.Found(wxT("user-home"), &paramValue))
             config().setUserHomePath(translatePathMacros(wx2std(paramValue)));
     }
 }
