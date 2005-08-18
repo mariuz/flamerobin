@@ -116,6 +116,7 @@ void ServerRegistrationDialog::setServer(Server *s)
         button_cancel->SetDefault();
     }
     updateButtons();
+	updateColors();
 }
 //-----------------------------------------------------------------------------
 void ServerRegistrationDialog::updateButtons()
