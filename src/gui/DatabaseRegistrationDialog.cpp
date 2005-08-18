@@ -198,7 +198,7 @@ void DatabaseRegistrationDialog::setDatabase(Database *db)
     // see whether the database has an empty or default name; knowing that will be
     // useful to keep the name in sync when other attributes change.
     setDefaultName();
-	
+
     // enable controls depending on operation and database connection status
     // use SetEditable() for edit controls to allow copying text to clipboard
     bool isConnected = databaseM->isConnected();
@@ -218,6 +218,7 @@ void DatabaseRegistrationDialog::setDatabase(Database *db)
 	if (connectAsM)
 		button_ok->SetLabel(_("Connect"));
     updateButtons();
+	updateColors();
 }
 //-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::setServer(Server *s)
