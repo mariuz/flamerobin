@@ -97,8 +97,8 @@ void BaseDialog::updateColors(wxWindow *parent)
 		parent = this;
 	const wxColour silver = wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE);
 	const wxColour white  = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
-	wxList& l = parent->GetChildren();
-	for (wxNode *n = l.GetFirst(); n; n = n->GetNext())
+	wxWindowList& l = parent->GetChildren();
+	for (wxWindowListNode *n = l.GetFirst(); n; n = n->GetNext())
 	{
 		wxObject *o = n->GetData();
 		if (dynamic_cast<wxPanel *>(o))
