@@ -168,6 +168,10 @@ Database *myTreeCtrl::getSelectedDatabase()
 //! returns the server of the object that selected wxTree node observes
 Server *myTreeCtrl::getSelectedServer()
 {
+	MetadataItem *m = getSelectedMetadataItem();
+	Server *s = dynamic_cast<Server *>(m);
+	if (s)
+		return s;
 	Database *d = getSelectedDatabase();
 	if (!d)
 		return 0;

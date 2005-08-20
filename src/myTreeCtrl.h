@@ -48,7 +48,7 @@ public:
     short GetSpacing() const { return m_spacing; }
     void SetSpacing(short spacing);
 
-    enum {	Menu_RegisterServer = 600, Menu_Configure, Menu_Manual, Menu_RelNotes, Menu_License,
+    enum {	Menu_RegisterServer = 600, Menu_Configure, Menu_Manual, Menu_RelNotes, Menu_License, Menu_NewObject,
 			Menu_Cut, Menu_Copy, Menu_Paste, Menu_Delete, Menu_ToggleStatusBar, Menu_ToggleDisconnected,
 			Menu_DatabaseRegistrationInfo, Menu_RegisterDatabase, Menu_CreateDatabase, Menu_ManageUsers, Menu_RestartServer,
 			Menu_StopServer, Menu_UnRegisterServer, Menu_ServerProperties, Menu_Reconnect, Menu_ConnectAs,

@@ -113,8 +113,7 @@ void MainFrame::buildMainMenu()
 	newMenu->Append(4993, _("Trigger"));
 	newMenu->Append(4994, _("Function"));
 	//...
-	objectMenuM->Append(-1, "&New", newMenu);
-	objectMenuM->AppendSeparator();
+	objectMenuM->Append(myTreeCtrl::Menu_NewObject, "&New", newMenu);
 	menuBarM->Append(objectMenuM, _("&Object"));
 
     windowMenuM = new wxMenu();
@@ -202,20 +201,30 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(myTreeCtrl::Menu_RelNotes, MainFrame::OnMenuRelNotes)
 	EVT_MENU(myTreeCtrl::Menu_License, MainFrame::OnMenuLicense)
 	EVT_MENU(myTreeCtrl::Menu_Configure, MainFrame::OnMenuConfigure)
+
 	EVT_MENU(myTreeCtrl::Menu_RegisterDatabase, MainFrame::OnMenuRegisterDatabase)
-	EVT_MENU(myTreeCtrl::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuDatabaseRegistrationInfo)
+	EVT_UPDATE_UI(myTreeCtrl::Menu_RegisterDatabase, MainFrame::OnMenuUpdateIfServerSelected)
 	EVT_MENU(myTreeCtrl::Menu_CreateDatabase, MainFrame::OnMenuCreateDatabase)
+	EVT_UPDATE_UI(myTreeCtrl::Menu_CreateDatabase, MainFrame::OnMenuUpdateIfServerSelected)
 	EVT_MENU(myTreeCtrl::Menu_ManageUsers, MainFrame::OnMenuManageUsers)
+	EVT_UPDATE_UI(myTreeCtrl::Menu_ManageUsers, MainFrame::OnMenuUpdateIfServerSelected)
 	EVT_MENU(myTreeCtrl::Menu_RestartServer, MainFrame::OnMenuRestartServer)
+	EVT_UPDATE_UI(myTreeCtrl::Menu_RestartServer, MainFrame::OnMenuUpdateIfServerSelected)
 	EVT_MENU(myTreeCtrl::Menu_StopServer, MainFrame::OnMenuStopServer)
+	EVT_UPDATE_UI(myTreeCtrl::Menu_StopServer, MainFrame::OnMenuUpdateIfServerSelected)
 	EVT_MENU(myTreeCtrl::Menu_UnRegisterServer, MainFrame::OnMenuUnRegisterServer)
 	EVT_UPDATE_UI(myTreeCtrl::Menu_UnRegisterServer, MainFrame::OnMenuUpdateUnRegisterServer)
 	EVT_MENU(myTreeCtrl::Menu_ServerProperties, MainFrame::OnMenuServerProperties)
+	EVT_UPDATE_UI(myTreeCtrl::Menu_ServerProperties, MainFrame::OnMenuUpdateIfServerSelected)
+
 	EVT_MENU(myTreeCtrl::Menu_UnRegisterDatabase, MainFrame::OnMenuUnRegisterDatabase)
 	EVT_UPDATE_UI(myTreeCtrl::Menu_UnRegisterDatabase, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
 	EVT_MENU(myTreeCtrl::Menu_ShowConnectedUsers, MainFrame::OnMenuShowConnectedUsers)
 	EVT_UPDATE_UI(myTreeCtrl::Menu_ShowConnectedUsers, MainFrame::OnMenuUpdateIfDatabaseConnected)
+	EVT_MENU(myTreeCtrl::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuDatabaseRegistrationInfo)
+	EVT_UPDATE_UI(myTreeCtrl::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuUpdateIfDatabaseSelected)
 	EVT_MENU(myTreeCtrl::Menu_Backup, MainFrame::OnMenuBackup)
+	EVT_UPDATE_UI(myTreeCtrl::Menu_Backup, MainFrame::OnMenuUpdateIfDatabaseSelected)
 	EVT_MENU(myTreeCtrl::Menu_Restore, MainFrame::OnMenuRestore)
 	EVT_UPDATE_UI(myTreeCtrl::Menu_Restore, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
 	EVT_MENU(myTreeCtrl::Menu_Connect, MainFrame::OnMenuConnect)
@@ -227,18 +236,24 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(myTreeCtrl::Menu_Reconnect, MainFrame::OnMenuReconnect)
 	EVT_UPDATE_UI(myTreeCtrl::Menu_Reconnect, MainFrame::OnMenuUpdateIfDatabaseConnected)
 	EVT_MENU(myTreeCtrl::Menu_Query, MainFrame::OnMenuQuery)
+	EVT_UPDATE_UI(myTreeCtrl::Menu_Query, MainFrame::OnMenuUpdateIfDatabaseSelected)
+	EVT_UPDATE_UI(myTreeCtrl::Menu_NewObject, MainFrame::OnMenuUpdateIfDatabaseSelected)
+
 	EVT_MENU(myTreeCtrl::Menu_Insert, MainFrame::OnMenuInsert)
 	EVT_MENU(myTreeCtrl::Menu_Browse, MainFrame::OnMenuBrowse)
 	EVT_MENU(myTreeCtrl::Menu_BrowseColumns, MainFrame::OnMenuBrowseColumns)
+	EVT_MENU(myTreeCtrl::Menu_LoadColumnsInfo, MainFrame::OnMenuLoadColumnsInfo)
+	EVT_MENU(myTreeCtrl::Menu_AddColumn, MainFrame::OnMenuAddColumn)
+	EVT_MENU(myTreeCtrl::Menu_CreateTrigger, MainFrame::OnMenuCreateTrigger)
+
 	EVT_MENU(myTreeCtrl::Menu_ShowAllGeneratorValues, MainFrame::OnMenuShowAllGeneratorValues)
 	EVT_MENU(myTreeCtrl::Menu_ShowGeneratorValue, MainFrame::OnMenuShowGeneratorValue)
 	EVT_MENU(myTreeCtrl::Menu_SetGeneratorValue, MainFrame::OnMenuSetGeneratorValue)
+
 	EVT_MENU(myTreeCtrl::Menu_CreateObject, MainFrame::OnMenuCreateObject)
-	EVT_MENU(myTreeCtrl::Menu_LoadColumnsInfo, MainFrame::OnMenuLoadColumnsInfo)
-	EVT_MENU(myTreeCtrl::Menu_AddColumn, MainFrame::OnMenuAddColumn)
 	EVT_MENU(myTreeCtrl::Menu_ObjectProperties, MainFrame::OnMenuObjectProperties)
 	EVT_MENU(myTreeCtrl::Menu_DropObject, MainFrame::OnMenuDropObject)
-	EVT_MENU(myTreeCtrl::Menu_CreateTrigger, MainFrame::OnMenuCreateTrigger)
+
 	EVT_MENU(myTreeCtrl::Menu_ToggleStatusBar, MainFrame::OnMenuToggleStatusBar)
 	EVT_MENU(myTreeCtrl::Menu_ToggleDisconnected, MainFrame::OnMenuToggleDisconnected)
 
@@ -258,12 +273,16 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 	// rebuild object menu
 	while (objectMenuM->GetMenuItemCount() > 2)
 		objectMenuM->Destroy(objectMenuM->FindItemByPosition(2));
+	if (objectMenuM->GetMenuItemCount() == 1)
+		objectMenuM->AppendSeparator();
 	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
 	if (m->getDatabase() != 0 && dynamic_cast<Database *>(m) == 0)	// has to be subitem of database
 	{
 		ContextMenuVisitor cmv(objectMenuM);
 		m->accept(&cmv);
 	}
+	if (objectMenuM->GetMenuItemCount() == 2)	// separator
+		objectMenuM->Destroy(objectMenuM->FindItemByPosition(1));
 
 	if (!GetStatusBar())
 		return;
@@ -1006,8 +1025,14 @@ const std::string MainFrame::getName() const
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateUnRegisterServer(wxUpdateUIEvent& event)
 {
-	Server *s = dynamic_cast<Server *>(tree_ctrl_1->getSelectedMetadataItem());
+	Server *s = tree_ctrl_1->getSelectedServer();
 	event.Enable(s != 0 && !s->hasConnectedDatabase());
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuUpdateIfServerSelected(wxUpdateUIEvent& event)
+{
+	Server *s = tree_ctrl_1->getSelectedServer();
+	event.Enable(s != 0);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateIfDatabaseConnected(wxUpdateUIEvent& event)
@@ -1020,5 +1045,11 @@ void MainFrame::OnMenuUpdateIfDatabaseNotConnected(wxUpdateUIEvent& event)
 {
 	Database *db = tree_ctrl_1->getSelectedDatabase();
 	event.Enable(db != 0 && !db->isConnected());
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuUpdateIfDatabaseSelected(wxUpdateUIEvent& event)
+{
+	Database *db = tree_ctrl_1->getSelectedDatabase();
+	event.Enable(db != 0);
 }
 //-----------------------------------------------------------------------------

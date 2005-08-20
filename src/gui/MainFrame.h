@@ -85,8 +85,10 @@ public:
 
 	// enabled menu items
 	void OnMenuUpdateUnRegisterServer(wxUpdateUIEvent& event);
+	void OnMenuUpdateIfServerSelected(wxUpdateUIEvent& event);
 	void OnMenuUpdateIfDatabaseConnected(wxUpdateUIEvent& event);
 	void OnMenuUpdateIfDatabaseNotConnected(wxUpdateUIEvent& event);
+	void OnMenuUpdateIfDatabaseSelected(wxUpdateUIEvent& event);
 
 	// other events
     void OnWindowMenuItem(wxCommandEvent& event);
