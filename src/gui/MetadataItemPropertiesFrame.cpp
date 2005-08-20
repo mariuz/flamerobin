@@ -210,8 +210,8 @@ void MetadataItemPropertiesFrame::processCommand(std::string cmd, MetadataItem *
 	else if (cmd == "parent_window")
 		htmlpage += wx2std(wxString::Format(wxT("%d"), (int)this));
 
-	else if (cmd == "app_path")
-		htmlpage += getApplicationPath();
+    else if (cmd == "fr_home")
+		htmlpage += config().getHomePath();
 
 	else if (cmd == "object_description")
 	{
