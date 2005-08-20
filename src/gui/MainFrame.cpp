@@ -18,6 +18,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): Nando Dessena
 */
 
@@ -113,7 +115,7 @@ void MainFrame::buildMainMenu()
 	newMenu->Append(4993, _("Trigger"));
 	newMenu->Append(4994, _("Function"));
 	//...
-	objectMenuM->Append(myTreeCtrl::Menu_NewObject, "&New", newMenu);
+	objectMenuM->Append(myTreeCtrl::Menu_NewObject, _("&New"), newMenu);
 	menuBarM->Append(objectMenuM, _("&Object"));
 
     windowMenuM = new wxMenu();
