@@ -257,25 +257,42 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(myTreeCtrl::Menu_ToggleStatusBar, MainFrame::OnMenuToggleStatusBar)
 	EVT_MENU(myTreeCtrl::Menu_ToggleDisconnected, MainFrame::OnMenuToggleDisconnected)
 
+	EVT_MENU_OPEN(MainFrame::OnMainMenuOpen)
 	EVT_MENU_RANGE(5000, 6000, MainFrame::OnWindowMenuItem)
 	EVT_TREE_SEL_CHANGED(myTreeCtrl::ID_tree_ctrl, MainFrame::OnTreeSelectionChanged)
 	EVT_TREE_ITEM_ACTIVATED(myTreeCtrl::ID_tree_ctrl, MainFrame::OnTreeItemActivate)
 	EVT_CLOSE(MainFrame::OnClose)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
-void MainFrame::OnWindowMenuItem(wxCommandEvent& event)
+void MainFrame::OnMainMenuOpen(wxMenuEvent& event)
 {
-	frameManager().bringOnTop(event.GetId());
-}
-//-----------------------------------------------------------------------------
-void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
-{
+	if (event.IsPopup())
+	{
+		event.Skip();
+		return;
+	}
+
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	if (!m)
+	{
+		event.Skip();
+		return;
+	}
+
+	static NodeType nt = ntUnknown;
+	if (m->getType() == nt)
+	{
+		event.Skip();
+		return;
+	}
+	nt = m->getType();
+
 	// rebuild object menu
 	while (objectMenuM->GetMenuItemCount() > 2)
 		objectMenuM->Destroy(objectMenuM->FindItemByPosition(2));
 	if (objectMenuM->GetMenuItemCount() == 1)
 		objectMenuM->AppendSeparator();
-	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+
 	if (m->getDatabase() != 0 && dynamic_cast<Database *>(m) == 0)	// has to be subitem of database
 	{
 		ContextMenuVisitor cmv(objectMenuM);
@@ -284,6 +301,16 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 	if (objectMenuM->GetMenuItemCount() == 2)	// separator
 		objectMenuM->Destroy(objectMenuM->FindItemByPosition(1));
 
+	event.Skip();
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnWindowMenuItem(wxCommandEvent& event)
+{
+	frameManager().bringOnTop(event.GetId());
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
+{
 	if (!GetStatusBar())
 		return;
 
