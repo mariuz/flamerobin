@@ -62,10 +62,20 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     BaseFrame(parent, id, title, pos, size, style, wxT("FlameRobin_main"))
 {
     tree_ctrl_1 = new myTreeCtrl(this, wxDefaultPosition, wxDefaultSize, wxTR_HAS_BUTTONS|wxSUNKEN_BORDER);
+	buildMainMenu();
+	SetStatusBarPane(-1);	// disable automatic fill
+    set_properties();
+    do_layout();
+}
+//-----------------------------------------------------------------------------
+void MainFrame::buildMainMenu()
+{
 	menuBarM = new wxMenuBar();
 
-	// Build MenuBar
     wxMenu *databaseMenu = new wxMenu();					// dynamic menus, created at runtime
+	databaseMenu->Append(myTreeCtrl::Menu_RegisterDatabase, _("&Register existing database..."));
+	databaseMenu->Append(myTreeCtrl::Menu_CreateDatabase, _("Create &new database..."));
+    databaseMenu->AppendSeparator();
 	ContextMenuVisitor cmvd(databaseMenu);
 	Database dummy;
 	dummy.accept(&cmvd);
@@ -87,19 +97,38 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     viewMenu->AppendCheckItem(myTreeCtrl::Menu_ToggleDisconnected, _("&Disconnected databases"));
 	menuBarM->Append(viewMenu, _("&View"));
 
-    windowMenu = new wxMenu();
-    menuBarM->Append(windowMenu, _("&Window"));
+	wxMenu *serverMenu = new wxMenu();
+	serverMenu->Append(myTreeCtrl::Menu_RegisterServer, _("Register server..."));
+	serverMenu->Append(myTreeCtrl::Menu_UnRegisterServer, _("&Unregister server"));
+	serverMenu->Append(myTreeCtrl::Menu_ServerProperties, _("Server registration &info..."));
+	serverMenu->AppendSeparator();
+	serverMenu->Append(myTreeCtrl::Menu_ManageUsers, _("&Manage users..."));
+	menuBarM->Append(serverMenu, _("&Server"));
+
+	objectMenuM = new wxMenu();
+	wxMenu *newMenu = new wxMenu();
+	newMenu->Append(4990, _("Table"));
+	newMenu->Append(4991, _("View"));
+	newMenu->Append(4992, _("Procedure"));
+	newMenu->Append(4993, _("Trigger"));
+	newMenu->Append(4994, _("Function"));
+	//...
+	objectMenuM->Append(-1, "&New", newMenu);
+	objectMenuM->AppendSeparator();
+	menuBarM->Append(objectMenuM, _("&Object"));
+
+    windowMenuM = new wxMenu();
+    menuBarM->Append(windowMenuM, _("&Windows"));
+	frameManager().setWindowMenu(windowMenuM);
 
     wxMenu* helpMenu = new wxMenu();
     helpMenu->Append(myTreeCtrl::Menu_Manual, _("&Manual"));
     helpMenu->Append(myTreeCtrl::Menu_RelNotes, _("&What's new"));
-    helpMenu->AppendSeparator();
     helpMenu->Append(myTreeCtrl::Menu_License, _("&License"));
+    helpMenu->AppendSeparator();
     helpMenu->Append(wxID_ABOUT, _("&About"));
     menuBarM->Append(helpMenu, _("&Help"));
 	SetMenuBar(menuBarM);
-	menuBarM->EnableTop(3, false);	// disable "window" menu at startup
-	frameManager().setWindowMenu(windowMenu, menuBarM);
 
 	// update checkboxes
 	config().setValue("HideDisconnectedDatabases", false);
@@ -109,10 +138,6 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
         CreateStatusBar();
         viewMenu->Check(myTreeCtrl::Menu_ToggleStatusBar, true);
     }
-
-	SetStatusBarPane(-1);	// disable automatic fill
-    set_properties();
-    do_layout();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::set_properties()
@@ -139,6 +164,12 @@ void MainFrame::set_properties()
 		getGlobalRoot().addServer(s);
 	}
 	tree_ctrl_1->Expand(root);
+
+	// make the first server active
+	wxTreeItemIdValue cookie;
+	wxTreeItemId firstServer = tree_ctrl_1->GetFirstChild(root, cookie);
+	if (firstServer.IsOk())
+		tree_ctrl_1->SelectItem(firstServer);
 
 	#include "fricon.xpm"
     wxBitmap bmp(fricon_xpm);
@@ -224,6 +255,16 @@ void MainFrame::OnWindowMenuItem(wxCommandEvent& event)
 //-----------------------------------------------------------------------------
 void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 {
+	// rebuild object menu
+	while (objectMenuM->GetMenuItemCount() > 2)
+		objectMenuM->Destroy(objectMenuM->FindItemByPosition(2));
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	if (m->getDatabase() != 0 && dynamic_cast<Database *>(m) == 0)	// has to be subitem of database
+	{
+		ContextMenuVisitor cmv(objectMenuM);
+		m->accept(&cmv);
+	}
+
 	if (!GetStatusBar())
 		return;
 
@@ -328,7 +369,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
 		event.Veto();
 		return;
 	}
-	frameManager().setWindowMenu(0, 0);	// tell it not to update menus anymore
+	frameManager().setWindowMenu(0);	// tell it not to update menus anymore
 	BaseFrame::OnClose(event);
 }
 //-----------------------------------------------------------------------------
@@ -574,7 +615,7 @@ void MainFrame::OnMenuStopServer(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUnRegisterServer(wxCommandEvent& WXUNUSED(event))
 {
-	Server *s = dynamic_cast<Server *>(tree_ctrl_1->getSelectedMetadataItem());
+	Server *s = tree_ctrl_1->getSelectedServer();
 	if (!s)
 		return;
 
@@ -590,7 +631,7 @@ void MainFrame::OnMenuUnRegisterServer(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuServerProperties(wxCommandEvent& WXUNUSED(event))
 {
-	Server *s = dynamic_cast<Server *>(tree_ctrl_1->getSelectedMetadataItem());
+	Server *s = tree_ctrl_1->getSelectedServer();
 	if (!s)
 		return;
     ServerRegistrationDialog srd(this, -1, _("Server Registration Info"));
@@ -600,7 +641,7 @@ void MainFrame::OnMenuServerProperties(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
 {
-	Root *r = dynamic_cast<Root *>(tree_ctrl_1->getSelectedMetadataItem());
+	Root *r = dynamic_cast<Root *>(tree_ctrl_1->getMetadataItem(tree_ctrl_1->GetRootItem()));
 	if (!r)
 		return;
 	Server s;
@@ -624,7 +665,7 @@ void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 	if (wxCANCEL == wxMessageBox(_("Are you sure?"), _("Unregister database"), wxOK | wxCANCEL | wxICON_QUESTION))
 		return;
 
-	Server *s = dynamic_cast<Server *>(d->getParent());
+	Server *s = d->getServer();
 	if (s)
 		s->removeDatabase(d);
 }

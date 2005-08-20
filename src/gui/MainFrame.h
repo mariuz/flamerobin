@@ -99,18 +99,17 @@ public:
 
 private:
 	bool connect(bool warn);
-
 	void showGeneratorValue(Generator* g);
 
-    // begin wxGlade: MainFrame::methods
     void set_properties();
     void do_layout();
-    // end wxGlade
+	void buildMainMenu();
 
 protected:
     myTreeCtrl* tree_ctrl_1;
     wxMenuBar* menuBarM;
-	wxMenu* windowMenu;		// dynamic menu
+	wxMenu* windowMenuM;		// dynamic menu
+	wxMenu* objectMenuM;
 
 	virtual const std::string getName() const;
 	virtual const wxRect getDefaultRect() const;

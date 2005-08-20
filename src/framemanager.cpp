@@ -54,17 +54,16 @@ FrameManager::~FrameManager()
 {
 }
 //-----------------------------------------------------------------------------
-void FrameManager::setWindowMenu(wxMenu *windowMenu, wxMenuBar *menuBar)
+void FrameManager::setWindowMenu(wxMenu *windowMenu)
 {
 	windowMenuM = windowMenu;
-	menuBarM = menuBar;
 }
 //-----------------------------------------------------------------------------
 // TODO: currently we just clear and rebuild from scratch
 //       we could implement more efficient algorithm later (find the one that is gone and remove, etc)
 void FrameManager::rebuildMenu()
 {
-	if (windowMenuM == 0 || menuBarM == 0)
+	if (windowMenuM == 0)
 		return;
 
 	// remove all items
@@ -98,10 +97,6 @@ void FrameManager::rebuildMenu()
 	// wxWidgets manual says that we should insert the submenus at end
 	for (std::map<Database *, wxMenu *>::iterator it = dmm.begin(); it != dmm.end(); ++it)
 		windowMenuM->Append(-1, std2wx((*it).first->getName()), (*it).second);
-
-    for (unsigned int i = 0; i < menuBarM->GetMenuCount(); i++)
-		if (menuBarM->GetMenu(i) == windowMenuM)
-			menuBarM->EnableTop(i, windowMenuM->GetMenuItemCount() > 0);
 }
 //-----------------------------------------------------------------------------
 void FrameManager::bringOnTop(int id)

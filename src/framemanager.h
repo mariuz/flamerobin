@@ -49,7 +49,7 @@ public:
     FrameManager();
     ~FrameManager();
 
-	void setWindowMenu(wxMenu *windowMenu, wxMenuBar *menuBar);
+	void setWindowMenu(wxMenu *windowMenu);
 	void rebuildMenu();
 	void bringOnTop(int id);
 

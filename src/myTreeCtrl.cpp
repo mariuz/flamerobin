@@ -165,6 +165,15 @@ Database *myTreeCtrl::getSelectedDatabase()
 	return m->getDatabase();
 }
 //-----------------------------------------------------------------------------
+//! returns the server of the object that selected wxTree node observes
+Server *myTreeCtrl::getSelectedServer()
+{
+	Database *d = getSelectedDatabase();
+	if (!d)
+		return 0;
+	return d->getServer();
+}
+//-----------------------------------------------------------------------------
 //! returns the object that some wxTree node observes
 MetadataItem *myTreeCtrl::getMetadataItem(wxTreeItemId item)
 {
