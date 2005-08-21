@@ -160,9 +160,12 @@ void MainFrame::set_properties()
 	getGlobalRoot().load();
 	if (tree_ctrl_1->GetCount() <= 1)
 	{
-		wxMessageBox(_("You may register a new server and databases."), _("File fr_databases.conf not found"));
+        wxString msg;
+        msg.Printf(_("Configuration file %s not found.\nYou may register a new server and databases."),
+            std2wx(config().getDBHFileName()));
+        wxMessageBox(msg, _("Configuration file not found"));
 
-		Server s; 					// add localhost
+		Server s;
 		s.setName("localhost");
 		s.setHostname("localhost");
 		getGlobalRoot().addServer(s);
