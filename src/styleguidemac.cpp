@@ -42,7 +42,7 @@
 
 #include "styleguide.h"
 //------------------------------------------------------------------------------
-class StyleGuideMAC: public YxStyleGuide
+class StyleGuideMAC: public StyleGuide
 {
 public:
     StyleGuideMAC();
