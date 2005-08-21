@@ -217,7 +217,7 @@ bool Root::save()
     ofstream file(getFileName().c_str());
 	if (!file)
 		return false;
-	file << "<?xml version='1.0' encoding='ISO-8859-2'?>\n";
+	file << "<?xml version='1.0' encoding='ISO-8859-1'?>\n";
     file << "<root>\n";
     file << "\t<nextId>" << nextIdM << "</nextId>\n";
 	for (std::list<Server>::iterator it = serversM.begin(); it != serversM.end(); ++it)
