@@ -248,7 +248,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_UPDATE_UI(myTreeCtrl::Menu_Reconnect, MainFrame::OnMenuUpdateIfDatabaseConnected)
 	EVT_MENU(myTreeCtrl::Menu_Query, MainFrame::OnMenuQuery)
 	EVT_UPDATE_UI(myTreeCtrl::Menu_Query, MainFrame::OnMenuUpdateIfDatabaseSelected)
-	EVT_UPDATE_UI(myTreeCtrl::Menu_NewObject, MainFrame::OnMenuUpdateIfDatabaseSelected)
+	EVT_UPDATE_UI(myTreeCtrl::Menu_NewObject, MainFrame::OnMenuUpdateIfDatabaseConnected)
 
 	EVT_MENU(myTreeCtrl::Menu_Insert, MainFrame::OnMenuInsert)
 	EVT_MENU(myTreeCtrl::Menu_Browse, MainFrame::OnMenuBrowse)
