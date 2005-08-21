@@ -165,7 +165,7 @@ void MainFrame::set_properties()
 	{
         wxString msg;
         msg.Printf(_("Configuration file %s not found.\nYou may register a new server and databases."),
-            config().getDBHFileName().c_str());
+            std2wx(config().getDBHFileName()).c_str());
         wxMessageBox(msg, _("Configuration file not found"));
 
 		Server s;
