@@ -82,7 +82,7 @@ public:
 
     // returns the home path to use as the basis for the following call.
     string getUserHomePath() const;
-    // returns the file name with full path of servers.xml.
+    // returns the file name (with full path) of the file containing registered databases.
 	string getDBHFileName() const;
 
 	// return true if value existed, false if not.
