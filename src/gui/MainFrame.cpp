@@ -219,10 +219,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_UPDATE_UI(myTreeCtrl::Menu_CreateDatabase, MainFrame::OnMenuUpdateIfServerSelected)
 	EVT_MENU(myTreeCtrl::Menu_ManageUsers, MainFrame::OnMenuManageUsers)
 	EVT_UPDATE_UI(myTreeCtrl::Menu_ManageUsers, MainFrame::OnMenuUpdateIfServerSelected)
-	EVT_MENU(myTreeCtrl::Menu_RestartServer, MainFrame::OnMenuRestartServer)
-	EVT_UPDATE_UI(myTreeCtrl::Menu_RestartServer, MainFrame::OnMenuUpdateIfServerSelected)
-	EVT_MENU(myTreeCtrl::Menu_StopServer, MainFrame::OnMenuStopServer)
-	EVT_UPDATE_UI(myTreeCtrl::Menu_StopServer, MainFrame::OnMenuUpdateIfServerSelected)
 	EVT_MENU(myTreeCtrl::Menu_UnRegisterServer, MainFrame::OnMenuUnRegisterServer)
 	EVT_UPDATE_UI(myTreeCtrl::Menu_UnRegisterServer, MainFrame::OnMenuUpdateUnRegisterServer)
 	EVT_MENU(myTreeCtrl::Menu_ServerProperties, MainFrame::OnMenuServerProperties)
@@ -669,18 +665,6 @@ void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuManageUsers(wxCommandEvent& WXUNUSED(event))
 {
 	// TODO:
-	::wxMessageBox(_("This feature is not yet implemented"), _("Not in this version"), wxICON_INFORMATION);
-}
-//-----------------------------------------------------------------------------
-// FIXME: this doesn't work for server, but on database basis
-void MainFrame::OnMenuRestartServer(wxCommandEvent& WXUNUSED(event))
-{
-	::wxMessageBox(_("This feature is not yet implemented"), _("Not in this version"), wxICON_INFORMATION);
-}
-//-----------------------------------------------------------------------------
-// FIXME: this doesn't work for server, but on database basis
-void MainFrame::OnMenuStopServer(wxCommandEvent& WXUNUSED(event))
-{
 	::wxMessageBox(_("This feature is not yet implemented"), _("Not in this version"), wxICON_INFORMATION);
 }
 //-----------------------------------------------------------------------------

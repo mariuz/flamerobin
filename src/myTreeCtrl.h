@@ -50,8 +50,8 @@ public:
 
     enum {	Menu_RegisterServer = 600, Menu_Configure, Menu_Manual, Menu_RelNotes, Menu_License, Menu_NewObject,
 			Menu_Cut, Menu_Copy, Menu_Paste, Menu_Delete, Menu_ToggleStatusBar, Menu_ToggleDisconnected,
-			Menu_DatabaseRegistrationInfo, Menu_RegisterDatabase, Menu_CreateDatabase, Menu_ManageUsers, Menu_RestartServer,
-			Menu_StopServer, Menu_UnRegisterServer, Menu_ServerProperties, Menu_Reconnect, Menu_ConnectAs,
+			Menu_DatabaseRegistrationInfo, Menu_RegisterDatabase, Menu_CreateDatabase, Menu_ManageUsers,
+			Menu_UnRegisterServer, Menu_ServerProperties, Menu_Reconnect, Menu_ConnectAs,
 			Menu_UnRegisterDatabase, Menu_Backup, Menu_Restore, Menu_Connect, Menu_Disconnect, Menu_Query, Menu_ShowConnectedUsers,
 			Menu_CreateObject, Menu_ShowAllGeneratorValues, Menu_Browse, Menu_BrowseColumns, Menu_Insert,
 			Menu_LoadColumnsInfo, Menu_ObjectProperties, Menu_DropObject, Menu_ShowGeneratorValue,
