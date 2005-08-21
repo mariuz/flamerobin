@@ -993,6 +993,8 @@ void ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
 		}
 		else if (sql.length() && !execute(sql, prepareOnly))
 		{
+			styled_text_ctrl_sql->GotoPos((int)oldpos);
+			styled_text_ctrl_sql->GotoPos((int)lastpos);
 			styled_text_ctrl_sql->SetSelectionStart((int)oldpos);		// select the text in STC
 			styled_text_ctrl_sql->SetSelectionEnd((int)lastpos);		// that failed to execute
 			return;
