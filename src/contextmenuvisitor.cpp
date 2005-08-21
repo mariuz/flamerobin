@@ -50,10 +50,7 @@ ContextMenuVisitor::~ContextMenuVisitor()
 void ContextMenuVisitor::visit(Column& item)
 {
 	if (dynamic_cast<Table *>(item.getParent()))		// only for table columns
-	{
-		menuM->Append(myTreeCtrl::Menu_DropObject, _("Dr&op"));
-		menuM->Append(myTreeCtrl::Menu_ObjectProperties, _("P&roperties..."));
-	}
+		addRegularObjectMenu();
 }
 //------------------------------------------------------------------------------
 void ContextMenuVisitor::visit(Database&)
@@ -91,8 +88,7 @@ void ContextMenuVisitor::visit(Generator&)
 {
 	menuM->Append(myTreeCtrl::Menu_ShowGeneratorValue, _("Show &value"));
 	menuM->Append(myTreeCtrl::Menu_SetGeneratorValue, _("&Set value"));
-	menuM->Append(myTreeCtrl::Menu_DropObject, _("Dr&op"));
-	menuM->Append(myTreeCtrl::Menu_ObjectProperties, _("P&roperties..."));
+	addRegularObjectMenu();
 }
 //------------------------------------------------------------------------------
 void ContextMenuVisitor::visit(Procedure&)
