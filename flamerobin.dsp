@@ -604,6 +604,12 @@ SOURCE=.\src\framemanager.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\frprec.cpp
+# ADD BASE CPP /Yc"wx/wxprec.h"
+# ADD CPP /Yc"wx/wxprec.h"
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\frutils.cpp
 # End Source File
 # Begin Source File
@@ -633,8 +639,6 @@ SOURCE=.\src\logger.cpp
 # Begin Source File
 
 SOURCE=.\src\main.cpp
-# ADD BASE CPP /Yc"wx/wxprec.h"
-# ADD CPP /Yc"wx/wxprec.h"
 # End Source File
 # Begin Source File
 

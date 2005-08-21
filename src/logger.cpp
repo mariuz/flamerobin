@@ -18,6 +18,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): ________________.
 */
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -36,11 +38,12 @@
 #include <wx/datetime.h>
 #include <wx/file.h>
 
-#include "ugly.h"
 #include "config.h"
-#include "main.h"
-#include "metadata/database.h"
+#include "frversion.h"
 #include "logger.h"
+#include "metadata/database.h"
+#include "ugly.h"
+
 //-----------------------------------------------------------------------------
 bool Logger::log2database(const executedStatement& /*st*/, Database* /*db*/)
 {
@@ -91,8 +94,8 @@ bool Logger::log2file(const executedStatement& st, Database *db, const std::stri
 	if (loggingAddHeader)
 	{
 		wxString header = wxString::Format(
-			_("\n/* Logged by FlameRobin %s at %s\n   User: %s    Database: %s */\n"),
-			wxString(wxT(FR_VERSION)).c_str(),
+			_("\n/* Logged by FlameRobin %d.%d.%d at %s\n   User: %s    Database: %s */\n"),
+            FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RELEASE,
 			wxDateTime::Now().Format().c_str(),
 			std2wx(db->getUsername()).c_str(),
 			std2wx(db->getPath()).c_str()

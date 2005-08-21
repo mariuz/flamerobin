@@ -37,6 +37,8 @@ public:
 	executedStatement(const std::string& st, const IBPP::STT& t): statement(st), type(t) {};
 };
 //------------------------------------------------------------------------------
+class Database;
+
 class Logger			// maybe we'll extend this later
 {
 private:

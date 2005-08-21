@@ -311,6 +311,7 @@
         $(SOURCEDIR)/frDataGrid.cpp
         $(SOURCEDIR)/frDataGridCells.cpp
         $(SOURCEDIR)/frDataGridTable.cpp
+        $(SOURCEDIR)/frprec.cpp
         $(SOURCEDIR)/frutils.cpp
         $(SOURCEDIR)/gui/BackupFrame.cpp
         $(SOURCEDIR)/gui/BackupRestoreBaseFrame.cpp
@@ -386,16 +387,16 @@
         TABLE.html
         TABLEconstraints.html
         TABLEtriggers.html
-		TABLEindices.html
+        TABLEindices.html
         TRIGGER.html
         VIEW.html
         VIEWtriggers.html
         dependencies.html
+        compute.png
         drop.png
         ok.png
+        redx.png
         view.png
-		compute.png
-		redx.png
     </set>
 
     <define-tag name="mac-app-bundle" rules="exe">
@@ -462,13 +463,11 @@
 
         <!-- the precompiled header file is created in $(BUILDDIR), when
              the first source file is compiled - all other source files
-             only *use* the PCH file
-             ideally a new source file should be used, but main.cpp is
-             sufficiently stable (changes will cause a full rebuild) -->
+             only *use* the PCH file -->
         <precomp-headers-header>wx/wxprec.h</precomp-headers-header>
         <precomp-headers>on</precomp-headers>
         <precomp-headers-file>$(id)</precomp-headers-file>
-        <precomp-headers-gen>$(SOURCEDIR)/main.cpp</precomp-headers-gen>
+        <precomp-headers-gen>$(SOURCEDIR)/frprec.cpp</precomp-headers-gen>
 
         <define>$(IBPPCOMPILERDEFINE)</define>
         <define>$(IBPPPLATFORMDEFINE)</define>

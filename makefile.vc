@@ -65,6 +65,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGrid.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridCells.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridTable.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupFrame.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupRestoreBaseFrame.obj \
@@ -219,7 +220,7 @@ clean:
 	-if exist vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.ilk del vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.ilk
 	-if exist vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.pdb del vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.pdb
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.obj  $(FLAMEROBIN_OBJECTS) vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin.res
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.obj  $(FLAMEROBIN_OBJECTS) vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin.res
 	link /NOLOGO /OUT:$@ $(LDFLAGS)  $(____flamerobin_DEBUGINFO_5) /nologo /subsystem:windows /machine:I386 /LIBPATH:$(____flamerobin_WX_LIB_DIR_FILENAMES) /SUBSYSTEM:WINDOWS /LIBPATH:$(IBPP)\$(__IBPPLIBVERSION_FILENAMES)\win32_msvc @<<
 	$(FLAMEROBIN_OBJECTS)  wxmsw26$(U_OPT)$(D_OPT)_stc.lib wxmsw26$(U_OPT)$(D_OPT)_html.lib wxmsw26$(U_OPT)$(D_OPT)_adv.lib wxmsw26$(U_OPT)$(D_OPT)_core.lib wxbase26$(U_OPT)$(D_OPT)_xml.lib wxbase26$(U_OPT)$(D_OPT).lib wxexpat$(D_OPT).lib wxtiff$(D_OPT).lib wxjpeg$(D_OPT).lib wxpng$(D_OPT).lib wxzlib$(D_OPT).lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib
 <<
@@ -261,6 +262,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridCells.obj: .\src\frDataGridCells
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridTable.obj: .\src\frDataGridTable.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.obj: .\src\frprec.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) /Ycwx/wxprec.h $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.obj: .\src\frutils.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
@@ -323,7 +327,7 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.obj: .\src\logger.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.obj: .\src\main.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) /Ycwx/wxprec.h $**
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_column.obj: .\src\metadata\column.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**

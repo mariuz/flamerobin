@@ -39,6 +39,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_frDataGrid.o \
 	flamerobin_frDataGridCells.o \
 	flamerobin_frDataGridTable.o \
+	flamerobin_frprec.o \
 	flamerobin_frutils.o \
 	flamerobin_BackupFrame.o \
 	flamerobin_BackupRestoreBaseFrame.o \
@@ -238,6 +239,9 @@ flamerobin_frDataGridCells.o: $(srcdir)/src/frDataGridCells.cpp $(FLAMEROBIN_ODE
 
 flamerobin_frDataGridTable.o: $(srcdir)/src/frDataGridTable.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/frDataGridTable.cpp
+
+flamerobin_frprec.o: $(srcdir)/src/frprec.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/frprec.cpp
 
 flamerobin_frutils.o: $(srcdir)/src/frutils.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/frutils.cpp

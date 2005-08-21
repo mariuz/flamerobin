@@ -1,3 +1,58 @@
+// $Id$
+
+////////////////////////////////////////////////////////////////////////
+// wxWidgets resources
+////////////////////////////////////////////////////////////////////////
+
 #include "wx/msw/wx.rc"
+
+
+////////////////////////////////////////////////////////////////////////
+// application icon
+////////////////////////////////////////////////////////////////////////
+
 aaaa     ICON "fricon.ico"
 
+
+////////////////////////////////////////////////////////////////////////
+// version information
+////////////////////////////////////////////////////////////////////////
+
+#ifdef _UNICODE
+    #define LANG "04090000"
+#else
+    #define LANG "040904b0"
+#endif
+
+#include "../src/frversion.h"
+#define FR_VERSION_STRING FR_VERSION_MAJOR "." FR_VERSION_MINOR "." FR_VERSION_RELEASE
+
+1 VERSIONINFO
+    FILEVERSION FR_VERSION_MAJOR,FR_VERSION_MINOR,FR_VERSION_RELEASE,0
+    PRODUCTVERSION FR_VERSION_MAJOR,FR_VERSION_MINOR,FR_VERSION_RELEASE,0
+    FILEFLAGSMASK 0x3fL
+    FILEFLAGS 0
+    FILEOS 0x40004L // VOS_NT_WINDOWS32
+    FILETYPE 1 // VFT_APP
+    FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        // US English Ascii
+        BLOCK LANG
+        BEGIN
+            VALUE "Comments", "FlameRobin: Multi platform Database Manager for Firebird Database Server\0"
+            VALUE "CompanyName", "FlameRobin development team\0"
+            VALUE "FileDescription", "FlameRobin Database Manager\0"
+            VALUE "FileVersion", "FlameRobin  " FR_VERSION_STRING "\0"
+            VALUE "InternalName", "FlameRobin\0"
+            VALUE "LegalCopyright", "Copyright © 2004-2005 FlameRobin development team\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "flamerobin.exe\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "FlameRobin Database Manager\0"
+            VALUE "ProductVersion", FR_VERSION_STRING "\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+END

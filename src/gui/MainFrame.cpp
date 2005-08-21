@@ -36,6 +36,8 @@
     #include "wx/wx.h"
 #endif
 
+#include "wx/progdlg.h"
+
 #include "config.h"
 #include "contextmenuvisitor.h"
 #include "dberror.h"
@@ -57,7 +59,8 @@
 #include "treeitem.h"
 #include "ugly.h"
 #include "urihandler.h"
-#include "wx/progdlg.h"
+
+#include "frversion.h"
 
 //-----------------------------------------------------------------------------
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
@@ -439,8 +442,12 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 		wxRELEASE_NUMBER
 	);
 
-	wxString msg(_("FlameRobin v"));
-	msg += wxT(FR_VERSION);
+	wxString msg;
+    msg.Printf(_("FlameRobin %d.%d.%d"), 
+        FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RELEASE);
+#if wxUSE_UNICODE
+	msg += wxT(" Unicode");
+#endif
 	msg += wxT("\n");
  	msg += _("Database administration tool for Firebird RDBMS");
 	msg += wxT("\n\n");
