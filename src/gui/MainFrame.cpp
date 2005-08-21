@@ -628,7 +628,7 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 {
-	Server *s = dynamic_cast<Server *>(tree_ctrl_1->getSelectedMetadataItem());
+	Server *s = tree_ctrl_1->getSelectedServer();
 	if (!s)
 		return;
 
@@ -653,7 +653,7 @@ void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
 {
-	Server *s = dynamic_cast<Server *>(tree_ctrl_1->getSelectedMetadataItem());
+    Server *s = tree_ctrl_1->getSelectedServer();
 	if (!s)
 		return;
 
