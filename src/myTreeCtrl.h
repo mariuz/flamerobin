@@ -55,7 +55,11 @@ public:
 			Menu_UnRegisterDatabase, Menu_Backup, Menu_Restore, Menu_Connect, Menu_Disconnect, Menu_Query, Menu_ShowConnectedUsers,
 			Menu_CreateObject, Menu_ShowAllGeneratorValues, Menu_Browse, Menu_BrowseColumns, Menu_Insert,
 			Menu_LoadColumnsInfo, Menu_ObjectProperties, Menu_DropObject, Menu_ShowGeneratorValue,
-			Menu_SetGeneratorValue, Menu_AddColumn, Menu_CreateTrigger
+			Menu_SetGeneratorValue, Menu_AddColumn, Menu_CreateTriggerForTable,
+
+			// create new ... (stuff)
+			Menu_CreateDomain, Menu_CreateException, Menu_CreateFunction, Menu_CreateGenerator,
+			Menu_CreateProcedure, Menu_CreateRole, Menu_CreateTable, Menu_CreateTrigger, Menu_CreateView
 	};
 
 	void OnBeginDrag(wxTreeEvent &event);

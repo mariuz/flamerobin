@@ -77,11 +77,23 @@ public:
     void OnMenuAddColumn(wxCommandEvent& event);
     void OnMenuObjectProperties(wxCommandEvent& event);
     void OnMenuDropObject(wxCommandEvent& event);
-    void OnMenuCreateTrigger(wxCommandEvent& event);
+    void OnMenuCreateTriggerForTable(wxCommandEvent& event);
     void OnMenuDisconnect(wxCommandEvent& event);
     void OnMenuConnect(wxCommandEvent& event);
     void OnMenuConnectAs(wxCommandEvent& event);
     void OnMenuReconnect(wxCommandEvent& event);
+
+	// create new object
+	void showCreateTemplate(const MetadataItem *m);
+	void OnMenuCreateDomain(wxCommandEvent& event);
+	void OnMenuCreateException(wxCommandEvent& event);
+	void OnMenuCreateFunction(wxCommandEvent& event);
+	void OnMenuCreateGenerator(wxCommandEvent& event);
+	void OnMenuCreateProcedure(wxCommandEvent& event);
+	void OnMenuCreateRole(wxCommandEvent& event);
+	void OnMenuCreateTable(wxCommandEvent& event);
+	void OnMenuCreateTrigger(wxCommandEvent& event);
+	void OnMenuCreateView(wxCommandEvent& event);
 
 	// enabled menu items
 	void OnMenuUpdateUnRegisterServer(wxUpdateUIEvent& event);

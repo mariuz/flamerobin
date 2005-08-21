@@ -112,12 +112,15 @@ void MainFrame::buildMainMenu()
 
 	objectMenuM = new wxMenu();
 	wxMenu *newMenu = new wxMenu();
-	newMenu->Append(4990, _("Table"));
-	newMenu->Append(4991, _("View"));
-	newMenu->Append(4992, _("Procedure"));
-	newMenu->Append(4993, _("Trigger"));
-	newMenu->Append(4994, _("Function"));
-	//...
+	newMenu->Append(myTreeCtrl::Menu_CreateDomain, 		_("&Domain"));
+	newMenu->Append(myTreeCtrl::Menu_CreateException, 	_("&Exception"));
+	newMenu->Append(myTreeCtrl::Menu_CreateFunction, 	_("&Function"));
+	newMenu->Append(myTreeCtrl::Menu_CreateGenerator, 	_("&Generator"));
+	newMenu->Append(myTreeCtrl::Menu_CreateProcedure, 	_("&Procedure"));
+	newMenu->Append(myTreeCtrl::Menu_CreateRole, 		_("&Role"));
+	newMenu->Append(myTreeCtrl::Menu_CreateTable, 		_("&Table"));
+	newMenu->Append(myTreeCtrl::Menu_CreateTrigger, 	_("Tr&igger"));
+	newMenu->Append(myTreeCtrl::Menu_CreateView,		_("&View"));
 	objectMenuM->Append(myTreeCtrl::Menu_NewObject, _("&New"), newMenu);
 	menuBarM->Append(objectMenuM, _("&Object"));
 
@@ -252,7 +255,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(myTreeCtrl::Menu_BrowseColumns, MainFrame::OnMenuBrowseColumns)
 	EVT_MENU(myTreeCtrl::Menu_LoadColumnsInfo, MainFrame::OnMenuLoadColumnsInfo)
 	EVT_MENU(myTreeCtrl::Menu_AddColumn, MainFrame::OnMenuAddColumn)
-	EVT_MENU(myTreeCtrl::Menu_CreateTrigger, MainFrame::OnMenuCreateTrigger)
+	EVT_MENU(myTreeCtrl::Menu_CreateTriggerForTable, MainFrame::OnMenuCreateTriggerForTable)
 
 	EVT_MENU(myTreeCtrl::Menu_ShowAllGeneratorValues, MainFrame::OnMenuShowAllGeneratorValues)
 	EVT_MENU(myTreeCtrl::Menu_ShowGeneratorValue, MainFrame::OnMenuShowGeneratorValue)
@@ -264,6 +267,16 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 
 	EVT_MENU(myTreeCtrl::Menu_ToggleStatusBar, MainFrame::OnMenuToggleStatusBar)
 	EVT_MENU(myTreeCtrl::Menu_ToggleDisconnected, MainFrame::OnMenuToggleDisconnected)
+
+	EVT_MENU(myTreeCtrl::Menu_CreateDomain, 	MainFrame::OnMenuCreateDomain)
+	EVT_MENU(myTreeCtrl::Menu_CreateException, 	MainFrame::OnMenuCreateException)
+	EVT_MENU(myTreeCtrl::Menu_CreateFunction, 	MainFrame::OnMenuCreateFunction)
+	EVT_MENU(myTreeCtrl::Menu_CreateGenerator, 	MainFrame::OnMenuCreateGenerator)
+	EVT_MENU(myTreeCtrl::Menu_CreateProcedure, 	MainFrame::OnMenuCreateProcedure)
+	EVT_MENU(myTreeCtrl::Menu_CreateRole, 		MainFrame::OnMenuCreateRole)
+	EVT_MENU(myTreeCtrl::Menu_CreateTable, 		MainFrame::OnMenuCreateTable)
+	EVT_MENU(myTreeCtrl::Menu_CreateTrigger, 	MainFrame::OnMenuCreateTrigger)
+	EVT_MENU(myTreeCtrl::Menu_CreateView, 		MainFrame::OnMenuCreateView)
 
 	EVT_MENU_OPEN(MainFrame::OnMainMenuOpen)
 	EVT_MENU_RANGE(5000, 6000, MainFrame::OnWindowMenuItem)
@@ -446,7 +459,7 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 	);
 
 	wxString msg;
-    msg.Printf(_("FlameRobin %d.%d.%d"), 
+    msg.Printf(_("FlameRobin %d.%d.%d"),
         FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RELEASE);
 #if wxUSE_UNICODE
 	msg += wxT(" Unicode");
@@ -508,7 +521,7 @@ void MainFrame::OnMenuInsert(wxCommandEvent& WXUNUSED(event))
 	eff->Show();
 }
 //-----------------------------------------------------------------------------
-void MainFrame::OnMenuCreateTrigger(wxCommandEvent& WXUNUSED(event))
+void MainFrame::OnMenuCreateTriggerForTable(wxCommandEvent& WXUNUSED(event))
 {
 	MetadataItem *i = tree_ctrl_1->getSelectedMetadataItem();
 	if (!i)
@@ -900,27 +913,86 @@ void MainFrame::OnMenuShowAllGeneratorValues(wxCommandEvent& WXUNUSED(event))
 	db->refreshByType(ntGenerator);
 }
 //-----------------------------------------------------------------------------
+void MainFrame::OnMenuCreateDomain(wxCommandEvent& WXUNUSED(event))
+{
+	Domain d;
+	showCreateTemplate(&d);
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuCreateException(wxCommandEvent& WXUNUSED(event))
+{
+	Exception e;
+	showCreateTemplate(&e);
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuCreateFunction(wxCommandEvent& WXUNUSED(event))
+{
+	Function x;
+	showCreateTemplate(&x);
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuCreateGenerator(wxCommandEvent& WXUNUSED(event))
+{
+	Generator x;
+	showCreateTemplate(&x);
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuCreateProcedure(wxCommandEvent& WXUNUSED(event))
+{
+	Procedure x;
+	showCreateTemplate(&x);
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuCreateRole(wxCommandEvent& WXUNUSED(event))
+{
+	Role x;
+	showCreateTemplate(&x);
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuCreateTable(wxCommandEvent& WXUNUSED(event))
+{
+	Table x;
+	showCreateTemplate(&x);
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuCreateTrigger(wxCommandEvent& WXUNUSED(event))
+{
+	Trigger x;
+	showCreateTemplate(&x);
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuCreateView(wxCommandEvent& WXUNUSED(event))
+{
+	View x;
+	showCreateTemplate(&x);
+}
+//-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateObject(wxCommandEvent& WXUNUSED(event))
 {
-	MetadataItem *t = tree_ctrl_1->getSelectedMetadataItem();
-	if (!t)
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+	if (!m)
 		return;
-	Database *db = t->getDatabase();
-	if (!db)
-	{
-		wxMessageBox(_("No database assigned"), _("Warning"), wxOK | wxICON_ERROR);
-		return;
-	}
-
+	showCreateTemplate(m);
+}
+//-----------------------------------------------------------------------------
+void MainFrame::showCreateTemplate(const MetadataItem *m)
+{
 	// TODO: add a call for wizards. For example, we can have NewTableWizard which is a frame with grid in which
 	// user can enter column data for new table (name, datatype, null option, collation, default, etc.) and also
 	// enter a name for new table, etc. Wizard should return a bunch of DDL statements as a string which would we
 	// pass to ExecuteSqlFrame.
 
-	std::string sql = t->getCreateSqlTemplate();
+	std::string sql = m->getCreateSqlTemplate();
 	if (sql == "")
 	{
 		wxMessageBox(_("The feature is not yet available for this type of database objects."), _("Not yet implemented"), wxOK | wxICON_INFORMATION);
+		return;
+	}
+
+	Database *db = tree_ctrl_1->getSelectedDatabase();
+	if (!db)
+	{
+		wxMessageBox(_("No database assigned"), _("Warning"), wxOK | wxICON_ERROR);
 		return;
 	}
 
