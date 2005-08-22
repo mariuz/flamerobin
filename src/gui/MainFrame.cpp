@@ -144,7 +144,8 @@ void MainFrame::buildMainMenu()
     {
         CreateStatusBar();
         viewMenu->Check(myTreeCtrl::Menu_ToggleStatusBar, true);
-    }
+		GetStatusBar()->SetStatusText(_("[No database selected]"));
+	}
 }
 //-----------------------------------------------------------------------------
 void MainFrame::set_properties()
@@ -341,7 +342,7 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 			GetStatusBar()->SetStatusText(std2wx(s));
 		}
 		else
-			GetStatusBar()->SetStatusText(wxT("-"));
+			GetStatusBar()->SetStatusText(_("[No database selected]"));
 		lastDatabase = d;
 	}
 }
