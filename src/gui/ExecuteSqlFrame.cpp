@@ -472,7 +472,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title, const
     button_new = new wxBitmapButton(panel_contents, ID_button_new, wxBitmap(sql_icons::new_xpm));
     button_load = new wxBitmapButton(panel_contents, ID_button_load, wxBitmap(sql_icons::load_xpm));
     button_save = new wxBitmapButton(panel_contents, ID_button_save, wxBitmap(sql_icons::save_xpm));
-    button_execute = new wxButton(panel_contents, ID_button_execute, _("Execute (F9)"));
+    button_execute = new wxButton(panel_contents, ID_button_execute, _("Execute (F4)"));
     button_commit = new wxButton(panel_contents, ID_button_commit, _("Commit (F5)"));
     button_rollback = new wxButton(panel_contents, ID_button_rollback, _("Rollback (F8)"));
     button_plan = new wxButton(panel_contents, ID_button_plan, _("Show plan"));
@@ -517,7 +517,7 @@ void ExecuteSqlFrame::set_properties()
 	button_new->SetToolTip(_("New window"));
 	button_load->SetToolTip(_("Load"));
 	button_save->SetToolTip(_("Save"));
-	button_execute->SetToolTip(_("F9 - Execute SQL statement"));
+	button_execute->SetToolTip(_("F4 - Execute SQL statement"));
 	button_commit->SetToolTip(_("F5 - Commit transaction"));
 	button_rollback->SetToolTip(_("F8 - Rollback transaction"));
 	button_plan->SetToolTip(_("Show execution plan for query"));
@@ -768,12 +768,12 @@ void ExecuteSqlFrame::autoComplete(bool force)
 	}
 }
 //-----------------------------------------------------------------------------
-//! handle function keys (F5, F8, F9, ...)
+//! handle function keys (F5, F8, F4, ...)
 void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
 {
 	wxCommandEvent e;
 	int key = event.GetKeyCode();
-	if (key == WXK_F9)
+	if (key == WXK_F4)
 		OnButtonExecuteClick(e);
 	if (key == WXK_F5)
 		OnButtonCommitClick(e);
@@ -782,7 +782,7 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
 	if (key == WXK_F3)
 		styled_text_ctrl_sql->find(false);
 
-	// TODO: we might need Ctrl+N for new window, Ctrl+S for Save, etc. but it cannot be catched from here
+	// TODO: we might need Ctrl+N for new window, Ctrl+S for Save, etc. but it cannot be caught from here
 	//       since OnKeyDown() doesn't seem to catch letters, only special keys
 
 	if (wxWindow::FindFocus() == styled_text_ctrl_sql)
