@@ -196,8 +196,8 @@ templates:
 	for %%f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TRIGGER.html VIEW.html VIEWtriggers.html dependencies.html compute.png drop.png ok.png redx.png view.png) do if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates\%%f copy html-templates\%%f gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
 
 config-options: 
-	if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT) mkdir gcc$(U_OPT)$(R_OPT)$(D_OPT)
-	for %%f in (fr_settings.confdef) do if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\%%f copy confdefs\%%f gcc$(U_OPT)$(R_OPT)$(D_OPT)
+	if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs mkdir gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
+	for %%f in (fr_settings.confdef) do if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs\%%f copy confdefs\%%f gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.o: ./src/addconstrainthandler.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<

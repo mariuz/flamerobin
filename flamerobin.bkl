@@ -504,7 +504,7 @@
     <copy-files id="config-options">
         <dependency-of>all</dependency-of>
         <srcdir>$(CONFIGOPTIONSDIR)</srcdir>
-        <dstdir>$(BUILDDIR)</dstdir>
+        <dstdir>$(BUILDDIR)/confdefs</dstdir>
         <files>$(CONFIGOPTIONSFILES)</files>
     </copy-files>
 

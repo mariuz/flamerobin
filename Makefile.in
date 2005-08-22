@@ -200,14 +200,14 @@ templates:
 	done
 
 config-options: 
-	@mkdir -p .
+	@mkdir -p ./confdefs
 	@for f in fr_settings.confdef; do \
-	if test ! -e ./$$f ; \
+	if test ! -e ./confdefs/$$f ; \
 	then x=yep ; \
-	else x=`find $(srcdir)/confdefs/$$f -newer ./$$f -print` ; \
+	else x=`find $(srcdir)/confdefs/$$f -newer ./confdefs/$$f -print` ; \
 	fi; \
 	case "$$x" in ?*) \
-	cp -pRf $(srcdir)/confdefs/$$f . ;; \
+	cp -pRf $(srcdir)/confdefs/$$f ./confdefs ;; \
 	esac; \
 	done
 
