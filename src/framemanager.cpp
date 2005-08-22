@@ -103,7 +103,7 @@ void FrameManager::rebuildMenu()
 		windowMenuM->Append(-1, std2wx((*it).first->getName()), (*it).second);
 
 	if (windowMenuM->GetMenuItemCount() == regularItems)	// remove the separator if nothing is beneath
-		windowMenuM->Destroy(windowMenuM->FindItemByPosition(regularItems));
+		windowMenuM->Destroy(windowMenuM->FindItemByPosition(regularItems-1));
 }
 //-----------------------------------------------------------------------------
 void FrameManager::bringOnTop(int id)
