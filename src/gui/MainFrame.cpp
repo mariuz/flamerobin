@@ -101,6 +101,7 @@ void MainFrame::buildMainMenu()
     viewMenu->AppendCheckItem(myTreeCtrl::Menu_ToggleStatusBar, _("&Status bar"));
     viewMenu->AppendCheckItem(myTreeCtrl::Menu_ToggleDisconnected, _("&Disconnected databases"));
 	menuBarM->Append(viewMenu, _("&View"));
+	frameManager().setWindowMenu(viewMenu);
 
 	wxMenu *serverMenu = new wxMenu();
 	serverMenu->Append(myTreeCtrl::Menu_RegisterServer, _("Register server..."));
@@ -123,10 +124,6 @@ void MainFrame::buildMainMenu()
 	newMenu->Append(myTreeCtrl::Menu_CreateView,		_("&View"));
 	objectMenuM->Append(myTreeCtrl::Menu_NewObject, _("&New"), newMenu);
 	menuBarM->Append(objectMenuM, _("&Object"));
-
-    windowMenuM = new wxMenu();
-    menuBarM->Append(windowMenuM, _("&Windows"));
-	frameManager().setWindowMenu(windowMenuM);
 
     wxMenu* helpMenu = new wxMenu();
     helpMenu->Append(myTreeCtrl::Menu_Manual, _("&Manual"));

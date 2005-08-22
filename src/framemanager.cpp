@@ -66,9 +66,13 @@ void FrameManager::rebuildMenu()
 	if (windowMenuM == 0)
 		return;
 
+	const int regularItems = 3;
+
 	// remove all items
-	while (windowMenuM->GetMenuItemCount() > 0)
-		windowMenuM->Destroy(windowMenuM->FindItemByPosition(0));
+	while (windowMenuM->GetMenuItemCount() > regularItems)
+		windowMenuM->Destroy(windowMenuM->FindItemByPosition(regularItems));
+	if (windowMenuM->GetMenuItemCount() == regularItems-1)
+		windowMenuM->AppendSeparator();
 
 	// each database has it's submenu
 	std::map<Database *, wxMenu *> dmm;
@@ -97,6 +101,9 @@ void FrameManager::rebuildMenu()
 	// wxWidgets manual says that we should insert the submenus at end
 	for (std::map<Database *, wxMenu *>::iterator it = dmm.begin(); it != dmm.end(); ++it)
 		windowMenuM->Append(-1, std2wx((*it).first->getName()), (*it).second);
+
+	if (windowMenuM->GetMenuItemCount() == regularItems)	// remove the separator if nothing is beneath
+		windowMenuM->Destroy(windowMenuM->FindItemByPosition(regularItems));
 }
 //-----------------------------------------------------------------------------
 void FrameManager::bringOnTop(int id)
