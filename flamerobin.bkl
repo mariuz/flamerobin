@@ -366,11 +366,11 @@
     </set>
 
     <set var="CONFIGOPTIONSDIR">
-        <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/res</if>
-        <if cond="FORMAT!='autoconf'">res</if>
+        <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/confdefs</if>
+        <if cond="FORMAT!='autoconf'">confdefs</if>
     </set>
     <set var="CONFIGOPTIONSFILES">
-        config_options.xml
+        fr_settings.confdef
     </set>
 
     <set var="HTMLTEMPLATEDIR">
@@ -421,6 +421,7 @@
                 <!-- create the directories: -->
                 mkdir -p $(BUNDLE)
                 mkdir -p $(BUNDLE)/MacOS
+                mkdir -p $(BUNDLE)/MacOS/confdefs
                 mkdir -p $(BUNDLE)/Resources
 
                 <!-- PkgInfo: -->
@@ -434,7 +435,7 @@
                 cp -f $(BUNDLE_ICONS) $(BUNDLE)/Resources
                     <!-- NOTE: only a temporary solution -->
                 cp -R $(HTMLTEMPLATEDIR) $(BUNDLE)/MacOS
-                cp -R $(CONFIGOPTIONSDIR)/$(CONFIGOPTIONSFILES) $(BUNDLE)/MacOS
+                cp -R $(CONFIGOPTIONSDIR)/$(CONFIGOPTIONSFILES) $(BUNDLE)/MacOS/confdefs
             </command>
         </modify-target>
 

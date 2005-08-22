@@ -169,6 +169,7 @@ flamerobin$(EXEEXT): $(FLAMEROBIN_OBJECTS) $(__flamerobin___win32rc)
 flamerobin.app/Contents/PkgInfo: flamerobin$(EXEEXT) $(srcdir)/res/flamerobin.Info.plist $(srcdir)/res/flamerobin.icns
 	mkdir -p flamerobin.app/Contents
 	mkdir -p flamerobin.app/Contents/MacOS
+	mkdir -p flamerobin.app/Contents/MacOS/confdefs
 	mkdir -p flamerobin.app/Contents/Resources
 	
 	
@@ -182,13 +183,13 @@ flamerobin.app/Contents/PkgInfo: flamerobin$(EXEEXT) $(srcdir)/res/flamerobin.In
 	cp -f $(srcdir)/res/flamerobin.icns flamerobin.app/Contents/Resources
 	
 	cp -R $(srcdir)/html-templates flamerobin.app/Contents/MacOS
-	cp -R $(srcdir)/res/config_options.xml flamerobin.app/Contents/MacOS
+	cp -R $(srcdir)/confdefs/fr_settings.confdef flamerobin.app/Contents/MacOS/confdefs
 
 @COND_PLATFORM_MACOSX_1@flamerobin_bundle: $(____flamerobin_BUNDLE_TGT_REF_DEP)
 
 templates: 
 	@mkdir -p ./html-templates
-	@for f in DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TRIGGER.html VIEW.html VIEWtriggers.html dependencies.html drop.png ok.png view.png compute.png redx.png; do \
+	@for f in DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TRIGGER.html VIEW.html VIEWtriggers.html dependencies.html compute.png drop.png ok.png redx.png view.png; do \
 	if test ! -e ./html-templates/$$f ; \
 	then x=yep ; \
 	else x=`find $(srcdir)/html-templates/$$f -newer ./html-templates/$$f -print` ; \
@@ -200,13 +201,13 @@ templates:
 
 config-options: 
 	@mkdir -p .
-	@for f in config_options.xml; do \
+	@for f in fr_settings.confdef; do \
 	if test ! -e ./$$f ; \
 	then x=yep ; \
-	else x=`find $(srcdir)/res/$$f -newer ./$$f -print` ; \
+	else x=`find $(srcdir)/confdefs/$$f -newer ./$$f -print` ; \
 	fi; \
 	case "$$x" in ?*) \
-	cp -pRf $(srcdir)/res/$$f . ;; \
+	cp -pRf $(srcdir)/confdefs/$$f . ;; \
 	esac; \
 	done
 
