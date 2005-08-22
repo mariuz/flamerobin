@@ -78,7 +78,7 @@ void MainFrame::buildMainMenu()
 	menuBarM = new wxMenuBar();
 
     wxMenu *databaseMenu = new wxMenu();					// dynamic menus, created at runtime
-	databaseMenu->Append(myTreeCtrl::Menu_RegisterDatabase, _("&Register existing database..."));
+	databaseMenu->Append(myTreeCtrl::Menu_RegisterDatabase, _("R&egister existing database..."));
 	databaseMenu->Append(myTreeCtrl::Menu_CreateDatabase, _("Create &new database..."));
     databaseMenu->AppendSeparator();
 	ContextMenuVisitor cmvd(databaseMenu);
@@ -104,7 +104,7 @@ void MainFrame::buildMainMenu()
 	frameManager().setWindowMenu(viewMenu);
 
 	wxMenu *serverMenu = new wxMenu();
-	serverMenu->Append(myTreeCtrl::Menu_RegisterServer, _("Register server..."));
+	serverMenu->Append(myTreeCtrl::Menu_RegisterServer, _("&Register server..."));
 	serverMenu->Append(myTreeCtrl::Menu_UnRegisterServer, _("&Unregister server"));
 	serverMenu->Append(myTreeCtrl::Menu_ServerProperties, _("Server registration &info..."));
 	serverMenu->AppendSeparator();

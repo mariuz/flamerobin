@@ -58,15 +58,15 @@ void ContextMenuVisitor::visit(Database&)
     menuM->Append(myTreeCtrl::Menu_Connect, _("&Connect"));
     menuM->Append(myTreeCtrl::Menu_ConnectAs, _("Connect &as..."));
 	menuM->Append(myTreeCtrl::Menu_Disconnect, _("&Disconnect"));
-	menuM->Append(myTreeCtrl::Menu_Reconnect, _("&Reconnect"));
-	menuM->Append(myTreeCtrl::Menu_Query, _("Run a &query..."));
+	menuM->Append(myTreeCtrl::Menu_Reconnect, _("Reconnec&t"));
+	menuM->Append(myTreeCtrl::Menu_Query, _("&Run a query..."));
 	menuM->AppendSeparator();
 	menuM->Append(myTreeCtrl::Menu_ShowConnectedUsers, _("&Show connected users"));
 	menuM->Append(myTreeCtrl::Menu_DatabaseRegistrationInfo, _("Database registration &info..."));
 	menuM->Append(myTreeCtrl::Menu_UnRegisterDatabase, _("&Unregister database"));
 	menuM->AppendSeparator();
 	menuM->Append(myTreeCtrl::Menu_Backup, _("&Backup database..."));
-	menuM->Append(myTreeCtrl::Menu_Restore, _("R&estore database..."));
+	menuM->Append(myTreeCtrl::Menu_Restore, _("Rest&ore database..."));
 }
 //------------------------------------------------------------------------------
 void ContextMenuVisitor::visit(Domain&)

@@ -118,13 +118,13 @@ void myTreeCtrl::OnContextMenu(wxContextMenuEvent& event)
 		// let's leave it like this until we implement the main menu
 		if (item == GetRootItem())
 		{
-			MyMenu.Append(Menu_RegisterServer, _("Register server..."));
+			MyMenu.Append(Menu_RegisterServer, _("&Register server..."));
 			MyMenu.AppendSeparator();
 		}
-		MyMenu.Append(wxID_ABOUT, _("About FlameRobin..."));
-		MyMenu.Append(Menu_Configure, _("Preferencess..."));
+		MyMenu.Append(wxID_ABOUT, _("&About FlameRobin..."));
+		MyMenu.Append(Menu_Configure, _("&Preferencess..."));
 		MyMenu.AppendSeparator();
-		MyMenu.Append(wxID_EXIT, _("Quit"));
+		MyMenu.Append(wxID_EXIT, _("&Quit"));
 	}
 	else
 	{	// read item data to find out what is the type of item
