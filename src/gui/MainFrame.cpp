@@ -163,13 +163,18 @@ void MainFrame::set_properties()
 	getGlobalRoot().load();
 	if (tree_ctrl_1->GetCount() <= 1)
 	{
+        wxString confile = std2wx(config().getDBHFileName());
+        if (confile.Length() > 20)
+            confile = wxT("\n") + confile + wxT("\n");  // break into several lines if path is long
+        else
+            confile = wxT(" ") + confile + wxT(" ");
         wxString msg;
-        msg.Printf(_("Configuration file %s not found.\nYou may register a new server and databases."),
-            std2wx(config().getDBHFileName()).c_str());
-        wxMessageBox(msg, _("Configuration file not found"));
+        msg.Printf(_("The configuration file:%sdoes not exist or cannot be opened.\n\nThis is normal for first time users.\n\nYou may now register new servers and databases."),
+            confile.c_str());
+        wxMessageBox(msg, _("Configuration file not found"), wxICON_INFORMATION);
 
 		Server s;
-		s.setName("localhost");
+		s.setName("Localhost");
 		s.setHostname("localhost");
 		getGlobalRoot().addServer(s);
 	}
