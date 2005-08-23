@@ -288,11 +288,13 @@ END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void MainFrame::OnMainMenuOpen(wxMenuEvent& event)
 {
-	if (event.IsPopup())
+	#ifndef __WXGTK__
+	if (event.IsPopup())	// on gtk all menus are treated as popup apparently
 	{
 		event.Skip();
 		return;
 	}
+	#endif
 
 	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
 	if (!m)
