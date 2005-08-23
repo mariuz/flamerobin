@@ -55,7 +55,7 @@ BaseFrame::BaseFrame(wxWindow* parent, int id, const wxString& title, const wxPo
 //-----------------------------------------------------------------------------
 bool BaseFrame::Show(bool show)
 {
-	if (show)
+	if (show && !IsShown())
 	 	readConfigSettings();
 	return wxFrame::Show(show);
 }
