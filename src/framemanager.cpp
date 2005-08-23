@@ -66,7 +66,7 @@ void FrameManager::rebuildMenu()
 	if (windowMenuM == 0)
 		return;
 
-	const int regularItems = 3;
+	const int regularItems = 5;
 
 	// remove all items
 	while (windowMenuM->GetMenuItemCount() > regularItems)

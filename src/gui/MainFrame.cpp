@@ -88,18 +88,20 @@ void MainFrame::buildMainMenu()
     databaseMenu->Append(wxID_EXIT, _("&Quit"));
     menuBarM->Append(databaseMenu, _("&Database"));
 
+    #ifdef __WXMAC__
 	wxMenu *editMenu = new wxMenu();
     editMenu->Append(myTreeCtrl::Menu_Cut, _("Cu&t"));
     editMenu->Append(myTreeCtrl::Menu_Copy, _("&Copy"));
     editMenu->Append(myTreeCtrl::Menu_Paste, _("&Paste"));
     editMenu->Append(myTreeCtrl::Menu_Delete, _("&Delete"));
-    editMenu->AppendSeparator();
-    editMenu->Append(myTreeCtrl::Menu_Configure, _("P&references..."));
 	menuBarM->Append(editMenu, _("&Edit"));
+    #endif
 
 	wxMenu *viewMenu = new wxMenu();
     viewMenu->AppendCheckItem(myTreeCtrl::Menu_ToggleStatusBar, _("&Status bar"));
     viewMenu->AppendCheckItem(myTreeCtrl::Menu_ToggleDisconnected, _("&Disconnected databases"));
+    viewMenu->AppendSeparator();
+    viewMenu->Append(myTreeCtrl::Menu_Configure, _("P&references..."));
 	menuBarM->Append(viewMenu, _("&View"));
 	frameManager().setWindowMenu(viewMenu);
 
