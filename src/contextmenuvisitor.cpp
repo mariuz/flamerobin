@@ -116,7 +116,7 @@ void ContextMenuVisitor::visit(Table&)
 {
 	menuM->Append(myTreeCtrl::Menu_Insert, _("&Insert into ..."));
 	addSelectMenu(true);
-	menuM->Append(myTreeCtrl::Menu_CreateTrigger, _("Create new &trigger..."));
+	menuM->Append(myTreeCtrl::Menu_CreateTriggerForTable, _("Create new &trigger..."));
 	addRegularObjectMenu();
 }
 //------------------------------------------------------------------------------
