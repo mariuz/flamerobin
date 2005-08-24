@@ -87,19 +87,13 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
     {
         label_pagesize = new wxStaticText(getControlsPanel(), -1, _("Page size:"));
         const wxString pagesize_choices[] = {
-            wxT("1024"),
-            wxT("2048"),
-            wxT("4096"),
-            wxT("8192"),
-            wxT("16384")
+            wxT("1024"), wxT("2048"), wxT("4096"), wxT("8192"), wxT("16384")
         };
         choice_pagesize = new wxChoice(getControlsPanel(), -1, wxDefaultPosition, wxDefaultSize,
             sizeof(pagesize_choices) / sizeof(wxString), pagesize_choices);
         label_dialect = new wxStaticText(getControlsPanel(), -1, _("SQL Dialect:"));
         const wxString dialect_choices[] = {
-            wxT("1"),
-            wxT("2"),
-            wxT("3")
+            wxT("1"), wxT("2"), wxT("3")
         };
         choice_dialect = new wxChoice(getControlsPanel(), -1, wxDefaultPosition, wxDefaultSize,
             sizeof(dialect_choices) / sizeof(wxString), dialect_choices);
@@ -114,6 +108,13 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
 }
 //-----------------------------------------------------------------------------
 //! implementation details
+const wxString DatabaseRegistrationDialog::buildName(const wxString& dbPath) const
+{
+    Database helper;
+    helper.setPath(wx2std(dbPath));
+    return std2wx(helper.extractNameFromConnectionString());
+}
+//-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::do_layout()
 {
     // create sizer for controls
@@ -209,16 +210,16 @@ void DatabaseRegistrationDialog::setDatabase(Database *db)
     text_ctrl_password->SetEditable(!isConnected);
     combobox_charset->Enable(!isConnected);
     text_ctrl_role->SetEditable(!isConnected);
-    //button_ok->Enable(!isConnected);
-    if (isConnected)
-    {
-        button_cancel->SetLabel(_("Close"));
-        button_cancel->SetDefault();
-    };
 	if (connectAsM)
 		button_ok->SetLabel(_("Connect"));
     updateButtons();
 	updateColors();
+}
+//-----------------------------------------------------------------------------
+void DatabaseRegistrationDialog::setDefaultName()
+{
+    defaultNameM = ((text_ctrl_name->GetValue().IsEmpty() ||
+        text_ctrl_name->GetValue() == buildName(text_ctrl_dbpath->GetValue())));
 }
 //-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::setServer(Server *s)
@@ -309,18 +310,5 @@ void DatabaseRegistrationDialog::OnNameChange(wxCommandEvent& WXUNUSED(event))
         setDefaultName();
         updateButtons();
 	}
-}
-//-----------------------------------------------------------------------------
-const wxString DatabaseRegistrationDialog::buildName(const wxString& dbPath) const
-{
-    Database helper;
-    helper.setPath(wx2std(dbPath));
-    return std2wx(helper.extractNameFromConnectionString());
-}
-//-----------------------------------------------------------------------------
-void DatabaseRegistrationDialog::setDefaultName()
-{
-    defaultNameM = ((text_ctrl_name->GetValue().IsEmpty() ||
-        text_ctrl_name->GetValue() == buildName(text_ctrl_dbpath->GetValue())));
 }
 //-----------------------------------------------------------------------------

@@ -60,6 +60,14 @@ ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent, int id,
 }
 //-----------------------------------------------------------------------------
 //! implementation details
+const wxString ServerRegistrationDialog::buildName(const wxString& hostName, const wxString& portNumber) const
+{
+    Server helper;
+    helper.setHostname(wx2std(hostName));
+    helper.setPort(wx2std(portNumber));
+    return std2wx(helper.getConnectionString());
+}
+//-----------------------------------------------------------------------------
 void ServerRegistrationDialog::do_layout()
 {
     // create sizer for controls
@@ -91,6 +99,12 @@ void ServerRegistrationDialog::set_properties()
     button_ok->SetDefault();
 }
 //-----------------------------------------------------------------------------
+void ServerRegistrationDialog::setDefaultName()
+{
+    defaultNameM = ((text_ctrl_name->GetValue().IsEmpty() ||
+        text_ctrl_name->GetValue() == buildName(text_ctrl_hostname->GetValue(), text_ctrl_portnumber->GetValue())));
+}
+//-----------------------------------------------------------------------------
 void ServerRegistrationDialog::setServer(Server *s)
 {
     serverM = s;
@@ -104,25 +118,18 @@ void ServerRegistrationDialog::setServer(Server *s)
     // useful to keep the name in sync when other attributes change.
     setDefaultName();
 
-    // enable controls depending on operation and database connection status
+    // enable controls depending on database connection status
     // use SetEditable() for edit controls to allow copying text to clipboard
     bool isConnected = serverM->hasConnectedDatabase();
     text_ctrl_hostname->SetEditable(!isConnected);
     text_ctrl_portnumber->SetEditable(!isConnected);
-    button_ok->Enable(!isConnected);
-    if (isConnected)
-    {
-        button_cancel->SetLabel(_("Close"));
-        button_cancel->SetDefault();
-    }
     updateButtons();
 	updateColors();
 }
 //-----------------------------------------------------------------------------
 void ServerRegistrationDialog::updateButtons()
 {
-    button_ok->Enable(text_ctrl_name->IsEditable()
-        && !text_ctrl_name->GetValue().IsEmpty());
+    button_ok->Enable(!text_ctrl_name->GetValue().IsEmpty());
 }
 //-----------------------------------------------------------------------------
 //! event handling
@@ -161,19 +168,5 @@ void ServerRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
     serverM->setHostname(wx2std(text_ctrl_hostname->GetValue()));
     serverM->setPort(wx2std(text_ctrl_portnumber->GetValue()));
     EndModal(wxID_OK);
-}
-//-----------------------------------------------------------------------------
-const wxString ServerRegistrationDialog::buildName(const wxString& hostName, const wxString& portNumber) const
-{
-    Server helper;
-    helper.setHostname(wx2std(hostName));
-    helper.setPort(wx2std(portNumber));
-    return std2wx(helper.getConnectionString());
-}
-//-----------------------------------------------------------------------------
-void ServerRegistrationDialog::setDefaultName()
-{
-    defaultNameM = ((text_ctrl_name->GetValue().IsEmpty() ||
-        text_ctrl_name->GetValue() == buildName(text_ctrl_hostname->GetValue(), text_ctrl_portnumber->GetValue())));
 }
 //-----------------------------------------------------------------------------
