@@ -1748,3 +1748,36 @@ bool ActivateTriggersHandler::handleURI(URI& uri)
 	return true;
 }
 //-----------------------------------------------------------------------------
+class ActivateTriggerHandler: public URIHandler
+{
+public:
+	bool handleURI(URI& uri);
+private:
+    static const ActivateTriggerHandler handlerInstance;
+};
+//-----------------------------------------------------------------------------
+const ActivateTriggerHandler ActivateTriggerHandler::handlerInstance;
+//-----------------------------------------------------------------------------
+bool ActivateTriggerHandler::handleURI(URI& uri)
+{
+	if (uri.action != "activate_trigger" && uri.action != "deactivate_trigger")
+		return false;
+
+	Trigger *t = (Trigger *)getObject(uri);
+	wxWindow *w = getWindow(uri);
+	if (!t || !w)
+		return true;
+
+	std::string sql = "ALTER TRIGGER " + t->getName() + " ";
+    if (uri.action == "deactivate_trigger")
+        sql += "IN";
+    sql += "ACTIVE;\n";
+
+	ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, wxEmptyString);
+	eff->setDatabase(t->getDatabase());
+	eff->Show();
+	eff->setSql(std2wx(sql));
+	eff->executeAllStatements(true);		// true = user must commit/rollback + frame is closed at once
+	return true;
+}
+//-----------------------------------------------------------------------------
