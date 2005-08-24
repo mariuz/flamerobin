@@ -21,7 +21,8 @@
 
 ;#define DEBUG
 
-#define VERSION "0.2.5"
+; TODO: can we centralize this?
+#define VERSION "0.3.0"
 
 [Setup]
 AppName=FlameRobin
@@ -33,7 +34,7 @@ AppUpdatesURL=http://www.flamerobin.org
 DefaultDirName={pf}\FlameRobin
 DefaultGroupName=FlameRobin
 AllowNoIcons=true
-LicenseFile=..\..\doc\usr\license.txt
+LicenseFile=..\..\docs-src\fr_license.txt
 InfoAfterFile=
 #ifdef DEBUG
 Compression=lzma/ultra
@@ -44,7 +45,7 @@ OutputBaseFilename=flamerobin-{#VERSION}-setup
 #endif
 SolidCompression=true
 OutputDir=.\output
-InfoBeforeFile=..\..\doc\usr\output\text\frrelnotes.txt
+InfoBeforeFile=..\..\docs-src\fr_whatsnew.txt
 InternalCompressLevel=ultra
 ShowLanguageDialog=yes
 
@@ -61,12 +62,11 @@ Source: ..\..\vc\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersio
 Source: ..\..\vcu\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersion: 0,4.0.1381
 #endif
 Source: ..\..\res\flamerobin.exe.Manifest; DestDir: {app}; Flags: ignoreversion; MinVersion: 0,5.01.2600
-Source: ..\..\doc\usr\license.html; DestDir: {app}\doc; Flags: ignoreversion
-Source: ..\..\doc\usr\output\html_one_page\frrelnotes.html; DestDir: {app}\doc; Flags: ignoreversion
-Source: ..\..\doc\usr\changes.txt; DestDir: {app}\doc; Flags: ignoreversion
-Source: ..\..\html-templates\*.html; DestDir: {app}\html-templates; Flags: ignoreversion
-Source: ..\..\html-templates\*.png; DestDir: {app}\html-templates; Flags: ignoreversion
-Source: ..\..\res\config_options.xml; DestDir: {app}; Flags: ignoreversion
+Source: ..\..\docs\fr_license.html; DestDir: {app}\doc; Flags: ignoreversion
+Source: ..\..\docs\fr_manual.html; DestDir: {app}\doc; Flags: ignoreversion
+Source: ..\..\docs\fr_whatsnew.html; DestDir: {app}\doc; Flags: ignoreversion
+Source: ..\..\html-templates\*.*; DestDir: {app}\html-templates; Flags: ignoreversion
+Source: ..\..\confdefs\*.*; DestDir: {app}\confdefs; Flags: ignoreversion
 Source: ..\..\res\system32\msvcr71.dll; DestDir: {app}; MinVersion: 0,5.0.2195
 Source: ..\..\res\system32\msvcr71.dll; DestDir: {sys}; Flags: sharedfile uninsneveruninstall; OnlyBelowVersion: 0,5.0.2195
 Source: ..\..\res\system32\msvcp71.dll; DestDir: {app}; MinVersion: 0,5.0.2195
@@ -77,8 +77,9 @@ Filename: {app}\flamerobin.url; Section: InternetShortcut; Key: URL; String: htt
 
 [Icons]
 Name: {group}\FlameRobin; Filename: {app}\flamerobin.exe; WorkingDir: {app}
-Name: {group}\IDPL License; Filename: {app}\doc\license.html
-Name: {group}\Release notes; Filename: {app}\doc\frrelnotes.html
+Name: {group}\License; Filename: {app}\docs\fr_license.html
+Name: {group}\Manual; Filename: {app}\docs\fr_manual.html
+Name: {group}\What's new; Filename: {app}\docs\fr_whatsnew.html
 Name: {group}\{cm:ProgramOnTheWeb,FlameRobin}; Filename: {app}\flamerobin.url
 Name: {group}\{cm:UninstallProgram,FlameRobin}; Filename: {uninstallexe}
 Name: {userdesktop}\FlameRobin; Filename: {app}\flamerobin.exe; Tasks: desktopicon; WorkingDir: {app}; IconIndex: 0
@@ -86,7 +87,7 @@ Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\FlameRobin; Filenam
 
 [Run]
 Filename: {app}\flamerobin.exe; Description: {cm:LaunchProgram,FlameRobin}; Flags: nowait postinstall skipifsilent
-Filename: {app}\doc\frrelnotes.html; WorkingDir: {app}\doc\; Description: Show Release Notes; StatusMsg: Showing Release notes; Flags: nowait shellexec postinstall
+Filename: {app}\docs\fr_whatsnew.html; WorkingDir: {app}\doc\; Description: Show Release Notes; StatusMsg: Showing Release notes; Flags: nowait shellexec postinstall
 
 [UninstallDelete]
 Type: files; Name: {app}\flamerobin.url

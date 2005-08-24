@@ -1,0 +1,208 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<TITLE>Changes</TITLE>
+	<STYLE>
+	<!--
+		@page { size: 21cm 29.7cm }
+		P.western { so-language: en-GB }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-GB" DIR="LTR">
+<P CLASS="western" STYLE="margin-bottom: 0cm"><U><FONT SIZE=4>Changes
+in FlameRobin 0.2.5 ALPHA</FONT></U><BR><BR><B>Highlights:</B><BR><BR>-
+Brand new Preferences dialog through which the user can configure
+FlameRobin. This removes the need to edit config.ini file manually.<BR>-
+Many improvements to the SQL Editor (autocomplete code, bug
+fixes...).<BR>- You can drag &amp; drop columns/tables from tree to
+SQL editor to create queries. Foreign keys are automatically used to
+make joins.<BR>- Many bug fixes.<BR>- Project home moved to
+http://flamerobin.sourceforge.net.<BR><BR><B>New features:</B><BR><BR>-
+New Preferences dialog.<BR>- Option to show/hide datatype and/or
+domain name in tree.<BR>- Ability to keep working after fatal
+errors.<BR>- Ability to prepare a statement (and show its PLAN)
+without actually executing it.<BR>- New context menu for the SQL
+Editor and new &quot;Execute selected&quot; command.<BR>- Ability to
+set a custom font for the SQL Editor.<BR>- Ability to set a custom
+font for the data grid header and cells.<BR>- Option to maximize the
+data grid when a certain number of rows has been fetched.<BR>- SQL
+Editor: auto-completion can be disabled and invoked manually.<BR>-
+Calltips for stored procedures in the SQL Editor.<BR>- Basic drag &amp;
+drop stuff (drag columns/tables from the tree to the SQL Editor).<BR>-
+SQL Editor: new Option to clear old messages when executing new
+statements.<BR>- You can set up logging of DDL (and optionally DML)
+statements to user defined log file(s).<BR>- Configurable
+double-click action for tables, views and SPs in main tree.<BR>-
+Option to prompt on exit.<BR>- Option to alphabetically sort server
+and database entries in tree.<BR>- Option to center dialogs on the
+screen.<BR>- SQL Editor: new Search &amp; replace tool (with support
+for regular expressions).<BR>- Ability to add a new column to a table
+directly from the tree.<BR>- Option to disallow showing table/view
+columns and stored procedure parameters as tree nodes.<BR>- Option to
+make it so that a double click on a tree item shows the properties
+dialog instead of expanding the subtree.<BR>- Added context menu for
+table columns in tree.<BR><BR><B>Enhancements and Bug fixes:</B><BR><BR>-
+Data grid: tabs used as separators instead of spaces when copying
+data to the clipboard.<BR>- Added server name (beside user@host) to
+the SQL Editor status bar.<BR>- &quot;Insert into&quot; command now
+puts VALUES clause on a new line.<BR>- Data grid: fixed display issue
+for non-null blobs.<BR>- Better automatic name suggestion for
+constraints (avoids duplicate names).<BR>- Fixed bug that caused FR
+to consume 100% CPU while doing nothing.<BR>- Databases couldn't be
+created if Page size was left to the default value.<BR>- SQL Editor:
+FR did hang when &quot;set term&quot; was issued without
+terminator.<BR>- SQL Editor: fixed bug when statement consisting
+solely of comments is executed.<BR>- SQL Editor: comments before SET
+statements were not handled correctly.<BR>- Data grid:
+platform-standard line breaks are now used when copying data to the
+clipboard.<BR>- Undo/redo/cut/copy/paste now work properly in the SQL
+Editor.<BR>- The Data grid is now much more responsive even with a
+lot of NULLs in it.<BR>- SQl Editor: added NULL to autocomplete list
+(solves known NULLIF problem).<BR>- Fixed constant 1-pixel frame
+growth for Windows 98.<BR>- Made database connections actually
+respect the charset.<BR>- Maintain separate size for database
+creation/registration info dialogs.<BR>- ALTER PROCEDURE now
+correctly reloads procedure parameters.<BR>- Changing column datatype
+for field editor now works.<BR>- Tree nodes can now be activated with
+double-click/Enter key on Linux too.<BR>- Enabled clicking inside
+selection in the SQL Editor.<BR>- Copy/paste of descriptions now
+works on Linux too.<BR>- Fixed crash when changing field type from
+one to another user defined domain.<BR>- Fixed known issue: if the
+connection credentials (username and password) of a registered
+database were modified, the new credentials were not used until
+FlameRobin was restarted.<BR><BR><B>Known issues:</B><BR><BR>Please
+see our bug tracker here:
+http://sourceforge.net/tracker/?group_id=124340&amp;atid=699234<BR><BR>
+</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm; background: transparent; page-break-before: always">
+<U><FONT SIZE=4>Changes in FlameRobin 0.2.0 ALPHA</FONT></U></P>
+<P CLASS="western" STYLE="margin-bottom: 0cm; background: transparent">
+<BR>
+</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm"><B>New
+features:</B></P>
+<P CLASS="western" STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- Brand
+new Backup/Restore dialogs that work in background, let you suppress
+the output messages and store their settings among invocations. Plus,
+the output messages can be copied to the clipboard.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- Many
+dialogs have been redesigned and now feature a cleaner GUI.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- &quot;Show
+value&quot; and &quot;Show all values&quot; context menu commands
+implemented for generators.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">-
+Exceptions are now shown in the tree view and have Create/Drop menu
+commands and a property page.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- Property
+pages for triggers, table constraints, dependencies (all objects),
+generators were added. Plus, a special empty property page now
+appears for not yet supported object types, instead of an error
+message.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- Ability
+to view/add/drop table constraints.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">-
+Reconnect menu command for databases will physically disconnect and
+reconnect a database in one shot.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- &quot;Create
+new&quot; and &quot;Drop&quot; commands added for external functions.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- New
+MacOS X port.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm; page-break-before: always">
+<B>Enhancements and Bug fixes:</B></P>
+<P CLASS="western" STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- When new
+objects are added to the database through a &quot;CREATE&quot; DDL
+statement, they are inserted in the right place in the tree view,
+instead of at the end of the lists.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- The tree
+view shows primary key table fields with a different icon.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- It is
+now possible to edit triggers.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">-
+User-defined domain names appear together with column datatypes in
+the property pages.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- Improved
+startup speed.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">-
+config.ini entry &quot;FrameStorage=1&quot; now works for all frames
+and dialogs (it only stores size - not position - for dialogs).</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- New
+multi-format program icon that looks OK at all sizes (16x16, 32x32,
+48x48 and 128x128).</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- In the
+SQL Window you can press Ctrl + &quot;+&quot; and Ctrl + &quot;-&quot;
+to increase and decrease the font size. The setting is remembered
+across sessions of FlameRobin.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- In the
+Server Registration dialog the controls are now read-only if any
+database is connected.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- New
+program icon.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- Assorted
+bug fixes.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm; page-break-before: always">
+<B>Known issues:</B></P>
+<P CLASS="western" STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- If you
+modify the connection credentials (username and password) of a
+registered database, the new credentials will not be used until you
+restart FlameRobin.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm; page-break-before: always">
+<FONT SIZE=4><U>Changes in FlameRobin 0.1.5 ALPHA</U></FONT></P>
+<P CLASS="western" STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">The
+changes in this release, from a user perspective, are:</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">-
+Properties window added for tables, views and stored procedures. You
+can now see and change the structure of tables and views, and you can
+see and change the source of stored procedures. Not all options are
+currently active; for tables you can:</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">  - add,
+remove and edit field definitions</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">  -
+reorder fields</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">  - see
+and edit table and fields descriptions</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">For views,
+you can:</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">  - see
+the view definition (source)</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">  - see
+and edit view and fields descriptions</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">For stored
+procedures, you can:</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">  - see
+the input and output parameters</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">  - see
+the definition (source)</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">  - edit
+the source</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">All
+changes are applied in the form of a DDL script that is run in the
+SQL window and that you can see, commit or rollback.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- Faster
+loading of metadata upon connection.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- Many
+bugfixes and enhancements.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- New
+icons. Tell us how you like them!</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm">- An
+automated installation program for Windows.</P>
+<P CLASS="western" STYLE="margin-bottom: 0cm"><BR>
+</P>
+</BODY>
+</HTML>

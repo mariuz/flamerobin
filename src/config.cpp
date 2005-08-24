@@ -235,7 +235,7 @@ string Config::getHtmlTemplatesPath() const
 //-----------------------------------------------------------------------------
 string Config::getDocsPath() const
 {
-	return getHomePath() + "doc/";
+	return getHomePath() + "docs/";
 }
 //-----------------------------------------------------------------------------
 string Config::getConfDefsPath() const
