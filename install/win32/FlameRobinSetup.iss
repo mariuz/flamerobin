@@ -21,12 +21,12 @@
 
 ;#define DEBUG
 
-; TODO: can we centralize this?
-#define VERSION "0.3.0"
+#include "..\..\src\frversion.h"
+#define FR_VERSION_STRING Str(FR_VERSION_MAJOR) + "." + Str(FR_VERSION_MINOR) + "." + Str(FR_VERSION_RELEASE)
 
 [Setup]
 AppName=FlameRobin
-AppVerName=FlameRobin {#VERSION} ALPHA
+AppVerName=FlameRobin {#FR_VERSION_STRING}
 AppPublisher=The FlameRobin Project
 AppPublisherURL=http://www.flamerobin.org
 AppSupportURL=http://www.flamerobin.org
@@ -38,14 +38,13 @@ LicenseFile=..\..\docs-src\fr_license.txt
 InfoAfterFile=
 #ifdef DEBUG
 Compression=lzma/ultra
-OutputBaseFilename=flamerobin-{#VERSION}-setup-debug
+OutputBaseFilename=flamerobin-{#FR_VERSION_STRING}-setup-debug
 #else
 Compression=lzma
-OutputBaseFilename=flamerobin-{#VERSION}-setup
+OutputBaseFilename=flamerobin-{#FR_VERSION_STRING}-setup
 #endif
 SolidCompression=true
 OutputDir=.\output
-InfoBeforeFile=..\..\docs-src\fr_whatsnew.txt
 InternalCompressLevel=ultra
 ShowLanguageDialog=yes
 
@@ -62,9 +61,7 @@ Source: ..\..\vc\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersio
 Source: ..\..\vcu\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersion: 0,4.0.1381
 #endif
 Source: ..\..\res\flamerobin.exe.Manifest; DestDir: {app}; Flags: ignoreversion; MinVersion: 0,5.01.2600
-Source: ..\..\docs\fr_license.html; DestDir: {app}\doc; Flags: ignoreversion
-Source: ..\..\docs\fr_manual.html; DestDir: {app}\doc; Flags: ignoreversion
-Source: ..\..\docs\fr_whatsnew.html; DestDir: {app}\doc; Flags: ignoreversion
+Source: ..\..\docs\*.*; DestDir: {app}\docs; Flags: ignoreversion
 Source: ..\..\html-templates\*.*; DestDir: {app}\html-templates; Flags: ignoreversion
 Source: ..\..\confdefs\*.*; DestDir: {app}\confdefs; Flags: ignoreversion
 Source: ..\..\res\system32\msvcr71.dll; DestDir: {app}; MinVersion: 0,5.0.2195
@@ -87,7 +84,7 @@ Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\FlameRobin; Filenam
 
 [Run]
 Filename: {app}\flamerobin.exe; Description: {cm:LaunchProgram,FlameRobin}; Flags: nowait postinstall skipifsilent
-Filename: {app}\docs\fr_whatsnew.html; WorkingDir: {app}\doc\; Description: Show Release Notes; StatusMsg: Showing Release notes; Flags: nowait shellexec postinstall
+Filename: {app}\docs\fr_whatsnew.html; Description: Show Release Notes; StatusMsg: Showing Release notes; Flags: nowait shellexec postinstall
 
 [UninstallDelete]
 Type: files; Name: {app}\flamerobin.url
