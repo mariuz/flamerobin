@@ -1,0 +1,221 @@
+Nando wrote:
+
+Hello,
+I would like to rationalize the way metadata items load their state
+from the database; currently YTable has loadColumns() and
+checkAndLockColumns(), YProcedure has loadParameters() and
+checkLoadParameters(), I myself have just added something similar
+(loadProperties()) to YException, etc.
+
+I was thinking of bringing all this under the umbrella of
+YxMetadataItem, with the following semantics:
+
+// invalidates everything the item has read from the database;
+// this means that next time a property is requested it will be
+// read anew from the database.
+// Some classes might support selective invalidation of portions
+// of data (e.g. "columns", or "indexes"), and that's what
+// propertySetName is for. By default, invaliate() invalidates
+// everything and calls notify().
+void YxMetadataItem::invalidate(std::string propertySetName = "");
+
+The item would keep one of more internal flags to account for what's
+invalidated and reload it on request.
+
+For a sample of the benefits of the approach, this code excerpt from
+database.cpp:
+
+if (t == ntTable || t == ntView)
+    result = ((YxMetadataItemWithColumns *)object)->loadColumns();
+else if (t == ntProcedure)
+    result = ((YProcedure *)object)->checkAndLoadParameters();
+else if (t == ntException)
+    ((YException *)object)->loadProperties(true);
+else
+    object->notify();
+
+(to which I have just contributed the third branch, BTW) would become:
+
+object->invalidate();
+
+Comments? Remarks? Better ideas?
+
+Milan replied:
+
+| I would like to rationalize the way metadata items load their state
+| from the database; currently YTable has loadColumns() and
+| checkAndLockColumns(), YProcedure has loadParameters() and
+| checkLoadParameters(), I myself have just added something similar
+| (loadProperties()) to YException, etc.
+|
+| I was thinking of bringing all this under the umbrella of
+| YxMetadataItem, with the following semantics:
+|
+| // invalidates everything the item has read from the database;
+[snip]
+
+Very good.
+
+I have thought that something like this will soon be needed anyway.
+
+| // By default, invaliate() invalidates
+| // everything and calls notify().
+
+We would have to be careful about this so we don't enter the endless
+loop. I guess we can use the locking mechanism that is already there.
+
+| For a sample of the benefits of the approach, this code excerpt from
+| database.cpp:
+|
+| if (t == ntTable || t == ntView)
+|     result = ((YxMetadataItemWithColumns *)object)->loadColumns();
+| else if (t == ntProcedure)
+|     result = ((YProcedure *)object)->checkAndLoadParameters();
+| else if (t == ntException)
+|     ((YException *)object)->loadProperties(true);
+| else
+|     object->notify();
+|
+| (to which I have just contributed the third branch, BTW) would become:
+|
+| object->invalidate();
+
+Well, not really since for tables/view/procedures you only have to
+invalidate columns/parameters (exactly what you wrote about: selective
+invalidation).
+
+Anyway, I fully agree what you wrote. We can have a parameter to
+invalidate() which will specify what is invalidated. Some objects would
+consider it, others ignore.
+
+One more remark: table->invalidate(columns) doesn't have to call
+notify() since reloading of columns will do that anyway, so a locking
+mechanism should really be used.
+
+Nando replied:
+
+M> | For a sample of the benefits of the approach, this code excerpt from
+M> | database.cpp:
+M> |
+M> | if (t == ntTable || t == ntView)
+M> |     result = ((YxMetadataItemWithColumns *)object)->loadColumns();
+M> | else if (t == ntProcedure)
+M> |     result = ((YProcedure *)object)->checkAndLoadParameters();
+M> | else if (t == ntException)
+M> |     ((YException *)object)->loadProperties(true);
+M> | else
+|     object->>notify();
+M> |
+M> | (to which I have just contributed the third branch, BTW) would become:
+M> |
+| object->>invalidate();
+
+M> Well, not really since for tables/view/procedures you only have to
+M> invalidate columns/parameters (exactly what you wrote about: selective
+M> invalidation).
+
+aren't columns/parameters all that those objects hold anyway? Huh
+no, tables have also constraints, for example. This needs a bit more
+thought...
+
+<more thought>
+
+Premise: the code above comes from database.cpp, and it runs
+when an executed SQL (mostly DDL) statement is parsed by YDatabase to
+see if any objects need refreshing.
+
+The problem is that only the metadata object itself knows ultimately
+what should be invalidated as a result of executing a SQL statement,
+so the solution is to let all metadata objects in turn have a peek at
+the statement and let each of them do whatever is needed to. IOW
+instead of letting the YDatabase govern everything, we use a
+cooperative network to achieve the same. This can be implemented at
+different degrees depending on the level of efficiency (did I say
+that? <g>) we want to achieve:
+
+a) the YDatabase hands the SQL statement off to each metadata object
+it holds in turn. Each metadata collection hands it to the items it
+contains (look, here's another reason for having concrete metadata
+collections!). This could be wasteful as potentially many items would
+need to parse the statement again and again. I said "could" because we
+might well be talking about millisecond-scale delays anyway.
+
+b) the YDatabase pre-parses the statement, finds the object kind and
+name (as it already does), locates the relevant metadata object and
+hands it the statement. This is slightly less flexible but probably
+faster.
+
+c) <???>
+
+Note: in many cases the SQL statement itself comes from a metadata
+object from the beginning. In other cases the user typed it freely in
+the SQL window. If we didn't have to support the latter scenario then
+a simpler variant of option b would be enough and the YDatabase
+wouldn't even be involved at all. But we do have to support it, right?
+
+M> One more remark: table->invalidate(columns) doesn't have to call
+M> notify() since reloading of columns will do that anyway, so a locking
+M> mechanism should really be used.
+
+In perspective I would even like to make notify() protected, so that
+each object deals with this stuff on its own. You just call a setXXX()
+member function and it sees by itself what's to
+invalidate/lock/notify, etc.
+
+Milan replied:
+
+| M> Well, not really since for tables/view/procedures you only have to
+| M> invalidate columns/parameters (exactly what you wrote about: selective
+| M> invalidation).
+|
+| aren't columns/parameters all that those objects hold anyway? Huh
+| no, tables have also constraints, for example
+
+Yep, and tables views might also get some links to triggers too.
+
+| a) the YDatabase hands the SQL statement off to each metadata object
+| it holds in turn. Each metadata collection hands it to the items it
+| contains (look, here's another reason for having concrete metadata
+| collections!). This could be wasteful as potentially many items would
+| need to parse the statement again and again. I said "could" because we
+| might well be talking about millisecond-scale delays anyway.
+
+Not needed IMHO.
+
+| b) the YDatabase pre-parses the statement, finds the object kind and
+| name (as it already does), locates the relevant metadata object and
+| hands it the statement. This is slightly less flexible but probably
+| faster.
+
+I think this will do. Also, note that DROP statements should be handles
+by YDatabase, so if it is going to parse the string anyway, we can use
+it for other things too.
+
+| c) <???>
+
+Maybe the same as b) but send the parsed pieces too? Although I haven't
+got the idea how to do that cleanly.
+
+| Note: in many cases the SQL statement itself comes from a metadata
+| object from the beginning. In other cases the user typed it freely in
+| the SQL window. If we didn't have to support the latter scenario then
+| a simpler variant of option b would be enough and the YDatabase
+| wouldn't even be involved at all. But we do have to support it, right?
+
+It's a must. User could always type some ALTER (or some other) statement
+that we don't provide via GUI, and object should refresh. Also, this way
+we can centralize all DDL processing, and make logging stuff easy. It
+also let's various program parts just dump SQL into ExecuteSqlFrame and
+don't "think" about it.
+
+| M> One more remark: table->invalidate(columns) doesn't have to call
+| M> notify() since reloading of columns will do that anyway, so a locking
+| M> mechanism should really be used.
+|
+| In perspective I would even like to make notify() protected, so that
+| each object deals with this stuff on its own. You just call a setXXX()
+| member function and it sees by itself what's to
+| invalidate/lock/notify, etc.
+
+Maybe not a bad idea. I can't foresee how will it work in practice
+though. I guess we will have to test and see.

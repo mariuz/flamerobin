@@ -1,0 +1,32 @@
+Building FlameRobin on Windows with Dev-C++
+===========================================
+
+This document is a collection of quick notes about building FlameRobin on Windows with Dev-C++.
+
+Dev-C++ is an integrated C++ development environment written in (and resembling, to some extent) Delphi. It uses the Mingw port of GCC as the compiler (and gdb as the debugger). Dev-C++ is free software; you can get it here:
+
+http://www.bloodshed.net/dev/
+
+Make sure you get the latest version available. I have used version 4.9.9.0 which is basically a 5.0 beta (yet very stable) version.
+
+To build FlameRobin you have to check-out the flamerobin1 module from the projects's CVS tree, and get some tools apart from Dev-C++.
+
+You need to check-out and compile branch rel_2_3 of IBPP. IBPP is the database access layer on which FlameRobin is built, and is of course free software as well. You can view the sources here:
+
+http://cvs.sourceforge.net/viewcvs.py/ibpp/ibpp2/?only_with_tag=rel_2_3
+
+Note that FlameRobin needs at least this version of IBPP. In case information is needed on how to compile IBPP with Dev-C++, you can contact me (nandod@dedonline.com); I can provide a Dev-C++ project or pre-built IBPP.a.
+
+Time for the GUI subsystem. FlameRobin needs at least version 2.4.2 of wxWidgets (http://www.wxwidgets.org) and the additional STC (StyledTextControl) component. All of this is open source. You can even get them pre-packaged for installation into Dev-C++ here:
+
+http://michel.weinachter.free.fr/
+
+Please note you're going to need all the three packages (imagelib, wxWindows 2.4.2 and wxWindows 2.4.2-contrib). Refer to the Dev-C++ documentation for instruction on how to install the packages (which is a straightforward process anyway).
+
+Once all the pieces are in place, you just need to open flamerobin.dev in Dev-C++ and build it. You don't need to touch any IDE or compiler environment setting, but you might need to modify the project options (which translates to changes to the flamerobin.dev and makefile.win files) in case you don't have ibpp installed in the same path I have used (../../../CppLibs/IBPP/ibpp2/IBPP.a). You can change this in Dev-C++ through the Project Options dialog (pages Parameters/Linker and Directories/Include Directories).
+The same applies to the Directories/Resource Directories setting, which is hard-coded as "C:\Dev-Cpp\include".
+
+I am aware that this setup might not be optimal, but I stopped tweaking it when it started to work :-). I am a newbie with C++ myself and coming from a Delphi background (that's why I have used Dev-C++). Thus, suggestions for streamlining the build process or enhancement to the makefile are welcome.
+
+Nando Dessena
+nandod@dedonline.com

@@ -1,0 +1,79 @@
+FlameRobin: support & config file paths roundup
+
+Files needed by FR:
+
+- $conf - a config file (config.ini, to be renamed fr_settings.conf)
+- $db - a database connection definition file (servers.xml, to be renamed fr_databases.conf)
+- $templ - the html-templates directory
+- $confdef - the confdefs directory, containing the main config settings definition file (config_options.xml, to be renamed fr_settings.confdef) and possibly other confdef files for scoped (database-level, for example, to be named database_settings.confdef or DATABASE_settings.confdef) configuration (preferences) dialogs
+- $docfiles - the files docs/fr_manual.html, docs/fr_changes.html and docs/fr_license.html that are displayed from the main menu
+
+Locations:
+
+- $frhome - FR will find $templ, $confdef and $docfiles (which are immutable and integral part of the FR distribution) in its home path. The home path is returned by config()::getHomePath(), usually the application folder.
+Note: defining the environment variable FR_HOME will override this path.
+Note: passing -h <path> on FR's command line will override this path and the environment variable as well.
+
+- $fruserhome - FR will find $conf and $db (which are user settings files) in its user home path. This path has to be writable and may be common to all users on the machine or different for each user. The user home path is config()::getUserHomePath(), and it defaults to wxStandardPaths::GetUserLocalDataDir().
+Note: defining the environment variable FR_USER_HOME will override this path.
+Note: passing -uh <path> on FR's command line will override this path and the environment variable as well.
+
+Additional note: the <path> specification in the command line parameters -h and -uh, or the value of the environment variables FR_HOME and FR_USER_HOME may be "$app", which translates to wxStandardPaths::GetLocalDataDir(), or "$user", which translates to wxStandardPaths::GetUserLocalDataDir(). Otherwise, it has to be a path (without the trailing path delimiter).
+
+FR will only ever write to files in $fruserhome. If FR is configured so that these files are shared by several users, then no precaution is taken to avoid overwriting other users' changes.
+
+The installer will use the default settings and not allow customization, for the time being.
+
+Use:
+
+$conf contains all FR settings that are managed by a singleton instance of Config, which is a wrapper around one or more instances of wxFileConfig, and which also handles a set of hardwired defaults. A call to Config::getValue() will always yield a value, even if the config file is not found or the key doesn't exist (defaults apply).
+
+$db is managed internally by the DBH using custom XML-parsing code (as it is now), or possibly wxXmlDocument.
+
+The locations of $templ, $confdef and $docfiles are returned by functions in Config. This means that not all services that Config exposes are directly related to the config file(s).
+
+Scoping (might come later):
+
+Each config setting has a name (ex. NumberPrecision) and a value. The value is retrieved based on scoping rules:
+
+getValue("NumberPrecision", n)
+will search for a value to assign to n in the NumberPrecision config key.
+
+getValue("DATABASE_SomeDatabase/TABLE_SomeTable/NumberPrecision", n)
+will search in the following config keys:
+- DATABASE_SomeDatabase/TABLE_SomeTable/NumberPrecision
+- DATABASE_SomeDatabase/NumberPrecision
+- NumberPrecision
+
+getValue("DATABASE_SomeDatabase/TABLE_SomeTable/COLUMN_SomeColumn/NumberPrecision", n)
+will search in the following config keys:
+- DATABASE_SomeDatabase/TABLE_SomeTable/COLUMN_SomeColumn/NumberPrecision
+- DATABASE_SomeDatabase/TABLE_SomeTable/NumberPrecision
+- DATABASE_SomeDatabase/NumberPrecision
+- NumberPrecision
+
+The caller of getValue will retrieve the prefix by calling the getItemPath() member function of the relevant metadata item. A shortcut member function in MetadataItem will shorten the code; for example, assuming a Database db named "foo", this code:
+
+int numPrec = db.getConfigValue("NumberPrecision");
+
+is equivalent to:
+
+config().GetValue(DATABASE_SomeDatabase/NumberPrecision", numPrec);
+
+Note: wxFileConfig will resolve the scoped setting names by using different [sections] in the pseudo-INI file, but that's not relevant to the users of FR's Config. Config might also split the settings in different files (one for each database) for better efficiency and manageability.
+
+The database rename issue:
+
+Tables, columns and other metadata objects don't get renamed very frequently, but since we allow to change the name of a database quite easily, if we use it as a path identifier then once you rename it you loose all config stuff about it (and the data stays there forever cluttering the config file. Even worse, if you later define a database with the same name then the old config applies...). I can see several solutions:
+
+a) when a database is renamed, do a search & replace over the whole config file. This might be heavy.
+b) don't use the database name but a "generator" instead. Store its value in the config file and use it to generate unique and invisible IDs for databases. This is light and should work well.
+c) store the config for each database in a separate file, then just rename the file when the database is renamed. This is going to require some tricky code in Config, and it has the potential to get messy(*) if we later want to define per-table, per-column, etc. config.
+
+(*) meaning we won't be treating all objects in the same fashion, but have special regards for Database instead.
+
+The preferred solution is c) for efficiency and manageability reasons, perhaps with a shot of b).
+
+Possible extensions:
+
+We might want to let the installers allow the user to choose whether to share the config files among all users of the machine or not, and generate different command lines as required.
