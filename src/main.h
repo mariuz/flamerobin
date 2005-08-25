@@ -32,10 +32,10 @@ public:
     bool OnInit();
 	void OnFatalException();
 private:
-    // reads the environment variables that influence FR's behaviour.
-    void FRApp::checkEnvironment();
-    // reads the command line params that influence FR's behaviour.
-    void FRApp::parseCommandLine();
+    // Reads the environment variables that influence FR's behaviour.
+    void checkEnvironment();
+    // Reads the command line params that influence FR's behaviour.
+    void parseCommandLine();
     // Translates the supported macros (like $app and $user) in path
     // specifications coming from the command line or the environment.
     const string translatePathMacros(const string path) const;
