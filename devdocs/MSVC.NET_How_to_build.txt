@@ -12,7 +12,7 @@ You will find IBPP at
 
   http://www.ibpp.org 
 
-and you can download the source package of version 2.3.4.0 (any later version should do as well) at
+and you can download the source package of version 2.3.5.0 (any later version should do as well) at
 
   http://sourceforge.net/project/showfiles.php?group_id=9514.
 
@@ -23,16 +23,14 @@ You will find wxWidgets at
 
   http://www.wxwidgets.org
 
-and you can download the source package of version 2.4.2 (stable) or 2.5.3 (development, probably a better choice if you have no other projects using wxWidgets to maintain) if you follow the "Download" link in the sidebar.
+and you can download the source package of version 2.6.0 (any later version should do as well) if you follow the "Download" link in the sidebar.
 If you download the wxAll* packages (all ports combined into one) please make sure that you unzip them using the -a switch to unzip.exe to convert all files to DOS line endings on-the-fly.  Visual Studio will complain if project or solution files have UNIX line endings.  Should that happen to you, just close the projects and convert the line endings by opening and saving with a text editor.
-Open the included project files and build both the debug and release configurations.  Depending on the version of wxWidgets the necessary projects are:
 
-a) for wxWidgets 2.4.2: [WX]\src\wxWindows.dsw and [WX]\contrib\src\stc\StcVC.dsw
-b) for wxWidgets 2.5.3: [WX]\build\msw\wx.dsw (contains STC)
+Open the included solution files $(WX)\build\msw\wx.sln and $(WX)\contrib\build\stc\stc.sln and build the same configuration (Debug/Release, Ansi/Unicode) of both.
 
-These files are for version 6 of VC++, you should convert all projects so that a solution file for version 7.1 is created.
+You have to define environment variables "IBPP" and "WXWIN" for the FlameRobin project to find the necessary libraries.  Adding them to your user environment works best.
 
-You have to define environment variables "IBPP" and "WXWIN" for the FlameRobin project to find the necessary libraries.  Adding them to your user environment works best.  If you have 2.4.x and 2.5.x versions of wxWidgets installed on your system you could also create special command files to run devenv.exe after the WXWIN variable is set to the matching directory.  There are configurations for both versions in the solution file.
+Be sure to select the same configuration for FlameRobin that you selected for wxWidgets, otherwise the linker will not find the needed libraries.
 
 
 If you have any questions about this, feel free to ask at our fbmanager-devel mailing list at sourceforge.net.
