@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -36,34 +36,56 @@
     #include "wx/wx.h"
 #endif
 
-#include "ugly.h"
+#include "PrintableHtmlWindow.h"
+
+#include "config.h"
 #include "images.h"
 #include "SimpleHtmlFrame.h"
-//-----------------------------------------------------------------------------
+#include "ugly.h"
+//------------------------------------------------------------------------------
+bool showDocsHtmlFile(wxWindow* parent, const wxString& fileName)
+{
+    wxFileName fullFileName(std2wx(config().getDocsPath()), fileName);
+    if (!fullFileName.FileExists())
+    {
+        wxString msg;
+        msg.Printf(_("The HTML document \"%s\" does not exist!"), 
+            fullFileName.GetFullPath().c_str());
+        wxMessageBox(msg, _("FlameRobin"), wxOK|wxICON_ERROR);
+        return false;
+    }
+
+    SimpleHtmlFrame *shf;
+    // TODO: check for and use an existing viewer instead of creating a new one
+    shf = new SimpleHtmlFrame(parent,  fullFileName.GetFullPath());
+    shf->Show();
+    return true;
+}
+//------------------------------------------------------------------------------
 SimpleHtmlFrame::SimpleHtmlFrame(wxWindow* parent, const wxString& pageName):
     BaseFrame(parent, -1, wxEmptyString)
 {
     window_1 = new PrintableHtmlWindow(this);
-	CreateStatusBar();
-	window_1->SetRelatedFrame(this, wxT("%s"));
-	window_1->SetRelatedStatusBar(0);
-	
-	window_1->LoadPage(pageName);
+    CreateStatusBar();
+    window_1->SetRelatedFrame(this, wxT("%s"));
+    window_1->SetRelatedStatusBar(0);
 
-	#include "fricon.xpm"
+    window_1->LoadPage(pageName);
+
+#include "fricon.xpm"
     wxBitmap bmp(fricon_xpm);
     wxIcon icon;
     icon.CopyFromBitmap(bmp);
     SetIcon(icon);
 }
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 const wxRect SimpleHtmlFrame::getDefaultRect() const
 {
-	return wxRect(-1, -1, 600, 420);
+    return wxRect(-1, -1, 600, 420);
 }
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 const std::string SimpleHtmlFrame::getName() const
 {
-	return "SimpleHtmlFrameFrame";
+    return "SimpleHtmlFrameFrame";
 }
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------

@@ -21,23 +21,26 @@
   Contributor(s):
 */
 
-#include <wx/wx.h>
-#include <wx/wxhtml.h>
-
-#include "BaseFrame.h"
-#include "PrintableHtmlWindow.h"
-
 #ifndef FR_SIMPLEHTMLFRAME_H
 #define FR_SIMPLEHTMLFRAME_H
-//-----------------------------------------------------------------------------
+
+#include <wx/wx.h>
+
+#include "BaseFrame.h"
+
+//------------------------------------------------------------------------------
+bool showDocsHtmlFile(wxWindow* parent, const wxString& fileName);
+
+class PrintableHtmlWindow;
+//------------------------------------------------------------------------------
 class SimpleHtmlFrame: public BaseFrame
 {
 public:
     SimpleHtmlFrame(wxWindow* parent, const wxString& fileName);
 protected:
     PrintableHtmlWindow* window_1;
-	virtual const std::string getName() const;
-	virtual const wxRect getDefaultRect() const;
+    virtual const std::string getName() const;
+    virtual const wxRect getDefaultRect() const;
 };
-//-----------------------------------------------------------------------------
-#endif // METADATAITEMPROPERTIESFRAME_H
+//------------------------------------------------------------------------------
+#endif // FR_SIMPLEHTMLFRAME_H

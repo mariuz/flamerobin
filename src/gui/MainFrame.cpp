@@ -481,20 +481,17 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuManual(wxCommandEvent& WXUNUSED(event))
 {
-    SimpleHtmlFrame *s = new SimpleHtmlFrame(this, std2wx(config().getDocsPath()) + wxT("fr_manual.html"));
-	s->Show();
+    showDocsHtmlFile(this, wxT("fr_manual.htm"));
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRelNotes(wxCommandEvent& WXUNUSED(event))
 {
-	SimpleHtmlFrame *s = new SimpleHtmlFrame(this, std2wx(config().getDocsPath()) + wxT("fr_whatsnew.html"));
-	s->Show();
+    showDocsHtmlFile(this, wxT("fr_whatsnew.html"));
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuLicense(wxCommandEvent& WXUNUSED(event))
 {
-	SimpleHtmlFrame *s = new SimpleHtmlFrame(this, std2wx(config().getDocsPath()) + wxT("fr_license.html"));
-	s->Show();
+    showDocsHtmlFile(this, wxT("fr_license.html"));
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
