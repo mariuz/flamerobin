@@ -28,9 +28,9 @@
     #pragma hdrstop
 #endif
 
-#include "config.h"
-#include "visitor.h"
+#include "config/Config.h"
 #include "server.h"
+#include "visitor.h"
 //------------------------------------------------------------------------------
 using namespace std;
 //------------------------------------------------------------------------------

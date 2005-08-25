@@ -18,7 +18,9 @@
 
   All Rights Reserved.
 
-  Contributor(s):
+  $Id$
+
+  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -38,7 +40,8 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
-#include "config.h"
+
+#include "config/Config.h"
 #include "converters.h"
 //---------------------------------------------------------------------------------------
 //! formats date according to DateFormat string

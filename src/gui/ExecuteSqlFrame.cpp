@@ -35,10 +35,6 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
-#include <wx/file.h>
-#include <wx/datetime.h>
-#include <wx/tokenzr.h>
-#include <wx/fontdlg.h>
 
 #include <sstream>
 #include <string>
@@ -46,23 +42,26 @@
 #include <vector>
 #include <map>
 
-#include "simpleparser.h"
-#include "ExecuteSqlFrame.h"
-#include "config.h"
-#include "logger.h"
-#include "dberror.h"
+#include <wx/file.h>
+#include <wx/datetime.h>
+#include <wx/tokenzr.h>
+#include <wx/fontdlg.h>
 
+#include "config/Config.h"
+#include "dberror.h"
+#include "ExecuteSqlFrame.h"
+#include "framemanager.h"
 #include "frDataGrid.h"
 #include "frDataGridTable.h"
-
-#include "metadata/server.h"
-#include "metadata/procedure.h"
-#include "metadata/view.h"
-#include "styleguide.h"
 #include "frutils.h"
+#include "logger.h"
+#include "metadata/procedure.h"
+#include "metadata/server.h"
+#include "metadata/view.h"
+#include "simpleparser.h"
+#include "styleguide.h"
 #include "ugly.h"
 #include "urihandler.h"
-#include "framemanager.h"
 //-----------------------------------------------------------------------------
 bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
 {

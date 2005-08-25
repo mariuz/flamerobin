@@ -36,10 +36,9 @@
     #include "wx/wx.h"
 #endif
 
-#include "PrintableHtmlWindow.h"
-
-#include "config.h"
+#include "config/Config.h"
 #include "images.h"
+#include "PrintableHtmlWindow.h"
 #include "SimpleHtmlFrame.h"
 #include "ugly.h"
 //------------------------------------------------------------------------------

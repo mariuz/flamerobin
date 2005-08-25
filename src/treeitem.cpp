@@ -34,11 +34,11 @@
     #include "wx/wx.h"
 #endif
 
-#include "ugly.h"
+#include "config/Config.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
-#include "config.h"
 #include "treeitem.h"
+#include "ugly.h"
 //------------------------------------------------------------------------------
 TreeItem::TreeItem(myTreeCtrl *tree)
 	: Observer()

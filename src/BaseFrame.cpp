@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Milan Babuskov, Michael Hieke
+  Contributor(s): Milan Babuskov, Michael Hieke, Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -40,8 +40,8 @@
     #include "windows.h"
 #endif
 
+#include "config/Config.h"
 #include "BaseFrame.h"
-#include "config.h"
 #include "framemanager.h"
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(BaseFrame, wxFrame)

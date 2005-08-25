@@ -18,7 +18,9 @@
 
   All Rights Reserved.
 
-  Contributor(s):
+  $Id$
+
+  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -31,14 +33,14 @@
 #include <sstream>
 #include <string>
 
-#include "config.h"
-#include "database.h"
+#include "config/Config.h"
 #include "collection.h"
-#include "domain.h"
+#include "column.h"
 #include "constraints.h"
+#include "database.h"
+#include "domain.h"
 #include "ugly.h"
 #include "visitor.h"
-#include "column.h"
 //------------------------------------------------------------------------------
 //! new undefined column
 Column::Column()

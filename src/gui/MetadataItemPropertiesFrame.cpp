@@ -36,19 +36,21 @@
     #include "wx/wx.h"
 #endif
 
-#include <wx/clipbrd.h>
-#include <wx/file.h>
-#include <wx/filedlg.h>
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
 
-#include "config.h"
+#include <wx/clipbrd.h>
+#include <wx/file.h>
+#include <wx/filedlg.h>
+
+#include "config/Config.h"
 #include "dberror.h"
 #include "framemanager.h"
 #include "frutils.h"
 #include "images.h"
+#include "MetadataItemPropertiesFrame.h"
 #include "metadata/database.h"
 #include "metadata/exception.h"
 #include "metadata/metadataitem.h"
@@ -56,8 +58,6 @@
 #include "metadata/view.h"
 #include "ugly.h"
 #include "urihandler.h"
-
-#include "MetadataItemPropertiesFrame.h"
 //-----------------------------------------------------------------------------
 //! converts chars that have special meaning in HTML, so they get displayed
 std::string escapeHtmlChars(std::string s, bool processNewlines = true)

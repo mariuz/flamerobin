@@ -19,7 +19,9 @@
 
   All Rights Reserved.
 
-  Contributor(s): Milan Babuskov.
+  $Id$
+  
+  Contributor(s): Milan Babuskov, Nando Dessena
 */
 //------------------------------------------------------------------------------
 #include "wx/wxprec.h"
@@ -34,7 +36,7 @@
 
 #include <wx/menu.h>
 
-#include "config.h"
+#include "config/Config.h"
 #include "contextmenuvisitor.h"
 #include "myTreeCtrl.h"
 //------------------------------------------------------------------------------

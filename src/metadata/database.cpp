@@ -29,14 +29,15 @@
 #endif
 
 #include <sstream>
-#include "config.h"
-#include "visitor.h"
-#include "parameter.h"
+
+#include "config/Config.h"
 #include "database.h"
-#include "ugly.h"
 #include "dberror.h"
+#include "parameter.h"
 #include "root.h"
 #include "simpleparser.h"
+#include "ugly.h"
+#include "visitor.h"
 //------------------------------------------------------------------------------
 using namespace std;
 //------------------------------------------------------------------------------

@@ -34,22 +34,19 @@
     #include "wx/wx.h"
 #endif
 
-//
-//
-//
-//
+#include <stack>
+
 #include <wx/imaglist.h>
 #include <wx/dataobj.h>
 #include <wx/dnd.h>
 
-#include "ugly.h"
-#include "config.h"
-#include "treeitem.h"
-#include "images.h"
+#include "config/Config.h"
 #include "contextmenuvisitor.h"
+#include "images.h"
 #include "metadata/root.h"
 #include "myTreeCtrl.h"
-#include <stack>
+#include "treeitem.h"
+#include "ugly.h"
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(myTreeCtrl, wxTreeCtrl)
 #if wxCHECK_VERSION(2, 5, 4) && !wxCHECK_VERSION(2, 5, 5)

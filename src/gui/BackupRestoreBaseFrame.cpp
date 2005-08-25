@@ -39,7 +39,7 @@ Contributor(s): Milan Babuskov, Nando Dessena
 #include <wx/timer.h>
 
 #include "BackupRestoreBaseFrame.h"
-#include "config.h"
+#include "config/Config.h"
 #include "ugly.h"
 
 //-----------------------------------------------------------------------------

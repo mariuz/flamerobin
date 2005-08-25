@@ -38,7 +38,7 @@
 #include <wx/datetime.h>
 #include <wx/file.h>
 
-#include "config.h"
+#include "config/Config.h"
 #include "frversion.h"
 #include "logger.h"
 #include "metadata/database.h"

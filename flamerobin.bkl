@@ -229,7 +229,7 @@
     <set var="HEADERFILES">
         $(SOURCEDIR)/BaseDialog.h
         $(SOURCEDIR)/BaseFrame.h
-        $(SOURCEDIR)/config.h
+        $(SOURCEDIR)/config/Config.h
         $(SOURCEDIR)/converters.h
         $(SOURCEDIR)/dberror.h
         $(SOURCEDIR)/framemanager.h
@@ -304,7 +304,7 @@
         $(SOURCEDIR)/addconstrainthandler.cpp
         $(SOURCEDIR)/BaseDialog.cpp
         $(SOURCEDIR)/BaseFrame.cpp
-        $(SOURCEDIR)/config.cpp
+        $(SOURCEDIR)/config/Config.cpp
         $(SOURCEDIR)/converters.cpp
         $(SOURCEDIR)/dberror.cpp
         $(SOURCEDIR)/framemanager.cpp

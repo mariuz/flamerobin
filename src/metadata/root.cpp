@@ -31,17 +31,17 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include "config.h"
-#include "visitor.h"
+
+#include <wx/filefn.h>
+
+#include "config/Config.h"
+#include "database.h"
 #include "root.h"
 #include "server.h"
-#include "database.h"
 #include "ugly.h"
-#include "wx/filefn.h"
+#include "visitor.h"
 //------------------------------------------------------------------------------
-// This code should be wx-clean. Only std library
 using namespace std;
-
 //------------------------------------------------------------------------------
 //! access to the singleton root of the DBH.
 Root& getGlobalRoot()
@@ -91,7 +91,8 @@ bool Root::load()
 	string line = s.substr(0, t);
 	s.erase(0, t);
 
-	while (true)
+    bool isRoot = false;
+    while (true)
 	{
 		string::size_type t = s.find('\n');
 		if (t == string::npos)
@@ -115,7 +116,6 @@ bool Root::load()
 			value = line.substr(end+1, start2-end-1);
 
         // root tags
-        bool isRoot = false;
         if (option == "root")
             isRoot = true;
         if (option == "nextId" && isRoot)

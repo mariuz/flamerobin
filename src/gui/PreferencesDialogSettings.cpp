@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -42,11 +42,10 @@
 #include <wx/spinctrl.h>
 #include <wx/xml/xml.h>
 
-#include "config.h"
+#include "config/Config.h"
+#include "PreferencesDialog.h"
 #include "styleguide.h"
 #include "ugly.h"
-
-#include "PreferencesDialog.h"
 //-----------------------------------------------------------------------------
 static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
 {

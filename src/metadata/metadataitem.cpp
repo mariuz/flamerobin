@@ -30,12 +30,13 @@
 
 //------------------------------------------------------------------------------
 #include <sstream>
-#include "config.h"
-#include "metadataitem.h"
-#include "visitor.h"
+
+#include "config/Config.h"
 #include "database.h"
 #include "dberror.h"
 #include "frutils.h"
+#include "metadataitem.h"
+#include "visitor.h"
 //------------------------------------------------------------------------------
 using namespace std;
 //------------------------------------------------------------------------------

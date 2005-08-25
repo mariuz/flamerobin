@@ -37,8 +37,9 @@ Contributor(s): Nando Dessena
 #endif
 
 #include <string>
+
 #include "BaseDialog.h"
-#include "config.h"
+#include "config/Config.h"
 #include "styleguide.h"
 //-----------------------------------------------------------------------------
 BaseDialog::BaseDialog(wxWindow* parent, int id, const wxString& title,

@@ -36,32 +36,30 @@
     #include "wx/wx.h"
 #endif
 
-#include "wx/progdlg.h"
+#include <wx/progdlg.h>
 
-#include "config.h"
-#include "contextmenuvisitor.h"
-#include "dberror.h"
-#include "framemanager.h"
 #include "BackupFrame.h"
+#include "config/Config.h"
+#include "contextmenuvisitor.h"
 #include "DatabaseRegistrationDialog.h"
+#include "dberror.h"
 #include "ExecuteSqlFrame.h"
 #include "FieldPropertiesFrame.h"
+#include "framemanager.h"
+#include "frversion.h"
+#include "main.h"
 #include "MainFrame.h"
+#include "metadata/metadataitem.h"
+#include "metadata/root.h"
+#include "myTreeCtrl.h"
 #include "PreferencesDialog.h"
 #include "RestoreFrame.h"
 #include "ServerRegistrationDialog.h"
 #include "SimpleHtmlFrame.h"
-#include "TriggerWizardDialog.h"
-#include "main.h"
-#include "metadata/metadataitem.h"
-#include "metadata/root.h"
-#include "myTreeCtrl.h"
 #include "treeitem.h"
+#include "TriggerWizardDialog.h"
 #include "ugly.h"
 #include "urihandler.h"
-
-#include "frversion.h"
-
 //-----------------------------------------------------------------------------
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
     BaseFrame(parent, id, title, pos, size, style, wxT("FlameRobin_main"))

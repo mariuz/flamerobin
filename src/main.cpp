@@ -34,14 +34,17 @@
 
 #include <vector>
 #include <string>
-#include "config.h"
+
+#include <wx/cmdline.h>
+#include <wx/stdpaths.h>
+#include <wx/utils.h>
+
+#include <ibpp.h>
+
+#include "config/Config.h"
 #include "gui/MainFrame.h"
-#include "ibpp.h"
 #include "main.h"
 #include "ugly.h"
-#include "wx/cmdline.h"
-#include "wx/stdpaths.h"
-#include "wx/utils.h"
 //-----------------------------------------------------------------------------
 IMPLEMENT_APP(FRApp)
 //-----------------------------------------------------------------------------

@@ -35,22 +35,21 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
-//-----------------------------------------------------------------------------
+
+#include <algorithm>
+#include <vector>
+
 #include <wx/bookctrl.h>
 #include <wx/tokenzr.h>
 #include <wx/wfstream.h>
 #include <wx/xml/xml.h>
 
-#include <algorithm>
-#include <vector>
-
-#include "config.h"
+#include "config/Config.h"
 #include "frutils.h"
 #include "images.h"
+#include "PreferencesDialog.h"
 #include "styleguide.h"
 #include "ugly.h"
-
-#include "PreferencesDialog.h"
 //-----------------------------------------------------------------------------
 static bool hasParamNode(wxXmlNode* node, const wxString& param)
 {

@@ -20,7 +20,7 @@ All Rights Reserved.
 
 $Id$
 
-Contributor(s):
+Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -37,15 +37,16 @@ Contributor(s):
 #endif
 
 #include <algorithm>
-#include <wx/datetime.h>
-#include "ibpp.h"
 
-#include "RestoreFrame.h"
-#include "config.h"
+#include <wx/datetime.h>
+
+#include <ibpp.h>
+
+#include "config/Config.h"
 #include "frutils.h"
+#include "RestoreFrame.h"
 #include "styleguide.h"
 #include "ugly.h"
-
 //-----------------------------------------------------------------------------
 // worker thread class to perform database restore
 class RestoreThread: public wxThread {

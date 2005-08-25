@@ -45,7 +45,7 @@ Contributor(s): Michael Hieke
 
 #include <string>
 
-#include "config.h"
+#include "config/Config.h"
 #include "frDataGrid.h"
 #include "frDataGridTable.h"
 #include "ugly.h"

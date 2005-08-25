@@ -484,6 +484,10 @@ SOURCE=.\src\BaseFrame.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\config\Config.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\DatabaseRegistrationDialog.cpp
 # End Source File
 # Begin Source File
@@ -549,10 +553,6 @@ SOURCE=.\src\addconstrainthandler.cpp
 # Begin Source File
 
 SOURCE=.\src\metadata\column.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\config.cpp
 # End Source File
 # Begin Source File
 
@@ -742,6 +742,10 @@ SOURCE=.\src\BaseFrame.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\config\Config.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\DatabaseRegistrationDialog.h
 # End Source File
 # Begin Source File
@@ -803,10 +807,6 @@ SOURCE=.\src\metadata\collection.h
 # Begin Source File
 
 SOURCE=.\src\metadata\column.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\config.h
 # End Source File
 # Begin Source File
 

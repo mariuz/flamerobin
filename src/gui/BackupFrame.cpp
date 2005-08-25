@@ -20,31 +20,32 @@ All Rights Reserved.
 
 $Id$
 
-Contributor(s): Milan Babuskov
+Contributor(s): Milan Babuskov, Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-#pragma hdrstop
+    #pragma hdrstop
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
 // need because it includes almost all "standard" wxWindows headers
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+    #include "wx/wx.h"
 #endif
 
 #include <algorithm>
+
 #include <wx/datetime.h>
-#include "ibpp.h"
+
+#include <ibpp.h>
 
 #include "BackupFrame.h"
-#include "config.h"
+#include "config/Config.h"
 #include "styleguide.h"
 #include "ugly.h"
-
 //-----------------------------------------------------------------------------
 // worker thread class to perform database backup
 class BackupThread: public wxThread {
