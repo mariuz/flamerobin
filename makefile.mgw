@@ -182,7 +182,7 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT):
 
 ### Targets: ###
 
-all: gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe templates config-options
+all: gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe configoptions htmldocs templates
 
 clean: 
 	-if exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\*.o del gcc$(U_OPT)$(R_OPT)$(D_OPT)\*.o
@@ -191,13 +191,17 @@ clean:
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS) gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o
 	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) $(LDFLAGS) -mthreads $(____flamerobin_DEBUGINFO) -L$(____flamerobin_WX_LIB_DIR_FILENAMES) -Wl,--subsystem,windows -mwindows -L$(IBPP)\$(__IBPPLIBVERSION_FILENAMES)\win32_mingw  -lwxmsw26$(U_OPT)$(D_OPT)_stc -lwxmsw26$(U_OPT)$(D_OPT)_html -lwxmsw26$(U_OPT)$(D_OPT)_adv -lwxmsw26$(U_OPT)$(D_OPT)_core -lwxbase26$(U_OPT)$(D_OPT)_xml -lwxbase26$(U_OPT)$(D_OPT) -lwxexpat$(D_OPT) -lwxtiff$(D_OPT) -lwxjpeg$(D_OPT) -lwxpng$(D_OPT) -lwxzlib$(D_OPT) -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lcomctl32 -lrpcrt4 -lwsock32 -libpp
 
+configoptions: 
+	if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs mkdir gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
+	for %%f in (fr_settings.confdef) do if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs\%%f copy confdefs\%%f gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
+
+htmldocs: 
+	if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\docs mkdir gcc$(U_OPT)$(R_OPT)$(D_OPT)\docs
+	for %%f in (fr_license.html fr_manual.html fr_whatsnew.html html.css) do if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\docs\%%f copy docs\%%f gcc$(U_OPT)$(R_OPT)$(D_OPT)\docs
+
 templates: 
 	if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates mkdir gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
 	for %%f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TRIGGER.html VIEW.html VIEWtriggers.html dependencies.html compute.png drop.png ok.png redx.png view.png) do if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates\%%f copy html-templates\%%f gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
-
-config-options: 
-	if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs mkdir gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
-	for %%f in (fr_settings.confdef) do if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs\%%f copy confdefs\%%f gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.o: ./src/addconstrainthandler.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $<
@@ -388,6 +392,6 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_urihandler.o: ./src/urihandler.cpp
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o: ./res/flamerobin.rc
 	windres --use-temp-file -i$< -o$@ --include-dir $(WXDIR)/include --include-dir $(WXDIR)/contrib/include $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) --define HAVE_W32API_H --define _WINDOWS --define __WINDOWS__ --define WINVER=0x400 --define WIN32 --define __WIN32__ --define __WIN95__ --define STRICT --define __WXMSW__ --define wxUSE_GUI=1 --define WIN32_LEAN_AND_MEAN --include-dir $(__flamerobin_WX_LIB_DIR)/msw$(U_OPT)$(D_OPT) --define IBPP_GCC --define IBPP_WINDOWS --include-dir ./src --include-dir ./res --include-dir $(IBPP)
 
-.PHONY: all clean templates config-options
+.PHONY: all clean configoptions htmldocs templates
 
 

@@ -373,6 +373,17 @@
         fr_settings.confdef
     </set>
 
+    <set var="HTMLDOCSDIR">
+        <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/docs</if>
+        <if cond="FORMAT!='autoconf'">docs</if>
+    </set>
+    <set var="HTMLDOCFILES">
+        fr_license.html
+        fr_manual.html
+        fr_whatsnew.html
+        html.css
+    </set>
+
     <set var="HTMLTEMPLATEDIR">
         <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/html-templates</if>
         <if cond="FORMAT!='autoconf'">html-templates</if>
@@ -422,6 +433,8 @@
                 mkdir -p $(BUNDLE)
                 mkdir -p $(BUNDLE)/MacOS
                 mkdir -p $(BUNDLE)/MacOS/confdefs
+                mkdir -p $(BUNDLE)/MacOS/docs
+                mkdir -p $(BUNDLE)/MacOS/html-templates
                 mkdir -p $(BUNDLE)/Resources
 
                 <!-- PkgInfo: -->
@@ -433,9 +446,9 @@
                 <!-- and copy resources, icons and support files -->
                 cp -f $(BUNDLE_PLIST) $(BUNDLE)/Info.plist
                 cp -f $(BUNDLE_ICONS) $(BUNDLE)/Resources
-                    <!-- NOTE: only a temporary solution -->
-                cp -R $(HTMLTEMPLATEDIR) $(BUNDLE)/MacOS
                 cp -R $(CONFIGOPTIONSDIR)/$(CONFIGOPTIONSFILES) $(BUNDLE)/MacOS/confdefs
+                cp -R $(HTMLDOCSDIR)/$(HTMLDOCFILES) $(BUNDLE)/MacOS/docs
+                cp -R $(HTMLTEMPLATEDIR)/$(HTMLTEMPLATEFILES) $(BUNDLE)/MacOS/html-templates
             </command>
         </modify-target>
 
@@ -494,18 +507,25 @@
         </if>
     </exe>
 
+    <copy-files id="configoptions">
+        <dependency-of>all</dependency-of>
+        <srcdir>$(CONFIGOPTIONSDIR)</srcdir>
+        <dstdir>$(BUILDDIR)/confdefs</dstdir>
+        <files>$(CONFIGOPTIONSFILES)</files>
+    </copy-files>
+
+    <copy-files id="htmldocs">
+        <dependency-of>all</dependency-of>
+        <srcdir>$(HTMLDOCSDIR)</srcdir>
+        <dstdir>$(BUILDDIR)/docs</dstdir>
+        <files>$(HTMLDOCFILES)</files>
+    </copy-files>
+
     <copy-files id="templates">
         <dependency-of>all</dependency-of>
         <srcdir>$(HTMLTEMPLATEDIR)</srcdir>
         <dstdir>$(BUILDDIR)/html-templates</dstdir>
         <files>$(HTMLTEMPLATEFILES)</files>
-    </copy-files>
-
-    <copy-files id="config-options">
-        <dependency-of>all</dependency-of>
-        <srcdir>$(CONFIGOPTIONSDIR)</srcdir>
-        <dstdir>$(BUILDDIR)/confdefs</dstdir>
-        <files>$(CONFIGOPTIONSFILES)</files>
     </copy-files>
 
 </makefile>

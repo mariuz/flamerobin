@@ -214,7 +214,7 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT):
 
 ### Targets: ###
 
-all: bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe templates config-options
+all: bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe configoptions htmldocs templates
 
 clean: 
 	-if exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\*.obj del bcc$(U_OPT)$(R_OPT)$(D_OPT)\*.obj
@@ -232,13 +232,17 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerob
 	c0w32.obj $(FLAMEROBIN_OBJECTS),$@,, wxmsw26$(U_OPT)$(D_OPT)_stc.lib wxmsw26$(U_OPT)$(D_OPT)_html.lib wxmsw26$(U_OPT)$(D_OPT)_adv.lib wxmsw26$(U_OPT)$(D_OPT)_core.lib wxbase26$(U_OPT)$(D_OPT)_xml.lib wxbase26$(U_OPT)$(D_OPT).lib wxexpat$(D_OPT).lib wxtiff$(D_OPT).lib wxjpeg$(D_OPT).lib wxpng$(D_OPT).lib wxzlib$(D_OPT).lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib ibpp.lib    import32.lib cw32mt$(__RTL_TYPE_1).lib,, bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin.res
 |
 
+configoptions: 
+	if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs mkdir bcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
+	for %f in (fr_settings.confdef) do if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs\%f copy confdefs\%f bcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
+
+htmldocs: 
+	if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\docs mkdir bcc$(U_OPT)$(R_OPT)$(D_OPT)\docs
+	for %f in (fr_license.html fr_manual.html fr_whatsnew.html html.css) do if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\docs\%f copy docs\%f bcc$(U_OPT)$(R_OPT)$(D_OPT)\docs
+
 templates: 
 	if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates mkdir bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
 	for %f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TRIGGER.html VIEW.html VIEWtriggers.html dependencies.html compute.png drop.png ok.png redx.png view.png) do if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates\%f copy html-templates\%f bcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
-
-config-options: 
-	if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs mkdir bcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
-	for %f in (fr_settings.confdef) do if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs\%f copy confdefs\%f bcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.obj: .\src\addconstrainthandler.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
