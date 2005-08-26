@@ -18,6 +18,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): Nando Dessena, Michael Hieke
 */
 
@@ -35,13 +37,16 @@
 #endif
 
 //------------------------------------------------------------------------------
+#include "wx/fileconf.h"
+#include "wx/stdpaths.h"
+
 #include <string>
 #include <fstream>
 #include <sstream>
+
 #include "config.h"
 #include "frutils.h"
 #include "ugly.h"
-#include "wx/stdpaths.h"
 //------------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------
@@ -49,12 +54,12 @@ const string Config::pathSeparator = "/";
 //------------------------------------------------------------------------------
 Config& config()
 {
-	static Config c;
-	return c;
+    static Config c;
+    return c;
 }
 //-----------------------------------------------------------------------------
 Config::Config()
-	: homePathM(""), userHomePathM(""), configM(0)
+    : homePathM(""), userHomePathM(""), configM(0)
 {
 }
 //-----------------------------------------------------------------------------
@@ -66,14 +71,17 @@ Config::~Config()
 wxFileConfig* Config::getConfig() const
 {
     if (!configM)
-        configM = new wxFileConfig(wxT(""), wxT(""), std2wx(getConfigFileName()));
+    {
+        configM = new wxFileConfig(wxT(""), wxT(""), 
+            std2wx(getConfigFileName()));
+    }
     return configM;
 }
 //-----------------------------------------------------------------------------
 //! return true if value exists, false if not
 bool Config::keyExists(const string& key) const
 {
-	return getConfig()->HasEntry(std2wx(key));
+    return getConfig()->HasEntry(std2wx(key));
 }
 //-----------------------------------------------------------------------------
 //! return true if value exists, false if not
@@ -108,54 +116,54 @@ bool Config::getValue(string key, string& value)
 //-----------------------------------------------------------------------------
 bool Config::getValue(string key, int& value)
 {
-	string s;
-	if (!getValue(key, s))
-		return false;
+    string s;
+    if (!getValue(key, s))
+        return false;
 
-	stringstream ss;
-	ss << s;
-	ss >> value;
-	return true;
+    stringstream ss;
+    ss << s;
+    ss >> value;
+    return true;
 }
 //-----------------------------------------------------------------------------
 bool Config::getValue(string key, double& value)
 {
-	string s;
-	if (!getValue(key, s))
-		return false;
+    string s;
+    if (!getValue(key, s))
+        return false;
 
-	stringstream ss;
-	ss << s;
-	ss >> value;
-	return true;
+    stringstream ss;
+    ss << s;
+    ss >> value;
+    return true;
 }
 //-----------------------------------------------------------------------------
 bool Config::getValue(string key, bool& value)
 {
-	string s;
-	if (!getValue(key, s))
-		return false;
+    string s;
+    if (!getValue(key, s))
+        return false;
 
-	value = (s == "1");
-	return true;
+    value = (s == "1");
+    return true;
 }
 //-----------------------------------------------------------------------------
 bool Config::getValue(string key, StorageGranularity& value)
 {
-	int intValue = 0;
-	bool ret = getValue(key, intValue);
-	if (ret)
-		value = StorageGranularity(intValue);
-	return ret;
+    int intValue = 0;
+    bool ret = getValue(key, intValue);
+    if (ret)
+        value = StorageGranularity(intValue);
+    return ret;
 }
 //-----------------------------------------------------------------------------
 bool Config::getValue(string key, vector<string>& value)
 {
-	string s;
-	if (!getValue(key, s))
-		return false;
+    string s;
+    if (!getValue(key, s))
+        return false;
 
-	value.clear();
+    value.clear();
     string item;
     size_t pos = 0, sep = s.find(',');
     while (sep != string::npos)
@@ -173,36 +181,36 @@ bool Config::getValue(string key, vector<string>& value)
 //! return true if value existed, false if not
 bool Config::setValue(string key, string value)
 {
-	bool result = getConfig()->Write(std2wx(key), std2wx(value));
+    bool result = getConfig()->Write(std2wx(key), std2wx(value));
     getConfig()->Flush();
     return result;
 }
 //-----------------------------------------------------------------------------
 bool Config::setValue(string key, int value)
 {
-	stringstream ss;
-	ss << value;
-	return setValue(key, ss.str());
+    stringstream ss;
+    ss << value;
+    return setValue(key, ss.str());
 }
 //-----------------------------------------------------------------------------
 bool Config::setValue(string key, double value)
 {
-	stringstream ss;
-	ss << value;
-	return setValue(key, ss.str());
+    stringstream ss;
+    ss << value;
+    return setValue(key, ss.str());
 }
 //-----------------------------------------------------------------------------
 bool Config::setValue(string key, bool value)
 {
-	if (value)
-		return setValue(key, string("1"));
-	else
-		return setValue(key, string("0"));
+    if (value)
+        return setValue(key, string("1"));
+    else
+        return setValue(key, string("0"));
 }
 //-----------------------------------------------------------------------------
 bool Config::setValue(string key, StorageGranularity value)
 {
-	return setValue(key, int(value));
+    return setValue(key, int(value));
 }
 //-----------------------------------------------------------------------------
 bool Config::setValue(string key, vector<string> value)
@@ -230,17 +238,17 @@ string Config::getHomePath() const
 //-----------------------------------------------------------------------------
 string Config::getHtmlTemplatesPath() const
 {
-	return getHomePath() + "html-templates/";
+    return getHomePath() + "html-templates/";
 }
 //-----------------------------------------------------------------------------
 string Config::getDocsPath() const
 {
-	return getHomePath() + "docs/";
+    return getHomePath() + "docs/";
 }
 //-----------------------------------------------------------------------------
 string Config::getConfDefsPath() const
 {
-	return getHomePath() + "confdefs/";
+    return getHomePath() + "confdefs/";
 }
 //-----------------------------------------------------------------------------
 string Config::getUserHomePath() const
@@ -253,12 +261,12 @@ string Config::getUserHomePath() const
 //-----------------------------------------------------------------------------
 string Config::getDBHFileName() const
 {
-	return getUserHomePath() + "fr_databases.conf";
+    return getUserHomePath() + "fr_databases.conf";
 }
 //-----------------------------------------------------------------------------
 string Config::getConfigFileName() const
 {
-	return getUserHomePath() + "fr_settings.conf";
+    return getUserHomePath() + "fr_settings.conf";
 }
 //-----------------------------------------------------------------------------
 void Config::setHomePath(const string& homePath)
