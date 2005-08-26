@@ -27,7 +27,7 @@ Contributor(s): Michael Hieke, Nando Dessena
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-#pragma hdrstop
+    #pragma hdrstop
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
@@ -39,7 +39,6 @@ Contributor(s): Michael Hieke, Nando Dessena
 #include "ServerRegistrationDialog.h"
 #include "styleguide.h"
 #include "ugly.h"
-
 //-----------------------------------------------------------------------------
 ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent, int id,
         const wxString& title, const wxPoint& pos, const wxSize& size, long style)
@@ -99,9 +98,9 @@ void ServerRegistrationDialog::set_properties()
     button_ok->SetDefault();
 }
 //-----------------------------------------------------------------------------
-void ServerRegistrationDialog::setDefaultName()
+void ServerRegistrationDialog::updateIsDefaultName()
 {
-    defaultNameM = ((text_ctrl_name->GetValue().IsEmpty() ||
+    isDefaultNameM = ((text_ctrl_name->GetValue().IsEmpty() ||
         text_ctrl_name->GetValue() == buildName(text_ctrl_hostname->GetValue(), text_ctrl_portnumber->GetValue())));
 }
 //-----------------------------------------------------------------------------
@@ -112,11 +111,10 @@ void ServerRegistrationDialog::setServer(Server *s)
     text_ctrl_name->SetValue(std2wx(serverM->getName()));
     text_ctrl_hostname->SetValue(std2wx(serverM->getHostname()));
     text_ctrl_portnumber->SetValue(std2wx(serverM->getPort()));
-	defaultNameM = (text_ctrl_name->GetValue() == buildName(text_ctrl_hostname->GetValue(), text_ctrl_portnumber->GetValue()));
 
     // see whether the server has an empty or default name; knowing that will be
     // useful to keep the name in sync when other attributes change.
-    setDefaultName();
+    updateIsDefaultName();
 
     // enable controls depending on database connection status
     // use SetEditable() for edit controls to allow copying text to clipboard
@@ -145,7 +143,7 @@ void ServerRegistrationDialog::OnNameChange(wxCommandEvent& WXUNUSED(event))
     // will allready be called in constructor!
     if (IsShown())
     {
-        setDefaultName();
+        updateIsDefaultName();
         updateButtons();
     }
 }
@@ -155,9 +153,9 @@ void ServerRegistrationDialog::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
     // will allready be called in constructor!
     if (IsShown())
     {
-        if (defaultNameM)
+        if (isDefaultNameM)
             text_ctrl_name->SetValue(buildName(text_ctrl_hostname->GetValue(), text_ctrl_portnumber->GetValue()));
-        setDefaultName();
+        updateIsDefaultName();
         updateButtons();
     }
 }

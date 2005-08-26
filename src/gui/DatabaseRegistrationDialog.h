@@ -27,10 +27,11 @@ Contributor(s): Michael Hieke, Nando Dessena
 #define DATABASEREGISTRATIONDIALOG_H
 
 #include <wx/wx.h>
-#include "BaseDialog.h"
-#include "metadata/server.h"
-#include "metadata/database.h"
 
+#include "BaseDialog.h"
+#include "metadata/database.h"
+#include "metadata/server.h"
+//-----------------------------------------------------------------------------
 class DatabaseRegistrationDialog: public BaseDialog {
 public:
     enum {
@@ -62,13 +63,13 @@ private:
     Server *serverM;
     bool createM;
 	bool connectAsM;
-	bool defaultNameM;
+	bool isDefaultNameM;
 
     void do_layout();
     void set_properties();
     void updateButtons();
     const wxString buildName(const wxString& dbPath) const;
-    void setDefaultName();
+    void updateIsDefaultName();
 protected:
     virtual const std::string getName() const;
 
@@ -95,5 +96,5 @@ protected:
 
     DECLARE_EVENT_TABLE()
 };
-
+//-----------------------------------------------------------------------------
 #endif // DATABASEREGISTRATIONDIALOG_H

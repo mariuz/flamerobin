@@ -27,23 +27,21 @@ Contributor(s): Michael Hieke, Nando Dessena
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-#pragma hdrstop
+    #pragma hdrstop
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
 // need because it includes almost all "standard" wxWindows headers
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+    #include "wx/wx.h"
 #endif
+
+#include <wx/filename.h>
+#include <wx/gbsizer.h>
 
 #include "DatabaseRegistrationDialog.h"
 #include "styleguide.h"
 #include "ugly.h"
-
-#include <wx/filename.h>
-#if wxCHECK_VERSION(2, 5, 3)
-#include "wx/gbsizer.h"
-#endif
 //-----------------------------------------------------------------------------
 DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id, const wxString& title,
 	bool createDB, bool connectAs, const wxPoint& pos, const wxSize& size, long style):
@@ -198,7 +196,7 @@ void DatabaseRegistrationDialog::setDatabase(Database *db)
         combobox_charset->SetSelection(combobox_charset->FindString(wxT("NONE")));
     // see whether the database has an empty or default name; knowing that will be
     // useful to keep the name in sync when other attributes change.
-    setDefaultName();
+    updateIsDefaultName();
 
     // enable controls depending on operation and database connection status
     // use SetEditable() for edit controls to allow copying text to clipboard
@@ -216,9 +214,9 @@ void DatabaseRegistrationDialog::setDatabase(Database *db)
 	updateColors();
 }
 //-----------------------------------------------------------------------------
-void DatabaseRegistrationDialog::setDefaultName()
+void DatabaseRegistrationDialog::updateIsDefaultName()
 {
-    defaultNameM = ((text_ctrl_name->GetValue().IsEmpty() ||
+    isDefaultNameM = ((text_ctrl_name->GetValue().IsEmpty() ||
         text_ctrl_name->GetValue() == buildName(text_ctrl_dbpath->GetValue())));
 }
 //-----------------------------------------------------------------------------
@@ -296,9 +294,9 @@ void DatabaseRegistrationDialog::OnSettingsChange(wxCommandEvent& WXUNUSED(event
 {
     if (IsShown())
 	{
-        if (defaultNameM)
+        if (isDefaultNameM)
             text_ctrl_name->SetValue(buildName(text_ctrl_dbpath->GetValue()));
-        setDefaultName();
+        updateIsDefaultName();
         updateButtons();
 	}
 }
@@ -307,7 +305,7 @@ void DatabaseRegistrationDialog::OnNameChange(wxCommandEvent& WXUNUSED(event))
 {
     if (IsShown())
 	{
-        setDefaultName();
+        updateIsDefaultName();
         updateButtons();
 	}
 }

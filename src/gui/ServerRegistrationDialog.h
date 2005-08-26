@@ -27,9 +27,10 @@ Contributor(s): Michael Hieke, Nando Dessena
 #define SERVERREGISTRATIONDIALOG_H
 
 #include <wx/wx.h>
-#include "metadata/server.h"
-#include "BaseDialog.h"
 
+#include "BaseDialog.h"
+#include "metadata/server.h"
+//-----------------------------------------------------------------------------
 class ServerRegistrationDialog: public BaseDialog {
 public:
     enum {
@@ -53,12 +54,12 @@ public:
 
 private:
     Server* serverM;
-    bool defaultNameM;
+    bool isDefaultNameM;
     void do_layout();
     void set_properties();
     void updateButtons();
     const wxString buildName(const wxString& hostName, const wxString& portNumber) const;
-    void setDefaultName();
+    void updateIsDefaultName();
 protected:
     wxStaticText* label_name;
     wxTextCtrl* text_ctrl_name;
@@ -72,5 +73,5 @@ protected:
     DECLARE_EVENT_TABLE()
     virtual const std::string getName() const;
 };
-
+//-----------------------------------------------------------------------------
 #endif // SERVERREGISTRATIONDIALOG_H
