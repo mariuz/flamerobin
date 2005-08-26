@@ -37,57 +37,17 @@
 #endif
 
 #include <string>
+
+#include "frutils.h"
+#include "main.h"
 #include "metadata/metadataitem.h"
 #include "metadata/table.h"
-#include "frutils.h"
 #include "ugly.h"
-#include "main.h"
 //-----------------------------------------------------------------------------
-//! Returns the application path or an empty string in case of failure.
-//  Code courtesy of Julian Smart.
-std::string getApplicationPath()
-{
-	wxString argv0(wxGetApp().argv[0]);
-	wxString cwd(::wxGetCwd());
-    wxString str;
-	wxString appVariableName(wxT("FLAMEROBIN"));
-
-    if (!appVariableName.IsEmpty())			// Try appVariableName
-    {
-        str = wxGetenv(appVariableName);
-        if (!str.IsEmpty())
-            return wx2std(str);
-    }
-
-#if defined(__WXMAC__) && !defined(__DARWIN__)
-    return wx2std(cwd);						// On Mac, the current directory is the relevant one
-#endif
-
-    if (wxIsAbsolutePath(argv0))
-        return wx2std(wxPathOnly(argv0));
-    else
-    {
-        wxString currentDir(cwd);			// Is it a relative path?
-        if (currentDir.Last() != wxFILE_SEP_PATH)
-            currentDir += wxFILE_SEP_PATH;
-        str = currentDir + argv0;
-        if (wxFileExists(str))
-            return wx2std(wxPathOnly(str));
-    }
-
-    wxPathList pathList;					// Neither an absolute path nor a relative path. Search PATH.
-    pathList.AddEnvList(wxT("PATH"));
-    str = pathList.FindAbsoluteValidPath(argv0);
-    if (!str.IsEmpty())
-        return wx2std(wxPathOnly(str));
-
-    return "";								// Failed
-}
+using namespace std;
 //-----------------------------------------------------------------------------
-void adjustControlsMinWidth(std::list<wxWindow*> controls)
+void adjustControlsMinWidth(list<wxWindow*> controls)
 {
-	using namespace std;
-
 	int w = 0;
     wxSize sz;
     // find widest control
@@ -106,7 +66,7 @@ void adjustControlsMinWidth(std::list<wxWindow*> controls)
     }
 }
 //-----------------------------------------------------------------------------
-void readBlob(IBPP::Statement &st, int column, std::string& result)
+void readBlob(IBPP::Statement& st, int column, string& result)
 {
 	result = "";
 	if (st->IsNull(column))
@@ -136,12 +96,12 @@ void readBlob(IBPP::Statement &st, int column, std::string& result)
 	b->Close();
 }
 //-----------------------------------------------------------------------------
-std::string selectTableColumns(Table *t, wxWindow *parent)
+string selectTableColumns(Table* t, wxWindow* parent)
 {
-	std::vector<std::string> list;
+	vector<string> list;
 	selectTableColumnsIntoVector(t, parent, list);
-	std::string retval;
-	for (std::vector<std::string>::iterator it = list.begin(); it != list.end(); ++it)
+	string retval;
+	for (vector<string>::iterator it = list.begin(); it != list.end(); ++it)
 	{
 		if (it != list.begin())
 			retval += ", ";
@@ -150,20 +110,20 @@ std::string selectTableColumns(Table *t, wxWindow *parent)
 	return retval;
 }
 //-----------------------------------------------------------------------------
-bool selectTableColumnsIntoVector(Table *t, wxWindow *parent, std::vector<std::string>& list)
+bool selectTableColumnsIntoVector(Table* t, wxWindow* parent, vector<string>& list)
 {
 	t->checkAndLoadColumns();
-	std::vector<MetadataItem *> temp;
+	vector<MetadataItem*> temp;
 	t->getChildren(temp);
 	wxArrayString columns;
-	for (std::vector<MetadataItem *>::const_iterator it = temp.begin(); it != temp.end(); ++it)
+	for (vector<MetadataItem*>::const_iterator it = temp.begin(); it != temp.end(); ++it)
 		columns.Add(std2wx((*it)->getName()));
 
 	wxArrayInt selected_columns;
 	if (!::wxGetMultipleChoices(selected_columns, _("Select one or more fields... (use ctrl key)"),  _("Table fields"), columns, parent))
 		return false;
 
-	for (size_t i=0; i<selected_columns.GetCount(); ++i)
+	for (size_t i = 0; i < selected_columns.GetCount(); ++i)
 		list.push_back(wx2std(columns[selected_columns[i]]));
 
 	return true;

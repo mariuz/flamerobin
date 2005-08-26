@@ -233,7 +233,7 @@ string Config::getHomePath() const
     if (!homePathM.empty())
         return homePathM + "/";
     else
-        return getApplicationPath() + "/";
+        return wx2std(wxStandardPaths::Get().GetDataDir()) + "/";
 }
 //-----------------------------------------------------------------------------
 string Config::getHtmlTemplatesPath() const

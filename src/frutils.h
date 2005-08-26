@@ -26,25 +26,23 @@
 #ifndef FRUTILS_H
 #define FRUTILS_H
 
-#include <string>
 #include <list>
+#include <string>
+
 #include <wx/wx.h>
-#include "ibpp.h"
+
+#include <ibpp.h>
 
 class Table;
-//-----------------------------------------------------------------------------
-//! Returns the absolute application path, if possible, or an empty string in case of failure.
-std::string getApplicationPath();
 //-----------------------------------------------------------------------------
 //! sets all controls to width of widest control
 void adjustControlsMinWidth(std::list<wxWindow*> controls);
 //-----------------------------------------------------------------------------
 //! reads blob from statement into std::string
-void readBlob(IBPP::Statement &st, int column, std::string& result);
+void readBlob(IBPP::Statement& st, int column, std::string& result);
 //-----------------------------------------------------------------------------
 //! displays a list of table columns and lets user select some
-std::string selectTableColumns(Table *t, wxWindow *parent);
-bool selectTableColumnsIntoVector(Table *t, wxWindow *parent, std::vector<std::string>& list);
+std::string selectTableColumns(Table* t, wxWindow* parent);
+bool selectTableColumnsIntoVector(Table* t, wxWindow* parent, std::vector<std::string>& list);
 //-----------------------------------------------------------------------------
 #endif // FRUTILS_H
-
