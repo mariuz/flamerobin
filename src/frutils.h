@@ -44,6 +44,7 @@ void readBlob(IBPP::Statement &st, int column, std::string& result);
 //-----------------------------------------------------------------------------
 //! displays a list of table columns and lets user select some
 std::string selectTableColumns(Table *t, wxWindow *parent);
+bool selectTableColumnsIntoVector(Table *t, wxWindow *parent, std::vector<std::string>& list);
 //-----------------------------------------------------------------------------
 #endif // FRUTILS_H
 

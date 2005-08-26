@@ -1437,6 +1437,43 @@ bool DropColumnHandler::handleURI(URI& uri)
 	return true;
 }
 //-----------------------------------------------------------------------------
+//! drop multiple columns
+class DropColumnsHandler: public URIHandler
+{
+public:
+	bool handleURI(URI& uri);
+private:
+    static const DropColumnsHandler handlerInstance;
+};
+//-----------------------------------------------------------------------------
+const DropColumnsHandler DropColumnsHandler::handlerInstance;
+//-----------------------------------------------------------------------------
+bool DropColumnsHandler::handleURI(URI& uri)
+{
+	if (uri.action != "drop_fields")
+		return false;
+
+	Table *t = (Table *)getObject(uri);
+	wxWindow *w = getWindow(uri);
+	if (!t || !w)
+		return true;
+
+	// get list of columns
+	std::string sql;
+	std::vector<std::string> list;
+	if (selectTableColumnsIntoVector(t, w, list))
+	{
+		for (std::vector<std::string>::iterator it = list.begin(); it != list.end(); ++it)
+			sql += "ALTER TABLE " + t->getName() + " DROP " + (*it) + ";\n";
+		ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, _("Dropping fields"));
+		eff->setDatabase(t->getDatabase());
+		eff->Show();
+		eff->setSql(std2wx(sql));
+		eff->executeAllStatements(true);		// true = user must commit/rollback + frame is closed at once
+	}
+	return true;
+}
+//-----------------------------------------------------------------------------
 class EditProcedureHandler: public URIHandler
 {
 public:

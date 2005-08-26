@@ -138,6 +138,20 @@ void readBlob(IBPP::Statement &st, int column, std::string& result)
 //-----------------------------------------------------------------------------
 std::string selectTableColumns(Table *t, wxWindow *parent)
 {
+	std::vector<std::string> list;
+	selectTableColumnsIntoVector(t, parent, list);
+	std::string retval;
+	for (std::vector<std::string>::iterator it = list.begin(); it != list.end(); ++it)
+	{
+		if (it != list.begin())
+			retval += ", ";
+		retval += (*it);
+	}
+	return retval;
+}
+//-----------------------------------------------------------------------------
+bool selectTableColumnsIntoVector(Table *t, wxWindow *parent, std::vector<std::string>& list)
+{
 	t->checkAndLoadColumns();
 	std::vector<MetadataItem *> temp;
 	t->getChildren(temp);
@@ -147,15 +161,11 @@ std::string selectTableColumns(Table *t, wxWindow *parent)
 
 	wxArrayInt selected_columns;
 	if (!::wxGetMultipleChoices(selected_columns, _("Select one or more fields... (use ctrl key)"),  _("Table fields"), columns, parent))
-		return "";
+		return false;
 
-	std::string retval;
 	for (size_t i=0; i<selected_columns.GetCount(); ++i)
-	{
-		if (i)
-			retval += ", ";
-		retval += wx2std(columns[selected_columns[i]]);
-	}
-	return retval;
+		list.push_back(wx2std(columns[selected_columns[i]]));
+
+	return true;
 }
 //-----------------------------------------------------------------------------
