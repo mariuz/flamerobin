@@ -45,7 +45,6 @@
 #include <sstream>
 
 #include "config.h"
-#include "frutils.h"
 #include "ugly.h"
 //------------------------------------------------------------------------------
 using namespace std;
