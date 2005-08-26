@@ -479,7 +479,7 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuManual(wxCommandEvent& WXUNUSED(event))
 {
-    showDocsHtmlFile(this, wxT("fr_manual.htm"));
+    showDocsHtmlFile(this, wxT("fr_manual.html"));
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRelNotes(wxCommandEvent& WXUNUSED(event))
