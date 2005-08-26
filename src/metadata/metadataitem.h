@@ -133,7 +133,7 @@ public:
 
 	Dependency(MetadataItem *object) { objectM = object; };
 	string getFields() const { return fieldsM; };
-	void addField(const string& name) { if (!fieldsM.empty()) fieldsM += ","; fieldsM += name; };
+	void addField(const string& name) { if (!fieldsM.empty()) fieldsM += ", "; fieldsM += name; };
 	void setFields(const string& fields) { fieldsM = fields; };
 };
 //------------------------------------------------------------------------------
