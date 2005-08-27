@@ -861,8 +861,6 @@ void MainFrame::showGeneratorValue(Generator* g)
 		return;
 	if (!g->loadValue(true))
 		wxMessageBox(std2wx(lastError().getMessage()), _("Error!"), wxOK | wxICON_ERROR);
-	else
-		g->notify();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuShowGeneratorValue(wxCommandEvent& WXUNUSED(event))
