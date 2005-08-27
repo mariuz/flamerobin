@@ -96,7 +96,7 @@ private:
 
 	// small help for parser
 	std::string getTableForIndex(std::string indexName);
-    
+
     mutable unsigned int idM;
 public:
     virtual void accept(Visitor *v);
@@ -159,7 +159,8 @@ public:
     // returns a candidate name based on the connection string. Example:
     // path is "C:\data\database.fdb" -> returns "database".
     std::string extractNameFromConnectionString() const;
-    virtual const string Database::getId() const;
+    virtual const string getId() const;
+    void setId(int id);
 };
 //----------------------------------------------------------------------------
 #endif

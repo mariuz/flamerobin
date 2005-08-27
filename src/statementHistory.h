@@ -28,15 +28,16 @@
 
 #include <wx/wx.h>
 #include <deque>
+#include <string>
 //-----------------------------------------------------------------------------
 class Database;
 //-----------------------------------------------------------------------------
 class StatementHistory
 {
 private:
-    StatementHistory();
+    StatementHistory(const std::string& storageName);
     std::deque<wxString> statementsM;
-    std::deque<wxString>::size_type positionM;
+    std::string storageNameM;
     void checkSize();
 
 public:
@@ -44,16 +45,15 @@ public:
     StatementHistory(const StatementHistory& source);
     virtual ~StatementHistory();
 
+    typedef std::deque<wxString>::size_type Position;
+
     //! reads granularity from config() and gives pointer to appropriate history object
     static StatementHistory& get(Database *db);
 
-    bool isAtStart();
-    bool isAtEnd();
-    wxString previous();
-    wxString next();
-    wxString getCurrent();
-    void setCurrent(const wxString&);
-    void add(const wxString&);
+    wxString get(Position position);
+    void set(Position position, const wxString& str);
+    Position add(const wxString&);
+    Position size();
 };
 //-----------------------------------------------------------------------------
 #endif

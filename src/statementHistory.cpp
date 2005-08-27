@@ -38,27 +38,47 @@
 
 #include <string>
 #include <map>
+#include "ugly.h"
 #include "config/Config.h"
 #include "metadata/database.h"
+#include "metadata/server.h"
 #include "statementHistory.h"
 
 class Server;
 //-----------------------------------------------------------------------------
-StatementHistory::StatementHistory()
+StatementHistory::StatementHistory(const std::string& storageName)
 {
-    // TODO: load from file
-    positionM = 0;
+    storageNameM = storageName;
+    Position p = 0;
+    while (true)    // load history
+    {
+        std::string s;
+        ostringstream keyname;
+        keyname << "HISTORY_" << storageNameM << "_ITEM_" << (p++);
+        if (config().getValue(keyname.str(), s)) // history exists
+            statementsM.push_back(std2wx(s));
+        else
+            break;
+    }
 }
 //-----------------------------------------------------------------------------
 StatementHistory::StatementHistory(const StatementHistory& source)
 {
-    positionM = source.positionM;
+    storageNameM = source.storageNameM;
     statementsM.assign(source.statementsM.begin(), source.statementsM.end());
 }
 //-----------------------------------------------------------------------------
 StatementHistory::~StatementHistory()
 {
-    // TODO: save to file
+    int i=0;
+    for (std::deque<wxString>::iterator it = statementsM.begin(); it != statementsM.end(); ++it)
+    {
+        if ((*it).IsEmpty())    // don't save empty buffers
+            continue;
+        ostringstream keyname;
+        keyname << "HISTORY_" << storageNameM << "_ITEM_" << (i++);
+        config().setValue(keyname.str(), wx2std(*it));
+    }
 }
 //-----------------------------------------------------------------------------
 //! reads granularity from config() and gives pointer to appropriate history object
@@ -68,7 +88,7 @@ StatementHistory& StatementHistory::get(Database *db)
     historyGranularity hg = (historyGranularity)(config().get("statementHistoryGranularity", (int)hgPerDatabase));
     if (hg == hgCommonToAll)
     {
-        static StatementHistory st;
+        static StatementHistory st("");
         return st;
     }
 
@@ -77,7 +97,7 @@ StatementHistory& StatementHistory::get(Database *db)
         static std::map<Server *, StatementHistory> stm;
         if (stm.find(db->getServer()) == stm.end())
         {
-            StatementHistory st;
+            StatementHistory st("SERVER" + db->getServer()->getId());
             stm.insert(std::pair<Server *, StatementHistory>(db->getServer(), st));
         }
         return (*(stm.find(db->getServer()))).second;
@@ -88,7 +108,7 @@ StatementHistory& StatementHistory::get(Database *db)
         static std::map<std::string, StatementHistory> stm;
         if (stm.find(db->getName()) == stm.end())
         {
-            StatementHistory st;
+            StatementHistory st("DATABASENAME" + db->getName());
             stm.insert(std::pair<std::string, StatementHistory>(db->getName(), st));
         }
         return (*(stm.find(db->getName()))).second;
@@ -99,79 +119,50 @@ StatementHistory& StatementHistory::get(Database *db)
         static std::map<Database *, StatementHistory> stm;
         if (stm.find(db) == stm.end())
         {
-            StatementHistory st;
+            StatementHistory st("DATABASE" + db->getId());
             stm.insert(std::pair<Database *, StatementHistory>(db, st));
         }
         return (*(stm.find(db))).second;
     }
 }
 //-----------------------------------------------------------------------------
-bool StatementHistory::isAtStart()
+wxString StatementHistory::get(StatementHistory::Position pos)
 {
-    return positionM == 0;
-};
-//-----------------------------------------------------------------------------
-bool StatementHistory::isAtEnd()
-{
-    return (positionM + 1) >= statementsM.size();
-}
-//-----------------------------------------------------------------------------
-wxString StatementHistory::previous()
-{
-    if (!isAtStart())
-        positionM--;
-    return getCurrent();
-}
-//-----------------------------------------------------------------------------
-wxString StatementHistory::next()
-{
-    if (!isAtEnd())
-        positionM++;
-    return getCurrent();
-}
-//-----------------------------------------------------------------------------
-wxString StatementHistory::getCurrent()
-{
-    if (positionM >= statementsM.size())    // safety check
-        positionM = statementsM.size() - 1;
-
-    if (statementsM.empty())
+    if (pos < size())
+        return statementsM[pos];
+    else
         return wxEmptyString;
-    else
-        return statementsM[positionM];
 }
 //-----------------------------------------------------------------------------
-void StatementHistory::add(const wxString& str)
+void StatementHistory::set(StatementHistory::Position pos, const wxString& str)
 {
-    if (statementsM.empty() || str != statementsM.back())  // avoid duplicates
-    {
-        statementsM.push_back(str);
-        checkSize();
-    }
-    positionM = statementsM.size() - 1; // current = last
-}
-//-----------------------------------------------------------------------------
-void StatementHistory::setCurrent(const wxString& str)
-{
-    if (statementsM.empty())
-    {
-        statementsM.push_back(str);
-        positionM = 0;
-    }
+    if (pos < size())
+        statementsM[pos] = str;
     else
-        statementsM[positionM] = str;
+        statementsM.push_back(str);
     checkSize();
+}
+//-----------------------------------------------------------------------------
+StatementHistory::Position StatementHistory::add(const wxString& str)
+{
+    if (statementsM.empty() || statementsM.back() != str)
+        statementsM.push_back(str);
+    checkSize();
+    return statementsM.size() - 1;
+}
+//-----------------------------------------------------------------------------
+StatementHistory::Position StatementHistory::size()
+{
+    return statementsM.size();
 }
 //-----------------------------------------------------------------------------
 void StatementHistory::checkSize()
 {
-    int historySize = config().get("statementHistorySize", -1);     // -1 = unlimited
-    if (historySize == -1)
+    if (!config().get("limitHistorySize", false))
         return;
+
+    int historySize = config().get("statementHistorySize", 50);     // -1 = unlimited
     while (statementsM.size() > (std::deque<wxString>::size_type)historySize)
-    {
         statementsM.pop_front();
-        positionM--;
-    }
 }
 //-----------------------------------------------------------------------------

@@ -39,6 +39,7 @@
 
 #include "ibpp.h"
 #include "metadata/database.h"
+#include "statementHistory.h"
 #include "observer.h"
 #include "logger.h"
 #include "BaseFrame.h"
@@ -116,6 +117,10 @@ private:
 	void log(wxString s, TextType type = ttNormal);		// write messages to textbox
 	void SplitScreen();
 	Database *databaseM;
+
+    StatementHistory::Position historyPositionM;
+    wxString localBuffer;
+    void updateHistoryButtons();
 
 	bool inTransactionM;
 	IBPP::Transaction transactionM;

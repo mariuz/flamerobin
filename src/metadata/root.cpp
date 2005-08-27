@@ -91,7 +91,6 @@ bool Root::load()
 	string line = s.substr(0, t);
 	s.erase(0, t);
 
-    bool isRoot = false;
     while (true)
 	{
 		string::size_type t = s.find('\n');
@@ -116,16 +115,12 @@ bool Root::load()
 			value = line.substr(end+1, start2-end-1);
 
         // root tags
-        if (option == "root")
-            isRoot = true;
-        if (option == "nextId" && isRoot)
+        if (option == "nextId")
         {
             stringstream ss;
 	        ss << value;
 	        ss >> nextIdM;
         }
-        if (option == "/root")
-            isRoot = false;
         // server start and end tags
         if (option == "server")
 		{
@@ -166,6 +161,17 @@ bool Root::load()
             else
 			    server->setName(value);
 		}
+
+        // database specific
+        if (option == "id" && database)
+        {
+            int id;
+            stringstream ss;
+            ss << value;
+            ss >> id;
+            database->setId(id);
+        }
+
 		// server-specific subtags
         if (option == "host" && server)
 			server->setHostname(value);

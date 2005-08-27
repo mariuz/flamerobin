@@ -868,28 +868,38 @@ void ExecuteSqlFrame::OnButtonSaveClick(wxCommandEvent& WXUNUSED(event))
 	statusbar_1->SetStatusText((_("File saved")), 2);
 }
 //-----------------------------------------------------------------------------
+void ExecuteSqlFrame::updateHistoryButtons()
+{
+    StatementHistory& sh = StatementHistory::get(databaseM);
+    button_prev->Enable(historyPositionM > 0 && sh.size() > 0);
+    button_next->Enable(sh.size() > historyPositionM);
+}
+//-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonPrevClick(wxCommandEvent& WXUNUSED(event))
 {
     StatementHistory& sh = StatementHistory::get(databaseM);
-    if (!sh.isAtStart())
+    if (historyPositionM > 0 && sh.size() > 0)
     {
-        sh.setCurrent(styled_text_ctrl_sql->GetText());
-        styled_text_ctrl_sql->SetText(sh.previous());
+        if (historyPositionM == sh.size())  // we're on local buffer => store it
+            localBuffer = styled_text_ctrl_sql->GetText();
+        historyPositionM--;
+        styled_text_ctrl_sql->SetText(sh.get(historyPositionM));
     }
-    button_prev->Enable(!sh.isAtStart());
-    button_next->Enable(!sh.isAtEnd());
+    updateHistoryButtons();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonNextClick(wxCommandEvent& WXUNUSED(event))
 {
     StatementHistory& sh = StatementHistory::get(databaseM);
-    if (!sh.isAtEnd())
+    if (historyPositionM != sh.size())  // we're already at the end?
     {
-        sh.setCurrent(styled_text_ctrl_sql->GetText());
-        styled_text_ctrl_sql->SetText(sh.next());
+        historyPositionM++;
+        if (historyPositionM == sh.size())
+            styled_text_ctrl_sql->SetText(localBuffer);
+        else
+            styled_text_ctrl_sql->SetText(sh.get(historyPositionM));
     }
-    button_prev->Enable(!sh.isAtStart());
-    button_next->Enable(!sh.isAtEnd());
+    updateHistoryButtons();
 }
 //-----------------------------------------------------------------------------
 //! enable/disable and show/hide controls depending of transaction status
@@ -944,8 +954,8 @@ void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
     // add to history
     StatementHistory& sh = StatementHistory::get(databaseM);
     sh.add(styled_text_ctrl_sql->GetText());
-    button_prev->Enable(!sh.isAtStart());
-    button_next->Enable(!sh.isAtEnd());
+    historyPositionM = sh.size();
+    updateHistoryButtons();
 }
 //-----------------------------------------------------------------------------
 //! adapted so we don't have to change all the other code that utilizes SQL editor
@@ -956,8 +966,8 @@ void ExecuteSqlFrame::executeAllStatements(bool closeWhenDone)
     // add buffer to history
     StatementHistory& sh = StatementHistory::get(databaseM);
     sh.add(styled_text_ctrl_sql->GetText());
-    button_prev->Enable(!sh.isAtStart());
-    button_next->Enable(!sh.isAtEnd());
+    historyPositionM = sh.size();
+    updateHistoryButtons();
 }
 //-----------------------------------------------------------------------------
 //! Parses all sql statements in STC
@@ -1365,8 +1375,8 @@ void ExecuteSqlFrame::setDatabase(Database *db)
 	InTransaction(false);	// enable/disable controls
 	setKeywords();			// set words for autocomplete feature
 
-    button_prev->Enable(!StatementHistory::get(databaseM).isAtStart());
-    button_next->Enable(!StatementHistory::get(databaseM).isAtEnd());
+    historyPositionM = StatementHistory::get(databaseM).size();
+    updateHistoryButtons();
 
 	// set drop target for DnD
     styled_text_ctrl_sql->SetDropTarget(new DnDText(styled_text_ctrl_sql, databaseM));

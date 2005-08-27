@@ -162,6 +162,43 @@
 				<default>0</default>
 			</setting>
 		</node>
+		<node>
+			<caption>Statement History</caption>
+			<description>History of executed SQL statements</description>
+			<image>0</image>
+            <setting type="radiobox">
+                <caption>Share SQL statement history</caption>
+                <description>History can be shared accross databases, which is useful if they have similar structure</description>
+                <key>statementHistoryGranularity</key>
+                <default>3</default>
+                <option>
+                    <caption>Between all databases</caption>
+                </option>
+                <option>
+                    <caption>Between databases on same server</caption>
+                </option>
+                <option>
+                    <caption>Between databases with same display name</caption>
+                </option>
+                <option>
+                    <caption>Don't share (each database has its own)</caption>
+                </option>
+            </setting>
+			<setting type="checkbox">
+				<caption>Limit history size</caption>
+				<key>limitHistorySize</key>
+				<default>0</default>
+                <enables>
+                    <setting type="int">
+                        <caption>Keep at most [VALUE] entries in history</caption>
+                        <key>statementHistorySize</key>
+                        <minvalue>0</minvalue>
+                        <maxvalue>10000</maxvalue>
+                        <default>50</default>
+                    </setting>
+                </enables>
+			</setting>
+        </node>
 	</node>
 	<node>
 		<caption>Data Grid</caption>
