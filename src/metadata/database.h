@@ -21,32 +21,24 @@
   Contributor(s): Nando Dessena
 */
 
-//
-//
-//
-//
-//------------------------------------------------------------------------------
 #ifndef FR_DATABASE_H
 #define FR_DATABASE_H
+//------------------------------------------------------------------------------
+#include <map>
 
-#include "metadataitem.h"
-#include "domain.h"
-#include "function.h"
+#include <ibpp.h>
+
 #include "collection.h"
 #include "domain.h"
 #include "exception.h"
+#include "function.h"
 #include "generator.h"
+#include "metadataitem.h"
 #include "procedure.h"
 #include "role.h"
 #include "table.h"
 #include "trigger.h"
 #include "view.h"
-#include <map>
-#include <ibpp.h>
-
-// for threading stuff
-#include <wx/wx.h>
-#include <wx/thread.h>
 
 // ND: for some reason including server.h doesn't work, probably a cyclic
 // dependency issue.
@@ -55,33 +47,33 @@ class Server;
 class Credentials
 {
 private:
-	std::string charsetM;
-	std::string roleM;
-	std::string usernameM;
-	std::string passwordM;
+    std::string charsetM;
+    std::string roleM;
+    std::string usernameM;
+    std::string passwordM;
 
 public:
-	std::string getCharset() const;
-	std::string getUsername() const;
-	std::string getPassword() const;
-	std::string getRole() const;
-	void setCharset(std::string value);
-	void setUsername(std::string value);
-	void setPassword(std::string value);
-	void setRole(std::string value);
+    std::string getCharset() const;
+    std::string getUsername() const;
+    std::string getPassword() const;
+    std::string getRole() const;
+    void setCharset(std::string value);
+    void setUsername(std::string value);
+    void setPassword(std::string value);
+    void setRole(std::string value);
 };
 //------------------------------------------------------------------------------
 class Database: public MetadataItem
 {
 private:
-	IBPP::Database databaseM;
-	bool connectedM;
+    IBPP::Database databaseM;
+    bool connectedM;
 
-	std::string pathM;
-	Credentials credentials;
-	Credentials *connectionCredentials;
+    std::string pathM;
+    Credentials credentials;
+    Credentials *connectionCredentials;
 
-	MetadataCollection<Domain> domainsM;
+    MetadataCollection<Domain> domainsM;
     MetadataCollection<Exception> exceptionsM;
     MetadataCollection<Function> functionsM;
     MetadataCollection<Generator> generatorsM;
@@ -91,70 +83,70 @@ private:
     MetadataCollection<Trigger> triggersM;
     MetadataCollection<View> viewsM;
 
-	std::multimap<std::string, std::string> collationsM;
-	void loadCollations();
+    std::multimap<std::string, std::string> collationsM;
+    void loadCollations();
 
-	// small help for parser
-	std::string getTableForIndex(std::string indexName);
+    // small help for parser
+    std::string getTableForIndex(std::string indexName);
 
     mutable unsigned int idM;
 public:
     virtual void accept(Visitor *v);
 
-	Database();
-	void initChildren();
-	virtual bool getChildren(std::vector<MetadataItem *>& temp);
-	void getCollections(std::vector<MetadataItem *>& temp);
+    Database();
+    void initChildren();
+    virtual bool getChildren(std::vector<MetadataItem *>& temp);
+    void getCollections(std::vector<MetadataItem *>& temp);
 
-	MetadataCollection<Generator>::const_iterator generatorsBegin();
-	MetadataCollection<Generator>::const_iterator generatorsEnd();
-	MetadataCollection<Domain>::const_iterator domainsBegin();
-	MetadataCollection<Domain>::const_iterator domainsEnd();
-	MetadataCollection<Table>::const_iterator tablesBegin();
-	MetadataCollection<Table>::const_iterator tablesEnd();
+    MetadataCollection<Generator>::const_iterator generatorsBegin();
+    MetadataCollection<Generator>::const_iterator generatorsEnd();
+    MetadataCollection<Domain>::const_iterator domainsBegin();
+    MetadataCollection<Domain>::const_iterator domainsEnd();
+    MetadataCollection<Table>::const_iterator tablesBegin();
+    MetadataCollection<Table>::const_iterator tablesEnd();
 
-	void clear();				// sets all values to empty string
-	bool isConnected() const;
-	bool connect(std::string password);
-	bool disconnect();
-	bool reconnect() const;
-	void prepareTemporaryCredentials();
-	void resetCredentials();
+    void clear();               // sets all values to empty string
+    bool isConnected() const;
+    bool connect(std::string password);
+    bool disconnect();
+    bool reconnect() const;
+    void prepareTemporaryCredentials();
+    void resetCredentials();
 
-	std::string loadDomainNameForColumn(std::string table, std::string field);
-	Domain *loadMissingDomain(std::string name);
-	bool loadObjects(NodeType type);
-	//std::string getLoadingSql(NodeType type);
+    std::string loadDomainNameForColumn(std::string table, std::string field);
+    Domain *loadMissingDomain(std::string name);
+    bool loadObjects(NodeType type);
+    //std::string getLoadingSql(NodeType type);
 
-	MetadataItem *findByNameAndType(NodeType nt, std::string name);
-	MetadataItem *findByName(std::string name);
-	void refreshByType(NodeType type);
-	void dropObject(MetadataItem *object);
-	bool addObject(NodeType type, std::string name);
-	bool parseCommitedSql(std::string sql);		// reads a DDL statement and does accordingly
+    MetadataItem *findByNameAndType(NodeType nt, std::string name);
+    MetadataItem *findByName(std::string name);
+    void refreshByType(NodeType type);
+    void dropObject(MetadataItem *object);
+    bool addObject(NodeType type, std::string name);
+    bool parseCommitedSql(std::string sql);     // reads a DDL statement and does accordingly
 
-	std::vector<std::string> getCollations(std::string charset);
+    std::vector<std::string> getCollations(std::string charset);
 
-	//! fill vector with names of all tables, views, etc.
-	void getIdentifiers(std::vector<std::string>& temp);
+    //! fill vector with names of all tables, views, etc.
+    void getIdentifiers(std::vector<std::string>& temp);
 
-	//! fill vector with result of sql statement
-	bool fillVector(std::vector<std::string>& list, std::string sql);
+    //! fill vector with result of sql statement
+    bool fillVector(std::vector<std::string>& list, std::string sql);
 
-	std::string getPath() const;
-	std::string getCharset() const;
-	std::string getUsername() const;
-	std::string getPassword() const;
-	std::string getRole() const;
-	IBPP::Database& getIBPPDatabase();
-	void setPath(std::string value);
-	void setCharset(std::string value);
-	void setUsername(std::string value);
-	void setPassword(std::string value);
-	void setRole(std::string value);
-	virtual const std::string getTypeName() const;
+    std::string getPath() const;
+    std::string getCharset() const;
+    std::string getUsername() const;
+    std::string getPassword() const;
+    std::string getRole() const;
+    IBPP::Database& getIBPPDatabase();
+    void setPath(std::string value);
+    void setCharset(std::string value);
+    void setUsername(std::string value);
+    void setPassword(std::string value);
+    void setRole(std::string value);
+    virtual const std::string getTypeName() const;
     Server *getServer() const;
-	// returns the complete connection string.
+    // returns the complete connection string.
     std::string getConnectionString() const;
     // returns a candidate name based on the connection string. Example:
     // path is "C:\data\database.fdb" -> returns "database".
