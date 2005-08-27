@@ -18,7 +18,9 @@
 
   All Rights Reserved.
 
-  Contributor(s):
+  $Id$
+
+  Contributor(s): Michael Hieke
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -28,91 +30,102 @@
     #pragma hdrstop
 #endif
 
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #include <sstream>
+
 #include "ibpp.h"
+
 #include "dberror.h"
 #include "database.h"
+#include "generator.h"
 #include "metadataitem.h"
 #include "visitor.h"
-#include "generator.h"
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 Generator::Generator():
-	MetadataItem()
+    MetadataItem()
 {
-	typeM = ntGenerator;
-	valueLoadedM = false;
+    typeM = ntGenerator;
+    valueLoadedM = false;
 }
-//------------------------------------------------------------------------------
-int Generator::getValue()
+//-----------------------------------------------------------------------------
+int64_t Generator::getValue()
 {
-	loadValue();
-	return valueM;
+    loadValue();
+    return valueM;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void Generator::setValue(int64_t value)
+{
+    if (!valueLoadedM || valueM != value)
+    {
+        valueM = value;
+        valueLoadedM = true;
+        notify();
+    }
+}
+//-----------------------------------------------------------------------------
 bool Generator::loadValue(bool force)
 {
-	if (!force && valueLoadedM)
-		return true;
+    if (!force && valueLoadedM)
+        return true;
 
-	Database *d = getDatabase();
-	if (!d)
-	{
-		lastError().setMessage("Database not set.");
-		return false;
-	}
+    Database *d = getDatabase();
+    if (!d)
+    {
+        lastError().setMessage("Database not set.");
+        return false;
+    }
 
-	IBPP::Database& db = d->getIBPPDatabase();
+    IBPP::Database& db = d->getIBPPDatabase();
 
-	try
-	{
-		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-		tr1->Start();
-		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-		st1->Prepare("select gen_id(" + getName() + ", 0) from rdb$database");
-		st1->Execute();
-		st1->Fetch();
-		st1->Get(1, &valueM);
-		tr1->Commit();
-		valueLoadedM = true;
-		return true;
-	}
-	catch (IBPP::Exception &e)
-	{
-		lastError().setMessage(e.ErrorMessage());
-	}
-	catch (...)
-	{
-		lastError().setMessage("System error.");
-	}
-	return false;
+    try
+    {
+        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+        tr1->Start();
+        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+        st1->Prepare("select gen_id(" + getName() + ", 0) from rdb$database");
+        st1->Execute();
+        st1->Fetch();
+        int64_t value;
+        st1->Get(1, &value);
+        tr1->Commit();
+        setValue(value);
+        return true;
+    }
+    catch (IBPP::Exception &e)
+    {
+        lastError().setMessage(e.ErrorMessage());
+    }
+    catch (...)
+    {
+        lastError().setMessage("System error.");
+    }
+    return false;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string Generator::getPrintableName()
 {
-	if (!valueLoadedM)
-		return getName();
+    if (!valueLoadedM)
+        return getName();
 
-	std::ostringstream s;
-	s << getName();
-	s << " = ";
-	s << valueM;
-	return s.str();
+    std::ostringstream s;
+    s << getName() << " = " << valueM;
+    return s.str();
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string Generator::getCreateSqlTemplate() const
 {
-	return "CREATE GENERATOR name;\nSET GENERATOR name TO value;\n";
+    return  "CREATE GENERATOR name;\n"
+            "SET GENERATOR name TO value;\n";
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 const std::string Generator::getTypeName() const
 {
-	return "GENERATOR";
+    return "GENERATOR";
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void Generator::accept(Visitor *v)
 {
-	v->visit(*this);
+    v->visit(*this);
 }
-//------------------------------------------------------------------------------
-
+//-----------------------------------------------------------------------------

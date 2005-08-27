@@ -18,36 +18,45 @@
 
   All Rights Reserved.
 
-  Contributor(s):
+  $Id$
+
+  Contributor(s): Michael Hieke
 */
 
-//
-//
-//
-//
-//------------------------------------------------------------------------------
 #ifndef FR_GENERATOR_H
 #define FR_GENERATOR_H
+//-----------------------------------------------------------------------------
+// TODO: we should have a header (usually setup.h) to hide such differences
+#ifndef _MSC_VER
+    #include <stdint.h>
+#endif
 
 #include "metadataitem.h"
+//-----------------------------------------------------------------------------
+// TODO: we should have a header (usually setup.h) to define such missing types
+#ifdef _MSC_VER
+    typedef __int64 int64_t;
+#endif
 
 class Generator: public MetadataItem
 {
 private:
-	int valueM;
-	bool valueLoadedM;
-
+    int64_t valueM;
+    bool valueLoadedM;
+    void setValue(int64_t value);
 public:
+    Generator();
+
     virtual void accept(Visitor *v);
 
-	std::string getCreateSqlTemplate() const;	// overrides MetadataItem::getCreateSqlTemplate()
+    // overrides MetadataItem::getCreateSqlTemplate()
+    std::string getCreateSqlTemplate() const;
 
-	bool loadValue(bool force = false);
-	int getValue();
+    bool loadValue(bool force = false);
+    int64_t getValue();
 
-	virtual std::string getPrintableName();
-	Generator();
-	virtual const std::string getTypeName() const;
+    virtual std::string getPrintableName();
+    virtual const std::string getTypeName() const;
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #endif
