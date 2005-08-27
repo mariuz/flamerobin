@@ -281,6 +281,7 @@
         $(SOURCEDIR)/observer.h
         $(SOURCEDIR)/visitor.h
         $(SOURCEDIR)/contextmenuvisitor.h
+        $(SOURCEDIR)/statementHistory.h
         $(SOURCEDIR)/styleguide.h
         $(SOURCEDIR)/subject.h
         $(SOURCEDIR)/treeitem.h
@@ -357,6 +358,7 @@
         $(SOURCEDIR)/observer.cpp
         $(SOURCEDIR)/contextmenuvisitor.cpp
         $(SOURCEDIR)/simpleparser.cpp
+        $(SOURCEDIR)/statementHistory.cpp
         $(SOURCEDIR)/styleguide.cpp
         $(PLATFORMSPECIFICSOURCES)
         $(SOURCEDIR)/subject.cpp
