@@ -1640,7 +1640,7 @@ bool EditGeneratorValueHandler::handleURI(URI& uri)
 		return true;
 
 	g->loadValue(true);	// force reload of value from database
-	int oldvalue = g->getValue();
+	int64_t oldvalue = g->getValue();
 	Database *db = g->getDatabase();
 	if (!db)
 	{
@@ -1649,7 +1649,9 @@ bool EditGeneratorValueHandler::handleURI(URI& uri)
 	}
 
 	wxString value = wxGetTextFromUser(_("Changing generator value"), _("Enter new value"),
-		wxString::Format(wxT("%d"), oldvalue), w);
+// MH: I have no idea if this works on all systems... but it should be better
+        wxLongLong(oldvalue).ToString(), w);
+//        wxString::Format(wxT("%d"), oldvalue), w);
 	if (value != wxT(""))
 	{
 		std::string sql = "SET GENERATOR " + g->getName() + " TO " + wx2std(value) + ";";
