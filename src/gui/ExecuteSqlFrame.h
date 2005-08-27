@@ -87,6 +87,8 @@ public:
         ID_button_new = 101,
         ID_button_load = 102,
         ID_button_save = 103,
+        ID_button_prev = 109,
+        ID_button_next = 110,
         ID_button_execute = 104,
         ID_button_commit = 105,
         ID_button_rollback = 106,
@@ -134,6 +136,8 @@ private:
     void OnButtonNewClick(wxCommandEvent &event);
     void OnButtonLoadClick(wxCommandEvent &event);
     void OnButtonSaveClick(wxCommandEvent &event);
+    void OnButtonPrevClick(wxCommandEvent &event);
+    void OnButtonNextClick(wxCommandEvent &event);
     void OnButtonExecuteClick(wxCommandEvent &event);
     void OnButtonCommitClick(wxCommandEvent &event);
     void OnButtonRollbackClick(wxCommandEvent &event);
@@ -157,6 +161,8 @@ protected:
     wxBitmapButton* button_new;
     wxBitmapButton* button_load;
     wxBitmapButton* button_save;
+    wxBitmapButton* button_prev;
+    wxBitmapButton* button_next;
     wxButton* button_execute;
     wxButton* button_commit;
     wxButton* button_rollback;

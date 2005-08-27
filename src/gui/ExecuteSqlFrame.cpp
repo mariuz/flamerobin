@@ -55,6 +55,7 @@
 #include "frDataGridTable.h"
 #include "frutils.h"
 #include "logger.h"
+#include "statementHistory.h"
 #include "metadata/procedure.h"
 #include "metadata/server.h"
 #include "metadata/view.h"
@@ -178,6 +179,8 @@ namespace sql_icons {
 #include "load.xpm"
 #include "save.xpm"
 #include "sqlicon.xpm"
+#include "left.xpm"
+#include "right.xpm"
 };
 //-----------------------------------------------------------------------------
 // Setup the Scintilla editor
@@ -294,16 +297,16 @@ END_EVENT_TABLE()
 void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
 {
     wxMenu m(0);
-    m.Append(ID_MENU_UNDO, _("Undo"));
-    m.Append(ID_MENU_REDO, _("Redo"));
+    m.Append(ID_MENU_UNDO, _("&Undo"));
+    m.Append(ID_MENU_REDO, _("&Redo"));
     m.AppendSeparator();
-    m.Append(ID_MENU_CUT,    _("Cut"));
-    m.Append(ID_MENU_COPY,   _("Copy"));
-    m.Append(ID_MENU_PASTE,  _("Paste"));
-    m.Append(ID_MENU_DELETE, _("Delete"));
+    m.Append(ID_MENU_CUT,    _("Cu&t"));
+    m.Append(ID_MENU_COPY,   _("&Copy"));
+    m.Append(ID_MENU_PASTE,  _("&Paste"));
+    m.Append(ID_MENU_DELETE, _("&Delete"));
     m.AppendSeparator();
-    m.Append(ID_MENU_SELECT_ALL,       _("Select All"));
-    m.Append(ID_MENU_EXECUTE_SELECTED, _("Execute selected"));
+    m.Append(ID_MENU_SELECT_ALL,       _("Select &All"));
+    m.Append(ID_MENU_EXECUTE_SELECTED, _("E&xecute selected"));
 
 	if (GetSelectionStart() != GetSelectionEnd())		// semething is selected
 	{
@@ -311,13 +314,13 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
 		int p = sel.Find(wxT(" "));
 		if (p != -1)
 			sel.Remove(p);
-		m.Append(ID_MENU_FIND_SELECTED, _("Show properties for ") + sel);
+		m.Append(ID_MENU_FIND_SELECTED, _("S&how properties for ") + sel);
 	}
 
     m.AppendSeparator();
-    m.Append(ID_MENU_FIND,          _("Find and replace"));
-    m.Append(ID_MENU_SET_FONT,      _("Set Font"));
-    m.AppendCheckItem(ID_MENU_WRAP, _("Wrap"));
+    m.Append(ID_MENU_FIND,          _("&Find and replace"));
+    m.Append(ID_MENU_SET_FONT,      _("Set F&ont"));
+    m.AppendCheckItem(ID_MENU_WRAP, _("&Wrap"));
 	if (wxSTC_WRAP_WORD == GetWrapMode())
 		m.Check(ID_MENU_WRAP, true);
 
@@ -471,6 +474,8 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title, const
     button_new = new wxBitmapButton(panel_contents, ID_button_new, wxBitmap(sql_icons::new_xpm));
     button_load = new wxBitmapButton(panel_contents, ID_button_load, wxBitmap(sql_icons::load_xpm));
     button_save = new wxBitmapButton(panel_contents, ID_button_save, wxBitmap(sql_icons::save_xpm));
+    button_prev = new wxBitmapButton(panel_contents, ID_button_prev, wxBitmap(sql_icons::left_xpm));
+    button_next = new wxBitmapButton(panel_contents, ID_button_next, wxBitmap(sql_icons::right_xpm));
     button_execute = new wxButton(panel_contents, ID_button_execute, _("Execute (F4)"));
     button_commit = new wxButton(panel_contents, ID_button_commit, _("Commit (F5)"));
     button_rollback = new wxButton(panel_contents, ID_button_rollback, _("Rollback (F8)"));
@@ -516,6 +521,8 @@ void ExecuteSqlFrame::set_properties()
 	button_new->SetToolTip(_("New window"));
 	button_load->SetToolTip(_("Load"));
 	button_save->SetToolTip(_("Save"));
+	button_prev->SetToolTip(_("Previous"));
+	button_next->SetToolTip(_("Next"));
 	button_execute->SetToolTip(_("F4 - Execute SQL statement"));
 	button_commit->SetToolTip(_("F5 - Commit transaction"));
 	button_rollback->SetToolTip(_("F8 - Rollback transaction"));
@@ -545,6 +552,8 @@ void ExecuteSqlFrame::do_layout()
     sizer_3->Add(button_new, 0, wxALL, 1);
     sizer_3->Add(button_load, 0, wxALL, 1);
     sizer_3->Add(button_save, 0, wxALL, 1);
+    sizer_3->Add(button_prev, 0, wxALL, 1);
+    sizer_3->Add(button_next, 0, wxALL, 1);
     sizer_3->Add(10, 5, 0, 0, 0);
     sizer_3->Add(button_execute, 0, wxALL, 3);
     sizer_3->Add(button_commit, 0, wxALL, 3);
@@ -615,6 +624,8 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
 	EVT_BUTTON(ExecuteSqlFrame::ID_button_new, ExecuteSqlFrame::OnButtonNewClick)
 	EVT_BUTTON(ExecuteSqlFrame::ID_button_load, ExecuteSqlFrame::OnButtonLoadClick)
 	EVT_BUTTON(ExecuteSqlFrame::ID_button_save, ExecuteSqlFrame::OnButtonSaveClick)
+	EVT_BUTTON(ExecuteSqlFrame::ID_button_prev, ExecuteSqlFrame::OnButtonPrevClick)
+	EVT_BUTTON(ExecuteSqlFrame::ID_button_next, ExecuteSqlFrame::OnButtonNextClick)
 	EVT_BUTTON(ExecuteSqlFrame::ID_button_execute, ExecuteSqlFrame::OnButtonExecuteClick)
 	EVT_BUTTON(ExecuteSqlFrame::ID_button_commit, ExecuteSqlFrame::OnButtonCommitClick)
 	EVT_BUTTON(ExecuteSqlFrame::ID_button_rollback, ExecuteSqlFrame::OnButtonRollbackClick)
@@ -857,6 +868,30 @@ void ExecuteSqlFrame::OnButtonSaveClick(wxCommandEvent& WXUNUSED(event))
 	statusbar_1->SetStatusText((_("File saved")), 2);
 }
 //-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnButtonPrevClick(wxCommandEvent& WXUNUSED(event))
+{
+    StatementHistory& sh = StatementHistory::get(databaseM);
+    if (!sh.isAtStart())
+    {
+        sh.setCurrent(styled_text_ctrl_sql->GetText());
+        styled_text_ctrl_sql->SetText(sh.previous());
+    }
+    button_prev->Enable(!sh.isAtStart());
+    button_next->Enable(!sh.isAtEnd());
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnButtonNextClick(wxCommandEvent& WXUNUSED(event))
+{
+    StatementHistory& sh = StatementHistory::get(databaseM);
+    if (!sh.isAtEnd())
+    {
+        sh.setCurrent(styled_text_ctrl_sql->GetText());
+        styled_text_ctrl_sql->SetText(sh.next());
+    }
+    button_prev->Enable(!sh.isAtStart());
+    button_next->Enable(!sh.isAtEnd());
+}
+//-----------------------------------------------------------------------------
 //! enable/disable and show/hide controls depending of transaction status
 void ExecuteSqlFrame::InTransaction(bool started)
 {
@@ -905,12 +940,24 @@ void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
 	}
 	else
 		parseStatements(styled_text_ctrl_sql->GetText(), false, prepareOnly);
+
+    // add to history
+    StatementHistory& sh = StatementHistory::get(databaseM);
+    sh.add(styled_text_ctrl_sql->GetText());
+    button_prev->Enable(!sh.isAtStart());
+    button_next->Enable(!sh.isAtEnd());
 }
 //-----------------------------------------------------------------------------
 //! adapted so we don't have to change all the other code that utilizes SQL editor
 void ExecuteSqlFrame::executeAllStatements(bool closeWhenDone)
 {
 	parseStatements(styled_text_ctrl_sql->GetText(), closeWhenDone);
+
+    // add buffer to history
+    StatementHistory& sh = StatementHistory::get(databaseM);
+    sh.add(styled_text_ctrl_sql->GetText());
+    button_prev->Enable(!sh.isAtStart());
+    button_next->Enable(!sh.isAtEnd());
 }
 //-----------------------------------------------------------------------------
 //! Parses all sql statements in STC
@@ -1317,6 +1364,9 @@ void ExecuteSqlFrame::setDatabase(Database *db)
 	executedStatementsM.clear();
 	InTransaction(false);	// enable/disable controls
 	setKeywords();			// set words for autocomplete feature
+
+    button_prev->Enable(!StatementHistory::get(databaseM).isAtStart());
+    button_next->Enable(!StatementHistory::get(databaseM).isAtEnd());
 
 	// set drop target for DnD
     styled_text_ctrl_sql->SetDropTarget(new DnDText(styled_text_ctrl_sql, databaseM));
