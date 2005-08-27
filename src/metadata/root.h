@@ -18,45 +18,43 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): Nando Dessena
 */
 
-//
-//
-//
-//
-//------------------------------------------------------------------------------
 #ifndef FR_ROOT_H
 #define FR_ROOT_H
-
-#include "server.h"
+//------------------------------------------------------------------------------
 #include "metadataitem.h"
+#include "server.h"
 //------------------------------------------------------------------------------
 class Root: public MetadataItem
 {
 public:
-    virtual void accept(Visitor *v);
+    virtual void accept(Visitor* v);
 
-	Server *addServer(Server& server);
-	void removeServer(Server* server);
+    Server *addServer(Server& server);
+    void removeServer(Server* server);
 
-	virtual bool getChildren(std::vector<MetadataItem *>& temp);
+    virtual bool getChildren(std::vector<MetadataItem*>& temp);
     virtual bool orderedChildren() const;
-	Root();
-	~Root();
+    Root();
+    ~Root();
 
-	bool load();
-	bool save();
-	virtual const std::string getItemPath() const;
+    bool load();
+    bool save();
+    virtual const std::string getItemPath() const;
 
-	void notifyAllServers();	// updates all servers (observer pattern)
+    // updates all servers (observer pattern)
+    void notifyAllServers();
 
     // increments the Id generator and returns the value.
     const unsigned int getNextId();
 private:
-	MetadataCollection<Server> serversM;
-	std::string fileNameM;
-	std::string getFileName();
+    MetadataCollection<Server> serversM;
+    std::string fileNameM;
+    std::string getFileName();
     bool dirtyM;
     unsigned int nextIdM;
 };
