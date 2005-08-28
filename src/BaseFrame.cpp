@@ -45,7 +45,7 @@
 #include "framemanager.h"
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(BaseFrame, wxFrame)
-	EVT_CLOSE(BaseFrame::OnClose)
+    EVT_CLOSE(BaseFrame::OnClose)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 BaseFrame::BaseFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style, const wxString& name):
@@ -55,9 +55,9 @@ BaseFrame::BaseFrame(wxWindow* parent, int id, const wxString& title, const wxPo
 //-----------------------------------------------------------------------------
 bool BaseFrame::Show(bool show)
 {
-	if (show && !IsShown())
-	 	readConfigSettings();
-	return wxFrame::Show(show);
+    if (show && !IsShown())
+         readConfigSettings();
+    return wxFrame::Show(show);
 }
 //-----------------------------------------------------------------------------
 BaseFrame::~BaseFrame()
@@ -67,30 +67,30 @@ BaseFrame::~BaseFrame()
 bool BaseFrame::Destroy()
 {
     frameManager().removeFrame(this);
-	writeConfigSettings();
-	return wxFrame::Destroy();
+    writeConfigSettings();
+    return wxFrame::Destroy();
 }
 //-----------------------------------------------------------------------------
 void BaseFrame::readConfigSettings()
 {
-	// load position and size from config; it values are not set, they will be untouched
-  	wxRect r = getDefaultRect();
-	bool enabled = false;
+    // load position and size from config; it values are not set, they will be untouched
+      wxRect r = getDefaultRect();
+    bool enabled = false;
     bool maximized = false;
- 	if (config().getValue("FrameStorage", enabled) && enabled)
-	{
-		std::string itemPrefix = getStorageName();
-		if (!itemPrefix.empty())
-		{
+     if (config().getValue("FrameStorage", enabled) && enabled)
+    {
+        std::string itemPrefix = getStorageName();
+        if (!itemPrefix.empty())
+        {
             config().getValue(itemPrefix + Config::pathSeparator + "maximized", maximized);
-			config().getValue(itemPrefix + Config::pathSeparator + "x", r.x);
-			config().getValue(itemPrefix + Config::pathSeparator + "y", r.y);
-			config().getValue(itemPrefix + Config::pathSeparator + "width", r.width);
-			config().getValue(itemPrefix + Config::pathSeparator + "height", r.height);
-			doReadConfigSettings(itemPrefix);
-		}
-	}
-	SetSize(r);
+            config().getValue(itemPrefix + Config::pathSeparator + "x", r.x);
+            config().getValue(itemPrefix + Config::pathSeparator + "y", r.y);
+            config().getValue(itemPrefix + Config::pathSeparator + "width", r.width);
+            config().getValue(itemPrefix + Config::pathSeparator + "height", r.height);
+            doReadConfigSettings(itemPrefix);
+        }
+    }
+    SetSize(r);
     if (maximized)
         Maximize();
 }
@@ -100,26 +100,26 @@ void BaseFrame::doReadConfigSettings(const std::string& WXUNUSED(prefix))
 //-----------------------------------------------------------------------------
 void BaseFrame::writeConfigSettings() const
 {
-	// propagate call to children frames.
-	const wxWindowList& children = GetChildren();
-	wxWindowListNode *node = children.GetFirst();
-	while (node)
-	{
-		BaseFrame *f = dynamic_cast<BaseFrame *>(node->GetData());
-		if (f)
-	  	{
-   			f->writeConfigSettings();
-		}
-	    node = node->GetNext();
-	}
+    // propagate call to children frames.
+    const wxWindowList& children = GetChildren();
+    wxWindowListNode *node = children.GetFirst();
+    while (node)
+    {
+        BaseFrame *f = dynamic_cast<BaseFrame *>(node->GetData());
+        if (f)
+          {
+               f->writeConfigSettings();
+        }
+        node = node->GetNext();
+    }
 
-	if (config().get("FrameStorage", false) && !IsIconized())	// don't save for minimized windows
-	{
-		// save window position and size to config.
-		std::string itemPrefix = getStorageName();
-		if (!itemPrefix.empty())
-		{
-			wxRect r = GetRect();
+    if (config().get("FrameStorage", false) && !IsIconized())    // don't save for minimized windows
+    {
+        // save window position and size to config.
+        std::string itemPrefix = getStorageName();
+        if (!itemPrefix.empty())
+        {
+            wxRect r = GetRect();
             // TODO: move this to a better place when source is refactored
 #ifdef __WIN32__
             WINDOWPLACEMENT wp;
@@ -133,13 +133,13 @@ void BaseFrame::writeConfigSettings() const
             }
             config().setValue(itemPrefix + Config::pathSeparator + "maximized", IsMaximized());
 #endif
-			config().setValue(itemPrefix + Config::pathSeparator + "x", r.x);
-			config().setValue(itemPrefix + Config::pathSeparator + "y", r.y);
-			config().setValue(itemPrefix + Config::pathSeparator + "width", r.width);
-			config().setValue(itemPrefix + Config::pathSeparator + "height", r.height);
-			doWriteConfigSettings(itemPrefix);
-		}
-	}
+            config().setValue(itemPrefix + Config::pathSeparator + "x", r.x);
+            config().setValue(itemPrefix + Config::pathSeparator + "y", r.y);
+            config().setValue(itemPrefix + Config::pathSeparator + "width", r.width);
+            config().setValue(itemPrefix + Config::pathSeparator + "height", r.height);
+            doWriteConfigSettings(itemPrefix);
+        }
+    }
 }
 //-----------------------------------------------------------------------------
 void BaseFrame::doWriteConfigSettings(const std::string& WXUNUSED(prefix)) const
@@ -148,24 +148,24 @@ void BaseFrame::doWriteConfigSettings(const std::string& WXUNUSED(prefix)) const
 //-----------------------------------------------------------------------------
 const std::string BaseFrame::getName() const
 {
-	// Couldn't find a reliable (meaning supportable and cross-platform) way
-	// to use the class name here, so every derived frame needs to override getName()
+    // Couldn't find a reliable (meaning supportable and cross-platform) way
+    // to use the class name here, so every derived frame needs to override getName()
     // if it needs to use features that depend on it.
-	return "";
+    return "";
 }
 //-----------------------------------------------------------------------------
 const std::string BaseFrame::getStorageName() const
 {
-	return getName();
+    return getName();
 }
 //-----------------------------------------------------------------------------
 const wxRect BaseFrame::getDefaultRect() const
 {
-	return wxRect(-1, -1, -1, -1);
+    return wxRect(-1, -1, -1, -1);
 }
 //-----------------------------------------------------------------------------
 void BaseFrame::OnClose(wxCloseEvent& WXUNUSED(event))
 {
-	Destroy();
+    Destroy();
 }
 //-----------------------------------------------------------------------------

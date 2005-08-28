@@ -39,24 +39,24 @@
 //-----------------------------------------------------------------------------
 std::string Error::getMessage() const
 {
-	return messageM;
+    return messageM;
 }
 //-----------------------------------------------------------------------------
 void Error::setMessage(std::string message)
 {
-	messageM = message;
+    messageM = message;
 }
 //-----------------------------------------------------------------------------
 #if (wxUSE_UNICODE)
-void Error::setMessage(wxString message)	// makes things easier for unicode builds
+void Error::setMessage(wxString message)    // makes things easier for unicode builds
 {
-	setMessage(wx2std(message));
+    setMessage(wx2std(message));
 }
 #endif
 //-----------------------------------------------------------------------------
 Error& lastError()
 {
-	static Error e;
-	return e;
+    static Error e;
+    return e;
 }
 //-----------------------------------------------------------------------------

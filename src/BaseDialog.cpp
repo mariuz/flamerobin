@@ -94,24 +94,24 @@ BaseDialog::~BaseDialog()
 //! updates colors of controls
 void BaseDialog::updateColors(wxWindow *parent)
 {
-	if (parent == 0)
-		parent = this;
-	const wxColour silver = wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE);
-	const wxColour white  = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
-	wxWindowList& l = parent->GetChildren();
-	for (wxWindowListNode *n = l.GetFirst(); n; n = n->GetNext())
-	{
-		wxObject *o = n->GetData();
-		if (dynamic_cast<wxPanel *>(o))
-		{
-			updateColors(dynamic_cast<wxWindow *>(o));
-			continue;
-		}
+    if (parent == 0)
+        parent = this;
+    const wxColour silver = wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE);
+    const wxColour white  = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
+    wxWindowList& l = parent->GetChildren();
+    for (wxWindowListNode *n = l.GetFirst(); n; n = n->GetNext())
+    {
+        wxObject *o = n->GetData();
+        if (dynamic_cast<wxPanel *>(o))
+        {
+            updateColors(dynamic_cast<wxWindow *>(o));
+            continue;
+        }
 
-		wxTextCtrl *tc = dynamic_cast<wxTextCtrl *>(o);
-		if (tc)
-			tc->SetBackgroundColour(tc->IsEditable() ? white : silver);
-	}
+        wxTextCtrl *tc = dynamic_cast<wxTextCtrl *>(o);
+        if (tc)
+            tc->SetBackgroundColour(tc->IsEditable() ? white : silver);
+    }
 
 }
 //-----------------------------------------------------------------------------
