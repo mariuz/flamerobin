@@ -44,7 +44,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "config.h"
+#include "Config.h"
 #include "ugly.h"
 //------------------------------------------------------------------------------
 using namespace std;
@@ -71,7 +71,7 @@ wxFileConfig* Config::getConfig() const
 {
     if (!configM)
     {
-        configM = new wxFileConfig(wxT(""), wxT(""), 
+        configM = new wxFileConfig(wxT(""), wxT(""),
             std2wx(getConfigFileName()));
     }
     return configM;
