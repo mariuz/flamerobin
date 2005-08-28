@@ -61,6 +61,30 @@
 #include "ugly.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
+bool checkValidDatabase(Database* database)
+{
+    if (database)
+        return true;
+    wxMessageBox(_("Operation can not be performed - no database assigned"), 
+        _("Internal Error"), wxOK|wxICON_ERROR);
+    return false;
+}
+//-----------------------------------------------------------------------------
+bool checkValidServer(Server* server)
+{
+    if (server)
+        return true;
+    wxMessageBox(_("Operation can not be performed - no server assigned"), 
+        _("Internal Error"), wxOK|wxICON_ERROR);
+    return false;
+}
+//-----------------------------------------------------------------------------
+void reportLastError(const wxString& actionMsg)
+{
+    wxMessageBox(std2wx(lastError().getMessage()), actionMsg, 
+        wxOK|wxICON_ERROR);
+}
+//-----------------------------------------------------------------------------
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
     BaseFrame(parent, id, title, pos, size, style, wxT("FlameRobin_main"))
 {
@@ -373,16 +397,13 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
 
 	if (treeActivateAction == showColumnInfo && (nt == ntTable || nt == ntView || nt == ntProcedure))
 	{
+        bool success;
 		if (nt == ntProcedure)
-		{
-			if (!((Procedure *)m)->checkAndLoadParameters())
-				::wxMessageBox(std2wx(lastError().getMessage()), _("An error occurred"), wxICON_ERROR);
-		}
-		else
-		{
-			if (!((Relation *)m)->checkAndLoadColumns())
-				::wxMessageBox(std2wx(lastError().getMessage()), _("An error occurred"), wxICON_ERROR);
-		}
+            success = (static_cast<Procedure*>(m))->checkAndLoadParameters();
+        else
+            success = (static_cast<Relation*>(m))->checkAndLoadColumns();
+        if (!success)
+            reportLastError(_("Error Loading Information"));
 	}
 	else
 	{
@@ -507,9 +528,11 @@ void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuInsert(wxCommandEvent& WXUNUSED(event))
 {
-	Table *t = dynamic_cast<Table *>(tree_ctrl_1->getSelectedMetadataItem());
 	Database *d = tree_ctrl_1->getSelectedDatabase();
-	if (!t || !d)
+    if (!checkValidDatabase(d))
+        return;
+	Table *t = dynamic_cast<Table *>(tree_ctrl_1->getSelectedMetadataItem());
+	if (!t)
 		return;
 
 	wxString sql = std2wx(t->getInsertStatement());
@@ -627,7 +650,7 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 {
 	Server *s = tree_ctrl_1->getSelectedServer();
-	if (!s)
+    if (!checkValidServer(s))
 		return;
 
 	Database db;
@@ -641,7 +664,7 @@ void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
 {
 	Database *d = tree_ctrl_1->getSelectedDatabase();
-	if (!d)
+    if (!checkValidDatabase(d))
 		return;
 
     DatabaseRegistrationDialog drd(this, -1, _("Database Registration Info"));
@@ -652,7 +675,7 @@ void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
 {
     Server *s = tree_ctrl_1->getSelectedServer();
-	if (!s)
+    if (!checkValidServer(s))
 		return;
 
 	Database db;
@@ -673,10 +696,8 @@ void MainFrame::OnMenuManageUsers(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuUnRegisterServer(wxCommandEvent& WXUNUSED(event))
 {
 	Server *s = tree_ctrl_1->getSelectedServer();
-	if (!s)
+    if (!checkValidServer(s))
 		return;
-
-	// FIXME: check if some of the databases is connected... and prevent the action
 
 	if (wxCANCEL == wxMessageBox(_("Are you sure?"), _("Unregister server"), wxOK | wxCANCEL | wxICON_QUESTION))
 		return;
@@ -689,8 +710,9 @@ void MainFrame::OnMenuUnRegisterServer(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuServerProperties(wxCommandEvent& WXUNUSED(event))
 {
 	Server *s = tree_ctrl_1->getSelectedServer();
-	if (!s)
+    if (!checkValidServer(s))
 		return;
+
     ServerRegistrationDialog srd(this, -1, _("Server Registration Info"));
 	srd.setServer(s);
 	srd.ShowModal();
@@ -701,6 +723,7 @@ void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
 	Root *r = dynamic_cast<Root *>(tree_ctrl_1->getMetadataItem(tree_ctrl_1->GetRootItem()));
 	if (!r)
 		return;
+
 	Server s;
     ServerRegistrationDialog srd(this, -1, _("Register New Server"));
 	srd.setServer(&s);
@@ -711,13 +734,11 @@ void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 {
 	Database *d = tree_ctrl_1->getSelectedDatabase();
-	if (!d)
+    if (!checkValidDatabase(d))
 		return;
-	if (d->isConnected())
-	{
-		::wxMessageBox(_("Cannot remove connected database.\nPlease disconnect first"), _("Database connected."), wxOK | wxICON_EXCLAMATION );
-		return;
-	}
+    // command should never be enabled when database is connected
+    wxCHECK_RET(!d->isConnected(), 
+        wxT("Can not unregister connected database"));
 
 	if (wxCANCEL == wxMessageBox(_("Are you sure?"), _("Unregister database"), wxOK | wxCANCEL | wxICON_QUESTION))
 		return;
@@ -730,8 +751,9 @@ void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
 {
 	Database *d = tree_ctrl_1->getSelectedDatabase();
-	if (!d)
+    if (!checkValidDatabase(d))
 		return;
+
 	wxArrayString as;
 	std::vector<std::string> users;
 	d->getIBPPDatabase()->Users(users);
@@ -744,8 +766,9 @@ void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuBackup(wxCommandEvent& WXUNUSED(event))
 {
 	Database *d = tree_ctrl_1->getSelectedDatabase();
-	if (!d)
+    if (!checkValidDatabase(d))
 		return;
+
     BackupFrame* f = new BackupFrame(this, d);
     f->Show();
 }
@@ -753,8 +776,9 @@ void MainFrame::OnMenuBackup(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuRestore(wxCommandEvent& WXUNUSED(event))
 {
 	Database *d = tree_ctrl_1->getSelectedDatabase();
-	if (!d)
+    if (!checkValidDatabase(d))
 		return;
+
     RestoreFrame* f = new RestoreFrame(this, d);
     f->Show();
 }
@@ -762,25 +786,24 @@ void MainFrame::OnMenuRestore(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuReconnect(wxCommandEvent& WXUNUSED(event))
 {
 	Database *d = tree_ctrl_1->getSelectedDatabase();
-	if (!d)
+    if (!checkValidDatabase(d))
 		return;
+
 	::wxBeginBusyCursor();
 	bool ok = d->reconnect();
 	::wxEndBusyCursor();
 	if (!ok)
-		wxMessageBox(std2wx(lastError().getMessage()), _("Error!"), wxOK | wxICON_ERROR);
+        reportLastError(_("Error Reconnecting Database"));
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuConnectAs(wxCommandEvent& WXUNUSED(event))
 {
 	Database *d = tree_ctrl_1->getSelectedDatabase();
-	if (!d)
+    if (!checkValidDatabase(d))
 		return;
-	if (d->isConnected())
-	{
-		wxMessageBox(_("Please disconnect first."), _("Already connected"), wxOK | wxICON_WARNING);
-		return;
-	}
+    // command should never be enabled when database is connected
+    wxCHECK_RET(!d->isConnected(), 
+        wxT("Can not connect to already connected database"));
 
     DatabaseRegistrationDialog drd(this, -1, _("Connect as..."), false, true);
 	d->prepareTemporaryCredentials();
@@ -797,7 +820,7 @@ void MainFrame::OnMenuConnect(wxCommandEvent& WXUNUSED(event))
 bool MainFrame::connect(bool warn)
 {
 	Database *db = tree_ctrl_1->getSelectedDatabase();
-	if (!db)
+    if (!checkValidDatabase(db))
 		return false;
 	if (db->isConnected())
 	{
@@ -821,22 +844,22 @@ bool MainFrame::connect(bool warn)
 	wxProgressDialog progress_dialog(_("Connecting..."), std2wx(db->getPath()), 9, NULL, wxPD_AUTO_HIDE | wxPD_APP_MODAL );
 	if (!db->connect(wx2std(pass)))
 	{
-		wxMessageBox(std2wx(lastError().getMessage()), _("Error!"), wxOK | wxICON_ERROR);
+        reportLastError(_("Error Connecting to Database"));
 		return false;
 	}
 
 	NodeType types[9] = { ntTable, ntView, ntProcedure, ntTrigger, ntRole, ntDomain,
         ntFunction, ntGenerator, ntException };
-	wxString names[9] = { _("tables"), _("views"), _("procedures"), _("triggers"), _("roles"), _("domains"),
-		_("functions"), _("generators"), _("exceptions")
+	wxString names[9] = { _("Tables"), _("Views"), _("Procedures"), _("Triggers"), _("Roles"), _("Domains"),
+		_("Functions"), _("Generators"), _("Exceptions")
 	};
 	for (int i = 0; i < 9; i++)
 	{
 		progress_dialog.Update(i + 1, wxString::Format(_("Loading %s."), names[i].c_str()));
 		if (!db->loadObjects(types[i]))
 		{
-			wxMessageBox(std2wx(lastError().getMessage()),
-   				wxString::Format(_("Error loading %s."), names[i].c_str()), wxOK | wxICON_ERROR);
+            reportLastError(wxString::Format(_("Error Loading %s"), 
+                names[i].c_str()));
 			break;
 		}
 	}
@@ -849,10 +872,10 @@ bool MainFrame::connect(bool warn)
 void MainFrame::OnMenuDisconnect(wxCommandEvent& WXUNUSED(event))
 {
 	Database *d = tree_ctrl_1->getSelectedDatabase();
-	if (!d)
+    if (!checkValidDatabase(d))
 		return;
 	if (!d->disconnect())
-		wxMessageBox(std2wx(lastError().getMessage()), _("Error!"), wxOK | wxICON_ERROR);
+        reportLastError(_("Error Disconnecting Database"));
 }
 //-----------------------------------------------------------------------------
 void MainFrame::showGeneratorValue(Generator* g)
@@ -860,7 +883,7 @@ void MainFrame::showGeneratorValue(Generator* g)
 	if (!g)
 		return;
 	if (!g->loadValue(true))
-		wxMessageBox(std2wx(lastError().getMessage()), _("Error!"), wxOK | wxICON_ERROR);
+        reportLastError(_("Error Loading Generator Value"));
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuShowGeneratorValue(wxCommandEvent& WXUNUSED(event))
@@ -882,19 +905,11 @@ void MainFrame::OnMenuSetGeneratorValue(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuShowAllGeneratorValues(wxCommandEvent& WXUNUSED(event))
 {
 	Database *db = tree_ctrl_1->getSelectedDatabase();
-	if (!db)
-	{
-		wxMessageBox(_("No database assigned"), _("Warning"), wxOK | wxICON_ERROR);
-		return;
-	}
-
-	for (MetadataCollection<Generator>::const_iterator it = db->generatorsBegin(); it != db->generatorsEnd(); ++it)
-	{
-		Generator *g = const_cast<Generator *>(&(*it));
-		if (!g->loadValue())
-			wxMessageBox(std2wx(lastError().getMessage()), _("Error!"), wxOK|wxICON_ERROR);
-	}
-	db->refreshByType(ntGenerator);
+    if (checkValidDatabase(db))
+    {
+        if (!db->loadGeneratorValues())
+            reportLastError(_("Error Loading Generator Value"));
+    }
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateDomain(wxCommandEvent& WXUNUSED(event))
@@ -974,11 +989,8 @@ void MainFrame::showCreateTemplate(const MetadataItem *m)
 	}
 
 	Database *db = tree_ctrl_1->getSelectedDatabase();
-	if (!db)
-	{
-		wxMessageBox(_("No database assigned"), _("Warning"), wxOK | wxICON_ERROR);
+    if (!checkValidDatabase(db))
 		return;
-	}
 
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(this, -1, wxEmptyString);
 	eff->setDatabase(db);
@@ -1003,7 +1015,7 @@ void MainFrame::OnMenuLoadColumnsInfo(wxCommandEvent& WXUNUSED(event))
 
 	if (!success)
 	{
-		::wxMessageBox(std2wx(lastError().getMessage()), _("Error!"), wxOK | wxICON_ERROR);
+        reportLastError(_("Error Loading Information"));
 		return;
 	}
 
@@ -1012,7 +1024,10 @@ void MainFrame::OnMenuLoadColumnsInfo(wxCommandEvent& WXUNUSED(event))
 		std::vector<MetadataItem *> temp;
 		((Procedure *)t)->getChildren(temp);
 		if (temp.empty())
-			::wxMessageBox(_("This procedure doesn't have any input or output parameters."), _("No parameters."), wxOK | wxICON_INFORMATION);
+        {
+			::wxMessageBox(_("This procedure doesn't have any input or output parameters."), 
+               _("Information"), wxOK | wxICON_INFORMATION);
+        }
 	}
 }
 //-----------------------------------------------------------------------------
@@ -1074,10 +1089,12 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
 {
-	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
 	Database *d = tree_ctrl_1->getSelectedDatabase();
-	if (!m || !d)
-		return;
+    if (!checkValidDatabase(d))
+        return;
+	MetadataItem *m = tree_ctrl_1->getSelectedMetadataItem();
+    if (!m)
+        return;
 
 	// TODO: We could first check if there are some dependant objects, and offer the user to
 	//       either drop dependencies, or drop those objects too. Then we should create a bunch of
@@ -1095,7 +1112,7 @@ void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
 {
 	Database *d = tree_ctrl_1->getSelectedDatabase();
-	if (!d)
+    if (!checkValidDatabase(d))
 		return;
 	if (!d->isConnected())
 	{
