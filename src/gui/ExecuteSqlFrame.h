@@ -103,7 +103,7 @@ public:
 	// query parsing and execution
 	void executeAllStatements(bool autoExecute = false);
 	void prepareAndExecute(bool prepareOnly = false);
-	void parseStatements(const wxString& statements, bool autoExecute = false, bool prepareOnly = false);
+	bool parseStatements(const wxString& statements, bool autoExecute = false, bool prepareOnly = false);
 	bool execute(std::string sql, bool prepareOnly = false);
 	void setSql(wxString sql);
 
