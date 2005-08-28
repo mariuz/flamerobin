@@ -35,10 +35,10 @@
 class FrameAndId
 {
 public:
-	BaseFrame *frame;
-	int id;
-	FrameAndId(BaseFrame *f, int i)
-		:frame(f), id(i) {};
+    BaseFrame *frame;
+    int id;
+    FrameAndId(BaseFrame *f, int i)
+        :frame(f), id(i) {};
 };
 //---------------------------------------------------------------------------------------
 typedef std::multimap<MetadataItem*, FrameAndId> ItemFrameMap;
@@ -49,9 +49,9 @@ public:
     FrameManager();
     ~FrameManager();
 
-	void setWindowMenu(wxMenu *windowMenu);
-	void rebuildMenu();
-	void bringOnTop(int id);
+    void setWindowMenu(wxMenu *windowMenu);
+    void rebuildMenu();
+    void bringOnTop(int id);
 
     void removeFrame(BaseFrame* frame);
     MetadataItemPropertiesFrame* showMetadataPropertyFrame(wxWindow* parent, MetadataItem* item,
@@ -63,8 +63,8 @@ protected:
     DECLARE_EVENT_TABLE()
 private:
     ItemFrameMap mipFramesM;
-	wxMenu* windowMenuM;
-	wxMenuBar* menuBarM;
+    wxMenu* windowMenuM;
+    wxMenuBar* menuBarM;
 
     void removeFrame(BaseFrame* frame, ItemFrameMap& frames);
 };

@@ -51,15 +51,15 @@ IMPLEMENT_APP(FRApp)
 void FRApp::OnFatalException()
 {
     if (wxYES == ::wxMessageBox(::wxGetTranslation(
-		wxT("A fatal error has occured. If you know how to\n")
-		wxT("reproduce the problem, please submit the bug report at:\n")
-		wxT("http://sourceforge.net/tracker/?group_id=124340&atid=699234\n\n")
-		wxT("The program can try to keep running so that you\n")
-		wxT("can save your data. Do you wish to try?\n")),
-		_("Fatal error"), wxYES_NO | wxICON_ERROR))
-	{
-		MainLoop();
-	}
+        wxT("A fatal error has occured. If you know how to\n")
+        wxT("reproduce the problem, please submit the bug report at:\n")
+        wxT("http://sourceforge.net/tracker/?group_id=124340&atid=699234\n\n")
+        wxT("The program can try to keep running so that you\n")
+        wxT("can save your data. Do you wish to try?\n")),
+        _("Fatal error"), wxYES_NO | wxICON_ERROR))
+    {
+        MainLoop();
+    }
 }
 //-----------------------------------------------------------------------------
 bool FRApp::OnInit()
@@ -72,19 +72,19 @@ bool FRApp::OnInit()
     parseCommandLine();
 
     // initialize IBPP library - if it fails: exit
-	try
-	{
-		if (! IBPP::CheckVersion(IBPP::Version))
-		{
-			wxMessageBox(_("Wrong IBPP version."), _("Error."), wxOK | wxICON_ERROR);
-			return false;
-		}
-	}
-	catch (IBPP::Exception &e)
-	{
-		wxMessageBox(std2wx(e.ErrorMessage()), _("Error initalizing IBPP library."), wxOK | wxICON_ERROR);
-		return false;
-	}
+    try
+    {
+        if (! IBPP::CheckVersion(IBPP::Version))
+        {
+            wxMessageBox(_("Wrong IBPP version."), _("Error."), wxOK | wxICON_ERROR);
+            return false;
+        }
+    }
+    catch (IBPP::Exception &e)
+    {
+        wxMessageBox(std2wx(e.ErrorMessage()), _("Error initalizing IBPP library."), wxOK | wxICON_ERROR);
+        return false;
+    }
 
     wxImage::AddHandler(new wxPNGHandler);
 

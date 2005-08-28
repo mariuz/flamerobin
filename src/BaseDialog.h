@@ -34,7 +34,7 @@ class BaseDialog: public wxDialog
 {
 public:
     BaseDialog(wxWindow* parent, int id, const wxString& title,
-        const wxPoint& pos = wxDefaultPosition,	const wxSize& size = wxDefaultSize,
+        const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
         long style = wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
     virtual bool Show(bool show = TRUE);
     virtual ~BaseDialog();
@@ -42,8 +42,8 @@ protected:
     void layoutSizers(wxSizer* controls, wxSizer* buttons, bool expandControls = false);
     wxPanel* getControlsPanel();
 
-	// Update the colors of textboxes
-	void updateColors(wxWindow *parent = 0);
+    // Update the colors of textboxes
+    void updateColors(wxWindow *parent = 0);
 
     // Reads any settings from config. The predefined implementation reads
     // the size of the dialog based on getStorageName(). No need to call

@@ -163,7 +163,7 @@ void GridTable::fetch()
     }
     while (rowsFetchedM < maxRowToFetchM);
 
-    if (rowsFetchedM > oldrf && GetView())		// notify the grid
+    if (rowsFetchedM > oldrf && GetView())        // notify the grid
     {
         wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED,
             rowsFetchedM - oldrf);
@@ -213,21 +213,21 @@ wxString GridTable::GetColLabelValue(int col)
 IBPP::SDT GridTable::getColumnType(int col)
 {
     if (col > columnCountM || statementM.intf() == 0)
-        return IBPP::sdString;	// I wish there is sdUnknown :)
+        return IBPP::sdString;    // I wish there is sdUnknown :)
     else
-	{
-		try
-		{
-			return statementM->ColumnType(col);
-		}
+    {
+        try
+        {
+            return statementM->ColumnType(col);
+        }
         catch (IBPP::Exception& e)
         {
-			// perhaps we should clear the statement, since something is obviously wrong
+            // perhaps we should clear the statement, since something is obviously wrong
             columnCountM = col-1;
             ::wxMessageBox(std2wx(e.ErrorMessage()), _("An IBPP error occurred."));
-			return IBPP::sdString;
+            return IBPP::sdString;
         }
-	}
+    }
 }
 //-----------------------------------------------------------------------------
 int GridTable::GetNumberCols()

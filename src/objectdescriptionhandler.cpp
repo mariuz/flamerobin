@@ -45,7 +45,7 @@
 class ObjectDescriptionHandler: public URIHandler
 {
 public:
-	bool handleURI(URI& uri);
+    bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
     static const ObjectDescriptionHandler handlerInstance;
@@ -55,22 +55,22 @@ const ObjectDescriptionHandler ObjectDescriptionHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool ObjectDescriptionHandler::handleURI(URI& uri)
 {
-	if (uri.action != "edit_description")
-		return false;
+    if (uri.action != "edit_description")
+        return false;
 
-	MetadataItem *m = (MetadataItem *)getObject(uri);
-	wxWindow *w = getWindow(uri);
-	if (!m || !w)
-		return true;
+    MetadataItem *m = (MetadataItem *)getObject(uri);
+    wxWindow *w = getWindow(uri);
+    if (!m || !w)
+        return true;
 
-	wxString desc = std2wx(m->getDescription());
-	if (GetMultilineTextFromUser(wxString::Format(_("Description of %s"), std2wx(uri.getParam("object_name")).c_str()), desc, w))
-	{
-		wxBusyCursor wait;
-		if (!m->setDescription(wx2std(desc)))
-			wxMessageBox(std2wx(lastError().getMessage()), _("Error while writing description."));
-	}
-	return true;
+    wxString desc = std2wx(m->getDescription());
+    if (GetMultilineTextFromUser(wxString::Format(_("Description of %s"), std2wx(uri.getParam("object_name")).c_str()), desc, w))
+    {
+        wxBusyCursor wait;
+        if (!m->setDescription(wx2std(desc)))
+            wxMessageBox(std2wx(lastError().getMessage()), _("Error while writing description."));
+    }
+    return true;
 }
 //-----------------------------------------------------------------------------
 

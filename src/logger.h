@@ -32,20 +32,20 @@
 class executedStatement
 {
 public:
-	std::string statement;
-	IBPP::STT type;
-	executedStatement(const std::string& st, const IBPP::STT& t): statement(st), type(t) {};
+    std::string statement;
+    IBPP::STT type;
+    executedStatement(const std::string& st, const IBPP::STT& t): statement(st), type(t) {};
 };
 //------------------------------------------------------------------------------
 class Database;
 
-class Logger			// maybe we'll extend this later
+class Logger            // maybe we'll extend this later
 {
 private:
-	static bool log2database(const executedStatement& st, Database *db);
-	static bool log2file(const executedStatement& st, Database *db, const std::string& filename);
+    static bool log2database(const executedStatement& st, Database *db);
+    static bool log2file(const executedStatement& st, Database *db, const std::string& filename);
 public:
-	static bool logStatement(const executedStatement& st, Database *db);
+    static bool logStatement(const executedStatement& st, Database *db);
 };
 //------------------------------------------------------------------------------
 #endif

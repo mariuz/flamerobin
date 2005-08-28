@@ -47,13 +47,13 @@ public:
     virtual void visit(Table&);
     virtual void visit(Trigger&);
     virtual void visit(View&);
-	virtual void visit(MetadataItem&);
+    virtual void visit(MetadataItem&);
 
 private:
     wxMenu* menuM;
 
-	void addRegularObjectMenu();
-	void addSelectMenu(bool isTable = false);
+    void addRegularObjectMenu();
+    void addSelectMenu(bool isTable = false);
 };
 //------------------------------------------------------------------------------
 #endif //FR_CONTEXTMENUVISITOR_H

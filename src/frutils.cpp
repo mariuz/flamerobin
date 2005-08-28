@@ -48,7 +48,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 void adjustControlsMinWidth(list<wxWindow*> controls)
 {
-	int w = 0;
+    int w = 0;
     wxSize sz;
     // find widest control
     for (list<wxWindow*>::iterator it = controls.begin(); it != controls.end(); ++it)
@@ -68,64 +68,64 @@ void adjustControlsMinWidth(list<wxWindow*> controls)
 //-----------------------------------------------------------------------------
 void readBlob(IBPP::Statement& st, int column, string& result)
 {
-	result = "";
-	if (st->IsNull(column))
-		return;
+    result = "";
+    if (st->IsNull(column))
+        return;
 
-	IBPP::Blob b = IBPP::BlobFactory(st->Database(), st->Transaction());
-	st->Get(column, b);
+    IBPP::Blob b = IBPP::BlobFactory(st->Database(), st->Transaction());
+    st->Get(column, b);
 
-	try				// if blob is empty the exception is thrown
-	{				// I tried to check st1->IsNull(1) but it doesn't work
-		b->Open();	// to this hack is the only way (for the time being)
-	}
-	catch (...)
-	{
-		return;
-	}
+    try                // if blob is empty the exception is thrown
+    {                // I tried to check st1->IsNull(1) but it doesn't work
+        b->Open();    // to this hack is the only way (for the time being)
+    }
+    catch (...)
+    {
+        return;
+    }
 
-	char buffer[8192];		// 8K block
-	while (true)
-	{
-		int size = b->Read(buffer, 8192);
-		if (size <= 0)
-			break;
-		buffer[size] = 0;
-		result += buffer;
-	}
-	b->Close();
+    char buffer[8192];        // 8K block
+    while (true)
+    {
+        int size = b->Read(buffer, 8192);
+        if (size <= 0)
+            break;
+        buffer[size] = 0;
+        result += buffer;
+    }
+    b->Close();
 }
 //-----------------------------------------------------------------------------
 string selectTableColumns(Table* t, wxWindow* parent)
 {
-	vector<string> list;
-	selectTableColumnsIntoVector(t, parent, list);
-	string retval;
-	for (vector<string>::iterator it = list.begin(); it != list.end(); ++it)
-	{
-		if (it != list.begin())
-			retval += ", ";
-		retval += (*it);
-	}
-	return retval;
+    vector<string> list;
+    selectTableColumnsIntoVector(t, parent, list);
+    string retval;
+    for (vector<string>::iterator it = list.begin(); it != list.end(); ++it)
+    {
+        if (it != list.begin())
+            retval += ", ";
+        retval += (*it);
+    }
+    return retval;
 }
 //-----------------------------------------------------------------------------
 bool selectTableColumnsIntoVector(Table* t, wxWindow* parent, vector<string>& list)
 {
-	t->checkAndLoadColumns();
-	vector<MetadataItem*> temp;
-	t->getChildren(temp);
-	wxArrayString columns;
-	for (vector<MetadataItem*>::const_iterator it = temp.begin(); it != temp.end(); ++it)
-		columns.Add(std2wx((*it)->getName()));
+    t->checkAndLoadColumns();
+    vector<MetadataItem*> temp;
+    t->getChildren(temp);
+    wxArrayString columns;
+    for (vector<MetadataItem*>::const_iterator it = temp.begin(); it != temp.end(); ++it)
+        columns.Add(std2wx((*it)->getName()));
 
-	wxArrayInt selected_columns;
-	if (!::wxGetMultipleChoices(selected_columns, _("Select one or more fields... (use ctrl key)"),  _("Table fields"), columns, parent))
-		return false;
+    wxArrayInt selected_columns;
+    if (!::wxGetMultipleChoices(selected_columns, _("Select one or more fields... (use ctrl key)"),  _("Table fields"), columns, parent))
+        return false;
 
-	for (size_t i = 0; i < selected_columns.GetCount(); ++i)
-		list.push_back(wx2std(columns[selected_columns[i]]));
+    for (size_t i = 0; i < selected_columns.GetCount(); ++i)
+        list.push_back(wx2std(columns[selected_columns[i]]));
 
-	return true;
+    return true;
 }
 //-----------------------------------------------------------------------------

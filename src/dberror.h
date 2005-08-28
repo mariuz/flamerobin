@@ -33,13 +33,13 @@
 class Error
 {
 private:
-	std::string messageM;
+    std::string messageM;
 
 public:
-	std::string getMessage() const;
-	void setMessage(std::string message);
+    std::string getMessage() const;
+    void setMessage(std::string message);
 #if (wxUSE_UNICODE)
-	void setMessage(wxString message);	// makes things easier for unicode builds
+    void setMessage(wxString message);    // makes things easier for unicode builds
 #endif
 };
 //-----------------------------------------------------------------------------

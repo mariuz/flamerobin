@@ -30,7 +30,7 @@ using namespace std;
 class FRApp: public wxApp {
 public:
     bool OnInit();
-	void OnFatalException();
+    void OnFatalException();
 private:
     // Reads the environment variables that influence FR's behaviour.
     void checkEnvironment();

@@ -42,8 +42,8 @@
 //-----------------------------------------------------------------------------
 FrameManager& frameManager()
 {
-	static FrameManager fm;
-	return fm;
+    static FrameManager fm;
+    return fm;
 }
 //-----------------------------------------------------------------------------
 FrameManager::FrameManager()
@@ -56,71 +56,71 @@ FrameManager::~FrameManager()
 //-----------------------------------------------------------------------------
 void FrameManager::setWindowMenu(wxMenu *windowMenu)
 {
-	windowMenuM = windowMenu;
+    windowMenuM = windowMenu;
 }
 //-----------------------------------------------------------------------------
 // TODO: currently we just clear and rebuild from scratch
 //       we could implement more efficient algorithm later (find the one that is gone and remove, etc)
 void FrameManager::rebuildMenu()
 {
-	if (windowMenuM == 0)
-		return;
+    if (windowMenuM == 0)
+        return;
 
-	const int regularItems = 5;
+    const int regularItems = 5;
 
-	// remove all items
-	while (windowMenuM->GetMenuItemCount() > regularItems)
-		windowMenuM->Destroy(windowMenuM->FindItemByPosition(regularItems));
-	if (windowMenuM->GetMenuItemCount() == regularItems-1)
-		windowMenuM->AppendSeparator();
+    // remove all items
+    while (windowMenuM->GetMenuItemCount() > regularItems)
+        windowMenuM->Destroy(windowMenuM->FindItemByPosition(regularItems));
+    if (windowMenuM->GetMenuItemCount() == regularItems-1)
+        windowMenuM->AppendSeparator();
 
-	// each database has it's submenu
-	std::map<Database *, wxMenu *> dmm;
+    // each database has it's submenu
+    std::map<Database *, wxMenu *> dmm;
 
-	// build submenus
-	int id = 5000;	// these menu IDs start from "safe" 5000 and upwards to 6000 (let's hope users won't open 1001 windows)
+    // build submenus
+    int id = 5000;    // these menu IDs start from "safe" 5000 and upwards to 6000 (let's hope users won't open 1001 windows)
     for (ItemFrameMap::iterator it = mipFramesM.begin(); it != mipFramesM.end(); ++it)
-	{
-		MetadataItemPropertiesFrame *mf = dynamic_cast<MetadataItemPropertiesFrame *>((*it).second.frame);
-		if (!mf)
-			continue;
-		MetadataItem *m = mf->getObservedObject();
-		if (!m)
-			continue;
-		Database *db = m->getDatabase();
-		if (!db)
-			continue;
+    {
+        MetadataItemPropertiesFrame *mf = dynamic_cast<MetadataItemPropertiesFrame *>((*it).second.frame);
+        if (!mf)
+            continue;
+        MetadataItem *m = mf->getObservedObject();
+        if (!m)
+            continue;
+        Database *db = m->getDatabase();
+        if (!db)
+            continue;
 
-		if (dmm.find(db) == dmm.end())		// add database if not already there
-			dmm.insert(dmm.begin(), std::pair<Database*, wxMenu*>(db, new wxMenu));
-		(dmm[db])->Append(id, ((*it).second.frame)->GetTitle());
-		(*it).second.id = id;
-		++id;
-	}
+        if (dmm.find(db) == dmm.end())        // add database if not already there
+            dmm.insert(dmm.begin(), std::pair<Database*, wxMenu*>(db, new wxMenu));
+        (dmm[db])->Append(id, ((*it).second.frame)->GetTitle());
+        (*it).second.id = id;
+        ++id;
+    }
 
-	// wxWidgets manual says that we should insert the submenus at end
-	for (std::map<Database *, wxMenu *>::iterator it = dmm.begin(); it != dmm.end(); ++it)
-		windowMenuM->Append(-1, std2wx((*it).first->getName()), (*it).second);
+    // wxWidgets manual says that we should insert the submenus at end
+    for (std::map<Database *, wxMenu *>::iterator it = dmm.begin(); it != dmm.end(); ++it)
+        windowMenuM->Append(-1, std2wx((*it).first->getName()), (*it).second);
 
-	if (windowMenuM->GetMenuItemCount() == regularItems)	// remove the separator if nothing is beneath
-		windowMenuM->Destroy(windowMenuM->FindItemByPosition(regularItems-1));
+    if (windowMenuM->GetMenuItemCount() == regularItems)    // remove the separator if nothing is beneath
+        windowMenuM->Destroy(windowMenuM->FindItemByPosition(regularItems-1));
 }
 //-----------------------------------------------------------------------------
 void FrameManager::bringOnTop(int id)
 {
     for (ItemFrameMap::iterator it = mipFramesM.begin(); it != mipFramesM.end(); ++it)
-	{
-		if ((*it).second.id == id)
-		{
-			MetadataItemPropertiesFrame* mipf = dynamic_cast<MetadataItemPropertiesFrame *>((*it).second.frame);
-			if (mipf)
-			{
-				mipf->Show();
-				mipf->Raise();
-			}
-			break;
-		}
-	}
+    {
+        if ((*it).second.id == id)
+        {
+            MetadataItemPropertiesFrame* mipf = dynamic_cast<MetadataItemPropertiesFrame *>((*it).second.frame);
+            if (mipf)
+            {
+                mipf->Show();
+                mipf->Raise();
+            }
+            break;
+        }
+    }
 }
 //-----------------------------------------------------------------------------
 void FrameManager::removeFrame(BaseFrame* frame)
@@ -144,20 +144,20 @@ void FrameManager::removeFrame(BaseFrame* frame, ItemFrameMap& frames)
         else
             it++;
     }
-	rebuildMenu();
+    rebuildMenu();
 }
 //-----------------------------------------------------------------------------
 MetadataItemPropertiesFrame* FrameManager::showMetadataPropertyFrame(wxWindow* parent,
     MetadataItem* item, bool delayed, bool force_new)
 {
-	MetadataItemPropertiesFrame* mipf = 0;
-	ItemFrameMap::iterator it = mipFramesM.find(item);
-	if (it != mipFramesM.end())
+    MetadataItemPropertiesFrame* mipf = 0;
+    ItemFrameMap::iterator it = mipFramesM.find(item);
+    if (it != mipFramesM.end())
         mipf = dynamic_cast<MetadataItemPropertiesFrame *>((*it).second.frame);
     if (!mipf || force_new)
     {
         mipf = new MetadataItemPropertiesFrame(parent, item);
-		FrameAndId fai(mipf, 0);
+        FrameAndId fai(mipf, 0);
         mipFramesM.insert(mipFramesM.begin(), std::pair<MetadataItem*, FrameAndId>(item, fai));
     }
     if (delayed)
@@ -171,8 +171,8 @@ MetadataItemPropertiesFrame* FrameManager::showMetadataPropertyFrame(wxWindow* p
         mipf->Show();
         mipf->Raise();
     }
-	rebuildMenu();
-	return mipf;
+    rebuildMenu();
+    return mipf;
 }
 //-----------------------------------------------------------------------------
 //! event handlers

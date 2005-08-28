@@ -62,20 +62,20 @@ DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
     SetGridLineColour(*wxLIGHT_GREY);
     SetRowLabelAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
 
-	std::string s;
-	wxFont f;
-	if (config().getValue("DataGridFont", s) && !s.empty())
-	{
-		f.SetNativeFontInfo(std2wx(s));
-		if (f.Ok())
-			SetDefaultCellFont(f);
-	}
-	if (config().getValue("DataGridHeaderFont", s) && !s.empty())
-	{
-		f.SetNativeFontInfo(std2wx(s));
-		if (f.Ok())
-			SetLabelFont(f);
-	}
+    std::string s;
+    wxFont f;
+    if (config().getValue("DataGridFont", s) && !s.empty())
+    {
+        f.SetNativeFontInfo(std2wx(s));
+        if (f.Ok())
+            SetDefaultCellFont(f);
+    }
+    if (config().getValue("DataGridHeaderFont", s) && !s.empty())
+    {
+        f.SetNativeFontInfo(std2wx(s));
+        if (f.Ok())
+            SetLabelFont(f);
+    }
 }
 //-----------------------------------------------------------------------------
 DataGrid::~DataGrid()

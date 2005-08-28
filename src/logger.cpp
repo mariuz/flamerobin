@@ -47,95 +47,95 @@
 //-----------------------------------------------------------------------------
 bool Logger::log2database(const executedStatement& /*st*/, Database* /*db*/)
 {
-	return true;
+    return true;
 }
 //-----------------------------------------------------------------------------
 bool Logger::log2file(const executedStatement& st, Database *db, const std::string& filename)
 {
-	enum { singleFile=0, multiFile };
-	int logToFileType;
-	config().getValue("LogToFileType", logToFileType);
+    enum { singleFile=0, multiFile };
+    int logToFileType;
+    config().getValue("LogToFileType", logToFileType);
 
-	std::string sql = st.statement;
-	if (logToFileType == singleFile)								// add ; to statement if missing
-	{
-		sql.erase(sql.find_last_not_of(" \n\t\r")+1);				// trim
-		std::string::size_type pos = sql.find_last_of(";");
-		if (pos == std::string::npos || pos < sql.length() - 1)		// add ; at end
-			sql += ";";
-	}
+    std::string sql = st.statement;
+    if (logToFileType == singleFile)                                // add ; to statement if missing
+    {
+        sql.erase(sql.find_last_not_of(" \n\t\r")+1);                // trim
+        std::string::size_type pos = sql.find_last_of(";");
+        if (pos == std::string::npos || pos < sql.length() - 1)        // add ; at end
+            sql += ";";
+    }
 
-	wxFile f;
-	if (logToFileType == multiFile)
-	{
-		if (filename.find_last_of("%d") == std::string::npos)		// %d not found, bail out
-			return false;
-		wxString test;
-		int start = 1;
-		config().getValue("IncrementalLogFileStart", start);
-		for (int i=start; i < 100000; ++i)							// dummy test for 100000
-		{
-			test.Printf(std2wx(filename), i);
-			if (!wxFileExists(test))
-			{
-				if (f.Open(test, wxFile::write))
-					break;
-			}
-		}
-		if (!f.IsOpened())
-			return false;
-	}
-	else
-		if (!f.Open(std2wx(filename), wxFile::write_append ))		// cannot open file
-			return false;
+    wxFile f;
+    if (logToFileType == multiFile)
+    {
+        if (filename.find_last_of("%d") == std::string::npos)        // %d not found, bail out
+            return false;
+        wxString test;
+        int start = 1;
+        config().getValue("IncrementalLogFileStart", start);
+        for (int i=start; i < 100000; ++i)                            // dummy test for 100000
+        {
+            test.Printf(std2wx(filename), i);
+            if (!wxFileExists(test))
+            {
+                if (f.Open(test, wxFile::write))
+                    break;
+            }
+        }
+        if (!f.IsOpened())
+            return false;
+    }
+    else
+        if (!f.Open(std2wx(filename), wxFile::write_append ))        // cannot open file
+            return false;
 
-	bool loggingAddHeader = true;
-	config().getValue("LoggingAddHeader", loggingAddHeader);
-	if (loggingAddHeader)
-	{
-		wxString header = wxString::Format(
-			_("\n/* Logged by FlameRobin %d.%d.%d at %s\n   User: %s    Database: %s */\n"),
+    bool loggingAddHeader = true;
+    config().getValue("LoggingAddHeader", loggingAddHeader);
+    if (loggingAddHeader)
+    {
+        wxString header = wxString::Format(
+            _("\n/* Logged by FlameRobin %d.%d.%d at %s\n   User: %s    Database: %s */\n"),
             FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RELEASE,
-			wxDateTime::Now().Format().c_str(),
-			std2wx(db->getUsername()).c_str(),
-			std2wx(db->getPath()).c_str()
-		);
-		f.Write(header);
-	}
-	else
-		f.Write(wxT("\n"));
-	f.Write(std2wx(sql));
-	f.Close();
-	return true;
+            wxDateTime::Now().Format().c_str(),
+            std2wx(db->getUsername()).c_str(),
+            std2wx(db->getPath()).c_str()
+        );
+        f.Write(header);
+    }
+    else
+        f.Write(wxT("\n"));
+    f.Write(std2wx(sql));
+    f.Close();
+    return true;
 }
 //-----------------------------------------------------------------------------
 bool Logger::logStatement(const executedStatement& st, Database *db)
 {
-	bool logDML = false;
-	config().getValue("LogDML", logDML);
-	if (!logDML && st.type != IBPP::stDDL)	// logging not needed
-		return true;
+    bool logDML = false;
+    config().getValue("LogDML", logDML);
+    if (!logDML && st.type != IBPP::stDDL)    // logging not needed
+        return true;
 
-	bool logToFile = false;
-	config().getValue("LogToFile", logToFile);
-	if (logToFile)
-	{
-		std::string logFilename;
-		config().getValue("LogFile", logFilename);
-		if (logFilename.empty())
-		{
-			::wxMessageBox(_("Logging to file enabled, but log filename not set"), _("Warning, no filename"), wxICON_WARNING);
-			return false;
-		}
-		return log2file(st, db, logFilename);
-	}
-	bool logToDb = false;
-	config().getValue("LogToDatabase", logToDb);
-	if (logToDb)
-	{
-		//prepareDatabase();	<- create log table, generator, etc. if needed
-		return log2database(st, db);			// <- log it
-	}
-	return true;
+    bool logToFile = false;
+    config().getValue("LogToFile", logToFile);
+    if (logToFile)
+    {
+        std::string logFilename;
+        config().getValue("LogFile", logFilename);
+        if (logFilename.empty())
+        {
+            ::wxMessageBox(_("Logging to file enabled, but log filename not set"), _("Warning, no filename"), wxICON_WARNING);
+            return false;
+        }
+        return log2file(st, db, logFilename);
+    }
+    bool logToDb = false;
+    config().getValue("LogToDatabase", logToDb);
+    if (logToDb)
+    {
+        //prepareDatabase();    <- create log table, generator, etc. if needed
+        return log2database(st, db);            // <- log it
+    }
+    return true;
 }
 //-----------------------------------------------------------------------------

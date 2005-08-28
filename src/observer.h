@@ -36,15 +36,15 @@ class Subject;
 class Observer
 {
 protected:
-	std::list<Subject *> observedObjectsM;			// pointer to objects that it is watching
+    std::list<Subject *> observedObjectsM;            // pointer to objects that it is watching
 public:
-	Observer();
-	virtual ~Observer();
-	virtual void update() = 0;
+    Observer();
+    virtual ~Observer();
+    virtual void update() = 0;
 
-	Subject *getFirstObservedObject();
-	void addObservedObject(Subject *object);
-	virtual void removeObservedObject(Subject *object);	// virtual so some controls can do something extra
+    Subject *getFirstObservedObject();
+    void addObservedObject(Subject *object);
+    virtual void removeObservedObject(Subject *object);    // virtual so some controls can do something extra
 };
 //-----------------------------------------------------------------------------
 #endif

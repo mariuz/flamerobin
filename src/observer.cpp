@@ -50,31 +50,31 @@ Observer::Observer()
 //-----------------------------------------------------------------------------
 Observer::~Observer()
 {
-	std::list<Subject *>::iterator it;
-	while (true)
-	{
-		it = observedObjectsM.begin();
-		if (it == observedObjectsM.end())
-			break;
-		(*it)->detach(this);	// object will be removed by removeObservedObject()
-	}
+    std::list<Subject *>::iterator it;
+    while (true)
+    {
+        it = observedObjectsM.begin();
+        if (it == observedObjectsM.end())
+            break;
+        (*it)->detach(this);    // object will be removed by removeObservedObject()
+    }
 }
 //-----------------------------------------------------------------------------
 Subject *Observer::getFirstObservedObject()
 {
-	if (observedObjectsM.empty())
-		return 0;
-	else
-		return *(observedObjectsM.begin());
+    if (observedObjectsM.empty())
+        return 0;
+    else
+        return *(observedObjectsM.begin());
 }
 //-----------------------------------------------------------------------------
 void Observer::addObservedObject(Subject *object)
 {
-	observedObjectsM.push_back(object);
+    observedObjectsM.push_back(object);
 }
 //-----------------------------------------------------------------------------
 void Observer::removeObservedObject(Subject *object)
 {
-	observedObjectsM.erase(std::find(observedObjectsM.begin(), observedObjectsM.end(), object));
+    observedObjectsM.erase(std::find(observedObjectsM.begin(), observedObjectsM.end(), object));
 }
 //-----------------------------------------------------------------------------

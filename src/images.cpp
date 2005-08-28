@@ -38,93 +38,93 @@
 //-----------------------------------------------------------------------------
 wxBitmap getImage(NodeType type)
 {
-	#include "object.xpm"
-	#include "column.xpm"
-	#include "database.xpm"
-	#include "domain.xpm"
-	//#include "images/folder.xpm" // unused
-	//#include "images/foldero.xpm" // unused
-	#include "function.xpm"
-	#include "generator.xpm"
-	#include "generators.xpm"
-	#include "procedure.xpm"
-	#include "procedures.xpm"
-	#include "root.xpm"
-	#include "server.xpm"
-	#include "table.xpm"
-	#include "tables.xpm"
-	#include "trigger.xpm"
-	#include "view.xpm"
-	#include "key.xpm"
+    #include "object.xpm"
+    #include "column.xpm"
+    #include "database.xpm"
+    #include "domain.xpm"
+    //#include "images/folder.xpm" // unused
+    //#include "images/foldero.xpm" // unused
+    #include "function.xpm"
+    #include "generator.xpm"
+    #include "generators.xpm"
+    #include "procedure.xpm"
+    #include "procedures.xpm"
+    #include "root.xpm"
+    #include "server.xpm"
+    #include "table.xpm"
+    #include "tables.xpm"
+    #include "trigger.xpm"
+    #include "view.xpm"
+    #include "key.xpm"
 
-	char ***map = new char**[ntLastType];
-	for (int i = 0; i < ntLastType; i++)
-		map[i] = object_xpm;
+    char ***map = new char**[ntLastType];
+    for (int i = 0; i < ntLastType; i++)
+        map[i] = object_xpm;
 
-	map[ntUnknown] 		= object_xpm;
-	map[ntRoot] 		= root_xpm;
-	map[ntServer] 		= server_xpm;
-	map[ntDatabase] 	= database_xpm;
-	map[ntTable] 		= table_xpm;
-	map[ntTables] 		= tables_xpm;
-	map[ntView] 		= view_xpm;
-	map[ntViews] 		= view_xpm;
-	map[ntProcedure] 	= procedure_xpm;
-	map[ntProcedures] 	= procedures_xpm;
-	map[ntGenerator] 	= generator_xpm;
-	map[ntFunction] 	= function_xpm;
-	map[ntSysTable] 	= table_xpm;
-	map[ntTrigger] 		= trigger_xpm;
-	map[ntTriggers] 	= trigger_xpm;
-	map[ntGenerators] 	= generators_xpm;
-	map[ntFunctions] 	= function_xpm;
-	map[ntSysTables] 	= tables_xpm;
-	map[ntColumn] 		= column_xpm;
-	map[ntDomains] 		= domain_xpm;
-	//map[ntRole] 		= role_xpm;
-	//map[ntRoles] 		= roles_xpm;
-	map[ntDomain] 		= domain_xpm;
-	map[ntParameter] 	= column_xpm;
-	map[ntPrimaryKey]	= key_xpm;
-	map[ntComputed] 	= function_xpm;
+    map[ntUnknown]         = object_xpm;
+    map[ntRoot]         = root_xpm;
+    map[ntServer]         = server_xpm;
+    map[ntDatabase]     = database_xpm;
+    map[ntTable]         = table_xpm;
+    map[ntTables]         = tables_xpm;
+    map[ntView]         = view_xpm;
+    map[ntViews]         = view_xpm;
+    map[ntProcedure]     = procedure_xpm;
+    map[ntProcedures]     = procedures_xpm;
+    map[ntGenerator]     = generator_xpm;
+    map[ntFunction]     = function_xpm;
+    map[ntSysTable]     = table_xpm;
+    map[ntTrigger]         = trigger_xpm;
+    map[ntTriggers]     = trigger_xpm;
+    map[ntGenerators]     = generators_xpm;
+    map[ntFunctions]     = function_xpm;
+    map[ntSysTables]     = tables_xpm;
+    map[ntColumn]         = column_xpm;
+    map[ntDomains]         = domain_xpm;
+    //map[ntRole]         = role_xpm;
+    //map[ntRoles]         = roles_xpm;
+    map[ntDomain]         = domain_xpm;
+    map[ntParameter]     = column_xpm;
+    map[ntPrimaryKey]    = key_xpm;
+    map[ntComputed]     = function_xpm;
 
-	wxBitmap ret = wxBitmap(map[type]);
+    wxBitmap ret = wxBitmap(map[type]);
 
-	delete [] map;
-	return ret;
+    delete [] map;
+    return ret;
 }
 //-----------------------------------------------------------------------------
 wxBitmap getImage32(NodeType type)
 {
-	// default image
-	#include "fricon.xpm"
+    // default image
+    #include "fricon.xpm"
 
-	#include "column32.xpm"
-	#include "domain32.xpm"
-	#include "function32.xpm"
-	#include "generator32.xpm"
-	#include "procedure32.xpm"
-	#include "table32.xpm"
-	#include "trigger32.xpm"
-	#include "view32.xpm"
+    #include "column32.xpm"
+    #include "domain32.xpm"
+    #include "function32.xpm"
+    #include "generator32.xpm"
+    #include "procedure32.xpm"
+    #include "table32.xpm"
+    #include "trigger32.xpm"
+    #include "view32.xpm"
 
-	char ***map = new char**[ntLastType];
-	for (int i = 0; i < ntLastType; i++)
-		map[i] = fricon_xpm;
+    char ***map = new char**[ntLastType];
+    for (int i = 0; i < ntLastType; i++)
+        map[i] = fricon_xpm;
 
-	map[ntUnknown] 		= fricon_xpm;
-	map[ntTable] 		= table_xpm;
-	map[ntView] 		= view_xpm;
-	map[ntProcedure] 	= procedure_xpm;
-	map[ntGenerator] 	= generator_xpm;
-	map[ntFunction] 	= function_xpm;
-	map[ntSysTable] 	= table_xpm;
-	map[ntTrigger] 		= trigger_xpm;
-	map[ntColumn] 		= column_xpm;
-	map[ntDomain] 		= domain_xpm;
-	wxBitmap ret = wxBitmap(map[type]);
+    map[ntUnknown]         = fricon_xpm;
+    map[ntTable]         = table_xpm;
+    map[ntView]         = view_xpm;
+    map[ntProcedure]     = procedure_xpm;
+    map[ntGenerator]     = generator_xpm;
+    map[ntFunction]     = function_xpm;
+    map[ntSysTable]     = table_xpm;
+    map[ntTrigger]         = trigger_xpm;
+    map[ntColumn]         = column_xpm;
+    map[ntDomain]         = domain_xpm;
+    wxBitmap ret = wxBitmap(map[type]);
 
-	delete [] map;
-	return ret;
+    delete [] map;
+    return ret;
 }
 //-----------------------------------------------------------------------------

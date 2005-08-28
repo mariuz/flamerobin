@@ -36,11 +36,11 @@ class Server;
 class myTreeCtrl: public wxTreeCtrl
 {
 private:
-	std::map<int, int> imageMapM;
-	void loadImages();
+    std::map<int, int> imageMapM;
+    void loadImages();
 
 protected:
-    short m_spacing;	// fix wxWidgets bug (or lack of feature)
+    short m_spacing;    // fix wxWidgets bug (or lack of feature)
 
 public:
     enum { ID_tree_ctrl = 101 };
@@ -48,37 +48,37 @@ public:
     short GetSpacing() const { return m_spacing; }
     void SetSpacing(short spacing);
 
-    enum {	Menu_RegisterServer = 600, Menu_Configure, Menu_Manual, Menu_RelNotes, Menu_License, Menu_NewObject,
-			Menu_Cut, Menu_Copy, Menu_Paste, Menu_Delete, Menu_ToggleStatusBar, Menu_ToggleDisconnected,
-			Menu_DatabaseRegistrationInfo, Menu_RegisterDatabase, Menu_CreateDatabase, Menu_ManageUsers,
-			Menu_UnRegisterServer, Menu_ServerProperties, Menu_Reconnect, Menu_ConnectAs,
-			Menu_UnRegisterDatabase, Menu_Backup, Menu_Restore, Menu_Connect, Menu_Disconnect, Menu_Query, Menu_ShowConnectedUsers,
-			Menu_CreateObject, Menu_ShowAllGeneratorValues, Menu_Browse, Menu_BrowseColumns, Menu_Insert,
-			Menu_LoadColumnsInfo, Menu_ObjectProperties, Menu_DropObject, Menu_ShowGeneratorValue,
-			Menu_SetGeneratorValue, Menu_AddColumn, Menu_CreateTriggerForTable,
+    enum {    Menu_RegisterServer = 600, Menu_Configure, Menu_Manual, Menu_RelNotes, Menu_License, Menu_NewObject,
+            Menu_Cut, Menu_Copy, Menu_Paste, Menu_Delete, Menu_ToggleStatusBar, Menu_ToggleDisconnected,
+            Menu_DatabaseRegistrationInfo, Menu_RegisterDatabase, Menu_CreateDatabase, Menu_ManageUsers,
+            Menu_UnRegisterServer, Menu_ServerProperties, Menu_Reconnect, Menu_ConnectAs,
+            Menu_UnRegisterDatabase, Menu_Backup, Menu_Restore, Menu_Connect, Menu_Disconnect, Menu_Query, Menu_ShowConnectedUsers,
+            Menu_CreateObject, Menu_ShowAllGeneratorValues, Menu_Browse, Menu_BrowseColumns, Menu_Insert,
+            Menu_LoadColumnsInfo, Menu_ObjectProperties, Menu_DropObject, Menu_ShowGeneratorValue,
+            Menu_SetGeneratorValue, Menu_AddColumn, Menu_CreateTriggerForTable,
 
-			// create new ... (stuff)
-			Menu_CreateDomain, Menu_CreateException, Menu_CreateFunction, Menu_CreateGenerator,
-			Menu_CreateProcedure, Menu_CreateRole, Menu_CreateTable, Menu_CreateTrigger, Menu_CreateView
-	};
+            // create new ... (stuff)
+            Menu_CreateDomain, Menu_CreateException, Menu_CreateFunction, Menu_CreateGenerator,
+            Menu_CreateProcedure, Menu_CreateRole, Menu_CreateTable, Menu_CreateTrigger, Menu_CreateView
+    };
 
-	void OnBeginDrag(wxTreeEvent &event);
+    void OnBeginDrag(wxTreeEvent &event);
     void OnContextMenu(wxContextMenuEvent& event);
-	#if wxCHECK_VERSION(2, 5, 4)
-	void myTreeCtrl::OnItemMenu(wxTreeEvent& event);
-	#endif
+    #if wxCHECK_VERSION(2, 5, 4)
+    void myTreeCtrl::OnItemMenu(wxTreeEvent& event);
+    #endif
 
-	// Returns the observed metadata item based on the specified tree item
-	MetadataItem *getMetadataItem(wxTreeItemId item);
+    // Returns the observed metadata item based on the specified tree item
+    MetadataItem *getMetadataItem(wxTreeItemId item);
 
-	// Returns the observed metadata item based on the currently selected tree item
-	MetadataItem *getSelectedMetadataItem();
-	Database *getSelectedDatabase();
-	Server *getSelectedServer();
+    // Returns the observed metadata item based on the currently selected tree item
+    MetadataItem *getSelectedMetadataItem();
+    Database *getSelectedDatabase();
+    Server *getSelectedServer();
 
     // Selects the tree item represented by the metadata item
     bool selectMetadataItem(MetadataItem* item);
-	int getItemImage(NodeType t);
+    int getItemImage(NodeType t);
 
     myTreeCtrl(wxWindow* parent, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxTR_HAS_BUTTONS);
 
