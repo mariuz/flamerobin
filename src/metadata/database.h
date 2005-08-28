@@ -118,6 +118,8 @@ public:
     bool loadObjects(NodeType type);
     //std::string getLoadingSql(NodeType type);
 
+    bool loadGeneratorValues();
+
     MetadataItem *findByNameAndType(NodeType nt, std::string name);
     MetadataItem *findByName(std::string name);
     void refreshByType(NodeType type);

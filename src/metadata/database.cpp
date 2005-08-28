@@ -412,6 +412,18 @@ bool Database::loadObjects(NodeType type)
 	return false;
 }
 //------------------------------------------------------------------------------
+bool Database::loadGeneratorValues()
+{
+    for (MetadataCollection<Generator>::iterator it = generatorsM.begin(); 
+        it != generatorsM.end(); ++it)
+	{
+		if (!(*it).loadValue())
+            return false;
+	}
+    // generatorsM.notify() not necessary, loadValue() notifies
+    return true;
+}
+//------------------------------------------------------------------------------
 //! Notify the observers that collection has changed
 void Database::refreshByType(NodeType type)
 {
