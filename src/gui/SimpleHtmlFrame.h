@@ -29,7 +29,7 @@
 #include "BaseFrame.h"
 
 //------------------------------------------------------------------------------
-bool showDocsHtmlFile(wxWindow* parent, const wxString& fileName);
+bool showHtmlFile(wxWindow* parent, const wxFileName& fileName);
 
 class PrintableHtmlWindow;
 //------------------------------------------------------------------------------

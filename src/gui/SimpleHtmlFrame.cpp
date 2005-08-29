@@ -42,21 +42,20 @@
 #include "SimpleHtmlFrame.h"
 #include "ugly.h"
 //------------------------------------------------------------------------------
-bool showDocsHtmlFile(wxWindow* parent, const wxString& fileName)
+bool showHtmlFile(wxWindow* parent, const wxFileName& fileName)
 {
-    wxFileName fullFileName(std2wx(config().getDocsPath()), fileName);
-    if (!fullFileName.FileExists())
+    if (!fileName.FileExists())
     {
         wxString msg;
         msg.Printf(_("The HTML document \"%s\" does not exist!"), 
-            fullFileName.GetFullPath().c_str());
+            fileName.GetFullPath().c_str());
         wxMessageBox(msg, _("FlameRobin"), wxOK|wxICON_ERROR);
         return false;
     }
 
     SimpleHtmlFrame *shf;
     // TODO: check for and use an existing viewer instead of creating a new one
-    shf = new SimpleHtmlFrame(parent,  fullFileName.GetFullPath());
+    shf = new SimpleHtmlFrame(parent,  fileName.GetFullPath());
     shf->Show();
     return true;
 }

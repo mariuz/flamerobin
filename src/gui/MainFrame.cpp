@@ -169,6 +169,12 @@ void MainFrame::buildMainMenu()
 	}
 }
 //-----------------------------------------------------------------------------
+void MainFrame::showDocsHtmlFile(const wxString& fileName)
+{
+    wxFileName fullFileName(std2wx(config().getDocsPath()), fileName);
+    showHtmlFile(this, fullFileName);
+}
+//-----------------------------------------------------------------------------
 void MainFrame::set_properties()
 {
     SetTitle(_("FlameRobin Database Admin"));
@@ -500,17 +506,17 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuManual(wxCommandEvent& WXUNUSED(event))
 {
-    showDocsHtmlFile(this, wxT("fr_manual.html"));
+    showDocsHtmlFile(wxT("fr_manual.html"));
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRelNotes(wxCommandEvent& WXUNUSED(event))
 {
-    showDocsHtmlFile(this, wxT("fr_whatsnew.html"));
+    showDocsHtmlFile(wxT("fr_whatsnew.html"));
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuLicense(wxCommandEvent& WXUNUSED(event))
 {
-    showDocsHtmlFile(this, wxT("fr_license.html"));
+    showDocsHtmlFile(wxT("fr_license.html"));
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))

@@ -115,6 +115,8 @@ public:
 private:
 	bool connect(bool warn);
 	void showGeneratorValue(Generator* g);
+    
+    void showDocsHtmlFile(const wxString& fileName);
 
     void set_properties();
     void do_layout();
