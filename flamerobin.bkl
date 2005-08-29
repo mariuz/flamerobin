@@ -434,10 +434,11 @@
                 <!-- create the directories: -->
                 mkdir -p $(BUNDLE)
                 mkdir -p $(BUNDLE)/MacOS
-                mkdir -p $(BUNDLE)/MacOS/confdefs
-                mkdir -p $(BUNDLE)/MacOS/docs
-                mkdir -p $(BUNDLE)/MacOS/html-templates
                 mkdir -p $(BUNDLE)/Resources
+                mkdir -p $(BUNDLE)/SharedSupport
+                mkdir -p $(BUNDLE)/SharedSupport/confdefs
+                mkdir -p $(BUNDLE)/SharedSupport/docs
+                mkdir -p $(BUNDLE)/SharedSupport/html-templates
 
                 <!-- PkgInfo: -->
                 echo -n "APPL????" >$(BUNDLE)/PkgInfo
@@ -448,9 +449,9 @@
                 <!-- and copy resources, icons and support files -->
                 cp -f $(BUNDLE_PLIST) $(BUNDLE)/Info.plist
                 cp -f $(BUNDLE_ICONS) $(BUNDLE)/Resources
-                cp -R $(CONFIGOPTIONSDIR)/$(CONFIGOPTIONSFILES) $(BUNDLE)/MacOS/confdefs
-                cp -R $(HTMLDOCSDIR)/$(HTMLDOCFILES) $(BUNDLE)/MacOS/docs
-                cp -R $(HTMLTEMPLATEDIR)/$(HTMLTEMPLATEFILES) $(BUNDLE)/MacOS/html-templates
+                cp -R $(CONFIGOPTIONSDIR)/$(CONFIGOPTIONSFILES) $(BUNDLE)/SharedSupport/confdefs
+                cp -R $(HTMLDOCSDIR)/$(HTMLDOCFILES) $(BUNDLE)/SharedSupport/docs
+                cp -R $(HTMLTEMPLATEDIR)/$(HTMLTEMPLATEFILES) $(BUNDLE)/SharedSupport/html-templates
             </command>
         </modify-target>
 
