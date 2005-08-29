@@ -23,10 +23,9 @@
   Contributor(s):
 */
 
-//-----------------------------------------------------------------------------
 #ifndef PREFERENCESDIALOG_H
 #define PREFERENCESDIALOG_H
-
+//-----------------------------------------------------------------------------
 #include <list>
 #include <string>
 
@@ -35,9 +34,9 @@
 #include <wx/treectrl.h>
 #include <wx/imaglist.h>
 
-#include "BaseDialog.h"
 #include "config/Config.h"
-
+#include "gui/BaseDialog.h"
+//-----------------------------------------------------------------------------
 class Optionbook;
 class wxXmlNode;
 //-----------------------------------------------------------------------------

@@ -36,14 +36,14 @@ Contributor(s): Milan Babuskov, Nando Dessena
     #include "wx/wx.h"
 #endif
 
-#include <algorithm>
-
 #include <wx/datetime.h>
+
+#include <algorithm>
 
 #include <ibpp.h>
 
-#include "BackupFrame.h"
 #include "config/Config.h"
+#include "gui/BackupFrame.h"
 #include "styleguide.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------

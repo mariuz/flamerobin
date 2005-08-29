@@ -18,6 +18,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s):
 */
 
@@ -30,10 +32,11 @@
 
 #include <string>
 #include <vector>
-#include "visitor.h"
+
+#include "core/Visitor.h"
 #include "metadataitem.h"
 #include "constraints.h"
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string ColumnConstraint::getColumnList() const
 {
 	std::string result;
@@ -45,7 +48,7 @@ std::string ColumnConstraint::getColumnList() const
 	}
 	return result;
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string ForeignKey::getReferencedColumnList() const
 {
 	std::string result;
@@ -57,9 +60,9 @@ std::string ForeignKey::getReferencedColumnList() const
 	}
 	return result;
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void Constraint::accept(Visitor *v)
 {
 	v->visit(*this);
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------

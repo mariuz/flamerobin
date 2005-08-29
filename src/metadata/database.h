@@ -18,12 +18,14 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): Nando Dessena
 */
 
 #ifndef FR_DATABASE_H
 #define FR_DATABASE_H
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #include <map>
 
 #include <ibpp.h>
@@ -43,7 +45,7 @@
 // ND: for some reason including server.h doesn't work, probably a cyclic
 // dependency issue.
 class Server;
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 class Credentials
 {
 private:
@@ -62,7 +64,7 @@ public:
     void setPassword(std::string value);
     void setRole(std::string value);
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 class Database: public MetadataItem
 {
 private:

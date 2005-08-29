@@ -152,7 +152,10 @@ void GridTable::fetch()
         {
             std::string value;
             if (CreateString(statementM, i, value))
-                s.push_back(new DataGridCell(std2wx(value)));
+            {
+                DataGridCell* cell = new DataGridCell(std2wx(value));
+                s.push_back(cell);
+            }
             else
                 s.push_back(0);
         }
@@ -223,7 +226,7 @@ IBPP::SDT GridTable::getColumnType(int col)
         catch (IBPP::Exception& e)
         {
             // perhaps we should clear the statement, since something is obviously wrong
-            columnCountM = col-1;
+            columnCountM = col - 1;
             ::wxMessageBox(std2wx(e.ErrorMessage()), _("An IBPP error occurred."));
             return IBPP::sdString;
         }

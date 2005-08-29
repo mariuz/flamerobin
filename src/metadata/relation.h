@@ -18,6 +18,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s):
 */
 
@@ -25,7 +27,7 @@
 //
 //
 //
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #ifndef FR_METADATAITEMWITHCOLUMNS_H
 #define FR_METADATAITEMWITHCOLUMNS_H
 
@@ -34,7 +36,7 @@
 #include "collection.h"
 #include "column.h"
 class Trigger;
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 class Relation: public MetadataItem
 {
 protected:
@@ -47,5 +49,5 @@ public:
 	bool getTriggers(std::vector<Trigger *>& list, Trigger::firingTimeType beforeOrAfter);
 	Relation();
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #endif

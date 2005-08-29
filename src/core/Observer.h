@@ -18,17 +18,14 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s):
 */
 
-//
-//Observer pattern [GoF]
-//
-//
-//-----------------------------------------------------------------------------
 #ifndef FR_OBSERVER_H
 #define FR_OBSERVER_H
-
+//-----------------------------------------------------------------------------
 #include <list>
 
 class Subject;
@@ -36,15 +33,17 @@ class Subject;
 class Observer
 {
 protected:
-    std::list<Subject *> observedObjectsM;            // pointer to objects that it is watching
+    // pointer to objects that it is watching
+    std::list<Subject*> subjectsM;
 public:
     Observer();
     virtual ~Observer();
     virtual void update() = 0;
 
-    Subject *getFirstObservedObject();
-    void addObservedObject(Subject *object);
-    virtual void removeObservedObject(Subject *object);    // virtual so some controls can do something extra
+    Subject* getFirstSubject();
+    void addSubject(Subject* subject);
+    // virtual so some controls can do something extra
+    virtual void removeSubject(Subject* subject);
 };
 //-----------------------------------------------------------------------------
 #endif

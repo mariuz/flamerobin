@@ -1378,7 +1378,7 @@ void ExecuteSqlFrame::setDatabase(Database *db)
     statusbar_1->SetStatusText(std2wx(s), 0);
 
     transactionM = IBPP::TransactionFactory(databaseM->getIBPPDatabase());
-    db->attach(this);    // observe database object
+    db->attachObserver(this);    // observe database object
 
     executedStatementsM.clear();
     InTransaction(false);    // enable/disable controls
@@ -1392,10 +1392,10 @@ void ExecuteSqlFrame::setDatabase(Database *db)
 }
 //-----------------------------------------------------------------------------
 //! closes window if database is removed (unregistered)
-void ExecuteSqlFrame::removeObservedObject(Subject *object)
+void ExecuteSqlFrame::removeSubject(Subject* subject)
 {
-    Observer::removeObservedObject(object);
-    if (object == databaseM)
+    Observer::removeSubject(subject);
+    if (subject == databaseM)
         Close();
 }
 //-----------------------------------------------------------------------------

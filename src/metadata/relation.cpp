@@ -18,6 +18,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s):
 */
 
@@ -29,138 +31,139 @@
 #endif
 
 #include <ibpp.h>
+
+#include "collection.h"
+#include "database.h"
 #include "dberror.h"
 #include "frutils.h"
-#include "database.h"
-#include "collection.h"
 #include "relation.h"
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 Relation::Relation()
 {
-	columnsM.setParent(this);
+    columnsM.setParent(this);
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 Column *Relation::addColumn(Column &c)
 {
-	checkAndLoadColumns();
-	Column *cc = columnsM.add(c);
-	cc->setParent(this);
-	return cc;
+    checkAndLoadColumns();
+    Column *cc = columnsM.add(c);
+    cc->setParent(this);
+    return cc;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 bool Relation::checkAndLoadColumns()
 {
-	return (!columnsM.empty() || loadColumns());
+    return (!columnsM.empty() || loadColumns());
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //! returns false if error occurs, and places the error text in error variable
 bool Relation::loadColumns()
 {
-	columnsM.clear();
-	Database *d = static_cast<Database *>(getParent());
-	if (!d)
-	{
-		lastError().setMessage("database not set");
-		return false;
-	}
+    columnsM.clear();
+    Database *d = static_cast<Database *>(getParent());
+    if (!d)
+    {
+        lastError().setMessage("database not set");
+        return false;
+    }
 
-	IBPP::Database& db = d->getIBPPDatabase();
+    IBPP::Database& db = d->getIBPPDatabase();
 
-	try
-	{
-		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-		tr1->Start();
-		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-		st1->Prepare(
-			"select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source, l.rdb$collation_name, f.rdb$computed_blr, "
-			" f.rdb$computed_source "
-			" from rdb$fields f"
-			" join rdb$relation_fields r on f.rdb$field_name=r.rdb$field_source"
-			" left outer join rdb$collations l on l.rdb$collation_id = r.rdb$collation_id and l.rdb$character_set_id = f.rdb$character_set_id"
-			" where r.rdb$relation_name = ?"
-			" order by r.rdb$field_position"
-		);
+    try
+    {
+        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+        tr1->Start();
+        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+        st1->Prepare(
+            "select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source, l.rdb$collation_name, f.rdb$computed_blr, "
+            " f.rdb$computed_source "
+            " from rdb$fields f"
+            " join rdb$relation_fields r on f.rdb$field_name=r.rdb$field_source"
+            " left outer join rdb$collations l on l.rdb$collation_id = r.rdb$collation_id and l.rdb$character_set_id = f.rdb$character_set_id"
+            " where r.rdb$relation_name = ?"
+            " order by r.rdb$field_position"
+        );
 
-		st1->Set(1, getName());
-		st1->Execute();
-		while (st1->Fetch())
-		{
-			std::string name, source, collation, computedSrc;
-			st1->Get(1, name);
-			st1->Get(3, source);
-			st1->Get(4, collation);
-			readBlob(st1, 6, computedSrc);
+        st1->Set(1, getName());
+        st1->Execute();
+        while (st1->Fetch())
+        {
+            std::string name, source, collation, computedSrc;
+            st1->Get(1, name);
+            st1->Get(3, source);
+            st1->Get(4, collation);
+            readBlob(st1, 6, computedSrc);
 
-			Column *cc = columnsM.add();
-			cc->setName(name);
-			cc->setParent(this);
-			cc->Init(!st1->IsNull(2), source, !st1->IsNull(5), computedSrc, collation);
-		}
+            Column *cc = columnsM.add();
+            cc->setName(name);
+            cc->setParent(this);
+            cc->Init(!st1->IsNull(2), source, !st1->IsNull(5), computedSrc, collation);
+        }
 
-		tr1->Commit();
-		notify();
-		return true;
-	}
-	catch (IBPP::Exception &e)
-	{
-		lastError().setMessage(e.ErrorMessage());
-	}
-	catch (...)
-	{
-		lastError().setMessage("System error.");
-	}
+        tr1->Commit();
+        notifyObservers();
+        return true;
+    }
+    catch (IBPP::Exception &e)
+    {
+        lastError().setMessage(e.ErrorMessage());
+    }
+    catch (...)
+    {
+        lastError().setMessage("System error.");
+    }
 
-	return false;
+    return false;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //! load list of triggers for relation
 //! link them to triggers in database's collection
 bool Relation::getTriggers(std::vector<Trigger *>& list, Trigger::firingTimeType beforeOrAfter)
 {
-	Database *d = getDatabase();
-	if (!d)
-	{
-		lastError().setMessage("database not set");
-		return false;
-	}
+    Database *d = getDatabase();
+    if (!d)
+    {
+        lastError().setMessage("database not set");
+        return false;
+    }
 
-	IBPP::Database& db = d->getIBPPDatabase();
-	try
-	{
-		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-		tr1->Start();
-		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-		st1->Prepare(
-			"select rdb$trigger_name from rdb$triggers where rdb$relation_name = ? "
-			"order by rdb$trigger_sequence"
-		);
-		st1->Set(1, getName());
-		st1->Execute();
-		while (st1->Fetch())
-		{
-			std::string name;
-			st1->Get(1, name);
-			name.erase(name.find_last_not_of(" ") + 1);
-			Trigger *t = dynamic_cast<Trigger *>(d->findByNameAndType(ntTrigger, name));
-			if (t && t->getFiringTime() == beforeOrAfter)
-				list.push_back(t);
-		}
-		tr1->Commit();
-		return true;
-	}
-	catch (IBPP::Exception &e)
-	{
-		lastError().setMessage(e.ErrorMessage());
-	}
-	catch (...)
-	{
-		lastError().setMessage("System error.");
-	}
-	return false;
+    IBPP::Database& db = d->getIBPPDatabase();
+    try
+    {
+        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+        tr1->Start();
+        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+        st1->Prepare(
+            "select rdb$trigger_name from rdb$triggers where rdb$relation_name = ? "
+            "order by rdb$trigger_sequence"
+        );
+        st1->Set(1, getName());
+        st1->Execute();
+        while (st1->Fetch())
+        {
+            std::string name;
+            st1->Get(1, name);
+            name.erase(name.find_last_not_of(" ") + 1);
+            Trigger *t = dynamic_cast<Trigger *>(d->findByNameAndType(ntTrigger, name));
+            if (t && t->getFiringTime() == beforeOrAfter)
+                list.push_back(t);
+        }
+        tr1->Commit();
+        return true;
+    }
+    catch (IBPP::Exception &e)
+    {
+        lastError().setMessage(e.ErrorMessage());
+    }
+    catch (...)
+    {
+        lastError().setMessage("System error.");
+    }
+    return false;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 bool Relation::getChildren(std::vector<MetadataItem *>& temp)
 {
-	return columnsM.getChildren(temp);
+    return columnsM.getChildren(temp);
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------

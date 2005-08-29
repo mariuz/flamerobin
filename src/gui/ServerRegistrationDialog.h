@@ -25,10 +25,10 @@ Contributor(s): Michael Hieke, Nando Dessena
 
 #ifndef SERVERREGISTRATIONDIALOG_H
 #define SERVERREGISTRATIONDIALOG_H
-
+//-----------------------------------------------------------------------------
 #include <wx/wx.h>
 
-#include "BaseDialog.h"
+#include "gui/BaseDialog.h"
 #include "metadata/server.h"
 //-----------------------------------------------------------------------------
 class ServerRegistrationDialog: public BaseDialog {

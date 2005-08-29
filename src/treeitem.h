@@ -18,25 +18,26 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s):
 */
 
-//
-//
-//
-//
 #ifndef FR_TREEITEM_H
 #define FR_TREEITEM_H
-
+//-----------------------------------------------------------------------------
 #include <wx/wx.h>
 #include <wx/treebase.h>
 #include <wx/treectrl.h>
+
 #include <vector>
+
+#include "core/Observer.h"
 #include "metadata/metadataitem.h"
-#include "observer.h"
 #include "myTreeCtrl.h"
-//------------------------------------------------------------------------------
-// TreeItem is a special kind of observer, which observes special kind of subjects: YxMetadataItems
+//-----------------------------------------------------------------------------
+// TreeItem is a special kind of observer, which observes special kind 
+// of subjects: YxMetadataItems
 class TreeItem: public wxTreeItemData, public Observer
 {
 private:
@@ -50,5 +51,5 @@ public:
 
 	virtual void update();
 };
-//------------------------------------------------------------------------------
-#endif
+//-----------------------------------------------------------------------------
+#endif // FR_TREEITEM_H

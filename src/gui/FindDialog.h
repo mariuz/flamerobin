@@ -25,11 +25,12 @@
 
 #ifndef FR_FIND_DIALOG
 #define FR_FIND_DIALOG
-
+//-----------------------------------------------------------------------------
 #include <wx/wx.h>
 #include <wx/image.h>
 #include <wx/stc/stc.h>
-#include "BaseDialog.h"
+
+#include "gui/BaseDialog.h"
 //-----------------------------------------------------------------------------
 namespace se 	// instead of defines
 {

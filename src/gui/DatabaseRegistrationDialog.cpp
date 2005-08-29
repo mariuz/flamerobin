@@ -39,7 +39,7 @@ Contributor(s): Michael Hieke, Nando Dessena
 #include <wx/filename.h>
 #include <wx/gbsizer.h>
 
-#include "DatabaseRegistrationDialog.h"
+#include "gui/DatabaseRegistrationDialog.h"
 #include "styleguide.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------

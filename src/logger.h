@@ -18,16 +18,17 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): ________________.
 */
 
-// Functions used to log successfully executed statements
-// in database or textual files
-//
-//
 #ifndef FR_LOGGER_H
 #define FR_LOGGER_H
-#include "ibpp.h"
+//-----------------------------------------------------------------------------
+// Functions used to log successfully executed statements
+// in database or textual files
+#include <ibpp.h>
 //-----------------------------------------------------------------------------
 class executedStatement
 {
@@ -36,7 +37,7 @@ public:
     IBPP::STT type;
     executedStatement(const std::string& st, const IBPP::STT& t): statement(st), type(t) {};
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 class Database;
 
 class Logger            // maybe we'll extend this later
@@ -47,5 +48,5 @@ private:
 public:
     static bool logStatement(const executedStatement& st, Database *db);
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #endif

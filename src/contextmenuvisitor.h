@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 /*
   The contents of this file are subject to the Initial Developer's Public
   License Version 1.0 (the "License"); you may not use this file except in
@@ -19,16 +19,18 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): Milan Babuskov.
 */
-//------------------------------------------------------------------------------
+
 #ifndef FR_CONTEXTMENUVISITOR_H
 #define FR_CONTEXTMENUVISITOR_H
-
-#include "visitor.h"
+//-----------------------------------------------------------------------------
+#include "core/Visitor.h"
 
 class wxMenu;
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 class ContextMenuVisitor : public Visitor
 {
 public:
@@ -55,5 +57,5 @@ private:
     void addRegularObjectMenu();
     void addSelectMenu(bool isTable = false);
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #endif //FR_CONTEXTMENUVISITOR_H

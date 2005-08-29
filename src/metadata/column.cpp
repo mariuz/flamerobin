@@ -33,22 +33,22 @@
 #include <sstream>
 #include <string>
 
-#include "config/Config.h"
 #include "collection.h"
 #include "column.h"
+#include "config/Config.h"
 #include "constraints.h"
+#include "core/Visitor.h"
 #include "database.h"
 #include "domain.h"
 #include "ugly.h"
-#include "visitor.h"
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //! new undefined column
 Column::Column()
     : MetadataItem()
 {
 	typeM = ntColumn;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //! initialize properties
 void Column::Init(bool notnull, std::string source, bool computed, std::string computedSource, std::string collation)
 {
@@ -60,17 +60,17 @@ void Column::Init(bool notnull, std::string source, bool computed, std::string c
 	computedSourceM = computedSource;
 	collationM = collation;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 bool Column::isNullable() const
 {
 	return !notnullM;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 bool Column::isComputed() const
 {
 	return computedM;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 bool Column::isPrimaryKey() const
 {
 	Table *t = dynamic_cast<Table *>(getParent());
@@ -84,7 +84,7 @@ bool Column::isPrimaryKey() const
 			return true;
 	return false;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //! retrieve datatype from domain if possible
 std::string Column::getDatatype()
 {
@@ -121,7 +121,7 @@ std::string Column::getDatatype()
 		ret += " (" + computedSourceM + ")";
 	return ret;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //! printable name = column_name + column_datatype [+ not null]
 std::string Column::getPrintableName()
 {
@@ -130,7 +130,7 @@ std::string Column::getPrintableName()
 		ret += " not null";
 	return ret;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 Domain *Column::getDomain() const
 {
 	Database *d = getDatabase();
@@ -143,24 +143,24 @@ Domain *Column::getDomain() const
 	// since we haven't find the domain, check the database
 	return d->loadMissingDomain(sourceM);
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string Column::getSource() const
 {
 	return sourceM;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string Column::getCollation() const
 {
 	return collationM;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string Column::getDropSqlStatement() const
 {
 	return "ALTER TABLE " + getParent()->getName() + " DROP " + getName();
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void Column::accept(Visitor *v)
 {
 	v->visit(*this);
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------

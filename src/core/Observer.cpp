@@ -18,7 +18,9 @@
 
   All Rights Reserved.
 
-  Contributor(s): Milan Babuskov.
+  $Id$
+
+  Contributor(s): Milan Babuskov, Michael Hieke
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -33,48 +35,45 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
-
-//
-//
-//
-//
 //-----------------------------------------------------------------------------
-#include <list>
 #include <algorithm>
-#include "observer.h"
-#include "subject.h"
+#include <list>
 
+#include "core/Observer.h"
+#include "core/Subject.h"
+//-----------------------------------------------------------------------------
+using namespace std;
+
+typedef list<Subject*>::iterator SubjectIterator;
+//-----------------------------------------------------------------------------
 Observer::Observer()
 {
 }
 //-----------------------------------------------------------------------------
 Observer::~Observer()
 {
-    std::list<Subject *>::iterator it;
-    while (true)
+    while (!subjectsM.empty())
     {
-        it = observedObjectsM.begin();
-        if (it == observedObjectsM.end())
-            break;
-        (*it)->detach(this);    // object will be removed by removeObservedObject()
+        SubjectIterator it = subjectsM.begin();
+        // object will be removed by removeObservedObject()
+        (*it)->detachObserver(this);
     }
 }
 //-----------------------------------------------------------------------------
-Subject *Observer::getFirstObservedObject()
+Subject* Observer::getFirstSubject()
 {
-    if (observedObjectsM.empty())
+    if (subjectsM.empty())
         return 0;
-    else
-        return *(observedObjectsM.begin());
+    return *(subjectsM.begin());
 }
 //-----------------------------------------------------------------------------
-void Observer::addObservedObject(Subject *object)
+void Observer::addSubject(Subject* subject)
 {
-    observedObjectsM.push_back(object);
+    subjectsM.push_back(subject);
 }
 //-----------------------------------------------------------------------------
-void Observer::removeObservedObject(Subject *object)
+void Observer::removeSubject(Subject* subject)
 {
-    observedObjectsM.erase(std::find(observedObjectsM.begin(), observedObjectsM.end(), object));
+    subjectsM.erase(find(subjectsM.begin(), subjectsM.end(), subject));
 }
 //-----------------------------------------------------------------------------

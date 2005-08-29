@@ -18,6 +18,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): Marius Popa, Nando Dessena
 */
 
@@ -28,43 +30,42 @@
     #pragma hdrstop
 #endif
 
+#include <wx/filefn.h>
+
 #include <fstream>
 #include <sstream>
 #include <string>
 
-#include <wx/filefn.h>
-
 #include "config/Config.h"
+#include "core/Visitor.h"
 #include "database.h"
 #include "root.h"
 #include "server.h"
 #include "ugly.h"
-#include "visitor.h"
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 using namespace std;
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //! access to the singleton root of the DBH.
 Root& getGlobalRoot()
 {
     static Root globalRoot;
     return globalRoot;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 Root::Root()
     : MetadataItem(), fileNameM(""), dirtyM(false), nextIdM(1)
 {
     setName("Firebird Servers");
     typeM = ntRoot;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 Root::~Root()
 {
     if (dirtyM)
         save();
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //! loads servers.xml file and:
-
 //! creates server nodes, fills their properties
 //! creates database nodes for server nodes, fills their properties
 //! returns: false if file cannot be loaded, true otherwise
@@ -196,23 +197,23 @@ bool Root::load()
     file.close();
     return true;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 Server *Root::addServer(Server& server)
 {
     Server *temp = serversM.add(server);
     temp->setParent(this);                    // grab it from collection
     dirtyM = true;
-    notify();
+    notifyObservers();
     return temp;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void Root::removeServer(Server* server)
 {
     serversM.remove(server);
     dirtyM = true;
-    notify();
+    notifyObservers();
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // browses the server nodes, and their database nodes
 // saves everything to servers.xml file
 // returns: false if file cannot be opened for writing, true otherwise
@@ -256,45 +257,45 @@ bool Root::save()
     file.close();
     return true;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void Root::notifyAllServers()
 {
     for (MetadataCollection<Server>::iterator it = serversM.begin(); it != serversM.end(); ++it)
-        (*it).notify();
+        (*it).notifyObservers();
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 bool Root::getChildren(vector<MetadataItem *>& temp)
 {
     return serversM.getChildren(temp);
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 bool Root::orderedChildren() const
 {
     bool ordered = false;
     config().getValue("OrderServersInTree", ordered);
     return ordered;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 const string Root::getItemPath() const
 {
     // Root is root, don't make the path strings any longer than needed.
     return "";
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 string Root::getFileName()
 {
     if (fileNameM.empty())
         fileNameM = config().getDBHFileName();
     return fileNameM;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void Root::accept(Visitor *v)
 {
     v->visit(*this);
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 const unsigned int Root::getNextId()
 {
     return nextIdM++;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------

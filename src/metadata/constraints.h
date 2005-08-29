@@ -18,53 +18,56 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s):
 */
 
 #ifndef FR_CONSTRAINTS_H
 #define FR_CONSTRAINTS_H
-
+//-----------------------------------------------------------------------------
 #include <string>
 #include <vector>
+
 #include "metadataitem.h"
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // These could all be simple "struct"s but we want to add some functionality later
 //
 class Constraint: public MetadataItem
 {
-	// nothing needed yet, but it may be once
+    // nothing needed yet, but it may be once
     virtual void accept(Visitor *v);
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //! primary keys and uniques
 class ColumnConstraint: public Constraint
 {
 public:
-	typedef std::vector<std::string>::const_iterator const_iterator;
-	//std::string indexName; needed?
-	std::vector<std::string> columnsM;
+    typedef std::vector<std::string>::const_iterator const_iterator;
+    //std::string indexName; needed?
+    std::vector<std::string> columnsM;
 
-	std::string getColumnList() const;
-	const_iterator begin() { return columnsM.begin(); };
-	const_iterator end() { return columnsM.end(); };
+    std::string getColumnList() const;
+    const_iterator begin() { return columnsM.begin(); };
+    const_iterator end() { return columnsM.end(); };
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //! checks
 class CheckConstraint: public Constraint
 {
 public:
-	std::string sourceM;
+    std::string sourceM;
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //! foreign keys
 class ForeignKey: public ColumnConstraint
 {
 public:
-	std::string referencedTableM;					// referenced table
-	std::vector<std::string> referencedColumnsM;	// referenced columns
-	std::string updateActionM;
-	std::string deleteActionM;
-	std::string getReferencedColumnList() const;
+    std::string referencedTableM;                   // referenced table
+    std::vector<std::string> referencedColumnsM;    // referenced columns
+    std::string updateActionM;
+    std::string deleteActionM;
+    std::string getReferencedColumnList() const;
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #endif

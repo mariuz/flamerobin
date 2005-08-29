@@ -227,10 +227,11 @@
     </set>
 
     <set var="HEADERFILES">
-        $(SOURCEDIR)/BaseDialog.h
-        $(SOURCEDIR)/BaseFrame.h
         $(SOURCEDIR)/config/Config.h
         $(SOURCEDIR)/converters.h
+        $(SOURCEDIR)/core/Observer.h
+        $(SOURCEDIR)/core/Subject.h
+        $(SOURCEDIR)/core/Visitor.h
         $(SOURCEDIR)/dberror.h
         $(SOURCEDIR)/framemanager.h
         $(SOURCEDIR)/frDataGrid.h
@@ -239,6 +240,8 @@
         $(SOURCEDIR)/frutils.h
         $(SOURCEDIR)/gui/BackupFrame.h
         $(SOURCEDIR)/gui/BackupRestoreBaseFrame.h
+        $(SOURCEDIR)/gui/BaseDialog.h
+        $(SOURCEDIR)/gui/BaseFrame.h
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.h
         $(SOURCEDIR)/gui/ExecuteSqlFrame.h
         $(SOURCEDIR)/gui/FieldPropertiesFrame.h
@@ -278,12 +281,9 @@
         $(SOURCEDIR)/metadata/view.h
         $(SOURCEDIR)/simpleparser.h
         $(SOURCEDIR)/myTreeCtrl.h
-        $(SOURCEDIR)/observer.h
-        $(SOURCEDIR)/visitor.h
         $(SOURCEDIR)/contextmenuvisitor.h
         $(SOURCEDIR)/statementHistory.h
         $(SOURCEDIR)/styleguide.h
-        $(SOURCEDIR)/subject.h
         $(SOURCEDIR)/treeitem.h
         $(SOURCEDIR)/ugly.h
         $(SOURCEDIR)/urihandler.h
@@ -303,10 +303,10 @@
 
     <set var="SOURCEFILES">
         $(SOURCEDIR)/addconstrainthandler.cpp
-        $(SOURCEDIR)/BaseDialog.cpp
-        $(SOURCEDIR)/BaseFrame.cpp
         $(SOURCEDIR)/config/Config.cpp
         $(SOURCEDIR)/converters.cpp
+        $(SOURCEDIR)/core/Observer.cpp
+        $(SOURCEDIR)/core/Subject.cpp
         $(SOURCEDIR)/dberror.cpp
         $(SOURCEDIR)/framemanager.cpp
         $(SOURCEDIR)/frDataGrid.cpp
@@ -316,6 +316,8 @@
         $(SOURCEDIR)/frutils.cpp
         $(SOURCEDIR)/gui/BackupFrame.cpp
         $(SOURCEDIR)/gui/BackupRestoreBaseFrame.cpp
+        $(SOURCEDIR)/gui/BaseDialog.cpp
+        $(SOURCEDIR)/gui/BaseFrame.cpp
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.cpp
         $(SOURCEDIR)/gui/ExecuteSqlFrame.cpp
         $(SOURCEDIR)/gui/FieldPropertiesFrame.cpp
@@ -355,13 +357,11 @@
         $(SOURCEDIR)/metadata/view.cpp
         $(SOURCEDIR)/myTreeCtrl.cpp
         $(SOURCEDIR)/objectdescriptionhandler.cpp
-        $(SOURCEDIR)/observer.cpp
         $(SOURCEDIR)/contextmenuvisitor.cpp
         $(SOURCEDIR)/simpleparser.cpp
         $(SOURCEDIR)/statementHistory.cpp
         $(SOURCEDIR)/styleguide.cpp
         $(PLATFORMSPECIFICSOURCES)
-        $(SOURCEDIR)/subject.cpp
         $(SOURCEDIR)/treeitem.cpp
         $(SOURCEDIR)/ugly.cpp
         $(SOURCEDIR)/urihandler.cpp

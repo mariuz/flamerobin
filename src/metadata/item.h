@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 /*
   The contents of this file are subject to the Initial Developer's Public
   License Version 1.0 (the "License"); you may not use this file except in
@@ -19,15 +19,17 @@
 
   All Rights Reserved.
 
-  Contributor(s): .
+  $Id$
+
+  Contributor(s):
 */
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #ifndef FR_ITEM_H
 #define FR_ITEM_H
 
-#include "subject.h"
+#include "core/Subject.h"
 class Visitor;
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //! Base Item class, currently metadataitems are only descendants, but in the future
 //! those could be other things that need Visitor pattern implemented on them.
 //! (Database Folders and other visual stuff comes to mind as a possibility)
@@ -36,5 +38,5 @@ class Item: public Subject
 public:
     virtual void accept(Visitor *v);
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #endif

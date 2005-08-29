@@ -18,16 +18,20 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s):
 */
 
 #ifndef TRIGGERWIZARDDIALOG_H
 #define TRIGGERWIZARDDIALOG_H
-
+//-----------------------------------------------------------------------------
 #include <wx/wx.h>
 #include <wx/image.h>
 #include <wx/spinctrl.h>
-#include "BaseDialog.h"
+
+#include "gui/BaseDialog.h"
+//-----------------------------------------------------------------------------
 class MetadataItem;
 //-----------------------------------------------------------------------------
 class TriggerWizardDialog: public BaseDialog

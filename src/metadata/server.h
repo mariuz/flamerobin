@@ -18,6 +18,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): Nando Dessena
 */
 
@@ -25,14 +27,14 @@
 //
 //
 //
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #ifndef FR_SERVER_H
 #define FR_SERVER_H
 
 #include "metadataitem.h"
 #include "collection.h"
 #include "database.h"
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // this is a coupled node (in visual sense). Server equals collection of YDatabases in wxTree
 // that's why getChildren() method just copies, since wxTree item will have pointer to Server.
 class Server: public MetadataItem
@@ -69,5 +71,5 @@ public:
 	bool hasConnectedDatabase() const;
 	virtual const string getItemPath() const;
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #endif

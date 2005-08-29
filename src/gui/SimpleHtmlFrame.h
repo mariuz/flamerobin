@@ -18,21 +18,22 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s):
 */
 
 #ifndef FR_SIMPLEHTMLFRAME_H
 #define FR_SIMPLEHTMLFRAME_H
-
+//-----------------------------------------------------------------------------
 #include <wx/wx.h>
 
-#include "BaseFrame.h"
-
-//------------------------------------------------------------------------------
+#include "gui/BaseFrame.h"
+//-----------------------------------------------------------------------------
 bool showHtmlFile(wxWindow* parent, const wxFileName& fileName);
 
 class PrintableHtmlWindow;
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 class SimpleHtmlFrame: public BaseFrame
 {
 public:
@@ -42,5 +43,5 @@ protected:
     virtual const std::string getName() const;
     virtual const wxRect getDefaultRect() const;
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #endif // FR_SIMPLEHTMLFRAME_H

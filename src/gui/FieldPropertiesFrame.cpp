@@ -18,6 +18,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): Nando Dessena
 */
 
@@ -45,10 +47,10 @@
 FieldPropertiesFrame::FieldPropertiesFrame(wxWindow* parent, int id, wxString title, Table *table, const wxPoint& pos, const wxSize& size, long style):
     BaseFrame(parent, id, title, pos, size, style)
 {
-	tableM = table;
-	if (table)
-		table->attach(this);
-	fieldM = 0;
+    tableM = table;
+    if (table)
+        table->attachObserver(this);
+    fieldM = 0;
 
     // begin wxGlade: FieldPropertiesFrame::FieldPropertiesFrame
     panel_1 = new wxPanel(this, -1);
@@ -56,8 +58,8 @@ FieldPropertiesFrame::FieldPropertiesFrame(wxWindow* parent, int id, wxString ti
     textctrl_fieldname = new wxTextCtrl(panel_1, ID_textctrl_fieldname, wxT(""));
     label_1 = new wxStaticText(panel_1, -1, _("Domain"));
     const wxString ch_domains_choices[] = {
-        wxT(""),	// ugly hack. The control doesn't want to show big list for selection if initial list is short
-        wxT(""),	//            so it looks really ugly on the screen
+        wxT(""),    // ugly hack. The control doesn't want to show big list for selection if initial list is short
+        wxT(""),    //            so it looks really ugly on the screen
         wxT(""),
         wxT(""),
         wxT(""),
@@ -95,7 +97,7 @@ FieldPropertiesFrame::FieldPropertiesFrame(wxWindow* parent, int id, wxString ti
     cb_notnull = new wxCheckBox(panel_1, -1, _("Not null"));
     label_5 = new wxStaticText(panel_1, -1, _("Charset"));
     const wxString ch_charset_choices[] = {
-		wxT("NONE")
+        wxT("NONE")
     };
     ch_charset = new wxChoice(panel_1, ID_ch_charset, wxDefaultPosition, wxDefaultSize, 1, ch_charset_choices);
     Database *d = table->getDatabase();
@@ -113,8 +115,8 @@ FieldPropertiesFrame::FieldPropertiesFrame(wxWindow* parent, int id, wxString ti
     
     label_6 = new wxStaticText(panel_1, -1, _("Collate"));
     const wxString ch_collate_choices[] = {
-        wxT(""),	// ugly hack. The control doesn't want to show big list for selection if initial list is short
-        wxT(""),	//            so it looks really ugly on the screen
+        wxT(""),    // ugly hack. The control doesn't want to show big list for selection if initial list is short
+        wxT(""),    //            so it looks really ugly on the screen
         wxT(""),
         wxT(""),
         wxT(""),
@@ -131,8 +133,8 @@ FieldPropertiesFrame::FieldPropertiesFrame(wxWindow* parent, int id, wxString ti
     textctrl_generatorname = new wxTextCtrl(panel_1, ID_textctrl_generatorname, wxT(""));
     radio_existing = new wxRadioButton(panel_1, ID_radio_existing, _("Use existing generator"));
     const wxString ch_generators_choices[] = {
-        wxT(""),	// ugly hack. The control doesn't want to show big list for selection if initial list is short
-        wxT(""),	//            so it looks really ugly on the screen
+        wxT(""),    // ugly hack. The control doesn't want to show big list for selection if initial list is short
+        wxT(""),    //            so it looks really ugly on the screen
         wxT(""),
         wxT(""),
         wxT(""),
@@ -157,7 +159,7 @@ FieldPropertiesFrame::FieldPropertiesFrame(wxWindow* parent, int id, wxString ti
     icon.CopyFromBitmap(bmp);
     SetIcon(icon);
 
-	button_cancel->SetFocus();
+    button_cancel->SetFocus();
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::set_properties()
@@ -236,381 +238,381 @@ void FieldPropertiesFrame::do_layout()
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(FieldPropertiesFrame, wxFrame)
-	EVT_BUTTON(FieldPropertiesFrame::ID_button_edit_domain, FieldPropertiesFrame::OnButtonEditDomainClick)
-	EVT_BUTTON(FieldPropertiesFrame::ID_button_ok,          FieldPropertiesFrame::OnButtonOkClick)
-	EVT_BUTTON(FieldPropertiesFrame::ID_button_cancel,      FieldPropertiesFrame::OnButtonCancelClick)
-	EVT_RADIOBUTTON(FieldPropertiesFrame::ID_radio_new,      FieldPropertiesFrame::OnRadioNewClick)
-	EVT_RADIOBUTTON(FieldPropertiesFrame::ID_radio_existing, FieldPropertiesFrame::OnRadioExistingClick)
-	EVT_TEXT(FieldPropertiesFrame::ID_textctrl_generatorname, FieldPropertiesFrame::OnTextctrlGeneratornameChange)
-	EVT_TEXT(FieldPropertiesFrame::ID_textctrl_fieldname,     FieldPropertiesFrame::OnTextctrlFieldnameChange)
-	EVT_CHOICE(FieldPropertiesFrame::ID_ch_generators, FieldPropertiesFrame::OnChGeneratorsClick)
-	EVT_CHOICE(FieldPropertiesFrame::ID_ch_domains,    FieldPropertiesFrame::OnChDomainsClick)
-	EVT_CHOICE(FieldPropertiesFrame::ID_ch_charset,    FieldPropertiesFrame::OnChCharsetClick)
-	EVT_CHOICE(FieldPropertiesFrame::ID_ch_datatypes,  FieldPropertiesFrame::OnChDatatypesClick)
-	EVT_CHECKBOX(FieldPropertiesFrame::ID_cb_trigger, FieldPropertiesFrame::OnCbTriggerClick)
+    EVT_BUTTON(FieldPropertiesFrame::ID_button_edit_domain, FieldPropertiesFrame::OnButtonEditDomainClick)
+    EVT_BUTTON(FieldPropertiesFrame::ID_button_ok,          FieldPropertiesFrame::OnButtonOkClick)
+    EVT_BUTTON(FieldPropertiesFrame::ID_button_cancel,      FieldPropertiesFrame::OnButtonCancelClick)
+    EVT_RADIOBUTTON(FieldPropertiesFrame::ID_radio_new,      FieldPropertiesFrame::OnRadioNewClick)
+    EVT_RADIOBUTTON(FieldPropertiesFrame::ID_radio_existing, FieldPropertiesFrame::OnRadioExistingClick)
+    EVT_TEXT(FieldPropertiesFrame::ID_textctrl_generatorname, FieldPropertiesFrame::OnTextctrlGeneratornameChange)
+    EVT_TEXT(FieldPropertiesFrame::ID_textctrl_fieldname,     FieldPropertiesFrame::OnTextctrlFieldnameChange)
+    EVT_CHOICE(FieldPropertiesFrame::ID_ch_generators, FieldPropertiesFrame::OnChGeneratorsClick)
+    EVT_CHOICE(FieldPropertiesFrame::ID_ch_domains,    FieldPropertiesFrame::OnChDomainsClick)
+    EVT_CHOICE(FieldPropertiesFrame::ID_ch_charset,    FieldPropertiesFrame::OnChCharsetClick)
+    EVT_CHOICE(FieldPropertiesFrame::ID_ch_datatypes,  FieldPropertiesFrame::OnChDatatypesClick)
+    EVT_CHECKBOX(FieldPropertiesFrame::ID_cb_trigger, FieldPropertiesFrame::OnCbTriggerClick)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::OnButtonEditDomainClick(wxCommandEvent& WXUNUSED(event))
 {
-	// create DomainPropertiesFrame & show it
-	// when done, reload domain definition
-	//updateDomainInfo(wx2std(cb_domains->GetValue()));
+    // create DomainPropertiesFrame & show it
+    // when done, reload domain definition
+    //updateDomainInfo(wx2std(cb_domains->GetValue()));
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::OnRadioNewClick(wxCommandEvent& WXUNUSED(event))
 {
-	updateSqlWindow();
+    updateSqlWindow();
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::OnTextctrlGeneratornameChange(wxCommandEvent& WXUNUSED(event))
 {
-	updateSqlWindow();
+    updateSqlWindow();
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::OnTextctrlFieldnameChange(wxCommandEvent& WXUNUSED(event))
 {
-	updateSqlWindow();
+    updateSqlWindow();
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::OnRadioExistingClick(wxCommandEvent& WXUNUSED(event))
 {
-	updateSqlWindow();
+    updateSqlWindow();
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::OnChGeneratorsClick(wxCommandEvent& WXUNUSED(event))
 {
-	updateSqlWindow();
+    updateSqlWindow();
 }
 //-----------------------------------------------------------------------------
 //! change collation list
 void FieldPropertiesFrame::OnChCharsetClick(wxCommandEvent& WXUNUSED(event))
 {
-	loadCollations(wx2std(ch_collate->GetStringSelection()));
+    loadCollations(wx2std(ch_collate->GetStringSelection()));
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::loadCollations(std::string desired)
 {
-	Database *d = tableM->getDatabase();	// get list of collations from Ydatabase
-	if (!d)
-		return;
+    Database *d = tableM->getDatabase();    // get list of collations from Ydatabase
+    if (!d)
+        return;
 
-	std::vector<std::string> list = d->getCollations(wx2std(ch_charset->GetStringSelection()));
-	int to_select = 0;
-	int counter = 0;
-	ch_collate->Clear();
-	for (std::vector<std::string>::iterator it = list.begin(); it != list.end(); ++it)
-	{
-		ch_collate->Append(std2wx(*it));
-		if ((*it) == desired)
-			to_select = counter;
-		counter++;
-	}
+    std::vector<std::string> list = d->getCollations(wx2std(ch_charset->GetStringSelection()));
+    int to_select = 0;
+    int counter = 0;
+    ch_collate->Clear();
+    for (std::vector<std::string>::iterator it = list.begin(); it != list.end(); ++it)
+    {
+        ch_collate->Append(std2wx(*it));
+        if ((*it) == desired)
+            to_select = counter;
+        counter++;
+    }
 
-	ch_collate->SetSelection(to_select);
+    ch_collate->SetSelection(to_select);
 }
 //-----------------------------------------------------------------------------
 //! enable/disable datatype properties
 void FieldPropertiesFrame::OnChDatatypesClick(wxCommandEvent& WXUNUSED(event))
 {
-	updateEditBoxes();
+    updateEditBoxes();
 }
 //-----------------------------------------------------------------------------
 //! enable/disable datatype properties
 void FieldPropertiesFrame::OnChDomainsClick(wxCommandEvent& WXUNUSED(event))
 {
-	wxString domain = ch_domains->GetStringSelection();
-	if (domain != wxT("[new]"))
-		updateDomainInfo(wx2std(ch_domains->GetStringSelection()));
-	updateEditBoxes();
+    wxString domain = ch_domains->GetStringSelection();
+    if (domain != wxT("[new]"))
+        updateDomainInfo(wx2std(ch_domains->GetStringSelection()));
+    updateEditBoxes();
 
-	bool allowEdit = (domain == wxT("[new]") || domain.Mid(0, 4) == wxT("RDB$"));
-	ch_datatypes->Enable(allowEdit);
-	textctrl_size->Enable(allowEdit);
-	textctrl_scale->Enable(allowEdit);
+    bool allowEdit = (domain == wxT("[new]") || domain.Mid(0, 4) == wxT("RDB$"));
+    ch_datatypes->Enable(allowEdit);
+    textctrl_size->Enable(allowEdit);
+    textctrl_scale->Enable(allowEdit);
 
-	ch_charset->Enable(fieldM == 0 && domain == wxT("[new]"));	// only for new fields with new domain
+    ch_charset->Enable(fieldM == 0 && domain == wxT("[new]"));  // only for new fields with new domain
 }
 //-----------------------------------------------------------------------------
 bool datatypeHasSize(const wxString& type)
 {
-	return (type == wxT("Char") || type == wxT("Varchar") || type == wxT("Numeric") || type == wxT("Decimal"));
+    return (type == wxT("Char") || type == wxT("Varchar") || type == wxT("Numeric") || type == wxT("Decimal"));
 }
 //-----------------------------------------------------------------------------
 bool datatypeHasScale(const wxString& type)
 {
-	return (type == wxT("Numeric") || type == wxT("Decimal"));
+    return (type == wxT("Numeric") || type == wxT("Decimal"));
 }
 //-----------------------------------------------------------------------------
 bool datatypeHasCollate(const wxString& type)
 {
-	return (type == wxT("Char") || type == wxT("Varchar"));
+    return (type == wxT("Char") || type == wxT("Varchar"));
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::updateEditBoxes()
 {
-	wxString type = ch_datatypes->GetStringSelection();
-	textctrl_size->Enable(datatypeHasSize(type));
-	textctrl_scale->Enable(datatypeHasScale(type));
-	ch_collate->Enable(fieldM == 0 && datatypeHasCollate(type));
+    wxString type = ch_datatypes->GetStringSelection();
+    textctrl_size->Enable(datatypeHasSize(type));
+    textctrl_scale->Enable(datatypeHasScale(type));
+    ch_collate->Enable(fieldM == 0 && datatypeHasCollate(type));
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::OnCbTriggerClick(wxCommandEvent& WXUNUSED(event))
 {
-	updateSqlWindow();
+    updateSqlWindow();
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::OnButtonOkClick(wxCommandEvent& WXUNUSED(event))
 {
-	updateSqlWindow();	// just in case, so we can copy from it
+    updateSqlWindow();  // just in case, so we can copy from it
 
-	wxString selectedDomain = ch_domains->GetStringSelection();
-	wxString selectedDatatype = ch_datatypes->GetStringSelection();
-	wxString tsize = textctrl_size->GetValue();
-	wxString tscale = textctrl_scale->GetValue();
-	if (!datatypeHasSize(selectedDatatype))
-		tsize = wxEmptyString;
-	if (!datatypeHasScale(selectedDatatype))
-		tscale = wxEmptyString;
-	wxString fieldName = textctrl_fieldname->GetValue();
+    wxString selectedDomain = ch_domains->GetStringSelection();
+    wxString selectedDatatype = ch_datatypes->GetStringSelection();
+    wxString tsize = textctrl_size->GetValue();
+    wxString tscale = textctrl_scale->GetValue();
+    if (!datatypeHasSize(selectedDatatype))
+        tsize = wxEmptyString;
+    if (!datatypeHasScale(selectedDatatype))
+        tscale = wxEmptyString;
+    wxString fieldName = textctrl_fieldname->GetValue();
 
-	std::string sql;
-	enum unn { unnNone, unnBefore, unnAfter } update_not_null = unnNone;
-	if (fieldM)			// detect changes and do appropriate SQL actions
-	{
-		if (std2wx(fieldM->getName()) != fieldName)		// field name changed
-			sql += "ALTER TABLE " + tableM->getName() + " ALTER "
-				+ fieldM->getName() + " TO " + wx2std(fieldName) + ";\n\n";
+    std::string sql;
+    enum unn { unnNone, unnBefore, unnAfter } update_not_null = unnNone;
+    if (fieldM)         // detect changes and do appropriate SQL actions
+    {
+        if (std2wx(fieldM->getName()) != fieldName)     // field name changed
+            sql += "ALTER TABLE " + tableM->getName() + " ALTER "
+                + fieldM->getName() + " TO " + wx2std(fieldName) + ";\n\n";
 
-		std::string type, size, scale, charset;
-		if (!getDomainInfo(fieldM->getSource(), type, size, scale, charset))
-		{
-			::wxMessageBox(_("Cannot get info for domain. Aborting."), _("Warning!"), wxICON_WARNING);
-			return;
-		}
+        std::string type, size, scale, charset;
+        if (!getDomainInfo(fieldM->getSource(), type, size, scale, charset))
+        {
+            ::wxMessageBox(_("Cannot get info for domain. Aborting."), _("Warning!"), wxICON_WARNING);
+            return;
+        }
 
-		// changed domain
-		if (std2wx(fieldM->getSource()) != selectedDomain && selectedDomain != wxT("[new]"))
-		{
-			sql += "ALTER TABLE " + tableM->getName() + " ALTER " + wx2std(fieldName) + " TYPE "
-				+ wx2std(selectedDomain) + ";\n\n";
-		}
-		else if (selectedDomain == wxT("[new]")		// user domain -> autogenerated domain
-			|| std2wx(type) != selectedDatatype		// OR changed datatype, size or scale
-			|| std2wx(size) != tsize
-			|| std2wx(scale) != tscale)
-		{
-			sql += "ALTER TABLE " + tableM->getName() + " ALTER " + wx2std(fieldName) + " TYPE ";
-			sql += wx2std(selectedDatatype);
-			if (!tsize.IsEmpty())
-			{
-				sql += "(" + wx2std(tsize);
-				if (!tscale.IsEmpty())
-					sql += "," + wx2std(tscale);
-				sql += ")";
-			}
-			sql += ";\n\n";
-		}
+        // changed domain
+        if (std2wx(fieldM->getSource()) != selectedDomain && selectedDomain != wxT("[new]"))
+        {
+            sql += "ALTER TABLE " + tableM->getName() + " ALTER " + wx2std(fieldName) + " TYPE "
+                + wx2std(selectedDomain) + ";\n\n";
+        }
+        else if (selectedDomain == wxT("[new]")     // user domain -> autogenerated domain
+            || std2wx(type) != selectedDatatype     // OR changed datatype, size or scale
+            || std2wx(size) != tsize
+            || std2wx(scale) != tscale)
+        {
+            sql += "ALTER TABLE " + tableM->getName() + " ALTER " + wx2std(fieldName) + " TYPE ";
+            sql += wx2std(selectedDatatype);
+            if (!tsize.IsEmpty())
+            {
+                sql += "(" + wx2std(tsize);
+                if (!tscale.IsEmpty())
+                    sql += "," + wx2std(tscale);
+                sql += ")";
+            }
+            sql += ";\n\n";
+        }
 
-		// check for null option
-		if (cb_notnull->IsChecked() == fieldM->isNullable())	// watch for double negation!
-		{
-			if (cb_notnull->IsChecked())	// change from NULL to NOT NULL
-				update_not_null = unnBefore;
+        // check for null option
+        if (cb_notnull->IsChecked() == fieldM->isNullable())    // watch for double negation!
+        {
+            if (cb_notnull->IsChecked())    // change from NULL to NOT NULL
+                update_not_null = unnBefore;
 
-			sql += "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = ";
-			if (cb_notnull->IsChecked())
-				sql += "1";
-			else
-				sql += "NULL";
-			sql += " \nWHERE RDB$FIELD_NAME = '" + wx2std(fieldName)
-				+ "' AND RDB$RELATION_NAME = '" + tableM->getName() + "';\n\n";
-		}
-	}
-	else	// new field
-	{
-		sql += "ALTER TABLE " + tableM->getName() + " ADD \n" + wx2std(fieldName) + " ";
-		if (selectedDomain == _("[new]"))
-		{
-			sql += wx2std(selectedDatatype);
-			if (!tsize.IsEmpty())
-			{
-				sql += "(" + wx2std(tsize);
-				if (!tscale.IsEmpty())
-					sql += "," + wx2std(tscale);
-				sql += ")";
-			}
-		}
-		else
-			sql += wx2std(selectedDomain);
+            sql += "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = ";
+            if (cb_notnull->IsChecked())
+                sql += "1";
+            else
+                sql += "NULL";
+            sql += " \nWHERE RDB$FIELD_NAME = '" + wx2std(fieldName)
+                + "' AND RDB$RELATION_NAME = '" + tableM->getName() + "';\n\n";
+        }
+    }
+    else    // new field
+    {
+        sql += "ALTER TABLE " + tableM->getName() + " ADD \n" + wx2std(fieldName) + " ";
+        if (selectedDomain == _("[new]"))
+        {
+            sql += wx2std(selectedDatatype);
+            if (!tsize.IsEmpty())
+            {
+                sql += "(" + wx2std(tsize);
+                if (!tscale.IsEmpty())
+                    sql += "," + wx2std(tscale);
+                sql += ")";
+            }
+        }
+        else
+            sql += wx2std(selectedDomain);
 
-		if (cb_notnull->IsChecked())
-		{
-			sql += " not null";
-			update_not_null = unnAfter;
-		}
-		sql += ";\n\n";
-	}
+        if (cb_notnull->IsChecked())
+        {
+            sql += " not null";
+            update_not_null = unnAfter;
+        }
+        sql += ";\n\n";
+    }
 
-	if (update_not_null != unnNone)
-	{
-		wxString s = ::wxGetTextFromUser(_("Enter value for existing fields with NULLs"),
-			_("NOT NULL field"), wxT(""), this);
-		std::string sqladd = "UPDATE " + tableM->getName() + " \nSET "
-			+ wx2std(fieldName) + " = '" + wx2std(s) + "' \nWHERE "
-			+ wx2std(fieldName) + " IS NULL;\n";
-		if (update_not_null == unnBefore)
-			sql = sqladd + sql;
-		else
-			sql += "COMMIT;\n" + sqladd;
-	}
+    if (update_not_null != unnNone)
+    {
+        wxString s = ::wxGetTextFromUser(_("Enter value for existing fields with NULLs"),
+            _("NOT NULL field"), wxT(""), this);
+        std::string sqladd = "UPDATE " + tableM->getName() + " \nSET "
+            + wx2std(fieldName) + " = '" + wx2std(s) + "' \nWHERE "
+            + wx2std(fieldName) + " IS NULL;\n";
+        if (update_not_null == unnBefore)
+            sql = sqladd + sql;
+        else
+            sql += "COMMIT;\n" + sqladd;
+    }
 
-	wxString wxsql = std2wx(sql);
-	wxsql += textctrl_sql->GetValue();	// execute autoinc sql (gen+trigger),
+    wxString wxsql = std2wx(sql);
+    wxsql += textctrl_sql->GetValue();  // execute autoinc sql (gen+trigger),
 
-	ExecuteSqlFrame *eff = 0;
-	if (!wxsql.Trim().IsEmpty())
-	{
-		eff = new ExecuteSqlFrame(GetParent(), -1, _("Executing change script"));
-		eff->setDatabase(tableM->getDatabase());
-	}
+    ExecuteSqlFrame *eff = 0;
+    if (!wxsql.Trim().IsEmpty())
+    {
+        eff = new ExecuteSqlFrame(GetParent(), -1, _("Executing change script"));
+        eff->setDatabase(tableM->getDatabase());
+    }
 
-	Close();
+    Close();
 
-	if (eff)			// this piece of code has to be after Close()
-	{					// otherwise ExecuteSqlFrame is shown underneath the html-properties window
-		eff->Show();
-		eff->Raise();	// make sure it's on top (otherwise it gets hidden behind)
-		eff->setSql(wxsql);
-		eff->executeAllStatements(true);		// true = user must commit/rollback + frame is closed at once
-	}
+    if (eff)            // this piece of code has to be after Close()
+    {                   // otherwise ExecuteSqlFrame is shown underneath the html-properties window
+        eff->Show();
+        eff->Raise();   // make sure it's on top (otherwise it gets hidden behind)
+        eff->setSql(wxsql);
+        eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
+    }
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::OnButtonCancelClick(wxCommandEvent& WXUNUSED(event))
 {
-	Close();
+    Close();
 }
 //-----------------------------------------------------------------------------
 //! setup visual controls
 void FieldPropertiesFrame::setProperties()
 {
-	if (!tableM)
-		return;
+    if (!tableM)
+        return;
 
-	std::string genname = "GEN_" + tableM->getName() + "_ID";
-	textctrl_generatorname->SetValue(std2wx(genname));
+    std::string genname = "GEN_" + tableM->getName() + "_ID";
+    textctrl_generatorname->SetValue(std2wx(genname));
 
-	Database *d = dynamic_cast<Database *>(tableM->getDatabase());
-	if (!d)
-		return;
-	ch_generators->Clear();
-	for (MetadataCollection<Generator>::const_iterator it = d->generatorsBegin(); it != d->generatorsEnd(); ++it)
-		ch_generators->Append(std2wx((*it).getName()));
-	ch_domains->Clear();
-	if (fieldM == 0 || fieldM->getSource().substr(0,4) != "RDB$")
-	{
-		ch_domains->Append(wxT("[new]"));
-		if (fieldM == 0)
-			ch_domains->SetSelection(0);
-	}
-	for (MetadataCollection<Domain>::const_iterator it = d->domainsBegin(); it != d->domainsEnd(); ++it)
-	{
-		std::string name = (*it).getName();
-		if (name.substr(0, 4) == "RDB$" && (!fieldM || fieldM->getSource() != name))
-			continue;
-		ch_domains->Append(std2wx(name));
-	}
+    Database *d = dynamic_cast<Database *>(tableM->getDatabase());
+    if (!d)
+        return;
+    ch_generators->Clear();
+    for (MetadataCollection<Generator>::const_iterator it = d->generatorsBegin(); it != d->generatorsEnd(); ++it)
+        ch_generators->Append(std2wx((*it).getName()));
+    ch_domains->Clear();
+    if (fieldM == 0 || fieldM->getSource().substr(0,4) != "RDB$")
+    {
+        ch_domains->Append(wxT("[new]"));
+        if (fieldM == 0)
+            ch_domains->SetSelection(0);
+    }
+    for (MetadataCollection<Domain>::const_iterator it = d->domainsBegin(); it != d->domainsEnd(); ++it)
+    {
+        std::string name = (*it).getName();
+        if (name.substr(0, 4) == "RDB$" && (!fieldM || fieldM->getSource() != name))
+            continue;
+        ch_domains->Append(std2wx(name));
+    }
 
-	if (fieldM)
-	{
-		// editing existing field...
-		textctrl_fieldname->SetValue(std2wx(fieldM->getName()));
-		cb_notnull->SetValue(!fieldM->isNullable());
-		ch_domains->SetSelection(ch_domains->FindString(std2wx(fieldM->getSource())));
+    if (fieldM)
+    {
+        // editing existing field...
+        textctrl_fieldname->SetValue(std2wx(fieldM->getName()));
+        cb_notnull->SetValue(!fieldM->isNullable());
+        ch_domains->SetSelection(ch_domains->FindString(std2wx(fieldM->getSource())));
 
-		wxCommandEvent dummy;
-		OnChDomainsClick(dummy);	// loads list of domains
-		loadCollations(fieldM->getCollation());
-	}
-	updateEditBoxes();
+        wxCommandEvent dummy;
+        OnChDomainsClick(dummy);    // loads list of domains
+        loadCollations(fieldM->getCollation());
+    }
+    updateEditBoxes();
 }
 //-----------------------------------------------------------------------------
 bool FieldPropertiesFrame::getDomainInfo(std::string domain, std::string& type, std::string& size,
-	std::string& scale, std::string& charset)
+    std::string& scale, std::string& charset)
 {
-	Database *db = dynamic_cast<Database *>(tableM->getDatabase());
-	if (!db)
-		return false;
-	for (MetadataCollection<Domain>::const_iterator it = db->domainsBegin(); it != db->domainsEnd(); ++it)
-	{
-		if (domain == (*it).getName())
-		{
-			Domain *d = (Domain *)&(*it);
-			d->getDatatypeParts(type,size,scale);
-			charset = d->getCharset();
-			return true;
-		}
-	}
-	return false;
+    Database *db = dynamic_cast<Database *>(tableM->getDatabase());
+    if (!db)
+        return false;
+    for (MetadataCollection<Domain>::const_iterator it = db->domainsBegin(); it != db->domainsEnd(); ++it)
+    {
+        if (domain == (*it).getName())
+        {
+            Domain *d = (Domain *)&(*it);
+            d->getDatatypeParts(type,size,scale);
+            charset = d->getCharset();
+            return true;
+        }
+    }
+    return false;
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::updateDomainInfo(std::string domain)
 {
-	std::string type, size, scale, charset;
-	if (!getDomainInfo(domain, type, size, scale, charset))
-		return;
-	textctrl_scale->SetValue(std2wx(scale));
-	textctrl_size->SetValue(std2wx(size));
-	ch_datatypes->SetSelection(ch_datatypes->FindString(std2wx(type)));
-	ch_charset->SetSelection(ch_charset->FindString(std2wx(charset)));
+    std::string type, size, scale, charset;
+    if (!getDomainInfo(domain, type, size, scale, charset))
+        return;
+    textctrl_scale->SetValue(std2wx(scale));
+    textctrl_size->SetValue(std2wx(size));
+    ch_datatypes->SetSelection(ch_datatypes->FindString(std2wx(type)));
+    ch_charset->SetSelection(ch_charset->FindString(std2wx(charset)));
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::update()
 {
-	setProperties();
+    setProperties();
 }
 //-----------------------------------------------------------------------------
 //! closes window if field is removed (dropped/table dropped/disconnected,etc.)
-void FieldPropertiesFrame::removeObservedObject(Subject *object)
+void FieldPropertiesFrame::removeSubject(Subject* subject)
 {
-	Observer::removeObservedObject(object);
-	if (object == fieldM)
-		Close();
+    Observer::removeSubject(subject);
+    if (subject == fieldM)
+        Close();
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::updateSqlWindow()
 {
-	std::string table = tableM->getName();
-	std::string field = wx2std(textctrl_fieldname->GetValue());
-	std::string sql;
-	std::string generator = wx2std(ch_generators->GetStringSelection());
-	if (radio_new->GetValue())
-	{
-		generator = wx2std(textctrl_generatorname->GetValue());
-		sql = "CREATE GENERATOR " + generator + ";\n\n";
-	}
+    std::string table = tableM->getName();
+    std::string field = wx2std(textctrl_fieldname->GetValue());
+    std::string sql;
+    std::string generator = wx2std(ch_generators->GetStringSelection());
+    if (radio_new->GetValue())
+    {
+        generator = wx2std(textctrl_generatorname->GetValue());
+        sql = "CREATE GENERATOR " + generator + ";\n\n";
+    }
 
-	if (cb_trigger->IsChecked())
-	{
-		sql += "SET TERM !! ;\n";
-		sql += "CREATE TRIGGER " + table + "_BI FOR " + table + "\n";
-		sql += "ACTIVE BEFORE INSERT POSITION 0\nAS\nBEGIN\n";
-		sql += "  IF (NEW." + field + " IS NULL) THEN\n";
-		sql += "    NEW." + field + " = GEN_ID(" + generator + ",1);\n";
-		sql += "END!!\n";
-		sql += "SET TERM ; !!\n";
-	}
+    if (cb_trigger->IsChecked())
+    {
+        sql += "SET TERM !! ;\n";
+        sql += "CREATE TRIGGER " + table + "_BI FOR " + table + "\n";
+        sql += "ACTIVE BEFORE INSERT POSITION 0\nAS\nBEGIN\n";
+        sql += "  IF (NEW." + field + " IS NULL) THEN\n";
+        sql += "    NEW." + field + " = GEN_ID(" + generator + ",1);\n";
+        sql += "END!!\n";
+        sql += "SET TERM ; !!\n";
+    }
 
-	textctrl_sql->SetValue(std2wx(sql));
+    textctrl_sql->SetValue(std2wx(sql));
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesFrame::setField(Column *field)
 {
-	fieldM = field;
-	if (field)
-	{
-		field->attach(this);
-		setProperties();
-	}
+    fieldM = field;
+    if (field)
+    {
+        field->attachObserver(this);
+        setProperties();
+    }
 }
 //-----------------------------------------------------------------------------
 const std::string FieldPropertiesFrame::getName() const
@@ -621,7 +623,7 @@ const std::string FieldPropertiesFrame::getName() const
 class ColumnPropertiesHandler: public URIHandler
 {
 public:
-	bool handleURI(URI& uri);
+    bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
     static const ColumnPropertiesHandler handlerInstance;
@@ -631,30 +633,30 @@ const ColumnPropertiesHandler ColumnPropertiesHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool ColumnPropertiesHandler::handleURI(URI& uri)
 {
-	if (uri.action != "edit_field" && uri.action != "add_field")
-		return false;
+    if (uri.action != "edit_field" && uri.action != "add_field")
+        return false;
 
-	wxWindow *w = getWindow(uri);
-	void *mo = getObject(uri);
-	if (!mo || !w)
-		return true;
+    wxWindow *w = getWindow(uri);
+    void *mo = getObject(uri);
+    if (!mo || !w)
+        return true;
 
-	Column *c = 0;
-	Table *t;
-	if (uri.action == "add_field")
-		t = (Table *)mo;
-	else
-	{
-		c = (Column *)mo;
-		t = (Table *)c->getParent();
-	}
+    Column *c = 0;
+    Table *t;
+    if (uri.action == "add_field")
+        t = (Table *)mo;
+    else
+    {
+        c = (Column *)mo;
+        t = (Table *)c->getParent();
+    }
 
-	FieldPropertiesFrame *f = new FieldPropertiesFrame(w, -1, wxString::Format(_("TABLE: %s"), std2wx(t->getName()).c_str()), t);
-	if (c)
-		f->setField(c);
-	else
-		f->setProperties();
-	f->Show();
-	return true;
+    FieldPropertiesFrame *f = new FieldPropertiesFrame(w, -1, wxString::Format(_("TABLE: %s"), std2wx(t->getName()).c_str()), t);
+    if (c)
+        f->setField(c);
+    else
+        f->setProperties();
+    f->Show();
+    return true;
 }
 //-----------------------------------------------------------------------------

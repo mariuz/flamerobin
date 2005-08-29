@@ -18,6 +18,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): Nando Dessena
 */
 
@@ -25,7 +27,7 @@
 //
 //
 //
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #ifndef FR_METADATA_H
 #define FR_METADATA_H
 
@@ -39,9 +41,9 @@ class Root;
 class Database;
 class Dependency;
 
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 using namespace std;
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
 	ntTable, ntView, ntProcedure, ntTrigger, ntGenerator, ntFunction,	ntSysTable,			// each item
 	ntTables, ntViews, ntProcedures, ntTriggers, ntGenerators,	ntFunctions, ntSysTables,	// ^^^ parent of those
@@ -50,9 +52,9 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
 	ntPrimaryKey, ntComputed,		// these are used only for images
 	ntLastType
 } NodeType;
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 NodeType getTypeByName(string name);
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 class MetadataItem: public Item
 {
 private:
@@ -118,7 +120,7 @@ public:
 
     static const string pathSeparator;
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //! masks the object it points to so others see it transparently
 class Dependency: public MetadataItem
 {
@@ -136,5 +138,5 @@ public:
 	void addField(const string& name) { if (!fieldsM.empty()) fieldsM += ", "; fieldsM += name; };
 	void setFields(const string& fields) { fieldsM = fields; };
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #endif

@@ -25,15 +25,15 @@ Contributor(s):
 
 #ifndef BACKUPRESTOREBASEFRAME_H
 #define BACKUPRESTOREBASEFRAME_H
-
+//-----------------------------------------------------------------------------
 #include <wx/wx.h>
 #include <wx/stc/stc.h>
 #include <wx/thread.h>
 
-#include "BaseFrame.h"
+#include "gui/BaseFrame.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
-
+//-----------------------------------------------------------------------------
 class BackupRestoreBaseFrame: public BaseFrame {
 public:
     enum MsgKind {
@@ -102,4 +102,5 @@ protected:
 
     DECLARE_EVENT_TABLE()
 };
+//-----------------------------------------------------------------------------
 #endif // BACKUPRESTOREBASEFRAME_H

@@ -18,45 +18,42 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s):
 */
 
-//
-//
-//
-//
-//------------------------------------------------------------------------------
 #ifndef FR_PROCEDURE_H
 #define FR_PROCEDURE_H
 
 #include "metadataitem.h"
 #include "parameter.h"
-
+//-----------------------------------------------------------------------------
 class Procedure: public MetadataItem
 {
 private:
-	bool parametersLoadedM;
-	bool loadParameters();
-	MetadataCollection <Parameter> parametersM;
+    bool parametersLoadedM;
+    bool loadParameters();
+    MetadataCollection <Parameter> parametersM;
 
 public:
     virtual void accept(Visitor *v);
 
-	std::string getCreateSqlTemplate() const;	// overrides MetadataItem::getCreateSqlTemplate()
+    std::string getCreateSqlTemplate() const;   // overrides MetadataItem::getCreateSqlTemplate()
 
-	bool getChildren(std::vector<MetadataItem *>& temp);
-	Parameter *addParameter(Parameter &c);
+    bool getChildren(std::vector<MetadataItem *>& temp);
+    Parameter *addParameter(Parameter &c);
 
-	std::string getSelectStatement(bool withColumns);
-	bool isSelectable();
+    std::string getSelectStatement(bool withColumns);
+    bool isSelectable();
 
-	bool checkAndLoadParameters(bool force = false);
-	bool getSource(std::string& source);
-	std::string getAlterSql();
-	std::string getDefinition();
+    bool checkAndLoadParameters(bool force = false);
+    bool getSource(std::string& source);
+    std::string getAlterSql();
+    std::string getDefinition();
 
-	Procedure();
-	virtual const std::string getTypeName() const;
+    Procedure();
+    virtual const std::string getTypeName() const;
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #endif

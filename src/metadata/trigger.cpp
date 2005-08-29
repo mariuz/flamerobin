@@ -19,6 +19,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s):
 */
 
@@ -29,230 +31,231 @@
     #pragma hdrstop
 #endif
 
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #include <sstream>
+
 #include <ibpp.h>
-#include "visitor.h"
-#include "metadataitem.h"
+
+#include "core/Visitor.h"
+#include "database.h"
 #include "dberror.h"
 #include "frutils.h"
-#include "database.h"
+#include "metadataitem.h"
 #include "trigger.h"
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 Trigger::Trigger():
-	MetadataItem()
+    MetadataItem()
 {
-	typeM = ntTrigger;
-	infoIsLoadedM = false;
+    typeM = ntTrigger;
+    infoIsLoadedM = false;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 bool Trigger::getTriggerInfo(std::string& object, bool& active, int& position, std::string& type)
 {
-	if (!infoIsLoadedM && !loadInfo())
-		return false;
-	object = objectM;
-	active = activeM;
-	position = positionM;
-	type = triggerTypeM;
-	return true;
+    if (!infoIsLoadedM && !loadInfo())
+        return false;
+    object = objectM;
+    active = activeM;
+    position = positionM;
+    type = triggerTypeM;
+    return true;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 bool Trigger::getRelation(std::string& relation)
 {
-	if (!infoIsLoadedM)
-		if (!loadInfo())
-			return false;
-	relation = objectM;
-	return true;
+    if (!infoIsLoadedM)
+        if (!loadInfo())
+            return false;
+    relation = objectM;
+    return true;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 bool Trigger::loadInfo(bool force)
 {
-	infoIsLoadedM = false;
-	Database *d = getDatabase();
-	if (!d)
-	{
-		lastError().setMessage("database not set");
-		return false;
-	}
+    infoIsLoadedM = false;
+    Database *d = getDatabase();
+    if (!d)
+    {
+        lastError().setMessage("database not set");
+        return false;
+    }
 
-	IBPP::Database& db = d->getIBPPDatabase();
+    IBPP::Database& db = d->getIBPPDatabase();
 
-	try
-	{
-		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-		tr1->Start();
-		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-		st1->Prepare(
-			"select t.rdb$relation_name, t.rdb$trigger_sequence, t.rdb$trigger_inactive, t.rdb$trigger_type "
-			"from rdb$triggers t where rdb$trigger_name = ? "
-		);
+    try
+    {
+        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+        tr1->Start();
+        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+        st1->Prepare(
+            "select t.rdb$relation_name, t.rdb$trigger_sequence, t.rdb$trigger_inactive, t.rdb$trigger_type "
+            "from rdb$triggers t where rdb$trigger_name = ? "
+        );
 
-		st1->Set(1, getName());
-		st1->Execute();
-		if (st1->Fetch())
-		{
-			st1->Get(1, objectM);
-			objectM.erase(objectM.find_last_not_of(" ")+1);
-			st1->Get(2, &positionM);
+        st1->Set(1, getName());
+        st1->Execute();
+        if (st1->Fetch())
+        {
+            st1->Get(1, objectM);
+            objectM.erase(objectM.find_last_not_of(" ")+1);
+            st1->Get(2, &positionM);
 
-			short temp;
-			if (st1->IsNull(3))
-				temp = 0;
-			else
-				st1->Get(3, &temp);
-			activeM = (temp == 0);
+            short temp;
+            if (st1->IsNull(3))
+                temp = 0;
+            else
+                st1->Get(3, &temp);
+            activeM = (temp == 0);
 
-			int ttype;
-			st1->Get(4, &ttype);
-			triggerTypeM = getTriggerType(ttype);
-			tr1->Commit();
-			infoIsLoadedM = true;
-			if (force)
-				notify();
-		}
-		else	// maybe trigger was dropped?
-		{
-			//wxMessageBox("Trigger does not exist in database");
-			return false;
-		}
-		return true;
-	}
-	catch (IBPP::Exception &e)
-	{
-		lastError().setMessage(e.ErrorMessage());
-	}
-	catch (...)
-	{
-		lastError().setMessage("System error.");
-	}
+            int ttype;
+            st1->Get(4, &ttype);
+            triggerTypeM = getTriggerType(ttype);
+            tr1->Commit();
+            infoIsLoadedM = true;
+            if (force)
+                notifyObservers();
+        }
+        else    // maybe trigger was dropped?
+        {
+            //wxMessageBox("Trigger does not exist in database");
+            return false;
+        }
+        return true;
+    }
+    catch (IBPP::Exception &e)
+    {
+        lastError().setMessage(e.ErrorMessage());
+    }
+    catch (...)
+    {
+        lastError().setMessage("System error.");
+    }
 
-	return false;
+    return false;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 bool Trigger::getSource(std::string& source) const
 {
-	Database *d = getDatabase();
-	if (!d)
-	{
-		lastError().setMessage("database not set");
-		return false;
-	}
+    Database *d = getDatabase();
+    if (!d)
+    {
+        lastError().setMessage("database not set");
+        return false;
+    }
 
-	IBPP::Database& db = d->getIBPPDatabase();
+    IBPP::Database& db = d->getIBPPDatabase();
 
-	try
-	{
-		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-		tr1->Start();
-		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-		st1->Prepare("select rdb$trigger_source from rdb$triggers where rdb$trigger_name = ?");
-		st1->Set(1, getName());
-		st1->Execute();
-		st1->Fetch();
-		readBlob(st1, 1, source);
-		tr1->Commit();
-		return true;
-	}
-	catch (IBPP::Exception &e)
-	{
-		lastError().setMessage(e.ErrorMessage());
-	}
-	catch (...)
-	{
-		lastError().setMessage("System error.");
-	}
+    try
+    {
+        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+        tr1->Start();
+        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+        st1->Prepare("select rdb$trigger_source from rdb$triggers where rdb$trigger_name = ?");
+        st1->Set(1, getName());
+        st1->Execute();
+        st1->Fetch();
+        readBlob(st1, 1, source);
+        tr1->Commit();
+        return true;
+    }
+    catch (IBPP::Exception &e)
+    {
+        lastError().setMessage(e.ErrorMessage());
+    }
+    catch (...)
+    {
+        lastError().setMessage("System error.");
+    }
 
-	return false;
+    return false;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string Trigger::getTriggerType(int type)
 {
-	std::string res;
+    std::string res;
 
-	std::vector<std::string> prefix_types, suffix_types;
-	prefix_types.push_back("BEFORE");
-	prefix_types.push_back("AFTER");
+    std::vector<std::string> prefix_types, suffix_types;
+    prefix_types.push_back("BEFORE");
+    prefix_types.push_back("AFTER");
 
-	suffix_types.push_back("");
-	suffix_types.push_back("INSERT");
-	suffix_types.push_back("UPDATE");
-	suffix_types.push_back("DELETE");
+    suffix_types.push_back("");
+    suffix_types.push_back("INSERT");
+    suffix_types.push_back("UPDATE");
+    suffix_types.push_back("DELETE");
 
-	#define TRIGGER_ACTION_PREFIX(value) ((value + 1) & 1)
-	#define TRIGGER_ACTION_SUFFIX(value, slot) (((value + 1) >> (slot * 2 - 1)) & 3)
+    #define TRIGGER_ACTION_PREFIX(value) ((value + 1) & 1)
+    #define TRIGGER_ACTION_SUFFIX(value, slot) (((value + 1) >> (slot * 2 - 1)) & 3)
 
-	std::string result;
-	int prefix = TRIGGER_ACTION_PREFIX(type);
-	result = prefix_types[prefix];
+    std::string result;
+    int prefix = TRIGGER_ACTION_PREFIX(type);
+    result = prefix_types[prefix];
 
-	int suffix = TRIGGER_ACTION_SUFFIX(type, 1);
-	result += " " + suffix_types[suffix];
-	suffix = TRIGGER_ACTION_SUFFIX(type, 2);
-	if (suffix)
-		result += " OR " + suffix_types[suffix];
-	suffix = TRIGGER_ACTION_SUFFIX(type, 3);
-	if (suffix)
-		result += " OR " + suffix_types[suffix];
-	return result;
+    int suffix = TRIGGER_ACTION_SUFFIX(type, 1);
+    result += " " + suffix_types[suffix];
+    suffix = TRIGGER_ACTION_SUFFIX(type, 2);
+    if (suffix)
+        result += " OR " + suffix_types[suffix];
+    suffix = TRIGGER_ACTION_SUFFIX(type, 3);
+    if (suffix)
+        result += " OR " + suffix_types[suffix];
+    return result;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 Trigger::firingTimeType Trigger::getFiringTime()
 {
-	if (!infoIsLoadedM)
-		loadInfo();
-	if (triggerTypeM.substr(0, 6) == "BEFORE")
-		return beforeTrigger;
-	else
-		return afterTrigger;
+    if (!infoIsLoadedM)
+        loadInfo();
+    if (triggerTypeM.substr(0, 6) == "BEFORE")
+        return beforeTrigger;
+    else
+        return afterTrigger;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string Trigger::getAlterSql()
 {
-	std::string object, source, type;
-	bool active;
-	int position;
+    std::string object, source, type;
+    bool active;
+    int position;
 
-	if (!getTriggerInfo(object, active, position, type) || !getSource(source))
-		return lastError().getMessage();
+    if (!getTriggerInfo(object, active, position, type) || !getSource(source))
+        return lastError().getMessage();
 
-	std::ostringstream sql;
-	sql << "SET TERM ^ ;\nALTER TRIGGER " << getName();
-	if (active)
-		sql << " ACTIVE\n";
-	else
-		sql << " INACTIVE\n";
-	sql << type;
-	sql << " POSITION ";
-	sql << position << "\n";
-	//sql << " AS ";
-	sql << source;
-	sql << "^\nSET TERM ; ^";
-	return sql.str();
+    std::ostringstream sql;
+    sql << "SET TERM ^ ;\nALTER TRIGGER " << getName();
+    if (active)
+        sql << " ACTIVE\n";
+    else
+        sql << " INACTIVE\n";
+    sql << type;
+    sql << " POSITION ";
+    sql << position << "\n";
+    //sql << " AS ";
+    sql << source;
+    sql << "^\nSET TERM ; ^";
+    return sql.str();
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string Trigger::getCreateSqlTemplate() const
 {
-	return	"SET TERM ^ ;\n\n"
-			"CREATE TRIGGER name FOR table/view \n"
-			" [IN]ACTIVE \n"
-			" {BEFORE | AFTER} INSERT OR UPDATE OR DELETE \n"
-			" POSITION number \n"
-			"AS \n"
-			"BEGIN \n"
-			"    /* enter trigger code here */ \n"
-			"END^\n\n"
-			"SET TERM ; ^\n";
+    return  "SET TERM ^ ;\n\n"
+            "CREATE TRIGGER name FOR table/view \n"
+            " [IN]ACTIVE \n"
+            " {BEFORE | AFTER} INSERT OR UPDATE OR DELETE \n"
+            " POSITION number \n"
+            "AS \n"
+            "BEGIN \n"
+            "    /* enter trigger code here */ \n"
+            "END^\n\n"
+            "SET TERM ; ^\n";
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 const std::string Trigger::getTypeName() const
 {
-	return "TRIGGER";
+    return "TRIGGER";
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void Trigger::accept(Visitor *v)
 {
-	v->visit(*this);
+    v->visit(*this);
 }
-//------------------------------------------------------------------------------
-
+//-----------------------------------------------------------------------------

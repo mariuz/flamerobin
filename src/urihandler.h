@@ -18,6 +18,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): Nando Dessena.
 */
 
@@ -25,8 +27,8 @@
 #define FR_URIHANDLER_H
 
 #include <list>
-#include <string>
 #include <map>
+#include <string>
 //-----------------------------------------------------------------------------
 //! almost like a struct, but with few helper functions
 class URI

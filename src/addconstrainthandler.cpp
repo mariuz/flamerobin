@@ -18,6 +18,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s):
 */
 
@@ -38,12 +40,12 @@
 #include <sstream>
 
 #include "dberror.h"
+#include "frutils.h"
 #include "gui/ExecuteSqlFrame.h"
 #include "gui/MultilineEnterDialog.h"
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
 #include "ugly.h"
-#include "frutils.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
 class AddConstraintHandler: public URIHandler

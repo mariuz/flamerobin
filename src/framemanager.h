@@ -18,20 +18,22 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): Milan Babuskov.
 */
 
 #ifndef FR_FRAMEMANAGER_H
 #define FR_FRAMEMANAGER_H
-
+//-----------------------------------------------------------------------------
 #include <wx/event.h>
 
 #include <map>
 
-#include "BaseFrame.h"
+#include "gui/BaseFrame.h"
 #include "gui/MetadataItemPropertiesFrame.h"
 #include "metadata/metadataitem.h"
-//---------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
 class FrameAndId
 {
 public:
@@ -40,9 +42,9 @@ public:
     FrameAndId(BaseFrame *f, int i)
         :frame(f), id(i) {};
 };
-//---------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
 typedef std::multimap<MetadataItem*, FrameAndId> ItemFrameMap;
-//---------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
 class FrameManager: public wxEvtHandler
 {
 public:
@@ -68,7 +70,7 @@ private:
 
     void removeFrame(BaseFrame* frame, ItemFrameMap& frames);
 };
-
+//--------------------------------------------------------------------------------------
 FrameManager& frameManager();
-//---------------------------------------------------------------------------------------
-#endif
+//--------------------------------------------------------------------------------------
+#endif // FR_FRAMEMANAGER_H

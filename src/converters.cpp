@@ -43,7 +43,7 @@
 
 #include "config/Config.h"
 #include "converters.h"
-//---------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
 //! formats date according to DateFormat string
 std::string GetHumanDate(int year, int month, int day, std::string DateFormat)
 {
@@ -75,7 +75,7 @@ std::string GetHumanDate(int year, int month, int day, std::string DateFormat)
     }
     return value;
 }
-//---------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
 //! formats time according to TimeFormat string
 std::string GetHumanTime(int hour, int minute, int second, std::string TimeFormat)
 {
@@ -104,7 +104,7 @@ std::string GetHumanTime(int hour, int minute, int second, std::string TimeForma
     }
     return value;
 }
-//---------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
 //! formats timestamp according to DateFormat and TimeFormat strings
 std::string GetHumanTimestamp(IBPP::Timestamp ts, std::string DateFormat, std::string TimeFormat)
 {
@@ -117,7 +117,7 @@ std::string GetHumanTimestamp(IBPP::Timestamp ts, std::string DateFormat, std::s
         value = " " + value;
     return GetHumanDate(year, month, day, DateFormat) + value;
 }
-//---------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
 //! takes value from column "col" of Statement and converts it into string
 // returns false if value is null
 bool CreateString(IBPP::Statement& st, int col, std::string& value)
@@ -208,4 +208,4 @@ bool CreateString(IBPP::Statement& st, int col, std::string& value)
 
     //return true;
 }
-//---------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------

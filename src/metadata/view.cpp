@@ -18,6 +18,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s):
 */
 
@@ -29,19 +31,20 @@
 #endif
 
 #include <ibpp.h>
-#include "dberror.h"
-#include "database.h"
-#include "view.h"
-#include "visitor.h"
+
 #include "collection.h"
+#include "core/Visitor.h"
+#include "database.h"
+#include "dberror.h"
 #include "relation.h"
-//------------------------------------------------------------------------------
+#include "view.h"
+//-----------------------------------------------------------------------------
 View::View()
 	:Relation()
 {
 	typeM = ntView;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //! returns false if an error occurs
 bool View::getSource(std::string& source)
 {
@@ -101,7 +104,7 @@ bool View::getSource(std::string& source)
 
 	return false;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string View::getAlterSql()
 {
 	if (!checkAndLoadColumns())
@@ -126,7 +129,7 @@ std::string View::getAlterSql()
 	sql += src;
 	return sql;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string View::getCreateSqlTemplate() const
 {
 	std::string sql(
@@ -136,15 +139,15 @@ std::string View::getCreateSqlTemplate() const
 		"WITH CHECK OPTION;\n");
 	return sql;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 const std::string View::getTypeName() const
 {
 	return "VIEW";
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void View::accept(Visitor *v)
 {
 	v->visit(*this);
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 

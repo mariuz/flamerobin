@@ -25,10 +25,10 @@ Contributor(s): Michael Hieke, Nando Dessena
 
 #ifndef DATABASEREGISTRATIONDIALOG_H
 #define DATABASEREGISTRATIONDIALOG_H
-
+//-----------------------------------------------------------------------------
 #include <wx/wx.h>
 
-#include "BaseDialog.h"
+#include "gui/BaseDialog.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
 //-----------------------------------------------------------------------------

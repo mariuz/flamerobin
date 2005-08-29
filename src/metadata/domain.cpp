@@ -18,10 +18,12 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): Nando Dessena
 */
 
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 #ifdef __BORLANDC__
@@ -30,19 +32,21 @@
 
 #include <sstream>
 #include <string>
+
 #include <ibpp.h>
-#include "visitor.h"
-#include "dberror.h"
+
+#include "core/Visitor.h"
 #include "database.h"
+#include "dberror.h"
 #include "domain.h"
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 Domain::Domain():
 	MetadataItem()
 {
 	typeM = ntDomain;
 	infoLoadedM = false;	// I had a 2 hour session with debugger to found out that this was missing
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 bool Domain::loadInfo()
 {
 	Database *d = getDatabase();
@@ -99,7 +103,7 @@ bool Domain::loadInfo()
 
 		tr1->Commit();
 		if (!isSystem())
-			notify();
+			notifyObservers();
 		infoLoadedM = true;
 		return true;
 	}
@@ -113,7 +117,7 @@ bool Domain::loadInfo()
 	}
 	return false;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //! returns column's datatype as human readable string. It can also be used to construct DDL for tables
 std::string Domain::getDatatypeAsString()
 {
@@ -122,7 +126,7 @@ std::string Domain::getDatatypeAsString()
 
 	return datatype2string(datatypeM, scaleM, precisionM, subtypeM, lengthM);
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string Domain::datatype2string(short datatype, short scale, short precision, short subtype, short length)
 {
 	std::ostringstream retval;		// this will be returned
@@ -188,7 +192,7 @@ std::string Domain::datatype2string(short datatype, short scale, short precision
 
 	return retval.str();
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void Domain::getDatatypeParts(std::string& type, std::string& size, std::string& scale)
 {
 	using namespace std;
@@ -210,7 +214,7 @@ void Domain::getDatatypeParts(std::string& type, std::string& size, std::string&
 	else
 		type = datatype;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string Domain::getCharset()
 {
 	if (!infoLoadedM)
@@ -218,12 +222,12 @@ std::string Domain::getCharset()
 
 	return charsetM;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string Domain::getPrintableName()
 {
 	return getName() + " " + getDatatypeAsString();
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string Domain::getCreateSqlTemplate() const
 {
 	return	"CREATE DOMAIN domain_name\n"
@@ -233,15 +237,15 @@ std::string Domain::getCreateSqlTemplate() const
             "[CHECK (dom_search_condition)]\n"
             "COLLATE collation;\n";
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 const std::string Domain::getTypeName() const
 {
 	return "DOMAIN";
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void Domain::accept(Visitor *v)
 {
 	v->visit(*this);
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 

@@ -18,20 +18,23 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): Michael Hieke
 */
 
 #ifndef REORDERFIELDSDIALOG_H
 #define REORDERFIELDSDIALOG_H
-
+//-----------------------------------------------------------------------------
 #include <wx/wx.h>
 #include <wx/image.h>
 
 #include <string>
-#include "BaseDialog.h"
-#include "observer.h"
-#include "metadata/table.h"
 
+#include "core/Observer.h"
+#include "gui/BaseDialog.h"
+#include "metadata/table.h"
+//-----------------------------------------------------------------------------
 class ReorderFieldsDialog: public BaseDialog, public Observer {
 public:
     enum {
@@ -54,7 +57,7 @@ public:
     ReorderFieldsDialog(wxWindow* parent, Table *table);
 
 private:
-	Table *tableM;
+    Table *tableM;
 
     void do_layout();
     void moveSelected(int moveby);
@@ -69,11 +72,11 @@ protected:
     wxButton* button_cancel;
 
     virtual const std::string getName() const;
-	void removeObservedObject(Subject *object);
-	void update();
+    void removeSubject(Subject* subject);
+    void update();
     void updateButtons();
 
     DECLARE_EVENT_TABLE()
 };
-
+//-----------------------------------------------------------------------------
 #endif // REORDERFIELDSDIALOG_H

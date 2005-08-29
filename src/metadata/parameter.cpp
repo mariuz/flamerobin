@@ -18,6 +18,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s):
 */
 
@@ -31,11 +33,11 @@
 #include <sstream>
 #include <string>
 
-#include "visitor.h"
+#include "core/Visitor.h"
 #include "column.h"
 #include "domain.h"
 #include "parameter.h"
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 Parameter::Parameter(std::string source, int parameterType)
 	: Column()
 {
@@ -43,28 +45,28 @@ Parameter::Parameter(std::string source, int parameterType)
 	typeM = ntParameter;
 	parameterTypeM = (parameterType == 0 ? ptInput : ptOutput);
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 Parameter::Parameter()
 	: Column()
 {
 	typeM = ntParameter;
 	parameterTypeM = ptInput;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string Parameter::getPrintableName()
 {
 	std::string ret;
 	ret = (parameterTypeM == ptInput ? "in " : "out ") + getName() + " " + getDomain()->getDatatypeAsString();
 	return ret;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 ParameterType Parameter::getParameterType() const
 {
 	return parameterTypeM;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void Parameter::accept(Visitor *v)
 {
 	v->visit(*this);
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------

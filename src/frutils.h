@@ -25,11 +25,11 @@
 
 #ifndef FRUTILS_H
 #define FRUTILS_H
+//-----------------------------------------------------------------------------
+#include <wx/wx.h>
 
 #include <list>
 #include <string>
-
-#include <wx/wx.h>
 
 #include <ibpp.h>
 
@@ -43,6 +43,7 @@ void readBlob(IBPP::Statement& st, int column, std::string& result);
 //-----------------------------------------------------------------------------
 //! displays a list of table columns and lets user select some
 std::string selectTableColumns(Table* t, wxWindow* parent);
-bool selectTableColumnsIntoVector(Table* t, wxWindow* parent, std::vector<std::string>& list);
+bool selectTableColumnsIntoVector(Table* t, wxWindow* parent, 
+    std::vector<std::string>& list);
 //-----------------------------------------------------------------------------
 #endif // FRUTILS_H

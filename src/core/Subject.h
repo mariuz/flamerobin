@@ -18,39 +18,38 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): Milan Babuskov.
 */
 
-//
-//
-//
-//
-//------------------------------------------------------------------------------
 #ifndef FR_SUBJECT_H
 #define FR_SUBJECT_H
-
+//-----------------------------------------------------------------------------
+#include <list>
 #include <string>
 #include <vector>
-#include <list>
 
 class Observer;
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 class Subject
 {
 protected:
-    std::list<Observer *> observersM;
+    std::list<Observer*> observersM;
     int locksCountM;
+    bool needsNotifyObjectsM;
 
 public:
-	Subject();
-	virtual ~Subject();
+    Subject();
+    virtual ~Subject();
 
-    void attach(Observer*);
-    void detach(Observer*);
-	void detachAllObservers();
-    void notify();
+    void attachObserver(Observer* observer);
+    void detachObserver(Observer* observer);
+    void detachAllObservers();
+    void notifyObservers();
     void lockSubject();
+    // TODO: remove parameters
     void unlockSubject(bool wantFullUnlock = false, bool doNotify = true);
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #endif

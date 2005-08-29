@@ -33,13 +33,13 @@
 //-----------------------------------------------------------------------------
 #include <sstream>
 
-#include "ibpp.h"
+#include <ibpp.h>
 
-#include "dberror.h"
+#include "core/Visitor.h"
 #include "database.h"
+#include "dberror.h"
 #include "generator.h"
 #include "metadataitem.h"
-#include "visitor.h"
 //-----------------------------------------------------------------------------
 Generator::Generator():
     MetadataItem()
@@ -60,7 +60,7 @@ void Generator::setValue(int64_t value)
     {
         valueM = value;
         valueLoadedM = true;
-        notify();
+        notifyObservers();
     }
 }
 //-----------------------------------------------------------------------------

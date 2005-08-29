@@ -25,11 +25,11 @@ Contributor(s): Michael Hieke, Nando Dessena
 
 #ifndef MULTILINEENTERDIALOG_H
 #define MULTILINEENTERDIALOG_H
-
+//-----------------------------------------------------------------------------
 #include <wx/wx.h>
 #include <wx/stc/stc.h>
-#include "BaseDialog.h"
 
+#include "gui/BaseDialog.h"
 //-----------------------------------------------------------------------------
 bool GetMultilineTextFromUser(const wxString& caption, wxString& value, wxWindow* parent=0);
 //-----------------------------------------------------------------------------

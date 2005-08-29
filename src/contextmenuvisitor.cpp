@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 /*
   The contents of this file are subject to the Initial Developer's Public
   License Version 1.0 (the "License"); you may not use this file except in
@@ -23,7 +23,7 @@
 
   Contributor(s): Milan Babuskov, Nando Dessena
 */
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
@@ -39,22 +39,22 @@
 #include "config/Config.h"
 #include "contextmenuvisitor.h"
 #include "myTreeCtrl.h"
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 ContextMenuVisitor::ContextMenuVisitor(wxMenu* menu)
     :Visitor(), menuM(menu)
 {
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 ContextMenuVisitor::~ContextMenuVisitor()
 {
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void ContextMenuVisitor::visit(Column& item)
 {
     if (dynamic_cast<Table *>(item.getParent()))        // only for table columns
         addRegularObjectMenu();
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void ContextMenuVisitor::visit(Database&)
 {
     menuM->Append(myTreeCtrl::Menu_Connect, _("&Connect"));
@@ -70,40 +70,40 @@ void ContextMenuVisitor::visit(Database&)
     menuM->Append(myTreeCtrl::Menu_Backup, _("&Backup database..."));
     menuM->Append(myTreeCtrl::Menu_Restore, _("Rest&ore database..."));
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void ContextMenuVisitor::visit(Domain&)
 {
     addRegularObjectMenu();
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void ContextMenuVisitor::visit(Exception&)
 {
     addRegularObjectMenu();
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void ContextMenuVisitor::visit(Function&)
 {
     addRegularObjectMenu();
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void ContextMenuVisitor::visit(Generator&)
 {
     menuM->Append(myTreeCtrl::Menu_ShowGeneratorValue, _("Show &value"));
     menuM->Append(myTreeCtrl::Menu_SetGeneratorValue, _("&Set value"));
     addRegularObjectMenu();
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void ContextMenuVisitor::visit(Procedure&)
 {
     addSelectMenu(false);    // false = not a table
     addRegularObjectMenu();
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void ContextMenuVisitor::visit(Role&)
 {
     addRegularObjectMenu();
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void ContextMenuVisitor::visit(Server&)
 {
     menuM->Append(myTreeCtrl::Menu_RegisterDatabase, _("&Register existing database..."));
@@ -113,7 +113,7 @@ void ContextMenuVisitor::visit(Server&)
     menuM->Append(myTreeCtrl::Menu_UnRegisterServer, _("&Unregister server"));
     menuM->Append(myTreeCtrl::Menu_ServerProperties, _("Server registration &info..."));
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void ContextMenuVisitor::visit(Table&)
 {
     menuM->Append(myTreeCtrl::Menu_Insert, _("&Insert into ..."));
@@ -121,18 +121,18 @@ void ContextMenuVisitor::visit(Table&)
     menuM->Append(myTreeCtrl::Menu_CreateTriggerForTable, _("Create new &trigger..."));
     addRegularObjectMenu();
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void ContextMenuVisitor::visit(Trigger&)
 {
     addRegularObjectMenu();
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void ContextMenuVisitor::visit(View&)
 {
     addSelectMenu(false);    // false = not a table
     addRegularObjectMenu();
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void ContextMenuVisitor::visit(MetadataItem &item)
 {
     NodeType type = item.getType();
@@ -149,7 +149,7 @@ void ContextMenuVisitor::visit(MetadataItem &item)
         type == ntTriggers || type == ntDomains || type == ntRoles || type == ntExceptions)
             menuM->Append(myTreeCtrl::Menu_CreateObject, _("Create &new..."));
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void ContextMenuVisitor::addSelectMenu(bool isTable)
 {
     menuM->Append(myTreeCtrl::Menu_Browse, _("&Select * from ..."));
@@ -163,10 +163,10 @@ void ContextMenuVisitor::addSelectMenu(bool isTable)
         menuM->AppendSeparator();
     }
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void ContextMenuVisitor::addRegularObjectMenu()
 {
     menuM->Append(myTreeCtrl::Menu_DropObject, _("Dr&op"));
     menuM->Append(myTreeCtrl::Menu_ObjectProperties, _("P&roperties..."));
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------

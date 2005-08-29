@@ -18,6 +18,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s):
 */
 
@@ -34,9 +36,10 @@
     #include "wx/wx.h"
 #endif
 
-#include <string>
-#include <sstream>
 #include <fstream>
+#include <sstream>
+#include <string>
+
 #include "simpleparser.h"
 //-----------------------------------------------------------------------------
 // returns false if errors occur

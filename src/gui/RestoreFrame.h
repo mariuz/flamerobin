@@ -25,12 +25,12 @@ Contributor(s):
 
 #ifndef RESTOREFRAME_H
 #define RESTOREFRAME_H
-
+//-----------------------------------------------------------------------------
 #include <wx/wx.h>
 #include "BackupRestoreBaseFrame.h"
 
 class RestoreThread;
-
+//-----------------------------------------------------------------------------
 class RestoreFrame: public BackupRestoreBaseFrame {
     friend class RestoreThread;
 public:
@@ -57,4 +57,5 @@ protected:
     wxChoice* choice_pagesize;
     DECLARE_EVENT_TABLE()
 };
+//-----------------------------------------------------------------------------
 #endif // RESTOREFRAME_H

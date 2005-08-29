@@ -41,12 +41,8 @@
 #endif
 
 #include "config/Config.h"
-#include "BaseFrame.h"
 #include "framemanager.h"
-//-----------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(BaseFrame, wxFrame)
-    EVT_CLOSE(BaseFrame::OnClose)
-END_EVENT_TABLE()
+#include "gui/BaseFrame.h"
 //-----------------------------------------------------------------------------
 BaseFrame::BaseFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style, const wxString& name):
     wxFrame(parent, id, title, pos, size, style|wxNO_FULL_REPAINT_ON_RESIZE, name)
@@ -163,6 +159,10 @@ const wxRect BaseFrame::getDefaultRect() const
 {
     return wxRect(-1, -1, -1, -1);
 }
+//-----------------------------------------------------------------------------
+BEGIN_EVENT_TABLE(BaseFrame, wxFrame)
+    EVT_CLOSE(BaseFrame::OnClose)
+END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void BaseFrame::OnClose(wxCloseEvent& WXUNUSED(event))
 {

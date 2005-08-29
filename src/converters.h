@@ -18,22 +18,23 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s):
 */
 
-//! Various functions that convert IBPP datatypes into human readable form
-//
-//
 #ifndef FR_CONVERTERS_H
 #define FR_CONVERTERS_H
-
+//--------------------------------------------------------------------------------------
 #include <string>
-#include "ibpp.h"
 
-//---------------------------------------------------------------------------------------
+#include <ibpp.h>
+//--------------------------------------------------------------------------------------
+//! Various functions that convert IBPP datatypes into human readable form
 std::string GetHumanDate(int year, int month, int day, std::string DateFormat);
 std::string GetHumanTime(int hour, int minute, int second, std::string TimeFormat);
-std::string GetHumanTimestamp(IBPP::Timestamp ts, std::string DateFormat, std::string TimeFormat);
+std::string GetHumanTimestamp(IBPP::Timestamp ts, std::string DateFormat, 
+    std::string TimeFormat);
 bool CreateString(IBPP::Statement& st, int col, std::string& s);
-//---------------------------------------------------------------------------------------
-#endif
+//--------------------------------------------------------------------------------------
+#endif // FR_CONVERTERS_H

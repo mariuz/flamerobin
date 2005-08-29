@@ -18,14 +18,16 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): Nando Dessena
 */
 
-#include <wx/wx.h>
-#include <wx/wxhtml.h>
-
 #ifndef FR_PRINTABLE_HTML_WINDOW_H
 #define FR_PRINTABLE_HTML_WINDOW_H
+//-----------------------------------------------------------------------------
+#include <wx/wx.h>
+#include <wx/wxhtml.h>
 
 class wxHtmlEasyPrinting;
 //-----------------------------------------------------------------------------

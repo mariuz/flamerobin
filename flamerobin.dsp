@@ -476,11 +476,11 @@ SOURCE=.\src\gui\BackupRestoreBaseFrame.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\BaseDialog.cpp
+SOURCE=.\src\gui\BaseDialog.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\BaseFrame.cpp
+SOURCE=.\src\gui\BaseFrame.cpp
 # End Source File
 # Begin Source File
 
@@ -516,6 +516,10 @@ SOURCE=.\src\gui\MultilineEnterDialog.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\core\Observer.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\PreferencesDialog.cpp
 # End Source File
 # Begin Source File
@@ -541,6 +545,10 @@ SOURCE=.\src\gui\ServerRegistrationDialog.cpp
 # Begin Source File
 
 SOURCE=.\src\gui\SimpleHtmlFrame.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\core\Subject.cpp
 # End Source File
 # Begin Source File
 
@@ -654,10 +662,6 @@ SOURCE=.\src\objectdescriptionhandler.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\observer.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\metadata\parameter.cpp
 # End Source File
 # Begin Source File
@@ -698,10 +702,6 @@ SOURCE=.\src\styleguidemsw.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\subject.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\metadata\table.cpp
 # End Source File
 # Begin Source File
@@ -738,11 +738,11 @@ SOURCE=.\src\gui\BackupRestoreBaseFrame.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\BaseDialog.h
+SOURCE=.\src\gui\BaseDialog.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\BaseFrame.h
+SOURCE=.\src\gui\BaseFrame.h
 # End Source File
 # Begin Source File
 
@@ -778,6 +778,10 @@ SOURCE=.\src\gui\MultilineEnterDialog.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\core\Observer.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\PreferencesDialog.h
 # End Source File
 # Begin Source File
@@ -802,7 +806,15 @@ SOURCE=.\src\gui\SimpleHtmlFrame.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\core\Subject.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\TriggerWizardDialog.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\core\Visitor.h
 # End Source File
 # Begin Source File
 
@@ -898,10 +910,6 @@ SOURCE=.\src\myTreeCtrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\observer.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\metadata\parameter.h
 # End Source File
 # Begin Source File
@@ -938,10 +946,6 @@ SOURCE=.\src\styleguide.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\subject.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\metadata\table.h
 # End Source File
 # Begin Source File
@@ -963,10 +967,6 @@ SOURCE=.\src\urihandler.h
 # Begin Source File
 
 SOURCE=.\src\metadata\view.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\visitor.h
 # End Source File
 # End Group
 # End Target

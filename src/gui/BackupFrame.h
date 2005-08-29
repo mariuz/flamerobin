@@ -25,12 +25,12 @@ Contributor(s):
 
 #ifndef BACKUPFRAME_H
 #define BACKUPFRAME_H
-
+//-----------------------------------------------------------------------------
 #include <wx/wx.h>
 #include "BackupRestoreBaseFrame.h"
 
 class BackupThread;
-
+//-----------------------------------------------------------------------------
 class BackupFrame: public BackupRestoreBaseFrame {
     friend class BackupThread;
 public:
@@ -55,4 +55,5 @@ protected:
     wxCheckBox* checkbox_extern;
     DECLARE_EVENT_TABLE()
 };
+//-----------------------------------------------------------------------------
 #endif // BACKUPFRAME_H

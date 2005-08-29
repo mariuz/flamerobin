@@ -41,7 +41,7 @@
 #include "PrintableHtmlWindow.h"
 #include "SimpleHtmlFrame.h"
 #include "ugly.h"
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 bool showHtmlFile(wxWindow* parent, const wxFileName& fileName)
 {
     if (!fileName.FileExists())
@@ -59,7 +59,7 @@ bool showHtmlFile(wxWindow* parent, const wxFileName& fileName)
     shf->Show();
     return true;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 SimpleHtmlFrame::SimpleHtmlFrame(wxWindow* parent, const wxString& pageName):
     BaseFrame(parent, -1, wxEmptyString)
 {
@@ -76,14 +76,14 @@ SimpleHtmlFrame::SimpleHtmlFrame(wxWindow* parent, const wxString& pageName):
     icon.CopyFromBitmap(bmp);
     SetIcon(icon);
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 const wxRect SimpleHtmlFrame::getDefaultRect() const
 {
     return wxRect(-1, -1, 600, 420);
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 const std::string SimpleHtmlFrame::getName() const
 {
     return "SimpleHtmlFrameFrame";
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------

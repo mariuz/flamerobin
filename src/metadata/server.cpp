@@ -18,6 +18,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s):
 */
 
@@ -29,54 +31,54 @@
 #endif
 
 #include "config/Config.h"
+#include "core/Visitor.h"
 #include "server.h"
-#include "visitor.h"
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 using namespace std;
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 Server::Server()
     : MetadataItem()
 {
-	typeM = ntServer;
+    typeM = ntServer;
 
-	hostnameM = "";
-	portM = "";
+    hostnameM = "";
+    portM = "";
 
-	databasesM.setParent(this);
-	databasesM.setType(ntServer);
+    databasesM.setParent(this);
+    databasesM.setType(ntServer);
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 bool Server::getChildren(vector<MetadataItem *>& temp)
 {
-	return databasesM.getChildren(temp);
+    return databasesM.getChildren(temp);
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 bool Server::orderedChildren() const
 {
     bool ordered = false;
     config().getValue("OrderDatabasesInTree", ordered);
     return ordered;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // returns pointer to object in vector
 Database* Server::addDatabase(Database& db)
 {
-	Database *temp = databasesM.add(db);
-	temp->setParent(this);					// grab it from collection
-	temp->initChildren();
-	notify();
-	return temp;
+    Database *temp = databasesM.add(db);
+    temp->setParent(this);                  // grab it from collection
+    temp->initChildren();
+    notifyObservers();
+    return temp;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void Server::removeDatabase(Database *db)
 {
-	databasesM.remove(db);
-	notify();
+    databasesM.remove(db);
+    notifyObservers();
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void Server::createDatabase(Database *db, int pagesize, int dialect)
 {
-	ostringstream extra_params;
+    ostringstream extra_params;
     if (pagesize)
         extra_params << "PAGE_SIZE " << pagesize << " ";
 
@@ -84,58 +86,58 @@ void Server::createDatabase(Database *db, int pagesize, int dialect)
     if (!charset.empty())
         extra_params << "DEFAULT CHARACTER SET " << charset << " ";
 
-	IBPP::Database db1;
-	db1 = IBPP::DatabaseFactory(hostnameM, db->getPath(), db->getUsername(),
+    IBPP::Database db1;
+    db1 = IBPP::DatabaseFactory(hostnameM, db->getPath(), db->getUsername(),
         db->getPassword(), "", charset, extra_params.str());
-	db1->Create(dialect);
+    db1->Create(dialect);
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 MetadataCollection<Database> *Server::getDatabases()
 {
-	return &databasesM;
+    return &databasesM;
 };
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 string Server::getHostname() const
 {
-	return hostnameM;
+    return hostnameM;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 string Server::getPort() const
 {
-	return portM;
+    return portM;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 bool Server::hasConnectedDatabase() const
 {
-	for (MetadataCollection<Database>::const_iterator it = databasesM.begin();
-		it != databasesM.end(); ++it)
-	{
-		if ((*it).isConnected())
-			return true;
-	}
-	return false;
+    for (MetadataCollection<Database>::const_iterator it = databasesM.begin();
+        it != databasesM.end(); ++it)
+    {
+        if ((*it).isConnected())
+            return true;
+    }
+    return false;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void Server::setHostname(string hostname)
 {
-	hostnameM = hostname;
+    hostnameM = hostname;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void Server::setPort(string port)
 {
-	portM = port;
+    portM = port;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 const string Server::getTypeName() const
 {
-	return "SERVER";
+    return "SERVER";
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void Server::accept(Visitor *v)
 {
-	v->visit(*this);
+    v->visit(*this);
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 string Server::getConnectionString() const
 {
     string hostname = getHostname();
@@ -145,7 +147,7 @@ string Server::getConnectionString() const
     else
         return hostname;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 const string Server::getItemPath() const
 {
     // Since database Ids are already unique, let's shorten the item paths
@@ -153,4 +155,4 @@ const string Server::getItemPath() const
     // to disappear in the future.
     return "";
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------

@@ -18,6 +18,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): Milan Babuskov.
 */
 
@@ -29,18 +31,20 @@
 #endif
 
 #include <string>
-#include "ibpp.h"
-#include "visitor.h"
-#include "function.h"
+
+#include <ibpp.h>
+
+#include "core/Visitor.h"
 #include "database.h"
 #include "domain.h"
-//------------------------------------------------------------------------------
+#include "function.h"
+//-----------------------------------------------------------------------------
 Function::Function()
 {
 	typeM = ntFunction;
 	infoLoadedM = false;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string Function::getCreateSqlTemplate() const
 {
 	return "DECLARE EXTERNAL FUNCTION name [datatype | CSTRING (int) [, datatype | CSTRING (int) ...]]\n"
@@ -48,23 +52,23 @@ std::string Function::getCreateSqlTemplate() const
            "ENTRY_POINT 'entryname'\n"
            "MODULE_NAME 'modulename';\n";
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 const std::string Function::getTypeName() const
 {
 	return "FUNCTION";
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string Function::getDropSqlStatement() const
 {
     return "DROP EXTERNAL FUNCTION " + getName() + ";";
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string Function::getDefinition()
 {
 	loadInfo();
 	return definitionM;
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void Function::loadInfo(bool force)
 {
 	if (infoLoadedM && !force)
@@ -138,15 +142,15 @@ void Function::loadInfo(bool force)
 		definitionM = "System error.";
 	}
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 std::string Function::getHtmlHeader()
 {
 	loadInfo();
 	return "<B>Library name:</B> " + libraryNameM + "<BR><B>Entry point:</B>  " + entryPointM + "<BR><BR>";
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void Function::accept(Visitor *v)
 {
 	v->visit(*this);
 }
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------

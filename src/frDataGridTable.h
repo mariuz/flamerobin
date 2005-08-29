@@ -25,20 +25,20 @@ Contributor(s): Michael Hieke
 
 #ifndef FR_DATAGRIDTABLE_H
 #define FR_DATAGRIDTABLE_H
-
+//-----------------------------------------------------------------------------
 #include <wx/wx.h>
 #include <wx/grid.h>
 
-#include "ibpp.h"
+#include <ibpp.h>
 
-//----------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // this event is sent after new rows have been fetched
 BEGIN_DECLARE_EVENT_TYPES()
-DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_ROWCOUNT_CHANGED, 42)
+    DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_ROWCOUNT_CHANGED, 42)
 END_DECLARE_EVENT_TYPES()
-//----------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 class GridBaseCell; // no need to include frDataGridCells.h
-//----------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 class GridTable: public wxGridTableBase
 {
 private:
@@ -77,7 +77,6 @@ public:
     virtual wxString GetValue(int row, int col);
     virtual bool IsEmptyCell(int row, int col);
     virtual void SetValue(int row, int col, const wxString& value);
-
 };
-//----------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #endif

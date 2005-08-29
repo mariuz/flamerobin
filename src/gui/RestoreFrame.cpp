@@ -27,24 +27,24 @@ Contributor(s): Nando Dessena
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-#pragma hdrstop
+    #pragma hdrstop
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
 // need because it includes almost all "standard" wxWindows headers
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+    #include "wx/wx.h"
 #endif
 
-#include <algorithm>
-
 #include <wx/datetime.h>
+
+#include <algorithm>
 
 #include <ibpp.h>
 
 #include "config/Config.h"
 #include "frutils.h"
-#include "RestoreFrame.h"
+#include "gui/RestoreFrame.h"
 #include "styleguide.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------

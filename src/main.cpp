@@ -18,6 +18,8 @@
 
   All Rights Reserved.
 
+  $Id$
+
   Contributor(s): Nando Dessena
 */
 
@@ -32,12 +34,12 @@
     #include "wx/wx.h"
 #endif
 
-#include <vector>
-#include <string>
-
 #include <wx/cmdline.h>
 #include <wx/stdpaths.h>
 #include <wx/utils.h>
+
+#include <vector>
+#include <string>
 
 #include <ibpp.h>
 
