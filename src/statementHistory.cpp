@@ -84,23 +84,12 @@ StatementHistory::~StatementHistory()
 //! reads granularity from config() and gives pointer to appropriate history object
 StatementHistory& StatementHistory::get(Database *db)
 {
-    enum historyGranularity { hgCommonToAll = 0, hgPerServer, hgPerDatabaseName, hgPerDatabase };
+    enum historyGranularity { hgCommonToAll = 0, hgPerDatabaseName, hgPerDatabase };
     historyGranularity hg = (historyGranularity)(config().get("statementHistoryGranularity", (int)hgPerDatabase));
     if (hg == hgCommonToAll)
     {
         static StatementHistory st("");
         return st;
-    }
-
-    else if (hg == hgPerServer)
-    {
-        static std::map<Server *, StatementHistory> stm;
-        if (stm.find(db->getServer()) == stm.end())
-        {
-            StatementHistory st("SERVER" + db->getServer()->getId());
-            stm.insert(std::pair<Server *, StatementHistory>(db->getServer(), st));
-        }
-        return (*(stm.find(db->getServer()))).second;
     }
 
     else if (hg == hgPerDatabaseName)

@@ -170,12 +170,9 @@
                 <caption>Share SQL statement history</caption>
                 <description>History can be shared accross databases, which is useful if they have similar structure</description>
                 <key>statementHistoryGranularity</key>
-                <default>3</default>
+                <default>2</default>
                 <option>
                     <caption>Between all databases</caption>
-                </option>
-                <option>
-                    <caption>Between databases on same server</caption>
                 </option>
                 <option>
                     <caption>Between databases with same display name</caption>
