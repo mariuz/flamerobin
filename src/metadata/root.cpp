@@ -121,6 +121,7 @@ bool Root::load()
 	        ss << value;
 	        ss >> nextIdM;
         }
+        
         // server start and end tags
         if (option == "server")
 		{
@@ -136,23 +137,25 @@ bool Root::load()
             server->unlockSubject();
             server = 0;
         }
+        
         // database start and end tag
 		if (option == "database" && server)
 		{
 			Database temp;
 			database = server->addDatabase(temp);
+		}
+		if (option == "/database" && database)
+		{
             // make sure the database has an Id before Root::save() is called,
             // otherwise a new Id will be generated then, but the generator value
             // will not be stored because it's at the beginning of the file.
             database->getId();
-		}
-		if (option == "/database" && database)
-		{
 			// backward compatibility with FR < 0.3.0
             if (database->getName().empty())
 				database->setName(database->extractNameFromConnectionString());
             database = 0;
         }
+        
         // common subtags
 		if (option == "name" && server)
 		{
@@ -162,7 +165,7 @@ bool Root::load()
 			    server->setName(value);
 		}
 
-        // database specific
+        // database-specific subtags
         if (option == "id" && database)
         {
             int id;
