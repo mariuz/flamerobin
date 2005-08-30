@@ -31,6 +31,7 @@
 #endif
 
 #include <wx/filefn.h>
+#include <wx/filename.h>
 
 #include <fstream>
 #include <sstream>
@@ -72,7 +73,11 @@ Root::~Root()
 //
 bool Root::load()
 {
-    ifstream file(getFileName().c_str());
+    wxFileName fileName = std2wx(getFileName());
+    if (!fileName.FileExists())
+        return false;
+    
+    ifstream file(fileName.GetFullPath().c_str());
     if (!file)
         return false;
 
