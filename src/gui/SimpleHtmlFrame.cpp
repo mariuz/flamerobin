@@ -49,19 +49,19 @@ bool showHtmlFile(wxWindow* parent, const wxFileName& fileName)
         wxString msg;
         msg.Printf(_("The HTML document \"%s\" does not exist!"), 
             fileName.GetFullPath().c_str());
-        wxMessageBox(msg, _("FlameRobin"), wxOK|wxICON_ERROR);
+        wxMessageBox(msg, _("FlameRobin"), wxOK | wxICON_ERROR);
         return false;
     }
 
     SimpleHtmlFrame *shf;
     // TODO: check for and use an existing viewer instead of creating a new one
-    shf = new SimpleHtmlFrame(parent,  fileName.GetFullPath());
+    shf = new SimpleHtmlFrame(parent, fileName.GetFullPath());
     shf->Show();
     return true;
 }
 //-----------------------------------------------------------------------------
-SimpleHtmlFrame::SimpleHtmlFrame(wxWindow* parent, const wxString& pageName):
-    BaseFrame(parent, -1, wxEmptyString)
+SimpleHtmlFrame::SimpleHtmlFrame(wxWindow* parent, const wxString& pageName)
+    : BaseFrame(parent, -1, wxEmptyString)
 {
     window_1 = new PrintableHtmlWindow(this);
     CreateStatusBar();
