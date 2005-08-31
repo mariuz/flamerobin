@@ -77,7 +77,7 @@ bool Root::load()
     if (!fileName.FileExists())
         return false;
     
-    ifstream file(fileName.GetFullPath().c_str());
+    ifstream file(wx2std(fileName.GetFullPath()).c_str());
     if (!file)
         return false;
 
