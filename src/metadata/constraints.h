@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
 #ifndef FR_CONSTRAINTS_H
@@ -35,8 +35,8 @@
 //
 class Constraint: public MetadataItem
 {
-    // nothing needed yet, but it may be once
-    virtual void accept(Visitor *v);
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
 //! primary keys and uniques

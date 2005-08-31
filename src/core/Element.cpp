@@ -12,10 +12,10 @@
 
   The Original Code is FlameRobin (TM).
 
-  The Initial Developer of the Original Code is Milan Babuskov.
+  The Initial Developer of the Original Code is Nando Dessena.
 
   Portions created by the original developer
-  are Copyright (C) 2005 Milan Babuskov.
+  are Copyright (C) 2005 Nando Dessena.
 
   All Rights Reserved.
 
@@ -23,20 +23,25 @@
 
   Contributor(s):
 */
-//-----------------------------------------------------------------------------
-#ifndef FR_ITEM_H
-#define FR_ITEM_H
 
-#include "core/Subject.h"
-class Visitor;
-//-----------------------------------------------------------------------------
-//! Base Item class, currently metadataitems are only descendants, but in the future
-//! those could be other things that need Visitor pattern implemented on them.
-//! (Database Folders and other visual stuff comes to mind as a possibility)
-class Item: public Subject
-{
-public:
-    virtual void accept(Visitor *v);
-};
-//-----------------------------------------------------------------------------
+// For compilers that support precompilation, includes "wx/wx.h".
+#include "wx/wxprec.h"
+
+#ifdef __BORLANDC__
+    #pragma hdrstop
 #endif
+
+// for all others, include the necessary headers (this file is usually all you
+// need because it includes almost all "standard" wxWindows headers
+#ifndef WX_PRECOMP
+    #include "wx/wx.h"
+#endif
+
+#include "Element.h"
+#include "Visitor.h"
+//-----------------------------------------------------------------------------
+void Element::acceptVisitor(Visitor* visitor)
+{
+	visitor->visit(*this);
+}
+//-----------------------------------------------------------------------------

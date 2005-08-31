@@ -1,3 +1,4 @@
+//-----------------------------------------------------------------------------
 /*
   The contents of this file are subject to the Initial Developer's Public
   License Version 1.0 (the "License"); you may not use this file except in
@@ -11,38 +12,29 @@
 
   The Original Code is FlameRobin (TM).
 
-  The Initial Developer of the Original Code is Milan Babuskov.
+  The Initial Developer of the Original Code is Nando Dessena.
 
   Portions created by the original developer
-  are Copyright (C) 2004 Milan Babuskov.
+  are Copyright (C) 2005 Nando Dessena.
 
   All Rights Reserved.
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s):
 */
-
 //-----------------------------------------------------------------------------
-#ifndef FR_FUNCTION_H
-#define FR_FUNCTION_H
+#ifndef FR_ELEMENT_H
+#define FR_ELEMENT_H
 
-#include "metadataitem.h"
+// [GoF] Visitor pattern. Abstract generic Element.
+
+class Visitor;
 //-----------------------------------------------------------------------------
-class Function: public MetadataItem
+class Element
 {
-private:
-	std::string libraryNameM, entryPointM, definitionM;
-	bool infoLoadedM;
-	void loadInfo(bool force = false);
 public:
-	Function();
-	virtual const std::string getTypeName() const;
-    virtual std::string getCreateSqlTemplate() const;
-    virtual std::string getDropSqlStatement() const;
-	std::string getDefinition();
-	std::string getHtmlHeader();
-    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    virtual void acceptVisitor(Visitor* visitor);
 };
 //-----------------------------------------------------------------------------
-#endif
+#endif //FR_ELEMENT_H

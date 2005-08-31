@@ -41,9 +41,7 @@
 #include "table.h"
 #include "trigger.h"
 #include "view.h"
-
-// ND: for some reason including server.h doesn't work, probably a cyclic
-// dependency issue.
+//-----------------------------------------------------------------------------
 class Server;
 //-----------------------------------------------------------------------------
 class Credentials
@@ -93,8 +91,6 @@ private:
 
     mutable unsigned int idM;
 public:
-    virtual void accept(Visitor *v);
-
     Database();
     void initChildren();
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
@@ -157,6 +153,7 @@ public:
     std::string extractNameFromConnectionString() const;
     virtual const string getId() const;
     void setId(int id);
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //----------------------------------------------------------------------------
 #endif

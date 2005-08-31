@@ -38,12 +38,6 @@
 //-----------------------------------------------------------------------------
 class MetadataItemPropertiesFrame: public BaseFrame, public Observer
 {
-public:
-    MetadataItem *getObservedObject() const;
-    void processHtmlFile(std::string filename);
-    void setPage(const std::string& type);
-
-    MetadataItemPropertiesFrame(wxWindow* parent, MetadataItem *object, int id = -1);
 private:
     enum { ptSummary, ptConstraints, ptDependencies, ptTriggers, ptTableIndices } pageTypeM;
 
@@ -63,6 +57,12 @@ protected:
     virtual const std::string getName() const;
     virtual const std::string getStorageName() const;
     virtual const wxRect getDefaultRect() const;
+public:
+    MetadataItem *getObservedObject() const;
+    void processHtmlFile(std::string fileName);
+    void setPage(const std::string& type);
+
+    MetadataItemPropertiesFrame(wxWindow* parent, MetadataItem *object, int id = -1);
 };
 //-----------------------------------------------------------------------------
 #endif // METADATAITEMPROPERTIESFRAME_H

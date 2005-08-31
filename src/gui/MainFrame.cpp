@@ -40,7 +40,7 @@
 
 #include "BackupFrame.h"
 #include "config/Config.h"
-#include "contextmenuvisitor.h"
+#include "ContextMenuMetadataItemVisitor.h"
 #include "DatabaseRegistrationDialog.h"
 #include "dberror.h"
 #include "ExecuteSqlFrame.h"
@@ -103,9 +103,9 @@ void MainFrame::buildMainMenu()
     databaseMenu->Append(myTreeCtrl::Menu_RegisterDatabase, _("R&egister existing database..."));
     databaseMenu->Append(myTreeCtrl::Menu_CreateDatabase, _("Create &new database..."));
     databaseMenu->AppendSeparator();
-    ContextMenuVisitor cmvd(databaseMenu);
+    ContextMenuMetadataItemVisitor cmvd(databaseMenu);
     Database dummy;
-    dummy.accept(&cmvd);
+    dummy.acceptVisitor(&cmvd);
     databaseMenu->AppendSeparator();
     databaseMenu->Append(wxID_EXIT, _("&Quit"));
     menuBarM->Append(databaseMenu, _("&Database"));
@@ -348,8 +348,8 @@ void MainFrame::OnMainMenuOpen(wxMenuEvent& event)
 
     if (m->getDatabase() != 0 && dynamic_cast<Database *>(m) == 0)  // has to be subitem of database
     {
-        ContextMenuVisitor cmv(objectMenuM);
-        m->accept(&cmv);
+        ContextMenuMetadataItemVisitor cmv(objectMenuM);
+        m->acceptVisitor(&cmv);
     }
     if (objectMenuM->GetMenuItemCount() == 2)   // separator
         objectMenuM->Destroy(objectMenuM->FindItemByPosition(1));

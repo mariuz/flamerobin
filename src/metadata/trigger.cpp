@@ -21,7 +21,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -41,10 +41,11 @@
 #include "dberror.h"
 #include "frutils.h"
 #include "metadataitem.h"
+#include "MetadataItemVisitor.h"
 #include "trigger.h"
 //-----------------------------------------------------------------------------
-Trigger::Trigger():
-    MetadataItem()
+Trigger::Trigger()
+    : MetadataItem()
 {
     typeM = ntTrigger;
     infoIsLoadedM = false;
@@ -254,8 +255,8 @@ const std::string Trigger::getTypeName() const
     return "TRIGGER";
 }
 //-----------------------------------------------------------------------------
-void Trigger::accept(Visitor *v)
+void Trigger::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    v->visit(*this);
+    visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------

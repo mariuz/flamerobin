@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Michael Hieke
+  Contributor(s): Michael Hieke, Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -35,14 +35,14 @@
 
 #include <ibpp.h>
 
-#include "core/Visitor.h"
 #include "database.h"
 #include "dberror.h"
 #include "generator.h"
 #include "metadataitem.h"
+#include "MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
-Generator::Generator():
-    MetadataItem()
+Generator::Generator()
+    : MetadataItem()
 {
     typeM = ntGenerator;
     valueLoadedM = false;
@@ -124,8 +124,8 @@ const std::string Generator::getTypeName() const
     return "GENERATOR";
 }
 //-----------------------------------------------------------------------------
-void Generator::accept(Visitor *v)
+void Generator::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    v->visit(*this);
+    visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------

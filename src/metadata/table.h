@@ -20,13 +20,9 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
-//
-//
-//
-//
 //-----------------------------------------------------------------------------
 #ifndef FR_TABLE_H
 #define FR_TABLE_H
@@ -34,9 +30,9 @@
 #include "collection.h"
 #include "column.h"
 #include "constraints.h"
-#include "trigger.h"
 #include "indices.h"
 #include "relation.h"
+#include "trigger.h"
 //-----------------------------------------------------------------------------
 //! small helper class
 class Join
@@ -71,7 +67,7 @@ private:
 	bool loadIndices();
 
 public:
-    virtual void accept(Visitor *v);
+	Table();
 
 	static bool tablesRelate(std::vector<std::string>& tables, Table *table, std::vector<Join>& list);
 
@@ -89,8 +85,8 @@ public:
 	std::string getInsertStatement();
 	//std::string getUpdateStatement();		// use primary key info
 	//std::string getDeleteStatement();
-	Table();
 	virtual const std::string getTypeName() const;
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
 #endif

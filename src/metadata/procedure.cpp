@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -33,10 +33,10 @@
 #include <ibpp.h>
 
 #include "collection.h"
-#include "core/Visitor.h"
 #include "database.h"
 #include "dberror.h"
 #include "frutils.h"
+#include "MetadataItemVisitor.h"
 #include "parameter.h"
 #include "procedure.h"
 //-----------------------------------------------------------------------------
@@ -313,9 +313,8 @@ const std::string Procedure::getTypeName() const
     return "PROCEDURE";
 }
 //-----------------------------------------------------------------------------
-void Procedure::accept(Visitor *v)
+void Procedure::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    v->visit(*this);
+    visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------
-

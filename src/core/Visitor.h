@@ -21,61 +21,26 @@
 
   $Id$
 
-  Contributor(s): Milan Babuskov.
+  Contributor(s): Milan Babuskov, Nando Dessena
 */
 //-----------------------------------------------------------------------------
 
 #ifndef FR_VISITOR_H
 #define FR_VISITOR_H
 
-// [GoF] Visitor pattern. <Visitor>
+// [GoF] Visitor pattern. Abstract generic Visitor.
 
-// It is possible to use forward declaration here
-// but then you will have to include this files in each
-// <concrete_visitor>.cpp (or .h) file
-
-#include "metadata/column.h"
-#include "metadata/database.h"
-#include "metadata/domain.h"
-#include "metadata/exception.h"
-#include "metadata/function.h"
-#include "metadata/generator.h"
-#include "metadata/procedure.h"
-#include "metadata/parameter.h"
-#include "metadata/role.h"
-#include "metadata/server.h"
-#include "metadata/table.h"
-#include "metadata/trigger.h"
-#include "metadata/view.h"
-#include "metadata/metadataitem.h"
-#include "metadata/item.h"
+class Element;
 //-----------------------------------------------------------------------------
 class Visitor
 {
 protected:
-	//! aviod the need to implement visit actions for each type in descendent classes
-	virtual void defaultAction() {};
-
-public:
-    virtual void visit(Column&) { defaultAction(); };
-    virtual void visit(Database&) { defaultAction(); };
-    virtual void visit(Domain&) { defaultAction(); };
-    virtual void visit(Exception&) { defaultAction(); };
-    virtual void visit(Function&) { defaultAction(); };
-    virtual void visit(Generator&) { defaultAction(); };
-    virtual void visit(Procedure&) { defaultAction(); };
-    virtual void visit(Parameter&) { defaultAction(); };
-    virtual void visit(Role&) { defaultAction(); };
-    virtual void visit(Server&) { defaultAction(); };
-    virtual void visit(Table&) { defaultAction(); };
-    virtual void visit(Trigger&) { defaultAction(); };
-    virtual void visit(View&) { defaultAction(); };
-	virtual void visit(MetadataItem&) { defaultAction(); };
-
-	virtual void visit(Item&) { defaultAction(); };
-public:
 	Visitor() {};
     virtual ~Visitor() {};
+	virtual void defaultAction();
+public:
+	virtual void visit(Element& element);
+public:
 };
 //-----------------------------------------------------------------------------
 #endif //FR_VISITOR_H

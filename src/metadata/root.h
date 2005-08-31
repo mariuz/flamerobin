@@ -31,16 +31,21 @@
 //-----------------------------------------------------------------------------
 class Root: public MetadataItem
 {
+private:
+    MetadataCollection<Server> serversM;
+    std::string fileNameM;
+    std::string getFileName();
+    bool dirtyM;
+    unsigned int nextIdM;
 public:
-    virtual void accept(Visitor* v);
+    Root();
+    ~Root();
 
     Server *addServer(Server& server);
     void removeServer(Server* server);
 
     virtual bool getChildren(std::vector<MetadataItem*>& temp);
     virtual bool orderedChildren() const;
-    Root();
-    ~Root();
 
     bool load();
     bool save();
@@ -51,12 +56,8 @@ public:
 
     // increments the Id generator and returns the value.
     const unsigned int getNextId();
-private:
-    MetadataCollection<Server> serversM;
-    std::string fileNameM;
-    std::string getFileName();
-    bool dirtyM;
-    unsigned int nextIdM;
+
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
 Root& getGlobalRoot();

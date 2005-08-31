@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
 #ifndef FR_PROCEDURE_H
@@ -37,7 +37,7 @@ private:
     MetadataCollection <Parameter> parametersM;
 
 public:
-    virtual void accept(Visitor *v);
+    Procedure();
 
     std::string getCreateSqlTemplate() const;   // overrides MetadataItem::getCreateSqlTemplate()
 
@@ -52,8 +52,8 @@ public:
     std::string getAlterSql();
     std::string getDefinition();
 
-    Procedure();
     virtual const std::string getTypeName() const;
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
 #endif

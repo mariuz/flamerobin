@@ -32,8 +32,10 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_addconstrainthandler.o \
 	flamerobin_Config.o \
 	flamerobin_converters.o \
+	flamerobin_Element.o \
 	flamerobin_Observer.o \
 	flamerobin_Subject.o \
+	flamerobin_Visitor.o \
 	flamerobin_dberror.o \
 	flamerobin_framemanager.o \
 	flamerobin_frDataGrid.o \
@@ -45,6 +47,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_BackupRestoreBaseFrame.o \
 	flamerobin_BaseDialog.o \
 	flamerobin_BaseFrame.o \
+	flamerobin_ContextMenuMetadataItemVisitor.o \
 	flamerobin_DatabaseRegistrationDialog.o \
 	flamerobin_ExecuteSqlFrame.o \
 	flamerobin_FieldPropertiesFrame.o \
@@ -71,8 +74,8 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_function.o \
 	flamerobin_generator.o \
 	flamerobin_indices.o \
-	flamerobin_item.o \
 	flamerobin_metadataitem.o \
+	flamerobin_MetadataItemVisitor.o \
 	flamerobin_parameter.o \
 	flamerobin_procedure.o \
 	flamerobin_relation.o \
@@ -84,7 +87,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_view.o \
 	flamerobin_myTreeCtrl.o \
 	flamerobin_objectdescriptionhandler.o \
-	flamerobin_contextmenuvisitor.o \
 	flamerobin_simpleparser.o \
 	flamerobin_statementHistory.o \
 	flamerobin_styleguide.o \
@@ -257,11 +259,17 @@ flamerobin_Config.o: $(srcdir)/src/config/Config.cpp $(FLAMEROBIN_ODEP)
 flamerobin_converters.o: $(srcdir)/src/converters.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/converters.cpp
 
+flamerobin_Element.o: $(srcdir)/src/core/Element.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/Element.cpp
+
 flamerobin_Observer.o: $(srcdir)/src/core/Observer.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/Observer.cpp
 
 flamerobin_Subject.o: $(srcdir)/src/core/Subject.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/Subject.cpp
+
+flamerobin_Visitor.o: $(srcdir)/src/core/Visitor.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/Visitor.cpp
 
 flamerobin_dberror.o: $(srcdir)/src/dberror.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/dberror.cpp
@@ -295,6 +303,9 @@ flamerobin_BaseDialog.o: $(srcdir)/src/gui/BaseDialog.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_BaseFrame.o: $(srcdir)/src/gui/BaseFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/BaseFrame.cpp
+
+flamerobin_ContextMenuMetadataItemVisitor.o: $(srcdir)/src/gui/ContextMenuMetadataItemVisitor.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/ContextMenuMetadataItemVisitor.cpp
 
 flamerobin_DatabaseRegistrationDialog.o: $(srcdir)/src/gui/DatabaseRegistrationDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/DatabaseRegistrationDialog.cpp
@@ -374,11 +385,11 @@ flamerobin_generator.o: $(srcdir)/src/metadata/generator.cpp $(FLAMEROBIN_ODEP)
 flamerobin_indices.o: $(srcdir)/src/metadata/indices.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/indices.cpp
 
-flamerobin_item.o: $(srcdir)/src/metadata/item.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/item.cpp
-
 flamerobin_metadataitem.o: $(srcdir)/src/metadata/metadataitem.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/metadataitem.cpp
+
+flamerobin_MetadataItemVisitor.o: $(srcdir)/src/metadata/MetadataItemVisitor.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/MetadataItemVisitor.cpp
 
 flamerobin_parameter.o: $(srcdir)/src/metadata/parameter.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/parameter.cpp
@@ -412,9 +423,6 @@ flamerobin_myTreeCtrl.o: $(srcdir)/src/myTreeCtrl.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_objectdescriptionhandler.o: $(srcdir)/src/objectdescriptionhandler.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/objectdescriptionhandler.cpp
-
-flamerobin_contextmenuvisitor.o: $(srcdir)/src/contextmenuvisitor.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/contextmenuvisitor.cpp
 
 flamerobin_simpleparser.o: $(srcdir)/src/simpleparser.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/simpleparser.cpp

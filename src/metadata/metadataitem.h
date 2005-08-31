@@ -23,24 +23,20 @@
   Contributor(s): Nando Dessena
 */
 
-//
-//
-//
-//
 //-----------------------------------------------------------------------------
-#ifndef FR_METADATA_H
-#define FR_METADATA_H
+#ifndef FR_METADATAITEM_H
+#define FR_METADATAITEM_H
 
 #include <string>
 #include <vector>
 
-#include "item.h"
+#include "core/Subject.h"
+#include "core/Element.h"
 
-// forward declarations
 class Root;
 class Database;
 class Dependency;
-
+class MetadataItemVisitor;
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------
@@ -55,7 +51,7 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
 //-----------------------------------------------------------------------------
 NodeType getTypeByName(string name);
 //-----------------------------------------------------------------------------
-class MetadataItem: public Item
+class MetadataItem: public Subject, public Element
 {
 private:
 	string nameM;
@@ -65,12 +61,10 @@ private:
 protected:
 	NodeType typeM;
 public:
-    virtual void accept(Visitor *v);
+	MetadataItem();
+	virtual ~MetadataItem();
 
 	bool getDependencies(vector<Dependency>& list, bool ofObject);	// load from db
-
-	MetadataItem();
-	virtual ~MetadataItem() {};
 
 	Database *getDatabase() const;
     Root* getRoot() const;
@@ -119,6 +113,7 @@ public:
 	virtual bool isSystem() const;
 
     static const string pathSeparator;
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
 //! masks the object it points to so others see it transparently
@@ -139,4 +134,4 @@ public:
 	void setFields(const string& fields) { fieldsM = fields; };
 };
 //-----------------------------------------------------------------------------
-#endif
+#endif //FR_METADATAITEM_H

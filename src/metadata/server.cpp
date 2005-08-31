@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -32,6 +32,7 @@
 
 #include "config/Config.h"
 #include "core/Visitor.h"
+#include "MetadataItemVisitor.h"
 #include "server.h"
 //-----------------------------------------------------------------------------
 using namespace std;
@@ -133,9 +134,9 @@ const string Server::getTypeName() const
     return "SERVER";
 }
 //-----------------------------------------------------------------------------
-void Server::accept(Visitor *v)
+void Server::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    v->visit(*this);
+    visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------
 string Server::getConnectionString() const

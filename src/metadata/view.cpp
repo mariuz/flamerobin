@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -36,11 +36,12 @@
 #include "core/Visitor.h"
 #include "database.h"
 #include "dberror.h"
+#include "MetadataItemVisitor.h"
 #include "relation.h"
 #include "view.h"
 //-----------------------------------------------------------------------------
 View::View()
-	:Relation()
+	: Relation()
 {
 	typeM = ntView;
 }
@@ -145,9 +146,8 @@ const std::string View::getTypeName() const
 	return "VIEW";
 }
 //-----------------------------------------------------------------------------
-void View::accept(Visitor *v)
+void View::acceptVisitor(MetadataItemVisitor* visitor)
 {
-	v->visit(*this);
+	visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------
-

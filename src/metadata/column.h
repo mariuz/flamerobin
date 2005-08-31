@@ -20,13 +20,9 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
-//
-//
-//
-//
 //-----------------------------------------------------------------------------
 #ifndef FR_COLUMN_H
 #define FR_COLUMN_H
@@ -40,8 +36,6 @@ private:
 	bool notnullM, computedM;
 	std::string sourceM, computedSourceM, collationM;
 public:
-    virtual void accept(Visitor *v);
-
 	Column();
 	void Init(bool notnull, std::string source, bool computed, std::string computedSource, std::string collation);
 	virtual std::string getPrintableName();
@@ -54,6 +48,7 @@ public:
 	std::string getSource() const;
 	std::string getCollation() const;
 	Domain *getDomain() const;
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
 #endif

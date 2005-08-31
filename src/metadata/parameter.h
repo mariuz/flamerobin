@@ -20,13 +20,9 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
-//
-//
-//
-//
 //-----------------------------------------------------------------------------
 #ifndef FR_PARAMETER_H
 #define FR_PARAMETER_H
@@ -38,16 +34,14 @@ typedef enum { ptInput, ptOutput } ParameterType;
 
 class Parameter: public Column
 {
-public:
-    virtual void accept(Visitor *v);
-
-	Parameter(std::string source, int parameterType);
-	Parameter();
-	std::string getPrintableName();
-	ParameterType getParameterType() const;
-
 private:
 	ParameterType parameterTypeM;
+public:
+	Parameter();
+	Parameter(std::string source, int parameterType);
+	std::string getPrintableName();
+	ParameterType getParameterType() const;
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
 #endif

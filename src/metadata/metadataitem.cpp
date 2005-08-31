@@ -33,22 +33,26 @@
 #include <sstream>
 
 #include "config/Config.h"
-#include "core/Visitor.h"
 #include "database.h"
 #include "dberror.h"
 #include "frutils.h"
 #include "metadataitem.h"
+#include "MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------
 const string MetadataItem::pathSeparator = "/";
 //-----------------------------------------------------------------------------
 MetadataItem::MetadataItem()
-    : Item()
+    : Subject(), Element()
 {
     parentM = 0;
     typeM = ntUnknown;
     descriptionLoadedM = false;
+}
+//-----------------------------------------------------------------------------
+MetadataItem::~MetadataItem()
+{
 }
 //-----------------------------------------------------------------------------
 const string MetadataItem::getTypeName() const
@@ -518,8 +522,8 @@ string MetadataItem::getDropSqlStatement() const
     return "DROP " + getTypeName() + " " + getName() + ";";
 }
 //-----------------------------------------------------------------------------
-void MetadataItem::accept(Visitor *v)
+void MetadataItem::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    v->visit(*this);
+    visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------

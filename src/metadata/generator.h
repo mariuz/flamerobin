@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Michael Hieke
+  Contributor(s): Michael Hieke, Nando Dessena
 */
 
 #ifndef FR_GENERATOR_H
@@ -37,7 +37,7 @@
 #if defined(_MSC_VER) || defined(__BORLANDC__)
     typedef __int64 int64_t;
 #endif
-
+//-----------------------------------------------------------------------------
 class Generator: public MetadataItem
 {
 private:
@@ -46,9 +46,6 @@ private:
     void setValue(int64_t value);
 public:
     Generator();
-
-    virtual void accept(Visitor *v);
-
     // overrides MetadataItem::getCreateSqlTemplate()
     std::string getCreateSqlTemplate() const;
 
@@ -57,6 +54,7 @@ public:
 
     virtual std::string getPrintableName();
     virtual const std::string getTypeName() const;
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
 #endif

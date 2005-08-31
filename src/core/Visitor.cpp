@@ -12,16 +12,16 @@
 
   The Original Code is FlameRobin (TM).
 
-  The Initial Developer of the Original Code is Milan Babuskov.
+  The Initial Developer of the Original Code is Nando Dessena.
 
   Portions created by the original developer
-  are Copyright (C) 2005 Milan Babuskov.
+  are Copyright (C) 2005 Nando Dessena.
 
   All Rights Reserved.
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s):
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -37,12 +37,14 @@
     #include "wx/wx.h"
 #endif
 
+#include "Visitor.h"
 //-----------------------------------------------------------------------------
-#include "core/Visitor.h"
-#include "item.h"
-//-----------------------------------------------------------------------------
-void Item::accept(Visitor *v)
+void Visitor::visit(Element&)
 {
-	v->visit(*this);
+	defaultAction();
+}
+//-----------------------------------------------------------------------------
+void Visitor::defaultAction()
+{
 }
 //-----------------------------------------------------------------------------

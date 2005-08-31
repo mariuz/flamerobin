@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -36,6 +36,7 @@
 #include "core/Visitor.h"
 #include "column.h"
 #include "domain.h"
+#include "MetadataItemVisitor.h"
 #include "parameter.h"
 //-----------------------------------------------------------------------------
 Parameter::Parameter(std::string source, int parameterType)
@@ -65,8 +66,8 @@ ParameterType Parameter::getParameterType() const
 	return parameterTypeM;
 }
 //-----------------------------------------------------------------------------
-void Parameter::accept(Visitor *v)
+void Parameter::acceptVisitor(MetadataItemVisitor* visitor)
 {
-	v->visit(*this);
+	visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------

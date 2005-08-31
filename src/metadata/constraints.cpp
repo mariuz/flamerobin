@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -33,9 +33,9 @@
 #include <string>
 #include <vector>
 
-#include "core/Visitor.h"
-#include "metadataitem.h"
 #include "constraints.h"
+#include "metadataitem.h"
+#include "MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 std::string ColumnConstraint::getColumnList() const
 {
@@ -61,8 +61,8 @@ std::string ForeignKey::getReferencedColumnList() const
 	return result;
 };
 //-----------------------------------------------------------------------------
-void Constraint::accept(Visitor *v)
+void Constraint::acceptVisitor(MetadataItemVisitor* visitor)
 {
-	v->visit(*this);
+	visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------

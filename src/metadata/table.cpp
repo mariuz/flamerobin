@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -37,11 +37,12 @@
 #include "database.h"
 #include "dberror.h"
 #include "indices.h"
+#include "MetadataItemVisitor.h"
 #include "relation.h"
 #include "table.h"
 //-----------------------------------------------------------------------------
 Table::Table()
-    :Relation()
+    : Relation()
 {
     typeM = ntTable;
     primaryKeyLoadedM = false;
@@ -599,8 +600,8 @@ bool Table::tablesRelate(std::vector<std::string>& tables, Table *table, std::ve
     return !list.empty();
 }
 //-----------------------------------------------------------------------------
-void Table::accept(Visitor *v)
+void Table::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    v->visit(*this);
+    visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------

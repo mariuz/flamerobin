@@ -488,7 +488,15 @@ SOURCE=.\src\config\Config.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\ContextMenuMetadataItemVisitor.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\DatabaseRegistrationDialog.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\core\Element.cpp
 # End Source File
 # Begin Source File
 
@@ -509,6 +517,10 @@ SOURCE=.\src\gui\MainFrame.cpp
 # Begin Source File
 
 SOURCE=.\src\gui\MetadataItemPropertiesFrame.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\metadata\MetadataItemVisitor.cpp
 # End Source File
 # Begin Source File
 
@@ -556,6 +568,10 @@ SOURCE=.\src\gui\TriggerWizardDialog.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\core\Visitor.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\addconstrainthandler.cpp
 # End Source File
 # Begin Source File
@@ -565,10 +581,6 @@ SOURCE=.\src\metadata\column.cpp
 # Begin Source File
 
 SOURCE=.\src\metadata\constraints.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\contextmenuvisitor.cpp
 # End Source File
 # Begin Source File
 
@@ -635,10 +647,6 @@ SOURCE=.\src\images.cpp
 # Begin Source File
 
 SOURCE=.\src\metadata\indices.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\metadata\item.cpp
 # End Source File
 # Begin Source File
 
@@ -750,7 +758,15 @@ SOURCE=.\src\config\Config.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\ContextMenuMetadataItemVisitor.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\DatabaseRegistrationDialog.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\core\Element.h
 # End Source File
 # Begin Source File
 
@@ -771,6 +787,10 @@ SOURCE=.\src\gui\MainFrame.h
 # Begin Source File
 
 SOURCE=.\src\gui\MetadataItemPropertiesFrame.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\metadata\MetadataItemVisitor.h
 # End Source File
 # Begin Source File
 
@@ -830,10 +850,6 @@ SOURCE=.\src\metadata\constraints.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\contextmenuvisitor.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\converters.h
 # End Source File
 # Begin Source File
@@ -887,10 +903,6 @@ SOURCE=.\src\images.h
 # Begin Source File
 
 SOURCE=.\src\metadata\indices.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\metadata\item.h
 # End Source File
 # Begin Source File
 

@@ -38,8 +38,8 @@
 #include <string>
 
 #include "config/Config.h"
-#include "core/Visitor.h"
 #include "database.h"
+#include "MetadataItemVisitor.h"
 #include "root.h"
 #include "server.h"
 #include "ugly.h"
@@ -294,13 +294,13 @@ string Root::getFileName()
     return fileNameM;
 }
 //-----------------------------------------------------------------------------
-void Root::accept(Visitor *v)
-{
-    v->visit(*this);
-}
-//-----------------------------------------------------------------------------
 const unsigned int Root::getNextId()
 {
     return nextIdM++;
+}
+//-----------------------------------------------------------------------------
+void Root::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------

@@ -23,10 +23,6 @@
   Contributor(s): Nando Dessena
 */
 
-//
-//
-//
-//
 //-----------------------------------------------------------------------------
 #ifndef FR_ROLE_H
 #define FR_ROLE_H
@@ -36,10 +32,9 @@
 class Role: public MetadataItem
 {
 public:
-    virtual void accept(Visitor *v);
-
     virtual std::string getCreateSqlTemplate() const;
     virtual const std::string getTypeName() const;
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
 #endif // FR_ROLE_H

@@ -229,6 +229,7 @@
     <set var="HEADERFILES">
         $(SOURCEDIR)/config/Config.h
         $(SOURCEDIR)/converters.h
+        $(SOURCEDIR)/core/Element.h
         $(SOURCEDIR)/core/Observer.h
         $(SOURCEDIR)/core/Subject.h
         $(SOURCEDIR)/core/Visitor.h
@@ -242,6 +243,7 @@
         $(SOURCEDIR)/gui/BackupRestoreBaseFrame.h
         $(SOURCEDIR)/gui/BaseDialog.h
         $(SOURCEDIR)/gui/BaseFrame.h
+        $(SOURCEDIR)/gui/ContextMenuMetadataItemVisitor.h
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.h
         $(SOURCEDIR)/gui/ExecuteSqlFrame.h
         $(SOURCEDIR)/gui/FieldPropertiesFrame.h
@@ -268,8 +270,8 @@
         $(SOURCEDIR)/metadata/function.h
         $(SOURCEDIR)/metadata/generator.h
         $(SOURCEDIR)/metadata/indices.h
-        $(SOURCEDIR)/metadata/item.h
         $(SOURCEDIR)/metadata/metadataitem.h
+        $(SOURCEDIR)/metadata/MetadataItemVisitor.h
         $(SOURCEDIR)/metadata/parameter.h
         $(SOURCEDIR)/metadata/procedure.h
         $(SOURCEDIR)/metadata/relation.h
@@ -281,7 +283,6 @@
         $(SOURCEDIR)/metadata/view.h
         $(SOURCEDIR)/simpleparser.h
         $(SOURCEDIR)/myTreeCtrl.h
-        $(SOURCEDIR)/contextmenuvisitor.h
         $(SOURCEDIR)/statementHistory.h
         $(SOURCEDIR)/styleguide.h
         $(SOURCEDIR)/treeitem.h
@@ -305,8 +306,10 @@
         $(SOURCEDIR)/addconstrainthandler.cpp
         $(SOURCEDIR)/config/Config.cpp
         $(SOURCEDIR)/converters.cpp
+        $(SOURCEDIR)/core/Element.cpp
         $(SOURCEDIR)/core/Observer.cpp
         $(SOURCEDIR)/core/Subject.cpp
+        $(SOURCEDIR)/core/Visitor.cpp
         $(SOURCEDIR)/dberror.cpp
         $(SOURCEDIR)/framemanager.cpp
         $(SOURCEDIR)/frDataGrid.cpp
@@ -318,6 +321,7 @@
         $(SOURCEDIR)/gui/BackupRestoreBaseFrame.cpp
         $(SOURCEDIR)/gui/BaseDialog.cpp
         $(SOURCEDIR)/gui/BaseFrame.cpp
+        $(SOURCEDIR)/gui/ContextMenuMetadataItemVisitor.cpp
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.cpp
         $(SOURCEDIR)/gui/ExecuteSqlFrame.cpp
         $(SOURCEDIR)/gui/FieldPropertiesFrame.cpp
@@ -344,8 +348,8 @@
         $(SOURCEDIR)/metadata/function.cpp
         $(SOURCEDIR)/metadata/generator.cpp
         $(SOURCEDIR)/metadata/indices.cpp
-        $(SOURCEDIR)/metadata/item.cpp
         $(SOURCEDIR)/metadata/metadataitem.cpp
+        $(SOURCEDIR)/metadata/MetadataItemVisitor.cpp
         $(SOURCEDIR)/metadata/parameter.cpp
         $(SOURCEDIR)/metadata/procedure.cpp
         $(SOURCEDIR)/metadata/relation.cpp
@@ -357,7 +361,6 @@
         $(SOURCEDIR)/metadata/view.cpp
         $(SOURCEDIR)/myTreeCtrl.cpp
         $(SOURCEDIR)/objectdescriptionhandler.cpp
-        $(SOURCEDIR)/contextmenuvisitor.cpp
         $(SOURCEDIR)/simpleparser.cpp
         $(SOURCEDIR)/statementHistory.cpp
         $(SOURCEDIR)/styleguide.cpp

@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -36,14 +36,14 @@
     #include "wx/wx.h"
 #endif
 
-#include <stack>
-
 #include <wx/imaglist.h>
 #include <wx/dataobj.h>
 #include <wx/dnd.h>
 
+#include <stack>
+
 #include "config/Config.h"
-#include "contextmenuvisitor.h"
+#include "gui/ContextMenuMetadataItemVisitor.h"
 #include "images.h"
 #include "metadata/root.h"
 #include "myTreeCtrl.h"
@@ -112,27 +112,14 @@ void myTreeCtrl::OnContextMenu(wxContextMenuEvent& event)
     }
 
     wxMenu MyMenu(0);    // create context menu, depending on type of clicked item
-    if (!item.IsOk() || item == GetRootItem())    // root item or no item selected, show default menu
-    {
-        // let's leave it like this until we implement the main menu
-        if (item == GetRootItem())
-        {
-            MyMenu.Append(Menu_RegisterServer, _("&Register server..."));
-            MyMenu.AppendSeparator();
-        }
-        MyMenu.Append(wxID_ABOUT, _("&About FlameRobin..."));
-        MyMenu.Append(Menu_Configure, _("&Preferencess..."));
-        MyMenu.AppendSeparator();
-        MyMenu.Append(wxID_EXIT, _("&Quit"));
-    }
-    else
-    {    // read item data to find out what is the type of item
-        MetadataItem *i = getMetadataItem(item);
-        if (!i)
-            return;
-        ContextMenuVisitor cmv(&MyMenu);
-        i->accept(&cmv);
-    }
+    if (!item.IsOk())
+        item = GetRootItem();
+    MetadataItem* i = getMetadataItem(item);
+    if (!i)
+        return;
+    ContextMenuMetadataItemVisitor cmv(&MyMenu);
+    i->acceptVisitor(&cmv);
+
     PopupMenu(&MyMenu, pos);
 }
 //-----------------------------------------------------------------------------

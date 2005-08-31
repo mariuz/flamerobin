@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -33,7 +33,7 @@
 #include <string>
 #include <vector>
 
-#include "core/Visitor.h"
+#include "MetadataItemVisitor.h"
 #include "indices.h"
 #include "metadataitem.h"
 //-----------------------------------------------------------------------------
@@ -78,13 +78,13 @@ std::string Index::getFieldsAsString()
 	return retval;
 }
 //-----------------------------------------------------------------------------
-Index::IndexType Index::getIndexType()
+IndexType Index::getIndexType()
 {
 	return indexTypeM;
 }
 //-----------------------------------------------------------------------------
-void Index::accept(Visitor *v)
+void Index::acceptVisitor(MetadataItemVisitor* visitor)
 {
-	v->visit(*this);
+	visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------

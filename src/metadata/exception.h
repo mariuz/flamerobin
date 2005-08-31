@@ -20,36 +20,31 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
-//
-//
-//
-//
 //-----------------------------------------------------------------------------
 #ifndef FR_EXCEPTION_H
 #define FR_EXCEPTION_H
 
 #include "metadataitem.h"
-
+//-----------------------------------------------------------------------------
 class Exception: public MetadataItem
 {
+private:
+    bool propertiesLoadedM;
+    std::string messageM;
+    int numberM;
 public:
-    virtual void accept(Visitor *v);
-
+    Exception();
     virtual std::string getCreateSqlTemplate() const;
     virtual const std::string getTypeName() const;
 
     std::string getMessage();
     int getNumber();
     std::string getAlterSql();
-    Exception();
     void loadProperties(bool force = false);
-private:
-    bool propertiesLoadedM;
-    std::string messageM;
-    int numberM;
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
 #endif // FR_EXCEPTION_H

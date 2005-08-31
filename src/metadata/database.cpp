@@ -33,9 +33,9 @@
 #include <sstream>
 
 #include "config/Config.h"
-#include "core/Visitor.h"
 #include "database.h"
 #include "dberror.h"
+#include "MetadataItemVisitor.h"
 #include "parameter.h"
 #include "root.h"
 #include "simpleparser.h"
@@ -1070,9 +1070,9 @@ const std::string Database::getTypeName() const
     return "DATABASE";
 }
 //-----------------------------------------------------------------------------
-void Database::accept(Visitor *v)
+void Database::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    v->visit(*this);
+    visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------
 Server *Database::getServer() const

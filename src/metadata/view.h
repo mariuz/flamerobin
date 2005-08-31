@@ -20,30 +20,25 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
-//
-//
-//
-//
 //-----------------------------------------------------------------------------
 #ifndef FR_VIEW_H
 #define FR_VIEW_H
 
 #include "relation.h"
-
+//-----------------------------------------------------------------------------
 class View: public Relation
 {
 public:
-    virtual void accept(Visitor *v);
-
+	View();
 	std::string getCreateSqlTemplate() const;	// overrides MetadataItem::getCreateSqlTemplate()
 
 	bool getSource(std::string& source);
 	std::string getAlterSql();
-	View();
 	virtual const std::string getTypeName() const;
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
 #endif

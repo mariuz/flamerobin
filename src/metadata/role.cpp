@@ -33,6 +33,7 @@
 #include <string>
 
 #include "core/Visitor.h"
+#include "MetadataItemVisitor.h"
 #include "role.h"
 //-----------------------------------------------------------------------------
 std::string Role::getCreateSqlTemplate() const
@@ -45,8 +46,8 @@ const std::string Role::getTypeName() const
 	return "ROLE";
 }
 //-----------------------------------------------------------------------------
-void Role::accept(Visitor *v)
+void Role::acceptVisitor(MetadataItemVisitor *visitor)
 {
-	v->visit(*this);
+	visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------

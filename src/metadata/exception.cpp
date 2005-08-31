@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -34,10 +34,10 @@
 
 #include <ibpp.h>
 
-#include "core/Visitor.h"
 #include "database.h"
 #include "dberror.h"
 #include "exception.h"
+#include "MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 Exception::Exception()
 {
@@ -108,8 +108,8 @@ std::string Exception::getAlterSql()
 	return "ALTER EXCEPTION " + getName() + " '" + getMessage() + "';";
 }
 //-----------------------------------------------------------------------------
-void Exception::accept(Visitor *v)
+void Exception::acceptVisitor(MetadataItemVisitor* visitor)
 {
-	v->visit(*this);
+	visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------

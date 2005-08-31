@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
 #ifndef FR_INDICES_H
@@ -28,14 +28,20 @@
 
 #include <vector>
 #include <string>
+
 #include "metadataitem.h"
+//-----------------------------------------------------------------------------
+typedef	enum IndexType { itAscending, itDescending };
 //-----------------------------------------------------------------------------
 class Index: public MetadataItem
 {
+private:
+	bool uniqueFlagM;
+	bool activeM;
+	IndexType indexTypeM;
+	double statisticsM;
+	std::vector<std::string> segmentsM;
 public:
-    virtual void accept(Visitor *v);
-
-	enum IndexType { itAscending, itDescending };
 	Index(bool unique, bool active, bool ascending, double statistics);
 
 	bool isActive();
@@ -44,13 +50,7 @@ public:
 	IndexType getIndexType();
 	std::string getFieldsAsString();
 	std::vector<std::string> *getSegments();
-
-private:
-	bool uniqueFlagM;
-	bool activeM;
-	IndexType indexTypeM;
-	double statisticsM;
-	std::vector<std::string> segmentsM;
+    virtual void acceptVisitor(MetadataItemVisitor* v);
 };
 //-----------------------------------------------------------------------------
 #endif

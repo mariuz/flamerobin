@@ -35,10 +35,10 @@
 
 #include <ibpp.h>
 
-#include "core/Visitor.h"
 #include "database.h"
 #include "dberror.h"
 #include "domain.h"
+#include "MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 Domain::Domain():
 	MetadataItem()
@@ -243,9 +243,8 @@ const std::string Domain::getTypeName() const
 	return "DOMAIN";
 }
 //-----------------------------------------------------------------------------
-void Domain::accept(Visitor *v)
+void Domain::acceptVisitor(MetadataItemVisitor* visitor)
 {
-	v->visit(*this);
+	visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------
-

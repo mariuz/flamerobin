@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Milan Babuskov.
+  Contributor(s): Milan Babuskov, Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -34,10 +34,10 @@
 
 #include <ibpp.h>
 
-#include "core/Visitor.h"
 #include "database.h"
 #include "domain.h"
 #include "function.h"
+#include "MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 Function::Function()
 {
@@ -149,8 +149,8 @@ std::string Function::getHtmlHeader()
 	return "<B>Library name:</B> " + libraryNameM + "<BR><B>Entry point:</B>  " + entryPointM + "<BR><BR>";
 }
 //-----------------------------------------------------------------------------
-void Function::accept(Visitor *v)
+void Function::acceptVisitor(MetadataItemVisitor* visitor)
 {
-	v->visit(*this);
+	visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------

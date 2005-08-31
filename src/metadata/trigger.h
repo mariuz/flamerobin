@@ -20,19 +20,15 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
-//
-//
-//
-//
 //-----------------------------------------------------------------------------
 #ifndef FR_TRIGGER_H
 #define FR_TRIGGER_H
 
 #include "metadataitem.h"
-
+//-----------------------------------------------------------------------------
 class Trigger: public MetadataItem
 {
 private:
@@ -41,9 +37,8 @@ private:
 	bool activeM;
 	int positionM;
 	std::string triggerTypeM;
-
 public:
-    virtual void accept(Visitor *v);
+	Trigger();
 
 	enum firingTimeType { afterTrigger, beforeTrigger };
 	std::string getCreateSqlTemplate() const;	// overrides MetadataItem::getCreateSqlTemplate()
@@ -56,8 +51,8 @@ public:
 	firingTimeType getFiringTime();
 	std::string getAlterSql();
 
-	Trigger();
 	virtual const std::string getTypeName() const;
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
 #endif

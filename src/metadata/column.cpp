@@ -37,9 +37,9 @@
 #include "column.h"
 #include "config/Config.h"
 #include "constraints.h"
-#include "core/Visitor.h"
 #include "database.h"
 #include "domain.h"
+#include "MetadataItemVisitor.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 //! new undefined column
@@ -159,8 +159,8 @@ std::string Column::getDropSqlStatement() const
 	return "ALTER TABLE " + getParent()->getName() + " DROP " + getName();
 }
 //-----------------------------------------------------------------------------
-void Column::accept(Visitor *v)
+void Column::acceptVisitor(MetadataItemVisitor* visitor)
 {
-	v->visit(*this);
+	visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------

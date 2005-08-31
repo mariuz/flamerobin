@@ -23,17 +23,14 @@
   Contributor(s): Nando Dessena
 */
 
-//
-//
-//
-//
 //-----------------------------------------------------------------------------
 #ifndef FR_DOMAIN_H
 #define FR_DOMAIN_H
 
 #include <string>
-#include "metadataitem.h"
 
+#include "metadataitem.h"
+//-----------------------------------------------------------------------------
 class Domain: public MetadataItem
 {
 private:
@@ -42,8 +39,6 @@ private:
 	bool infoLoadedM;
 
 public:
-    virtual void accept(Visitor *v);
-
 	Domain();
 
 	static std::string datatype2string(short datatype, short scale, short precision, short subtype, short length);
@@ -54,6 +49,7 @@ public:
 	virtual const std::string getTypeName() const;
 	virtual std::string getCreateSqlTemplate() const;
 	virtual std::string getPrintableName();
+    virtual void acceptVisitor(MetadataItemVisitor* v);
 };
 //-----------------------------------------------------------------------------
 #endif

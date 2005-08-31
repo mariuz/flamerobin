@@ -23,17 +23,13 @@
   Contributor(s): Nando Dessena
 */
 
-//
-//
-//
-//
 //-----------------------------------------------------------------------------
 #ifndef FR_SERVER_H
 #define FR_SERVER_H
 
-#include "metadataitem.h"
 #include "collection.h"
 #include "database.h"
+#include "metadataitem.h"
 //-----------------------------------------------------------------------------
 // this is a coupled node (in visual sense). Server equals collection of YDatabases in wxTree
 // that's why getChildren() method just copies, since wxTree item will have pointer to Server.
@@ -46,8 +42,6 @@ private:
 	MetadataCollection<Database> databasesM;
 
 public:
-    virtual void accept(Visitor *v);
-
 	Server();
 	virtual bool getChildren(std::vector<MetadataItem *>& temp);
     virtual bool orderedChildren() const;
@@ -70,6 +64,7 @@ public:
 
 	bool hasConnectedDatabase() const;
 	virtual const string getItemPath() const;
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
 #endif

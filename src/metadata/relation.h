@@ -35,7 +35,7 @@
 #include "metadataitem.h"
 #include "collection.h"
 #include "column.h"
-class Trigger;
+#include "trigger.h"
 //-----------------------------------------------------------------------------
 class Relation: public MetadataItem
 {
