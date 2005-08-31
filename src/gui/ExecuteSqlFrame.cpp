@@ -1149,9 +1149,6 @@ bool ExecuteSqlFrame::execute(std::string sql, bool prepareOnly)
         if (type == IBPP::stSelect)            // for select statements: show data
         {
             grid_data->fill();
-            //data_grid->AdjustScrollbars();    // sometimes scrollbars get lost (this should be a solution)
-                                                // if someone can make a reproducible test that always makes scrollbars
-                                                // vanish, then we can test if this is the solution
             notebook_1->SetSelection(1);
             grid_data->SetFocus();
         }
