@@ -38,6 +38,7 @@
 
 //-----------------------------------------------------------------------------
 #include "wx/fileconf.h"
+#include "wx/filename.h"
 #include "wx/stdpaths.h"
 
 #include <string>
@@ -71,8 +72,11 @@ wxFileConfig* Config::getConfig() const
 {
     if (!configM)
     {
-        configM = new wxFileConfig(wxT(""), wxT(""),
-            std2wx(getConfigFileName()));
+        wxFileName configFileName = std2wx(getConfigFileName());
+        if (!configFileName.FileExists())
+            wxMkdir(configFileName.GetPath());
+        configM = new wxFileConfig(wxT(""), wxT(""), 
+            configFileName.GetFullPath(), wxT(""), wxCONFIG_USE_LOCAL_FILE);
     }
     return configM;
 }
