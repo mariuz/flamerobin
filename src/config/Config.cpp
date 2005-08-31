@@ -73,7 +73,7 @@ wxFileConfig* Config::getConfig() const
     if (!configM)
     {
         wxFileName configFileName = std2wx(getConfigFileName());
-        if (!configFileName.FileExists())
+        if (!wxDirExists(configFileName.GetPath()))
             wxMkdir(configFileName.GetPath());
         configM = new wxFileConfig(wxT(""), wxT(""), 
             configFileName.GetFullPath(), wxT(""), wxCONFIG_USE_LOCAL_FILE);
