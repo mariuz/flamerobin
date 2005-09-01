@@ -39,7 +39,6 @@
 #include <string>
 
 #include "frutils.h"
-#include "main.h"
 #include "metadata/metadataitem.h"
 #include "metadata/table.h"
 #include "ugly.h"
