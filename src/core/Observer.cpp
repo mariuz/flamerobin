@@ -43,8 +43,6 @@
 #include "core/Subject.h"
 //-----------------------------------------------------------------------------
 using namespace std;
-
-typedef list<Subject*>::iterator SubjectIterator;
 //-----------------------------------------------------------------------------
 Observer::Observer()
 {
@@ -54,7 +52,7 @@ Observer::~Observer()
 {
     while (!subjectsM.empty())
     {
-        SubjectIterator it = subjectsM.begin();
+        list<Subject*>::iterator it = subjectsM.begin();
         // object will be removed by removeObservedObject()
         (*it)->detachObserver(this);
     }
