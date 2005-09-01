@@ -35,11 +35,11 @@ class Element;
 class Visitor
 {
 protected:
-	Visitor() {};
+    Visitor() {};
     virtual ~Visitor() {};
-	virtual void defaultAction();
+    virtual void defaultAction();
 public:
-	virtual void visit(Element& element);
+    virtual void visit(Element& element);
 public:
 };
 //-----------------------------------------------------------------------------
