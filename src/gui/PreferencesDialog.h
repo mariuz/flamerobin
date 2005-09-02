@@ -31,6 +31,7 @@
 
 #include <wx/wx.h>
 #include <wx/event.h>
+#include <wx/filename.h>
 #include <wx/treectrl.h>
 #include <wx/imaglist.h>
 
@@ -129,7 +130,7 @@ private:
 
     bool createControlsAndAddToSizer(wxPanel* page, wxSizer* sizerPage);
     void layout();
-    void loadDescriptionFile(const wxString& filename);
+    void loadDescriptionFile(const wxFileName& filename);
     bool parseDescriptionNode(wxTreeItemId parent, wxXmlNode* xmln);
     bool parseDescriptionSetting(wxPanel* page, wxXmlNode* xmln,
         PrefDlgSetting* enabledby);

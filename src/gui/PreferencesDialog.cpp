@@ -315,7 +315,7 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
 
     // order of these is important: first create all controls, then set
     // their properties (may affect min size), then create sizer layout
-    loadDescriptionFile(std2wx(configM.getConfDefsPath()) + descriptionFileName);
+    loadDescriptionFile(wxFileName(std2wx(configM.getConfDefsPath()), descriptionFileName));
     setProperties();
     layout();
     // do this last, otherwise default button style may be lost on MSW
@@ -421,11 +421,19 @@ void PreferencesDialog::layout()
     layoutSizers(sizerControls, sizerButtons, true);
 }
 //-----------------------------------------------------------------------------
-void PreferencesDialog::loadDescriptionFile(const wxString& filename)
+void PreferencesDialog::loadDescriptionFile(const wxFileName& filename)
 {
     loadSuccessM = false;
 
-    wxFileInputStream stream(filename);
+    if (!filename.FileExists())
+    {
+        wxString msg;
+        msg.Printf(_("The support file:\n%s\ndoes not exist!\n\nThis means there is a problem with your installation of FlameRobin."), 
+            filename.GetFullPath().c_str());
+        wxMessageBox(msg, _("Support file not found"), wxOK | wxICON_ERROR);
+        return;
+    }
+    wxFileInputStream stream(filename.GetFullPath());
     if (!stream.Ok())
         return;
 
@@ -436,7 +444,7 @@ void PreferencesDialog::loadDescriptionFile(const wxString& filename)
     if (xmlr->GetName() != wxT("root"))
     {
         wxLogError(_("Invalid root node in description file \"%s\""),
-            filename.c_str());
+            filename.GetFullPath().c_str());
         return;
     }
     processPlatformProperty(xmlr);
@@ -619,7 +627,7 @@ END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void PreferencesDialog::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-	wxBusyCursor wait;
+    wxBusyCursor wait;
     if (saveToConfig())
         EndModal(wxID_OK);
 }
