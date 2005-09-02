@@ -27,8 +27,6 @@
 #define MAIN_H
 
 //-----------------------------------------------------------------------------
-using namespace std;
-//-----------------------------------------------------------------------------
 class FRApp: public wxApp {
 public:
     bool OnInit();
@@ -40,7 +38,7 @@ private:
     void parseCommandLine();
     // Translates the supported macros (like $app and $user) in path
     // specifications coming from the command line or the environment.
-    const string translatePathMacros(const string path) const;
+    const std::string translatePathMacros(const std::string path) const;
 };
 //-----------------------------------------------------------------------------
 DECLARE_APP(FRApp)

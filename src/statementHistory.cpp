@@ -46,13 +46,15 @@
 
 class Server;
 //-----------------------------------------------------------------------------
-StatementHistory::StatementHistory(const std::string& storageName)
+using namespace std;
+//-----------------------------------------------------------------------------
+StatementHistory::StatementHistory(const string& storageName)
 {
     storageNameM = storageName;
     Position p = 0;
     while (true)    // load history
     {
-        std::string s;
+        string s;
         ostringstream keyname;
         keyname << "HISTORY_" << storageNameM << "_ITEM_" << (p++);
         if (config().getValue(keyname.str(), s)) // history exists
@@ -71,7 +73,7 @@ StatementHistory::StatementHistory(const StatementHistory& source)
 StatementHistory::~StatementHistory()
 {
     int i=0;
-    for (std::deque<wxString>::iterator it = statementsM.begin(); it != statementsM.end(); ++it)
+    for (deque<wxString>::iterator it = statementsM.begin(); it != statementsM.end(); ++it)
     {
         if ((*it).IsEmpty())    // don't save empty buffers
             continue;
@@ -94,22 +96,22 @@ StatementHistory& StatementHistory::get(Database *db)
 
     else if (hg == hgPerDatabaseName)
     {
-        static std::map<std::string, StatementHistory> stm;
+        static map<string, StatementHistory> stm;
         if (stm.find(db->getName()) == stm.end())
         {
             StatementHistory st("DATABASENAME" + db->getName());
-            stm.insert(std::pair<std::string, StatementHistory>(db->getName(), st));
+            stm.insert(pair<string, StatementHistory>(db->getName(), st));
         }
         return (*(stm.find(db->getName()))).second;
     }
 
     else // (hg == hgPerDatabase)
     {
-        static std::map<Database *, StatementHistory> stm;
+        static map<Database *, StatementHistory> stm;
         if (stm.find(db) == stm.end())
         {
             StatementHistory st("DATABASE" + db->getId());
-            stm.insert(std::pair<Database *, StatementHistory>(db, st));
+            stm.insert(pair<Database *, StatementHistory>(db, st));
         }
         return (*(stm.find(db))).second;
     }
@@ -151,7 +153,7 @@ void StatementHistory::checkSize()
         return;
 
     int historySize = config().get("statementHistorySize", 50);     // -1 = unlimited
-    while (statementsM.size() > (std::deque<wxString>::size_type)historySize)
+    while (statementsM.size() > (deque<wxString>::size_type)historySize)
         statementsM.pop_front();
 }
 //-----------------------------------------------------------------------------
