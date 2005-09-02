@@ -31,10 +31,12 @@
 
 #include "metadataitem.h"
 //-----------------------------------------------------------------------------
-typedef	enum IndexType { itAscending, itDescending };
-//-----------------------------------------------------------------------------
 class Index: public MetadataItem
 {
+public:
+	// needs to be declared here as type is used in private section
+	enum IndexType { itAscending, itDescending };
+	
 private:
 	bool uniqueFlagM;
 	bool activeM;

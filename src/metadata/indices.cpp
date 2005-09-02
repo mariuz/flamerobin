@@ -78,7 +78,7 @@ std::string Index::getFieldsAsString()
 	return retval;
 }
 //-----------------------------------------------------------------------------
-IndexType Index::getIndexType()
+Index::IndexType Index::getIndexType()
 {
 	return indexTypeM;
 }
