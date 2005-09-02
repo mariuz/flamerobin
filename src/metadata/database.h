@@ -151,7 +151,7 @@ public:
     // returns a candidate name based on the connection string. Example:
     // path is "C:\data\database.fdb" -> returns "database".
     std::string extractNameFromConnectionString() const;
-    virtual const string getId() const;
+    virtual const std::string getId() const;
     void setId(int id);
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };

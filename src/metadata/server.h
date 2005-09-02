@@ -36,34 +36,34 @@
 class Server: public MetadataItem
 {
 private:
-	std::string hostnameM;
-	std::string portM;
+    std::string hostnameM;
+    std::string portM;
 
-	MetadataCollection<Database> databasesM;
+    MetadataCollection<Database> databasesM;
 
 public:
-	Server();
-	virtual bool getChildren(std::vector<MetadataItem *>& temp);
+    Server();
+    virtual bool getChildren(std::vector<MetadataItem *>& temp);
     virtual bool orderedChildren() const;
-	Database* addDatabase(Database&);
-	void removeDatabase(Database*);
-	MetadataCollection<Database> *getDatabases();
+    Database* addDatabase(Database&);
+    void removeDatabase(Database*);
+    MetadataCollection<Database> *getDatabases();
 
-	void createDatabase(Database *db, int pagesize = 4096, int dialect = 3);
+    void createDatabase(Database *db, int pagesize = 4096, int dialect = 3);
 
-	// setters/getters
-	std::string getHostname() const;
-	std::string getPort() const;
-	// returns the server-related portion of the connection string,
+    // setters/getters
+    std::string getHostname() const;
+    std::string getPort() const;
+    // returns the server-related portion of the connection string,
     // that is server name and port number if specified.
     std::string getConnectionString() const;
 
-	void setHostname(std::string hostname);
-	void setPort(std::string port);
-	virtual const std::string getTypeName() const;
+    void setHostname(std::string hostname);
+    void setPort(std::string port);
+    virtual const std::string getTypeName() const;
 
-	bool hasConnectedDatabase() const;
-	virtual const string getItemPath() const;
+    bool hasConnectedDatabase() const;
+    virtual const std::string getItemPath() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
