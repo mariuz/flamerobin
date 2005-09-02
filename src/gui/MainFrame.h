@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 class MainFrame: public BaseFrame {
 public:
-	// menu handling events
+    // menu handling events
     void OnMenuRegisterServer(wxCommandEvent& event);
     void OnMenuQuit(wxCommandEvent& event);
     void OnMenuAbout(wxCommandEvent& event);
@@ -65,69 +65,70 @@ public:
     void OnMenuBrowseColumns(wxCommandEvent& event);
     void OnMenuBrowse(wxCommandEvent& event);
     void OnMenuRestore(wxCommandEvent& event);
-	void OnMenuShowAllGeneratorValues(wxCommandEvent& event);
-	void OnMenuShowGeneratorValue(wxCommandEvent& event);
-	void OnMenuSetGeneratorValue(wxCommandEvent& event);
-	void OnMenuToggleStatusBar(wxCommandEvent& event);
-	void OnMenuToggleDisconnected(wxCommandEvent& event);
-	void OnMenuCreateObject(wxCommandEvent& event);
+    void OnMenuShowAllGeneratorValues(wxCommandEvent& event);
+    void OnMenuShowGeneratorValue(wxCommandEvent& event);
+    void OnMenuSetGeneratorValue(wxCommandEvent& event);
+    void OnMenuToggleStatusBar(wxCommandEvent& event);
+    void OnMenuToggleDisconnected(wxCommandEvent& event);
+    void OnMenuCreateObject(wxCommandEvent& event);
     void OnMenuLoadColumnsInfo(wxCommandEvent& event);
     void OnMenuAddColumn(wxCommandEvent& event);
     void OnMenuObjectProperties(wxCommandEvent& event);
     void OnMenuDropObject(wxCommandEvent& event);
     void OnMenuCreateTriggerForTable(wxCommandEvent& event);
+    void OnMenuExecuteProcedure(wxCommandEvent& event);
     void OnMenuDisconnect(wxCommandEvent& event);
     void OnMenuConnect(wxCommandEvent& event);
     void OnMenuConnectAs(wxCommandEvent& event);
     void OnMenuReconnect(wxCommandEvent& event);
 
-	// create new object
-	void showCreateTemplate(const MetadataItem *m);
-	void OnMenuCreateDomain(wxCommandEvent& event);
-	void OnMenuCreateException(wxCommandEvent& event);
-	void OnMenuCreateFunction(wxCommandEvent& event);
-	void OnMenuCreateGenerator(wxCommandEvent& event);
-	void OnMenuCreateProcedure(wxCommandEvent& event);
-	void OnMenuCreateRole(wxCommandEvent& event);
-	void OnMenuCreateTable(wxCommandEvent& event);
-	void OnMenuCreateTrigger(wxCommandEvent& event);
-	void OnMenuCreateView(wxCommandEvent& event);
+    // create new object
+    void showCreateTemplate(const MetadataItem *m);
+    void OnMenuCreateDomain(wxCommandEvent& event);
+    void OnMenuCreateException(wxCommandEvent& event);
+    void OnMenuCreateFunction(wxCommandEvent& event);
+    void OnMenuCreateGenerator(wxCommandEvent& event);
+    void OnMenuCreateProcedure(wxCommandEvent& event);
+    void OnMenuCreateRole(wxCommandEvent& event);
+    void OnMenuCreateTable(wxCommandEvent& event);
+    void OnMenuCreateTrigger(wxCommandEvent& event);
+    void OnMenuCreateView(wxCommandEvent& event);
 
-	// enabled menu items
-	void OnMenuUpdateUnRegisterServer(wxUpdateUIEvent& event);
-	void OnMenuUpdateIfServerSelected(wxUpdateUIEvent& event);
-	void OnMenuUpdateIfDatabaseConnected(wxUpdateUIEvent& event);
-	void OnMenuUpdateIfDatabaseNotConnected(wxUpdateUIEvent& event);
-	void OnMenuUpdateIfDatabaseSelected(wxUpdateUIEvent& event);
+    // enabled menu items
+    void OnMenuUpdateUnRegisterServer(wxUpdateUIEvent& event);
+    void OnMenuUpdateIfServerSelected(wxUpdateUIEvent& event);
+    void OnMenuUpdateIfDatabaseConnected(wxUpdateUIEvent& event);
+    void OnMenuUpdateIfDatabaseNotConnected(wxUpdateUIEvent& event);
+    void OnMenuUpdateIfDatabaseSelected(wxUpdateUIEvent& event);
 
-	// other events
+    // other events
     void OnWindowMenuItem(wxCommandEvent& event);
-	void OnMainMenuOpen(wxMenuEvent& event);
-	void OnTreeSelectionChanged(wxTreeEvent& event);
-	void OnTreeItemActivate(wxTreeEvent& event);
-	void OnClose(wxCloseEvent& event);
+    void OnMainMenuOpen(wxMenuEvent& event);
+    void OnTreeSelectionChanged(wxTreeEvent& event);
+    void OnTreeItemActivate(wxTreeEvent& event);
+    void OnClose(wxCloseEvent& event);
 
     MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos = wxDefaultPosition,
-    	const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE);
+        const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE);
 
 private:
-	bool connect(bool warn);
-	void showGeneratorValue(Generator* g);
+    bool connect(bool warn);
+    void showGeneratorValue(Generator* g);
     
     void showDocsHtmlFile(const wxString& fileName);
 
     void set_properties();
     void do_layout();
-	void buildMainMenu();
+    void buildMainMenu();
 
 protected:
     myTreeCtrl* tree_ctrl_1;
     wxMenuBar* menuBarM;
-	wxMenu* windowMenuM;		// dynamic menu
-	wxMenu* objectMenuM;
+    wxMenu* windowMenuM;        // dynamic menu
+    wxMenu* objectMenuM;
 
-	virtual const std::string getName() const;
-	virtual const wxRect getDefaultRect() const;
+    virtual const std::string getName() const;
+    virtual const wxRect getDefaultRect() const;
     DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------

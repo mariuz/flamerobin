@@ -286,6 +286,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(myTreeCtrl::Menu_LoadColumnsInfo, MainFrame::OnMenuLoadColumnsInfo)
     EVT_MENU(myTreeCtrl::Menu_AddColumn, MainFrame::OnMenuAddColumn)
     EVT_MENU(myTreeCtrl::Menu_CreateTriggerForTable, MainFrame::OnMenuCreateTriggerForTable)
+    EVT_MENU(myTreeCtrl::Menu_ExecuteProcedure, MainFrame::OnMenuExecuteProcedure)
 
     EVT_MENU(myTreeCtrl::Menu_ShowAllGeneratorValues, MainFrame::OnMenuShowAllGeneratorValues)
     EVT_MENU(myTreeCtrl::Menu_ShowGeneratorValue, MainFrame::OnMenuShowGeneratorValue)
@@ -556,6 +557,18 @@ void MainFrame::OnMenuCreateTriggerForTable(wxCommandEvent& WXUNUSED(event))
         return;
     TriggerWizardDialog *t = new TriggerWizardDialog(this, i);
     t->Show();
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuExecuteProcedure(wxCommandEvent& WXUNUSED(event))
+{
+    Procedure *p = dynamic_cast<Procedure *>(tree_ctrl_1->getSelectedMetadataItem());
+    if (!p)
+        return;
+
+    ExecuteSqlFrame *eff = new ExecuteSqlFrame(this, -1, wxString(_("Executing procedure")));
+    eff->setDatabase(p->getDatabase());
+    eff->setSql(std2wx(p->getExecuteStatement()));
+    eff->Show();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuBrowse(wxCommandEvent& WXUNUSED(event))

@@ -44,6 +44,7 @@ public:
     bool getChildren(std::vector<MetadataItem *>& temp);
     Parameter *addParameter(Parameter &c);
 
+    std::string getExecuteStatement();
     std::string getSelectStatement(bool withColumns);
     bool isSelectable();
 

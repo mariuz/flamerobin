@@ -112,6 +112,7 @@ void ContextMenuMetadataItemVisitor::visit(MetadataItem& metadataItem)
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visit(Procedure&)
 {
+    menuM->Append(myTreeCtrl::Menu_ExecuteProcedure, _("&Execute..."));
     addSelectMenu(false);    // false = not a table
     addRegularObjectMenu();
 }

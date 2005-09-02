@@ -103,6 +103,27 @@ std::string Procedure::getSelectStatement(bool withColumns)
     return sql;
 }
 //-----------------------------------------------------------------------------
+std::string Procedure::getExecuteStatement()
+{
+    if (!parametersLoadedM)
+        loadParameters();
+    std::string parlist;
+    for (MetadataCollection <Parameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
+    {
+        if ((*it).getParameterType() == ptInput)
+        {
+            if (!parlist.empty())
+                parlist += ", ";
+            parlist += (*it).getName();
+        }
+    }
+
+    std::string sql = "EXECUTE PROCEDURE " + getName();
+    if (!parlist.empty())
+        sql += "(" + parlist + ")";
+    return sql;
+}
+//-----------------------------------------------------------------------------
 bool Procedure::checkAndLoadParameters(bool force)
 {
     if (force || !parametersLoadedM)
