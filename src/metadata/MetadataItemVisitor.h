@@ -50,7 +50,7 @@
 class MetadataItemVisitor: public Visitor
 {
 public:
-	MetadataItemVisitor();
+    MetadataItemVisitor();
     virtual ~MetadataItemVisitor();
 
     virtual void visit(Column& dolumn);
@@ -67,7 +67,7 @@ public:
     virtual void visit(Table& table);
     virtual void visit(Trigger& trigger);
     virtual void visit(View& view);
-	virtual void visit(MetadataItem& metadataItem);
+    virtual void visit(MetadataItem& metadataItem);
 };
 //-----------------------------------------------------------------------------
 #endif //FR_METADATAITEMVISITOR_H

@@ -2,21 +2,14 @@
 <makefile>
     <using module="datafiles"/>
 
-    <!-- only needed on MSW, on Unix wx-config will find this for us -->
+<!-- only needed on MSW, on Unix wx-config will find this for us -->
     <option name="WXDIR" category="path" never_empty="1">
         <values></values>
         <default-value></default-value>
     </option>
 
-    <!-- used to find IBPP header file and libraries -->
-    <option name="IBPP" category="path" never_empty="1">
-        <values></values>
-        <default-value></default-value>
-    </option>
-
-    <!-- these options allow the application to build with options for
-         Unicode/ANSI, Debug/Release, and Static/DLL configs
-         of wxWidgets -->
+<!-- this option allows to build the application with either the 
+     Static or DLL configuration of wxWidgets -->
     <option name="USEDLL">
         <values>0,1</values>
         <values-description>,DLL</values-description>
@@ -26,6 +19,8 @@
         <if cond="USEDLL=='1'">WXUSINGDLL</if>
     </set>
 
+<!-- this option allows to build the application with either the 
+     Ansi or Unicode configuration of wxWidgets -->
     <option name="UNICODE">
         <values>0,1</values>
         <values-description>,Unicode</values-description>
@@ -35,6 +30,8 @@
         <if cond="UNICODE=='1'">u</if>
     </set>
 
+<!-- this option allows to build the application with either the 
+     Debug or Release configuration of wxWidgets and IBPP -->
     <option name="FINAL">
         <values>0,1</values>
         <values-description>Debug,Release</values-description>
@@ -43,7 +40,17 @@
     <set var="D_OPT">
         <if cond="FINAL=='0'">d</if>
     </set>
+    <set var="DEBUGINFO">
+        <if cond="FINAL=='0'">on</if>
+        <if cond="FINAL=='1'">off</if>
+    </set>
+    <set var="OPTIMIZE">
+        <if cond="FINAL=='0'">off</if>
+        <if cond="FINAL=='1'">size</if>
+    </set>
 
+<!-- this option allows to build the application with either the 
+     dynamic or static runtime libraries -->
     <option name="STATICRTL">
         <values>0,1</values>
         <values-description>Dynamic,Static</values-description>
@@ -57,14 +64,127 @@
         <if cond="STATICRTL=='1'">static</if>
     </set>
 
+
+    <define-tag name="headers" rules="dll,lib,exe">
+        <if cond="FORMAT=='msvc6prj'">
+            <msvc-project-files>
+                $(value)
+            </msvc-project-files>
+        </if>
+    </define-tag>
+
+
+    <template id="fr_common">
+        <runtime-libs>$(RTL_TYPE)</runtime-libs>
+        <threading>multi</threading>
+
+        <debug-info>$(DEBUGINFO)</debug-info>
+        <optimize>$(OPTIMIZE)</optimize>
+
+        <if cond="FORMAT in ['msvc6prj','msvc']">
+            <ldflags>/nologo</ldflags>
+            <ldflags>/subsystem:windows</ldflags>
+            <ldflags>/machine:I386</ldflags>
+        </if>
+
+        <cxx-rtti>on</cxx-rtti>
+        <cxx-exceptions>on</cxx-exceptions>
+        <warnings>max</warnings>
+    </template>
+
+    <set var="BUILDDIR">
+        <if cond="TOOLSET=='win32'">$(COMPILER)$(U_OPT)$(R_OPT)$(D_OPT)</if>
+        <if cond="TOOLSET!='win32'">.</if>
+    </set>
+
+    <set var="SOURCEDIR">src</set>
+    <set var="RESDIR">res</set>
+
+<!-- Part 1: build the IBPP library -->
+
+    <!-- IBPP needs one of these defined for the compiler in use -->
+    <set var="IBPPCOMPILERDEFINE">
+        <if cond="FORMAT=='autoconf'">IBPP_GCC</if>
+        <if cond="FORMAT=='borland'">IBPP_BCC</if>
+        <if cond="FORMAT=='mingw'">IBPP_GCC</if>
+        <if cond="FORMAT=='msvc'">IBPP_MSVC</if>
+        <if cond="FORMAT=='msvc6prj'">IBPP_MSVC</if>
+    </set>
+
+    <!-- IBPP needs one of these defined for the target platform -->
+    <set var="IBPPPLATFORMDEFINE">
+        <if cond="PLATFORM_MACOSX=='1'">IBPP_DARWIN</if>
+        <if cond="PLATFORM_UNIX=='1'">IBPP_LINUX</if>
+        <if cond="PLATFORM_WIN32=='1'">IBPP_WINDOWS</if>
+    </set>
+
+    <set var="FIREBIRDFRAMEWORK">
+        <if cond="PLATFORM_MACOSX=='1'">-framework Firebird</if>  -->
+    </set>
+    <set var="FIREBIRDLIBRARY">
+        <if cond="PLATFORM_UNIX=='1'">fbclient</if>
+        <!-- PLATFORM_WIN32: ibpp library loads firebird DLL dynamically -->
+    </set>
+
+    <set var="IBPP_HEADERFILES">
+        $(SOURCEDIR)/ibpp/ibpp.h
+        $(SOURCEDIR)/ibpp/_internals.h
+        $(SOURCEDIR)/ibpp/_msvcwarnings.h        
+    </set>
+
+    <set var="IBPP_SOURCEFILES">
+        $(SOURCEDIR)/ibpp/array.cpp
+        $(SOURCEDIR)/ibpp/blob.cpp
+        $(SOURCEDIR)/ibpp/database.cpp
+        $(SOURCEDIR)/ibpp/date.cpp
+        $(SOURCEDIR)/ibpp/datecalc.cpp
+        $(SOURCEDIR)/ibpp/dbkey.cpp
+        $(SOURCEDIR)/ibpp/exception.cpp
+        $(SOURCEDIR)/ibpp/ibpp.cpp
+        $(SOURCEDIR)/ibpp/row.cpp
+        $(SOURCEDIR)/ibpp/service.cpp
+        $(SOURCEDIR)/ibpp/statement.cpp
+        $(SOURCEDIR)/ibpp/time.cpp
+        $(SOURCEDIR)/ibpp/transaction.cpp
+        $(SOURCEDIR)/ibpp/_dpb.cpp
+        $(SOURCEDIR)/ibpp/_epb.cpp
+        $(SOURCEDIR)/ibpp/_ibs.cpp
+        $(SOURCEDIR)/ibpp/_rb.cpp
+        $(SOURCEDIR)/ibpp/_spb.cpp
+        $(SOURCEDIR)/ibpp/_tpb.cpp
+    </set>
+
+    <lib id="ibpp" template="fr_common">
+        <headers>$(IBPP_HEADERFILES)</headers>
+        <sources>$(IBPP_SOURCEFILES)</sources>
+
+        <!-- the precompiled header file is created in $(BUILDDIR), when
+             the first source file is compiled - all other source files
+             only *use* the PCH file -->
+        <precomp-headers-header>ibpp.h</precomp-headers-header>
+        <precomp-headers>on</precomp-headers>
+        <precomp-headers-file>$(id)</precomp-headers-file>
+        <precomp-headers-gen>$(SOURCEDIR)/ibpp/ibpp.cpp</precomp-headers-gen>
+
+        <define>$(IBPPCOMPILERDEFINE)</define>
+        <define>$(IBPPPLATFORMDEFINE)</define>
+        <if cond="FORMAT=='autoconf'">
+            <include>$(DOLLAR)(srcdir)/ibpp</include>
+            <include>$(DOLLAR)(srcdir)/ibpp/fbheaders</include>
+        </if>
+        <if cond="FORMAT!='autoconf'">
+            <include>./src/ibpp</include>
+            <include>./src/ibpp/fbheaders</include>
+        </if>
+    </lib>
+<!-- End of part 1 -->
+
+<!-- Part 2: build the FlameRobin executable -->
+ 
     <template id="wx">
         <if cond="FORMAT!='autoconf'">
             <set var="WXDIR">$(DOLLAR)(WXDIR)</set>
         </if>
-
-        <runtime-libs>$(RTL_TYPE)</runtime-libs>
-        <threading>multi</threading>
-
         <if cond="FORMAT!='autoconf'">
             <include>$(WXDIR)/include</include>
             <include>$(WXDIR)/contrib/include</include>
@@ -86,24 +206,6 @@
         <define>$(UNICODE_DEFINE)</define>
         <define>$(WXDEBUG)</define>
         <define>$(DEBUGFLAG)</define>
-
-        <set var="DEBUGINFO">
-            <if cond="FINAL=='0'">on</if>
-            <if cond="FINAL=='1'">off</if>
-        </set>
-        <set var="OPTIMIZE">
-            <if cond="FINAL=='0'">off</if>
-            <if cond="FINAL=='1'">speed</if>
-        </set>
-
-        <debug-info>$(DEBUGINFO)</debug-info>
-        <optimize>$(OPTIMIZE)</optimize>
-
-        <if cond="FORMAT in ['msvc6prj','msvc']">
-            <ldflags>/nologo</ldflags>
-            <ldflags>/subsystem:windows</ldflags>
-            <ldflags>/machine:I386</ldflags>
-        </if>
 
         <if cond="FORMAT in ['mingw']">
             <define>HAVE_W32API_H</define>
@@ -163,76 +265,13 @@
         </if>
     </template>
 
-    <define-tag name="headers" rules="dll,lib,exe">
-        <if cond="FORMAT=='msvc6prj'">
-            <msvc-project-files>
-                $(value)
-            </msvc-project-files>
-        </if>
-    </define-tag>
-
-    <set var="BUILDDIR">
-        <if cond="TOOLSET=='win32'">$(COMPILER)$(U_OPT)$(R_OPT)$(D_OPT)</if>
-        <if cond="TOOLSET!='win32'">.</if>
-    </set>
-
-    <set var="SOURCEDIR">src</set>
-    <set var="RESDIR">res</set>
-
-    <!-- IBPP needs one of these defined -->
-    <set var="IBPPCOMPILERDEFINE">
-        <if cond="FORMAT=='autoconf'">IBPP_GCC</if>
-        <if cond="FORMAT=='borland'">IBPP_BCC</if>
-        <if cond="FORMAT=='mingw'">IBPP_GCC</if>
-        <if cond="FORMAT=='msvc'">IBPP_MSVC</if>
-        <if cond="FORMAT=='msvc6prj'">IBPP_MSVC</if>
-    </set>
-
-    <!-- IBPP needs one of these defined -->
-    <set var="IBPPPLATFORMDEFINE">
-        <if cond="PLATFORM_MACOSX=='1'">IBPP_DARWIN</if>
-        <if cond="PLATFORM_UNIX=='1'">IBPP_LINUX</if>
-        <if cond="PLATFORM_WIN32=='1'">IBPP_WINDOWS</if>
-    </set>
-
-    <!-- path of IBPP library depends on platform and DEBUG setting -->
-    <set var="IBPPPLATFORM">
-        <if cond="PLATFORM_MACOSX=='1'">darwin</if>
-        <if cond="PLATFORM_UNIX=='1'">linux</if>
-        <if cond="FORMAT=='borland'">win32_bcc</if>
-        <if cond="FORMAT=='mingw'">win32_mingw</if>
-        <if cond="FORMAT=='msvc'">win32_msvc</if>
-        <if cond="FORMAT=='msvc6prj'">win32_msvc</if>
-    </set>
-    <set var="IBPPLIBVERSION">
-        <if cond="FINAL=='0'">debug</if>
-        <if cond="FINAL=='1'">release</if>
-    </set>
-    <set var="IBPPLIBPATH">$(DOLLAR)(IBPP)/$(IBPPLIBVERSION)/$(IBPPPLATFORM)</set>
-
-    <set var="IBPPDYNLIBRARY">
-        <if cond="PLATFORM_WIN32=='1'">ibpp</if>
-    </set>
-    <set var="IBPPSTATICLIBRARY">
-        <if cond="PLATFORM_MACOSX=='1'">$(IBPPLIBPATH)/libibpp.a</if>
-        <if cond="PLATFORM_UNIX=='1'">$(IBPPLIBPATH)/libibpp.a</if>
-    </set>
-
-    <set var="FIREBIRDFRAMEWORK">
-        <if cond="PLATFORM_MACOSX=='1'">-framework Firebird</if>  -->
-    </set>
-    <set var="FIREBIRDLIBRARY">
-        <if cond="PLATFORM_UNIX=='1'">fbclient</if>
-        <!-- PLATFORM_WIN32: ibpp library loads firebird DLL dynamically -->
-    </set>
-
-    <set var="HEADERFILES">
+    <set var="FR_HEADERFILES">
         $(SOURCEDIR)/config/Config.h
-        $(SOURCEDIR)/converters.h
         $(SOURCEDIR)/core/Element.h
         $(SOURCEDIR)/core/Observer.h
         $(SOURCEDIR)/core/Subject.h
         $(SOURCEDIR)/core/Visitor.h
+        $(SOURCEDIR)/converters.h
         $(SOURCEDIR)/dberror.h
         $(SOURCEDIR)/framemanager.h
         $(SOURCEDIR)/frDataGrid.h
@@ -290,7 +329,7 @@
         $(SOURCEDIR)/urihandler.h
     </set>
 
-    <set var="PLATFORMSPECIFICSOURCES">
+    <set var="FR_PLATFORMSPECIFICSOURCES">
         <if cond="PLATFORM_UNIX=='1'">
             $(SOURCEDIR)/styleguidegeneric.cpp
         </if>
@@ -302,7 +341,7 @@
         </if>
     </set>
 
-    <set var="SOURCEFILES">
+    <set var="FR_SOURCEFILES">
         $(SOURCEDIR)/addconstrainthandler.cpp
         $(SOURCEDIR)/config/Config.cpp
         $(SOURCEDIR)/converters.cpp
@@ -364,7 +403,7 @@
         $(SOURCEDIR)/simpleparser.cpp
         $(SOURCEDIR)/statementHistory.cpp
         $(SOURCEDIR)/styleguide.cpp
-        $(PLATFORMSPECIFICSOURCES)
+        $(FR_PLATFORMSPECIFICSOURCES)
         $(SOURCEDIR)/treeitem.cpp
         $(SOURCEDIR)/ugly.cpp
         $(SOURCEDIR)/urihandler.cpp
@@ -472,14 +511,13 @@
         </modify-target>
     </define-tag>
 
-    <exe id="flamerobin" template="wx">
+    <exe id="flamerobin" template="fr_common,wx">
         <app-type>gui</app-type>
-        <cxx-rtti>on</cxx-rtti>
-        <cxx-exceptions>on</cxx-exceptions>
-        <warnings>max</warnings>
 
-        <headers>$(HEADERFILES)</headers>
-        <sources>$(SOURCEFILES)</sources>
+        <depends>ibpp</depends>
+        
+        <headers>$(FR_HEADERFILES)</headers>
+        <sources>$(FR_SOURCEFILES)</sources>
 
         <!-- the precompiled header file is created in $(BUILDDIR), when
              the first source file is compiled - all other source files
@@ -493,18 +531,17 @@
         <define>$(IBPPPLATFORMDEFINE)</define>
         <if cond="FORMAT=='autoconf'">
             <include>$(DOLLAR)(srcdir)/src</include>
+            <include>$(DOLLAR)(srcdir)/src/ibpp</include>
             <include>$(DOLLAR)(srcdir)/res</include>
         </if>
         <if cond="FORMAT!='autoconf'">
             <include>./src</include>
+            <include>./src/ibpp</include>
             <include>./res</include>
         </if>
-        <include>$(DOLLAR)(IBPP)</include>
 
         <win32-res>$(RESDIR)/flamerobin.rc</win32-res>
-        <lib-path>$(IBPPLIBPATH)</lib-path>
-        <sys-lib>$(IBPPDYNLIBRARY)</sys-lib>
-        <ldlibs>$(IBPPSTATICLIBRARY)</ldlibs>
+        <library>ibpp</library>
         <ldlibs>$(FIREBIRDFRAMEWORK)</ldlibs>
         <sys-lib>$(FIREBIRDLIBRARY)</sys-lib>
 
@@ -513,25 +550,6 @@
         </if>
     </exe>
 
-    <copy-files id="configoptions">
-        <dependency-of>all</dependency-of>
-        <srcdir>$(CONFIGOPTIONSDIR)</srcdir>
-        <dstdir>$(BUILDDIR)/confdefs</dstdir>
-        <files>$(CONFIGOPTIONSFILES)</files>
-    </copy-files>
-
-    <copy-files id="htmldocs">
-        <dependency-of>all</dependency-of>
-        <srcdir>$(HTMLDOCSDIR)</srcdir>
-        <dstdir>$(BUILDDIR)/docs</dstdir>
-        <files>$(HTMLDOCFILES)</files>
-    </copy-files>
-
-    <copy-files id="templates">
-        <dependency-of>all</dependency-of>
-        <srcdir>$(HTMLTEMPLATEDIR)</srcdir>
-        <dstdir>$(BUILDDIR)/html-templates</dstdir>
-        <files>$(HTMLTEMPLATEFILES)</files>
-    </copy-files>
+<!-- End of part 2 -->
 
 </makefile>
