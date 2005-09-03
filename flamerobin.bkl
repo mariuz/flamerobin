@@ -169,8 +169,8 @@
         <define>$(IBPPCOMPILERDEFINE)</define>
         <define>$(IBPPPLATFORMDEFINE)</define>
         <if cond="FORMAT=='autoconf'">
-            <include>$(DOLLAR)(srcdir)/ibpp</include>
-            <include>$(DOLLAR)(srcdir)/ibpp/fbheaders</include>
+            <include>$(DOLLAR)(srcdir)/src/ibpp</include>
+            <include>$(DOLLAR)(srcdir)/src/ibpp/fbheaders</include>
         </if>
         <if cond="FORMAT!='autoconf'">
             <include>./src/ibpp</include>
