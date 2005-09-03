@@ -272,7 +272,7 @@ PACKAGE_STRING=
 PACKAGE_BUGREPORT=
 
 ac_unique_file="aclocal.m4"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT WX_CONFIG_PATH WX_CPPFLAGS WX_CFLAGS WX_CXXFLAGS WX_CFLAGS_ONLY WX_CXXFLAGS_ONLY WX_LIBS WX_LIBS_STATIC WX_VERSION RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S SET_MAKE MAKE_SET AR ac_ct_AR STRIP ac_ct_STRIP NM ac_ct_NM INSTALL_DIR LDFLAGS_GUI IF_GNU_MAKE PLATFORM_UNIX PLATFORM_WIN32 PLATFORM_MSDOS PLATFORM_MAC PLATFORM_MACOS PLATFORM_MACOSX PLATFORM_OS2 PLATFORM_BEOS SO_SUFFIX SO_SUFFIX_MODULE DLLIMP_SUFFIX LIBPREFIX LIBEXT DLLPREFIX DLLPREFIX_MODULE CC CFLAGS ac_ct_CC AIX_CXX_LD SHARED_LD_CC SHARED_LD_CXX SHARED_LD_MODULE_CC SHARED_LD_MODULE_CXX PIC_FLAG USE_SOVERSION USE_SOVERLINUX USE_SOVERSOLARIS USE_MACVERSION USE_SOSYMLINKS SONAME_FLAG DEPS_TRACKING RESCOMP SETFILE GCC_PCH COND_DEPS_TRACKING_0 COND_DEPS_TRACKING_1 COND_FINAL_0 COND_FINAL_1 COND_GCC_PCH_1 COND_PLATFORM_MACOSX_1 COND_PLATFORM_MAC_1 COND_PLATFORM_OS2_1 COND_PLATFORM_UNIX_1 COND_PLATFORM_WIN32_1 COND_STATICRTL_0 COND_STATICRTL_1 COND_UNICODE_1 COND_USEDLL_1 LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT WX_CONFIG_PATH WX_CPPFLAGS WX_CFLAGS WX_CXXFLAGS WX_CFLAGS_ONLY WX_CXXFLAGS_ONLY WX_LIBS WX_LIBS_STATIC WX_VERSION RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S SET_MAKE MAKE_SET AR ac_ct_AR STRIP ac_ct_STRIP NM ac_ct_NM INSTALL_DIR LDFLAGS_GUI IF_GNU_MAKE PLATFORM_UNIX PLATFORM_WIN32 PLATFORM_MSDOS PLATFORM_MAC PLATFORM_MACOS PLATFORM_MACOSX PLATFORM_OS2 PLATFORM_BEOS SO_SUFFIX SO_SUFFIX_MODULE DLLIMP_SUFFIX LIBPREFIX LIBEXT DLLPREFIX DLLPREFIX_MODULE dlldir CC CFLAGS ac_ct_CC AIX_CXX_LD SHARED_LD_CC SHARED_LD_CXX SHARED_LD_MODULE_CC SHARED_LD_MODULE_CXX PIC_FLAG WINDOWS_IMPLIB USE_SOVERSION USE_SOVERLINUX USE_SOVERSOLARIS USE_SOVERCYGWIN USE_MACVERSION USE_SOSYMLINKS SONAME_FLAG DEPS_TRACKING RESCOMP SETFILE GCC_PCH COND_DEPS_TRACKING_0 COND_DEPS_TRACKING_1 COND_FINAL_0 COND_FINAL_1 COND_GCC_PCH_1 COND_PLATFORM_MACOSX_1 COND_PLATFORM_MAC_1 COND_PLATFORM_OS2_1 COND_PLATFORM_UNIX_1 COND_PLATFORM_WIN32_1 COND_STATICRTL_0 COND_STATICRTL_1 COND_UNICODE_1 COND_USEDLL_1 LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -2062,7 +2062,7 @@ fi
   if test "$WX_CONFIG_PATH" != "no" ; then
     WX_VERSION=""
 
-    min_wx_version=2.4.0
+    min_wx_version=2.6.0
     if test -z "" ; then
       echo "$as_me:$LINENO: checking for wxWindows version >= $min_wx_version" >&5
 echo $ECHO_N "checking for wxWindows version >= $min_wx_version... $ECHO_C" >&6
@@ -2182,7 +2182,7 @@ echo "${ECHO_T}no (version $WX_VERSION is not new enough)" >&6
      	   Please check that wx-config is in path, the directory
      	   where wxWindows libraries are installed (returned by
      	   'wx-config --libs' command) is in LD_LIBRARY_PATH or
-     	   equivalent variable and wxWindows version is 2.4.0 or above.
+     	   equivalent variable and wxWindows version is 2.6.0 or above.
         " >&5
 echo "$as_me: error:
      	   wxWindows must be installed on your system
@@ -2191,7 +2191,7 @@ echo "$as_me: error:
      	   Please check that wx-config is in path, the directory
      	   where wxWindows libraries are installed (returned by
      	   'wx-config --libs' command) is in LD_LIBRARY_PATH or
-     	   equivalent variable and wxWindows version is 2.4.0 or above.
+     	   equivalent variable and wxWindows version is 2.6.0 or above.
         " >&2;}
    { (exit 1); exit 1; }; }
 
@@ -3447,7 +3447,7 @@ echo "${ECHO_T}$bakefile_cv_prog_makeisgnu" >&6
 
     if test "x$BAKEFILE_FORCE_PLATFORM" = "x"; then
         case "${BAKEFILE_HOST}" in
-            *-*-cygwin* | *-*-mingw32* )
+            *-*-mingw32* )
                 PLATFORM_WIN32=1
             ;;
             *-pc-msdosdjgpp )
@@ -3549,6 +3549,7 @@ fi;
     DLLPREFIX="lib"
     DLLPREFIX_MODULE=""
     DLLIMP_SUFFIX=""
+    dlldir="$libdir"
 
     case "${BAKEFILE_HOST}" in
         *-hp-hpux* )
@@ -3559,16 +3560,26 @@ fi;
                                                                         SO_SUFFIX="a"
             SO_SUFFIX_MODULE="a"
         ;;
-        *-*-cygwin* | *-*-mingw32* )
+        *-*-cygwin* )
+            SO_SUFFIX="dll"
+            SO_SUFFIX_MODULE="dll"
+            DLLIMP_SUFFIX="dll.a"
+            EXEEXT=".exe"
+            DLLPREFIX="cyg"
+            dlldir="$bindir"
+        ;;
+        *-*-mingw32* )
             SO_SUFFIX="dll"
             SO_SUFFIX_MODULE="dll"
             DLLIMP_SUFFIX="dll.a"
             EXEEXT=".exe"
             DLLPREFIX=""
+            dlldir="$bindir"
         ;;
         *-pc-msdosdjgpp )
             EXEEXT=".exe"
             DLLPREFIX=""
+            dlldir="$bindir"
         ;;
         *-pc-os2_emx | *-pc-os2-emx )
             SO_SUFFIX="dll"
@@ -3578,6 +3589,7 @@ fi;
             DLLPREFIX=""
             LIBPREFIX=""
             LIBEXT=".$OS2_LIBEXT"
+            dlldir="$bindir"
         ;;
         powerpc-*-darwin* )
             SO_SUFFIX="dylib"
@@ -3599,6 +3611,7 @@ fi;
 
 
 
+
         PIC_FLAG=""
     if test "x$GCC" = "xyes"; then
                 PIC_FLAG="-fPIC"
@@ -3606,6 +3619,7 @@ fi;
 
         SHARED_LD_CC="\$(CC) -shared ${PIC_FLAG} -o"
     SHARED_LD_CXX="\$(CXX) -shared ${PIC_FLAG} -o"
+    WINDOWS_IMPLIB=0
 
     case "${BAKEFILE_HOST}" in
       *-hp-hpux* )
@@ -3778,6 +3792,7 @@ verbose=0
 args=""
 objects=""
 linking_flag="-dynamiclib"
+ldargs="-r -keep_private_externs -nostdlib"
 
 while test ${D}# -gt 0; do
     case ${D}1 in
@@ -3791,6 +3806,10 @@ while test ${D}# -gt 0; do
         args="${D}{args} ${D}1 ${D}2"
         shift
         ;;
+
+       -s|-Wl,*)
+        # collect these load args
+        ldargs="${D}{ldargs} ${D}1"
 
        -l*|-L*|-flat_namespace|-headerpad_max_install_names)
         # collect these options
@@ -3820,28 +3839,27 @@ while test ${D}# -gt 0; do
     shift
 done
 
+status=0
+
 #
 # Link one module containing all the others
 #
 if test ${D}{verbose} = 1; then
-    echo "c++ -r -keep_private_externs -nostdlib ${D}{objects} -o master.${D}${D}.o"
+    echo "c++ ${D}{ldargs} ${D}{objects} -o master.${D}${D}.o"
 fi
-c++ -r -keep_private_externs -nostdlib ${D}{objects} -o master.${D}${D}.o
+c++ ${D}{ldargs} ${D}{objects} -o master.${D}${D}.o
 status=${D}?
-if test ${D}{status} != 0; then
-    exit ${D}{status}
-fi
 
 #
-# Link the shared library from the single module created
+# Link the shared library from the single module created, but only if the
+# previous command didn't fail:
 #
-if test ${D}{verbose} = 1; then
-    echo "cc ${D}{linking_flag} master.${D}${D}.o ${D}{args}"
-fi
-c++ ${D}{linking_flag} master.${D}${D}.o ${D}{args}
-status=${D}?
-if test ${D}{status} != 0; then
-    exit ${D}{status}
+if test ${D}{status} = 0; then
+    if test ${D}{verbose} = 1; then
+        echo "c++ ${D}{linking_flag} master.${D}${D}.o ${D}{args}"
+    fi
+    c++ ${D}{linking_flag} master.${D}${D}.o ${D}{args}
+    status=${D}?
 fi
 
 #
@@ -3849,7 +3867,7 @@ fi
 #
 rm -f master.${D}${D}.o
 
-exit 0
+exit ${D}status
 EOF
 
             chmod +x shared-ld-sh
@@ -3926,6 +3944,7 @@ fi
         PIC_FLAG=""
         SHARED_LD_CC="\$(CC) -shared -o"
         SHARED_LD_CXX="\$(CXX) -shared -o"
+        WINDOWS_IMPLIB=1
       ;;
 
       *-pc-os2_emx | *-pc-os2-emx )
@@ -4418,7 +4437,8 @@ EOF
       *-*-sunos4* | \
       *-*-osf* | \
       *-*-dgux5* | \
-      *-*-sysv5* )
+      *-*-sysv5* | \
+      *-pc-msdosdjgpp )
               ;;
 
       *)
@@ -4445,9 +4465,11 @@ echo "$as_me: error: unknown system type $BAKEFILE_HOST." >&2;}
 
 
 
+
     USE_SOVERSION=0
     USE_SOVERLINUX=0
     USE_SOVERSOLARIS=0
+    USE_SOVERCYGWIN=0
     USE_SOSYMLINKS=0
     USE_MACVERSION=0
     SONAME_FLAG=
@@ -4472,7 +4494,13 @@ echo "$as_me: error: unknown system type $BAKEFILE_HOST." >&2;}
         USE_SOVERSION=1
         USE_SOSYMLINKS=1
       ;;
+
+      *-*-cygwin* )
+        USE_SOVERSION=1
+        USE_SOVERCYGWIN=1
+      ;;
     esac
+
 
 
 
@@ -4505,6 +4533,12 @@ echo "${ECHO_T}gcc" >&6
         DEPSFLAG_MWCC="-MM"
         echo "$as_me:$LINENO: result: mwcc" >&5
 echo "${ECHO_T}mwcc" >&6
+    elif test "x$SUNCC" = "xyes"; then
+        DEPSMODE=suncc
+        DEPS_TRACKING=1
+        DEPSFLAG_SUNCC="-xM1"
+        echo "$as_me:$LINENO: result: suncc" >&5
+echo "${ECHO_T}suncc" >&6
     else
         echo "$as_me:$LINENO: result: none" >&5
 echo "${ECHO_T}none" >&6
@@ -4525,6 +4559,7 @@ DEPSMODE=${DEPSMODE}
 DEPSDIR=.deps
 DEPSFLAG_GCC="${DEPSFLAG_GCC}"
 DEPSFLAG_MWCC="${DEPSFLAG_MWCC}"
+DEPSFLAG_SUNCC="${DEPSFLAG_SUNCC}"
 
 mkdir -p ${D}DEPSDIR
 
@@ -4586,6 +4621,28 @@ elif test ${D}DEPSMODE = mwcc ; then
         prevarg="${D}arg"
     done
     ${D}* ${D}DEPSFLAG_MWCC >${D}{DEPSDIR}/${D}{objfile}.d
+    exit 0
+elif test ${D}DEPSMODE = suncc; then
+    ${D}* || exit
+    # Run compiler again with deps flag and redirect into the dep file.
+    # It doesn't work if the '-o FILE' option is used, but without it the
+    # dependency file will contain the wrong name for the object. So it is
+    # removed from the command line, and the dep file is fixed with sed.
+    cmd=""
+    while test ${D}# -gt 0; do
+        case "${D}1" in
+            -o )
+                shift
+                objfile=${D}1
+            ;;
+            * )
+                eval arg${D}#=\\${D}1
+                cmd="${D}cmd \\${D}arg${D}#"
+            ;;
+        esac
+        shift
+    done
+    eval "${D}cmd ${D}DEPSFLAG_SUNCC" | sed "s|.*:|${D}objfile:|" >${D}{DEPSDIR}/${D}{objfile}.d
     exit 0
 else
     ${D}*
@@ -4726,10 +4783,10 @@ fi
 
 
 
-    BAKEFILE_BAKEFILE_M4_VERSION="0.1.6"
+    BAKEFILE_BAKEFILE_M4_VERSION="0.1.9.1"
 
 
-BAKEFILE_AUTOCONF_INC_M4_VERSION="0.1.6"
+BAKEFILE_AUTOCONF_INC_M4_VERSION="0.1.9.1"
 
 
 
@@ -4934,6 +4991,12 @@ EOF
     fi
 
 
+
+    if test "$BAKEFILE_AUTOCONF_INC_M4_VERSION" = "" ; then
+        { { echo "$as_me:$LINENO: error: No version found in autoconf_inc.m4 - bakefile macro was changed to take additional argument, perhaps configure.in wasn't updated (see the documentation)?" >&5
+echo "$as_me: error: No version found in autoconf_inc.m4 - bakefile macro was changed to take additional argument, perhaps configure.in wasn't updated (see the documentation)?" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
 
     if test "$BAKEFILE_BAKEFILE_M4_VERSION" != "$BAKEFILE_AUTOCONF_INC_M4_VERSION" ; then
         { { echo "$as_me:$LINENO: error: Versions of Bakefile used to generate makefiles ($BAKEFILE_AUTOCONF_INC_M4_VERSION) and configure ($BAKEFILE_BAKEFILE_M4_VERSION) do not match." >&5
@@ -5642,6 +5705,7 @@ s,@LIBPREFIX@,$LIBPREFIX,;t t
 s,@LIBEXT@,$LIBEXT,;t t
 s,@DLLPREFIX@,$DLLPREFIX,;t t
 s,@DLLPREFIX_MODULE@,$DLLPREFIX_MODULE,;t t
+s,@dlldir@,$dlldir,;t t
 s,@CC@,$CC,;t t
 s,@CFLAGS@,$CFLAGS,;t t
 s,@ac_ct_CC@,$ac_ct_CC,;t t
@@ -5651,9 +5715,11 @@ s,@SHARED_LD_CXX@,$SHARED_LD_CXX,;t t
 s,@SHARED_LD_MODULE_CC@,$SHARED_LD_MODULE_CC,;t t
 s,@SHARED_LD_MODULE_CXX@,$SHARED_LD_MODULE_CXX,;t t
 s,@PIC_FLAG@,$PIC_FLAG,;t t
+s,@WINDOWS_IMPLIB@,$WINDOWS_IMPLIB,;t t
 s,@USE_SOVERSION@,$USE_SOVERSION,;t t
 s,@USE_SOVERLINUX@,$USE_SOVERLINUX,;t t
 s,@USE_SOVERSOLARIS@,$USE_SOVERSOLARIS,;t t
+s,@USE_SOVERCYGWIN@,$USE_SOVERCYGWIN,;t t
 s,@USE_MACVERSION@,$USE_MACVERSION,;t t
 s,@USE_SOSYMLINKS@,$USE_SOSYMLINKS,;t t
 s,@SONAME_FLAG@,$SONAME_FLAG,;t t

@@ -30,7 +30,7 @@ LDFLAGS = @LDFLAGS@
 
 DESTDIR = 
 IBPP_CXXFLAGS = $(__ibpp_PCH_INC) -DIBPP_GCC $(__IBPPPLATFORMDEFINE_p) \
-	-I$(srcdir)/ibpp -I$(srcdir)/ibpp/fbheaders $(CPPFLAGS) $(CXXFLAGS)
+	-I$(srcdir)/src/ibpp -I$(srcdir)/src/ibpp/fbheaders $(CPPFLAGS) $(CXXFLAGS)
 IBPP_OBJECTS =  \
 	ibpp_array.o \
 	ibpp_blob.o \
