@@ -135,7 +135,7 @@ bool CreateString(IBPP::Statement& st, int col, std::string& value)
 
     double dval;
     float fval;
-    __int64 int64val;
+    int64_t int64val;
     int x;
     IBPP::Date d;
     IBPP::Time t;
