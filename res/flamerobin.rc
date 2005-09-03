@@ -25,7 +25,9 @@ aaaa     ICON "fricon.ico"
 #endif
 
 #include "../src/frversion.h"
-#define FR_VERSION_STRING FR_VERSION_MAJOR "." FR_VERSION_MINOR "." FR_VERSION_RELEASE
+#define STR(x)  #x
+#define FR_VERSION_STRING STR(FR_VERSION_MAJOR) "." \
+        STR(FR_VERSION_MINOR) "." STR(FR_VERSION_RELEASE)
 
 1 VERSIONINFO
     FILEVERSION FR_VERSION_MAJOR,FR_VERSION_MINOR,FR_VERSION_RELEASE,0
@@ -44,7 +46,7 @@ BEGIN
             VALUE "Comments", "FlameRobin: Multi platform Database Manager for Firebird Database Server\0"
             VALUE "CompanyName", "FlameRobin development team\0"
             VALUE "FileDescription", "FlameRobin Database Manager\0"
-            VALUE "FileVersion", "FlameRobin  " FR_VERSION_STRING "\0"
+            VALUE "FileVersion", "FlameRobin " FR_VERSION_STRING "\0"
             VALUE "InternalName", "FlameRobin\0"
             VALUE "LegalCopyright", "Copyright © 2004-2005 FlameRobin development team\0"
             VALUE "LegalTrademarks", "\0"
