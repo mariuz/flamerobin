@@ -1,0 +1,136 @@
+///////////////////////////////////////////////////////////////////////////////
+//
+//	File    : $Id$
+//	Subject : IBPP, internal SPB class implementation
+//
+///////////////////////////////////////////////////////////////////////////////
+//
+//	The contents of this file are subject to the Mozilla Public License
+//	Version 1.0 (the "License"); you may not use this file except in
+//	compliance with the License. You may obtain a copy of the License at
+//	http://www.mozilla.org/MPL/
+//
+//	Software distributed under the License is distributed on an "AS IS"
+//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+//	License for the specific language governing rights and limitations
+//	under the License.
+//
+//	The Original Code is "IBPP 0.9" and all its associated documentation.
+//
+//	The Initial Developer of the Original Code is T.I.P. Group S.A.
+//	Portions created by T.I.P. Group S.A. are
+//	Copyright (C) 2000 T.I.P Group S.A.
+//	All Rights Reserved.
+//
+//	Contributor(s): ______________________________________.
+//
+///////////////////////////////////////////////////////////////////////////////
+//
+//	COMMENTS
+//	* SPB == Service Parameter Block/Buffer, see Interbase 6.0 C-API
+//	* Tabulations should be set every four characters when editing this file.
+//
+///////////////////////////////////////////////////////////////////////////////
+
+#include "ibpp.h"
+#include "_internals.h"
+
+#ifdef HAS_HDRSTOP
+#pragma hdrstop
+#endif
+
+using namespace ibpp_internals;
+
+namespace {
+	const int BUFFERINCR = 128;
+};
+
+void SPB::Grow(int needed)
+{
+	if ((mSize + needed) > mAlloc)
+	{
+		// We need to grow the buffer. We use increments of BUFFERINCR bytes.
+		needed = (needed / BUFFERINCR + 1) * BUFFERINCR;
+		char* newbuffer = new char[mAlloc + needed];
+		if (mBuffer != 0)
+		{
+			// Move the old buffer content to the new one
+			memcpy(newbuffer, mBuffer, mSize);
+			delete [] mBuffer;
+		}
+		mBuffer = newbuffer;
+		mAlloc += needed;
+	}
+}
+
+void SPB::Insert(char opcode)
+{
+	Grow(1);
+	mBuffer[mSize++] = opcode;
+}
+
+void SPB::InsertString(char type, int lenwidth, const char* data)
+{
+	short len = (short)strlen(data);
+
+	Grow(1 + lenwidth + len);
+	mBuffer[mSize++] = type;
+	switch (lenwidth)
+	{
+		case 1 :	mBuffer[mSize] = char(len); mSize++; break;
+		case 2 :	*(short*)&mBuffer[mSize] = short((*gds.Call()->m_vax_integer)((char*)&len, 2));
+					mSize += 2; break;
+		default :	throw LogicExceptionImpl("IISPB::IISPB", "Invalid length parameter");
+	}
+	strncpy(&mBuffer[mSize], data, len);
+	mSize += len;
+}
+
+void SPB::InsertByte(char type, char data)
+{
+	Grow(1 + 1);
+	mBuffer[mSize++] = type;
+	mBuffer[mSize++] = data;
+}
+
+void SPB::InsertQuad(char type, int data)
+{
+	Grow(1 + 4);
+	mBuffer[mSize++] = type;
+	*(int*)&mBuffer[mSize] = (*gds.Call()->m_vax_integer)((char*)&data, 4);
+	mSize += 4;
+}
+
+void SPB::Reset()
+{
+	if (mBuffer != 0)
+	{
+		delete [] mBuffer;
+		mBuffer = 0;
+		mSize = 0;
+		mAlloc = 0;
+    }
+}
+
+/*
+void SPB::Insert(char type, short data)
+{
+	Grow(1 + 3);
+	mBuffer[mSize++] = type;
+	mBuffer[mSize++] = char(2);
+	*(short*)&mBuffer[mSize] = data;
+	mSize += 2;
+}
+
+void SPB::Insert(char type, bool data)
+{
+	Grow(1 + 2);
+	mBuffer[mSize++] = type;
+	mBuffer[mSize++] = char(1);
+	mBuffer[mSize++] = char(data ? 1 : 0);
+}
+*/
+
+//
+//	EOF
+//

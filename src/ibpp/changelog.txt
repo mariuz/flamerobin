@@ -1,0 +1,138 @@
+$Id$
+
+IBPP, A c++ Client API for Firebird (and Interbase)
+
+History of Changes
+
+---------------------------------------------------------------------------
+
+The contents of this file are subject to the Mozilla Public License
+Version 1.0 (the "License"); you may not use this file except in
+compliance with the License. You may obtain a copy of the License at
+http://www.mozilla.org/MPL/
+
+Software distributed under the License is distributed on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+License for the specific language governing rights and limitations
+under the License.
+
+The Original Code is "IBPP 0.9" and all its associated documentation.
+
+The Initial Developer of the Original Code is T.I.P. Group S.A.
+Portions created by T.I.P. Group S.A. are
+Copyright (C) 2000 T.I.P Group S.A.
+All Rights Reserved.
+
+Contributor(s): ______________________________________.
+
+---------------------------------------------------------------------------
+
+The most recent addition to this file is always on top and has the highest
+item number.
+
+
+6. February 13, 2005
+
+- Added methods Save(const std::string&) and Load(std::string) to class Blob.
+Those methods allow to easily read and write a full blob using a std::string.
+A Save(), is the equivalent of Create(), a loop of Write(), and Close().
+A Load(), is the equivalent of Open(), a loop of Read(), and Close().
+
+- Extended the Statement::Set() and Statement::Get() in regards to blobs and
+std::string. Now one can directly Get(3, str) where str is a std::string and
+the column at hands is a blob. The blob is retrieved and stored to the string.
+The reverse is true for Set(3, str) where str is a std::string. It will be
+stored directly. For simple case useages, this allows to bypass the useage of
+any IBPP::Blob intermediate objects and, unless finer control is required
+(which Create/Open/Write/Read/Close offer), it it much simpler to use blobs
+from application code.
+
+- Statement::Get when acting on std::string type and on a SQL CHAR or VARCHAR)
+has been streamlined a bit to remove an unnecessary std::string copy. The string
+read is now being directly copied from the FB client buffer to the user
+std::string variable. Might have a minor impact on heavy string I/O.
+
+
+5. December 9, 2004, 18:00 GMT+1
+
+- Change in the interface definition of methods using or returning 64 bits
+integers. The ibpp.h now uses the C99 standard (section 7.18) types which are
+defined by including the stdint.h header. This is perfectly fine using all
+compilers on which IBPP is maintained, except for one. Guess which one ? Yes,
+MSVC does not supply that header nor those typedefs in any other file. The
+solution is simple, ibpp.h does a typedef __int64 int64_t in case of the MSVC
+compilers.
+
+
+4. November 6, 2004, 14:15 GMT+1
+
+- Added bool Row::Updated(). Returns wether any column of the row was updated
+(wether Set() was called at least one time on one of the columns).
+
+- Added bool Row::ColumnUpdated(int). Returns wether a specific column was
+updated.
+
+
+3. November 6, 2004, 11:45 GMT+1 --- Experiment in progress in CVS HEAD
+
+- There is a new object named IBPP::Row. The internal XSDA class has been
+merged in the new Row/IRow/RowImpl class. There is no RowFactory(). The only
+way to get a Row is through Statement::Fetch(Row&).
+
+For now, this Row thing is not very interesting in itself. It seems only to
+duplicate what is already available through Statement methods. Instead of
+writing something like:
+
+	while (st->Fetch())
+	{
+		st->Get(1, ...);
+		...
+	}
+
+we can now (optionally) write:
+
+	IBPP::Row r;
+	while (st->Fetch(r))
+	{
+		r->Get(1, ...);
+		...
+	}
+
+The Statement implementation itself has been revised to share code and uses
+an internal Row to implement the Set/Get methods and some others.
+
+One of the goals behind this IBPP:Row is to ease the writing of client side
+caches of result sets by the application programmers. It is conceptually much
+more easy to cache a list of rows than a list of lists of individual columns.
+Note that at the present time, the current Row interface might not yet be
+sufficient to achieve this goal perfectly. Interfaces changes will probably
+occur in the next days.
+
+But there are also more goals behind this one. Stay tuned.
+
+!! The code compiles and runs and should not bring any semantic differences to
+existing applications (as the full Statement interface is maintained). For some
+days though (while we test it extensively at TIP Group), there could some bugs
+lurking in the dark. We therefore recommend people not to use HEAD code for
+anything than tests until further notice. !!
+
+
+2. November 4, 2004 --- Exception revision
+
+- Exception handling revision. The current code compiles with MSVC7.1. Other
+compilers / platform to be tested. There is now IBPP::Exception as a base class.
+SQLException specialization is thrown as result of an engine reported runtime
+error. LogicException specialization is thrown in all other cases.
+
+                    std::exception
+                           |
+                   IBPP::Exception
+                 /                 \
+    IBPP::LogicException    IBPP::SQLException
+
+
+1. October 27, 2004 --- BUG FIX RELEASE 2.3.5.0
+
+The HEAD code is synched with the branch 'rel_2_3' after the 2.3.5.0 release.
+
+>>> EOF <<<
