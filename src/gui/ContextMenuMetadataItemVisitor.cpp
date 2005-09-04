@@ -127,7 +127,7 @@ void ContextMenuMetadataItemVisitor::visit(Root&)
     menuM->Append(myTreeCtrl::Menu_RegisterServer, _("&Register server..."));
     menuM->AppendSeparator();
     menuM->Append(wxID_ABOUT, _("&About FlameRobin..."));
-    menuM->Append(myTreeCtrl::Menu_Configure, _("&Preferencess..."));
+    menuM->Append(wxID_PREFERENCES, _("&Preferences..."));
     menuM->AppendSeparator();
     menuM->Append(wxID_EXIT, _("&Quit"));
 }
@@ -178,6 +178,6 @@ void ContextMenuMetadataItemVisitor::addSelectMenu(bool isTable)
 void ContextMenuMetadataItemVisitor::addRegularObjectMenu()
 {
     menuM->Append(myTreeCtrl::Menu_DropObject, _("Dr&op"));
-    menuM->Append(myTreeCtrl::Menu_ObjectProperties, _("P&roperties..."));
+    menuM->Append(myTreeCtrl::Menu_ObjectProperties, _("Show P&roperties"));
 }
 //-----------------------------------------------------------------------------
