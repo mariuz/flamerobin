@@ -454,6 +454,15 @@
         view.png
     </set>
 
+    <set var="COPYFILESDESTDIR">
+        <if cond="PLATFORM_MACOSX=='1'">
+            $(BUILDDIR)/flamerobin.app/Contents/SharedSupport
+        </if>
+        <if cond="PLATFORM_UNIX=='1'">$(BUILDDIR)</if>
+        <if cond="PLATFORM_WIN32=='1'">$(BUILDDIR)</if>
+    </set>
+
+
     <define-tag name="mac-app-bundle" rules="exe">
         <!-- bundle directory: -->
         <set var="BUNDLE">$(id).app/Contents</set>
@@ -488,12 +497,9 @@
                 <!-- make a hardlink to the binary: -->
                 ln -f $(ref("__targetdir",id))$(ref("__targetname",id)) $(BUNDLE)/MacOS/$(id)
 
-                <!-- and copy resources, icons and support files -->
+                <!-- and copy resources and icons -->
                 cp -f $(BUNDLE_PLIST) $(BUNDLE)/Info.plist
                 cp -f $(BUNDLE_ICONS) $(BUNDLE)/Resources
-                cp -R $(CONFIGOPTIONSDIR)/$(CONFIGOPTIONSFILES) $(BUNDLE)/SharedSupport/confdefs
-                cp -R $(HTMLDOCSDIR)/$(HTMLDOCFILES) $(BUNDLE)/SharedSupport/docs
-                cp -R $(HTMLTEMPLATEDIR)/$(HTMLTEMPLATEFILES) $(BUNDLE)/SharedSupport/html-templates
             </command>
         </modify-target>
 
@@ -549,6 +555,28 @@
             <mac-app-bundle>$(id)</mac-app-bundle>
         </if>
     </exe>
+
+    <copy-files id="config-options">
+        <dependency-of>all</dependency-of>
+        <depends>flamerobin</depends>
+        <srcdir>$(CONFIGOPTIONSDIR)</srcdir>
+        <dstdir>$(COPYFILESDESTDIR)/confdefs</dstdir>
+        <files>$(CONFIGOPTIONSFILES)</files>
+    </copy-files>
+    <copy-files id="html-docs">
+        <dependency-of>all</dependency-of>
+        <depends>flamerobin</depends>
+        <srcdir>$(HTMLDOCSDIR)</srcdir>
+        <dstdir>$(COPYFILESDESTDIR)/docs</dstdir>
+        <files>$(HTMLDOCFILES)</files>
+    </copy-files>
+    <copy-files id="html-templates">
+        <dependency-of>all</dependency-of>
+        <depends>flamerobin</depends>
+        <srcdir>$(HTMLTEMPLATEDIR)</srcdir>
+        <dstdir>$(COPYFILESDESTDIR)/html-templates</dstdir>
+        <files>$(HTMLTEMPLATEFILES)</files>
+    </copy-files>
 
 <!-- End of part 2 -->
 

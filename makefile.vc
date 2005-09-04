@@ -148,9 +148,6 @@ FLAMEROBIN_OBJECTS =  \
 
 ### Conditionally set variables: ###
 
-!if "$(STATICRTL)" == "1"
-R_OPT = s
-!endif
 !if "$(FINAL)" == "0"
 __DEBUGINFO_18 = /DEBUG
 !endif
@@ -211,17 +208,20 @@ __OPTIMIZE = /Od
 !if "$(FINAL)" == "1"
 __OPTIMIZE = /O1
 !endif
-!if "$(UNICODE)" == "1"
-U_OPT = u
-!endif
-!if "$(FINAL)" == "0"
-D_OPT = d
-!endif
 !if "$(USEDLL)" == "0"
 ____flamerobin_WX_LIB_DIR_FILENAMES = $(WXDIR)\lib\vc_lib
 !endif
 !if "$(USEDLL)" == "1"
 ____flamerobin_WX_LIB_DIR_FILENAMES = $(WXDIR)\lib\vc_dll
+!endif
+!if "$(UNICODE)" == "1"
+U_OPT = u
+!endif
+!if "$(STATICRTL)" == "1"
+R_OPT = s
+!endif
+!if "$(FINAL)" == "0"
+D_OPT = d
 !endif
 
 
@@ -231,7 +231,7 @@ vc$(U_OPT)$(R_OPT)$(D_OPT):
 
 ### Targets: ###
 
-all: vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe
+all: vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe config-options html-docs html-templates
 
 clean: 
 	-if exist vc$(U_OPT)$(R_OPT)$(D_OPT)\*.obj del vc$(U_OPT)$(R_OPT)$(D_OPT)\*.obj
@@ -252,6 +252,18 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin
 	link /NOLOGO /OUT:$@ $(LDFLAGS)  $(__DEBUGINFO_18) /nologo /subsystem:windows /machine:I386 /LIBPATH:$(____flamerobin_WX_LIB_DIR_FILENAMES) /SUBSYSTEM:WINDOWS @<<
 	$(FLAMEROBIN_OBJECTS)  wxmsw26$(U_OPT)$(D_OPT)_stc.lib wxmsw26$(U_OPT)$(D_OPT)_html.lib wxmsw26$(U_OPT)$(D_OPT)_adv.lib wxmsw26$(U_OPT)$(D_OPT)_core.lib wxbase26$(U_OPT)$(D_OPT)_xml.lib wxbase26$(U_OPT)$(D_OPT).lib wxexpat$(D_OPT).lib wxtiff$(D_OPT).lib wxjpeg$(D_OPT).lib wxpng$(D_OPT).lib wxzlib$(D_OPT).lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib
 <<
+
+config-options: vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe
+	if not exist vc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs mkdir vc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
+	for %f in (fr_settings.confdef) do if not exist vc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs\%f copy confdefs\%f vc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
+
+html-docs: vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe
+	if not exist vc$(U_OPT)$(R_OPT)$(D_OPT)\docs mkdir vc$(U_OPT)$(R_OPT)$(D_OPT)\docs
+	for %f in (fr_license.html fr_manual.html fr_whatsnew.html html.css) do if not exist vc$(U_OPT)$(R_OPT)$(D_OPT)\docs\%f copy docs\%f vc$(U_OPT)$(R_OPT)$(D_OPT)\docs
+
+html-templates: vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe
+	if not exist vc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates mkdir vc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
+	for %f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TRIGGER.html VIEW.html VIEWtriggers.html dependencies.html compute.png drop.png ok.png redx.png view.png) do if not exist vc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates\%f copy html-templates\%f vc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_array.obj: .\src\ibpp\array.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) $**

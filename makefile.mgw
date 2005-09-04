@@ -143,9 +143,6 @@ FLAMEROBIN_OBJECTS =  \
 
 ### Conditionally set variables: ###
 
-ifeq ($(STATICRTL),1)
-R_OPT = s
-endif
 ifeq ($(UNICODE),1)
 ____flamerobin_UNICODE_DEFINE_p = -D_UNICODE
 endif
@@ -170,12 +167,6 @@ endif
 ifeq ($(USEDLL),1)
 __flamerobin_WX_LIB_DIR = $(WXDIR)/lib/gcc_dll
 endif
-ifeq ($(UNICODE),1)
-U_OPT = u
-endif
-ifeq ($(FINAL),0)
-D_OPT = d
-endif
 ifeq ($(FINAL),0)
 __OPTIMIZE = -O0
 endif
@@ -194,6 +185,15 @@ endif
 ifeq ($(USEDLL),1)
 ____flamerobin_WX_LIB_DIR_FILENAMES = $(WXDIR)\lib\gcc_dll
 endif
+ifeq ($(UNICODE),1)
+U_OPT = u
+endif
+ifeq ($(STATICRTL),1)
+R_OPT = s
+endif
+ifeq ($(FINAL),0)
+D_OPT = d
+endif
 
 
 all: gcc$(U_OPT)$(R_OPT)$(D_OPT)
@@ -202,7 +202,7 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT):
 
 ### Targets: ###
 
-all: gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe
+all: gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe config-options html-docs html-templates
 
 clean: 
 	-if exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\*.o del gcc$(U_OPT)$(R_OPT)$(D_OPT)\*.o
@@ -217,6 +217,18 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a: $(IBPP_OBJECTS)
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS) gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a
 	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) $(LDFLAGS) -mthreads $(__DEBUGINFO) -L$(____flamerobin_WX_LIB_DIR_FILENAMES) -Wl,--subsystem,windows -mwindows  -lwxmsw26$(U_OPT)$(D_OPT)_stc -lwxmsw26$(U_OPT)$(D_OPT)_html -lwxmsw26$(U_OPT)$(D_OPT)_adv -lwxmsw26$(U_OPT)$(D_OPT)_core -lwxbase26$(U_OPT)$(D_OPT)_xml -lwxbase26$(U_OPT)$(D_OPT) -lwxexpat$(D_OPT) -lwxtiff$(D_OPT) -lwxjpeg$(D_OPT) -lwxpng$(D_OPT) -lwxzlib$(D_OPT) -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lcomctl32 -lrpcrt4 -lwsock32 gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a
+
+config-options: gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe
+	if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs mkdir gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
+	for %%f in (fr_settings.confdef) do if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs\%%f copy confdefs\%%f gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
+
+html-docs: gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe
+	if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\docs mkdir gcc$(U_OPT)$(R_OPT)$(D_OPT)\docs
+	for %%f in (fr_license.html fr_manual.html fr_whatsnew.html html.css) do if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\docs\%%f copy docs\%%f gcc$(U_OPT)$(R_OPT)$(D_OPT)\docs
+
+html-templates: gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe
+	if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates mkdir gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
+	for %%f in (DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TRIGGER.html VIEW.html VIEWtriggers.html dependencies.html compute.png drop.png ok.png redx.png view.png) do if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates\%%f copy html-templates\%%f gcc$(U_OPT)$(R_OPT)$(D_OPT)\html-templates
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_array.o: ./src/ibpp/array.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
@@ -473,7 +485,7 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_urihandler.o: ./src/urihandler.cpp
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o: ./res/flamerobin.rc
 	windres --use-temp-file -i$< -o$@ --include-dir $(WXDIR)/include --include-dir $(WXDIR)/contrib/include $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) --define HAVE_W32API_H --define _WINDOWS --define __WINDOWS__ --define WINVER=0x400 --define WIN32 --define __WIN32__ --define __WIN95__ --define STRICT --define __WXMSW__ --define wxUSE_GUI=1 --define WIN32_LEAN_AND_MEAN --include-dir $(__flamerobin_WX_LIB_DIR)/msw$(U_OPT)$(D_OPT) --define IBPP_GCC --define IBPP_WINDOWS --include-dir ./src --include-dir ./src/ibpp --include-dir ./res
 
-.PHONY: all clean
+.PHONY: all clean config-options html-docs html-templates
 
 
 # Dependencies tracking:
