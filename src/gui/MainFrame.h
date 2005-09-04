@@ -81,6 +81,7 @@ public:
     void OnMenuConnect(wxCommandEvent& event);
     void OnMenuConnectAs(wxCommandEvent& event);
     void OnMenuReconnect(wxCommandEvent& event);
+    void OnMenuDatabasePreferences(wxCommandEvent& event);
 
     // create new object
     void showCreateTemplate(const MetadataItem *m);
@@ -114,7 +115,7 @@ public:
 private:
     bool connect(bool warn);
     void showGeneratorValue(Generator* g);
-    
+
     void showDocsHtmlFile(const wxString& fileName);
 
     void set_properties();

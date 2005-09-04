@@ -40,6 +40,7 @@
 
 #include "BackupFrame.h"
 #include "config/Config.h"
+#include "config/DatabaseConfig.h"
 #include "ContextMenuMetadataItemVisitor.h"
 #include "DatabaseRegistrationDialog.h"
 #include "dberror.h"
@@ -65,7 +66,7 @@ bool checkValidDatabase(Database* database)
 {
     if (database)
         return true;
-    wxMessageBox(_("Operation can not be performed - no database assigned"), 
+    wxMessageBox(_("Operation can not be performed - no database assigned"),
         _("Internal Error"), wxOK|wxICON_ERROR);
     return false;
 }
@@ -74,14 +75,14 @@ bool checkValidServer(Server* server)
 {
     if (server)
         return true;
-    wxMessageBox(_("Operation can not be performed - no server assigned"), 
+    wxMessageBox(_("Operation can not be performed - no server assigned"),
         _("Internal Error"), wxOK|wxICON_ERROR);
     return false;
 }
 //-----------------------------------------------------------------------------
 void reportLastError(const wxString& actionMsg)
 {
-    wxMessageBox(std2wx(lastError().getMessage()), actionMsg, 
+    wxMessageBox(std2wx(lastError().getMessage()), actionMsg,
         wxOK|wxICON_ERROR);
 }
 //-----------------------------------------------------------------------------
@@ -200,7 +201,7 @@ void MainFrame::set_properties()
         else
             confile = wxT(" ") + confile + wxT(" ");
         wxString msg;
-        msg.Printf(_("The configuration file:%sdoes not exist or can not be opened.\n\nThis is normal for first time users.\n\nYou may now register new servers and databases."), 
+        msg.Printf(_("The configuration file:%sdoes not exist or can not be opened.\n\nThis is normal for first time users.\n\nYou may now register new servers and databases."),
             confile.c_str());
         wxMessageBox(msg, _("Configuration file not found"), wxICON_INFORMATION);
 
@@ -281,6 +282,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(myTreeCtrl::Menu_Query, MainFrame::OnMenuQuery)
     EVT_UPDATE_UI(myTreeCtrl::Menu_Query, MainFrame::OnMenuUpdateIfDatabaseSelected)
     EVT_UPDATE_UI(myTreeCtrl::Menu_NewObject, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_MENU(myTreeCtrl::Menu_DatabasePreferences, MainFrame::OnMenuDatabasePreferences)
+    EVT_UPDATE_UI(myTreeCtrl::Menu_DatabasePreferences, MainFrame::OnMenuUpdateIfDatabaseSelected)
 
     EVT_MENU(myTreeCtrl::Menu_Insert, MainFrame::OnMenuInsert)
     EVT_MENU(myTreeCtrl::Menu_Browse, MainFrame::OnMenuBrowse)
@@ -536,6 +539,19 @@ void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
     }
 }
 //-----------------------------------------------------------------------------
+void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))
+{
+    Database *db = tree_ctrl_1->getSelectedDatabase();
+    if (!checkValidDatabase(db))
+        return;
+    DatabaseConfig dc(db);
+    PreferencesDialog pd(this,
+        wxString::Format(_("%s preferences"), std2wx(db->getName()).c_str()),
+        dc, wxT("db_settings.confdef"));
+    if (pd.isOk() && pd.loadFromConfig())
+        pd.ShowModal();
+}
+//-----------------------------------------------------------------------------
 void MainFrame::OnMenuInsert(wxCommandEvent& WXUNUSED(event))
 {
     Database *d = tree_ctrl_1->getSelectedDatabase();
@@ -759,7 +775,7 @@ void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
     if (!checkValidDatabase(d))
         return;
     // command should never be enabled when database is connected
-    wxCHECK_RET(!d->isConnected(), 
+    wxCHECK_RET(!d->isConnected(),
         wxT("Can not unregister connected database"));
 
     if (wxCANCEL == wxMessageBox(_("Are you sure?"), _("Unregister database"), wxOK | wxCANCEL | wxICON_QUESTION))
@@ -824,7 +840,7 @@ void MainFrame::OnMenuConnectAs(wxCommandEvent& WXUNUSED(event))
     if (!checkValidDatabase(d))
         return;
     // command should never be enabled when database is connected
-    wxCHECK_RET(!d->isConnected(), 
+    wxCHECK_RET(!d->isConnected(),
         wxT("Can not connect to already connected database"));
 
     DatabaseRegistrationDialog drd(this, -1, _("Connect as..."), false, true);
@@ -880,7 +896,7 @@ bool MainFrame::connect(bool warn)
         progress_dialog.Update(i + 1, wxString::Format(_("Loading %s."), names[i].c_str()));
         if (!db->loadObjects(types[i]))
         {
-            reportLastError(wxString::Format(_("Error Loading %s"), 
+            reportLastError(wxString::Format(_("Error Loading %s"),
                 names[i].c_str()));
             break;
         }
@@ -1047,7 +1063,7 @@ void MainFrame::OnMenuLoadColumnsInfo(wxCommandEvent& WXUNUSED(event))
         ((Procedure *)t)->getChildren(temp);
         if (temp.empty())
         {
-            ::wxMessageBox(_("This procedure doesn't have any input or output parameters."), 
+            ::wxMessageBox(_("This procedure doesn't have any input or output parameters."),
                _("Information"), wxOK | wxICON_INFORMATION);
         }
     }

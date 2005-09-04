@@ -49,8 +49,8 @@ class Config
 {
 public:
     // return true if value exists, false if not
-    bool keyExists(const std::string& key) const;
-    bool getValue(std::string key, std::string& value);
+    virtual bool keyExists(const std::string& key) const;
+    virtual bool getValue(std::string key, std::string& value);
     bool getValue(std::string key, int& value);
     bool getValue(std::string key, double& value);
     bool getValue(std::string key, bool& value);
@@ -84,12 +84,12 @@ public:
 
     // returns the home path to use as the basis for the following call.
     std::string getUserHomePath() const;
-    // returns the file name (with full path) of the file containing 
+    // returns the file name (with full path) of the file containing
     // registered databases.
     std::string getDBHFileName() const;
 
     // return true if value existed, false if not.
-    bool setValue(std::string key, std::string value);
+    virtual bool setValue(std::string key, std::string value);
     bool setValue(std::string key, int value);
     bool setValue(std::string key, double value);
     bool setValue(std::string key, bool value);

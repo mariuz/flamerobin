@@ -58,6 +58,7 @@ FLAMEROBIN_CXXFLAGS = $(__flamerobin_PCH_INC) $(____flamerobin_WXDEBUG_p) \
 FLAMEROBIN_OBJECTS =  \
 	flamerobin_addconstrainthandler.o \
 	flamerobin_Config.o \
+	flamerobin_DatabaseConfig.o \
 	flamerobin_converters.o \
 	flamerobin_Element.o \
 	flamerobin_Observer.o \
@@ -225,7 +226,7 @@ flamerobin.app/Contents/PkgInfo: flamerobin$(EXEEXT) $(srcdir)/res/flamerobin.In
 
 config-options: flamerobin$(EXEEXT)
 	@mkdir -p $(COPYFILESDESTDIR)/confdefs
-	@for f in fr_settings.confdef; do \
+	@for f in fr_settings.confdef db_settings.confdef; do \
 	if test ! -f $(COPYFILESDESTDIR)/confdefs/$$f -a ! -d $(COPYFILESDESTDIR)/confdefs/$$f ; \
 	then x=yep ; \
 	else x=`find $(srcdir)/confdefs/$$f -newer $(COPYFILESDESTDIR)/confdefs/$$f -print` ; \
@@ -321,6 +322,9 @@ flamerobin_addconstrainthandler.o: $(srcdir)/src/addconstrainthandler.cpp $(FLAM
 
 flamerobin_Config.o: $(srcdir)/src/config/Config.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/config/Config.cpp
+
+flamerobin_DatabaseConfig.o: $(srcdir)/src/config/DatabaseConfig.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/config/DatabaseConfig.cpp
 
 flamerobin_converters.o: $(srcdir)/src/converters.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/converters.cpp

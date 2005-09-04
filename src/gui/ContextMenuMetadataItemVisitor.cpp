@@ -69,6 +69,8 @@ void ContextMenuMetadataItemVisitor::visit(Database&)
     menuM->AppendSeparator();
     menuM->Append(myTreeCtrl::Menu_Backup, _("&Backup database..."));
     menuM->Append(myTreeCtrl::Menu_Restore, _("Rest&ore database..."));
+    menuM->AppendSeparator();
+    menuM->Append(myTreeCtrl::Menu_DatabasePreferences, _("Database &preferences..."));
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visit(Domain&)

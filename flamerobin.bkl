@@ -8,7 +8,7 @@
         <default-value></default-value>
     </option>
 
-<!-- this option allows to build the application with either the 
+<!-- this option allows to build the application with either the
      Static or DLL configuration of wxWidgets -->
     <option name="USEDLL">
         <values>0,1</values>
@@ -19,7 +19,7 @@
         <if cond="USEDLL=='1'">WXUSINGDLL</if>
     </set>
 
-<!-- this option allows to build the application with either the 
+<!-- this option allows to build the application with either the
      Ansi or Unicode configuration of wxWidgets -->
     <option name="UNICODE">
         <values>0,1</values>
@@ -30,7 +30,7 @@
         <if cond="UNICODE=='1'">u</if>
     </set>
 
-<!-- this option allows to build the application with either the 
+<!-- this option allows to build the application with either the
      Debug or Release configuration of wxWidgets and IBPP -->
     <option name="FINAL">
         <values>0,1</values>
@@ -49,7 +49,7 @@
         <if cond="FINAL=='1'">size</if>
     </set>
 
-<!-- this option allows to build the application with either the 
+<!-- this option allows to build the application with either the
      dynamic or static runtime libraries -->
     <option name="STATICRTL">
         <values>0,1</values>
@@ -129,7 +129,7 @@
     <set var="IBPP_HEADERFILES">
         $(SOURCEDIR)/ibpp/ibpp.h
         $(SOURCEDIR)/ibpp/_internals.h
-        $(SOURCEDIR)/ibpp/_msvcwarnings.h        
+        $(SOURCEDIR)/ibpp/_msvcwarnings.h
     </set>
 
     <set var="IBPP_SOURCEFILES">
@@ -180,7 +180,7 @@
 <!-- End of part 1 -->
 
 <!-- Part 2: build the FlameRobin executable -->
- 
+
     <template id="wx">
         <if cond="FORMAT!='autoconf'">
             <set var="WXDIR">$(DOLLAR)(WXDIR)</set>
@@ -267,6 +267,7 @@
 
     <set var="FR_HEADERFILES">
         $(SOURCEDIR)/config/Config.h
+        $(SOURCEDIR)/config/DatabaseConfig.h
         $(SOURCEDIR)/core/Element.h
         $(SOURCEDIR)/core/Observer.h
         $(SOURCEDIR)/core/Subject.h
@@ -344,6 +345,7 @@
     <set var="FR_SOURCEFILES">
         $(SOURCEDIR)/addconstrainthandler.cpp
         $(SOURCEDIR)/config/Config.cpp
+        $(SOURCEDIR)/config/DatabaseConfig.cpp
         $(SOURCEDIR)/converters.cpp
         $(SOURCEDIR)/core/Element.cpp
         $(SOURCEDIR)/core/Observer.cpp
@@ -415,6 +417,7 @@
     </set>
     <set var="CONFIGOPTIONSFILES">
         fr_settings.confdef
+        db_settings.confdef
     </set>
 
     <set var="HTMLDOCSDIR">
@@ -521,7 +524,7 @@
         <app-type>gui</app-type>
 
         <depends>ibpp</depends>
-        
+
         <headers>$(FR_HEADERFILES)</headers>
         <sources>$(FR_SOURCEFILES)</sources>
 
