@@ -38,42 +38,43 @@
 #include <wx/datetime.h>
 #include <wx/file.h>
 
-#include "config/Config.h"
+#include "config/DatabaseConfig.h"
 #include "frversion.h"
 #include "logger.h"
 #include "metadata/database.h"
 #include "ugly.h"
 
-//-----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 bool Logger::log2database(const executedStatement& /*st*/, Database* /*db*/)
 {
     return true;
 }
-//-----------------------------------------------------------------------------
-bool Logger::log2file(const executedStatement& st, Database *db, const std::string& filename)
+//----------------------------------------------------------------------------
+bool Logger::log2file(Config *cfg, const executedStatement& st,
+    Database *db, const std::string& filename)
 {
     enum { singleFile=0, multiFile };
     int logToFileType;
-    config().getValue("LogToFileType", logToFileType);
+    cfg->getValue("LogToFileType", logToFileType);
 
     std::string sql = st.statement;
-    if (logToFileType == singleFile)                                // add ; to statement if missing
+    if (logToFileType == singleFile)         // add ; to statement if missing
     {
-        sql.erase(sql.find_last_not_of(" \n\t\r")+1);                // trim
+        sql.erase(sql.find_last_not_of(" \n\t\r")+1);           // trim
         std::string::size_type pos = sql.find_last_of(";");
-        if (pos == std::string::npos || pos < sql.length() - 1)        // add ; at end
+        if (pos == std::string::npos || pos < sql.length() - 1)
             sql += ";";
     }
 
     wxFile f;
     if (logToFileType == multiFile)
     {
-        if (filename.find_last_of("%d") == std::string::npos)        // %d not found, bail out
+        if (filename.find_last_of("%d") == std::string::npos) // %d not found
             return false;
         wxString test;
         int start = 1;
-        config().getValue("IncrementalLogFileStart", start);
-        for (int i=start; i < 100000; ++i)                            // dummy test for 100000
+        cfg->getValue("IncrementalLogFileStart", start);
+        for (int i=start; i < 100000; ++i) // dummy test for 100000
         {
             test.Printf(std2wx(filename), i);
             if (!wxFileExists(test))
@@ -86,11 +87,11 @@ bool Logger::log2file(const executedStatement& st, Database *db, const std::stri
             return false;
     }
     else
-        if (!f.Open(std2wx(filename), wxFile::write_append ))        // cannot open file
+        if (!f.Open(std2wx(filename), wxFile::write_append )) // cannot open
             return false;
 
     bool loggingAddHeader = true;
-    config().getValue("LoggingAddHeader", loggingAddHeader);
+    cfg->getValue("LoggingAddHeader", loggingAddHeader);
     if (loggingAddHeader)
     {
         wxString header = wxString::Format(
@@ -108,34 +109,49 @@ bool Logger::log2file(const executedStatement& st, Database *db, const std::stri
     f.Close();
     return true;
 }
-//-----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 bool Logger::logStatement(const executedStatement& st, Database *db)
 {
+    DatabaseConfig dc(db);
+    logStatementByConfig(&dc, st, db);
+    if (!dc.get("ExcludeFromGlobalLogging", false))
+    {
+        Config& globalConfig = config();
+        logStatementByConfig(&globalConfig, st, db);
+    }
+}
+//---------------------------------------------------------------------------
+bool Logger::logStatementByConfig(Config *cfg, const executedStatement& st,
+    Database *db)
+{
     bool logDML = false;
-    config().getValue("LogDML", logDML);
+    cfg->getValue("LogDML", logDML);
     if (!logDML && st.type != IBPP::stDDL)    // logging not needed
         return true;
 
     bool logToFile = false;
-    config().getValue("LogToFile", logToFile);
+    cfg->getValue("LogToFile", logToFile);
     if (logToFile)
     {
         std::string logFilename;
-        config().getValue("LogFile", logFilename);
+        cfg->getValue("LogFile", logFilename);
         if (logFilename.empty())
         {
-            ::wxMessageBox(_("Logging to file enabled, but log filename not set"), _("Warning, no filename"), wxICON_WARNING);
+            ::wxMessageBox(
+                _("Logging to file enabled, but log filename not set"),
+                _("Warning, no filename"), wxICON_WARNING|wxOK
+            );
             return false;
         }
-        return log2file(st, db, logFilename);
+        return log2file(cfg, st, db, logFilename);
     }
     bool logToDb = false;
-    config().getValue("LogToDatabase", logToDb);
+    cfg->getValue("LogToDatabase", logToDb);
     if (logToDb)
     {
-        //prepareDatabase();    <- create log table, generator, etc. if needed
+        //prepareDatabase();    <- create log table, generator, etc.
         return log2database(st, db);            // <- log it
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+//----------------------------------------------------------------------------

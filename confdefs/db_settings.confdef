@@ -5,6 +5,12 @@
         <caption>Logging</caption>
         <image>1</image>
         <setting type="checkbox">
+            <caption>Exclude this database from global logging</caption>
+            <description>By default, actions are logged both globally and per-database.<br />If checked only per-database logging would work.</description>
+            <key>ExcludeFromGlobalLogging</key>
+            <default>0</default>
+        </setting>
+        <setting type="checkbox">
             <caption>Log DML statements</caption>
             <description>Should the logging work for DML statements too.<br />If unchecked only DDL statements are logged.</description>
             <key>LogDML</key>
