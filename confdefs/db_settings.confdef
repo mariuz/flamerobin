@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <debug />
+    <node>
+        <caption>Logging</caption>
+        <image>1</image>
+        <setting type="checkbox">
+            <caption>Log DML statements</caption>
+            <description>Should the logging work for DML statements too.<br />If unchecked only DDL statements are logged.</description>
+            <key>LogDML</key>
+            <default>0</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Enable logging to file</caption>
+            <description>Logs all successful DDL statements to file</description>
+            <key>LogToFile</key>
+            <default>0</default>
+            <enables>
+                <setting type="file">
+                    <caption>Log file name:</caption>
+                    <description>For multiple files place %d mark where you want numbers to be inserted.<br />If you wish leading zeros use %0xd, where x is a number of digits (ex. %02d)</description>
+                    <key>LogFile</key>
+                </setting>
+                <setting type="checkbox">
+                    <caption>Use multiple files</caption>
+                    <key>LogToFileType</key>
+                    <default>0</default>
+                    <enables>
+                        <setting type="int">
+                            <caption>Incremental file numbers start at:</caption>
+                            <key>IncrementalLogFileStart</key>
+                            <minvalue>0</minvalue>
+                            <maxvalue>10000</maxvalue>
+                            <default>1</default>
+                        </setting>
+                    </enables>
+                </setting>
+                <setting type="checkbox">
+                    <caption>Add header to each statement</caption>
+                    <description>Should logging add a header showing the context in which statement was run:<br />FlameRobin version, database, username, timestamp</description>
+                    <key>LoggingAddHeader</key>
+                    <default>1</default>
+                </setting>
+            </enables>
+        </setting>
+        <!--
+        <setting type="checkbox">
+            <caption>Enable logging to database</caption>
+            <description>Logs all successful DDL statements to database.<br />This will create a table named FLAMEROBIN_LOG into your databases.</description>
+            <key>LogToDatabase</key>
+            <default>0</default>
+            <enables>
+                <setting type="checkbox">
+                    <caption>Use generator instead of 1+max(id)</caption>
+                    <description>If not checked, logging will do a "select max(id)+1" to create<br />keys for flamerobin_log table. This can be slow if<br />there is a huge amount of records in it.</description>
+                    <key>LoggingUsesGenerator</key>
+                </setting>
+            </enables>
+        </setting>
+        -->
+    </node>
+</root>
