@@ -1,6 +1,13 @@
 Building FlameRobin on Windows with Borland's free C++ Compiler
 ===============================================================
 
+
+ATTENTION:
+
+Due to limitation in Borland's command line linker (ilink32), FlameRobin versions higher than 0.3.1 do not link anymore. Therefore this build is NO LONGER SUPPORTED. We tried our best, but failed. However, if you somehow manage to build it, please let us know.
+
+
+
 This document is a collection of quick notes about building FlameRobin on Windows with Borland's Free C++ Compiler.
 
 Borland's Free C++ Compiler (in short BCC) is a freeware version of Borland's C++ compiler used in C++ Builder product:
