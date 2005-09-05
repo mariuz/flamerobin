@@ -382,7 +382,8 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
     {
         if (d)
         {
-            std::string s = d->getUsername() + "@" + d->getConnectionString() + " (" + d->getCharset() + ")";
+            std::string s = d->getUsername() + "@" + d->getConnectionString()
+                + " (" + d->getConnectionCharset() + ")";
             GetStatusBar()->SetStatusText(std2wx(s));
         }
         else
@@ -925,6 +926,26 @@ bool MainFrame::connect(bool warn)
 
     wxTreeItemId id = tree_ctrl_1->GetSelection();
     tree_ctrl_1->Expand(id);
+
+    if (db->getDatabaseCharset() != db->getConnectionCharset())
+    {
+        DatabaseConfig dc(db);
+        if (dc.get("differentCharsetWarning", true))
+        {
+            if (wxNO == wxMessageBox(wxString::Format(
+                _("Database charset: %s\nis different from connection charset: %s.\n\nWould you like to be reminded next time?"),
+                std2wx(db->getDatabaseCharset()).c_str(),
+                std2wx(db->getConnectionCharset()).c_str()),
+                _("Warning"),
+                wxICON_QUESTION|wxYES_NO))
+            {
+                // FIXME: I can't figure out why, but it crashes with this:
+                // dc.setValue("differentCharsetWarning", false);
+                // so I used this:
+                dc.setValue("differentCharsetWarning", "0");
+            }
+        }
+    }
     return true;
 }
 //-----------------------------------------------------------------------------

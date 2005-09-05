@@ -99,7 +99,7 @@ public:
     static const std::string pathSeparator;
 
     Config();
-    ~Config();
+    virtual ~Config();
 private:
     mutable wxFileConfig* configM;
     // performs lazy initialization of configM.

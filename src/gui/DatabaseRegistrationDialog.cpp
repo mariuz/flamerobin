@@ -44,11 +44,11 @@ Contributor(s): Michael Hieke, Nando Dessena
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id, const wxString& title,
-	bool createDB, bool connectAs, const wxPoint& pos, const wxSize& size, long style):
+    bool createDB, bool connectAs, const wxPoint& pos, const wxSize& size, long style):
     BaseDialog(parent, id, title, pos, size, style)
 {
     createM = createDB;
-	connectAsM = connectAs;
+    connectAsM = connectAs;
     label_name = new wxStaticText(getControlsPanel(), -1, _("Display name:"));
     text_ctrl_name = new wxTextCtrl(getControlsPanel(), ID_textcontrol_name, wxEmptyString);
     label_dbpath = new wxStaticText(getControlsPanel(), -1, _("Database path:"));
@@ -191,7 +191,7 @@ void DatabaseRegistrationDialog::setDatabase(Database *db)
     text_ctrl_username->SetValue(std2wx(databaseM->getUsername()));
     text_ctrl_password->SetValue(std2wx(databaseM->getPassword()));
     text_ctrl_role->SetValue(std2wx(databaseM->getRole()));
-    combobox_charset->SetSelection(combobox_charset->FindString(std2wx(databaseM->getCharset())));
+    combobox_charset->SetSelection(combobox_charset->FindString(std2wx(databaseM->getConnectionCharset())));
     if (combobox_charset->GetSelection() < 0)
         combobox_charset->SetSelection(combobox_charset->FindString(wxT("NONE")));
     // see whether the database has an empty or default name; knowing that will be
@@ -203,15 +203,15 @@ void DatabaseRegistrationDialog::setDatabase(Database *db)
     bool isConnected = databaseM->isConnected();
     text_ctrl_dbpath->SetEditable(!connectAsM && !isConnected);
     button_browse->Enable(!connectAsM && !isConnected);
-	text_ctrl_name->SetEditable(!connectAsM);
+    text_ctrl_name->SetEditable(!connectAsM);
     text_ctrl_username->SetEditable(!isConnected);
     text_ctrl_password->SetEditable(!isConnected);
     combobox_charset->Enable(!isConnected);
     text_ctrl_role->SetEditable(!isConnected);
-	if (connectAsM)
-		button_ok->SetLabel(_("Connect"));
+    if (connectAsM)
+        button_ok->SetLabel(_("Connect"));
     updateButtons();
-	updateColors();
+    updateColors();
 }
 //-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::updateIsDefaultName()
@@ -232,8 +232,8 @@ void DatabaseRegistrationDialog::updateButtons()
         button_ok->Enable(!text_ctrl_dbpath->GetValue().IsEmpty()
             && !text_ctrl_username->GetValue().IsEmpty()
             && !text_ctrl_name->GetValue().IsEmpty()
-			&& (!connectAsM || !text_ctrl_password->GetValue().IsEmpty())
-		);
+            && (!connectAsM || !text_ctrl_password->GetValue().IsEmpty())
+        );
     }
 }
 //-----------------------------------------------------------------------------
@@ -262,12 +262,12 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
     databaseM->setPath(wx2std(text_ctrl_dbpath->GetValue()));
     databaseM->setUsername(wx2std(text_ctrl_username->GetValue()));
     databaseM->setPassword(wx2std(text_ctrl_password->GetValue()));
-    databaseM->setCharset(wx2std(combobox_charset->GetStringSelection()));
+    databaseM->setConnectionCharset(wx2std(combobox_charset->GetStringSelection()));
     databaseM->setRole(wx2std(text_ctrl_role->GetValue()));
 
     try
     {
-        if (createM)	// create new database
+        if (createM)    // create new database
         {
             long ps = 0;
             choice_pagesize->GetStringSelection().ToLong(&ps);
@@ -293,20 +293,20 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
 void DatabaseRegistrationDialog::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
 {
     if (IsShown())
-	{
+    {
         if (isDefaultNameM)
             text_ctrl_name->SetValue(buildName(text_ctrl_dbpath->GetValue()));
         updateIsDefaultName();
         updateButtons();
-	}
+    }
 }
 //-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::OnNameChange(wxCommandEvent& WXUNUSED(event))
 {
     if (IsShown())
-	{
+    {
         updateIsDefaultName();
         updateButtons();
-	}
+    }
 }
 //-----------------------------------------------------------------------------

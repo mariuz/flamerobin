@@ -41,13 +41,17 @@
 #include "DatabaseConfig.h"
 //-----------------------------------------------------------------------------
 DatabaseConfig::DatabaseConfig(Database *d)
+    :Config()
 {
     databaseM = d;
 }
 //-----------------------------------------------------------------------------
 std::string DatabaseConfig::addPathToKey(const std::string key) const
 {
-    return "DATABASE_" + databaseM->getId() + "_" + key;
+    if (databaseM)
+        return "DATABASE_" + databaseM->getId() + "_" + key;
+    else
+        return key;
 }
 //-----------------------------------------------------------------------------
 bool DatabaseConfig::keyExists(const std::string& key) const

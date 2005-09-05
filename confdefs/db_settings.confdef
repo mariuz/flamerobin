@@ -2,6 +2,20 @@
 <root>
     <debug />
     <node>
+        <caption>Connection</caption>
+        <image>3</image>
+        <setting type="checkbox">
+            <caption>Warn when connection charset is different from database charset</caption>
+            <key>differentCharsetWarning</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Store encrypted password</caption>
+            <key>storeEncryptedPassword</key>
+            <default>0</default>
+        </setting>
+    </node>
+    <node>
         <caption>Logging</caption>
         <image>1</image>
         <setting type="checkbox">
