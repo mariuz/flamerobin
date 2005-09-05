@@ -150,6 +150,7 @@ BEGIN_EVENT_TABLE(DataGrid, wxGrid)
 
     #ifdef __WXGTK__
     EVT_MOUSEWHEEL(DataGrid::OnMouseWheel)
+    EVT_SCROLLWIN_THUMBTRACK(DataGrid::OnThumbTrack)
     #endif
 
     EVT_GRID_CELL_RIGHT_CLICK(DataGrid::OnGridCellRightClick)
@@ -167,6 +168,14 @@ END_EVENT_TABLE()
 void DataGrid::OnContextMenu(wxContextMenuEvent& event)
 {
     showPopMenu(event.GetPosition());
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnThumbTrack(wxScrollWinEvent& event)
+{
+    wxIdleEvent dummy;
+    OnIdle(dummy);
+    AdjustScrollbars();
+    event.Skip();
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnMouseWheel(wxMouseEvent& event)
