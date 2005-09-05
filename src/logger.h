@@ -39,6 +39,7 @@ public:
 };
 //-----------------------------------------------------------------------------
 class Database;
+class Config;
 
 class Logger            // maybe we'll extend this later
 {
