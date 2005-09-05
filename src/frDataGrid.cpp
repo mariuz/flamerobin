@@ -125,6 +125,11 @@ void DataGrid::fill()
             (wxObjectEventFunction) (wxEventFunction)
             (wxIdleEventFunction)&DataGrid::OnIdle);
     }
+
+    #ifdef __WXGTK__
+    // needed to make scrollbars show on large datasets
+    Layout();
+    #endif
 }
 //-----------------------------------------------------------------------------
 void DataGrid::showPopMenu(wxPoint cursorPos)
