@@ -52,6 +52,7 @@ public:
     void OnMenuRegisterDatabase(wxCommandEvent& event);
     void OnMenuDatabaseRegistrationInfo(wxCommandEvent& event);
     void OnMenuCreateDatabase(wxCommandEvent& event);
+    void OnMenuRestoreIntoNewDatabase(wxCommandEvent& event);
     void OnMenuManageUsers(wxCommandEvent& event);
     void OnMenuRestartServer(wxCommandEvent& event);
     void OnMenuStopServer(wxCommandEvent& event);

@@ -103,6 +103,7 @@ void MainFrame::buildMainMenu()
     wxMenu *databaseMenu = new wxMenu();                    // dynamic menus, created at runtime
     databaseMenu->Append(myTreeCtrl::Menu_RegisterDatabase, _("R&egister existing database..."));
     databaseMenu->Append(myTreeCtrl::Menu_CreateDatabase, _("Create &new database..."));
+    databaseMenu->Append(myTreeCtrl::Menu_RestoreIntoNew, _("Restore bac&kup into new database..."));
     databaseMenu->AppendSeparator();
     ContextMenuMetadataItemVisitor cmvd(databaseMenu);
     Database dummy;
@@ -254,6 +255,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_UPDATE_UI(myTreeCtrl::Menu_RegisterDatabase, MainFrame::OnMenuUpdateIfServerSelected)
     EVT_MENU(myTreeCtrl::Menu_CreateDatabase, MainFrame::OnMenuCreateDatabase)
     EVT_UPDATE_UI(myTreeCtrl::Menu_CreateDatabase, MainFrame::OnMenuUpdateIfServerSelected)
+    EVT_MENU(myTreeCtrl::Menu_RestoreIntoNew, MainFrame::OnMenuRestoreIntoNewDatabase)
+    EVT_UPDATE_UI(myTreeCtrl::Menu_RestoreIntoNew, MainFrame::OnMenuUpdateIfServerSelected)
     EVT_MENU(myTreeCtrl::Menu_ManageUsers, MainFrame::OnMenuManageUsers)
     EVT_UPDATE_UI(myTreeCtrl::Menu_ManageUsers, MainFrame::OnMenuUpdateIfServerSelected)
     EVT_MENU(myTreeCtrl::Menu_UnRegisterServer, MainFrame::OnMenuUnRegisterServer)
@@ -697,6 +700,24 @@ void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 
     if (drd.ShowModal() == wxID_OK)
         tree_ctrl_1->selectMetadataItem(s->addDatabase(db));
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuRestoreIntoNewDatabase(wxCommandEvent& WXUNUSED(event))
+{
+    Server *s = tree_ctrl_1->getSelectedServer();
+    if (!checkValidServer(s))
+        return;
+
+    Database db;
+    DatabaseRegistrationDialog drd(this, -1, _("New database parameters"));
+    drd.setDatabase(&db);
+    if (drd.ShowModal() != wxID_OK)
+        return;
+
+    Database *newDB = s->addDatabase(db);
+    tree_ctrl_1->selectMetadataItem(newDB);
+    RestoreFrame* f = new RestoreFrame(this, newDB);
+    f->Show();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
