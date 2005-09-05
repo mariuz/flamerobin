@@ -150,9 +150,9 @@ BEGIN_EVENT_TABLE(DataGrid, wxGrid)
 
     #ifdef __WXGTK__
     EVT_MOUSEWHEEL(DataGrid::OnMouseWheel)
-    EVT_SCROLLWIN_THUMBTRACK(DataGrid::OnThumbTrack)
     #endif
 
+    EVT_SCROLLWIN_THUMBTRACK(DataGrid::OnThumbTrack)
     EVT_GRID_CELL_RIGHT_CLICK(DataGrid::OnGridCellRightClick)
     EVT_GRID_LABEL_RIGHT_CLICK(DataGrid::OnGridLabelRightClick)
     EVT_MENU(DataGrid::ID_MENU_CELLFONT, DataGrid::OnMenuCellFont)
