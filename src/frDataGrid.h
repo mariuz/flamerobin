@@ -43,7 +43,7 @@ public:
         ID_MENU_SAVEASHTML };
 
     void OnMouseWheel(wxMouseEvent& event);
-    void OnThumbTrack(wxScrollWinEvent& event);
+    void OnThumbRelease(wxScrollWinEvent& event);
     void OnContextMenu(wxContextMenuEvent& event);
     void OnGridCellRightClick(wxGridEvent& event);
     void OnGridLabelRightClick(wxGridEvent& event);

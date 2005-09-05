@@ -150,9 +150,9 @@ BEGIN_EVENT_TABLE(DataGrid, wxGrid)
 
     #ifdef __WXGTK__
     EVT_MOUSEWHEEL(DataGrid::OnMouseWheel)
+    EVT_SCROLLWIN_THUMBRELEASE(DataGrid::OnThumbRelease)
     #endif
 
-    EVT_SCROLLWIN_THUMBTRACK(DataGrid::OnThumbTrack)
     EVT_GRID_CELL_RIGHT_CLICK(DataGrid::OnGridCellRightClick)
     EVT_GRID_LABEL_RIGHT_CLICK(DataGrid::OnGridLabelRightClick)
     EVT_MENU(DataGrid::ID_MENU_CELLFONT, DataGrid::OnMenuCellFont)
@@ -170,7 +170,7 @@ void DataGrid::OnContextMenu(wxContextMenuEvent& event)
     showPopMenu(event.GetPosition());
 }
 //-----------------------------------------------------------------------------
-void DataGrid::OnThumbTrack(wxScrollWinEvent& event)
+void DataGrid::OnThumbRelease(wxScrollWinEvent& event)
 {
     wxIdleEvent dummy;
     OnIdle(dummy);
