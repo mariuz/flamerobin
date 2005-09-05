@@ -83,7 +83,7 @@ void Server::createDatabase(Database *db, int pagesize, int dialect)
     if (pagesize)
         extra_params << "PAGE_SIZE " << pagesize << " ";
 
-    string charset = db->getCharset();
+    string charset = db->getConnectionCharset();
     if (!charset.empty())
         extra_params << "DEFAULT CHARACTER SET " << charset << " ";
 

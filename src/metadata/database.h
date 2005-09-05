@@ -68,6 +68,7 @@ class Database: public MetadataItem
 private:
     IBPP::Database databaseM;
     bool connectedM;
+    std::string databaseCharsetM;
 
     std::string pathM;
     Credentials credentials;
@@ -134,13 +135,14 @@ public:
     bool fillVector(std::vector<std::string>& list, std::string sql);
 
     std::string getPath() const;
-    std::string getCharset() const;
+    std::string getDatabaseCharset() const;
+    std::string getConnectionCharset() const;
     std::string getUsername() const;
     std::string getPassword() const;
     std::string getRole() const;
     IBPP::Database& getIBPPDatabase();
     void setPath(std::string value);
-    void setCharset(std::string value);
+    void setConnectionCharset(std::string value);
     void setUsername(std::string value);
     void setPassword(std::string value);
     void setRole(std::string value);

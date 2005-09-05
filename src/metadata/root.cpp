@@ -76,7 +76,7 @@ bool Root::load()
     wxFileName fileName = std2wx(getFileName());
     if (!fileName.FileExists())
         return false;
-    
+
     ifstream file(wx2std(fileName.GetFullPath()).c_str());
     if (!file)
         return false;
@@ -190,7 +190,7 @@ bool Root::load()
         if (option == "path" && database)
             database->setPath(value);
         if (option == "charset" && database)
-            database->setCharset(value);
+            database->setConnectionCharset(value);
         if (option == "username" && database)
             database->setUsername(value);
         if (option == "password" && database)
@@ -249,7 +249,7 @@ bool Root::save()
             file << "\t\t\t<id>" << it2->getId() << "</id>\n";
             file << "\t\t\t<name>" << it2->getName() << "</name>\n";
             file << "\t\t\t<path>" << it2->getPath() << "</path>\n";
-            file << "\t\t\t<charset>" << it2->getCharset() << "</charset>\n";
+            file << "\t\t\t<charset>" << it2->getConnectionCharset() << "</charset>\n";
             file << "\t\t\t<username>" << it2->getUsername() << "</username>\n";
             file << "\t\t\t<password>" << it2->getPassword() << "</password>\n";
             file << "\t\t\t<role>" << it2->getRole() << "</role>\n";

@@ -416,7 +416,7 @@ bool Database::loadObjects(NodeType type)
 //-----------------------------------------------------------------------------
 bool Database::loadGeneratorValues()
 {
-    for (MetadataCollection<Generator>::iterator it = generatorsM.begin(); 
+    for (MetadataCollection<Generator>::iterator it = generatorsM.begin();
         it != generatorsM.end(); ++it)
     {
         if (!(*it).loadValue())
@@ -845,13 +845,23 @@ bool Database::connect(std::string password)
     try
     {
         databaseM = IBPP::DatabaseFactory("", getConnectionString(), getUsername(),
-            password, getRole(), getCharset(), "");
+            password, getRole(), getConnectionCharset(), "");
         databaseM->Connect();
         connectedM = true;
         notifyObservers();
 
         tablesM.setParent(this);
 
+        // load database charset
+        IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
+        tr1->Start();
+        IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
+        st1->Prepare("select rdb$character_set_name from rdb$database");
+        st1->Execute();
+        if (st1->Fetch())
+            st1->Get(1, databaseCharsetM);
+        databaseCharsetM.erase(databaseCharsetM.find_last_not_of(" ")+1);
+        tr1->Commit();
         return true;
     }
     catch (IBPP::Exception &e)
@@ -922,7 +932,7 @@ bool Database::disconnect()
 void Database::clear()
 {
     setPath("");
-    setCharset("");
+    setConnectionCharset("");
     setUsername("");
     setPassword("");
     setRole("");
@@ -991,7 +1001,12 @@ std::string Database::getPath() const
     return pathM;
 }
 //-----------------------------------------------------------------------------
-std::string Database::getCharset() const
+std::string Database::getDatabaseCharset() const
+{
+    return databaseCharsetM;
+}
+//-----------------------------------------------------------------------------
+std::string Database::getConnectionCharset() const
 {
     if (connectionCredentials)
         return connectionCredentials->getCharset();
@@ -1033,7 +1048,7 @@ void Database::setPath(std::string value)
     pathM = value;
 }
 //-----------------------------------------------------------------------------
-void Database::setCharset(std::string value)
+void Database::setConnectionCharset(std::string value)
 {
     if (connectionCredentials)
         connectionCredentials->setCharset(value);
