@@ -147,6 +147,11 @@ void DataGrid::showPopMenu(wxPoint cursorPos)
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_CONTEXT_MENU(DataGrid::OnContextMenu)
+
+    #ifdef __WXGTK__
+    EVT_MOUSEWHEEL(DataGrid::OnMouseWheel)
+    #endif
+
     EVT_GRID_CELL_RIGHT_CLICK(DataGrid::OnGridCellRightClick)
     EVT_GRID_LABEL_RIGHT_CLICK(DataGrid::OnGridLabelRightClick)
     EVT_MENU(DataGrid::ID_MENU_CELLFONT, DataGrid::OnMenuCellFont)
@@ -162,6 +167,19 @@ END_EVENT_TABLE()
 void DataGrid::OnContextMenu(wxContextMenuEvent& event)
 {
     showPopMenu(event.GetPosition());
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnMouseWheel(wxMouseEvent& event)
+{
+    int wheelrotation = event.GetWheelRotation();
+    int x, y;
+    GetViewStart(&x, &y);
+    if (wheelrotation < 0)
+        y += 5;
+    else
+        y -= 5;
+    Scroll(x,y);
+    AdjustScrollbars();
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnGridCellRightClick(wxGridEvent& event)

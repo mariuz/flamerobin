@@ -42,6 +42,7 @@ public:
         ID_MENU_COPYTOCLIPBOARD, ID_MENU_COPYTOCLIPBOARDASINSERT, 
         ID_MENU_SAVEASHTML };
 
+    void OnMouseWheel(wxMouseEvent& event);
     void OnContextMenu(wxContextMenuEvent& event);
     void OnGridCellRightClick(wxGridEvent& event);
     void OnGridLabelRightClick(wxGridEvent& event);
