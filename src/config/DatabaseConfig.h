@@ -47,7 +47,7 @@ private:
 public:
     DatabaseConfig(Database *d);
 
-    // unhides methods in base class, for details see:
+    // unhides methods of base class, for details see:
     // http://www.parashift.com/c++-faq-lite/strange-inheritance.html#faq-23.7
     using Config::getValue;
     using Config::setValue;
