@@ -49,9 +49,9 @@ DatabaseConfig::DatabaseConfig(Database *d)
 std::string DatabaseConfig::addPathToKey(const std::string key) const
 {
     if (databaseM)
-        return "DATABASE_" + databaseM->getId() + "_" + key;
+        return "DATABASE_" + databaseM->getId() + Config::pathSeparator + key;
     else
-        return key;
+        return "";
 }
 //-----------------------------------------------------------------------------
 bool DatabaseConfig::keyExists(const std::string& key) const
