@@ -939,10 +939,7 @@ bool MainFrame::connect(bool warn)
                 _("Warning"),
                 wxICON_QUESTION|wxYES_NO))
             {
-                // FIXME: I can't figure out why, but it crashes with this:
-                // dc.setValue("differentCharsetWarning", false);
-                // so I used this:
-                dc.setValue("differentCharsetWarning", "0");
+                dc.setValue("differentCharsetWarning", false);
             }
         }
     }

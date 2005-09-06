@@ -47,6 +47,11 @@ private:
 public:
     DatabaseConfig(Database *d);
 
+    // unhides methods in base class, for details see:
+    // http://www.parashift.com/c++-faq-lite/strange-inheritance.html#faq-23.7
+    using Config::getValue;
+    using Config::setValue;
+
     // transform the key based on Database, and call regular config
     virtual bool keyExists(const std::string& key) const;
     virtual bool getValue(std::string key, std::string& value);
