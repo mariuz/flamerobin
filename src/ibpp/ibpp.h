@@ -68,7 +68,7 @@
 #define IBPP_UNIX	// IBPP_UNIX stands as a common denominator to *NIX flavours
 #endif
 
-#if defined(IBPP_MSVC)
+#if defined(IBPP_MSVC) || defined(IBPP_BCC)
 typedef __int64 int64_t;
 #else
 #include <stdint.h>			// C99 (§7.18) integer types definitions
@@ -87,7 +87,7 @@ namespace IBPP
 	//	Dates range checking
 	const int MinDate = -693594;	//  1 JAN 0001
 	const int MaxDate = 2958464;	// 31 DEC 9999
-	
+
 	//	Transaction Access Modes
 	enum TAM {amWrite, amRead};
 
@@ -213,7 +213,7 @@ namespace IBPP
 		void Add(int days);
 		void StartOfMonth(void);
 		void EndOfMonth(void);
-	
+
 		Date() { Clear(); };
 		Date(int year, int month, int day);
 		Date(const Date&);					// Copy Constructor
@@ -305,7 +305,7 @@ namespace IBPP
 	private:
 		void* mDBKey;				// Stores the binary DBKey
 		mutable char* mString;		// String (temporary) representation of it
-		int mSize;					// Length of DBKey (multiple of 8 bytes) 
+		int mSize;					// Length of DBKey (multiple of 8 bytes)
 
 		void BlindCopy(const DBKey&);
 
@@ -355,7 +355,7 @@ namespace IBPP
 	public:
 		virtual int SqlCode(void) const throw() = 0;
 		virtual int EngineCode(void) const throw() = 0;
-		
+
 		virtual ~SQLException() throw();
 	};
 
@@ -389,7 +389,7 @@ namespace IBPP
 		virtual int Read(void*, int size) = 0;
 		virtual void Write(const void*, int size) = 0;
 		virtual void Info(int* Size, int* Largest, int* Segments) = 0;
-	
+
 		virtual void Save(const std::string& data) = 0;
 		virtual void Load(std::string& data) = 0;
 
@@ -492,7 +492,7 @@ namespace IBPP
 			int* Buffers, int* Sweep, bool* Sync, bool* Reserve) = 0;
 		virtual void Statistics(int* Fetches, int* Marks,
 			int* Reads, int* Writes) = 0;
-		virtual void Counts(int* Insert, int* Update, int* Delete, 
+		virtual void Counts(int* Insert, int* Update, int* Delete,
 			int* ReadIdx, int* ReadSeq) = 0;
 		virtual void Users(std::vector<std::string>& users) = 0;
 		virtual int Dialect(void) = 0;
@@ -615,7 +615,7 @@ namespace IBPP
 		virtual int ColumnSize(int) = 0;
 		virtual int ColumnScale(int) = 0;
 		virtual int Columns(void) = 0;
-		
+
 		virtual bool ColumnUpdated(int) = 0;
 		virtual bool Updated() = 0;
 
@@ -741,7 +741,7 @@ namespace IBPP
 	    virtual ~IStatement() { };
 	};
 	typedef Ptr<IStatement> Statement;
-	
+
 	//	--- Factories ---
 	//	These methods are the only way to get one of the above
 	//	Interfaces.  They are at the heart of how you program using IBPP.  For
@@ -775,7 +775,7 @@ namespace IBPP
 			{ return TransactionFactory(db.intf(), am, il, lr, flags); }
 
 	//IRow* RowFactory(int dialect);
-	
+
 	IStatement* StatementFactory(IDatabase* db, ITransaction* tr,
 		const std::string& sql);
 
