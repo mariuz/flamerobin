@@ -537,6 +537,7 @@ void ExecuteSqlFrame::set_properties()
 
     keywordsM = wxT("");
     closeWhenTransactionDoneM = false;
+    autoCommitM = config().get("autoCommitDDL", false);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::do_layout()
@@ -1041,6 +1042,8 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
         strstrm >> third;
         if (first == "COMMIT")
             commitTransaction();
+        else if (first == "ROLLBACK")
+            rollbackTransaction();
         else if (first == "SET" && (second == "TERM" || second == "TERMINATOR"))
         {
             searchpos = oldpos = lastpos + terminator.length();    // has to be here since terminator length can change
@@ -1054,18 +1057,37 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
             }
             continue;
         }
-        else if (sql.length() && !execute(sql, prepareOnly))
+        else if (first == "SET" && (second == "AUTO" || second == "AUTODDL"))
         {
-            styled_text_ctrl_sql->GotoPos((int)oldpos);
-            styled_text_ctrl_sql->GotoPos((int)lastpos);
-            styled_text_ctrl_sql->SetSelectionStart((int)oldpos);        // select the text in STC
-            styled_text_ctrl_sql->SetSelectionEnd((int)lastpos);        // that failed to execute
-            return false;
+            if (third == "ON")
+                autoCommitM = true;
+            else if (third == "OFF")
+                autoCommitM = false;
+            else
+                autoCommitM = !autoCommitM;
+            continue;
+        }
+        else
+        {
+            if (sql.length())
+            {
+                if (!execute(sql, prepareOnly))
+                {
+                    styled_text_ctrl_sql->GotoPos((int)oldpos);
+                    styled_text_ctrl_sql->GotoPos((int)lastpos);
+                    styled_text_ctrl_sql->SetSelectionStart((int)oldpos);        // select the text in STC
+                    styled_text_ctrl_sql->SetSelectionEnd((int)lastpos);        // that failed to execute
+                    return false;
+                }
+                else if (autoCommitM)
+                {
+                    commitTransaction();
+                }
+            }
         }
 
         if (pos == string::npos)    // last statement
             break;
-
         searchpos = oldpos = lastpos + terminator.length();
     }
 
@@ -1279,7 +1301,11 @@ void ExecuteSqlFrame::commitTransaction()
 void ExecuteSqlFrame::OnButtonRollbackClick(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor cr;
-
+    rollbackTransaction();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::rollbackTransaction()
+{
     // grid_data->stopFetching();
     if (!transactionM->Started())    // check
     {

@@ -118,11 +118,13 @@ private:
     wxString localBuffer;
     void updateHistoryButtons();
 
+    bool autoCommitM;
     bool inTransactionM;
     IBPP::Transaction transactionM;
     IBPP::Statement statementM;
     void InTransaction(bool started);       // changes controls (enable/disable)
     void commitTransaction();
+    void rollbackTransaction();
 
     void autoComplete(bool force);
     void OnSqlEditUpdateUI(wxStyledTextEvent &event);
