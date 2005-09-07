@@ -492,6 +492,10 @@ SOURCE=.\src\gui\ContextMenuMetadataItemVisitor.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\config\DatabaseConfig.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\DatabaseRegistrationDialog.cpp
 # End Source File
 # Begin Source File
@@ -501,6 +505,10 @@ SOURCE=.\src\core\Element.cpp
 # Begin Source File
 
 SOURCE=.\src\gui\ExecuteSqlFrame.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\core\FRError.cpp
 # End Source File
 # Begin Source File
 
@@ -762,6 +770,10 @@ SOURCE=.\src\gui\ContextMenuMetadataItemVisitor.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\config\DatabaseConfig.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\DatabaseRegistrationDialog.h
 # End Source File
 # Begin Source File
@@ -771,6 +783,10 @@ SOURCE=.\src\core\Element.h
 # Begin Source File
 
 SOURCE=.\src\gui\ExecuteSqlFrame.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\core\FRError.h
 # End Source File
 # Begin Source File
 

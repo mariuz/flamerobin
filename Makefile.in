@@ -61,6 +61,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_DatabaseConfig.o \
 	flamerobin_converters.o \
 	flamerobin_Element.o \
+	flamerobin_FRError.o \
 	flamerobin_Observer.o \
 	flamerobin_Subject.o \
 	flamerobin_Visitor.o \
@@ -331,6 +332,9 @@ flamerobin_converters.o: $(srcdir)/src/converters.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_Element.o: $(srcdir)/src/core/Element.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/Element.cpp
+
+flamerobin_FRError.o: $(srcdir)/src/core/FRError.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/FRError.cpp
 
 flamerobin_Observer.o: $(srcdir)/src/core/Observer.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/Observer.cpp

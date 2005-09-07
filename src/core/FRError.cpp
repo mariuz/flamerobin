@@ -1,3 +1,4 @@
+//-----------------------------------------------------------------------------
 /*
   The contents of this file are subject to the Initial Developer's Public
   License Version 1.0 (the "License"); you may not use this file except in
@@ -14,7 +15,7 @@
   The Initial Developer of the Original Code is Nando Dessena.
 
   Portions created by the original developer
-  are Copyright (C) 2004 Nando Dessena.
+  are Copyright (C) 2005 Nando Dessena.
 
   All Rights Reserved.
 
@@ -23,26 +24,28 @@
   Contributor(s):
 */
 
-#ifndef MAIN_H
-#define MAIN_H
+// For compilers that support precompilation, includes "wx/wx.h".
+#include "wx/wxprec.h"
 
+#ifdef __BORLANDC__
+    #pragma hdrstop
+#endif
+
+// for all others, include the necessary headers (this file is usually all you
+// need because it includes almost all "standard" wxWindows headers
+#ifndef WX_PRECOMP
+    #include "wx/wx.h"
+#endif
+
+#include "FRError.h"
 //-----------------------------------------------------------------------------
-class FRApp: public wxApp {
-public:
-    bool OnInit();
-    void OnFatalException();
-    virtual int OnRun();
-    virtual bool OnExceptionInMainLoop();
-private:
-    // Reads the environment variables that influence FR's behaviour.
-    void checkEnvironment();
-    // Reads the command line params that influence FR's behaviour.
-    void parseCommandLine();
-    // Translates the supported macros (like $app and $user) in path
-    // specifications coming from the command line or the environment.
-    const std::string translatePathMacros(const std::string path) const;
-};
+FRError::FRError(const wxString& message)
+    : messageM(message)
+{
+}
 //-----------------------------------------------------------------------------
-DECLARE_APP(FRApp)
+const char* FRError::what() const
+{
+    return (messageM.c_str());
+}
 //-----------------------------------------------------------------------------
-#endif // MAIN_H

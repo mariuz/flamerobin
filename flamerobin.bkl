@@ -269,6 +269,7 @@
         $(SOURCEDIR)/config/Config.h
         $(SOURCEDIR)/config/DatabaseConfig.h
         $(SOURCEDIR)/core/Element.h
+        $(SOURCEDIR)/core/FRError.h
         $(SOURCEDIR)/core/Observer.h
         $(SOURCEDIR)/core/Subject.h
         $(SOURCEDIR)/core/Visitor.h
@@ -348,7 +349,8 @@
         $(SOURCEDIR)/config/DatabaseConfig.cpp
         $(SOURCEDIR)/converters.cpp
         $(SOURCEDIR)/core/Element.cpp
-        $(SOURCEDIR)/core/Observer.cpp
+	$(SOURCEDIR)/core/FRError.cpp
+	$(SOURCEDIR)/core/Observer.cpp
         $(SOURCEDIR)/core/Subject.cpp
         $(SOURCEDIR)/core/Visitor.cpp
         $(SOURCEDIR)/dberror.cpp

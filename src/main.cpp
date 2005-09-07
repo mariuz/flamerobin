@@ -38,6 +38,7 @@
 #include <wx/stdpaths.h>
 #include <wx/utils.h>
 
+#include <exception>
 #include <vector>
 #include <string>
 
@@ -97,6 +98,30 @@ bool FRApp::OnInit()
     main_frame->Show();
 
     return true;
+}
+//-----------------------------------------------------------------------------
+int FRApp::OnRun()
+{
+    while (true)
+    {
+        try
+        {
+            return wxApp::OnRun();
+        }
+        catch (exception& e)
+        {
+            wxMessageBox(std2wx(e.what()), _("Error"), wxOK | wxICON_ERROR);
+        }
+        catch (...)
+        {
+            OnFatalException();
+        }
+    }
+}
+//-----------------------------------------------------------------------------
+bool FRApp::OnExceptionInMainLoop()
+{
+    throw;
 }
 //-----------------------------------------------------------------------------
 void FRApp::checkEnvironment()

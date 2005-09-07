@@ -1,3 +1,4 @@
+//-----------------------------------------------------------------------------
 /*
   The contents of this file are subject to the Initial Developer's Public
   License Version 1.0 (the "License"); you may not use this file except in
@@ -14,7 +15,7 @@
   The Initial Developer of the Original Code is Nando Dessena.
 
   Portions created by the original developer
-  are Copyright (C) 2004 Nando Dessena.
+  are Copyright (C) 2005 Nando Dessena.
 
   All Rights Reserved.
 
@@ -22,27 +23,23 @@
 
   Contributor(s):
 */
-
-#ifndef MAIN_H
-#define MAIN_H
-
 //-----------------------------------------------------------------------------
-class FRApp: public wxApp {
-public:
-    bool OnInit();
-    void OnFatalException();
-    virtual int OnRun();
-    virtual bool OnExceptionInMainLoop();
+#ifndef FR_FRERROR_H
+#define FR_FRERROR_H
+
+// Base class for all FlameRobin-specific exceptions.
+
+#include <wx/wx.h>
+
+#include <exception>
+//-----------------------------------------------------------------------------
+class FRError: public std::exception
+{
 private:
-    // Reads the environment variables that influence FR's behaviour.
-    void checkEnvironment();
-    // Reads the command line params that influence FR's behaviour.
-    void parseCommandLine();
-    // Translates the supported macros (like $app and $user) in path
-    // specifications coming from the command line or the environment.
-    const std::string translatePathMacros(const std::string path) const;
+    wxString messageM;
+public:
+    FRError(const wxString& message);
+    virtual const char* what() const;
 };
 //-----------------------------------------------------------------------------
-DECLARE_APP(FRApp)
-//-----------------------------------------------------------------------------
-#endif // MAIN_H
+#endif //FR_FRERROR_H

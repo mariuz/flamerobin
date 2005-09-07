@@ -39,6 +39,7 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 #include <wx/clipbrd.h>
@@ -46,6 +47,7 @@
 #include <wx/filedlg.h>
 
 #include "config/Config.h"
+#include "core/FRError.h"
 #include "dberror.h"
 #include "framemanager.h"
 #include "frutils.h"
@@ -181,7 +183,7 @@ void MetadataItemPropertiesFrame::loadPage()
             htmlpage += "dependencies.html";
             break;
     }
-    processHtmlFile(htmlpage);  // load HTML template, parse, and fill the wxHTML control: window_1
+    processHtmlFile(htmlpage);  // load HTML template, parse, and fill the HTML control
 }
 //-----------------------------------------------------------------------------
 //! processes commands found in HTML template
@@ -582,17 +584,29 @@ void MetadataItemPropertiesFrame::processHtmlCode(std::string& htmlpage, std::st
 }
 //-----------------------------------------------------------------------------
 //! processes the given html template file
-void MetadataItemPropertiesFrame::processHtmlFile(std::string filename)
+void MetadataItemPropertiesFrame::processHtmlFile(std::string fileName)
 {
     using namespace std;
     string htmlpage;        // create html page into variable
 
-    ifstream file(filename.c_str());            // read entire file into string buffer
+    wxFileName localFileName = std2wx(fileName);
+    if (!localFileName.FileExists())
+    {
+        wxString msg;
+        msg.Printf(_("The file \"%s\" does not exist."), 
+            localFileName.GetFullPath().c_str());
+        throw FRError(msg);
+    }
+
+    ifstream file(fileName.c_str()); // read entire file into string buffer
     if (!file)
     {
-        ::wxMessageBox(std2wx(filename), _("File not found"), wxICON_WARNING);
-        return;
+        wxString msg;
+        msg.Printf(_("The file \"%s\" cannot be opened."), 
+            fileName.c_str());
+        throw FRError(msg);
     }
+
     stringstream ss;
     ss << file.rdbuf();
     string s(ss.str());

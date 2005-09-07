@@ -102,8 +102,10 @@ FLAMEROBIN_CXXFLAGS = $(__RTL_TYPE) -I$(BCCDIR)\include -tWM $(__DEBUGINFO) \
 FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Config.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_converters.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Element.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRError.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Observer.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Subject.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Visitor.obj \
@@ -260,7 +262,7 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerob
 
 config-options: bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe
 	if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs mkdir bcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
-	for %f in (fr_settings.confdef) do if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs\%f copy confdefs\%f bcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
+	for %f in (fr_settings.confdef db_settings.confdef) do if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs\%f copy confdefs\%f bcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
 
 html-docs: bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe
 	if not exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\docs mkdir bcc$(U_OPT)$(R_OPT)$(D_OPT)\docs
@@ -333,10 +335,16 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.obj: .\src\addconstr
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Config.obj: .\src\config\Config.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.obj: .\src\config\DatabaseConfig.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_converters.obj: .\src\converters.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Element.obj: .\src\core\Element.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRError.obj: .\src\core\FRError.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Observer.obj: .\src\core\Observer.cpp
