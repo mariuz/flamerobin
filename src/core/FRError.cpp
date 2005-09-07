@@ -38,6 +38,12 @@
 #endif
 
 #include "FRError.h"
+#include "ugly.h"
+//-----------------------------------------------------------------------------
+void handleException(std::exception& e)
+{
+    wxMessageBox(std2wx(e.what()), _("Error"), wxOK | wxICON_ERROR);
+}
 //-----------------------------------------------------------------------------
 FRError::FRError(const wxString& message)
     : messageM(message)

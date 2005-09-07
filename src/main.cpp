@@ -45,6 +45,7 @@
 #include <ibpp.h>
 
 #include "config/Config.h"
+#include "core/FRError.h"
 #include "gui/MainFrame.h"
 #include "main.h"
 #include "ugly.h"
@@ -102,20 +103,18 @@ bool FRApp::OnInit()
 //-----------------------------------------------------------------------------
 int FRApp::OnRun()
 {
-    while (true)
+    try
     {
-        try
-        {
-            return wxApp::OnRun();
-        }
-        catch (exception& e)
-        {
-            wxMessageBox(std2wx(e.what()), _("Error"), wxOK | wxICON_ERROR);
-        }
-        catch (...)
-        {
-            OnFatalException();
-        }
+        return wxApp::OnRun();
+    }
+    catch (exception& e)
+    {
+        handleException(e);
+    }
+    catch (...)
+    {
+        OnFatalException();
+        return 3;
     }
 }
 //-----------------------------------------------------------------------------

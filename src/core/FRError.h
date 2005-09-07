@@ -33,6 +33,12 @@
 
 #include <exception>
 //-----------------------------------------------------------------------------
+#define BEGIN_EVENT_HANDLER try {
+
+#define END_EVENT_HANDLER } catch (std::exception& e) { handleException(e); }
+//-----------------------------------------------------------------------------
+void handleException(std::exception& e);
+//-----------------------------------------------------------------------------
 class FRError: public std::exception
 {
 private:

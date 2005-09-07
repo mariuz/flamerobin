@@ -42,6 +42,7 @@
 #include "config/Config.h"
 #include "config/DatabaseConfig.h"
 #include "ContextMenuMetadataItemVisitor.h"
+#include "core/FRError.h"
 #include "DatabaseRegistrationDialog.h"
 #include "dberror.h"
 #include "ExecuteSqlFrame.h"
@@ -395,6 +396,8 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 //! handle double-click on item (or press Enter)
 void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
 {
+    BEGIN_EVENT_HANDLER
+
     wxTreeItemId item = tree_ctrl_1->GetSelection();
     if (!item.IsOk())
         return;
@@ -463,6 +466,8 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
     if (!expanded)                      // on MSW the tree control toggles the branch automatically
         tree_ctrl_1->Collapse(item);    // so an ugly hack to trick it.
     #endif
+    
+    END_EVENT_HANDLER
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnClose(wxCloseEvent& event)
