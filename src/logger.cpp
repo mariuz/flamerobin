@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): ________________.
+  Contributor(s): Nando Dessena
 */
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
@@ -113,12 +113,14 @@ bool Logger::log2file(Config *cfg, const executedStatement& st,
 bool Logger::logStatement(const executedStatement& st, Database *db)
 {
     DatabaseConfig dc(db);
-    logStatementByConfig(&dc, st, db);
+    bool result = logStatementByConfig(&dc, st, db);
     if (!dc.get("ExcludeFromGlobalLogging", false))
     {
         Config& globalConfig = config();
-        logStatementByConfig(&globalConfig, st, db);
+        return logStatementByConfig(&globalConfig, st, db);
     }
+    else
+        return result;
 }
 //---------------------------------------------------------------------------
 bool Logger::logStatementByConfig(Config *cfg, const executedStatement& st,
