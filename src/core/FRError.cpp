@@ -44,7 +44,7 @@ FRError::FRError(const wxString& message)
 {
 }
 //-----------------------------------------------------------------------------
-const char* FRError::what() const
+const char* FRError::what() const throw()
 {
     return (messageM.c_str());
 }

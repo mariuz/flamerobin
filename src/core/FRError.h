@@ -39,7 +39,9 @@ private:
     wxString messageM;
 public:
     FRError(const wxString& message);
-    virtual const char* what() const;
+    virtual const char* what() const throw();
+
+    ~FRError() throw();
 };
 //-----------------------------------------------------------------------------
 #endif //FR_FRERROR_H
