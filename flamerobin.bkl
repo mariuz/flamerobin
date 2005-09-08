@@ -583,6 +583,30 @@
         <files>$(HTMLTEMPLATEFILES)</files>
     </copy-files>
 
+    <if cond="FORMAT=='autoconf'">
+        <script-files>
+            <srcdir>$(BUILDDIR)</srcdir>
+            <files>flamerobin$(EXEEXT)</files>
+            <install-to>$(BINDIR)</install-to>
+        </script-files>
+
+        <data-files>
+            <srcdir>$(CONFIGOPTIONSDIR)</srcdir>
+            <files>$(CONFIGOPTIONSFILES)</files>
+            <install-to>$(DATADIR)/confdefs</install-to>
+        </data-files>
+        <data-files>
+            <srcdir>$(HTMLDOCSDIR)</srcdir>
+            <files>$(HTMLDOCFILES)</files>
+            <install-to>$(DATADIR)/docs</install-to>
+        </data-files>
+        <data-files>
+            <srcdir>$(HTMLTEMPLATEDIR)</srcdir>
+            <files>$(HTMLTEMPLATEFILES)</files>
+            <install-to>$(DATADIR)/html-templates</install-to>
+        </data-files>
+    </if>
+
 <!-- End of part 2 -->
 
 </makefile>

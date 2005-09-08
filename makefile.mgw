@@ -76,8 +76,10 @@ FLAMEROBIN_CXXFLAGS = -mthreads $(__DEBUGINFO) $(__OPTIMIZE) -W -Wall \
 FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Config.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_converters.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Element.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRError.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Observer.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Subject.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Visitor.o \
@@ -220,7 +222,7 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS) gcc$(U_OPT)$(R
 
 config-options: gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe
 	if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs mkdir gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
-	for %%f in (fr_settings.confdef) do if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs\%%f copy confdefs\%%f gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
+	for %%f in (fr_settings.confdef db_settings.confdef) do if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs\%%f copy confdefs\%%f gcc$(U_OPT)$(R_OPT)$(D_OPT)\confdefs
 
 html-docs: gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe
 	if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\docs mkdir gcc$(U_OPT)$(R_OPT)$(D_OPT)\docs
@@ -293,10 +295,16 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.o: ./src/addconstrai
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Config.o: ./src/config/Config.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.o: ./src/config/DatabaseConfig.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_converters.o: ./src/converters.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Element.o: ./src/core/Element.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRError.o: ./src/core/FRError.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Observer.o: ./src/core/Observer.cpp

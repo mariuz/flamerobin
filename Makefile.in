@@ -16,8 +16,13 @@ EXEEXT = @EXEEXT@
 RESCOMP = @RESCOMP@
 SETFILE = @SETFILE@
 NM = @NM@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_DIR = @INSTALL_DIR@
 srcdir = @srcdir@
 top_builddir = @top_builddir@
+bindir = @bindir@
+datadir = @datadir@
 LDFLAGS_GUI = @LDFLAGS_GUI@
 AR = @AR@
 RANLIB = @RANLIB@
@@ -172,6 +177,14 @@ COND_PLATFORM_OS2_1___flamerobin___os2_emxbindcmd = $(NM) flamerobin$(EXEEXT) \
 all: $(LIBPREFIX)ibpp$(LIBEXT) flamerobin$(EXEEXT) $(__flamerobin_bundle___depname) config-options html-docs html-templates
 
 install: all
+	$(INSTALL_DIR) $(DESTDIR)$(bindir)
+	(cd ./ ; $(INSTALL_PROGRAM)  flamerobin$(EXEEXT) $(DESTDIR)$(bindir))
+	$(INSTALL_DIR) $(DESTDIR)$(datadir)/confdefs
+	(cd $(srcdir)/confdefs/ ; $(INSTALL_DATA)  fr_settings.confdef db_settings.confdef $(DESTDIR)$(datadir)/confdefs)
+	$(INSTALL_DIR) $(DESTDIR)$(datadir)/docs
+	(cd $(srcdir)/docs/ ; $(INSTALL_DATA)  fr_license.html fr_manual.html fr_whatsnew.html html.css $(DESTDIR)$(datadir)/docs)
+	$(INSTALL_DIR) $(DESTDIR)$(datadir)/html-templates
+	(cd $(srcdir)/html-templates/ ; $(INSTALL_DATA)  DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TRIGGER.html VIEW.html VIEWtriggers.html dependencies.html compute.png drop.png ok.png redx.png view.png $(DESTDIR)$(datadir)/html-templates)
 
 uninstall: 
 
