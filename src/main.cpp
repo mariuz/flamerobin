@@ -65,7 +65,9 @@ void parachute()
         _("Fatal error"), wxYES_NO | wxICON_ERROR))
     {
         ::wxGetApp().MainLoop();
+        exit(0);
     }
+    exit(1);
 }
 //-----------------------------------------------------------------------------
 void FRApp::OnFatalException()
