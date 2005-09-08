@@ -52,7 +52,7 @@ FRError::FRError(const wxString& message)
 //-----------------------------------------------------------------------------
 const char* FRError::what() const throw()
 {
-    return (messageM.c_str());
+    return (wx2std(messageM).c_str());
 }
 //-----------------------------------------------------------------------------
 FRError::~FRError() throw()
