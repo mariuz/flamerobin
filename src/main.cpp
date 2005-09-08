@@ -54,7 +54,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 IMPLEMENT_APP(FRApp)
 //-----------------------------------------------------------------------------
-void FRApp::OnFatalException()
+void parachute()
 {
     if (wxYES == ::wxMessageBox(::wxGetTranslation(
         wxT("A fatal error has occured. If you know how to\n")
@@ -64,8 +64,13 @@ void FRApp::OnFatalException()
         wxT("can save your data. Do you wish to try?\n")),
         _("Fatal error"), wxYES_NO | wxICON_ERROR))
     {
-        MainLoop();
+        ::wxGetApp().MainLoop();
     }
+}
+//-----------------------------------------------------------------------------
+void FRApp::OnFatalException()
+{
+    parachute();
 }
 //-----------------------------------------------------------------------------
 bool FRApp::OnInit()
@@ -74,6 +79,7 @@ bool FRApp::OnInit()
     ::wxHandleFatalExceptions();
 #endif
 
+    std::set_terminate(parachute);
     checkEnvironment();
     parseCommandLine();
 
