@@ -159,9 +159,15 @@ void FRApp::parseCommandLine()
 const string FRApp::translatePathMacros(const string path) const
 {
     if (path == "$app")
-        return wx2std(wxStandardPaths::Get().GetLocalDataDir());
+    {   
+        wxStandardPaths& standardPaths = config().getStandardPaths();
+        return wx2std(standardPaths.GetLocalDataDir());
+    }
     else if (path == "$user")
-        return wx2std(wxStandardPaths::Get().GetUserLocalDataDir());
+    {   
+        wxStandardPaths& standardPaths = config().getStandardPaths();
+        return wx2std(standardPaths.GetUserLocalDataDir());
+    }
     else
         return path;
 }

@@ -61,6 +61,9 @@ Config& config()
 Config::Config()
     : homePathM(""), userHomePathM(""), configM(0)
 {
+#if defined(__UNIX__) && !defined(__WXMAC__) && !defined(__DARWIN__)
+    standardPathsM.SetInstallPrefix(wxT("/opt/flamerobin"));
+#endif
 }
 //-----------------------------------------------------------------------------
 Config::~Config()
@@ -236,7 +239,7 @@ string Config::getHomePath() const
     if (!homePathM.empty())
         return homePathM + "/";
     else
-        return wx2std(wxStandardPaths::Get().GetDataDir()) + "/";
+        return wx2std(standardPathsM.GetDataDir()) + "/";
 }
 //-----------------------------------------------------------------------------
 string Config::getHtmlTemplatesPath() const
@@ -259,7 +262,7 @@ string Config::getUserHomePath() const
     if (!userHomePathM.empty())
         return userHomePathM + "/";
     else
-        return wx2std(wxStandardPaths::Get().GetUserLocalDataDir()) + "/";
+        return wx2std(standardPathsM.GetUserLocalDataDir()) + "/";
 }
 //-----------------------------------------------------------------------------
 string Config::getDBHFileName() const
@@ -270,6 +273,11 @@ string Config::getDBHFileName() const
 string Config::getConfigFileName() const
 {
     return getUserHomePath() + "fr_settings.conf";
+}
+//-----------------------------------------------------------------------------
+wxStandardPaths& Config::getStandardPaths()
+{
+    return standardPathsM;
 }
 //-----------------------------------------------------------------------------
 void Config::setHomePath(const string& homePath)

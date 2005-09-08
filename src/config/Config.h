@@ -29,6 +29,8 @@
 #ifndef FR_CONFIG_H
 #define FR_CONFIG_H
 
+#include <wx/stdpaths.h>
+
 #include <map>
 #include <string>
 #include <vector>
@@ -68,6 +70,11 @@ public:
             return defaultValue;
     }
 
+    // We need to use an instance of wxStandardPaths to be able to call
+    // SetInstallPrefix() for UNIX.  All other code should use this method
+    // instead of wxStandardPaths::Get() to use the correct paths.
+    wxStandardPaths& getStandardPaths();
+
     // these should be called before calling the get* functions below,
     // otherwise defaults apply.
     void setHomePath(const std::string& homePath);
@@ -104,6 +111,7 @@ private:
     mutable wxFileConfig* configM;
     // performs lazy initialization of configM.
     wxFileConfig* getConfig() const;
+    wxStandardPaths standardPathsM;
     std::string getConfigFileName() const;
     std::string homePathM;
     std::string userHomePathM;
