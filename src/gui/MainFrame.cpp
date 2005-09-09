@@ -1159,9 +1159,8 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
         Table *t = dynamic_cast<Table *>(c->getParent());
         if (!t)     // dummy check
             return;
-        FieldPropertiesFrame *f = new FieldPropertiesFrame(this, -1,
-            wxString::Format(_("TABLE: %s"), std2wx(t->getName()).c_str()),
-            t);
+        FieldPropertiesFrame *f = new FieldPropertiesFrame(this, -1, 
+            wxEmptyString, t);
         f->setField(c);
         f->Show();
     }
