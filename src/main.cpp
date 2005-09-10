@@ -64,8 +64,8 @@ void parachute()
         wxT("can save your data. Do you wish to try?\n")),
         _("Fatal error"), wxYES_NO | wxICON_ERROR))
     {
-        ::wxGetApp().MainLoop();
-        exit(0);
+        int result = ::wxGetApp().OnRun();
+        exit(result);
     }
     exit(1);
 }
@@ -111,18 +111,16 @@ bool FRApp::OnInit()
 //-----------------------------------------------------------------------------
 int FRApp::OnRun()
 {
-    try
+    while (true)
     {
-        return wxApp::OnRun();
-    }
-    catch (exception& e)
-    {
-        handleException(e);
-    }
-    catch (...)
-    {
-        OnFatalException();
-        return 3;
+        try
+        {
+            return wxApp::OnRun();
+        }
+        catch (exception& e)
+        {
+            handleException(e);
+        }
     }
 }
 //-----------------------------------------------------------------------------
@@ -159,12 +157,12 @@ void FRApp::parseCommandLine()
 const string FRApp::translatePathMacros(const string path) const
 {
     if (path == "$app")
-    {   
+    {
         wxStandardPaths& standardPaths = config().getStandardPaths();
         return wx2std(standardPaths.GetLocalDataDir());
     }
     else if (path == "$user")
-    {   
+    {
         wxStandardPaths& standardPaths = config().getStandardPaths();
         return wx2std(standardPaths.GetUserLocalDataDir());
     }
