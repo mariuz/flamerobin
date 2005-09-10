@@ -166,6 +166,11 @@
                 <key>AutoCompleteWithEnter</key>
                 <default>0</default>
             </setting>
+            <setting type="checkbox">
+                <caption>Allow auto-completion inside quoted text</caption>
+                <key>autoCompleteQuoted</key>
+                <default>1</default>
+            </setting>
         </node>
         <node>
             <caption>Statement History</caption>

@@ -676,7 +676,17 @@ void ExecuteSqlFrame::OnSqlEditUpdateUI(wxStyledTextEvent& WXUNUSED(event))
         styled_text_ctrl_sql->BraceBadLight(wxSTC_INVALID_POSITION);    // remove light
 
     if (styled_text_ctrl_sql->GetTextLength() > 5)
-        SetTitle(styled_text_ctrl_sql->GetLine(0).Trim());
+    {
+        for (int i=0; i<styled_text_ctrl_sql->GetLineCount(); ++i)
+        {
+            wxString t = styled_text_ctrl_sql->GetLine(i).Trim();
+            if (!t.IsEmpty())
+            {
+                SetTitle(t);
+                break;
+            }
+        }
+    }
 }
 //-----------------------------------------------------------------------------
 //! returns true if there is a word in "wordlist" that starts with "word"
@@ -699,35 +709,46 @@ bool HasWord(wxString word, wxString& wordlist)
 void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
 {
     int pos = styled_text_ctrl_sql->GetCurrentPos();
-    if (pos > 0)
+    if (pos == 0)
+        return;
+
+    int c = styled_text_ctrl_sql->GetCharAt(pos-1);
+    if (c == '(')
     {
-        int c = styled_text_ctrl_sql->GetCharAt(pos-1);
-        if (c == '(')
+        if (config().get("SQLEditorCalltips", true))
         {
-            if (config().get("SQLEditorCalltips", true))
+            int start = styled_text_ctrl_sql->WordStartPosition(pos-2, true);
+            if (start != -1 && start != pos-2)
             {
-                int start = styled_text_ctrl_sql->WordStartPosition(pos-2, true);
-                if (start != -1 && start != pos-2)
+                wxString word = styled_text_ctrl_sql->GetTextRange(start, pos-1).Upper();
+                std::string calltip;
+                Procedure *p = dynamic_cast<Procedure *>(databaseM->findByNameAndType(ntProcedure, wx2std(word)));
+                if (p)
+                    calltip = p->getDefinition();
+                Function *f = dynamic_cast<Function *>(databaseM->findByNameAndType(ntFunction, wx2std(word)));
+                if (f)
+                    calltip = f->getDefinition();
+                if (!calltip.empty())
                 {
-                    wxString word = styled_text_ctrl_sql->GetTextRange(start, pos-1).Upper();
-                    std::string calltip;
-                    Procedure *p = dynamic_cast<Procedure *>(databaseM->findByNameAndType(ntProcedure, wx2std(word)));
-                    if (p)
-                        calltip = p->getDefinition();
-                    Function *f = dynamic_cast<Function *>(databaseM->findByNameAndType(ntFunction, wx2std(word)));
-                    if (f)
-                        calltip = f->getDefinition();
-                    if (!calltip.empty())
-                    {
-                        styled_text_ctrl_sql->CallTipShow(start, std2wx(calltip));
-                        styled_text_ctrl_sql->CallTipSetHighlight(0, pos-1-start);    // start, end
-                    }
+                    styled_text_ctrl_sql->CallTipShow(start, std2wx(calltip));
+                    styled_text_ctrl_sql->CallTipSetHighlight(0, pos-1-start);    // start, end
                 }
             }
         }
-        else
+    }
+    else
+    {
+        if (config().get("AutocompleteEnabled", true))
         {
-            if (config().get("AutocompleteEnabled", true))
+            bool allow = config().get("autoCompleteQuoted", true);
+            if (!allow)
+            {
+                // needed since event that updates the style happens later
+                ::wxSafeYield();
+                if (styled_text_ctrl_sql->GetStyleAt(pos-1) != 7)   // not in quotes
+                    allow = true;
+            }
+            if (allow)
             {
                 if (styled_text_ctrl_sql->CallTipActive())
                 {
