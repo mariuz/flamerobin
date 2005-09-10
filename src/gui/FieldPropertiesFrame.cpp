@@ -80,6 +80,7 @@ FieldPropertiesFrame::FieldPropertiesFrame(wxWindow* parent, int id, wxString ti
         wxT("Smallint"),
         wxT("Numeric"),
         wxT("Decimal"),
+        wxT("BigInt"),
         wxT("Float"),
         wxT("Double precision"),
         wxT("Date"),
@@ -89,7 +90,7 @@ FieldPropertiesFrame::FieldPropertiesFrame(wxWindow* parent, int id, wxString ti
         wxT("Blob")
     };
 
-    ch_datatypes = new wxChoice(panel_1, ID_ch_datatypes, wxDefaultPosition, wxDefaultSize, 13, ch_datatypes_choices);
+    ch_datatypes = new wxChoice(panel_1, ID_ch_datatypes, wxDefaultPosition, wxDefaultSize, 14, ch_datatypes_choices);
     label_3 = new wxStaticText(panel_1, -1, _("Size"));
     textctrl_size = new wxTextCtrl(panel_1, -1, wxT(""));
     label_4 = new wxStaticText(panel_1, -1, _("Scale"));
@@ -112,7 +113,7 @@ FieldPropertiesFrame::FieldPropertiesFrame(wxWindow* parent, int id, wxString ti
             ch_charset->Append(std2wx(*it));
         }
     }
-    
+
     label_6 = new wxStaticText(panel_1, -1, _("Collate"));
     const wxString ch_collate_choices[] = {
         wxT(""),    // ugly hack. The control doesn't want to show big list for selection if initial list is short
