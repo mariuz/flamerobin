@@ -547,6 +547,15 @@ bool Database::parseCommitedSql(std::string sql)
         strstrm >> name;
     }
 
+    // support CREATE OR ALTER statements
+    if (action == "CREATE" && object_type == "OR" && name == "ALTER")
+    {
+        strstrm >> object_type;
+        strstrm >> name;
+        if (findByNameAndType(getTypeByName(object_type), name)) // it is already CREATE
+            action = "ALTER";
+    }
+
     if (action == "SET" && object_type == "GENERATOR")
     {
         Generator *g = dynamic_cast<Generator *>(findByNameAndType(ntGenerator, name));
@@ -664,8 +673,16 @@ bool Database::parseCommitedSql(std::string sql)
     if (pbr != std::string::npos)
         name.erase(pbr);
 
-    // process the action...
     NodeType t = getTypeByName(object_type);
+    if (action == "RECREATE")
+    {
+        if (findByNameAndType(t, name))
+            action = "ALTER";
+        else
+            action = "CREATE";
+    }
+
+    // process the action...
     if (action == "CREATE" || action == "DECLARE")
     {
         if (addObject(t, name))     // inserts object into collection
