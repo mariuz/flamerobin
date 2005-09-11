@@ -42,11 +42,11 @@ void handleException(std::exception& e);
 class FRError: public std::exception
 {
 private:
-    wxString messageM;
-    mutable char *storageM;
+    char *messageM;
 
 public:
     FRError(const wxString& message);
+    FRError(const FRError& source);
     virtual const char* what() const throw();
 
     ~FRError() throw();
