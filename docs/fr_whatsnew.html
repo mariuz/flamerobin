@@ -2,52 +2,37 @@
 <html>
 <head>
   <title>Changes</title>
-  <style>
-	<!--
-		@page { size: 21cm 29.7cm }
-		P.western { so-language: en-GB }
-	-->
-	</style>
 </head>
-<body dir="ltr" lang="en-GB">
-<p class="western" style="margin-bottom: 0cm;"><u><font size="4">Changes
-in FlameRobin 0.4.0 ALPHA<br>
-</font></u></p>
-<p class="western" style="margin-bottom: 0cm;"><u><font size="4"><br>
-</font></u><small><font size="4"><small><span style="font-weight: bold;">New
-features:<br>
-</span></small></font></small></p>
-<p class="western" style="margin-bottom: 0cm;"><small><font size="4"><small><span
- style="font-weight: bold;">- </span>History of SQL statements,
-presistent even after closing program<br>
-<span style="font-weight: bold;">- </span>Activate/deactivate option
-for triggers<span style="font-weight: bold;"><br>
-</span>- "Drop multiple columns" option for tables<br>
+<body bgcolor="#FFFFCC">
+<font size=-1>For known issues please see our bug tracker at:
+http://sourceforge.net/tracker/?group_id=124340&amp;atid=699234</font><br>
+<br>
+<br>
+<font size=+2>Changes in FlameRobin 0.4.0 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- History of SQL statements, presistent even after closing program<br>
+- Activate/deactivate option for triggers<br>
+- "Drop multiple columns" option for tables<br>
 - Execute option for procedures<br>
 - Preferences can be set on database basis (ex. logging)<br>
 - Option to restore backup into new database<br>
-- Support for SET AUTODDL isql feature and option to automatically
-commit DDL statements<br>
+- Support for SET AUTODDL isql feature and option to automatically commit DDL statements<br>
 - Support for RECREATE and CREATE OR ALTER statements<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
 <br>
-</small></font></small></p>
-<p class="western" style="margin-bottom: 0cm;"><small><font size="4"><small><span
- style="font-weight: bold;">Enhancements and Bug fixes:<br>
-</span></small></font></small></p>
-<p class="western" style="margin-bottom: 0cm;">- Fixed bug when
-password is supplied upon connecting<br>
-- Fixed parsing of committed statements when statement starts with a
-comment<br>
+- Fixed bug when password is supplied upon connecting<br>
+- Fixed parsing of committed statements when statement starts with a comment<br>
 - Main menu system reorganized<br>
-- Configuration files reorganized: user configuration files stored in
-user's directories<br>
+- Configuration files reorganized: user configuration files stored in user's directories<br>
 - Option to hide the status bar<br>
 - Option to hide databases that are not connected<br>
 - Fixed background colors of read-only fields in various dialogs<br>
 - Fixed "no database assigned" error for new databases<br>
 - Made sure the statement with error is visible in large scripts<br>
-- Changed the execute key to F4, as F9 has a special meaning on some
-platforms<br>
+- Changed the execute key to F4, as F9 has a special meaning on some platforms<br>
 - Long text now wraps on Dependencies page, making to easier to read<br>
 - Fixed scrollbar bugs of data grid with Linux port<br>
 - Mousewheel now works on Linux<br>
@@ -57,336 +42,135 @@ platforms<br>
 - Option to disable autocompletion inside quoted text<br>
 - Fixed bug that sql editor dialog can have an empty title<br>
 - Improved handling of fatal exceptions<br>
-</p>
-<pre wrap=""><br></pre>
-<p class="western" style="margin-bottom: 0cm;"><small><font size="4"><small><span
- style="font-weight: bold;"></span></small></font></small></p>
-<p class="western" style="margin-bottom: 0cm;"><small><font size="4"><small><span
- style="font-weight: bold;"></span></small></font></small><br>
-</p>
-<p class="western" style="margin-bottom: 0cm;"><u><font size="4">Changes
-in FlameRobin 0.3.0 ALPHA<br>
-</font></u></p>
-<p class="western" style="margin-bottom: 0cm;"><u><font size="4"><br>
-</font></u></p>
-<p class="western" style="margin-bottom: 0cm;"><small><font size="4"><small><span
- style="font-weight: bold;">New features:</span><br>
-<br>
-&nbsp; - Support for computed columns (shown in tree, removed from
-insert statements) <br>
-&nbsp; - Calltips for UDFs <br>
-&nbsp; - Properties page for UDFs <br>
-&nbsp; - Option "create new trigger" for tables and views <br>
-&nbsp; - Support for table indices - display, add, drop, recompute
-stats., edit descriptions <br>
-&nbsp; - Property page for view's triggers <br>
-&nbsp; - Select object's name in SQL editor and get its properties page
-<br>
-&nbsp; - Context menu for properties windows with options to print and
-save contents <br>
-&nbsp; - Implemented "open in new window" context menu option for
-properties page links <br>
-&nbsp; - Added main menu for main application window <br>
-&nbsp; - Added "diplay name" to servers and databases <br>
-&nbsp; - "Connect as" option for databases: ability to connect as
-different user/role without need to register new database<br>
-<br style="font-weight: bold;">
-<span style="font-weight: bold;">Enhancements and Bug fixes:</span><br>
-<br>
-&nbsp; - ALTER TABLE x ALTER COLUMN y updates the tree/properties page <br>
-&nbsp; - Improved handling when adding NOT NULL columns <br>
-&nbsp; - Fixed bug when SP and triggers contained ampersand (&amp;) in
-source (FR would hang) <br>
-&nbsp; - Size and position of minimized windows is not stored anymore <br>
-&nbsp; - Pressing function keys and clicking buttons in SQL editor now
-does the same <br>
-&nbsp; - Prompt to overwrite files when saving in SQL editor <br>
-&nbsp; - Faster startup upon connection since domains are loaded
-on-demand <br>
-&nbsp; - Dropping tables and views now properly removes triggers from
-tree <br>
-&nbsp; - Fixed parsing of CREATE,ALTER,DROP trigger statements
-(tables/views get notified) <br>
-&nbsp; - Saving data to html file now uses default .html extension if
-user does not supply it <br>
-&nbsp; - Fixed and improved dependencies detection for database objects
-<br>
-&nbsp; - Fixed logging to file: newlines are added when headers are off
-<br>
-&nbsp; - Registration of Firebird embedded server is now possible from
-application <br>
-&nbsp; - Firebird 1.5 charsets made available, charset box is user
-editable to support future charsets <br>
-&nbsp; - Current tree item's database printed in status bar instead of
-tooltip <br>
-&nbsp; - Improved connecting speed by postponing loading of
-autogenerated domain info <br>
-<br>
-</small></font></small><u><font size="4"><br>
 <br>
 <br>
-</font></u></p>
-<p class="western" style="margin-bottom: 0cm;"><u><font size="4">Changes
-in FlameRobin 0.2.5 ALPHA</font></u><br>
 <br>
-<b>Highlights:</b><br>
 <br>
--
-Brand new Preferences dialog through which the user can configure
-FlameRobin. This removes the need to edit config.ini file manually.<br>
--
-Many improvements to the SQL Editor (autocomplete code, bug
-fixes...).<br>
-- You can drag &amp; drop columns/tables from tree to
-SQL editor to create queries. Foreign keys are automatically used to
-make joins.<br>
-- Many bug fixes.<br>
-- Project home moved to
-http://flamerobin.sourceforge.net.<br>
+<font size=+2>Changes in FlameRobin 0.3.0 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
 <br>
-<b>New features:</b><br>
+- Support for computed columns (shown in tree, removed from insert statements) <br>
+- Calltips for UDFs <br>
+- Properties page for UDFs <br>
+- Option "create new trigger" for tables and views <br>
+- Support for table indices - display, add, drop, recompute stats., edit descriptions <br>
+- Property page for view's triggers <br>
+- Select object's name in SQL editor and get its properties page<br>
+- Context menu for properties windows with options to print and save contents <br>
+- Implemented "open in new window" context menu option for properties page links <br>
+- Added main menu for main application window <br>
+- Added "diplay name" to servers and databases <br>
+- "Connect as" option for databases: ability to connect as different user/role without need to register new database<br><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
 <br>
--
-New Preferences dialog.<br>
-- Option to show/hide datatype and/or
-domain name in tree.<br>
-- Ability to keep working after fatal
-errors.<br>
-- Ability to prepare a statement (and show its PLAN)
-without actually executing it.<br>
-- New context menu for the SQL
-Editor and new "Execute selected" command.<br>
-- Ability to
-set a custom font for the SQL Editor.<br>
-- Ability to set a custom
-font for the data grid header and cells.<br>
-- Option to maximize the
-data grid when a certain number of rows has been fetched.<br>
-- SQL
-Editor: auto-completion can be disabled and invoked manually.<br>
--
-Calltips for stored procedures in the SQL Editor.<br>
-- Basic drag &amp;
-drop stuff (drag columns/tables from the tree to the SQL Editor).<br>
--
-SQL Editor: new Option to clear old messages when executing new
-statements.<br>
-- You can set up logging of DDL (and optionally DML)
-statements to user defined log file(s).<br>
-- Configurable
-double-click action for tables, views and SPs in main tree.<br>
--
-Option to prompt on exit.<br>
-- Option to alphabetically sort server
-and database entries in tree.<br>
-- Option to center dialogs on the
-screen.<br>
-- SQL Editor: new Search &amp; replace tool (with support
-for regular expressions).<br>
-- Ability to add a new column to a table
-directly from the tree.<br>
-- Option to disallow showing table/view
-columns and stored procedure parameters as tree nodes.<br>
-- Option to
-make it so that a double click on a tree item shows the properties
-dialog instead of expanding the subtree.<br>
-- Added context menu for
-table columns in tree.<br>
+- ALTER TABLE x ALTER COLUMN y updates the tree/properties page <br>
+- Improved handling when adding NOT NULL columns <br>
+- Fixed bug when SP and triggers contained ampersand (&amp;) in source (FR would hang) <br>
+- Size and position of minimized windows is not stored anymore <br>
+- Pressing function keys and clicking buttons in SQL editor now does the same <br>
+- Prompt to overwrite files when saving in SQL editor <br>
+- Faster startup upon connection since domains are loaded on-demand <br>
+- Dropping tables and views now properly removes triggers from tree <br>
+- Fixed parsing of CREATE,ALTER,DROP trigger statements (tables/views get notified) <br>
+- Saving data to html file now uses default .html extension if user does not supply it <br>
+- Fixed and improved dependencies detection for database objects<br>
+- Fixed logging to file: newlines are added when headers are off<br>
+- Registration of Firebird embedded server is now possible from application <br>
+- Firebird 1.5 charsets made available, charset box is user editable to support future charsets <br>
+- Current tree item's database printed in status bar instead of tooltip <br>
+- Improved connecting speed by postponing loading of autogenerated domain info <br>
 <br>
-<b>Enhancements and Bug fixes:</b><br>
 <br>
--
-Data grid: tabs used as separators instead of spaces when copying
-data to the clipboard.<br>
-- Added server name (beside user@host) to
-the SQL Editor status bar.<br>
-- "Insert into" command now
-puts VALUES clause on a new line.<br>
-- Data grid: fixed display issue
-for non-null blobs.<br>
-- Better automatic name suggestion for
-constraints (avoids duplicate names).<br>
-- Fixed bug that caused FR
-to consume 100% CPU while doing nothing.<br>
-- Databases couldn't be
-created if Page size was left to the default value.<br>
-- SQL Editor:
-FR did hang when "set term" was issued without
-terminator.<br>
-- SQL Editor: fixed bug when statement consisting
-solely of comments is executed.<br>
-- SQL Editor: comments before SET
-statements were not handled correctly.<br>
-- Data grid:
-platform-standard line breaks are now used when copying data to the
-clipboard.<br>
-- Undo/redo/cut/copy/paste now work properly in the SQL
-Editor.<br>
-- The Data grid is now much more responsive even with a
-lot of NULLs in it.<br>
-- SQl Editor: added NULL to autocomplete list
-(solves known NULLIF problem).<br>
-- Fixed constant 1-pixel frame
-growth for Windows 98.<br>
-- Made database connections actually
-respect the charset.<br>
-- Maintain separate size for database
-creation/registration info dialogs.<br>
-- ALTER PROCEDURE now
-correctly reloads procedure parameters.<br>
-- Changing column datatype
-for field editor now works.<br>
-- Tree nodes can now be activated with
-double-click/Enter key on Linux too.<br>
-- Enabled clicking inside
-selection in the SQL Editor.<br>
-- Copy/paste of descriptions now
-works on Linux too.<br>
-- Fixed crash when changing field type from
-one to another user defined domain.<br>
-- Fixed known issue: if the
-connection credentials (username and password) of a registered
-database were modified, the new credentials were not used until
-FlameRobin was restarted.<br>
 <br>
-<b>Known issues:</b><br>
 <br>
-Please
-see our bug tracker here:
-http://sourceforge.net/tracker/?group_id=124340&amp;atid=699234<br>
+<font size=+2>Changes in FlameRobin 0.2.5 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
 <br>
-</p>
-<p class="western"
- style="background: transparent none repeat scroll 0%; margin-bottom: 0cm; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; page-break-before: always;">
-<u><font size="4">Changes in FlameRobin 0.2.0 ALPHA</font></u></p>
-<p class="western"
- style="background: transparent none repeat scroll 0%; margin-bottom: 0cm; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial;">
+- New Preferences dialog.<br>
+- Option to show/hide datatype and/or domain name in tree.<br>
+- Ability to keep working after fatal errors.<br>
+- Ability to prepare a statement (and show its PLAN) without actually executing it.<br>
+- New context menu for the SQL Editor and new "Execute selected" command.<br>
+- Ability to set a custom font for the SQL Editor.<br>
+- Ability to set a custom font for the data grid header and cells.<br>
+- Option to maximize the data grid when a certain number of rows has been fetched.<br>
+- SQL Editor: auto-completion can be disabled and invoked manually.<br>
+- Calltips for stored procedures in the SQL Editor.<br>
+- Basic drag&amp;drop stuff (drag columns/tables from the tree to the SQL Editor).<br>
+- SQL Editor: new Option to clear old messages when executing new statements.<br>
+- You can set up logging of DDL (and optionally DML) statements to user defined log file(s).<br>
+- Configurable double-click action for tables, views and SPs in main tree.<br>
+- Option to prompt on exit.<br>
+- Option to alphabetically sort server and database entries in tree.<br>
+- Option to center dialogs on the screen.<br>
+- SQL Editor: new Search &amp; replace tool (with support for regular expressions).<br>
+- Ability to add a new column to a table directly from the tree.<br>
+- Option to disallow showing table/view columns and stored procedure parameters as tree nodes.<br>
+- Option to make it so that a double click on a tree item shows the properties dialog instead of expanding the subtree.<br>
+- Added context menu for table columns in tree.<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
 <br>
-</p>
-<p class="western" style="margin-bottom: 0cm;"><b>New
-features:</b></p>
-<p class="western" style="margin-bottom: 0cm;"><br>
-</p>
-<p class="western" style="margin-bottom: 0cm;">- Brand
-new Backup/Restore dialogs that work in background, let you suppress
-the output messages and store their settings among invocations. Plus,
-the output messages can be copied to the clipboard.<br>
-- Many
-dialogs have been redesigned and now feature a cleaner GUI.<br>
-- "Show
-value" and "Show all values" context menu commands
-implemented for generators.<br>
--
-Exceptions are now shown in the tree view and have Create/Drop menu
-commands and a property page.<br>
-- Property
-pages for triggers, table constraints, dependencies (all objects),
-generators were added. Plus, a special empty property page now
-appears for not yet supported object types, instead of an error
-message.<br>
-- Ability
-to view/add/drop table constraints.<br>
--
-Reconnect menu command for databases will physically disconnect and
-reconnect a database in one shot.<br>
-- "Create
-new" and "Drop" commands added for external functions.<br>
-- New
-MacOS X port.</p>
-<p class="western" style="margin-bottom: 0cm;"><br>
-</p>
-<p class="western"
- style="margin-bottom: 0cm; page-break-before: always;">
-<b>Enhancements and Bug fixes:</b></p>
-<p class="western" style="margin-bottom: 0cm;"><br>
-</p>
-<p class="western" style="margin-bottom: 0cm;">- When new
-objects are added to the database through a "CREATE" DDL
-statement, they are inserted in the right place in the tree view,
-instead of at the end of the lists.<br>
-- The tree
-view shows primary key table fields with a different icon.<br>
-- It is
-now possible to edit triggers.<br>
--
-User-defined domain names appear together with column datatypes in
-the property pages.<br>
-- Improved
-startup speed.<br>
--
-config.ini entry "FrameStorage=1" now works for all frames
-and dialogs (it only stores size - not position - for dialogs).<br>
-- New
-multi-format program icon that looks OK at all sizes (16x16, 32x32,
-48x48 and 128x128).<br>
-- In the
-SQL Window you can press Ctrl + "+" and Ctrl + "-"
-to increase and decrease the font size. The setting is remembered
-across sessions of FlameRobin.<br>
-- In the
-Server Registration dialog the controls are now read-only if any
-database is connected.<br>
-- New
-program icon.<br>
-- Assorted
-bug fixes.</p>
-<p class="western" style="margin-bottom: 0cm;"><br>
-</p>
-<p class="western"
- style="margin-bottom: 0cm; page-break-before: always;">
-<b>Known issues:</b></p>
-<p class="western" style="margin-bottom: 0cm;"><br>
-</p>
-<p class="western" style="margin-bottom: 0cm;">- If you
-modify the connection credentials (username and password) of a
-registered database, the new credentials will not be used until you
-restart FlameRobin.</p>
-<p class="western" style="margin-bottom: 0cm;"><br>
-</p>
-<p class="western"
- style="margin-bottom: 0cm; page-break-before: always;">
-<font size="4"><u>Changes in FlameRobin 0.1.5 ALPHA</u></font></p>
-<p class="western" style="margin-bottom: 0cm;"><br>
-</p>
-<p class="western" style="margin-bottom: 0cm;">The
-changes in this release, from a user perspective, are:</p>
-<p class="western" style="margin-bottom: 0cm;">-
-Properties window added for tables, views and stored procedures. You
-can now see and change the structure of tables and views, and you can
-see and change the source of stored procedures. Not all options are
-currently active; for tables you can:</p>
-<p class="western" style="margin-bottom: 0cm;"> - add,
-remove and edit field definitions<br>
--
-reorder fields<br>
-- see
-and edit table and fields descriptions</p>
-<p class="western" style="margin-bottom: 0cm;">For views,
-you can:</p>
-<p class="western" style="margin-bottom: 0cm;"> - see
-the view definition (source)<br>
-- see
-and edit view and fields descriptions</p>
-<p class="western" style="margin-bottom: 0cm;">For stored
-procedures, you can:</p>
-<p class="western" style="margin-bottom: 0cm;"> - see
-the input and output parameters<br>
-- see
-the definition (source)<br>
-- edit
-the source</p>
-<p class="western" style="margin-bottom: 0cm;">All
-changes are applied in the form of a DDL script that is run in the
-SQL window and that you can see, commit or rollback.</p>
-<p class="western" style="margin-bottom: 0cm;">- Faster
-loading of metadata upon connection.<br>
-- Many
-bugfixes and enhancements.<br>
-- New
-icons. Tell us how you like them!<br>
-- An
-automated installation program for Windows.</p>
-<p class="western" style="margin-bottom: 0cm;"><br>
-</p>
+- Data grid: tabs used as separators instead of spaces when copying data to the clipboard.<br>
+- Added server name (beside user@host) to the SQL Editor status bar.<br>
+- "Insert into" command now puts VALUES clause on a new line.<br>
+- Data grid: fixed display issue for non-null blobs.<br>
+- Better automatic name suggestion for constraints (avoids duplicate names).<br>
+- Fixed bug that caused FR to consume 100% CPU while doing nothing.<br>
+- Databases couldn't be created if Page size was left to the default value.<br>
+- SQL Editor: FR did hang when "set term" was issued without terminator.<br>
+- SQL Editor: fixed bug when statement consisting solely of comments is executed.<br>
+- SQL Editor: comments before SET statements were not handled correctly.<br>
+- Data grid: platform-standard line breaks are now used when copying data to the clipboard.<br>
+- Undo/redo/cut/copy/paste now work properly in the SQL Editor.<br>
+- The Data grid is now much more responsive even with a lot of NULLs in it.<br>
+- SQl Editor: added NULL to autocomplete list (solves known NULLIF problem).<br>
+- Fixed constant 1-pixel frame growth for Windows 98.<br>
+- Made database connections actually respect the charset.<br>
+- Maintain separate size for database creation/registration info dialogs.<br>
+- ALTER PROCEDURE now correctly reloads procedure parameters.<br>
+- Changing column datatype for field editor now works.<br>
+- Tree nodes can now be activated with double-click/Enter key on Linux too.<br>
+- Enabled clicking inside selection in the SQL Editor.<br>
+- Copy/paste of descriptions now works on Linux too.<br>
+- Fixed crash when changing field type from one to another user defined domain.<br>
+- Fixed known issue: if the connection credentials (username and password) of a registered database were modified, the new credentials were not used until FlameRobin was restarted.<br>
+<br>
+<br>
+<br>
+<br>
+<font size=+2>Changes in FlameRobin 0.2.0 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- Brand new Backup/Restore dialogs that work in background, let you suppress the output messages and store their settings among invocations. Plus, the output messages can be copied to the clipboard.<br>
+- Many dialogs have been redesigned and now feature a cleaner GUI.<br>
+- "Show value" and "Show all values" context menu commands implemented for generators.<br>
+- Exceptions are now shown in the tree view and have Create/Drop menu commands and a property page.<br>
+- Property pages for triggers, table constraints, dependencies (all objects), generators were added. Plus, a special empty property page now appears for not yet supported object types, instead of an error message.<br>
+- Ability to view/add/drop table constraints.<br>
+- Reconnect menu command for databases will physically disconnect and reconnect a database in one shot.<br>
+- "Create new" and "Drop" commands added for external functions.<br>
+- New MacOS X port.</p>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- When new objects are added to the database through a "CREATE" DDL statement, they are inserted in the right place in the tree view, instead of at the end of the lists.<br>
+- The tree view shows primary key table fields with a different icon.<br>
+- It is now possible to edit triggers.<br>
+- User-defined domain names appear together with column datatypes in the property pages.<br>
+- Improved startup speed.<br>
+- config.ini entry "FrameStorage=1" now works for all frames and dialogs (it only stores size - not position - for dialogs).<br>
+- New multi-format program icon that looks OK at all sizes (16x16, 32x32, 48x48 and 128x128).<br>
+- In the SQL Window you can press Ctrl + "+" and Ctrl + "-" to increase and decrease the font size. The setting is remembered across sessions of FlameRobin.<br>
+- In the Server Registration dialog the controls are now read-only if any database is connected.<br>
+- New program icon.<br>
+- Assorted bug fixes.</p>
+<br>
+<hr>
+<br>
 </body>
 </html>
