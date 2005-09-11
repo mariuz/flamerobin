@@ -43,6 +43,8 @@ class FRError: public std::exception
 {
 private:
     wxString messageM;
+    mutable char *storageM;
+
 public:
     FRError(const wxString& message);
     virtual const char* what() const throw();

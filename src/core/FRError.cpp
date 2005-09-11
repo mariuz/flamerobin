@@ -46,16 +46,28 @@ void handleException(std::exception& e)
 }
 //-----------------------------------------------------------------------------
 FRError::FRError(const wxString& message)
-    : messageM(message)
+    : messageM(message), storageM(0)
 {
 }
 //-----------------------------------------------------------------------------
 const char* FRError::what() const throw()
 {
-    return (wx2std(messageM).c_str());
+    if (storageM)
+    {
+        delete storageM;
+        storageM = 0;
+    }
+    std::string s = wx2std(messageM);
+    storageM = new char[s.length() + 1];
+    for (unsigned i=0; i < s.length(); ++i) // copy the string
+        storageM[i] = s[i];
+    storageM[s.length()] = '\0';
+    return storageM;
 }
 //-----------------------------------------------------------------------------
 FRError::~FRError() throw()
 {
+    if (storageM)
+        delete storageM;
 }
 //-----------------------------------------------------------------------------
