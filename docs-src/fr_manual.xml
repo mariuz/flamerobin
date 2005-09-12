@@ -6,8 +6,7 @@
 -->
 <article id="frrelnotes">
   <articleinfo>
-    <title><application>FlameRobin</application> 0.2.5 ALPHA Release
-    Notes</title>
+    <title><application>FlameRobin</application> 0.4.0 ALPHA Manual</title>
 
     <author>
       <firstname>Nando</firstname>
@@ -15,6 +14,14 @@
       <surname>Dessena</surname>
     </author>
   </articleinfo>
+
+  <section>
+    <title>About this manual</title>
+
+    <para>Currently this manual is incomplete, and it will probably stay
+    incomplete until FlameRobin 1.0. Nonetheless, we try to make sure that the
+    information included here is accurate also for ALPHA releases.</para>
+  </section>
 
   <section id="frrelnotes-alphatest">
     <title>About the ALPHA test program</title>
@@ -24,20 +31,20 @@
     requests back to us so we can make a better product. We remind you that
     this is Alpha quality software so you shouldn't expect it to work
     flawlessly (although we use it for daily work already). The main purpose
-    of this very early release is finding bugs and tune the user interface,
-    for which we need feedback from the prospect users.</para>
+    of this early release is finding bugs and tune the user interface, for
+    which we need feedback from the prospect users.</para>
   </section>
 
   <section id="frrelnotes-what-fr-is">
     <title>What FlameRobin is</title>
 
     <para>FlameRobin is a GUI administration and data manipulation tool for
-    Firebird servers and databases. It is designed to be small, simple and
-    cross-platform, yet offer all the basic features needed to administer
-    Firebird servers and create/maintain databases. FlameRobin is Open Source
-    software and binaries are currently available for Windows, several
-    GNU/Linux flavours and MacOS X. Ports to other platforms are possible,
-    subject to the availability of maintainers for those platforms.</para>
+    Firebird databases. It is designed to be small, simple and cross-platform,
+    yet offer all the basic features needed to administer Firebird servers and
+    create/maintain databases. FlameRobin is Open Source software and binaries
+    are currently available for Windows, several GNU/Linux and BSD flavours
+    and MacOS X. Ports to other platforms are possible, subject to the
+    availability of maintainers for those platforms.</para>
   </section>
 
   <section id="frrelnotes-what-fr-is-not">
@@ -51,9 +58,9 @@
     are several rich and mature GUI tools under Windows, some of them
     available for free or for a modest price, there isn't any for Linux.
     Another goal for the "lite" edition of FlameRobin is to be bundled with
-    the Firebird server to serve as a starting kit for new users - this is
-    subject to approval by the Firebird Project, which may have alternative
-    tools at hand.</para>
+    the Firebird server to serve as a starting kit for new users. This bundle
+    may be distributed by the Firebird Project itself or by some third
+    party.</para>
   </section>
 
   <section id="frrelnotes-who-we-are">
@@ -79,15 +86,15 @@
     <title>License</title>
 
     <para>FlameRobin is released under the Initial Developer's Public License.
-    You can find the complete license text in the file license.html, or <ulink
-    url="http://www.flamerobin.org/license.html">here</ulink>.</para>
+    You can find the complete license text in the file fr_license.html, or
+    <ulink url="http://www.flamerobin.org/license.html">here</ulink>.</para>
   </section>
 
   <section id="frrelnotes-changes">
     <title>What's new?</title>
 
-    <para>Please refer to changes.txt for a detailed history of all the
-    changes since the previous alpha release.</para>
+    <para>Please refer to fr_whatsnew.html for a detailed history of all the
+    changes since the previous ALPHA release.</para>
   </section>
 
   <section id="frrelnotes-installation">
@@ -99,40 +106,52 @@
     supported platforms.</para>
 
     <section>
-      <title>Windows (Win32)</title>
+      <title>General information</title>
 
-      <para>To install FlameRobin under Windows you need to have the Firebird
-      client (gds32.dll for Firebird 1.0, fbclient.dll for Firebird 1.5 and
-      up) installed and available, then just run the automatic installer of
-      FlameRobin which will copy all required files in a directory of your
-      choice and optionally create desktop and start menu shortcuts. If you
-      have installed a previous alpha version of FlameRobin, it is recommended
-      that you remove it before installing this version. You might be able to
-      keep your servers.xml and config.ini files, but at this early stage of
-      development we cannot guarantee that.</para>
+      <para>If you have installed a previous ALPHA version of FlameRobin, it
+      is recommended that you remove it before installing this version.</para>
+
+      <para>You won't be able to keep a config.ini file from an earlier
+      version, because the name and file format have changed.</para>
+
+      <para>You might be able to keep your servers.xml file, provided that you
+      rename it to fr_databases.conf and move it to your data folder.
+      FlameRobin will tell you the exact path of this file (which changes with
+      the platform) upon first startup, when it cannot find the file.</para>
 
       <para>Here are the files used by FlameRobin to store configuration
       information:</para>
 
       <itemizedlist>
         <listitem>
-          <para>servers.xml is the list of Firebird servers and databases you
-          work with; FlameRobin will create it (and automatically add the
-          "localhost" server) when you run it for the first time; then you can
-          register new servers and databases.</para>
+          <para>fr_databases.conf is the list of Firebird servers and
+          databases you work with; FlameRobin will create it (and
+          automatically add the "localhost" server) when you run it for the
+          first time; then you can register new servers and databases.</para>
         </listitem>
 
         <listitem>
-          <para>config.ini stores FlameRobin's configuration information, like
-          the position and size of the main program window. You don't need to
-          edit it by hand.</para>
+          <para>fr_settings.conf stores FlameRobin's configuration
+          information, like the position and size of the main program window.
+          You don't need to edit it by hand.</para>
         </listitem>
       </itemizedlist>
 
       <note>
-        <para>The name, structure and location of these files is going to
-        change in a future release, certainly before release 1.0.</para>
+        <para>The location of these files changes with the platform, and it's
+        usually a directory owned by the current user. FlameRobin needs write
+        access to that folder.</para>
       </note>
+    </section>
+
+    <section>
+      <title>Windows (Win32)</title>
+
+      <para>To install FlameRobin under Windows you need to have the Firebird
+      client (gds32.dll for Firebird 1.0, fbclient.dll for Firebird 1.5 and
+      up) installed and available, then just run the automatic installer of
+      FlameRobin which will copy all required files in a directory of your
+      choice and optionally create desktop and start menu shortcuts.</para>
 
       <para>If you need to uninstall FlameRobin you can do so from the start
       menu icon (unless you told the installation program not to create one)
@@ -143,7 +162,8 @@
       <title>Linux</title>
 
       <para>For the time being, unpacking the supplied archive into a
-      directory of your choice will do.</para>
+      directory of your choice will do. We are working on installation
+      packages for the various Linux distributions.</para>
     </section>
 
     <section>
@@ -168,9 +188,10 @@
       <title>Adding a server</title>
 
       <para>You can add a server by righ-clicking in "Firebird Servers" and
-      choosing "Register server...". You will have to specify the host name
-      and the TCP port number (default 3050) on which it listens. Once you
-      have added a server, you can register databases under its node.</para>
+      choosing "Register server...". You will have to specify a display name,
+      the host name and optionally the TCP port number (default 3050) on which
+      the Firebird server listens. Once you have added a server, you can
+      register databases under its node.</para>
     </section>
 
     <section>
@@ -180,12 +201,13 @@
       register it. Registration will make FlameRobin remember the database
       connection properties so you don't have to re-enter them every time.
       Locate the correct server in the tree, right click it and choose
-      "Register existing database...". You will have to enter the database
-      path (or alias name), the user name and password (note: the password is
-      stored as plain text in servers.xml. For security reasons, we recommend
-      you to NOT specify it in this dialog: FlameRobin will then prompt you
-      for the password each time you connect to the database). You can also
-      optionally specify a connection charset and role.</para>
+      "Register existing database...". You will have to enter a display name,
+      the database path (or alias name), the user name and password (note: the
+      password is stored as plain text in fr_databases.conf. For security
+      reasons, we recommend you to NOT specify it in this dialog: FlameRobin
+      will then prompt you for the password each time you connect to the
+      database). You can also optionally specify a connection charset and
+      role.</para>
     </section>
 
     <section>
@@ -223,20 +245,20 @@
 
       <para>You can view and/or change the properties of every object you see
       in the tree by choosing the "Properties..." option. Please note that
-      currently not all object types are supported. Trying to show the
-      property page for an object of an unsupported type will result in a
-      blank page. The property page is a HTML window with a summary of the
-      object's properties and links which open other pages or specific
-      editors. Some of the options are not yet available, but you can f. ex.
-      edit almost all aspects of the most common objects (tables, views,
-      stored procedures, and so on). Please have a look at changes.txt to see
-      what's new.<note>
+      currently not all object types are supported, but you'll find almost all
+      of them. Trying to show the property page for an object of an
+      unsupported type will result in an error message. The property page is a
+      HTML window with a summary of the object's properties and links which
+      open other pages or specific editors. Some of the options are not yet
+      available, but you can f. ex. edit almost all aspects of the most common
+      objects (tables, views, stored procedures, and so on). Please have a
+      look at fr_whatsnew.html to see, well, what's new.<note>
           <para>Although we try to test the features as much as we can, this
           is ALPHA software and you should only use it to work on backup
           copies of your databases, or perform backup copies before using
           FlameRobin on them. Having said that, we have to add that many of us
-          use FlameRobin in their everyday Firebird development without a
-          problem.</para>
+          have been using FlameRobin in their everyday Firebird development
+          for months without a problem.</para>
         </note></para>
     </section>
 
@@ -258,15 +280,15 @@
       <para>Of course you can use the SQL editor window to execute arbitrary
       SQL statements. You can open a SQL editor window by right clicking on a
       database node and choosing "Run a query". The SQL editor tool offers
-      script execution capabilities (including SET TERM support), load/save
-      buttons, auto-completion and call-tip features, commit/rollback, some
-      execution statistics (including but not limited to the query PLAN), and
-      a data export tool: to activate it, right click on the data grid. The
-      data export tool is currently able to copy the data to the clipboard,
-      generate SQL INSERT statements or export the data to a HTML file. All
-      options work on the whole grid contents or just the selected parts. You
-      can also multiple-select several different grid "islands" and have the
-      tool export them.</para>
+      script execution capabilities (including SET AUTODDL and SET TERM
+      support), load/save buttons, auto-completion and call-tip features,
+      commit/rollback, some execution statistics (including but not limited to
+      the query PLAN), and a data export tool: to activate it, right click on
+      the data grid. The data export tool is currently able to copy the data
+      to the clipboard, generate SQL INSERT statements or export the data to a
+      HTML file. All options work on the whole grid contents or just the
+      selected parts. You can also multiple-select several different grid
+      "islands" and have the tool export them.</para>
     </section>
 
     <section>
@@ -275,12 +297,10 @@
       <para>You can perform a database backup by right clicking on a database
       and choosing "Backup database...". Choose "Restore database..." to
       restore a backup file over the current database (you will have to
-      disconnect first). Note: it is usually considered bad practice to
-      restore a backup file over an existing database. Future versions of
-      FlameRobin will probably provide a way to restore under a different file
-      name. For the time being, you can do that by registering a new (non
-      existing) database in FlameRobin and restore over it. The Backup and
-      Restore features work in background, so you are allowed to continue
+      disconnect first), or "Restore backup into new database..." to create a
+      new database from a backup file. Note: it is usually considered bad
+      practice to restore a backup file over an existing database. The Backup
+      and Restore tools work in background, so you are allowed to continue
       working with FlameRobin while they proceed.</para>
     </section>
   </section>
@@ -295,6 +315,12 @@
     organized in categories; here is a description of each category. Please
     read the tooltip that appears when you move the mouse cursor over each
     option to know more about it.</para>
+
+    <note>
+      <para>Since new options are added to FlameRobin daily, this section of
+      the documentation will likely be out-of-date. Please refer to the
+      tooltips for fresh descriptions of all the available options.</para>
+    </note>
 
     <section>
       <title>General</title>
