@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Michael Hieke
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -44,6 +44,10 @@ DatabaseConfig::DatabaseConfig(Database *d)
     :Config()
 {
     databaseM = d;
+    // we need to copy these settings, since they may have been modified
+    // by env variables or command line params
+    setHomePath(config().getHomePath());
+    setUserHomePath(config().getUserHomePath());
 }
 //-----------------------------------------------------------------------------
 std::string DatabaseConfig::addPathToKey(const std::string key) const
