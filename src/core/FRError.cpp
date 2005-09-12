@@ -46,33 +46,16 @@ void handleException(std::exception& e)
 }
 //-----------------------------------------------------------------------------
 FRError::FRError(const wxString& message)
-    : messageM(0)
 {
-    std::string s = wx2std(message);
-    messageM = new char[s.length() + 1];
-    for (unsigned i=0; i < s.length(); ++i) // copy the string
-        messageM[i] = s[i];
-    messageM[s.length()] = '\0';
-}
-//-----------------------------------------------------------------------------
-// needed so that each object has it's own copy of message
-FRError::FRError(const FRError& source)
-{
-    std::string s(source.what());   // source.what() is always non-zero!
-    messageM = new char[s.length() + 1];
-    for (unsigned i=0; i < s.length(); ++i) // copy the string
-        messageM[i] = s[i];
-    messageM[s.length()] = '\0';
+    messageM = wx2std(message);
 }
 //-----------------------------------------------------------------------------
 const char* FRError::what() const throw()
 {
-    return messageM;
+    return messageM.c_str();
 }
 //-----------------------------------------------------------------------------
 FRError::~FRError() throw()
 {
-    if (messageM)
-        delete messageM;
 }
 //-----------------------------------------------------------------------------

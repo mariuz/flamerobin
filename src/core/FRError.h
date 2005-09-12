@@ -31,6 +31,7 @@
 
 #include <wx/wx.h>
 
+#include <string>
 #include <exception>
 //-----------------------------------------------------------------------------
 #define BEGIN_EVENT_HANDLER try {
@@ -42,11 +43,10 @@ void handleException(std::exception& e);
 class FRError: public std::exception
 {
 private:
-    char *messageM;
+    std::string messageM;
 
 public:
     FRError(const wxString& message);
-    FRError(const FRError& source);
     virtual const char* what() const throw();
 
     ~FRError() throw();
