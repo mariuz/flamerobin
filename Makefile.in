@@ -179,12 +179,12 @@ all: $(LIBPREFIX)ibpp$(LIBEXT) flamerobin$(EXEEXT) $(__flamerobin_bundle___depna
 install: all
 	$(INSTALL_DIR) $(DESTDIR)$(bindir)
 	(cd ./ ; $(INSTALL_PROGRAM)  flamerobin$(EXEEXT) $(DESTDIR)$(bindir))
-	$(INSTALL_DIR) $(DESTDIR)$(datadir)/confdefs
-	(cd $(srcdir)/confdefs/ ; $(INSTALL_DATA)  fr_settings.confdef db_settings.confdef $(DESTDIR)$(datadir)/confdefs)
-	$(INSTALL_DIR) $(DESTDIR)$(datadir)/docs
-	(cd $(srcdir)/docs/ ; $(INSTALL_DATA)  fr_license.html fr_manual.html fr_whatsnew.html html.css $(DESTDIR)$(datadir)/docs)
-	$(INSTALL_DIR) $(DESTDIR)$(datadir)/html-templates
-	(cd $(srcdir)/html-templates/ ; $(INSTALL_DATA)  DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TRIGGER.html VIEW.html VIEWtriggers.html dependencies.html compute.png drop.png ok.png redx.png view.png $(DESTDIR)$(datadir)/html-templates)
+	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/confdefs
+	(cd $(srcdir)/confdefs/ ; $(INSTALL_DATA)  fr_settings.confdef db_settings.confdef $(DESTDIR)$(datadir)/flamerobin/confdefs)
+	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/docs
+	(cd $(srcdir)/docs/ ; $(INSTALL_DATA)  fr_license.html fr_manual.html fr_whatsnew.html html.css $(DESTDIR)$(datadir)/flamerobin/docs)
+	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/html-templates
+	(cd $(srcdir)/html-templates/ ; $(INSTALL_DATA)  DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TRIGGER.html VIEW.html VIEWtriggers.html dependencies.html compute.png drop.png ok.png redx.png view.png $(DESTDIR)$(datadir)/flamerobin/html-templates)
 
 uninstall: 
 
