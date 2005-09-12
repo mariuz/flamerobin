@@ -72,9 +72,6 @@ public:
 
     void OnBeginDrag(wxTreeEvent &event);
     void OnContextMenu(wxContextMenuEvent& event);
-    #if wxCHECK_VERSION(2, 5, 4)
-    void myTreeCtrl::OnItemMenu(wxTreeEvent& event);
-    #endif
 
     // Returns observed metadata item based on specified tree item
     MetadataItem *getMetadataItem(wxTreeItemId item);

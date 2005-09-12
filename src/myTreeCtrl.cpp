@@ -51,26 +51,9 @@
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(myTreeCtrl, wxTreeCtrl)
-#if wxCHECK_VERSION(2, 5, 4) && !wxCHECK_VERSION(2, 5, 5)
-    // this is needed so context menu can be invoked with keyboard with wx2.5.4
-    EVT_TREE_ITEM_MENU(myTreeCtrl::ID_tree_ctrl, myTreeCtrl::OnItemMenu)
-#endif
     EVT_CONTEXT_MENU(myTreeCtrl::OnContextMenu)
     EVT_TREE_BEGIN_DRAG(myTreeCtrl::ID_tree_ctrl, myTreeCtrl::OnBeginDrag)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
-#if wxCHECK_VERSION(2, 5, 4) && !wxCHECK_VERSION(2, 5, 5)
-void myTreeCtrl::OnItemMenu(wxTreeEvent& event)
-{
-    wxTreeItemId id = event.GetItem();
-    wxRect r;
-    GetBoundingRect(id, r);
-    wxPoint pos(r.x + r.width/2, r.y + r.height/2);
-    wxContextMenuEvent e;
-    e.SetPosition(pos);
-    OnContextMenu(e);
-}
-#endif
 //-----------------------------------------------------------------------------
 void myTreeCtrl::OnBeginDrag(wxTreeEvent& event)
 {
