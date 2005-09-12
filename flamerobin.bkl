@@ -593,17 +593,17 @@
         <data-files>
             <srcdir>$(CONFIGOPTIONSDIR)</srcdir>
             <files>$(CONFIGOPTIONSFILES)</files>
-            <install-to>$(DATADIR)/confdefs</install-to>
+            <install-to>$(DATADIR)/flamerobin/confdefs</install-to>
         </data-files>
         <data-files>
             <srcdir>$(HTMLDOCSDIR)</srcdir>
             <files>$(HTMLDOCFILES)</files>
-            <install-to>$(DATADIR)/docs</install-to>
+            <install-to>$(DATADIR)/flamerobin/docs</install-to>
         </data-files>
         <data-files>
             <srcdir>$(HTMLTEMPLATEDIR)</srcdir>
             <files>$(HTMLTEMPLATEFILES)</files>
-            <install-to>$(DATADIR)/html-templates</install-to>
+            <install-to>$(DATADIR)/flamerobin/html-templates</install-to>
         </data-files>
     </if>
 
