@@ -62,7 +62,7 @@ Config::Config()
     : homePathM(""), userHomePathM(""), configM(0)
 {
 #if defined(__UNIX__) && !defined(__WXMAC__) && !defined(__DARWIN__)
-    standardPathsM.SetInstallPrefix(wxT("/opt/flamerobin"));
+    standardPathsM.SetInstallPrefix(wxT("/usr/local"));
 #endif
 }
 //-----------------------------------------------------------------------------
