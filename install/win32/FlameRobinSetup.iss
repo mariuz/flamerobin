@@ -60,7 +60,6 @@ Source: ..\..\vcud\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVers
 Source: ..\..\vc\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersion: 4.0.950,0
 Source: ..\..\vcu\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersion: 0,4.0.1381
 #endif
-Source: ..\..\res\flamerobin.exe.Manifest; DestDir: {app}; Flags: ignoreversion; MinVersion: 0,5.01.2600
 Source: ..\..\docs\*.*; DestDir: {app}\docs; Flags: ignoreversion
 Source: ..\..\html-templates\*.*; DestDir: {app}\html-templates; Flags: ignoreversion
 Source: ..\..\confdefs\*.*; DestDir: {app}\confdefs; Flags: ignoreversion
