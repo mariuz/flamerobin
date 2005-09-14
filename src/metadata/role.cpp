@@ -30,20 +30,18 @@
     #pragma hdrstop
 #endif
 
-#include <string>
-
 #include "core/Visitor.h"
 #include "MetadataItemVisitor.h"
 #include "role.h"
 //-----------------------------------------------------------------------------
-std::string Role::getCreateSqlTemplate() const
+wxString Role::getCreateSqlTemplate() const
 {
-	return	"CREATE ROLE role_name;\n";
+	return	wxT("CREATE ROLE role_name;\n");
 }
 //-----------------------------------------------------------------------------
-const std::string Role::getTypeName() const
+const wxString Role::getTypeName() const
 {
-	return "ROLE";
+	return wxT("ROLE");
 }
 //-----------------------------------------------------------------------------
 void Role::acceptVisitor(MetadataItemVisitor *visitor)

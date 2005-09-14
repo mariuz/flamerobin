@@ -36,10 +36,12 @@
 #include "core/Visitor.h"
 #include "database.h"
 #include "dberror.h"
+#include "frutils.h"
 #include "indices.h"
 #include "MetadataItemVisitor.h"
 #include "relation.h"
 #include "table.h"
+#include "ugly.h"
 //-----------------------------------------------------------------------------
 Table::Table()
     : Relation()
@@ -71,27 +73,27 @@ bool Table::loadColumns()           // update the keys info too
     return Relation::loadColumns();
 }
 //-----------------------------------------------------------------------------
-std::string Table::getInsertStatement()
+wxString Table::getInsertStatement()
 {
     checkAndLoadColumns();
-    std::string sql = "INSERT INTO " + getName() + " (";
-    std::string collist, valist;
+    wxString sql = wxT("INSERT INTO ") + getName() + wxT(" (");
+    wxString collist, valist;
     for (MetadataCollection<Column>::const_iterator i = columnsM.begin(); i != columnsM.end(); ++i)
     {
         if ((*i).isComputed())
             continue;
         if (!collist.empty())
         {
-            valist += ", \n";
-            collist += ", ";
+            valist += wxT(", \n");
+            collist += wxT(", ");
         }
         collist += (*i).getName();
 
         if (!(*i).isNullable())
-            valist += "*";
+            valist += wxT("*");
         valist += (*i).getName();
     }
-    sql += collist + ")\n VALUES (\n" + valist + "\n)";
+    sql += collist + wxT(")\n VALUES (\n") + valist + wxT("\n)");
     return sql;
 }
 //-----------------------------------------------------------------------------
@@ -105,7 +107,7 @@ bool Table::loadCheckConstraints()
     Database *d = getDatabase();
     if (!d)
     {
-        lastError().setMessage("database not set");
+        lastError().setMessage(wxT("database not set"));
         return false;
     }
 
@@ -123,36 +125,19 @@ bool Table::loadCheckConstraints()
             " where r.rdb$relation_name=?"
         );
 
-        st1->Set(1, getName());
+        st1->Set(1, wx2std(getName()));
         st1->Execute();
-        IBPP::Blob b = IBPP::BlobFactory(st1->Database(), st1->Transaction());
         while (st1->Fetch())
         {
-            std::string cname, source;
+            wxString source;
+            std::string cname;
             st1->Get(1, cname);
-            source = "";
-            if (!st1->IsNull(2))
-            {
-                st1->Get(2, b);
-                b->Open();
-                std::string desc;
-                char buffer[8192];      // 8K block
-                while (true)
-                {
-                    int size = b->Read(buffer, 8192);
-                    if (size <= 0)
-                        break;
-                    buffer[size] = 0;
-                    source += buffer;
-                }
-                b->Close();
-            }
-
+            readBlob(st1, 2, source);
             cname.erase(cname.find_last_not_of(" ") + 1);
-            source.erase(source.find_last_not_of(" ") + 1);
+            source.erase(source.find_last_not_of(wxT(" ")) + 1);
             CheckConstraint c;
             c.setParent(this);
-            c.setName(cname);
+            c.setName(std2wx(cname));
             c.sourceM = source;
             checkConstraintsM.push_back(c);
         }
@@ -162,11 +147,11 @@ bool Table::loadCheckConstraints()
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage("System error.");
+        lastError().setMessage(_("System error."));
     }
     return false;
 }
@@ -181,7 +166,7 @@ bool Table::loadPrimaryKey()
     Database *d = getDatabase();
     if (!d)
     {
-        lastError().setMessage("database not set");
+        lastError().setMessage(wxT("database not set"));
         return false;
     }
 
@@ -198,7 +183,7 @@ bool Table::loadPrimaryKey()
             "(r.rdb$constraint_type='PRIMARY KEY') order by 1, 2"
         );
 
-        st1->Set(1, getName());
+        st1->Set(1, wx2std(getName()));
         st1->Execute();
         while (st1->Fetch())
         {
@@ -208,8 +193,8 @@ bool Table::loadPrimaryKey()
 
             name.erase(name.find_last_not_of(" ") + 1);
             cname.erase(cname.find_last_not_of(" ") + 1);
-            primaryKeyM.setName(cname);
-            primaryKeyM.columnsM.push_back(name);
+            primaryKeyM.setName(std2wx(cname));
+            primaryKeyM.columnsM.push_back(std2wx(name));
         }
         tr1->Commit();
         primaryKeyM.setParent(this);
@@ -218,11 +203,11 @@ bool Table::loadPrimaryKey()
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage("System error.");
+        lastError().setMessage(_("System error."));
     }
     return false;
 }
@@ -237,7 +222,7 @@ bool Table::loadUniqueConstraints()
     Database *d = getDatabase();
     if (!d)
     {
-        lastError().setMessage("database not set");
+        lastError().setMessage(wxT("database not set"));
         return false;
     }
 
@@ -254,7 +239,7 @@ bool Table::loadUniqueConstraints()
             "(r.rdb$constraint_type='UNIQUE') order by 1, 2"
         );
 
-        st1->Set(1, getName());
+        st1->Set(1, wx2std(getName()));
         st1->Execute();
         ColumnConstraint *cc = 0;
         while (st1->Fetch())
@@ -265,15 +250,15 @@ bool Table::loadUniqueConstraints()
             name.erase(name.find_last_not_of(" ") + 1);
             cname.erase(cname.find_last_not_of(" ") + 1);
 
-            if (cc && cc->getName() == cname)
-                cc->columnsM.push_back(name);
+            if (cc && cc->getName() == std2wx(cname))
+                cc->columnsM.push_back(std2wx(name));
             else
             {
                 ColumnConstraint c;
                 uniqueConstraintsM.push_back(c);
                 cc = &uniqueConstraintsM.back();
-                cc->setName(cname);
-                cc->columnsM.push_back(name);
+                cc->setName(std2wx(cname));
+                cc->columnsM.push_back(std2wx(name));
                 cc->setParent(this);
             }
         }
@@ -283,11 +268,11 @@ bool Table::loadUniqueConstraints()
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage("System error.");
+        lastError().setMessage(_("System error."));
     }
     return false;
 }
@@ -337,7 +322,7 @@ bool Table::loadForeignKeys()
     Database *d = getDatabase();
     if (!d)
     {
-        lastError().setMessage("database not set");
+        lastError().setMessage(wxT("database not set"));
         return false;
     }
 
@@ -364,7 +349,7 @@ bool Table::loadForeignKeys()
             " order by i.rdb$field_position "
         );
 
-        st1->Set(1, getName());
+        st1->Set(1, wx2std(getName()));
         st1->Execute();
         ForeignKey *fkp = 0;
         while (st1->Fetch())
@@ -380,17 +365,17 @@ bool Table::loadForeignKeys()
             cname.erase(cname.find_last_not_of(" ") + 1);
             ref_constraint.erase(ref_constraint.find_last_not_of(" ") + 1);
 
-            if (fkp && fkp->getName() == cname) // add column
-                fkp->columnsM.push_back(name);
+            if (fkp && fkp->getName() == std2wx(cname)) // add column
+                fkp->columnsM.push_back(std2wx(name));
             else
             {
                 ForeignKey fk;
                 foreignKeysM.push_back(fk);
                 fkp = &foreignKeysM.back();
-                fkp->setName(cname);
+                fkp->setName(std2wx(cname));
                 fkp->setParent(this);
-                fkp->updateActionM = update_rule;
-                fkp->deleteActionM = delete_rule;
+                fkp->updateActionM = std2wx(update_rule);
+                fkp->deleteActionM = std2wx(delete_rule);
 
                 st2->Set(1, ref_constraint);
                 st2->Execute();
@@ -400,11 +385,11 @@ bool Table::loadForeignKeys()
                     st2->Get(1, rtable);
                     st2->Get(2, rcolumn);
                     rcolumn.erase(rcolumn.find_last_not_of(" ") + 1);
-                    fkp->referencedColumnsM.push_back(rcolumn);
+                    fkp->referencedColumnsM.push_back(std2wx(rcolumn));
                 }
                 rtable.erase(rtable.find_last_not_of(" ") + 1);
-                fkp->referencedTableM = rtable;
-                fkp->columnsM.push_back(name);
+                fkp->referencedTableM = std2wx(rtable);
+                fkp->columnsM.push_back(std2wx(name));
             }
         }
         tr1->Commit();
@@ -413,11 +398,11 @@ bool Table::loadForeignKeys()
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage("System error.");
+        lastError().setMessage(_("System error."));
     }
     return false;
 }
@@ -432,7 +417,7 @@ bool Table::loadIndices()
     Database *d = getDatabase();
     if (!d)
     {
-        lastError().setMessage("database not set");
+        lastError().setMessage(wxT("database not set"));
         return false;
     }
 
@@ -451,9 +436,9 @@ bool Table::loadIndices()
             " order by i.rdb$index_id, s.rdb$field_position "
         );
 
-        st1->Set(1, getName());
+        st1->Set(1, wx2std(getName()));
         st1->Execute();
-        Index *i = 0;
+        Index* i = 0;
         while (st1->Fetch())
         {
             std::string name, fname;
@@ -477,8 +462,8 @@ bool Table::loadIndices()
             name.erase(name.find_last_not_of(" ") + 1);
             fname.erase(fname.find_last_not_of(" ") + 1);
 
-            if (i && i->getName() == name)
-                i->getSegments()->push_back(fname);
+            if (i && i->getName() == std2wx(name))
+                i->getSegments()->push_back(std2wx(fname));
             else
             {
                 Index x(
@@ -489,8 +474,8 @@ bool Table::loadIndices()
                 );
                 indicesM.push_back(x);
                 i = &indicesM.back();
-                i->setName(name);
-                i->getSegments()->push_back(fname);
+                i->setName(std2wx(name));
+                i->getSegments()->push_back(std2wx(fname));
                 i->setParent(this);
             }
         }
@@ -500,56 +485,56 @@ bool Table::loadIndices()
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage("System error.");
+        lastError().setMessage(_("System error."));
     }
     return false;
 }
 //-----------------------------------------------------------------------------
-std::string Table::getCreateSqlTemplate() const
+wxString Table::getCreateSqlTemplate() const
 {
-    return  "CREATE TABLE table_name\n"
-            "(\n"
-            "    column_name {< datatype> | COMPUTED BY (< expr>) | domain}\n"
-            "        [DEFAULT { literal | NULL | USER}] [NOT NULL]\n"
-            "    ...\n"
-            "    CONSTRAINT constraint_name\n"
-            "        PRIMARY KEY (column_list),\n"
-            "        UNIQUE      (column_list),\n"
-            "        FOREIGN KEY (column_list) REFERENCES other_table (column_list),\n"
-            "        CHECK       (condition),\n"
-            "    ...\n"
-            ");\n";
+    return  wxT("CREATE TABLE table_name\n")
+            wxT("(\n")
+            wxT("    column_name {< datatype> | COMPUTED BY (< expr>) | domain}\n")
+            wxT("        [DEFAULT { literal | NULL | USER}] [NOT NULL]\n")
+            wxT("    ...\n")
+            wxT("    CONSTRAINT constraint_name\n")
+            wxT("        PRIMARY KEY (column_list),\n")
+            wxT("        UNIQUE      (column_list),\n")
+            wxT("        FOREIGN KEY (column_list) REFERENCES other_table (column_list),\n")
+            wxT("        CHECK       (condition),\n")
+            wxT("    ...\n")
+            wxT(");\n");
 }
 //-----------------------------------------------------------------------------
-const std::string Table::getTypeName() const
+const wxString Table::getTypeName() const
 {
-    return "TABLE";
+    return wxT("TABLE");
 }
 //-----------------------------------------------------------------------------
 // find all tables from "tables" which have foreign keys with "table"
 // and return them in "list"
-bool Table::tablesRelate(std::vector<std::string>& tables, Table *table, std::vector<Join>& list)
+bool Table::tablesRelate(std::vector<wxString>& tables, Table* table, std::vector<Join>& list)
 {
     // see if "table" references some of the "tables"
     std::vector<ForeignKey> *fks = table->getForeignKeys();
     for (std::vector<ForeignKey>::iterator it = fks->begin(); it != fks->end(); ++it)
     {
         ForeignKey& fk = (*it);
-        for (std::vector<std::string>::iterator i2 = tables.begin(); i2 != tables.end(); ++i2)
+        for (std::vector<wxString>::iterator i2 = tables.begin(); i2 != tables.end(); ++i2)
         {
             if ((*i2) == fk.referencedTableM)
             {
-                std::string join;
-                for (unsigned int i=0; i < fk.referencedColumnsM.size(); ++i)
+                wxString join;
+                for (unsigned int i = 0; i < fk.referencedColumnsM.size(); ++i)
                 {
                     if (i > 0)
-                        join += " AND ";
-                    join += fk.referencedTableM + "." + fk.referencedColumnsM[i] + " = " +
-                        table->getName() + "." + fk.columnsM[i];
+                        join += wxT(" AND ");
+                    join += fk.referencedTableM + wxT(".") + fk.referencedColumnsM[i] +
+                        wxT(" = ") + table->getName() + wxT(".") + fk.columnsM[i];
                 }
                 list.push_back(Join(fk.referencedTableM, join));
 
@@ -564,29 +549,29 @@ bool Table::tablesRelate(std::vector<std::string>& tables, Table *table, std::ve
     {
         if ((*it).getType() == ntTable)
         {
-            for (std::vector<std::string>::iterator i2 = tables.begin(); i2 != tables.end(); ++i2)
+            for (std::vector<wxString>::iterator i2 = tables.begin(); i2 != tables.end(); ++i2)
             {
                 if ((*i2) == (*it).getName())
                 {
                     // find foreign keys for that table
-                    Database *d = table->getDatabase();
-                    Table *other_table = dynamic_cast<Table *>(d->findByNameAndType(ntTable, (*i2)));
+                    Database* d = table->getDatabase();
+                    Table* other_table = dynamic_cast<Table*>(d->findByNameAndType(ntTable, (*i2)));
                     if (!other_table)
                         break;
 
-                    std::vector<ForeignKey> *fks = other_table->getForeignKeys();
+                    std::vector<ForeignKey>* fks = other_table->getForeignKeys();
                     for (std::vector<ForeignKey>::iterator it = fks->begin(); it != fks->end(); ++it)
                     {
                         ForeignKey& fk = (*it);
                         if (table->getName() == fk.referencedTableM)
                         {
-                            std::string join;
-                            for (unsigned int i=0; i < fk.referencedColumnsM.size(); ++i)
+                            wxString join;
+                            for (unsigned int i = 0; i < fk.referencedColumnsM.size(); ++i)
                             {
                                 if (i > 0)
-                                    join += " AND ";
-                                join += fk.referencedTableM + "." + fk.referencedColumnsM[i] + " = " +
-                                    (*i2) + "." + fk.columnsM[i];
+                                    join += wxT(" AND ");
+                                join += fk.referencedTableM + wxT(".") + fk.referencedColumnsM[i] +
+                                    wxT(" = ") + (*i2) + wxT(".") + fk.columnsM[i];
                             }
                             list.push_back(Join(fk.referencedTableM, join));
                             break;  // no need for more

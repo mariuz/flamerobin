@@ -50,24 +50,24 @@ protected:
     // it directly except when wanting to "reload" the saved settings.
     void readConfigSettings();
     // Use this to customize which settings are read from config().
-    virtual void doReadConfigSettings(const std::string& prefix);
+    virtual void doReadConfigSettings(const wxString& prefix);
     // Writes any settings to config. The predefined implementation saves
     // the size of the dialog based on getStorageName(). No need to call
     // it directly except when wanting to save settings without destroying the
     // dialog.
     void writeConfigSettings() const;
     // Use this to customize which settings are written to config().
-    virtual void doWriteConfigSettings(const std::string& prefix) const;
+    virtual void doWriteConfigSettings(const wxString& prefix) const;
     // Returns the name of the dialog for storage purpose.
     // A dialog that wants its settings stored and retrieved must override this
-    // function and return a nonempty string. The predefined implementation
+    // function and return a nonempty wxString. The predefined implementation
     // returns getName().
-    virtual const std::string getStorageName() const;
+    virtual const wxString getStorageName() const;
     // Returns the name of the dialog, which can be the same for all instances
     // of the class or different for each instance. Currently it isn't really
     // used except as a base for getStorageName().
     // The predefined implementation returns "".
-    virtual const std::string getName() const;
+    virtual const wxString getName() const;
     // Returns the default position and size for the dialog; it's called by
     // readConfigSettings() to get first-time default position and size.
     // The predefined implementation returns -1 for all 4 items.

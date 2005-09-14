@@ -109,8 +109,8 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
 const wxString DatabaseRegistrationDialog::buildName(const wxString& dbPath) const
 {
     Database helper;
-    helper.setPath(wx2std(dbPath));
-    return std2wx(helper.extractNameFromConnectionString());
+    helper.setPath(dbPath);
+    return helper.extractNameFromConnectionString();
 }
 //-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::do_layout()
@@ -159,12 +159,12 @@ void DatabaseRegistrationDialog::do_layout()
     layoutSizers(sizerControls, sizerButtons);
 }
 //-----------------------------------------------------------------------------
-const std::string DatabaseRegistrationDialog::getName() const
+const wxString DatabaseRegistrationDialog::getName() const
 {
     if (createM)
-        return "CreateDatabaseDialog";
+        return wxT("CreateDatabaseDialog");
     else
-        return "DatabaseRegistrationDialog";
+        return wxT("DatabaseRegistrationDialog");
 }
 //-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::set_properties()
@@ -186,12 +186,12 @@ void DatabaseRegistrationDialog::setDatabase(Database *db)
     if (databaseM->isConnected())
     ::wxMessageBox(_("Properties of connected database cannot be changed."), _("Warning"), wxOK |wxICON_INFORMATION );
     */
-    text_ctrl_name->SetValue(std2wx(databaseM->getName()));
-    text_ctrl_dbpath->SetValue(std2wx(databaseM->getPath()));
-    text_ctrl_username->SetValue(std2wx(databaseM->getUsername()));
-    text_ctrl_password->SetValue(std2wx(databaseM->getPassword()));
-    text_ctrl_role->SetValue(std2wx(databaseM->getRole()));
-    combobox_charset->SetSelection(combobox_charset->FindString(std2wx(databaseM->getConnectionCharset())));
+    text_ctrl_name->SetValue(databaseM->getName());
+    text_ctrl_dbpath->SetValue(databaseM->getPath());
+    text_ctrl_username->SetValue(databaseM->getUsername());
+    text_ctrl_password->SetValue(databaseM->getPassword());
+    text_ctrl_role->SetValue(databaseM->getRole());
+    combobox_charset->SetSelection(combobox_charset->FindString(databaseM->getConnectionCharset()));
     if (combobox_charset->GetSelection() < 0)
         combobox_charset->SetSelection(combobox_charset->FindString(wxT("NONE")));
     // see whether the database has an empty or default name; knowing that will be
@@ -258,12 +258,12 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
 void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor wait;
-    databaseM->setName(wx2std(text_ctrl_name->GetValue()));
-    databaseM->setPath(wx2std(text_ctrl_dbpath->GetValue()));
-    databaseM->setUsername(wx2std(text_ctrl_username->GetValue()));
-    databaseM->setPassword(wx2std(text_ctrl_password->GetValue()));
-    databaseM->setConnectionCharset(wx2std(combobox_charset->GetStringSelection()));
-    databaseM->setRole(wx2std(text_ctrl_role->GetValue()));
+    databaseM->setName(text_ctrl_name->GetValue());
+    databaseM->setPath(text_ctrl_dbpath->GetValue());
+    databaseM->setUsername(text_ctrl_username->GetValue());
+    databaseM->setPassword(text_ctrl_password->GetValue());
+    databaseM->setConnectionCharset(combobox_charset->GetStringSelection());
+    databaseM->setRole(text_ctrl_role->GetValue());
 
     try
     {

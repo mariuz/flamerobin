@@ -41,7 +41,6 @@
 #include "wx/filename.h"
 #include "wx/stdpaths.h"
 
-#include <string>
 #include <fstream>
 #include <sstream>
 
@@ -50,7 +49,7 @@
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------
-const string Config::pathSeparator = "/";
+const wxString Config::pathSeparator = wxT("/");
 //-----------------------------------------------------------------------------
 Config& config()
 {
@@ -59,7 +58,7 @@ Config& config()
 }
 //-----------------------------------------------------------------------------
 Config::Config()
-    : homePathM(""), userHomePathM(""), configM(0)
+    : homePathM(wxT("")), userHomePathM(wxT("")), configM(0)
 {
 #if defined(__UNIX__) && !defined(__WXMAC__) && !defined(__DARWIN__)
     standardPathsM.SetInstallPrefix(wxT("/usr/local"));
@@ -75,7 +74,7 @@ wxFileConfig* Config::getConfig() const
 {
     if (!configM)
     {
-        wxFileName configFileName = std2wx(getConfigFileName());
+        wxFileName configFileName = getConfigFileName();
         if (!wxDirExists(configFileName.GetPath()))
             wxMkdir(configFileName.GetPath());
         configM = new wxFileConfig(wxT(""), wxT(""),
@@ -85,34 +84,34 @@ wxFileConfig* Config::getConfig() const
 }
 //-----------------------------------------------------------------------------
 //! return true if value exists, false if not
-bool Config::keyExists(const string& key) const
+bool Config::keyExists(const wxString& key) const
 {
-    return getConfig()->HasEntry(std2wx(key));
+    return getConfig()->HasEntry(key);
 }
 //-----------------------------------------------------------------------------
 //! return true if value exists, false if not
-bool Config::getValue(string key, string& value)
+bool Config::getValue(wxString key, wxString& value)
 {
     // if complete key is found, then return (recursion exit condition).
     wxString configValue;
-    if (getConfig()->Read(std2wx(key), &configValue))
+    if (getConfig()->Read(key, &configValue))
     {
-        value = wx2std(configValue);
+        value = configValue;
         return true;
     }
     // does key contain a separator? If not, then the key is not found and
     // we're done.
-    string::size_type separatorPos = key.rfind(pathSeparator);
-    if (separatorPos == string::npos)
+    wxString::size_type separatorPos = key.rfind(pathSeparator);
+    if (separatorPos == wxString::npos)
         return false;
     else
     {
         // split key into keyPart and pathPart; remove last component of
         // pathPart and recurse.
-        string keyPart = key.substr(separatorPos + 1, key.length());
-        string pathPart = key.substr(0, separatorPos);
-        string::size_type separatorPosInPath = pathPart.rfind(pathSeparator);
-        if (separatorPosInPath == string::npos)
+        wxString keyPart = key.substr(separatorPos + 1, key.length());
+        wxString pathPart = key.substr(0, separatorPos);
+        wxString::size_type separatorPosInPath = pathPart.rfind(pathSeparator);
+        if (separatorPosInPath == wxString::npos)
             return getValue(keyPart, value);
         else
             return getValue(pathPart.substr(0, separatorPosInPath) +
@@ -120,41 +119,46 @@ bool Config::getValue(string key, string& value)
     }
 }
 //-----------------------------------------------------------------------------
-bool Config::getValue(string key, int& value)
+bool Config::getValue(wxString key, int& value)
 {
-    string s;
+    wxString s;
     if (!getValue(key, s))
         return false;
 
-    stringstream ss;
-    ss << s;
-    ss >> value;
+    // This variable is only needed because the compiler considers
+    // int* and long* incompatible. It may be ditched if a better solution
+    // is found.
+    long longValue;
+    if (!s.ToLong(&longValue))
+        return false;
+        
+    value = longValue;
     return true;
 }
 //-----------------------------------------------------------------------------
-bool Config::getValue(string key, double& value)
+bool Config::getValue(wxString key, double& value)
 {
-    string s;
+    wxString s;
     if (!getValue(key, s))
         return false;
 
-    stringstream ss;
-    ss << s;
-    ss >> value;
+    if (!s.ToDouble(&value))
+        return false;
+
     return true;
 }
 //-----------------------------------------------------------------------------
-bool Config::getValue(string key, bool& value)
+bool Config::getValue(wxString key, bool& value)
 {
-    string s;
+    wxString s;
     if (!getValue(key, s))
         return false;
 
-    value = (s == "1");
+    value = (s == wxT("1"));
     return true;
 }
 //-----------------------------------------------------------------------------
-bool Config::getValue(string key, StorageGranularity& value)
+bool Config::getValue(wxString key, StorageGranularity& value)
 {
     int intValue = 0;
     bool ret = getValue(key, intValue);
@@ -163,16 +167,16 @@ bool Config::getValue(string key, StorageGranularity& value)
     return ret;
 }
 //-----------------------------------------------------------------------------
-bool Config::getValue(string key, vector<string>& value)
+bool Config::getValue(wxString key, vector<wxString>& value)
 {
-    string s;
+    wxString s;
     if (!getValue(key, s))
         return false;
 
     value.clear();
-    string item;
+    wxString item;
     size_t pos = 0, sep = s.find(',');
-    while (sep != string::npos)
+    while (sep != wxString::npos)
     {
         item = s.substr(pos, sep - pos);
         if (!item.empty())
@@ -185,94 +189,94 @@ bool Config::getValue(string key, vector<string>& value)
 }
 //-----------------------------------------------------------------------------
 //! return true if value existed, false if not
-bool Config::setValue(string key, string value)
+bool Config::setValue(wxString key, wxString value)
 {
-    bool result = getConfig()->Write(std2wx(key), std2wx(value));
+    bool result = getConfig()->Write(key, value);
     getConfig()->Flush();
     return result;
 }
 //-----------------------------------------------------------------------------
-bool Config::setValue(string key, int value)
+bool Config::setValue(wxString key, int value)
 {
-    stringstream ss;
-    ss << value;
-    return setValue(key, ss.str());
+    wxString s;
+    s << value;
+    return setValue(key, s);
 }
 //-----------------------------------------------------------------------------
-bool Config::setValue(string key, double value)
+bool Config::setValue(wxString key, double value)
 {
-    stringstream ss;
-    ss << value;
-    return setValue(key, ss.str());
+    wxString s;
+    s << value;
+    return setValue(key, s);
 }
 //-----------------------------------------------------------------------------
-bool Config::setValue(string key, bool value)
+bool Config::setValue(wxString key, bool value)
 {
     if (value)
-        return setValue(key, string("1"));
+        return setValue(key, wxString(wxT("1")));
     else
-        return setValue(key, string("0"));
+        return setValue(key, wxString(wxT("0")));
 }
 //-----------------------------------------------------------------------------
-bool Config::setValue(string key, StorageGranularity value)
+bool Config::setValue(wxString key, StorageGranularity value)
 {
     return setValue(key, int(value));
 }
 //-----------------------------------------------------------------------------
-bool Config::setValue(string key, vector<string> value)
+bool Config::setValue(wxString key, vector<wxString> value)
 {
-    string s;
-    for (vector<string>::iterator it = value.begin(); it != value.end(); it++)
+    wxString s;
+    for (vector<wxString>::iterator it = value.begin(); it != value.end(); it++)
     {
         if (it != value.begin())
-            s += ",";
+            s += wxT(",");
         // this is just a parachute, if this should ever be triggered we
-        // will need to quote and unquote this string or all in value
-        wxASSERT((*it).find(',') == string::npos);
+        // will need to quote and unquote this wxString or all in value
+        wxASSERT((*it).find(',') == wxString::npos);
         s += *it;
     }
     return setValue(key, s);
 }
 //-----------------------------------------------------------------------------
-string Config::getHomePath() const
+wxString Config::getHomePath() const
 {
     if (!homePathM.empty())
-        return homePathM + "/";
+        return homePathM + wxT("/");
     else
-        return wx2std(standardPathsM.GetDataDir()) + "/";
+        return standardPathsM.GetDataDir() + wxT("/");
 }
 //-----------------------------------------------------------------------------
-string Config::getHtmlTemplatesPath() const
+wxString Config::getHtmlTemplatesPath() const
 {
-    return getHomePath() + "html-templates/";
+    return getHomePath() + wxT("html-templates/");
 }
 //-----------------------------------------------------------------------------
-string Config::getDocsPath() const
+wxString Config::getDocsPath() const
 {
-    return getHomePath() + "docs/";
+    return getHomePath() + wxT("docs/");
 }
 //-----------------------------------------------------------------------------
-string Config::getConfDefsPath() const
+wxString Config::getConfDefsPath() const
 {
-    return getHomePath() + "confdefs/";
+    return getHomePath() + wxT("confdefs/");
 }
 //-----------------------------------------------------------------------------
-string Config::getUserHomePath() const
+wxString Config::getUserHomePath() const
 {
     if (!userHomePathM.empty())
-        return userHomePathM + "/";
+        return userHomePathM + wxT("/");
     else
-        return wx2std(standardPathsM.GetUserLocalDataDir()) + "/";
+        return standardPathsM.GetUserLocalDataDir() + wxT("/");
 }
 //-----------------------------------------------------------------------------
-string Config::getDBHFileName() const
+wxString Config::getDBHFileName() const
 {
-    return getUserHomePath() + "fr_databases.conf";
+    return getUserHomePath() + wxT("fr_databases.conf");
 }
 //-----------------------------------------------------------------------------
-string Config::getConfigFileName() const
+wxString Config::getConfigFileName() const
 {
-    return getUserHomePath() + "fr_settings.conf";
+    return getUserHomePath() + wxT("fr_settings.conf");
 }
 //-----------------------------------------------------------------------------
 wxStandardPaths& Config::getStandardPaths()
@@ -280,12 +284,12 @@ wxStandardPaths& Config::getStandardPaths()
     return standardPathsM;
 }
 //-----------------------------------------------------------------------------
-void Config::setHomePath(const string& homePath)
+void Config::setHomePath(const wxString& homePath)
 {
     homePathM = homePath;
 }
 //-----------------------------------------------------------------------------
-void Config::setUserHomePath(const string& userHomePath)
+void Config::setUserHomePath(const wxString& userHomePath)
 {
     userHomePathM = userHomePath;
 }

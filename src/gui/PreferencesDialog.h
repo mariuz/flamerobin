@@ -27,7 +27,6 @@
 #define PREFERENCESDIALOG_H
 //-----------------------------------------------------------------------------
 #include <list>
-#include <string>
 
 #include <wx/wx.h>
 #include <wx/event.h>
@@ -66,7 +65,7 @@ public:
 protected:
     wxString captionM;
     wxString descriptionM;
-    std::string keyM;
+    wxString keyM;
 
     virtual void addControlsToSizer(wxSizer* sizer) = 0;
     void addEnabledSetting(PrefDlgSetting* setting);
@@ -136,7 +135,7 @@ private:
         PrefDlgSetting* enabledby);
     void setProperties();
 protected:
-    virtual const std::string getName() const;
+    virtual const wxString getName() const;
 
     DECLARE_EVENT_TABLE()
 };

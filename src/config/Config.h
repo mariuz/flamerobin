@@ -32,7 +32,6 @@
 #include <wx/stdpaths.h>
 
 #include <map>
-#include <string>
 #include <vector>
 //-----------------------------------------------------------------------------
 enum StorageGranularity
@@ -51,17 +50,17 @@ class Config
 {
 public:
     // return true if value exists, false if not
-    virtual bool keyExists(const std::string& key) const;
-    virtual bool getValue(std::string key, std::string& value);
-    bool getValue(std::string key, int& value);
-    bool getValue(std::string key, double& value);
-    bool getValue(std::string key, bool& value);
-    bool getValue(std::string key, StorageGranularity& value);
-    bool getValue(std::string key, std::vector<std::string>& value);
+    virtual bool keyExists(const wxString& key) const;
+    virtual bool getValue(wxString key, wxString& value);
+    bool getValue(wxString key, int& value);
+    bool getValue(wxString key, double& value);
+    bool getValue(wxString key, bool& value);
+    bool getValue(wxString key, StorageGranularity& value);
+    bool getValue(wxString key, std::vector<wxString>& value);
 
     // returns the value for key if it exists, or default value if it doesn't.
     template <typename T>
-    T get(std::string key, const T& defaultValue)
+    T get(wxString key, const T& defaultValue)
     {
         T temp;
         if (getValue(key, temp))
@@ -69,7 +68,7 @@ public:
         else
             return defaultValue;
     }
-
+    
     // We need to use an instance of wxStandardPaths to be able to call
     // SetInstallPrefix() for UNIX.  All other code should use this method
     // instead of wxStandardPaths::Get() to use the correct paths.
@@ -77,33 +76,33 @@ public:
 
     // these should be called before calling the get* functions below,
     // otherwise defaults apply.
-    void setHomePath(const std::string& homePath);
-    void setUserHomePath(const std::string& userHomePath);
+    void setHomePath(const wxString& homePath);
+    void setUserHomePath(const wxString& userHomePath);
 
     // returns the home path to use as the basis for the following calls.
-    std::string getHomePath() const;
+    wxString getHomePath() const;
     // returns the path from which to load the HTML templates.
-    std::string getHtmlTemplatesPath() const;
+    wxString getHtmlTemplatesPath() const;
     // returns the path containing the docs.
-    std::string getDocsPath() const;
+    wxString getDocsPath() const;
     // returns the path containing the confdefs.
-    std::string getConfDefsPath() const;
+    wxString getConfDefsPath() const;
 
     // returns the home path to use as the basis for the following call.
-    std::string getUserHomePath() const;
+    wxString getUserHomePath() const;
     // returns the file name (with full path) of the file containing
     // registered databases.
-    std::string getDBHFileName() const;
+    wxString getDBHFileName() const;
 
     // return true if value existed, false if not.
-    virtual bool setValue(std::string key, std::string value);
-    bool setValue(std::string key, int value);
-    bool setValue(std::string key, double value);
-    bool setValue(std::string key, bool value);
-    bool setValue(std::string key, StorageGranularity value);
-    bool setValue(std::string key, std::vector<std::string> value);
+    virtual bool setValue(wxString key, wxString value);
+    bool setValue(wxString key, int value);
+    bool setValue(wxString key, double value);
+    bool setValue(wxString key, bool value);
+    bool setValue(wxString key, StorageGranularity value);
+    bool setValue(wxString key, std::vector<wxString> value);
 
-    static const std::string pathSeparator;
+    static const wxString pathSeparator;
 
     Config();
     virtual ~Config();
@@ -112,9 +111,9 @@ private:
     // performs lazy initialization of configM.
     wxFileConfig* getConfig() const;
     wxStandardPaths standardPathsM;
-    std::string getConfigFileName() const;
-    std::string homePathM;
-    std::string userHomePathM;
+    wxString getConfigFileName() const;
+    wxString homePathM;
+    wxString userHomePathM;
 };
 //-----------------------------------------------------------------------------
 Config& config();

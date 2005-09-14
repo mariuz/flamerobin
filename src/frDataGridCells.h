@@ -37,7 +37,7 @@ public:
     virtual wxString getValue() = 0;
 };
 //----------------------------------------------------------------------
-// Cell class to show string representation of data
+// Cell class to show wxString representation of data
 //   Note that a class containing the data itself would both be cheaper
 //   (both memory and cycles) and allow for on-thy-fly changes to the 
 //   display format).  Probably also easier to edit in an editable grid.
@@ -51,7 +51,7 @@ public:
     virtual wxString getValue();
 };
 //----------------------------------------------------------------------
-// Cell class to show "[...]" for field data without an obvious string 
+// Cell class to show "[...]" for field data without an obvious wxString 
 // representation of the value (like array or blob fields)
 class DataNAGridCell: public GridBaseCell
 {

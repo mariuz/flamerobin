@@ -33,8 +33,8 @@ class Root: public MetadataItem
 {
 private:
     MetadataCollection<Server> serversM;
-    std::string fileNameM;
-    std::string getFileName();
+    wxString fileNameM;
+    wxString getFileName();
     bool dirtyM;
     unsigned int nextIdM;
 public:
@@ -49,7 +49,7 @@ public:
 
     bool load();
     bool save();
-    virtual const std::string getItemPath() const;
+    virtual const wxString getItemPath() const;
 
     // updates all servers (observer pattern)
     void notifyAllServers();

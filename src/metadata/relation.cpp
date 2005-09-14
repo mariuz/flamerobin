@@ -63,7 +63,7 @@ bool Relation::loadColumns()
     Database *d = static_cast<Database *>(getParent());
     if (!d)
     {
-        lastError().setMessage("database not set");
+        lastError().setMessage(wxT("database not set"));
         return false;
     }
 
@@ -84,20 +84,21 @@ bool Relation::loadColumns()
             " order by r.rdb$field_position"
         );
 
-        st1->Set(1, getName());
+        st1->Set(1, wx2std(getName()));
         st1->Execute();
         while (st1->Fetch())
         {
-            std::string name, source, collation, computedSrc;
+            std::string name, source, collation;
+            wxString computedSrc;
             st1->Get(1, name);
             st1->Get(3, source);
             st1->Get(4, collation);
             readBlob(st1, 6, computedSrc);
 
             Column *cc = columnsM.add();
-            cc->setName(name);
+            cc->setName(std2wx(name));
             cc->setParent(this);
-            cc->Init(!st1->IsNull(2), source, !st1->IsNull(5), computedSrc, collation);
+            cc->Init(!st1->IsNull(2), std2wx(source), !st1->IsNull(5), computedSrc, std2wx(collation));
         }
 
         tr1->Commit();
@@ -106,11 +107,11 @@ bool Relation::loadColumns()
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage("System error.");
+        lastError().setMessage(_("System error."));
     }
 
     return false;
@@ -123,7 +124,7 @@ bool Relation::getTriggers(std::vector<Trigger *>& list, Trigger::firingTimeType
     Database *d = getDatabase();
     if (!d)
     {
-        lastError().setMessage("database not set");
+        lastError().setMessage(wxT("database not set"));
         return false;
     }
 
@@ -137,14 +138,14 @@ bool Relation::getTriggers(std::vector<Trigger *>& list, Trigger::firingTimeType
             "select rdb$trigger_name from rdb$triggers where rdb$relation_name = ? "
             "order by rdb$trigger_sequence"
         );
-        st1->Set(1, getName());
+        st1->Set(1, wx2std(getName()));
         st1->Execute();
         while (st1->Fetch())
         {
             std::string name;
             st1->Get(1, name);
             name.erase(name.find_last_not_of(" ") + 1);
-            Trigger *t = dynamic_cast<Trigger *>(d->findByNameAndType(ntTrigger, name));
+            Trigger* t = dynamic_cast<Trigger*>(d->findByNameAndType(ntTrigger, std2wx(name)));
             if (t && t->getFiringTime() == beforeOrAfter)
                 list.push_back(t);
         }
@@ -153,16 +154,16 @@ bool Relation::getTriggers(std::vector<Trigger *>& list, Trigger::firingTimeType
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage("System error.");
+        lastError().setMessage(_("System error."));
     }
     return false;
 }
 //-----------------------------------------------------------------------------
-bool Relation::getChildren(std::vector<MetadataItem *>& temp)
+bool Relation::getChildren(std::vector<MetadataItem*>& temp)
 {
     return columnsM.getChildren(temp);
 }

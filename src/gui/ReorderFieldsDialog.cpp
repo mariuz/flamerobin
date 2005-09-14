@@ -50,7 +50,7 @@ namespace reorder_icons {
     #include "down.xpm"
 };
 //-----------------------------------------------------------------------------
-ReorderFieldsDialog::ReorderFieldsDialog(wxWindow* parent, Table *table):
+ReorderFieldsDialog::ReorderFieldsDialog(wxWindow* parent, Table* table):
     BaseDialog(parent, -1, wxEmptyString)
 {
     tableM = table;
@@ -72,7 +72,7 @@ ReorderFieldsDialog::ReorderFieldsDialog(wxWindow* parent, Table *table):
     set_properties();
     do_layout();
 
-    SetTitle(_("Reordering fields of table ") + std2wx(table->getName()));
+    SetTitle(_("Reordering fields of table ") + table->getName());
     update();
 }
 //-----------------------------------------------------------------------------
@@ -102,9 +102,9 @@ void ReorderFieldsDialog::do_layout()
     layoutSizers(sizerControls, sizerButtons, true);
 }
 //-----------------------------------------------------------------------------
-const std::string ReorderFieldsDialog::getName() const
+const wxString ReorderFieldsDialog::getName() const
 {
-    return "ReorderFieldsDialog";
+    return wxT("ReorderFieldsDialog");
 }
 //-----------------------------------------------------------------------------
 void ReorderFieldsDialog::moveSelected(int moveby)
@@ -146,8 +146,8 @@ void ReorderFieldsDialog::update()
     tableM->getChildren(temp);
 
     list_box_fields->Clear();
-    for (std::vector<MetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
-        list_box_fields->Append(std2wx((*it)->getName()));
+    for (std::vector<MetadataItem*>::iterator it = temp.begin(); it != temp.end(); ++it)
+        list_box_fields->Append((*it)->getName());
     updateButtons();
 }
 //-----------------------------------------------------------------------------
@@ -181,8 +181,9 @@ void ReorderFieldsDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
     wxString sql;
     for (int i=0; i<list_box_fields->GetCount(); ++i)
     {
-        sql += wxT("ALTER TABLE ") + std2wx(tableM->getName()) + wxT(" ALTER ")
-            + list_box_fields->GetString(i) + wxT(" POSITION ") + wxString::Format(wxT("%d"), i+1) + wxT(";\n");
+        sql += wxT("ALTER TABLE ") + tableM->getName() + wxT(" ALTER ") +
+            list_box_fields->GetString(i) + wxT(" POSITION ") +
+            wxString::Format(wxT("%d"), i + 1) + wxT(";\n");
     }
 
     // create ExecuteSqlFrame with option to close at once
@@ -227,11 +228,11 @@ const ReorderFieldsHandler ReorderFieldsHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool ReorderFieldsHandler::handleURI(URI& uri)
 {
-    if (uri.action != "reorder_fields")
+    if (uri.action != wxT("reorder_fields"))
         return false;
 
-    Table *t = (Table *)getObject(uri);
-    wxWindow *w = getWindow(uri);
+    Table* t = (Table*)getObject(uri);
+    wxWindow* w = getWindow(uri);
     if (!t || !w)
         return true;
 

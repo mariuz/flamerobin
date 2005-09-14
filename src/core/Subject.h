@@ -27,7 +27,6 @@
 #define FR_SUBJECT_H
 //-----------------------------------------------------------------------------
 #include <list>
-#include <string>
 #include <vector>
 
 class Observer;

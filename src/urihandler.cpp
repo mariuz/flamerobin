@@ -36,9 +36,9 @@
     #include "wx/wx.h"
 #endif
 //-----------------------------------------------------------------------------
-#include <string>
 #include <list>
 #include <algorithm>
+
 #include "ugly.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
@@ -46,59 +46,59 @@ URI::URI()
 {
 }
 //-----------------------------------------------------------------------------
-URI::URI(const std::string& uri)
+URI::URI(const wxString& uri)
 {
 	parseURI(uri);
 }
 //-----------------------------------------------------------------------------
 //! pair has format: name=value
-void URI::addParam(const std::string& pair)
+void URI::addParam(const wxString& pair)
 {
-	std::string::size_type p = pair.find("=");
-	if (p == std::string::npos)
-		params[pair] = "";
+	wxString::size_type p = pair.find(wxT("="));
+	if (p == wxString::npos)
+		params[pair] = wxT("");
 	else
-		params[pair.substr(0,p)] = pair.substr(p+1);
+		params[pair.substr(0, p)] = pair.substr(p + 1);
 }
 //-----------------------------------------------------------------------------
-std::string URI::getParam(const std::string& name) const
+wxString URI::getParam(const wxString& name) const
 {
-	std::map<std::string, std::string>::const_iterator it = params.find(name);
+	std::map<wxString, wxString>::const_iterator it = params.find(name);
 	if (it == params.end())
-		return "";
+		return wxT("");
 	else
 		return (*it).second;
 }
 //-----------------------------------------------------------------------------
-bool URI::parseURI(const std::string& uri)
+bool URI::parseURI(const wxString& uri)
 {
 	using namespace std;
-	string::size_type p = uri.find("://");				// find ://
-	if (p == string::npos)
+	wxString::size_type p = uri.find(wxT("://"));				// find ://
+	if (p == wxString::npos)
 		return false;
 	protocol = uri.substr(0, p);
 
-	string::size_type p2 = uri.find("?", p);				// ?
-	if (p2 == string::npos)
+	wxString::size_type p2 = uri.find(wxT("?"), p);				// ?
+	if (p2 == wxString::npos)
 	{
-		action = uri.substr(p+3);
+		action = uri.substr(p + 3);
 		params.clear();
 		return true;
 	}
 
-	action = uri.substr(p+3, p2-p-3);
-	std::string par = uri.substr(p2+1);
+	action = uri.substr(p + 3, p2 - p - 3);
+	wxString par = uri.substr(p2 + 1);
 	while (true)
 	{
-		p = par.find("&");
-		if (p == string::npos)
+		p = par.find(wxT("&"));
+		if (p == wxString::npos)
 		{
 			addParam(par);
 			break;
 		}
 
 		addParam(par.substr(0, p));
-		par.erase(0, p+1);
+		par.erase(0, p + 1);
 	}
 
 	return true;
@@ -111,8 +111,8 @@ URIProcessor& getURIProcessor()
 }
 //-----------------------------------------------------------------------------
 //! needed to disallow instantiation
-URIProcessor::URIProcessor() :
-    handlerListSortedM(false)
+URIProcessor::URIProcessor()
+    : handlerListSortedM(false)
 {
 }
 //-----------------------------------------------------------------------------
@@ -182,21 +182,21 @@ URIHandler::~URIHandler()
         processorM->removeHandler(this);
 }
 //-----------------------------------------------------------------------------
-wxWindow *URIHandler::getWindow(const URI& uri)
+wxWindow* URIHandler::getWindow(const URI& uri)
 {
-	std::string ms = uri.getParam("parent_window");		// window
+	wxString ms = uri.getParam(wxT("parent_window"));		// window
 	unsigned long mo;
-	if (!std2wx(ms).ToULong(&mo))
+	if (!ms.ToULong(&mo))
 		return 0;
-	return (wxWindow *)mo;
+	return (wxWindow*)mo;
 }
 //-----------------------------------------------------------------------------
-void *URIHandler::getObject(const URI& uri)
+void* URIHandler::getObject(const URI& uri)
 {
-	std::string ms = uri.getParam("object_address");		// object
+	wxString ms = uri.getParam(wxT("object_address"));		// object
 	unsigned long mo;
-	if (!std2wx(ms).ToULong(&mo))
+	if (!ms.ToULong(&mo))
 		return 0;
-	return (void *)mo;
+	return (void*)mo;
 }
 //-----------------------------------------------------------------------------

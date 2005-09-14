@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------
-const string MetadataItem::pathSeparator = "/";
+const wxString MetadataItem::pathSeparator = wxT("/");
 //-----------------------------------------------------------------------------
 MetadataItem::MetadataItem()
     : Subject(), Element()
@@ -55,54 +55,54 @@ MetadataItem::~MetadataItem()
 {
 }
 //-----------------------------------------------------------------------------
-const string MetadataItem::getTypeName() const
+const wxString MetadataItem::getTypeName() const
 {
-    return "";
+    return wxT("");
 }
 //-----------------------------------------------------------------------------
-const string MetadataItem::getItemPath() const
+const wxString MetadataItem::getItemPath() const
 {
-    string result = getTypeName() + "_" + getPathId();
+    wxString result = getTypeName() + wxT("_") + getPathId();
     if (parentM)
     {
-        string parentItemPath = parentM->getItemPath();
-        if (parentItemPath != "")
+        wxString parentItemPath = parentM->getItemPath();
+        if (parentItemPath != wxT(""))
             result = parentItemPath + pathSeparator + result;
     }
     return result;
 }
 //-----------------------------------------------------------------------------
-const string MetadataItem::getPathId() const
+const wxString MetadataItem::getPathId() const
 {
     return getId();
 }
 //-----------------------------------------------------------------------------
-const string MetadataItem::getId() const
+const wxString MetadataItem::getId() const
 {
     return getName();
 }
 //-----------------------------------------------------------------------------
-NodeType getTypeByName(string name)
+NodeType getTypeByName(wxString name)
 {
-    if (name == "TABLE")
+    if (name == wxT("TABLE"))
         return ntTable;
-    else if (name == "VIEW")
+    else if (name == wxT("VIEW"))
         return ntView;
-    else if (name == "PROCEDURE")
+    else if (name == wxT("PROCEDURE"))
         return ntProcedure;
-    else if (name == "TRIGGER")
+    else if (name == wxT("TRIGGER"))
         return ntTrigger;
-    else if (name == "GENERATOR")
+    else if (name == wxT("GENERATOR"))
         return ntGenerator;
-    else if (name == "FUNCTION")
+    else if (name == wxT("FUNCTION"))
         return ntFunction;
-    else if (name == "DOMAIN")
+    else if (name == wxT("DOMAIN"))
         return ntDomain;
-    else if (name == "ROLE")
+    else if (name == wxT("ROLE"))
         return ntRole;
-    else if (name == "COLUMN")
+    else if (name == wxT("COLUMN"))
         return ntColumn;
-    else if (name == "EXCEPTION")
+    else if (name == wxT("EXCEPTION"))
         return ntException;
     else
         return ntUnknown;
@@ -116,9 +116,9 @@ bool MetadataItem::getChildren(vector<MetadataItem*>& /*temp*/)
 //! removes its children (by calling drop() for each) and notifies its parent
 void MetadataItem::drop()
 {
-    vector<MetadataItem *>temp;
+    vector<MetadataItem* >temp;
     if (getChildren(temp))
-        for (vector<MetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
+        for (vector<MetadataItem*>::iterator it = temp.begin(); it != temp.end(); ++it)
             (*it)->drop();
 
     // TODO: perhaps the whole DBH needs to be reconsidered
@@ -129,10 +129,10 @@ void MetadataItem::drop()
 //-----------------------------------------------------------------------------
 Database *MetadataItem::getDatabase() const
 {
-    MetadataItem *m = const_cast<MetadataItem *>(this);
+    MetadataItem* m = const_cast<MetadataItem*>(this);
     while (m && m->getType() != ntDatabase)
         m = m->getParent();
-    return (Database *)m;
+    return (Database*)m;
 }
 //-----------------------------------------------------------------------------
 Root* MetadataItem::getRoot() const
@@ -144,40 +144,40 @@ Root* MetadataItem::getRoot() const
 }
 //-----------------------------------------------------------------------------
 //! virtual so it can eventually be delegated to Table, View, etc.
-string MetadataItem::getDescriptionSql() const
+wxString MetadataItem::getDescriptionSql() const
 {
     switch (typeM)
     {
         case ntView:
-        case ntTable:       return "select rdb$description from rdb$relations where RDB$RELATION_NAME=?";
-        case ntProcedure:   return "select rdb$description from rdb$procedures where RDB$procedure_NAME=?";
-        case ntTrigger:     return "select rdb$description from rdb$triggers where RDB$trigger_NAME=?";
-        case ntFunction:    return "select rdb$description from RDB$FUNCTIONS where RDB$FUNCTION_NAME=?";
-        case ntColumn:      return "select rdb$description from rdb$relation_fields where rdb$field_name=? and rdb$relation_name=?";
-        case ntParameter:   return "select rdb$description from rdb$procedure_parameters where rdb$parameter_name=? and rdb$procedure_name=?";
-        case ntDomain:      return "select rdb$description from rdb$fields where rdb$field_name=?";
-        case ntException:   return "select RDB$DESCRIPTION from RDB$EXCEPTIONS where RDB$EXCEPTION_NAME = ?";
-        case ntIndex:       return "select rdb$description from rdb$indices where RDB$INDEX_NAME = ?";
-        default:            return "";
+        case ntTable:       return wxT("select rdb$description from rdb$relations where RDB$RELATION_NAME=?");
+        case ntProcedure:   return wxT("select rdb$description from rdb$procedures where RDB$procedure_NAME=?");
+        case ntTrigger:     return wxT("select rdb$description from rdb$triggers where RDB$trigger_NAME=?");
+        case ntFunction:    return wxT("select rdb$description from RDB$FUNCTIONS where RDB$FUNCTION_NAME=?");
+        case ntColumn:      return wxT("select rdb$description from rdb$relation_fields where rdb$field_name=? and rdb$relation_name=?");
+        case ntParameter:   return wxT("select rdb$description from rdb$procedure_parameters where rdb$parameter_name=? and rdb$procedure_name=?");
+        case ntDomain:      return wxT("select rdb$description from rdb$fields where rdb$field_name=?");
+        case ntException:   return wxT("select RDB$DESCRIPTION from RDB$EXCEPTIONS where RDB$EXCEPTION_NAME = ?");
+        case ntIndex:       return wxT("select rdb$description from rdb$indices where RDB$INDEX_NAME = ?");
+        default:            return wxT("");
     };
 }
 //-----------------------------------------------------------------------------
 //! virtual so it can eventually be delegated to Table, View, etc.
-string MetadataItem::getChangeDescriptionSql() const
+wxString MetadataItem::getChangeDescriptionSql() const
 {
     switch (typeM)
     {
         case ntView:
-        case ntTable:       return "update rdb$relations set rdb$description = ? where RDB$RELATION_NAME = ?";
-        case ntProcedure:   return "update rdb$procedures set rdb$description = ? where RDB$PROCEDURE_name=?";
-        case ntTrigger:     return "update rdb$triggers set rdb$description = ? where RDB$trigger_NAME=?";
-        case ntFunction:    return "update RDB$FUNCTIONS set rdb$description = ? where RDB$FUNCTION_NAME=?";
-        case ntColumn:      return "update rdb$relation_fields set rdb$description = ? where rdb$field_name=? and rdb$relation_name=?";
-        case ntParameter:   return "update rdb$procedure_parameters set rdb$description = ? where rdb$parameter_name = ? and rdb$procedure_name=?";
-        case ntDomain:      return "update rdb$fields set rdb$description = ? where rdb$field_name=?";
-        case ntException:   return "update RDB$EXCEPTIONS set RDB$DESCRIPTION = ? where RDB$EXCEPTION_NAME = ?";
-        case ntIndex:       return "update rdb$indices set rdb$description = ? where RDB$INDEX_NAME = ?";
-        default:            return "";
+        case ntTable:       return wxT("update rdb$relations set rdb$description = ? where RDB$RELATION_NAME = ?");
+        case ntProcedure:   return wxT("update rdb$procedures set rdb$description = ? where RDB$PROCEDURE_name=?");
+        case ntTrigger:     return wxT("update rdb$triggers set rdb$description = ? where RDB$trigger_NAME=?");
+        case ntFunction:    return wxT("update RDB$FUNCTIONS set rdb$description = ? where RDB$FUNCTION_NAME=?");
+        case ntColumn:      return wxT("update rdb$relation_fields set rdb$description = ? where rdb$field_name=? and rdb$relation_name=?");
+        case ntParameter:   return wxT("update rdb$procedure_parameters set rdb$description = ? where rdb$parameter_name = ? and rdb$procedure_name=?");
+        case ntDomain:      return wxT("update rdb$fields set rdb$description = ? where rdb$field_name=?");
+        case ntException:   return wxT("update RDB$EXCEPTIONS set RDB$DESCRIPTION = ? where RDB$EXCEPTION_NAME = ?");
+        case ntIndex:       return wxT("update rdb$indices set rdb$description = ? where RDB$INDEX_NAME = ?");
+        default:            return wxT("");
     };
 }
 //-----------------------------------------------------------------------------
@@ -185,10 +185,10 @@ string MetadataItem::getChangeDescriptionSql() const
 //! ofObject = false  => returns list of objects that depend on this object
 bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
 {
-    Database *d = getDatabase();
+    Database* d = getDatabase();
     if (!d)
     {
-        lastError().setMessage("Database not set");
+        lastError().setMessage(wxT("Database not set"));
         return false;
     }
 
@@ -199,12 +199,12 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
                                 ntFunction
     };
     int type_count = sizeof(dep_types)/sizeof(NodeType);
-    for (int i=0; i<type_count; i++)
+    for (int i = 0; i < type_count; i++)
         if (typeM == dep_types[i])
             mytype = i;
     if (typeM == ntUnknown || mytype == -1)
     {
-        lastError().setMessage("Unsupported type");
+        lastError().setMessage(wxT("Unsupported type"));
         return false;
     }
     if (mytype == 1 && !ofObject)   // views count as relations(tables) when other object refer to them
@@ -217,55 +217,55 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
         tr1->Start();
         IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
 
-        string o1 = (ofObject ? "DEPENDENT" : "DEPENDED_ON");
-        string o2 = (ofObject ? "DEPENDED_ON" : "DEPENDENT");
-        string sql =
-            "select RDB$" + o2 + "_TYPE, RDB$" + o2 + "_NAME, RDB$FIELD_NAME \n "
-            " from RDB$DEPENDENCIES \n "
-            " where RDB$" + o1 + "_TYPE = ? and RDB$" + o1 + "_NAME = ? \n ";
+        wxString o1 = (ofObject ? wxT("DEPENDENT") : wxT("DEPENDED_ON"));
+        wxString o2 = (ofObject ? wxT("DEPENDED_ON") : wxT("DEPENDENT"));
+        wxString sql =
+            wxT("select RDB$") + o2 + wxT("_TYPE, RDB$") + o2 + wxT("_NAME, RDB$FIELD_NAME \n ")
+            wxT(" from RDB$DEPENDENCIES \n ")
+            wxT(" where RDB$") + o1 + wxT("_TYPE = ? and RDB$") + o1 + wxT("_NAME = ? \n ");
         if ((typeM == ntTable || typeM == ntView) && ofObject)  // get deps for computed columns
         {                                                       // view needed to bind with generators
-            sql += " union all \n"
-                " SELECT DISTINCT d.rdb$depended_on_type, d.rdb$depended_on_name, d.rdb$field_name \n"
-                " FROM rdb$relation_fields f \n"
-                " LEFT JOIN rdb$dependencies d ON d.rdb$dependent_name = f.rdb$field_source \n"
-                " WHERE d.rdb$dependent_type = 3 AND f.rdb$relation_name = ? \n";
+            sql += wxT(" union all \n")
+                wxT(" SELECT DISTINCT d.rdb$depended_on_type, d.rdb$depended_on_name, d.rdb$field_name \n")
+                wxT(" FROM rdb$relation_fields f \n")
+                wxT(" LEFT JOIN rdb$dependencies d ON d.rdb$dependent_name = f.rdb$field_source \n")
+                wxT(" WHERE d.rdb$dependent_type = 3 AND f.rdb$relation_name = ? \n");
         }
         if (!ofObject)                      // find tables that have calculated columns based on "this" object
         {
-            sql += "union all \n"
-                " SELECT distinct cast(0 as smallint), f.rdb$relation_name, d.rdb$field_name \n"
-                " from rdb$relation_fields f \n"
-                " left join rdb$dependencies d on d.rdb$dependent_name = f.rdb$field_source \n"
-                " where d.rdb$dependent_type = 3 and d.rdb$depended_on_name = ? ";
+            sql += wxT("union all \n")
+                wxT(" SELECT distinct cast(0 as smallint), f.rdb$relation_name, d.rdb$field_name \n")
+                wxT(" from rdb$relation_fields f \n")
+                wxT(" left join rdb$dependencies d on d.rdb$dependent_name = f.rdb$field_source \n")
+                wxT(" where d.rdb$dependent_type = 3 and d.rdb$depended_on_name = ? ");
         }
-        sql += " order by 1, 2, 3";
-        st1->Prepare(sql);
+        sql += wxT(" order by 1, 2, 3");
+        st1->Prepare(wx2std(sql));
         st1->Set(1, mytype);
-        st1->Set(2, nameM);
+        st1->Set(2, wx2std(nameM));
         if (!ofObject || typeM == ntTable || typeM == ntView)
-            st1->Set(3, nameM);
+            st1->Set(3, wx2std(nameM));
         st1->Execute();
-        MetadataItem *last = 0;
-        Dependency *dep = 0;
+        MetadataItem* last = 0;
+        Dependency* dep = 0;
         while (st1->Fetch())
         {
-            string object_name, field_name;
+            std::string object_name, field_name;
             int object_type;
             st1->Get(1, &object_type);
             st1->Get(2, object_name);
-            object_name.erase(object_name.find_last_not_of(" ")+1);     // trim
+            object_name.erase(object_name.find_last_not_of(" ") + 1);     // trim
 
             if (object_type > type_count)   // some system object, not interesting for us
                 continue;
             NodeType t = dep_types[object_type];
             if (t == ntUnknown)             // ditto
                 continue;
-            MetadataItem *current = d->findByNameAndType(t, object_name);
+            MetadataItem* current = d->findByNameAndType(t, std2wx(object_name));
             if (!current)
             {                               // maybe it's a view masked as table
                 if (t == ntTable)
-                    current = d->findByNameAndType(ntView, object_name);
+                    current = d->findByNameAndType(ntView, std2wx(object_name));
                 if (!current)
                     continue;
             }
@@ -279,8 +279,8 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
             if (!st1->IsNull(3))
             {
                 st1->Get(3, field_name);
-                field_name.erase(field_name.find_last_not_of(" ")+1);       // trim
-                dep->addField(field_name);
+                field_name.erase(field_name.find_last_not_of(" ") + 1);       // trim
+                dep->addField(std2wx(field_name));
             }
         }
 
@@ -295,7 +295,7 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
                 MetadataItem *table = d->findByNameAndType(ntTable, (*it).referencedTableM);
                 if (!table)
                 {
-                    lastError().setMessage("Table " + (*it).referencedTableM + " not found.");
+                    lastError().setMessage(wxT("Table ") + (*it).referencedTableM + wxT(" not found."));
                     return false;
                 }
                 Dependency de(table);
@@ -316,20 +316,20 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
                 " where r2.rdb$relation_name=? "
                 " and r1.rdb$constraint_type='FOREIGN KEY' "
             );
-            st1->Set(1, nameM);
+            st1->Set(1, wx2std(nameM));
             st1->Execute();
-            string lasttable;
+            std::string lasttable;
             Dependency *dep = 0;
             while (st1->Fetch())
             {
-                string table_name, field_name;
+                std::string table_name, field_name;
                 st1->Get(1, table_name);
                 st1->Get(2, field_name);
                 table_name.erase(table_name.find_last_not_of(" ")+1);       // trim
                 field_name.erase(field_name.find_last_not_of(" ")+1);       // trim
                 if (table_name != lasttable)    // new
                 {
-                    MetadataItem *table = d->findByNameAndType(ntTable, table_name);
+                    MetadataItem* table = d->findByNameAndType(ntTable, std2wx(table_name));
                     if (!table)
                         continue;           // dummy check
                     Dependency de(table);
@@ -337,7 +337,7 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
                     dep = &list.back();
                     lasttable = table_name;
                 }
-                dep->addField(field_name);
+                dep->addField(std2wx(field_name));
             }
         }
 
@@ -346,85 +346,65 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage("System error.");
+        lastError().setMessage(_("System error."));
     }
     return false;
 }
 //-----------------------------------------------------------------------------
-string MetadataItem::getDescription()
+wxString MetadataItem::getDescription()
 {
     if (descriptionLoadedM)
         return descriptionM;
 
     Database *d = getDatabase();
-    string sql = getDescriptionSql();
-    if (!d || sql == "")
-        return "N/A";
+    wxString sql = getDescriptionSql();
+    if (!d || sql == wxT(""))
+        return wxT("N/A");
 
-    descriptionM = "";
+    descriptionM = wxT("");
     try
     {
         IBPP::Database& db = d->getIBPPDatabase();
         IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
         tr1->Start();
         IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare(sql);
-        st1->Set(1, nameM);
+        st1->Prepare(wx2std(sql));
+        st1->Set(1, wx2std(nameM));
         if (typeM == ntColumn || typeM == ntParameter)
-            st1->Set(2, getParent()->getName());    // table/view/SP name
+            st1->Set(2, wx2std(getParent()->getName()));    // table/view/SP name
         st1->Execute();
         st1->Fetch();
-        descriptionLoadedM = true;
-        if (st1->IsNull(1))
-            return "";
-        /*
-        IBPP::Blob b = IBPP::BlobFactory(st1->Database(), st1->Transaction());
-        st1->Get(1, b);
-        b->Open();
-        char buffer[8192];      // 8K block
-        while (true)
-        {
-            int size = b->Read(buffer, 8192);
-            if (size <= 0)
-                break;
-            buffer[size] = 0;
-            descriptionM += buffer;
-        }
-        b->Close();
-        */
-
         readBlob(st1, 1, descriptionM);
-
-        tr1->Commit();
         descriptionLoadedM = true;
+        tr1->Commit();
         return descriptionM;
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage("System error.");
+        lastError().setMessage(_("System error."));
     }
 
     return lastError().getMessage();
 }
 //-----------------------------------------------------------------------------
-bool MetadataItem::setDescription(string description)
+bool MetadataItem::setDescription(wxString description)
 {
     Database *d = getDatabase();
     if (!d)
         return false;
 
-    string sql = getChangeDescriptionSql();
-    if (sql == "")
+    wxString sql = getChangeDescriptionSql();
+    if (sql == wxT(""))
     {
-        lastError().setMessage("The object does not support descriptions");
+        lastError().setMessage(_("The object does not support descriptions"));
         return false;
     }
 
@@ -434,7 +414,7 @@ bool MetadataItem::setDescription(string description)
         IBPP::Transaction tr1 = IBPP::TransactionFactory(db);
         tr1->Start();
         IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare(sql);
+        st1->Prepare(wx2std(sql));
 
         if (!description.empty())
         {
@@ -446,9 +426,9 @@ bool MetadataItem::setDescription(string description)
         }
         else
             st1->SetNull(1);
-        st1->Set(2, nameM);
+        st1->Set(2, wx2std(nameM));
         if (typeM == ntColumn || typeM == ntParameter)
-            st1->Set(3, getParent()->getName());
+            st1->Set(3, wx2std(getParent()->getName()));
         st1->Execute();
         tr1->Commit();
         descriptionLoadedM = true;
@@ -458,44 +438,44 @@ bool MetadataItem::setDescription(string description)
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage("System error.");
+        lastError().setMessage(_("System error."));
     }
     return false;
 }
 //-----------------------------------------------------------------------------
-MetadataItem *MetadataItem::getParent() const
+MetadataItem* MetadataItem::getParent() const
 {
     return parentM;
 }
 //-----------------------------------------------------------------------------
-void MetadataItem::setParent(MetadataItem *parent)
+void MetadataItem::setParent(MetadataItem* parent)
 {
     parentM = parent;
 }
 //-----------------------------------------------------------------------------
-string MetadataItem::getPrintableName()
+wxString MetadataItem::getPrintableName()
 {
     size_t n = getChildrenCount();
     if (n)
     {
         ostringstream ss;
-        ss << nameM << " (" << n << ")";
-        return ss.str();
+        ss << wx2std(nameM) << " (" << n << ")";
+        return std2wx(ss.str());
     }
     else
         return nameM;
 }
 //-----------------------------------------------------------------------------
-const string& MetadataItem::getName() const
+const wxString& MetadataItem::getName() const
 {
     return nameM;
 }
 //-----------------------------------------------------------------------------
-void MetadataItem::setName(string name)
+void MetadataItem::setName(wxString name)
 {
     name.erase(name.find_last_not_of(' ')+1);       // right trim
     nameM = name;
@@ -514,12 +494,12 @@ void MetadataItem::setType(NodeType type)
 //-----------------------------------------------------------------------------
 bool MetadataItem::isSystem() const
 {
-    return getName().substr(0, 4) == "RDB$";
+    return getName().substr(0, 4) == wxT("RDB$");
 }
 //-----------------------------------------------------------------------------
-string MetadataItem::getDropSqlStatement() const
+wxString MetadataItem::getDropSqlStatement() const
 {
-    return "DROP " + getTypeName() + " " + getName() + ";";
+    return wxT("DROP ") + getTypeName() + wxT(" ") + getName() + wxT(";");
 }
 //-----------------------------------------------------------------------------
 void MetadataItem::acceptVisitor(MetadataItemVisitor* visitor)

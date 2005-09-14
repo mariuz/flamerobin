@@ -43,8 +43,6 @@ Contributor(s): Michael Hieke
 #include <wx/textbuf.h>
 #include <wx/txtstrm.h>
 
-#include <string>
-
 #include "config/Config.h"
 #include "frDataGrid.h"
 #include "frDataGridTable.h"
@@ -62,17 +60,17 @@ DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
     SetGridLineColour(*wxLIGHT_GREY);
     SetRowLabelAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
 
-    std::string s;
+    wxString s;
     wxFont f;
-    if (config().getValue("DataGridFont", s) && !s.empty())
+    if (config().getValue(wxT("DataGridFont"), s) && !s.empty())
     {
-        f.SetNativeFontInfo(std2wx(s));
+        f.SetNativeFontInfo(s);
         if (f.Ok())
             SetDefaultCellFont(f);
     }
-    if (config().getValue("DataGridHeaderFont", s) && !s.empty())
+    if (config().getValue(wxT("DataGridHeaderFont"), s) && !s.empty())
     {
-        f.SetNativeFontInfo(std2wx(s));
+        f.SetNativeFontInfo(s);
         if (f.Ok())
             SetLabelFont(f);
     }
@@ -280,7 +278,7 @@ void DataGrid::OnMenuCopyToCBAsInsert(wxCommandEvent& WXUNUSED(event))
             {
                 if (!sCols.IsEmpty())
                     sCols += wxT(", ");
-                // NOTE: preloading the column names into a local string
+                // NOTE: preloading the column names into a local wxString
                 //       array might be a worthy optimization
                 sCols += GetColLabelValue(j);
                 if (!sValues.IsEmpty())

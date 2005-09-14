@@ -29,7 +29,6 @@
 #include <wx/wx.h>
 
 #include <list>
-#include <string>
 
 #include <ibpp.h>
 
@@ -38,12 +37,12 @@ class Table;
 //! sets all controls to width of widest control
 void adjustControlsMinWidth(std::list<wxWindow*> controls);
 //-----------------------------------------------------------------------------
-//! reads blob from statement into std::string
-void readBlob(IBPP::Statement& st, int column, std::string& result);
+//! reads blob from statement into wxString
+void readBlob(IBPP::Statement& st, int column, wxString& result);
 //-----------------------------------------------------------------------------
 //! displays a list of table columns and lets user select some
-std::string selectTableColumns(Table* t, wxWindow* parent);
+wxString selectTableColumns(Table* t, wxWindow* parent);
 bool selectTableColumnsIntoVector(Table* t, wxWindow* parent, 
-    std::vector<std::string>& list);
+    std::vector<wxString>& list);
 //-----------------------------------------------------------------------------
 #endif // FRUTILS_H

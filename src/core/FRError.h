@@ -34,11 +34,12 @@
 #include <string>
 #include <exception>
 //-----------------------------------------------------------------------------
-#define BEGIN_EVENT_HANDLER try {
+#define FR_TRY try {
 
-#define END_EVENT_HANDLER } catch (std::exception& e) { handleException(e); }
+#define FR_CATCH } catch (const std::exception& e) \
+    { handleException(e); }
 //-----------------------------------------------------------------------------
-void handleException(std::exception& e);
+void handleException(const std::exception& e);
 //-----------------------------------------------------------------------------
 class FRError: public std::exception
 {
@@ -49,7 +50,7 @@ public:
     FRError(const wxString& message);
     virtual const char* what() const throw();
 
-    ~FRError() throw();
+    virtual ~FRError() throw();
 };
 //-----------------------------------------------------------------------------
 #endif //FR_FRERROR_H

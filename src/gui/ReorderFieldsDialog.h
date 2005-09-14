@@ -29,8 +29,6 @@
 #include <wx/wx.h>
 #include <wx/image.h>
 
-#include <string>
-
 #include "core/Observer.h"
 #include "gui/BaseDialog.h"
 #include "metadata/table.h"
@@ -71,7 +69,7 @@ protected:
     wxButton* button_ok;
     wxButton* button_cancel;
 
-    virtual const std::string getName() const;
+    virtual const wxString getName() const;
     void removeSubject(Subject* subject);
     void update();
     void updateButtons();

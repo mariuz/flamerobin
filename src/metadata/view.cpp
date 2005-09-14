@@ -36,8 +36,10 @@
 #include "core/Visitor.h"
 #include "database.h"
 #include "dberror.h"
+#include "frutils.h"
 #include "MetadataItemVisitor.h"
 #include "relation.h"
+#include "ugly.h"
 #include "view.h"
 //-----------------------------------------------------------------------------
 View::View()
@@ -47,12 +49,13 @@ View::View()
 }
 //-----------------------------------------------------------------------------
 //! returns false if an error occurs
-bool View::getSource(std::string& source)
+bool View::getSource(wxString& source)
 {
+	source = wxT("");
 	Database *d = static_cast<Database *>(getParent());
 	if (!d)
 	{
-		lastError().setMessage("Database not set.");
+		lastError().setMessage(wxT("Database not set."));
 		return false;
 	}
 
@@ -64,58 +67,35 @@ bool View::getSource(std::string& source)
 		tr1->Start();
 		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
 		st1->Prepare("select rdb$view_source from rdb$relations where rdb$relation_name = ?");
-		st1->Set(1, getName());
+		st1->Set(1, wx2std(getName()));
 		st1->Execute();
 		st1->Fetch();
-		IBPP::Blob b = IBPP::BlobFactory(st1->Database(), st1->Transaction());
-		st1->Get(1, b);
-
-		try				// if blob is empty the exception is thrown
-		{				// I tried to check st1->IsNull(1) but it doesn't work
-			b->Open();	// to this hack is the only way (for the time being)
-		}
-		catch (...)
-		{
-			source = "";
-			return true;
-		}
-
-		std::string desc;
-		char buffer[8192];		// 8K block
-		while (true)
-		{
-			int size = b->Read(buffer, 8192);
-			if (size <= 0)
-				break;
-			buffer[size] = 0;
-			source += buffer;
-		}
-		b->Close();
+        readBlob(st1, 1, source);
 		tr1->Commit();
 		return true;
 	}
 	catch (IBPP::Exception &e)
 	{
-		lastError().setMessage(e.ErrorMessage());
+		lastError().setMessage(std2wx(e.ErrorMessage()));
 	}
 	catch (...)
 	{
-		lastError().setMessage("System error.");
+		lastError().setMessage(_("System error."));
 	}
 
 	return false;
 }
 //-----------------------------------------------------------------------------
-std::string View::getAlterSql()
+wxString View::getAlterSql()
 {
 	if (!checkAndLoadColumns())
 		return lastError().getMessage();
-	std::string src;
+	wxString src;
 	if (!getSource(src))
 		return lastError().getMessage();
 
-	std::string sql = "DROP VIEW " + getName() + ";\n";
-	sql += "CREATE VIEW " + getName() + " (";
+	wxString sql = wxT("DROP VIEW ") + getName() + wxT(";\n");
+	sql += wxT("CREATE VIEW ") + getName() + wxT(" (");
 
 	bool first = true;
 	for (MetadataCollection <Column>::const_iterator it = columnsM.begin(); it != columnsM.end(); ++it)
@@ -123,27 +103,27 @@ std::string View::getAlterSql()
 		if (first)
 			first = false;
 		else
-			sql += ", ";
+			sql += wxT(", ");
 		sql += (*it).getName();
 	}
-	sql += ")\nAS ";
+	sql += wxT(")\nAS ");
 	sql += src;
 	return sql;
 }
 //-----------------------------------------------------------------------------
-std::string View::getCreateSqlTemplate() const
+wxString View::getCreateSqlTemplate() const
 {
-	std::string sql(
-		"CREATE VIEW name ( view_column, ...)\n"
-		"AS\n"
-		"/* write select statement here */\n"
-		"WITH CHECK OPTION;\n");
+	wxString sql(
+		wxT("CREATE VIEW name ( view_column, ...)\n")
+		wxT("AS\n")
+		wxT("/* write select statement here */\n")
+		wxT("WITH CHECK OPTION;\n"));
 	return sql;
 }
 //-----------------------------------------------------------------------------
-const std::string View::getTypeName() const
+const wxString View::getTypeName() const
 {
-	return "VIEW";
+	return wxT("VIEW");
 }
 //-----------------------------------------------------------------------------
 void View::acceptVisitor(MetadataItemVisitor* visitor)

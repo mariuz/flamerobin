@@ -38,8 +38,8 @@ private:
 	ParameterType parameterTypeM;
 public:
 	Parameter();
-	Parameter(std::string source, int parameterType);
-	std::string getPrintableName();
+	Parameter(wxString source, int parameterType);
+	wxString getPrintableName();
 	ParameterType getParameterType() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };

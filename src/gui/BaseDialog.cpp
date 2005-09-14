@@ -36,8 +36,6 @@ Contributor(s): Nando Dessena
     #include "wx/wx.h"
 #endif
 
-#include <string>
-
 #include "config/Config.h"
 #include "gui/BaseDialog.h"
 #include "styleguide.h"
@@ -118,25 +116,25 @@ void BaseDialog::updateColors(wxWindow *parent)
 void BaseDialog::readConfigSettings()
 {
     // default to centered dialogs
-    bool centered = config().get("centerDialogOnParent", true);
-    if (config().get("FrameStorage", false))
+    bool centered = config().get(wxT("centerDialogOnParent"), true);
+    if (config().get(wxT("FrameStorage"), false))
     {
-        std::string itemPrefix = getStorageName();
+        wxString itemPrefix = getStorageName();
         if (!itemPrefix.empty())
         {
             wxRect r = getDefaultRect();
-            config().getValue(itemPrefix + Config::pathSeparator + "width", r.width);
-            config().getValue(itemPrefix + Config::pathSeparator + "height", r.height);
+            config().getValue(itemPrefix + Config::pathSeparator + wxT("width"), r.width);
+            config().getValue(itemPrefix + Config::pathSeparator + wxT("height"), r.height);
             doReadConfigSettings(itemPrefix);
             if (r.width > 0 && r.height > 0)
                 SetSize(r.width, r.height);
             // default to global setting, set to 0 to disable
             // restore the position if we don't want it centered
-            config().getValue(itemPrefix + Config::pathSeparator + "centerDialogOnParent", centered);
+            config().getValue(itemPrefix + Config::pathSeparator + wxT("centerDialogOnParent"), centered);
             if (!centered)
             {
-                config().getValue(itemPrefix + Config::pathSeparator + "x", r.x);
-                config().getValue(itemPrefix + Config::pathSeparator + "y", r.y);
+                config().getValue(itemPrefix + Config::pathSeparator + wxT("x"), r.x);
+                config().getValue(itemPrefix + Config::pathSeparator + wxT("y"), r.y);
                 SetSize(r);
             }
         }
@@ -145,47 +143,47 @@ void BaseDialog::readConfigSettings()
         CenterOnParent();
 }
 //-----------------------------------------------------------------------------
-void BaseDialog::doReadConfigSettings(const std::string& WXUNUSED(prefix))
+void BaseDialog::doReadConfigSettings(const wxString& WXUNUSED(prefix))
 {
 }
 //-----------------------------------------------------------------------------
 void BaseDialog::writeConfigSettings() const
 {
-    if (config().get("FrameStorage", false) && !IsIconized())
+    if (config().get(wxT("FrameStorage"), false) && !IsIconized())
     {
         // save window size to config.
-        std::string itemPrefix = getStorageName();
+        wxString itemPrefix = getStorageName();
         if (!itemPrefix.empty())
         {
             wxRect r = GetRect();
-            config().setValue(itemPrefix + Config::pathSeparator + "width", r.width);
-            config().setValue(itemPrefix + Config::pathSeparator + "height", r.height);
+            config().setValue(itemPrefix + Config::pathSeparator + wxT("width"), r.width);
+            config().setValue(itemPrefix + Config::pathSeparator + wxT("height"), r.height);
 
             bool centered = true;
-            config().getValue(itemPrefix + Config::pathSeparator + "centerDialogOnParent", centered);
+            config().getValue(itemPrefix + Config::pathSeparator + wxT("centerDialogOnParent"), centered);
             if (!centered)
             {
-                config().setValue(itemPrefix + Config::pathSeparator + "x", r.x);
-                config().setValue(itemPrefix + Config::pathSeparator + "y", r.y);
+                config().setValue(itemPrefix + Config::pathSeparator + wxT("x"), r.x);
+                config().setValue(itemPrefix + Config::pathSeparator + wxT("y"), r.y);
             }
             doWriteConfigSettings(itemPrefix);
         }
     }
 }
 //-----------------------------------------------------------------------------
-void BaseDialog::doWriteConfigSettings(const std::string& WXUNUSED(prefix)) const
+void BaseDialog::doWriteConfigSettings(const wxString& WXUNUSED(prefix)) const
 {
 }
 //-----------------------------------------------------------------------------
-const std::string BaseDialog::getName() const
+const wxString BaseDialog::getName() const
 {
     // Couldn't find a reliable (meaning supportable and cross-platform) way
     // to use the class name here, so every derived frame needs to override getName()
     // if it needs to use features that depend on it.
-    return "";
+    return wxT("");
 }
 //-----------------------------------------------------------------------------
-const std::string BaseDialog::getStorageName() const
+const wxString BaseDialog::getStorageName() const
 {
     return getName();
 }

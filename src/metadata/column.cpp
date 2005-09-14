@@ -31,7 +31,6 @@
 #endif
 
 #include <sstream>
-#include <string>
 
 #include "collection.h"
 #include "column.h"
@@ -50,10 +49,10 @@ Column::Column()
 }
 //-----------------------------------------------------------------------------
 //! initialize properties
-void Column::Init(bool notnull, std::string source, bool computed, std::string computedSource, std::string collation)
+void Column::Init(bool notnull, wxString source, bool computed, wxString computedSource, wxString collation)
 {
-	source.erase(source.find_last_not_of(" ")+1);		// right trim everything
-	collation.erase(collation.find_last_not_of(" ")+1);
+	source.erase(source.find_last_not_of(wxT(" ")) + 1);		// right trim everything
+	collation.erase(collation.find_last_not_of(wxT(" ")) + 1);
 	notnullM = notnull;
 	sourceM = source;
 	computedM = computed;
@@ -86,26 +85,36 @@ bool Column::isPrimaryKey() const
 }
 //-----------------------------------------------------------------------------
 //! retrieve datatype from domain if possible
-std::string Column::getDatatype()
+wxString Column::getDatatype()
 {
-	enum { showType=0, showFormula, showAll };
+	enum
+	{
+	    showType = 0,
+	    showFormula,
+	    showAll
+	};	
 	int flag = showFormula;
-	config().getValue("ShowComputed", flag);
+	config().getValue(wxT("ShowComputed"), flag);
 	// view columns are all computed and have their source empty
 	if (computedM && flag == showFormula && !computedSourceM.empty())
 		return computedSourceM;
 
-	std::string ret;
+	wxString ret;
 	Domain *d = getDomain();
-	std::string datatype;
+	wxString datatype;
  	if (d)
 		datatype = d->getDatatypeAsString();
 	else
 		datatype = sourceM;
 
-	enum { showDatatype=0, showDomain, showBoth };
+	enum
+	{
+	    showDatatype = 0,
+	    showDomain,
+	    showBoth
+	};	
 	int show = showBoth;
- 	config().getValue("ShowDomains", show);
+ 	config().getValue(wxT("ShowDomains"), show);
 
 	if (!d || d->isSystem() || show == showBoth || show == showDatatype)
 		ret += datatype;
@@ -113,21 +122,21 @@ std::string Column::getDatatype()
 	if (d && !d->isSystem() && (show == showBoth || show == showDomain))
 	{
 		if (!ret.empty())
-			ret += " ";
-		ret += "(" + d->getName() + ")";
+			ret += wxT(" ");
+		ret += wxT("(") + d->getName() + wxT(")");
 	}
 
 	if (computedM && flag == showAll && !computedSourceM.empty())
-		ret += " (" + computedSourceM + ")";
+		ret += wxT(" (") + computedSourceM + wxT(")");
 	return ret;
 }
 //-----------------------------------------------------------------------------
 //! printable name = column_name + column_datatype [+ not null]
-std::string Column::getPrintableName()
+wxString Column::getPrintableName()
 {
-	std::string ret = getName() + " " + getDatatype();
+	wxString ret = getName() + wxT(" ") + getDatatype();
 	if (notnullM)
-		ret += " not null";
+		ret += wxT(" not null");
 	return ret;
 }
 //-----------------------------------------------------------------------------
@@ -144,19 +153,19 @@ Domain *Column::getDomain() const
 	return d->loadMissingDomain(sourceM);
 }
 //-----------------------------------------------------------------------------
-std::string Column::getSource() const
+wxString Column::getSource() const
 {
 	return sourceM;
 }
 //-----------------------------------------------------------------------------
-std::string Column::getCollation() const
+wxString Column::getCollation() const
 {
 	return collationM;
 }
 //-----------------------------------------------------------------------------
-std::string Column::getDropSqlStatement() const
+wxString Column::getDropSqlStatement() const
 {
-	return "ALTER TABLE " + getParent()->getName() + " DROP " + getName();
+	return wxT("ALTER TABLE ") + getParent()->getName() + wxT(" DROP ") + getName();
 }
 //-----------------------------------------------------------------------------
 void Column::acceptVisitor(MetadataItemVisitor* visitor)

@@ -43,9 +43,9 @@ private:
     void do_layout();
     virtual void updateControls();
 protected:
-    virtual void doReadConfigSettings(const std::string& prefix);
-    virtual void doWriteConfigSettings(const std::string& prefix) const;
-    virtual const std::string getName() const;
+    virtual void doReadConfigSettings(const wxString& prefix);
+    virtual void doWriteConfigSettings(const wxString& prefix) const;
+    virtual const wxString getName() const;
 protected:
     wxCheckBox* checkbox_replace;
     wxCheckBox* checkbox_deactivate;

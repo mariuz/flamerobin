@@ -75,7 +75,7 @@ protected:
     TextCtrlWithContextMenu* text_ctrl_value;
     wxButton* button_ok;
     wxButton* button_cancel;
-    virtual const std::string getName() const;
+    virtual const wxString getName() const;
 };
 //-----------------------------------------------------------------------------
 #endif // MULTILINEENTERDIALOG_H

@@ -37,7 +37,7 @@ Contributor(s): Michael Hieke, Nando Dessena
 #endif
 
 #include <wx/clipbrd.h>
-#include <string>
+
 #include "MultilineEnterDialog.h"
 #include "styleguide.h"
 //-----------------------------------------------------------------------------
@@ -71,9 +71,9 @@ void MultilineEnterDialog::do_layout()
     layoutSizers(sizerControls, sizerButtons, true);
 }
 //-----------------------------------------------------------------------------
-const std::string MultilineEnterDialog::getName() const
+const wxString MultilineEnterDialog::getName() const
 {
-    return "MultilineEnterDialog";
+    return wxT("MultilineEnterDialog");
 }
 //-----------------------------------------------------------------------------
 wxString MultilineEnterDialog::getText() const

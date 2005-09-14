@@ -81,15 +81,15 @@ void TreeItem::update()
         return;
 
     bool itemHadChildren =  treeM->ItemHasChildren(id);
-    bool hideDisconnected = config().get("HideDisconnectedDatabases", false);
+    bool hideDisconnected = config().get(wxT("HideDisconnectedDatabases"), false);
 
     // check current item
-    if (treeM->GetItemText(id) != std2wx(object->getPrintableName()))
-        treeM->SetItemText(id, std2wx(object->getPrintableName()));
+    if (treeM->GetItemText(id) != object->getPrintableName())
+        treeM->SetItemText(id, object->getPrintableName());
 
     NodeType ndt = object->getType();
     bool affectedBySetting = (ndt == ntTable || ndt == ntView || ndt == ntProcedure);
-    bool showColumns = !affectedBySetting || config().get("ShowColumnsInTree", true);
+    bool showColumns = !affectedBySetting || config().get(wxT("ShowColumnsInTree"), true);
 
     // check subitems
     std::vector<MetadataItem *>temp;
@@ -109,7 +109,7 @@ void TreeItem::update()
                     continue;
             }
 
-            wxString dbh_name = std2wx((*i)->getPrintableName());
+            wxString dbh_name = (*i)->getPrintableName();
             wxTreeItemId item = findSubNode(*i);
             // add if needed
             if (!item.IsOk())

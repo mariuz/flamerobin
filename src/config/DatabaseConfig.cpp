@@ -36,9 +36,8 @@
     #include "wx/wx.h"
 #endif
 //-----------------------------------------------------------------------------
-#include <string>
-#include "metadata/database.h"
 #include "DatabaseConfig.h"
+#include "metadata/database.h"
 //-----------------------------------------------------------------------------
 DatabaseConfig::DatabaseConfig(Database *d)
     :Config()
@@ -50,25 +49,25 @@ DatabaseConfig::DatabaseConfig(Database *d)
     setUserHomePath(config().getUserHomePath());
 }
 //-----------------------------------------------------------------------------
-std::string DatabaseConfig::addPathToKey(const std::string key) const
+wxString DatabaseConfig::addPathToKey(const wxString key) const
 {
     if (databaseM)
-        return "DATABASE_" + databaseM->getId() + Config::pathSeparator + key;
+        return wxT("DATABASE_") + databaseM->getId() + Config::pathSeparator + key;
     else
-        return "";
+        return wxT("");
 }
 //-----------------------------------------------------------------------------
-bool DatabaseConfig::keyExists(const std::string& key) const
+bool DatabaseConfig::keyExists(const wxString& key) const
 {
     return config().keyExists(addPathToKey(key));
 }
 //-----------------------------------------------------------------------------
-bool DatabaseConfig::getValue(std::string key, std::string& value)
+bool DatabaseConfig::getValue(wxString key, wxString& value)
 {
     return config().getValue(addPathToKey(key), value);
 }
 //-----------------------------------------------------------------------------
-bool DatabaseConfig::setValue(std::string key, std::string value)
+bool DatabaseConfig::setValue(wxString key, wxString value)
 {
     return config().setValue(addPathToKey(key), value);
 }

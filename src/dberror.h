@@ -27,22 +27,18 @@
 #define FR_DBERROR_H
 
 #if (wxUSE_UNICODE)
-#include <wx/wx.h>
+    #include <wx/wx.h>
 #endif
 
-#include <string>
 //-----------------------------------------------------------------------------
 class Error
 {
 private:
-    std::string messageM;
+    wxString messageM;
 
 public:
-    std::string getMessage() const;
-    void setMessage(std::string message);
-#if (wxUSE_UNICODE)
-    void setMessage(wxString message);    // makes things easier for unicode builds
-#endif
+    wxString getMessage() const;
+    void setMessage(wxString message);
 };
 //-----------------------------------------------------------------------------
 Error& lastError();

@@ -27,17 +27,17 @@
 #define FR_HISTORY_H
 
 #include <wx/wx.h>
+
 #include <deque>
-#include <string>
 //-----------------------------------------------------------------------------
 class Database;
 //-----------------------------------------------------------------------------
 class StatementHistory
 {
 private:
-    StatementHistory(const std::string& storageName);
+    StatementHistory(const wxString& storageName);
     std::deque<wxString> statementsM;
-    std::string storageNameM;
+    wxString storageNameM;
     void checkSize();
 
 public:

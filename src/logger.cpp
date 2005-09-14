@@ -51,32 +51,32 @@ bool Logger::log2database(const executedStatement& /*st*/, Database* /*db*/)
 }
 //----------------------------------------------------------------------------
 bool Logger::log2file(Config *cfg, const executedStatement& st,
-    Database *db, const std::string& filename)
+    Database *db, const wxString& filename)
 {
     enum { singleFile=0, multiFile };
     int logToFileType;
-    cfg->getValue("LogToFileType", logToFileType);
+    cfg->getValue(wxT("LogToFileType"), logToFileType);
 
-    std::string sql = st.statement;
+    wxString sql = st.statement;
     if (logToFileType == singleFile)         // add ; to statement if missing
     {
-        sql.erase(sql.find_last_not_of(" \n\t\r")+1);           // trim
-        std::string::size_type pos = sql.find_last_of(";");
-        if (pos == std::string::npos || pos < sql.length() - 1)
-            sql += ";";
+        sql.erase(sql.find_last_not_of(wxT(" \n\t\r")) + 1);           // trim
+        wxString::size_type pos = sql.find_last_of(wxT(";"));
+        if (pos == wxString::npos || pos < sql.length() - 1)
+            sql += wxT(";");
     }
 
     wxFile f;
     if (logToFileType == multiFile)
     {
-        if (filename.find_last_of("%d") == std::string::npos) // %d not found
+        if (filename.find_last_of(wxT("%d")) == wxString::npos) // %d not found
             return false;
         wxString test;
         int start = 1;
-        cfg->getValue("IncrementalLogFileStart", start);
+        cfg->getValue(wxT("IncrementalLogFileStart"), start);
         for (int i=start; i < 100000; ++i) // dummy test for 100000
         {
-            test.Printf(std2wx(filename), i);
+            test.Printf(filename, i);
             if (!wxFileExists(test))
             {
                 if (f.Open(test, wxFile::write))
@@ -87,34 +87,34 @@ bool Logger::log2file(Config *cfg, const executedStatement& st,
             return false;
     }
     else
-        if (!f.Open(std2wx(filename), wxFile::write_append )) // cannot open
+        if (!f.Open(filename, wxFile::write_append )) // cannot open
             return false;
 
     bool loggingAddHeader = true;
-    cfg->getValue("LoggingAddHeader", loggingAddHeader);
+    cfg->getValue(wxT("LoggingAddHeader"), loggingAddHeader);
     if (loggingAddHeader)
     {
         wxString header = wxString::Format(
             _("\n/* Logged by FlameRobin %d.%d.%d at %s\n   User: %s    Database: %s */\n"),
             FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RELEASE,
             wxDateTime::Now().Format().c_str(),
-            std2wx(db->getUsername()).c_str(),
-            std2wx(db->getPath()).c_str()
+            db->getUsername().c_str(),
+            db->getPath().c_str()
         );
         f.Write(header);
     }
     else
         f.Write(wxT("\n"));
-    f.Write(std2wx(sql));
+    f.Write(sql);
     f.Close();
     return true;
 }
 //----------------------------------------------------------------------------
-bool Logger::logStatement(const executedStatement& st, Database *db)
+bool Logger::logStatement(const executedStatement& st, Database* db)
 {
     DatabaseConfig dc(db);
     bool result = logStatementByConfig(&dc, st, db);
-    if (!dc.get("ExcludeFromGlobalLogging", false))
+    if (!dc.get(wxT("ExcludeFromGlobalLogging"), false))
     {
         Config& globalConfig = config();
         return logStatementByConfig(&globalConfig, st, db);
@@ -123,20 +123,20 @@ bool Logger::logStatement(const executedStatement& st, Database *db)
         return result;
 }
 //---------------------------------------------------------------------------
-bool Logger::logStatementByConfig(Config *cfg, const executedStatement& st,
+bool Logger::logStatementByConfig(Config* cfg, const executedStatement& st,
     Database *db)
 {
     bool logDML = false;
-    cfg->getValue("LogDML", logDML);
+    cfg->getValue(wxT("LogDML"), logDML);
     if (!logDML && st.type != IBPP::stDDL)    // logging not needed
         return true;
 
     bool logToFile = false;
-    cfg->getValue("LogToFile", logToFile);
+    cfg->getValue(wxT("LogToFile"), logToFile);
     if (logToFile)
     {
-        std::string logFilename;
-        cfg->getValue("LogFile", logFilename);
+        wxString logFilename;
+        cfg->getValue(wxT("LogFile"), logFilename);
         if (logFilename.empty())
         {
             ::wxMessageBox(
@@ -148,7 +148,7 @@ bool Logger::logStatementByConfig(Config *cfg, const executedStatement& st,
         return log2file(cfg, st, db, logFilename);
     }
     bool logToDb = false;
-    cfg->getValue("LogToDatabase", logToDb);
+    cfg->getValue(wxT("LogToDatabase"), logToDb);
     if (logToDb)
     {
         //prepareDatabase();    <- create log table, generator, etc.

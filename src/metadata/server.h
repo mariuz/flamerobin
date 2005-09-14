@@ -36,8 +36,8 @@
 class Server: public MetadataItem
 {
 private:
-    std::string hostnameM;
-    std::string portM;
+    wxString hostnameM;
+    wxString portM;
 
     MetadataCollection<Database> databasesM;
 
@@ -52,18 +52,18 @@ public:
     void createDatabase(Database *db, int pagesize = 4096, int dialect = 3);
 
     // setters/getters
-    std::string getHostname() const;
-    std::string getPort() const;
-    // returns the server-related portion of the connection string,
+    wxString getHostname() const;
+    wxString getPort() const;
+    // returns the server-related portion of the connection wxString,
     // that is server name and port number if specified.
-    std::string getConnectionString() const;
+    wxString getConnectionString() const;
 
-    void setHostname(std::string hostname);
-    void setPort(std::string port);
-    virtual const std::string getTypeName() const;
+    void setHostname(wxString hostname);
+    void setPort(wxString port);
+    virtual const wxString getTypeName() const;
 
     bool hasConnectedDatabase() const;
-    virtual const std::string getItemPath() const;
+    virtual const wxString getItemPath() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------

@@ -33,25 +33,25 @@ class Trigger: public MetadataItem
 {
 private:
 	bool infoIsLoadedM;
-	std::string objectM;
+	wxString objectM;
 	bool activeM;
 	int positionM;
-	std::string triggerTypeM;
+	wxString triggerTypeM;
 public:
 	Trigger();
 
 	enum firingTimeType { afterTrigger, beforeTrigger };
-	std::string getCreateSqlTemplate() const;	// overrides MetadataItem::getCreateSqlTemplate()
+	wxString getCreateSqlTemplate() const;	// overrides MetadataItem::getCreateSqlTemplate()
 
 	bool loadInfo(bool force = false);
-	bool getTriggerInfo(std::string& object, bool& active, int& position, std::string& type);
-	bool getSource(std::string& source) const;
-	bool getRelation(std::string& relation);
-	static std::string getTriggerType(int flags);
+	bool getTriggerInfo(wxString& object, bool& active, int& position, wxString& type);
+	bool getSource(wxString& source) const;
+	bool getRelation(wxString& relation);
+	static wxString getTriggerType(int flags);
 	firingTimeType getFiringTime();
-	std::string getAlterSql();
+	wxString getAlterSql();
 
-	virtual const std::string getTypeName() const;
+	virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------

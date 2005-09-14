@@ -31,6 +31,7 @@
 
 #include "domain.h"
 #include "metadataitem.h"
+#include "ugly.h"
 //-----------------------------------------------------------------------------
 template <class T>
 class MetadataCollection: public MetadataItem
@@ -65,7 +66,7 @@ public:
     }
 
     //! same as add() but watches for sorting
-    virtual T* add(std::string name)            // inserts item to vector and returns pointer to it
+    virtual T* add(wxString name)            // inserts item to vector and returns pointer to it
     {
         T item;
         item.setParent(this);
@@ -88,7 +89,7 @@ public:
     virtual T* add()                // Creates new item, adds it and returns pointer to it.
     {                               // notify() is *not* called since newly added object still doesn't
         T item;                     // have its properties set, so for example getName() would return
-        item.setParent(this);       // empty string. It is responsibility of the caller to call notify
+        item.setParent(this);       // empty wxString. It is responsibility of the caller to call notify
         itemsM.push_back(item);     // after it has set the properties.
         return &itemsM.back();
     }
@@ -124,7 +125,7 @@ public:
         notifyObservers();
     };
 
-    virtual MetadataItem *findByName(std::string name)
+    virtual MetadataItem *findByName(wxString name)
     {
         for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
         {
@@ -144,19 +145,19 @@ public:
         return (itemsM.size() != 0);
     }
 
-    void getChildrenNames(std::vector<std::string>& temp)
+    void getChildrenNames(std::vector<wxString>& temp)
     {
         for (const_iterator it = itemsM.begin(); it != itemsM.end(); ++it)
             temp.push_back((*it).getName());
     }
 
-    std::string getCreateSqlTemplate() const        // this could be done better, but I haven't got the idea
+    wxString getCreateSqlTemplate() const        // this could be done better, but I haven't got the idea
     {                                               // function looks like it could be static, but then it
         T dummy;                                    // can't be virtual, and vice versa. So I just create a dummy
         return dummy.getCreateSqlTemplate();        // object to call the function on.
     }
 
-    virtual std::string getPrintableName()
+    virtual wxString getPrintableName()
     {
         if (typeM != ntDomains)
             return MetadataItem::getPrintableName();
@@ -167,9 +168,9 @@ public:
                 n++;
         if (n)
         {
-            std::ostringstream ss;
-            ss << getName() << " (" << n << ")";
-            return ss.str();
+            wxString s;
+            s << getName() << wxT(" (") << n << wxT(")");
+            return s;
         }
         else
             return getName();
@@ -188,7 +189,7 @@ private:
 /* FIXME: from some yet unknown reason, this doesn't compile on g++ 3.3
 //! specific for domains since system-generated domains should not be counted
 template<>
-std::string MetadataCollection<Domain>::getPrintableName() const
+wxString MetadataCollection<Domain>::getPrintableName() const
 {
     unsigned int n = 0;
     for (const_iterator it = itemsM.begin(); it != itemsM.end(); ++it)

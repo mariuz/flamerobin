@@ -33,11 +33,11 @@ class View: public Relation
 {
 public:
 	View();
-	std::string getCreateSqlTemplate() const;	// overrides MetadataItem::getCreateSqlTemplate()
+	wxString getCreateSqlTemplate() const;	// overrides MetadataItem::getCreateSqlTemplate()
 
-	bool getSource(std::string& source);
-	std::string getAlterSql();
-	virtual const std::string getTypeName() const;
+	bool getSource(wxString& source);
+	wxString getAlterSql();
+	virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------

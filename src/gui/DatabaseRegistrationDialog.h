@@ -71,7 +71,7 @@ private:
     const wxString buildName(const wxString& dbPath) const;
     void updateIsDefaultName();
 protected:
-    virtual const std::string getName() const;
+    virtual const wxString getName() const;
 
 protected:
     wxStaticText* label_name;

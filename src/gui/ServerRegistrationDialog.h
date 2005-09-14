@@ -71,7 +71,7 @@ protected:
     wxButton* button_cancel;
 
     DECLARE_EVENT_TABLE()
-    virtual const std::string getName() const;
+    virtual const wxString getName() const;
 };
 //-----------------------------------------------------------------------------
 #endif // SERVERREGISTRATIONDIALOG_H

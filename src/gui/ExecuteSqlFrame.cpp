@@ -36,16 +36,15 @@
     #include "wx/wx.h"
 #endif
 
-#include <sstream>
-#include <string>
 #include <algorithm>
-#include <vector>
 #include <map>
+#include <sstream>
+#include <vector>
 
-#include <wx/file.h>
 #include <wx/datetime.h>
-#include <wx/tokenzr.h>
+#include <wx/file.h>
 #include <wx/fontdlg.h>
+#include <wx/tokenzr.h>
 
 #include "config/Config.h"
 #include "dberror.h"
@@ -77,54 +76,54 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
     Database *db = m->getDatabase();
     if (db != databaseM)
     {
-        wxMessageBox(_("Cannot use objects from different databases."), _("Wrong database."), wxOK|wxICON_WARNING);
+        wxMessageBox(_("Cannot use objects from different databases."), _("Wrong database."), wxOK | wxICON_WARNING);
         return false;
     }
 
-    Table *t = 0;
-    std::string column_list;
+    Table* t = 0;
+    wxString column_list;
     if (m->getType() == ntColumn)
     {
-        t = dynamic_cast<Table *>(m->getParent());
-        column_list = t->getName() + "." + m->getName();
+        t = dynamic_cast<Table*>(m->getParent());
+        column_list = t->getName() + wxT(".") + m->getName();
     }
     if (m->getType() == ntTable)
     {
-        t = dynamic_cast<Table *>(m);
-        column_list = t->getName() + ".*";
+        t = dynamic_cast<Table*>(m);
+        column_list = t->getName() + wxT(".*");
     }
     if (t == 0)
     {
-        wxMessageBox(_("Only tables and table columns can be dropped."), _("Object type not supported."), wxOK|wxICON_WARNING);
+        wxMessageBox(_("Only tables and table columns can be dropped."), _("Object type not supported."), wxOK | wxICON_WARNING);
         return false;
     }
 
     // setup complete. now the actual stuff:
-    std::string sql = wx2std(ownerM->GetText().Upper());
+    wxString sql = ownerM->GetText().Upper();
 
     // currently we don't support having comments and quotes (it's complicated)
     //if (!Parser::stripSql(sql))
     //    return true;
 
-    std::string::size_type psel, pfrom;
-    psel = sql.find("SELECT");
-    if (psel == std::string::npos)                            // simple select statement
+    wxString::size_type psel, pfrom;
+    psel = sql.find(wxT("SELECT"));
+    if (psel == wxString::npos)                            // simple select statement
     {
-        sql = "SELECT " + column_list + "\nFROM " + t->getName();
-        ownerM->SetText(std2wx(sql));
+        sql = wxT("SELECT ") + column_list + wxT("\nFROM ") + t->getName();
+        ownerM->SetText(sql);
         return true;
     }
 
-    pfrom = sql.find("FROM", psel);
-    if (pfrom == std::string::npos)
+    pfrom = sql.find(wxT("FROM"), psel);
+    if (pfrom == wxString::npos)
     {
-        wxMessageBox(_("SELECT present, but FROM missing."), _("Unable to parse the statement"), wxOK|wxICON_WARNING);
+        wxMessageBox(_("SELECT present, but FROM missing."), _("Unable to parse the statement"), wxOK | wxICON_WARNING);
         return true;
     }
 
     // read in the table names, and find position where FROM clause ends
-    std::vector<std::string> tableNames;
-    std::string::size_type from_end = pfrom + Parser::getTableNames(tableNames, sql.substr(pfrom));
+    std::vector<wxString> tableNames;
+    wxString::size_type from_end = pfrom + Parser::getTableNames(tableNames, sql.substr(pfrom));
 
     // if table is not there, add it
     if (std::find(tableNames.begin(), tableNames.end(), t->getName()) == tableNames.end())
@@ -132,12 +131,12 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
         std::vector<Join> relatedTables;
         if (Table::tablesRelate(tableNames, t, relatedTables))    // foreign keys
         {
-            std::string join_list;
+            wxString join_list;
             if (relatedTables.size() > 1)    // let the user decide
             {
                 wxArrayString as;
                 for (std::vector<Join>::iterator it = relatedTables.begin(); it != relatedTables.end(); ++it)
-                    as.Add(std2wx((*it).table));
+                    as.Add((*it).table);
                 int selected = ::wxGetSingleChoiceIndex(_("Multiple foreign keys found"),
                     _("Select the desired table"), as);
                 if (selected == -1)
@@ -151,25 +150,25 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
             // can_be_null = (check if any of the FK fields can be null)
             bool can_be_null = true;
 
-            std::string insert = (can_be_null?" LEFT":"");
-            insert += " JOIN " + t->getName() + " ON " + join_list;
-            insert = "\n" + insert + " ";
+            wxString insert = (can_be_null ? wxT(" LEFT") : wxT(""));
+            insert += wxT(" JOIN ") + t->getName() + wxT(" ON ") + join_list;
+            insert = wxT("\n") + insert + wxT(" ");
             sql.insert(from_end, insert);
         }
         else
         {
-            sql.insert(pfrom + 5, " ");
+            sql.insert(pfrom + 5, wxT(" "));
             if (!tableNames.empty())
-                sql.insert(pfrom+5, ",");
+                sql.insert(pfrom + 5, wxT(","));
             sql.insert(pfrom + 5, t->getName());
         }
     }
 
     // add columns to SELECT. Possible solutions include either psel+8 or pfrom + 1. I picked pfrom + 1.
-    sql.insert(pfrom, ",\n");
+    sql.insert(pfrom, wxT(",\n"));
     sql.insert(pfrom+1, column_list);
 
-    ownerM->SetText(std2wx(sql));
+    ownerM->SetText(sql);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -188,11 +187,11 @@ SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id, ExecuteSqlFrame *frame)
     : SearchableEditor(parent, id)
 {
     frameM = frame;
-    std::string s;
-    if (config().getValue("SqlEditorFont", s) && !s.empty())
+    wxString s;
+    if (config().getValue(wxT("SqlEditorFont"), s) && !s.empty())
     {
         wxFont f;
-        f.SetNativeFontInfo(std2wx(s));
+        f.SetNativeFontInfo(s);
         if (f.Ok())
             StyleSetFont(wxSTC_STYLE_DEFAULT, f);
     }
@@ -203,7 +202,7 @@ SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id, ExecuteSqlFrame *frame)
     }
 
     int charset;
-    if (config().getValue("SqlEditorCharset", charset))
+    if (config().getValue(wxT("SqlEditorCharset"), charset))
         StyleSetCharacterSet(wxSTC_STYLE_DEFAULT, charset);
 
     setup();
@@ -384,8 +383,8 @@ void SqlEditor::OnMenuFindSelected(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void SqlEditor::OnMenuExecuteSelected(wxCommandEvent& WXUNUSED(event))
 {
-    if (config().get("TreatAsSingleStatement", false))
-        frameM->execute(wx2std(GetSelectedText()));
+    if (config().get(wxT("TreatAsSingleStatement"), false))
+        frameM->execute(GetSelectedText());
     else
         frameM->parseStatements(GetSelectedText());
 }
@@ -404,10 +403,10 @@ void SqlEditor::OnMenuSetFont(wxCommandEvent& WXUNUSED(event))
 {
     // step 1 of 2: set font
     wxFont f, f2;
-    std::string s;        // since we can't get the font from control we ask config() for it
-    if (config().getValue("SqlEditorFont", s) && !s.empty())
+    wxString s;        // since we can't get the font from control we ask config() for it
+    if (config().getValue(wxT("SqlEditorFont"), s) && !s.empty())
     {
-        f.SetNativeFontInfo(std2wx(s));
+        f.SetNativeFontInfo(s);
         f2 = ::wxGetFontFromUser(this, f);
     }
     else                // if config() doesn't have it, we'll use the default
@@ -421,38 +420,38 @@ void SqlEditor::OnMenuSetFont(wxCommandEvent& WXUNUSED(event))
     StyleSetFont(wxSTC_STYLE_DEFAULT, f2);
 
     // step 2 of 2: set charset
-    std::map<std::string, int> sets;        // create human-readable names from wxSTC charsets
-    sets["CHARSET_ANSI"] = 0;
-    sets["CHARSET_EASTEUROPE"] = 238;
-    sets["CHARSET_GB2312"] = 134;
-    sets["CHARSET_HANGUL"] = 129;
-    sets["CHARSET_HEBREW"] = 177;
-    sets["CHARSET_SHIFTJIS"] = 128;
+    std::map<wxString, int> sets;        // create human-readable names from wxSTC charsets
+    sets[wxT("CHARSET_ANSI")] = 0;
+    sets[wxT("CHARSET_EASTEUROPE")] = 238;
+    sets[wxT("CHARSET_GB2312")] = 134;
+    sets[wxT("CHARSET_HANGUL")] = 129;
+    sets[wxT("CHARSET_HEBREW")] = 177;
+    sets[wxT("CHARSET_SHIFTJIS")] = 128;
     #ifdef __WXMSW__
-    sets["CHARSET_DEFAULT"] = 1;        // according to scintilla docs these only work on Windows
-    sets["CHARSET_BALTIC"] = 186;        // so we won't offer them
-    sets["CHARSET_CHINESEBIG5"] = 136;
-    sets["CHARSET_GREEK"] = 161;
-    sets["CHARSET_MAC"] = 77;
-    sets["CHARSET_OEM"] = 255;
-    sets["CHARSET_RUSSIAN"] = 204;
-    sets["CHARSET_SYMBOL"] = 2;
-    sets["CHARSET_TURKISH"] = 162;
-    sets["CHARSET_JOHAB"] = 130;
-    sets["CHARSET_ARABIC"] = 178;
-    sets["CHARSET_VIETNAMESE"] = 163;
-    sets["CHARSET_THAI"] = 222;
+    sets[wxT("CHARSET_DEFAULT")] = 1;        // according to scintilla docs these only work on Windows
+    sets[wxT("CHARSET_BALTIC")] = 186;        // so we won't offer them
+    sets[wxT("CHARSET_CHINESEBIG5")] = 136;
+    sets[wxT("CHARSET_GREEK")] = 161;
+    sets[wxT("CHARSET_MAC")] = 77;
+    sets[wxT("CHARSET_OEM")] = 255;
+    sets[wxT("CHARSET_RUSSIAN")] = 204;
+    sets[wxT("CHARSET_SYMBOL")] = 2;
+    sets[wxT("CHARSET_TURKISH")] = 162;
+    sets[wxT("CHARSET_JOHAB")] = 130;
+    sets[wxT("CHARSET_ARABIC")] = 178;
+    sets[wxT("CHARSET_VIETNAMESE")] = 163;
+    sets[wxT("CHARSET_THAI")] = 222;
     #endif
     wxArrayString slist;  // copy to wxArrayString
     slist.Alloc(sets.size());
-    std::map<std::string, int>::iterator it;
+    std::map<wxString, int>::iterator it;
     for (it = sets.begin(); it != sets.end(); ++it)
-        slist.Add(std2wx((*it).first));
+        slist.Add((*it).first);
 
     wxString c = wxGetSingleChoice(_("Select charset to use"), _("Setting font for editor"), slist, this);
     if (c.IsEmpty())    // Canceled
         return;
-    it = sets.find(wx2std(c));
+    it = sets.find(c);
     if (it == sets.end())
         return;        // should never happen
 
@@ -461,8 +460,8 @@ void SqlEditor::OnMenuSetFont(wxCommandEvent& WXUNUSED(event))
     {
         wxString fontdesc = f2.GetNativeFontInfoDesc();
         if (!fontdesc.IsEmpty())
-            config().setValue("SqlEditorFont", wx2std(fontdesc));
-        config().setValue("SqlEditorCharset", (*it).second);
+            config().setValue(wxT("SqlEditorFont"), fontdesc);
+        config().setValue(wxT("SqlEditorCharset"), (*it).second);
     }
     setup();    // make control accept new settings
 }
@@ -537,7 +536,7 @@ void ExecuteSqlFrame::set_properties()
 
     keywordsM = wxT("");
     closeWhenTransactionDoneM = false;
-    autoCommitM = config().get("autoCommitDDL", false);
+    autoCommitM = config().get(wxT("autoCommitDDL"), false);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::do_layout()
@@ -602,13 +601,13 @@ void ExecuteSqlFrame::do_layout()
 // to know about database class
 void ExecuteSqlFrame::showProperties(wxString objectName)
 {
-    MetadataItem *m = databaseM->findByName(wx2std(objectName));
+    MetadataItem *m = databaseM->findByName(objectName);
     if (!m)
     {
         wxMessageBox(
             wxString::Format(_("Object %s has not been found in this database."), objectName.c_str()),
             _("Search failed."),
-            wxID_OK|wxICON_INFORMATION
+            wxID_OK | wxICON_INFORMATION
         );
         return;
     }
@@ -715,44 +714,44 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
     int c = styled_text_ctrl_sql->GetCharAt(pos-1);
     if (c == '(')
     {
-        if (config().get("SQLEditorCalltips", true))
+        if (config().get(wxT("SQLEditorCalltips"), true))
         {
-            int start = styled_text_ctrl_sql->WordStartPosition(pos-2, true);
-            if (start != -1 && start != pos-2)
+            int start = styled_text_ctrl_sql->WordStartPosition(pos - 2, true);
+            if (start != -1 && start != pos - 2)
             {
-                wxString word = styled_text_ctrl_sql->GetTextRange(start, pos-1).Upper();
-                std::string calltip;
-                Procedure *p = dynamic_cast<Procedure *>(databaseM->findByNameAndType(ntProcedure, wx2std(word)));
+                wxString word = styled_text_ctrl_sql->GetTextRange(start, pos - 1).Upper();
+                wxString calltip;
+                Procedure* p = dynamic_cast<Procedure*>(databaseM->findByNameAndType(ntProcedure, word));
                 if (p)
                     calltip = p->getDefinition();
-                Function *f = dynamic_cast<Function *>(databaseM->findByNameAndType(ntFunction, wx2std(word)));
+                Function* f = dynamic_cast<Function*>(databaseM->findByNameAndType(ntFunction, word));
                 if (f)
                     calltip = f->getDefinition();
                 if (!calltip.empty())
                 {
-                    styled_text_ctrl_sql->CallTipShow(start, std2wx(calltip));
-                    styled_text_ctrl_sql->CallTipSetHighlight(0, pos-1-start);    // start, end
+                    styled_text_ctrl_sql->CallTipShow(start, calltip);
+                    styled_text_ctrl_sql->CallTipSetHighlight(0, pos - 1 - start);    // start, end
                 }
             }
         }
     }
     else
     {
-        if (config().get("AutocompleteEnabled", true))
+        if (config().get(wxT("AutocompleteEnabled"), true))
         {
-            bool allow = config().get("autoCompleteQuoted", true);
+            bool allow = config().get(wxT("autoCompleteQuoted"), true);
             if (!allow)
             {
                 // needed since event that updates the style happens later
                 ::wxSafeYield();
-                if (styled_text_ctrl_sql->GetStyleAt(pos-1) != 7)   // not in quotes
+                if (styled_text_ctrl_sql->GetStyleAt(pos - 1) != 7)   // not in quotes
                     allow = true;
             }
             if (allow)
             {
                 if (styled_text_ctrl_sql->CallTipActive())
                 {
-                    if (!config().get("AutoCompleteDisableWhenCalltipShown", true))
+                    if (!config().get(wxT("AutoCompleteDisableWhenCalltipShown"), true))
                         autoComplete(false);
                 }
                 else
@@ -784,7 +783,7 @@ void ExecuteSqlFrame::autoComplete(bool force)
     int autoCompleteChars = 1;
     if (!force)
     {
-        autoCompleteChars = config().get("AutocompleteChars", 3);
+        autoCompleteChars = config().get(wxT("AutocompleteChars"), 3);
         if (autoCompleteChars <= 0)
             return;
     }
@@ -823,7 +822,7 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
         {
             enum { acSpace=0, acTab };
             int acc = acSpace;
-            config().getValue("AutoCompleteKey", acc);
+            config().getValue(wxT("AutoCompleteKey"), acc);
             if (acc == acSpace && event.ControlDown() && key == WXK_SPACE)
                 autoComplete(true);
 
@@ -845,7 +844,7 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
         else if (key == WXK_RETURN)
         {
             bool acEnter = false;
-            config().getValue("AutoCompleteWithEnter", acEnter);
+            config().getValue(wxT("AutoCompleteWithEnter"), acEnter);
             if (!acEnter)
                 styled_text_ctrl_sql->AutoCompCancel();
         }
@@ -949,7 +948,7 @@ void ExecuteSqlFrame::setSql(wxString sql)
 void ExecuteSqlFrame::OnButtonExecuteClick(wxCommandEvent& WXUNUSED(event))
 {
     bool clearMessages = false;
-    config().getValue("SQLEditorExecuteClears", clearMessages);
+    config().getValue(wxT("SQLEditorExecuteClears"), clearMessages);
     if (clearMessages)
         styled_text_ctrl_stats->ClearAll();
 
@@ -961,20 +960,20 @@ void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
     bool hasSelection = styled_text_ctrl_sql->GetSelectionStart() != styled_text_ctrl_sql->GetSelectionEnd();
     bool only = false;
     bool ok;
-    config().getValue("OnlyExecuteSelected", only);
+    config().getValue(wxT("OnlyExecuteSelected"), only);
     if (only && hasSelection)    // something is selected
     {
         bool single = false;
-        config().getValue("TreatAsSingleStatement", single);
+        config().getValue(wxT("TreatAsSingleStatement"), single);
         if (single)
-            ok = execute(wx2std(styled_text_ctrl_sql->GetSelectedText()), prepareOnly);
+            ok = execute(styled_text_ctrl_sql->GetSelectedText(), prepareOnly);
         else
             ok = parseStatements(styled_text_ctrl_sql->GetSelectedText(), false, prepareOnly);
     }
     else
         ok = parseStatements(styled_text_ctrl_sql->GetText(), false, prepareOnly);
 
-    if (ok || config().get("historyStoreUnsuccessful", true))
+    if (ok || config().get(wxT("historyStoreUnsuccessful"), true))
     {
         // add to history
         StatementHistory& sh = StatementHistory::get(databaseM);
@@ -988,8 +987,8 @@ void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
 void ExecuteSqlFrame::executeAllStatements(bool closeWhenDone)
 {
     bool ok = parseStatements(styled_text_ctrl_sql->GetText(), closeWhenDone);
-    if (config().get("historyStoreGenerated", true) &&
-        (ok || config().get("historyStoreUnsuccessful", true)))
+    if (config().get(wxT("historyStoreGenerated"), true) &&
+        (ok || config().get(wxT("historyStoreUnsuccessful"), true)))
     {
         // add buffer to history
         StatementHistory& sh = StatementHistory::get(databaseM);
@@ -1007,57 +1006,57 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
     styled_text_ctrl_stats->Clear();
 
     using namespace std;
-    string terminator = ";";
-    string commands = wx2std(statements);
+    wxString terminator = wxT(";");
+    wxString commands = statements;
 
     // find terminator, and execute the statement
-    string::size_type oldpos = 0;
-    string::size_type searchpos = 0;
+    wxString::size_type oldpos = 0;
+    wxString::size_type searchpos = 0;
     while (true)
     {
-        string::size_type pos = commands.find(terminator, searchpos);
-        string::size_type quote = commands.find("'", searchpos);            // watch for quoted text
-        string::size_type comment1 = commands.find("/*", searchpos);        // watch for commented text
-        string::size_type comment2 = commands.find("--", searchpos);        // watch for commented text
+        wxString::size_type pos = commands.find(terminator, searchpos);
+        wxString::size_type quote = commands.find(wxT("'"), searchpos);        // watch for quoted text
+        wxString::size_type comment1 = commands.find(wxT("/*"), searchpos);    // watch for commented text
+        wxString::size_type comment2 = commands.find(wxT("--"), searchpos);    // watch for commented text
 
         // check if terminator is maybe inside quotes or comments
-        if (pos != string::npos)                                        // terminator found
+        if (pos != wxString::npos)                                             // terminator found
         {
             // find the closest (check for quotes first)
-            if (quote != string::npos && quote < pos &&                 // found & before terminator
-                (comment1 == string::npos || quote < comment1) &&        // before comment1
-                (comment2 == string::npos || quote < comment2))            // before comment2
+            if (quote != wxString::npos && quote < pos &&                      // found & before terminator
+                (comment1 == wxString::npos || quote < comment1) &&            // before comment1
+                (comment2 == wxString::npos || quote < comment2))              // before comment2
             {
-                searchpos = 1 + commands.find("'", quote+1);            // end quote
+                searchpos = 1 + commands.find(wxT("'"), quote+1);              // end quote
                 continue;
             }
 
             // check for comment1
-            if (comment1 != string::npos && comment1 < pos &&            // found & before terminator
-                (comment2 == string::npos || comment1 < comment2))        // before comment2
+            if (comment1 != wxString::npos && comment1 < pos &&                // found & before terminator
+                (comment2 == wxString::npos || comment1 < comment2))           // before comment2
             {
-                searchpos = 1 + commands.find("*/", comment1+1);            // end comment
+                searchpos = 1 + commands.find(wxT("*/"), comment1 + 1);        // end comment
                 continue;
             }
 
             // check for comment2
-            if (comment2 != string::npos && comment2 < pos)                // found & before terminator
+            if (comment2 != wxString::npos && comment2 < pos)                  // found & before terminator
             {
-                searchpos = 1 + commands.find("\n", comment2+1);            // end comment
+                searchpos = 1 + commands.find(wxT("\n"), comment2 + 1);        // end comment
                 continue;
             }
         }
 
-        std::string::size_type lastpos = (pos == std::string::npos ? commands.length() : pos);
-        string sql = commands.substr(oldpos, lastpos-oldpos);
-        sql.erase(sql.find_last_not_of("\n\r\t ")+1);    // right-trim the statement
+        wxString::size_type lastpos = (pos == wxString::npos ? commands.length() : pos);
+        wxString sql = commands.substr(oldpos, lastpos-oldpos);
+        sql.erase(sql.find_last_not_of(wxT("\n\r\t ")) + 1);    // right-trim the statement
 
         stringstream strstrm;            // Search and intercept
-        string first, second, third;    // SET TERM and COMMIT statements
-        std::string strippedSql(sql);
-        Parser::removeComments(strippedSql, "/*", "*/");
-        Parser::removeComments(strippedSql, "--", "\n");
-        strstrm << upcase(strippedSql);
+        std::string first, second, third;    // SET TERM and COMMIT statements
+        wxString strippedSql(sql);
+        Parser::removeComments(strippedSql, wxT("/*"), wxT("*/"));
+        Parser::removeComments(strippedSql, wxT("--"), wxT("\n"));
+        strstrm << wx2std(strippedSql.Upper());
         strstrm >> first;
         strstrm >> second;
         strstrm >> third;
@@ -1068,12 +1067,12 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
         else if (first == "SET" && (second == "TERM" || second == "TERMINATOR"))
         {
             searchpos = oldpos = lastpos + terminator.length();    // has to be here since terminator length can change
-            terminator = third;
+            terminator = std2wx(third);
             if (terminator.empty())
             {
                 ::wxMessageBox(_("SET TERM command found without terminator.\nStopping further execution."),
-                    _("Warning."), wxOK|wxICON_WARNING);
-                terminator = ";";
+                    _("Warning."), wxOK | wxICON_WARNING);
+                terminator = wxT(";");
                 break;
             }
             continue;
@@ -1107,7 +1106,7 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
             }
         }
 
-        if (pos == string::npos)    // last statement
+        if (pos == wxString::npos)    // last statement
             break;
         searchpos = oldpos = lastpos + terminator.length();
     }
@@ -1123,24 +1122,24 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
 }
 //-----------------------------------------------------------------------------
 //! when autoexecute is TRUE, program just waits user to click Commit/Rollback and closes window
-bool ExecuteSqlFrame::execute(std::string sql, bool prepareOnly)
+bool ExecuteSqlFrame::execute(wxString sql, bool prepareOnly)
 {
     // check if sql only contains comments
-    std::string sqlclean(sql);
-    sqlclean += "\n";                                            // just in case -- comment is on last line
-    Parser::removeComments(sqlclean, "/*", "*/");
-    Parser::removeComments(sqlclean, "--", "\n");
+    wxString sqlclean(sql);
+    sqlclean += wxT("\n");                                            // just in case -- comment is on last line
+    Parser::removeComments(sqlclean, wxT("/*"), wxT("*/"));
+    Parser::removeComments(sqlclean, wxT("--"), wxT("\n"));
     while (true)
     {
-        std::string::size_type pos = sqlclean.find(";");        // remove ;
-        if (pos == std::string::npos)
+        wxString::size_type pos = sqlclean.find(wxT(";"));        // remove ;
+        if (pos == wxString::npos)
             break;
         sqlclean.erase(pos, 1);
     }
-    sqlclean.erase(sqlclean.find_last_not_of(" \n\t\r") + 1);    // trim
+    sqlclean.erase(sqlclean.find_last_not_of(wxT(" \n\t\r")) + 1);    // trim
     if (sqlclean.empty())
     {
-        log(_("Parsed query: " + std2wx(sql)), ttSql);
+        log(_("Parsed query: " + sql), ttSql);
         log(_("Empty statement detected, bailing out..."));
         return true;
     }
@@ -1162,8 +1161,8 @@ bool ExecuteSqlFrame::execute(std::string sql, bool prepareOnly)
 
         grid_data->ClearGrid(); // statement object will be invalidated, so clear the grid
         statementM = IBPP::StatementFactory(databaseM->getIBPPDatabase(), transactionM);
-        log(_("Preparing query: " + std2wx(sql)), ttSql);
-        statementM->Prepare(sql);
+        log(_("Preparing query: " + sql), ttSql);
+        statementM->Prepare(wx2std(sql));
 
         wxTimeSpan dif = wxDateTime::Now().Subtract(start);
         log(wxString(_("Prepare time: ")) + dif.Format(wxT("%H:%M:%S.")));
@@ -1197,11 +1196,11 @@ bool ExecuteSqlFrame::execute(std::string sql, bool prepareOnly)
         }
         else                                // for other statements: show rows affected
         {
-            std::string::size_type p = sql.find_first_not_of(" \n\t\r");    // left trim
-            if (p != std::string::npos && p > 0)
+            wxString::size_type p = sql.find_first_not_of(wxT(" \n\t\r"));    // left trim
+            if (p != wxString::npos && p > 0)
                 sql.erase(0, p);
-            bool changeNull = (sql.substr(0,44) == "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG");
-            bool setGenerator = (sql.substr(0,13) == "SET GENERATOR");
+            bool changeNull = (sql.substr(0, 44) == wxT("UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG"));
+            bool setGenerator = (sql.substr(0, 13) == wxT("SET GENERATOR"));
             if (changeNull || setGenerator)
                 type = IBPP::stDDL;
 
@@ -1282,11 +1281,11 @@ void ExecuteSqlFrame::commitTransaction()
         {
             if ((*it).type == IBPP::stDDL)
                 if (!databaseM->parseCommitedSql((*it).statement))
-                    ::wxMessageBox(std2wx(lastError().getMessage()), _("A non-fatal error occurred."), wxOK|wxICON_INFORMATION);
+                    ::wxMessageBox(lastError().getMessage(), _("A non-fatal error occurred."), wxOK | wxICON_INFORMATION);
         }
 
         // possible future version (see database.cpp file for details: ONLY IF FIRST solution is used from database.cpp)
-        //for (std::vector<std::string>::const_iterator it = executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
+        //for (std::vector<wxString>::const_iterator it = executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
         //    databaseM->addCommitedSql(*it);
         //databaseM->parseAll();
 
@@ -1395,11 +1394,11 @@ void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent &event)
     if (!splitter_window_1->IsSplit())    // already ok
         return;
     bool selectMaximizeGrid = false;
-    config().getValue("SelectMaximizeGrid", selectMaximizeGrid);
+    config().getValue(wxT("SelectMaximizeGrid"), selectMaximizeGrid);
     if (selectMaximizeGrid)
     {
         int rowsNeeded = 10;    // default
-        config().getValue("MaximizeGridRowsNeeded", rowsNeeded);
+        config().getValue(wxT("MaximizeGridRowsNeeded"), rowsNeeded);
         if (rowsFetched >= rowsNeeded)
         {
             //SplitScreen();    // not needed atm, might be later (see TODO above)
@@ -1418,8 +1417,8 @@ void ExecuteSqlFrame::setDatabase(Database *db)
 {
     databaseM = db;
 
-    std::string s = db->getUsername() + "@" + db->getParent()->getName() + ":" + db->getPath();
-    statusbar_1->SetStatusText(std2wx(s), 0);
+    wxString s = db->getUsername() + wxT("@") + db->getParent()->getName() + wxT(":") + db->getPath();
+    statusbar_1->SetStatusText(s, 0);
 
     transactionM = IBPP::TransactionFactory(databaseM->getIBPPDatabase());
     db->attachObserver(this);    // observe database object
@@ -1457,10 +1456,10 @@ void ExecuteSqlFrame::setKeywords()
     #include "autocomplete-sql_keywords.txt"
 
     // get list od database objects' names
-    std::vector<std::string> v;
+    std::vector<wxString> v;
     databaseM->getIdentifiers(v);
-    for (std::vector<std::string>::const_iterator it = v.begin(); it != v.end(); ++it)
-        as.Add(std2wx(*it));
+    for (std::vector<wxString>::const_iterator it = v.begin(); it != v.end(); ++it)
+        as.Add(*it);
 
     // TODO:
     // we can also make ExecuteSqlFrame observer of YTables/YViews/... objects
@@ -1468,8 +1467,8 @@ void ExecuteSqlFrame::setKeywords()
 
     as.Sort();    // The list has to be sorted for autocomplete to work properly
 
-    keywordsM = wxT("");                        // create final string from array
-    for (size_t i = 0; i<as.GetCount(); ++i)    // words are separated with spaces
+    keywordsM = wxT("");                        // create final wxString from array
+    for (size_t i = 0; i < as.GetCount(); ++i)    // words are separated with spaces
         keywordsM += as.Item(i) + wxT(" ");
 }
 //-----------------------------------------------------------------------------
@@ -1493,23 +1492,24 @@ void ExecuteSqlFrame::log(wxString s, TextType type)
     styled_text_ctrl_stats->GotoPos(endpos);
 }
 //-----------------------------------------------------------------------------
-const std::string ExecuteSqlFrame::getName() const
+const wxString ExecuteSqlFrame::getName() const
 {
-    return "ExecuteSqlFrame";
+    return wxT("ExecuteSqlFrame");
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::doReadConfigSettings(const std::string& prefix)
+void ExecuteSqlFrame::doReadConfigSettings(const wxString& prefix)
 {
     BaseFrame::doReadConfigSettings(prefix);
     int zoom;
-    if (config().getValue(prefix + Config::pathSeparator + "zoom", zoom))
+    if (config().getValue(prefix + Config::pathSeparator + wxT("zoom"), zoom))
         styled_text_ctrl_sql->SetZoom(zoom);
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::doWriteConfigSettings(const std::string& prefix) const
+void ExecuteSqlFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BaseFrame::doWriteConfigSettings(prefix);
-    config().setValue(prefix + Config::pathSeparator + "zoom", styled_text_ctrl_sql->GetZoom());
+    config().setValue(prefix + Config::pathSeparator + wxT("zoom"),
+        styled_text_ctrl_sql->GetZoom());
 }
 //-----------------------------------------------------------------------------
 const wxRect ExecuteSqlFrame::getDefaultRect() const
@@ -1530,22 +1530,22 @@ const DropColumnHandler DropColumnHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool DropColumnHandler::handleURI(URI& uri)
 {
-    if (uri.action != "drop_field" && uri.action != "drop_constraint")
+    if (uri.action != wxT("drop_field") && uri.action != wxT("drop_constraint"))
         return false;
 
-    MetadataItem *c = (MetadataItem *)getObject(uri);
-    wxWindow *w = getWindow(uri);
+    MetadataItem* c = (MetadataItem*)getObject(uri);
+    wxWindow* w = getWindow(uri);
     if (!c || !w)
         return true;
 
-    std::string sql = "ALTER TABLE " + c->getParent()->getName() + " DROP ";
-    if (uri.action == "drop_constraint")
-        sql += "CONSTRAINT ";
+    wxString sql = wxT("ALTER TABLE ") + c->getParent()->getName() + wxT(" DROP ");
+    if (uri.action == wxT("drop_constraint"))
+        sql += wxT("CONSTRAINT ");
     sql += c->getName();
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, _("Dropping field"));
     eff->setDatabase(c->getDatabase());
     eff->Show();
-    eff->setSql(std2wx(sql));
+    eff->setSql(sql);
     eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
     return true;
 }
@@ -1563,25 +1563,25 @@ const DropColumnsHandler DropColumnsHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool DropColumnsHandler::handleURI(URI& uri)
 {
-    if (uri.action != "drop_fields")
+    if (uri.action != wxT("drop_fields"))
         return false;
 
-    Table *t = (Table *)getObject(uri);
-    wxWindow *w = getWindow(uri);
+    Table* t = (Table*)getObject(uri);
+    wxWindow* w = getWindow(uri);
     if (!t || !w)
         return true;
 
     // get list of columns
-    std::string sql;
-    std::vector<std::string> list;
+    wxString sql;
+    std::vector<wxString> list;
     if (selectTableColumnsIntoVector(t, w, list))
     {
-        for (std::vector<std::string>::iterator it = list.begin(); it != list.end(); ++it)
-            sql += "ALTER TABLE " + t->getName() + " DROP " + (*it) + ";\n";
+        for (std::vector<wxString>::iterator it = list.begin(); it != list.end(); ++it)
+            sql += wxT("ALTER TABLE ") + t->getName() + wxT(" DROP ") + (*it) + wxT(";\n");
         ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, _("Dropping fields"));
         eff->setDatabase(t->getDatabase());
         eff->Show();
-        eff->setSql(std2wx(sql));
+        eff->setSql(sql);
         eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
     }
     return true;
@@ -1600,18 +1600,18 @@ const EditProcedureHandler EditProcedureHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool EditProcedureHandler::handleURI(URI& uri)
 {
-    if (uri.action != "edit_procedure")
+    if (uri.action != wxT("edit_procedure"))
         return false;
 
-    Procedure *p = (Procedure *)getObject(uri);
-    wxWindow *w = getWindow(uri);
+    Procedure* p = (Procedure*)getObject(uri);
+    wxWindow* w = getWindow(uri);
     if (!p || !w)
         return true;
 
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing stored procedure"));
     eff->setDatabase(p->getDatabase());
     eff->Show();
-    eff->setSql(std2wx(p->getAlterSql()));
+    eff->setSql(p->getAlterSql());
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -1628,18 +1628,18 @@ const EditViewHandler EditViewHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool EditViewHandler::handleURI(URI& uri)
 {
-    if (uri.action != "edit_view")
+    if (uri.action != wxT("edit_view"))
         return false;
 
-    View *v = (View *)getObject(uri);
-    wxWindow *w = getWindow(uri);
+    View* v = (View*)getObject(uri);
+    wxWindow* w = getWindow(uri);
     if (!v || !w)
         return true;
 
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing view"));
     eff->setDatabase(v->getDatabase());
     eff->Show();
-    eff->setSql(std2wx(v->getAlterSql()));
+    eff->setSql(v->getAlterSql());
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -1656,18 +1656,18 @@ const EditTriggerHandler EditTriggerHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool EditTriggerHandler::handleURI(URI& uri)
 {
-    if (uri.action != "edit_trigger")
+    if (uri.action != wxT("edit_trigger"))
         return false;
 
-    Trigger *t = (Trigger *)getObject(uri);
-    wxWindow *w = getWindow(uri);
+    Trigger* t = (Trigger*)getObject(uri);
+    wxWindow* w = getWindow(uri);
     if (!t || !w)
         return true;
 
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing trigger"));
     eff->setDatabase(t->getDatabase());
     eff->Show();
-    eff->setSql(std2wx(t->getAlterSql()));
+    eff->setSql(t->getAlterSql());
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -1684,11 +1684,11 @@ const EditGeneratorValueHandler EditGeneratorValueHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool EditGeneratorValueHandler::handleURI(URI& uri)
 {
-    if (uri.action != "edit_generator_value")
+    if (uri.action != wxT("edit_generator_value"))
         return false;
 
-    Generator *g = (Generator *)getObject(uri);
-    wxWindow *w = getWindow(uri);
+    Generator* g = (Generator*)getObject(uri);
+    wxWindow* w = getWindow(uri);
     if (!g || !w)
         return true;
 
@@ -1707,11 +1707,11 @@ bool EditGeneratorValueHandler::handleURI(URI& uri)
 //        wxString::Format(wxT("%d"), oldvalue), w);
     if (value != wxT(""))
     {
-        std::string sql = "SET GENERATOR " + g->getName() + " TO " + wx2std(value) + ";";
-        ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1, wxString(std2wx(sql)));
+        wxString sql = wxT("SET GENERATOR ") + g->getName() + wxT(" TO ") + value + wxT(";");
+        ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1, sql);
         esf->setDatabase(db);
         esf->Show();
-        esf->setSql(std2wx(sql));
+        esf->setSql(sql);
         esf->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
     }
     return true;
@@ -1730,18 +1730,18 @@ const EditExceptionHandler EditExceptionHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool EditExceptionHandler::handleURI(URI& uri)
 {
-    if (uri.action != "edit_exception")
+    if (uri.action != wxT("edit_exception"))
         return false;
 
-    Exception *e = (Exception *)getObject(uri);
-    wxWindow *w = getWindow(uri);
+    Exception* e = (Exception*)getObject(uri);
+    wxWindow* w = getWindow(uri);
     if (!e || !w)
         return true;
 
-    ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing exception"));
+    ExecuteSqlFrame* eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing exception"));
     eff->setDatabase(e->getDatabase());
     eff->Show();
-    eff->setSql(std2wx(e->getAlterSql()));
+    eff->setSql(e->getAlterSql());
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -1758,27 +1758,27 @@ const IndexActionHandler IndexActionHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool IndexActionHandler::handleURI(URI& uri)
 {
-    if (uri.action != "index_action")
+    if (uri.action != wxT("index_action"))
         return false;
 
-    Index *i = (Index *)getObject(uri);
-    wxWindow *w = getWindow(uri);
+    Index* i = (Index*)getObject(uri);
+    wxWindow* w = getWindow(uri);
     if (!i || !w)
         return true;
 
-    std::string sql;
-    std::string type = uri.getParam("type");        // type of operation
-    if (type == "DROP")
-        sql = "DROP INDEX " + i->getName();
-    else if (type == "RECOMPUTE")
-        sql = "SET STATISTICS INDEX " + i->getName();
-    else if (type == "TOGGLE_ACTIVE")
-        sql = "ALTER INDEX " + i->getName() + (i->isActive() ? " INACTIVE" : " ACTIVE");
+    wxString sql;
+    wxString type = uri.getParam(wxT("type"));        // type of operation
+    if (type == wxT("DROP"))
+        sql = wxT("DROP INDEX ") + i->getName();
+    else if (type == wxT("RECOMPUTE"))
+        sql = wxT("SET STATISTICS INDEX ") + i->getName();
+    else if (type == wxT("TOGGLE_ACTIVE"))
+        sql = wxT("ALTER INDEX ") + i->getName() + (i->isActive() ? wxT(" INACTIVE") : wxT(" ACTIVE"));
 
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, wxEmptyString);
     eff->setDatabase(i->getDatabase());
     eff->Show();
-    eff->setSql(std2wx(sql));
+    eff->setSql(sql);
     eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
     return true;
 }
@@ -1796,20 +1796,20 @@ const TableIndicesHandler TableIndicesHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool TableIndicesHandler::handleURI(URI& uri)
 {
-    if (uri.action != "add_index" && uri.action != "recompute_all")
+    if (uri.action != wxT("add_index") && uri.action != wxT("recompute_all"))
         return false;
 
-    Table *t = (Table *)getObject(uri);
-    wxWindow *w = getWindow(uri);
+    Table* t = (Table*)getObject(uri);
+    wxWindow* w = getWindow(uri);
     if (!t || !w)
         return true;
 
-    std::string sql;
-    std::vector<Index> *ix = t->getIndices();
-    if (uri.action == "recompute_all")
+    wxString sql;
+    std::vector<Index>* ix = t->getIndices();
+    if (uri.action == wxT("recompute_all"))
     {
         for (std::vector<Index>::iterator it = ix->begin(); it != ix->end(); ++it)
-            sql += "SET STATISTICS INDEX " + (*it).getName() + ";\n";
+            sql += wxT("SET STATISTICS INDEX ") + (*it).getName() + wxT(";\n");
     }
     else    // add_index
     {
@@ -1818,22 +1818,22 @@ bool TableIndicesHandler::handleURI(URI& uri)
         while (true)        // find first available name
         {
             bool found = false;
-            newname = wxT("IDX_") + std2wx(t->getName()) + wxString::Format(wxT("%d"), nr++);
+            newname = wxT("IDX_") + t->getName() + wxString::Format(wxT("%d"), nr++);
             for (std::vector<Index>::iterator it = ix->begin(); it != ix->end(); ++it)
-                if ((*it).getName() == wx2std(newname))
+                if ((*it).getName() == newname)
                     found = true;
             if (!found)
                 break;
         }
-        wxString indexname = ::wxGetTextFromUser(_("Enter index name"),    _("Adding new index"), newname, w);
+        wxString indexname = ::wxGetTextFromUser(_("Enter index name"), _("Adding new index"), newname, w);
         if (indexname.IsEmpty())    // cancel
             return true;
 
         bool unique = (wxYES == wxMessageBox(_("Would you like to create UNIQUE index?"),
             _("Creating new index"), wxYES_NO|wxICON_QUESTION));
 
-        std::string columns = selectTableColumns(t, w);
-        if (columns == "")
+        wxString columns = selectTableColumns(t, w);
+        if (columns == wxT(""))
             return true;
 
         wxArrayString types;
@@ -1843,18 +1843,18 @@ bool TableIndicesHandler::handleURI(URI& uri)
         if (sort == -1)
             return true;
 
-        sql = "CREATE ";
+        sql = wxT("CREATE ");
         if (unique)
-            sql += "UNIQUE ";
+            sql += wxT("UNIQUE ");
         if (sort == 1)
-            sql += "DESCENDING ";
-        sql += " \nINDEX " + wx2std(indexname) + " ON " + t->getName() + " (" + columns + ");\n";
+            sql += wxT("DESCENDING ");
+        sql += wxT(" \nINDEX ") + indexname + wxT(" ON ") + t->getName() + wxT(" (") + columns + wxT(");\n");
     }
 
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, wxEmptyString);
     eff->setDatabase(t->getDatabase());
     eff->Show();
-    eff->setSql(std2wx(sql));
+    eff->setSql(sql);
     eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
     return true;
 }
@@ -1871,30 +1871,30 @@ const ActivateTriggersHandler ActivateTriggersHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool ActivateTriggersHandler::handleURI(URI& uri)
 {
-    if (uri.action != "activate_triggers" && uri.action != "deactivate_triggers")
+    if (uri.action != wxT("activate_triggers") && uri.action != wxT("deactivate_triggers"))
         return false;
 
-    Table *t = (Table *)getObject(uri);
-    wxWindow *w = getWindow(uri);
+    Table* t = (Table*)getObject(uri);
+    wxWindow* w = getWindow(uri);
     if (!t || !w)
         return true;
 
-    std::vector<Trigger *> list;
+    std::vector<Trigger*> list;
     t->getTriggers(list, Trigger::afterTrigger);
     t->getTriggers(list, Trigger::beforeTrigger);
-    std::string sql;
-    for (std::vector<Trigger *>::iterator it = list.begin(); it != list.end(); ++it)
+    wxString sql;
+    for (std::vector<Trigger*>::iterator it = list.begin(); it != list.end(); ++it)
     {
-        sql += "ALTER TRIGGER " + (*it)->getName() + " ";
-        if (uri.action == "deactivate_triggers")
-            sql += "IN";
-        sql += "ACTIVE;\n";
+        sql += wxT("ALTER TRIGGER ") + (*it)->getName() + wxT(" ");
+        if (uri.action == wxT("deactivate_triggers"))
+            sql += wxT("IN");
+        sql += wxT("ACTIVE;\n");
     }
 
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, wxEmptyString);
     eff->setDatabase(t->getDatabase());
     eff->Show();
-    eff->setSql(std2wx(sql));
+    eff->setSql(sql);
     eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
     return true;
 }
@@ -1911,23 +1911,23 @@ const ActivateTriggerHandler ActivateTriggerHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool ActivateTriggerHandler::handleURI(URI& uri)
 {
-    if (uri.action != "activate_trigger" && uri.action != "deactivate_trigger")
+    if (uri.action != wxT("activate_trigger") && uri.action != wxT("deactivate_trigger"))
         return false;
 
-    Trigger *t = (Trigger *)getObject(uri);
-    wxWindow *w = getWindow(uri);
+    Trigger* t = (Trigger*)getObject(uri);
+    wxWindow* w = getWindow(uri);
     if (!t || !w)
         return true;
 
-    std::string sql = "ALTER TRIGGER " + t->getName() + " ";
-    if (uri.action == "deactivate_trigger")
-        sql += "IN";
-    sql += "ACTIVE;\n";
+    wxString sql = wxT("ALTER TRIGGER ") + t->getName() + wxT(" ");
+    if (uri.action == wxT("deactivate_trigger"))
+        sql += wxT("IN");
+    sql += wxT("ACTIVE;\n");
 
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, wxEmptyString);
     eff->setDatabase(t->getDatabase());
     eff->Show();
-    eff->setSql(std2wx(sql));
+    eff->setSql(sql);
     eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
     return true;
 }

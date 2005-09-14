@@ -129,13 +129,13 @@ void PrintableHtmlWindow::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void PrintableHtmlWindow::OnMenuNewWindow(wxCommandEvent& WXUNUSED(event))
 {
-	std::string addr = wx2std(tempLinkM);
+	wxString addr = tempLinkM;
 	URI uri(addr);
-	if (uri.protocol != "fr")				// we don't support "new window" for non-fr protocols
+	if (uri.protocol != wxT("fr"))				// we don't support "new window" for non-fr protocols
 		return;
-	uri.addParam("target=new");
+	uri.addParam(wxT("target=new"));
 	if (!getURIProcessor().handleURI(uri))
-		::wxMessageBox(_("Feature not yet implemented."), _("Information"), wxICON_INFORMATION|wxOK);
+		::wxMessageBox(_("Feature not yet implemented."), _("Information"), wxICON_INFORMATION | wxOK);
 }
 //-----------------------------------------------------------------------------
 void PrintableHtmlWindow::OnMenuSave(wxCommandEvent& WXUNUSED(event))
@@ -179,9 +179,9 @@ void PrintableHtmlWindow::OnMenuPrint(wxCommandEvent& WXUNUSED(event))
 //! Link is in format: "protocol://action?name=value&amp;name=value...etc.
 void PrintableHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
 {
-	std::string addr = wx2std(link.GetHref());
+	wxString addr = link.GetHref();
 	URI uri(addr);
-	if (uri.protocol != "fr")		// call default handler for other protocols
+	if (uri.protocol != wxT("fr"))		// call default handler for other protocols
 	{
 		wxHtmlWindow::OnLinkClicked(link);
 		return;

@@ -38,7 +38,6 @@ Contributor(s): Michael Hieke, Nando Dessena
 
 #include "ServerRegistrationDialog.h"
 #include "styleguide.h"
-#include "ugly.h"
 //-----------------------------------------------------------------------------
 ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent, int id,
         const wxString& title, const wxPoint& pos, const wxSize& size, long style)
@@ -62,9 +61,9 @@ ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent, int id,
 const wxString ServerRegistrationDialog::buildName(const wxString& hostName, const wxString& portNumber) const
 {
     Server helper;
-    helper.setHostname(wx2std(hostName));
-    helper.setPort(wx2std(portNumber));
-    return std2wx(helper.getConnectionString());
+    helper.setHostname(hostName);
+    helper.setPort(portNumber);
+    return helper.getConnectionString();
 }
 //-----------------------------------------------------------------------------
 void ServerRegistrationDialog::do_layout()
@@ -88,9 +87,9 @@ void ServerRegistrationDialog::do_layout()
     layoutSizers(sizerControls, sizerButtons);
 }
 //-----------------------------------------------------------------------------
-const std::string ServerRegistrationDialog::getName() const
+const wxString ServerRegistrationDialog::getName() const
 {
-    return "ServerRegistrationDialog";
+    return wxT("ServerRegistrationDialog");
 }
 //-----------------------------------------------------------------------------
 void ServerRegistrationDialog::set_properties()
@@ -108,9 +107,9 @@ void ServerRegistrationDialog::setServer(Server *s)
 {
     serverM = s;
 
-    text_ctrl_name->SetValue(std2wx(serverM->getName()));
-    text_ctrl_hostname->SetValue(std2wx(serverM->getHostname()));
-    text_ctrl_portnumber->SetValue(std2wx(serverM->getPort()));
+    text_ctrl_name->SetValue(serverM->getName());
+    text_ctrl_hostname->SetValue(serverM->getHostname());
+    text_ctrl_portnumber->SetValue(serverM->getPort());
 
     // see whether the server has an empty or default name; knowing that will be
     // useful to keep the name in sync when other attributes change.
@@ -162,9 +161,9 @@ void ServerRegistrationDialog::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ServerRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    serverM->setName(wx2std(text_ctrl_name->GetValue()));
-    serverM->setHostname(wx2std(text_ctrl_hostname->GetValue()));
-    serverM->setPort(wx2std(text_ctrl_portnumber->GetValue()));
+    serverM->setName(text_ctrl_name->GetValue());
+    serverM->setHostname(text_ctrl_hostname->GetValue());
+    serverM->setPort(text_ctrl_portnumber->GetValue());
     EndModal(wxID_OK);
 }
 //-----------------------------------------------------------------------------

@@ -31,7 +31,6 @@
 #endif
 
 #include <sstream>
-#include <string>
 
 #include "core/Visitor.h"
 #include "column.h"
@@ -39,10 +38,10 @@
 #include "MetadataItemVisitor.h"
 #include "parameter.h"
 //-----------------------------------------------------------------------------
-Parameter::Parameter(std::string source, int parameterType)
+Parameter::Parameter(wxString source, int parameterType)
 	: Column()
 {
-	Column::Init(true, source, false, "", "");
+	Column::Init(true, source, false, wxT(""), wxT(""));
 	typeM = ntParameter;
 	parameterTypeM = (parameterType == 0 ? ptInput : ptOutput);
 }
@@ -54,10 +53,11 @@ Parameter::Parameter()
 	parameterTypeM = ptInput;
 }
 //-----------------------------------------------------------------------------
-std::string Parameter::getPrintableName()
+wxString Parameter::getPrintableName()
 {
-	std::string ret;
-	ret = (parameterTypeM == ptInput ? "in " : "out ") + getName() + " " + getDomain()->getDatatypeAsString();
+	wxString ret;
+	ret = (parameterTypeM == ptInput ? wxT("in ") : wxT("out ")) + getName() +
+	    wxT(" ") + getDomain()->getDatatypeAsString();
 	return ret;
 }
 //-----------------------------------------------------------------------------

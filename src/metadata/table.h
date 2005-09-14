@@ -38,9 +38,9 @@
 class Join
 {
 public:
-	std::string table;
-	std::string fields;
-	Join(std::string a, std::string b): table(a), fields(b) { };
+	wxString table;
+	wxString fields;
+	Join(wxString a, wxString b): table(a), fields(b) { };
 };
 //-----------------------------------------------------------------------------
 class Table: public Relation
@@ -69,9 +69,9 @@ private:
 public:
 	Table();
 
-	static bool tablesRelate(std::vector<std::string>& tables, Table *table, std::vector<Join>& list);
+	static bool tablesRelate(std::vector<wxString>& tables, Table *table, std::vector<Join>& list);
 
-	virtual std::string getCreateSqlTemplate() const;
+	virtual wxString getCreateSqlTemplate() const;
 
 	virtual bool loadColumns();			// update the keys info too
 	void invalidateIndices();
@@ -82,10 +82,10 @@ public:
 	std::vector<ColumnConstraint> *getUniqueConstraints();
 	std::vector<Index> *getIndices();
 
-	std::string getInsertStatement();
-	//std::string getUpdateStatement();		// use primary key info
-	//std::string getDeleteStatement();
-	virtual const std::string getTypeName() const;
+	wxString getInsertStatement();
+	//wxString getUpdateStatement();		// use primary key info
+	//wxString getDeleteStatement();
+	virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------

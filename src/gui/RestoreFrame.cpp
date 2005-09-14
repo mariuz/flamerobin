@@ -51,19 +51,19 @@ Contributor(s): Nando Dessena
 // worker thread class to perform database restore
 class RestoreThread: public wxThread {
 public:
-    RestoreThread(RestoreFrame* frame, std::string server, std::string username,
-        std::string password, std::string bkfilename, std::string dbfilename,
+    RestoreThread(RestoreFrame* frame, wxString server, wxString username,
+        wxString password, wxString bkfilename, wxString dbfilename,
         int pagesize, IBPP::BRF flags);
 
     virtual void* Entry();
     virtual void OnExit();
 private:
     RestoreFrame* frameM;
-    std::string serverM;
-    std::string usernameM;
-    std::string passwordM;
-    std::string bkfileM;
-    std::string dbfileM;
+    wxString serverM;
+    wxString usernameM;
+    wxString passwordM;
+    wxString bkfileM;
+    wxString dbfileM;
     int pagesizeM;
     IBPP::BRF brfM;
     void logError(wxString& msg);
@@ -71,8 +71,8 @@ private:
     void logProgress(wxString& msg);
 };
 //-----------------------------------------------------------------------------
-RestoreThread::RestoreThread(RestoreFrame* frame, std::string server, std::string username, std::string password,
-        std::string bkfilename, std::string dbfilename, int pagesize, IBPP::BRF flags):
+RestoreThread::RestoreThread(RestoreFrame* frame, wxString server, wxString username, wxString password,
+        wxString bkfilename, wxString dbfilename, int pagesize, IBPP::BRF flags):
     wxThread()
 {
     frameM = frame;
@@ -93,15 +93,16 @@ void* RestoreThread::Entry()
 
     try
     {
-        msg.Printf(_("Connecting to server %s..."), std2wx(serverM).c_str());
+        msg.Printf(_("Connecting to server %s..."), serverM.c_str());
         logImportant(msg);
-        IBPP::Service svc = IBPP::ServiceFactory(serverM, usernameM, passwordM);
+        IBPP::Service svc = IBPP::ServiceFactory(wx2std(serverM),
+            wx2std(usernameM), wx2std(passwordM));
         svc->Connect();
 
         now = wxDateTime::Now();
         msg.Printf(_("Database restore started %s"), now.FormatTime().c_str());
         logImportant(msg);
-        svc->StartRestore(bkfileM, dbfileM, pagesizeM, brfM);
+        svc->StartRestore(wx2std(bkfileM), wx2std(dbfileM), pagesizeM, brfM);
         while (true)
         {
             if (TestDestroy())
@@ -172,11 +173,11 @@ RestoreFrame::RestoreFrame(wxWindow* parent, Database* db):
 {
     wxString s;
     s.Printf(_("Restore Database \"%s:%s\""),
-        std2wx(serverM->getName()).c_str(), std2wx(databaseM->getName()).c_str());
+        serverM->getName().c_str(), databaseM->getName().c_str());
     SetTitle(s);
 
     panel_controls = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize,
-        wxTAB_TRAVERSAL|wxCLIP_CHILDREN|wxNO_FULL_REPAINT_ON_RESIZE);
+        wxTAB_TRAVERSAL | wxCLIP_CHILDREN | wxNO_FULL_REPAINT_ON_RESIZE);
     label_filename = new wxStaticText(panel_controls, -1, _("Backup file:"));
     text_ctrl_filename = new wxTextCtrl(panel_controls, ID_text_ctrl_filename, wxEmptyString);
     button_browse = new wxButton(panel_controls, ID_button_browse, _("..."), wxDefaultPosition,
@@ -272,60 +273,61 @@ void RestoreFrame::do_layout()
     SetSizerAndFit(sizerMain);
 }
 //-----------------------------------------------------------------------------
-void RestoreFrame::doReadConfigSettings(const std::string& prefix)
+void RestoreFrame::doReadConfigSettings(const wxString& prefix)
 {
     BackupRestoreBaseFrame::doReadConfigSettings(prefix);
 
-    std::string pagesize;
+    wxString pagesize;
     int selindex = -1;
-    if (config().getValue(prefix + Config::pathSeparator + "pagesize", pagesize) && !pagesize.empty())
-        selindex = choice_pagesize->FindString(std2wx(pagesize));
+    if (config().getValue(prefix + Config::pathSeparator + wxT("pagesize"), pagesize) && !pagesize.empty())
+        selindex = choice_pagesize->FindString(pagesize);
     // select default pagesize of 1024 if invalid selindex
     choice_pagesize->SetSelection(selindex >= 0 ? selindex : 0);
 
-    std::vector<std::string> flags;
-    if (config().getValue(prefix + Config::pathSeparator + "options", flags) && !flags.empty())
+    std::vector<wxString> flags;
+    if (config().getValue(prefix + Config::pathSeparator + wxT("options"), flags) && !flags.empty())
     {
         checkbox_replace->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), "replace"));
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("replace")));
         checkbox_deactivate->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), "deactivate_indices"));
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("deactivate_indices")));
         checkbox_noshadow->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), "no_shadow"));
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("no_shadow")));
         checkbox_validity->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), "no_constraints"));
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("no_constraints")));
         checkbox_commit->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), "commit_per_table"));
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("commit_per_table")));
         checkbox_space->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), "use_all_space"));
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("use_all_space")));
     }
     updateControls();
 }
 //-----------------------------------------------------------------------------
-void RestoreFrame::doWriteConfigSettings(const std::string& prefix) const
+void RestoreFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BackupRestoreBaseFrame::doWriteConfigSettings(prefix);
-    config().setValue(prefix + Config::pathSeparator + "pagesize", wx2std(choice_pagesize->GetStringSelection()));
+    config().setValue(prefix + Config::pathSeparator + wxT("pagesize"),
+        choice_pagesize->GetStringSelection());
 
-    std::vector<std::string> flags;
+    std::vector<wxString> flags;
     if (checkbox_replace->IsChecked())
-        flags.push_back("replace");
+        flags.push_back(wxT("replace"));
     if (checkbox_deactivate->IsChecked())
-        flags.push_back("deactivate_indices");
+        flags.push_back(wxT("deactivate_indices"));
     if (checkbox_noshadow->IsChecked())
-        flags.push_back("no_shadow");
+        flags.push_back(wxT("no_shadow"));
     if (checkbox_validity->IsChecked())
-        flags.push_back("no_constraints");
+        flags.push_back(wxT("no_constraints"));
     if (checkbox_commit->IsChecked())
-        flags.push_back("commit_per_table");
+        flags.push_back(wxT("commit_per_table"));
     if (checkbox_space->IsChecked())
-        flags.push_back("use_all_space");
-    config().setValue(prefix + Config::pathSeparator + "options", flags);
+        flags.push_back(wxT("use_all_space"));
+    config().setValue(prefix + Config::pathSeparator + wxT("options"), flags);
 }
 //-----------------------------------------------------------------------------
-const std::string RestoreFrame::getName() const
+const wxString RestoreFrame::getName() const
 {
-    return "RestoreFrame";
+    return wxT("RestoreFrame");
 }
 //-----------------------------------------------------------------------------
 void RestoreFrame::updateControls()
@@ -368,12 +370,12 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     //   if (!getDatabasePassword(this, databaseM, password))
     //       return;
 
-    std::string password = databaseM->getPassword();
+    wxString password = databaseM->getPassword();
     if (password.empty())
     {
         wxString msg;
-        msg.Printf(_("Enter password for user %s:"), std2wx(databaseM->getUsername()).c_str());
-        password = wx2std(::wxGetPasswordFromUser(msg, _("Connecting To Server")));
+        msg.Printf(_("Enter password for user %s:"), databaseM->getUsername().c_str());
+        password = ::wxGetPasswordFromUser(msg, _("Connecting To Server"));
         if (password.empty())
             return;
     }
@@ -397,7 +399,7 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
         pagesize = 0;
 
     RestoreThread* thread = new RestoreThread(this, serverM->getName(), databaseM->getUsername(),
-        password, wx2std(text_ctrl_filename->GetValue()), databaseM->getPath(), pagesize, (IBPP::BRF)flags);
+        password, text_ctrl_filename->GetValue(), databaseM->getPath(), pagesize, (IBPP::BRF)flags);
     startThread(thread);
     updateControls();
 }

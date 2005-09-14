@@ -207,7 +207,7 @@ bool PrefDlgSetting::parseProperty(wxXmlNode* xmln)
         else if (name == wxT("description"))
             descriptionM = value;
         else if (name == wxT("key"))
-            keyM = wx2std(value);
+            keyM = value;
         else if (name == wxT("default"))
             setDefault(value);
         else if (name == wxT("related"))
@@ -620,7 +620,7 @@ private:
     wxStaticText* captionAfterM;
     wxStaticText* captionBeforeM;
     wxTextCtrl* textctrlM;
-    std::string defaultM;
+    wxString defaultM;
 };
 //-----------------------------------------------------------------------------
 PrefDlgStringEditSetting::PrefDlgStringEditSetting(wxPanel* page, PrefDlgSetting* parent)
@@ -701,9 +701,9 @@ bool PrefDlgStringEditSetting::loadFromConfig(Config& config)
         return false;
     if (textctrlM)
     {
-        std::string value = defaultM;
+        wxString value = defaultM;
         config.getValue(keyM, value);
-        textctrlM->SetValue(std2wx(value));
+        textctrlM->SetValue(value);
     }
     return true;
 }
@@ -713,13 +713,13 @@ bool PrefDlgStringEditSetting::saveToConfig(Config& config)
     if (!checkConfigProperties())
         return false;
     if (textctrlM)
-        config.setValue(keyM, wx2std(textctrlM->GetValue()));
+        config.setValue(keyM, textctrlM->GetValue());
     return true;
 }
 //-----------------------------------------------------------------------------
 void PrefDlgStringEditSetting::setDefault(const wxString& defValue)
 {
-    defaultM = wx2std(defValue);
+    defaultM = defValue;
 }
 //-----------------------------------------------------------------------------
 // PrefDlgChooserSetting class
@@ -747,7 +747,7 @@ private:
     wxButton* browsebtnM;
     wxStaticText* captionBeforeM;
     wxTextCtrl* textctrlM;
-    std::string defaultM;
+    wxString defaultM;
 
     void chooseFile();
     void chooseFont();
@@ -853,9 +853,9 @@ bool PrefDlgChooserSetting::loadFromConfig(Config& config)
         return false;
     if (textctrlM)
     {
-        std::string value = defaultM;
+        wxString value = defaultM;
         config.getValue(keyM, value);
-        textctrlM->SetValue(std2wx(value));
+        textctrlM->SetValue(value);
     }
     return true;
 }
@@ -865,13 +865,13 @@ bool PrefDlgChooserSetting::saveToConfig(Config& config)
     if (!checkConfigProperties())
         return false;
     if (textctrlM)
-        config.setValue(keyM, wx2std(textctrlM->GetValue()));
+        config.setValue(keyM, textctrlM->GetValue());
     return true;
 }
 //-----------------------------------------------------------------------------
 void PrefDlgChooserSetting::setDefault(const wxString& defValue)
 {
-    defaultM = wx2std(defValue);
+    defaultM = defValue;
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(PrefDlgChooserSetting, wxEvtHandler)

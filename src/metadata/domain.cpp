@@ -31,7 +31,6 @@
 #endif
 
 #include <sstream>
-#include <string>
 
 #include <ibpp.h>
 
@@ -72,7 +71,7 @@ bool Domain::loadInfo()
 			" and t.rdb$field_name='RDB$FIELD_TYPE'"
 		);
 
-		st1->Set(1, getName());
+		st1->Set(1, wx2std(getName()));
 		st1->Execute();
 		if (!st1->Fetch())
 		{
@@ -94,11 +93,13 @@ bool Domain::loadInfo()
 		else
 			st1->Get(5, &scaleM);
 		if (st1->IsNull(6))
-			charsetM = "";
+			charsetM = wxT("");
 		else
 		{
-			st1->Get(6, charsetM);
-			charsetM.erase(charsetM.find_last_not_of(" ")+1);
+			std::string charset;
+			st1->Get(6, charset);
+			charsetM = std2wx(charset);
+			charsetM.erase(charsetM.find_last_not_of(wxT(" ")) + 1);
 		}
 
 		tr1->Commit();
@@ -109,17 +110,17 @@ bool Domain::loadInfo()
 	}
 	catch (IBPP::Exception &e)
 	{
-		lastError().setMessage(e.ErrorMessage());
+		lastError().setMessage(std2wx(e.ErrorMessage()));
 	}
 	catch (...)
 	{
-		lastError().setMessage("System error.");
+		lastError().setMessage(_("System error."));
 	}
 	return false;
 }
 //-----------------------------------------------------------------------------
-//! returns column's datatype as human readable string. It can also be used to construct DDL for tables
-std::string Domain::getDatatypeAsString()
+//! returns column's datatype as human readable wxString. It can also be used to construct DDL for tables
+wxString Domain::getDatatypeAsString()
 {
 	if (!infoLoadedM)
 		loadInfo();
@@ -127,7 +128,7 @@ std::string Domain::getDatatypeAsString()
 	return datatype2string(datatypeM, scaleM, precisionM, subtypeM, lengthM);
 }
 //-----------------------------------------------------------------------------
-std::string Domain::datatype2string(short datatype, short scale, short precision, short subtype, short length)
+wxString Domain::datatype2string(short datatype, short scale, short precision, short subtype, short length)
 {
 	std::ostringstream retval;		// this will be returned
 
@@ -135,20 +136,20 @@ std::string Domain::datatype2string(short datatype, short scale, short precision
 	if (datatype == 27 && scale < 0)
 	{
 		retval << "Numeric(15," << -scale << ")";
-		return retval.str();
+		return std2wx(retval.str());
 	}
 
-	// LONG&INT64: INT/SALLINT (prec=0), DECIAL(sub_type=2), NUERIC(sub_type=1)
+	// LONG&INT64: INT/SMALLINT (prec=0), DECIMAL(sub_type=2), NUMERIC(sub_type=1)
 	if (datatype == 7 || datatype == 8 || datatype == 16)
 	{
 		if (scale == 0)
 		{
 			if (datatype == 7)
-				return "Smallint";
+				return wxT("Smallint");
 			else if (datatype == 8)
-				return "Integer";
+				return wxT("Integer");
 			else
-				return "Numeric(18,0)";
+				return wxT("Numeric(18,0)");
 		}
 		else
 		{
@@ -158,28 +159,28 @@ std::string Domain::datatype2string(short datatype, short scale, short precision
 			else
 				retval << precision;
 			retval << "," << -scale << ")";
-			return retval.str();
+			return std2wx(retval.str());
 		}
 	}
 
-	std::string names[] = {
-		"Char",
-		"Float",
-		"Double precision",
-		"Timestamp",
-		"Varchar",
-		"Blob",
-		"Date",
-		"Time",
-		"CSTRING"
+	wxString names[] = {
+		wxT("Char"),
+		wxT("Float"),
+		wxT("Double precision"),
+		wxT("Timestamp"),
+		wxT("Varchar"),
+		wxT("Blob"),
+		wxT("Date"),
+		wxT("Time"),
+		wxT("CSTRING")
 	};
 	short mapper[9] = { 14, 10, 27, 35, 37, 261, 12, 13, 40 };
 
-	for (int i=0; i<9; ++i)
+	for (int i = 0; i < 9; ++i)
 	{
 		if (mapper[i] == datatype)
 		{
-			retval << names[i];
+			retval << wx2std(names[i]);
 			break;
 		}
 	}
@@ -190,32 +191,31 @@ std::string Domain::datatype2string(short datatype, short scale, short precision
 	if (datatype == 261)	// blob
 		retval << " sub_type " << subtype;
 
-	return retval.str();
+	return std2wx(retval.str());
 }
 //-----------------------------------------------------------------------------
-void Domain::getDatatypeParts(std::string& type, std::string& size, std::string& scale)
+void Domain::getDatatypeParts(wxString& type, wxString& size, wxString& scale)
 {
-	using namespace std;
-	string datatype = getDatatypeAsString();
-	string::size_type p1 = datatype.find("(");
-	if (p1 != string::npos)
+	wxString datatype = getDatatypeAsString();
+	wxString::size_type p1 = datatype.find(wxT("("));
+	if (p1 != wxString::npos)
 	{
 		type = datatype.substr(0, p1);
-		string::size_type p2 = datatype.find(",");
-		if (p2 == string::npos)
-			p2 = datatype.find(")");
+		wxString::size_type p2 = datatype.find(wxT(","));
+		if (p2 == wxString::npos)
+			p2 = datatype.find(wxT(")"));
 		else
 		{
-			string::size_type p3 = datatype.find(")");
-			scale = datatype.substr(p2+1, p3-p2-1);
+			wxString::size_type p3 = datatype.find(wxT(")"));
+			scale = datatype.substr(p2 + 1, p3 - p2 - 1);
 		}
-		size = datatype.substr(p1+1, p2-p1-1);
+		size = datatype.substr(p1 + 1, p2 - p1 - 1);
 	}
 	else
 		type = datatype;
 }
 //-----------------------------------------------------------------------------
-std::string Domain::getCharset()
+wxString Domain::getCharset()
 {
 	if (!infoLoadedM)
 		loadInfo();
@@ -223,24 +223,24 @@ std::string Domain::getCharset()
 	return charsetM;
 }
 //-----------------------------------------------------------------------------
-std::string Domain::getPrintableName()
+wxString Domain::getPrintableName()
 {
-	return getName() + " " + getDatatypeAsString();
+	return getName() + wxT(" ") + getDatatypeAsString();
 }
 //-----------------------------------------------------------------------------
-std::string Domain::getCreateSqlTemplate() const
+wxString Domain::getCreateSqlTemplate() const
 {
-	return	"CREATE DOMAIN domain_name\n"
-            "AS datatype\n"
-            "DEFAULT {literal | NULL | USER}\n"
-            "[NOT NULL]\n"
-            "[CHECK (dom_search_condition)]\n"
-            "COLLATE collation;\n";
+	return	wxT("CREATE DOMAIN domain_name\n")
+            wxT("AS datatype\n")
+            wxT("DEFAULT {literal | NULL | USER}\n")
+            wxT("[NOT NULL]\n")
+            wxT("[CHECK (dom_search_condition)]\n")
+            wxT("COLLATE collation;\n");
 }
 //-----------------------------------------------------------------------------
-const std::string Domain::getTypeName() const
+const wxString Domain::getTypeName() const
 {
-	return "DOMAIN";
+	return wxT("DOMAIN");
 }
 //-----------------------------------------------------------------------------
 void Domain::acceptVisitor(MetadataItemVisitor* visitor)

@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -36,21 +36,20 @@
     #include "wx/wx.h"
 #endif
 
-#include <ctype.h>		// needed for toupper()
 #include <wx/wx.h>
 #include <wx/encconv.h>
-#include <string>
+
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 //! ugly.cpp contains all ugly stuff with ifdefs and similar
 //! things that would otherwise make code ugly and unreadable
 //-----------------------------------------------------------------------------
-//! converts wxString to std::string
+//! converts wxString to wxString
 std::string wx2std(const wxString& input)
 {
 #if (wxUSE_UNICODE)
 	int size = input.Length() + 1;
-	char *buffer = new char[size];
+	char* buffer = new char[size];
 	wxEncodingConverter wxec;
 	wxec.Init(wxFONTENCODING_UNICODE, wxFONTENCODING_ISO8859_1);
 	wxec.Convert(input.wc_str(), buffer);
@@ -62,7 +61,7 @@ std::string wx2std(const wxString& input)
 #endif
 }
 //-----------------------------------------------------------------------------
-//! converts std::string to wxString
+//! converts wxString to wxString
 wxString std2wx(std::string input)
 {
 #if (wxUSE_UNICODE)
@@ -79,16 +78,7 @@ wxString std2wx(std::string input)
 #endif
 }
 //-----------------------------------------------------------------------------
-//! Changes given std::string to uppercase
-std::string upcase(std::string str)
-{
-	std::string s(str);
-	for (std::string::size_type p = 0; p < s.length(); ++p)
-		s[p] = toupper(s[p]);
-	return s;
-}
-//-----------------------------------------------------------------------------
-//! return string for comparison, used to limit features to certain platforms
+//! return wxString for comparison, used to limit features to certain platforms
 wxString getPlatformName()
 {
 #ifdef __WINDOWS__

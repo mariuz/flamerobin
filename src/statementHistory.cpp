@@ -36,29 +36,29 @@
     #include "wx/wx.h"
 #endif
 
-#include <string>
 #include <map>
-#include "ugly.h"
+
 #include "config/Config.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
 #include "statementHistory.h"
+#include "ugly.h"
 
 class Server;
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------
-StatementHistory::StatementHistory(const string& storageName)
+StatementHistory::StatementHistory(const wxString& storageName)
 {
     storageNameM = storageName;
     Position p = 0;
     while (true)    // load history
     {
-        string s;
-        ostringstream keyname;
-        keyname << "HISTORY_" << storageNameM << "_ITEM_" << (p++);
-        if (config().getValue(keyname.str(), s)) // history exists
-            statementsM.push_back(std2wx(s));
+        wxString keyname;
+        keyname << wxT("HISTORY_") << storageNameM << wxT("_ITEM_") << (p++);
+        wxString s;
+        if (config().getValue(keyname, s)) // history exists
+            statementsM.push_back(s);
         else
             break;
     }
@@ -77,41 +77,41 @@ StatementHistory::~StatementHistory()
     {
         if ((*it).IsEmpty())    // don't save empty buffers
             continue;
-        ostringstream keyname;
-        keyname << "HISTORY_" << storageNameM << "_ITEM_" << (i++);
-        config().setValue(keyname.str(), wx2std(*it));
+        wxString keyname;
+        keyname << wxT("HISTORY_") << storageNameM << wxT("_ITEM_") << (i++);
+        config().setValue(keyname, *it);
     }
 }
 //-----------------------------------------------------------------------------
 //! reads granularity from config() and gives pointer to appropriate history object
-StatementHistory& StatementHistory::get(Database *db)
+StatementHistory& StatementHistory::get(Database* db)
 {
     enum historyGranularity { hgCommonToAll = 0, hgPerDatabaseName, hgPerDatabase };
-    historyGranularity hg = (historyGranularity)(config().get("statementHistoryGranularity", (int)hgPerDatabase));
+    historyGranularity hg = (historyGranularity)(config().get(wxT("statementHistoryGranularity"), (int)hgPerDatabase));
     if (hg == hgCommonToAll)
     {
-        static StatementHistory st("");
+        static StatementHistory st(wxT(""));
         return st;
     }
 
     else if (hg == hgPerDatabaseName)
     {
-        static map<string, StatementHistory> stm;
+        static map<wxString, StatementHistory> stm;
         if (stm.find(db->getName()) == stm.end())
         {
-            StatementHistory st("DATABASENAME" + db->getName());
-            stm.insert(pair<string, StatementHistory>(db->getName(), st));
+            StatementHistory st(wxT("DATABASENAME") + db->getName());
+            stm.insert(pair<wxString, StatementHistory>(db->getName(), st));
         }
         return (*(stm.find(db->getName()))).second;
     }
 
     else // (hg == hgPerDatabase)
     {
-        static map<Database *, StatementHistory> stm;
+        static map<Database*, StatementHistory> stm;
         if (stm.find(db) == stm.end())
         {
-            StatementHistory st("DATABASE" + db->getId());
-            stm.insert(pair<Database *, StatementHistory>(db, st));
+            StatementHistory st(wxT("DATABASE") + db->getId());
+            stm.insert(pair<Database*, StatementHistory>(db, st));
         }
         return (*(stm.find(db))).second;
     }
@@ -149,10 +149,10 @@ StatementHistory::Position StatementHistory::size()
 //-----------------------------------------------------------------------------
 void StatementHistory::checkSize()
 {
-    if (!config().get("limitHistorySize", false))
+    if (!config().get(wxT("limitHistorySize"), false))
         return;
 
-    int historySize = config().get("statementHistorySize", 50);     // -1 = unlimited
+    int historySize = config().get(wxT("statementHistorySize"), 50);     // -1 = unlimited
     while (statementsM.size() > (deque<wxString>::size_type)historySize)
         statementsM.pop_front();
 }

@@ -32,8 +32,8 @@
 class Role: public MetadataItem
 {
 public:
-    virtual std::string getCreateSqlTemplate() const;
-    virtual const std::string getTypeName() const;
+    virtual wxString getCreateSqlTemplate() const;
+    virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------

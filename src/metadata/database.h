@@ -47,20 +47,20 @@ class Server;
 class Credentials
 {
 private:
-    std::string charsetM;
-    std::string roleM;
-    std::string usernameM;
-    std::string passwordM;
+    wxString charsetM;
+    wxString roleM;
+    wxString usernameM;
+    wxString passwordM;
 
 public:
-    std::string getCharset() const;
-    std::string getUsername() const;
-    std::string getPassword() const;
-    std::string getRole() const;
-    void setCharset(std::string value);
-    void setUsername(std::string value);
-    void setPassword(std::string value);
-    void setRole(std::string value);
+    wxString getCharset() const;
+    wxString getUsername() const;
+    wxString getPassword() const;
+    wxString getRole() const;
+    void setCharset(wxString value);
+    void setUsername(wxString value);
+    void setPassword(wxString value);
+    void setRole(wxString value);
 };
 //-----------------------------------------------------------------------------
 class Database: public MetadataItem
@@ -68,9 +68,9 @@ class Database: public MetadataItem
 private:
     IBPP::Database databaseM;
     bool connectedM;
-    std::string databaseCharsetM;
+    wxString databaseCharsetM;
 
-    std::string pathM;
+    wxString pathM;
     Credentials credentials;
     Credentials *connectionCredentials;
 
@@ -84,11 +84,11 @@ private:
     MetadataCollection<Trigger> triggersM;
     MetadataCollection<View> viewsM;
 
-    std::multimap<std::string, std::string> collationsM;
+    std::multimap<wxString, wxString> collationsM;
     void loadCollations();
 
     // small help for parser
-    std::string getTableForIndex(std::string indexName);
+    wxString getTableForIndex(wxString indexName);
 
     mutable unsigned int idM;
 public:
@@ -104,56 +104,56 @@ public:
     MetadataCollection<Table>::const_iterator tablesBegin();
     MetadataCollection<Table>::const_iterator tablesEnd();
 
-    void clear();               // sets all values to empty string
+    void clear();               // sets all values to empty wxString
     bool isConnected() const;
-    bool connect(std::string password);
+    bool connect(wxString password);
     bool disconnect();
     bool reconnect() const;
     void prepareTemporaryCredentials();
     void resetCredentials();
 
-    std::string loadDomainNameForColumn(std::string table, std::string field);
-    Domain *loadMissingDomain(std::string name);
+    wxString loadDomainNameForColumn(wxString table, wxString field);
+    Domain *loadMissingDomain(wxString name);
     bool loadObjects(NodeType type);
-    //std::string getLoadingSql(NodeType type);
+    //wxString getLoadingSql(NodeType type);
 
     bool loadGeneratorValues();
 
-    MetadataItem *findByNameAndType(NodeType nt, std::string name);
-    MetadataItem *findByName(std::string name);
+    MetadataItem *findByNameAndType(NodeType nt, wxString name);
+    MetadataItem *findByName(wxString name);
     void refreshByType(NodeType type);
     void dropObject(MetadataItem *object);
-    bool addObject(NodeType type, std::string name);
-    bool parseCommitedSql(std::string sql);     // reads a DDL statement and does accordingly
+    bool addObject(NodeType type, wxString name);
+    bool parseCommitedSql(wxString sql);     // reads a DDL statement and does accordingly
 
-    std::vector<std::string> getCollations(std::string charset);
+    std::vector<wxString> getCollations(wxString charset);
 
     //! fill vector with names of all tables, views, etc.
-    void getIdentifiers(std::vector<std::string>& temp);
+    void getIdentifiers(std::vector<wxString>& temp);
 
     //! fill vector with result of sql statement
-    bool fillVector(std::vector<std::string>& list, std::string sql);
+    bool fillVector(std::vector<wxString>& list, wxString sql);
 
-    std::string getPath() const;
-    std::string getDatabaseCharset() const;
-    std::string getConnectionCharset() const;
-    std::string getUsername() const;
-    std::string getPassword() const;
-    std::string getRole() const;
+    wxString getPath() const;
+    wxString getDatabaseCharset() const;
+    wxString getConnectionCharset() const;
+    wxString getUsername() const;
+    wxString getPassword() const;
+    wxString getRole() const;
     IBPP::Database& getIBPPDatabase();
-    void setPath(std::string value);
-    void setConnectionCharset(std::string value);
-    void setUsername(std::string value);
-    void setPassword(std::string value);
-    void setRole(std::string value);
-    virtual const std::string getTypeName() const;
+    void setPath(wxString value);
+    void setConnectionCharset(wxString value);
+    void setUsername(wxString value);
+    void setPassword(wxString value);
+    void setRole(wxString value);
+    virtual const wxString getTypeName() const;
     Server *getServer() const;
-    // returns the complete connection string.
-    std::string getConnectionString() const;
-    // returns a candidate name based on the connection string. Example:
+    // returns the complete connection wxString.
+    wxString getConnectionString() const;
+    // returns a candidate name based on the connection wxString. Example:
     // path is "C:\data\database.fdb" -> returns "database".
-    std::string extractNameFromConnectionString() const;
-    virtual const std::string getId() const;
+    wxString extractNameFromConnectionString() const;
+    virtual const wxString getId() const;
     void setId(int id);
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };

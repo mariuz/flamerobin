@@ -40,7 +40,7 @@ public:
     SimpleHtmlFrame(wxWindow* parent, const wxString& fileName);
 protected:
     PrintableHtmlWindow* window_1;
-    virtual const std::string getName() const;
+    virtual const wxString getName() const;
     virtual const wxRect getDefaultRect() const;
 };
 //-----------------------------------------------------------------------------

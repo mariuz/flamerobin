@@ -30,32 +30,31 @@
     #pragma hdrstop
 #endif
 
-#include <string>
 #include <vector>
 
 #include "constraints.h"
 #include "metadataitem.h"
 #include "MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
-std::string ColumnConstraint::getColumnList() const
+wxString ColumnConstraint::getColumnList() const
 {
-	std::string result;
-	for (std::vector<std::string>::const_iterator it = columnsM.begin(); it != columnsM.end(); ++it)
+	wxString result;
+	for (std::vector<wxString>::const_iterator it = columnsM.begin(); it != columnsM.end(); ++it)
 	{
 		if (it != columnsM.begin())
-			result += ",";
+			result += wxT(",");
 		result += (*it);
 	}
 	return result;
 };
 //-----------------------------------------------------------------------------
-std::string ForeignKey::getReferencedColumnList() const
+wxString ForeignKey::getReferencedColumnList() const
 {
-	std::string result;
-	for (std::vector<std::string>::const_iterator it = referencedColumnsM.begin(); it != referencedColumnsM.end(); ++it)
+	wxString result;
+	for (std::vector<wxString>::const_iterator it = referencedColumnsM.begin(); it != referencedColumnsM.end(); ++it)
 	{
 		if (it != referencedColumnsM.begin())
-			result += ",";
+			result += wxT(",");
 		result += (*it);
 	}
 	return result;

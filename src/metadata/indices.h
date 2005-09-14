@@ -27,7 +27,6 @@
 #define FR_INDICES_H
 
 #include <vector>
-#include <string>
 
 #include "metadataitem.h"
 //-----------------------------------------------------------------------------
@@ -42,7 +41,7 @@ private:
 	bool activeM;
 	IndexType indexTypeM;
 	double statisticsM;
-	std::vector<std::string> segmentsM;
+	std::vector<wxString> segmentsM;
 public:
 	Index(bool unique, bool active, bool ascending, double statistics);
 
@@ -50,8 +49,8 @@ public:
 	bool isUnique();
 	double getStatistics();
 	IndexType getIndexType();
-	std::string getFieldsAsString();
-	std::vector<std::string> *getSegments();
+	wxString getFieldsAsString();
+	std::vector<wxString> *getSegments();
     virtual void acceptVisitor(MetadataItemVisitor* v);
 };
 //-----------------------------------------------------------------------------

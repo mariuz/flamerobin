@@ -56,7 +56,7 @@ private:
     static const AddConstraintHandler handlerInstance;    // singleton; registers itself on creation.
 
     Table *selectTable(Database *d, wxWindow *parent) const;
-    std::string selectAction(const wxString& label, wxWindow *parent) const;
+    wxString selectAction(const wxString& label, wxWindow *parent) const;
 };
 //-----------------------------------------------------------------------------
 const AddConstraintHandler AddConstraintHandler::handlerInstance;
@@ -65,17 +65,17 @@ Table *AddConstraintHandler::selectTable(Database *d, wxWindow *parent) const
 {
     wxArrayString tables;
     for (MetadataCollection<Table>::const_iterator it = d->tablesBegin(); it != d->tablesEnd(); ++it)
-        tables.Add(std2wx((*it).getName()));
+        tables.Add((*it).getName());
     int index = ::wxGetSingleChoiceIndex(_("Select table to reference"), _("Creating foreign key"), tables, parent);
     if (index == -1)
         return 0;
     for (MetadataCollection<Table>::const_iterator it = d->tablesBegin(); it != d->tablesEnd(); ++it)
-        if ((*it).getName() == wx2std(tables[index]))
+        if ((*it).getName() == tables[index])
             return const_cast<Table *>(&(*it));
     return 0;
 }
 //-----------------------------------------------------------------------------
-std::string AddConstraintHandler::selectAction(const wxString& label, wxWindow *parent) const
+wxString AddConstraintHandler::selectAction(const wxString& label, wxWindow *parent) const
 {
     wxArrayString actions;
     actions.Add(wxT("RESTRICT"));
@@ -86,16 +86,16 @@ std::string AddConstraintHandler::selectAction(const wxString& label, wxWindow *
     int index = ::wxGetSingleChoiceIndex(wxString::Format(_("Select action for %s"), label.c_str()),
         _("Creating foreign key"), actions, parent);
     if (index == -1)
-        return "CANCEL";
-    return wx2std(actions[index]);
+        return wxT("CANCEL");
+    return actions[index];
 }
 //-----------------------------------------------------------------------------
 bool AddConstraintHandler::handleURI(URI& uri)
 {
-    if (uri.action != "add_constraint")
+    if (uri.action != wxT("add_constraint"))
         return false;
 
-    std::string type = uri.getParam("type");    // pk, fk, check, unique
+    wxString type = uri.getParam(wxT("type"));    // pk, fk, check, unique
     Table *t = (Table *)getObject(uri);
     wxWindow *w = getWindow(uri);
     if (!t || !w)
@@ -103,21 +103,19 @@ bool AddConstraintHandler::handleURI(URI& uri)
 
     // Find first available constraint name:
     Database *db = t->getDatabase();
-    std::string default_value;
-    std::string prefix = type + "_" + t->getName();
-    std::vector<std::string> cnames;
+    wxString default_value;
+    wxString prefix = type + wxT("_") + t->getName();
+    std::vector<wxString> cnames;
     if (db->fillVector(cnames,
-        "select rdb$constraint_name from rdb$relation_constraints "
-        "where rdb$relation_name = '" + t->getName()
-        + "' and rdb$constraint_name starting with '" + prefix + "' order by 1"))
+        wxT("select rdb$constraint_name from rdb$relation_constraints ")
+        wxT("where rdb$relation_name = '") + t->getName()
+        + wxT("' and rdb$constraint_name starting with '") + prefix + wxT("' order by 1")))
     {
-        int i=0;
+        int i = 0;
         do
         {
             i++;
-            std::ostringstream ss;
-            ss << i;
-            default_value = prefix + "_" + ss.str();
+            default_value = prefix + wxString::Format(wxT("_%d"), i);
         }
         while (std::find(cnames.begin(), cnames.end(), default_value) != cnames.end());
     }
@@ -125,63 +123,64 @@ bool AddConstraintHandler::handleURI(URI& uri)
         default_value = prefix;
 
     wxString cname = ::wxGetTextFromUser(_("Enter constraint name"),
-        _("Adding new table constraint"), std2wx(default_value), w);
+        _("Adding new table constraint"), default_value, w);
     if (cname == wxT(""))    // cancel
         return true;
 
-    std::string sql = "alter table " + t->getName() + "\nadd constraint " + wx2std(cname);
+    wxString sql = wxT("alter table ") + t->getName() + wxT("\nadd constraint ") + cname;
 
-    if (type == "PK")
+    if (type == wxT("PK"))
     {
-        std::string columnlist = selectTableColumns(t, w);
-        sql += "\nprimary key (" + columnlist + ")";
+        wxString columnlist = selectTableColumns(t, w);
+        sql += wxT("\nprimary key (") + columnlist + wxT(")");
     }
-    else if (type == "FK")
+    else if (type == wxT("FK"))
     {
-        std::string columnlist = selectTableColumns(t, w);
-        if (columnlist == "")
+        wxString columnlist = selectTableColumns(t, w);
+        if (columnlist == wxT(""))
             return true;
-        Table *ref = selectTable(t->getDatabase(), w);
+        Table* ref = selectTable(t->getDatabase(), w);
         if (!ref)
             return true;
-        std::string refcolumnlist = selectTableColumns(ref, w);
-        if (refcolumnlist == "")
+        wxString refcolumnlist = selectTableColumns(ref, w);
+        if (refcolumnlist == wxT(""))
             return true;
-        sql += "\nforeign key (" + columnlist + ") \nreferences " + ref->getName() + " (" + refcolumnlist + ")";
-        std::string action = selectAction(_("update"), w);
-        if (action == "CANCEL")
+        sql += wxT("\nforeign key (") + columnlist + wxT(") \nreferences ") + ref->getName()
+            + wxT(" (") + refcolumnlist + wxT(")");
+        wxString action = selectAction(_("update"), w);
+        if (action == wxT("CANCEL"))
             return true;
-        else if (action != "RESTRICT")
-            sql += "\non update " + action + " ";
+        else if (action != wxT("RESTRICT"))
+            sql += wxT("\non update ") + action + wxT(" ");
 
         action = selectAction(_("delete"), w);
-        if (action == "CANCEL")
+        if (action == wxT("CANCEL"))
             return true;
-        else if (action != "RESTRICT")
-            sql += "\non delete " + action + " ";
+        else if (action != wxT("RESTRICT"))
+            sql += wxT("\non delete ") + action + wxT(" ");
     }
-    else if (type == "CHK")
+    else if (type == wxT("CHK"))
     {
         wxString source;
         if (!GetMultilineTextFromUser(_("Enter check condition"), source, w))
             return true;
-        sql += "\ncheck (" + wx2std(source) + ")";
+        sql += wxT("\ncheck (") + source + wxT(")");
     }
-    else if (type == "UNQ")
+    else if (type == wxT("UNQ"))
     {
-        std::string columnlist = selectTableColumns(t, w);
-        sql += "\nunique (" + columnlist + ")";
+        wxString columnlist = selectTableColumns(t, w);
+        sql += wxT("\nunique (") + columnlist + wxT(")");
     }
     else
     {
-        ::wxMessageBox(_("Unknown constraint type"), _("Error."), wxOK|wxICON_ERROR);
+        ::wxMessageBox(_("Unknown constraint type"), _("Error."), wxOK | wxICON_ERROR);
         return true;
     }
 
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, wxT(""));
     eff->setDatabase(db);
     eff->Show();
-    eff->setSql(std2wx(sql));
+    eff->setSql(sql);
     eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
     return true;
 }

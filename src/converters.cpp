@@ -36,29 +36,29 @@
     #include "wx/wx.h"
 #endif
 
-#include <string>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
 
 #include "config/Config.h"
 #include "converters.h"
+#include "ugly.h"
 //--------------------------------------------------------------------------------------
-//! formats date according to DateFormat string
-std::string GetHumanDate(int year, int month, int day, std::string DateFormat)
+//! formats date according to DateFormat wxString
+wxString GetHumanDate(int year, int month, int day, wxString DateFormat)
 {
-    std::string value;
-    for (std::string::iterator c = DateFormat.begin(); c != DateFormat.end(); c++)
+    wxString value;
+    for (wxString::iterator c = DateFormat.begin(); c != DateFormat.end(); c++)
     {
         int var = -1;
-        std::string format = "%02d";
+        wxString format = wxT("%02d");
         switch (*c)
         {
-            case 'd':    format = "%d";
+            case 'd':    format = wxT("%d");
             case 'D':    var = day;            break;
-            case 'm':    format = "%d";
+            case 'm':    format = wxT("%d");
             case 'M':    var = month;        break;
-            case 'Y':    format = "%04d";
+            case 'Y':    format = wxT("%04d");
             case 'y':    var = year;            break;
             default:    value += *c;
         }
@@ -69,28 +69,28 @@ std::string GetHumanDate(int year, int month, int day, std::string DateFormat)
         if (var != -1)
         {
             char str[10];
-            sprintf(str, format.c_str(), var);
-            value += str;
+            sprintf(str, wx2std(format).c_str(), var);
+            value += std2wx(str);
         }
     }
     return value;
 }
 //--------------------------------------------------------------------------------------
-//! formats time according to TimeFormat string
-std::string GetHumanTime(int hour, int minute, int second, std::string TimeFormat)
+//! formats time according to TimeFormat wxString
+wxString GetHumanTime(int hour, int minute, int second, wxString TimeFormat)
 {
-    std::string value;
-    for (std::string::iterator c = TimeFormat.begin(); c != TimeFormat.end(); c++)
+    wxString value;
+    for (wxString::iterator c = TimeFormat.begin(); c != TimeFormat.end(); c++)
     {
         int var = -1;
-        std::string format = "%02d";
+        wxString format = wxT("%02d");
         switch (*c)
         {
-            case 'h':    format = "%d";
+            case 'h':    format = wxT("%d");
             case 'H':    var = hour;            break;
-            case 'm':    format = "%d";
+            case 'm':    format = wxT("%d");
             case 'M':    var = minute;        break;
-            case 's':    format = "%d";
+            case 's':    format = wxT("%d");
             case 'S':    var = second;        break;
             default:    value += *c;
         }
@@ -98,29 +98,29 @@ std::string GetHumanTime(int hour, int minute, int second, std::string TimeForma
         if (var != -1)
         {
             char str[10];
-            sprintf(str, format.c_str(), var);
-            value += str;
+            sprintf(str, wx2std(format).c_str(), var);
+            value += std2wx(str);
         }
     }
     return value;
 }
 //--------------------------------------------------------------------------------------
 //! formats timestamp according to DateFormat and TimeFormat strings
-std::string GetHumanTimestamp(IBPP::Timestamp ts, std::string DateFormat, std::string TimeFormat)
+wxString GetHumanTimestamp(IBPP::Timestamp ts, wxString DateFormat, wxString TimeFormat)
 {
     int year, month, day, hour, minute, second;
     ts.GetDate(year, month, day);
     ts.GetTime(hour, minute, second);
 
-    std::string value = GetHumanTime(hour, minute, second, TimeFormat);
-    if (value != "")
-        value = " " + value;
+    wxString value = GetHumanTime(hour, minute, second, TimeFormat);
+    if (value != wxT(""))
+        value = wxT(" ") + value;
     return GetHumanDate(year, month, day, DateFormat) + value;
 }
 //--------------------------------------------------------------------------------------
-//! takes value from column "col" of Statement and converts it into string
+//! takes value from column "col" of Statement and converts it into wxString
 // returns false if value is null
-bool CreateString(IBPP::Statement& st, int col, std::string& value)
+bool CreateString(IBPP::Statement& st, int col, wxString& value)
 {
     std::ostringstream svalue;
 
@@ -128,10 +128,12 @@ bool CreateString(IBPP::Statement& st, int col, std::string& value)
         return false;
 
     // some defaults
-    bool reformatNumbers = config().get("ReformatNumbers", false);
-    int numberPrecision = config().get("NumberPrecision", 2);    // defaults to 2 decimal digits
-    std::string dateFormat = config().get("DateFormat", std::string("D.M.Y"));
-    std::string timeFormat = config().get("TimeFormat", std::string("H:M:S"));
+    bool reformatNumbers = config().get(wxT("ReformatNumbers"), false);
+    int numberPrecision = config().get(wxT("NumberPrecision"), 2);    // defaults to 2 decimal digits
+    //wxString dateFormatDefault = wxT("D.M.Y");
+    wxString dateFormat = config().get(wxT("DateFormat"), wxString(wxT("D.M.Y")));
+    //wxString timeFormatDefault = wxT("H:M:S");
+    wxString timeFormat = config().get(wxT("TimeFormat"), wxString(wxT("H:M:S")));
 
     double dval;
     float fval;
@@ -146,17 +148,18 @@ bool CreateString(IBPP::Statement& st, int col, std::string& value)
     if (st->ColumnScale(col))
         DataType = IBPP::sdDouble;
 
-    value = "";
+    value = wxT("");
+    std::string tempValue;
     switch (DataType)
     {
         case IBPP::sdString:
-            st->Get(col, value);
+            st->Get(col, tempValue);
+            value = std2wx(tempValue);
             return true;
         case IBPP::sdInteger:
         case IBPP::sdSmallint:
             st->Get(col, &x);
-            svalue << x;
-            value = svalue.str();
+            value << x;
             return true;
         case IBPP::sdDate:
             st->Get(col, d);
@@ -175,7 +178,7 @@ bool CreateString(IBPP::Statement& st, int col, std::string& value)
         case IBPP::sdFloat:
             st->Get(col, &fval);
             svalue << std::fixed << fval;
-            value = svalue.str();
+            value = std2wx(svalue.str());
             return true;
         case IBPP::sdDouble:
             st->Get(col, &dval);
@@ -188,21 +191,17 @@ bool CreateString(IBPP::Statement& st, int col, std::string& value)
                 else
                     svalue << std::fixed << dval;
             }
-            value = svalue.str();
+            value = std2wx(svalue.str());
             return true;
 
         case IBPP::sdLargeint:
             st->Get(col, &int64val);
             svalue << int64val;
-            value = svalue.str();
+            value = std2wx(svalue.str());
             return true;
 
-            //sprintf(str, INT64FORMAT, int64val);
-            //value = str;
-            //return value;
-
         default:
-            value = "[...]";
+            value = wxT("[...]");
             return true;
     };
 

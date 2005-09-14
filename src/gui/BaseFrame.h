@@ -26,8 +26,6 @@
 #ifndef BASEFRAME_H
 #define BASEFRAME_H
 
-#include <string>
-
 //-----------------------------------------------------------------------------
 // Base class for all the frames in FlameRobin. Implements storing and restoring
 // of settings in config and other commonalities.
@@ -44,24 +42,24 @@ protected:
     // it directly except when wanting to "reload" the saved settings.
     void readConfigSettings();
     // Use this to customize which settings are read from config().
-    virtual void doReadConfigSettings(const std::string& prefix);
+    virtual void doReadConfigSettings(const wxString& prefix);
     // Writes any settings to config. The predefined implementation saves
     // size and position of the frame based on getStorageName(). No need to call
     // it directly except when wanting to save settings without destroying the
     // frame.
     void writeConfigSettings() const;
     // Use this to customize which settings are written to config().
-    virtual void doWriteConfigSettings(const std::string& prefix) const;
+    virtual void doWriteConfigSettings(const wxString& prefix) const;
     // Returns the name of the frame for storage purpose.
     // A frame that wants its settings stored and retrieved must override this
-    // function and return a nonempty string. The predefined implementation
+    // function and return a nonempty wxString. The predefined implementation
     // returns getName().
-    virtual const std::string getStorageName() const;
+    virtual const wxString getStorageName() const;
     // Returns the name of the frame, which can be the same for all instances
     // of the class or different for each instance. Currently it isn't really
     // used except as a base for getStorageName().
     // The predefined implementation returns "".
-    virtual const std::string getName() const;
+    virtual const wxString getName() const;
     // Returns the default position and size for the frame; it's called by
     // readConfigSettings() to get first-time default position and size.
     // The predefined implementation returns -1 for all 4 items.

@@ -28,21 +28,20 @@
 
 #include <list>
 #include <map>
-#include <string>
 //-----------------------------------------------------------------------------
 //! almost like a struct, but with few helper functions
 class URI
 {
 public:
-	std::string protocol;
-	std::string action;
-	std::map<std::string, std::string> params;
+	wxString protocol;
+	wxString action;
+	std::map<wxString, wxString> params;
 
 	URI();
-	URI(const std::string& uri);
-	bool parseURI(const std::string& uri);
-	void addParam(const std::string& pair);
-	std::string getParam(const std::string& name) const;
+	URI(const wxString& uri);
+	bool parseURI(const wxString& uri);
+	void addParam(const wxString& pair);
+	wxString getParam(const wxString& name) const;
 };
 //-----------------------------------------------------------------------------
 class URIHandler;

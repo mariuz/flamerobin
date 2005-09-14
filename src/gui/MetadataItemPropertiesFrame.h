@@ -29,8 +29,6 @@
 #include <wx/wx.h>
 #include <wx/wxhtml.h>
 
-#include <string>
-
 #include "core/Observer.h"
 #include "gui/BaseFrame.h"
 #include "metadata/metadataitem.h"
@@ -46,21 +44,21 @@ private:
 
     void do_layout();
     void loadPage();    // force reload from outside
-    void processCommand(std::string cmd, MetadataItem *object, std::string& htmlpage);
-    void processHtmlCode(std::string& htmlpage, std::string htmlsource, MetadataItem *object = 0);
+    void processCommand(wxString cmd, MetadataItem *object, wxString& htmlpage);
+    void processHtmlCode(wxString& htmlpage, wxString htmlsource, MetadataItem *object = 0);
     void update();
     // used to remember the value among calls to getStorageName(), needed because
     // it's not possible to access objectM (see getStorageName()) after detaching from it.
-    mutable std::string storageNameM;
+    mutable wxString storageNameM;
 protected:
     PrintableHtmlWindow* window_1;
-    virtual const std::string getName() const;
-    virtual const std::string getStorageName() const;
+    virtual const wxString getName() const;
+    virtual const wxString getStorageName() const;
     virtual const wxRect getDefaultRect() const;
 public:
     MetadataItem *getObservedObject() const;
-    void processHtmlFile(std::string fileName);
-    void setPage(const std::string& type);
+    void processHtmlFile(wxString fileName);
+    void setPage(const wxString& type);
 
     MetadataItemPropertiesFrame(wxWindow* parent, MetadataItem *object, int id = -1);
 };

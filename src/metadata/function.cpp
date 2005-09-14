@@ -30,8 +30,6 @@
     #pragma hdrstop
 #endif
 
-#include <string>
-
 #include <ibpp.h>
 
 #include "database.h"
@@ -45,25 +43,25 @@ Function::Function()
 	infoLoadedM = false;
 }
 //-----------------------------------------------------------------------------
-std::string Function::getCreateSqlTemplate() const
+wxString Function::getCreateSqlTemplate() const
 {
-	return "DECLARE EXTERNAL FUNCTION name [datatype | CSTRING (int) [, datatype | CSTRING (int) ...]]\n"
-           "RETURNS {datatype [BY VALUE] | CSTRING (int)} [FREE_IT]\n"
-           "ENTRY_POINT 'entryname'\n"
-           "MODULE_NAME 'modulename';\n";
+	return wxT("DECLARE EXTERNAL FUNCTION name [datatype | CSTRING (int) [, datatype | CSTRING (int) ...]]\n")
+           wxT("RETURNS {datatype [BY VALUE] | CSTRING (int)} [FREE_IT]\n")
+           wxT("ENTRY_POINT 'entryname'\n")
+           wxT("MODULE_NAME 'modulename';\n");
 }
 //-----------------------------------------------------------------------------
-const std::string Function::getTypeName() const
+const wxString Function::getTypeName() const
 {
-	return "FUNCTION";
+	return wxT("FUNCTION");
 }
 //-----------------------------------------------------------------------------
-std::string Function::getDropSqlStatement() const
+wxString Function::getDropSqlStatement() const
 {
-    return "DROP EXTERNAL FUNCTION " + getName() + ";";
+    return wxT("DROP EXTERNAL FUNCTION ") + getName() + wxT(";");
 }
 //-----------------------------------------------------------------------------
-std::string Function::getDefinition()
+wxString Function::getDefinition()
 {
 	loadInfo();
 	return definitionM;
@@ -74,15 +72,15 @@ void Function::loadInfo(bool force)
 	if (infoLoadedM && !force)
 		return;
 
-	Database *d = getDatabase();
+	Database* d = getDatabase();
 	if (!d)
 	{
-		definitionM = "Error";
+		definitionM = wxT("Error");
 		return;
 	}
 
 	IBPP::Database& db = d->getIBPPDatabase();
-	definitionM = getName() + "(\n";
+	definitionM = getName() + wxT("(\n");
 	try
 	{
 		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
@@ -97,13 +95,14 @@ void Function::loadInfo(bool force)
 			" WHERE f.RDB$FUNCTION_NAME = ?"
 			" ORDER BY a.RDB$ARGUMENT_POSITION"
 		);
-		st1->Set(1, getName());
+		st1->Set(1, wx2std(getName()));
 		st1->Execute();
-		std::string retstr;
+		wxString retstr;
 		bool first = true;
 		while (st1->Fetch())
 		{
 			short returnarg, mechanism, type, scale, length, subtype, precision, retpos;
+			std::string libraryName, entryPoint;
 			st1->Get(1, returnarg);
 			st1->Get(2, mechanism);
 			st1->Get(3, retpos);
@@ -112,12 +111,14 @@ void Function::loadInfo(bool force)
 			st1->Get(6, length);
 			st1->Get(7, subtype);
 			st1->Get(8, precision);
-			st1->Get(9, libraryNameM);
-			st1->Get(10, entryPointM);
-			std::string param = "    " + Domain::datatype2string(type, scale, precision, subtype, length)
-				+ " by " + (mechanism == 0 ? "value":"reference");
+			st1->Get(9, libraryName);
+			libraryNameM = std2wx(libraryName);
+			st1->Get(10, entryPoint);
+			entryPointM = std2wx(entryPoint);
+			wxString param = wxT("    ") + Domain::datatype2string(type, scale, precision, subtype, length)
+				+ wxT(" by ") + (mechanism == 0 ? wxT("value") : wxT("reference"));
 			if (mechanism == -1)
-				param += " [FREE_IT]";
+				param += wxT(" [FREE_IT]");
 			if (returnarg == retpos)	// output
 				retstr = param;
 			else
@@ -125,28 +126,29 @@ void Function::loadInfo(bool force)
 				if (first)
 					first = false;
 				else
-					definitionM += ",\n";
+					definitionM += wxT(",\n");
 				definitionM += param;
 			}
 		}
-		definitionM += "\n)\nreturns:\n" + retstr;
+		definitionM += wxT("\n)\nreturns:\n") + retstr;
 		infoLoadedM = true;
 		tr1->Commit();
 	}
 	catch (IBPP::Exception &e)
 	{
-		definitionM = e.ErrorMessage();
+		definitionM = std2wx(e.ErrorMessage());
 	}
 	catch (...)
 	{
-		definitionM = "System error.";
+		definitionM = _("System error.");
 	}
 }
 //-----------------------------------------------------------------------------
-std::string Function::getHtmlHeader()
+wxString Function::getHtmlHeader()
 {
 	loadInfo();
-	return "<B>Library name:</B> " + libraryNameM + "<BR><B>Entry point:</B>  " + entryPointM + "<BR><BR>";
+	return wxT("<B>Library name:</B> ") + libraryNameM + wxT("<BR><B>Entry point:</B>  ")
+	    + entryPointM + wxT("<BR><BR>");
 }
 //-----------------------------------------------------------------------------
 void Function::acceptVisitor(MetadataItemVisitor* visitor)

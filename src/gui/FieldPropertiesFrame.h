@@ -72,7 +72,7 @@ public:
     void setProperties();
 
 private:
-    void loadCollations(std::string desired);
+    void loadCollations(wxString desired);
     void updateSqlWindow();
     void updateEditBoxes();
     Column *fieldM;     // needed when field is edited
@@ -85,8 +85,8 @@ private:
 
 protected:
     void removeSubject(Subject* subject);
-    void updateDomainInfo(std::string domain);
-    bool getDomainInfo(std::string domain, std::string& type, std::string& size, std::string& scale, std::string& charset);
+    void updateDomainInfo(wxString domain);
+    bool getDomainInfo(wxString domain, wxString& type, wxString& size, wxString& scale, wxString& charset);
     void update();
 
     // begin wxGlade: FieldPropertiesFrame::attributes
@@ -120,7 +120,7 @@ protected:
     // end wxGlade
 
     DECLARE_EVENT_TABLE()
-    virtual const std::string getName() const;
+    virtual const wxString getName() const;
 };
 //-----------------------------------------------------------------------------
 #endif // FIELDPROPERTIESFRAME_H

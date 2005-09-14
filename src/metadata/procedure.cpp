@@ -71,56 +71,56 @@ bool Procedure::isSelectable()
     return false;
 }
 //-----------------------------------------------------------------------------
-std::string Procedure::getSelectStatement(bool withColumns)
+wxString Procedure::getSelectStatement(bool withColumns)
 {
     if (!parametersLoadedM)
         loadParameters();
-    std::string collist, parlist;
+    wxString collist, parlist;
     for (MetadataCollection <Parameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
     {
         if ((*it).getParameterType() == ptInput)
         {
             if (!parlist.empty())
-                parlist += ", ";
+                parlist += wxT(", ");
             parlist += (*it).getName();
         }
         else
         {
             if (!collist.empty())
-                collist += ", ";
+                collist += wxT(", ");
             collist += (*it).getName();
         }
     }
 
-    std::string sql = "SELECT ";
+    wxString sql = wxT("SELECT ");
     if (withColumns)
         sql += collist;
     else
-        sql += "* ";
-    sql += "\nFROM " + getName();
+        sql += wxT("* ");
+    sql += wxT("\nFROM ") + getName();
     if (!parlist.empty())
-        sql += "(" + parlist + ")";
+        sql += wxT("(") + parlist + wxT(")");
     return sql;
 }
 //-----------------------------------------------------------------------------
-std::string Procedure::getExecuteStatement()
+wxString Procedure::getExecuteStatement()
 {
     if (!parametersLoadedM)
         loadParameters();
-    std::string parlist;
+    wxString parlist;
     for (MetadataCollection <Parameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
     {
         if ((*it).getParameterType() == ptInput)
         {
             if (!parlist.empty())
-                parlist += ", ";
+                parlist += wxT(", ");
             parlist += (*it).getName();
         }
     }
 
-    std::string sql = "EXECUTE PROCEDURE " + getName();
+    wxString sql = wxT("EXECUTE PROCEDURE ") + getName();
     if (!parlist.empty())
-        sql += "(" + parlist + ")";
+        sql += wxT("(") + parlist + wxT(")");
     return sql;
 }
 //-----------------------------------------------------------------------------
@@ -138,10 +138,10 @@ bool Procedure::checkAndLoadParameters(bool force)
 bool Procedure::loadParameters()
 {
     parametersM.clear();
-    Database *d = static_cast<Database *>(getParent());
+    Database* d = static_cast<Database*>(getParent());
     if (!d)
     {
-        lastError().setMessage("database not set");
+        lastError().setMessage(wxT("database not set"));
         parametersLoadedM = false;
         return false;
     }
@@ -159,7 +159,7 @@ bool Procedure::loadParameters()
             " where p.rdb$PROCEDURE_name = ? "
             " order by p.rdb$parameter_type, rdb$PARAMETER_number "
         );
-        st1->Set(1, getName());
+        st1->Set(1, wx2std(getName()));
         st1->Execute();
 
         while (st1->Fetch())
@@ -170,9 +170,9 @@ bool Procedure::loadParameters()
             st1->Get(2, source);
             st1->Get(3, &partype);
 
-            Parameter p(source, partype);
-            p.setName(column_name);
-            Parameter *pp = parametersM.add(p);
+            Parameter p(std2wx(source), partype);
+            p.setName(std2wx(column_name));
+            Parameter* pp = parametersM.add(p);
             pp->setParent(this);
         }
 
@@ -182,11 +182,11 @@ bool Procedure::loadParameters()
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage("System error.");
+        lastError().setMessage(_("System error."));
     }
 
     parametersLoadedM = false;
@@ -194,12 +194,12 @@ bool Procedure::loadParameters()
 }
 //-----------------------------------------------------------------------------
 //! returns false if an error occurs
-bool Procedure::getSource(std::string& source)
+bool Procedure::getSource(wxString& source)
 {
-    Database *d = static_cast<Database *>(getParent());
+    Database* d = static_cast<Database*>(getParent());
     if (!d)
     {
-        lastError().setMessage("Database not set.");
+        lastError().setMessage(wxT("Database not set."));
         return false;
     }
 
@@ -211,7 +211,7 @@ bool Procedure::getSource(std::string& source)
         tr1->Start();
         IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
         st1->Prepare("select rdb$procedure_source from rdb$procedures where rdb$procedure_name = ?");
-        st1->Set(1, getName());
+        st1->Set(1, wx2std(getName()));
         st1->Execute();
         st1->Fetch();
         readBlob(st1, 1, source);
@@ -220,20 +220,20 @@ bool Procedure::getSource(std::string& source)
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage("System error.");
+        lastError().setMessage(_("System error."));
     }
 
     return false;
 }
 //-----------------------------------------------------------------------------
-std::string Procedure::getDefinition()
+wxString Procedure::getDefinition()
 {
     checkAndLoadParameters();
-    std::string collist, parlist;
+    wxString collist, parlist;
     MetadataCollection <Parameter>::const_iterator lastInput, lastOutput;
     for (MetadataCollection <Parameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
     {
@@ -246,92 +246,92 @@ std::string Procedure::getDefinition()
     {
         if ((*it).getParameterType() == ptInput)
         {
-            parlist += "    " + (*it).getName() + " " + (*it).getDomain()->getDatatypeAsString();
+            parlist += wxT("    ") + (*it).getName() + wxT(" ") + (*it).getDomain()->getDatatypeAsString();
             if (it != lastInput)
-                parlist += ",";
-            parlist += "\n";
+                parlist += wxT(",");
+            parlist += wxT("\n");
         }
         else
         {
-            collist += "    " + (*it).getName() + " " + (*it).getDomain()->getDatatypeAsString();
+            collist += wxT("    ") + (*it).getName() + wxT(" ") + (*it).getDomain()->getDatatypeAsString();
             if (it != lastOutput)
-                collist += ",";
-            collist += "\n";
+                collist += wxT(",");
+            collist += wxT("\n");
         }
     }
-    std::string retval = getName();
+    wxString retval = getName();
     if (!parlist.empty())
-        retval += "(\n" + parlist + ")";
-    retval += "\n";
+        retval += wxT("(\n") + parlist + wxT(")");
+    retval += wxT("\n");
     if (!collist.empty())
-        retval += "returns:\n" + collist;
+        retval += wxT("returns:\n") + collist;
     return retval;
 }
 //-----------------------------------------------------------------------------
-std::string Procedure::getAlterSql()
+wxString Procedure::getAlterSql()
 {
     if (!parametersLoadedM)
         if (loadParameters())
             return lastError().getMessage();
 
-    std::string source;
+    wxString source;
     if (!getSource(source))
         return lastError().getMessage();
 
-    std::string sql = "SET TERM ^ ;\nALTER PROCEDURE " + getName();
+    wxString sql = wxT("SET TERM ^ ;\nALTER PROCEDURE ") + getName();
     if (!parametersM.empty())
     {
-        std::string input, output;
+        wxString input, output;
         for (MetadataCollection <Parameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
         {
             if ((*it).getParameterType() == ptInput)
             {
                 if (input.empty())
-                    input += " (\n    ";
+                    input += wxT(" (\n    ");
                 else
-                    input += ",\n    ";
-                input += (*it).getName() + " " + (*it).getDomain()->getDatatypeAsString();
+                    input += wxT(",\n    ");
+                input += (*it).getName() + wxT(" ") + (*it).getDomain()->getDatatypeAsString();
             }
             else
             {
                 if (output.empty())
-                    output += "\nRETURNS (\n    ";
+                    output += wxT("\nRETURNS (\n    ");
                 else
-                    output += ",\n    ";
-                output += (*it).getName() + " " + (*it).getDomain()->getDatatypeAsString();
+                    output += wxT(",\n    ");
+                output += (*it).getName() + wxT(" ") + (*it).getDomain()->getDatatypeAsString();
             }
         }
 
         if (!input.empty())
-            sql += input + " )";
+            sql += input + wxT(" )");
         if (!output.empty())
-            sql += output + " )";
+            sql += output + wxT(" )");
     }
-    sql += "\nAS";
+    sql += wxT("\nAS");
     sql += source;
-    sql += "^\nSET TERM ; ^";
+    sql += wxT("^\nSET TERM ; ^");
     return sql;
 }
 //-----------------------------------------------------------------------------
-std::string Procedure::getCreateSqlTemplate() const
+wxString Procedure::getCreateSqlTemplate() const
 {
-    std::string s("SET TERM ^ ;\n\n"
-            "CREATE PROCEDURE name \n"
-            " ( input_parameter_name < datatype>, ... ) \n"
-            "RETURNS \n"
-            " ( output_parameter_name < datatype>, ... )\n"
-            "AS \n"
-            "DECLARE VARIABLE variable_name < datatype>; \n"
-            "BEGIN\n"
-            "  /* write your code here */ \n"
-            "END^\n\n"
-            "SET TERM ; ^\n");
+    wxString s(wxT("SET TERM ^ ;\n\n")
+            wxT("CREATE PROCEDURE name \n")
+            wxT(" ( input_parameter_name < datatype>, ... ) \n")
+            wxT("RETURNS \n")
+            wxT(" ( output_parameter_name < datatype>, ... )\n")
+            wxT("AS \n")
+            wxT("DECLARE VARIABLE variable_name < datatype>; \n")
+            wxT("BEGIN\n")
+            wxT("  /* write your code here */ \n")
+            wxT("END^\n\n")
+            wxT("SET TERM ; ^\n"));
     return s;
 }
 //-----------------------------------------------------------------------------
-const std::string Procedure::getTypeName() const
+const wxString Procedure::getTypeName() const
 {
-    return "PROCEDURE";
+    return wxT("PROCEDURE");
 }
 //-----------------------------------------------------------------------------
 void Procedure::acceptVisitor(MetadataItemVisitor* visitor)

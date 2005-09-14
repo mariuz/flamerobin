@@ -32,16 +32,16 @@
 class Function: public MetadataItem
 {
 private:
-	std::string libraryNameM, entryPointM, definitionM;
+	wxString libraryNameM, entryPointM, definitionM;
 	bool infoLoadedM;
 	void loadInfo(bool force = false);
 public:
 	Function();
-	virtual const std::string getTypeName() const;
-    virtual std::string getCreateSqlTemplate() const;
-    virtual std::string getDropSqlStatement() const;
-	std::string getDefinition();
-	std::string getHtmlHeader();
+	virtual const wxString getTypeName() const;
+    virtual wxString getCreateSqlTemplate() const;
+    virtual wxString getDropSqlStatement() const;
+	wxString getDefinition();
+	wxString getHtmlHeader();
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------

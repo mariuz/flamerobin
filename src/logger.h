@@ -33,9 +33,9 @@
 class executedStatement
 {
 public:
-    std::string statement;
+    wxString statement;
     IBPP::STT type;
-    executedStatement(const std::string& st, const IBPP::STT& t): statement(st), type(t) {};
+    executedStatement(const wxString& st, const IBPP::STT& t): statement(st), type(t) {};
 };
 //-----------------------------------------------------------------------------
 class Database;
@@ -45,7 +45,7 @@ class Logger            // maybe we'll extend this later
 {
 private:
     static bool log2database(const executedStatement& st, Database *db);
-    static bool log2file(Config *, const executedStatement& st, Database *db, const std::string& filename);
+    static bool log2file(Config *, const executedStatement& st, Database *db, const wxString& filename);
     static bool logStatementByConfig(Config *cfg, const executedStatement& st, Database *db);
 public:
     static bool logStatement(const executedStatement& st, Database *db);

@@ -82,8 +82,8 @@ const wxRect SimpleHtmlFrame::getDefaultRect() const
     return wxRect(-1, -1, 600, 420);
 }
 //-----------------------------------------------------------------------------
-const std::string SimpleHtmlFrame::getName() const
+const wxString SimpleHtmlFrame::getName() const
 {
-    return "SimpleHtmlFrameFrame";
+    return wxT("SimpleHtmlFrameFrame");
 }
 //-----------------------------------------------------------------------------

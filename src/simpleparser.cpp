@@ -38,67 +38,66 @@
 
 #include <fstream>
 #include <sstream>
-#include <string>
 
 #include "simpleparser.h"
 //-----------------------------------------------------------------------------
 // returns false if errors occur
-bool Parser::stripSql(std::string &sql)
+bool Parser::stripSql(wxString &sql)
 {
     while (true)    // strip quotes and brackets
     {
-        std::string::size_type p1, p2;
-        p1 = sql.find("/*");
-        p2 = sql.find("'");
-        if (p1 == std::string::npos && p2 == std::string::npos)    // no more
+        wxString::size_type p1, p2;
+        p1 = sql.find(wxT("/*"));
+        p2 = sql.find(wxT("'"));
+        if (p1 == wxString::npos && p2 == wxString::npos)    // no more
             break;
 
-        if (p1 != std::string::npos && (p1 < p2 || p2 == std::string::npos))
+        if (p1 != wxString::npos && (p1 < p2 || p2 == wxString::npos))
         {
-            p2 = sql.find("*/", p1);
-            if (p2 == std::string::npos)
+            p2 = sql.find(wxT("*/"), p1);
+            if (p2 == wxString::npos)
             {
                 wxMessageBox(_("Cannot parse sql, please close the comments."), _("Error."), wxOK|wxICON_WARNING);
                 return false;
             }
-            sql.erase(p1, p2-p1+1);
+            sql.erase(p1, p2 - p1 + 1);
             continue;
         }
 
-        if (p2 != std::string::npos && (p2 < p1 || p1 == std::string::npos))
+        if (p2 != wxString::npos && (p2 < p1 || p1 == wxString::npos))
         {
             p1 = p2;
-            p2 = sql.find("'", p1+1);
-            if (p2 == std::string::npos)
+            p2 = sql.find(wxT("'"), p1+1);
+            if (p2 == wxString::npos)
             {
                 wxMessageBox(_("Cannot parse sql, please close the quotes."), _("Error."), wxOK|wxICON_WARNING);
                 return false;
             }
-            sql.erase(p1, p2-p1+1);
+            sql.erase(p1, p2 - p1 + 1);
             continue;
         }
     }
     return true;
 }
 //-----------------------------------------------------------------------------
-// get next token from sql string
+// get next token from sql wxString
 // returns number of characters removed
-std::string::size_type Parser::nextToken(std::string& in, std::string& out)
+wxString::size_type Parser::nextToken(wxString& in, wxString& out)
 {
     if (in.empty())
         return 0;
 
-    std::string::size_type retval = 0;
+    wxString::size_type retval = 0;
 
-    const std::string spaces("\n\r\t ");
-    const std::string delims(";,");
-    const std::string all = spaces + delims;
+    const wxString spaces(wxT("\n\r\t "));
+    const wxString delims(wxT(";,"));
+    const wxString all = spaces + delims;
 
-    std::string::size_type pos, endp;
+    wxString::size_type pos, endp;
     if (in.find_first_of(spaces) == 0)        // strip starting spaces
     {
         pos = in.find_first_not_of(spaces);
-        if (pos == std::string::npos)
+        if (pos == wxString::npos)
             return 0;
         retval += pos;
         in.erase(0, pos);
@@ -123,18 +122,19 @@ std::string::size_type Parser::nextToken(std::string& in, std::string& out)
 // gets table names from SELECT sql script
 // input: sql statement without SELECT clause, i.e. should start with: "FROM"
 //
-std::string::size_type Parser::getTableNames(std::vector<std::string>& list, std::string sql)
+wxString::size_type Parser::getTableNames(std::vector<wxString>& list, wxString sql)
 {
-    sql += " ";     // parser needs blank space at end
+    sql += wxT(" ");     // parser needs blank space at end
 
-    std::string::size_type retval = 0;
-    std::string keywords[] = {"LEFT", "RIGHT", "INNER", "OUTER", "FULL", "JOIN", "WHERE", "GROUP", "ORDER"};
-    std::string ss(sql);
-    std::string s;
+    wxString::size_type retval = 0;
+    wxString keywords[] = {wxT("LEFT"), wxT("RIGHT"), wxT("INNER"), wxT("OUTER"),
+        wxT("FULL"), wxT("JOIN"), wxT("WHERE"), wxT("GROUP"), wxT("ORDER")};
+    wxString ss(sql);
+    wxString s;
     retval += nextToken(ss, s);            // remove FROM
     while (true)
     {
-        std::string::size_type c = nextToken(ss, s);        // a table: push it to the list
+        wxString::size_type c = nextToken(ss, s);        // a table: push it to the list
         if (c == 0)
             return retval;
         retval += c;
@@ -145,16 +145,16 @@ std::string::size_type Parser::getTableNames(std::vector<std::string>& list, std
             c = nextToken(ss, s);        // alias, comma, keyword (left, outer, inner, right, join, where, group, order), ;
             if (c == 0)
                 return retval;
-            if (s == ";")
+            if (s == wxT(";"))
                 return retval;
-            if (s == ",")    // next is a table
+            if (s == wxT(","))    // next is a table
             {
                 retval += c;
                 break;
             }
 
             bool is_join = false;
-            for (int i=0; i<sizeof(keywords)/sizeof(std::string); ++i)
+            for (int i = 0; i < sizeof(keywords) / sizeof(wxString); ++i)
             {
                 if (s == keywords[i])
                 {
@@ -164,10 +164,10 @@ std::string::size_type Parser::getTableNames(std::vector<std::string>& list, std
                         if (c2 == 0)
                             break;
                         retval += c2;
-                        i=-1;        // start from beginning
+                        i = -1;        // start from beginning
                         continue;
                     }
-                    else if (s == "JOIN")    // 5
+                    else if (s == wxT("JOIN"))    // 5
                     {
                         is_join = true;
                         break;
@@ -187,28 +187,28 @@ std::string::size_type Parser::getTableNames(std::vector<std::string>& list, std
 }
 //-----------------------------------------------------------------------------
 //! removes comments from sql statements, with taking care of single quotes
-void Parser::removeComments(std::string& sql, const std::string startComment, const std::string endComment)
+void Parser::removeComments(wxString& sql, const wxString startComment, const wxString endComment)
 {
     using namespace std;
-    string::size_type oldpos = 0;
+    wxString::size_type oldpos = 0;
     while (true)
     {
-        string::size_type pos = sql.find(startComment, oldpos);
-        if (pos == string::npos)
+        wxString::size_type pos = sql.find(startComment, oldpos);
+        if (pos == wxString::npos)
             break;
 
-        string::size_type quote = sql.find("'", oldpos);
-        if (quote != string::npos && quote < pos)    // move to the next quote
+        wxString::size_type quote = sql.find(wxT("'"), oldpos);
+        if (quote != wxString::npos && quote < pos)    // move to the next quote
         {
-            oldpos = 1 + sql.find("'", quote+1);    // end quote
+            oldpos = 1 + sql.find(wxT("'"), quote+1);    // end quote
             continue;
         }
 
-        oldpos = sql.find(endComment, pos+startComment.length());
-        if (oldpos == string::npos)    // unclosed comment
+        oldpos = sql.find(endComment, pos + startComment.length());
+        if (oldpos == wxString::npos)    // unclosed comment
             break;
 
-        sql.erase(pos, oldpos-pos+endComment.length());
+        sql.erase(pos, oldpos - pos + endComment.length());
         oldpos = pos;
     }
 }

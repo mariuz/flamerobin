@@ -47,13 +47,13 @@ private:
 public:
     Generator();
     // overrides MetadataItem::getCreateSqlTemplate()
-    std::string getCreateSqlTemplate() const;
+    wxString getCreateSqlTemplate() const;
 
     bool loadValue(bool force = false);
     int64_t getValue();
 
-    virtual std::string getPrintableName();
-    virtual const std::string getTypeName() const;
+    virtual wxString getPrintableName();
+    virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------

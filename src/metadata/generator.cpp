@@ -72,7 +72,7 @@ bool Generator::loadValue(bool force)
     Database *d = getDatabase();
     if (!d)
     {
-        lastError().setMessage("Database not set.");
+        lastError().setMessage(wxT("Database not set."));
         return false;
     }
 
@@ -83,7 +83,7 @@ bool Generator::loadValue(bool force)
         IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
         tr1->Start();
         IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare("select gen_id(" + getName() + ", 0) from rdb$database");
+        st1->Prepare("select gen_id(" + wx2std(getName()) + ", 0) from rdb$database");
         st1->Execute();
         st1->Fetch();
         int64_t value;
@@ -94,34 +94,34 @@ bool Generator::loadValue(bool force)
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage("System error.");
+        lastError().setMessage(_("System error."));
     }
     return false;
 }
 //-----------------------------------------------------------------------------
-std::string Generator::getPrintableName()
+wxString Generator::getPrintableName()
 {
     if (!valueLoadedM)
         return getName();
 
-    std::ostringstream s;
-    s << getName() << " = " << valueM;
-    return s.str();
+    std::ostringstream ss;
+    ss << wx2std(getName()) << " = " << valueM;
+    return std2wx(ss.str());
 }
 //-----------------------------------------------------------------------------
-std::string Generator::getCreateSqlTemplate() const
+wxString Generator::getCreateSqlTemplate() const
 {
-    return  "CREATE GENERATOR name;\n"
-            "SET GENERATOR name TO value;\n";
+    return  wxT("CREATE GENERATOR name;\n")
+            wxT("SET GENERATOR name TO value;\n");
 }
 //-----------------------------------------------------------------------------
-const std::string Generator::getTypeName() const
+const wxString Generator::getTypeName() const
 {
-    return "GENERATOR";
+    return wxT("GENERATOR");
 }
 //-----------------------------------------------------------------------------
 void Generator::acceptVisitor(MetadataItemVisitor* visitor)

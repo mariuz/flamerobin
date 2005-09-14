@@ -43,6 +43,7 @@
 #include "metadataitem.h"
 #include "MetadataItemVisitor.h"
 #include "trigger.h"
+#include "ugly.h"
 //-----------------------------------------------------------------------------
 Trigger::Trigger()
     : MetadataItem()
@@ -51,7 +52,7 @@ Trigger::Trigger()
     infoIsLoadedM = false;
 }
 //-----------------------------------------------------------------------------
-bool Trigger::getTriggerInfo(std::string& object, bool& active, int& position, std::string& type)
+bool Trigger::getTriggerInfo(wxString& object, bool& active, int& position, wxString& type)
 {
     if (!infoIsLoadedM && !loadInfo())
         return false;
@@ -62,7 +63,7 @@ bool Trigger::getTriggerInfo(std::string& object, bool& active, int& position, s
     return true;
 }
 //-----------------------------------------------------------------------------
-bool Trigger::getRelation(std::string& relation)
+bool Trigger::getRelation(wxString& relation)
 {
     if (!infoIsLoadedM)
         if (!loadInfo())
@@ -77,7 +78,7 @@ bool Trigger::loadInfo(bool force)
     Database *d = getDatabase();
     if (!d)
     {
-        lastError().setMessage("database not set");
+        lastError().setMessage(wxT("database not set"));
         return false;
     }
 
@@ -93,12 +94,14 @@ bool Trigger::loadInfo(bool force)
             "from rdb$triggers t where rdb$trigger_name = ? "
         );
 
-        st1->Set(1, getName());
+        st1->Set(1, wx2std(getName()));
         st1->Execute();
         if (st1->Fetch())
         {
-            st1->Get(1, objectM);
-            objectM.erase(objectM.find_last_not_of(" ")+1);
+            std::string objectName;
+            st1->Get(1, objectName);
+            objectM = std2wx(objectName);
+            objectM.erase(objectM.find_last_not_of(wxT(" ")) + 1);
             st1->Get(2, &positionM);
 
             short temp;
@@ -125,22 +128,22 @@ bool Trigger::loadInfo(bool force)
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage("System error.");
+        lastError().setMessage(_("System error."));
     }
 
     return false;
 }
 //-----------------------------------------------------------------------------
-bool Trigger::getSource(std::string& source) const
+bool Trigger::getSource(wxString& source) const
 {
-    Database *d = getDatabase();
+    Database* d = getDatabase();
     if (!d)
     {
-        lastError().setMessage("database not set");
+        lastError().setMessage(wxT("database not set"));
         return false;
     }
 
@@ -152,7 +155,7 @@ bool Trigger::getSource(std::string& source) const
         tr1->Start();
         IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
         st1->Prepare("select rdb$trigger_source from rdb$triggers where rdb$trigger_name = ?");
-        st1->Set(1, getName());
+        st1->Set(1, wx2std(getName()));
         st1->Execute();
         st1->Fetch();
         readBlob(st1, 1, source);
@@ -161,44 +164,44 @@ bool Trigger::getSource(std::string& source) const
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage("System error.");
+        lastError().setMessage(_("System error."));
     }
 
     return false;
 }
 //-----------------------------------------------------------------------------
-std::string Trigger::getTriggerType(int type)
+wxString Trigger::getTriggerType(int type)
 {
-    std::string res;
+    wxString res;
 
-    std::vector<std::string> prefix_types, suffix_types;
-    prefix_types.push_back("BEFORE");
-    prefix_types.push_back("AFTER");
+    std::vector<wxString> prefix_types, suffix_types;
+    prefix_types.push_back(wxT("BEFORE"));
+    prefix_types.push_back(wxT("AFTER"));
 
-    suffix_types.push_back("");
-    suffix_types.push_back("INSERT");
-    suffix_types.push_back("UPDATE");
-    suffix_types.push_back("DELETE");
+    suffix_types.push_back(wxT(""));
+    suffix_types.push_back(wxT("INSERT"));
+    suffix_types.push_back(wxT("UPDATE"));
+    suffix_types.push_back(wxT("DELETE"));
 
     #define TRIGGER_ACTION_PREFIX(value) ((value + 1) & 1)
     #define TRIGGER_ACTION_SUFFIX(value, slot) (((value + 1) >> (slot * 2 - 1)) & 3)
 
-    std::string result;
+    wxString result;
     int prefix = TRIGGER_ACTION_PREFIX(type);
     result = prefix_types[prefix];
 
     int suffix = TRIGGER_ACTION_SUFFIX(type, 1);
-    result += " " + suffix_types[suffix];
+    result += wxT(" ") + suffix_types[suffix];
     suffix = TRIGGER_ACTION_SUFFIX(type, 2);
     if (suffix)
-        result += " OR " + suffix_types[suffix];
+        result += wxT(" OR ") + suffix_types[suffix];
     suffix = TRIGGER_ACTION_SUFFIX(type, 3);
     if (suffix)
-        result += " OR " + suffix_types[suffix];
+        result += wxT(" OR ") + suffix_types[suffix];
     return result;
 }
 //-----------------------------------------------------------------------------
@@ -206,53 +209,52 @@ Trigger::firingTimeType Trigger::getFiringTime()
 {
     if (!infoIsLoadedM)
         loadInfo();
-    if (triggerTypeM.substr(0, 6) == "BEFORE")
+    if (triggerTypeM.substr(0, 6) == wxT("BEFORE"))
         return beforeTrigger;
     else
         return afterTrigger;
 }
 //-----------------------------------------------------------------------------
-std::string Trigger::getAlterSql()
+wxString Trigger::getAlterSql()
 {
-    std::string object, source, type;
+    wxString object, source, type;
     bool active;
     int position;
 
     if (!getTriggerInfo(object, active, position, type) || !getSource(source))
         return lastError().getMessage();
 
-    std::ostringstream sql;
-    sql << "SET TERM ^ ;\nALTER TRIGGER " << getName();
+    wxString sql;
+    sql << wxT("SET TERM ^ ;\nALTER TRIGGER ") << getName();
     if (active)
-        sql << " ACTIVE\n";
+        sql << wxT(" ACTIVE\n");
     else
-        sql << " INACTIVE\n";
+        sql << wxT(" INACTIVE\n");
     sql << type;
-    sql << " POSITION ";
-    sql << position << "\n";
-    //sql << " AS ";
+    sql << wxT(" POSITION ");
+    sql << position << wxT("\n");
     sql << source;
-    sql << "^\nSET TERM ; ^";
-    return sql.str();
+    sql << wxT("^\nSET TERM ; ^");
+    return sql;
 }
 //-----------------------------------------------------------------------------
-std::string Trigger::getCreateSqlTemplate() const
+wxString Trigger::getCreateSqlTemplate() const
 {
-    return  "SET TERM ^ ;\n\n"
-            "CREATE TRIGGER name FOR table/view \n"
-            " [IN]ACTIVE \n"
-            " {BEFORE | AFTER} INSERT OR UPDATE OR DELETE \n"
-            " POSITION number \n"
-            "AS \n"
-            "BEGIN \n"
-            "    /* enter trigger code here */ \n"
-            "END^\n\n"
-            "SET TERM ; ^\n";
+    return  wxT("SET TERM ^ ;\n\n")
+            wxT("CREATE TRIGGER name FOR table/view \n")
+            wxT(" [IN]ACTIVE \n")
+            wxT(" {BEFORE | AFTER} INSERT OR UPDATE OR DELETE \n")
+            wxT(" POSITION number \n")
+            wxT("AS \n")
+            wxT("BEGIN \n")
+            wxT("    /* enter trigger code here */ \n")
+            wxT("END^\n\n")
+            wxT("SET TERM ; ^\n");
 }
 //-----------------------------------------------------------------------------
-const std::string Trigger::getTypeName() const
+const wxString Trigger::getTypeName() const
 {
-    return "TRIGGER";
+    return wxT("TRIGGER");
 }
 //-----------------------------------------------------------------------------
 void Trigger::acceptVisitor(MetadataItemVisitor* visitor)

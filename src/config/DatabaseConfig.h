@@ -31,7 +31,6 @@
 #define FR_DATABASE_CONFIG_H
 
 #include <map>
-#include <string>
 #include <vector>
 
 #include "Config.h"
@@ -42,7 +41,7 @@ class DatabaseConfig: public Config
 {
 private:
     Database *databaseM;
-    std::string addPathToKey(const std::string key) const;
+    wxString addPathToKey(const wxString key) const;
 
 public:
     DatabaseConfig(Database *d);
@@ -53,9 +52,9 @@ public:
     using Config::setValue;
 
     // transform the key based on Database, and call regular config
-    virtual bool keyExists(const std::string& key) const;
-    virtual bool getValue(std::string key, std::string& value);
-    virtual bool setValue(std::string key, std::string value);
+    virtual bool keyExists(const wxString& key) const;
+    virtual bool getValue(wxString key, wxString& value);
+    virtual bool setValue(wxString key, wxString value);
 };
 //-----------------------------------------------------------------------------
 #endif

@@ -63,7 +63,7 @@ public:
     // make sure that thread gets deleted
     virtual bool Destroy();
 protected:
-    mutable std::string storageNameM;
+    mutable wxString storageNameM;
 
     Server* serverM;
     Database *databaseM;
@@ -75,9 +75,9 @@ protected:
 
     void cancelBackupRestore();
     void clearLog();
-    virtual void doReadConfigSettings(const std::string& prefix);
-    virtual void doWriteConfigSettings(const std::string& prefix) const;
-    virtual const std::string getStorageName() const;
+    virtual void doReadConfigSettings(const wxString& prefix);
+    virtual void doWriteConfigSettings(const wxString& prefix) const;
+    virtual const wxString getStorageName() const;
     // set threadM if thread was successfully created and started, otherwise delete thread
     bool startThread(wxThread* thread);
     void threadOutputMsg(const wxString msg, MsgKind kind);

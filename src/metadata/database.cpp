@@ -43,42 +43,42 @@
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------
-void Credentials::setCharset(std::string value)
+void Credentials::setCharset(wxString value)
 {
     charsetM = value;
 }
 //-----------------------------------------------------------------------------
-void Credentials::setUsername(std::string value)
+void Credentials::setUsername(wxString value)
 {
     usernameM = value;
 }
 //-----------------------------------------------------------------------------
-void Credentials::setPassword(std::string value)
+void Credentials::setPassword(wxString value)
 {
     passwordM = value;
 }
 //-----------------------------------------------------------------------------
-void Credentials::setRole(std::string value)
+void Credentials::setRole(wxString value)
 {
     roleM = value;
 }
 //-----------------------------------------------------------------------------
-std::string Credentials::getCharset() const
+wxString Credentials::getCharset() const
 {
     return charsetM;
 }
 //-----------------------------------------------------------------------------
-std::string Credentials::getUsername() const
+wxString Credentials::getUsername() const
 {
     return usernameM;
 }
 //-----------------------------------------------------------------------------
-std::string Credentials::getPassword() const
+wxString Credentials::getPassword() const
 {
     return passwordM;
 }
 //-----------------------------------------------------------------------------
-std::string Credentials::getRole() const
+wxString Credentials::getRole() const
 {
     return roleM;
 }
@@ -91,23 +91,23 @@ Database::Database()
     connectionCredentials = 0;
 
     // has to be here, since notify() might be called before initChildren()
-    domainsM.setName("Domains");
+    domainsM.setName(wxT("Domains"));
     domainsM.setType(ntDomains);
-    exceptionsM.setName("Exceptions");
+    exceptionsM.setName(wxT("Exceptions"));
     exceptionsM.setType(ntExceptions);
-    functionsM.setName("Functions");
+    functionsM.setName(wxT("Functions"));
     functionsM.setType(ntFunctions);
-    generatorsM.setName("Generators");
+    generatorsM.setName(wxT("Generators"));
     generatorsM.setType(ntGenerators);
-    proceduresM.setName("Procedures");
+    proceduresM.setName(wxT("Procedures"));
     proceduresM.setType(ntProcedures);
-    rolesM.setName("Roles");
+    rolesM.setName(wxT("Roles"));
     rolesM.setType(ntRoles);
-    tablesM.setName("Tables");
+    tablesM.setName(wxT("Tables"));
     tablesM.setType(ntTables);
-    triggersM.setName("Triggers");
+    triggersM.setName(wxT("Triggers"));
     triggersM.setType(ntTriggers);
-    viewsM.setName("Views");
+    viewsM.setName(wxT("Views"));
     viewsM.setType(ntViews);
 }
 //-----------------------------------------------------------------------------
@@ -135,7 +135,7 @@ void Database::resetCredentials()
     }
 }
 //-----------------------------------------------------------------------------
-void Database::getIdentifiers(std::vector<std::string>& temp)
+void Database::getIdentifiers(std::vector<wxString>& temp)
 {
     tablesM.getChildrenNames(temp);
     viewsM.getChildrenNames(temp);
@@ -148,42 +148,42 @@ void Database::getIdentifiers(std::vector<std::string>& temp)
     exceptionsM.getChildrenNames(temp);
 }
 //-----------------------------------------------------------------------------
-std::string getLoadingSql(NodeType type)
+wxString getLoadingSql(NodeType type)
 {
     switch (type)
     {
-        case ntTable:       return "select rr.rdb$relation_name from rdb$relations rr "
-            " where (rr.RDB$SYSTEM_FLAG = 0 or rr.RDB$SYSTEM_FLAG is null) "
-            " and rr.RDB$VIEW_SOURCE is null order by 1";
+        case ntTable:       return wxT("select rr.rdb$relation_name from rdb$relations rr ")
+            wxT(" where (rr.RDB$SYSTEM_FLAG = 0 or rr.RDB$SYSTEM_FLAG is null) ")
+            wxT(" and rr.RDB$VIEW_SOURCE is null order by 1");
 
-        case ntView:        return "select rr.rdb$relation_name from rdb$relations rr "
-            " where (rr.RDB$SYSTEM_FLAG = 0 or rr.RDB$SYSTEM_FLAG is null) "
-            " and rr.RDB$VIEW_SOURCE is not null order by 1";
+        case ntView:        return wxT("select rr.rdb$relation_name from rdb$relations rr ")
+            wxT(" where (rr.RDB$SYSTEM_FLAG = 0 or rr.RDB$SYSTEM_FLAG is null) ")
+            wxT(" and rr.RDB$VIEW_SOURCE is not null order by 1");
 
-        case ntProcedure:   return "select pp.rdb$PROCEDURE_name from rdb$procedures pp "
-            " where (pp.RDB$SYSTEM_FLAG = 0 or pp.RDB$SYSTEM_FLAG is null) order by 1";
+        case ntProcedure:   return wxT("select pp.rdb$PROCEDURE_name from rdb$procedures pp ")
+            wxT(" where (pp.RDB$SYSTEM_FLAG = 0 or pp.RDB$SYSTEM_FLAG is null) order by 1");
 
-        case ntTrigger:     return "select RDB$TRIGGER_NAME from RDB$TRIGGERS where "
-            "(RDB$SYSTEM_FLAG = 0 or RDB$SYSTEM_FLAG is null) ORDER BY 1";
+        case ntTrigger:     return wxT("select RDB$TRIGGER_NAME from RDB$TRIGGERS where ")
+            wxT("(RDB$SYSTEM_FLAG = 0 or RDB$SYSTEM_FLAG is null) ORDER BY 1");
 
-        case ntRole:        return "select RDB$ROLE_NAME from RDB$ROLES ORDER BY 1";
+        case ntRole:        return wxT("select RDB$ROLE_NAME from RDB$ROLES ORDER BY 1");
 
-        case ntGenerator:   return "select rdb$generator_name from rdb$generators where "
-            "(RDB$SYSTEM_FLAG = 0 or RDB$SYSTEM_FLAG is null) ORDER BY 1";
+        case ntGenerator:   return wxT("select rdb$generator_name from rdb$generators where ")
+            wxT("(RDB$SYSTEM_FLAG = 0 or RDB$SYSTEM_FLAG is null) ORDER BY 1");
 
-        case ntFunction:    return "select RDB$FUNCTION_NAME from RDB$FUNCTIONS where "
-            "(RDB$SYSTEM_FLAG = 0 or RDB$SYSTEM_FLAG is null) ORDER BY 1";
+        case ntFunction:    return wxT("select RDB$FUNCTION_NAME from RDB$FUNCTIONS where ")
+            wxT("(RDB$SYSTEM_FLAG = 0 or RDB$SYSTEM_FLAG is null) ORDER BY 1");
 
-        case ntDomain:      return "select f.rdb$field_name from rdb$fields f "
-            "left outer join rdb$types t on f.rdb$field_type=t.rdb$type "
-            "where t.rdb$field_name='RDB$FIELD_TYPE' and f.rdb$field_name not starting with 'RDB$' order by 1";
-        case ntException:   return "select RDB$EXCEPTION_NAME from RDB$EXCEPTIONS ORDER BY 1";
-        default:            return "";
+        case ntDomain:      return wxT("select f.rdb$field_name from rdb$fields f ")
+            wxT("left outer join rdb$types t on f.rdb$field_type=t.rdb$type ")
+            wxT("where t.rdb$field_name='RDB$FIELD_TYPE' and f.rdb$field_name not starting with 'RDB$' order by 1");
+        case ntException:   return wxT("select RDB$EXCEPTION_NAME from RDB$EXCEPTIONS ORDER BY 1");
+        default:            return wxT("");
     };
 }
 //-----------------------------------------------------------------------------
 // This could be moved to Column class
-std::string Database::loadDomainNameForColumn(std::string table, std::string field)
+wxString Database::loadDomainNameForColumn(wxString table, wxString field)
 {
     try
     {
@@ -193,35 +193,35 @@ std::string Database::loadDomainNameForColumn(std::string table, std::string fie
         st1->Prepare(
             "select rdb$field_source from rdb$relation_fields where rdb$relation_name = ? and rdb$field_name = ?"
         );
-        st1->Set(1, table);
-        st1->Set(2, field);
+        st1->Set(1, wx2std(table));
+        st1->Set(2, wx2std(field));
         st1->Execute();
         st1->Fetch();
         std::string domain;
         st1->Get(1, domain);
         tr1->Commit();
         domain.erase(domain.find_last_not_of(" ") + 1);
-        return domain;
+        return std2wx(domain);
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
         lastError().setMessage(_("System error."));
     }
 
-    ::wxMessageBox(std2wx(lastError().getMessage()), _("Postprocessing error."), wxICON_WARNING);
-    return "";
+    ::wxMessageBox(lastError().getMessage(), _("Postprocessing error."), wxICON_WARNING);
+    return wxT("");
 }
 //-----------------------------------------------------------------------------
 //! returns all collations for a given charset
-std::vector<std::string> Database::getCollations(std::string charset)
+std::vector<wxString> Database::getCollations(wxString charset)
 {
     loadCollations();
-    std::vector<std::string> temp;
-    std::multimap<std::string, std::string>::iterator low, high;
+    std::vector<wxString> temp;
+    std::multimap<wxString, wxString>::iterator low, high;
 
     high = collationsM.upper_bound(charset);
     for (low = collationsM.lower_bound(charset); low != high; ++low)
@@ -229,7 +229,7 @@ std::vector<std::string> Database::getCollations(std::string charset)
     return temp;
 }
 //-----------------------------------------------------------------------------
-Domain *Database::loadMissingDomain(std::string name)
+Domain *Database::loadMissingDomain(wxString name)
 {
     try
     {
@@ -240,7 +240,7 @@ Domain *Database::loadMissingDomain(std::string name)
             "select count(*) from rdb$fields f left outer join rdb$types t on f.rdb$field_type=t.rdb$type "
             "where t.rdb$field_name='RDB$FIELD_TYPE' and f.rdb$field_name = ?"
         );
-        st1->Set(1, name);
+        st1->Set(1, wx2std(name));
         st1->Execute();
         if (st1->Fetch())
         {
@@ -248,9 +248,9 @@ Domain *Database::loadMissingDomain(std::string name)
             st1->Get(1, c);
             if (c > 0)
             {
-                Domain *d = domainsM.add(name); // add domain to collection
+                Domain* d = domainsM.add(name); // add domain to collection
                 d->setParent(this);
-                if (name.substr(0, 4) != "RDB$")
+                if (name.substr(0, 4) != wxT("RDB$"))
                     refreshByType(ntDomain);
                 return d;
             }
@@ -259,7 +259,7 @@ Domain *Database::loadMissingDomain(std::string name)
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
@@ -270,28 +270,28 @@ Domain *Database::loadMissingDomain(std::string name)
 //-----------------------------------------------------------------------------
 //! small helper function, reads sql and fills the vector with values
 // this can be made template function in future
-bool Database::fillVector(std::vector<std::string>& list, std::string sql)
+bool Database::fillVector(std::vector<wxString>& list, wxString sql)
 {
     try
     {
         IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
         tr1->Start();
         IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
-        st1->Prepare(sql);
+        st1->Prepare(wx2std(sql));
         st1->Execute();
         while (st1->Fetch())
         {
             std::string s;
             st1->Get(1, s);
-            s.erase(s.find_last_not_of(" ")+1); // trim
-            list.push_back(s);
+            s.erase(s.find_last_not_of(" ") + 1); // trim
+            list.push_back(std2wx(s));
         }
         tr1->Commit();
         return true;
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
@@ -311,7 +311,7 @@ void Database::loadCollations()
         IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
         tr1->Start();
         IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
-        st1->Prepare(   "select c.rdb$character_set_name, k.rdb$collation_name from rdb$character_sets c"
+        st1->Prepare("select c.rdb$character_set_name, k.rdb$collation_name from rdb$character_sets c"
             " left outer join rdb$collations k on c.rdb$character_set_id = k.rdb$character_set_id order by 1, 2");
         st1->Execute();
         while (st1->Fetch())
@@ -321,24 +321,24 @@ void Database::loadCollations()
             st1->Get(2, collation);
             charset.erase(charset.find_last_not_of(" ") + 1);
             collation.erase(collation.find_last_not_of(" ") + 1);
-            collationsM.insert(std::multimap<std::string,std::string>::value_type(charset,collation));
+            collationsM.insert(std::multimap<wxString, wxString>::value_type(std2wx(charset), std2wx(collation)));
         }
         tr1->Commit();
         return;
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
         lastError().setMessage(_("System error."));
     }
 
-    ::wxMessageBox(std2wx(lastError().getMessage()), _("Error while loading collations."), wxICON_WARNING);
+    ::wxMessageBox(lastError().getMessage(), _("Error while loading collations."), wxICON_WARNING);
 }
 //-----------------------------------------------------------------------------
-std::string Database::getTableForIndex(std::string indexName)
+wxString Database::getTableForIndex(wxString indexName)
 {
     try
     {
@@ -346,27 +346,27 @@ std::string Database::getTableForIndex(std::string indexName)
         tr1->Start();
         IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
         st1->Prepare("SELECT rdb$relation_name from rdb$indices where rdb$index_name = ?");
-        st1->Set(1, indexName);
+        st1->Set(1, wx2std(indexName));
         st1->Execute();
         if (st1->Fetch())
         {
             std::string retval;
             st1->Get(1, retval);
             retval.erase(retval.find_last_not_of(" ") + 1);
-            return retval;
+            return std2wx(retval);
         }
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
         lastError().setMessage(_("System error."));
     }
 
-    ::wxMessageBox(std2wx(lastError().getMessage()), _("Error while loading table for index."), wxICON_WARNING);
-    return "";
+    ::wxMessageBox(lastError().getMessage(), _("Error while loading table for index."), wxICON_WARNING);
+    return wxT("");
 }
 //-----------------------------------------------------------------------------
 //! load list of objects of type "type" from database, and fill the DBH
@@ -391,24 +391,24 @@ bool Database::loadObjects(NodeType type)
         IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
         tr1->Start();
         IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
-        st1->Prepare(getLoadingSql(type));
+        st1->Prepare(wx2std(getLoadingSql(type)));
         st1->Execute();
         while (st1->Fetch())
         {
             std::string name;
             st1->Get(1, name);
-            addObject(type, name);
+            addObject(type, std2wx(name));
         }
         refreshByType(type);
         return true;
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage("System error.");
+        lastError().setMessage(_("System error."));
     }
 
     return false;
@@ -444,18 +444,18 @@ void Database::refreshByType(NodeType type)
     };
 }
 //-----------------------------------------------------------------------------
-MetadataItem *Database::findByName(std::string name)
+MetadataItem* Database::findByName(wxString name)
 {
     for (int n = (int)ntTable; n < (int)ntLastType; n++)
     {
-        MetadataItem *m = findByNameAndType((NodeType)n, name);
+        MetadataItem* m = findByNameAndType((NodeType)n, name);
         if (m)
             return m;
     }
     return 0;
 }
 //-----------------------------------------------------------------------------
-MetadataItem *Database::findByNameAndType(NodeType nt, std::string name)
+MetadataItem* Database::findByNameAndType(NodeType nt, wxString name)
 {
     switch (nt)
     {
@@ -473,7 +473,7 @@ MetadataItem *Database::findByNameAndType(NodeType nt, std::string name)
     };
 }
 //-----------------------------------------------------------------------------
-void Database::dropObject(MetadataItem *object)
+void Database::dropObject(MetadataItem* object)
 {
     object->drop();     // alert the children if any
 
@@ -481,23 +481,23 @@ void Database::dropObject(MetadataItem *object)
     NodeType nt = object->getType();
     switch (nt)
     {
-        case ntTable:       tablesM.remove((Table *)object);            break;
-        case ntView:        viewsM.remove((View *)object);              break;
-        case ntTrigger:     triggersM.remove((Trigger *)object);        break;
-        case ntProcedure:   proceduresM.remove((Procedure *)object);    break;
-        case ntFunction:    functionsM.remove((Function *)object);      break;
-        case ntGenerator:   generatorsM.remove((Generator *)object);    break;
-        case ntRole:        rolesM.remove((Role *)object);              break;
-        case ntDomain:      domainsM.remove((Domain *)object);          break;
-        case ntException:   exceptionsM.remove((Exception *)object);   break;
+        case ntTable:       tablesM.remove((Table*)object);            break;
+        case ntView:        viewsM.remove((View*)object);              break;
+        case ntTrigger:     triggersM.remove((Trigger*)object);        break;
+        case ntProcedure:   proceduresM.remove((Procedure*)object);    break;
+        case ntFunction:    functionsM.remove((Function*)object);      break;
+        case ntGenerator:   generatorsM.remove((Generator*)object);    break;
+        case ntRole:        rolesM.remove((Role*)object);              break;
+        case ntDomain:      domainsM.remove((Domain*)object);          break;
+        case ntException:   exceptionsM.remove((Exception*)object);    break;
         default:
             return;
     };
 }
 //-----------------------------------------------------------------------------
-bool Database::addObject(NodeType type, std::string name)
+bool Database::addObject(NodeType type, wxString name)
 {
-    MetadataItem *m;
+    MetadataItem* m;
     switch (type)
     {
         case ntTable:       m = tablesM.add(name);      break;
@@ -528,15 +528,15 @@ bool Database::addObject(NodeType type, std::string name)
 // alter table [name] alter [column] type [domain or datatype]
 // declare external function [name]
 // set null flag via system tables update
-bool Database::parseCommitedSql(std::string sql)
+bool Database::parseCommitedSql(wxString sql)
 {
-    sql += "\n";    // if last line starts with --
-    Parser::removeComments(sql, "/*", "*/");
-    Parser::removeComments(sql, "--", "\n");
-    sql = upcase(sql);              // make sql UpperCase for easier handling
+    sql += wxT("\n");    // if last line starts with --
+    Parser::removeComments(sql, wxT("/*"), wxT("*/"));
+    Parser::removeComments(sql, wxT("--"), wxT("\n"));
+    sql = sql.Upper();              // make sql UpperCase for easier handling
     std::stringstream strstrm;      // parse statement into tokens
     std::string action, object_type, name;
-    strstrm << sql;
+    strstrm << wx2std(sql);
     strstrm >> action;
     strstrm >> object_type;
     strstrm >> name;
@@ -552,13 +552,13 @@ bool Database::parseCommitedSql(std::string sql)
     {
         strstrm >> object_type;
         strstrm >> name;
-        if (findByNameAndType(getTypeByName(object_type), name)) // it is already CREATE
+        if (findByNameAndType(getTypeByName(std2wx(object_type)), std2wx(name))) // it is already CREATE
             action = "ALTER";
     }
 
     if (action == "SET" && object_type == "GENERATOR")
     {
-        Generator *g = dynamic_cast<Generator *>(findByNameAndType(ntGenerator, name));
+        Generator* g = dynamic_cast<Generator*>(findByNameAndType(ntGenerator, std2wx(name)));
         if (!g)
             return true;
         g->loadValue(true);     // force (re)load of generator value
@@ -577,8 +577,8 @@ bool Database::parseCommitedSql(std::string sql)
     {
         if (action == "SET")    // move by 1
             strstrm >> name;
-        std::string tableName = getTableForIndex(name);
-        Table *t = dynamic_cast<Table *>(findByNameAndType(ntTable, tableName));
+        wxString tableName = getTableForIndex(std2wx(name));
+        Table* t = dynamic_cast<Table*>(findByNameAndType(ntTable, tableName));
         if (t)
             t->invalidateIndices();
         return true;
@@ -601,10 +601,10 @@ bool Database::parseCommitedSql(std::string sql)
         else
         {
             bool found = false;
-            std::string words[] = { "UNIQUE", "ASC", "ASCENDING", "DESC", "DESCENDING" };
-            for (int i=0; i<sizeof(words) / sizeof(std::string); ++i)
+            wxString words[] = { wxT("UNIQUE"), wxT("ASC"), wxT("ASCENDING"), wxT("DESC"), wxT("DESCENDING") };
+            for (int i = 0; i < sizeof(words) / sizeof(wxString); ++i)
             {
-                if (words[i] == object_type)
+                if (words[i] == std2wx(object_type))
                 {
                     found = true;
                     break;
@@ -619,9 +619,9 @@ bool Database::parseCommitedSql(std::string sql)
                 }
                 else
                 {
-                    for (int i=0; i<sizeof(words) / sizeof(std::string); ++i)
+                    for (int i = 0; i < sizeof(words) / sizeof(wxString); ++i)
                     {
-                        if (words[i] == name)
+                        if (words[i] == std2wx(name))
                         {
                             found = true;
                             break;
@@ -644,39 +644,38 @@ bool Database::parseCommitedSql(std::string sql)
     {
         strstrm >> name;    // ON
         strstrm >> name;    // table name
-        std::string::size_type p = name.find("(");
-        if (p != std::string::npos)
+        wxString::size_type p = name.find("(");
+        if (p != wxString::npos)
             name.erase(p);
-        Table *t = dynamic_cast<Table *>(findByNameAndType(ntTable, name));
+        Table* t = dynamic_cast<Table*>(findByNameAndType(ntTable, std2wx(name)));
         if (t)
             t->invalidateIndices();
         return true;
     }
 
-
     // convert change in NULL flag to ALTER TABLE (since it should be processed like that)
-    if (sql.substr(0, 44) == "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG")
+    if (sql.substr(0, 44) == wxT("UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG"))
     {
         action = "ALTER";
         object_type = "TABLE";
-        std::string::size_type pos = sql.find("RDB$RELATION_NAME = '");
-        if (pos == std::string::npos)
+        wxString::size_type pos = sql.find(wxT("RDB$RELATION_NAME = '"));
+        if (pos == wxString::npos)
             return true;
         pos += 21;
-        std::string::size_type end = sql.find("'", pos);
-        if (end == std::string::npos)
+        wxString::size_type end = sql.find(wxT("'"), pos);
+        if (end == wxString::npos)
             return true;
-        name = sql.substr(pos, end-pos);
+        name = wx2std(sql.substr(pos, end - pos));
     }
 
-    std::string::size_type pbr = name.find("(");        // CREATE PROCEDURE NAME(    <- remove colon
-    if (pbr != std::string::npos)
+    wxString::size_type pbr = name.find("(");        // CREATE PROCEDURE NAME(    <- remove colon
+    if (pbr != wxString::npos)
         name.erase(pbr);
 
-    NodeType t = getTypeByName(object_type);
+    NodeType t = getTypeByName(std2wx(object_type));
     if (action == "RECREATE")
     {
-        if (findByNameAndType(t, name))
+        if (findByNameAndType(t, std2wx(name)))
             action = "ALTER";
         else
             action = "CREATE";
@@ -685,17 +684,17 @@ bool Database::parseCommitedSql(std::string sql)
     // process the action...
     if (action == "CREATE" || action == "DECLARE")
     {
-        if (addObject(t, name))     // inserts object into collection
+        if (addObject(t, std2wx(name)))     // inserts object into collection
             refreshByType(t);
         if (object_type == "TRIGGER")       // new trigger created, alert tables/views
         {                                   // to update their property pages
             std::string relation;
             strstrm >> relation;    // FOR
             strstrm >> relation;    // relation_name
-            Relation *m = dynamic_cast<Relation *>(findByNameAndType(ntTable, relation));
+            Relation* m = dynamic_cast<Relation*>(findByNameAndType(ntTable, std2wx(relation)));
             if (!m)
             {
-                m = dynamic_cast<Relation *>(findByNameAndType(ntView, relation));
+                m = dynamic_cast<Relation*>(findByNameAndType(ntView, std2wx(relation)));
                 if (!m)
                     return true;
             }
@@ -704,7 +703,7 @@ bool Database::parseCommitedSql(std::string sql)
     }
     else if (action == "DROP" || action == "ALTER")
     {
-        MetadataItem *object = findByNameAndType(t, name);
+        MetadataItem* object = findByNameAndType(t, std2wx(name));
         if (!object)
             return true;
 
@@ -715,11 +714,11 @@ bool Database::parseCommitedSql(std::string sql)
             {
                 while (true)
                 {
-                    Trigger *todrop = 0;
+                    Trigger* todrop = 0;
                     for (MetadataCollection<Trigger>::iterator it = triggersM.begin(); it != triggersM.end(); ++it)
                     {
-                        std::string relname;            // trigger already gone => cannot fetch relation name
-                        if (!(*it).getRelation(relname) || relname == name)
+                        wxString relname;            // trigger already gone => cannot fetch relation name
+                        if (!(*it).getRelation(relname) || relname == std2wx(name))
                             todrop = &(*it);
                     }
                     if (todrop)
@@ -742,33 +741,33 @@ bool Database::parseCommitedSql(std::string sql)
                 if (maybe_type == "TYPE")       // domain is either created/modified/deleted or none
                 {                               // if we'd only know what was there before... life would be easier
                     strstrm >> domain_or_datatype;
-                    std::string::size_type pos = domain_or_datatype.find("(");
-                    if (pos != std::string::npos)
+                    wxString::size_type pos = domain_or_datatype.find("(");
+                    if (pos != wxString::npos)
                         domain_or_datatype.erase(pos);      // remove if it has size/scale
 
-                    std::vector<std::string> typenames;             // I first tried a simple array of strings
-                    typenames.push_back("CHAR");                    // but program kept crashing
-                    typenames.push_back("VARCHAR");
-                    typenames.push_back("INTEGER");
-                    typenames.push_back("SMALLINT");
-                    typenames.push_back("NUMERIC");
-                    typenames.push_back("DECIMAL");
-                    typenames.push_back("FLOAT");
-                    typenames.push_back("DOUBLE PRECISION");
-                    typenames.push_back("DATE");
-                    typenames.push_back("TIME");
-                    typenames.push_back("TIMESTAMP");
-                    typenames.push_back("ARRAY");
-                    typenames.push_back("BLOB");
+                    std::vector<wxString> typenames;             // I first tried a simple array of strings
+                    typenames.push_back(wxT("CHAR"));                    // but program kept crashing
+                    typenames.push_back(wxT("VARCHAR"));
+                    typenames.push_back(wxT("INTEGER"));
+                    typenames.push_back(wxT("SMALLINT"));
+                    typenames.push_back(wxT("NUMERIC"));
+                    typenames.push_back(wxT("DECIMAL"));
+                    typenames.push_back(wxT("FLOAT"));
+                    typenames.push_back(wxT("DOUBLE PRECISION"));
+                    typenames.push_back(wxT("DATE"));
+                    typenames.push_back(wxT("TIME"));
+                    typenames.push_back(wxT("TIMESTAMP"));
+                    typenames.push_back(wxT("ARRAY"));
+                    typenames.push_back(wxT("BLOB"));
                     bool is_datatype = false;
-                    for (std::vector<std::string>::iterator it = typenames.begin(); it != typenames.end(); ++it)
-                        if ((*it) == domain_or_datatype)
+                    for (std::vector<wxString>::iterator it = typenames.begin(); it != typenames.end(); ++it)
+                        if ((*it) == std2wx(domain_or_datatype))
                             is_datatype = true;
 
                     if (is_datatype)        // either existing domain is changing, or new is created
                     {
-                        std::string domain_name = loadDomainNameForColumn(name, field_name);
-                        MetadataItem *m = domainsM.findByName(domain_name);
+                        wxString domain_name = loadDomainNameForColumn(std2wx(name), std2wx(field_name));
+                        MetadataItem* m = domainsM.findByName(domain_name);
                         if (m == 0)     // domain does not exist in DBH
                         {
                             m = domainsM.add();
@@ -776,7 +775,7 @@ bool Database::parseCommitedSql(std::string sql)
                             m->setParent(this);
                             m->setType(ntDomain);   // just in case
                         }
-                        ((Domain *)m)->loadInfo();
+                        ((Domain*)m)->loadInfo();
                     }
                     else
                     {
@@ -792,22 +791,22 @@ bool Database::parseCommitedSql(std::string sql)
             // and object would do wherever it needs to
             bool result = true;
             if (t == ntTable || t == ntView)
-                result = ((Relation *)object)->loadColumns();
+                result = ((Relation*)object)->loadColumns();
             else if (t == ntProcedure)
-                result = ((Procedure *)object)->checkAndLoadParameters(true);   // force reload
+                result = ((Procedure*)object)->checkAndLoadParameters(true);   // force reload
             else if (t == ntException)
-                ((Exception *)object)->loadProperties(true);
+                ((Exception*)object)->loadProperties(true);
             else if (t == ntTrigger)
             {
-                ((Trigger *)object)->loadInfo(true);
-                std::string relation;                   // alert table/view
-                Trigger *tr = dynamic_cast<Trigger *>(findByNameAndType(ntTrigger, name));
+                ((Trigger*)object)->loadInfo(true);
+                wxString relation;                   // alert table/view
+                Trigger* tr = dynamic_cast<Trigger*>(findByNameAndType(ntTrigger, std2wx(name)));
                 if (!tr || !tr->getRelation(relation))
                     return true;
-                Relation *m = dynamic_cast<Relation *>(findByNameAndType(ntTable, relation));
+                Relation* m = dynamic_cast<Relation*>(findByNameAndType(ntTable, relation));
                 if (!m)
                 {
-                    m = dynamic_cast<Relation *>(findByNameAndType(ntView, relation));
+                    m = dynamic_cast<Relation*>(findByNameAndType(ntView, relation));
                     if (!m)
                         return true;
                 }
@@ -842,11 +841,11 @@ bool Database::reconnect() const
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage("System error.");
+        lastError().setMessage(_("System error."));
     }
     return false;
 }
@@ -854,15 +853,15 @@ bool Database::reconnect() const
 // the caller of this function should check whether the database object has the
 // password set, and if it does not, it should provide the password
 //               and if it does, just provide that password
-bool Database::connect(std::string password)
+bool Database::connect(wxString password)
 {
     if (connectedM)
         return true;
 
     try
     {
-        databaseM = IBPP::DatabaseFactory("", getConnectionString(), getUsername(),
-            password, getRole(), getConnectionCharset(), "");
+        databaseM = IBPP::DatabaseFactory("", wx2std(getConnectionString()), wx2std(getUsername()),
+            wx2std(password), wx2std(getRole()), wx2std(getConnectionCharset()), "");
         databaseM->Connect();
         connectedM = true;
         notifyObservers();
@@ -876,18 +875,22 @@ bool Database::connect(std::string password)
         st1->Prepare("select rdb$character_set_name from rdb$database");
         st1->Execute();
         if (st1->Fetch())
-            st1->Get(1, databaseCharsetM);
-        databaseCharsetM.erase(databaseCharsetM.find_last_not_of(" ")+1);
+        {
+            std::string databaseCharset;
+            st1->Get(1, databaseCharset);
+            databaseCharsetM = std2wx(databaseCharset);
+        }
+        databaseCharsetM.erase(databaseCharsetM.find_last_not_of(wxT(" ")) + 1);
         tr1->Commit();
         return true;
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage("System error.");
+        lastError().setMessage(_("System error."));
     }
 
     databaseM.clear();
@@ -929,18 +932,18 @@ bool Database::disconnect()
         viewsM.detachAllObservers();
         exceptionsM.detachAllObservers();
 
-        if (config().get("HideDisconnectedDatabases", false))
+        if (config().get(wxT("HideDisconnectedDatabases"), false))
             getParent()->notifyObservers();
         notifyObservers();
         return true;
     }
     catch (IBPP::Exception &e)
     {
-        lastError().setMessage(e.ErrorMessage());
+        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage("System error.");
+        lastError().setMessage(_("System error."));
     }
 
     return false;
@@ -948,11 +951,11 @@ bool Database::disconnect()
 //-----------------------------------------------------------------------------
 void Database::clear()
 {
-    setPath("");
-    setConnectionCharset("");
-    setUsername("");
-    setPassword("");
-    setRole("");
+    setPath(wxT(""));
+    setConnectionCharset(wxT(""));
+    setUsername(wxT(""));
+    setPassword(wxT(""));
+    setRole(wxT(""));
 }
 //-----------------------------------------------------------------------------
 bool Database::isConnected() const
@@ -960,7 +963,7 @@ bool Database::isConnected() const
     return connectedM;
 }
 //-----------------------------------------------------------------------------
-bool Database::getChildren(std::vector<MetadataItem *>& temp)
+bool Database::getChildren(std::vector<MetadataItem*>& temp)
 {
     if (!connectedM)
         return false;
@@ -970,7 +973,7 @@ bool Database::getChildren(std::vector<MetadataItem *>& temp)
 }
 //-----------------------------------------------------------------------------
 // returns vector of all subitems
-void Database::getCollections(std::vector<MetadataItem *>& temp)
+void Database::getCollections(std::vector<MetadataItem*>& temp)
 {
     temp.push_back(&domainsM);
     temp.push_back(&exceptionsM);
@@ -1013,17 +1016,17 @@ MetadataCollection<Table>::const_iterator Database::tablesEnd()
     return tablesM.end();
 }
 //-----------------------------------------------------------------------------
-std::string Database::getPath() const
+wxString Database::getPath() const
 {
     return pathM;
 }
 //-----------------------------------------------------------------------------
-std::string Database::getDatabaseCharset() const
+wxString Database::getDatabaseCharset() const
 {
     return databaseCharsetM;
 }
 //-----------------------------------------------------------------------------
-std::string Database::getConnectionCharset() const
+wxString Database::getConnectionCharset() const
 {
     if (connectionCredentials)
         return connectionCredentials->getCharset();
@@ -1031,7 +1034,7 @@ std::string Database::getConnectionCharset() const
         return credentials.getCharset();
 }
 //-----------------------------------------------------------------------------
-std::string Database::getUsername() const
+wxString Database::getUsername() const
 {
     if (connectionCredentials)
         return connectionCredentials->getUsername();
@@ -1039,7 +1042,7 @@ std::string Database::getUsername() const
         return credentials.getUsername();
 }
 //-----------------------------------------------------------------------------
-std::string Database::getPassword() const
+wxString Database::getPassword() const
 {
     if (connectionCredentials)
         return connectionCredentials->getPassword();
@@ -1047,7 +1050,7 @@ std::string Database::getPassword() const
         return credentials.getPassword();
 }
 //-----------------------------------------------------------------------------
-std::string Database::getRole() const
+wxString Database::getRole() const
 {
     if (connectionCredentials)
         return connectionCredentials->getRole();
@@ -1060,12 +1063,12 @@ IBPP::Database& Database::getIBPPDatabase()
     return databaseM;
 }
 //-----------------------------------------------------------------------------
-void Database::setPath(std::string value)
+void Database::setPath(wxString value)
 {
     pathM = value;
 }
 //-----------------------------------------------------------------------------
-void Database::setConnectionCharset(std::string value)
+void Database::setConnectionCharset(wxString value)
 {
     if (connectionCredentials)
         connectionCredentials->setCharset(value);
@@ -1073,7 +1076,7 @@ void Database::setConnectionCharset(std::string value)
         credentials.setCharset(value);
 }
 //-----------------------------------------------------------------------------
-void Database::setUsername(std::string value)
+void Database::setUsername(wxString value)
 {
     if (connectionCredentials)
         connectionCredentials->setUsername(value);
@@ -1081,7 +1084,7 @@ void Database::setUsername(std::string value)
         credentials.setUsername(value);
 }
 //-----------------------------------------------------------------------------
-void Database::setPassword(std::string value)
+void Database::setPassword(wxString value)
 {
     if (connectionCredentials)
         connectionCredentials->setPassword(value);
@@ -1089,7 +1092,7 @@ void Database::setPassword(std::string value)
         credentials.setPassword(value);
 }
 //-----------------------------------------------------------------------------
-void Database::setRole(std::string value)
+void Database::setRole(wxString value)
 {
     if (connectionCredentials)
         connectionCredentials->setRole(value);
@@ -1097,9 +1100,9 @@ void Database::setRole(std::string value)
         credentials.setRole(value);
 }
 //-----------------------------------------------------------------------------
-const std::string Database::getTypeName() const
+const wxString Database::getTypeName() const
 {
-    return "DATABASE";
+    return wxT("DATABASE");
 }
 //-----------------------------------------------------------------------------
 void Database::acceptVisitor(MetadataItemVisitor* visitor)
@@ -1109,37 +1112,36 @@ void Database::acceptVisitor(MetadataItemVisitor* visitor)
 //-----------------------------------------------------------------------------
 Server *Database::getServer() const
 {
-    return dynamic_cast<Server *>(getParent());
+    return dynamic_cast<Server*>(getParent());
 }
 //-----------------------------------------------------------------------------
-std::string Database::getConnectionString() const
+wxString Database::getConnectionString() const
 {
-    std::string serverConnStr = getServer()->getConnectionString();
+    wxString serverConnStr = getServer()->getConnectionString();
     if (!serverConnStr.empty())
-        return serverConnStr + ":" + pathM;
+        return serverConnStr + wxT(":") + pathM;
     else
         return pathM;
 }
 //-----------------------------------------------------------------------------
-std::string Database::extractNameFromConnectionString() const
+wxString Database::extractNameFromConnectionString() const
 {
-    string name = pathM;
-    string::size_type p = name.find_last_of("/\\:");
-    if (p != string::npos)
+    wxString name = pathM;
+    wxString::size_type p = name.find_last_of(wxT("/\\:"));
+    if (p != wxString::npos)
         name.erase(0, p + 1);
-    p = name.find_last_of(".");
-    if (p != string::npos)
+    p = name.find_last_of(wxT("."));
+    if (p != wxString::npos)
         name.erase(p, name.length());
     return name;
 }
 //-----------------------------------------------------------------------------
-const string Database::getId() const
+const wxString Database::getId() const
 {
     if (idM == 0)
         idM = getRoot()->getNextId();
-    ostringstream oss;
-    oss << idM;
-    return oss.str();
+    wxString result = wxString::Format(wxT("%d"), idM);
+    return result;
 }
 //-----------------------------------------------------------------------------
 void Database::setId(int id)

@@ -66,7 +66,7 @@ TriggerWizardDialog::TriggerWizardDialog(wxWindow* parent, MetadataItem *item):
 //-----------------------------------------------------------------------------
 void TriggerWizardDialog::set_properties()
 {
-    SetTitle(_("Creating new trigger for: ") + std2wx(relationM->getName()));
+    SetTitle(_("Creating new trigger for: ") + relationM->getName());
     radio_box_1_copy->SetSelection(0);
 	checkbox_1_copy->SetValue(true);
     button_ok->SetDefault();
@@ -105,9 +105,9 @@ void TriggerWizardDialog::do_layout()
     layoutSizers(sizerControls, sizerButtons);
 }
 //-----------------------------------------------------------------------------
-const std::string TriggerWizardDialog::getName() const
+const wxString TriggerWizardDialog::getName() const
 {
-    return "TriggerWizardDialog";
+    return wxT("TriggerWizardDialog");
 }
 //-----------------------------------------------------------------------------
 //! event handling
@@ -140,7 +140,7 @@ void TriggerWizardDialog::OnOkButtonClick(wxCommandEvent& event)
 
 	bool isBefore = (radio_box_1_copy->GetSelection() == 0);
 	wxString name = text_ctrl_1->GetValue();
-	wxString relationName = std2wx(relationM->getName());
+	wxString relationName = relationM->getName();
 	if (name.IsEmpty())
 	{
 		name = relationName + wxT("_") + (isBefore ? wxT("B") : wxT("A")) + suffix
@@ -172,15 +172,15 @@ const CreateTriggerHandler CreateTriggerHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool CreateTriggerHandler::handleURI(URI& uri)
 {
-	if (uri.action != "create_trigger")
+	if (uri.action != wxT("create_trigger"))
 		return false;
 
-	Table *t = (Table *)getObject(uri);
-	wxWindow *w = getWindow(uri);
+	Table* t = (Table*)getObject(uri);
+	wxWindow* w = getWindow(uri);
 	if (!t || !w)
 		return true;
 
-	TriggerWizardDialog *tw = new TriggerWizardDialog(w, t);
+	TriggerWizardDialog* tw = new TriggerWizardDialog(w, t);
 	tw->Show();
 	return true;
 }

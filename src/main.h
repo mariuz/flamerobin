@@ -26,13 +26,10 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+//#include "config/Configurable.h"
 //-----------------------------------------------------------------------------
-class FRApp: public wxApp {
-public:
-    bool OnInit();
-    void OnFatalException();
-    virtual int OnRun();
-    virtual bool OnExceptionInMainLoop();
+class Application: public wxApp
+{
 private:
     // Reads the environment variables that influence FR's behaviour.
     void checkEnvironment();
@@ -40,9 +37,16 @@ private:
     void parseCommandLine();
     // Translates the supported macros (like $app and $user) in path
     // specifications coming from the command line or the environment.
-    const std::string translatePathMacros(const std::string path) const;
+    const wxString translatePathMacros(const wxString path) const;
+protected:
+    virtual const wxString getConfigurableObjectId() const;
+public:
+    bool OnInit();
+    void OnFatalException();
+    virtual int OnRun();
+    virtual bool OnExceptionInMainLoop();
 };
 //-----------------------------------------------------------------------------
-DECLARE_APP(FRApp)
+DECLARE_APP(Application)
 //-----------------------------------------------------------------------------
 #endif // MAIN_H

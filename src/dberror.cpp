@@ -35,26 +35,18 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
-//-----------------------------------------------------------------------------
-#include "ugly.h"
+
 #include "dberror.h"
 //-----------------------------------------------------------------------------
-std::string Error::getMessage() const
+wxString Error::getMessage() const
 {
     return messageM;
 }
 //-----------------------------------------------------------------------------
-void Error::setMessage(std::string message)
+void Error::setMessage(wxString message)
 {
     messageM = message;
 }
-//-----------------------------------------------------------------------------
-#if (wxUSE_UNICODE)
-void Error::setMessage(wxString message)    // makes things easier for unicode builds
-{
-    setMessage(wx2std(message));
-}
-#endif
 //-----------------------------------------------------------------------------
 Error& lastError()
 {

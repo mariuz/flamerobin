@@ -27,11 +27,10 @@
 #ifndef FR_METADATAITEM_H
 #define FR_METADATAITEM_H
 
-#include <string>
 #include <vector>
 
-#include "core/Subject.h"
 #include "core/Element.h"
+#include "core/Subject.h"
 
 class Root;
 class Database;
@@ -49,14 +48,14 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
     ntLastType
 } NodeType;
 //-----------------------------------------------------------------------------
-NodeType getTypeByName(std::string name);
+NodeType getTypeByName(wxString name);
 //-----------------------------------------------------------------------------
 class MetadataItem: public Subject, public Element
 {
 private:
-    std::string nameM;
+    wxString nameM;
     MetadataItem *parentM;
-    std::string descriptionM;
+    wxString descriptionM;
     bool descriptionLoadedM;
 protected:
     NodeType typeM;
@@ -75,44 +74,44 @@ public:
     virtual bool orderedChildren() const { return false; };
 
     // returns CREATE SQL statement template
-    virtual std::string getCreateSqlTemplate() const { return ""; };
+    virtual wxString getCreateSqlTemplate() const { return wxT(""); };
 
     // returns complete DROP SQL statement
-    virtual std::string getDropSqlStatement() const;
+    virtual wxString getDropSqlStatement() const;
 
     // getters/setters
     virtual MetadataItem *getParent() const;
     void setParent(MetadataItem *parent);
-    virtual const std::string& getName() const;
-    virtual std::string getPrintableName();
-    void setName(std::string name);
+    virtual const wxString& getName() const;
+    virtual wxString getPrintableName();
+    void setName(wxString name);
     virtual NodeType getType() const;
     void setType(NodeType type);
 
     // returns the name of the data type (f. ex. TABLE)
-    virtual const std::string getTypeName() const;
+    virtual const wxString getTypeName() const;
 
     // returns the item path, currently only used to store settings in config().
     // It could also be used to locate items in the DBH tree.
-    virtual const std::string getItemPath() const;
+    virtual const wxString getItemPath() const;
 
-    // returns the id string of the metadata item that contributes to the path. The
+    // returns the id wxString of the metadata item that contributes to the path. The
     // predefined implementation just returns getId().
-    virtual const std::string getPathId() const;
+    virtual const wxString getPathId() const;
     // returns the id of the item (to be saved in config files, etc.).
     // The predefined implementation just returns getName().
-    virtual const std::string getId() const;
+    virtual const wxString getId() const;
 
     // items description (in database)
-    std::string getDescription();
-    bool setDescription(std::string description);
-    virtual std::string getDescriptionSql() const;
-    virtual std::string getChangeDescriptionSql() const;
+    wxString getDescription();
+    bool setDescription(wxString description);
+    virtual wxString getDescriptionSql() const;
+    virtual wxString getChangeDescriptionSql() const;
 
     // returns true if the metadata item is a system (as opposed to user-defined) item.
     virtual bool isSystem() const;
 
-    static const std::string pathSeparator;
+    static const wxString pathSeparator;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
@@ -121,17 +120,17 @@ class Dependency: public MetadataItem
 {
 private:
     MetadataItem *objectM;
-    std::string fieldsM;
+    wxString fieldsM;
 public:
     virtual MetadataItem *getParent() const { return objectM->getParent(); };
-    virtual const std::string& getName() const { return objectM->getName(); };
+    virtual const wxString& getName() const { return objectM->getName(); };
     virtual NodeType getType() const { return objectM->getType(); };
-    virtual const std::string getTypeName() const { return objectM->getTypeName(); };
+    virtual const wxString getTypeName() const { return objectM->getTypeName(); };
 
     Dependency(MetadataItem *object) { objectM = object; };
-    std::string getFields() const { return fieldsM; };
-    void addField(const std::string& name) { if (!fieldsM.empty()) fieldsM += ", "; fieldsM += name; };
-    void setFields(const std::string& fields) { fieldsM = fields; };
+    wxString getFields() const { return fieldsM; };
+    void addField(const wxString& name) { if (!fieldsM.empty()) fieldsM += wxT(", "); fieldsM += name; };
+    void setFields(const wxString& fields) { fieldsM = fields; };
 };
 //-----------------------------------------------------------------------------
 #endif //FR_METADATAITEM_H

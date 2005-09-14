@@ -39,8 +39,6 @@
 #include <wx/utils.h>
 
 #include <exception>
-#include <vector>
-#include <string>
 
 #include <ibpp.h>
 
@@ -52,7 +50,7 @@
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------
-IMPLEMENT_APP(FRApp)
+IMPLEMENT_APP(Application)
 //-----------------------------------------------------------------------------
 void parachute()
 {
@@ -70,12 +68,12 @@ void parachute()
     exit(1);
 }
 //-----------------------------------------------------------------------------
-void FRApp::OnFatalException()
+void Application::OnFatalException()
 {
     parachute();
 }
 //-----------------------------------------------------------------------------
-bool FRApp::OnInit()
+bool Application::OnInit()
 {
 #if wxUSE_ON_FATAL_EXCEPTION
     ::wxHandleFatalExceptions();
@@ -109,7 +107,7 @@ bool FRApp::OnInit()
     return true;
 }
 //-----------------------------------------------------------------------------
-int FRApp::OnRun()
+int Application::OnRun()
 {
     while (true)
     {
@@ -124,21 +122,21 @@ int FRApp::OnRun()
     }
 }
 //-----------------------------------------------------------------------------
-bool FRApp::OnExceptionInMainLoop()
+bool Application::OnExceptionInMainLoop()
 {
     throw;
 }
 //-----------------------------------------------------------------------------
-void FRApp::checkEnvironment()
+void Application::checkEnvironment()
 {
     wxString envVar;
     if (wxGetEnv(wxT("FR_HOME"), &envVar))
-        config().setHomePath(translatePathMacros(wx2std(envVar)));
+        config().setHomePath(translatePathMacros(envVar));
     if (wxGetEnv(wxT("FR_USER_HOME"), &envVar))
-        config().setUserHomePath(translatePathMacros(wx2std(envVar)));
+        config().setUserHomePath(translatePathMacros(envVar));
 }
 //-----------------------------------------------------------------------------
-void FRApp::parseCommandLine()
+void Application::parseCommandLine()
 {
     wxCmdLineParser parser(wxGetApp().argc, wxGetApp().argv);
     parser.AddOption(wxT("h"), wxT("home"));
@@ -147,26 +145,31 @@ void FRApp::parseCommandLine()
     {
         wxString paramValue;
         if (parser.Found(wxT("home"), &paramValue))
-            config().setHomePath(translatePathMacros(wx2std(paramValue)));
+            config().setHomePath(translatePathMacros(paramValue));
 
         if (parser.Found(wxT("user-home"), &paramValue))
-            config().setUserHomePath(translatePathMacros(wx2std(paramValue)));
+            config().setUserHomePath(translatePathMacros(paramValue));
     }
 }
 //-----------------------------------------------------------------------------
-const string FRApp::translatePathMacros(const string path) const
+const wxString Application::translatePathMacros(const wxString path) const
 {
-    if (path == "$app")
+    if (path == wxT("$app"))
     {
         wxStandardPaths& standardPaths = config().getStandardPaths();
-        return wx2std(standardPaths.GetLocalDataDir());
+        return standardPaths.GetLocalDataDir();
     }
-    else if (path == "$user")
+    else if (path == wxT("$user"))
     {
         wxStandardPaths& standardPaths = config().getStandardPaths();
-        return wx2std(standardPaths.GetUserLocalDataDir());
+        return standardPaths.GetUserLocalDataDir();
     }
     else
         return path;
+}
+//-----------------------------------------------------------------------------
+const wxString Application::getConfigurableObjectId() const
+{
+    return wxT("");
 }
 //-----------------------------------------------------------------------------

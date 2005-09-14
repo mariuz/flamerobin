@@ -150,10 +150,10 @@ void GridTable::fetch()
         s.reserve(columnCountM);
         for (int i=1; i<=statementM->Columns(); i++)
         {
-            std::string value;
+            wxString value;
             if (CreateString(statementM, i, value))
             {
-                DataGridCell* cell = new DataGridCell(std2wx(value));
+                DataGridCell* cell = new DataGridCell(value);
                 s.push_back(cell);
             }
             else

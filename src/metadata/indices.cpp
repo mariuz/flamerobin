@@ -30,7 +30,6 @@
     #pragma hdrstop
 #endif
 
-#include <string>
 #include <vector>
 
 #include "MetadataItemVisitor.h"
@@ -61,18 +60,18 @@ double Index::getStatistics()
 	return statisticsM;
 }
 //-----------------------------------------------------------------------------
-std::vector<std::string> *Index::getSegments()
+std::vector<wxString> *Index::getSegments()
 {
 	return &segmentsM;
 }
 //-----------------------------------------------------------------------------
-std::string Index::getFieldsAsString()
+wxString Index::getFieldsAsString()
 {
-	std::string retval;
-	for (std::vector<std::string>::iterator it = segmentsM.begin(); it != segmentsM.end(); ++it)
+	wxString retval;
+	for (std::vector<wxString>::iterator it = segmentsM.begin(); it != segmentsM.end(); ++it)
 	{
 		if (!retval.empty())
-			retval += ",";
+			retval += wxT(",");
 		retval += (*it);
 	}
 	return retval;

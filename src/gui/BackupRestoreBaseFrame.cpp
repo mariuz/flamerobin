@@ -52,7 +52,7 @@ BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, Database* db):
     threadM = 0;
     threadMsgTimeMillisM = 0;
     verboseMsgsM = true;
-    storageNameM = "unassigned";
+    storageNameM = wxT("unassigned");
 
     // create controls in constructor of descendant class to allow for correct tab order
     panel_controls = 0;
@@ -119,33 +119,33 @@ bool BackupRestoreBaseFrame::Destroy()
     return BaseFrame::Destroy();
 }
 //-----------------------------------------------------------------------------
-void BackupRestoreBaseFrame::doReadConfigSettings(const std::string& prefix)
+void BackupRestoreBaseFrame::doReadConfigSettings(const wxString& prefix)
 {
     BaseFrame::doReadConfigSettings(prefix);
 
     bool verbose;
-    if (!config().getValue(prefix + Config::pathSeparator + "verboselog", verbose))
+    if (!config().getValue(prefix + Config::pathSeparator + wxT("verboselog"), verbose))
         verbose = true;
     checkbox_showlog->SetValue(verbose);
 
-    std::string bkfile;
-    if (config().getValue(prefix + Config::pathSeparator + "backupfilename", bkfile) && !bkfile.empty())
-        text_ctrl_filename->SetValue(std2wx(bkfile));
+    wxString bkfile;
+    if (config().getValue(prefix + Config::pathSeparator + wxT("backupfilename"), bkfile) && !bkfile.empty())
+        text_ctrl_filename->SetValue(bkfile);
 }
 //-----------------------------------------------------------------------------
-void BackupRestoreBaseFrame::doWriteConfigSettings(const std::string& prefix) const
+void BackupRestoreBaseFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BaseFrame::doWriteConfigSettings(prefix);
-    config().setValue(prefix + Config::pathSeparator + "verboselog", checkbox_showlog->GetValue());
-    config().setValue(prefix + Config::pathSeparator + "backupfilename", wx2std(text_ctrl_filename->GetValue()));
+    config().setValue(prefix + Config::pathSeparator + wxT("verboselog"), checkbox_showlog->GetValue());
+    config().setValue(prefix + Config::pathSeparator + wxT("backupfilename"), text_ctrl_filename->GetValue());
 }
 //-----------------------------------------------------------------------------
-const std::string BackupRestoreBaseFrame::getStorageName() const
+const wxString BackupRestoreBaseFrame::getStorageName() const
 {
-    if (storageNameM == "unassigned")
+    if (storageNameM == wxT("unassigned"))
     {
         StorageGranularity g;
-        if (!config().getValue(getName() + "StorageGranularity", g))
+        if (!config().getValue(getName() + wxT("StorageGranularity"), g))
             g = sgFrame;
 
         switch (g)
@@ -157,7 +157,7 @@ const std::string BackupRestoreBaseFrame::getStorageName() const
             storageNameM = getName() + Config::pathSeparator + databaseM->getItemPath();
             break;
         default:
-            storageNameM = "";
+            storageNameM = wxT("");
             break;
         }
     }

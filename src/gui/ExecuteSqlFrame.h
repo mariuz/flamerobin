@@ -100,7 +100,7 @@ public:
     void executeAllStatements(bool autoExecute = false);
     void prepareAndExecute(bool prepareOnly = false);
     bool parseStatements(const wxString& statements, bool autoExecute = false, bool prepareOnly = false);
-    bool execute(std::string sql, bool prepareOnly = false);
+    bool execute(wxString sql, bool prepareOnly = false);
     void setSql(wxString sql);
 
     ExecuteSqlFrame(wxWindow* parent, int id, wxString title, const wxPoint& pos=wxDefaultPosition,
@@ -184,9 +184,9 @@ protected:
 
     wxStatusBar* statusbar_1;
 
-    virtual const std::string getName() const;
-    virtual void doReadConfigSettings(const std::string& prefix);
-    virtual void doWriteConfigSettings(const std::string& prefix) const;
+    virtual const wxString getName() const;
+    virtual void doReadConfigSettings(const wxString& prefix);
+    virtual void doWriteConfigSettings(const wxString& prefix) const;
     virtual const wxRect getDefaultRect() const;
 
     DECLARE_EVENT_TABLE()

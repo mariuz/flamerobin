@@ -57,7 +57,7 @@ protected:
     wxSpinCtrl* spin_ctrl_1;
     wxButton* button_ok;
     wxButton* button_cancel;
-    virtual const std::string getName() const;
+    virtual const wxString getName() const;
 
     DECLARE_EVENT_TABLE()
 };

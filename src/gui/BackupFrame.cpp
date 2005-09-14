@@ -50,27 +50,27 @@ Contributor(s): Milan Babuskov, Nando Dessena
 // worker thread class to perform database backup
 class BackupThread: public wxThread {
 public:
-    BackupThread(BackupFrame* frame, std::string server, std::string username,
-        std::string password, std::string dbfilename, std::string bkfilename,
+    BackupThread(BackupFrame* frame, wxString server, wxString username,
+        wxString password, wxString dbfilename, wxString bkfilename,
         IBPP::BRF flags);
 
     virtual void* Entry();
     virtual void OnExit();
 private:
     BackupFrame* frameM;
-    std::string serverM;
-    std::string usernameM;
-    std::string passwordM;
-    std::string dbfileM;
-    std::string bkfileM;
+    wxString serverM;
+    wxString usernameM;
+    wxString passwordM;
+    wxString dbfileM;
+    wxString bkfileM;
     IBPP::BRF brfM;
     void logError(wxString& msg);
     void logImportant(wxString& msg);
     void logProgress(wxString& msg);
 };
 //-----------------------------------------------------------------------------
-BackupThread::BackupThread(BackupFrame* frame, std::string server, std::string username, std::string password,
-        std::string dbfilename, std::string bkfilename, IBPP::BRF flags):
+BackupThread::BackupThread(BackupFrame* frame, wxString server, wxString username, wxString password,
+        wxString dbfilename, wxString bkfilename, IBPP::BRF flags):
     wxThread()
 {
     frameM = frame;
@@ -90,15 +90,15 @@ void* BackupThread::Entry()
 
     try
     {
-        msg.Printf(_("Connecting to server %s..."), std2wx(serverM).c_str());
+        msg.Printf(_("Connecting to server %s..."), serverM.c_str());
         logImportant(msg);
-        IBPP::Service svc = IBPP::ServiceFactory(serverM, usernameM, passwordM);
+        IBPP::Service svc = IBPP::ServiceFactory(wx2std(serverM), wx2std(usernameM), wx2std(passwordM));
         svc->Connect();
 
         now = wxDateTime::Now();
         msg.Printf(_("Database backup started %s"), now.FormatTime().c_str());
         logImportant(msg);
-        svc->StartBackup(dbfileM, bkfileM, brfM);
+        svc->StartBackup(wx2std(dbfileM), wx2std(bkfileM), brfM);
         while (true)
         {
             if (TestDestroy())
@@ -169,11 +169,11 @@ BackupFrame::BackupFrame(wxWindow* parent, Database* db):
 {
     wxString s;
     s.Printf(_("Backup Database \"%s:%s\""),
-        std2wx(serverM->getName()).c_str(), std2wx(databaseM->getName()).c_str());
+        serverM->getName().c_str(), databaseM->getName().c_str());
     SetTitle(s);
 
     panel_controls = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize,
-        wxTAB_TRAVERSAL|wxCLIP_CHILDREN|wxNO_FULL_REPAINT_ON_RESIZE);
+        wxTAB_TRAVERSAL | wxCLIP_CHILDREN | wxNO_FULL_REPAINT_ON_RESIZE);
     label_filename = new wxStaticText(panel_controls, -1, _("Backup file:"));
     text_ctrl_filename = new wxTextCtrl(panel_controls, ID_text_ctrl_filename, wxEmptyString);
     button_browse = new wxButton(panel_controls, ID_button_browse, _("..."), wxDefaultPosition,
@@ -250,50 +250,50 @@ void BackupFrame::do_layout()
     SetSizerAndFit(sizerMain);
 }
 //-----------------------------------------------------------------------------
-void BackupFrame::doReadConfigSettings(const std::string& prefix)
+void BackupFrame::doReadConfigSettings(const wxString& prefix)
 {
     BackupRestoreBaseFrame::doReadConfigSettings(prefix);
-    std::vector<std::string> flags;
-    if (config().getValue(prefix + Config::pathSeparator + "options", flags) && !flags.empty())
+    std::vector<wxString> flags;
+    if (config().getValue(prefix + Config::pathSeparator + wxT("options"), flags) && !flags.empty())
     {
         checkbox_checksum->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), "ignore_checksums"));
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("ignore_checksums")));
         checkbox_limbo->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), "ignore_limbo"));
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("ignore_limbo")));
         checkbox_metadata->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), "metadata_only"));
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("metadata_only")));
         checkbox_garbage->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), "no_garbage_collect"));
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("no_garbage_collect")));
         checkbox_transport->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), "no_transportable"));
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("no_transportable")));
         checkbox_extern->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), "external_tables"));
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("external_tables")));
     }
     updateControls();
 }
 //-----------------------------------------------------------------------------
-void BackupFrame::doWriteConfigSettings(const std::string& prefix) const
+void BackupFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BackupRestoreBaseFrame::doWriteConfigSettings(prefix);
-    std::vector<std::string> flags;
+    std::vector<wxString> flags;
     if (checkbox_checksum->IsChecked())
-        flags.push_back("ignore_checksums");
+        flags.push_back(wxT("ignore_checksums"));
     if (checkbox_limbo->IsChecked())
-        flags.push_back("ignore_limbo");
+        flags.push_back(wxT("ignore_limbo"));
     if (checkbox_metadata->IsChecked())
-        flags.push_back("metadata_only");
+        flags.push_back(wxT("metadata_only"));
     if (checkbox_garbage->IsChecked())
-        flags.push_back("no_garbage_collect");
+        flags.push_back(wxT("no_garbage_collect"));
     if (checkbox_transport->IsChecked())
-        flags.push_back("no_transportable");
+        flags.push_back(wxT("no_transportable"));
     if (checkbox_extern->IsChecked())
-        flags.push_back("external_tables");
-    config().setValue(prefix + Config::pathSeparator + "options", flags);
+        flags.push_back(wxT("external_tables"));
+    config().setValue(prefix + Config::pathSeparator + wxT("options"), flags);
 }
 //-----------------------------------------------------------------------------
-const std::string BackupFrame::getName() const
+const wxString BackupFrame::getName() const
 {
-    return "BackupFrame";
+    return wxT("BackupFrame");
 }
 //-----------------------------------------------------------------------------
 void BackupFrame::updateControls()
@@ -336,12 +336,12 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     //   if (!getDatabasePassword(this, databaseM, password))
     //       return;
 
-    std::string password = databaseM->getPassword();
+    wxString password = databaseM->getPassword();
     if (password.empty())
     {
         wxString msg;
-        msg.Printf(_("Enter password for user %s:"), std2wx(databaseM->getUsername()).c_str());
-        password = wx2std(::wxGetPasswordFromUser(msg, _("Connecting To Server")));
+        msg.Printf(_("Enter password for user %s:"), databaseM->getUsername().c_str());
+        password = ::wxGetPasswordFromUser(msg, _("Connecting To Server"));
         if (password.empty())
             return;
     }
@@ -361,7 +361,7 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
         flags |= (int)IBPP::brConvertExtTables;
 
     BackupThread* thread = new BackupThread(this, serverM->getName(), databaseM->getUsername(),
-        password, databaseM->getPath(), wx2std(text_ctrl_filename->GetValue()), (IBPP::BRF)flags);
+        password, databaseM->getPath(), text_ctrl_filename->GetValue(), (IBPP::BRF)flags);
     startThread(thread);
     updateControls();
 }

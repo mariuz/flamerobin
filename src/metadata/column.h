@@ -34,19 +34,19 @@ class Column: public MetadataItem
 {
 private:
 	bool notnullM, computedM;
-	std::string sourceM, computedSourceM, collationM;
+	wxString sourceM, computedSourceM, collationM;
 public:
 	Column();
-	void Init(bool notnull, std::string source, bool computed, std::string computedSource, std::string collation);
-	virtual std::string getPrintableName();
-	std::string getDatatype();
-    virtual std::string getDropSqlStatement() const;
+	void Init(bool notnull, wxString source, bool computed, wxString computedSource, wxString collation);
+	virtual wxString getPrintableName();
+	wxString getDatatype();
+    virtual wxString getDropSqlStatement() const;
 
 	bool isNullable() const;
 	bool isPrimaryKey() const;
 	bool isComputed() const;
-	std::string getSource() const;
-	std::string getCollation() const;
+	wxString getSource() const;
+	wxString getCollation() const;
 	Domain *getDomain() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };

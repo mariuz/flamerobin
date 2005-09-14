@@ -27,28 +27,26 @@
 #ifndef FR_DOMAIN_H
 #define FR_DOMAIN_H
 
-#include <string>
-
 #include "metadataitem.h"
 //-----------------------------------------------------------------------------
 class Domain: public MetadataItem
 {
 private:
 	short datatypeM, subtypeM, lengthM, precisionM, scaleM;
-	std::string charsetM;
+	wxString charsetM;
 	bool infoLoadedM;
 
 public:
 	Domain();
 
-	static std::string datatype2string(short datatype, short scale, short precision, short subtype, short length);
+	static wxString datatype2string(short datatype, short scale, short precision, short subtype, short length);
 	bool loadInfo();
-	std::string getDatatypeAsString();
-	void getDatatypeParts(std::string& type, std::string& size, std::string& scale);
-	std::string getCharset();
-	virtual const std::string getTypeName() const;
-	virtual std::string getCreateSqlTemplate() const;
-	virtual std::string getPrintableName();
+	wxString getDatatypeAsString();
+	void getDatatypeParts(wxString& type, wxString& size, wxString& scale);
+	wxString getCharset();
+	virtual const wxString getTypeName() const;
+	virtual wxString getCreateSqlTemplate() const;
+	virtual wxString getPrintableName();
     virtual void acceptVisitor(MetadataItemVisitor* v);
 };
 //-----------------------------------------------------------------------------

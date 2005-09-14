@@ -40,7 +40,7 @@
 #include "FRError.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
-void handleException(std::exception& e)
+void handleException(const std::exception& e)
 {
     wxMessageBox(std2wx(e.what()), _("Error"), wxOK | wxICON_ERROR);
 }

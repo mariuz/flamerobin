@@ -170,7 +170,7 @@ void ContextMenuMetadataItemVisitor::addSelectMenu(bool isTable)
     menuM->Append(myTreeCtrl::Menu_Browse, _("&Select * from ..."));
     menuM->Append(myTreeCtrl::Menu_BrowseColumns, _("Select &col1, col2, ... from ..."));
     menuM->AppendSeparator();
-    if (config().get("ShowColumnsInTree", true))
+    if (config().get(wxT("ShowColumnsInTree"), true))
     {
         menuM->Append(myTreeCtrl::Menu_LoadColumnsInfo, _("Show columns in&fo"));
         if (isTable)

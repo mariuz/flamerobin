@@ -33,16 +33,16 @@ class Exception: public MetadataItem
 {
 private:
     bool propertiesLoadedM;
-    std::string messageM;
+    wxString messageM;
     int numberM;
 public:
     Exception();
-    virtual std::string getCreateSqlTemplate() const;
-    virtual const std::string getTypeName() const;
+    virtual wxString getCreateSqlTemplate() const;
+    virtual const wxString getTypeName() const;
 
-    std::string getMessage();
+    wxString getMessage();
     int getNumber();
-    std::string getAlterSql();
+    wxString getAlterSql();
     void loadProperties(bool force = false);
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };

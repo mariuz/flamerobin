@@ -102,7 +102,7 @@ void FrameManager::rebuildMenu()
 
     // wxWidgets manual says that we should insert the submenus at end
     for (std::map<Database *, wxMenu *>::iterator it = dmm.begin(); it != dmm.end(); ++it)
-        windowMenuM->Append(-1, std2wx((*it).first->getName()), (*it).second);
+        windowMenuM->Append(-1, (*it).first->getName(), (*it).second);
 
     if (windowMenuM->GetMenuItemCount() == regularItems)    // remove the separator if nothing is beneath
         windowMenuM->Destroy(windowMenuM->FindItemByPosition(regularItems-1));

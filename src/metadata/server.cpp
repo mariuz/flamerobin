@@ -42,14 +42,14 @@ Server::Server()
 {
     typeM = ntServer;
 
-    hostnameM = "";
-    portM = "";
+    hostnameM = wxT("");
+    portM = wxT("");
 
     databasesM.setParent(this);
     databasesM.setType(ntServer);
 }
 //-----------------------------------------------------------------------------
-bool Server::getChildren(vector<MetadataItem *>& temp)
+bool Server::getChildren(vector<MetadataItem*>& temp)
 {
     return databasesM.getChildren(temp);
 }
@@ -57,53 +57,54 @@ bool Server::getChildren(vector<MetadataItem *>& temp)
 bool Server::orderedChildren() const
 {
     bool ordered = false;
-    config().getValue("OrderDatabasesInTree", ordered);
+    config().getValue(wxT("OrderDatabasesInTree"), ordered);
     return ordered;
 }
 //-----------------------------------------------------------------------------
 // returns pointer to object in vector
 Database* Server::addDatabase(Database& db)
 {
-    Database *temp = databasesM.add(db);
+    Database* temp = databasesM.add(db);
     temp->setParent(this);                  // grab it from collection
     temp->initChildren();
     notifyObservers();
     return temp;
 }
 //-----------------------------------------------------------------------------
-void Server::removeDatabase(Database *db)
+void Server::removeDatabase(Database* db)
 {
     databasesM.remove(db);
     notifyObservers();
 }
 //-----------------------------------------------------------------------------
-void Server::createDatabase(Database *db, int pagesize, int dialect)
+void Server::createDatabase(Database* db, int pagesize, int dialect)
 {
     ostringstream extra_params;
     if (pagesize)
         extra_params << "PAGE_SIZE " << pagesize << " ";
 
-    string charset = db->getConnectionCharset();
+    wxString charset = db->getConnectionCharset();
     if (!charset.empty())
         extra_params << "DEFAULT CHARACTER SET " << charset << " ";
 
     IBPP::Database db1;
-    db1 = IBPP::DatabaseFactory(hostnameM, db->getPath(), db->getUsername(),
-        db->getPassword(), "", charset, extra_params.str());
+    db1 = IBPP::DatabaseFactory(wx2std(hostnameM), wx2std(db->getPath()),
+        wx2std(db->getUsername()), wx2std(db->getPassword()), "",
+        wx2std(charset), extra_params.str());
     db1->Create(dialect);
 }
 //-----------------------------------------------------------------------------
-MetadataCollection<Database> *Server::getDatabases()
+MetadataCollection<Database>* Server::getDatabases()
 {
     return &databasesM;
 };
 //-----------------------------------------------------------------------------
-string Server::getHostname() const
+wxString Server::getHostname() const
 {
     return hostnameM;
 }
 //-----------------------------------------------------------------------------
-string Server::getPort() const
+wxString Server::getPort() const
 {
     return portM;
 }
@@ -119,19 +120,19 @@ bool Server::hasConnectedDatabase() const
     return false;
 }
 //-----------------------------------------------------------------------------
-void Server::setHostname(string hostname)
+void Server::setHostname(wxString hostname)
 {
     hostnameM = hostname;
 }
 //-----------------------------------------------------------------------------
-void Server::setPort(string port)
+void Server::setPort(wxString port)
 {
     portM = port;
 }
 //-----------------------------------------------------------------------------
-const string Server::getTypeName() const
+const wxString Server::getTypeName() const
 {
-    return "SERVER";
+    return wxT("SERVER");
 }
 //-----------------------------------------------------------------------------
 void Server::acceptVisitor(MetadataItemVisitor* visitor)
@@ -139,21 +140,21 @@ void Server::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------
-string Server::getConnectionString() const
+wxString Server::getConnectionString() const
 {
-    string hostname = getHostname();
-    string port = getPort();
+    wxString hostname = getHostname();
+    wxString port = getPort();
     if (!hostname.empty() && !port.empty())
-        return hostname + "/" + port;
+        return hostname + wxT("/") + port;
     else
         return hostname;
 }
 //-----------------------------------------------------------------------------
-const string Server::getItemPath() const
+const wxString Server::getItemPath() const
 {
     // Since database Ids are already unique, let's shorten the item paths
     // by not including the server part. Even more so if this class is bound
     // to disappear in the future.
-    return "";
+    return wxT("");
 }
 //-----------------------------------------------------------------------------

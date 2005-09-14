@@ -26,7 +26,6 @@
 #ifndef FR_CONSTRAINTS_H
 #define FR_CONSTRAINTS_H
 //-----------------------------------------------------------------------------
-#include <string>
 #include <vector>
 
 #include "metadataitem.h"
@@ -43,11 +42,11 @@ public:
 class ColumnConstraint: public Constraint
 {
 public:
-    typedef std::vector<std::string>::const_iterator const_iterator;
-    //std::string indexName; needed?
-    std::vector<std::string> columnsM;
+    typedef std::vector<wxString>::const_iterator const_iterator;
+    //wxString indexName; needed?
+    std::vector<wxString> columnsM;
 
-    std::string getColumnList() const;
+    wxString getColumnList() const;
     const_iterator begin() { return columnsM.begin(); };
     const_iterator end() { return columnsM.end(); };
 };
@@ -56,18 +55,18 @@ public:
 class CheckConstraint: public Constraint
 {
 public:
-    std::string sourceM;
+    wxString sourceM;
 };
 //-----------------------------------------------------------------------------
 //! foreign keys
 class ForeignKey: public ColumnConstraint
 {
 public:
-    std::string referencedTableM;                   // referenced table
-    std::vector<std::string> referencedColumnsM;    // referenced columns
-    std::string updateActionM;
-    std::string deleteActionM;
-    std::string getReferencedColumnList() const;
+    wxString referencedTableM;                   // referenced table
+    std::vector<wxString> referencedColumnsM;    // referenced columns
+    wxString updateActionM;
+    wxString deleteActionM;
+    wxString getReferencedColumnList() const;
 };
 //-----------------------------------------------------------------------------
 #endif

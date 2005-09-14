@@ -30,8 +30,6 @@
     #pragma hdrstop
 #endif
 
-#include <string>
-
 #include <ibpp.h>
 
 #include "database.h"
@@ -44,17 +42,17 @@ Exception::Exception()
     propertiesLoadedM = false;
 }
 //-----------------------------------------------------------------------------
-std::string Exception::getCreateSqlTemplate() const
+wxString Exception::getCreateSqlTemplate() const
 {
-	return	"CREATE EXCEPTION name 'exception message';\n";
+	return	wxT("CREATE EXCEPTION name 'exception message';\n");
 }
 //-----------------------------------------------------------------------------
-const std::string Exception::getTypeName() const
+const wxString Exception::getTypeName() const
 {
-	return "EXCEPTION";
+	return wxT("EXCEPTION");
 }
 //-----------------------------------------------------------------------------
-std::string Exception::getMessage()
+wxString Exception::getMessage()
 {
     loadProperties();
     return messageM;
@@ -71,11 +69,11 @@ void Exception::loadProperties(bool force)
     if (!force && propertiesLoadedM)
         return;
 
-	Database *d = getDatabase();
+	Database* d = getDatabase();
 	if (!d)
 		return; // should signal an error here.
 
-	messageM = "";
+	messageM = wxT("");
     numberM = 0;
 	try
 	{
@@ -84,28 +82,30 @@ void Exception::loadProperties(bool force)
 		tr1->Start();
 		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
 		st1->Prepare("select RDB$MESSAGE, RDB$EXCEPTION_NUMBER from RDB$EXCEPTIONS where RDB$EXCEPTION_NAME = ?");
-		st1->Set(1, getName());
+		st1->Set(1, wx2std(getName()));
 		st1->Execute();
 		st1->Fetch();
-		st1->Get(1, messageM);
+		std::string message;
+		st1->Get(1, message);
+		messageM = std2wx(message);
         st1->Get(2, numberM);
 		tr1->Commit();
 		propertiesLoadedM = true;
 	}
 	catch (IBPP::Exception &e)
 	{
-		lastError().setMessage(e.ErrorMessage());
+		lastError().setMessage(std2wx(e.ErrorMessage()));
 	}
 	catch (...)
 	{
-		lastError().setMessage("System error.");
+		lastError().setMessage(_("System error."));
 	}
     notifyObservers();
 }
 //-----------------------------------------------------------------------------
-std::string Exception::getAlterSql()
+wxString Exception::getAlterSql()
 {
-	return "ALTER EXCEPTION " + getName() + " '" + getMessage() + "';";
+	return wxT("ALTER EXCEPTION ") + getName() + wxT(" '") + getMessage() + wxT("';");
 }
 //-----------------------------------------------------------------------------
 void Exception::acceptVisitor(MetadataItemVisitor* visitor)

@@ -20,22 +20,22 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Nando Dessena
 */
 
 #ifndef UGLY_H
 #define UGLY_H
+
 // this file contains declarations for all functions in ugly.cpp
 // ugly.cpp contains all ugly stuff with ifdefs and similar
 // things that would otherwise make code ugly and unreadable
 
 #include <wx/wx.h>
+
 #include <string>
 //-----------------------------------------------------------------------------
 std::string wx2std(const wxString& input);
 wxString std2wx(std::string input);
-
-std::string upcase(std::string str);
 
 wxString getPlatformName();
 //-----------------------------------------------------------------------------

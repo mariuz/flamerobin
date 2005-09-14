@@ -299,11 +299,11 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
 {
     // we don't want this dialog centered on parent since it is very big, and
     // some parents (ex. main frame) could even be smaller
-    configM.setValue(getName() + Config::pathSeparator + "centerDialogOnParent", false);
+    configM.setValue(getName() + Config::pathSeparator + wxT("centerDialogOnParent"), false);
 
     treectrl_1 = new wxTreeCtrl(getControlsPanel(), ID_treectrl_panes,
         wxDefaultPosition, wxDefaultSize,
-        wxSUNKEN_BORDER|wxTR_DEFAULT_STYLE|wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT);
+        wxSUNKEN_BORDER | wxTR_DEFAULT_STYLE | wxTR_HAS_BUTTONS | wxTR_HIDE_ROOT);
     panel_categ = new wxPanel(getControlsPanel(), wxID_ANY, wxDefaultPosition,
         wxDefaultSize, wxSUNKEN_BORDER);
     static_text_categ = new wxStaticText(panel_categ, wxID_ANY, wxEmptyString);
@@ -315,7 +315,7 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
 
     // order of these is important: first create all controls, then set
     // their properties (may affect min size), then create sizer layout
-    loadDescriptionFile(wxFileName(std2wx(configM.getConfDefsPath()), descriptionFileName));
+    loadDescriptionFile(wxFileName(configM.getConfDefsPath(), descriptionFileName));
     setProperties();
     layout();
     // do this last, otherwise default button style may be lost on MSW
@@ -383,9 +383,9 @@ bool PreferencesDialog::createControlsAndAddToSizer(wxPanel* page, wxSizer* size
     return true;
 }
 //-----------------------------------------------------------------------------
-const std::string PreferencesDialog::getName() const
+const wxString PreferencesDialog::getName() const
 {
-    return "PreferencesDialog";
+    return wxT("PreferencesDialog");
 }
 //-----------------------------------------------------------------------------
 int PreferencesDialog::getSelectedPage()

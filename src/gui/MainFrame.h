@@ -30,7 +30,6 @@
 #include <wx/image.h>
 #include <wx/treectrl.h>
 
-#include <string>
 #include <vector>
 
 #include "gui/BaseFrame.h"
@@ -129,7 +128,7 @@ protected:
     wxMenu* windowMenuM;        // dynamic menu
     wxMenu* objectMenuM;
 
-    virtual const std::string getName() const;
+    virtual const wxString getName() const;
     virtual const wxRect getDefaultRect() const;
     DECLARE_EVENT_TABLE()
 };

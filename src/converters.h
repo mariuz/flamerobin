@@ -26,15 +26,13 @@
 #ifndef FR_CONVERTERS_H
 #define FR_CONVERTERS_H
 //--------------------------------------------------------------------------------------
-#include <string>
-
 #include <ibpp.h>
 //--------------------------------------------------------------------------------------
 //! Various functions that convert IBPP datatypes into human readable form
-std::string GetHumanDate(int year, int month, int day, std::string DateFormat);
-std::string GetHumanTime(int hour, int minute, int second, std::string TimeFormat);
-std::string GetHumanTimestamp(IBPP::Timestamp ts, std::string DateFormat, 
-    std::string TimeFormat);
-bool CreateString(IBPP::Statement& st, int col, std::string& s);
+wxString GetHumanDate(int year, int month, int day, wxString DateFormat);
+wxString GetHumanTime(int hour, int minute, int second, wxString TimeFormat);
+wxString GetHumanTimestamp(IBPP::Timestamp ts, wxString DateFormat, 
+    wxString TimeFormat);
+bool CreateString(IBPP::Statement& st, int col, wxString& s);
 //--------------------------------------------------------------------------------------
 #endif // FR_CONVERTERS_H

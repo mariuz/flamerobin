@@ -39,21 +39,21 @@ private:
 public:
     Procedure();
 
-    std::string getCreateSqlTemplate() const;   // overrides MetadataItem::getCreateSqlTemplate()
+    wxString getCreateSqlTemplate() const;   // overrides MetadataItem::getCreateSqlTemplate()
 
     bool getChildren(std::vector<MetadataItem *>& temp);
     Parameter *addParameter(Parameter &c);
 
-    std::string getExecuteStatement();
-    std::string getSelectStatement(bool withColumns);
+    wxString getExecuteStatement();
+    wxString getSelectStatement(bool withColumns);
     bool isSelectable();
 
     bool checkAndLoadParameters(bool force = false);
-    bool getSource(std::string& source);
-    std::string getAlterSql();
-    std::string getDefinition();
+    bool getSource(wxString& source);
+    wxString getAlterSql();
+    wxString getDefinition();
 
-    virtual const std::string getTypeName() const;
+    virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
