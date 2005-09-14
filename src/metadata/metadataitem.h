@@ -27,6 +27,8 @@
 #ifndef FR_METADATAITEM_H
 #define FR_METADATAITEM_H
 
+#include <wx/string.h>
+
 #include <vector>
 
 #include "core/Element.h"
