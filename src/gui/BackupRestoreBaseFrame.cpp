@@ -61,7 +61,6 @@ BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, Database* db):
     button_browse = 0;
     checkbox_showlog = 0;
     button_start = 0;
-    button_cancel = 0;
     text_ctrl_log = 0;
 
 #include "backup.xpm"
@@ -245,18 +244,11 @@ void BackupRestoreBaseFrame::updateMessages(size_t firstmsg, size_t lastmsg)
 //-----------------------------------------------------------------------------
 //! event handlers
 BEGIN_EVENT_TABLE(BackupRestoreBaseFrame, BaseFrame)
-    EVT_BUTTON(BackupRestoreBaseFrame::ID_button_cancel, BackupRestoreBaseFrame::OnCancelButtonClick)
     EVT_CHECKBOX(BackupRestoreBaseFrame::ID_checkbox_showlog, BackupRestoreBaseFrame::OnVerboseLogChange)
     EVT_MENU(BackupRestoreBaseFrame::ID_thread_finished, BackupRestoreBaseFrame::OnThreadFinished)
     EVT_MENU(BackupRestoreBaseFrame::ID_thread_output, BackupRestoreBaseFrame::OnThreadOutput)
     EVT_TEXT(BackupRestoreBaseFrame::ID_text_ctrl_filename, BackupRestoreBaseFrame::OnSettingsChange)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
-void BackupRestoreBaseFrame::OnCancelButtonClick(wxCommandEvent& WXUNUSED(event))
-{
-    cancelBackupRestore();
-    updateControls();
-}
 //-----------------------------------------------------------------------------
 void BackupRestoreBaseFrame::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
 {

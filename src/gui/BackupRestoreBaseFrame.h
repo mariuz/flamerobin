@@ -54,7 +54,6 @@ public:
         ID_thread_finished
     };
     // events
-    void OnCancelButtonClick(wxCommandEvent& event);
     void OnSettingsChange(wxCommandEvent& event);
     void OnThreadFinished(wxCommandEvent& event);
     void OnThreadOutput(wxCommandEvent& event);
@@ -96,7 +95,6 @@ protected:
     wxButton* button_browse;
     wxCheckBox* checkbox_showlog;
     wxButton* button_start;
-    wxButton* button_cancel;
     wxStyledTextCtrl* text_ctrl_log;
     void setupControls();
 

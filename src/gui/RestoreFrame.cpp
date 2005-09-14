@@ -199,7 +199,6 @@ RestoreFrame::RestoreFrame(wxWindow* parent, Database* db):
 
     checkbox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog, _("Show complete log"));
     button_start = new wxButton(panel_controls, ID_button_start, _("Restore"));
-    button_cancel = new wxButton(panel_controls, ID_button_cancel, _("Cancel"));
 
     text_ctrl_log = new wxStyledTextCtrl(this, ID_text_ctrl_log);
 
@@ -245,8 +244,6 @@ void RestoreFrame::do_layout()
     sizerButtons->Add(checkbox_showlog, 0, wxALIGN_CENTER_VERTICAL);
     sizerButtons->Add(0, 0, 1, wxEXPAND);
     sizerButtons->Add(button_start);
-    sizerButtons->Add(styleguide().getBetweenButtonsMargin(wxHORIZONTAL), 0);
-    sizerButtons->Add(button_cancel);
 
     wxBoxSizer* sizerPanelV = new wxBoxSizer(wxVERTICAL);
     sizerPanelV->Add(0, styleguide().getFrameMargin(wxTOP));
@@ -343,7 +340,6 @@ void RestoreFrame::updateControls()
     checkbox_space->Enable(!running);
     choice_pagesize->Enable(!running);
     button_start->Enable(!running && !text_ctrl_filename->GetValue().empty());
-    button_cancel->Enable(running);
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(RestoreFrame, BackupRestoreBaseFrame)
