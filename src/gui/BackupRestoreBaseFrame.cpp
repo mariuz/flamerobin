@@ -1,39 +1,39 @@
 /*
-The contents of this file are subject to the Initial Developer's Public
-License Version 1.0 (the "License"); you may not use this file except in
-compliance with the License. You may obtain a copy of the License here:
-http://www.flamerobin.org/license.html.
+  The contents of this file are subject to the Initial Developer's Public
+  License Version 1.0 (the "License"); you may not use this file except in
+  compliance with the License. You may obtain a copy of the License here:
+  http://www.flamerobin.org/license.html.
 
-Software distributed under the License is distributed on an "AS IS"
-basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-License for the specific language governing rights and limitations under
-the License.
+  Software distributed under the License is distributed on an "AS IS"
+  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+  License for the specific language governing rights and limitations under
+  the License.
 
-The Original Code is FlameRobin (TM).
+  The Original Code is FlameRobin (TM).
 
-The Initial Developer of the Original Code is Michael Hieke.
+  The Initial Developer of the Original Code is Michael Hieke.
 
-Portions created by the original developer
-are Copyright (C) 2004 Michael Hieke.
+  Portions created by the original developer
+  are Copyright (C) 2004 Michael Hieke.
 
-All Rights Reserved.
+  All Rights Reserved.
 
-$Id$
+  $Id$
 
-Contributor(s): Milan Babuskov, Nando Dessena
+  Contributor(s): Milan Babuskov, Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-#pragma hdrstop
+    #pragma hdrstop
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
 // need because it includes almost all "standard" wxWindows headers
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+    #include "wx/wx.h"
 #endif
 
 #include <wx/timer.h>
@@ -43,8 +43,9 @@ Contributor(s): Milan Babuskov, Nando Dessena
 #include "ugly.h"
 
 //-----------------------------------------------------------------------------
-BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, Database* db):
-    BaseFrame(parent, -1, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE|wxNO_FULL_REPAINT_ON_RESIZE)
+BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, Database* db)
+    : BaseFrame(parent, -1, wxEmptyString, wxDefaultPosition, wxDefaultSize, 
+        wxDEFAULT_FRAME_STYLE|wxNO_FULL_REPAINT_ON_RESIZE)
 {
     databaseM = db;
     serverM = reinterpret_cast<Server*>(db->getParent());
@@ -54,7 +55,7 @@ BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, Database* db):
     verboseMsgsM = true;
     storageNameM = wxT("unassigned");
 
-    // create controls in constructor of descendant class to allow for correct tab order
+    // create controls in constructor of descendant class (correct tab order)
     panel_controls = 0;
     label_filename = 0;
     text_ctrl_filename = 0;
@@ -87,8 +88,8 @@ void BackupRestoreBaseFrame::addThreadMsg(const wxString msg, bool& notification
 
     wxCriticalSectionLocker locker(critsectM);
     threadMsgsM.Add(msg);
-    // we post no more than 10 events per second to prevent flooding of the message queue
-    // and keep the frame responsive for user interaction
+    // we post no more than 10 events per second to prevent flooding of
+    // the message queue, and to keep the frame responsive for user interaction
     if ((millisNow - threadMsgTimeMillisM).GetLo() > 100)
     {
         threadMsgTimeMillisM = millisNow;
@@ -122,30 +123,33 @@ void BackupRestoreBaseFrame::doReadConfigSettings(const wxString& prefix)
 {
     BaseFrame::doReadConfigSettings(prefix);
 
-    bool verbose;
-    if (!config().getValue(prefix + Config::pathSeparator + wxT("verboselog"), verbose))
-        verbose = true;
+    bool verbose = true;
+    config().getValue(prefix + Config::pathSeparator + wxT("verboselog"), 
+        verbose);
     checkbox_showlog->SetValue(verbose);
 
     wxString bkfile;
-    if (config().getValue(prefix + Config::pathSeparator + wxT("backupfilename"), bkfile) && !bkfile.empty())
+    config().getValue(prefix + Config::pathSeparator + wxT("backupfilename"), 
+        bkfile);
+    if (!bkfile.empty())
         text_ctrl_filename->SetValue(bkfile);
 }
 //-----------------------------------------------------------------------------
 void BackupRestoreBaseFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BaseFrame::doWriteConfigSettings(prefix);
-    config().setValue(prefix + Config::pathSeparator + wxT("verboselog"), checkbox_showlog->GetValue());
-    config().setValue(prefix + Config::pathSeparator + wxT("backupfilename"), text_ctrl_filename->GetValue());
+    config().setValue(prefix + Config::pathSeparator + wxT("verboselog"), 
+        checkbox_showlog->GetValue());
+    config().setValue(prefix + Config::pathSeparator + wxT("backupfilename"), 
+        text_ctrl_filename->GetValue());
 }
 //-----------------------------------------------------------------------------
 const wxString BackupRestoreBaseFrame::getStorageName() const
 {
     if (storageNameM == wxT("unassigned"))
     {
-        StorageGranularity g;
-        if (!config().getValue(getName() + wxT("StorageGranularity"), g))
-            g = sgFrame;
+        StorageGranularity g = sgFrame;
+        config().getValue(getName() + wxT("StorageGranularity"), g);
 
         switch (g)
         {
