@@ -44,30 +44,30 @@
 //-----------------------------------------------------------------------------
 wxString ColumnConstraint::getColumnList() const
 {
-	wxString result;
-	for (std::vector<wxString>::const_iterator it = columnsM.begin(); it != columnsM.end(); ++it)
-	{
-		if (it != columnsM.begin())
-			result += wxT(",");
-		result += (*it);
-	}
-	return result;
+    wxString result;
+    for (std::vector<wxString>::const_iterator it = columnsM.begin(); it != columnsM.end(); ++it)
+    {
+        if (it != columnsM.begin())
+            result += wxT(",");
+        result += (*it);
+    }
+    return result;
 };
 //-----------------------------------------------------------------------------
 wxString ForeignKey::getReferencedColumnList() const
 {
-	wxString result;
-	for (std::vector<wxString>::const_iterator it = referencedColumnsM.begin(); it != referencedColumnsM.end(); ++it)
-	{
-		if (it != referencedColumnsM.begin())
-			result += wxT(",");
-		result += (*it);
-	}
-	return result;
+    wxString result;
+    for (std::vector<wxString>::const_iterator it = referencedColumnsM.begin(); it != referencedColumnsM.end(); ++it)
+    {
+        if (it != referencedColumnsM.begin())
+            result += wxT(",");
+        result += (*it);
+    }
+    return result;
 };
 //-----------------------------------------------------------------------------
 void Constraint::acceptVisitor(MetadataItemVisitor* visitor)
 {
-	visitor->visit(*this);
+    visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------

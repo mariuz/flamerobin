@@ -45,35 +45,35 @@
 #include "parameter.h"
 //-----------------------------------------------------------------------------
 Parameter::Parameter(wxString source, int parameterType)
-	: Column()
+    : Column()
 {
-	Column::Init(true, source, false, wxT(""), wxT(""));
-	typeM = ntParameter;
-	parameterTypeM = (parameterType == 0 ? ptInput : ptOutput);
+    Column::Init(true, source, false, wxT(""), wxT(""));
+    typeM = ntParameter;
+    parameterTypeM = (parameterType == 0 ? ptInput : ptOutput);
 }
 //-----------------------------------------------------------------------------
 Parameter::Parameter()
-	: Column()
+    : Column()
 {
-	typeM = ntParameter;
-	parameterTypeM = ptInput;
+    typeM = ntParameter;
+    parameterTypeM = ptInput;
 }
 //-----------------------------------------------------------------------------
 wxString Parameter::getPrintableName()
 {
-	wxString ret;
-	ret = (parameterTypeM == ptInput ? wxT("in ") : wxT("out ")) + getName() +
-	    wxT(" ") + getDomain()->getDatatypeAsString();
-	return ret;
+    wxString ret;
+    ret = (parameterTypeM == ptInput ? wxT("in ") : wxT("out ")) + getName() +
+        wxT(" ") + getDomain()->getDatatypeAsString();
+    return ret;
 }
 //-----------------------------------------------------------------------------
 ParameterType Parameter::getParameterType() const
 {
-	return parameterTypeM;
+    return parameterTypeM;
 }
 //-----------------------------------------------------------------------------
 void Parameter::acceptVisitor(MetadataItemVisitor* visitor)
 {
-	visitor->visit(*this);
+    visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------
