@@ -26,6 +26,18 @@
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
+// for all others, include the necessary headers (this file is usually all you
+// need because it includes almost all "standard" wxWindows headers
+#ifndef WX_PRECOMP
+    #include "wx/wx.h"
+#endif
+
+// for all others, include the necessary headers (this file is usually all you
+// need because it includes almost all "standard" wxWindows headers
+#ifndef WX_PRECOMP
+    #include "wx/wx.h"
+#endif
+
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
@@ -92,7 +104,7 @@ wxString Column::getDatatype()
 	    showType = 0,
 	    showFormula,
 	    showAll
-	};	
+	};
 	int flag = showFormula;
 	config().getValue(wxT("ShowComputed"), flag);
 	// view columns are all computed and have their source empty
@@ -112,7 +124,7 @@ wxString Column::getDatatype()
 	    showDatatype = 0,
 	    showDomain,
 	    showBoth
-	};	
+	};
 	int show = showBoth;
  	config().getValue(wxT("ShowDomains"), show);
 
