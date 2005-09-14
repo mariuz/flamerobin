@@ -25,7 +25,8 @@ aaaa     ICON "../res/fricon.ico"
 #endif
 
 #include "../src/frversion.h"
-#define STR(x)  #x
+#define STRINGIZE(x) #x
+#define STR(x)  STRINGIZE(x)
 #define FR_VERSION_STRING STR(FR_VERSION_MAJOR) "." \
         STR(FR_VERSION_MINOR) "." STR(FR_VERSION_RELEASE)
 
