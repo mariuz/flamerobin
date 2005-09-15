@@ -60,7 +60,7 @@ Config& config()
 Config::Config()
     : homePathM(wxT("")), userHomePathM(wxT("")), configM(0)
 {
-#if defined(__UNIX__) && !defined(__WXMAC__) && !defined(__DARWIN__)
+#ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
     standardPathsM.SetInstallPrefix(wxT("/usr/local"));
 #endif
 }
@@ -243,7 +243,7 @@ wxString Config::getHomePath() const
     if (!homePathM.empty())
         return homePathM + wxT("/");
     else
-        return standardPathsM.GetDataDir() + wxT("/");
+        return getStandardPathsDataDir() + wxT("/");
 }
 //-----------------------------------------------------------------------------
 wxString Config::getHtmlTemplatesPath() const
@@ -266,7 +266,7 @@ wxString Config::getUserHomePath() const
     if (!userHomePathM.empty())
         return userHomePathM + wxT("/");
     else
-        return standardPathsM.GetUserLocalDataDir() + wxT("/");
+        return getStandardPathsUserLocalDataDir() + wxT("/");
 }
 //-----------------------------------------------------------------------------
 wxString Config::getDBHFileName() const
@@ -279,9 +279,31 @@ wxString Config::getConfigFileName() const
     return getUserHomePath() + wxT("fr_settings.conf");
 }
 //-----------------------------------------------------------------------------
-wxStandardPaths& Config::getStandardPaths()
+wxString Config::getStandardPathsDataDir() const
 {
-    return standardPathsM;
+#ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
+    return standardPathsM.GetDataDir();
+#else
+    return wxStandardPaths::Get().GetDataDir();
+#endif
+}
+//-----------------------------------------------------------------------------
+wxString Config::getStandardPathsLocalDataDir() const
+{
+#ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
+    return standardPathsM.GetLocalDataDir();
+#else
+    return wxStandardPaths::Get().GetLocalDataDir();
+#endif
+}
+//-----------------------------------------------------------------------------
+wxString Config::getStandardPathsUserLocalDataDir() const
+{
+#ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
+    return standardPathsM.GetUserLocalDataDir();
+#else
+    return wxStandardPaths::Get().GetUserLocalDataDir();
+#endif
 }
 //-----------------------------------------------------------------------------
 void Config::setHomePath(const wxString& homePath)

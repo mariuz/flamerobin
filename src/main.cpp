@@ -155,15 +155,9 @@ void Application::parseCommandLine()
 const wxString Application::translatePathMacros(const wxString path) const
 {
     if (path == wxT("$app"))
-    {
-        wxStandardPaths& standardPaths = config().getStandardPaths();
-        return standardPaths.GetLocalDataDir();
-    }
+        return config().getStandardPathsLocalDataDir();
     else if (path == wxT("$user"))
-    {
-        wxStandardPaths& standardPaths = config().getStandardPaths();
-        return standardPaths.GetUserLocalDataDir();
-    }
+        return config().getStandardPathsUserLocalDataDir();
     else
         return path;
 }

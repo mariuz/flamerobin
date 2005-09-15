@@ -46,6 +46,12 @@ class wxFileConfig;
 //-----------------------------------------------------------------------------
 //! Do not instantiate objects of this class. Use config() function (see below).
 
+#if defined(__UNIX__) && !defined(__WXMAC_OSX__)
+    #define FR_CONFIG_USE_PRIVATE_STDPATHS
+#else
+    #undef FR_CONFIG_USE_PRIVATE_STDPATHS
+#endif
+
 class Config
 {
 public:
@@ -69,10 +75,13 @@ public:
             return defaultValue;
     }
     
-    // We need to use an instance of wxStandardPaths to be able to call
-    // SetInstallPrefix() for UNIX.  All other code should use this method
-    // instead of wxStandardPaths::Get() to use the correct paths.
-    wxStandardPaths& getStandardPaths();
+    // We must use an instance of wxStandardPaths for UNIX, but must not
+    // use such an instance for things to work on Mac OS X.  Great...
+    // These methods are to work around that, use them instead of 
+    // wxStandardPaths methods.
+    wxString getStandardPathsDataDir() const;
+    wxString getStandardPathsLocalDataDir() const;
+    wxString getStandardPathsUserLocalDataDir() const;
 
     // these should be called before calling the get* functions below,
     // otherwise defaults apply.
@@ -110,7 +119,9 @@ private:
     mutable wxFileConfig* configM;
     // performs lazy initialization of configM.
     wxFileConfig* getConfig() const;
+#ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
     wxStandardPaths standardPathsM;
+#endif
     wxString getConfigFileName() const;
     wxString homePathM;
     wxString userHomePathM;
