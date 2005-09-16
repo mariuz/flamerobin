@@ -11,9 +11,9 @@ The following people also made a significant non-coding contributions:
 
 Marius Popa
 Alex Stanciu
-
+Barbara Del Vecchio
 
 License
 ---------------------------
-flamerobin is licensed under the IDPL license. 
-A copy of the license can be found in the docs folder. 
+FlameRobin is licensed under the IDPL license.
+A copy of the license can be found in the docs folder.
