@@ -40,21 +40,25 @@ default to 0 and are optional.
 -------------------------------
 -- MSW - Borland's Free C++ Build Instructions
 -------------------------------
-Assuming that you have IBPP installed in c:\ibpp2 and wxWidgets installed
-in c:\wxwin260, you should open MS-DOS prompt, cd to flamerobin root
-directory, and execute:
+
+Due to limitation in Borland's command line linker (ilink32), FlameRobin versions 
+0.4.0 and higher do not link anymore. Therefore this build is NO LONGER SUPPORTED. 
+We tried our best, but failed. However, if you somehow manage to build it, please 
+let us know.
+
+Assuming that you have wxWidgets installed in c:\wxwin260, you should open MS-DOS 
+prompt, cd to flamerobin root directory, and execute:
 
 set WXDIR=c:\wxwin260
-make -f makefile.bcc STATICRTL=1 FINAL=1 IBPP=c:\path\to\ibpp2
+make -f makefile.bcc STATICRTL=1 FINAL=1
 
 for release build, or
 
 set WXDIR=c:\wxwin260
-make -f makefile.bcc STATICRTL=1 FINAL=0 IBPP=c:\path\to\ibpp2
+make -f makefile.bcc STATICRTL=1 FINAL=0
 
 for debug build. Explanantion:
 
-IBPP=<dir>		- tells the makefile where to find the root IBPP directory
 WXDIR=<dir>     - tells the makefile where to find the root wxWidgets directory
 FINAL=<0,1>     - tells whether to build debug (0) or release (1) build
 STATICRTL=<0,1> - tells whether to link against wx static(1) or dynamic(0) libs
@@ -63,7 +67,7 @@ STATICRTL=<0,1> - tells whether to link against wx static(1) or dynamic(0) libs
 -------------------------------
 -- Unix - Autoconf Build Instructions
 -------------------------------
-To build on Unix, simply open a command line, cd into the flamerobin
+To build on Unix or MinGW, simply open a command line, cd into the flamerobin
 root directory, and execute the following commands:
 
 mkdir debug
@@ -84,12 +88,11 @@ default one.
 
 Running the command
 
-make <IBPP=/my/path/to/ibpp>
+make
 
-should build the flamerobin executable. You need to specify IBPP only
-if you do not have this variable set in your environment.
-If you experience any problems, please check the flamerobin developer
-mailing list archive, or ask a question there.
+should build the flamerobin executable. If you experience any problems, 
+please check the flamerobin developer mailing list archive, or ask a 
+question there.
 
 
 

@@ -1,7 +1,19 @@
-flamerobin
+FlameRobin
 ---------------------------
-flamerobin is a software package for doing <enter your stuff here> developed by AUTHOR.
+FlameRobin is a software package for administration of Firebird DBMS developed by:
+
+Milan Babuskov
+Nando Dessena
+Michael Hieke
+Gregory Sapunkov
+
+The following people also made a significant non-coding contributions:
+
+Marius Popa
+Alex Stanciu
+
 
 License
 ---------------------------
-flamerobin is licensed under the LICENSE. A copy of the license can be found in the license folder. 
+flamerobin is licensed under the IDPL license. 
+A copy of the license can be found in the docs folder. 
