@@ -561,6 +561,7 @@
         </if>
     </exe>
 
+<!-- do not copy files as part of the "all" target of make
     <copy-files id="config-options">
         <dependency-of>all</dependency-of>
         <depends>flamerobin</depends>
@@ -582,6 +583,7 @@
         <dstdir>$(COPYFILESDESTDIR)/html-templates</dstdir>
         <files>$(HTMLTEMPLATEFILES)</files>
     </copy-files>
+-->
 
     <if cond="FORMAT=='autoconf'">
         <script-files>

@@ -138,10 +138,6 @@ FLAMEROBIN_ODEP =  $(___pch_flamerobin_wx_wxprec_h_gch___depname)
 @COND_PLATFORM_MACOSX_1@FIREBIRDFRAMEWORK = -framework Firebird
 @COND_GCC_PCH_1@__ibpp_PCH_INC = -I.pch/ibpp
 @COND_GCC_PCH_1@___pch_ibpp_ibpp_h_gch___depname = .pch/ibpp/ibpp.h.gch
-@COND_PLATFORM_MACOSX_1@COPYFILESDESTDIR = \
-@COND_PLATFORM_MACOSX_1@	./flamerobin.app/Contents/SharedSupport
-@COND_PLATFORM_UNIX_1@COPYFILESDESTDIR = .
-@COND_PLATFORM_WIN32_1@COPYFILESDESTDIR = .
 @COND_PLATFORM_MAC_1@__flamerobin___mac_setfilecmd = \
 @COND_PLATFORM_MAC_1@	$(SETFILE) -t APPL flamerobin$(EXEEXT)
 @COND_FINAL_0@____flamerobin_WXDEBUG_p = -D__WXDEBUG__
@@ -174,7 +170,7 @@ COND_PLATFORM_OS2_1___flamerobin___os2_emxbindcmd = $(NM) flamerobin$(EXEEXT) \
 
 ### Targets: ###
 
-all: $(LIBPREFIX)ibpp$(LIBEXT) flamerobin$(EXEEXT) $(__flamerobin_bundle___depname) config-options html-docs html-templates
+all: $(LIBPREFIX)ibpp$(LIBEXT) flamerobin$(EXEEXT) $(__flamerobin_bundle___depname)
 
 install: all
 	$(INSTALL_DIR) $(DESTDIR)$(bindir)
@@ -237,42 +233,6 @@ flamerobin.app/Contents/PkgInfo: flamerobin$(EXEEXT) $(srcdir)/res/flamerobin.In
 	cp -f $(srcdir)/res/flamerobin.icns flamerobin.app/Contents/Resources
 
 @COND_PLATFORM_MACOSX_1@flamerobin_bundle: $(____flamerobin_BUNDLE_TGT_REF_DEP)
-
-config-options: flamerobin$(EXEEXT)
-	@mkdir -p $(COPYFILESDESTDIR)/confdefs
-	@for f in fr_settings.confdef db_settings.confdef; do \
-	if test ! -f $(COPYFILESDESTDIR)/confdefs/$$f -a ! -d $(COPYFILESDESTDIR)/confdefs/$$f ; \
-	then x=yep ; \
-	else x=`find $(srcdir)/confdefs/$$f -newer $(COPYFILESDESTDIR)/confdefs/$$f -print` ; \
-	fi; \
-	case "$$x" in ?*) \
-	cp -pRf $(srcdir)/confdefs/$$f $(COPYFILESDESTDIR)/confdefs ;; \
-	esac; \
-	done
-
-html-docs: flamerobin$(EXEEXT)
-	@mkdir -p $(COPYFILESDESTDIR)/docs
-	@for f in fr_license.html fr_manual.html fr_whatsnew.html html.css; do \
-	if test ! -f $(COPYFILESDESTDIR)/docs/$$f -a ! -d $(COPYFILESDESTDIR)/docs/$$f ; \
-	then x=yep ; \
-	else x=`find $(srcdir)/docs/$$f -newer $(COPYFILESDESTDIR)/docs/$$f -print` ; \
-	fi; \
-	case "$$x" in ?*) \
-	cp -pRf $(srcdir)/docs/$$f $(COPYFILESDESTDIR)/docs ;; \
-	esac; \
-	done
-
-html-templates: flamerobin$(EXEEXT)
-	@mkdir -p $(COPYFILESDESTDIR)/html-templates
-	@for f in DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html ROLE.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TRIGGER.html VIEW.html VIEWtriggers.html dependencies.html compute.png drop.png ok.png redx.png view.png; do \
-	if test ! -f $(COPYFILESDESTDIR)/html-templates/$$f -a ! -d $(COPYFILESDESTDIR)/html-templates/$$f ; \
-	then x=yep ; \
-	else x=`find $(srcdir)/html-templates/$$f -newer $(COPYFILESDESTDIR)/html-templates/$$f -print` ; \
-	fi; \
-	case "$$x" in ?*) \
-	cp -pRf $(srcdir)/html-templates/$$f $(COPYFILESDESTDIR)/html-templates ;; \
-	esac; \
-	done
 
 ibpp_array.o: $(srcdir)/src/ibpp/array.cpp $(IBPP_ODEP)
 	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/array.cpp
@@ -545,4 +505,4 @@ flamerobin_flamerobin_rc.o: $(srcdir)/res/flamerobin.rc $(FLAMEROBIN_ODEP)
 # Include dependency info, if present:
 @IF_GNU_MAKE@-include .deps/*.d
 
-.PHONY: all install uninstall clean distclean flamerobin_bundle config-options html-docs html-templates
+.PHONY: all install uninstall clean distclean flamerobin_bundle
