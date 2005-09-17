@@ -79,9 +79,9 @@ public:
     // use such an instance for things to work on Mac OS X.  Great...
     // These methods are to work around that, use them instead of 
     // wxStandardPaths methods.
-    wxString getStandardPathsDataDir() const;
-    wxString getStandardPathsLocalDataDir() const;
-    wxString getStandardPathsUserLocalDataDir() const;
+    wxString getDataDir() const;
+    wxString getLocalDataDir() const;
+    wxString getUserLocalDataDir() const;
 
     // these should be called before calling the get* functions below,
     // otherwise defaults apply.

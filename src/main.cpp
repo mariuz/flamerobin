@@ -35,7 +35,6 @@
 #endif
 
 #include <wx/cmdline.h>
-#include <wx/stdpaths.h>
 #include <wx/utils.h>
 
 #include <exception>
@@ -155,9 +154,9 @@ void Application::parseCommandLine()
 const wxString Application::translatePathMacros(const wxString path) const
 {
     if (path == wxT("$app"))
-        return config().getStandardPathsLocalDataDir();
+        return config().getLocalDataDir();
     else if (path == wxT("$user"))
-        return config().getStandardPathsUserLocalDataDir();
+        return config().getUserLocalDataDir();
     else
         return path;
 }

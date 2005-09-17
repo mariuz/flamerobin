@@ -39,7 +39,6 @@
 //-----------------------------------------------------------------------------
 #include "wx/fileconf.h"
 #include "wx/filename.h"
-#include "wx/stdpaths.h"
 
 #include <fstream>
 #include <sstream>
@@ -243,7 +242,7 @@ wxString Config::getHomePath() const
     if (!homePathM.empty())
         return homePathM + wxT("/");
     else
-        return getStandardPathsDataDir() + wxT("/");
+        return getDataDir() + wxT("/");
 }
 //-----------------------------------------------------------------------------
 wxString Config::getHtmlTemplatesPath() const
@@ -266,7 +265,7 @@ wxString Config::getUserHomePath() const
     if (!userHomePathM.empty())
         return userHomePathM + wxT("/");
     else
-        return getStandardPathsUserLocalDataDir() + wxT("/");
+        return getUserLocalDataDir() + wxT("/");
 }
 //-----------------------------------------------------------------------------
 wxString Config::getDBHFileName() const
@@ -279,7 +278,7 @@ wxString Config::getConfigFileName() const
     return getUserHomePath() + wxT("fr_settings.conf");
 }
 //-----------------------------------------------------------------------------
-wxString Config::getStandardPathsDataDir() const
+wxString Config::getDataDir() const
 {
 #ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
     return standardPathsM.GetDataDir();
@@ -288,7 +287,7 @@ wxString Config::getStandardPathsDataDir() const
 #endif
 }
 //-----------------------------------------------------------------------------
-wxString Config::getStandardPathsLocalDataDir() const
+wxString Config::getLocalDataDir() const
 {
 #ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
     return standardPathsM.GetLocalDataDir();
@@ -297,7 +296,7 @@ wxString Config::getStandardPathsLocalDataDir() const
 #endif
 }
 //-----------------------------------------------------------------------------
-wxString Config::getStandardPathsUserLocalDataDir() const
+wxString Config::getUserLocalDataDir() const
 {
 #ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
     return standardPathsM.GetUserLocalDataDir();
