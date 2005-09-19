@@ -89,9 +89,10 @@ void Server::createDatabase(Database* db, int pagesize, int dialect)
     if (pagesize)
         extra_params << "PAGE_SIZE " << pagesize << " ";
 
-    wxString charset = db->getConnectionCharset();
+    wxString charset(db->getConnectionCharset());
+    // mghie: wxString does not play nice with ostringstream
     if (!charset.empty())
-        extra_params << "DEFAULT CHARACTER SET " << charset << " ";
+        extra_params << "DEFAULT CHARACTER SET " << wx2std(charset) << " ";
 
     IBPP::Database db1;
     db1 = IBPP::DatabaseFactory(wx2std(hostnameM), wx2std(db->getPath()),
