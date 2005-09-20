@@ -191,9 +191,11 @@ void DatabaseRegistrationDialog::setDatabase(Database *db)
     text_ctrl_username->SetValue(databaseM->getUsername());
     text_ctrl_password->SetValue(databaseM->getPassword());
     text_ctrl_role->SetValue(databaseM->getRole());
-    combobox_charset->SetSelection(combobox_charset->FindString(databaseM->getConnectionCharset()));
-    if (combobox_charset->GetSelection() < 0)
-        combobox_charset->SetSelection(combobox_charset->FindString(wxT("NONE")));
+    int selection = combobox_charset->FindString(databaseM->getConnectionCharset());
+    if (selection < 0)
+        selection = combobox_charset->FindString(wxT("NONE"));
+    if (selection >= 0)
+        combobox_charset->SetSelection(selection);
     // see whether the database has an empty or default name; knowing that will be
     // useful to keep the name in sync when other attributes change.
     updateIsDefaultName();
