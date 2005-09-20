@@ -465,15 +465,11 @@ void MetadataItem::setParent(MetadataItem* parent)
 //-----------------------------------------------------------------------------
 wxString MetadataItem::getPrintableName()
 {
+    wxString printableName(getName());
     size_t n = getChildrenCount();
     if (n)
-    {
-        ostringstream ss;
-        ss << wx2std(nameM) << " (" << n << ")";
-        return std2wx(ss.str());
-    }
-    else
-        return nameM;
+        printableName << wxT(" (") << n << wxT(")");
+    return printableName;
 }
 //-----------------------------------------------------------------------------
 const wxString& MetadataItem::getName() const

@@ -85,19 +85,18 @@ void Server::removeDatabase(Database* db)
 //-----------------------------------------------------------------------------
 void Server::createDatabase(Database* db, int pagesize, int dialect)
 {
-    ostringstream extra_params;
+    wxString extra_params;
     if (pagesize)
-        extra_params << "PAGE_SIZE " << pagesize << " ";
+        extra_params << wxT(" PAGE_SIZE ") << pagesize;
 
     wxString charset(db->getConnectionCharset());
-    // mghie: wxString does not play nice with ostringstream
     if (!charset.empty())
-        extra_params << "DEFAULT CHARACTER SET " << wx2std(charset) << " ";
+        extra_params << wxT(" DEFAULT CHARACTER SET ") << charset;
 
     IBPP::Database db1;
     db1 = IBPP::DatabaseFactory(wx2std(hostnameM), wx2std(db->getPath()),
         wx2std(db->getUsername()), wx2std(db->getPassword()), "",
-        wx2std(charset), extra_params.str());
+        wx2std(charset), wx2std(extra_params));
     db1->Create(dialect);
 }
 //-----------------------------------------------------------------------------
