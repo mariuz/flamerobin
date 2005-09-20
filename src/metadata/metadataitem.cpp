@@ -272,6 +272,28 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
             {                               // maybe it's a view masked as table
                 if (t == ntTable)
                     current = d->findByNameAndType(ntView, std2wx(object_name));
+                if (!ofObject && t == ntTrigger)
+                {
+                    // system trigger dependent of this object indicates possible check constraint on a table
+                    // that references this object. So, let's check if this trigger is used for check constraint
+                    // and get that table's name
+                    IBPP::Statement st2 = IBPP::StatementFactory(db, tr1);
+                    st2->Prepare(
+                        "select r.rdb$relation_name from rdb$relation_constraints r "
+                        " join rdb$check_constraints c on r.rdb$constraint_name=c.rdb$constraint_name "
+                        " and r.rdb$constraint_type = 'CHECK' where c.rdb$trigger_name = ? "
+                    );
+                    st2->Set(1, object_name);
+                    st2->Execute();
+                    if (st2->Fetch()) // table using that trigger found
+                    {
+                        std::string tablecheck;
+                        st2->Get(1, tablecheck);
+                        tablecheck.erase(tablecheck.find_last_not_of(" ")+1);
+                        if (nameM != std2wx(tablecheck))    // avoid self-reference
+                            current = d->findByNameAndType(ntTable, std2wx(tablecheck));
+                    }
+                }
                 if (!current)
                     continue;
             }
@@ -305,9 +327,54 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
                     return false;
                 }
                 Dependency de(table);
-                de.setFields((*it).getReferencedColumnList());
+                de.setFields((*it).referencedColumnsM);
                 list.push_back(de);
             }
+
+            // Add check constraints here (CHECKS are checked via system triggers), example:
+            // table1::check( table1.field1 > select max(field2) from table2 )
+            // So, table vs any object from this ^^^ select
+            // Algorithm: 1.find all system triggers bound to that CHECK constraint
+            //            2.find dependencies for those system triggers
+            //            3.display those dependencies as deps. of this table
+            st1->Prepare("select distinct c.rdb$trigger_name from rdb$relation_constraints r "
+                " join rdb$check_constraints c on r.rdb$constraint_name=c.rdb$constraint_name "
+                " and r.rdb$constraint_type = 'CHECK' where r.rdb$relation_name= ? "
+            );
+            st1->Set(1, wx2std(nameM));
+            st1->Execute();
+            vector<Dependency> tempdep;
+            while (st1->Fetch())
+            {
+                std::string s;
+                st1->Get(1, s);
+                s.erase(s.find_last_not_of(" ")+1);
+                Trigger t;
+                t.setName(std2wx(s));
+                t.setParent(d);
+                t.getDependencies(tempdep, true);
+            }
+            // remove duplicates, and self-references from "tempdep"
+            while (true)
+            {
+                std::vector<Dependency>::iterator to_remove = tempdep.end();
+                for (std::vector<Dependency>::iterator it = tempdep.begin(); it != tempdep.end(); ++it)
+                {
+                    if ((*it).getDependentObject() == this)
+                    {
+                        to_remove = it;
+                        break;
+                    }
+                    to_remove = std::find(it + 1, tempdep.end(), (*it));
+                    if (to_remove != tempdep.end())
+                        break;
+                }
+                if (to_remove == tempdep.end())
+                    break;
+                else
+                    tempdep.erase(to_remove);
+            }
+            list.insert(list.end(), tempdep.begin(), tempdep.end());
         }
 
         // TODO: perhaps this could be moved to Table?
