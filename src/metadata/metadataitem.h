@@ -29,6 +29,7 @@
 
 #include <wx/string.h>
 
+#include <algorithm>
 #include <vector>
 
 #include "core/Element.h"
@@ -122,17 +123,34 @@ class Dependency: public MetadataItem
 {
 private:
     MetadataItem *objectM;
-    wxString fieldsM;
+    std::vector<wxString> fieldsM;
+
 public:
     virtual MetadataItem *getParent() const { return objectM->getParent(); };
     virtual const wxString& getName() const { return objectM->getName(); };
     virtual NodeType getType() const { return objectM->getType(); };
     virtual const wxString getTypeName() const { return objectM->getTypeName(); };
+    MetadataItem *getDependentObject() const { return objectM; };
 
     Dependency(MetadataItem *object) { objectM = object; };
-    wxString getFields() const { return fieldsM; };
-    void addField(const wxString& name) { if (!fieldsM.empty()) fieldsM += wxT(", "); fieldsM += name; };
-    void setFields(const wxString& fields) { fieldsM = fields; };
+    wxString getFields() const {
+        wxString temp;
+        for (std::vector<wxString>::const_iterator it = fieldsM.begin(); it != fieldsM.end(); ++it)
+        {
+            if (it != fieldsM.begin())
+                temp += wxT(", ");
+            temp += (*it);
+        }
+        return temp;
+    };
+    void addField(const wxString& name) {
+        if (fieldsM.end() == std::find(fieldsM.begin(), fieldsM.end(), name))
+            fieldsM.push_back(name);
+    };
+    void setFields(const std::vector<wxString>& fields) { fieldsM = fields; };
+
+    bool operator== (const Dependency& other) const {
+        return (objectM == other.getDependentObject() && getFields() == other.getFields()); };
 };
 //-----------------------------------------------------------------------------
 #endif //FR_METADATAITEM_H
