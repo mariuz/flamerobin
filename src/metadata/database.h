@@ -137,6 +137,7 @@ public:
     wxString getPath() const;
     wxString getDatabaseCharset() const;
     wxString getConnectionCharset() const;
+    bool usesDifferentConnectionCharset() const;
     wxString getUsername() const;
     wxString getPassword() const;
     wxString getRole() const;

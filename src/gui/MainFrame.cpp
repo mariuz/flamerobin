@@ -1056,7 +1056,7 @@ bool MainFrame::connect(bool warn)
     wxTreeItemId id = tree_ctrl_1->GetSelection();
     tree_ctrl_1->Expand(id);
 
-    if (db->getDatabaseCharset() != db->getConnectionCharset())
+    if (db->usesDifferentConnectionCharset())
     {
         DatabaseConfig dc(db);
         if (dc.get(wxT("differentCharsetWarning"), true))

@@ -1040,6 +1040,14 @@ wxString Database::getConnectionCharset() const
         return credentials.getCharset();
 }
 //-----------------------------------------------------------------------------
+bool Database::usesDifferentConnectionCharset() const
+{
+    wxString charset(getConnectionCharset().Upper());
+    if (databaseCharsetM.IsEmpty() && charset == wxT("NONE"))
+        return false;
+    return (charset.compare(databaseCharsetM.Upper()) != 0);
+}
+//-----------------------------------------------------------------------------
 wxString Database::getUsername() const
 {
     if (connectionCredentials)
