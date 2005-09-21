@@ -37,11 +37,12 @@
 #endif
 //-----------------------------------------------------------------------------
 
-#include "metadata/metadataitem.h"
-#include "metadata/database.h"
-#include "ugly.h"
+#include "core/FRError.h"
 #include "dberror.h"
 #include "gui/MultilineEnterDialog.h"
+#include "metadata/database.h"
+#include "metadata/metadataitem.h"
+#include "ugly.h"
 #include "urihandler.h"
 
 class ObjectDescriptionHandler: public URIHandler
@@ -60,18 +61,23 @@ bool ObjectDescriptionHandler::handleURI(URI& uri)
     if (uri.action != wxT("edit_description"))
         return false;
 
+    FR_TRY
+
     MetadataItem* m = (MetadataItem*)getObject(uri);
     wxWindow* w = getWindow(uri);
     if (!m || !w)
         return true;
 
     wxString desc = m->getDescription();
-    if (GetMultilineTextFromUser(wxString::Format(_("Description of %s"), uri.getParam(wxT("object_name")).c_str()), desc, w))
+    if (GetMultilineTextFromUser(wxString::Format(_("Description of %s"), 
+        uri.getParam(wxT("object_name")).c_str()), desc, w))
     {
         wxBusyCursor wait;
-        if (!m->setDescription(desc))
-            wxMessageBox(lastError().getMessage(), _("Error while writing description."));
+        m->setDescription(desc);
     }
+
+    FR_CATCH
+
     return true;
 }
 //-----------------------------------------------------------------------------
