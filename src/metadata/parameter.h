@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
 //-----------------------------------------------------------------------------
@@ -36,6 +36,9 @@ class Parameter: public Column
 {
 private:
 	ParameterType parameterTypeM;
+protected:
+    virtual void loadDescription();
+    virtual void saveDescription(wxString description);
 public:
 	Parameter();
 	Parameter(wxString source, int parameterType);

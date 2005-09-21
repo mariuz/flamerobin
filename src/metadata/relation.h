@@ -20,34 +20,36 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Michael Hieke
 */
 
-//
-//
-//
-//
 //-----------------------------------------------------------------------------
 #ifndef FR_METADATAITEMWITHCOLUMNS_H
 #define FR_METADATAITEMWITHCOLUMNS_H
 
 #include <vector>
-#include "metadataitem.h"
+
 #include "collection.h"
 #include "column.h"
+#include "metadataitem.h"
 #include "trigger.h"
 //-----------------------------------------------------------------------------
 class Relation: public MetadataItem
 {
 protected:
 	MetadataCollection <Column>columnsM;
+
+    virtual void loadDescription();
+    virtual void saveDescription(wxString description);
 public:
-	bool getChildren(std::vector<MetadataItem *>& temp);
+	Relation();
 	bool checkAndLoadColumns();
 	virtual bool loadColumns();
 	Column *addColumn(Column &c);
-	bool getTriggers(std::vector<Trigger *>& list, Trigger::firingTimeType beforeOrAfter);
-	Relation();
+
+    bool getChildren(std::vector<MetadataItem *>& temp);
+	bool getTriggers(std::vector<Trigger *>& list, 
+        Trigger::firingTimeType beforeOrAfter);
 };
 //-----------------------------------------------------------------------------
 #endif

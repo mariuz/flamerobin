@@ -1,4 +1,4 @@
-    /*
+/*
   The contents of this file are subject to the Initial Developer's Public
   License Version 1.0 (the "License"); you may not use this file except in
   compliance with the License. You may obtain a copy of the License here:
@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
 //-----------------------------------------------------------------------------
@@ -35,11 +35,14 @@ private:
 	short datatypeM, subtypeM, lengthM, precisionM, scaleM;
 	wxString charsetM;
 	bool infoLoadedM;
-
+protected:
+    virtual void loadDescription();
+    virtual void saveDescription(wxString description);
 public:
 	Domain();
 
-	static wxString datatype2string(short datatype, short scale, short precision, short subtype, short length);
+	static wxString datatype2string(short datatype, short scale, 
+        short precision, short subtype, short length);
 	bool loadInfo();
 	wxString getDatatypeAsString();
 	void getDatatypeParts(wxString& type, wxString& size, wxString& scale);

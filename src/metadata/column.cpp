@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -55,7 +55,8 @@ Column::Column()
 }
 //-----------------------------------------------------------------------------
 //! initialize properties
-void Column::Init(bool notnull, wxString source, bool computed, wxString computedSource, wxString collation)
+void Column::Init(bool notnull, wxString source, bool computed, 
+    wxString computedSource, wxString collation)
 {
 	source.erase(source.find_last_not_of(wxT(" ")) + 1);		// right trim everything
 	collation.erase(collation.find_last_not_of(wxT(" ")) + 1);
@@ -172,6 +173,21 @@ wxString Column::getCollation() const
 wxString Column::getDropSqlStatement() const
 {
 	return wxT("ALTER TABLE ") + getParent()->getName() + wxT(" DROP ") + getName();
+}
+//-----------------------------------------------------------------------------
+void Column::loadDescription()
+{
+    MetadataItem::loadDescription(
+        wxT("select RDB$DESCRIPTION from RDB$RELATION_FIELDS ")
+        wxT("where RDB$FIELD_NAME = ? and RDB$RELATION_NAME = ?"));
+}
+//-----------------------------------------------------------------------------
+void Column::saveDescription(wxString description)
+{
+    MetadataItem::saveDescription(
+        wxT("update RDB$RELATION_FIELDS set RDB$DESCRIPTION = ? ")
+        wxT("where RDB$FIELD_NAME = ? and RDB$RELATION_NAME = ?"),
+        description);
 }
 //-----------------------------------------------------------------------------
 void Column::acceptVisitor(MetadataItemVisitor* visitor)

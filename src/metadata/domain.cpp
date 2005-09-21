@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
 //-----------------------------------------------------------------------------
@@ -135,7 +135,8 @@ wxString Domain::getDatatypeAsString()
 	return datatype2string(datatypeM, scaleM, precisionM, subtypeM, lengthM);
 }
 //-----------------------------------------------------------------------------
-wxString Domain::datatype2string(short datatype, short scale, short precision, short subtype, short length)
+wxString Domain::datatype2string(short datatype, short scale, short precision, 
+    short subtype, short length)
 {
 	std::ostringstream retval;		// this will be returned
 
@@ -248,6 +249,21 @@ wxString Domain::getCreateSqlTemplate() const
 const wxString Domain::getTypeName() const
 {
 	return wxT("DOMAIN");
+}
+//-----------------------------------------------------------------------------
+void Domain::loadDescription()
+{
+    MetadataItem::loadDescription(
+        wxT("select RDB$DESCRIPTION from RDB$FIELDS ")
+        wxT("where RDB$FIELD_NAME = ?"));
+}
+//-----------------------------------------------------------------------------
+void Domain::saveDescription(wxString description)
+{
+    MetadataItem::saveDescription(
+        wxT("update RDB$FIELDS set RDB$DESCRIPTION = ? ")
+        wxT("where RDB$FIELD_NAME = ?"),
+        description);
 }
 //-----------------------------------------------------------------------------
 void Domain::acceptVisitor(MetadataItemVisitor* visitor)

@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Milan Babuskov, Nando Dessena
+  Contributor(s): Milan Babuskov, Nando Dessena, Michael Hieke
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -155,6 +155,21 @@ wxString Function::getHtmlHeader()
 	loadInfo();
 	return wxT("<B>Library name:</B> ") + libraryNameM + wxT("<BR><B>Entry point:</B>  ")
 	    + entryPointM + wxT("<BR><BR>");
+}
+//-----------------------------------------------------------------------------
+void Function::loadDescription()
+{
+    MetadataItem::loadDescription(
+        wxT("select RDB$DESCRIPTION from RDB$FUNCTIONS ")
+        wxT("where RDB$FUNCTION_NAME = ?"));
+}
+//-----------------------------------------------------------------------------
+void Function::saveDescription(wxString description)
+{
+    MetadataItem::saveDescription(
+        wxT("update RDB$FUNCTIONS set rdb$description = ? ")
+        wxT("where RDB$FUNCTION_NAME = ?"),
+        description);
 }
 //-----------------------------------------------------------------------------
 void Function::acceptVisitor(MetadataItemVisitor* visitor)

@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -39,6 +39,7 @@
 #include <sstream>
 
 #include "config/Config.h"
+#include "core/FRError.h"
 #include "database.h"
 #include "dberror.h"
 #include "frutils.h"
@@ -147,44 +148,6 @@ Root* MetadataItem::getRoot() const
     while (m->getParent())
         m = m->getParent();
     return (Root*)m;
-}
-//-----------------------------------------------------------------------------
-//! virtual so it can eventually be delegated to Table, View, etc.
-wxString MetadataItem::getDescriptionSql() const
-{
-    switch (typeM)
-    {
-        case ntView:
-        case ntTable:       return wxT("select rdb$description from rdb$relations where RDB$RELATION_NAME=?");
-        case ntProcedure:   return wxT("select rdb$description from rdb$procedures where RDB$procedure_NAME=?");
-        case ntTrigger:     return wxT("select rdb$description from rdb$triggers where RDB$trigger_NAME=?");
-        case ntFunction:    return wxT("select rdb$description from RDB$FUNCTIONS where RDB$FUNCTION_NAME=?");
-        case ntColumn:      return wxT("select rdb$description from rdb$relation_fields where rdb$field_name=? and rdb$relation_name=?");
-        case ntParameter:   return wxT("select rdb$description from rdb$procedure_parameters where rdb$parameter_name=? and rdb$procedure_name=?");
-        case ntDomain:      return wxT("select rdb$description from rdb$fields where rdb$field_name=?");
-        case ntException:   return wxT("select RDB$DESCRIPTION from RDB$EXCEPTIONS where RDB$EXCEPTION_NAME = ?");
-        case ntIndex:       return wxT("select rdb$description from rdb$indices where RDB$INDEX_NAME = ?");
-        default:            return wxT("");
-    };
-}
-//-----------------------------------------------------------------------------
-//! virtual so it can eventually be delegated to Table, View, etc.
-wxString MetadataItem::getChangeDescriptionSql() const
-{
-    switch (typeM)
-    {
-        case ntView:
-        case ntTable:       return wxT("update rdb$relations set rdb$description = ? where RDB$RELATION_NAME = ?");
-        case ntProcedure:   return wxT("update rdb$procedures set rdb$description = ? where RDB$PROCEDURE_name=?");
-        case ntTrigger:     return wxT("update rdb$triggers set rdb$description = ? where RDB$trigger_NAME=?");
-        case ntFunction:    return wxT("update RDB$FUNCTIONS set rdb$description = ? where RDB$FUNCTION_NAME=?");
-        case ntColumn:      return wxT("update rdb$relation_fields set rdb$description = ? where rdb$field_name=? and rdb$relation_name=?");
-        case ntParameter:   return wxT("update rdb$procedure_parameters set rdb$description = ? where rdb$parameter_name = ? and rdb$procedure_name=?");
-        case ntDomain:      return wxT("update rdb$fields set rdb$description = ? where rdb$field_name=?");
-        case ntException:   return wxT("update RDB$EXCEPTIONS set RDB$DESCRIPTION = ? where RDB$EXCEPTION_NAME = ?");
-        case ntIndex:       return wxT("update rdb$indices set rdb$description = ? where RDB$INDEX_NAME = ?");
-        default:            return wxT("");
-    };
 }
 //-----------------------------------------------------------------------------
 //! ofObject = true   => returns list of objects this object depends on
@@ -430,94 +393,99 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
 //-----------------------------------------------------------------------------
 wxString MetadataItem::getDescription()
 {
-    if (descriptionLoadedM)
-        return descriptionM;
-
-    Database *d = getDatabase();
-    wxString sql = getDescriptionSql();
-    if (!d || sql == wxT(""))
-        return wxT("N/A");
-
-    descriptionM = wxT("");
-    try
-    {
-        IBPP::Database& db = d->getIBPPDatabase();
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare(wx2std(sql));
-        st1->Set(1, wx2std(nameM));
-        if (typeM == ntColumn || typeM == ntParameter)
-            st1->Set(2, wx2std(getParent()->getName()));    // table/view/SP name
-        st1->Execute();
-        st1->Fetch();
-        readBlob(st1, 1, descriptionM);
-        descriptionLoadedM = true;
-        tr1->Commit();
-        return descriptionM;
-    }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-
-    return lastError().getMessage();
+    if (!descriptionLoadedM)
+        loadDescription();
+    return descriptionM;
 }
 //-----------------------------------------------------------------------------
-bool MetadataItem::setDescription(wxString description)
+void MetadataItem::loadDescription()
 {
+    setDescriptionM(wxEmptyString);
+}
+//-----------------------------------------------------------------------------
+void MetadataItem::loadDescription(wxString loadStatement)
+{
+    // FIXME: implement findDatabase() vs. getDatabase()
     Database *d = getDatabase();
-    if (!d)
-        return false;
+    if (!(d))
+        throw FRError(wxT("No database assigned"));
 
-    wxString sql = getChangeDescriptionSql();
-    if (sql == wxT(""))
+    IBPP::Database& db = d->getIBPPDatabase();
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+    st1->Prepare(wx2std(loadStatement));
+    st1->Set(1, wx2std(nameM));
+    if (st1->Parameters() > 1)
+        st1->Set(2, wx2std(getParent()->getName())); // table/view/SP name
+    st1->Execute();
+    st1->Fetch();
+
+    string value;
+    IBPP::Blob b = IBPP::BlobFactory(db, tr1);
+    if (!st1->IsNull(1))
     {
-        lastError().setMessage(_("The object does not support descriptions"));
-        return false;
+        st1->Get(1, b);
+        b->Load(value);
     }
+    tr1->Commit();
+    // set value, notify observers
+    setDescriptionM(std2wx(value));
+}
+//-----------------------------------------------------------------------------
+void MetadataItem::saveDescription(wxString description)
+{
+    throw FRError(wxString::Format(
+        wxT("Objects of type %s do not support descriptions"),
+        getTypeName().c_str()));
+}
+//-----------------------------------------------------------------------------
+void MetadataItem::saveDescription(wxString saveStatement, 
+    wxString description)
+{
+    // FIXME: implement findDatabase() vs. getDatabase()
+    Database *d = getDatabase();
+    if (!(d))
+        throw FRError(wxT("No database assigned"));
 
-    try
+    IBPP::Database& db = d->getIBPPDatabase();
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(db);
+    tr1->Start();
+
+    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+    st1->Prepare(wx2std(saveStatement));
+
+    if (!description.empty())
     {
-        IBPP::Database& db = d->getIBPPDatabase();
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(db);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare(wx2std(sql));
-
-        if (!description.empty())
-        {
-            IBPP::Blob b = IBPP::BlobFactory(st1->Database(), st1->Transaction());
-            b->Create();
-            b->Write(description.c_str(), description.length());
-            b->Close();
-            st1->Set(1, b);
-        }
-        else
-            st1->SetNull(1);
-        st1->Set(2, wx2std(nameM));
-        if (typeM == ntColumn || typeM == ntParameter)
-            st1->Set(3, wx2std(getParent()->getName()));
-        st1->Execute();
-        tr1->Commit();
-        descriptionLoadedM = true;
+        IBPP::Blob b = IBPP::BlobFactory(db, tr1);
+        b->Save(wx2std(description));
+        st1->Set(1, b);
+    }
+    else
+        st1->SetNull(1);
+    st1->Set(2, wx2std(nameM));
+    if (st1->Parameters() > 2)
+        st1->Set(3, wx2std(getParent()->getName()));
+    st1->Execute();
+    tr1->Commit();
+    // set value, notify observers
+    setDescriptionM(description);
+}
+//-----------------------------------------------------------------------------
+void MetadataItem::setDescription(wxString description)
+{
+    if (description.compare(getDescription()) != 0)
+        saveDescription(description);
+}
+//-----------------------------------------------------------------------------
+void MetadataItem::setDescriptionM(wxString description)
+{
+    if (!descriptionLoadedM || (descriptionM.compare(description) != 0))
+    {
         descriptionM = description;
+        descriptionLoadedM = true;
         notifyObservers();
-        return true;
     }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-    return false;
 }
 //-----------------------------------------------------------------------------
 MetadataItem* MetadataItem::getParent() const

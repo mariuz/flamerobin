@@ -44,7 +44,6 @@
 #include "database.h"
 #include "dberror.h"
 #include "generator.h"
-#include "metadataitem.h"
 #include "MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 Generator::Generator()

@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -38,9 +38,8 @@
 
 #include <vector>
 
-#include "MetadataItemVisitor.h"
 #include "indices.h"
-#include "metadataitem.h"
+#include "MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 Index::Index(bool unique, bool active, bool ascending, double statistics)
 {
@@ -86,6 +85,21 @@ wxString Index::getFieldsAsString()
 Index::IndexType Index::getIndexType()
 {
 	return indexTypeM;
+}
+//-----------------------------------------------------------------------------
+void Index::loadDescription()
+{
+    MetadataItem::loadDescription(
+        wxT("select RDB$DESCRIPTION from RDB$INDICES ")
+        wxT("where RDB$INDEX_NAME = ?"));
+}
+//-----------------------------------------------------------------------------
+void Index::saveDescription(wxString description)
+{
+    MetadataItem::saveDescription(
+        wxT("update RDB$INDICES set RDB$DESCRIPTION = ? ")
+        wxT("where RDB$INDEX_NAME = ?"),
+        description);
 }
 //-----------------------------------------------------------------------------
 void Index::acceptVisitor(MetadataItemVisitor* visitor)

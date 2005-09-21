@@ -20,24 +20,28 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
 //-----------------------------------------------------------------------------
 #ifndef FR_COLUMN_H
 #define FR_COLUMN_H
 
-#include "metadataitem.h"
 #include "domain.h"
+#include "metadataitem.h"
 
 class Column: public MetadataItem
 {
 private:
 	bool notnullM, computedM;
 	wxString sourceM, computedSourceM, collationM;
+protected:
+    virtual void loadDescription();
+    virtual void saveDescription(wxString description);
 public:
 	Column();
-	void Init(bool notnull, wxString source, bool computed, wxString computedSource, wxString collation);
+	void Init(bool notnull, wxString source, bool computed, 
+        wxString computedSource, wxString collation);
 	virtual wxString getPrintableName();
 	wxString getDatatype();
     virtual wxString getDropSqlStatement() const;

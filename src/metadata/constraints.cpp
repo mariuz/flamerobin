@@ -39,7 +39,6 @@
 #include <vector>
 
 #include "constraints.h"
-#include "metadataitem.h"
 #include "MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 wxString ColumnConstraint::getColumnList() const

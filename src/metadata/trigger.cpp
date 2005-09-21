@@ -21,7 +21,7 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -46,7 +46,6 @@
 #include "database.h"
 #include "dberror.h"
 #include "frutils.h"
-#include "metadataitem.h"
 #include "MetadataItemVisitor.h"
 #include "trigger.h"
 #include "ugly.h"
@@ -261,6 +260,21 @@ wxString Trigger::getCreateSqlTemplate() const
 const wxString Trigger::getTypeName() const
 {
     return wxT("TRIGGER");
+}
+//-----------------------------------------------------------------------------
+void Trigger::loadDescription()
+{
+    MetadataItem::loadDescription(
+        wxT("select RDB$DESCRIPTION from RDB$TRIGGERS ")
+        wxT("where RDB$TRIGGER_NAME = ?"));
+}
+//-----------------------------------------------------------------------------
+void Trigger::saveDescription(wxString description)
+{
+    MetadataItem::saveDescription(
+        wxT("update RDB$TRIGGERS set RDB$DESCRIPTION = ? ")
+        wxT("where RDB$TRIGGER_NAME = ?"),
+        description);
 }
 //-----------------------------------------------------------------------------
 void Trigger::acceptVisitor(MetadataItemVisitor* visitor)

@@ -42,6 +42,9 @@ private:
 	IndexType indexTypeM;
 	double statisticsM;
 	std::vector<wxString> segmentsM;
+protected:
+    virtual void loadDescription();
+    virtual void saveDescription(wxString description);
 public:
 	Index(bool unique, bool active, bool ascending, double statistics);
 

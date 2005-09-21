@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
 //-----------------------------------------------------------------------------
@@ -60,8 +60,16 @@ private:
     MetadataItem *parentM;
     wxString descriptionM;
     bool descriptionLoadedM;
+    void setDescriptionM(wxString description);
+
 protected:
     NodeType typeM;
+
+    virtual void loadDescription();
+    void loadDescription(wxString loadStatement);
+    virtual void saveDescription(wxString description);
+    void saveDescription(wxString saveStatement, wxString description);
+
 public:
     MetadataItem();
     virtual ~MetadataItem();
@@ -107,9 +115,7 @@ public:
 
     // items description (in database)
     wxString getDescription();
-    bool setDescription(wxString description);
-    virtual wxString getDescriptionSql() const;
-    virtual wxString getChangeDescriptionSql() const;
+    void setDescription(wxString description);
 
     // returns true if the metadata item is a system (as opposed to user-defined) item.
     virtual bool isSystem() const;

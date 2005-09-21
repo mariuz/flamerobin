@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
 //-----------------------------------------------------------------------------
@@ -35,6 +35,9 @@ private:
     bool propertiesLoadedM;
     wxString messageM;
     int numberM;
+protected:
+    virtual void loadDescription();
+    virtual void saveDescription(wxString description);
 public:
     Exception();
     virtual wxString getCreateSqlTemplate() const;

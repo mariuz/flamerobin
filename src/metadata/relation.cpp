@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Michael Hieke
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -172,5 +172,20 @@ bool Relation::getTriggers(std::vector<Trigger *>& list, Trigger::firingTimeType
 bool Relation::getChildren(std::vector<MetadataItem*>& temp)
 {
     return columnsM.getChildren(temp);
+}
+//-----------------------------------------------------------------------------
+void Relation::loadDescription()
+{
+    MetadataItem::loadDescription(
+        wxT("select RDB$DESCRIPTION from RDB$RELATIONS ")
+        wxT("where RDB$RELATION_NAME = ?"));
+}
+//-----------------------------------------------------------------------------
+void Relation::saveDescription(wxString description)
+{
+    MetadataItem::saveDescription(
+        wxT("update RDB$RELATIONS set RDB$DESCRIPTION = ? ")
+        wxT("where RDB$RELATION_NAME = ?"),
+        description);
 }
 //-----------------------------------------------------------------------------

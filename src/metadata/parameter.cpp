@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -70,6 +70,21 @@ wxString Parameter::getPrintableName()
 ParameterType Parameter::getParameterType() const
 {
     return parameterTypeM;
+}
+//-----------------------------------------------------------------------------
+void Parameter::loadDescription()
+{
+    MetadataItem::loadDescription(
+        wxT("select RDB$DESCRIPTION from RDB$PROCEDURE_PARAMETERS ")
+        wxT("where RDB$PARAMETER_NAME = ? and RDB$PROCEDURE_NAME = ?"));
+}
+//-----------------------------------------------------------------------------
+void Parameter::saveDescription(wxString description)
+{
+    MetadataItem::saveDescription(
+        wxT("update RDB$PROCEDURE_PARAMETERS set RDB$DESCRIPTION = ? ")
+        wxT("where RDB$PARAMETER_NAME = ? and RDB$PROCEDURE_NAME = ?"),
+        description);
 }
 //-----------------------------------------------------------------------------
 void Parameter::acceptVisitor(MetadataItemVisitor* visitor)

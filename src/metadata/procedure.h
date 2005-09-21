@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
 #ifndef FR_PROCEDURE_H
@@ -35,7 +35,9 @@ private:
     bool parametersLoadedM;
     bool loadParameters();
     MetadataCollection <Parameter> parametersM;
-
+protected:
+    virtual void loadDescription();
+    virtual void saveDescription(wxString description);
 public:
     Procedure();
 

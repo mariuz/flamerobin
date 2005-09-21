@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -107,6 +107,21 @@ void Exception::loadProperties(bool force)
 		lastError().setMessage(_("System error."));
 	}
     notifyObservers();
+}
+//-----------------------------------------------------------------------------
+void Exception::loadDescription()
+{
+    MetadataItem::loadDescription(
+        wxT("select RDB$DESCRIPTION from RDB$EXCEPTIONS ")
+        wxT("where RDB$EXCEPTION_NAME = ?"));
+}
+//-----------------------------------------------------------------------------
+void Exception::saveDescription(wxString description)
+{
+    MetadataItem::saveDescription(
+        wxT("update RDB$EXCEPTIONS set RDB$DESCRIPTION = ? ")
+        wxT("where RDB$EXCEPTION_NAME = ?"), 
+        description);
 }
 //-----------------------------------------------------------------------------
 wxString Exception::getAlterSql()

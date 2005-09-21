@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
 //-----------------------------------------------------------------------------
@@ -35,6 +35,9 @@ private:
 	wxString libraryNameM, entryPointM, definitionM;
 	bool infoLoadedM;
 	void loadInfo(bool force = false);
+protected:
+    virtual void loadDescription();
+    virtual void saveDescription(wxString description);
 public:
 	Function();
 	virtual const wxString getTypeName() const;
