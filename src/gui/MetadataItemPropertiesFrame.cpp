@@ -99,10 +99,10 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent, Metad
         return;
     }
 
-    window_1 = new PrintableHtmlWindow(this);
     objectM = object;
     objectM->attachObserver(this);
 
+    window_1 = new PrintableHtmlWindow(this);
     CreateStatusBar();
     wxString title = objectM->getName().c_str();
     window_1->SetRelatedFrame(this, title + wxT(": %s"));
@@ -383,13 +383,18 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         Procedure* p = dynamic_cast<Procedure*>(object);
         if (!p)
             return;
+
+        SubjectLocker locker(p);
         std::vector<MetadataItem*> tmp;
-        p->lockSubject();
         if (p->checkAndLoadParameters() && p->getChildren(tmp))
-            for (std::vector<MetadataItem*>::iterator it = tmp.begin(); it != tmp.end(); ++it)
-                if (((Parameter *)(*it))->getParameterType() == ptInput)
+        {
+            std::vector<MetadataItem*>::iterator it;
+            for (it = tmp.begin(); it != tmp.end(); ++it)
+            {
+                if (((Parameter*)(*it))->getParameterType() == ptInput)
                     processHtmlCode(htmlpage, suffix, *it);
-        p->unlockSubject(true, false);
+            }
+        }
     }
 
     else if (cmd == wxT("output_parameters"))    // SP params
@@ -397,13 +402,18 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         Procedure* p = dynamic_cast<Procedure*>(object);
         if (!p)
             return;
+
+        SubjectLocker locker(p);
         std::vector<MetadataItem*> tmp;
-        p->lockSubject();
         if (p->checkAndLoadParameters() && p->getChildren(tmp))
-            for (std::vector<MetadataItem*>::iterator it = tmp.begin(); it != tmp.end(); ++it)
+        {
+            std::vector<MetadataItem*>::iterator it;
+            for (it = tmp.begin(); it != tmp.end(); ++it)
+            {
                 if (((Parameter*)(*it))->getParameterType() == ptOutput)
                     processHtmlCode(htmlpage, suffix, *it);
-        p->unlockSubject(true, false);
+            }
+        }
     }
 
     else if (cmd == wxT("view_source"))
@@ -650,6 +660,8 @@ void MetadataItemPropertiesFrame::update()
         Relation* t = dynamic_cast<Relation*>(objectM);
         if (!t)
             return;
+
+        SubjectLocker locker(t);
         t->checkAndLoadColumns();       // load column data if needed
         std::vector<MetadataItem*> temp;
         objectM->getChildren(temp);
@@ -663,13 +675,13 @@ void MetadataItemPropertiesFrame::update()
         Procedure* p = dynamic_cast<Procedure*>(objectM);
         if (!p)
             return;
-        p->lockSubject();
+
+        SubjectLocker locker(p);
         p->checkAndLoadParameters();        // load column data if needed
         std::vector<MetadataItem*> temp;
         objectM->getChildren(temp);
         for (std::vector<MetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
             (*it)->attachObserver(this);
-        p->unlockSubject(false, false);
     }
 
     loadPage();
