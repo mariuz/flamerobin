@@ -484,7 +484,9 @@ void MetadataItem::setDescriptionM(wxString description)
     {
         descriptionM = description;
         descriptionLoadedM = true;
-        notifyObservers();
+        // FIXME: This is correct, but leads to reentrancy problems with the
+        //        current code.  Working on it...
+        // notifyObservers();
     }
 }
 //-----------------------------------------------------------------------------
