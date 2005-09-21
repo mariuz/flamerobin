@@ -20,11 +20,12 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
-#ifndef FR_INDICES_H
-#define FR_INDICES_H
+//-----------------------------------------------------------------------------
+#ifndef FR_INDEX_H
+#define FR_INDEX_H
 
 #include <vector>
 

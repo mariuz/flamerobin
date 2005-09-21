@@ -30,7 +30,7 @@
 #include "collection.h"
 #include "column.h"
 #include "constraints.h"
-#include "indices.h"
+#include "Index.h"
 #include "relation.h"
 #include "trigger.h"
 //-----------------------------------------------------------------------------

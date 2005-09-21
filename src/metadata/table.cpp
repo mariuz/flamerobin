@@ -38,14 +38,11 @@
 
 #include <ibpp.h>
 
-#include "collection.h"
 #include "core/Visitor.h"
 #include "database.h"
 #include "dberror.h"
 #include "frutils.h"
-#include "indices.h"
 #include "MetadataItemVisitor.h"
-#include "relation.h"
 #include "table.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------

@@ -38,7 +38,7 @@
 
 #include <vector>
 
-#include "indices.h"
+#include "Index.h"
 #include "MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 Index::Index(bool unique, bool active, bool ascending, double statistics)
