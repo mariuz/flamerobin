@@ -520,6 +520,10 @@ SOURCE=.\src\gui\FindDialog.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\metadata\Index.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\MainFrame.cpp
 # End Source File
 # Begin Source File
@@ -651,10 +655,6 @@ SOURCE=.\src\metadata\generator.cpp
 # Begin Source File
 
 SOURCE=.\src\images.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\metadata\indices.cpp
 # End Source File
 # Begin Source File
 
@@ -798,6 +798,10 @@ SOURCE=.\src\gui\FindDialog.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\metadata\Index.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\MainFrame.h
 # End Source File
 # Begin Source File
@@ -915,10 +919,6 @@ SOURCE=.\src\metadata\generator.h
 # Begin Source File
 
 SOURCE=.\src\images.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\metadata\indices.h
 # End Source File
 # Begin Source File
 

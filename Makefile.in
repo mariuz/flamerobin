@@ -107,7 +107,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_exception.o \
 	flamerobin_function.o \
 	flamerobin_generator.o \
-	flamerobin_indices.o \
+	flamerobin_Index.o \
 	flamerobin_metadataitem.o \
 	flamerobin_MetadataItemVisitor.o \
 	flamerobin_parameter.o \
@@ -429,8 +429,8 @@ flamerobin_function.o: $(srcdir)/src/metadata/function.cpp $(FLAMEROBIN_ODEP)
 flamerobin_generator.o: $(srcdir)/src/metadata/generator.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/generator.cpp
 
-flamerobin_indices.o: $(srcdir)/src/metadata/indices.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/indices.cpp
+flamerobin_Index.o: $(srcdir)/src/metadata/Index.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/Index.cpp
 
 flamerobin_metadataitem.o: $(srcdir)/src/metadata/metadataitem.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/metadataitem.cpp
