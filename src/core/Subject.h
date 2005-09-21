@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Milan Babuskov.
+  Contributor(s): Milan Babuskov, Michael Hieke
 */
 
 #ifndef FR_SUBJECT_H
@@ -46,9 +46,23 @@ public:
     void detachObserver(Observer* observer);
     void detachAllObservers();
     void notifyObservers();
+    // TODO: Make these private, and this class and SubjectLocker friends,
+    //       to force the use of SubjectLocker (exception-safe locking).
+    //       Right now (un)lockSubject() is used in Root::load().
     void lockSubject();
-    // TODO: remove parameters
-    void unlockSubject(bool wantFullUnlock = false, bool doNotify = true);
+    void unlockSubject();
+};
+//-----------------------------------------------------------------------------
+class SubjectLocker
+{
+private:
+    Subject* subjectM;
+protected:
+    Subject* getSubject();
+    void setSubject(Subject* subject);
+public:
+    SubjectLocker(Subject* subject);
+    ~SubjectLocker();
 };
 //-----------------------------------------------------------------------------
 #endif

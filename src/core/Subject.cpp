@@ -95,9 +95,12 @@ void Subject::notifyObservers()
         needsNotifyObjectsM = true;
     else
     {
-        needsNotifyObjectsM = false;
+        // make sure there are no reentrancy problems
+        ++locksCountM;
         for(ObserverIterator i = observersM.begin(); i != observersM.end(); ++i)
             (*i)->update();
+        --locksCountM;
+        needsNotifyObjectsM = false;
     }
 }
 //-----------------------------------------------------------------------------
@@ -106,15 +109,41 @@ void Subject::lockSubject()
     ++locksCountM;
 }
 //-----------------------------------------------------------------------------
-void Subject::unlockSubject(bool wantFullUnlock, bool doNotify)
+void Subject::unlockSubject()
 {
     if (locksCountM > 0)
     {
         --locksCountM;
-        if (wantFullUnlock)
-            locksCountM = 0;
-        if (doNotify || (locksCountM == 0 && needsNotifyObjectsM))
+        if (locksCountM == 0 && needsNotifyObjectsM)
             notifyObservers();
+    }
+}
+//-----------------------------------------------------------------------------
+SubjectLocker::SubjectLocker(Subject* subject)
+{
+    subjectM = 0;
+    setSubject(subject);
+}
+//-----------------------------------------------------------------------------
+SubjectLocker::~SubjectLocker()
+{
+    setSubject(0);
+}
+//-----------------------------------------------------------------------------
+Subject* SubjectLocker::getSubject()
+{
+    return subjectM;
+}
+//-----------------------------------------------------------------------------
+void SubjectLocker::setSubject(Subject* subject)
+{
+    if (subject != subjectM)
+    {
+        if (subjectM)
+            subjectM->unlockSubject();
+        subjectM = subject;
+        if (subjectM)
+            subjectM->lockSubject();
     }
 }
 //-----------------------------------------------------------------------------
