@@ -46,11 +46,11 @@ public:
     void detachObserver(Observer* observer);
     void detachAllObservers();
     void notifyObservers();
-    // TODO: Make these private, and this class and SubjectLocker friends,
+    // TODO: Make these protected, and this class and SubjectLocker friends,
     //       to force the use of SubjectLocker (exception-safe locking).
     //       Right now (un)lockSubject() is used in Root::load().
-    void lockSubject();
-    void unlockSubject();
+    virtual void lockSubject();
+    virtual void unlockSubject();
 };
 //-----------------------------------------------------------------------------
 class SubjectLocker
