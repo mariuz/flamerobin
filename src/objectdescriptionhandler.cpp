@@ -74,6 +74,9 @@ bool ObjectDescriptionHandler::handleURI(URI& uri)
     {
         wxBusyCursor wait;
         m->setDescription(desc);
+        // FIXME: This can be removed when MetadataItem::setDescriptionM() 
+        //        is fixed to call it without recursion.
+        m->notifyObservers();
     }
 
     FR_CATCH
