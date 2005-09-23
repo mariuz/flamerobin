@@ -499,7 +499,7 @@ flamerobin_urihandler.o: $(srcdir)/src/urihandler.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/urihandler.cpp
 
 flamerobin_flamerobin_rc.o: $(srcdir)/res/flamerobin.rc $(FLAMEROBIN_ODEP)
-	$(RESCOMP) -i$< -o$@  $(____flamerobin_WXDEBUG_p_2) $(____flamerobin_DEBUGFLAG_p_2) --define IBPP_GCC $(__IBPPPLATFORMDEFINE_p_3) --include-dir $(srcdir)/src --include-dir $(srcdir)/src/ibpp --include-dir $(srcdir)/res
+	$(RESCOMP) -i$< -o$@  $(____flamerobin_WXDEBUG_p_2) $(____flamerobin_DEBUGFLAG_p_2) --define IBPP_GCC $(__IBPPPLATFORMDEFINE_p_3) --include-dir $(srcdir)/src --include-dir $(srcdir)/src/ibpp --include-dir $(srcdir)/res --include-dir $(WXDIR)/include
 
 
 # Include dependency info, if present:

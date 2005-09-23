@@ -544,6 +544,7 @@
             <include>$(DOLLAR)(srcdir)/src</include>
             <include>$(DOLLAR)(srcdir)/src/ibpp</include>
             <include>$(DOLLAR)(srcdir)/res</include>
+            <res-include>$(DOLLAR)(WXDIR)/include</res-include>
         </if>
         <if cond="FORMAT!='autoconf'">
             <include>./src</include>
