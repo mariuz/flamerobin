@@ -23,10 +23,12 @@
   Contributor(s):
 */
 
+//-----------------------------------------------------------------------------
 #ifndef BACKUPFRAME_H
 #define BACKUPFRAME_H
-//-----------------------------------------------------------------------------
+
 #include <wx/wx.h>
+
 #include "BackupRestoreBaseFrame.h"
 
 class BackupThread;
@@ -40,7 +42,7 @@ public:
 
     BackupFrame(wxWindow* parent, Database* db);
 private:
-    void do_layout();
+    void layoutControls();
     virtual void updateControls();
 protected:
     virtual void doReadConfigSettings(const wxString& prefix);

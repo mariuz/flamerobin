@@ -27,10 +27,10 @@
 #define BACKUPRESTOREBASEFRAME_H
 //-----------------------------------------------------------------------------
 #include <wx/wx.h>
-#include <wx/stc/stc.h>
 #include <wx/thread.h>
 
 #include "gui/BaseFrame.h"
+#include "gui/controls/LogTextControl.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
 //-----------------------------------------------------------------------------
@@ -95,7 +95,7 @@ protected:
     wxButton* button_browse;
     wxCheckBox* checkbox_showlog;
     wxButton* button_start;
-    wxStyledTextCtrl* text_ctrl_log;
+    LogTextControl* text_ctrl_log;
     void setupControls();
 
     DECLARE_EVENT_TABLE()

@@ -23,10 +23,12 @@
   Contributor(s):
 */
 
+//-----------------------------------------------------------------------------
 #ifndef RESTOREFRAME_H
 #define RESTOREFRAME_H
-//-----------------------------------------------------------------------------
+
 #include <wx/wx.h>
+
 #include "BackupRestoreBaseFrame.h"
 
 class RestoreThread;
@@ -40,7 +42,7 @@ public:
 
     RestoreFrame(wxWindow* parent, Database* db);
 private:
-    void do_layout();
+    void layoutControls();
     virtual void updateControls();
 protected:
     virtual void doReadConfigSettings(const wxString& prefix);

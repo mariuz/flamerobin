@@ -71,17 +71,9 @@ BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, Database* db)
     SetIcon(icon);
 }
 //-----------------------------------------------------------------------------
-//! some controls need additional setup after descendant frame's controls are created
-void BackupRestoreBaseFrame::setupControls()
-{
-    text_ctrl_log->StyleSetForeground(1, *wxBLUE);
-    text_ctrl_log->StyleSetForeground(2, *wxRED);
-    text_ctrl_log->SetMarginWidth(1, 0);
-    text_ctrl_log->SetWrapMode(wxSTC_WRAP_WORD);
-}
-//-----------------------------------------------------------------------------
 //! implementation details
-void BackupRestoreBaseFrame::addThreadMsg(const wxString msg, bool& notificationNeeded)
+void BackupRestoreBaseFrame::addThreadMsg(const wxString msg, 
+    bool& notificationNeeded)
 {
     notificationNeeded = false;
     wxLongLong millisNow = ::wxGetLocalTimeMillis();
@@ -217,33 +209,22 @@ void BackupRestoreBaseFrame::updateMessages(size_t firstmsg, size_t lastmsg)
 {
     if (lastmsg > msgsM.GetCount())
         lastmsg = msgsM.GetCount();
-    bool added = false;
     for (size_t i = firstmsg; i < lastmsg; i++)
     {
-        int style = 0;
         switch ((MsgKind)msgKindsM[i])
         {
-        case progress_message:
-            if (!verboseMsgsM)
-                continue;
-            break;
-        case important_message:
-            style = 1;
-            break;
-        case error_message:
-            style = 2;
-            break;
+            case progress_message:
+                if (verboseMsgsM)
+                    text_ctrl_log->logMsg(msgsM[i]);
+                break;
+            case important_message:
+                text_ctrl_log->logImportantMsg(msgsM[i]);
+                break;
+            case error_message:
+                text_ctrl_log->logErrorMsg(msgsM[i]);
+                break;
         }
-        int startpos = text_ctrl_log->GetLength();
-        text_ctrl_log->AddText(msgsM[i] + wxT("\n"));
-        int endpos = text_ctrl_log->GetLength();
-        text_ctrl_log->StartStyling(startpos, 255);
-        text_ctrl_log->SetStyling(endpos-startpos-1, style);
-        added = true;
     }
-
-    if (added)
-        text_ctrl_log->GotoPos(text_ctrl_log->GetLength());
 }
 //-----------------------------------------------------------------------------
 //! event handlers
@@ -291,8 +272,8 @@ void BackupRestoreBaseFrame::OnThreadOutput(wxCommandEvent& WXUNUSED(event))
             break;
         }
         // this depends on server type, so just in case...
-        if (s.Last() == '\n')
-            s.RemoveLast();
+        if (s.Last() != '\n')
+            s.Append('\n');
         msgsM.Add(s.Mid(1));
     }
     threadMsgsM.Clear();
