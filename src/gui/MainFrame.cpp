@@ -1113,8 +1113,8 @@ void MainFrame::OnMenuSetGeneratorValue(wxCommandEvent& WXUNUSED(event))
     if (!g)
         return;
 
-    URI uri = URI(wxT("fr://edit_generator_value?parent_window=") + wxString::Format(wxT("%d"), (uintptr_t)this)
-        + wxT("&object_address=") + wxString::Format(wxT("%d"), (uintptr_t)g));
+    URI uri = URI(wxT("fr://edit_generator_value?parent_window=") + wxString::Format(wxT("%ld"), (uintptr_t)this)
+        + wxT("&object_address=") + wxString::Format(wxT("%ld"), (uintptr_t)g));
     getURIProcessor().handleURI(uri);
     
     FR_CATCH
