@@ -44,7 +44,7 @@
 //! ugly.cpp contains all ugly stuff with ifdefs and similar
 //! things that would otherwise make code ugly and unreadable
 //-----------------------------------------------------------------------------
-//! converts wxString to wxString
+//! converts wxString to std::string
 std::string wx2std(const wxString& input)
 {
 #if (wxUSE_UNICODE)
@@ -61,7 +61,7 @@ std::string wx2std(const wxString& input)
 #endif
 }
 //-----------------------------------------------------------------------------
-//! converts wxString to wxString
+//! converts std:string to wxString
 wxString std2wx(std::string input)
 {
 #if (wxUSE_UNICODE)
