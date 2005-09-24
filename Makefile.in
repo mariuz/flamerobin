@@ -82,6 +82,8 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_BaseDialog.o \
 	flamerobin_BaseFrame.o \
 	flamerobin_ContextMenuMetadataItemVisitor.o \
+	flamerobin_LogTextControl.o \
+	flamerobin_TextControl.o \
 	flamerobin_DatabaseRegistrationDialog.o \
 	flamerobin_ExecuteSqlFrame.o \
 	flamerobin_FieldPropertiesFrame.o \
@@ -353,6 +355,12 @@ flamerobin_BaseFrame.o: $(srcdir)/src/gui/BaseFrame.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_ContextMenuMetadataItemVisitor.o: $(srcdir)/src/gui/ContextMenuMetadataItemVisitor.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/ContextMenuMetadataItemVisitor.cpp
+
+flamerobin_LogTextControl.o: $(srcdir)/src/gui/controls/LogTextControl.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/controls/LogTextControl.cpp
+
+flamerobin_TextControl.o: $(srcdir)/src/gui/controls/TextControl.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/controls/TextControl.cpp
 
 flamerobin_DatabaseRegistrationDialog.o: $(srcdir)/src/gui/DatabaseRegistrationDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/DatabaseRegistrationDialog.cpp

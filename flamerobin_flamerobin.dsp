@@ -524,6 +524,10 @@ SOURCE=.\src\metadata\Index.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\controls\LogTextControl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\MainFrame.cpp
 # End Source File
 # Begin Source File
@@ -573,6 +577,10 @@ SOURCE=.\src\gui\SimpleHtmlFrame.cpp
 # Begin Source File
 
 SOURCE=.\src\core\Subject.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\controls\TextControl.cpp
 # End Source File
 # Begin Source File
 
@@ -802,6 +810,10 @@ SOURCE=.\src\metadata\Index.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\controls\LogTextControl.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\MainFrame.h
 # End Source File
 # Begin Source File
@@ -847,6 +859,10 @@ SOURCE=.\src\gui\SimpleHtmlFrame.h
 # Begin Source File
 
 SOURCE=.\src\core\Subject.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\controls\TextControl.h
 # End Source File
 # Begin Source File
 
