@@ -65,7 +65,7 @@ void myTreeCtrl::OnBeginDrag(wxTreeEvent& event)
         if (!m)
             return;
         wxString test;
-        test.Printf(wxT("OBJECT:%d"), (int)m);
+        test.Printf(wxT("OBJECT:%d"), (uintptr_t)m);
         wxTextDataObject textData(test);
         wxDropSource source(textData, this);
         source.DoDragDrop(wxDrag_AllowMove);
