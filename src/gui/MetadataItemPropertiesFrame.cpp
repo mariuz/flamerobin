@@ -205,10 +205,10 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         htmlpage += object->getTypeName();
 
     else if (cmd == wxT("object_address"))
-        htmlpage += wxString::Format(wxT("%d"), (int)object);
+        htmlpage += wxString::Format(wxT("%d"), (uintptr_t)object);
 
     else if (cmd == wxT("parent_window"))
-        htmlpage += wxString::Format(wxT("%d"), (int)this);
+        htmlpage += wxString::Format(wxT("%d"), (uintptr_t)this);
 
     else if (cmd == wxT("fr_home"))
         htmlpage += config().getHomePath();
