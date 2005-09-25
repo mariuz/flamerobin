@@ -68,10 +68,18 @@
 #define IBPP_UNIX	// IBPP_UNIX stands as a common denominator to *NIX flavours
 #endif
 
-#if defined(IBPP_MSVC) || defined(IBPP_BCC)
+#if defined(IBPP_MSVC)
+// C99 §7.18.1.1 Exact-width integer types (only those used by IBPP)
+typedef __int16 int16_t;
+typedef __int32 int32_t;
+typedef unsigned __int32 uint32_t;
 typedef __int64 int64_t;
 #else
 #include <stdint.h>			// C99 (§7.18) integer types definitions
+#endif
+
+#if !defined(_)
+#define _(s)	s
 #endif
 
 #include <exception>
@@ -82,12 +90,12 @@ namespace IBPP
 {
 	//	Typically you use this constant in a call IBPP::CheckVersion as in:
 	//	if (! IBPP::CheckVersion(IBPP::Version)) { throw .... ; }
-	const unsigned int Version = 0x02040001; // Version == 2.4.0.1
+	const uint32_t Version = 0x02040300; // Version == 2.4.3.0
 
 	//	Dates range checking
-	const int MinDate = -693594;	//  1 JAN 0001
-	const int MaxDate = 2958464;	// 31 DEC 9999
-
+	const int32_t MinDate = -693594;	//  1 JAN 0001
+	const int32_t MaxDate = 2958464;	// 31 DEC 9999
+	
 	//	Transaction Access Modes
 	enum TAM {amWrite, amRead};
 
@@ -111,7 +119,7 @@ namespace IBPP
 
 	//	Array Data Types
 	enum ADT {adDate, adTime, adTimestamp, adString,
-		adBool, adShort, adInt, adInt64, adFloat, adDouble};
+		adBool, adInt16, adInt32, adInt64, adFloat, adDouble};
 
 	// Database::Shutdown Modes
 	enum DSM {dsForce, dsDenyTrans, dsDenyAttach};
@@ -192,7 +200,7 @@ namespace IBPP
 	 * or substract a number from a Date, that will modify it to represent the
 	 * correct date, X days later or sooner. All the Y2K details taken into
 	 * account. The assignment operator and conversion operator that deal with
-	 * 'int' type are used to assign and extract the date as a stand alone
+	 * 'int32_t' type are used to assign and extract the date as a stand alone
 	 * integer number. This number represents the date as the number of days
 	 * elapsed since 31 Dec 1899. So 1 is 1 Jan 1900, 2 is 2 Jan 1900 and so
 	 * on...  See the IBPP::dtoi and IBPP::itod methods. The full range goes
@@ -203,31 +211,31 @@ namespace IBPP
 	class Date
 	{
 	protected:
-		int mDate;	// The date as an integer : 1 == 1 Jan 1900
+		int32_t mDate;	// The date as an integer : 1 == 1 Jan 1900
 
 	public:
 		void Clear(void) { mDate = MinDate - 1; };
 		void Today(void);
-		void SetDate(int year, int month, int day);
-		void GetDate(int& year, int& month, int& day) const;
-		void Add(int days);
+		void SetDate(int32_t year, int32_t month, int32_t day);
+		void GetDate(int32_t& year, int32_t& month, int32_t& day) const;
+		void Add(int32_t days);
 		void StartOfMonth(void);
 		void EndOfMonth(void);
-
+	
 		Date() { Clear(); };
-		Date(int year, int month, int day);
+		Date(int32_t year, int32_t month, int32_t day);
 		Date(const Date&);					// Copy Constructor
-		Date(const int&);
+		Date(const int32_t&);
 		Date& operator=(const Timestamp&);	// Timestamp Assignment operator
 		Date& operator=(const Date&);		// Date Assignment operator
-		Date& operator=(const int&);		// int Assignment operator
-		operator int() const { return mDate; }	// int Conversion operator
+		Date& operator=(const int32_t&);		// int32_t Assignment operator
+		operator int32_t() const { return mDate; }	// int32_t Conversion operator
 		~Date() { };
 	};
 
 	/* Class Time represent purely a Time (H:M:S). It is usefull in interactions
 	 * with the SQL TIME type of Interbase. The assignment operator and
-	 * conversion operator that deal with 'int' type are used to assign and
+	 * conversion operator that deal with 'int32_t' type are used to assign and
 	 * extract the time as a stand alone integer number. This number represents
 	 * the time as the number of seconds elapsed since midnight. See the
 	 * IBPP::ttoi and IBPP::itot methods. */
@@ -235,22 +243,22 @@ namespace IBPP
 	class Time
 	{
 	protected:
-		int mTime;		// The time as an integer, seconds since midnight
+		int32_t mTime;		// The time as an integer, seconds since midnight
 
 	public:
 		void Clear(void) { mTime = 0; }
 		void Now(void);
-		void SetTime(int hour, int minute, int second);
-		void GetTime(int& hour, int& minute, int& second) const;
+		void SetTime(int32_t hour, int32_t minute, int32_t second);
+		void GetTime(int32_t& hour, int32_t& minute, int32_t& second) const;
 
 		Time() { Clear(); }
-		Time(int hour, int minute, int second);
+		Time(int32_t hour, int32_t minute, int32_t second);
 		Time(const Time&);					// Copy Constructor
-		Time(const int&);
+		Time(const int32_t&);
 		Time& operator=(const Timestamp&);	// Timestamp Assignment operator
 		Time& operator=(const Time&);		// Time Assignment operator
-		Time& operator=(const int&);		// int Assignment operator
-		operator int() const { return mTime; }	// int Conversion operator
+		Time& operator=(const int32_t&);		// int32_t Assignment operator
+		operator int32_t() const { return mTime; }	// int32_t Conversion operator
 		~Time() { };
 	};
 
@@ -267,17 +275,17 @@ namespace IBPP
 		void Now(void)		{ Date::Today(); Time::Now(); }
 
 		using Date::GetDate;
-		int GetDate(void) const	{ return mDate; };
+		int32_t GetDate(void) const	{ return mDate; };
 
 		using Time::GetTime;
-		int GetTime(void) const	{ return mTime; }
+		int32_t GetTime(void) const	{ return mTime; }
 
 		Timestamp()	{ Clear(); }
 
-	  	Timestamp(int y, int m, int d)
+	  	Timestamp(int32_t y, int32_t m, int32_t d)
 	  		{ Date::SetDate(y, m, d); Time::Clear(); }
 
-		Timestamp(int y, int mo, int d, int h, int mi, int s)
+		Timestamp(int32_t y, int32_t mo, int32_t d, int32_t h, int32_t mi, int32_t s)
 	  		{ Date::SetDate(y, mo, d); Time::SetTime(h, mi, s); }
 
 		Timestamp(const Timestamp& rv)			// Copy Constructor
@@ -305,14 +313,14 @@ namespace IBPP
 	private:
 		void* mDBKey;				// Stores the binary DBKey
 		mutable char* mString;		// String (temporary) representation of it
-		int mSize;					// Length of DBKey (multiple of 8 bytes)
+		int32_t mSize;				// Length of DBKey (multiple of 8 bytes) 
 
 		void BlindCopy(const DBKey&);
 
 	public:
 		void Clear(void);
-		void SetKey(const void*, int size);
-		void GetKey(void*, int size) const;
+		void SetKey(const void*, int32_t size);
+		void GetKey(void*, int32_t size) const;
 		const char* AsString(void) const;
 
 		DBKey& operator=(const DBKey&);	// Assignment operator
@@ -353,9 +361,9 @@ namespace IBPP
 	class SQLException : public Exception
 	{
 	public:
-		virtual int SqlCode(void) const throw() = 0;
-		virtual int EngineCode(void) const throw() = 0;
-
+		virtual int32_t SqlCode(void) const throw() = 0;
+		virtual int32_t EngineCode(void) const throw() = 0;
+		
 		virtual ~SQLException() throw();
 	};
 
@@ -386,10 +394,10 @@ namespace IBPP
 		virtual void Open(void) = 0;
 		virtual void Close(void) = 0;
 		virtual void Cancel(void) = 0;
-		virtual int Read(void*, int size) = 0;
-		virtual void Write(const void*, int size) = 0;
-		virtual void Info(int* Size, int* Largest, int* Segments) = 0;
-
+		virtual int32_t Read(void*, int32_t size) = 0;
+		virtual void Write(const void*, int32_t size) = 0;
+		virtual void Info(int32_t* Size, int32_t* Largest, int32_t* Segments) = 0;
+	
 		virtual void Save(const std::string& data) = 0;
 		virtual void Load(std::string& data) = 0;
 
@@ -410,14 +418,14 @@ namespace IBPP
 		virtual IDatabase* Database(void) const = 0;
 		virtual ITransaction* Transaction(void) const = 0;
 		virtual void Describe(const std::string& table, const std::string& column) = 0;
-		virtual void ReadTo(ADT, void* buffer, int elemcount) = 0;
-		virtual void WriteFrom(ADT, const void* buffer, int elemcount) = 0;
+		virtual void ReadTo(ADT, void* buffer, int32_t elemcount) = 0;
+		virtual void WriteFrom(ADT, const void* buffer, int32_t elemcount) = 0;
 		virtual SDT ElementType(void) = 0;
-		virtual int ElementSize(void) = 0;
-		virtual int ElementScale(void) = 0;
-		virtual int Dimensions(void) = 0;
-		virtual void Bounds(int dim, int* low, int* high) = 0;
-		virtual void SetBounds(int dim, int low, int high) = 0;
+		virtual int32_t ElementSize(void) = 0;
+		virtual int32_t ElementScale(void) = 0;
+		virtual int32_t Dimensions(void) = 0;
+		virtual void Bounds(int32_t dim, int32_t* low, int32_t* high) = 0;
+		virtual void SetBounds(int32_t dim, int32_t low, int32_t high) = 0;
 
 		virtual IArray* AddRef(void) = 0;
 		virtual void Release(IArray*&) = 0;
@@ -447,13 +455,13 @@ namespace IBPP
 		virtual void RemoveUser(const std::string& username) = 0;
 		virtual void ListUsers(std::vector<std::string>& users) = 0;
 
-		virtual void SetPageBuffers(const std::string& dbfile, int buffers) = 0;
-		virtual void SetSweepInterval(const std::string& dbfile, int sweep) = 0;
+		virtual void SetPageBuffers(const std::string& dbfile, int32_t buffers) = 0;
+		virtual void SetSweepInterval(const std::string& dbfile, int32_t sweep) = 0;
 		virtual void SetSyncWrite(const std::string& dbfile, bool) = 0;
 		virtual void SetReadOnly(const std::string& dbfile, bool) = 0;
 		virtual void SetReserveSpace(const std::string& dbfile, bool) = 0;
 
-		virtual void Shutdown(const std::string& dbfile, DSM mode, int sectimeout) = 0;
+		virtual void Shutdown(const std::string& dbfile, DSM mode, int32_t sectimeout) = 0;
 		virtual void Restart(const std::string& dbfile) = 0;
 		virtual void Sweep(const std::string& dbfile) = 0;
 		virtual void Repair(const std::string& dbfile, RPF flags) = 0;
@@ -461,7 +469,7 @@ namespace IBPP
 		virtual void StartBackup(const std::string& dbfile,
 			const std::string& bkfile, BRF flags = BRF(0)) = 0;
 		virtual void StartRestore(const std::string& bkfile, const std::string& dbfile,
-			int pagesize = 0, BRF flags = BRF(0)) = 0;
+			int32_t pagesize = 0, BRF flags = BRF(0)) = 0;
 
 		virtual const char* WaitMsg(void) = 0;	// With reporting (does not block)
 		virtual void Wait(void) = 0;			// Without reporting (does block)
@@ -488,16 +496,17 @@ namespace IBPP
 		virtual const char* CharSet(void) const = 0;
 		virtual const char* CreateParams(void) const = 0;
 
-		virtual void Info(int* ODS, int* ODSMinor, int* PageSize, int* Pages,
-			int* Buffers, int* Sweep, bool* Sync, bool* Reserve) = 0;
-		virtual void Statistics(int* Fetches, int* Marks,
-			int* Reads, int* Writes) = 0;
-		virtual void Counts(int* Insert, int* Update, int* Delete,
-			int* ReadIdx, int* ReadSeq) = 0;
+		virtual void Info(int32_t* ODS, int32_t* ODSMinor, int32_t* PageSize,
+			int32_t* Pages,	int32_t* Buffers, int32_t* Sweep, bool* Sync,
+			bool* Reserve) = 0;
+		virtual void Statistics(int32_t* Fetches, int32_t* Marks,
+			int32_t* Reads, int32_t* Writes) = 0;
+		virtual void Counts(int32_t* Insert, int32_t* Update, int32_t* Delete, 
+			int32_t* ReadIdx, int32_t* ReadSeq) = 0;
 		virtual void Users(std::vector<std::string>& users) = 0;
-		virtual int Dialect(void) = 0;
+		virtual int32_t Dialect(void) = 0;
 
-		virtual void Create(int dialect) = 0;
+		virtual void Create(int32_t dialect) = 0;
 		virtual void Connect(void) = 0;
 		virtual bool Connected(void) = 0;
 		virtual void Inactivate(void) = 0;
@@ -556,47 +565,45 @@ namespace IBPP
 		virtual	IDatabase* Database(void) const = 0;
 		virtual ITransaction* Transaction(void) const = 0;
 
-		virtual void SetNull(int) = 0;
-		virtual void Set(int, bool) = 0;
-		virtual void Set(int, const void*, int) = 0;		// byte buffers
-		virtual void Set(int, const std::string&) = 0;
-		virtual void Set(int, short) = 0;
-		virtual void Set(int, int) = 0;
-		virtual void Set(int, long) = 0;
-		virtual void Set(int, int64_t) = 0;
-		virtual void Set(int, float) = 0;
-		virtual void Set(int, double) = 0;
-		virtual void Set(int, const Timestamp&) = 0;
-		virtual void Set(int, const Date&) = 0;
-		virtual void Set(int, const Time&) = 0;
-		virtual void Set(int, const DBKey&) = 0;
-		virtual void Set(int, const Blob&) = 0;
-		virtual void Set(int, const Array&) = 0;
+		virtual void SetNull(int32_t) = 0;
+		virtual void Set(int32_t, bool) = 0;
+		virtual void Set(int32_t, const void*, int32_t) = 0;		// byte buffers
+		virtual void Set(int32_t, const char*) = 0;				// c-string
+		virtual void Set(int32_t, const std::string&) = 0;
+		virtual void Set(int32_t, int16_t) = 0;
+		virtual void Set(int32_t, int32_t) = 0;
+		virtual void Set(int32_t, int64_t) = 0;
+		virtual void Set(int32_t, float) = 0;
+		virtual void Set(int32_t, double) = 0;
+		virtual void Set(int32_t, const Timestamp&) = 0;
+		virtual void Set(int32_t, const Date&) = 0;
+		virtual void Set(int32_t, const Time&) = 0;
+		virtual void Set(int32_t, const DBKey&) = 0;
+		virtual void Set(int32_t, const Blob&) = 0;
+		virtual void Set(int32_t, const Array&) = 0;
 
-		virtual bool IsNull(int) = 0;
-		virtual bool Get(int, bool&) = 0;
-		virtual bool Get(int, void*, int&) = 0;	// byte buffers
-		virtual bool Get(int, std::string&) = 0;
-		virtual bool Get(int, short&) = 0;
-		virtual bool Get(int, int&) = 0;
-		virtual bool Get(int, long&) = 0;
-		virtual bool Get(int, int64_t&) = 0;
-		virtual bool Get(int, float&) = 0;
-		virtual bool Get(int, double&) = 0;
-		virtual bool Get(int, Timestamp&) = 0;
-		virtual bool Get(int, Date&) = 0;
-		virtual bool Get(int, Time&) = 0;
-		virtual bool Get(int, DBKey&) = 0;
-		virtual bool Get(int, Blob&) = 0;
-		virtual bool Get(int, Array&) = 0;
+		virtual bool IsNull(int32_t) = 0;
+		virtual bool Get(int32_t, bool&) = 0;
+		virtual bool Get(int32_t, void*, int32_t&) = 0;	// byte buffers
+		virtual bool Get(int32_t, std::string&) = 0;
+		virtual bool Get(int32_t, int16_t&) = 0;
+		virtual bool Get(int32_t, int32_t&) = 0;
+		virtual bool Get(int32_t, int64_t&) = 0;
+		virtual bool Get(int32_t, float&) = 0;
+		virtual bool Get(int32_t, double&) = 0;
+		virtual bool Get(int32_t, Timestamp&) = 0;
+		virtual bool Get(int32_t, Date&) = 0;
+		virtual bool Get(int32_t, Time&) = 0;
+		virtual bool Get(int32_t, DBKey&) = 0;
+		virtual bool Get(int32_t, Blob&) = 0;
+		virtual bool Get(int32_t, Array&) = 0;
 
 		virtual bool IsNull(const std::string&) = 0;
 		virtual bool Get(const std::string&, bool&) = 0;
-		virtual bool Get(const std::string&, void*, int&) = 0;	// byte buffers
+		virtual bool Get(const std::string&, void*, int32_t&) = 0;	// byte buffers
 		virtual bool Get(const std::string&, std::string&) = 0;
-		virtual bool Get(const std::string&, short&) = 0;
-		virtual bool Get(const std::string&, int&) = 0;
-		virtual bool Get(const std::string&, long&) = 0;
+		virtual bool Get(const std::string&, int16_t&) = 0;
+		virtual bool Get(const std::string&, int32_t&) = 0;
 		virtual bool Get(const std::string&, int64_t&) = 0;
 		virtual bool Get(const std::string&, float&) = 0;
 		virtual bool Get(const std::string&, double&) = 0;
@@ -607,16 +614,16 @@ namespace IBPP
 		virtual bool Get(const std::string&, Blob&) = 0;
 		virtual bool Get(const std::string&, Array&) = 0;
 
-		virtual int ColumnNum(const std::string&) = 0;
-		virtual const char* ColumnName(int) = 0;
-		virtual const char* ColumnAlias(int) = 0;
-		virtual const char* ColumnTable(int) = 0;
-		virtual SDT ColumnType(int) = 0;
-		virtual int ColumnSize(int) = 0;
-		virtual int ColumnScale(int) = 0;
-		virtual int Columns(void) = 0;
-
-		virtual bool ColumnUpdated(int) = 0;
+		virtual int32_t ColumnNum(const std::string&) = 0;
+		virtual const char* ColumnName(int32_t) = 0;
+		virtual const char* ColumnAlias(int32_t) = 0;
+		virtual const char* ColumnTable(int32_t) = 0;
+		virtual SDT ColumnType(int32_t) = 0;
+		virtual int32_t ColumnSize(int32_t) = 0;
+		virtual int32_t ColumnScale(int32_t) = 0;
+		virtual int32_t Columns(void) = 0;
+		
+		virtual bool ColumnUpdated(int32_t) = 0;
 		virtual bool Updated() = 0;
 
 		virtual IRow* Clone() = 0;
@@ -647,70 +654,51 @@ namespace IBPP
 		virtual void CursorExecute(const std::string& cursor, const std::string&) = 0;
 		virtual bool Fetch(void) = 0;
 		virtual bool Fetch(Row&) = 0;
-		virtual int AffectedRows(void) = 0;
+		virtual int32_t AffectedRows(void) = 0;
 		virtual void Close(void) = 0;
 		virtual STT Type(void) = 0;
 
-		virtual void SetNull(int) = 0;
-		virtual void Set(int, bool) = 0;
-		virtual void Set(int, const char*) = 0;				// c-strings
-		virtual void Set(int, const void*, int) = 0;		// byte buffers
-		virtual void Set(int, const std::string&) = 0;
-		virtual void Set(int, short value) = 0;
-		virtual void Set(int, int value) = 0;
-		virtual void Set(int, long value) = 0;
-		virtual void Set(int, int64_t value) = 0;
-		virtual void Set(int, float value) = 0;
-		virtual void Set(int, double value) = 0;
-		virtual void Set(int, const Timestamp& value) = 0;
-		virtual void Set(int, const Date& value) = 0;
-		virtual void Set(int, const Time& value) = 0;
-		virtual void Set(int, const DBKey& value) = 0;
-		virtual void Set(int, const Blob& value) = 0;
-		virtual void Set(int, const Array& value) = 0;
+		virtual void SetNull(int32_t) = 0;
+		virtual void Set(int32_t, bool) = 0;
+		virtual void Set(int32_t, const void*, int32_t) = 0;		// byte buffers
+		virtual void Set(int32_t, const char*) = 0;				// c-string
+		virtual void Set(int32_t, const std::string&) = 0;
+		virtual void Set(int32_t, int16_t value) = 0;
+		virtual void Set(int32_t, int32_t value) = 0;
+		virtual void Set(int32_t, int64_t value) = 0;
+		virtual void Set(int32_t, float value) = 0;
+		virtual void Set(int32_t, double value) = 0;
+		virtual void Set(int32_t, const Timestamp& value) = 0;
+		virtual void Set(int32_t, const Date& value) = 0;
+		virtual void Set(int32_t, const Time& value) = 0;
+		virtual void Set(int32_t, const DBKey& value) = 0;
+		virtual void Set(int32_t, const Blob& value) = 0;
+		virtual void Set(int32_t, const Array& value) = 0;
 
-		virtual bool IsNull(int) = 0;
-		virtual bool Get(int, bool*) = 0;
-		virtual bool Get(int, bool&) = 0;
-		virtual bool Get(int, char*) = 0;  		// c-strings, len unchecked
-		virtual bool Get(int, void*, int&) = 0;	// byte buffers
-		virtual bool Get(int, std::string&) = 0;
-		virtual bool Get(int, short*) = 0;
-		virtual bool Get(int, short&) = 0;
-		virtual bool Get(int, int*) = 0;
-		virtual bool Get(int, int&) = 0;
-		virtual bool Get(int, long*) = 0;
-		virtual bool Get(int, long&) = 0;
-		virtual bool Get(int, int64_t*) = 0;
-		virtual bool Get(int, int64_t&) = 0;
-		virtual bool Get(int, float*) = 0;
-		virtual bool Get(int, float&) = 0;
-		virtual bool Get(int, double*) = 0;
-		virtual bool Get(int, double&) = 0;
-		virtual bool Get(int, Timestamp& value) = 0;
-		virtual bool Get(int, Date& value) = 0;
-		virtual bool Get(int, Time& value) = 0;
-		virtual bool Get(int, DBKey& value) = 0;
-		virtual bool Get(int, Blob& value) = 0;
-		virtual bool Get(int, Array& value) = 0;
+		virtual bool IsNull(int32_t) = 0;
+		virtual bool Get(int32_t, bool&) = 0;
+		virtual bool Get(int32_t, void*, int32_t&) = 0;	// byte buffers
+		virtual bool Get(int32_t, std::string&) = 0;
+		virtual bool Get(int32_t, int16_t&) = 0;
+		virtual bool Get(int32_t, int32_t&) = 0;
+		virtual bool Get(int32_t, int64_t&) = 0;
+		virtual bool Get(int32_t, float&) = 0;
+		virtual bool Get(int32_t, double&) = 0;
+		virtual bool Get(int32_t, Timestamp& value) = 0;
+		virtual bool Get(int32_t, Date& value) = 0;
+		virtual bool Get(int32_t, Time& value) = 0;
+		virtual bool Get(int32_t, DBKey& value) = 0;
+		virtual bool Get(int32_t, Blob& value) = 0;
+		virtual bool Get(int32_t, Array& value) = 0;
 
 		virtual bool IsNull(const std::string&) = 0;
-		virtual bool Get(const std::string&, bool*) = 0;
 		virtual bool Get(const std::string&, bool&) = 0;
-		virtual bool Get(const std::string&, char*) = 0;	// c-strings, len unchecked
-		virtual bool Get(const std::string&, void*, int&) = 0;	// byte buffers
+		virtual bool Get(const std::string&, void*, int32_t&) = 0;	// byte buffers
 		virtual bool Get(const std::string&, std::string&) = 0;
-		virtual bool Get(const std::string&, short*) = 0;
-		virtual bool Get(const std::string&, short&) = 0;
-		virtual bool Get(const std::string&, int*) = 0;
-		virtual bool Get(const std::string&, int&) = 0;
-		virtual bool Get(const std::string&, long*) = 0;
-		virtual bool Get(const std::string&, long&) = 0;
-		virtual bool Get(const std::string&, int64_t*) = 0;
+		virtual bool Get(const std::string&, int16_t&) = 0;
+		virtual bool Get(const std::string&, int32_t&) = 0;
 		virtual bool Get(const std::string&, int64_t&) = 0;
-		virtual bool Get(const std::string&, float*) = 0;
 		virtual bool Get(const std::string&, float&) = 0;
-		virtual bool Get(const std::string&, double*) = 0;
 		virtual bool Get(const std::string&, double&) = 0;
 		virtual bool Get(const std::string&, Timestamp& value) = 0;
 		virtual bool Get(const std::string&, Date& value) = 0;
@@ -719,19 +707,19 @@ namespace IBPP
 		virtual bool Get(const std::string&, Blob& value) = 0;
 		virtual bool Get(const std::string&, Array& value) = 0;
 
-		virtual int ColumnNum(const std::string&) = 0;
-		virtual const char* ColumnName(int) = 0;
-		virtual const char* ColumnAlias(int) = 0;
-		virtual const char* ColumnTable(int) = 0;
-		virtual SDT ColumnType(int) = 0;
-		virtual int ColumnSize(int) = 0;
-		virtual int ColumnScale(int) = 0;
-		virtual int Columns(void) = 0;
+		virtual int32_t ColumnNum(const std::string&) = 0;
+		virtual const char* ColumnName(int32_t) = 0;
+		virtual const char* ColumnAlias(int32_t) = 0;
+		virtual const char* ColumnTable(int32_t) = 0;
+		virtual SDT ColumnType(int32_t) = 0;
+		virtual int32_t ColumnSize(int32_t) = 0;
+		virtual int32_t ColumnScale(int32_t) = 0;
+		virtual int32_t Columns(void) = 0;
 
-		virtual SDT ParameterType(int) = 0;
-		virtual int ParameterSize(int) = 0;
-		virtual int ParameterScale(int) = 0;
-		virtual int Parameters(void) = 0;
+		virtual SDT ParameterType(int32_t) = 0;
+		virtual int32_t ParameterSize(int32_t) = 0;
+		virtual int32_t ParameterScale(int32_t) = 0;
+		virtual int32_t Parameters(void) = 0;
 
 		virtual void Plan(std::string&) = 0;
 
@@ -739,9 +727,25 @@ namespace IBPP
 		virtual void Release(IStatement*&) = 0;
 
 	    virtual ~IStatement() { };
+
+		// DEPRECATED METHODS (WON'T BE AVAILABLE IN VERSIONS 3.x)
+		virtual bool Get(int32_t, char*) = 0;			  		// DEPRECATED
+		virtual bool Get(const std::string&, char*) = 0;	// DEPRECATED
+		virtual bool Get(int32_t, bool*) = 0;					// DEPRECATED
+		virtual bool Get(const std::string&, bool*) = 0;	// DEPRECATED
+		virtual bool Get(int32_t, int16_t*) = 0;				// DEPRECATED
+		virtual bool Get(const std::string&, int16_t*) = 0;	// DEPRECATED
+		virtual bool Get(int32_t, int32_t*) = 0;					// DEPRECATED
+		virtual bool Get(const std::string&, int32_t*) = 0;		// DEPRECATED
+		virtual bool Get(int32_t, int64_t*) = 0;				// DEPRECATED
+		virtual bool Get(const std::string&, int64_t*) = 0;	// DEPRECATED
+		virtual bool Get(int32_t, float*) = 0;					// DEPRECATED
+		virtual bool Get(const std::string&, float*) = 0;	// DEPRECATED
+		virtual bool Get(int32_t, double*) = 0;					// DEPRECATED
+		virtual bool Get(const std::string&, double*) = 0;	// DEPRECATED
 	};
 	typedef Ptr<IStatement> Statement;
-
+	
 	//	--- Factories ---
 	//	These methods are the only way to get one of the above
 	//	Interfaces.  They are at the heart of how you program using IBPP.  For
@@ -774,8 +778,8 @@ namespace IBPP
 		TIL il = ilConcurrency, TLR lr = lrWait, TFF flags = TFF(0))
 			{ return TransactionFactory(db.intf(), am, il, lr, flags); }
 
-	//IRow* RowFactory(int dialect);
-
+	//IRow* RowFactory(int32_t dialect);
+	
 	IStatement* StatementFactory(IDatabase* db, ITransaction* tr,
 		const std::string& sql);
 
@@ -812,7 +816,7 @@ namespace IBPP
 	class EventInterface
 	{
 	public:
-		virtual void ibppEventHandler(IDatabase*, const std::string&, int) = 0;
+		virtual void ibppEventHandler(IDatabase*, const std::string&, int32_t) = 0;
 
 		virtual ~EventInterface() { };
 	};
@@ -825,18 +829,30 @@ namespace IBPP
 	 * IBPP::CheckVersion will assure you that YOUR code has been compiled
 	 * against a compatible version of the library. */
 
-	bool CheckVersion(unsigned long);
-	int GDSVersion(void);
+	bool CheckVersion(uint32_t);
+	int32_t GDSVersion(void);
+	
+	/* On Win32 platform, ClientLibSearchPaths() allows to setup
+	 * one or multiple additional paths (separated with a ';') where IBPP
+	 * will look for the client library (before the default implicit search
+	 * locations). This is usefull for applications distributed with a 'private'
+	 * copy of Firebird, when the registry is useless to identify the location
+	 * from where to attempt loading the fbclient.dll / gds32.dll.
+	 * If called, this function must be called *early* by the application,
+	 * before *any* other function or object methods of IBPP.
+	 * This is a NO-OP on platforms other than Win32. */
+	 
+	void ClientLibSearchPaths(const std::string&);
 
 	/* Finally, here are some date and time conversion routines used by IBPP and
 	 * that may be helpful at the application level. They do not depend on
 	 * anything related to Firebird/Interbase. Just a bonus. dtoi and itod
 	 * return false on invalid parameters or out of range conversions. */
 
-	bool dtoi (int date, int *y, int *m, int *d);
-	bool itod (int* pdate, int year, int month, int day);
-	void ttoi (int itime, int *hour, int *minute, int *second);
-	void itot (int* ptime, int hour, int minute, int second);
+	bool dtoi (int32_t date, int32_t *y, int32_t *m, int32_t *d);
+	bool itod (int32_t* pdate, int32_t year, int32_t month, int32_t day);
+	void ttoi (int32_t itime, int32_t *hour, int32_t *minute, int32_t *second);
+	void itot (int32_t* ptime, int32_t hour, int32_t minute, int32_t second);
 
 };
 

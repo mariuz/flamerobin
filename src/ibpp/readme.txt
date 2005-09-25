@@ -129,8 +129,17 @@ support for blobs and std:string.
 perfectly functionnal but is still a concept in the works for this 2.4 release.
 So we ask users of IBPP not to start using IBPP::Row as is, consider it already
 deprecated in its current form. We will introduce something 'bigger' in the
-next major version (3.0) whose first beta should not be delayed too much after
-this 2.4 maintenance version.
+next major version (3.0.
+
+- Added void ClientDLLSearchPaths(const std::string&);
+On Win32 platform, ClientDLLSearchPaths() allows to setup one or multiple 
+additional paths (separated with a ';') where IBPP will look for the client 
+library (before the default implicit search locations). This is usefull for 
+applications distributed with a 'private' copy of Firebird, when the registry 
+is useless to identify the location from where to attempt loading the 
+fbclient.dll / gds32.dll. If called, this function must be called *early* by 
+the application, before *any* other function or object methods of IBPP. This 
+is currently a NO-OP on platforms other than Win32.
 
 
 4/ Comments, Acknowledgments

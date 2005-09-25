@@ -76,12 +76,12 @@ void IBPP::DBKey::Clear(void)
 	mSize = 0;
 }
 
-void IBPP::DBKey::SetKey(const void* key, int size)
+void IBPP::DBKey::SetKey(const void* key, int32_t size)
 {
 	if (key == 0)
-		throw LogicExceptionImpl("IBPP::DBKey::SetKey", "0 DBKey reference detected.");
+		throw LogicExceptionImpl("IBPP::DBKey::SetKey", _("Null DBKey reference detected."));
 	if (size <= 0 || ((size >> 3) << 3) != size)
-		throw LogicExceptionImpl("IBPP::DBKey::SetKey", "Invalid DBKey size.");
+		throw LogicExceptionImpl("IBPP::DBKey::SetKey", _("Invalid DBKey size."));
 
 	if (mString != 0)
 	{
@@ -94,14 +94,14 @@ void IBPP::DBKey::SetKey(const void* key, int size)
 	mSize = size;
 }
 
-void IBPP::DBKey::GetKey(void* key, int size) const
+void IBPP::DBKey::GetKey(void* key, int32_t size) const
 {
 	if (mDBKey == 0)
-		throw LogicExceptionImpl("IBPP::DBKey::GetKey", "DBKey not assigned.");
+		throw LogicExceptionImpl("IBPP::DBKey::GetKey", _("DBKey not assigned."));
 	if (key == 0)
-		throw LogicExceptionImpl("IBPP::DBKey::GetKey", "0 DBKey reference detected.");
+		throw LogicExceptionImpl("IBPP::DBKey::GetKey", _("Null DBKey reference detected."));
 	if (size != mSize)
-		throw LogicExceptionImpl("IBPP::DBKey::GetKey", "Incompatible DBKey size detected.");
+		throw LogicExceptionImpl("IBPP::DBKey::GetKey", _("Incompatible DBKey size detected."));
 
 	memcpy(key, mDBKey, size);
 }
@@ -109,7 +109,7 @@ void IBPP::DBKey::GetKey(void* key, int size) const
 const char* IBPP::DBKey::AsString(void) const
 {
 	if (mDBKey == 0)
-		throw LogicExceptionImpl("IBPP::DBKey::GetString", "DBKey not assigned.");
+		throw LogicExceptionImpl("IBPP::DBKey::GetString", _("DBKey not assigned."));
 
 	if (mString == 0)
 	{

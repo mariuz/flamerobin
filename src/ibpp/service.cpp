@@ -49,14 +49,14 @@ using namespace ibpp_internals;
 
 void ServiceImpl::Connect(void)
 {
+	if (mHandle	!= 0) return;	// Already connected
+	
 	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", "Requires the version 6 of GDS32.DLL");
-	if (mHandle	!= 0)
-		throw LogicExceptionImpl("Service::Connect", "Service	is already connected.");
+		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mUserName.empty())
-		throw LogicExceptionImpl("Service::Connect", "Unspecified user name.");
+		throw LogicExceptionImpl("Service::Connect", _("Unspecified user name."));
 	if (mUserPassword.empty())
-		throw LogicExceptionImpl("Service::Connect", "Unspecified user password.");
+		throw LogicExceptionImpl("Service::Connect", _("Unspecified user password."));
 
 	// Attach to the Service Manager
 	IBS status;
@@ -82,25 +82,27 @@ void ServiceImpl::Connect(void)
 	if (status.Errors())
 	{
 		mHandle	= 0;		// Should be, but better be	sure...
-		throw SQLExceptionImpl(status, "Service::Connect", "isc_service_attach failed");
+		throw SQLExceptionImpl(status, "Service::Connect", _("isc_service_attach failed"));
 	}
 }
 
 void ServiceImpl::Disconnect(void)
 {
+	if (mHandle	== 0) return; // Already disconnected
+	
 	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", "Requires the version 6 of GDS32.DLL");
-	if (mHandle	== 0)
-		throw LogicExceptionImpl("Service::Disconnect", "Service is not connected.");
+		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 
 	IBS status;
 
 	// Detach from the service manager
 	(*gds.Call()->m_service_detach)(status.Self(), &mHandle);
-	if (status.Errors())
-		throw SQLExceptionImpl(status, "Service::Disconnect", "isc_service_detach failed");
 
+	// Set mHandle to 0 now, just in case we need to throw, because Disconnect()
+	// is called from Service destructor and we want to maintain a coherent state.
 	mHandle	= 0;
+	if (status.Errors())
+		throw SQLExceptionImpl(status, "Service::Disconnect", _("isc_service_detach failed"));
 }
 
 void ServiceImpl::GetVersion(std::string& version)
@@ -108,9 +110,9 @@ void ServiceImpl::GetVersion(std::string& version)
 	// Based on a patch provided by Torsten Martinsen (SourceForge 'bullestock')
 
 	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", "Requires the version 6 of GDS32.DLL");
+		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle == 0)
-		throw LogicExceptionImpl("Service::GetVersion", "Service is not connected.");
+		throw LogicExceptionImpl("Service::GetVersion", _("Service is not connected."));
 
 	IBS status;
 	SPB spb;
@@ -121,7 +123,7 @@ void ServiceImpl::GetVersion(std::string& version)
 	(*gds.Call()->m_service_query)(status.Self(), &mHandle, 0, 0, 0, spb.Size(), spb.Self(),
 		result.Size(), result.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Service::GetVersion", "isc_service_query failed");
+		throw SQLExceptionImpl(status, "Service::GetVersion", _("isc_service_query failed"));
 
 	result.GetString(isc_info_svc_server_version, version);
 }
@@ -130,11 +132,11 @@ void ServiceImpl::AddUser(const std::string& username, const std::string& passwo
 			const std::string& first, const std::string& middle, const std::string& last)
 {
 	if (gds.Call()->mGDSVersion >= 60 && mHandle == 0)
-		throw LogicExceptionImpl("Service::AddUser", "Service is not connected.");
+		throw LogicExceptionImpl("Service::AddUser", _("Service is not connected."));
 	if (username.empty())
-		throw LogicExceptionImpl("Service::AddUser", "Username required.");
+		throw LogicExceptionImpl("Service::AddUser", _("Username required."));
 	if (password.empty())
-		throw LogicExceptionImpl("Service::AddUser", "Password required.");
+		throw LogicExceptionImpl("Service::AddUser", _("Password required."));
 
 	IBS status;
 	SPB spb;
@@ -147,7 +149,7 @@ void ServiceImpl::AddUser(const std::string& username, const std::string& passwo
 
 	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Service::AddUser", "isc_service_start failed");
+		throw SQLExceptionImpl(status, "Service::AddUser", _("isc_service_start failed"));
 
 	Wait();
 }
@@ -156,9 +158,9 @@ void ServiceImpl::ModifyUser(const std::string& username, const std::string& pas
 			const std::string& first, const std::string& middle, const std::string& last)
 {
 	if (gds.Call()->mGDSVersion >= 60 && mHandle == 0)
-		throw LogicExceptionImpl("Service::ModifyUser", "Service is not connected.");
+		throw LogicExceptionImpl("Service::ModifyUser", _("Service is not connected."));
 	if (username.empty())
-		throw LogicExceptionImpl("Service::ModifyUser", "Username required.");
+		throw LogicExceptionImpl("Service::ModifyUser", _("Username required."));
 
 	IBS status;
 	SPB spb;
@@ -172,7 +174,7 @@ void ServiceImpl::ModifyUser(const std::string& username, const std::string& pas
 
 	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Service::ModifyUser", "isc_service_start failed");
+		throw SQLExceptionImpl(status, "Service::ModifyUser", _("isc_service_start failed"));
 
 	Wait();
 }
@@ -181,9 +183,9 @@ void ServiceImpl::RemoveUser(const std::string& username)
 {
 
 	if (gds.Call()->mGDSVersion >= 60 && mHandle == 0)
-		throw LogicExceptionImpl("Service::RemoveUser", "Service is not connected.");
+		throw LogicExceptionImpl("Service::RemoveUser", _("Service is not connected."));
 	if (username.empty())
-		throw LogicExceptionImpl("Service::RemoveUser", "Username required.");
+		throw LogicExceptionImpl("Service::RemoveUser", _("Username required."));
 
 	IBS status;
 	SPB spb;
@@ -193,7 +195,7 @@ void ServiceImpl::RemoveUser(const std::string& username)
 
 	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Service::RemoveUser", "isc_service_start failed");
+		throw SQLExceptionImpl(status, "Service::RemoveUser", _("isc_service_start failed"));
 
 	Wait();
 }
@@ -201,16 +203,16 @@ void ServiceImpl::RemoveUser(const std::string& username)
 void ServiceImpl::ListUsers(std::vector<std::string>& users)
 {
 	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", "Requires the version 6 of GDS32.DLL");
+		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle == 0)
-		throw LogicExceptionImpl("Service::GetVersion", "Service is not connected.");
+		throw LogicExceptionImpl("Service::GetVersion", _("Service is not connected."));
 
 	SPB spb;
 	spb.Insert(isc_action_svc_display_user);
 	IBS status;
 	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Service::ListUsers", "isc_service_start failed");
+		throw SQLExceptionImpl(status, "Service::ListUsers", _("isc_service_start failed"));
 
 	RB result(8000);
 	char request[] = {isc_info_svc_get_users};
@@ -218,12 +220,12 @@ void ServiceImpl::ListUsers(std::vector<std::string>& users)
 	(*gds.Call()->m_service_query)(status.Self(), &mHandle, 0, 0, 0,
 		sizeof(request), request, result.Size(), result.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Service::ListUsers", "isc_service_query failed");
+		throw SQLExceptionImpl(status, "Service::ListUsers", _("isc_service_query failed"));
 
 	users.clear();
 	char* p = result.Self();
 	if (*p != isc_info_svc_get_users)
-		throw SQLExceptionImpl(status, "Service::ListUsers", "isc_service_query returned unexpected answer");
+		throw SQLExceptionImpl(status, "Service::ListUsers", _("isc_service_query returned unexpected answer"));
 
 	p += 3;	// Skips the 'isc_info_svc_get_users' and its total length
 	while (*p != isc_info_end)
@@ -241,14 +243,14 @@ void ServiceImpl::ListUsers(std::vector<std::string>& users)
     }
 }
 
-void ServiceImpl::SetPageBuffers(const std::string& dbfile, int buffers)
+void ServiceImpl::SetPageBuffers(const std::string& dbfile, int32_t buffers)
 {
 	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", "Requires the version 6 of GDS32.DLL");
+		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
-		throw LogicExceptionImpl("Service::SetPageBuffers", "Service is not connected.");
+		throw LogicExceptionImpl("Service::SetPageBuffers", _("Service is not connected."));
 	if (dbfile.empty())
-		throw LogicExceptionImpl("Service::SetPageBuffers", "Main database file must be specified.");
+		throw LogicExceptionImpl("Service::SetPageBuffers", _("Main database file must be specified."));
 
 	IBS status;
 	SPB spb;
@@ -259,19 +261,19 @@ void ServiceImpl::SetPageBuffers(const std::string& dbfile, int buffers)
 
 	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Service::SetPageBuffers", "isc_service_start failed");
+		throw SQLExceptionImpl(status, "Service::SetPageBuffers", _("isc_service_start failed"));
 
 	Wait();
 }
 
-void ServiceImpl::SetSweepInterval(const std::string& dbfile, int sweep)
+void ServiceImpl::SetSweepInterval(const std::string& dbfile, int32_t sweep)
 {
 	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", "Requires the version 6 of GDS32.DLL");
+		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
-		throw LogicExceptionImpl("Service::SetSweepInterval", "Service is not connected.");
+		throw LogicExceptionImpl("Service::SetSweepInterval", _("Service is not connected."));
 	if (dbfile.empty())
-		throw LogicExceptionImpl("Service::SetSweepInterval", "Main database file must be specified.");
+		throw LogicExceptionImpl("Service::SetSweepInterval", _("Main database file must be specified."));
 
 	IBS status;
 	SPB spb;
@@ -282,7 +284,7 @@ void ServiceImpl::SetSweepInterval(const std::string& dbfile, int sweep)
 
 	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Service::SetSweepInterval", "isc_service_start failed");
+		throw SQLExceptionImpl(status, "Service::SetSweepInterval", _("isc_service_start failed"));
 
 	Wait();
 }
@@ -290,11 +292,11 @@ void ServiceImpl::SetSweepInterval(const std::string& dbfile, int sweep)
 void ServiceImpl::SetSyncWrite(const std::string& dbfile, bool sync)
 {
 	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", "Requires the version 6 of GDS32.DLL");
+		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
-		throw LogicExceptionImpl("Service::SetSyncWrite", "Service is not connected.");
+		throw LogicExceptionImpl("Service::SetSyncWrite", _("Service is not connected."));
 	if (dbfile.empty())
-		throw LogicExceptionImpl("Service::SetSyncWrite", "Main database file must be specified.");
+		throw LogicExceptionImpl("Service::SetSyncWrite", _("Main database file must be specified."));
 
 	IBS status;
 	SPB spb;
@@ -306,7 +308,7 @@ void ServiceImpl::SetSyncWrite(const std::string& dbfile, bool sync)
 
 	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Service::SetSyncWrite", "isc_service_start failed");
+		throw SQLExceptionImpl(status, "Service::SetSyncWrite", _("isc_service_start failed"));
 
 	Wait();
 }
@@ -314,11 +316,11 @@ void ServiceImpl::SetSyncWrite(const std::string& dbfile, bool sync)
 void ServiceImpl::SetReadOnly(const std::string& dbfile, bool readonly)
 {
 	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", "Requires the version 6 of GDS32.DLL");
+		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
-		throw LogicExceptionImpl("Service::SetReadOnly", "Service is not connected.");
+		throw LogicExceptionImpl("Service::SetReadOnly", _("Service is not connected."));
 	if (dbfile.empty())
-		throw LogicExceptionImpl("Service::SetReadOnly", "Main database file must be specified.");
+		throw LogicExceptionImpl("Service::SetReadOnly", _("Main database file must be specified."));
 
 	IBS status;
 	SPB spb;
@@ -330,7 +332,7 @@ void ServiceImpl::SetReadOnly(const std::string& dbfile, bool readonly)
 
 	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Service::SetReadOnly", "isc_service_start failed");
+		throw SQLExceptionImpl(status, "Service::SetReadOnly", _("isc_service_start failed"));
 
 	Wait();
 }
@@ -338,11 +340,11 @@ void ServiceImpl::SetReadOnly(const std::string& dbfile, bool readonly)
 void ServiceImpl::SetReserveSpace(const std::string& dbfile, bool reserve)
 {
 	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", "Requires the version 6 of GDS32.DLL");
+		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
-		throw LogicExceptionImpl("Service::SetReserveSpace", "Service is not connected.");
+		throw LogicExceptionImpl("Service::SetReserveSpace", _("Service is not connected."));
 	if (dbfile.empty())
-		throw LogicExceptionImpl("Service::SetReserveSpace", "Main database file must be specified.");
+		throw LogicExceptionImpl("Service::SetReserveSpace", _("Main database file must be specified."));
 
 	IBS status;
 	SPB spb;
@@ -354,19 +356,19 @@ void ServiceImpl::SetReserveSpace(const std::string& dbfile, bool reserve)
 
 	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Service::SetReserveSpace", "isc_service_start failed");
+		throw SQLExceptionImpl(status, "Service::SetReserveSpace", _("isc_service_start failed"));
 
 	Wait();
 }
 
-void ServiceImpl::Shutdown(const std::string& dbfile, IBPP::DSM mode, int sectimeout)
+void ServiceImpl::Shutdown(const std::string& dbfile, IBPP::DSM mode, int32_t sectimeout)
 {
 	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", "Requires the version 6 of GDS32.DLL");
+		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
-		throw LogicExceptionImpl("Service::Shutdown", "Service is not connected.");
+		throw LogicExceptionImpl("Service::Shutdown", _("Service is not connected."));
 	if (dbfile.empty())
-		throw LogicExceptionImpl("Service::Shutdown", "Main database file must be specified.");
+		throw LogicExceptionImpl("Service::Shutdown", _("Main database file must be specified."));
 
 	IBS status;
 	SPB spb;
@@ -388,7 +390,7 @@ void ServiceImpl::Shutdown(const std::string& dbfile, IBPP::DSM mode, int sectim
 
 	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Service::Shutdown", "isc_service_start failed");
+		throw SQLExceptionImpl(status, "Service::Shutdown", _("isc_service_start failed"));
 
 	Wait();
 }
@@ -396,11 +398,11 @@ void ServiceImpl::Shutdown(const std::string& dbfile, IBPP::DSM mode, int sectim
 void ServiceImpl::Restart(const std::string& dbfile)
 {
 	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", "Requires the version 6 of GDS32.DLL");
+		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
-		throw LogicExceptionImpl("Service::Restart", "Service is not connected.");
+		throw LogicExceptionImpl("Service::Restart", _("Service is not connected."));
 	if (dbfile.empty())
-		throw LogicExceptionImpl("Service::Restart", "Main database file must be specified.");
+		throw LogicExceptionImpl("Service::Restart", _("Main database file must be specified."));
 
 	IBS status;
 	SPB spb;
@@ -411,7 +413,7 @@ void ServiceImpl::Restart(const std::string& dbfile)
 
 	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Service::Restart", "isc_service_start failed");
+		throw SQLExceptionImpl(status, "Service::Restart", _("isc_service_start failed"));
 
 	Wait();
 }
@@ -419,11 +421,11 @@ void ServiceImpl::Restart(const std::string& dbfile)
 void ServiceImpl::Sweep(const std::string& dbfile)
 {
 	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", "Requires the version 6 of GDS32.DLL");
+		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
-		throw LogicExceptionImpl("Service::Sweep", "Service is not connected.");
+		throw LogicExceptionImpl("Service::Sweep", _("Service is not connected."));
 	if (dbfile.empty())
-		throw LogicExceptionImpl("Service::Sweep", "Main database file must be specified.");
+		throw LogicExceptionImpl("Service::Sweep", _("Main database file must be specified."));
 
 	IBS status;
 	SPB spb;
@@ -434,7 +436,7 @@ void ServiceImpl::Sweep(const std::string& dbfile)
 
 	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Service::Sweep", "isc_service_start failed");
+		throw SQLExceptionImpl(status, "Service::Sweep", _("isc_service_start failed"));
 
 	Wait();
 }
@@ -442,11 +444,11 @@ void ServiceImpl::Sweep(const std::string& dbfile)
 void ServiceImpl::Repair(const std::string& dbfile, IBPP::RPF flags)
 {
 	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", "Requires the version 6 of GDS32.DLL");
+		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
-		throw LogicExceptionImpl("Service::Repair", "Service is not connected.");
+		throw LogicExceptionImpl("Service::Repair", _("Service is not connected."));
 	if (dbfile.empty())
-		throw LogicExceptionImpl("Service::Repair", "Main database file must be specified.");
+		throw LogicExceptionImpl("Service::Repair", _("Main database file must be specified."));
 
 	IBS status;
 	SPB spb;
@@ -459,7 +461,7 @@ void ServiceImpl::Repair(const std::string& dbfile, IBPP::RPF flags)
 	else if (flags & IBPP::rpValidatePages) mask = isc_spb_rpr_validate_db;
 	else if (flags & IBPP::rpMendRecords) mask = isc_spb_rpr_mend_db;
 	else throw LogicExceptionImpl("Service::Repair",
-		"One of rpMendRecords, rpValidatePages, rpValidateFull is required.");
+		_("One of rpMendRecords, rpValidatePages, rpValidateFull is required."));
 
 	if (flags & IBPP::rpReadOnly)			mask |= isc_spb_rpr_check_db;
 	if (flags & IBPP::rpIgnoreChecksums)	mask |= isc_spb_rpr_ignore_checksum;
@@ -469,7 +471,7 @@ void ServiceImpl::Repair(const std::string& dbfile, IBPP::RPF flags)
 
 	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Service::Repair", "isc_service_start failed");
+		throw SQLExceptionImpl(status, "Service::Repair", _("isc_service_start failed"));
 
 	Wait();
 }
@@ -478,13 +480,13 @@ void ServiceImpl::StartBackup(const std::string& dbfile,
 	const std::string& bkfile, IBPP::BRF flags)
 {
 	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", "Requires the version 6 of GDS32.DLL");
+		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
-		throw LogicExceptionImpl("Service::Backup", "Service is not connected.");
+		throw LogicExceptionImpl("Service::Backup", _("Service is not connected."));
 	if (dbfile.empty())
-		throw LogicExceptionImpl("Service::Backup", "Main database file must be specified.");
+		throw LogicExceptionImpl("Service::Backup", _("Main database file must be specified."));
 	if (bkfile.empty())
-		throw LogicExceptionImpl("Service::Backup", "Backup file must be specified.");
+		throw LogicExceptionImpl("Service::Backup", _("Backup file must be specified."));
 
 	IBS status;
 	SPB spb;
@@ -505,20 +507,20 @@ void ServiceImpl::StartBackup(const std::string& dbfile,
 
 	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Service::Backup", "isc_service_start failed");
+		throw SQLExceptionImpl(status, "Service::Backup", _("isc_service_start failed"));
 }
 
 void ServiceImpl::StartRestore(const std::string& bkfile, const std::string& dbfile,
-	int	pagesize, IBPP::BRF flags)
+	int32_t	pagesize, IBPP::BRF flags)
 {
 	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", "Requires the version 6 of GDS32.DLL");
+		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
-		throw LogicExceptionImpl("Service::Restore", "Service is not connected.");
+		throw LogicExceptionImpl("Service::Restore", _("Service is not connected."));
 	if (bkfile.empty())
-		throw LogicExceptionImpl("Service::Restore", "Backup file must be specified.");
+		throw LogicExceptionImpl("Service::Restore", _("Backup file must be specified."));
 	if (dbfile.empty())
-		throw LogicExceptionImpl("Service::Restore", "Main database file must be specified.");
+		throw LogicExceptionImpl("Service::Restore", _("Main database file must be specified."));
 
 	IBS status;
 	SPB spb;
@@ -542,7 +544,7 @@ void ServiceImpl::StartRestore(const std::string& bkfile, const std::string& dbf
 
 	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Service::Restore", "isc_service_start failed");
+		throw SQLExceptionImpl(status, "Service::Restore", _("isc_service_start failed"));
 }
 
 const char* ServiceImpl::WaitMsg(void)
@@ -552,7 +554,7 @@ const char* ServiceImpl::WaitMsg(void)
 	RB result(1024);
 
 	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", "Requires the version 6 of GDS32.DLL");
+		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 
 	req.Insert(isc_info_svc_line);	// Request one line of textual output
 
@@ -561,7 +563,7 @@ const char* ServiceImpl::WaitMsg(void)
 	(*gds.Call()->m_service_query)(status.Self(), &mHandle, 0, 0, 0,
 		req.Size(),	req.Self(),	result.Size(), result.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "ServiceImpl::Wait", "isc_service_query failed");
+		throw SQLExceptionImpl(status, "ServiceImpl::Wait", _("isc_service_query failed"));
 
 	// If message length is	zero bytes,	task is	finished
 	if (result.GetString(isc_info_svc_line,	mWaitMessage) == 0) return 0;
@@ -578,10 +580,10 @@ void ServiceImpl::Wait(void)
 	std::string msg;
 
 	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", "Requires the version 6 of GDS32.DLL");
+		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 
 	spb.Insert(isc_info_svc_line);
-	while (true)
+	for (;;)
 	{
 		// Sleeps 1 millisecond upfront. This will release the remaining
 		// timeslot of the thread. Doing so will give a good chance for small
@@ -596,7 +598,7 @@ void ServiceImpl::Wait(void)
 		(*gds.Call()->m_service_query)(status.Self(), &mHandle, 0, 0,	0,
 			spb.Size(),	spb.Self(),	result.Size(), result.Self());
 		if (status.Errors())
-			throw SQLExceptionImpl(status, "ServiceImpl::Wait", "isc_service_query failed");
+			throw SQLExceptionImpl(status, "ServiceImpl::Wait", _("isc_service_query failed"));
 
 		// If message length is	zero bytes,	task is	finished
 		if (result.GetString(isc_info_svc_line,	msg) ==	0) return;
@@ -616,7 +618,7 @@ IBPP::IService* ServiceImpl::AddRef(void)
 void ServiceImpl::Release(IBPP::IService*& Self)
 {
 	if (this != dynamic_cast<ServiceImpl*>(Self))
-		throw LogicExceptionImpl("Service::Release", "Invalid Release()");
+		throw LogicExceptionImpl("Service::Release", _("Invalid Release()"));
 
 	ASSERTION(mRefCount >= 0);
 
@@ -655,10 +657,7 @@ ServiceImpl::ServiceImpl(const std::string& ServerName,
 ServiceImpl::~ServiceImpl()
 {
 	if (Connected())
-	{
-		try	{ Disconnect();	}
-			catch (IBPP::Exception&) { }
-	}
+		try	{ Disconnect();	} catch (IBPP::Exception&) { }
 }
 
 //

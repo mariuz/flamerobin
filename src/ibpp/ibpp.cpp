@@ -81,26 +81,51 @@ GDS* GDS::Call(void)
 		char fbdll[MAX_PATH];
 		HKEY hkey_instances;
 
-		// Try to load FBCLIENT.DLL from the current application location.  This
-		// is a usefull step for applications using the embedded version of FB
-		// or a local copy (for whatever reasons) of the dll.
-
+		// Try to load FBCLIENT.DLL from each of the additional optional paths
+		// that may have been specified through ClientDLLSearchPaths().
 		mHandle = 0;
-		int len = GetModuleFileName(NULL, fbdll, sizeof(fbdll));
-		if (len != 0)
+
+		std::string::size_type pos = 0;
+		while (pos < mSearchPaths.size())
 		{
-			// Get to the last '\' (this one precedes the filename part).
-			// There is always one after a success call to GetModuleFileName().
-			char* p = fbdll + len;
-			do {--p;} while (*p != '\\');
-			*p = '\0';
-			lstrcat(fbdll, "\\fbembed.dll");// Local copy could be named fbembed.dll
-			mHandle = LoadLibrary(fbdll);
-			if (mHandle == 0)
+			std::string::size_type newpos = mSearchPaths.find(';', pos);
+
+			std::string path;
+			if (newpos == std::string::npos) path = mSearchPaths.substr(pos);
+			else path = mSearchPaths.substr(pos, newpos-pos);
+				
+			if (path.size() >= 1)
 			{
+				if (path[path.size()-1] != '\\') path += '\\';
+				path.append("fbclient.dll");
+				mHandle = LoadLibrary(path.c_str());
+				if (mHandle != 0 || newpos == std::string::npos) break;
+			}
+			pos = newpos + 1;
+		}
+		
+		if (mHandle == 0)
+		{
+			// Try to load FBCLIENT.DLL from the current application location.  This
+			// is a usefull step for applications using the embedded version of FB
+			// or a local copy (for whatever reasons) of the dll.
+			
+			int len = GetModuleFileName(NULL, fbdll, sizeof(fbdll));
+			if (len != 0)
+			{
+				// Get to the last '\' (this one precedes the filename part).
+				// There is always one after a success call to GetModuleFileName().
+				char* p = fbdll + len;
+				do {--p;} while (*p != '\\');
 				*p = '\0';
-				lstrcat(fbdll, "\\fbclient.dll");	// Or possibly renamed fbclient.dll
+				lstrcat(fbdll, "\\fbembed.dll");// Local copy could be named fbembed.dll
 				mHandle = LoadLibrary(fbdll);
+				if (mHandle == 0)
+				{
+					*p = '\0';
+					lstrcat(fbdll, "\\fbclient.dll");	// Or possibly renamed fbclient.dll
+					mHandle = LoadLibrary(fbdll);
+				}
 			}
 		}
 
@@ -137,7 +162,8 @@ GDS* GDS::Call(void)
 				// System directories
 				mHandle = LoadLibrary("gds32.dll");
 				if (mHandle == 0)
-					throw LogicExceptionImpl("GDS::Call()", "Can't find/load FBCLIENT/GDS32.");
+					throw LogicExceptionImpl("GDS::Call()",
+						_("Can't find or load FBCLIENT.DLL or GDS32.DLL"));
 			}
 		}
 #endif
@@ -149,7 +175,7 @@ GDS* GDS::Call(void)
 #ifdef IBPP_WINDOWS
 #define IB_ENTRYPOINT(X) \
 			if ((m_##X = (proto_##X*)GetProcAddress(mHandle, "isc_"#X)) == 0) \
-				throw LogicExceptionImpl("GDS:gds()", "Entry-point isc_"#X" not found")
+				throw LogicExceptionImpl("GDS:gds()", _("Entry-point isc_"#X" not found"))
 #endif
 #ifdef IBPP_UNIX
 /* TODO : perform a late-bind on unix --- not so important, well I think (OM) */
@@ -219,18 +245,29 @@ GDS* GDS::Call(void)
 namespace IBPP
 {
 
-	bool CheckVersion(unsigned long AppVersion)
+	bool CheckVersion(uint32_t AppVersion)
 	{
-		(void)gds.Call(); 		// Just call it to trigger the initialization
+		//(void)gds.Call(); 		// Just call it to trigger the initialization
 		return (AppVersion & 0xFFFFFF00) ==
 				(IBPP::Version & 0xFFFFFF00) ? true : false;
 	}
 
-	int GDSVersion(void)
+	int32_t GDSVersion(void)
 	{
 		return gds.Call()->mGDSVersion;
 	}
 
+#ifdef IBPP_WINDOWS
+	void ClientLibSearchPaths(const std::string& paths)
+	{
+		gds.mSearchPaths.assign(paths);
+	}
+#else
+	void ClientLibSearchPaths(const std::string&)
+	{
+	}
+#endif
+	
 	//	Factories for our Interface objects
 
 	IService* ServiceFactory(const std::string& ServerName,

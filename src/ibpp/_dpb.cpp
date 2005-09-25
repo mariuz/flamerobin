@@ -80,12 +80,12 @@ void DPB::Insert(char type, const char* data)
     mSize += len;
 }
 
-void DPB::Insert(char type, short data)
+void DPB::Insert(char type, int16_t data)
 {
 	Grow(2 + 2);
     mBuffer[mSize++] = type;
 	mBuffer[mSize++] = char(2);
-    *(short*)&mBuffer[mSize] = short((*gds.Call()->m_vax_integer)((char*)&data, 2));
+    *(int16_t*)&mBuffer[mSize] = int16_t((*gds.Call()->m_vax_integer)((char*)&data, 2));
     mSize += 2;
 }
 

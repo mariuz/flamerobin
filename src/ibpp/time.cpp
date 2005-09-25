@@ -49,22 +49,22 @@ void IBPP::Time::Now(void)
 	IBPP::itot(&mTime, loctime->tm_hour, loctime->tm_min, loctime->tm_sec);
 }
 
-void IBPP::Time::SetTime(int hour, int minute, int second)
+void IBPP::Time::SetTime(int32_t hour, int32_t minute, int32_t second)
 {
 	if (hour < 0 || hour > 23 ||
 		minute < 0 || minute > 59 ||
 			second < 0 || second > 59)
 				throw LogicExceptionImpl("Time::SetTime",
-					"Invalid hour, minute, second values");
+					_("Invalid hour, minute, second values"));
 	IBPP::itot(&mTime, hour, minute, second);
 }
 
-void IBPP::Time::GetTime(int& hour, int& minute, int& second) const
+void IBPP::Time::GetTime(int32_t& hour, int32_t& minute, int32_t& second) const
 {
 	IBPP::ttoi(mTime, &hour, &minute, &second);
 }
 
-IBPP::Time::Time(int hour, int minute, int second)
+IBPP::Time::Time(int32_t hour, int32_t minute, int32_t second)
 {
 	SetTime(hour, minute, second);
 }
@@ -74,9 +74,9 @@ IBPP::Time::Time(const IBPP::Time& copied)
 	mTime = copied.mTime;
 }
 
-IBPP::Time::Time(const int& copied)
+IBPP::Time::Time(const int32_t& copied)
 {
-	if (copied < 0 || copied > 86399) throw LogicExceptionImpl("Time::Time(int&)", "Invalid time value");
+	if (copied < 0 || copied > 86399) throw LogicExceptionImpl("Time::Time(int&)", _("Invalid time value"));
 	mTime = copied;
 }
 
@@ -92,10 +92,10 @@ IBPP::Time& IBPP::Time::operator=(const IBPP::Time& assigned)
 	return *this;
 }
 
-IBPP::Time& IBPP::Time::operator=(const int& assigned)
+IBPP::Time& IBPP::Time::operator=(const int32_t& assigned)
 {
 	if (assigned < 0 || assigned > 86399)
-		throw LogicExceptionImpl("Time::operator=(int)", "Invalid time value");
+		throw LogicExceptionImpl("Time::operator=(int)", _("Invalid time value"));
 	mTime = assigned;
 	return *this;
 }

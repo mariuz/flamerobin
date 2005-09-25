@@ -30,6 +30,54 @@ Contributor(s): ______________________________________.
 The most recent addition to this file is always on top and has the highest
 item number.
 
+10. September 23, 2005
+
+- Huge but simple code editing occured over all the source code base to correctly
+support LP64 and LLP64 models on 64 bits environments. Good news is that this only
+relies on using the C 99 standard exact precision integer types int16_t, int32_t
+and int64_t (int64_t had already been introduced in the source earlier).
+
+9. September 12, 2005
+
+- The official way to build IBPP on Windows using Borland, Microsoft and Digital
+Mars compilers has changed. Previously the HOWTOBUILD.TXT files recommended to
+download and install MSYS. This is not required anymore though still applicable.
+All you need to do is to get a Win32 native port of GNU MAKE and SH. See the
+HOWTOBUILD.TXT file for details. This is easier / lighter and helps keep a
+single Makefile valid for all supported platforms, until some more complex
+configuration like eventually bakefiles start to be used. Really this is not
+so new. It has been a looong time that you could build IBPP that way, I just
+decided that it was a more simple / straighforward default procedure.
+
+- Note regarding MSVC. For building with MSVC 6, you have to proceed as
+described in HOWTOBUILD.TXT (using gnu make). No visual project is provided
+for MSVC 6 and no such will be provided. (Because it would then have to be
+maintained). For building with MSVC 7.1, you have two options. The Makefile
+way (as for MSVC 6) or the visual way using the provided ibpp.sln solution file.
+This solution file will be maintained (because _I_ use that method so can
+commit myself to maintain / support it).
+
+
+8. September 10, 2005
+
+- A lot of small details changed in the implementation of various internals
+methods, as to stop using C++ exceptions in some specific cases. This makes for
+a cleaner design and better experience when running under debugger control.
+Thanks to Michael Hieke and some others for insisting on this.
+
+
+7. August 30, 2005
+
+- Added void ClientDLLSearchPaths(const std::string&);
+On Win32 platform, ClientDLLSearchPaths() allows to setup one or multiple 
+additional paths (separated with a ';') where IBPP will look for the client 
+library (before the default implicit search locations). This is usefull for 
+applications distributed with a 'private' copy of Firebird, when the registry 
+is useless to identify the location from where to attempt loading the 
+fbclient.dll / gds32.dll. If called, this function must be called *early* by 
+the application, before *any* other function or object methods of IBPP. This 
+is currently a NO-OP on platforms other than Win32.
+
 
 6. February 13, 2005
 

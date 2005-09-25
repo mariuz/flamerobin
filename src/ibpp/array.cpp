@@ -45,9 +45,13 @@
 
 using namespace ibpp_internals;
 
-#ifdef IBPP_MSVC	// Fix to famous MSVC 6 variable scope bug
+/*
+// Fix to famous MSVC 6 variable scope bug
+// This fix will trigger warning C4127 at level 4 with MSVC 7.1 at least
+#ifdef IBPP_MSVC
 #define for if(true)for
 #endif
+*/
 
 namespace ibpp_internals
 {
@@ -84,7 +88,7 @@ namespace ibpp_internals
 void ArrayImpl::AttachDatabase(IBPP::IDatabase* database)
 {
 	if (database == 0) throw LogicExceptionImpl("Array::AttachDatabase",
-			"Can't attach a 0 Database object.");
+			_("Can't attach a 0 Database object."));
 
 	if (mDatabase != 0) mDatabase->DetachArray(this);
 	mDatabase = dynamic_cast<DatabaseImpl*>(database);
@@ -94,7 +98,7 @@ void ArrayImpl::AttachDatabase(IBPP::IDatabase* database)
 void ArrayImpl::AttachTransaction(IBPP::ITransaction* transaction)
 {
 	if (transaction == 0) throw LogicExceptionImpl("Array::AttachTransaction",
-			"Can't attach a 0 Transaction object.");
+			_("Can't attach a 0 Transaction object."));
 
 	if (mTransaction != 0) mTransaction->DetachArray(this);
 	mTransaction = dynamic_cast<TransactionImpl*>(transaction);
@@ -103,8 +107,7 @@ void ArrayImpl::AttachTransaction(IBPP::ITransaction* transaction)
 
 void ArrayImpl::DetachDatabase(void)
 {
-	if (mDatabase == 0) throw LogicExceptionImpl("Array::DetachDatabase",
-			"No Database was attached.");
+	if (mDatabase == 0) return;
 
 	mDatabase->DetachArray(this);
 	mDatabase = 0;
@@ -112,8 +115,7 @@ void ArrayImpl::DetachDatabase(void)
 
 void ArrayImpl::DetachTransaction(void)
 {
-	if (mTransaction == 0) throw LogicExceptionImpl("Array::DetachTransaction",
-			"No Transaction was attached.");
+	if (mTransaction == 0) return;
 
 	mTransaction->DetachArray(this);
 	mTransaction = 0;
@@ -122,25 +124,25 @@ void ArrayImpl::DetachTransaction(void)
 IBPP::IDatabase* ArrayImpl::Database(void) const
 {
 	if (mDatabase == 0) throw LogicExceptionImpl("Array::Database",
-			"No Database is attached.");
+			_("No Database is attached."));
 	return mDatabase;
 }
 
 IBPP::ITransaction* ArrayImpl::Transaction(void) const
 {
 	if (mTransaction == 0) throw LogicExceptionImpl("Array::Transaction",
-			"No Transaction is attached.");
+			_("No Transaction is attached."));
 	return mTransaction;
 }
 
 void ArrayImpl::Describe(const std::string& table, const std::string& column)
 {
 	//if (mIdAssigned)
-	//	throw LogicExceptionImpl("Array::Lookup", "Array already in use.");
+	//	throw LogicExceptionImpl("Array::Lookup", _("Array already in use."));
 	if (mDatabase == 0)
-		throw LogicExceptionImpl("Array::Lookup", "No Database is attached.");
+		throw LogicExceptionImpl("Array::Lookup", _("No Database is attached."));
 	if (mTransaction == 0)
-		throw LogicExceptionImpl("Array::Lookup", "No Transaction is attached.");
+		throw LogicExceptionImpl("Array::Lookup", _("No Transaction is attached."));
 
 	ResetId();	// Re-use this array object if was previously assigned
 
@@ -150,29 +152,30 @@ void ArrayImpl::Describe(const std::string& table, const std::string& column)
 			const_cast<char*>(column.c_str()), &mDesc);
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Array::Lookup",
-			"isc_array_lookup_bounds failed.");
+			_("isc_array_lookup_bounds failed."));
 
 	AllocArrayBuffer();
 
 	mDescribed = true;
 }
 
-void ArrayImpl::SetBounds(int dim, int low, int high)
+void ArrayImpl::SetBounds(int32_t dim, int32_t low, int32_t high)
 {
 	if (! mDescribed)
-		throw LogicExceptionImpl("Array::SetBounds", "Array description not set.");
+		throw LogicExceptionImpl("Array::SetBounds", _("Array description not set."));
 	if (mDatabase == 0)
-		throw LogicExceptionImpl("Array::SetBounds", "No Database is attached.");
+		throw LogicExceptionImpl("Array::SetBounds", _("No Database is attached."));
 	if (mTransaction == 0)
-		throw LogicExceptionImpl("Array::SetBounds", "No Transaction is attached.");
+		throw LogicExceptionImpl("Array::SetBounds", _("No Transaction is attached."));
 	if (dim < 0 || dim > mDesc.array_desc_dimensions-1)
-		throw LogicExceptionImpl("Array::SetBounds", "Invalid dimension.");
+		throw LogicExceptionImpl("Array::SetBounds", _("Invalid dimension."));
 	if (low > high ||
 		low < mDesc.array_desc_bounds[dim].array_bound_lower ||
 		low > mDesc.array_desc_bounds[dim].array_bound_upper ||
 		high > mDesc.array_desc_bounds[dim].array_bound_upper ||
 		high < mDesc.array_desc_bounds[dim].array_bound_lower)
-		throw LogicExceptionImpl("Array::SetBounds", "Invalid bounds. You can only narrow the bounds.");
+		throw LogicExceptionImpl("Array::SetBounds",
+			_("Invalid bounds. You can only narrow the bounds."));
 
 	mDesc.array_desc_bounds[dim].array_bound_lower = short(low);
 	mDesc.array_desc_bounds[dim].array_bound_upper = short(high);
@@ -183,7 +186,8 @@ void ArrayImpl::SetBounds(int dim, int low, int high)
 IBPP::SDT ArrayImpl::ElementType(void)
 {
 	if (! mDescribed)
-		throw LogicExceptionImpl("Array::ElementType", "Array description not set.");
+		throw LogicExceptionImpl("Array::ElementType",
+			_("Array description not set."));
 
 	IBPP::SDT value;
 	switch (mDesc.array_desc_dtype)
@@ -200,44 +204,47 @@ IBPP::SDT ArrayImpl::ElementType(void)
 		case blr_sql_date :		value = IBPP::sdDate;		break;
 		case blr_sql_time :		value = IBPP::sdTime;		break;
 		default : throw LogicExceptionImpl("Array::ElementType",
-						"Found an unknown sqltype !");
+						_("Found an unknown sqltype !"));
 	}
 
 	return value;
 }
 
-int ArrayImpl::ElementSize(void)
+int32_t ArrayImpl::ElementSize(void)
 {
 	if (! mDescribed)
-		throw LogicExceptionImpl("Array::ElementSize", "Array description not set.");
+		throw LogicExceptionImpl("Array::ElementSize",
+			_("Array description not set."));
 
 	return mDesc.array_desc_length;
 }
 
-int ArrayImpl::ElementScale(void)
+int32_t ArrayImpl::ElementScale(void)
 {
 	if (! mDescribed)
-		throw LogicExceptionImpl("Array::ElementScale", "Array description not set.");
+		throw LogicExceptionImpl("Array::ElementScale",
+			_("Array description not set."));
 
 	return mDesc.array_desc_scale;
 }
 
-int ArrayImpl::Dimensions(void)
+int32_t ArrayImpl::Dimensions(void)
 {
 	if (! mDescribed)
-		throw LogicExceptionImpl("Array::Dimensions", "Array description not set.");
+		throw LogicExceptionImpl("Array::Dimensions",
+			_("Array description not set."));
 
 	return mDesc.array_desc_dimensions;
 }
 
-void ArrayImpl::Bounds(int dim, int* low, int* high)
+void ArrayImpl::Bounds(int32_t dim, int32_t* low, int32_t* high)
 {
 	if (! mDescribed)
-		throw LogicExceptionImpl("Array::Bounds", "Array description not set.");
+		throw LogicExceptionImpl("Array::Bounds", _("Array description not set."));
 	if (dim < 0 || dim > mDesc.array_desc_dimensions-1)
-		throw LogicExceptionImpl("Array::Bounds", "Invalid dimension.");
+		throw LogicExceptionImpl("Array::Bounds", _("Invalid dimension."));
 	if (low == 0 || high == 0)
-		throw LogicExceptionImpl("Array::Bounds", "0 reference detected.");
+		throw LogicExceptionImpl("Array::Bounds", _("Null reference detected."));
 
 	*low =  mDesc.array_desc_bounds[dim].array_bound_lower;
 	*high = mDesc.array_desc_bounds[dim].array_bound_upper;
@@ -275,27 +282,27 @@ We have no idea if this is fixed or not in Interbase 6.5 though.
 
 */
 
-void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
+void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int32_t datacount)
 {
 	if (! mIdAssigned)
-		throw LogicExceptionImpl("Array::ReadTo", "Array Id not read from column.");
+		throw LogicExceptionImpl("Array::ReadTo", _("Array Id not read from column."));
 	if (! mDescribed)
-		throw LogicExceptionImpl("Array::ReadTo", "Array description not set.");
+		throw LogicExceptionImpl("Array::ReadTo", _("Array description not set."));
 	if (mDatabase == 0)
-		throw LogicExceptionImpl("Array::ReadTo", "No Database is attached.");
+		throw LogicExceptionImpl("Array::ReadTo", _("No Database is attached."));
 	if (mTransaction == 0)
-		throw LogicExceptionImpl("Array::ReadTo", "No Transaction is attached.");
+		throw LogicExceptionImpl("Array::ReadTo", _("No Transaction is attached."));
 	if (datacount != mElemCount)
-		throw LogicExceptionImpl("Array::ReadTo", "Wrong count of array elements");
+		throw LogicExceptionImpl("Array::ReadTo", _("Wrong count of array elements"));
 
 	IBS status;
-	long lenbuf = mBufferSize;
+	ISC_LONG lenbuf = mBufferSize;
 	(*gds.Call()->m_array_get_slice)(status.Self(), mDatabase->GetHandlePtr(),
 		mTransaction->GetHandlePtr(), &mId, &mDesc, mBuffer, &lenbuf);
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Array::ReadTo", "isc_array_get_slice failed.");
+		throw SQLExceptionImpl(status, "Array::ReadTo", _("isc_array_get_slice failed."));
 	if (lenbuf != mBufferSize)
-		throw SQLExceptionImpl(status, "Array::ReadTo", "Internal buffer size discrepancy.");
+		throw SQLExceptionImpl(status, "Array::ReadTo", _("Internal buffer size discrepancy."));
 
 	// Now, convert the types and copy values to the user array...
 	int len;
@@ -326,7 +333,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 					dst += sizeof(bool);
 				}
 			}
-			else throw LogicExceptionImpl("Array::ReadTo", "Incompatible types.");
+			else throw LogicExceptionImpl("Array::ReadTo", _("Incompatible types."));
 			break;
 
 		case blr_varying :
@@ -353,7 +360,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 					dst += sizeof(bool);
 				}
 			}
-			else throw LogicExceptionImpl("Array::ReadTo", "Incompatible types.");
+			else throw LogicExceptionImpl("Array::ReadTo", _("Incompatible types."));
 			break;
 
 		case blr_short :
@@ -361,7 +368,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::ReadTo",
-						"NUM/DEC with scale : use GetDouble()");
+						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(bool*)dst = (*(short*)src != 0) ? true : false;
@@ -369,11 +376,11 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 					dst += sizeof(bool);
 				}
 			}
-			else if (adtype == IBPP::adShort)
+			else if (adtype == IBPP::adInt16)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::ReadTo",
-						"NUM/DEC with scale : use GetDouble()");
+						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(short*)dst = *(short*)src;
@@ -381,11 +388,11 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 					dst += sizeof(short);
 				}
 			}
-			else if (adtype == IBPP::adInt)
+			else if (adtype == IBPP::adInt32)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::ReadTo",
-						"NUM/DEC with scale : use GetDouble()");
+						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(int*)dst = (int)*(short*)src;
@@ -397,7 +404,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::ReadTo",
-						"NUM/DEC with scale : use GetDouble()");
+						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(int64_t*)dst = (int64_t)*(short*)src;
@@ -427,7 +434,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 					dst += sizeof(double);
 				}
 			}
-			else throw LogicExceptionImpl("Array::ReadTo", "Incompatible types.");
+			else throw LogicExceptionImpl("Array::ReadTo", _("Incompatible types."));
 			break;
 
 		case blr_long :
@@ -435,7 +442,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::ReadTo",
-						"NUM/DEC with scale : use GetDouble()");
+						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(bool*)dst = (*(long*)src != 0) ? true : false;
@@ -443,26 +450,26 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 					dst += sizeof(bool);
 				}
 			}
-			else if (adtype == IBPP::adShort)
+			else if (adtype == IBPP::adInt16)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::ReadTo",
-						"NUM/DEC with scale : use GetDouble()");
+						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					if (*(long*)src < minshort || *(long*)src > maxshort)
 						throw LogicExceptionImpl("Array::ReadTo",
-							"Out of range numeric conversion !");
+							_("Out of range numeric conversion !"));
 					*(short*)dst = short(*(long*)src);
 					src += mElemSize;
 					dst += sizeof(short);
 				}
 			}
-			else if (adtype == IBPP::adInt)
+			else if (adtype == IBPP::adInt32)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::ReadTo",
-						"NUM/DEC with scale : use GetDouble()");
+						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(long*)dst = *(long*)src;
@@ -474,7 +481,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::ReadTo",
-						"NUM/DEC with scale : use GetDouble()");
+						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(int64_t*)dst = (int64_t)*(long*)src;
@@ -504,7 +511,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 					dst += sizeof(double);
 				}
 			}
-			else throw LogicExceptionImpl("Array::ReadTo", "Incompatible types.");
+			else throw LogicExceptionImpl("Array::ReadTo", _("Incompatible types."));
 			break;
 
 		case blr_int64 :
@@ -512,7 +519,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::ReadTo",
-						"NUM/DEC with scale : use GetDouble()");
+						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(bool*)dst = (*(int64_t*)src != 0) ? true : false;
@@ -520,31 +527,31 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 					dst += sizeof(bool);
 				}
 			}
-			else if (adtype == IBPP::adShort)
+			else if (adtype == IBPP::adInt16)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::ReadTo",
-						"NUM/DEC with scale : use GetDouble()");
+						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					if (*(int64_t*)src < minshort || *(int64_t*)src > maxshort)
 						throw LogicExceptionImpl("Array::ReadTo",
-							"Out of range numeric conversion !");
+							_("Out of range numeric conversion !"));
 					*(short*)dst = short(*(int64_t*)src);
 					src += mElemSize;
 					dst += sizeof(short);
 				}
 			}
-			else if (adtype == IBPP::adInt)
+			else if (adtype == IBPP::adInt32)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::ReadTo",
-						"NUM/DEC with scale : use GetDouble()");
+						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					if (*(int64_t*)src < minlong || *(int64_t*)src > maxlong)
 						throw LogicExceptionImpl("Array::ReadTo",
-							"Out of range numeric conversion !");
+							_("Out of range numeric conversion !"));
 					*(long*)dst = (long)*(int64_t*)src;
 					src += mElemSize;
 					dst += sizeof(long);
@@ -554,7 +561,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::ReadTo",
-						"NUM/DEC with scale : use GetDouble()");
+						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(int64_t*)dst = *(int64_t*)src;
@@ -584,12 +591,12 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 					dst += sizeof(double);
 				}
 			}
-			else throw LogicExceptionImpl("Array::ReadTo", "Incompatible types.");
+			else throw LogicExceptionImpl("Array::ReadTo", _("Incompatible types."));
 			break;
 
 		case blr_float :
 			if (adtype != IBPP::adFloat || mDesc.array_desc_scale != 0)
-				throw LogicExceptionImpl("Array::ReadTo", "Incompatible types.");
+				throw LogicExceptionImpl("Array::ReadTo", _("Incompatible types."));
 			for (int i = 0; i < mElemCount; i++)
 			{
 				*(float*)dst = *(float*)src;
@@ -600,7 +607,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 
 		case blr_double :
 			if (adtype != IBPP::adDouble) throw LogicExceptionImpl("Array::ReadTo",
-										"Incompatible types.");
+										_("Incompatible types."));
 			if (mDesc.array_desc_scale != 0)
 			{
 				// Round to scale of NUMERIC(x,y)
@@ -625,7 +632,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 
 		case blr_timestamp :
 			if (adtype != IBPP::adTimestamp) throw LogicExceptionImpl("Array::ReadTo",
-												"Incompatible types.");
+												_("Incompatible types."));
 			for (int i = 0; i < mElemCount; i++)
 			{
 				tm tms;
@@ -640,7 +647,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 
 		case blr_sql_date :
 			if (adtype != IBPP::adDate) throw LogicExceptionImpl("Array::ReadTo",
-												"Incompatible types.");
+												_("Incompatible types."));
 			for (int i = 0; i < mElemCount; i++)
 			{
 				tm tms;
@@ -654,7 +661,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 
 		case blr_sql_time :
 			if (adtype != IBPP::adTime) throw LogicExceptionImpl("Array::ReadTo",
-												"Incompatible types.");
+												_("Incompatible types."));
 			for (int i = 0; i < mElemCount; i++)
 			{
 				tm tms;
@@ -667,20 +674,20 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			break;
 
 		default :
-			throw LogicExceptionImpl("Array::ReadTo", "Unknown sql type.");
+			throw LogicExceptionImpl("Array::ReadTo", _("Unknown sql type."));
 	}
 }
 
-void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
+void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int32_t datacount)
 {
 	if (! mDescribed)
-		throw LogicExceptionImpl("Array::WriteFrom", "Array description not set.");
+		throw LogicExceptionImpl("Array::WriteFrom", _("Array description not set."));
 	if (mDatabase == 0)
-		throw LogicExceptionImpl("Array::WriteFrom", "No Database is attached.");
+		throw LogicExceptionImpl("Array::WriteFrom", _("No Database is attached."));
 	if (mTransaction == 0)
-		throw LogicExceptionImpl("Array::WriteFrom", "No Transaction is attached.");
+		throw LogicExceptionImpl("Array::WriteFrom", _("No Transaction is attached."));
 	if (datacount != mElemCount)
-		throw LogicExceptionImpl("Array::ReadTo", "Wrong count of array elements");
+		throw LogicExceptionImpl("Array::ReadTo", _("Wrong count of array elements"));
 
 	// Read user data and convert types to the mBuffer
 	int len;
@@ -713,7 +720,7 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 					dst += mElemSize;
 				}
 			}
-			else throw LogicExceptionImpl("Array::WriteFrom", "Incompatible types.");
+			else throw LogicExceptionImpl("Array::WriteFrom", _("Incompatible types."));
 			break;
 
 		case blr_varying :
@@ -739,7 +746,7 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 					dst += mElemSize;
 				}
 			}
-			else throw LogicExceptionImpl("Array::WriteFrom", "Incompatible types.");
+			else throw LogicExceptionImpl("Array::WriteFrom", _("Incompatible types."));
 			break;
 
 		case blr_short :
@@ -747,7 +754,7 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::WriteFrom",
-						"NUM/DEC with scale : use SetDouble()");
+						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(short*)dst = short(*(bool*)src ? 1 : 0);
@@ -755,11 +762,11 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 					dst += mElemSize;
 				}
 			}
-			else if (adtype == IBPP::adShort)
+			else if (adtype == IBPP::adInt16)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::WriteFrom",
-						"NUM/DEC with scale : use SetDouble()");
+						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(short*)dst = *(short*)src;
@@ -767,16 +774,16 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 					dst += mElemSize;
 				}
 			}
-			else if (adtype == IBPP::adInt)
+			else if (adtype == IBPP::adInt32)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::WriteFrom",
-						"NUM/DEC with scale : use SetDouble()");
+						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					if (*(long*)src < minshort || *(long*)src > maxshort)
 						throw LogicExceptionImpl("Array::WriteFrom",
-							"Out of range numeric conversion !");
+							_("Out of range numeric conversion !"));
 					*(short*)dst = (short)*(int*)src;
 					src += sizeof(int);
 					dst += mElemSize;
@@ -786,12 +793,12 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::WriteFrom",
-						"NUM/DEC with scale : use SetDouble()");
+						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					if (*(int64_t*)src < minshort || *(int64_t*)src > maxshort)
 						throw LogicExceptionImpl("Array::WriteFrom",
-							"Out of range numeric conversion !");
+							_("Out of range numeric conversion !"));
 					*(short*)dst = (short)*(int64_t*)src;
 					src += sizeof(int64_t);
 					dst += mElemSize;
@@ -821,7 +828,7 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 					dst += mElemSize;
 				}
 			}
-			else throw LogicExceptionImpl("Array::WriteFrom", "Incompatible types.");
+			else throw LogicExceptionImpl("Array::WriteFrom", _("Incompatible types."));
 			break;
 
 		case blr_long :
@@ -829,7 +836,7 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::WriteFrom",
-						"NUM/DEC with scale : use SetDouble()");
+						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(long*)dst = *(bool*)src ? 1 : 0;
@@ -837,11 +844,11 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 					dst += mElemSize;
 				}
 			}
-			else if (adtype == IBPP::adShort)
+			else if (adtype == IBPP::adInt16)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::WriteFrom",
-						"NUM/DEC with scale : use SetDouble()");
+						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(long*)dst = *(short*)src;
@@ -849,11 +856,11 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 					dst += mElemSize;
 				}
 			}
-			else if (adtype == IBPP::adInt)
+			else if (adtype == IBPP::adInt32)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::WriteFrom",
-						"NUM/DEC with scale : use SetDouble()");
+						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(long*)dst = *(long*)src;
@@ -865,12 +872,12 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::WriteFrom",
-						"NUM/DEC with scale : use SetDouble()");
+						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					if (*(int64_t*)src < minlong || *(int64_t*)src > maxlong)
 						throw LogicExceptionImpl("Array::WriteFrom",
-							"Out of range numeric conversion !");
+							_("Out of range numeric conversion !"));
 					*(long*)dst = (long)*(int64_t*)src;
 					src += sizeof(int64_t);
 					dst += mElemSize;
@@ -900,7 +907,7 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 					dst += mElemSize;
 				}
 			}
-			else throw LogicExceptionImpl("Array::WriteFrom", "Incompatible types.");
+			else throw LogicExceptionImpl("Array::WriteFrom", _("Incompatible types."));
 			break;
 
 		case blr_int64 :
@@ -908,7 +915,7 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::WriteFrom",
-						"NUM/DEC with scale : use SetDouble()");
+						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(int64_t*)dst = *(bool*)src ? 1 : 0;
@@ -916,11 +923,11 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 					dst += mElemSize;
 				}
 			}
-			else if (adtype == IBPP::adShort)
+			else if (adtype == IBPP::adInt16)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::WriteFrom",
-						"NUM/DEC with scale : use SetDouble()");
+						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(int64_t*)dst = *(short*)src;
@@ -928,11 +935,11 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 					dst += mElemSize;
 				}
 			}
-			else if (adtype == IBPP::adInt)
+			else if (adtype == IBPP::adInt32)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::WriteFrom",
-						"NUM/DEC with scale : use SetDouble()");
+						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(int64_t*)dst = *(long*)src;
@@ -944,7 +951,7 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			{
 				if (mDesc.array_desc_scale != 0)
 					throw LogicExceptionImpl("Array::WriteFrom",
-						"NUM/DEC with scale : use SetDouble()");
+						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(int64_t*)dst = *(int64_t*)src;
@@ -978,12 +985,12 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			}
 			else
 				throw LogicExceptionImpl("Array::WriteFrom",
-					"Incompatible types (blr_int64 and ADT %d).", (int)adtype);
+					_("Incompatible types (blr_int64 and ADT %d)."), (int)adtype);
 			break;
 
 		case blr_float :
 			if (adtype != IBPP::adFloat || mDesc.array_desc_scale != 0)
-				throw LogicExceptionImpl("Array::WriteFrom", "Incompatible types.");
+				throw LogicExceptionImpl("Array::WriteFrom", _("Incompatible types."));
 			for (int i = 0; i < mElemCount; i++)
 			{
 				*(float*)dst = *(float*)src;
@@ -994,7 +1001,7 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 
 		case blr_double :
 			if (adtype != IBPP::adDouble) throw LogicExceptionImpl("Array::WriteFrom",
-										"Incompatible types.");
+										_("Incompatible types."));
 			if (mDesc.array_desc_scale != 0)
 			{
 				// Round to scale of NUMERIC(x,y)
@@ -1020,12 +1027,12 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 
 		case blr_timestamp :
 			if (adtype != IBPP::adTimestamp) throw LogicExceptionImpl("Array::ReadTo",
-												"Incompatible types.");
+												_("Incompatible types."));
 			for (int i = 0; i < mElemCount; i++)
 			{
 				IBPP::Timestamp* timestamp;
-				int year, month, day;
-				int hour, minute, second;
+				int32_t year, month, day;
+				int32_t hour, minute, second;
 				tm tms;
 				memset(&tms, 0, sizeof(tms));
 				timestamp = (IBPP::Timestamp*)src;
@@ -1045,11 +1052,11 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 
 		case blr_sql_date :
 			if (adtype != IBPP::adDate) throw LogicExceptionImpl("Array::ReadTo",
-												"Incompatible types.");
+												_("Incompatible types."));
 			for (int i = 0; i < mElemCount; i++)
 			{
 				IBPP::Date* date;
-				int year, month, day;
+				int32_t year, month, day;
 				tm tms;
 				memset(&tms, 0, sizeof(tms));
 				date = (IBPP::Date*)src;
@@ -1065,11 +1072,11 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 
 		case blr_sql_time :
 			if (adtype != IBPP::adTime) throw LogicExceptionImpl("Array::ReadTo",
-												"Incompatible types.");
+												_("Incompatible types."));
 			for (int i = 0; i < mElemCount; i++)
 			{
 				IBPP::Time* time;
-				int hour, minute, second;
+				int32_t hour, minute, second;
 				tm tms;
 				memset(&tms, 0, sizeof(tms));
 				time = (IBPP::Time*)src;
@@ -1084,17 +1091,17 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			break;
 
 		default :
-			throw LogicExceptionImpl("Array::WriteFrom", "Unknown sql type.");
+			throw LogicExceptionImpl("Array::WriteFrom", _("Unknown sql type."));
 	}
 
 	IBS status;
-	long lenbuf = mBufferSize;
+	ISC_LONG lenbuf = mBufferSize;
 	(*gds.Call()->m_array_put_slice)(status.Self(), mDatabase->GetHandlePtr(),
 		mTransaction->GetHandlePtr(), &mId, &mDesc, mBuffer, &lenbuf);
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Array::WriteFrom", "isc_array_put_slice failed.");
+		throw SQLExceptionImpl(status, "Array::WriteFrom", _("isc_array_put_slice failed."));
 	if (lenbuf != mBufferSize)
-		throw SQLExceptionImpl(status, "Array::WriteFrom", "Internal buffer size discrepancy.");
+		throw SQLExceptionImpl(status, "Array::WriteFrom", _("Internal buffer size discrepancy."));
 }
 
 IBPP::IArray* ArrayImpl::AddRef(void)
@@ -1107,7 +1114,7 @@ IBPP::IArray* ArrayImpl::AddRef(void)
 void ArrayImpl::Release(IBPP::IArray*& Self)
 {
 	if (this != dynamic_cast<ArrayImpl*>(Self))
-		throw LogicExceptionImpl("Array::Release", "Invalid Release()");
+		throw LogicExceptionImpl("Array::Release", _("Invalid Release()"));
 
 	ASSERTION(mRefCount >= 0);
 
@@ -1131,7 +1138,7 @@ void ArrayImpl::Init(void)
 void ArrayImpl::SetId(ISC_QUAD* quad)
 {
 	if (quad == 0)
-		throw LogicExceptionImpl("ArrayImpl::SetId", "0 Id reference detected.");
+		throw LogicExceptionImpl("ArrayImpl::SetId", _("Null Id reference detected."));
 
 	memcpy(&mId, quad, sizeof(mId));
 	mIdAssigned = true;
@@ -1140,7 +1147,7 @@ void ArrayImpl::SetId(ISC_QUAD* quad)
 void ArrayImpl::GetId(ISC_QUAD* quad)
 {
 	if (quad == 0)
-		throw LogicExceptionImpl("ArrayImpl::GetId", "0 Id reference detected.");
+		throw LogicExceptionImpl("ArrayImpl::GetId", _("Null Id reference detected."));
 
 	memcpy(quad, &mId, sizeof(mId));
 }

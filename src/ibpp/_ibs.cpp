@@ -40,15 +40,15 @@
 
 using namespace ibpp_internals;
 
-int IBS::SqlCode(void) const
+int32_t IBS::SqlCode(void) const
 {
-	return (int)(*gds.Call()->m_sqlcode)(&mVector[0]);
+	return (int32_t)(*gds.Call()->m_sqlcode)(&mVector[0]);
 }
 
 const char* IBS::ErrorMessage(void) const
 {
 	char msg[1024];
-	long sqlcode;
+	ISC_LONG sqlcode;
 
 	if (! mMessage.empty()) return mMessage.c_str();	// If message compiled, returns it
 
@@ -58,16 +58,16 @@ const char* IBS::ErrorMessage(void) const
 	if (sqlcode != -999)
 	{
 		(*gds.Call()->m_sql_interprete)((short)sqlcode, msg, sizeof(msg));
-		message<< "SQL Message : "<< sqlcode<< "\n"<< msg<< "\n\n";
+		message<< _("SQL Message : ")<< sqlcode<< "\n"<< msg<< "\n\n";
 	}
 
-	message<< "Engine Code    : "<< EngineCode()<< "\n";
+	message<< _("Engine Code    : ")<< EngineCode()<< "\n";
 
 	// Compiles the message (Engine part)
-	long* error = &mVector[0];
+	ISC_STATUS* error = &mVector[0];
 	try { (*gds.Call()->m_interprete)(msg, &error); }
 	catch(...) { msg[0] = '\0'; }
-	message<< "Engine Message :\n"<< msg;
+	message<< _("Engine Message :")<< "\n"<< msg;
 	try
 	{
 		while ((*gds.Call()->m_interprete)(msg, &error))

@@ -45,7 +45,7 @@ using namespace ibpp_internals;
 void BlobImpl::AttachDatabase(IBPP::IDatabase* database)
 {
 	if (database == 0) throw LogicExceptionImpl("Blob::AttachDatabase",
-			"Can't attach a NULL Database object.");
+			_("Can't attach a NULL Database object."));
 
 	if (mDatabase != 0) mDatabase->DetachBlob(this);
 	mDatabase = dynamic_cast<DatabaseImpl*>(database);
@@ -55,7 +55,7 @@ void BlobImpl::AttachDatabase(IBPP::IDatabase* database)
 void BlobImpl::AttachTransaction(IBPP::ITransaction* transaction)
 {
 	if (transaction == 0) throw LogicExceptionImpl("Blob::AttachTransaction",
-			"Can't attach a NULL Transaction object.");
+			_("Can't attach a NULL Transaction object."));
 
 	if (mTransaction != 0) mTransaction->DetachBlob(this);
 	mTransaction = dynamic_cast<TransactionImpl*>(transaction);
@@ -64,8 +64,7 @@ void BlobImpl::AttachTransaction(IBPP::ITransaction* transaction)
 
 void BlobImpl::DetachDatabase(void)
 {
-	if (mDatabase == 0) throw LogicExceptionImpl("Blob::DetachDatabase",
-			"No Database was attached.");
+	if (mDatabase == 0) return;
 
 	mDatabase->DetachBlob(this);
 	mDatabase = 0;
@@ -73,8 +72,7 @@ void BlobImpl::DetachDatabase(void)
 
 void BlobImpl::DetachTransaction(void)
 {
-	if (mTransaction == 0) throw LogicExceptionImpl("Blob::DetachTransaction",
-			"No Transaction was attached.");
+	if (mTransaction == 0) return;
 
 	mTransaction->DetachBlob(this);
 	mTransaction = 0;
@@ -83,90 +81,89 @@ void BlobImpl::DetachTransaction(void)
 IBPP::IDatabase* BlobImpl::Database(void) const
 {
 	if (mDatabase == 0) throw LogicExceptionImpl("Blob::GetDatabase",
-			"No Database is attached.");
+			_("No Database is attached."));
 	return mDatabase;
 }
 
 IBPP::ITransaction* BlobImpl::Transaction(void) const
 {
 	if (mTransaction == 0) throw LogicExceptionImpl("Blob::GetTransaction",
-			"No Transaction is attached.");
+			_("No Transaction is attached."));
 	return mTransaction;
 }
 
 void BlobImpl::Open(void)
 {
 	if (mHandle != 0)
-		throw LogicExceptionImpl("Blob::Open", "Blob already opened.");
+		throw LogicExceptionImpl("Blob::Open", _("Blob already opened."));
 	if (mDatabase == 0)
-		throw LogicExceptionImpl("Blob::Open", "No Database is attached.");
+		throw LogicExceptionImpl("Blob::Open", _("No Database is attached."));
 	if (mTransaction == 0)
-		throw LogicExceptionImpl("Blob::Open", "No Transaction is attached.");
+		throw LogicExceptionImpl("Blob::Open", _("No Transaction is attached."));
 	if (! mIdAssigned)
-		throw LogicExceptionImpl("Blob::Open", "Blob Id is not assigned.");
+		throw LogicExceptionImpl("Blob::Open", _("Blob Id is not assigned."));
 
 	IBS status;
 	(*gds.Call()->m_open_blob2)(status.Self(), mDatabase->GetHandlePtr(),
 		mTransaction->GetHandlePtr(), &mHandle, &mId, 0, 0);
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Blob::Open", "isc_open_blob2 failed.");
+		throw SQLExceptionImpl(status, "Blob::Open", _("isc_open_blob2 failed."));
 	mWriteMode = false;
 }
 
 void BlobImpl::Create(void)
 {
 	if (mHandle != 0)
-		throw LogicExceptionImpl("Blob::Create", "Blob already opened.");
+		throw LogicExceptionImpl("Blob::Create", _("Blob already opened."));
 	if (mDatabase == 0)
-		throw LogicExceptionImpl("Blob::Create", "No Database is attached.");
+		throw LogicExceptionImpl("Blob::Create", _("No Database is attached."));
 	if (mTransaction == 0)
-		throw LogicExceptionImpl("Blob::Create", "No Transaction is attached.");
+		throw LogicExceptionImpl("Blob::Create", _("No Transaction is attached."));
 
 	IBS status;
 	(*gds.Call()->m_create_blob2)(status.Self(), mDatabase->GetHandlePtr(),
 		mTransaction->GetHandlePtr(), &mHandle, &mId, 0, 0);
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Blob::Create",
-			"isc_create_blob failed.");
+			_("isc_create_blob failed."));
 	mIdAssigned = true;
 	mWriteMode = true;
 }
 
 void BlobImpl::Close(void)
 {
-	if (mHandle == 0)
-		throw LogicExceptionImpl("Blob::Close", "The Blob is not opened");
+	if (mHandle == 0) return;	// Not opened anyway
 
 	IBS status;
 	(*gds.Call()->m_close_blob)(status.Self(), &mHandle);
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Blob::Close", "isc_close_blob failed.");
+		throw SQLExceptionImpl(status, "Blob::Close", _("isc_close_blob failed."));
 	mHandle = 0;
 }
 
 void BlobImpl::Cancel(void)
 {
-	if (mHandle == 0)
-		throw LogicExceptionImpl("Blob::Cancel", "The Blob is not opened");
+	if (mHandle == 0) return;	// Not opened anyway
+
 	if (! mWriteMode)
-		throw LogicExceptionImpl("Blob::Cancel", "Can't cancel a Blob opened for read");
+		throw LogicExceptionImpl("Blob::Cancel", _("Can't cancel a Blob opened for read"));
 
 	IBS status;
 	(*gds.Call()->m_cancel_blob)(status.Self(), &mHandle);
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Blob::Cancel", "isc_cancel_blob failed.");
+		throw SQLExceptionImpl(status, "Blob::Cancel", _("isc_cancel_blob failed."));
 	mHandle = 0;
 	mIdAssigned = false;
 }
 
-int BlobImpl::Read(void* buffer, int size)
+int32_t BlobImpl::Read(void* buffer, int32_t size)
 {
 	if (mHandle == 0)
-		throw LogicExceptionImpl("Blob::Read", "The Blob is not opened");
+		throw LogicExceptionImpl("Blob::Read", _("The Blob is not opened"));
 	if (mWriteMode)
-		throw LogicExceptionImpl("Blob::Read", "Can't read from Blob opened for write");
+		throw LogicExceptionImpl("Blob::Read", _("Can't read from Blob opened for write"));
 	if (size < 1 || size > (64*1024-1))
-		throw LogicExceptionImpl("Blob::Read", "Invalid segment size (max 64Kb-1)");
+		throw LogicExceptionImpl("Blob::Read", _("Invalid segment size (max 64Kb-1)"));
 
 	IBS status;
 	unsigned short bytesread;
@@ -174,41 +171,41 @@ int BlobImpl::Read(void* buffer, int size)
 					(unsigned short)size, (char*)buffer);
 	if (result == isc_segstr_eof) return 0;	// Fin du blob
 	if (result != isc_segment && status.Errors())
-		throw SQLExceptionImpl(status, "Blob::Read", "isc_get_segment failed.");
-	return (int)bytesread;
+		throw SQLExceptionImpl(status, "Blob::Read", _("isc_get_segment failed."));
+	return (int32_t)bytesread;
 }
 
-void BlobImpl::Write(const void* buffer, int size)
+void BlobImpl::Write(const void* buffer, int32_t size)
 {
 	if (mHandle == 0)
-		throw LogicExceptionImpl("Blob::Write", "The Blob is not opened");
+		throw LogicExceptionImpl("Blob::Write", _("The Blob is not opened"));
 	if (! mWriteMode)
-		throw LogicExceptionImpl("Blob::Write", "Can't write to Blob opened for read");
+		throw LogicExceptionImpl("Blob::Write", _("Can't write to Blob opened for read"));
 	if (size < 1 || size > (64*1024-1))
-		throw LogicExceptionImpl("Blob::Write", "Invalid segment size (max 64Kb-1)");
+		throw LogicExceptionImpl("Blob::Write", _("Invalid segment size (max 64Kb-1)"));
 
 	IBS status;
 	(*gds.Call()->m_put_segment)(status.Self(), &mHandle,
 		(unsigned short)size, (char*)buffer);
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Blob::Write", "isc_put_segment failed.");
+		throw SQLExceptionImpl(status, "Blob::Write", _("isc_put_segment failed."));
 }
 
-void BlobImpl::Info(int* Size, int* Largest, int* Segments)
+void BlobImpl::Info(int32_t* Size, int32_t* Largest, int32_t* Segments)
 {
 	char items[] = {isc_info_blob_total_length,
 					isc_info_blob_max_segment,
 					isc_info_blob_num_segments};
 
 	if (mHandle == 0)
-		throw LogicExceptionImpl("Blob::GetInfo", "The Blob is not opened");
+		throw LogicExceptionImpl("Blob::GetInfo", _("The Blob is not opened"));
 
 	IBS status;
 	RB result(100);
 	(*gds.Call()->m_blob_info)(status.Self(), &mHandle, sizeof(items), items,
-		result.Size(), result.Self());
+		(short)result.Size(), result.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Blob::GetInfo", "isc_blob_info failed.");
+		throw SQLExceptionImpl(status, "Blob::GetInfo", _("isc_blob_info failed."));
 
 	if (Size != 0) *Size = result.GetValue(isc_info_blob_total_length);
 	if (Largest != 0) *Largest = result.GetValue(isc_info_blob_max_segment);
@@ -218,18 +215,18 @@ void BlobImpl::Info(int* Size, int* Largest, int* Segments)
 void BlobImpl::Save(const std::string& data)
 {
 	if (mHandle != 0)
-		throw LogicExceptionImpl("Blob::Save", "Blob already opened.");
+		throw LogicExceptionImpl("Blob::Save", _("Blob already opened."));
 	if (mDatabase == 0)
-		throw LogicExceptionImpl("Blob::Save", "No Database is attached.");
+		throw LogicExceptionImpl("Blob::Save", _("No Database is attached."));
 	if (mTransaction == 0)
-		throw LogicExceptionImpl("Blob::Save", "No Transaction is attached.");
+		throw LogicExceptionImpl("Blob::Save", _("No Transaction is attached."));
 
 	IBS status;
 	(*gds.Call()->m_create_blob2)(status.Self(), mDatabase->GetHandlePtr(),
 		mTransaction->GetHandlePtr(), &mHandle, &mId, 0, 0);
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Blob::Save",
-			"isc_create_blob failed.");
+			_("isc_create_blob failed."));
 	mIdAssigned = true;
 	mWriteMode = true;
 
@@ -243,7 +240,7 @@ void BlobImpl::Save(const std::string& data)
 			(unsigned short)blklen, const_cast<char*>(data.data()+pos));
 		if (status.Errors())
 			throw SQLExceptionImpl(status, "Blob::Save",
-					"isc_put_segment failed.");
+					_("isc_put_segment failed."));
 		pos += blklen;
 		len -= blklen;
 	}
@@ -251,26 +248,26 @@ void BlobImpl::Save(const std::string& data)
 	status.Reset();
 	(*gds.Call()->m_close_blob)(status.Self(), &mHandle);
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Blob::Save", "isc_close_blob failed.");
+		throw SQLExceptionImpl(status, "Blob::Save", _("isc_close_blob failed."));
 	mHandle = 0;
 }
 
 void BlobImpl::Load(std::string& data)
 {
 	if (mHandle != 0)
-		throw LogicExceptionImpl("Blob::Load", "Blob already opened.");
+		throw LogicExceptionImpl("Blob::Load", _("Blob already opened."));
 	if (mDatabase == 0)
-		throw LogicExceptionImpl("Blob::Load", "No Database is attached.");
+		throw LogicExceptionImpl("Blob::Load", _("No Database is attached."));
 	if (mTransaction == 0)
-		throw LogicExceptionImpl("Blob::Load", "No Transaction is attached.");
+		throw LogicExceptionImpl("Blob::Load", _("No Transaction is attached."));
 	if (! mIdAssigned)
-		throw LogicExceptionImpl("Blob::Load", "Blob Id is not assigned.");
+		throw LogicExceptionImpl("Blob::Load", _("Blob Id is not assigned."));
 
 	IBS status;
 	(*gds.Call()->m_open_blob2)(status.Self(), mDatabase->GetHandlePtr(),
 		mTransaction->GetHandlePtr(), &mHandle, &mId, 0, 0);
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Blob::Load", "isc_open_blob2 failed.");
+		throw SQLExceptionImpl(status, "Blob::Load", _("isc_open_blob2 failed."));
 	mWriteMode = false;
 
 	size_t blklen = 32*1024-1;
@@ -287,7 +284,7 @@ void BlobImpl::Load(std::string& data)
 							const_cast<char*>(data.data()+pos));
 		if (result == isc_segstr_eof) break;	// End of blob
 		if (result != isc_segment && status.Errors())
-			throw SQLExceptionImpl(status, "Blob::Load", "isc_get_segment failed.");
+			throw SQLExceptionImpl(status, "Blob::Load", _("isc_get_segment failed."));
 
 		pos += bytesread;
 		size += bytesread;
@@ -298,7 +295,7 @@ void BlobImpl::Load(std::string& data)
 	status.Reset();
 	(*gds.Call()->m_close_blob)(status.Self(), &mHandle);
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Blob::Load", "isc_close_blob failed.");
+		throw SQLExceptionImpl(status, "Blob::Load", _("isc_close_blob failed."));
 	mHandle = 0;
 }
 
@@ -312,7 +309,7 @@ IBPP::IBlob* BlobImpl::AddRef(void)
 void BlobImpl::Release(IBPP::IBlob*& Self)
 {
 	if (this != dynamic_cast<BlobImpl*>(Self))
-		throw LogicExceptionImpl("Blob::Release", "Invalid Release()");
+		throw LogicExceptionImpl("Blob::Release", _("Invalid Release()"));
 
 	ASSERTION(mRefCount >= 0);
 
@@ -335,9 +332,9 @@ void BlobImpl::Init(void)
 void BlobImpl::SetId(ISC_QUAD* quad)
 {
 	if (mHandle != 0)
-		throw LogicExceptionImpl("BlobImpl::SetId", "Can't set Id on an opened BlobImpl.");
+		throw LogicExceptionImpl("BlobImpl::SetId", _("Can't set Id on an opened BlobImpl."));
 	if (quad == 0)
-		throw LogicExceptionImpl("BlobImpl::SetId", "0 Id reference detected.");
+		throw LogicExceptionImpl("BlobImpl::SetId", _("Null Id reference detected."));
 
 	memcpy(&mId, quad, sizeof(mId));
 	mIdAssigned = true;
@@ -346,11 +343,11 @@ void BlobImpl::SetId(ISC_QUAD* quad)
 void BlobImpl::GetId(ISC_QUAD* quad)
 {
 	if (mHandle != 0)
-		throw LogicExceptionImpl("BlobImpl::GetId", "Can't get Id on an opened BlobImpl.");
+		throw LogicExceptionImpl("BlobImpl::GetId", _("Can't get Id on an opened BlobImpl."));
 	if (! mWriteMode)
-		throw LogicExceptionImpl("BlobImpl::GetId", "Can only get Id of a newly created Blob.");
+		throw LogicExceptionImpl("BlobImpl::GetId", _("Can only get Id of a newly created Blob."));
 	if (quad == 0)
-		throw LogicExceptionImpl("BlobImpl::GetId", "0 Id reference detected.");
+		throw LogicExceptionImpl("BlobImpl::GetId", _("Null Id reference detected."));
 
 	memcpy(quad, &mId, sizeof(mId));
 }
@@ -365,13 +362,17 @@ BlobImpl::BlobImpl(DatabaseImpl* database, TransactionImpl* transaction)
 
 BlobImpl::~BlobImpl()
 {
-	if (mHandle != 0)
+	try
 	{
-		if (mWriteMode) Cancel();
-		else try {Close();} catch (IBPP::Exception&) {}
+		if (mHandle != 0)
+		{
+			if (mWriteMode) Cancel();
+			else Close();
+		}
+		if (mTransaction != 0) mTransaction->DetachBlob(this);
+		if (mDatabase != 0) mDatabase->DetachBlob(this);
 	}
-	if (mTransaction != 0) mTransaction->DetachBlob(this);
-	if (mDatabase != 0) mDatabase->DetachBlob(this);
+	catch (IBPP::Exception&) {}
 }
 
 //

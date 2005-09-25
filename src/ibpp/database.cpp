@@ -44,16 +44,16 @@ using namespace ibpp_internals;
 
 //	(((((((( OBJECT INTERFACE IMPLEMENTATION ))))))))
 
-void DatabaseImpl::Create(int dialect)
+void DatabaseImpl::Create(int32_t dialect)
 {
 	if (mHandle != 0)
-		throw LogicExceptionImpl("Database::Create", "Database is already connected.");
+		throw LogicExceptionImpl("Database::Create", _("Database is already connected."));
 	if (mDatabaseName.empty())
-		throw LogicExceptionImpl("Database::Create", "Unspecified database name.");
+		throw LogicExceptionImpl("Database::Create", _("Unspecified database name."));
 	if (mUserName.empty())
-		throw LogicExceptionImpl("Database::Create", "Unspecified user name.");
+		throw LogicExceptionImpl("Database::Create", _("Unspecified user name."));
 	if (dialect != 1 && dialect != 3)
-		throw LogicExceptionImpl("Database::Create", "Only dialects 1 and 3 are supported.");
+		throw LogicExceptionImpl("Database::Create", _("Only dialects 1 and 3 are supported."));
 
 	// Build the SQL Create Statement
 	std::string create;
@@ -73,19 +73,19 @@ void DatabaseImpl::Create(int dialect)
     (*gds.Call()->m_dsql_execute_immediate)(status.Self(), &mHandle, &tr_handle,
     	0, const_cast<char*>(create.c_str()), short(dialect), NULL);
     if (status.Errors())
-		throw SQLExceptionImpl(status, "Database::Create", "isc_dsql_execute_immediate failed");
+		throw SQLExceptionImpl(status, "Database::Create", _("isc_dsql_execute_immediate failed"));
 
 	Disconnect();
 }
 
 void DatabaseImpl::Connect(void)
 {
-	if (mHandle != 0)
-		throw LogicExceptionImpl("Database::Connect", "Database is already connected.");
+	if (mHandle != 0) return;	// Already connected
+
 	if (mDatabaseName.empty())
-		throw LogicExceptionImpl("Database::Connect", "Unspecified database name.");
+		throw LogicExceptionImpl("Database::Connect", _("Unspecified database name."));
 	if (mUserName.empty())
-		throw LogicExceptionImpl("Database::Connect", "Unspecified user name.");
+		throw LogicExceptionImpl("Database::Connect", _("Unspecified user name."));
 
     // Build a DPB based on the properties
 	DPB dpb;
@@ -105,7 +105,7 @@ void DatabaseImpl::Connect(void)
     if (status.Errors())
     {
         mHandle = 0;     // Should be, but better be sure...
-		throw SQLExceptionImpl(status, "Database::Connect", "isc_attach_database failed");
+		throw SQLExceptionImpl(status, "Database::Connect", _("isc_attach_database failed"));
     }
 
 	// Now, get ODS version information and dialect.
@@ -126,7 +126,7 @@ void DatabaseImpl::Connect(void)
 		status.Reset();
 	    (*gds.Call()->m_detach_database)(status.Self(), &mHandle);
         mHandle = 0;     // Should be, but better be sure...
-		throw SQLExceptionImpl(status, "Database::Connect", "isc_database_info failed");
+		throw SQLExceptionImpl(status, "Database::Connect", _("isc_database_info failed"));
 	}
 
 	int ODS = result.GetValue(isc_info_ods_version);
@@ -136,7 +136,7 @@ void DatabaseImpl::Connect(void)
 	    (*gds.Call()->m_detach_database)(status.Self(), &mHandle);
         mHandle = 0;     // Should be, but better be sure...
 		throw LogicExceptionImpl("Database::Connect",
-			"Unsupported Server : wrong ODS version (%d), at least '10' required.", ODS);
+			_("Unsupported Server : wrong ODS version (%d), at least '10' required."), ODS);
 	}
 
 	mDialect = result.GetValue(isc_info_db_SQL_dialect);
@@ -145,7 +145,7 @@ void DatabaseImpl::Connect(void)
 		status.Reset();
 	    (*gds.Call()->m_detach_database)(status.Self(), &mHandle);
         mHandle = 0;     // Should be, but better be sure...
-		throw LogicExceptionImpl("Database::Connect", "Dialect 1 or 3 required");
+		throw LogicExceptionImpl("Database::Connect", _("Dialect 1 or 3 required"));
 	}
 
 	// Now, verify the GDS32.DLL we are using is compatible with the server
@@ -154,14 +154,13 @@ void DatabaseImpl::Connect(void)
 		status.Reset();
 	    (*gds.Call()->m_detach_database)(status.Self(), &mHandle);
         mHandle = 0;     // Should be, but better be sure...
-		throw LogicExceptionImpl("Database::Connect", "GDS32.DLL version 5 against IBSERVER 6");
+		throw LogicExceptionImpl("Database::Connect", _("GDS32.DLL version 5 against IBSERVER 6"));
 	}
 }
 
 void DatabaseImpl::Inactivate(void)
 {
-	if (mHandle == 0)
-		throw LogicExceptionImpl("Database::Inactivate", "Database is not connected.");
+	if (mHandle == 0) return;	// Not connected anyway
 
     IBS status;
 
@@ -169,57 +168,51 @@ void DatabaseImpl::Inactivate(void)
 	ClearEvents();
 
     // Rollback any started transaction...
-	for (unsigned int i = 0; i < mTransactions.size(); i++)
+	for (unsigned i = 0; i < mTransactions.size(); i++)
 	{
 		if (mTransactions[i]->Started())
-		{
-			try { mTransactions[i]->Rollback(); }
-				catch (IBPP::Exception&) { }
-		}
+				mTransactions[i]->Rollback();
 	}
 
 	// Let's detach from all Blobs
 	while (mBlobs.size() > 0)
-		try { mBlobs.back()->DetachDatabase(); }
-			catch (IBPP::Exception&) { }
+		mBlobs.back()->DetachDatabase();
 
 	// Let's detach from all Arrays
 	while (mArrays.size() > 0)
-		try { mArrays.back()->DetachDatabase(); }
-			catch (IBPP::Exception&) { }
+		mArrays.back()->DetachDatabase();
 
 	// Let's detach from all Statements
 	while (mStatements.size() > 0)
-		try { mStatements.back()->DetachDatabase(); }
-			catch (IBPP::Exception&) { }
+		mStatements.back()->DetachDatabase();
 
 	// Let's detach from all Transactions
 	while (mTransactions.size() > 0)
-		try { mTransactions.back()->DetachDatabase(this); }
-			catch (IBPP::Exception&) { }
+		mTransactions.back()->DetachDatabase(this);
 }
 
 void DatabaseImpl::Disconnect(void)
 {
-	if (mHandle == 0)
-		throw LogicExceptionImpl("Database::Disconnect", "Database is not connected.");
+	if (mHandle == 0) return;	// Not connected anyway
 
-	// Put the connection to a rest
+	// Put the connection to rest
 	Inactivate();
 
 	// Detach from the server
 	IBS status;
     (*gds.Call()->m_detach_database)(status.Self(), &mHandle);
-    if (status.Errors())
-		throw SQLExceptionImpl(status, "Database::Disconnect", "isc_detach_database failed");
 
-    mHandle = 0;
+    // Should we throw, set mHandle to 0 first, because Disconnect() may
+	// be called from Database destructor (keeps the object coherent).
+	mHandle = 0;
+    if (status.Errors())
+		throw SQLExceptionImpl(status, "Database::Disconnect", _("isc_detach_database failed"));
 }
 
 void DatabaseImpl::Drop(void)
 {
 	if (mHandle == 0)
-		throw LogicExceptionImpl("Database::Drop", "Database is not connected.");
+		throw LogicExceptionImpl("Database::Drop", _("Database must be connected."));
 
 	// Put the connection to a rest
 	Inactivate();
@@ -227,7 +220,7 @@ void DatabaseImpl::Drop(void)
 	IBS vector;
 	(*gds.Call()->m_drop_database)(vector.Self(), &mHandle);
     if (vector.Errors())
-    	throw SQLExceptionImpl(vector, "Database::Drop", "isc_drop_database failed");
+    	throw SQLExceptionImpl(vector, "Database::Drop", _("isc_drop_database failed"));
 
     mHandle = 0;
 }
@@ -235,11 +228,11 @@ void DatabaseImpl::Drop(void)
 void DatabaseImpl::DefineEvent(const std::string& eventname, IBPP::EventInterface* objref)
 {
 	if (eventname.empty())
-		throw LogicExceptionImpl("Database::DefineEvent", "Null pointer reference detected.");
+		throw LogicExceptionImpl("Database::DefineEvent", _("Null pointer reference detected."));
 
 	if (mEventsThrew)
-		throw LogicExceptionImpl("Database::DefineEvent", "An error condition was "
-							"detected by the asynchronous EventHandler() method.");
+		throw LogicExceptionImpl("Database::DefineEvent", _("An error condition was "
+							"detected by the asynchronous EventHandler() method."));
 
 	if (mEvents == 0) mEvents = new EPB;
 	else CancelEvents();
@@ -267,11 +260,11 @@ void DatabaseImpl::DispatchEvents(void)
 	if (mEvents == 0 || mEventsQueued) return;
 
 	if (mHandle == 0)
-		throw LogicExceptionImpl("Database::DispatchEvents", "Database is not connected.");
+		throw LogicExceptionImpl("Database::DispatchEvents", _("Database is not connected."));
 
 	if (mEventsThrew)
-		throw LogicExceptionImpl("Database::DispatchEvents", "An error condition was "
-							"detected by the asynchronous EventHandler() method.");
+		throw LogicExceptionImpl("Database::DispatchEvents", _("An error condition was "
+							"detected by the asynchronous EventHandler() method."));
 	
 	// Let's fire the events actions for all the events which triggered, if any.
 	if (mEventsTrapped) mEvents->FireActions(this);
@@ -280,12 +273,12 @@ void DatabaseImpl::DispatchEvents(void)
 	QueueEvents();
 }
 
-void DatabaseImpl::Info(int* ODSMajor, int* ODSMinor,
-	int* PageSize, int* Pages, int* Buffers, int* Sweep,
+void DatabaseImpl::Info(int32_t* ODSMajor, int32_t* ODSMinor,
+	int32_t* PageSize, int32_t* Pages, int32_t* Buffers, int32_t* Sweep,
 	bool* Sync, bool* Reserve)
 {
 	if (mHandle == 0)
-		throw LogicExceptionImpl("Database::Info", "Database is not connected.");
+		throw LogicExceptionImpl("Database::Info", _("Database is not connected."));
 
 	char items[] = {isc_info_ods_version,
 					isc_info_ods_minor_version,
@@ -303,7 +296,7 @@ void DatabaseImpl::Info(int* ODSMajor, int* ODSMinor,
 	(*gds.Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
 		result.Size(), result.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Database::Info", "isc_database_info failed");
+		throw SQLExceptionImpl(status, "Database::Info", _("isc_database_info failed"));
 
 	if (ODSMajor != 0) *ODSMajor = result.GetValue(isc_info_ods_version);
 	if (ODSMinor != 0) *ODSMinor = result.GetValue(isc_info_ods_minor_version);
@@ -317,10 +310,10 @@ void DatabaseImpl::Info(int* ODSMajor, int* ODSMinor,
 		*Reserve = result.GetValue(isc_info_no_reserve) == 1 ? false : true;
 }
 
-void DatabaseImpl::Statistics(int* Fetches, int* Marks, int* Reads, int* Writes)
+void DatabaseImpl::Statistics(int32_t* Fetches, int32_t* Marks, int32_t* Reads, int32_t* Writes)
 {
 	if (mHandle == 0)
-		throw LogicExceptionImpl("Database::Statistics", "Database is not connected.");
+		throw LogicExceptionImpl("Database::Statistics", _("Database is not connected."));
 
 	char items[] = {isc_info_fetches,
 					isc_info_marks,
@@ -334,7 +327,7 @@ void DatabaseImpl::Statistics(int* Fetches, int* Marks, int* Reads, int* Writes)
 	(*gds.Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
 		result.Size(), result.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Database::Statistics", "isc_database_info failed");
+		throw SQLExceptionImpl(status, "Database::Statistics", _("isc_database_info failed"));
 
 	if (Fetches != 0) *Fetches = result.GetValue(isc_info_fetches);
 	if (Marks != 0) *Marks = result.GetValue(isc_info_marks);
@@ -342,11 +335,11 @@ void DatabaseImpl::Statistics(int* Fetches, int* Marks, int* Reads, int* Writes)
 	if (Writes != 0) *Writes = result.GetValue(isc_info_writes);
 }
 
-void DatabaseImpl::Counts(int* Insert, int* Update, int* Delete, 
-	int* ReadIdx, int* ReadSeq)
+void DatabaseImpl::Counts(int32_t* Insert, int32_t* Update, int32_t* Delete, 
+	int32_t* ReadIdx, int32_t* ReadSeq)
 {
 	if (mHandle == 0)
-		throw LogicExceptionImpl("Database::Counts", "Database is not connected.");
+		throw LogicExceptionImpl("Database::Counts", _("Database is not connected."));
 
 	char items[] = {isc_info_insert_count,
 					isc_info_update_count,
@@ -361,7 +354,7 @@ void DatabaseImpl::Counts(int* Insert, int* Update, int* Delete,
 	(*gds.Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
 		result.Size(), result.Self());
 	if (status.Errors())
-		throw SQLExceptionImpl(status, "Database::Counts", "isc_database_info failed");
+		throw SQLExceptionImpl(status, "Database::Counts", _("isc_database_info failed"));
 
 	if (Insert != 0) *Insert = result.GetCountValue(isc_info_insert_count);
 	if (Update != 0) *Update = result.GetCountValue(isc_info_update_count);
@@ -373,7 +366,7 @@ void DatabaseImpl::Counts(int* Insert, int* Update, int* Delete,
 void DatabaseImpl::Users(std::vector<std::string>& users)
 {
 	if (mHandle == 0)
-		throw LogicExceptionImpl("Database::Users", "Database is not connected.");
+		throw LogicExceptionImpl("Database::Users", _("Database is not connected."));
 
 	char items[] = {isc_info_user_names,
 					isc_info_end};
@@ -386,7 +379,7 @@ void DatabaseImpl::Users(std::vector<std::string>& users)
 	if (status.Errors())
 	{
 		status.Reset();
-		throw SQLExceptionImpl(status, "Database::Users", "isc_database_info failed");
+		throw SQLExceptionImpl(status, "Database::Users", _("isc_database_info failed"));
 	}
 
 	users.clear();
@@ -412,7 +405,7 @@ IBPP::IDatabase* DatabaseImpl::AddRef(void)
 void DatabaseImpl::Release(IBPP::IDatabase*& Self)
 {
 	if (this != dynamic_cast<DatabaseImpl*>(Self))
-		throw LogicExceptionImpl("Database::Release", "Invalid Release()");
+		throw LogicExceptionImpl("Database::Release", _("Invalid Release()"));
 
 	ASSERTION(mRefCount >= 0);
 
@@ -427,7 +420,7 @@ void DatabaseImpl::AttachTransaction(TransactionImpl* tr)
 {
 	if (tr == 0)
 		throw LogicExceptionImpl("Database::AttachTransaction",
-					"Transaction object is null.");
+					_("Transaction object is null."));
 
 	mTransactions.push_back(tr);
 }
@@ -436,7 +429,7 @@ void DatabaseImpl::DetachTransaction(TransactionImpl* tr)
 {
 	if (tr == 0)
 		throw LogicExceptionImpl("Database::DetachTransaction",
-				"ITransaction object is null.");
+				_("ITransaction object is null."));
 
 	mTransactions.erase(std::find(mTransactions.begin(), mTransactions.end(), tr));
 }
@@ -445,7 +438,7 @@ void DatabaseImpl::AttachStatement(StatementImpl* st)
 {
 	if (st == 0)
 		throw LogicExceptionImpl("Database::AttachStatement",
-					"Can't attach a null Statement object.");
+					_("Can't attach a null Statement object."));
 
 	mStatements.push_back(st);
 }
@@ -454,7 +447,7 @@ void DatabaseImpl::DetachStatement(StatementImpl* st)
 {
 	if (st == 0)
 		throw LogicExceptionImpl("Database::DetachStatement",
-				"Can't detach a null Statement object.");
+				_("Can't detach a null Statement object."));
 
 	mStatements.erase(std::find(mStatements.begin(), mStatements.end(), st));
 }
@@ -463,7 +456,7 @@ void DatabaseImpl::AttachBlob(BlobImpl* bb)
 {
 	if (bb == 0)
 		throw LogicExceptionImpl("Database::AttachBlob",
-					"Can't attach a null Blob object.");
+					_("Can't attach a null Blob object."));
 
 	mBlobs.push_back(bb);
 }
@@ -472,7 +465,7 @@ void DatabaseImpl::DetachBlob(BlobImpl* bb)
 {
 	if (bb == 0)
 		throw LogicExceptionImpl("Database::DetachBlob",
-				"Can't detach a null Blob object.");
+				_("Can't detach a null Blob object."));
 
 	mBlobs.erase(std::find(mBlobs.begin(), mBlobs.end(), bb));
 }
@@ -481,7 +474,7 @@ void DatabaseImpl::AttachArray(ArrayImpl* ar)
 {
 	if (ar == 0)
 		throw LogicExceptionImpl("Database::AttachArray",
-					"Can't attach a null Array object.");
+					_("Can't attach a null Array object."));
 
 	mArrays.push_back(ar);
 }
@@ -490,7 +483,7 @@ void DatabaseImpl::DetachArray(ArrayImpl* ar)
 {
 	if (ar == 0)
 		throw LogicExceptionImpl("Database::DetachArray",
-				"Can't detach a null Array object.");
+				_("Can't detach a null Array object."));
 
 	mArrays.erase(std::find(mArrays.begin(), mArrays.end(), ar));
 }
@@ -501,7 +494,7 @@ void DatabaseImpl::QueueEvents(void)
 	{
 		if (mHandle == 0)
 			throw LogicExceptionImpl("Database::QueueEvents",
-				  "Database is not connected");
+				  _("Database is not connected"));
 
 		IBS vector;
 		mEventsTrapped = false;
@@ -515,7 +508,7 @@ void DatabaseImpl::QueueEvents(void)
 			mEventsId = 0;	// Should be, but better be safe
 			mEventsQueued = false;
 			throw SQLExceptionImpl(vector, "Database::QueueEvents",
-				"isc_que_events failed");
+				_("isc_que_events failed"));
 		}
 	}
 }
@@ -525,7 +518,7 @@ void DatabaseImpl::CancelEvents(void)
 	if (mEvents != 0 && mEventsQueued)
 	{
 		if (mHandle == 0) throw LogicExceptionImpl("Database::CancelEvents",
-			"Database is not connected");
+			_("Database is not connected"));
 
 		IBS vector;
 
@@ -535,7 +528,7 @@ void DatabaseImpl::CancelEvents(void)
 
 	    if (vector.Errors())
 	    	throw SQLExceptionImpl(vector, "Database::CancelEvents",
-	    		"isc_cancel_events failed");
+	    		_("isc_cancel_events failed"));
 
 		mEventsId = 0;	// Should be, but better be safe
 		mEventsQueued = false;
@@ -543,7 +536,7 @@ void DatabaseImpl::CancelEvents(void)
 	}
 }
 
-void DatabaseImpl::EventUpdateCounts(short size, const char* tmpbuffer)
+void DatabaseImpl::EventUpdateCounts(int32_t size, const char* tmpbuffer)
 {
 	if (size > mEvents->Size())
 	{
@@ -557,6 +550,8 @@ void DatabaseImpl::EventUpdateCounts(short size, const char* tmpbuffer)
 	mEventsTrapped = true;
 }
 
+// This function must keep this prototype to stay compatible with
+// what isc_que_events() expect
 void DatabaseImpl::EventHandler(const char* object,
 	short size, const char* tmpbuffer)
 {
@@ -589,10 +584,7 @@ DatabaseImpl::DatabaseImpl(const std::string& ServerName, const std::string& Dat
 DatabaseImpl::~DatabaseImpl()
 {
 	if (Connected())
-	{
-		try { Disconnect(); }
-			catch (IBPP::Exception&) { }
-	}
+		try { Disconnect(); } catch(IBPP::Exception&) { }
 }
 
 //

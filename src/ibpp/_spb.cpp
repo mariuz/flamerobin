@@ -71,16 +71,16 @@ void SPB::Insert(char opcode)
 
 void SPB::InsertString(char type, int lenwidth, const char* data)
 {
-	short len = (short)strlen(data);
+	int len = (int)strlen(data);
 
 	Grow(1 + lenwidth + len);
 	mBuffer[mSize++] = type;
 	switch (lenwidth)
 	{
 		case 1 :	mBuffer[mSize] = char(len); mSize++; break;
-		case 2 :	*(short*)&mBuffer[mSize] = short((*gds.Call()->m_vax_integer)((char*)&len, 2));
+		case 2 :	*(int16_t*)&mBuffer[mSize] = int16_t((*gds.Call()->m_vax_integer)((char*)&len, 2));
 					mSize += 2; break;
-		default :	throw LogicExceptionImpl("IISPB::IISPB", "Invalid length parameter");
+		default :	throw LogicExceptionImpl("IISPB::IISPB", _("Invalid length parameter"));
 	}
 	strncpy(&mBuffer[mSize], data, len);
 	mSize += len;
@@ -93,11 +93,11 @@ void SPB::InsertByte(char type, char data)
 	mBuffer[mSize++] = data;
 }
 
-void SPB::InsertQuad(char type, int data)
+void SPB::InsertQuad(char type, int32_t data)
 {
 	Grow(1 + 4);
 	mBuffer[mSize++] = type;
-	*(int*)&mBuffer[mSize] = (*gds.Call()->m_vax_integer)((char*)&data, 4);
+	*(int32_t*)&mBuffer[mSize] = int32_t((*gds.Call()->m_vax_integer)((char*)&data, 4));
 	mSize += 4;
 }
 

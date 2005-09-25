@@ -39,7 +39,7 @@
 //	more than 15 names. This is a sad limitation, partly because the maximum
 //	number of parameters safely processed in such an API is very compiler
 //	dependant and also because isc_event_counts() is designed to return counts
-//	through the IB status vector which is a vector of 20 longs !
+//	through the IB status vector which is a vector of 20 32-bits integers !
 //	From reverse engineering of the isc_event_block() API in
 //	source file jrd/alt.c (as available on fourceforge.net/project/InterBase as
 //	of 2000 Nov 12), it looks like the internal format of those EPB is simple.
@@ -68,9 +68,9 @@ namespace { const size_t MAXEVENTNAMELEN = 127; };
 void EPB::Define(const std::string& eventname, IBPP::EventInterface* objref)
 {
 	if (eventname.size() == 0)
-		throw LogicExceptionImpl("EPB::Define", "Zero length event names not permitted");
+		throw LogicExceptionImpl("EPB::Define", _("Zero length event names not permitted"));
 	if (eventname.size() > MAXEVENTNAMELEN)
-		throw LogicExceptionImpl("EPB::Define", "Event name is too long");
+		throw LogicExceptionImpl("EPB::Define", _("Event name is too long"));
 
 	// 1) Alloc or grow the buffers
 	size_t prev_buffer_size = mEventBuffer.size();
@@ -114,9 +114,9 @@ void EPB::FireActions(IBPP::IDatabase* db)
 	{
 		if (event_buffer_it == EventIterator(mEventBuffer.end())
 			  || results_buffer_it == EventIterator(mResultsBuffer.end()))
-			throw LogicExceptionImpl("EPB::FireActions", "Internal buffer size error");
-		unsigned int vnew = results_buffer_it.get_count();
-		unsigned int vold = event_buffer_it.get_count();
+			throw LogicExceptionImpl("EPB::FireActions", _("Internal buffer size error"));
+		uint32_t vnew = results_buffer_it.get_count();
+		uint32_t vold = event_buffer_it.get_count();
 		if (vnew > vold)
 		{ // Fire the action
 			try

@@ -68,10 +68,10 @@ IBPP::SQLException::~SQLException() throw()
 void ExceptionBase::buildErrorMessage(const char* message)
 {
 	if (! mContext.empty())
-		mWhat.append("Context: ").append(mContext).append("\n");
+		mWhat.append(_("Context: ")).append(mContext).append("\n");
 
 	if (message != 0 && *message != 0 )
-		mWhat.append("Message: ").append(message).append("\n");
+		mWhat.append(_("Message: ")).append(message).append("\n");
 	
 	mWhat.append("\n");
 }
@@ -246,12 +246,12 @@ const char* SQLExceptionImpl::what() const throw()
 	return ExceptionBase::what();
 }
 
-int SQLExceptionImpl::SqlCode(void) const throw()
+int32_t SQLExceptionImpl::SqlCode(void) const throw()
 {
 	return mSqlCode;
 }
 
-int SQLExceptionImpl::EngineCode(void) const throw()
+int32_t SQLExceptionImpl::EngineCode(void) const throw()
 {
 	return mEngineCode;
 }

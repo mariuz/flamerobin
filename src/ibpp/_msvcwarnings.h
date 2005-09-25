@@ -47,6 +47,9 @@
 // on the very top of every source file just to fix this compiler issue.
 
 #pragma warning(disable: 4786)
+#ifndef _DEBUG
+#pragma warning(disable: 4702)
+#endif
 
 //
 //	Eof

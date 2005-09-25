@@ -49,15 +49,15 @@ void TransactionImpl::AttachDatabase(IBPP::IDatabase* db,
 {
 	if (mHandle != 0)
 		throw LogicExceptionImpl("Transaction::AttachDatabase",
-				"Can't attach a Database if Transaction started.");
+				_("Can't attach a Database if Transaction started."));
 	if (db == 0)
 		throw LogicExceptionImpl("Transaction::AttachDatabase",
-				"Can't attach a null Database.");
+				_("Can't attach a null Database."));
 
 	DatabaseImpl* dbi = dynamic_cast<DatabaseImpl*>(db);
 	if (dbi == 0)
 		throw LogicExceptionImpl("Transaction::AttachDatabase",
-				"Illegal parameter (database)");
+				_("Illegal parameter (database)"));
 
 	mDatabases.push_back(dbi);
 
@@ -93,15 +93,15 @@ void TransactionImpl::DetachDatabase(IBPP::IDatabase* db)
 {
 	if (mHandle != 0)
 		throw LogicExceptionImpl("Transaction::DetachDatabase",
-				"Can't detach a Database if Transaction started.");
+				_("Can't detach a Database if Transaction started."));
 	if (db == 0)
 		throw LogicExceptionImpl("Transaction::DetachDatabase",
-				"Can't detach a null Database.");
+				_("Can't detach a null Database."));
 
 	DatabaseImpl* dbi = dynamic_cast<DatabaseImpl*>(db);
 	if (dbi == 0)
 		throw LogicExceptionImpl("Transaction::DetachDatabase",
-				"Illegal parameter (database)");
+				_("Illegal parameter (database)"));
 
 	std::vector<DatabaseImpl*>::iterator pos =
 		std::find(mDatabases.begin(), mDatabases.end(), dbi);
@@ -123,10 +123,10 @@ void TransactionImpl::AddReservation(IBPP::IDatabase* db,
 {
 	if (mHandle != 0)
 		throw LogicExceptionImpl("Transaction::AddReservation",
-				"Can't add table reservation if Transaction started.");
+				_("Can't add table reservation if Transaction started."));
 	if (db == 0)
 		throw LogicExceptionImpl("Transaction::AddReservation",
-				"Null IDatabase pointer detected.");
+				_("Null IDatabase pointer detected."));
 
 	// Find the TPB associated with this database
 	std::vector<DatabaseImpl*>::iterator pos =
@@ -161,29 +161,28 @@ void TransactionImpl::AddReservation(IBPP::IDatabase* db,
 					break;
 			default :
 					throw LogicExceptionImpl("Transaction::AddReservation",
-						"Illegal TTR value detected.");
+						_("Illegal TTR value detected."));
 		}
 	}
 	else throw LogicExceptionImpl("Transaction::AddReservation",
-			"The database connection you specified is not attached to this transaction.");
+			_("The database connection you specified is not attached to this transaction."));
 }
 
 void TransactionImpl::Start(void)
 {
-	if (mHandle != 0)
-		throw LogicExceptionImpl("Transaction::Start", "Transaction already started.");
-	if (mDatabases.empty())
-		throw LogicExceptionImpl("Transaction::Start", "No Database is attached.");
+	if (mHandle != 0) return;	// Already started anyway
 
-	IBS status;
+	if (mDatabases.empty())
+		throw LogicExceptionImpl("Transaction::Start", _("No Database is attached."));
+
 	struct ISC_TEB
 	{
-		long* db_ptr;
-		long tpb_len;
+		ISC_LONG* db_ptr;
+		ISC_LONG tpb_len;
 		char* tpb_ptr;
 	} * teb = new ISC_TEB[mDatabases.size()];
-	unsigned int i;
 
+	unsigned i;
 	for (i = 0; i < mDatabases.size(); i++)
 	{
 		if (mDatabases[i]->GetHandle() == 0)
@@ -191,13 +190,14 @@ void TransactionImpl::Start(void)
 			// All Databases must be connected to Start the transaction !
 			delete [] teb;
 			throw LogicExceptionImpl("Transaction::Start",
-					"All attached Database should have been connected.");
+					_("All attached Database should have been connected."));
 		}
-		teb[i].db_ptr = (long*) mDatabases[i]->GetHandlePtr();
+		teb[i].db_ptr = (ISC_LONG*) mDatabases[i]->GetHandlePtr();
 		teb[i].tpb_len = mTPBs[i]->Size();
 		teb[i].tpb_ptr = mTPBs[i]->Self();
 	}
 
+	IBS status;
 	(*gds.Call()->m_start_multiple)(status.Self(), &mHandle, (short)mDatabases.size(), teb);
 	delete [] teb;
 	if (status.Errors())
@@ -210,7 +210,7 @@ void TransactionImpl::Start(void)
 void TransactionImpl::Commit(void)
 {
 	if (mHandle == 0)
-		throw LogicExceptionImpl("Transaction::Commit", "Transaction is not started.");
+		throw LogicExceptionImpl("Transaction::Commit", _("Transaction is not started."));
 		
 	IBS status;
 
@@ -228,7 +228,7 @@ void TransactionImpl::Commit(void)
 void TransactionImpl::CommitRetain(void)
 {
 	if (mHandle == 0)
-		throw LogicExceptionImpl("Transaction::CommitRetain", "Transaction is not started.");
+		throw LogicExceptionImpl("Transaction::CommitRetain", _("Transaction is not started."));
 
 	IBS status;
 
@@ -239,8 +239,7 @@ void TransactionImpl::CommitRetain(void)
 
 void TransactionImpl::Rollback(void)
 {
-	if (mHandle == 0)
-		throw LogicExceptionImpl("Transaction::Rollback", "Transaction is not started.");
+	if (mHandle == 0) return;	// Transaction not started anyway
 
 	IBS status;
 
@@ -258,7 +257,7 @@ void TransactionImpl::Rollback(void)
 void TransactionImpl::RollbackRetain(void)
 {
 	if (mHandle == 0)
-		throw LogicExceptionImpl("Transaction::RollbackRetain", "Transaction is not started.");
+		throw LogicExceptionImpl("Transaction::RollbackRetain", _("Transaction is not started."));
 
 	IBS status;
 
@@ -277,7 +276,7 @@ IBPP::ITransaction* TransactionImpl::AddRef(void)
 void TransactionImpl::Release(IBPP::ITransaction*& Self)
 {
 	if (this != dynamic_cast<TransactionImpl*>(Self))
-		throw LogicExceptionImpl("Transaction::Release", "Invalid Release()");
+		throw LogicExceptionImpl("Transaction::Release", _("Invalid Release()"));
 
 	ASSERTION(mRefCount >= 0);
 
@@ -302,7 +301,7 @@ void TransactionImpl::AttachStatement(StatementImpl* st)
 {
 	if (st == 0)
 		throw LogicExceptionImpl("Transaction::AttachStatement",
-					"Can't attach a 0 Statement object.");
+					_("Can't attach a 0 Statement object."));
 
 	mStatements.push_back(st);
 }
@@ -311,7 +310,7 @@ void TransactionImpl::DetachStatement(StatementImpl* st)
 {
 	if (st == 0)
 		throw LogicExceptionImpl("Transaction::DetachStatement",
-				"Can't detach a 0 Statement object.");
+				_("Can't detach a 0 Statement object."));
 
 	mStatements.erase(std::find(mStatements.begin(), mStatements.end(), st));
 }
@@ -320,7 +319,7 @@ void TransactionImpl::AttachBlob(BlobImpl* bb)
 {
 	if (bb == 0)
 		throw LogicExceptionImpl("Transaction::AttachBlob",
-					"Can't attach a 0 BlobImpl object.");
+					_("Can't attach a 0 BlobImpl object."));
 
 	mBlobs.push_back(bb);
 }
@@ -329,7 +328,7 @@ void TransactionImpl::DetachBlob(BlobImpl* bb)
 {
 	if (bb == 0)
 		throw LogicExceptionImpl("Transaction::DetachBlob",
-				"Can't detach a 0 BlobImpl object.");
+				_("Can't detach a 0 BlobImpl object."));
 
 	mBlobs.erase(std::find(mBlobs.begin(), mBlobs.end(), bb));
 }
@@ -338,7 +337,7 @@ void TransactionImpl::AttachArray(ArrayImpl* ar)
 {
 	if (ar == 0)
 		throw LogicExceptionImpl("Transaction::AttachArray",
-					"Can't attach a 0 ArrayImpl object.");
+					_("Can't attach a 0 ArrayImpl object."));
 
 	mArrays.push_back(ar);
 }
@@ -347,7 +346,7 @@ void TransactionImpl::DetachArray(ArrayImpl* ar)
 {
 	if (ar == 0)
 		throw LogicExceptionImpl("Transaction::DetachArray",
-				"Can't detach a 0 ArrayImpl object.");
+				_("Can't detach a 0 ArrayImpl object."));
 
 	mArrays.erase(std::find(mArrays.begin(), mArrays.end(), ar));
 }
@@ -368,11 +367,7 @@ TransactionImpl::TransactionImpl(DatabaseImpl* db,
 TransactionImpl::~TransactionImpl()
 {
 	// Rollback the transaction if it was Started
-	if (Started())
-	{
-		try { Rollback(); }
-			catch (IBPP::Exception&) { }
-	}
+	if (Started()) Rollback();
 
 	// Let's detach cleanly all Blobs from this Transaction.
 	// No Blob object can still maintain pointers to this
@@ -383,37 +378,30 @@ TransactionImpl::~TransactionImpl()
 	// And during the deletion, there is a packing of the array through a
 	// copy of elements from the end to the beginning of the array.
 	while (mBlobs.size() > 0)
-		try { mBlobs.back()->DetachTransaction(); }
-			catch (IBPP::Exception&) { }
+		mBlobs.back()->DetachTransaction();
 
 	// Let's detach cleanly all Arrays from this Transaction.
 	// No Array object can still maintain pointers to this
 	// Transaction which is disappearing.
 	while (mArrays.size() > 0)
-		try { mArrays.back()->DetachTransaction(); }
-			catch (IBPP::Exception&) { }
+		mArrays.back()->DetachTransaction();
 
 	// Let's detach cleanly all Statements from this Transaction.
 	// No Statement object can still maintain pointers to this
 	// Transaction which is disappearing.
 	while (mStatements.size() > 0)
-		try { mStatements.back()->DetachTransaction(); }
-			catch (IBPP::Exception&) { }
+		mStatements.back()->DetachTransaction();
 
 	// Very important : let's detach cleanly all Databases from this
 	// Transaction. No Database object can still maintain pointers to this
 	// Transaction which is disappearing.
 	while (mDatabases.size() > 0)
 	{
-		try
-		{
-			size_t i = mDatabases.size()-1;
-			DetachDatabase(mDatabases[i]);	// <-- remove link to database from mTPBs
-											// array and destroy TPB object
-											// Fixed : Maxim Abrashkin on 12 Jun 2002
-			//mDatabases.back()->DetachTransaction(this);
-		}
-		catch (IBPP::Exception&) { }
+		size_t i = mDatabases.size()-1;
+		DetachDatabase(mDatabases[i]);	// <-- remove link to database from mTPBs
+										// array and destroy TPB object
+										// Fixed : Maxim Abrashkin on 12 Jun 2002
+		//mDatabases.back()->DetachTransaction(this);
 	}
 }
 
