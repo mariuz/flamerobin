@@ -83,7 +83,7 @@ void StyleGuideMSW::dbuNeeded()
         HFONT fnt = (HFONT)SelectObject(dc, (HFONT)GetStockObject(DEFAULT_GUI_FONT));
 
         wxString s(wxT("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"));
-        int len = s.Length();
+        int len = int(s.Length());
         SIZE sz;
         GetTextExtentPoint32(dc, s.c_str(), len, &sz);
         SelectObject(dc, fnt);

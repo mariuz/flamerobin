@@ -48,7 +48,7 @@
 std::string wx2std(const wxString& input)
 {
 #if (wxUSE_UNICODE)
-	int size = input.Length() + 1;
+	size_t size = input.Length() + 1;
 	char* buffer = new char[size];
 	wxEncodingConverter wxec;
 	wxec.Init(wxFONTENCODING_UNICODE, wxFONTENCODING_ISO8859_1);
@@ -65,7 +65,7 @@ std::string wx2std(const wxString& input)
 wxString std2wx(std::string input)
 {
 #if (wxUSE_UNICODE)
-	int size = input.size() + 1;
+	size_t size = input.size() + 1;
 	wchar_t *buffer = new wchar_t[size*4];	// to make sure if we have 32-bit characters
 	wxEncodingConverter wxec;
 	wxec.Init(wxFONTENCODING_ISO8859_1, wxFONTENCODING_UNICODE);
