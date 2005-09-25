@@ -28,7 +28,8 @@
 
 #include "gui/controls/TextControl.h"
 //-----------------------------------------------------------------------------
-class LogTextControl: public TextControl {
+class LogTextControl: public TextControl 
+{
 private:
     enum LogStyle { logStyleDefault, logStyleImportant, logStyleError };
     void setDefaultStyles();

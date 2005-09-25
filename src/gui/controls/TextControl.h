@@ -33,7 +33,8 @@
 // Base class for multiline text controls in FlameRobin.  Based on 
 // wxStyledTextCtrl instead of wxTextCtrl, because that works better/faster 
 // on some systems, and provides popup menu on wxGTK.  
-class TextControl: public wxStyledTextCtrl {
+class TextControl: public wxStyledTextCtrl 
+{
 protected:
     void resetStyles();
 
