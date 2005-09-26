@@ -44,7 +44,10 @@
 
 #include "config/Config.h"
 #include "frutils.h"
+#include "gui/controls/LogTextControl.h"
 #include "gui/RestoreFrame.h"
+#include "metadata/database.h"
+#include "metadata/server.h"
 #include "styleguide.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------

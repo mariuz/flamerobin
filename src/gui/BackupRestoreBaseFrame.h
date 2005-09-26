@@ -23,16 +23,19 @@
   Contributor(s):
 */
 
+//-----------------------------------------------------------------------------
 #ifndef BACKUPRESTOREBASEFRAME_H
 #define BACKUPRESTOREBASEFRAME_H
-//-----------------------------------------------------------------------------
+
 #include <wx/wx.h>
 #include <wx/thread.h>
 
 #include "gui/BaseFrame.h"
-#include "gui/controls/LogTextControl.h"
-#include "metadata/database.h"
-#include "metadata/server.h"
+
+class LogTextControl;
+
+class Server;
+class Database;
 //-----------------------------------------------------------------------------
 class BackupRestoreBaseFrame: public BaseFrame {
 public:

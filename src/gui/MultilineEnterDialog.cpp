@@ -36,7 +36,8 @@
   #include "wx/wx.h"
 #endif
 
-#include "MultilineEnterDialog.h"
+#include "gui/controls/TextControl.h"
+#include "gui/MultilineEnterDialog.h"
 #include "styleguide.h"
 //-----------------------------------------------------------------------------
 bool GetMultilineTextFromUser(const wxString& caption, wxString& value, 

@@ -40,8 +40,10 @@
 
 #include "config/Config.h"
 #include "gui/BackupRestoreBaseFrame.h"
+#include "gui/controls/LogTextControl.h"
+#include "metadata/database.h"
+#include "metadata/server.h"
 #include "ugly.h"
-
 //-----------------------------------------------------------------------------
 BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, Database* db)
     : BaseFrame(parent, -1, wxEmptyString, wxDefaultPosition, wxDefaultSize, 

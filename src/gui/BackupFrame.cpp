@@ -44,6 +44,9 @@
 
 #include "config/Config.h"
 #include "gui/BackupFrame.h"
+#include "gui/controls/LogTextControl.h"
+#include "metadata/database.h"
+#include "metadata/server.h"
 #include "styleguide.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------

@@ -30,7 +30,8 @@
 #include <wx/wx.h>
 
 #include "gui/BaseDialog.h"
-#include "gui/controls/TextControl.h"
+
+class TextControl;
 //-----------------------------------------------------------------------------
 bool GetMultilineTextFromUser(const wxString& caption, wxString& value, 
     wxWindow* parent = 0);
