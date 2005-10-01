@@ -62,6 +62,7 @@ Config::Config()
 #ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
     standardPathsM.SetInstallPrefix(wxT("/usr/local"));
 #endif
+    getConfig()->SetExpandEnvVars(false);
 }
 //-----------------------------------------------------------------------------
 Config::~Config()
@@ -130,7 +131,7 @@ bool Config::getValue(wxString key, int& value)
     long longValue;
     if (!s.ToLong(&longValue))
         return false;
-        
+
     value = longValue;
     return true;
 }
