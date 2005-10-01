@@ -265,8 +265,9 @@ void SqlEditor::setup()
             wxT("while with work write year yearday" )
     );
 
-    SetTabWidth(4);
-    SetIndent(4);
+    int tabSize = config().get(wxT("sqlEditorTabSize"), 4);
+    SetTabWidth(tabSize);
+    SetIndent(tabSize);
     SetUseTabs(false);
     SetTabIndents(true);
     SetBackSpaceUnIndents(true);
@@ -275,6 +276,11 @@ void SqlEditor::setup()
     SetMarginWidth(0, 40);            // turn on the linenumbers margin, set width to 40pixels
     SetMarginWidth(1, 0);            // turn off the folding margin
     SetMarginType(0, 1);            // set margin type to linenumbers
+    if (config().get(wxT("sqlEditorShowEdge"), false))
+    {
+        SetEdgeMode(wxSTC_EDGE_LINE);
+        SetEdgeColumn(config().get(wxT("sqlEditorEdgeColumn"), 50));
+    }
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(SqlEditor, wxStyledTextCtrl)
