@@ -68,8 +68,8 @@ bool Logger::log2file(Config *cfg, const executedStatement& st,
 
     wxFile f;
     if (logToFileType == multiFile)
-    {
-        if (filename.find_last_of(wxT("%d")) == wxString::npos) // %d not found
+    {   // filename should contain stuff like: %d, %02d, %05d, etc.
+        if (filename.find_last_of(wxT("%")) == wxString::npos) // % not found
             return false;
         wxString test;
         int start = 1;
