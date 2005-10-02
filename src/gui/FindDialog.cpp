@@ -36,273 +36,291 @@
 #include "wx/wx.h"
 #endif
 
+#include <wx/utils.h>
 #include "styleguide.h"
 #include "FindDialog.h"
 //-----------------------------------------------------------------------------
 FindFlags::FindFlags()
 {
-	flags = se::DEFAULT;
+    flags = se::DEFAULT;
 }
 //-----------------------------------------------------------------------------
 bool FindFlags::has(unsigned int flag) const
 {
-	return ((flags & flag) == flag);
+    return ((flags & flag) == flag);
 }
 //-----------------------------------------------------------------------------
 void FindFlags::remove(unsigned int flag)
 {
-	flags &= ~flag;
+    flags &= ~flag;
 }
 //-----------------------------------------------------------------------------
 void FindFlags::add(unsigned int flag)
 {
-	flags |= flag;
+    flags |= flag;
 }
 //-----------------------------------------------------------------------------
-int FindFlags::asStc() const			// returns "flags" converted to wxSTC search flags
+int FindFlags::asStc() const            // returns "flags" converted to wxSTC search flags
 {
-	int retval = 0;
-	if (has(se::WHOLE_WORD))
-		retval |= wxSTC_FIND_WHOLEWORD;
-	if (has(se::MATCH_CASE))
-		retval |= wxSTC_FIND_MATCHCASE;
-	if (has(se::REGULAR_EXPRESSION))
-		retval |= wxSTC_FIND_REGEXP;
-	return retval;
+    int retval = 0;
+    if (has(se::WHOLE_WORD))
+        retval |= wxSTC_FIND_WHOLEWORD;
+    if (has(se::MATCH_CASE))
+        retval |= wxSTC_FIND_MATCHCASE;
+    if (has(se::REGULAR_EXPRESSION))
+        retval |= wxSTC_FIND_REGEXP;
+    return retval;
 }
 //-----------------------------------------------------------------------------
 // Used for debugging
 void FindFlags::show() const
 {
-	wxString retval(wxString::Format(wxT("Flags (%d) contains:\n"), flags));
-	if (has(se::WHOLE_WORD))
-		retval += wxT("se::WHOLE_WORD\n");
-	if (has(se::MATCH_CASE))
-		retval += wxT("se::MATCH_CASE\n");
-	if (has(se::REGULAR_EXPRESSION))
-		retval += wxT("se::REGULAR_EXPRESSION\n");
-	if (has(se::FROM_TOP))
-		retval += wxT("se::FROM_TOP\n");
-	if (has(se::WRAP))
-		retval += wxT("se::WRAP\n");
-	if (has(se::CONVERT_BACKSLASH))
-		retval += wxT("se::CONVERT_BACKSLASH\n");
-	wxMessageBox(retval);
+    wxString retval(wxString::Format(wxT("Flags (%d) contains:\n"), flags));
+    if (has(se::WHOLE_WORD))
+        retval += wxT("se::WHOLE_WORD\n");
+    if (has(se::MATCH_CASE))
+        retval += wxT("se::MATCH_CASE\n");
+    if (has(se::REGULAR_EXPRESSION))
+        retval += wxT("se::REGULAR_EXPRESSION\n");
+    if (has(se::FROM_TOP))
+        retval += wxT("se::FROM_TOP\n");
+    if (has(se::WRAP))
+        retval += wxT("se::WRAP\n");
+    if (has(se::CONVERT_BACKSLASH))
+        retval += wxT("se::CONVERT_BACKSLASH\n");
+    wxMessageBox(retval);
 }
 //-----------------------------------------------------------------------------
 FindFlags& FindFlags::operator= (const FindFlags& source)
 {
-	flags = source.flags;
-	return *this;
+    flags = source.flags;
+    return *this;
 }
 //-----------------------------------------------------------------------------
 //! wxStyledTextCtrl with Search&Replace capability
 SearchableEditor::SearchableEditor(wxWindow *parent, wxWindowID id)
-	: wxStyledTextCtrl(parent, id)
+    : wxStyledTextCtrl(parent, id)
 {
-	fd = 0;
+    fd = 0;
 }
 //-----------------------------------------------------------------------------
 wxString SearchableEditor::convertBackslashes(const wxString& source)
 {
-	wxString result(source);
-	result.Replace(wxT("\\n"), wxT("\n"));
-	result.Replace(wxT("\\r"), wxT("\r"));
-	result.Replace(wxT("\\t"), wxT("\t"));
-	while (true)	// hexadecimal bytes can be given if format: \xNN where NN is in range from 00 to ff
-	{
-		int p = result.Find(wxT("\\x"));
-		if (p == -1)
-			break;
-		unsigned long number;
-		if (result.Mid(p+2, 2).ToULong(&number, 16))
-		{
-			result.Remove(p, 3);
-			result.SetChar(p, number);
-		}
-		else
-		{
-			wxMessageBox(_("Only single-byte hexadecimal numbers are allowed\nin format: \\xNN, where NN is in range 00-ff"), _("Error in escape sequence"), wxICON_WARNING|wxOK);
-			break;
-		}
-	}
-	result.Replace(wxT("\\\\"), wxT("\\"));
-	return result;
+    wxString result(source);
+    result.Replace(wxT("\\n"), wxT("\n"));
+    result.Replace(wxT("\\r"), wxT("\r"));
+    result.Replace(wxT("\\t"), wxT("\t"));
+    while (true)    // hexadecimal bytes can be given if format: \xNN where NN is in range from 00 to ff
+    {
+        int p = result.Find(wxT("\\x"));
+        if (p == -1)
+            break;
+        unsigned long number;
+        if (result.Mid(p+2, 2).ToULong(&number, 16))
+        {
+            result.Remove(p, 3);
+            result.SetChar(p, number);
+        }
+        else
+        {
+            wxMessageBox(_("Only single-byte hexadecimal numbers are allowed\nin format: \\xNN, where NN is in range 00-ff"), _("Error in escape sequence"), wxICON_WARNING|wxOK);
+            break;
+        }
+    }
+    result.Replace(wxT("\\\\"), wxT("\\"));
+    return result;
 }
 //-----------------------------------------------------------------------------
 void SearchableEditor::setupSearch(const wxString& findText, const wxString& replaceText, const FindFlags& flags)
 {
-	findFlagsM = flags;
-	if (findFlagsM.has(se::CONVERT_BACKSLASH))
-	{
-		findTextM = convertBackslashes(findText);
-		replaceTextM = convertBackslashes(replaceText);
-	}
-	else
-	{
-		findTextM = findText;
-		replaceTextM = replaceText;
-	}
+    findFlagsM = flags;
+    if (findFlagsM.has(se::CONVERT_BACKSLASH))
+    {
+        findTextM = convertBackslashes(findText);
+        replaceTextM = convertBackslashes(replaceText);
+    }
+    else
+    {
+        findTextM = findText;
+        replaceTextM = replaceText;
+    }
 }
 //-----------------------------------------------------------------------------
 bool SearchableEditor::find(bool newSearch)
 {
-	if (!fd)
+    if (!fd)
         fd = new FindDialog(this, ::wxGetTopLevelParent(this));
-	if (newSearch || findTextM.IsEmpty())
-	{
-		fd->Show();
-		return false;	// <- caller shouldn't care about this
-	}
+    if (newSearch || findTextM.IsEmpty())
+    {
+        fd->Show();
+        return false;    // <- caller shouldn't care about this
+    }
 
-	int start = GetSelectionEnd();
-	if (findFlagsM.has(se::FROM_TOP))
-	{
-		start = 0;
-		findFlagsM.remove(se::ALERT);	// remove flag after first find
-	}
+    int start = GetSelectionEnd();
+    if (findFlagsM.has(se::FROM_TOP))
+    {
+        start = 0;
+        findFlagsM.remove(se::ALERT);    // remove flag after first find
+    }
 
-	int end = GetTextLength();
-	int p = FindText(start, end, findTextM, findFlagsM.asStc());
-	if (p == -1)
-	{
-		if (findFlagsM.has(se::WRAP))
-			p = FindText(0, end, findTextM, findFlagsM.asStc());
-		if (p == -1)
-		{
-			if (findFlagsM.has(se::ALERT))
-				wxMessageBox(_("No more matches"), _("Search complete"), wxICON_INFORMATION|wxOK);
-			return false;
-		}
-	}
+    int end = GetTextLength();
+    int p = FindText(start, end, findTextM, findFlagsM.asStc());
+    if (p == -1)
+    {
+        if (findFlagsM.has(se::WRAP))
+            p = FindText(0, end, findTextM, findFlagsM.asStc());
+        if (p == -1)
+        {
+            if (findFlagsM.has(se::ALERT))
+                wxMessageBox(_("No more matches"), _("Search complete"), wxICON_INFORMATION|wxOK);
+            return false;
+        }
+    }
+    centerCaret(true);
     GotoPos(p);
-	SetSelectionStart(p);
-	SetSelectionEnd(p + findTextM.Length());
-	return true;
+    GotoPos(p + findTextM.Length());
+    SetSelectionStart(p);
+    SetSelectionEnd(p + findTextM.Length());
+    centerCaret(false);
+    return true;
 }
 //-----------------------------------------------------------------------------
 bool SearchableEditor::replace(bool force)
 {
-	int start = GetSelectionStart();
-	int end = GetSelectionEnd();
-	if (start == end || FindText(start, end, findTextM, findFlagsM.asStc()) == -1)
-	{
-		if (!find(false))
-			return false;
-		if (!force)
-			return false;
-	}
+    int start = GetSelectionStart();
+    int end = GetSelectionEnd();
+    if (start == end || FindText(start, end, findTextM, findFlagsM.asStc()) == -1)
+    {
+        if (!find(false))
+            return false;
+        if (!force)
+            return false;
+    }
 
-	// we have selection here
-	start = GetSelectionStart();
-	ReplaceSelection(replaceTextM);
-	SetSelectionEnd(start + replaceTextM.Length());		// position at end of replaced text
-	find(false);
-	return true;
+    // we have selection here
+    start = GetSelectionStart();
+    ReplaceSelection(replaceTextM);
+    SetSelectionEnd(start + replaceTextM.Length());        // position at end of replaced text
+    find(false);
+    return true;
 }
 //-----------------------------------------------------------------------------
 int SearchableEditor::replaceAll()
 {
-	int caret = GetSelectionStart();		// remember position, so we return to some sensible place at end
-	SetSelectionStart(0);					// start from beginning of file
-	SetSelectionEnd(0);
-	findFlagsM.remove(se::FROM_TOP);
-	bool alert = findFlagsM.has(se::ALERT);
-	if (alert)
-		findFlagsM.remove(se::ALERT);		// turn flag off temporary (we'll popup a different message)
-	bool wrap = findFlagsM.has(se::WRAP);
-	if (wrap)
-		findFlagsM.remove(se::WRAP);		// turn it off to prevent endless loop (if replace text contains search text)
+    int caret = GetSelectionStart();        // remember position, so we return to some sensible place at end
+    SetSelectionStart(0);                    // start from beginning of file
+    SetSelectionEnd(0);
+    findFlagsM.remove(se::FROM_TOP);
+    bool alert = findFlagsM.has(se::ALERT);
+    if (alert)
+        findFlagsM.remove(se::ALERT);        // turn flag off temporary (we'll popup a different message)
+    bool wrap = findFlagsM.has(se::WRAP);
+    if (wrap)
+        findFlagsM.remove(se::WRAP);        // turn it off to prevent endless loop (if replace text contains search text)
 
-	int cnt = 0;
-	while (replace(true))
-		cnt++;
-	if (alert)
-	{
-		wxMessageBox(wxString::Format(_("%d replacements were made."), cnt), _("Replace"), wxICON_INFORMATION|wxOK);
-		findFlagsM.add(se::ALERT);			// turn it back on
-	}
-	if (wrap)								// turn it back on
-		findFlagsM.add(se::WRAP);
-	SetSelectionStart(caret);
-	SetSelectionEnd(caret);
-	return cnt;
+    int cnt = 0;
+    while (replace(true))
+        cnt++;
+    if (alert)
+    {
+        wxMessageBox(wxString::Format(_("%d replacements were made."), cnt), _("Replace"), wxICON_INFORMATION|wxOK);
+        findFlagsM.add(se::ALERT);            // turn it back on
+    }
+    if (wrap)                                // turn it back on
+        findFlagsM.add(se::WRAP);
+    SetSelectionStart(caret);
+    SetSelectionEnd(caret);
+    return cnt;
 }
 //-----------------------------------------------------------------------------
 int SearchableEditor::replaceInSelection()
 {
-	findFlagsM.remove(se::FROM_TOP);	// turn flag off
-	bool alert = findFlagsM.has(se::ALERT);
-	if (alert)
-		findFlagsM.remove(se::ALERT);	// turn flag off temporary
-	bool wrap = findFlagsM.has(se::WRAP);
-	if (wrap)
-		findFlagsM.remove(se::WRAP);		// turn it off to prevent endless loop (if replace text contains search text)
+    findFlagsM.remove(se::FROM_TOP);    // turn flag off
+    bool alert = findFlagsM.has(se::ALERT);
+    if (alert)
+        findFlagsM.remove(se::ALERT);    // turn flag off temporary
+    bool wrap = findFlagsM.has(se::WRAP);
+    if (wrap)
+        findFlagsM.remove(se::WRAP);        // turn it off to prevent endless loop (if replace text contains search text)
 
-	int cnt = 0;
-	int selstart = GetSelectionStart();
-	int selend = GetSelectionEnd();
-	SetSelectionEnd(selstart);	// start replace from here
-	while (find(false))
-	{
-		int start = GetSelectionStart();
-		int end =   GetSelectionEnd();
-		if (end <= selend)		// in range
-		{
-			selend += replaceTextM.Length() - (end-start);		// expand/contract range
-			ReplaceSelection(replaceTextM);
-			SetSelectionEnd(start + replaceTextM.Length());		// move to appropriate position for next find()
-			cnt++;
-		}
-		else
-			break;
-	}
+    int cnt = 0;
+    int selstart = GetSelectionStart();
+    int selend = GetSelectionEnd();
+    SetSelectionEnd(selstart);    // start replace from here
+    while (find(false))
+    {
+        int start = GetSelectionStart();
+        int end =   GetSelectionEnd();
+        if (end <= selend)        // in range
+        {
+            selend += replaceTextM.Length() - (end-start);        // expand/contract range
+            ReplaceSelection(replaceTextM);
+            SetSelectionEnd(start + replaceTextM.Length());        // move to appropriate position for next find()
+            cnt++;
+        }
+        else
+            break;
+    }
 
-	if (alert)
-	{
-		wxMessageBox(wxString::Format(_("%d replacements were made."), cnt), _("Replace"), wxICON_INFORMATION|wxOK);
-		findFlagsM.add(se::ALERT);		// turn it back on
-	}
-	if (wrap)								// turn it back on
-		findFlagsM.add(se::WRAP);
-	SetSelectionStart(selstart);
-	SetSelectionEnd(selend);
-	return cnt;
+    if (alert)
+    {
+        wxMessageBox(wxString::Format(_("%d replacements were made."), cnt), _("Replace"), wxICON_INFORMATION|wxOK);
+        findFlagsM.add(se::ALERT);        // turn it back on
+    }
+    if (wrap)                                // turn it back on
+        findFlagsM.add(se::WRAP);
+    SetSelectionStart(selstart);
+    SetSelectionEnd(selend);
+    return cnt;
+}
+//-----------------------------------------------------------------------------
+void SearchableEditor::centerCaret(bool doCenter)
+{
+    if (doCenter)       // try to keep it in center of screen
+    {
+        SetXCaretPolicy(wxSTC_CARET_STRICT|wxSTC_CARET_EVEN, 0);
+        SetYCaretPolicy(wxSTC_CARET_STRICT|wxSTC_CARET_EVEN, 0);
+    }
+    else
+    {
+        SetXCaretPolicy(wxSTC_CARET_SLOP|wxSTC_CARET_EVEN|wxSTC_CARET_STRICT, 50);
+        SetYCaretPolicy(wxSTC_CARET_SLOP|wxSTC_CARET_EVEN|wxSTC_CARET_STRICT, 2);
+    }
 }
 //-----------------------------------------------------------------------------
 FindDialog::FindDialog(SearchableEditor *editor, wxWindow* parent, const wxString& title, FindFlags *allowedFlags)
-	:BaseDialog(parent, -1, title)
+    :BaseDialog(parent, -1, title)
 {
-	parentEditorM = editor;
-	FindFlags flags;
-	if (allowedFlags)
-		flags = *allowedFlags;	// copy settings
+    parentEditorM = editor;
+    FindFlags flags;
+    if (allowedFlags)
+        flags = *allowedFlags;    // copy settings
 
     label_find = new wxStaticText(getControlsPanel(), -1, _("Find:"));
     text_ctrl_find = new wxTextCtrl(getControlsPanel(), -1);
     label_replace = new wxStaticText(getControlsPanel(), -1, _("Replace with:"));
     text_ctrl_replace = new wxTextCtrl(getControlsPanel(), -1);
 
-	checkbox_wholeword = checkbox_matchcase = checkbox_regexp = checkbox_convertbs = checkbox_wrap = checkbox_fromtop = 0;
-	if (flags.has(se::WHOLE_WORD))
-		checkbox_wholeword = new wxCheckBox(getControlsPanel(), -1, _("Whole word only"));
-	if (flags.has(se::MATCH_CASE))
-		checkbox_matchcase = new wxCheckBox(getControlsPanel(), -1, _("Match case"));
-	if (flags.has(se::REGULAR_EXPRESSION))
-		checkbox_regexp    = new wxCheckBox(getControlsPanel(), -1, _("Regular expression"));
-	if (flags.has(se::CONVERT_BACKSLASH))
-		checkbox_convertbs = new wxCheckBox(getControlsPanel(), -1, _("Convert backslashes"));
-	if (flags.has(se::WRAP))
-		checkbox_wrap      = new wxCheckBox(getControlsPanel(), -1, _("Wrap around"));
-	if (flags.has(se::FROM_TOP))
-		checkbox_fromtop   = new wxCheckBox(getControlsPanel(), -1, _("Start search from top"));
+    checkbox_wholeword = checkbox_matchcase = checkbox_regexp = checkbox_convertbs = checkbox_wrap = checkbox_fromtop = 0;
+    if (flags.has(se::WHOLE_WORD))
+        checkbox_wholeword = new wxCheckBox(getControlsPanel(), -1, _("Whole word only"));
+    if (flags.has(se::MATCH_CASE))
+        checkbox_matchcase = new wxCheckBox(getControlsPanel(), -1, _("Match case"));
+    if (flags.has(se::REGULAR_EXPRESSION))
+        checkbox_regexp    = new wxCheckBox(getControlsPanel(), -1, _("Regular expression"));
+    if (flags.has(se::CONVERT_BACKSLASH))
+        checkbox_convertbs = new wxCheckBox(getControlsPanel(), -1, _("Convert backslashes"));
+    if (flags.has(se::WRAP))
+        checkbox_wrap      = new wxCheckBox(getControlsPanel(), -1, _("Wrap around"));
+    if (flags.has(se::FROM_TOP))
+        checkbox_fromtop   = new wxCheckBox(getControlsPanel(), -1, _("Start search from top"));
 
     button_find = new wxButton(getControlsPanel(), ID_button_find, _("Find"));
     button_replace = new wxButton(getControlsPanel(), ID_button_replace, _("Replace"));
     button_replace_all = new wxButton(getControlsPanel(), ID_button_replace_all, _("Replace all"));
     button_replace_in_selection = new wxButton(getControlsPanel(), ID_button_replace_in_selection, _("In selection"));
 
-	do_layout();
+    do_layout();
 }
 //-----------------------------------------------------------------------------
 void FindDialog::do_layout()
@@ -315,23 +333,23 @@ void FindDialog::do_layout()
     sizerEdits->Add(text_ctrl_find, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
     sizerEdits->Add(label_replace, 0, wxALIGN_CENTER_VERTICAL);
     sizerEdits->Add(text_ctrl_replace, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
-	sizerEdits->AddGrowableCol(1, 1);
+    sizerEdits->AddGrowableCol(1, 1);
 
     wxGridSizer* sizerChecks = new wxGridSizer(2, 2,
         styleguide().getCheckboxSpacing(),
         styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
-	if (checkbox_wholeword)
-		sizerChecks->Add(checkbox_wholeword);
-	if (checkbox_matchcase)
-		sizerChecks->Add(checkbox_matchcase);
-	if (checkbox_regexp)
-		sizerChecks->Add(checkbox_regexp);
-	if (checkbox_convertbs)
-		sizerChecks->Add(checkbox_convertbs);
-	if (checkbox_wrap)
-		sizerChecks->Add(checkbox_wrap);
-	if (checkbox_fromtop)
-		sizerChecks->Add(checkbox_fromtop);
+    if (checkbox_wholeword)
+        sizerChecks->Add(checkbox_wholeword);
+    if (checkbox_matchcase)
+        sizerChecks->Add(checkbox_matchcase);
+    if (checkbox_regexp)
+        sizerChecks->Add(checkbox_regexp);
+    if (checkbox_convertbs)
+        sizerChecks->Add(checkbox_convertbs);
+    if (checkbox_wrap)
+        sizerChecks->Add(checkbox_wrap);
+    if (checkbox_fromtop)
+        sizerChecks->Add(checkbox_fromtop);
 
     wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
     sizerButtons->Add(0, 0, 1, wxEXPAND);
@@ -354,55 +372,59 @@ void FindDialog::do_layout()
 //-----------------------------------------------------------------------------
 void FindDialog::setup()
 {
-	FindFlags flags;
-	if (!checkbox_wholeword->IsChecked())
-		flags.remove(se::WHOLE_WORD);
-	if (!checkbox_matchcase->IsChecked())
-		flags.remove(se::MATCH_CASE);
-	if (!checkbox_regexp->IsChecked())
-		flags.remove(se::REGULAR_EXPRESSION);
-	if (!checkbox_convertbs->IsChecked())
-		flags.remove(se::CONVERT_BACKSLASH);
-	if (!checkbox_wrap->IsChecked())
-		flags.remove(se::WRAP);
-	if (!checkbox_fromtop->IsChecked())
-		flags.remove(se::FROM_TOP);
+    FindFlags flags;
+    if (!checkbox_wholeword->IsChecked())
+        flags.remove(se::WHOLE_WORD);
+    if (!checkbox_matchcase->IsChecked())
+        flags.remove(se::MATCH_CASE);
+    if (!checkbox_regexp->IsChecked())
+        flags.remove(se::REGULAR_EXPRESSION);
+    if (!checkbox_convertbs->IsChecked())
+        flags.remove(se::CONVERT_BACKSLASH);
+    if (!checkbox_wrap->IsChecked())
+        flags.remove(se::WRAP);
+    if (!checkbox_fromtop->IsChecked())
+        flags.remove(se::FROM_TOP);
 
-	wxString find = text_ctrl_find->GetValue();
-	wxString replace = text_ctrl_replace->GetValue();
-	parentEditorM->setupSearch(find, replace, flags);
-	if (flags.has(se::FROM_TOP))
-		checkbox_fromtop->SetValue(false);
+    wxString find = text_ctrl_find->GetValue();
+    wxString replace = text_ctrl_replace->GetValue();
+    parentEditorM->setupSearch(find, replace, flags);
+    if (flags.has(se::FROM_TOP))
+        checkbox_fromtop->SetValue(false);
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(FindDialog, BaseDialog)
-	EVT_BUTTON(FindDialog::ID_button_find, FindDialog::OnFindButtonClick)
-	EVT_BUTTON(FindDialog::ID_button_replace, FindDialog::OnReplaceButtonClick)
-	EVT_BUTTON(FindDialog::ID_button_replace_all, FindDialog::OnReplaceAllButtonClick)
-	EVT_BUTTON(FindDialog::ID_button_replace_in_selection, FindDialog::OnReplaceInSelectionButtonClick)
+    EVT_BUTTON(FindDialog::ID_button_find, FindDialog::OnFindButtonClick)
+    EVT_BUTTON(FindDialog::ID_button_replace, FindDialog::OnReplaceButtonClick)
+    EVT_BUTTON(FindDialog::ID_button_replace_all, FindDialog::OnReplaceAllButtonClick)
+    EVT_BUTTON(FindDialog::ID_button_replace_in_selection, FindDialog::OnReplaceInSelectionButtonClick)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void FindDialog::OnFindButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-	setup();
-	parentEditorM->find(false);
+    wxBusyCursor wait;
+    setup();
+    parentEditorM->find(false);
 }
 //-----------------------------------------------------------------------------
 void FindDialog::OnReplaceButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-	setup();
-	parentEditorM->replace();
+    wxBusyCursor wait;
+    setup();
+    parentEditorM->replace();
 }
 //-----------------------------------------------------------------------------
 void FindDialog::OnReplaceAllButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-	setup();
-	parentEditorM->replaceAll();
+    wxBusyCursor wait;
+    setup();
+    parentEditorM->replaceAll();
 }
 //-----------------------------------------------------------------------------
 void FindDialog::OnReplaceInSelectionButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-	setup();
-	parentEditorM->replaceInSelection();
+    wxBusyCursor wait;
+    setup();
+    parentEditorM->replaceInSelection();
 }
 //-----------------------------------------------------------------------------
