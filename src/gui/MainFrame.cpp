@@ -366,7 +366,7 @@ void MainFrame::OnMainMenuOpen(wxMenuEvent& event)
         objectMenuM->Destroy(objectMenuM->FindItemByPosition(1));
 
     event.Skip();
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
@@ -375,14 +375,14 @@ void MainFrame::OnWindowMenuItem(wxCommandEvent& event)
     FR_TRY
 
     frameManager().bringOnTop(event.GetId());
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     if (!GetStatusBar())
         return;
 
@@ -400,7 +400,7 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
             GetStatusBar()->SetStatusText(_("[No database selected]"));
         lastDatabase = d;
     }
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
@@ -477,14 +477,15 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
     if (!expanded)                      // on MSW the tree control toggles the branch automatically
         tree_ctrl_1->Collapse(item);    // so an ugly hack to trick it.
     #endif
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnClose(wxCloseEvent& event)
 {
     FR_TRY
-    
+
+    Raise();
     bool confirm = false;
     config().getValue(wxT("ConfirmQuit"), confirm);
     if (confirm && event.CanVeto() && wxNO ==
@@ -502,16 +503,16 @@ void MainFrame::OnClose(wxCloseEvent& event)
 void MainFrame::OnMenuQuit(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Close();
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     wxString ib;
     ib.Printf(_("This tool uses IBPP library version %d.%d.%d.%d\nand wxWidgets library version %d.%d.%d"),
         (IBPP::Version & 0xFF000000) >> 24,
@@ -539,41 +540,41 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
     msg += _("http://www.flamerobin.org");
 
     ::wxMessageBox(msg, _("About FlameRobin"), wxOK | wxICON_INFORMATION);
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuManual(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     showDocsHtmlFile(wxT("fr_manual.html"));
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRelNotes(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     showDocsHtmlFile(wxT("fr_whatsnew.html"));
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuLicense(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     showDocsHtmlFile(wxT("fr_license.html"));
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     PreferencesDialog pd(this, _("Preferences"), config(),
         wxT("fr_settings.confdef"));
     if (pd.isOk() && pd.loadFromConfig())
@@ -583,14 +584,14 @@ void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
         pd.ShowModal();
         pdSelection = pd.getSelectedPage();
     }
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Database* d = tree_ctrl_1->getSelectedDatabase();
     if (!checkValidDatabase(d))
         return;
@@ -600,14 +601,14 @@ void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))
         dc, wxT("db_settings.confdef"));
     if (pd.isOk() && pd.loadFromConfig())
         pd.ShowModal();
-        
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuInsert(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Database* d = tree_ctrl_1->getSelectedDatabase();
     if (!checkValidDatabase(d))
         return;
@@ -620,27 +621,27 @@ void MainFrame::OnMenuInsert(wxCommandEvent& WXUNUSED(event))
     eff->setDatabase(d);
     eff->setSql(sql);
     eff->Show();
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateTriggerForTable(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     MetadataItem* i = tree_ctrl_1->getSelectedMetadataItem();
     if (!i)
         return;
     TriggerWizardDialog* t = new TriggerWizardDialog(this, i);
     t->Show();
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuExecuteProcedure(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Procedure* p = dynamic_cast<Procedure*>(tree_ctrl_1->getSelectedMetadataItem());
     if (!p)
         return;
@@ -649,14 +650,14 @@ void MainFrame::OnMenuExecuteProcedure(wxCommandEvent& WXUNUSED(event))
     eff->setDatabase(p->getDatabase());
     eff->setSql(p->getExecuteStatement());
     eff->Show();
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuBrowse(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     MetadataItem* i = tree_ctrl_1->getSelectedMetadataItem();
     if (!i)
         return;
@@ -692,14 +693,14 @@ void MainFrame::OnMenuBrowse(wxCommandEvent& WXUNUSED(event))
     eff->setSql(sql);
     if (t != ntProcedure)
         eff->executeAllStatements();
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     MetadataItem* i = tree_ctrl_1->getSelectedMetadataItem();
     if (!i)
         return;
@@ -753,14 +754,14 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
     eff->setSql(sql);
     if (t != ntProcedure)
         eff->executeAllStatements();
-        
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Server* s = tree_ctrl_1->getSelectedServer();
     if (!checkValidServer(s))
         return;
@@ -771,14 +772,14 @@ void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 
     if (drd.ShowModal() == wxID_OK)
         tree_ctrl_1->selectMetadataItem(s->addDatabase(db));
-        
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRestoreIntoNewDatabase(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Server* s = tree_ctrl_1->getSelectedServer();
     if (!checkValidServer(s))
         return;
@@ -793,14 +794,14 @@ void MainFrame::OnMenuRestoreIntoNewDatabase(wxCommandEvent& WXUNUSED(event))
     tree_ctrl_1->selectMetadataItem(newDB);
     RestoreFrame* f = new RestoreFrame(this, newDB);
     f->Show();
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Database* d = tree_ctrl_1->getSelectedDatabase();
     if (!checkValidDatabase(d))
         return;
@@ -808,14 +809,14 @@ void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
     DatabaseRegistrationDialog drd(this, -1, _("Database Registration Info"));
     drd.setDatabase(d);
     drd.ShowModal();
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Server* s = tree_ctrl_1->getSelectedServer();
     if (!checkValidServer(s))
         return;
@@ -827,24 +828,24 @@ void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
 
     if (drd.ShowModal() == wxID_OK)
         tree_ctrl_1->selectMetadataItem(s->addDatabase(db));
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuManageUsers(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     // TODO:
     ::wxMessageBox(_("This feature is not yet implemented"), _("Not in this version"), wxICON_INFORMATION);
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUnRegisterServer(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Server* s = tree_ctrl_1->getSelectedServer();
     if (!checkValidServer(s))
         return;
@@ -855,14 +856,14 @@ void MainFrame::OnMenuUnRegisterServer(wxCommandEvent& WXUNUSED(event))
     Root* r = dynamic_cast<Root*>(s->getParent());
     if (r)
         r->removeServer(s);
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuServerProperties(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Server* s = tree_ctrl_1->getSelectedServer();
     if (!checkValidServer(s))
         return;
@@ -870,14 +871,14 @@ void MainFrame::OnMenuServerProperties(wxCommandEvent& WXUNUSED(event))
     ServerRegistrationDialog srd(this, -1, _("Server Registration Info"));
     srd.setServer(s);
     srd.ShowModal();
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Root* r = dynamic_cast<Root*>(tree_ctrl_1->getMetadataItem(tree_ctrl_1->GetRootItem()));
     if (!r)
         return;
@@ -887,14 +888,14 @@ void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
     srd.setServer(&s);
     if (wxID_OK == srd.ShowModal())
         tree_ctrl_1->selectMetadataItem(r->addServer(s));
-        
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Database* d = tree_ctrl_1->getSelectedDatabase();
     if (!checkValidDatabase(d))
         return;
@@ -908,14 +909,14 @@ void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
     Server* s = d->getServer();
     if (s)
         s->removeDatabase(d);
-        
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Database* d = tree_ctrl_1->getSelectedDatabase();
     if (!checkValidDatabase(d))
         return;
@@ -927,42 +928,42 @@ void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
         as.Add(std2wx(*i));
 
     ::wxGetSingleChoice(_("Connected users"), d->getPath(), as);
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuBackup(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Database* d = tree_ctrl_1->getSelectedDatabase();
     if (!checkValidDatabase(d))
         return;
 
     BackupFrame* f = new BackupFrame(this, d);
     f->Show();
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRestore(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Database* d = tree_ctrl_1->getSelectedDatabase();
     if (!checkValidDatabase(d))
         return;
 
     RestoreFrame* f = new RestoreFrame(this, d);
     f->Show();
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuReconnect(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Database* d = tree_ctrl_1->getSelectedDatabase();
     if (!checkValidDatabase(d))
         return;
@@ -972,14 +973,14 @@ void MainFrame::OnMenuReconnect(wxCommandEvent& WXUNUSED(event))
     ::wxEndBusyCursor();
     if (!ok)
         reportLastError(_("Error Reconnecting Database"));
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuConnectAs(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Database* d = tree_ctrl_1->getSelectedDatabase();
     if (!checkValidDatabase(d))
         return;
@@ -992,21 +993,21 @@ void MainFrame::OnMenuConnectAs(wxCommandEvent& WXUNUSED(event))
     drd.setDatabase(d);
     if (wxID_OK != drd.ShowModal() || !connect(false))
         d->resetCredentials();
-        
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuConnect(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     connect(true);  // true = warn if already connected
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 bool MainFrame::connect(bool warn)
-{ 
+{
     Database* db = tree_ctrl_1->getSelectedDatabase();
     if (!checkValidDatabase(db))
         return false;
@@ -1078,13 +1079,13 @@ bool MainFrame::connect(bool warn)
 void MainFrame::OnMenuDisconnect(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Database* d = tree_ctrl_1->getSelectedDatabase();
     if (!checkValidDatabase(d))
         return;
     if (!d->disconnect())
         reportLastError(_("Error Disconnecting Database"));
-        
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
@@ -1099,16 +1100,16 @@ void MainFrame::showGeneratorValue(Generator* g)
 void MainFrame::OnMenuShowGeneratorValue(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     showGeneratorValue(dynamic_cast<Generator*>(tree_ctrl_1->getSelectedMetadataItem()));
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuSetGeneratorValue(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Generator* g = dynamic_cast<Generator*>(tree_ctrl_1->getSelectedMetadataItem());
     if (!g)
         return;
@@ -1116,123 +1117,123 @@ void MainFrame::OnMenuSetGeneratorValue(wxCommandEvent& WXUNUSED(event))
     URI uri = URI(wxT("fr://edit_generator_value?parent_window=") + wxString::Format(wxT("%ld"), (uintptr_t)this)
         + wxT("&object_address=") + wxString::Format(wxT("%ld"), (uintptr_t)g));
     getURIProcessor().handleURI(uri);
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuShowAllGeneratorValues(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Database* d = tree_ctrl_1->getSelectedDatabase();
     if (checkValidDatabase(d))
     {
         if (!d->loadGeneratorValues())
             reportLastError(_("Error Loading Generator Value"));
     }
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateDomain(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Domain d;
     showCreateTemplate(&d);
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateException(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Exception e;
     showCreateTemplate(&e);
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateFunction(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Function x;
     showCreateTemplate(&x);
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateGenerator(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Generator x;
     showCreateTemplate(&x);
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateProcedure(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Procedure x;
     showCreateTemplate(&x);
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateRole(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Role x;
     showCreateTemplate(&x);
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateTable(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Table x;
     showCreateTemplate(&x);
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateTrigger(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Trigger x;
     showCreateTemplate(&x);
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateView(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-        
+
     View x;
     showCreateTemplate(&x);
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateObject(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     MetadataItem* item = tree_ctrl_1->getSelectedMetadataItem();
     if (!item)
         return;
     showCreateTemplate(item);
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
@@ -1263,7 +1264,7 @@ void MainFrame::showCreateTemplate(const MetadataItem* m)
 void MainFrame::OnMenuLoadColumnsInfo(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     MetadataItem* t = tree_ctrl_1->getSelectedMetadataItem();
     if (!t)
         return;
@@ -1293,14 +1294,14 @@ void MainFrame::OnMenuLoadColumnsInfo(wxCommandEvent& WXUNUSED(event))
                _("Information"), wxOK | wxICON_INFORMATION);
         }
     }
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     MetadataItem* i = tree_ctrl_1->getSelectedMetadataItem();
     if (!i)
         return;
@@ -1313,24 +1314,24 @@ void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))
         t);
     f->setProperties();
     f->Show();
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuToggleDisconnected(wxCommandEvent& event)
 {
     FR_TRY
-    
+
     config().setValue(wxT("HideDisconnectedDatabases"), !event.IsChecked());
     getGlobalRoot().notifyAllServers();
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuToggleStatusBar(wxCommandEvent& event)
 {
     FR_TRY
-    
+
     wxStatusBar* s = GetStatusBar();
     if (!s)
         s = CreateStatusBar();
@@ -1339,14 +1340,14 @@ void MainFrame::OnMenuToggleStatusBar(wxCommandEvent& event)
     config().setValue(wxT("showStatusBar"), show);
     s->Show(show);
     SendSizeEvent();
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     MetadataItem* m = tree_ctrl_1->getSelectedMetadataItem();
     if (!m)
         return;
@@ -1357,21 +1358,21 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
         Table* t = dynamic_cast<Table*>(c->getParent());
         if (!t)     // dummy check
             return;
-        FieldPropertiesFrame* f = new FieldPropertiesFrame(this, -1, 
+        FieldPropertiesFrame* f = new FieldPropertiesFrame(this, -1,
             wxEmptyString, t);
         f->setField(c);
         f->Show();
     }
     else
         frameManager().showMetadataPropertyFrame(this, m);
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Database* d = tree_ctrl_1->getSelectedDatabase();
     if (!checkValidDatabase(d))
         return;
@@ -1389,7 +1390,7 @@ void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
     eff->Show();
     eff->setSql(sql);
     eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
@@ -1397,7 +1398,7 @@ void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-    
+
     Database* d = tree_ctrl_1->getSelectedDatabase();
     if (!checkValidDatabase(d))
         return;
@@ -1415,7 +1416,7 @@ void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
     ExecuteSqlFrame* eff = new ExecuteSqlFrame(this, -1, wxString(_("Execute SQL statements")));
     eff->setDatabase(d);
     eff->Show();
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
@@ -1427,40 +1428,40 @@ const wxString MainFrame::getName() const
 void MainFrame::OnMenuUpdateUnRegisterServer(wxUpdateUIEvent& event)
 {
     FR_TRY
-    
+
     Server* s = tree_ctrl_1->getSelectedServer();
     event.Enable(s != 0 && !s->hasConnectedDatabase());
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateIfServerSelected(wxUpdateUIEvent& event)
 {
     FR_TRY
-    
+
     Server* s = tree_ctrl_1->getSelectedServer();
     event.Enable(s != 0);
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateIfDatabaseConnected(wxUpdateUIEvent& event)
 {
     FR_TRY
-    
+
     Database* d = tree_ctrl_1->getSelectedDatabase();
     event.Enable(d != 0 && d->isConnected());
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateIfDatabaseNotConnected(wxUpdateUIEvent& event)
 {
     FR_TRY
-    
+
     Database* d = tree_ctrl_1->getSelectedDatabase();
     event.Enable(d != 0 && !d->isConnected());
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
@@ -1470,7 +1471,7 @@ void MainFrame::OnMenuUpdateIfDatabaseSelected(wxUpdateUIEvent& event)
 
     Database* d = tree_ctrl_1->getSelectedDatabase();
     event.Enable(d != 0);
-    
+
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
