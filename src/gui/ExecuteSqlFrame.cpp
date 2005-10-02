@@ -274,17 +274,14 @@ void SqlEditor::setup()
     AutoCompSetIgnoreCase(true);
     AutoCompSetAutoHide(true);        // info in ScintillaDoc.html file (in scintilla source package)
     SetMarginWidth(0, 40);            // turn on the linenumbers margin, set width to 40pixels
-    SetMarginWidth(1, 0);            // turn off the folding margin
-    SetMarginType(0, 1);            // set margin type to linenumbers
+    SetMarginWidth(1, 0);             // turn off the folding margin
+    SetMarginType(0, 1);              // set margin type to linenumbers
     if (config().get(wxT("sqlEditorShowEdge"), false))
     {
         SetEdgeMode(wxSTC_EDGE_LINE);
         SetEdgeColumn(config().get(wxT("sqlEditorEdgeColumn"), 50));
     }
-
-    // used to scroll/position in text on errors and find&replace
-    SetXCaretPolicy(wxSTC_CARET_STRICT|wxSTC_CARET_EVEN|wxSTC_CARET_JUMPS, 0);
-    SetYCaretPolicy(wxSTC_CARET_STRICT|wxSTC_CARET_EVEN|wxSTC_CARET_JUMPS, 0);    // try to keep in center
+    centerCaret(false);
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(SqlEditor, wxStyledTextCtrl)
@@ -1103,10 +1100,12 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
             {
                 if (!execute(sql, prepareOnly))
                 {
-                    styled_text_ctrl_sql->GotoPos((int)oldpos);
+                    styled_text_ctrl_sql->centerCaret(true);
                     styled_text_ctrl_sql->GotoPos((int)lastpos);
+                    styled_text_ctrl_sql->GotoPos((int)oldpos);
                     styled_text_ctrl_sql->SetSelectionStart((int)oldpos);        // select the text in STC
                     styled_text_ctrl_sql->SetSelectionEnd((int)lastpos);        // that failed to execute
+                    styled_text_ctrl_sql->centerCaret(false);
                     return false;
                 }
                 else if (autoCommitM)

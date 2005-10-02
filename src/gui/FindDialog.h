@@ -80,13 +80,14 @@ private:
 public:
 	friend class FindDialog;
 	bool find(bool newSearch);
-	
+    void centerCaret(bool doCenter);
+
 	SearchableEditor(wxWindow *parent, wxWindowID id);
 };
 //-----------------------------------------------------------------------------
 class FindDialog: public BaseDialog
 {
-protected:	
+protected:
 	void setup();
 	void do_layout();
 
@@ -109,16 +110,16 @@ protected:
 	wxButton *button_replace_in_selection;
 
 public:
-    enum {	ID_button_find = 101, 
-			ID_button_replace, 
-			ID_button_replace_all, 
-			ID_button_replace_in_selection	
+    enum {	ID_button_find = 101,
+			ID_button_replace,
+			ID_button_replace_all,
+			ID_button_replace_in_selection
 	};
 	void OnFindButtonClick(wxCommandEvent &event);
 	void OnReplaceButtonClick(wxCommandEvent &event);
 	void OnReplaceAllButtonClick(wxCommandEvent &event);
 	void OnReplaceInSelectionButtonClick(wxCommandEvent &event);
-	
+
 	FindDialog(SearchableEditor *editor, wxWindow* parent, const wxString& title = _("Find and replace"), FindFlags *allowedFlags = 0);
     DECLARE_EVENT_TABLE()
 };
