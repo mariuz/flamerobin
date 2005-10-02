@@ -59,6 +59,7 @@ public:
 
     SqlEditor(wxWindow *parent, wxWindowID id, ExecuteSqlFrame *frame);
     void OnContextMenu(wxContextMenuEvent& event);
+    void OnKillFocus(wxFocusEvent& event);
     void OnMenuUndo(wxCommandEvent& event);
     void OnMenuRedo(wxCommandEvent& event);
     void OnMenuCut(wxCommandEvent& event);

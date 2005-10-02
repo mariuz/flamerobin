@@ -286,6 +286,7 @@ void SqlEditor::setup()
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(SqlEditor, wxStyledTextCtrl)
     EVT_CONTEXT_MENU(SqlEditor::OnContextMenu)
+    EVT_KILL_FOCUS(SqlEditor::OnKillFocus)
     EVT_MENU(SqlEditor::ID_MENU_UNDO,             SqlEditor::OnMenuUndo)
     EVT_MENU(SqlEditor::ID_MENU_REDO,             SqlEditor::OnMenuRedo)
     EVT_MENU(SqlEditor::ID_MENU_CUT,              SqlEditor::OnMenuCut)
@@ -342,6 +343,14 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
     }
 
     PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
+}
+//-----------------------------------------------------------------------------
+void SqlEditor::OnKillFocus(wxFocusEvent& WXUNUSED(event))
+{
+    if (AutoCompActive())
+        AutoCompCancel();
+    if (CallTipActive())
+        CallTipCancel();
 }
 //-----------------------------------------------------------------------------
 void SqlEditor::OnMenuUndo(wxCommandEvent& WXUNUSED(event))
