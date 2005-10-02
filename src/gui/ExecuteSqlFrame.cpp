@@ -281,6 +281,10 @@ void SqlEditor::setup()
         SetEdgeMode(wxSTC_EDGE_LINE);
         SetEdgeColumn(config().get(wxT("sqlEditorEdgeColumn"), 50));
     }
+
+    // used to scroll/position in text on errors and find&replace
+    SetXCaretPolicy(wxSTC_CARET_STRICT|wxSTC_CARET_EVEN|wxSTC_CARET_JUMPS, 0);
+    SetYCaretPolicy(wxSTC_CARET_STRICT|wxSTC_CARET_EVEN|wxSTC_CARET_JUMPS, 0);    // try to keep in center
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(SqlEditor, wxStyledTextCtrl)

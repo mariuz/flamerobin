@@ -175,6 +175,7 @@ bool SearchableEditor::find(bool newSearch)
 			return false;
 		}
 	}
+    GotoPos(p);
 	SetSelectionStart(p);
 	SetSelectionEnd(p + findTextM.Length());
 	return true;
