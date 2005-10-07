@@ -1200,8 +1200,9 @@ bool ExecuteSqlFrame::execute(wxString sql, bool prepareOnly)
             return true;
 
         log(wxEmptyString);
-          log(wxEmptyString);
-          log(_("Executing..."));
+        log(wxEmptyString);
+        log(_("Executing..."));
+        ::wxSafeYield();            // let GUI update the controls
         statementM->Execute();
         log(_("Done."));
 
