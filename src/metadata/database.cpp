@@ -526,6 +526,15 @@ bool Database::addObject(NodeType type, wxString name)
     return true;
 }
 //-----------------------------------------------------------------------------
+// a shortcut
+inline void getCleanName(std::stringstream& strstrm, std::string& name)
+{
+    strstrm >> name;
+    std::string::size_type p = name.find("(");     // TODO: we need a decent parser
+    if (p != std::string::npos)                    //       but this hack will do until we have it
+        name.erase(p);
+}
+//-----------------------------------------------------------------------------
 //! reads a DDL statement and does accordingly
 
 // drop [object_type] [name]
@@ -545,19 +554,20 @@ bool Database::parseCommitedSql(wxString sql)
     strstrm << wx2std(sql);
     strstrm >> action;
     strstrm >> object_type;
-    strstrm >> name;
+    getCleanName(strstrm, name);
+
     // patch for external functions whose name is made of two words. Shift the words.
     if ((action == "DECLARE" || action == "DROP") && object_type == "EXTERNAL" && name == "FUNCTION")
     {
         object_type = name;
-        strstrm >> name;
+        getCleanName(strstrm, name);
     }
 
     // support CREATE OR ALTER statements
     if (action == "CREATE" && object_type == "OR" && name == "ALTER")
     {
         strstrm >> object_type;
-        strstrm >> name;
+        getCleanName(strstrm, name);
         if (findByNameAndType(getTypeByName(std2wx(object_type)), std2wx(name))) // it is already CREATE
             action = "ALTER";
     }
@@ -582,7 +592,7 @@ bool Database::parseCommitedSql(wxString sql)
     if (action == "ALTER" && object_type == "INDEX" || action == "SET" && object_type == "STATISTICS")  // refresh table
     {
         if (action == "SET")    // move by 1
-            strstrm >> name;
+            getCleanName(strstrm, name);
         wxString tableName = getTableForIndex(std2wx(name));
         Table* t = dynamic_cast<Table*>(findByNameAndType(ntTable, tableName));
         if (t)
@@ -621,7 +631,7 @@ bool Database::parseCommitedSql(wxString sql)
                 if (name == "INDEX")
                 {
                     isIndex = true;
-                    strstrm >> name;
+                    getCleanName(strstrm, name);
                 }
                 else
                 {
@@ -639,7 +649,7 @@ bool Database::parseCommitedSql(wxString sql)
                         if (name == "INDEX")
                         {
                             isIndex = true;
-                            strstrm >> name;
+                            getCleanName(strstrm, name);
                         }
                     }
                 }
@@ -649,10 +659,7 @@ bool Database::parseCommitedSql(wxString sql)
     if (isIndex)
     {
         strstrm >> name;    // ON
-        strstrm >> name;    // table name
-        wxString::size_type p = name.find("(");
-        if (p != wxString::npos)
-            name.erase(p);
+        getCleanName(strstrm, name);
         Table* t = dynamic_cast<Table*>(findByNameAndType(ntTable, std2wx(name)));
         if (t)
             t->invalidateIndices();
@@ -674,10 +681,6 @@ bool Database::parseCommitedSql(wxString sql)
         name = wx2std(sql.substr(pos, end - pos));
     }
 
-    wxString::size_type pbr = name.find("(");        // CREATE PROCEDURE NAME(    <- remove colon
-    if (pbr != wxString::npos)
-        name.erase(pbr);
-
     NodeType t = getTypeByName(std2wx(object_type));
     if (action == "RECREATE")
     {
@@ -696,7 +699,7 @@ bool Database::parseCommitedSql(wxString sql)
         {                                   // to update their property pages
             std::string relation;
             strstrm >> relation;    // FOR
-            strstrm >> relation;    // relation_name
+            getCleanName(strstrm, relation);
             Relation* m = dynamic_cast<Relation*>(findByNameAndType(ntTable, std2wx(relation)));
             if (!m)
             {
@@ -740,9 +743,9 @@ bool Database::parseCommitedSql(wxString sql)
             {
                 std::string alter, field_name, maybe_type, domain_or_datatype;
                 strstrm >> alter;
-                strstrm >> field_name;
+                getCleanName(strstrm, field_name);
                 if (field_name == "COLUMN") // ALTER TABLE xyz ALTER COLUMN field TYPE {domain or datatype}
-                    strstrm >> field_name;
+                    getCleanName(strstrm, field_name);
                 strstrm >> maybe_type;
                 if (maybe_type == "TYPE")       // domain is either created/modified/deleted or none
                 {                               // if we'd only know what was there before... life would be easier
