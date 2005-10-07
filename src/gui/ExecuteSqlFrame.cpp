@@ -1218,6 +1218,8 @@ bool ExecuteSqlFrame::execute(wxString sql, bool prepareOnly)
             wxString::size_type p = sql.find_first_not_of(wxT(" \n\t\r"));    // left trim
             if (p != wxString::npos && p > 0)
                 sql.erase(0, p);
+            // FIXME: this needs to be parsed better. User can enter SET  GENERATOR (two spaces) and
+            //        it wouldn't be detected. He could also put newlines, tabs, put the statement in brackets, etc.
             bool changeNull = (sql.substr(0, 44) == wxT("UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG"));
             bool setGenerator = (sql.substr(0, 13) == wxT("SET GENERATOR"));
             if (changeNull || setGenerator)
