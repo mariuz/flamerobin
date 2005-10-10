@@ -127,14 +127,6 @@ bool CreateString(IBPP::Statement& st, int col, wxString& value)
     if (st->IsNull(col))
         return false;
 
-    // some defaults
-    bool reformatNumbers = config().get(wxT("ReformatNumbers"), false);
-    int numberPrecision = config().get(wxT("NumberPrecision"), 2);    // defaults to 2 decimal digits
-    //wxString dateFormatDefault = wxT("D.M.Y");
-    wxString dateFormat = config().get(wxT("DateFormat"), wxString(wxT("D.M.Y")));
-    //wxString timeFormatDefault = wxT("H:M:S");
-    wxString timeFormat = config().get(wxT("TimeFormat"), wxString(wxT("H:M:S")));
-
     double dval;
     float fval;
     int64_t int64val;
@@ -147,6 +139,23 @@ bool CreateString(IBPP::Statement& st, int col, wxString& value)
     IBPP::SDT DataType = st->ColumnType(col);
     if (st->ColumnScale(col))
         DataType = IBPP::sdDouble;
+
+    // load these only if needed for formatting the value
+    bool reformatNumbers = false;
+    int numberPrecision = 2;
+    if (DataType == IBPP::sdDouble)
+    {
+        reformatNumbers = config().get(wxT("ReformatNumbers"), false);
+        // defaults to 2 decimal digits
+        numberPrecision = config().get(wxT("NumberPrecision"), 2);
+    }
+
+    wxString dateFormat;
+    wxString timeFormat;
+    if (DataType == IBPP::sdDate || DataType == IBPP::sdTimestamp)
+        dateFormat = config().get(wxT("DateFormat"), wxString(wxT("D.M.Y")));
+    if (DataType == IBPP::sdTime || DataType == IBPP::sdTimestamp)
+        timeFormat = config().get(wxT("TimeFormat"), wxString(wxT("H:M:S")));
 
     value = wxT("");
     std::string tempValue;
@@ -163,12 +172,12 @@ bool CreateString(IBPP::Statement& st, int col, wxString& value)
             return true;
         case IBPP::sdDate:
             st->Get(col, d);
-            dtoi(d, &year, &month, &day);
+            d.GetDate(year, month, day);
             value = GetHumanDate(year, month, day, dateFormat);
             return true;
         case IBPP::sdTime:
             st->Get(col, t);
-            ttoi(t, &hour, &minute, &second);
+            t.GetTime(hour, minute, second);
             value = GetHumanTime(hour, minute, second, timeFormat);
             return true;
         case IBPP::sdTimestamp:
