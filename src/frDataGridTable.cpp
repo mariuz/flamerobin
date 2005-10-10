@@ -1,39 +1,39 @@
 /*
-The contents of this file are subject to the Initial Developer's Public
-License Version 1.0 (the "License"); you may not use this file except in
-compliance with the License. You may obtain a copy of the License here:
-http://www.flamerobin.org/license.html.
+  The contents of this file are subject to the Initial Developer's Public
+  License Version 1.0 (the "License"); you may not use this file except in
+  compliance with the License. You may obtain a copy of the License here:
+  http://www.flamerobin.org/license.html.
 
-Software distributed under the License is distributed on an "AS IS"
-basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-License for the specific language governing rights and limitations under
-the License.
+  Software distributed under the License is distributed on an "AS IS"
+  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+  License for the specific language governing rights and limitations under
+  the License.
 
-The Original Code is FlameRobin (TM).
+  The Original Code is FlameRobin (TM).
 
-The Initial Developer of the Original Code is Milan Babuskov.
+  The Initial Developer of the Original Code is Milan Babuskov.
 
-Portions created by the original developer
-are Copyright (C) 2004 Milan Babuskov.
+  Portions created by the original developer
+  are Copyright (C) 2004 Milan Babuskov.
 
-All Rights Reserved.
+  All Rights Reserved.
 
-$Id$
+  $Id$
 
-Contributor(s): Michael Hieke
+  Contributor(s): Michael Hieke
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-#pragma hdrstop
+  #pragma hdrstop
 #endif
 
 // for all others, include the necessary headers (this file is usually all you
 // need because it includes almost all "standard" wxWindows headers
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+  #include "wx/wx.h"
 #endif
 
 #include <wx/grid.h>
@@ -260,9 +260,11 @@ wxString GridTable::GetValue(int row, int col)
     if (col >= (int)dataM[row].size())
         return wxEmptyString;
 
-    // keep up to 200 more rows fetched for better responsiveness
-    if (maxRowToFetchM < row + 200)
-        maxRowToFetchM = row + 200;
+    // keep between 200 and 250 more rows fetched for better responsiveness
+    // (but make the count of fetched rows a multiple of 50)
+    int maxRowToFetch = 50 * (row / 50 + 5);
+    if (maxRowToFetchM < maxRowToFetch)
+        maxRowToFetchM = maxRowToFetch;
 
     GridBaseCell* cell = dataM[row][col];
     if (cell)
