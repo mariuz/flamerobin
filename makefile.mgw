@@ -50,7 +50,6 @@ IBPP_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_blob.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_database.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_date.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_datecalc.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_dbkey.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_exception.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_ibpp.o \
@@ -232,9 +231,6 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_database.o: ./src/ibpp/database.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_date.o: ./src/ibpp/date.cpp
-	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
-
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_datecalc.o: ./src/ibpp/datecalc.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_dbkey.o: ./src/ibpp/dbkey.cpp

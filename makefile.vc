@@ -52,7 +52,6 @@ IBPP_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_blob.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_database.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_date.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_datecalc.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_dbkey.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_exception.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_ibpp.obj \
@@ -267,9 +266,6 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_database.obj: .\src\ibpp\database.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_date.obj: .\src\ibpp\date.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) $**
-
-vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_datecalc.obj: .\src\ibpp\datecalc.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_dbkey.obj: .\src\ibpp\dbkey.cpp

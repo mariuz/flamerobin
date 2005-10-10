@@ -41,7 +41,6 @@ IBPP_OBJECTS =  \
 	ibpp_blob.o \
 	ibpp_database.o \
 	ibpp_date.o \
-	ibpp_datecalc.o \
 	ibpp_dbkey.o \
 	ibpp_exception.o \
 	ibpp_ibpp.o \
@@ -247,9 +246,6 @@ ibpp_database.o: $(srcdir)/src/ibpp/database.cpp $(IBPP_ODEP)
 
 ibpp_date.o: $(srcdir)/src/ibpp/date.cpp $(IBPP_ODEP)
 	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/date.cpp
-
-ibpp_datecalc.o: $(srcdir)/src/ibpp/datecalc.cpp $(IBPP_ODEP)
-	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/datecalc.cpp
 
 ibpp_dbkey.o: $(srcdir)/src/ibpp/dbkey.cpp $(IBPP_ODEP)
 	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/dbkey.cpp

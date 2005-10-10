@@ -137,7 +137,6 @@
         $(SOURCEDIR)/ibpp/blob.cpp
         $(SOURCEDIR)/ibpp/database.cpp
         $(SOURCEDIR)/ibpp/date.cpp
-        $(SOURCEDIR)/ibpp/datecalc.cpp
         $(SOURCEDIR)/ibpp/dbkey.cpp
         $(SOURCEDIR)/ibpp/exception.cpp
         $(SOURCEDIR)/ibpp/ibpp.cpp

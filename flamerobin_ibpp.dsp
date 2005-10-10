@@ -475,10 +475,6 @@ SOURCE=.\src\ibpp\date.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\ibpp\datecalc.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\ibpp\dbkey.cpp
 # End Source File
 # Begin Source File
