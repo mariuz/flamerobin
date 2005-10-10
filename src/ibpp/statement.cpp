@@ -365,7 +365,7 @@ void StatementImpl::ExecuteImmediate(const std::string& sql)
 	}
 }
 
-int32_t StatementImpl::AffectedRows(void)
+int StatementImpl::AffectedRows(void)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::AffectedRows", _("No statement has been prepared."));
@@ -374,7 +374,7 @@ int32_t StatementImpl::AffectedRows(void)
 	if (mDatabase->GetHandle() == 0)
 		throw LogicExceptionImpl("Statement::AffectedRows", _("Database must be connected."));
 
-	int32_t count;
+	int count;
 	IBS status;
 	RB result;
 	char itemsReq[] = {isc_info_sql_records};
@@ -404,7 +404,7 @@ bool StatementImpl::Fetch(void)
 			_("No statement has been executed or no result set available."));
 
 	IBS status;
-	int32_t code = (*gds.Call()->m_dsql_fetch)(status.Self(), &mHandle, 1, mOutRow->Self());
+	int code = (*gds.Call()->m_dsql_fetch)(status.Self(), &mHandle, 1, mOutRow->Self());
 	if (code == 100)	// This special code means "no more rows"
 	{
 		CursorFree();	// Free the explicit or implicit cursor/result-set
@@ -430,7 +430,7 @@ bool StatementImpl::Fetch(IBPP::Row& row)
 	row = rowimpl;
 
 	IBS status;
-	int32_t code = (*gds.Call()->m_dsql_fetch)(status.Self(), &mHandle, 1,
+	int code = (*gds.Call()->m_dsql_fetch)(status.Self(), &mHandle, 1,
 					rowimpl->Self());
 	if (code == 100)	// This special code means "no more rows"
 	{
@@ -471,7 +471,7 @@ void StatementImpl::Close(void)
 	}
 }
 
-void StatementImpl::SetNull(int32_t param)
+void StatementImpl::SetNull(int param)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::SetNull", _("No statement has been prepared."));
@@ -481,7 +481,7 @@ void StatementImpl::SetNull(int32_t param)
 	mInRow->SetNull(param);
 }
 
-void StatementImpl::Set(int32_t param, bool value)
+void StatementImpl::Set(int param, bool value)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::Set[bool]", _("No statement has been prepared."));
@@ -491,7 +491,7 @@ void StatementImpl::Set(int32_t param, bool value)
 	mInRow->Set(param, value);
 }
 
-void StatementImpl::Set(int32_t param, const char* cstring)
+void StatementImpl::Set(int param, const char* cstring)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::Set[char*]", _("No statement has been prepared."));
@@ -501,7 +501,7 @@ void StatementImpl::Set(int32_t param, const char* cstring)
 	mInRow->Set(param, cstring);
 }
 
-void StatementImpl::Set(int32_t param, const void* bindata, int32_t len)
+void StatementImpl::Set(int param, const void* bindata, int len)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::Set[void*]", _("No statement has been prepared."));
@@ -511,7 +511,7 @@ void StatementImpl::Set(int32_t param, const void* bindata, int32_t len)
 	mInRow->Set(param, bindata, len);
 }
 
-void StatementImpl::Set(int32_t param, const std::string& s)
+void StatementImpl::Set(int param, const std::string& s)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::Set[string]", _("No statement has been prepared."));
@@ -521,7 +521,7 @@ void StatementImpl::Set(int32_t param, const std::string& s)
 	mInRow->Set(param, s);
 }
 
-void StatementImpl::Set(int32_t param, int16_t value)
+void StatementImpl::Set(int param, int16_t value)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::Set[int16_t]", _("No statement has been prepared."));
@@ -531,7 +531,7 @@ void StatementImpl::Set(int32_t param, int16_t value)
 	mInRow->Set(param, value);
 }
 
-void StatementImpl::Set(int32_t param, int32_t value)
+void StatementImpl::Set(int param, int32_t value)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::Set[int32_t]", _("No statement has been prepared."));
@@ -541,7 +541,7 @@ void StatementImpl::Set(int32_t param, int32_t value)
 	mInRow->Set(param, value);
 }
 
-void StatementImpl::Set(int32_t param, int64_t value)
+void StatementImpl::Set(int param, int64_t value)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::Set[int64_t]", _("No statement has been prepared."));
@@ -551,7 +551,7 @@ void StatementImpl::Set(int32_t param, int64_t value)
 	mInRow->Set(param, value);
 }
 
-void StatementImpl::Set(int32_t param, float value)
+void StatementImpl::Set(int param, float value)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::Set[float]", _("No statement has been prepared."));
@@ -561,7 +561,7 @@ void StatementImpl::Set(int32_t param, float value)
 	mInRow->Set(param, value);
 }
 
-void StatementImpl::Set(int32_t param, double value)
+void StatementImpl::Set(int param, double value)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::Set[double]", _("No statement has been prepared."));
@@ -571,7 +571,7 @@ void StatementImpl::Set(int32_t param, double value)
 	mInRow->Set(param, value);
 }
 
-void StatementImpl::Set(int32_t param, const IBPP::Timestamp& value)
+void StatementImpl::Set(int param, const IBPP::Timestamp& value)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::Set[Timestamp]", _("No statement has been prepared."));
@@ -581,7 +581,7 @@ void StatementImpl::Set(int32_t param, const IBPP::Timestamp& value)
 	mInRow->Set(param, value);
 }
 
-void StatementImpl::Set(int32_t param, const IBPP::Date& value)
+void StatementImpl::Set(int param, const IBPP::Date& value)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::Set[Date]", _("No statement has been prepared."));
@@ -591,7 +591,7 @@ void StatementImpl::Set(int32_t param, const IBPP::Date& value)
 	mInRow->Set(param, value);
 }
 
-void StatementImpl::Set(int32_t param, const IBPP::Time& value)
+void StatementImpl::Set(int param, const IBPP::Time& value)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::Set[Time]", _("No statement has been prepared."));
@@ -601,7 +601,7 @@ void StatementImpl::Set(int32_t param, const IBPP::Time& value)
 	mInRow->Set(param, value);
 }
 
-void StatementImpl::Set(int32_t param, const IBPP::Blob& blob)
+void StatementImpl::Set(int param, const IBPP::Blob& blob)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::Set[Blob]", _("No statement has been prepared."));
@@ -611,7 +611,7 @@ void StatementImpl::Set(int32_t param, const IBPP::Blob& blob)
 	mInRow->Set(param, blob);
 }
 
-void StatementImpl::Set(int32_t param, const IBPP::Array& array)
+void StatementImpl::Set(int param, const IBPP::Array& array)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::Set[Array]", _("No statement has been prepared."));
@@ -621,7 +621,7 @@ void StatementImpl::Set(int32_t param, const IBPP::Array& array)
 	mInRow->Set(param, array);
 }
 
-void StatementImpl::Set(int32_t param, const IBPP::DBKey& key)
+void StatementImpl::Set(int param, const IBPP::DBKey& key)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::Set[DBKey]", _("No statement has been prepared."));
@@ -632,7 +632,7 @@ void StatementImpl::Set(int32_t param, const IBPP::DBKey& key)
 }
 
 /*
-void StatementImpl::Set(int32_t param, const IBPP::Value& value)
+void StatementImpl::Set(int param, const IBPP::Value& value)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::Set[Value]", _("No statement has been prepared."));
@@ -643,7 +643,7 @@ void StatementImpl::Set(int32_t param, const IBPP::Value& value)
 }
 */
 
-bool StatementImpl::IsNull(int32_t column)
+bool StatementImpl::IsNull(int column)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::IsNull", _("The row is not initialized."));
@@ -651,7 +651,7 @@ bool StatementImpl::IsNull(int32_t column)
 	return mOutRow->IsNull(column);
 }
 
-bool StatementImpl::Get(int32_t column, bool* retvalue)
+bool StatementImpl::Get(int column, bool* retvalue)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -661,7 +661,7 @@ bool StatementImpl::Get(int32_t column, bool* retvalue)
 	return mOutRow->Get(column, *retvalue);
 }
 
-bool StatementImpl::Get(int32_t column, bool& retvalue)
+bool StatementImpl::Get(int column, bool& retvalue)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -669,7 +669,7 @@ bool StatementImpl::Get(int32_t column, bool& retvalue)
 	return mOutRow->Get(column, retvalue);
 }
 
-bool StatementImpl::Get(int32_t column, char* retvalue)
+bool StatementImpl::Get(int column, char* retvalue)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -677,7 +677,7 @@ bool StatementImpl::Get(int32_t column, char* retvalue)
 	return mOutRow->Get(column, retvalue);
 }
 
-bool StatementImpl::Get(int32_t column, void* bindata, int32_t& userlen)
+bool StatementImpl::Get(int column, void* bindata, int& userlen)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -685,7 +685,7 @@ bool StatementImpl::Get(int32_t column, void* bindata, int32_t& userlen)
 	return mOutRow->Get(column, bindata, userlen);
 }
 
-bool StatementImpl::Get(int32_t column, std::string& retvalue)
+bool StatementImpl::Get(int column, std::string& retvalue)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -693,7 +693,7 @@ bool StatementImpl::Get(int32_t column, std::string& retvalue)
 	return mOutRow->Get(column, retvalue);
 }
 
-bool StatementImpl::Get(int32_t column, int16_t* retvalue)
+bool StatementImpl::Get(int column, int16_t* retvalue)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -703,7 +703,7 @@ bool StatementImpl::Get(int32_t column, int16_t* retvalue)
 	return mOutRow->Get(column, *retvalue);
 }
 
-bool StatementImpl::Get(int32_t column, int16_t& retvalue)
+bool StatementImpl::Get(int column, int16_t& retvalue)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -711,7 +711,7 @@ bool StatementImpl::Get(int32_t column, int16_t& retvalue)
 	return mOutRow->Get(column, retvalue);
 }
 
-bool StatementImpl::Get(int32_t column, int32_t* retvalue)
+bool StatementImpl::Get(int column, int32_t* retvalue)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -721,7 +721,7 @@ bool StatementImpl::Get(int32_t column, int32_t* retvalue)
 	return mOutRow->Get(column, *retvalue);
 }
 
-bool StatementImpl::Get(int32_t column, int32_t& retvalue)
+bool StatementImpl::Get(int column, int32_t& retvalue)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -729,7 +729,7 @@ bool StatementImpl::Get(int32_t column, int32_t& retvalue)
 	return mOutRow->Get(column, retvalue);
 }
 
-bool StatementImpl::Get(int32_t column, int64_t* retvalue)
+bool StatementImpl::Get(int column, int64_t* retvalue)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -739,7 +739,7 @@ bool StatementImpl::Get(int32_t column, int64_t* retvalue)
 	return mOutRow->Get(column, *retvalue);
 }
 
-bool StatementImpl::Get(int32_t column, int64_t& retvalue)
+bool StatementImpl::Get(int column, int64_t& retvalue)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -747,7 +747,7 @@ bool StatementImpl::Get(int32_t column, int64_t& retvalue)
 	return mOutRow->Get(column, retvalue);
 }
 
-bool StatementImpl::Get(int32_t column, float* retvalue)
+bool StatementImpl::Get(int column, float* retvalue)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -757,7 +757,7 @@ bool StatementImpl::Get(int32_t column, float* retvalue)
 	return mOutRow->Get(column, *retvalue);
 }
 
-bool StatementImpl::Get(int32_t column, float& retvalue)
+bool StatementImpl::Get(int column, float& retvalue)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -765,7 +765,7 @@ bool StatementImpl::Get(int32_t column, float& retvalue)
 	return mOutRow->Get(column, retvalue);
 }
 
-bool StatementImpl::Get(int32_t column, double* retvalue)
+bool StatementImpl::Get(int column, double* retvalue)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -775,7 +775,7 @@ bool StatementImpl::Get(int32_t column, double* retvalue)
 	return mOutRow->Get(column, *retvalue);
 }
 
-bool StatementImpl::Get(int32_t column, double& retvalue)
+bool StatementImpl::Get(int column, double& retvalue)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -783,7 +783,7 @@ bool StatementImpl::Get(int32_t column, double& retvalue)
 	return mOutRow->Get(column, retvalue);
 }
 
-bool StatementImpl::Get(int32_t column, IBPP::Timestamp& timestamp)
+bool StatementImpl::Get(int column, IBPP::Timestamp& timestamp)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -791,7 +791,7 @@ bool StatementImpl::Get(int32_t column, IBPP::Timestamp& timestamp)
 	return mOutRow->Get(column, timestamp);
 }
 
-bool StatementImpl::Get(int32_t column, IBPP::Date& date)
+bool StatementImpl::Get(int column, IBPP::Date& date)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -799,7 +799,7 @@ bool StatementImpl::Get(int32_t column, IBPP::Date& date)
 	return mOutRow->Get(column, date);
 }
 
-bool StatementImpl::Get(int32_t column, IBPP::Time& time)
+bool StatementImpl::Get(int column, IBPP::Time& time)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -807,7 +807,7 @@ bool StatementImpl::Get(int32_t column, IBPP::Time& time)
 	return mOutRow->Get(column, time);
 }
 
-bool StatementImpl::Get(int32_t column, IBPP::Blob& blob)
+bool StatementImpl::Get(int column, IBPP::Blob& blob)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -815,7 +815,7 @@ bool StatementImpl::Get(int32_t column, IBPP::Blob& blob)
 	return mOutRow->Get(column, blob);
 }
 
-bool StatementImpl::Get(int32_t column, IBPP::DBKey& key)
+bool StatementImpl::Get(int column, IBPP::DBKey& key)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -823,7 +823,7 @@ bool StatementImpl::Get(int32_t column, IBPP::DBKey& key)
 	return mOutRow->Get(column, key);
 }
 
-bool StatementImpl::Get(int32_t column, IBPP::Array& array)
+bool StatementImpl::Get(int column, IBPP::Array& array)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -832,7 +832,7 @@ bool StatementImpl::Get(int32_t column, IBPP::Array& array)
 }
 
 /*
-const IBPP::Value StatementImpl::Get(int32_t column)
+const IBPP::Value StatementImpl::Get(int column)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
@@ -875,10 +875,10 @@ bool StatementImpl::Get(const std::string& name, char* retvalue)
 	return mOutRow->Get(name, retvalue);
 }
 
-bool StatementImpl::Get(const std::string& name, void* retvalue, int32_t& count)
+bool StatementImpl::Get(const std::string& name, void* retvalue, int& count)
 {
 	if (mOutRow == 0)
-		throw LogicExceptionImpl("Statement::Get[void*,int32_t]", _("The row is not initialized."));
+		throw LogicExceptionImpl("Statement::Get[void*,int]", _("The row is not initialized."));
 
 	return mOutRow->Get(name, retvalue, count);
 }
@@ -1039,7 +1039,7 @@ const IBPP::Value StatementImpl::Get(const std::string& name)
 }
 */
 
-int32_t StatementImpl::Columns(void)
+int StatementImpl::Columns(void)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Columns", _("The row is not initialized."));
@@ -1047,7 +1047,7 @@ int32_t StatementImpl::Columns(void)
 	return mOutRow->Columns();
 }
 
-int32_t StatementImpl::ColumnNum(const std::string& name)
+int StatementImpl::ColumnNum(const std::string& name)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::ColumnNum", _("The row is not initialized."));
@@ -1055,7 +1055,7 @@ int32_t StatementImpl::ColumnNum(const std::string& name)
 	return mOutRow->ColumnNum(name);
 }
 
-const char* StatementImpl::ColumnName(int32_t varnum)
+const char* StatementImpl::ColumnName(int varnum)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Columns", _("The row is not initialized."));
@@ -1063,7 +1063,7 @@ const char* StatementImpl::ColumnName(int32_t varnum)
 	return mOutRow->ColumnName(varnum);
 }
 
-const char* StatementImpl::ColumnAlias(int32_t varnum)
+const char* StatementImpl::ColumnAlias(int varnum)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Columns", _("The row is not initialized."));
@@ -1071,7 +1071,7 @@ const char* StatementImpl::ColumnAlias(int32_t varnum)
 	return mOutRow->ColumnAlias(varnum);
 }
 
-const char* StatementImpl::ColumnTable(int32_t varnum)
+const char* StatementImpl::ColumnTable(int varnum)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Columns", _("The row is not initialized."));
@@ -1079,7 +1079,7 @@ const char* StatementImpl::ColumnTable(int32_t varnum)
 	return mOutRow->ColumnTable(varnum);
 }
 
-IBPP::SDT StatementImpl::ColumnType(int32_t varnum)
+IBPP::SDT StatementImpl::ColumnType(int varnum)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::ColumnType", _("No statement has been prepared."));
@@ -1089,7 +1089,17 @@ IBPP::SDT StatementImpl::ColumnType(int32_t varnum)
     return mOutRow->ColumnType(varnum);
 }
 
-int32_t StatementImpl::ColumnSize(int32_t varnum)
+int StatementImpl::ColumnSubtype(int varnum)
+{
+	if (mHandle == 0)
+		throw LogicExceptionImpl("Statement::ColumnSubtype", _("No statement has been prepared."));
+	if (mOutRow == 0)
+		throw LogicExceptionImpl("Statement::ColumnSubtype", _("The statement does not return results."));
+
+    return mOutRow->ColumnSubtype(varnum);
+}
+
+int StatementImpl::ColumnSize(int varnum)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::ColumnSize", _("No statement has been prepared."));
@@ -1099,7 +1109,7 @@ int32_t StatementImpl::ColumnSize(int32_t varnum)
 	return mOutRow->ColumnSize(varnum);
 }
 
-int32_t StatementImpl::ColumnScale(int32_t varnum)
+int StatementImpl::ColumnScale(int varnum)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::ColumnScale", _("No statement has been prepared."));
@@ -1109,7 +1119,7 @@ int32_t StatementImpl::ColumnScale(int32_t varnum)
 	return mOutRow->ColumnScale(varnum);
 }
 
-int32_t StatementImpl::Parameters(void)
+int StatementImpl::Parameters(void)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::Parameters", _("No statement has been prepared."));
@@ -1119,7 +1129,7 @@ int32_t StatementImpl::Parameters(void)
 	return mInRow->Columns();
 }
 
-IBPP::SDT StatementImpl::ParameterType(int32_t varnum)
+IBPP::SDT StatementImpl::ParameterType(int varnum)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::ParameterType", _("No statement has been prepared."));
@@ -1129,7 +1139,17 @@ IBPP::SDT StatementImpl::ParameterType(int32_t varnum)
     return mInRow->ColumnType(varnum);
 }
 
-int32_t StatementImpl::ParameterSize(int32_t varnum)
+int StatementImpl::ParameterSubtype(int varnum)
+{
+	if (mHandle == 0)
+		throw LogicExceptionImpl("Statement::ParameterSubtype", _("No statement has been prepared."));
+	if (mInRow == 0)
+		throw LogicExceptionImpl("Statement::ParameterSubtype", _("The statement uses no parameters."));
+
+    return mInRow->ColumnSubtype(varnum);
+}
+
+int StatementImpl::ParameterSize(int varnum)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::ParameterSize", _("No statement has been prepared."));
@@ -1139,7 +1159,7 @@ int32_t StatementImpl::ParameterSize(int32_t varnum)
 	return mInRow->ColumnSize(varnum);
 }
 
-int32_t StatementImpl::ParameterScale(int32_t varnum)
+int StatementImpl::ParameterScale(int varnum)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::ParameterScale", _("No statement has been prepared."));

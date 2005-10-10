@@ -121,7 +121,7 @@ void EPB::FireActions(IBPP::IDatabase* db)
 		{ // Fire the action
 			try
 			{
-				(*ref_it)->ibppEventHandler(db, event_buffer_it.get_name(), vnew - vold);
+				(*ref_it)->ibppEventHandler(db, event_buffer_it.get_name(), (int)(vnew - vold));
 			} catch (...) { }
 		}
 	}

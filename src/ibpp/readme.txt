@@ -45,7 +45,7 @@ website at http://www.ibpp.org.
 
 ---------------------------------------------------------------------------
 
-Release Notes for Version 2.4 (August, 2005)
+Release Notes for Version 2.4 (September, 2005)
 
 
 1/ Introduction
@@ -79,15 +79,14 @@ second source of information.
 
 3/ New or Updated Features since Version 2.3
 
-Version 2.4 was meant essentially as a maintenance version. We chose to tag it
-2.4 instead of 2.3.6 mostly because of the exception classes changes and the
-blob interfaces extensions which both change the public API significantly in
-some areas.
+Version 2.4 was initially meant essentially as a maintenance version. We chose
+to tag it 2.4 instead of 2.3.6 mostly because of the exception classes changes
+and the blob interfaces extensions which both changed the public API
+significantly in some areas.
 
-The next major version (3.0) will start beta some weeks after release of
-version 2.4. This 2.4 release has been used by T.I.P. Group S.A. in Windows
-products since february 2005. So at least on this platform it should be rock-
-solid.
+Though, in a second stage, the source code received numerous additional fixes
+and additions, not the least of them being that IBPP 2.4 is now ready for
+64 bits environments, wether LP64 on many unixes or LLP64 on Windows64.
 
 - Exception handling revision.  There is now IBPP::Exception as a base class.
 SQLException specialization is thrown as result of an engine reported runtime
@@ -99,13 +98,12 @@ error. LogicException specialization is thrown in all other cases.
                  /                 \
     IBPP::LogicException    IBPP::SQLException
 
-- Change in the interface definition of methods using or returning 64 bits
-integers. The ibpp.h now uses the C99 standard (section 7.18) types which are
-defined by including the stdint.h header. This is perfectly fine using all
-compilers on which IBPP is maintained, except for one. Guess which one ? Yes,
+- Change in the interface definition of methods using or returning integers.
+The ibpp.h now uses the C99 standard (section 7.18) exact precision types which
+are defined by including the stdint.h header. This is perfectly fine using all
+compilers on which IBPP is maintained, except for one. Guess which one? Yes,
 MSVC does not supply that header nor those typedefs in any other file. The
-solution is simple, ibpp.h does a typedef __int64 int64_t in case of the MSVC
-compilers.
+solution is simple, ibpp.h does some typedef in case of the MSVC compilers.
 
 - Extended the Statement::Set() and Statement::Get() in regards to blobs and
 std::string. Now one can directly Get(3, str) where str is a std::string and
@@ -131,8 +129,8 @@ So we ask users of IBPP not to start using IBPP::Row as is, consider it already
 deprecated in its current form. We will introduce something 'bigger' in the
 next major version (3.0.
 
-- Added void ClientDLLSearchPaths(const std::string&);
-On Win32 platform, ClientDLLSearchPaths() allows to setup one or multiple 
+- Added void ClientLibSearchPaths(const std::string&);
+On Win32 platform, ClientLibSearchPaths() allows to setup one or multiple 
 additional paths (separated with a ';') where IBPP will look for the client 
 library (before the default implicit search locations). This is usefull for 
 applications distributed with a 'private' copy of Firebird, when the registry 
@@ -140,6 +138,15 @@ is useless to identify the location from where to attempt loading the
 fbclient.dll / gds32.dll. If called, this function must be called *early* by 
 the application, before *any* other function or object methods of IBPP. This 
 is currently a NO-OP on platforms other than Win32.
+
+- Changed the date / time / timestamp support in order to get access to the sub-second
+precision, which is defined in ten thousandths of seconds in IB and FB.
+The operator int() has been dropped and replaced by methods GetDate() and GetTime().
+The method GetTime() can take an optional fourth parameter to get the sub-seconds.
+Same for method SetTime(). This is true for classes Time and Timestamp.
+
+- Added int Statement::GetSubtype(int) returning, for a Blob column only, the subtype
+of the Blob as it is declared in the database metadata.
 
 
 4/ Comments, Acknowledgments

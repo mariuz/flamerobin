@@ -30,12 +30,31 @@ Contributor(s): ______________________________________.
 The most recent addition to this file is always on top and has the highest
 item number.
 
+11. September 27, 2005
+
+- Again, huge editing, this time to simplify and revert to 'int' a lot of places
+where int32_t had been declared in the previous step and which are not needed. It is
+better to declare the interface using simple int where possible and use only specific
+size integers where needed for portability reasons between 32 and 64 bits systems.
+By the way, just a reminder : 16 bits systems are NOT supported by IBPP.
+
+- Changed the date / time / timestamp support in order to get access to the sub-second
+precision, which is defined in ten thousandths of seconds in IB and FB.
+The operator int() has been dropped and replaced by methods GetDate() and GetTime().
+The method GetTime() can take an optional fourth parameter to get the sub-seconds.
+Same for method SetTime(). This is true for classes Time and Timestamp.
+
+- Added int Statement::GetSubtype(int) returning, for a Blob column only, the subtype
+of the Blob as it is declared in the database metadata.
+
+
 10. September 23, 2005
 
-- Huge but simple code editing occured over all the source code base to correctly
-support LP64 and LLP64 models on 64 bits environments. Good news is that this only
-relies on using the C 99 standard exact precision integer types int16_t, int32_t
-and int64_t (int64_t had already been introduced in the source earlier).
+- Huge but simple code editing occured over all the source code base to
+correctly support LP64 and LLP64 models on 64 bits environments. Good news is
+that this only relies on using the C 99 standard exact precision integer types
+int16_t, int32_t and int64_t (int64_t had already been introduced in the source
+earlier).
 
 9. September 12, 2005
 
@@ -68,8 +87,8 @@ Thanks to Michael Hieke and some others for insisting on this.
 
 7. August 30, 2005
 
-- Added void ClientDLLSearchPaths(const std::string&);
-On Win32 platform, ClientDLLSearchPaths() allows to setup one or multiple 
+- Added void ClientLibSearchPaths(const std::string&);
+On Win32 platform, ClientLibSearchPaths() allows to setup one or multiple 
 additional paths (separated with a ';') where IBPP will look for the client 
 library (before the default implicit search locations). This is usefull for 
 applications distributed with a 'private' copy of Firebird, when the registry 

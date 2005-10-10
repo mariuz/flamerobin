@@ -387,7 +387,7 @@ struct GDS
 {
 	// Attributes
 	bool mReady;
-	int32_t mGDSVersion; 		// Version of the GDS32.DLL (50 for 5.0, 60 for 6.0)
+	int mGDSVersion; 		// Version of the GDS32.DLL (50 for 5.0, 60 for 6.0)
 
 #ifdef IBPP_WINDOWS
 	HMODULE mHandle;			// The GDS32.DLL HMODULE
@@ -435,22 +435,22 @@ struct GDS
 	proto_dsql_free_statement*		m_dsql_free_statement;
 	proto_dsql_set_cursor_name*		m_dsql_set_cursor_name;
 	proto_dsql_sql_info* 			m_dsql_sql_info;
-	proto_decode_date*				m_decode_date;
-	proto_encode_date*				m_encode_date;
-	proto_add_user*					m_add_user;
-	proto_delete_user*				m_delete_user;
-	proto_modify_user*				m_modify_user;
+	//proto_decode_date*				m_decode_date;
+	//proto_encode_date*				m_encode_date;
+	//proto_add_user*					m_add_user;
+	//proto_delete_user*				m_delete_user;
+	//proto_modify_user*				m_modify_user;
 
 	proto_service_attach*			m_service_attach;
 	proto_service_detach*			m_service_detach;
 	proto_service_start*			m_service_start;
 	proto_service_query*			m_service_query;
-	proto_decode_sql_date*			m_decode_sql_date;
-	proto_decode_sql_time*			m_decode_sql_time;
-	proto_decode_timestamp*			m_decode_timestamp;
-	proto_encode_sql_date*			m_encode_sql_date;
-	proto_encode_sql_time*			m_encode_sql_time;
-	proto_encode_timestamp*			m_encode_timestamp;
+	//proto_decode_sql_date*			m_decode_sql_date;
+	//proto_decode_sql_time*			m_decode_sql_time;
+	//proto_decode_timestamp*			m_decode_timestamp;
+	//proto_encode_sql_date*			m_encode_sql_date;
+	//proto_encode_sql_time*			m_encode_sql_time;
+	//proto_encode_timestamp*			m_encode_timestamp;
 
 	// Constructor (No need for a specific destructor)
 	GDS()
@@ -595,7 +595,7 @@ public:
 	void FireActions(IBPP::IDatabase *);
 	char* EventsBuffer(void) { return &mEventBuffer[0]; }
 	char* ResultsBuffer(void) { return &mResultsBuffer[0]; }
-	int32_t Size(void) const { return (int32_t)mEventBuffer.size(); }
+	short Size(void) const { return (short)mEventBuffer.size(); }
 
 	EPB() {}
 };
@@ -641,8 +641,8 @@ public:
 	ISC_STATUS* Self(void) { return mVector; }
 	bool Errors(void) { return (mVector[0] == 1 && mVector[1] > 0) ? true : false; }
 	const char* ErrorMessage(void) const;
-	int32_t SqlCode(void) const;
-	int32_t EngineCode(void) const { return (mVector[0] == 1) ? (int32_t)mVector[1] : 0; }
+	int SqlCode(void) const;
+	int EngineCode(void) const { return (mVector[0] == 1) ? (int)mVector[1] : 0; }
 	void Reset(void);
 
 	IBS();
@@ -737,8 +737,8 @@ class SQLExceptionImpl : public IBPP::SQLException, public ExceptionBase
 	//	(((((((( OBJECT INTERNALS ))))))))
 
 private:
-	int32_t mSqlCode;
-	int32_t mEngineCode;
+	int mSqlCode;
+	int mEngineCode;
 
 public:
 	// The following constructors are small and could be inlined, but for object
@@ -762,8 +762,8 @@ public:
     virtual const char* Origin() const throw();
     virtual const char* ErrorMessage() const throw();
 	virtual const char* what() const throw();
-	virtual int32_t SqlCode(void) const throw();
-	virtual int32_t EngineCode(void) const throw();
+	virtual int SqlCode(void) const throw();
+	virtual int EngineCode(void) const throw();
 };
 
 class ServiceImpl : public IBPP::IService
@@ -806,13 +806,13 @@ public:
 	void RemoveUser(const std::string& username);
 	void ListUsers(std::vector<std::string>& users);
 
-	void SetPageBuffers(const std::string& dbfile, int32_t buffers);
-	void SetSweepInterval(const std::string& dbfile, int32_t sweep);
+	void SetPageBuffers(const std::string& dbfile, int buffers);
+	void SetSweepInterval(const std::string& dbfile, int sweep);
 	void SetSyncWrite(const std::string& dbfile, bool);
 	void SetReadOnly(const std::string& dbfile, bool);
 	void SetReserveSpace(const std::string& dbfile, bool);
 
-	void Shutdown(const std::string& dbfile, IBPP::DSM mode, int32_t sectimeout);
+	void Shutdown(const std::string& dbfile, IBPP::DSM mode, int sectimeout);
 	void Restart(const std::string& dbfile);
 	void Sweep(const std::string& dbfile);
 	void Repair(const std::string& dbfile, IBPP::RPF flags);
@@ -820,7 +820,7 @@ public:
 	void StartBackup(const std::string& dbfile, const std::string& bkfile,
 		IBPP::BRF flags = IBPP::BRF(0));
 	void StartRestore(const std::string& bkfile, const std::string& dbfile,
-		int32_t pagesize, IBPP::BRF flags = IBPP::BRF(0));
+		int pagesize, IBPP::BRF flags = IBPP::BRF(0));
 
 	const char* WaitMsg(void);
 	void Wait(void);
@@ -857,7 +857,7 @@ class DatabaseImpl : public IBPP::IDatabase
 
 	void QueueEvents(void);
 	void CancelEvents(void);
-	void EventUpdateCounts(int32_t size, const char* tmpbuffer);
+	void EventUpdateCounts(int size, const char* tmpbuffer);
 
 	static void EventHandler(const char*, short, const char*);
 
@@ -891,16 +891,16 @@ public:
 	const char* CharSet(void) const			{ return mCharSet.c_str(); }
 	const char* CreateParams(void) const	{ return mCreateParams.c_str(); }
 
-	void Info(int32_t* ODSMajor, int32_t* ODSMinor,
-		int32_t* PageSize, int32_t* Pages, int32_t* Buffers, int32_t* Sweep,
+	void Info(int* ODSMajor, int* ODSMinor,
+		int* PageSize, int* Pages, int* Buffers, int* Sweep,
 		bool* SyncWrites, bool* Reserve);
-	void Statistics(int32_t* Fetches, int32_t* Marks, int32_t* Reads, int32_t* Writes);
-	void Counts(int32_t* Insert, int32_t* Update, int32_t* Delete, 
-		int32_t* ReadIdx, int32_t* ReadSeq);
+	void Statistics(int* Fetches, int* Marks, int* Reads, int* Writes);
+	void Counts(int* Insert, int* Update, int* Delete, 
+		int* ReadIdx, int* ReadSeq);
 	void Users(std::vector<std::string>& users);
-	int32_t Dialect(void) { return mDialect; }
+	int Dialect(void) { return mDialect; }
 
-    void Create(int32_t dialect);
+    void Create(int dialect);
 	void Connect(void);
 	bool Connected(void) { return mHandle == 0 ? false : true; }
 	void Inactivate(void);
@@ -980,7 +980,7 @@ private:
 	std::vector<int64_t> mInt64s;	// Temporary storage for 64 bits
 	std::vector<int32_t> mInt32s;	// Temporary storage for 32 bits
 	std::vector<int16_t> mInt16s;	// Temporary storage for 16 bits
-	std::vector<int16_t> mBools;		// Temporary storage for Bools (need int16_t due to address taking)
+	std::vector<char> mBools;		// Temporary storage for Bools
 	std::vector<std::string> mStrings;	// Temporary storage for Strings
 	std::vector<bool> mUpdated;		// Which columns where updated (Set()) ?
 
@@ -988,13 +988,13 @@ private:
 	DatabaseImpl* mDatabase;		// Related Database (important for Blobs, ...)
 	TransactionImpl* mTransaction;	// Related Transaction (same remark)
 
-	void SetValue(int32_t, IITYPE, const void* value, int32_t = 0);
-	void* GetValue(int32_t, IITYPE, void* = 0);
+	void SetValue(int, IITYPE, const void* value, int = 0);
+	void* GetValue(int, IITYPE, void* = 0);
 
 public:
 	void Free(void);
-	int16_t AllocatedSize(void) { return mDescrArea->sqln; }
-	void Resize(int32_t n);
+	short AllocatedSize(void) { return mDescrArea->sqln; }
+	void Resize(int n);
 	void AllocVariables(void);
 	bool MissingValues(void);		// Returns wether one of the mMissing[] is true
 	XSQLDA* Self(void) { return mDescrArea; }
@@ -1002,7 +1002,7 @@ public:
 
 	RowImpl& RowImpl::operator=(const RowImpl& copied);
 	RowImpl(const RowImpl& copied);
-	RowImpl(int32_t dialect, int32_t size, DatabaseImpl* db, TransactionImpl* tr);
+	RowImpl(int dialect, int size, DatabaseImpl* db, TransactionImpl* tr);
     ~RowImpl();
 
 	//	(((((((( OBJECT INTERFACE ))))))))
@@ -1011,44 +1011,44 @@ public:
 	IBPP::IDatabase* Database(void) const;
 	IBPP::ITransaction* Transaction(void) const;
 
-	void SetNull(int32_t);
-	void Set(int32_t, bool);
-	void Set(int32_t, const char*);				// c-strings
-	void Set(int32_t, const void*, int32_t);		// byte buffers
-	void Set(int32_t, const std::string&);
-	void Set(int32_t, int16_t);
-	void Set(int32_t, int32_t);
-	void Set(int32_t, int64_t);
-	void Set(int32_t, float);
-	void Set(int32_t, double);
-	void Set(int32_t, const IBPP::Timestamp&);
-	void Set(int32_t, const IBPP::Date&);
-	void Set(int32_t, const IBPP::Time&);
-	void Set(int32_t, const IBPP::DBKey&);
-	void Set(int32_t, const IBPP::Blob&);
-	void Set(int32_t, const IBPP::Array&);
+	void SetNull(int);
+	void Set(int, bool);
+	void Set(int, const char*);				// c-strings
+	void Set(int, const void*, int);		// byte buffers
+	void Set(int, const std::string&);
+	void Set(int, int16_t);
+	void Set(int, int32_t);
+	void Set(int, int64_t);
+	void Set(int, float);
+	void Set(int, double);
+	void Set(int, const IBPP::Timestamp&);
+	void Set(int, const IBPP::Date&);
+	void Set(int, const IBPP::Time&);
+	void Set(int, const IBPP::DBKey&);
+	void Set(int, const IBPP::Blob&);
+	void Set(int, const IBPP::Array&);
 
-	bool IsNull(int32_t);
-	bool Get(int32_t, bool&);
-	bool Get(int32_t, char*);  		// c-strings, len unchecked
-	bool Get(int32_t, void*, int32_t&);	// byte buffers
-	bool Get(int32_t, std::string&);
-	bool Get(int32_t, int16_t&);
-	bool Get(int32_t, int32_t&);
-	bool Get(int32_t, int64_t&);
-	bool Get(int32_t, float&);
-	bool Get(int32_t, double&);
-	bool Get(int32_t, IBPP::Timestamp&);
-	bool Get(int32_t, IBPP::Date&);
-	bool Get(int32_t, IBPP::Time&);
-	bool Get(int32_t, IBPP::DBKey&);
-	bool Get(int32_t, IBPP::Blob&);
-	bool Get(int32_t, IBPP::Array&);
+	bool IsNull(int);
+	bool Get(int, bool&);
+	bool Get(int, char*);  		// c-strings, len unchecked
+	bool Get(int, void*, int&);	// byte buffers
+	bool Get(int, std::string&);
+	bool Get(int, int16_t&);
+	bool Get(int, int32_t&);
+	bool Get(int, int64_t&);
+	bool Get(int, float&);
+	bool Get(int, double&);
+	bool Get(int, IBPP::Timestamp&);
+	bool Get(int, IBPP::Date&);
+	bool Get(int, IBPP::Time&);
+	bool Get(int, IBPP::DBKey&);
+	bool Get(int, IBPP::Blob&);
+	bool Get(int, IBPP::Array&);
 
 	bool IsNull(const std::string&);
 	bool Get(const std::string&, bool&);
 	bool Get(const std::string&, char*);	// c-strings, len unchecked
-	bool Get(const std::string&, void*, int32_t&);	// byte buffers
+	bool Get(const std::string&, void*, int&);	// byte buffers
 	bool Get(const std::string&, std::string&);
 	bool Get(const std::string&, int16_t&);
 	bool Get(const std::string&, int32_t&);
@@ -1062,16 +1062,17 @@ public:
 	bool Get(const std::string&, IBPP::Blob&);
 	bool Get(const std::string&, IBPP::Array&);
 
-	int32_t ColumnNum(const std::string&);
-	const char* ColumnName(int32_t);
-	const char* ColumnAlias(int32_t);
-	const char* ColumnTable(int32_t);
-	IBPP::SDT ColumnType(int32_t);
-	int32_t ColumnSize(int32_t);
-	int32_t ColumnScale(int32_t);
-	int32_t Columns(void);
+	int ColumnNum(const std::string&);
+	const char* ColumnName(int);
+	const char* ColumnAlias(int);
+	const char* ColumnTable(int);
+	IBPP::SDT ColumnType(int);
+	int ColumnSubtype(int);
+	int ColumnSize(int);
+	int ColumnScale(int);
+	int Columns(void);
 
-	bool ColumnUpdated(int32_t);
+	bool ColumnUpdated(int);
 	bool Updated();
 
 	IBPP::IRow* Clone();
@@ -1126,55 +1127,55 @@ public:
 	inline void CursorExecute(const std::string& cursor)	{ CursorExecute(cursor, std::string()); }
 	bool Fetch(void);
 	bool Fetch(IBPP::Row&);
-	int32_t AffectedRows(void);
+	int AffectedRows(void);
 	void Close(void);	// Free resources, attachments maintained
 	IBPP::STT Type(void) { return mType; }
 
-	void SetNull(int32_t);
-	void Set(int32_t, bool);
-	void Set(int32_t, const char*);				// c-strings
-	void Set(int32_t, const void*, int32_t);		// byte buffers
-	void Set(int32_t, const std::string&);
-	void Set(int32_t, int16_t);
-	void Set(int32_t, int32_t);
-	void Set(int32_t, int64_t);
-	void Set(int32_t, float);
-	void Set(int32_t, double);
-	void Set(int32_t, const IBPP::Timestamp&);
-	void Set(int32_t, const IBPP::Date&);
-	void Set(int32_t, const IBPP::Time&);
-	void Set(int32_t, const IBPP::DBKey&);
-	void Set(int32_t, const IBPP::Blob&);
-	void Set(int32_t, const IBPP::Array&);
+	void SetNull(int);
+	void Set(int, bool);
+	void Set(int, const char*);				// c-strings
+	void Set(int, const void*, int);		// byte buffers
+	void Set(int, const std::string&);
+	void Set(int, int16_t);
+	void Set(int, int32_t);
+	void Set(int, int64_t);
+	void Set(int, float);
+	void Set(int, double);
+	void Set(int, const IBPP::Timestamp&);
+	void Set(int, const IBPP::Date&);
+	void Set(int, const IBPP::Time&);
+	void Set(int, const IBPP::DBKey&);
+	void Set(int, const IBPP::Blob&);
+	void Set(int, const IBPP::Array&);
 
-	bool IsNull(int32_t);
-	bool Get(int32_t, bool*);
-	bool Get(int32_t, bool&);
-	bool Get(int32_t, char*);				// c-strings, len unchecked
-	bool Get(int32_t, void*, int32_t&);			// byte buffers
-	bool Get(int32_t, std::string&);
-	bool Get(int32_t, int16_t*);
-	bool Get(int32_t, int16_t&);
-	bool Get(int32_t, int32_t*);
-	bool Get(int32_t, int32_t&);
-	bool Get(int32_t, int64_t*);
-	bool Get(int32_t, int64_t&);
-	bool Get(int32_t, float*);
-	bool Get(int32_t, float&);
-	bool Get(int32_t, double*);
-	bool Get(int32_t, double&);
-	bool Get(int32_t, IBPP::Timestamp&);
-	bool Get(int32_t, IBPP::Date&);
-	bool Get(int32_t, IBPP::Time&);
-	bool Get(int32_t, IBPP::DBKey&);
-	bool Get(int32_t, IBPP::Blob&);
-	bool Get(int32_t, IBPP::Array&);
+	bool IsNull(int);
+	bool Get(int, bool*);
+	bool Get(int, bool&);
+	bool Get(int, char*);				// c-strings, len unchecked
+	bool Get(int, void*, int&);			// byte buffers
+	bool Get(int, std::string&);
+	bool Get(int, int16_t*);
+	bool Get(int, int16_t&);
+	bool Get(int, int32_t*);
+	bool Get(int, int32_t&);
+	bool Get(int, int64_t*);
+	bool Get(int, int64_t&);
+	bool Get(int, float*);
+	bool Get(int, float&);
+	bool Get(int, double*);
+	bool Get(int, double&);
+	bool Get(int, IBPP::Timestamp&);
+	bool Get(int, IBPP::Date&);
+	bool Get(int, IBPP::Time&);
+	bool Get(int, IBPP::DBKey&);
+	bool Get(int, IBPP::Blob&);
+	bool Get(int, IBPP::Array&);
 
 	bool IsNull(const std::string&);
 	bool Get(const std::string&, bool*);
 	bool Get(const std::string&, bool&);
 	bool Get(const std::string&, char*);		// c-strings, len unchecked
-	bool Get(const std::string&, void*, int32_t&);	// byte buffers
+	bool Get(const std::string&, void*, int&);	// byte buffers
 	bool Get(const std::string&, std::string&);
 	bool Get(const std::string&, int16_t*);
 	bool Get(const std::string&, int16_t&);
@@ -1193,20 +1194,22 @@ public:
 	bool Get(const std::string&, IBPP::Blob&);
 	bool Get(const std::string&, IBPP::Array&);
 
-	int32_t ColumnNum(const std::string&);
-    int32_t ColumnNumAlias(const std::string&);
-	const char* ColumnName(int32_t);
-	const char* ColumnAlias(int32_t);
-	const char* ColumnTable(int32_t);
-	IBPP::SDT ColumnType(int32_t);
-	int32_t ColumnSize(int32_t);
-	int32_t ColumnScale(int32_t);
-	int32_t Columns(void);
+	int ColumnNum(const std::string&);
+    int ColumnNumAlias(const std::string&);
+	const char* ColumnName(int);
+	const char* ColumnAlias(int);
+	const char* ColumnTable(int);
+	IBPP::SDT ColumnType(int);
+	int ColumnSubtype(int);
+	int ColumnSize(int);
+	int ColumnScale(int);
+	int Columns(void);
 
-	IBPP::SDT ParameterType(int32_t);
-	int32_t ParameterSize(int32_t);
-	int32_t ParameterScale(int32_t);
-	int32_t Parameters(void);
+	IBPP::SDT ParameterType(int);
+	int ParameterSubtype(int);
+	int ParameterSize(int);
+	int ParameterScale(int);
+	int Parameters(void);
 
 	void Plan(std::string&);
 	
@@ -1221,13 +1224,13 @@ class BlobImpl : public IBPP::IBlob
 private:
 	friend class RowImpl;
 
-	int mRefCount;				// Reference counter
-	bool				mIdAssigned;
-	ISC_QUAD			mId;
-	isc_blob_handle		mHandle;
-	bool				mWriteMode;
-	DatabaseImpl*  		mDatabase;		// Database attachée
-	TransactionImpl*	mTransaction;	// Transaction attachée
+	int mRefCount;
+	bool					mIdAssigned;
+	ISC_QUAD				mId;
+	isc_blob_handle			mHandle;
+	bool					mWriteMode;
+	DatabaseImpl*  			mDatabase;		// Belongs to this database
+	TransactionImpl*		mTransaction;	// Belongs to this transaction
 
 	void Init(void);
 	void SetId(ISC_QUAD*);
@@ -1251,9 +1254,9 @@ public:
 	void Open(void);
 	void Close(void);
 	void Cancel(void);
-	int32_t Read(void*, int32_t size);
-	void Write(const void*, int32_t size);
-	void Info(int32_t* Size, int32_t* Largest, int32_t* Segments);
+	int Read(void*, int size);
+	void Write(const void*, int size);
+	void Info(int* Size, int* Largest, int* Segments);
 
 	void Save(const std::string& data);
 	void Load(std::string& data);
@@ -1302,18 +1305,27 @@ public:
 	IBPP::ITransaction* Transaction(void) const;
 	void DetachTransaction(void);
 	void Describe(const std::string& table, const std::string& column);
-	void ReadTo(IBPP::ADT, void*, int32_t);
-	void WriteFrom(IBPP::ADT, const void*, int32_t);
+	void ReadTo(IBPP::ADT, void*, int);
+	void WriteFrom(IBPP::ADT, const void*, int);
 	IBPP::SDT ElementType(void);
-	int32_t ElementSize(void);
-	int32_t ElementScale(void);
-	int32_t Dimensions(void);
-	void Bounds(int32_t dim, int32_t* low, int32_t* high);
-	void SetBounds(int32_t dim, int32_t low, int32_t high);
+	int ElementSize(void);
+	int ElementScale(void);
+	int Dimensions(void);
+	void Bounds(int dim, int* low, int* high);
+	void SetBounds(int dim, int low, int high);
 
 	IBPP::IArray* AddRef(void);
 	void Release(IBPP::IArray*&);
 };
+
+void encodeDate(ISC_DATE& isc_dt, const IBPP::Date& dt);
+void decodeDate(IBPP::Date& dt, const ISC_DATE& isc_dt);
+
+void encodeTime(ISC_TIME& isc_tm, const IBPP::Time& tm);
+void decodeTime(IBPP::Time& tm, const ISC_TIME& isc_tm);
+
+void encodeTimestamp(ISC_TIMESTAMP& isc_ts, const IBPP::Timestamp& ts);
+void decodeTimestamp(IBPP::Timestamp& ts, const ISC_TIMESTAMP& isc_ts);
 
 }	// namespace ibpp_internal
 

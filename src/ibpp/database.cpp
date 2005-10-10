@@ -44,7 +44,7 @@ using namespace ibpp_internals;
 
 //	(((((((( OBJECT INTERFACE IMPLEMENTATION ))))))))
 
-void DatabaseImpl::Create(int32_t dialect)
+void DatabaseImpl::Create(int dialect)
 {
 	if (mHandle != 0)
 		throw LogicExceptionImpl("Database::Create", _("Database is already connected."));
@@ -273,8 +273,8 @@ void DatabaseImpl::DispatchEvents(void)
 	QueueEvents();
 }
 
-void DatabaseImpl::Info(int32_t* ODSMajor, int32_t* ODSMinor,
-	int32_t* PageSize, int32_t* Pages, int32_t* Buffers, int32_t* Sweep,
+void DatabaseImpl::Info(int* ODSMajor, int* ODSMinor,
+	int* PageSize, int* Pages, int* Buffers, int* Sweep,
 	bool* Sync, bool* Reserve)
 {
 	if (mHandle == 0)
@@ -310,7 +310,7 @@ void DatabaseImpl::Info(int32_t* ODSMajor, int32_t* ODSMinor,
 		*Reserve = result.GetValue(isc_info_no_reserve) == 1 ? false : true;
 }
 
-void DatabaseImpl::Statistics(int32_t* Fetches, int32_t* Marks, int32_t* Reads, int32_t* Writes)
+void DatabaseImpl::Statistics(int* Fetches, int* Marks, int* Reads, int* Writes)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Database::Statistics", _("Database is not connected."));
@@ -335,8 +335,8 @@ void DatabaseImpl::Statistics(int32_t* Fetches, int32_t* Marks, int32_t* Reads, 
 	if (Writes != 0) *Writes = result.GetValue(isc_info_writes);
 }
 
-void DatabaseImpl::Counts(int32_t* Insert, int32_t* Update, int32_t* Delete, 
-	int32_t* ReadIdx, int32_t* ReadSeq)
+void DatabaseImpl::Counts(int* Insert, int* Update, int* Delete, 
+	int* ReadIdx, int* ReadSeq)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Database::Counts", _("Database is not connected."));
@@ -536,7 +536,7 @@ void DatabaseImpl::CancelEvents(void)
 	}
 }
 
-void DatabaseImpl::EventUpdateCounts(int32_t size, const char* tmpbuffer)
+void DatabaseImpl::EventUpdateCounts(int size, const char* tmpbuffer)
 {
 	if (size > mEvents->Size())
 	{

@@ -41,7 +41,6 @@
 #include <limits>
 
 #include <math.h>
-#include <time.h>
 
 using namespace ibpp_internals;
 
@@ -159,7 +158,7 @@ void ArrayImpl::Describe(const std::string& table, const std::string& column)
 	mDescribed = true;
 }
 
-void ArrayImpl::SetBounds(int32_t dim, int32_t low, int32_t high)
+void ArrayImpl::SetBounds(int dim, int low, int high)
 {
 	if (! mDescribed)
 		throw LogicExceptionImpl("Array::SetBounds", _("Array description not set."));
@@ -210,7 +209,7 @@ IBPP::SDT ArrayImpl::ElementType(void)
 	return value;
 }
 
-int32_t ArrayImpl::ElementSize(void)
+int ArrayImpl::ElementSize(void)
 {
 	if (! mDescribed)
 		throw LogicExceptionImpl("Array::ElementSize",
@@ -219,7 +218,7 @@ int32_t ArrayImpl::ElementSize(void)
 	return mDesc.array_desc_length;
 }
 
-int32_t ArrayImpl::ElementScale(void)
+int ArrayImpl::ElementScale(void)
 {
 	if (! mDescribed)
 		throw LogicExceptionImpl("Array::ElementScale",
@@ -228,7 +227,7 @@ int32_t ArrayImpl::ElementScale(void)
 	return mDesc.array_desc_scale;
 }
 
-int32_t ArrayImpl::Dimensions(void)
+int ArrayImpl::Dimensions(void)
 {
 	if (! mDescribed)
 		throw LogicExceptionImpl("Array::Dimensions",
@@ -237,7 +236,7 @@ int32_t ArrayImpl::Dimensions(void)
 	return mDesc.array_desc_dimensions;
 }
 
-void ArrayImpl::Bounds(int32_t dim, int32_t* low, int32_t* high)
+void ArrayImpl::Bounds(int dim, int* low, int* high)
 {
 	if (! mDescribed)
 		throw LogicExceptionImpl("Array::Bounds", _("Array description not set."));
@@ -282,7 +281,7 @@ We have no idea if this is fixed or not in Interbase 6.5 though.
 
 */
 
-void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int32_t datacount)
+void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 {
 	if (! mIdAssigned)
 		throw LogicExceptionImpl("Array::ReadTo", _("Array Id not read from column."));
@@ -635,11 +634,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int32_t datacount)
 												_("Incompatible types."));
 			for (int i = 0; i < mElemCount; i++)
 			{
-				tm tms;
-				IBPP::Timestamp* timestamp = (IBPP::Timestamp*)dst;
-				(*gds.Call()->m_decode_timestamp)((ISC_TIMESTAMP*)src, &tms);
-				timestamp->SetDate(tms.tm_year + 1900, tms.tm_mon + 1, tms.tm_mday);
-				timestamp->SetTime(tms.tm_hour, tms.tm_min, tms.tm_sec);
+				decodeTimestamp(*(IBPP::Timestamp*)dst, *(ISC_TIMESTAMP*)src);
 				src += mElemSize;
 				dst += sizeof(IBPP::Timestamp);
 			}
@@ -650,10 +645,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int32_t datacount)
 												_("Incompatible types."));
 			for (int i = 0; i < mElemCount; i++)
 			{
-				tm tms;
-				IBPP::Date* vardate = (IBPP::Date*)dst;
-				(*gds.Call()->m_decode_sql_date)((ISC_DATE*)src, &tms);
-				vardate->SetDate(tms.tm_year + 1900, tms.tm_mon + 1, tms.tm_mday);
+				decodeDate(*(IBPP::Date*)dst, *(ISC_DATE*)src);
 				src += mElemSize;
 				dst += sizeof(IBPP::Date);
 			}
@@ -664,10 +656,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int32_t datacount)
 												_("Incompatible types."));
 			for (int i = 0; i < mElemCount; i++)
 			{
-				tm tms;
-				IBPP::Time* vartime = (IBPP::Time*)dst;
-				(*gds.Call()->m_decode_sql_time)((ISC_TIME*)src, &tms);
-				vartime->SetTime(tms.tm_hour, tms.tm_min, tms.tm_sec);
+				decodeTime(*(IBPP::Time*)dst, *(ISC_TIME*)src);
 				src += mElemSize;
 				dst += sizeof(IBPP::Time);
 			}
@@ -678,7 +667,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int32_t datacount)
 	}
 }
 
-void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int32_t datacount)
+void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 {
 	if (! mDescribed)
 		throw LogicExceptionImpl("Array::WriteFrom", _("Array description not set."));
@@ -1030,21 +1019,7 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int32_t datacount)
 												_("Incompatible types."));
 			for (int i = 0; i < mElemCount; i++)
 			{
-				IBPP::Timestamp* timestamp;
-				int32_t year, month, day;
-				int32_t hour, minute, second;
-				tm tms;
-				memset(&tms, 0, sizeof(tms));
-				timestamp = (IBPP::Timestamp*)src;
-				timestamp->GetDate(year, month, day);
-				timestamp->GetTime(hour, minute, second);
-				tms.tm_year = year - 1900;
-				tms.tm_mon = month - 1;
-				tms.tm_mday = day;
-				tms.tm_hour = hour;
-				tms.tm_min = minute;
-				tms.tm_sec = second;
-				(*gds.Call()->m_encode_timestamp)(&tms, (ISC_TIMESTAMP*)dst);
+				encodeTimestamp(*(ISC_TIMESTAMP*)dst, *(IBPP::Timestamp*)src);
 				src += sizeof(IBPP::Timestamp);
 				dst += mElemSize;
 			}
@@ -1055,16 +1030,7 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int32_t datacount)
 												_("Incompatible types."));
 			for (int i = 0; i < mElemCount; i++)
 			{
-				IBPP::Date* date;
-				int32_t year, month, day;
-				tm tms;
-				memset(&tms, 0, sizeof(tms));
-				date = (IBPP::Date*)src;
-				date->GetDate(year, month, day);
-				tms.tm_year = year - 1900;
-				tms.tm_mon = month - 1;
-				tms.tm_mday = day;
-				(*gds.Call()->m_encode_sql_date)(&tms, (ISC_DATE*)dst);
+				encodeDate(*(ISC_DATE*)dst, *(IBPP::Date*)src); 
 				src += sizeof(IBPP::Date);
 				dst += mElemSize;
 			}
@@ -1075,16 +1041,7 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int32_t datacount)
 												_("Incompatible types."));
 			for (int i = 0; i < mElemCount; i++)
 			{
-				IBPP::Time* time;
-				int32_t hour, minute, second;
-				tm tms;
-				memset(&tms, 0, sizeof(tms));
-				time = (IBPP::Time*)src;
-				time->GetTime(hour, minute, second);
-				tms.tm_hour = hour;
-				tms.tm_min = minute;
-				tms.tm_sec = second;
-				(*gds.Call()->m_encode_sql_time)(&tms, (ISC_TIME*)dst);
+				encodeTime(*(ISC_TIME*)dst, *(IBPP::Time*)src);
 				src += sizeof(IBPP::Time);
 				dst += mElemSize;
 			}

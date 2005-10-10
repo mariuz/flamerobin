@@ -82,7 +82,7 @@ GDS* GDS::Call(void)
 		HKEY hkey_instances;
 
 		// Try to load FBCLIENT.DLL from each of the additional optional paths
-		// that may have been specified through ClientDLLSearchPaths().
+		// that may have been specified through ClientLibSearchPaths().
 		mHandle = 0;
 
 		std::string::size_type pos = 0;
@@ -219,22 +219,23 @@ GDS* GDS::Call(void)
 		IB_ENTRYPOINT(dsql_free_statement);
 		IB_ENTRYPOINT(dsql_set_cursor_name);
 		IB_ENTRYPOINT(dsql_sql_info);
-		//IB_ENTRYPOINT(decode_date);
-		//IB_ENTRYPOINT(encode_date);
-		//IB_ENTRYPOINT(add_user);
-		//IB_ENTRYPOINT(modify_user);
-		//IB_ENTRYPOINT(delete_user);
-
+		
 		IB_ENTRYPOINT(service_attach);
 		IB_ENTRYPOINT(service_detach);
 		IB_ENTRYPOINT(service_start);
 		IB_ENTRYPOINT(service_query);
-		IB_ENTRYPOINT(decode_sql_date);
-		IB_ENTRYPOINT(decode_sql_time);
-		IB_ENTRYPOINT(decode_timestamp);
-		IB_ENTRYPOINT(encode_sql_date);
-		IB_ENTRYPOINT(encode_sql_time);
-		IB_ENTRYPOINT(encode_timestamp);
+
+		//IB_ENTRYPOINT(add_user);
+		//IB_ENTRYPOINT(modify_user);
+		//IB_ENTRYPOINT(delete_user);
+		//IB_ENTRYPOINT(decode_date);
+		//IB_ENTRYPOINT(encode_date);
+		//IB_ENTRYPOINT(decode_sql_date);
+		//IB_ENTRYPOINT(decode_sql_time);
+		//IB_ENTRYPOINT(decode_timestamp);
+		//IB_ENTRYPOINT(encode_sql_date);
+		//IB_ENTRYPOINT(encode_sql_time);
+		//IB_ENTRYPOINT(encode_timestamp);
 
 		mReady = true;
 	}
@@ -252,7 +253,7 @@ namespace IBPP
 				(IBPP::Version & 0xFFFFFF00) ? true : false;
 	}
 
-	int32_t GDSVersion(void)
+	int GDSVersion(void)
 	{
 		return gds.Call()->mGDSVersion;
 	}

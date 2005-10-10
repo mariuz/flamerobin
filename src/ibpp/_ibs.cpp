@@ -40,9 +40,9 @@
 
 using namespace ibpp_internals;
 
-int32_t IBS::SqlCode(void) const
+int IBS::SqlCode(void) const
 {
-	return (int32_t)(*gds.Call()->m_sqlcode)(&mVector[0]);
+	return (int)(*gds.Call()->m_sqlcode)(&mVector[0]);
 }
 
 const char* IBS::ErrorMessage(void) const

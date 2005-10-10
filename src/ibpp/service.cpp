@@ -243,7 +243,7 @@ void ServiceImpl::ListUsers(std::vector<std::string>& users)
     }
 }
 
-void ServiceImpl::SetPageBuffers(const std::string& dbfile, int32_t buffers)
+void ServiceImpl::SetPageBuffers(const std::string& dbfile, int buffers)
 {
 	if (gds.Call()->mGDSVersion < 60)
 		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
@@ -266,7 +266,7 @@ void ServiceImpl::SetPageBuffers(const std::string& dbfile, int32_t buffers)
 	Wait();
 }
 
-void ServiceImpl::SetSweepInterval(const std::string& dbfile, int32_t sweep)
+void ServiceImpl::SetSweepInterval(const std::string& dbfile, int sweep)
 {
 	if (gds.Call()->mGDSVersion < 60)
 		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
@@ -361,7 +361,7 @@ void ServiceImpl::SetReserveSpace(const std::string& dbfile, bool reserve)
 	Wait();
 }
 
-void ServiceImpl::Shutdown(const std::string& dbfile, IBPP::DSM mode, int32_t sectimeout)
+void ServiceImpl::Shutdown(const std::string& dbfile, IBPP::DSM mode, int sectimeout)
 {
 	if (gds.Call()->mGDSVersion < 60)
 		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
@@ -511,7 +511,7 @@ void ServiceImpl::StartBackup(const std::string& dbfile,
 }
 
 void ServiceImpl::StartRestore(const std::string& bkfile, const std::string& dbfile,
-	int32_t	pagesize, IBPP::BRF flags)
+	int	pagesize, IBPP::BRF flags)
 {
 	if (gds.Call()->mGDSVersion < 60)
 		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));

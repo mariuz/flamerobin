@@ -46,79 +46,50 @@ using namespace ibpp_internals;
 
 //	Private implementation
 
-void IBPP::DBKey::BlindCopy(const DBKey& copied)
-{
-	mSize = copied.mSize;
-
-	if (copied.mDBKey != 0)
-	{
-		mDBKey = new char[mSize];
-		memcpy(mDBKey, copied.mDBKey, mSize);
-	}
-	else mDBKey = 0;
-
-	if (copied.mString != 0)
-	{
-		mString = new char[strlen(copied.mString)+1];
-		strcpy(mString, copied.mString);
-	}
-	else mString = 0;
-}
-
 //	Public implementation
 
 void IBPP::DBKey::Clear(void)
 {
-	if (mDBKey != 0) delete [] reinterpret_cast<char*>(mDBKey);
-	if (mString != 0) delete [] mString;
-	mDBKey = 0;
-	mString = 0;
-	mSize = 0;
+	mDBKey.clear();
+	mString.clear();
 }
 
-void IBPP::DBKey::SetKey(const void* key, int32_t size)
+void IBPP::DBKey::SetKey(const void* key, int size)
 {
 	if (key == 0)
 		throw LogicExceptionImpl("IBPP::DBKey::SetKey", _("Null DBKey reference detected."));
 	if (size <= 0 || ((size >> 3) << 3) != size)
 		throw LogicExceptionImpl("IBPP::DBKey::SetKey", _("Invalid DBKey size."));
 
-	if (mString != 0)
-	{
-		delete [] mString;
-		mString = 0;
-	}
-	if (mDBKey != 0) delete [] reinterpret_cast<char*>(mDBKey);
-	mDBKey = new char[size];
-	memcpy(mDBKey, key, size);
-	mSize = size;
+	mDBKey.assign((const char*)key, (size_t)size);
+	mString.clear();
 }
 
-void IBPP::DBKey::GetKey(void* key, int32_t size) const
+void IBPP::DBKey::GetKey(void* key, int size) const
 {
-	if (mDBKey == 0)
+	if (mDBKey.empty())
 		throw LogicExceptionImpl("IBPP::DBKey::GetKey", _("DBKey not assigned."));
 	if (key == 0)
 		throw LogicExceptionImpl("IBPP::DBKey::GetKey", _("Null DBKey reference detected."));
-	if (size != mSize)
+	if (size != (int)mDBKey.size())
 		throw LogicExceptionImpl("IBPP::DBKey::GetKey", _("Incompatible DBKey size detected."));
 
-	memcpy(key, mDBKey, size);
+	mDBKey.copy((char*)key, mDBKey.size());
 }
 
-const char* IBPP::DBKey::AsString(void) const
+const char* IBPP::DBKey::AsString() const
 {
-	if (mDBKey == 0)
+	if (mDBKey.empty())
 		throw LogicExceptionImpl("IBPP::DBKey::GetString", _("DBKey not assigned."));
 
-	if (mString == 0)
+	if (mString.empty())
 	{
 		std::ostringstream hexkey;
 		hexkey.setf(std::ios::hex, std::ios::basefield);
 		hexkey.setf(std::ios::uppercase);
 
-		unsigned* key = reinterpret_cast<unsigned*>(mDBKey);
-		int n = mSize / 8;
+		const uint32_t* key = reinterpret_cast<const uint32_t*>(mDBKey.data());
+		int n = (int)mDBKey.size() / 8;
 		for (int i = 0; i < n; i++)
 		{
 			if (i != 0) hexkey<< "-";
@@ -126,39 +97,23 @@ const char* IBPP::DBKey::AsString(void) const
 			hexkey<< std::setw(8)<< key[i*2+1];
 		}
 
-		size_t len = hexkey.str().size();
-		mString = new char[len+1];
-		hexkey.str().copy(mString, len);
-		mString[len] = 0;
+		mString = hexkey.str();
 	}
 
-	return mString;
-}
-
-IBPP::DBKey::DBKey()
-{
-	mDBKey = 0;
-	mString = 0;
-	mSize = 0;
+	return mString.c_str();
 }
 
 IBPP::DBKey::DBKey(const DBKey& copied)
 {
-	BlindCopy(copied);
+	mDBKey = copied.mDBKey;
+	mString = copied.mString;
 }
 
 IBPP::DBKey& IBPP::DBKey::operator=(const IBPP::DBKey& assigned)
 {
-	if (mDBKey != 0) delete [] reinterpret_cast<char*>(mDBKey);
-	if (mString != 0) delete [] mString;
-	BlindCopy(assigned);
+	mDBKey = assigned.mDBKey;
+	mString = assigned.mString;
 	return *this;
-}
-
-IBPP::DBKey::~DBKey()
-{
-	if (mDBKey != 0) delete [] reinterpret_cast<char*>(mDBKey);
-	if (mString != 0) delete [] mString;
 }
 
 //

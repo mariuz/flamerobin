@@ -246,12 +246,12 @@ const char* SQLExceptionImpl::what() const throw()
 	return ExceptionBase::what();
 }
 
-int32_t SQLExceptionImpl::SqlCode(void) const throw()
+int SQLExceptionImpl::SqlCode(void) const throw()
 {
 	return mSqlCode;
 }
 
-int32_t SQLExceptionImpl::EngineCode(void) const throw()
+int SQLExceptionImpl::EngineCode(void) const throw()
 {
 	return mEngineCode;
 }

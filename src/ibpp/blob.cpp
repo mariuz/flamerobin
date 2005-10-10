@@ -156,7 +156,7 @@ void BlobImpl::Cancel(void)
 	mIdAssigned = false;
 }
 
-int32_t BlobImpl::Read(void* buffer, int32_t size)
+int BlobImpl::Read(void* buffer, int size)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Blob::Read", _("The Blob is not opened"));
@@ -172,10 +172,10 @@ int32_t BlobImpl::Read(void* buffer, int32_t size)
 	if (result == isc_segstr_eof) return 0;	// Fin du blob
 	if (result != isc_segment && status.Errors())
 		throw SQLExceptionImpl(status, "Blob::Read", _("isc_get_segment failed."));
-	return (int32_t)bytesread;
+	return (int)bytesread;
 }
 
-void BlobImpl::Write(const void* buffer, int32_t size)
+void BlobImpl::Write(const void* buffer, int size)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Blob::Write", _("The Blob is not opened"));
@@ -191,7 +191,7 @@ void BlobImpl::Write(const void* buffer, int32_t size)
 		throw SQLExceptionImpl(status, "Blob::Write", _("isc_put_segment failed."));
 }
 
-void BlobImpl::Info(int32_t* Size, int32_t* Largest, int32_t* Segments)
+void BlobImpl::Info(int* Size, int* Largest, int* Segments)
 {
 	char items[] = {isc_info_blob_total_length,
 					isc_info_blob_max_segment,
