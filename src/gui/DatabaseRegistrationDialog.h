@@ -1,26 +1,26 @@
 /*
-The contents of this file are subject to the Initial Developer's Public
-License Version 1.0 (the "License"); you may not use this file except in
-compliance with the License. You may obtain a copy of the License here:
-http://www.flamerobin.org/license.html.
+  The contents of this file are subject to the Initial Developer's Public
+  License Version 1.0 (the "License"); you may not use this file except in
+  compliance with the License. You may obtain a copy of the License here:
+  http://www.flamerobin.org/license.html.
 
-Software distributed under the License is distributed on an "AS IS"
-basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-License for the specific language governing rights and limitations under
-the License.
+  Software distributed under the License is distributed on an "AS IS"
+  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+  License for the specific language governing rights and limitations under
+  the License.
 
-The Original Code is FlameRobin (TM).
+  The Original Code is FlameRobin (TM).
 
-The Initial Developer of the Original Code is Milan Babuskov.
+  The Initial Developer of the Original Code is Milan Babuskov.
 
-Portions created by the original developer
-are Copyright (C) 2004 Milan Babuskov.
+  Portions created by the original developer
+  are Copyright (C) 2004 Milan Babuskov.
 
-All Rights Reserved.
+  All Rights Reserved.
 
-$Id$
+  $Id$
 
-Contributor(s): Michael Hieke, Nando Dessena
+  Contributor(s): Michael Hieke, Nando Dessena
 */
 
 #ifndef DATABASEREGISTRATIONDIALOG_H
@@ -29,14 +29,15 @@ Contributor(s): Michael Hieke, Nando Dessena
 #include <wx/wx.h>
 
 #include "gui/BaseDialog.h"
-#include "metadata/database.h"
-#include "metadata/server.h"
+
+class Server;
+class Database;
 //-----------------------------------------------------------------------------
 class DatabaseRegistrationDialog: public BaseDialog {
 public:
     enum {
         ID_textcontrol_dbpath = 101,
-        ID_textcontrol_name = 102,
+        ID_textcontrol_name,
         ID_textcontrol_username,
 		ID_textcontrol_password,
         ID_button_browse,
@@ -53,10 +54,10 @@ public:
     void OnOkButtonClick(wxCommandEvent& event);
     void OnBrowseButtonClick(wxCommandEvent& event);
 
-    DatabaseRegistrationDialog(wxWindow* parent, int id, const wxString& title, bool createDB = false,
-		bool connectAs = false,		// a temporary solution, as we'll change the entire login scheme soon
-        const wxPoint& pos=wxDefaultPosition, const wxSize& size=wxDefaultSize,
-        long style=wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER);
+    DatabaseRegistrationDialog(wxWindow* parent, int id, const wxString& title,
+        bool createDB = false, 
+        // a temporary solution, as we'll change the entire login scheme soon
+        bool connectAs = false);
 
 private:
     Database *databaseM;
@@ -65,8 +66,8 @@ private:
 	bool connectAsM;
 	bool isDefaultNameM;
 
-    void do_layout();
-    void set_properties();
+    void layoutControls();
+    void setProperties();
     void updateButtons();
     const wxString buildName(const wxString& dbPath) const;
     void updateIsDefaultName();

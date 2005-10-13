@@ -1,26 +1,26 @@
 /*
-The contents of this file are subject to the Initial Developer's Public
-License Version 1.0 (the "License"); you may not use this file except in
-compliance with the License. You may obtain a copy of the License here:
-http://www.flamerobin.org/license.html.
+  The contents of this file are subject to the Initial Developer's Public
+  License Version 1.0 (the "License"); you may not use this file except in
+  compliance with the License. You may obtain a copy of the License here:
+  http://www.flamerobin.org/license.html.
 
-Software distributed under the License is distributed on an "AS IS"
-basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-License for the specific language governing rights and limitations under
-the License.
+  Software distributed under the License is distributed on an "AS IS"
+  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+  License for the specific language governing rights and limitations under
+  the License.
 
-The Original Code is FlameRobin (TM).
+  The Original Code is FlameRobin (TM).
 
-The Initial Developer of the Original Code is Milan Babuskov.
+  The Initial Developer of the Original Code is Milan Babuskov.
 
-Portions created by the original developer
-are Copyright (C) 2004 Milan Babuskov.
+  Portions created by the original developer
+  are Copyright (C) 2004 Milan Babuskov.
 
-All Rights Reserved.
+  All Rights Reserved.
 
-$Id$
+  $Id$
 
-Contributor(s): Michael Hieke, Nando Dessena
+  Contributor(s): Michael Hieke, Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -40,12 +40,14 @@ Contributor(s): Michael Hieke, Nando Dessena
 #include <wx/gbsizer.h>
 
 #include "gui/DatabaseRegistrationDialog.h"
+#include "metadata/database.h"
+#include "metadata/server.h"
 #include "styleguide.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
-DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id, const wxString& title,
-    bool createDB, bool connectAs, const wxPoint& pos, const wxSize& size, long style):
-    BaseDialog(parent, id, title, pos, size, style)
+DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, 
+        int id, const wxString& title, bool createDB, bool connectAs)
+    : BaseDialog(parent, id, title)
 {
     createM = createDB;
     connectAsM = connectAs;
@@ -64,15 +66,15 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
     label_charset = new wxStaticText(getControlsPanel(), -1, _("Charset:"));
 
     const wxString charset_choices[] = {
-        wxT("NONE"),        wxT("ASCII"),        wxT("BIG_5"),        wxT("CYRL"),        wxT("DOS437"),
-        wxT("DOS737"),      wxT("DOS775"),       wxT("DOS850"),       wxT("DOS852"),      wxT("DOS857"),
-        wxT("DOS858"),      wxT("DOS860"),       wxT("DOS861"),       wxT("DOS862"),      wxT("DOS863"),
-        wxT("DOS864"),      wxT("DOS865"),       wxT("DOS866"),       wxT("DOS869"),      wxT("EUCJ_0208"),
-        wxT("GB_2312"),     wxT("ISO8859_1"),    wxT("ISO8859_2"),    wxT("ISO8859_3"),   wxT("ISO8859_4"),
-        wxT("ISO8859_5"),   wxT("ISO8859_6"),    wxT("ISO8859_7"),    wxT("ISO8859_8"),   wxT("ISO8859_9"),
-        wxT("ISO8859_13"),  wxT("KSC_5601"),     wxT("NEXT"),         wxT("OCTETS"),      wxT("SJIS_0208"),
-        wxT("UNICODE_FSS"), wxT("WIN1250"),      wxT("WIN1251"),      wxT("WIN1252"),     wxT("WIN1253"),
-        wxT("WIN1254"),     wxT("WIN1255"),      wxT("WIN1256"),      wxT("WIN1257")
+        wxT("NONE"),        wxT("ASCII"),       wxT("BIG_5"),       wxT("CYRL"),        wxT("DOS437"),
+        wxT("DOS737"),      wxT("DOS775"),      wxT("DOS850"),      wxT("DOS852"),      wxT("DOS857"),
+        wxT("DOS858"),      wxT("DOS860"),      wxT("DOS861"),      wxT("DOS862"),      wxT("DOS863"),
+        wxT("DOS864"),      wxT("DOS865"),      wxT("DOS866"),      wxT("DOS869"),      wxT("EUCJ_0208"),
+        wxT("GB_2312"),     wxT("ISO8859_1"),   wxT("ISO8859_2"),   wxT("ISO8859_3"),   wxT("ISO8859_4"),
+        wxT("ISO8859_5"),   wxT("ISO8859_6"),   wxT("ISO8859_7"),   wxT("ISO8859_8"),   wxT("ISO8859_9"),
+        wxT("ISO8859_13"),  wxT("KSC_5601"),    wxT("NEXT"),        wxT("OCTETS"),      wxT("SJIS_0208"),
+        wxT("UNICODE_FSS"), wxT("WIN1250"),     wxT("WIN1251"),     wxT("WIN1252"),     wxT("WIN1253"),
+        wxT("WIN1254"),     wxT("WIN1255"),     wxT("WIN1256"),     wxT("WIN1257")
     };
 
     combobox_charset = new wxComboBox(getControlsPanel(), -1, wxT("NONE"), wxDefaultPosition, wxDefaultSize,
@@ -100,8 +102,8 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, int id,
     button_ok = new wxButton(getControlsPanel(), ID_button_ok, (createM ? _("Create") : _("Save")));
     button_cancel = new wxButton(getControlsPanel(), ID_button_cancel, _("Cancel"));
 
-    set_properties();
-    do_layout();
+    setProperties();
+    layoutControls();
     updateButtons();
 }
 //-----------------------------------------------------------------------------
@@ -113,7 +115,7 @@ const wxString DatabaseRegistrationDialog::buildName(const wxString& dbPath) con
     return helper.extractNameFromConnectionString();
 }
 //-----------------------------------------------------------------------------
-void DatabaseRegistrationDialog::do_layout()
+void DatabaseRegistrationDialog::layoutControls()
 {
     // create sizer for controls
     wxGridBagSizer* sizerControls = new wxGridBagSizer(styleguide().getRelatedControlMargin(wxVERTICAL),
@@ -167,7 +169,7 @@ const wxString DatabaseRegistrationDialog::getName() const
         return wxT("DatabaseRegistrationDialog");
 }
 //-----------------------------------------------------------------------------
-void DatabaseRegistrationDialog::set_properties()
+void DatabaseRegistrationDialog::setProperties()
 {
     int wh = text_ctrl_dbpath->GetMinHeight();
     button_browse->SetSize(wh, wh);
