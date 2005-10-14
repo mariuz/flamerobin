@@ -49,20 +49,46 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent,
         int id, const wxString& title, bool createDB, bool connectAs)
     : BaseDialog(parent, id, title)
 {
+    serverM = 0;
+    databaseM = 0;
     createM = createDB;
     connectAsM = connectAs;
+	isDefaultNameM = true;
+
+    createControls();
+    setControlsProperties();
+    layoutControls();
+    updateButtons();
+}
+//-----------------------------------------------------------------------------
+//! implementation details
+const wxString DatabaseRegistrationDialog::buildName(const wxString& dbPath) const
+{
+    Database helper;
+    helper.setPath(dbPath);
+    return helper.extractNameFromConnectionString();
+}
+//-----------------------------------------------------------------------------
+void DatabaseRegistrationDialog::createControls()
+{
     label_name = new wxStaticText(getControlsPanel(), -1, _("Display name:"));
-    text_ctrl_name = new wxTextCtrl(getControlsPanel(), ID_textcontrol_name, wxEmptyString);
-    label_dbpath = new wxStaticText(getControlsPanel(), -1, _("Database path:"));
-    text_ctrl_dbpath = new wxTextCtrl(getControlsPanel(), ID_textcontrol_dbpath, wxEmptyString);
-    button_browse = new wxButton(getControlsPanel(), ID_button_browse, wxT("..."),
-        wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+    text_ctrl_name = new wxTextCtrl(getControlsPanel(), ID_textcontrol_name, 
+        wxEmptyString);
+    label_dbpath = new wxStaticText(getControlsPanel(), -1, 
+        _("Database path:"));
+    text_ctrl_dbpath = new wxTextCtrl(getControlsPanel(), 
+        ID_textcontrol_dbpath, wxEmptyString);
+    button_browse = new wxButton(getControlsPanel(), ID_button_browse, 
+        wxT("..."), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
     label_username = new wxStaticText(getControlsPanel(), -1, _("Username:"));
-    text_ctrl_username = new wxTextCtrl(getControlsPanel(), ID_textcontrol_username, wxEmptyString);
+    text_ctrl_username = new wxTextCtrl(getControlsPanel(), 
+        ID_textcontrol_username, wxEmptyString);
     label_password = new wxStaticText(getControlsPanel(), -1, _("Password:"));
-    text_ctrl_password = new wxTextCtrl(getControlsPanel(), ID_textcontrol_password, wxEmptyString,
-        wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
-    text_ctrl_password->SetToolTip(_("Leave empty if you wish to be prompted for password every time"));
+    text_ctrl_password = new wxTextCtrl(getControlsPanel(), 
+        ID_textcontrol_password, wxEmptyString, wxDefaultPosition, 
+        wxDefaultSize, wxTE_PASSWORD);
+    text_ctrl_password->SetToolTip(
+        _("Leave empty if you wish to be prompted for password every time"));
     label_charset = new wxStaticText(getControlsPanel(), -1, _("Charset:"));
 
     const wxString charset_choices[] = {
@@ -77,42 +103,46 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent,
         wxT("WIN1254"),     wxT("WIN1255"),     wxT("WIN1256"),     wxT("WIN1257")
     };
 
-    combobox_charset = new wxComboBox(getControlsPanel(), -1, wxT("NONE"), wxDefaultPosition, wxDefaultSize,
-        sizeof(charset_choices) / sizeof(wxString), charset_choices, wxCB_DROPDOWN|wxCB_SORT);
+    combobox_charset = new wxComboBox(getControlsPanel(), -1, wxT("NONE"), 
+        wxDefaultPosition, wxDefaultSize, 
+        sizeof(charset_choices) / sizeof(wxString), charset_choices, 
+        wxCB_DROPDOWN | wxCB_SORT);
 
     label_role = new wxStaticText(getControlsPanel(), -1, _("Role:"));
     text_ctrl_role = new wxTextCtrl(getControlsPanel(), -1, wxT(""));
 
     if (createM)
     {
-        label_pagesize = new wxStaticText(getControlsPanel(), -1, _("Page size:"));
+        label_pagesize = new wxStaticText(getControlsPanel(), -1, 
+            _("Page size:"));
         const wxString pagesize_choices[] = {
             wxT("1024"), wxT("2048"), wxT("4096"), wxT("8192"), wxT("16384")
         };
-        choice_pagesize = new wxChoice(getControlsPanel(), -1, wxDefaultPosition, wxDefaultSize,
+        choice_pagesize = new wxChoice(getControlsPanel(), -1, 
+            wxDefaultPosition, wxDefaultSize,
             sizeof(pagesize_choices) / sizeof(wxString), pagesize_choices);
-        label_dialect = new wxStaticText(getControlsPanel(), -1, _("SQL Dialect:"));
+        label_dialect = new wxStaticText(getControlsPanel(), -1, 
+            _("SQL Dialect:"));
         const wxString dialect_choices[] = {
             wxT("1"), wxT("2"), wxT("3")
         };
-        choice_dialect = new wxChoice(getControlsPanel(), -1, wxDefaultPosition, wxDefaultSize,
+        choice_dialect = new wxChoice(getControlsPanel(), -1, 
+            wxDefaultPosition, wxDefaultSize,
             sizeof(dialect_choices) / sizeof(wxString), dialect_choices);
     }
 
-    button_ok = new wxButton(getControlsPanel(), ID_button_ok, (createM ? _("Create") : _("Save")));
-    button_cancel = new wxButton(getControlsPanel(), ID_button_cancel, _("Cancel"));
-
-    setProperties();
-    layoutControls();
-    updateButtons();
+    button_ok = new wxButton(getControlsPanel(), ID_button_ok, 
+        (createM ? _("Create") : _("Save")));
+    button_cancel = new wxButton(getControlsPanel(), ID_button_cancel, 
+        _("Cancel"));
 }
 //-----------------------------------------------------------------------------
-//! implementation details
-const wxString DatabaseRegistrationDialog::buildName(const wxString& dbPath) const
+const wxString DatabaseRegistrationDialog::getName() const
 {
-    Database helper;
-    helper.setPath(dbPath);
-    return helper.extractNameFromConnectionString();
+    if (createM)
+        return wxT("CreateDatabaseDialog");
+    else
+        return wxT("DatabaseRegistrationDialog");
 }
 //-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::layoutControls()
@@ -122,12 +152,12 @@ void DatabaseRegistrationDialog::layoutControls()
         styleguide().getControlLabelMargin());
 
     sizerControls->Add(label_name, wxGBPosition(0, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-    sizerControls->Add(text_ctrl_name, wxGBPosition(0, 1), wxGBSpan(1, 3), wxALIGN_CENTER_VERTICAL|wxEXPAND);
+    sizerControls->Add(text_ctrl_name, wxGBPosition(0, 1), wxGBSpan(1, 3), wxALIGN_CENTER_VERTICAL | wxEXPAND);
 
     sizerControls->Add(label_dbpath, wxGBPosition(1, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
     wxBoxSizer* sizer_r1c1_3 = new wxBoxSizer(wxHORIZONTAL);
     sizer_r1c1_3->Add(text_ctrl_dbpath, 1, wxALIGN_CENTER_VERTICAL);
-    sizer_r1c1_3->Add(button_browse, 0, wxLEFT|wxALIGN_CENTER_VERTICAL, styleguide().getBrowseButtonMargin());
+    sizer_r1c1_3->Add(button_browse, 0, wxLEFT | wxALIGN_CENTER_VERTICAL, styleguide().getBrowseButtonMargin());
     sizerControls->Add(sizer_r1c1_3, wxGBPosition(1, 1), wxGBSpan(1, 3), wxEXPAND);
 
     int dx = styleguide().getUnrelatedControlMargin(wxHORIZONTAL) - styleguide().getControlLabelMargin();
@@ -135,21 +165,21 @@ void DatabaseRegistrationDialog::layoutControls()
         dx = 0;
 
     sizerControls->Add(label_username, wxGBPosition(2, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-    sizerControls->Add(text_ctrl_username, wxGBPosition(2, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
-    sizerControls->Add(label_password, wxGBPosition(2, 2), wxDefaultSpan, wxLEFT|wxALIGN_CENTER_VERTICAL, dx);
-    sizerControls->Add(text_ctrl_password, wxGBPosition(2, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
+    sizerControls->Add(text_ctrl_username, wxGBPosition(2, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    sizerControls->Add(label_password, wxGBPosition(2, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+    sizerControls->Add(text_ctrl_password, wxGBPosition(2, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
 
     sizerControls->Add(label_charset, wxGBPosition(3, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-    sizerControls->Add(combobox_charset, wxGBPosition(3, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
-    sizerControls->Add(label_role, wxGBPosition(3, 2), wxDefaultSpan, wxLEFT|wxALIGN_CENTER_VERTICAL, dx);
-    sizerControls->Add(text_ctrl_role, wxGBPosition(3, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
+    sizerControls->Add(combobox_charset, wxGBPosition(3, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    sizerControls->Add(label_role, wxGBPosition(3, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+    sizerControls->Add(text_ctrl_role, wxGBPosition(3, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
 
     if (createM)
     {
         sizerControls->Add(label_pagesize, wxGBPosition(4, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-        sizerControls->Add(choice_pagesize, wxGBPosition(4, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
-        sizerControls->Add(label_dialect, wxGBPosition(4, 2), wxDefaultSpan, wxLEFT|wxALIGN_CENTER_VERTICAL, dx);
-        sizerControls->Add(choice_dialect, wxGBPosition(4, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL|wxEXPAND);
+        sizerControls->Add(choice_pagesize, wxGBPosition(4, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+        sizerControls->Add(label_dialect, wxGBPosition(4, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+        sizerControls->Add(choice_dialect, wxGBPosition(4, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
     }
 
     sizerControls->AddGrowableCol(1);
@@ -161,15 +191,7 @@ void DatabaseRegistrationDialog::layoutControls()
     layoutSizers(sizerControls, sizerButtons);
 }
 //-----------------------------------------------------------------------------
-const wxString DatabaseRegistrationDialog::getName() const
-{
-    if (createM)
-        return wxT("CreateDatabaseDialog");
-    else
-        return wxT("DatabaseRegistrationDialog");
-}
-//-----------------------------------------------------------------------------
-void DatabaseRegistrationDialog::setProperties()
+void DatabaseRegistrationDialog::setControlsProperties()
 {
     int wh = text_ctrl_dbpath->GetMinHeight();
     button_browse->SetSize(wh, wh);
@@ -181,8 +203,9 @@ void DatabaseRegistrationDialog::setProperties()
     button_ok->SetDefault();
 }
 //-----------------------------------------------------------------------------
-void DatabaseRegistrationDialog::setDatabase(Database *db)
+void DatabaseRegistrationDialog::setDatabase(Database* db)
 {
+    wxASSERT(db);
     databaseM = db;
     /* this could be reactivated if there is a dialog with "Don't show me again"
     if (databaseM->isConnected())
@@ -218,14 +241,9 @@ void DatabaseRegistrationDialog::setDatabase(Database *db)
     updateColors();
 }
 //-----------------------------------------------------------------------------
-void DatabaseRegistrationDialog::updateIsDefaultName()
-{
-    isDefaultNameM = ((text_ctrl_name->GetValue().IsEmpty() ||
-        text_ctrl_name->GetValue() == buildName(text_ctrl_dbpath->GetValue())));
-}
-//-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::setServer(Server *s)
 {
+    wxASSERT(s);
     serverM = s;
 }
 //-----------------------------------------------------------------------------
@@ -239,6 +257,12 @@ void DatabaseRegistrationDialog::updateButtons()
             && (!connectAsM || !text_ctrl_password->GetValue().IsEmpty())
         );
     }
+}
+//-----------------------------------------------------------------------------
+void DatabaseRegistrationDialog::updateIsDefaultName()
+{
+    isDefaultNameM = ((text_ctrl_name->GetValue().IsEmpty() ||
+        text_ctrl_name->GetValue() == buildName(text_ctrl_dbpath->GetValue())));
 }
 //-----------------------------------------------------------------------------
 //! event handling

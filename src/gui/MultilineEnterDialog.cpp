@@ -83,7 +83,8 @@ void MultilineEnterDialog::layoutControls()
     text_ctrl_value->SetSizeHints(200, 100);
     text_ctrl_value->SetSize(200, 100);
     sizerControls->Add(text_ctrl_value, 1, wxEXPAND);
-    wxSizer* sizerButtons = styleguide().createButtonSizer(button_ok, button_cancel);
+    wxSizer* sizerButtons = styleguide().createButtonSizer(button_ok, 
+        button_cancel);
     layoutSizers(sizerControls, sizerButtons, true);
 }
 //-----------------------------------------------------------------------------

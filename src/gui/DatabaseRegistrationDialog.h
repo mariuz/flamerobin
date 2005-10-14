@@ -34,47 +34,13 @@ class Server;
 class Database;
 //-----------------------------------------------------------------------------
 class DatabaseRegistrationDialog: public BaseDialog {
-public:
-    enum {
-        ID_textcontrol_dbpath = 101,
-        ID_textcontrol_name,
-        ID_textcontrol_username,
-		ID_textcontrol_password,
-        ID_button_browse,
-        ID_button_ok,
-        ID_button_cancel = wxID_CANCEL
-    };
-
-    void setDatabase(Database *db);
-    void setServer(Server *s);			// needed to create new db
-
-    // events
-    void OnSettingsChange(wxCommandEvent& event);
-    void OnNameChange(wxCommandEvent& event);
-    void OnOkButtonClick(wxCommandEvent& event);
-    void OnBrowseButtonClick(wxCommandEvent& event);
-
-    DatabaseRegistrationDialog(wxWindow* parent, int id, const wxString& title,
-        bool createDB = false, 
-        // a temporary solution, as we'll change the entire login scheme soon
-        bool connectAs = false);
-
 private:
-    Database *databaseM;
-    Server *serverM;
+    Server* serverM;
+    Database* databaseM;
     bool createM;
 	bool connectAsM;
 	bool isDefaultNameM;
 
-    void layoutControls();
-    void setProperties();
-    void updateButtons();
-    const wxString buildName(const wxString& dbPath) const;
-    void updateIsDefaultName();
-protected:
-    virtual const wxString getName() const;
-
-protected:
     wxStaticText* label_name;
     wxTextCtrl* text_ctrl_name;
     wxStaticText* label_dbpath;
@@ -94,6 +60,39 @@ protected:
     wxChoice* choice_dialect;
     wxButton* button_ok;
     wxButton* button_cancel;
+
+    const wxString buildName(const wxString& dbPath) const;
+    void createControls();
+    void layoutControls();
+    void setControlsProperties();
+    void updateButtons();
+    void updateIsDefaultName();
+protected:
+    virtual const wxString getName() const;
+public:
+    DatabaseRegistrationDialog(wxWindow* parent, int id, const wxString& title,
+        bool createDB = false, 
+        // a temporary solution, as we'll change the entire login scheme soon
+        bool connectAs = false);
+
+    void setServer(Server* s); // needed to create new db
+    void setDatabase(Database* db);
+private:
+    // event handling
+    enum {
+        ID_textcontrol_dbpath = 101,
+        ID_textcontrol_name,
+        ID_textcontrol_username,
+		ID_textcontrol_password,
+        ID_button_browse,
+        ID_button_ok,
+        ID_button_cancel = wxID_CANCEL
+    };
+
+    void OnBrowseButtonClick(wxCommandEvent& event);
+    void OnNameChange(wxCommandEvent& event);
+    void OnOkButtonClick(wxCommandEvent& event);
+    void OnSettingsChange(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()
 };

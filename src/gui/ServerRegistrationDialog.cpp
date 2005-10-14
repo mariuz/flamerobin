@@ -1,26 +1,26 @@
 /*
-The contents of this file are subject to the Initial Developer's Public
-License Version 1.0 (the "License"); you may not use this file except in
-compliance with the License. You may obtain a copy of the License here:
-http://www.flamerobin.org/license.html.
+  The contents of this file are subject to the Initial Developer's Public
+  License Version 1.0 (the "License"); you may not use this file except in
+  compliance with the License. You may obtain a copy of the License here:
+  http://www.flamerobin.org/license.html.
 
-Software distributed under the License is distributed on an "AS IS"
-basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-License for the specific language governing rights and limitations under
-the License.
+  Software distributed under the License is distributed on an "AS IS"
+  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+  License for the specific language governing rights and limitations under
+  the License.
 
-The Original Code is FlameRobin (TM).
+  The Original Code is FlameRobin (TM).
 
-The Initial Developer of the Original Code is Milan Babuskov.
+  The Initial Developer of the Original Code is Milan Babuskov.
 
-Portions created by the original developer
-are Copyright (C) 2004 Milan Babuskov.
+  Portions created by the original developer
+  are Copyright (C) 2004 Milan Babuskov.
 
-All Rights Reserved.
+  All Rights Reserved.
 
-$Id$
+  $Id$
 
-Contributor(s): Michael Hieke, Nando Dessena
+  Contributor(s): Michael Hieke, Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -36,37 +36,55 @@ Contributor(s): Michael Hieke, Nando Dessena
     #include "wx/wx.h"
 #endif
 
-#include "ServerRegistrationDialog.h"
+#include "gui/ServerRegistrationDialog.h"
+#include "metadata/server.h"
 #include "styleguide.h"
 //-----------------------------------------------------------------------------
-ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent, int id,
-        const wxString& title, const wxPoint& pos, const wxSize& size, long style)
-    : BaseDialog(parent, id, title, pos, size, style)
+ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent, int id, 
+        const wxString& title)
+    : BaseDialog(parent, id, title)
 {
-    label_name = new wxStaticText(getControlsPanel(), -1, _("Display name:"));
-    text_ctrl_name = new wxTextCtrl(getControlsPanel(), ID_textctrl_name, wxT(""));
-    label_hostname = new wxStaticText(getControlsPanel(), -1, _("Hostname:"));
-    text_ctrl_hostname = new wxTextCtrl(getControlsPanel(), ID_textctrl_hostname, wxT("localhost"));
-    label_portnumber = new wxStaticText(getControlsPanel(), -1, _("Port number:"));
-    text_ctrl_portnumber = new wxTextCtrl(getControlsPanel(), ID_textctrl_portnumber, wxEmptyString);
-    button_ok = new wxButton(getControlsPanel(), ID_button_ok, _("Save"));
-    button_cancel = new wxButton(getControlsPanel(), ID_button_cancel, _("Cancel"));
+    serverM = 0;
+    isDefaultNameM = true;
 
-    set_properties();
-    do_layout();
+    createControls();
+    setControlsProperties();
+    layoutControls();
     updateButtons();
 }
 //-----------------------------------------------------------------------------
 //! implementation details
-const wxString ServerRegistrationDialog::buildName(const wxString& hostName, const wxString& portNumber) const
+const wxString ServerRegistrationDialog::buildDefaultName() const
 {
     Server helper;
-    helper.setHostname(hostName);
-    helper.setPort(portNumber);
+    helper.setHostname(text_ctrl_hostname->GetValue());
+    helper.setPort(text_ctrl_portnumber->GetValue());
     return helper.getConnectionString();
 }
 //-----------------------------------------------------------------------------
-void ServerRegistrationDialog::do_layout()
+void ServerRegistrationDialog::createControls()
+{
+    label_name = new wxStaticText(getControlsPanel(), -1, _("Display name:"));
+    text_ctrl_name = new wxTextCtrl(getControlsPanel(), ID_textctrl_name, 
+        wxEmptyString);
+    label_hostname = new wxStaticText(getControlsPanel(), -1, _("Hostname:"));
+    text_ctrl_hostname = new wxTextCtrl(getControlsPanel(), 
+        ID_textctrl_hostname, wxT("localhost"));
+    label_portnumber = new wxStaticText(getControlsPanel(), -1, 
+        _("Port number:"));
+    text_ctrl_portnumber = new wxTextCtrl(getControlsPanel(), 
+        ID_textctrl_portnumber, wxEmptyString);
+    button_ok = new wxButton(getControlsPanel(), ID_button_ok, _("Save"));
+    button_cancel = new wxButton(getControlsPanel(), ID_button_cancel, 
+        _("Cancel"));
+}
+//-----------------------------------------------------------------------------
+const wxString ServerRegistrationDialog::getName() const
+{
+    return wxT("ServerRegistrationDialog");
+}
+//-----------------------------------------------------------------------------
+void ServerRegistrationDialog::layoutControls()
 {
     // create sizer for controls
     wxFlexGridSizer* sizerControls = new wxFlexGridSizer(3, 2,
@@ -75,32 +93,24 @@ void ServerRegistrationDialog::do_layout()
     sizerControls->AddGrowableCol(1);
 
     sizerControls->Add(label_name, 0, wxALIGN_CENTER_VERTICAL);
-    sizerControls->Add(text_ctrl_name, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
+    sizerControls->Add(text_ctrl_name, 1, wxEXPAND | wxALIGN_CENTER_VERTICAL);
     sizerControls->Add(label_hostname, 0, wxALIGN_CENTER_VERTICAL);
-    sizerControls->Add(text_ctrl_hostname, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
+    sizerControls->Add(text_ctrl_hostname, 1, 
+        wxEXPAND | wxALIGN_CENTER_VERTICAL);
     sizerControls->Add(label_portnumber, 0, wxALIGN_CENTER_VERTICAL);
-    sizerControls->Add(text_ctrl_portnumber, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
+    sizerControls->Add(text_ctrl_portnumber, 1, 
+        wxEXPAND | wxALIGN_CENTER_VERTICAL);
 
     // create sizer for buttons -> styleguide class will align it correctly
-    wxSizer* sizerButtons = styleguide().createButtonSizer(button_ok, button_cancel);
+    wxSizer* sizerButtons = styleguide().createButtonSizer(button_ok, 
+        button_cancel);
     // use method in base class to set everything up
     layoutSizers(sizerControls, sizerButtons);
 }
 //-----------------------------------------------------------------------------
-const wxString ServerRegistrationDialog::getName() const
-{
-    return wxT("ServerRegistrationDialog");
-}
-//-----------------------------------------------------------------------------
-void ServerRegistrationDialog::set_properties()
+void ServerRegistrationDialog::setControlsProperties()
 {
     button_ok->SetDefault();
-}
-//-----------------------------------------------------------------------------
-void ServerRegistrationDialog::updateIsDefaultName()
-{
-    isDefaultNameM = ((text_ctrl_name->GetValue().IsEmpty() ||
-        text_ctrl_name->GetValue() == buildName(text_ctrl_hostname->GetValue(), text_ctrl_portnumber->GetValue())));
 }
 //-----------------------------------------------------------------------------
 void ServerRegistrationDialog::setServer(Server *s)
@@ -129,6 +139,12 @@ void ServerRegistrationDialog::updateButtons()
     button_ok->Enable(!text_ctrl_name->GetValue().IsEmpty());
 }
 //-----------------------------------------------------------------------------
+void ServerRegistrationDialog::updateIsDefaultName()
+{
+    isDefaultNameM = (text_ctrl_name->GetValue().IsEmpty() 
+        || text_ctrl_name->GetValue() == buildDefaultName());
+}
+//-----------------------------------------------------------------------------
 //! event handling
 BEGIN_EVENT_TABLE(ServerRegistrationDialog, BaseDialog)
     EVT_TEXT(ServerRegistrationDialog::ID_textctrl_name, ServerRegistrationDialog::OnNameChange)
@@ -153,7 +169,7 @@ void ServerRegistrationDialog::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
     if (IsShown())
     {
         if (isDefaultNameM)
-            text_ctrl_name->SetValue(buildName(text_ctrl_hostname->GetValue(), text_ctrl_portnumber->GetValue()));
+            text_ctrl_name->SetValue(buildDefaultName());
         updateIsDefaultName();
         updateButtons();
     }
