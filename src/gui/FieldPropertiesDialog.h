@@ -35,23 +35,39 @@ class Table;
 class Column;
 //-----------------------------------------------------------------------------
 class FieldPropertiesDialog: public BaseDialog, public Observer {
+private:
+    Table* tableM;
+    Column* columnM;
+
+    wxStaticText* label_fieldname;
+    wxTextCtrl* text_ctrl_fieldname;
+
+    wxButton* button_ok;
+    wxButton* button_cancel;
+
+    void createControls();
+    void layoutControls();
+    void setColumnM(Column* column);
+    void setControlsProperties();
+    void setTableM(Table* table);
+    void updateControlsFromColumn();
+    void updateControlsFromTable();
+    void updateDialogTitle();
+protected:
+    virtual const wxString getName() const;
+    virtual void removeSubject(Subject* subject);
+    virtual void update();
 public:
+    // Database is required so that domains, charsets, generators can be loaded
+    FieldPropertiesDialog(wxWindow* parent, Table* table, Column* column = 0);
+private:
+    // event handling
     enum {
         ID_textctrl_fieldname = 101,
         ID_button_ok,
         ID_button_cancel = wxID_CANCEL
     };
-    // Database is required so that domains, charsets, generators can be loaded
-    FieldPropertiesDialog(wxWindow* parent, Table* table, Column* column = 0);
-private:
-    Table* tableM;
-    Column* columnM;
-    void createControls();
-    void layoutControls();
-    void setColumnM(Column* column);
-    void setTableM(Table* table);
-    void updateControlsFromColumn();
-    void updateControlsFromTable();
+
 };
 //-----------------------------------------------------------------------------
 #endif // FR_FIELDPROPERTIESDIALOG_H
