@@ -287,6 +287,7 @@
         $(SOURCEDIR)/gui/controls/LogTextControl.h
         $(SOURCEDIR)/gui/controls/TextControl.h
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.h
+        $(SOURCEDIR)/gui/EventWatcherFrame.h
         $(SOURCEDIR)/gui/ExecuteSqlFrame.h
         $(SOURCEDIR)/gui/FieldPropertiesFrame.h
         $(SOURCEDIR)/gui/MainFrame.h
@@ -369,6 +370,7 @@
         $(SOURCEDIR)/gui/controls/LogTextControl.cpp
         $(SOURCEDIR)/gui/controls/TextControl.cpp
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.cpp
+        $(SOURCEDIR)/gui/EventWatcherFrame.cpp
         $(SOURCEDIR)/gui/ExecuteSqlFrame.cpp
         $(SOURCEDIR)/gui/FieldPropertiesFrame.cpp
         $(SOURCEDIR)/gui/MainFrame.cpp

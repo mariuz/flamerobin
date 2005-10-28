@@ -84,6 +84,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_LogTextControl.o \
 	flamerobin_TextControl.o \
 	flamerobin_DatabaseRegistrationDialog.o \
+	flamerobin_EventWatcherFrame.o \
 	flamerobin_ExecuteSqlFrame.o \
 	flamerobin_FieldPropertiesFrame.o \
 	flamerobin_MainFrame.o \
@@ -360,6 +361,9 @@ flamerobin_TextControl.o: $(srcdir)/src/gui/controls/TextControl.cpp $(FLAMEROBI
 
 flamerobin_DatabaseRegistrationDialog.o: $(srcdir)/src/gui/DatabaseRegistrationDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/DatabaseRegistrationDialog.cpp
+
+flamerobin_EventWatcherFrame.o: $(srcdir)/src/gui/EventWatcherFrame.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/EventWatcherFrame.cpp
 
 flamerobin_ExecuteSqlFrame.o: $(srcdir)/src/gui/ExecuteSqlFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/ExecuteSqlFrame.cpp

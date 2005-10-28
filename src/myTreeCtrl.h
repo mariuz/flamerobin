@@ -63,6 +63,7 @@ public:
         Menu_Insert, Menu_LoadColumnsInfo, Menu_ObjectProperties,
         Menu_DropObject, Menu_ShowGeneratorValue, Menu_SetGeneratorValue,
         Menu_AddColumn, Menu_CreateTriggerForTable, Menu_RestoreIntoNew,
+        Menu_MonitorEvents,
 
         // create new ... (stuff)
         Menu_CreateDomain, Menu_CreateException, Menu_CreateFunction,

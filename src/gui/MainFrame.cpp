@@ -45,6 +45,7 @@
 #include "core/FRError.h"
 #include "DatabaseRegistrationDialog.h"
 #include "dberror.h"
+#include "EventWatcherFrame.h"
 #include "ExecuteSqlFrame.h"
 #include "FieldPropertiesFrame.h"
 #include "framemanager.h"
@@ -268,6 +269,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_UPDATE_UI(myTreeCtrl::Menu_UnRegisterDatabase, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
     EVT_MENU(myTreeCtrl::Menu_ShowConnectedUsers, MainFrame::OnMenuShowConnectedUsers)
     EVT_UPDATE_UI(myTreeCtrl::Menu_ShowConnectedUsers, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_MENU(myTreeCtrl::Menu_MonitorEvents, MainFrame::OnMenuMonitorEvents)
+    EVT_UPDATE_UI(myTreeCtrl::Menu_MonitorEvents, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_MENU(myTreeCtrl::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuDatabaseRegistrationInfo)
     EVT_UPDATE_UI(myTreeCtrl::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuUpdateIfDatabaseSelected)
     EVT_MENU(myTreeCtrl::Menu_Backup, MainFrame::OnMenuBackup)
@@ -928,6 +931,20 @@ void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
         as.Add(std2wx(*i));
 
     ::wxGetSingleChoice(_("Connected users"), d->getPath(), as);
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuMonitorEvents(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    Database* d = tree_ctrl_1->getSelectedDatabase();
+    if (!checkValidDatabase(d))
+        return;
+
+    EventWatcherFrame *f = new EventWatcherFrame(this, d);
+    f->Show();
 
     FR_CATCH
 }

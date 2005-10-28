@@ -64,6 +64,7 @@ void ContextMenuMetadataItemVisitor::visit(Database&)
     menuM->Append(myTreeCtrl::Menu_Query, _("&Run a query..."));
     menuM->AppendSeparator();
     menuM->Append(myTreeCtrl::Menu_ShowConnectedUsers, _("&Show connected users"));
+    menuM->Append(myTreeCtrl::Menu_MonitorEvents, _("&Monitor events"));
     menuM->Append(myTreeCtrl::Menu_DatabaseRegistrationInfo, _("Database registration &info..."));
     menuM->Append(myTreeCtrl::Menu_UnRegisterDatabase, _("&Unregister database"));
     menuM->AppendSeparator();
