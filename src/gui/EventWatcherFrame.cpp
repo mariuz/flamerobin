@@ -37,12 +37,14 @@
 #endif
 
 #include <wx/file.h>
+#include <wx/datetime.h>
+#include "ugly.h"
 #include "metadata/database.h"
 #include "controls/LogTextControl.h"
 #include "EventWatcherFrame.h"
 //-----------------------------------------------------------------------------
 EventWatcherFrame::EventWatcherFrame(wxWindow *parent, Database *db)
-    :BaseFrame(parent, -1, wxEmptyString), databaseM(db)
+    :BaseFrame(parent, -1, wxEmptyString), databaseM(db), timerM(this, ID_timer)
 {
     SetTitle(wxString::Format(_("Event monitor for database: %s"), db->getName().c_str()));
     layoutControls();
@@ -53,6 +55,14 @@ EventWatcherFrame::EventWatcherFrame(wxWindow *parent, Database *db)
     wxIcon icon;
     icon.CopyFromBitmap(bmp);
     SetIcon(icon);
+}
+//-----------------------------------------------------------------------------
+void EventWatcherFrame::ibppEventHandler(IBPP::IDatabase*, const std::string& name, int count)
+{
+    // uses error levels to get different colors (perhaps we could do it nicely...later)
+    text_ctrl_log->logImportantMsg(wxDateTime::Now().Format(wxT("%H:%M:%S  ")));
+    text_ctrl_log->logMsg(std2wx(name));
+    text_ctrl_log->logErrorMsg(wxString::Format(wxT(" (%d)\n"), count));
 }
 //-----------------------------------------------------------------------------
 void EventWatcherFrame::updateControls()
@@ -113,16 +123,25 @@ const wxString EventWatcherFrame::getName() const
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(EventWatcherFrame, wxFrame)
-    EVT_BUTTON(EventWatcherFrame::ID_button_add, EventWatcherFrame::OnButtonAddClick)
+    EVT_TIMER(EventWatcherFrame::ID_timer, EventWatcherFrame::OnTimer)
+    EVT_BUTTON(EventWatcherFrame::ID_button_add,    EventWatcherFrame::OnButtonAddClick)
     EVT_BUTTON(EventWatcherFrame::ID_button_remove, EventWatcherFrame::OnButtonRemoveClick)
-    EVT_BUTTON(EventWatcherFrame::ID_button_load, EventWatcherFrame::OnButtonLoadClick)
-    EVT_BUTTON(EventWatcherFrame::ID_button_save, EventWatcherFrame::OnButtonSaveClick)
-    EVT_BUTTON(EventWatcherFrame::ID_button_start, EventWatcherFrame::OnButtonStartClick)
+    EVT_BUTTON(EventWatcherFrame::ID_button_load,   EventWatcherFrame::OnButtonLoadClick)
+    EVT_BUTTON(EventWatcherFrame::ID_button_save,   EventWatcherFrame::OnButtonSaveClick)
+    EVT_BUTTON(EventWatcherFrame::ID_button_start,  EventWatcherFrame::OnButtonStartClick)
 END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+void EventWatcherFrame::OnTimer(wxTimerEvent& WXUNUSED(event))
+{
+    databaseM->getIBPPDatabase()->DispatchEvents();
+}
 //-----------------------------------------------------------------------------
 void EventWatcherFrame::OnButtonLoadClick(wxCommandEvent& WXUNUSED(event))
 {
-    //...
+    // TODO: fill listbox_events with data from file
+    databaseM->getIBPPDatabase()->ClearEvents();
+    for (int ix = 0; ix < listbox_events->GetCount(); ++ix)
+        databaseM->getIBPPDatabase()->DefineEvent(wx2std(listbox_events->GetString(ix)), this);
     updateControls();
 }
 //-----------------------------------------------------------------------------
@@ -156,8 +175,7 @@ void EventWatcherFrame::OnButtonAddClick(wxCommandEvent& WXUNUSED(event))
     if (s.IsEmpty())
         return;
 
-    // subscribe to event "s" here
-
+    databaseM->getIBPPDatabase()->DefineEvent(wx2std(s), this);
     listbox_events->Append(s);
     updateControls();
 }
@@ -175,11 +193,15 @@ void EventWatcherFrame::OnButtonRemoveClick(wxCommandEvent& WXUNUSED(event))
     for (int ix = sel.GetCount() - 1; ix >= 0; --ix)
     {
         int to_remove = sel.Item(ix);
-
-        // unsubscribe event
-
+        // unsubscribe event (currently we have to remove all and re-add them)
+        // if once we're able to selectively remove events, it could be done here
         listbox_events->Delete(to_remove);
     }
+
+    databaseM->getIBPPDatabase()->ClearEvents();
+    for (int ix = 0; ix < listbox_events->GetCount(); ++ix)
+        databaseM->getIBPPDatabase()->DefineEvent(wx2std(listbox_events->GetString(ix)), this);
+
     updateControls();
 }
 //-----------------------------------------------------------------------------
@@ -187,13 +209,17 @@ void EventWatcherFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
 {
     if (button_start->GetLabel() == _("Start &polling"))
     {
-        // start the actuall polling
+        timerM.Start(500);
         button_start->SetLabel(_("Stop polling"));
+        text_ctrl_log->logImportantMsg(wxDateTime::Now().Format(wxT("%H:%M:%S  ")));
+        text_ctrl_log->logMsg(_("Polling for events started\n"));
     }
     else
     {
-        // stop the polling
+        timerM.Stop();
         button_start->SetLabel(_("Start &polling"));
+        text_ctrl_log->logImportantMsg(wxDateTime::Now().Format(wxT("%H:%M:%S  ")));
+        text_ctrl_log->logMsg(_("Polling for events stopped\n"));
     }
 }
 //-----------------------------------------------------------------------------

@@ -30,15 +30,19 @@
 #include <wx/panel.h>
 #include <wx/listbox.h>
 
+#include "ibpp.h"
 #include "controls/LogTextControl.h"
 #include "BaseFrame.h"
 
 class Database;
 // TODO: make it an observer of database, so it closes when connection is closed
 //-----------------------------------------------------------------------------
-class EventWatcherFrame : public BaseFrame
+class EventWatcherFrame : public BaseFrame, public IBPP::EventInterface
 {
 protected:
+	virtual void ibppEventHandler(IBPP::IDatabase*, const std::string& name, int count);
+    wxTimer timerM;
+
     Database *databaseM;
     virtual const wxString getName() const;
     void layoutControls();
@@ -60,13 +64,15 @@ protected:
         ID_button_remove = 102,
         ID_button_load = 103,
         ID_button_save = 104,
-        ID_button_start = 105
+        ID_button_start = 105,
+        ID_timer
     };
     void OnButtonAddClick(wxCommandEvent &event);
     void OnButtonRemoveClick(wxCommandEvent &event);
     void OnButtonLoadClick(wxCommandEvent &event);
     void OnButtonSaveClick(wxCommandEvent &event);
     void OnButtonStartClick(wxCommandEvent &event);
+    void OnTimer(wxTimerEvent &event);
 
 public:
     EventWatcherFrame(wxWindow *parent, Database *db);
