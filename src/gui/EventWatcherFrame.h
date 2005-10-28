@@ -31,13 +31,13 @@
 #include <wx/listbox.h>
 
 #include "ibpp.h"
+#include "core/Observer.h"
 #include "controls/LogTextControl.h"
 #include "BaseFrame.h"
 
 class Database;
-// TODO: make it an observer of database, so it closes when connection is closed
 //-----------------------------------------------------------------------------
-class EventWatcherFrame : public BaseFrame, public IBPP::EventInterface
+class EventWatcherFrame : public BaseFrame, public IBPP::EventInterface, public Observer
 {
 protected:
 	virtual void ibppEventHandler(IBPP::IDatabase*, const std::string& name, int count);
@@ -76,6 +76,8 @@ protected:
 
 public:
     EventWatcherFrame(wxWindow *parent, Database *db);
+    void removeSubject(Subject* subject);
+    void update();
     DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------

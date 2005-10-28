@@ -46,6 +46,7 @@
 EventWatcherFrame::EventWatcherFrame(wxWindow *parent, Database *db)
     :BaseFrame(parent, -1, wxEmptyString), databaseM(db), timerM(this, ID_timer)
 {
+    db->attachObserver(this);    // observe database object
     SetTitle(wxString::Format(_("Event monitor for database: %s"), db->getName().c_str()));
     layoutControls();
     updateControls();
@@ -69,7 +70,7 @@ void EventWatcherFrame::updateControls()
 {
     bool hasEvents = !listbox_events->IsEmpty();
     button_save->Enable(hasEvents);
-    button_start->Enable(hasEvents);
+    button_start->Enable(hasEvents || timerM.IsRunning());
 }
 //-----------------------------------------------------------------------------
 void EventWatcherFrame::layoutControls()
@@ -84,8 +85,8 @@ void EventWatcherFrame::layoutControls()
     fgSizer2->AddGrowableCol(0);
     fgSizer2->AddGrowableCol(1);
     fgSizer2->AddGrowableRow(1);
-    m_staticText1 = new wxStaticText(m_panel1,-1,wxT("Subscribed to"),wxDefaultPosition,wxDefaultSize,0);
-    m_staticText2 = new wxStaticText(m_panel1,-1,wxT("Received events"),wxDefaultPosition,wxDefaultSize,0);
+    m_staticText1 = new wxStaticText(m_panel1,-1,_("Subscribed to"),wxDefaultPosition,wxDefaultSize,0);
+    m_staticText2 = new wxStaticText(m_panel1,-1,_("Received events"),wxDefaultPosition,wxDefaultSize,0);
     fgSizer2->Add(m_staticText1, 0, wxALL, 5);
     fgSizer2->Add(m_staticText2, 0, wxALL, 5);
     listbox_events = new wxListBox(m_panel1,-1);
@@ -95,11 +96,11 @@ void EventWatcherFrame::layoutControls()
     bSizer2->Add(fgSizer2, 1, wxEXPAND, 5);
 
     wxBoxSizer *bSizer3 = new wxBoxSizer(wxHORIZONTAL);
-    button_add = new wxButton(m_panel1,   ID_button_add,   wxT("Subscribe &new"),wxDefaultPosition,wxDefaultSize,0);
-    button_remove = new wxButton(m_panel1,ID_button_remove,wxT("&Unsubscribe selected"),wxDefaultPosition,wxDefaultSize,0);
-    button_load = new wxButton(m_panel1,  ID_button_load,  wxT("&Load"),wxDefaultPosition,wxDefaultSize,0);
-    button_save = new wxButton(m_panel1,  ID_button_save,  wxT("&Save"),wxDefaultPosition,wxDefaultSize,0);
-    button_start = new wxButton(m_panel1, ID_button_start, wxT("Start &polling"),wxDefaultPosition,wxDefaultSize,0);
+    button_add = new wxButton(m_panel1,   ID_button_add,   _("Subscribe &new"),wxDefaultPosition,wxDefaultSize,0);
+    button_remove = new wxButton(m_panel1,ID_button_remove,_("&Unsubscribe selected"),wxDefaultPosition,wxDefaultSize,0);
+    button_load = new wxButton(m_panel1,  ID_button_load,  _("&Load"),wxDefaultPosition,wxDefaultSize,0);
+    button_save = new wxButton(m_panel1,  ID_button_save,  _("&Save"),wxDefaultPosition,wxDefaultSize,0);
+    button_start = new wxButton(m_panel1, ID_button_start, _("Start &polling"),wxDefaultPosition,wxDefaultSize,0);
     bSizer3->Add(button_add, 0, wxALL, 5);
     bSizer3->Add(button_remove, 0, wxALL, 5);
     bSizer3->Add(10, 10, 0, wxALL, 5);
@@ -115,6 +116,20 @@ void EventWatcherFrame::layoutControls()
     SetSizer(bSizer1);
     SetAutoLayout(true);
     Layout();
+}
+//-----------------------------------------------------------------------------
+void EventWatcherFrame::update()
+{
+    if (!databaseM->isConnected())
+        Close();
+}
+//-----------------------------------------------------------------------------
+//! closes window if database is removed (unregistered)
+void EventWatcherFrame::removeSubject(Subject* subject)
+{
+    Observer::removeSubject(subject);
+    if (subject == databaseM)
+        Close();
 }
 //-----------------------------------------------------------------------------
 const wxString EventWatcherFrame::getName() const
@@ -209,7 +224,11 @@ void EventWatcherFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
 {
     if (button_start->GetLabel() == _("Start &polling"))
     {
-        timerM.Start(500);
+        if (!timerM.Start(50))
+        {
+            wxMessageBox(_("Cannot start timer."), _("Error."), wxICON_ERROR);
+            return;
+        }
         button_start->SetLabel(_("Stop polling"));
         text_ctrl_log->logImportantMsg(wxDateTime::Now().Format(wxT("%H:%M:%S  ")));
         text_ctrl_log->logMsg(_("Polling for events started\n"));
@@ -221,5 +240,6 @@ void EventWatcherFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
         text_ctrl_log->logImportantMsg(wxDateTime::Now().Format(wxT("%H:%M:%S  ")));
         text_ctrl_log->logMsg(_("Polling for events stopped\n"));
     }
+    updateControls();
 }
 //-----------------------------------------------------------------------------
