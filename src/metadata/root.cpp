@@ -212,6 +212,7 @@ Server* Root::addServer(Server& server)
     temp->setParent(this);                    // grab it from collection
     dirtyM = true;
     notifyObservers();
+    getGlobalRoot().save();
     return temp;
 }
 //-----------------------------------------------------------------------------
@@ -220,6 +221,7 @@ void Root::removeServer(Server* server)
     serversM.remove(server);
     dirtyM = true;
     notifyObservers();
+    getGlobalRoot().save();
 }
 //-----------------------------------------------------------------------------
 // browses the server nodes, and their database nodes

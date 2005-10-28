@@ -39,6 +39,7 @@
 #include "config/Config.h"
 #include "core/Visitor.h"
 #include "MetadataItemVisitor.h"
+#include "root.h"
 #include "server.h"
 //-----------------------------------------------------------------------------
 using namespace std;
@@ -74,6 +75,7 @@ Database* Server::addDatabase(Database& db)
     temp->setParent(this);                  // grab it from collection
     temp->initChildren();
     notifyObservers();
+    getGlobalRoot().save();
     return temp;
 }
 //-----------------------------------------------------------------------------
@@ -81,6 +83,7 @@ void Server::removeDatabase(Database* db)
 {
     databasesM.remove(db);
     notifyObservers();
+    getGlobalRoot().save();
 }
 //-----------------------------------------------------------------------------
 void Server::createDatabase(Database* db, int pagesize, int dialect)
