@@ -20,66 +20,79 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Michael Hieke
 */
 
 #ifndef FR_EVENT_FRAME_H
 #define FR_EVENT_FRAME_H
+
 #include <wx/wx.h>
 #include <wx/button.h>
-#include <wx/panel.h>
 #include <wx/listbox.h>
+#include <wx/panel.h>
 
 #include "ibpp.h"
+
 #include "core/Observer.h"
 #include "controls/LogTextControl.h"
-#include "BaseFrame.h"
+#include "gui/BaseFrame.h"
 
 class Database;
+class EventLogControl;
 //-----------------------------------------------------------------------------
 class EventWatcherFrame : public BaseFrame, public IBPP::EventInterface, public Observer
 {
-protected:
-	virtual void ibppEventHandler(IBPP::IDatabase*, const std::string& name, int count);
+private:
+    Database* databaseM;
     wxTimer timerM;
+    bool monitoringM;
 
-    Database *databaseM;
-    virtual const wxString getName() const;
-    void layoutControls();
-    void updateControls();
-
-    wxPanel *m_panel1;
-    wxStaticText *m_staticText1;
-    wxStaticText *m_staticText2;
-    wxListBox *listbox_events;
-    LogTextControl* text_ctrl_log;    // we want colors :)
+    wxPanel* panel_controls;
+    wxStaticText* static_text_monitored;
+    wxStaticText* static_text_received;
+    wxListBox* listbox_monitored;
+    EventLogControl* eventlog_received;
     wxButton *button_add;
     wxButton *button_remove;
     wxButton *button_load;
     wxButton *button_save;
-    wxButton *button_start;
-    enum
-    {
-        ID_button_add = 101,
-        ID_button_remove = 102,
-        ID_button_load = 103,
-        ID_button_save = 104,
-        ID_button_start = 105,
-        ID_timer
-    };
-    void OnButtonAddClick(wxCommandEvent &event);
-    void OnButtonRemoveClick(wxCommandEvent &event);
-    void OnButtonLoadClick(wxCommandEvent &event);
-    void OnButtonSaveClick(wxCommandEvent &event);
-    void OnButtonStartClick(wxCommandEvent &event);
-    void OnTimer(wxTimerEvent &event);
+    wxButton *button_monitor;
+    void createControls();
+    void layoutControls();
+    void updateControls();
 
+    void defineMonitoredEvents();
+	virtual void ibppEventHandler(IBPP::IDatabase*, const std::string& name, int count);
+protected:
+    virtual const wxString getName() const;
 public:
     EventWatcherFrame(wxWindow *parent, Database *db);
     void removeSubject(Subject* subject);
     void update();
+
+private:
+    // event handling
+    enum
+    {
+        ID_listbox_monitored = 101,
+        ID_log_received,
+        ID_button_add,
+        ID_button_remove,
+        ID_button_load,
+        ID_button_save,
+        ID_button_monitor,
+        ID_timer
+    };
+
+    void OnButtonAddClick(wxCommandEvent& event);
+    void OnButtonRemoveClick(wxCommandEvent& event);
+    void OnButtonLoadClick(wxCommandEvent& event);
+    void OnButtonSaveClick(wxCommandEvent& event);
+    void OnButtonStartStopClick(wxCommandEvent& event);
+    void OnListBoxSelected(wxCommandEvent& event);
+    void OnTimer(wxTimerEvent& event);
+
     DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
 #endif
-
