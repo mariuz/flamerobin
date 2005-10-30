@@ -92,7 +92,6 @@ void FieldPropertiesDialog::createControls()
     label_scale = new wxStaticText(getControlsPanel(), wxID_ANY, _("Scale:"));
     textctrl_scale = new wxTextCtrl(getControlsPanel(), wxID_ANY, wxEmptyString);
 
-    checkbox_notnull = new wxCheckBox(getControlsPanel(), wxID_ANY, _("Not null"));
     label_charset = new wxStaticText(getControlsPanel(), wxID_ANY, _("Charset:"));
     const wxString charset_choices[] = { 
         wxT("NONE")
@@ -103,6 +102,8 @@ void FieldPropertiesDialog::createControls()
     label_collate = new wxStaticText(getControlsPanel(), wxID_ANY, _("Collate:"));
     choice_collate = new wxChoice(getControlsPanel(), ID_choice_collate, 
         wxDefaultPosition, wxDefaultSize, 0, 0);
+
+    checkbox_notnull = new wxCheckBox(getControlsPanel(), wxID_ANY, _("Not null"));
 
     static_line_autoinc = new wxStaticLine(getControlsPanel());
     label_autoinc = new wxStaticText(getControlsPanel(), wxID_ANY, _("Autoincrement"));
@@ -237,6 +238,21 @@ void FieldPropertiesDialog::setControlsProperties()
     wxFont font(label_autoinc->GetFont());
     font.SetWeight(wxBOLD);
     label_autoinc->SetFont(font);
+
+    // select items in controls without selection, this is called after
+    // database and field (if applicable) have been set
+    if (choice_domain->GetCount() > 0 && choice_domain->GetSelection() == wxNOT_FOUND)
+        choice_domain->SetSelection(0);
+    if (choice_datatype->GetCount() > 0 && choice_datatype->GetSelection() == wxNOT_FOUND)
+        choice_datatype->SetSelection(0);
+    if (choice_charset->GetCount() > 0 && choice_charset->GetSelection() == wxNOT_FOUND)
+        choice_charset->SetSelection(0);
+    radio_generator_existing->SetValue(true);
+    if (choice_generator->GetCount() > 0 && choice_generator->GetSelection() == wxNOT_FOUND)
+        choice_generator->SetSelection(0);
+
+    button_ok->SetDefault();
+    button_cancel->SetFocus();
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::setTableM(Table* table)
@@ -270,5 +286,56 @@ void FieldPropertiesDialog::updateControlsFromTable()
     if (!(tableM))
         return;
 // TODO
+}
+//-----------------------------------------------------------------------------
+void FieldPropertiesDialog::updateSqlStatement()
+{
+    wxString table = tableM->getName();
+    wxString field = textctrl_fieldname->GetValue();
+    wxString generator = choice_generator->GetStringSelection();
+
+    wxString sql;
+    if (radio_generator_new->GetValue())
+    {
+        generator = textctrl_generator_name->GetValue();
+        sql = wxT("CREATE GENERATOR ") + generator + wxT(";\n\n");
+    }
+
+    if (checkbox_trigger->IsChecked())
+    {
+        sql += wxT("SET TERM !! ;\n");
+        sql += wxT("CREATE TRIGGER ") + table + wxT("_BI FOR ") + table + wxT("\n");
+        sql += wxT("ACTIVE BEFORE INSERT POSITION 0\nAS\nBEGIN\n");
+        sql += wxT("  IF (NEW.") + field + wxT(" IS NULL) THEN\n");
+        sql += wxT("    NEW.") + field + wxT(" = GEN_ID(") + generator + wxT(", 1);\n");
+        sql += wxT("END!!\n");
+        sql += wxT("SET TERM ; !!\n");
+    }
+
+    textctrl_sql->SetValue(sql);
+
+}
+//-----------------------------------------------------------------------------
+//! event handling
+BEGIN_EVENT_TABLE(FieldPropertiesDialog, BaseDialog)
+    EVT_BUTTON(FieldPropertiesDialog::ID_button_edit_domain, OnEditDomainClick)
+    EVT_CHECKBOX(FieldPropertiesDialog::ID_checkbox_trigger, OnNeedsUpdateSql)
+    EVT_CHOICE(FieldPropertiesDialog::ID_choice_generator, OnNeedsUpdateSql)
+    EVT_RADIOBUTTON(FieldPropertiesDialog::ID_radio_generator_existing, OnNeedsUpdateSql)
+    EVT_RADIOBUTTON(FieldPropertiesDialog::ID_radio_generator_new, OnNeedsUpdateSql)
+    EVT_TEXT(FieldPropertiesDialog::ID_textctrl_fieldname, OnNeedsUpdateSql)
+    EVT_TEXT(FieldPropertiesDialog::ID_textctrl_generator_name, OnNeedsUpdateSql)
+END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+void FieldPropertiesDialog::OnEditDomainClick(wxCommandEvent& WXUNUSED(event))
+{
+    // create DomainPropertiesFrame & show it
+    // when done, reload domain definition
+    // updateDomainInfo(wx2std(cb_domains->GetValue()));
+}
+//-----------------------------------------------------------------------------
+void FieldPropertiesDialog::OnNeedsUpdateSql(wxCommandEvent& WXUNUSED(event))
+{
+    updateSqlStatement();
 }
 //-----------------------------------------------------------------------------

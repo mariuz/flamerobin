@@ -75,7 +75,7 @@ private:
     void setTableM(Table* table);
     void updateControlsFromColumn();
     void updateControlsFromTable();
-    void updateDialogTitle();
+    void updateSqlStatement();
 protected:
     virtual const wxString getName() const;
     virtual void removeSubject(Subject* subject);
@@ -102,6 +102,10 @@ private:
         ID_button_cancel = wxID_CANCEL
     };
 
+    void OnEditDomainClick(wxCommandEvent& event);
+    void OnNeedsUpdateSql(wxCommandEvent& event);
+
+    DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
 #endif // FR_FIELDPROPERTIESDIALOG_H
