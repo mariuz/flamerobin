@@ -28,12 +28,12 @@
 
 #include "gui/controls/TextControl.h"
 //-----------------------------------------------------------------------------
-class LogTextControl: public TextControl 
+class LogTextControl: public TextControl
 {
 private:
-    enum LogStyle { logStyleDefault, logStyleImportant, logStyleError };
     void setDefaultStyles();
 protected:
+    enum LogStyle { logStyleDefault, logStyleImportant, logStyleError };
     void addStyledText(const wxString& message, LogStyle style);
 public:
     LogTextControl(wxWindow *parent, wxWindowID id = wxID_ANY, 
