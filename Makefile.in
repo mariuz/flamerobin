@@ -86,6 +86,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_DatabaseRegistrationDialog.o \
 	flamerobin_EventWatcherFrame.o \
 	flamerobin_ExecuteSqlFrame.o \
+	flamerobin_FieldPropertiesDialog.o \
 	flamerobin_FieldPropertiesFrame.o \
 	flamerobin_MainFrame.o \
 	flamerobin_MetadataItemPropertiesFrame.o \
@@ -367,6 +368,9 @@ flamerobin_EventWatcherFrame.o: $(srcdir)/src/gui/EventWatcherFrame.cpp $(FLAMER
 
 flamerobin_ExecuteSqlFrame.o: $(srcdir)/src/gui/ExecuteSqlFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/ExecuteSqlFrame.cpp
+
+flamerobin_FieldPropertiesDialog.o: $(srcdir)/src/gui/FieldPropertiesDialog.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/FieldPropertiesDialog.cpp
 
 flamerobin_FieldPropertiesFrame.o: $(srcdir)/src/gui/FieldPropertiesFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/FieldPropertiesFrame.cpp

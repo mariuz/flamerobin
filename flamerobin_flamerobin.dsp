@@ -504,11 +504,19 @@ SOURCE=.\src\core\Element.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\EventWatcherFrame.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\ExecuteSqlFrame.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\core\FRError.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\FieldPropertiesDialog.cpp
 # End Source File
 # Begin Source File
 
@@ -790,11 +798,19 @@ SOURCE=.\src\core\Element.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\EventWatcherFrame.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\ExecuteSqlFrame.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\core\FRError.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\FieldPropertiesDialog.h
 # End Source File
 # Begin Source File
 
