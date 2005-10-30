@@ -65,8 +65,15 @@ Root::Root()
     typeM = ntRoot;
 }
 //-----------------------------------------------------------------------------
-Root::~Root()
+void Root::disconnectAllDatabases()
 {
+    for (std::list<Server>::iterator it = serversM.begin(); it != serversM.end(); ++it)
+        for (std::list<Database>::iterator it2 = it->getDatabases()->begin(); it2 != it->getDatabases()->end(); ++it2)
+            it2->disconnect();
+}
+//-----------------------------------------------------------------------------
+Root::~Root()
+{            
     if (dirtyM)
         save();
 }

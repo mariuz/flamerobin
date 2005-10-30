@@ -53,6 +53,7 @@ public:
 
     // updates all servers (observer pattern)
     void notifyAllServers();
+    void disconnectAllDatabases();
 
     // increments the Id generator and returns the value.
     const unsigned int getNextId();

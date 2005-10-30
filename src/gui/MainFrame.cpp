@@ -504,6 +504,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
         return;
     }
     frameManager().setWindowMenu(0);    // tell it not to update menus anymore
+    getGlobalRoot().disconnectAllDatabases();
     BaseFrame::OnClose(event);
 
     FR_CATCH
