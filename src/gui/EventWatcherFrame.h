@@ -62,7 +62,7 @@ private:
     void updateControls();
 
     void defineMonitoredEvents();
-	virtual void ibppEventHandler(IBPP::IDatabase*, const std::string& name, int count);
+    virtual void ibppEventHandler(IBPP::IDatabase*, const std::string& name, int count);
 protected:
     virtual const wxString getName() const;
 public:
