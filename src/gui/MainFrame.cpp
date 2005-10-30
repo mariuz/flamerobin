@@ -36,31 +36,37 @@
     #include "wx/wx.h"
 #endif
 
+// #define TEST_FIELDPROPERTIESDIALOG
+
 #include <wx/progdlg.h>
 
-#include "BackupFrame.h"
 #include "config/Config.h"
 #include "config/DatabaseConfig.h"
 #include "ContextMenuMetadataItemVisitor.h"
 #include "core/FRError.h"
-#include "DatabaseRegistrationDialog.h"
 #include "dberror.h"
-#include "EventWatcherFrame.h"
-#include "ExecuteSqlFrame.h"
-#include "FieldPropertiesFrame.h"
+#include "gui/BackupFrame.h"
+#include "gui/DatabaseRegistrationDialog.h"
+#include "gui/EventWatcherFrame.h"
+#include "gui/ExecuteSqlFrame.h"
+#ifdef TEST_FIELDPROPERTIESDIALOG
+    #include "gui/FieldPropertiesDialog.h"
+#else
+    #include "gui/FieldPropertiesFrame.h"
+#endif
+#include "gui/MainFrame.h"
+#include "gui/PreferencesDialog.h"
+#include "gui/RestoreFrame.h"
+#include "gui/ServerRegistrationDialog.h"
+#include "gui/SimpleHtmlFrame.h"
+#include "gui/TriggerWizardDialog.h"
 #include "framemanager.h"
 #include "frversion.h"
 #include "main.h"
-#include "MainFrame.h"
 #include "metadata/metadataitem.h"
 #include "metadata/root.h"
 #include "myTreeCtrl.h"
-#include "PreferencesDialog.h"
-#include "RestoreFrame.h"
-#include "ServerRegistrationDialog.h"
-#include "SimpleHtmlFrame.h"
 #include "treeitem.h"
-#include "TriggerWizardDialog.h"
 #include "ugly.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
@@ -1326,11 +1332,15 @@ void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))
     if (!t)
         return;
 
+#ifdef TEST_FIELDPROPERTIESDIALOG
+    FieldPropertiesDialog fpd(this, t);
+    fpd.ShowModal();
+#else
     FieldPropertiesFrame* f = new FieldPropertiesFrame(this, -1,
-        wxString::Format(_("TABLE: %s"), t->getName().c_str()),
-        t);
+        wxString::Format(_("TABLE: %s"), t->getName().c_str()), t);
     f->setProperties();
     f->Show();
+#endif
 
     FR_CATCH
 }
@@ -1375,10 +1385,16 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
         Table* t = dynamic_cast<Table*>(c->getParent());
         if (!t)     // dummy check
             return;
+
+#ifdef TEST_FIELDPROPERTIESDIALOG
+        FieldPropertiesDialog fpd(this, t, c);
+        fpd.ShowModal();
+#else
         FieldPropertiesFrame* f = new FieldPropertiesFrame(this, -1,
             wxEmptyString, t);
         f->setField(c);
         f->Show();
+#endif
     }
     else
         frameManager().showMetadataPropertyFrame(this, m);
