@@ -27,6 +27,7 @@
 #define FR_FIELDPROPERTIESDIALOG_H
 //-----------------------------------------------------------------------------
 #include <wx/wx.h>
+#include <wx/statline.h>
 
 #include "core/Observer.h"
 #include "gui/BaseDialog.h"
@@ -40,7 +41,29 @@ private:
     Column* columnM;
 
     wxStaticText* label_fieldname;
-    wxTextCtrl* text_ctrl_fieldname;
+    wxTextCtrl* textctrl_fieldname;
+    wxStaticText* label_domain;
+    wxChoice* choice_domain;
+    wxButton* button_edit_domain;
+    wxStaticText* label_datatype;
+    wxChoice* choice_datatype;
+    wxStaticText* label_size;
+    wxTextCtrl* textctrl_size;
+    wxStaticText* label_scale;
+    wxTextCtrl* textctrl_scale;
+    wxCheckBox* checkbox_notnull;
+    wxStaticText* label_charset;
+    wxChoice* choice_charset;
+    wxStaticText* label_collate;
+    wxChoice* choice_collate;
+    wxStaticLine* static_line_autoinc;
+    wxStaticText* label_autoinc;
+    wxRadioButton* radio_generator_new;
+    wxTextCtrl* textctrl_generator_name;
+    wxRadioButton* radio_generator_existing;
+    wxChoice* choice_generator;
+    wxCheckBox* checkbox_trigger;
+    wxTextCtrl* textctrl_sql;
 
     wxButton* button_ok;
     wxButton* button_cancel;
@@ -64,6 +87,17 @@ private:
     // event handling
     enum {
         ID_textctrl_fieldname = 101,
+        ID_choice_domain,
+        ID_button_edit_domain,
+        ID_choice_datatype,
+        ID_choice_charset,
+        ID_choice_collate,
+        ID_radio_generator_new,
+        ID_textctrl_generator_name,
+        ID_radio_generator_existing,
+        ID_choice_generator,
+        ID_checkbox_trigger,
+
         ID_button_ok,
         ID_button_cancel = wxID_CANCEL
     };
