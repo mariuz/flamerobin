@@ -41,6 +41,7 @@
 
 #include "controls/LogTextControl.h"
 #include "gui/EventWatcherFrame.h"
+#include "gui/MultilineEnterDialog.h"
 #include "metadata/database.h"
 #include "styleguide.h"
 #include "ugly.h"
@@ -48,13 +49,13 @@
 class EventLogControl: public LogTextControl
 {
 public:
-    EventLogControl(wxWindow* parent, wxWindowID id = wxID_ANY, 
+    EventLogControl(wxWindow* parent, wxWindowID id = wxID_ANY,
         long style = wxSUNKEN_BORDER);
     void logAction(const wxString& action);
     void logEvent(const wxString& name, int count);
 };
 //-----------------------------------------------------------------------------
-EventLogControl::EventLogControl(wxWindow* parent, wxWindowID id, 
+EventLogControl::EventLogControl(wxWindow* parent, wxWindowID id,
         long style)
     : LogTextControl(parent, id, style)
 {
@@ -81,9 +82,9 @@ EventWatcherFrame::EventWatcherFrame(wxWindow *parent, Database *db)
     monitoringM = false;
     timerM.SetOwner(this, ID_timer);
     db->attachObserver(this);    // observe database object
-    SetTitle(wxString::Format(_("Event Monitor for Database: %s"), 
+    SetTitle(wxString::Format(_("Event Monitor for Database: %s"),
         db->getName().c_str()));
-    
+
     createControls();
     layoutControls();
     updateControls();
@@ -104,14 +105,14 @@ void EventWatcherFrame::createControls()
     static_text_received = new wxStaticText(panel_controls, wxID_ANY,
         _("Received events"));
     listbox_monitored = new wxListBox(panel_controls, ID_listbox_monitored);
-    eventlog_received = new EventLogControl(panel_controls, 
+    eventlog_received = new EventLogControl(panel_controls,
         ID_log_received);
     button_add = new wxButton(panel_controls, ID_button_add, _("&Add event"));
     button_remove = new wxButton(panel_controls, ID_button_remove,
         _("&Remove selected"));
     button_load = new wxButton(panel_controls, ID_button_load, _("&Load"));
     button_save = new wxButton(panel_controls, ID_button_save, _("&Save"));
-    button_monitor = new wxButton(panel_controls, ID_button_monitor, 
+    button_monitor = new wxButton(panel_controls, ID_button_monitor,
         _("Start &monitoring"));
 }
 //-----------------------------------------------------------------------------
@@ -187,7 +188,7 @@ void EventWatcherFrame::defineMonitoredEvents()
     updateControls();
 }
 //-----------------------------------------------------------------------------
-void EventWatcherFrame::ibppEventHandler(IBPP::IDatabase*, 
+void EventWatcherFrame::ibppEventHandler(IBPP::IDatabase*,
     const std::string& name, int count)
 {
     eventlog_received->logEvent(std2wx(name), count);
@@ -254,13 +255,32 @@ void EventWatcherFrame::OnButtonSaveClick(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void EventWatcherFrame::OnButtonAddClick(wxCommandEvent& WXUNUSED(event))
 {
-    wxString s = wxGetTextFromUser(_("Enter event name"), 
-        _("Add Event"), wxEmptyString, this);
-    if (s.IsEmpty() || listbox_monitored->FindString(s) != wxNOT_FOUND)
+    // TODO: perhaps we should extend the MultilineEnterDialog to include
+    //       an optional label to give a short explanation to the user
+    wxString s(_("You can add multiple events by adding one per line"));
+    if (!GetMultilineTextFromUser(_("Add event(s)"), s, this))
         return;
 
-    databaseM->getIBPPDatabase()->DefineEvent(wx2std(s), this);
-    listbox_monitored->Select(listbox_monitored->Append(s));
+    while (true)
+    {
+        int p = s.Find(wxT("\n"));
+        wxString s2;
+        if (p == -1)
+            s2 = s.Strip();
+        else
+        {
+            s2 = s.Left(p).Strip(wxString::both);
+            s.Remove(0, p);
+            s.Trim(false);
+        }
+        if (!s2.IsEmpty() && listbox_monitored->FindString(s2) == wxNOT_FOUND)
+        {
+            databaseM->getIBPPDatabase()->DefineEvent(wx2std(s2), this);
+            listbox_monitored->Select(listbox_monitored->Append(s2));
+        }
+        if (p == -1)
+            break;
+    }
     updateControls();
 }
 //-----------------------------------------------------------------------------
