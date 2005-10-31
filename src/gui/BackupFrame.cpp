@@ -72,8 +72,8 @@ private:
     void logProgress(wxString& msg);
 };
 //-----------------------------------------------------------------------------
-BackupThread::BackupThread(BackupFrame* frame, wxString server, 
-        wxString username, wxString password, wxString dbfilename, 
+BackupThread::BackupThread(BackupFrame* frame, wxString server,
+        wxString username, wxString password, wxString dbfilename,
         wxString bkfilename, IBPP::BRF flags)
     : wxThread()
 {
@@ -96,7 +96,7 @@ void* BackupThread::Entry()
     {
         msg.Printf(_("Connecting to server %s..."), serverM.c_str());
         logImportant(msg);
-        IBPP::Service svc = IBPP::ServiceFactory(wx2std(serverM), 
+        IBPP::Service svc = IBPP::ServiceFactory(wx2std(serverM),
             wx2std(usernameM), wx2std(passwordM));
         svc->Connect();
 
@@ -109,7 +109,7 @@ void* BackupThread::Entry()
             if (TestDestroy())
             {
                 now = wxDateTime::Now();
-                msg.Printf(_("Database backup cancelled %s"), 
+                msg.Printf(_("Database backup cancelled %s"),
                     now.FormatTime().c_str());
                 logImportant(msg);
                 break;
@@ -118,7 +118,7 @@ void* BackupThread::Entry()
             if (c == 0)
             {
                 now = wxDateTime::Now();
-                msg.Printf(_("Database backup finished %s"), 
+                msg.Printf(_("Database backup finished %s"),
                     now.FormatTime().c_str());
                 logImportant(msg);
                 break;
@@ -131,7 +131,7 @@ void* BackupThread::Entry()
     catch (IBPP::Exception& e)
     {
         now = wxDateTime::Now();
-        msg.Printf(_("Database backup cancelled %s due to IBPP exception:\n\n"), 
+        msg.Printf(_("Database backup cancelled %s due to IBPP exception:\n\n"),
             now.FormatTime().c_str());
         msg += std2wx(e.ErrorMessage());
         logError(msg);
@@ -139,7 +139,7 @@ void* BackupThread::Entry()
     catch (...)
     {
         now = wxDateTime::Now();
-        msg.Printf(_("Database backup cancelled %s due to exception"), 
+        msg.Printf(_("Database backup cancelled %s due to exception"),
             now.FormatTime().c_str());
         logError(msg);
     }
@@ -150,7 +150,7 @@ void BackupThread::OnExit()
 {
     if (frameM != 0)
     {
-        wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, 
+        wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
             BackupRestoreBaseFrame::ID_thread_finished);
         wxPostEvent(frameM, event);
     }
@@ -185,25 +185,25 @@ BackupFrame::BackupFrame(wxWindow* parent, Database* db):
     panel_controls = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize,
         wxTAB_TRAVERSAL | wxCLIP_CHILDREN | wxNO_FULL_REPAINT_ON_RESIZE);
     label_filename = new wxStaticText(panel_controls, -1, _("Backup file:"));
-    text_ctrl_filename = new wxTextCtrl(panel_controls, ID_text_ctrl_filename, 
+    text_ctrl_filename = new wxTextCtrl(panel_controls, ID_text_ctrl_filename,
         wxEmptyString);
-    button_browse = new wxButton(panel_controls, ID_button_browse, _("..."), 
+    button_browse = new wxButton(panel_controls, ID_button_browse, _("..."),
         wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
 
-    checkbox_checksum = new wxCheckBox(panel_controls, -1, 
+    checkbox_checksum = new wxCheckBox(panel_controls, -1,
         _("Ignore Checksums"));
-    checkbox_limbo = new wxCheckBox(panel_controls, -1, 
+    checkbox_limbo = new wxCheckBox(panel_controls, -1,
         _("Ignore Limbo Transactions"));
-    checkbox_transport = new wxCheckBox(panel_controls, -1, 
+    checkbox_transport = new wxCheckBox(panel_controls, -1,
         _("Use non-transportable format"));
-    checkbox_metadata = new wxCheckBox(panel_controls, -1, 
+    checkbox_metadata = new wxCheckBox(panel_controls, -1,
         _("Only backup metadata"));
-    checkbox_garbage = new wxCheckBox(panel_controls, -1, 
+    checkbox_garbage = new wxCheckBox(panel_controls, -1,
         _("Don't do garbage collection"));
-    checkbox_extern = new wxCheckBox(panel_controls, -1, 
+    checkbox_extern = new wxCheckBox(panel_controls, -1,
         _("Convert external tables"));
 
-    checkbox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog, 
+    checkbox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog,
         _("Show complete log"));
     button_start = new wxButton(panel_controls, ID_button_start, _("Backup"));
 
@@ -307,7 +307,7 @@ void BackupFrame::layoutControls()
     sizerMain->Add(text_ctrl_log, 1, wxEXPAND);
 
     // show at least 3 lines of text since it is default size too
-    sizerMain->SetItemMinSize(text_ctrl_log, 
+    sizerMain->SetItemMinSize(text_ctrl_log,
         -1, 3 * text_ctrl_filename->GetSize().GetHeight());
     SetSizerAndFit(sizerMain);
 }
@@ -334,8 +334,9 @@ END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void BackupFrame::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    wxString filename = ::wxFileSelector(_("Select Backup File"), wxT(""), 
-        wxT(""), wxT(""), _("All files (*.*)|*.*"), 0, this);
+    wxString filename = ::wxFileSelector(_("Select Backup File"), wxT(""),
+                        wxT(""), wxT(""), _("All files (*.*)|*.*"),
+                        wxSAVE|wxOVERWRITE_PROMPT, this);
     if (!filename.empty())
         text_ctrl_filename->SetValue(filename);
 }
@@ -375,8 +376,8 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     if (checkbox_extern->IsChecked())
         flags |= (int)IBPP::brConvertExtTables;
 
-    BackupThread* thread = new BackupThread(this, serverM->getHostname(), 
-        databaseM->getUsername(), password, databaseM->getPath(), 
+    BackupThread* thread = new BackupThread(this, serverM->getHostname(),
+        databaseM->getUsername(), password, databaseM->getPath(),
         text_ctrl_filename->GetValue(), (IBPP::BRF)flags);
     startThread(thread);
     updateControls();
