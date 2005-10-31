@@ -220,7 +220,12 @@ void Domain::getDatatypeParts(wxString& type, wxString& size, wxString& scale)
 		size = datatype.substr(p1 + 1, p2 - p1 - 1);
 	}
 	else
+    {
 		type = datatype;
+        // HACK ALERT: some better fix needed, but we don't want the subtype
+    	if (datatypeM == 261)
+            type = wxT("Blob");
+    }
 }
 //-----------------------------------------------------------------------------
 wxString Domain::getCharset()
