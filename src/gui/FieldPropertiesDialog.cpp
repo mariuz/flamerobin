@@ -60,8 +60,8 @@ static const DatatypeProperties datatypes[] = {
     { wxT("Varchar"), true, false, true },
     { wxT("Integer") },
     { wxT("Smallint") },
-    { wxT("Numeric"), true, true, false }, 
-    { wxT("Decimal"), true, true, false }, 
+    { wxT("Numeric"), true, true, false },
+    { wxT("Decimal"), true, true, false },
     { wxT("BigInt") },
     { wxT("Float") },
     { wxT("Double precision") },
@@ -74,7 +74,7 @@ static const DatatypeProperties datatypes[] = {
 
 const size_t datatypescnt = sizeof(datatypes) / sizeof(DatatypeProperties);
 //-----------------------------------------------------------------------------
-FieldPropertiesDialog::FieldPropertiesDialog(wxWindow* parent, Table* table, 
+FieldPropertiesDialog::FieldPropertiesDialog(wxWindow* parent, Table* table,
         Column* column)
     : BaseDialog(parent, wxID_ANY, wxEmptyString)
 {
@@ -96,23 +96,23 @@ void FieldPropertiesDialog::createControls()
 {
     label_fieldname = new wxStaticText(getControlsPanel(), wxID_ANY,
         _("Field name:"));
-    textctrl_fieldname = new wxTextCtrl(getControlsPanel(), 
+    textctrl_fieldname = new wxTextCtrl(getControlsPanel(),
         ID_textctrl_fieldname, wxEmptyString);
-    
+
     label_domain = new wxStaticText(getControlsPanel(), wxID_ANY,
         _("Domain:"));
-    choice_domain = new wxChoice(getControlsPanel(), ID_choice_domain, 
+    choice_domain = new wxChoice(getControlsPanel(), ID_choice_domain,
         wxDefaultPosition, wxDefaultSize, 0, 0);
-    button_edit_domain = new wxButton(getControlsPanel(), 
+    button_edit_domain = new wxButton(getControlsPanel(),
         ID_button_edit_domain, _("Edit domain"));
 
-    label_datatype = new wxStaticText(getControlsPanel(), wxID_ANY, 
+    label_datatype = new wxStaticText(getControlsPanel(), wxID_ANY,
         _("Datatype:"));
     wxArrayString datatypes_choices;
     datatypes_choices.Alloc(datatypescnt);
     for (size_t n = 0; n < datatypescnt; n++)
         datatypes_choices.Add(datatypes[n].name);
-    choice_datatype = new wxChoice(getControlsPanel(), ID_choice_datatype, 
+    choice_datatype = new wxChoice(getControlsPanel(), ID_choice_datatype,
         wxDefaultPosition, wxDefaultSize, datatypes_choices);
     label_size = new wxStaticText(getControlsPanel(), wxID_ANY, _("Size:"));
     textctrl_size = new wxTextCtrl(getControlsPanel(), wxID_ANY, wxEmptyString);
@@ -120,14 +120,14 @@ void FieldPropertiesDialog::createControls()
     textctrl_scale = new wxTextCtrl(getControlsPanel(), wxID_ANY, wxEmptyString);
 
     label_charset = new wxStaticText(getControlsPanel(), wxID_ANY, _("Charset:"));
-    const wxString charset_choices[] = { 
+    const wxString charset_choices[] = {
         wxT("NONE")
     };
-    choice_charset = new wxChoice(getControlsPanel(), ID_choice_charset, 
-        wxDefaultPosition, wxDefaultSize, 
+    choice_charset = new wxChoice(getControlsPanel(), ID_choice_charset,
+        wxDefaultPosition, wxDefaultSize,
         sizeof(charset_choices) / sizeof(wxString), charset_choices);
     label_collate = new wxStaticText(getControlsPanel(), wxID_ANY, _("Collate:"));
-    choice_collate = new wxChoice(getControlsPanel(), ID_choice_collate, 
+    choice_collate = new wxChoice(getControlsPanel(), ID_choice_collate,
         wxDefaultPosition, wxDefaultSize, 0, 0);
 
     checkbox_notnull = new wxCheckBox(getControlsPanel(), wxID_ANY, _("Not null"));
@@ -135,12 +135,12 @@ void FieldPropertiesDialog::createControls()
     static_line_autoinc = new wxStaticLine(getControlsPanel());
     label_autoinc = new wxStaticText(getControlsPanel(), wxID_ANY, _("Autoincrement"));
 
-    radio_generator_new = new wxRadioButton(getControlsPanel(), 
+    radio_generator_new = new wxRadioButton(getControlsPanel(),
         ID_radio_generator_new, _("Create new generator:"));
-    textctrl_generator_name = new wxTextCtrl(getControlsPanel(), 
+    textctrl_generator_name = new wxTextCtrl(getControlsPanel(),
         ID_textctrl_generator_name, wxEmptyString);
 
-    radio_generator_existing = new wxRadioButton(getControlsPanel(), 
+    radio_generator_existing = new wxRadioButton(getControlsPanel(),
         ID_radio_generator_existing, _("Use existing generator:"));
     choice_generator = new wxChoice(getControlsPanel(), ID_choice_generator,
         wxDefaultPosition, wxDefaultSize, 0, 0);
@@ -151,7 +151,7 @@ void FieldPropertiesDialog::createControls()
         wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
 
     button_ok = new wxButton(getControlsPanel(), ID_button_ok, _("Save"));
-    button_cancel = new wxButton(getControlsPanel(), ID_button_cancel, 
+    button_cancel = new wxButton(getControlsPanel(), ID_button_cancel,
         _("Cancel"));
 }
 //-----------------------------------------------------------------------------
@@ -243,7 +243,7 @@ void FieldPropertiesDialog::update()
     updateControls();
 }
 //-----------------------------------------------------------------------------
-bool FieldPropertiesDialog::getDomainInfo(const wxString& domain,  
+bool FieldPropertiesDialog::getDomainInfo(const wxString& domain,
     wxString& type, wxString& size, wxString& scale, wxString& charset)
 {
     Database* db = tableM->getDatabase();
@@ -269,11 +269,11 @@ void FieldPropertiesDialog::loadCharsets()
     choice_charset->Freeze();
     choice_charset->Clear();
     choice_charset->Append(wxT("NONE"));
-    
+
     if (tableM && tableM->getDatabase())
     {
         vector<wxString> charsets;
-        tableM->getDatabase()->fillVector(charsets, 
+        tableM->getDatabase()->fillVector(charsets,
             wxT("select rdb$character_set_name from rdb$character_sets order by 1"));
         for (vector<wxString>::iterator it = charsets.begin(); it != charsets.end(); ++it)
         {
@@ -471,15 +471,15 @@ void FieldPropertiesDialog::updateSqlStatement()
 //-----------------------------------------------------------------------------
 //! event handling
 BEGIN_EVENT_TABLE(FieldPropertiesDialog, BaseDialog)
-    EVT_BUTTON(FieldPropertiesDialog::ID_button_edit_domain, OnEditDomainClick)
-    EVT_CHECKBOX(FieldPropertiesDialog::ID_checkbox_trigger, OnNeedsUpdateSql)
-    EVT_CHOICE(FieldPropertiesDialog::ID_choice_datatype, OnChoiceDatatypeClick)
-    EVT_CHOICE(FieldPropertiesDialog::ID_choice_domain, OnChoiceDomainClick)
-    EVT_CHOICE(FieldPropertiesDialog::ID_choice_generator, OnNeedsUpdateSql)
-    EVT_RADIOBUTTON(FieldPropertiesDialog::ID_radio_generator_existing, OnRadioGeneratorClick)
-    EVT_RADIOBUTTON(FieldPropertiesDialog::ID_radio_generator_new, OnRadioGeneratorClick)
-    EVT_TEXT(FieldPropertiesDialog::ID_textctrl_fieldname, OnNeedsUpdateSql)
-    EVT_TEXT(FieldPropertiesDialog::ID_textctrl_generator_name, OnNeedsUpdateSql)
+        EVT_BUTTON(FieldPropertiesDialog::ID_button_edit_domain, FieldPropertiesDialog::OnEditDomainClick)
+        EVT_CHECKBOX(FieldPropertiesDialog::ID_checkbox_trigger, FieldPropertiesDialog::OnNeedsUpdateSql)
+        EVT_CHOICE(FieldPropertiesDialog::ID_choice_datatype, FieldPropertiesDialog::OnChoiceDatatypeClick)
+        EVT_CHOICE(FieldPropertiesDialog::ID_choice_domain, FieldPropertiesDialog::OnChoiceDomainClick)
+        EVT_CHOICE(FieldPropertiesDialog::ID_choice_generator, FieldPropertiesDialog::OnNeedsUpdateSql)
+        EVT_RADIOBUTTON(FieldPropertiesDialog::ID_radio_generator_existing, FieldPropertiesDialog::OnRadioGeneratorClick)
+        EVT_RADIOBUTTON(FieldPropertiesDialog::ID_radio_generator_new, FieldPropertiesDialog::OnRadioGeneratorClick)
+        EVT_TEXT(FieldPropertiesDialog::ID_textctrl_fieldname, FieldPropertiesDialog::OnNeedsUpdateSql)
+        EVT_TEXT(FieldPropertiesDialog::ID_textctrl_generator_name, FieldPropertiesDialog::OnNeedsUpdateSql)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::OnChoiceDatatypeClick(wxCommandEvent& WXUNUSED(event))
