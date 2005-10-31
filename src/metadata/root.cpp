@@ -59,7 +59,7 @@ Root& getGlobalRoot()
 }
 //-----------------------------------------------------------------------------
 Root::Root()
-    : MetadataItem(), fileNameM(wxT("")), dirtyM(false), nextIdM(1)
+    : MetadataItem(), fileNameM(wxT("")), dirtyM(false), loadingM(false), nextIdM(1)
 {
     setName(wxT("Home"));
     typeM = ntRoot;
@@ -85,13 +85,27 @@ Root::~Root()
 //
 bool Root::load()
 {
+    wxString s;
+
     wxFileName fileName = getFileName();
-    if (!fileName.FileExists())
+    if (fileName.FileExists())
+    {
+        ifstream file(wx2std(fileName.GetFullPath()).c_str());
+        if (file)
+        {
+            // I had to do it this way, since standard line << file, doesn't
+            // work good if data has spaces in it.
+            stringstream ss;         
+            // read entire file into wxString buffer
+            ss << file.rdbuf();
+            s = std2wx(ss.str());
+        }
+    }
+    if (s.IsEmpty())
         return false;
 
-    ifstream file(wx2std(fileName.GetFullPath()).c_str());
-    if (!file)
-        return false;
+    // make sure that save() isn't called via addServer() or addDatabase()
+    loadingM = true;
 
     // These have to be pointers since when they get pushed to vector, they relocate
     // so in order to set the right Parent for database objects, we need to know its exact
@@ -100,10 +114,6 @@ bool Root::load()
     Server *server = NULL;            // current server
     Database *database = NULL;        // current db
 
-    // I had to do it this way, since standard line << file, doesn't work good if data has spaces in it.
-    stringstream ss;            // read entire file into wxString buffer
-    ss << file.rdbuf();
-    wxString s(std2wx(ss.str()));
     // skip xml encoding
     wxString::size_type t = s.find('\n');
     wxString line = s.substr(0, t);
@@ -209,7 +219,8 @@ bool Root::load()
             database->setRole(value);
     }
 
-    file.close();
+    loadingM = false;
+    dirtyM = false;
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -237,6 +248,9 @@ void Root::removeServer(Server* server)
 //
 bool Root::save()
 {
+    if (loadingM)
+        return true;
+
     // create directory if it doesn't exist yet.
     wxString dir = wxPathOnly(getFileName());
     if (!wxDirExists(dir))
@@ -272,6 +286,7 @@ bool Root::save()
     file << "</root>\n";
 
     file.close();
+    dirtyM = false;
     return true;
 }
 //-----------------------------------------------------------------------------

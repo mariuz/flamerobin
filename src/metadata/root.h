@@ -36,6 +36,7 @@ private:
     wxString fileNameM;
     wxString getFileName();
     bool dirtyM;
+    bool loadingM;
     unsigned int nextIdM;
 public:
     Root();
