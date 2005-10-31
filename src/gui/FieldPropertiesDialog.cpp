@@ -45,6 +45,35 @@
 #include "ugly.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
+using namespace std;
+//-----------------------------------------------------------------------------
+struct DatatypeProperties
+{
+    wxString name;
+    bool hasSize;
+    bool hasScale;
+    bool isChar;
+};
+
+static const DatatypeProperties datatypes[] = {
+    { wxT("Char"), true, false, true },
+    { wxT("Varchar"), true, false, true },
+    { wxT("Integer") },
+    { wxT("Smallint") },
+    { wxT("Numeric"), true, true, false }, 
+    { wxT("Decimal"), true, true, false }, 
+    { wxT("BigInt") },
+    { wxT("Float") },
+    { wxT("Double precision") },
+    { wxT("Date") },
+    { wxT("Time") },
+    { wxT("Timestamp") },
+    { wxT("Array") },
+    { wxT("Blob") }
+};
+
+const size_t datatypescnt = sizeof(datatypes) / sizeof(DatatypeProperties);
+//-----------------------------------------------------------------------------
 FieldPropertiesDialog::FieldPropertiesDialog(wxWindow* parent, Table* table, 
         Column* column)
     : BaseDialog(parent, wxID_ANY, wxEmptyString)
@@ -59,6 +88,7 @@ FieldPropertiesDialog::FieldPropertiesDialog(wxWindow* parent, Table* table,
     setTableM(table);
     setColumnM(column);
     setControlsProperties();
+    updateControls();
     layoutControls();
 }
 //-----------------------------------------------------------------------------
@@ -78,15 +108,12 @@ void FieldPropertiesDialog::createControls()
 
     label_datatype = new wxStaticText(getControlsPanel(), wxID_ANY, 
         _("Datatype:"));
-    const wxString datatypes_choices[] = {
-        wxT("Char"), wxT("Varchar"), wxT("Integer"), wxT("Smallint"),
-        wxT("Numeric"), wxT("Decimal"), wxT("BigInt"), wxT("Float"),
-        wxT("Double precision"), wxT("Date"), wxT("Time"), wxT("Timestamp"),
-        wxT("Array"), wxT("Blob")
-    };
+    wxArrayString datatypes_choices;
+    datatypes_choices.Alloc(datatypescnt);
+    for (size_t n = 0; n < datatypescnt; n++)
+        datatypes_choices.Add(datatypes[n].name);
     choice_datatype = new wxChoice(getControlsPanel(), ID_choice_datatype, 
-        wxDefaultPosition, wxDefaultSize, 
-        sizeof(datatypes_choices) / sizeof(wxString), datatypes_choices);
+        wxDefaultPosition, wxDefaultSize, datatypes_choices);
     label_size = new wxStaticText(getControlsPanel(), wxID_ANY, _("Size:"));
     textctrl_size = new wxTextCtrl(getControlsPanel(), wxID_ANY, wxEmptyString);
     label_scale = new wxStaticText(getControlsPanel(), wxID_ANY, _("Scale:"));
@@ -126,11 +153,6 @@ void FieldPropertiesDialog::createControls()
     button_ok = new wxButton(getControlsPanel(), ID_button_ok, _("Save"));
     button_cancel = new wxButton(getControlsPanel(), ID_button_cancel, 
         _("Cancel"));
-}
-//-----------------------------------------------------------------------------
-const wxString FieldPropertiesDialog::getName() const
-{
-    return wxT("FieldPropertiesDialog");
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::layoutControls()
@@ -198,6 +220,11 @@ void FieldPropertiesDialog::layoutControls()
     layoutSizers(sizerControls, sizerButtons, true);
 }
 //-----------------------------------------------------------------------------
+const wxString FieldPropertiesDialog::getName() const
+{
+    return wxT("FieldPropertiesDialog");
+}
+//-----------------------------------------------------------------------------
 void FieldPropertiesDialog::removeSubject(Subject* subject)
 {
     Observer::removeSubject(subject);
@@ -211,6 +238,96 @@ void FieldPropertiesDialog::removeSubject(Subject* subject)
     }
 }
 //-----------------------------------------------------------------------------
+void FieldPropertiesDialog::update()
+{
+    updateControls();
+}
+//-----------------------------------------------------------------------------
+bool FieldPropertiesDialog::getDomainInfo(const wxString& domain,  
+    wxString& type, wxString& size, wxString& scale, wxString& charset)
+{
+    Database* db = tableM->getDatabase();
+    if (db)
+    {
+        MetadataCollection<Domain>::const_iterator it;
+        for (it = db->domainsBegin(); it != db->domainsEnd(); ++it)
+        {
+            if (domain == (*it).getName())
+            {
+                Domain* d = (Domain*)&(*it);
+                d->getDatatypeParts(type, size, scale);
+                charset = d->getCharset();
+                return true;
+            }
+        }
+    }
+    return false;
+}
+//-----------------------------------------------------------------------------
+void FieldPropertiesDialog::loadCharsets()
+{
+    choice_charset->Freeze();
+    choice_charset->Clear();
+    choice_charset->Append(wxT("NONE"));
+    
+    if (tableM && tableM->getDatabase())
+    {
+        vector<wxString> charsets;
+        tableM->getDatabase()->fillVector(charsets, 
+            wxT("select rdb$character_set_name from rdb$character_sets order by 1"));
+        for (vector<wxString>::iterator it = charsets.begin(); it != charsets.end(); ++it)
+        {
+            if ((*it) != wxT("NONE"))
+                choice_charset->Append(*it);
+        }
+    }
+    choice_charset->Thaw();
+}
+//-----------------------------------------------------------------------------
+void FieldPropertiesDialog::loadDomains()
+{
+    choice_domain->Freeze();
+    choice_domain->Clear();
+
+    if (columnM == 0 ||columnM->getSource().substr(0,4) != wxT("RDB$"))
+    {
+        choice_domain->Append(wxT("[Create new]"));
+        if (!columnM)
+            choice_domain->SetSelection(0);
+    }
+
+    if (tableM && tableM->getDatabase())
+    {
+        Database* db = tableM->getDatabase();
+        MetadataCollection<Domain>::const_iterator it;
+        for (it = db->domainsBegin(); it != db->domainsEnd(); ++it)
+        {
+            wxString name = (*it).getName();
+            // ignore RDB$XXX domains unless it's the one columnM uses
+            bool addDomain = name.substr(0, 4) != wxT("RDB$")
+                || (columnM && columnM->getSource() == name);
+            if (addDomain)
+                choice_domain->Append(name);
+        }
+    }
+    choice_domain->Thaw();
+}
+//-----------------------------------------------------------------------------
+void FieldPropertiesDialog::loadGeneratorNames()
+{
+    choice_generator->Freeze();
+    choice_generator->Clear();
+
+    if (tableM && tableM->getDatabase())
+    {
+        Database* db = tableM->getDatabase();
+        MetadataCollection<Generator>::const_iterator it;
+        for (it = db->generatorsBegin(); it != db->generatorsEnd(); ++it)
+            choice_generator->Append((*it).getName());
+    }
+    choice_generator->Thaw();
+}
+//-----------------------------------------------------------------------------
 void FieldPropertiesDialog::setColumnM(Column* column)
 {
     if (columnM != column)
@@ -220,7 +337,6 @@ void FieldPropertiesDialog::setColumnM(Column* column)
         columnM = column;
         if (columnM)
             columnM->attachObserver(this);
-        updateControlsFromColumn();
     }
 }
 //-----------------------------------------------------------------------------
@@ -247,6 +363,8 @@ void FieldPropertiesDialog::setControlsProperties()
         choice_datatype->SetSelection(0);
     if (choice_charset->GetCount() > 0 && choice_charset->GetSelection() == wxNOT_FOUND)
         choice_charset->SetSelection(0);
+    textctrl_generator_name->SetEditable(false);
+    updateColors();
     radio_generator_existing->SetValue(true);
     if (choice_generator->GetCount() > 0 && choice_generator->GetSelection() == wxNOT_FOUND)
         choice_generator->SetSelection(0);
@@ -264,28 +382,64 @@ void FieldPropertiesDialog::setTableM(Table* table)
         tableM = table;
         if (tableM)
             tableM->attachObserver(this);
-        updateControlsFromTable();
     }
 }
 //-----------------------------------------------------------------------------
-void FieldPropertiesDialog::update()
+void FieldPropertiesDialog::updateColumnControls()
 {
-    updateControlsFromTable();
-    updateControlsFromColumn();
+    if (columnM)
+    {
+        textctrl_fieldname->SetValue(columnM->getName());
+        checkbox_notnull->SetValue(!columnM->isNullable());
+        int n = choice_domain->FindString(columnM->getSource());
+        if (n != wxNOT_FOUND)
+            choice_domain->SetSelection(n);
+/*
+        wxCommandEvent dummy;
+        OnChDomainsClick(dummy);    // loads list of domains
+        loadCollations(fieldM->getCollation());
+*/
+    }
+    updateDatatypeInfo();
 }
 //-----------------------------------------------------------------------------
-void FieldPropertiesDialog::updateControlsFromColumn()
+void FieldPropertiesDialog::updateControls()
 {
-    if (!(columnM))
-        return;
-// TODO
+    wxString genName;
+    if (tableM)
+        genName = wxT("GEN_") + tableM->getName() + wxT("_ID");
+    textctrl_generator_name->SetValue(genName);
+
+    loadGeneratorNames();
+    loadCharsets();
+    loadDomains();
+    updateColumnControls();
 }
 //-----------------------------------------------------------------------------
-void FieldPropertiesDialog::updateControlsFromTable()
+void FieldPropertiesDialog::updateDatatypeInfo()
 {
-    if (!(tableM))
+    int n = choice_datatype->GetSelection();
+    bool indexOk = n >= 0 && n < datatypescnt;
+    choice_charset->Enable(columnM == 0 && indexOk && datatypes[n].isChar);
+    textctrl_size->SetEditable(indexOk && datatypes[n].hasSize);
+    textctrl_scale->SetEditable(indexOk && datatypes[n].hasScale);
+    choice_collate->Enable(columnM == 0 && indexOk && datatypes[n].isChar);
+    updateColors();
+}
+//-----------------------------------------------------------------------------
+void FieldPropertiesDialog::updateDomainInfo(const wxString& domain)
+{
+    wxString type, size, scale, charset;
+    if (!getDomainInfo(domain, type, size, scale, charset))
         return;
-// TODO
+    textctrl_scale->SetValue(scale);
+    textctrl_size->SetValue(size);
+    int selType = choice_datatype->FindString(type);
+    if (selType != wxNOT_FOUND)
+        choice_datatype->SetSelection(selType);
+    int selCharset = choice_charset->FindString(charset);
+    if (selCharset != wxNOT_FOUND)
+        choice_charset->SetSelection(selCharset);
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::updateSqlStatement()
@@ -313,19 +467,50 @@ void FieldPropertiesDialog::updateSqlStatement()
     }
 
     textctrl_sql->SetValue(sql);
-
 }
 //-----------------------------------------------------------------------------
 //! event handling
 BEGIN_EVENT_TABLE(FieldPropertiesDialog, BaseDialog)
     EVT_BUTTON(FieldPropertiesDialog::ID_button_edit_domain, OnEditDomainClick)
     EVT_CHECKBOX(FieldPropertiesDialog::ID_checkbox_trigger, OnNeedsUpdateSql)
+    EVT_CHOICE(FieldPropertiesDialog::ID_choice_datatype, OnChoiceDatatypeClick)
+    EVT_CHOICE(FieldPropertiesDialog::ID_choice_domain, OnChoiceDomainClick)
     EVT_CHOICE(FieldPropertiesDialog::ID_choice_generator, OnNeedsUpdateSql)
-    EVT_RADIOBUTTON(FieldPropertiesDialog::ID_radio_generator_existing, OnNeedsUpdateSql)
-    EVT_RADIOBUTTON(FieldPropertiesDialog::ID_radio_generator_new, OnNeedsUpdateSql)
+    EVT_RADIOBUTTON(FieldPropertiesDialog::ID_radio_generator_existing, OnRadioGeneratorClick)
+    EVT_RADIOBUTTON(FieldPropertiesDialog::ID_radio_generator_new, OnRadioGeneratorClick)
     EVT_TEXT(FieldPropertiesDialog::ID_textctrl_fieldname, OnNeedsUpdateSql)
     EVT_TEXT(FieldPropertiesDialog::ID_textctrl_generator_name, OnNeedsUpdateSql)
 END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+void FieldPropertiesDialog::OnChoiceDatatypeClick(wxCommandEvent& WXUNUSED(event))
+{
+    updateDatatypeInfo();
+}
+//-----------------------------------------------------------------------------
+void FieldPropertiesDialog::OnChoiceDomainClick(wxCommandEvent& WXUNUSED(event))
+{
+    wxString domain = choice_domain->GetStringSelection();
+    int selDomain = choice_domain->GetSelection();
+    if (selDomain > 0) // is not "[Create new]"
+        updateDomainInfo(domain);
+
+    // data type, size, scale and collate are not editable for all other
+    // already existing domains
+    bool allowEdit = (selDomain == 0 || domain.Mid(0, 4) == wxT("RDB$"));
+    choice_datatype->Enable(allowEdit);
+    if (allowEdit)
+        updateDatatypeInfo();
+    else
+    {
+        textctrl_size->SetEditable(false);
+        textctrl_scale->SetEditable(false);
+        choice_collate->Enable(false);
+        updateColors();
+    }
+
+    // charset is editable only for new fields with new domain
+    choice_charset->Enable(columnM == 0 && selDomain == 0);
+}
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::OnEditDomainClick(wxCommandEvent& WXUNUSED(event))
 {
@@ -336,6 +521,14 @@ void FieldPropertiesDialog::OnEditDomainClick(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::OnNeedsUpdateSql(wxCommandEvent& WXUNUSED(event))
 {
+    updateSqlStatement();
+}
+//-----------------------------------------------------------------------------
+void FieldPropertiesDialog::OnRadioGeneratorClick(wxCommandEvent& WXUNUSED(event))
+{
+    textctrl_generator_name->SetEditable(radio_generator_new->GetValue());
+    updateColors();
+    choice_generator->Enable(radio_generator_existing->GetValue());
     updateSqlStatement();
 }
 //-----------------------------------------------------------------------------

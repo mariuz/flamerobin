@@ -32,6 +32,7 @@
 #include "core/Observer.h"
 #include "gui/BaseDialog.h"
 
+class Database;
 class Table;
 class Column;
 //-----------------------------------------------------------------------------
@@ -69,12 +70,19 @@ private:
     wxButton* button_cancel;
 
     void createControls();
+    bool getDomainInfo(const wxString& domain, 
+        wxString& type, wxString& size, wxString& scale, wxString& charset);
     void layoutControls();
+    void loadCharsets();
+    void loadDomains();
+    void loadGeneratorNames();
     void setColumnM(Column* column);
     void setControlsProperties();
     void setTableM(Table* table);
-    void updateControlsFromColumn();
-    void updateControlsFromTable();
+    void updateColumnControls();
+    void updateControls();
+    void updateDatatypeInfo();
+    void updateDomainInfo(const wxString& domain);
     void updateSqlStatement();
 protected:
     virtual const wxString getName() const;
@@ -102,8 +110,11 @@ private:
         ID_button_cancel = wxID_CANCEL
     };
 
+    void OnChoiceDatatypeClick(wxCommandEvent& event);
+    void OnChoiceDomainClick(wxCommandEvent& event);
     void OnEditDomainClick(wxCommandEvent& event);
     void OnNeedsUpdateSql(wxCommandEvent& event);
+    void OnRadioGeneratorClick(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()
 };
