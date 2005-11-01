@@ -178,8 +178,8 @@ all: $(LIBPREFIX)ibpp$(LIBEXT) flamerobin$(EXEEXT) $(__flamerobin_bundle___depna
 install: all
 	$(INSTALL_DIR) $(DESTDIR)$(bindir)
 	(cd ./ ; $(INSTALL_PROGRAM)  flamerobin$(EXEEXT) $(DESTDIR)$(bindir))
-	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/confdefs
-	(cd $(srcdir)/confdefs/ ; $(INSTALL_DATA)  fr_settings.confdef db_settings.confdef $(DESTDIR)$(datadir)/flamerobin/confdefs)
+	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/conf-defs
+	(cd $(srcdir)/conf-defs/ ; $(INSTALL_DATA)  fr_settings.confdef db_settings.confdef $(DESTDIR)$(datadir)/flamerobin/conf-defs)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/docs
 	(cd $(srcdir)/docs/ ; $(INSTALL_DATA)  fr_license.html fr_manual.html fr_whatsnew.html html.css $(DESTDIR)$(datadir)/flamerobin/docs)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/html-templates
@@ -221,7 +221,7 @@ flamerobin.app/Contents/PkgInfo: flamerobin$(EXEEXT) $(srcdir)/res/flamerobin.In
 	mkdir -p flamerobin.app/Contents/MacOS
 	mkdir -p flamerobin.app/Contents/Resources
 	mkdir -p flamerobin.app/Contents/SharedSupport
-	mkdir -p flamerobin.app/Contents/SharedSupport/confdefs
+	mkdir -p flamerobin.app/Contents/SharedSupport/conf-defs
 	mkdir -p flamerobin.app/Contents/SharedSupport/docs
 	mkdir -p flamerobin.app/Contents/SharedSupport/html-templates
 	

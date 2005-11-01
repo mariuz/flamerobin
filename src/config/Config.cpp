@@ -258,7 +258,7 @@ wxString Config::getDocsPath() const
 //-----------------------------------------------------------------------------
 wxString Config::getConfDefsPath() const
 {
-    return getHomePath() + wxT("confdefs/");
+    return getHomePath() + wxT("conf-defs/");
 }
 //-----------------------------------------------------------------------------
 wxString Config::getUserHomePath() const

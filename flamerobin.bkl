@@ -421,8 +421,8 @@
     </set>
 
     <set var="CONFIGOPTIONSDIR">
-        <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/confdefs</if>
-        <if cond="FORMAT!='autoconf'">confdefs</if>
+        <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/conf-defs</if>
+        <if cond="FORMAT!='autoconf'">conf-defs</if>
     </set>
     <set var="CONFIGOPTIONSFILES">
         fr_settings.confdef
@@ -499,7 +499,7 @@
                 mkdir -p $(BUNDLE)/MacOS
                 mkdir -p $(BUNDLE)/Resources
                 mkdir -p $(BUNDLE)/SharedSupport
-                mkdir -p $(BUNDLE)/SharedSupport/confdefs
+                mkdir -p $(BUNDLE)/SharedSupport/conf-defs
                 mkdir -p $(BUNDLE)/SharedSupport/docs
                 mkdir -p $(BUNDLE)/SharedSupport/html-templates
 
@@ -574,7 +574,7 @@
         <dependency-of>all</dependency-of>
         <depends>flamerobin</depends>
         <srcdir>$(CONFIGOPTIONSDIR)</srcdir>
-        <dstdir>$(COPYFILESDESTDIR)/confdefs</dstdir>
+        <dstdir>$(COPYFILESDESTDIR)/conf-defs</dstdir>
         <files>$(CONFIGOPTIONSFILES)</files>
     </copy-files>
     <copy-files id="html-docs">
@@ -603,7 +603,7 @@
         <data-files>
             <srcdir>$(CONFIGOPTIONSDIR)</srcdir>
             <files>$(CONFIGOPTIONSFILES)</files>
-            <install-to>$(DATADIR)/flamerobin/confdefs</install-to>
+            <install-to>$(DATADIR)/flamerobin/conf-defs</install-to>
         </data-files>
         <data-files>
             <srcdir>$(HTMLDOCSDIR)</srcdir>
