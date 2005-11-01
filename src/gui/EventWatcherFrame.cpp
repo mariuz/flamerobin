@@ -37,6 +37,7 @@
 #endif
 
 #include <wx/datetime.h>
+#include <wx/ffile.h>
 #include <wx/file.h>
 
 #include "controls/LogTextControl.h"
@@ -77,7 +78,7 @@ void EventLogControl::logEvent(const wxString& name, int count)
 }
 //-----------------------------------------------------------------------------
 EventWatcherFrame::EventWatcherFrame(wxWindow *parent, Database *db)
-    :BaseFrame(parent, -1, wxEmptyString), databaseM(db)
+    :BaseFrame(parent, -1, wxEmptyString), databaseM(db), skipEventsM(false)
 {
     monitoringM = false;
     timerM.SetOwner(this, ID_timer);
@@ -104,7 +105,8 @@ void EventWatcherFrame::createControls()
         _("Monitored events"));
     static_text_received = new wxStaticText(panel_controls, wxID_ANY,
         _("Received events"));
-    listbox_monitored = new wxListBox(panel_controls, ID_listbox_monitored);
+    listbox_monitored = new wxListBox(panel_controls, ID_listbox_monitored,
+        wxDefaultPosition, wxDefaultSize, 0, 0, wxLB_EXTENDED);
     eventlog_received = new EventLogControl(panel_controls,
         ID_log_received);
     button_add = new wxButton(panel_controls, ID_button_add, _("&Add event"));
@@ -181,17 +183,39 @@ void EventWatcherFrame::updateControls()
 //-----------------------------------------------------------------------------
 void EventWatcherFrame::defineMonitoredEvents()
 {
+    // prevent timer from messing our business
+    bool timerRunning = timerM.IsRunning();
+    if (timerRunning)
+    {
+        timerM.Stop();
+        wxSafeYield();
+    }
+
+    skipEventsM = true;         // used to catch phantom notifications
     IBPP::Database& idb = databaseM->getIBPPDatabase();
     idb->ClearEvents();
     for (int ix = 0; ix < listbox_monitored->GetCount(); ++ix)
+    {
         idb->DefineEvent(wx2std(listbox_monitored->GetString(ix)), this);
+        idb->DispatchEvents();  // let that phantom notification loose
+    }
+    skipEventsM = false;
+
     updateControls();
+    if (timerRunning)
+        timerM.Start(50);
 }
 //-----------------------------------------------------------------------------
 void EventWatcherFrame::ibppEventHandler(IBPP::IDatabase*,
     const std::string& name, int count)
 {
-    eventlog_received->logEvent(std2wx(name), count);
+    if (!skipEventsM)
+        eventlog_received->logEvent(std2wx(name), count);
+    // else
+    //      TODO: should we inform user anyway that he got those events?
+    //      perhaps display in log control, with gray/silver color?
+    //      I decided not to put anything as it can give a lot of output
+    //      when many events are registered
 }
 //-----------------------------------------------------------------------------
 //! closes window if database is removed (unregistered)
@@ -225,7 +249,23 @@ END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void EventWatcherFrame::OnButtonLoadClick(wxCommandEvent& WXUNUSED(event))
 {
-    // TODO: fill listbox_monitored with data from file
+    wxFileDialog fd(this, _("Select file to load"), wxT(""), wxT(""),
+        _("Text files (*.txt)|*.sql|All files (*.*)|*.*"),
+        wxOPEN|wxCHANGE_DIR);
+    if (wxID_OK != fd.ShowModal())
+        return;
+
+    wxFFile f(fd.GetPath());
+    if (!f.IsOpened())
+    {
+        wxMessageBox(_("Cannot open file."), _("Error"), wxICON_ERROR);
+        return;
+    }
+    wxBusyCursor wait;
+    wxString s;
+    f.ReadAll(&s);
+    f.Close();
+    addEvents(s);
     defineMonitoredEvents();
 }
 //-----------------------------------------------------------------------------
@@ -238,6 +278,7 @@ void EventWatcherFrame::OnButtonSaveClick(wxCommandEvent& WXUNUSED(event))
     if (wxID_OK != fd.ShowModal())
         return;
 
+    wxBusyCursor wait;
     wxString s;
     for (int i = 0; i < listbox_monitored->GetCount(); ++i)
         s += listbox_monitored->GetString(i) + wxT("\n");
@@ -258,9 +299,12 @@ void EventWatcherFrame::OnButtonAddClick(wxCommandEvent& WXUNUSED(event))
     // TODO: perhaps we should extend the MultilineEnterDialog to include
     //       an optional label to give a short explanation to the user
     wxString s(_("You can add multiple events by adding one per line"));
-    if (!GetMultilineTextFromUser(_("Add event(s)"), s, this))
-        return;
-
+    if (GetMultilineTextFromUser(_("Add event(s)"), s, this))
+        addEvents(s);
+}
+//-----------------------------------------------------------------------------
+void EventWatcherFrame::addEvents(wxString& s)
+{
     while (true)
     {
         int p = s.Find(wxT("\n"));
@@ -290,14 +334,10 @@ void EventWatcherFrame::OnButtonRemoveClick(wxCommandEvent& WXUNUSED(event))
     if (listbox_monitored->GetSelections(sel) == 0)
         return;
 
+    wxBusyCursor wait;
     // going backwards to keep indexes valid
     for (int ix = sel.GetCount() - 1; ix >= 0; --ix)
-    {
-        int to_remove = sel.Item(ix);
-        // unsubscribe event (currently we have to remove all and re-add them)
-        // if once we're able to selectively remove events, it could be done here
-        listbox_monitored->Delete(to_remove);
-    }
+        listbox_monitored->Delete(sel.Item(ix));
     defineMonitoredEvents();
 }
 //-----------------------------------------------------------------------------

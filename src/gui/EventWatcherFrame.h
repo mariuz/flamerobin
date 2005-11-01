@@ -46,6 +46,7 @@ private:
     Database* databaseM;
     wxTimer timerM;
     bool monitoringM;
+    bool skipEventsM;
 
     wxPanel* panel_controls;
     wxStaticText* static_text_monitored;
@@ -61,6 +62,7 @@ private:
     void layoutControls();
     void updateControls();
 
+    void addEvents(wxString& s);    // multiline allowed
     void defineMonitoredEvents();
     virtual void ibppEventHandler(IBPP::IDatabase*, const std::string& name, int count);
 protected:
