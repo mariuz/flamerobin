@@ -218,7 +218,7 @@ wxString Database::loadDomainNameForColumn(wxString table, wxString field)
         lastError().setMessage(_("System error."));
     }
 
-    ::wxMessageBox(lastError().getMessage(), _("Postprocessing error."), wxICON_WARNING);
+    ::wxMessageBox(lastError().getMessage(), _("Postprocessing error."), wxOK|wxICON_WARNING);
     return wxT("");
 }
 //-----------------------------------------------------------------------------
@@ -341,7 +341,7 @@ void Database::loadCollations()
         lastError().setMessage(_("System error."));
     }
 
-    ::wxMessageBox(lastError().getMessage(), _("Error while loading collations."), wxICON_WARNING);
+    ::wxMessageBox(lastError().getMessage(), _("Error while loading collations."), wxOK|wxICON_WARNING);
 }
 //-----------------------------------------------------------------------------
 wxString Database::getTableForIndex(wxString indexName)
@@ -371,7 +371,7 @@ wxString Database::getTableForIndex(wxString indexName)
         lastError().setMessage(_("System error."));
     }
 
-    ::wxMessageBox(lastError().getMessage(), _("Error while loading table for index."), wxICON_WARNING);
+    ::wxMessageBox(lastError().getMessage(), _("Error while loading table for index."), wxOK|wxICON_WARNING);
     return wxT("");
 }
 //-----------------------------------------------------------------------------

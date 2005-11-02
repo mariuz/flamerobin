@@ -135,12 +135,13 @@ void GridTable::fetch()
         {
             allRowsFetchedM = true;
             ::wxMessageBox(std2wx(e.ErrorMessage()),
-                _("An IBPP error occurred."));
+                _("An IBPP error occurred."), wxOK|wxICON_ERROR);
         }
         catch (...)
         {
             allRowsFetchedM = true;
-            ::wxMessageBox(_("A system error occurred!"));
+            ::wxMessageBox(_("A system error occurred!"), _("Error"),
+                wxOK|wxICON_ERROR);
         }
         if (allRowsFetchedM)
             break;
@@ -227,7 +228,8 @@ IBPP::SDT GridTable::getColumnType(int col)
         {
             // perhaps we should clear the statement, since something is obviously wrong
             columnCountM = col - 1;
-            ::wxMessageBox(std2wx(e.ErrorMessage()), _("An IBPP error occurred."));
+            ::wxMessageBox(std2wx(e.ErrorMessage()),
+                            _("An IBPP error occurred."), wxOK|wxICON_ERROR);
             return IBPP::sdString;
         }
     }

@@ -258,7 +258,7 @@ void EventWatcherFrame::OnButtonLoadClick(wxCommandEvent& WXUNUSED(event))
     wxFFile f(fd.GetPath());
     if (!f.IsOpened())
     {
-        wxMessageBox(_("Cannot open file."), _("Error"), wxICON_ERROR);
+        wxMessageBox(_("Cannot open file."), _("Error"), wxOK|wxICON_ERROR);
         return;
     }
     wxBusyCursor wait;
@@ -286,7 +286,7 @@ void EventWatcherFrame::OnButtonSaveClick(wxCommandEvent& WXUNUSED(event))
     wxFile f;
     if (!f.Open(fd.GetPath(), wxFile::write) || !f.Write(s))
     {
-        wxMessageBox(_("Cannot write to file."), _("Error"), wxICON_ERROR);
+        wxMessageBox(_("Cannot write to file."), _("Error"), wxOK|wxICON_ERROR);
         return;
     }
 
@@ -354,7 +354,7 @@ void EventWatcherFrame::OnButtonStartStopClick(wxCommandEvent& WXUNUSED(event))
     {
         if (!timerM.Start(50))
         {
-            wxMessageBox(_("Cannot start timer"), _("Error"), wxICON_ERROR);
+            wxMessageBox(_("Cannot start timer"), _("Error"), wxOK|wxICON_ERROR);
             return;
         }
         monitoringM = true;

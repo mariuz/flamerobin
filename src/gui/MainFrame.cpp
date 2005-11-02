@@ -211,7 +211,7 @@ void MainFrame::set_properties()
         wxString msg;
         msg.Printf(_("The configuration file:%sdoes not exist or can not be opened.\n\nThis is normal for first time users.\n\nYou may now register new servers and databases."),
             confile.c_str());
-        wxMessageBox(msg, _("Configuration file not found"), wxICON_INFORMATION);
+        wxMessageBox(msg, _("Configuration file not found"), wxOK|wxICON_INFORMATION);
 
         Server s;
         s.setName(wxT("Localhost"));
@@ -691,7 +691,8 @@ void MainFrame::OnMenuBrowse(wxCommandEvent& WXUNUSED(event))
 
         if (!p->isSelectable())
         {
-            ::wxMessageBox(_("This procedure is not selectable"), _("Cannot create statement"), wxICON_INFORMATION);
+            ::wxMessageBox(_("This procedure is not selectable"),
+                _("Cannot create statement"), wxOK|wxICON_INFORMATION);
             return;
         }
         sql = p->getSelectStatement(false); // false = without columns info (just *)
@@ -732,7 +733,8 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
 
         if (!p->isSelectable())
         {
-            ::wxMessageBox(_("This procedure is not selectable"), _("Cannot create statement"), wxICON_INFORMATION);
+            ::wxMessageBox(_("This procedure is not selectable"),
+                _("Cannot create statement"), wxOK|wxICON_INFORMATION);
             return;
         }
         sql = p->getSelectStatement(true);  // true = with columns info
@@ -847,7 +849,8 @@ void MainFrame::OnMenuManageUsers(wxCommandEvent& WXUNUSED(event))
     FR_TRY
 
     // TODO:
-    ::wxMessageBox(_("This feature is not yet implemented"), _("Not in this version"), wxICON_INFORMATION);
+    ::wxMessageBox(_("This feature is not yet implemented"),
+        _("Not in this version"), wxOK|wxICON_INFORMATION);
 
     FR_CATCH
 }

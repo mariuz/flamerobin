@@ -46,7 +46,7 @@
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, Database* db)
-    : BaseFrame(parent, -1, wxEmptyString, wxDefaultPosition, wxDefaultSize, 
+    : BaseFrame(parent, -1, wxEmptyString, wxDefaultPosition, wxDefaultSize,
         wxDEFAULT_FRAME_STYLE|wxNO_FULL_REPAINT_ON_RESIZE)
 {
     databaseM = db;
@@ -74,7 +74,7 @@ BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, Database* db)
 }
 //-----------------------------------------------------------------------------
 //! implementation details
-void BackupRestoreBaseFrame::addThreadMsg(const wxString msg, 
+void BackupRestoreBaseFrame::addThreadMsg(const wxString msg,
     bool& notificationNeeded)
 {
     notificationNeeded = false;
@@ -118,12 +118,12 @@ void BackupRestoreBaseFrame::doReadConfigSettings(const wxString& prefix)
     BaseFrame::doReadConfigSettings(prefix);
 
     bool verbose = true;
-    config().getValue(prefix + Config::pathSeparator + wxT("verboselog"), 
+    config().getValue(prefix + Config::pathSeparator + wxT("verboselog"),
         verbose);
     checkbox_showlog->SetValue(verbose);
 
     wxString bkfile;
-    config().getValue(prefix + Config::pathSeparator + wxT("backupfilename"), 
+    config().getValue(prefix + Config::pathSeparator + wxT("backupfilename"),
         bkfile);
     if (!bkfile.empty())
         text_ctrl_filename->SetValue(bkfile);
@@ -132,9 +132,9 @@ void BackupRestoreBaseFrame::doReadConfigSettings(const wxString& prefix)
 void BackupRestoreBaseFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BaseFrame::doWriteConfigSettings(prefix);
-    config().setValue(prefix + Config::pathSeparator + wxT("verboselog"), 
+    config().setValue(prefix + Config::pathSeparator + wxT("verboselog"),
         checkbox_showlog->GetValue());
-    config().setValue(prefix + Config::pathSeparator + wxT("backupfilename"), 
+    config().setValue(prefix + Config::pathSeparator + wxT("backupfilename"),
         text_ctrl_filename->GetValue());
 }
 //-----------------------------------------------------------------------------
@@ -166,13 +166,13 @@ bool BackupRestoreBaseFrame::startThread(wxThread* thread)
     wxASSERT(threadM == 0);
     if (wxTHREAD_NO_ERROR != thread->Create())
     {
-        ::wxMessageBox(_("Error creating thread!"), _("Error"), wxICON_ERROR);
+        ::wxMessageBox(_("Error creating thread!"), _("Error"), wxOK|wxICON_ERROR);
         delete thread;
         return false;
     }
     if (wxTHREAD_NO_ERROR != thread->Run())
     {
-        ::wxMessageBox(_("Error starting thread!"), _("Error"), wxICON_ERROR);
+        ::wxMessageBox(_("Error starting thread!"), _("Error"), wxOK|wxICON_ERROR);
         delete thread;
         return false;
     }
