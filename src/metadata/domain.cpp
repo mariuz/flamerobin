@@ -204,6 +204,7 @@ wxString Domain::datatype2string(short datatype, short scale, short precision,
 //-----------------------------------------------------------------------------
 void Domain::getDatatypeParts(wxString& type, wxString& size, wxString& scale)
 {
+    size = scale = wxEmptyString;
 	wxString datatype = getDatatypeAsString();
 	wxString::size_type p1 = datatype.find(wxT("("));
 	if (p1 != wxString::npos)
