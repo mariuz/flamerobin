@@ -72,8 +72,11 @@ private:
     void createControls();
     bool getDomainInfo(const wxString& domain, 
         wxString& type, wxString& size, wxString& scale, wxString& charset);
+    bool getIsNewDomainSelected();
+    bool getStatementsToExecute(wxString& sql);
     void layoutControls();
     void loadCharsets();
+    void loadCollations();
     void loadDomains();
     void loadGeneratorNames();
     void setColumnM(Column* column);
@@ -82,6 +85,7 @@ private:
     void updateColumnControls();
     void updateControls();
     void updateDatatypeInfo();
+    void updateDomainControls();
     void updateDomainInfo(const wxString& domain);
     void updateSqlStatement();
 protected:
@@ -110,11 +114,14 @@ private:
         ID_button_cancel = wxID_CANCEL
     };
 
+    void OnButtonEditDomainClick(wxCommandEvent& event);
+    void OnButtonOkClick(wxCommandEvent& event);
+    void OnChoiceCharsetClick(wxCommandEvent& event);
     void OnChoiceDatatypeClick(wxCommandEvent& event);
     void OnChoiceDomainClick(wxCommandEvent& event);
-    void OnEditDomainClick(wxCommandEvent& event);
     void OnNeedsUpdateSql(wxCommandEvent& event);
     void OnRadioGeneratorClick(wxCommandEvent& event);
+    void OnTextFieldnameUpdate(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()
 };
