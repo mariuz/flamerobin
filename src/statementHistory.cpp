@@ -136,9 +136,13 @@ void StatementHistory::set(StatementHistory::Position pos, const wxString& str)
 //-----------------------------------------------------------------------------
 StatementHistory::Position StatementHistory::add(const wxString& str)
 {
-    if (statementsM.empty() || statementsM.back() != str)
-        statementsM.push_back(str);
-    checkSize();
+    if (!config().get(wxT("limitHistoryItemSize"), true) ||
+        str.Length() < 1024*config().get(wxT("statementHistoryItemSize"), 10))
+    {
+        if (statementsM.empty() || statementsM.back() != str)
+            statementsM.push_back(str);
+        checkSize();
+    }
     return statementsM.size() - 1;
 }
 //-----------------------------------------------------------------------------

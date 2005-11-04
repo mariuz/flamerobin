@@ -224,6 +224,20 @@
                 </enables>
             </setting>
             <setting type="checkbox">
+                <caption>Limit history item size</caption>
+                <key>limitHistoryItemSize</key>
+                <default>1</default>
+                <enables>
+                    <setting type="int">
+                        <caption>Don't store buffers bigger than [VALUE] characters</caption>
+                        <key>statementHistoryItemSize</key>
+                        <minvalue>0</minvalue>
+                        <maxvalue>10000</maxvalue>
+                        <default>10</default>
+                    </setting>
+                </enables>
+            </setting>
+            <setting type="checkbox">
                 <caption>Remember unsuccessfully executed buffers</caption>
                 <key>historyStoreUnsuccessful</key>
                 <default>1</default>
