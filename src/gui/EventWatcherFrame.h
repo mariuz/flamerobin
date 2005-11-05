@@ -23,6 +23,7 @@
   Contributor(s): Michael Hieke
 */
 
+//-----------------------------------------------------------------------------
 #ifndef FR_EVENT_FRAME_H
 #define FR_EVENT_FRAME_H
 
@@ -62,16 +63,21 @@ private:
     void layoutControls();
     void updateControls();
 
+    static wxString getFrameId(Database* db);
+
     void addEvents(wxString& s);    // multiline allowed
     void defineMonitoredEvents();
-    virtual void ibppEventHandler(IBPP::IDatabase*, const std::string& name, int count);
+    virtual void ibppEventHandler(IBPP::IDatabase*, const std::string& name, 
+        int count);
 protected:
     virtual const wxString getName() const;
 public:
-    EventWatcherFrame(wxWindow *parent, Database *db);
+    EventWatcherFrame(wxWindow* parent, Database* db);
+
     void removeSubject(Subject* subject);
     void update();
 
+    static EventWatcherFrame* findFrameFor(Database* db);
 private:
     // event handling
     enum

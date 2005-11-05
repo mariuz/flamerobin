@@ -44,9 +44,18 @@
 #include "framemanager.h"
 #include "gui/BaseFrame.h"
 //-----------------------------------------------------------------------------
-BaseFrame::BaseFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style, const wxString& name):
-    wxFrame(parent, id, title, pos, size, style|wxNO_FULL_REPAINT_ON_RESIZE, name)
+BaseFrame::FrameIdMap BaseFrame::frameIdsM;
+//-----------------------------------------------------------------------------
+BaseFrame::BaseFrame(wxWindow* parent, int id, const wxString& title, 
+        const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+    : wxFrame(parent, id, title, pos, size, style | wxNO_FULL_REPAINT_ON_RESIZE, name)
 {
+    frameIdsM.insert(FrameIdPair(this, wxEmptyString));
+}
+//-----------------------------------------------------------------------------
+BaseFrame::~BaseFrame()
+{
+    frameIdsM.erase(this);
 }
 //-----------------------------------------------------------------------------
 bool BaseFrame::Show(bool show)
@@ -54,10 +63,6 @@ bool BaseFrame::Show(bool show)
     if (show && !IsShown())
          readConfigSettings();
     return wxFrame::Show(show);
-}
-//-----------------------------------------------------------------------------
-BaseFrame::~BaseFrame()
-{
 }
 //-----------------------------------------------------------------------------
 bool BaseFrame::Destroy()
@@ -158,6 +163,27 @@ const wxString BaseFrame::getStorageName() const
 const wxRect BaseFrame::getDefaultRect() const
 {
     return wxRect(-1, -1, -1, -1);
+}
+//-----------------------------------------------------------------------------
+void BaseFrame::setIdString(BaseFrame* frame, const wxString& id)
+{
+    FrameIdMap::iterator it = frameIdsM.find(frame);
+    if (it != frameIdsM.end())
+        (*it).second = id;
+}
+//-----------------------------------------------------------------------------
+BaseFrame* BaseFrame::frameFromIdString(const wxString& id)
+{
+    if (!id.IsEmpty())
+    {
+        FrameIdMap::iterator it;
+        for (it = frameIdsM.begin(); it != frameIdsM.end(); it++)
+        {
+            if ((*it).second == id)
+                return (*it).first;
+        }
+    }
+    return 0;
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(BaseFrame, wxFrame)

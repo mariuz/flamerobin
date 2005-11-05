@@ -82,6 +82,7 @@ EventWatcherFrame::EventWatcherFrame(wxWindow *parent, Database *db)
 {
     monitoringM = false;
     timerM.SetOwner(this, ID_timer);
+    setIdString(this, getFrameId(db));
     db->attachObserver(this);    // observe database object
     SetTitle(wxString::Format(_("Event Monitor for Database: %s"),
         db->getName().c_str()));
@@ -235,6 +236,22 @@ void EventWatcherFrame::update()
 const wxString EventWatcherFrame::getName() const
 {
     return wxT("EventWatcherFrame");
+}
+//-----------------------------------------------------------------------------
+wxString EventWatcherFrame::getFrameId(Database* db)
+{
+    if (db)
+        return wxString(wxT("EventWatcherFrame/") + db->getItemPath());
+    else
+        return wxEmptyString;
+}
+//-----------------------------------------------------------------------------
+EventWatcherFrame* EventWatcherFrame::findFrameFor(Database* db)
+{
+    BaseFrame* bf = frameFromIdString(getFrameId(db));
+    if (!bf)
+        return 0;
+    return dynamic_cast<EventWatcherFrame*>(bf);
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(EventWatcherFrame, wxFrame)
