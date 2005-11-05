@@ -36,7 +36,7 @@
     #include "wx/wx.h"
 #endif
 
-// #define TEST_FIELDPROPERTIESDIALOG
+#define TEST_FIELDPROPERTIESDIALOG
 
 #include <wx/progdlg.h>
 
