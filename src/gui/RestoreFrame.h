@@ -35,20 +35,7 @@ class RestoreThread;
 //-----------------------------------------------------------------------------
 class RestoreFrame: public BackupRestoreBaseFrame {
     friend class RestoreThread;
-public:
-    // events
-    void OnBrowseButtonClick(wxCommandEvent& event);
-    void OnStartButtonClick(wxCommandEvent& event);
-
-    RestoreFrame(wxWindow* parent, Database* db);
 private:
-    void layoutControls();
-    virtual void updateControls();
-protected:
-    virtual void doReadConfigSettings(const wxString& prefix);
-    virtual void doWriteConfigSettings(const wxString& prefix) const;
-    virtual const wxString getName() const;
-protected:
     wxCheckBox* checkbox_replace;
     wxCheckBox* checkbox_deactivate;
     wxCheckBox* checkbox_noshadow;
@@ -57,6 +44,24 @@ protected:
     wxCheckBox* checkbox_space;
     wxStaticText* label_pagesize;
     wxChoice* choice_pagesize;
+    void createControls();
+    void layoutControls();
+    virtual void updateControls();
+
+    static wxString getFrameId(Database* db);
+protected:
+    virtual void doReadConfigSettings(const wxString& prefix);
+    virtual void doWriteConfigSettings(const wxString& prefix) const;
+    virtual const wxString getName() const;
+public:
+    RestoreFrame(wxWindow* parent, Database* db);
+
+    static RestoreFrame* findFrameFor(Database* db);
+private:
+    // event handling
+    void OnBrowseButtonClick(wxCommandEvent& event);
+    void OnStartButtonClick(wxCommandEvent& event);
+
     DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------

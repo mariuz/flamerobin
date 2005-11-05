@@ -174,14 +174,24 @@ void BackupThread::logProgress(wxString& msg)
         frameM->threadOutputMsg(msg, BackupRestoreBaseFrame::progress_message);
 }
 //-----------------------------------------------------------------------------
-BackupFrame::BackupFrame(wxWindow* parent, Database* db):
-    BackupRestoreBaseFrame(parent, db)
+BackupFrame::BackupFrame(wxWindow* parent, Database* db)
+    : BackupRestoreBaseFrame(parent, db)
 {
+    setIdString(this, getFrameId(db));
+
     wxString s;
     s.Printf(_("Backup Database \"%s:%s\""),
         serverM->getName().c_str(), databaseM->getName().c_str());
     SetTitle(s);
 
+    createControls();
+    layoutControls();
+    updateControls();
+}
+//-----------------------------------------------------------------------------
+//! implementation details
+void BackupFrame::createControls()
+{
     panel_controls = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize,
         wxTAB_TRAVERSAL | wxCLIP_CHILDREN | wxNO_FULL_REPAINT_ON_RESIZE);
     label_filename = new wxStaticText(panel_controls, -1, _("Backup file:"));
@@ -208,57 +218,6 @@ BackupFrame::BackupFrame(wxWindow* parent, Database* db):
     button_start = new wxButton(panel_controls, ID_button_start, _("Backup"));
 
     text_ctrl_log = new LogTextControl(this, ID_text_ctrl_log);
-
-    layoutControls();
-    updateControls();
-}
-//-----------------------------------------------------------------------------
-//! implementation details
-void BackupFrame::doReadConfigSettings(const wxString& prefix)
-{
-    BackupRestoreBaseFrame::doReadConfigSettings(prefix);
-    std::vector<wxString> flags;
-    config().getValue(prefix + Config::pathSeparator + wxT("options"), flags);
-    if (!flags.empty())
-    {
-        checkbox_checksum->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), wxT("ignore_checksums")));
-        checkbox_limbo->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), wxT("ignore_limbo")));
-        checkbox_metadata->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), wxT("metadata_only")));
-        checkbox_garbage->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), wxT("no_garbage_collect")));
-        checkbox_transport->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), wxT("no_transportable")));
-        checkbox_extern->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), wxT("external_tables")));
-    }
-    updateControls();
-}
-//-----------------------------------------------------------------------------
-void BackupFrame::doWriteConfigSettings(const wxString& prefix) const
-{
-    BackupRestoreBaseFrame::doWriteConfigSettings(prefix);
-    std::vector<wxString> flags;
-    if (checkbox_checksum->IsChecked())
-        flags.push_back(wxT("ignore_checksums"));
-    if (checkbox_limbo->IsChecked())
-        flags.push_back(wxT("ignore_limbo"));
-    if (checkbox_metadata->IsChecked())
-        flags.push_back(wxT("metadata_only"));
-    if (checkbox_garbage->IsChecked())
-        flags.push_back(wxT("no_garbage_collect"));
-    if (checkbox_transport->IsChecked())
-        flags.push_back(wxT("no_transportable"));
-    if (checkbox_extern->IsChecked())
-        flags.push_back(wxT("external_tables"));
-    config().setValue(prefix + Config::pathSeparator + wxT("options"), flags);
-}
-//-----------------------------------------------------------------------------
-const wxString BackupFrame::getName() const
-{
-    return wxT("BackupFrame");
 }
 //-----------------------------------------------------------------------------
 void BackupFrame::layoutControls()
@@ -326,6 +285,69 @@ void BackupFrame::updateControls()
     button_start->Enable(!running && !text_ctrl_filename->GetValue().empty());
 }
 //-----------------------------------------------------------------------------
+void BackupFrame::doReadConfigSettings(const wxString& prefix)
+{
+    BackupRestoreBaseFrame::doReadConfigSettings(prefix);
+    std::vector<wxString> flags;
+    config().getValue(prefix + Config::pathSeparator + wxT("options"), flags);
+    if (!flags.empty())
+    {
+        checkbox_checksum->SetValue(
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("ignore_checksums")));
+        checkbox_limbo->SetValue(
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("ignore_limbo")));
+        checkbox_metadata->SetValue(
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("metadata_only")));
+        checkbox_garbage->SetValue(
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("no_garbage_collect")));
+        checkbox_transport->SetValue(
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("no_transportable")));
+        checkbox_extern->SetValue(
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("external_tables")));
+    }
+    updateControls();
+}
+//-----------------------------------------------------------------------------
+void BackupFrame::doWriteConfigSettings(const wxString& prefix) const
+{
+    BackupRestoreBaseFrame::doWriteConfigSettings(prefix);
+    std::vector<wxString> flags;
+    if (checkbox_checksum->IsChecked())
+        flags.push_back(wxT("ignore_checksums"));
+    if (checkbox_limbo->IsChecked())
+        flags.push_back(wxT("ignore_limbo"));
+    if (checkbox_metadata->IsChecked())
+        flags.push_back(wxT("metadata_only"));
+    if (checkbox_garbage->IsChecked())
+        flags.push_back(wxT("no_garbage_collect"));
+    if (checkbox_transport->IsChecked())
+        flags.push_back(wxT("no_transportable"));
+    if (checkbox_extern->IsChecked())
+        flags.push_back(wxT("external_tables"));
+    config().setValue(prefix + Config::pathSeparator + wxT("options"), flags);
+}
+//-----------------------------------------------------------------------------
+const wxString BackupFrame::getName() const
+{
+    return wxT("BackupFrame");
+}
+//-----------------------------------------------------------------------------
+wxString BackupFrame::getFrameId(Database* db)
+{
+    if (db)
+        return wxString(wxT("BackupFrame/") + db->getItemPath());
+    else
+        return wxEmptyString;
+}
+//-----------------------------------------------------------------------------
+BackupFrame* BackupFrame::findFrameFor(Database* db)
+{
+    BaseFrame* bf = frameFromIdString(getFrameId(db));
+    if (!bf)
+        return 0;
+    return dynamic_cast<BackupFrame*>(bf);
+}
+//-----------------------------------------------------------------------------
 //! event handlers
 BEGIN_EVENT_TABLE(BackupFrame, BackupRestoreBaseFrame)
     EVT_BUTTON(BackupRestoreBaseFrame::ID_button_browse, BackupFrame::OnBrowseButtonClick)
@@ -335,8 +357,8 @@ END_EVENT_TABLE()
 void BackupFrame::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxString filename = ::wxFileSelector(_("Select Backup File"), wxT(""),
-                        wxT(""), wxT(""), _("All files (*.*)|*.*"),
-                        wxSAVE|wxOVERWRITE_PROMPT, this);
+        wxT(""), wxT(""), _("All files (*.*)|*.*"), 
+        wxSAVE | wxOVERWRITE_PROMPT, this);
     if (!filename.empty())
         text_ctrl_filename->SetValue(filename);
 }

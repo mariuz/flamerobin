@@ -35,26 +35,31 @@ class BackupThread;
 //-----------------------------------------------------------------------------
 class BackupFrame: public BackupRestoreBaseFrame {
     friend class BackupThread;
-public:
-    // events
-    void OnBrowseButtonClick(wxCommandEvent& event);
-    void OnStartButtonClick(wxCommandEvent& event);
-
-    BackupFrame(wxWindow* parent, Database* db);
 private:
-    void layoutControls();
-    virtual void updateControls();
-protected:
-    virtual void doReadConfigSettings(const wxString& prefix);
-    virtual void doWriteConfigSettings(const wxString& prefix) const;
-    virtual const wxString getName() const;
-protected:
     wxCheckBox* checkbox_checksum;
     wxCheckBox* checkbox_limbo;
     wxCheckBox* checkbox_metadata;
     wxCheckBox* checkbox_garbage;
     wxCheckBox* checkbox_transport;
     wxCheckBox* checkbox_extern;
+    void createControls();
+    void layoutControls();
+    virtual void updateControls();
+
+    static wxString getFrameId(Database* db);
+protected:
+    virtual void doReadConfigSettings(const wxString& prefix);
+    virtual void doWriteConfigSettings(const wxString& prefix) const;
+    virtual const wxString getName() const;
+public:
+    BackupFrame(wxWindow* parent, Database* db);
+
+    static BackupFrame* findFrameFor(Database* db);
+private:
+    // event handling
+    void OnBrowseButtonClick(wxCommandEvent& event);
+    void OnStartButtonClick(wxCommandEvent& event);
+
     DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------

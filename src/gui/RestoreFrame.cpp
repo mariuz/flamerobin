@@ -177,14 +177,24 @@ void RestoreThread::logProgress(wxString& msg)
         frameM->threadOutputMsg(msg, BackupRestoreBaseFrame::progress_message);
 }
 //-----------------------------------------------------------------------------
-RestoreFrame::RestoreFrame(wxWindow* parent, Database* db):
-    BackupRestoreBaseFrame(parent, db)
+RestoreFrame::RestoreFrame(wxWindow* parent, Database* db)
+    : BackupRestoreBaseFrame(parent, db)
 {
+    setIdString(this, getFrameId(db));
+
     wxString s;
     s.Printf(_("Restore Database \"%s:%s\""),
         serverM->getName().c_str(), databaseM->getName().c_str());
     SetTitle(s);
 
+    createControls();
+    layoutControls();
+    updateControls();
+}
+//-----------------------------------------------------------------------------
+//! implementation details
+void RestoreFrame::createControls()
+{
     panel_controls = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize,
         wxTAB_TRAVERSAL | wxCLIP_CHILDREN | wxNO_FULL_REPAINT_ON_RESIZE);
     label_filename = new wxStaticText(panel_controls, -1, _("Backup file:"));
@@ -212,68 +222,6 @@ RestoreFrame::RestoreFrame(wxWindow* parent, Database* db):
     button_start = new wxButton(panel_controls, ID_button_start, _("Restore"));
 
     text_ctrl_log = new LogTextControl(this, ID_text_ctrl_log);
-
-    layoutControls();
-    updateControls();
-}
-//-----------------------------------------------------------------------------
-void RestoreFrame::doReadConfigSettings(const wxString& prefix)
-{
-    BackupRestoreBaseFrame::doReadConfigSettings(prefix);
-
-    wxString pagesize;
-    config().getValue(prefix + Config::pathSeparator + wxT("pagesize"), pagesize);
-    int selindex = -1;
-    if (!pagesize.empty())
-        selindex = choice_pagesize->FindString(pagesize);
-    // select default pagesize of 1024 if invalid selindex
-    choice_pagesize->SetSelection(selindex >= 0 ? selindex : 0);
-
-    std::vector<wxString> flags;
-    config().getValue(prefix + Config::pathSeparator + wxT("options"), flags);
-    if (!flags.empty())
-    {
-        checkbox_replace->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), wxT("replace")));
-        checkbox_deactivate->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), wxT("deactivate_indices")));
-        checkbox_noshadow->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), wxT("no_shadow")));
-        checkbox_validity->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), wxT("no_constraints")));
-        checkbox_commit->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), wxT("commit_per_table")));
-        checkbox_space->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), wxT("use_all_space")));
-    }
-    updateControls();
-}
-//-----------------------------------------------------------------------------
-void RestoreFrame::doWriteConfigSettings(const wxString& prefix) const
-{
-    BackupRestoreBaseFrame::doWriteConfigSettings(prefix);
-    config().setValue(prefix + Config::pathSeparator + wxT("pagesize"),
-        choice_pagesize->GetStringSelection());
-
-    std::vector<wxString> flags;
-    if (checkbox_replace->IsChecked())
-        flags.push_back(wxT("replace"));
-    if (checkbox_deactivate->IsChecked())
-        flags.push_back(wxT("deactivate_indices"));
-    if (checkbox_noshadow->IsChecked())
-        flags.push_back(wxT("no_shadow"));
-    if (checkbox_validity->IsChecked())
-        flags.push_back(wxT("no_constraints"));
-    if (checkbox_commit->IsChecked())
-        flags.push_back(wxT("commit_per_table"));
-    if (checkbox_space->IsChecked())
-        flags.push_back(wxT("use_all_space"));
-    config().setValue(prefix + Config::pathSeparator + wxT("options"), flags);
-}
-//-----------------------------------------------------------------------------
-const wxString RestoreFrame::getName() const
-{
-    return wxT("RestoreFrame");
 }
 //-----------------------------------------------------------------------------
 void RestoreFrame::layoutControls()
@@ -353,6 +301,81 @@ void RestoreFrame::updateControls()
     checkbox_space->Enable(!running);
     choice_pagesize->Enable(!running);
     button_start->Enable(!running && !text_ctrl_filename->GetValue().empty());
+}
+//-----------------------------------------------------------------------------
+void RestoreFrame::doReadConfigSettings(const wxString& prefix)
+{
+    BackupRestoreBaseFrame::doReadConfigSettings(prefix);
+
+    wxString pagesize;
+    config().getValue(prefix + Config::pathSeparator + wxT("pagesize"), pagesize);
+    int selindex = -1;
+    if (!pagesize.empty())
+        selindex = choice_pagesize->FindString(pagesize);
+    // select default pagesize of 1024 if invalid selindex
+    choice_pagesize->SetSelection(selindex >= 0 ? selindex : 0);
+
+    std::vector<wxString> flags;
+    config().getValue(prefix + Config::pathSeparator + wxT("options"), flags);
+    if (!flags.empty())
+    {
+        checkbox_replace->SetValue(
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("replace")));
+        checkbox_deactivate->SetValue(
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("deactivate_indices")));
+        checkbox_noshadow->SetValue(
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("no_shadow")));
+        checkbox_validity->SetValue(
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("no_constraints")));
+        checkbox_commit->SetValue(
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("commit_per_table")));
+        checkbox_space->SetValue(
+            flags.end() != std::find(flags.begin(), flags.end(), wxT("use_all_space")));
+    }
+    updateControls();
+}
+//-----------------------------------------------------------------------------
+void RestoreFrame::doWriteConfigSettings(const wxString& prefix) const
+{
+    BackupRestoreBaseFrame::doWriteConfigSettings(prefix);
+    config().setValue(prefix + Config::pathSeparator + wxT("pagesize"),
+        choice_pagesize->GetStringSelection());
+
+    std::vector<wxString> flags;
+    if (checkbox_replace->IsChecked())
+        flags.push_back(wxT("replace"));
+    if (checkbox_deactivate->IsChecked())
+        flags.push_back(wxT("deactivate_indices"));
+    if (checkbox_noshadow->IsChecked())
+        flags.push_back(wxT("no_shadow"));
+    if (checkbox_validity->IsChecked())
+        flags.push_back(wxT("no_constraints"));
+    if (checkbox_commit->IsChecked())
+        flags.push_back(wxT("commit_per_table"));
+    if (checkbox_space->IsChecked())
+        flags.push_back(wxT("use_all_space"));
+    config().setValue(prefix + Config::pathSeparator + wxT("options"), flags);
+}
+//-----------------------------------------------------------------------------
+const wxString RestoreFrame::getName() const
+{
+    return wxT("RestoreFrame");
+}
+//-----------------------------------------------------------------------------
+wxString RestoreFrame::getFrameId(Database* db)
+{
+    if (db)
+        return wxString(wxT("RestoreFrame/") + db->getItemPath());
+    else
+        return wxEmptyString;
+}
+//-----------------------------------------------------------------------------
+RestoreFrame* RestoreFrame::findFrameFor(Database* db)
+{
+    BaseFrame* bf = frameFromIdString(getFrameId(db));
+    if (!bf)
+        return 0;
+    return dynamic_cast<RestoreFrame*>(bf);
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(RestoreFrame, BackupRestoreBaseFrame)
