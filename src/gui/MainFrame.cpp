@@ -951,12 +951,18 @@ void MainFrame::OnMenuMonitorEvents(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
-    Database* d = tree_ctrl_1->getSelectedDatabase();
-    if (!checkValidDatabase(d))
+    Database* db = tree_ctrl_1->getSelectedDatabase();
+    if (!checkValidDatabase(db))
         return;
 
-    EventWatcherFrame *f = new EventWatcherFrame(this, d);
-    f->Show();
+    EventWatcherFrame* ewf = EventWatcherFrame::findFrameFor(db);
+    if (ewf)
+    {
+        ewf->Raise();
+        return;
+    }
+    ewf = new EventWatcherFrame(this, db);
+    ewf->Show();
 
     FR_CATCH
 }
@@ -965,12 +971,18 @@ void MainFrame::OnMenuBackup(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
-    Database* d = tree_ctrl_1->getSelectedDatabase();
-    if (!checkValidDatabase(d))
+    Database* db = tree_ctrl_1->getSelectedDatabase();
+    if (!checkValidDatabase(db))
         return;
 
-    BackupFrame* f = new BackupFrame(this, d);
-    f->Show();
+    BackupFrame* bf = BackupFrame::findFrameFor(db);
+    if (bf)
+    {
+        bf->Raise();
+        return;
+    }
+    bf = new BackupFrame(this, db);
+    bf->Show();
 
     FR_CATCH
 }
@@ -979,12 +991,18 @@ void MainFrame::OnMenuRestore(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
-    Database* d = tree_ctrl_1->getSelectedDatabase();
-    if (!checkValidDatabase(d))
+    Database* db = tree_ctrl_1->getSelectedDatabase();
+    if (!checkValidDatabase(db))
         return;
 
-    RestoreFrame* f = new RestoreFrame(this, d);
-    f->Show();
+    RestoreFrame* rf = RestoreFrame::findFrameFor(db);
+    if (rf)
+    {
+        rf->Raise();
+        return;
+    }
+    rf = new RestoreFrame(this, db);
+    rf->Show();
 
     FR_CATCH
 }
