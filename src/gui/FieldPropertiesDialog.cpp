@@ -271,6 +271,8 @@ bool FieldPropertiesDialog::getIsNewDomainSelected()
     return choice_domain->GetSelection() == 0;
 }
 //-----------------------------------------------------------------------------
+// UDD = user defined domain
+// AGD = auto generated domain (those starting with RDB$)
 bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
 {
     wxString fieldName = textctrl_fieldname->GetValue();
@@ -295,12 +297,12 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
     sql = wxEmptyString;
 
     // detect changes to existing field, create appropriate SQL actions
-    if (columnM)         
+    if (columnM)
     {
         // field name changed ?
         if (columnM->getName() != fieldName)
         {
-            sql += alterTable + wxT("ALTER ") + columnM->getName() 
+            sql += alterTable + wxT("ALTER ") + columnM->getName()
                 + wxT(" TO ") + fieldName + wxT(";\n\n");
         }
 
@@ -308,18 +310,18 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
         wxString type, size, scale, charset;
         if (!getDomainInfo(columnM->getSource(), type, size, scale, charset))
         {
-            ::wxMessageBox(_("Can not get domain info - aborting."), 
+            ::wxMessageBox(_("Can not get domain info - aborting."),
                 _("Error"), wxOK | wxICON_ERROR);
             return false;
         }
-        if (columnM->getSource() != selDomain && newDomain)
-        {
+        if (columnM->getSource() != selDomain && !newDomain)
+        {   // UDD -> other UDD  or  AGD -> UDD
             sql += alterTable + wxT("ALTER ") + fieldName +
                 wxT(" TYPE ") + selDomain + wxT(";\n\n");
         }
         else if (newDomain
             || type != selDatatype || size != dtSize || scale != dtScale)
-        {
+        {   // UDD -> AGD  or  AGD -> different AGD
             sql += alterTable + wxT("ALTER ") + fieldName +
                 wxT(" TYPE ");
             sql += selDatatype;
@@ -345,7 +347,7 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
             else
                 sql += wxT("1");
             sql += wxT("\nWHERE RDB$FIELD_NAME = '") + fieldName
-                + wxT("' AND RDB$RELATION_NAME = '") + tableM->getName() 
+                + wxT("' AND RDB$RELATION_NAME = '") + tableM->getName()
                 + wxT("';\n\n");
         }
     }
@@ -379,8 +381,8 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
         wxString s = ::wxGetTextFromUser(
             _("Enter value for existing fields containing NULL"),
             _("Update Existing NULL Values"), wxT(""), this);
-        wxString sqlAdd = wxT("UPDATE ") + tableM->getName() 
-            + wxT(" \nSET ") + fieldName + wxT(" = '") + s 
+        wxString sqlAdd = wxT("UPDATE ") + tableM->getName()
+            + wxT(" \nSET ") + fieldName + wxT(" = '") + s
             + wxT("' \nWHERE ") + fieldName + wxT(" IS NULL;\n");
         if (update_not_null == unnBefore)
             sql = sqlAdd + sql;
