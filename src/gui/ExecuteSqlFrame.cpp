@@ -690,7 +690,7 @@ void ExecuteSqlFrame::OnSqlEditUpdateUI(wxStyledTextEvent& WXUNUSED(event))
     else
         styled_text_ctrl_sql->BraceBadLight(wxSTC_INVALID_POSITION);    // remove light
 
-    if (styled_text_ctrl_sql->GetTextLength() > 5)
+    if (styled_text_ctrl_sql->GetTextLength() > 0)
     {
         for (int i=0; i<styled_text_ctrl_sql->GetLineCount(); ++i)
         {
@@ -702,6 +702,8 @@ void ExecuteSqlFrame::OnSqlEditUpdateUI(wxStyledTextEvent& WXUNUSED(event))
             }
         }
     }
+    else
+        SetTitle(_("Execute SQL statements"));
 }
 //-----------------------------------------------------------------------------
 //! returns true if there is a word in "wordlist" that starts with "word"
