@@ -40,10 +40,10 @@
 #include "gui/MultilineEnterDialog.h"
 #include "styleguide.h"
 //-----------------------------------------------------------------------------
-bool GetMultilineTextFromUser(const wxString& caption, wxString& value, 
-    wxWindow* parent)
+bool GetMultilineTextFromUser(const wxString& title, wxString& value,
+    wxWindow* parent, const wxString& caption)
 {
-    MultilineEnterDialog med(parent, caption);
+    MultilineEnterDialog med(parent, title, caption);
     med.setText(value);
     if (wxID_OK != med.ShowModal())
         return false;
@@ -51,11 +51,15 @@ bool GetMultilineTextFromUser(const wxString& caption, wxString& value,
     return true;
 }
 //-----------------------------------------------------------------------------
-MultilineEnterDialog::MultilineEnterDialog(wxWindow* parent, 
-        const wxString& title)
+MultilineEnterDialog::MultilineEnterDialog(wxWindow* parent,
+        const wxString& title, const wxString& caption)
     : BaseDialog(parent, wxID_ANY, title)
 {
-	text_ctrl_value = new TextControl(getControlsPanel());
+    if (!caption.IsEmpty())
+        static_caption = new wxStaticText(getControlsPanel(), -1, caption);
+    else
+        static_caption = 0;
+    text_ctrl_value = new TextControl(getControlsPanel());
     button_ok = new wxButton(getControlsPanel(), wxID_OK, _("Save"));
     button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
     layoutControls();
@@ -79,11 +83,16 @@ const wxString MultilineEnterDialog::getName() const
 //-----------------------------------------------------------------------------
 void MultilineEnterDialog::layoutControls()
 {
-    wxBoxSizer* sizerControls = new wxBoxSizer(wxHORIZONTAL);
+    wxBoxSizer* sizerControls = new wxBoxSizer(wxVERTICAL);
+    if (static_caption)
+    {
+        sizerControls->Add(static_caption, 0, wxEXPAND);
+        sizerControls->AddSpacer(styleguide().getControlLabelMargin());
+    }
     text_ctrl_value->SetSizeHints(200, 100);
     text_ctrl_value->SetSize(200, 100);
     sizerControls->Add(text_ctrl_value, 1, wxEXPAND);
-    wxSizer* sizerButtons = styleguide().createButtonSizer(button_ok, 
+    wxSizer* sizerButtons = styleguide().createButtonSizer(button_ok,
         button_cancel);
     layoutSizers(sizerControls, sizerButtons, true);
 }

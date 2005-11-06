@@ -33,22 +33,24 @@
 
 class TextControl;
 //-----------------------------------------------------------------------------
-bool GetMultilineTextFromUser(const wxString& caption, wxString& value, 
-    wxWindow* parent = 0);
+bool GetMultilineTextFromUser(const wxString& title, wxString& value,
+    wxWindow* parent = 0, const wxString& caption = wxEmptyString);
 //-----------------------------------------------------------------------------
 //! normally you shouldn't need to create objects of this class, just use
 //  the GetMultilineTextFromUser() function
 class MultilineEnterDialog: public BaseDialog {
 private:
     TextControl* text_ctrl_value;
+    wxStaticText* static_caption;
     wxButton* button_ok;
     wxButton* button_cancel;
     void layoutControls();
 protected:
     virtual const wxString getName() const;
 public:
-    MultilineEnterDialog(wxWindow* parent, const wxString& title);
-        
+    MultilineEnterDialog(wxWindow* parent, const wxString& title,
+        const wxString& caption = wxEmptyString);
+
     wxString getText() const;
     void setText(const wxString& text);
 };
