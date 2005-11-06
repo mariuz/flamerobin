@@ -229,7 +229,7 @@
                 <default>1</default>
                 <enables>
                     <setting type="int">
-                        <caption>Don't store buffers bigger than [VALUE] characters</caption>
+                        <caption>Don't store buffers bigger than [VALUE] kilobytes</caption>
                         <key>statementHistoryItemSize</key>
                         <minvalue>0</minvalue>
                         <maxvalue>10000</maxvalue>
