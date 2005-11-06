@@ -36,8 +36,6 @@
     #include "wx/wx.h"
 #endif
 
-#define TEST_FIELDPROPERTIESDIALOG
-
 #include <wx/progdlg.h>
 
 #include "config/Config.h"
@@ -49,11 +47,7 @@
 #include "gui/DatabaseRegistrationDialog.h"
 #include "gui/EventWatcherFrame.h"
 #include "gui/ExecuteSqlFrame.h"
-#ifdef TEST_FIELDPROPERTIESDIALOG
-    #include "gui/FieldPropertiesDialog.h"
-#else
-    #include "gui/FieldPropertiesFrame.h"
-#endif
+#include "gui/FieldPropertiesDialog.h"
 #include "gui/MainFrame.h"
 #include "gui/PreferencesDialog.h"
 #include "gui/RestoreFrame.h"
@@ -1356,15 +1350,8 @@ void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))
     if (!t)
         return;
 
-#ifdef TEST_FIELDPROPERTIESDIALOG
     FieldPropertiesDialog fpd(this, t);
     fpd.ShowModal();
-#else
-    FieldPropertiesFrame* f = new FieldPropertiesFrame(this, -1,
-        wxString::Format(_("TABLE: %s"), t->getName().c_str()), t);
-    f->setProperties();
-    f->Show();
-#endif
 
     FR_CATCH
 }
@@ -1410,15 +1397,8 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
         if (!t)     // dummy check
             return;
 
-#ifdef TEST_FIELDPROPERTIESDIALOG
         FieldPropertiesDialog fpd(this, t, c);
         fpd.ShowModal();
-#else
-        FieldPropertiesFrame* f = new FieldPropertiesFrame(this, -1,
-            wxEmptyString, t);
-        f->setField(c);
-        f->Show();
-#endif
     }
     else
         frameManager().showMetadataPropertyFrame(this, m);
