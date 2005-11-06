@@ -26,8 +26,10 @@
 #ifndef FR_ROOT_H
 #define FR_ROOT_H
 //-----------------------------------------------------------------------------
-#include "metadataitem.h"
-#include "server.h"
+#include "metadata/metadataitem.h"
+#include "metadata/server.h"
+
+class wxXmlNode;
 //-----------------------------------------------------------------------------
 class Root: public MetadataItem
 {
@@ -38,11 +40,14 @@ private:
     bool dirtyM;
     bool loadingM;
     unsigned int nextIdM;
+
+    bool parseDatabase(Server* server, wxXmlNode* xmln);
+    bool parseServer(wxXmlNode* xmln);
 public:
     Root();
     ~Root();
 
-    Server *addServer(Server& server);
+    Server* addServer(Server& server);
     void removeServer(Server* server);
 
     virtual bool getChildren(std::vector<MetadataItem*>& temp);

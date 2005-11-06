@@ -38,6 +38,8 @@
 
 #include <wx/filefn.h>
 #include <wx/filename.h>
+#include <wx/wfstream.h>
+#include <wx/xml/xml.h>
 
 #include <fstream>
 #include <sstream>
@@ -58,6 +60,19 @@ Root& getGlobalRoot()
     return globalRoot;
 }
 //-----------------------------------------------------------------------------
+static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
+{
+    for (wxXmlNode* n = node->GetChildren(); (n); n = n->GetNext())
+    {
+        if (n->GetType() == wxXML_TEXT_NODE
+            || n->GetType() == wxXML_CDATA_SECTION_NODE)
+        {
+            return n->GetContent();
+        }
+    }
+    return defvalue;
+}
+//-----------------------------------------------------------------------------
 Root::Root()
     : MetadataItem(), fileNameM(wxT("")), dirtyM(false), loadingM(false), nextIdM(1)
 {
@@ -67,9 +82,13 @@ Root::Root()
 //-----------------------------------------------------------------------------
 void Root::disconnectAllDatabases()
 {
-    for (std::list<Server>::iterator it = serversM.begin(); it != serversM.end(); ++it)
-        for (std::list<Database>::iterator it2 = it->getDatabases()->begin(); it2 != it->getDatabases()->end(); ++it2)
-            it2->disconnect();
+    std::list<Server>::iterator its;
+    for (its = serversM.begin(); its != serversM.end(); ++its)
+    {
+        std::list<Database>::iterator itdb;
+        for (itdb = its->getDatabases()->begin(); itdb != its->getDatabases()->end(); ++itdb)
+            itdb->disconnect();
+    }
 }
 //-----------------------------------------------------------------------------
 Root::~Root()
@@ -78,149 +97,120 @@ Root::~Root()
         save();
 }
 //-----------------------------------------------------------------------------
-//! loads servers.xml file and:
+//! loads fr_databases.conf file and:
 //! creates server nodes, fills their properties
 //! creates database nodes for server nodes, fills their properties
 //! returns: false if file cannot be loaded, true otherwise
 //
 bool Root::load()
 {
-    wxString s;
-
+    wxXmlDocument doc;
     wxFileName fileName = getFileName();
     if (fileName.FileExists())
     {
-        ifstream file(wx2std(fileName.GetFullPath()).c_str());
-        if (file)
-        {
-            // I had to do it this way, since standard line << file, doesn't
-            // work good if data has spaces in it.
-            stringstream ss;         
-            // read entire file into wxString buffer
-            ss << file.rdbuf();
-            s = std2wx(ss.str());
-        }
+        wxFileInputStream stream(fileName.GetFullPath());
+        if (stream.Ok())
+            doc.Load(stream);
     }
-    if (s.IsEmpty())
+    if (!doc.IsOk())
         return false;
 
-    // make sure that save() isn't called via addServer() or addDatabase()
+    wxXmlNode* xmlr = doc.GetRoot();
+    if (xmlr->GetName() != wxT("root"))
+        return false;
+
     loadingM = true;
-
-    // These have to be pointers since when they get pushed to vector, they relocate
-    // so in order to set the right Parent for database objects, we need to know its exact
-    // address (that's returned by function add()).
-    // Also, we want ctor to be called for every object in vector
-    Server *server = NULL;            // current server
-    Database *database = NULL;        // current db
-
-    // skip xml encoding
-    wxString::size_type t = s.find('\n');
-    wxString line = s.substr(0, t);
-    s.erase(0, t);
-
-    while (true)
+    for (wxXmlNode* xmln = doc.GetRoot()->GetChildren();
+        (xmln); xmln = xmln->GetNext())
     {
-        wxString::size_type t = s.find('\n');
-        if (t == wxString::npos)
-            break;
-
-        wxString line = s.substr(0, t);
-        s.erase(0, t + 1);
-
-        wxString::size_type start = line.find('<');
-        if (start == wxString::npos)
+        if (xmln->GetType() != wxXML_ELEMENT_NODE)
             continue;
-
-        wxString::size_type end = line.find('>');
-        if (end == wxString::npos)
-            continue;
-
-        wxString::size_type start2 = line.find(wxT("</"));
-        wxString option = line.substr(start + 1, end - start - 1);
-        wxString value;
-        if (start2 != wxString::npos && start2 - end - 1 > 0)
-            value = line.substr(end + 1, start2 - end - 1);
-
-        // root tags
-        if (option == wxT("nextId"))
+        if (xmln->GetName() == wxT("server"))
+            parseServer(xmln);
+        if (xmln->GetName() == wxT("nextId"))
         {
-            unsigned long longNextId;
-            value.ToULong(&longNextId);
-            nextIdM = longNextId;
+            wxString value(getNodeContent(xmln, wxEmptyString));
+            unsigned long l;
+            if (!value.IsEmpty() && value.ToULong(&l))
+                nextIdM = l;
         }
-
-        // server start and end tags
-        if (option == wxT("server"))
-        {
-            Server temp;
-            server = addServer(temp);
-            server->lockSubject();
-        }
-        if (option == wxT("/server") && server)
-        {
-            // backward compatibility with FR < 0.3.0
-            if (server->getName().empty())
-                server->setName(server->getConnectionString());
-            server->unlockSubject();
-            server = 0;
-        }
-
-        // database start and end tag
-        if (option == wxT("database") && server)
-        {
-            Database temp;
-            database = server->addDatabase(temp);
-        }
-        if (option == wxT("/database") && database)
-        {
-            // make sure the database has an Id before Root::save() is called,
-            // otherwise a new Id will be generated then, but the generator value
-            // will not be stored because it's at the beginning of the file.
-            database->getId();
-            // backward compatibility with FR < 0.3.0
-            if (database->getName().empty())
-                database->setName(database->extractNameFromConnectionString());
-            database = 0;
-        }
-
-        // common subtags
-        if (option == wxT("name") && server)
-        {
-            if (database)
-                database->setName(value);
-            else
-                server->setName(value);
-        }
-
-        // database-specific subtags
-        if (option == wxT("id") && database)
-        {
-            long id;
-            value.ToLong(&id);
-            database->setId(id);
-        }
-
-        // server-specific subtags
-        if (option == wxT("host") && server)
-            server->setHostname(value);
-        if (option == wxT("port") && server)
-            server->setPort(value);
-        // database-specific subtags
-        if (option == wxT("path") && database)
-            database->setPath(value);
-        if (option == wxT("charset") && database)
-            database->setConnectionCharset(value);
-        if (option == wxT("username") && database)
-            database->setUsername(value);
-        if (option == wxT("password") && database)
-            database->setPassword(value);
-        if (option == wxT("role") && database)
-            database->setRole(value);
     }
-
-    loadingM = false;
     dirtyM = false;
+    loadingM = false;
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool Root::parseDatabase(Server* server, wxXmlNode* xmln)
+{
+    wxASSERT(server);
+    wxASSERT(xmln);
+    Database tempDb;
+    Database* database = server->addDatabase(tempDb);
+    SubjectLocker locker(database);
+
+    for (xmln = xmln->GetChildren(); (xmln); xmln = xmln->GetNext())
+    {
+        if (xmln->GetType() != wxXML_ELEMENT_NODE)
+            continue;
+
+        wxString value(getNodeContent(xmln, wxEmptyString));
+        if (xmln->GetName() == wxT("name"))
+            database->setName(value);
+        else if (xmln->GetName() == wxT("path"))
+            database->setPath(value);
+        else if (xmln->GetName() == wxT("charset"))
+            database->setConnectionCharset(value);
+        else if (xmln->GetName() == wxT("username"))
+            database->setUsername(value);
+        else if (xmln->GetName() == wxT("password"))
+            database->setPassword(value);
+        else if (xmln->GetName() == wxT("role"))
+            database->setRole(value);
+        else if (xmln->GetName() == wxT("id"))
+        {
+            unsigned long id;
+            if (value.ToULong(&id))
+                database->setId(id);
+        }
+    }
+    // make sure the database has an Id before Root::save() is called,
+    // otherwise a new Id will be generated then, but the generator value
+    // will not be stored because it's at the beginning of the file.
+    database->getId();
+    // backward compatibility with FR < 0.3.0
+    if (database->getName().IsEmpty())
+        database->setName(database->extractNameFromConnectionString());
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool Root::parseServer(wxXmlNode* xmln)
+{
+    wxASSERT(xmln);
+    Server tempSrv;
+    Server* server = addServer(tempSrv);
+    SubjectLocker locker(server);
+
+    for (xmln = xmln->GetChildren(); (xmln); xmln = xmln->GetNext())
+    {
+        if (xmln->GetType() != wxXML_ELEMENT_NODE)
+            continue;
+
+        wxString value(getNodeContent(xmln, wxEmptyString));
+        if (xmln->GetName() == wxT("name"))
+            server->setName(value);
+        else if (xmln->GetName() == wxT("host"))
+            server->setHostname(value);
+        else if (xmln->GetName() == wxT("port"))
+            server->setPort(value);
+        else if (xmln->GetName() == wxT("database"))
+        {
+            if (!parseDatabase(server, xmln))
+                return false;
+        }
+    }
+    // backward compatibility with FR < 0.3.0
+    if (server->getName().IsEmpty())
+        server->setName(server->getConnectionString());
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -230,7 +220,7 @@ Server* Root::addServer(Server& server)
     temp->setParent(this);                    // grab it from collection
     dirtyM = true;
     notifyObservers();
-    getGlobalRoot().save();
+    save();
     return temp;
 }
 //-----------------------------------------------------------------------------
@@ -239,7 +229,7 @@ void Root::removeServer(Server* server)
     serversM.remove(server);
     dirtyM = true;
     notifyObservers();
-    getGlobalRoot().save();
+    save();
 }
 //-----------------------------------------------------------------------------
 // browses the server nodes, and their database nodes
@@ -292,7 +282,8 @@ bool Root::save()
 //-----------------------------------------------------------------------------
 void Root::notifyAllServers()
 {
-    for (MetadataCollection<Server>::iterator it = serversM.begin(); it != serversM.end(); ++it)
+    MetadataCollection<Server>::iterator it;
+    for (it = serversM.begin(); it != serversM.end(); ++it)
         (*it).notifyObservers();
 }
 //-----------------------------------------------------------------------------
