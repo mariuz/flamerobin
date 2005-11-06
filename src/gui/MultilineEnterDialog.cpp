@@ -87,7 +87,9 @@ void MultilineEnterDialog::layoutControls()
     if (static_caption)
     {
         sizerControls->Add(static_caption, 0, wxEXPAND);
-        sizerControls->AddSpacer(styleguide().getControlLabelMargin());
+        // styleguide().getControlLabelMargin() doesn't look good
+        sizerControls->AddSpacer(
+            styleguide().getRelatedControlMargin(wxVERTICAL));
     }
     text_ctrl_value->SetSizeHints(200, 100);
     text_ctrl_value->SetSize(200, 100);
