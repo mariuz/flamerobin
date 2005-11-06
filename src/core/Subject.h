@@ -33,11 +33,14 @@ class Observer;
 //-----------------------------------------------------------------------------
 class Subject
 {
+    friend class SubjectLocker;
 protected:
     std::list<Observer*> observersM;
     int locksCountM;
     bool needsNotifyObjectsM;
 
+    virtual void lockSubject();
+    virtual void unlockSubject();
 public:
     Subject();
     virtual ~Subject();
@@ -46,11 +49,6 @@ public:
     void detachObserver(Observer* observer);
     void detachAllObservers();
     void notifyObservers();
-    // TODO: Make these protected, and this class and SubjectLocker friends,
-    //       to force the use of SubjectLocker (exception-safe locking).
-    //       Right now (un)lockSubject() is used in Root::load().
-    virtual void lockSubject();
-    virtual void unlockSubject();
 };
 //-----------------------------------------------------------------------------
 class SubjectLocker
