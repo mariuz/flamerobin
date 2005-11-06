@@ -290,7 +290,6 @@
         $(SOURCEDIR)/gui/EventWatcherFrame.h
         $(SOURCEDIR)/gui/ExecuteSqlFrame.h
         $(SOURCEDIR)/gui/FieldPropertiesDialog.h
-        $(SOURCEDIR)/gui/FieldPropertiesFrame.h
         $(SOURCEDIR)/gui/MainFrame.h
         $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.h
         $(SOURCEDIR)/gui/MultilineEnterDialog.h
@@ -374,7 +373,6 @@
         $(SOURCEDIR)/gui/EventWatcherFrame.cpp
         $(SOURCEDIR)/gui/ExecuteSqlFrame.cpp
         $(SOURCEDIR)/gui/FieldPropertiesDialog.cpp
-        $(SOURCEDIR)/gui/FieldPropertiesFrame.cpp
         $(SOURCEDIR)/gui/MainFrame.cpp
         $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.cpp
         $(SOURCEDIR)/gui/MultilineEnterDialog.cpp

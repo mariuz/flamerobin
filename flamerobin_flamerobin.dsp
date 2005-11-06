@@ -520,10 +520,6 @@ SOURCE=.\src\gui\FieldPropertiesDialog.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gui\FieldPropertiesFrame.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\gui\FindDialog.cpp
 # End Source File
 # Begin Source File
@@ -811,10 +807,6 @@ SOURCE=.\src\core\FRError.h
 # Begin Source File
 
 SOURCE=.\src\gui\FieldPropertiesDialog.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\gui\FieldPropertiesFrame.h
 # End Source File
 # Begin Source File
 
