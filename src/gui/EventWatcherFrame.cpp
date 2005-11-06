@@ -313,11 +313,12 @@ void EventWatcherFrame::OnButtonSaveClick(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void EventWatcherFrame::OnButtonAddClick(wxCommandEvent& WXUNUSED(event))
 {
-    // TODO: perhaps we should extend the MultilineEnterDialog to include
-    //       an optional label to give a short explanation to the user
-    wxString s(_("You can add multiple events by adding one per line"));
-    if (GetMultilineTextFromUser(_("Add event(s)"), s, this))
+    wxString s;
+    if (GetMultilineTextFromUser(_("Add event(s)"), s, this,
+        _("You can add multiple events\nby adding one per line.")))
+    {
         addEvents(s);
+    }
 }
 //-----------------------------------------------------------------------------
 void EventWatcherFrame::addEvents(wxString& s)
