@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Marius Popa, Nando Dessena
+  Contributor(s): Marius Popa, Nando Dessena, Michael Hieke
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -131,7 +131,8 @@ bool Root::load()
         {
             wxString value(getNodeContent(xmln, wxEmptyString));
             unsigned long l;
-            if (!value.IsEmpty() && value.ToULong(&l))
+            // nextIdM may be written already (database id)
+            if (!value.IsEmpty() && value.ToULong(&l) && l > nextIdM)
                 nextIdM = l;
         }
     }
@@ -170,7 +171,11 @@ bool Root::parseDatabase(Server* server, wxXmlNode* xmln)
         {
             unsigned long id;
             if (value.ToULong(&id))
+            {
                 database->setId(id);
+                if (id > nextIdM)
+                    nextIdM = id;
+            }
         }
     }
     // make sure the database has an Id before Root::save() is called,
