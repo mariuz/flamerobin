@@ -731,3 +731,41 @@ void FieldPropertiesDialog::OnTextFieldnameUpdate(wxCommandEvent& WXUNUSED(event
     updateSqlStatement();
 }
 //-----------------------------------------------------------------------------
+class ColumnPropertiesHandler: public URIHandler
+{
+public:
+    bool handleURI(URI& uri);
+private:
+    // singleton; registers itself on creation.
+    static const ColumnPropertiesHandler handlerInstance;
+};
+//-----------------------------------------------------------------------------
+const ColumnPropertiesHandler ColumnPropertiesHandler::handlerInstance;
+//-----------------------------------------------------------------------------
+bool ColumnPropertiesHandler::handleURI(URI& uri)
+{
+    bool addField = uri.action == wxT("add_field");
+    bool editField = uri.action == wxT("edit_field");
+    if (!addField && !editField)
+        return false;
+
+    wxWindow* w = getWindow(uri);
+    void* mo = getObject(uri);
+    if (!mo || !w)
+        return true;
+
+    Column* c = 0;
+    Table* t;
+    if (addField)
+        t = (Table*)mo;
+    else
+    {
+        c = (Column*)mo;
+        t = (Table*)c->getParent();
+    }
+
+    FieldPropertiesDialog fpd(w, t, c);
+    fpd.ShowModal();
+    return true;
+}
+//-----------------------------------------------------------------------------
