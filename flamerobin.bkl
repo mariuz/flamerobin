@@ -464,14 +464,6 @@
         view.png
     </set>
 
-    <set var="COPYFILESDESTDIR">
-        <if cond="PLATFORM_MACOSX=='1'">
-            $(BUILDDIR)/flamerobin.app/Contents/SharedSupport
-        </if>
-        <if cond="PLATFORM_UNIX=='1'">$(BUILDDIR)</if>
-        <if cond="PLATFORM_WIN32=='1'">$(BUILDDIR)</if>
-    </set>
-
 
     <define-tag name="mac-app-bundle" rules="exe">
         <!-- bundle directory: -->
@@ -510,6 +502,9 @@
                 <!-- and copy resources and icons -->
                 cp -f $(BUNDLE_PLIST) $(BUNDLE)/Info.plist
                 cp -f $(BUNDLE_ICONS) $(BUNDLE)/Resources
+                cp -R $(DOLLAR)(srcdir)/conf-defs/* $(BUNDLE)/SharedSupport/conf-defs
+                cp -R $(DOLLAR)(srcdir)/docs/* $(BUNDLE)/SharedSupport/docs
+                cp -R $(DOLLAR)(srcdir)/html-templates/* $(BUNDLE)/SharedSupport/html-templates
             </command>
         </modify-target>
 
@@ -566,30 +561,6 @@
             <mac-app-bundle>$(id)</mac-app-bundle>
         </if>
     </exe>
-
-<!-- do not copy files as part of the "all" target of make
-    <copy-files id="config-options">
-        <dependency-of>all</dependency-of>
-        <depends>flamerobin</depends>
-        <srcdir>$(CONFIGOPTIONSDIR)</srcdir>
-        <dstdir>$(COPYFILESDESTDIR)/conf-defs</dstdir>
-        <files>$(CONFIGOPTIONSFILES)</files>
-    </copy-files>
-    <copy-files id="html-docs">
-        <dependency-of>all</dependency-of>
-        <depends>flamerobin</depends>
-        <srcdir>$(HTMLDOCSDIR)</srcdir>
-        <dstdir>$(COPYFILESDESTDIR)/docs</dstdir>
-        <files>$(HTMLDOCFILES)</files>
-    </copy-files>
-    <copy-files id="html-templates">
-        <dependency-of>all</dependency-of>
-        <depends>flamerobin</depends>
-        <srcdir>$(HTMLTEMPLATEDIR)</srcdir>
-        <dstdir>$(COPYFILESDESTDIR)/html-templates</dstdir>
-        <files>$(HTMLTEMPLATEFILES)</files>
-    </copy-files>
--->
 
     <if cond="FORMAT=='autoconf'">
         <script-files>
