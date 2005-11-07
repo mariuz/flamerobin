@@ -131,7 +131,7 @@ bool Root::load()
         {
             wxString value(getNodeContent(xmln, wxEmptyString));
             unsigned long l;
-            // nextIdM may be written already (database id)
+            // nextIdM may have been written already (database id)
             if (!value.IsEmpty() && value.ToULong(&l) && l > nextIdM)
                 nextIdM = l;
         }
@@ -173,8 +173,9 @@ bool Root::parseDatabase(Server* server, wxXmlNode* xmln)
             if (value.ToULong(&id))
             {
                 database->setId(id);
-                if (id > nextIdM)
-                    nextIdM = id;
+                // force nextIdM to be higher than ids of existing databases
+                if (nextIdM <= id)
+                    nextIdM = id + 1;
             }
         }
     }
