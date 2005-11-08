@@ -267,7 +267,7 @@ END_EVENT_TABLE()
 void EventWatcherFrame::OnButtonLoadClick(wxCommandEvent& WXUNUSED(event))
 {
     wxFileDialog fd(this, _("Select file to load"), wxT(""), wxT(""),
-        _("Text files (*.txt)|*.sql|All files (*.*)|*.*"),
+        _("Text files (*.txt)|*.txt|All files (*.*)|*.*"),
         wxOPEN|wxCHANGE_DIR);
     if (wxID_OK != fd.ShowModal())
         return;
@@ -323,6 +323,11 @@ void EventWatcherFrame::OnButtonAddClick(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void EventWatcherFrame::addEvents(wxString& s)
 {
+    // deselect all items so user can cleanly see what is added
+    for (int ix = 0; ix < listbox_monitored->GetCount(); ++ix)
+        if (listbox_monitored->Selected(ix))
+            listbox_monitored->Deselect(ix);
+
     while (true)
     {
         int p = s.Find(wxT("\n"));
