@@ -102,6 +102,42 @@ void EPB::Define(const std::string& eventname, IBPP::EventInterface* objref)
 	mObjectReferences.push_back(objref);
 }
 
+void EPB::Drop(const std::string& eventname)
+{
+	if (eventname.size() == 0)
+		throw LogicExceptionImpl("EPB::Drop", _("Zero length event names not permitted"));
+	if (eventname.size() > MAXEVENTNAMELEN)
+		throw LogicExceptionImpl("EPB::Drop", _("Event name is too long"));
+
+	if (mEventBuffer.size() <= 1) return;	// Nothing to do, but not an error
+
+	// 1) Find the event in the buffers
+	typedef EventBufferIterator<Buffer::iterator> EventIterator;
+	EventIterator eit(mEventBuffer.begin()+1);
+	EventIterator rit(mResultsBuffer.begin()+1);
+
+	for (ObjRefs::iterator oit = mObjectReferences.begin();
+			oit != mObjectReferences.end();
+				++oit, ++eit, ++rit)
+	{
+		if (eventname != eit.get_name()) continue;
+		
+		// 2) Event found, remove it
+		mEventBuffer.erase(eit.begin(), eit.end());
+		mResultsBuffer.erase(rit.begin(), rit.end());
+		mObjectReferences.erase(oit);
+		break;
+	}
+
+	return;
+}
+
+void EPB::ClearCounts()
+{
+	// Copy over the results buffer to the events buffer in preparation of the next asynchronous wait.
+	mEventBuffer = mResultsBuffer;
+}
+
 void EPB::FireActions(IBPP::IDatabase* db)
 {
 	typedef EventBufferIterator<Buffer::iterator> EventIterator;
@@ -125,8 +161,6 @@ void EPB::FireActions(IBPP::IDatabase* db)
 			} catch (...) { }
 		}
 	}
-	// Copy over the results buffer to the events buffer to prepare for next asynchronous wait.
-	mEventBuffer = mResultsBuffer;
 }
 
 //

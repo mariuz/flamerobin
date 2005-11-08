@@ -45,7 +45,7 @@ website at http://www.ibpp.org.
 
 ---------------------------------------------------------------------------
 
-Release Notes for Version 2.4 (September, 2005)
+Release Notes for Version 2.4 (November, 2005)
 
 
 1/ Introduction
@@ -123,12 +123,6 @@ A Load(), is the equivalent of Open(), a loop of Read(), and Close(). Adding
 this interface on IBPP::Blob was logical now that IBPP::Statement had a direct
 support for blobs and std:string.
 
-- An IBPP::Row has been introduced and the code refactored around it. This is
-perfectly functionnal but is still a concept in the works for this 2.4 release.
-So we ask users of IBPP not to start using IBPP::Row as is, consider it already
-deprecated in its current form. We will introduce something 'bigger' in the
-next major version (3.0.
-
 - Added void ClientLibSearchPaths(const std::string&);
 On Win32 platform, ClientLibSearchPaths() allows to setup one or multiple 
 additional paths (separated with a ';') where IBPP will look for the client 
@@ -144,9 +138,25 @@ precision, which is defined in ten thousandths of seconds in IB and FB.
 The operator int() has been dropped and replaced by methods GetDate() and GetTime().
 The method GetTime() can take an optional fourth parameter to get the sub-seconds.
 Same for method SetTime(). This is true for classes Time and Timestamp.
+Be warned that the GetTime() method which replaces the dropped operator int()
+returns the number of ten-thousandths of seconds elapsed since midnight instead
+of the number of seconds as before. So that integer time value is now 10000
+times larger than before. Existing code relying on the old operator int() will
+have to be updated to divide the return value by 10000. Of course, the same
+is true for SetTime(int) : if you used to pass a count of seconds there, you
+need to multiply it by 10000.
 
 - Added int Statement::GetSubtype(int) returning, for a Blob column only, the subtype
 of the Blob as it is declared in the database metadata.
+
+- Added Database::DropEvent(const std::string&) to drop interest in a previously
+registered event (using Database::DefineEvent()).
+
+- An IBPP::Row has been introduced and the code refactored around it. This is
+perfectly functionnal but is still a concept in the works for this 2.4 release.
+So we ask users of IBPP not to start using IBPP::Row as is, consider it already
+deprecated in its current form. We will introduce something 'bigger' in the
+next major version (3.0).
 
 
 4/ Comments, Acknowledgments

@@ -241,6 +241,22 @@ void DatabaseImpl::DefineEvent(const std::string& eventname, IBPP::EventInterfac
 	QueueEvents();
 }
 
+void DatabaseImpl::DropEvent(const std::string& eventname)
+{
+	if (eventname.empty())
+		throw LogicExceptionImpl("Database::DropEvent", _("Null pointer reference detected."));
+
+	if (mEventsThrew)
+		throw LogicExceptionImpl("Database::DropEvent", _("An error condition was "
+							"detected by the asynchronous EventHandler() method."));
+
+	if (mEvents == 0) return;
+
+	CancelEvents();
+	mEvents->Drop(eventname);
+	QueueEvents();
+}
+
 void DatabaseImpl::ClearEvents(void)
 {
 	CancelEvents();
@@ -496,6 +512,8 @@ void DatabaseImpl::QueueEvents(void)
 			throw LogicExceptionImpl("Database::QueueEvents",
 				  _("Database is not connected"));
 
+		mEvents->ClearCounts();
+
 		IBS vector;
 		mEventsTrapped = false;
 		mEventsQueued = true;
@@ -523,15 +541,20 @@ void DatabaseImpl::CancelEvents(void)
 		IBS vector;
 
 		// A call to cancel_events will call *once* the handler routine, even
-		// though no events had fired.
+		// though no events had fired. This is why we first set mEventsQueued
+		// to false, so that we can be sure to dismiss those unwanted callbacks
+		// subsequent to the execution of isc_cancel_events().
+		mEventsQueued = false;
 		(*gds.Call()->m_cancel_events)(vector.Self(), &mHandle, &mEventsId);
 
 	    if (vector.Errors())
+		{
+			mEventsQueued = true;	// Need to restore this as cancel failed
 	    	throw SQLExceptionImpl(vector, "Database::CancelEvents",
 	    		_("isc_cancel_events failed"));
+		}
 
 		mEventsId = 0;	// Should be, but better be safe
-		mEventsQueued = false;
 		mEventsThrew = false;	// Reset potential error condition
 	}
 }
@@ -561,7 +584,7 @@ void DatabaseImpl::EventHandler(const char* object,
 
 	DatabaseImpl* db = (DatabaseImpl*)object;	// Ugly, but wanted, c-style cast
 
-	if (size != 0 && tmpbuffer != 0)
+	if (db->mEventsQueued && size != 0 && tmpbuffer != 0)
 		db->EventUpdateCounts(size, tmpbuffer);
 
 	db->mEventsQueued = false;

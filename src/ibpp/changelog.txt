@@ -30,6 +30,15 @@ Contributor(s): ______________________________________.
 The most recent addition to this file is always on top and has the highest
 item number.
 
+12. November 7, 2005
+
+- Added Database::DropEvent(const std::string&) to drop interest in a previously
+registered event (using Database::DefineEvent()).
+
+- Cleaned some details of the current Events handling implementation such that
+false shadow counts are not reported when re-defining events after having dropped
+them.
+
 11. September 27, 2005
 
 - Again, huge editing, this time to simplify and revert to 'int' a lot of places
