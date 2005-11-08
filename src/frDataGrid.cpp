@@ -118,11 +118,7 @@ void DataGrid::fill()
     // event handler is only needed if not all rows have already been
     // fetched
     if (table->canFetchMoreRows())
-    {
-        Connect(wxID_ANY, wxEVT_IDLE,
-            (wxObjectEventFunction) (wxEventFunction)
-            (wxIdleEventFunction)&DataGrid::OnIdle);
-    }
+        Connect(wxID_ANY, wxEVT_IDLE, wxIdleEventHandler(DataGrid::OnIdle));
 
 #ifdef __WXGTK__
     // needed to make scrollbars show on large datasets
