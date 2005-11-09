@@ -102,6 +102,7 @@ void EPB::Define(const std::string& eventname, IBPP::EventInterface* objref)
 	mObjectReferences.push_back(objref);
 }
 
+#ifdef FR_NEW_EVENT_CODE
 void EPB::Drop(const std::string& eventname)
 {
 	if (eventname.size() == 0)
@@ -162,6 +163,34 @@ void EPB::FireActions(IBPP::IDatabase* db)
 		}
 	}
 }
+#else
+void EPB::FireActions(IBPP::IDatabase* db)
+{
+	typedef EventBufferIterator<Buffer::iterator> EventIterator;
+	EventIterator event_buffer_it(mEventBuffer.begin()+1);
+	EventIterator results_buffer_it(mResultsBuffer.begin()+1);
+
+	for (ObjRefs::iterator ref_it = mObjectReferences.begin();
+		 ref_it != mObjectReferences.end();
+			 ++ref_it, ++event_buffer_it, ++results_buffer_it)
+	{
+		if (event_buffer_it == EventIterator(mEventBuffer.end())
+			  || results_buffer_it == EventIterator(mResultsBuffer.end()))
+			throw LogicExceptionImpl("EPB::FireActions", _("Internal buffer size error"));
+		uint32_t vnew = results_buffer_it.get_count();
+		uint32_t vold = event_buffer_it.get_count();
+		if (vnew > vold)
+		{ // Fire the action
+			try
+			{
+				(*ref_it)->ibppEventHandler(db, event_buffer_it.get_name(), (int)(vnew - vold));
+			} catch (...) { }
+		}
+	}
+	// Copy over the results buffer to the events buffer to prepare for next asynchronous wait.
+	mEventBuffer = mResultsBuffer;
+}
+#endif
 
 //
 //	EOF

@@ -97,7 +97,7 @@ namespace IBPP
 {
 	//	Typically you use this constant in a call IBPP::CheckVersion as in:
 	//	if (! IBPP::CheckVersion(IBPP::Version)) { throw .... ; }
-	const uint32_t Version = 0x02040500; // Version == 2.4.5.0
+	const uint32_t Version = 0x02040400; // Version == 2.4.4.0
 
 	//	Dates range checking
 	const int MinDate = -693594;	//  1 JAN 0001
@@ -527,7 +527,9 @@ namespace IBPP
 		virtual void Drop(void) = 0;
 
 		virtual void DefineEvent(const std::string&, EventInterface*) = 0;
+#ifdef FR_NEW_EVENT_CODE
 		virtual void DropEvent(const std::string&) = 0;
+#endif
 		virtual void ClearEvents(void) = 0;		// Drop all events
 		virtual void DispatchEvents(void) = 0;
 

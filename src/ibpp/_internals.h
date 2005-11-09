@@ -571,9 +571,13 @@ public:
 			(const_cast<char*>(&*(mIt + 1 + static_cast<uint32_t>(*mIt))), 4);
 	}
 
+#ifdef FR_NEW_EVENT_CODE
 	// Those container like begin() and end() allow access to the underlying type
 	It begin()	{ return mIt; }
 	It end()	{ return mIt + 1 + static_cast<int32_t>(*mIt) + 4; }
+#else
+	It iterator() { return mIt; }
+#endif
 
 	EventBufferIterator() {}
 	EventBufferIterator(It it) : mIt(it) {}
@@ -594,8 +598,10 @@ class EPB
 public:
 	// Define (add) an event to the list
 	void Define(const std::string&, IBPP::EventInterface*);
+#ifdef FR_NEW_EVENT_CODE
 	void Drop(const std::string&);
 	void ClearCounts();
+#endif
 	void FireActions(IBPP::IDatabase *);
 	char* EventsBuffer(void) { return &mEventBuffer[0]; }
 	char* ResultsBuffer(void) { return &mResultsBuffer[0]; }
@@ -912,7 +918,9 @@ public:
     void Drop(void);
 
 	void DefineEvent(const std::string&, IBPP::EventInterface*);
+#ifdef FR_NEW_EVENT_CODE
 	void DropEvent(const std::string&);
+#endif
 	void ClearEvents(void);
 	void DispatchEvents(void);
 

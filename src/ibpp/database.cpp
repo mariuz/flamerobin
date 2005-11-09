@@ -241,6 +241,7 @@ void DatabaseImpl::DefineEvent(const std::string& eventname, IBPP::EventInterfac
 	QueueEvents();
 }
 
+#ifdef FR_NEW_EVENT_CODE
 void DatabaseImpl::DropEvent(const std::string& eventname)
 {
 	if (eventname.empty())
@@ -256,6 +257,7 @@ void DatabaseImpl::DropEvent(const std::string& eventname)
 	mEvents->Drop(eventname);
 	QueueEvents();
 }
+#endif
 
 void DatabaseImpl::ClearEvents(void)
 {
@@ -512,7 +514,9 @@ void DatabaseImpl::QueueEvents(void)
 			throw LogicExceptionImpl("Database::QueueEvents",
 				  _("Database is not connected"));
 
+#ifdef FR_NEW_EVENT_CODE
 		mEvents->ClearCounts();
+#endif
 
 		IBS vector;
 		mEventsTrapped = false;
@@ -531,6 +535,7 @@ void DatabaseImpl::QueueEvents(void)
 	}
 }
 
+#ifdef FR_NEW_EVENT_CODE
 void DatabaseImpl::CancelEvents(void)
 {
 	if (mEvents != 0 && mEventsQueued)
@@ -558,6 +563,30 @@ void DatabaseImpl::CancelEvents(void)
 		mEventsThrew = false;	// Reset potential error condition
 	}
 }
+#else
+void DatabaseImpl::CancelEvents(void)
+{
+	if (mEvents != 0 && mEventsQueued)
+	{
+		if (mHandle == 0) throw LogicExceptionImpl("Database::CancelEvents",
+			_("Database is not connected"));
+
+		IBS vector;
+
+		// A call to cancel_events will call *once* the handler routine, even
+		// though no events had fired.
+		(*gds.Call()->m_cancel_events)(vector.Self(), &mHandle, &mEventsId);
+
+	    if (vector.Errors())
+	    	throw SQLExceptionImpl(vector, "Database::CancelEvents",
+	    		_("isc_cancel_events failed"));
+
+		mEventsId = 0;	// Should be, but better be safe
+		mEventsQueued = false;
+		mEventsThrew = false;	// Reset potential error condition
+	}
+}
+#endif
 
 void DatabaseImpl::EventUpdateCounts(int size, const char* tmpbuffer)
 {
@@ -584,7 +613,11 @@ void DatabaseImpl::EventHandler(const char* object,
 
 	DatabaseImpl* db = (DatabaseImpl*)object;	// Ugly, but wanted, c-style cast
 
+#ifdef FR_NEW_EVENT_CODE
 	if (db->mEventsQueued && size != 0 && tmpbuffer != 0)
+#else
+	if (size != 0 && tmpbuffer != 0)
+#endif
 		db->EventUpdateCounts(size, tmpbuffer);
 
 	db->mEventsQueued = false;
