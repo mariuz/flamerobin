@@ -37,6 +37,7 @@
 #endif
 
 #include <wx/progdlg.h>
+#include <wx/clipbrd.h>
 
 #include "config/Config.h"
 #include "config/DatabaseConfig.h"
@@ -502,6 +503,9 @@ void MainFrame::OnClose(wxCloseEvent& event)
     getGlobalRoot().disconnectAllDatabases();
     tree_ctrl_1->Thaw();
     BaseFrame::OnClose(event);
+
+    if (wxTheClipboard->IsOpened())
+        wxTheClipboard->Close();
 
     FR_CATCH
 }
