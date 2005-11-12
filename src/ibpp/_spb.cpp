@@ -71,7 +71,7 @@ void SPB::Insert(char opcode)
 
 void SPB::InsertString(char type, int lenwidth, const char* data)
 {
-	int len = (int)strlen(data);
+	int16_t len = (int16_t)strlen(data);
 
 	Grow(1 + lenwidth + len);
 	mBuffer[mSize++] = type;
