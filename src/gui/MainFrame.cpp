@@ -490,10 +490,10 @@ void MainFrame::OnClose(wxCloseEvent& event)
     FR_TRY
 
     Raise();
-    bool confirm = false;
-    config().getValue(wxT("ConfirmQuit"), confirm);
+    bool confirm = config().get(wxT("ConfirmQuit"), false);
     if (confirm && event.CanVeto() && wxNO ==
-        wxMessageBox(_("Are you sure you wish to exit?"), wxT("FlameRobin"), wxYES_NO | wxICON_QUESTION))
+        wxMessageBox(_("Are you sure you wish to exit?"), wxT("FlameRobin"),
+        wxYES_NO | wxICON_QUESTION))
     {
         event.Veto();
         return;
@@ -513,9 +513,6 @@ void MainFrame::OnClose(wxCloseEvent& event)
     tree_ctrl_1->Thaw();
 
     BaseFrame::OnClose(event);
-
-    if (wxTheClipboard->IsOpened())
-        wxTheClipboard->Close();
 
     FR_CATCH
 }
