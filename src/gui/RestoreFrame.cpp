@@ -37,6 +37,7 @@
 #endif
 
 #include <wx/datetime.h>
+#include <wx/filename.h>
 
 #include <algorithm>
 
@@ -385,8 +386,10 @@ END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void RestoreFrame::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    wxString filename = ::wxFileSelector(_("Select Backup File"), wxT(""), 
-        wxT(""), wxT(""), _("All files (*.*)|*.*"), 0, this);
+    wxFileName origName(text_ctrl_filename->GetValue());
+    wxString filename = ::wxFileSelector(_("Select Backup File"), 
+        origName.GetPath(), origName.GetName(), wxEmptyString,
+        _("All files (*.*)|*.*"), 0, this);
     if (!filename.empty())
         text_ctrl_filename->SetValue(filename);
 }
