@@ -312,6 +312,7 @@
         $(SOURCEDIR)/metadata/exception.h
         $(SOURCEDIR)/metadata/function.h
         $(SOURCEDIR)/metadata/generator.h
+        $(SOURCEDIR)/metadata/identifier.h
         $(SOURCEDIR)/metadata/Index.h
         $(SOURCEDIR)/metadata/metadataitem.h
         $(SOURCEDIR)/metadata/MetadataItemVisitor.h
@@ -395,6 +396,7 @@
         $(SOURCEDIR)/metadata/exception.cpp
         $(SOURCEDIR)/metadata/function.cpp
         $(SOURCEDIR)/metadata/generator.cpp
+        $(SOURCEDIR)/metadata/identifier.cpp
         $(SOURCEDIR)/metadata/Index.cpp
         $(SOURCEDIR)/metadata/metadataitem.cpp
         $(SOURCEDIR)/metadata/MetadataItemVisitor.cpp
