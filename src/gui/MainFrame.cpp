@@ -820,7 +820,8 @@ void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
 
     DatabaseRegistrationDialog drd(this, -1, _("Database Registration Info"));
     drd.setDatabase(d);
-    drd.ShowModal();
+    if (drd.ShowModal())
+        getGlobalRoot().save();
 
     FR_CATCH
 }
@@ -883,7 +884,8 @@ void MainFrame::OnMenuServerProperties(wxCommandEvent& WXUNUSED(event))
 
     ServerRegistrationDialog srd(this, -1, _("Server Registration Info"));
     srd.setServer(s);
-    srd.ShowModal();
+    if (srd.ShowModal())
+        getGlobalRoot().save();
 
     FR_CATCH
 }
