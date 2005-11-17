@@ -62,6 +62,8 @@
 #include "styleguide.h"
 #include "ugly.h"
 #include "urihandler.h"
+
+// #define USE_IDENTIFIER_CLASS 1
 //-----------------------------------------------------------------------------
 bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
 {
@@ -238,6 +240,9 @@ void SqlEditor::setup()
     StyleSetItalic(2, TRUE);
     StyleSetItalic(1, TRUE);
     SetLexer(wxSTC_LEX_SQL);
+#ifdef USE_IDENTIFIER_CLASS
+    SetKeyWords(0, Identifier::getKeywords(true));    // true = lower_case
+#else
     SetKeyWords(0,
             wxT("abs action active add admin after all alter and any as asc ascending at auto autoddl ")
             wxT("avg based basename base_name before begin between bigint blob blobedit boolean both ")
@@ -269,6 +274,7 @@ void SqlEditor::setup()
             wxT("values varchar variable varying version view wait wait_time weekday when whenever where ")
             wxT("while with work write year yearday" )
     );
+#endif
 
     int tabSize = config().get(wxT("sqlEditorTabSize"), 4);
     SetTabWidth(tabSize);
@@ -1473,30 +1479,34 @@ void ExecuteSqlFrame::removeSubject(Subject* subject)
 //! Creates a list for autocomplete feature
 
 //! The list consists of:
-//! - sql keywords (longer that 4 characters)
+//! - sql keywords
 //! - names of database objects (tables, views, etc.)
 //
 void ExecuteSqlFrame::setKeywords()
 {
-    wxArrayString as;
-
-    // a bunch of as.Add("something") statements, placed in separate file
-    #include "autocomplete-sql_keywords.txt"
-
-    // get list od database objects' names
-    std::vector<wxString> v;
-    databaseM->getIdentifiers(v);
-    for (std::vector<wxString>::const_iterator it = v.begin(); it != v.end(); ++it)
-        as.Add(*it);
-
     // TODO:
     // we can also make ExecuteSqlFrame observer of YTables/YViews/... objects
     // so it can reload this list if something changes
 
+    wxArrayString as;
+#ifdef USE_IDENTIFIER_CLASS
+    const Identifier::keywordContainer& k = Identifier::getKeywordSet();
+    for (Identifier::keywordContainer::const_iterator ci = k.begin(); ci != k.end(); ++ci)
+        as.Add(*it);
+#else
+    // a bunch of as.Add("something") statements, placed in separate file
+    #include "autocomplete-sql_keywords.txt"
+#endif
+
+    // get list od database objects' names
+    std::vector<std::string> v;
+    databaseM->getIdentifiers(v);
+    for (std::vector<std::string>::const_iterator it = v.begin(); it != v.end(); ++it)
+        as.Add(std2wx(*it));
     as.Sort();    // The list has to be sorted for autocomplete to work properly
 
-    keywordsM = wxT("");                        // create final wxString from array
-    for (size_t i = 0; i < as.GetCount(); ++i)    // words are separated with spaces
+    keywordsM.Empty();                          // create final wxString from array
+    for (size_t i = 0; i < as.GetCount(); ++i)  // words are separated with spaces
         keywordsM += as.Item(i) + wxT(" ");
 }
 //-----------------------------------------------------------------------------
