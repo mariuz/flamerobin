@@ -142,7 +142,7 @@ const wxString BackupRestoreBaseFrame::getStorageName() const
 {
     if (storageNameM == wxT("unassigned"))
     {
-        StorageGranularity g = sgFrame;
+        StorageGranularity g = sgObject;
         config().getValue(getName() + wxT("StorageGranularity"), g);
 
         switch (g)
