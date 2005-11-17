@@ -63,7 +63,10 @@
 #include "ugly.h"
 #include "urihandler.h"
 
-// #define USE_IDENTIFIER_CLASS 1
+//#define USE_IDENTIFIER_CLASS 1
+#ifdef USE_IDENTIFIER_CLASS
+#include "metadata/identifier.h"
+#endif
 //-----------------------------------------------------------------------------
 bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
 {
@@ -1492,7 +1495,7 @@ void ExecuteSqlFrame::setKeywords()
 #ifdef USE_IDENTIFIER_CLASS
     const Identifier::keywordContainer& k = Identifier::getKeywordSet();
     for (Identifier::keywordContainer::const_iterator ci = k.begin(); ci != k.end(); ++ci)
-        as.Add(*it);
+        as.Add(*ci);
 #else
     // a bunch of as.Add("something") statements, placed in separate file
     #include "autocomplete-sql_keywords.txt"
