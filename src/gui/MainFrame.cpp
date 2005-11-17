@@ -499,9 +499,19 @@ void MainFrame::OnClose(wxCloseEvent& event)
         return;
     }
     frameManager().setWindowMenu(0);    // tell it not to update menus anymore
+
+    // the next few lines fix the (threading?) problem on some Linux distributions
+    // which leave FlameRobin running if there were connected databases upon exit.
+    // also, some other versions might crash (on Debian 64bit for example).
+    // apparently, doing disconnect before exiting makes it work properly, and
+    // on some distros, the wxSafeYield call is needed as well
+    // as it doesn't hurt for others, we can leave it all here, at least until
+    // Firebird packagers for various distros figure out how to properly use NPTL
     tree_ctrl_1->Freeze();
     getGlobalRoot().disconnectAllDatabases();
+    wxSafeYield();
     tree_ctrl_1->Thaw();
+
     BaseFrame::OnClose(event);
 
     if (wxTheClipboard->IsOpened())
@@ -820,8 +830,7 @@ void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
 
     DatabaseRegistrationDialog drd(this, -1, _("Database Registration Info"));
     drd.setDatabase(d);
-    if (drd.ShowModal())
-        getGlobalRoot().save();
+    drd.ShowModal();
 
     FR_CATCH
 }
@@ -884,8 +893,7 @@ void MainFrame::OnMenuServerProperties(wxCommandEvent& WXUNUSED(event))
 
     ServerRegistrationDialog srd(this, -1, _("Server Registration Info"));
     srd.setServer(s);
-    if (srd.ShowModal())
-        getGlobalRoot().save();
+    srd.ShowModal();
 
     FR_CATCH
 }
