@@ -22,6 +22,20 @@
 
   Contributor(s):
 */
+// For compilers that support precompilation, includes "wx/wx.h".
+#include "wx/wxprec.h"
+
+#ifdef __BORLANDC__
+#pragma hdrstop
+#endif
+
+// for all others, include the necessary headers (this file is usually all you
+// need because it includes almost all "standard" wxWindows headers
+#ifndef WX_PRECOMP
+#include "wx/wx.h"
+#endif
+
+#include "config/Config.h"
 #include "identifier.h"
 //----------------------------------------------------------------------------
 Identifier::Identifier(const wxString& source)
@@ -31,7 +45,7 @@ Identifier::Identifier(const wxString& source)
 
     if (textM[0] == wxChar('\"'))
     {
-        wxString::size_t p = textM.Length();
+        wxString::size_type p = textM.Length();
         if (textM[p-1] == wxChar('\"'))
             textM = source.SubString(1, p-2);
         else                    // a really strange occurence of identifier
@@ -41,7 +55,7 @@ Identifier::Identifier(const wxString& source)
         textM = source.Upper();
 }
 //----------------------------------------------------------------------------
-static const keywordContainer& getKeywordSet()
+const Identifier::keywordContainer& Identifier::getKeywordSet()
 {
     // placed here, so others can't access it until it is initialized
     static keywordContainer keywords;
@@ -52,7 +66,7 @@ static const keywordContainer& getKeywordSet()
     return keywords;
 }
 //----------------------------------------------------------------------------
-static wxString getKeywords(bool lowerCase)
+wxString Identifier::getKeywords(bool lowerCase)
 {
     static wxString resultLower;
     static wxString resultUpper;
@@ -75,12 +89,12 @@ bool Identifier::isReserved() const
 //----------------------------------------------------------------------------
 bool Identifier::needsQuoting() const
 {
-    if (isReserved() || !wxIsascii(textM) || textM != textM.Upper())
+    if (isReserved() || !textM.IsAscii() || textM != textM.Upper())
         return true;
 
     // isalnum can return true for letters in character set from
     // locale. That's why we need isAscii check above
-    for (wxString::size_t i = 0; i < textM.Length(); i++)
+    for (wxString::size_type i = 0; i < textM.Length(); i++)
     {
         wxChar c = textM[i];
         if (!wxIsalnum(c) || wxIsspace(c))

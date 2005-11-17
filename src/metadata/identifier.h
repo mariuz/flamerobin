@@ -24,26 +24,29 @@
 */
 #ifndef FR_IDENTIFIER_H
 #define FR_IDENTIFIER_H
+
+#include <set>
 //----------------------------------------------------------------------------
 //! The purpose of this class is to abstract all the work with identifiers
 //! so that we don't have to struggle with quoted identifiers all over the
 //! place. If also makes matching easier (upper/lower case problems)
 class Identifier
 {
-private:
-    typedef std::set<wxString> keywordContainer;
-    wxString textM;
-    bool needsQuoting() const;
-    bool isReserved() const;
-
 public:
+    typedef std::set<wxString> keywordContainer;
     Identifier(const wxString& source);
+
     static const keywordContainer& getKeywordSet();
     static wxString getKeywords(bool lowerCase = false);
 
     bool equals(const Identifier& other) const;
     wxString get() const;
     wxString getQuoted() const;
+
+private:
+    wxString textM;
+    bool needsQuoting() const;
+    bool isReserved() const;
 };
 //----------------------------------------------------------------------------
 #endif
