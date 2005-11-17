@@ -131,12 +131,17 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
         std::vector<Join> relatedTables;
         if (Table::tablesRelate(tableNames, t, relatedTables))    // foreign keys
         {
-            wxString join_list;
-            if (relatedTables.size() > 1)    // let the user decide
+            wxArrayString as;
+            for (std::vector<Join>::iterator it = relatedTables.begin(); it != relatedTables.end(); ++it)
             {
-                wxArrayString as;
-                for (std::vector<Join>::iterator it = relatedTables.begin(); it != relatedTables.end(); ++it)
-                    as.Add((*it).table);
+                wxString addme = (*it).table + wxT(":  ") + (*it).fields;
+                if (as.Index(addme) == wxNOT_FOUND)
+                    as.Add(addme);
+            }
+            wxString join_list;
+            if (as.GetCount() > 1)    // let the user decide
+            {
+
                 int selected = ::wxGetSingleChoiceIndex(_("Multiple foreign keys found"),
                     _("Select the desired table"), as);
                 if (selected == -1)
@@ -1204,7 +1209,7 @@ bool ExecuteSqlFrame::execute(wxString sql, bool prepareOnly)
         log(wxEmptyString);
         log(wxEmptyString);
         log(_("Executing..."));
-        ::wxSafeYield();            // let GUI update the controls
+        styled_text_ctrl_stats->Update();            // let GUI update the controls
         statementM->Execute();
         log(_("Done."));
 
