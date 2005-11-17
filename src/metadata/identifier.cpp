@@ -47,7 +47,7 @@ static const keywordContainer& getKeywordSet()
     static keywordContainer keywords;
     if (keywords.empty())   // load
     {
-        keywords.insert(...blahblah);
+        #include "keywords.txt"
     }
     return keywords;
 }
@@ -58,23 +58,28 @@ static wxString getKeywords(bool lowerCase)
     static wxString resultUpper;
     wxString& s = (lowerCase ? resultLower : resultUpper);
     if (s.IsEmpty())
-        for (keywordContainer::const_iterator it = getKeywordSet().begin(); it != getKeywordSet().end(); ++it)
-            s += (*it) + wxT(" ");
+    {
+        for (keywordContainer::const_iterator it = getKeywordSet().begin();
+            it != getKeywordSet().end(); ++it)
+        {
+            s += (lowerCase ? (*it) : (*it).Upper()) + wxT(" ");
+        }
+    }
     return s;
 }
 //----------------------------------------------------------------------------
 bool Identifier::isReserved() const
 {
-    return (getKeywordSet().find(textM.Upper()) == getKeywordSet().end());
+    return (getKeywordSet().find(textM.Lower()) == getKeywordSet().end());
 }
 //----------------------------------------------------------------------------
 bool Identifier::needsQuoting() const
 {
-    if (isReserved() || !wxIsascii(textM))
+    if (isReserved() || !wxIsascii(textM) || textM != textM.Upper())
         return true;
 
-    // be careful: isalnum can return true for letters in character set from
-    //             locale. That's why we need isAscii check above
+    // isalnum can return true for letters in character set from
+    // locale. That's why we need isAscii check above
     for (wxString::size_t i = 0; i < textM.Length(); i++)
     {
         wxChar c = textM[i];
