@@ -33,8 +33,8 @@
 
 class TextControl;
 //-----------------------------------------------------------------------------
-bool GetMultilineTextFromUser(const wxString& title, wxString& value,
-    wxWindow* parent = 0, const wxString& caption = wxEmptyString);
+bool GetMultilineTextFromUser(wxWindow* parent, const wxString& title,
+    wxString& value, const wxString& caption = wxEmptyString);
 //-----------------------------------------------------------------------------
 //! normally you shouldn't need to create objects of this class, just use
 //  the GetMultilineTextFromUser() function

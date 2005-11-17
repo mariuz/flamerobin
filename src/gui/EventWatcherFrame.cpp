@@ -314,7 +314,7 @@ void EventWatcherFrame::OnButtonSaveClick(wxCommandEvent& WXUNUSED(event))
 void EventWatcherFrame::OnButtonAddClick(wxCommandEvent& WXUNUSED(event))
 {
     wxString s;
-    if (GetMultilineTextFromUser(_("Add event(s)"), s, this,
+    if (GetMultilineTextFromUser(this, _("Add event(s)"), s,
         _("You can add multiple events by adding one per line.")))
     {
         addEvents(s);

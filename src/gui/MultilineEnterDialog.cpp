@@ -40,8 +40,8 @@
 #include "gui/MultilineEnterDialog.h"
 #include "styleguide.h"
 //-----------------------------------------------------------------------------
-bool GetMultilineTextFromUser(const wxString& title, wxString& value,
-    wxWindow* parent, const wxString& caption)
+bool GetMultilineTextFromUser(wxWindow* parent, const wxString& title,
+    wxString& value, const wxString& caption)
 {
     MultilineEnterDialog med(parent, title, caption);
     med.setText(value);

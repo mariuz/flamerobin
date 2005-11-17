@@ -69,8 +69,8 @@ bool ObjectDescriptionHandler::handleURI(URI& uri)
         return true;
 
     wxString desc = m->getDescription();
-    if (GetMultilineTextFromUser(wxString::Format(_("Description of %s"), 
-        uri.getParam(wxT("object_name")).c_str()), desc, w))
+    if (GetMultilineTextFromUser(w, wxString::Format(_("Description of %s"),
+        uri.getParam(wxT("object_name")).c_str()), desc))
     {
         wxBusyCursor wait;
         m->setDescription(desc);
