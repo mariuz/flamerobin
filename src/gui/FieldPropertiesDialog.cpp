@@ -51,7 +51,8 @@ using namespace std;
 struct DatatypeProperties
 {
     //wxString name;    // doesn't work with Borland
-    wxChar name[];
+    //wxChar name[];    // doesn't work with MSVC
+    wxChar* name;
     bool hasSize;
     bool hasScale;
     bool isChar;
