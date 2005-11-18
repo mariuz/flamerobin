@@ -359,12 +359,13 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
     PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
 }
 //-----------------------------------------------------------------------------
-void SqlEditor::OnKillFocus(wxFocusEvent& WXUNUSED(event))
+void SqlEditor::OnKillFocus(wxFocusEvent& event)
 {
     if (AutoCompActive())
         AutoCompCancel();
     if (CallTipActive())
         CallTipCancel();
+    event.Skip();   // let the STC do it's job
 }
 //-----------------------------------------------------------------------------
 void SqlEditor::OnMenuUndo(wxCommandEvent& WXUNUSED(event))
