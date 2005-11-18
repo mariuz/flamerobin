@@ -116,7 +116,7 @@ wxString Identifier::get() const
 wxString Identifier::getQuoted() const
 {
     // retrieved only once, needs restart to change (but it is much efficient)
-    static bool alwaysQuoteM = config().get("alwaysQuoteIdentifiers", false);
+    static bool alwaysQuoteM = config().get(wxT("alwaysQuoteIdentifiers"), false);
     if (alwaysQuoteM || needsQuoting())
         return wxT("\"") + textM + wxT("\"");
     else
