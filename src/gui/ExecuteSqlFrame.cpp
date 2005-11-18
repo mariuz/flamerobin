@@ -65,7 +65,7 @@
 
 #define USE_IDENTIFIER_CLASS 1
 #ifdef USE_IDENTIFIER_CLASS
-#include "metadata/identifier.h"
+#include "sql/Identifier.h"
 #endif
 //-----------------------------------------------------------------------------
 bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)

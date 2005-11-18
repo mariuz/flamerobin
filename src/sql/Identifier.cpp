@@ -36,7 +36,7 @@
 #endif
 
 #include "config/Config.h"
-#include "identifier.h"
+#include "Identifier.h"
 //----------------------------------------------------------------------------
 Identifier::Identifier(const wxString& source)
 {
