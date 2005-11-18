@@ -148,6 +148,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_exception.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_function.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_generator.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_identifier.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Index.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitem.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.obj \
@@ -461,6 +462,9 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_function.obj: .\src\metadata\function.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_generator.obj: .\src\metadata\generator.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_identifier.obj: .\src\metadata\identifier.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Index.obj: .\src\metadata\Index.cpp

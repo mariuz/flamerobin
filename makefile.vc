@@ -127,6 +127,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_exception.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_function.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_generator.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_identifier.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Index.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitem.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.obj \
@@ -456,6 +457,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_function.obj: .\src\metadata\function.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_generator.obj: .\src\metadata\generator.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_identifier.obj: .\src\metadata\identifier.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Index.obj: .\src\metadata\Index.cpp

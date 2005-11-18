@@ -666,6 +666,10 @@ SOURCE=.\src\metadata\generator.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\metadata\identifier.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\images.cpp
 # End Source File
 # Begin Source File
@@ -939,6 +943,10 @@ SOURCE=.\src\metadata\function.h
 # Begin Source File
 
 SOURCE=.\src\metadata\generator.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\metadata\identifier.h
 # End Source File
 # Begin Source File
 
