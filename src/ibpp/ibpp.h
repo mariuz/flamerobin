@@ -75,7 +75,7 @@
 // the standard type 'int' is used. And where an exact integer size is required
 // the standard exact precision types definitions of C 99 standard are used.
 
-#if defined(IBPP_MSVC)
+#if defined(IBPP_MSVC) || defined(IBPP_BCC)
 // C99 §7.18.1.1 Exact-width integer types (only those used by IBPP)
 typedef __int16 int16_t;
 typedef __int32 int32_t;
@@ -102,7 +102,7 @@ namespace IBPP
 	//	Dates range checking
 	const int MinDate = -693594;	//  1 JAN 0001
 	const int MaxDate = 2958464;	// 31 DEC 9999
-	
+
 	//	Transaction Access Modes
 	enum TAM {amWrite, amRead};
 
@@ -197,7 +197,7 @@ namespace IBPP
 	public:
 		virtual int SqlCode(void) const throw() = 0;
 		virtual int EngineCode(void) const throw() = 0;
-		
+
 		virtual ~SQLException() throw();
 	};
 
@@ -232,7 +232,7 @@ namespace IBPP
 		void Add(int days);
 		void StartOfMonth();
 		void EndOfMonth();
-	
+
 		Date()			{ Clear(); };
 		Date(int dt)	{ SetDate(dt); }
 		Date(int year, int month, int day);
@@ -410,7 +410,7 @@ namespace IBPP
 		virtual int Read(void*, int size) = 0;
 		virtual void Write(const void*, int size) = 0;
 		virtual void Info(int* Size, int* Largest, int* Segments) = 0;
-	
+
 		virtual void Save(const std::string& data) = 0;
 		virtual void Load(std::string& data) = 0;
 
@@ -514,7 +514,7 @@ namespace IBPP
 			bool* Reserve) = 0;
 		virtual void Statistics(int* Fetches, int* Marks,
 			int* Reads, int* Writes) = 0;
-		virtual void Counts(int* Insert, int* Update, int* Delete, 
+		virtual void Counts(int* Insert, int* Update, int* Delete,
 			int* ReadIdx, int* ReadSeq) = 0;
 		virtual void Users(std::vector<std::string>& users) = 0;
 		virtual int Dialect(void) = 0;
@@ -639,7 +639,7 @@ namespace IBPP
 		virtual int ColumnSize(int) = 0;
 		virtual int ColumnScale(int) = 0;
 		virtual int Columns(void) = 0;
-		
+
 		virtual bool ColumnUpdated(int) = 0;
 		virtual bool Updated() = 0;
 
@@ -764,7 +764,7 @@ namespace IBPP
 		virtual bool Get(const std::string&, double*) = 0;	// DEPRECATED
 	};
 	typedef Ptr<IStatement> Statement;
-	
+
 	//	--- Factories ---
 	//	These methods are the only way to get one of the above
 	//	Interfaces.  They are at the heart of how you program using IBPP.  For
@@ -798,7 +798,7 @@ namespace IBPP
 			{ return TransactionFactory(db.intf(), am, il, lr, flags); }
 
 	//IRow* RowFactory(int dialect);
-	
+
 	IStatement* StatementFactory(IDatabase* db, ITransaction* tr,
 		const std::string& sql);
 
@@ -849,7 +849,7 @@ namespace IBPP
 
 	bool CheckVersion(uint32_t);
 	int GDSVersion(void);
-	
+
 	/* On Win32 platform, ClientLibSearchPaths() allows to setup
 	 * one or multiple additional paths (separated with a ';') where IBPP
 	 * will look for the client library (before the default implicit search
@@ -859,7 +859,7 @@ namespace IBPP
 	 * If called, this function must be called *early* by the application,
 	 * before *any* other function or object methods of IBPP.
 	 * This is a NO-OP on platforms other than Win32. */
-	 
+
 	void ClientLibSearchPaths(const std::string&);
 
 	/* Finally, here are some date and time conversion routines used by IBPP and
