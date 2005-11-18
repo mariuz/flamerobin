@@ -50,7 +50,8 @@ using namespace std;
 //-----------------------------------------------------------------------------
 struct DatatypeProperties
 {
-    wxString name;
+    //wxString name;    // doesn't work with Borland
+    wxChar name[];
     bool hasSize;
     bool hasScale;
     bool isChar;
