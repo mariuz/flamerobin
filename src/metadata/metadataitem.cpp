@@ -440,7 +440,7 @@ void MetadataItem::saveDescription(wxString description)
         getTypeName().c_str()));
 }
 //-----------------------------------------------------------------------------
-void MetadataItem::saveDescription(wxString saveStatement, 
+void MetadataItem::saveDescription(wxString saveStatement,
     wxString description)
 {
     // FIXME: implement findDatabase() vs. getDatabase()
@@ -544,5 +544,68 @@ wxString MetadataItem::getDropSqlStatement() const
 void MetadataItem::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visit(*this);
+}
+//-----------------------------------------------------------------------------
+MetadataItem *Dependency::getParent() const
+{
+    return objectM->getParent();
+}
+//-----------------------------------------------------------------------------
+const wxString& Dependency::getName() const
+{
+    return objectM->getName();
+}
+//-----------------------------------------------------------------------------
+NodeType Dependency::getType() const
+{
+    return objectM->getType();
+}
+//-----------------------------------------------------------------------------
+const wxString Dependency::getTypeName() const
+{
+    return objectM->getTypeName();
+}
+//-----------------------------------------------------------------------------
+MetadataItem *Dependency::getDependentObject() const
+{
+    return objectM;
+}
+//-----------------------------------------------------------------------------
+Dependency::Dependency(MetadataItem *object)
+{
+    objectM = object;
+}
+//-----------------------------------------------------------------------------
+wxString Dependency::getFields() const
+{
+    wxString temp;
+    for (std::vector<wxString>::const_iterator it = fieldsM.begin(); it != fieldsM.end(); ++it)
+    {
+        if (it != fieldsM.begin())
+            temp += wxT(", ");
+        temp += (*it);
+    }
+    return temp;
+}
+//-----------------------------------------------------------------------------
+void Dependency::addField(const wxString& name)
+{
+    if (fieldsM.end() == std::find(fieldsM.begin(), fieldsM.end(), name))
+        fieldsM.push_back(name);
+}
+//-----------------------------------------------------------------------------
+void Dependency::setFields(const std::vector<wxString>& fields)
+{
+    fieldsM = fields;
+}
+//-----------------------------------------------------------------------------
+bool Dependency::operator== (const Dependency& other) const
+{
+    return (objectM == other.getDependentObject() && getFields() == other.getFields());
+}
+//-----------------------------------------------------------------------------
+bool Dependency::operator!= (const Dependency& other) const
+{
+    return (objectM != other.getDependentObject() || getFields() != other.getFields());
 }
 //-----------------------------------------------------------------------------

@@ -132,31 +132,18 @@ private:
     std::vector<wxString> fieldsM;
 
 public:
-    virtual MetadataItem *getParent() const { return objectM->getParent(); };
-    virtual const wxString& getName() const { return objectM->getName(); };
-    virtual NodeType getType() const { return objectM->getType(); };
-    virtual const wxString getTypeName() const { return objectM->getTypeName(); };
-    MetadataItem *getDependentObject() const { return objectM; };
+    virtual MetadataItem *getParent() const;
+    virtual const wxString& getName() const;
+    virtual NodeType getType() const;
+    virtual const wxString getTypeName() const;
+    MetadataItem *getDependentObject() const;
 
-    Dependency(MetadataItem *object) { objectM = object; };
-    wxString getFields() const {
-        wxString temp;
-        for (std::vector<wxString>::const_iterator it = fieldsM.begin(); it != fieldsM.end(); ++it)
-        {
-            if (it != fieldsM.begin())
-                temp += wxT(", ");
-            temp += (*it);
-        }
-        return temp;
-    };
-    void addField(const wxString& name) {
-        if (fieldsM.end() == std::find(fieldsM.begin(), fieldsM.end(), name))
-            fieldsM.push_back(name);
-    };
-    void setFields(const std::vector<wxString>& fields) { fieldsM = fields; };
-
-    bool operator== (const Dependency& other) const {
-        return (objectM == other.getDependentObject() && getFields() == other.getFields()); };
+    Dependency(MetadataItem *object);
+    wxString getFields() const;
+    void addField(const wxString& name);
+    void setFields(const std::vector<wxString>& fields);
+    bool operator== (const Dependency& other) const;
+    bool operator!= (const Dependency& other) const;
 };
 //-----------------------------------------------------------------------------
 #endif //FR_METADATAITEM_H
