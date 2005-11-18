@@ -63,7 +63,7 @@
 #include "ugly.h"
 #include "urihandler.h"
 
-//#define USE_IDENTIFIER_CLASS 1
+#define USE_IDENTIFIER_CLASS 1
 #ifdef USE_IDENTIFIER_CLASS
 #include "metadata/identifier.h"
 #endif
@@ -1131,6 +1131,7 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
                     styled_text_ctrl_sql->SetSelectionStart((int)oldpos);        // select the text in STC
                     styled_text_ctrl_sql->SetSelectionEnd((int)lastpos);        // that failed to execute
                     styled_text_ctrl_sql->centerCaret(false);
+                    styled_text_ctrl_sql->SetFocus();
                     return false;
                 }
                 else if (autoCommitM)
@@ -1249,6 +1250,7 @@ bool ExecuteSqlFrame::execute(wxString sql, bool prepareOnly)
                 statusbar_1->SetStatusText(s, 1);
             }
             executedStatementsM.push_back(executedStatement(sql, type));
+            styled_text_ctrl_sql->SetFocus();
         }
     }
     catch (IBPP::Exception &e)
@@ -1333,8 +1335,6 @@ void ExecuteSqlFrame::commitTransaction()
         // it was supposed to be fixed in wxWidgets versions 2.5.4 and later,
         // but it looks like it is not (at least for gtk1)
         styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
-
-        styled_text_ctrl_sql->SetFocus();
         if (closeWhenTransactionDoneM)
         {
             Close();
@@ -1353,6 +1353,9 @@ void ExecuteSqlFrame::commitTransaction()
     }
 
     notebook_1->SetSelection(0);
+
+    // apparently is has to be at the end to have any effect
+    styled_text_ctrl_sql->SetFocus();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonRollbackClick(wxCommandEvent& WXUNUSED(event))
@@ -1379,7 +1382,6 @@ void ExecuteSqlFrame::rollbackTransaction()
         statusbar_1->SetStatusText(_("Transaction rolled back."), 3);
         InTransaction(false);
         executedStatementsM.clear();
-        styled_text_ctrl_sql->SetFocus();
 
         if (closeWhenTransactionDoneM)
         {
@@ -1399,6 +1401,7 @@ void ExecuteSqlFrame::rollbackTransaction()
     }
 
     notebook_1->SetSelection(0);
+    styled_text_ctrl_sql->SetFocus();
 }
 //-----------------------------------------------------------------------------
 //! toggle the views in the following order:
@@ -1495,7 +1498,7 @@ void ExecuteSqlFrame::setKeywords()
 #ifdef USE_IDENTIFIER_CLASS
     const Identifier::keywordContainer& k = Identifier::getKeywordSet();
     for (Identifier::keywordContainer::const_iterator ci = k.begin(); ci != k.end(); ++ci)
-        as.Add(*ci);
+        as.Add((*ci).Upper());
 #else
     // a bunch of as.Add("something") statements, placed in separate file
     #include "autocomplete-sql_keywords.txt"
