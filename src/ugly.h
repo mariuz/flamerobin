@@ -39,7 +39,7 @@ wxString std2wx(std::string input);
 
 wxString getPlatformName();
 
-#ifdef IBPP_BCC && !defined(uintptr_t)
+#if defined(IBPP_BCC) && !defined(uintptr_t)
 typedef unsigned long uintptr_t;
 #endif
 //-----------------------------------------------------------------------------
