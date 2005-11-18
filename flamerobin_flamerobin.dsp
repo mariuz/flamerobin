@@ -524,6 +524,10 @@ SOURCE=.\src\gui\FindDialog.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\sql\Identifier.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\metadata\Index.cpp
 # End Source File
 # Begin Source File
@@ -577,6 +581,10 @@ SOURCE=.\src\gui\ServerRegistrationDialog.cpp
 # Begin Source File
 
 SOURCE=.\src\gui\SimpleHtmlFrame.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\sql\SimpleParser.cpp
 # End Source File
 # Begin Source File
 
@@ -666,10 +674,6 @@ SOURCE=.\src\metadata\generator.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\metadata\identifier.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\images.cpp
 # End Source File
 # Begin Source File
@@ -715,10 +719,6 @@ SOURCE=.\src\metadata\root.cpp
 # Begin Source File
 
 SOURCE=.\src\metadata\server.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\simpleparser.cpp
 # End Source File
 # Begin Source File
 
@@ -818,6 +818,10 @@ SOURCE=.\src\gui\FindDialog.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\sql\Identifier.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\metadata\Index.h
 # End Source File
 # Begin Source File
@@ -867,6 +871,10 @@ SOURCE=.\src\gui\ServerRegistrationDialog.h
 # Begin Source File
 
 SOURCE=.\src\gui\SimpleHtmlFrame.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\sql\SimpleParser.h
 # End Source File
 # Begin Source File
 
@@ -946,10 +954,6 @@ SOURCE=.\src\metadata\generator.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\metadata\identifier.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\images.h
 # End Source File
 # Begin Source File
@@ -991,10 +995,6 @@ SOURCE=.\src\metadata\root.h
 # Begin Source File
 
 SOURCE=.\src\metadata\server.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\simpleparser.h
 # End Source File
 # Begin Source File
 
