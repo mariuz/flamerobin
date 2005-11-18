@@ -25,18 +25,9 @@
 
 #ifndef FR_GENERATOR_H
 #define FR_GENERATOR_H
-//-----------------------------------------------------------------------------
-// TODO: we should have a header (usually setup.h) to hide such differences
-#if !defined(_MSC_VER) && !defined(__BORLANDC__)
-    #include <stdint.h>
-#endif
 
-#include "metadataitem.h"
-//-----------------------------------------------------------------------------
-// TODO: we should have a header (usually setup.h) to define such missing types
-#if defined(_MSC_VER) || defined(__BORLANDC__)
-    typedef __int64 int64_t;
-#endif
+#include "metadata/metadataitem.h"
+#include "frtypes.h"
 //-----------------------------------------------------------------------------
 class Generator: public MetadataItem
 {

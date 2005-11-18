@@ -942,7 +942,15 @@ SOURCE=.\src\framemanager.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\frtypes.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\frutils.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\frversion.h
 # End Source File
 # Begin Source File
 

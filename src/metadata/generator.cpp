@@ -41,10 +41,10 @@
 
 #include <ibpp.h>
 
-#include "database.h"
 #include "dberror.h"
-#include "generator.h"
-#include "MetadataItemVisitor.h"
+#include "metadata/database.h"
+#include "metadata/generator.h"
+#include "metadata/MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 Generator::Generator()
     : MetadataItem()

@@ -122,7 +122,6 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_exception.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_function.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_generator.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_identifier.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Index.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitem.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.o \
@@ -137,7 +136,8 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_view.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_myTreeCtrl.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_simpleparser.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Identifier.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleParser.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_styleguide.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_styleguidemsw.o \
@@ -424,9 +424,6 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_function.o: ./src/metadata/function.cpp
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_generator.o: ./src/metadata/generator.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_identifier.o: ./src/metadata/identifier.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
-
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Index.o: ./src/metadata/Index.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
@@ -469,7 +466,10 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_myTreeCtrl.o: ./src/myTreeCtrl.cpp
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.o: ./src/objectdescriptionhandler.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_simpleparser.o: ./src/simpleparser.cpp
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Identifier.o: ./src/sql/Identifier.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleParser.o: ./src/sql/SimpleParser.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.o: ./src/statementHistory.cpp

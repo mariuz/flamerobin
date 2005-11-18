@@ -278,7 +278,9 @@
         $(SOURCEDIR)/frDataGrid.h
         $(SOURCEDIR)/frDataGridCells.h
         $(SOURCEDIR)/frDataGridTable.h
+        $(SOURCEDIR)/frtypes.h
         $(SOURCEDIR)/frutils.h
+        $(SOURCEDIR)/frversion.h
         $(SOURCEDIR)/gui/BackupFrame.h
         $(SOURCEDIR)/gui/BackupRestoreBaseFrame.h
         $(SOURCEDIR)/gui/BaseDialog.h
