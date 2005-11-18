@@ -113,10 +113,10 @@ void DatabaseRegistrationDialog::createControls()
 
     if (createM)
     {
-        label_pagesize = new wxStaticText(getControlsPanel(), -1, 
+        label_pagesize = new wxStaticText(getControlsPanel(), -1,
             _("Page size:"));
         const wxString pagesize_choices[] = {
-            wxT("1024"), wxT("2048"), wxT("4096"), wxT("8192"), wxT("16384")
+            _("Default"), wxT("1024"), wxT("2048"), wxT("4096"), wxT("8192"), wxT("16384")
         };
         choice_pagesize = new wxChoice(getControlsPanel(), -1, 
             wxDefaultPosition, wxDefaultSize,
@@ -197,8 +197,9 @@ void DatabaseRegistrationDialog::setControlsProperties()
     button_browse->SetSize(wh, wh);
     if (createM)
     {
-        choice_pagesize->SetSelection(2);
-        choice_dialect->SetSelection(2);
+        choice_pagesize->SetSelection(
+            choice_pagesize->FindString(wxT("4096")));
+        choice_dialect->SetSelection(choice_dialect->FindString(wxT("3")));
     }
     button_ok->SetDefault();
 }
@@ -298,13 +299,12 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
         if (createM)    // create new database
         {
             long ps = 0;
-            choice_pagesize->GetStringSelection().ToLong(&ps);
-
-            int dialect = 3;
-            if (choice_dialect->GetSelection() == 0)
+            if (!choice_pagesize->GetStringSelection().ToLong(&ps))
+                ps = 0;
+            long dialect = 3;
+            if (choice_dialect->GetStringSelection() == wxT("1"))
                 dialect = 1;
-
-            serverM->createDatabase(databaseM, (ps) ? ps : 4096, dialect);
+            serverM->createDatabase(databaseM, ps, dialect);
         }
         EndModal(wxID_OK);
     }
