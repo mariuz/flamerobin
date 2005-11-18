@@ -96,7 +96,7 @@ bool Logger::log2file(Config *cfg, const executedStatement& st,
     {
         wxString header = wxString::Format(
             _("\n/* Logged by FlameRobin %d.%d.%d at %s\n   User: %s    Database: %s */\n"),
-            FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RELEASE,
+            FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS,
             wxDateTime::Now().Format().c_str(),
             db->getUsername().c_str(),
             db->getPath().c_str()

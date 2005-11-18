@@ -543,7 +543,7 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 
     wxString msg;
     msg.Printf(_("FlameRobin %d.%d.%d"),
-        FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RELEASE);
+        FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS);
 #if wxUSE_UNICODE
     msg += wxT(" Unicode");
 #endif
