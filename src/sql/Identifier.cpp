@@ -84,7 +84,12 @@ wxString Identifier::getKeywords(bool lowerCase)
 //----------------------------------------------------------------------------
 bool Identifier::isReserved() const
 {
-    return (getKeywordSet().find(textM.Lower()) == getKeywordSet().end());
+    // needed to be like this, since RogueWave std library does not implement
+    // operator == for const_iterator vs iterator, and find() returns a
+    // non-const iterator.
+    const Identifier::keywordContainer& k = Identifier::getKeywordSet();
+    Identifier::keywordContainer::const_iterator ci = k.find(textM.Lower());
+    return (ci == k.end());
 }
 //----------------------------------------------------------------------------
 bool Identifier::needsQuoting() const
