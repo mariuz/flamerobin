@@ -148,7 +148,6 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_exception.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_function.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_generator.obj \
-	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_identifier.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Index.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitem.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.obj \
@@ -163,7 +162,8 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_view.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_myTreeCtrl.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.obj \
-	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_simpleparser.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Identifier.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleParser.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_styleguide.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_styleguidemsw.obj \
@@ -464,9 +464,6 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_function.obj: .\src\metadata\function.cpp
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_generator.obj: .\src\metadata\generator.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_identifier.obj: .\src\metadata\identifier.cpp
-	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
-
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Index.obj: .\src\metadata\Index.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
@@ -509,7 +506,10 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_myTreeCtrl.obj: .\src\myTreeCtrl.cpp
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.obj: .\src\objectdescriptionhandler.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_simpleparser.obj: .\src\simpleparser.cpp
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Identifier.obj: .\src\sql\Identifier.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleParser.obj: .\src\sql\SimpleParser.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.obj: .\src\statementHistory.cpp

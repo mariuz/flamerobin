@@ -44,7 +44,7 @@
 #include "MetadataItemVisitor.h"
 #include "parameter.h"
 #include "root.h"
-#include "simpleparser.h"
+#include "sql/SimpleParser.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 using namespace std;
@@ -546,8 +546,8 @@ inline void getCleanName(std::stringstream& strstrm, std::string& name)
 bool Database::parseCommitedSql(wxString sql)
 {
     sql += wxT("\n");    // if last line starts with --
-    Parser::removeComments(sql, wxT("/*"), wxT("*/"));
-    Parser::removeComments(sql, wxT("--"), wxT("\n"));
+    SimpleParser::removeComments(sql, wxT("/*"), wxT("*/"));
+    SimpleParser::removeComments(sql, wxT("--"), wxT("\n"));
     sql = sql.Upper();              // make sql UpperCase for easier handling
     std::stringstream strstrm;      // parse statement into tokens
     std::string action, object_type, name;

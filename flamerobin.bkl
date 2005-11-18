@@ -312,7 +312,6 @@
         $(SOURCEDIR)/metadata/exception.h
         $(SOURCEDIR)/metadata/function.h
         $(SOURCEDIR)/metadata/generator.h
-        $(SOURCEDIR)/metadata/identifier.h
         $(SOURCEDIR)/metadata/Index.h
         $(SOURCEDIR)/metadata/metadataitem.h
         $(SOURCEDIR)/metadata/MetadataItemVisitor.h
@@ -325,7 +324,8 @@
         $(SOURCEDIR)/metadata/table.h
         $(SOURCEDIR)/metadata/trigger.h
         $(SOURCEDIR)/metadata/view.h
-        $(SOURCEDIR)/simpleparser.h
+        $(SOURCEDIR)/sql/Identifier.h
+        $(SOURCEDIR)/sql/SimpleParser.h
         $(SOURCEDIR)/myTreeCtrl.h
         $(SOURCEDIR)/statementHistory.h
         $(SOURCEDIR)/styleguide.h
@@ -396,7 +396,6 @@
         $(SOURCEDIR)/metadata/exception.cpp
         $(SOURCEDIR)/metadata/function.cpp
         $(SOURCEDIR)/metadata/generator.cpp
-        $(SOURCEDIR)/metadata/identifier.cpp
         $(SOURCEDIR)/metadata/Index.cpp
         $(SOURCEDIR)/metadata/metadataitem.cpp
         $(SOURCEDIR)/metadata/MetadataItemVisitor.cpp
@@ -411,7 +410,8 @@
         $(SOURCEDIR)/metadata/view.cpp
         $(SOURCEDIR)/myTreeCtrl.cpp
         $(SOURCEDIR)/objectdescriptionhandler.cpp
-        $(SOURCEDIR)/simpleparser.cpp
+        $(SOURCEDIR)/sql/Identifier.cpp
+        $(SOURCEDIR)/sql/SimpleParser.cpp
         $(SOURCEDIR)/statementHistory.cpp
         $(SOURCEDIR)/styleguide.cpp
         $(FR_PLATFORMSPECIFICSOURCES)

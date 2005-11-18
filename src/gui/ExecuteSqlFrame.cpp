@@ -58,7 +58,7 @@
 #include "metadata/procedure.h"
 #include "metadata/server.h"
 #include "metadata/view.h"
-#include "simpleparser.h"
+#include "sql/SimpleParser.h"
 #include "styleguide.h"
 #include "ugly.h"
 #include "urihandler.h"
@@ -107,7 +107,7 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
     wxString sql = ownerM->GetText().Upper();
 
     // currently we don't support having comments and quotes (it's complicated)
-    //if (!Parser::stripSql(sql))
+    //if (!SimpleParser::stripSql(sql))
     //    return true;
 
     wxString::size_type psel, pfrom;
@@ -128,7 +128,7 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
 
     // read in the table names, and find position where FROM clause ends
     std::vector<wxString> tableNames;
-    wxString::size_type from_end = pfrom + Parser::getTableNames(tableNames, sql.substr(pfrom));
+    wxString::size_type from_end = pfrom + SimpleParser::getTableNames(tableNames, sql.substr(pfrom));
 
     // if table is not there, add it
     if (std::find(tableNames.begin(), tableNames.end(), t->getName()) == tableNames.end())
@@ -1087,8 +1087,8 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
         stringstream strstrm;            // Search and intercept
         std::string first, second, third;    // SET TERM and COMMIT statements
         wxString strippedSql(sql);
-        Parser::removeComments(strippedSql, wxT("/*"), wxT("*/"));
-        Parser::removeComments(strippedSql, wxT("--"), wxT("\n"));
+        SimpleParser::removeComments(strippedSql, wxT("/*"), wxT("*/"));
+        SimpleParser::removeComments(strippedSql, wxT("--"), wxT("\n"));
         strstrm << wx2std(strippedSql.Upper());
         strstrm >> first;
         strstrm >> second;
@@ -1163,8 +1163,8 @@ bool ExecuteSqlFrame::execute(wxString sql, bool prepareOnly)
     // check if sql only contains comments
     wxString sqlclean(sql);
     sqlclean += wxT("\n");                                            // just in case -- comment is on last line
-    Parser::removeComments(sqlclean, wxT("/*"), wxT("*/"));
-    Parser::removeComments(sqlclean, wxT("--"), wxT("\n"));
+    SimpleParser::removeComments(sqlclean, wxT("/*"), wxT("*/"));
+    SimpleParser::removeComments(sqlclean, wxT("--"), wxT("\n"));
     while (true)
     {
         wxString::size_type pos = sqlclean.find(wxT(";"));        // remove ;

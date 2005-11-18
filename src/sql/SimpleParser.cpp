@@ -39,10 +39,10 @@
 #include <fstream>
 #include <sstream>
 
-#include "simpleparser.h"
+#include "SimpleParser.h"
 //-----------------------------------------------------------------------------
 // returns false if errors occur
-bool Parser::stripSql(wxString &sql)
+bool SimpleParser::stripSql(wxString &sql)
 {
     while (true)    // strip quotes and brackets
     {
@@ -82,7 +82,7 @@ bool Parser::stripSql(wxString &sql)
 //-----------------------------------------------------------------------------
 // get next token from sql wxString
 // returns number of characters removed
-wxString::size_type Parser::nextToken(wxString& in, wxString& out)
+wxString::size_type SimpleParser::nextToken(wxString& in, wxString& out)
 {
     if (in.empty())
         return 0;
@@ -122,7 +122,7 @@ wxString::size_type Parser::nextToken(wxString& in, wxString& out)
 // gets table names from SELECT sql script
 // input: sql statement without SELECT clause, i.e. should start with: "FROM"
 //
-wxString::size_type Parser::getTableNames(std::vector<wxString>& list, wxString sql)
+wxString::size_type SimpleParser::getTableNames(std::vector<wxString>& list, wxString sql)
 {
     sql += wxT(" ");     // parser needs blank space at end
 
@@ -187,7 +187,7 @@ wxString::size_type Parser::getTableNames(std::vector<wxString>& list, wxString 
 }
 //-----------------------------------------------------------------------------
 //! removes comments from sql statements, with taking care of single quotes
-void Parser::removeComments(wxString& sql, const wxString startComment, const wxString endComment)
+void SimpleParser::removeComments(wxString& sql, const wxString startComment, const wxString endComment)
 {
     using namespace std;
     wxString::size_type oldpos = 0;

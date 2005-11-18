@@ -109,7 +109,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_exception.o \
 	flamerobin_function.o \
 	flamerobin_generator.o \
-	flamerobin_identifier.o \
 	flamerobin_Index.o \
 	flamerobin_metadataitem.o \
 	flamerobin_MetadataItemVisitor.o \
@@ -124,7 +123,8 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_view.o \
 	flamerobin_myTreeCtrl.o \
 	flamerobin_objectdescriptionhandler.o \
-	flamerobin_simpleparser.o \
+	flamerobin_Identifier.o \
+	flamerobin_SimpleParser.o \
 	flamerobin_statementHistory.o \
 	flamerobin_styleguide.o \
 	$(__FR_PLATFORMSPECIFICSOURCES_OBJECTS) \
@@ -441,9 +441,6 @@ flamerobin_function.o: $(srcdir)/src/metadata/function.cpp $(FLAMEROBIN_ODEP)
 flamerobin_generator.o: $(srcdir)/src/metadata/generator.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/generator.cpp
 
-flamerobin_identifier.o: $(srcdir)/src/metadata/identifier.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/identifier.cpp
-
 flamerobin_Index.o: $(srcdir)/src/metadata/Index.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/Index.cpp
 
@@ -486,8 +483,11 @@ flamerobin_myTreeCtrl.o: $(srcdir)/src/myTreeCtrl.cpp $(FLAMEROBIN_ODEP)
 flamerobin_objectdescriptionhandler.o: $(srcdir)/src/objectdescriptionhandler.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/objectdescriptionhandler.cpp
 
-flamerobin_simpleparser.o: $(srcdir)/src/simpleparser.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/simpleparser.cpp
+flamerobin_Identifier.o: $(srcdir)/src/sql/Identifier.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/Identifier.cpp
+
+flamerobin_SimpleParser.o: $(srcdir)/src/sql/SimpleParser.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/SimpleParser.cpp
 
 flamerobin_statementHistory.o: $(srcdir)/src/statementHistory.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/statementHistory.cpp
