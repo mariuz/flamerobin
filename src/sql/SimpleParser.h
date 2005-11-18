@@ -4,7 +4,7 @@
 #include <vector>
 //-----------------------------------------------------------------------------
 // collection of functions to parse SQL scripts
-class Parser
+class SimpleParser
 {
 public:
     static bool stripSql(wxString &sql);
