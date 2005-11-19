@@ -39,6 +39,7 @@ protected:
     int locksCountM;
     bool needsNotifyObjectsM;
 
+    virtual bool isLocked();
     virtual void lockSubject();
     virtual void unlockSubject();
 public:

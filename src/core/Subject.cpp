@@ -59,7 +59,7 @@ Subject::~Subject()
 //-----------------------------------------------------------------------------
 void Subject::attachObserver(Observer* observer)
 {
-    if(observer && std::find(observersM.begin(), observersM.end(), observer)
+    if (observer && std::find(observersM.begin(), observersM.end(), observer)
         == observersM.end())
     {
         observer->addSubject(this);
@@ -74,10 +74,10 @@ void Subject::detachObserver(Observer* observer)
 
     observer->removeSubject(this);
     observersM.erase(find(observersM.begin(), observersM.end(), observer));
-
-    // TODO: remove this when no negative side-effects
+/*  // TODO: remove this when no negative side-effects
     if(!observersM.size())
         locksCountM = 0;
+*/
 }
 //-----------------------------------------------------------------------------
 void Subject::detachAllObservers()
@@ -85,38 +85,44 @@ void Subject::detachAllObservers()
     for (ObserverIterator i = observersM.begin(); i != observersM.end(); ++i)
         (*i)->removeSubject(this);
     observersM.clear();
-    // TODO: remove this when no negative side-effects
+/*  // TODO: remove this when no negative side-effects
     locksCountM = 0;
+*/
 }
 //-----------------------------------------------------------------------------
 void Subject::notifyObservers()
 {
-    if (locksCountM > 0)
+    if (isLocked())
         needsNotifyObjectsM = true;
     else
     {
         // make sure there are no reentrancy problems
         ++locksCountM;
-        for(ObserverIterator i = observersM.begin(); i != observersM.end(); ++i)
+        for (ObserverIterator i = observersM.begin(); i != observersM.end(); ++i)
             (*i)->update();
         --locksCountM;
         needsNotifyObjectsM = false;
     }
 }
 //-----------------------------------------------------------------------------
-void Subject::lockSubject()
+inline void Subject::lockSubject()
 {
     ++locksCountM;
 }
 //-----------------------------------------------------------------------------
 void Subject::unlockSubject()
 {
-    if (locksCountM > 0)
+    if (isLocked())
     {
         --locksCountM;
-        if (locksCountM == 0 && needsNotifyObjectsM)
+        if (!isLocked() && needsNotifyObjectsM)
             notifyObservers();
     }
+}
+//-----------------------------------------------------------------------------
+inline bool Subject::isLocked()
+{
+    return locksCountM > 0;
 }
 //-----------------------------------------------------------------------------
 SubjectLocker::SubjectLocker(Subject* subject)
