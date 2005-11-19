@@ -37,10 +37,12 @@ class PrintableHtmlWindow;
 class SimpleHtmlFrame: public BaseFrame
 {
 private:
+    wxString fileNameM;
     PrintableHtmlWindow* html_window;
     static wxString getFrameId(const wxFileName& fileName);
 protected:
     virtual const wxString getName() const;
+    virtual const wxString getStorageName() const;
     virtual const wxRect getDefaultRect() const;
 public:
     SimpleHtmlFrame(wxWindow* parent, const wxFileName& fileName);

@@ -38,8 +38,8 @@
 
 #include "config/Config.h"
 #include "images.h"
-#include "PrintableHtmlWindow.h"
-#include "SimpleHtmlFrame.h"
+#include "gui/PrintableHtmlWindow.h"
+#include "gui/SimpleHtmlFrame.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 bool showHtmlFile(wxWindow* parent, const wxFileName& fileName)
@@ -73,6 +73,7 @@ SimpleHtmlFrame::SimpleHtmlFrame(wxWindow* parent, const wxFileName& fileName)
     html_window->SetRelatedStatusBar(0);
 
     html_window->LoadPage(fileName.GetFullPath());
+    fileNameM = fileName.GetFullName();
     setIdString(this, getFrameId(fileName));
 
 #include "fricon.xpm"
@@ -90,6 +91,14 @@ const wxRect SimpleHtmlFrame::getDefaultRect() const
 const wxString SimpleHtmlFrame::getName() const
 {
     return wxT("SimpleHtmlFrameFrame");
+}
+//-----------------------------------------------------------------------------
+const wxString SimpleHtmlFrame::getStorageName() const
+{
+    wxString name(getName());
+    if (!fileNameM.IsEmpty())
+        name += Config::pathSeparator + fileNameM;
+    return name;
 }
 //-----------------------------------------------------------------------------
 wxString SimpleHtmlFrame::getFrameId(const wxFileName& fileName)
