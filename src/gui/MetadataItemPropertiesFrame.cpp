@@ -599,7 +599,7 @@ void MetadataItemPropertiesFrame::processHtmlFile(wxString fileName)
     if (!localFileName.FileExists())
     {
         wxString msg;
-        msg.Printf(_("The file \"%s\" does not exist."), 
+        msg.Printf(_("The file \"%s\" does not exist."),
             localFileName.GetFullPath().c_str());
         throw FRError(msg);
     }
@@ -608,7 +608,7 @@ void MetadataItemPropertiesFrame::processHtmlFile(wxString fileName)
     if (!file)
     {
         wxString msg;
-        msg.Printf(_("The file \"%s\" cannot be opened."), 
+        msg.Printf(_("The file \"%s\" cannot be opened."),
             fileName.c_str());
         throw FRError(msg);
     }
@@ -632,7 +632,10 @@ void MetadataItemPropertiesFrame::removeSubject(Subject* subject)
     Observer::removeSubject(subject);
     // main observed object is getting destroyed
     if (subject == objectM)
+    {
+        objectM = 0;
         Close();
+    }
 }
 //-----------------------------------------------------------------------------
 void MetadataItemPropertiesFrame::setPage(const wxString& type)
@@ -707,22 +710,17 @@ bool PageHandler::handleURI(URI& uri)
     if (!ms.ToULong(&mo))
         return true;
     MetadataItemPropertiesFrame* m = (MetadataItemPropertiesFrame*)mo;
-    bool skip = false;
     if (uri.getParam(wxT("target")) == wxT("new"))
     {
         wxWindow* mainFrame = m->GetParent();
-        if (mainFrame)
-        {
+        if (mainFrame)                                              // !delayed, force_new
             m = frameManager().showMetadataPropertyFrame(mainFrame, m->getObservedObject(), false, true);
-            skip = true;
-        }
     }
 
     if (m)
     {
         m->setPage(uri.getParam(wxT("type")));
-        if (!skip)
-            frameManager().rebuildMenu();
+        frameManager().rebuildMenu();
     }
     return true;
 }

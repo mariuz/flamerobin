@@ -95,7 +95,7 @@ void FrameManager::rebuildMenu()
 
         if (dmm.find(db) == dmm.end())        // add database if not already there
             dmm.insert(dmm.begin(), std::pair<Database*, wxMenu*>(db, new wxMenu));
-        (dmm[db])->Append(id, ((*it).second.frame)->GetTitle());
+        (dmm[db])->Append(id, mf->GetTitle());
         (*it).second.id = id;
         ++id;
     }
@@ -173,7 +173,8 @@ MetadataItemPropertiesFrame* FrameManager::showMetadataPropertyFrame(wxWindow* p
         mipf->Show();
         mipf->Raise();
     }
-    rebuildMenu();
+    if (!force_new)     // forced ones would rebuild themselves anyway
+        rebuildMenu();
     return mipf;
 }
 //-----------------------------------------------------------------------------
