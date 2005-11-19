@@ -53,22 +53,27 @@ bool showHtmlFile(wxWindow* parent, const wxFileName& fileName)
         return false;
     }
 
-    SimpleHtmlFrame *shf;
-    // TODO: check for and use an existing viewer instead of creating a new one
+    SimpleHtmlFrame* shf = SimpleHtmlFrame::findFrameFor(fileName);
+    if (shf)
+    {
+        shf->Raise();
+        return true;
+    }
     shf = new SimpleHtmlFrame(parent, fileName.GetFullPath());
     shf->Show();
     return true;
 }
 //-----------------------------------------------------------------------------
-SimpleHtmlFrame::SimpleHtmlFrame(wxWindow* parent, const wxString& pageName)
+SimpleHtmlFrame::SimpleHtmlFrame(wxWindow* parent, const wxFileName& fileName)
     : BaseFrame(parent, -1, wxEmptyString)
 {
-    window_1 = new PrintableHtmlWindow(this);
+    html_window = new PrintableHtmlWindow(this);
     CreateStatusBar();
-    window_1->SetRelatedFrame(this, wxT("%s"));
-    window_1->SetRelatedStatusBar(0);
+    html_window->SetRelatedFrame(this, wxT("%s"));
+    html_window->SetRelatedStatusBar(0);
 
-    window_1->LoadPage(pageName);
+    html_window->LoadPage(fileName.GetFullPath());
+    setIdString(this, getFrameId(fileName));
 
 #include "fricon.xpm"
     wxBitmap bmp(fricon_xpm);
@@ -85,5 +90,21 @@ const wxRect SimpleHtmlFrame::getDefaultRect() const
 const wxString SimpleHtmlFrame::getName() const
 {
     return wxT("SimpleHtmlFrameFrame");
+}
+//-----------------------------------------------------------------------------
+wxString SimpleHtmlFrame::getFrameId(const wxFileName& fileName)
+{
+    if (fileName.HasName())
+        return wxString(wxT("SimpleHtmlFrame/") + fileName.GetFullPath());
+    else
+        return wxEmptyString;
+}
+//-----------------------------------------------------------------------------
+SimpleHtmlFrame* SimpleHtmlFrame::findFrameFor(const wxFileName& fileName)
+{
+    BaseFrame* bf = frameFromIdString(getFrameId(fileName));
+    if (!bf)
+        return 0;
+    return dynamic_cast<SimpleHtmlFrame*>(bf);
 }
 //-----------------------------------------------------------------------------
