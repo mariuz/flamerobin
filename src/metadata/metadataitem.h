@@ -53,7 +53,7 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
 //-----------------------------------------------------------------------------
 NodeType getTypeByName(wxString name);
 //-----------------------------------------------------------------------------
-class MetadataItem: public Subject, public Element
+class MetadataItem: public Element, public Subject
 {
 private:
     wxString nameM;
