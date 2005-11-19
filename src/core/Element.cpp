@@ -21,7 +21,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Milan Babuskov
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -43,5 +43,9 @@
 void Element::acceptVisitor(Visitor* visitor)
 {
     visitor->visit(*this);
+}
+//-----------------------------------------------------------------------------
+Element::~Element()
+{
 }
 //-----------------------------------------------------------------------------

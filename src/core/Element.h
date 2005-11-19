@@ -21,7 +21,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Milan Babuskov
 */
 //-----------------------------------------------------------------------------
 #ifndef FR_ELEMENT_H
@@ -35,6 +35,7 @@ class Element
 {
 public:
     virtual void acceptVisitor(Visitor* visitor);
+    virtual ~Element();
 };
 //-----------------------------------------------------------------------------
 #endif //FR_ELEMENT_H
