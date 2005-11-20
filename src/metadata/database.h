@@ -71,8 +71,8 @@ private:
     wxString databaseCharsetM;
 
     wxString pathM;
-    Credentials credentials;
-    Credentials *connectionCredentials;
+    Credentials credentialsM;
+    Credentials* connectionCredentialsM;
 
     MetadataCollection<Domain> domainsM;
     MetadataCollection<Exception> exceptionsM;
@@ -93,9 +93,8 @@ private:
     mutable unsigned int idM;
 public:
     Database();
-    Database(const Database&);
+    Database(const Database& rhs);
 
-    void initChildren();
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
     void getCollections(std::vector<MetadataItem *>& temp);
 

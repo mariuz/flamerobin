@@ -39,6 +39,15 @@ public:
     typedef typename std::list<T> ContainerType;
     typedef typename ContainerType::iterator iterator;
     typedef typename ContainerType::const_iterator const_iterator;
+private:
+    ContainerType itemsM;
+public:
+    void setProperties(MetadataItem* parent, const wxString& name, NodeType type)
+    {
+        setParent(parent);
+        setName(name);
+        setType(type);
+    }
 
     void remove(T *item)        // removes item from vector
     {
@@ -179,10 +188,6 @@ public:
     {
         return itemsM.size();
     }
-
-private:
-    ContainerType itemsM;
-
 };
 //-----------------------------------------------------------------------------
 /* FIXME: from some yet unknown reason, this doesn't compile on g++ 3.3

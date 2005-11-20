@@ -52,8 +52,10 @@ Procedure::Procedure()
     parametersLoadedM = false;
 }
 //-----------------------------------------------------------------------------
-Procedure::Procedure(const Procedure&)
+Procedure::Procedure(const Procedure& rhs)
+    : MetadataItem(rhs), parametersM(rhs.parametersM)
 {
+    parametersLoadedM = rhs.parametersLoadedM;
     parametersM.setParent(this);
 }
 //-----------------------------------------------------------------------------

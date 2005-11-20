@@ -40,7 +40,7 @@ protected:
     virtual void saveDescription(wxString description);
 public:
     Procedure();
-    Procedure(const Procedure&);
+    Procedure(const Procedure& rhs);
 
     wxString getCreateSqlTemplate() const;   // overrides MetadataItem::getCreateSqlTemplate()
 

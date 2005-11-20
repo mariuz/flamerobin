@@ -45,18 +45,15 @@
 using namespace std;
 //-----------------------------------------------------------------------------
 Server::Server()
-    : MetadataItem()
 {
     typeM = ntServer;
-
-    hostnameM = wxT("");
-    portM = wxT("");
 
     databasesM.setParent(this);
     databasesM.setType(ntServer);
 }
 //-----------------------------------------------------------------------------
-Server::Server(const Server&)
+Server::Server(const Server& rhs)
+    : MetadataItem(rhs), hostnameM(rhs.hostnameM), portM(rhs.portM)
 {
     databasesM.setParent(this);
 }
@@ -78,7 +75,6 @@ Database* Server::addDatabase(Database& db)
 {
     Database* temp = databasesM.add(db);
     temp->setParent(this);                  // grab it from collection
-    temp->initChildren();
     notifyObservers();
     getGlobalRoot().save();
     return temp;

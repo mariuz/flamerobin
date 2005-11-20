@@ -42,7 +42,7 @@ private:
     MetadataCollection<Database> databasesM;
 public:
     Server();
-    Server(const Server&);
+    Server(const Server& rhs);
 
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
     virtual bool orderedChildren() const;

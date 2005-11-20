@@ -37,13 +37,13 @@
 class Relation: public MetadataItem
 {
 protected:
-	MetadataCollection <Column>columnsM;
+	MetadataCollection<Column> columnsM;
 
     virtual void loadDescription();
     virtual void saveDescription(wxString description);
 public:
 	Relation();
-    Relation(const Relation&);
+    Relation(const Relation& rhs);
 
 	bool checkAndLoadColumns();
 	virtual bool loadColumns();

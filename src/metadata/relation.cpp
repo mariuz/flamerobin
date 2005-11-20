@@ -48,7 +48,8 @@ Relation::Relation()
     columnsM.setParent(this);
 }
 //-----------------------------------------------------------------------------
-Relation::Relation(const Relation&)
+Relation::Relation(const Relation& rhs)
+    : MetadataItem(rhs), columnsM(rhs.columnsM)
 {
     columnsM.setParent(this);
 }

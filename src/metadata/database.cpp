@@ -39,11 +39,11 @@
 #include <sstream>
 
 #include "config/Config.h"
-#include "database.h"
 #include "dberror.h"
-#include "MetadataItemVisitor.h"
-#include "parameter.h"
-#include "root.h"
+#include "metadata/database.h"
+#include "metadata/MetadataItemVisitor.h"
+#include "metadata/parameter.h"
+#include "metadata/root.h"
 #include "sql/SimpleParser.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
@@ -94,31 +94,33 @@ Database::Database()
 {
     typeM = ntDatabase;
     connectedM = false;
-    connectionCredentials = 0;
+    connectionCredentialsM = 0;
 
     // has to be here, since notify() might be called before initChildren()
-    domainsM.setName(wxT("Domains"));
-    domainsM.setType(ntDomains);
-    exceptionsM.setName(wxT("Exceptions"));
-    exceptionsM.setType(ntExceptions);
-    functionsM.setName(wxT("Functions"));
-    functionsM.setType(ntFunctions);
-    generatorsM.setName(wxT("Generators"));
-    generatorsM.setType(ntGenerators);
-    proceduresM.setName(wxT("Procedures"));
-    proceduresM.setType(ntProcedures);
-    rolesM.setName(wxT("Roles"));
-    rolesM.setType(ntRoles);
-    tablesM.setName(wxT("Tables"));
-    tablesM.setType(ntTables);
-    triggersM.setName(wxT("Triggers"));
-    triggersM.setType(ntTriggers);
-    viewsM.setName(wxT("Views"));
-    viewsM.setType(ntViews);
+    domainsM.setProperties(this, wxT("Domains"), ntDomains);
+    exceptionsM.setProperties(this, wxT("Exceptions"), ntExceptions);
+    functionsM.setProperties(this, wxT("Functions"), ntFunctions);
+    generatorsM.setProperties(this, wxT("Generators"), ntGenerators);
+    proceduresM.setProperties(this, wxT("Procedures"), ntProcedures);
+    rolesM.setProperties(this, wxT("Roles"), ntRoles);
+    tablesM.setProperties(this, wxT("Tables"), ntTables);
+    triggersM.setProperties(this, wxT("Triggers"), ntTriggers);
+    viewsM.setProperties(this, wxT("Views"), ntViews);
 }
 //-----------------------------------------------------------------------------
-Database::Database(const Database&)
+Database::Database(const Database& rhs)
+    : MetadataItem(rhs), databaseM(rhs.databaseM), connectedM(rhs.connectedM),
+    databaseCharsetM(rhs.databaseCharsetM), pathM(rhs.pathM),
+    credentialsM(rhs.credentialsM), connectionCredentialsM(0),
+    domainsM(rhs.domainsM), exceptionsM(rhs.exceptionsM), 
+    functionsM(rhs.functionsM), generatorsM(rhs.generatorsM), 
+    proceduresM(rhs.proceduresM), rolesM(rhs.rolesM), tablesM(rhs.tablesM), 
+    triggersM(rhs.triggersM), viewsM(rhs.viewsM), collationsM(rhs.collationsM), 
+    idM(rhs.idM)
 {
+    if (rhs.connectionCredentialsM)
+        connectionCredentialsM = new Credentials(*connectionCredentialsM);
+
     domainsM.setParent(this);
     exceptionsM.setParent(this);
     functionsM.setParent(this);
@@ -130,27 +132,19 @@ Database::Database(const Database&)
     viewsM.setParent(this);
 }
 //-----------------------------------------------------------------------------
-void Database::initChildren()
-{
-    std::vector<MetadataItem *> temp;
-    getCollections(temp);
-    for (std::vector<MetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
-        (*it)->setParent(this);
-}
-//-----------------------------------------------------------------------------
 void Database::prepareTemporaryCredentials()
 {
     resetCredentials();
-    connectionCredentials = new Credentials;
-    connectionCredentials->setCharset(credentials.getCharset());    // default to database charset
+    connectionCredentialsM = new Credentials;
+    connectionCredentialsM->setCharset(credentialsM.getCharset()); // default to database charset
 }
 //-----------------------------------------------------------------------------
 void Database::resetCredentials()
 {
-    if (connectionCredentials)  // i.e. there is some other
+    if (connectionCredentialsM)  // i.e. there is some other
     {
-        delete connectionCredentials;
-        connectionCredentials = 0;
+        delete connectionCredentialsM;
+        connectionCredentialsM = 0;
     }
 }
 //-----------------------------------------------------------------------------
@@ -1050,10 +1044,10 @@ wxString Database::getDatabaseCharset() const
 //-----------------------------------------------------------------------------
 wxString Database::getConnectionCharset() const
 {
-    if (connectionCredentials)
-        return connectionCredentials->getCharset();
+    if (connectionCredentialsM)
+        return connectionCredentialsM->getCharset();
     else
-        return credentials.getCharset();
+        return credentialsM.getCharset();
 }
 //-----------------------------------------------------------------------------
 bool Database::usesDifferentConnectionCharset() const
@@ -1066,26 +1060,26 @@ bool Database::usesDifferentConnectionCharset() const
 //-----------------------------------------------------------------------------
 wxString Database::getUsername() const
 {
-    if (connectionCredentials)
-        return connectionCredentials->getUsername();
+    if (connectionCredentialsM)
+        return connectionCredentialsM->getUsername();
     else
-        return credentials.getUsername();
+        return credentialsM.getUsername();
 }
 //-----------------------------------------------------------------------------
 wxString Database::getPassword() const
 {
-    if (connectionCredentials)
-        return connectionCredentials->getPassword();
+    if (connectionCredentialsM)
+        return connectionCredentialsM->getPassword();
     else
-        return credentials.getPassword();
+        return credentialsM.getPassword();
 }
 //-----------------------------------------------------------------------------
 wxString Database::getRole() const
 {
-    if (connectionCredentials)
-        return connectionCredentials->getRole();
+    if (connectionCredentialsM)
+        return connectionCredentialsM->getRole();
     else
-        return credentials.getRole();
+        return credentialsM.getRole();
 }
 //-----------------------------------------------------------------------------
 IBPP::Database& Database::getIBPPDatabase()
@@ -1100,34 +1094,34 @@ void Database::setPath(wxString value)
 //-----------------------------------------------------------------------------
 void Database::setConnectionCharset(wxString value)
 {
-    if (connectionCredentials)
-        connectionCredentials->setCharset(value);
+    if (connectionCredentialsM)
+        connectionCredentialsM->setCharset(value);
     else
-        credentials.setCharset(value);
+        credentialsM.setCharset(value);
 }
 //-----------------------------------------------------------------------------
 void Database::setUsername(wxString value)
 {
-    if (connectionCredentials)
-        connectionCredentials->setUsername(value);
+    if (connectionCredentialsM)
+        connectionCredentialsM->setUsername(value);
     else
-        credentials.setUsername(value);
+        credentialsM.setUsername(value);
 }
 //-----------------------------------------------------------------------------
 void Database::setPassword(wxString value)
 {
-    if (connectionCredentials)
-        connectionCredentials->setPassword(value);
+    if (connectionCredentialsM)
+        connectionCredentialsM->setPassword(value);
     else
-        credentials.setPassword(value);
+        credentialsM.setPassword(value);
 }
 //-----------------------------------------------------------------------------
 void Database::setRole(wxString value)
 {
-    if (connectionCredentials)
-        connectionCredentials->setRole(value);
+    if (connectionCredentialsM)
+        connectionCredentialsM->setRole(value);
     else
-        credentials.setRole(value);
+        credentialsM.setRole(value);
 }
 //-----------------------------------------------------------------------------
 const wxString Database::getTypeName() const
