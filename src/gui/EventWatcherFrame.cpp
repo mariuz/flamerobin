@@ -78,7 +78,7 @@ void EventLogControl::logEvent(const wxString& name, int count)
 }
 //-----------------------------------------------------------------------------
 EventWatcherFrame::EventWatcherFrame(wxWindow *parent, Database *db)
-    :BaseFrame(parent, -1, wxEmptyString), databaseM(db), skipEventsM(false)
+    : BaseFrame(parent, -1, wxEmptyString), databaseM(db), skipEventsM(false)
 {
     monitoringM = false;
     timerM.SetOwner(this, ID_timer);

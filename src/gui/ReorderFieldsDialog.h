@@ -23,44 +23,20 @@
   Contributor(s): Michael Hieke
 */
 
-#ifndef REORDERFIELDSDIALOG_H
-#define REORDERFIELDSDIALOG_H
+#ifndef FR_REORDERFIELDSDIALOG_H
+#define FR_REORDERFIELDSDIALOG_H
 //-----------------------------------------------------------------------------
 #include <wx/wx.h>
-#include <wx/image.h>
 
 #include "core/Observer.h"
 #include "gui/BaseDialog.h"
-#include "metadata/table.h"
+
+class Table;
 //-----------------------------------------------------------------------------
 class ReorderFieldsDialog: public BaseDialog, public Observer {
-public:
-    enum {
-        ID_list_box_fields = 100,
-        ID_button_up,
-        ID_button_down,
-        ID_button_first,
-        ID_button_last,
-        ID_button_ok,
-        ID_button_cancel = wxID_CANCEL
-    };
-
-    void OnListBoxSelChange(wxCommandEvent& event);
-    void OnOkButtonClick(wxCommandEvent& event);
-    void OnDownButtonClick(wxCommandEvent& event);
-    void OnFirstButtonClick(wxCommandEvent& event);
-    void OnLastButtonClick(wxCommandEvent& event);
-    void OnUpButtonClick(wxCommandEvent& event);
-
-    ReorderFieldsDialog(wxWindow* parent, Table *table);
-
 private:
-    Table *tableM;
+    Table* tableM;
 
-    void do_layout();
-    void moveSelected(int moveby);
-    void set_properties();
-protected:
     wxListBox* list_box_fields;
     wxBitmapButton* button_first;
     wxBitmapButton* button_up;
@@ -69,12 +45,35 @@ protected:
     wxButton* button_ok;
     wxButton* button_cancel;
 
-    virtual const wxString getName() const;
-    void removeSubject(Subject* subject);
-    void update();
+    void createControls();
+    void layoutControls();
+
+    void moveSelected(int moveby);
     void updateButtons();
+protected:
+    virtual const wxString getName() const;
+    virtual void removeSubject(Subject* subject);
+    virtual void update();
+public:
+    ReorderFieldsDialog(wxWindow* parent, Table *table);
+    // creation of statement execution frame outside of dialog class
+    const wxString getReorderStatement();
+private:
+    // event handling
+    enum {
+        ID_list_box_fields = 100,
+        ID_button_up,
+        ID_button_down,
+        ID_button_first,
+        ID_button_last
+    };
+    void OnListBoxSelChange(wxCommandEvent& event);
+    void OnDownButtonClick(wxCommandEvent& event);
+    void OnFirstButtonClick(wxCommandEvent& event);
+    void OnLastButtonClick(wxCommandEvent& event);
+    void OnUpButtonClick(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
-#endif // REORDERFIELDSDIALOG_H
+#endif // FR_REORDERFIELDSDIALOG_H

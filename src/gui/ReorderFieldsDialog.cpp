@@ -38,8 +38,9 @@
 
 #include <string>
 
-#include "ExecuteSqlFrame.h"
-#include "ReorderFieldsDialog.h"
+#include "gui/ExecuteSqlFrame.h"
+#include "gui/ReorderFieldsDialog.h"
+#include "metadata/table.h"
 #include "styleguide.h"
 #include "ugly.h"
 #include "urihandler.h"
@@ -50,13 +51,22 @@ namespace reorder_icons {
     #include "down.xpm"
 };
 //-----------------------------------------------------------------------------
-ReorderFieldsDialog::ReorderFieldsDialog(wxWindow* parent, Table* table):
-    BaseDialog(parent, -1, wxEmptyString)
+ReorderFieldsDialog::ReorderFieldsDialog(wxWindow* parent, Table* table)
+    : BaseDialog(parent, -1, wxEmptyString)
 {
     tableM = table;
     tableM->checkAndLoadColumns();
     tableM->attachObserver(this);
 
+    SetTitle(_("Reordering Fields of Table ") + table->getName());
+    createControls();
+    layoutControls();
+    update();
+    button_ok->SetDefault();
+}
+//-----------------------------------------------------------------------------
+void ReorderFieldsDialog::createControls()
+{
     const wxString fields_choices[] = {
         _("List of fields")
     };
@@ -66,18 +76,11 @@ ReorderFieldsDialog::ReorderFieldsDialog(wxWindow* parent, Table* table):
     button_up = new wxBitmapButton(getControlsPanel(), ID_button_up, wxBitmap(reorder_icons::up_xpm));
     button_down = new wxBitmapButton(getControlsPanel(), ID_button_down, wxBitmap(reorder_icons::down_xpm));
     button_last = new wxBitmapButton(getControlsPanel(), ID_button_last, wxBitmap(reorder_icons::down_xpm));
-    button_ok = new wxButton(getControlsPanel(), ID_button_ok, _("Reorder"));
-    button_cancel = new wxButton(getControlsPanel(), ID_button_cancel, _("Cancel"));
-
-    set_properties();
-    do_layout();
-
-    SetTitle(_("Reordering fields of table ") + table->getName());
-    update();
+    button_ok = new wxButton(getControlsPanel(), wxID_OK, _("Reorder"));
+    button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
 }
 //-----------------------------------------------------------------------------
-//! implementation details
-void ReorderFieldsDialog::do_layout()
+void ReorderFieldsDialog::layoutControls()
 {
     wxBoxSizer* sizerBtns1 = new wxBoxSizer(wxVERTICAL);
     sizerBtns1->Add(0, 0, 1, wxEXPAND);
@@ -135,11 +138,6 @@ void ReorderFieldsDialog::removeSubject(Subject* subject)
         Close();
 }
 //-----------------------------------------------------------------------------
-void ReorderFieldsDialog::set_properties()
-{
-    button_ok->SetDefault();
-}
-//-----------------------------------------------------------------------------
 void ReorderFieldsDialog::update()
 {
     std::vector<MetadataItem *> temp;
@@ -161,6 +159,18 @@ void ReorderFieldsDialog::updateButtons()
     button_last->Enable(sel >= 0 && sel < itemcnt - 1);
 }
 //-----------------------------------------------------------------------------
+const wxString ReorderFieldsDialog::getReorderStatement()
+{
+    wxString sql;
+    for (int i = 0; i < list_box_fields->GetCount(); ++i)
+    {
+        sql += wxString::Format(wxT("ALTER TABLE %s ALTER %s POSITION %d;\n"),
+            tableM->getName().c_str(), 
+            list_box_fields->GetString(i).c_str(), i + 1);
+    }
+    return sql;
+}
+//-----------------------------------------------------------------------------
 //! event handling
 BEGIN_EVENT_TABLE(ReorderFieldsDialog, BaseDialog)
     EVT_LISTBOX(ReorderFieldsDialog::ID_list_box_fields, ReorderFieldsDialog::OnListBoxSelChange)
@@ -168,31 +178,11 @@ BEGIN_EVENT_TABLE(ReorderFieldsDialog, BaseDialog)
     EVT_BUTTON(ReorderFieldsDialog::ID_button_first, ReorderFieldsDialog::OnFirstButtonClick)
     EVT_BUTTON(ReorderFieldsDialog::ID_button_last, ReorderFieldsDialog::OnLastButtonClick)
     EVT_BUTTON(ReorderFieldsDialog::ID_button_up, ReorderFieldsDialog::OnUpButtonClick)
-    EVT_BUTTON(ReorderFieldsDialog::ID_button_ok, ReorderFieldsDialog::OnOkButtonClick)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void ReorderFieldsDialog::OnListBoxSelChange(wxCommandEvent& WXUNUSED(event))
 {
     updateButtons();
-}
-//-----------------------------------------------------------------------------
-void ReorderFieldsDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
-{
-    wxString sql;
-    for (int i=0; i<list_box_fields->GetCount(); ++i)
-    {
-        sql += wxT("ALTER TABLE ") + tableM->getName() + wxT(" ALTER ") +
-            list_box_fields->GetString(i) + wxT(" POSITION ") +
-            wxString::Format(wxT("%d"), i + 1) + wxT(";\n");
-    }
-
-    // create ExecuteSqlFrame with option to close at once
-    ExecuteSqlFrame *eff = new ExecuteSqlFrame(GetParent(), -1, _("Executing change script"));
-    eff->setDatabase(tableM->getDatabase());
-    eff->setSql(sql);
-    Close();
-    eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
-    eff->Show();
 }
 //-----------------------------------------------------------------------------
 void ReorderFieldsDialog::OnDownButtonClick(wxCommandEvent& WXUNUSED(event))
@@ -237,7 +227,20 @@ bool ReorderFieldsHandler::handleURI(URI& uri)
         return true;
 
     ReorderFieldsDialog rfd(w, t);
-    rfd.ShowModal();
+    // NOTE: this has been moved here from OnOkButtonClick() to make frame
+    //       activation work properly.  Basically activation of another
+    //       frame has to happen outside wxDialog::ShowModal(), because it
+    //       does at the end re-focus the last focused control, raising
+    //       the parent frame over the newly created sql execution frame
+    if (rfd.ShowModal())
+    {
+        // create ExecuteSqlFrame with option to close at once
+        ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1, rfd.GetTitle());
+        esf->setDatabase(t->getDatabase());
+        esf->setSql(rfd.getReorderStatement());
+        esf->executeAllStatements(true);
+        esf->Show();
+    }
     return true;
 }
 //-----------------------------------------------------------------------------
