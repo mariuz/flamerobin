@@ -70,7 +70,7 @@ bool Domain::loadInfo()
 		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
 		st1->Prepare(
 			"select t.rdb$type, f.rdb$field_sub_type, f.rdb$field_length,"
-			" f.rdb$field_precision, f.rdb$field_scale, c.rdb$character_set_name"
+			" f.rdb$field_precision, f.rdb$field_scale, c.rdb$character_set_name, f.rdb$character_length"
 			" from rdb$fields f"
 			" join rdb$types t on f.rdb$field_type=t.rdb$type"
 			" left outer join rdb$character_sets c on c.rdb$character_set_id = f.rdb$character_set_id"
@@ -91,6 +91,8 @@ bool Domain::loadInfo()
 		else
 			st1->Get(2, &subtypeM);
 		st1->Get(3, &lengthM);
+        if (!st1->IsNull(7))        // use rdb$character_length for character types
+            st1->Get(7, &lengthM);
 		if (st1->IsNull(4))
 			precisionM = 0;
 		else
@@ -135,7 +137,7 @@ wxString Domain::getDatatypeAsString()
 	return datatype2string(datatypeM, scaleM, precisionM, subtypeM, lengthM);
 }
 //-----------------------------------------------------------------------------
-wxString Domain::datatype2string(short datatype, short scale, short precision, 
+wxString Domain::datatype2string(short datatype, short scale, short precision,
     short subtype, short length)
 {
 	std::ostringstream retval;		// this will be returned
