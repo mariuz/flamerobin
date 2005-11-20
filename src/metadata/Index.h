@@ -29,7 +29,7 @@
 
 #include <vector>
 
-#include "metadataitem.h"
+#include "metadata/metadataitem.h"
 //-----------------------------------------------------------------------------
 class Index: public MetadataItem
 {

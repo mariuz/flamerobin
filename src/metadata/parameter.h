@@ -27,8 +27,8 @@
 #ifndef FR_PARAMETER_H
 #define FR_PARAMETER_H
 
-#include "column.h"
-#include "metadataitem.h"
+#include "metadata/column.h"
+#include "metadata/metadataitem.h"
 
 typedef enum { ptInput, ptOutput } ParameterType;
 

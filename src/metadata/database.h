@@ -30,17 +30,17 @@
 
 #include <ibpp.h>
 
-#include "collection.h"
-#include "domain.h"
-#include "exception.h"
-#include "function.h"
-#include "generator.h"
-#include "metadataitem.h"
-#include "procedure.h"
-#include "role.h"
-#include "table.h"
-#include "trigger.h"
-#include "view.h"
+#include "metadata/collection.h"
+#include "metadata/domain.h"
+#include "metadata/exception.h"
+#include "metadata/function.h"
+#include "metadata/generator.h"
+#include "metadata/metadataitem.h"
+#include "metadata/procedure.h"
+#include "metadata/role.h"
+#include "metadata/table.h"
+#include "metadata/trigger.h"
+#include "metadata/view.h"
 //-----------------------------------------------------------------------------
 class Server;
 //-----------------------------------------------------------------------------
@@ -93,6 +93,8 @@ private:
     mutable unsigned int idM;
 public:
     Database();
+    Database(const Database&);
+
     void initChildren();
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
     void getCollections(std::vector<MetadataItem *>& temp);

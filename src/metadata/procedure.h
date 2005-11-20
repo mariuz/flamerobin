@@ -26,20 +26,21 @@
 #ifndef FR_PROCEDURE_H
 #define FR_PROCEDURE_H
 
-#include "metadataitem.h"
-#include "parameter.h"
+#include "metadata/metadataitem.h"
+#include "metadata/parameter.h"
 //-----------------------------------------------------------------------------
 class Procedure: public MetadataItem
 {
 private:
+    MetadataCollection<Parameter> parametersM;
     bool parametersLoadedM;
     bool loadParameters();
-    MetadataCollection <Parameter> parametersM;
 protected:
     virtual void loadDescription();
     virtual void saveDescription(wxString description);
 public:
     Procedure();
+    Procedure(const Procedure&);
 
     wxString getCreateSqlTemplate() const;   // overrides MetadataItem::getCreateSqlTemplate()
 

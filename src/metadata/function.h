@@ -27,7 +27,7 @@
 #ifndef FR_FUNCTION_H
 #define FR_FUNCTION_H
 
-#include "metadataitem.h"
+#include "metadata/metadataitem.h"
 //-----------------------------------------------------------------------------
 class Function: public MetadataItem
 {

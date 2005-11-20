@@ -29,8 +29,7 @@
 #include <list>
 #include <sstream>
 
-#include "domain.h"
-#include "metadataitem.h"
+#include "metadata/metadataitem.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 template <class T>

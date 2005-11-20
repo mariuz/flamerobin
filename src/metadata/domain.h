@@ -27,7 +27,7 @@
 #ifndef FR_DOMAIN_H
 #define FR_DOMAIN_H
 
-#include "metadataitem.h"
+#include "metadata/metadataitem.h"
 //-----------------------------------------------------------------------------
 class Domain: public MetadataItem
 {

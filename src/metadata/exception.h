@@ -27,7 +27,7 @@
 #ifndef FR_EXCEPTION_H
 #define FR_EXCEPTION_H
 
-#include "metadataitem.h"
+#include "metadata/metadataitem.h"
 //-----------------------------------------------------------------------------
 class Exception: public MetadataItem
 {

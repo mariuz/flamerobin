@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
 #include <vector>
 
-#include "metadataitem.h"
+#include "metadata/metadataitem.h"
 //-----------------------------------------------------------------------------
 // These could all be simple "struct"s but we want to add some functionality later
 //

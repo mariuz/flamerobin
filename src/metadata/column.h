@@ -27,9 +27,10 @@
 #ifndef FR_COLUMN_H
 #define FR_COLUMN_H
 
-#include "domain.h"
-#include "metadataitem.h"
+#include "metadata/metadataitem.h"
 
+class Domain;
+//-----------------------------------------------------------------------------
 class Column: public MetadataItem
 {
 private:
@@ -51,7 +52,7 @@ public:
 	bool isComputed() const;
 	wxString getSource() const;
 	wxString getCollation() const;
-	Domain *getDomain() const;
+	Domain* getDomain() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------

@@ -38,22 +38,26 @@
 
 #include <ibpp.h>
 
-#include "collection.h"
-#include "database.h"
 #include "dberror.h"
 #include "frutils.h"
-#include "MetadataItemVisitor.h"
-#include "parameter.h"
-#include "procedure.h"
+#include "metadata/collection.h"
+#include "metadata/database.h"
+#include "metadata/MetadataItemVisitor.h"
+#include "metadata/procedure.h"
 //-----------------------------------------------------------------------------
 Procedure::Procedure()
 {
-    typeM = ntProcedure;
     parametersM.setParent(this);
+    typeM = ntProcedure;
     parametersLoadedM = false;
 }
 //-----------------------------------------------------------------------------
-Parameter *Procedure::addParameter(Parameter &c)
+Procedure::Procedure(const Procedure&)
+{
+    parametersM.setParent(this);
+}
+//-----------------------------------------------------------------------------
+Parameter* Procedure::addParameter(Parameter &c)
 {
     if (!parametersLoadedM)
         loadParameters();

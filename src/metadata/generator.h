@@ -26,8 +26,8 @@
 #ifndef FR_GENERATOR_H
 #define FR_GENERATOR_H
 
-#include "metadata/metadataitem.h"
 #include "frtypes.h"
+#include "metadata/metadataitem.h"
 //-----------------------------------------------------------------------------
 class Generator: public MetadataItem
 {

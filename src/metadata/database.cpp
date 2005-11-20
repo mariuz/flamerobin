@@ -117,6 +117,19 @@ Database::Database()
     viewsM.setType(ntViews);
 }
 //-----------------------------------------------------------------------------
+Database::Database(const Database&)
+{
+    domainsM.setParent(this);
+    exceptionsM.setParent(this);
+    functionsM.setParent(this);
+    generatorsM.setParent(this);
+    proceduresM.setParent(this);
+    rolesM.setParent(this);
+    tablesM.setParent(this);
+    triggersM.setParent(this);
+    viewsM.setParent(this);
+}
+//-----------------------------------------------------------------------------
 void Database::initChildren()
 {
     std::vector<MetadataItem *> temp;

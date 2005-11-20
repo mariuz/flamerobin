@@ -27,7 +27,7 @@
 #ifndef FR_ROLE_H
 #define FR_ROLE_H
 
-#include "metadataitem.h"
+#include "metadata/metadataitem.h"
 
 class Role: public MetadataItem
 {

@@ -27,7 +27,7 @@
 #ifndef FR_TRIGGER_H
 #define FR_TRIGGER_H
 
-#include "metadataitem.h"
+#include "metadata/metadataitem.h"
 //-----------------------------------------------------------------------------
 class Trigger: public MetadataItem
 {

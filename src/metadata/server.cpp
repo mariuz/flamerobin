@@ -38,9 +38,9 @@
 
 #include "config/Config.h"
 #include "core/Visitor.h"
-#include "MetadataItemVisitor.h"
-#include "root.h"
-#include "server.h"
+#include "metadata/MetadataItemVisitor.h"
+#include "metadata/root.h"
+#include "metadata/server.h"
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------
@@ -54,6 +54,11 @@ Server::Server()
 
     databasesM.setParent(this);
     databasesM.setType(ntServer);
+}
+//-----------------------------------------------------------------------------
+Server::Server(const Server&)
+{
+    databasesM.setParent(this);
 }
 //-----------------------------------------------------------------------------
 bool Server::getChildren(vector<MetadataItem*>& temp)

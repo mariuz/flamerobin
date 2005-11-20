@@ -30,22 +30,22 @@
 
 // [GoF] Visitor pattern. Abstract Visitor for metadata items.
 
-#include "column.h"
 #include "core/Visitor.h"
-#include "database.h"
-#include "domain.h"
-#include "exception.h"
-#include "function.h"
-#include "generator.h"
-#include "metadataitem.h"
-#include "parameter.h"
-#include "procedure.h"
-#include "role.h"
-#include "root.h"
-#include "server.h"
-#include "table.h"
-#include "trigger.h"
-#include "view.h"
+#include "metadata/column.h"
+#include "metadata/database.h"
+#include "metadata/domain.h"
+#include "metadata/exception.h"
+#include "metadata/function.h"
+#include "metadata/generator.h"
+#include "metadata/metadataitem.h"
+#include "metadata/parameter.h"
+#include "metadata/procedure.h"
+#include "metadata/role.h"
+#include "metadata/root.h"
+#include "metadata/server.h"
+#include "metadata/table.h"
+#include "metadata/trigger.h"
+#include "metadata/view.h"
 //-----------------------------------------------------------------------------
 class MetadataItemVisitor: public Visitor
 {
