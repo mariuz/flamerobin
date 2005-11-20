@@ -27,7 +27,7 @@
 #ifndef FR_VIEW_H
 #define FR_VIEW_H
 
-#include "relation.h"
+#include "metadata/relation.h"
 //-----------------------------------------------------------------------------
 class View: public Relation
 {

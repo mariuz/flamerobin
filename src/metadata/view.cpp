@@ -38,18 +38,16 @@
 
 #include <ibpp.h>
 
-#include "collection.h"
 #include "core/Visitor.h"
-#include "database.h"
 #include "dberror.h"
 #include "frutils.h"
-#include "MetadataItemVisitor.h"
-#include "relation.h"
+#include "metadata/collection.h"
+#include "metadata/database.h"
+#include "metadata/MetadataItemVisitor.h"
+#include "metadata/view.h"
 #include "ugly.h"
-#include "view.h"
 //-----------------------------------------------------------------------------
 View::View()
-	: Relation()
 {
 	typeM = ntView;
 }

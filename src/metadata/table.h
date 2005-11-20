@@ -27,12 +27,12 @@
 #ifndef FR_TABLE_H
 #define FR_TABLE_H
 
-#include "collection.h"
-#include "column.h"
-#include "constraints.h"
-#include "Index.h"
-#include "relation.h"
-#include "trigger.h"
+#include "metadata/collection.h"
+#include "metadata/column.h"
+#include "metadata/constraints.h"
+#include "metadata/Index.h"
+#include "metadata/relation.h"
+#include "metadata/trigger.h"
 //-----------------------------------------------------------------------------
 //! small helper class
 class Join

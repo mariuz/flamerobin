@@ -39,15 +39,14 @@
 #include <ibpp.h>
 
 #include "core/Visitor.h"
-#include "database.h"
 #include "dberror.h"
 #include "frutils.h"
-#include "MetadataItemVisitor.h"
-#include "table.h"
+#include "metadata/database.h"
+#include "metadata/MetadataItemVisitor.h"
+#include "metadata/table.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 Table::Table()
-    : Relation()
 {
     typeM = ntTable;
     primaryKeyLoadedM = false;
