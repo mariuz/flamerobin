@@ -40,11 +40,11 @@
 
 #include "config/Config.h"
 #include "core/FRError.h"
-#include "database.h"
 #include "dberror.h"
 #include "frutils.h"
-#include "metadataitem.h"
-#include "MetadataItemVisitor.h"
+#include "metadata/database.h"
+#include "metadata/metadataitem.h"
+#include "metadata/MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------
@@ -544,6 +544,13 @@ wxString MetadataItem::getDropSqlStatement() const
 void MetadataItem::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visit(*this);
+}
+//-----------------------------------------------------------------------------
+bool MetadataItem::isLocked()
+{
+    if (Subject::isLocked())
+        return true;
+    return (parentM && parentM->isLocked());
 }
 //-----------------------------------------------------------------------------
 MetadataItem *Dependency::getParent() const

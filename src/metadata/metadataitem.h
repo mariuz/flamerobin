@@ -57,13 +57,15 @@ class MetadataItem: public Element, public Subject
 {
 private:
     wxString nameM;
-    MetadataItem *parentM;
+    MetadataItem* parentM;
     wxString descriptionM;
     bool descriptionLoadedM;
     void setDescriptionM(wxString description);
 
 protected:
     NodeType typeM;
+
+    virtual bool isLocked();
 
     virtual void loadDescription();
     void loadDescription(wxString loadStatement);
