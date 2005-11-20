@@ -29,10 +29,10 @@
 
 #include <vector>
 
-#include "collection.h"
-#include "column.h"
-#include "metadataitem.h"
-#include "trigger.h"
+#include "metadata/collection.h"
+#include "metadata/column.h"
+#include "metadata/metadataitem.h"
+#include "metadata/trigger.h"
 //-----------------------------------------------------------------------------
 class Relation: public MetadataItem
 {
@@ -43,6 +43,8 @@ protected:
     virtual void saveDescription(wxString description);
 public:
 	Relation();
+    Relation(const Relation&);
+
 	bool checkAndLoadColumns();
 	virtual bool loadColumns();
 	Column *addColumn(Column &c);

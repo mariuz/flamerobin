@@ -38,13 +38,17 @@
 
 #include <ibpp.h>
 
-#include "collection.h"
-#include "database.h"
 #include "dberror.h"
 #include "frutils.h"
-#include "relation.h"
+#include "metadata/database.h"
+#include "metadata/relation.h"
 //-----------------------------------------------------------------------------
 Relation::Relation()
+{
+    columnsM.setParent(this);
+}
+//-----------------------------------------------------------------------------
+Relation::Relation(const Relation&)
 {
     columnsM.setParent(this);
 }
@@ -66,7 +70,7 @@ bool Relation::checkAndLoadColumns()
 bool Relation::loadColumns()
 {
     columnsM.clear();
-    Database *d = static_cast<Database *>(getParent());
+    Database *d = static_cast<Database*>(getParent());
     if (!d)
     {
         lastError().setMessage(wxT("database not set"));
