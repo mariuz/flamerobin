@@ -1311,6 +1311,7 @@ void ExecuteSqlFrame::commitTransaction()
         statusbar_1->SetStatusText(_("Transaction commited"), 3);
         InTransaction(false);
 
+        SubjectLocker locker(databaseM);
         // log statements, done before parsing in case parsing crashes FR
         for (std::vector<executedStatement>::const_iterator it = executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
             if (!Logger::logStatement(*it, databaseM))

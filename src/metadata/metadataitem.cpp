@@ -546,11 +546,30 @@ void MetadataItem::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------
-bool MetadataItem::isLocked()
+void MetadataItem::lockChildren()
 {
-    if (Subject::isLocked())
-        return true;
-    return (parentM && parentM->isLocked());
+// NOTE: getChildren() can not be used here, because we want to lock the 
+//       MetadataCollection objects as well.  That means we have to override
+//       this method in all descendant classes - oh well...
+}
+//-----------------------------------------------------------------------------
+void MetadataItem::lockSubject()
+{
+    Subject::lockSubject();
+    lockChildren();
+}
+//-----------------------------------------------------------------------------
+void MetadataItem::unlockChildren()
+{
+// NOTE: getChildren() can not be used here, because we want to lock the 
+//       MetadataCollection objects as well.  That means we have to override
+//       this method in all descendant classes - oh well...
+}
+//-----------------------------------------------------------------------------
+void MetadataItem::unlockSubject()
+{
+    Subject::unlockSubject();
+    unlockChildren();
 }
 //-----------------------------------------------------------------------------
 MetadataItem *Dependency::getParent() const

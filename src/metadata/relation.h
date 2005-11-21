@@ -37,20 +37,23 @@
 class Relation: public MetadataItem
 {
 protected:
-	MetadataCollection<Column> columnsM;
+    MetadataCollection<Column> columnsM;
 
     virtual void loadDescription();
     virtual void saveDescription(wxString description);
 public:
-	Relation();
+    Relation();
     Relation(const Relation& rhs);
 
-	bool checkAndLoadColumns();
-	virtual bool loadColumns();
-	Column *addColumn(Column &c);
+    virtual void lockChildren();
+    virtual void unlockChildren();
+
+    bool checkAndLoadColumns();
+    virtual bool loadColumns();
+    Column *addColumn(Column &c);
 
     bool getChildren(std::vector<MetadataItem *>& temp);
-	bool getTriggers(std::vector<Trigger *>& list, 
+    bool getTriggers(std::vector<Trigger *>& list, 
         Trigger::firingTimeType beforeOrAfter);
 };
 //-----------------------------------------------------------------------------

@@ -399,6 +399,7 @@ bool Database::loadObjects(NodeType type)
         default:            return false;
     };
 
+    SubjectLocker locker(this);
     try
     {
         IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
@@ -1002,6 +1003,32 @@ void Database::getCollections(std::vector<MetadataItem*>& temp)
     temp.push_back(&viewsM);
 }
 //-----------------------------------------------------------------------------
+void Database::lockChildren()
+{
+    domainsM.lockSubject();
+    exceptionsM.lockSubject();
+    functionsM.lockSubject();
+    generatorsM.lockSubject();
+    proceduresM.lockSubject();
+    rolesM.lockSubject();
+    tablesM.lockSubject();
+    triggersM.lockSubject();
+    viewsM.lockSubject();
+}
+//-----------------------------------------------------------------------------
+void Database::unlockChildren()
+{
+    domainsM.unlockSubject();
+    exceptionsM.unlockSubject();
+    functionsM.unlockSubject();
+    generatorsM.unlockSubject();
+    proceduresM.unlockSubject();
+    rolesM.unlockSubject();
+    tablesM.unlockSubject();
+    triggersM.unlockSubject();
+    viewsM.unlockSubject();
+}
+//-----------------------------------------------------------------------------
 MetadataCollection<Generator>::const_iterator Database::generatorsBegin()
 {
     return generatorsM.begin();
@@ -1134,7 +1161,7 @@ void Database::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------
-Server *Database::getServer() const
+Server* Database::getServer() const
 {
     return dynamic_cast<Server*>(getParent());
 }

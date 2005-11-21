@@ -42,6 +42,9 @@ public:
     Procedure();
     Procedure(const Procedure& rhs);
 
+    virtual void lockChildren();
+    virtual void unlockChildren();
+
     wxString getCreateSqlTemplate() const;   // overrides MetadataItem::getCreateSqlTemplate()
 
     bool getChildren(std::vector<MetadataItem *>& temp);

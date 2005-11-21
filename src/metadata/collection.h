@@ -69,7 +69,13 @@ public:
     {
         item.setParent(this);
         itemsM.push_back(item);
-        notifyObservers();
+        if (isLocked())
+        {
+            for (unsigned int i = getLockCount(); i > 0; i--)
+                item.lockSubject();
+        }
+        else
+            notifyObservers();
         return &itemsM.back();
     }
 
@@ -79,6 +85,8 @@ public:
         T item;
         item.setParent(this);
         item.setName(name);
+        for (unsigned int i = getLockCount(); i > 0; i--)
+            item.lockSubject();
 
         iterator pos = itemsM.begin();      // find the place
         for (; pos != itemsM.end(); ++pos)
@@ -99,6 +107,8 @@ public:
         T item;                     // have its properties set, so for example getName() would return
         item.setParent(this);       // empty wxString. It is responsibility of the caller to call notify
         itemsM.push_back(item);     // after it has set the properties.
+        for (unsigned int i = getLockCount(); i > 0; i--)
+            item.lockSubject();
         return &itemsM.back();
     }
 
@@ -187,6 +197,18 @@ public:
     virtual size_t getChildrenCount() const
     {
         return itemsM.size();
+    }
+
+    virtual void lockChildren()
+    {
+        for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
+            (*it).lockSubject();
+    }
+
+    virtual void unlockChildren()
+    {
+        for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
+            (*it).unlockSubject();
     }
 };
 //-----------------------------------------------------------------------------

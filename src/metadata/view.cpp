@@ -49,89 +49,89 @@
 //-----------------------------------------------------------------------------
 View::View()
 {
-	typeM = ntView;
+    typeM = ntView;
 }
 //-----------------------------------------------------------------------------
 //! returns false if an error occurs
 bool View::getSource(wxString& source)
 {
-	source = wxT("");
-	Database *d = static_cast<Database *>(getParent());
-	if (!d)
-	{
-		lastError().setMessage(wxT("Database not set."));
-		return false;
-	}
+    source = wxT("");
+    Database *d = getDatabase();
+    if (!d)
+    {
+        lastError().setMessage(wxT("Database not set."));
+        return false;
+    }
 
-	IBPP::Database& db = d->getIBPPDatabase();
+    IBPP::Database& db = d->getIBPPDatabase();
 
-	try
-	{
-		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-		tr1->Start();
-		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-		st1->Prepare("select rdb$view_source from rdb$relations where rdb$relation_name = ?");
-		st1->Set(1, wx2std(getName()));
-		st1->Execute();
-		st1->Fetch();
+    try
+    {
+        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+        tr1->Start();
+        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+        st1->Prepare("select rdb$view_source from rdb$relations where rdb$relation_name = ?");
+        st1->Set(1, wx2std(getName()));
+        st1->Execute();
+        st1->Fetch();
         readBlob(st1, 1, source);
-		tr1->Commit();
-		return true;
-	}
-	catch (IBPP::Exception &e)
-	{
-		lastError().setMessage(std2wx(e.ErrorMessage()));
-	}
-	catch (...)
-	{
-		lastError().setMessage(_("System error."));
-	}
+        tr1->Commit();
+        return true;
+    }
+    catch (IBPP::Exception &e)
+    {
+        lastError().setMessage(std2wx(e.ErrorMessage()));
+    }
+    catch (...)
+    {
+        lastError().setMessage(_("System error."));
+    }
 
-	return false;
+    return false;
 }
 //-----------------------------------------------------------------------------
 wxString View::getAlterSql()
 {
-	if (!checkAndLoadColumns())
-		return lastError().getMessage();
-	wxString src;
-	if (!getSource(src))
-		return lastError().getMessage();
+    if (!checkAndLoadColumns())
+        return lastError().getMessage();
+    wxString src;
+    if (!getSource(src))
+        return lastError().getMessage();
 
-	wxString sql = wxT("DROP VIEW ") + getName() + wxT(";\n");
-	sql += wxT("CREATE VIEW ") + getName() + wxT(" (");
+    wxString sql = wxT("DROP VIEW ") + getName() + wxT(";\n");
+    sql += wxT("CREATE VIEW ") + getName() + wxT(" (");
 
-	bool first = true;
-	for (MetadataCollection <Column>::const_iterator it = columnsM.begin(); it != columnsM.end(); ++it)
-	{
-		if (first)
-			first = false;
-		else
-			sql += wxT(", ");
-		sql += (*it).getName();
-	}
-	sql += wxT(")\nAS ");
-	sql += src;
-	return sql;
+    bool first = true;
+    for (MetadataCollection <Column>::const_iterator it = columnsM.begin(); it != columnsM.end(); ++it)
+    {
+        if (first)
+            first = false;
+        else
+            sql += wxT(", ");
+        sql += (*it).getName();
+    }
+    sql += wxT(")\nAS ");
+    sql += src;
+    return sql;
 }
 //-----------------------------------------------------------------------------
 wxString View::getCreateSqlTemplate() const
 {
-	wxString sql(
-		wxT("CREATE VIEW name ( view_column, ...)\n")
-		wxT("AS\n")
-		wxT("/* write select statement here */\n")
-		wxT("WITH CHECK OPTION;\n"));
-	return sql;
+    wxString sql(
+        wxT("CREATE VIEW name ( view_column, ...)\n")
+        wxT("AS\n")
+        wxT("/* write select statement here */\n")
+        wxT("WITH CHECK OPTION;\n"));
+    return sql;
 }
 //-----------------------------------------------------------------------------
 const wxString View::getTypeName() const
 {
-	return wxT("VIEW");
+    return wxT("VIEW");
 }
 //-----------------------------------------------------------------------------
 void View::acceptVisitor(MetadataItemVisitor* visitor)
 {
-	visitor->visit(*this);
+    visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------

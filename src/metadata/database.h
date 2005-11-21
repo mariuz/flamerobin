@@ -91,6 +91,9 @@ private:
     wxString getTableForIndex(wxString indexName);
 
     mutable unsigned int idM;
+protected:
+    virtual void lockChildren();
+    virtual void unlockChildren();
 public:
     Database();
     Database(const Database& rhs);

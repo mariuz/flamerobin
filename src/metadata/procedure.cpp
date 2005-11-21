@@ -73,6 +73,16 @@ bool Procedure::getChildren(std::vector<MetadataItem *>& temp)
     return parametersM.getChildren(temp);
 }
 //-----------------------------------------------------------------------------
+void Procedure::lockChildren()
+{
+    parametersM.lockSubject();
+}
+//-----------------------------------------------------------------------------
+void Procedure::unlockChildren()
+{
+    parametersM.unlockSubject();
+}
+//-----------------------------------------------------------------------------
 bool Procedure::isSelectable()
 {
     if (!parametersLoadedM)
@@ -150,7 +160,7 @@ bool Procedure::checkAndLoadParameters(bool force)
 bool Procedure::loadParameters()
 {
     parametersM.clear();
-    Database* d = static_cast<Database*>(getParent());
+    Database* d = getDatabase();
     if (!d)
     {
         lastError().setMessage(wxT("database not set"));
@@ -208,7 +218,7 @@ bool Procedure::loadParameters()
 //! returns false if an error occurs
 bool Procedure::getSource(wxString& source)
 {
-    Database* d = static_cast<Database*>(getParent());
+    Database* d = getDatabase();
     if (!d)
     {
         lastError().setMessage(wxT("Database not set."));

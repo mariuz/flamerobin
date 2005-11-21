@@ -58,6 +58,16 @@ Server::Server(const Server& rhs)
     databasesM.setParent(this);
 }
 //-----------------------------------------------------------------------------
+void Server::lockChildren()
+{
+    databasesM.lockSubject();
+}
+//-----------------------------------------------------------------------------
+void Server::unlockChildren()
+{
+    databasesM.unlockSubject();
+}
+//-----------------------------------------------------------------------------
 bool Server::getChildren(vector<MetadataItem*>& temp)
 {
     return databasesM.getChildren(temp);

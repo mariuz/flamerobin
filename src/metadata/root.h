@@ -47,6 +47,9 @@ public:
     Root();
     ~Root();
 
+    virtual void lockChildren();
+    virtual void unlockChildren();
+
     Server* addServer(Server& server);
     void removeServer(Server* server);
 

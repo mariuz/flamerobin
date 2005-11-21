@@ -71,7 +71,7 @@ bool Relation::checkAndLoadColumns()
 bool Relation::loadColumns()
 {
     columnsM.clear();
-    Database *d = static_cast<Database*>(getParent());
+    Database *d = getDatabase();
     if (!d)
     {
         lastError().setMessage(wxT("database not set"));
@@ -177,6 +177,16 @@ bool Relation::getTriggers(std::vector<Trigger *>& list, Trigger::firingTimeType
 bool Relation::getChildren(std::vector<MetadataItem*>& temp)
 {
     return columnsM.getChildren(temp);
+}
+//-----------------------------------------------------------------------------
+void Relation::lockChildren()
+{
+    columnsM.lockSubject();
+}
+//-----------------------------------------------------------------------------
+void Relation::unlockChildren()
+{
+    columnsM.unlockSubject();
 }
 //-----------------------------------------------------------------------------
 void Relation::loadDescription()

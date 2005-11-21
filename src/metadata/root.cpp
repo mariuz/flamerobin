@@ -45,10 +45,10 @@
 #include <sstream>
 
 #include "config/Config.h"
-#include "database.h"
-#include "MetadataItemVisitor.h"
-#include "root.h"
-#include "server.h"
+#include "metadata/database.h"
+#include "metadata/MetadataItemVisitor.h"
+#include "metadata/root.h"
+#include "metadata/server.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 using namespace std;
@@ -303,6 +303,17 @@ bool Root::orderedChildren() const
     bool ordered = false;
     config().getValue(wxT("OrderServersInTree"), ordered);
     return ordered;
+}
+//-----------------------------------------------------------------------------
+void Root::lockChildren()
+{
+    serversM.lockSubject();
+}
+//-----------------------------------------------------------------------------
+void Root::unlockChildren()
+{
+    serversM.unlockSubject();
+
 }
 //-----------------------------------------------------------------------------
 const wxString Root::getItemPath() const

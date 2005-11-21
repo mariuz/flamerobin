@@ -105,7 +105,7 @@ void Subject::notifyObservers()
     }
 }
 //-----------------------------------------------------------------------------
-inline void Subject::lockSubject()
+void Subject::lockSubject()
 {
     ++locksCountM;
 }
@@ -120,7 +120,12 @@ void Subject::unlockSubject()
     }
 }
 //-----------------------------------------------------------------------------
-inline bool Subject::isLocked()
+unsigned int Subject::getLockCount()
+{
+    return locksCountM;
+}
+//-----------------------------------------------------------------------------
+bool Subject::isLocked()
 {
     return locksCountM > 0;
 }

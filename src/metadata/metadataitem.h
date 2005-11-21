@@ -65,16 +65,19 @@ private:
 protected:
     NodeType typeM;
 
-    virtual bool isLocked();
-
     virtual void loadDescription();
     void loadDescription(wxString loadStatement);
     virtual void saveDescription(wxString description);
     void saveDescription(wxString saveStatement, wxString description);
 
+    virtual void lockChildren();
+    virtual void unlockChildren();
 public:
     MetadataItem();
     virtual ~MetadataItem();
+
+    virtual void lockSubject();
+    virtual void unlockSubject();
 
     bool getDependencies(std::vector<Dependency>& list, bool ofObject);  // load from db
 

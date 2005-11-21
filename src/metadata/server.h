@@ -44,6 +44,9 @@ public:
     Server();
     Server(const Server& rhs);
 
+    virtual void lockChildren();
+    virtual void unlockChildren();
+
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
     virtual bool orderedChildren() const;
     Database* addDatabase(Database&);
