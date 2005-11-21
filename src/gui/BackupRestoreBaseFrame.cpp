@@ -50,7 +50,7 @@ BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, Database* db)
         wxDEFAULT_FRAME_STYLE|wxNO_FULL_REPAINT_ON_RESIZE)
 {
     databaseM = db;
-    serverM = reinterpret_cast<Server*>(db->getParent());
+    serverM = db->getServer();
 
     threadM = 0;
     threadMsgTimeMillisM = 0;
