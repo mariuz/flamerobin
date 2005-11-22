@@ -22,7 +22,7 @@
 ;#define DEBUG
 
 #include "..\..\src\frversion.h"
-#define FR_VERSION_STRING Str(FR_VERSION_MAJOR) + "." + Str(FR_VERSION_MINOR) + "." + Str(FR_VERSION_RELEASE)
+#define FR_VERSION_STRING Str(FR_VERSION_MAJOR) + "." + Str(FR_VERSION_MINOR) + "." + Str(FR_VERSION_RLS)
 
 [Setup]
 AppName=FlameRobin
