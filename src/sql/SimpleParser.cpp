@@ -119,7 +119,7 @@ wxString::size_type SimpleParser::nextToken(wxString& in, wxString& out)
     return retval;
 }
 //-----------------------------------------------------------------------------
-// gets table names from SELECT sql script
+// gets not-quoted table names from SELECT sql script
 // input: sql statement without SELECT clause, i.e. should start with: "FROM"
 //
 wxString::size_type SimpleParser::getTableNames(std::vector<wxString>& list, wxString sql)
@@ -138,7 +138,8 @@ wxString::size_type SimpleParser::getTableNames(std::vector<wxString>& list, wxS
         if (c == 0)
             return retval;
         retval += c;
-        list.push_back(s);
+        Identifier temp(s);         // strip quotes if needed
+        list.push_back(s.get());
 
         while (true)
         {

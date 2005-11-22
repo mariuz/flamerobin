@@ -70,3 +70,8 @@ void Constraint::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------
+Table* Constraint::getTable() const
+{
+    return getParentObjectOfType(ntTable);
+}
+//-----------------------------------------------------------------------------

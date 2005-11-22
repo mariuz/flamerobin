@@ -255,7 +255,7 @@ bool FieldPropertiesDialog::getDomainInfo(const wxString& domain,
         MetadataCollection<Domain>::const_iterator it;
         for (it = db->domainsBegin(); it != db->domainsEnd(); ++it)
         {
-            if (domain == (*it).getName())
+            if (domain == (*it).getName_())
             {
                 Domain* d = (Domain*)&(*it);
                 d->getDatatypeParts(type, size, scale);
@@ -277,8 +277,9 @@ bool FieldPropertiesDialog::getIsNewDomainSelected()
 // AGD = auto generated domain (those starting with RDB$)
 bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
 {
-    wxString fieldName = textctrl_fieldname->GetValue();
-    wxString selDomain = choice_domain->GetStringSelection();
+    Identifier fldName(textctrl_fieldname->GetValue());
+    wxString fieldName = fldName.getQuoted();
+    Identifier selDomain(choice_domain->GetStringSelection());
     bool newDomain = getIsNewDomainSelected();
     wxString selDatatype = choice_datatype->GetStringSelection();
     wxString dtSize = textctrl_size->GetValue();
@@ -294,7 +295,7 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
             dtScale.Clear();
     }
 
-    wxString alterTable = wxT("ALTER TABLE ") + tableM->getName() + wxT(" ");
+    wxString alterTable = wxT("ALTER TABLE ") + tableM->getQuotedName() + wxT(" ");
     enum unn { unnNone, unnBefore, unnAfter } update_not_null = unnNone;
     sql = wxEmptyString;
 
@@ -302,9 +303,9 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
     if (columnM)
     {
         // field name changed ?
-        if (columnM->getName() != fieldName)
+        if (columnM->getQuotedName() != fieldName)
         {
-            sql += alterTable + wxT("ALTER ") + columnM->getName()
+            sql += alterTable + wxT("ALTER ") + columnM->getQuotedName()
                 + wxT(" TO ") + fieldName + wxT(";\n\n");
         }
 
@@ -316,10 +317,10 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
                 _("Error"), wxOK | wxICON_ERROR);
             return false;
         }
-        if (columnM->getSource() != selDomain && !newDomain)
+        if (columnM->getSource() != selDomain.get() && !newDomain)
         {   // UDD -> other UDD  or  AGD -> UDD
             sql += alterTable + wxT("ALTER ") + fieldName +
-                wxT(" TYPE ") + selDomain + wxT(";\n\n");
+                wxT(" TYPE ") + selDomain.getQuoted() + wxT(";\n\n");
         }
         else if (newDomain
             || type != selDatatype || size != dtSize || scale != dtScale)
@@ -348,8 +349,8 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
                 sql += wxT("NULL");
             else
                 sql += wxT("1");
-            sql += wxT("\nWHERE RDB$FIELD_NAME = '") + fieldName
-                + wxT("' AND RDB$RELATION_NAME = '") + tableM->getName()
+            sql += wxT("\nWHERE RDB$FIELD_NAME = '") + fldName.get()
+                + wxT("' AND RDB$RELATION_NAME = '") + tableM->getName_()
                 + wxT("';\n\n");
         }
     }
@@ -368,7 +369,7 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
             }
         }
         else
-            sql += selDomain;
+            sql += selDomain.getQuoted();
 
         if (!isNullable)
         {
@@ -383,7 +384,7 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
         wxString s = ::wxGetTextFromUser(
             _("Enter value for existing fields containing NULL"),
             _("Update Existing NULL Values"), wxT(""), this);
-        wxString sqlAdd = wxT("UPDATE ") + tableM->getName()
+        wxString sqlAdd = wxT("UPDATE ") + tableM->getQuotedName()
             + wxT(" \nSET ") + fieldName + wxT(" = '") + s
             + wxT("' \nWHERE ") + fieldName + wxT(" IS NULL;\n");
         if (update_not_null == unnBefore)
@@ -447,7 +448,7 @@ void FieldPropertiesDialog::loadDomains()
         MetadataCollection<Domain>::const_iterator it;
         for (it = db->domainsBegin(); it != db->domainsEnd(); ++it)
         {
-            wxString name = (*it).getName();
+            wxString name = (*it).getName_();
             // ignore RDB$XXX domains unless it's the one columnM uses
             bool addDomain = name.substr(0, 4) != wxT("RDB$")
                 || (columnM && columnM->getSource() == name);
@@ -468,7 +469,7 @@ void FieldPropertiesDialog::loadGeneratorNames()
         Database* db = tableM->getDatabase();
         MetadataCollection<Generator>::const_iterator it;
         for (it = db->generatorsBegin(); it != db->generatorsEnd(); ++it)
-            choice_generator->Append((*it).getName());
+            choice_generator->Append((*it).getName_());
     }
     choice_generator->Thaw();
 }
@@ -493,7 +494,7 @@ void FieldPropertiesDialog::setControlsProperties()
         fmt = _("Table %s: Field Properties");
     else
         fmt = _("Table %s: Create New Field");
-    SetTitle(wxString::Format(fmt, tableM->getName().c_str()));
+    SetTitle(wxString::Format(fmt, tableM->getName_().c_str()));
 
     // bold font for "Autoincrement" label
     wxFont font(label_autoinc->GetFont());
@@ -534,7 +535,7 @@ void FieldPropertiesDialog::updateColumnControls()
 {
     if (columnM)
     {
-        textctrl_fieldname->SetValue(columnM->getName());
+        textctrl_fieldname->SetValue(columnM->getName_());
         checkbox_notnull->SetValue(!columnM->isNullable());
         choice_domain->SetSelection(
             choice_domain->FindString(columnM->getSource()));
@@ -552,7 +553,7 @@ void FieldPropertiesDialog::updateControls()
 
     wxString genName;
     if (tableM)
-        genName = wxT("GEN_") + tableM->getName() + wxT("_ID");
+        genName = wxT("GEN_") + tableM->getName_() + wxT("_ID");
     textctrl_generator_name->SetValue(genName);
 
     loadGeneratorNames();
@@ -618,24 +619,24 @@ void FieldPropertiesDialog::updateDomainInfo(const wxString& domain)
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::updateSqlStatement()
 {
-    wxString table = tableM->getName();
-    wxString field = textctrl_fieldname->GetValue();
-    wxString generator = choice_generator->GetStringSelection();
+    Identifier field(textctrl_fieldname->GetValue());
+    Identifier generator(choice_generator->GetStringSelection());
 
     wxString sql;
     if (radio_generator_new->GetValue())
     {
-        generator = textctrl_generator_name->GetValue();
-        sql = wxT("CREATE GENERATOR ") + generator + wxT(";\n\n");
+        generator.set(textctrl_generator_name->GetValue());
+        sql = wxT("CREATE GENERATOR ") + generator.getQuoted() + wxT(";\n\n");
     }
 
     if (checkbox_trigger->IsChecked())
     {
+        Identifier triggername(tableM->getName_() + wxT("_BI"));
         sql += wxT("SET TERM !! ;\n");
-        sql += wxT("CREATE TRIGGER ") + table + wxT("_BI FOR ") + table + wxT("\n");
+        sql += wxT("CREATE TRIGGER ") + triggername.getQuoted() + wxT(" FOR ") + tableM->getQuotedName() + wxT("\n");
         sql += wxT("ACTIVE BEFORE INSERT POSITION 0\nAS\nBEGIN\n");
-        sql += wxT("  IF (NEW.") + field + wxT(" IS NULL) THEN\n");
-        sql += wxT("    NEW.") + field + wxT(" = GEN_ID(") + generator + wxT(", 1);\n");
+        sql += wxT("  IF (NEW.") + field.getQuoted() + wxT(" IS NULL) THEN\n");
+        sql += wxT("    NEW.") + field.getQuoted() + wxT(" = GEN_ID(") + generator.getQuoted() + wxT(", 1);\n");
         sql += wxT("END!!\n");
         sql += wxT("SET TERM ; !!\n");
     }

@@ -90,12 +90,12 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
     if (m->getType() == ntColumn)
     {
         t = dynamic_cast<Table*>(m->getParent());
-        column_list = t->getName() + wxT(".") + m->getName();
+        column_list = t->getQuotedName() + wxT(".") + m->getQuotedName();
     }
     if (m->getType() == ntTable)
     {
         t = dynamic_cast<Table*>(m);
-        column_list = t->getName() + wxT(".*");
+        column_list = t->getQuotedName() + wxT(".*");
     }
     if (t == 0)
     {
@@ -114,7 +114,7 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
     psel = sql.find(wxT("SELECT"));
     if (psel == wxString::npos)                            // simple select statement
     {
-        sql = wxT("SELECT ") + column_list + wxT("\nFROM ") + t->getName();
+        sql = wxT("SELECT ") + column_list + wxT("\nFROM ") + t->getQuotedName();
         ownerM->SetText(sql);
         return true;
     }
@@ -131,7 +131,7 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
     wxString::size_type from_end = pfrom + SimpleParser::getTableNames(tableNames, sql.substr(pfrom));
 
     // if table is not there, add it
-    if (std::find(tableNames.begin(), tableNames.end(), t->getName()) == tableNames.end())
+    if (std::find(tableNames.begin(), tableNames.end(), t->getName_()) == tableNames.end())
     {
         std::vector<Join> relatedTables;
         if (Table::tablesRelate(tableNames, t, relatedTables))    // foreign keys
@@ -161,7 +161,7 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
             bool can_be_null = true;
 
             wxString insert = (can_be_null ? wxT(" LEFT") : wxT(""));
-            insert += wxT(" JOIN ") + t->getName() + wxT(" ON ") + join_list;
+            insert += wxT(" JOIN ") + t->getQuotedName() + wxT(" ON ") + join_list;
             insert = wxT("\n") + insert + wxT(" ");
             sql.insert(from_end, insert);
         }
@@ -170,7 +170,7 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
             sql.insert(pfrom + 5, wxT(" "));
             if (!tableNames.empty())
                 sql.insert(pfrom + 5, wxT(","));
-            sql.insert(pfrom + 5, t->getName());
+            sql.insert(pfrom + 5, t->getQuotedName());
         }
     }
 
@@ -1460,7 +1460,7 @@ void ExecuteSqlFrame::setDatabase(Database *db)
     databaseM = db;
 
     wxString s = wxString::Format(wxT("%s@%s:%s"), db->getUsername().c_str(),
-        db->getServer()->getName().c_str(), db->getPath().c_str());
+        db->getServer()->getName_().c_str(), db->getPath().c_str());
     statusbar_1->SetStatusText(s, 0);
 
     transactionM = IBPP::TransactionFactory(databaseM->getIBPPDatabase());
@@ -1585,10 +1585,26 @@ bool DropColumnHandler::handleURI(URI& uri)
     if (!c || !w)
         return true;
 
-    wxString sql = wxT("ALTER TABLE ") + c->getParent()->getName() + wxT(" DROP ");
+    Table *t = 0;
+    if (uri.action == wxT("drop_field"))
+    {
+        Column *cp = dynamic_cast<Column *>(c);
+        if (cp)
+            t = cp->getTable();
+    }
+    else
+    {
+        Constraint *cs = dynamic_cast<Constraint *>(c);
+        if (cs)
+            t = cs->getTable();
+    }
+    if (!t)
+        return true;
+
+    wxString sql = wxT("ALTER TABLE ") + t->getQuotedName() + wxT(" DROP ");
     if (uri.action == wxT("drop_constraint"))
         sql += wxT("CONSTRAINT ");
-    sql += c->getName();
+    sql += c->getQuotedName();
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, _("Dropping field"));
     eff->setDatabase(c->getDatabase());
     eff->Show();
@@ -1624,7 +1640,10 @@ bool DropColumnsHandler::handleURI(URI& uri)
     if (selectTableColumnsIntoVector(t, w, list))
     {
         for (std::vector<wxString>::iterator it = list.begin(); it != list.end(); ++it)
-            sql += wxT("ALTER TABLE ") + t->getName() + wxT(" DROP ") + (*it) + wxT(";\n");
+        {
+            Identifier temp(*it);
+            sql += wxT("ALTER TABLE ") + t->getQuotedName() + wxT(" DROP ") + temp.getQuoted() + wxT(";\n");
+        }
         ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, _("Dropping fields"));
         eff->setDatabase(t->getDatabase());
         eff->Show();
@@ -1754,7 +1773,7 @@ bool EditGeneratorValueHandler::handleURI(URI& uri)
 //        wxString::Format(wxT("%d"), oldvalue), w);
     if (value != wxT(""))
     {
-        wxString sql = wxT("SET GENERATOR ") + g->getName() + wxT(" TO ") + value + wxT(";");
+        wxString sql = wxT("SET GENERATOR ") + g->getQuotedName() + wxT(" TO ") + value + wxT(";");
         ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1, sql);
         esf->setDatabase(db);
         esf->Show();
@@ -1816,11 +1835,11 @@ bool IndexActionHandler::handleURI(URI& uri)
     wxString sql;
     wxString type = uri.getParam(wxT("type"));        // type of operation
     if (type == wxT("DROP"))
-        sql = wxT("DROP INDEX ") + i->getName();
+        sql = wxT("DROP INDEX ") + i->getQuotedName();
     else if (type == wxT("RECOMPUTE"))
-        sql = wxT("SET STATISTICS INDEX ") + i->getName();
+        sql = wxT("SET STATISTICS INDEX ") + i->getQuotedName();
     else if (type == wxT("TOGGLE_ACTIVE"))
-        sql = wxT("ALTER INDEX ") + i->getName() + (i->isActive() ? wxT(" INACTIVE") : wxT(" ACTIVE"));
+        sql = wxT("ALTER INDEX ") + i->getQuotedName() + (i->isActive() ? wxT(" INACTIVE") : wxT(" ACTIVE"));
 
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, wxEmptyString);
     eff->setDatabase(i->getDatabase());
@@ -1856,7 +1875,7 @@ bool TableIndicesHandler::handleURI(URI& uri)
     if (uri.action == wxT("recompute_all"))
     {
         for (std::vector<Index>::iterator it = ix->begin(); it != ix->end(); ++it)
-            sql += wxT("SET STATISTICS INDEX ") + (*it).getName() + wxT(";\n");
+            sql += wxT("SET STATISTICS INDEX ") + (*it).getQuotedName() + wxT(";\n");
     }
     else    // add_index
     {
@@ -1865,16 +1884,17 @@ bool TableIndicesHandler::handleURI(URI& uri)
         while (true)        // find first available name
         {
             bool found = false;
-            newname = wxT("IDX_") + t->getName() + wxString::Format(wxT("%d"), nr++);
+            newname = wxT("IDX_") + t->getName_() + wxString::Format(wxT("%d"), nr++);
             for (std::vector<Index>::iterator it = ix->begin(); it != ix->end(); ++it)
-                if ((*it).getName() == newname)
+                if ((*it).getName_() == newname)
                     found = true;
             if (!found)
                 break;
         }
-        wxString indexname = ::wxGetTextFromUser(_("Enter index name"), _("Adding new index"), newname, w);
-        if (indexname.IsEmpty())    // cancel
+        wxString ixname = ::wxGetTextFromUser(_("Enter index name"), _("Adding new index"), newname, w);
+        if (ixname.IsEmpty())    // cancel
             return true;
+        Identifier indxname(ixname);
 
         bool unique = (wxYES == wxMessageBox(_("Would you like to create UNIQUE index?"),
             _("Creating new index"), wxYES_NO|wxICON_QUESTION));
@@ -1895,7 +1915,7 @@ bool TableIndicesHandler::handleURI(URI& uri)
             sql += wxT("UNIQUE ");
         if (sort == 1)
             sql += wxT("DESCENDING ");
-        sql += wxT(" \nINDEX ") + indexname + wxT(" ON ") + t->getName() + wxT(" (") + columns + wxT(");\n");
+        sql += wxT(" \nINDEX ") + indxname.getQuoted() + wxT(" ON ") + t->getQuotedName() + wxT(" (") + columns + wxT(");\n");
     }
 
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, wxEmptyString);
@@ -1932,7 +1952,7 @@ bool ActivateTriggersHandler::handleURI(URI& uri)
     wxString sql;
     for (std::vector<Trigger*>::iterator it = list.begin(); it != list.end(); ++it)
     {
-        sql += wxT("ALTER TRIGGER ") + (*it)->getName() + wxT(" ");
+        sql += wxT("ALTER TRIGGER ") + (*it)->getQuotedName() + wxT(" ");
         if (uri.action == wxT("deactivate_triggers"))
             sql += wxT("IN");
         sql += wxT("ACTIVE;\n");
@@ -1966,7 +1986,7 @@ bool ActivateTriggerHandler::handleURI(URI& uri)
     if (!t || !w)
         return true;
 
-    wxString sql = wxT("ALTER TRIGGER ") + t->getName() + wxT(" ");
+    wxString sql = wxT("ALTER TRIGGER ") + t->getQuotedName() + wxT(" ");
     if (uri.action == wxT("deactivate_trigger"))
         sql += wxT("IN");
     sql += wxT("ACTIVE;\n");

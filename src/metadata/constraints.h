@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "metadata/metadataitem.h"
+class Table;
 //-----------------------------------------------------------------------------
 // These could all be simple "struct"s but we want to add some functionality later
 //
@@ -36,6 +37,7 @@ class Constraint: public MetadataItem
 {
 public:
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    virtual Table* getTable() const;
 };
 //-----------------------------------------------------------------------------
 //! primary keys and uniques
