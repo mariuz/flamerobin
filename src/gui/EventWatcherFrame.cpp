@@ -85,7 +85,7 @@ EventWatcherFrame::EventWatcherFrame(wxWindow *parent, Database *db)
     setIdString(this, getFrameId(db));
     db->attachObserver(this);    // observe database object
     SetTitle(wxString::Format(_("Event Monitor for Database: %s"),
-        db->getName().c_str()));
+        db->getName_().c_str()));
 
     createControls();
     layoutControls();

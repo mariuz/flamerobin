@@ -45,7 +45,7 @@
 #include "styleguide.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
-DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent, 
+DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent,
         int id, const wxString& title, bool createDB, bool connectAs)
     : BaseDialog(parent, id, title)
 {
@@ -72,20 +72,20 @@ const wxString DatabaseRegistrationDialog::buildName(const wxString& dbPath) con
 void DatabaseRegistrationDialog::createControls()
 {
     label_name = new wxStaticText(getControlsPanel(), -1, _("Display name:"));
-    text_ctrl_name = new wxTextCtrl(getControlsPanel(), ID_textcontrol_name, 
+    text_ctrl_name = new wxTextCtrl(getControlsPanel(), ID_textcontrol_name,
         wxEmptyString);
-    label_dbpath = new wxStaticText(getControlsPanel(), -1, 
+    label_dbpath = new wxStaticText(getControlsPanel(), -1,
         _("Database path:"));
-    text_ctrl_dbpath = new wxTextCtrl(getControlsPanel(), 
+    text_ctrl_dbpath = new wxTextCtrl(getControlsPanel(),
         ID_textcontrol_dbpath, wxEmptyString);
-    button_browse = new wxButton(getControlsPanel(), ID_button_browse, 
+    button_browse = new wxButton(getControlsPanel(), ID_button_browse,
         wxT("..."), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
     label_username = new wxStaticText(getControlsPanel(), -1, _("Username:"));
-    text_ctrl_username = new wxTextCtrl(getControlsPanel(), 
+    text_ctrl_username = new wxTextCtrl(getControlsPanel(),
         ID_textcontrol_username, wxEmptyString);
     label_password = new wxStaticText(getControlsPanel(), -1, _("Password:"));
-    text_ctrl_password = new wxTextCtrl(getControlsPanel(), 
-        ID_textcontrol_password, wxEmptyString, wxDefaultPosition, 
+    text_ctrl_password = new wxTextCtrl(getControlsPanel(),
+        ID_textcontrol_password, wxEmptyString, wxDefaultPosition,
         wxDefaultSize, wxTE_PASSWORD);
     text_ctrl_password->SetToolTip(
         _("Leave empty if you wish to be prompted for password every time"));
@@ -103,9 +103,9 @@ void DatabaseRegistrationDialog::createControls()
         wxT("WIN1254"),     wxT("WIN1255"),     wxT("WIN1256"),     wxT("WIN1257")
     };
 
-    combobox_charset = new wxComboBox(getControlsPanel(), -1, wxT("NONE"), 
-        wxDefaultPosition, wxDefaultSize, 
-        sizeof(charset_choices) / sizeof(wxString), charset_choices, 
+    combobox_charset = new wxComboBox(getControlsPanel(), -1, wxT("NONE"),
+        wxDefaultPosition, wxDefaultSize,
+        sizeof(charset_choices) / sizeof(wxString), charset_choices,
         wxCB_DROPDOWN | wxCB_SORT);
 
     label_role = new wxStaticText(getControlsPanel(), -1, _("Role:"));
@@ -118,22 +118,22 @@ void DatabaseRegistrationDialog::createControls()
         const wxString pagesize_choices[] = {
             _("Default"), wxT("1024"), wxT("2048"), wxT("4096"), wxT("8192"), wxT("16384")
         };
-        choice_pagesize = new wxChoice(getControlsPanel(), -1, 
+        choice_pagesize = new wxChoice(getControlsPanel(), -1,
             wxDefaultPosition, wxDefaultSize,
             sizeof(pagesize_choices) / sizeof(wxString), pagesize_choices);
-        label_dialect = new wxStaticText(getControlsPanel(), -1, 
+        label_dialect = new wxStaticText(getControlsPanel(), -1,
             _("SQL Dialect:"));
         const wxString dialect_choices[] = {
             wxT("1"), wxT("2"), wxT("3")
         };
-        choice_dialect = new wxChoice(getControlsPanel(), -1, 
+        choice_dialect = new wxChoice(getControlsPanel(), -1,
             wxDefaultPosition, wxDefaultSize,
             sizeof(dialect_choices) / sizeof(wxString), dialect_choices);
     }
 
-    button_ok = new wxButton(getControlsPanel(), ID_button_ok, 
+    button_ok = new wxButton(getControlsPanel(), ID_button_ok,
         (createM ? _("Create") : _("Save")));
-    button_cancel = new wxButton(getControlsPanel(), ID_button_cancel, 
+    button_cancel = new wxButton(getControlsPanel(), ID_button_cancel,
         _("Cancel"));
 }
 //-----------------------------------------------------------------------------
@@ -212,7 +212,7 @@ void DatabaseRegistrationDialog::setDatabase(Database* db)
     if (databaseM->isConnected())
     ::wxMessageBox(_("Properties of connected database cannot be changed."), _("Warning"), wxOK |wxICON_INFORMATION );
     */
-    text_ctrl_name->SetValue(databaseM->getName());
+    text_ctrl_name->SetValue(databaseM->getName_());
     text_ctrl_dbpath->SetValue(databaseM->getPath());
     text_ctrl_username->SetValue(databaseM->getUsername());
     text_ctrl_password->SetValue(databaseM->getPassword());
@@ -287,7 +287,7 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
 void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor wait;
-    databaseM->setName(text_ctrl_name->GetValue());
+    databaseM->setName_(text_ctrl_name->GetValue());
     databaseM->setPath(text_ctrl_dbpath->GetValue());
     databaseM->setUsername(text_ctrl_username->GetValue());
     databaseM->setPassword(text_ctrl_password->GetValue());

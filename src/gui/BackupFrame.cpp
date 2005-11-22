@@ -182,7 +182,7 @@ BackupFrame::BackupFrame(wxWindow* parent, Database* db)
 
     wxString s;
     s.Printf(_("Backup Database \"%s:%s\""),
-        serverM->getName().c_str(), databaseM->getName().c_str());
+        serverM->getName_().c_str(), databaseM->getName_().c_str());
     SetTitle(s);
 
     createControls();
@@ -358,7 +358,7 @@ END_EVENT_TABLE()
 void BackupFrame::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxFileName origName(text_ctrl_filename->GetValue());
-    wxString filename = ::wxFileSelector(_("Select Backup File"), 
+    wxString filename = ::wxFileSelector(_("Select Backup File"),
         origName.GetPath(), origName.GetName(), wxEmptyString,
         _("All files (*.*)|*.*"), wxSAVE | wxOVERWRITE_PROMPT, this);
     if (!filename.empty())

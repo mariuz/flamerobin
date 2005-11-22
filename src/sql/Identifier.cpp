@@ -40,13 +40,17 @@
 //----------------------------------------------------------------------------
 Identifier::Identifier(const wxString& source)
 {
-    textM.Trim(true);   // maybe these could be removed as parser is not going
-    textM.Trim(false);  // to send whitespace anyway
-
-    if (textM[0] == wxChar('\"'))
+    set(source);
+}
+//----------------------------------------------------------------------------
+void Identifier::set(const wxString& source)
+{
+    source.Trim(true);   // maybe these could be removed as parser is not going
+    source.Trim(false);  // to send whitespace anyway
+    if (source[0] == wxChar('\"'))
     {
-        wxString::size_type p = textM.Length();
-        if (textM[p-1] == wxChar('\"'))
+        wxString::size_type p = source.Length();
+        if (source[p-1] == wxChar('\"'))
             textM = source.SubString(1, p-2);
         else                    // a really strange occurence of identifier
             textM = source;     // starting with quote and not ending with it

@@ -34,6 +34,7 @@
 
 #include "core/Element.h"
 #include "core/Subject.h"
+#include "sql/Identifier.h"
 
 class Root;
 class Database;
@@ -56,7 +57,7 @@ NodeType getTypeByName(wxString name);
 class MetadataItem: public Element, public Subject
 {
 private:
-    wxString nameM;
+    Identifier identifierM;
     MetadataItem* parentM;
     wxString descriptionM;
     bool descriptionLoadedM;
@@ -99,9 +100,10 @@ public:
     // getters/setters
     virtual MetadataItem *getParent() const;
     void setParent(MetadataItem *parent);
-    virtual const wxString& getName() const;
+    virtual const wxString& getName_() const;
+    virtual const wxString& getQuotedName() const;
     virtual wxString getPrintableName();
-    void setName(wxString name);
+    void setName_(wxString name);
     virtual NodeType getType() const;
     void setType(NodeType type);
 

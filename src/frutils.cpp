@@ -116,14 +116,17 @@ bool selectTableColumnsIntoVector(Table* t, wxWindow* parent, vector<wxString>& 
     t->getChildren(temp);
     wxArrayString columns;
     for (vector<MetadataItem*>::const_iterator it = temp.begin(); it != temp.end(); ++it)
-        columns.Add((*it)->getName());
+        columns.Add((*it)->getName_());
 
     wxArrayInt selected_columns;
     if (!::wxGetMultipleChoices(selected_columns, _("Select one or more fields... (use ctrl key)"),  _("Table fields"), columns, parent))
         return false;
 
     for (size_t i = 0; i < selected_columns.GetCount(); ++i)
-        list.push_back(columns[selected_columns[i]]);
+    {
+        Identifier temp(columns[selected_columns[i]]);
+        list.push_back(temp.getQuoted());
+    }
 
     return true;
 }

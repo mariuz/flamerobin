@@ -65,12 +65,12 @@ Table *AddConstraintHandler::selectTable(Database *d, wxWindow *parent) const
 {
     wxArrayString tables;
     for (MetadataCollection<Table>::const_iterator it = d->tablesBegin(); it != d->tablesEnd(); ++it)
-        tables.Add((*it).getName());
+        tables.Add((*it).getName_());
     int index = ::wxGetSingleChoiceIndex(_("Select table to reference"), _("Creating foreign key"), tables, parent);
     if (index == -1)
         return 0;
     for (MetadataCollection<Table>::const_iterator it = d->tablesBegin(); it != d->tablesEnd(); ++it)
-        if ((*it).getName() == tables[index])
+        if ((*it).getName_() == tables[index])
             return const_cast<Table *>(&(*it));
     return 0;
 }
@@ -104,11 +104,11 @@ bool AddConstraintHandler::handleURI(URI& uri)
     // Find first available constraint name:
     Database *db = t->getDatabase();
     wxString default_value;
-    wxString prefix = type + wxT("_") + t->getName();
+    wxString prefix = type + wxT("_") + t->getName_();
     std::vector<wxString> cnames;
     if (db->fillVector(cnames,
         wxT("select rdb$constraint_name from rdb$relation_constraints ")
-        wxT("where rdb$relation_name = '") + t->getName()
+        wxT("where rdb$relation_name = '") + t->getName_()
         + wxT("' and rdb$constraint_name starting with '") + prefix + wxT("' order by 1")))
     {
         int i = 0;
@@ -124,10 +124,11 @@ bool AddConstraintHandler::handleURI(URI& uri)
 
     wxString cname = ::wxGetTextFromUser(_("Enter constraint name"),
         _("Adding new table constraint"), default_value, w);
-    if (cname == wxT(""))    // cancel
+    if (cname.IsEmpty())    // cancel
         return true;
 
-    wxString sql = wxT("alter table ") + t->getName() + wxT("\nadd constraint ") + cname;
+    Identifier cqname(cname);
+    wxString sql = wxT("alter table ") + t->getQuotedName() + wxT("\nadd constraint ") + cqname.getQuoted();
 
     if (type == wxT("PK"))
     {
@@ -145,7 +146,7 @@ bool AddConstraintHandler::handleURI(URI& uri)
         wxString refcolumnlist = selectTableColumns(ref, w);
         if (refcolumnlist == wxT(""))
             return true;
-        sql += wxT("\nforeign key (") + columnlist + wxT(") \nreferences ") + ref->getName()
+        sql += wxT("\nforeign key (") + columnlist + wxT(") \nreferences ") + ref->getQuotedName()
             + wxT(" (") + refcolumnlist + wxT(")");
         wxString action = selectAction(_("update"), w);
         if (action == wxT("CANCEL"))
@@ -164,7 +165,8 @@ bool AddConstraintHandler::handleURI(URI& uri)
         wxString source;
         if (!GetMultilineTextFromUser(w, _("Enter check condition"), source))
             return true;
-        sql += wxT("\ncheck (") + source + wxT(")");
+        Identifier temp(source);
+        sql += wxT("\ncheck (") + temp.getQuoted() + wxT(")");
     }
     else if (type == wxT("UNQ"))
     {

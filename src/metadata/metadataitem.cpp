@@ -86,7 +86,7 @@ const wxString MetadataItem::getPathId() const
 //-----------------------------------------------------------------------------
 const wxString MetadataItem::getId() const
 {
-    return getName();
+    return getName_();
 }
 //-----------------------------------------------------------------------------
 NodeType getTypeByName(wxString name)
@@ -511,15 +511,19 @@ wxString MetadataItem::getPrintableName()
     return printableName;
 }
 //-----------------------------------------------------------------------------
-const wxString& MetadataItem::getName() const
+const wxString& MetadataItem::getName_() const
 {
-    return nameM;
+    return identifierM.get();
 }
 //-----------------------------------------------------------------------------
-void MetadataItem::setName(wxString name)
+const wxString& MetadataItem::getQuotedName() const
 {
-    name.erase(name.find_last_not_of(' ')+1);       // right trim
-    nameM = name;
+    return identifierM.getQuoted();
+}
+//-----------------------------------------------------------------------------
+void MetadataItem::setName_(wxString name)
+{
+    identifierM.set(name);
     notifyObservers();
 }
 //-----------------------------------------------------------------------------
@@ -535,12 +539,12 @@ void MetadataItem::setType(NodeType type)
 //-----------------------------------------------------------------------------
 bool MetadataItem::isSystem() const
 {
-    return getName().substr(0, 4) == wxT("RDB$");
+    return getName_().substr(0, 4) == wxT("RDB$");
 }
 //-----------------------------------------------------------------------------
 wxString MetadataItem::getDropSqlStatement() const
 {
-    return wxT("DROP ") + getTypeName() + wxT(" ") + getName() + wxT(";");
+    return wxT("DROP ") + getTypeName() + wxT(" ") + getQuotedName() + wxT(";");
 }
 //-----------------------------------------------------------------------------
 void MetadataItem::acceptVisitor(MetadataItemVisitor* visitor)
@@ -550,7 +554,7 @@ void MetadataItem::acceptVisitor(MetadataItemVisitor* visitor)
 //-----------------------------------------------------------------------------
 void MetadataItem::lockChildren()
 {
-// NOTE: getChildren() can not be used here, because we want to lock the 
+// NOTE: getChildren() can not be used here, because we want to lock the
 //       MetadataCollection objects as well.  That means we have to override
 //       this method in all descendant classes - oh well...
 }
@@ -563,7 +567,7 @@ void MetadataItem::lockSubject()
 //-----------------------------------------------------------------------------
 void MetadataItem::unlockChildren()
 {
-// NOTE: getChildren() can not be used here, because we want to lock the 
+// NOTE: getChildren() can not be used here, because we want to lock the
 //       MetadataCollection objects as well.  That means we have to override
 //       this method in all descendant classes - oh well...
 }
@@ -581,7 +585,7 @@ MetadataItem *Dependency::getParent() const
 //-----------------------------------------------------------------------------
 const wxString& Dependency::getName() const
 {
-    return objectM->getName();
+    return objectM->getName_();
 }
 //-----------------------------------------------------------------------------
 NodeType Dependency::getType() const
