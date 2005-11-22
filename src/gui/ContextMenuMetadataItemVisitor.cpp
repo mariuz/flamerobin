@@ -51,7 +51,7 @@ ContextMenuMetadataItemVisitor::~ContextMenuMetadataItemVisitor()
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visit(Column& column)
 {
-    if (dynamic_cast<Table*>(column.getParent())) // only for table columns
+    if (column.getTable()) // only for table columns
         addRegularObjectMenu();
 }
 //-----------------------------------------------------------------------------

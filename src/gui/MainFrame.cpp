@@ -875,7 +875,7 @@ void MainFrame::OnMenuUnRegisterServer(wxCommandEvent& WXUNUSED(event))
     if (wxCANCEL == wxMessageBox(_("Are you sure?"), _("Unregister server"), wxOK | wxCANCEL | wxICON_QUESTION))
         return;
 
-    Root* r = dynamic_cast<Root*>(s->getParent());
+    Root* r = s->getRoot();
     if (r)
         r->removeServer(s);
 

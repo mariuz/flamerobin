@@ -79,7 +79,7 @@ bool Column::isComputed() const
 //-----------------------------------------------------------------------------
 bool Column::isPrimaryKey() const
 {
-    Table *t = dynamic_cast<Table *>(getParent());
+    Table* t = getTable();
     if (!t) // view/SP
         return false;
     ColumnConstraint *key = t->getPrimaryKey();
@@ -160,6 +160,11 @@ Domain *Column::getDomain() const
     return d->loadMissingDomain(sourceM);
 }
 //-----------------------------------------------------------------------------
+Table* Column::getTable() const
+{
+    return dynamic_cast<Table*>(getParentObjectOfType(ntTable));
+}
+//-----------------------------------------------------------------------------
 wxString Column::getSource() const
 {
     return sourceM;
@@ -172,7 +177,7 @@ wxString Column::getCollation() const
 //-----------------------------------------------------------------------------
 wxString Column::getDropSqlStatement() const
 {
-    return wxT("ALTER TABLE ") + getParent()->getName() + wxT(" DROP ") + getName();
+    return wxT("ALTER TABLE ") + getTable()->getName() + wxT(" DROP ") + getName();
 }
 //-----------------------------------------------------------------------------
 void Column::loadDescription()

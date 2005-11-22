@@ -950,7 +950,7 @@ bool Database::disconnect()
         exceptionsM.detachAllObservers();
 
         if (config().get(wxT("HideDisconnectedDatabases"), false))
-            getParent()->notifyObservers();
+            getServer()->notifyObservers();
         notifyObservers();
         return true;
     }
@@ -1163,7 +1163,7 @@ void Database::acceptVisitor(MetadataItemVisitor* visitor)
 //-----------------------------------------------------------------------------
 Server* Database::getServer() const
 {
-    return dynamic_cast<Server*>(getParent());
+    return dynamic_cast<Server*>(getParentObjectOfType(ntServer));
 }
 //-----------------------------------------------------------------------------
 wxString Database::getConnectionString() const

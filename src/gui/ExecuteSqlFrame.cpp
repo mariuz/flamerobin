@@ -1459,7 +1459,8 @@ void ExecuteSqlFrame::setDatabase(Database *db)
 {
     databaseM = db;
 
-    wxString s = db->getUsername() + wxT("@") + db->getParent()->getName() + wxT(":") + db->getPath();
+    wxString s = wxString::Format(wxT("%s@%s:%s"), db->getUsername().c_str(),
+        db->getServer()->getName().c_str(), db->getPath().c_str());
     statusbar_1->SetStatusText(s, 0);
 
     transactionM = IBPP::TransactionFactory(databaseM->getIBPPDatabase());
@@ -1467,7 +1468,7 @@ void ExecuteSqlFrame::setDatabase(Database *db)
 
     executedStatementsM.clear();
     InTransaction(false);    // enable/disable controls
-    setKeywords();            // set words for autocomplete feature
+    setKeywords();           // set words for autocomplete feature
 
     historyPositionM = StatementHistory::get(databaseM).size();
     updateHistoryButtons();

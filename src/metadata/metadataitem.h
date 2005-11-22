@@ -64,6 +64,7 @@ private:
 
 protected:
     NodeType typeM;
+    MetadataItem* getParentObjectOfType(NodeType type) const;
 
     virtual void loadDescription();
     void loadDescription(wxString loadStatement);

@@ -134,20 +134,22 @@ void MetadataItem::drop()
     // ie. currently it is a Database object
 }
 //-----------------------------------------------------------------------------
-Database *MetadataItem::getDatabase() const
+MetadataItem* MetadataItem::getParentObjectOfType(NodeType type) const
 {
     MetadataItem* m = const_cast<MetadataItem*>(this);
-    while (m && m->getType() != ntDatabase)
+    while (m && m->getType() != type)
         m = m->getParent();
-    return (Database*)m;
+    return m;
+}
+//-----------------------------------------------------------------------------
+Database *MetadataItem::getDatabase() const
+{
+    return dynamic_cast<Database*>(getParentObjectOfType(ntDatabase));
 }
 //-----------------------------------------------------------------------------
 Root* MetadataItem::getRoot() const
 {
-    MetadataItem* m = const_cast<MetadataItem*>(this);
-    while (m->getParent())
-        m = m->getParent();
-    return (Root*)m;
+    return dynamic_cast<Root*>(getParentObjectOfType(ntRoot));
 }
 //-----------------------------------------------------------------------------
 //! ofObject = true   => returns list of objects this object depends on

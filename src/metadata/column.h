@@ -30,6 +30,7 @@
 #include "metadata/metadataitem.h"
 
 class Domain;
+class Table;
 //-----------------------------------------------------------------------------
 class Column: public MetadataItem
 {
@@ -53,6 +54,7 @@ public:
 	wxString getSource() const;
 	wxString getCollation() const;
 	Domain* getDomain() const;
+    Table* getTable() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
