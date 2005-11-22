@@ -772,6 +772,7 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
     eff->setDatabase(d);
     eff->Show();
     eff->setSql(sql);
+    eff->Update();
     if (t != ntProcedure)
         eff->executeAllStatements();
 
@@ -1407,7 +1408,7 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
     Column* c = dynamic_cast<Column*>(m);
     if (c)
     {
-        Table* t = dynamic_cast<Table*>(c->getParent());
+        Table* t = c->getTable();
         if (!t)     // dummy check
             return;
 
