@@ -104,10 +104,10 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent, Metad
 
     window_1 = new PrintableHtmlWindow(this);
     CreateStatusBar();
-    wxString title = objectM->getName().c_str();
+    wxString title = objectM->getName_().c_str();
     window_1->SetRelatedFrame(this, title + wxT(": %s"));
     window_1->SetRelatedStatusBar(0);
-    SetTitle(wxString::Format(_("%s: properties"), objectM->getName().c_str()));
+    SetTitle(wxString::Format(_("%s: properties"), objectM->getName_().c_str()));
 
     update();   // initial rendering
 
@@ -198,8 +198,9 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         cmd = cmd.substr(0, pos);
     }
 
+    // TODO: change this to getURLencodedName()
     if (cmd == wxT("object_name"))
-        htmlpage += object->getName();
+        htmlpage += object->getName_();
 
     else if (cmd == wxT("object_type"))
         htmlpage += object->getTypeName();

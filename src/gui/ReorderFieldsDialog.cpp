@@ -58,7 +58,7 @@ ReorderFieldsDialog::ReorderFieldsDialog(wxWindow* parent, Table* table)
     tableM->checkAndLoadColumns();
     tableM->attachObserver(this);
 
-    SetTitle(_("Reordering Fields of Table ") + table->getName());
+    SetTitle(_("Reordering Fields of Table ") + table->getName_());
     createControls();
     layoutControls();
     update();
@@ -145,7 +145,7 @@ void ReorderFieldsDialog::update()
 
     list_box_fields->Clear();
     for (std::vector<MetadataItem*>::iterator it = temp.begin(); it != temp.end(); ++it)
-        list_box_fields->Append((*it)->getName());
+        list_box_fields->Append((*it)->getName_());
     updateButtons();
 }
 //-----------------------------------------------------------------------------
@@ -164,9 +164,10 @@ const wxString ReorderFieldsDialog::getReorderStatement()
     wxString sql;
     for (int i = 0; i < list_box_fields->GetCount(); ++i)
     {
+        Identifier temp(list_box_fields->GetString(i));
         sql += wxString::Format(wxT("ALTER TABLE %s ALTER %s POSITION %d;\n"),
-            tableM->getName().c_str(), 
-            list_box_fields->GetString(i).c_str(), i + 1);
+            tableM->getQuotedName().c_str(),
+            temp.getQuoted().c_str(), i + 1);
     }
     return sql;
 }

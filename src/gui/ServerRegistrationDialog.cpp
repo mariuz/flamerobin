@@ -40,7 +40,7 @@
 #include "metadata/server.h"
 #include "styleguide.h"
 //-----------------------------------------------------------------------------
-ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent, int id, 
+ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent, int id,
         const wxString& title)
     : BaseDialog(parent, id, title)
 {
@@ -65,17 +65,17 @@ const wxString ServerRegistrationDialog::buildDefaultName() const
 void ServerRegistrationDialog::createControls()
 {
     label_name = new wxStaticText(getControlsPanel(), -1, _("Display name:"));
-    text_ctrl_name = new wxTextCtrl(getControlsPanel(), ID_textctrl_name, 
+    text_ctrl_name = new wxTextCtrl(getControlsPanel(), ID_textctrl_name,
         wxEmptyString);
     label_hostname = new wxStaticText(getControlsPanel(), -1, _("Hostname:"));
-    text_ctrl_hostname = new wxTextCtrl(getControlsPanel(), 
+    text_ctrl_hostname = new wxTextCtrl(getControlsPanel(),
         ID_textctrl_hostname, wxT("localhost"));
-    label_portnumber = new wxStaticText(getControlsPanel(), -1, 
+    label_portnumber = new wxStaticText(getControlsPanel(), -1,
         _("Port number:"));
-    text_ctrl_portnumber = new wxTextCtrl(getControlsPanel(), 
+    text_ctrl_portnumber = new wxTextCtrl(getControlsPanel(),
         ID_textctrl_portnumber, wxEmptyString);
     button_ok = new wxButton(getControlsPanel(), ID_button_ok, _("Save"));
-    button_cancel = new wxButton(getControlsPanel(), ID_button_cancel, 
+    button_cancel = new wxButton(getControlsPanel(), ID_button_cancel,
         _("Cancel"));
 }
 //-----------------------------------------------------------------------------
@@ -95,14 +95,14 @@ void ServerRegistrationDialog::layoutControls()
     sizerControls->Add(label_name, 0, wxALIGN_CENTER_VERTICAL);
     sizerControls->Add(text_ctrl_name, 1, wxEXPAND | wxALIGN_CENTER_VERTICAL);
     sizerControls->Add(label_hostname, 0, wxALIGN_CENTER_VERTICAL);
-    sizerControls->Add(text_ctrl_hostname, 1, 
+    sizerControls->Add(text_ctrl_hostname, 1,
         wxEXPAND | wxALIGN_CENTER_VERTICAL);
     sizerControls->Add(label_portnumber, 0, wxALIGN_CENTER_VERTICAL);
-    sizerControls->Add(text_ctrl_portnumber, 1, 
+    sizerControls->Add(text_ctrl_portnumber, 1,
         wxEXPAND | wxALIGN_CENTER_VERTICAL);
 
     // create sizer for buttons -> styleguide class will align it correctly
-    wxSizer* sizerButtons = styleguide().createButtonSizer(button_ok, 
+    wxSizer* sizerButtons = styleguide().createButtonSizer(button_ok,
         button_cancel);
     // use method in base class to set everything up
     layoutSizers(sizerControls, sizerButtons);
@@ -117,7 +117,7 @@ void ServerRegistrationDialog::setServer(Server *s)
 {
     serverM = s;
 
-    text_ctrl_name->SetValue(serverM->getName());
+    text_ctrl_name->SetValue(serverM->getName_());
     text_ctrl_hostname->SetValue(serverM->getHostname());
     text_ctrl_portnumber->SetValue(serverM->getPort());
 
@@ -141,7 +141,7 @@ void ServerRegistrationDialog::updateButtons()
 //-----------------------------------------------------------------------------
 void ServerRegistrationDialog::updateIsDefaultName()
 {
-    isDefaultNameM = (text_ctrl_name->GetValue().IsEmpty() 
+    isDefaultNameM = (text_ctrl_name->GetValue().IsEmpty()
         || text_ctrl_name->GetValue() == buildDefaultName());
 }
 //-----------------------------------------------------------------------------
@@ -177,7 +177,7 @@ void ServerRegistrationDialog::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ServerRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    serverM->setName(text_ctrl_name->GetValue());
+    serverM->setName_(text_ctrl_name->GetValue());
     serverM->setHostname(text_ctrl_hostname->GetValue());
     serverM->setPort(text_ctrl_portnumber->GetValue());
     EndModal(wxID_OK);

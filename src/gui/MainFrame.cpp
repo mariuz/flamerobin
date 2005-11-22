@@ -210,7 +210,7 @@ void MainFrame::set_properties()
         wxMessageBox(msg, _("Configuration file not found"), wxOK|wxICON_INFORMATION);
 
         Server s;
-        s.setName(wxT("Localhost"));
+        s.setName_(wxT("Localhost"));
         s.setHostname(wxT("localhost"));
         getGlobalRoot().addServer(s);
     }
@@ -615,7 +615,7 @@ void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))
         return;
     DatabaseConfig dc(d);
     PreferencesDialog pd(this,
-        wxString::Format(_("%s preferences"), d->getName().c_str()),
+        wxString::Format(_("%s preferences"), d->getName_().c_str()),
         dc, wxT("db_settings.confdef"));
     if (pd.isOk() && pd.loadFromConfig())
         pd.ShowModal();
@@ -689,7 +689,7 @@ void MainFrame::OnMenuBrowse(wxCommandEvent& WXUNUSED(event))
         return;
 
     wxString sql(wxT("select * from "));
-    sql += i->getName();
+    sql += i->getQuotedName();
 
     if (t == ntProcedure)
     {
@@ -763,9 +763,9 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
                 first = false;
             else
                 sql += wxT(", ");
-            sql += (*it)->getName();
+            sql += (*it)->getQuotedName();
         }
-        sql += wxT("\nFROM ") + i->getName();
+        sql += wxT("\nFROM ") + i->getQuotedName();
     }
 
     ExecuteSqlFrame* eff = new ExecuteSqlFrame(this, -1, wxString(_("Execute SQL statements")));

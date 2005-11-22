@@ -75,8 +75,8 @@ private:
     void logProgress(wxString& msg);
 };
 //-----------------------------------------------------------------------------
-RestoreThread::RestoreThread(RestoreFrame* frame, wxString server, 
-        wxString username, wxString password, wxString bkfilename, 
+RestoreThread::RestoreThread(RestoreFrame* frame, wxString server,
+        wxString username, wxString password, wxString bkfilename,
         wxString dbfilename, int pagesize, IBPP::BRF flags)
     : wxThread()
 {
@@ -113,7 +113,7 @@ void* RestoreThread::Entry()
             if (TestDestroy())
             {
                 now = wxDateTime::Now();
-                msg.Printf(_("Database restore cancelled %s"), 
+                msg.Printf(_("Database restore cancelled %s"),
                     now.FormatTime().c_str());
                 logImportant(msg);
                 break;
@@ -122,7 +122,7 @@ void* RestoreThread::Entry()
             if (c == 0)
             {
                 now = wxDateTime::Now();
-                msg.Printf(_("Database restore finished %s"), 
+                msg.Printf(_("Database restore finished %s"),
                     now.FormatTime().c_str());
                 logImportant(msg);
                 break;
@@ -135,7 +135,7 @@ void* RestoreThread::Entry()
     catch (IBPP::Exception& e)
     {
         now = wxDateTime::Now();
-        msg.Printf(_("Database restore cancelled %s due to IBPP exception:\n\n"), 
+        msg.Printf(_("Database restore cancelled %s due to IBPP exception:\n\n"),
             now.FormatTime().c_str());
         msg += std2wx(e.ErrorMessage());
         logError(msg);
@@ -143,7 +143,7 @@ void* RestoreThread::Entry()
     catch (...)
     {
         now = wxDateTime::Now();
-        msg.Printf(_("Database restore cancelled %s due to exception"), 
+        msg.Printf(_("Database restore cancelled %s due to exception"),
             now.FormatTime().c_str());
         logError(msg);
     }
@@ -154,7 +154,7 @@ void RestoreThread::OnExit()
 {
     if (frameM != 0)
     {
-        wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, 
+        wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
             BackupRestoreBaseFrame::ID_thread_finished);
         wxPostEvent(frameM, event);
     }
@@ -185,7 +185,7 @@ RestoreFrame::RestoreFrame(wxWindow* parent, Database* db)
 
     wxString s;
     s.Printf(_("Restore Database \"%s:%s\""),
-        serverM->getName().c_str(), databaseM->getName().c_str());
+        serverM->getName_().c_str(), databaseM->getName_().c_str());
     SetTitle(s);
 
     createControls();
@@ -199,9 +199,9 @@ void RestoreFrame::createControls()
     panel_controls = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize,
         wxTAB_TRAVERSAL | wxCLIP_CHILDREN | wxNO_FULL_REPAINT_ON_RESIZE);
     label_filename = new wxStaticText(panel_controls, -1, _("Backup file:"));
-    text_ctrl_filename = new wxTextCtrl(panel_controls, ID_text_ctrl_filename, 
+    text_ctrl_filename = new wxTextCtrl(panel_controls, ID_text_ctrl_filename,
         wxEmptyString);
-    button_browse = new wxButton(panel_controls, ID_button_browse, _("..."), 
+    button_browse = new wxButton(panel_controls, ID_button_browse, _("..."),
         wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
 
     checkbox_replace = new wxCheckBox(panel_controls, -1, _("Replace existing database"));
@@ -218,7 +218,7 @@ void RestoreFrame::createControls()
     choice_pagesize = new wxChoice(panel_controls, -1, wxDefaultPosition, wxDefaultSize,
         sizeof(pagesize_choices) / sizeof(wxString), pagesize_choices);
 
-    checkbox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog, 
+    checkbox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog,
         _("Show complete log"));
     button_start = new wxButton(panel_controls, ID_button_start, _("Restore"));
 
@@ -284,7 +284,7 @@ void RestoreFrame::layoutControls()
     sizerMain->Add(text_ctrl_log, 1, wxEXPAND);
 
 	// show at least 3 lines of text since it is default size too
-    sizerMain->SetItemMinSize(text_ctrl_log, 
+    sizerMain->SetItemMinSize(text_ctrl_log,
         -1, 3 * text_ctrl_filename->GetSize().GetHeight());
     SetSizerAndFit(sizerMain);
 }
@@ -387,7 +387,7 @@ END_EVENT_TABLE()
 void RestoreFrame::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxFileName origName(text_ctrl_filename->GetValue());
-    wxString filename = ::wxFileSelector(_("Select Backup File"), 
+    wxString filename = ::wxFileSelector(_("Select Backup File"),
         origName.GetPath(), origName.GetName(), wxEmptyString,
         _("All files (*.*)|*.*"), 0, this);
     if (!filename.empty())
@@ -433,8 +433,8 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     if (!choice_pagesize->GetStringSelection().ToULong(&pagesize))
         pagesize = 0;
 
-    RestoreThread* thread = new RestoreThread(this, serverM->getHostname(), 
-        databaseM->getUsername(), password, text_ctrl_filename->GetValue(), 
+    RestoreThread* thread = new RestoreThread(this, serverM->getHostname(),
+        databaseM->getUsername(), password, text_ctrl_filename->GetValue(),
         databaseM->getPath(), pagesize, (IBPP::BRF)flags);
     startThread(thread);
     updateControls();
