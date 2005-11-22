@@ -763,7 +763,7 @@ bool ColumnPropertiesHandler::handleURI(URI& uri)
     else
     {
         c = (Column*)mo;
-        t = (Table*)c->getParent();
+        t = c->getTable();
     }
 
     FieldPropertiesDialog fpd(w, t, c);
