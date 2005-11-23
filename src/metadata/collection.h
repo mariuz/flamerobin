@@ -197,7 +197,7 @@ public:
 
     virtual void setName_(wxString name)
     {
-        identifierM.setDirect(s);
+        identifierM.setDirect(name);
         notifyObservers();
     }
 
