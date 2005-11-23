@@ -105,12 +105,17 @@ bool Identifier::isReserved() const
     // non-const iterator.
     const Identifier::keywordContainer& k = Identifier::getKeywordSet();
     Identifier::keywordContainer::const_iterator ci = k.find(textM.Lower());
-    return (ci == k.end());
+    return (ci != k.end());
 }
 //----------------------------------------------------------------------------
 bool Identifier::needsQuoting() const
 {
+    if (textM.IsEmpty())
+        return false;
     if (isReserved() || !textM.IsAscii() || textM != textM.Upper())
+        return true;
+
+    if (!wxIsalpha(textM[0]))                // initial character must be A-Z,a-z
         return true;
 
     // isalnum can return true for letters in character set from
@@ -118,6 +123,8 @@ bool Identifier::needsQuoting() const
     for (wxString::size_type i = 0; i < textM.Length(); i++)
     {
         wxChar c = textM[i];
+        if (c == wxChar('_') || c == wxChar('$'))   // allowed chars
+            continue;
         if (!wxIsalnum(c) || wxIsspace(c))
             return true;
     }
