@@ -130,7 +130,7 @@ wxString Column::getDatatype()
     {
         if (!ret.empty())
             ret += wxT(" ");
-        ret += wxT("(") + d->getName() + wxT(")");
+        ret += wxT("(") + d->getName_() + wxT(")");
     }
 
     if (computedM && flag == showAll && !computedSourceM.empty())
@@ -141,7 +141,7 @@ wxString Column::getDatatype()
 //! printable name = column_name + column_datatype [+ not null]
 wxString Column::getPrintableName()
 {
-    wxString ret = getName() + wxT(" ") + getDatatype();
+    wxString ret = getName_() + wxT(" ") + getDatatype();
     if (notnullM)
         ret += wxT(" not null");
     return ret;
@@ -153,7 +153,7 @@ Domain *Column::getDomain() const
     if (!d)
         return 0;
     for (MetadataCollection<Domain>::const_iterator it = d->domainsBegin(); it != d->domainsEnd(); ++it)
-        if ((*it).getName() == sourceM)
+        if ((*it).getName_() == sourceM)
             return (Domain *)&(*it);
 
     // since we haven't find the domain, check the database
@@ -177,7 +177,7 @@ wxString Column::getCollation() const
 //-----------------------------------------------------------------------------
 wxString Column::getDropSqlStatement() const
 {
-    return wxT("ALTER TABLE ") + getTable()->getName() + wxT(" DROP ") + getName();
+    return wxT("ALTER TABLE ") + getTable()->getQuotedName() + wxT(" DROP ") + getQuotedName();
 }
 //-----------------------------------------------------------------------------
 void Column::loadDescription()

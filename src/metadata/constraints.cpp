@@ -72,6 +72,6 @@ void Constraint::acceptVisitor(MetadataItemVisitor* visitor)
 //-----------------------------------------------------------------------------
 Table* Constraint::getTable() const
 {
-    return getParentObjectOfType(ntTable);
+    return dynamic_cast<Table *>(getParentObjectOfType(ntTable));
 }
 //-----------------------------------------------------------------------------
