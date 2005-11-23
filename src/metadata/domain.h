@@ -32,24 +32,24 @@
 class Domain: public MetadataItem
 {
 private:
-	short datatypeM, subtypeM, lengthM, precisionM, scaleM;
-	wxString charsetM;
-	bool infoLoadedM;
+    short datatypeM, subtypeM, lengthM, precisionM, scaleM;
+    wxString charsetM;
+    bool infoLoadedM;
 protected:
     virtual void loadDescription();
     virtual void saveDescription(wxString description);
 public:
-	Domain();
+    Domain();
 
-	static wxString datatype2string(short datatype, short scale, 
+    static wxString datatype2string(short datatype, short scale,
         short precision, short subtype, short length);
-	bool loadInfo();
-	wxString getDatatypeAsString();
-	void getDatatypeParts(wxString& type, wxString& size, wxString& scale);
-	wxString getCharset();
-	virtual const wxString getTypeName() const;
-	virtual wxString getCreateSqlTemplate() const;
-	virtual wxString getPrintableName();
+    bool loadInfo();
+    wxString getDatatypeAsString();
+    void getDatatypeParts(wxString& type, wxString& size, wxString& scale);
+    wxString getCharset();
+    virtual const wxString getTypeName() const;
+    virtual wxString getCreateSqlTemplate() const;
+    virtual wxString getPrintableName();
     virtual void acceptVisitor(MetadataItemVisitor* v);
 };
 //-----------------------------------------------------------------------------

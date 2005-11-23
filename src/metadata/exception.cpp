@@ -50,12 +50,12 @@ Exception::Exception()
 //-----------------------------------------------------------------------------
 wxString Exception::getCreateSqlTemplate() const
 {
-	return	wxT("CREATE EXCEPTION name 'exception message';\n");
+    return  wxT("CREATE EXCEPTION name 'exception message';\n");
 }
 //-----------------------------------------------------------------------------
 const wxString Exception::getTypeName() const
 {
-	return wxT("EXCEPTION");
+    return wxT("EXCEPTION");
 }
 //-----------------------------------------------------------------------------
 wxString Exception::getMessage()
@@ -75,37 +75,37 @@ void Exception::loadProperties(bool force)
     if (!force && propertiesLoadedM)
         return;
 
-	Database* d = getDatabase();
-	if (!d)
-		return; // should signal an error here.
+    Database* d = getDatabase();
+    if (!d)
+        return; // should signal an error here.
 
-	messageM = wxT("");
+    messageM = wxT("");
     numberM = 0;
-	try
-	{
-		IBPP::Database& db = d->getIBPPDatabase();
-		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-		tr1->Start();
-		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-		st1->Prepare("select RDB$MESSAGE, RDB$EXCEPTION_NUMBER from RDB$EXCEPTIONS where RDB$EXCEPTION_NAME = ?");
-		st1->Set(1, wx2std(getName()));
-		st1->Execute();
-		st1->Fetch();
-		std::string message;
-		st1->Get(1, message);
-		messageM = std2wx(message);
+    try
+    {
+        IBPP::Database& db = d->getIBPPDatabase();
+        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+        tr1->Start();
+        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+        st1->Prepare("select RDB$MESSAGE, RDB$EXCEPTION_NUMBER from RDB$EXCEPTIONS where RDB$EXCEPTION_NAME = ?");
+        st1->Set(1, wx2std(getName_()));
+        st1->Execute();
+        st1->Fetch();
+        std::string message;
+        st1->Get(1, message);
+        messageM = std2wx(message);
         st1->Get(2, numberM);
-		tr1->Commit();
-		propertiesLoadedM = true;
-	}
-	catch (IBPP::Exception &e)
-	{
-		lastError().setMessage(std2wx(e.ErrorMessage()));
-	}
-	catch (...)
-	{
-		lastError().setMessage(_("System error."));
-	}
+        tr1->Commit();
+        propertiesLoadedM = true;
+    }
+    catch (IBPP::Exception &e)
+    {
+        lastError().setMessage(std2wx(e.ErrorMessage()));
+    }
+    catch (...)
+    {
+        lastError().setMessage(_("System error."));
+    }
     notifyObservers();
 }
 //-----------------------------------------------------------------------------
@@ -120,17 +120,19 @@ void Exception::saveDescription(wxString description)
 {
     MetadataItem::saveDescription(
         wxT("update RDB$EXCEPTIONS set RDB$DESCRIPTION = ? ")
-        wxT("where RDB$EXCEPTION_NAME = ?"), 
+        wxT("where RDB$EXCEPTION_NAME = ?"),
         description);
 }
 //-----------------------------------------------------------------------------
 wxString Exception::getAlterSql()
 {
-	return wxT("ALTER EXCEPTION ") + getName() + wxT(" '") + getMessage() + wxT("';");
+    wxString message = getMessage();
+    message.Replace(wxT("'"), wxT("''"));
+    return wxT("ALTER EXCEPTION ") + getQuotedName() + wxT(" '") + message + wxT("';");
 }
 //-----------------------------------------------------------------------------
 void Exception::acceptVisitor(MetadataItemVisitor* visitor)
 {
-	visitor->visit(*this);
+    visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------

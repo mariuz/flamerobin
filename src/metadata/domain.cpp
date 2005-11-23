@@ -47,206 +47,206 @@
 #include "MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 Domain::Domain():
-	MetadataItem()
+    MetadataItem()
 {
-	typeM = ntDomain;
-	infoLoadedM = false;	// I had a 2 hour session with debugger to found out that this was missing
+    typeM = ntDomain;
+    infoLoadedM = false;    // I had a 2 hour session with debugger to found out that this was missing
 }
 //-----------------------------------------------------------------------------
 bool Domain::loadInfo()
 {
-	Database *d = getDatabase();
-	if (!d)
-	{
-		//wxMessageBox(_("Domain::loadInfo, database = 0"), _("WARNING"), wxICON_WARNING|wxOK);
-		return false;
-	}
-	IBPP::Database& db = d->getIBPPDatabase();
+    Database *d = getDatabase();
+    if (!d)
+    {
+        //wxMessageBox(_("Domain::loadInfo, database = 0"), _("WARNING"), wxICON_WARNING|wxOK);
+        return false;
+    }
+    IBPP::Database& db = d->getIBPPDatabase();
 
-	try
-	{
-		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-		tr1->Start();
-		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-		st1->Prepare(
-			"select t.rdb$type, f.rdb$field_sub_type, f.rdb$field_length,"
-			" f.rdb$field_precision, f.rdb$field_scale, c.rdb$character_set_name, f.rdb$character_length"
-			" from rdb$fields f"
-			" join rdb$types t on f.rdb$field_type=t.rdb$type"
-			" left outer join rdb$character_sets c on c.rdb$character_set_id = f.rdb$character_set_id"
-			" where f.rdb$field_name = ?"
-			" and t.rdb$field_name='RDB$FIELD_TYPE'"
-		);
+    try
+    {
+        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+        tr1->Start();
+        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+        st1->Prepare(
+            "select t.rdb$type, f.rdb$field_sub_type, f.rdb$field_length,"
+            " f.rdb$field_precision, f.rdb$field_scale, c.rdb$character_set_name, f.rdb$character_length"
+            " from rdb$fields f"
+            " join rdb$types t on f.rdb$field_type=t.rdb$type"
+            " left outer join rdb$character_sets c on c.rdb$character_set_id = f.rdb$character_set_id"
+            " where f.rdb$field_name = ?"
+            " and t.rdb$field_name='RDB$FIELD_TYPE'"
+        );
 
-		st1->Set(1, wx2std(getName()));
-		st1->Execute();
-		if (!st1->Fetch())
-		{
-			//wxMessageBox(_("Domain not found."), _("Warning."), wxICON_WARNING|wxOK);
-			return false;
-		}
-		st1->Get(1, &datatypeM);
-		if (st1->IsNull(2))
-			subtypeM = 0;
-		else
-			st1->Get(2, &subtypeM);
-		st1->Get(3, &lengthM);
+        st1->Set(1, wx2std(getName_()));
+        st1->Execute();
+        if (!st1->Fetch())
+        {
+            //wxMessageBox(_("Domain not found."), _("Warning."), wxICON_WARNING|wxOK);
+            return false;
+        }
+        st1->Get(1, &datatypeM);
+        if (st1->IsNull(2))
+            subtypeM = 0;
+        else
+            st1->Get(2, &subtypeM);
+        st1->Get(3, &lengthM);
         if (!st1->IsNull(7))        // use rdb$character_length for character types
             st1->Get(7, &lengthM);
-		if (st1->IsNull(4))
-			precisionM = 0;
-		else
-			st1->Get(4, &precisionM);
-		if (st1->IsNull(5))
-			scaleM = 0;
-		else
-			st1->Get(5, &scaleM);
-		if (st1->IsNull(6))
-			charsetM = wxT("");
-		else
-		{
-			std::string charset;
-			st1->Get(6, charset);
-			charsetM = std2wx(charset);
-			charsetM.erase(charsetM.find_last_not_of(wxT(" ")) + 1);
-		}
+        if (st1->IsNull(4))
+            precisionM = 0;
+        else
+            st1->Get(4, &precisionM);
+        if (st1->IsNull(5))
+            scaleM = 0;
+        else
+            st1->Get(5, &scaleM);
+        if (st1->IsNull(6))
+            charsetM = wxT("");
+        else
+        {
+            std::string charset;
+            st1->Get(6, charset);
+            charsetM = std2wx(charset);
+            charsetM.erase(charsetM.find_last_not_of(wxT(" ")) + 1);
+        }
 
-		tr1->Commit();
-		if (!isSystem())
-			notifyObservers();
-		infoLoadedM = true;
-		return true;
-	}
-	catch (IBPP::Exception &e)
-	{
-		lastError().setMessage(std2wx(e.ErrorMessage()));
-	}
-	catch (...)
-	{
-		lastError().setMessage(_("System error."));
-	}
-	return false;
+        tr1->Commit();
+        if (!isSystem())
+            notifyObservers();
+        infoLoadedM = true;
+        return true;
+    }
+    catch (IBPP::Exception &e)
+    {
+        lastError().setMessage(std2wx(e.ErrorMessage()));
+    }
+    catch (...)
+    {
+        lastError().setMessage(_("System error."));
+    }
+    return false;
 }
 //-----------------------------------------------------------------------------
 //! returns column's datatype as human readable wxString. It can also be used to construct DDL for tables
 wxString Domain::getDatatypeAsString()
 {
-	if (!infoLoadedM)
-		loadInfo();
+    if (!infoLoadedM)
+        loadInfo();
 
-	return datatype2string(datatypeM, scaleM, precisionM, subtypeM, lengthM);
+    return datatype2string(datatypeM, scaleM, precisionM, subtypeM, lengthM);
 }
 //-----------------------------------------------------------------------------
 wxString Domain::datatype2string(short datatype, short scale, short precision,
     short subtype, short length)
 {
-	std::ostringstream retval;		// this will be returned
+    std::ostringstream retval;      // this will be returned
 
-	// special case (mess that some tools (ex. IBExpert) make by only setting scale and not changing type)
-	if (datatype == 27 && scale < 0)
-	{
-		retval << "Numeric(15," << -scale << ")";
-		return std2wx(retval.str());
-	}
+    // special case (mess that some tools (ex. IBExpert) make by only setting scale and not changing type)
+    if (datatype == 27 && scale < 0)
+    {
+        retval << "Numeric(15," << -scale << ")";
+        return std2wx(retval.str());
+    }
 
-	// LONG&INT64: INT/SMALLINT (prec=0), DECIMAL(sub_type=2), NUMERIC(sub_type=1)
-	if (datatype == 7 || datatype == 8 || datatype == 16)
-	{
-		if (scale == 0)
-		{
-			if (datatype == 7)
-				return wxT("Smallint");
-			else if (datatype == 8)
-				return wxT("Integer");
-			else
-				return wxT("Numeric(18,0)");
-		}
-		else
-		{
-			retval << (subtype == 2 ? "Decimal(" : "Numeric(");
-			if (precision <= 0 || precision > 18)
-				retval << 18;
-			else
-				retval << precision;
-			retval << "," << -scale << ")";
-			return std2wx(retval.str());
-		}
-	}
+    // LONG&INT64: INT/SMALLINT (prec=0), DECIMAL(sub_type=2), NUMERIC(sub_type=1)
+    if (datatype == 7 || datatype == 8 || datatype == 16)
+    {
+        if (scale == 0)
+        {
+            if (datatype == 7)
+                return wxT("Smallint");
+            else if (datatype == 8)
+                return wxT("Integer");
+            else
+                return wxT("Numeric(18,0)");
+        }
+        else
+        {
+            retval << (subtype == 2 ? "Decimal(" : "Numeric(");
+            if (precision <= 0 || precision > 18)
+                retval << 18;
+            else
+                retval << precision;
+            retval << "," << -scale << ")";
+            return std2wx(retval.str());
+        }
+    }
 
-	wxString names[] = {
-		wxT("Char"),
-		wxT("Float"),
-		wxT("Double precision"),
-		wxT("Timestamp"),
-		wxT("Varchar"),
-		wxT("Blob"),
-		wxT("Date"),
-		wxT("Time"),
-		wxT("CSTRING")
-	};
-	short mapper[9] = { 14, 10, 27, 35, 37, 261, 12, 13, 40 };
+    wxString names[] = {
+        wxT("Char"),
+        wxT("Float"),
+        wxT("Double precision"),
+        wxT("Timestamp"),
+        wxT("Varchar"),
+        wxT("Blob"),
+        wxT("Date"),
+        wxT("Time"),
+        wxT("CSTRING")
+    };
+    short mapper[9] = { 14, 10, 27, 35, 37, 261, 12, 13, 40 };
 
-	for (int i = 0; i < 9; ++i)
-	{
-		if (mapper[i] == datatype)
-		{
-			retval << wx2std(names[i]);
-			break;
-		}
-	}
+    for (int i = 0; i < 9; ++i)
+    {
+        if (mapper[i] == datatype)
+        {
+            retval << wx2std(names[i]);
+            break;
+        }
+    }
 
-	if (datatype == 14 || datatype == 37 || datatype == 40)	// char, varchar & cstring, add (length)
-		retval << "(" << length << ")";
+    if (datatype == 14 || datatype == 37 || datatype == 40) // char, varchar & cstring, add (length)
+        retval << "(" << length << ")";
 
-	if (datatype == 261)	// blob
-		retval << " sub_type " << subtype;
+    if (datatype == 261)    // blob
+        retval << " sub_type " << subtype;
 
-	return std2wx(retval.str());
+    return std2wx(retval.str());
 }
 //-----------------------------------------------------------------------------
 void Domain::getDatatypeParts(wxString& type, wxString& size, wxString& scale)
 {
     size = scale = wxEmptyString;
-	wxString datatype = getDatatypeAsString();
-	wxString::size_type p1 = datatype.find(wxT("("));
-	if (p1 != wxString::npos)
-	{
-		type = datatype.substr(0, p1);
-		wxString::size_type p2 = datatype.find(wxT(","));
-		if (p2 == wxString::npos)
-			p2 = datatype.find(wxT(")"));
-		else
-		{
-			wxString::size_type p3 = datatype.find(wxT(")"));
-			scale = datatype.substr(p2 + 1, p3 - p2 - 1);
-		}
-		size = datatype.substr(p1 + 1, p2 - p1 - 1);
-	}
-	else
+    wxString datatype = getDatatypeAsString();
+    wxString::size_type p1 = datatype.find(wxT("("));
+    if (p1 != wxString::npos)
     {
-		type = datatype;
+        type = datatype.substr(0, p1);
+        wxString::size_type p2 = datatype.find(wxT(","));
+        if (p2 == wxString::npos)
+            p2 = datatype.find(wxT(")"));
+        else
+        {
+            wxString::size_type p3 = datatype.find(wxT(")"));
+            scale = datatype.substr(p2 + 1, p3 - p2 - 1);
+        }
+        size = datatype.substr(p1 + 1, p2 - p1 - 1);
+    }
+    else
+    {
+        type = datatype;
         // HACK ALERT: some better fix needed, but we don't want the subtype
-    	if (datatypeM == 261)
+        if (datatypeM == 261)
             type = wxT("Blob");
     }
 }
 //-----------------------------------------------------------------------------
 wxString Domain::getCharset()
 {
-	if (!infoLoadedM)
-		loadInfo();
+    if (!infoLoadedM)
+        loadInfo();
 
-	return charsetM;
+    return charsetM;
 }
 //-----------------------------------------------------------------------------
 wxString Domain::getPrintableName()
 {
-	return getName() + wxT(" ") + getDatatypeAsString();
+    return getName_() + wxT(" ") + getDatatypeAsString();
 }
 //-----------------------------------------------------------------------------
 wxString Domain::getCreateSqlTemplate() const
 {
-	return	wxT("CREATE DOMAIN domain_name\n")
+    return  wxT("CREATE DOMAIN domain_name\n")
             wxT("AS datatype\n")
             wxT("DEFAULT {literal | NULL | USER}\n")
             wxT("[NOT NULL]\n")
@@ -256,7 +256,7 @@ wxString Domain::getCreateSqlTemplate() const
 //-----------------------------------------------------------------------------
 const wxString Domain::getTypeName() const
 {
-	return wxT("DOMAIN");
+    return wxT("DOMAIN");
 }
 //-----------------------------------------------------------------------------
 void Domain::loadDescription()
@@ -276,6 +276,6 @@ void Domain::saveDescription(wxString description)
 //-----------------------------------------------------------------------------
 void Domain::acceptVisitor(MetadataItemVisitor* visitor)
 {
-	visitor->visit(*this);
+    visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------

@@ -104,13 +104,13 @@ wxString Procedure::getSelectStatement(bool withColumns)
         {
             if (!parlist.empty())
                 parlist += wxT(", ");
-            parlist += (*it).getName();
+            parlist += (*it).getQuotedName();
         }
         else
         {
             if (!collist.empty())
                 collist += wxT(", ");
-            collist += (*it).getName();
+            collist += (*it).getQuotedName();
         }
     }
 
@@ -119,7 +119,7 @@ wxString Procedure::getSelectStatement(bool withColumns)
         sql += collist;
     else
         sql += wxT("* ");
-    sql += wxT("\nFROM ") + getName();
+    sql += wxT("\nFROM ") + getQuotedName();
     if (!parlist.empty())
         sql += wxT("(") + parlist + wxT(")");
     return sql;
@@ -136,11 +136,11 @@ wxString Procedure::getExecuteStatement()
         {
             if (!parlist.empty())
                 parlist += wxT(", ");
-            parlist += (*it).getName();
+            parlist += (*it).getQuotedName();
         }
     }
 
-    wxString sql = wxT("EXECUTE PROCEDURE ") + getName();
+    wxString sql = wxT("EXECUTE PROCEDURE ") + getQuotedName();
     if (!parlist.empty())
         sql += wxT("(") + parlist + wxT(")");
     return sql;
@@ -181,7 +181,7 @@ bool Procedure::loadParameters()
             " where p.rdb$PROCEDURE_name = ? "
             " order by p.rdb$parameter_type, rdb$PARAMETER_number "
         );
-        st1->Set(1, wx2std(getName()));
+        st1->Set(1, wx2std(getName_()));
         st1->Execute();
 
         while (st1->Fetch())
@@ -193,7 +193,7 @@ bool Procedure::loadParameters()
             st1->Get(3, &partype);
 
             Parameter p(std2wx(source), partype);
-            p.setName(std2wx(column_name));
+            p.setName_(std2wx(column_name));
             Parameter* pp = parametersM.add(p);
             pp->setParent(this);
         }
@@ -233,7 +233,7 @@ bool Procedure::getSource(wxString& source)
         tr1->Start();
         IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
         st1->Prepare("select rdb$procedure_source from rdb$procedures where rdb$procedure_name = ?");
-        st1->Set(1, wx2std(getName()));
+        st1->Set(1, wx2std(getName_()));
         st1->Execute();
         st1->Fetch();
         readBlob(st1, 1, source);
@@ -266,22 +266,24 @@ wxString Procedure::getDefinition()
     }
     for (MetadataCollection <Parameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
     {
+        // No need to quote domains, as currently only regular datatypes can be used
+        // for SP parameters
         if ((*it).getParameterType() == ptInput)
         {
-            parlist += wxT("    ") + (*it).getName() + wxT(" ") + (*it).getDomain()->getDatatypeAsString();
+            parlist += wxT("    ") + (*it).getQuotedName() + wxT(" ") + (*it).getDomain()->getDatatypeAsString();
             if (it != lastInput)
                 parlist += wxT(",");
             parlist += wxT("\n");
         }
         else
         {
-            collist += wxT("    ") + (*it).getName() + wxT(" ") + (*it).getDomain()->getDatatypeAsString();
+            collist += wxT("    ") + (*it).getQuotedName() + wxT(" ") + (*it).getDomain()->getDatatypeAsString();
             if (it != lastOutput)
                 collist += wxT(",");
             collist += wxT("\n");
         }
     }
-    wxString retval = getName();
+    wxString retval = getQuotedName();
     if (!parlist.empty())
         retval += wxT("(\n") + parlist + wxT(")");
     retval += wxT("\n");
@@ -300,7 +302,7 @@ wxString Procedure::getAlterSql()
     if (!getSource(source))
         return lastError().getMessage();
 
-    wxString sql = wxT("SET TERM ^ ;\nALTER PROCEDURE ") + getName();
+    wxString sql = wxT("SET TERM ^ ;\nALTER PROCEDURE ") + getQuotedName();
     if (!parametersM.empty())
     {
         wxString input, output;
@@ -312,7 +314,7 @@ wxString Procedure::getAlterSql()
                     input += wxT(" (\n    ");
                 else
                     input += wxT(",\n    ");
-                input += (*it).getName() + wxT(" ") + (*it).getDomain()->getDatatypeAsString();
+                input += (*it).getQuotedName() + wxT(" ") + (*it).getDomain()->getDatatypeAsString();
             }
             else
             {
@@ -320,7 +322,7 @@ wxString Procedure::getAlterSql()
                     output += wxT("\nRETURNS (\n    ");
                 else
                     output += wxT(",\n    ");
-                output += (*it).getName() + wxT(" ") + (*it).getDomain()->getDatatypeAsString();
+                output += (*it).getQuotedName() + wxT(" ") + (*it).getDomain()->getDatatypeAsString();
             }
         }
 

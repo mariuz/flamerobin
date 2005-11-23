@@ -213,9 +213,9 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
         sql += wxT(" order by 1, 2, 3");
         st1->Prepare(wx2std(sql));
         st1->Set(1, mytype);
-        st1->Set(2, wx2std(nameM));
+        st1->Set(2, wx2std(getName_()));
         if (!ofObject || typeM == ntTable || typeM == ntView)
-            st1->Set(3, wx2std(nameM));
+            st1->Set(3, wx2std(getName_()));
         st1->Execute();
         MetadataItem* last = 0;
         Dependency* dep = 0;
@@ -255,7 +255,7 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
                         std::string tablecheck;
                         st2->Get(1, tablecheck);
                         tablecheck.erase(tablecheck.find_last_not_of(" ")+1);
-                        if (nameM != std2wx(tablecheck))    // avoid self-reference
+                        if (getName_() != std2wx(tablecheck))    // avoid self-reference
                             current = d->findByNameAndType(ntTable, std2wx(tablecheck));
                     }
                 }
@@ -306,7 +306,7 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
                 " join rdb$check_constraints c on r.rdb$constraint_name=c.rdb$constraint_name "
                 " and r.rdb$constraint_type = 'CHECK' where r.rdb$relation_name= ? "
             );
-            st1->Set(1, wx2std(nameM));
+            st1->Set(1, wx2std(getName_()));
             st1->Execute();
             vector<Dependency> tempdep;
             while (st1->Fetch())
@@ -315,7 +315,7 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
                 st1->Get(1, s);
                 s.erase(s.find_last_not_of(" ")+1);
                 Trigger t;
-                t.setName(std2wx(s));
+                t.setName_(std2wx(s));
                 t.setParent(d);
                 t.getDependencies(tempdep, true);
             }
@@ -354,7 +354,7 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
                 " where r2.rdb$relation_name=? "
                 " and r1.rdb$constraint_type='FOREIGN KEY' "
             );
-            st1->Set(1, wx2std(nameM));
+            st1->Set(1, wx2std(getName_()));
             st1->Execute();
             std::string lasttable;
             Dependency *dep = 0;
@@ -417,9 +417,9 @@ void MetadataItem::loadDescription(wxString loadStatement)
     tr1->Start();
     IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
     st1->Prepare(wx2std(loadStatement));
-    st1->Set(1, wx2std(nameM));
+    st1->Set(1, wx2std(getName_()));
     if (st1->Parameters() > 1)
-        st1->Set(2, wx2std(getParent()->getName())); // table/view/SP name
+        st1->Set(2, wx2std(getParent()->getName_())); // table/view/SP name
     st1->Execute();
     st1->Fetch();
 
@@ -465,9 +465,9 @@ void MetadataItem::saveDescription(wxString saveStatement,
     }
     else
         st1->SetNull(1);
-    st1->Set(2, wx2std(nameM));
+    st1->Set(2, wx2std(getName_()));
     if (st1->Parameters() > 2)
-        st1->Set(3, wx2std(getParent()->getName()));
+        st1->Set(3, wx2std(getParent()->getName_()));
     st1->Execute();
     tr1->Commit();
     // set value, notify observers
@@ -504,19 +504,19 @@ void MetadataItem::setParent(MetadataItem* parent)
 //-----------------------------------------------------------------------------
 wxString MetadataItem::getPrintableName()
 {
-    wxString printableName(getName());
+    wxString printableName(getName_());
     size_t n = getChildrenCount();
     if (n)
         printableName << wxT(" (") << n << wxT(")");
     return printableName;
 }
 //-----------------------------------------------------------------------------
-const wxString& MetadataItem::getName_() const
+wxString MetadataItem::getName_() const
 {
     return identifierM.get();
 }
 //-----------------------------------------------------------------------------
-const wxString& MetadataItem::getQuotedName() const
+wxString MetadataItem::getQuotedName() const
 {
     return identifierM.getQuoted();
 }
@@ -583,7 +583,7 @@ MetadataItem *Dependency::getParent() const
     return objectM->getParent();
 }
 //-----------------------------------------------------------------------------
-const wxString& Dependency::getName() const
+wxString Dependency::getName() const
 {
     return objectM->getName_();
 }

@@ -100,8 +100,8 @@ public:
     // getters/setters
     virtual MetadataItem *getParent() const;
     void setParent(MetadataItem *parent);
-    virtual const wxString& getName_() const;
-    virtual const wxString& getQuotedName() const;
+    virtual wxString getName_() const;
+    virtual wxString getQuotedName() const;
     virtual wxString getPrintableName();
     void setName_(wxString name);
     virtual NodeType getType() const;
@@ -141,7 +141,7 @@ private:
 
 public:
     virtual MetadataItem *getParent() const;
-    virtual const wxString& getName() const;
+    virtual wxString getName() const;
     virtual NodeType getType() const;
     virtual const wxString getTypeName() const;
     MetadataItem *getDependentObject() const;

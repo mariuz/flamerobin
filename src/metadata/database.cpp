@@ -112,10 +112,10 @@ Database::Database(const Database& rhs)
     : MetadataItem(rhs), databaseM(rhs.databaseM), connectedM(rhs.connectedM),
     databaseCharsetM(rhs.databaseCharsetM), pathM(rhs.pathM),
     credentialsM(rhs.credentialsM), connectionCredentialsM(0),
-    domainsM(rhs.domainsM), exceptionsM(rhs.exceptionsM), 
-    functionsM(rhs.functionsM), generatorsM(rhs.generatorsM), 
-    proceduresM(rhs.proceduresM), rolesM(rhs.rolesM), tablesM(rhs.tablesM), 
-    triggersM(rhs.triggersM), viewsM(rhs.viewsM), collationsM(rhs.collationsM), 
+    domainsM(rhs.domainsM), exceptionsM(rhs.exceptionsM),
+    functionsM(rhs.functionsM), generatorsM(rhs.generatorsM),
+    proceduresM(rhs.proceduresM), rolesM(rhs.rolesM), tablesM(rhs.tablesM),
+    triggersM(rhs.triggersM), viewsM(rhs.viewsM), collationsM(rhs.collationsM),
     idM(rhs.idM)
 {
     if (rhs.connectionCredentialsM)
@@ -528,7 +528,7 @@ bool Database::addObject(NodeType type, wxString name)
 
     if (!m)     // should never happen, but just in case
         return false;
-    m->setName(name);
+    m->setName_(name);
     m->setParent(this);
     m->setType(type);   // in case it doesn't have ctor to set it
     return true;
@@ -541,6 +541,8 @@ inline void getCleanName(std::stringstream& strstrm, std::string& name)
     std::string::size_type p = name.find("(");     // TODO: we need a decent parser
     if (p != std::string::npos)                    //       but this hack will do until we have it
         name.erase(p);
+    Identifier i(std2wx(name));
+    name = wx2std(i.get());
 }
 //-----------------------------------------------------------------------------
 //! reads a DDL statement and does accordingly
@@ -551,6 +553,10 @@ inline void getCleanName(std::stringstream& strstrm, std::string& name)
 // alter table [name] alter [column] type [domain or datatype]
 // declare external function [name]
 // set null flag via system tables update
+
+//! FIXME: This NEEDS to be rewritten to use the Identifier class
+//!        However, it would require a better tokenizer which would
+//!        support identifiers which are quoted and have space in the name
 bool Database::parseCommitedSql(wxString sql)
 {
     sql += wxT("\n");    // if last line starts with --
@@ -788,7 +794,7 @@ bool Database::parseCommitedSql(wxString sql)
                         if (m == 0)     // domain does not exist in DBH
                         {
                             m = domainsM.add();
-                            m->setName(domain_name);
+                            m->setName_(domain_name);
                             m->setParent(this);
                             m->setType(ntDomain);   // just in case
                         }

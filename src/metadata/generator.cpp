@@ -88,7 +88,7 @@ bool Generator::loadValue(bool force)
         IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
         tr1->Start();
         IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare("select gen_id(" + wx2std(getName()) + ", 0) from rdb$database");
+        st1->Prepare("select gen_id(" + wx2std(getQuotedName()) + ", 0) from rdb$database");
         st1->Execute();
         st1->Fetch();
         int64_t value;
@@ -111,10 +111,10 @@ bool Generator::loadValue(bool force)
 wxString Generator::getPrintableName()
 {
     if (!valueLoadedM)
-        return getName();
+        return getName_();
 
     std::ostringstream ss;
-    ss << wx2std(getName()) << " = " << valueM;
+    ss << wx2std(getName_()) << " = " << valueM;
     return std2wx(ss.str());
 }
 //-----------------------------------------------------------------------------

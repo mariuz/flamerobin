@@ -45,13 +45,13 @@
 //-----------------------------------------------------------------------------
 Function::Function()
 {
-	typeM = ntFunction;
-	infoLoadedM = false;
+    typeM = ntFunction;
+    infoLoadedM = false;
 }
 //-----------------------------------------------------------------------------
 wxString Function::getCreateSqlTemplate() const
 {
-	return wxT("DECLARE EXTERNAL FUNCTION name [datatype | CSTRING (int) [, datatype | CSTRING (int) ...]]\n")
+    return wxT("DECLARE EXTERNAL FUNCTION name [datatype | CSTRING (int) [, datatype | CSTRING (int) ...]]\n")
            wxT("RETURNS {datatype [BY VALUE] | CSTRING (int)} [FREE_IT]\n")
            wxT("ENTRY_POINT 'entryname'\n")
            wxT("MODULE_NAME 'modulename';\n");
@@ -59,102 +59,102 @@ wxString Function::getCreateSqlTemplate() const
 //-----------------------------------------------------------------------------
 const wxString Function::getTypeName() const
 {
-	return wxT("FUNCTION");
+    return wxT("FUNCTION");
 }
 //-----------------------------------------------------------------------------
 wxString Function::getDropSqlStatement() const
 {
-    return wxT("DROP EXTERNAL FUNCTION ") + getName() + wxT(";");
+    return wxT("DROP EXTERNAL FUNCTION ") + getQuotedName() + wxT(";");
 }
 //-----------------------------------------------------------------------------
 wxString Function::getDefinition()
 {
-	loadInfo();
-	return definitionM;
+    loadInfo();
+    return definitionM;
 }
 //-----------------------------------------------------------------------------
 void Function::loadInfo(bool force)
 {
-	if (infoLoadedM && !force)
-		return;
+    if (infoLoadedM && !force)
+        return;
 
-	Database* d = getDatabase();
-	if (!d)
-	{
-		definitionM = wxT("Error");
-		return;
-	}
+    Database* d = getDatabase();
+    if (!d)
+    {
+        definitionM = wxT("Error");
+        return;
+    }
 
-	IBPP::Database& db = d->getIBPPDatabase();
-	definitionM = getName() + wxT("(\n");
-	try
-	{
-		IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-		tr1->Start();
-		IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-		st1->Prepare(
-			"SELECT f.RDB$RETURN_ARGUMENT, a.RDB$MECHANISM, a.RDB$ARGUMENT_POSITION, "
-			" a.RDB$FIELD_TYPE, a.RDB$FIELD_SCALE, a.RDB$FIELD_LENGTH, a.RDB$FIELD_SUB_TYPE, a.RDB$FIELD_PRECISION,"
-			" f.RDB$MODULE_NAME, f.RDB$ENTRYPOINT "
-			" FROM RDB$FUNCTIONS f"
-			" LEFT OUTER JOIN RDB$FUNCTION_ARGUMENTS a ON f.RDB$FUNCTION_NAME = a.RDB$FUNCTION_NAME"
-			" WHERE f.RDB$FUNCTION_NAME = ?"
-			" ORDER BY a.RDB$ARGUMENT_POSITION"
-		);
-		st1->Set(1, wx2std(getName()));
-		st1->Execute();
-		wxString retstr;
-		bool first = true;
-		while (st1->Fetch())
-		{
-			short returnarg, mechanism, type, scale, length, subtype, precision, retpos;
-			std::string libraryName, entryPoint;
-			st1->Get(1, returnarg);
-			st1->Get(2, mechanism);
-			st1->Get(3, retpos);
-			st1->Get(4, type);
-			st1->Get(5, scale);
-			st1->Get(6, length);
-			st1->Get(7, subtype);
-			st1->Get(8, precision);
-			st1->Get(9, libraryName);
-			libraryNameM = std2wx(libraryName);
-			st1->Get(10, entryPoint);
-			entryPointM = std2wx(entryPoint);
-			wxString param = wxT("    ") + Domain::datatype2string(type, scale, precision, subtype, length)
-				+ wxT(" by ") + (mechanism == 0 ? wxT("value") : wxT("reference"));
-			if (mechanism == -1)
-				param += wxT(" [FREE_IT]");
-			if (returnarg == retpos)	// output
-				retstr = param;
-			else
-			{
-				if (first)
-					first = false;
-				else
-					definitionM += wxT(",\n");
-				definitionM += param;
-			}
-		}
-		definitionM += wxT("\n)\nreturns:\n") + retstr;
-		infoLoadedM = true;
-		tr1->Commit();
-	}
-	catch (IBPP::Exception &e)
-	{
-		definitionM = std2wx(e.ErrorMessage());
-	}
-	catch (...)
-	{
-		definitionM = _("System error.");
-	}
+    IBPP::Database& db = d->getIBPPDatabase();
+    definitionM = getName_() + wxT("(\n");
+    try
+    {
+        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+        tr1->Start();
+        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+        st1->Prepare(
+            "SELECT f.RDB$RETURN_ARGUMENT, a.RDB$MECHANISM, a.RDB$ARGUMENT_POSITION, "
+            " a.RDB$FIELD_TYPE, a.RDB$FIELD_SCALE, a.RDB$FIELD_LENGTH, a.RDB$FIELD_SUB_TYPE, a.RDB$FIELD_PRECISION,"
+            " f.RDB$MODULE_NAME, f.RDB$ENTRYPOINT "
+            " FROM RDB$FUNCTIONS f"
+            " LEFT OUTER JOIN RDB$FUNCTION_ARGUMENTS a ON f.RDB$FUNCTION_NAME = a.RDB$FUNCTION_NAME"
+            " WHERE f.RDB$FUNCTION_NAME = ?"
+            " ORDER BY a.RDB$ARGUMENT_POSITION"
+        );
+        st1->Set(1, wx2std(getName_()));
+        st1->Execute();
+        wxString retstr;
+        bool first = true;
+        while (st1->Fetch())
+        {
+            short returnarg, mechanism, type, scale, length, subtype, precision, retpos;
+            std::string libraryName, entryPoint;
+            st1->Get(1, returnarg);
+            st1->Get(2, mechanism);
+            st1->Get(3, retpos);
+            st1->Get(4, type);
+            st1->Get(5, scale);
+            st1->Get(6, length);
+            st1->Get(7, subtype);
+            st1->Get(8, precision);
+            st1->Get(9, libraryName);
+            libraryNameM = std2wx(libraryName);
+            st1->Get(10, entryPoint);
+            entryPointM = std2wx(entryPoint);
+            wxString param = wxT("    ") + Domain::datatype2string(type, scale, precision, subtype, length)
+                + wxT(" by ") + (mechanism == 0 ? wxT("value") : wxT("reference"));
+            if (mechanism == -1)
+                param += wxT(" [FREE_IT]");
+            if (returnarg == retpos)    // output
+                retstr = param;
+            else
+            {
+                if (first)
+                    first = false;
+                else
+                    definitionM += wxT(",\n");
+                definitionM += param;
+            }
+        }
+        definitionM += wxT("\n)\nreturns:\n") + retstr;
+        infoLoadedM = true;
+        tr1->Commit();
+    }
+    catch (IBPP::Exception &e)
+    {
+        definitionM = std2wx(e.ErrorMessage());
+    }
+    catch (...)
+    {
+        definitionM = _("System error.");
+    }
 }
 //-----------------------------------------------------------------------------
 wxString Function::getHtmlHeader()
 {
-	loadInfo();
-	return wxT("<B>Library name:</B> ") + libraryNameM + wxT("<BR><B>Entry point:</B>  ")
-	    + entryPointM + wxT("<BR><BR>");
+    loadInfo();
+    return wxT("<B>Library name:</B> ") + libraryNameM + wxT("<BR><B>Entry point:</B>  ")
+        + entryPointM + wxT("<BR><BR>");
 }
 //-----------------------------------------------------------------------------
 void Function::loadDescription()
@@ -174,6 +174,6 @@ void Function::saveDescription(wxString description)
 //-----------------------------------------------------------------------------
 void Function::acceptVisitor(MetadataItemVisitor* visitor)
 {
-	visitor->visit(*this);
+    visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------
