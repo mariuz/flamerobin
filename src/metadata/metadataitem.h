@@ -57,13 +57,13 @@ NodeType getTypeByName(wxString name);
 class MetadataItem: public Element, public Subject
 {
 private:
-    Identifier identifierM;
     MetadataItem* parentM;
     wxString descriptionM;
     bool descriptionLoadedM;
     void setDescriptionM(wxString description);
 
 protected:
+    Identifier identifierM;
     NodeType typeM;
     MetadataItem* getParentObjectOfType(NodeType type) const;
 
