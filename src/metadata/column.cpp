@@ -58,8 +58,8 @@ Column::Column()
 void Column::Init(bool notnull, wxString source, bool computed,
     wxString computedSource, wxString collation)
 {
-    source.erase(source.find_last_not_of(wxT(" ")) + 1);        // right trim everything
-    collation.erase(collation.find_last_not_of(wxT(" ")) + 1);
+    source.Trim();        // right trim everything
+    collation.Trim();
     notnullM = notnull;
     sourceM = source;
     computedM = computed;

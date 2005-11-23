@@ -165,8 +165,7 @@ bool AddConstraintHandler::handleURI(URI& uri)
         wxString source;
         if (!GetMultilineTextFromUser(w, _("Enter check condition"), source))
             return true;
-        Identifier temp(source);
-        sql += wxT("\ncheck (") + temp.getQuoted() + wxT(")");
+        sql += wxT("\ncheck (") + source + wxT(")");
     }
     else if (type == wxT("UNQ"))
     {

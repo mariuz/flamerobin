@@ -435,7 +435,7 @@ void MetadataItem::loadDescription(wxString loadStatement)
     setDescriptionM(std2wx(value));
 }
 //-----------------------------------------------------------------------------
-void MetadataItem::saveDescription(wxString description)
+void MetadataItem::saveDescription(wxString WXUNUSED(description))
 {
     throw FRError(wxString::Format(
         wxT("Objects of type %s do not support descriptions"),
@@ -523,7 +523,7 @@ wxString MetadataItem::getQuotedName() const
 //-----------------------------------------------------------------------------
 void MetadataItem::setName_(wxString name)
 {
-    identifierM.set(name);
+    identifierM.setText(name);
     notifyObservers();
 }
 //-----------------------------------------------------------------------------

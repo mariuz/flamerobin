@@ -155,12 +155,6 @@ const wxString Server::getTypeName() const
     return wxT("SERVER");
 }
 //-----------------------------------------------------------------------------
-void Server::setName_(wxString s)
-{
-    identifierM.setDirect(s);
-    notifyObservers();
-}
-//-----------------------------------------------------------------------------
 void Server::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visit(*this);

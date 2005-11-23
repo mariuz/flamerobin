@@ -140,7 +140,8 @@ wxString::size_type SimpleParser::getTableNames(std::vector<wxString>& list, wxS
         if (c == 0)
             return retval;
         retval += c;
-        Identifier temp(s);         // strip quotes if needed
+        Identifier temp;
+        temp.setFromSql(s);         // strip quotes if needed
         list.push_back(temp.get());
 
         while (true)

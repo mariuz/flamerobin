@@ -195,12 +195,6 @@ public:
             return getName_();
     }
 
-    virtual void setName_(wxString name)
-    {
-        identifierM.setDirect(name);
-        notifyObservers();
-    }
-
     virtual size_t getChildrenCount() const
     {
         return itemsM.size();

@@ -40,19 +40,22 @@
 //----------------------------------------------------------------------------
 Identifier::Identifier(const wxString& source)
 {
-    set(source);
+    setText(source);
 }
 //----------------------------------------------------------------------------
 Identifier::Identifier()
 {
 }
 //----------------------------------------------------------------------------
-void Identifier::setDirect(const wxString& source)
+void Identifier::setText(const wxString& source)
 {
-    textM = source;
+    // although it may not be completely correct we right-trim everything we
+    // get. This means that users can't use quoted identifiers which end with
+    // a space - but who does that anyway
+    textM = source.Strip();
 }
 //----------------------------------------------------------------------------
-void Identifier::set(const wxString& source)
+void Identifier::setFromSql(const wxString& source)
 {
     if (source.IsEmpty())
         return;
@@ -66,6 +69,7 @@ void Identifier::set(const wxString& source)
             textM = temp.SubString(1, p-2);
         else                    // a really strange occurence of identifier
             textM = temp;     // starting with quote and not ending with it
+        textM.Replace(wxT("\"\""), wxT("\""));  // remove escapes for quotes
     }
     else
         textM = temp.Upper();
@@ -146,7 +150,11 @@ wxString Identifier::getQuoted() const
     // retrieved only once, needs restart to change (but it is much efficient)
     static bool alwaysQuoteM = config().get(wxT("alwaysQuoteIdentifiers"), false);
     if (alwaysQuoteM || needsQuoting())
-        return wxT("\"") + textM + wxT("\"");
+    {
+        wxString retval(textM);
+        retval.Replace(wxT("\""), wxT("\"\""));      // escape quotes
+        return wxT("\"") + retval + wxT("\"");
+    }
     else
         return textM;
 }

@@ -65,7 +65,6 @@ public:
     void setHostname(wxString hostname);
     void setPort(wxString port);
     virtual const wxString getTypeName() const;
-    virtual void setName_(wxString name);
 
     bool hasConnectedDatabase() const;
     virtual const wxString getItemPath() const;

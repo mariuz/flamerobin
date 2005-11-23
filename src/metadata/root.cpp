@@ -322,12 +322,6 @@ const wxString Root::getItemPath() const
     return wxT("");
 }
 //-----------------------------------------------------------------------------
-void Root::setName_(wxString s)
-{
-    identifierM.setDirect(s);
-    notifyObservers();
-}
-//-----------------------------------------------------------------------------
 wxString Root::getFileName()
 {
     if (fileNameM.empty())

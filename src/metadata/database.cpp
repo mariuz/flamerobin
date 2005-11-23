@@ -411,6 +411,7 @@ bool Database::loadObjects(NodeType type)
         {
             std::string name;
             st1->Get(1, name);
+            name.erase(name.find_last_not_of(" ") + 1);
             addObject(type, std2wx(name));
         }
         refreshByType(type);
@@ -541,7 +542,8 @@ inline void getCleanName(std::stringstream& strstrm, std::string& name)
     std::string::size_type p = name.find("(");     // TODO: we need a decent parser
     if (p != std::string::npos)                    //       but this hack will do until we have it
         name.erase(p);
-    Identifier i(std2wx(name));
+    Identifier i;
+    i.setFromSql(std2wx(name));
     name = wx2std(i.get());
 }
 //-----------------------------------------------------------------------------
@@ -557,6 +559,8 @@ inline void getCleanName(std::stringstream& strstrm, std::string& name)
 //! FIXME: This NEEDS to be rewritten to use the Identifier class
 //!        However, it would require a better tokenizer which would
 //!        support identifiers which are quoted and have space in the name
+//!        it can either strip quoted itself, or call Identifier::setFromSql
+//!        on the original string
 bool Database::parseCommitedSql(wxString sql)
 {
     sql += wxT("\n");    // if last line starts with --
@@ -1204,11 +1208,5 @@ const wxString Database::getId() const
 void Database::setId(int id)
 {
     idM = id;
-}
-//-----------------------------------------------------------------------------
-void Database::setName_(wxString s)
-{
-    identifierM.setDirect(s);
-    notifyObservers();
 }
 //-----------------------------------------------------------------------------

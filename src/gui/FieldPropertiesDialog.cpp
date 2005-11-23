@@ -625,7 +625,7 @@ void FieldPropertiesDialog::updateSqlStatement()
     wxString sql;
     if (radio_generator_new->GetValue())
     {
-        generator.set(textctrl_generator_name->GetValue());
+        generator.setText(textctrl_generator_name->GetValue());
         sql = wxT("CREATE GENERATOR ") + generator.getQuoted() + wxT(";\n\n");
     }
 
