@@ -59,6 +59,7 @@ public:
     bool load();
     bool save();
     virtual const wxString getItemPath() const;
+    virtual void setName_(wxString name);
 
     // updates all servers (observer pattern)
     void notifyAllServers();

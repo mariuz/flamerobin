@@ -161,6 +161,7 @@ public:
     virtual const wxString getId() const;
     void setId(int id);
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    virtual void setName_(wxString name);
 };
 //----------------------------------------------------------------------------
 #endif

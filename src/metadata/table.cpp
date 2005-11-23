@@ -78,9 +78,10 @@ bool Table::loadColumns()           // update the keys info too
 wxString Table::getInsertStatement()
 {
     checkAndLoadColumns();
-    wxString sql = wxT("INSERT INTO ") + getName() + wxT(" (");
+    wxString sql = wxT("INSERT INTO ") + getQuotedName() + wxT(" (");
     wxString collist, valist;
-    for (MetadataCollection<Column>::const_iterator i = columnsM.begin(); i != columnsM.end(); ++i)
+    for (MetadataCollection<Column>::const_iterator i = columnsM.begin();
+         i != columnsM.end(); ++i)
     {
         if ((*i).isComputed())
             continue;
@@ -89,11 +90,11 @@ wxString Table::getInsertStatement()
             valist += wxT(", \n");
             collist += wxT(", ");
         }
-        collist += (*i).getName();
+        collist += (*i).getQuotedName();
 
         if (!(*i).isNullable())
             valist += wxT("*");
-        valist += (*i).getName();
+        valist += (*i).getQuotedName();
     }
     sql += collist + wxT(")\n VALUES (\n") + valist + wxT("\n)");
     return sql;
@@ -127,7 +128,7 @@ bool Table::loadCheckConstraints()
             " where r.rdb$relation_name=?"
         );
 
-        st1->Set(1, wx2std(getName()));
+        st1->Set(1, wx2std(getName_()));
         st1->Execute();
         while (st1->Fetch())
         {
@@ -139,7 +140,7 @@ bool Table::loadCheckConstraints()
             source.erase(source.find_last_not_of(wxT(" ")) + 1);
             CheckConstraint c;
             c.setParent(this);
-            c.setName(std2wx(cname));
+            c.setName_(std2wx(cname));
             c.sourceM = source;
             checkConstraintsM.push_back(c);
         }
@@ -185,7 +186,7 @@ bool Table::loadPrimaryKey()
             "(r.rdb$constraint_type='PRIMARY KEY') order by 1, 2"
         );
 
-        st1->Set(1, wx2std(getName()));
+        st1->Set(1, wx2std(getName_()));
         st1->Execute();
         while (st1->Fetch())
         {
@@ -195,7 +196,7 @@ bool Table::loadPrimaryKey()
 
             name.erase(name.find_last_not_of(" ") + 1);
             cname.erase(cname.find_last_not_of(" ") + 1);
-            primaryKeyM.setName(std2wx(cname));
+            primaryKeyM.setName_(std2wx(cname));
             primaryKeyM.columnsM.push_back(std2wx(name));
         }
         tr1->Commit();
@@ -241,7 +242,7 @@ bool Table::loadUniqueConstraints()
             "(r.rdb$constraint_type='UNIQUE') order by 1, 2"
         );
 
-        st1->Set(1, wx2std(getName()));
+        st1->Set(1, wx2std(getName_()));
         st1->Execute();
         ColumnConstraint *cc = 0;
         while (st1->Fetch())
@@ -252,14 +253,14 @@ bool Table::loadUniqueConstraints()
             name.erase(name.find_last_not_of(" ") + 1);
             cname.erase(cname.find_last_not_of(" ") + 1);
 
-            if (cc && cc->getName() == std2wx(cname))
+            if (cc && cc->getName_() == std2wx(cname))
                 cc->columnsM.push_back(std2wx(name));
             else
             {
                 ColumnConstraint c;
                 uniqueConstraintsM.push_back(c);
                 cc = &uniqueConstraintsM.back();
-                cc->setName(std2wx(cname));
+                cc->setName_(std2wx(cname));
                 cc->columnsM.push_back(std2wx(name));
                 cc->setParent(this);
             }
@@ -351,7 +352,7 @@ bool Table::loadForeignKeys()
             " order by i.rdb$field_position "
         );
 
-        st1->Set(1, wx2std(getName()));
+        st1->Set(1, wx2std(getName_()));
         st1->Execute();
         ForeignKey *fkp = 0;
         while (st1->Fetch())
@@ -367,14 +368,14 @@ bool Table::loadForeignKeys()
             cname.erase(cname.find_last_not_of(" ") + 1);
             ref_constraint.erase(ref_constraint.find_last_not_of(" ") + 1);
 
-            if (fkp && fkp->getName() == std2wx(cname)) // add column
+            if (fkp && fkp->getName_() == std2wx(cname)) // add column
                 fkp->columnsM.push_back(std2wx(name));
             else
             {
                 ForeignKey fk;
                 foreignKeysM.push_back(fk);
                 fkp = &foreignKeysM.back();
-                fkp->setName(std2wx(cname));
+                fkp->setName_(std2wx(cname));
                 fkp->setParent(this);
                 fkp->updateActionM = std2wx(update_rule);
                 fkp->deleteActionM = std2wx(delete_rule);
@@ -438,7 +439,7 @@ bool Table::loadIndices()
             " order by i.rdb$index_id, s.rdb$field_position "
         );
 
-        st1->Set(1, wx2std(getName()));
+        st1->Set(1, wx2std(getName_()));
         st1->Execute();
         Index* i = 0;
         while (st1->Fetch())
@@ -464,7 +465,7 @@ bool Table::loadIndices()
             name.erase(name.find_last_not_of(" ") + 1);
             fname.erase(fname.find_last_not_of(" ") + 1);
 
-            if (i && i->getName() == std2wx(name))
+            if (i && i->getName_() == std2wx(name))
                 i->getSegments()->push_back(std2wx(fname));
             else
             {
@@ -476,7 +477,7 @@ bool Table::loadIndices()
                 );
                 indicesM.push_back(x);
                 i = &indicesM.back();
-                i->setName(std2wx(name));
+                i->setName_(std2wx(name));
                 i->getSegments()->push_back(std2wx(fname));
                 i->setParent(this);
             }
@@ -519,29 +520,17 @@ const wxString Table::getTypeName() const
 //-----------------------------------------------------------------------------
 // find all tables from "tables" which have foreign keys with "table"
 // and return them in "list"
-bool Table::tablesRelate(std::vector<wxString>& tables, Table* table, std::vector<Join>& list)
+bool Table::tablesRelate(const std::vector<wxString>& tables, Table* table,
+                          std::vector<ForeignKey>& list)
 {
     // see if "table" references some of the "tables"
     std::vector<ForeignKey> *fks = table->getForeignKeys();
     for (std::vector<ForeignKey>::iterator it = fks->begin(); it != fks->end(); ++it)
     {
         ForeignKey& fk = (*it);
-        for (std::vector<wxString>::iterator i2 = tables.begin(); i2 != tables.end(); ++i2)
-        {
+        for (std::vector<wxString>::const_iterator i2 = tables.begin(); i2 != tables.end(); ++i2)
             if ((*i2) == fk.referencedTableM)
-            {
-                wxString join;
-                for (unsigned int i = 0; i < fk.referencedColumnsM.size(); ++i)
-                {
-                    if (i > 0)
-                        join += wxT(" AND ");
-                    join += fk.referencedTableM + wxT(".") + fk.referencedColumnsM[i] +
-                        wxT(" = ") + table->getName() + wxT(".") + fk.columnsM[i];
-                }
-                list.push_back(Join(fk.referencedTableM, join));
-
-            }
-        }
+                list.push_back(fk);
     }
 
     // see if some of the "tables" reference the "table"
@@ -551,7 +540,7 @@ bool Table::tablesRelate(std::vector<wxString>& tables, Table* table, std::vecto
     {
         if ((*it).getType() == ntTable)
         {
-            for (std::vector<wxString>::iterator i2 = tables.begin(); i2 != tables.end(); ++i2)
+            for (std::vector<wxString>::const_iterator i2 = tables.begin(); i2 != tables.end(); ++i2)
             {
                 if ((*i2) == (*it).getName())
                 {
@@ -565,17 +554,9 @@ bool Table::tablesRelate(std::vector<wxString>& tables, Table* table, std::vecto
                     for (std::vector<ForeignKey>::iterator it = fks->begin(); it != fks->end(); ++it)
                     {
                         ForeignKey& fk = (*it);
-                        if (table->getName() == fk.referencedTableM)
+                        if (table->getName_() == fk.referencedTableM)
                         {
-                            wxString join;
-                            for (unsigned int i = 0; i < fk.referencedColumnsM.size(); ++i)
-                            {
-                                if (i > 0)
-                                    join += wxT(" AND ");
-                                join += fk.referencedTableM + wxT(".") + fk.referencedColumnsM[i] +
-                                    wxT(" = ") + (*i2) + wxT(".") + fk.columnsM[i];
-                            }
-                            list.push_back(Join(fk.referencedTableM, join));
+                            list.push_back(fk);
                             break;  // no need for more
                         }
                     }

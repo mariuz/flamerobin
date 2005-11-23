@@ -99,7 +99,7 @@ bool Trigger::loadInfo(bool force)
             "from rdb$triggers t where rdb$trigger_name = ? "
         );
 
-        st1->Set(1, wx2std(getName()));
+        st1->Set(1, wx2std(getName_()));
         st1->Execute();
         if (st1->Fetch())
         {
@@ -160,7 +160,7 @@ bool Trigger::getSource(wxString& source) const
         tr1->Start();
         IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
         st1->Prepare("select rdb$trigger_source from rdb$triggers where rdb$trigger_name = ?");
-        st1->Set(1, wx2std(getName()));
+        st1->Set(1, wx2std(getName_()));
         st1->Execute();
         st1->Fetch();
         readBlob(st1, 1, source);
@@ -230,7 +230,7 @@ wxString Trigger::getAlterSql()
         return lastError().getMessage();
 
     wxString sql;
-    sql << wxT("SET TERM ^ ;\nALTER TRIGGER ") << getName();
+    sql << wxT("SET TERM ^ ;\nALTER TRIGGER ") << getQuotedName();
     if (active)
         sql << wxT(" ACTIVE\n");
     else

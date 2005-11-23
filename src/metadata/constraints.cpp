@@ -56,7 +56,8 @@ wxString ColumnConstraint::getColumnList() const
 wxString ForeignKey::getReferencedColumnList() const
 {
     wxString result;
-    for (std::vector<wxString>::const_iterator it = referencedColumnsM.begin(); it != referencedColumnsM.end(); ++it)
+    for (std::vector<wxString>::const_iterator it = referencedColumnsM.begin();
+         it != referencedColumnsM.end(); ++it)
     {
         if (it != referencedColumnsM.begin())
             result += wxT(",");
@@ -64,6 +65,27 @@ wxString ForeignKey::getReferencedColumnList() const
     }
     return result;
 };
+//-----------------------------------------------------------------------------
+wxString ForeignKey::getJoin(bool quoted) const
+{
+    Identifier reftab(referencedTableM);
+    wxString rtab = (quoted ? reftab.getQuoted() : reftab.get());
+    wxString table = (quoted ? getTable()->getQuotedName() : getTable()->getName_());
+    wxString result;
+    std::vector<wxString>::const_iterator im = columnsM.begin();
+    for (std::vector<wxString>::const_iterator it = referencedColumnsM.begin();
+         it != referencedColumnsM.end(); ++it, ++im)
+    {
+        if (!result.IsEmpty())
+            result += wxT(" AND ");
+        Identifier col1(*im);
+        Identifier col2(*it);
+        wxString c1 = (quoted ? col1.getQuoted() : col1.get());
+        wxString c2 = (quoted ? col2.getQuoted() : col2.get());
+        result += table + wxT(".") + c1 + wxT(" = ") + rtab + wxT(".") + c2;
+    }
+    return result;
+}
 //-----------------------------------------------------------------------------
 void Constraint::acceptVisitor(MetadataItemVisitor* visitor)
 {

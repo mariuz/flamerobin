@@ -76,7 +76,7 @@ static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
 Root::Root()
     : MetadataItem(), fileNameM(wxT("")), dirtyM(false), loadingM(false), nextIdM(1)
 {
-    setName(wxT("Home"));
+    setName_(wxT("Home"));
     typeM = ntRoot;
 }
 //-----------------------------------------------------------------------------
@@ -92,7 +92,7 @@ void Root::disconnectAllDatabases()
 }
 //-----------------------------------------------------------------------------
 Root::~Root()
-{            
+{
     if (dirtyM)
         save();
 }
@@ -156,7 +156,7 @@ bool Root::parseDatabase(Server* server, wxXmlNode* xmln)
 
         wxString value(getNodeContent(xmln, wxEmptyString));
         if (xmln->GetName() == wxT("name"))
-            database->setName(value);
+            database->setName_(value);
         else if (xmln->GetName() == wxT("path"))
             database->setPath(value);
         else if (xmln->GetName() == wxT("charset"))
@@ -184,8 +184,8 @@ bool Root::parseDatabase(Server* server, wxXmlNode* xmln)
     // will not be stored because it's at the beginning of the file.
     database->getId();
     // backward compatibility with FR < 0.3.0
-    if (database->getName().IsEmpty())
-        database->setName(database->extractNameFromConnectionString());
+    if (database->getName_().IsEmpty())
+        database->setName_(database->extractNameFromConnectionString());
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -203,7 +203,7 @@ bool Root::parseServer(wxXmlNode* xmln)
 
         wxString value(getNodeContent(xmln, wxEmptyString));
         if (xmln->GetName() == wxT("name"))
-            server->setName(value);
+            server->setName_(value);
         else if (xmln->GetName() == wxT("host"))
             server->setHostname(value);
         else if (xmln->GetName() == wxT("port"))
@@ -215,8 +215,8 @@ bool Root::parseServer(wxXmlNode* xmln)
         }
     }
     // backward compatibility with FR < 0.3.0
-    if (server->getName().IsEmpty())
-        server->setName(server->getConnectionString());
+    if (server->getName_().IsEmpty())
+        server->setName_(server->getConnectionString());
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -260,7 +260,7 @@ bool Root::save()
     for (std::list<Server>::iterator it = serversM.begin(); it != serversM.end(); ++it)
     {
         file << "\t<server>\n";
-        file << "\t\t<name>" << wx2std(it->getName()) << "</name>\n";
+        file << "\t\t<name>" << wx2std(it->getName_()) << "</name>\n";
         file << "\t\t<host>" << wx2std(it->getHostname()) << "</host>\n";
         file << "\t\t<port>" << wx2std(it->getPort()) << "</port>\n";
 
@@ -269,7 +269,7 @@ bool Root::save()
             it2->resetCredentials();    // clean up eventual extra credentials
             file << "\t\t<database>\n";
             file << "\t\t\t<id>" << wx2std(it2->getId()) << "</id>\n";
-            file << "\t\t\t<name>" << wx2std(it2->getName()) << "</name>\n";
+            file << "\t\t\t<name>" << wx2std(it2->getName_()) << "</name>\n";
             file << "\t\t\t<path>" << wx2std(it2->getPath()) << "</path>\n";
             file << "\t\t\t<charset>" << wx2std(it2->getConnectionCharset()) << "</charset>\n";
             file << "\t\t\t<username>" << wx2std(it2->getUsername()) << "</username>\n";
@@ -320,6 +320,12 @@ const wxString Root::getItemPath() const
 {
     // Root is root, don't make the path strings any longer than needed.
     return wxT("");
+}
+//-----------------------------------------------------------------------------
+void Root::setName_(wxString s)
+{
+    identifierM.setDirect(s);
+    notifyObservers();
 }
 //-----------------------------------------------------------------------------
 wxString Root::getFileName()

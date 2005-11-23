@@ -1206,3 +1206,9 @@ void Database::setId(int id)
     idM = id;
 }
 //-----------------------------------------------------------------------------
+void Database::setName_(wxString s)
+{
+    identifierM.setDirect(s);
+    notifyObservers();
+}
+//-----------------------------------------------------------------------------

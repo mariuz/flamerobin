@@ -103,7 +103,7 @@ public:
     virtual wxString getName_() const;
     virtual wxString getQuotedName() const;
     virtual wxString getPrintableName();
-    void setName_(wxString name);
+    virtual void setName_(wxString name);
     virtual NodeType getType() const;
     void setType(NodeType type);
 

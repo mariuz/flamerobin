@@ -34,8 +34,10 @@ class Identifier
 {
 public:
     typedef std::set<wxString> keywordContainer;
+    Identifier();
     Identifier(const wxString& source);
     void set(const wxString& source);
+    void setDirect(const wxString& source);
 
     static const keywordContainer& getKeywordSet();
     static wxString getKeywords(bool lowerCase = false);

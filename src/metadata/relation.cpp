@@ -95,7 +95,7 @@ bool Relation::loadColumns()
             " order by r.rdb$field_position"
         );
 
-        st1->Set(1, wx2std(getName()));
+        st1->Set(1, wx2std(getName_()));
         st1->Execute();
         while (st1->Fetch())
         {
@@ -107,7 +107,7 @@ bool Relation::loadColumns()
             readBlob(st1, 6, computedSrc);
 
             Column *cc = columnsM.add();
-            cc->setName(std2wx(name));
+            cc->setName_(std2wx(name));
             cc->setParent(this);
             cc->Init(!st1->IsNull(2), std2wx(source), !st1->IsNull(5), computedSrc, std2wx(collation));
         }
@@ -149,7 +149,7 @@ bool Relation::getTriggers(std::vector<Trigger *>& list, Trigger::firingTimeType
             "select rdb$trigger_name from rdb$triggers where rdb$relation_name = ? "
             "order by rdb$trigger_sequence"
         );
-        st1->Set(1, wx2std(getName()));
+        st1->Set(1, wx2std(getName_()));
         st1->Execute();
         while (st1->Fetch())
         {

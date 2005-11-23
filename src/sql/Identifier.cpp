@@ -43,20 +43,32 @@ Identifier::Identifier(const wxString& source)
     set(source);
 }
 //----------------------------------------------------------------------------
+Identifier::Identifier()
+{
+}
+//----------------------------------------------------------------------------
+void Identifier::setDirect(const wxString& source)
+{
+    textM = source;
+}
+//----------------------------------------------------------------------------
 void Identifier::set(const wxString& source)
 {
-    source.Trim(true);   // maybe these could be removed as parser is not going
-    source.Trim(false);  // to send whitespace anyway
-    if (source[0] == wxChar('\"'))
+    if (source.IsEmpty())
+        return;
+    wxString temp(source);          // remove the constness
+    temp.Trim(true);   // maybe these could be removed as parser is not going
+    temp.Trim(false);  // to send whitespace anyway
+    if (temp[0] == wxChar('\"'))
     {
-        wxString::size_type p = source.Length();
-        if (source[p-1] == wxChar('\"'))
-            textM = source.SubString(1, p-2);
+        wxString::size_type p = temp.Length();
+        if (temp[p-1] == wxChar('\"'))
+            textM = temp.SubString(1, p-2);
         else                    // a really strange occurence of identifier
-            textM = source;     // starting with quote and not ending with it
+            textM = temp;     // starting with quote and not ending with it
     }
     else
-        textM = source.Upper();
+        textM = temp.Upper();
 }
 //----------------------------------------------------------------------------
 const Identifier::keywordContainer& Identifier::getKeywordSet()

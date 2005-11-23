@@ -133,13 +133,13 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
     // if table is not there, add it
     if (std::find(tableNames.begin(), tableNames.end(), t->getName_()) == tableNames.end())
     {
-        std::vector<Join> relatedTables;
+        std::vector<ForeignKey> relatedTables;
         if (Table::tablesRelate(tableNames, t, relatedTables))    // foreign keys
         {
             wxArrayString as;
-            for (std::vector<Join>::iterator it = relatedTables.begin(); it != relatedTables.end(); ++it)
+            for (std::vector<ForeignKey>::iterator it = relatedTables.begin(); it != relatedTables.end(); ++it)
             {
-                wxString addme = (*it).table + wxT(":  ") + (*it).fields;
+                wxString addme = (*it).referencedTableM + wxT(":  ") + (*it).getJoin(false); // false = unquoted
                 if (as.Index(addme) == wxNOT_FOUND)
                     as.Add(addme);
             }
@@ -151,10 +151,10 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
                     _("Select the desired table"), as);
                 if (selected == -1)
                     return false;
-                join_list = relatedTables[selected].fields;
+                join_list = relatedTables[selected].getJoin(true); // true = quoted
             }
             else
-                join_list = relatedTables[0].fields;
+                join_list = relatedTables[0].getJoin(true);
 
             // FIXME: dummy test value
             // can_be_null = (check if any of the FK fields can be null)

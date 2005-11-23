@@ -97,12 +97,12 @@ StatementHistory& StatementHistory::get(Database* db)
     else if (hg == hgPerDatabaseName)
     {
         static map<wxString, StatementHistory> stm;
-        if (stm.find(db->getName()) == stm.end())
+        if (stm.find(db->getName_()) == stm.end())
         {
-            StatementHistory st(wxT("DATABASENAME") + db->getName());
-            stm.insert(pair<wxString, StatementHistory>(db->getName(), st));
+            StatementHistory st(wxT("DATABASENAME") + db->getName_());
+            stm.insert(pair<wxString, StatementHistory>(db->getName_(), st));
         }
-        return (*(stm.find(db->getName()))).second;
+        return (*(stm.find(db->getName_()))).second;
     }
 
     else // (hg == hgPerDatabase)

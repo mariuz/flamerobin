@@ -71,7 +71,7 @@ bool View::getSource(wxString& source)
         tr1->Start();
         IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
         st1->Prepare("select rdb$view_source from rdb$relations where rdb$relation_name = ?");
-        st1->Set(1, wx2std(getName()));
+        st1->Set(1, wx2std(getName_()));
         st1->Execute();
         st1->Fetch();
         readBlob(st1, 1, source);
@@ -98,8 +98,8 @@ wxString View::getAlterSql()
     if (!getSource(src))
         return lastError().getMessage();
 
-    wxString sql = wxT("DROP VIEW ") + getName() + wxT(";\n");
-    sql += wxT("CREATE VIEW ") + getName() + wxT(" (");
+    wxString sql = wxT("DROP VIEW ") + getQuotedName() + wxT(";\n");
+    sql += wxT("CREATE VIEW ") + getQuotedName() + wxT(" (");
 
     bool first = true;
     for (MetadataCollection <Column>::const_iterator it = columnsM.begin(); it != columnsM.end(); ++it)
@@ -108,7 +108,7 @@ wxString View::getAlterSql()
             first = false;
         else
             sql += wxT(", ");
-        sql += (*it).getName();
+        sql += (*it).getQuotedName();
     }
     sql += wxT(")\nAS ");
     sql += src;

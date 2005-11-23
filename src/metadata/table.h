@@ -34,58 +34,50 @@
 #include "metadata/relation.h"
 #include "metadata/trigger.h"
 //-----------------------------------------------------------------------------
-//! small helper class
-class Join
-{
-public:
-	wxString table;
-	wxString fields;
-	Join(wxString a, wxString b): table(a), fields(b) { };
-};
-//-----------------------------------------------------------------------------
 class Table: public Relation
 {
 private:
-	ColumnConstraint primaryKeyM;			// table can have only one pk
-	bool primaryKeyLoadedM;
-	bool loadPrimaryKey();
+    ColumnConstraint primaryKeyM;           // table can have only one pk
+    bool primaryKeyLoadedM;
+    bool loadPrimaryKey();
 
-	std::vector<ForeignKey> foreignKeysM;
-	bool foreignKeysLoadedM;
-	bool loadForeignKeys();
+    std::vector<ForeignKey> foreignKeysM;
+    bool foreignKeysLoadedM;
+    bool loadForeignKeys();
 
-	std::vector<CheckConstraint> checkConstraintsM;
-	bool checkConstraintsLoadedM;
-	bool loadCheckConstraints();
+    std::vector<CheckConstraint> checkConstraintsM;
+    bool checkConstraintsLoadedM;
+    bool loadCheckConstraints();
 
-	std::vector<ColumnConstraint> uniqueConstraintsM;
-	bool uniqueConstraintsLoadedM;
-	bool loadUniqueConstraints();
+    std::vector<ColumnConstraint> uniqueConstraintsM;
+    bool uniqueConstraintsLoadedM;
+    bool loadUniqueConstraints();
 
-	std::vector<Index> indicesM;
-	bool indicesLoadedM;
-	bool loadIndices();
+    std::vector<Index> indicesM;
+    bool indicesLoadedM;
+    bool loadIndices();
 
 public:
-	Table();
+    Table();
 
-	static bool tablesRelate(std::vector<wxString>& tables, Table *table, std::vector<Join>& list);
+    static bool tablesRelate(const std::vector<wxString>& tables, Table *table,
+                             std::vector<ForeignKey>& list);
 
-	virtual wxString getCreateSqlTemplate() const;
+    virtual wxString getCreateSqlTemplate() const;
 
-	virtual bool loadColumns();			// update the keys info too
-	void invalidateIndices();
+    virtual bool loadColumns();         // update the keys info too
+    void invalidateIndices();
 
-	ColumnConstraint *getPrimaryKey();
-	std::vector<ForeignKey> *getForeignKeys();
-	std::vector<CheckConstraint> *getCheckConstraints();
-	std::vector<ColumnConstraint> *getUniqueConstraints();
-	std::vector<Index> *getIndices();
+    ColumnConstraint *getPrimaryKey();
+    std::vector<ForeignKey> *getForeignKeys();
+    std::vector<CheckConstraint> *getCheckConstraints();
+    std::vector<ColumnConstraint> *getUniqueConstraints();
+    std::vector<Index> *getIndices();
 
-	wxString getInsertStatement();
-	//wxString getUpdateStatement();		// use primary key info
-	//wxString getDeleteStatement();
-	virtual const wxString getTypeName() const;
+    wxString getInsertStatement();
+    //wxString getUpdateStatement();        // use primary key info
+    //wxString getDeleteStatement();
+    virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------

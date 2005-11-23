@@ -39,6 +39,7 @@
 #include <fstream>
 #include <sstream>
 
+#include "Identifier.h"
 #include "SimpleParser.h"
 //-----------------------------------------------------------------------------
 // returns false if errors occur
@@ -122,6 +123,7 @@ wxString::size_type SimpleParser::nextToken(wxString& in, wxString& out)
 // gets not-quoted table names from SELECT sql script
 // input: sql statement without SELECT clause, i.e. should start with: "FROM"
 //
+// TODO: this needs to support Identifiers
 wxString::size_type SimpleParser::getTableNames(std::vector<wxString>& list, wxString sql)
 {
     sql += wxT(" ");     // parser needs blank space at end
@@ -139,7 +141,7 @@ wxString::size_type SimpleParser::getTableNames(std::vector<wxString>& list, wxS
             return retval;
         retval += c;
         Identifier temp(s);         // strip quotes if needed
-        list.push_back(s.get());
+        list.push_back(temp.get());
 
         while (true)
         {

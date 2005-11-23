@@ -69,6 +69,7 @@ public:
     wxString updateActionM;
     wxString deleteActionM;
     wxString getReferencedColumnList() const;
+    wxString getJoin(bool quoted) const;
 };
 //-----------------------------------------------------------------------------
 #endif
