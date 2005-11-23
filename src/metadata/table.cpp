@@ -542,7 +542,7 @@ bool Table::tablesRelate(const std::vector<wxString>& tables, Table* table,
         {
             for (std::vector<wxString>::const_iterator i2 = tables.begin(); i2 != tables.end(); ++i2)
             {
-                if ((*i2) == (*it).getName())
+                if ((*i2) == (*it).getName_())
                 {
                     // find foreign keys for that table
                     Database* d = table->getDatabase();
