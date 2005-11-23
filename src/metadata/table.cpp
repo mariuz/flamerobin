@@ -94,7 +94,7 @@ wxString Table::getInsertStatement()
 
         if (!(*i).isNullable())
             valist += wxT("*");
-        valist += (*i).getQuotedName();
+        valist += (*i).getName_();
     }
     sql += collist + wxT(")\n VALUES (\n") + valist + wxT("\n)");
     return sql;
