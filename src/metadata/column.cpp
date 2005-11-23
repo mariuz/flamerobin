@@ -55,7 +55,7 @@ Column::Column()
 }
 //-----------------------------------------------------------------------------
 //! initialize properties
-void Column::Init(bool notnull, wxString source, bool computed, 
+void Column::Init(bool notnull, wxString source, bool computed,
     wxString computedSource, wxString collation)
 {
     source.erase(source.find_last_not_of(wxT(" ")) + 1);        // right trim everything
@@ -86,7 +86,7 @@ bool Column::isPrimaryKey() const
     if (!key)
         return false;
     for (ColumnConstraint::const_iterator it = key->begin(); it != key->end(); ++it)
-        if ((*it) == getName())
+        if ((*it) == getName_())
             return true;
     return false;
 }

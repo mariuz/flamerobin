@@ -45,7 +45,7 @@ public:
     void setProperties(MetadataItem* parent, const wxString& name, NodeType type)
     {
         setParent(parent);
-        setName(name);
+        setName_(name);
         setType(type);
     }
 
@@ -84,7 +84,7 @@ public:
     {
         T item;
         item.setParent(this);
-        item.setName(name);
+        item.setName_(name);
         for (unsigned int i = getLockCount(); i > 0; i--)
             item.lockSubject();
 
@@ -94,7 +94,7 @@ public:
             MetadataItem *p = &(*pos);
             if (!p)
                 continue;
-            if (p->getName() > name)
+            if (p->getName_() > name)
                 break;
         }
 
@@ -145,12 +145,13 @@ public:
 
     virtual MetadataItem *findByName(wxString name)
     {
+        Identifier id(name);
         for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
         {
             MetadataItem *p = &(*it);
             if (!p)
                 continue;
-            if (p->getName() == name)
+            if (p->getName_() == id.get())
                 return p;
         }
         return 0;
@@ -187,11 +188,11 @@ public:
         if (n)
         {
             wxString s;
-            s << getName() << wxT(" (") << n << wxT(")");
+            s << getName_() << wxT(" (") << n << wxT(")");
             return s;
         }
         else
-            return getName();
+            return getName_();
     }
 
     virtual size_t getChildrenCount() const
