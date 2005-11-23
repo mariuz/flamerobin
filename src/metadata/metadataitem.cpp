@@ -583,7 +583,7 @@ MetadataItem *Dependency::getParent() const
     return objectM->getParent();
 }
 //-----------------------------------------------------------------------------
-wxString Dependency::getName() const
+wxString Dependency::getName_() const
 {
     return objectM->getName_();
 }

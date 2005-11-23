@@ -141,7 +141,7 @@ private:
 
 public:
     virtual MetadataItem *getParent() const;
-    virtual wxString getName() const;
+    virtual wxString getName_() const;
     virtual NodeType getType() const;
     virtual const wxString getTypeName() const;
     MetadataItem *getDependentObject() const;
