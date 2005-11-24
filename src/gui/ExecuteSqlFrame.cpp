@@ -458,6 +458,8 @@ void SqlEditor::OnMenuSetFont(wxCommandEvent& WXUNUSED(event))
         config().setValue(wxT("SqlEditorCharset"), (*it).second);
     }
     setup();    // make control accept new settings
+    wxMessageBox(_("This setting only affects font in the editor.\nTo have characters displayed correctly in result grid,\nyou need to specify its font separately."),
+        _("Font changed"), wxOK|wxICON_INFORMATION);
 }
 //-----------------------------------------------------------------------------
 ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title, const wxPoint& pos, const wxSize& size, long style):
