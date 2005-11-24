@@ -148,7 +148,7 @@ void Database::resetCredentials()
     }
 }
 //-----------------------------------------------------------------------------
-void Database::getIdentifiers(std::vector<wxString>& temp)
+void Database::getIdentifiers(std::vector<Identifier>& temp)
 {
     tablesM.getChildrenNames(temp);
     viewsM.getChildrenNames(temp);

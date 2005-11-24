@@ -133,7 +133,7 @@ public:
     std::vector<wxString> getCollations(wxString charset);
 
     //! fill vector with names of all tables, views, etc.
-    void getIdentifiers(std::vector<wxString>& temp);
+    void getIdentifiers(std::vector<Identifier>& temp);
 
     //! fill vector with result of sql statement
     bool fillVector(std::vector<wxString>& list, wxString sql);

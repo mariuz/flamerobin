@@ -521,6 +521,11 @@ wxString MetadataItem::getQuotedName() const
     return identifierM.getQuoted();
 }
 //-----------------------------------------------------------------------------
+Identifier MetadataItem::getIdentifier() const
+{
+    return identifierM;
+}
+//-----------------------------------------------------------------------------
 void MetadataItem::setName_(wxString name)
 {
     identifierM.setText(name);

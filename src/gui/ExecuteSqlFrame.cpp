@@ -1466,10 +1466,10 @@ void ExecuteSqlFrame::setKeywords()
         as.Add((*ci).Upper());
 
     // get list od database objects' names
-    std::vector<wxString> v;
+    std::vector<Identifier> v;
     databaseM->getIdentifiers(v);
-    for (std::vector<wxString>::const_iterator it = v.begin(); it != v.end(); ++it)
-        as.Add(*it);
+    for (std::vector<Identifier>::const_iterator it = v.begin(); it != v.end(); ++it)
+        as.Add((*it).get());
     as.Sort();    // The list has to be sorted for autocomplete to work properly
 
     keywordsM.Empty();                          // create final wxString from array

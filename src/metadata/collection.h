@@ -164,10 +164,10 @@ public:
         return (itemsM.size() != 0);
     }
 
-    void getChildrenNames(std::vector<wxString>& temp)
+    void getChildrenNames(std::vector<Identifier>& temp)
     {
         for (const_iterator it = itemsM.begin(); it != itemsM.end(); ++it)
-            temp.push_back((*it).getName_());
+            temp.push_back((*it).getIdentifier());
     }
 
     wxString getCreateSqlTemplate() const        // this could be done better, but I haven't got the idea
