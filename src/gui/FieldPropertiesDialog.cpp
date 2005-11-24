@@ -270,7 +270,10 @@ bool FieldPropertiesDialog::getDomainInfo(const wxString& domain,
 bool FieldPropertiesDialog::getIsNewDomainSelected()
 {
     // first item is "[Create new]"
-    return choice_domain->GetSelection() == 0;
+    // Note: The following code does not work when there are no user defined
+    // domains:
+    // return choice_domain->GetSelection() == 0;
+    return choice_domain->GetStringSelection() == wxT("[Create new]");
 }
 //-----------------------------------------------------------------------------
 // UDD = user defined domain
