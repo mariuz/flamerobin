@@ -63,10 +63,7 @@
 #include "ugly.h"
 #include "urihandler.h"
 
-#define USE_IDENTIFIER_CLASS 1
-#ifdef USE_IDENTIFIER_CLASS
 #include "sql/Identifier.h"
-#endif
 //-----------------------------------------------------------------------------
 bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
 {
@@ -243,41 +240,7 @@ void SqlEditor::setup()
     StyleSetItalic(2, TRUE);
     StyleSetItalic(1, TRUE);
     SetLexer(wxSTC_LEX_SQL);
-#ifdef USE_IDENTIFIER_CLASS
     SetKeyWords(0, Identifier::getKeywords(true));    // true = lower_case
-#else
-    SetKeyWords(0,
-            wxT("abs action active add admin after all alter and any as asc ascending at auto autoddl ")
-            wxT("avg based basename base_name before begin between bigint blob blobedit boolean both ")
-            wxT("break buffer by cache cascade case cast char character character_length char_length ")
-            wxT("check check_point_len check_point_length close coalesce collate collation column ")
-            wxT("commit committed compiletime computed conditional connect constraint containing ")
-            wxT("continue count create cstring current current_connection current_date current_role ")
-            wxT("current_time current_timestamp current_transaction current_user cursor database date day ")
-            wxT("db_key debug dec decimal declare default delete deleting desc descending describe ")
-            wxT("descriptor disconnect display distinct do domain double drop echo edit else end entry_point ")
-            wxT("escape event exception execute exists exit extern external extract false fetch file ")
-            wxT("filter first float for foreign found free_it from full function gdscode generator gen_id ")
-            wxT("global goto grant group group_commit_ group_commit_wait having help hour if iif ")
-            wxT("immediate in inactive index indicator init inner input input_type insert inserting int ")
-            wxT("integer into is isolation isql join key last lc_messages lc_type leading leave left length ")
-            wxT("lev level like lock logfile log_buffer_size log_buf_size long manual max maximum ")
-            wxT("maximum_segment max_segment merge message min minimum minute module_name month names national ")
-            wxT("natural nchar no noauto not null nullif nulls numeric num_log_buffers num_log_bufs ")
-            wxT("octet_length of on only open option or order outer output output_type overflow page pagelength ")
-            wxT("pages page_size parameter password percent plan position post_event precision ")
-            wxT("prepare preserve primary privileges procedure protected public quit raw_partitions ")
-            wxT("rdb$db_key read real record_version recreate references release reserv reserving restrict ")
-            wxT("retain return returning_values returns revoke right role rollback rows row_count ")
-            wxT("runtime savepoint schema second segment select set shadow shared shell show singular size ")
-            wxT("skip smallint snapshot some sort sqlcode sqlerror sqlwarning stability starting ")
-            wxT("starts statement static statistics substring sub_type sum suspend table temporary ")
-            wxT("terminator then ties time timestamp to trailing transaction translate translation trigger ")
-            wxT("trim true type uncommitted union unique unknown update updating upper user using value ")
-            wxT("values varchar variable varying version view wait wait_time weekday when whenever where ")
-            wxT("while with work write year yearday" )
-    );
-#endif
 
     int tabSize = config().get(wxT("sqlEditorTabSize"), 4);
     SetTabWidth(tabSize);
@@ -1498,14 +1461,9 @@ void ExecuteSqlFrame::setKeywords()
     // so it can reload this list if something changes
 
     wxArrayString as;
-#ifdef USE_IDENTIFIER_CLASS
     const Identifier::keywordContainer& k = Identifier::getKeywordSet();
     for (Identifier::keywordContainer::const_iterator ci = k.begin(); ci != k.end(); ++ci)
         as.Add((*ci).Upper());
-#else
-    // a bunch of as.Add("something") statements, placed in separate file
-    #include "autocomplete-sql_keywords.txt"
-#endif
 
     // get list od database objects' names
     std::vector<wxString> v;
