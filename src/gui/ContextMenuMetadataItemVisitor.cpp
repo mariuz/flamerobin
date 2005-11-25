@@ -141,6 +141,7 @@ void ContextMenuMetadataItemVisitor::visit(Server&)
     menuM->Append(myTreeCtrl::Menu_CreateDatabase, _("Create &new database..."));
     menuM->Append(myTreeCtrl::Menu_RestoreIntoNew, _("Restore bac&kup into new database..."));
     menuM->AppendSeparator();
+    menuM->Append(myTreeCtrl::Menu_GetServerVersion, _("Retrieve server &version"));
     menuM->Append(myTreeCtrl::Menu_ManageUsers, _("&Manage users..."));
     menuM->AppendSeparator();
     menuM->Append(myTreeCtrl::Menu_UnRegisterServer, _("&Unregister server"));

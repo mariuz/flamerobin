@@ -114,6 +114,68 @@ void Server::createDatabase(Database* db, int pagesize, int dialect)
     db1->Create(dialect);
 }
 //-----------------------------------------------------------------------------
+bool Server::getVersionString(const wxString& username,
+    const wxString& password, wxString& version)
+{
+    IBPP::Service svc;
+    wxBusyCursor bc;
+    try
+    {
+        svc = IBPP::ServiceFactory(wx2std(getName_()), wx2std(username),
+            wx2std(password));
+        svc->Connect();
+    }
+    catch (IBPP::Exception& e)
+    {
+        return false;
+    }
+    std::string vrs;
+    svc->GetVersion(vrs);
+    svc->Disconnect();
+    version = std2wx(vrs);
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool Server::getVersion(wxString& version)
+{
+    try // try to connect using credentials of some database
+    {
+        // try connected ones first
+        for (MetadataCollection<Database>::const_iterator ci =
+            databasesM.begin(); ci != databasesM.end(); ++ci)
+        {
+            if ((*ci).isConnected() && getVersionString((*ci).getUsername(),
+                (*ci).getPassword(), version))
+                return true;
+        }
+        // it failed: try disconnected ones
+        for (MetadataCollection<Database>::const_iterator ci =
+            databasesM.begin(); ci != databasesM.end(); ++ci)
+        {
+            if (!(*ci).isConnected() && getVersionString((*ci).getUsername(),
+                (*ci).getPassword(), version))
+                return true;
+        }
+        wxMessageBox(_("None of the credentials of the databases could be used\nYou need to supply a valid username and password."),
+            _("No usable database"), wxOK|wxICON_WARNING);
+        wxString username = ::wxGetTextFromUser(_("Connecting to server"),
+            _("Enter username"));
+        if (username.IsEmpty())
+            return true;
+        wxString password = ::wxGetPasswordFromUser(_("Connecting to server"),
+            _("Enter password"));
+        if (password.IsEmpty())
+            return true;
+        if (getVersionString(username, password, version))
+            return true;
+    }
+    catch (IBPP::Exception& e)
+    {
+        version = std2wx(e.ErrorMessage());
+    }
+    return false;
+}
+//-----------------------------------------------------------------------------
 MetadataCollection<Database>* Server::getDatabases()
 {
     return &databasesM;

@@ -54,6 +54,9 @@ public:
     MetadataCollection<Database> *getDatabases();
 
     void createDatabase(Database *db, int pagesize = 4096, int dialect = 3);
+    bool getVersion(wxString& version);
+    bool getVersionString(const wxString& username, const wxString& password,
+        wxString& version);
 
     // setters/getters
     wxString getHostname() const;

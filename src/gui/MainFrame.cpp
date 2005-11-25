@@ -137,6 +137,7 @@ void MainFrame::buildMainMenu()
     serverMenu->Append(myTreeCtrl::Menu_UnRegisterServer, _("&Unregister server"));
     serverMenu->Append(myTreeCtrl::Menu_ServerProperties, _("Server registration &info..."));
     serverMenu->AppendSeparator();
+    serverMenu->Append(myTreeCtrl::Menu_GetServerVersion, _("Retrieve server &version"));
     serverMenu->Append(myTreeCtrl::Menu_ManageUsers, _("&Manage users..."));
     menuBarM->Append(serverMenu, _("&Server"));
 
@@ -271,6 +272,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_UPDATE_UI(myTreeCtrl::Menu_UnRegisterDatabase, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
     EVT_MENU(myTreeCtrl::Menu_ShowConnectedUsers, MainFrame::OnMenuShowConnectedUsers)
     EVT_UPDATE_UI(myTreeCtrl::Menu_ShowConnectedUsers, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_MENU(myTreeCtrl::Menu_GetServerVersion, MainFrame::OnMenuGetServerVersion)
     EVT_MENU(myTreeCtrl::Menu_MonitorEvents, MainFrame::OnMenuMonitorEvents)
     EVT_UPDATE_UI(myTreeCtrl::Menu_MonitorEvents, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_MENU(myTreeCtrl::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuDatabaseRegistrationInfo)
@@ -952,6 +954,24 @@ void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
         as.Add(std2wx(*i));
 
     ::wxGetSingleChoice(_("Connected users"), d->getPath(), as);
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuGetServerVersion(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    Server* s = tree_ctrl_1->getSelectedServer();
+    wxString version;
+    if (s->getVersion(version))
+    {
+        if (!version.IsEmpty())
+            wxMessageBox(version, _("Server version"), wxOK|wxICON_INFORMATION);
+    }
+    else
+        wxMessageBox(_("Function not supported."), _("Getting server version"),
+            wxOK|wxICON_WARNING);
 
     FR_CATCH
 }
