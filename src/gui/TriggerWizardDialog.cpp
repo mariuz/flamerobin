@@ -139,16 +139,15 @@ void TriggerWizardDialog::OnOkButtonClick(wxCommandEvent& event)
     }
 
     bool isBefore = (radio_box_1_copy->GetSelection() == 0);
-    wxString sname = text_ctrl_1->GetValue();
-    wxString relationName = relationM->getName_();
-    if (sname.IsEmpty())
+    wxString name(Identifier::userString(text_ctrl_1->GetValue()));
+    if (name.IsEmpty())
     {
-        sname = relationName + wxT("_") + (isBefore ? wxT("B") : wxT("A")) + suffix
+        wxString sname = relationM->getName_() + wxT("_") + (isBefore ? wxT("B") : wxT("A")) + suffix
             + wxString::Format(wxT("%d"), spin_ctrl_1->GetValue());
+        Identifier iname(sname);
+        name = iname.getQuoted();
     }
 
-    Identifier iname(sname);
-    wxString name = iname.getQuoted();
     wxString sql = wxT("SET TERM ^ ;\n\nCREATE TRIGGER ") + name + wxT(" FOR ") + relationM->getQuotedName() + wxT("\n") +
         (checkbox_1_copy->IsChecked() ? wxEmptyString : wxT("IN")) + wxT("ACTIVE ") +
         (isBefore ? wxT("BEFORE") : wxT("AFTER")) +

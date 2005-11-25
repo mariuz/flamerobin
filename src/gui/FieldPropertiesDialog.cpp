@@ -280,8 +280,10 @@ bool FieldPropertiesDialog::getIsNewDomainSelected()
 // AGD = auto generated domain (those starting with RDB$)
 bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
 {
-    Identifier fldName(textctrl_fieldname->GetValue());
-    wxString fieldName = fldName.getQuoted();
+    wxString fNameSql(Identifier::userString(textctrl_fieldname->GetValue()));
+    Identifier ftemp;
+    ftemp.setFromSql(fNameSql);
+    wxString fName = ftemp.getQuoted();
     Identifier selDomain(choice_domain->GetStringSelection());
     bool newDomain = getIsNewDomainSelected();
     wxString selDatatype = choice_datatype->GetStringSelection();
@@ -306,10 +308,10 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
     if (columnM)
     {
         // field name changed ?
-        if (columnM->getQuotedName() != fieldName)
+        if (columnM->getQuotedName() != fName)
         {
             sql += alterTable + wxT("ALTER ") + columnM->getQuotedName()
-                + wxT(" TO ") + fieldName + wxT(";\n\n");
+                + wxT(" TO ") + fNameSql + wxT(";\n\n");
         }
 
         // domain changed ?
@@ -322,13 +324,13 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
         }
         if (columnM->getSource() != selDomain.get() && !newDomain)
         {   // UDD -> other UDD  or  AGD -> UDD
-            sql += alterTable + wxT("ALTER ") + fieldName +
+            sql += alterTable + wxT("ALTER ") + fNameSql +
                 wxT(" TYPE ") + selDomain.getQuoted() + wxT(";\n\n");
         }
         else if (newDomain
             || type != selDatatype || size != dtSize || scale != dtScale)
         {   // UDD -> AGD  or  AGD -> different AGD
-            sql += alterTable + wxT("ALTER ") + fieldName +
+            sql += alterTable + wxT("ALTER ") + fNameSql +
                 wxT(" TYPE ");
             sql += selDatatype;
             if (!dtSize.IsEmpty())
@@ -352,14 +354,16 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
                 sql += wxT("NULL");
             else
                 sql += wxT("1");
-            sql += wxT("\nWHERE RDB$FIELD_NAME = '") + fldName.get()
+            wxString fnm = textctrl_fieldname->GetValue();
+            fnm.Replace(wxT("'"), wxT("''"));
+            sql += wxT("\nWHERE RDB$FIELD_NAME = '") + fnm
                 + wxT("' AND RDB$RELATION_NAME = '") + tableM->getName_()
                 + wxT("';\n\n");
         }
     }
     else // create new field
     {
-        sql += alterTable + wxT("ADD \n") + fieldName + wxT(" ");
+        sql += alterTable + wxT("ADD \n") + fNameSql + wxT(" ");
         if (newDomain)
         {
             sql += selDatatype;
@@ -388,8 +392,8 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
             _("Enter value for existing fields containing NULL"),
             _("Update Existing NULL Values"), wxT(""), this);
         wxString sqlAdd = wxT("UPDATE ") + tableM->getQuotedName()
-            + wxT(" \nSET ") + fieldName + wxT(" = '") + s
-            + wxT("' \nWHERE ") + fieldName + wxT(" IS NULL;\n");
+            + wxT(" \nSET ") + fNameSql + wxT(" = '") + s
+            + wxT("' \nWHERE ") + fNameSql + wxT(" IS NULL;\n");
         if (update_not_null == unnBefore)
             sql = sqlAdd + sql;
         else
@@ -622,7 +626,7 @@ void FieldPropertiesDialog::updateDomainInfo(const wxString& domain)
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::updateSqlStatement()
 {
-    Identifier field(textctrl_fieldname->GetValue());
+    wxString fNameSql(Identifier::userString(textctrl_fieldname->GetValue()));
     Identifier generator(choice_generator->GetStringSelection());
 
     wxString sql;
@@ -638,8 +642,8 @@ void FieldPropertiesDialog::updateSqlStatement()
         sql += wxT("SET TERM !! ;\n");
         sql += wxT("CREATE TRIGGER ") + triggername.getQuoted() + wxT(" FOR ") + tableM->getQuotedName() + wxT("\n");
         sql += wxT("ACTIVE BEFORE INSERT POSITION 0\nAS\nBEGIN\n");
-        sql += wxT("  IF (NEW.") + field.getQuoted() + wxT(" IS NULL) THEN\n");
-        sql += wxT("    NEW.") + field.getQuoted() + wxT(" = GEN_ID(") + generator.getQuoted() + wxT(", 1);\n");
+        sql += wxT("  IF (NEW.") + fNameSql + wxT(" IS NULL) THEN\n");
+        sql += wxT("    NEW.") + fNameSql + wxT(" = GEN_ID(") + generator.getQuoted() + wxT(", 1);\n");
         sql += wxT("END!!\n");
         sql += wxT("SET TERM ; !!\n");
     }

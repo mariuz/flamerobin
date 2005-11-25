@@ -75,6 +75,58 @@ void Identifier::setFromSql(const wxString& source)
         textM = temp.Upper();
 }
 //----------------------------------------------------------------------------
+bool Identifier::isQuoted(const wxString &s)
+{
+    wxString::size_type p = s.Length();
+    return (s[0] == wxChar('\"') && p > 1 && s[p-1] == wxChar('\"'));
+}
+//----------------------------------------------------------------------------
+wxString& Identifier::escape(wxString& s)
+{
+    s.Replace(wxT("\""), wxT("\"\""));
+    return s;
+}
+//----------------------------------------------------------------------------
+wxString& Identifier::strip(wxString& s)
+{
+    if (isQuoted(s))
+        s = s.SubString(1, s.Length()-2);
+    return s;
+}
+//----------------------------------------------------------------------------
+wxString& Identifier::quote(wxString &s)
+{
+    s = wxT("\"") + s + wxT("\"");
+    return s;
+}
+//----------------------------------------------------------------------------
+wxString Identifier::userString(const wxString& s)
+{
+    if (s.IsEmpty())
+        return wxEmptyString;
+    wxString ret(s);
+    static bool alwaysQuote = !config().get(wxT("quoteOnlyWhenNeeded"), true);
+    static bool quoteMixedCase = config().get(wxT("quoteMixedCase"), false);
+    static bool quoteCharsAreRegular = config().get(wxT("quoteCharsAreRegular"), false);
+    if (alwaysQuote)
+    {
+        if (quoteCharsAreRegular)
+            return quote(escape(ret));
+        else
+            return quote(escape(strip(ret)));
+    }
+    else
+    {
+        if (isQuoted(ret))   // pass the quoted text as-it-is
+            return ret;
+        if (quoteMixedCase && ret.Upper() != ret && ret.Lower() != ret)
+            return quote(escape(ret));
+        if (Identifier::needsQuoting(ret.Upper()))    // special chars
+            return quote(escape(ret));
+        return ret;
+    }
+}
+//----------------------------------------------------------------------------
 const Identifier::keywordContainer& Identifier::getKeywordSet()
 {
     // placed here, so others can't access it until it is initialized
@@ -102,31 +154,31 @@ wxString Identifier::getKeywords(bool lowerCase)
     return s;
 }
 //----------------------------------------------------------------------------
-bool Identifier::isReserved() const
+bool Identifier::isReserved(const wxString& s)
 {
     // needed to be like this, since RogueWave std library does not implement
     // operator == for const_iterator vs iterator, and find() returns a
     // non-const iterator.
     const Identifier::keywordContainer& k = Identifier::getKeywordSet();
-    Identifier::keywordContainer::const_iterator ci = k.find(textM.Lower());
+    Identifier::keywordContainer::const_iterator ci = k.find(s.Lower());
     return (ci != k.end());
 }
 //----------------------------------------------------------------------------
-bool Identifier::needsQuoting() const
+bool Identifier::needsQuoting(const wxString& s)
 {
-    if (textM.IsEmpty())
+    if (s.IsEmpty())
         return false;
-    if (isReserved() || !textM.IsAscii() || textM != textM.Upper())
+    if (isReserved(s) || !s.IsAscii() || s != s.Upper())
         return true;
 
-    if (!wxIsalpha(textM[0]))                // initial character must be A-Z,a-z
+    if (!wxIsalpha(s[0]))                // initial character must be A-Z,a-z
         return true;
 
     // isalnum can return true for letters in character set from
     // locale. That's why we need isAscii check above
-    for (wxString::size_type i = 0; i < textM.Length(); i++)
+    for (wxString::size_type i = 0; i < s.Length(); i++)
     {
-        wxChar c = textM[i];
+        wxChar c = s[i];
         if (c == wxChar('_') || c == wxChar('$'))   // allowed chars
             continue;
         if (!wxIsalnum(c) || wxIsspace(c))
@@ -148,12 +200,11 @@ wxString Identifier::get() const
 wxString Identifier::getQuoted() const
 {
     // retrieved only once, needs restart to change (but it is much efficient)
-    static bool alwaysQuoteM = config().get(wxT("alwaysQuoteIdentifiers"), false);
-    if (alwaysQuoteM || needsQuoting())
+    static bool alwaysQuote = !config().get(wxT("quoteOnlyWhenNeeded"), true);
+    if (alwaysQuote || needsQuoting(textM))
     {
         wxString retval(textM);
-        retval.Replace(wxT("\""), wxT("\"\""));      // escape quotes
-        return wxT("\"") + retval + wxT("\"");
+        return quote(escape(retval));
     }
     else
         return textM;

@@ -45,11 +45,16 @@ public:
     bool equals(const Identifier& other) const;
     wxString get() const;
     wxString getQuoted() const;
+    static wxString userString(const wxString& s);
 
 private:
     wxString textM;
-    bool needsQuoting() const;
-    bool isReserved() const;
+    static bool isReserved(const wxString& s);
+    static bool needsQuoting(const wxString& s);
+    static bool isQuoted(const wxString &s);
+    static wxString& escape(wxString& s);
+    static wxString& strip(wxString& s);
+    static wxString& quote(wxString &s);
 };
 //----------------------------------------------------------------------------
 #endif

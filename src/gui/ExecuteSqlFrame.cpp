@@ -1854,7 +1854,6 @@ bool TableIndicesHandler::handleURI(URI& uri)
         wxString ixname = ::wxGetTextFromUser(_("Enter index name"), _("Adding new index"), newname, w);
         if (ixname.IsEmpty())    // cancel
             return true;
-        Identifier indxname(ixname);
 
         bool unique = (wxYES == wxMessageBox(_("Would you like to create UNIQUE index?"),
             _("Creating new index"), wxYES_NO|wxICON_QUESTION));
@@ -1875,7 +1874,7 @@ bool TableIndicesHandler::handleURI(URI& uri)
             sql += wxT("UNIQUE ");
         if (sort == 1)
             sql += wxT("DESCENDING ");
-        sql += wxT(" \nINDEX ") + indxname.getQuoted() + wxT(" ON ") + t->getQuotedName() + wxT(" (") + columns + wxT(");\n");
+        sql += wxT(" \nINDEX ") + Identifier::userString(ixname) + wxT(" ON ") + t->getQuotedName() + wxT(" (") + columns + wxT(");\n");
     }
 
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, wxEmptyString);

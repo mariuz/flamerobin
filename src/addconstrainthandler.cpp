@@ -127,8 +127,8 @@ bool AddConstraintHandler::handleURI(URI& uri)
     if (cname.IsEmpty())    // cancel
         return true;
 
-    Identifier cqname(cname);
-    wxString sql = wxT("alter table ") + t->getQuotedName() + wxT("\nadd constraint ") + cqname.getQuoted();
+    wxString sql = wxT("alter table ") + t->getQuotedName() +
+            wxT("\nadd constraint ") + Identifier::userString(cname);
 
     if (type == wxT("PK"))
     {
