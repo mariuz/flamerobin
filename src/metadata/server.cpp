@@ -121,11 +121,11 @@ bool Server::getVersionString(const wxString& username,
     wxBusyCursor bc;
     try
     {
-        svc = IBPP::ServiceFactory(wx2std(getName_()), wx2std(username),
-            wx2std(password));
+        svc = IBPP::ServiceFactory(wx2std(getConnectionString()),
+            wx2std(username), wx2std(password));
         svc->Connect();
     }
-    catch (IBPP::Exception& e)
+    catch (IBPP::Exception&)
     {
         return false;
     }
