@@ -314,14 +314,14 @@
             <caption>Quote names only when needed</caption>
             <key>quoteOnlyWhenNeeded</key>
             <default>1</default>
+            <enables>
+                <setting type="checkbox">
+                    <caption>Quote names in mixed case (both uppercase and lowercase characters)</caption>
+                    <key>quoteMixedCase</key>
+                    <default>0</default>
+                </setting>
+            </enables>
         </setting>
-        <enables>
-            <setting type="checkbox">
-                <caption>Quote names in mixed case (both uppercase and lowercase characters)</caption>
-                <key>quoteMixedCase</key>
-                <default>0</default>
-            </setting>
-        </enables>
         <setting type="checkbox">
             <caption>Treat quote characters like other characters</caption>
             <key>quoteCharsAreRegular</key>
