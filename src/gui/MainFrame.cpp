@@ -89,10 +89,31 @@ void reportLastError(const wxString& actionMsg)
     wxMessageBox(lastError().getMessage(), actionMsg, wxOK | wxICON_ERROR);
 }
 //-----------------------------------------------------------------------------
+//! included xpm files, so that icons are compiled into executable
+namespace sql_icons {
+#include "new.xpm"
+#include "left.xpm"
+#include "right.xpm"
+};
+//-----------------------------------------------------------------------------
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
     BaseFrame(parent, id, title, pos, size, style, wxT("FlameRobin_main"))
 {
-    tree_ctrl_1 = new myTreeCtrl(this, wxDefaultPosition, wxDefaultSize, wxTR_HAS_BUTTONS|wxSUNKEN_BORDER);
+    //mainPanelM = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize, 0);
+    mainPanelM = new wxPanel(this);
+    tree_ctrl_1 = new myTreeCtrl(mainPanelM, wxDefaultPosition, wxDefaultSize, wxTR_HAS_BUTTONS|wxSUNKEN_BORDER);
+    wxArrayString choices;  // load from config?
+
+    searchPanelM = new wxPanel(mainPanelM, -1, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL|wxSUNKEN_BORDER);
+    searchBoxM = new wxComboBox(searchPanelM, ID_search_box, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+        choices, wxCB_DROPDOWN|wxCB_SORT);
+    button_advanced = new wxBitmapButton(searchPanelM, ID_button_advanced, wxBitmap(sql_icons::new_xpm));
+    button_prev = new wxBitmapButton(searchPanelM, ID_button_prev, wxBitmap(sql_icons::left_xpm));
+    button_next = new wxBitmapButton(searchPanelM, ID_button_next, wxBitmap(sql_icons::right_xpm));
+    button_advanced->SetToolTip(_("Advanced metadata search"));
+    button_prev->SetToolTip(_("Previous match"));
+    button_next->SetToolTip(_("Next match"));
+
     buildMainMenu();
     SetStatusBarPane(-1);   // disable automatic fill
     set_properties();
@@ -126,6 +147,7 @@ void MainFrame::buildMainMenu()
 
     wxMenu* viewMenu = new wxMenu();
     viewMenu->AppendCheckItem(myTreeCtrl::Menu_ToggleStatusBar, _("&Status bar"));
+    viewMenu->AppendCheckItem(myTreeCtrl::Menu_ToggleSearchBar, _("&Search bar"));
     viewMenu->AppendCheckItem(myTreeCtrl::Menu_ToggleDisconnected, _("&Disconnected databases"));
     viewMenu->AppendSeparator();
     viewMenu->Append(wxID_PREFERENCES, _("P&references..."));
@@ -175,6 +197,11 @@ void MainFrame::buildMainMenu()
         viewMenu->Check(myTreeCtrl::Menu_ToggleStatusBar, true);
         GetStatusBar()->SetStatusText(_("[No database selected]"));
     }
+    if (config().get(wxT("showSearchBar"), true))
+    {
+        viewMenu->Check(myTreeCtrl::Menu_ToggleSearchBar, true);
+    }
+    // show + hide
 }
 //-----------------------------------------------------------------------------
 void MainFrame::showDocsHtmlFile(const wxString& fileName)
@@ -232,13 +259,23 @@ void MainFrame::set_properties()
 //-----------------------------------------------------------------------------
 void MainFrame::do_layout()
 {
-    // begin wxGlade: MainFrame::do_layout
-    wxBoxSizer* sizer_1 = new wxBoxSizer(wxVERTICAL);
-    sizer_1->Add(tree_ctrl_1, 1, wxEXPAND, 0);
+    wxBoxSizer* outer_sizer = new wxBoxSizer(wxVERTICAL);
+    outer_sizer->Add(mainPanelM, 1, wxEXPAND, 0);
+    inner_sizer = new wxBoxSizer(wxVERTICAL);
+    inner_sizer->Add(tree_ctrl_1, 1, wxEXPAND, 0);
+
+    sizer_search = new wxBoxSizer(wxHORIZONTAL);
+    sizer_search->Add(searchBoxM, 1, wxEXPAND, 0);
+    sizer_search->Add(button_prev);
+    sizer_search->Add(button_next);
+    sizer_search->Add(button_advanced);
+    searchPanelM->SetSizer(sizer_search);
+
+    inner_sizer->Add(searchPanelM, 0, wxEXPAND);
+    mainPanelM->SetSizer(inner_sizer);
     SetAutoLayout(true);
-    SetSizer(sizer_1);
+    SetSizer(outer_sizer);
     Layout();
-    // end wxGlade
 }
 //-----------------------------------------------------------------------------
 const wxRect MainFrame::getDefaultRect() const
@@ -312,7 +349,10 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(myTreeCtrl::Menu_DropObject, MainFrame::OnMenuDropObject)
 
     EVT_MENU(myTreeCtrl::Menu_ToggleStatusBar, MainFrame::OnMenuToggleStatusBar)
+    EVT_MENU(myTreeCtrl::Menu_ToggleSearchBar, MainFrame::OnMenuToggleSearchBar)
     EVT_MENU(myTreeCtrl::Menu_ToggleDisconnected, MainFrame::OnMenuToggleDisconnected)
+
+    EVT_TEXT(MainFrame::ID_search_box, MainFrame::OnSearchTextChange)
 
     EVT_MENU(myTreeCtrl::Menu_CreateDomain,     MainFrame::OnMenuCreateDomain)
     EVT_MENU(myTreeCtrl::Menu_CreateException,  MainFrame::OnMenuCreateException)
@@ -1413,6 +1453,71 @@ void MainFrame::OnMenuToggleStatusBar(wxCommandEvent& event)
     config().setValue(wxT("showStatusBar"), show);
     s->Show(show);
     SendSizeEvent();
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuToggleSearchBar(wxCommandEvent& event)
+{
+    FR_TRY
+
+    bool show = event.IsChecked();
+    config().setValue(wxT("showSearchBar"), show);
+    inner_sizer->Show(searchPanelM, show, true);    // recursive
+    inner_sizer->Layout();
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnSearchTextChange(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    wxString text = searchBoxM->GetValue().Upper();
+    if (text.IsEmpty())
+        return;
+
+    // start from the current position in tree and look forward
+    // for item that starts with that name
+    wxTreeItemId start = tree_ctrl_1->GetSelection();
+    wxTreeItemId temp = start;
+    wxTreeItemIdValue cookie;
+    while (true)
+    {
+        wxString current = tree_ctrl_1->GetItemText(temp);
+        if (current.Upper().Matches(text + wxT("*")))   // found?
+        {
+            if (temp != start)
+                tree_ctrl_1->SelectItem(temp);
+            tree_ctrl_1->EnsureVisible(temp);
+            //searchBoxM->SetForegroundColor(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
+            break;
+        }
+
+        // get the next item
+        if (tree_ctrl_1->ItemHasChildren(temp))
+            temp = tree_ctrl_1->GetFirstChild(temp, cookie);
+        else
+        {
+            while (true)
+            {
+                if (temp == tree_ctrl_1->GetRootItem()) // back to the root (start search from top)
+                    break;
+                wxTreeItemId t = temp;
+                temp = tree_ctrl_1->GetNextSibling(t);
+                if (temp.IsOk())
+                    break;
+                else
+                    temp = tree_ctrl_1->GetItemParent(t);
+            }
+        }
+
+        if (temp == start)  // not found (change colour or something)
+        {
+            //searchBoxM->SetForegroundColor(*wxRED);
+            break;
+        }
+    }
 
     FR_CATCH
 }

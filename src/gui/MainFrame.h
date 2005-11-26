@@ -38,7 +38,8 @@
 #include "metadata/root.h"
 #include "myTreeCtrl.h"
 //-----------------------------------------------------------------------------
-class MainFrame: public BaseFrame {
+class MainFrame: public BaseFrame
+{
 public:
     // menu handling events
     void OnMenuRegisterServer(wxCommandEvent& event);
@@ -71,6 +72,7 @@ public:
     void OnMenuShowGeneratorValue(wxCommandEvent& event);
     void OnMenuSetGeneratorValue(wxCommandEvent& event);
     void OnMenuToggleStatusBar(wxCommandEvent& event);
+    void OnMenuToggleSearchBar(wxCommandEvent& event);
     void OnMenuToggleDisconnected(wxCommandEvent& event);
     void OnMenuCreateObject(wxCommandEvent& event);
     void OnMenuLoadColumnsInfo(wxCommandEvent& event);
@@ -109,7 +111,16 @@ public:
     void OnMainMenuOpen(wxMenuEvent& event);
     void OnTreeSelectionChanged(wxTreeEvent& event);
     void OnTreeItemActivate(wxTreeEvent& event);
+    void OnSearchTextChange(wxCommandEvent& event);
     void OnClose(wxCloseEvent& event);
+
+    // search stuff (IDs 600+ are taken!)
+    enum {
+        ID_button_advanced = 401,
+        ID_button_prev,
+        ID_button_next,
+        ID_search_box
+    };
 
     MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE);
@@ -129,6 +140,14 @@ protected:
     wxMenuBar* menuBarM;
     wxMenu* windowMenuM;        // dynamic menu
     wxMenu* objectMenuM;
+    wxPanel* mainPanelM;
+    wxPanel* searchPanelM;
+    wxBoxSizer* sizer_search;
+    wxBoxSizer* inner_sizer;
+    wxComboBox* searchBoxM;
+    wxBitmapButton* button_prev;
+    wxBitmapButton* button_next;
+    wxBitmapButton* button_advanced;
 
     virtual const wxString getName() const;
     virtual const wxRect getDefaultRect() const;

@@ -52,8 +52,7 @@ public:
 
     enum {
         Menu_RegisterServer = 600, Menu_Manual, Menu_RelNotes, Menu_License,
-        Menu_NewObject, Menu_ToggleStatusBar, Menu_ToggleDisconnected,
-        Menu_DatabaseRegistrationInfo, Menu_RegisterDatabase,
+        Menu_NewObject, Menu_DatabaseRegistrationInfo, Menu_RegisterDatabase,
         Menu_CreateDatabase, Menu_ManageUsers, Menu_UnRegisterServer,
         Menu_ServerProperties, Menu_Reconnect, Menu_ConnectAs,
         Menu_ExecuteProcedure, Menu_UnRegisterDatabase, Menu_Backup,
@@ -64,6 +63,9 @@ public:
         Menu_DropObject, Menu_ShowGeneratorValue, Menu_SetGeneratorValue,
         Menu_AddColumn, Menu_CreateTriggerForTable, Menu_RestoreIntoNew,
         Menu_MonitorEvents, Menu_GetServerVersion,
+
+        // view menu
+        Menu_ToggleStatusBar, Menu_ToggleSearchBar, Menu_ToggleDisconnected,
 
         // create new ... (stuff)
         Menu_CreateDomain, Menu_CreateException, Menu_CreateFunction,
