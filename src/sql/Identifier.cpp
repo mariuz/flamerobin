@@ -105,9 +105,8 @@ wxString Identifier::userString(const wxString& s)
     if (s.IsEmpty())
         return wxEmptyString;
     wxString ret(s);
-    static bool alwaysQuote = !config().get(wxT("quoteOnlyWhenNeeded"), true);
-    static bool quoteMixedCase = config().get(wxT("quoteMixedCase"), false);
-    static bool quoteCharsAreRegular = config().get(wxT("quoteCharsAreRegular"), false);
+    bool alwaysQuote = !config().get(wxT("quoteOnlyWhenNeeded"), true);
+    bool quoteCharsAreRegular = config().get(wxT("quoteCharsAreRegular"), false);
     if (alwaysQuote)
     {
         if (quoteCharsAreRegular)
@@ -119,6 +118,7 @@ wxString Identifier::userString(const wxString& s)
     {
         if (isQuoted(ret))   // pass the quoted text as-it-is
             return ret;
+        bool quoteMixedCase = config().get(wxT("quoteMixedCase"), false);
         if (quoteMixedCase && ret.Upper() != ret && ret.Lower() != ret)
             return quote(escape(ret));
         if (Identifier::needsQuoting(ret.Upper()))    // special chars
@@ -200,7 +200,7 @@ wxString Identifier::get() const
 wxString Identifier::getQuoted() const
 {
     // retrieved only once, needs restart to change (but it is much efficient)
-    static bool alwaysQuote = !config().get(wxT("quoteOnlyWhenNeeded"), true);
+    bool alwaysQuote = !config().get(wxT("quoteOnlyWhenNeeded"), true);
     if (alwaysQuote || needsQuoting(textM))
     {
         wxString retval(textM);
