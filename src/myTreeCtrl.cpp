@@ -227,4 +227,84 @@ bool myTreeCtrl::selectMetadataItem(MetadataItem* item)
     }
     return false;
 }
+//----------------------------------------------------------------------------
+//! recursively get the last child of item
+wxTreeItemId myTreeCtrl::getLastItem(wxTreeItemId id)
+{
+    wxTreeItemId temp = GetLastChild(id);
+    if (temp.IsOk())
+        return getLastItem(temp);
+    else
+        return id;
+}
+//----------------------------------------------------------------------------
+//! get the previous item vertically
+wxTreeItemId myTreeCtrl::getPreviousItem(wxTreeItemId current)
+{
+    wxTreeItemId temp = current;
+    temp = GetPrevSibling(temp);
+    if (!temp.IsOk())
+    {
+        temp = GetItemParent(current);
+        if (temp.IsOk())
+            return temp;
+        else
+            return getLastItem(GetRootItem());
+    }
+    else
+        return getLastItem(temp);
+}
+//----------------------------------------------------------------------------
+//! get the next item vertically
+wxTreeItemId myTreeCtrl::getNextItem(wxTreeItemId current)
+{
+    wxTreeItemId temp = current;
+    wxTreeItemIdValue cookie;   // dummy - not really used
+    if (ItemHasChildren(temp))
+        temp = GetFirstChild(temp, cookie);
+    else
+    {
+        while (true)
+        {
+            if (temp == GetRootItem()) // back to the root (start search from top)
+                break;
+            wxTreeItemId t = temp;
+            temp = GetNextSibling(t);
+            if (temp.IsOk())
+                break;
+            else
+                temp = GetItemParent(t);
+        }
+    }
+    return temp;
+}
+//----------------------------------------------------------------------------
+//! searches for next node whose text starts with "text"
+//! where "text" can contain wildcards: * and ?
+bool myTreeCtrl::findText(const wxString& text, bool forward)
+{
+    wxString searchString = text.Upper() + wxT("*");
+    // start from the current position in tree and look forward
+    // for item that starts with that name
+    wxTreeItemId start = GetSelection();
+    wxTreeItemId temp = start;
+    while (true)
+    {
+        wxString current = GetItemText(temp);
+        if (current.Upper().Matches(searchString))   // found?
+        {
+            if (temp != start)
+                SelectItem(temp);
+            EnsureVisible(temp);
+            return true;
+        }
+
+        if (forward)
+            temp = getNextItem(temp);
+        else
+            temp = getPreviousItem(temp);
+        if (temp == start)  // not found (we wrapped around completely)
+            return false;
+    }
+}
 //-----------------------------------------------------------------------------

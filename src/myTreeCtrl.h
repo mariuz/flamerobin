@@ -88,6 +88,11 @@ public:
     bool selectMetadataItem(MetadataItem* item);
     int getItemImage(NodeType t);
 
+    wxTreeItemId getLastItem(wxTreeItemId id);
+    wxTreeItemId getNextItem(wxTreeItemId current);
+    wxTreeItemId getPreviousItem(wxTreeItemId current);
+    bool findText(const wxString& text, bool forward = true);
+
     myTreeCtrl(wxWindow* parent, const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, long style = wxTR_HAS_BUTTONS);
 

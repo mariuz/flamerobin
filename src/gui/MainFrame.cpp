@@ -118,6 +118,12 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     SetStatusBarPane(-1);   // disable automatic fill
     set_properties();
     do_layout();
+
+    if (!config().get(wxT("showSearchBar"), true))
+    {
+        inner_sizer->Show(searchPanelM, false, true);    // recursive
+        inner_sizer->Layout();
+    }
 }
 //-----------------------------------------------------------------------------
 void MainFrame::buildMainMenu()
@@ -198,10 +204,7 @@ void MainFrame::buildMainMenu()
         GetStatusBar()->SetStatusText(_("[No database selected]"));
     }
     if (config().get(wxT("showSearchBar"), true))
-    {
         viewMenu->Check(myTreeCtrl::Menu_ToggleSearchBar, true);
-    }
-    // show + hide
 }
 //-----------------------------------------------------------------------------
 void MainFrame::showDocsHtmlFile(const wxString& fileName)
@@ -353,6 +356,9 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(myTreeCtrl::Menu_ToggleDisconnected, MainFrame::OnMenuToggleDisconnected)
 
     EVT_TEXT(MainFrame::ID_search_box, MainFrame::OnSearchTextChange)
+    EVT_BUTTON(MainFrame::ID_button_advanced, MainFrame::OnButtonSearchClick)
+    EVT_BUTTON(MainFrame::ID_button_prev, MainFrame::OnButtonPrevClick)
+    EVT_BUTTON(MainFrame::ID_button_next, MainFrame::OnButtonNextClick)
 
     EVT_MENU(myTreeCtrl::Menu_CreateDomain,     MainFrame::OnMenuCreateDomain)
     EVT_MENU(myTreeCtrl::Menu_CreateException,  MainFrame::OnMenuCreateException)
@@ -1473,50 +1479,48 @@ void MainFrame::OnSearchTextChange(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
-    wxString text = searchBoxM->GetValue().Upper();
-    if (text.IsEmpty())
-        return;
+    if (tree_ctrl_1->findText(searchBoxM->GetValue()))
+        searchBoxM->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
+    else
+        searchBoxM->SetForegroundColour(*wxRED);
 
-    // start from the current position in tree and look forward
-    // for item that starts with that name
-    wxTreeItemId start = tree_ctrl_1->GetSelection();
-    wxTreeItemId temp = start;
-    wxTreeItemIdValue cookie;
-    while (true)
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnButtonSearchClick(wxCommandEvent &event)
+{
+    FR_TRY
+
+    wxMessageBox(_("Not yet implemented"), _("Advanced search dialog"));
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnButtonPrevClick(wxCommandEvent &event)
+{
+    FR_TRY
+
+    // move backward and search then
+    wxTreeItemId id = tree_ctrl_1->GetSelection();
+    if (id.IsOk())
     {
-        wxString current = tree_ctrl_1->GetItemText(temp);
-        if (current.Upper().Matches(text + wxT("*")))   // found?
-        {
-            if (temp != start)
-                tree_ctrl_1->SelectItem(temp);
-            tree_ctrl_1->EnsureVisible(temp);
-            //searchBoxM->SetForegroundColor(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-            break;
-        }
+        tree_ctrl_1->SelectItem(tree_ctrl_1->getPreviousItem(id));
+        tree_ctrl_1->findText(searchBoxM->GetValue(),false);
+    }
 
-        // get the next item
-        if (tree_ctrl_1->ItemHasChildren(temp))
-            temp = tree_ctrl_1->GetFirstChild(temp, cookie);
-        else
-        {
-            while (true)
-            {
-                if (temp == tree_ctrl_1->GetRootItem()) // back to the root (start search from top)
-                    break;
-                wxTreeItemId t = temp;
-                temp = tree_ctrl_1->GetNextSibling(t);
-                if (temp.IsOk())
-                    break;
-                else
-                    temp = tree_ctrl_1->GetItemParent(t);
-            }
-        }
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnButtonNextClick(wxCommandEvent &event)
+{
+    FR_TRY
 
-        if (temp == start)  // not found (change colour or something)
-        {
-            //searchBoxM->SetForegroundColor(*wxRED);
-            break;
-        }
+    // move forward and search then
+    wxTreeItemId id = tree_ctrl_1->GetSelection();
+    if (id.IsOk())
+    {
+        tree_ctrl_1->SelectItem(tree_ctrl_1->getNextItem(id));
+        tree_ctrl_1->findText(searchBoxM->GetValue(), true);
     }
 
     FR_CATCH

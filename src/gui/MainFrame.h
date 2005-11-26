@@ -111,7 +111,6 @@ public:
     void OnMainMenuOpen(wxMenuEvent& event);
     void OnTreeSelectionChanged(wxTreeEvent& event);
     void OnTreeItemActivate(wxTreeEvent& event);
-    void OnSearchTextChange(wxCommandEvent& event);
     void OnClose(wxCloseEvent& event);
 
     // search stuff (IDs 600+ are taken!)
@@ -121,6 +120,10 @@ public:
         ID_button_next,
         ID_search_box
     };
+    void OnSearchTextChange(wxCommandEvent& event);
+    void OnButtonSearchClick(wxCommandEvent &event);
+    void OnButtonPrevClick(wxCommandEvent &event);
+    void OnButtonNextClick(wxCommandEvent &event);
 
     MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE);
