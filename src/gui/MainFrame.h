@@ -121,6 +121,7 @@ public:
         ID_search_box
     };
     void OnSearchTextChange(wxCommandEvent& event);
+    void OnSearchBoxEnter(wxCommandEvent& event);
     void OnButtonSearchClick(wxCommandEvent &event);
     void OnButtonPrevClick(wxCommandEvent &event);
     void OnButtonNextClick(wxCommandEvent &event);

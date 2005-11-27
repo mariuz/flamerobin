@@ -107,9 +107,9 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     searchPanelM = new wxPanel(mainPanelM, -1, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL|wxSUNKEN_BORDER);
     searchBoxM = new wxComboBox(searchPanelM, ID_search_box, wxEmptyString, wxDefaultPosition, wxDefaultSize,
         choices, wxCB_DROPDOWN|wxCB_SORT);
-    button_advanced = new wxBitmapButton(searchPanelM, ID_button_advanced, wxBitmap(sql_icons::new_xpm));
     button_prev = new wxBitmapButton(searchPanelM, ID_button_prev, wxBitmap(sql_icons::left_xpm));
     button_next = new wxBitmapButton(searchPanelM, ID_button_next, wxBitmap(sql_icons::right_xpm));
+    button_advanced = new wxBitmapButton(searchPanelM, ID_button_advanced, wxBitmap(sql_icons::new_xpm));
     button_advanced->SetToolTip(_("Advanced metadata search"));
     button_prev->SetToolTip(_("Previous match"));
     button_next->SetToolTip(_("Next match"));
@@ -355,6 +355,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(myTreeCtrl::Menu_ToggleSearchBar, MainFrame::OnMenuToggleSearchBar)
     EVT_MENU(myTreeCtrl::Menu_ToggleDisconnected, MainFrame::OnMenuToggleDisconnected)
 
+    EVT_TEXT_ENTER(MainFrame::ID_search_box, MainFrame::OnSearchBoxEnter)
     EVT_TEXT(MainFrame::ID_search_box, MainFrame::OnSearchTextChange)
     EVT_BUTTON(MainFrame::ID_button_advanced, MainFrame::OnButtonSearchClick)
     EVT_BUTTON(MainFrame::ID_button_prev, MainFrame::OnButtonPrevClick)
@@ -436,23 +437,24 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 {
     FR_TRY
 
-    if (!GetStatusBar())
+    wxStatusBar *sb = GetStatusBar();
+    if (!sb)
         return;
 
-    static Database* lastDatabase = 0;      // remember the last database/node type, so menus don't
+    //static Database* lastDatabase = 0;
     Database* d = tree_ctrl_1->getSelectedDatabase();
-    if (d != lastDatabase)
-    {
+    //if (d != lastDatabase)
+    //{
         if (d)
         {
             wxString s = d->getUsername() + wxT("@") + d->getConnectionString()
                 + wxT(" (") + d->getConnectionCharset() + wxT(")");
-            GetStatusBar()->SetStatusText(s);
+            sb->SetStatusText(s);
         }
         else
-            GetStatusBar()->SetStatusText(_("[No database selected]"));
-        lastDatabase = d;
-    }
+            sb->SetStatusText(_("[No database selected]"));
+        //lastDatabase = d;
+    //}
 
     FR_CATCH
 }
@@ -1483,6 +1485,35 @@ void MainFrame::OnSearchTextChange(wxCommandEvent& WXUNUSED(event))
         searchBoxM->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
     else
         searchBoxM->SetForegroundColour(*wxRED);
+    wxStatusBar *sb = GetStatusBar();
+    if (sb)
+        sb->SetStatusText(_("Hit ENTER to focus the tree."));
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnSearchBoxEnter(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    wxString text = searchBoxM->GetValue();
+    if (text.IsEmpty())
+        return;
+    // if it's a wildcard, add wildcard to the list...
+    if (searchBoxM->GetForegroundColour() == *wxRED)
+        searchBoxM->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
+    else
+    {
+        if (text.Find(wxChar('*')) != -1 || text.Find(wxChar('?')) != -1)
+            searchBoxM->Append(text);
+        else    // ...otherwise, add item's name to the list
+            searchBoxM->Append(tree_ctrl_1->GetItemText(tree_ctrl_1->GetSelection()));
+    }
+    searchBoxM->SetValue(wxEmptyString);
+    tree_ctrl_1->SetFocus();
+    wxStatusBar *sb = GetStatusBar();
+    if (sb)
+        sb->SetStatusText(_("Item added to the list."));
 
     FR_CATCH
 }
@@ -1506,6 +1537,12 @@ void MainFrame::OnButtonPrevClick(wxCommandEvent &event)
     {
         tree_ctrl_1->SelectItem(tree_ctrl_1->getPreviousItem(id));
         tree_ctrl_1->findText(searchBoxM->GetValue(),false);
+        if (id == tree_ctrl_1->GetSelection())
+        {
+            wxStatusBar *sb = GetStatusBar();
+            if (sb)
+                sb->SetStatusText(_("No more matches."));
+        }
     }
 
     FR_CATCH
@@ -1521,6 +1558,12 @@ void MainFrame::OnButtonNextClick(wxCommandEvent &event)
     {
         tree_ctrl_1->SelectItem(tree_ctrl_1->getNextItem(id));
         tree_ctrl_1->findText(searchBoxM->GetValue(), true);
+        if (id == tree_ctrl_1->GetSelection())
+        {
+            wxStatusBar *sb = GetStatusBar();
+            if (sb)
+                sb->SetStatusText(_("No more matches."));
+        }
     }
 
     FR_CATCH
