@@ -168,23 +168,22 @@ bool Identifier::needsQuoting(const wxString& s)
 {
     if (s.IsEmpty())
         return false;
-    if (isReserved(s) || !s.IsAscii() || s != s.Upper())
+    const wxChar* p = s.c_str();
+    // first character: only 'A'..'Z' allowed, else quotes needed
+    if (*p < 'A' || *p > 'Z')
         return true;
-
-    if (!wxIsalpha(s[0]))                // initial character must be A-Z,a-z
-        return true;
-
-    // isalnum can return true for letters in character set from
-    // locale. That's why we need isAscii check above
-    for (wxString::size_type i = 0; i < s.Length(); i++)
+    p++;
+    // after first character: 'A'..'Z', '0'..'9', '_', '$' allowed
+    while (*p != 0)
     {
-        wxChar c = s[i];
-        if (c == wxChar('_') || c == wxChar('$'))   // allowed chars
-            continue;
-        if (!wxIsalnum(c) || wxIsspace(c))
+        bool validChar = (*p >= 'A' && *p <= 'Z') || (*p >= '0' && *p <= '9')
+            || *p == '_' || *p == '$';
+        if (!validChar)
             return true;
+        p++;
     }
-    return false;
+    // may still need quotes if reserved word
+    return isReserved(s);
 }
 //----------------------------------------------------------------------------
 bool Identifier::equals(const Identifier& rhs) const
