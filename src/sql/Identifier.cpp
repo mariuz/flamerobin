@@ -36,7 +36,7 @@
 #endif
 
 #include "config/Config.h"
-#include "Identifier.h"
+#include "sql/Identifier.h"
 //----------------------------------------------------------------------------
 Identifier::Identifier(const wxString& source)
 {
@@ -187,9 +187,17 @@ bool Identifier::needsQuoting(const wxString& s)
     return false;
 }
 //----------------------------------------------------------------------------
-bool Identifier::equals(const Identifier& other) const
+bool Identifier::equals(const Identifier& rhs) const
 {
-    return textM == other.textM;
+    return textM == rhs.textM;
+}
+//----------------------------------------------------------------------------
+bool Identifier::equals(const wxString& rhs) const
+{
+    if (needsQuoting(textM))
+        return (0 == rhs.Cmp(textM));
+    else
+        return (0 == rhs.CmpNoCase(textM));
 }
 //----------------------------------------------------------------------------
 wxString Identifier::get() const

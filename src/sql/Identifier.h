@@ -32,6 +32,14 @@
 //! place. If also makes matching easier (upper/lower case problems)
 class Identifier
 {
+private:
+    wxString textM;
+    static bool isReserved(const wxString& s);
+    static bool needsQuoting(const wxString& s);
+    static bool isQuoted(const wxString &s);
+    static wxString& escape(wxString& s);
+    static wxString& strip(wxString& s);
+    static wxString& quote(wxString &s);
 public:
     typedef std::set<wxString> keywordContainer;
     Identifier();
@@ -42,19 +50,11 @@ public:
     static const keywordContainer& getKeywordSet();
     static wxString getKeywords(bool lowerCase = false);
 
-    bool equals(const Identifier& other) const;
+    bool equals(const Identifier& rhs) const;
+    bool equals(const wxString& rhs) const;
     wxString get() const;
     wxString getQuoted() const;
     static wxString userString(const wxString& s);
-
-private:
-    wxString textM;
-    static bool isReserved(const wxString& s);
-    static bool needsQuoting(const wxString& s);
-    static bool isQuoted(const wxString &s);
-    static wxString& escape(wxString& s);
-    static wxString& strip(wxString& s);
-    static wxString& quote(wxString &s);
 };
 //----------------------------------------------------------------------------
 #endif
