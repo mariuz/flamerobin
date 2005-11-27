@@ -1518,7 +1518,7 @@ void MainFrame::OnSearchBoxEnter(wxCommandEvent& WXUNUSED(event))
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
-void MainFrame::OnButtonSearchClick(wxCommandEvent &event)
+void MainFrame::OnButtonSearchClick(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
@@ -1527,7 +1527,7 @@ void MainFrame::OnButtonSearchClick(wxCommandEvent &event)
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
-void MainFrame::OnButtonPrevClick(wxCommandEvent &event)
+void MainFrame::OnButtonPrevClick(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
@@ -1548,7 +1548,7 @@ void MainFrame::OnButtonPrevClick(wxCommandEvent &event)
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
-void MainFrame::OnButtonNextClick(wxCommandEvent &event)
+void MainFrame::OnButtonNextClick(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
