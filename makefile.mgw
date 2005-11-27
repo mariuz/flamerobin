@@ -138,6 +138,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Identifier.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleParser.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_styleguide.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_styleguidemsw.o \
@@ -470,6 +471,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Identifier.o: ./src/sql/Identifier.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleParser.o: ./src/sql/SimpleParser.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.o: ./src/sql/SqlTokenizer.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.o: ./src/statementHistory.cpp

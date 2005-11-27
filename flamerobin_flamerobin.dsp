@@ -588,6 +588,10 @@ SOURCE=.\src\sql\SimpleParser.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\sql\SqlTokenizer.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\core\Subject.cpp
 # End Source File
 # Begin Source File
@@ -875,6 +879,10 @@ SOURCE=.\src\gui\SimpleHtmlFrame.h
 # Begin Source File
 
 SOURCE=.\src\sql\SimpleParser.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\sql\SqlTokenizer.h
 # End Source File
 # Begin Source File
 
