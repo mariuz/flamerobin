@@ -45,9 +45,12 @@
 #include "metadata/parameter.h"
 #include "metadata/root.h"
 #include "sql/SimpleParser.h"
+#include "sql/SqlTokenizer.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 using namespace std;
+
+// #define USE_TOKENIZER
 //-----------------------------------------------------------------------------
 void Credentials::setCharset(wxString value)
 {
@@ -563,6 +566,325 @@ inline void getCleanName(std::stringstream& strstrm, std::string& name)
 //!        on the original string
 bool Database::parseCommitedSql(wxString sql)
 {
+#ifdef USE_TOKENIZER
+    SqlTokenizer tokenizer(sql);
+    // get vector of leading keywords before first identifier
+    vector<SqlTokenType> leadingKWs;
+    while (true)
+    {
+        SqlTokenType tt = tokenizer.getCurrentToken();
+        if (tt == tkEOF)
+            return false;
+        if (tt == tkIDENTIFIER)
+            break;
+        if (tokenizer.isKeywordToken())
+            leadingKWs.push_back(tt);
+        tokenizer.nextToken();
+    }
+    // first identifier found
+    Identifier name;
+    name.setFromSql(tokenizer.getCurrentTokenString());
+
+    // needs at least action and object type to act on
+    if (leadingKWs.size() < 2)
+        return false;
+    size_t typeIndex = 1;
+    // get action
+    enum SqlAction {
+        actNONE, actALTER, actCREATE, actCREATE_OR_ALTER, actDECLARE, actDROP,
+        actRECREATE, actSET, actUPDATE
+    } action = actNONE;
+    switch (leadingKWs[0])
+    {
+        case kwALTER:
+            action = actALTER; break;
+        case kwCREATE:
+            action = actCREATE; break;
+        case kwDECLARE:
+            action = actDECLARE; break;
+        case kwDROP:
+            action = actDROP; break;
+        case kwRECREATE:
+            action = actRECREATE; break;
+        case kwSET:
+            action = actSET; break;
+        case kwUPDATE:
+            action = actUPDATE; break;
+        default:
+            return true;
+    }
+    if (action == actNONE)
+        return false;
+    // special handling for "CREATE OR ALTER"
+    if (action == actCREATE && leadingKWs.size() > 3
+        && leadingKWs[1] == kwOR && leadingKWs[2] == kwALTER)
+    {
+        action = actCREATE_OR_ALTER;
+        typeIndex = 3;
+    }
+
+    // get object type
+    if (typeIndex >= leadingKWs.size())
+        return false;
+    NodeType objectType = ntUnknown;
+    while (objectType == ntUnknown && typeIndex < leadingKWs.size())
+    {
+        switch (leadingKWs[typeIndex])
+        {
+            case kwDATABASE:
+                objectType = ntDatabase; break;
+            case kwDOMAIN:
+                objectType = ntDomain; break;
+            case kwEXCEPTION:
+                objectType = ntException; break;
+            case kwFUNCTION:
+                objectType = ntFunction; break;
+            case kwGENERATOR:
+                objectType = ntGenerator; break;
+            case kwINDEX:
+                objectType = ntIndex; break;
+            case kwPROCEDURE:
+                objectType = ntProcedure; break;
+            case kwROLE:
+                objectType = ntRole; break;
+            case kwTABLE:
+                objectType = ntTable; break;
+            case kwTRIGGER:
+                objectType = ntTrigger; break;
+            case kwVIEW:
+                objectType = ntView; break;
+            default:
+                // this will scan over things like "EXTERNAL", "UNIQUE",
+                // "ASCENDING", "STATISTICS" etc., until object type is found
+                typeIndex++;
+                break;
+        }
+    }
+    if (objectType == ntUnknown)
+        return false;
+
+    // TODO: check that there are no unwanted side-effects to this
+    // SubjectLocker locker(this);
+
+    // handle "SET GENERATOR"
+    if (action == actSET && objectType == ntGenerator)
+    {
+        MetadataItem* m = findByNameAndType(ntGenerator, name.get());
+        if (Generator* g = dynamic_cast<Generator*>(m))
+            g->loadValue(true);
+        return true;
+    }
+    // handle "DROP INDEX"
+    if (action == actDROP && objectType == ntIndex)
+    {
+        // We cannot know which table is affected, so the only solution is to
+        // have all tables reload their indexes
+        MetadataCollection<Table>::iterator it;
+        for (it = tablesM.begin(); it != tablesM.end(); ++it)
+            (*it).invalidateIndices();
+        return true;
+    }
+    // handle "CREATE INDEX", "ALTER INDEX" and "SET STATISTICS INDEX"
+    if (objectType == ntIndex 
+        && (action == actCREATE || action == actALTER || action == actSET))
+    {
+        wxString tableName;
+        if (action == actCREATE)
+            tableName = getTableForIndex(name.get());
+        else
+            tableName = name.get();
+        MetadataItem* m = findByNameAndType(ntTable, tableName);
+        if (Table* t = dynamic_cast<Table*>(m))
+            t->invalidateIndices();
+        return true;
+    }
+
+    // map "CREATE OR ALTER" and "RECREATE" to correct action
+    if (action == actCREATE_OR_ALTER ||action == actRECREATE) 
+    {
+        if (findByNameAndType(objectType, name.get()))
+            action = actALTER;
+        else
+            action = actCREATE;
+    }
+
+    // update all TABLEs and VIEWs on "DROP TRIGGER"
+    if (action == actDROP && objectType == ntTrigger)
+    {
+        MetadataCollection<Table>::iterator itt;
+        for (itt = tablesM.begin(); itt != tablesM.end(); itt++)
+            (*itt).notifyObservers();
+        MetadataCollection<View>::iterator itv;
+        for (itv = viewsM.begin(); itv != viewsM.end(); itv++)
+            (*itv).notifyObservers();
+    }
+
+    // convert change in NULL flag to "ALTER TABLE"
+    if (action == actUPDATE && name.equals(wxT("RDB$RELATION_FIELDS")))
+    {
+
+    }
+
+/* TODO
+    // convert change in NULL flag to ALTER TABLE (since it should be processed like that)
+    if (sql.substr(0, 44) == wxT("UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG"))
+    {
+        action = "ALTER";
+        object_type = "TABLE";
+        wxString::size_type pos = sql.find(wxT("RDB$RELATION_NAME = '"));
+        if (pos == wxString::npos)
+            return true;
+        pos += 21;
+        wxString::size_type end = sql.find(wxT("'"), pos);
+        if (end == wxString::npos)
+            return true;
+        name = wx2std(sql.substr(pos, end - pos));
+    }
+
+    NodeType t = getTypeByName(std2wx(object_type));
+
+    // process the action...
+    if (action == "CREATE" || action == "DECLARE")
+    {
+        if (addObject(t, std2wx(name)))     // inserts object into collection
+            refreshByType(t);
+        if (object_type == "TRIGGER")       // new trigger created, alert tables/views
+        {                                   // to update their property pages
+            std::string relation;
+            strstrm >> relation;    // FOR
+            getCleanName(strstrm, relation);
+            Relation* m = dynamic_cast<Relation*>(findByNameAndType(ntTable, std2wx(relation)));
+            if (!m)
+            {
+                m = dynamic_cast<Relation*>(findByNameAndType(ntView, std2wx(relation)));
+                if (!m)
+                    return true;
+            }
+            m->notifyObservers();
+        }
+    }
+    else if (action == "DROP" || action == "ALTER")
+    {
+        MetadataItem* object = findByNameAndType(t, std2wx(name));
+        if (!object)
+            return true;
+
+        if (action == "DROP")
+        {
+            dropObject(object);
+            if (t == ntTable || t == ntView)    // remove related triggers
+            {
+                while (true)
+                {
+                    Trigger* todrop = 0;
+                    for (MetadataCollection<Trigger>::iterator it = triggersM.begin(); it != triggersM.end(); ++it)
+                    {
+                        wxString relname;            // trigger already gone => cannot fetch relation name
+                        if (!(*it).getRelation(relname) || relname == std2wx(name))
+                            todrop = &(*it);
+                    }
+                    if (todrop)
+                        dropObject(todrop);
+                    else
+                        break;
+                }
+            }
+        }
+        else                        // ALTER
+        {
+            if (t == ntTable)       // ALTER TABLE xyz ALTER field TYPE {domain or datatype}
+            {
+                std::string alter, field_name, maybe_type, domain_or_datatype;
+                strstrm >> alter;
+                getCleanName(strstrm, field_name);
+                if (field_name == "COLUMN") // ALTER TABLE xyz ALTER COLUMN field TYPE {domain or datatype}
+                    getCleanName(strstrm, field_name);
+                strstrm >> maybe_type;
+                if (maybe_type == "TYPE")       // domain is either created/modified/deleted or none
+                {                               // if we'd only know what was there before... life would be easier
+                    strstrm >> domain_or_datatype;
+                    wxString::size_type pos = domain_or_datatype.find("(");
+                    if (pos != wxString::npos)
+                        domain_or_datatype.erase(pos);      // remove if it has size/scale
+
+                    std::vector<wxString> typenames;             // I first tried a simple array of strings
+                    typenames.push_back(wxT("CHAR"));                    // but program kept crashing
+                    typenames.push_back(wxT("VARCHAR"));
+                    typenames.push_back(wxT("INTEGER"));
+                    typenames.push_back(wxT("SMALLINT"));
+                    typenames.push_back(wxT("NUMERIC"));
+                    typenames.push_back(wxT("DECIMAL"));
+                    typenames.push_back(wxT("FLOAT"));
+                    typenames.push_back(wxT("DOUBLE PRECISION"));
+                    typenames.push_back(wxT("DATE"));
+                    typenames.push_back(wxT("TIME"));
+                    typenames.push_back(wxT("TIMESTAMP"));
+                    typenames.push_back(wxT("ARRAY"));
+                    typenames.push_back(wxT("BLOB"));
+                    bool is_datatype = false;
+                    for (std::vector<wxString>::iterator it = typenames.begin(); it != typenames.end(); ++it)
+                        if ((*it) == std2wx(domain_or_datatype))
+                            is_datatype = true;
+
+                    if (is_datatype)        // either existing domain is changing, or new is created
+                    {
+                        wxString domain_name = loadDomainNameForColumn(std2wx(name), std2wx(field_name));
+                        MetadataItem* m = domainsM.findByName(domain_name);
+                        if (m == 0)     // domain does not exist in DBH
+                        {
+                            m = domainsM.add();
+                            m->setName_(domain_name);
+                            m->setParent(this);
+                            m->setType(ntDomain);   // just in case
+                        }
+                        ((Domain*)m)->loadInfo();
+                    }
+                    else
+                    {
+                        // there is (maybe) an extra RDB$domain in domainsM, but we can leave it there
+                        // as it is not going to hurt anyone
+                        // Besides, it appears that domain is left in database too (not cleared)
+                        // so we won't call this: loadObjects(ntDomain);
+                    }
+                }
+            }
+
+            // TODO: this is a place where we would simply call virtual invalidate() function
+            // and object would do wherever it needs to
+            bool result = true;
+            if (t == ntTable || t == ntView)
+                result = ((Relation*)object)->loadColumns();
+            else if (t == ntProcedure)
+                result = ((Procedure*)object)->checkAndLoadParameters(true);   // force reload
+            else if (t == ntException)
+                ((Exception*)object)->loadProperties(true);
+            else if (t == ntTrigger)
+            {
+                ((Trigger*)object)->loadInfo(true);
+                wxString relation;                   // alert table/view
+                Trigger* tr = dynamic_cast<Trigger*>(findByNameAndType(ntTrigger, std2wx(name)));
+                if (!tr || !tr->getRelation(relation))
+                    return true;
+                Relation* m = dynamic_cast<Relation*>(findByNameAndType(ntTable, relation));
+                if (!m)
+                {
+                    m = dynamic_cast<Relation*>(findByNameAndType(ntView, relation));
+                    if (!m)
+                        return true;
+                }
+                m->notifyObservers();
+            }
+            else
+                object->notifyObservers();
+
+            if (!result)
+                return false;
+        }
+    }
+*/
+
+    return true;
+#else
     sql += wxT("\n");    // if last line starts with --
     SimpleParser::removeComments(sql, wxT("/*"), wxT("*/"));
     SimpleParser::removeComments(sql, wxT("--"), wxT("\n"));
@@ -856,6 +1178,7 @@ bool Database::parseCommitedSql(wxString sql)
     //       Log can contain stuff like: Server,DB,User,Role,Data&Time,SQL statement
     //       In short: History
     return true;
+#endif
 }
 //-----------------------------------------------------------------------------
 bool Database::reconnect() const
