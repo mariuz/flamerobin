@@ -122,6 +122,12 @@ bool SqlTokenizer::nextToken()
         quotedIdentifierToken();
     else if (c == '\'')
         stringToken();
+    else if (c == '(')
+        symbolToken(tkPARENOPEN);
+    else if (c == ')')
+        symbolToken(tkPARENCLOSE);
+    else if (c == '=')
+        symbolToken(tkEQUALS);
     else if (wxIsspace(c))
         whitespaceToken();
     else
@@ -242,6 +248,12 @@ void SqlTokenizer::stringToken()
         }
         sqlTokenEndM++;
     }
+}
+//-----------------------------------------------------------------------------
+inline void SqlTokenizer::symbolToken(SqlTokenType type)
+{
+    sqlTokenTypeM = type;
+    sqlTokenEndM++;
 }
 //-----------------------------------------------------------------------------
 void SqlTokenizer::whitespaceToken()

@@ -32,7 +32,8 @@ enum SqlTokenType {
     /* 
      * these are token types used by SqlTokenizer class
      */
-    tkEOF, tkUNKNOWN, tkWHITESPACE, tkCOMMENT, tkTERM,
+    tkEOF, tkUNKNOWN, tkWHITESPACE, tkCOMMENT, 
+    tkTERM, tkPARENOPEN, tkPARENCLOSE, tkEQUALS,
     tkSTRING, tkIDENTIFIER,
 
     tk_KEYWORDS_START_HERE,
@@ -131,7 +132,6 @@ class SqlTokenizer
 private:
     wxString sqlM;
     wxString termM;
-//    size_t sqlLengthM;
     const wxChar* sqlTokenStartM;
     const wxChar* sqlTokenEndM;
     SqlTokenType sqlTokenTypeM;
@@ -143,6 +143,7 @@ private:
     void quotedIdentifierToken();
     void singleLineCommentToken();
     void stringToken();
+    void symbolToken(SqlTokenType type);
     void whitespaceToken();
 public:
     SqlTokenizer();
