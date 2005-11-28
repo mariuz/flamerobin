@@ -59,6 +59,10 @@ FrameManager::~FrameManager()
 void FrameManager::setWindowMenu(wxMenu *windowMenu)
 {
     windowMenuM = windowMenu;
+
+    // remember number of items that shouldn't be touched
+    if (windowMenu)
+        regularItemsM = windowMenu->GetMenuItemCount() + 1;
 }
 //-----------------------------------------------------------------------------
 // TODO: currently we just clear and rebuild from scratch
@@ -68,12 +72,10 @@ void FrameManager::rebuildMenu()
     if (windowMenuM == 0)
         return;
 
-    const int regularItems = 5;
-
     // remove all items
-    while (windowMenuM->GetMenuItemCount() > regularItems)
-        windowMenuM->Destroy(windowMenuM->FindItemByPosition(regularItems));
-    if (windowMenuM->GetMenuItemCount() == regularItems-1)
+    while (windowMenuM->GetMenuItemCount() > regularItemsM)
+        windowMenuM->Destroy(windowMenuM->FindItemByPosition(regularItemsM));
+    if (windowMenuM->GetMenuItemCount() == regularItemsM-1)
         windowMenuM->AppendSeparator();
 
     // each database has it's submenu
@@ -104,8 +106,8 @@ void FrameManager::rebuildMenu()
     for (std::map<Database *, wxMenu *>::iterator it = dmm.begin(); it != dmm.end(); ++it)
         windowMenuM->Append(-1, (*it).first->getName_(), (*it).second);
 
-    if (windowMenuM->GetMenuItemCount() == regularItems)    // remove the separator if nothing is beneath
-        windowMenuM->Destroy(windowMenuM->FindItemByPosition(regularItems-1));
+    if (windowMenuM->GetMenuItemCount() == regularItemsM)    // remove the separator if nothing is beneath
+        windowMenuM->Destroy(windowMenuM->FindItemByPosition(regularItemsM-1));
 }
 //-----------------------------------------------------------------------------
 void FrameManager::bringOnTop(int id)

@@ -64,6 +64,7 @@ protected:
     enum { ID_ACTIVATE_FRAME = 42 };
     DECLARE_EVENT_TABLE()
 private:
+    size_t regularItemsM;
     ItemFrameMap mipFramesM;
     wxMenu* windowMenuM;
     wxMenuBar* menuBarM;
