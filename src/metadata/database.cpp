@@ -760,8 +760,8 @@ bool Database::parseCommitedSql(wxString sql)
         objectType = ntTable;
         bool tableFound = false;
         // find "RDB$RELATION_NAME" in map
-        map<int, wxString>::const_iterator mit = tokenStrings.begin();
-        while (mit != tokenStrings.end())
+        for (map<int, wxString>::const_iterator mit = tokenStrings.begin();
+            mit != tokenStrings.end(); mit++)
         {
             if ((*mit).second.CmpNoCase(wxT("RDB$RELATION_NAME")) == 0)
             {
@@ -771,6 +771,7 @@ bool Database::parseCommitedSql(wxString sql)
                 {
                     name.setFromSqlString(tokenStrings[i + 2]);
                     tableFound = true;
+                    break;
                 }
             }
         }
