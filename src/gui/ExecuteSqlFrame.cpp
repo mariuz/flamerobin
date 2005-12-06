@@ -737,6 +737,7 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
     {
         if (config().get(wxT("AutocompleteEnabled"), true))
         {
+            #ifndef __WXGTK20__
             bool allow = config().get(wxT("autoCompleteQuoted"), true);
             if (!allow)
             {
@@ -745,6 +746,11 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
                 if (styled_text_ctrl_sql->GetStyleAt(pos - 1) != 7)   // not in quotes
                     allow = true;
             }
+            #else
+            bool allow = true;  // ::wxSafeYield kills the focus on gtk2
+                                // so, until we make a parser to detect whether we're
+                                // inside quotes or not - this #ifdef stays
+            #endif
             if (allow)
             {
                 if (styled_text_ctrl_sql->CallTipActive())
