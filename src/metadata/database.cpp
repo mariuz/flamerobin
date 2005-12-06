@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -567,34 +567,49 @@ inline void getCleanName(std::stringstream& strstrm, std::string& name)
 bool Database::parseCommitedSql(wxString sql)
 {
 #ifdef USE_TOKENIZER
+    // use the tokenizer to split the statements into a vector of tokens
+    // also keep the token strings for identifiers and strings
     SqlTokenizer tokenizer(sql);
-    // get vector of leading keywords before first identifier
-    vector<SqlTokenType> leadingKWs;
+    vector<SqlTokenType> tokens;
+    map<int, wxString> tokenStrings;
+
+    // first get the tokens up to the first identifier
+    Identifier name;
+    SqlTokenType stt;
     while (true)
     {
-        SqlTokenType tt = tokenizer.getCurrentToken();
-        if (tt == tkEOF)
-            return false;
-        if (tt == tkIDENTIFIER)
-            break;
-        if (tokenizer.isKeywordToken())
-            leadingKWs.push_back(tt);
+        stt = tokenizer.getCurrentToken();
+        if (stt == tkEOF)
+            return true;
+        if (stt != tkCOMMENT && stt != tkWHITESPACE)
+        {
+            tokens.push_back(stt);
+            if (stt == tkIDENTIFIER || stt == tkSTRING)
+            {
+                wxString ts(tokenizer.getCurrentTokenString());
+                tokenStrings[tokens.size() - 1] = ts;
+                if (stt == tkIDENTIFIER)
+                {
+                    name.setFromSql(ts);
+                    tokenizer.nextToken();
+                    break;
+                }
+            }
+        }
         tokenizer.nextToken();
     }
-    // first identifier found
-    Identifier name;
-    name.setFromSql(tokenizer.getCurrentTokenString());
 
-    // needs at least action and object type to act on
-    if (leadingKWs.size() < 2)
-        return false;
+    // needs at least action
+    if (tokens.size() < 1)
+        return true;
     size_t typeIndex = 1;
     // get action
     enum SqlAction {
         actNONE, actALTER, actCREATE, actCREATE_OR_ALTER, actDECLARE, actDROP,
         actRECREATE, actSET, actUPDATE
     } action = actNONE;
-    switch (leadingKWs[0])
+    NodeType objectType = ntUnknown;
+    switch (tokens[0])
     {
         case kwALTER:
             action = actALTER; break;
@@ -609,27 +624,24 @@ bool Database::parseCommitedSql(wxString sql)
         case kwSET:
             action = actSET; break;
         case kwUPDATE:
-            action = actUPDATE; break;
+            action = actUPDATE; objectType = ntTable; break;
         default:
             return true;
     }
     if (action == actNONE)
         return false;
     // special handling for "CREATE OR ALTER"
-    if (action == actCREATE && leadingKWs.size() > 3
-        && leadingKWs[1] == kwOR && leadingKWs[2] == kwALTER)
+    if (action == actCREATE && tokens.size() > 3
+        && tokens[1] == kwOR && tokens[2] == kwALTER)
     {
         action = actCREATE_OR_ALTER;
         typeIndex = 3;
     }
 
     // get object type
-    if (typeIndex >= leadingKWs.size())
-        return false;
-    NodeType objectType = ntUnknown;
-    while (objectType == ntUnknown && typeIndex < leadingKWs.size())
+    while (objectType == ntUnknown && typeIndex < tokens.size())
     {
-        switch (leadingKWs[typeIndex])
+        switch (tokens[typeIndex])
         {
             case kwDATABASE:
                 objectType = ntDatabase; break;
@@ -700,7 +712,7 @@ bool Database::parseCommitedSql(wxString sql)
     }
 
     // map "CREATE OR ALTER" and "RECREATE" to correct action
-    if (action == actCREATE_OR_ALTER ||action == actRECREATE) 
+    if (action == actCREATE_OR_ALTER || action == actRECREATE) 
     {
         if (findByNameAndType(objectType, name.get()))
             action = actALTER;
@@ -719,29 +731,82 @@ bool Database::parseCommitedSql(wxString sql)
             (*itv).notifyObservers();
     }
 
-    // convert change in NULL flag to "ALTER TABLE"
-    if (action == actUPDATE && name.equals(wxT("RDB$RELATION_FIELDS")))
+    // get remaining tokens, and token content for identifiers + strings
+    while (tkEOF != (stt = tokenizer.getCurrentToken()))
     {
-
+        if (stt != tkCOMMENT && stt != tkWHITESPACE)
+        {
+            tokens.push_back(stt);
+            if (stt == tkIDENTIFIER || stt == tkSTRING)
+            {
+                wxString ts(tokenizer.getCurrentTokenString());
+                tokenStrings[tokens.size() - 1] = ts;
+            }
+        }
+        tokenizer.nextToken();
     }
+
+    // convert change in NULL flag to "ALTER TABLE"
+    if (action == actUPDATE && name.equals(wxT("RDB$RELATION_FIELDS")) 
+        && tokens.size() >= 2 && tokens[0] == kwSET 
+        && tokens[1] == tkIDENTIFIER)
+    {
+        Identifier id;
+        id.setFromSql(tokenStrings[1]);
+        if (!id.equals(wxT("RDB$NULL_FLAG")))
+            return true;
+
+        action = actALTER;
+        objectType = ntTable;
+        bool tableFound = false;
+        // find "RDB$RELATION_NAME" in map
+        map<int, wxString>::const_iterator mit = tokenStrings.begin();
+        while (mit != tokenStrings.end())
+        {
+            if ((*mit).second.CmpNoCase(wxT("RDB$RELATION_NAME")) == 0)
+            {
+                size_t i = (*mit).first;
+                if (tokens.size() > i + 2 && tokens[i + 1] == tkEQUALS
+                    && tokens[i + 2] == tkSTRING)
+                {
+                    name.setFromSqlString(tokenStrings[i + 2]);
+                    tableFound = true;
+                }
+            }
+        }
+        if (!tableFound)
+            return true;
+    }
+
+    NodeType t = getTypeByName(name.get());
+    // handle "CREATE" and "DECLARE"
+    if (action == actCREATE || action == actDECLARE)
+    {
+        if (addObject(t, name.get())) // inserts object into collection
+            refreshByType(t);
+        // when trigger created -> force relations to update their property pages
+        if (objectType == ntTrigger)
+        {
+/*
+            std::string relation;
+            strstrm >> relation;    // FOR
+            getCleanName(strstrm, relation);
+            Relation* m = dynamic_cast<Relation*>(findByNameAndType(ntTable, std2wx(relation)));
+            if (!m)
+            {
+                m = dynamic_cast<Relation*>(findByNameAndType(ntView, std2wx(relation)));
+                if (!m)
+                    return true;
+            }
+            m->notifyObservers();
+*/
+        }
+
+        return true;
+    }
+
 
 /* TODO
-    // convert change in NULL flag to ALTER TABLE (since it should be processed like that)
-    if (sql.substr(0, 44) == wxT("UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG"))
-    {
-        action = "ALTER";
-        object_type = "TABLE";
-        wxString::size_type pos = sql.find(wxT("RDB$RELATION_NAME = '"));
-        if (pos == wxString::npos)
-            return true;
-        pos += 21;
-        wxString::size_type end = sql.find(wxT("'"), pos);
-        if (end == wxString::npos)
-            return true;
-        name = wx2std(sql.substr(pos, end - pos));
-    }
-
-    NodeType t = getTypeByName(std2wx(object_type));
 
     // process the action...
     if (action == "CREATE" || action == "DECLARE")
