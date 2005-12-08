@@ -170,6 +170,8 @@ bool AddConstraintHandler::handleURI(URI& uri)
     else if (type == wxT("UNQ"))
     {
         wxString columnlist = selectTableColumns(t, w);
+        if (columnlist.IsEmpty())	// cancel
+        	return true;
         sql += wxT("\nunique (") + columnlist + wxT(")");
     }
     else
