@@ -1,6 +1,0 @@
-Building FlameRobin on Windows with Borland's free C++ Compiler
-===============================================================
-
-
-Please read BUILD.txt file for instructions.
-
