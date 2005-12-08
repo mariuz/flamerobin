@@ -2,7 +2,7 @@ flamerobin Build Instructions
 -------------------------------
 Below are build instructions for flamerobin on all supported build environments.
 
-Instructions assume that you have already compiled wxWidgets and IBPP library.
+Instructions assume that you have already compiled wxWidgets.
 There are some tips regarding that at the end of this file.
 
 -------------------------------
@@ -43,8 +43,9 @@ default to 0 and are optional.
 
 Due to limitation in Borland's command line linker (ilink32), FlameRobin versions 
 0.4.0 and higher do not link anymore. Therefore this build is NO LONGER SUPPORTED. 
-We tried our best, but failed. However, if you somehow manage to build it, please 
-let us know.
+
+Update: versions after 0.4.5 seem to compile and link ok. So, even that we don't
+officially support it, it does work.
 
 Assuming that you have wxWidgets installed in c:\wxwin260, you should open MS-DOS 
 prompt, cd to flamerobin root directory, and execute:
