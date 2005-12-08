@@ -148,13 +148,15 @@ void PrintableHtmlWindow::OnMenuSave(wxCommandEvent& WXUNUSED(event))
 		if (f.Open(filename, wxFile::write))
 		{
 			wxString ns(pageSourceM);
-			while (true)	// remove links
+			while (true)	// remove links, but leave text
 			{
 				int p1 = ns.Upper().find(wxT("<A"));
-				int p2 = ns.Upper().find(wxT("</A>"), p1);
-				if (p1 == -1 || p2 == -1)
+				int pb = ns.Upper().find(wxT(">"), p1);
+				int p2 = ns.Upper().find(wxT("</A>"), pb);
+				if (p1 == -1 || p2 == -1 || pb == -1)
 					break;
-				ns.Remove(p1, p2 - p1 + 4);
+				ns.Remove(p2, 4);
+				ns.Remove(p1, pb-p1+1);
 			}
 			f.Write(ns);
 			f.Close();
