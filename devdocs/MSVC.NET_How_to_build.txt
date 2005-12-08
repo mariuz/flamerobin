@@ -1,39 +1,39 @@
 Building FlameRobin on Windows with Microsoft Visual C++ .NET
 =============================================================
 
-Building FlameRobin with Visual C++ .NET (version 7.1) should be easy using the provided project and solution files.
+Building FlameRobin with Visual C++ .NET (version 7.1) should be easy using the
+provided project and solution files.
 
-To build FlameRobin you have to use the downloaded sources or to check-out the flamerobin1 module from the projects's CVS tree.  FlameRobin uses and needs the following Open Source libraries to build:
-
-1. IBPP library (for database access)
-2. wxWidgets for GUI
-
-You will find IBPP at 
-
-  http://www.ibpp.org 
-
-and you can download the source package of version 2.3.5.0 (any later version should do as well) at
-
-  http://sourceforge.net/project/showfiles.php?group_id=9514.
-
-Open the included solution ibpp.sln and build both the debug and release configurations.
-If you need help compiling it, feel free to ask at either IBPP or FlameRobin mailing lists.
+To build FlameRobin you have to use the downloaded sources or to check-out the
+mghie module from the "fbmanager" projects's CVS tree.  FlameRobin uses and 
+needs the wxWidgets library.
 
 You will find wxWidgets at
 
   http://www.wxwidgets.org
 
-and you can download the source package of version 2.6.0 (any later version should do as well) if you follow the "Download" link in the sidebar.
-If you download the wxAll* packages (all ports combined into one) please make sure that you unzip them using the -a switch to unzip.exe to convert all files to DOS line endings on-the-fly.  Visual Studio will complain if project or solution files have UNIX line endings.  Should that happen to you, just close the projects and convert the line endings by opening and saving with a text editor.
+and you can download the source package of version 2.6.0 (any later version 
+should do as well) if you follow the "Download" link in the sidebar.
+If you download the wxAll* packages (all ports combined into one) please make 
+sure that you unzip them using the -a switch to unzip.exe to convert all files 
+to DOS line endings on-the-fly.  Visual Studio will complain if project or 
+solution files have UNIX line endings.  Should that happen to you, just close 
+the projects and convert the line endings by opening and saving with a text 
+editor.
 
-Open the included solution files $(WX)\build\msw\wx.sln and $(WX)\contrib\build\stc\stc.sln and build the same configuration (Debug/Release, Ansi/Unicode) of both.
+Open the included solution files $(WX)\build\msw\wx.sln and 
+$(WX)\contrib\build\stc\stc.sln and build the same configuration 
+(Debug/Release, Ansi/Unicode) of both.
 
-You have to define environment variables "IBPP" and "WXWIN" for the FlameRobin project to find the necessary libraries.  Adding them to your user environment works best.
+You have to define environment variable "WXWIN" for the FlameRobin project to 
+find the necessary libraries. Adding them to your user environment works best.
 
-Be sure to select the same configuration for FlameRobin that you selected for wxWidgets, otherwise the linker will not find the needed libraries.
+Be sure to select the same configuration for FlameRobin that you selected for 
+wxWidgets, otherwise the linker will not find the needed libraries.
 
 
-If you have any questions about this, feel free to ask at our fbmanager-devel mailing list at sourceforge.net.
+If you have any questions about this, feel free to ask at our flamerobin-devel
+mailing list at sourceforge.net.
 
 Michael Hieke
 mghie@users.sourceforge.net

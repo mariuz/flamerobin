@@ -41,6 +41,13 @@ default to 0 and are optional.
 -- MSW - Borland's Free C++ Build Instructions
 -------------------------------
 
+Borland's Free C++ Compiler (in short BCC) is a freeware version of 
+Borland's C++ compiler used in C++ Builder product:
+
+http://www.borland.com/bcppbuilder/freecompiler/
+
+I have used version 5.5.1.
+
 Due to limitation in Borland's command line linker (ilink32), FlameRobin versions 
 0.4.0 and higher do not link anymore. Therefore this build is NO LONGER SUPPORTED. 
 
