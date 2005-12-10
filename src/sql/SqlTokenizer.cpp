@@ -171,9 +171,9 @@ void SqlTokenizer::keywordIdentifierToken()
     // check whether it's a keyword, and not an identifier
     wxString checkKW(sqlTokenStartM, sqlTokenEndM);
     checkKW.UpperCase();
-    SqlTokenType kwType = getKeywordTokenType(checkKW);
-    if (kwType != tkIDENTIFIER)
-        sqlTokenTypeM = kwType;
+    SqlTokenType keywordType = getKeywordTokenType(checkKW);
+    if (keywordType != tkIDENTIFIER)
+        sqlTokenTypeM = keywordType;
 }
 //-----------------------------------------------------------------------------
 void SqlTokenizer::multilineCommentToken()
