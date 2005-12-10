@@ -117,14 +117,15 @@ public:
     void resetCredentials();
 
     wxString loadDomainNameForColumn(wxString table, wxString field);
-    Domain *loadMissingDomain(wxString name);
+    Domain* loadMissingDomain(wxString name);
     bool loadObjects(NodeType type);
     //wxString getLoadingSql(NodeType type);
 
     bool loadGeneratorValues();
+    Relation* getRelationForTrigger(Trigger* trigger);
 
-    MetadataItem *findByNameAndType(NodeType nt, wxString name);
-    MetadataItem *findByName(wxString name);
+    MetadataItem* findByNameAndType(NodeType nt, wxString name);
+    MetadataItem* findByName(wxString name);
     Relation* findRelation(const Identifier& name);
     void refreshByType(NodeType type);
     void dropObject(MetadataItem *object);
