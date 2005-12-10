@@ -57,22 +57,34 @@ void Identifier::setText(const wxString& source)
 //----------------------------------------------------------------------------
 void Identifier::setFromSql(const wxString& source)
 {
-    if (source.IsEmpty())
-        return;
-    wxString temp(source);          // remove the constness
-    temp.Trim(true);   // maybe these could be removed as parser is not going
-    temp.Trim(false);  // to send whitespace anyway
-    if (temp[0] == wxChar('\"'))
+    // const wxChar pointers to first and last characters
+    const wxChar* p = source.c_str();
+    const wxChar* q = p + source.Length() - 1;
+    // skip leading and trailing whitespace
+    while (q > p && wxIsspace(*p))
+        p++;
+    while (q > p && wxIsspace(*q))
+        q--;
+    if (p >= q)
     {
-        wxString::size_type p = temp.Length();
-        if (temp[p-1] == wxChar('\"'))
-            textM = temp.SubString(1, p-2);
-        else                    // a really strange occurence of identifier
-            textM = temp;     // starting with quote and not ending with it
-        textM.Replace(wxT("\"\""), wxT("\""));  // remove escapes for quotes
+        textM = wxEmptyString;
+        return;
     }
-    else
-        textM = temp.Upper();
+    // quoted identifier -> strip and unescape double quote characters
+    if (*p == '\"' && *q == '\"')
+    {
+        textM = wxString(p + 1, q - 1);
+        textM.Replace(wxT("\"\""), wxT("\""));
+        return;
+    }
+    // strings -> strip and unescape single quote characters
+    if (*p == '\'' && *q == '\'')
+    {
+        textM = wxString(p + 1, q - 1);
+        textM.Replace(wxT("\'\'"), wxT("\'"));
+        return;
+    }
+    textM = source.Upper();
 }
 //----------------------------------------------------------------------------
 bool Identifier::isQuoted(const wxString &s)
