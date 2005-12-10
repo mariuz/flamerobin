@@ -73,7 +73,9 @@ void Identifier::setFromSql(const wxString& source)
     // quoted identifier -> strip and unescape double quote characters
     if (*p == '\"' && *q == '\"')
     {
-        textM = wxString(p + 1, q - 1);
+        // NOTE: first parameter must point to first char, but second parameter
+        //       has to point to the char *after* the last char !!!
+        textM = wxString(p + 1, q);
         textM.Replace(wxT("\"\""), wxT("\""));
         return;
     }
