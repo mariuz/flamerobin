@@ -50,7 +50,7 @@
 //-----------------------------------------------------------------------------
 using namespace std;
 
-// #define USE_TOKENIZER
+#define USE_TOKENIZER
 //-----------------------------------------------------------------------------
 void Credentials::setCharset(wxString value)
 {
@@ -491,6 +491,23 @@ MetadataItem* Database::findByNameAndType(NodeType nt, wxString name)
     };
 }
 //-----------------------------------------------------------------------------
+Relation* Database::findRelation(const Identifier& name)
+{
+    for (MetadataCollection<Table>::iterator it = tablesM.begin();
+        it != tablesM.end(); it++)
+    {
+        if ((*it).getIdentifier().equals(name))
+            return &(*it);
+    }
+    for (MetadataCollection<View>::iterator it = viewsM.begin();
+        it != viewsM.end(); it++)
+    {
+        if ((*it).getIdentifier().equals(name))
+            return &(*it);
+    }
+    return 0;
+}
+//-----------------------------------------------------------------------------
 void Database::dropObject(MetadataItem* object)
 {
     object->drop();     // alert the children if any
@@ -550,20 +567,14 @@ inline void getCleanName(std::stringstream& strstrm, std::string& name)
     name = wx2std(i.get());
 }
 //-----------------------------------------------------------------------------
-//! reads a DDL statement and does accordingly
-
+//! reads a DDL statement and acts accordingly
+//
 // drop [object_type] [name]
 // alter [object_type] [name]
 // create [object_type] [name]
 // alter table [name] alter [column] type [domain or datatype]
 // declare external function [name]
 // set null flag via system tables update
-
-//! FIXME: This NEEDS to be rewritten to use the Identifier class
-//!        However, it would require a better tokenizer which would
-//!        support identifiers which are quoted and have space in the name
-//!        it can either strip quoted itself, or call Identifier::setFromSql
-//!        on the original string
 bool Database::parseCommitedSql(wxString sql)
 {
 #ifdef USE_TOKENIZER
@@ -602,7 +613,8 @@ bool Database::parseCommitedSql(wxString sql)
     // needs at least action
     if (tokens.size() < 1)
         return true;
-    size_t typeIndex = 1;
+    size_t idTokenIndex = tokens.size() - 1;
+    size_t typeTokenIndex = 1;
     // get action
     enum SqlAction {
         actNONE, actALTER, actCREATE, actCREATE_OR_ALTER, actDECLARE, actDROP,
@@ -624,24 +636,23 @@ bool Database::parseCommitedSql(wxString sql)
         case kwSET:
             action = actSET; break;
         case kwUPDATE:
+            // it's the only statement we care for which has implicit type
             action = actUPDATE; objectType = ntTable; break;
         default:
             return true;
     }
-    if (action == actNONE)
-        return false;
     // special handling for "CREATE OR ALTER"
     if (action == actCREATE && tokens.size() > 3
         && tokens[1] == kwOR && tokens[2] == kwALTER)
     {
         action = actCREATE_OR_ALTER;
-        typeIndex = 3;
+        typeTokenIndex = 3;
     }
 
     // get object type
-    while (objectType == ntUnknown && typeIndex < tokens.size())
+    while (objectType == ntUnknown && typeTokenIndex < tokens.size())
     {
-        switch (tokens[typeIndex])
+        switch (tokens[typeTokenIndex])
         {
             case kwDATABASE:
                 objectType = ntDatabase; break;
@@ -668,25 +679,24 @@ bool Database::parseCommitedSql(wxString sql)
             default:
                 // this will scan over things like "EXTERNAL", "UNIQUE",
                 // "ASCENDING", "STATISTICS" etc., until object type is found
-                typeIndex++;
+                typeTokenIndex++;
                 break;
         }
     }
     if (objectType == ntUnknown)
         return false;
+    MetadataItem* object = findByNameAndType(objectType, name.get());
 
     // TODO: check that there are no unwanted side-effects to this
     // SubjectLocker locker(this);
 
-    // handle "SET GENERATOR"
     if (action == actSET && objectType == ntGenerator)
     {
-        MetadataItem* m = findByNameAndType(ntGenerator, name.get());
-        if (Generator* g = dynamic_cast<Generator*>(m))
+        if (Generator* g = dynamic_cast<Generator*>(object))
             g->loadValue(true);
         return true;
     }
-    // handle "DROP INDEX"
+
     if (action == actDROP && objectType == ntIndex)
     {
         // We cannot know which table is affected, so the only solution is to
@@ -696,6 +706,7 @@ bool Database::parseCommitedSql(wxString sql)
             (*it).invalidateIndices();
         return true;
     }
+
     // handle "CREATE INDEX", "ALTER INDEX" and "SET STATISTICS INDEX"
     if (objectType == ntIndex 
         && (action == actCREATE || action == actALTER || action == actSET))
@@ -714,7 +725,7 @@ bool Database::parseCommitedSql(wxString sql)
     // map "CREATE OR ALTER" and "RECREATE" to correct action
     if (action == actCREATE_OR_ALTER || action == actRECREATE) 
     {
-        if (findByNameAndType(objectType, name.get()))
+        if (object)
             action = actALTER;
         else
             action = actCREATE;
@@ -746,19 +757,20 @@ bool Database::parseCommitedSql(wxString sql)
         tokenizer.nextToken();
     }
 
-    // convert change in NULL flag to "ALTER TABLE"
+    // check for "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG"
+    // convert this change in NULL flag to "ALTER TABLE" and act accordingly
     if (action == actUPDATE && name.equals(wxT("RDB$RELATION_FIELDS")) 
-        && tokens.size() >= 2 && tokens[0] == kwSET 
-        && tokens[1] == tkIDENTIFIER)
+        && tokens.size() >= 4 && tokens[2] == kwSET 
+        && tokens[3] == tkIDENTIFIER)
     {
         Identifier id;
-        id.setFromSql(tokenStrings[1]);
+        id.setFromSql(tokenStrings[3]);
         if (!id.equals(wxT("RDB$NULL_FLAG")))
             return true;
 
         action = actALTER;
         objectType = ntTable;
-        bool tableFound = false;
+        object = 0;
         // find "RDB$RELATION_NAME" in map
         for (map<int, wxString>::const_iterator mit = tokenStrings.begin();
             mit != tokenStrings.end(); mit++)
@@ -769,95 +781,64 @@ bool Database::parseCommitedSql(wxString sql)
                 if (tokens.size() > i + 2 && tokens[i + 1] == tkEQUALS
                     && tokens[i + 2] == tkSTRING)
                 {
-                    name.setFromSqlString(tokenStrings[i + 2]);
-                    tableFound = true;
+                    name.setFromSql(tokenStrings[i + 2]);
+                    object = findByNameAndType(ntTable, name.get());
                     break;
                 }
             }
         }
-        if (!tableFound)
+        if (!object)
             return true;
     }
 
-    NodeType t = getTypeByName(name.get());
-    // handle "CREATE" and "DECLARE"
     if (action == actCREATE || action == actDECLARE)
     {
-        if (addObject(t, name.get())) // inserts object into collection
-            refreshByType(t);
+        if (addObject(objectType, name.get())) // inserts object into collection
+            refreshByType(objectType);
         // when trigger created -> force relations to update their property pages
-        if (objectType == ntTrigger)
+        if (objectType == ntTrigger && tokens.size() > idTokenIndex + 2
+            && tokens[idTokenIndex + 1] == kwFOR 
+            && tokens[idTokenIndex + 2] == tkIDENTIFIER)
         {
-/*
-            std::string relation;
-            strstrm >> relation;    // FOR
-            getCleanName(strstrm, relation);
-            Relation* m = dynamic_cast<Relation*>(findByNameAndType(ntTable, std2wx(relation)));
-            if (!m)
-            {
-                m = dynamic_cast<Relation*>(findByNameAndType(ntView, std2wx(relation)));
-                if (!m)
-                    return true;
-            }
-            m->notifyObservers();
-*/
+            Identifier id;
+            id.setFromSql(tokenStrings[idTokenIndex + 2]);
+            Relation* r = findRelation(id);
+            if (r)
+                r->notifyObservers();
         }
-
         return true;
     }
 
-
-/* TODO
-
-    // process the action...
-    if (action == "CREATE" || action == "DECLARE")
+    if (!object)
+        return true;
+    if (action == actDROP)
     {
-        if (addObject(t, std2wx(name)))     // inserts object into collection
-            refreshByType(t);
-        if (object_type == "TRIGGER")       // new trigger created, alert tables/views
-        {                                   // to update their property pages
-            std::string relation;
-            strstrm >> relation;    // FOR
-            getCleanName(strstrm, relation);
-            Relation* m = dynamic_cast<Relation*>(findByNameAndType(ntTable, std2wx(relation)));
-            if (!m)
-            {
-                m = dynamic_cast<Relation*>(findByNameAndType(ntView, std2wx(relation)));
-                if (!m)
-                    return true;
-            }
-            m->notifyObservers();
-        }
-    }
-    else if (action == "DROP" || action == "ALTER")
-    {
-        MetadataItem* object = findByNameAndType(t, std2wx(name));
-        if (!object)
-            return true;
-
-        if (action == "DROP")
+        dropObject(object);
+        if (objectType == ntTable || objectType == ntView)
         {
-            dropObject(object);
-            if (t == ntTable || t == ntView)    // remove related triggers
+            MetadataCollection<Trigger>::iterator it = triggersM.begin();
+            while (it != triggersM.end())
             {
-                while (true)
+                wxString relName;
+                if (!(*it).getRelation(relName) || name.equals(relName))
                 {
-                    Trigger* todrop = 0;
-                    for (MetadataCollection<Trigger>::iterator it = triggersM.begin(); it != triggersM.end(); ++it)
-                    {
-                        wxString relname;            // trigger already gone => cannot fetch relation name
-                        if (!(*it).getRelation(relname) || relname == std2wx(name))
-                            todrop = &(*it);
-                    }
-                    if (todrop)
-                        dropObject(todrop);
-                    else
-                        break;
+                    dropObject(&(*it));
+                    it = triggersM.begin();
                 }
+                else
+                    it++;
             }
         }
-        else                        // ALTER
-        {
+        return true;
+    }
+
+    if (action == actALTER)
+    {
+/* TODO
+        // handle "ALTER TABLE xyz ALTER [COLUMN] fgh TYPE {domain or datatype}
+        if (objectType == ntTable && 
+
+
             if (t == ntTable)       // ALTER TABLE xyz ALTER field TYPE {domain or datatype}
             {
                 std::string alter, field_name, maybe_type, domain_or_datatype;
@@ -948,7 +929,7 @@ bool Database::parseCommitedSql(wxString sql)
         }
     }
 */
-
+    }
     return true;
 #else
     sql += wxT("\n");    // if last line starts with --

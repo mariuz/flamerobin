@@ -125,6 +125,7 @@ public:
 
     MetadataItem *findByNameAndType(NodeType nt, wxString name);
     MetadataItem *findByName(wxString name);
+    Relation* findRelation(const Identifier& name);
     void refreshByType(NodeType type);
     void dropObject(MetadataItem *object);
     bool addObject(NodeType type, wxString name);
