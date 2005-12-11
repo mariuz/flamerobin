@@ -294,9 +294,8 @@ wxString Procedure::getDefinition()
 //-----------------------------------------------------------------------------
 wxString Procedure::getAlterSql()
 {
-    if (!parametersLoadedM)
-        if (loadParameters())
-            return lastError().getMessage();
+    if (!parametersLoadedM && !loadParameters())
+        return lastError().getMessage();
 
     wxString source;
     if (!getSource(source))
