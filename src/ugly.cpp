@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -47,6 +47,10 @@
 //! converts wxString to std::string
 std::string wx2std(const wxString& input)
 {
+    if (input.IsEmpty())
+        return "";
+    return std::string(input.mb_str(*wxConvCurrent));
+/*
 #if (wxUSE_UNICODE)
 	size_t size = input.Length() + 1;
 	char* buffer = new char[size];
@@ -59,11 +63,16 @@ std::string wx2std(const wxString& input)
 #else
 	return std::string(input.c_str());
 #endif
+*/
 }
 //-----------------------------------------------------------------------------
 //! converts std:string to wxString
 wxString std2wx(std::string input)
 {
+    if (input == "")
+        return wxEmptyString;
+    return wxString(input.c_str(), *wxConvCurrent);
+/*
 #if (wxUSE_UNICODE)
 	size_t size = input.size() + 1;
 	wchar_t *buffer = new wchar_t[size*4];	// to make sure if we have 32-bit characters
@@ -76,6 +85,7 @@ wxString std2wx(std::string input)
 #else
 	return wxString(input.c_str());
 #endif
+*/
 }
 //-----------------------------------------------------------------------------
 //! return wxString for comparison, used to limit features to certain platforms
