@@ -70,20 +70,14 @@ void Identifier::setFromSql(const wxString& source)
         textM = wxEmptyString;
         return;
     }
-    // quoted identifier -> strip and unescape double quote characters
-    if (*p == '\"' && *q == '\"')
+    // strings/quoted identifier -> strip and unescape single/double quotes
+    if (*q == *p && (*p == '\"' || *p == '\''))
     {
         // NOTE: first parameter must point to first char, but second parameter
         //       has to point to the char *after* the last char !!!
         textM = wxString(p + 1, q);
-        textM.Replace(wxT("\"\""), wxT("\""));
-        return;
-    }
-    // strings -> strip and unescape single quote characters
-    if (*p == '\'' && *q == '\'')
-    {
-        textM = wxString(p + 1, q - 1);
-        textM.Replace(wxT("\'\'"), wxT("\'"));
+        wxString escapedChar(p, 1);
+        textM.Replace(escapedChar + escapedChar, escapedChar);
         return;
     }
     textM = source.Upper();
