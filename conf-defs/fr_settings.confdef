@@ -192,7 +192,7 @@
         </node>
         <node>
             <caption>Statement History</caption>
-            <description>History of executed SQL statements</description>
+            <description>History of Executed SQL Statements</description>
             <image>0</image>
             <setting type="radiobox">
                 <caption>Share SQL statement history</caption>
