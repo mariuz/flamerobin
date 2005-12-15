@@ -56,12 +56,27 @@ Table::Table()
     indicesLoadedM = false;
 }
 //-----------------------------------------------------------------------------
-void Table::invalidateIndices()
+void Table::invalidateIndices(const wxString& forIndex)
 {
     if (indicesLoadedM)
     {
-        indicesLoadedM = false;
-        notifyObservers();
+        bool hasit = false;
+        if (forIndex.IsEmpty())
+            hasit = true;
+        else
+        {
+            for (std::vector<Index>::iterator it = indicesM.begin(); 
+                it != indicesM.end(); ++it)
+            {
+                if ((*it).getName_() == forIndex)
+                    hasit = true;
+            }
+        }
+        if (hasit)
+        {
+            indicesLoadedM = false;
+            notifyObservers();
+        }
     }
 }
 //-----------------------------------------------------------------------------

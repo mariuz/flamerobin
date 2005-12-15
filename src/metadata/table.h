@@ -66,7 +66,7 @@ public:
     virtual wxString getCreateSqlTemplate() const;
 
     virtual bool loadColumns();         // update the keys info too
-    void invalidateIndices();
+    void invalidateIndices(const wxString& forIndex = wxEmptyString);
 
     ColumnConstraint *getPrimaryKey();
     std::vector<ForeignKey> *getForeignKeys();

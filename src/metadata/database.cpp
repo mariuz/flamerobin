@@ -709,11 +709,10 @@ bool Database::parseCommitedSql(wxString sql)
 
     if (action == actDROP && objectType == ntIndex)
     {
-        // We cannot know which table is affected, so the only solution is to
-        // have all tables reload their indexes
+        // the affected table will recognize its index (if loaded)
         MetadataCollection<Table>::iterator it;
         for (it = tablesM.begin(); it != tablesM.end(); ++it)
-            (*it).invalidateIndices();
+            (*it).invalidateIndices(name.get());
         return true;
     }
 
