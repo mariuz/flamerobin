@@ -233,7 +233,7 @@ bool ReorderFieldsHandler::handleURI(URI& uri)
     //       frame has to happen outside wxDialog::ShowModal(), because it
     //       does at the end re-focus the last focused control, raising
     //       the parent frame over the newly created sql execution frame
-    if (rfd.ShowModal())
+    if (rfd.ShowModal() == wxID_OK)
     {
         // create ExecuteSqlFrame with option to close at once
         ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1, rfd.GetTitle());
