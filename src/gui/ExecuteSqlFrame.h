@@ -79,23 +79,21 @@ class ExecuteSqlFrame: public BaseFrame, public Observer {
 public:
     void setDatabase(Database *db);
     void showProperties(wxString objectName);
-
-    // begin wxGlade: ExecuteSqlFrame::ids
     enum {
         ID_button_new = 101,
-        ID_button_load = 102,
-        ID_button_save = 103,
-        ID_button_prev = 109,
-        ID_button_next = 110,
-        ID_button_execute = 104,
-        ID_button_commit = 105,
-        ID_button_rollback = 106,
-        ID_button_toggle = 107,
-        ID_button_plan = 108,
-        ID_grid_data = 200,
-        ID_stc_sql = 201
+        ID_button_load,
+        ID_button_save,
+        ID_button_saveas,
+        ID_button_prev,
+        ID_button_next,
+        ID_button_execute,
+        ID_button_commit,
+        ID_button_rollback,
+        ID_button_toggle,
+        ID_button_plan,
+        ID_grid_data,
+        ID_stc_sql
     };
-    // end wxGlade
 
     // query parsing and execution
     void executeAllStatements(bool autoExecute = false);
@@ -109,6 +107,7 @@ public:
 
 private:
     std::vector<executedStatement> executedStatementsM;
+    wxString filenameM;
 
     typedef enum { ttNormal, ttSql, ttError } TextType;
     void log(wxString s, TextType type = ttNormal);     // write messages to textbox
@@ -140,6 +139,7 @@ private:
     void OnButtonNewClick(wxCommandEvent &event);
     void OnButtonLoadClick(wxCommandEvent &event);
     void OnButtonSaveClick(wxCommandEvent &event);
+    void OnButtonSaveAsClick(wxCommandEvent &event);
     void OnButtonPrevClick(wxCommandEvent &event);
     void OnButtonNextClick(wxCommandEvent &event);
     void OnButtonExecuteClick(wxCommandEvent &event);
@@ -165,6 +165,7 @@ protected:
     wxBitmapButton* button_new;
     wxBitmapButton* button_load;
     wxBitmapButton* button_save;
+    wxBitmapButton* button_saveas;
     wxBitmapButton* button_prev;
     wxBitmapButton* button_next;
     wxButton* button_execute;
