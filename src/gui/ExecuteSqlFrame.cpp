@@ -184,6 +184,7 @@ namespace sql_icons {
 #include "new.xpm"
 #include "load.xpm"
 #include "save.xpm"
+#include "saveas.xpm"
 #include "sqlicon.xpm"
 #include "left.xpm"
 #include "right.xpm"
@@ -469,6 +470,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title, const
     button_new = new wxBitmapButton(panel_contents, ID_button_new, wxBitmap(sql_icons::new_xpm));
     button_load = new wxBitmapButton(panel_contents, ID_button_load, wxBitmap(sql_icons::load_xpm));
     button_save = new wxBitmapButton(panel_contents, ID_button_save, wxBitmap(sql_icons::save_xpm));
+    button_saveas = new wxBitmapButton(panel_contents, ID_button_saveas, wxBitmap(sql_icons::saveas_xpm));
     button_prev = new wxBitmapButton(panel_contents, ID_button_prev, wxBitmap(sql_icons::left_xpm));
     button_next = new wxBitmapButton(panel_contents, ID_button_next, wxBitmap(sql_icons::right_xpm));
     button_execute = new wxButton(panel_contents, ID_button_execute, _("Execute (F4)"));
@@ -516,6 +518,7 @@ void ExecuteSqlFrame::set_properties()
     button_new->SetToolTip(_("New window"));
     button_load->SetToolTip(_("Load"));
     button_save->SetToolTip(_("Save"));
+    button_saveas->SetToolTip(_("Save"));
     button_prev->SetToolTip(_("Previous"));
     button_next->SetToolTip(_("Next"));
     button_execute->SetToolTip(_("F4 - Execute SQL statement"));
@@ -548,6 +551,7 @@ void ExecuteSqlFrame::do_layout()
     sizer_3->Add(button_new, 0, wxALL, 1);
     sizer_3->Add(button_load, 0, wxALL, 1);
     sizer_3->Add(button_save, 0, wxALL, 1);
+    sizer_3->Add(button_saveas, 0, wxALL, 1);
     sizer_3->Add(button_prev, 0, wxALL, 1);
     sizer_3->Add(button_next, 0, wxALL, 1);
     sizer_3->Add(10, 5, 0, 0, 0);
@@ -620,6 +624,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_new, ExecuteSqlFrame::OnButtonNewClick)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_load, ExecuteSqlFrame::OnButtonLoadClick)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_save, ExecuteSqlFrame::OnButtonSaveClick)
+    EVT_BUTTON(ExecuteSqlFrame::ID_button_saveas, ExecuteSqlFrame::OnButtonSaveAsClick)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_prev, ExecuteSqlFrame::OnButtonPrevClick)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_next, ExecuteSqlFrame::OnButtonNextClick)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_execute, ExecuteSqlFrame::OnButtonExecuteClick)
@@ -877,10 +882,11 @@ void ExecuteSqlFrame::OnButtonLoadClick(wxCommandEvent& WXUNUSED(event))
     if (wxID_OK != fd.ShowModal())
         return;
 
-    styled_text_ctrl_sql->LoadFile(fd.GetPath());
+    if (styled_text_ctrl_sql->LoadFile(fd.GetPath()))
+	    filenameM = fd.GetPath();
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnButtonSaveClick(wxCommandEvent& WXUNUSED(event))
+void ExecuteSqlFrame::OnButtonSaveAsClick(wxCommandEvent& WXUNUSED(event))
 {
     wxFileDialog fd(this, _("Select file to save"), wxT(""), wxT(""),
         _("SQL Scripts (*.sql)|*.sql|All files (*.*)|*.*"),
@@ -889,8 +895,20 @@ void ExecuteSqlFrame::OnButtonSaveClick(wxCommandEvent& WXUNUSED(event))
     if (wxID_OK != fd.ShowModal())
         return;
 
+	filenameM = fd.GetPath();
     styled_text_ctrl_sql->SaveFile(fd.GetPath());
     statusbar_1->SetStatusText((_("File saved")), 2);
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnButtonSaveClick(wxCommandEvent& event)
+{
+	if (filenameM.IsEmpty())
+		OnButtonSaveAsClick(event);
+	else
+	{
+	    styled_text_ctrl_sql->SaveFile(filenameM);
+	    statusbar_1->SetStatusText((_("File saved")), 2);
+	}
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::updateHistoryButtons()
