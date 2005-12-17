@@ -116,8 +116,8 @@ void ContextMenuMetadataItemVisitor::visit(MetadataItem& metadataItem)
 void ContextMenuMetadataItemVisitor::visit(Procedure&)
 {
     menuM->Append(myTreeCtrl::Menu_ExecuteProcedure, _("&Execute..."));
-    addSelectMenu(false);    // false = not a table
-    addRegularObjectMenu();
+    addSelectMenu(false);       // false = not a table
+    addRegularObjectMenu(true);	// true = add Alter menu
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visit(Role&)
@@ -158,13 +158,13 @@ void ContextMenuMetadataItemVisitor::visit(Table&)
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visit(Trigger&)
 {
-    addRegularObjectMenu();
+    addRegularObjectMenu(true);	// true = add Alter menu
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visit(View&)
 {
-    addSelectMenu(false);    // false = not a table
-    addRegularObjectMenu();
+    addSelectMenu(false);    	// false = not a table
+    addRegularObjectMenu(true);	// true = add Alter menu
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::addSelectMenu(bool isTable)
@@ -181,9 +181,11 @@ void ContextMenuMetadataItemVisitor::addSelectMenu(bool isTable)
     }
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addRegularObjectMenu()
+void ContextMenuMetadataItemVisitor::addRegularObjectMenu(bool alter)
 {
-    menuM->Append(myTreeCtrl::Menu_DropObject, _("Dr&op"));
+    if (alter)
+	    menuM->Append(myTreeCtrl::Menu_AlterObject, _("&Alter..."));
+    menuM->Append(myTreeCtrl::Menu_DropObject, _("Dr&op..."));
     menuM->Append(myTreeCtrl::Menu_ObjectProperties, _("Show P&roperties"));
 }
 //-----------------------------------------------------------------------------

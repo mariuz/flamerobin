@@ -350,6 +350,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(myTreeCtrl::Menu_CreateObject, MainFrame::OnMenuCreateObject)
     EVT_MENU(myTreeCtrl::Menu_ObjectProperties, MainFrame::OnMenuObjectProperties)
     EVT_MENU(myTreeCtrl::Menu_DropObject, MainFrame::OnMenuDropObject)
+    EVT_MENU(myTreeCtrl::Menu_AlterObject, MainFrame::OnMenuAlterObject)
 
     EVT_MENU(myTreeCtrl::Menu_ToggleStatusBar, MainFrame::OnMenuToggleStatusBar)
     EVT_MENU(myTreeCtrl::Menu_ToggleSearchBar, MainFrame::OnMenuToggleSearchBar)
@@ -1591,6 +1592,30 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
     }
     else
         frameManager().showMetadataPropertyFrame(this, m);
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+	Database *db = tree_ctrl_1->getSelectedDatabase();
+    Procedure* p = dynamic_cast<Procedure *>(tree_ctrl_1->getSelectedMetadataItem());
+    View* v = dynamic_cast<View *>(tree_ctrl_1->getSelectedMetadataItem());
+    Trigger* t = dynamic_cast<Trigger *>(tree_ctrl_1->getSelectedMetadataItem());
+    if (!db || !p && !v && !t)
+        return;
+
+    ExecuteSqlFrame* eff = new ExecuteSqlFrame(this, -1, wxString(_("Alter object")));
+    eff->setDatabase(db);
+    if (p)
+	    eff->setSql(p->getAlterSql());
+	else if (v)
+	    eff->setSql(v->getAlterSql());
+	else if (t)
+	    eff->setSql(t->getAlterSql());
+    eff->Show();
 
     FR_CATCH
 }

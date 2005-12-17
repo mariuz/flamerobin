@@ -62,7 +62,7 @@ public:
         Menu_Insert, Menu_LoadColumnsInfo, Menu_ObjectProperties,
         Menu_DropObject, Menu_ShowGeneratorValue, Menu_SetGeneratorValue,
         Menu_AddColumn, Menu_CreateTriggerForTable, Menu_RestoreIntoNew,
-        Menu_MonitorEvents, Menu_GetServerVersion,
+        Menu_MonitorEvents, Menu_GetServerVersion, Menu_AlterObject,
 
         // view menu
         Menu_ToggleStatusBar, Menu_ToggleSearchBar, Menu_ToggleDisconnected,
