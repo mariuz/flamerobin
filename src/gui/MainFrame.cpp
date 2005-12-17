@@ -1162,6 +1162,8 @@ bool MainFrame::connect(bool warn)
         return false;
     }
 
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(db->getIBPPDatabase(), IBPP::amRead);
+    tr1->Start();
     NodeType types[9] = { ntTable, ntView, ntProcedure, ntTrigger, ntRole, ntDomain,
         ntFunction, ntGenerator, ntException };
     wxString names[9] = { _("Tables"), _("Views"), _("Procedures"), _("Triggers"), _("Roles"), _("Domains"),
@@ -1170,7 +1172,7 @@ bool MainFrame::connect(bool warn)
     for (int i = 0; i < 9; i++)
     {
         progress_dialog.Update(i + 1, wxString::Format(_("Loading %s."), names[i].c_str()));
-        if (!db->loadObjects(types[i]))
+        if (!db->loadObjects(types[i], tr1))
         {
             reportLastError(wxString::Format(_("Error Loading %s"),
                 names[i].c_str()));

@@ -118,7 +118,7 @@ public:
 
     wxString loadDomainNameForColumn(wxString table, wxString field);
     Domain* loadMissingDomain(wxString name);
-    bool loadObjects(NodeType type);
+    bool loadObjects(NodeType type, IBPP::Transaction& tr1);
     //wxString getLoadingSql(NodeType type);
 
     bool loadGeneratorValues();

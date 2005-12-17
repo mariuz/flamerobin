@@ -386,7 +386,7 @@ wxString Database::getTableForIndex(wxString indexName)
 }
 //-----------------------------------------------------------------------------
 //! load list of objects of type "type" from database, and fill the DBH
-bool Database::loadObjects(NodeType type)
+bool Database::loadObjects(NodeType type, IBPP::Transaction& tr1)
 {
     switch (type)
     {
@@ -405,8 +405,6 @@ bool Database::loadObjects(NodeType type)
     SubjectLocker locker(this);
     try
     {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
-        tr1->Start();
         IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
         st1->Prepare(wx2std(getLoadingSql(type)));
         st1->Execute();
