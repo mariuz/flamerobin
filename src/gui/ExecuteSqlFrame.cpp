@@ -1106,10 +1106,6 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
                     styled_text_ctrl_sql->SetFocus();
                     return false;
                 }
-                else if (autoCommitM)
-                {
-                    commitTransaction();
-                }
             }
         }
 
@@ -1223,6 +1219,8 @@ bool ExecuteSqlFrame::execute(wxString sql, bool prepareOnly)
             }
             executedStatementsM.push_back(executedStatement(sql, type));
             styled_text_ctrl_sql->SetFocus();
+            if (type == IBPP::stDDL && autoCommitM)
+                commitTransaction();
         }
     }
     catch (IBPP::Exception &e)
