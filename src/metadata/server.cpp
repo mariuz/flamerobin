@@ -154,7 +154,7 @@ bool Server::getVersion(wxString& version)
         {
             if ((*ci).isConnected())
 			{
-				if (!pd.Update(cnt++, _("Using username and password of: ") + 
+				if (!pd.Update(cnt++, _("Using password of: ") +
 					(*ci).getUsername() + wxT("@") + (*ci).getName_()))
 				{
 					skip = true;
@@ -174,7 +174,7 @@ bool Server::getVersion(wxString& version)
 	        {
 	            if (!(*ci).isConnected())
 	            {
-					if (!pd.Update(cnt++, _("Using credentials of: ") +
+					if (!pd.Update(cnt++, _("Using password of: ") +
 						(*ci).getUsername() + wxT("@") + (*ci).getName_()))
 						break;
 					if (getVersionString((*ci).getUsername(), (*ci).getPassword(), version))
