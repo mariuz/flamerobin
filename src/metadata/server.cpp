@@ -36,6 +36,8 @@
     #pragma hdrstop
 #endif
 
+#include <wx/progdlg.h>
+
 #include "config/Config.h"
 #include "core/Visitor.h"
 #include "metadata/MetadataItemVisitor.h"
@@ -118,7 +120,7 @@ bool Server::getVersionString(const wxString& username,
     const wxString& password, wxString& version)
 {
     IBPP::Service svc;
-    wxBusyCursor bc;
+    //wxBusyCursor bc;
     try
     {
         svc = IBPP::ServiceFactory(wx2std(getConnectionString()),
@@ -138,24 +140,48 @@ bool Server::getVersionString(const wxString& username,
 //-----------------------------------------------------------------------------
 bool Server::getVersion(wxString& version)
 {
+    wxProgressDialog pd(_("Connecting..."), wxEmptyString,
+		databasesM.getChildrenCount(),	NULL,
+		wxPD_CAN_ABORT |  wxPD_APP_MODAL);
+
     try // try to connect using credentials of some database
     {
         // try connected ones first
+		int cnt = 0;
+		bool skip = false;
         for (MetadataCollection<Database>::const_iterator ci =
             databasesM.begin(); ci != databasesM.end(); ++ci)
         {
-            if ((*ci).isConnected() && getVersionString((*ci).getUsername(),
-                (*ci).getPassword(), version))
-                return true;
+            if ((*ci).isConnected())
+			{
+				if (!pd.Update(cnt++, _("Using username and password of: ") + 
+					(*ci).getUsername() + wxT("@") + (*ci).getName_()))
+				{
+					skip = true;
+					break;
+				}
+
+				if (getVersionString((*ci).getUsername(), (*ci).getPassword(), version))
+	                return true;
+			}
         }
-        // it failed: try disconnected ones
-        for (MetadataCollection<Database>::const_iterator ci =
-            databasesM.begin(); ci != databasesM.end(); ++ci)
+
+        if (!skip)
         {
-            if (!(*ci).isConnected() && getVersionString((*ci).getUsername(),
-                (*ci).getPassword(), version))
-                return true;
-        }
+	        // it failed: try disconnected ones
+	        for (MetadataCollection<Database>::const_iterator ci =
+	            databasesM.begin(); ci != databasesM.end(); ++ci)
+	        {
+	            if (!(*ci).isConnected())
+	            {
+					if (!pd.Update(cnt++, _("Using credentials of: ") +
+						(*ci).getUsername() + wxT("@") + (*ci).getName_()))
+						break;
+					if (getVersionString((*ci).getUsername(), (*ci).getPassword(), version))
+		                return true;
+		        }
+	        }
+	    }
         wxMessageBox(_("None of the credentials of the databases could be used\nYou need to supply a valid username and password."),
             _("No usable database"), wxOK|wxICON_WARNING);
         wxString username = ::wxGetTextFromUser(_("Connecting to server"),
