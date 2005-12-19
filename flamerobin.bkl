@@ -328,6 +328,7 @@
         $(SOURCEDIR)/metadata/view.h
         $(SOURCEDIR)/sql/Identifier.h
         $(SOURCEDIR)/sql/SimpleParser.h
+        $(SOURCEDIR)/sql/SqlStatement.h
         $(SOURCEDIR)/sql/SqlTokenizer.h
         $(SOURCEDIR)/myTreeCtrl.h
         $(SOURCEDIR)/statementHistory.h
@@ -415,6 +416,7 @@
         $(SOURCEDIR)/objectdescriptionhandler.cpp
         $(SOURCEDIR)/sql/Identifier.cpp
         $(SOURCEDIR)/sql/SimpleParser.cpp
+        $(SOURCEDIR)/sql/SqlStatement.cpp
         $(SOURCEDIR)/sql/SqlTokenizer.cpp
         $(SOURCEDIR)/statementHistory.cpp
         $(SOURCEDIR)/styleguide.cpp

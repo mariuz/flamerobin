@@ -125,6 +125,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_objectdescriptionhandler.o \
 	flamerobin_Identifier.o \
 	flamerobin_SimpleParser.o \
+	flamerobin_SqlStatement.o \
 	flamerobin_SqlTokenizer.o \
 	flamerobin_statementHistory.o \
 	flamerobin_styleguide.o \
@@ -489,6 +490,9 @@ flamerobin_Identifier.o: $(srcdir)/src/sql/Identifier.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_SimpleParser.o: $(srcdir)/src/sql/SimpleParser.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/SimpleParser.cpp
+
+flamerobin_SqlStatement.o: $(srcdir)/src/sql/SqlStatement.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/SqlStatement.cpp
 
 flamerobin_SqlTokenizer.o: $(srcdir)/src/sql/SqlTokenizer.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/SqlTokenizer.cpp
