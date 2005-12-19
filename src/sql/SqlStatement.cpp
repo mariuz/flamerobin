@@ -46,9 +46,9 @@ void TokenList::add(const SqlTokenType& item)
 	tokensM.push_back(item);
 }
 //-----------------------------------------------------------------------------
-SqlTokenType& TokenList::operator[](const size_t& index)
+const SqlTokenType& TokenList::operator[](const size_t& index) const
 {
-	static SqlTokenType dummy = tkEOF;
+	static const SqlTokenType dummy = tkEOF;
 	if (index >= tokensM.size())
 		return dummy;
 	else

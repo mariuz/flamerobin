@@ -46,7 +46,7 @@ private:
 public:
 	size_t size() const;
 	void add(const SqlTokenType& item);
-	SqlTokenType& operator[](const size_t& index);
+	const SqlTokenType& operator[](const size_t& index) const;
 };
 //-----------------------------------------------------------------------------
 class SqlStatement
