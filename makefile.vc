@@ -143,6 +143,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Identifier.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleParser.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlStatement.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_styleguide.obj \
@@ -506,6 +507,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Identifier.obj: .\src\sql\Identifier.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleParser.obj: .\src\sql\SimpleParser.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlStatement.obj: .\src\sql\SqlStatement.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.obj: .\src\sql\SqlTokenizer.cpp
