@@ -43,7 +43,10 @@
 #include <fstream>
 #include <sstream>
 
-#include "Config.h"
+#include "config/Config.h"
+#ifdef HAVE_FRCONFIG_H
+    #include "frconfig.h"
+#endif
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 using namespace std;
@@ -60,7 +63,7 @@ Config::Config()
     : homePathM(wxT("")), userHomePathM(wxT("")), configM(0)
 {
 #ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
-    standardPathsM.SetInstallPrefix(wxT("/usr/local"));
+    standardPathsM.SetInstallPrefix(wxT(FR_INSTALL_PREFIX));
 #endif
     getConfig()->SetExpandEnvVars(false);
 }
