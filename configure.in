@@ -41,4 +41,20 @@ if test $GCC_PCH = 1 ; then
    CPPFLAGS="$CPPFLAGS -DWX_PRECOMP"
 fi
 
-AC_OUTPUT([Makefile])
+dnl -----------------------------------------------------------------------
+dnl install prefix
+dnl -----------------------------------------------------------------------
+
+if test "x$prefix" != "xNONE"; then
+    FR_PREFIX=$prefix
+else
+    FR_PREFIX=$ac_default_prefix
+fi
+
+AC_DEFINE_UNQUOTED(FR_INSTALL_PREFIX, "$FR_PREFIX")
+
+
+AC_CONFIG_HEADERS([ frconfig.h:frconfig.h.in ])
+AC_CONFIG_FILES([ Makefile ])
+
+AC_OUTPUT

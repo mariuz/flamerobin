@@ -56,9 +56,10 @@ IBPP_OBJECTS =  \
 	ibpp__spb.o \
 	ibpp__tpb.o
 IBPP_ODEP =  $(___pch_ibpp_ibpp_h_gch___depname)
-FLAMEROBIN_CXXFLAGS = $(__flamerobin_PCH_INC) $(____flamerobin_WXDEBUG_p) \
-	$(____flamerobin_DEBUGFLAG_p) -DIBPP_GCC $(__IBPPPLATFORMDEFINE_p) \
-	-I$(srcdir)/src -I$(srcdir)/src/ibpp -I$(srcdir)/res $(CPPFLAGS) $(CXXFLAGS)
+FLAMEROBIN_CXXFLAGS = $(__flamerobin_PCH_INC) -DHAVE_FRCONFIG_H \
+	$(____flamerobin_WXDEBUG_p) $(____flamerobin_DEBUGFLAG_p) -DIBPP_GCC \
+	$(__IBPPPLATFORMDEFINE_p) -I. -I$(srcdir)/src -I$(srcdir)/src/ibpp \
+	-I$(srcdir)/res $(CPPFLAGS) $(CXXFLAGS)
 FLAMEROBIN_OBJECTS =  \
 	flamerobin_addconstrainthandler.o \
 	flamerobin_Config.o \
@@ -522,7 +523,7 @@ flamerobin_urihandler.o: $(srcdir)/src/urihandler.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/urihandler.cpp
 
 flamerobin_flamerobin_rc.o: $(srcdir)/res/flamerobin.rc $(FLAMEROBIN_ODEP)
-	$(RESCOMP) -i$< -o$@  $(____flamerobin_WXDEBUG_p_2) $(____flamerobin_DEBUGFLAG_p_2) --define IBPP_GCC $(__IBPPPLATFORMDEFINE_p_3) --include-dir $(srcdir)/src --include-dir $(srcdir)/src/ibpp --include-dir $(srcdir)/res --include-dir $(WXDIR)/include
+	$(RESCOMP) -i$< -o$@ --define HAVE_FRCONFIG_H  $(____flamerobin_WXDEBUG_p_2) $(____flamerobin_DEBUGFLAG_p_2) --define IBPP_GCC $(__IBPPPLATFORMDEFINE_p_3) --include-dir . --include-dir $(srcdir)/src --include-dir $(srcdir)/src/ibpp --include-dir $(srcdir)/res --include-dir $(WXDIR)/include
 
 
 # Include dependency info, if present:

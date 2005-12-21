@@ -183,10 +183,11 @@
     <template id="wx">
         <if cond="FORMAT!='autoconf'">
             <set var="WXDIR">$(DOLLAR)(WXDIR)</set>
-        </if>
-        <if cond="FORMAT!='autoconf'">
             <include>$(WXDIR)/include</include>
             <include>$(WXDIR)/contrib/include</include>
+        </if>
+        <if cond="FORMAT=='autoconf'">
+            <define>HAVE_FRCONFIG_H</define>
         </if>
 
         <!-- Set debug info here -->
@@ -549,6 +550,7 @@
         <define>$(IBPPCOMPILERDEFINE)</define>
         <define>$(IBPPPLATFORMDEFINE)</define>
         <if cond="FORMAT=='autoconf'">
+            <include>.</include>
             <include>$(DOLLAR)(srcdir)/src</include>
             <include>$(DOLLAR)(srcdir)/src/ibpp</include>
             <include>$(DOLLAR)(srcdir)/res</include>

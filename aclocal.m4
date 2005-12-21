@@ -12,286 +12,13 @@
 # PARTICULAR PURPOSE.
 
 dnl ---------------------------------------------------------------------------
-dnl Macros for wxWindows detection. Typically used in configure.in as:
-dnl
-dnl     AC_ARG_ENABLE(...)
-dnl     AC_ARG_WITH(...)
-dnl        ...
-dnl     AM_OPTIONS_WXCONFIG
-dnl        ...
-dnl        ...
-dnl     AM_PATH_WXCONFIG(2.3.4, wxWin=1)
-dnl     if test "$wxWin" != 1; then
-dnl        AC_MSG_ERROR([
-dnl                wxWindows must be installed on your system
-dnl                but wx-config script couldn't be found.
-dnl
-dnl                Please check that wx-config is in path, the directory
-dnl                where wxWindows libraries are installed (returned by
-dnl                'wx-config --libs' command) is in LD_LIBRARY_PATH or
-dnl                equivalent variable and wxWindows version is 2.3.4 or above.
-dnl        ])
-dnl     fi
-dnl     CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
-dnl     CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
-dnl     CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
-dnl
-dnl     LDFLAGS="$LDFLAGS $WX_LIBS"
-dnl ---------------------------------------------------------------------------
-
-dnl ---------------------------------------------------------------------------
-dnl AM_OPTIONS_WXCONFIG
-dnl
-dnl adds support for --wx-prefix, --wx-exec-prefix, --with-wxdir and
-dnl --wx-config command line options
-dnl ---------------------------------------------------------------------------
-
-AC_DEFUN([AM_OPTIONS_WXCONFIG],
-[
-    AC_ARG_WITH(wxdir,
-                [  --with-wxdir=PATH       Use uninstalled version of wxWindows in PATH],
-                [ wx_config_name="$withval/wx-config"
-                  wx_config_args="--inplace"])
-    AC_ARG_WITH(wx-config,
-                [  --with-wx-config=CONFIG wx-config script to use (optional)],
-                wx_config_name="$withval" )
-    AC_ARG_WITH(wx-prefix,
-                [  --with-wx-prefix=PREFIX Prefix where wxWindows is installed (optional)],
-                wx_config_prefix="$withval", wx_config_prefix="")
-    AC_ARG_WITH(wx-exec-prefix,
-                [  --with-wx-exec-prefix=PREFIX
-                          Exec prefix where wxWindows is installed (optional)],
-                wx_config_exec_prefix="$withval", wx_config_exec_prefix="")
-])
-
-dnl ---------------------------------------------------------------------------
-dnl AM_PATH_WXCONFIG(VERSION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND
-dnl                  [, WX-LIBS [, ADDITIONAL-WX-CONFIG-FLAGS]]]])
-dnl
-dnl Test for wxWindows, and define WX_C*FLAGS, WX_LIBS and WX_LIBS_STATIC
-dnl (the latter is for static linking against wxWindows). Set WX_CONFIG_NAME
-dnl environment variable to override the default name of the wx-config script
-dnl to use. Set WX_CONFIG_PATH to specify the full path to wx-config - in this
-dnl case the macro won't even waste time on tests for its existence.
-dnl
-dnl Optional WX-LIBS argument contains comma- or space-separated list of
-dnl wxWindows libraries to link against (it may include contrib libraries). If
-dnl it is not specified then WX_LIBS and WX_LIBS_STATIC will contain flags to
-dnl link with all of the core wxWindows libraries.
-dnl
-dnl Optional ADDITIONAL-WX-CONFIG-FLAGS argument is appended to wx-config
-dnl invocation command in present. It can be used to fine-tune lookup of
-dnl best wxWidgets build available.
-dnl
-dnl Example use:
-dnl   AM_PATH_WXCONFIG([2.6.0], [wxWin=1], [wxWin=0], [html,core,net]
-dnl                    [--unicode --debug])
-dnl ---------------------------------------------------------------------------
-
-dnl
-dnl Get the cflags and libraries from the wx-config script
-dnl
-AC_DEFUN([AM_PATH_WXCONFIG],
-[
-  dnl do we have wx-config name: it can be wx-config or wxd-config or ...
-  if test x${WX_CONFIG_NAME+set} != xset ; then
-     WX_CONFIG_NAME=wx-config
-  fi
-
-  if test "x$wx_config_name" != x ; then
-     WX_CONFIG_NAME="$wx_config_name"
-  fi
-
-  dnl deal with optional prefixes
-  if test x$wx_config_exec_prefix != x ; then
-     wx_config_args="$wx_config_args --exec-prefix=$wx_config_exec_prefix"
-     WX_LOOKUP_PATH="$wx_config_exec_prefix/bin"
-  fi
-  if test x$wx_config_prefix != x ; then
-     wx_config_args="$wx_config_args --prefix=$wx_config_prefix"
-     WX_LOOKUP_PATH="$WX_LOOKUP_PATH:$wx_config_prefix/bin"
-  fi
-  if test "$cross_compiling" = "yes"; then
-     wx_config_args="$wx_config_args --host=$host_alias"
-  fi
-
-  dnl don't search the PATH if WX_CONFIG_NAME is absolute filename
-  if test -x "$WX_CONFIG_NAME" ; then
-     AC_MSG_CHECKING(for wx-config)
-     WX_CONFIG_PATH="$WX_CONFIG_NAME"
-     AC_MSG_RESULT($WX_CONFIG_PATH)
-  else
-     AC_PATH_PROG(WX_CONFIG_PATH, $WX_CONFIG_NAME, no, "$WX_LOOKUP_PATH:$PATH")
-  fi
-
-  if test "$WX_CONFIG_PATH" != "no" ; then
-    WX_VERSION=""
-
-    min_wx_version=ifelse([$1], ,2.2.1,$1)
-    if test -z "$5" ; then
-      AC_MSG_CHECKING([for wxWindows version >= $min_wx_version])
-    else
-      AC_MSG_CHECKING([for wxWindows version >= $min_wx_version ($5)])
-    fi
-
-    WX_CONFIG_WITH_ARGS="$WX_CONFIG_PATH $wx_config_args $5 $4"
-
-    WX_VERSION=`$WX_CONFIG_WITH_ARGS --version 2>/dev/null`
-    wx_config_major_version=`echo $WX_VERSION | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
-    wx_config_minor_version=`echo $WX_VERSION | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
-    wx_config_micro_version=`echo $WX_VERSION | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
-
-    wx_requested_major_version=`echo $min_wx_version | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
-    wx_requested_minor_version=`echo $min_wx_version | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
-    wx_requested_micro_version=`echo $min_wx_version | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
-
-    wx_ver_ok=""
-    if test "x$WX_VERSION" != x ; then
-      if test $wx_config_major_version -gt $wx_requested_major_version; then
-        wx_ver_ok=yes
-      else
-        if test $wx_config_major_version -eq $wx_requested_major_version; then
-           if test $wx_config_minor_version -gt $wx_requested_minor_version; then
-              wx_ver_ok=yes
-           else
-              if test $wx_config_minor_version -eq $wx_requested_minor_version; then
-                 if test $wx_config_micro_version -ge $wx_requested_micro_version; then
-                    wx_ver_ok=yes
-                 fi
-              fi
-           fi
-        fi
-      fi
-    fi
-
-    if test -n "$wx_ver_ok"; then
-
-      AC_MSG_RESULT(yes (version $WX_VERSION))
-      WX_LIBS=`$WX_CONFIG_WITH_ARGS --libs`
-
-      dnl is this even still appropriate?  --static is a real option now
-      dnl and WX_CONFIG_WITH_ARGS is likely to contain it if that is
-      dnl what the user actually wants, making this redundant at best.
-      dnl For now keep it in case anyone actually used it in the past.
-      AC_MSG_CHECKING([for wxWindows static library])
-      WX_LIBS_STATIC=`$WX_CONFIG_WITH_ARGS --static --libs 2>/dev/null`
-      if test "x$WX_LIBS_STATIC" = "x"; then
-        AC_MSG_RESULT(no)
-      else
-        AC_MSG_RESULT(yes)
-      fi
-
-      dnl starting with version 2.2.6 wx-config has --cppflags argument
-      wx_has_cppflags=""
-      if test $wx_config_major_version -gt 2; then
-        wx_has_cppflags=yes
-      else
-        if test $wx_config_major_version -eq 2; then
-           if test $wx_config_minor_version -gt 2; then
-              wx_has_cppflags=yes
-           else
-              if test $wx_config_minor_version -eq 2; then
-                 if test $wx_config_micro_version -ge 6; then
-                    wx_has_cppflags=yes
-                 fi
-              fi
-           fi
-        fi
-      fi
-
-      if test "x$wx_has_cppflags" = x ; then
-         dnl no choice but to define all flags like CFLAGS
-         WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags`
-         WX_CPPFLAGS=$WX_CFLAGS
-         WX_CXXFLAGS=$WX_CFLAGS
-
-         WX_CFLAGS_ONLY=$WX_CFLAGS
-         WX_CXXFLAGS_ONLY=$WX_CFLAGS
-      else
-         dnl we have CPPFLAGS included in CFLAGS included in CXXFLAGS
-         WX_CPPFLAGS=`$WX_CONFIG_WITH_ARGS --cppflags`
-         WX_CXXFLAGS=`$WX_CONFIG_WITH_ARGS --cxxflags`
-         WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags`
-
-         WX_CFLAGS_ONLY=`echo $WX_CFLAGS | sed "s@^$WX_CPPFLAGS *@@"`
-         WX_CXXFLAGS_ONLY=`echo $WX_CXXFLAGS | sed "s@^$WX_CFLAGS *@@"`
-      fi
-
-      ifelse([$2], , :, [$2])
-
-    else
-
-       if test "x$WX_VERSION" = x; then
-          dnl no wx-config at all
-          AC_MSG_RESULT(no)
-       else
-          AC_MSG_RESULT(no (version $WX_VERSION is not new enough))
-       fi
-
-       WX_CFLAGS=""
-       WX_CPPFLAGS=""
-       WX_CXXFLAGS=""
-       WX_LIBS=""
-       WX_LIBS_STATIC=""
-       ifelse([$3], , :, [$3])
-
-    fi
-  fi
-
-  AC_SUBST(WX_CPPFLAGS)
-  AC_SUBST(WX_CFLAGS)
-  AC_SUBST(WX_CXXFLAGS)
-  AC_SUBST(WX_CFLAGS_ONLY)
-  AC_SUBST(WX_CXXFLAGS_ONLY)
-  AC_SUBST(WX_LIBS)
-  AC_SUBST(WX_LIBS_STATIC)
-  AC_SUBST(WX_VERSION)
-])
-
-dnl ---------------------------------------------------------------------------
 dnl Support macros for makefiles generated by BAKEFILE.
 dnl ---------------------------------------------------------------------------
 
 dnl Lots of compiler & linker detection code contained here was taken from
 dnl wxWindows configure.in script (see http://www.wxwindows.org)
 
-dnl Based on autoconf _AC_LANG_COMPILER_GNU
-AC_DEFUN([_AC_BAKEFILE_LANG_COMPILER_MWERKS],
-[AC_CACHE_CHECK([whether we are using the Metrowerks _AC_LANG compiler],
-    [bakefile_cv_[]_AC_LANG_ABBREV[]_compiler_mwerks],
-    [AC_TRY_COMPILE([],[#ifndef __MWERKS__
-       choke me
-#endif
-],
-        [bakefile_compiler_mwerks=yes],
-        [bakefile_compiler_mwerks=no])
-    bakefile_cv_[]_AC_LANG_ABBREV[]_compiler_mwerks=$bakefile_compiler_mwerks
-    ])
-])
 
-dnl Loosely based on autoconf AC_PROG_CC
-dnl TODO: Maybe this should wrap the call to AC_PROG_CC and be used instead.
-AC_DEFUN([AC_BAKEFILE_PROG_MWCC],
-[AC_LANG_PUSH(C)
-_AC_BAKEFILE_LANG_COMPILER_MWERKS
-MWCC=`test $bakefile_compiler_mwerks = yes && echo yes`
-AC_LANG_POP(C)
-])
-
-dnl Loosely based on autoconf AC_PROG_CXX
-dnl TODO: Maybe this should wrap the call to AC_PROG_CXX and be used instead.
-AC_DEFUN([AC_BAKEFILE_PROG_MWCXX],
-[AC_LANG_PUSH(C++)
-_AC_BAKEFILE_LANG_COMPILER_MWERKS
-MWCXX=`test $bakefile_compiler_mwerks = yes && echo yes`
-AC_LANG_POP(C++)
-])
 
 dnl ---------------------------------------------------------------------------
 dnl AC_BAKEFILE_GNUMAKE
@@ -339,7 +66,7 @@ AC_DEFUN([AC_BAKEFILE_PLATFORM],
 
     if test "x$BAKEFILE_FORCE_PLATFORM" = "x"; then 
         case "${BAKEFILE_HOST}" in
-            *-*-cygwin* | *-*-mingw32* )
+            *-*-mingw32* )
                 PLATFORM_WIN32=1
             ;;
             *-pc-msdosdjgpp )
@@ -457,6 +184,7 @@ AC_DEFUN([AC_BAKEFILE_SUFFIXES],
     DLLPREFIX="lib"
     DLLPREFIX_MODULE=""
     DLLIMP_SUFFIX=""
+    dlldir="$libdir"
     
     case "${BAKEFILE_HOST}" in
         *-hp-hpux* )
@@ -472,16 +200,26 @@ AC_DEFUN([AC_BAKEFILE_SUFFIXES],
             SO_SUFFIX="a"
             SO_SUFFIX_MODULE="a"
         ;;
-        *-*-cygwin* | *-*-mingw32* )
+        *-*-cygwin* )
+            SO_SUFFIX="dll"
+            SO_SUFFIX_MODULE="dll"
+            DLLIMP_SUFFIX="dll.a"
+            EXEEXT=".exe"
+            DLLPREFIX="cyg"
+            dlldir="$bindir"
+        ;;
+        *-*-mingw32* )
             SO_SUFFIX="dll"
             SO_SUFFIX_MODULE="dll"
             DLLIMP_SUFFIX="dll.a"
             EXEEXT=".exe"
             DLLPREFIX=""
+            dlldir="$bindir"
         ;;
         *-pc-msdosdjgpp )
             EXEEXT=".exe"
             DLLPREFIX=""
+            dlldir="$bindir"
         ;;
         *-pc-os2_emx | *-pc-os2-emx )
             SO_SUFFIX="dll"
@@ -491,6 +229,7 @@ AC_DEFUN([AC_BAKEFILE_SUFFIXES],
             DLLPREFIX=""
             LIBPREFIX=""
             LIBEXT=".$OS2_LIBEXT"
+            dlldir="$bindir"
         ;;
         powerpc-*-darwin* )
             SO_SUFFIX="dylib"
@@ -510,6 +249,7 @@ AC_DEFUN([AC_BAKEFILE_SUFFIXES],
     AC_SUBST(LIBEXT)
     AC_SUBST(DLLPREFIX)
     AC_SUBST(DLLPREFIX_MODULE)
+    AC_SUBST(dlldir)
 ])
 
 
@@ -532,6 +272,7 @@ AC_DEFUN([AC_BAKEFILE_SHARED_LD],
     dnl Defaults for GCC and ELF .so shared libs:
     SHARED_LD_CC="\$(CC) -shared ${PIC_FLAG} -o"
     SHARED_LD_CXX="\$(CXX) -shared ${PIC_FLAG} -o"
+    WINDOWS_IMPLIB=0
 
     case "${BAKEFILE_HOST}" in
       *-hp-hpux* )
@@ -651,6 +392,7 @@ AC_DEFUN([AC_BAKEFILE_SHARED_LD],
         PIC_FLAG=""
         SHARED_LD_CC="\$(CC) -shared -o"
         SHARED_LD_CXX="\$(CXX) -shared -o"
+        WINDOWS_IMPLIB=1
       ;;
 
       *-pc-os2_emx | *-pc-os2-emx )
@@ -666,7 +408,8 @@ AC_DEFUN([AC_BAKEFILE_SHARED_LD],
       *-*-sunos4* | \
       *-*-osf* | \
       *-*-dgux5* | \
-      *-*-sysv5* )
+      *-*-sysv5* | \
+      *-pc-msdosdjgpp )
         dnl defaults are ok
       ;;
 
@@ -690,6 +433,7 @@ AC_DEFUN([AC_BAKEFILE_SHARED_LD],
     AC_SUBST(SHARED_LD_MODULE_CC)
     AC_SUBST(SHARED_LD_MODULE_CXX)
     AC_SUBST(PIC_FLAG)
+    AC_SUBST(WINDOWS_IMPLIB)
 ])
 
 
@@ -704,6 +448,7 @@ AC_DEFUN([AC_BAKEFILE_SHARED_VERSIONS],
     USE_SOVERSION=0
     USE_SOVERLINUX=0
     USE_SOVERSOLARIS=0
+    USE_SOVERCYGWIN=0
     USE_SOSYMLINKS=0
     USE_MACVERSION=0
     SONAME_FLAG=
@@ -727,12 +472,18 @@ AC_DEFUN([AC_BAKEFILE_SHARED_VERSIONS],
         USE_MACVERSION=1
         USE_SOVERSION=1
         USE_SOSYMLINKS=1
-      ;;      
+      ;;
+
+      *-*-cygwin* )
+        USE_SOVERSION=1
+        USE_SOVERCYGWIN=1
+      ;;
     esac
 
     AC_SUBST(USE_SOVERSION)
     AC_SUBST(USE_SOVERLINUX)
     AC_SUBST(USE_SOVERSOLARIS)
+    AC_SUBST(USE_SOVERCYGWIN)
     AC_SUBST(USE_MACVERSION)
     AC_SUBST(USE_SOSYMLINKS)
     AC_SUBST(SONAME_FLAG)
@@ -769,6 +520,11 @@ AC_DEFUN([AC_BAKEFILE_DEPS],
         DEPS_TRACKING=1
         DEPSFLAG_MWCC="-MM"
         AC_MSG_RESULT([mwcc])
+    elif test "x$SUNCC" = "xyes"; then
+        DEPSMODE=suncc
+        DEPS_TRACKING=1
+        DEPSFLAG_SUNCC="-xM1"
+        AC_MSG_RESULT([suncc])
     else
         AC_MSG_RESULT([none])
     fi
@@ -946,10 +702,14 @@ AC_DEFUN([AC_BAKEFILE],
     AC_BAKEFILE_DEPS
     AC_BAKEFILE_RES_COMPILERS
 
-    BAKEFILE_BAKEFILE_M4_VERSION="0.1.6"
+    BAKEFILE_BAKEFILE_M4_VERSION="0.1.9.1"
    
     dnl includes autoconf_inc.m4:
     $1
+    
+    if test "$BAKEFILE_AUTOCONF_INC_M4_VERSION" = "" ; then
+        AC_MSG_ERROR([No version found in autoconf_inc.m4 - bakefile macro was changed to take additional argument, perhaps configure.in wasn't updated (see the documentation)?])
+    fi
     
     if test "$BAKEFILE_BAKEFILE_M4_VERSION" != "$BAKEFILE_AUTOCONF_INC_M4_VERSION" ; then
         AC_MSG_ERROR([Versions of Bakefile used to generate makefiles ($BAKEFILE_AUTOCONF_INC_M4_VERSION) and configure ($BAKEFILE_BAKEFILE_M4_VERSION) do not match.])
@@ -1463,6 +1223,7 @@ DEPSMODE=${DEPSMODE}
 DEPSDIR=.deps
 DEPSFLAG_GCC="${DEPSFLAG_GCC}"
 DEPSFLAG_MWCC="${DEPSFLAG_MWCC}"
+DEPSFLAG_SUNCC="${DEPSFLAG_SUNCC}"
 
 mkdir -p ${D}DEPSDIR
 
@@ -1525,6 +1286,28 @@ elif test ${D}DEPSMODE = mwcc ; then
     done
     ${D}* ${D}DEPSFLAG_MWCC >${D}{DEPSDIR}/${D}{objfile}.d
     exit 0
+elif test ${D}DEPSMODE = suncc; then
+    ${D}* || exit
+    # Run compiler again with deps flag and redirect into the dep file.
+    # It doesn't work if the '-o FILE' option is used, but without it the
+    # dependency file will contain the wrong name for the object. So it is
+    # removed from the command line, and the dep file is fixed with sed.
+    cmd=""
+    while test ${D}# -gt 0; do
+        case "${D}1" in
+            -o )
+                shift
+                objfile=${D}1
+            ;;
+            * )
+                eval arg${D}#=\\${D}1
+                cmd="${D}cmd \\${D}arg${D}#"
+            ;;
+        esac
+        shift
+    done
+    eval "${D}cmd ${D}DEPSFLAG_SUNCC" | sed "s|.*:|${D}objfile:|" >${D}{DEPSDIR}/${D}{objfile}.d
+    exit 0
 else
     ${D}*
     exit ${D}?
@@ -1553,6 +1336,7 @@ verbose=0
 args=""
 objects=""
 linking_flag="-dynamiclib"
+ldargs="-r -keep_private_externs -nostdlib"
 
 while test ${D}# -gt 0; do
     case ${D}1 in
@@ -1566,6 +1350,10 @@ while test ${D}# -gt 0; do
         args="${D}{args} ${D}1 ${D}2"
         shift
         ;;
+       
+       -s|-Wl,*)
+        # collect these load args
+        ldargs="${D}{ldargs} ${D}1"
 
        -l*|-L*|-flat_namespace|-headerpad_max_install_names)
         # collect these options
@@ -1595,28 +1383,27 @@ while test ${D}# -gt 0; do
     shift
 done
 
+status=0
+
 #
 # Link one module containing all the others
 #
 if test ${D}{verbose} = 1; then
-    echo "c++ -r -keep_private_externs -nostdlib ${D}{objects} -o master.${D}${D}.o"
+    echo "c++ ${D}{ldargs} ${D}{objects} -o master.${D}${D}.o"
 fi
-c++ -r -keep_private_externs -nostdlib ${D}{objects} -o master.${D}${D}.o
+c++ ${D}{ldargs} ${D}{objects} -o master.${D}${D}.o
 status=${D}?
-if test ${D}{status} != 0; then
-    exit ${D}{status}
-fi
 
 #
-# Link the shared library from the single module created
+# Link the shared library from the single module created, but only if the
+# previous command didn't fail:
 #
-if test ${D}{verbose} = 1; then
-    echo "cc ${D}{linking_flag} master.${D}${D}.o ${D}{args}"
-fi
-c++ ${D}{linking_flag} master.${D}${D}.o ${D}{args}
-status=${D}?
-if test ${D}{status} != 0; then
-    exit ${D}{status}
+if test ${D}{status} = 0; then
+    if test ${D}{verbose} = 1; then
+        echo "c++ ${D}{linking_flag} master.${D}${D}.o ${D}{args}"
+    fi
+    c++ ${D}{linking_flag} master.${D}${D}.o ${D}{args}
+    status=${D}?
 fi
 
 #
@@ -1624,7 +1411,7 @@ fi
 #
 rm -f master.${D}${D}.o
 
-exit 0
+exit ${D}status
 EOF
 dnl ===================== shared-ld-sh ends here =====================
 ])
@@ -1679,5 +1466,248 @@ else
 fi
 EOF
 dnl ===================== bk-make-pch ends here =====================
+])
+
+dnl ---------------------------------------------------------------------------
+dnl Macros for wxWindows detection. Typically used in configure.in as:
+dnl
+dnl     AC_ARG_ENABLE(...)
+dnl     AC_ARG_WITH(...)
+dnl        ...
+dnl     AM_OPTIONS_WXCONFIG
+dnl        ...
+dnl        ...
+dnl     AM_PATH_WXCONFIG(2.3.4, wxWin=1)
+dnl     if test "$wxWin" != 1; then
+dnl        AC_MSG_ERROR([
+dnl                wxWindows must be installed on your system
+dnl                but wx-config script couldn't be found.
+dnl
+dnl                Please check that wx-config is in path, the directory
+dnl                where wxWindows libraries are installed (returned by
+dnl                'wx-config --libs' command) is in LD_LIBRARY_PATH or
+dnl                equivalent variable and wxWindows version is 2.3.4 or above.
+dnl        ])
+dnl     fi
+dnl     CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
+dnl     CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
+dnl     CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
+dnl
+dnl     LDFLAGS="$LDFLAGS $WX_LIBS"
+dnl ---------------------------------------------------------------------------
+
+dnl ---------------------------------------------------------------------------
+dnl AM_OPTIONS_WXCONFIG
+dnl
+dnl adds support for --wx-prefix, --wx-exec-prefix, --with-wxdir and
+dnl --wx-config command line options
+dnl ---------------------------------------------------------------------------
+
+AC_DEFUN([AM_OPTIONS_WXCONFIG],
+[
+    AC_ARG_WITH(wxdir,
+                [  --with-wxdir=PATH       Use uninstalled version of wxWindows in PATH],
+                [ wx_config_name="$withval/wx-config"
+                  wx_config_args="--inplace"])
+    AC_ARG_WITH(wx-config,
+                [  --with-wx-config=CONFIG wx-config script to use (optional)],
+                wx_config_name="$withval" )
+    AC_ARG_WITH(wx-prefix,
+                [  --with-wx-prefix=PREFIX Prefix where wxWindows is installed (optional)],
+                wx_config_prefix="$withval", wx_config_prefix="")
+    AC_ARG_WITH(wx-exec-prefix,
+                [  --with-wx-exec-prefix=PREFIX
+                          Exec prefix where wxWindows is installed (optional)],
+                wx_config_exec_prefix="$withval", wx_config_exec_prefix="")
+])
+
+dnl ---------------------------------------------------------------------------
+dnl AM_PATH_WXCONFIG(VERSION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND
+dnl                  [, WX-LIBS [, ADDITIONAL-WX-CONFIG-FLAGS]]]])
+dnl
+dnl Test for wxWindows, and define WX_C*FLAGS, WX_LIBS and WX_LIBS_STATIC
+dnl (the latter is for static linking against wxWindows). Set WX_CONFIG_NAME
+dnl environment variable to override the default name of the wx-config script
+dnl to use. Set WX_CONFIG_PATH to specify the full path to wx-config - in this
+dnl case the macro won't even waste time on tests for its existence.
+dnl
+dnl Optional WX-LIBS argument contains comma- or space-separated list of
+dnl wxWindows libraries to link against (it may include contrib libraries). If
+dnl it is not specified then WX_LIBS and WX_LIBS_STATIC will contain flags to
+dnl link with all of the core wxWindows libraries.
+dnl
+dnl Optional ADDITIONAL-WX-CONFIG-FLAGS argument is appended to wx-config
+dnl invocation command in present. It can be used to fine-tune lookup of
+dnl best wxWidgets build available.
+dnl
+dnl Example use:
+dnl   AM_PATH_WXCONFIG([2.6.0], [wxWin=1], [wxWin=0], [html,core,net]
+dnl                    [--unicode --debug])
+dnl ---------------------------------------------------------------------------
+
+dnl
+dnl Get the cflags and libraries from the wx-config script
+dnl
+AC_DEFUN([AM_PATH_WXCONFIG],
+[
+  dnl do we have wx-config name: it can be wx-config or wxd-config or ...
+  if test x${WX_CONFIG_NAME+set} != xset ; then
+     WX_CONFIG_NAME=wx-config
+  fi
+
+  if test "x$wx_config_name" != x ; then
+     WX_CONFIG_NAME="$wx_config_name"
+  fi
+
+  dnl deal with optional prefixes
+  if test x$wx_config_exec_prefix != x ; then
+     wx_config_args="$wx_config_args --exec-prefix=$wx_config_exec_prefix"
+     WX_LOOKUP_PATH="$wx_config_exec_prefix/bin"
+  fi
+  if test x$wx_config_prefix != x ; then
+     wx_config_args="$wx_config_args --prefix=$wx_config_prefix"
+     WX_LOOKUP_PATH="$WX_LOOKUP_PATH:$wx_config_prefix/bin"
+  fi
+  if test "$cross_compiling" = "yes"; then
+     wx_config_args="$wx_config_args --host=$host_alias"
+  fi
+
+  dnl don't search the PATH if WX_CONFIG_NAME is absolute filename
+  if test -x "$WX_CONFIG_NAME" ; then
+     AC_MSG_CHECKING(for wx-config)
+     WX_CONFIG_PATH="$WX_CONFIG_NAME"
+     AC_MSG_RESULT($WX_CONFIG_PATH)
+  else
+     AC_PATH_PROG(WX_CONFIG_PATH, $WX_CONFIG_NAME, no, "$WX_LOOKUP_PATH:$PATH")
+  fi
+
+  if test "$WX_CONFIG_PATH" != "no" ; then
+    WX_VERSION=""
+
+    min_wx_version=ifelse([$1], ,2.2.1,$1)
+    if test -z "$5" ; then
+      AC_MSG_CHECKING([for wxWindows version >= $min_wx_version])
+    else
+      AC_MSG_CHECKING([for wxWindows version >= $min_wx_version ($5)])
+    fi
+
+    WX_CONFIG_WITH_ARGS="$WX_CONFIG_PATH $wx_config_args $5 $4"
+
+    WX_VERSION=`$WX_CONFIG_WITH_ARGS --version 2>/dev/null`
+    wx_config_major_version=`echo $WX_VERSION | \
+           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
+    wx_config_minor_version=`echo $WX_VERSION | \
+           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
+    wx_config_micro_version=`echo $WX_VERSION | \
+           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
+
+    wx_requested_major_version=`echo $min_wx_version | \
+           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
+    wx_requested_minor_version=`echo $min_wx_version | \
+           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
+    wx_requested_micro_version=`echo $min_wx_version | \
+           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
+
+    wx_ver_ok=""
+    if test "x$WX_VERSION" != x ; then
+      if test $wx_config_major_version -gt $wx_requested_major_version; then
+        wx_ver_ok=yes
+      else
+        if test $wx_config_major_version -eq $wx_requested_major_version; then
+           if test $wx_config_minor_version -gt $wx_requested_minor_version; then
+              wx_ver_ok=yes
+           else
+              if test $wx_config_minor_version -eq $wx_requested_minor_version; then
+                 if test $wx_config_micro_version -ge $wx_requested_micro_version; then
+                    wx_ver_ok=yes
+                 fi
+              fi
+           fi
+        fi
+      fi
+    fi
+
+    if test -n "$wx_ver_ok"; then
+
+      AC_MSG_RESULT(yes (version $WX_VERSION))
+      WX_LIBS=`$WX_CONFIG_WITH_ARGS --libs`
+
+      dnl is this even still appropriate?  --static is a real option now
+      dnl and WX_CONFIG_WITH_ARGS is likely to contain it if that is
+      dnl what the user actually wants, making this redundant at best.
+      dnl For now keep it in case anyone actually used it in the past.
+      AC_MSG_CHECKING([for wxWindows static library])
+      WX_LIBS_STATIC=`$WX_CONFIG_WITH_ARGS --static --libs 2>/dev/null`
+      if test "x$WX_LIBS_STATIC" = "x"; then
+        AC_MSG_RESULT(no)
+      else
+        AC_MSG_RESULT(yes)
+      fi
+
+      dnl starting with version 2.2.6 wx-config has --cppflags argument
+      wx_has_cppflags=""
+      if test $wx_config_major_version -gt 2; then
+        wx_has_cppflags=yes
+      else
+        if test $wx_config_major_version -eq 2; then
+           if test $wx_config_minor_version -gt 2; then
+              wx_has_cppflags=yes
+           else
+              if test $wx_config_minor_version -eq 2; then
+                 if test $wx_config_micro_version -ge 6; then
+                    wx_has_cppflags=yes
+                 fi
+              fi
+           fi
+        fi
+      fi
+
+      if test "x$wx_has_cppflags" = x ; then
+         dnl no choice but to define all flags like CFLAGS
+         WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags`
+         WX_CPPFLAGS=$WX_CFLAGS
+         WX_CXXFLAGS=$WX_CFLAGS
+
+         WX_CFLAGS_ONLY=$WX_CFLAGS
+         WX_CXXFLAGS_ONLY=$WX_CFLAGS
+      else
+         dnl we have CPPFLAGS included in CFLAGS included in CXXFLAGS
+         WX_CPPFLAGS=`$WX_CONFIG_WITH_ARGS --cppflags`
+         WX_CXXFLAGS=`$WX_CONFIG_WITH_ARGS --cxxflags`
+         WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags`
+
+         WX_CFLAGS_ONLY=`echo $WX_CFLAGS | sed "s@^$WX_CPPFLAGS *@@"`
+         WX_CXXFLAGS_ONLY=`echo $WX_CXXFLAGS | sed "s@^$WX_CFLAGS *@@"`
+      fi
+
+      ifelse([$2], , :, [$2])
+
+    else
+
+       if test "x$WX_VERSION" = x; then
+          dnl no wx-config at all
+          AC_MSG_RESULT(no)
+       else
+          AC_MSG_RESULT(no (version $WX_VERSION is not new enough))
+       fi
+
+       WX_CFLAGS=""
+       WX_CPPFLAGS=""
+       WX_CXXFLAGS=""
+       WX_LIBS=""
+       WX_LIBS_STATIC=""
+       ifelse([$3], , :, [$3])
+
+    fi
+  fi
+
+  AC_SUBST(WX_CPPFLAGS)
+  AC_SUBST(WX_CFLAGS)
+  AC_SUBST(WX_CXXFLAGS)
+  AC_SUBST(WX_CFLAGS_ONLY)
+  AC_SUBST(WX_CXXFLAGS_ONLY)
+  AC_SUBST(WX_LIBS)
+  AC_SUBST(WX_LIBS_STATIC)
+  AC_SUBST(WX_VERSION)
 ])
 
