@@ -1,0 +1,10 @@
+#ifndef FR_FRCONFIG_H
+#define FR_FRCONFIG_H
+
+/*
+  this is used to set the correct install prefix for autoconf-based builds
+  for UNIX versions of FR
+*/
+#undef FR_INSTALL_PREFIX
+
+#endif // FR_FRCONFIG_H
