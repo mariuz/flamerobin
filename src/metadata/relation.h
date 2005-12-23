@@ -51,6 +51,9 @@ public:
     bool checkAndLoadColumns();
     virtual bool loadColumns();
     Column *addColumn(Column &c);
+							  
+	MetadataCollection<Column>::iterator begin();
+	MetadataCollection<Column>::iterator end();
 
     bool getChildren(std::vector<MetadataItem *>& temp);
     bool getTriggers(std::vector<Trigger *>& list, 

@@ -709,6 +709,17 @@ bool Database::parseCommitedSql(wxString sql)
                     }
                     break;
                 }
+            case ntDomain:
+				if (!dynamic_cast<Domain *>(object)->loadInfo())
+					success = false;
+				else	// notify all table columns with that domain
+				{
+					for (MetadataCollection<Table>::iterator it = tablesM.begin(); it != tablesM.end(); ++it)
+						for (MetadataCollection<Column>::iterator i2 = (*it).begin(); i2 != (*it).end(); ++i2)
+							if ((*i2).getSource() == stm.getName())
+								(*i2).notifyObservers();
+				}
+            	break;
             default:
                 object->notifyObservers();
                 break;

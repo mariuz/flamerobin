@@ -62,6 +62,21 @@ Column *Relation::addColumn(Column &c)
     return cc;
 }
 //-----------------------------------------------------------------------------
+MetadataCollection<Column>::iterator Relation::begin()
+{
+	// please - don't load here
+	// this code is used to get columns we want to alert about changes
+	// but if there aren't any columns, we don't want to waste time 
+	// loading them
+	return columnsM.begin();
+}
+//-----------------------------------------------------------------------------
+MetadataCollection<Column>::iterator Relation::end()
+{
+	// please see comment for begin()
+	return columnsM.end();
+}
+//-----------------------------------------------------------------------------
 bool Relation::checkAndLoadColumns()
 {
     return (!columnsM.empty() || loadColumns());
