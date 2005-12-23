@@ -1107,7 +1107,6 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
                 autoCommitM = false;
             else
                 autoCommitM = !autoCommitM;
-            continue;
         }
         else
         {
