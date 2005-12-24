@@ -175,7 +175,7 @@ void myTreeCtrl::loadImages()
     wxImageList* imageList = new wxImageList(16, 16);
     for (int i=0; i<ntLastType; i++)
     {
-        wxBitmap bmp = getImage((NodeType)i);
+        wxBitmap bmp(getImage((NodeType)i));
         if (!bmp.Ok())
             continue;
         wxIcon icon;

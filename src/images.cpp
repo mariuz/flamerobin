@@ -90,7 +90,7 @@ wxBitmap getImage(NodeType type)
     map[ntPrimaryKey]    = key_xpm;
     map[ntComputed]     = function_xpm;
 
-    wxBitmap ret = wxBitmap(map[type]);
+    wxBitmap ret(map[type]);
 
     delete [] map;
     return ret;
@@ -124,7 +124,7 @@ wxBitmap getImage32(NodeType type)
     map[ntTrigger]         = trigger_xpm;
     map[ntColumn]         = column_xpm;
     map[ntDomain]         = domain_xpm;
-    wxBitmap ret = wxBitmap(map[type]);
+    wxBitmap ret(map[type]);
 
     delete [] map;
     return ret;
