@@ -59,12 +59,18 @@
 #include "metadata/server.h"
 #include "metadata/view.h"
 #include "sql/SimpleParser.h"
+#include "sql/SqlStatement.h"
 #include "styleguide.h"
 #include "ugly.h"
 #include "urihandler.h"
 
 #include "sql/Identifier.h"
 //-----------------------------------------------------------------------------
+// TODO: This needs to be reworked to use the tokenizer
+//       Perhaps we could have a SelectStatement class, that would be able to:
+//       - load the select statement
+//       - alter some of it (add new table, column, etc.)
+//       - dump statement back to editor
 bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
 {
     if (text.Mid(0, 7) != wxT("OBJECT:"))
@@ -1220,13 +1226,9 @@ bool ExecuteSqlFrame::execute(wxString sql, bool prepareOnly)
             wxString::size_type p = sql.find_first_not_of(wxT(" \n\t\r"));    // left trim
             if (p != wxString::npos && p > 0)
                 sql.erase(0, p);
-            // FIXME: this needs to be parsed better. User can enter SET  GENERATOR (two spaces) and
-            //        it wouldn't be detected. He could also put newlines, tabs, put the statement in brackets, etc.
-            bool changeNull = (sql.substr(0, 44) == wxT("UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG"));
-            bool setGenerator = (sql.substr(0, 13) == wxT("SET GENERATOR"));
-            if (changeNull || setGenerator)
+            SqlStatement stm(sql, databaseM);
+            if (stm.isDDL())
                 type = IBPP::stDDL;
-
             if (type == IBPP::stInsert || type == IBPP::stDelete || type == IBPP::stExecProcedure
                 || type == IBPP::stUpdate)
             {
