@@ -1429,15 +1429,13 @@ void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
-    MetadataItem* i = tree_ctrl_1->getSelectedMetadataItem();
-    if (!i)
-        return;
-    Table* t = dynamic_cast<Table*>(i);
+    Table* t = dynamic_cast<Table*>(tree_ctrl_1->getSelectedMetadataItem());
     if (!t)
         return;
 
-    FieldPropertiesDialog fpd(this, t);
-    fpd.ShowModal();
+    URI uri = URI(wxT("fr://add_field?parent_window=") + wxString::Format(wxT("%ld"), (uintptr_t)this)
+        + wxT("&object_address=") + wxString::Format(wxT("%ld"), (uintptr_t)t));
+    getURIProcessor().handleURI(uri);
 
     FR_CATCH
 }
@@ -1583,12 +1581,9 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
     Column* c = dynamic_cast<Column*>(m);
     if (c)
     {
-        Table* t = c->getTable();
-        if (!t)     // dummy check
-            return;
-
-        FieldPropertiesDialog fpd(this, t, c);
-        fpd.ShowModal();
+	    URI uri = URI(wxT("fr://edit_field?parent_window=") + wxString::Format(wxT("%ld"), (uintptr_t)this)
+	        + wxT("&object_address=") + wxString::Format(wxT("%ld"), (uintptr_t)c));
+	    getURIProcessor().handleURI(uri);
     }
     else
         frameManager().showMetadataPropertyFrame(this, m);

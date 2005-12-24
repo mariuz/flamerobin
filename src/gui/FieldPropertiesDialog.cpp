@@ -278,8 +278,9 @@ bool FieldPropertiesDialog::getIsNewDomainSelected()
 //-----------------------------------------------------------------------------
 // UDD = user defined domain
 // AGD = auto generated domain (those starting with RDB$)
-bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
+wxString FieldPropertiesDialog::getStatementsToExecute()
 {
+	wxString sql;	// we'll return this at the end
     wxString fNameSql(Identifier::userString(textctrl_fieldname->GetValue()));
     Identifier ftemp;
     ftemp.setFromSql(fNameSql);
@@ -320,7 +321,7 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
         {
             ::wxMessageBox(_("Can not get domain info - aborting."),
                 _("Error"), wxOK | wxICON_ERROR);
-            return false;
+            return wxEmptyString;
         }
         if (columnM->getSource() != selDomain.get() && !newDomain)
         {   // UDD -> other UDD  or  AGD -> UDD
@@ -399,7 +400,8 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& sql)
         else
             sql += wxT("COMMIT;\n") + sqlAdd;
     }
-    return true;
+	sql += textctrl_sql->GetValue();
+    return sql;
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::loadCharsets()
@@ -676,33 +678,16 @@ void FieldPropertiesDialog::OnButtonEditDomainClick(wxCommandEvent& WXUNUSED(eve
 void FieldPropertiesDialog::OnButtonOkClick(wxCommandEvent& WXUNUSED(event))
 {
     updateSqlStatement();
-
-    wxString sql;
-    if (!getStatementsToExecute(sql))
-        return;
-    sql += textctrl_sql->GetValue();
-    if (sql.IsEmpty())
-    {
-        EndModal(wxID_OK);
-        return;
-    }
-
-    wxString title;
+    if (!getStatementsToExecute().IsEmpty())
+    	EndModal(wxID_OK);
+}
+//-----------------------------------------------------------------------------
+wxString FieldPropertiesDialog::getStatementTitle() const
+{
     if (columnM)
-        title = _("Executing Field Modification Script");
+        return _("Executing Field Modification Script");
     else
-        title = _("Executing Field Creation Script");
-    ExecuteSqlFrame* esf = new ExecuteSqlFrame(GetParent(), wxID_ANY, title);
-    esf->setDatabase(tableM->getDatabase());
-    esf->setSql(sql);
-
-    // close dialog before showing the sql frame, otherwise parent frame of
-    // this dialog is brought to top instead of ExecuteSqlFrame
-    Close();
-    esf->Show();
-    esf->Raise();
-    // user must commit/rollback + frame is closed at once
-    esf->executeAllStatements(true);
+        return _("Executing Field Creation Script");
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::OnChoiceCharsetClick(wxCommandEvent& WXUNUSED(event))
@@ -775,7 +760,20 @@ bool ColumnPropertiesHandler::handleURI(URI& uri)
     }
 
     FieldPropertiesDialog fpd(w, t, c);
-    fpd.ShowModal();
+    // NOTE: this has been moved here from OnOkButtonClick() to make frame
+    //       activation work properly.  Basically activation of another
+    //       frame has to happen outside wxDialog::ShowModal(), because it
+    //       does at the end re-focus the last focused control, raising
+    //       the parent frame over the newly created sql execution frame
+    if (fpd.ShowModal() == wxID_OK)
+    {
+        // create ExecuteSqlFrame with option to close at once
+        ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1, fpd.getStatementTitle());
+        esf->setDatabase(t->getDatabase());
+        esf->setSql(fpd.getStatementsToExecute());
+        esf->executeAllStatements(true);
+        esf->Show();
+    }
     return true;
 }
 //-----------------------------------------------------------------------------
