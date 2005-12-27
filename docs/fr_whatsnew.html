@@ -7,26 +7,48 @@
 <font size=-1>For known issues please see our bug tracker at:
 http://sourceforge.net/tracker/?group_id=124340&amp;atid=699234</font><br>
 <br><br>
-<font size=+2>Changes in FlameRobin 0.4.5 ALPHA</font><br>
+<font size=+2>Changes in FlameRobin 0.5.0 ALPHA</font><br>
 <br><br>
 <font size=+1 color="#AA0000"><B>New features</B></font><br>
 <br>
 - Event monitor: a dialog to register for and monitor posted events<br>
+- Support for quoted identifiers (case sensitive, etc.)<br>
+- Quick metadata search from the main screen<br>
+- Ability to retrive server version<br>
 <br><br>
 <font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
 <br>
-- Display name was used instead of hostname for backup and restore<br>
+- Parsing of executed statements rewritten to work properly<br>
+- &quot;Alter&quot; menu item for procedures, triggers and views<br>
 - Allow user to enter backup filename with GTK2<br>
 - Fixed message dialogs which didn't have any buttons on GTK1<br>
 - Improved dependency detection (objects referenced in CHECK constraints)<br>
 - Support for 64-bit platforms<br>
-- Allow usage of various formats for multiple log files<br>
-- Option to change tab size in sql editor<br>
-- Option to show long line marker in sql editor<br>
+- SQL editor is no longer created beneath other windows<br>
+- Option to change tab size in SQL editor<br>
+- Option to show long line marker in SQL editor<br>
 - Many minor fixes and improvements for SQL editor<br>
+- Fixed problem with visible caret when SQL editor doesn't have focus<br>
+- Improved running of large SQL scripts<br>
+- Fixed problem with auto-completion on GTK2<br>
 - Option to limit size of single item in statement history<br>
-- Improved handling of large SQL scripts<br>
+- Fixed drag and drop query building with multiple foreign keys<br>
+- Fixed disconnect problems on some Linux distributions<br>
+- Registered server and databases are saved instantly (for multiple instances of FlameRobin)<br>
+- Display name was used instead of hostname for backup and restore<br>
+- Fixed backup and restore problems on PPC<br>
+- Backup and restore dialogs show file selector with path of current file name<br>
+- Backup and restore settings are remembered on database basis<br>
+- FlameRobin is buildable with Borland's compiler again<br>
+- Improved overall speed in some areas<br>
+- Fixed reported character field lengths for multibyte character sets<br>
+- Fixed problems with datatypes when there aren't any user-defined domains in database<br>
+- Links included in saved .html Property pages<br>
+- Changed the way strings are translated in Unicode versions<br>
+- Cancel button isn't ignored anymore when adding unique constraints<br>
+- Cancel button isn't ignored anymore when reordering fields<br>
 - Improved Field editor<br>
+- Allow usage of various formats for multiple log files<br>
 <br>
 <br>
 <br>
