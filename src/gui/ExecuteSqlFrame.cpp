@@ -524,7 +524,7 @@ void ExecuteSqlFrame::set_properties()
     button_new->SetToolTip(_("New window"));
     button_load->SetToolTip(_("Load"));
     button_save->SetToolTip(_("Save"));
-    button_saveas->SetToolTip(_("Save"));
+    button_saveas->SetToolTip(_("Save As..."));
     button_prev->SetToolTip(_("Previous"));
     button_next->SetToolTip(_("Next"));
     button_execute->SetToolTip(_("F4 - Execute SQL statement"));
