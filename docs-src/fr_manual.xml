@@ -6,12 +6,18 @@
 -->
 <article id="frrelnotes">
   <articleinfo>
-    <title><application>FlameRobin</application> 0.4.5 ALPHA Manual</title>
+    <title><application>FlameRobin</application> 0.5.0 ALPHA Manual</title>
 
     <author>
       <firstname>Nando</firstname>
 
       <surname>Dessena</surname>
+    </author>
+
+    <author>
+      <firstname>Milan</firstname>
+
+      <surname>Babuskov</surname>
     </author>
   </articleinfo>
 
@@ -19,8 +25,9 @@
     <title>About this manual</title>
 
     <para>Currently this manual is incomplete, and it will probably stay
-    incomplete until FlameRobin 1.0. Nonetheless, we try to make sure that the
-    information included here is accurate also for ALPHA releases.</para>
+    incomplete until FlameRobin reaches version 1.0. Nonetheless, we try to
+    make sure that the information included here is accurate also for ALPHA
+    releases.</para>
   </section>
 
   <section id="frrelnotes-alphatest">
@@ -30,9 +37,9 @@
     this software and encourage you to send comments, bug reports and feature
     requests back to us so we can make a better product. We remind you that
     this is Alpha quality software so you shouldn't expect it to work
-    flawlessly (although we use it for daily work already). The main purpose
-    of this early release is finding bugs and tune the user interface, for
-    which we need feedback from the prospect users.</para>
+    flawlessly (although we've been using it for daily work for a long time
+    now). The main purpose of this early release is finding bugs and tune the
+    user interface, for which we need feedback from the prospect users.</para>
   </section>
 
   <section id="frrelnotes-what-fr-is">
@@ -54,13 +61,13 @@
     there are plenty available for Firebird from several different parties.
     Our first goal with FlameRobin is to provide people not used to the
     command line with a GUI tool to get started with Firebird. Our longer-term
-    goal is to develop a richer tool mainly for the Linux market; while there
-    are several rich and mature GUI tools under Windows, some of them
+    goal is to develop a richer tool mainly for the Linux platform; while
+    there are several rich and mature GUI tools under Windows, some of them
     available for free or for a modest price, there isn't any for Linux.
-    Another goal for the "lite" edition of FlameRobin is to be bundled with
-    the Firebird server to serve as a starting kit for new users. This bundle
-    may be distributed by the Firebird Project itself or by some third
-    party.</para>
+    Another goal of the project is for a "lite" edition of FlameRobin to be
+    bundled with the Firebird server to serve as a starting kit for new users.
+    This bundle may be distributed by the Firebird Project itself or by some
+    third party.</para>
   </section>
 
   <section id="frrelnotes-who-we-are">
@@ -109,8 +116,8 @@
       <title>General information</title>
 
       <para>If you have installed a previous ALPHA version of FlameRobin which
-      is less than 0.4.0, it is recommended that you remove it before
-      installing this version.</para>
+      is <emphasis>less than 0.4.0</emphasis>, it is recommended that you
+      remove it before installing this version.</para>
 
       <para>You won't be able to keep a config.ini file from an earlier
       version, because the name and file format have changed in version
@@ -149,9 +156,9 @@
     <section>
       <title>Windows (Win32)</title>
 
-      <para>To install FlameRobin under Windows you need to have the Firebird
-      client (gds32.dll for Firebird 1.0, fbclient.dll for Firebird 1.5 and
-      up) installed and available, then just run the automatic installer of
+      <para>To install FlameRobin under Windows you need the Firebird client
+      (gds32.dll for Firebird 1.0, fbclient.dll for Firebird 1.5 and up)
+      installed and available, then just run the automatic installer of
       FlameRobin which will copy all required files in a directory of your
       choice and optionally create desktop and start menu shortcuts.</para>
 
@@ -163,13 +170,13 @@
     <section>
       <title>Linux</title>
 
-      <para>Installation packages for various Linux distributions are
-      provided, as well as a compressed archive. Unpacking the supplied
-      archive into a directory of your choice will do.</para>
+      <para>Installation packages for various Linux distributions are provided
+      on an "experimental" basis, as well as a compressed archive. Unpacking
+      the supplied archive into a directory of your choice will do.</para>
     </section>
 
     <section>
-      <title>MacOS X </title>
+      <title>MacOS X</title>
 
       <para>Installation on Mac OS X is an absolute no-brainer: just drag the
       icon from the installation package to the folder you want the
@@ -181,19 +188,24 @@
   <section id="frrelnotes-getting-started">
     <title>Getting started</title>
 
-    <para>Upon first startup, FlameRobin will present a "Home" tree containing
+    <para>Upon first startup, FlameRobin will show a "Home" tree containing
     only the local server (localhost), and will invite you to create new
-    servers and databases as required. Here is a brief how-to for getting
-    started with FlameRobin.</para>
+    servers and databases as required. You'll also see a menu bar at the top
+    of the window, and a search bar and status bar at the bottom. Here is a
+    brief how-to for getting started with FlameRobin.</para>
 
     <section>
       <title>Adding a server</title>
 
-      <para>You can add a server by righ-clicking on "Home" and choosing
-      "Register server...". You will have to specify a display name, the host
-      name and optionally the TCP port number (default 3050) on which the
-      Firebird server listens. Once you have added a server, you can register
-      databases under its node.</para>
+      <para>You can add a server by right-clicking on "Home" and choosing
+      "Register server..." (alternatively, use the "Register server..."
+      command from the "Server" menu). You will have to specify a display name
+      and optionally the host name and TCP port number on which the Firebird
+      server listens. Leave the display name empty to have FlameRobin build
+      one automatically from the host name and port values (if you don't have
+      a host name, because yours is a local or embedded Firebird server, you
+      will be required to type in a display name manually). Once you have
+      added a server, you can register databases under its node.</para>
     </section>
 
     <section>
@@ -239,28 +251,38 @@
 
       <para>Upon connection, the sub-tree under the database name is populated
       with a description of the database structure (metadata). Browse the tree
-      to explore the metadata.</para>
+      to explore the metadata. You can also use the quick search feature to
+      locate a particular object in the tree. Just type the name of the object
+      you are looking for (use the "*" wildcard character for a partial match)
+      in the search box at the bottom of FlameRobin's main window and the
+      first object in the tree whose name matches your search string will be
+      highlighted. Now you can hit Enter to focus the tree and add the object
+      name (or search string) to the search box's drop-down list. For your
+      convenience, FlameRobin will remember your search strings for further
+      use. Click the arrow buttons next to the search box to move to the next
+      and previous matches.</para>
     </section>
 
     <section>
       <title>Editing objects</title>
 
       <para>You can view and/or change the properties of every object you see
-      in the tree by choosing the "Properties..." option. Please note that
-      currently not all object types are supported, but you'll find almost all
-      of them. Trying to show the property page for an object of an
-      unsupported type will result in an error message. The property page is a
-      HTML window with a summary of the object's properties and links which
-      open other pages or specific editors. Some of the options are not yet
-      available, but you can f. ex. edit almost all aspects of the most common
-      objects (tables, views, stored procedures, and so on). Please have a
-      look at fr_whatsnew.html to see, well, what's new.<note>
+      in the tree by choosing the "Properties..." option from the object's
+      context menu or from the "Object" menu. Please note that currently not
+      all object types are supported, but you'll find almost all of them.
+      Trying to show the property page for an object of an unsupported type
+      will result in an error message. The property page is a HTML window with
+      a summary of the object's properties and links which open other pages or
+      specific editors. Some of the options are not yet available, but you can
+      edit almost all aspects of the most common objects (tables, views,
+      stored procedures, and so on). Please have a look at fr_whatsnew.html to
+      see, well, what's new.<note>
           <para>Although we try to test the features as much as we can, this
           is ALPHA software and you should only use it to work on backup
           copies of your databases, or perform backup copies before using
           FlameRobin on them. Having said that, we have to add that many users
           (including us) have been using FlameRobin in their everyday Firebird
-          development for about a year now without problems.</para>
+          development for more than a year now without problems.</para>
         </note></para>
     </section>
 
@@ -270,7 +292,7 @@
       <para>After connecting to a database, locate a table, view or selectable
       stored procedure of your interest in the tree and right-click it.
       Choosing either "Select ... from ..." option will open the SQL editor
-      with the table/view data shown in the lower grid. In the case of
+      with the table/view data shown in the grid at the bottom. In the case of
       selectable stored procedures with parameters, just the select statement
       appears in the SQL editor, so you should fill the parameter values (if
       you have any) and click the Execute button to see the data.</para>
@@ -285,16 +307,18 @@
       script execution capabilities (including SET AUTODDL and SET TERM
       support), load/save buttons, auto-completion and call-tip features,
       commit/rollback, some execution statistics (including but not limited to
-      the query PLAN), and a data export tool: to activate it, right click on
-      the data grid. The data export tool is currently able to copy the data
-      to the clipboard, generate SQL INSERT statements or export the data to a
-      HTML file. All options work on the whole grid contents or just the
-      selected parts. You can also multiple-select several different grid
-      "islands" and have the tool export them.</para>
+      the query PLAN), and a data export tool.</para>
+
+      <para>To activate the data export tool, right click on the data grid.
+      The data export tool is currently able to copy the data to the
+      clipboard, generate SQL INSERT statements or export the data to a HTML
+      file. All options work on the whole grid contents or just the selected
+      parts. You can also multiple-select several different grid "islands" and
+      have the tool export them.</para>
     </section>
 
     <section>
-      <title>Backup and restore </title>
+      <title>Backup and restore</title>
 
       <para>You can perform a database backup by right clicking on a database
       and choosing "Backup database...". Choose "Restore database..." to
@@ -318,26 +342,40 @@
     <section>
       <title>Connected users</title>
 
-      <para>Select "Show connected users" at the database level to see a list
-      of users connected to that database. This only works reliably with the
-      SuperServer variant of Firebird. If you are using Firebird Classic you
-      will see at most one user connection there, which is yours.</para>
+      <para>Select "Show connected users" at the database level (or in the
+      "Database" menu) to see a list of users connected to that database. This
+      only works reliably with the SuperServer variant of Firebird. If you are
+      using Firebird Classic you will see at most one user connection there,
+      which is yours.</para>
     </section>
 
     <section>
       <title>Event monitoring</title>
 
       <para>FlameRobin allows you to listen for Firebird events interactively.
-      Just select the "Monitor events" command to open the Event Monitor
-      window. This window allows you to monitor one or more events, save the
-      received events to a text file and load them back. Events are posted
-      from the database when the POST_EVENT statement is used.</para>
+      Just select the "Monitor events" command at the database level (or in
+      the "Database" menu) to open the Event Monitor window (you will need to
+      connect to the database first). This window allows you to monitor one or
+      more events, save the received events to a text file and load them back.
+      Events are posted from the database when the POST_EVENT statement is
+      called (and the transaction is committed).</para>
     </section>
 
     <section>
       <title>User management</title>
 
       <para>This feature is not yet implemented.</para>
+    </section>
+
+    <section>
+      <title>Retrieving server version</title>
+
+      <para>Select "Retrieve server version" from the "Server" menu (or from a
+      server's context menu) to see a dialog box with the server's version
+      string. A server's version string reveals the exact build number of your
+      Firebird server and the platform it is running on. For example, a
+      version string equal to "WI-V1.5.2.4731 Firebird 1.5" means Firebird
+      1.5.2, build 4731, on Windows.</para>
     </section>
   </section>
 
@@ -346,11 +384,10 @@
 
     <para>This section documents the options you can set to tune FlameRobin's
     behaviour to your liking. You can set the options by means of the
-    Preferences dialog, which is invoked through the "Preferences..." menu
-    command in the local menu of the tree's root node. The Preferences are
-    organized in categories; here is a description of each category. Please
-    read the tooltip that appears when you move the mouse cursor over each
-    option to know more about it.</para>
+    Preferences dialog, which is invoked through the "Preferences..." command
+    in the "View" menu. The Preferences are organized in categories; here is a
+    description of each category. Please read the tooltip that appears when
+    you move the mouse cursor over each option to know more about it.</para>
 
     <note>
       <para>Since new options are added to FlameRobin daily, this section of
@@ -452,35 +489,53 @@
     </section>
 
     <section>
-      <title>SQL Editor [OUT OF DATE - please refer to the program
-      hints]</title>
+      <title>SQL Editor</title>
 
       <para>Use these options to customize the behaviour of the SQL Editor,
       which is used in FlameRobin to execute any kind of system-generated or
       user-supplied query.</para>
 
       <section>
-        <title>When text is selected in editor</title>
+        <title>Automatically commit DDL statements</title>
 
-        <para>This options turns on and off a useful feature of the SQL
-        Editor: you can type in or paste several SQL statements and execute
-        just one of them by selecting it before hitting the Execute button. If
-        for some reason you'd like to always execute the content of the whole
-        editor buffer, then disable this option.</para>
+        <para>Enable this option to have FlameRobin automatically "click" the
+        Commit button on your part each time it detects a DDL (Data Definition
+        Language) statements. DDL statements are those that modify the
+        database structure (as opposed to DML, or Data Manipulation Language
+        statements, which modify the data). Firebird does support
+        transactional DDL, yet it is common practice to auto-commit these
+        statements to avoid unexpected behaviours (for example, adding a
+        column to an existing table and populate it through an UPDATE
+        statement in the same transaction can lead to unexpected results with
+        current versions of Firebird). This option sets a default state that
+        you can change with the script commands SET AUTODDL ON and SET AUTODDL
+        OFF.</para>
+
+        <section>
+          <title>When text is selected in editor</title>
+
+          <para>Leave this option to "Execute the entire buffer" if you don't
+          want to take advantage of FlameRobin's advanced selection handling.
+          If you set it to "Execute only the selection" you will be able to
+          type (or load) entire scripts in the SQL editor and only execute
+          single parts of them by selecting them and clicking the "Execute"
+          button. If you don't select anything, FlameRobin will execute the
+          whole text in the editor.</para>
+        </section>
 
         <section>
           <title>Treat selected text as a single statement</title>
 
           <para>If you only ever select a single statement at a time, then you
           can save FlameRobin's parser some work by enabling this option. When
-          this option is disabled, FlameRobin will parse the selected text
+          you disable it, instead, FlameRobin will parse the selected text
           before executing it, break it into several statements if necessary
           and send them to Firebird one at a time; this is necessary since
           Firebird does not support executing more than one statement (i.e. a
           script) at a time. It can also be used if you have CREATE PROCEDURE
-          or CREATE TRIGGER statement with SET TERM. This way, you can select
-          and execute the statement, and you don't need SET TERM at
-          all.</para>
+          or CREATE TRIGGER (or similar) statements with SET TERM. This way,
+          you can select and execute the CREATE statement, and you don't need
+          SET TERM at all.</para>
         </section>
 
         <section>
@@ -503,7 +558,18 @@
         </section>
 
         <section>
-          <title>SQL Code Completion</title>
+          <title>Show long line marker</title>
+
+          <para>Activate this option to have the editor display a vertical
+          line that visually marks the place where a line break would occur if
+          lines couldn't be longer than a certain amount of characters. The
+          marker is only a visual indicator, as FlameRobin will not enforce
+          any limit to the length of text lines. You can also customize the
+          column at which the marker will appear.</para>
+        </section>
+
+        <section>
+          <title>Code Completion</title>
 
           <para>This page contains options to customize FlameRobin's code
           completion feature.</para>
@@ -515,9 +581,9 @@
             in the SQL Editor on or off. Disable it if you don't like code
             completion windows that pop up while you write SQL code. If you
             keep it enabled, then you can set a certain number of characters
-            you'll have to type before code completion kicks in (default 5),
-            and choose to disable code completion when a call-tip is displayed
-            as it would close the call-tip.</para>
+            you'll have to type before code completion kicks in, and choose to
+            disable code completion when a call-tip is displayed (as it would
+            close the call-tip window).</para>
           </section>
 
           <section>
@@ -533,6 +599,68 @@
             <para>Set this option to have the currently selected item in the
             code completion window copied to the text buffer when you hit
             Enter. Otherwise you can use Tab key for that.</para>
+          </section>
+
+          <section>
+            <title>Allow auto-completion inside quoted text</title>
+
+            <para>By default, FlameRobin will disable auto-completion inside
+            quoted text. If for some reason you need it, here you can enable
+            it.</para>
+          </section>
+        </section>
+
+        <section>
+          <title>Statement History</title>
+
+          <para>FlameRobin can remember the statements you execute and allow
+          you to retrieve and re-execute past statements. This page allows you
+          to customize the feature.</para>
+
+          <section>
+            <title>Share SQL statement history</title>
+
+            <para>You can have a single statement history list for all the
+            databases you work with ("Between all databases") or a separate
+            history list for each of them ("Don't share"). Additionally, you
+            can make it so that all databases with the same display name
+            (typically copies of the same database, or databases with the same
+            structures, on different servers) share a history list.</para>
+          </section>
+
+          <section>
+            <title>Limit history size</title>
+
+            <para>By default, each history list is allowed to grow without
+            bounds. If you are concerned about the size of your statement
+            history lists, you can limit the number of entries. If a history
+            list reaches its limit, FlameRobin will remove the oldest elements
+            to make room for the new statements.</para>
+          </section>
+
+          <section>
+            <title>Limit history item size</title>
+
+            <para>You can also set a limit for each statement in the history
+            list. Statements bigger than the specified amount will not be
+            added to the history list. This is useful if you execute entire
+            database-creation scripts often.</para>
+          </section>
+
+          <section>
+            <title>Remember unsuccessfully executed buffers</title>
+
+            <para>By default, only statements that are executed without errors
+            are added to the history list. Set this option to have FlameRobin
+            remember also statements that caused errors.</para>
+          </section>
+
+          <section>
+            <title>Remember statements generated by FlameRobin</title>
+
+            <para>FlameRobin translates as much visual operations as possible
+            to SQL statements. Uncheck this option to prevent this kind of
+            statements from being added to the history lists.</para>
           </section>
         </section>
       </section>
@@ -590,6 +718,112 @@
     </section>
 
     <section>
+      <title>Object names</title>
+
+      <para>This page offers options to customize the way FlameRobin deals
+      with object names in general, and quoted identifiers in particular. If
+      you don't know how quoted identifiers work in Firebird, you should leave
+      these settings to their default values.</para>
+
+      <section>
+        <title>Quote names only when needed</title>
+
+        <para>Uncheck this option to have FlameRobin always quote object names
+        with " in dialect 3 databases. Leave it checked to let FlameRobin
+        detect on its own when it is needed to quote identifiers. The setting
+        "Quote names in mixed case" is only used for names entered by the user
+        (for example, when you add a new field to a table, you type in its
+        name).</para>
+
+        <para>If "Quote names only when needed" is checked and "Quote names in
+        mixed case" is not, FlameRobin will leave the name entered by the user
+        as it is, even if it is written in mixed case (unless the name is a
+        reserved word or contains non-ASCII characters, in which case it is
+        quoted).</para>
+
+        <para>Here are two use cases to better explain how these settings
+        interact with each other:<table>
+            <title>Case 1: "Quote names only when needed" = on; "Quote names
+            in mixed case" = off</title>
+
+            <tgroup cols="2">
+              <tbody>
+                <row>
+                  <entry>User enters</entry>
+
+                  <entry>Turns into</entry>
+                </row>
+
+                <row>
+                  <entry>FIELD1</entry>
+
+                  <entry>FIELD1</entry>
+                </row>
+
+                <row>
+                  <entry>Field1</entry>
+
+                  <entry>Field1</entry>
+                </row>
+
+                <row>
+                  <entry>Date</entry>
+
+                  <entry>"Date"</entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </table><table>
+            <title>Case 2: "Quote names only when needed" = on; "Quote names
+            in mixed case" = on</title>
+
+            <tgroup cols="2">
+              <tbody>
+                <row>
+                  <entry>User enters</entry>
+
+                  <entry>Turns into</entry>
+                </row>
+
+                <row>
+                  <entry>FIELD1</entry>
+
+                  <entry>FIELD1</entry>
+                </row>
+
+                <row>
+                  <entry>Field1</entry>
+
+                  <entry>"Field1"</entry>
+                </row>
+
+                <row>
+                  <entry>Date</entry>
+
+                  <entry>"Date"</entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </table> The rationale behind all this is that if you write a name
+        in mixed case, then you probably want it quoted (since you bothered to
+        mix the case). Some users, however, find this rule awkward and
+        unpredictable, and need a way to disable it.</para>
+      </section>
+
+      <section>
+        <title>Treat quote characters like other characters</title>
+
+        <para>This setting determines what happens if you type the quote
+        character (") as a part of some name. Again, it only affects
+        user-entered names. One option (unchecked) is to ignore it, other is
+        to treat it like any other character (checked). Quotes are special
+        cases, since they need to be escaped (by doubling them). When this
+        setting is off, user can force quoting even when it is not required,
+        by writing the name quoted in the text box.</para>
+      </section>
+    </section>
+
+    <section>
       <title>Fields</title>
 
       <para>Here you can customize the appearance of field types in the tree
@@ -614,15 +848,17 @@
       <title>Logging</title>
 
       <para>The SQL Editor can log all executed statements to a text file
-      (and, in a future release, to a database table). Here you set the
-      options to tune this feature.</para>
+      (and, in a future release, to a database table). This gives you the
+      ability to work visually and produce scripts to easily replicate
+      sequences of operations on other databases. Here you set the options to
+      tune this feature.</para>
 
       <section>
         <title>Log DML statements</title>
 
-        <para>When logging is enabled, by default only DDL (data definition)
-        statements are logged. Turn this option on to enable logging of DML
-        (data manipulation) statements as well.</para>
+        <para>When logging is enabled, by default only DDL (CREATE, ALTER,
+        DROP...) statements are logged. Turn this option on to enable logging
+        of DML (SELECT, INSERT, UPDATE, DELETE) statements as well.</para>
 
         <section>
           <title>Enable logging to file</title>
@@ -633,7 +869,7 @@
           database and user name, and execution date and time. Each statement
           can go into separate file, and it uses incremental numbers for
           filenames. You can format your own filenames by using %d as a
-          placeholder for number. If you wish numbers with fixed number of
+          placeholder for number. If you want numbers with fixed number of
           digits, like 0003 instead of 3, then use %04d as placeholder, where
           4 means four digits, and 0 means that it should be padded with
           zeros.</para>
@@ -647,16 +883,17 @@
 
     <para>There is a set of options in FlameRobin that you can set on a
     per-database basis. You access the database configuration window by right
-    clicking a database and selecting the "Database preferences..." command.
-    Like global preferences, database preferences are organized in categories;
-    here is a description of each category. Please read the tooltip that
-    appears when you move the mouse cursor over each option to know more about
+    clicking on a database and selecting the "Database preferences..."
+    command, or selecting the same command from the "Database" menu. Like
+    global preferences, database preferences are organized in categories; here
+    is a description of each category. Please read the tooltip that appears
+    when you move the mouse cursor over each option to know more about
     it.</para>
 
     <section>
       <title>Connection</title>
 
-      <para>This page holds options that influence database connection and
+      <para>This page holds options that apply to database connection and
       database registration info.</para>
 
       <section>
@@ -696,9 +933,95 @@
       <title>Logging</title>
 
       <para>Please see the section about global logging. The options are the
-      same here, but they apply to the current database only. There is also an
-      option to turn off logging for a particular database only while leaving
-      it active for all the other databases.</para>
+      same here, but they apply to the current database only. There is an
+      additional option to turn off logging for a particular database only
+      while leaving it active for all the other databases.</para>
     </section>
+  </section>
+
+  <section>
+    <title>The FlameRobin environment</title>
+
+    <para>FlameRobin needs, or creates, some external files. This section
+    documents what these files contain, and where they are found. While
+    FlameRobin is installed with usable default settings, it is possible to
+    fine-tune the installation for special uses or multiple users. The
+    information provided here is valuable in this regard.</para>
+
+    <para>FlameRobin uses the following files and folders:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>fr_settings.conf; a file containing all settings you see in the
+        Preferences dialog box and other global settings of FlameRobin, like
+        position and size of open windows. FlameRobin needs write access
+        privileges to this file.</para>
+      </listitem>
+
+      <listitem>
+        <para>fr_databases.conf; a file containing all the servers and
+        databases defined in FlameRobin's Home tree. FlameRobin needs write
+        access privileges to this file.</para>
+      </listitem>
+
+      <listitem>
+        <para>the html-templates and conf-defs folders, which contain metadata
+        used to render some of FlameRobin's windows, and the docs folder,
+        containing documentation files that can be opened through FlameRobin's
+        main menu. FlameRobin only needs read access to the files in these
+        folders.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Locations:</para>
+
+    <para><itemizedlist>
+        <listitem>
+          <para>$frhome is FlameRobin's home path. FlameRobin will find
+          html-templates, conf-defs and docs (which are immutable and integral
+          part of the FlameRobin distribution) in its home path. The home path
+          is usually the application folder (on Windows) and an otherwise
+          fixed folder on POSIX platforms.</para>
+
+          <note>
+            <para>Defining the environment variable FR_HOME will override this
+            path.</para>
+          </note>
+
+          <note>
+            <para>Passing -h &lt;path&gt; on FlameRobin's command line will
+            override this path and the environment variable as well.</para>
+          </note>
+        </listitem>
+
+        <listitem>
+          <para>$fruserhome is FlameRobin's user home path. FlameRobin will
+          find the conf files in its user home path. This path has to be
+          writable and may be common to all users on the machine or different
+          for each user. The user home path defaults to the user local data
+          directory, which varies with the platform.</para>
+
+          <note>
+            <para>Defining the environment variable FR_USER_HOME will override
+            this path.</para>
+          </note>
+
+          <note>
+            <para>Passing -uh &lt;path&gt; on FlameRobin's command line will
+            override this path and the environment variable as well.</para>
+          </note>
+        </listitem>
+      </itemizedlist>Additionally, the &lt;path&gt; specification in the
+    command line parameters -h and -uh, or the value of the environment
+    variables FR_HOME and FR_USER_HOME may be "$app", which translates to the
+    common data folder (the application folder on Windows and an otherwise
+    fixed folder on POSIX platforms), or "$user", which translates to the user
+    local data directory. Otherwise, it has to be a path (without the trailing
+    path delimiter).</para>
+
+    <para>FlameRobin will only ever write to files in $fruserhome. If
+    FlameRobin is configured so that these files are shared by several users
+    (or concurrent instances of FlameRobin), then no precaution is taken to
+    avoid overwriting other users' changes.</para>
   </section>
 </article>
