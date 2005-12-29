@@ -217,10 +217,13 @@ void DatabaseRegistrationDialog::setDatabase(Database* db)
     text_ctrl_username->SetValue(databaseM->getUsername());
     text_ctrl_password->SetValue(databaseM->getPassword());
     text_ctrl_role->SetValue(databaseM->getRole());
-    int selection = combobox_charset->FindString(databaseM->getConnectionCharset());
+    wxString charset(databaseM->getConnectionCharset());
+	if (charset.IsEmpty())
+        charset = wxT("NONE");
+    int selection = combobox_charset->FindString(charset);
     if (selection < 0)
-        selection = combobox_charset->FindString(wxT("NONE"));
-    if (selection >= 0)
+		combobox_charset->SetValue(charset);
+	else
         combobox_charset->SetSelection(selection);
     // see whether the database has an empty or default name; knowing that will be
     // useful to keep the name in sync when other attributes change.
@@ -291,7 +294,15 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
     databaseM->setPath(text_ctrl_dbpath->GetValue());
     databaseM->setUsername(text_ctrl_username->GetValue());
     databaseM->setPassword(text_ctrl_password->GetValue());
-    databaseM->setConnectionCharset(combobox_charset->GetStringSelection());
+
+	// for some reason GetValue didn't work correctly before
+	// I can't remember the exact issue, perhaps it was platform specific (Gtk1 maybe?)
+	// so we replaced all of those with GetStringSelection()
+	// the problem is that we are now using a *real* combo, not just a
+	// dropdown list. So, this needs testing
+    databaseM->setConnectionCharset(combobox_charset->GetValue());
+    //databaseM->setConnectionCharset(combobox_charset->GetStringSelection());
+
     databaseM->setRole(text_ctrl_role->GetValue());
 
     try
