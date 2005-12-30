@@ -273,14 +273,13 @@ bool FieldPropertiesDialog::getIsNewDomainSelected()
     // Note: The following code does not work when there are no user defined
     // domains:
     // return choice_domain->GetSelection() == 0;
-    return choice_domain->GetStringSelection() == wxT("[Create new]");
+    return choice_domain->GetStringSelection() == _("[Create new]");
 }
 //-----------------------------------------------------------------------------
 // UDD = user defined domain
 // AGD = auto generated domain (those starting with RDB$)
 wxString FieldPropertiesDialog::getStatementsToExecute()
 {
-	wxString sql;	// we'll return this at the end
     wxString fNameSql(Identifier::userString(textctrl_fieldname->GetValue()));
     Identifier ftemp;
     ftemp.setFromSql(fNameSql);
@@ -303,7 +302,7 @@ wxString FieldPropertiesDialog::getStatementsToExecute()
 
     wxString alterTable = wxT("ALTER TABLE ") + tableM->getQuotedName() + wxT(" ");
     enum unn { unnNone, unnBefore, unnAfter } update_not_null = unnNone;
-    sql = wxEmptyString;
+	wxString sql; // we'll return this at the end
 
     // detect changes to existing field, create appropriate SQL actions
     if (columnM)
@@ -446,7 +445,7 @@ void FieldPropertiesDialog::loadDomains()
 
     if (columnM == 0 ||columnM->getSource().substr(0,4) != wxT("RDB$"))
     {
-        choice_domain->Append(wxT("[Create new]"));
+        choice_domain->Append(_("[Create new]"));
         if (!columnM)
             choice_domain->SetSelection(0);
     }
