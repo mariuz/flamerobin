@@ -95,7 +95,7 @@ public:
     // Database is required so that domains, charsets, generators can be loaded
     FieldPropertiesDialog(wxWindow* parent, Table* table, Column* column = 0);
 	wxString getStatementTitle() const;
-    wxString getStatementsToExecute();
+    const wxString getStatementsToExecute();
 private:
     // event handling
     enum {

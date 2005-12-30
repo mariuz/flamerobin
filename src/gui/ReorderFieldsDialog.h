@@ -57,7 +57,7 @@ protected:
 public:
     ReorderFieldsDialog(wxWindow* parent, Table *table);
     // creation of statement execution frame outside of dialog class
-    const wxString getReorderStatement();
+    const wxString getStatementsToExecute();
 private:
     // event handling
     enum {

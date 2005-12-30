@@ -159,7 +159,7 @@ void ReorderFieldsDialog::updateButtons()
     button_last->Enable(sel >= 0 && sel < itemcnt - 1);
 }
 //-----------------------------------------------------------------------------
-const wxString ReorderFieldsDialog::getReorderStatement()
+const wxString ReorderFieldsDialog::getStatementsToExecute()
 {
     wxString sql;
     for (int i = 0; i < list_box_fields->GetCount(); ++i)
@@ -238,7 +238,7 @@ bool ReorderFieldsHandler::handleURI(URI& uri)
         // create ExecuteSqlFrame with option to close at once
         ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1, rfd.GetTitle());
         esf->setDatabase(t->getDatabase());
-        esf->setSql(rfd.getReorderStatement());
+        esf->setSql(rfd.getStatementsToExecute());
         esf->executeAllStatements(true);
         esf->Show();
     }

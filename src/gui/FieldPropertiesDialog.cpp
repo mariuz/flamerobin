@@ -278,7 +278,7 @@ bool FieldPropertiesDialog::getIsNewDomainSelected()
 //-----------------------------------------------------------------------------
 // UDD = user defined domain
 // AGD = auto generated domain (those starting with RDB$)
-wxString FieldPropertiesDialog::getStatementsToExecute()
+const wxString FieldPropertiesDialog::getStatementsToExecute()
 {
     wxString fNameSql(Identifier::userString(textctrl_fieldname->GetValue()));
     Identifier ftemp;
