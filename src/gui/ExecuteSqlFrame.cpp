@@ -889,7 +889,7 @@ void ExecuteSqlFrame::OnButtonLoadClick(wxCommandEvent& WXUNUSED(event))
         return;
 
     if (styled_text_ctrl_sql->LoadFile(fd.GetPath()))
-	    filenameM = fd.GetPath();
+        filenameM = fd.GetPath();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonSaveAsClick(wxCommandEvent& WXUNUSED(event))
@@ -901,20 +901,20 @@ void ExecuteSqlFrame::OnButtonSaveAsClick(wxCommandEvent& WXUNUSED(event))
     if (wxID_OK != fd.ShowModal())
         return;
 
-	filenameM = fd.GetPath();
+    filenameM = fd.GetPath();
     styled_text_ctrl_sql->SaveFile(fd.GetPath());
     statusbar_1->SetStatusText((_("File saved")), 2);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonSaveClick(wxCommandEvent& event)
 {
-	if (filenameM.IsEmpty())
-		OnButtonSaveAsClick(event);
-	else
-	{
-	    styled_text_ctrl_sql->SaveFile(filenameM);
-	    statusbar_1->SetStatusText((_("File saved")), 2);
-	}
+    if (filenameM.IsEmpty())
+        OnButtonSaveAsClick(event);
+    else
+    {
+        styled_text_ctrl_sql->SaveFile(filenameM);
+        statusbar_1->SetStatusText((_("File saved")), 2);
+    }
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::updateHistoryButtons()
@@ -1034,7 +1034,7 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
     styled_text_ctrl_stats->Clear();
 
     using namespace std;
-    wxString terminator = wxT(";");
+    terminatorM = wxT(";");
     wxString commands = statements;
 
     // find terminator, and execute the statement
@@ -1042,7 +1042,7 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
     wxString::size_type searchpos = 0;
     while (true)
     {
-        wxString::size_type pos = commands.find(terminator, searchpos);
+        wxString::size_type pos = commands.find(terminatorM, searchpos);
         wxString::size_type quote = commands.find(wxT("'"), searchpos);        // watch for quoted text
         wxString::size_type comment1 = commands.find(wxT("/*"), searchpos);    // watch for commented text
         wxString::size_type comment2 = commands.find(wxT("--"), searchpos);    // watch for commented text
@@ -1094,13 +1094,13 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
             rollbackTransaction();
         else if (first == "SET" && (second == "TERM" || second == "TERMINATOR"))
         {
-            searchpos = oldpos = lastpos + terminator.length();    // has to be here since terminator length can change
-            terminator = std2wx(third);
-            if (terminator.empty())
+            searchpos = oldpos = lastpos + terminatorM.length();    // has to be here since terminator length can change
+            terminatorM = std2wx(third);
+            if (terminatorM.empty())
             {
                 ::wxMessageBox(_("SET TERM command found without terminator.\nStopping further execution."),
                     _("Warning."), wxOK | wxICON_WARNING);
-                terminator = wxT(";");
+                terminatorM = wxT(";");
                 break;
             }
             continue;
@@ -1134,7 +1134,7 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
 
         if (pos == wxString::npos)    // last statement
             break;
-        searchpos = oldpos = lastpos + terminator.length();
+        searchpos = oldpos = lastpos + terminatorM.length();
     }
 
     if (closeWhenDone)
@@ -1236,7 +1236,7 @@ bool ExecuteSqlFrame::execute(wxString sql, bool prepareOnly)
                 log(wxT("") + s);
                 statusbar_1->SetStatusText(s, 1);
             }
-            executedStatementsM.push_back(executedStatement(sql, type));
+            executedStatementsM.push_back(ExecutedStatement(sql, type, terminatorM));
             styled_text_ctrl_sql->SetFocus();
             if (type == IBPP::stDDL && autoCommitM)
                 commitTransaction();
@@ -1301,12 +1301,12 @@ void ExecuteSqlFrame::commitTransaction()
 
         SubjectLocker locker(databaseM);
         // log statements, done before parsing in case parsing crashes FR
-        for (std::vector<executedStatement>::const_iterator it = executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
+        for (std::vector<ExecutedStatement>::const_iterator it = executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
             if (!Logger::logStatement(*it, databaseM))
                 break;
 
         // parse all successfully executed statements
-        for (std::vector<executedStatement>::const_iterator it = executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
+        for (std::vector<ExecutedStatement>::const_iterator it = executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
         {
             if ((*it).type == IBPP::stDDL)
                 if (!databaseM->parseCommitedSql((*it).statement))

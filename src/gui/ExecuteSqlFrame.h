@@ -106,7 +106,7 @@ public:
         const wxSize& size=wxDefaultSize, long style=wxDEFAULT_FRAME_STYLE);
 
 private:
-    std::vector<executedStatement> executedStatementsM;
+    std::vector<ExecutedStatement> executedStatementsM;
     wxString filenameM;
 
     typedef enum { ttNormal, ttSql, ttError } TextType;
@@ -118,6 +118,7 @@ private:
     wxString localBuffer;
     void updateHistoryButtons();
 
+    wxString terminatorM;
     bool autoCommitM;
     bool inTransactionM;
     IBPP::Transaction transactionM;

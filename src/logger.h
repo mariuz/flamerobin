@@ -30,12 +30,14 @@
 // in database or textual files
 #include <ibpp.h>
 //-----------------------------------------------------------------------------
-class executedStatement
+class ExecutedStatement
 {
 public:
     wxString statement;
     IBPP::STT type;
-    executedStatement(const wxString& st, const IBPP::STT& t): statement(st), type(t) {};
+    wxString terminator;
+    ExecutedStatement(const wxString& st, const IBPP::STT& t,
+        const wxString& term);
 };
 //-----------------------------------------------------------------------------
 class Database;
@@ -44,11 +46,11 @@ class Config;
 class Logger            // maybe we'll extend this later
 {
 private:
-    static bool log2database(const executedStatement& st, Database *db);
-    static bool log2file(Config *, const executedStatement& st, Database *db, const wxString& filename);
-    static bool logStatementByConfig(Config *cfg, const executedStatement& st, Database *db);
+    static bool log2database(const ExecutedStatement& st, Database *db);
+    static bool log2file(Config *, const ExecutedStatement& st, Database *db, const wxString& filename);
+    static bool logStatementByConfig(Config *cfg, const ExecutedStatement& st, Database *db);
 public:
-    static bool logStatement(const executedStatement& st, Database *db);
+    static bool logStatement(const ExecutedStatement& st, Database *db);
 };
 //-----------------------------------------------------------------------------
 #endif

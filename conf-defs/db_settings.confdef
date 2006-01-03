@@ -61,6 +61,11 @@
                     <key>LoggingAddHeader</key>
                     <default>1</default>
                 </setting>
+                <setting type="checkbox">
+                    <caption>Add SET TERM when different terminator is used in editor</caption>
+                    <key>LogSetTerm</key>
+                    <default>0</default>
+                </setting>
             </enables>
         </setting>
         <!--

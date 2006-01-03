@@ -43,14 +43,19 @@
 #include "logger.h"
 #include "metadata/database.h"
 #include "ugly.h"
-
 //----------------------------------------------------------------------------
-bool Logger::log2database(const executedStatement& /*st*/, Database* /*db*/)
+ExecutedStatement::ExecutedStatement(const wxString& st, const IBPP::STT& t,
+        const wxString& term)
+    :statement(st), type(t), terminator(term)
+{
+}
+//----------------------------------------------------------------------------
+bool Logger::log2database(const ExecutedStatement& /*st*/, Database* /*db*/)
 {
     return true;
 }
 //----------------------------------------------------------------------------
-bool Logger::log2file(Config *cfg, const executedStatement& st,
+bool Logger::log2file(Config *cfg, const ExecutedStatement& st,
     Database *db, const wxString& filename)
 {
     enum { singleFile=0, multiFile };
@@ -105,12 +110,18 @@ bool Logger::log2file(Config *cfg, const executedStatement& st,
     }
     else
         f.Write(wxT("\n"));
+    bool logSetTerm = false;
+    cfg->getValue(wxT("LogSetTerm"), logSetTerm);
+    if (logSetTerm && st.terminator != wxT(";"))
+        f.Write(wxT("SET TERM ") + st.terminator + wxT(" ;\n"));
     f.Write(sql);
+    if (logSetTerm && st.terminator != wxT(";"))
+        f.Write(wxT("\nSET TERM ; ") + st.terminator + wxT("\n"));
     f.Close();
     return true;
 }
 //----------------------------------------------------------------------------
-bool Logger::logStatement(const executedStatement& st, Database* db)
+bool Logger::logStatement(const ExecutedStatement& st, Database* db)
 {
     DatabaseConfig dc(db);
     bool result = logStatementByConfig(&dc, st, db);
@@ -123,7 +134,7 @@ bool Logger::logStatement(const executedStatement& st, Database* db)
         return result;
 }
 //---------------------------------------------------------------------------
-bool Logger::logStatementByConfig(Config* cfg, const executedStatement& st,
+bool Logger::logStatementByConfig(Config* cfg, const ExecutedStatement& st,
     Database *db)
 {
     bool logDML = false;
