@@ -1210,10 +1210,15 @@ void MainFrame::OnMenuDisconnect(wxCommandEvent& WXUNUSED(event))
     Database* d = tree_ctrl_1->getSelectedDatabase();
     if (!checkValidDatabase(d))
         return;
+
+    tree_ctrl_1->Freeze();
     if (!d->disconnect())
         reportLastError(_("Error Disconnecting Database"));
 
     FR_CATCH
+
+    wxSafeYield();
+    tree_ctrl_1->Thaw();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::showGeneratorValue(Generator* g)
