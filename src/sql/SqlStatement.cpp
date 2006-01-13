@@ -264,7 +264,10 @@ Relation* SqlStatement::getCreateTriggerRelation()
 //-----------------------------------------------------------------------------
 bool SqlStatement::isDDL() const
 {
-	return (objectTypeM != ntUnknown && actionM != actNONE);
+	// actUPDATE means that we did have the UPDATE statment, but it didn't
+	// convert to actALTER (i.e. it's a regular update statement)
+	return (objectTypeM != ntUnknown && actionM != actNONE
+		&& actionM != actUPDATE);
 }
 //-----------------------------------------------------------------------------
 bool SqlStatement::isAlterColumn() const

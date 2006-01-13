@@ -1226,9 +1226,6 @@ bool ExecuteSqlFrame::execute(wxString sql, bool prepareOnly)
             wxString::size_type p = sql.find_first_not_of(wxT(" \n\t\r"));    // left trim
             if (p != wxString::npos && p > 0)
                 sql.erase(0, p);
-            SqlStatement stm(sql, databaseM);
-            if (stm.isDDL())
-                type = IBPP::stDDL;
             if (type == IBPP::stInsert || type == IBPP::stDelete || type == IBPP::stExecProcedure
                 || type == IBPP::stUpdate)
             {
@@ -1236,6 +1233,9 @@ bool ExecuteSqlFrame::execute(wxString sql, bool prepareOnly)
                 log(wxT("") + s);
                 statusbar_1->SetStatusText(s, 1);
             }
+            SqlStatement stm(sql, databaseM);
+            if (stm.isDDL())
+                type = IBPP::stDDL;
             executedStatementsM.push_back(ExecutedStatement(sql, type, terminatorM));
             styled_text_ctrl_sql->SetFocus();
             if (type == IBPP::stDDL && autoCommitM)
