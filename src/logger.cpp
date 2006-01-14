@@ -63,12 +63,12 @@ bool Logger::log2file(Config *cfg, const ExecutedStatement& st,
     cfg->getValue(wxT("LogToFileType"), logToFileType);
 
     wxString sql = st.statement;
-    if (logToFileType == singleFile)         // add ; to statement if missing
+    if (logToFileType == singleFile)   // add term. to statement if missing
     {
-        sql.erase(sql.find_last_not_of(wxT(" \n\t\r")) + 1);           // trim
-        wxString::size_type pos = sql.find_last_of(wxT(";"));
-        if (pos == wxString::npos || pos < sql.length() - 1)
-            sql += wxT(";");
+        sql.erase(sql.find_last_not_of(wxT(" \n\t\r")) + 1);     // trim
+        wxString::size_type pos = sql.rfind(st.terminator);
+        if (pos == wxString::npos || pos < sql.length() - st.terminator.length())
+            sql += st.terminator;
     }
 
     wxFile f;
