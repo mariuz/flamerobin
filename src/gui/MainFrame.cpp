@@ -434,30 +434,30 @@ void MainFrame::OnWindowMenuItem(wxCommandEvent& event)
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
-void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
+void MainFrame::updateStatusbarText()
 {
-    FR_TRY
-
     wxStatusBar *sb = GetStatusBar();
     if (!sb)
         return;
 
-    //static Database* lastDatabase = 0;
     Database* d = tree_ctrl_1->getSelectedDatabase();
-    //if (d != lastDatabase)
-    //{
-        if (d)
-        {
-            wxString s = d->getUsername() + wxT("@") + d->getConnectionString()
-                + wxT(" (") + d->getConnectionCharset() + wxT(")");
-            sb->SetStatusText(s);
-        }
-        else
-            sb->SetStatusText(_("[No database selected]"));
-        //lastDatabase = d;
-    //}
+    if (d)
+    {    
+		wxString s = d->getUsername() + wxT("@") + d->getConnectionString()
+			+ wxT(" (") + d->getConnectionCharset() + wxT(")");
+        sb->SetStatusText(s);
+	}
+	else
+        sb->SetStatusText(_("[No database selected]"));
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
+{
+    FR_TRY
 
-    FR_CATCH
+	updateStatusbarText();
+
+	FR_CATCH
 }
 //-----------------------------------------------------------------------------
 //! handle double-click on item (or press Enter)
@@ -1200,6 +1200,7 @@ bool MainFrame::connect(bool warn)
             }
         }
     }
+	updateStatusbarText();
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -1219,6 +1220,7 @@ void MainFrame::OnMenuDisconnect(wxCommandEvent& WXUNUSED(event))
 
     wxSafeYield();
     tree_ctrl_1->Thaw();
+	updateStatusbarText();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::showGeneratorValue(Generator* g)

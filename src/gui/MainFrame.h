@@ -133,6 +133,7 @@ public:
 private:
     bool connect(bool warn);
     void showGeneratorValue(Generator* g);
+	void updateStatusbarText();
 
     void showDocsHtmlFile(const wxString& fileName);
 
