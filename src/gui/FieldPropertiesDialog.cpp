@@ -278,7 +278,7 @@ bool FieldPropertiesDialog::getIsNewDomainSelected()
 //-----------------------------------------------------------------------------
 // UDD = user defined domain
 // AGD = auto generated domain (those starting with RDB$)
-const wxString FieldPropertiesDialog::getStatementsToExecute()
+bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements)
 {
     wxString fNameSql(Identifier::userString(textctrl_fieldname->GetValue()));
     Identifier ftemp;
@@ -302,7 +302,6 @@ const wxString FieldPropertiesDialog::getStatementsToExecute()
 
     wxString alterTable = wxT("ALTER TABLE ") + tableM->getQuotedName() + wxT(" ");
     enum unn { unnNone, unnBefore, unnAfter } update_not_null = unnNone;
-	wxString sql; // we'll return this at the end
 
     // detect changes to existing field, create appropriate SQL actions
     if (columnM)
@@ -310,7 +309,7 @@ const wxString FieldPropertiesDialog::getStatementsToExecute()
         // field name changed ?
         if (columnM->getQuotedName() != fName)
         {
-            sql += alterTable + wxT("ALTER ") + columnM->getQuotedName()
+            statements += alterTable + wxT("ALTER ") + columnM->getQuotedName()
                 + wxT(" TO ") + fNameSql + wxT(";\n\n");
         }
 
@@ -320,27 +319,27 @@ const wxString FieldPropertiesDialog::getStatementsToExecute()
         {
             ::wxMessageBox(_("Can not get domain info - aborting."),
                 _("Error"), wxOK | wxICON_ERROR);
-            return wxEmptyString;
+            return false;
         }
         if (columnM->getSource() != selDomain.get() && !newDomain)
         {   // UDD -> other UDD  or  AGD -> UDD
-            sql += alterTable + wxT("ALTER ") + fNameSql +
+            statements += alterTable + wxT("ALTER ") + fNameSql +
                 wxT(" TYPE ") + selDomain.getQuoted() + wxT(";\n\n");
         }
         else if (newDomain
             || type != selDatatype || size != dtSize || scale != dtScale)
         {   // UDD -> AGD  or  AGD -> different AGD
-            sql += alterTable + wxT("ALTER ") + fNameSql +
+            statements += alterTable + wxT("ALTER ") + fNameSql +
                 wxT(" TYPE ");
-            sql += selDatatype;
+            statements += selDatatype;
             if (!dtSize.IsEmpty())
             {
-                sql += wxT("(") + dtSize;
+                statements += wxT("(") + dtSize;
                 if (!dtScale.IsEmpty())
-                    sql += wxT(",") + dtScale;
-                sql += wxT(")");
+                    statements += wxT(",") + dtScale;
+                statements += wxT(")");
             }
-            sql += wxT(";\n\n");
+            statements += wxT(";\n\n");
         }
 
         // not null option changed ?
@@ -349,41 +348,41 @@ const wxString FieldPropertiesDialog::getStatementsToExecute()
             if (!isNullable) // change from NULL to NOT NULL
                 update_not_null = unnBefore;
 
-            sql += wxT("UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = ");
+            statements += wxT("UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = ");
             if (isNullable)
-                sql += wxT("NULL");
+                statements += wxT("NULL");
             else
-                sql += wxT("1");
+                statements += wxT("1");
             wxString fnm = textctrl_fieldname->GetValue();
             fnm.Replace(wxT("'"), wxT("''"));
-            sql += wxT("\nWHERE RDB$FIELD_NAME = '") + fnm
+            statements += wxT("\nWHERE RDB$FIELD_NAME = '") + fnm
                 + wxT("' AND RDB$RELATION_NAME = '") + tableM->getName_()
                 + wxT("';\n\n");
         }
     }
     else // create new field
     {
-        sql += alterTable + wxT("ADD \n") + fNameSql + wxT(" ");
+        statements += alterTable + wxT("ADD \n") + fNameSql + wxT(" ");
         if (newDomain)
         {
-            sql += selDatatype;
+            statements += selDatatype;
             if (!dtSize.IsEmpty())
             {
-                sql += wxT("(") + dtSize;
+                statements += wxT("(") + dtSize;
                 if (!dtScale.IsEmpty())
-                    sql += wxT(",") + dtScale;
-                sql += wxT(")");
+                    statements += wxT(",") + dtScale;
+                statements += wxT(")");
             }
         }
         else
-            sql += selDomain.getQuoted();
+            statements += selDomain.getQuoted();
 
         if (!isNullable)
         {
-            sql += wxT(" not null");
+            statements += wxT(" not null");
             update_not_null = unnAfter;
         }
-        sql += wxT(";\n\n");
+        statements += wxT(";\n\n");
     }
 
     if (update_not_null != unnNone)
@@ -395,12 +394,19 @@ const wxString FieldPropertiesDialog::getStatementsToExecute()
             + wxT(" \nSET ") + fNameSql + wxT(" = '") + s
             + wxT("' \nWHERE ") + fNameSql + wxT(" IS NULL;\n");
         if (update_not_null == unnBefore)
-            sql = sqlAdd + sql;
+            statements = sqlAdd + statements;
         else
-            sql += wxT("COMMIT;\n") + sqlAdd;
+            statements += wxT("COMMIT;\n") + sqlAdd;
     }
-	sql += textctrl_sql->GetValue();
-    return sql;
+    statements += textctrl_sql->GetValue();
+    return true;
+}
+//-----------------------------------------------------------------------------
+const wxString FieldPropertiesDialog::getStatementsToExecute()
+{
+    wxString statements;
+    getStatementsToExecute(statements);
+    return statements;
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::loadCharsets()
@@ -677,8 +683,9 @@ void FieldPropertiesDialog::OnButtonEditDomainClick(wxCommandEvent& WXUNUSED(eve
 void FieldPropertiesDialog::OnButtonOkClick(wxCommandEvent& WXUNUSED(event))
 {
     updateSqlStatement();
-    if (!getStatementsToExecute().IsEmpty())
-    	EndModal(wxID_OK);
+    wxString statements;
+    if (getStatementsToExecute(statements))
+        EndModal(wxID_OK);
 }
 //-----------------------------------------------------------------------------
 wxString FieldPropertiesDialog::getStatementTitle() const
@@ -766,12 +773,18 @@ bool ColumnPropertiesHandler::handleURI(URI& uri)
     //       the parent frame over the newly created sql execution frame
     if (fpd.ShowModal() == wxID_OK)
     {
-        // create ExecuteSqlFrame with option to close at once
-        ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1, fpd.getStatementTitle());
-        esf->setDatabase(t->getDatabase());
-        esf->setSql(fpd.getStatementsToExecute());
-        esf->executeAllStatements(true);
-        esf->Show();
+        wxString statements(fpd.getStatementsToExecute());
+        // nothing to be done
+        if (!statements.IsEmpty())
+        {
+            // create ExecuteSqlFrame with option to close at once
+            ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1, 
+                fpd.getStatementTitle());
+            esf->setDatabase(t->getDatabase());
+            esf->setSql(statements);
+            esf->executeAllStatements(true);
+            esf->Show();
+        }
     }
     return true;
 }

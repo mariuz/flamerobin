@@ -73,6 +73,7 @@ private:
     bool getDomainInfo(const wxString& domain, 
         wxString& type, wxString& size, wxString& scale, wxString& charset);
     bool getIsNewDomainSelected();
+    bool getStatementsToExecute(wxString& statements);
     void layoutControls();
     void loadCharsets();
     void loadCollations();
@@ -94,7 +95,7 @@ protected:
 public:
     // Database is required so that domains, charsets, generators can be loaded
     FieldPropertiesDialog(wxWindow* parent, Table* table, Column* column = 0);
-	wxString getStatementTitle() const;
+    wxString getStatementTitle() const;
     const wxString getStatementsToExecute();
 private:
     // event handling
