@@ -442,7 +442,7 @@ void MainFrame::updateStatusbarText()
 
     Database* d = tree_ctrl_1->getSelectedDatabase();
     if (d)
-    {    
+    {
 		wxString s = d->getUsername() + wxT("@") + d->getConnectionString()
 			+ wxT(" (") + d->getConnectionCharset() + wxT(")");
         sb->SetStatusText(s);
@@ -1666,6 +1666,7 @@ void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
         else
             return;
     }
+	wxBusyCursor bc;
     ExecuteSqlFrame* eff = new ExecuteSqlFrame(this, -1, wxString(_("Execute SQL statements")));
     eff->setDatabase(d);
     eff->Show();
