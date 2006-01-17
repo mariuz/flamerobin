@@ -6,20 +6,30 @@ Instructions assume that you have already compiled wxWidgets.
 There are some tips regarding that at the end of this file.
 
 -------------------------------
+-- Common to all builds 
+-------------------------------
+
+FR must be built with the same settings for debug/release, Ansi/Unicode etc.
+as the wxWidgets library.  Failing to do so will usually lead to compile or
+link errors.
+
+Before building on Windows, you MUST set a WXDIR environment variable which
+points to your wxWidgets root directory. To do this, go to
+Start->Control Panel->System and select the "Advanced" tab. Then, click the
+"Environment Variables" button and add WXDIR to the user or system env vars.
+
+-------------------------------
 -- MSW - Visual C++ Build Instructions
 -------------------------------
+
 There are two ways to build using Microsoft Visual C++. One is via the dsp/dsw
 project files, and the other is via the makefile.vc command line makefile.
 
 * Using the dsp/dsw projects *
-Before building, you MUST set a WXDIR environment variable which points to
-your wxWidgets root directory. To do this, go to
-Start->Control Panel->System and select the "Advanced" tab. Then, click the
-"Environment Variables" button and add WXDIR to the user or system env vars.
 
-Once that is finished, double click on flamerobin\flamerobin.dsw, select
-a build configuration by going to the Build menu, selecting
-"Set build configuration" and then picking a config, then build!
+Double click on flamerobin\flamerobin.dsw, select a build configuration by
+going to the Build menu, selecting "Set build configuration" and then
+picking a config, then build!
 
 * Using the makefiles *
 To use the makefiles, start up a command line and navigate to the
