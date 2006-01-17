@@ -6,7 +6,7 @@ Instructions assume that you have already compiled wxWidgets.
 There are some tips regarding that at the end of this file.
 
 -------------------------------
--- Common to all builds 
+-- Common to all builds
 -------------------------------
 
 FR must be built with the same settings for debug/release, Ansi/Unicode etc.
@@ -17,6 +17,8 @@ Before building on Windows, you MUST set a WXDIR environment variable which
 points to your wxWidgets root directory. To do this, go to
 Start->Control Panel->System and select the "Advanced" tab. Then, click the
 "Environment Variables" button and add WXDIR to the user or system env vars.
+If you are using Windows98, you can set the variable from the command line,
+using the "set" command.
 
 -------------------------------
 -- MSW - Visual C++ Build Instructions
@@ -51,20 +53,20 @@ default to 0 and are optional.
 -- MSW - Borland's Free C++ Build Instructions
 -------------------------------
 
-Borland's Free C++ Compiler (in short BCC) is a freeware version of 
+Borland's Free C++ Compiler (in short BCC) is a freeware version of
 Borland's C++ compiler used in C++ Builder product:
 
 http://www.borland.com/bcppbuilder/freecompiler/
 
 I have used version 5.5.1.
 
-Due to limitation in Borland's command line linker (ilink32), FlameRobin versions 
-0.4.0 and higher do not link anymore. Therefore this build is NO LONGER SUPPORTED. 
+Due to limitation in Borland's command line linker (ilink32), FlameRobin versions
+0.4.0 and higher do not link anymore. Therefore this build is NO LONGER SUPPORTED.
 
 Update: versions after 0.4.5 seem to compile and link ok. So, even that we don't
 officially support it, it does work.
 
-Assuming that you have wxWidgets installed in c:\wxwin260, you should open MS-DOS 
+Assuming that you have wxWidgets installed in c:\wxwin260, you should open MS-DOS
 prompt, cd to flamerobin root directory, and execute:
 
 set WXDIR=c:\wxwin260
@@ -108,8 +110,8 @@ Running the command
 
 make
 
-should build the flamerobin executable. If you experience any problems, 
-please check the flamerobin developer mailing list archive, or ask a 
+should build the flamerobin executable. If you experience any problems,
+please check the flamerobin developer mailing list archive, or ask a
 question there.
 
 
