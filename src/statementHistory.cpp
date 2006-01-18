@@ -36,6 +36,7 @@
     #include "wx/wx.h"
 #endif
 
+#include <wx/ffile.h>
 #include <map>
 
 #include "config/Config.h"
@@ -48,39 +49,42 @@ class Server;
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------
+wxString StatementHistory::getFilename(size_t item)
+{
+	wxString fn = config().getUserHomePath() + wxT("history_");
+	//if (!wxDir::Exists(fn))
+	// TODO: create directory fn
+	// "history_" should be "history/"
+	// I can't find a way to do this with wxWidgets???
+	// there is mkdir in #include <dir.h>, which should work, but I'm not sure
+	// about portability
+
+	for (size_t i=0; i<storageNameM.Length(); ++i)
+		fn += wxString::Format(wxT("%04x"), storageNameM[i]);
+	fn << wxT("_ITEM_") << (item);
+	return fn;
+}
+//-----------------------------------------------------------------------------
 StatementHistory::StatementHistory(const wxString& storageName)
 {
     storageNameM = storageName;
-    Position p = 0;
+    sizeM = 0;
     while (true)    // load history
     {
-        wxString keyname;
-        keyname << wxT("HISTORY_") << storageNameM << wxT("_ITEM_") << (p++);
-        wxString s;
-        if (config().getValue(keyname, s)) // history exists
-            statementsM.push_back(s);
-        else
-            break;
+		if (!wxFileExists(getFilename(sizeM)))
+			break;
+		sizeM++;
     }
 }
 //-----------------------------------------------------------------------------
 StatementHistory::StatementHistory(const StatementHistory& source)
 {
     storageNameM = source.storageNameM;
-    statementsM.assign(source.statementsM.begin(), source.statementsM.end());
+	sizeM = source.sizeM;
 }
 //-----------------------------------------------------------------------------
 StatementHistory::~StatementHistory()
 {
-    int i=0;
-    for (deque<wxString>::iterator it = statementsM.begin(); it != statementsM.end(); ++it)
-    {
-        if ((*it).IsEmpty())    // don't save empty buffers
-            continue;
-        wxString keyname;
-        keyname << wxT("HISTORY_") << storageNameM << wxT("_ITEM_") << (i++);
-        config().setValue(keyname, *it);
-    }
 }
 //-----------------------------------------------------------------------------
 //! reads granularity from config() and gives pointer to appropriate history object
@@ -90,7 +94,7 @@ StatementHistory& StatementHistory::get(Database* db)
     historyGranularity hg = (historyGranularity)(config().get(wxT("statementHistoryGranularity"), (int)hgPerDatabase));
     if (hg == hgCommonToAll)
     {
-        static StatementHistory st(wxT(""));
+        static StatementHistory st(wxEmptyString);
         return st;
     }
 
@@ -119,36 +123,40 @@ StatementHistory& StatementHistory::get(Database* db)
 //-----------------------------------------------------------------------------
 wxString StatementHistory::get(StatementHistory::Position pos)
 {
-    if (pos < size())
-        return statementsM[pos];
-    else
-        return wxEmptyString;
-}
-//-----------------------------------------------------------------------------
-void StatementHistory::set(StatementHistory::Position pos, const wxString& str)
-{
-    if (pos < size())
-        statementsM[pos] = str;
-    else
-        statementsM.push_back(str);
-    checkSize();
+    if (pos < sizeM)
+	{
+		wxFFile f(getFilename(pos), "rb");
+		if (!f.IsOpened())
+			return wxEmptyString;
+		wxString retval;
+		if (f.ReadAll(&retval))
+		{
+			f.Close();
+			return retval;
+		}
+	}
+	return wxEmptyString;
 }
 //-----------------------------------------------------------------------------
 StatementHistory::Position StatementHistory::add(const wxString& str)
 {
-    if (!config().get(wxT("limitHistoryItemSize"), true) ||
-        int(str.Length()) < 1024 * config().get(wxT("statementHistoryItemSize"), 10))
-    {
-        if (statementsM.empty() || statementsM.back() != str)
-            statementsM.push_back(str);
-        checkSize();
+	if (sizeM == 0 || get(sizeM-1) != str)
+	{
+		wxFFile f(getFilename(sizeM), wxT("wb+"));
+		if (f.IsOpened())
+		{
+			f.Write(str);
+			f.Close();
+			sizeM++;
+			checkSize();
+		}
     }
-    return statementsM.size() - 1;
+    return sizeM - 1;
 }
 //-----------------------------------------------------------------------------
 StatementHistory::Position StatementHistory::size()
 {
-    return statementsM.size();
+    return sizeM;
 }
 //-----------------------------------------------------------------------------
 void StatementHistory::checkSize()
@@ -157,7 +165,9 @@ void StatementHistory::checkSize()
         return;
 
     int historySize = config().get(wxT("statementHistorySize"), 50);     // -1 = unlimited
-    while (statementsM.size() > (deque<wxString>::size_type)historySize)
-        statementsM.pop_front();
+    while (sizeM > (deque<wxString>::size_type)historySize)
+	{
+		// reorder stuff or truncate files or whatever
+	}
 }
 //-----------------------------------------------------------------------------
