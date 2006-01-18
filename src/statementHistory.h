@@ -27,10 +27,6 @@
 #define FR_HISTORY_H
 
 #include <wx/wx.h>
-
-#define MULTIFILE_HISTORY
-
-#include <deque>
 //-----------------------------------------------------------------------------
 class Database;
 //-----------------------------------------------------------------------------
@@ -38,24 +34,20 @@ class StatementHistory
 {
 private:
     StatementHistory(const wxString& storageName);
-	wxString getFilename(size_t item);
+    wxString getFilename(size_t item);
     wxString storageNameM;
-    void checkSize();
-	size_t sizeM;
+    size_t sizeM;
 
 public:
     // copy ctor needed for std:: containers
     StatementHistory(const StatementHistory& source);
-    virtual ~StatementHistory();
-
-    typedef std::deque<wxString>::size_type Position;
+    typedef size_t Position;
 
     //! reads granularity from config() and gives pointer to appropriate history object
     static StatementHistory& get(Database *db);
 
     wxString get(Position position);
-    //void set(Position position, const wxString& str);
-    Position add(const wxString&);
+    void add(const wxString&);
     Position size();
 };
 //-----------------------------------------------------------------------------
