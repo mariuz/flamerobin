@@ -229,6 +229,7 @@ void DataGrid::OnMenuCopyToCB(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor cr;
     wxString sRows;
+	bool all = true;
     for (int i = 0; i < GetNumberRows(); i++)
     {
         wxString sRow;
@@ -242,12 +243,19 @@ void DataGrid::OnMenuCopyToCB(wxCommandEvent& WXUNUSED(event))
                     sRow += wxT("\t");
                 sRow += GetCellValue(i, j);
             }
+			else
+				all = false;
         }
         if (!sRow.IsEmpty())
             sRows += sRow + wxTextBuffer::GetEOL();
     }
     if (!sRows.IsEmpty())
         copyToClipboard(sRows);
+
+    GridTable* table = dynamic_cast<GridTable*>(GetTable());
+	if (all && table && table->canFetchMoreRows())
+		wxMessageBox(_("There are more rows to fetch from database"),
+		_("Only the rows in the grid are copied"), wxOK|wxICON_INFORMATION);
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnMenuCopyToCBAsInsert(wxCommandEvent& WXUNUSED(event))
@@ -264,6 +272,7 @@ void DataGrid::OnMenuCopyToCBAsInsert(wxCommandEvent& WXUNUSED(event))
     // NOTE: this has been reworked (compared to myDataGrid), because
     //       not all rows have necessarily the same fields selected
     wxString sRows;
+	bool all = true;
     for (int i = 0; i < GetNumberRows(); i++)
     {
         wxString sCols;
@@ -281,6 +290,8 @@ void DataGrid::OnMenuCopyToCBAsInsert(wxCommandEvent& WXUNUSED(event))
                     sValues += wxT(", ");
                 sValues += table->getCellValueForInsert(i, j);
             }
+			else
+				all = false;
         }
         if (!sCols.IsEmpty())
         {
@@ -294,6 +305,10 @@ void DataGrid::OnMenuCopyToCBAsInsert(wxCommandEvent& WXUNUSED(event))
     }
     if (!sRows.IsEmpty())
         copyToClipboard(sRows);
+
+	if (all && table->canFetchMoreRows())
+		wxMessageBox(_("There are more rows to fetch from database"),
+		_("Only the rows in the grid are copied"), wxOK|wxICON_INFORMATION);
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnMenuLabelFont(wxCommandEvent& WXUNUSED(event))
