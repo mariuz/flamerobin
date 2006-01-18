@@ -37,6 +37,7 @@
 #endif
 
 #include <wx/ffile.h>
+#include <wx/filefn.h>
 #include <map>
 
 #include "config/Config.h"
@@ -51,13 +52,9 @@ using namespace std;
 //-----------------------------------------------------------------------------
 wxString StatementHistory::getFilename(size_t item)
 {
-	wxString fn = config().getUserHomePath() + wxT("history_");
-	//if (!wxDir::Exists(fn))
-	// TODO: create directory fn
-	// "history_" should be "history/"
-	// I can't find a way to do this with wxWidgets???
-	// there is mkdir in #include <dir.h>, which should work, but I'm not sure
-	// about portability
+	wxString fn = config().getUserHomePath() + wxT("history/");
+	if (!wxDirExists(fn))
+		wxMkdir(fn);
 
 	for (size_t i=0; i<storageNameM.Length(); ++i)
 		fn += wxString::Format(wxT("%04x"), storageNameM[i]);
