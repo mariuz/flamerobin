@@ -128,6 +128,10 @@ bool SqlTokenizer::nextToken()
         symbolToken(tkPARENCLOSE);
     else if (c == '=')
         symbolToken(tkEQUALS);
+    else if (c == '/' && *(sqlTokenEndM + 1) == '*')
+        multilineCommentToken();
+    else if (c == '-' && *(sqlTokenEndM + 1) == '-')
+        singleLineCommentToken();
     else if (wxIsspace(c))
         whitespaceToken();
     else
