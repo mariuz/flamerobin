@@ -43,28 +43,28 @@
 //-----------------------------------------------------------------------------
 void TokenList::add(const SqlTokenType& item)
 {
-	tokensM.push_back(item);
+    tokensM.push_back(item);
 }
 //-----------------------------------------------------------------------------
 const SqlTokenType& TokenList::operator[](const size_t& index) const
 {
-	static const SqlTokenType dummy = tkEOF;
-	if (index >= tokensM.size())
-		return dummy;
-	else
-		return tokensM[index];
+    static const SqlTokenType dummy = tkEOF;
+    if (index >= tokensM.size())
+        return dummy;
+    else
+        return tokensM[index];
 }
 //-----------------------------------------------------------------------------
 size_t TokenList::size() const
 {
-	return tokensM.size();
+    return tokensM.size();
 }
 //-----------------------------------------------------------------------------
 // STATEMENT
 //-----------------------------------------------------------------------------
 SqlStatement::SqlStatement(const wxString& sql, Database *db)
-	:actionM(actNONE), objectTypeM(ntUnknown), databaseM(db), objectM(0),
-	 identifierTokenIndexM(0), isAlterColumnM(false), isDatatypeM(false)
+    :actionM(actNONE), objectTypeM(ntUnknown), databaseM(db), objectM(0),
+     identifierTokenIndexM(0), isAlterColumnM(false), isDatatypeM(false)
 {
     // use the tokenizer to split the statements into a vector of tokens
     // also keep the token strings for identifiers and strings
@@ -171,10 +171,10 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db)
 
     // map "CREATE OR ALTER" and "RECREATE" to correct action
     if (actionM == actCREATE_OR_ALTER || actionM == actRECREATE)
-    	actionM = (objectM ? actALTER : actCREATE);
+        actionM = (objectM ? actALTER : actCREATE);
 
-	// -------------- STEP 2 ------------------------------------------------
-	// if we decide to have a two-step evaluation, this is the breaking point
+    // -------------- STEP 2 ------------------------------------------------
+    // if we decide to have a two-step evaluation, this is the breaking point
 
 
     // get remaining tokens, and token content for identifiers + strings
@@ -224,7 +224,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db)
             return; // true;
     }
 
-	if (actionM == actALTER)	// check for alter column
+    if (actionM == actALTER)    // check for alter column
     {
         // handle "ALTER TABLE xyz ALTER [COLUMN] fgh TYPE {domain or datatype}
         if (objectTypeM == ntTable && tokensM[identifierTokenIndexM + 1] == kwALTER)
@@ -234,7 +234,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db)
                 fieldNameIndex++;
             if (tokensM[fieldNameIndex] == tkIDENTIFIER && tokensM[fieldNameIndex + 1] == kwTYPE)
             {
-				isAlterColumnM = true;
+                isAlterColumnM = true;
                 fieldNameM.setFromSql(tokenStringsM[fieldNameIndex]);
 
                 stt = tokensM[fieldNameIndex + 2];
@@ -246,12 +246,12 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db)
                     || (stt == kwDOUBLE && tokensM[fieldNameIndex + 3] == kwPRECISION);
             }
         }
-	}
+    }
 }
 //-----------------------------------------------------------------------------
 Relation* SqlStatement::getCreateTriggerRelation()
 {
-	if (objectTypeM == ntTrigger && databaseM
+    if (objectTypeM == ntTrigger && databaseM
         && tokensM[identifierTokenIndexM + 1] == kwFOR
         && tokensM[identifierTokenIndexM + 2] == tkIDENTIFIER)
     {
@@ -264,57 +264,57 @@ Relation* SqlStatement::getCreateTriggerRelation()
 //-----------------------------------------------------------------------------
 bool SqlStatement::isDDL() const
 {
-	// actUPDATE means that we did have the UPDATE statment, but it didn't
-	// convert to actALTER (i.e. it's a regular update statement)
-	return (objectTypeM != ntUnknown && actionM != actNONE
-		&& actionM != actUPDATE);
+    // actUPDATE means that we did have the UPDATE statment, but it didn't
+    // convert to actALTER (i.e. it's a regular update statement)
+    return (objectTypeM != ntUnknown && actionM != actNONE
+        && actionM != actUPDATE);
 }
 //-----------------------------------------------------------------------------
 bool SqlStatement::isAlterColumn() const
 {
-	return isAlterColumnM;
+    return isAlterColumnM;
 }
 //-----------------------------------------------------------------------------
 bool SqlStatement::isDatatype() const
 {
-	return isDatatypeM;
+    return isDatatypeM;
 }
 //-----------------------------------------------------------------------------
 MetadataItem* SqlStatement::getObject()
 {
-	return objectM;
+    return objectM;
 }
 //-----------------------------------------------------------------------------
 NodeType SqlStatement::getObjectType() const
 {
-	return objectTypeM;
+    return objectTypeM;
 }
 //-----------------------------------------------------------------------------
 Identifier SqlStatement::getIdentifier()
 {
-	return nameM;
+    return nameM;
 }
 //-----------------------------------------------------------------------------
 wxString SqlStatement::getName()
 {
-	return nameM.get();
+    return nameM.get();
 }
 //-----------------------------------------------------------------------------
 wxString SqlStatement::getFieldName()
 {
-	return fieldNameM.get();
+    return fieldNameM.get();
 }
 //-----------------------------------------------------------------------------
 SqlAction SqlStatement::getAction() const
 {
-	return actionM;
+    return actionM;
 }
 //-----------------------------------------------------------------------------
 bool SqlStatement::actionIs(const SqlAction& act, NodeType nt) const
 {
-	if (nt == ntUnknown)
-		return actionM == act;
-	else
-		return (actionM == act && objectTypeM == nt);
+    if (nt == ntUnknown)
+        return actionM == act;
+    else
+        return (actionM == act && objectTypeM == nt);
 }
 //-----------------------------------------------------------------------------
