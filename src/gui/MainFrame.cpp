@@ -54,7 +54,7 @@
 #include "gui/RestoreFrame.h"
 #include "gui/ServerRegistrationDialog.h"
 #include "gui/SimpleHtmlFrame.h"
-#include "gui/TriggerWizardDialog.h"
+//#include "gui/TriggerWizardDialog.h"
 #include "framemanager.h"
 #include "frtypes.h"
 #include "frversion.h"
@@ -701,8 +701,10 @@ void MainFrame::OnMenuCreateTriggerForTable(wxCommandEvent& WXUNUSED(event))
     MetadataItem* i = tree_ctrl_1->getSelectedMetadataItem();
     if (!i)
         return;
-    TriggerWizardDialog* t = new TriggerWizardDialog(this, i);
-    t->Show();
+    URI uri = URI(wxT("fr://create_trigger?parent_window=") +
+        wxString::Format(wxT("%ld"), (uintptr_t)this) +
+        wxT("&object_address=") + wxString::Format(wxT("%ld"), (uintptr_t)i));
+    getURIProcessor().handleURI(uri);
 
     FR_CATCH
 }

@@ -115,7 +115,18 @@ BEGIN_EVENT_TABLE(TriggerWizardDialog, BaseDialog)
     EVT_BUTTON(wxID_OK, TriggerWizardDialog::OnOkButtonClick)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
-void TriggerWizardDialog::OnOkButtonClick(wxCommandEvent& event)
+void TriggerWizardDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
+{
+    if (getSqlStatement().IsEmpty())
+    {
+        wxMessageBox(_("Please select INSERT, UPDATE or DELETE checkbox."),
+            _("No action specified."), wxOK|wxICON_INFORMATION);
+    }
+    else
+        EndModal(wxID_OK);
+}
+//-----------------------------------------------------------------------------
+wxString TriggerWizardDialog::getSqlStatement() const
 {
     wxString insupdel, suffix;
     if (checkbox_insert->IsChecked())
@@ -137,28 +148,27 @@ void TriggerWizardDialog::OnOkButtonClick(wxCommandEvent& event)
         insupdel += wxT(" DELETE");
         suffix += wxT("D");
     }
+    if (insupdel.IsEmpty())
+        return wxEmptyString;
 
     bool isBefore = (radio_box_1_copy->GetSelection() == 0);
     wxString name(Identifier::userString(text_ctrl_1->GetValue()));
     if (name.IsEmpty())
     {
-        wxString sname = relationM->getName_() + wxT("_") + (isBefore ? wxT("B") : wxT("A")) + suffix
+        wxString sname = relationM->getName_() + wxT("_")
+            + (isBefore ? wxT("B") : wxT("A")) + suffix
             + wxString::Format(wxT("%d"), spin_ctrl_1->GetValue());
         Identifier iname(sname);
         name = iname.getQuoted();
     }
 
-    wxString sql = wxT("SET TERM ^ ;\n\nCREATE TRIGGER ") + name + wxT(" FOR ") + relationM->getQuotedName() + wxT("\n") +
-        (checkbox_1_copy->IsChecked() ? wxEmptyString : wxT("IN")) + wxT("ACTIVE ") +
-        (isBefore ? wxT("BEFORE") : wxT("AFTER")) +
-        insupdel + wxString::Format(wxT(" POSITION %d"), spin_ctrl_1->GetValue()) +
-        wxT("\nAS \nBEGIN \n\t/* enter trigger code here */ \nEND^\n\nSET TERM ; ^ \n");
-
-    ExecuteSqlFrame *eff = new ExecuteSqlFrame(GetParent(), -1, wxString(_("Creating new trigger")));
-    eff->setDatabase(relationM->getDatabase());
-    eff->setSql(sql);
-    eff->Show();
-    event.Skip();    // let the dialog close
+    wxString sql = wxT("SET TERM ^ ;\n\nCREATE TRIGGER ") + name +
+        wxT(" FOR ") + relationM->getQuotedName() + wxT("\n") +
+        (checkbox_1_copy->IsChecked() ? wxEmptyString : wxT("IN")) +
+        wxT("ACTIVE ") + (isBefore ? wxT("BEFORE") : wxT("AFTER")) +
+        insupdel + wxString::Format(wxT(" POSITION %d"),
+        spin_ctrl_1->GetValue()) + wxT("\nAS \nBEGIN \n\t/* enter trigger code here */ \nEND^\n\nSET TERM ; ^ \n");
+    return sql;
 }
 //-----------------------------------------------------------------------------
 class CreateTriggerHandler: public URIHandler
@@ -181,8 +191,25 @@ bool CreateTriggerHandler::handleURI(URI& uri)
     if (!t || !w)
         return true;
 
-    TriggerWizardDialog* tw = new TriggerWizardDialog(w, t);
-    tw->Show();
+    TriggerWizardDialog twd(w, t);
+    // NOTE: this has been moved here from OnOkButtonClick() to make frame
+    //       activation work properly.  Basically activation of another
+    //       frame has to happen outside wxDialog::ShowModal(), because it
+    //       does at the end re-focus the last focused control, raising
+    //       the parent frame over the newly created sql execution frame
+    if (twd.ShowModal() == wxID_OK)
+    {
+        wxString statement(twd.getSqlStatement());
+        if (!statement.IsEmpty())
+        {
+            // create ExecuteSqlFrame with option to close at once
+            ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1,
+                _("Creating new trigger"));
+            esf->setDatabase(t->getDatabase());
+            esf->setSql(statement);
+            esf->Show();
+        }
+    }
     return true;
 }
 //-----------------------------------------------------------------------------

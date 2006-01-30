@@ -39,9 +39,10 @@ class TriggerWizardDialog: public BaseDialog
 public:
     TriggerWizardDialog(wxWindow* parent, MetadataItem *item);
     void OnOkButtonClick(wxCommandEvent& event);
+    wxString getSqlStatement() const;
 
 private:
-	MetadataItem *relationM;
+    MetadataItem *relationM;
     void set_properties();
     void do_layout();
 
