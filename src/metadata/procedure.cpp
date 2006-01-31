@@ -330,7 +330,7 @@ wxString Procedure::getAlterSql()
         if (!output.empty())
             sql += output + wxT(" )");
     }
-    sql += wxT("\nAS");
+    sql += wxT("\nAS\n");
     sql += source;
     sql += wxT("^\nSET TERM ; ^");
     return sql;
