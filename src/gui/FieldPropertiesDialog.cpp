@@ -278,7 +278,8 @@ bool FieldPropertiesDialog::getIsNewDomainSelected()
 //-----------------------------------------------------------------------------
 // UDD = user defined domain
 // AGD = auto generated domain (those starting with RDB$)
-bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements)
+bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
+    bool justCheck)
 {
     wxString fNameSql(Identifier::userString(textctrl_fieldname->GetValue()));
     Identifier ftemp;
@@ -385,7 +386,7 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements)
         statements += wxT(";\n\n");
     }
 
-    if (update_not_null != unnNone)
+    if (update_not_null != unnNone && !justCheck)
     {
         wxString s = ::wxGetTextFromUser(
             _("Enter value for existing fields containing NULL"),
@@ -399,13 +400,13 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements)
             statements += wxT("COMMIT;\n") + sqlAdd;
     }
     statements += textctrl_sql->GetValue();
-    return true;
+    return !statements.IsEmpty();
 }
 //-----------------------------------------------------------------------------
 const wxString FieldPropertiesDialog::getStatementsToExecute()
 {
     wxString statements;
-    getStatementsToExecute(statements);
+    getStatementsToExecute(statements, false);
     return statements;
 }
 //-----------------------------------------------------------------------------
@@ -684,7 +685,7 @@ void FieldPropertiesDialog::OnButtonOkClick(wxCommandEvent& WXUNUSED(event))
 {
     updateSqlStatement();
     wxString statements;
-    if (getStatementsToExecute(statements))
+    if (getStatementsToExecute(statements, true))
         EndModal(wxID_OK);
 }
 //-----------------------------------------------------------------------------
@@ -778,7 +779,7 @@ bool ColumnPropertiesHandler::handleURI(URI& uri)
         if (!statements.IsEmpty())
         {
             // create ExecuteSqlFrame with option to close at once
-            ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1, 
+            ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1,
                 fpd.getStatementTitle());
             esf->setDatabase(t->getDatabase());
             esf->setSql(statements);

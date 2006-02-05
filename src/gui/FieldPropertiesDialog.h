@@ -70,10 +70,10 @@ private:
     wxButton* button_cancel;
 
     void createControls();
-    bool getDomainInfo(const wxString& domain, 
+    bool getDomainInfo(const wxString& domain,
         wxString& type, wxString& size, wxString& scale, wxString& charset);
     bool getIsNewDomainSelected();
-    bool getStatementsToExecute(wxString& statements);
+    bool getStatementsToExecute(wxString& statements, bool justCheck);
     void layoutControls();
     void loadCharsets();
     void loadCollations();
