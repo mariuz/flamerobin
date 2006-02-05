@@ -299,12 +299,10 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
     m.Append(ID_MENU_SELECT_ALL,       _("Select &All"));
     m.Append(ID_MENU_EXECUTE_SELECTED, _("E&xecute selected"));
 
-    if (GetSelectionStart() != GetSelectionEnd())        // semething is selected
+    int slen = GetSelectionStart() - GetSelectionEnd();
+    if (slen && slen < 50)     // something (small) is selected
     {
-        wxString sel = GetSelectedText();
-        int p = sel.Find(wxT(" "));
-        if (p != -1)
-            sel.Remove(p);
+        wxString sel = GetSelectedText().Strip();
         m.Append(ID_MENU_FIND_SELECTED, _("S&how properties for ") + sel);
     }
 
