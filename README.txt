@@ -18,4 +18,3 @@ License
 FlameRobin is licensed under the IDPL license.
 A copy of the license can be found in the docs folder.
 
-Testing subversion - please ignore
