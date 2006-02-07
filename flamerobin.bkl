@@ -286,6 +286,7 @@
         $(SOURCEDIR)/gui/BackupRestoreBaseFrame.h
         $(SOURCEDIR)/gui/BaseDialog.h
         $(SOURCEDIR)/gui/BaseFrame.h
+        $(SOURCEDIR)/gui/AdvancedMessageDialog.h
         $(SOURCEDIR)/gui/ContextMenuMetadataItemVisitor.h
         $(SOURCEDIR)/gui/controls/LogTextControl.h
         $(SOURCEDIR)/gui/controls/TextControl.h
@@ -368,6 +369,7 @@
         $(SOURCEDIR)/frDataGridTable.cpp
         $(SOURCEDIR)/frprec.cpp
         $(SOURCEDIR)/frutils.cpp
+        $(SOURCEDIR)/gui/AdvancedMessageDialog.cpp
         $(SOURCEDIR)/gui/BackupFrame.cpp
         $(SOURCEDIR)/gui/BackupRestoreBaseFrame.cpp
         $(SOURCEDIR)/gui/BaseDialog.cpp

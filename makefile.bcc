@@ -19,24 +19,24 @@ BCCDIR = $(MAKEDIR)\..
 # These are configurable options:
 # -------------------------------------------------------------------------
 
-# C++ compiler 
+# C++ compiler
 !ifndef CXX
 CXX = bcc32
 !endif
 
-# Standard flags for C++ 
+# Standard flags for C++
 !ifndef CXXFLAGS
-CXXFLAGS = 
+CXXFLAGS =
 !endif
 
-# Standard preprocessor flags (common for CC and CXX) 
+# Standard preprocessor flags (common for CC and CXX)
 !ifndef CPPFLAGS
 CPPFLAGS = -a8 -g0
 !endif
 
-# Standard linker flags 
+# Standard linker flags
 !ifndef LDFLAGS
-LDFLAGS = 
+LDFLAGS =
 !endif
 
 #  [0,1]
@@ -94,7 +94,7 @@ FLAMEROBIN_CXXFLAGS = $(__RTL_TYPE) -I$(BCCDIR)\include -tWM $(__DEBUGINFO) \
 	$(____flamerobin_UNICODE_DEFINE_p) $(____flamerobin_WXDEBUG_p) \
 	$(____flamerobin_DEBUGFLAG_p) -D_WINDOWS -D__WINDOWS__ -DWINVER=0x400 \
 	-DWIN32 -D__WIN32__ -D__WIN95__ -DSTRICT -D__WXMSW__ -DwxUSE_GUI=1 \
-	-DWIN32_LEAN_AND_MEAN \
+	-DWIN32_LEAN_AND_MEAN -j2 \
 	-I$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(U_OPT)$(D_OPT) -DIBPP_BCC \
 	-DIBPP_WINDOWS -I.\src -I.\src\ibpp -I.\res -Hu \
 	-H=bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.csm $(CPPFLAGS) $(CXXFLAGS)
@@ -115,6 +115,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridTable.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AdvancedMessageDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupRestoreBaseFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseDialog.obj \
@@ -182,7 +183,7 @@ R_OPT = s
 __RTL_TYPE_14 = i
 !endif
 !if "$(STATICRTL)" == "1"
-__RTL_TYPE_14 = 
+__RTL_TYPE_14 =
 !endif
 !if "$(UNICODE)" == "1"
 ____flamerobin_UNICODE_DEFINE_p = -D_UNICODE
@@ -206,7 +207,7 @@ ____flamerobin_DEBUGFLAG_p_1 = -d_DEBUG
 __RTL_TYPE = -tWR
 !endif
 !if "$(STATICRTL)" == "1"
-__RTL_TYPE = 
+__RTL_TYPE =
 !endif
 !if "$(FINAL)" == "0"
 __OPTIMIZE = -Od
@@ -242,7 +243,7 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT):
 
 all: bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe
 
-clean: 
+clean:
 	-if exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\*.obj del bcc$(U_OPT)$(R_OPT)$(D_OPT)\*.obj
 	-if exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\*.res del bcc$(U_OPT)$(R_OPT)$(D_OPT)\*.res
 	-if exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\*.csm del bcc$(U_OPT)$(R_OPT)$(D_OPT)\*.csm
@@ -365,6 +366,9 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.obj: .\src\frprec.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) -H $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.obj: .\src\frutils.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AdvancedMessageDialog.obj: .\src\gui\AdvancedMessageDialog.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupFrame.obj: .\src\gui\BackupFrame.cpp

@@ -43,6 +43,7 @@
 #include "config/DatabaseConfig.h"
 #include "core/FRError.h"
 #include "dberror.h"
+#include "gui/AdvancedMessageDialog.h"
 #include "gui/BackupFrame.h"
 #include "gui/ContextMenuMetadataItemVisitor.h"
 #include "gui/DatabaseRegistrationDialog.h"
@@ -540,10 +541,12 @@ void MainFrame::OnClose(wxCloseEvent& event)
     FR_TRY
 
     Raise();
-    bool confirm = config().get(wxT("ConfirmQuit"), false);
-    if (confirm && event.CanVeto() && wxNO ==
-        wxMessageBox(_("Are you sure you wish to exit?"), wxT("FlameRobin"),
-        wxYES_NO | wxICON_QUESTION))
+    AdvancedMessageDialogButtons btns;
+    btns.add(wxOK, _("E&xit"));
+    btns.add(wxCANCEL, _("&Cancel"));
+    if (event.CanVeto() && wxCANCEL ==
+        AdvancedMessageBox(_("Are you sure you wish to exit?"),
+        wxT("FlameRobin"), btns, wxT("DIALOG_ConfirmQuit")))
     {
         event.Veto();
         return;
