@@ -70,14 +70,17 @@ public:
     void OnButtonClick(wxCommandEvent& event);
 
     AdvancedMessageDialog(wxWindow* parent, const wxString& message,
-        const wxString& caption, const AdvancedMessageDialogButtons& buttons,
-        const wxString& name);
+        const wxString& caption, int style = 0,
+        AdvancedMessageDialogButtons *buttons = 0,
+        const wxString& name = wxEmptyString);
 
     //DECLARE_EVENT_TABLE()
 };
 //----------------------------------------------------------------------------
-int AdvancedMessageBox(const wxString& message,
-    const wxString& caption, const AdvancedMessageDialogButtons& buttons,
+// you can provide regular buttons in "style" parameter,
+// just like in wxMessageBox
+int AdvancedMessageBox(const wxString& message, const wxString& caption,
+    int style = 0, AdvancedMessageDialogButtons *buttons = 0,
     const wxString& keyname = wxEmptyString);
 //----------------------------------------------------------------------------
 #endif

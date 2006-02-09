@@ -442,11 +442,11 @@ void MainFrame::updateStatusbarText()
     Database* d = tree_ctrl_1->getSelectedDatabase();
     if (d)
     {
-		wxString s = d->getUsername() + wxT("@") + d->getConnectionString()
-			+ wxT(" (") + d->getConnectionCharset() + wxT(")");
+        wxString s = d->getUsername() + wxT("@") + d->getConnectionString()
+            + wxT(" (") + d->getConnectionCharset() + wxT(")");
         sb->SetStatusText(s);
-	}
-	else
+    }
+    else
         sb->SetStatusText(_("[No database selected]"));
 }
 //-----------------------------------------------------------------------------
@@ -454,9 +454,9 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 {
     FR_TRY
 
-	updateStatusbarText();
+    updateStatusbarText();
 
-	FR_CATCH
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 //! handle double-click on item (or press Enter)
@@ -546,7 +546,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
     btns.add(wxCANCEL, _("&Cancel"));
     if (event.CanVeto() && wxCANCEL ==
         AdvancedMessageBox(_("Are you sure you wish to exit?"),
-        wxT("FlameRobin"), btns, wxT("DIALOG_ConfirmQuit")))
+        wxT("FlameRobin"), wxICON_QUESTION, &btns, wxT("DIALOG_ConfirmQuit")))
     {
         event.Veto();
         return;
@@ -1203,7 +1203,7 @@ bool MainFrame::connect(bool warn)
             }
         }
     }
-	updateStatusbarText();
+    updateStatusbarText();
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -1223,7 +1223,7 @@ void MainFrame::OnMenuDisconnect(wxCommandEvent& WXUNUSED(event))
 
     wxSafeYield();
     tree_ctrl_1->Thaw();
-	updateStatusbarText();
+    updateStatusbarText();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::showGeneratorValue(Generator* g)
@@ -1591,9 +1591,9 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
     Column* c = dynamic_cast<Column*>(m);
     if (c)
     {
-	    URI uri = URI(wxT("fr://edit_field?parent_window=") + wxString::Format(wxT("%ld"), (uintptr_t)this)
-	        + wxT("&object_address=") + wxString::Format(wxT("%ld"), (uintptr_t)c));
-	    getURIProcessor().handleURI(uri);
+        URI uri = URI(wxT("fr://edit_field?parent_window=") + wxString::Format(wxT("%ld"), (uintptr_t)this)
+            + wxT("&object_address=") + wxString::Format(wxT("%ld"), (uintptr_t)c));
+        getURIProcessor().handleURI(uri);
     }
     else
         frameManager().showMetadataPropertyFrame(this, m);
@@ -1605,7 +1605,7 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
-	Database *db = tree_ctrl_1->getSelectedDatabase();
+    Database *db = tree_ctrl_1->getSelectedDatabase();
     Procedure* p = dynamic_cast<Procedure *>(tree_ctrl_1->getSelectedMetadataItem());
     View* v = dynamic_cast<View *>(tree_ctrl_1->getSelectedMetadataItem());
     Trigger* t = dynamic_cast<Trigger *>(tree_ctrl_1->getSelectedMetadataItem());
@@ -1615,11 +1615,11 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
     ExecuteSqlFrame* eff = new ExecuteSqlFrame(this, -1, wxString(_("Alter object")));
     eff->setDatabase(db);
     if (p)
-	    eff->setSql(p->getAlterSql());
-	else if (v)
-	    eff->setSql(v->getAlterSql());
-	else if (t)
-	    eff->setSql(t->getAlterSql());
+        eff->setSql(p->getAlterSql());
+    else if (v)
+        eff->setSql(v->getAlterSql());
+    else if (t)
+        eff->setSql(t->getAlterSql());
     eff->Show();
 
     FR_CATCH
@@ -1669,7 +1669,7 @@ void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
         else
             return;
     }
-	wxBusyCursor bc;
+    wxBusyCursor bc;
     ExecuteSqlFrame* eff = new ExecuteSqlFrame(this, -1, wxString(_("Execute SQL statements")));
     eff->setDatabase(d);
     eff->Show();

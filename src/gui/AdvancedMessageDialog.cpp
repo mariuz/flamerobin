@@ -36,39 +36,82 @@
     #include "wx/wx.h"
 #endif
 //----------------------------------------------------------------------------
+#include <wx/artprov.h>
 #include <vector>
 #include <utility>
 #include "config/Config.h"
 #include "AdvancedMessageDialog.h"
 //----------------------------------------------------------------------------
 AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent,
-    const wxString& message, const wxString& caption,
-    const AdvancedMessageDialogButtons& buttons, const wxString& name)
+    const wxString& message, const wxString& caption, int style,
+    AdvancedMessageDialogButtons* buttons, const wxString& name)
     :wxDialog(parent, -1, caption)
 {
     wxBoxSizer *bSizer1 = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer *bSizer2 = new wxBoxSizer(wxHORIZONTAL);
+    wxBoxSizer *btnSizer = new wxBoxSizer(wxHORIZONTAL);
+    wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
     messageM = new wxStaticText(this, -1, message, wxDefaultPosition,
         wxDefaultSize, wxALIGN_CENTRE);
-    bSizer1->Add(messageM, 1, wxALL|wxEXPAND, 20);
+
+    // setup the icon
+    wxArtID iconid = wxART_MISSING_IMAGE;
+    if ((style & wxICON_QUESTION) == wxICON_QUESTION)
+        iconid = wxART_QUESTION;
+    else if ((style & wxICON_WARNING) == wxICON_WARNING)
+        iconid = wxART_WARNING;
+    else if ((style & wxICON_ERROR) == wxICON_ERROR)
+        iconid = wxART_ERROR;
+    else if ((style & wxICON_INFORMATION) == wxICON_INFORMATION)
+        iconid = wxART_INFORMATION;
+    if (iconid != wxART_MISSING_IMAGE)
+    {
+        wxStaticBitmap* sb = new wxStaticBitmap(this, -1,
+            wxArtProvider::GetBitmap(iconid, wxART_MESSAGE_BOX));
+        topSizer->Add(sb, 0, wxALL, 15);
+    }
+
+    topSizer->Add(messageM, 1, wxALL|wxEXPAND, 15);
+    bSizer1->Add(topSizer, 0, wxEXPAND, 5);
+
+    // add buttons set in "style" to the list
+    AdvancedMessageDialogButtons temp;
+    if (!buttons)
+        buttons = &temp;
+    if ((style & wxYES_NO) == wxYES_NO)
+    {
+        buttons->add(wxYES, _("Yes"));
+        buttons->add(wxNO, _("No"));
+    }
+    if ((style & wxOK) == wxOK)
+        buttons->add(wxOK, _("OK"));
+    if ((style & wxCANCEL) == wxCANCEL)
+        buttons->add(wxCANCEL, _("Cancel"));
+
+    // create buttons
+    wxButton* defaultBtn = 0;
+    for (AdvancedMessageDialogButtons::const_iterator it = buttons->begin();
+        it != buttons->end(); ++it)
+    {
+        wxButton *b = new wxButton(this, (*it).first, (*it).second);
+        if (!defaultBtn)
+            defaultBtn = b;
+        btnSizer->Add(b, 0, wxALL, 5);
+        Connect((*it).first, wxEVT_COMMAND_BUTTON_CLICKED,
+            wxCommandEventHandler(AdvancedMessageDialog::OnButtonClick));
+    }
+
+    bSizer1->Add(btnSizer, 0, wxALIGN_RIGHT, 5);
 
     checkBoxM = new wxCheckBox(this, -1, _("Don't ask again"));
     if (!name.IsEmpty())
         bSizer1->Add(checkBoxM, 0, wxALL|wxEXPAND, 5);
 
-    for (AdvancedMessageDialogButtons::const_iterator it = buttons.begin();
-        it != buttons.end(); ++it)
-    {
-        wxButton *b = new wxButton(this, (*it).first, (*it).second);
-        bSizer2->Add(b, 0, wxALL, 5);
-        Connect((*it).first, wxEVT_COMMAND_BUTTON_CLICKED,
-            wxCommandEventHandler(AdvancedMessageDialog::OnButtonClick));
-    }
-    bSizer1->Add(bSizer2, 0, wxEXPAND, 5);
     SetSizer(bSizer1);
     bSizer1->Fit(this);
     SetAutoLayout(true);
     Layout();
+    if (defaultBtn)
+        defaultBtn->SetDefault();
 }
 //----------------------------------------------------------------------------
 bool AdvancedMessageDialog::dontShowAgain() const
@@ -82,12 +125,12 @@ void AdvancedMessageDialog::OnButtonClick(wxCommandEvent& event)
 }
 //----------------------------------------------------------------------------
 int AdvancedMessageBox(const wxString& message,  const wxString& caption,
-    const AdvancedMessageDialogButtons& buttons, const wxString& keyname)
+    int style, AdvancedMessageDialogButtons* buttons, const wxString& keyname)
 {
     int value;
     if (config().getValue(keyname, value))
         return value;
-    AdvancedMessageDialog adm(0, message, caption, buttons, keyname);
+    AdvancedMessageDialog adm(0, message, caption, style, buttons, keyname);
     value = adm.ShowModal();
     // Cancel means: cancel action, so it is not treated like a regular
     // "choice", but rather giving up on it (so, checkBox is ignored)
