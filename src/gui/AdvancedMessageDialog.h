@@ -56,6 +56,11 @@ public:
     {
         buttonsM.clear();
     }
+
+    ButtonCollection::size_type size() const
+    {
+        return buttonsM.size();
+    }
 private:
     ButtonCollection buttonsM;
 };

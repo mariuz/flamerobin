@@ -118,7 +118,8 @@ AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent,
 
     if (!name.IsEmpty())
     {
-        checkBoxM = new wxCheckBox(this, -1, _("Don't ask again"));
+        checkBoxM = new wxCheckBox(this, -1, buttons->size() > 1 ?
+            _("Don't ask again") : _("Don't show again"));
         bSizer1->Add(checkBoxM, 0, wxALL|wxEXPAND, 5);
     }
 
