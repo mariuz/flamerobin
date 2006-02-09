@@ -52,6 +52,10 @@ public:
         return buttonsM.end();
     }
 
+    void clear()
+    {
+        buttonsM.clear();
+    }
 private:
     ButtonCollection buttonsM;
 };

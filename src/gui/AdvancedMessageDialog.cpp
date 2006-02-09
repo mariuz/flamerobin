@@ -116,9 +116,11 @@ AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent,
 
     bSizer1->Add(btnSizer, 0, wxALIGN_RIGHT, 5);
 
-    checkBoxM = new wxCheckBox(this, -1, _("Don't ask again"));
     if (!name.IsEmpty())
+    {
+        checkBoxM = new wxCheckBox(this, -1, _("Don't ask again"));
         bSizer1->Add(checkBoxM, 0, wxALL|wxEXPAND, 5);
+    }
 
     SetSizer(bSizer1);
     bSizer1->Fit(this);
@@ -130,7 +132,10 @@ AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent,
 //----------------------------------------------------------------------------
 bool AdvancedMessageDialog::dontShowAgain() const
 {
-    return checkBoxM->IsChecked();
+    if (!checkBoxM)
+        return true;
+    else
+        return checkBoxM->IsChecked();
 }
 //----------------------------------------------------------------------------
 void AdvancedMessageDialog::OnButtonClick(wxCommandEvent& event)

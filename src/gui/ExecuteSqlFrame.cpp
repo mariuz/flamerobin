@@ -48,6 +48,7 @@
 
 #include "config/Config.h"
 #include "dberror.h"
+#include "gui/AdvancedMessageDialog.h"
 #include "ExecuteSqlFrame.h"
 #include "framemanager.h"
 #include "frDataGrid.h"
@@ -1876,24 +1877,31 @@ bool TableIndicesHandler::handleURI(URI& uri)
         if (ixname.IsEmpty())    // cancel
             return true;
 
-        bool unique = (wxYES == wxMessageBox(_("Would you like to create UNIQUE index?"),
-            _("Creating new index"), wxYES_NO|wxICON_QUESTION));
+        AdvancedMessageDialogButtons btns;
+        btns.add(wxYES, _("&Unique"));
+        btns.add(wxNO,  _("&Non unique"));
+        int result = AdvancedMessageBox(_("Would you like to create UNIQUE index?"),
+            _("Creating new index"), wxICON_QUESTION|wxCANCEL, &btns);
+        if (result == wxCANCEL)
+            return true;
+        bool unique = (result == wxYES);
 
         wxString columns = selectTableColumns(t, w);
         if (columns == wxT(""))
             return true;
 
-        wxArrayString types;
-        types.Add(wxT("ASCENDING"));
-        types.Add(wxT("DESCENDING"));
-        int sort = ::wxGetSingleChoiceIndex(_("Select sort order"), _("Creating new index"), types, w);
-        if (sort == -1)
+        btns.clear();
+        btns.add(wxYES, wxT("Ascending"));
+        btns.add(wxNO, wxT("Descending"));
+        int sort = AdvancedMessageBox(_("Select sort order"),
+            _("Creating new index"), wxICON_QUESTION|wxCANCEL, &btns);
+        if (sort == wxCANCEL)
             return true;
 
         sql = wxT("CREATE ");
         if (unique)
             sql += wxT("UNIQUE ");
-        if (sort == 1)
+        if (sort == wxNO)
             sql += wxT("DESCENDING ");
         sql += wxT(" \nINDEX ") + Identifier::userString(ixname) + wxT(" ON ") + t->getQuotedName() + wxT(" (") + columns + wxT(");\n");
     }
