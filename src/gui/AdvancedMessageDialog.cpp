@@ -45,7 +45,8 @@
 AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent,
     const wxString& message, const wxString& caption, int style,
     AdvancedMessageDialogButtons* buttons, const wxString& name)
-    :wxDialog(parent, -1, caption)
+    :wxDialog(parent, -1, caption, wxDefaultPosition, wxDefaultSize,
+     wxCAPTION)
 {
     wxBoxSizer *bSizer1 = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer *btnSizer = new wxBoxSizer(wxHORIZONTAL);
