@@ -61,7 +61,6 @@ class AdvancedMessageDialog: public wxDialog
 {
 protected:
     wxString configKeyNameM;
-    wxStaticText *messageM;
     wxCheckBox *checkBoxM;
 
 public:

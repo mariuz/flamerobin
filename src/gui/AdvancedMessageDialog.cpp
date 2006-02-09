@@ -50,8 +50,22 @@ AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent,
     wxBoxSizer *bSizer1 = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer *btnSizer = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
-    messageM = new wxStaticText(this, -1, message, wxDefaultPosition,
-        wxDefaultSize, wxALIGN_CENTRE);
+
+    // get the text size, so we can determine the minimal textctrl size
+    wxScreenDC dc;
+    wxCoord w, h, dw, dh;
+    dc.GetTextExtent(message, &w, &h);
+    ::wxDisplaySize(&dw, &dh);      // I hate dialogs that go off the screen
+    if (w > dw*0.8)                 // This may happen if we decide to
+        w = dw*0.8;                 // print the backtrace in case of crash
+    if (h > dh*0.8)                 // and similar stuff with a lot of text
+        h = dh*0.8;
+
+    wxTextCtrl *messageM = new wxTextCtrl(this, -1, message,
+        wxDefaultPosition, wxSize(w, h), wxTE_MULTILINE|wxTE_READONLY|
+        wxTE_RICH|wxTE_AUTO_URL|wxNO_BORDER|wxTE_NO_VSCROLL);
+    messageM->SetOwnBackgroundColour(
+        wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
 
     // setup the icon
     wxArtID iconid = wxART_MISSING_IMAGE;
