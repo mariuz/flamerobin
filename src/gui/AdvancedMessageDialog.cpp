@@ -18,7 +18,7 @@
 
   All Rights Reserved.
 
-  $Id:  $
+  $Id$
 
   Contributor(s):
 */
