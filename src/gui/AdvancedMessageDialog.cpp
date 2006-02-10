@@ -65,8 +65,7 @@ AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent,
     wxTextCtrl *messageM = new wxTextCtrl(this, -1, message,
         wxDefaultPosition, wxSize(w, h), wxTE_MULTILINE|wxTE_READONLY|
         wxTE_RICH|wxTE_AUTO_URL|wxNO_BORDER|wxTE_NO_VSCROLL);
-    messageM->SetOwnBackgroundColour(
-        wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
+    messageM->SetOwnBackgroundColour(GetBackgroundColour());
     messageM->SetInsertionPointEnd();
 
     // setup the icon
