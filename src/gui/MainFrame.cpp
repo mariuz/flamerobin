@@ -546,7 +546,8 @@ void MainFrame::OnClose(wxCloseEvent& event)
     btns.add(wxCANCEL, _("&Cancel"));
     if (event.CanVeto() && wxCANCEL ==
         AdvancedMessageBox(_("Are you sure you wish to exit?"),
-        wxT("FlameRobin"), wxICON_QUESTION, &btns, wxT("DIALOG_ConfirmQuit")))
+        wxT("FlameRobin"), wxICON_QUESTION, &btns, 0,
+        wxT("DIALOG_ConfirmQuit")))
     {
         event.Veto();
         return;

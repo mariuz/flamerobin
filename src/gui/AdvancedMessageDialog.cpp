@@ -128,6 +128,7 @@ AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent,
     bSizer1->Fit(this);
     SetAutoLayout(true);
     Layout();
+    CentreOnParent();
     if (defaultBtn)
         defaultBtn->SetDefault();
 }
@@ -146,12 +147,14 @@ void AdvancedMessageDialog::OnButtonClick(wxCommandEvent& event)
 }
 //----------------------------------------------------------------------------
 int AdvancedMessageBox(const wxString& message,  const wxString& caption,
-    int style, AdvancedMessageDialogButtons* buttons, const wxString& keyname)
+    int style, AdvancedMessageDialogButtons* buttons, wxWindow* parent,
+    const wxString& keyname)
 {
     int value;
     if (config().getValue(keyname, value))
         return value;
-    AdvancedMessageDialog adm(0, message, caption, style, buttons, keyname);
+    AdvancedMessageDialog adm(parent, message, caption, style, buttons,
+        keyname);
     value = adm.ShowModal();
     // Cancel means: cancel action, so it is not treated like a regular
     // "choice", but rather giving up on it (so, checkBox is ignored)

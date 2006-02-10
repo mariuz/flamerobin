@@ -465,7 +465,7 @@ void SqlEditor::OnMenuSetFont(wxCommandEvent& WXUNUSED(event))
     }
     setup();    // make control accept new settings
     AdvancedMessageBox(_("This setting only affects font in the editor.\nTo have characters displayed correctly in result grid,\nyou need to specify its font separately."),
-        _("Font changed"), wxOK|wxICON_INFORMATION, 0, wxT("DIALOG_WarnFont"));
+        _("Font changed"), wxOK|wxICON_INFORMATION, 0, 0, wxT("DIALOG_WarnFont"));
 }
 //-----------------------------------------------------------------------------
 ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title, const wxPoint& pos, const wxSize& size, long style):
@@ -1881,7 +1881,7 @@ bool TableIndicesHandler::handleURI(URI& uri)
         btns.add(wxYES, _("&Unique"));
         btns.add(wxNO,  _("&Non unique"));
         int result = AdvancedMessageBox(_("Would you like to create UNIQUE index?"),
-            _("Creating new index"), wxICON_QUESTION|wxCANCEL, &btns);
+            _("Creating new index"), wxICON_QUESTION|wxCANCEL, &btns, w);
         if (result == wxCANCEL)
             return true;
         bool unique = (result == wxYES);
@@ -1894,7 +1894,7 @@ bool TableIndicesHandler::handleURI(URI& uri)
         btns.add(wxYES, wxT("Ascending"));
         btns.add(wxNO, wxT("Descending"));
         int sort = AdvancedMessageBox(_("Select sort order"),
-            _("Creating new index"), wxICON_QUESTION|wxCANCEL, &btns);
+            _("Creating new index"), wxICON_QUESTION|wxCANCEL, &btns, w);
         if (sort == wxCANCEL)
             return true;
 

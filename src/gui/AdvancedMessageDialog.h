@@ -89,6 +89,6 @@ public:
 // just like in wxMessageBox
 int AdvancedMessageBox(const wxString& message, const wxString& caption,
     int style = 0, AdvancedMessageDialogButtons *buttons = 0,
-    const wxString& keyname = wxEmptyString);
+    wxWindow* parent = 0, const wxString& keyname = wxEmptyString);
 //----------------------------------------------------------------------------
 #endif
