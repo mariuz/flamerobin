@@ -55,7 +55,7 @@ AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent,
     // get the text size, so we can determine the minimal textctrl size
     wxScreenDC dc;
     wxCoord w, h, dw, dh;
-    dc.GetTextExtent(message, &w, &h);
+    dc.GetMultiLineTextExtent(message, &w, &h);
     ::wxDisplaySize(&dw, &dh);      // I hate dialogs that go off the screen
     if (w > dw*0.8)                 // This may happen if we decide to
         w = dw*0.8;                 // print the backtrace in case of crash
