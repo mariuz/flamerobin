@@ -53,6 +53,16 @@ wxString CreateDDLVisitor::getSQL() const
     return sqlM;
 }
 //-----------------------------------------------------------------------------
+wxString CreateDDLVisitor::getPrefixSql() const
+{
+    return preSqlM;
+}
+//-----------------------------------------------------------------------------
+wxString CreateDDLVisitor::getSuffixSql() const
+{
+    return postSqlM;
+}
+//-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Column&)
 {
     // empty

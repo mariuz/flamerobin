@@ -50,13 +50,15 @@ class CreateDDLVisitor: public Visitor
 private:
     wxString sqlM;      // main
 
-    wxString preSqlM;  // used for scripts to create entire database
-    wxString postSqlM;
+    wxString preSqlM;   // used for scripts to create entire database
+    wxString postSqlM;  // sometimes it's the same as sqlM, sometimes not
 
 public:
     CreateDDLVisitor();
     virtual ~CreateDDLVisitor();
     wxString getSQL() const;
+    wxString getPrefixSql() const;
+    wxString getSuffixSql() const;
 
     virtual void visit(Column& dolumn);
     virtual void visit(Database& database);
