@@ -112,6 +112,9 @@ wxString View::getAlterSql()
     }
     sql += wxT(")\nAS ");
     sql += src;
+
+    // TODO: restore user privileges
+
     return sql;
 }
 //-----------------------------------------------------------------------------
