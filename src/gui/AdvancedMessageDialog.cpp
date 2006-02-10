@@ -67,6 +67,7 @@ AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent,
         wxTE_RICH|wxTE_AUTO_URL|wxNO_BORDER|wxTE_NO_VSCROLL);
     messageM->SetOwnBackgroundColour(
         wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
+    messageM->SetInsertionPointEnd();
 
     // setup the icon
     wxArtID iconid = wxART_MISSING_IMAGE;
