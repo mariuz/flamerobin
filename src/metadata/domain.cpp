@@ -41,6 +41,7 @@
 
 #include <ibpp.h>
 
+#include "frutils.h"
 #include "database.h"
 #include "dberror.h"
 #include "domain.h"
@@ -70,10 +71,13 @@ bool Domain::loadInfo()
         IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
         st1->Prepare(
             "select t.rdb$type, f.rdb$field_sub_type, f.rdb$field_length,"
-            " f.rdb$field_precision, f.rdb$field_scale, c.rdb$character_set_name, f.rdb$character_length"
+            " f.rdb$field_precision, f.rdb$field_scale, c.rdb$character_set_name, f.rdb$character_length,"
+            " f.rdb$null_flag, f.rdb$default_source, l.rdb$collation_name, f.rdb$validation_source "
             " from rdb$fields f"
             " join rdb$types t on f.rdb$field_type=t.rdb$type"
             " left outer join rdb$character_sets c on c.rdb$character_set_id = f.rdb$character_set_id"
+            " left outer join rdb$collations l on l.rdb$collation_id = f.rdb$collation_id "
+                " and l.rdb$character_set_id = f.rdb$character_set_id"
             " where f.rdb$field_name = ?"
             " and t.rdb$field_name='RDB$FIELD_TYPE'"
         );
@@ -110,6 +114,23 @@ bool Domain::loadInfo()
             charsetM = std2wx(charset);
             charsetM.erase(charsetM.find_last_not_of(wxT(" ")) + 1);
         }
+        isNotNullM = !st1->IsNull(8);
+        if (st1->IsNull(9))
+            defaultM = wxEmptyString;
+        else
+            readBlob(st1, 9, defaultM);
+        if (st1->IsNull(10))
+            collationM = wxEmptyString;
+        else
+        {
+            std::string coll;
+            st1->Get(10, coll);
+            collationM = std2wx(coll);
+        }
+        if (st1->IsNull(11))
+            checkM = wxEmptyString;
+        else
+            readBlob(st1, 11, checkM);
 
         tr1->Commit();
         if (!isSystem())
@@ -128,17 +149,18 @@ bool Domain::loadInfo()
     return false;
 }
 //-----------------------------------------------------------------------------
-//! returns column's datatype as human readable wxString. It can also be used to construct DDL for tables
+//! returns column's datatype as human readable wxString.
 wxString Domain::getDatatypeAsString()
 {
     if (!infoLoadedM)
         loadInfo();
 
-    return datatype2string(datatypeM, scaleM, precisionM, subtypeM, lengthM);
+    return datatype2string(datatypeM, scaleM, precisionM, subtypeM, lengthM,
+        !isNotNullM);
 }
 //-----------------------------------------------------------------------------
 wxString Domain::datatype2string(short datatype, short scale, short precision,
-    short subtype, short length)
+    short subtype, short length, bool isNullable)
 {
     std::ostringstream retval;      // this will be returned
 
@@ -201,7 +223,37 @@ wxString Domain::datatype2string(short datatype, short scale, short precision,
     if (datatype == 261)    // blob
         retval << " sub_type " << subtype;
 
+    if (!isNullable)
+        retval << " not null";
     return std2wx(retval.str());
+}
+//-----------------------------------------------------------------------------
+wxString Domain::getDefault()
+{
+    if (!infoLoadedM)
+        loadInfo();
+    return defaultM;
+}
+//-----------------------------------------------------------------------------
+wxString Domain::getCollation()
+{
+    if (!infoLoadedM)
+        loadInfo();
+    return collationM;
+}
+//-----------------------------------------------------------------------------
+wxString Domain::getCheckConstraint()
+{
+    if (!infoLoadedM)
+        loadInfo();
+    return checkM;
+}
+//-----------------------------------------------------------------------------
+bool Domain::isNullable()
+{
+    if (!infoLoadedM)
+        loadInfo();
+    return !isNotNullM;
 }
 //-----------------------------------------------------------------------------
 void Domain::getDatatypeParts(wxString& type, wxString& size, wxString& scale)
@@ -247,7 +299,7 @@ wxString Domain::getPrintableName()
 wxString Domain::getCreateSqlTemplate() const
 {
     return  wxT("CREATE DOMAIN domain_name\n")
-            wxT("AS datatype\n")
+            wxT("AS datatype [CHARACTER SET charset]\n")
             wxT("DEFAULT {literal | NULL | USER}\n")
             wxT("[NOT NULL]\n")
             wxT("[CHECK (dom_search_condition)]\n")

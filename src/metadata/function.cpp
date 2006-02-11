@@ -121,8 +121,9 @@ void Function::loadInfo(bool force)
             libraryNameM = std2wx(libraryName);
             st1->Get(10, entryPoint);
             entryPointM = std2wx(entryPoint);
-            wxString param = wxT("    ") + Domain::datatype2string(type, scale, precision, subtype, length)
-                + wxT(" by ") + (mechanism == 0 ? wxT("value") : wxT("reference"));
+            wxString param = wxT("    ") + Domain::datatype2string(
+                type, scale, precision, subtype, length, true) + wxT(" by ")
+                + (mechanism == 0 ? wxT("value") : wxT("reference"));
             if (mechanism == -1)
                 param += wxT(" [FREE_IT]");
             if (returnarg == retpos)    // output

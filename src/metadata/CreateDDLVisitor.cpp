@@ -80,7 +80,7 @@ void CreateDDLVisitor::visit(Domain& d)
     wxString dflt = d.getDefault();
     if (!dflt.IsEmpty())
         sqlM += wxT(" DEFAULT ") + dflt + wxT("\n");
-    if (d.isNotNull())
+    if (!d.isNullable())
         sqlM += wxT(" NOT NULL\n")
     wxString check = d.getCheckConstraint();
     if (!check.IsEmpty())
@@ -156,16 +156,111 @@ void CreateDDLVisitor::visit(Table& t)
     for (MetadataCollection<Column>::iterator it=t.begin(); it!=t.end; ++it)
         preSqlM += (*it).getDDL();
 
-    presqlM +=
     // primary keys (detect the name and use CONSTRAINT name PRIMARY KEY... or PRIMARY KEY(col)
+    ColumnConstraint *pk = t.getPrimaryKey();
+    if (pk)
+    {
+        presqlM += wxT(",");
+        if (pk->getName_().StartsWith("INTEG_"))     // system one, noname
+            presqlM += wxT("\n  PRIMARY KEY (");
+        else
+            presqlM += wxT("\n  CONSTRAINT ") + pk->getQuotedName() + wxT(" PRIMARY KEY (");
+
+        for (std::vector<wxString>::const_iterator it = pk->begin(); it != pk->end(); ++it)
+        {
+            if (it != pk->begin())
+                preSqlM += wxT(",");
+            Identifier id(*it);
+            preSqlM += id.getQuoted();
+        }
+        preSqlM += wxT(")");
+    }
+
     // unique constraints
+    std::vector<ColumnConstraint> *uc = t.getUniqueConstraints();
+    if (uc)
+    {
+        for (std::vector<ColumnConstraint>::const_iterator ci = uc->begin(); ci != uc->end(); ++ci)
+        {
+            presqlM += wxT("\n  CONSTRAINT ") + (*ci).getQuotedName() + wxT(" UNIQUE (");
+            for (std::vector<wxString>::const_iterator it = (*ci).begin(); it != (*ci).end(); ++it)
+            {
+                if (it != (*ci).begin())
+                    preSqlM += wxT(",");
+                Identifier id(*it);
+                preSqlM += id.getQuoted();
+            }
+            preSqlM += wxT(")");
+        }
+    }
 
-    postSqlM =
     // foreign keys
-    // check constraints
-    // indices
-    // TODO: grant sel/ins/upd/del/ref/all ON [name] to [SP,user,role]
+    std::vector<ForeignKey> *fk = getForeignKeys();
+    if (fk)
+    {
+        for (std::vector<ForeignKey>::const_iterator ci = fk->begin(); ci != fk->end(); ++ci)
+        {
+            Identifier reftab((*ci).referencedTableM);
+            wxString src_col, dest_col;
+            for (std::vector<wxString>::const_iterator it = (*ci).begin(); it != (*ci).end(); ++it)
+            {
+                if (it != (*ci).begin())
+                    src_col += wxT(",");
+                Identifier id(*ci);
+                src_col += id.getQuoted();
+            }
+            for (std::vector<wxString>::const_iterator it = (*ci).referencedColumnsM.begin();
+                it != (*ci).referencedColumnsM.end(); ++it)
+            {
+                if (it != (*ci).begin())
+                    dest_col += wxT(",");
+                Identifier id(*ci);
+                dest_col += id.getQuoted();
+            }
+            postSqlM += wxT("ALTER TABLE ") + t.getQuotedName() + wxT(" ADD CONSTRAINT ") +
+                (*ci).getQuotedName() + wxT(" FOREIGN KEY (") + src_col +
+                wxT(" REFERENCES ") + reftab.getQuoted() + wxT(" (") + dest_col + wxT(");\n");
+        }
+    }
 
+    // check constraints
+    std::vector<CheckConstraint> *chk = t.getCheckConstraints();
+    if (chk)
+    {
+        for (std::vector<CheckConstraint>::const_iterator ci = chk->begin(); ci != chk->end(); ++ci)
+        {
+            postSqlM += wxT("ALTER TABLE ") + t.getQuotedName() + wxT(" ADD CONSTRAINT ") +
+                (*ci).getQuotedName() + wxT(" CHECK (") + (*ci).sourceM + wxT(");\n");
+        }
+    }
+
+    // indices
+    std::vector<Index> *ix = getIndices();
+    if (ix)
+    {
+        for (std::vector<Index>::const_iterator ci = ix->begin(); ci != ix->end(); ++ci)
+        {
+            postSqlM += wxT("CREATE ");
+            if ((*ci).getIndexType() == Index::itDescending)
+                postSqlM += wx("DESCENDING ");
+            postSqlM += wxT("INDEX ") + (*ci).getQuotedName() + wxT(" ON ")
+                + t.getQuotedName() + wxT(" (");
+            std::vector<wxString> *cols = (*ci).getSegments();
+            for (std::vector<wxString>::const_iterator it = cols->begin(); it != cols->end(); ++it)
+            {
+                if (it != cols->begin())
+                    postSqlM += wxT(",");
+                Identifier id(*it);
+                postSqlM += id.getQuoted();
+            }
+            postSqlM += wxT(");\n");
+        }
+    }
+
+    // TODO: grant sel/ins/upd/del/ref/all ON [name] to [SP,user,role]
+    //postSqlM +=
+
+    preSqlM += wxT("\n);\n");
     sqlM = preSqlM + postSqlM;
 }
 //-----------------------------------------------------------------------------
@@ -178,7 +273,7 @@ void CreateDDLVisitor::visit(Trigger& t)
     t.getSource(source);
     t.getRelation(relation);
 
-    sqlM << wxT("SET TERM ^ ;\nCREATE TRIGGER ") << getQuotedName()
+    sqlM << wxT("SET TERM ^ ;\nCREATE TRIGGER ") << t.getQuotedName()
          << wxT(" FOR ") << relation;
     if (active)
         sqlM << wxT(" ACTIVE\n");

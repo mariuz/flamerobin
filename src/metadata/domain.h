@@ -33,20 +33,25 @@ class Domain: public MetadataItem
 {
 private:
     short datatypeM, subtypeM, lengthM, precisionM, scaleM;
-    wxString charsetM;
+    bool isNotNullM;
+    wxString charsetM, defaultM, collationM, checkM;
     bool infoLoadedM;
 protected:
     virtual void loadDescription();
     virtual void saveDescription(wxString description);
 public:
     Domain();
+    bool loadInfo();
 
     static wxString datatype2string(short datatype, short scale,
-        short precision, short subtype, short length);
-    bool loadInfo();
-    wxString getDatatypeAsString();
+        short precision, short subtype, short length, bool isNullable);
     void getDatatypeParts(wxString& type, wxString& size, wxString& scale);
+    wxString getDatatypeAsString();
+    wxString getDefault();
+    wxString getCollation();
+    wxString getCheckConstraint();
     wxString getCharset();
+    bool isNullable();
     virtual const wxString getTypeName() const;
     virtual wxString getCreateSqlTemplate() const;
     virtual wxString getPrintableName();

@@ -35,25 +35,26 @@ class Table;
 class Column: public MetadataItem
 {
 private:
-	bool notnullM, computedM;
-	wxString sourceM, computedSourceM, collationM;
+    bool notnullM, computedM;
+    wxString sourceM, computedSourceM, collationM;
 protected:
     virtual void loadDescription();
     virtual void saveDescription(wxString description);
 public:
-	Column();
-	void Init(bool notnull, wxString source, bool computed, 
+    Column();
+    void Init(bool notnull, wxString source, bool computed,
         wxString computedSource, wxString collation);
-	virtual wxString getPrintableName();
-	wxString getDatatype();
+    virtual wxString getPrintableName();
+    wxString getDatatype();
     virtual wxString getDropSqlStatement() const;
 
-	bool isNullable() const;
-	bool isPrimaryKey() const;
-	bool isComputed() const;
-	wxString getSource() const;
-	wxString getCollation() const;
-	Domain* getDomain() const;
+    wxString getDDL() const;
+    bool isNullable() const;
+    bool isPrimaryKey() const;
+    bool isComputed() const;
+    wxString getSource() const;
+    wxString getCollation() const;
+    Domain* getDomain() const;
     Table* getTable() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };

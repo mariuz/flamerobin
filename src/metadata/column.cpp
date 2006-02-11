@@ -69,7 +69,12 @@ void Column::Init(bool notnull, wxString source, bool computed,
 //-----------------------------------------------------------------------------
 bool Column::isNullable() const
 {
-    return !notnullM;
+    if (notnullM)
+        return false;
+    Domain *d = getDomain();
+    if (d)
+        return d->isNullable();
+    return true;
 }
 //-----------------------------------------------------------------------------
 bool Column::isComputed() const
@@ -145,6 +150,34 @@ wxString Column::getPrintableName()
     if (notnullM)
         ret += wxT(" not null");
     return ret;
+}
+//-----------------------------------------------------------------------------
+// [name] [type] [charset] [collation] [default] [null option] [computed by]...
+wxString Column::getDDL() const
+{
+    // TODO: this needs to be done properly
+    wxString result;
+    result = getQuotedName() + wxT(" ");
+
+    if (computedM && !computedSourceM.empty())
+    {
+        result += wxT("COMPUTED BY ") + computedSourceM;
+        return result;
+    }
+
+    Domain *d = getDomain();
+    if (d)
+    {
+        if (d->isSystem())
+            result += d->getDatatypeAsString();
+        else
+            result += d->getQuotedName();
+    }
+    else
+        result += sourceM;  // shouldn't happen
+
+    // add collation, default value, etc. ...
+    return result;
 }
 //-----------------------------------------------------------------------------
 Domain *Column::getDomain() const
