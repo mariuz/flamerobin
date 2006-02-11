@@ -53,7 +53,7 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent,
     databaseM = 0;
     createM = createDB;
     connectAsM = connectAs;
-	isDefaultNameM = true;
+    isDefaultNameM = true;
 
     createControls();
     setControlsProperties();
@@ -99,8 +99,8 @@ void DatabaseRegistrationDialog::createControls()
         wxT("GB_2312"),     wxT("ISO8859_1"),   wxT("ISO8859_2"),   wxT("ISO8859_3"),   wxT("ISO8859_4"),
         wxT("ISO8859_5"),   wxT("ISO8859_6"),   wxT("ISO8859_7"),   wxT("ISO8859_8"),   wxT("ISO8859_9"),
         wxT("ISO8859_13"),  wxT("KSC_5601"),    wxT("NEXT"),        wxT("OCTETS"),      wxT("SJIS_0208"),
-        wxT("UNICODE_FSS"), wxT("WIN1250"),     wxT("WIN1251"),     wxT("WIN1252"),     wxT("WIN1253"),
-        wxT("WIN1254"),     wxT("WIN1255"),     wxT("WIN1256"),     wxT("WIN1257")
+        wxT("UNICODE_FSS"), wxT("UTF-8"),       wxT("WIN1250"),     wxT("WIN1251"),     wxT("WIN1252"),
+        wxT("WIN1253"),     wxT("WIN1254"),     wxT("WIN1255"),     wxT("WIN1256"),     wxT("WIN1257")
     };
 
     combobox_charset = new wxComboBox(getControlsPanel(), -1, wxT("NONE"),
@@ -218,12 +218,12 @@ void DatabaseRegistrationDialog::setDatabase(Database* db)
     text_ctrl_password->SetValue(databaseM->getPassword());
     text_ctrl_role->SetValue(databaseM->getRole());
     wxString charset(databaseM->getConnectionCharset());
-	if (charset.IsEmpty())
+    if (charset.IsEmpty())
         charset = wxT("NONE");
     int selection = combobox_charset->FindString(charset);
     if (selection < 0)
-		combobox_charset->SetValue(charset);
-	else
+        combobox_charset->SetValue(charset);
+    else
         combobox_charset->SetSelection(selection);
     // see whether the database has an empty or default name; knowing that will be
     // useful to keep the name in sync when other attributes change.
@@ -295,11 +295,11 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
     databaseM->setUsername(text_ctrl_username->GetValue());
     databaseM->setPassword(text_ctrl_password->GetValue());
 
-	// for some reason GetValue didn't work correctly before
-	// I can't remember the exact issue, perhaps it was platform specific (Gtk1 maybe?)
-	// so we replaced all of those with GetStringSelection()
-	// the problem is that we are now using a *real* combo, not just a
-	// dropdown list. So, this needs testing
+    // for some reason GetValue didn't work correctly before
+    // I can't remember the exact issue, perhaps it was platform specific (Gtk1 maybe?)
+    // so we replaced all of those with GetStringSelection()
+    // the problem is that we are now using a *real* combo, not just a
+    // dropdown list. So, this needs testing
     databaseM->setConnectionCharset(combobox_charset->GetValue());
     //databaseM->setConnectionCharset(combobox_charset->GetStringSelection());
 
