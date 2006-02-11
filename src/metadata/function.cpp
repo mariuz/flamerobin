@@ -49,6 +49,16 @@ Function::Function()
     infoLoadedM = false;
 }
 //-----------------------------------------------------------------------------
+wxString Function::getCreateSql()
+{
+    loadInfo();
+    wxString ret(wxT("DECLARE EXTERNAL FUNCTION "));
+    ret += getQuotedName() + wxT("\n") + paramListM
+        + wxT("RETURNS ") + retstrM + wxT("\nENTRY_POINT '") + entryPointM
+        + wxT("'\nMODULE NAME '") + libraryNameM + wxT("';\n");
+    return ret;
+}
+//-----------------------------------------------------------------------------
 wxString Function::getCreateSqlTemplate() const
 {
     return wxT("DECLARE EXTERNAL FUNCTION name [datatype | CSTRING (int) [, datatype | CSTRING (int) ...]]\n")
@@ -103,8 +113,8 @@ void Function::loadInfo(bool force)
         );
         st1->Set(1, wx2std(getName_()));
         st1->Execute();
-        wxString retstr;
         bool first = true;
+        paramListM = wxEmptyString;
         while (st1->Fetch())
         {
             short returnarg, mechanism, type, scale, length, subtype, precision, retpos;
@@ -125,9 +135,9 @@ void Function::loadInfo(bool force)
                 type, scale, precision, subtype, length, true) + wxT(" by ")
                 + (mechanism == 0 ? wxT("value") : wxT("reference"));
             if (mechanism == -1)
-                param += wxT(" [FREE_IT]");
+                param += wxT(" FREE_IT");
             if (returnarg == retpos)    // output
-                retstr = param;
+                retstrM = param;
             else
             {
                 if (first)
@@ -135,9 +145,12 @@ void Function::loadInfo(bool force)
                 else
                     definitionM += wxT(",\n");
                 definitionM += param;
+                if (!paramListM.IsEmpty())
+                    paramListM += wxT(",\n");
+                paramListM += param;
             }
         }
-        definitionM += wxT("\n)\nreturns:\n") + retstr;
+        definitionM += wxT("\n)\nreturns:\n") + retstrM;
         infoLoadedM = true;
         tr1->Commit();
     }

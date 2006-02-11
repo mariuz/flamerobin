@@ -311,6 +311,7 @@
         $(SOURCEDIR)/metadata/collection.h
         $(SOURCEDIR)/metadata/column.h
         $(SOURCEDIR)/metadata/constraints.h
+        $(SOURCEDIR)/metadata/CreateDDLVisitor.h
         $(SOURCEDIR)/metadata/database.h
         $(SOURCEDIR)/metadata/domain.h
         $(SOURCEDIR)/metadata/exception.h
@@ -398,6 +399,7 @@
         $(SOURCEDIR)/main.cpp
         $(SOURCEDIR)/metadata/column.cpp
         $(SOURCEDIR)/metadata/constraints.cpp
+        $(SOURCEDIR)/metadata/CreateDDLVisitor.cpp
         $(SOURCEDIR)/metadata/database.cpp
         $(SOURCEDIR)/metadata/domain.cpp
         $(SOURCEDIR)/metadata/exception.cpp

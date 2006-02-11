@@ -77,32 +77,33 @@ void CreateDDLVisitor::visit(Domain& d)
 {
     sqlM = wxT("CREATE DOMAIN ") + d.getQuotedName() + wxT("\n AS ") +
             d.getDatatypeAsString() + wxT("\n");
-    wxString dflt = d.getDefault();
+    wxString dflt(d.getDefault());
     if (!dflt.IsEmpty())
         sqlM += wxT(" DEFAULT ") + dflt + wxT("\n");
     if (!d.isNullable())
-        sqlM += wxT(" NOT NULL\n")
+        sqlM += wxT(" NOT NULL\n");
     wxString check = d.getCheckConstraint();
     if (!check.IsEmpty())
         sqlM += wxT(" CHECK (") + check + wxT(")\n");
     wxString collate = d.getCollation();
     if (!collate.IsEmpty())
         sqlM += wxT(" COLLATE ") + collate;
-
     preSqlM = sqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Exception& e)
 {
-    sqlM = wxT("CREATE EXCEPTION )" + e.getQuotedName() + wxT("'") +
-        e.getMessage() + wxT("'\n");
+    wxString ms(e.getMessage());
+    ms.Replace(wxT("'"), wxT("''"));    // escape quotes
+    sqlM = wxT("CREATE EXCEPTION ") + e.getQuotedName() + wxT(" '") +
+        ms + wxT("'\n");
 
     preSqlM = sqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Function& f)
 {
-    sqlM = f.getCreateSQL();
+    sqlM = f.getCreateSql();
     preSqlM = sqlM;
 }
 //-----------------------------------------------------------------------------
@@ -121,9 +122,12 @@ void CreateDDLVisitor::visit(Procedure& p)
 
     // TODO: grant execute on [name] to [user/role]
 
+    // TODO: create empty procedure body (for database DDL dump)
+
     preSqlM = wxT("SET TERM ^ ;\nCREATE PROCEDURE ") + p.getQuotedName()
-        + wxT(" ") + p.params
+    //    + wxT(" ") + p.params
         + wxT("\nAS\nBEGIN\n/* nothing */\nEND^\nSET TERM ; ^");
+
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Parameter&)
@@ -153,18 +157,18 @@ void CreateDDLVisitor::visit(Server&)
 void CreateDDLVisitor::visit(Table& t)
 {
     preSqlM = wxT("CREATE TABLE ") + t.getQuotedName() + wxT("\n(\n");
-    for (MetadataCollection<Column>::iterator it=t.begin(); it!=t.end; ++it)
+    for (MetadataCollection<Column>::iterator it=t.begin(); it!=t.end(); ++it)
         preSqlM += (*it).getDDL();
 
     // primary keys (detect the name and use CONSTRAINT name PRIMARY KEY... or PRIMARY KEY(col)
     ColumnConstraint *pk = t.getPrimaryKey();
     if (pk)
     {
-        presqlM += wxT(",");
+        preSqlM += wxT(",");
         if (pk->getName_().StartsWith("INTEG_"))     // system one, noname
-            presqlM += wxT("\n  PRIMARY KEY (");
+            preSqlM += wxT("\n  PRIMARY KEY (");
         else
-            presqlM += wxT("\n  CONSTRAINT ") + pk->getQuotedName() + wxT(" PRIMARY KEY (");
+            preSqlM += wxT("\n  CONSTRAINT ") + pk->getQuotedName() + wxT(" PRIMARY KEY (");
 
         for (std::vector<wxString>::const_iterator it = pk->begin(); it != pk->end(); ++it)
         {
@@ -180,9 +184,9 @@ void CreateDDLVisitor::visit(Table& t)
     std::vector<ColumnConstraint> *uc = t.getUniqueConstraints();
     if (uc)
     {
-        for (std::vector<ColumnConstraint>::const_iterator ci = uc->begin(); ci != uc->end(); ++ci)
+        for (std::vector<ColumnConstraint>::iterator ci = uc->begin(); ci != uc->end(); ++ci)
         {
-            presqlM += wxT("\n  CONSTRAINT ") + (*ci).getQuotedName() + wxT(" UNIQUE (");
+            preSqlM += wxT("\n  CONSTRAINT ") + (*ci).getQuotedName() + wxT(" UNIQUE (");
             for (std::vector<wxString>::const_iterator it = (*ci).begin(); it != (*ci).end(); ++it)
             {
                 if (it != (*ci).begin())
@@ -195,10 +199,10 @@ void CreateDDLVisitor::visit(Table& t)
     }
 
     // foreign keys
-    std::vector<ForeignKey> *fk = getForeignKeys();
+    std::vector<ForeignKey> *fk = t.getForeignKeys();
     if (fk)
     {
-        for (std::vector<ForeignKey>::const_iterator ci = fk->begin(); ci != fk->end(); ++ci)
+        for (std::vector<ForeignKey>::iterator ci = fk->begin(); ci != fk->end(); ++ci)
         {
             Identifier reftab((*ci).referencedTableM);
             wxString src_col, dest_col;
@@ -206,7 +210,7 @@ void CreateDDLVisitor::visit(Table& t)
             {
                 if (it != (*ci).begin())
                     src_col += wxT(",");
-                Identifier id(*ci);
+                Identifier id(*it);
                 src_col += id.getQuoted();
             }
             for (std::vector<wxString>::const_iterator it = (*ci).referencedColumnsM.begin();
@@ -214,7 +218,7 @@ void CreateDDLVisitor::visit(Table& t)
             {
                 if (it != (*ci).begin())
                     dest_col += wxT(",");
-                Identifier id(*ci);
+                Identifier id(*it);
                 dest_col += id.getQuoted();
             }
             postSqlM += wxT("ALTER TABLE ") + t.getQuotedName() + wxT(" ADD CONSTRAINT ") +
@@ -227,7 +231,7 @@ void CreateDDLVisitor::visit(Table& t)
     std::vector<CheckConstraint> *chk = t.getCheckConstraints();
     if (chk)
     {
-        for (std::vector<CheckConstraint>::const_iterator ci = chk->begin(); ci != chk->end(); ++ci)
+        for (std::vector<CheckConstraint>::iterator ci = chk->begin(); ci != chk->end(); ++ci)
         {
             postSqlM += wxT("ALTER TABLE ") + t.getQuotedName() + wxT(" ADD CONSTRAINT ") +
                 (*ci).getQuotedName() + wxT(" CHECK (") + (*ci).sourceM + wxT(");\n");
@@ -235,14 +239,14 @@ void CreateDDLVisitor::visit(Table& t)
     }
 
     // indices
-    std::vector<Index> *ix = getIndices();
+    std::vector<Index> *ix = t.getIndices();
     if (ix)
     {
-        for (std::vector<Index>::const_iterator ci = ix->begin(); ci != ix->end(); ++ci)
+        for (std::vector<Index>::iterator ci = ix->begin(); ci != ix->end(); ++ci)
         {
             postSqlM += wxT("CREATE ");
             if ((*ci).getIndexType() == Index::itDescending)
-                postSqlM += wx("DESCENDING ");
+                postSqlM += wxT("DESCENDING ");
             postSqlM += wxT("INDEX ") + (*ci).getQuotedName() + wxT(" ON ")
                 + t.getQuotedName() + wxT(" (");
             std::vector<wxString> *cols = (*ci).getSegments();
@@ -294,7 +298,7 @@ void CreateDDLVisitor::visit(View& v)
     v.checkAndLoadColumns();
     v.getSource(src);
 
-    sqlM = wxT("CREATE VIEW ") + getQuotedName() + wxT(" (");
+    sqlM = wxT("CREATE VIEW ") + v.getQuotedName() + wxT(" (");
     bool first = true;
     for (MetadataCollection<Column>::const_iterator it = v.begin();
         it != v.end(); ++it)

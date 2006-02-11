@@ -106,6 +106,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_main.o \
 	flamerobin_column.o \
 	flamerobin_constraints.o \
+	flamerobin_CreateDDLVisitor.o \
 	flamerobin_database.o \
 	flamerobin_domain.o \
 	flamerobin_exception.o \
@@ -432,6 +433,9 @@ flamerobin_column.o: $(srcdir)/src/metadata/column.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_constraints.o: $(srcdir)/src/metadata/constraints.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/constraints.cpp
+
+flamerobin_CreateDDLVisitor.o: $(srcdir)/src/metadata/CreateDDLVisitor.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/CreateDDLVisitor.cpp
 
 flamerobin_database.o: $(srcdir)/src/metadata/database.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/database.cpp

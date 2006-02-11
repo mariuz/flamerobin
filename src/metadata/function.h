@@ -32,19 +32,20 @@
 class Function: public MetadataItem
 {
 private:
-	wxString libraryNameM, entryPointM, definitionM;
-	bool infoLoadedM;
-	void loadInfo(bool force = false);
+    wxString libraryNameM, entryPointM, definitionM, retstrM, paramListM;
+    bool infoLoadedM;
+    void loadInfo(bool force = false);
 protected:
     virtual void loadDescription();
     virtual void saveDescription(wxString description);
 public:
-	Function();
-	virtual const wxString getTypeName() const;
+    Function();
+    virtual const wxString getTypeName() const;
     virtual wxString getCreateSqlTemplate() const;
     virtual wxString getDropSqlStatement() const;
-	wxString getDefinition();
-	wxString getHtmlHeader();
+    wxString getCreateSql();
+    wxString getDefinition();
+    wxString getHtmlHeader();
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
