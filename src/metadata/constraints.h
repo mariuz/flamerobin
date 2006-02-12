@@ -38,6 +38,7 @@ class Constraint: public MetadataItem
 public:
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     virtual Table* getTable() const;
+    virtual bool isSystem() const;
 };
 //-----------------------------------------------------------------------------
 //! primary keys and uniques

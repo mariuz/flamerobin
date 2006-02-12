@@ -28,7 +28,6 @@
 #ifndef FR_CREATEDDLVISITOR_H
 #define FR_CREATEDDLVISITOR_H
 
-#include "core/Visitor.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
 #include "metadata/domain.h"
@@ -36,6 +35,7 @@
 #include "metadata/function.h"
 #include "metadata/generator.h"
 #include "metadata/metadataitem.h"
+#include "metadata/MetadataItemVisitor.h"
 #include "metadata/parameter.h"
 #include "metadata/procedure.h"
 #include "metadata/role.h"
@@ -45,7 +45,7 @@
 #include "metadata/trigger.h"
 #include "metadata/view.h"
 //-----------------------------------------------------------------------------
-class CreateDDLVisitor: public Visitor
+class CreateDDLVisitor: public MetadataItemVisitor
 {
 private:
     wxString sqlM;      // main
@@ -56,7 +56,7 @@ private:
 public:
     CreateDDLVisitor();
     virtual ~CreateDDLVisitor();
-    wxString getSQL() const;
+    wxString getSql() const;
     wxString getPrefixSql() const;
     wxString getSuffixSql() const;
 

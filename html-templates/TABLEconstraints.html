@@ -9,7 +9,7 @@
  href="fr://page?type=indices&amp;parent_window={%parent_window%}">Indices</a> | <a
  href="fr://privileges?object_address={%object_address%}">Privileges</a> | <a
  href="fr://page?type=dependencies&amp;parent_window={%parent_window%}">Dependencies</a> | <a
- href="fr://extract_ddl?object_type=table&amp;object_name={%object_name%}">DDL</a>
+ href="fr://page?type=ddl&amp;parent_window={%parent_window%}">DDL</a>
 <br><br>
 <font size=+2>{%object_name%}</font>
 <br><br>
@@ -20,11 +20,11 @@
       <td nowrap><b><font color=white>Primary key</font></b></td>
       <td nowrap><b><font color=white>On field(s)</font></b></td>
     </tr>
-	{%primary_key:
+    {%primary_key:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
       <td valign="top">
-		  <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
-	  </td>
+          <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
+      </td>
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top">{%constraint_columns%}</td>
     </tr>%}
@@ -43,11 +43,11 @@
       <td nowrap><b><font color=white>On update</font></b></td>
       <td nowrap><b><font color=white>On delete</font></b></td>
     </tr>
-	{%foreign_keys:
+    {%foreign_keys:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
       <td nowrap valign="top">
-		  <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
-	  </td>
+          <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
+      </td>
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top">{%constraint_columns%}</td>
       <td nowrap valign="top"><a href="fr://properties?object_type=TABLE&amp;object_name={%fk_table%}&amp;parent_window={%parent_window%}&amp;helper_object={%object_address%}">{%fk_table%}</a></td>
@@ -67,11 +67,11 @@
       <td nowrap><b><font color=white>Unique constraint</font></b></td>
       <td nowrap><b><font color=white>On field(s)</font></b></td>
     </tr>
-	{%unique_constraints:
+    {%unique_constraints:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
       <td nowrap valign="top">
-		  <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
-	  </td>
+          <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
+      </td>
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top">{%constraint_columns%}</td>
     </tr>%}
@@ -87,11 +87,11 @@
       <td nowrap><b><font color=white>Check constraint</font></b></td>
       <td nowrap><b><font color=white>Source</font></b></td>
     </tr>
-	{%check_constraints:
+    {%check_constraints:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
       <td nowrap valign="top">
-		  <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
-	  </td>
+          <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
+      </td>
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top">{%check_source%}</td>
     </tr>%}

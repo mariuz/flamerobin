@@ -456,6 +456,7 @@
         <if cond="FORMAT!='autoconf'">html-templates</if>
     </set>
     <set var="HTMLTEMPLATEFILES">
+        DDL.html
         DOMAIN.html
         EXCEPTION.html
         FUNCTION.html

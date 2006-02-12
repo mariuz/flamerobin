@@ -41,6 +41,7 @@
 #include "CreateDDLVisitor.h"
 //-----------------------------------------------------------------------------
 CreateDDLVisitor::CreateDDLVisitor()
+    :MetadataItemVisitor()
 {
 }
 //-----------------------------------------------------------------------------
@@ -48,7 +49,7 @@ CreateDDLVisitor::~CreateDDLVisitor()
 {
 }
 //-----------------------------------------------------------------------------
-wxString CreateDDLVisitor::getSQL() const
+wxString CreateDDLVisitor::getSql() const
 {
     return sqlM;
 }
@@ -63,9 +64,37 @@ wxString CreateDDLVisitor::getSuffixSql() const
     return postSqlM;
 }
 //-----------------------------------------------------------------------------
-void CreateDDLVisitor::visit(Column&)
+// this one is not called from "outside", but from visit(Table) function
+void CreateDDLVisitor::visit(Column& c)
 {
-    // empty
+    preSqlM << c.getQuotedName() << wxT(" ");
+
+    wxString computed = c.getComputedSource();
+    if (!computed.IsEmpty())
+    {
+        preSqlM << wxT("COMPUTED BY ") << computed;
+        return;
+    }
+
+    Domain *d = c.getDomain();
+    if (d)
+    {
+        if (d->isSystem())
+            preSqlM << d->getDatatypeAsString();
+        else
+            preSqlM <<  d->getQuotedName();
+    }
+    else
+        preSqlM <<  c.getSource();  // shouldn't happen
+
+    wxString defaultVal = c.getDefault();
+    if (!defaultVal.IsEmpty())
+        preSqlM << defaultVal;     // already contains word DEFAULT
+    if (!c.isNullable())
+        preSqlM << wxT(" NOT NULL");
+    wxString collate = c.getCollation();
+    if (!collate.IsEmpty())
+        preSqlM << wxT(" COLLATE ") << collate;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Database&)
@@ -76,18 +105,24 @@ void CreateDDLVisitor::visit(Database&)
 void CreateDDLVisitor::visit(Domain& d)
 {
     sqlM = wxT("CREATE DOMAIN ") + d.getQuotedName() + wxT("\n AS ") +
-            d.getDatatypeAsString() + wxT("\n");
+            d.getDatatypeAsString();
+    wxString charset = d.getCharset();
+    Database *db = d.getDatabase();
+    if (!charset.IsEmpty() && (!db || db->getDatabaseCharset() != charset))
+        sqlM += wxT(" CHARACTER SET ") + charset;
+    sqlM += wxT("\n");
     wxString dflt(d.getDefault());
     if (!dflt.IsEmpty())
-        sqlM += wxT(" DEFAULT ") + dflt + wxT("\n");
+        sqlM += dflt + wxT("\n");   // already contains DEFAULT keyword
     if (!d.isNullable())
         sqlM += wxT(" NOT NULL\n");
     wxString check = d.getCheckConstraint();
     if (!check.IsEmpty())
-        sqlM += wxT(" CHECK (") + check + wxT(")\n");
+        sqlM += check + wxT("\n");  // already contains CHECK keyword
     wxString collate = d.getCollation();
     if (!collate.IsEmpty())
         sqlM += wxT(" COLLATE ") + collate;
+    sqlM += wxT(";")
     preSqlM = sqlM;
 }
 //-----------------------------------------------------------------------------
@@ -95,8 +130,8 @@ void CreateDDLVisitor::visit(Exception& e)
 {
     wxString ms(e.getMessage());
     ms.Replace(wxT("'"), wxT("''"));    // escape quotes
-    sqlM = wxT("CREATE EXCEPTION ") + e.getQuotedName() + wxT(" '") +
-        ms + wxT("'\n");
+    sqlM = wxT("CREATE EXCEPTION ") + e.getQuotedName() + wxT("\n'") +
+        ms + wxT("';\n");
 
     preSqlM = sqlM;
 }
@@ -109,7 +144,7 @@ void CreateDDLVisitor::visit(Function& f)
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Generator& g)
 {
-    sqlM = wxT("CREATE GENERATOR ") + g.getQuotedName() + wxT("\n");
+    sqlM = wxT("CREATE GENERATOR ") + g.getQuotedName() + wxT(";\n");
     preSqlM = sqlM;
 }
 //-----------------------------------------------------------------------------
@@ -156,19 +191,22 @@ void CreateDDLVisitor::visit(Server&)
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Table& t)
 {
-    preSqlM = wxT("CREATE TABLE ") + t.getQuotedName() + wxT("\n(\n");
+    preSqlM = wxT("CREATE TABLE ") + t.getQuotedName() + wxT("\n(\n  ");
     for (MetadataCollection<Column>::iterator it=t.begin(); it!=t.end(); ++it)
-        preSqlM += (*it).getDDL();
+    {
+        if (it != t.begin())
+            preSqlM += wxT(",\n  ");
+        visit(*it);
+    }
 
     // primary keys (detect the name and use CONSTRAINT name PRIMARY KEY... or PRIMARY KEY(col)
     ColumnConstraint *pk = t.getPrimaryKey();
     if (pk)
     {
-        preSqlM += wxT(",");
-        if (pk->getName_().StartsWith("INTEG_"))     // system one, noname
-            preSqlM += wxT("\n  PRIMARY KEY (");
-        else
-            preSqlM += wxT("\n  CONSTRAINT ") + pk->getQuotedName() + wxT(" PRIMARY KEY (");
+        preSqlM += wxT(",\n ");
+        if (!pk->isSystem())     // system one, noname
+            preSqlM += wxT(" CONSTRAINT ") + pk->getQuotedName();
+        preSqlM += wxT(" PRIMARY KEY (");
 
         for (std::vector<wxString>::const_iterator it = pk->begin(); it != pk->end(); ++it)
         {
@@ -186,7 +224,10 @@ void CreateDDLVisitor::visit(Table& t)
     {
         for (std::vector<ColumnConstraint>::iterator ci = uc->begin(); ci != uc->end(); ++ci)
         {
-            preSqlM += wxT("\n  CONSTRAINT ") + (*ci).getQuotedName() + wxT(" UNIQUE (");
+            preSqlM += wxT(",\n ");
+            if (!(*ci).isSystem())
+                preSqlM += wxT(" CONSTRAINT ") + (*ci).getQuotedName();
+            preSqlM += wxT(" UNIQUE (");
             for (std::vector<wxString>::const_iterator it = (*ci).begin(); it != (*ci).end(); ++it)
             {
                 if (it != (*ci).begin())
@@ -216,14 +257,23 @@ void CreateDDLVisitor::visit(Table& t)
             for (std::vector<wxString>::const_iterator it = (*ci).referencedColumnsM.begin();
                 it != (*ci).referencedColumnsM.end(); ++it)
             {
-                if (it != (*ci).begin())
+                if (it != (*ci).referencedColumnsM.begin())
                     dest_col += wxT(",");
                 Identifier id(*it);
                 dest_col += id.getQuoted();
             }
-            postSqlM += wxT("ALTER TABLE ") + t.getQuotedName() + wxT(" ADD CONSTRAINT ") +
-                (*ci).getQuotedName() + wxT(" FOREIGN KEY (") + src_col +
-                wxT(" REFERENCES ") + reftab.getQuoted() + wxT(" (") + dest_col + wxT(");\n");
+            postSqlM += wxT("ALTER TABLE ") + t.getQuotedName() + wxT(" ADD");
+            if (!(*ci).isSystem())
+                postSqlM += wxT(" CONSTRAINT ") + (*ci).getQuotedName();
+            postSqlM += wxT("\n  FOREIGN KEY (") + src_col + wxT(") REFERENCES ")
+                + reftab.getQuoted() + wxT(" (") + dest_col + wxT(")");
+            wxString upd = (*ci).updateActionM;
+            if (!upd.IsEmpty() && upd != wxT("RESTRICT"))
+                postSqlM += wxT(" ON UPDATE ") + upd;
+            wxString del = (*ci).deleteActionM;
+            if (!del.IsEmpty() && del != wxT("RESTRICT"))
+                postSqlM += wxT(" ON DELETE ") + del;
+            postSqlM += (";\n");
         }
     }
 
@@ -233,8 +283,10 @@ void CreateDDLVisitor::visit(Table& t)
     {
         for (std::vector<CheckConstraint>::iterator ci = chk->begin(); ci != chk->end(); ++ci)
         {
-            postSqlM += wxT("ALTER TABLE ") + t.getQuotedName() + wxT(" ADD CONSTRAINT ") +
-                (*ci).getQuotedName() + wxT(" CHECK (") + (*ci).sourceM + wxT(");\n");
+            postSqlM += wxT("ALTER TABLE ") + t.getQuotedName() + wxT(" ADD ");
+            if (!(*ci).isSystem())
+                postSqlM += wxT("CONSTRAINT ") + (*ci).getQuotedName();
+            postSqlM += wxT("\n  ") + (*ci).sourceM + wxT(";\n");
         }
     }
 
@@ -244,6 +296,8 @@ void CreateDDLVisitor::visit(Table& t)
     {
         for (std::vector<Index>::iterator ci = ix->begin(); ci != ix->end(); ++ci)
         {
+            if ((*ci).isSystem())
+                continue;
             postSqlM += wxT("CREATE ");
             if ((*ci).getIndexType() == Index::itDescending)
                 postSqlM += wxT("DESCENDING ");

@@ -115,10 +115,7 @@ bool Domain::loadInfo()
             charsetM.erase(charsetM.find_last_not_of(wxT(" ")) + 1);
         }
         isNotNullM = !st1->IsNull(8);
-        if (st1->IsNull(9))
-            defaultM = wxEmptyString;
-        else
-            readBlob(st1, 9, defaultM);
+        readBlob(st1, 9, defaultM);
         if (st1->IsNull(10))
             collationM = wxEmptyString;
         else
@@ -127,10 +124,7 @@ bool Domain::loadInfo()
             st1->Get(10, coll);
             collationM = std2wx(coll);
         }
-        if (st1->IsNull(11))
-            checkM = wxEmptyString;
-        else
-            readBlob(st1, 11, checkM);
+        readBlob(st1, 11, checkM);
 
         tr1->Commit();
         if (!isSystem())
@@ -155,12 +149,11 @@ wxString Domain::getDatatypeAsString()
     if (!infoLoadedM)
         loadInfo();
 
-    return datatype2string(datatypeM, scaleM, precisionM, subtypeM, lengthM,
-        !isNotNullM);
+    return datatype2string(datatypeM, scaleM, precisionM, subtypeM, lengthM);
 }
 //-----------------------------------------------------------------------------
 wxString Domain::datatype2string(short datatype, short scale, short precision,
-    short subtype, short length, bool isNullable)
+    short subtype, short length)
 {
     std::ostringstream retval;      // this will be returned
 
@@ -223,8 +216,6 @@ wxString Domain::datatype2string(short datatype, short scale, short precision,
     if (datatype == 261)    // blob
         retval << " sub_type " << subtype;
 
-    if (!isNullable)
-        retval << " not null";
     return std2wx(retval.str());
 }
 //-----------------------------------------------------------------------------
@@ -293,7 +284,10 @@ wxString Domain::getCharset()
 //-----------------------------------------------------------------------------
 wxString Domain::getPrintableName()
 {
-    return getName_() + wxT(" ") + getDatatypeAsString();
+    wxString retval = getName_() + wxT(" ") + getDatatypeAsString();
+    if (isNotNullM)
+        retval += wxT(" not null");
+    return retval;
 }
 //-----------------------------------------------------------------------------
 wxString Domain::getCreateSqlTemplate() const

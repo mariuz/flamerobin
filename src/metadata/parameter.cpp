@@ -47,7 +47,7 @@
 Parameter::Parameter(wxString source, int parameterType)
     : Column()
 {
-    Column::Init(true, source, false, wxT(""), wxT(""));
+    Column::Init(true, source, wxT(""), wxT(""), wxT(""));
     typeM = ntParameter;
     parameterTypeM = (parameterType == 0 ? ptInput : ptOutput);
 }

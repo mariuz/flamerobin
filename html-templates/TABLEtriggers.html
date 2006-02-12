@@ -9,7 +9,7 @@
  href="fr://page?type=indices&amp;parent_window={%parent_window%}">Indices</a> | <a
  href="fr://privileges?object_address={%object_address%}">Privileges</a> | <a
  href="fr://page?type=dependencies&amp;parent_window={%parent_window%}">Dependencies</a> | <a
- href="fr://extract_ddl?object_type=table&amp;object_name={%object_name%}">DDL</a>
+ href="fr://page?type=ddl&amp;parent_window={%parent_window%}">DDL</a>
 <br><br>
 <font size=+2>Triggers on table {%object_name%}</font>
 <br><br>
@@ -19,11 +19,11 @@
       <td nowrap><b><font color=white>Before triggers</font></b></td>
       <td nowrap><b><font color=white>Trigger info</font></b></td>
     </tr>
-	{%triggers:befor
+    {%triggers:befor
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
       <td nowrap valign="top"><a
-		  href="fr://properties?object_type=TRIGGER&amp;object_name={%object_name%}&amp;parent_window={%parent_window%}">{%object_name%}</a></td>
-	  <td valign="top">{%trigger_info%}</td>
+          href="fr://properties?object_type=TRIGGER&amp;object_name={%object_name%}&amp;parent_window={%parent_window%}">{%object_name%}</a></td>
+      <td valign="top">{%trigger_info%}</td>
     </tr>%}
   </tbody>
 </table>
@@ -34,11 +34,11 @@
       <td nowrap><b><font color=white>After triggers</font></b></td>
       <td nowrap><b><font color=white>Trigger info</font></b></td>
     </tr>
-	{%triggers:after
+    {%triggers:after
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
       <td nowrap valign="top"><a
-		  href="fr://properties?object_type=TRIGGER&amp;object_name={%object_name%}&amp;parent_window={%parent_window%}">{%object_name%}</a></td>
-	  <td valign="top">{%trigger_info%}</td>
+          href="fr://properties?object_type=TRIGGER&amp;object_name={%object_name%}&amp;parent_window={%parent_window%}">{%object_name%}</a></td>
+      <td valign="top">{%trigger_info%}</td>
     </tr>%}
   </tbody>
 </table>

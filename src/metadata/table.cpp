@@ -65,7 +65,7 @@ void Table::invalidateIndices(const wxString& forIndex)
             hasit = true;
         else
         {
-            for (std::vector<Index>::iterator it = indicesM.begin(); 
+            for (std::vector<Index>::iterator it = indicesM.begin();
                 it != indicesM.end(); ++it)
             {
                 if ((*it).getName_() == forIndex)
@@ -98,7 +98,7 @@ wxString Table::getInsertStatement()
     for (MetadataCollection<Column>::const_iterator i = columnsM.begin();
          i != columnsM.end(); ++i)
     {
-        if ((*i).isComputed())
+        if (!(*i).getComputedSource().IsEmpty())
             continue;
         if (!collist.empty())
         {
@@ -392,8 +392,8 @@ bool Table::loadForeignKeys()
                 fkp = &foreignKeysM.back();
                 fkp->setName_(std2wx(cname));
                 fkp->setParent(this);
-                fkp->updateActionM = std2wx(update_rule);
-                fkp->deleteActionM = std2wx(delete_rule);
+                fkp->updateActionM = std2wx(update_rule).Strip();
+                fkp->deleteActionM = std2wx(delete_rule).Strip();
 
                 st2->Set(1, ref_constraint);
                 st2->Execute();

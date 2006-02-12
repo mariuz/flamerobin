@@ -44,7 +44,7 @@ public:
     bool loadInfo();
 
     static wxString datatype2string(short datatype, short scale,
-        short precision, short subtype, short length, bool isNullable);
+        short precision, short subtype, short length);
     void getDatatypeParts(wxString& type, wxString& size, wxString& scale);
     wxString getDatatypeAsString();
     wxString getDefault();

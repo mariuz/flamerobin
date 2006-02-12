@@ -41,6 +41,12 @@
 #include "constraints.h"
 #include "MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
+bool Constraint::isSystem() const
+{
+    return (getName_().substr(0, 4) == wxT("RDB$")
+        || getName_().StartsWith(wxT("INTEG_")));
+}
+//-----------------------------------------------------------------------------
 wxString ColumnConstraint::getColumnList() const
 {
     wxString result;

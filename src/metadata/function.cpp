@@ -54,8 +54,8 @@ wxString Function::getCreateSql()
     loadInfo();
     wxString ret(wxT("DECLARE EXTERNAL FUNCTION "));
     ret += getQuotedName() + wxT("\n") + paramListM
-        + wxT("RETURNS ") + retstrM + wxT("\nENTRY_POINT '") + entryPointM
-        + wxT("'\nMODULE NAME '") + libraryNameM + wxT("';\n");
+        + wxT("\nRETURNS ") + retstrM + wxT("\nENTRY_POINT '") + entryPointM
+        + wxT("'\nMODULE_NAME '") + libraryNameM + wxT("';\n");
     return ret;
 }
 //-----------------------------------------------------------------------------
@@ -115,6 +115,7 @@ void Function::loadInfo(bool force)
         st1->Execute();
         bool first = true;
         paramListM = wxEmptyString;
+        wxString retstr;
         while (st1->Fetch())
         {
             short returnarg, mechanism, type, scale, length, subtype, precision, retpos;
@@ -128,16 +129,22 @@ void Function::loadInfo(bool force)
             st1->Get(7, subtype);
             st1->Get(8, precision);
             st1->Get(9, libraryName);
-            libraryNameM = std2wx(libraryName);
+            libraryNameM = std2wx(libraryName).Strip();
             st1->Get(10, entryPoint);
-            entryPointM = std2wx(entryPoint);
-            wxString param = wxT("    ") + Domain::datatype2string(
-                type, scale, precision, subtype, length, true) + wxT(" by ")
+            entryPointM = std2wx(entryPoint).Strip();
+            wxString datatype = Domain::datatype2string(type, scale,
+                precision, subtype, length);
+            wxString param = wxT("    ") + datatype + wxT(" by ")
                 + (mechanism == 0 ? wxT("value") : wxT("reference"));
             if (mechanism == -1)
                 param += wxT(" FREE_IT");
             if (returnarg == retpos)    // output
-                retstrM = param;
+            {
+                retstr = param;
+                retstrM = datatype;
+                if (mechanism == 0)
+                    retstrM += wxT(" BY VALUE ");
+            }
             else
             {
                 if (first)
@@ -146,11 +153,13 @@ void Function::loadInfo(bool force)
                     definitionM += wxT(",\n");
                 definitionM += param;
                 if (!paramListM.IsEmpty())
-                    paramListM += wxT(",\n");
-                paramListM += param;
+                    paramListM += wxT(", ");
+                paramListM += datatype;
+                if (mechanism == 0)
+                    paramListM += wxT(" BY VALUE ");
             }
         }
-        definitionM += wxT("\n)\nreturns:\n") + retstrM;
+        definitionM += wxT("\n)\nreturns:\n") + retstr;
         infoLoadedM = true;
         tr1->Commit();
     }

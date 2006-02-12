@@ -9,7 +9,7 @@
  href="fr://page?type=triggers&amp;parent_window={%parent_window%}">Triggers</a> | <a
  href="fr://privileges?object_address={%object_address%}">Privileges</a> | <a
  href="fr://page?type=dependencies&amp;parent_window={%parent_window%}">Dependencies</a> | <a
- href="fr://extract_ddl?object_type=table&amp;object_name={%object_name%}">DDL</a>
+ href="fr://page?type=ddl&amp;parent_window={%parent_window%}">DDL</a>
 <br><br>
 <font size=+2>Indices for table {%object_name%}</font><br>
 <br><br>
@@ -25,21 +25,21 @@
       <td valign="top"><b><font color=white>Statistics</font></b></td>
       <td valign="top"><b><font color=white>Description</font></b></td>
     </tr>
-	{%indices:
+    {%indices:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
       <td valign="top" nowrap>
-		  <a href="fr://index_action?type=DROP&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
-		  <a href="fr://index_action?type=RECOMPUTE&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/compute.png"></a>
-	  </td>
+          <a href="fr://index_action?type=DROP&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
+          <a href="fr://index_action?type=RECOMPUTE&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/compute.png"></a>
+      </td>
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top" align="center">{%index_type%}</td>
-      <td nowrap valign="top" align="center"><a 
-		href="fr://index_action?type=TOGGLE_ACTIVE&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">{%index_active%}</a></td>
+      <td nowrap valign="top" align="center"><a
+        href="fr://index_action?type=TOGGLE_ACTIVE&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">{%index_active%}</a></td>
       <td nowrap valign="top" align="center">{%index_unique%}</td>
       <td nowrap valign="top">{%index_fields%}</td>
       <td nowrap valign="top" align="right">{%index_stats%}</td>
       <td nowrap valign="top"><font size=-1>{%object_description%} [<a
-		href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=INDEX&amp;object_name={%object_name%}">edit</a>]</font></td>
+        href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=INDEX&amp;object_name={%object_name%}">edit</a>]</font></td>
     </tr>%}
   </tbody>
 </table>
@@ -50,14 +50,14 @@ href="fr://recompute_all?parent_window={%parent_window%}&amp;object_address={%ob
 statistics for all indices</a>
 <br><br>
 <table border=0 bgcolor="white" cellspacing=1 cellpadding=2>
-	<tr bgcolor="#CCCCFF">
-		<td><B>Icon</B></td>
-		<td nowrap><B>Click to...</B></td>
-	</tr>
-	<tr><td><img src="{%fr_home%}/html-templates/drop.png"></td><td>Drop index</td></tr>
-	<tr><td><img src="{%fr_home%}/html-templates/compute.png"></td><td>Recompute statistics for index</td></tr>
-	<tr><td><img src="{%fr_home%}/html-templates/ok.png"></td><td>Make index inactive</td></tr>
-	<tr><td><img src="{%fr_home%}/html-templates/redx.png"></td><td>Make index active</td></tr>
+    <tr bgcolor="#CCCCFF">
+        <td><B>Icon</B></td>
+        <td nowrap><B>Click to...</B></td>
+    </tr>
+    <tr><td><img src="{%fr_home%}/html-templates/drop.png"></td><td>Drop index</td></tr>
+    <tr><td><img src="{%fr_home%}/html-templates/compute.png"></td><td>Recompute statistics for index</td></tr>
+    <tr><td><img src="{%fr_home%}/html-templates/ok.png"></td><td>Make index inactive</td></tr>
+    <tr><td><img src="{%fr_home%}/html-templates/redx.png"></td><td>Make index active</td></tr>
 </table>
 </body>
 </html>

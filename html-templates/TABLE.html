@@ -9,7 +9,7 @@
  href="fr://page?type=indices&amp;parent_window={%parent_window%}">Indices</a> | <a
  href="fr://privileges?object_address={%object_address%}">Privileges</a> | <a
  href="fr://page?type=dependencies&amp;parent_window={%parent_window%}">Dependencies</a> | <a
- href="fr://extract_ddl?object_type=table&amp;object_name={%object_name%}">DDL</a>
+ href="fr://page?type=ddl&amp;parent_window={%parent_window%}">DDL</a>
 <br><br>
 <font size=+2>{%object_name%}</font><br>
 {%object_description%} [<a
@@ -24,17 +24,17 @@
       <td><b><font color=white>NULL</font></b></td>
       <td><b><font color=white>Description</font></b></td>
     </tr>
-	{%columns:
+    {%columns:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
       <td valign="top" nowrap>
-		  <a href="fr://drop_field?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
-		  <a href="fr://edit_field?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/view.png"></a>
-	  </td>
+          <a href="fr://drop_field?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
+          <a href="fr://edit_field?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/view.png"></a>
+      </td>
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top">{%column_datatype%}</td>
       <td nowrap valign="top">{%column_nulloption%}</td>
       <td valign="top"><font size=-1>{%object_description%} [<a
-		href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>
+        href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>
     </tr>%}
   </tbody>
 </table>

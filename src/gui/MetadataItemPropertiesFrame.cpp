@@ -51,6 +51,7 @@
 #include "frutils.h"
 #include "gui/MetadataItemPropertiesFrame.h"
 #include "images.h"
+#include "metadata/CreateDDLVisitor.h"
 #include "metadata/database.h"
 #include "metadata/exception.h"
 #include "metadata/metadataitem.h"
@@ -179,6 +180,9 @@ void MetadataItemPropertiesFrame::loadPage()
             break;
         case ptDependencies:
             htmlpage += wxT("dependencies.html");
+            break;
+        case ptDDL:
+            htmlpage += wxT("DDL.html");
             break;
     }
     processHtmlFile(htmlpage);  // load HTML template, parse, and fill the HTML control
@@ -517,6 +521,13 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
             processHtmlCode(htmlpage, suffix, &(*it));
     }
 
+    else if (cmd == wxT("object_ddl"))
+    {
+        CreateDDLVisitor cdv;
+        object->acceptVisitor(&cdv);
+        htmlpage += cdv.getSql();
+    }
+
     else if (cmd.substr(0, 5) == wxT("index"))
     {
         wxString okimage = wxT("<img src=\"") + config().getHtmlTemplatesPath() + wxT("ok.png\">");
@@ -649,6 +660,8 @@ void MetadataItemPropertiesFrame::setPage(const wxString& type)
         pageTypeM = ptTriggers;
     else if (type == wxT("indices"))
         pageTypeM = ptTableIndices;
+    else if (type == wxT("ddl"))
+        pageTypeM = ptDDL;
     // add more page types here when needed
     else
         pageTypeM = ptSummary;

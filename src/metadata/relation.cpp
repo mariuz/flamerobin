@@ -111,11 +111,14 @@ bool Relation::loadColumns()
         tr1->Start();
         IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
         st1->Prepare(
-            "select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source, l.rdb$collation_name, f.rdb$computed_blr, "
-            " f.rdb$computed_source "
+            "select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source, "
+            " l.rdb$collation_name,f.rdb$computed_source,r.rdb$default_source"
             " from rdb$fields f"
-            " join rdb$relation_fields r on f.rdb$field_name=r.rdb$field_source"
-            " left outer join rdb$collations l on l.rdb$collation_id = r.rdb$collation_id and l.rdb$character_set_id = f.rdb$character_set_id"
+            " join rdb$relation_fields r "
+            "     on f.rdb$field_name=r.rdb$field_source"
+            " left outer join rdb$collations l "
+            "     on l.rdb$collation_id = r.rdb$collation_id "
+            "     and l.rdb$character_set_id = f.rdb$character_set_id"
             " where r.rdb$relation_name = ?"
             " order by r.rdb$field_position"
         );
@@ -125,16 +128,18 @@ bool Relation::loadColumns()
         while (st1->Fetch())
         {
             std::string name, source, collation;
-            wxString computedSrc;
+            wxString computedSrc, defaultSrc;
             st1->Get(1, name);
             st1->Get(3, source);
             st1->Get(4, collation);
-            readBlob(st1, 6, computedSrc);
+            readBlob(st1, 5, computedSrc);
+            readBlob(st1, 6, defaultSrc);
 
             Column *cc = columnsM.add();
             cc->setName_(std2wx(name));
             cc->setParent(this);
-            cc->Init(!st1->IsNull(2), std2wx(source), !st1->IsNull(5), computedSrc, std2wx(collation));
+            cc->Init(!st1->IsNull(2), std2wx(source),
+                computedSrc, std2wx(collation), defaultSrc);
         }
 
         tr1->Commit();

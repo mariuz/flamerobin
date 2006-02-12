@@ -55,16 +55,16 @@ Column::Column()
 }
 //-----------------------------------------------------------------------------
 //! initialize properties
-void Column::Init(bool notnull, wxString source, bool computed,
-    wxString computedSource, wxString collation)
+void Column::Init(bool notnull, wxString source, wxString computedSource,
+    wxString collation, wxString defaultValue)
 {
     source.Trim();        // right trim everything
     collation.Trim();
     notnullM = notnull;
     sourceM = source;
-    computedM = computed;
     computedSourceM = computedSource;
     collationM = collation;
+    defaultM = defaultValue;
 }
 //-----------------------------------------------------------------------------
 bool Column::isNullable() const
@@ -75,11 +75,6 @@ bool Column::isNullable() const
     if (d)
         return d->isNullable();
     return true;
-}
-//-----------------------------------------------------------------------------
-bool Column::isComputed() const
-{
-    return computedM;
 }
 //-----------------------------------------------------------------------------
 bool Column::isPrimaryKey() const
@@ -108,7 +103,7 @@ wxString Column::getDatatype()
     int flag = showFormula;
     config().getValue(wxT("ShowComputed"), flag);
     // view columns are all computed and have their source empty
-    if (computedM && flag == showFormula && !computedSourceM.empty())
+    if (flag == showFormula && !computedSourceM.empty())
         return computedSourceM;
 
     wxString ret;
@@ -138,7 +133,7 @@ wxString Column::getDatatype()
         ret += wxT("(") + d->getName_() + wxT(")");
     }
 
-    if (computedM && flag == showAll && !computedSourceM.empty())
+    if (flag == showAll && !computedSourceM.empty())
         ret += wxT(" (") + computedSourceM + wxT(")");
     return ret;
 }
@@ -150,34 +145,6 @@ wxString Column::getPrintableName()
     if (notnullM)
         ret += wxT(" not null");
     return ret;
-}
-//-----------------------------------------------------------------------------
-// [name] [type] [charset] [collation] [default] [null option] [computed by]...
-wxString Column::getDDL() const
-{
-    // TODO: this needs to be done properly
-    wxString result;
-    result = getQuotedName() + wxT(" ");
-
-    if (computedM && !computedSourceM.empty())
-    {
-        result += wxT("COMPUTED BY ") + computedSourceM;
-        return result;
-    }
-
-    Domain *d = getDomain();
-    if (d)
-    {
-        if (d->isSystem())
-            result += d->getDatatypeAsString();
-        else
-            result += d->getQuotedName();
-    }
-    else
-        result += sourceM;  // shouldn't happen
-
-    // add collation, default value, etc. ...
-    return result;
 }
 //-----------------------------------------------------------------------------
 Domain *Column::getDomain() const
@@ -198,6 +165,11 @@ Table* Column::getTable() const
     return dynamic_cast<Table*>(getParentObjectOfType(ntTable));
 }
 //-----------------------------------------------------------------------------
+wxString Column::getComputedSource() const
+{
+    return computedSourceM;
+}
+//-----------------------------------------------------------------------------
 wxString Column::getSource() const
 {
     return sourceM;
@@ -206,6 +178,11 @@ wxString Column::getSource() const
 wxString Column::getCollation() const
 {
     return collationM;
+}
+//-----------------------------------------------------------------------------
+wxString Column::getDefault() const
+{
+    return defaultM;
 }
 //-----------------------------------------------------------------------------
 wxString Column::getDropSqlStatement() const
