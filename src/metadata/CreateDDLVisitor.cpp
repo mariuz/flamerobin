@@ -80,16 +80,25 @@ void CreateDDLVisitor::visit(Column& c)
     if (d)
     {
         if (d->isSystem())
+        {
             preSqlM << d->getDatatypeAsString();
+            wxString charset = d->getCharset();
+            Database *db = d->getDatabase();
+            if (!charset.IsEmpty() && (!db
+                || db->getDatabaseCharset() != charset))
+            {
+                preSqlM << wxT(" CHARACTER SET ") << charset;
+            }
+        }
         else
-            preSqlM <<  d->getQuotedName();
+            preSqlM << d->getQuotedName();
     }
     else
         preSqlM <<  c.getSource();  // shouldn't happen
 
     wxString defaultVal = c.getDefault();
     if (!defaultVal.IsEmpty())
-        preSqlM << defaultVal;     // already contains word DEFAULT
+        preSqlM << wxT(" ") << defaultVal;     // already contains word DEFAULT
     if (!c.isNullable())
         preSqlM << wxT(" NOT NULL");
     wxString collate = c.getCollation();
@@ -113,16 +122,16 @@ void CreateDDLVisitor::visit(Domain& d)
     sqlM += wxT("\n");
     wxString dflt(d.getDefault());
     if (!dflt.IsEmpty())
-        sqlM += dflt + wxT("\n");   // already contains DEFAULT keyword
+        sqlM += wxT(" ") + dflt + wxT("\n");   // already contains DEFAULT keyword
     if (!d.isNullable())
         sqlM += wxT(" NOT NULL\n");
     wxString check = d.getCheckConstraint();
     if (!check.IsEmpty())
-        sqlM += check + wxT("\n");  // already contains CHECK keyword
+        sqlM += wxT(" ") + check + wxT("\n");  // already contains CHECK keyword
     wxString collate = d.getCollation();
     if (!collate.IsEmpty())
         sqlM += wxT(" COLLATE ") + collate;
-    sqlM += wxT(";")
+    sqlM += wxT(";");
     preSqlM = sqlM;
 }
 //-----------------------------------------------------------------------------
