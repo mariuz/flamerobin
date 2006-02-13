@@ -646,3 +646,9 @@ bool Dependency::operator!= (const Dependency& other) const
     return (objectM != other.getDependentObject() || getFields() != other.getFields());
 }
 //-----------------------------------------------------------------------------
+void Dependency::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    if (objectM)
+        objectM->acceptVisitor(visitor);
+}
+//-----------------------------------------------------------------------------

@@ -153,6 +153,7 @@ public:
     void setFields(const std::vector<wxString>& fields);
     bool operator== (const Dependency& other) const;
     bool operator!= (const Dependency& other) const;
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
 #endif //FR_METADATAITEM_H
