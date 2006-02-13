@@ -104,12 +104,6 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent, Metad
     objectM->attachObserver(this);
 
     window_1 = new PrintableHtmlWindow(this);
-    #ifdef __WXGTK20__
-    // default fonts are just too big on GTK2
-    int sizes[] = { 7, 8, 10, 12, 16, 22, 30 };
-    window_1->SetFonts(wxEmptyString, wxEmptyString, sizes);
-    #endif
-
     CreateStatusBar();
     wxString title = objectM->getName_().c_str();
     window_1->SetRelatedFrame(this, title + wxT(": %s"));

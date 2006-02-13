@@ -67,6 +67,11 @@ HtmlPrinter::~HtmlPrinter()
 PrintableHtmlWindow::PrintableHtmlWindow(wxWindow *parent)
     : wxHtmlWindow(parent, -1)
 {
+    #ifdef __WXGTK20__
+    // default fonts are just too big on GTK2
+    int sizes[] = { 7, 8, 10, 12, 16, 22, 30 };
+    SetFonts(wxEmptyString, wxEmptyString, sizes);
+    #endif
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(PrintableHtmlWindow, wxHtmlWindow)
