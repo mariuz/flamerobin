@@ -1039,6 +1039,7 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
     // find terminator, and execute the statement
     wxString::size_type oldpos = 0;
     wxString::size_type searchpos = 0;
+    wxString::size_type len = commands.length();
     while (true)
     {
         wxString::size_type pos = commands.find(terminatorM, searchpos);
@@ -1054,23 +1055,31 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
                 (comment1 == wxString::npos || quote < comment1) &&            // before comment1
                 (comment2 == wxString::npos || quote < comment2))              // before comment2
             {
-                searchpos = 1 + commands.find(wxT("'"), quote+1);              // end quote
-                continue;
+                searchpos = commands.find(wxT("'"), quote+1);              // end quote
+                if (searchpos++ != wxString::npos)
+                    continue;
+                pos = wxString::npos;
             }
 
             // check for comment1
-            if (comment1 != wxString::npos && comment1 < pos &&                // found & before terminator
+            if (pos != wxString::npos &&
+                comment1 != wxString::npos && comment1 < pos &&                // found & before terminator
                 (comment2 == wxString::npos || comment1 < comment2))           // before comment2
             {
-                searchpos = 1 + commands.find(wxT("*/"), comment1 + 1);        // end comment
-                continue;
+                searchpos = commands.find(wxT("*/"), comment1 + 1);        // end comment
+                if (searchpos++ != wxString::npos)
+                    continue;
+                pos = wxString::npos;
             }
 
             // check for comment2
-            if (comment2 != wxString::npos && comment2 < pos)                  // found & before terminator
+            if (pos != wxString::npos &&
+                comment2 != wxString::npos && comment2 < pos)                  // found & before terminator
             {
-                searchpos = 1 + commands.find(wxT("\n"), comment2 + 1);        // end comment
-                continue;
+                searchpos = commands.find(wxT("\n"), comment2 + 1);        // end comment
+                if (searchpos++ != wxString::npos)
+                    continue;
+                pos = wxString::npos;
             }
         }
 
