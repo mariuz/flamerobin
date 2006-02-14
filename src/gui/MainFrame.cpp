@@ -152,7 +152,7 @@ void MainFrame::buildMainMenu()
 
     wxMenu* viewMenu = new wxMenu();
     viewMenu->AppendCheckItem(myTreeCtrl::Menu_ToggleStatusBar, _("&Status bar"));
-    viewMenu->AppendCheckItem(myTreeCtrl::Menu_ToggleSearchBar, _("&Search bar"));
+    viewMenu->AppendCheckItem(myTreeCtrl::Menu_ToggleSearchBar, _("S&earch bar"));
     viewMenu->AppendCheckItem(myTreeCtrl::Menu_ToggleDisconnected, _("&Disconnected databases"));
     viewMenu->AppendSeparator();
     viewMenu->Append(wxID_PREFERENCES, _("P&references..."));
