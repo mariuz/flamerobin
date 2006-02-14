@@ -1635,6 +1635,35 @@ bool DropColumnsHandler::handleURI(URI& uri)
     return true;
 }
 //-----------------------------------------------------------------------------
+//! drop any metadata item
+class DropObjectHandler: public URIHandler
+{
+public:
+    bool handleURI(URI& uri);
+private:
+    static const DropObjectHandler handlerInstance;
+};
+//-----------------------------------------------------------------------------
+const DropObjectHandler DropObjectHandler::handlerInstance;
+//-----------------------------------------------------------------------------
+bool DropObjectHandler::handleURI(URI& uri)
+{
+    if (uri.action != wxT("drop_object"))
+        return false;
+
+    MetadataItem* m = (MetadataItem*)getObject(uri);
+    wxWindow* w = getWindow(uri);
+    if (!m || !w)
+        return true;
+
+    ExecuteSqlFrame* eff = new ExecuteSqlFrame(w->GetParent(), -1, wxT("DROP"));
+    eff->setDatabase(m->getDatabase());
+    eff->Show();
+    eff->setSql(m->getDropSqlStatement());
+    eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
+    return true;
+}
+//-----------------------------------------------------------------------------
 class EditProcedureHandler: public URIHandler
 {
 public:
