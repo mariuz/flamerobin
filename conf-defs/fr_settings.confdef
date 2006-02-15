@@ -33,13 +33,13 @@
                 </setting>
             </enables>
         </setting>
+        <!--
         <setting type="checkbox">
             <caption>Confirm quit</caption>
             <description>Asks the "Are you sure you wish to exit FlameRobin?" question when closing</description>
             <key>ConfirmQuit</key>
             <default>0</default>
         </setting>
-        <!--
         <setting type="checkbox" platform="win">
             <caption>Minimize to system tray</caption>
             <description>Minimizes to system tray instead of taskbar</description>
