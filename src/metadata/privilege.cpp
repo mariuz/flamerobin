@@ -60,7 +60,7 @@ void Privilege::addPrivilege(char privilege)
         case 'D':   p = wxT("DELETE");      break;
         case 'R':   p = wxT("REFERENCES");  break;
         case 'X':   p = wxT("EXECUTE");     break;
-        //case '':   p = wxT("");      break;
+        case 'M':   p = wxT("MEMBER OF");   break;
         default:
             return;
     };
@@ -82,12 +82,14 @@ void Privilege::addReferencesColumn(const wxString& column)
 //-----------------------------------------------------------------------------
 wxString granteeTypeToString(int type)
 {
-    if (type == 1)  // view
-        return wxT("VIEW ");
-    if (type == 2)  // trigger
-        return wxT("TRIGGER ");
-    if (type == 5)  // procedure
-        return wxT("PROCEDURE ");
+    if (type == 1)
+        return wxT("VIEW");
+    if (type == 2)
+        return wxT("TRIGGER");
+    if (type == 5)
+        return wxT("PROCEDURE");
+    if (type == 13)
+        return wxT("ROLE");
     return wxEmptyString;
 }
 //-----------------------------------------------------------------------------
@@ -132,7 +134,7 @@ wxString Privilege::getSql() const
             }
         }
         ret += wxT(" ON ") + r->getQuotedName() + wxT("\n    TO ")
-            + granteeTypeToString(granteeTypeM) + granteeM;
+            + granteeTypeToString(granteeTypeM) + wxT(" ") + granteeM;
         if (withGrantOptionM)
             ret += wxT(" WITH GRANT OPTION");
     }
@@ -146,7 +148,7 @@ wxString Privilege::getSql() const
             {
                 ret += wxT("GRANT EXECUTE ON PROCEDURE ") +
                     p->getQuotedName() + wxT(" TO ") +
-                    granteeTypeToString(granteeTypeM) + granteeM;
+                    granteeTypeToString(granteeTypeM) + wxT(" ") + granteeM;
             }
         }
         else
@@ -154,6 +156,8 @@ wxString Privilege::getSql() const
             Role *r = dynamic_cast<Role *>(parentM);
             if (r)
             {
+                ret = wxT("GRANT ") + r->getQuotedName() + wxT(" TO ") +
+                    granteeM;
             }
         }
     }

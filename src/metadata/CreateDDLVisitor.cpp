@@ -190,11 +190,19 @@ void CreateDDLVisitor::visit(Parameter&)
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Role& r)
 {
-    sqlM = wxT("CREATE ROLE ") + r.getQuotedName();
+    preSqlM = wxT("CREATE ROLE ") + r.getQuotedName() + wxT(";\n");
 
-    // TODO: grant role [name] to [user]
-
-    preSqlM = sqlM;
+    // grant execute on [name] to [user/role]
+    const std::vector<Privilege>* priv = r.getPrivileges();
+    if (priv)
+    {
+        for (std::vector<Privilege>::const_iterator ci = priv->begin();
+            ci != priv->end(); ++ci)
+        {
+            postSqlM += (*ci).getSql() + wxT(";\n");
+        }
+    }
+    sqlM = preSqlM + wxT("\n") + postSqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Root&)

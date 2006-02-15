@@ -27,11 +27,16 @@
 #ifndef FR_ROLE_H
 #define FR_ROLE_H
 
+#include <vector>
 #include "metadata/metadataitem.h"
+#include "metadata/privilege.h"
 
 class Role: public MetadataItem
 {
+private:
+    std::vector<Privilege> privilegesM;
 public:
+    const std::vector<Privilege>* getPrivileges();
     virtual wxString getCreateSqlTemplate() const;
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
