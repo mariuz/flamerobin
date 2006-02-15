@@ -32,12 +32,14 @@
 #include "metadata/collection.h"
 #include "metadata/column.h"
 #include "metadata/metadataitem.h"
+#include "metadata/privilege.h"
 #include "metadata/trigger.h"
 //-----------------------------------------------------------------------------
 class Relation: public MetadataItem
 {
 protected:
     MetadataCollection<Column> columnsM;
+    std::vector<Privilege> privilegesM;
 
     virtual void loadDescription();
     virtual void saveDescription(wxString description);
@@ -57,6 +59,7 @@ public:
     MetadataCollection<Column>::const_iterator begin() const;
     MetadataCollection<Column>::const_iterator end() const;
 
+    const std::vector<Privilege>* getPrivileges();
     bool getChildren(std::vector<MetadataItem *>& temp);
     bool getTriggers(std::vector<Trigger *>& list,
         Trigger::firingTimeType beforeOrAfter);

@@ -26,12 +26,15 @@
 #ifndef FR_PROCEDURE_H
 #define FR_PROCEDURE_H
 
+#include <vector>
 #include "metadata/metadataitem.h"
 #include "metadata/parameter.h"
+#include "metadata/privilege.h"
 //-----------------------------------------------------------------------------
 class Procedure: public MetadataItem
 {
 private:
+    std::vector<Privilege> privilegesM;
     MetadataCollection<Parameter> parametersM;
     bool parametersLoadedM;
     bool loadParameters();
@@ -58,6 +61,7 @@ public:
     bool getSource(wxString& source);
     wxString getAlterSql();
     wxString getDefinition();   // used for calltip in sql editor
+    const std::vector<Privilege>* getPrivileges();
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);

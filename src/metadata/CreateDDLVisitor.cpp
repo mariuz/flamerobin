@@ -160,18 +160,27 @@ void CreateDDLVisitor::visit(Generator& g)
 void CreateDDLVisitor::visit(Procedure& p)
 {
     wxString temp(p.getAlterSql());
+    temp += wxT("\n");
+
+    // grant execute on [name] to [user/role]
+    const std::vector<Privilege>* priv = p.getPrivileges();
+    if (priv)
+    {
+        for (std::vector<Privilege>::const_iterator ci = priv->begin();
+            ci != priv->end(); ++ci)
+        {
+            temp += (*ci).getSql() + wxT(";\n");
+        }
+    }
+
     postSqlM = temp;
     temp.Replace(wxT("ALTER"), wxT("CREATE"), false);   // just first
     sqlM = temp;
 
-    // TODO: grant execute on [name] to [user/role]
-
     // TODO: create empty procedure body (for database DDL dump)
-
     preSqlM = wxT("SET TERM ^ ;\nCREATE PROCEDURE ") + p.getQuotedName()
     //    + wxT(" ") + p.params
         + wxT("\nAS\nBEGIN\n/* nothing */\nEND^\nSET TERM ; ^");
-
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Parameter&)
@@ -324,11 +333,19 @@ void CreateDDLVisitor::visit(Table& t)
         }
     }
 
-    // TODO: grant sel/ins/upd/del/ref/all ON [name] to [SP,user,role]
-    //postSqlM +=
+    // grant sel/ins/upd/del/ref/all ON [name] to [SP,user,role]
+    const std::vector<Privilege>* priv = t.getPrivileges();
+    if (priv)
+    {
+        for (std::vector<Privilege>::const_iterator ci = priv->begin();
+            ci != priv->end(); ++ci)
+        {
+            postSqlM += (*ci).getSql() + wxT(";\n");
+        }
+    }
 
     preSqlM += wxT("\n);\n");
-    sqlM = preSqlM + postSqlM;
+    sqlM = preSqlM + wxT("\n") + postSqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Trigger& t)
@@ -361,7 +378,7 @@ void CreateDDLVisitor::visit(View& v)
     v.checkAndLoadColumns();
     v.getSource(src);
 
-    sqlM = wxT("CREATE VIEW ") + v.getQuotedName() + wxT(" (");
+    preSqlM = wxT("CREATE VIEW ") + v.getQuotedName() + wxT(" (");
     bool first = true;
     for (MetadataCollection<Column>::const_iterator it = v.begin();
         it != v.end(); ++it)
@@ -369,15 +386,22 @@ void CreateDDLVisitor::visit(View& v)
         if (first)
             first = false;
         else
-            sqlM += wxT(", ");
-        sqlM += (*it).getQuotedName();
+            preSqlM += wxT(", ");
+        preSqlM += (*it).getQuotedName();
     }
-    sqlM += wxT(")\nAS ");
-    sqlM += src;
+    preSqlM += wxT(")\nAS ") + src + wxT(";\n");
 
-    // TODO: grant sel/ins/upd/del/ref/all ON [name] to [SP,user,role]
-
-    preSqlM = sqlM;
+    // grant sel/ins/upd/del/ref/all ON [name] to [SP,user,role]
+    const std::vector<Privilege>* priv = v.getPrivileges();
+    if (priv)
+    {
+        for (std::vector<Privilege>::const_iterator ci = priv->begin();
+            ci != priv->end(); ++ci)
+        {
+            postSqlM += (*ci).getSql() + wxT(";\n");
+        }
+    }
+    sqlM = preSqlM + wxT("\n") + postSqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(MetadataItem&)

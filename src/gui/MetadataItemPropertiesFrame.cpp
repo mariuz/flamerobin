@@ -525,7 +525,7 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
     {
         CreateDDLVisitor cdv;
         object->acceptVisitor(&cdv);
-        htmlpage += cdv.getSql();
+        htmlpage += escapeHtmlChars(cdv.getSql(), false);
     }
 
     else if (cmd.substr(0, 5) == wxT("index"))

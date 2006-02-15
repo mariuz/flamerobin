@@ -321,6 +321,7 @@
         $(SOURCEDIR)/metadata/metadataitem.h
         $(SOURCEDIR)/metadata/MetadataItemVisitor.h
         $(SOURCEDIR)/metadata/parameter.h
+        $(SOURCEDIR)/metadata/privilege.h
         $(SOURCEDIR)/metadata/procedure.h
         $(SOURCEDIR)/metadata/relation.h
         $(SOURCEDIR)/metadata/role.h
@@ -409,6 +410,7 @@
         $(SOURCEDIR)/metadata/metadataitem.cpp
         $(SOURCEDIR)/metadata/MetadataItemVisitor.cpp
         $(SOURCEDIR)/metadata/parameter.cpp
+        $(SOURCEDIR)/metadata/privilege.cpp
         $(SOURCEDIR)/metadata/procedure.cpp
         $(SOURCEDIR)/metadata/relation.cpp
         $(SOURCEDIR)/metadata/role.cpp
