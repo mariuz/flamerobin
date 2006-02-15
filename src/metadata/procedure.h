@@ -57,7 +57,7 @@ public:
     bool checkAndLoadParameters(bool force = false);
     bool getSource(wxString& source);
     wxString getAlterSql();
-    wxString getDefinition();
+    wxString getDefinition();   // used for calltip in sql editor
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);

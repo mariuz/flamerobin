@@ -257,27 +257,31 @@ wxString Procedure::getDefinition()
     checkAndLoadParameters();
     wxString collist, parlist;
     MetadataCollection <Parameter>::const_iterator lastInput, lastOutput;
-    for (MetadataCollection <Parameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
+    for (MetadataCollection <Parameter>::const_iterator it =
+        parametersM.begin(); it != parametersM.end(); ++it)
     {
         if ((*it).getParameterType() == ptInput)
             lastInput = it;
         else
             lastOutput = it;
     }
-    for (MetadataCollection <Parameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
+    for (MetadataCollection <Parameter>::const_iterator it =
+        parametersM.begin(); it != parametersM.end(); ++it)
     {
-        // No need to quote domains, as currently only regular datatypes can be used
-        // for SP parameters
+        // No need to quote domains, as currently only regular datatypes can be
+        // used for SP parameters
         if ((*it).getParameterType() == ptInput)
         {
-            parlist += wxT("    ") + (*it).getQuotedName() + wxT(" ") + (*it).getDomain()->getDatatypeAsString();
+            parlist += wxT("    ") + (*it).getQuotedName() + wxT(" ")
+                + (*it).getDomain()->getDatatypeAsString();
             if (it != lastInput)
                 parlist += wxT(",");
             parlist += wxT("\n");
         }
         else
         {
-            collist += wxT("    ") + (*it).getQuotedName() + wxT(" ") + (*it).getDomain()->getDatatypeAsString();
+            collist += wxT("    ") + (*it).getQuotedName() + wxT(" ")
+                + (*it).getDomain()->getDatatypeAsString();
             if (it != lastOutput)
                 collist += wxT(",");
             collist += wxT("\n");
@@ -305,15 +309,20 @@ wxString Procedure::getAlterSql()
     if (!parametersM.empty())
     {
         wxString input, output;
-        for (MetadataCollection <Parameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
+        for (MetadataCollection <Parameter>::const_iterator it =
+            parametersM.begin(); it != parametersM.end(); ++it)
         {
+            Domain *dm = (*it).getDomain();
             if ((*it).getParameterType() == ptInput)
             {
                 if (input.empty())
                     input += wxT(" (\n    ");
                 else
                     input += wxT(",\n    ");
-                input += (*it).getQuotedName() + wxT(" ") + (*it).getDomain()->getDatatypeAsString();
+                input += (*it).getQuotedName() + wxT(" ") +
+                    dm->getDatatypeAsString();
+                if (!dm->getCharset().IsEmpty())
+                    input += wxT(" CHARACTER SET ") + dm->getCharset();
             }
             else
             {
@@ -321,7 +330,10 @@ wxString Procedure::getAlterSql()
                     output += wxT("\nRETURNS (\n    ");
                 else
                     output += wxT(",\n    ");
-                output += (*it).getQuotedName() + wxT(" ") + (*it).getDomain()->getDatatypeAsString();
+                output += (*it).getQuotedName() + wxT(" ") +
+                    dm->getDatatypeAsString();
+                if (!dm->getCharset().IsEmpty())
+                    output += wxT(" CHARACTER SET ") + dm->getCharset();
             }
         }
 
