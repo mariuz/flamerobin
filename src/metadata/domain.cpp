@@ -111,8 +111,7 @@ bool Domain::loadInfo()
         {
             std::string charset;
             st1->Get(6, charset);
-            charsetM = std2wx(charset);
-            charsetM.erase(charsetM.find_last_not_of(wxT(" ")) + 1);
+            charsetM = std2wx(charset).Strip();
         }
         isNotNullM = !st1->IsNull(8);
         readBlob(st1, 9, defaultM);
@@ -122,7 +121,7 @@ bool Domain::loadInfo()
         {
             std::string coll;
             st1->Get(10, coll);
-            collationM = std2wx(coll);
+            collationM = std2wx(coll).Strip();
         }
         readBlob(st1, 11, checkM);
 
