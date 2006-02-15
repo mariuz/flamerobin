@@ -174,31 +174,47 @@ void FieldPropertiesDialog::layoutControls()
     sizerDomain->Add(button_edit_domain);
     sizerTop->Add(sizerDomain, wxGBPosition(1, 1), wxGBSpan(1, 5), wxALIGN_CENTER_VERTICAL | wxEXPAND);
 
-    int dx = styleguide().getUnrelatedControlMargin(wxHORIZONTAL) - styleguide().getControlLabelMargin();
+    int dx = styleguide().getUnrelatedControlMargin(wxHORIZONTAL) -
+        styleguide().getControlLabelMargin();
     if (dx < 0)
         dx = 0;
 
-    sizerTop->Add(label_datatype, wxGBPosition(2, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-    sizerTop->Add(choice_datatype, wxGBPosition(2, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-    sizerTop->Add(label_size, wxGBPosition(2, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
-    sizerTop->Add(textctrl_size, wxGBPosition(2, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-    sizerTop->Add(label_scale, wxGBPosition(2, 4), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
-    sizerTop->Add(textctrl_scale, wxGBPosition(2, 5), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-    sizerTop->Add(label_charset, wxGBPosition(3, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
-    sizerTop->Add(choice_charset, wxGBPosition(3, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-    sizerTop->Add(label_collate, wxGBPosition(3, 4), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
-    sizerTop->Add(choice_collate, wxGBPosition(3, 5), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    sizerTop->Add(label_datatype, wxGBPosition(2, 0), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL);
+    sizerTop->Add(choice_datatype, wxGBPosition(2, 1), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    sizerTop->Add(label_size, wxGBPosition(2, 2), wxDefaultSpan,
+        wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+    sizerTop->Add(textctrl_size, wxGBPosition(2, 3), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    sizerTop->Add(label_scale, wxGBPosition(2, 4), wxDefaultSpan,
+        wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+    sizerTop->Add(textctrl_scale, wxGBPosition(2, 5), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    sizerTop->Add(label_charset, wxGBPosition(3, 2), wxDefaultSpan,
+        wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+    sizerTop->Add(choice_charset, wxGBPosition(3, 3), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    sizerTop->Add(label_collate, wxGBPosition(3, 4), wxDefaultSpan,
+        wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+    sizerTop->Add(choice_collate, wxGBPosition(3, 5), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL | wxEXPAND);
 
     sizerTop->AddGrowableCol(1);
     sizerTop->AddGrowableCol(3);
     sizerTop->AddGrowableCol(5);
 
-    wxGridBagSizer* sizerGenerator = new wxGridBagSizer(styleguide().getRelatedControlMargin(wxHORIZONTAL),
+    wxGridBagSizer* sizerGenerator = new wxGridBagSizer(
+        styleguide().getRelatedControlMargin(wxHORIZONTAL),
         styleguide().getRelatedControlMargin(wxVERTICAL));
-    sizerGenerator->Add(radio_generator_new, wxGBPosition(0, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-    sizerGenerator->Add(textctrl_generator_name, wxGBPosition(0, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-    sizerGenerator->Add(radio_generator_existing, wxGBPosition(1, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-    sizerGenerator->Add(choice_generator, wxGBPosition(1, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    sizerGenerator->Add(radio_generator_new, wxGBPosition(0, 0),
+        wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+    sizerGenerator->Add(textctrl_generator_name, wxGBPosition(0, 1),
+        wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    sizerGenerator->Add(radio_generator_existing, wxGBPosition(1, 0),
+        wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+    sizerGenerator->Add(choice_generator, wxGBPosition(1, 1),
+        wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
     sizerGenerator->AddGrowableCol(1);
 
     // stack everything vertically
@@ -363,6 +379,7 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
     }
     else // create new field
     {
+        wxString addCollate;
         statements += alterTable + wxT("ADD \n") + fNameSql + wxT(" ");
         if (newDomain)
         {
@@ -374,16 +391,27 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
                     statements += wxT(",") + dtScale;
                 statements += wxT(")");
             }
+            if (datatypes[n].isChar)
+            {
+                wxString charset = choice_charset->GetStringSelection();
+                wxString collate = choice_collate->GetStringSelection();
+                if (!charset.IsEmpty())
+                {
+                    statements += wxT(" CHARACTER SET ") + charset;
+                    if (!collate.IsEmpty())
+                        addCollate = wxT(" COLLATE ") + collate;
+                }
+            }
         }
         else
             statements += selDomain.getQuoted();
 
         if (!isNullable)
         {
-            statements += wxT(" not null");
+            statements += wxT(" NOT NULL");
             update_not_null = unnAfter;
         }
-        statements += wxT(";\n\n");
+        statements += addCollate + wxT(";\n\n");
     }
 
     if (update_not_null != unnNone && !justCheck)
@@ -421,7 +449,8 @@ void FieldPropertiesDialog::loadCharsets()
         vector<wxString> charsets;
         tableM->getDatabase()->fillVector(charsets,
             wxT("select rdb$character_set_name from rdb$character_sets order by 1"));
-        for (vector<wxString>::iterator it = charsets.begin(); it != charsets.end(); ++it)
+        for (vector<wxString>::iterator it = charsets.begin();
+            it != charsets.end(); ++it)
         {
             if ((*it) != wxT("NONE"))
                 choice_charset->Append(*it);
@@ -648,10 +677,12 @@ void FieldPropertiesDialog::updateSqlStatement()
     {
         Identifier triggername(tableM->getName_() + wxT("_BI"));
         sql += wxT("SET TERM !! ;\n");
-        sql += wxT("CREATE TRIGGER ") + triggername.getQuoted() + wxT(" FOR ") + tableM->getQuotedName() + wxT("\n");
+        sql += wxT("CREATE TRIGGER ") + triggername.getQuoted() + wxT(" FOR ")
+            + tableM->getQuotedName() + wxT("\n");
         sql += wxT("ACTIVE BEFORE INSERT POSITION 0\nAS\nBEGIN\n");
         sql += wxT("  IF (NEW.") + fNameSql + wxT(" IS NULL) THEN\n");
-        sql += wxT("    NEW.") + fNameSql + wxT(" = GEN_ID(") + generator.getQuoted() + wxT(", 1);\n");
+        sql += wxT("    NEW.") + fNameSql + wxT(" = GEN_ID(")
+            + generator.getQuoted() + wxT(", 1);\n");
         sql += wxT("END!!\n");
         sql += wxT("SET TERM ; !!\n");
     }
@@ -661,20 +692,32 @@ void FieldPropertiesDialog::updateSqlStatement()
 //-----------------------------------------------------------------------------
 //! event handling
 BEGIN_EVENT_TABLE(FieldPropertiesDialog, BaseDialog)
-    EVT_BUTTON(FieldPropertiesDialog::ID_button_edit_domain, FieldPropertiesDialog::OnButtonEditDomainClick)
-    EVT_BUTTON(FieldPropertiesDialog::ID_button_ok, FieldPropertiesDialog::OnButtonOkClick)
-    EVT_CHECKBOX(FieldPropertiesDialog::ID_checkbox_trigger, FieldPropertiesDialog::OnNeedsUpdateSql)
-    EVT_CHOICE(FieldPropertiesDialog::ID_choice_charset, FieldPropertiesDialog::OnChoiceCharsetClick)
-    EVT_CHOICE(FieldPropertiesDialog::ID_choice_datatype, FieldPropertiesDialog::OnChoiceDatatypeClick)
-    EVT_CHOICE(FieldPropertiesDialog::ID_choice_domain, FieldPropertiesDialog::OnChoiceDomainClick)
-    EVT_CHOICE(FieldPropertiesDialog::ID_choice_generator, FieldPropertiesDialog::OnNeedsUpdateSql)
-    EVT_RADIOBUTTON(FieldPropertiesDialog::ID_radio_generator_existing, FieldPropertiesDialog::OnRadioGeneratorClick)
-    EVT_RADIOBUTTON(FieldPropertiesDialog::ID_radio_generator_new, FieldPropertiesDialog::OnRadioGeneratorClick)
-    EVT_TEXT(FieldPropertiesDialog::ID_textctrl_fieldname, FieldPropertiesDialog::OnTextFieldnameUpdate)
-    EVT_TEXT(FieldPropertiesDialog::ID_textctrl_generator_name, FieldPropertiesDialog::OnNeedsUpdateSql)
+    EVT_BUTTON(FieldPropertiesDialog::ID_button_edit_domain,
+        FieldPropertiesDialog::OnButtonEditDomainClick)
+    EVT_BUTTON(FieldPropertiesDialog::ID_button_ok,
+        FieldPropertiesDialog::OnButtonOkClick)
+    EVT_CHECKBOX(FieldPropertiesDialog::ID_checkbox_trigger,
+        FieldPropertiesDialog::OnNeedsUpdateSql)
+    EVT_CHOICE(FieldPropertiesDialog::ID_choice_charset,
+        FieldPropertiesDialog::OnChoiceCharsetClick)
+    EVT_CHOICE(FieldPropertiesDialog::ID_choice_datatype,
+        FieldPropertiesDialog::OnChoiceDatatypeClick)
+    EVT_CHOICE(FieldPropertiesDialog::ID_choice_domain,
+        FieldPropertiesDialog::OnChoiceDomainClick)
+    EVT_CHOICE(FieldPropertiesDialog::ID_choice_generator,
+        FieldPropertiesDialog::OnNeedsUpdateSql)
+    EVT_RADIOBUTTON(FieldPropertiesDialog::ID_radio_generator_existing,
+        FieldPropertiesDialog::OnRadioGeneratorClick)
+    EVT_RADIOBUTTON(FieldPropertiesDialog::ID_radio_generator_new,
+        FieldPropertiesDialog::OnRadioGeneratorClick)
+    EVT_TEXT(FieldPropertiesDialog::ID_textctrl_fieldname,
+        FieldPropertiesDialog::OnTextFieldnameUpdate)
+    EVT_TEXT(FieldPropertiesDialog::ID_textctrl_generator_name,
+        FieldPropertiesDialog::OnNeedsUpdateSql)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
-void FieldPropertiesDialog::OnButtonEditDomainClick(wxCommandEvent& WXUNUSED(event))
+void FieldPropertiesDialog::OnButtonEditDomainClick(wxCommandEvent&
+    WXUNUSED(event))
 {
     // create DomainPropertiesFrame & show it
     // when done, reload domain definition
@@ -697,19 +740,22 @@ wxString FieldPropertiesDialog::getStatementTitle() const
         return _("Executing Field Creation Script");
 }
 //-----------------------------------------------------------------------------
-void FieldPropertiesDialog::OnChoiceCharsetClick(wxCommandEvent& WXUNUSED(event))
+void FieldPropertiesDialog::OnChoiceCharsetClick(wxCommandEvent&
+    WXUNUSED(event))
 {
     wxString oldCol(choice_collate->GetStringSelection());
     loadCollations();
     choice_collate->SetSelection(choice_collate->FindString(oldCol));
 }
 //-----------------------------------------------------------------------------
-void FieldPropertiesDialog::OnChoiceDatatypeClick(wxCommandEvent& WXUNUSED(event))
+void FieldPropertiesDialog::OnChoiceDatatypeClick(wxCommandEvent&
+    WXUNUSED(event))
 {
     updateDatatypeInfo();
 }
 //-----------------------------------------------------------------------------
-void FieldPropertiesDialog::OnChoiceDomainClick(wxCommandEvent& WXUNUSED(event))
+void FieldPropertiesDialog::OnChoiceDomainClick(wxCommandEvent&
+    WXUNUSED(event))
 {
     updateDomainControls();
 }
@@ -719,7 +765,8 @@ void FieldPropertiesDialog::OnNeedsUpdateSql(wxCommandEvent& WXUNUSED(event))
     updateSqlStatement();
 }
 //-----------------------------------------------------------------------------
-void FieldPropertiesDialog::OnRadioGeneratorClick(wxCommandEvent& WXUNUSED(event))
+void FieldPropertiesDialog::OnRadioGeneratorClick(wxCommandEvent&
+    WXUNUSED(event))
 {
     textctrl_generator_name->SetEditable(radio_generator_new->GetValue());
     updateColors();
@@ -727,7 +774,8 @@ void FieldPropertiesDialog::OnRadioGeneratorClick(wxCommandEvent& WXUNUSED(event
     updateSqlStatement();
 }
 //-----------------------------------------------------------------------------
-void FieldPropertiesDialog::OnTextFieldnameUpdate(wxCommandEvent& WXUNUSED(event))
+void FieldPropertiesDialog::OnTextFieldnameUpdate(wxCommandEvent&
+    WXUNUSED(event))
 {
     button_ok->Enable(!textctrl_fieldname->GetValue().IsEmpty());
     updateSqlStatement();
@@ -783,9 +831,9 @@ bool ColumnPropertiesHandler::handleURI(URI& uri)
                 fpd.getStatementTitle());
             esf->setDatabase(t->getDatabase());
             esf->setSql(statements);
-            esf->executeAllStatements(true);
-            esf->Show();
-        }
+            esf->executeAllStatements(false);   // statement may contain the
+            esf->Show();                        // COMMIT, so let's give user
+        }                                       // a chance to cancel
     }
     return true;
 }
