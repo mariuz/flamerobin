@@ -66,7 +66,7 @@ const std::vector<Privilege>* Role::getPrivileges()
         );
         st1->Set(1, wx2std(getName_()));
         st1->Execute();
-        wxString lastuser;
+        std::string lastuser;
         int lasttype = -1;
         Privilege *pr = 0;
         while (st1->Fetch())
