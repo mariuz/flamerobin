@@ -140,7 +140,7 @@ wxString View::getAlterSql()
 // STEPS:
 // * drop dependent check constraints (checks reference this view)
 // * alter dep. stored procedures
-// * drop dep. views (recursive call)
+// * drop dep. views (BUILD DEPENDENCY TREE)
 // * drop this view
 // * create this view
 // * create dep. views
@@ -185,16 +185,21 @@ void View::getRebuildSql(std::vector<wxString>& prefix,
         for (std::vector<Dependency>::iterator it = list.begin();
             it != list.end(); ++it)
         {
-            View *v = dynamic_cast<View *>((*it).getDependentObject());
-            if (v && v != this)
-                v->getRebuildSql(prefix, suffix);
-
             Procedure *p = dynamic_cast<Procedure *>((*it).getDependentObject());
             if (p)
             {
                 prefix.push_back(p->getAlterSql(false));    // alter to empty
                 suffix.push_back(p->getAlterSql(true));     // alter to full
             }
+        }
+
+        // FIXME: it's not that simple, we need to build a dependecy tree
+        for (std::vector<Dependency>::iterator it = list.begin();
+            it != list.end(); ++it)
+        {
+            View *v = dynamic_cast<View *>((*it).getDependentObject());
+            if (v && v != this)
+                v->getRebuildSql(prefix, suffix);
         }
     }
     prefix.push_back(wxT("DROP VIEW ") + getQuotedName() + wxT(";\n"));
