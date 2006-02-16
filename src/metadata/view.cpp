@@ -94,6 +94,8 @@ bool View::getSource(wxString& source)
 wxString View::getCreateSql()
 {
     wxString src;
+    if (!checkAndLoadColumns())
+        return lastError().getMessage();
     if (!getSource(src))
         return lastError().getMessage();
 
@@ -117,9 +119,6 @@ wxString View::getCreateSql()
 //-----------------------------------------------------------------------------
 wxString View::getAlterSql()
 {
-    if (!checkAndLoadColumns())
-        return lastError().getMessage();
-
     wxString sql = wxT("DROP VIEW ") + getQuotedName() + wxT(";\n");
     sql += getCreateSql();
 
@@ -158,8 +157,6 @@ wxString View::getRebuildSql()
     RebuildMap checks;
 
     // 1. build view list (dependency tree) - ordered by DROP
-    //    add all interesting procedures in the process (as it deals with
-    //      dependencies anyway)
     std::vector<View *> viewList;
     getDependentViews(viewList);
 
@@ -167,8 +164,8 @@ wxString View::getRebuildSql()
     for (std::vector<View *>::iterator vi = viewList.begin();
         vi != viewList.end(); ++vi)
     {
-        dropViews += wxT("DROP VIEW ") + (*vi)->getQuotedName() + wxT("\n;");
-        createViews = (*vi)->getCreateSql() + createViews;
+        dropViews += wxT("DROP VIEW ") + (*vi)->getQuotedName() + wxT(";\n");
+        createViews = (*vi)->getCreateSql() + wxT("\n") + createViews;
 
         std::vector<Dependency> list;               // procedures
         if ((*vi)->getDependencies(list, false))
@@ -248,7 +245,7 @@ void View::getDependentViews(std::vector<View *>& views)
             it != list.end(); ++it)
         {
             View *v = dynamic_cast<View *>((*it).getDependentObject());
-            if (v && v != this)
+            if (v && views.end() == std::find(views.begin(), views.end(), v))
                 v->getDependentViews(views);
         }
     }
