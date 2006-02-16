@@ -113,9 +113,36 @@ wxString View::getAlterSql()
     sql += wxT(")\nAS ");
     sql += src;
 
-    // TODO: restore user privileges
+    // Restore user privileges
+    const std::vector<Privilege>* priv = getPrivileges();
+    if (priv)
+    {
+        sql += wxT(";\n\n");
+        for (std::vector<Privilege>::const_iterator ci = priv->begin();
+            ci != priv->end(); ++ci)
+        {
+            sql += (*ci).getSql() + wxT(";\n");
+        }
+    }
 
     return sql;
+}
+//-----------------------------------------------------------------------------
+// STEPS:
+// 1. drop dependent foreign keys (other tables reference this view) + store DDL
+// 2. drop dependent check constraints (checks reference this view) + store DDL
+// 3. alter dep. stored procedures + store DDL
+// 4. drop dep. views (recursive call)
+// 5. drop this view
+// 6. create this view
+// 7. create dep. views
+// 8. alter back SPs
+// 9. recreate triggers
+// 10. create checks
+// 11. create FKs
+// 12. grant privileges on all dropped views
+wxString View::getRebuildSql()
+{
 }
 //-----------------------------------------------------------------------------
 wxString View::getCreateSqlTemplate() const

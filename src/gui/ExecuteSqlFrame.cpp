@@ -1729,6 +1729,34 @@ bool EditViewHandler::handleURI(URI& uri)
     return true;
 }
 //-----------------------------------------------------------------------------
+class RebuildViewHandler: public URIHandler
+{
+public:
+    bool handleURI(URI& uri);
+private:
+    // singleton; registers itself on creation.
+    static const RebuildViewHandler handlerInstance;
+};
+//-----------------------------------------------------------------------------
+const RebuildViewHandler RebuildViewHandler::handlerInstance;
+//-----------------------------------------------------------------------------
+bool RebuildViewHandler::handleURI(URI& uri)
+{
+    if (uri.action != wxT("rebuild_view"))
+        return false;
+
+    View* v = (View*)getObject(uri);
+    wxWindow* w = getWindow(uri);
+    if (!v || !w)
+        return true;
+
+    ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing view"));
+    eff->setDatabase(v->getDatabase());
+    eff->Show();
+    eff->setSql(v->getRebuildSql());
+    return true;
+}
+//-----------------------------------------------------------------------------
 class EditTriggerHandler: public URIHandler
 {
 public:
