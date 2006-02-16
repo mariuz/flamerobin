@@ -299,7 +299,7 @@ void CreateDDLVisitor::visit(Table& t)
             wxString del = (*ci).deleteActionM;
             if (!del.IsEmpty() && del != wxT("RESTRICT"))
                 postSqlM += wxT(" ON DELETE ") + del;
-            postSqlM += (";\n");
+            postSqlM += wxT(";\n");
         }
     }
 
