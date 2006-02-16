@@ -133,13 +133,14 @@ wxString View::getAlterSql()
             sql += (*ci).getSql() + wxT(";\n");
         }
     }
-
     return sql;
 }
 //-----------------------------------------------------------------------------
 // STEPS:
 // * drop dependent check constraints (checks reference this view)
-// * alter dep. stored procedures
+//      these checks can include other objects that might be dropped here
+//      put CREATE of all checks at the end
+// * alter all dep. stored procedures (empty)
 // * drop dep. views (BUILD DEPENDENCY TREE)
 // * drop this view
 // * create this view
@@ -147,63 +148,111 @@ wxString View::getAlterSql()
 // * alter back SPs
 // * recreate triggers
 // * create checks
-// * grant privileges on all dropped views
-void View::getRebuildSql(std::vector<wxString>& prefix,
-    std::vector<wxString>& suffix)
+// * grant back privileges on all! dropped views
+wxString View::getRebuildSql()
 {
-    // This comes first since suffix has reversed order
-    const std::vector<Privilege>* priv = getPrivileges();
-    if (priv)
+    // 0. prepare stuff
+    std::vector<Procedure *> procedures;
+    wxString privileges, triggers, dropViews, createViews;
+    typedef std::map<wxString, std::pair<wxString,wxString> > RebuildMap;
+    RebuildMap checks;
+
+    // 1. build view list (dependency tree) - ordered by DROP
+    //    add all interesting procedures in the process (as it deals with
+    //      dependencies anyway)
+    std::vector<View *> viewList;
+    getDependentViews(viewList);
+
+    // 2. walk the tree and add stuff
+    for (std::vector<View *>::iterator vi = viewList.begin();
+        vi != viewList.end(); ++vi)
     {
-        for (std::vector<Privilege>::const_iterator ci = priv->begin();
-            ci != priv->end(); ++ci)
+        dropViews += wxT("DROP VIEW ") + (*vi)->getQuotedName() + wxT("\n;");
+        createViews = (*vi)->getCreateSql() + createViews;
+
+        std::vector<Dependency> list;               // procedures
+        if ((*vi)->getDependencies(list, false))
         {
-            suffix.push_back((*ci).getSql() + wxT(";\n"));
+            for (std::vector<Dependency>::iterator it = list.begin();
+                it != list.end(); ++it)
+            {
+                Procedure *p = dynamic_cast<Procedure *>(
+                    (*it).getDependentObject());
+                if (p && procedures.end() == std::find(procedures.begin(),
+                    procedures.end(), p))
+                {
+                    procedures.push_back(p);
+                }
+            }
+        }
+
+        /*  TODO: write the getDependentChecks function
+        wxString checkName;
+        std::pair<wxString,wxString> checkStatements;
+        (*vi).getDependentChecks(checkName, checkStatements);
+        if (!checks.has_key(checkName))
+            checks[checkName] = checkStatements;
+        */
+
+        std::vector<Trigger *> trigs;
+        (*vi)->getTriggers(trigs, Trigger::afterTrigger);
+        (*vi)->getTriggers(trigs, Trigger::beforeTrigger);
+        for (std::vector<Trigger *>::iterator it = trigs.begin();
+            it != trigs.end(); ++it)
+        {
+            CreateDDLVisitor cdv;
+            (*it)->acceptVisitor(&cdv);
+            triggers += cdv.getSql() + wxT("\n");
+        }
+
+        const std::vector<Privilege>* priv = (*vi)->getPrivileges();
+        if (priv)
+        {
+            for (std::vector<Privilege>::const_iterator ci = priv->begin();
+                ci != priv->end(); ++ci)
+            {
+                privileges += (*ci).getSql() + wxT(";\n");
+            }
         }
     }
 
-    // Recreate triggers on this view
-    std::vector<Trigger *> trigs;
-    getTriggers(trigs, Trigger::afterTrigger);
-    getTriggers(trigs, Trigger::beforeTrigger);
-    for (std::vector<Trigger *>::iterator it = trigs.begin();
-        it != trigs.end(); ++it)
+    wxString sql(wxT("SET AUTODDL ON;\n\n"));
+    for (RebuildMap::iterator it = checks.begin(); it != checks.end(); ++it)
+        sql += (*it).second.first + wxT("\n");
+    for (std::vector<Procedure *>::iterator it = procedures.begin();
+        it != procedures.end(); ++it)
     {
-        CreateDDLVisitor cdv;
-        (*it)->acceptVisitor(&cdv);
-        suffix.push_back(cdv.getSql());
+        sql += (*it)->getAlterSql(false);
     }
-
-    // ret << wxT("/* drop checks that reference this view */\n");
-    // TODO: add each CHECK to drops/creates
-
-
-    wxString retval;
+    sql += dropViews;
+    sql += wxT("\n/**************** DROPPING COMPLETE ***************/\n\n");
+    sql += createViews;
+    for (std::vector<Procedure *>::iterator it = procedures.begin();
+        it != procedures.end(); ++it)
+    {
+        sql += (*it)->getAlterSql(true);
+    }
+    sql += triggers;
+    for (RebuildMap::iterator it = checks.begin(); it != checks.end(); ++it)
+        sql += (*it).second.second + wxT("\n");
+    sql += privileges;
+    return sql;
+}
+//-----------------------------------------------------------------------------
+void View::getDependentViews(std::vector<View *>& views)
+{
     std::vector<Dependency> list;
     if (getDependencies(list, false))
     {
         for (std::vector<Dependency>::iterator it = list.begin();
             it != list.end(); ++it)
         {
-            Procedure *p = dynamic_cast<Procedure *>((*it).getDependentObject());
-            if (p)
-            {
-                prefix.push_back(p->getAlterSql(false));    // alter to empty
-                suffix.push_back(p->getAlterSql(true));     // alter to full
-            }
-        }
-
-        // FIXME: it's not that simple, we need to build a dependecy tree
-        for (std::vector<Dependency>::iterator it = list.begin();
-            it != list.end(); ++it)
-        {
             View *v = dynamic_cast<View *>((*it).getDependentObject());
             if (v && v != this)
-                v->getRebuildSql(prefix, suffix);
+                v->getDependentViews(views);
         }
     }
-    prefix.push_back(wxT("DROP VIEW ") + getQuotedName() + wxT(";\n"));
-    suffix.push_back(getCreateSql());
+    views.push_back(this);
 }
 //-----------------------------------------------------------------------------
 wxString View::getCreateSqlTemplate() const

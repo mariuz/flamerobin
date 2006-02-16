@@ -38,8 +38,8 @@ public:
     bool getSource(wxString& source);
     wxString getAlterSql();
     wxString getCreateSql();
-    void getRebuildSql(std::vector<wxString>& prefix,
-        std::vector<wxString>& suffix);
+    wxString getRebuildSql();
+    void getDependentViews(std::vector<View *>& views);
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
