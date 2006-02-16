@@ -59,7 +59,7 @@ public:
 
     bool checkAndLoadParameters(bool force = false);
     bool getSource(wxString& source);
-    wxString getAlterSql();
+    wxString getAlterSql(bool full = true);
     wxString getDefinition();   // used for calltip in sql editor
     const std::vector<Privilege>* getPrivileges();
 

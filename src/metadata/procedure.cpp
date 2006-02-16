@@ -296,7 +296,7 @@ wxString Procedure::getDefinition()
     return retval;
 }
 //-----------------------------------------------------------------------------
-wxString Procedure::getAlterSql()
+wxString Procedure::getAlterSql(bool full)
 {
     if (!parametersLoadedM && !loadParameters())
         return lastError().getMessage();
@@ -343,7 +343,10 @@ wxString Procedure::getAlterSql()
             sql += output + wxT(" )");
     }
     sql += wxT("\nAS\n");
-    sql += source;
+    if (full)
+        sql += source;
+    else
+        sql += wxT("BEGIN EXIT; END");
     sql += wxT("^\nSET TERM ; ^");
     return sql;
 }

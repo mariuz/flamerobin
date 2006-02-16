@@ -177,10 +177,8 @@ void CreateDDLVisitor::visit(Procedure& p)
     temp.Replace(wxT("ALTER"), wxT("CREATE"), false);   // just first
     sqlM = temp;
 
-    // TODO: create empty procedure body (for database DDL dump)
-    preSqlM = wxT("SET TERM ^ ;\nCREATE PROCEDURE ") + p.getQuotedName()
-    //    + wxT(" ") + p.params
-        + wxT("\nAS\nBEGIN\n/* nothing */\nEND^\nSET TERM ; ^");
+    // create empty procedure body (for database DDL dump)
+    preSqlM = p.getAlterSql(false);
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Parameter&)

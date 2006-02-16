@@ -42,6 +42,7 @@
 #include "dberror.h"
 #include "frutils.h"
 #include "metadata/collection.h"
+#include "metadata/CreateDDLVisitor.h"
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/view.h"
@@ -90,15 +91,13 @@ bool View::getSource(wxString& source)
     return false;
 }
 //-----------------------------------------------------------------------------
-wxString View::getAlterSql()
+wxString View::getCreateSql()
 {
-    if (!checkAndLoadColumns())
-        return lastError().getMessage();
     wxString src;
     if (!getSource(src))
         return lastError().getMessage();
 
-    wxString sql = wxT("DROP VIEW ") + getQuotedName() + wxT(";\n");
+    wxString sql;
     sql += wxT("CREATE VIEW ") + getQuotedName() + wxT(" (");
 
     bool first = true;
@@ -112,12 +111,22 @@ wxString View::getAlterSql()
     }
     sql += wxT(")\nAS ");
     sql += src;
+    sql += wxT(";\n");
+    return sql;
+}
+//-----------------------------------------------------------------------------
+wxString View::getAlterSql()
+{
+    if (!checkAndLoadColumns())
+        return lastError().getMessage();
+
+    wxString sql = wxT("DROP VIEW ") + getQuotedName() + wxT(";\n");
+    sql += getCreateSql();
 
     // Restore user privileges
     const std::vector<Privilege>* priv = getPrivileges();
     if (priv)
     {
-        sql += wxT(";\n\n");
         for (std::vector<Privilege>::const_iterator ci = priv->begin();
             ci != priv->end(); ++ci)
         {
@@ -129,20 +138,67 @@ wxString View::getAlterSql()
 }
 //-----------------------------------------------------------------------------
 // STEPS:
-// 1. drop dependent foreign keys (other tables reference this view) + store DDL
-// 2. drop dependent check constraints (checks reference this view) + store DDL
-// 3. alter dep. stored procedures + store DDL
-// 4. drop dep. views (recursive call)
-// 5. drop this view
-// 6. create this view
-// 7. create dep. views
-// 8. alter back SPs
-// 9. recreate triggers
-// 10. create checks
-// 11. create FKs
-// 12. grant privileges on all dropped views
-wxString View::getRebuildSql()
+// * drop dependent check constraints (checks reference this view)
+// * alter dep. stored procedures
+// * drop dep. views (recursive call)
+// * drop this view
+// * create this view
+// * create dep. views
+// * alter back SPs
+// * recreate triggers
+// * create checks
+// * grant privileges on all dropped views
+void View::getRebuildSql(std::vector<wxString>& prefix,
+    std::vector<wxString>& suffix)
 {
+    // This comes first since suffix has reversed order
+    const std::vector<Privilege>* priv = getPrivileges();
+    if (priv)
+    {
+        for (std::vector<Privilege>::const_iterator ci = priv->begin();
+            ci != priv->end(); ++ci)
+        {
+            suffix.push_back((*ci).getSql() + wxT(";\n"));
+        }
+    }
+
+    // Recreate triggers on this view
+    std::vector<Trigger *> trigs;
+    getTriggers(trigs, Trigger::afterTrigger);
+    getTriggers(trigs, Trigger::beforeTrigger);
+    for (std::vector<Trigger *>::iterator it = trigs.begin();
+        it != trigs.end(); ++it)
+    {
+        CreateDDLVisitor cdv;
+        (*it)->acceptVisitor(&cdv);
+        suffix.push_back(cdv.getSql());
+    }
+
+    // ret << wxT("/* drop checks that reference this view */\n");
+    // TODO: add each CHECK to drops/creates
+
+
+    wxString retval;
+    std::vector<Dependency> list;
+    if (getDependencies(list, false))
+    {
+        for (std::vector<Dependency>::iterator it = list.begin();
+            it != list.end(); ++it)
+        {
+            View *v = dynamic_cast<View *>((*it).getDependentObject());
+            if (v && v != this)
+                v->getRebuildSql(prefix, suffix);
+
+            Procedure *p = dynamic_cast<Procedure *>((*it).getDependentObject());
+            if (p)
+            {
+                prefix.push_back(p->getAlterSql(false));    // alter to empty
+                suffix.push_back(p->getAlterSql(true));     // alter to full
+            }
+        }
+    }
+    prefix.push_back(wxT("DROP VIEW ") + getQuotedName() + wxT(";\n"));
+    suffix.push_back(getCreateSql());
 }
 //-----------------------------------------------------------------------------
 wxString View::getCreateSqlTemplate() const

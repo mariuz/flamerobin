@@ -1750,10 +1750,25 @@ bool RebuildViewHandler::handleURI(URI& uri)
     if (!v || !w)
         return true;
 
+    std::vector<wxString> preSql, postSql;
+    v->getRebuildSql(preSql, postSql);
+    wxString sql(wxT("SET AUTODDL ON;\n\n"));
+    for (std::vector<wxString>::iterator it = preSql.begin();
+        it != preSql.end(); ++it)
+    {
+        sql += (*it) + wxT("\n");
+    }
+    sql += wxT("\n/**************** DROPPING COMPLETE ***************/\n\n");
+    for (std::vector<wxString>::reverse_iterator ri = postSql.rbegin();
+        ri != postSql.rend(); ++ri)
+    {
+        sql += (*ri) + wxT("\n");
+    }
+
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing view"));
     eff->setDatabase(v->getDatabase());
     eff->Show();
-    eff->setSql(v->getRebuildSql());
+    eff->setSql(sql);
     return true;
 }
 //-----------------------------------------------------------------------------
