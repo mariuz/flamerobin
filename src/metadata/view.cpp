@@ -213,6 +213,14 @@ void View::getDependentChecks(std::vector<CheckConstraint>& checks)
 // * recreate triggers
 // * create checks
 // * grant back privileges on all! dropped views
+//
+// TODO: we don't support computed columns. A table's column (if computed) can
+//       reference the view, so view cannot be dropped. Since it is a column,
+//       it can be referenced by other view, SP, trigger, etc.
+//       All that could get a lot complicated, so we don't support it (yet).
+//       P.S. Whoever builds a computed column based on a view, and decides
+//            to reference it in other object, deserves the pleasure of
+//            building the "rebuild" script manually ;)
 wxString View::getRebuildSql()
 {
     // 0. prepare stuff
