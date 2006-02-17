@@ -1039,7 +1039,6 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
     // find terminator, and execute the statement
     wxString::size_type oldpos = 0;
     wxString::size_type searchpos = 0;
-    wxString::size_type len = commands.length();
     while (true)
     {
         wxString::size_type pos = commands.find(terminatorM, searchpos);
