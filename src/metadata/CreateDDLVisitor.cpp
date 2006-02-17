@@ -380,22 +380,7 @@ void CreateDDLVisitor::visit(Trigger& t)
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(View& v)
 {
-    wxString src;
-    v.checkAndLoadColumns();
-    v.getSource(src);
-
-    preSqlM = wxT("CREATE VIEW ") + v.getQuotedName() + wxT(" (");
-    bool first = true;
-    for (MetadataCollection<Column>::const_iterator it = v.begin();
-        it != v.end(); ++it)
-    {
-        if (first)
-            first = false;
-        else
-            preSqlM += wxT(", ");
-        preSqlM += (*it).getQuotedName();
-    }
-    preSqlM += wxT(")\nAS ") + src + wxT(";\n");
+    preSqlM = v.getCreateSql();
 
     // grant sel/ins/upd/del/ref/all ON [name] to [SP,user,role]
     const std::vector<Privilege>* priv = v.getPrivileges();

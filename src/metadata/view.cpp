@@ -135,15 +135,80 @@ wxString View::getAlterSql()
     return sql;
 }
 //-----------------------------------------------------------------------------
+void View::getDependentChecks(std::vector<CheckConstraint>& checks)
+{
+    Database *d = getDatabase();
+    if (!d)
+        return;
+    IBPP::Database& db = d->getIBPPDatabase();
+    try
+    {
+        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+        tr1->Start();
+        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+        st1->Prepare(
+            "select c.rdb$constraint_name, t.rdb$relation_name, "
+            "   t.rdb$trigger_source "
+            "from rdb$check_constraints c "
+            "join rdb$triggers t on c.rdb$trigger_name = t.rdb$trigger_name "
+            "join rdb$dependencies d on "
+            "   t.rdb$trigger_name = d.rdb$dependent_name "
+            "where d.rdb$depended_on_name = ? "
+            "and d.rdb$dependent_type = 2 and d.rdb$depended_on_type = 0 "
+            "and t.rdb$trigger_type = 1 and d.rdb$field_name is null "
+        );
+
+        st1->Set(1, wx2std(getName_()));
+        st1->Execute();
+        while (st1->Fetch())
+        {
+            wxString source;
+            std::string table, cname;
+            st1->Get(1, cname);
+            st1->Get(2, table);
+            readBlob(st1, 3, source);
+            wxString consname = std2wx(cname).Strip();
+            Table *tab = dynamic_cast<Table *>(d->findByNameAndType(ntTable,
+                std2wx(table).Strip()));
+            if (!tab)
+                continue;
+
+            // check if it exists
+            std::vector<CheckConstraint>::iterator it;
+            for (it = checks.begin(); it != checks.end(); ++it)
+                if ((*it).getTable() == tab && (*it).getName_() == consname)
+                    break;
+
+            if (it != checks.end())     // already there
+                continue;
+
+            CheckConstraint c;
+            c.setParent(tab);
+            c.setName_(consname);
+            c.sourceM = source;
+            checks.push_back(c);
+        }
+        tr1->Commit();
+    }
+    catch (IBPP::Exception &e)
+    {
+        lastError().setMessage(std2wx(e.ErrorMessage()));
+    }
+    catch (...)
+    {
+        lastError().setMessage(_("System error."));
+    }
+}
+//-----------------------------------------------------------------------------
 // STEPS:
 // * drop dependent check constraints (checks reference this view)
 //      these checks can include other objects that might be dropped here
 //      put CREATE of all checks at the end
 // * alter all dep. stored procedures (empty)
-// * drop dep. views (BUILD DEPENDENCY TREE)
+// * drop dep. views (BUILD DEPENDENCY TREE) + TODO: computed table columns
 // * drop this view
 // * create this view
-// * create dep. views
+// * create dep. views + TODO: computed table columns
 // * alter back SPs
 // * recreate triggers
 // * create checks
@@ -152,9 +217,8 @@ wxString View::getRebuildSql()
 {
     // 0. prepare stuff
     std::vector<Procedure *> procedures;
+    std::vector<CheckConstraint> checks;
     wxString privileges, triggers, dropViews, createViews;
-    typedef std::map<wxString, std::pair<wxString,wxString> > RebuildMap;
-    RebuildMap checks;
 
     // 1. build view list (dependency tree) - ordered by DROP
     std::vector<View *> viewList;
@@ -182,14 +246,7 @@ wxString View::getRebuildSql()
                 }
             }
         }
-
-        /*  TODO: write the getDependentChecks function
-        wxString checkName;
-        std::pair<wxString,wxString> checkStatements;
-        (*vi).getDependentChecks(checkName, checkStatements);
-        if (!checks.has_key(checkName))
-            checks[checkName] = checkStatements;
-        */
+        (*vi)->getDependentChecks(checks);
 
         std::vector<Trigger *> trigs;
         (*vi)->getTriggers(trigs, Trigger::afterTrigger);
@@ -213,9 +270,23 @@ wxString View::getRebuildSql()
         }
     }
 
+    wxString createChecks, dropChecks;
+    for (std::vector<CheckConstraint>::iterator it = checks.begin();
+        it != checks.end(); ++it)
+    {
+        wxString cname = wxT("CONSTRAINT ") + (*it).getQuotedName();
+        createChecks += wxT("ALTER TABLE ") +
+            (*it).getTable()->getQuotedName();
+        dropChecks = createChecks;
+        dropChecks += wxT(" DROP ") + cname + wxT(";\n");
+        createChecks += wxT(" ADD ");
+        if (!(*it).isSystem())
+            createChecks += cname;
+        createChecks += wxT("\n  ") + (*it).sourceM + wxT(";\n");
+    }
+
     wxString sql(wxT("SET AUTODDL ON;\n\n"));
-    for (RebuildMap::iterator it = checks.begin(); it != checks.end(); ++it)
-        sql += (*it).second.first + wxT("\n");
+    sql += dropChecks;
     for (std::vector<Procedure *>::iterator it = procedures.begin();
         it != procedures.end(); ++it)
     {
@@ -232,11 +303,10 @@ wxString View::getRebuildSql()
             + (*it)->getAlterSql(true);
     }
     sql += triggers;
-    for (RebuildMap::iterator it = checks.begin(); it != checks.end(); ++it)
-        sql += (*it).second.second + wxT("\n");
+    sql += createChecks;
     sql += privileges;
 
-    // TODO: restore views desctiptions
+    // TODO: restore view descriptions
 
     return sql;
 }

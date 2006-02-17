@@ -31,6 +31,10 @@
 //-----------------------------------------------------------------------------
 class View: public Relation
 {
+private:
+    void getDependentChecks(std::vector<CheckConstraint>& checks);
+    void getDependentViews(std::vector<View *>& views);
+
 public:
     View();
     wxString getCreateSqlTemplate() const;  // overrides MetadataItem::getCreateSqlTemplate()
@@ -39,7 +43,6 @@ public:
     wxString getAlterSql();
     wxString getCreateSql();
     wxString getRebuildSql();
-    void getDependentViews(std::vector<View *>& views);
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
