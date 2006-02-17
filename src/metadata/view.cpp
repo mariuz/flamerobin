@@ -219,7 +219,8 @@ wxString View::getRebuildSql()
     for (std::vector<Procedure *>::iterator it = procedures.begin();
         it != procedures.end(); ++it)
     {
-        sql += (*it)->getAlterSql(false);
+        sql += wxT("\n/* ------------------------------------------ */\n\n")
+            + (*it)->getAlterSql(false);
     }
     sql += dropViews;
     sql += wxT("\n/**************** DROPPING COMPLETE ***************/\n\n");
@@ -227,12 +228,16 @@ wxString View::getRebuildSql()
     for (std::vector<Procedure *>::iterator it = procedures.begin();
         it != procedures.end(); ++it)
     {
-        sql += (*it)->getAlterSql(true);
+        sql += wxT("\n/* ------------------------------------------ */\n\n")
+            + (*it)->getAlterSql(true);
     }
     sql += triggers;
     for (RebuildMap::iterator it = checks.begin(); it != checks.end(); ++it)
         sql += (*it).second.second + wxT("\n");
     sql += privileges;
+
+    // TODO: restore views desctiptions
+
     return sql;
 }
 //-----------------------------------------------------------------------------
