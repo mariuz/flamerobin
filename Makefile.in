@@ -95,6 +95,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_PreferencesDialog.o \
 	flamerobin_PreferencesDialogSettings.o \
 	flamerobin_PrintableHtmlWindow.o \
+	flamerobin_ProgressDialog.o \
 	flamerobin_ReorderFieldsDialog.o \
 	flamerobin_TriggerWizardDialog.o \
 	flamerobin_RestoreFrame.o \
@@ -401,6 +402,9 @@ flamerobin_PreferencesDialogSettings.o: $(srcdir)/src/gui/PreferencesDialogSetti
 
 flamerobin_PrintableHtmlWindow.o: $(srcdir)/src/gui/PrintableHtmlWindow.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/PrintableHtmlWindow.cpp
+
+flamerobin_ProgressDialog.o: $(srcdir)/src/gui/ProgressDialog.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/ProgressDialog.cpp
 
 flamerobin_ReorderFieldsDialog.o: $(srcdir)/src/gui/ReorderFieldsDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/ReorderFieldsDialog.cpp

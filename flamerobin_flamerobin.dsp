@@ -468,6 +468,10 @@ LINK32=link.exe
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\src\gui\AdvancedMessageDialog.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\BackupFrame.cpp
 # End Source File
 # Begin Source File
@@ -489,6 +493,10 @@ SOURCE=.\src\config\Config.cpp
 # Begin Source File
 
 SOURCE=.\src\gui\ContextMenuMetadataItemVisitor.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\metadata\CreateDDLVisitor.cpp
 # End Source File
 # Begin Source File
 
@@ -565,6 +573,10 @@ SOURCE=.\src\gui\PreferencesDialogSettings.cpp
 # Begin Source File
 
 SOURCE=.\src\gui\PrintableHtmlWindow.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\ProgressDialog.cpp
 # End Source File
 # Begin Source File
 
@@ -710,6 +722,10 @@ SOURCE=.\src\metadata\parameter.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\metadata\privilege.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\metadata\procedure.cpp
 # End Source File
 # Begin Source File
@@ -770,6 +786,10 @@ SOURCE=.\src\metadata\view.cpp
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\src\gui\AdvancedMessageDialog.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\BackupFrame.h
 # End Source File
 # Begin Source File
@@ -791,6 +811,10 @@ SOURCE=.\src\config\Config.h
 # Begin Source File
 
 SOURCE=.\src\gui\ContextMenuMetadataItemVisitor.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\metadata\CreateDDLVisitor.h
 # End Source File
 # Begin Source File
 
@@ -863,6 +887,14 @@ SOURCE=.\src\gui\PreferencesDialog.h
 # Begin Source File
 
 SOURCE=.\src\gui\PrintableHtmlWindow.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\ProgressDialog.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\core\ProgressIndicator.h
 # End Source File
 # Begin Source File
 
@@ -999,6 +1031,10 @@ SOURCE=.\src\myTreeCtrl.h
 # Begin Source File
 
 SOURCE=.\src\metadata\parameter.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\metadata\privilege.h
 # End Source File
 # Begin Source File
 

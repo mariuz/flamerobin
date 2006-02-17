@@ -89,6 +89,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridTable.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AdvancedMessageDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupRestoreBaseFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseDialog.o \
@@ -106,6 +107,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ProgressDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TriggerWizardDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.o \
@@ -117,6 +119,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_column.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_constraints.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CreateDDLVisitor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_database.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_domain.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_exception.o \
@@ -126,6 +129,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitem.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_parameter.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_privilege.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_procedure.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_relation.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_role.o \
@@ -327,6 +331,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.o: ./src/frprec.cpp
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.o: ./src/frutils.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AdvancedMessageDialog.o: ./src/gui/AdvancedMessageDialog.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupFrame.o: ./src/gui/BackupFrame.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
@@ -378,6 +385,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.o: ./src/gui/Pr
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.o: ./src/gui/PrintableHtmlWindow.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ProgressDialog.o: ./src/gui/ProgressDialog.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.o: ./src/gui/ReorderFieldsDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
@@ -411,6 +421,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_column.o: ./src/metadata/column.cpp
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_constraints.o: ./src/metadata/constraints.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CreateDDLVisitor.o: ./src/metadata/CreateDDLVisitor.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_database.o: ./src/metadata/database.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
@@ -436,6 +449,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.o: ./src/metadata/Met
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_parameter.o: ./src/metadata/parameter.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_privilege.o: ./src/metadata/privilege.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_procedure.o: ./src/metadata/procedure.cpp
