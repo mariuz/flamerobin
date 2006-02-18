@@ -119,14 +119,49 @@ void CreateDDLVisitor::visit(Column& c)
     }
 }
 //-----------------------------------------------------------------------------
-void CreateDDLVisitor::visit(Database&)
+template <class T>
+void iterateit(CreateDDLVisitor* v, Database& db/*, ProgressIndicator *pi */)
 {
-    // TODO: build the sql script for entire database?
+    MetadataCollection<T>* p = db.getCollection<T>();
+    for (typename MetadataCollection<T>::iterator it = p->begin();
+        it != p->end(); ++it)
+    {
+        v->visit(*it);
+    }
+}
+// build the sql script for entire database
+void CreateDDLVisitor::visit(Database& d)
+{
+    // TODO: use the ProgressIndicator to show what's going on
+
+    preSqlM = wxT("/********************* ROLES **********************/\n\n");
+    iterateit<Role>(this, d);
+    preSqlM = wxT("/********************* UDFS ***********************/\n\n");
+    iterateit<Function>(this, d);
+    preSqlM = wxT("/****************** GENERATORS ********************/\n\n");
+    iterateit<Generator>(this, d);
+    preSqlM = wxT("/******************** DOMAINS *********************/\n\n");
+    iterateit<Domain>(this, d);
+    preSqlM = wxT("/******************** TABLES **********************/\n\n");
+    iterateit<Table>(this, d);
+
+    preSqlM = wxT("/********************* VIEWS **********************/\n\n");
+    // TODO: build dependecy tree first, and order views by it
+    iterateit<View>(this, d);
+
+    preSqlM = wxT("/******************* EXCEPTIONS *******************/\n\n");
+    iterateit<Exception>(this, d);
+    preSqlM = wxT("/******************* PROCEDURES ******************/\n\n");
+    iterateit<Procedure>(this, d);
+    preSqlM = wxT("/******************** TRIGGERS ********************/\n\n");
+    iterateit<Trigger>(this, d);
+
+    sqlM = preSqlM + wxT("\n") + postSqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Domain& d)
 {
-    sqlM = wxT("CREATE DOMAIN ") + d.getQuotedName() + wxT("\n AS ") +
+    sqlM += wxT("CREATE DOMAIN ") + d.getQuotedName() + wxT("\n AS ") +
             d.getDatatypeAsString();
     wxString charset = d.getCharset();
     Database *db = d.getDatabase();
@@ -156,14 +191,14 @@ void CreateDDLVisitor::visit(Domain& d)
              << description << wxT("'\n  where RDB$FIELD_NAME = '")
              << colname << wxT("';\n");
     }
-    preSqlM = sqlM;
+    preSqlM << sqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Exception& e)
 {
     wxString ms(e.getMessage());
     ms.Replace(wxT("'"), wxT("''"));    // escape quotes
-    sqlM = wxT("CREATE EXCEPTION ") + e.getQuotedName() + wxT("\n'") +
+    sqlM += wxT("CREATE EXCEPTION ") + e.getQuotedName() + wxT("\n'") +
         ms + wxT("';\n");
 
     wxString description = e.getDescription();
@@ -176,12 +211,12 @@ void CreateDDLVisitor::visit(Exception& e)
              << description << wxT("'\n  where RDB$EXCEPTION_NAME = '")
              << name << wxT("';\n");
     }
-    preSqlM = sqlM;
+    preSqlM << sqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Function& f)
 {
-    sqlM = f.getCreateSql();
+    sqlM << f.getCreateSql();
     wxString description = f.getDescription();
     if (!description.IsEmpty())
     {
@@ -192,12 +227,12 @@ void CreateDDLVisitor::visit(Function& f)
              << description << wxT("'\n  where RDB$FUNCITION_NAME = '")
              << name << wxT("';\n");
     }
-    preSqlM = sqlM;
+    preSqlM << sqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Generator& g)
 {
-    sqlM = wxT("CREATE GENERATOR ") + g.getQuotedName() + wxT(";\n");
+    sqlM += wxT("CREATE GENERATOR ") + g.getQuotedName() + wxT(";\n");
     wxString description = g.getDescription();
     if (!description.IsEmpty())
     {
@@ -208,7 +243,7 @@ void CreateDDLVisitor::visit(Generator& g)
              << description << wxT("'\n  where RDB$GENERATOR_NAME = '")
              << name << wxT("';\n");
     }
-    preSqlM = sqlM;
+    preSqlM << sqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Procedure& p)
@@ -259,12 +294,12 @@ void CreateDDLVisitor::visit(Procedure& p)
         }
     }
 
-    postSqlM = temp;
+    postSqlM << temp;
     temp.Replace(wxT("ALTER"), wxT("CREATE"), false);   // just first
-    sqlM = temp;
+    sqlM << temp;
 
     // create empty procedure body (for database DDL dump)
-    preSqlM = p.getAlterSql(false);
+    preSqlM << p.getAlterSql(false);
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Parameter& p)
@@ -274,7 +309,7 @@ void CreateDDLVisitor::visit(Parameter& p)
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Role& r)
 {
-    preSqlM = wxT("CREATE ROLE ") + r.getQuotedName() + wxT(";\n");
+    preSqlM += wxT("CREATE ROLE ") + r.getQuotedName() + wxT(";\n");
 
     // grant execute on [name] to [user/role]
     const std::vector<Privilege>* priv = r.getPrivileges();
@@ -296,7 +331,7 @@ void CreateDDLVisitor::visit(Role& r)
                  << description << wxT("'\nwhere RDB$ROLE_NAME = '")
                  << name << wxT("';\n");
     }
-    sqlM = preSqlM + wxT("\n") + postSqlM;
+    sqlM += preSqlM + wxT("\n") + postSqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Root&)
@@ -311,7 +346,7 @@ void CreateDDLVisitor::visit(Server&)
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Table& t)
 {
-    preSqlM = wxT("CREATE TABLE ") + t.getQuotedName() + wxT("\n(\n  ");
+    preSqlM += wxT("CREATE TABLE ") + t.getQuotedName() + wxT("\n(\n  ");
     for (MetadataCollection<Column>::iterator it=t.begin(); it!=t.end(); ++it)
     {
         if (it != t.begin())
@@ -459,7 +494,7 @@ void CreateDDLVisitor::visit(Table& t)
                  << name << wxT("';\n");
     }
 
-    sqlM = preSqlM + wxT("\n") + postSqlM;
+    sqlM += preSqlM + wxT("\n") + postSqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Trigger& t)
@@ -493,12 +528,12 @@ void CreateDDLVisitor::visit(Trigger& t)
              << description << wxT("'\n  where RDB$TRIGGER_NAME = '")
              << name << wxT("';\n");
     }
-    postSqlM = sqlM;    // create triggers at the end
+    postSqlM << sqlM;    // create triggers at the end
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(View& v)
 {
-    preSqlM = v.getCreateSql();
+    preSqlM << v.getCreateSql();
 
     // grant sel/ins/upd/del/ref/all ON [name] to [SP,user,role]
     const std::vector<Privilege>* priv = v.getPrivileges();
@@ -543,7 +578,7 @@ void CreateDDLVisitor::visit(View& v)
         }
     }
 
-    sqlM = preSqlM + wxT("\n") + postSqlM;
+    sqlM += preSqlM + wxT("\n") + postSqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(MetadataItem&)

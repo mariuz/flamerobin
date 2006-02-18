@@ -87,7 +87,7 @@ private:
 
     std::multimap<wxString, wxString> collationsM;
     void loadCollations();
-    bool loadObjects(NodeType type, IBPP::Transaction& tr1, 
+    bool loadObjects(NodeType type, IBPP::Transaction& tr1,
         ProgressIndicator* indicator = 0);
 
     // small help for parser
@@ -103,6 +103,21 @@ public:
 
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
     void getCollections(std::vector<MetadataItem *>& temp);
+
+    template<class T>
+    MetadataCollection<T>* getCollection()
+    {
+        std::vector<MetadataItem *> temp;
+        getCollections(temp);
+        for (std::vector<MetadataItem *>::iterator it = temp.begin();
+            it != temp.end(); ++it)
+        {
+            MetadataCollection<T>* p =
+                dynamic_cast<MetadataCollection<T>*>(*it);
+            if (p)
+                return p;
+        }
+    }
 
     MetadataCollection<Generator>::const_iterator generatorsBegin();
     MetadataCollection<Generator>::const_iterator generatorsEnd();
