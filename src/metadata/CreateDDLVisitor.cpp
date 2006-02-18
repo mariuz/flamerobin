@@ -312,7 +312,7 @@ void CreateDDLVisitor::visit(Procedure& p)
     preSqlM << p.getAlterSql(false);
 }
 //-----------------------------------------------------------------------------
-void CreateDDLVisitor::visit(Parameter& p)
+void CreateDDLVisitor::visit(Parameter&)
 {
     // empty
 }
