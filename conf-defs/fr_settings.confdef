@@ -294,6 +294,20 @@
         </setting>
     </node>
     <node>
+        <caption>Property pages</caption>
+        <image>4</image>
+        <setting type="checkbox">
+            <caption>Show default column values</caption>
+            <key>displayColumnDefault</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Show column descriptions</caption>
+            <key>displayColumnDescription</key>
+            <default>1</default>
+        </setting>
+    </node>
+    <node>
         <caption>Object names</caption>
         <image>5</image>
         <setting type="checkbox">

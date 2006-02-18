@@ -226,6 +226,23 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         htmlpage += escapeHtmlChars(s);
     }
 
+    else if (cmd == wxT("show_if_config"))
+    {
+        wxString::size_type poscolon = suffix.find(':');
+        if (poscolon != wxString::npos)
+        {
+            wxString configKey = suffix.substr(0, poscolon);
+            suffix = suffix.substr(poscolon+1);
+            wxString::size_type pos2 = suffix.find(':');
+            if (pos2 != wxString::npos)
+            {
+                wxString flag = suffix.substr(0, pos2);
+                if (config().get(configKey, (flag == wxT("true"))))
+                    processHtmlCode(htmlpage, suffix.substr(pos2+1), object);
+            }
+        }
+    }
+
     else if (cmd == wxT("columns"))  // table and view columns
     {
         Relation* r = dynamic_cast<Relation*>(object);
@@ -381,6 +398,22 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         Column* c = dynamic_cast<Column*>(object);
         if (c)
             htmlpage += (c->isNullable() ? wxT("") : wxT("<b>not null</b>"));
+    }
+
+    else if (cmd == wxT("column_default"))
+    {
+        Column* c = dynamic_cast<Column*>(object);
+        if (c)
+        {
+            wxString def(c->getDefault());
+            def.Trim(false);    // left trim
+            if (def.Upper().StartsWith(wxT("DEFAULT")))
+            {
+                def.Remove(0, 7);
+                def.Trim(false);
+            }
+            htmlpage += def;
+        }
     }
 
     else if (cmd == wxT("input_parameters")) // SP params

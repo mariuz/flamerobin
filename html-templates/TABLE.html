@@ -22,7 +22,10 @@
       <td><b><font color=white>Field</font></b></td>
       <td><b><font color=white>Type</font></b></td>
       <td><b><font color=white>NULL</font></b></td>
-      <td><b><font color=white>Description</font></b></td>
+      {%show_if_config:DisplayColumnDefault:true:
+      <td><b><font color=white>Default</font></b></td>%}
+      {%show_if_config:DisplayColumnDescription:true:
+      <td><b><font color=white>Description</font></b></td>%}
     </tr>
     {%columns:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
@@ -33,8 +36,11 @@
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top">{%column_datatype%}</td>
       <td nowrap valign="top">{%column_nulloption%}</td>
+      {%show_if_config:displayColumnDefault:true:
+      <td nowrap valign="top">{%column_default%}</td>%}
+      {%show_if_config:displayColumnDescription:true:
       <td valign="top"><font size=-1>{%object_description%} [<a
-        href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>
+        href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>%}
     </tr>%}
   </tbody>
 </table>
