@@ -38,6 +38,7 @@
     #include "wx/wx.h"
 #endif
 
+#include "gui/ProgressDialog.h"
 #include "CreateDDLVisitor.h"
 //-----------------------------------------------------------------------------
 CreateDDLVisitor::CreateDDLVisitor()
@@ -120,12 +121,20 @@ void CreateDDLVisitor::visit(Column& c)
 }
 //-----------------------------------------------------------------------------
 template <class T>
-void iterateit(CreateDDLVisitor* v, Database& db/*, ProgressIndicator *pi */)
+void iterateit(CreateDDLVisitor* v, Database& db, ProgressIndicator* pi)
 {
     MetadataCollection<T>* p = db.getCollection<T>();
+    pi->setProgressMessage(wxT("Extracting ") + p->getPrintableName());
+    pi->stepProgress();
+    pi->initProgress(wxEmptyString, p->getChildrenCount(), 0, 2);
+
     for (typename MetadataCollection<T>::iterator it = p->begin();
         it != p->end(); ++it)
     {
+        if (pi->isCanceled())
+            break;
+        pi->setProgressMessage(wxT("Extracting ") + (*it).getName_(), 2);
+        pi->stepProgress(2);
         v->visit(*it);
     }
 }
@@ -133,28 +142,29 @@ void iterateit(CreateDDLVisitor* v, Database& db/*, ProgressIndicator *pi */)
 void CreateDDLVisitor::visit(Database& d)
 {
     // TODO: use the ProgressIndicator to show what's going on
-
+    ProgressDialog indicator(wxT("Extracting DDL definitions"), 2);
+    indicator.initProgress(wxEmptyString, 10, 0, 1);
     preSqlM = wxT("/********************* ROLES **********************/\n\n");
-    iterateit<Role>(this, d);
+    iterateit<Role>(this, d, &indicator);
     preSqlM = wxT("/********************* UDFS ***********************/\n\n");
-    iterateit<Function>(this, d);
+    iterateit<Function>(this, d, &indicator);
     preSqlM = wxT("/****************** GENERATORS ********************/\n\n");
-    iterateit<Generator>(this, d);
+    iterateit<Generator>(this, d, &indicator);
     preSqlM = wxT("/******************** DOMAINS *********************/\n\n");
-    iterateit<Domain>(this, d);
+    iterateit<Domain>(this, d, &indicator);
     preSqlM = wxT("/******************** TABLES **********************/\n\n");
-    iterateit<Table>(this, d);
+    iterateit<Table>(this, d, &indicator);
 
     preSqlM = wxT("/********************* VIEWS **********************/\n\n");
     // TODO: build dependecy tree first, and order views by it
-    iterateit<View>(this, d);
+    iterateit<View>(this, d, &indicator);
 
     preSqlM = wxT("/******************* EXCEPTIONS *******************/\n\n");
-    iterateit<Exception>(this, d);
+    iterateit<Exception>(this, d, &indicator);
     preSqlM = wxT("/******************* PROCEDURES ******************/\n\n");
-    iterateit<Procedure>(this, d);
+    iterateit<Procedure>(this, d, &indicator);
     preSqlM = wxT("/******************** TRIGGERS ********************/\n\n");
-    iterateit<Trigger>(this, d);
+    iterateit<Trigger>(this, d, &indicator);
 
     sqlM = preSqlM + wxT("\n") + postSqlM;
 }
