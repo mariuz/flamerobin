@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -51,6 +51,7 @@
 #include "gui/ExecuteSqlFrame.h"
 #include "gui/MainFrame.h"
 #include "gui/PreferencesDialog.h"
+#include "gui/ProgressDialog.h"
 #include "gui/RestoreFrame.h"
 #include "gui/ServerRegistrationDialog.h"
 #include "gui/SimpleHtmlFrame.h"
@@ -1159,48 +1160,36 @@ bool MainFrame::connect(bool warn)
     else
         pass = db->getPassword();
 
-    wxProgressDialog progress_dialog(_("Connecting..."), db->getPath(), 9, NULL,
-        wxPD_AUTO_HIDE | wxPD_APP_MODAL);
-    if (!db->connect(pass))
+    wxString caption(wxString::Format(wxT("Connecting with Database \"%s\""), 
+        db->getName_().c_str()));
+    ProgressDialog pd(caption, 1);
+
+    if (!db->connect(pass, &pd))
     {
         reportLastError(_("Error Connecting to Database"));
         return false;
     }
+    pd.Hide();
 
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db->getIBPPDatabase(), IBPP::amRead);
-    tr1->Start();
-    NodeType types[9] = { ntTable, ntView, ntProcedure, ntTrigger, ntRole, ntDomain,
-        ntFunction, ntGenerator, ntException };
-    wxString names[9] = { _("Tables"), _("Views"), _("Procedures"), _("Triggers"), _("Roles"), _("Domains"),
-        _("Functions"), _("Generators"), _("Exceptions")
-    };
-    for (int i = 0; i < 9; i++)
+    if (db->isConnected())
     {
-        progress_dialog.Update(i + 1, wxString::Format(_("Loading %s."), names[i].c_str()));
-        if (!db->loadObjects(types[i], tr1))
-        {
-            reportLastError(wxString::Format(_("Error Loading %s"),
-                names[i].c_str()));
-            break;
-        }
-    }
+        wxTreeItemId id = tree_ctrl_1->GetSelection();
+        tree_ctrl_1->Expand(id);
 
-    wxTreeItemId id = tree_ctrl_1->GetSelection();
-    tree_ctrl_1->Expand(id);
-
-    if (db->usesDifferentConnectionCharset())
-    {
-        DatabaseConfig dc(db);
-        if (dc.get(wxT("differentCharsetWarning"), true))
+        if (db->usesDifferentConnectionCharset())
         {
-            if (wxNO == wxMessageBox(wxString::Format(
-                _("Database charset: %s\nis different from connection charset: %s.\n\nWould you like to be reminded next time?"),
-                db->getDatabaseCharset().c_str(),
-                db->getConnectionCharset().c_str()),
-                _("Warning"),
-                wxICON_QUESTION | wxYES_NO))
+            DatabaseConfig dc(db);
+            if (dc.get(wxT("differentCharsetWarning"), true))
             {
-                dc.setValue(wxT("differentCharsetWarning"), false);
+                if (wxNO == wxMessageBox(wxString::Format(
+                    _("Database charset: %s\nis different from connection charset: %s.\n\nWould you like to be reminded next time?"),
+                    db->getDatabaseCharset().c_str(),
+                    db->getConnectionCharset().c_str()),
+                    _("Warning"),
+                    wxICON_QUESTION | wxYES_NO))
+                {
+                    dc.setValue(wxT("differentCharsetWarning"), false);
+                }
             }
         }
     }

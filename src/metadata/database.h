@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena, Michael Hieke
 */
 
 #ifndef FR_DATABASE_H
@@ -30,6 +30,7 @@
 
 #include <ibpp.h>
 
+#include "core/ProgressIndicator.h"
 #include "metadata/collection.h"
 #include "metadata/domain.h"
 #include "metadata/exception.h"
@@ -86,6 +87,8 @@ private:
 
     std::multimap<wxString, wxString> collationsM;
     void loadCollations();
+    bool loadObjects(NodeType type, IBPP::Transaction& tr1, 
+        ProgressIndicator* indicator = 0);
 
     // small help for parser
     wxString getTableForIndex(wxString indexName);
@@ -110,7 +113,7 @@ public:
 
     void clear();               // sets all values to empty wxString
     bool isConnected() const;
-    bool connect(wxString password);
+    bool connect(wxString password, ProgressIndicator* indicator = 0);
     bool disconnect();
     bool reconnect() const;
     void prepareTemporaryCredentials();
@@ -118,7 +121,6 @@ public:
 
     wxString loadDomainNameForColumn(wxString table, wxString field);
     Domain* loadMissingDomain(wxString name);
-    bool loadObjects(NodeType type, IBPP::Transaction& tr1);
     //wxString getLoadingSql(NodeType type);
 
     bool loadGeneratorValues();

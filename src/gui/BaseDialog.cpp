@@ -1,26 +1,26 @@
 /*
-The contents of this file are subject to the Initial Developer's Public
-License Version 1.0 (the "License"); you may not use this file except in
-compliance with the License. You may obtain a copy of the License here:
-http://www.flamerobin.org/license.html.
+  The contents of this file are subject to the Initial Developer's Public
+  License Version 1.0 (the "License"); you may not use this file except in
+  compliance with the License. You may obtain a copy of the License here:
+  http://www.flamerobin.org/license.html.
 
-Software distributed under the License is distributed on an "AS IS"
-basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-License for the specific language governing rights and limitations under
-the License.
+  Software distributed under the License is distributed on an "AS IS"
+  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+  License for the specific language governing rights and limitations under
+  the License.
 
-The Original Code is FlameRobin (TM).
+  The Original Code is FlameRobin (TM).
 
-The Initial Developer of the Original Code is Michael Hieke.
+  The Initial Developer of the Original Code is Michael Hieke.
 
-Portions created by the original developer
-are Copyright (C) 2004 Michael Hieke.
+  Portions created by the original developer
+  are Copyright (C) 2004 Michael Hieke.
 
-All Rights Reserved.
+  All Rights Reserved.
 
-$Id$
+  $Id$
 
-Contributor(s): Nando Dessena
+  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -53,20 +53,25 @@ wxPanel* BaseDialog::getControlsPanel()
     return panel_controls;
 }
 //-----------------------------------------------------------------------------
-void BaseDialog::layoutSizers(wxSizer* controls, wxSizer* buttons, bool expandControls)
+void BaseDialog::layoutSizers(wxSizer* controls, wxSizer* buttons, 
+    bool expandControls)
 {
     wxBoxSizer* sizerVert = new wxBoxSizer(wxVERTICAL);
-    sizerVert->Add(0, styleguide().getDialogMargin(wxTOP));
-    sizerVert->Add(controls, expandControls ? 1 : 0, wxEXPAND);
-    // make buttons align to bottom of dialog
-    sizerVert->Add(0, styleguide().getDialogMargin(wxBOTTOM), expandControls ? 0 : 1, wxEXPAND);
+    sizerVert->AddSpacer(styleguide().getDialogMargin(wxTOP));
+    if (controls)
+    {
+        sizerVert->Add(controls, expandControls ? 1 : 0, wxEXPAND);
+        // make buttons align to bottom of dialog
+        sizerVert->Add(0, styleguide().getDialogMargin(wxBOTTOM), 
+            expandControls ? 0 : 1, wxEXPAND);
+    }
     sizerVert->Add(buttons, 0, wxEXPAND);
-    sizerVert->Add(0, styleguide().getDialogMargin(wxBOTTOM));
+    sizerVert->AddSpacer(styleguide().getDialogMargin(wxBOTTOM));
 
     wxBoxSizer* sizerHorz = new wxBoxSizer(wxHORIZONTAL);
-    sizerHorz->Add(styleguide().getDialogMargin(wxLEFT), 0);
+    sizerHorz->AddSpacer(styleguide().getDialogMargin(wxLEFT));
     sizerHorz->Add(sizerVert, 1, wxEXPAND);
-    sizerHorz->Add(styleguide().getDialogMargin(wxRIGHT), 0);
+    sizerHorz->AddSpacer(styleguide().getDialogMargin(wxRIGHT));
 
     wxBoxSizer* sizerAll = new wxBoxSizer(wxHORIZONTAL);
     sizerAll->Add(sizerHorz, 1, wxEXPAND);
@@ -140,7 +145,7 @@ void BaseDialog::readConfigSettings()
         }
     }
     if (centered)
-        CenterOnParent();
+        Centre(wxCENTER_FRAME | wxBOTH);
 }
 //-----------------------------------------------------------------------------
 void BaseDialog::doReadConfigSettings(const wxString& WXUNUSED(prefix))

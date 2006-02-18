@@ -30,23 +30,43 @@
 
 #include <wx/wx.h>
 
+#include <vector>
+
 #include "core/ProgressIndicator.h"
+#include "gui/BaseDialog.h"
 //-----------------------------------------------------------------------------
-class ProgressDialog: public wxDialog, ProgressIndicator
+class ProgressDialog: public BaseDialog, public ProgressIndicator
 {
 private:
+    bool canceledM;
     unsigned int levelCountM;
+    std::vector<wxStaticText*> labelsM;
+    std::vector<wxGauge*> gaugesM;
+    wxButton* button_cancel;
+
+    wxWindowDisabler* winDisablerM;
+
+    void createControls();
+    void layoutControls();
+
+    void enableOtherWindows(bool enable);
+    void setCanceled();
+
+    wxGauge* getGaugeForLevel(unsigned int progressLevel);
+    wxStaticText* getLabelForLevel(unsigned int progressLevel);
+    bool isValidProgressLevel(unsigned int progressLevel);
+    void setGaugeIndeterminate(wxGauge* gauge, bool indeterminate);
+
 public:
-    ProgressDialog(wxWindow* parent, int id, const wxString& title,
+    ProgressDialog(const wxString& title, unsigned int levelCount = 1,
         const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxDEFAULT_DIALOG_STYLE);
+        const wxSize& size = wxDefaultSize);
     ~ProgressDialog();
 
-    void setLevelCount(unsigned int levelCount);
+   virtual bool Show(bool show = true);
 
     // ProgressIndicator methods
-    virtual bool isCancelled();
+    virtual bool isCanceled();
     virtual void initProgress(wxString progressMsg, 
         unsigned int maxPosition = 0, unsigned int startingPosition = 0,
         unsigned int progressLevel = 1);
@@ -58,6 +78,12 @@ public:
         unsigned int progressLevel = 1);
     virtual void stepProgress(int stepAmount = 1,
         unsigned int progressLevel = 1);
+private:
+    // event handling
+    void OnCancelButtonClick(wxCommandEvent& event);
+    void OnClose(wxCloseEvent& event);
+
+    DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
 #endif // FR_PROGRESSDIALOG_H

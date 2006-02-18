@@ -380,12 +380,14 @@ wxString Database::getTableForIndex(wxString indexName)
         lastError().setMessage(_("System error."));
     }
 
-    ::wxMessageBox(lastError().getMessage(), _("Error while loading table for index."), wxOK|wxICON_WARNING);
+    ::wxMessageBox(lastError().getMessage(), 
+        _("Error while loading table for index."), wxOK | wxICON_WARNING);
     return wxT("");
 }
 //-----------------------------------------------------------------------------
 //! load list of objects of type "type" from database, and fill the DBH
-bool Database::loadObjects(NodeType type, IBPP::Transaction& tr1)
+bool Database::loadObjects(NodeType type, IBPP::Transaction& tr1, 
+    ProgressIndicator* indicator)
 {
     switch (type)
     {
@@ -413,6 +415,9 @@ bool Database::loadObjects(NodeType type, IBPP::Transaction& tr1)
             st1->Get(1, name);
             name.erase(name.find_last_not_of(" ") + 1);
             addObject(type, std2wx(name));
+
+            if (indicator && indicator->isCanceled())
+                break;
         }
         refreshByType(type);
         return true;
@@ -752,35 +757,71 @@ bool Database::reconnect() const
 // the caller of this function should check whether the database object has the
 // password set, and if it does not, it should provide the password
 //               and if it does, just provide that password
-bool Database::connect(wxString password)
+bool Database::connect(wxString password, ProgressIndicator* indicator)
 {
     if (connectedM)
         return true;
 
     try
     {
-        databaseM = IBPP::DatabaseFactory("", wx2std(getConnectionString()), wx2std(getUsername()),
-            wx2std(password), wx2std(getRole()), wx2std(getConnectionCharset()), "");
+        if (indicator)
+            indicator->initProgressIndeterminate(wxT("Establishing connection..."));
+        databaseM = IBPP::DatabaseFactory("", wx2std(getConnectionString()), 
+            wx2std(getUsername()), wx2std(password), wx2std(getRole()), 
+            wx2std(getConnectionCharset()), "");
         databaseM->Connect();
         connectedM = true;
         notifyObservers();
-
         tablesM.setParent(this);
 
-        // load database charset
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
-        st1->Prepare("select rdb$character_set_name from rdb$database");
-        st1->Execute();
-        if (st1->Fetch())
+        bool canceled = (indicator && indicator->isCanceled());
+        if (!canceled)
         {
-            std::string databaseCharset;
-            st1->Get(1, databaseCharset);
-            databaseCharsetM = std2wx(databaseCharset);
+            IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
+            tr1->Start();
+
+            // load database charset
+            IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
+            st1->Prepare("select rdb$character_set_name from rdb$database");
+            st1->Execute();
+            if (st1->Fetch())
+            {
+                std::string databaseCharset;
+                st1->Get(1, databaseCharset);
+                databaseCharsetM = std2wx(databaseCharset).Strip();
+            }
+
+            // load metadata information
+            struct NodeTypeName { NodeType type; const wxChar* name; };
+            static const NodeTypeName nodetypes[] = {
+                { ntTable, _("Tables") }, { ntView, _("Views") },
+                { ntProcedure, _("Procedures") }, { ntTrigger, _("Triggers") },
+                { ntRole, _("Roles") }, { ntDomain, _("Domains") },
+                { ntFunction, _("Functions") }, { ntGenerator, _("Generators") },
+                { ntException, _("Exceptions")  }
+            };
+
+            int typeCount = sizeof(nodetypes) / sizeof(NodeTypeName);
+            for (int i = 0; i < typeCount; i++)
+            {
+                if (indicator)
+                {
+                    indicator->initProgress(wxString::Format(_("Loading %s..."),
+                        nodetypes[i].name), typeCount, i);
+                }
+                loadObjects(nodetypes[i].type, tr1, indicator);
+                if (indicator && indicator->isCanceled())
+                {
+                    canceled = true;
+                    break;
+                }
+            }
+            if (!canceled && indicator)
+                indicator->initProgress(_("Complete"), typeCount, typeCount);
+            tr1->Commit();
         }
-        databaseCharsetM.erase(databaseCharsetM.find_last_not_of(wxT(" ")) + 1);
-        tr1->Commit();
+        if (canceled)
+            disconnect();
         return true;
     }
     catch (IBPP::Exception &e)
@@ -792,6 +833,7 @@ bool Database::connect(wxString password)
         lastError().setMessage(_("System error."));
     }
 
+    disconnect();
     databaseM.clear();
     return false;
 }

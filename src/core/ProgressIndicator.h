@@ -32,7 +32,8 @@
 //-----------------------------------------------------------------------------
 class ProgressIndicator
 {
-    virtual bool isCancelled() = 0;
+public:
+    virtual bool isCanceled() = 0;
     virtual void initProgress(wxString progressMsg, 
         unsigned int maxPosition = 0, unsigned int startingPosition = 0,
         unsigned int progressLevel = 1) = 0;
