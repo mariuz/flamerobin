@@ -104,6 +104,19 @@ void CreateDDLVisitor::visit(Column& c)
     wxString collate = c.getCollation();
     if (!collate.IsEmpty())
         preSqlM << wxT(" COLLATE ") << collate;
+    wxString description = c.getDescription();
+    if (!description.IsEmpty())
+    {
+        wxString colname(c.getName_());
+        wxString tabname(c.getTable()->getName_());
+        description.Replace(wxT("'"), wxT("''"));
+        colname.Replace(wxT("'"), wxT("''"));
+        tabname.Replace(wxT("'"), wxT("''"));
+        postSqlM << wxT("UPDATE RDB$RELATION_FIELDS set RDB$DESCRIPTION = '")
+                 << description << wxT("'  where RDB$FIELD_NAME = '")
+                 << colname << wxT("' and RDB$RELATION_NAME = '") << tabname
+                 << wxT("';\n");
+    }
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Database&)
@@ -132,6 +145,17 @@ void CreateDDLVisitor::visit(Domain& d)
     if (!collate.IsEmpty())
         sqlM += wxT(" COLLATE ") + collate;
     sqlM += wxT(";");
+
+    wxString description = d.getDescription();
+    if (!description.IsEmpty())
+    {
+        wxString colname(d.getName_());
+        description.Replace(wxT("'"), wxT("''"));
+        colname.Replace(wxT("'"), wxT("''"));
+        sqlM << wxT("UPDATE RDB$FIELDS set\n  RDB$DESCRIPTION = '")
+             << description << wxT("'\n  where RDB$FIELD_NAME = '")
+             << colname << wxT("';\n");
+    }
     preSqlM = sqlM;
 }
 //-----------------------------------------------------------------------------
@@ -142,18 +166,48 @@ void CreateDDLVisitor::visit(Exception& e)
     sqlM = wxT("CREATE EXCEPTION ") + e.getQuotedName() + wxT("\n'") +
         ms + wxT("';\n");
 
+    wxString description = e.getDescription();
+    if (!description.IsEmpty())
+    {
+        wxString name(e.getName_());
+        description.Replace(wxT("'"), wxT("''"));
+        name.Replace(wxT("'"), wxT("''"));
+        sqlM << wxT("UPDATE RDB$EXCEPTIONS set\n  RDB$DESCRIPTION = '")
+             << description << wxT("'\n  where RDB$EXCEPTION_NAME = '")
+             << name << wxT("';\n");
+    }
     preSqlM = sqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Function& f)
 {
     sqlM = f.getCreateSql();
+    wxString description = f.getDescription();
+    if (!description.IsEmpty())
+    {
+        wxString name(f.getName_());
+        description.Replace(wxT("'"), wxT("''"));
+        name.Replace(wxT("'"), wxT("''"));
+        sqlM << wxT("UPDATE RDB$FUNCITIONS set\n  RDB$DESCRIPTION = '")
+             << description << wxT("'\n  where RDB$FUNCITION_NAME = '")
+             << name << wxT("';\n");
+    }
     preSqlM = sqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Generator& g)
 {
     sqlM = wxT("CREATE GENERATOR ") + g.getQuotedName() + wxT(";\n");
+    wxString description = g.getDescription();
+    if (!description.IsEmpty())
+    {
+        wxString name(g.getName_());
+        description.Replace(wxT("'"), wxT("''"));
+        name.Replace(wxT("'"), wxT("''"));
+        sqlM << wxT("UPDATE RDB$GENERATORS set\n  RDB$DESCRIPTION = '")
+             << description << wxT("'\n  where RDB$GENERATOR_NAME = '")
+             << name << wxT("';\n");
+    }
     preSqlM = sqlM;
 }
 //-----------------------------------------------------------------------------
@@ -173,6 +227,38 @@ void CreateDDLVisitor::visit(Procedure& p)
         }
     }
 
+    /* description of procedure and parameters */
+    wxString name(p.getName_());
+    name.Replace(wxT("'"), wxT("''"));
+    wxString description = p.getDescription();
+    if (!description.IsEmpty())
+    {
+        description.Replace(wxT("'"), wxT("''"));
+        temp << wxT("UPDATE RDB$PROCEDURES set\n  RDB$DESCRIPTION = '")
+             << description << wxT("'\n  where RDB$PROCEDURE_NAME = '")
+             << name << wxT("';\n");
+    }
+    std::vector<MetadataItem *> params;
+    if (p.getChildren(params))
+    {
+        for (std::vector<MetadataItem *>::iterator it = params.begin();
+            it != params.end(); ++it)
+        {
+            wxString description = (*it)->getDescription();
+            if (!description.IsEmpty())
+            {
+                wxString pname((*it)->getName_());
+                description.Replace(wxT("'"), wxT("''"));
+                pname.Replace(wxT("'"), wxT("''"));
+                temp <<
+                wxT("UPDATE RDB$PROCEDURE_PARAMETERS set RDB$DESCRIPTION = '")
+                << description << wxT("'\n  where RDB$PARAMETER_NAME = '")
+                << pname << wxT("' AND RDB$PROCEDURE_NAME = '") << name
+                << wxT("';\n");
+            }
+        }
+    }
+
     postSqlM = temp;
     temp.Replace(wxT("ALTER"), wxT("CREATE"), false);   // just first
     sqlM = temp;
@@ -181,7 +267,7 @@ void CreateDDLVisitor::visit(Procedure& p)
     preSqlM = p.getAlterSql(false);
 }
 //-----------------------------------------------------------------------------
-void CreateDDLVisitor::visit(Parameter&)
+void CreateDDLVisitor::visit(Parameter& p)
 {
     // empty
 }
@@ -199,6 +285,16 @@ void CreateDDLVisitor::visit(Role& r)
         {
             postSqlM += (*ci).getSql() + wxT(";\n");
         }
+    }
+    wxString description = r.getDescription();
+    if (!description.IsEmpty())
+    {
+        wxString name(r.getName_());
+        description.Replace(wxT("'"), wxT("''"));
+        name.Replace(wxT("'"), wxT("''"));
+        postSqlM << wxT("UPDATE RDB$ROLES set\nRDB$DESCRIPTION = '")
+                 << description << wxT("'\nwhere RDB$ROLE_NAME = '")
+                 << name << wxT("';\n");
     }
     sqlM = preSqlM + wxT("\n") + postSqlM;
 }
@@ -351,6 +447,18 @@ void CreateDDLVisitor::visit(Table& t)
     }
 
     preSqlM += wxT("\n);\n");
+
+    wxString description = t.getDescription();
+    if (!description.IsEmpty())
+    {
+        wxString name(t.getName_());
+        description.Replace(wxT("'"), wxT("''"));
+        name.Replace(wxT("'"), wxT("''"));
+        postSqlM << wxT("UPDATE RDB$RELATIONS set\nRDB$DESCRIPTION = '")
+                 << description << wxT("'\nwhere RDB$RELATION_NAME = '")
+                 << name << wxT("';\n");
+    }
+
     sqlM = preSqlM + wxT("\n") + postSqlM;
 }
 //-----------------------------------------------------------------------------
@@ -375,6 +483,16 @@ void CreateDDLVisitor::visit(Trigger& t)
     sqlM << source;
     sqlM << wxT("^\nSET TERM ; ^");
 
+    wxString description = t.getDescription();
+    if (!description.IsEmpty())
+    {
+        wxString name(t.getName_());
+        description.Replace(wxT("'"), wxT("''"));
+        name.Replace(wxT("'"), wxT("''"));
+        sqlM << wxT("UPDATE RDB$TRIGGERS set\n  RDB$DESCRIPTION = '")
+             << description << wxT("'\n  where RDB$TRIGGER_NAME = '")
+             << name << wxT("';\n");
+    }
     postSqlM = sqlM;    // create triggers at the end
 }
 //-----------------------------------------------------------------------------
@@ -392,6 +510,39 @@ void CreateDDLVisitor::visit(View& v)
             postSqlM += (*ci).getSql() + wxT(";\n");
         }
     }
+    wxString name(v.getName_());
+    name.Replace(wxT("'"), wxT("''"));
+    wxString description = v.getDescription();
+    if (!description.IsEmpty())
+    {
+        description.Replace(wxT("'"), wxT("''"));
+        postSqlM << wxT("UPDATE RDB$RELATIONS set\n  RDB$DESCRIPTION = '")
+                 << description << wxT("'\n  where RDB$RELATION_NAME = '")
+                 << name << wxT("';\n");
+    }
+
+    // description for columns
+    std::vector<MetadataItem *> cols;
+    if (v.getChildren(cols))
+    {
+        for (std::vector<MetadataItem *>::iterator it = cols.begin();
+            it != cols.end(); ++it)
+        {
+            wxString description = (*it)->getDescription();
+            if (!description.IsEmpty())
+            {
+                wxString cname((*it)->getName_());
+                description.Replace(wxT("'"), wxT("''"));
+                cname.Replace(wxT("'"), wxT("''"));
+                postSqlM <<
+                wxT("UPDATE RDB$RELATION_FIELDS set\n  RDB$DESCRIPTION = '")
+                << description << wxT("'\n  where RDB$FIELD_NAME = '") <<
+                cname << wxT(" AND RDB$RELATION_NAME = '") << name <<
+                wxT("';\n");
+            }
+        }
+    }
+
     sqlM = preSqlM + wxT("\n") + postSqlM;
 }
 //-----------------------------------------------------------------------------
