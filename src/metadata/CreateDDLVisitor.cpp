@@ -144,26 +144,26 @@ void CreateDDLVisitor::visit(Database& d)
     // TODO: use the ProgressIndicator to show what's going on
     ProgressDialog indicator(wxT("Extracting DDL definitions"), 2);
     indicator.initProgress(wxEmptyString, 10, 0, 1);
-    preSqlM = wxT("/********************* ROLES **********************/\n\n");
+    preSqlM << wxT("/********************* ROLES **********************/\n\n");
     iterateit<Role>(this, d, &indicator);
-    preSqlM = wxT("/********************* UDFS ***********************/\n\n");
+    preSqlM << wxT("/********************* UDFS ***********************/\n\n");
     iterateit<Function>(this, d, &indicator);
-    preSqlM = wxT("/****************** GENERATORS ********************/\n\n");
+    preSqlM << wxT("/****************** GENERATORS ********************/\n\n");
     iterateit<Generator>(this, d, &indicator);
-    preSqlM = wxT("/******************** DOMAINS *********************/\n\n");
+    preSqlM << wxT("/******************** DOMAINS *********************/\n\n");
     iterateit<Domain>(this, d, &indicator);
-    preSqlM = wxT("/******************** TABLES **********************/\n\n");
+    preSqlM << wxT("/******************** TABLES **********************/\n\n");
     iterateit<Table>(this, d, &indicator);
 
-    preSqlM = wxT("/********************* VIEWS **********************/\n\n");
+    preSqlM << wxT("/********************* VIEWS **********************/\n\n");
     // TODO: build dependecy tree first, and order views by it
     iterateit<View>(this, d, &indicator);
 
-    preSqlM = wxT("/******************* EXCEPTIONS *******************/\n\n");
+    preSqlM << wxT("/******************* EXCEPTIONS *******************/\n\n");
     iterateit<Exception>(this, d, &indicator);
-    preSqlM = wxT("/******************* PROCEDURES ******************/\n\n");
+    preSqlM << wxT("/******************* PROCEDURES ******************/\n\n");
     iterateit<Procedure>(this, d, &indicator);
-    preSqlM = wxT("/******************** TRIGGERS ********************/\n\n");
+    preSqlM << wxT("/******************** TRIGGERS ********************/\n\n");
     iterateit<Trigger>(this, d, &indicator);
 
     sqlM = preSqlM + wxT("\n") + postSqlM;
