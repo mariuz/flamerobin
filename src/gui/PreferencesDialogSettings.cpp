@@ -371,7 +371,7 @@ bool PrefDlgRadioboxSetting::createControl(bool ignoreerrors)
             wxLogError(_("Radiobox \"%s\" has no options"), captionM.c_str());
         return ignoreerrors;
     }
-    radioboxM = new wxRadioBox(getPage(), wxID_ANY, captionM, 
+    radioboxM = new wxRadioBox(getPage(), wxID_ANY, captionM,
         wxDefaultPosition, wxDefaultSize, choicesM, 1);
     if (!descriptionM.IsEmpty())
         radioboxM->SetToolTip(descriptionM);
@@ -518,7 +518,7 @@ bool PrefDlgIntEditSetting::createControl(bool WXUNUSED(ignoreerrors))
     spinctrlM->SetRange(minValueM, maxValueM);
     if (!caption2.IsEmpty())
         captionAfterM = new wxStaticText(getPage(), wxID_ANY, caption2);
-    
+
     if (!descriptionM.IsEmpty())
     {
         spinctrlM->SetToolTip(descriptionM);
@@ -790,10 +790,10 @@ void PrefDlgChooserSetting::addControlsToSizer(wxSizer* sizer)
 void PrefDlgChooserSetting::chooseFile()
 {
     wxString path;
-	wxFileName::SplitPath(textctrlM->GetValue(), &path, 0, 0);
+    wxFileName::SplitPath(textctrlM->GetValue(), &path, 0, 0);
 
-    wxString filename = ::wxFileSelector(_("Select File"), path, 
-        wxEmptyString, wxEmptyString, _("All files (*.*)|*.*"), 0, 
+    wxString filename = ::wxFileSelector(_("Select File"), path,
+        wxEmptyString, wxEmptyString, _("All files (*.*)|*.*"), wxSAVE,
         ::wxGetTopLevelParent(textctrlM));
     if (!filename.IsEmpty())
         textctrlM->SetValue(filename);
@@ -801,13 +801,13 @@ void PrefDlgChooserSetting::chooseFile()
 //-----------------------------------------------------------------------------
 void PrefDlgChooserSetting::chooseFont()
 {
-   	wxFont font;
-	wxString fontdesc = textctrlM->GetValue();
-	if (!fontdesc.IsEmpty())
-		font.SetNativeFontInfo(fontdesc);
+    wxFont font;
+    wxString fontdesc = textctrlM->GetValue();
+    if (!fontdesc.IsEmpty())
+        font.SetNativeFontInfo(fontdesc);
     wxFont font2 = ::wxGetFontFromUser(::wxGetTopLevelParent(textctrlM), font);
-	if (font2.Ok())
-		textctrlM->SetValue(font2.GetNativeFontInfoDesc());
+    if (font2.Ok())
+        textctrlM->SetValue(font2.GetNativeFontInfoDesc());
 }
 //-----------------------------------------------------------------------------
 bool PrefDlgChooserSetting::createControl(bool WXUNUSED(ignoreerrors))
@@ -889,7 +889,7 @@ void PrefDlgChooserSetting::OnBrowseButton(wxCommandEvent& WXUNUSED(event))
 }
 //-----------------------------------------------------------------------------
 // PrefDlgSetting factory
-PrefDlgSetting* createPrefDlgSetting(wxPanel* page, const wxString& type, 
+PrefDlgSetting* createPrefDlgSetting(wxPanel* page, const wxString& type,
     PrefDlgSetting* parent)
 {
     if (type == wxT("checkbox"))
