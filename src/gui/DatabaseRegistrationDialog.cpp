@@ -282,7 +282,7 @@ END_EVENT_TABLE()
 void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxString path = ::wxFileSelector(_("Select database file"), wxT(""), wxT(""), wxT(""),
-        _("Firebird database files (*.fdb, *.gdb)|*.fdb;*.gdb|All files (*.*)|*.*"), 0, this);
+        _("Firebird database files (*.fdb, *.gdb)|*.fdb;*.gdb|All files (*.*)|*.*"), wxOPEN, this);
     if (!path.empty())
         text_ctrl_dbpath->SetValue(path);
 }

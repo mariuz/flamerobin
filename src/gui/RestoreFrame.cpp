@@ -283,7 +283,7 @@ void RestoreFrame::layoutControls()
     sizerMain->Add(panel_controls, 0, wxEXPAND);
     sizerMain->Add(text_ctrl_log, 1, wxEXPAND);
 
-	// show at least 3 lines of text since it is default size too
+    // show at least 3 lines of text since it is default size too
     sizerMain->SetItemMinSize(text_ctrl_log,
         -1, 3 * text_ctrl_filename->GetSize().GetHeight());
     SetSizerAndFit(sizerMain);
@@ -389,7 +389,7 @@ void RestoreFrame::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
     wxFileName origName(text_ctrl_filename->GetValue());
     wxString filename = ::wxFileSelector(_("Select Backup File"),
         origName.GetPath(), origName.GetName(), wxEmptyString,
-        _("All files (*.*)|*.*"), 0, this);
+        _("All files (*.*)|*.*"), wxOPEN, this);
     if (!filename.empty())
         text_ctrl_filename->SetValue(filename);
 }
