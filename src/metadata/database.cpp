@@ -380,13 +380,13 @@ wxString Database::getTableForIndex(wxString indexName)
         lastError().setMessage(_("System error."));
     }
 
-    ::wxMessageBox(lastError().getMessage(), 
+    ::wxMessageBox(lastError().getMessage(),
         _("Error while loading table for index."), wxOK | wxICON_WARNING);
     return wxT("");
 }
 //-----------------------------------------------------------------------------
 //! load list of objects of type "type" from database, and fill the DBH
-bool Database::loadObjects(NodeType type, IBPP::Transaction& tr1, 
+bool Database::loadObjects(NodeType type, IBPP::Transaction& tr1,
     ProgressIndicator* indicator)
 {
     switch (type)
@@ -577,7 +577,7 @@ bool Database::parseCommitedSql(wxString sql)
 {
     SqlStatement stm(sql, this);
     if (!stm.isDDL())
-        return true;	// false or true?
+        return true;    // false or true?
 
     // TODO: check that there are no unwanted side-effects to this
     // SubjectLocker locker(this);
@@ -596,7 +596,7 @@ bool Database::parseCommitedSql(wxString sql)
         stm.actionIs(actCREATE) || stm.actionIs(actALTER) || stm.actionIs(actSET)))
     {
         wxString tableName;
-        if (stm.actionIs(actCREATE))
+        if (stm.actionIs(actCREATE) || stm.actionIs(actALTER))
             tableName = getTableForIndex(stm.getName());
         else
             tableName = stm.getName();
@@ -638,7 +638,7 @@ bool Database::parseCommitedSql(wxString sql)
             g->loadValue(true);
         return true;
     }
-    
+
     if (stm.actionIs(actDROP))
     {
         dropObject(object);
@@ -684,7 +684,7 @@ bool Database::parseCommitedSql(wxString sql)
             // so we won't call this: loadObjects(ntDomain);
         }
     }
-    
+
     if (stm.actionIs(actALTER))
     {
         // TODO: this is a place where we would simply call virtual invalidate() function
@@ -715,16 +715,16 @@ bool Database::parseCommitedSql(wxString sql)
                     break;
                 }
             case ntDomain:
-				if (!dynamic_cast<Domain *>(object)->loadInfo())
-					success = false;
-				else	// notify all table columns with that domain
-				{
-					for (MetadataCollection<Table>::iterator it = tablesM.begin(); it != tablesM.end(); ++it)
-						for (MetadataCollection<Column>::iterator i2 = (*it).begin(); i2 != (*it).end(); ++i2)
-							if ((*i2).getSource() == stm.getName())
-								(*i2).notifyObservers();
-				}
-            	break;
+                if (!dynamic_cast<Domain *>(object)->loadInfo())
+                    success = false;
+                else    // notify all table columns with that domain
+                {
+                    for (MetadataCollection<Table>::iterator it = tablesM.begin(); it != tablesM.end(); ++it)
+                        for (MetadataCollection<Column>::iterator i2 = (*it).begin(); i2 != (*it).end(); ++i2)
+                            if ((*i2).getSource() == stm.getName())
+                                (*i2).notifyObservers();
+                }
+                break;
             default:
                 object->notifyObservers();
                 break;
@@ -766,8 +766,8 @@ bool Database::connect(wxString password, ProgressIndicator* indicator)
     {
         if (indicator)
             indicator->initProgressIndeterminate(wxT("Establishing connection..."));
-        databaseM = IBPP::DatabaseFactory("", wx2std(getConnectionString()), 
-            wx2std(getUsername()), wx2std(password), wx2std(getRole()), 
+        databaseM = IBPP::DatabaseFactory("", wx2std(getConnectionString()),
+            wx2std(getUsername()), wx2std(password), wx2std(getRole()),
             wx2std(getConnectionCharset()), "");
         databaseM->Connect();
         connectedM = true;
