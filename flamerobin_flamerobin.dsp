@@ -500,6 +500,10 @@ SOURCE=.\src\metadata\CreateDDLVisitor.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\CreateIndexDialog.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\config\DatabaseConfig.cpp
 # End Source File
 # Begin Source File
@@ -815,6 +819,10 @@ SOURCE=.\src\gui\ContextMenuMetadataItemVisitor.h
 # Begin Source File
 
 SOURCE=.\src\metadata\CreateDDLVisitor.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\CreateIndexDialog.h
 # End Source File
 # Begin Source File
 

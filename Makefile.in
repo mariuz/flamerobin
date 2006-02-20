@@ -85,10 +85,12 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_ContextMenuMetadataItemVisitor.o \
 	flamerobin_LogTextControl.o \
 	flamerobin_TextControl.o \
+	flamerobin_CreateIndexDialog.o \
 	flamerobin_DatabaseRegistrationDialog.o \
 	flamerobin_EventWatcherFrame.o \
 	flamerobin_ExecuteSqlFrame.o \
 	flamerobin_FieldPropertiesDialog.o \
+	flamerobin_FindDialog.o \
 	flamerobin_MainFrame.o \
 	flamerobin_MetadataItemPropertiesFrame.o \
 	flamerobin_MultilineEnterDialog.o \
@@ -97,11 +99,10 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_PrintableHtmlWindow.o \
 	flamerobin_ProgressDialog.o \
 	flamerobin_ReorderFieldsDialog.o \
-	flamerobin_TriggerWizardDialog.o \
 	flamerobin_RestoreFrame.o \
 	flamerobin_ServerRegistrationDialog.o \
 	flamerobin_SimpleHtmlFrame.o \
-	flamerobin_FindDialog.o \
+	flamerobin_TriggerWizardDialog.o \
 	flamerobin_images.o \
 	flamerobin_logger.o \
 	flamerobin_main.o \
@@ -373,6 +374,9 @@ flamerobin_LogTextControl.o: $(srcdir)/src/gui/controls/LogTextControl.cpp $(FLA
 flamerobin_TextControl.o: $(srcdir)/src/gui/controls/TextControl.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/controls/TextControl.cpp
 
+flamerobin_CreateIndexDialog.o: $(srcdir)/src/gui/CreateIndexDialog.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/CreateIndexDialog.cpp
+
 flamerobin_DatabaseRegistrationDialog.o: $(srcdir)/src/gui/DatabaseRegistrationDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/DatabaseRegistrationDialog.cpp
 
@@ -384,6 +388,9 @@ flamerobin_ExecuteSqlFrame.o: $(srcdir)/src/gui/ExecuteSqlFrame.cpp $(FLAMEROBIN
 
 flamerobin_FieldPropertiesDialog.o: $(srcdir)/src/gui/FieldPropertiesDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/FieldPropertiesDialog.cpp
+
+flamerobin_FindDialog.o: $(srcdir)/src/gui/FindDialog.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/FindDialog.cpp
 
 flamerobin_MainFrame.o: $(srcdir)/src/gui/MainFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/MainFrame.cpp
@@ -409,9 +416,6 @@ flamerobin_ProgressDialog.o: $(srcdir)/src/gui/ProgressDialog.cpp $(FLAMEROBIN_O
 flamerobin_ReorderFieldsDialog.o: $(srcdir)/src/gui/ReorderFieldsDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/ReorderFieldsDialog.cpp
 
-flamerobin_TriggerWizardDialog.o: $(srcdir)/src/gui/TriggerWizardDialog.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/TriggerWizardDialog.cpp
-
 flamerobin_RestoreFrame.o: $(srcdir)/src/gui/RestoreFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/RestoreFrame.cpp
 
@@ -421,8 +425,8 @@ flamerobin_ServerRegistrationDialog.o: $(srcdir)/src/gui/ServerRegistrationDialo
 flamerobin_SimpleHtmlFrame.o: $(srcdir)/src/gui/SimpleHtmlFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/SimpleHtmlFrame.cpp
 
-flamerobin_FindDialog.o: $(srcdir)/src/gui/FindDialog.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/FindDialog.cpp
+flamerobin_TriggerWizardDialog.o: $(srcdir)/src/gui/TriggerWizardDialog.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/TriggerWizardDialog.cpp
 
 flamerobin_images.o: $(srcdir)/src/images.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/images.cpp

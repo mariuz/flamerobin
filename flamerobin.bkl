@@ -283,18 +283,20 @@
         $(SOURCEDIR)/frtypes.h
         $(SOURCEDIR)/frutils.h
         $(SOURCEDIR)/frversion.h
+        $(SOURCEDIR)/gui/AdvancedMessageDialog.h
         $(SOURCEDIR)/gui/BackupFrame.h
         $(SOURCEDIR)/gui/BackupRestoreBaseFrame.h
         $(SOURCEDIR)/gui/BaseDialog.h
         $(SOURCEDIR)/gui/BaseFrame.h
-        $(SOURCEDIR)/gui/AdvancedMessageDialog.h
         $(SOURCEDIR)/gui/ContextMenuMetadataItemVisitor.h
         $(SOURCEDIR)/gui/controls/LogTextControl.h
         $(SOURCEDIR)/gui/controls/TextControl.h
+        $(SOURCEDIR)/gui/CreateIndexDialog.h
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.h
         $(SOURCEDIR)/gui/EventWatcherFrame.h
         $(SOURCEDIR)/gui/ExecuteSqlFrame.h
         $(SOURCEDIR)/gui/FieldPropertiesDialog.h
+        $(SOURCEDIR)/gui/FindDialog.h
         $(SOURCEDIR)/gui/MainFrame.h
         $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.h
         $(SOURCEDIR)/gui/MultilineEnterDialog.h
@@ -302,11 +304,10 @@
         $(SOURCEDIR)/gui/PrintableHtmlWindow.h
         $(SOURCEDIR)/gui/ProgressDialog.h
         $(SOURCEDIR)/gui/ReorderFieldsDialog.h
-        $(SOURCEDIR)/gui/TriggerWizardDialog.h
         $(SOURCEDIR)/gui/RestoreFrame.h
         $(SOURCEDIR)/gui/ServerRegistrationDialog.h
         $(SOURCEDIR)/gui/SimpleHtmlFrame.h
-        $(SOURCEDIR)/gui/FindDialog.h
+        $(SOURCEDIR)/gui/TriggerWizardDialog.h
         $(SOURCEDIR)/images.h
         $(SOURCEDIR)/logger.h
         $(SOURCEDIR)/main.h
@@ -381,10 +382,12 @@
         $(SOURCEDIR)/gui/ContextMenuMetadataItemVisitor.cpp
         $(SOURCEDIR)/gui/controls/LogTextControl.cpp
         $(SOURCEDIR)/gui/controls/TextControl.cpp
+        $(SOURCEDIR)/gui/CreateIndexDialog.cpp
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.cpp
         $(SOURCEDIR)/gui/EventWatcherFrame.cpp
         $(SOURCEDIR)/gui/ExecuteSqlFrame.cpp
         $(SOURCEDIR)/gui/FieldPropertiesDialog.cpp
+        $(SOURCEDIR)/gui/FindDialog.cpp
         $(SOURCEDIR)/gui/MainFrame.cpp
         $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.cpp
         $(SOURCEDIR)/gui/MultilineEnterDialog.cpp
@@ -393,11 +396,10 @@
         $(SOURCEDIR)/gui/PrintableHtmlWindow.cpp
         $(SOURCEDIR)/gui/ProgressDialog.cpp
         $(SOURCEDIR)/gui/ReorderFieldsDialog.cpp
-        $(SOURCEDIR)/gui/TriggerWizardDialog.cpp
         $(SOURCEDIR)/gui/RestoreFrame.cpp
         $(SOURCEDIR)/gui/ServerRegistrationDialog.cpp
         $(SOURCEDIR)/gui/SimpleHtmlFrame.cpp
-        $(SOURCEDIR)/gui/FindDialog.cpp
+        $(SOURCEDIR)/gui/TriggerWizardDialog.cpp
         $(SOURCEDIR)/images.cpp
         $(SOURCEDIR)/logger.cpp
         $(SOURCEDIR)/main.cpp
