@@ -235,7 +235,7 @@ bool TableIndicesHandler::handleURI(URI& uri)
         for (itIdx = indices->begin(); itIdx != indices->end(); ++itIdx)
         {
             sql += wxString::Format(wxT("SET STATISTICS INDEX %s;\n"),
-                (*itIdx).getQuotedName());
+                (*itIdx).getQuotedName().c_str());
         }
         frameCaption = _("Recompute All Indexes");
     }
