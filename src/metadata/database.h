@@ -105,7 +105,7 @@ public:
     void getCollections(std::vector<MetadataItem *>& temp);
 
     template<class T>
-    MetadataCollection<T>* getCollection(T* dummy)
+    MetadataCollection<T>* getCollection()
     {
         std::vector<MetadataItem *> temp;
         getCollections(temp);
