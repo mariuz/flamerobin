@@ -37,6 +37,7 @@
 
 #include <wx/datetime.h>
 #include <wx/file.h>
+#include <wx/filename.h>
 
 #include "config/DatabaseConfig.h"
 #include "frversion.h"
@@ -82,6 +83,11 @@ bool Logger::log2file(Config *cfg, const ExecutedStatement& st,
         for (int i=start; i < 100000; ++i) // dummy test for 100000
         {
             test.Printf(filename, i);
+            wxFileName fn(test);
+
+            if (!wxDirExists(fn.GetPath()))  // directory doesn't exist
+                return false;
+
             if (!wxFileExists(test))
             {
                 if (f.Open(test, wxFile::write))
