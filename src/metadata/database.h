@@ -117,6 +117,7 @@ public:
             if (p)
                 return p;
         }
+        return 0;
     }
 
     MetadataCollection<Generator>::const_iterator generatorsBegin();
