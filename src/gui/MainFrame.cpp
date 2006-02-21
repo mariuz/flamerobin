@@ -564,6 +564,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
     wxSafeYield();
     tree_ctrl_1->Thaw();
 
+    wxTheClipboard->Flush();
     BaseFrame::OnClose(event);
 
     FR_CATCH
@@ -1187,7 +1188,10 @@ bool MainFrame::connect(bool warn)
             }
         }
     }
+
     updateStatusbarText();
+    Raise();
+    Update();
     return true;
 }
 //-----------------------------------------------------------------------------
