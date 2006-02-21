@@ -473,7 +473,6 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
     if (!m)
         return;
 
-    bool expanded = tree_ctrl_1->IsExpanded(item);
     NodeType nt = m->getType();
 
     enum { showProperties = 0, showColumnInfo };
@@ -515,24 +514,22 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             case ntRole:
                 frameManager().showMetadataPropertyFrame(this, m, true);
                 break;
-            #ifdef __WXMSW__
             default:
-                return;
-            #endif
+                break;
         };
     }
 
-    #ifdef __WXGTK__
-    if (expanded)                       // on GTK the tree control does nothing by itself, so we have to tell it
-        tree_ctrl_1->Collapse(item);
-    else
-        tree_ctrl_1->Expand(item);
-    #endif
-
-    #ifdef __WXMSW__
-    if (!expanded)                      // on MSW the tree control toggles the branch automatically
-        tree_ctrl_1->Collapse(item);    // so an ugly hack to trick it.
-    #endif
+#ifdef __WXGTK__
+    bool toggle = true;
+    config().getValue(wxT("ToggleNodeOnTreeActivate"), toggle);
+    if (toggle)
+    {
+        if (tree_ctrl_1->IsExpanded(item))
+            tree_ctrl_1->Collapse(item);
+        else
+            tree_ctrl_1->Expand(item);
+    }
+#endif
 
     FR_CATCH
 }
@@ -1173,9 +1170,6 @@ bool MainFrame::connect(bool warn)
 
     if (db->isConnected())
     {
-        wxTreeItemId id = tree_ctrl_1->GetSelection();
-        tree_ctrl_1->Expand(id);
-
         if (db->usesDifferentConnectionCharset())
         {
             DatabaseConfig dc(db);
