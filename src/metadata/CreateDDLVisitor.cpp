@@ -123,7 +123,8 @@ void CreateDDLVisitor::visit(Column& c)
 template <class T>
 void iterateit(CreateDDLVisitor* v, Database& db, ProgressIndicator* pi)
 {
-    MetadataCollection<T>* p = db.getCollection<T>();
+    T* dummy = 0;
+    MetadataCollection<T>* p = db.getCollection(dummy);
     pi->setProgressMessage(wxT("Extracting ") + p->getPrintableName());
     pi->stepProgress();
     pi->initProgress(wxEmptyString, p->getChildrenCount(), 0, 2);
