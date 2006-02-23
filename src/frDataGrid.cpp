@@ -74,6 +74,7 @@ DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
         if (f.Ok())
             SetLabelFont(f);
     }
+    SetScrollLineY(GetDefaultRowSize());
 }
 //-----------------------------------------------------------------------------
 DataGrid::~DataGrid()
