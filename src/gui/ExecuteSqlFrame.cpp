@@ -300,10 +300,13 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
     m.Append(ID_MENU_SELECT_ALL,       _("Select &All"));
     m.Append(ID_MENU_EXECUTE_SELECTED, _("E&xecute selected"));
 
-    int slen = GetSelectionStart() - GetSelectionEnd();
+    int slen = GetSelectionEnd() - GetSelectionStart();
     if (slen && slen < 50)     // something (small) is selected
     {
         wxString sel = GetSelectedText().Strip();
+        size_t p = sel.find_first_of(wxT("\n\r\t"));
+        if (p != wxString::npos)
+            sel.Remove(p);
         m.Append(ID_MENU_FIND_SELECTED, _("S&how properties for ") + sel);
     }
 
@@ -317,7 +320,7 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
     // disable stuff
     m.Enable(ID_MENU_UNDO, CanUndo());
     m.Enable(ID_MENU_REDO, CanRedo());
-    if (GetSelectionStart() == GetSelectionEnd())        // nothing is selected
+    if (slen == 0)        // nothing is selected
     {
         m.Enable(ID_MENU_CUT,              false);
         m.Enable(ID_MENU_COPY,             false);
