@@ -54,7 +54,6 @@ DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
 {
     EnableEditing(false);
     SetColLabelValue(0, wxT(""));
-    SetColLabelSize(GetDefaultRowSize());
     SetRowLabelSize(50);
     DisableDragRowSize();
     SetGridLineColour(*wxLIGHT_GREY);
@@ -74,7 +73,7 @@ DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
         if (f.Ok())
             SetLabelFont(f);
     }
-    SetScrollLineY(GetDefaultRowSize());
+    updateRowHeights();
 }
 //-----------------------------------------------------------------------------
 DataGrid::~DataGrid()
@@ -138,6 +137,28 @@ void DataGrid::showPopMenu(wxPoint cursorPos)
     m.Append(ID_MENU_LABELFONT, _("Set header font"));
     m.Append(ID_MENU_CELLFONT, _("Set cell font"));
     PopupMenu(&m, cursorPos);
+}
+//-----------------------------------------------------------------------------
+void DataGrid::updateRowHeights()
+{
+    // HACK alert: this is taken straight from wxWidgets grid.cpp...
+#if defined(__WXMOTIF__) || defined(__WXGTK__)
+    int extraHeight = 8;
+#else
+    int extraHeight = 4;
+#endif
+
+    wxScreenDC dc;
+    // adjust height of grid header row (extra 2 pixels for border)
+    dc.SetFont(GetLabelFont());
+    SetColLabelSize(dc.GetCharHeight() + extraHeight + 2);
+        
+    // adjust height of rows, and make grid scroll by that amount
+    dc.SetFont(GetDefaultCellFont());
+    int h = dc.GetCharHeight() + extraHeight;
+    SetRowMinimalAcceptableHeight(h);
+    SetDefaultRowSize(h, true);
+    SetScrollLineY(h);
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(DataGrid, wxGrid)
@@ -222,6 +243,8 @@ void DataGrid::OnMenuCellFont(wxCommandEvent& WXUNUSED(event))
     if (f.Ok())
     {
         SetDefaultCellFont(f);
+        config().setValue(wxT("DataGridFont"), f.GetNativeFontInfoDesc());
+        updateRowHeights();
         ForceRefresh();
     }
 }
@@ -318,6 +341,9 @@ void DataGrid::OnMenuLabelFont(wxCommandEvent& WXUNUSED(event))
     if (f.Ok())
     {
         SetLabelFont(f);
+        config().setValue(wxT("DataGridHeaderFont"),
+            f.GetNativeFontInfoDesc());
+        updateRowHeights();
         AutoSizeColumns();
         ForceRefresh();
     }
