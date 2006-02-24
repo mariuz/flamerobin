@@ -50,6 +50,7 @@
 #include "framemanager.h"
 #include "frutils.h"
 #include "gui/MetadataItemPropertiesFrame.h"
+#include "gui/ProgressDialog.h"
 #include "images.h"
 #include "metadata/CreateDDLVisitor.h"
 #include "metadata/database.h"
@@ -556,7 +557,9 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
 
     else if (cmd == wxT("object_ddl"))
     {
-        CreateDDLVisitor cdv;
+        ProgressDialog pd(this, _("Extracting DDL Definitions"), 2);
+
+        CreateDDLVisitor cdv(&pd);
         object->acceptVisitor(&cdv);
         htmlpage += escapeHtmlChars(cdv.getSql(), false);
     }

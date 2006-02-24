@@ -59,9 +59,9 @@ void recursiveLayout(wxSizer* sizer)
 }
 //-----------------------------------------------------------------------------
 // ProgressDialog
-ProgressDialog::ProgressDialog(const wxString& title, unsigned int levelCount, 
-        const wxPoint& pos, const wxSize& size)
-    : BaseDialog(0, wxID_ANY, title, pos, size, wxDEFAULT_DIALOG_STYLE)
+ProgressDialog::ProgressDialog(wxWindow* parent, const wxString& title, 
+        unsigned int levelCount, const wxPoint& pos, const wxSize& size)
+    : BaseDialog(parent, wxID_ANY, title, pos, size, wxDEFAULT_DIALOG_STYLE)
 {
     canceledM = false;
     levelCountM = levelCount;

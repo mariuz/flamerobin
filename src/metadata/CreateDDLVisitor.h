@@ -28,6 +28,7 @@
 #ifndef FR_CREATEDDLVISITOR_H
 #define FR_CREATEDDLVISITOR_H
 
+#include "core/ProgressIndicator.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
 #include "metadata/domain.h"
@@ -53,8 +54,10 @@ private:
     wxString preSqlM;   // used for scripts to create entire database
     wxString postSqlM;  // sometimes it's the same as sqlM, sometimes not
 
+    ProgressIndicator* progressIndicatorM;
+
 public:
-    CreateDDLVisitor();
+    CreateDDLVisitor(ProgressIndicator* progressIndicator = 0);
     virtual ~CreateDDLVisitor();
     wxString getSql() const;
     wxString getPrefixSql() const;

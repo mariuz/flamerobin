@@ -58,8 +58,8 @@ private:
     void setGaugeIndeterminate(wxGauge* gauge, bool indeterminate);
 
 public:
-    ProgressDialog(const wxString& title, unsigned int levelCount = 1,
-        const wxPoint& pos = wxDefaultPosition,
+    ProgressDialog(wxWindow* parent, const wxString& title, 
+        unsigned int levelCount = 1, const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize);
     ~ProgressDialog();
 

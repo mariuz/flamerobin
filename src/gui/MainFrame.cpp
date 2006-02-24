@@ -1160,7 +1160,7 @@ bool MainFrame::connect(bool warn)
 
     wxString caption(wxString::Format(wxT("Connecting with Database \"%s\""), 
         db->getName_().c_str()));
-    ProgressDialog pd(caption, 1);
+    ProgressDialog pd(this, caption, 1);
 
     if (!db->connect(pass, &pd))
     {

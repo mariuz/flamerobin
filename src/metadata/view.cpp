@@ -262,7 +262,14 @@ wxString View::getRebuildSql()
         for (std::vector<Trigger *>::iterator it = trigs.begin();
             it != trigs.end(); ++it)
         {
-            CreateDDLVisitor cdv;
+            // TODO: this would need a progress indicator that is created
+            //       outside of the loop, otherwise several dialogs would be 
+            //       created and destroyed
+            //       besides: this introduces GUI stuff into metadata, so
+            //       we first need a global facility to create an instance
+            //       of ProgressIndicator
+            //       for the time being: don't use a progress indicator
+            CreateDDLVisitor cdv(0);
             (*it)->acceptVisitor(&cdv);
             triggers += cdv.getSql() + wxT("\n");
         }
