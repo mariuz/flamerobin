@@ -595,11 +595,7 @@ bool Database::parseCommitedSql(wxString sql)
     if (stm.getObjectType() == ntIndex && (
         stm.actionIs(actCREATE) || stm.actionIs(actALTER) || stm.actionIs(actSET)))
     {
-        wxString tableName;
-        if (stm.actionIs(actCREATE) || stm.actionIs(actALTER))
-            tableName = getTableForIndex(stm.getName());
-        else
-            tableName = stm.getName();
+        wxString tableName = getTableForIndex(stm.getName());
         MetadataItem* m = findByNameAndType(ntTable, tableName);
         if (Table* t = dynamic_cast<Table*>(m))
             t->invalidateIndices();
