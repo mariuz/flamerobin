@@ -98,7 +98,8 @@ public:
     // query parsing and execution
     void executeAllStatements(bool autoExecute = false);
     void prepareAndExecute(bool prepareOnly = false);
-    bool parseStatements(const wxString& statements, bool autoExecute = false, bool prepareOnly = false);
+    bool parseStatements(const wxString& statements, bool autoExecute = false,
+        bool prepareOnly = false, int selectionOffset = 0);
     bool execute(wxString sql, bool prepareOnly = false);
     void setSql(wxString sql);
 

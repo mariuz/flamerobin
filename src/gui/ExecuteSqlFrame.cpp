@@ -389,7 +389,7 @@ void SqlEditor::OnMenuExecuteSelected(wxCommandEvent& WXUNUSED(event))
     if (config().get(wxT("TreatAsSingleStatement"), false))
         frameM->execute(GetSelectedText());
     else
-        frameM->parseStatements(GetSelectedText());
+        frameM->parseStatements(GetSelectedText(), false, false, GetSelectionStart());
 }
 //-----------------------------------------------------------------------------
 void SqlEditor::OnMenuFind(wxCommandEvent& WXUNUSED(event))
@@ -998,7 +998,7 @@ void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
         if (single)
             ok = execute(styled_text_ctrl_sql->GetSelectedText(), prepareOnly);
         else
-            ok = parseStatements(styled_text_ctrl_sql->GetSelectedText(), false, prepareOnly);
+            ok = parseStatements(styled_text_ctrl_sql->GetSelectedText(), false, prepareOnly, styled_text_ctrl_sql->GetSelectionStart());
     }
     else
         ok = parseStatements(styled_text_ctrl_sql->GetText(), false, prepareOnly);
@@ -1030,7 +1030,8 @@ void ExecuteSqlFrame::executeAllStatements(bool closeWhenDone)
 //-----------------------------------------------------------------------------
 //! Parses all sql statements in STC
 //! when autoexecute is TRUE, program just waits user to click Commit/Rollback and closes window
-bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhenDone, bool prepareOnly)
+bool ExecuteSqlFrame::parseStatements(const wxString& statements,
+    bool closeWhenDone, bool prepareOnly, int selectionOffset)
 {
     wxBusyCursor cr;
     styled_text_ctrl_stats->Clear();
@@ -1131,10 +1132,10 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements, bool closeWhen
                 if (!execute(sql, prepareOnly))
                 {
                     styled_text_ctrl_sql->centerCaret(true);
-                    styled_text_ctrl_sql->GotoPos((int)lastpos);
-                    styled_text_ctrl_sql->GotoPos((int)oldpos);
-                    styled_text_ctrl_sql->SetSelectionStart((int)oldpos);        // select the text in STC
-                    styled_text_ctrl_sql->SetSelectionEnd((int)lastpos);        // that failed to execute
+                    styled_text_ctrl_sql->GotoPos(selectionOffset+(int)lastpos);
+                    styled_text_ctrl_sql->GotoPos(selectionOffset+(int)oldpos);
+                    styled_text_ctrl_sql->SetSelectionStart(selectionOffset+(int)oldpos);        // select the text in STC
+                    styled_text_ctrl_sql->SetSelectionEnd(selectionOffset+(int)lastpos);        // that failed to execute
                     styled_text_ctrl_sql->centerCaret(false);
                     styled_text_ctrl_sql->SetFocus();
                     return false;
