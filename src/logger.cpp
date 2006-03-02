@@ -64,9 +64,12 @@ bool Logger::log2file(Config *cfg, const ExecutedStatement& st,
     cfg->getValue(wxT("LogToFileType"), logToFileType);
 
     wxString sql = st.statement;
-    if (logToFileType == singleFile)   // add term. to statement if missing
+    bool logSetTerm = false;
+    cfg->getValue(wxT("LogSetTerm"), logSetTerm);
+    // add term. to statement if missing
+    if (logToFileType == singleFile || logSetTerm && st.terminator != wxT(";"))
     {
-        sql.erase(sql.find_last_not_of(wxT(" \n\t\r")) + 1);     // trim
+        sql.Trim();
         wxString::size_type pos = sql.rfind(st.terminator);
         if (pos == wxString::npos || pos < sql.length() - st.terminator.length())
             sql += st.terminator;
@@ -116,8 +119,6 @@ bool Logger::log2file(Config *cfg, const ExecutedStatement& st,
     }
     else
         f.Write(wxT("\n"));
-    bool logSetTerm = false;
-    cfg->getValue(wxT("LogSetTerm"), logSetTerm);
     if (logSetTerm && st.terminator != wxT(";"))
         f.Write(wxT("SET TERM ") + st.terminator + wxT(" ;\n"));
     f.Write(sql);
