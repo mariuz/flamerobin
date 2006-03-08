@@ -305,6 +305,8 @@ wxString Procedure::getAlterSql(bool full)
     if (!getSource(source))
         return lastError().getMessage();
 
+    Database *db = getDatabase();
+
     wxString sql = wxT("SET TERM ^ ;\nALTER PROCEDURE ") + getQuotedName();
     if (!parametersM.empty())
     {
@@ -313,6 +315,7 @@ wxString Procedure::getAlterSql(bool full)
             parametersM.begin(); it != parametersM.end(); ++it)
         {
             Domain *dm = (*it).getDomain();
+            wxString charset = dm->getCharset();
             if ((*it).getParameterType() == ptInput)
             {
                 if (input.empty())
@@ -321,7 +324,7 @@ wxString Procedure::getAlterSql(bool full)
                     input += wxT(",\n    ");
                 input += (*it).getQuotedName() + wxT(" ") +
                     dm->getDatatypeAsString();
-                if (!dm->getCharset().IsEmpty())
+                if (!charset.IsEmpty() && charset != db->getDatabaseCharset())
                     input += wxT(" CHARACTER SET ") + dm->getCharset();
             }
             else
@@ -332,7 +335,7 @@ wxString Procedure::getAlterSql(bool full)
                     output += wxT(",\n    ");
                 output += (*it).getQuotedName() + wxT(" ") +
                     dm->getDatatypeAsString();
-                if (!dm->getCharset().IsEmpty())
+                if (!charset.IsEmpty() && charset != db->getDatabaseCharset())
                     output += wxT(" CHARACTER SET ") + dm->getCharset();
             }
         }
