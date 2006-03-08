@@ -433,7 +433,7 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     if (!choice_pagesize->GetStringSelection().ToULong(&pagesize))
         pagesize = 0;
 
-    RestoreThread* thread = new RestoreThread(this, serverM->getHostname(),
+    RestoreThread* thread = new RestoreThread(this, serverM->getConnectionString(),
         databaseM->getUsername(), password, text_ctrl_filename->GetValue(),
         databaseM->getPath(), pagesize, (IBPP::BRF)flags);
     startThread(thread);
