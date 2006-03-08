@@ -400,7 +400,7 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     if (checkbox_extern->IsChecked())
         flags |= (int)IBPP::brConvertExtTables;
 
-    BackupThread* thread = new BackupThread(this, serverM->getHostname(),
+    BackupThread* thread = new BackupThread(this, serverM->getConnectionString(),
         databaseM->getUsername(), password, databaseM->getPath(),
         text_ctrl_filename->GetValue(), (IBPP::BRF)flags);
     startThread(thread);
