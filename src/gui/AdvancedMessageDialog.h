@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Michael Hieke
 */
 
 #ifndef FR_ADVANCEDMESSAGEDIALOG_H
@@ -29,6 +29,7 @@
 #include <wx/wx.h>
 #include <vector>
 #include <utility>
+#include "gui/BaseDialog.h"
 //----------------------------------------------------------------------------
 class AdvancedMessageDialogButtons
 {
@@ -66,29 +67,27 @@ private:
 };
 //----------------------------------------------------------------------------
 // don't create instances of this class, use the AdvancedMessageBox function
-class AdvancedMessageDialog: public wxDialog
+class AdvancedMessageDialog: public BaseDialog
 {
 protected:
     wxString configKeyNameM;
-    wxCheckBox *checkBoxM;
+    wxCheckBox* checkBoxM;
 
 public:
-    bool dontShowAgain() const;
-
-    void OnButtonClick(wxCommandEvent& event);
-
     AdvancedMessageDialog(wxWindow* parent, const wxString& message,
         const wxString& caption, int style = 0,
-        AdvancedMessageDialogButtons *buttons = 0,
+        AdvancedMessageDialogButtons* buttons = 0,
         const wxString& name = wxEmptyString);
 
-    //DECLARE_EVENT_TABLE()
+    bool getDontShowAgain() const;
+
+    void OnButtonClick(wxCommandEvent& event);
 };
 //----------------------------------------------------------------------------
 // you can provide regular buttons in "style" parameter,
 // just like in wxMessageBox
 int AdvancedMessageBox(const wxString& message, const wxString& caption,
-    int style = 0, AdvancedMessageDialogButtons *buttons = 0,
+    int style = 0, AdvancedMessageDialogButtons* buttons = 0,
     wxWindow* parent = 0, const wxString& keyname = wxEmptyString);
 //----------------------------------------------------------------------------
 #endif

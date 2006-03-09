@@ -20,7 +20,7 @@
 
   $Id$
 
-  Contributor(s):
+  Contributor(s): Michael Hieke
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -37,61 +37,31 @@
 #endif
 //----------------------------------------------------------------------------
 #include <wx/artprov.h>
-#include <vector>
-#include <utility>
+#include <wx/display.h>
+
 #include "config/Config.h"
-#include "AdvancedMessageDialog.h"
+#include "gui/AdvancedMessageDialog.h"
+#include "styleguide.h"
 //----------------------------------------------------------------------------
 AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent,
-    const wxString& message, const wxString& caption, int style,
-    AdvancedMessageDialogButtons* buttons, const wxString& name)
-    :wxDialog(parent, -1, caption, wxDefaultPosition, wxDefaultSize,
-     wxCAPTION)
+        const wxString& message, const wxString& caption, int style,
+        AdvancedMessageDialogButtons* buttons, const wxString& name)
+    : BaseDialog(parent, wxID_ANY, caption, wxDefaultPosition, wxDefaultSize,
+        wxDEFAULT_DIALOG_STYLE) // wxCAPTION)
 {
-    wxBoxSizer *bSizer1 = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer *btnSizer = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
-
-    // get the text size, so we can determine the minimal textctrl size
-    wxScreenDC dc;
-    wxCoord w, h, dw, dh;
-    dc.GetMultiLineTextExtent(message, &w, &h);
-    ::wxDisplaySize(&dw, &dh);      // I hate dialogs that go off the screen
-    if (w > dw*0.8)                 // This may happen if we decide to
-        w = dw*0.8;                 // print the backtrace in case of crash
-    if (h > dh*0.8)                 // and similar stuff with a lot of text
-        h = dh*0.8;
-
-    wxTextCtrl *messageM = new wxTextCtrl(this, -1, message,
-        wxDefaultPosition, wxSize(w, h), wxTE_MULTILINE|wxTE_READONLY|
-        wxTE_RICH|wxTE_AUTO_URL|wxNO_BORDER|wxTE_NO_VSCROLL);
-    messageM->SetOwnBackgroundColour(GetBackgroundColour());
-    messageM->SetInsertionPointEnd();
-
-    // setup the icon
-    wxArtID iconid = wxART_MISSING_IMAGE;
+    // setup the icon, default to wxICON_INFORMATION if no other was given
+    wxArtID iconid = wxART_INFORMATION;
     if ((style & wxICON_QUESTION) == wxICON_QUESTION)
         iconid = wxART_QUESTION;
     else if ((style & wxICON_WARNING) == wxICON_WARNING)
         iconid = wxART_WARNING;
     else if ((style & wxICON_ERROR) == wxICON_ERROR)
         iconid = wxART_ERROR;
-    else if ((style & wxICON_INFORMATION) == wxICON_INFORMATION)
-        iconid = wxART_INFORMATION;
-    if (iconid != wxART_MISSING_IMAGE)
-    {
-        wxStaticBitmap* sb = new wxStaticBitmap(this, -1,
-            wxArtProvider::GetBitmap(iconid, wxART_MESSAGE_BOX));
-        topSizer->Add(sb, 0, wxALL, 15);
-    }
 
-    topSizer->Add(messageM, 1, wxALL|wxEXPAND, 15);
-    bSizer1->Add(topSizer, 0, wxEXPAND, 5);
-
-    // add buttons set in "style" to the list
-    AdvancedMessageDialogButtons temp;
+    // setup dialog buttons: add buttons set in "style" to list
+    AdvancedMessageDialogButtons tempButtons;
     if (!buttons)
-        buttons = &temp;
+        buttons = &tempButtons;
     if ((style & wxYES_NO) == wxYES_NO)
     {
         buttons->add(wxYES, _("Yes"));
@@ -101,44 +71,63 @@ AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent,
         buttons->add(wxOK, _("OK"));
     if ((style & wxCANCEL) == wxCANCEL)
         buttons->add(wxCANCEL, _("Cancel"));
+    if (buttons->size() == 0)
+        buttons->add(wxOK, _("OK"));
 
-    // create buttons
+    // create controls and sizers
+    wxSizer* sizerControls = new wxBoxSizer(wxHORIZONTAL);
+    wxStaticBitmap* bmp = new wxStaticBitmap(getControlsPanel(), wxID_ANY,
+        wxArtProvider::GetBitmap(iconid, wxART_MESSAGE_BOX));
+    sizerControls->Add(bmp, 0, wxALIGN_TOP);
+    // TODO: get the spacing right for all toolkits
+    sizerControls->AddSpacer(
+        2 * styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
+
+    wxSizer* sizerText = new wxBoxSizer(wxVERTICAL);
+    wxStaticText* text = new wxStaticText(getControlsPanel(), wxID_ANY,
+        message);
+    sizerText->Add(text);
+
+    if (!name.IsEmpty())
+    {
+        checkBoxM = new wxCheckBox(getControlsPanel(), wxID_ANY,
+            (buttons->size() > 1) ? _("Don't ask again") : _("Don't show again"));
+        sizerText->AddSpacer(styleguide().getUnrelatedControlMargin(wxVERTICAL));
+        sizerText->Add(checkBoxM, 0, wxEXPAND);
+    }
+    sizerControls->Add(sizerText);
+
+    // create buttons and button sizer -- BIG TODO
+    wxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
+    sizerButtons->AddStretchSpacer(1);
     wxButton* defaultBtn = 0;
     for (AdvancedMessageDialogButtons::const_iterator it = buttons->begin();
         it != buttons->end(); ++it)
     {
-        wxButton *b = new wxButton(this, (*it).first, (*it).second);
-        if (!defaultBtn)
-            defaultBtn = b;
-        btnSizer->Add(b, 0, wxALL, 5);
+        wxButton* btn = new wxButton(getControlsPanel(), (*it).first, (*it).second);
+        if (defaultBtn)
+            sizerButtons->AddSpacer(styleguide().getBetweenButtonsMargin(wxHORIZONTAL));
+        else
+            defaultBtn = btn;
+        sizerButtons->Add(btn);
         Connect((*it).first, wxEVT_COMMAND_BUTTON_CLICKED,
             wxCommandEventHandler(AdvancedMessageDialog::OnButtonClick));
     }
 
-    bSizer1->Add(btnSizer, 0, wxALIGN_RIGHT, 5);
+    layoutSizers(sizerControls, sizerButtons);
 
-    if (!name.IsEmpty())
-    {
-        checkBoxM = new wxCheckBox(this, -1, buttons->size() > 1 ?
-            _("Don't ask again") : _("Don't show again"));
-        bSizer1->Add(checkBoxM, 0, wxALL|wxEXPAND, 5);
-    }
-
-    SetSizer(bSizer1);
-    bSizer1->Fit(this);
-    SetAutoLayout(true);
-    Layout();
-    CentreOnParent();
     if (defaultBtn)
+    {
         defaultBtn->SetDefault();
+        defaultBtn->SetFocus();
+    }
 }
 //----------------------------------------------------------------------------
-bool AdvancedMessageDialog::dontShowAgain() const
+bool AdvancedMessageDialog::getDontShowAgain() const
 {
-    if (!checkBoxM)
-        return true;
-    else
+    if (checkBoxM)
         return checkBoxM->IsChecked();
+    return true;
 }
 //----------------------------------------------------------------------------
 void AdvancedMessageDialog::OnButtonClick(wxCommandEvent& event)
@@ -153,12 +142,15 @@ int AdvancedMessageBox(const wxString& message,  const wxString& caption,
     int value;
     if (config().getValue(keyname, value))
         return value;
+
+    if (!parent)
+        parent = wxTheApp->GetTopWindow();
     AdvancedMessageDialog adm(parent, message, caption, style, buttons,
         keyname);
     value = adm.ShowModal();
     // Cancel means: cancel action, so it is not treated like a regular
     // "choice", but rather giving up on it (so, checkBox is ignored)
-    if (!keyname.IsEmpty() && adm.dontShowAgain() && value != wxCANCEL)
+    if (!keyname.IsEmpty() && adm.getDontShowAgain() && value != wxCANCEL)
         config().setValue(keyname, value);
     return value;
 }

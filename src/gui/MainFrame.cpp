@@ -545,7 +545,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
     btns.add(wxOK, _("E&xit"));
     btns.add(wxCANCEL, _("&Cancel"));
     if (event.CanVeto() && wxCANCEL ==
-        AdvancedMessageBox(_("Are you sure you wish to exit?"),
+        AdvancedMessageBox(_("Do you really want to quit FlameRobin?\n\nAll uncommitted transactions will be rolled back,\nand any changes will be lost."),
         wxT("FlameRobin"), wxICON_QUESTION, &btns, 0,
         wxT("DIALOG_ConfirmQuit")))
     {
@@ -1678,7 +1678,12 @@ void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
         return;
     if (!d->isConnected())
     {
-        if (wxYES == ::wxMessageBox(_("Do you want to connect?"), _("Not connected."), wxYES_NO | wxICON_QUESTION ))
+        AdvancedMessageDialogButtons btns;
+        btns.add(wxOK, _("C&onnect"));
+        btns.add(wxCANCEL, _("&Cancel"));
+        if (wxOK == AdvancedMessageBox(_("The database is not connected. Do you want to connect?"),
+            wxT("FlameRobin"), wxICON_QUESTION, &btns, 0, 
+            wxT("DIALOG_ConfirmConnectForQuery")))
         {
             connect(false);
             if (!d->isConnected())
