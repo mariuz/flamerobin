@@ -36,8 +36,8 @@
     #include "wx/wx.h"
 #endif
 
-#include <wx/progdlg.h>
 #include <wx/clipbrd.h>
+#include <wx/tokenzr.h>
 
 #include "config/Config.h"
 #include "config/DatabaseConfig.h"
@@ -599,6 +599,15 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
     wxString msg;
     msg.Printf(_("FlameRobin %d.%d.%d"),
         FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS);
+
+    // TODO: let a subversion commit script directly write the revision number
+    // for now: extract revision number from string "$Rev: NNNN "
+    wxStringTokenizer tknzr(wxT(FR_VERSION_SVN));
+    tknzr.NextToken();
+    unsigned long revision;
+    if (wxString(tknzr.GetNextToken()).ToULong(&revision))
+        msg += wxString::Format(wxT(".%u"), revision);
+
 #if wxUSE_UNICODE
     msg += wxT(" Unicode");
 #endif
