@@ -130,10 +130,11 @@ public:
     void clear();               // sets all values to empty wxString
     bool isConnected() const;
     bool connect(wxString password, ProgressIndicator* indicator = 0);
-    bool disconnect();
+    bool disconnect(bool onlyDBH = false);
     bool reconnect() const;
     void prepareTemporaryCredentials();
     void resetCredentials();
+    bool drop();
 
     wxString loadDomainNameForColumn(wxString table, wxString field);
     Domain* loadMissingDomain(wxString name);

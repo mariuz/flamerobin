@@ -70,6 +70,7 @@ void ContextMenuMetadataItemVisitor::visit(Database&)
     menuM->AppendSeparator();
     menuM->Append(myTreeCtrl::Menu_Backup, _("&Backup database..."));
     menuM->Append(myTreeCtrl::Menu_Restore, _("Rest&ore database..."));
+    menuM->Append(myTreeCtrl::Menu_DropDatabase, _("Drop database"));
     menuM->AppendSeparator();
     menuM->Append(myTreeCtrl::Menu_DatabasePreferences, _("Database &preferences..."));
 }
@@ -117,7 +118,7 @@ void ContextMenuMetadataItemVisitor::visit(Procedure&)
 {
     menuM->Append(myTreeCtrl::Menu_ExecuteProcedure, _("&Execute..."));
     addSelectMenu(false);       // false = not a table
-    addRegularObjectMenu(true);	// true = add Alter menu
+    addRegularObjectMenu(true); // true = add Alter menu
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visit(Role&)
@@ -158,13 +159,13 @@ void ContextMenuMetadataItemVisitor::visit(Table&)
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visit(Trigger&)
 {
-    addRegularObjectMenu(true);	// true = add Alter menu
+    addRegularObjectMenu(true); // true = add Alter menu
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visit(View&)
 {
-    addSelectMenu(false);    	// false = not a table
-    addRegularObjectMenu(true);	// true = add Alter menu
+    addSelectMenu(false);       // false = not a table
+    addRegularObjectMenu(true); // true = add Alter menu
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::addSelectMenu(bool isTable)
@@ -184,7 +185,7 @@ void ContextMenuMetadataItemVisitor::addSelectMenu(bool isTable)
 void ContextMenuMetadataItemVisitor::addRegularObjectMenu(bool alter)
 {
     if (alter)
-	    menuM->Append(myTreeCtrl::Menu_AlterObject, _("&Alter..."));
+        menuM->Append(myTreeCtrl::Menu_AlterObject, _("&Alter..."));
     menuM->Append(myTreeCtrl::Menu_DropObject, _("Dr&op..."));
     menuM->Append(myTreeCtrl::Menu_ObjectProperties, _("Show P&roperties"));
 }

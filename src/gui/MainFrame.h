@@ -52,6 +52,7 @@ public:
     void OnMenuRegisterDatabase(wxCommandEvent& event);
     void OnMenuDatabaseRegistrationInfo(wxCommandEvent& event);
     void OnMenuCreateDatabase(wxCommandEvent& event);
+    void OnMenuDropDatabase(wxCommandEvent& event);
     void OnMenuRestoreIntoNewDatabase(wxCommandEvent& event);
     void OnMenuManageUsers(wxCommandEvent& event);
     void OnMenuRestartServer(wxCommandEvent& event);
@@ -133,7 +134,7 @@ public:
 private:
     bool connect(bool warn);
     void showGeneratorValue(Generator* g);
-	void updateStatusbarText();
+    void updateStatusbarText();
 
     void showDocsHtmlFile(const wxString& fileName);
 

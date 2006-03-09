@@ -329,6 +329,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_UPDATE_UI(myTreeCtrl::Menu_Disconnect, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_MENU(myTreeCtrl::Menu_Reconnect, MainFrame::OnMenuReconnect)
     EVT_UPDATE_UI(myTreeCtrl::Menu_Reconnect, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_MENU(myTreeCtrl::Menu_DropDatabase, MainFrame::OnMenuDropDatabase)
+    EVT_UPDATE_UI(myTreeCtrl::Menu_DropDatabase, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_MENU(myTreeCtrl::Menu_Query, MainFrame::OnMenuQuery)
     EVT_UPDATE_UI(myTreeCtrl::Menu_Query, MainFrame::OnMenuUpdateIfDatabaseSelected)
     EVT_UPDATE_UI(myTreeCtrl::Menu_NewObject, MainFrame::OnMenuUpdateIfDatabaseConnected)
@@ -349,8 +351,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 
     EVT_MENU(myTreeCtrl::Menu_CreateObject, MainFrame::OnMenuCreateObject)
     EVT_MENU(myTreeCtrl::Menu_ObjectProperties, MainFrame::OnMenuObjectProperties)
-    EVT_MENU(myTreeCtrl::Menu_DropObject, MainFrame::OnMenuDropObject)
     EVT_MENU(myTreeCtrl::Menu_AlterObject, MainFrame::OnMenuAlterObject)
+    EVT_MENU(myTreeCtrl::Menu_DropObject, MainFrame::OnMenuDropObject)
 
     EVT_MENU(myTreeCtrl::Menu_ToggleStatusBar, MainFrame::OnMenuToggleStatusBar)
     EVT_MENU(myTreeCtrl::Menu_ToggleSearchBar, MainFrame::OnMenuToggleSearchBar)
@@ -1158,7 +1160,7 @@ bool MainFrame::connect(bool warn)
     else
         pass = db->getPassword();
 
-    wxString caption(wxString::Format(wxT("Connecting with Database \"%s\""), 
+    wxString caption(wxString::Format(wxT("Connecting with Database \"%s\""),
         db->getName_().c_str()));
     ProgressDialog pd(this, caption, 1);
 
@@ -1613,6 +1615,35 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
+void MainFrame::OnMenuDropDatabase(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    Database* d = tree_ctrl_1->getSelectedDatabase();
+    if (!checkValidDatabase(d))
+        return;
+    int result = wxMessageBox(
+        _("Do you wish to keep the registration info?"),
+        _("Dropping database: ")+d->getName_(),
+        wxYES_NO|wxCANCEL|wxICON_QUESTION);
+    if (result == wxCANCEL)
+        return;
+    if (!d->drop())
+    {
+        reportLastError(_("Error dropping database."));
+        return;
+    }
+    d->disconnect(true);    // true = just remove the child nodes
+    if (result == wxNO)
+    {   // unregister
+        Server* s = d->getServer();
+        if (s)
+            s->removeDatabase(d);
+    }
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
 void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
@@ -1627,7 +1658,6 @@ void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
     // TODO: We could first check if there are some dependant objects, and offer the user to
     //       either drop dependencies, or drop those objects too. Then we should create a bunch of
     //       sql statements that do it.
-
     wxString sql = m->getDropSqlStatement();
     ExecuteSqlFrame* eff = new ExecuteSqlFrame(this, -1, sql);
     eff->setDatabase(d);

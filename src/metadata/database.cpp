@@ -731,6 +731,24 @@ bool Database::parseCommitedSql(wxString sql)
     return true;
 }
 //-----------------------------------------------------------------------------
+bool Database::drop()
+{
+    try
+    {
+        databaseM->Drop();
+        return true;
+    }
+    catch (IBPP::Exception &e)
+    {
+        lastError().setMessage(std2wx(e.ErrorMessage()));
+    }
+    catch (...)
+    {
+        lastError().setMessage(_("System error."));
+    }
+    return false;
+}
+//-----------------------------------------------------------------------------
 bool Database::reconnect() const
 {
     try
@@ -834,14 +852,15 @@ bool Database::connect(wxString password, ProgressIndicator* indicator)
     return false;
 }
 //-----------------------------------------------------------------------------
-bool Database::disconnect()
+bool Database::disconnect(bool onlyDBH)
 {
-    if (!connectedM)
+    if (!connectedM && !onlyDBH)
         return true;
 
     try
     {
-        databaseM->Disconnect();
+        if (!onlyDBH)
+            databaseM->Disconnect();
         resetCredentials();     // "forget" temporary username/password
         connectedM = false;
 
