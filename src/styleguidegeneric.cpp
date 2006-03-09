@@ -46,7 +46,8 @@ class StyleGuideGeneric: public StyleGuide
 {
 public:
     StyleGuideGeneric();
-    virtual wxSizer* createButtonSizer(wxButton* button_ok, wxButton* button_cancel);
+    virtual wxSizer* createButtonSizer(wxButton* button_ok, 
+        wxButton* button_cancel);
     virtual int getBetweenButtonsMargin(wxOrientation orientation);
     virtual int getBrowseButtonMargin();
     virtual int getCheckboxSpacing();
@@ -55,66 +56,66 @@ public:
     virtual int getFrameMargin(wxDirection direction);
     virtual int getRelatedControlMargin(wxOrientation orientation);
     virtual int getUnrelatedControlMargin(wxOrientation orientation);
-	virtual int getEditorFontSize();
+    virtual int getEditorFontSize();
 };
 //------------------------------------------------------------------------------
 StyleGuideGeneric::StyleGuideGeneric()
 {
 }
 //------------------------------------------------------------------------------
-wxSizer* StyleGuideGeneric::createButtonSizer(wxButton* button_ok, wxButton* button_cancel)
+wxSizer* StyleGuideGeneric::createButtonSizer(wxButton* button_ok,
+    wxButton* button_cancel)
 {
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-    // center-align
+    // right-align as per HIG
     sizer->Add(0, 0, 1, wxEXPAND);
-    if (button_ok != 0)
-        sizer->Add(button_ok);
-    if (button_ok != 0 && button_cancel != 0)
-        sizer->Add(getBetweenButtonsMargin(wxHORIZONTAL), 0);
     if (button_cancel != 0)
         sizer->Add(button_cancel);
-    sizer->Add(0, 0, 1, wxEXPAND);
+    if (button_ok != 0 && button_cancel != 0)
+        sizer->Add(getBetweenButtonsMargin(wxHORIZONTAL), 0);
+    if (button_ok != 0)
+        sizer->Add(button_ok);
     return sizer;
 }
 //------------------------------------------------------------------------------
-int StyleGuideGeneric::getBetweenButtonsMargin(wxOrientation WXUNUSED(orientation))
+int StyleGuideGeneric::getBetweenButtonsMargin(wxOrientation /*orientation*/)
 {
-    return 12;
+    return 6;
 }
 //------------------------------------------------------------------------------
 int StyleGuideGeneric::getBrowseButtonMargin()
 {
-    return 5;
+    return 6;
 }
 //------------------------------------------------------------------------------
 int StyleGuideGeneric::getCheckboxSpacing()
 {
-    return 4;
+    return 6;
 }
 //------------------------------------------------------------------------------
 int StyleGuideGeneric::getControlLabelMargin()
 {
-    return 5;
+    return 12;
 }
 //------------------------------------------------------------------------------
 int StyleGuideGeneric::getDialogMargin(wxDirection WXUNUSED(direction))
 {
-    return 20;
+    return 12;
 }
 //------------------------------------------------------------------------------
 int StyleGuideGeneric::getFrameMargin(wxDirection direction)
 {
-    return 10;
+    return 12;
 }
 //------------------------------------------------------------------------------
-int StyleGuideGeneric::getRelatedControlMargin(wxOrientation WXUNUSED(orientation))
+int StyleGuideGeneric::getRelatedControlMargin(wxOrientation/*orientation*/)
 {
-    return 10;
+    return 12;
 }
 //------------------------------------------------------------------------------
-int StyleGuideGeneric::getUnrelatedControlMargin(wxOrientation WXUNUSED(orientation))
+int StyleGuideGeneric::getUnrelatedControlMargin(wxOrientation /*orientation*/)
 {
-    return 15;
+    return 18;
 }
 //------------------------------------------------------------------------------
 int StyleGuideGeneric::getEditorFontSize()
