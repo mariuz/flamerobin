@@ -84,9 +84,7 @@ ProgressDialog::~ProgressDialog()
 //-----------------------------------------------------------------------------
 void ProgressDialog::createControls()
 {
-    // TODO: find out if there is some default for this
-    int gaugeHeight = 15;
-
+    int gaugeHeight = wxSystemSettings::GetMetric(wxSYS_HSCROLL_Y);
     for (unsigned int i = 1; i <= levelCountM; i++)
     {
         wxStaticText* label = new wxStaticText(getControlsPanel(), wxID_ANY, 
