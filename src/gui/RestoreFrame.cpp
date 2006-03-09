@@ -196,26 +196,34 @@ RestoreFrame::RestoreFrame(wxWindow* parent, Database* db)
 //! implementation details
 void RestoreFrame::createControls()
 {
-    panel_controls = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize,
+    panel_controls = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
         wxTAB_TRAVERSAL | wxCLIP_CHILDREN | wxNO_FULL_REPAINT_ON_RESIZE);
-    label_filename = new wxStaticText(panel_controls, -1, _("Backup file:"));
+    label_filename = new wxStaticText(panel_controls, wxID_ANY, _("Backup file:"));
     text_ctrl_filename = new wxTextCtrl(panel_controls, ID_text_ctrl_filename,
         wxEmptyString);
     button_browse = new wxButton(panel_controls, ID_button_browse, _("..."),
         wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
 
-    checkbox_replace = new wxCheckBox(panel_controls, -1, _("Replace existing database"));
-    checkbox_noshadow = new wxCheckBox(panel_controls, -1, _("Don't restore shadow files"));
-    checkbox_commit = new wxCheckBox(panel_controls, -1, _("Commit per table"));
-    checkbox_deactivate = new wxCheckBox(panel_controls, -1, _("Deactivate indices"));
-    checkbox_validity = new wxCheckBox(panel_controls, -1, _("Ignore validity constraints"));
-    checkbox_space = new wxCheckBox(panel_controls, -1, _("Use all space"));
+    checkbox_replace = new wxCheckBox(panel_controls, wxID_ANY,
+        _("Replace existing database"));
+    checkbox_noshadow = new wxCheckBox(panel_controls, wxID_ANY,
+        _("Don't restore shadow files"));
+    checkbox_commit = new wxCheckBox(panel_controls, wxID_ANY,
+        _("Commit per table"));
+    checkbox_deactivate = new wxCheckBox(panel_controls, wxID_ANY,
+        _("Deactivate indices"));
+    checkbox_validity = new wxCheckBox(panel_controls, wxID_ANY,
+        _("Ignore validity constraints"));
+    checkbox_space = new wxCheckBox(panel_controls, wxID_ANY,
+        _("Use all space"));
 
-    label_pagesize = new wxStaticText(panel_controls, -1, _("Page size:"));
+    label_pagesize = new wxStaticText(panel_controls, wxID_ANY,
+        _("Page size:"));
     const wxString pagesize_choices[] = {
         _("Default"), wxT("1024"), wxT("2048"), wxT("4096"), wxT("8192"), wxT("16384")
     };
-    choice_pagesize = new wxChoice(panel_controls, -1, wxDefaultPosition, wxDefaultSize,
+    choice_pagesize = new wxChoice(panel_controls, wxID_ANY, 
+        wxDefaultPosition, wxDefaultSize,
         sizeof(pagesize_choices) / sizeof(wxString), pagesize_choices);
 
     checkbox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog,
@@ -246,12 +254,12 @@ void RestoreFrame::layoutControls()
     wxGridSizer* sizerChecks = new wxGridSizer(2, 2,
         styleguide().getCheckboxSpacing(),
         styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
-    sizerChecks->Add(checkbox_replace);
-    sizerChecks->Add(checkbox_deactivate);
-    sizerChecks->Add(checkbox_noshadow);
-    sizerChecks->Add(checkbox_validity);
-    sizerChecks->Add(checkbox_commit);
-    sizerChecks->Add(checkbox_space);
+    sizerChecks->Add(checkbox_replace, 0, wxEXPAND);
+    sizerChecks->Add(checkbox_deactivate, 0, wxEXPAND);
+    sizerChecks->Add(checkbox_noshadow, 0, wxEXPAND);
+    sizerChecks->Add(checkbox_validity, 0, wxEXPAND);
+    sizerChecks->Add(checkbox_commit, 0, wxEXPAND);
+    sizerChecks->Add(checkbox_space, 0, wxEXPAND);
 
     wxBoxSizer* sizerCombo = new wxBoxSizer(wxHORIZONTAL);
     sizerCombo->Add(label_pagesize, 0, wxALIGN_CENTER_VERTICAL);

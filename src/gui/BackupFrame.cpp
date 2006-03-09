@@ -193,25 +193,26 @@ BackupFrame::BackupFrame(wxWindow* parent, Database* db)
 //! implementation details
 void BackupFrame::createControls()
 {
-    panel_controls = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize,
+    panel_controls = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
         wxTAB_TRAVERSAL | wxCLIP_CHILDREN | wxNO_FULL_REPAINT_ON_RESIZE);
-    label_filename = new wxStaticText(panel_controls, -1, _("Backup file:"));
+    label_filename = new wxStaticText(panel_controls, wxID_ANY, 
+        _("Backup file:"));
     text_ctrl_filename = new wxTextCtrl(panel_controls, ID_text_ctrl_filename,
         wxEmptyString);
     button_browse = new wxButton(panel_controls, ID_button_browse, _("..."),
         wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
 
-    checkbox_checksum = new wxCheckBox(panel_controls, -1,
-        _("Ignore Checksums"));
-    checkbox_limbo = new wxCheckBox(panel_controls, -1,
-        _("Ignore Limbo Transactions"));
-    checkbox_transport = new wxCheckBox(panel_controls, -1,
+    checkbox_checksum = new wxCheckBox(panel_controls, wxID_ANY,
+        _("Ignore checksums"));
+    checkbox_limbo = new wxCheckBox(panel_controls, wxID_ANY,
+        _("Ignore limbo transactions"));
+    checkbox_transport = new wxCheckBox(panel_controls, wxID_ANY,
         _("Use non-transportable format"));
-    checkbox_metadata = new wxCheckBox(panel_controls, -1,
+    checkbox_metadata = new wxCheckBox(panel_controls, wxID_ANY,
         _("Only backup metadata"));
-    checkbox_garbage = new wxCheckBox(panel_controls, -1,
-        _("Don't do garbage collection"));
-    checkbox_extern = new wxCheckBox(panel_controls, -1,
+    checkbox_garbage = new wxCheckBox(panel_controls, wxID_ANY,
+        _("Don't perform garbage collection"));
+    checkbox_extern = new wxCheckBox(panel_controls, wxID_ANY,
         _("Convert external tables"));
 
     checkbox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog,
@@ -236,12 +237,12 @@ void BackupFrame::layoutControls()
     wxGridSizer* sizerChecks = new wxGridSizer(2, 2,
         styleguide().getCheckboxSpacing(),
         styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
-    sizerChecks->Add(checkbox_checksum);
-    sizerChecks->Add(checkbox_metadata);
-    sizerChecks->Add(checkbox_limbo);
-    sizerChecks->Add(checkbox_garbage);
-    sizerChecks->Add(checkbox_transport);
-    sizerChecks->Add(checkbox_extern);
+    sizerChecks->Add(checkbox_checksum, 0, wxEXPAND);
+    sizerChecks->Add(checkbox_metadata, 0, wxEXPAND);
+    sizerChecks->Add(checkbox_limbo, 0, wxEXPAND);
+    sizerChecks->Add(checkbox_garbage, 0, wxEXPAND);
+    sizerChecks->Add(checkbox_transport, 0, wxEXPAND);
+    sizerChecks->Add(checkbox_extern, 0, wxEXPAND);
 
     wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
     sizerButtons->Add(checkbox_showlog, 0, wxALIGN_CENTER_VERTICAL);
