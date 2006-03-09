@@ -163,7 +163,8 @@ void ProgressDialog::setCanceled()
     }
 }
 //-----------------------------------------------------------------------------
-void ProgressDialog::setGaugeIndeterminate(wxGauge* gauge, bool indeterminate)
+void ProgressDialog::setGaugeIndeterminate(wxGauge* gauge, 
+    bool /* indeterminate */ )
 {
     if (gauge)
     {

@@ -110,13 +110,13 @@ void EventWatcherFrame::createControls()
         wxDefaultPosition, wxDefaultSize, 0, 0, wxLB_EXTENDED);
     eventlog_received = new EventLogControl(panel_controls,
         ID_log_received);
-    button_add = new wxButton(panel_controls, ID_button_add, _("&Add event"));
+    button_add = new wxButton(panel_controls, ID_button_add, _("&Add Event"));
     button_remove = new wxButton(panel_controls, ID_button_remove,
-        _("&Remove selected"));
+        _("&Remove Selected"));
     button_load = new wxButton(panel_controls, ID_button_load, _("&Load"));
     button_save = new wxButton(panel_controls, ID_button_save, _("&Save"));
     button_monitor = new wxButton(panel_controls, ID_button_monitor,
-        _("Start &monitoring"));
+        _("Start &Monitoring"));
 }
 //-----------------------------------------------------------------------------
 void EventWatcherFrame::layoutControls()

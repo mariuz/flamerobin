@@ -228,7 +228,8 @@ void RestoreFrame::createControls()
 
     checkbox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog,
         _("Show complete log"));
-    button_start = new wxButton(panel_controls, ID_button_start, _("Restore"));
+    button_start = new wxButton(panel_controls, ID_button_start, 
+        _("&Start Restore"));
 
     text_ctrl_log = new LogTextControl(this, ID_text_ctrl_log);
 }
