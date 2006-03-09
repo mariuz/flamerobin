@@ -46,8 +46,8 @@
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent,
-        int id, const wxString& title, bool createDB, bool connectAs)
-    : BaseDialog(parent, id, title)
+        const wxString& title, bool createDB, bool connectAs)
+    : BaseDialog(parent, wxID_ANY, title)
 {
     serverM = 0;
     databaseM = 0;

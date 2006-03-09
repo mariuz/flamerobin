@@ -844,7 +844,7 @@ void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
         return;
 
     Database db;
-    DatabaseRegistrationDialog drd(this, -1, _("Register Existing Database"));
+    DatabaseRegistrationDialog drd(this, _("Register Existing Database"));
     drd.setDatabase(&db);
 
     if (drd.ShowModal() == wxID_OK)
@@ -862,7 +862,7 @@ void MainFrame::OnMenuRestoreIntoNewDatabase(wxCommandEvent& WXUNUSED(event))
         return;
 
     Database db;
-    DatabaseRegistrationDialog drd(this, -1, _("New database parameters"));
+    DatabaseRegistrationDialog drd(this, _("New database parameters"));
     drd.setDatabase(&db);
     if (drd.ShowModal() != wxID_OK)
         return;
@@ -883,7 +883,7 @@ void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
     if (!checkValidDatabase(d))
         return;
 
-    DatabaseRegistrationDialog drd(this, -1, _("Database Registration Info"));
+    DatabaseRegistrationDialog drd(this, _("Database Registration Info"));
     drd.setDatabase(d);
     if (drd.ShowModal())
         getGlobalRoot().save();
@@ -900,7 +900,7 @@ void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
         return;
 
     Database db;
-    DatabaseRegistrationDialog drd(this, -1, _("Create New Database"), true);
+    DatabaseRegistrationDialog drd(this, _("Create New Database"), true);
     drd.setDatabase(&db);
     drd.setServer(s);
 
@@ -947,7 +947,7 @@ void MainFrame::OnMenuServerProperties(wxCommandEvent& WXUNUSED(event))
     if (!checkValidServer(s))
         return;
 
-    ServerRegistrationDialog srd(this, -1, _("Server Registration Info"));
+    ServerRegistrationDialog srd(this, _("Server Registration Info"));
     srd.setServer(s);
     if (srd.ShowModal())
         getGlobalRoot().save();
@@ -964,7 +964,7 @@ void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
         return;
 
     Server s;
-    ServerRegistrationDialog srd(this, -1, _("Register New Server"));
+    ServerRegistrationDialog srd(this, _("Register New Server"), true);
     srd.setServer(&s);
     if (wxID_OK == srd.ShowModal())
         tree_ctrl_1->selectMetadataItem(r->addServer(s));
@@ -1118,7 +1118,7 @@ void MainFrame::OnMenuConnectAs(wxCommandEvent& WXUNUSED(event))
     wxCHECK_RET(!d->isConnected(),
         wxT("Can not connect to already connected database"));
 
-    DatabaseRegistrationDialog drd(this, -1, _("Connect as..."), false, true);
+    DatabaseRegistrationDialog drd(this, _("Connect as..."), false, true);
     d->prepareTemporaryCredentials();
     drd.setDatabase(d);
     if (wxID_OK != drd.ShowModal() || !connect(false))

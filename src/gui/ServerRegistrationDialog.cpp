@@ -40,12 +40,13 @@
 #include "metadata/server.h"
 #include "styleguide.h"
 //-----------------------------------------------------------------------------
-ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent, int id,
-        const wxString& title)
-    : BaseDialog(parent, id, title)
+ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent, 
+        const wxString& title, bool registerServer)
+    : BaseDialog(parent, wxID_ANY, title)
 {
     serverM = 0;
     isDefaultNameM = true;
+    isNewServerM = registerServer;
 
     createControls();
     setControlsProperties();
@@ -74,7 +75,8 @@ void ServerRegistrationDialog::createControls()
         _("Port number:"));
     text_ctrl_portnumber = new wxTextCtrl(getControlsPanel(),
         ID_textctrl_portnumber, wxEmptyString);
-    button_ok = new wxButton(getControlsPanel(), ID_button_ok, _("Save"));
+    button_ok = new wxButton(getControlsPanel(), ID_button_ok, 
+        (isNewServerM) ? _("Register") : _("Save"));
     button_cancel = new wxButton(getControlsPanel(), ID_button_cancel,
         _("Cancel"));
 }

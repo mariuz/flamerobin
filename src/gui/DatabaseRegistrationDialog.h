@@ -70,7 +70,7 @@ private:
 protected:
     virtual const wxString getName() const;
 public:
-    DatabaseRegistrationDialog(wxWindow* parent, int id, const wxString& title,
+    DatabaseRegistrationDialog(wxWindow* parent, const wxString& title,
         bool createDB = false, 
         // a temporary solution, as we'll change the entire login scheme soon
         bool connectAs = false);

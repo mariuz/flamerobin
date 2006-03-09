@@ -36,6 +36,7 @@ class ServerRegistrationDialog: public BaseDialog {
 private:
     Server* serverM;
     bool isDefaultNameM;
+    bool isNewServerM;
 
     wxStaticText* label_name;
     wxTextCtrl* text_ctrl_name;
@@ -55,7 +56,8 @@ private:
 protected:
     virtual const wxString getName() const;
 public:
-    ServerRegistrationDialog(wxWindow* parent, int id, const wxString& title);
+    ServerRegistrationDialog(wxWindow* parent, const wxString& title,
+        bool registerServer = false);
 
     void setServer(Server* s);
 private:
