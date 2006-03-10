@@ -1175,6 +1175,7 @@ bool MainFrame::connect(bool warn)
 
     if (!db->connect(pass, &pd))
     {
+        pd.Hide();
         reportLastError(_("Error Connecting to Database"));
         return false;
     }
