@@ -600,13 +600,17 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
     msg.Printf(_("FlameRobin %d.%d.%d"),
         FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS);
 
-    // TODO: let a subversion commit script directly write the revision number
-    // for now: extract revision number from string "$Rev: NNNN "
+/*  Commented out for the time being, because the revision string in
+    frversion.h is only updated when the file is modifed, or when a full
+    checkout or export happens :-(
+
+    // extract revision number from string "$Rev: NNNN "
     wxStringTokenizer tknzr(wxT(FR_VERSION_SVN));
     tknzr.NextToken();
     unsigned long revision;
     if (wxString(tknzr.GetNextToken()).ToULong(&revision))
         msg += wxString::Format(wxT(".%u"), revision);
+*/
 
 #if wxUSE_UNICODE
     msg += wxT(" Unicode");
