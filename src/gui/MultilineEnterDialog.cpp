@@ -41,17 +41,19 @@
 #include "styleguide.h"
 //-----------------------------------------------------------------------------
 bool GetMultilineTextFromUser(wxWindow* parent, const wxString& title,
-    wxString& value, const wxString& caption)
+    wxString& value, const wxString& caption, const wxString& buttonLabel)
 {
     MultilineEnterDialog med(parent, title, caption);
     med.setText(value);
+    if (!buttonLabel.IsEmpty())
+        med.setOkButtonLabel(buttonLabel);
     if (wxID_OK != med.ShowModal())
         return false;
     value = med.getText();
     return true;
 }
 //-----------------------------------------------------------------------------
-MultilineEnterDialog::MultilineEnterDialog(wxWindow* parent,
+MultilineEnterDialog::MultilineEnterDialog(wxWindow* parent, 
         const wxString& title, const wxString& caption)
     : BaseDialog(parent, wxID_ANY, title)
 {
@@ -74,6 +76,11 @@ wxString MultilineEnterDialog::getText() const
 void MultilineEnterDialog::setText(const wxString& text)
 {
     text_ctrl_value->SetText(text);
+}
+//-----------------------------------------------------------------------------
+void MultilineEnterDialog::setOkButtonLabel(const wxString& label)
+{
+    button_ok->SetLabel(label);
 }
 //-----------------------------------------------------------------------------
 const wxString MultilineEnterDialog::getName() const

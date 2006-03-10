@@ -110,7 +110,7 @@ void EventWatcherFrame::createControls()
         wxDefaultPosition, wxDefaultSize, 0, 0, wxLB_EXTENDED);
     eventlog_received = new EventLogControl(panel_controls,
         ID_log_received);
-    button_add = new wxButton(panel_controls, ID_button_add, _("&Add Event"));
+    button_add = new wxButton(panel_controls, ID_button_add, _("&Add Events"));
     button_remove = new wxButton(panel_controls, ID_button_remove,
         _("&Remove Selected"));
     button_load = new wxButton(panel_controls, ID_button_load, _("&Load"));
@@ -123,42 +123,42 @@ void EventWatcherFrame::layoutControls()
 {
     wxBoxSizer* sizerList = new wxBoxSizer(wxVERTICAL);
     sizerList->Add(static_text_monitored);
-    sizerList->Add(0, styleguide().getControlLabelMargin());
+    sizerList->AddSpacer(styleguide().getControlLabelMargin());
     sizerList->Add(listbox_monitored, 1, wxEXPAND);
 
     wxBoxSizer* sizerLog = new wxBoxSizer(wxVERTICAL);
     sizerLog->Add(static_text_received);
-    sizerLog->Add(0, styleguide().getControlLabelMargin());
+    sizerLog->AddSpacer(styleguide().getControlLabelMargin());
     sizerLog->Add(eventlog_received, 1, wxEXPAND);
 
     wxBoxSizer* sizerTop = new wxBoxSizer(wxHORIZONTAL);
     sizerTop->Add(sizerList, 2, wxEXPAND);
-    sizerTop->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 0);
+    sizerTop->AddSpacer(styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
     sizerTop->Add(sizerLog, 3, wxEXPAND);
 
     wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
     sizerButtons->Add(button_add);
-    sizerButtons->Add(styleguide().getBetweenButtonsMargin(wxHORIZONTAL), 0);
+    sizerButtons->AddSpacer(styleguide().getBetweenButtonsMargin(wxHORIZONTAL));
     sizerButtons->Add(button_remove);
-    sizerButtons->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 0);
+    sizerButtons->AddSpacer(styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
     sizerButtons->Add(button_load);
-    sizerButtons->Add(styleguide().getBetweenButtonsMargin(wxHORIZONTAL), 0);
+    sizerButtons->AddSpacer(styleguide().getBetweenButtonsMargin(wxHORIZONTAL));
     sizerButtons->Add(button_save);
     sizerButtons->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 0,
         1, wxEXPAND);
     sizerButtons->Add(button_monitor);
 
     wxBoxSizer* sizerPanelV = new wxBoxSizer(wxVERTICAL);
-    sizerPanelV->Add(0, styleguide().getFrameMargin(wxTOP));
+    sizerPanelV->AddSpacer(styleguide().getFrameMargin(wxTOP));
     sizerPanelV->Add(sizerTop, 1, wxEXPAND);
-    sizerPanelV->Add(0, styleguide().getUnrelatedControlMargin(wxVERTICAL));
+    sizerPanelV->AddSpacer(styleguide().getUnrelatedControlMargin(wxVERTICAL));
     sizerPanelV->Add(sizerButtons, 0, wxEXPAND);
-    sizerPanelV->Add(0, styleguide().getFrameMargin(wxBOTTOM));
+    sizerPanelV->AddSpacer(styleguide().getFrameMargin(wxBOTTOM));
 
     wxBoxSizer* sizerPanelH = new wxBoxSizer(wxHORIZONTAL);
-    sizerPanelH->Add(styleguide().getFrameMargin(wxLEFT), 0);
+    sizerPanelH->AddSpacer(styleguide().getFrameMargin(wxLEFT));
     sizerPanelH->Add(sizerPanelV, 1, wxEXPAND);
-    sizerPanelH->Add(styleguide().getFrameMargin(wxRIGHT), 0);
+    sizerPanelH->AddSpacer(styleguide().getFrameMargin(wxRIGHT));
 
     wxBoxSizer* sizerAll = new wxBoxSizer(wxHORIZONTAL);
     sizerAll->Add(sizerPanelH, 1, wxEXPAND);
@@ -314,8 +314,9 @@ void EventWatcherFrame::OnButtonSaveClick(wxCommandEvent& WXUNUSED(event))
 void EventWatcherFrame::OnButtonAddClick(wxCommandEvent& WXUNUSED(event))
 {
     wxString s;
-    if (GetMultilineTextFromUser(this, _("Add event(s)"), s,
-        _("You can add multiple events by adding one per line.")))
+    if (GetMultilineTextFromUser(this, _("Add Events for Monitoring"), s,
+        _("You can add multiple events by adding one per line."),
+        _("Add Events")))
     {
         addEvents(s);
     }
@@ -370,7 +371,7 @@ void EventWatcherFrame::OnButtonStartStopClick(wxCommandEvent& WXUNUSED(event))
     {
         timerM.Stop();
         monitoringM = false;
-        button_monitor->SetLabel(_("Start &monitoring"));
+        button_monitor->SetLabel(_("Start &Monitoring"));
         eventlog_received->logAction(_("Monitoring stopped"));
     }
     else
@@ -381,7 +382,7 @@ void EventWatcherFrame::OnButtonStartStopClick(wxCommandEvent& WXUNUSED(event))
             return;
         }
         monitoringM = true;
-        button_monitor->SetLabel(_("Stop &monitoring"));
+        button_monitor->SetLabel(_("Stop &Monitoring"));
         eventlog_received->logAction(_("Monitoring started"));
     }
     updateControls();

@@ -34,7 +34,8 @@
 class TextControl;
 //-----------------------------------------------------------------------------
 bool GetMultilineTextFromUser(wxWindow* parent, const wxString& title,
-    wxString& value, const wxString& caption = wxEmptyString);
+    wxString& value, const wxString& caption = wxEmptyString,
+    const wxString& buttonLabel = wxEmptyString);
 //-----------------------------------------------------------------------------
 //! normally you shouldn't need to create objects of this class, just use
 //  the GetMultilineTextFromUser() function
@@ -53,6 +54,8 @@ public:
 
     wxString getText() const;
     void setText(const wxString& text);
+
+    void setOkButtonLabel(const wxString& label);
 };
 //-----------------------------------------------------------------------------
 #endif
