@@ -132,7 +132,7 @@ public:
         const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE);
 
 private:
-    bool connect(bool warn);
+    bool connect();
     void showGeneratorValue(Generator* g);
     void updateStatusbarText();
 

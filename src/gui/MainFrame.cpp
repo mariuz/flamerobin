@@ -498,7 +498,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
         switch (nt)
         {
             case ntDatabase:
-                connect(false);                     // false = don't warn if already connected
+                connect();
                 break;
             case ntGenerator:
                 showGeneratorValue(dynamic_cast<Generator*>(m));
@@ -1134,7 +1134,7 @@ void MainFrame::OnMenuConnectAs(wxCommandEvent& WXUNUSED(event))
     DatabaseRegistrationDialog drd(this, _("Connect as..."), false, true);
     d->prepareTemporaryCredentials();
     drd.setDatabase(d);
-    if (wxID_OK != drd.ShowModal() || !connect(false))
+    if (wxID_OK != drd.ShowModal() || !connect())
         d->resetCredentials();
 
     FR_CATCH
@@ -1144,22 +1144,18 @@ void MainFrame::OnMenuConnect(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
-    connect(true);  // true = warn if already connected
+    connect();
 
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
-bool MainFrame::connect(bool warn)
+bool MainFrame::connect()
 {
     Database* db = tree_ctrl_1->getSelectedDatabase();
     if (!checkValidDatabase(db))
         return false;
     if (db->isConnected())
-    {
-        if (warn)
-            wxMessageBox(_("Already connected"), _("Warning"), wxOK | wxICON_WARNING);
         return false;
-    }
 
     wxString pass;
     if (db->getPassword().empty())
@@ -1699,7 +1695,7 @@ void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
             wxT("FlameRobin"), wxICON_QUESTION, &btns, 0, 
             wxT("DIALOG_ConfirmConnectForQuery")))
         {
-            connect(false);
+            connect();
             if (!d->isConnected())
                 return;
         }
