@@ -294,7 +294,7 @@
         </setting>
     </node>
     <node>
-        <caption>Property pages</caption>
+        <caption>Property Pages</caption>
         <image>4</image>
         <setting type="checkbox">
             <caption>Show default column values</caption>
@@ -308,7 +308,7 @@
         </setting>
     </node>
     <node>
-        <caption>Object names</caption>
+        <caption>Object Names</caption>
         <image>5</image>
         <setting type="checkbox">
             <caption>Quote names only when needed</caption>
