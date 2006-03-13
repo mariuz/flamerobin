@@ -7,6 +7,51 @@
 <font size=-1>For known issues please see our bug tracker at:
 http://sourceforge.net/tracker/?group_id=124340&amp;atid=699234</font><br>
 <br><br>
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.6.0 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- DDL extraction for all object types<br>
+- Rebuild View option (drop and recreate dependent objects)<br>
+- Option to drop database<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- TCP port setting is not longer ignored when creating, backing up and restoring databases<br>
+- New dialog for index creation.<br>
+- Field properties dialog can now be closed when no changes are made.<br>
+- Main tree control now behaves natively on all platforms.<br>
+- Progress dialog when connecting has ability to cancel<br>
+- Windows: FlameRobin doesn't destroy Clipboard contents when exiting<br>
+- Gtk2: Reduced font size for property pages.<br>
+- Gtk2: allow user to enter filename in dialogs.<br>
+- Other minor UI improvements.<br>
+- Faster disconnecting.<br>
+- Faster startup of SQL editor, statement history stored in separate files.<br>
+- Warn when copying data from the grid and not all rows have been fetched.<br>
+- If error happens while executing selection, the executed statement is selected in SQL editor.<br>
+- Fixed problem with context menu and large selection in SQL Editor.<br>
+- Fixed hiding of SQL editor behind other windows.<br>
+- Data grid is now scrolled by rows<br>
+- Triggers can be added/dropped from table's &quot;Triggers&quot; page.<br>
+- Take character set and collation into account when adding new columns.<br>
+- Configurable columns (default value, description) on table's property page.<br>
+- All UPDATE statements were treated as DDL. Fixed.<br>
+- Fixed bugs in statement parser.<br>
+- Preserve character sets when altering procedures.<br>
+- Added missing whitespace between AS and procedure source.<br>
+- Privileges are restored after ALTER VIEW.<br>
+- Property pages are now updated after ALTER INDEX and SET STATISTICS<br>
+- Custom charsets are now really used when connecting to database.<br>
+- Logging can now log SET TERM statements if desired.<br>
+- Logging now detects if target directory doesn't exist.<br>
+- Updated documentation about building FlameRobin.<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
 <font size=+2>Changes in FlameRobin 0.5.0 ALPHA</font><br>
 <br><br>
 <font size=+1 color="#AA0000"><B>New features</B></font><br>
