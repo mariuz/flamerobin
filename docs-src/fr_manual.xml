@@ -6,7 +6,7 @@
 -->
 <article id="frrelnotes">
   <articleinfo>
-    <title><application>FlameRobin</application> 0.5.0 ALPHA Manual</title>
+    <title><application>FlameRobin</application> 0.6.0 ALPHA Manual</title>
 
     <author>
       <firstname>Nando</firstname>
@@ -236,6 +236,10 @@
       just fine) and the SQL dialect (leave it set at 3 if you don't know what
       a SQL dialect is). The new database will be created and registered
       (which means it is available in FlameRobin).</para>
+
+      <para>You can also drop an existing registered database, optionally
+      keeping the FlameRobin registration information. Use the "Drop" menu
+      command to do that.</para>
     </section>
 
     <section>
@@ -337,7 +341,37 @@
     <title>Advanced features</title>
 
     <para>This section illustrates features in FlameRobin that you won't
-    likely use every day, but often enough to know they exist.</para>
+    likely use every day, but often enough to make them useful to know.</para>
+
+    <section>
+      <title>DDL extraction</title>
+
+      <para>You can generate DDL (Data Definition Language) creation scripts
+      for any object you have in the database. Just open the DDL subpage of an
+      object's property page to see the code that creates it.</para>
+
+      <para>Extracting DDL scripts is useful if you want to replicate an
+      object's structure in a different database, or create a slightly
+      different object in the same database.</para>
+    </section>
+
+    <section>
+      <title>Rebuild View functionality</title>
+
+      <para>Firebird doesn't have an ALTER VIEW DDL command, which means that
+      if you want to modify a view definition you need to DROP and CREATE it
+      back. But dropping an object in Firebird requires dropping all objects
+      that depend on it, and so on recursively. Doing this by hand is very
+      hard, especially if the database structure is complex. A unique feature
+      in FlameRobin, which you activate by righ-clicking a View object and
+      selecting the "Alter..." menu command (or selecting the "Alter..."
+      command from the "Object" menu after selecting a View), will generate a
+      script that drops all the objects that depend on the view (in the
+      correct order), drops and recreates the view, then recreates all the
+      objects (again, in the correct order). The script is pasted into the SQL
+      editor window so you can modify it and recreate everything with a single
+      click.</para>
+    </section>
 
     <section>
       <title>Connected users</title>
@@ -629,22 +663,15 @@
           </section>
 
           <section>
-            <title>Limit history size</title>
-
-            <para>By default, each history list is allowed to grow without
-            bounds. If you are concerned about the size of your statement
-            history lists, you can limit the number of entries. If a history
-            list reaches its limit, FlameRobin will remove the oldest elements
-            to make room for the new statements.</para>
-          </section>
-
-          <section>
             <title>Limit history item size</title>
 
-            <para>You can also set a limit for each statement in the history
-            list. Statements bigger than the specified amount will not be
-            added to the history list. This is useful if you execute entire
-            database-creation scripts often.</para>
+            <para>By default, each history list item is allowed to grow
+            without bounds. If you are concerned about the size of your
+            statement history lists, you can set an upper limit in Kilobytes
+            for each statement in the history list. Statements bigger than the
+            specified amount will not be added to the history list. This is
+            useful if you execute entire database-creation scripts
+            often.</para>
           </section>
 
           <section>
@@ -685,6 +712,56 @@
 
         <para>Choose the format you'd like for showing time and timestamp
         values in the grid.</para>
+      </section>
+
+      <section>
+        <title>Grid header font</title>
+
+        <para>Choose a character font for the grid header (the column
+        names).</para>
+      </section>
+
+      <section>
+        <title>Grid cell font</title>
+
+        <para>Choose a character font for the grid cells (the data).</para>
+      </section>
+
+      <section>
+        <title>Re-format float and double precision numbers</title>
+
+        <para>If unchecked, decimal numbers are displayed as returned from
+        server; otherwise, they are formatted according to the specified
+        number of decimal digits.</para>
+      </section>
+
+      <section>
+        <title>Maximize data grid after execution of SELECT statement</title>
+
+        <para>Here you can turn off an useful feature that will enlarge the
+        data grid to the maximum available size when a SQL SELECT statement
+        returns more than a specified number of rows.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Property Pages</title>
+
+      <para>This section contains customization options for FlameRobin-s
+      property pages.</para>
+
+      <section>
+        <title>Show default column values</title>
+
+        <para>Set this option to display the "Default" column in a table's
+        property page.</para>
+      </section>
+
+      <section>
+        <title>Show column descriptions</title>
+
+        <para>Set this option to display the "Description" column in a table's
+        property page.</para>
       </section>
 
       <section>
@@ -873,6 +950,9 @@
           digits, like 0003 instead of 3, then use %04d as placeholder, where
           4 means four digits, and 0 means that it should be padded with
           zeros.</para>
+
+          <para>There are also options to add a comment header to each logged
+          statement, and to add SET TERM statements if required.</para>
         </section>
       </section>
     </section>
