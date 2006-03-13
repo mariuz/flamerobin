@@ -190,7 +190,6 @@ void DataGrid::OnThumbRelease(wxScrollWinEvent& event)
 {
     wxIdleEvent dummy;
     OnIdle(dummy);
-    AdjustScrollbars();
     event.Skip();
 }
 //-----------------------------------------------------------------------------
@@ -234,6 +233,7 @@ void DataGrid::OnIdle(wxIdleEvent& event)
         table->fetch();
         if (table->needsMoreRowsFetched())
             event.RequestMore();
+        AdjustScrollbars();
     }
 }
 //-----------------------------------------------------------------------------
