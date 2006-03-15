@@ -620,7 +620,7 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
     msg += wxT("\n\n");
     msg += ib;
     msg += wxT("\n\n");
-    msg += _("Copyright (c) 2004,2005  FlameRobin development team");
+    msg += _("Copyright (c) 2004-2006  FlameRobin Development Team");
     msg += wxT("\n");
     msg += _("http://www.flamerobin.org");
 
