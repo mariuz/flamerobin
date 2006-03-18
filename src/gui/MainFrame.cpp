@@ -1617,7 +1617,7 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
     if (p)
         eff->setSql(p->getAlterSql());
     else if (v)
-        eff->setSql(v->getAlterSql());
+        eff->setSql(v->getRebuildSql());
     else if (t)
         eff->setSql(t->getAlterSql());
     eff->Show();
@@ -1692,7 +1692,7 @@ void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
         btns.add(wxOK, _("C&onnect"));
         btns.add(wxCANCEL, _("&Cancel"));
         if (wxOK == AdvancedMessageBox(_("The database is not connected. Do you want to connect?"),
-            wxT("FlameRobin"), wxICON_QUESTION, &btns, 0, 
+            wxT("FlameRobin"), wxICON_QUESTION, &btns, 0,
             wxT("DIALOG_ConfirmConnectForQuery")))
         {
             connect();

@@ -117,24 +117,6 @@ wxString View::getCreateSql()
     return sql;
 }
 //-----------------------------------------------------------------------------
-wxString View::getAlterSql()
-{
-    wxString sql = wxT("DROP VIEW ") + getQuotedName() + wxT(";\n");
-    sql += getCreateSql();
-
-    // Restore user privileges
-    const std::vector<Privilege>* priv = getPrivileges();
-    if (priv)
-    {
-        for (std::vector<Privilege>::const_iterator ci = priv->begin();
-            ci != priv->end(); ++ci)
-        {
-            sql += (*ci).getSql() + wxT(";\n");
-        }
-    }
-    return sql;
-}
-//-----------------------------------------------------------------------------
 void View::getDependentChecks(std::vector<CheckConstraint>& checks)
 {
     Database *d = getDatabase();
@@ -263,7 +245,7 @@ wxString View::getRebuildSql()
             it != trigs.end(); ++it)
         {
             // TODO: this would need a progress indicator that is created
-            //       outside of the loop, otherwise several dialogs would be 
+            //       outside of the loop, otherwise several dialogs would be
             //       created and destroyed
             //       besides: this introduces GUI stuff into metadata, so
             //       we first need a global facility to create an instance

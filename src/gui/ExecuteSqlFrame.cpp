@@ -1704,20 +1704,20 @@ bool EditProcedureHandler::handleURI(URI& uri)
     return true;
 }
 //-----------------------------------------------------------------------------
-class EditViewHandler: public URIHandler
+class AlterViewHandler: public URIHandler
 {
 public:
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
-    static const EditViewHandler handlerInstance;
+    static const AlterViewHandler handlerInstance;
 };
 //-----------------------------------------------------------------------------
-const EditViewHandler EditViewHandler::handlerInstance;
+const AlterViewHandler AlterViewHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-bool EditViewHandler::handleURI(URI& uri)
+bool AlterViewHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("edit_view"))
+    if (uri.action != wxT("alter_view"))
         return false;
 
     View* v = (View*)getObject(uri);
@@ -1725,35 +1725,8 @@ bool EditViewHandler::handleURI(URI& uri)
     if (!v || !w)
         return true;
 
-    ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing view"));
-    eff->setDatabase(v->getDatabase());
-    eff->Show();
-    eff->setSql(v->getAlterSql());
-    return true;
-}
-//-----------------------------------------------------------------------------
-class RebuildViewHandler: public URIHandler
-{
-public:
-    bool handleURI(URI& uri);
-private:
-    // singleton; registers itself on creation.
-    static const RebuildViewHandler handlerInstance;
-};
-//-----------------------------------------------------------------------------
-const RebuildViewHandler RebuildViewHandler::handlerInstance;
-//-----------------------------------------------------------------------------
-bool RebuildViewHandler::handleURI(URI& uri)
-{
-    if (uri.action != wxT("rebuild_view"))
-        return false;
-
-    View* v = (View*)getObject(uri);
-    wxWindow* w = getWindow(uri);
-    if (!v || !w)
-        return true;
-
-    ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing view"));
+    ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1,
+        _("Altering view"));
     eff->setDatabase(v->getDatabase());
     eff->Show();
     eff->setSql(v->getRebuildSql());

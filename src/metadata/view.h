@@ -40,7 +40,6 @@ public:
     wxString getCreateSqlTemplate() const;  // overrides MetadataItem::getCreateSqlTemplate()
 
     bool getSource(wxString& source);
-    wxString getAlterSql();
     wxString getCreateSql();
     wxString getRebuildSql();
     virtual const wxString getTypeName() const;
