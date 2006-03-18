@@ -99,7 +99,7 @@ void DatabaseRegistrationDialog::createControls()
         wxT("GB_2312"),     wxT("ISO8859_1"),   wxT("ISO8859_2"),   wxT("ISO8859_3"),   wxT("ISO8859_4"),
         wxT("ISO8859_5"),   wxT("ISO8859_6"),   wxT("ISO8859_7"),   wxT("ISO8859_8"),   wxT("ISO8859_9"),
         wxT("ISO8859_13"),  wxT("KSC_5601"),    wxT("NEXT"),        wxT("OCTETS"),      wxT("SJIS_0208"),
-        wxT("UNICODE_FSS"), wxT("UTF-8"),       wxT("WIN1250"),     wxT("WIN1251"),     wxT("WIN1252"),
+        wxT("UNICODE_FSS"), wxT("UTF8"),       wxT("WIN1250"),     wxT("WIN1251"),     wxT("WIN1252"),
         wxT("WIN1253"),     wxT("WIN1254"),     wxT("WIN1255"),     wxT("WIN1256"),     wxT("WIN1257")
     };
 
