@@ -33,15 +33,15 @@
 class URI
 {
 public:
-	wxString protocol;
-	wxString action;
-	std::map<wxString, wxString> params;
+    wxString protocol;
+    wxString action;
+    std::map<wxString, wxString> params;
 
-	URI();
-	URI(const wxString& uri);
-	bool parseURI(const wxString& uri);
-	void addParam(const wxString& pair);
-	wxString getParam(const wxString& name) const;
+    URI();
+    URI(const wxString& uri);
+    bool parseURI(const wxString& uri);
+    void addParam(const wxString& pair);
+    wxString getParam(const wxString& name) const;
 };
 //-----------------------------------------------------------------------------
 class URIHandler;
@@ -50,15 +50,15 @@ class URIProcessor
 {
 public:
     // interface for handler providers.
-	void addHandler(URIHandler *handler);
-	void removeHandler(URIHandler *handler);
+    void addHandler(URIHandler *handler);
+    void removeHandler(URIHandler *handler);
 
     // interface for consumers.
-	bool handleURI(URI& uri);
+    bool handleURI(URI& uri);
 
     virtual ~URIProcessor();
 private:
-	std::list<URIHandler*> handlersM;
+    std::list<URIHandler*> handlersM;
     bool handlerListSortedM;
     void checkHandlerListSorted();
 
@@ -80,9 +80,9 @@ class URIHandler
 public:
     URIHandler();
     virtual ~URIHandler();
-	virtual bool handleURI(URI& uri) = 0;
-	bool operator<(const URIHandler& right) const
-	{
+    virtual bool handleURI(URI& uri) = 0;
+    bool operator<(const URIHandler& right) const
+    {
         return getPosition() < right.getPosition();
     }
 protected:
@@ -99,9 +99,9 @@ protected:
         return 1024;
     }
 
-	// some helper functions
-	wxWindow *URIHandler::getWindow(const URI& uri);
-	void *getObject(const URI& uri);
+    // some helper functions
+    wxWindow *getWindow(const URI& uri);
+    void *getObject(const URI& uri);
 
 private:
     URIProcessor* processorM;
