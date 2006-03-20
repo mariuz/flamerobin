@@ -108,9 +108,17 @@ int StyleGuideGeneric::getFrameMargin(wxDirection direction)
     return 12;
 }
 //------------------------------------------------------------------------------
-int StyleGuideGeneric::getRelatedControlMargin(wxOrientation/*orientation*/)
+int StyleGuideGeneric::getRelatedControlMargin(wxOrientation orientation)
 {
-    return 12;
+    switch (orientation)
+    {
+        case wxHORIZONTAL:
+            return 12;
+        case wxVERTICAL:
+            return 6;
+        default:
+            return 0;
+    }
 }
 //------------------------------------------------------------------------------
 int StyleGuideGeneric::getUnrelatedControlMargin(wxOrientation /*orientation*/)
