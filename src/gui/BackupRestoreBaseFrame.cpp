@@ -47,7 +47,7 @@
 //-----------------------------------------------------------------------------
 BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, Database* db)
     : BaseFrame(parent, -1, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-        wxDEFAULT_FRAME_STYLE|wxNO_FULL_REPAINT_ON_RESIZE)
+        wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE)
 {
     databaseM = db;
     serverM = db->getServer();

@@ -188,6 +188,8 @@ BackupFrame::BackupFrame(wxWindow* parent, Database* db)
     createControls();
     layoutControls();
     updateControls();
+
+    text_ctrl_filename->SetFocus();
 }
 //-----------------------------------------------------------------------------
 //! implementation details
