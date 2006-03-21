@@ -46,7 +46,7 @@ class ColumnConstraint: public Constraint
 {
 public:
     typedef std::vector<wxString>::const_iterator const_iterator;
-    //wxString indexName; needed?
+    wxString indexName; // needed for DDL extraction
     std::vector<wxString> columnsM;
 
     wxString getColumnList() const;

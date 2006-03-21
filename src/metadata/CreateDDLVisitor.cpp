@@ -143,7 +143,7 @@ void iterateit(CreateDDLVisitor* v, Database& db, ProgressIndicator* pi)
 // build the sql script for entire database
 void CreateDDLVisitor::visit(Database& d)
 {
-    // TODO: use progressIndicatorM to show what's going on, and check for 
+    // TODO: use progressIndicatorM to show what's going on, and check for
     //       isCanceled()
     if (progressIndicatorM)
         progressIndicatorM->initProgress(wxEmptyString, 10, 0, 1);
@@ -364,6 +364,24 @@ void CreateDDLVisitor::visit(Server&)
     // empty
 }
 //-----------------------------------------------------------------------------
+// used by visit(Table)
+void addIndex(std::vector<Index> *ix, wxString& sql, ColumnConstraint *cc)
+{
+    // only for FB 1.5+
+    if (!ix || cc->indexName.StartsWith(wxT("RDB$")) || cc->getName_() == cc->indexName)
+        return;
+    for (std::vector<Index>::iterator it = ix->begin(); it != ix->end(); ++it)
+    {
+        if ((*it).getName_() == cc->indexName)
+        {
+            sql += wxT("\n  USING ");
+            if ((*it).getIndexType() == Index::itDescending)
+                sql += wxT("DESC ");
+            sql += wxT("INDEX ") + (*it).getQuotedName();
+        }
+    }
+}
+//-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Table& t)
 {
     preSqlM += wxT("CREATE TABLE ") + t.getQuotedName() + wxT("\n(\n  ");
@@ -373,6 +391,9 @@ void CreateDDLVisitor::visit(Table& t)
             preSqlM += wxT(",\n  ");
         visit(*it);
     }
+
+    // PRELOAD indexes as we might need them for PK,FK
+    std::vector<Index> *ix = t.getIndices();
 
     // primary keys (detect the name and use CONSTRAINT name PRIMARY KEY... or PRIMARY KEY(col)
     ColumnConstraint *pk = t.getPrimaryKey();
@@ -391,6 +412,7 @@ void CreateDDLVisitor::visit(Table& t)
             preSqlM += id.getQuoted();
         }
         preSqlM += wxT(")");
+        addIndex(ix, preSqlM, pk);
     }
 
     // unique constraints
@@ -411,6 +433,7 @@ void CreateDDLVisitor::visit(Table& t)
                 preSqlM += id.getQuoted();
             }
             preSqlM += wxT(")");
+            addIndex(ix, preSqlM, &(*ci));
         }
     }
 
@@ -448,6 +471,7 @@ void CreateDDLVisitor::visit(Table& t)
             wxString del = (*ci).deleteActionM;
             if (!del.IsEmpty() && del != wxT("RESTRICT"))
                 postSqlM += wxT(" ON DELETE ") + del;
+            addIndex(ix, postSqlM, &(*ci));
             postSqlM += wxT(";\n");
         }
     }
@@ -466,7 +490,6 @@ void CreateDDLVisitor::visit(Table& t)
     }
 
     // indices
-    std::vector<Index> *ix = t.getIndices();
     if (ix)
     {
         for (std::vector<Index>::iterator ci = ix->begin(); ci != ix->end(); ++ci)

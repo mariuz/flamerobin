@@ -195,7 +195,7 @@ bool Table::loadPrimaryKey()
         tr1->Start();
         IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
         st1->Prepare(
-            "select r.rdb$constraint_name, i.rdb$field_name "
+            "select r.rdb$constraint_name, i.rdb$field_name, r.rdb$index_name "
             "from rdb$relation_constraints r, rdb$index_segments i "
             "where r.rdb$relation_name=? and r.rdb$index_name=i.rdb$index_name and "
             "(r.rdb$constraint_type='PRIMARY KEY') order by 1, 2"
@@ -205,14 +205,14 @@ bool Table::loadPrimaryKey()
         st1->Execute();
         while (st1->Fetch())
         {
-            std::string name, cname;
+            std::string name, cname, ix;
             st1->Get(1, cname);
             st1->Get(2, name);
+            st1->Get(3, ix);
 
-            name.erase(name.find_last_not_of(" ") + 1);
-            cname.erase(cname.find_last_not_of(" ") + 1);
-            primaryKeyM.setName_(std2wx(cname));
-            primaryKeyM.columnsM.push_back(std2wx(name));
+            primaryKeyM.setName_(std2wx(cname).Strip());
+            primaryKeyM.columnsM.push_back(std2wx(name).Strip());
+            primaryKeyM.indexName = std2wx(ix).Strip();
         }
         tr1->Commit();
         primaryKeyM.setParent(this);
@@ -251,7 +251,7 @@ bool Table::loadUniqueConstraints()
         tr1->Start();
         IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
         st1->Prepare(
-            "select r.rdb$constraint_name, i.rdb$field_name "
+            "select r.rdb$constraint_name, i.rdb$field_name, r.rdb$index_name "
             "from rdb$relation_constraints r, rdb$index_segments i "
             "where r.rdb$relation_name=? and r.rdb$index_name=i.rdb$index_name and "
             "(r.rdb$constraint_type='UNIQUE') order by 1, 2"
@@ -262,9 +262,10 @@ bool Table::loadUniqueConstraints()
         ColumnConstraint *cc = 0;
         while (st1->Fetch())
         {
-            std::string name, cname;
+            std::string name, cname, ix;
             st1->Get(1, cname);
             st1->Get(2, name);
+            st1->Get(3, ix);
             name.erase(name.find_last_not_of(" ") + 1);
             cname.erase(cname.find_last_not_of(" ") + 1);
 
@@ -275,6 +276,7 @@ bool Table::loadUniqueConstraints()
                 ColumnConstraint c;
                 uniqueConstraintsM.push_back(c);
                 cc = &uniqueConstraintsM.back();
+                cc->indexName = std2wx(ix).Strip();
                 cc->setName_(std2wx(cname));
                 cc->columnsM.push_back(std2wx(name));
                 cc->setParent(this);
@@ -352,7 +354,8 @@ bool Table::loadForeignKeys()
         IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
         IBPP::Statement st2 = IBPP::StatementFactory(db, tr1);
         st1->Prepare(
-            "select r.rdb$constraint_name, i.rdb$field_name, c.rdb$update_rule, c.rdb$delete_rule, c.RDB$CONST_NAME_UQ "
+            "select r.rdb$constraint_name, i.rdb$field_name, c.rdb$update_rule, "
+            " c.rdb$delete_rule, c.RDB$CONST_NAME_UQ, r.rdb$index_name "
             "from rdb$relation_constraints r, rdb$index_segments i, rdb$ref_constraints c "
             "where r.rdb$relation_name=? and r.rdb$index_name=i.rdb$index_name  "
             "and r.rdb$constraint_name = c.rdb$constraint_name "
@@ -373,11 +376,13 @@ bool Table::loadForeignKeys()
         while (st1->Fetch())
         {
             std::string name, cname, update_rule, delete_rule, ref_constraint;
+            std::string ix;
             st1->Get(1, cname);
             st1->Get(2, name);
             st1->Get(3, update_rule);
             st1->Get(4, delete_rule);
             st1->Get(5, ref_constraint);
+            st1->Get(6, ix);
 
             name.erase(name.find_last_not_of(" ") + 1);
             cname.erase(cname.find_last_not_of(" ") + 1);
@@ -394,6 +399,7 @@ bool Table::loadForeignKeys()
                 fkp->setParent(this);
                 fkp->updateActionM = std2wx(update_rule).Strip();
                 fkp->deleteActionM = std2wx(delete_rule).Strip();
+                fkp->indexName = std2wx(ix).Strip();
 
                 st2->Set(1, ref_constraint);
                 st2->Execute();
