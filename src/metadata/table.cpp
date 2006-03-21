@@ -447,9 +447,12 @@ bool Table::loadIndices()
         IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
         st1->Prepare(
             "SELECT i.rdb$index_name, i.rdb$unique_flag, i.rdb$index_inactive, "
-            " i.rdb$index_type, i.rdb$statistics, s.rdb$field_name"
+            " i.rdb$index_type, i.rdb$statistics, s.rdb$field_name, "
+            " rc.rdb$constraint_name"
             " from rdb$indices i"
             " join rdb$index_segments s on i.rdb$index_name = s.rdb$index_name"
+            " left outer join rdb$relation_constraints rc "
+            "   on rc.rdb$index_name = i.rdb$index_name "
             " where i.rdb$relation_name = ?"
             " order by i.rdb$index_id, s.rdb$field_position "
         );
@@ -488,7 +491,8 @@ bool Table::loadIndices()
                     unq == 1,
                     inactive == 0,
                     type == 0,
-                    statistics
+                    statistics,
+                    !st1->IsNull(7)
                 );
                 indicesM.push_back(x);
                 i = &indicesM.back();

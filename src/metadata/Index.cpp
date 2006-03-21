@@ -41,50 +41,57 @@
 #include "Index.h"
 #include "MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
-Index::Index(bool unique, bool active, bool ascending, double statistics)
+Index::Index(bool unique, bool active, bool ascending, double statistics,
+    bool system)
 {
-	typeM = ntIndex;
-	uniqueFlagM = unique;
-	activeM = active;
-	indexTypeM = (ascending ? itAscending : itDescending);
-	statisticsM = statistics;
+    typeM = ntIndex;
+    uniqueFlagM = unique;
+    activeM = active;
+    indexTypeM = (ascending ? itAscending : itDescending);
+    statisticsM = statistics;
+    isSystemM = system;
+}
+//-----------------------------------------------------------------------------
+bool Index::isSystem() const
+{
+    return isSystemM;
 }
 //-----------------------------------------------------------------------------
 bool Index::isActive()
 {
-	return activeM;
+    return activeM;
 }
 //-----------------------------------------------------------------------------
 bool Index::isUnique()
 {
-	return uniqueFlagM;
+    return uniqueFlagM;
 }
 //-----------------------------------------------------------------------------
 double Index::getStatistics()
 {
-	return statisticsM;
+    return statisticsM;
 }
 //-----------------------------------------------------------------------------
 std::vector<wxString> *Index::getSegments()
 {
-	return &segmentsM;
+    return &segmentsM;
 }
 //-----------------------------------------------------------------------------
 wxString Index::getFieldsAsString()
 {
-	wxString retval;
-	for (std::vector<wxString>::iterator it = segmentsM.begin(); it != segmentsM.end(); ++it)
-	{
-		if (!retval.empty())
-			retval += wxT(",");
-		retval += (*it);
-	}
-	return retval;
+    wxString retval;
+    for (std::vector<wxString>::iterator it = segmentsM.begin(); it != segmentsM.end(); ++it)
+    {
+        if (!retval.empty())
+            retval += wxT(",");
+        retval += (*it);
+    }
+    return retval;
 }
 //-----------------------------------------------------------------------------
 Index::IndexType Index::getIndexType()
 {
-	return indexTypeM;
+    return indexTypeM;
 }
 //-----------------------------------------------------------------------------
 void Index::loadDescription()
@@ -104,6 +111,6 @@ void Index::saveDescription(wxString description)
 //-----------------------------------------------------------------------------
 void Index::acceptVisitor(MetadataItemVisitor* visitor)
 {
-	visitor->visit(*this);
+    visitor->visit(*this);
 }
 //-----------------------------------------------------------------------------

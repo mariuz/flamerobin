@@ -34,27 +34,30 @@
 class Index: public MetadataItem
 {
 public:
-	// needs to be declared here as type is used in private section
-	enum IndexType { itAscending, itDescending };
-	
+    // needs to be declared here as type is used in private section
+    enum IndexType { itAscending, itDescending };
+
 private:
-	bool uniqueFlagM;
-	bool activeM;
-	IndexType indexTypeM;
-	double statisticsM;
-	std::vector<wxString> segmentsM;
+    bool isSystemM;
+    bool uniqueFlagM;
+    bool activeM;
+    IndexType indexTypeM;
+    double statisticsM;
+    std::vector<wxString> segmentsM;
 protected:
     virtual void loadDescription();
     virtual void saveDescription(wxString description);
 public:
-	Index(bool unique, bool active, bool ascending, double statistics);
+    Index(bool unique, bool active, bool ascending, double statistics,
+        bool system);
 
-	bool isActive();
-	bool isUnique();
-	double getStatistics();
-	IndexType getIndexType();
-	wxString getFieldsAsString();
-	std::vector<wxString> *getSegments();
+    virtual bool isSystem() const;
+    bool isActive();
+    bool isUnique();
+    double getStatistics();
+    IndexType getIndexType();
+    wxString getFieldsAsString();
+    std::vector<wxString> *getSegments();
     virtual void acceptVisitor(MetadataItemVisitor* v);
 };
 //-----------------------------------------------------------------------------
