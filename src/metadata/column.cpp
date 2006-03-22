@@ -67,10 +67,12 @@ void Column::Init(bool notnull, wxString source, wxString computedSource,
     defaultM = defaultValue;
 }
 //-----------------------------------------------------------------------------
-bool Column::isNullable() const
+bool Column::isNullable(bool checkDomain) const
 {
     if (notnullM)
         return false;
+    if (!checkDomain)
+        return true;
     Domain *d = getDomain();
     if (d)
         return d->isNullable();

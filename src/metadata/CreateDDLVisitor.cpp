@@ -100,7 +100,7 @@ void CreateDDLVisitor::visit(Column& c)
     wxString defaultVal = c.getDefault();
     if (!defaultVal.IsEmpty())
         preSqlM << wxT(" ") << defaultVal;     // already contains word DEFAULT
-    if (!c.isNullable())
+    if (!c.isNullable(false))               // false = don't check domain
         preSqlM << wxT(" NOT NULL");
     wxString collate = c.getCollation();
     if (!collate.IsEmpty())

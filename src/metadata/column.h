@@ -48,7 +48,7 @@ public:
     wxString getDatatype();
     virtual wxString getDropSqlStatement() const;
 
-    bool isNullable() const;
+    bool isNullable(bool checkDomain = true) const;
     bool isPrimaryKey() const;
     wxString getComputedSource() const;
     wxString getSource() const;
