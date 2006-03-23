@@ -251,8 +251,10 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
             return;
         std::vector<MetadataItem*> tmp;
         if (r->checkAndLoadColumns() && r->getChildren(tmp))
+        {
             for (std::vector<MetadataItem*>::iterator it = tmp.begin(); it != tmp.end(); ++it)
                 processHtmlCode(htmlpage, suffix, *it);
+        }
     }
 
     else if (cmd == wxT("triggers")) // table triggers,  triggers:after or triggers:befor  <- not a typo
@@ -417,7 +419,7 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         }
     }
 
-    else if (cmd == wxT("input_parameters")) // SP params
+    else if (cmd == wxT("input_parameters") || cmd == wxT("output_parameters"))     // SP params
     {
         Procedure* p = dynamic_cast<Procedure*>(object);
         if (!p)
@@ -427,29 +429,11 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         std::vector<MetadataItem*> tmp;
         if (p->checkAndLoadParameters() && p->getChildren(tmp))
         {
+            ParameterType pt = (cmd == wxT("input_parameters")) ? ptInput : ptOutput;
             std::vector<MetadataItem*>::iterator it;
             for (it = tmp.begin(); it != tmp.end(); ++it)
             {
-                if (((Parameter*)(*it))->getParameterType() == ptInput)
-                    processHtmlCode(htmlpage, suffix, *it);
-            }
-        }
-    }
-
-    else if (cmd == wxT("output_parameters"))    // SP params
-    {
-        Procedure* p = dynamic_cast<Procedure*>(object);
-        if (!p)
-            return;
-
-        SubjectLocker locker(p);
-        std::vector<MetadataItem*> tmp;
-        if (p->checkAndLoadParameters() && p->getChildren(tmp))
-        {
-            std::vector<MetadataItem*>::iterator it;
-            for (it = tmp.begin(); it != tmp.end(); ++it)
-            {
-                if (((Parameter*)(*it))->getParameterType() == ptOutput)
+                if ((dynamic_cast<Parameter*>(*it))->getParameterType() == pt)
                     processHtmlCode(htmlpage, suffix, *it);
             }
         }
