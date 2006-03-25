@@ -50,6 +50,7 @@
 #include "dberror.h"
 #include "gui/AdvancedMessageDialog.h"
 #include "ExecuteSqlFrame.h"
+#include "StatementHistoryFrame.h"
 #include "framemanager.h"
 #include "frDataGrid.h"
 #include "frDataGridTable.h"
@@ -195,6 +196,7 @@ namespace sql_icons {
 #include "sqlicon.xpm"
 #include "left.xpm"
 #include "right.xpm"
+#include "history.xpm"
 };
 //-----------------------------------------------------------------------------
 // Setup the Scintilla editor
@@ -481,6 +483,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title, const
     button_saveas = new wxBitmapButton(panel_contents, ID_button_saveas, wxBitmap(sql_icons::saveas_xpm));
     button_prev = new wxBitmapButton(panel_contents, ID_button_prev, wxBitmap(sql_icons::left_xpm));
     button_next = new wxBitmapButton(panel_contents, ID_button_next, wxBitmap(sql_icons::right_xpm));
+    button_history = new wxBitmapButton(panel_contents, ID_button_history, wxBitmap(sql_icons::history_xpm));
     button_execute = new wxButton(panel_contents, ID_button_execute, _("Execute (F4)"));
     button_commit = new wxButton(panel_contents, ID_button_commit, _("Commit (F5)"));
     button_rollback = new wxButton(panel_contents, ID_button_rollback, _("Rollback (F8)"));
@@ -529,6 +532,7 @@ void ExecuteSqlFrame::set_properties()
     button_saveas->SetToolTip(_("Save As..."));
     button_prev->SetToolTip(_("Previous"));
     button_next->SetToolTip(_("Next"));
+    button_history->SetToolTip(_("Statement History"));
     button_execute->SetToolTip(_("F4 - Execute SQL statement"));
     button_commit->SetToolTip(_("F5 - Commit transaction"));
     button_rollback->SetToolTip(_("F8 - Rollback transaction"));
@@ -562,6 +566,7 @@ void ExecuteSqlFrame::do_layout()
     sizer_3->Add(button_saveas, 0, wxALL, 1);
     sizer_3->Add(button_prev, 0, wxALL, 1);
     sizer_3->Add(button_next, 0, wxALL, 1);
+    sizer_3->Add(button_history, 0, wxALL, 1);
     sizer_3->Add(10, 5, 0, 0, 0);
     sizer_3->Add(button_execute, 0, wxALL, 3);
     sizer_3->Add(button_commit, 0, wxALL, 3);
@@ -635,6 +640,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_saveas, ExecuteSqlFrame::OnButtonSaveAsClick)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_prev, ExecuteSqlFrame::OnButtonPrevClick)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_next, ExecuteSqlFrame::OnButtonNextClick)
+    EVT_BUTTON(ExecuteSqlFrame::ID_button_history, ExecuteSqlFrame::OnButtonHistoryClick)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_execute, ExecuteSqlFrame::OnButtonExecuteClick)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_commit, ExecuteSqlFrame::OnButtonCommitClick)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_rollback, ExecuteSqlFrame::OnButtonRollbackClick)
@@ -951,6 +957,13 @@ void ExecuteSqlFrame::OnButtonNextClick(wxCommandEvent& WXUNUSED(event))
             styled_text_ctrl_sql->SetText(sh.get(historyPositionM));
     }
     updateHistoryButtons();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnButtonHistoryClick(wxCommandEvent& WXUNUSED(event))
+{
+    StatementHistory& sh = StatementHistory::get(databaseM);
+    StatementHistoryFrame *shf = new StatementHistoryFrame(this, &sh);
+    shf->Show();
 }
 //-----------------------------------------------------------------------------
 //! enable/disable and show/hide controls depending of transaction status
