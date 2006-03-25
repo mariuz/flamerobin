@@ -50,13 +50,13 @@ class Server;
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------
-wxString StatementHistory::getFilename(size_t item)
+wxString StatementHistory::getFilename(StatementHistory::Position item)
 {
     wxString fn = config().getUserHomePath() + wxT("history/");
     if (!wxDirExists(fn))
         wxMkdir(fn);
 
-    for (size_t i=0; i<storageNameM.Length(); ++i)
+    for (Position i=0; i<storageNameM.Length(); ++i)
         fn += wxString::Format(wxT("%04x"), storageNameM[i]);
     fn << wxT("_ITEM_") << (item);
     return fn;
@@ -156,5 +156,32 @@ void StatementHistory::add(const wxString& str)
 StatementHistory::Position StatementHistory::size()
 {
     return sizeM;
+}
+//-----------------------------------------------------------------------------
+void StatementHistory::deleteItems(
+    const std::vector<StatementHistory::Position>& items)
+{
+    // remove the files (remembering the "lowest" deleted)
+    Position start = size();
+    for (std::vector<Position>::const_iterator ci = items.begin();
+        ci != items.end(); ++ci)
+    {
+        wxRemoveFile(getFilename(*ci));
+        if ((*ci) < start)
+            start = (*ci);
+    }
+
+    // move existing files
+    for (Position currentpos = start; currentpos < size(); currentpos++)
+    {
+        if (!wxFileExists(getFilename(currentpos)))
+            continue;
+        if (currentpos != start)
+            wxRenameFile(getFilename(currentpos), getFilename(start));
+        start++;
+    }
+
+    // set new size
+    sizeM = start;
 }
 //-----------------------------------------------------------------------------

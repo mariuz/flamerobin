@@ -73,7 +73,7 @@ StatementHistoryFrame::StatementHistoryFrame(ExecuteSqlFrame *parent,
     topSizer->Add(button_delete, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     innerSizer->Add(topSizer, 0, wxEXPAND, 5);
     listbox_search = new wxListBox(m_panel1, ID_listbox_search,
-        wxDefaultPosition, wxDefaultSize, 0, NULL, 0);
+        wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_MULTIPLE);
 
     innerSizer->Add(listbox_search, 1, wxALL|wxEXPAND, 5);
     m_panel1->SetSizer(innerSizer);
@@ -152,16 +152,38 @@ void StatementHistoryFrame::OnButtonSearchClick(wxCommandEvent&
 void StatementHistoryFrame::OnButtonDeleteClick(wxCommandEvent&
     WXUNUSED(event))
 {
+    wxArrayInt temp;
+    if (listbox_search->GetSelections(temp) == 0)
+    {
+        wxMessageBox(_("Please select items you wish to delete"),
+            _("Nothing is selected"),
+            wxOK|wxICON_WARNING);
+        return;
+    }
+    wxBusyCursor b;
+    std::vector<StatementHistory::Position> vect;
+    for (size_t i=0; i<temp.GetCount(); ++i)
+    {
+        vect.push_back(
+            (StatementHistory::Position)listbox_search->GetClientData(
+            temp.Item(i)));
+    }
+    historyM->deleteItems(vect);
+
+    for (size_t i=temp.GetCount()-1; (int)i >= 0; --i)
+        listbox_search->Delete(temp.Item(i));
 }
 //-----------------------------------------------------------------------------
 void StatementHistoryFrame::OnListBoxSearchDoubleClick(wxCommandEvent& event)
 {
+    wxMessageBox(_("Not set"));
+
     // it is certain, but who knows...
     ExecuteSqlFrame *f = dynamic_cast<ExecuteSqlFrame *>(GetParent());
+    if (!f)
+        return;
     StatementHistory::Position item =
         (StatementHistory::Position)event.GetClientData();
-    if (!f || item < 0)
-        return;
     f->setSql(historyM->get(item));
     Destroy();
 }

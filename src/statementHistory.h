@@ -27,27 +27,31 @@
 #define FR_HISTORY_H
 
 #include <wx/wx.h>
+#include <vector>
 //-----------------------------------------------------------------------------
 class Database;
 //-----------------------------------------------------------------------------
 class StatementHistory
 {
+public:
+    typedef size_t Position;
+
 private:
     StatementHistory(const wxString& storageName);
-    wxString getFilename(size_t item);
+    wxString getFilename(Position item);
     wxString storageNameM;
-    size_t sizeM;
+    Position sizeM;
 
 public:
     // copy ctor needed for std:: containers
     StatementHistory(const StatementHistory& source);
-    typedef size_t Position;
 
     //! reads granularity from config() and gives pointer to appropriate history object
     static StatementHistory& get(Database *db);
 
     wxString get(Position position);
     void add(const wxString&);
+    void deleteItems(const std::vector<Position>& items);
     Position size();
 };
 //-----------------------------------------------------------------------------
