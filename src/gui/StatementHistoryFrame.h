@@ -45,6 +45,7 @@ private:
     wxButton *button_delete;
     wxButton *button_copy;
     wxListBox *listbox_search;
+    void setSearching(bool searching);
 
     enum    // event handling
     {

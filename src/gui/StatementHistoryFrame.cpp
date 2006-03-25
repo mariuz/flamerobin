@@ -97,6 +97,17 @@ StatementHistoryFrame::StatementHistoryFrame(ExecuteSqlFrame *parent,
     Centre();
 }
 //-----------------------------------------------------------------------------
+void StatementHistoryFrame::setSearching(bool searching)
+{
+    isSearchingM = searching;
+    button_delete->Enable(!searching);
+    button_copy->Enable(!searching);
+    if (searching)
+        button_search->SetLabel(_("&Stop"));
+    else
+        button_search->SetLabel(_("&Search"));
+}
+//-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(StatementHistoryFrame, wxFrame)
     EVT_BUTTON(StatementHistoryFrame::ID_button_search,
         StatementHistoryFrame::OnButtonSearchClick)
@@ -113,18 +124,14 @@ void StatementHistoryFrame::OnButtonSearchClick(wxCommandEvent&
 {
     if (isSearchingM)
     {
-        isSearchingM = false;
-        button_search->SetLabel(_("&Search"));
-        button_delete->Enable(true);
+        setSearching(false);
         return;
     }
 
     // start the search
     listbox_search->Clear();
     wxString searchString = textctrl_search->GetValue().Upper();
-    button_delete->Enable(false);
-    isSearchingM = true;
-    button_search->SetLabel(_("&Stop"));
+    setSearching(true);
     StatementHistory::Position total = historyM->size();
     for (StatementHistory::Position p = total - 1; (int)p >= 0; --p)
     {
@@ -147,9 +154,7 @@ void StatementHistoryFrame::OnButtonSearchClick(wxCommandEvent&
             listbox_search->Append(s, (void *)p);
         }
     }
-    isSearchingM = false;
-    button_delete->Enable(true);
-    button_search->SetLabel(_("&Search"));
+    setSearching(false);
     statusBarM->SetStatusText(_("Search complete."));
 }
 //-----------------------------------------------------------------------------
@@ -198,10 +203,10 @@ void StatementHistoryFrame::OnListBoxSearchDoubleClick(wxCommandEvent& event)
 {
    // it is certain, but who knows...
     ExecuteSqlFrame *f = dynamic_cast<ExecuteSqlFrame *>(GetParent());
-    if (!f)
-        return;
     StatementHistory::Position item =
         (StatementHistory::Position)event.GetClientData();
+    if (!f || (int)item < 0)
+        return;
     f->setSql(historyM->get(item));
     Destroy();
 }
