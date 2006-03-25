@@ -33,12 +33,12 @@
 #include <wx/wx.h>
 #endif //WX_PRECOMP
 
-#include "StatementHistory.h"
+#include "statementHistory.h"
 #include "StatementHistoryFrame.h"
 //-----------------------------------------------------------------------------
 StatementHistoryFrame::StatementHistoryFrame(wxWindow *parent,
-    StatementHistory *history, const wxString& title, wxSize)
-    :wxFrame(parent, -1, title, wxDefaultPosition, size), historyM(history),
+    StatementHistory *history, const wxString& title, wxSize size)
+    :BaseFrame(parent, -1, title, wxDefaultPosition, size), historyM(history),
      isSearchingM(false)
 {
     wxBoxSizer *mainSizer;

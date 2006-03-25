@@ -307,6 +307,7 @@
         $(SOURCEDIR)/gui/RestoreFrame.h
         $(SOURCEDIR)/gui/ServerRegistrationDialog.h
         $(SOURCEDIR)/gui/SimpleHtmlFrame.h
+        $(SOURCEDIR)/gui/StatementHistoryFrame.h
         $(SOURCEDIR)/gui/TriggerWizardDialog.h
         $(SOURCEDIR)/images.h
         $(SOURCEDIR)/logger.h
@@ -399,6 +400,7 @@
         $(SOURCEDIR)/gui/RestoreFrame.cpp
         $(SOURCEDIR)/gui/ServerRegistrationDialog.cpp
         $(SOURCEDIR)/gui/SimpleHtmlFrame.cpp
+        $(SOURCEDIR)/gui/StatementHistoryFrame.cpp
         $(SOURCEDIR)/gui/TriggerWizardDialog.cpp
         $(SOURCEDIR)/images.cpp
         $(SOURCEDIR)/logger.cpp
