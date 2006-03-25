@@ -57,25 +57,29 @@ StatementHistoryFrame::StatementHistoryFrame(ExecuteSqlFrame *parent,
     topSizer = new wxBoxSizer(wxHORIZONTAL);
     m_staticText2 = new wxStaticText(m_panel1, wxID_ANY, wxT("Search for:"),
         wxDefaultPosition, wxDefaultSize, 0);
-
     topSizer->Add(m_staticText2, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
+
     textctrl_search = new wxTextCtrl(m_panel1, wxID_ANY, wxT(""),
         wxDefaultPosition, wxDefaultSize, 0);
-
     topSizer->Add(textctrl_search, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5);
+
     button_search = new wxButton(m_panel1, ID_button_search, wxT("&Search"),
         wxDefaultPosition, wxDefaultSize, 0);
-
     topSizer->Add(button_search, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
+
     button_delete = new wxButton(m_panel1, ID_button_delete,
         wxT("&Delete Selected"), wxDefaultPosition, wxDefaultSize, 0);
-
     topSizer->Add(button_delete, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
+
+    button_copy = new wxButton(m_panel1, ID_button_copy,
+        wxT("&Copy to editor"), wxDefaultPosition, wxDefaultSize, 0);
+    topSizer->Add(button_copy, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
+
     innerSizer->Add(topSizer, 0, wxEXPAND, 5);
     listbox_search = new wxListBox(m_panel1, ID_listbox_search,
         wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_MULTIPLE);
-
     innerSizer->Add(listbox_search, 1, wxALL|wxEXPAND, 5);
+
     m_panel1->SetSizer(innerSizer);
     mainSizer->Add(m_panel1, 1, wxEXPAND, 0);
     this->SetSizerAndFit(mainSizer);
@@ -88,11 +92,9 @@ StatementHistoryFrame::StatementHistoryFrame(ExecuteSqlFrame *parent,
 
     button_search->SetDefault();
     textctrl_search->SetFocus();
-}
-//-----------------------------------------------------------------------------
-const wxRect StatementHistoryFrame::getDefaultRect() const
-{
-    return wxRect(-1, -1, 620, 400);
+    // center on parent
+    SetSize(620, 400);
+    Centre();
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(StatementHistoryFrame, wxFrame)
@@ -100,6 +102,8 @@ BEGIN_EVENT_TABLE(StatementHistoryFrame, wxFrame)
         StatementHistoryFrame::OnButtonSearchClick)
     EVT_BUTTON(StatementHistoryFrame::ID_button_delete,
         StatementHistoryFrame::OnButtonDeleteClick)
+    EVT_BUTTON(StatementHistoryFrame::ID_button_copy,
+        StatementHistoryFrame::OnButtonCopyClick)
     EVT_LISTBOX_DCLICK(StatementHistoryFrame::ID_listbox_search,
         StatementHistoryFrame::OnListBoxSearchDoubleClick)
 END_EVENT_TABLE()
@@ -174,11 +178,25 @@ void StatementHistoryFrame::OnButtonDeleteClick(wxCommandEvent&
         listbox_search->Delete(temp.Item(i));
 }
 //-----------------------------------------------------------------------------
+void StatementHistoryFrame::OnButtonCopyClick(wxCommandEvent& WXUNUSED(event))
+{
+   // it is certain, but who knows...
+    ExecuteSqlFrame *f = dynamic_cast<ExecuteSqlFrame *>(GetParent());
+    if (!f)
+        return;
+
+    int sel = listbox_search->GetSelection();
+    if (sel == wxNOT_FOUND)
+        return;
+    StatementHistory::Position item =
+        (StatementHistory::Position)listbox_search->GetClientData(sel);
+    f->setSql(historyM->get(item));
+    Destroy();
+}
+//-----------------------------------------------------------------------------
 void StatementHistoryFrame::OnListBoxSearchDoubleClick(wxCommandEvent& event)
 {
-    wxMessageBox(_("Not set"));
-
-    // it is certain, but who knows...
+   // it is certain, but who knows...
     ExecuteSqlFrame *f = dynamic_cast<ExecuteSqlFrame *>(GetParent());
     if (!f)
         return;

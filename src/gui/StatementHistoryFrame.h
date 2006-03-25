@@ -43,22 +43,24 @@ private:
     wxTextCtrl *textctrl_search;
     wxButton *button_search;
     wxButton *button_delete;
+    wxButton *button_copy;
     wxListBox *listbox_search;
 
     enum    // event handling
     {
         ID_button_search = 101,
         ID_button_delete,
+        ID_button_copy,
         ID_listbox_search
     };
     void OnButtonSearchClick(wxCommandEvent& event);
     void OnButtonDeleteClick(wxCommandEvent& event);
+    void OnButtonCopyClick(wxCommandEvent& event);
     void OnListBoxSearchDoubleClick(wxCommandEvent& event);
 public:
     StatementHistoryFrame(ExecuteSqlFrame *parent, StatementHistory *history,
         const wxString& title = wxT("SQL Statement History"));
 
-    virtual const wxRect getDefaultRect() const;
     DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
