@@ -34,13 +34,18 @@
 #endif //WX_PRECOMP
 
 #include "statementHistory.h"
+#include "ExecuteSqlFrame.h"
 #include "StatementHistoryFrame.h"
 //-----------------------------------------------------------------------------
-StatementHistoryFrame::StatementHistoryFrame(wxWindow *parent,
-    StatementHistory *history, const wxString& title, wxSize size)
-    :BaseFrame(parent, -1, title, wxDefaultPosition, size), historyM(history),
+StatementHistoryFrame::StatementHistoryFrame(ExecuteSqlFrame *parent,
+    StatementHistory *history, const wxString& title)
+    :BaseFrame(parent, -1, title), historyM(history),
      isSearchingM(false)
 {
+    statusBarM = CreateStatusBar();
+    statusBarM->SetStatusText(
+        _("Searching with empty search box shows entire history."));
+
     wxBoxSizer *mainSizer;
     mainSizer = new wxBoxSizer(wxVERTICAL);
     m_panel1 = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
@@ -74,6 +79,20 @@ StatementHistoryFrame::StatementHistoryFrame(wxWindow *parent,
     m_panel1->SetSizer(innerSizer);
     mainSizer->Add(m_panel1, 1, wxEXPAND, 0);
     this->SetSizerAndFit(mainSizer);
+
+    #include "history.xpm"
+    wxBitmap bmp = wxBitmap(history_xpm);
+    wxIcon icon;
+    icon.CopyFromBitmap(bmp);
+    SetIcon(icon);
+
+    button_search->SetDefault();
+    textctrl_search->SetFocus();
+}
+//-----------------------------------------------------------------------------
+const wxRect StatementHistoryFrame::getDefaultRect() const
+{
+    return wxRect(-1, -1, 620, 400);
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(StatementHistoryFrame, wxFrame)
@@ -97,28 +116,37 @@ void StatementHistoryFrame::OnButtonSearchClick(wxCommandEvent&
     }
 
     // start the search
+    listbox_search->Clear();
     wxString searchString = textctrl_search->GetValue().Upper();
     button_delete->Enable(false);
     isSearchingM = true;
     button_search->SetLabel(_("&Stop"));
-    for (StatementHistory::Position p = historyM->size() - 1; p >= 0; --p)
+    StatementHistory::Position total = historyM->size();
+    for (StatementHistory::Position p = total - 1; (int)p >= 0; --p)
     {
         wxYield();
         if (!isSearchingM)
+        {
+            statusBarM->SetStatusText(_("Search stopped."));
             return;
+        }
+
+        statusBarM->SetStatusText(wxString::Format(
+            _("Searching %d of %d (%d%%)"), (int)p, (int)total, (int)p/total));
         wxString s = historyM->get(p);
-        if (s.Upper().Contains(searchString))
+        if (searchString.IsEmpty() || s.Upper().Contains(searchString))
         {
             s.Replace(wxT("\n"), wxT(" "));
             s.Replace(wxT("\r"), wxEmptyString);
             if (s.Length() > 150)
-                listbox_search->Append(s.Mid(0, 150));
-            listbox_search->Append(s);
+                listbox_search->Append(s.Mid(0, 150), (void *)p);
+            listbox_search->Append(s, (void *)p);
         }
     }
     isSearchingM = false;
     button_delete->Enable(true);
     button_search->SetLabel(_("&Search"));
+    statusBarM->SetStatusText(_("Search complete."));
 }
 //-----------------------------------------------------------------------------
 void StatementHistoryFrame::OnButtonDeleteClick(wxCommandEvent&
@@ -126,10 +154,16 @@ void StatementHistoryFrame::OnButtonDeleteClick(wxCommandEvent&
 {
 }
 //-----------------------------------------------------------------------------
-void StatementHistoryFrame::OnListBoxSearchDoubleClick(wxCommandEvent&
-    WXUNUSED(event))
+void StatementHistoryFrame::OnListBoxSearchDoubleClick(wxCommandEvent& event)
 {
-    // copy item to SQL frame? or Clipboard
+    // it is certain, but who knows...
+    ExecuteSqlFrame *f = dynamic_cast<ExecuteSqlFrame *>(GetParent());
+    StatementHistory::Position item =
+        (StatementHistory::Position)event.GetClientData();
+    if (!f || item < 0)
+        return;
+    f->setSql(historyM->get(item));
+    Destroy();
 }
 //-----------------------------------------------------------------------------
 

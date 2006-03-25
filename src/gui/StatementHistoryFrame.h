@@ -30,12 +30,14 @@
 #include "BaseFrame.h"
 
 class StatementHistory;
+class ExecuteSqlFrame;
 //-----------------------------------------------------------------------------
 class StatementHistoryFrame : public BaseFrame
 {
 private:
     bool isSearchingM;
     StatementHistory *historyM;
+    wxStatusBar *statusBarM;
     wxPanel *m_panel1;
     wxStaticText *m_staticText2;
     wxTextCtrl *textctrl_search;
@@ -53,10 +55,10 @@ private:
     void OnButtonDeleteClick(wxCommandEvent& event);
     void OnListBoxSearchDoubleClick(wxCommandEvent& event);
 public:
-    StatementHistoryFrame(wxWindow *parent, StatementHistory *history,
-        const wxString& title = wxT("SQL Statement History"),
-        wxSize size = wxSize(620,400));
+    StatementHistoryFrame(ExecuteSqlFrame *parent, StatementHistory *history,
+        const wxString& title = wxT("SQL Statement History"));
 
+    virtual const wxRect getDefaultRect() const;
     DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
