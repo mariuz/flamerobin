@@ -284,6 +284,7 @@
         $(SOURCEDIR)/frutils.h
         $(SOURCEDIR)/frversion.h
         $(SOURCEDIR)/gui/AdvancedMessageDialog.h
+        $(SOURCEDIR)/gui/AdvancedSearchFrame.h
         $(SOURCEDIR)/gui/BackupFrame.h
         $(SOURCEDIR)/gui/BackupRestoreBaseFrame.h
         $(SOURCEDIR)/gui/BaseDialog.h
@@ -376,6 +377,7 @@
         $(SOURCEDIR)/frprec.cpp
         $(SOURCEDIR)/frutils.cpp
         $(SOURCEDIR)/gui/AdvancedMessageDialog.cpp
+        $(SOURCEDIR)/gui/AdvancedSearchFrame.cpp
         $(SOURCEDIR)/gui/BackupFrame.cpp
         $(SOURCEDIR)/gui/BackupRestoreBaseFrame.cpp
         $(SOURCEDIR)/gui/BaseDialog.cpp

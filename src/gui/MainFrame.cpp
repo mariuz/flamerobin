@@ -44,6 +44,7 @@
 #include "core/FRError.h"
 #include "dberror.h"
 #include "gui/AdvancedMessageDialog.h"
+#include "gui/AdvancedSearchFrame.h"
 #include "gui/BackupFrame.h"
 #include "gui/ContextMenuMetadataItemVisitor.h"
 #include "gui/DatabaseRegistrationDialog.h"
@@ -91,9 +92,9 @@ void reportLastError(const wxString& actionMsg)
 //-----------------------------------------------------------------------------
 //! included xpm files, so that icons are compiled into executable
 namespace sql_icons {
-#include "new.xpm"
 #include "left.xpm"
 #include "right.xpm"
+#include "search.xpm"
 };
 //-----------------------------------------------------------------------------
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
@@ -109,7 +110,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
         choices, wxCB_DROPDOWN|wxCB_SORT);
     button_prev = new wxBitmapButton(searchPanelM, ID_button_prev, wxBitmap(sql_icons::left_xpm));
     button_next = new wxBitmapButton(searchPanelM, ID_button_next, wxBitmap(sql_icons::right_xpm));
-    button_advanced = new wxBitmapButton(searchPanelM, ID_button_advanced, wxBitmap(sql_icons::new_xpm));
+    button_advanced = new wxBitmapButton(searchPanelM, ID_button_advanced, wxBitmap(sql_icons::search_xpm));
     button_advanced->SetToolTip(_("Advanced metadata search"));
     button_prev->SetToolTip(_("Previous match"));
     button_next->SetToolTip(_("Next match"));
@@ -1533,7 +1534,8 @@ void MainFrame::OnButtonSearchClick(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
-    wxMessageBox(_("Not yet implemented"), _("Advanced search dialog"));
+    AdvancedSearchFrame *asf = new AdvancedSearchFrame(this);
+    asf->Show();
 
     FR_CATCH
 }
