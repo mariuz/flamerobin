@@ -116,6 +116,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AdvancedMessageDialog.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AdvancedSearchFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupRestoreBaseFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseDialog.obj \
@@ -140,6 +141,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleHtmlFrame.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TriggerWizardDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.obj \
@@ -375,6 +377,9 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.obj: .\src\frutils.cpp
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AdvancedMessageDialog.obj: .\src\gui\AdvancedMessageDialog.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AdvancedSearchFrame.obj: .\src\gui\AdvancedSearchFrame.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupFrame.obj: .\src\gui\BackupFrame.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
@@ -445,6 +450,9 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.obj: .\src\gui\S
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleHtmlFrame.obj: .\src\gui\SimpleHtmlFrame.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryFrame.obj: .\src\gui\StatementHistoryFrame.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TriggerWizardDialog.obj: .\src\gui\TriggerWizardDialog.cpp

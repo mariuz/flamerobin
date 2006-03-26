@@ -472,6 +472,10 @@ SOURCE=.\src\gui\AdvancedMessageDialog.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\AdvancedSearchFrame.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\BackupFrame.cpp
 # End Source File
 # Begin Source File
@@ -609,6 +613,10 @@ SOURCE=.\src\sql\SqlStatement.cpp
 # Begin Source File
 
 SOURCE=.\src\sql\SqlTokenizer.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\StatementHistoryFrame.cpp
 # End Source File
 # Begin Source File
 
@@ -794,6 +802,10 @@ SOURCE=.\src\gui\AdvancedMessageDialog.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\AdvancedSearchFrame.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\BackupFrame.h
 # End Source File
 # Begin Source File
@@ -931,6 +943,10 @@ SOURCE=.\src\sql\SqlStatement.h
 # Begin Source File
 
 SOURCE=.\src\sql\SqlTokenizer.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\StatementHistoryFrame.h
 # End Source File
 # Begin Source File
 
