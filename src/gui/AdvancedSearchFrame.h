@@ -31,9 +31,37 @@
 
 #include "BaseFrame.h"
 //-----------------------------------------------------------------------------
+class CriteriaItem
+{
+public:
+    enum Type { ctType, ctName, ctDescription, ctDDL, ctField, ctDB };
+    Type type;
+    wxString value;
+    Database *database; // only used for ctDB type
+    CriteriaItem(Type t, const wxString& v, Database *db = 0)
+        :type(t), value(v), database(db)
+    {
+    }
+    wxString getTypeString() const
+    {
+        switch (type)
+        {
+            case ctType:        return _("Type");
+            case ctName:        return _("Name");
+            case ctDescription: return _("Description");
+            case ctDDL:         return _("DDL contains");
+            case ctField:       return _("Has field");
+            case ctDB:          return _("In database");
+        };
+        return wxEmptyString;
+    }
+};
+//-----------------------------------------------------------------------------
 class AdvancedSearchFrame : public BaseFrame
 {
 private:
+    std::vector<CriteriaItem> searchCriteriaM;
+    void addCriteria(const CriteriaItem& item);
 
 protected:
     wxPanel *mainPanel;
@@ -67,15 +95,31 @@ protected:
     wxTextCtrl *stc_ddl;
 
 public:
+    AdvancedSearchFrame(wxWindow *parent);
     enum
     {
         ID_button_remove=100,
         ID_button_start,
+        ID_button_add_type,
+        ID_button_add_name,
+        ID_button_add_description,
+        ID_button_add_ddl,
+        ID_button_add_field,
+        ID_button_add_database,
         ID_checkbox_ddl,
         ID_listctrl_results
     };
 
-    AdvancedSearchFrame(wxWindow *parent);
+    void OnSize(wxSizeEvent& event);
+    void OnButtonRemoveClick(wxCommandEvent& event);
+    void OnButtonStartClick(wxCommandEvent& event);
+    void OnButtonAddTypeClick(wxCommandEvent& event);
+    void OnButtonAddNameClick(wxCommandEvent& event);
+    void OnButtonAddDescriptionClick(wxCommandEvent& event);
+    void OnButtonAddDDLClick(wxCommandEvent& event);
+    void OnButtonAddFieldClick(wxCommandEvent& event);
+    void OnButtonAddDatabaseClick(wxCommandEvent& event);
+    DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
 #endif

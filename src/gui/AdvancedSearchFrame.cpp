@@ -65,7 +65,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
     choice_type = new wxChoice(mainPanel, wxID_ANY, wxDefaultPosition,
         wxDefaultSize, nchoices1, choices1, 0);
     fgSizer1->Add(choice_type, 0, wxALL|wxEXPAND, 5);
-    button_add_type = new wxButton(mainPanel, wxID_ANY, _("Add"));
+    button_add_type = new wxButton(mainPanel, ID_button_add_type, _("Add"));
     fgSizer1->Add(button_add_type, 0, wxALL, 5);
 
     m_staticText2 = new wxStaticText(mainPanel, wxID_ANY, _("Name"));
@@ -73,28 +73,29 @@ AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
     textctrl_name = new wxTextCtrl(mainPanel, wxID_ANY,
         _("Allows * and ? wildcards"), wxDefaultPosition, wxDefaultSize, 0);
     fgSizer1->Add(textctrl_name, 0, wxALL|wxEXPAND, 5);
-    button_add_name = new wxButton(mainPanel, wxID_ANY, _("Add"));
+    button_add_name = new wxButton(mainPanel, ID_button_add_name, _("Add"));
     fgSizer1->Add(button_add_name, 0, wxALL, 5);
 
     m_staticText3 = new wxStaticText(mainPanel, wxID_ANY, _("Description"));
     fgSizer1->Add(m_staticText3, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     textctrl_description = new wxTextCtrl(mainPanel, wxID_ANY, wxEmptyString);
     fgSizer1->Add(textctrl_description, 0, wxALL|wxEXPAND, 5);
-    button_add_description = new wxButton(mainPanel, wxID_ANY, _("Add"));
+    button_add_description = new wxButton(mainPanel,
+        ID_button_add_description, _("Add"));
     fgSizer1->Add(button_add_description, 0, wxALL, 5);
 
     m_staticText4 = new wxStaticText(mainPanel, wxID_ANY, _("DDL contains"));
     fgSizer1->Add(m_staticText4, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     textctrl_ddl = new wxTextCtrl(mainPanel, wxID_ANY, wxEmptyString);
     fgSizer1->Add(textctrl_ddl, 0, wxALL|wxEXPAND, 5);
-    button_add_ddl = new wxButton(mainPanel, wxID_ANY, _("Add"));
+    button_add_ddl = new wxButton(mainPanel, ID_button_add_ddl, _("Add"));
     fgSizer1->Add(button_add_ddl, 0, wxALL, 5);
 
     m_staticText5 = new wxStaticText(mainPanel, wxID_ANY,_("Has field named"));
     fgSizer1->Add(m_staticText5, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     textctrl_field = new wxTextCtrl(mainPanel, wxID_ANY, wxEmptyString);
     fgSizer1->Add(textctrl_field, 0, wxALL|wxEXPAND, 5);
-    button_add_field = new wxButton(mainPanel, wxID_ANY, _("Add"));
+    button_add_field = new wxButton(mainPanel, ID_button_add_field, _("Add"));
     fgSizer1->Add(button_add_field, 0, wxALL, 5);
 
     m_staticText6 = new wxStaticText(mainPanel, wxID_ANY, _("Search in"));
@@ -123,7 +124,8 @@ AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
     }
     choice_database->SetSelection(0);
     fgSizer1->Add(choice_database, 0, wxALL|wxEXPAND, 5);
-    button_add_database = new wxButton(mainPanel, wxID_ANY, _("Add"));
+    button_add_database = new wxButton(mainPanel, ID_button_add_database,
+        _("Add"));
     fgSizer1->Add(button_add_database, 0, wxALL, 5);
     leftSizer->Add(fgSizer1, 0, wxEXPAND, 5);
 
@@ -194,16 +196,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
     mainPanel->SetSizer(innerSizer);
     mainSizer->Add(mainPanel, 1, wxEXPAND, 0);
     SetSizerAndFit(mainSizer);
-
     Layout();
-    int w, h;
-    listctrl_criteria->GetSize(&w, &h);
-    listctrl_criteria->SetColumnWidth( 0, w/2 );
-    listctrl_criteria->SetColumnWidth( 1, w/2-3 ); // -3 for sunken border
-    listctrl_results->GetSize(&w, &h);
-    listctrl_results->SetColumnWidth( 0, w/3 );
-    listctrl_results->SetColumnWidth( 1, w/3-3 );
-    listctrl_results->SetColumnWidth( 2, w/3 );
 
     #include "search.xpm"
     wxBitmap bmp = wxBitmap(search_xpm);
@@ -212,4 +205,97 @@ AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
     SetIcon(icon);
 }
 //-----------------------------------------------------------------------------
-
+void AdvancedSearchFrame::addCriteria(const CriteriaItem& item)
+{
+    // sort by criteria type? insert into proper place?
+    searchCriteriaM.push_back(item);
+    listctrl_criteria->InsertItem(0, item.getTypeString());
+    listctrl_criteria->SetItem(0, 1, item.value);
+}
+//-----------------------------------------------------------------------------
+BEGIN_EVENT_TABLE(AdvancedSearchFrame, wxFrame)
+    EVT_SIZE(AdvancedSearchFrame::OnSize)
+    EVT_BUTTON(AdvancedSearchFrame::ID_button_remove,
+        AdvancedSearchFrame::OnButtonRemoveClick)
+    EVT_BUTTON(AdvancedSearchFrame::ID_button_start,
+        AdvancedSearchFrame::OnButtonStartClick)
+    EVT_BUTTON(AdvancedSearchFrame::ID_button_add_type,
+        AdvancedSearchFrame::OnButtonAddTypeClick)
+    EVT_BUTTON(AdvancedSearchFrame::ID_button_add_name,
+        AdvancedSearchFrame::OnButtonAddNameClick)
+    EVT_BUTTON(AdvancedSearchFrame::ID_button_add_description,
+        AdvancedSearchFrame::OnButtonAddDescriptionClick)
+    EVT_BUTTON(AdvancedSearchFrame::ID_button_add_ddl,
+        AdvancedSearchFrame::OnButtonAddDDLClick)
+    EVT_BUTTON(AdvancedSearchFrame::ID_button_add_field,
+        AdvancedSearchFrame::OnButtonAddFieldClick)
+    EVT_BUTTON(AdvancedSearchFrame::ID_button_add_database,
+        AdvancedSearchFrame::OnButtonAddDatabaseClick)
+END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+void AdvancedSearchFrame::OnSize(wxSizeEvent& event)
+{
+    int w, h;
+    listctrl_criteria->GetSize(&w, &h);
+    int w1 = w/3;
+    listctrl_criteria->SetColumnWidth( 0, w1 );
+    listctrl_criteria->SetColumnWidth( 1, w-w1-4 ); // -4 for sunken border
+    listctrl_results->GetSize(&w, &h);
+    listctrl_results->SetColumnWidth( 0, w1 );
+    listctrl_results->SetColumnWidth( 1, w-2*w1-4 );
+    listctrl_results->SetColumnWidth( 2, w1 );
+    event.Skip();
+}
+//-----------------------------------------------------------------------------
+void AdvancedSearchFrame::OnButtonRemoveClick(wxCommandEvent& event)
+{
+}
+//-----------------------------------------------------------------------------
+void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& event)
+{
+}
+//-----------------------------------------------------------------------------
+void AdvancedSearchFrame::OnButtonAddTypeClick(wxCommandEvent& event)
+{
+    //, ctName, ctDescription, ctDDL, ctField, ctDB };
+    CriteriaItem item(CriteriaItem::ctType, choice_type->GetStringSelection());
+    addCriteria(item);
+}
+//-----------------------------------------------------------------------------
+void AdvancedSearchFrame::OnButtonAddNameClick(wxCommandEvent& event)
+{
+    CriteriaItem item(CriteriaItem::ctName, textctrl_name->GetValue());
+    addCriteria(item);
+}
+//-----------------------------------------------------------------------------
+void AdvancedSearchFrame::OnButtonAddDescriptionClick(wxCommandEvent& event)
+{
+    CriteriaItem item(CriteriaItem::ctDescription,
+        textctrl_description->GetValue());
+    addCriteria(item);
+}
+//-----------------------------------------------------------------------------
+void AdvancedSearchFrame::OnButtonAddDDLClick(wxCommandEvent& event)
+{
+    CriteriaItem item(CriteriaItem::ctDDL, textctrl_ddl->GetValue());
+    addCriteria(item);
+}
+//-----------------------------------------------------------------------------
+void AdvancedSearchFrame::OnButtonAddFieldClick(wxCommandEvent& event)
+{
+    CriteriaItem item(CriteriaItem::ctField, textctrl_field->GetValue());
+    addCriteria(item);
+}
+//-----------------------------------------------------------------------------
+void AdvancedSearchFrame::OnButtonAddDatabaseClick(wxCommandEvent& event)
+{
+    Database *db = (Database *)
+        choice_database->GetClientData(choice_database->GetSelection());
+    CriteriaItem item(
+        CriteriaItem::ctDB,
+        choice_database->GetStringSelection(),
+        db
+    );
+    addCriteria(item);
+}
+//-----------------------------------------------------------------------------
