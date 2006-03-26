@@ -55,7 +55,6 @@ protected:
     wxStaticText *m_staticText6;
     wxChoice *choice_database;
     wxButton *button_add_database;
-    wxStaticText *label_search_criteria;
     wxListCtrl *listctrl_criteria;
     wxButton *button_remove;
     wxButton *button_search;
