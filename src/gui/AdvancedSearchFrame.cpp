@@ -33,6 +33,9 @@
 #include <wx/wx.h>
 #endif
 
+#include "metadata/root.h"
+#include "metadata/server.h"
+#include "metadata/database.h"
 #include "AdvancedSearchFrame.h"
 //-----------------------------------------------------------------------------
 AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
@@ -89,10 +92,26 @@ AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
 
     m_staticText6 = new wxStaticText(mainPanel, wxID_ANY, wxT("Search in"), wxDefaultPosition, wxDefaultSize, 0);
     fgSizer1->Add(m_staticText6, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
-    // TODO: add all databases
-    wxString choices2[] = { wxT("[Connected databases]"), wxT("[All databases]") };
-    int nchoices2 = sizeof(choices2) / sizeof(wxString);
-    choice_database = new wxChoice(mainPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, nchoices2, choices2, 0);
+    choice_database = new wxChoice(mainPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, 0, 0);
+    choice_database->Append(_("[Connected databases]"), (void *)0);
+    choice_database->Append(_("[All databases]"), (void *)0);
+    Root& r = getGlobalRoot();  // add all databases
+    std::vector<MetadataItem*> servers;
+    r.getChildren(servers);
+    for (std::vector<MetadataItem*>::iterator it = servers.begin();
+        it != servers.end(); ++it)
+    {
+        Server *s = dynamic_cast<Server *>(*it);
+        if (!s)
+            continue;
+        MetadataCollection<Database> *dbs = s->getDatabases();
+        for (MetadataCollection<Database>::iterator i2 = dbs->begin();
+            i2 != dbs->end(); ++i2)
+        {   // FIXME: we store database pointer, so this frame should be made
+            //        observer in case database is dropped/unregistered
+            choice_database->Append((*it)->getName_() + wxT("::") + (*i2).getName_(), (void *)(&(*i2)));
+        }
+    }
     fgSizer1->Add(choice_database, 0, wxALL|wxEXPAND, 5);
     button_add_database = new wxButton(mainPanel, wxID_ANY, wxT("Add"), wxDefaultPosition, wxDefaultSize, 0);
     fgSizer1->Add(button_add_database, 0, wxALL, 5);
@@ -121,6 +140,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
     bSizer7->Add(label_search_results, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     bSizer7->Add(20, 2, 1, 0, 0);
     checkbox_ddl = new wxCheckBox(mainPanel, ID_checkbox_ddl, wxT("Show DDL for selected objects"), wxDefaultPosition, wxDefaultSize, 0);
+    checkbox_ddl->SetValue(true);   // checked by default
     bSizer7->Add(checkbox_ddl, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     rightSizer->Add(bSizer7, 0, wxEXPAND, 5);
 
