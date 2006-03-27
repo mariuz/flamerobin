@@ -33,9 +33,13 @@
 #include <wx/wx.h>
 #endif
 
+#include "dberror.h"
+#include "frutils.h"
+#include "metadata/metadataitem.h"
 #include "metadata/root.h"
 #include "metadata/server.h"
 #include "metadata/database.h"
+#include "metadata/CreateDDLVisitor.h"
 #include "AdvancedSearchFrame.h"
 //-----------------------------------------------------------------------------
 // derived class since we need to catch size event
@@ -274,6 +278,25 @@ void AdvancedSearchFrame::rebuildList()
     }
 }
 //-----------------------------------------------------------------------------
+void AdvancedSearchFrame::addResult(Database* db, MetadataItem* item)
+{
+    listctrl_results->InsertItem(0, db->getName_());
+    listctrl_results->SetItem(0, 1, item->getTypeName());
+    listctrl_results->SetItem(0, 2, item->getName_());
+}
+//-----------------------------------------------------------------------------
+bool AdvancedSearchFrame::match(CriteriaItem::Type type, const wxString& text)
+{
+    for (CriteriaCollection::const_iterator ci =
+        searchCriteriaM.lower_bound(type); ci !=
+        searchCriteriaM.upper_bound(type); ++ci)
+    {
+        if (!text.Matches((*ci).second.value))
+            return false;
+    }
+    return true;
+}
+//-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(AdvancedSearchFrame, wxFrame)
     EVT_CHECKBOX(AdvancedSearchFrame::ID_checkbox_ddl,
         AdvancedSearchFrame::OnCheckboxDdlToggle)
@@ -331,23 +354,74 @@ void AdvancedSearchFrame::OnButtonRemoveClick(wxCommandEvent& event)
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& event)
 {
-    /*
-    build list of databases to search from
-    foreach database
+    // build list of databases to search from
+    if (searchCriteriaM.count(CriteriaItem::ctDB) == 0)
+    {   // TODO: search all databases?
+        return;
+    }
+
+    // get all types we want to match
+    std::set<NodeType> types;
+    if (searchCriteriaM.count(CriteriaItem::ctType) != 0)
     {
-        build list of object types
-        foreach collection(object_type)
+        for (CriteriaCollection::const_iterator
+            ct = searchCriteriaM.lower_bound(CriteriaItem::ctType);
+            ct != searchCriteriaM.upper_bound(CriteriaItem::ctType); ++ct)
         {
-            foreach name -> (string comparison)
+            types.insert(getTypeByName((*ct).second.value));
+        }
+    }
+
+    // foreach database
+    for (CriteriaCollection::const_iterator
+        cid = searchCriteriaM.lower_bound(CriteriaItem::ctDB);
+        cid != searchCriteriaM.upper_bound(CriteriaItem::ctDB); ++cid)
+    {
+        Database *db = (*cid).second.database;
+        if (!db->isConnected() && !connectDatabase(db, this))
+            continue;
+
+        std::vector<MetadataItem *> colls;
+        db->getCollections(colls);
+        for (std::vector<MetadataItem *>::iterator col = colls.begin(); col !=
+            colls.end(); ++col)
+        {
+            std::vector<MetadataItem *> ch;
+            (*col)->getChildren(ch);
+            for (std::vector<MetadataItem *>::iterator it = ch.begin(); it !=
+                ch.end(); ++it)
             {
-                if (description contains)
-                and (ddl contains)
-                and (has field)
-                    add to results
+                if (!types.empty() &&
+                    types.find((*it)->getType()) == types.end())
+                    break;
+                if (searchCriteriaM.count(CriteriaItem::ctName) > 0)
+                {
+                    wxString name = (*it)->getName_();
+                    if (!match(CriteriaItem::ctName, name))
+                        continue;
+                }
+                if (searchCriteriaM.count(CriteriaItem::ctDescription) > 0)
+                {
+                    wxString desc = (*it)->getDescription();
+                    if (!match(CriteriaItem::ctDescription, desc))
+                        continue;
+                }
+                if (searchCriteriaM.count(CriteriaItem::ctDDL) > 0)
+                {
+                    CreateDDLVisitor cdv;
+                    (*it)->acceptVisitor(&cdv);
+                    if (!match(CriteriaItem::ctDDL, cdv.getSql()))
+                        continue;
+                }
+                if (searchCriteriaM.count(CriteriaItem::ctField) > 0)
+                {
+                    // TODO: check fields?
+                }
+                // everything ok -> add to results
+                addResult(db, *it);
             }
         }
     }
-    */
 }
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnButtonAddTypeClick(wxCommandEvent& event)

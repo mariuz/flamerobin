@@ -52,7 +52,6 @@
 #include "gui/ExecuteSqlFrame.h"
 #include "gui/MainFrame.h"
 #include "gui/PreferencesDialog.h"
-#include "gui/ProgressDialog.h"
 #include "gui/RestoreFrame.h"
 #include "gui/ServerRegistrationDialog.h"
 #include "gui/SimpleHtmlFrame.h"
@@ -64,6 +63,7 @@
 #include "metadata/root.h"
 #include "myTreeCtrl.h"
 #include "treeitem.h"
+#include "frutils.h"
 #include "ugly.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
@@ -83,11 +83,6 @@ bool checkValidServer(Server* server)
     wxMessageBox(_("Operation can not be performed - no server assigned"),
         _("Internal Error"), wxOK|wxICON_ERROR);
     return false;
-}
-//-----------------------------------------------------------------------------
-void reportLastError(const wxString& actionMsg)
-{
-    wxMessageBox(lastError().getMessage(), actionMsg, wxOK | wxICON_ERROR);
 }
 //-----------------------------------------------------------------------------
 //! included xpm files, so that icons are compiled into executable
@@ -1155,33 +1150,8 @@ bool MainFrame::connect()
     Database* db = tree_ctrl_1->getSelectedDatabase();
     if (!checkValidDatabase(db))
         return false;
-    if (db->isConnected())
+    if (db->isConnected() || !connectDatabase(db, this))
         return false;
-
-    wxString pass;
-    if (db->getPassword().empty())
-    {
-        wxString message(_("Enter password for user: "));
-        message += db->getUsername();
-        pass = ::wxGetPasswordFromUser(message, _("Connecting to database"));
-        if (pass.IsEmpty())
-            return false;
-    }
-    else
-        pass = db->getPassword();
-
-    wxString caption(wxString::Format(wxT("Connecting with Database \"%s\""),
-        db->getName_().c_str()));
-    ProgressDialog pd(this, caption, 1);
-
-    if (!db->connect(pass, &pd))
-    {
-        pd.Hide();
-        reportLastError(_("Error Connecting to Database"));
-        return false;
-    }
-    pd.Hide();
-
     if (db->isConnected())
     {
         if (db->usesDifferentConnectionCharset())

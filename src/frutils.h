@@ -33,6 +33,7 @@
 #include <ibpp.h>
 
 class Table;
+class Database;
 //-----------------------------------------------------------------------------
 //! sets all controls to width of widest control
 void adjustControlsMinWidth(std::list<wxWindow*> controls);
@@ -42,7 +43,13 @@ void readBlob(IBPP::Statement& st, int column, wxString& result);
 //-----------------------------------------------------------------------------
 //! displays a list of table columns and lets user select some
 wxString selectTableColumns(Table* t, wxWindow* parent);
-bool selectTableColumnsIntoVector(Table* t, wxWindow* parent, 
+bool selectTableColumnsIntoVector(Table* t, wxWindow* parent,
     std::vector<wxString>& list);
+//-----------------------------------------------------------------------------
+//! pops up message box with last error from database operations
+void reportLastError(const wxString& actionMsg);
+//-----------------------------------------------------------------------------
+//! prompts for password if needed and connects to database
+bool connectDatabase(Database *db, wxWindow* parent);
 //-----------------------------------------------------------------------------
 #endif // FRUTILS_H

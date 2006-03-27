@@ -36,7 +36,10 @@
     #include "wx/wx.h"
 #endif
 
+#include "dberror.h"
 #include "frutils.h"
+#include "gui/ProgressDialog.h"
+#include "metadata/database.h"
 #include "metadata/metadataitem.h"
 #include "metadata/table.h"
 #include "ugly.h"
@@ -128,6 +131,38 @@ bool selectTableColumnsIntoVector(Table* t, wxWindow* parent, vector<wxString>& 
         list.push_back(temp.getQuoted());
     }
 
+    return true;
+}
+//-----------------------------------------------------------------------------
+void reportLastError(const wxString& actionMsg)
+{
+    wxMessageBox(lastError().getMessage(), actionMsg, wxOK | wxICON_ERROR);
+}
+//-----------------------------------------------------------------------------
+bool connectDatabase(Database *db, wxWindow* parent)
+{
+    wxString pass;
+    if (db->getPassword().empty())
+    {
+        wxString message(_("Enter password for user: "));
+        message += db->getUsername();
+        pass = ::wxGetPasswordFromUser(message, _("Connecting to database"));
+        if (pass.IsEmpty())
+            return false;
+    }
+    else
+        pass = db->getPassword();
+
+    wxString caption(wxString::Format(wxT("Connecting with Database \"%s\""),
+        db->getName_().c_str()));
+    ProgressDialog pd(parent, caption, 1);
+    if (!db->connect(pass, &pd))
+    {
+        pd.Hide();
+        reportLastError(_("Error Connecting to Database"));
+        return false;
+    }
+    pd.Hide();
     return true;
 }
 //-----------------------------------------------------------------------------

@@ -60,6 +60,7 @@ public:
         return wxEmptyString;
     }
 };
+class MetadataItem;
 class AdjustableListCtrl;   // declaration in cpp file
 //-----------------------------------------------------------------------------
 class AdvancedSearchFrame : public BaseFrame
@@ -70,6 +71,8 @@ private:
     void addCriteria(CriteriaItem::Type type, const wxString& value,
         Database *db = 0);
     void rebuildList();
+    void addResult(Database* db, MetadataItem* item);
+    bool match(CriteriaItem::Type type, const wxString& text);
 
 protected:
     wxPanel *mainPanel;
