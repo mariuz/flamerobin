@@ -52,7 +52,7 @@ public:
         int w, h;
         GetSize(&w, &h);
         int w1 = w/3;
-        SetColumnWidth( 0, w1 );
+        SetColumnWidth(0, w1);
         w -= w1;
         if (GetColumnCount() == 3)  // result list
         {
@@ -98,6 +98,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
     fgSizer1->Add(choice_type, 0, wxALL|wxEXPAND, 5);
     button_add_type = new wxButton(mainPanel, ID_button_add_type, _("Add"));
     fgSizer1->Add(button_add_type, 0, wxALL, 5);
+    choice_type->SetSelection(0);
 
     m_staticText2 = new wxStaticText(mainPanel, wxID_ANY, _("Name"));
     fgSizer1->Add(m_staticText2, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
@@ -226,7 +227,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
     mainPanel->SetSizer(innerSizer);
     mainSizer->Add(mainPanel, 1, wxEXPAND, 0);
     SetSizerAndFit(mainSizer);
-    Layout();
+    Centre();
 
     #include "search.xpm"
     wxBitmap bmp = wxBitmap(search_xpm);
@@ -265,15 +266,33 @@ END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnButtonRemoveClick(wxCommandEvent& event)
 {
+    // iterate all selected items
+    // remove them from searchCriteriaM and from listctrl_criteria
 }
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& event)
 {
+    /*
+    build list of databases to search from
+    foreach database
+    {
+        build list of object types
+        foreach collection(object_type)
+        {
+            foreach name -> (string comparison)
+            {
+                if (description contains)
+                and (ddl contains)
+                and (has field)
+                    add to results
+            }
+        }
+    }
+    */
 }
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnButtonAddTypeClick(wxCommandEvent& event)
 {
-    //, ctName, ctDescription, ctDDL, ctField, ctDB };
     CriteriaItem item(CriteriaItem::ctType, choice_type->GetStringSelection());
     addCriteria(item);
 }
