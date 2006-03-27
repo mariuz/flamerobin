@@ -56,6 +56,7 @@ public:
         return wxEmptyString;
     }
 };
+class AdjustableListCtrl;   // declaration in cpp file
 //-----------------------------------------------------------------------------
 class AdvancedSearchFrame : public BaseFrame
 {
@@ -83,14 +84,14 @@ protected:
     wxStaticText *m_staticText6;
     wxChoice *choice_database;
     wxButton *button_add_database;
-    wxListCtrl *listctrl_criteria;
+    AdjustableListCtrl *listctrl_criteria;
     wxButton *button_remove;
     wxButton *button_search;
     wxStaticText *label_search_results;
     wxCheckBox *checkbox_ddl;
     wxSplitterWindow *splitter1;
     wxPanel *top_splitter_panel;
-    wxListCtrl *listctrl_results;
+    AdjustableListCtrl *listctrl_results;
     wxPanel *bottom_splitter_panel;
     wxTextCtrl *stc_ddl;
 
@@ -110,7 +111,6 @@ public:
         ID_listctrl_results
     };
 
-    void OnSize(wxSizeEvent& event);
     void OnButtonRemoveClick(wxCommandEvent& event);
     void OnButtonStartClick(wxCommandEvent& event);
     void OnButtonAddTypeClick(wxCommandEvent& event);

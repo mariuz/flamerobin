@@ -38,6 +38,37 @@
 #include "metadata/database.h"
 #include "AdvancedSearchFrame.h"
 //-----------------------------------------------------------------------------
+// derived class since we need to catch size event
+class AdjustableListCtrl: public wxListCtrl
+{
+public:
+    AdjustableListCtrl(wxWindow *parent, wxWindowID id, long style)
+        :wxListCtrl(parent, id, wxDefaultPosition, wxDefaultSize, style)
+    {
+    };
+
+    void OnSize(wxSizeEvent& event)
+    {
+        int w, h;
+        GetSize(&w, &h);
+        int w1 = w/3;
+        SetColumnWidth( 0, w1 );
+        w -= w1;
+        if (GetColumnCount() == 3)  // result list
+        {
+            SetColumnWidth(2, w1);
+            w -= w1;
+        }
+        SetColumnWidth(1, w-4);
+        event.Skip();
+    };
+    DECLARE_EVENT_TABLE()
+};
+//-----------------------------------------------------------------------------
+BEGIN_EVENT_TABLE(AdjustableListCtrl, wxListCtrl)
+    EVT_SIZE(AdjustableListCtrl::OnSize)
+END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
 AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
     :BaseFrame(parent, -1, _("Advanced Metadata Search"))
 {
@@ -129,8 +160,8 @@ AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
     fgSizer1->Add(button_add_database, 0, wxALL, 5);
     leftSizer->Add(fgSizer1, 0, wxEXPAND, 5);
 
-    listctrl_criteria = new wxListCtrl(mainPanel, wxID_ANY, wxDefaultPosition,
-        wxDefaultSize, wxLC_REPORT|wxLC_VRULES|wxSUNKEN_BORDER);
+    listctrl_criteria = new AdjustableListCtrl(mainPanel, wxID_ANY,
+        wxLC_REPORT|wxLC_VRULES|wxSUNKEN_BORDER);
     wxListItem itemCol;
     itemCol.SetImage(-1);
     itemCol.SetText(_("Search criteria"));
@@ -170,9 +201,8 @@ AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
     top_splitter_panel = new wxPanel(splitter1, wxID_ANY, wxDefaultPosition,
         wxDefaultSize, wxTAB_TRAVERSAL);
     wxBoxSizer *top_splitter_sizer = new wxBoxSizer(wxVERTICAL);
-    listctrl_results = new wxListCtrl(top_splitter_panel, ID_listctrl_results,
-        wxDefaultPosition, wxDefaultSize,
-        wxLC_REPORT|wxLC_VRULES|wxSUNKEN_BORDER);
+    listctrl_results = new AdjustableListCtrl(top_splitter_panel,
+        ID_listctrl_results, wxLC_REPORT|wxLC_VRULES|wxSUNKEN_BORDER);
     itemCol.SetText(_("Database"));
     listctrl_results->InsertColumn(0, itemCol);
     itemCol.SetText(_("Type"));
@@ -232,20 +262,6 @@ BEGIN_EVENT_TABLE(AdvancedSearchFrame, wxFrame)
     EVT_BUTTON(AdvancedSearchFrame::ID_button_add_database,
         AdvancedSearchFrame::OnButtonAddDatabaseClick)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
-void AdvancedSearchFrame::OnSize(wxSizeEvent& event)
-{
-    int w, h;
-    listctrl_criteria->GetSize(&w, &h);
-    int w1 = w/3;
-    listctrl_criteria->SetColumnWidth( 0, w1 );
-    listctrl_criteria->SetColumnWidth( 1, w-w1-4 ); // -4 for sunken border
-    listctrl_results->GetSize(&w, &h);
-    listctrl_results->SetColumnWidth( 0, w1 );
-    listctrl_results->SetColumnWidth( 1, w-2*w1-4 );
-    listctrl_results->SetColumnWidth( 2, w1 );
-    event.Skip();
-}
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnButtonRemoveClick(wxCommandEvent& event)
 {
