@@ -28,21 +28,25 @@
 #include <wx/wx.h>
 #include <wx/splitter.h>
 #include <wx/listctrl.h>
-
+#include <map>
 #include "BaseFrame.h"
 //-----------------------------------------------------------------------------
 class CriteriaItem
 {
 public:
     enum Type { ctType, ctName, ctDescription, ctDDL, ctField, ctDB };
-    Type type;
     wxString value;
     Database *database; // only used for ctDB type
-    CriteriaItem(Type t, const wxString& v, Database *db = 0)
-        :type(t), value(v), database(db)
+    long listIndex;
+    CriteriaItem(const wxString& v, Database *db)
+        :value(v), database(db), listIndex(-1)
     {
     }
-    wxString getTypeString() const
+    bool operator==(const CriteriaItem& other) const
+    {
+        return (value == other.value && database == other.database);
+    };
+    static wxString getTypeString(Type type)
     {
         switch (type)
         {
@@ -61,8 +65,11 @@ class AdjustableListCtrl;   // declaration in cpp file
 class AdvancedSearchFrame : public BaseFrame
 {
 private:
-    std::vector<CriteriaItem> searchCriteriaM;
-    void addCriteria(const CriteriaItem& item);
+    typedef std::multimap<CriteriaItem::Type, CriteriaItem> CriteriaCollection;
+    CriteriaCollection searchCriteriaM;
+    void addCriteria(CriteriaItem::Type type, const wxString& value,
+        Database *db = 0);
+    void rebuildList();
 
 protected:
     wxPanel *mainPanel;
@@ -111,6 +118,7 @@ public:
         ID_listctrl_results
     };
 
+    void OnCheckboxDdlToggle(wxCommandEvent& event);
     void OnButtonRemoveClick(wxCommandEvent& event);
     void OnButtonStartClick(wxCommandEvent& event);
     void OnButtonAddTypeClick(wxCommandEvent& event);

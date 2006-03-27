@@ -88,7 +88,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
     fgSizer1->Add(m_staticText1, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     wxString choices1[] =
     {
-        _("[Any]"), wxT("TABLE"), wxT("VIEW"), wxT("PROCEDURE"),
+        wxT("TABLE"), wxT("VIEW"), wxT("PROCEDURE"),
         wxT("TRIGGER"), wxT("GENERATOR"), wxT("FUNCTION"), wxT("DOMAIN"),
         wxT("ROLE"), wxT("COLUMN"), wxT("EXCEPTION")
     };
@@ -134,8 +134,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
     fgSizer1->Add(m_staticText6, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     choice_database = new wxChoice(mainPanel, wxID_ANY, wxDefaultPosition,
         wxDefaultSize, 0, 0, 0);
-    choice_database->Append(_("[Connected databases]"), (void *)0);
-    choice_database->Append(_("[All databases]"), (void *)0);
+    choice_database->Append(_("[All Connected Databases]"), (void *)0);
     Root& r = getGlobalRoot();  // add all databases
     std::vector<MetadataItem*> servers;
     r.getChildren(servers);
@@ -236,16 +235,48 @@ AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
     SetIcon(icon);
 }
 //-----------------------------------------------------------------------------
-void AdvancedSearchFrame::addCriteria(const CriteriaItem& item)
+void AdvancedSearchFrame::addCriteria(CriteriaItem::Type type, const wxString&
+    value, Database *db)
 {
-    // sort by criteria type? insert into proper place?
-    searchCriteriaM.push_back(item);
-    listctrl_criteria->InsertItem(0, item.getTypeString());
-    listctrl_criteria->SetItem(0, 1, item.value);
+    if (value.IsEmpty())
+        return;
+    CriteriaItem c(value, db);
+    for (CriteriaCollection::const_iterator
+        it = searchCriteriaM.lower_bound(type);
+        it != searchCriteriaM.upper_bound(type); ++it)
+    {
+        if ((*it).second == c)
+        {
+            wxMessageBox(_("That criteria already exists"),
+                _("Warning"), wxOK|wxICON_WARNING);
+            return;
+        }
+    }
+
+    searchCriteriaM.insert(
+        std::pair<CriteriaItem::Type, CriteriaItem>(type, c));
+    rebuildList();
+}
+//-----------------------------------------------------------------------------
+void AdvancedSearchFrame::rebuildList()
+{
+    listctrl_criteria->DeleteAllItems();
+    long index = 0;
+    for (CriteriaCollection::iterator it =
+        searchCriteriaM.begin(); it != searchCriteriaM.end(); ++it)
+    {
+        listctrl_criteria->InsertItem(index,
+            CriteriaItem::getTypeString((*it).first));
+        listctrl_criteria->SetItem(index, 1, (*it).second.value);
+        listctrl_criteria->SetItemData(index, index);
+        (*it).second.listIndex = index;
+        index++;
+    }
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(AdvancedSearchFrame, wxFrame)
-    EVT_SIZE(AdvancedSearchFrame::OnSize)
+    EVT_CHECKBOX(AdvancedSearchFrame::ID_checkbox_ddl,
+        AdvancedSearchFrame::OnCheckboxDdlToggle)
     EVT_BUTTON(AdvancedSearchFrame::ID_button_remove,
         AdvancedSearchFrame::OnButtonRemoveClick)
     EVT_BUTTON(AdvancedSearchFrame::ID_button_start,
@@ -264,10 +295,38 @@ BEGIN_EVENT_TABLE(AdvancedSearchFrame, wxFrame)
         AdvancedSearchFrame::OnButtonAddDatabaseClick)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
+void AdvancedSearchFrame::OnCheckboxDdlToggle(wxCommandEvent& event)
+{
+    if (event.IsChecked())
+        splitter1->SplitHorizontally(top_splitter_panel,bottom_splitter_panel);
+    else
+        splitter1->Unsplit();
+}
+//-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnButtonRemoveClick(wxCommandEvent& event)
 {
-    // iterate all selected items
-    // remove them from searchCriteriaM and from listctrl_criteria
+    // iterate all selected items and remove them from searchCriteriaM
+    long item = -1;
+    do
+    {
+        item = listctrl_criteria->GetNextItem(item, wxLIST_NEXT_ALL,
+            wxLIST_STATE_SELECTED);
+        if (item != -1)
+        {
+            long index = listctrl_criteria->GetItemData(item);
+            for (CriteriaCollection::iterator it = searchCriteriaM.begin();
+                it != searchCriteriaM.end(); ++it)
+            {
+                if ((*it).second.listIndex == index)
+                {
+                    searchCriteriaM.erase(it);
+                    break;
+                }
+            }
+        }
+    }
+    while (item != -1);
+    rebuildList();
 }
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& event)
@@ -293,44 +352,49 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& event)
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnButtonAddTypeClick(wxCommandEvent& event)
 {
-    CriteriaItem item(CriteriaItem::ctType, choice_type->GetStringSelection());
-    addCriteria(item);
+    addCriteria(CriteriaItem::ctType, choice_type->GetStringSelection());
 }
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnButtonAddNameClick(wxCommandEvent& event)
 {
-    CriteriaItem item(CriteriaItem::ctName, textctrl_name->GetValue());
-    addCriteria(item);
+    addCriteria(CriteriaItem::ctName, textctrl_name->GetValue());
 }
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnButtonAddDescriptionClick(wxCommandEvent& event)
 {
-    CriteriaItem item(CriteriaItem::ctDescription,
-        textctrl_description->GetValue());
-    addCriteria(item);
+    addCriteria(CriteriaItem::ctDescription, textctrl_description->GetValue());
 }
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnButtonAddDDLClick(wxCommandEvent& event)
 {
-    CriteriaItem item(CriteriaItem::ctDDL, textctrl_ddl->GetValue());
-    addCriteria(item);
+    addCriteria(CriteriaItem::ctDDL, textctrl_ddl->GetValue());
 }
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnButtonAddFieldClick(wxCommandEvent& event)
 {
-    CriteriaItem item(CriteriaItem::ctField, textctrl_field->GetValue());
-    addCriteria(item);
+    addCriteria(CriteriaItem::ctField, textctrl_field->GetValue());
 }
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnButtonAddDatabaseClick(wxCommandEvent& event)
 {
-    Database *db = (Database *)
-        choice_database->GetClientData(choice_database->GetSelection());
-    CriteriaItem item(
-        CriteriaItem::ctDB,
-        choice_database->GetStringSelection(),
-        db
-    );
-    addCriteria(item);
+    if (choice_database->GetSelection() == 0)   // all connected databases
+    {
+        for (int i=1; i<choice_database->GetCount(); ++i)
+        {
+            Database *db = (Database *)choice_database->GetClientData(i);
+            if (db && db->isConnected())
+            {
+                addCriteria(CriteriaItem::ctDB, choice_database->GetString(i),
+                db);
+            }
+        }
+    }
+    else    // a single database
+    {
+        Database *db = (Database *)
+            choice_database->GetClientData(choice_database->GetSelection());
+        addCriteria(CriteriaItem::ctDB, choice_database->GetStringSelection(),
+            db);
+    }
 }
 //-----------------------------------------------------------------------------
