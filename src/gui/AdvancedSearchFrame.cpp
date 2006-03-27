@@ -35,6 +35,7 @@
 
 #include "dberror.h"
 #include "frutils.h"
+#include "ContextMenuMetadataItemVisitor.h"
 #include "metadata/metadataitem.h"
 #include "metadata/root.h"
 #include "metadata/server.h"
@@ -104,7 +105,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
     fgSizer1->Add(button_add_type, 0, wxALL, 5);
     choice_type->SetSelection(0);
 
-    m_staticText2 = new wxStaticText(mainPanel, wxID_ANY, _("Name"));
+    m_staticText2 = new wxStaticText(mainPanel, wxID_ANY, _("Name is"));
     fgSizer1->Add(m_staticText2, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     textctrl_name = new wxTextCtrl(mainPanel, wxID_ANY,
         _("Allows * and ? wildcards"), wxDefaultPosition, wxDefaultSize, 0);
@@ -112,7 +113,8 @@ AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
     button_add_name = new wxButton(mainPanel, ID_button_add_name, _("Add"));
     fgSizer1->Add(button_add_name, 0, wxALL, 5);
 
-    m_staticText3 = new wxStaticText(mainPanel, wxID_ANY, _("Description"));
+    m_staticText3 = new wxStaticText(mainPanel, wxID_ANY,
+        _("Description contains"));
     fgSizer1->Add(m_staticText3, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     textctrl_description = new wxTextCtrl(mainPanel, wxID_ANY, wxEmptyString);
     fgSizer1->Add(textctrl_description, 0, wxALL|wxEXPAND, 5);
@@ -280,24 +282,35 @@ void AdvancedSearchFrame::rebuildList()
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::addResult(Database* db, MetadataItem* item)
 {
-    listctrl_results->InsertItem(0, db->getName_());
-    listctrl_results->SetItem(0, 1, item->getTypeName());
-    listctrl_results->SetItem(0, 2, item->getName_());
+    int index = listctrl_results->GetItemCount();
+    listctrl_results->InsertItem(index, db->getName_());
+    listctrl_results->SetItem(index, 1, item->getTypeName());
+    listctrl_results->SetItem(index, 2, item->getName_());
+    listctrl_results->SetItemData(index, index);
+    results.push_back(item);
 }
 //-----------------------------------------------------------------------------
-bool AdvancedSearchFrame::match(CriteriaItem::Type type, const wxString& text)
+bool AdvancedSearchFrame::match(CriteriaItem::Type type, wxString text,
+    bool strict)
 {
     for (CriteriaCollection::const_iterator ci =
         searchCriteriaM.lower_bound(type); ci !=
         searchCriteriaM.upper_bound(type); ++ci)
     {
-        if (!text.Matches((*ci).second.value))
+        wxString ss((*ci).second.value);
+        if (!strict)
+            ss = wxT("*") + ss + wxT("*");
+        if (!text.Matches(ss))
             return false;
     }
     return true;
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(AdvancedSearchFrame, wxFrame)
+    EVT_LIST_ITEM_RIGHT_CLICK(AdvancedSearchFrame::ID_listctrl_results,
+        AdvancedSearchFrame::OnListCtrlResultsRightClick)
+    EVT_LIST_ITEM_SELECTED(AdvancedSearchFrame::ID_listctrl_results,
+        AdvancedSearchFrame::OnListCtrlResultsItemSelected)
     EVT_CHECKBOX(AdvancedSearchFrame::ID_checkbox_ddl,
         AdvancedSearchFrame::OnCheckboxDdlToggle)
     EVT_BUTTON(AdvancedSearchFrame::ID_button_remove,
@@ -317,6 +330,26 @@ BEGIN_EVENT_TABLE(AdvancedSearchFrame, wxFrame)
     EVT_BUTTON(AdvancedSearchFrame::ID_button_add_database,
         AdvancedSearchFrame::OnButtonAddDatabaseClick)
 END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+void AdvancedSearchFrame::OnListCtrlResultsItemSelected(wxListEvent& event)
+{
+    MetadataItem *m = results[event.GetData()];
+    CreateDDLVisitor cdv;
+    m->acceptVisitor(&cdv);
+    stc_ddl->SetValue(cdv.getSql());
+}
+//-----------------------------------------------------------------------------
+void AdvancedSearchFrame::OnListCtrlResultsRightClick(wxListEvent& event)
+{
+    MetadataItem *m = results[event.GetData()];
+    wxMenu MyMenu(0);    // create context menu, depending on type of clicked item
+    ContextMenuMetadataItemVisitor cmv(&MyMenu);
+    m->acceptVisitor(&cmv);
+    //wxRect r;
+    //listctrl_results->GetItemRect(event.GetIndex(), r);
+    //PopupMenu(&MyMenu, r.x+r.width/2, r.y+r.height/2);
+    PopupMenu(&MyMenu, wxGetMousePosition() - GetPosition());
+}
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnCheckboxDdlToggle(wxCommandEvent& event)
 {
@@ -360,6 +393,9 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& event)
         return;
     }
 
+    results.clear();
+    listctrl_results->DeleteAllItems();
+
     // get all types we want to match
     std::set<NodeType> types;
     if (searchCriteriaM.count(CriteriaItem::ctType) != 0)
@@ -397,20 +433,20 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& event)
                 if (searchCriteriaM.count(CriteriaItem::ctName) > 0)
                 {
                     wxString name = (*it)->getName_();
-                    if (!match(CriteriaItem::ctName, name))
+                    if (!match(CriteriaItem::ctName, name, true))
                         continue;
                 }
                 if (searchCriteriaM.count(CriteriaItem::ctDescription) > 0)
                 {
                     wxString desc = (*it)->getDescription();
-                    if (!match(CriteriaItem::ctDescription, desc))
+                    if (!match(CriteriaItem::ctDescription, desc, false))
                         continue;
                 }
                 if (searchCriteriaM.count(CriteriaItem::ctDDL) > 0)
                 {
                     CreateDDLVisitor cdv;
                     (*it)->acceptVisitor(&cdv);
-                    if (!match(CriteriaItem::ctDDL, cdv.getSql()))
+                    if (!match(CriteriaItem::ctDDL, cdv.getSql(), false))
                         continue;
                 }
                 if (searchCriteriaM.count(CriteriaItem::ctField) > 0)
@@ -432,21 +468,25 @@ void AdvancedSearchFrame::OnButtonAddTypeClick(wxCommandEvent& event)
 void AdvancedSearchFrame::OnButtonAddNameClick(wxCommandEvent& event)
 {
     addCriteria(CriteriaItem::ctName, textctrl_name->GetValue());
+    textctrl_name->Clear();
 }
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnButtonAddDescriptionClick(wxCommandEvent& event)
 {
     addCriteria(CriteriaItem::ctDescription, textctrl_description->GetValue());
+    textctrl_description->Clear();
 }
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnButtonAddDDLClick(wxCommandEvent& event)
 {
     addCriteria(CriteriaItem::ctDDL, textctrl_ddl->GetValue());
+    textctrl_ddl->Clear();
 }
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnButtonAddFieldClick(wxCommandEvent& event)
 {
     addCriteria(CriteriaItem::ctField, textctrl_field->GetValue());
+    textctrl_field->Clear();
 }
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnButtonAddDatabaseClick(wxCommandEvent& event)

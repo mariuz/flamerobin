@@ -50,9 +50,9 @@ public:
     {
         switch (type)
         {
-            case ctType:        return _("Type");
-            case ctName:        return _("Name");
-            case ctDescription: return _("Description");
+            case ctType:        return _("Type is");
+            case ctName:        return _("Name is");
+            case ctDescription: return _("Description contains");
             case ctDDL:         return _("DDL contains");
             case ctField:       return _("Has field");
             case ctDB:          return _("In database");
@@ -71,8 +71,9 @@ private:
     void addCriteria(CriteriaItem::Type type, const wxString& value,
         Database *db = 0);
     void rebuildList();
+    std::vector<MetadataItem *> results;
     void addResult(Database* db, MetadataItem* item);
-    bool match(CriteriaItem::Type type, const wxString& text);
+    bool match(CriteriaItem::Type type, wxString text, bool strict);
 
 protected:
     wxPanel *mainPanel;
@@ -130,6 +131,8 @@ public:
     void OnButtonAddDDLClick(wxCommandEvent& event);
     void OnButtonAddFieldClick(wxCommandEvent& event);
     void OnButtonAddDatabaseClick(wxCommandEvent& event);
+    void OnListCtrlResultsRightClick(wxListEvent& event);
+    void OnListCtrlResultsItemSelected(wxListEvent& event);
     DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
