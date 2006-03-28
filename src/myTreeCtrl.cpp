@@ -185,47 +185,31 @@ void myTreeCtrl::loadImages()
     AssignImageList(imageList);    // autodeleted
 }
 //-----------------------------------------------------------------------------
+// recursively searches children for item
+bool myTreeCtrl::findMetadataItem(MetadataItem *item, wxTreeItemId parent)
+{
+    wxTreeItemIdValue cookie;
+    if (item == getMetadataItem(parent))
+    {
+        SelectItem(parent);
+        EnsureVisible(parent);
+        return true;
+    }
+    for (wxTreeItemId node = GetFirstChild(parent, cookie); node.IsOk();
+        node = GetNextChild(parent, cookie))
+    {
+        if (findMetadataItem(item, node))
+            return true;
+    }
+    return false;
+}
+//-----------------------------------------------------------------------------
 bool myTreeCtrl::selectMetadataItem(MetadataItem* item)
 {
     if (item == 0)
         return false;
-    // create a stack of parent metadata items (break before root node)
-    std::stack<MetadataItem*> metaitems;
-    metaitems.push(item);
-    MetadataItem* parent = item->getParent();
-    while (parent != 0 && parent->getParent() != 0)
-    {
-        metaitems.push(parent);
-        parent = parent->getParent();
-    }
-    // walk stack of metadata items to find item in treenode hierarchy
-    wxTreeItemId parentNode = GetRootItem();
-    while (!metaitems.empty())
-    {
-        parent = metaitems.top();
-        wxTreeItemIdValue cookie;
-        wxTreeItemId node = GetFirstChild(parentNode, cookie);
-        while (node.IsOk())
-        {
-            MetadataItem* nodeItem = getMetadataItem(node);
-            if (parent == nodeItem)
-            {
-                if (item == nodeItem)
-                {
-                    SelectItem(node);
-                    EnsureVisible(node);
-                    return true;
-                }
-                metaitems.pop();
-                parentNode = node;
-                break;
-            }
-            node = GetNextChild(parentNode, cookie);
-        }
-        if (!node.IsOk())    // not found
-            break;
-    }
-    return false;
+
+    return findMetadataItem(item, GetRootItem());
 }
 //----------------------------------------------------------------------------
 //! recursively get the last child of item

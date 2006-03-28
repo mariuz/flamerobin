@@ -41,6 +41,7 @@
 #include "metadata/server.h"
 #include "metadata/database.h"
 #include "metadata/CreateDDLVisitor.h"
+#include "MainFrame.h"
 #include "AdvancedSearchFrame.h"
 //-----------------------------------------------------------------------------
 // derived class since we need to catch size event
@@ -74,7 +75,7 @@ BEGIN_EVENT_TABLE(AdjustableListCtrl, wxListCtrl)
     EVT_SIZE(AdjustableListCtrl::OnSize)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
-AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
+AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent)
     :BaseFrame(parent, -1, _("Advanced Metadata Search"))
 {
     wxBoxSizer *mainSizer;
@@ -241,11 +242,13 @@ AdvancedSearchFrame::AdvancedSearchFrame(wxWindow *parent)
     SetIcon(icon);
 }
 //-----------------------------------------------------------------------------
-void AdvancedSearchFrame::addCriteria(CriteriaItem::Type type, const wxString&
+void AdvancedSearchFrame::addCriteria(CriteriaItem::Type type, wxString
     value, Database *db)
 {
     if (value.IsEmpty())
         return;
+    if (type == CriteriaItem::ctDDL || type == CriteriaItem::ctDescription)
+        value = wxT("*") + value + wxT("*");
     CriteriaItem c(value, db);
     for (CriteriaCollection::const_iterator
         it = searchCriteriaM.lower_bound(type);
@@ -290,17 +293,13 @@ void AdvancedSearchFrame::addResult(Database* db, MetadataItem* item)
     results.push_back(item);
 }
 //-----------------------------------------------------------------------------
-bool AdvancedSearchFrame::match(CriteriaItem::Type type, wxString text,
-    bool strict)
+bool AdvancedSearchFrame::match(CriteriaItem::Type type, const wxString& text)
 {
     for (CriteriaCollection::const_iterator ci =
         searchCriteriaM.lower_bound(type); ci !=
         searchCriteriaM.upper_bound(type); ++ci)
     {
-        wxString ss((*ci).second.value);
-        if (!strict)
-            ss = wxT("*") + ss + wxT("*");
-        if (!text.Matches(ss))
+        if (!text.Matches((*ci).second.value));
             return false;
     }
     return true;
@@ -337,6 +336,18 @@ void AdvancedSearchFrame::OnListCtrlResultsItemSelected(wxListEvent& event)
     CreateDDLVisitor cdv;
     m->acceptVisitor(&cdv);
     stc_ddl->SetValue(cdv.getSql());
+    MainFrame *mf = dynamic_cast<MainFrame *>(GetParent());
+    if (mf)
+    {
+        myTreeCtrl *tree = mf->getTreeCtrl();
+        if (tree)
+        {
+            if (!tree->selectMetadataItem(m))
+            {
+                wxMessageBox(_("item not found"));
+            }
+        }
+    }
 }
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnListCtrlResultsRightClick(wxListEvent& event)
@@ -348,7 +359,7 @@ void AdvancedSearchFrame::OnListCtrlResultsRightClick(wxListEvent& event)
     //wxRect r;
     //listctrl_results->GetItemRect(event.GetIndex(), r);
     //PopupMenu(&MyMenu, r.x+r.width/2, r.y+r.height/2);
-    PopupMenu(&MyMenu, wxGetMousePosition() - GetPosition());
+    PopupMenu(&MyMenu, ScreenToClient(wxGetMousePosition()));
 }
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnCheckboxDdlToggle(wxCommandEvent& event)
@@ -433,20 +444,20 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& event)
                 if (searchCriteriaM.count(CriteriaItem::ctName) > 0)
                 {
                     wxString name = (*it)->getName_();
-                    if (!match(CriteriaItem::ctName, name, true))
+                    if (!match(CriteriaItem::ctName, name))
                         continue;
                 }
                 if (searchCriteriaM.count(CriteriaItem::ctDescription) > 0)
                 {
                     wxString desc = (*it)->getDescription();
-                    if (!match(CriteriaItem::ctDescription, desc, false))
+                    if (!match(CriteriaItem::ctDescription, desc))
                         continue;
                 }
                 if (searchCriteriaM.count(CriteriaItem::ctDDL) > 0)
                 {
                     CreateDDLVisitor cdv;
                     (*it)->acceptVisitor(&cdv);
-                    if (!match(CriteriaItem::ctDDL, cdv.getSql(), false))
+                    if (!match(CriteriaItem::ctDDL, cdv.getSql()))
                         continue;
                 }
                 if (searchCriteriaM.count(CriteriaItem::ctField) > 0)

@@ -40,6 +40,8 @@ class myTreeCtrl: public wxTreeCtrl
 private:
     std::map<int, int> imageMapM;
     void loadImages();
+    // recursive function used by selectMetadataItem
+    bool findMetadataItem(MetadataItem *item, wxTreeItemId parent);
 
 protected:
     short m_spacing;    // fix wxWidgets bug (or lack of feature)

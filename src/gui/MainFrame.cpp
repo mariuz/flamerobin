@@ -282,6 +282,11 @@ const wxRect MainFrame::getDefaultRect() const
     return wxRect(-1, -1, 257, 367);
 }
 //-----------------------------------------------------------------------------
+myTreeCtrl* MainFrame::getTreeCtrl()
+{
+    return tree_ctrl_1;
+}
+//-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(myTreeCtrl::Menu_RegisterServer, MainFrame::OnMenuRegisterServer)
     EVT_MENU(wxID_EXIT, MainFrame::OnMenuQuit)

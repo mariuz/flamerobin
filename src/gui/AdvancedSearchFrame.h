@@ -62,18 +62,19 @@ public:
 };
 class MetadataItem;
 class AdjustableListCtrl;   // declaration in cpp file
+class MainFrame;
 //-----------------------------------------------------------------------------
 class AdvancedSearchFrame : public BaseFrame
 {
 private:
     typedef std::multimap<CriteriaItem::Type, CriteriaItem> CriteriaCollection;
     CriteriaCollection searchCriteriaM;
-    void addCriteria(CriteriaItem::Type type, const wxString& value,
+    void addCriteria(CriteriaItem::Type type, wxString value,
         Database *db = 0);
     void rebuildList();
     std::vector<MetadataItem *> results;
     void addResult(Database* db, MetadataItem* item);
-    bool match(CriteriaItem::Type type, wxString text, bool strict);
+    bool match(CriteriaItem::Type type, const wxString& text);
 
 protected:
     wxPanel *mainPanel;
@@ -107,7 +108,7 @@ protected:
     wxTextCtrl *stc_ddl;
 
 public:
-    AdvancedSearchFrame(wxWindow *parent);
+    AdvancedSearchFrame(MainFrame *parent);
     enum
     {
         ID_button_remove=100,
