@@ -25,6 +25,7 @@
 #ifndef FR_ADVANCEDSEARCHFRAME_H
 #define FR_ADVANCEDSEARCHFRAME_H
 
+#include "core/Observer.h"
 #include <wx/wx.h>
 #include <wx/splitter.h>
 #include <wx/listctrl.h>
@@ -64,7 +65,7 @@ class MetadataItem;
 class AdjustableListCtrl;   // declaration in cpp file
 class MainFrame;
 //-----------------------------------------------------------------------------
-class AdvancedSearchFrame : public BaseFrame
+class AdvancedSearchFrame : public BaseFrame, public Observer
 {
 private:
     typedef std::multimap<CriteriaItem::Type, CriteriaItem> CriteriaCollection;
@@ -124,6 +125,11 @@ public:
         ID_listctrl_results
     };
 
+    // observer stuff
+    virtual void update();
+    virtual void removeSubject(Subject* subject);
+
+    // events
     void OnCheckboxDdlToggle(wxCommandEvent& event);
     void OnButtonRemoveClick(wxCommandEvent& event);
     void OnButtonStartClick(wxCommandEvent& event);

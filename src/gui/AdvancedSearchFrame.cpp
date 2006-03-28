@@ -154,10 +154,10 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent)
         MetadataCollection<Database> *dbs = s->getDatabases();
         for (MetadataCollection<Database>::iterator i2 = dbs->begin();
             i2 != dbs->end(); ++i2)
-        {   // FIXME: we store database pointer, so this frame should be made
-            //        observer in case database is dropped/unregistered
+        {   // we store DB pointer, so we observe in case database is removed
             choice_database->Append((*it)->getName_() + wxT("::") +
                 (*i2).getName_(), (void *)(&(*i2)));
+            (*i2).attachObserver(this);
         }
     }
     choice_database->SetSelection(0);
@@ -286,13 +286,14 @@ void AdvancedSearchFrame::rebuildList()
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::addResult(Database* db, MetadataItem* item)
 {
-    // TODO: become observer for that Item in case it gets dropped/deleted...
     int index = listctrl_results->GetItemCount();
     listctrl_results->InsertItem(index, db->getName_());
     listctrl_results->SetItem(index, 1, item->getTypeName());
     listctrl_results->SetItem(index, 2, item->getName_());
     listctrl_results->SetItemData(index, index);
     results.push_back(item);
+    // become observer for that Item in case it gets dropped/deleted...
+    item->attachObserver(this);
 }
 //-----------------------------------------------------------------------------
 // returns true if "text" matches all criteria of type "type"
@@ -306,6 +307,61 @@ bool AdvancedSearchFrame::match(CriteriaItem::Type type, const wxString& text)
             return false;
     }
     return true;
+}
+//-----------------------------------------------------------------------------
+// OBSERVER functions
+void AdvancedSearchFrame::update()
+{
+}
+//-----------------------------------------------------------------------------
+void AdvancedSearchFrame::removeSubject(Subject* subject)
+{
+    Observer::removeSubject(subject);
+    Database *db = dynamic_cast<Database *>(subject);
+    if (db)    // database node
+    {
+        // remove from choice_database
+        for (int i=choice_database->GetCount()-1; i>=0; i--)
+        {
+            Database *d = (Database *)choice_database->GetClientData(i);
+            if (db == d)
+                choice_database->Delete(i);
+        }
+
+        // remove from listctrl_criteria + searchCriteriaM
+        while (true)    // in case iterators get invalidated on delete
+        {
+            CriteriaCollection::iterator it = searchCriteriaM.begin();
+            while (it != searchCriteriaM.end())
+            {
+                if ((*it).second.database == db)
+                    break;
+                ++it;
+            }
+            if (it == searchCriteriaM.end())    // none to remove
+                break;
+            searchCriteriaM.erase(it);
+        }
+        rebuildList();
+    }
+    else    // remove from listctrl_results + results
+    {
+        long i = 0;
+        for (std::vector<MetadataItem *>::iterator it = results.begin();
+            it != results.end(); ++it, i++)
+        {
+            if ((*it) == subject)
+            {
+                long item = listctrl_results->FindItem(-1, i);
+                if (item != -1)
+                {
+                    listctrl_results->DeleteItem(item);
+                    results.erase(it);
+                    break;
+                }
+            }
+        }
+    }
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(AdvancedSearchFrame, wxFrame)
@@ -355,9 +411,12 @@ void AdvancedSearchFrame::OnListCtrlCriteriaActivate(wxListEvent& event)
 void AdvancedSearchFrame::OnListCtrlResultsItemSelected(wxListEvent& event)
 {
     MetadataItem *m = results[event.GetData()];
-    CreateDDLVisitor cdv;
-    m->acceptVisitor(&cdv);
-    stc_ddl->SetValue(cdv.getSql());
+    if (checkbox_ddl->IsChecked())
+    {
+        CreateDDLVisitor cdv;
+        m->acceptVisitor(&cdv);
+        stc_ddl->SetValue(cdv.getSql());
+    }
     MainFrame *mf = dynamic_cast<MainFrame *>(GetParent());
     if (mf)
     {
@@ -414,7 +473,9 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& event)
 {
     // build list of databases to search from
     if (searchCriteriaM.count(CriteriaItem::ctDB) == 0)
-    {   // TODO: search all databases?
+    {
+        wxMessageBox(_("Please select at least one database to search."),
+            _("No databases selected"), wxOK|wxICON_WARNING);
         return;
     }
 

@@ -385,6 +385,7 @@ void addIndex(std::vector<Index> *ix, wxString& sql, ColumnConstraint *cc)
 void CreateDDLVisitor::visit(Table& t)
 {
     preSqlM += wxT("CREATE TABLE ") + t.getQuotedName() + wxT("\n(\n  ");
+    t.checkAndLoadColumns();
     for (MetadataCollection<Column>::iterator it=t.begin(); it!=t.end(); ++it)
     {
         if (it != t.begin())
