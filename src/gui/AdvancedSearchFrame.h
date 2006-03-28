@@ -77,6 +77,10 @@ private:
     void addResult(Database* db, MetadataItem* item);
     bool match(CriteriaItem::Type type, const wxString& text);
 
+    // observer stuff
+    void update();
+    void removeSubject(Subject* subject);
+
 protected:
     wxPanel *mainPanel;
     wxStaticText *m_staticText1;
@@ -124,10 +128,6 @@ public:
         ID_listctrl_criteria,
         ID_listctrl_results
     };
-
-    // observer stuff
-    virtual void update();
-    virtual void removeSubject(Subject* subject);
 
     // events
     void OnCheckboxDdlToggle(wxCommandEvent& event);

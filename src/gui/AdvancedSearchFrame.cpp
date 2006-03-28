@@ -290,7 +290,6 @@ void AdvancedSearchFrame::addResult(Database* db, MetadataItem* item)
     listctrl_results->InsertItem(index, db->getName_());
     listctrl_results->SetItem(index, 1, item->getTypeName());
     listctrl_results->SetItem(index, 2, item->getName_());
-    listctrl_results->SetItemData(index, index);
     results.push_back(item);
     // become observer for that Item in case it gets dropped/deleted...
     item->attachObserver(this);
@@ -352,13 +351,9 @@ void AdvancedSearchFrame::removeSubject(Subject* subject)
         {
             if ((*it) == subject)
             {
-                long item = listctrl_results->FindItem(-1, i);
-                if (item != -1)
-                {
-                    listctrl_results->DeleteItem(item);
-                    results.erase(it);
-                    break;
-                }
+                listctrl_results->DeleteItem(i);
+                results.erase(it);
+                break;
             }
         }
     }
@@ -410,7 +405,7 @@ void AdvancedSearchFrame::OnListCtrlCriteriaActivate(wxListEvent& event)
 // show DDL for selected item, and select it in main tree
 void AdvancedSearchFrame::OnListCtrlResultsItemSelected(wxListEvent& event)
 {
-    MetadataItem *m = results[event.GetData()];
+    MetadataItem *m = results[event.GetIndex()];
     if (checkbox_ddl->IsChecked())
     {
         CreateDDLVisitor cdv;
@@ -428,7 +423,7 @@ void AdvancedSearchFrame::OnListCtrlResultsItemSelected(wxListEvent& event)
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnListCtrlResultsRightClick(wxListEvent& event)
 {
-    MetadataItem *m = results[event.GetData()];
+    MetadataItem *m = results[event.GetIndex()];
     wxMenu MyMenu(0);
     ContextMenuMetadataItemVisitor cmv(&MyMenu);
     m->acceptVisitor(&cmv);
