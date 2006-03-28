@@ -62,10 +62,14 @@ public:
         w -= w1;
         if (GetColumnCount() == 3)  // result list
         {
-            SetColumnWidth(2, w1);
-            w -= w1;
+            int wd;
+            wxMemoryDC dc;
+            dc.SetFont(GetFont());
+            dc.GetTextExtent(wxT("PROCEDUREM"), &wd, &h);
+            SetColumnWidth(1, wd);
+            w -= wd;
         }
-        SetColumnWidth(1, w-4);
+        SetColumnWidth(GetColumnCount() - 1, w-4);  // last column
         event.Skip();
     };
     DECLARE_EVENT_TABLE()
@@ -287,7 +291,8 @@ void AdvancedSearchFrame::rebuildList()
 void AdvancedSearchFrame::addResult(Database* db, MetadataItem* item)
 {
     int index = listctrl_results->GetItemCount();
-    listctrl_results->InsertItem(index, db->getName_());
+    listctrl_results->InsertItem(index, db->getServer()->getName_()
+        + wxT("::") + db->getName_());
     listctrl_results->SetItem(index, 1, item->getTypeName());
     listctrl_results->SetItem(index, 2, item->getName_());
     results.push_back(item);
