@@ -120,6 +120,7 @@ public:
         ID_button_add_field,
         ID_button_add_database,
         ID_checkbox_ddl,
+        ID_listctrl_criteria,
         ID_listctrl_results
     };
 
@@ -134,6 +135,7 @@ public:
     void OnButtonAddDatabaseClick(wxCommandEvent& event);
     void OnListCtrlResultsRightClick(wxListEvent& event);
     void OnListCtrlResultsItemSelected(wxListEvent& event);
+    void OnListCtrlCriteriaActivate(wxListEvent& event);
     DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------

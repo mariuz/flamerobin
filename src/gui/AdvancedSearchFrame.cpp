@@ -167,7 +167,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent)
     fgSizer1->Add(button_add_database, 0, wxALL, 5);
     leftSizer->Add(fgSizer1, 0, wxEXPAND, 5);
 
-    listctrl_criteria = new AdjustableListCtrl(mainPanel, wxID_ANY,
+    listctrl_criteria = new AdjustableListCtrl(mainPanel, ID_listctrl_criteria,
         wxLC_REPORT|wxLC_VRULES|wxSUNKEN_BORDER);
     wxListItem itemCol;
     itemCol.SetImage(-1);
@@ -247,6 +247,7 @@ void AdvancedSearchFrame::addCriteria(CriteriaItem::Type type, wxString
 {
     if (value.IsEmpty())
         return;
+    value.MakeUpper();
     if (type == CriteriaItem::ctDDL || type == CriteriaItem::ctDescription)
         value = wxT("*") + value + wxT("*");
     CriteriaItem c(value, db);
@@ -285,6 +286,7 @@ void AdvancedSearchFrame::rebuildList()
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::addResult(Database* db, MetadataItem* item)
 {
+    // TODO: become observer for that Item in case it gets dropped/deleted...
     int index = listctrl_results->GetItemCount();
     listctrl_results->InsertItem(index, db->getName_());
     listctrl_results->SetItem(index, 1, item->getTypeName());
@@ -293,19 +295,22 @@ void AdvancedSearchFrame::addResult(Database* db, MetadataItem* item)
     results.push_back(item);
 }
 //-----------------------------------------------------------------------------
+// returns true if "text" matches all criteria of type "type"
 bool AdvancedSearchFrame::match(CriteriaItem::Type type, const wxString& text)
 {
     for (CriteriaCollection::const_iterator ci =
         searchCriteriaM.lower_bound(type); ci !=
         searchCriteriaM.upper_bound(type); ++ci)
     {
-        if (!text.Matches((*ci).second.value));
+        if (!text.Matches((*ci).second.value))
             return false;
     }
     return true;
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(AdvancedSearchFrame, wxFrame)
+    EVT_LIST_ITEM_ACTIVATED(AdvancedSearchFrame::ID_listctrl_criteria,
+        AdvancedSearchFrame::OnListCtrlCriteriaActivate)
     EVT_LIST_ITEM_RIGHT_CLICK(AdvancedSearchFrame::ID_listctrl_results,
         AdvancedSearchFrame::OnListCtrlResultsRightClick)
     EVT_LIST_ITEM_SELECTED(AdvancedSearchFrame::ID_listctrl_results,
@@ -330,6 +335,23 @@ BEGIN_EVENT_TABLE(AdvancedSearchFrame, wxFrame)
         AdvancedSearchFrame::OnButtonAddDatabaseClick)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
+// remove item on double-click/Enter
+void AdvancedSearchFrame::OnListCtrlCriteriaActivate(wxListEvent& event)
+{
+    long index = event.GetIndex();
+    for (CriteriaCollection::iterator it = searchCriteriaM.begin();
+        it != searchCriteriaM.end(); ++it)
+    {
+        if ((*it).second.listIndex == index)
+        {
+            searchCriteriaM.erase(it);
+            break;
+        }
+    }
+    rebuildList();
+}
+//-----------------------------------------------------------------------------
+// show DDL for selected item, and select it in main tree
 void AdvancedSearchFrame::OnListCtrlResultsItemSelected(wxListEvent& event)
 {
     MetadataItem *m = results[event.GetData()];
@@ -341,24 +363,16 @@ void AdvancedSearchFrame::OnListCtrlResultsItemSelected(wxListEvent& event)
     {
         myTreeCtrl *tree = mf->getTreeCtrl();
         if (tree)
-        {
-            if (!tree->selectMetadataItem(m))
-            {
-                wxMessageBox(_("item not found"));
-            }
-        }
+            tree->selectMetadataItem(m);
     }
 }
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::OnListCtrlResultsRightClick(wxListEvent& event)
 {
     MetadataItem *m = results[event.GetData()];
-    wxMenu MyMenu(0);    // create context menu, depending on type of clicked item
+    wxMenu MyMenu(0);
     ContextMenuMetadataItemVisitor cmv(&MyMenu);
     m->acceptVisitor(&cmv);
-    //wxRect r;
-    //listctrl_results->GetItemRect(event.GetIndex(), r);
-    //PopupMenu(&MyMenu, r.x+r.width/2, r.y+r.height/2);
     PopupMenu(&MyMenu, ScreenToClient(wxGetMousePosition()));
 }
 //-----------------------------------------------------------------------------
@@ -407,7 +421,7 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& event)
     results.clear();
     listctrl_results->DeleteAllItems();
 
-    // get all types we want to match
+    // get all types we want to match, for faster lookup later
     std::set<NodeType> types;
     if (searchCriteriaM.count(CriteriaItem::ctType) != 0)
     {
@@ -455,6 +469,7 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& event)
                 }
                 if (searchCriteriaM.count(CriteriaItem::ctDDL) > 0)
                 {
+                    // TODO: add ProgressDialog, and link it up in here
                     CreateDDLVisitor cdv;
                     (*it)->acceptVisitor(&cdv);
                     if (!match(CriteriaItem::ctDDL, cdv.getSql()))
@@ -462,9 +477,32 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& event)
                 }
                 if (searchCriteriaM.count(CriteriaItem::ctField) > 0)
                 {
-                    // TODO: check fields?
+                    Relation *r = dynamic_cast<Relation *>(*it);
+                    Procedure *p = dynamic_cast<Procedure *>(*it);
+                    if (r)
+                        r->checkAndLoadColumns();
+                    if (p)
+                        p->checkAndLoadParameters();
+                    if (r || p)
+                    {
+                        std::vector<MetadataItem *> tmpc;
+                        (*it)->getChildren(tmpc);
+                        bool found = false;
+                        for (std::vector<MetadataItem *>::iterator ic =
+                            tmpc.begin(); ic != tmpc.end(); ++ic)
+                        {
+                            if (match(CriteriaItem::ctField,
+                                (*ic)->getName_()))
+                            {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found)     // object doesn't contain that field
+                            continue;
+                    }
                 }
-                // everything ok -> add to results
+                // everything criteria is matched -> add to results
                 addResult(db, *it);
             }
         }
