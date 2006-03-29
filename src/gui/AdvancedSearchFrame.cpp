@@ -320,23 +320,21 @@ void AdvancedSearchFrame::update()
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::removeSubject(Subject* subject)
 {
-    wxMessageBox(subject->getSubjectName(), _("removing subject"));
     Observer::removeSubject(subject);
 
-    // NOTE: we can't do this, since this function is called from ~Subject()
-    //       and ~Database() has already been called. So we can't cast
-    //       to Database (and not even MetadataItem
+    // NOTE: we can't do this dynamic_cast, since this function is called
+    //       from ~Subject() and ~Database() has already been called. So we
+    //       can't cast to Database (and not even MetadataItem
     // Database *db = dynamic_cast<Database *>(subject);
-
+    //
+    // Since we can't determine what it is by dynamic_cast, we try both:
     // STEP1: Check for database
-    // remove from choice_database
     for (int i=choice_database->GetCount()-1; i>=0; i--)
-    {
+    {   // remove from choice_database
         Database *d = (Database *)choice_database->GetClientData(i);
         if (subject == d)
             choice_database->Delete(i);
     }
-
     // remove from listctrl_criteria + searchCriteriaM
     bool removed_db = false;
     while (true)    // in case iterators get invalidated on delete
