@@ -641,7 +641,7 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
             return;
         if (d->getInfo()->getReadOnly())
             htmlpage += wxT("true");
-	else
+    else
             htmlpage += wxT("false");
     }
     else if (cmd == wxT("forced_writes"))
@@ -653,7 +653,7 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         wxString okimage = wxT("<img src=\"") + config().getHtmlTemplatesPath() + wxT("ok.png\">");
         wxString ximage = wxT("<img src=\"") + config().getHtmlTemplatesPath() + wxT("redx.png\">");
 
-	htmlpage += (d->getInfo()->getForcedWrites() ? okimage : ximage);
+    htmlpage += (d->getInfo()->getForcedWrites() ? okimage : ximage);
     }
 }
 //-----------------------------------------------------------------------------
@@ -776,6 +776,14 @@ void MetadataItemPropertiesFrame::setPage(const wxString& type)
 //! recreate html page if something changes
 void MetadataItemPropertiesFrame::update()
 {
+    Database *db = dynamic_cast<Database *>(objectM);
+    if (db && !db->isConnected())
+    {
+        objectM = 0;
+        Close();
+        return;
+    }
+
     // if table or view columns change, we need to reattach
     if (objectM->getType() == ntTable || objectM->getType() == ntView)  // also observe columns
     {
