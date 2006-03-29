@@ -307,10 +307,10 @@ bool AdvancedSearchFrame::match(CriteriaItem::Type type, const wxString& text)
         searchCriteriaM.lower_bound(type); ci !=
         searchCriteriaM.upper_bound(type); ++ci)
     {
-        if (!text.Matches((*ci).second.value))
-            return false;
+        if (text.Matches((*ci).second.value))
+            return true;
     }
-    return true;
+    return false;
 }
 //-----------------------------------------------------------------------------
 // OBSERVER functions
