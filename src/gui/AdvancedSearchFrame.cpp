@@ -333,7 +333,11 @@ void AdvancedSearchFrame::removeSubject(Subject* subject)
     {   // remove from choice_database
         Database *d = (Database *)choice_database->GetClientData(i);
         if (subject == d)
+        {
             choice_database->Delete(i);
+            choice_database->SetSelection(0);
+            break;
+        }
     }
     // remove from listctrl_criteria + searchCriteriaM
     bool removed_db = false;
