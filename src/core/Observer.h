@@ -42,7 +42,11 @@ public:
 
     Subject* getFirstSubject();
     void addSubject(Subject* subject);
+
     // virtual so some controls can do something extra
+    // BE CAREFUL: if function gets called when subject is destroyed
+    //             its derived-class destructor has already been called so
+    //             you can't, for example, dynamic_cast it to MetadataItem*
     virtual void removeSubject(Subject* subject);
 };
 //-----------------------------------------------------------------------------
