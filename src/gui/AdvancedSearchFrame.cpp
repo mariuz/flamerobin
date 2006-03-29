@@ -320,46 +320,52 @@ void AdvancedSearchFrame::update()
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::removeSubject(Subject* subject)
 {
+    wxMessageBox(subject->getSubjectName(), _("removing subject"));
     Observer::removeSubject(subject);
-    Database *db = dynamic_cast<Database *>(subject);
-    if (db)    // database node
-    {
-        // remove from choice_database
-        for (int i=choice_database->GetCount()-1; i>=0; i--)
-        {
-            Database *d = (Database *)choice_database->GetClientData(i);
-            if (db == d)
-                choice_database->Delete(i);
-        }
 
-        // remove from listctrl_criteria + searchCriteriaM
-        while (true)    // in case iterators get invalidated on delete
-        {
-            CriteriaCollection::iterator it = searchCriteriaM.begin();
-            while (it != searchCriteriaM.end())
-            {
-                if ((*it).second.database == db)
-                    break;
-                ++it;
-            }
-            if (it == searchCriteriaM.end())    // none to remove
-                break;
-            searchCriteriaM.erase(it);
-        }
-        rebuildList();
-    }
-    else    // remove from listctrl_results + results
+    // NOTE: we can't do this, since this function is called from ~Subject()
+    //       and ~Database() has already been called. So we can't cast
+    //       to Database (and not even MetadataItem
+    // Database *db = dynamic_cast<Database *>(subject);
+
+    // STEP1: Check for database
+    // remove from choice_database
+    for (int i=choice_database->GetCount()-1; i>=0; i--)
     {
-        long i = 0;
-        for (std::vector<MetadataItem *>::iterator it = results.begin();
-            it != results.end(); ++it, i++)
+        Database *d = (Database *)choice_database->GetClientData(i);
+        if (subject == d)
+            choice_database->Delete(i);
+    }
+
+    // remove from listctrl_criteria + searchCriteriaM
+    bool removed_db = false;
+    while (true)    // in case iterators get invalidated on delete
+    {
+        CriteriaCollection::iterator it = searchCriteriaM.begin();
+        while (it != searchCriteriaM.end())
         {
-            if ((*it) == subject)
-            {
-                listctrl_results->DeleteItem(i);
-                results.erase(it);
+            if ((*it).second.database == subject)
                 break;
-            }
+            ++it;
+        }
+        if (it == searchCriteriaM.end())    // none to remove
+            break;
+        removed_db = true;
+        searchCriteriaM.erase(it);
+    }
+    if (removed_db)
+        rebuildList();
+
+    // STEP2: Check for criteria
+    long i = 0;
+    for (std::vector<MetadataItem *>::iterator it = results.begin();
+        it != results.end(); ++it, i++)
+    {
+        if ((*it) == subject)
+        {
+            listctrl_results->DeleteItem(i);
+            results.erase(it);
+            break;
         }
     }
 }
