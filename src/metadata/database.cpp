@@ -91,6 +91,68 @@ wxString Credentials::getRole() const
     return roleM;
 }
 //-----------------------------------------------------------------------------
+int DatabaseInfo::getBuffers()
+{
+    return buffersM;
+}
+//-----------------------------------------------------------------------------
+wxString DatabaseInfo::getCreated()
+{
+    return wxT("not supported");
+}
+//-----------------------------------------------------------------------------
+int DatabaseInfo::getDialect()
+{
+    return dialectM;
+}
+//-----------------------------------------------------------------------------
+bool DatabaseInfo::getForcedWrites()
+{
+    return forcedWritesM;
+}
+//-----------------------------------------------------------------------------
+int DatabaseInfo::getNextTransaction()
+{
+    return nextTransactionM;
+}
+//-----------------------------------------------------------------------------
+int DatabaseInfo::getODS()
+{
+    return odsM;
+}
+//-----------------------------------------------------------------------------
+int DatabaseInfo::getODSMinor()
+{
+    return odsMinorM;
+}
+//-----------------------------------------------------------------------------
+int DatabaseInfo::getOldestTransaction()
+{
+    return oldestTransactionM;
+}
+//-----------------------------------------------------------------------------
+int DatabaseInfo::getPageSize()
+{
+    return pageSizeM;
+}
+//-----------------------------------------------------------------------------
+bool DatabaseInfo::getReadOnly()
+{
+    return readOnlyM;
+}
+//-----------------------------------------------------------------------------
+int DatabaseInfo::getSweep()
+{
+    return sweepM;
+}
+//-----------------------------------------------------------------------------
+void DatabaseInfo::loadInfo(const IBPP::Database* database)
+{
+    (*database)->Info(&odsM, &odsMinorM, &pageSizeM, NULL,
+        &buffersM, &sweepM, &forcedWritesM, &reserveM);
+    dialectM = (*database)->Dialect();
+}
+//-----------------------------------------------------------------------------
 Database::Database()
     : MetadataItem(), idM(0)
 {
@@ -755,6 +817,7 @@ bool Database::reconnect() const
     {
         databaseM->Disconnect();
         databaseM->Connect();
+
         return true;
     }
     catch (IBPP::Exception &e)
@@ -783,6 +846,7 @@ bool Database::connect(wxString password, ProgressIndicator* indicator)
         databaseM = IBPP::DatabaseFactory("", wx2std(getConnectionString()),
             wx2std(getUsername()), wx2std(password), wx2std(getRole()),
             wx2std(getConnectionCharset()), "");
+
         databaseM->Connect();
         connectedM = true;
         notifyObservers();
@@ -836,6 +900,9 @@ bool Database::connect(wxString password, ProgressIndicator* indicator)
         }
         if (canceled)
             disconnect();
+
+        databaseInfoM.loadInfo(&databaseM);
+
         return true;
     }
     catch (IBPP::Exception &e)
@@ -1137,5 +1204,10 @@ const wxString Database::getId() const
 void Database::setId(int id)
 {
     idM = id;
+}
+//-----------------------------------------------------------------------------
+DatabaseInfo* Database::getInfo() const
+{
+    return const_cast<DatabaseInfo*>(&databaseInfoM);
 }
 //-----------------------------------------------------------------------------

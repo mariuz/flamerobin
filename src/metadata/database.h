@@ -64,6 +64,47 @@ public:
     void setRole(wxString value);
 };
 //-----------------------------------------------------------------------------
+class DatabaseInfo
+{
+private:
+    int odsM;
+    int odsMinorM;
+    int dialectM;
+
+    int pageSizeM;
+    int buffersM;
+
+    int oldestTransactionM;
+    int nextTransactionM;
+
+    int sweepM;
+
+    bool readOnlyM;
+    bool forcedWritesM;
+    bool reserveM;
+
+public:
+    void loadInfo(const IBPP::Database* database);
+
+    wxString getCreated();
+
+    int getODS();
+    int getODSMinor();
+
+    int getDialect();
+
+    int getPageSize();
+    int getBuffers();
+
+    int getOldestTransaction();
+    int getNextTransaction();
+
+    int getSweep();
+
+    bool getReadOnly();
+    bool getForcedWrites();
+};
+//-----------------------------------------------------------------------------
 class Database: public MetadataItem
 {
 private:
@@ -74,6 +115,8 @@ private:
     wxString pathM;
     Credentials credentialsM;
     Credentials* connectionCredentialsM;
+
+    DatabaseInfo databaseInfoM;
 
     MetadataCollection<Domain> domainsM;
     MetadataCollection<Exception> exceptionsM;
@@ -97,6 +140,7 @@ private:
 protected:
     virtual void lockChildren();
     virtual void unlockChildren();
+
 public:
     Database();
     Database(const Database& rhs);
@@ -182,6 +226,8 @@ public:
     virtual const wxString getId() const;
     void setId(int id);
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+
+    DatabaseInfo* getInfo() const;
 };
 //----------------------------------------------------------------------------
 #endif

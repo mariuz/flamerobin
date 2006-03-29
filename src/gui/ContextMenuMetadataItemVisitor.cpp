@@ -63,16 +63,28 @@ void ContextMenuMetadataItemVisitor::visit(Database&)
     menuM->Append(myTreeCtrl::Menu_Reconnect, _("Reconnec&t"));
     menuM->Append(myTreeCtrl::Menu_Query, _("&Run a query..."));
     menuM->AppendSeparator();
-    menuM->Append(myTreeCtrl::Menu_ShowConnectedUsers, _("&Show connected users"));
-    menuM->Append(myTreeCtrl::Menu_MonitorEvents, _("&Monitor events"));
+
+    wxMenu* actions = new wxMenu();
+    menuM->Append(0, _("Actions"), actions);
+
+    wxMenu* advanced = new wxMenu();
+    menuM->Append(0, _("Advanced"), advanced);
+
     menuM->Append(myTreeCtrl::Menu_DatabaseRegistrationInfo, _("Database registration &info..."));
     menuM->Append(myTreeCtrl::Menu_UnRegisterDatabase, _("&Unregister database"));
+
+    // the actions submenu
+    actions->Append(myTreeCtrl::Menu_DropDatabase, _("Drop database"));
+    actions->Append(myTreeCtrl::Menu_Backup, _("&Backup database..."));
+    actions->Append(myTreeCtrl::Menu_Restore, _("Rest&ore database..."));
+
+    // the advanced submenu
+    advanced->Append(myTreeCtrl::Menu_ShowConnectedUsers, _("&Show connected users"));
+    advanced->Append(myTreeCtrl::Menu_MonitorEvents, _("&Monitor events"));
+    advanced->Append(myTreeCtrl::Menu_DatabasePreferences, _("Database &preferences..."));
+
     menuM->AppendSeparator();
-    menuM->Append(myTreeCtrl::Menu_Backup, _("&Backup database..."));
-    menuM->Append(myTreeCtrl::Menu_Restore, _("Rest&ore database..."));
-    menuM->Append(myTreeCtrl::Menu_DropDatabase, _("Drop database"));
-    menuM->AppendSeparator();
-    menuM->Append(myTreeCtrl::Menu_DatabasePreferences, _("Database &preferences..."));
+    menuM->Append(myTreeCtrl::Menu_ObjectProperties, _("Show P&roperties"));
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visit(Domain&)

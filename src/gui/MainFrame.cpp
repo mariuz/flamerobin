@@ -52,6 +52,7 @@
 #include "gui/ExecuteSqlFrame.h"
 #include "gui/MainFrame.h"
 #include "gui/PreferencesDialog.h"
+#include "gui/ProgressDialog.h"
 #include "gui/RestoreFrame.h"
 #include "gui/ServerRegistrationDialog.h"
 #include "gui/SimpleHtmlFrame.h"
@@ -351,9 +352,13 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(myTreeCtrl::Menu_SetGeneratorValue, MainFrame::OnMenuSetGeneratorValue)
 
     EVT_MENU(myTreeCtrl::Menu_CreateObject, MainFrame::OnMenuCreateObject)
-    EVT_MENU(myTreeCtrl::Menu_ObjectProperties, MainFrame::OnMenuObjectProperties)
     EVT_MENU(myTreeCtrl::Menu_AlterObject, MainFrame::OnMenuAlterObject)
     EVT_MENU(myTreeCtrl::Menu_DropObject, MainFrame::OnMenuDropObject)
+    EVT_MENU(myTreeCtrl::Menu_ObjectProperties, MainFrame::OnMenuObjectProperties)
+    // Because object properties are also available for the database object, the
+    // menu item should be disabled when the database is disconnected, and become
+    // enabled when there is a connection to the database.
+    EVT_UPDATE_UI(myTreeCtrl::Menu_ObjectProperties, MainFrame::OnMenuUpdateIfDatabaseConnected)
 
     EVT_MENU(myTreeCtrl::Menu_ToggleStatusBar, MainFrame::OnMenuToggleStatusBar)
     EVT_MENU(myTreeCtrl::Menu_ToggleSearchBar, MainFrame::OnMenuToggleSearchBar)
@@ -1030,9 +1035,11 @@ void MainFrame::OnMenuGetServerVersion(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
+    ProgressDialog pd(this, _("Retrieving server version"), 1);
+
     Server* s = tree_ctrl_1->getSelectedServer();
     wxString version;
-    if (s->getVersion(version))
+    if (s->getVersion(version, &pd))
     {
         if (!version.IsEmpty())
             wxMessageBox(version, _("Server version"), wxOK|wxICON_INFORMATION);

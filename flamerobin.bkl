@@ -369,6 +369,7 @@
         $(SOURCEDIR)/core/Observer.cpp
         $(SOURCEDIR)/core/Subject.cpp
         $(SOURCEDIR)/core/Visitor.cpp
+        $(SOURCEDIR)/databasehandler.cpp
         $(SOURCEDIR)/dberror.cpp
         $(SOURCEDIR)/framemanager.cpp
         $(SOURCEDIR)/frDataGrid.cpp
@@ -467,6 +468,7 @@
         <if cond="FORMAT!='autoconf'">html-templates</if>
     </set>
     <set var="HTMLTEMPLATEFILES">
+        DATABASE.html
         DDL.html
         DOMAIN.html
         EXCEPTION.html

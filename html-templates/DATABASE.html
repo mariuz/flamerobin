@@ -1,0 +1,59 @@
+<html>
+<head>
+ <title>Database properties</title>
+</head>
+<body>
+<a href="fr://page?type=ddl&amp;parent_window={%parent_window%}">DDL</a>
+<br>
+<br>
+<font size=+2>{%object_name%}</font><br>
+<br>
+<table cellspacing=0 cellpadding=1 border=0 bgcolor=0>
+  <tbody>
+    <tr bgcolor="#DDDDFF">
+      <td>ODS Version</td>
+      <td align="right">{%ods_version%}</td>
+      <td width="10" bgcolor="white">&nbsp;</td>
+      <td>Page size</td>
+      <td align="right">{%page_size%}</td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+      <td>Dialect</td>
+      <td align="right">{%dialect%}</td>
+      <td width="10" bgcolor="white">&nbsp;</td>
+      <td>Page buffers</td>
+      <td align="right">{%page_buffers%}</td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+      <td>Sweep interval</td>
+      <td align="right"><a href="fr://edit_sweep_interval?parent_window={%parent_window%}&amp;object_address={%object_address%}">{%sweep_interval%}</a></td>
+      <td width="10" bgcolor="white">&nbsp;</td>
+      <td bgcolor="white">&nbsp;</td>
+      <td bgcolor="white">&nbsp;</td>
+    </tr>
+    <tr bgcolor="white">
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+      <td>Read only</td>
+      <td align="right">{%read_only%}</td>
+      <td width="10" bgcolor="white">&nbsp;</td>
+      <td bgcolor="white">&nbsp;</td>
+      <td bgcolor="white">&nbsp;</td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+      <td>Forced writes</td>
+      <td align="right"><a href="fr://edit_forced_writes?parent_window={%parent_window%}&amp;object_address={%object_address%}">{%forced_writes%}</a></td>
+      <td width="10" bgcolor="white">&nbsp;</td>
+      <td bgcolor="white">&nbsp;</td>
+      <td bgcolor="white">&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+
+</body>
+</html>

@@ -570,6 +570,91 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         else if (cmd == wxT("index_fields"))
             htmlpage += i->getFieldsAsString();
     }
+    else if (cmd == wxT("creation_date"))
+    {
+        Database* d = dynamic_cast<Database*>(object);
+        if (!d)
+            return;
+
+        htmlpage += d->getInfo()->getCreated();
+    }
+    else if (cmd == wxT("ods_version"))
+    {
+        Database* d = dynamic_cast<Database*>(object);
+        if (!d)
+            return;
+
+        htmlpage += wxString() << d->getInfo()->getODS();
+    }
+    else if (cmd == wxT("dialect"))
+    {
+        Database* d = dynamic_cast<Database*>(object);
+        if (!d)
+            return;
+
+        htmlpage += wxString() << d->getInfo()->getDialect();
+    }
+    else if (cmd == wxT("sweep_interval"))
+    {
+        Database* d = dynamic_cast<Database*>(object);
+        if (!d)
+            return;
+
+        htmlpage += wxString() << d->getInfo()->getSweep();
+    }
+    else if (cmd == wxT("page_size"))
+    {
+        Database* d = dynamic_cast<Database*>(object);
+        if (!d)
+            return;
+
+        htmlpage += wxString() << d->getInfo()->getPageSize();
+    }
+    else if (cmd == wxT("page_buffers"))
+    {
+        Database* d = dynamic_cast<Database*>(object);
+        if (!d)
+            return;
+
+        htmlpage += wxString() << d->getInfo()->getBuffers();
+    }
+    else if (cmd == wxT("oldest_transaction"))
+    {
+        Database* d = dynamic_cast<Database*>(object);
+        if (!d)
+            return;
+
+        htmlpage += wxString() << d->getInfo()->getOldestTransaction();
+    }
+    else if (cmd == wxT("next_transaction"))
+    {
+        Database* d = dynamic_cast<Database*>(object);
+        if (!d)
+            return;
+
+        htmlpage += wxString() << d->getInfo()->getNextTransaction();
+    }
+    else if (cmd == wxT("read_only"))
+    {
+        Database* d = dynamic_cast<Database*>(object);
+        if (!d)
+            return;
+        if (d->getInfo()->getReadOnly())
+            htmlpage += wxT("true");
+	else
+            htmlpage += wxT("false");
+    }
+    else if (cmd == wxT("forced_writes"))
+    {
+        Database* d = dynamic_cast<Database*>(object);
+        if (!d)
+            return;
+
+        wxString okimage = wxT("<img src=\"") + config().getHtmlTemplatesPath() + wxT("ok.png\">");
+        wxString ximage = wxT("<img src=\"") + config().getHtmlTemplatesPath() + wxT("redx.png\">");
+
+	htmlpage += (d->getInfo()->getForcedWrites() ? okimage : ximage);
+    }
 }
 //-----------------------------------------------------------------------------
 //! processes html template code given in the htmlsource wxString

@@ -27,6 +27,8 @@
 #ifndef FR_SERVER_H
 #define FR_SERVER_H
 
+#include "ibpp/ibpp.h"
+
 #include "metadata/collection.h"
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
@@ -54,9 +56,9 @@ public:
     MetadataCollection<Database> *getDatabases();
 
     void createDatabase(Database *db, int pagesize = 4096, int dialect = 3);
-    bool getVersion(wxString& version);
-    bool getVersionString(const wxString& username, const wxString& password,
-        wxString& version);
+    bool getVersion(wxString& version, ProgressIndicator* progressIndicator = NULL);
+
+    IBPP::Service getService(ProgressIndicator* progressIndicator = NULL);
 
     // setters/getters
     wxString getHostname() const;

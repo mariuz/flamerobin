@@ -116,90 +116,26 @@ void Server::createDatabase(Database* db, int pagesize, int dialect)
     db1->Create(dialect);
 }
 //-----------------------------------------------------------------------------
-bool Server::getVersionString(const wxString& username,
-    const wxString& password, wxString& version)
+bool Server::getVersion(wxString& version, ProgressIndicator* progressIndicator)
 {
     IBPP::Service svc;
-    //wxBusyCursor bc;
     try
     {
-        svc = IBPP::ServiceFactory(wx2std(getConnectionString()),
-            wx2std(username), wx2std(password));
+        svc = getService(progressIndicator);
         svc->Connect();
-    }
-    catch (IBPP::Exception&)
-    {
-        return false;
-    }
-    std::string vrs;
-    svc->GetVersion(vrs);
-    svc->Disconnect();
-    version = std2wx(vrs);
-    return true;
-}
-//-----------------------------------------------------------------------------
-bool Server::getVersion(wxString& version)
-{
-    wxProgressDialog pd(_("Connecting..."), wxEmptyString,
-		databasesM.getChildrenCount(),	NULL,
-		wxPD_CAN_ABORT |  wxPD_APP_MODAL);
-
-    try // try to connect using credentials of some database
-    {
-        // try connected ones first
-		int cnt = 0;
-		bool skip = false;
-        for (MetadataCollection<Database>::const_iterator ci =
-            databasesM.begin(); ci != databasesM.end(); ++ci)
-        {
-            if ((*ci).isConnected())
-			{
-				if (!pd.Update(cnt++, _("Using password of: ") +
-					(*ci).getUsername() + wxT("@") + (*ci).getName_()))
-				{
-					skip = true;
-					break;
-				}
-
-				if (getVersionString((*ci).getUsername(), (*ci).getPassword(), version))
-	                return true;
-			}
-        }
-
-        if (!skip)
-        {
-	        // it failed: try disconnected ones
-	        for (MetadataCollection<Database>::const_iterator ci =
-	            databasesM.begin(); ci != databasesM.end(); ++ci)
-	        {
-	            if (!(*ci).isConnected())
-	            {
-					if (!pd.Update(cnt++, _("Using password of: ") +
-						(*ci).getUsername() + wxT("@") + (*ci).getName_()))
-						break;
-					if (getVersionString((*ci).getUsername(), (*ci).getPassword(), version))
-		                return true;
-		        }
-	        }
-	    }
-        wxMessageBox(_("None of the credentials of the databases could be used\nYou need to supply a valid username and password."),
-            _("No usable database"), wxOK|wxICON_WARNING);
-        wxString username = ::wxGetTextFromUser(_("Connecting to server"),
-            _("Enter username"));
-        if (username.IsEmpty())
-            return true;
-        wxString password = ::wxGetPasswordFromUser(_("Connecting to server"),
-            _("Enter password"));
-        if (password.IsEmpty())
-            return true;
-        if (getVersionString(username, password, version))
-            return true;
     }
     catch (IBPP::Exception& e)
     {
         version = std2wx(e.ErrorMessage());
+        return false;
     }
-    return false;
+
+    std::string vrs;
+    svc->GetVersion(vrs);
+    svc->Disconnect();
+    version = std2wx(vrs);
+
+    return true;
 }
 //-----------------------------------------------------------------------------
 MetadataCollection<Database>* Server::getDatabases()
@@ -264,5 +200,81 @@ const wxString Server::getItemPath() const
     // by not including the server part. Even more so if this class is bound
     // to disappear in the future.
     return wxT("");
+}
+//-----------------------------------------------------------------------------
+IBPP::Service Server::getService(ProgressIndicator* progressIndicator)
+{
+    if (progressIndicator)
+    {
+        progressIndicator->initProgress(_("Connecting..."),
+	databasesM.getChildrenCount(), 0, 1);
+    }
+
+    wxString user, pwd;
+    bool canceled = false;
+
+    // first try connected databases
+    for (MetadataCollection<Database>::iterator ci = databasesM.begin();
+        ci != databasesM.end(); ++ci)
+    {
+        if (progressIndicator && progressIndicator->isCanceled())
+        {
+            canceled = true;
+            break;
+        }
+
+        if ((*ci).isConnected())
+        {
+            // Use the user name and password of the connected user
+            // instead of the stored onces.
+            IBPP::Database& db = (*ci).getIBPPDatabase();
+            user = std2wx(db->Username());
+            pwd = std2wx(db->UserPassword());
+
+            if (progressIndicator)
+            {
+                progressIndicator->setProgressMessage(_("Using password of: ") +
+                    user + wxT("@") + (*ci).getName_());
+                progressIndicator->stepProgress();
+            }
+        }
+    }
+
+    // when the operation is not canceled and the user and/or password
+    // is still empty, try to find them stored in the disconnected databases.
+    if (!canceled && (user.IsEmpty() || pwd.IsEmpty()))
+    {
+        for (MetadataCollection<Database>::const_iterator ci = databasesM.begin();
+            ci != databasesM.end(); ++ci)
+        {
+            if (!(*ci).isConnected())
+            {
+                user = (*ci).getUsername();
+                pwd = (*ci).getPassword();
+
+                if (!user.IsEmpty() && !pwd.IsEmpty())
+                    break;
+            }
+        }
+    }
+
+    wxString msg;
+    if (canceled)
+        msg = _("You've canceled the search for a usable username and password.");
+    else if (user.IsEmpty() || pwd.IsEmpty())
+        msg = _("None of the credentials of the databases could be used.");
+
+    if (!msg.IsEmpty())
+    {
+        wxMessageBox(msg + _("\nYou need to supply a valid username and password."),
+            _("Connecting to server"), wxOK|wxICON_INFORMATION);
+	user = ::wxGetTextFromUser(_("Connecting to server"),
+            _("Enter username"));
+        pwd = ::wxGetPasswordFromUser(_("Connecting to server"),
+            _("Enter password"));
+    }
+
+    return IBPP::ServiceFactory(wx2std(getConnectionString()),
+        wx2std(user), wx2std(pwd));
 }
 //-----------------------------------------------------------------------------
