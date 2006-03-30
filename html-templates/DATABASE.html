@@ -8,52 +8,52 @@
 <br>
 <font size=+2>{%object_name%}</font><br>
 <br>
-<table cellspacing=0 cellpadding=1 border=0 bgcolor=0>
+<table bgcolor="white" border=0 cellpadding=2 cellspacing=0 valign=top>
+    <tr><td>
+
+<!-- left table -->
+<table cellspacing=1 cellpadding=2 border=0 bgcolor="white">
   <tbody>
-    <tr bgcolor="#DDDDFF">
-      <td>ODS Version</td>
-      <td align="right" bgcolor="#CCCCFF">{%ods_version%}</td>
-      <td width="10" bgcolor="white">&nbsp;</td>
-      <td>Page size</td>
-      <td align="right" bgcolor="#CCCCFF">{%page_size%}</td>
+    <tr bgcolor="navy">
+      <td nowrap colspan=2><b><font color=white>Database file</font></b></td>
     </tr>
     <tr bgcolor="#DDDDFF">
-      <td>Dialect</td>
-      <td align="right" bgcolor="#CCCCFF">{%dialect%}</td>
-      <td width="10" bgcolor="white">&nbsp;</td>
-      <td>Page buffers</td>
-      <td align="right" bgcolor="#CCCCFF">{%page_buffers%}</td>
+        <td nowrap>ODS Version</td><td align="right" bgcolor="#CCCCFF" nowrap>{%ods_version%}</td>
     </tr>
     <tr bgcolor="#DDDDFF">
-      <td>Sweep interval</td>
-      <td align="right" bgcolor="#CCCCFF"><a href="fr://edit_sweep_interval?parent_window={%parent_window%}&amp;object_address={%object_address%}">{%sweep_interval%}</a></td>
-      <td width="10" bgcolor="white">&nbsp;</td>
-      <td bgcolor="white">&nbsp;</td>
-      <td bgcolor="white">&nbsp;</td>
-    </tr>
-    <tr bgcolor="white">
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
+        <td nowrap>Page size</td><td align="right" bgcolor="#CCCCFF" nowrap>{%page_size%}</td>
     </tr>
     <tr bgcolor="#DDDDFF">
-      <td>Read only</td>
-      <td align="right" bgcolor="#CCCCFF">{%read_only%}</td>
-      <td width="10" bgcolor="white">&nbsp;</td>
-      <td bgcolor="white">&nbsp;</td>
-      <td bgcolor="white">&nbsp;</td>
+        <td nowrap>Page buffers</td><td align="right" bgcolor="#CCCCFF" nowrap>{%page_buffers%}</td>
     </tr>
     <tr bgcolor="#DDDDFF">
-      <td>Forced writes</td>
-      <td align="right" bgcolor="#CCCCFF"><a href="fr://edit_forced_writes?parent_window={%parent_window%}&amp;object_address={%object_address%}">{%forced_writes%}</a></td>
-      <td width="10" bgcolor="white">&nbsp;</td>
-      <td bgcolor="white">&nbsp;</td>
-      <td bgcolor="white">&nbsp;</td>
+        <td nowrap>Read only</td><td align="right" bgcolor="#CCCCFF" nowrap>{%read_only%}</td>
     </tr>
   </tbody>
 </table>
-
+<!-- left table end-->
+</td><td> &nbsp; </td><td>
+<!-- right table -->
+<table cellspacing=1 cellpadding=2 border=0 bgcolor="white">
+  <tbody>
+    <tr bgcolor="navy">
+      <td colspan=2><b><font color=white>Settings</font></b></td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>Dialect</td><td align="right" bgcolor="#CCCCFF" nowrap>{%dialect%}</td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>Sweep interval</td>
+        <td align="right" bgcolor="#CCCCFF" nowrap><a href="fr://edit_sweep_interval?parent_window={%parent_window%}&amp;object_address={%object_address%}">{%sweep_interval%}</a></td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>Forced writes</td>
+        <td align="right" bgcolor="#CCCCFF" nowrap><a href="fr://edit_forced_writes?parent_window={%parent_window%}&amp;object_address={%object_address%}">{%forced_writes%}</a></td>
+    </tr>
+  </tbody>
+</table>
+<!-- right table end -->
+    </td></tr>
+</table>
 </body>
 </html>
