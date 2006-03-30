@@ -44,6 +44,7 @@
 #include "ugly.h"
 #include "urihandler.h"
 
+#include "core/FRError.h"
 #include "PrintableHtmlWindow.h"
 //-----------------------------------------------------------------------------
 HtmlPrinter::HtmlPrinter()
