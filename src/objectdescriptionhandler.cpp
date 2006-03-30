@@ -61,8 +61,6 @@ bool ObjectDescriptionHandler::handleURI(URI& uri)
     if (uri.action != wxT("edit_description"))
         return false;
 
-    FR_TRY
-
     MetadataItem* m = (MetadataItem*)getObject(uri);
     wxWindow* w = getWindow(uri);
     if (!m || !w)
@@ -74,13 +72,10 @@ bool ObjectDescriptionHandler::handleURI(URI& uri)
     {
         wxBusyCursor wait;
         m->setDescription(desc);
-        // FIXME: This can be removed when MetadataItem::setDescriptionM() 
+        // FIXME: This can be removed when MetadataItem::setDescriptionM()
         //        is fixed to call it without recursion.
         m->notifyObservers();
     }
-
-    FR_CATCH
-
     return true;
 }
 //-----------------------------------------------------------------------------

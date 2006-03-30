@@ -11,16 +11,16 @@
 
   The Original Code is FlameRobin (TM).
 
-  The Initial Developer of the Original Code is Milan Babuskov.
+  The Initial Developer of the Original Code is Bart Bakker.
 
   Portions created by the original developer
-  are Copyright (C) 2004 Milan Babuskov.
+  are Copyright (C) 2006 Bart Bakker.
 
   All Rights Reserved.
 
   $Id: databaseshandlers.cpp $
 
-  Contributor(s): Bart Bakker.
+  Contributor(s): Milan Babuskov.
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -65,8 +65,6 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
     if (!isEditSweep && !isEditForcedWrites)
         return false;
 
-    FR_TRY
-
     Database* d = (Database*)getObject(uri);
     wxWindow* w = getWindow(uri);
 
@@ -88,20 +86,18 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
             wxString s;
             s = ::wxGetTextFromUser(_("Enter the sweep interval"), _("Sweep interval"), _(""));
 
-            // return from the iteration when the entered string is empty, in 
+            // return from the iteration when the entered string is empty, in
             // case of cancelling the operation.
-	    if (s.IsEmpty())
-                break;
-	    if (!s.ToLong(&sweep))
-                continue;
+            if (s.IsEmpty())
+                    break;
+            if (!s.ToLong(&sweep))
+                    continue;
 
             svc->SetSweepInterval(wx2std(d->getPath()), sweep);
 
             // load the database info because the sweep interval has changed
             d->getInfo()->loadInfo((&d->getIBPPDatabase()));
-
             d->notifyObservers();
-
             break;
         }
     }
@@ -116,21 +112,17 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
         // until the database server is restarted.
         d->getIBPPDatabase()->Disconnect();
 
-	svc->SetSyncWrite(wx2std(d->getPath()), forced);
+        svc->SetSyncWrite(wx2std(d->getPath()), forced);
 
         // connect to the database again
         d->getIBPPDatabase()->Connect();
 
-	// load the database info because the value of forced writes has changed
+        // load the database info because the value of forced writes has changed
         d->getInfo()->loadInfo((&d->getIBPPDatabase()));
-
         d->notifyObservers();
     }
 
     svc->Disconnect();
-
-    FR_CATCH
-
     return true;
 }
 //-----------------------------------------------------------------------------

@@ -186,6 +186,9 @@ void PrintableHtmlWindow::OnMenuPrint(wxCommandEvent& WXUNUSED(event))
 //! Link is in format: "protocol://action?name=value&amp;name=value...etc.
 void PrintableHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
 {
+    // shield all URI handlers
+    FR_TRY
+
     wxString addr = link.GetHref();
     URI uri(addr);
     if (uri.protocol != wxT("fr"))      // call default handler for other protocols
@@ -195,5 +198,7 @@ void PrintableHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
     }
     if (!getURIProcessor().handleURI(uri))
         ::wxMessageBox(_("Feature not yet implemented."), _("Information"), wxICON_INFORMATION|wxOK);
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
