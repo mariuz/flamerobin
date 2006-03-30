@@ -33,8 +33,9 @@
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
 //-----------------------------------------------------------------------------
-// this is a coupled node (in visual sense). Server equals collection of YDatabases in wxTree
-// that's why getChildren() method just copies, since wxTree item will have pointer to Server.
+// this is a coupled node (in visual sense). Server equals collection of
+// YDatabases in wxTree. that's why getChildren() method just copies, since
+// wxTree item will have pointer to Server
 class Server: public MetadataItem
 {
 private:
@@ -56,9 +57,9 @@ public:
     MetadataCollection<Database> *getDatabases();
 
     void createDatabase(Database *db, int pagesize = 4096, int dialect = 3);
-    bool getVersion(wxString& version, ProgressIndicator* progressIndicator = NULL);
 
-    IBPP::Service getService(ProgressIndicator* progressIndicator = NULL);
+    // returns *connected* service
+    bool getService(IBPP::Service& svc, ProgressIndicator* progressind = 0);
 
     // setters/getters
     wxString getHostname() const;

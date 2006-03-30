@@ -116,28 +116,6 @@ void Server::createDatabase(Database* db, int pagesize, int dialect)
     db1->Create(dialect);
 }
 //-----------------------------------------------------------------------------
-bool Server::getVersion(wxString& version, ProgressIndicator* progressIndicator)
-{
-    IBPP::Service svc;
-    try
-    {
-        svc = getService(progressIndicator);
-        svc->Connect();
-    }
-    catch (IBPP::Exception& e)
-    {
-        version = std2wx(e.ErrorMessage());
-        return false;
-    }
-
-    std::string vrs;
-    svc->GetVersion(vrs);
-    svc->Disconnect();
-    version = std2wx(vrs);
-
-    return true;
-}
-//-----------------------------------------------------------------------------
 MetadataCollection<Database>* Server::getDatabases()
 {
     return &databasesM;
@@ -202,79 +180,72 @@ const wxString Server::getItemPath() const
     return wxT("");
 }
 //-----------------------------------------------------------------------------
-IBPP::Service Server::getService(ProgressIndicator* progressIndicator)
+bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind)
 {
-    if (progressIndicator)
+    if (progressind)
     {
-        progressIndicator->initProgress(_("Connecting..."),
-	databasesM.getChildrenCount(), 0, 1);
+        progressind->initProgress(_("Connecting..."),
+            databasesM.getChildrenCount(), 0, 1);
     }
-
-    wxString user, pwd;
-    bool canceled = false;
 
     // first try connected databases
     for (MetadataCollection<Database>::iterator ci = databasesM.begin();
         ci != databasesM.end(); ++ci)
     {
-        if (progressIndicator && progressIndicator->isCanceled())
+        if (progressind && progressind->isCanceled())
+            return false;
+        if (!(*ci).isConnected())
+            continue;
+        // Use the user name and password of the connected user
+        // instead of the stored ones.
+        IBPP::Database& db = (*ci).getIBPPDatabase();
+        if (progressind)
         {
-            canceled = true;
-            break;
+            progressind->setProgressMessage(_("Using password of: ") +
+                std2wx(db->Username()) + wxT("@") + (*ci).getName_());
+            progressind->stepProgress();
         }
+        try
+        {
+            svc = IBPP::ServiceFactory(wx2std(getConnectionString()),
+                db->Username(), db->UserPassword());
+            svc->Connect();
+            return true;
+        }
+        catch(IBPP::Exception& e)   // keep going if connect fails
+        {
+        }
+    }
 
+    // when the operation is not canceled try to user/pass of disconnected DBs
+    for (MetadataCollection<Database>::const_iterator
+        ci = databasesM.begin(); ci != databasesM.end(); ++ci)
+    {
+        if (progressind && progressind->isCanceled())
+            return false;
         if ((*ci).isConnected())
+            continue;
+        wxString user = (*ci).getUsername();
+        wxString pwd = (*ci).getPassword();
+        if (pwd.IsEmpty())
+            continue;
+        if (progressind)
         {
-            // Use the user name and password of the connected user
-            // instead of the stored onces.
-            IBPP::Database& db = (*ci).getIBPPDatabase();
-            user = std2wx(db->Username());
-            pwd = std2wx(db->UserPassword());
-
-            if (progressIndicator)
-            {
-                progressIndicator->setProgressMessage(_("Using password of: ") +
-                    user + wxT("@") + (*ci).getName_());
-                progressIndicator->stepProgress();
-            }
+            progressind->setProgressMessage(_("Using password of: ") +
+                user + wxT("@") + (*ci).getName_());
+            progressind->stepProgress();
+        }
+        try
+        {
+            svc = IBPP::ServiceFactory(wx2std(getConnectionString()),
+                wx2std(user), wx2std(pwd));
+            svc->Connect();
+            return true;
+        }
+        catch(IBPP::Exception& e)   // keep going if connect fails
+        {
         }
     }
-
-    // when the operation is not canceled and the user and/or password
-    // is still empty, try to find them stored in the disconnected databases.
-    if (!canceled && (user.IsEmpty() || pwd.IsEmpty()))
-    {
-        for (MetadataCollection<Database>::const_iterator ci = databasesM.begin();
-            ci != databasesM.end(); ++ci)
-        {
-            if (!(*ci).isConnected())
-            {
-                user = (*ci).getUsername();
-                pwd = (*ci).getPassword();
-
-                if (!user.IsEmpty() && !pwd.IsEmpty())
-                    break;
-            }
-        }
-    }
-
-    wxString msg;
-    if (canceled)
-        msg = _("You've canceled the search for a usable username and password.");
-    else if (user.IsEmpty() || pwd.IsEmpty())
-        msg = _("None of the credentials of the databases could be used.");
-
-    if (!msg.IsEmpty())
-    {
-        wxMessageBox(msg + _("\nYou need to supply a valid username and password."),
-            _("Connecting to server"), wxOK|wxICON_INFORMATION);
-	user = ::wxGetTextFromUser(_("Connecting to server"),
-            _("Enter username"));
-        pwd = ::wxGetPasswordFromUser(_("Connecting to server"),
-            _("Enter password"));
-    }
-
-    return IBPP::ServiceFactory(wx2std(getConnectionString()),
-        wx2std(user), wx2std(pwd));
+    return false;
 }
 //-----------------------------------------------------------------------------

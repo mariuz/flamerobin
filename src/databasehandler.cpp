@@ -71,10 +71,13 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
     // when either the database or the window does not exist
     // return immediately. Because this function returns whether
     // the specified uri is handled, return true.
-    if (!d || !w)
+    if (!d || !w || !d->isConnected())
          return true;
 
-    IBPP::Service svc = d->getServer()->getService();
+    IBPP::Database& db = d->getIBPPDatabase();
+    IBPP::Service svc = IBPP::ServiceFactory(
+        wx2std(d->getServer()->getConnectionString()),
+        db->Username(), db->UserPassword());
     svc->Connect();
 
     if (isEditSweep)
@@ -110,15 +113,15 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
         // database remains connected, you can set SyncWrites for about
         // three times before the database will be locked and unavailable
         // until the database server is restarted.
-        d->getIBPPDatabase()->Disconnect();
+        db->Disconnect();
 
         svc->SetSyncWrite(wx2std(d->getPath()), forced);
 
         // connect to the database again
-        d->getIBPPDatabase()->Connect();
+        db->Connect();
 
-        // load the database info because the value of forced writes has changed
-        d->getInfo()->loadInfo((&d->getIBPPDatabase()));
+        // load the database info because the value of forced writes changed
+        d->getInfo()->loadInfo(&db);
         d->notifyObservers();
     }
 

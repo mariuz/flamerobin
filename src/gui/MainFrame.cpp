@@ -1035,18 +1035,45 @@ void MainFrame::OnMenuGetServerVersion(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
-    ProgressDialog pd(this, _("Retrieving server version"), 1);
-
     Server* s = tree_ctrl_1->getSelectedServer();
-    wxString version;
-    if (s->getVersion(version, &pd))
+    if (!s)
+        return;
+
+    std::string version;
+    try
     {
-        if (!version.IsEmpty())
-            wxMessageBox(version, _("Server version"), wxOK|wxICON_INFORMATION);
+        // progress dialog will get closed in case of fatal exception or when
+        // retieving is complete
+        ProgressDialog pd(this, _("Retrieving server version"), 1);
+        IBPP::Service svc;
+        if (!s->getService(svc, &pd))
+        {
+            wxString msg;
+            if (pd.isCanceled())
+                msg = _("You've canceled the search for a usable username and password.");
+            else
+                msg = _("None of the credentials of the databases could be used.");
+            wxMessageBox(msg +
+                _("\nYou need to supply a valid username and password."),
+                _("Connecting to server"), wxOK|wxICON_INFORMATION);
+            wxString user = ::wxGetTextFromUser(_("Connecting to server"),
+                _("Enter username"));
+            wxString pass = ::wxGetPasswordFromUser(_("Connecting to server"),
+                _("Enter password"));
+            svc = IBPP::ServiceFactory(wx2std(s->getConnectionString()),
+                wx2std(user), wx2std(pass));
+            svc->Connect();
+        }
+        svc->GetVersion(version);
     }
-    else
-        wxMessageBox(_("Function not supported."), _("Getting server version"),
-            wxOK|wxICON_WARNING);
+    catch (IBPP::Exception& e)
+    {
+        wxMessageBox(std2wx(e.ErrorMessage()), _("Error"));
+        return;
+    }
+
+    wxMessageBox(std2wx(version), _("Server version"),
+        wxOK|wxICON_INFORMATION);
 
     FR_CATCH
 }
