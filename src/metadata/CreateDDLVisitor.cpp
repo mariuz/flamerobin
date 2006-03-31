@@ -140,6 +140,9 @@ void iterateit(CreateDDLVisitor* v, Database& db, ProgressIndicator* pi)
     {
         if (pi->isCanceled())
             throw CanceledException();
+        Domain *d = dynamic_cast<Domain *>(&(*it));
+        if (d && d->isSystem())     // system domains get loaded during
+            continue;               // program lifetime - so we skip them
         pi->setProgressMessage(wxT("Extracting ") + (*it).getName_(), 2);
         pi->stepProgress(1, 2);
         (*it).acceptVisitor(v);
