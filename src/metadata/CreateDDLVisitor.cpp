@@ -155,6 +155,8 @@ void CreateDDLVisitor::visit(Database& d)
 
     try
     {
+        preSqlM << _("/* Please note that this script doesn't handle\n")
+                << _("computed columns properly */\n\n");
         preSqlM << wxT("/********************* ROLES **********************/\n\n");
         iterateit<Role>(this, d, progressIndicatorM);
 
@@ -167,6 +169,9 @@ void CreateDDLVisitor::visit(Database& d)
         preSqlM << wxT("/******************** DOMAINS *********************/\n\n");
         iterateit<Domain>(this, d, progressIndicatorM);
 
+        preSqlM << wxT("/******************* PROCEDURES ******************/\n\n");
+        iterateit<Procedure>(this, d, progressIndicatorM);
+
         preSqlM << wxT("/******************** TABLES **********************/\n\n");
         iterateit<Table>(this, d, progressIndicatorM);
 
@@ -176,9 +181,6 @@ void CreateDDLVisitor::visit(Database& d)
 
         preSqlM << wxT("/******************* EXCEPTIONS *******************/\n\n");
         iterateit<Exception>(this, d, progressIndicatorM);
-
-        preSqlM << wxT("/******************* PROCEDURES ******************/\n\n");
-        iterateit<Procedure>(this, d, progressIndicatorM);
 
         preSqlM << wxT("/******************** TRIGGERS ********************/\n\n");
         iterateit<Trigger>(this, d, progressIndicatorM);
@@ -213,7 +215,7 @@ void CreateDDLVisitor::visit(Domain& d)
     wxString collate = d.getCollation();
     if (!collate.IsEmpty())
         preSqlM += wxT(" COLLATE ") + collate;
-    preSqlM += wxT(";");
+    preSqlM += wxT(";\n");
 
     wxString description = d.getDescription();
     if (!description.IsEmpty())
@@ -250,7 +252,7 @@ void CreateDDLVisitor::visit(Exception& e)
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Function& f)
 {
-    preSqlM << f.getCreateSql();
+    preSqlM << f.getCreateSql() << wxT("\n");
     wxString description = f.getDescription();
     if (!description.IsEmpty())
     {
@@ -328,12 +330,14 @@ void CreateDDLVisitor::visit(Procedure& p)
         }
     }
 
-    postSqlM << temp;
+    postSqlM << temp << wxT("\n");
     temp.Replace(wxT("ALTER"), wxT("CREATE"), false);   // just first
     sqlM << temp;
 
     // create empty procedure body (for database DDL dump)
-    preSqlM << p.getAlterSql(false);
+    temp = p.getAlterSql(false);    // false = only headers
+    temp.Replace(wxT("ALTER"), wxT("CREATE"), false);   // just first
+    preSqlM << temp << wxT("\n");
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Parameter&)
@@ -365,7 +369,7 @@ void CreateDDLVisitor::visit(Role& r)
                  << description << wxT("'\nwhere RDB$ROLE_NAME = '")
                  << name << wxT("';\n");
     }
-    sqlM += preSqlM + wxT("\n") + postSqlM;
+    sqlM = preSqlM + wxT("\n") + postSqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Root&)
@@ -574,7 +578,7 @@ void CreateDDLVisitor::visit(Trigger& t)
     preSqlM << wxT(" POSITION ");
     preSqlM << position << wxT("\n");
     preSqlM << source;
-    preSqlM << wxT("^\nSET TERM ; ^");
+    preSqlM << wxT("^\nSET TERM ; ^\n");
 
     wxString description = t.getDescription();
     if (!description.IsEmpty())
@@ -586,7 +590,7 @@ void CreateDDLVisitor::visit(Trigger& t)
              << description << wxT("'\n  where RDB$TRIGGER_NAME = '")
              << name << wxT("';\n");
     }
-    sqlM = preSqlM + postSqlM;    // create triggers at the end
+    sqlM = preSqlM + postSqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(View& v)
