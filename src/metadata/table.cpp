@@ -198,7 +198,7 @@ bool Table::loadPrimaryKey()
             "select r.rdb$constraint_name, i.rdb$field_name, r.rdb$index_name "
             "from rdb$relation_constraints r, rdb$index_segments i "
             "where r.rdb$relation_name=? and r.rdb$index_name=i.rdb$index_name and "
-            "(r.rdb$constraint_type='PRIMARY KEY') order by 1, 2"
+            "(r.rdb$constraint_type='PRIMARY KEY') order by r.rdb$constraint_name, i.rdb$field_position"
         );
 
         st1->Set(1, wx2std(getName_()));
@@ -254,7 +254,7 @@ bool Table::loadUniqueConstraints()
             "select r.rdb$constraint_name, i.rdb$field_name, r.rdb$index_name "
             "from rdb$relation_constraints r, rdb$index_segments i "
             "where r.rdb$relation_name=? and r.rdb$index_name=i.rdb$index_name and "
-            "(r.rdb$constraint_type='UNIQUE') order by 1, 2"
+            "(r.rdb$constraint_type='UNIQUE') order by r.rdb$constraint_name, i.rdb$field_position"
         );
 
         st1->Set(1, wx2std(getName_()));
