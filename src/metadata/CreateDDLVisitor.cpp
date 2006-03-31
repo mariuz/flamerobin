@@ -141,7 +141,7 @@ void iterateit(CreateDDLVisitor* v, Database& db, ProgressIndicator* pi)
         if (pi->isCanceled())
             throw CanceledException();
         pi->setProgressMessage(wxT("Extracting ") + (*it).getName_(), 2);
-        pi->stepProgress(2);
+        pi->stepProgress(1, 2);
         (*it).acceptVisitor(v);
     }
 }
@@ -186,7 +186,7 @@ void CreateDDLVisitor::visit(Database& d)
     catch (CanceledException& c)
     {
         // this is expected if user cancels the extraction
-        sqlM = preSqlM = postSqlM = wxEmptyString;
+        sqlM = _("Extraction canceled");
         return;
     }
 
