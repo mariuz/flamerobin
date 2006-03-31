@@ -120,6 +120,11 @@ void CreateDDLVisitor::visit(Column& c)
     }
 }
 //-----------------------------------------------------------------------------
+class CanceledException
+{
+public:
+    CanceledException() {};
+};
 template <class T>
 void iterateit(CreateDDLVisitor* v, Database& db, ProgressIndicator* pi)
 {
@@ -134,10 +139,10 @@ void iterateit(CreateDDLVisitor* v, Database& db, ProgressIndicator* pi)
         it != p->end(); ++it)
     {
         if (pi->isCanceled())
-            break;
+            throw CanceledException();
         pi->setProgressMessage(wxT("Extracting ") + (*it).getName_(), 2);
         pi->stepProgress(2);
-        v->visit(*it);
+        (*it).acceptVisitor(v);
     }
 }
 // build the sql script for entire database
@@ -148,58 +153,67 @@ void CreateDDLVisitor::visit(Database& d)
     if (progressIndicatorM)
         progressIndicatorM->initProgress(wxEmptyString, 10, 0, 1);
 
-    preSqlM << wxT("/********************* ROLES **********************/\n\n");
-    iterateit<Role>(this, d, progressIndicatorM);
+    try
+    {
+        preSqlM << wxT("/********************* ROLES **********************/\n\n");
+        iterateit<Role>(this, d, progressIndicatorM);
 
-    preSqlM << wxT("/********************* UDFS ***********************/\n\n");
-    iterateit<Function>(this, d, progressIndicatorM);
+        preSqlM << wxT("/********************* UDFS ***********************/\n\n");
+        iterateit<Function>(this, d, progressIndicatorM);
 
-    preSqlM << wxT("/****************** GENERATORS ********************/\n\n");
-    iterateit<Generator>(this, d, progressIndicatorM);
+        preSqlM << wxT("/****************** GENERATORS ********************/\n\n");
+        iterateit<Generator>(this, d, progressIndicatorM);
 
-    preSqlM << wxT("/******************** DOMAINS *********************/\n\n");
-    iterateit<Domain>(this, d, progressIndicatorM);
+        preSqlM << wxT("/******************** DOMAINS *********************/\n\n");
+        iterateit<Domain>(this, d, progressIndicatorM);
 
-    preSqlM << wxT("/******************** TABLES **********************/\n\n");
-    iterateit<Table>(this, d, progressIndicatorM);
+        preSqlM << wxT("/******************** TABLES **********************/\n\n");
+        iterateit<Table>(this, d, progressIndicatorM);
 
-    preSqlM << wxT("/********************* VIEWS **********************/\n\n");
-    // TODO: build dependecy tree first, and order views by it
-    iterateit<View>(this, d, progressIndicatorM);
+        preSqlM << wxT("/********************* VIEWS **********************/\n\n");
+        // TODO: build dependecy tree first, and order views by it
+        iterateit<View>(this, d, progressIndicatorM);
 
-    preSqlM << wxT("/******************* EXCEPTIONS *******************/\n\n");
-    iterateit<Exception>(this, d, progressIndicatorM);
+        preSqlM << wxT("/******************* EXCEPTIONS *******************/\n\n");
+        iterateit<Exception>(this, d, progressIndicatorM);
 
-    preSqlM << wxT("/******************* PROCEDURES ******************/\n\n");
-    iterateit<Procedure>(this, d, progressIndicatorM);
+        preSqlM << wxT("/******************* PROCEDURES ******************/\n\n");
+        iterateit<Procedure>(this, d, progressIndicatorM);
 
-    preSqlM << wxT("/******************** TRIGGERS ********************/\n\n");
-    iterateit<Trigger>(this, d, progressIndicatorM);
+        preSqlM << wxT("/******************** TRIGGERS ********************/\n\n");
+        iterateit<Trigger>(this, d, progressIndicatorM);
+    }
+    catch (CanceledException& c)
+    {
+        // this is expected if user cancels the extraction
+        sqlM = preSqlM = postSqlM = wxEmptyString;
+        return;
+    }
 
     sqlM = preSqlM + wxT("\n") + postSqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Domain& d)
 {
-    sqlM += wxT("CREATE DOMAIN ") + d.getQuotedName() + wxT("\n AS ") +
+    preSqlM += wxT("CREATE DOMAIN ") + d.getQuotedName() + wxT("\n AS ") +
             d.getDatatypeAsString();
     wxString charset = d.getCharset();
     Database *db = d.getDatabase();
     if (!charset.IsEmpty() && (!db || db->getDatabaseCharset() != charset))
-        sqlM += wxT(" CHARACTER SET ") + charset;
-    sqlM += wxT("\n");
+        preSqlM += wxT(" CHARACTER SET ") + charset;
+    preSqlM += wxT("\n");
     wxString dflt(d.getDefault());
     if (!dflt.IsEmpty())
-        sqlM += wxT(" ") + dflt + wxT("\n");   // already contains DEFAULT keyword
+        preSqlM += wxT(" ") + dflt + wxT("\n");   // already contains DEFAULT keyword
     if (!d.isNullable())
-        sqlM += wxT(" NOT NULL\n");
+        preSqlM += wxT(" NOT NULL\n");
     wxString check = d.getCheckConstraint();
     if (!check.IsEmpty())
-        sqlM += wxT(" ") + check + wxT("\n");  // already contains CHECK keyword
+        preSqlM += wxT(" ") + check + wxT("\n");  // already contains CHECK keyword
     wxString collate = d.getCollation();
     if (!collate.IsEmpty())
-        sqlM += wxT(" COLLATE ") + collate;
-    sqlM += wxT(";");
+        preSqlM += wxT(" COLLATE ") + collate;
+    preSqlM += wxT(";");
 
     wxString description = d.getDescription();
     if (!description.IsEmpty())
@@ -207,18 +221,18 @@ void CreateDDLVisitor::visit(Domain& d)
         wxString colname(d.getName_());
         description.Replace(wxT("'"), wxT("''"));
         colname.Replace(wxT("'"), wxT("''"));
-        sqlM << wxT("UPDATE RDB$FIELDS set\n  RDB$DESCRIPTION = '")
+        postSqlM << wxT("UPDATE RDB$FIELDS set\n  RDB$DESCRIPTION = '")
              << description << wxT("'\n  where RDB$FIELD_NAME = '")
              << colname << wxT("';\n");
     }
-    preSqlM << sqlM;
+    sqlM = preSqlM + postSqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Exception& e)
 {
     wxString ms(e.getMessage());
     ms.Replace(wxT("'"), wxT("''"));    // escape quotes
-    sqlM += wxT("CREATE EXCEPTION ") + e.getQuotedName() + wxT("\n'") +
+    preSqlM += wxT("CREATE EXCEPTION ") + e.getQuotedName() + wxT("\n'") +
         ms + wxT("';\n");
 
     wxString description = e.getDescription();
@@ -227,43 +241,43 @@ void CreateDDLVisitor::visit(Exception& e)
         wxString name(e.getName_());
         description.Replace(wxT("'"), wxT("''"));
         name.Replace(wxT("'"), wxT("''"));
-        sqlM << wxT("UPDATE RDB$EXCEPTIONS set\n  RDB$DESCRIPTION = '")
+        postSqlM << wxT("UPDATE RDB$EXCEPTIONS set\n  RDB$DESCRIPTION = '")
              << description << wxT("'\n  where RDB$EXCEPTION_NAME = '")
              << name << wxT("';\n");
     }
-    preSqlM << sqlM;
+    sqlM = preSqlM + postSqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Function& f)
 {
-    sqlM << f.getCreateSql();
+    preSqlM << f.getCreateSql();
     wxString description = f.getDescription();
     if (!description.IsEmpty())
     {
         wxString name(f.getName_());
         description.Replace(wxT("'"), wxT("''"));
         name.Replace(wxT("'"), wxT("''"));
-        sqlM << wxT("UPDATE RDB$FUNCITIONS set\n  RDB$DESCRIPTION = '")
+        postSqlM << wxT("UPDATE RDB$FUNCITIONS set\n  RDB$DESCRIPTION = '")
              << description << wxT("'\n  where RDB$FUNCITION_NAME = '")
              << name << wxT("';\n");
     }
-    preSqlM << sqlM;
+    sqlM = preSqlM + postSqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Generator& g)
 {
-    sqlM += wxT("CREATE GENERATOR ") + g.getQuotedName() + wxT(";\n");
+    preSqlM += wxT("CREATE GENERATOR ") + g.getQuotedName() + wxT(";\n");
     wxString description = g.getDescription();
     if (!description.IsEmpty())
     {
         wxString name(g.getName_());
         description.Replace(wxT("'"), wxT("''"));
         name.Replace(wxT("'"), wxT("''"));
-        sqlM << wxT("UPDATE RDB$GENERATORS set\n  RDB$DESCRIPTION = '")
+        postSqlM << wxT("UPDATE RDB$GENERATORS set\n  RDB$DESCRIPTION = '")
              << description << wxT("'\n  where RDB$GENERATOR_NAME = '")
              << name << wxT("';\n");
     }
-    preSqlM << sqlM;
+    sqlM = preSqlM + postSqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Procedure& p)
@@ -550,17 +564,17 @@ void CreateDDLVisitor::visit(Trigger& t)
     t.getSource(source);
     t.getRelation(relation);
 
-    sqlM << wxT("SET TERM ^ ;\nCREATE TRIGGER ") << t.getQuotedName()
+    preSqlM << wxT("SET TERM ^ ;\nCREATE TRIGGER ") << t.getQuotedName()
          << wxT(" FOR ") << relation;
     if (active)
-        sqlM << wxT(" ACTIVE\n");
+        preSqlM << wxT(" ACTIVE\n");
     else
-        sqlM << wxT(" INACTIVE\n");
-    sqlM << type;
-    sqlM << wxT(" POSITION ");
-    sqlM << position << wxT("\n");
-    sqlM << source;
-    sqlM << wxT("^\nSET TERM ; ^");
+        preSqlM << wxT(" INACTIVE\n");
+    preSqlM << type;
+    preSqlM << wxT(" POSITION ");
+    preSqlM << position << wxT("\n");
+    preSqlM << source;
+    preSqlM << wxT("^\nSET TERM ; ^");
 
     wxString description = t.getDescription();
     if (!description.IsEmpty())
@@ -568,11 +582,11 @@ void CreateDDLVisitor::visit(Trigger& t)
         wxString name(t.getName_());
         description.Replace(wxT("'"), wxT("''"));
         name.Replace(wxT("'"), wxT("''"));
-        sqlM << wxT("UPDATE RDB$TRIGGERS set\n  RDB$DESCRIPTION = '")
+        postSqlM << wxT("UPDATE RDB$TRIGGERS set\n  RDB$DESCRIPTION = '")
              << description << wxT("'\n  where RDB$TRIGGER_NAME = '")
              << name << wxT("';\n");
     }
-    postSqlM << sqlM;    // create triggers at the end
+    sqlM = preSqlM + postSqlM;    // create triggers at the end
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(View& v)
