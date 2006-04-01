@@ -59,25 +59,10 @@ public:
         int w, h;
         GetSize(&w, &h);
 
-        // GetItemCount doesn't seem to work consistently so
-        // we count items ourselves
-        // int cnt = GetItemCount();
-        int cnt = -1;
-        long item = -1;
-        do
-        {
-            item = GetNextItem(item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
-            cnt++;
-        }
-        while (item != -1);
-
-        if (cnt > 0)        // calculate whether it has scrollbar because
-        {                   // HasScrollbar(wxVERTICAL) doesn't work
-            wxRect size;
-            GetItemRect(0, size);
-            if (size.height * (cnt+1) > h)
-                w -= wxSystemSettings::GetMetric(wxSYS_VSCROLL_X, this);
-        }
+        // has more than fits on one page => needs scrollbar
+        // so we deduce scrollbar width
+        if (GetItemCount() > GetCountPerPage())
+            w -= wxSystemSettings::GetMetric(wxSYS_VSCROLL_X, this);
 
         int w1 = w/3;
         SetColumnWidth(0, w1);
