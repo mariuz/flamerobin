@@ -59,14 +59,22 @@ public:
         int w, h;
         GetSize(&w, &h);
 
-        // doesn't seem to work, so we calculate it ourselves
-        // if (HasScrollbar(wxVERTICAL))
-        int cnt = GetItemCount();
-        if (cnt > 0)
+        // GetItemCount doesn't seem to work consistently so
+        // we count items ourselves
+        // int cnt = GetItemCount();
+        int cnt = -1;
+        long item = -1;
+        do
         {
+            item = GetNextItem(item, wxLIST_NEXT_ALL, wxLIST_STATE_DONTCARE);
+            cnt++;
+        }
+        while (item != -1);
+
+        if (cnt > 0)        // calculate whether it has scrollbar because
+        {                   // HasScrollbar(wxVERTICAL) doesn't work
             wxRect size;
             GetItemRect(0, size);
-            wxMessageBox(wxString::Format("cnt = %d, size.h = %d, h = %d", cnt, size.height, h));
             if (size.height * (cnt+1) > h)
                 w -= wxSystemSettings::GetMetric(wxSYS_VSCROLL_X, this);
         }
@@ -300,7 +308,9 @@ void AdvancedSearchFrame::rebuildList()
         (*it).second.listIndex = index;
         index++;
     }
-    // send size event (I'm not sure how though)
+    // send size event
+    wxSizeEvent ev(listctrl_criteria->GetSize());
+    listctrl_criteria->AddPendingEvent(ev);
 }
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::addResult(Database* db, MetadataItem* item)
@@ -313,6 +323,9 @@ void AdvancedSearchFrame::addResult(Database* db, MetadataItem* item)
     results.push_back(item);
     // become observer for that Item in case it gets dropped/deleted...
     item->attachObserver(this);
+    // send size event
+    wxSizeEvent ev(listctrl_results->GetSize());
+    listctrl_results->AddPendingEvent(ev);
 }
 //-----------------------------------------------------------------------------
 // returns true if "text" matches all criteria of type "type"
@@ -339,7 +352,7 @@ void AdvancedSearchFrame::removeSubject(Subject* subject)
 
     // NOTE: we can't do this dynamic_cast, since this function is called
     //       from ~Subject() and ~Database() has already been called. So we
-    //       can't cast to Database (and not even MetadataItem
+    //       can't cast to Database (and not even MetadataItem)
     // Database *db = dynamic_cast<Database *>(subject);
     //
     // Since we can't determine what it is by dynamic_cast, we try both:
