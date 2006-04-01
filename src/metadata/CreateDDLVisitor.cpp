@@ -637,7 +637,7 @@ void CreateDDLVisitor::visit(View& v)
                 postSqlM <<
                 wxT("UPDATE RDB$RELATION_FIELDS set\n  RDB$DESCRIPTION = '")
                 << description << wxT("'\n  where RDB$FIELD_NAME = '") <<
-                cname << wxT(" AND RDB$RELATION_NAME = '") << name <<
+                cname << wxT("' AND RDB$RELATION_NAME = '") << name <<
                 wxT("';\n");
             }
         }
