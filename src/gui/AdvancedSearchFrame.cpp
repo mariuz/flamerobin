@@ -58,6 +58,19 @@ public:
     {
         int w, h;
         GetSize(&w, &h);
+
+        // doesn't seem to work, so we calculate it ourselves
+        // if (HasScrollbar(wxVERTICAL))
+        int cnt = GetItemCount();
+        if (cnt > 0)
+        {
+            wxRect size;
+            GetItemRect(0, size);
+            wxMessageBox(wxString::Format("cnt = %d, size.h = %d, h = %d", cnt, size.height, h));
+            if (size.height * (cnt+1) > h)
+                w -= wxSystemSettings::GetMetric(wxSYS_VSCROLL_X, this);
+        }
+
         int w1 = w/3;
         SetColumnWidth(0, w1);
         w -= w1;
@@ -287,6 +300,7 @@ void AdvancedSearchFrame::rebuildList()
         (*it).second.listIndex = index;
         index++;
     }
+    // send size event (I'm not sure how though)
 }
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::addResult(Database* db, MetadataItem* item)
