@@ -180,12 +180,8 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent)
 
     listctrl_criteria = new AdjustableListCtrl(mainPanel, ID_listctrl_criteria,
         wxLC_REPORT|wxLC_VRULES|wxSUNKEN_BORDER);
-    wxListItem itemCol;
-    itemCol.SetImage(-1);
-    itemCol.SetText(_("Search criteria"));
-    listctrl_criteria->InsertColumn(0, itemCol);
-    itemCol.SetText(_("Value"));
-    listctrl_criteria->InsertColumn(1, itemCol);
+    listctrl_criteria->InsertColumn(0, _("Search criteria"));
+    listctrl_criteria->InsertColumn(1, _("Value"));
     leftSizer->Add(listctrl_criteria, 1, wxALL|wxEXPAND, 5);
 
     wxBoxSizer *bSizer5;
@@ -221,13 +217,10 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent)
     wxBoxSizer *top_splitter_sizer = new wxBoxSizer(wxVERTICAL);
     listctrl_results = new AdjustableListCtrl(top_splitter_panel,
         ID_listctrl_results, wxLC_REPORT|wxLC_VRULES|wxSUNKEN_BORDER);
-    itemCol.SetText(_("Database"));
-    listctrl_results->InsertColumn(0, itemCol);
-    itemCol.SetText(_("Type"));
-    listctrl_results->InsertColumn(1, itemCol);
-    itemCol.SetText(_("Name"));
-    listctrl_results->InsertColumn(2, itemCol);
-    top_splitter_sizer->Add(listctrl_results, 1, wxALL|wxEXPAND, 0);
+    listctrl_results->InsertColumn(0, _("Database"));
+    listctrl_results->InsertColumn(1, _("Type"));
+    listctrl_results->InsertColumn(2, _("Name"));
+    top_splitter_sizer->Add(listctrl_results, 1, wxEXPAND, 0);
 
     top_splitter_panel->SetSizer(top_splitter_sizer);
     bottom_splitter_panel = new wxPanel(splitter1, wxID_ANY, wxDefaultPosition,
@@ -236,7 +229,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent)
     stc_ddl = new wxTextCtrl(bottom_splitter_panel, wxID_ANY,
         _("DDL for selected objects"), wxDefaultPosition, wxDefaultSize,
         wxTE_MULTILINE|wxTE_WORDWRAP);
-    bottom_splitter_sizer->Add(stc_ddl, 1, wxALL|wxEXPAND, 0);
+    bottom_splitter_sizer->Add(stc_ddl, 1, wxEXPAND, 0);
     bottom_splitter_panel->SetSizer(bottom_splitter_sizer);
     splitter1->SplitHorizontally(top_splitter_panel,bottom_splitter_panel,0);
     rightSizer->Add(splitter1, 1, wxEXPAND, 5);
