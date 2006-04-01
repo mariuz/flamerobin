@@ -34,6 +34,7 @@
 
 class Table;
 class Database;
+class ProgressDialog;
 //-----------------------------------------------------------------------------
 //! sets all controls to width of widest control
 void adjustControlsMinWidth(std::list<wxWindow*> controls);
@@ -50,6 +51,7 @@ bool selectTableColumnsIntoVector(Table* t, wxWindow* parent,
 void reportLastError(const wxString& actionMsg);
 //-----------------------------------------------------------------------------
 //! prompts for password if needed and connects to database
-bool connectDatabase(Database *db, wxWindow* parent);
+bool connectDatabase(Database *db, wxWindow* parent,
+    ProgressDialog* progressdialog = 0);
 //-----------------------------------------------------------------------------
 #endif // FRUTILS_H

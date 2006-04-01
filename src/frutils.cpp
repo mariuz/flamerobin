@@ -139,7 +139,8 @@ void reportLastError(const wxString& actionMsg)
     wxMessageBox(lastError().getMessage(), actionMsg, wxOK | wxICON_ERROR);
 }
 //-----------------------------------------------------------------------------
-bool connectDatabase(Database *db, wxWindow* parent)
+bool connectDatabase(Database *db, wxWindow* parent,
+    ProgressDialog* progressdialog)
 {
     wxString pass;
     if (db->getPassword().empty())
@@ -155,14 +156,22 @@ bool connectDatabase(Database *db, wxWindow* parent)
 
     wxString caption(wxString::Format(wxT("Connecting with Database \"%s\""),
         db->getName_().c_str()));
-    ProgressDialog pd(parent, caption, 1);
-    if (!db->connect(pass, &pd))
+    bool ok;
+    if (progressdialog)
     {
-        pd.Hide();
+        progressdialog->setProgressMessage(caption);
+        ok = db->connect(pass, progressdialog);
+    }
+    else
+    {
+        ProgressDialog pd(parent, caption, 1);
+        ok = db->connect(pass, &pd);;
+    }
+    if (!ok)
+    {
         reportLastError(_("Error Connecting to Database"));
         return false;
     }
-    pd.Hide();
     return true;
 }
 //-----------------------------------------------------------------------------

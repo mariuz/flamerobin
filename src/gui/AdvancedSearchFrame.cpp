@@ -41,6 +41,7 @@
 #include "metadata/server.h"
 #include "metadata/database.h"
 #include "metadata/CreateDDLVisitor.h"
+#include "ProgressDialog.h"
 #include "MainFrame.h"
 #include "AdvancedSearchFrame.h"
 //-----------------------------------------------------------------------------
@@ -220,7 +221,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent)
     listctrl_results->InsertColumn(1, itemCol);
     itemCol.SetText(_("Name"));
     listctrl_results->InsertColumn(2, itemCol);
-    top_splitter_sizer->Add(listctrl_results, 1, wxALL|wxEXPAND, 5);
+    top_splitter_sizer->Add(listctrl_results, 1, wxALL|wxEXPAND, 0);
 
     top_splitter_panel->SetSizer(top_splitter_sizer);
     bottom_splitter_panel = new wxPanel(splitter1, wxID_ANY, wxDefaultPosition,
@@ -229,7 +230,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent)
     stc_ddl = new wxTextCtrl(bottom_splitter_panel, wxID_ANY,
         _("DDL for selected objects"), wxDefaultPosition, wxDefaultSize,
         wxTE_MULTILINE|wxTE_WORDWRAP);
-    bottom_splitter_sizer->Add(stc_ddl, 1, wxALL|wxEXPAND, 5);
+    bottom_splitter_sizer->Add(stc_ddl, 1, wxALL|wxEXPAND, 0);
     bottom_splitter_panel->SetSizer(bottom_splitter_sizer);
     splitter1->SplitHorizontally(top_splitter_panel,bottom_splitter_panel,0);
     rightSizer->Add(splitter1, 1, wxEXPAND, 5);
@@ -451,7 +452,7 @@ void AdvancedSearchFrame::OnCheckboxDdlToggle(wxCommandEvent& event)
         splitter1->Unsplit();
 }
 //-----------------------------------------------------------------------------
-void AdvancedSearchFrame::OnButtonRemoveClick(wxCommandEvent& event)
+void AdvancedSearchFrame::OnButtonRemoveClick(wxCommandEvent& WXUNUSED(event))
 {
     // iterate all selected items and remove them from searchCriteriaM
     long item = -1;
@@ -477,7 +478,7 @@ void AdvancedSearchFrame::OnButtonRemoveClick(wxCommandEvent& event)
     rebuildList();
 }
 //-----------------------------------------------------------------------------
-void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& event)
+void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
 {
     // build list of databases to search from
     if (searchCriteriaM.count(CriteriaItem::ctDB) == 0)
@@ -502,14 +503,31 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& event)
         }
     }
 
-    // foreach database
+    int database_count = 0;
     for (CriteriaCollection::const_iterator
         cid = searchCriteriaM.lower_bound(CriteriaItem::ctDB);
         cid != searchCriteriaM.upper_bound(CriteriaItem::ctDB); ++cid)
     {
+        database_count++;
+    }
+
+    // foreach database
+    int current = 0;
+    ProgressDialog pd(this, _("Searching..."), 2);
+    pd.Show();
+    for (CriteriaCollection::const_iterator
+        cid = searchCriteriaM.lower_bound(CriteriaItem::ctDB);
+        cid != searchCriteriaM.upper_bound(CriteriaItem::ctDB); ++cid)
+    {
+        if (pd.isCanceled())
+            return;
+        pd.setProgressPosition(0, 2);
         Database *db = (*cid).second.database;
-        if (!db->isConnected() && !connectDatabase(db, this))
+        if (!db->isConnected() && !connectDatabase(db, this, &pd))
             continue;
+
+        pd.initProgress(_("Searching database: ")+db->getName_(),
+            database_count, current++, 1);
 
         std::vector<MetadataItem *> colls;
         db->getCollections(colls);
@@ -518,12 +536,21 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& event)
         {
             std::vector<MetadataItem *> ch;
             (*col)->getChildren(ch);
+            pd.initProgress(wxEmptyString, ch.size(), 0, 2);
             for (std::vector<MetadataItem *>::iterator it = ch.begin(); it !=
                 ch.end(); ++it)
             {
                 if (!types.empty() &&
                     types.find((*it)->getType()) == types.end())
                     break;
+                Domain *dmn = dynamic_cast<Domain *>(*it);
+                if (dmn && dmn->isSystem()) // System domains get loaded in
+                    continue;               // program lifetime. Skip them.
+                pd.setProgressMessage(_("Searching ") + (*col)->getName_() +
+                    wxT(": ") + (*it)->getName_(), 2);
+                pd.stepProgress(1, 2);
+                if (pd.isCanceled())
+                    return;
                 if (searchCriteriaM.count(CriteriaItem::ctName) > 0)
                 {
                     wxString name = (*it)->getName_();
@@ -578,36 +605,36 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& event)
     }
 }
 //-----------------------------------------------------------------------------
-void AdvancedSearchFrame::OnButtonAddTypeClick(wxCommandEvent& event)
+void AdvancedSearchFrame::OnButtonAddTypeClick(wxCommandEvent& WXUNUSED(event))
 {
     addCriteria(CriteriaItem::ctType, choice_type->GetStringSelection());
 }
 //-----------------------------------------------------------------------------
-void AdvancedSearchFrame::OnButtonAddNameClick(wxCommandEvent& event)
+void AdvancedSearchFrame::OnButtonAddNameClick(wxCommandEvent& WXUNUSED(event))
 {
     addCriteria(CriteriaItem::ctName, textctrl_name->GetValue());
     textctrl_name->Clear();
 }
 //-----------------------------------------------------------------------------
-void AdvancedSearchFrame::OnButtonAddDescriptionClick(wxCommandEvent& event)
+void AdvancedSearchFrame::OnButtonAddDescriptionClick(wxCommandEvent& WXUNUSED(event))
 {
     addCriteria(CriteriaItem::ctDescription, textctrl_description->GetValue());
     textctrl_description->Clear();
 }
 //-----------------------------------------------------------------------------
-void AdvancedSearchFrame::OnButtonAddDDLClick(wxCommandEvent& event)
+void AdvancedSearchFrame::OnButtonAddDDLClick(wxCommandEvent& WXUNUSED(event))
 {
     addCriteria(CriteriaItem::ctDDL, textctrl_ddl->GetValue());
     textctrl_ddl->Clear();
 }
 //-----------------------------------------------------------------------------
-void AdvancedSearchFrame::OnButtonAddFieldClick(wxCommandEvent& event)
+void AdvancedSearchFrame::OnButtonAddFieldClick(wxCommandEvent& WXUNUSED(event))
 {
     addCriteria(CriteriaItem::ctField, textctrl_field->GetValue());
     textctrl_field->Clear();
 }
 //-----------------------------------------------------------------------------
-void AdvancedSearchFrame::OnButtonAddDatabaseClick(wxCommandEvent& event)
+void AdvancedSearchFrame::OnButtonAddDatabaseClick(wxCommandEvent& WXUNUSED(event))
 {
     if (choice_database->GetSelection() == 0)   // all connected databases
     {
