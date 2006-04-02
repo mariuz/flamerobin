@@ -656,6 +656,10 @@ SOURCE=.\src\metadata\database.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\databasehandler.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\dberror.cpp
 # End Source File
 # Begin Source File
