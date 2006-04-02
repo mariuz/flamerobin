@@ -188,7 +188,7 @@ void CreateDDLVisitor::visit(Database& d)
         preSqlM << wxT("/******************** TRIGGERS ********************/\n\n");
         iterateit<Trigger>(this, d, progressIndicatorM);
     }
-    catch (CanceledException& c)
+    catch (CanceledException&)
     {
         // this is expected if user cancels the extraction
         sqlM = _("Extraction canceled");

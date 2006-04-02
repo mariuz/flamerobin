@@ -212,7 +212,7 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind)
             svc->Connect();
             return true;
         }
-        catch(IBPP::Exception& e)   // keep going if connect fails
+        catch(IBPP::Exception&)   // keep going if connect fails
         {
         }
     }
@@ -242,7 +242,7 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind)
             svc->Connect();
             return true;
         }
-        catch(IBPP::Exception& e)   // keep going if connect fails
+        catch(IBPP::Exception&)   // keep going if connect fails
         {
         }
     }
