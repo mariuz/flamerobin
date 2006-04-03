@@ -196,6 +196,12 @@ void CreateDDLVisitor::visit(Database& d)
     }
 
     sqlM = preSqlM + wxT("\n") + postSqlM;
+    if (progressIndicatorM)
+    {
+        progressIndicatorM->setProgressMessage(_("Extraction complete."));
+        progressIndicatorM->setProgressPosition(10);
+        progressIndicatorM->setProgressMessage(_("Done."), 2);
+    }
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Domain& d)
