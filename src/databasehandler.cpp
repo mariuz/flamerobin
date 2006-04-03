@@ -87,7 +87,8 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
         while (true)
         {
             wxString s;
-            s = ::wxGetTextFromUser(_("Enter the sweep interval"), _("Sweep interval"), _(""));
+            s = ::wxGetTextFromUser(_("Enter the sweep interval"), 
+                _("Sweep interval"), wxString::Format(wxT("%d"), sweep));
 
             // return from the iteration when the entered string is empty, in
             // case of cancelling the operation.
