@@ -18,7 +18,7 @@
 
   All Rights Reserved.
 
-  $Id: databaseshandlers.cpp $
+  $Id$
 
   Contributor(s): Milan Babuskov.
 */
