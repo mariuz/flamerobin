@@ -570,6 +570,7 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         else if (cmd == wxT("index_fields"))
             htmlpage += i->getFieldsAsString();
     }
+
     else if (cmd == wxT("creation_date"))
     {
         Database* d = dynamic_cast<Database*>(object);
@@ -578,13 +579,13 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
 
         htmlpage += d->getInfo()->getCreated();
     }
-    else if (cmd == wxT("ods_version"))
+    else if (cmd == wxT("default_charset"))
     {
         Database* d = dynamic_cast<Database*>(object);
         if (!d)
             return;
 
-        htmlpage += wxString() << d->getInfo()->getODS();
+        htmlpage += d->getDatabaseCharset();
     }
     else if (cmd == wxT("dialect"))
     {
@@ -594,29 +595,48 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
 
         htmlpage += wxString() << d->getInfo()->getDialect();
     }
-    else if (cmd == wxT("sweep_interval"))
+    else if (cmd == wxT("filesize"))
     {
         Database* d = dynamic_cast<Database*>(object);
         if (!d)
             return;
 
-        htmlpage += wxString() << d->getInfo()->getSweep();
+        htmlpage += wxString() << (d->getInfo()->getSize());
     }
-    else if (cmd == wxT("page_size"))
+    else if (cmd == wxT("forced_writes"))
     {
         Database* d = dynamic_cast<Database*>(object);
         if (!d)
             return;
 
-        htmlpage += wxString() << d->getInfo()->getPageSize();
+        wxString okimage = wxT("<img src=\"") + config().getHtmlTemplatesPath() + wxT("ok.png\">");
+        wxString ximage = wxT("<img src=\"") + config().getHtmlTemplatesPath() + wxT("redx.png\">");
+
+        htmlpage += (d->getInfo()->getForcedWrites() ? okimage : ximage);
     }
-    else if (cmd == wxT("page_buffers"))
+    else if (cmd == wxT("fullpath"))
     {
         Database* d = dynamic_cast<Database*>(object);
         if (!d)
             return;
 
-        htmlpage += wxString() << d->getInfo()->getBuffers();
+        htmlpage += d->getConnectionString();
+    }
+    else if (cmd == wxT("next_transaction"))
+    {
+        Database* d = dynamic_cast<Database*>(object);
+        if (!d)
+            return;
+
+        htmlpage += wxString() << d->getInfo()->getNextTransaction();
+    }
+    else if (cmd == wxT("ods_version"))
+    {
+        Database* d = dynamic_cast<Database*>(object);
+        if (!d)
+            return;
+
+        htmlpage += wxString() << d->getInfo()->getODS();
     }
     else if (cmd == wxT("oldest_transaction"))
     {
@@ -626,13 +646,29 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
 
         htmlpage += wxString() << d->getInfo()->getOldestTransaction();
     }
-    else if (cmd == wxT("next_transaction"))
+    else if (cmd == wxT("page_buffers"))
     {
         Database* d = dynamic_cast<Database*>(object);
         if (!d)
             return;
 
-        htmlpage += wxString() << d->getInfo()->getNextTransaction();
+        htmlpage += wxString() << d->getInfo()->getBuffers();
+    }
+    else if (cmd == wxT("page_size"))
+    {
+        Database* d = dynamic_cast<Database*>(object);
+        if (!d)
+            return;
+
+        htmlpage += wxString() << d->getInfo()->getPageSize();
+    }
+    else if (cmd == wxT("pages"))
+    {
+        Database* d = dynamic_cast<Database*>(object);
+        if (!d)
+            return;
+
+        htmlpage += wxString() << d->getInfo()->getPages();
     }
     else if (cmd == wxT("read_only"))
     {
@@ -644,16 +680,13 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
     else
             htmlpage += wxT("false");
     }
-    else if (cmd == wxT("forced_writes"))
+    else if (cmd == wxT("sweep_interval"))
     {
         Database* d = dynamic_cast<Database*>(object);
         if (!d)
             return;
 
-        wxString okimage = wxT("<img src=\"") + config().getHtmlTemplatesPath() + wxT("ok.png\">");
-        wxString ximage = wxT("<img src=\"") + config().getHtmlTemplatesPath() + wxT("redx.png\">");
-
-    htmlpage += (d->getInfo()->getForcedWrites() ? okimage : ximage);
+        htmlpage += wxString() << d->getInfo()->getSweep();
     }
 }
 //-----------------------------------------------------------------------------

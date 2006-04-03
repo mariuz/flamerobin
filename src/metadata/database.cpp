@@ -136,9 +136,19 @@ int DatabaseInfo::getPageSize()
     return pageSizeM;
 }
 //-----------------------------------------------------------------------------
+int DatabaseInfo::getPages()
+{
+    return pagesM;
+}
+//-----------------------------------------------------------------------------
 bool DatabaseInfo::getReadOnly()
 {
     return readOnlyM;
+}
+//-----------------------------------------------------------------------------
+int DatabaseInfo::getSize()
+{
+    return ((pagesM * pageSizeM) / 1024);
 }
 //-----------------------------------------------------------------------------
 int DatabaseInfo::getSweep()
@@ -148,7 +158,7 @@ int DatabaseInfo::getSweep()
 //-----------------------------------------------------------------------------
 void DatabaseInfo::loadInfo(const IBPP::Database* database)
 {
-    (*database)->Info(&odsM, &odsMinorM, &pageSizeM, NULL,
+    (*database)->Info(&odsM, &odsMinorM, &pageSizeM, &pagesM,
         &buffersM, &sweepM, &forcedWritesM, &reserveM);
     dialectM = (*database)->Dialect();
 }

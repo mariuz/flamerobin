@@ -73,6 +73,7 @@ private:
 
     int pageSizeM;
     int buffersM;
+    int pagesM;
 
     int oldestTransactionM;
     int nextTransactionM;
@@ -95,6 +96,8 @@ public:
 
     int getPageSize();
     int getBuffers();
+    int getPages();
+    int getSize();
 
     int getOldestTransaction();
     int getNextTransaction();
