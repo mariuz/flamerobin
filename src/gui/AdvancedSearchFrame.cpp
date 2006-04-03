@@ -59,10 +59,13 @@ public:
         int w, h;
         GetSize(&w, &h);
 
-        // has more than fits on one page => needs scrollbar
+        #ifdef __WXMSW__
+        // On Linux, scrollbar is beneath the header so this isn't needed.
+        // If it has more than fits on one page => needs scrollbar
         // so we deduce scrollbar width
         if (GetItemCount() > GetCountPerPage())
             w -= wxSystemSettings::GetMetric(wxSYS_VSCROLL_X, this);
+        #endif
 
         int w1 = w/3;
         SetColumnWidth(0, w1);
