@@ -98,8 +98,13 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
 
             svc->SetSweepInterval(wx2std(d->getPath()), sweep);
 
-            // load the database info because the sweep interval has changed
-            d->getInfo()->loadInfo((&d->getIBPPDatabase()));
+            // load the database info because the sweep interval has been
+            // changed. Before loading the info, re-attach to the database
+            // otherwise the sweep interval won't be changed for FB Classic
+            // Server.
+            db->Disconnect();
+            db->Connect();
+            d->getInfo()->loadInfo(&db);
             d->notifyObservers();
             break;
         }
@@ -120,7 +125,8 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
         // connect to the database again
         db->Connect();
 
-        // load the database info because the value of forced writes changed
+        // load the database info because the value of forced writes been
+        // changed.
         d->getInfo()->loadInfo(&db);
         d->notifyObservers();
     }
