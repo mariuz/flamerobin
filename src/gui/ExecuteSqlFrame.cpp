@@ -48,7 +48,8 @@
 
 #include "config/Config.h"
 #include "dberror.h"
-#include "gui/AdvancedMessageDialog.h"
+#include "AdvancedMessageDialog.h"
+#include "ProgressDialog.h"
 #include "ExecuteSqlFrame.h"
 #include "StatementHistoryFrame.h"
 #include "framemanager.h"
@@ -57,6 +58,7 @@
 #include "frutils.h"
 #include "logger.h"
 #include "statementHistory.h"
+#include "metadata/CreateDDLVisitor.h"
 #include "metadata/procedure.h"
 #include "metadata/server.h"
 #include "metadata/view.h"
@@ -1686,6 +1688,40 @@ bool DropObjectHandler::handleURI(URI& uri)
     eff->Show();
     eff->setSql(m->getDropSqlStatement());
     eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
+    return true;
+}
+//-----------------------------------------------------------------------------
+//! show DDL in SQL editor
+class EditDDLHandler: public URIHandler
+{
+public:
+    bool handleURI(URI& uri);
+private:
+    static const EditDDLHandler handlerInstance;
+};
+//-----------------------------------------------------------------------------
+const EditDDLHandler EditDDLHandler::handlerInstance;
+//-----------------------------------------------------------------------------
+bool EditDDLHandler::handleURI(URI& uri)
+{
+    if (uri.action != wxT("edit_ddl"))
+        return false;
+
+    MetadataItem* m = (MetadataItem*)getObject(uri);
+    wxWindow* w = getWindow(uri);
+    if (!m || !w)
+        return true;
+
+    ProgressDialog pd(w, _("Extracting DDL Definitions"), 2);
+    CreateDDLVisitor cdv(&pd);
+    m->acceptVisitor(&cdv);
+    if (pd.isCanceled())
+        return true;
+
+    ExecuteSqlFrame* eff = new ExecuteSqlFrame(w->GetParent(), -1, wxT("DDL"));
+    eff->setDatabase(m->getDatabase());
+    eff->setSql(cdv.getSql());
+    eff->Show();
     return true;
 }
 //-----------------------------------------------------------------------------
