@@ -147,11 +147,11 @@ void StatementHistoryFrame::OnButtonSearchClick(wxCommandEvent&
         wxString s = historyM->get(p);
         if (searchString.IsEmpty() || s.Upper().Contains(searchString))
         {
-            s.Replace(wxT("\n"), wxT(" "));
-            s.Replace(wxT("\r"), wxEmptyString);
-            if (s.Length() > 150)
-                listbox_search->Append(s.Mid(0, 150), (void *)p);
-            listbox_search->Append(s, (void *)p);
+            wxString entry;
+            entry = (s.Length() > 200) ? s.Mid(0, 200) + wxT("...") : s;
+            entry.Replace(wxT("\n"), wxT(" "));
+            entry.Replace(wxT("\r"), wxEmptyString);
+            listbox_search->Append(entry, (void *)p);
         }
     }
     setSearching(false);
