@@ -88,6 +88,7 @@ public:
     void OnMenuConnectAs(wxCommandEvent& event);
     void OnMenuReconnect(wxCommandEvent& event);
     void OnMenuDatabasePreferences(wxCommandEvent& event);
+    void OnMenuDatabaseProperties(wxCommandEvent& event);
 
     // create new object
     void showCreateTemplate(const MetadataItem *m);

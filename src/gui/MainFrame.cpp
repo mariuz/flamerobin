@@ -338,6 +338,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_UPDATE_UI(myTreeCtrl::Menu_NewObject, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_MENU(myTreeCtrl::Menu_DatabasePreferences, MainFrame::OnMenuDatabasePreferences)
     EVT_UPDATE_UI(myTreeCtrl::Menu_DatabasePreferences, MainFrame::OnMenuUpdateIfDatabaseSelected)
+    EVT_MENU(myTreeCtrl::Menu_DatabaseProperties, MainFrame::OnMenuDatabaseProperties)
+    EVT_UPDATE_UI(myTreeCtrl::Menu_DatabaseProperties, MainFrame::OnMenuUpdateIfDatabaseConnected)
 
     EVT_MENU(myTreeCtrl::Menu_Insert, MainFrame::OnMenuInsert)
     EVT_MENU(myTreeCtrl::Menu_Browse, MainFrame::OnMenuBrowse)
@@ -355,10 +357,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(myTreeCtrl::Menu_AlterObject, MainFrame::OnMenuAlterObject)
     EVT_MENU(myTreeCtrl::Menu_DropObject, MainFrame::OnMenuDropObject)
     EVT_MENU(myTreeCtrl::Menu_ObjectProperties, MainFrame::OnMenuObjectProperties)
-    // Because object properties are also available for the database object, the
-    // menu item should be disabled when the database is disconnected, and become
-    // enabled when there is a connection to the database.
-    EVT_UPDATE_UI(myTreeCtrl::Menu_ObjectProperties, MainFrame::OnMenuUpdateIfDatabaseConnected)
 
     EVT_MENU(myTreeCtrl::Menu_ToggleStatusBar, MainFrame::OnMenuToggleStatusBar)
     EVT_MENU(myTreeCtrl::Menu_ToggleSearchBar, MainFrame::OnMenuToggleSearchBar)
@@ -675,6 +673,19 @@ void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
         pd.ShowModal();
         pdSelection = pd.getSelectedPage();
     }
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuDatabaseProperties(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    Database* d = tree_ctrl_1->getSelectedDatabase();
+    if (!d)
+        return;
+
+    frameManager().showMetadataPropertyFrame(this, d);
 
     FR_CATCH
 }

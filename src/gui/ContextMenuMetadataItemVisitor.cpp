@@ -65,10 +65,10 @@ void ContextMenuMetadataItemVisitor::visit(Database&)
     menuM->AppendSeparator();
 
     wxMenu* actions = new wxMenu();
-    menuM->Append(0, _("Actions"), actions);
+    menuM->Append(0, _("Acti&ons"), actions);
 
     wxMenu* advanced = new wxMenu();
-    menuM->Append(0, _("Advanced"), advanced);
+    menuM->Append(0, _("Ad&vanced"), advanced);
 
     menuM->Append(myTreeCtrl::Menu_DatabaseRegistrationInfo, _("Database registration &info..."));
     menuM->Append(myTreeCtrl::Menu_UnRegisterDatabase, _("&Unregister database"));
@@ -84,7 +84,7 @@ void ContextMenuMetadataItemVisitor::visit(Database&)
     advanced->Append(myTreeCtrl::Menu_DatabasePreferences, _("Database &preferences..."));
 
     menuM->AppendSeparator();
-    menuM->Append(myTreeCtrl::Menu_ObjectProperties, _("Show P&roperties"));
+    menuM->Append(myTreeCtrl::Menu_DatabaseProperties, _("Data&base Properties"));
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visit(Domain&)
