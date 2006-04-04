@@ -830,13 +830,25 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
     wxCommandEvent e;
     int key = event.GetKeyCode();
     if (key == WXK_F4)
+    {
         OnButtonExecuteClick(e);
+        return;         // needed on Linux
+    }
     if (key == WXK_F5)
+    {
         OnButtonCommitClick(e);
+        return;
+    }
     if (key == WXK_F8)
+    {
         OnButtonRollbackClick(e);
+        return;
+    }
     if (key == WXK_F3)
+    {
         styled_text_ctrl_sql->find(false);
+        return;
+    }
 
     // TODO: we might need Ctrl+N for new window, Ctrl+S for Save, etc. but it cannot be caught from here
     //       since OnKeyDown() doesn't seem to catch letters, only special keys
