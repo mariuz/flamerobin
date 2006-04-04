@@ -911,7 +911,8 @@ bool Database::connect(wxString password, ProgressIndicator* indicator)
         if (canceled)
             disconnect();
 
-        databaseInfoM.loadInfo(&databaseM);
+        if (connectedM)
+            databaseInfoM.loadInfo(&databaseM);
 
         return true;
     }
