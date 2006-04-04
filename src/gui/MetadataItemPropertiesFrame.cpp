@@ -601,7 +601,13 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         if (!d)
             return;
 
-        htmlpage += wxString() << (d->getInfo()->getSize());
+        int size = d->getInfo()->getSize();
+        if (size > 1048576)
+            htmlpage += wxString::Format(wxT("%0.2fGB"), size/1048576.0);
+        else if (size > 1024)
+            htmlpage += wxString::Format(wxT("%0.2fMB"), size/1024.0);
+        else
+            htmlpage << size << wxT("kB");
     }
     else if (cmd == wxT("forced_writes"))
     {

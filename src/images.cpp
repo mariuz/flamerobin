@@ -102,6 +102,7 @@ wxBitmap getImage32(NodeType type)
     #include "fricon.xpm"
 
     #include "column32.xpm"
+    #include "database32.xpm"
     #include "domain32.xpm"
     #include "function32.xpm"
     #include "generator32.xpm"
@@ -124,6 +125,7 @@ wxBitmap getImage32(NodeType type)
     map[ntTrigger]         = trigger_xpm;
     map[ntColumn]         = column_xpm;
     map[ntDomain]         = domain_xpm;
+    map[ntDatabase]     = database32_xpm;
     wxBitmap ret(map[type]);
 
     delete [] map;
