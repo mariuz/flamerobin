@@ -53,11 +53,16 @@ GridTable::GridTable(IBPP::Statement& s)
 
     nullAttrM = new wxGridCellAttr();
     nullAttrM->SetTextColour(*wxRED);
+    nullAttrM->SetAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
+    nullAttrNumericM = new wxGridCellAttr();
+    nullAttrNumericM->SetTextColour(*wxRED);
+    nullAttrNumericM->SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
 }
 //-----------------------------------------------------------------------------
 GridTable::~GridTable()
 {
     Clear();
+    nullAttrNumericM->DecRef();
     nullAttrM->DecRef();
 }
 //-----------------------------------------------------------------------------
@@ -184,6 +189,11 @@ wxGridCellAttr* GridTable::GetAttr(int row, int col,
 {
     if (row < rowsFetchedM && col < columnCountM && !dataM[row][col])
     {
+        if (isNumericColumn(col - 1))
+        {
+            nullAttrNumericM->IncRef();
+            return nullAttrNumericM;
+        }
         nullAttrM->IncRef();
         return nullAttrM;
     }

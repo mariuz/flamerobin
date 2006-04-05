@@ -48,6 +48,7 @@ private:
     int rowsFetchedM;
 
     wxGridCellAttr* nullAttrM;
+    wxGridCellAttr* nullAttrNumericM;
 
     std::vector< std::vector<GridBaseCell*> > dataM;
     IBPP::Statement& statementM;

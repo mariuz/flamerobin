@@ -105,12 +105,11 @@ void DataGrid::fill()
 
     for (int i = 1; i <= table->GetNumberCols(); i++)
     {
-        if (table->isNumericColumn(i))
-        {
-            wxGridCellAttr *ca = new wxGridCellAttr;
-            ca->SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
-            SetColAttr(i-1, ca);
-        }
+        wxGridCellAttr *ca = new wxGridCellAttr;
+        ca->SetAlignment(
+            (table->isNumericColumn(i)) ? wxALIGN_RIGHT : wxALIGN_LEFT,
+            wxALIGN_CENTRE);
+        SetColAttr(i-1, ca);
     }
     AutoSizeColumns();
     EndBatch();
