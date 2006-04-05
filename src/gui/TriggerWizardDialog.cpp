@@ -62,6 +62,12 @@ TriggerWizardDialog::TriggerWizardDialog(wxWindow* parent, MetadataItem *item):
 
     set_properties();
     do_layout();
+
+    #include "trigger32.xpm"
+    wxBitmap bmp = wxBitmap(trigger_xpm);
+    wxIcon icon;
+    icon.CopyFromBitmap(bmp);
+    SetIcon(icon);
 }
 //-----------------------------------------------------------------------------
 void TriggerWizardDialog::set_properties()

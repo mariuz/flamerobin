@@ -93,6 +93,12 @@ FieldPropertiesDialog::FieldPropertiesDialog(wxWindow* parent, Table* table,
     setControlsProperties();
     updateControls();
     layoutControls();
+
+    #include "column32.xpm"
+    wxBitmap bmp = wxBitmap(column_xpm);
+    wxIcon icon;
+    icon.CopyFromBitmap(bmp);
+    SetIcon(icon);
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::createControls()

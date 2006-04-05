@@ -59,6 +59,12 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent,
     setControlsProperties();
     layoutControls();
     updateButtons();
+
+    #include "database32.xpm"
+    wxBitmap bmp = wxBitmap(database32_xpm);
+    wxIcon icon;
+    icon.CopyFromBitmap(bmp);
+    SetIcon(icon);
 }
 //-----------------------------------------------------------------------------
 //! implementation details
