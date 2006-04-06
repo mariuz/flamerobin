@@ -71,14 +71,12 @@ MasterPassword& MasterPassword::getInstance()
 wxString MasterPassword::getMasterPassword()
 {
     wxString& mp = getInstance().mpw;
-
-    AdvancedMessageBox(
-        _("You should now enter the Master Password which\nis used to encrypt all passwords.\n\nIf you haven't used this feature before, then please\nenter the Master Password which will be used in future.\n\nYou can change the master password by\nselecting the appropriate option from View menu.\n\nPlease read the manual for more information."),
-        _("Master password required"),
-        wxOK, 0, 0, wxT("DIALOG_MasterPasswordNotice"));
-
     if (mp.IsEmpty())
     {
+        AdvancedMessageBox(
+            _("You should now enter the Master Password which\nis used to encrypt all passwords.\n\nIf you haven't used this feature before, then please\nenter the Master Password which will be used in future.\n\nYou can change the master password by\nselecting the appropriate option from View menu.\n\nPlease read the manual for more information."),
+            _("Master password required"),
+            wxOK, 0, 0, wxT("DIALOG_MasterPasswordNotice"));
         mp = wxGetPasswordFromUser(
             _("Please enter the master password"),
             _("Enter master password"));
