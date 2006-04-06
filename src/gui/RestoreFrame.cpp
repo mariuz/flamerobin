@@ -224,13 +224,13 @@ void RestoreFrame::createControls()
     const wxString pagesize_choices[] = {
         _("Default"), wxT("1024"), wxT("2048"), wxT("4096"), wxT("8192"), wxT("16384")
     };
-    choice_pagesize = new wxChoice(panel_controls, wxID_ANY, 
+    choice_pagesize = new wxChoice(panel_controls, wxID_ANY,
         wxDefaultPosition, wxDefaultSize,
         sizeof(pagesize_choices) / sizeof(wxString), pagesize_choices);
 
     checkbox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog,
         _("Show complete log"));
-    button_start = new wxButton(panel_controls, ID_button_start, 
+    button_start = new wxButton(panel_controls, ID_button_start,
         _("&Start Restore"));
 
     text_ctrl_log = new LogTextControl(this, ID_text_ctrl_log);
@@ -416,7 +416,7 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     //   if (!getDatabasePassword(this, databaseM, password))
     //       return;
 
-    wxString password = databaseM->getPassword();
+    wxString password = databaseM->getDecryptedPassword();
     if (password.empty())
     {
         wxString msg;

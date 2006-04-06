@@ -40,11 +40,11 @@ class Database;
 class DatabaseConfig: public Config
 {
 private:
-    Database *databaseM;
+    const Database *databaseM;
     wxString addPathToKey(const wxString key) const;
 
 public:
-    DatabaseConfig(Database *d);
+    DatabaseConfig(const Database *d);
 
     // unhides methods of base class, for details see:
     // http://www.parashift.com/c++-faq-lite/strange-inheritance.html#faq-23.7

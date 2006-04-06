@@ -111,7 +111,7 @@ void Server::createDatabase(Database* db, int pagesize, int dialect)
 
     IBPP::Database db1;
     db1 = IBPP::DatabaseFactory(wx2std(getConnectionString()), wx2std(db->getPath()),
-        wx2std(db->getUsername()), wx2std(db->getPassword()), "",
+        wx2std(db->getUsername()), wx2std(db->getDecryptedPassword()), "",
         wx2std(charset), wx2std(extra_params));
     db1->Create(dialect);
 }
@@ -226,7 +226,7 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind)
         if ((*ci).isConnected())
             continue;
         wxString user = (*ci).getUsername();
-        wxString pwd = (*ci).getPassword();
+        wxString pwd = (*ci).getDecryptedPassword();
         if (pwd.IsEmpty())
             continue;
         if (progressind)

@@ -38,8 +38,8 @@ private:
     Server* serverM;
     Database* databaseM;
     bool createM;
-	bool connectAsM;
-	bool isDefaultNameM;
+    bool connectAsM;
+    bool isDefaultNameM;
 
     wxStaticText* label_name;
     wxTextCtrl* text_ctrl_name;
@@ -58,6 +58,7 @@ private:
     wxChoice* choice_pagesize;
     wxStaticText* label_dialect;
     wxChoice* choice_dialect;
+    wxCheckBox* checkbox_encrypted;
     wxButton* button_ok;
     wxButton* button_cancel;
 
@@ -71,7 +72,7 @@ protected:
     virtual const wxString getName() const;
 public:
     DatabaseRegistrationDialog(wxWindow* parent, const wxString& title,
-        bool createDB = false, 
+        bool createDB = false,
         // a temporary solution, as we'll change the entire login scheme soon
         bool connectAs = false);
 
@@ -83,7 +84,7 @@ private:
         ID_textcontrol_dbpath = 101,
         ID_textcontrol_name,
         ID_textcontrol_username,
-		ID_textcontrol_password,
+        ID_textcontrol_password,
         ID_button_browse,
         ID_button_ok,
         ID_button_cancel = wxID_CANCEL

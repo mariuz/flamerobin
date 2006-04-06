@@ -9,11 +9,6 @@
             <key>differentCharsetWarning</key>
             <default>1</default>
         </setting>
-        <setting type="checkbox">
-            <caption>Store password encrypted</caption>
-            <key>storePasswordEncrypted</key>
-            <default>0</default>
-        </setting>
     </node>
     <node>
         <caption>Logging</caption>

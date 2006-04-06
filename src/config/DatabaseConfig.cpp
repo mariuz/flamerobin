@@ -39,10 +39,9 @@
 #include "DatabaseConfig.h"
 #include "metadata/database.h"
 //-----------------------------------------------------------------------------
-DatabaseConfig::DatabaseConfig(Database *d)
-    :Config()
+DatabaseConfig::DatabaseConfig(const Database *d)
+    :Config(), databaseM(d)
 {
-    databaseM = d;
     // we need to copy these settings, since they may have been modified
     // by env variables or command line params
     setHomePath(config().getHomePath());

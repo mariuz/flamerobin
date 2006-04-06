@@ -72,8 +72,9 @@ wxString MasterPassword::getMasterPassword()
     wxString& mp = getInstance().mpw;
     if (mp.IsEmpty())
     {
-        mp = wxGetPasswordFromUser(_("Enter master password"),
-            _("Please enter the current master password"));
+        mp = wxGetPasswordFromUser(
+            _("Please enter the current master password"),
+            _("Enter master password"));
     }
     return mp;
 }

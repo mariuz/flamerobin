@@ -197,7 +197,7 @@ void BackupFrame::createControls()
 {
     panel_controls = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
         wxTAB_TRAVERSAL | wxCLIP_CHILDREN | wxNO_FULL_REPAINT_ON_RESIZE);
-    label_filename = new wxStaticText(panel_controls, wxID_ANY, 
+    label_filename = new wxStaticText(panel_controls, wxID_ANY,
         _("Backup file:"));
     text_ctrl_filename = new wxTextCtrl(panel_controls, ID_text_ctrl_filename,
         wxEmptyString);
@@ -219,7 +219,7 @@ void BackupFrame::createControls()
 
     checkbox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog,
         _("Show complete log"));
-    button_start = new wxButton(panel_controls, ID_button_start, 
+    button_start = new wxButton(panel_controls, ID_button_start,
         _("&Start Backup"));
 
     text_ctrl_log = new LogTextControl(this, ID_text_ctrl_log);
@@ -380,7 +380,7 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     //   if (!getDatabasePassword(this, databaseM, password))
     //       return;
 
-    wxString password = databaseM->getPassword();
+    wxString password = databaseM->getDecryptedPassword();
     if (password.empty())
     {
         wxString msg;

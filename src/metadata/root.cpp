@@ -164,7 +164,9 @@ bool Root::parseDatabase(Server* server, wxXmlNode* xmln)
         else if (xmln->GetName() == wxT("username"))
             database->setUsername(value);
         else if (xmln->GetName() == wxT("password"))
-            database->setPassword(value);
+            database->setRawPassword(value);
+        else if (xmln->GetName() == wxT("encrypted"))
+            database->setStoreEncryptedPassword(value == wxT("1"));
         else if (xmln->GetName() == wxT("role"))
             database->setRole(value);
         else if (xmln->GetName() == wxT("id"))
@@ -273,7 +275,8 @@ bool Root::save()
             file << "\t\t\t<path>" << wx2std(it2->getPath()) << "</path>\n";
             file << "\t\t\t<charset>" << wx2std(it2->getConnectionCharset()) << "</charset>\n";
             file << "\t\t\t<username>" << wx2std(it2->getUsername()) << "</username>\n";
-            file << "\t\t\t<password>" << wx2std(it2->getPassword()) << "</password>\n";
+            file << "\t\t\t<password>" << wx2std(it2->getRawPassword()) << "</password>\n";
+            file << "\t\t\t<encrypted>" << (it2->getStoreEncryptedPassword() ? "1" : "0") << "</encrypted>\n";
             file << "\t\t\t<role>" << wx2std(it2->getRole()) << "</role>\n";
             file << "\t\t</database>\n";
         }

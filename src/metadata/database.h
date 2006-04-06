@@ -118,6 +118,7 @@ private:
     wxString pathM;
     Credentials credentialsM;
     Credentials* connectionCredentialsM;
+    bool storeEncryptedPasswordM;
 
     DatabaseInfo databaseInfoM;
 
@@ -211,13 +212,17 @@ public:
     wxString getConnectionCharset() const;
     bool usesDifferentConnectionCharset() const;
     wxString getUsername() const;
-    wxString getPassword() const;
+    wxString getRawPassword() const;
+    wxString getDecryptedPassword() const;
+    bool getStoreEncryptedPassword() const;
     wxString getRole() const;
     IBPP::Database& getIBPPDatabase();
     void setPath(wxString value);
     void setConnectionCharset(wxString value);
     void setUsername(wxString value);
-    void setPassword(wxString value);
+    void setRawPassword(wxString value);
+    void setEncryptedPassword(wxString value);
+    void setStoreEncryptedPassword(bool value);
     void setRole(wxString value);
     virtual const wxString getTypeName() const;
     Server *getServer() const;

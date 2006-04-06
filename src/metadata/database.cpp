@@ -39,7 +39,9 @@
 #include <sstream>
 
 #include "config/Config.h"
+#include "config/DatabaseConfig.h"
 #include "dberror.h"
+#include "MasterPassword.h"
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/parameter.h"
@@ -164,7 +166,7 @@ void DatabaseInfo::loadInfo(const IBPP::Database* database)
 }
 //-----------------------------------------------------------------------------
 Database::Database()
-    : MetadataItem(), idM(0)
+    : MetadataItem(), idM(0), storeEncryptedPasswordM(false)
 {
     typeM = ntDatabase;
     connectedM = false;
@@ -988,7 +990,7 @@ void Database::clear()
     setPath(wxT(""));
     setConnectionCharset(wxT(""));
     setUsername(wxT(""));
-    setPassword(wxT(""));
+    setRawPassword(wxT(""));
     setRole(wxT(""));
 }
 //-----------------------------------------------------------------------------
@@ -1110,12 +1112,32 @@ wxString Database::getUsername() const
         return credentialsM.getUsername();
 }
 //-----------------------------------------------------------------------------
-wxString Database::getPassword() const
+wxString Database::getRawPassword() const
 {
     if (connectionCredentialsM)
         return connectionCredentialsM->getPassword();
     else
         return credentialsM.getPassword();
+}
+//-----------------------------------------------------------------------------
+wxString Database::getDecryptedPassword() const
+{
+    // temporary connection
+    if (connectionCredentialsM)
+        return connectionCredentialsM->getPassword();
+    wxString raw = credentialsM.getPassword();
+    if (raw.IsEmpty())
+        return wxEmptyString;
+
+    if (storeEncryptedPasswordM)
+        return decryptPassword(raw, getUsername()+getConnectionString());
+    else
+        return raw;
+}
+//-----------------------------------------------------------------------------
+bool Database::getStoreEncryptedPassword() const
+{
+    return storeEncryptedPasswordM;
 }
 //-----------------------------------------------------------------------------
 wxString Database::getRole() const
@@ -1152,12 +1174,40 @@ void Database::setUsername(wxString value)
         credentialsM.setUsername(value);
 }
 //-----------------------------------------------------------------------------
-void Database::setPassword(wxString value)
+void Database::setRawPassword(wxString value)
 {
     if (connectionCredentialsM)
         connectionCredentialsM->setPassword(value);
     else
         credentialsM.setPassword(value);
+}
+//-----------------------------------------------------------------------------
+void Database::setEncryptedPassword(wxString value)
+{
+    // temporary connection
+    if (connectionCredentialsM)
+    {
+        connectionCredentialsM->setPassword(value);
+        return;
+    }
+    if (value.IsEmpty())
+    {
+        credentialsM.setPassword(value);
+        return;
+    }
+
+    if (storeEncryptedPasswordM)
+    {
+        credentialsM.setPassword(encryptPassword(value,
+            getUsername()+getConnectionString()));
+    }
+    else
+        credentialsM.setPassword(value);
+}
+//-----------------------------------------------------------------------------
+void Database::setStoreEncryptedPassword(bool value)
+{
+    storeEncryptedPasswordM = value;
 }
 //-----------------------------------------------------------------------------
 void Database::setRole(wxString value)

@@ -143,7 +143,7 @@ bool connectDatabase(Database *db, wxWindow* parent,
     ProgressDialog* progressdialog)
 {
     wxString pass;
-    if (db->getPassword().empty())
+    if (db->getDecryptedPassword().empty())
     {
         wxString message(_("Enter password for user: "));
         message += db->getUsername();
@@ -152,7 +152,7 @@ bool connectDatabase(Database *db, wxWindow* parent,
             return false;
     }
     else
-        pass = db->getPassword();
+        pass = db->getDecryptedPassword();
 
     wxString caption(wxString::Format(wxT("Connecting with Database \"%s\""),
         db->getName_().c_str()));

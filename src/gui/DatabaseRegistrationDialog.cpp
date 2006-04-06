@@ -137,6 +137,11 @@ void DatabaseRegistrationDialog::createControls()
             sizeof(dialect_choices) / sizeof(wxString), dialect_choices);
     }
 
+    if (!connectAsM)
+        checkbox_encrypted = new wxCheckBox(getControlsPanel(), -1, _("Encrypt password"));
+    else
+        checkbox_encrypted = 0;
+
     button_ok = new wxButton(getControlsPanel(), ID_button_ok,
         (createM ? _("Create") : _("Save")));
     button_cancel = new wxButton(getControlsPanel(), ID_button_cancel,
@@ -188,6 +193,11 @@ void DatabaseRegistrationDialog::layoutControls()
         sizerControls->Add(choice_dialect, wxGBPosition(4, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
     }
 
+    if (!connectAsM)
+    {
+        sizerControls->Add(checkbox_encrypted, wxGBPosition(5, 0), wxGBSpan(1, 4), wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    }
+
     sizerControls->AddGrowableCol(1);
     sizerControls->AddGrowableCol(3);
 
@@ -221,7 +231,7 @@ void DatabaseRegistrationDialog::setDatabase(Database* db)
     text_ctrl_name->SetValue(databaseM->getName_());
     text_ctrl_dbpath->SetValue(databaseM->getPath());
     text_ctrl_username->SetValue(databaseM->getUsername());
-    text_ctrl_password->SetValue(databaseM->getPassword());
+    text_ctrl_password->SetValue(databaseM->getDecryptedPassword());
     text_ctrl_role->SetValue(databaseM->getRole());
     wxString charset(databaseM->getConnectionCharset());
     if (charset.IsEmpty())
@@ -247,6 +257,8 @@ void DatabaseRegistrationDialog::setDatabase(Database* db)
     text_ctrl_role->SetEditable(!isConnected);
     if (connectAsM)
         button_ok->SetLabel(_("Connect"));
+    else
+        checkbox_encrypted->SetValue(databaseM->getStoreEncryptedPassword());
     updateButtons();
     updateColors();
 }
@@ -295,12 +307,20 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
 //-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    wxBusyCursor wait;
+    // Please note that the order of calls is important here:
+    // setPath and setUsername and setStoreEncryptedPassword
+    // must come before setEncryptedPassword.
+    // The reason is that setEncryptedPassword uses those 3 values to determine
+    // whether the password needs to be encrypted, and if it does need, it uses
+    // them to calculate the key (using master key)
+    if (checkbox_encrypted)
+        databaseM->setStoreEncryptedPassword(checkbox_encrypted->IsChecked());
     databaseM->setName_(text_ctrl_name->GetValue());
     databaseM->setPath(text_ctrl_dbpath->GetValue());
     databaseM->setUsername(text_ctrl_username->GetValue());
-    databaseM->setPassword(text_ctrl_password->GetValue());
+    databaseM->setEncryptedPassword(text_ctrl_password->GetValue());
 
+    wxBusyCursor wait;
     // for some reason GetValue didn't work correctly before
     // I can't remember the exact issue, perhaps it was platform specific (Gtk1 maybe?)
     // so we replaced all of those with GetStringSelection()
