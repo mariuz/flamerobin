@@ -135,8 +135,6 @@ wxString Role::getRoleOwner()
     {
         return _("System error.");
     }
-
-    return wxEmptyString;
 }
 //-----------------------------------------------------------------------------
 void Role::loadDescription()
