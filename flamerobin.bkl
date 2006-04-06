@@ -311,8 +311,10 @@
         $(SOURCEDIR)/gui/StatementHistoryFrame.h
         $(SOURCEDIR)/gui/TriggerWizardDialog.h
         $(SOURCEDIR)/images.h
+        $(SOURCEDIR)/Isaac.h
         $(SOURCEDIR)/logger.h
         $(SOURCEDIR)/main.h
+        $(SOURCEDIR)/MasterPassword.h
         $(SOURCEDIR)/metadata/collection.h
         $(SOURCEDIR)/metadata/column.h
         $(SOURCEDIR)/metadata/constraints.h
@@ -408,6 +410,7 @@
         $(SOURCEDIR)/images.cpp
         $(SOURCEDIR)/logger.cpp
         $(SOURCEDIR)/main.cpp
+        $(SOURCEDIR)/MasterPassword.cpp
         $(SOURCEDIR)/metadata/column.cpp
         $(SOURCEDIR)/metadata/constraints.cpp
         $(SOURCEDIR)/metadata/CreateDDLVisitor.cpp

@@ -109,6 +109,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_images.o \
 	flamerobin_logger.o \
 	flamerobin_main.o \
+	flamerobin_MasterPassword.o \
 	flamerobin_column.o \
 	flamerobin_constraints.o \
 	flamerobin_CreateDDLVisitor.o \
@@ -448,6 +449,9 @@ flamerobin_logger.o: $(srcdir)/src/logger.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_main.o: $(srcdir)/src/main.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/main.cpp
+
+flamerobin_MasterPassword.o: $(srcdir)/src/MasterPassword.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/MasterPassword.cpp
 
 flamerobin_column.o: $(srcdir)/src/metadata/column.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/column.cpp
