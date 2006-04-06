@@ -147,6 +147,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MasterPassword.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_column.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_constraints.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CreateDDLVisitor.obj \
@@ -469,6 +470,9 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.obj: .\src\logger.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.obj: .\src\main.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MasterPassword.obj: .\src\MasterPassword.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_column.obj: .\src\metadata\column.cpp

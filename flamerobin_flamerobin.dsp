@@ -556,6 +556,10 @@ SOURCE=.\src\gui\MainFrame.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\MasterPassword.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\MetadataItemPropertiesFrame.cpp
 # End Source File
 # Begin Source File
@@ -882,11 +886,19 @@ SOURCE=.\src\metadata\Index.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\Isaac.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\controls\LogTextControl.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\gui\MainFrame.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\MasterPassword.h
 # End Source File
 # Begin Source File
 

@@ -121,6 +121,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MasterPassword.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_column.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_constraints.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CreateDDLVisitor.o \
@@ -429,6 +430,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.o: ./src/logger.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.o: ./src/main.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MasterPassword.o: ./src/MasterPassword.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_column.o: ./src/metadata/column.cpp
