@@ -35,7 +35,11 @@ class Role: public MetadataItem
 {
 private:
     std::vector<Privilege> privilegesM;
+protected:
+    virtual void loadDescription();
+    virtual void saveDescription(wxString description);
 public:
+    wxString getRoleOwner();
     const std::vector<Privilege>* getPrivileges();
     virtual wxString getCreateSqlTemplate() const;
     virtual const wxString getTypeName() const;

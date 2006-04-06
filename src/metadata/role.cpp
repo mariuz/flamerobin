@@ -105,6 +105,55 @@ const std::vector<Privilege>* Role::getPrivileges()
     return 0;
 }
 //-----------------------------------------------------------------------------
+wxString Role::getRoleOwner()
+{
+    Database* d = getDatabase();
+    if (!d)
+        return _("ERROR: Database not set");
+    IBPP::Database& db = d->getIBPPDatabase();
+
+    try
+    {
+        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+        tr1->Start();
+        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+        st1->Prepare(
+            "select rdb$owner_name from rdb$roles where rdb$role_name = ?");
+        st1->Set(1, wx2std(getName_()));
+        st1->Execute();
+        st1->Fetch();
+        std::string name;
+        st1->Get(1, name);
+        tr1->Commit();
+        return std2wx(name).Strip();
+    }
+    catch (IBPP::Exception &e)
+    {
+        return std2wx(e.ErrorMessage());
+    }
+    catch (...)
+    {
+        return _("System error.");
+    }
+
+    return wxEmptyString;
+}
+//-----------------------------------------------------------------------------
+void Role::loadDescription()
+{
+    MetadataItem::loadDescription(
+        wxT("select RDB$DESCRIPTION from RDB$ROLES ")
+        wxT("where RDB$ROLE_NAME = ?"));
+}
+//-----------------------------------------------------------------------------
+void Role::saveDescription(wxString description)
+{
+    MetadataItem::saveDescription(
+        wxT("update RDB$ROLES set RDB$DESCRIPTION = ? ")
+        wxT("where RDB$ROLE_NAME = ?"),
+        description);
+}
+//-----------------------------------------------------------------------------
 wxString Role::getCreateSqlTemplate() const
 {
     return  wxT("CREATE ROLE role_name;\n");

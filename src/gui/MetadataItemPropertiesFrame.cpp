@@ -457,6 +457,14 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         htmlpage += escapeHtmlChars(src, false);
     }
 
+    else if (cmd == wxT("role_owner"))
+    {
+        Role* r = dynamic_cast<Role*>(object);
+        if (!r)
+            return;
+        htmlpage += escapeHtmlChars(r->getRoleOwner(), false);
+    }
+
     else if (cmd == wxT("trigger_source"))
     {
         Trigger* t = dynamic_cast<Trigger*>(object);
