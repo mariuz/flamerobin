@@ -164,3 +164,36 @@ wxString Privilege::getSql() const
     return ret;
 }
 //-----------------------------------------------------------------------------
+wxString Privilege::getGrantee() const
+{
+    wxString gt = granteeTypeToString(granteeTypeM);
+    if (!gt.IsEmpty())
+        gt += wxT(" ");
+    return gt + grantorM;
+}
+//-----------------------------------------------------------------------------
+wxString Privilege::getGrantor() const
+{
+    return grantorM;
+}
+//-----------------------------------------------------------------------------
+bool Privilege::getGrantOption() const
+{
+    return withGrantOptionM;
+}
+//-----------------------------------------------------------------------------
+void Privilege::getPrivileges(std::vector<wxString>& list) const
+{
+    list.insert(list.begin(), privilegesM.begin(), privilegesM.end());
+}
+//-----------------------------------------------------------------------------
+void Privilege::getUpdateColumns(std::vector<wxString>& list) const
+{
+    list.insert(list.begin(), updateColumnsM.begin(), updateColumnsM.end());
+}
+//-----------------------------------------------------------------------------
+void Privilege::getReferenceColumns(std::vector<wxString>& list) const
+{
+    list.insert(list.begin(), refColumnsM.begin(), refColumnsM.end());
+}
+//-----------------------------------------------------------------------------

@@ -49,6 +49,13 @@ public:
     void addUpdateColumn(const wxString& column);
     void addReferencesColumn(const wxString& column);
     wxString getSql() const;
+
+    wxString getGrantee() const;
+    wxString getGrantor() const;
+    bool getGrantOption() const;
+    void getPrivileges(std::vector<wxString>& list) const;
+    void getUpdateColumns(std::vector<wxString>& list) const;
+    void getReferenceColumns(std::vector<wxString>& list) const;
 };
 //-----------------------------------------------------------------------------
 #endif

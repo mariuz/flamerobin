@@ -179,12 +179,13 @@ const std::vector<Privilege>* Relation::getPrivileges()
             "RDB$GRANT_OPTION, RDB$FIELD_NAME "
             "from RDB$USER_PRIVILEGES "
             "where RDB$RELATION_NAME = ? and rdb$object_type = 0 "
-            "order by rdb$user, rdb$user_type, rdb$privilege"
+            "order by rdb$user, rdb$user_type, rdb$grant_option, rdb$privilege"
         );
         st1->Set(1, wx2std(getName_()));
         st1->Execute();
         std::string lastuser;
         int lasttype = -1;
+        int lastgrantoption = 0;
         Privilege *pr = 0;
         while (st1->Fetch())
         {
@@ -197,7 +198,8 @@ const std::vector<Privilege>* Relation::getPrivileges()
             if (!st1->IsNull(5))
                 st1->Get(5, grantoption);
             st1->Get(6, field);
-            if (!pr || user != lastuser || usertype != lasttype)
+            if (!pr || user != lastuser || usertype != lasttype ||
+                lastgrantoption != grantoption)
             {
                 Privilege p(this, std2wx(user).Strip(), usertype,
                     std2wx(grantor).Strip(), grantoption == 1);
@@ -205,6 +207,7 @@ const std::vector<Privilege>* Relation::getPrivileges()
                 pr = &privilegesM.back();
                 lastuser = user;
                 lasttype = usertype;
+                lastgrantoption = grantoption;
             }
             pr->addPrivilege(privilege[0]);
             wxString wfield = std2wx(field).Strip();
