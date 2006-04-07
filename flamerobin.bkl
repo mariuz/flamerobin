@@ -277,9 +277,6 @@
         $(SOURCEDIR)/converters.h
         $(SOURCEDIR)/dberror.h
         $(SOURCEDIR)/framemanager.h
-        $(SOURCEDIR)/frDataGrid.h
-        $(SOURCEDIR)/frDataGridCells.h
-        $(SOURCEDIR)/frDataGridTable.h
         $(SOURCEDIR)/frtypes.h
         $(SOURCEDIR)/frutils.h
         $(SOURCEDIR)/frversion.h
@@ -290,6 +287,9 @@
         $(SOURCEDIR)/gui/BaseDialog.h
         $(SOURCEDIR)/gui/BaseFrame.h
         $(SOURCEDIR)/gui/ContextMenuMetadataItemVisitor.h
+        $(SOURCEDIR)/gui/controls/DataGrid.h
+        $(SOURCEDIR)/gui/controls/DataGridCells.h
+        $(SOURCEDIR)/gui/controls/DataGridTable.h
         $(SOURCEDIR)/gui/controls/LogTextControl.h
         $(SOURCEDIR)/gui/controls/TextControl.h
         $(SOURCEDIR)/gui/CreateIndexDialog.h
@@ -374,9 +374,6 @@
         $(SOURCEDIR)/databasehandler.cpp
         $(SOURCEDIR)/dberror.cpp
         $(SOURCEDIR)/framemanager.cpp
-        $(SOURCEDIR)/frDataGrid.cpp
-        $(SOURCEDIR)/frDataGridCells.cpp
-        $(SOURCEDIR)/frDataGridTable.cpp
         $(SOURCEDIR)/frprec.cpp
         $(SOURCEDIR)/frutils.cpp
         $(SOURCEDIR)/gui/AdvancedMessageDialog.cpp
@@ -386,6 +383,9 @@
         $(SOURCEDIR)/gui/BaseDialog.cpp
         $(SOURCEDIR)/gui/BaseFrame.cpp
         $(SOURCEDIR)/gui/ContextMenuMetadataItemVisitor.cpp
+        $(SOURCEDIR)/gui/controls/DataGrid.cpp
+        $(SOURCEDIR)/gui/controls/DataGridCells.cpp
+        $(SOURCEDIR)/gui/controls/DataGridTable.cpp
         $(SOURCEDIR)/gui/controls/LogTextControl.cpp
         $(SOURCEDIR)/gui/controls/TextControl.cpp
         $(SOURCEDIR)/gui/CreateIndexDialog.cpp

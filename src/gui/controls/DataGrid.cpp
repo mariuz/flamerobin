@@ -44,8 +44,8 @@
 #include <wx/wfstream.h>
 
 #include "config/Config.h"
-#include "frDataGrid.h"
-#include "frDataGridTable.h"
+#include "gui/controls/DataGrid.h"
+#include "gui/controls/DataGridTable.h"
 #include "ugly.h"
 
 //-----------------------------------------------------------------------------

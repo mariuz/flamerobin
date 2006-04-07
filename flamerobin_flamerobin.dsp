@@ -508,6 +508,18 @@ SOURCE=.\src\gui\CreateIndexDialog.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\controls\DataGrid.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\controls\DataGridCells.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\controls\DataGridTable.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\config\DatabaseConfig.cpp
 # End Source File
 # Begin Source File
@@ -680,18 +692,6 @@ SOURCE=.\res\flamerobin.rc
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\frDataGrid.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\frDataGridCells.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\frDataGridTable.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\framemanager.cpp
 # End Source File
 # Begin Source File
@@ -843,6 +843,18 @@ SOURCE=.\src\metadata\CreateDDLVisitor.h
 # Begin Source File
 
 SOURCE=.\src\gui\CreateIndexDialog.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\controls\DataGrid.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\controls\DataGridCells.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\controls\DataGridTable.h
 # End Source File
 # Begin Source File
 
@@ -1011,18 +1023,6 @@ SOURCE=.\src\metadata\domain.h
 # Begin Source File
 
 SOURCE=.\src\metadata\exception.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\frDataGrid.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\frDataGridCells.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\frDataGridTable.h
 # End Source File
 # Begin Source File
 

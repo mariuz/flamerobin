@@ -36,7 +36,7 @@
     #include "wx/wx.h"
 #endif
 
-#include "frDataGridCells.h"
+#include "gui/controls/DataGridCells.h"
 
 //-----------------------------------------------------------------------------
 // GridBaseCell class

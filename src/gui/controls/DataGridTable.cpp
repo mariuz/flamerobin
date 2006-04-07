@@ -39,8 +39,8 @@
 #include <wx/grid.h>
 
 #include "converters.h"
-#include "frDataGridCells.h"
-#include "frDataGridTable.h"
+#include "gui/controls/DataGridCells.h"
+#include "gui/controls/DataGridTable.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 GridTable::GridTable(IBPP::Statement& s)

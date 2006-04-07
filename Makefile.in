@@ -73,9 +73,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_databasehandler.o \
 	flamerobin_dberror.o \
 	flamerobin_framemanager.o \
-	flamerobin_frDataGrid.o \
-	flamerobin_frDataGridCells.o \
-	flamerobin_frDataGridTable.o \
 	flamerobin_frprec.o \
 	flamerobin_frutils.o \
 	flamerobin_AdvancedMessageDialog.o \
@@ -85,6 +82,9 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_BaseDialog.o \
 	flamerobin_BaseFrame.o \
 	flamerobin_ContextMenuMetadataItemVisitor.o \
+	flamerobin_DataGrid.o \
+	flamerobin_DataGridCells.o \
+	flamerobin_DataGridTable.o \
 	flamerobin_LogTextControl.o \
 	flamerobin_TextControl.o \
 	flamerobin_CreateIndexDialog.o \
@@ -342,15 +342,6 @@ flamerobin_dberror.o: $(srcdir)/src/dberror.cpp $(FLAMEROBIN_ODEP)
 flamerobin_framemanager.o: $(srcdir)/src/framemanager.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/framemanager.cpp
 
-flamerobin_frDataGrid.o: $(srcdir)/src/frDataGrid.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/frDataGrid.cpp
-
-flamerobin_frDataGridCells.o: $(srcdir)/src/frDataGridCells.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/frDataGridCells.cpp
-
-flamerobin_frDataGridTable.o: $(srcdir)/src/frDataGridTable.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/frDataGridTable.cpp
-
 flamerobin_frprec.o: $(srcdir)/src/frprec.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/frprec.cpp
 
@@ -377,6 +368,15 @@ flamerobin_BaseFrame.o: $(srcdir)/src/gui/BaseFrame.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_ContextMenuMetadataItemVisitor.o: $(srcdir)/src/gui/ContextMenuMetadataItemVisitor.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/ContextMenuMetadataItemVisitor.cpp
+
+flamerobin_DataGrid.o: $(srcdir)/src/gui/controls/DataGrid.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/controls/DataGrid.cpp
+
+flamerobin_DataGridCells.o: $(srcdir)/src/gui/controls/DataGridCells.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/controls/DataGridCells.cpp
+
+flamerobin_DataGridTable.o: $(srcdir)/src/gui/controls/DataGridTable.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/controls/DataGridTable.cpp
 
 flamerobin_LogTextControl.o: $(srcdir)/src/gui/controls/LogTextControl.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/controls/LogTextControl.cpp

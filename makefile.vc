@@ -90,9 +90,6 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_databasehandler.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_dberror.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_framemanager.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGrid.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridCells.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridTable.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AdvancedMessageDialog.obj \
@@ -102,6 +99,9 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseFrame.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ContextMenuMetadataItemVisitor.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGrid.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridCells.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_LogTextControl.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TextControl.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CreateIndexDialog.obj \
@@ -359,15 +359,6 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_dberror.obj: .\src\dberror.cpp
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_framemanager.obj: .\src\framemanager.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGrid.obj: .\src\frDataGrid.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
-
-vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridCells.obj: .\src\frDataGridCells.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
-
-vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frDataGridTable.obj: .\src\frDataGridTable.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
-
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.obj: .\src\frprec.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) /Ycwx/wxprec.h $**
 
@@ -393,6 +384,15 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseFrame.obj: .\src\gui\BaseFrame.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ContextMenuMetadataItemVisitor.obj: .\src\gui\ContextMenuMetadataItemVisitor.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGrid.obj: .\src\gui\controls\DataGrid.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridCells.obj: .\src\gui\controls\DataGridCells.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.obj: .\src\gui\controls\DataGridTable.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_LogTextControl.obj: .\src\gui\controls\LogTextControl.cpp
