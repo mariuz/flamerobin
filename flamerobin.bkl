@@ -483,6 +483,7 @@
         TABLEconstraints.html
         TABLEtriggers.html
         TABLEindices.html
+        TABLEprivileges.html
         TRIGGER.html
         VIEW.html
         VIEWtriggers.html
@@ -490,6 +491,7 @@
         compute.png
         drop.png
         ok.png
+        ok2.png
         redx.png
         view.png
     </set>

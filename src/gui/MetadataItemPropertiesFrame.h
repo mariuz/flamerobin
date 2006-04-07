@@ -38,7 +38,7 @@ class MetadataItemPropertiesFrame: public BaseFrame, public Observer
 {
 private:
     enum { ptSummary, ptConstraints, ptDependencies, ptTriggers,
-        ptTableIndices, ptDDL } pageTypeM;
+        ptTableIndices, ptDDL, ptPrivileges } pageTypeM;
 
     MetadataItem *objectM;
     void removeSubject(Subject* subject);

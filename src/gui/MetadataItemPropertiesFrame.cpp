@@ -176,6 +176,9 @@ void MetadataItemPropertiesFrame::loadPage()
         case ptTriggers:
             htmlpage += objectM->getTypeName() + wxT("triggers.html");
             break;
+        case ptPrivileges:
+            htmlpage += objectM->getTypeName() + wxT("privileges.html");
+            break;
         case ptTableIndices:
             htmlpage += wxT("TABLEindices.html");
             break;
@@ -814,6 +817,8 @@ void MetadataItemPropertiesFrame::setPage(const wxString& type)
         pageTypeM = ptTableIndices;
     else if (type == wxT("ddl"))
         pageTypeM = ptDDL;
+    else if (type == wxT("privileges"))
+        pageTypeM = ptPrivileges;
     // add more page types here when needed
     else
         pageTypeM = ptSummary;
