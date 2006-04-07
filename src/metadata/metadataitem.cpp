@@ -51,7 +51,7 @@ using namespace std;
 const wxString MetadataItem::pathSeparator = wxT("/");
 //-----------------------------------------------------------------------------
 MetadataItem::MetadataItem()
-    : Subject(), Element()
+    : Element(), Subject()
 {
     parentM = 0;
     typeM = ntUnknown;
