@@ -72,6 +72,11 @@ protected:
     // readConfigSettings() to get first-time default position and size.
     // The predefined implementation returns -1 for all 4 items.
     virtual const wxRect getDefaultRect() const;
+    // Returns true in default implementation, but allows for descendent
+    // classes to always come up in minimal width or height - just return
+    // false in overridden methods.
+    virtual bool getConfigStoresWidth() const;
+    virtual bool getConfigStoresHeight() const;
 private:
     wxPanel* panel_controls;
 };

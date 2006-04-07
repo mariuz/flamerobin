@@ -128,8 +128,10 @@ void BaseDialog::readConfigSettings()
         if (!itemPrefix.empty())
         {
             wxRect r = getDefaultRect();
-            config().getValue(itemPrefix + Config::pathSeparator + wxT("width"), r.width);
-            config().getValue(itemPrefix + Config::pathSeparator + wxT("height"), r.height);
+            if (getConfigStoresWidth())
+                config().getValue(itemPrefix + Config::pathSeparator + wxT("width"), r.width);
+            if (getConfigStoresHeight())
+                config().getValue(itemPrefix + Config::pathSeparator + wxT("height"), r.height);
             doReadConfigSettings(itemPrefix);
             if (r.width > 0 && r.height > 0)
                 SetSize(r.width, r.height);
@@ -196,5 +198,15 @@ const wxString BaseDialog::getStorageName() const
 const wxRect BaseDialog::getDefaultRect() const
 {
     return wxRect(-1, -1, -1, -1);
+}
+//-----------------------------------------------------------------------------
+bool BaseDialog::getConfigStoresWidth() const
+{
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool BaseDialog::getConfigStoresHeight() const
+{
+    return true;
 }
 //-----------------------------------------------------------------------------

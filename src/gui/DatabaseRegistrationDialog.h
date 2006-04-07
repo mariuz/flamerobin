@@ -70,6 +70,7 @@ private:
     void updateIsDefaultName();
 protected:
     virtual const wxString getName() const;
+    virtual bool getConfigStoresHeight() const;
 public:
     DatabaseRegistrationDialog(wxWindow* parent, const wxString& title,
         bool createDB = false,

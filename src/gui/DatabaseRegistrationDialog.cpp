@@ -150,10 +150,14 @@ void DatabaseRegistrationDialog::createControls()
 //-----------------------------------------------------------------------------
 const wxString DatabaseRegistrationDialog::getName() const
 {
-    if (createM)
-        return wxT("CreateDatabaseDialog");
-    else
-        return wxT("DatabaseRegistrationDialog");
+    // don't use different names here, force minimal height instead
+    // this way it will work for all combinations of control visibility
+    return wxT("DatabaseRegistrationDialog");
+}
+//-----------------------------------------------------------------------------
+bool DatabaseRegistrationDialog::getConfigStoresHeight() const
+{
+    return false;
 }
 //-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::layoutControls()
@@ -180,22 +184,25 @@ void DatabaseRegistrationDialog::layoutControls()
     sizerControls->Add(label_password, wxGBPosition(2, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
     sizerControls->Add(text_ctrl_password, wxGBPosition(2, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
 
-    sizerControls->Add(label_charset, wxGBPosition(3, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-    sizerControls->Add(combobox_charset, wxGBPosition(3, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-    sizerControls->Add(label_role, wxGBPosition(3, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
-    sizerControls->Add(text_ctrl_role, wxGBPosition(3, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    int row = 3;
+    if (!connectAsM)
+    {
+        sizerControls->Add(checkbox_encrypted, wxGBPosition(row, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+        row++;
+    }
+
+    sizerControls->Add(label_charset, wxGBPosition(row, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+    sizerControls->Add(combobox_charset, wxGBPosition(row, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    sizerControls->Add(label_role, wxGBPosition(row, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+    sizerControls->Add(text_ctrl_role, wxGBPosition(row, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    row++;
 
     if (createM)
     {
-        sizerControls->Add(label_pagesize, wxGBPosition(4, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-        sizerControls->Add(choice_pagesize, wxGBPosition(4, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-        sizerControls->Add(label_dialect, wxGBPosition(4, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
-        sizerControls->Add(choice_dialect, wxGBPosition(4, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-    }
-
-    if (!connectAsM)
-    {
-        sizerControls->Add(checkbox_encrypted, wxGBPosition(5, 0), wxGBSpan(1, 4), wxALIGN_CENTER_VERTICAL | wxEXPAND);
+        sizerControls->Add(label_pagesize, wxGBPosition(row, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+        sizerControls->Add(choice_pagesize, wxGBPosition(row, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+        sizerControls->Add(label_dialect, wxGBPosition(row, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+        sizerControls->Add(choice_dialect, wxGBPosition(row, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
     }
 
     sizerControls->AddGrowableCol(1);
