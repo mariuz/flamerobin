@@ -4,7 +4,7 @@
 </head>
 <body>
 <a
- href="fr://page?type=summary&amp;parent_window={%parent_window%}">Summary</a> | <a
+ href="fr://page?type=summary&amp;parent_window={%parent_window%}">Summary</a> | Triggers | <a
  href="fr://privileges?object_address={%object_address%}">Privileges</a> | <a
  href="fr://page?type=dependencies&amp;parent_window={%parent_window%}">Dependencies</a> | <a
  href="fr://page?type=ddl&amp;parent_window={%parent_window%}">DDL</a>
@@ -14,11 +14,16 @@
 <table cellspacing=1 cellpadding=2 border=0 bgcolor=0 width="98%">
   <tbody>
     <tr bgcolor="navy">
+      <td></td>
       <td nowrap><b><font color=white>Before triggers</font></b></td>
       <td nowrap><b><font color=white>Trigger info</font></b></td>
     </tr>
     {%triggers:befor
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
+      <td valign="top" nowrap>
+          <a href="fr://drop_object?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
+          <a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/view.png"></a>
+      </td>
       <td nowrap valign="top"><a
           href="fr://properties?object_type=TRIGGER&amp;object_name={%object_name%}&amp;parent_window={%parent_window%}">{%object_name%}</a></td>
       <td valign="top">{%trigger_info%}</td>
@@ -29,11 +34,16 @@
 <table cellspacing=1 cellpadding=2 border=0 bgcolor=0 width="98%">
   <tbody>
     <tr bgcolor="navy">
+      <td></td>
       <td nowrap><b><font color=white>After triggers</font></b></td>
       <td nowrap><b><font color=white>Trigger info</font></b></td>
     </tr>
     {%triggers:after
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
+      <td valign="top" nowrap>
+          <a href="fr://drop_object?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
+          <a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/view.png"></a>
+      </td>
       <td nowrap valign="top"><a
           href="fr://properties?object_type=TRIGGER&amp;object_name={%object_name%}&amp;parent_window={%parent_window%}">{%object_name%}</a></td>
       <td valign="top">{%trigger_info%}</td>
