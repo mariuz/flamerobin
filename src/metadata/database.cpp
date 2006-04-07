@@ -192,7 +192,7 @@ Database::Database(const Database& rhs)
     functionsM(rhs.functionsM), generatorsM(rhs.generatorsM),
     proceduresM(rhs.proceduresM), rolesM(rhs.rolesM), tablesM(rhs.tablesM),
     triggersM(rhs.triggersM), viewsM(rhs.viewsM), collationsM(rhs.collationsM),
-    idM(rhs.idM)
+    idM(rhs.idM), storeEncryptedPasswordM(rhs.storeEncryptedPasswordM)
 {
     if (rhs.connectionCredentialsM)
         connectionCredentialsM = new Credentials(*connectionCredentialsM);
