@@ -125,7 +125,7 @@ wxString Privilege::getSql() const
                 for (std::vector<wxString>::const_iterator i =
                     refColumnsM.begin(); i != refColumnsM.end(); ++i)
                 {
-                    if (i != updateColumnsM.begin())
+                    if (i != refColumnsM.begin())
                         ret += wxT(",");
                     Identifier id(*i);
                     ret += id.getQuoted();
