@@ -1,0 +1,62 @@
+<html>
+<head>
+  <title>Privileges</title>
+</head>
+<body>
+<a
+ href="fr://page?type=summary&amp;parent_window={%parent_window%}">Fields</a> | <a
+ href="fr://page?type=constraints&amp;parent_window={%parent_window%}">Constraints</a> | <a
+ href="fr://page?type=triggers&amp;parent_window={%parent_window%}">Triggers</a> | <a
+ href="fr://page?type=indices&amp;parent_window={%parent_window%}">Indices</a> |
+ Privileges | <a
+ href="fr://page?type=dependencies&amp;parent_window={%parent_window%}">Dependencies</a> | <a
+ href="fr://page?type=ddl&amp;parent_window={%parent_window%}">DDL</a>
+<br><br>
+<font size=+2>Privileges on {%object_name%}</font>
+<br><br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=0>
+  <tbody>
+    <tr bgcolor="navy">
+      <td colspan="2" rowspan="1"><b><font color="white">Grantee</font></b></td>
+      <td><b><font color="white">Select</font></b></td>
+      <td><b><font color="white">Insert</font></b></td>
+      <td><b><font color="white">Update</font></b></td>
+      <td><b><font color="white">Delete</font></b></td>
+      <td><b><font color="white">Reference</font></b></td>
+    </tr>
+    {%relation_privileges:
+    <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
+      <td nowrap valign="top">{%grantee_type%}</td>
+      <td nowrap valign="top">{%privilege:SELECT%}</td>
+      <td nowrap valign="top">{%privilege:INSERT%}</td>
+      <td nowrap valign="top">{%privilege:UPDATE%}</td>
+      <td nowrap valign="top">{%privilege:DELETE%}</td>
+      <td nowrap valign="top">{%privilege:REFERENCES%}</td>
+    </tr>%}
+  </tbody>
+</table>
+<br>
+<br>
+<a href="fr://manage_privileges?parent_window={%parent_window%}&amp;object_address={%object_address%}">Grant
+and revoke privileges</a>
+<br>
+<br>
+<table border="0" cellpadding="3" cellspacing="1" bgcolor="#CCCCCC">
+    <tr>
+        <td colspan="2" bgcolor="#CCCCFF"><B>Legend</B></td>
+    </tr>
+    <tr bgcolor="#DDDDDD">
+        <td><img src="{%fr_home%}/html-templates/redx.png"></td>
+        <td>privilege not granted</td>
+    </tr>
+    <tr bgcolor="#DDDDDD">
+        <td><img src="{%fr_home%}/html-templates/ok.png"></td>
+        <td>privilege granted</td>
+    </tr>
+    <tr bgcolor="#DDDDDD">
+        <td><img src="{%fr_home%}/html-templates/ok2.png"></td>
+        <td>privilege granted with grant option</td>
+    </tr>
+</table>
+</body>
+</html>
