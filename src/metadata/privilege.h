@@ -41,10 +41,13 @@ public:
         const wxString& fieldName);
 };
 //-----------------------------------------------------------------------------
-class Privilege
+// Privilege class only descends from MetadataItem to be able to be used in
+// MetadataItemPropertiesFrame::processHtmlCode
+// Perhaps it could be changed to have a common class for that
+class Privilege: public MetadataItem
 {
 private:
-    MetadataItem* parentM;
+    MetadataItem* parentObjectM;
     int granteeTypeM;
     wxString granteeM;
 

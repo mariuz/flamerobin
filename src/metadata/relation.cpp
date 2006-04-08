@@ -158,7 +158,7 @@ bool Relation::loadColumns()
     return false;
 }
 //-----------------------------------------------------------------------------
-const std::vector<Privilege>* Relation::getPrivileges()
+std::vector<Privilege>* Relation::getPrivileges()
 {
     // load privileges from database and return the pointer to collection
     Database *d = getDatabase();

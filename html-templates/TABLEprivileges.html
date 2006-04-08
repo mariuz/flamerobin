@@ -17,7 +17,7 @@
 <table cellspacing=1 cellpadding=2 border=0 bgcolor=0>
   <tbody>
     <tr bgcolor="navy">
-      <td colspan="2" rowspan="1"><b><font color="white">Grantee</font></b></td>
+      <td><b><font color="white">Grantee</font></b></td>
       <td><b><font color="white">Select</font></b></td>
       <td><b><font color="white">Insert</font></b></td>
       <td><b><font color="white">Update</font></b></td>
@@ -26,7 +26,7 @@
     </tr>
     {%relation_privileges:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
-      <td nowrap valign="top">{%grantee_type%}</td>
+      <td nowrap valign="top">{%grantee_name%}</td>
       <td nowrap valign="top">{%privilege:SELECT%}</td>
       <td nowrap valign="top">{%privilege:INSERT%}</td>
       <td nowrap valign="top">{%privilege:UPDATE%}</td>

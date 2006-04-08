@@ -52,7 +52,8 @@ PrivilegeItem::PrivilegeItem(const wxString& grantorName,
 //-----------------------------------------------------------------------------
 Privilege::Privilege(MetadataItem *parent, const wxString& grantee,
     int granteeType)
-    :parentM(parent), granteeM(grantee), granteeTypeM(granteeType)
+    :parentObjectM(parent), granteeM(grantee), granteeTypeM(granteeType),
+     MetadataItem()
 {
 }
 //-----------------------------------------------------------------------------
@@ -142,9 +143,9 @@ wxString Privilege::getSql(bool withGrantOption) const
         return wxEmptyString;
 
     ret = wxT("GRANT ") + ret + wxT("\n ON ");
-    if (dynamic_cast<Procedure *>(parentM))
+    if (dynamic_cast<Procedure *>(parentObjectM))
         ret += wxT("PROCEDURE ");
-    ret += parentM->getQuotedName()
+    ret += parentObjectM->getQuotedName()
         + wxT(" TO ") + granteeTypeToString(granteeTypeM) + wxT(" ")
         + granteeM;
 
@@ -156,7 +157,7 @@ wxString Privilege::getSql(bool withGrantOption) const
 //-----------------------------------------------------------------------------
 wxString Privilege::getSql() const
 {
-    Role *r = dynamic_cast<Role *>(parentM);
+    Role *r = dynamic_cast<Role *>(parentObjectM);
     if (!r)
         return getSql(true) + getSql(false);
 

@@ -351,6 +351,27 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
             processHtmlCode(htmlpage, suffix, &(*it));
     }
 
+    else if (cmd == wxT("relation_privileges"))
+    {
+        Relation* r = dynamic_cast<Relation*>(object);
+        if (!r)
+            return;
+        std::vector<Privilege>* p = r->getPrivileges();
+        if (!p)
+            return;
+        for (std::vector<Privilege>::iterator it = p->begin();
+            it != p->end(); ++it)
+            processHtmlCode(htmlpage, suffix, &(*it));
+    }
+
+    else if (cmd == wxT("grantee_name"))
+    {
+        Privilege* p = dynamic_cast<Privilege*>(object);
+        if (!p)
+            return;
+        htmlpage += escapeHtmlChars(p->getGrantee());
+    }
+
     else if (cmd == wxT("check_source"))
     {
         CheckConstraint* c = dynamic_cast<CheckConstraint*>(object);

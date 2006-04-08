@@ -59,7 +59,7 @@ public:
     MetadataCollection<Column>::const_iterator begin() const;
     MetadataCollection<Column>::const_iterator end() const;
 
-    const std::vector<Privilege>* getPrivileges();
+    std::vector<Privilege>* getPrivileges();
     bool getChildren(std::vector<MetadataItem *>& temp);
     bool getTriggers(std::vector<Trigger *>& list,
         Trigger::firingTimeType beforeOrAfter);
