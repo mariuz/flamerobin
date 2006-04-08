@@ -384,17 +384,34 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         p->getPrivileges(suffix, list);
         if (list.size())
         {
+            bool brnext = false;
             for (std::vector<PrivilegeItem>::iterator it = list.begin(); it !=
                 list.end(); ++it)
             {
+                if (brnext)
+                {
+                    htmlpage += wxT("<br>");
+                    brnext = false;
+                }
+
+                // wxHTML doesn't support TITLE or ALT property of IMG tag so
+                // we show grantor like this (display in status bar)
+                htmlpage += wxT("<a href=\"Granted by ") + (*it).grantor
+                    + wxT("\">");
+
                 htmlpage += wxT("<img src=\"") +
                     config().getHtmlTemplatesPath();
                 if ((*it).grantOption)
                     htmlpage += wxT("ok2.png\"");
                 else
                     htmlpage += wxT("ok.png\"");
-                htmlpage += wxT(" TITLE=\"Granted by ") + (*it).grantor +
-                    wxT("\">");
+                // wxHTML doesn't seem to support this
+                htmlpage += wxT(" TITLE=\"Granted by ") + (*it).grantor
+                    + wxT("\">");
+
+                // see wxHTML comment above
+                htmlpage += wxT("</a>");
+
                 if ((*it).columns.size())
                 {
                     htmlpage += wxT(" <font size=-1>");
@@ -405,7 +422,8 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
                             htmlpage += wxT(",");
                         htmlpage += (*i);
                     }
-                    htmlpage += wxT("</font><br>");
+                    htmlpage += wxT("</font>");
+                    brnext = true;
                 }
             }
         }
