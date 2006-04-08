@@ -26,9 +26,20 @@
 #ifndef FR_PRIVILEGE_H
 #define FR_PRIVILEGE_H
 
+#include <map>
 #include <vector>
 
 class MetadataItem;
+//-----------------------------------------------------------------------------
+class PrivilegeItem
+{
+public:
+    wxString grantor;
+    bool grantOption;
+    std::vector<wxString> columns;
+    PrivilegeItem(const wxString& grantorName, bool withGrantOption,
+        const wxString& fieldName);
+};
 //-----------------------------------------------------------------------------
 class Privilege
 {
@@ -36,26 +47,22 @@ private:
     MetadataItem* parentM;
     int granteeTypeM;
     wxString granteeM;
-    wxString grantorM;
-    bool withGrantOptionM;
-    std::vector<wxString> privilegesM;      // INS, UPD, DEL, REF, EXECUTE, ALL
-    std::vector<wxString> updateColumnsM;
-    std::vector<wxString> refColumnsM;
+
+    // type (SEL, INS, ...), privilege
+    typedef std::multimap<wxString, PrivilegeItem> PMap;
+    PMap privilegesM;
+
+    wxString getSql(bool withGrantOption) const;
 
 public:
-    Privilege(MetadataItem *parent, const wxString& grantee, int granteeType,
-        const wxString& grantor, bool withGrantOption);
-    void addPrivilege(char privilege);
-    void addUpdateColumn(const wxString& column);
-    void addReferencesColumn(const wxString& column);
-    wxString getSql() const;
+    Privilege(MetadataItem *parent, const wxString& grantee, int granteeType);
+    void addPrivilege(char privilege, const wxString& grantor,
+        bool withGrantOption, const wxString& field = wxEmptyString);
 
+    wxString getSql() const;
     wxString getGrantee() const;
-    wxString getGrantor() const;
-    bool getGrantOption() const;
-    void getPrivileges(std::vector<wxString>& list) const;
-    void getUpdateColumns(std::vector<wxString>& list) const;
-    void getReferenceColumns(std::vector<wxString>& list) const;
+    void getPrivileges(const wxString& type,
+        std::vector<PrivilegeItem>& list) const;
 };
 //-----------------------------------------------------------------------------
 #endif

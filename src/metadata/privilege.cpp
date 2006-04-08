@@ -42,14 +42,22 @@
 
 #include "privilege.h"
 //-----------------------------------------------------------------------------
+PrivilegeItem::PrivilegeItem(const wxString& grantorName,
+    bool withGrantOption, const wxString& fieldName)
+    :grantor(grantorName), grantOption(withGrantOption)
+{
+    if (!fieldName.IsEmpty())
+        columns.push_back(fieldName);
+}
+//-----------------------------------------------------------------------------
 Privilege::Privilege(MetadataItem *parent, const wxString& grantee,
-    int granteeType, const wxString& grantor, bool withGrantOption)
-    :parentM(parent), granteeM(grantee), grantorM(grantor),
-     granteeTypeM(granteeType), withGrantOptionM(withGrantOption)
+    int granteeType)
+    :parentM(parent), granteeM(grantee), granteeTypeM(granteeType)
 {
 }
 //-----------------------------------------------------------------------------
-void Privilege::addPrivilege(char privilege)
+void Privilege::addPrivilege(char privilege, const wxString& grantor,
+    bool withGrantOption, const wxString& field)
 {
     wxString p;
     switch (privilege)
@@ -65,19 +73,29 @@ void Privilege::addPrivilege(char privilege)
             return;
     };
 
-    if (privilegesM.end() ==
-        std::find(privilegesM.begin(), privilegesM.end(), p))
-        privilegesM.push_back(p);
-}
-//-----------------------------------------------------------------------------
-void Privilege::addUpdateColumn(const wxString& column)
-{
-    updateColumnsM.push_back(column);
-}
-//-----------------------------------------------------------------------------
-void Privilege::addReferencesColumn(const wxString& column)
-{
-    refColumnsM.push_back(column);
+    // iterate all of this type
+    PMap::iterator it;
+    for (it = privilegesM.lower_bound(p);
+        it != privilegesM.upper_bound(p); ++it)
+    {
+        if ((*it).second.grantor == grantor &&
+            (*it).second.grantOption == withGrantOption)    // got it
+        {
+            std::vector<wxString> *cols = 0;
+            if (p == wxT("UPDATE") || p == wxT("REFERENCES"))
+                cols = &((*it).second.columns);
+            if (!field.IsEmpty() && cols && cols->end() ==
+                std::find(cols->begin(), cols->end(), field))
+            {
+                cols->push_back(field);
+            }
+            return;
+        }
+    }
+
+    // not found, so add it
+    PrivilegeItem pi(grantor, withGrantOption, field);
+    privilegesM.insert(std::pair<wxString,PrivilegeItem>(p,pi));
 }
 //-----------------------------------------------------------------------------
 wxString granteeTypeToString(int type)
@@ -93,74 +111,66 @@ wxString granteeTypeToString(int type)
     return wxEmptyString;
 }
 //-----------------------------------------------------------------------------
-wxString Privilege::getSql() const
+wxString Privilege::getSql(bool withGrantOption) const
 {
     wxString ret;
-    Relation *r = dynamic_cast<Relation *>(parentM);
-    if (r)
+    for (PMap::const_iterator c = privilegesM.begin();
+        c != privilegesM.end(); ++c)
     {
-        ret = wxT("GRANT ");
-        for (std::vector<wxString>::const_iterator c = privilegesM.begin();
-            c != privilegesM.end(); ++c)
+        if ((*c).second.grantOption != withGrantOption)
+            continue;
+        if (!ret.IsEmpty())
+            ret += wxT(", ");
+        ret += (*c).first;
+        const std::vector<wxString>& cols = (*c).second.columns;
+        if (cols.size())
         {
-            if (c != privilegesM.begin())
-                ret += wxT(",");
-            ret += (*c);
-            if ((*c) == wxT("UPDATE") && updateColumnsM.size())
+            ret += wxT("(");
+            for (std::vector<wxString>::const_iterator ci = cols.begin();
+                ci != cols.end(); ++ci)
             {
-                ret += wxT("(");
-                for (std::vector<wxString>::const_iterator i =
-                    updateColumnsM.begin(); i != updateColumnsM.end(); ++i)
-                {
-                    if (i != updateColumnsM.begin())
-                        ret += wxT(",");
-                    Identifier id(*i);
-                    ret += id.getQuoted();
-                }
-                ret += wxT(")");
+                if (ci != cols.begin())
+                    ret += wxT(",");
+                Identifier id(*ci);
+                ret += id.getQuoted();
             }
-            if ((*c) == wxT("REFERENCES") && refColumnsM.size())
-            {
-                ret += wxT("(");
-                for (std::vector<wxString>::const_iterator i =
-                    refColumnsM.begin(); i != refColumnsM.end(); ++i)
-                {
-                    if (i != refColumnsM.begin())
-                        ret += wxT(",");
-                    Identifier id(*i);
-                    ret += id.getQuoted();
-                }
-                ret += wxT(")");
-            }
+            ret += wxT(")");
         }
-        ret += wxT(" ON ") + r->getQuotedName() + wxT("\n    TO ")
-            + granteeTypeToString(granteeTypeM) + wxT(" ") + granteeM;
-        if (withGrantOptionM)
+    }
+
+    if (ret.IsEmpty())          // no privileges found
+        return wxEmptyString;
+
+    ret = wxT("GRANT ") + ret + wxT("\n ON ");
+    if (dynamic_cast<Procedure *>(parentM))
+        ret += wxT("PROCEDURE ");
+    ret += parentM->getQuotedName()
+        + wxT(" TO ") + granteeTypeToString(granteeTypeM) + wxT(" ")
+        + granteeM;
+
+    if (withGrantOption)
+        ret += wxT(" WITH GRANT OPTION");
+    ret += wxT(";\n");
+    return ret;
+}
+//-----------------------------------------------------------------------------
+wxString Privilege::getSql() const
+{
+    Role *r = dynamic_cast<Role *>(parentM);
+    if (!r)
+        return getSql(true) + getSql(false);
+
+    wxString ret = wxT("GRANT ") + r->getQuotedName() + wxT(" TO ") + granteeM;
+    for (PMap::const_iterator c = privilegesM.begin();
+        c != privilegesM.end(); ++c)
+    {
+        if ((*c).second.grantOption)
+        {
             ret += wxT(" WITH GRANT OPTION");
-    }
-    else
-    {
-        Procedure *p = dynamic_cast<Procedure *>(parentM);
-        if (p)
-        {
-            if (privilegesM.end() != std::find(privilegesM.begin(),
-                privilegesM.end(), wxT("EXECUTE")))
-            {
-                ret += wxT("GRANT EXECUTE ON PROCEDURE ") +
-                    p->getQuotedName() + wxT(" TO ") +
-                    granteeTypeToString(granteeTypeM) + wxT(" ") + granteeM;
-            }
-        }
-        else
-        {
-            Role *r = dynamic_cast<Role *>(parentM);
-            if (r)
-            {
-                ret = wxT("GRANT ") + r->getQuotedName() + wxT(" TO ") +
-                    granteeM;
-            }
+            break;
         }
     }
+    ret += wxT(";\n");
     return ret;
 }
 //-----------------------------------------------------------------------------
@@ -169,31 +179,17 @@ wxString Privilege::getGrantee() const
     wxString gt = granteeTypeToString(granteeTypeM);
     if (!gt.IsEmpty())
         gt += wxT(" ");
-    return gt + grantorM;
+    return gt + granteeM;
 }
 //-----------------------------------------------------------------------------
-wxString Privilege::getGrantor() const
+void Privilege::getPrivileges(const wxString& type,
+    std::vector<PrivilegeItem>& list) const
 {
-    return grantorM;
-}
-//-----------------------------------------------------------------------------
-bool Privilege::getGrantOption() const
-{
-    return withGrantOptionM;
-}
-//-----------------------------------------------------------------------------
-void Privilege::getPrivileges(std::vector<wxString>& list) const
-{
-    list.insert(list.begin(), privilegesM.begin(), privilegesM.end());
-}
-//-----------------------------------------------------------------------------
-void Privilege::getUpdateColumns(std::vector<wxString>& list) const
-{
-    list.insert(list.begin(), updateColumnsM.begin(), updateColumnsM.end());
-}
-//-----------------------------------------------------------------------------
-void Privilege::getReferenceColumns(std::vector<wxString>& list) const
-{
-    list.insert(list.begin(), refColumnsM.begin(), refColumnsM.end());
+    PMap::const_iterator it;
+    for (it = privilegesM.lower_bound(type);
+        it != privilegesM.upper_bound(type); ++it)
+    {
+        list.push_back((*it).second);
+    }
 }
 //-----------------------------------------------------------------------------

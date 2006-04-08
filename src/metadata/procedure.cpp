@@ -395,14 +395,14 @@ const std::vector<Privilege>* Procedure::getPrivileges()
             st1->Get(6, field);
             if (!pr || user != lastuser || usertype != lasttype)
             {
-                Privilege p(this, std2wx(user).Strip(), usertype,
-                    std2wx(grantor).Strip(), grantoption == 1);
+                Privilege p(this, std2wx(user).Strip(), usertype);
                 privilegesM.push_back(p);
                 pr = &privilegesM.back();
                 lastuser = user;
                 lasttype = usertype;
             }
-            pr->addPrivilege(privilege[0]);
+            pr->addPrivilege(privilege[0], std2wx(grantor).Strip(),
+                grantoption == 1);
         }
         tr1->Commit();
         return &privilegesM;

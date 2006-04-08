@@ -59,7 +59,7 @@ const std::vector<Privilege>* Role::getPrivileges()
         IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
         st1->Prepare(
             "select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
-            "RDB$GRANT_OPTION, RDB$FIELD_NAME "
+            "RDB$GRANT_OPTION "
             "from RDB$USER_PRIVILEGES "
             "where RDB$RELATION_NAME = ? and rdb$object_type = 13 "
             "order by rdb$user, rdb$user_type, rdb$privilege"
@@ -71,7 +71,7 @@ const std::vector<Privilege>* Role::getPrivileges()
         Privilege *pr = 0;
         while (st1->Fetch())
         {
-            std::string user, grantor, privilege, field;
+            std::string user, grantor, privilege;
             int usertype, grantoption = 0;
             st1->Get(1, user);
             st1->Get(2, usertype);
@@ -79,17 +79,16 @@ const std::vector<Privilege>* Role::getPrivileges()
             st1->Get(4, privilege);
             if (!st1->IsNull(5))
                 st1->Get(5, grantoption);
-            st1->Get(6, field);
             if (!pr || user != lastuser || usertype != lasttype)
             {
-                Privilege p(this, std2wx(user).Strip(), usertype,
-                    std2wx(grantor).Strip(), grantoption == 1);
+                Privilege p(this, std2wx(user).Strip(), usertype);
                 privilegesM.push_back(p);
                 pr = &privilegesM.back();
                 lastuser = user;
                 lasttype = usertype;
             }
-            pr->addPrivilege(privilege[0]);
+            pr->addPrivilege(privilege[0], std2wx(grantor).Strip(),
+                grantoption == 1);
         }
         tr1->Commit();
         return &privilegesM;

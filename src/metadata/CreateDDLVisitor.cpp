@@ -303,7 +303,7 @@ void CreateDDLVisitor::visit(Procedure& p)
         for (std::vector<Privilege>::const_iterator ci = priv->begin();
             ci != priv->end(); ++ci)
         {
-            temp += (*ci).getSql() + wxT(";\n");
+            temp += (*ci).getSql() + wxT("\n");
         }
     }
 
@@ -365,7 +365,7 @@ void CreateDDLVisitor::visit(Role& r)
         for (std::vector<Privilege>::const_iterator ci = priv->begin();
             ci != priv->end(); ++ci)
         {
-            postSqlM += (*ci).getSql() + wxT(";\n");
+            postSqlM += (*ci).getSql() + wxT("\n");
         }
     }
     wxString description = r.getDescription();
@@ -548,7 +548,7 @@ void CreateDDLVisitor::visit(Table& t)
         for (std::vector<Privilege>::const_iterator ci = priv->begin();
             ci != priv->end(); ++ci)
         {
-            postSqlM += (*ci).getSql() + wxT(";\n");
+            postSqlM += (*ci).getSql() + wxT("\n");
         }
     }
 
@@ -613,7 +613,7 @@ void CreateDDLVisitor::visit(View& v)
         for (std::vector<Privilege>::const_iterator ci = priv->begin();
             ci != priv->end(); ++ci)
         {
-            postSqlM += (*ci).getSql() + wxT(";\n");
+            postSqlM += (*ci).getSql() + wxT("\n");
         }
     }
     wxString name(v.getName_());

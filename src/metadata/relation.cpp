@@ -185,7 +185,6 @@ const std::vector<Privilege>* Relation::getPrivileges()
         st1->Execute();
         std::string lastuser;
         int lasttype = -1;
-        int lastgrantoption = 0;
         Privilege *pr = 0;
         while (st1->Fetch())
         {
@@ -198,23 +197,16 @@ const std::vector<Privilege>* Relation::getPrivileges()
             if (!st1->IsNull(5))
                 st1->Get(5, grantoption);
             st1->Get(6, field);
-            if (!pr || user != lastuser || usertype != lasttype ||
-                lastgrantoption != grantoption)
+            if (!pr || user != lastuser || usertype != lasttype)
             {
-                Privilege p(this, std2wx(user).Strip(), usertype,
-                    std2wx(grantor).Strip(), grantoption == 1);
+                Privilege p(this, std2wx(user).Strip(), usertype);
                 privilegesM.push_back(p);
                 pr = &privilegesM.back();
                 lastuser = user;
                 lasttype = usertype;
-                lastgrantoption = grantoption;
             }
-            pr->addPrivilege(privilege[0]);
-            wxString wfield = std2wx(field).Strip();
-            if (privilege[0] == 'U' && !wfield.IsEmpty())
-                pr->addUpdateColumn(wfield);
-            if (privilege[0] == 'R' && !wfield.IsEmpty())
-                pr->addReferencesColumn(wfield);
+            pr->addPrivilege(privilege[0], std2wx(grantor).Strip(),
+                grantoption == 1, std2wx(field).Strip());
         }
         tr1->Commit();
         return &privilegesM;
