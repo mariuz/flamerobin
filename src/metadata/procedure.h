@@ -61,7 +61,7 @@ public:
     bool getSource(wxString& source);
     wxString getAlterSql(bool full = true);
     wxString getDefinition();   // used for calltip in sql editor
-    const std::vector<Privilege>* getPrivileges();
+    std::vector<Privilege>* getPrivileges();
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);

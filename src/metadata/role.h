@@ -39,8 +39,9 @@ protected:
     virtual void loadDescription();
     virtual void saveDescription(wxString description);
 public:
+    Role();
     wxString getRoleOwner();
-    const std::vector<Privilege>* getPrivileges();
+    std::vector<Privilege>* getPrivileges();
     virtual wxString getCreateSqlTemplate() const;
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);

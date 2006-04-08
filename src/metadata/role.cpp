@@ -41,7 +41,13 @@
 #include "MetadataItemVisitor.h"
 #include "role.h"
 //-----------------------------------------------------------------------------
-const std::vector<Privilege>* Role::getPrivileges()
+Role::Role()
+    :MetadataItem()
+{
+    typeM = ntRole;
+}
+//-----------------------------------------------------------------------------
+std::vector<Privilege>* Role::getPrivileges()
 {
     // load privileges from database and return the pointer to collection
     Database *d = getDatabase();

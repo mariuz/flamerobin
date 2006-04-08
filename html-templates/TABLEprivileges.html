@@ -27,11 +27,11 @@
     {%relation_privileges:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
       <td nowrap valign="top">{%grantee_name%}</td>
-      <td nowrap valign="top">{%privilege:SELECT%}</td>
-      <td nowrap valign="top">{%privilege:INSERT%}</td>
-      <td nowrap valign="top">{%privilege:UPDATE%}</td>
-      <td nowrap valign="top">{%privilege:DELETE%}</td>
-      <td nowrap valign="top">{%privilege:REFERENCES%}</td>
+      <td nowrap valign="top" align="center">{%privilege:SELECT%}</td>
+      <td nowrap valign="top" align="center">{%privilege:INSERT%}</td>
+      <td nowrap valign="top" align="center">{%privilege:UPDATE%}</td>
+      <td nowrap valign="top" align="center">{%privilege:DELETE%}</td>
+      <td nowrap valign="top" align="center">{%privilege:REFERENCES%}</td>
     </tr>%}
   </tbody>
 </table>
@@ -46,7 +46,7 @@ and revoke privileges</a>
         <td colspan="2" bgcolor="#CCCCFF"><B>Icons</B></td>
     </tr>
     <tr bgcolor="#DDDDDD">
-        <td><img src="{%fr_home%}/html-templates/redx.png"></td>
+        <td width=10><img src="{%fr_home%}/html-templates/redx.png"></td>
         <td>privilege not granted</td>
     </tr>
     <tr bgcolor="#DDDDDD">
@@ -56,6 +56,9 @@ and revoke privileges</a>
     <tr bgcolor="#DDDDDD">
         <td><img src="{%fr_home%}/html-templates/ok2.png"></td>
         <td>privilege granted with grant option</td>
+    </tr>
+    <tr bgcolor="silver">
+        <td colspan=2>Hover over icons to see who granted the privileges</td>
     </tr>
 </table>
 </body>

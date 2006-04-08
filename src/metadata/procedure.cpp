@@ -354,7 +354,7 @@ wxString Procedure::getAlterSql(bool full)
     return sql;
 }
 //-----------------------------------------------------------------------------
-const std::vector<Privilege>* Procedure::getPrivileges()
+std::vector<Privilege>* Procedure::getPrivileges()
 {
     // load privileges from database and return the pointer to collection
     Database *d = getDatabase();

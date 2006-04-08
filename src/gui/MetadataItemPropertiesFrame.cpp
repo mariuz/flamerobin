@@ -372,6 +372,50 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         htmlpage += escapeHtmlChars(p->getGrantee());
     }
 
+    else if (cmd == wxT("privilege"))
+    {
+        Privilege* p = dynamic_cast<Privilege*>(object);
+        if (!p)
+            return;
+        wxString okimage = wxT("<img src=\"") + config().getHtmlTemplatesPath() + wxT("ok.png\">");
+        wxString ok2image = wxT("<img src=\"") + config().getHtmlTemplatesPath() + wxT("ok2.png\">");
+        // see which type
+        std::vector<PrivilegeItem> list;
+        p->getPrivileges(suffix, list);
+        if (list.size())
+        {
+            for (std::vector<PrivilegeItem>::iterator it = list.begin(); it !=
+                list.end(); ++it)
+            {
+                htmlpage += wxT("<img src=\"") +
+                    config().getHtmlTemplatesPath();
+                if ((*it).grantOption)
+                    htmlpage += wxT("ok2.png\"");
+                else
+                    htmlpage += wxT("ok.png\"");
+                htmlpage += wxT(" TITLE=\"Granted by ") + (*it).grantor +
+                    wxT("\">");
+                if ((*it).columns.size())
+                {
+                    htmlpage += wxT(" <font size=-1>");
+                    for (std::vector<wxString>::iterator i =
+                        (*it).columns.begin(); i != (*it).columns.end(); ++i)
+                    {
+                        if (i != (*it).columns.begin())
+                            htmlpage += wxT(",");
+                        htmlpage += (*i);
+                    }
+                    htmlpage += wxT("</font><br>");
+                }
+            }
+        }
+        else
+        {
+            htmlpage += wxT("<img src=\"") + config().getHtmlTemplatesPath()
+                + wxT("redx.png\">");
+        }
+    }
+
     else if (cmd == wxT("check_source"))
     {
         CheckConstraint* c = dynamic_cast<CheckConstraint*>(object);

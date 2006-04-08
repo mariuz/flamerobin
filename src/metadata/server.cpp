@@ -47,6 +47,7 @@
 using namespace std;
 //-----------------------------------------------------------------------------
 Server::Server()
+    :MetadataItem()
 {
     typeM = ntServer;
 
