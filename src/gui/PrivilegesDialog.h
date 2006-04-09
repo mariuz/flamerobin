@@ -37,6 +37,7 @@ class PrivilegesDialog : public wxDialog
 private:
     Database *databaseM;
     void enableRelationCheckboxes(bool enable, bool all);
+    void loadRelationColumns();
 
 protected:
     wxPanel *mainPanel;
@@ -79,6 +80,8 @@ protected:
 public:
     void updateControls();
     void OnSettingChanged(wxCommandEvent& event);
+    void OnButtonAddClick(wxCommandEvent& event);
+    void OnButtonRemoveClick(wxCommandEvent& event);
 
     enum
     {
@@ -94,6 +97,7 @@ public:
         ID_textctrl_user
     };
 
+    wxString getSqlStatements();
     PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         const wxString& title = wxT("Grant and revoke privileges"));
 

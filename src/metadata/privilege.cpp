@@ -169,7 +169,7 @@ wxString Privilege::getSql() const
     {
         if ((*c).second.grantOption)
         {
-            ret += wxT(" WITH GRANT OPTION");
+            ret += wxT(" WITH ADMIN OPTION");
             break;
         }
     }

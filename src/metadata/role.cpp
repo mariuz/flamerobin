@@ -96,7 +96,7 @@ std::vector<Privilege>* Role::getPrivileges()
                 lasttype = usertype;
             }
             pr->addPrivilege(privilege[0], std2wx(grantor).Strip(),
-                grantoption == 1);
+                grantoption != 0);  // ADMIN OPTION = 2
         }
         tr1->Commit();
         return &privilegesM;

@@ -40,7 +40,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "metadata/metadataitem.h"
 #include "metadata/trigger.h"
 #include "urihandler.h"
-
+#include "ExecuteSqlFrame.h"
 #include "PrivilegesDialog.h"
 
 //-----------------------------------------------------------------------------
@@ -98,6 +98,8 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         for (MetadataCollection<Trigger>::iterator it = tc->begin(); it != tc->end(); ++it)
             choices.Add((*it).getName_());
         choice_trigger = new wxChoice(granteePanel, ID_choice, wxDefaultPosition, wxDefaultSize, choices);
+        if (!choices.IsEmpty())
+            choice_trigger->SetSelection(0);
     }
     choice_trigger->Enable(false);
 
@@ -111,6 +113,8 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         for (MetadataCollection<Procedure>::iterator it = tc->begin(); it != tc->end(); ++it)
             choices.Add((*it).getName_());
         choice_procedure = new wxChoice(granteePanel, ID_choice, wxDefaultPosition, wxDefaultSize, choices);
+        if (!choices.IsEmpty())
+            choice_procedure->SetSelection(0);
     }
     choice_procedure->Enable(false);
 
@@ -124,6 +128,8 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         for (MetadataCollection<View>::iterator it = tc->begin(); it != tc->end(); ++it)
             choices.Add((*it).getName_());
         choice_view = new wxChoice(granteePanel, ID_choice, wxDefaultPosition, wxDefaultSize, choices);
+        if (!choices.IsEmpty())
+            choice_view->SetSelection(0);
     }
     choice_view->Enable(false);
 
@@ -167,22 +173,32 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     relationPrivilegesSizer->Add(relPrivLeftSizer, 0, wxEXPAND, 0);
     wxBoxSizer *relPrivRightSizer;
     relPrivRightSizer = new wxBoxSizer(wxVERTICAL);
+
     {
         wxArrayString choices;
         MetadataCollection<Table>* tt = databaseM->getCollection<Table>();
+        size_t relation_to_select = 0;
         for (MetadataCollection<Table>::iterator it = tt->begin(); it != tt->end(); ++it)
+        {
+            if (dynamic_cast<Table *>(object) == &(*it))
+                relation_to_select = choices.GetCount();
             choices.Add((*it).getName_());
+        }
         MetadataCollection<View>* tv = databaseM->getCollection<View>();
         for (MetadataCollection<View>::iterator it = tv->begin(); it != tv->end(); ++it)
+        {
+            if (dynamic_cast<View *>(object) == &(*it))
+                relation_to_select = choices.GetCount();
             choices.Add((*it).getName_());
+        }
         choice_relations = new wxChoice(privilegesPanel, ID_choice, wxDefaultPosition, wxDefaultSize, choices);
+        if (!choices.IsEmpty())
+            choice_relations->SetSelection(relation_to_select);
     }
     choice_relations->Enable(false);
-
     relPrivRightSizer->Add(choice_relations, 0, wxALL|wxEXPAND, 5);
     listbox_columns = new wxListBox(privilegesPanel, ID_listbox,
-        wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_MULTIPLE);
-
+        wxDefaultPosition, wxDefaultSize, 0, 0, wxLB_MULTIPLE);
     relPrivRightSizer->Add(listbox_columns, 1, wxALL|wxEXPAND, 5);
     relationPrivilegesSizer->Add(relPrivRightSizer, 1, wxEXPAND, 5);
     privilegesSizer->Add(relationPrivilegesSizer, 0, wxEXPAND, 0);
@@ -196,9 +212,16 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     {
         MetadataCollection<Procedure>* tc = databaseM->getCollection<Procedure>();
         wxArrayString choices;
+        size_t to_select = 0;
         for (MetadataCollection<Procedure>::iterator it = tc->begin(); it != tc->end(); ++it)
+        {
+            if (dynamic_cast<Procedure *>(object) == &(*it))
+                to_select = choices.GetCount();
             choices.Add((*it).getName_());
+        }
         choice_execute = new wxChoice(privilegesPanel, ID_choice, wxDefaultPosition, wxDefaultSize, choices);
+        if (!choices.IsEmpty())
+            choice_execute->SetSelection(to_select);
     }
     choice_execute->Enable(false);
 
@@ -209,9 +232,16 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     {
         MetadataCollection<Role>* tc = databaseM->getCollection<Role>();
         wxArrayString choices;
+        size_t to_select = 0;
         for (MetadataCollection<Role>::iterator it = tc->begin(); it != tc->end(); ++it)
+        {
+            if (dynamic_cast<Role *>(object) == &(*it))
+                to_select = choices.GetCount();
             choices.Add((*it).getName_());
+        }
         choice_memberof = new wxChoice(privilegesPanel, ID_choice, wxDefaultPosition, wxDefaultSize, choices);
+        if (!choices.IsEmpty())
+            choice_memberof->SetSelection(to_select);
     }
     choice_memberof->Enable(false);
 
@@ -226,7 +256,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
 
     previewSqlSizer->Add(label_sql, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     textbox_current_sql = new wxTextCtrl(mainPanel, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
-    textbox_current_sql->SetBackgroundColour(wxColour(192,192,192));
+    textbox_current_sql->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
     textbox_current_sql->Enable(false);
 
     previewSqlSizer->Add(textbox_current_sql, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5);
@@ -240,7 +270,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     label_statements = new wxStaticText(mainPanel, wxID_ANY, _("List of SQL statements to execute"), wxDefaultPosition, wxDefaultSize, 0);
 
     innerSizer->Add(label_statements, 0, wxALIGN_BOTTOM|wxTOP|wxLEFT|wxEXPAND, 10);
-    listbox_statements = new wxListBox(mainPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0);
+    listbox_statements = new wxListBox(mainPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, 0, 0);
 
     innerSizer->Add(listbox_statements, 1, wxEXPAND|wxRIGHT|wxLEFT, 10);
     wxBoxSizer *sizer_buttons;
@@ -274,6 +304,26 @@ void PrivilegesDialog::enableRelationCheckboxes(bool enable, bool all)
     checkbox_references->Enable(enable);
 }
 //-----------------------------------------------------------------------------
+void PrivilegesDialog::loadRelationColumns()
+{
+    static wxString lastRelation = wxT("-");
+    if (lastRelation != choice_relations->GetStringSelection())
+    {
+        lastRelation = choice_relations->GetStringSelection();
+        listbox_columns->Clear();
+        Relation *r = databaseM->findRelation(Identifier(lastRelation));
+        if (r)
+        {
+            r->checkAndLoadColumns();
+            for (MetadataCollection<Column>::const_iterator ci = r->begin();
+                ci != r->end(); ++ci)
+            {
+                listbox_columns->Append((*ci).getName_());
+            }
+        }
+    }
+}
+//-----------------------------------------------------------------------------
 void PrivilegesDialog::updateControls()
 {
     // enable left-size choices
@@ -293,15 +343,17 @@ void PrivilegesDialog::updateControls()
         checkbox_all->IsChecked()    ||  checkbox_select->IsChecked() ||
         checkbox_insert->IsChecked() ||  checkbox_delete->IsChecked());
     bool isExecuteChecked = checkbox_execute->IsChecked();
-    bool isMemberOfChecked = checkbox_memberof->IsChecked();
+    bool isRole = checkbox_memberof->IsChecked();
 
     choice_relations->Enable(isRelationChecked);
     listbox_columns->Enable(isUpdRefChecked);
-    checkbox_execute->Enable(!(isRelationChecked||isMemberOfChecked));
+    if (isUpdRefChecked)
+        loadRelationColumns();
+    checkbox_execute->Enable(!(isRelationChecked||isRole));
     checkbox_memberof->Enable(!(isRelationChecked||isExecuteChecked));
-    enableRelationCheckboxes(!(isExecuteChecked||isMemberOfChecked), true);
+    enableRelationCheckboxes(!(isExecuteChecked||isRole), true);
     choice_execute->Enable(isExecuteChecked);
-    choice_memberof->Enable(isMemberOfChecked);
+    choice_memberof->Enable(isRole);
 
     // if ALL is selected, turn the rest off...
     if (checkbox_all->IsChecked())
@@ -313,42 +365,128 @@ void PrivilegesDialog::updateControls()
     if (checkbox_memberof->IsEnabled() && !radiobtn_user->GetValue())
         checkbox_memberof->Enable(false);
 
-    // if selected table/view has changed -> reload column list
-    static wxString lastRelation = choice_relations->GetStringSelection();
-    if (choice_relations->IsEnabled() &&
-        lastRelation != choice_relations->GetStringSelection())
+    /* CONSTRUCT SQL STATEMENT.   Various combinations covered:
+    GRANT            ... ON table/view     TO   grantee [WGO]
+    REVOKE [GOF]     ... ON table/view     FROM grantee
+    GRANT            ... ON PROCEDURE proc TO   grantee [WGO]
+    REVOKE [GOF] EXECUTE ON PROCEDURE proc FROM grantee
+    GRANT        rolename                  TO   grantee [WAO]
+    REVOKE [AOF] rolename                  FROM grantee
+    */
+
+    bool hasSomething = isRelationChecked || isExecuteChecked || isRole;
+    button_add->Enable(hasSomething);
+    if (!hasSomething)
     {
-        listbox_columns->Clear();
-        lastRelation = choice_relations->GetStringSelection();
-        Relation *r = databaseM->findRelation(Identifier(lastRelation));
-        if (r)
-        {
-            r->checkAndLoadColumns();
-            for (MetadataCollection<Column>::const_iterator ci = r->begin();
-                ci != r->end(); ++ci)
-            {
-                listbox_columns->Append((*ci).getName_());
-            }
-        }
+        textbox_current_sql->SetValue(wxEmptyString);
+        return;
     }
 
-    // construct SQL statement
+    wxString grantee;
+    if (radiobtn_user->GetValue())
+        grantee = textctrl_user->GetValue();
+    else if (radiobtn_trigger->GetValue())
+        grantee = wxT("TRIGGER ") + choice_trigger->GetStringSelection();
+    else if (radiobtn_procedure->GetValue())
+        grantee = wxT("PROCEDURE ") + choice_procedure->GetStringSelection();
+    else if (radiobtn_view->GetValue())
+        grantee = wxT("VIEW ") + choice_view->GetStringSelection();
+    bool grant = radiobox_action->GetSelection() == 0;
+    bool grantoption = checkbox_grant_option->IsChecked();
+    wxString sql(grant ? wxT("GRANT ") : wxT("REVOKE "));
+    if (!grant && grantoption)
+        sql << (isRole ? wxT("ADMIN") : wxT("GRANT")) << wxT(" OPTION FOR ");
+    if (isRole)
+        sql << choice_memberof->GetStringSelection();
+    else if (isRelationChecked)
+    {
+        wxString priv;
+        if (checkbox_all->IsChecked())
+            priv = wxT("ALL");
+        else
+        {
+            wxCheckBox* boxes[5] = { checkbox_select, checkbox_insert,
+                checkbox_update, checkbox_delete, checkbox_references };
+            for (int i = 0; i < sizeof(boxes)/sizeof(wxCheckBox *); i++)
+            {
+                if (boxes[i]->IsChecked())
+                {
+                    if (!priv.IsEmpty())
+                        priv += wxT(",");
+                    priv += boxes[i]->GetLabel().Upper();
+                    wxArrayInt ai;
+                    listbox_columns->GetSelections(ai);
+                    if ((boxes[i] == checkbox_update || boxes[i] ==
+                        checkbox_references) && !ai.IsEmpty())
+                    {
+                        priv += wxT("(");
+                        for (size_t i = 0; i < ai.GetCount(); i++)
+                        {
+                            if (i != 0)
+                                priv += wxT(",");
+                            priv += listbox_columns->GetString(ai.Item(i));
+                        }
+                        priv += wxT(")");
+                    }
+                }
+            }
+        }
+        sql << priv << wxT(" ON ") << choice_relations->GetStringSelection();
+    }
+    else if (isExecuteChecked)
+    {
+        sql << wxT("EXECUTE ON PROCEDURE ")
+            << choice_execute->GetStringSelection();
+    }
+
+    sql << (grant ? wxT(" TO ") : wxT(" FROM ")) << grantee;
+    if (grant && grantoption)
+    {
+        sql << wxT(" WITH ") << (isRole ? wxT("ADMIN") : wxT("GRANT"))
+            << wxT(" OPTION");
+    }
+
+    textbox_current_sql->SetValue(sql);
+}
+//-----------------------------------------------------------------------------
+wxString PrivilegesDialog::getSqlStatements()
+{
+    wxString stmt;
+    for (size_t i = 0; i<listbox_statements->GetCount(); i++)
+        stmt << listbox_statements->GetString(i) << wxT(";\n");
+    return stmt;
 }
 //-----------------------------------------------------------------------------
 //! event handling
 BEGIN_EVENT_TABLE(PrivilegesDialog, wxDialog)
-//    EVT_BUTTON(FieldPropertiesDialog::ID_button_edit_domain,
-//        FieldPropertiesDialog::OnButtonEditDomainClick)
+    EVT_BUTTON(PrivilegesDialog::ID_button_add,
+        PrivilegesDialog::OnButtonAddClick)
+    EVT_BUTTON(PrivilegesDialog::ID_button_remove,
+        PrivilegesDialog::OnButtonRemoveClick)
     EVT_CHECKBOX(PrivilegesDialog::ID_checkbox,
         PrivilegesDialog::OnSettingChanged)
     EVT_CHOICE(PrivilegesDialog::ID_choice, PrivilegesDialog::OnSettingChanged)
+    EVT_LISTBOX(PrivilegesDialog::ID_listbox,
+        PrivilegesDialog::OnSettingChanged)
     EVT_RADIOBOX(PrivilegesDialog::ID_radiobox_action,
         PrivilegesDialog::OnSettingChanged)
     EVT_RADIOBUTTON(PrivilegesDialog::ID_radiobtn,
         PrivilegesDialog::OnSettingChanged)
-//    EVT_TEXT(FieldPropertiesDialog::ID_textctrl_fieldname,
-//        FieldPropertiesDialog::OnTextFieldnameUpdate)
+    EVT_TEXT(PrivilegesDialog::ID_textctrl_user,
+        PrivilegesDialog::OnSettingChanged)
 END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+void PrivilegesDialog::OnButtonAddClick(wxCommandEvent& WXUNUSED(event))
+{
+    listbox_statements->Append(textbox_current_sql->GetValue());
+}
+//-----------------------------------------------------------------------------
+void PrivilegesDialog::OnButtonRemoveClick(wxCommandEvent& WXUNUSED(event))
+{
+    int sel = listbox_statements->GetSelection();
+    if (sel != wxNOT_FOUND)
+        listbox_statements->Delete(sel);
+}
 //-----------------------------------------------------------------------------
 void PrivilegesDialog::OnSettingChanged(wxCommandEvent& WXUNUSED(event))
 {
@@ -384,20 +522,18 @@ bool ManagePrivilegesHandler::handleURI(URI& uri)
     //       the parent frame over the newly created sql execution frame
     if (pd.ShowModal() == wxID_OK)
     {
-        /*
-        wxString statements(fpd.getStatementsToExecute());
+        wxString statements(pd.getSqlStatements());
         // nothing to be done
         if (!statements.IsEmpty())
         {
             // create ExecuteSqlFrame with option to close at once
             ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1,
-                fpd.getStatementTitle());
-            esf->setDatabase(t->getDatabase());
+                _("Grant and revoke privileges"));
+            esf->setDatabase(m->getDatabase());
             esf->setSql(statements);
-            esf->executeAllStatements(false);   // statement may contain the
-            esf->Show();                        // COMMIT, so let's give user
-        }                                       // a chance to cancel
-        */
+            esf->executeAllStatements(false);
+            esf->Show();
+        }
     }
     return true;
 }
