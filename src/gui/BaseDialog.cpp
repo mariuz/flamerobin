@@ -1,26 +1,28 @@
 /*
-  The contents of this file are subject to the Initial Developer's Public
-  License Version 1.0 (the "License"); you may not use this file except in
-  compliance with the License. You may obtain a copy of the License here:
-  http://www.flamerobin.org/license.html.
+Copyright (c) 2004, 2005, 2006 The FlameRobin Development Team
 
-  Software distributed under the License is distributed on an "AS IS"
-  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-  License for the specific language governing rights and limitations under
-  the License.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
-  The Original Code is FlameRobin (TM).
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
 
-  The Initial Developer of the Original Code is Michael Hieke.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-  Portions created by the original developer
-  are Copyright (C) 2004 Michael Hieke.
-
-  All Rights Reserved.
 
   $Id$
 
-  Contributor(s): Nando Dessena
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -53,7 +55,7 @@ wxPanel* BaseDialog::getControlsPanel()
     return panel_controls;
 }
 //-----------------------------------------------------------------------------
-void BaseDialog::layoutSizers(wxSizer* controls, wxSizer* buttons, 
+void BaseDialog::layoutSizers(wxSizer* controls, wxSizer* buttons,
     bool expandControls)
 {
     wxBoxSizer* sizerVert = new wxBoxSizer(wxVERTICAL);
@@ -62,7 +64,7 @@ void BaseDialog::layoutSizers(wxSizer* controls, wxSizer* buttons,
     {
         sizerVert->Add(controls, expandControls ? 1 : 0, wxEXPAND);
         // make buttons align to bottom of dialog
-        sizerVert->Add(0, styleguide().getDialogMargin(wxBOTTOM), 
+        sizerVert->Add(0, styleguide().getDialogMargin(wxBOTTOM),
             expandControls ? 0 : 1, wxEXPAND);
     }
     sizerVert->Add(buttons, 0, wxEXPAND);

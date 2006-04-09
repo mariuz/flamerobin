@@ -1,26 +1,28 @@
 /*
-  The contents of this file are subject to the Initial Developer's Public
-  License Version 1.0 (the "License"); you may not use this file except in
-  compliance with the License. You may obtain a copy of the License here:
-  http://www.flamerobin.org/license.html.
+Copyright (c) 2004, 2005, 2006 The FlameRobin Development Team
 
-  Software distributed under the License is distributed on an "AS IS"
-  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-  License for the specific language governing rights and limitations under
-  the License.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
-  The Original Code is FlameRobin (TM).
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
 
-  The Initial Developer of the Original Code is Michael Hieke.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-  Portions created by the original developer
-  are Copyright (C) 2006 Michael Hieke.
-
-  All Rights Reserved.
 
   $Id$
 
-  Contributor(s):
 */
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -67,15 +69,15 @@ void CreateIndexDialog::createControls()
     textctrl_name = new wxTextCtrl(getControlsPanel(), ID_textcontrol_name,
         wxEmptyString);
 
-    checkbox_unique = new wxCheckBox(getControlsPanel(), ID_check_unique, 
+    checkbox_unique = new wxCheckBox(getControlsPanel(), ID_check_unique,
         _("Unique index"));
 
     const wxString orderChoices[] = { _("Ascending"), _("Descending") };
-    radiobox_order = new wxRadioBox(getControlsPanel(), ID_radio_order, 
-        _("Index sort order"), wxDefaultPosition, wxDefaultSize, 
+    radiobox_order = new wxRadioBox(getControlsPanel(), ID_radio_order,
+        _("Index sort order"), wxDefaultPosition, wxDefaultSize,
         sizeof(orderChoices) / sizeof(wxString), orderChoices);
 
-    label_columns = new wxStaticText(getControlsPanel(), -1, 
+    label_columns = new wxStaticText(getControlsPanel(), -1,
         _("Select one or more columns for the index:"));;
     listbox_columns = new wxListBox(getControlsPanel(), ID_list_columns,
         wxDefaultPosition, wxDefaultSize, 0, 0, wxLB_MULTIPLE);
@@ -121,7 +123,7 @@ void CreateIndexDialog::setControlsProperties()
     std::vector<Index>* indices = tableM->getIndices();
     while (indexName.IsEmpty())
     {
-        indexName = wxString::Format(wxT("IDX_%s%d"), 
+        indexName = wxString::Format(wxT("IDX_%s%d"),
             tableM->getName_().c_str(), nr++);
         std::vector<Index>::iterator itIdx;
         for (itIdx = indices->begin(); itIdx != indices->end(); ++itIdx)
@@ -177,7 +179,7 @@ const wxString CreateIndexDialog::getStatementsToExecute()
     if (radiobox_order->GetSelection() == 1)
         sql += wxT("DESCENDING ");
     sql += wxT("INDEX ") + Identifier::userString(textctrl_name->GetValue())
-        + wxT(" ON ") + tableM->getQuotedName() + wxT("\n") 
+        + wxT(" ON ") + tableM->getQuotedName() + wxT("\n")
         + wxT("  (") + getSelectedColumnsList() + wxT(");\n");
     return sql;
 }

@@ -1,26 +1,28 @@
 /*
-  The contents of this file are subject to the Initial Developer's Public
-  License Version 1.0 (the "License"); you may not use this file except in
-  compliance with the License. You may obtain a copy of the License here:
-  http://www.flamerobin.org/license.html.
+Copyright (c) 2004, 2005, 2006 The FlameRobin Development Team
 
-  Software distributed under the License is distributed on an "AS IS"
-  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-  License for the specific language governing rights and limitations under
-  the License.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
-  The Original Code is FlameRobin (TM).
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
 
-  The Initial Developer of the Original Code is Michael Hieke.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-  Portions created by the original developer
-  are Copyright (C) 2005 Michael Hieke.
-
-  All Rights Reserved.
 
   $Id$
 
-  Contributor(s):
 */
 
 #ifndef FR_SQLTOKENIZER_H
@@ -29,10 +31,10 @@
 #include <wx/wx.h>
 //-----------------------------------------------------------------------------
 enum SqlTokenType {
-    /* 
+    /*
      * these are token types used by SqlTokenizer class
      */
-    tkEOF, tkUNKNOWN, tkWHITESPACE, tkCOMMENT, 
+    tkEOF, tkUNKNOWN, tkWHITESPACE, tkCOMMENT,
     tkTERM, tkPARENOPEN, tkPARENCLOSE, tkEQUALS,
     tkSTRING, tkIDENTIFIER,
 
@@ -45,8 +47,8 @@ enum SqlTokenType {
 
     kwBASED, kwBASENAME, kwBASE_NAME, kwBEFORE, kwBEGIN, kwBETWEEN,
     kwBIGINT, kwBLOB, kwBLOBEDIT, kwBOOLEAN, kwBOTH, kwBREAK, kwBUFFER,
-    kwBY, 
-    
+    kwBY,
+
     kwCACHE, kwCASCADE, kwCASE, kwCAST, kwCHAR, kwCHARACTER,
     kwCHARACTER_LENGTH, kwCHAR_LENGTH, kwCHECK, kwCHECK_POINT_LEN,
     kwCHECK_POINT_LENGTH, kwCLOSE, kwCOALESCE, kwCOLLATE, kwCOLLATION,
@@ -55,24 +57,24 @@ enum SqlTokenType {
     kwCOUNT, kwCREATE, kwCSTRING, kwCURRENT, kwCURRENT_CONNECTION,
     kwCURRENT_DATE, kwCURRENT_ROLE, kwCURRENT_TIME, kwCURRENT_TIMESTAMP,
     kwCURRENT_TRANSACTION, kwCURRENT_USER, kwCURSOR,
-    
+
     kwDATABASE, kwDATE, kwDAY, kwDB_KEY, kwDEBUG, kwDEC, kwDECIMAL,
     kwDECLARE, kwDEFAULT, kwDELETE, kwDELETING, /*kwDESC,*/ kwDESCENDING,
     kwDESCRIBE, kwDESCRIPTOR, kwDISCONNECT, kwDISPLAY, kwDISTINCT, kwDO,
     kwDOMAIN, kwDOUBLE, kwDROP,
-    
+
     kwECHO, kwEDIT, kwELSE, kwEND, kwENTRY_POINT, kwESCAPE, kwEVENT,
     kwEXCEPTION, kwEXECUTE, kwEXISTS, kwEXIT, kwEXTERN, kwEXTERNAL,
     kwEXTRACT,
-    
+
     kwFALSE, kwFETCH, kwFILE, kwFILTER, kwFIRST, kwFLOAT, kwFOR,
     kwFOREIGN, kwFOUND, kwFREE_IT, kwFROM, kwFULL, kwFUNCTION,
-    
+
     kwGDSCODE, kwGENERATOR, kwGEN_ID, kwGLOBAL, kwGOTO, kwGRANT, kwGROUP,
     kwGROUP_COMMIT_, kwGROUP_COMMIT_WAIT,
-    
+
     kwHAVING, kwHELP, kwHOUR,
-    
+
     kwIF, kwIIF, kwIMMEDIATE, kwIN, kwINACTIVE, kwINDEX, kwINDICATOR,
     kwINIT, kwINNER, kwINPUT, kwINPUT_TYPE, kwINSERT, kwINSERTING, kwINT,
     kwINTEGER, kwINTO, kwIS, kwISOLATION, kwISQL,
@@ -116,7 +118,7 @@ enum SqlTokenType {
 
     kwUNCOMMITTED, kwUNION, kwUNIQUE, kwUNKNOWN, kwUPDATE, kwUPDATING,
     kwUPPER, kwUSER, kwUSING,
-    
+
     kwVALUE, kwVALUES, kwVARCHAR, kwVARIABLE, kwVARYING, kwVERSION, kwVIEW,
 
     kwWAIT, kwWAIT_TIME, kwWEEKDAY, kwWHEN, kwWHENEVER, kwWHERE, kwWHILE,

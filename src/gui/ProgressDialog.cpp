@@ -1,27 +1,28 @@
-//-----------------------------------------------------------------------------
 /*
-  The contents of this file are subject to the Initial Developer's Public
-  License Version 1.0 (the "License"); you may not use this file except in
-  compliance with the License. You may obtain a copy of the License here:
-  http://www.flamerobin.org/license.html.
+Copyright (c) 2004, 2005, 2006 The FlameRobin Development Team
 
-  Software distributed under the License is distributed on an "AS IS"
-  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-  License for the specific language governing rights and limitations under
-  the License.
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
-  The Original Code is FlameRobin (TM).
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
 
-  The Initial Developer of the Original Code is Michael Hieke.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-  Portions created by the original developer
-  are Copyright (C) 2006 Michael Hieke.
-
-  All Rights Reserved.
 
   $Id$
 
-  Contributor(s):
 */
 //-----------------------------------------------------------------------------
 
@@ -45,7 +46,7 @@ void recursiveLayout(wxSizer* sizer)
 {
     if (sizer)
     {
-        wxSizerItemList::compatibility_iterator 
+        wxSizerItemList::compatibility_iterator
             node = sizer->GetChildren().GetFirst();
         while (node)
         {
@@ -59,7 +60,7 @@ void recursiveLayout(wxSizer* sizer)
 }
 //-----------------------------------------------------------------------------
 // ProgressDialog
-ProgressDialog::ProgressDialog(wxWindow* parent, const wxString& title, 
+ProgressDialog::ProgressDialog(wxWindow* parent, const wxString& title,
         unsigned int levelCount, const wxPoint& pos, const wxSize& size)
     : BaseDialog(parent, wxID_ANY, title, pos, size, wxDEFAULT_DIALOG_STYLE)
 {
@@ -87,11 +88,11 @@ void ProgressDialog::createControls()
     int gaugeHeight = wxSystemSettings::GetMetric(wxSYS_HSCROLL_Y);
     for (unsigned int i = 1; i <= levelCountM; i++)
     {
-        wxStaticText* label = new wxStaticText(getControlsPanel(), wxID_ANY, 
+        wxStaticText* label = new wxStaticText(getControlsPanel(), wxID_ANY,
             wxEmptyString);
         labelsM.push_back(label);
-        wxGauge* gauge = new wxGauge(getControlsPanel(), wxID_ANY, 100, 
-            wxDefaultPosition, wxSize(300, gaugeHeight), 
+        wxGauge* gauge = new wxGauge(getControlsPanel(), wxID_ANY, 100,
+            wxDefaultPosition, wxSize(300, gaugeHeight),
             wxGA_HORIZONTAL | wxGA_SMOOTH);
         gaugesM.push_back(gauge);
     }
@@ -163,7 +164,7 @@ void ProgressDialog::setCanceled()
     }
 }
 //-----------------------------------------------------------------------------
-void ProgressDialog::setGaugeIndeterminate(wxGauge* gauge, 
+void ProgressDialog::setGaugeIndeterminate(wxGauge* gauge,
     bool /* indeterminate */ )
 {
     if (gauge)
@@ -186,8 +187,8 @@ bool ProgressDialog::isCanceled()
     return canceledM;
 }
 //-----------------------------------------------------------------------------
-void ProgressDialog::initProgress(wxString progressMsg, 
-    unsigned int maxPosition, unsigned int startingPosition, 
+void ProgressDialog::initProgress(wxString progressMsg,
+    unsigned int maxPosition, unsigned int startingPosition,
     unsigned int progressLevel)
 {
     wxASSERT(isValidProgressLevel(progressLevel));
@@ -219,7 +220,7 @@ void ProgressDialog::initProgressIndeterminate(wxString progressMsg,
     }
 }
 //-----------------------------------------------------------------------------
-void ProgressDialog::setProgressMessage(wxString progressMsg, 
+void ProgressDialog::setProgressMessage(wxString progressMsg,
     unsigned int progressLevel)
 {
     wxASSERT(isValidProgressLevel(progressLevel));
