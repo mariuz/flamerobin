@@ -480,7 +480,9 @@
         FUNCTION.html
         GENERATOR.html
         PROCEDURE.html
+        PROCEDUREprivileges.html
         ROLE.html
+        ROLEprivileges.html
         TABLE.html
         TABLEconstraints.html
         TABLEtriggers.html
@@ -488,6 +490,7 @@
         TABLEprivileges.html
         TRIGGER.html
         VIEW.html
+        VIEWprivileges.html
         VIEWtriggers.html
         dependencies.html
         compute.png

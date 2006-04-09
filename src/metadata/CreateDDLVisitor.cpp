@@ -366,7 +366,7 @@ void CreateDDLVisitor::visit(Role& r)
         for (std::vector<Privilege>::const_iterator ci = priv->begin();
             ci != priv->end(); ++ci)
         {
-            postSqlM += (*ci).getSql() + wxT("\n");
+            postSqlM += (*ci).getSql();
         }
     }
     wxString description = r.getDescription();
