@@ -191,7 +191,9 @@ wxGridCellAttr* GridTable::GetAttr(int row, int col,
 {
     if (row < rowsFetchedM && col < columnCountM && !dataM[row][col])
     {
-        if (isNumericColumn(col - 1))
+        // wxGrid columns run from 0 to columnCountM - 1
+        // IBPP::Statement columns run from 1 to Columns()
+        if (isNumericColumn(col + 1))
         {
             nullAttrNumericM->IncRef();
             return nullAttrNumericM;
