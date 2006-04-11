@@ -42,12 +42,18 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/ffile.h>
 #include <wx/file.h>
 
+#include <string>
+#include <vector>
+
 #include "controls/LogTextControl.h"
+#include "core/FRError.h"
 #include "gui/EventWatcherFrame.h"
 #include "gui/MultilineEnterDialog.h"
 #include "metadata/database.h"
 #include "styleguide.h"
 #include "ugly.h"
+//-----------------------------------------------------------------------------
+using namespace std;
 //-----------------------------------------------------------------------------
 class EventLogControl: public LogTextControl
 {
@@ -82,8 +88,9 @@ void EventLogControl::logEvent(const wxString& name, int count)
 EventWatcherFrame::EventWatcherFrame(wxWindow *parent, Database *db)
     : BaseFrame(parent, -1, wxEmptyString), databaseM(db), skipEventsM(false)
 {
-    monitoringM = false;
     timerM.SetOwner(this, ID_timer);
+    eventsM = 0;
+
     setIdString(this, getFrameId(db));
     db->attachObserver(this);    // observe database object
     SetTitle(wxString::Format(_("Event Monitor for Database: %s"),
@@ -186,31 +193,92 @@ void EventWatcherFrame::updateControls()
     button_monitor->Enable(hasEvents || timerM.IsRunning());
 }
 //-----------------------------------------------------------------------------
+void EventWatcherFrame::addEvents(wxString& s)
+{
+    // deselect all items so user can cleanly see what is added
+    for (int ix = 0; ix < listbox_monitored->GetCount(); ++ix)
+    {
+        if (listbox_monitored->Selected(ix))
+            listbox_monitored->Deselect(ix);
+    }
+    while (true)
+    {
+        int p = s.Find(wxT("\n"));
+        wxString s2;
+        if (p == -1)
+            s2 = s.Strip();
+        else
+        {
+            s2 = s.Left(p).Strip(wxString::both);
+            s.Remove(0, p);
+            s.Trim(false);
+        }
+        if (!s2.IsEmpty() && listbox_monitored->FindString(s2) == wxNOT_FOUND)
+            listbox_monitored->Select(listbox_monitored->Append(s2));
+        if (p == -1)
+            break;
+    }
+    updateControls();
+}
+//-----------------------------------------------------------------------------
 void EventWatcherFrame::defineMonitoredEvents()
 {
-/* TODO
-    // prevent timer from messing our business
-    bool timerRunning = timerM.IsRunning();
-    if (timerRunning)
+    if (eventsM != 0)
+    {
+        // prevent timer from messing our business
+        bool timerRunning = timerM.IsRunning();
+        setTimerActive(false);
+
+        // get a list of events to be monitored
+        vector<string> events;
+        for (int i = 0; i < listbox_monitored->GetCount(); i++)
+            events.push_back(wx2std(listbox_monitored->GetString(i)));
+
+        skipEventsM = true; // used to catch phantom notifications
+        eventsM->Clear();
+
+        vector<string>::const_iterator it;
+        for (it = events.begin(); it != events.end(); it++)
+        {
+            eventsM->Add(*it, this);
+            eventsM->Dispatch();
+        }
+
+        skipEventsM = false;
+        updateControls();
+        if (timerRunning)
+            setTimerActive(true);
+    }
+}
+//-----------------------------------------------------------------------------
+bool EventWatcherFrame::setTimerActive(bool active)
+{
+    if (active && !timerM.Start(100))
+        wxMessageBox(_("Can not start timer"), _("Error"), wxOK | wxICON_ERROR);
+        
+    if (!active && timerM.IsRunning())
     {
         timerM.Stop();
         wxSafeYield();
     }
-
-    skipEventsM = true;         // used to catch phantom notifications
-    IBPP::Database& idb = databaseM->getIBPPDatabase();
-    idb->ClearEvents();
-    for (int ix = 0; ix < listbox_monitored->GetCount(); ++ix)
+    return active == timerM.IsRunning();
+}
+//-----------------------------------------------------------------------------
+void EventWatcherFrame::updateMonitoringActive()
+{
+    if (eventsM != 0)
     {
-        idb->DefineEvent(wx2std(listbox_monitored->GetString(ix)), this);
-        idb->DispatchEvents();  // let that phantom notification loose
+        setTimerActive(true);
+        button_monitor->SetLabel(_("Stop &Monitoring"));
+        eventlog_received->logAction(_("Monitoring started"));
     }
-    skipEventsM = false;
-
+    else
+    {
+        timerM.Stop();
+        button_monitor->SetLabel(_("Start &Monitoring"));
+        eventlog_received->logAction(_("Monitoring stopped"));
+    }
     updateControls();
-    if (timerRunning)
-        timerM.Start(50);
-*/
 }
 //-----------------------------------------------------------------------------
 void EventWatcherFrame::ibppEventHandler(IBPP::Events events,
@@ -325,37 +393,8 @@ void EventWatcherFrame::OnButtonAddClick(wxCommandEvent& WXUNUSED(event))
         _("Add Events")))
     {
         addEvents(s);
+        defineMonitoredEvents();
     }
-}
-//-----------------------------------------------------------------------------
-void EventWatcherFrame::addEvents(wxString& s)
-{
-    // deselect all items so user can cleanly see what is added
-    for (int ix = 0; ix < listbox_monitored->GetCount(); ++ix)
-        if (listbox_monitored->Selected(ix))
-            listbox_monitored->Deselect(ix);
-
-    while (true)
-    {
-        int p = s.Find(wxT("\n"));
-        wxString s2;
-        if (p == -1)
-            s2 = s.Strip();
-        else
-        {
-            s2 = s.Left(p).Strip(wxString::both);
-            s.Remove(0, p);
-            s.Trim(false);
-        }
-        if (!s2.IsEmpty() && listbox_monitored->FindString(s2) == wxNOT_FOUND)
-        {
-// TODO            databaseM->getIBPPDatabase()->DefineEvent(wx2std(s2), this);
-            listbox_monitored->Select(listbox_monitored->Append(s2));
-        }
-        if (p == -1)
-            break;
-    }
-    updateControls();
 }
 //-----------------------------------------------------------------------------
 void EventWatcherFrame::OnButtonRemoveClick(wxCommandEvent& WXUNUSED(event))
@@ -373,25 +412,19 @@ void EventWatcherFrame::OnButtonRemoveClick(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void EventWatcherFrame::OnButtonStartStopClick(wxCommandEvent& WXUNUSED(event))
 {
-    if (monitoringM)
-    {
-        timerM.Stop();
-        monitoringM = false;
-        button_monitor->SetLabel(_("Start &Monitoring"));
-        eventlog_received->logAction(_("Monitoring stopped"));
-    }
+    FR_TRY
+
+    if (eventsM != 0)
+        eventsM.clear();
     else
     {
-        if (!timerM.Start(50))
-        {
-            wxMessageBox(_("Cannot start timer"), _("Error"), wxOK|wxICON_ERROR);
-            return;
-        }
-        monitoringM = true;
-        button_monitor->SetLabel(_("Stop &Monitoring"));
-        eventlog_received->logAction(_("Monitoring started"));
+        IBPP::Database db(databaseM->getIBPPDatabase());
+        eventsM = IBPP::EventsFactory(db);
+        defineMonitoredEvents();
     }
-    updateControls();
+    updateMonitoringActive();
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void EventWatcherFrame::OnListBoxSelected(wxCommandEvent& WXUNUSED(event))
@@ -401,6 +434,9 @@ void EventWatcherFrame::OnListBoxSelected(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void EventWatcherFrame::OnTimer(wxTimerEvent& WXUNUSED(event))
 {
-// TODO    databaseM->getIBPPDatabase()->DispatchEvents();
+    if (eventsM != 0)
+        eventsM->Dispatch();
+    else // stop timer, update UI
+        updateMonitoringActive();
 }
 //-----------------------------------------------------------------------------

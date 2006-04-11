@@ -48,7 +48,8 @@ class EventWatcherFrame : public BaseFrame, public IBPP::EventInterface, public 
 private:
     Database* databaseM;
     wxTimer timerM;
-    bool monitoringM;
+
+    IBPP::Events eventsM;
     bool skipEventsM;
 
     wxPanel* panel_controls;
@@ -69,6 +70,9 @@ private:
 
     void addEvents(wxString& s);    // multiline allowed
     void defineMonitoredEvents();
+    bool setTimerActive(bool active);
+    void updateMonitoringActive();
+
     virtual void ibppEventHandler(IBPP::Events events, const std::string& name,
         int count);
 protected:
