@@ -23,6 +23,18 @@ under the License.
 The most recent addition to this file is always on top and has the highest
 item number.
 
+19. April 11, 2006
+
+- Had to drop the new 'asynchronous' events support. It is flawed. Simply
+can't work that way, because the isc_que_events() *cannot* be called from the
+events handler itself. After facts and tracing this back, it is indeed the very
+reason why the initial implementation of events in IBPP was done using a
+Dispatch() method. This deep internal motivation was lost with time and
+implementing an asynchronous delivery in the way it was recently tried was
+doomed from the start. An asynchronous delivery can be implemented, though not
+without using threads. And for now we want to stay away from spawning threads
+from IBPP itself.
+
 18. April 7, 2006
 
 - Changed some public prototypes which were taking references to object. There

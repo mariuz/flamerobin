@@ -44,8 +44,7 @@
 //	SPECIAL CREDIT (July 2004) : this is a complete re-implementation of this
 //	class, directly based on work by Val Samko.
 //	The whole event handling has then be completely redesigned, based on the old
-//	EPB class to bring up the current IBPP::Events implementation, supporting
-//	synchronous and asynchronous notifications.
+//	EPB class to bring up the current IBPP::Events implementation.
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -172,8 +171,8 @@ void EventsImpl::Clear()
 
 void EventsImpl::Dispatch()
 {
-	// If no events registered, or this is a set of asynchronous events, nothing to do of course.
-	if (mEventBuffer.size() == 0 || mAsync == true) return;
+	// If no events registered, nothing to do of course.
+	if (mEventBuffer.size() == 0) return;
 
 	// Let's fire the events actions for all the events which triggered, if any, and requeue.
 	FireActions();
@@ -322,16 +321,6 @@ void EventsImpl::EventHandler(const char* object, short size, const char* tmpbuf
 				rb[i] = tmpbuffer[i];
 			evi->mTrapped = true;
 			evi->mQueued = false;
-			
-			if (evi->mAsync)
-			{
-				// Fire actions immediately in case these are async events
-				// We cannot let exceptions leak out of this callback function
-				// And we must guarantee that we try to re-queue even in case of problem
-				try { evi->FireActions(); }
-				catch (...) { }
-				evi->Queue();
-			}
 		}
 		catch (...) { }
 	}
@@ -355,11 +344,10 @@ void EventsImpl::DetachDatabaseImpl()
 	mDatabase = 0;
 }
 
-EventsImpl::EventsImpl(DatabaseImpl* database, bool async)
+EventsImpl::EventsImpl(DatabaseImpl* database)
 	: mRefCount(0)
 {
 	mDatabase = 0;
-	mAsync = async;
 	mId = 0;
 	mQueued = mTrapped = false;
 	AttachDatabaseImpl(database);

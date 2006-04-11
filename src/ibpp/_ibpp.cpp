@@ -333,10 +333,10 @@ namespace IBPP
 							dynamic_cast<TransactionImpl*>(tr.intf()));
 	}
 
-	Events EventsFactory(Database db, bool async)
+	Events EventsFactory(Database db)
 	{
 		(void)gds.Call();			// Triggers the initialization, if needed
-		return new EventsImpl(dynamic_cast<DatabaseImpl*>(db.intf()), async);
+		return new EventsImpl(dynamic_cast<DatabaseImpl*>(db.intf()));
 	}
 
 }

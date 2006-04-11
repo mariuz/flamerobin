@@ -2,6 +2,13 @@ $Id$
 
 
 2006-04-11 (mghie):
+  updated to IBPP sources taken from Subversion repository revision 70
+  --------------------------------------------------------------------
+
+  (new 'asynchronous' events support had to be dropped)
+
+
+2006-04-11 (mghie):
 
   Integration of IBPP sources taken from Subversion repository revision 68
   ------------------------------------------------------------------------

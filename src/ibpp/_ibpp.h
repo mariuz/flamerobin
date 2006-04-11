@@ -1352,7 +1352,6 @@ class EventsImpl : public IBPP::IEvents
 
 	int mRefCount;		// Reference counter
 
-	bool mAsync;			// Are events of this set to be triggered asynchronously?
 	DatabaseImpl* mDatabase;
 	ISC_LONG mId;			// Firebird internal Id of these events
 	bool mQueued;			// Has isc_que_events() been called?
@@ -1369,7 +1368,7 @@ public:
 	void AttachDatabaseImpl(DatabaseImpl*);
 	void DetachDatabaseImpl();
 	
-	EventsImpl(DatabaseImpl* dbi, bool async);
+	EventsImpl(DatabaseImpl* dbi);
 	~EventsImpl();
 		
 	//	(((((((( OBJECT INTERFACE ))))))))
@@ -1380,7 +1379,6 @@ public:
 	void List(std::vector<std::string>&);
 	void Clear();				// Drop all events
 	void Dispatch();			// Dispatch NON async events
-	bool Asynchronous() const { return mAsync; }
 
 	IBPP::Database DatabasePtr() const;
 

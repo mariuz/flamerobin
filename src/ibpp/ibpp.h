@@ -95,7 +95,7 @@ namespace IBPP
 {
 	//	Typically you use this constant in a call IBPP::CheckVersion as in:
 	//	if (! IBPP::CheckVersion(IBPP::Version)) { throw .... ; }
-	const uint32_t Version = (2<<24) + (5<<16) + (1<<8) + 65; // Version == 2.5.1.65
+	const uint32_t Version = (2<<24) + (5<<16) + (2<<8) + 0; // Version == 2.5.2.0
 
 	//	Dates range checking
 	const int MinDate = -693594;	//  1 JAN 0001
@@ -815,8 +815,7 @@ namespace IBPP
 		virtual void Drop(const std::string&) = 0;
 		virtual void List(std::vector<std::string>&) = 0;
 		virtual void Clear() = 0;				// Drop all events
-		virtual void Dispatch() = 0;			// Dispatch NON async events; else it's a no-op
-		virtual bool Asynchronous() const = 0;	// Tells if this set is asynchronous or not
+		virtual void Dispatch() = 0;			// Dispatch events (calls handlers)
 
 		virtual	Database DatabasePtr() const = 0;
 
@@ -876,7 +875,7 @@ namespace IBPP
 	
 	Array ArrayFactory(Database db, Transaction tr);
 	
-	Events EventsFactory(Database db, bool async);
+	Events EventsFactory(Database db);
 
 	/* IBPP uses a self initialization system. Each time an object that may
 	 * require the usage of the Interbase client C-API library is used, the
