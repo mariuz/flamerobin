@@ -90,6 +90,33 @@ wxString escapeHtmlChars(wxString s, bool processNewlines = true)
     return s;
 }
 //-----------------------------------------------------------------------------
+wxString loadHtmlFile(const wxString& filename)
+{
+    wxFileName localFileName = filename;
+    if (!localFileName.FileExists())
+    {
+        wxString msg;
+        msg.Printf(_("The file \"%s\" does not exist."),
+            localFileName.GetFullPath().c_str());
+        throw FRError(msg);
+    }
+
+    std::ifstream file(wx2std(filename).c_str()); // read entire file into wxString buffer
+    if (!file)
+    {
+        wxString msg;
+        msg.Printf(_("The file \"%s\" cannot be opened."),
+            filename.c_str());
+        throw FRError(msg);
+    }
+
+    std::stringstream ss;
+    ss << file.rdbuf();
+    wxString s(std2wx(ss.str()));
+    file.close();
+    return s;
+}
+//-----------------------------------------------------------------------------
 //! MetadataItemPropertiesFrame class
 MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent, MetadataItem *object, int id):
     BaseFrame(parent, id, wxT(""))
@@ -223,6 +250,61 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
 
     else if (cmd == wxT("fr_home"))
         htmlpage += config().getHomePath();
+
+    else if (cmd == wxT("header"))  // include another file
+    {
+        std::vector<wxString> pages;            // pages this object has
+        pages.push_back(wxT("Summary"));
+        if (object->getType() == ntRole)        // special case, roles
+            pages.push_back(wxT("Privileges")); // don't have dependencies
+        switch (object->getType())
+        {
+            case ntTable:
+                pages.push_back(wxT("Constraints"));
+                pages.push_back(wxT("Indices"));
+            case ntView:
+                pages.push_back(wxT("Triggers"));
+            case ntProcedure:
+                pages.push_back(wxT("Privileges"));
+            case ntTrigger:
+            case ntException:
+            case ntFunction:
+            case ntGenerator:
+                pages.push_back(wxT("Dependencies"));
+            case ntDatabase:
+            case ntRole:
+                pages.push_back(wxT("DDL"));
+        };
+        wxString page = loadHtmlFile(config().getHtmlTemplatesPath()
+            + wxT("header.html"));
+        bool first = true;
+        while (!page.Strip().IsEmpty())
+        {
+            wxString::size_type p2 = page.find('|');
+            wxString part(page);
+            if (p2 != wxString::npos)
+            {
+                part = page.substr(0, p2);
+                page.Remove(0, p2+1);
+            }
+            else
+                page.Clear();
+            for (std::vector<wxString>::iterator it = pages.begin(); it !=
+                pages.end(); ++it)
+            {
+                if (part.Find(wxT(">")+(*it)+wxT("<")) == -1)
+                    continue;
+                if (first)
+                    first = false;
+                else
+                    htmlpage += wxT(" | ");
+                if (part.Find(wxT(">")+suffix+wxT("<")) != -1)
+                    htmlpage += suffix;
+                else
+                    processHtmlCode(htmlpage, part, object);
+            }
+        }
+    }
 
     else if (cmd == wxT("object_description"))
     {
@@ -853,32 +935,8 @@ void MetadataItemPropertiesFrame::processHtmlCode(wxString& htmlpage, wxString h
 void MetadataItemPropertiesFrame::processHtmlFile(wxString fileName)
 {
     using namespace std;
-    wxString htmlpage;        // create html page into variable
-
-    wxFileName localFileName = fileName;
-    if (!localFileName.FileExists())
-    {
-        wxString msg;
-        msg.Printf(_("The file \"%s\" does not exist."),
-            localFileName.GetFullPath().c_str());
-        throw FRError(msg);
-    }
-
-    ifstream file(wx2std(fileName).c_str()); // read entire file into wxString buffer
-    if (!file)
-    {
-        wxString msg;
-        msg.Printf(_("The file \"%s\" cannot be opened."),
-            fileName.c_str());
-        throw FRError(msg);
-    }
-
-    stringstream ss;
-    ss << file.rdbuf();
-    wxString s(std2wx(ss.str()));
-    file.close();
-
-    processHtmlCode(htmlpage, s);
+    wxString htmlpage;
+    processHtmlCode(htmlpage, loadHtmlFile(fileName));
 
     int x = 0, y = 0;
     window_1->GetViewStart(&x, &y);         // save scroll position
