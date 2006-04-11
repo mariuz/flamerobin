@@ -600,6 +600,10 @@ SOURCE=.\src\gui\PrintableHtmlWindow.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\PrivilegesDialog.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\ProgressDialog.cpp
 # End Source File
 # Begin Source File
@@ -935,6 +939,10 @@ SOURCE=.\src\gui\PreferencesDialog.h
 # Begin Source File
 
 SOURCE=.\src\gui\PrintableHtmlWindow.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\PrivilegesDialog.h
 # End Source File
 # Begin Source File
 

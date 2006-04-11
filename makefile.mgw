@@ -111,6 +111,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrivilegesDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ProgressDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.o \
@@ -400,6 +401,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.o: ./src/gui/Pr
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.o: ./src/gui/PrintableHtmlWindow.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrivilegesDialog.o: ./src/gui/PrivilegesDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ProgressDialog.o: ./src/gui/ProgressDialog.cpp

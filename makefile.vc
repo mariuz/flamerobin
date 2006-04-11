@@ -116,6 +116,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrivilegesDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ProgressDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.obj \
@@ -435,6 +436,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.obj: .\src\gui\P
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.obj: .\src\gui\PrintableHtmlWindow.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrivilegesDialog.obj: .\src\gui\PrivilegesDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ProgressDialog.obj: .\src\gui\ProgressDialog.cpp
