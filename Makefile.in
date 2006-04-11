@@ -34,30 +34,31 @@ LDFLAGS = @LDFLAGS@
 ### Variables: ###
 
 DESTDIR = 
-IBPP_CXXFLAGS = $(__ibpp_PCH_INC) -DIBPP_GCC $(__IBPPPLATFORMDEFINE_p) \
-	-I$(srcdir)/src/ibpp -I$(srcdir)/src/ibpp/fbheaders $(CPPFLAGS) $(CXXFLAGS)
+IBPP_CXXFLAGS = $(__ibpp_PCH_INC) $(__IBPPPLATFORMDEFINE_p) \
+	-I$(srcdir)/src/ibpp $(CPPFLAGS) $(CXXFLAGS)
 IBPP_OBJECTS =  \
+	ibpp__dpb.o \
+	ibpp__ibpp.o \
+	ibpp__ibs.o \
+	ibpp__rb.o \
+	ibpp__spb.o \
+	ibpp__tpb.o \
 	ibpp_array.o \
 	ibpp_blob.o \
 	ibpp_database.o \
 	ibpp_date.o \
 	ibpp_dbkey.o \
+	ibpp_events.o \
 	ibpp_exception.o \
-	ibpp_ibpp.o \
 	ibpp_row.o \
 	ibpp_service.o \
 	ibpp_statement.o \
 	ibpp_time.o \
 	ibpp_transaction.o \
-	ibpp__dpb.o \
-	ibpp__epb.o \
-	ibpp__ibs.o \
-	ibpp__rb.o \
-	ibpp__spb.o \
-	ibpp__tpb.o
-IBPP_ODEP =  $(___pch_ibpp_ibpp_h_gch___depname)
+	ibpp_user.o
+IBPP_ODEP =  $(___pch_ibpp__ibpp_h_gch___depname)
 FLAMEROBIN_CXXFLAGS = $(__flamerobin_PCH_INC) -DHAVE_FRCONFIG_H \
-	$(____flamerobin_WXDEBUG_p) $(____flamerobin_DEBUGFLAG_p) -DIBPP_GCC \
+	$(____flamerobin_WXDEBUG_p) $(____flamerobin_DEBUGFLAG_p) \
 	$(__IBPPPLATFORMDEFINE_p) -I. -I$(srcdir)/src -I$(srcdir)/src/ibpp \
 	-I$(srcdir)/res $(CPPFLAGS) $(CXXFLAGS)
 FLAMEROBIN_OBJECTS =  \
@@ -153,7 +154,7 @@ FLAMEROBIN_ODEP =  $(___pch_flamerobin_wx_wxprec_h_gch___depname)
 @COND_DEPS_TRACKING_0@CXXC = $(CXX)
 @COND_PLATFORM_MACOSX_1@FIREBIRDFRAMEWORK = -framework Firebird
 @COND_GCC_PCH_1@__ibpp_PCH_INC = -I.pch/ibpp
-@COND_GCC_PCH_1@___pch_ibpp_ibpp_h_gch___depname = .pch/ibpp/ibpp.h.gch
+@COND_GCC_PCH_1@___pch_ibpp__ibpp_h_gch___depname = .pch/ibpp/_ibpp.h.gch
 @COND_PLATFORM_MAC_1@__flamerobin___mac_setfilecmd = \
 @COND_PLATFORM_MAC_1@	$(SETFILE) -t APPL flamerobin$(EXEEXT)
 @COND_FINAL_0@____flamerobin_WXDEBUG_p = -D__WXDEBUG__
@@ -217,8 +218,8 @@ $(LIBPREFIX)ibpp$(LIBEXT): $(IBPP_OBJECTS)
 	$(AR) rcu $@ $(IBPP_OBJECTS)
 	$(RANLIB) $@
 
-@COND_GCC_PCH_1@.pch/ibpp/ibpp.h.gch: 
-@COND_GCC_PCH_1@	$(top_builddir)./bk-make-pch .pch/ibpp/ibpp.h.gch ibpp.h $(CXX) $(IBPP_CXXFLAGS)
+@COND_GCC_PCH_1@.pch/ibpp/_ibpp.h.gch: 
+@COND_GCC_PCH_1@	$(top_builddir)./bk-make-pch .pch/ibpp/_ibpp.h.gch _ibpp.h $(CXX) $(IBPP_CXXFLAGS)
 
 flamerobin$(EXEEXT): $(FLAMEROBIN_OBJECTS) $(LIBPREFIX)ibpp$(LIBEXT) $(__flamerobin___win32rc) $(LIBPREFIX)ibpp$(LIBEXT)
 	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) -L. $(LDFLAGS)   $(LDFLAGS_GUI)  -libpp $(FIREBIRDFRAMEWORK) $(__FIREBIRDLIBRARY_p)
@@ -253,6 +254,24 @@ flamerobin.app/Contents/PkgInfo: flamerobin$(EXEEXT) $(srcdir)/res/flamerobin.In
 
 @COND_PLATFORM_MACOSX_1@flamerobin_bundle: $(____flamerobin_BUNDLE_TGT_REF_DEP)
 
+ibpp__dpb.o: $(srcdir)/src/ibpp/_dpb.cpp $(IBPP_ODEP)
+	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/_dpb.cpp
+
+ibpp__ibpp.o: $(srcdir)/src/ibpp/_ibpp.cpp $(IBPP_ODEP)
+	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/_ibpp.cpp
+
+ibpp__ibs.o: $(srcdir)/src/ibpp/_ibs.cpp $(IBPP_ODEP)
+	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/_ibs.cpp
+
+ibpp__rb.o: $(srcdir)/src/ibpp/_rb.cpp $(IBPP_ODEP)
+	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/_rb.cpp
+
+ibpp__spb.o: $(srcdir)/src/ibpp/_spb.cpp $(IBPP_ODEP)
+	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/_spb.cpp
+
+ibpp__tpb.o: $(srcdir)/src/ibpp/_tpb.cpp $(IBPP_ODEP)
+	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/_tpb.cpp
+
 ibpp_array.o: $(srcdir)/src/ibpp/array.cpp $(IBPP_ODEP)
 	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/array.cpp
 
@@ -268,11 +287,11 @@ ibpp_date.o: $(srcdir)/src/ibpp/date.cpp $(IBPP_ODEP)
 ibpp_dbkey.o: $(srcdir)/src/ibpp/dbkey.cpp $(IBPP_ODEP)
 	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/dbkey.cpp
 
+ibpp_events.o: $(srcdir)/src/ibpp/events.cpp $(IBPP_ODEP)
+	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/events.cpp
+
 ibpp_exception.o: $(srcdir)/src/ibpp/exception.cpp $(IBPP_ODEP)
 	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/exception.cpp
-
-ibpp_ibpp.o: $(srcdir)/src/ibpp/ibpp.cpp $(IBPP_ODEP)
-	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/ibpp.cpp
 
 ibpp_row.o: $(srcdir)/src/ibpp/row.cpp $(IBPP_ODEP)
 	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/row.cpp
@@ -289,23 +308,8 @@ ibpp_time.o: $(srcdir)/src/ibpp/time.cpp $(IBPP_ODEP)
 ibpp_transaction.o: $(srcdir)/src/ibpp/transaction.cpp $(IBPP_ODEP)
 	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/transaction.cpp
 
-ibpp__dpb.o: $(srcdir)/src/ibpp/_dpb.cpp $(IBPP_ODEP)
-	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/_dpb.cpp
-
-ibpp__epb.o: $(srcdir)/src/ibpp/_epb.cpp $(IBPP_ODEP)
-	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/_epb.cpp
-
-ibpp__ibs.o: $(srcdir)/src/ibpp/_ibs.cpp $(IBPP_ODEP)
-	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/_ibs.cpp
-
-ibpp__rb.o: $(srcdir)/src/ibpp/_rb.cpp $(IBPP_ODEP)
-	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/_rb.cpp
-
-ibpp__spb.o: $(srcdir)/src/ibpp/_spb.cpp $(IBPP_ODEP)
-	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/_spb.cpp
-
-ibpp__tpb.o: $(srcdir)/src/ibpp/_tpb.cpp $(IBPP_ODEP)
-	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/_tpb.cpp
+ibpp_user.o: $(srcdir)/src/ibpp/user.cpp $(IBPP_ODEP)
+	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/user.cpp
 
 flamerobin_addconstrainthandler.o: $(srcdir)/src/addconstrainthandler.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/addconstrainthandler.cpp
@@ -563,7 +567,7 @@ flamerobin_urihandler.o: $(srcdir)/src/urihandler.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/urihandler.cpp
 
 flamerobin_flamerobin_rc.o: $(srcdir)/res/flamerobin.rc $(FLAMEROBIN_ODEP)
-	$(RESCOMP) -i$< -o$@ --define HAVE_FRCONFIG_H  $(____flamerobin_WXDEBUG_p_2) $(____flamerobin_DEBUGFLAG_p_2) --define IBPP_GCC $(__IBPPPLATFORMDEFINE_p_3) --include-dir . --include-dir $(srcdir)/src --include-dir $(srcdir)/src/ibpp --include-dir $(srcdir)/res --include-dir $(WXDIR)/include
+	$(RESCOMP) -i$< -o$@ --define HAVE_FRCONFIG_H  $(____flamerobin_WXDEBUG_p_2) $(____flamerobin_DEBUGFLAG_p_2) $(__IBPPPLATFORMDEFINE_p_3) --include-dir . --include-dir $(srcdir)/src --include-dir $(srcdir)/src/ibpp --include-dir $(srcdir)/res --include-dir $(WXDIR)/include
 
 
 # Include dependency info, if present:

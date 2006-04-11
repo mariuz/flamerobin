@@ -5,24 +5,17 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-//	The contents of this file are subject to the Mozilla Public License
-//	Version 1.0 (the "License"); you may not use this file except in
-//	compliance with the License. You may obtain a copy of the License at
-//	http://www.mozilla.org/MPL/
+//	(C) Copyright 2000-2006 T.I.P. Group S.A. and the IBPP Team (www.ibpp.org)
 //
-//	Software distributed under the License is distributed on an "AS IS"
-//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+//	The contents of this file are subject to the IBPP License (the "License");
+//	you may not use this file except in compliance with the License.  You may
+//	obtain a copy of the License at http://www.ibpp.org or in the 'license.txt'
+//	file which must have been distributed along with this file.
+//
+//	This software, distributed under the License, is distributed on an "AS IS"
+//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See the
 //	License for the specific language governing rights and limitations
 //	under the License.
-//
-//	The Original Code is "IBPP 0.9" and all its associated documentation.
-//
-//	The Initial Developer of the Original Code is T.I.P. Group S.A.
-//	Portions created by T.I.P. Group S.A. are
-//	Copyright (C) 2000 T.I.P Group S.A.
-//	All Rights Reserved.
-//
-//	Contributor(s): ______________________________________.
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -31,12 +24,20 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "ibpp.h"
-#include "_internals.h"
+#ifdef _MSC_VER
+#pragma warning(disable: 4786 4996)
+#ifndef _DEBUG
+#pragma warning(disable: 4702)
+#endif
+#endif
+
+#include "_ibpp.h"
 
 #ifdef HAS_HDRSTOP
 #pragma hdrstop
 #endif
+
+#include <limits>
 
 #ifdef IBPP_WINDOWS
 // New (optional) Registry Keys introduced by Firebird Server 1.5
@@ -46,6 +47,31 @@
 
 namespace ibpp_internals
 {
+	const double consts::dscales[19] = {
+		  1, 1E1, 1E2, 1E3, 1E4, 1E5, 1E6, 1E7, 1E8,
+		  1E9, 1E10, 1E11, 1E12, 1E13, 1E14, 1E15,
+		  1E16, 1E17, 1E18 };
+
+	const int consts::Dec31_1899 = 693595;
+
+// Many compilers confuses those following min/max with macros min and max !
+#undef min
+#undef max
+
+#ifdef __DMC__ // Needs to break-down the declaration else compiler crash (!)
+	const std::numeric_limits<int16_t> i16_limits;
+	const std::numeric_limits<int32_t> i32_limits;
+	const int16_t consts::min16 = i16_limits.min();
+	const int16_t consts::max16 = i16_limits.max();
+	const int32_t consts::min32 = i32_limits.min();
+	const int32_t consts::max32 = i32_limits.max();
+#else
+	const int16_t consts::min16 = std::numeric_limits<int16_t>::min();
+	const int16_t consts::max16 = std::numeric_limits<int16_t>::max();
+	const int32_t consts::min32 = std::numeric_limits<int32_t>::min();
+	const int32_t consts::max32 = std::numeric_limits<int32_t>::max();
+#endif
+
 	GDS gds;	// Global unique GDS instance
 
 #ifdef _DEBUG
@@ -66,7 +92,7 @@ namespace ibpp_internals
 
 using namespace ibpp_internals;
 
-GDS* GDS::Call(void)
+GDS* GDS::Call()
 {
 	// Let's load the CLIENT library, if it is not already loaded.
 	// The load is guaranteed to be done only once per application.
@@ -93,7 +119,7 @@ GDS* GDS::Call(void)
 			std::string path;
 			if (newpos == std::string::npos) path = mSearchPaths.substr(pos);
 			else path = mSearchPaths.substr(pos, newpos-pos);
-				
+
 			if (path.size() >= 1)
 			{
 				if (path[path.size()-1] != '\\') path += '\\';
@@ -103,13 +129,13 @@ GDS* GDS::Call(void)
 			}
 			pos = newpos + 1;
 		}
-		
+
 		if (mHandle == 0)
 		{
 			// Try to load FBCLIENT.DLL from the current application location.  This
 			// is a usefull step for applications using the embedded version of FB
 			// or a local copy (for whatever reasons) of the dll.
-			
+
 			int len = GetModuleFileName(NULL, fbdll, sizeof(fbdll));
 			if (len != 0)
 			{
@@ -151,7 +177,7 @@ GDS* GDS::Call(void)
 				RegCloseKey(hkey_instances);
 			}
 		}
-		
+
 		if (mHandle == 0)
 		{
 			// Let's try from the PATH and System directories
@@ -179,7 +205,7 @@ GDS* GDS::Call(void)
 #endif
 #ifdef IBPP_UNIX
 /* TODO : perform a late-bind on unix --- not so important, well I think (OM) */
-#define IB_ENTRYPOINT(X) m_##X = (proto_##X*)isc_##X 
+#define IB_ENTRYPOINT(X) m_##X = (proto_##X*)isc_##X
 #endif
 
 		IB_ENTRYPOINT(create_database);
@@ -219,23 +245,11 @@ GDS* GDS::Call(void)
 		IB_ENTRYPOINT(dsql_free_statement);
 		IB_ENTRYPOINT(dsql_set_cursor_name);
 		IB_ENTRYPOINT(dsql_sql_info);
-		
+
 		IB_ENTRYPOINT(service_attach);
 		IB_ENTRYPOINT(service_detach);
 		IB_ENTRYPOINT(service_start);
 		IB_ENTRYPOINT(service_query);
-
-		//IB_ENTRYPOINT(add_user);
-		//IB_ENTRYPOINT(modify_user);
-		//IB_ENTRYPOINT(delete_user);
-		//IB_ENTRYPOINT(decode_date);
-		//IB_ENTRYPOINT(encode_date);
-		//IB_ENTRYPOINT(decode_sql_date);
-		//IB_ENTRYPOINT(decode_sql_time);
-		//IB_ENTRYPOINT(decode_timestamp);
-		//IB_ENTRYPOINT(encode_sql_date);
-		//IB_ENTRYPOINT(encode_sql_time);
-		//IB_ENTRYPOINT(encode_timestamp);
 
 		mReady = true;
 	}
@@ -253,7 +267,7 @@ namespace IBPP
 				(IBPP::Version & 0xFFFFFF00) ? true : false;
 	}
 
-	int GDSVersion(void)
+	int GDSVersion()
 	{
 		return gds.Call()->mGDSVersion;
 	}
@@ -268,65 +282,61 @@ namespace IBPP
 	{
 	}
 #endif
-	
+
 	//	Factories for our Interface objects
 
-	IService* ServiceFactory(const std::string& ServerName,
+	Service ServiceFactory(const std::string& ServerName,
 				const std::string& UserName, const std::string& UserPassword)
 	{
 		(void)gds.Call();			// Triggers the initialization, if needed
 		return new ServiceImpl(ServerName, UserName, UserPassword);
 	}
 
-	IDatabase* DatabaseFactory(const std::string& ServerName,
+	Database DatabaseFactory(const std::string& ServerName,
 		const std::string& DatabaseName, const std::string& UserName,
 		const std::string& UserPassword, const std::string& RoleName,
 		const std::string& CharSet, const std::string& CreateParams)
 	{
 		(void)gds.Call();			// Triggers the initialization, if needed
 		return new DatabaseImpl(ServerName, DatabaseName, UserName,
-					UserPassword, RoleName, CharSet, CreateParams);
+								UserPassword, RoleName, CharSet, CreateParams);
 	}
 
-	ITransaction* TransactionFactory(IDatabase* db, TAM am,
+	Transaction TransactionFactory(Database db, TAM am,
 					TIL il, TLR lr, TFF flags)
 	{
 		(void)gds.Call();			// Triggers the initialization, if needed
-		DatabaseImpl* dbimpl = dynamic_cast<DatabaseImpl*>(db);
-		return new TransactionImpl(dbimpl, am, il, lr, flags);
+		return new TransactionImpl(	dynamic_cast<DatabaseImpl*>(db.intf()),
+									am, il, lr, flags);
 	}
 
-	/*
-	IRow* RowFactory(int dialect)
-	{
-		(void)gds.Call();			// Triggers the initialization, if needed
-		return new RowImpl(dialect);
-	}
-	*/
-
-	IStatement* StatementFactory(IDatabase* db, ITransaction* tr,
+	Statement StatementFactory(Database db, Transaction tr,
 		const std::string& sql)
 	{
 		(void)gds.Call();			// Triggers the initialization, if needed
-		DatabaseImpl* dbimpl = dynamic_cast<DatabaseImpl*>(db);
-		TransactionImpl* trimpl = dynamic_cast<TransactionImpl*>(tr);
-		return new StatementImpl(dbimpl, trimpl, sql);
+		return new StatementImpl(	dynamic_cast<DatabaseImpl*>(db.intf()),
+									dynamic_cast<TransactionImpl*>(tr.intf()),
+									sql);
 	}
 
-	IBlob* BlobFactory(IDatabase* db, ITransaction* tr)
+	Blob BlobFactory(Database db, Transaction tr)
 	{
 		(void)gds.Call();			// Triggers the initialization, if needed
-		DatabaseImpl* dbimpl = dynamic_cast<DatabaseImpl*>(db);
-		TransactionImpl* trimpl = dynamic_cast<TransactionImpl*>(tr);
-		return new BlobImpl(dbimpl, trimpl);
+		return new BlobImpl(dynamic_cast<DatabaseImpl*>(db.intf()),
+							dynamic_cast<TransactionImpl*>(tr.intf()));
 	}
 
-	IArray* ArrayFactory(IDatabase* db, ITransaction* tr)
+	Array ArrayFactory(Database db, Transaction tr)
 	{
 		(void)gds.Call();			// Triggers the initialization, if needed
-		DatabaseImpl* dbimpl = dynamic_cast<DatabaseImpl*>(db);
-		TransactionImpl* trimpl = dynamic_cast<TransactionImpl*>(tr);
-		return new ArrayImpl(dbimpl, trimpl);
+		return new ArrayImpl(dynamic_cast<DatabaseImpl*>(db.intf()),
+							dynamic_cast<TransactionImpl*>(tr.intf()));
+	}
+
+	Events EventsFactory(Database db, bool async)
+	{
+		(void)gds.Call();			// Triggers the initialization, if needed
+		return new EventsImpl(dynamic_cast<DatabaseImpl*>(db.intf()), async);
 	}
 
 }
@@ -334,3 +344,4 @@ namespace IBPP
 //
 //	EOF
 //
+

@@ -102,15 +102,6 @@
 
 <!-- Part 1: build the IBPP library -->
 
-    <!-- IBPP needs one of these defined for the compiler in use -->
-    <set var="IBPPCOMPILERDEFINE">
-        <if cond="FORMAT=='autoconf'">IBPP_GCC</if>
-        <if cond="FORMAT=='borland'">IBPP_BCC</if>
-        <if cond="FORMAT=='mingw'">IBPP_GCC</if>
-        <if cond="FORMAT=='msvc'">IBPP_MSVC</if>
-        <if cond="FORMAT=='msvc6prj'">IBPP_MSVC</if>
-    </set>
-
     <!-- IBPP needs one of these defined for the target platform -->
     <set var="IBPPPLATFORMDEFINE">
         <if cond="PLATFORM_MACOSX=='1'">IBPP_DARWIN</if>
@@ -127,30 +118,32 @@
     </set>
 
     <set var="IBPP_HEADERFILES">
+        $(SOURCEDIR)/ibpp/_ibpp.h
+        $(SOURCEDIR)/ibpp/ibase.h
+        $(SOURCEDIR)/ibpp/iberror.h
         $(SOURCEDIR)/ibpp/ibpp.h
-        $(SOURCEDIR)/ibpp/_internals.h
-        $(SOURCEDIR)/ibpp/_msvcwarnings.h
     </set>
 
     <set var="IBPP_SOURCEFILES">
+        $(SOURCEDIR)/ibpp/_dpb.cpp
+        $(SOURCEDIR)/ibpp/_ibpp.cpp
+        $(SOURCEDIR)/ibpp/_ibs.cpp
+        $(SOURCEDIR)/ibpp/_rb.cpp
+        $(SOURCEDIR)/ibpp/_spb.cpp
+        $(SOURCEDIR)/ibpp/_tpb.cpp
         $(SOURCEDIR)/ibpp/array.cpp
         $(SOURCEDIR)/ibpp/blob.cpp
         $(SOURCEDIR)/ibpp/database.cpp
         $(SOURCEDIR)/ibpp/date.cpp
         $(SOURCEDIR)/ibpp/dbkey.cpp
+        $(SOURCEDIR)/ibpp/events.cpp
         $(SOURCEDIR)/ibpp/exception.cpp
-        $(SOURCEDIR)/ibpp/ibpp.cpp
         $(SOURCEDIR)/ibpp/row.cpp
         $(SOURCEDIR)/ibpp/service.cpp
         $(SOURCEDIR)/ibpp/statement.cpp
         $(SOURCEDIR)/ibpp/time.cpp
         $(SOURCEDIR)/ibpp/transaction.cpp
-        $(SOURCEDIR)/ibpp/_dpb.cpp
-        $(SOURCEDIR)/ibpp/_epb.cpp
-        $(SOURCEDIR)/ibpp/_ibs.cpp
-        $(SOURCEDIR)/ibpp/_rb.cpp
-        $(SOURCEDIR)/ibpp/_spb.cpp
-        $(SOURCEDIR)/ibpp/_tpb.cpp
+        $(SOURCEDIR)/ibpp/user.cpp
     </set>
 
     <lib id="ibpp" template="fr_common">
@@ -160,20 +153,17 @@
         <!-- the precompiled header file is created in $(BUILDDIR), when
              the first source file is compiled - all other source files
              only *use* the PCH file -->
-        <precomp-headers-header>ibpp.h</precomp-headers-header>
+        <precomp-headers-header>_ibpp.h</precomp-headers-header>
         <precomp-headers>on</precomp-headers>
         <precomp-headers-file>$(id)</precomp-headers-file>
-        <precomp-headers-gen>$(SOURCEDIR)/ibpp/ibpp.cpp</precomp-headers-gen>
+        <precomp-headers-gen>$(SOURCEDIR)/ibpp/_ibpp.cpp</precomp-headers-gen>
 
-        <define>$(IBPPCOMPILERDEFINE)</define>
         <define>$(IBPPPLATFORMDEFINE)</define>
         <if cond="FORMAT=='autoconf'">
             <include>$(DOLLAR)(srcdir)/src/ibpp</include>
-            <include>$(DOLLAR)(srcdir)/src/ibpp/fbheaders</include>
         </if>
         <if cond="FORMAT!='autoconf'">
             <include>./src/ibpp</include>
-            <include>./src/ibpp/fbheaders</include>
         </if>
     </lib>
 <!-- End of part 1 -->
@@ -575,7 +565,6 @@
         <precomp-headers-file>$(id)</precomp-headers-file>
         <precomp-headers-gen>$(SOURCEDIR)/frprec.cpp</precomp-headers-gen>
 
-        <define>$(IBPPCOMPILERDEFINE)</define>
         <define>$(IBPPPLATFORMDEFINE)</define>
         <if cond="FORMAT=='autoconf'">
             <include>.</include>

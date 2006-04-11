@@ -5,24 +5,17 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-//	The contents of this file are subject to the Mozilla Public License
-//	Version 1.0 (the "License"); you may not use this file except in
-//	compliance with the License. You may obtain a copy of the License at
-//	http://www.mozilla.org/MPL/
+//	(C) Copyright 2000-2006 T.I.P. Group S.A. and the IBPP Team (www.ibpp.org)
 //
-//	Software distributed under the License is distributed on an "AS IS"
-//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+//	The contents of this file are subject to the IBPP License (the "License");
+//	you may not use this file except in compliance with the License.  You may
+//	obtain a copy of the License at http://www.ibpp.org or in the 'license.txt'
+//	file which must have been distributed along with this file.
+//
+//	This software, distributed under the License, is distributed on an "AS IS"
+//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See the
 //	License for the specific language governing rights and limitations
 //	under the License.
-//
-//	The Original Code is "IBPP 0.9" and all its associated documentation.
-//
-//	The Initial Developer of the Original Code is T.I.P. Group S.A.
-//	Portions created by T.I.P. Group S.A. are
-//	Copyright (C) 2000 T.I.P Group S.A.
-//	All Rights Reserved.
-//
-//	Contributor(s): ______________________________________.
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -31,8 +24,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "ibpp.h"
-#include "_internals.h"
+#ifdef _MSC_VER
+#pragma warning(disable: 4786 4996)
+#ifndef _DEBUG
+#pragma warning(disable: 4702)
+#endif
+#endif
+
+#include "_ibpp.h"
 
 #ifdef HAS_HDRSTOP
 #pragma hdrstop
@@ -42,60 +41,84 @@
 
 using namespace ibpp_internals;
 
-void IBPP::Date::Today(void)
+void IBPP::Date::Today()
 {
 	time_t systime = time(0);
 	tm* loctime = localtime(&systime);
 
 	if (! IBPP::itod(&mDate, loctime->tm_year + 1900,
 		loctime->tm_mon + 1, loctime->tm_mday))
-			throw LogicExceptionImpl("Date::Today", _("Out of range date"));
+			throw LogicExceptionImpl("Date::Today", _("Out of range"));
 }
 
 void IBPP::Date::SetDate(int dt)
 {
 	if (! IBPP::dtoi(dt, 0, 0, 0))
-		throw LogicExceptionImpl("Date::SetDate", _("Out of range date"));
+		throw LogicExceptionImpl("Date::SetDate", _("Out of range"));
 	mDate = dt;
 }
 
 void IBPP::Date::SetDate(int year, int month, int day)
 {
 	if (! IBPP::itod(&mDate, year, month, day))
-		throw LogicExceptionImpl("Date::SetDate", _("Out of range date"));
+		throw LogicExceptionImpl("Date::SetDate", _("Out of range"));
 }
 
 void IBPP::Date::GetDate(int& year, int& month, int& day) const
 {
 	if (! IBPP::dtoi(mDate, &year, &month, &day))
-		throw LogicExceptionImpl("Date::GetDate", _("Out of range date"));
+		throw LogicExceptionImpl("Date::GetDate", _("Out of range"));
+}
+
+int IBPP::Date::Year() const
+{
+	int year;
+	if (! IBPP::dtoi(mDate, &year, 0, 0))
+		throw LogicExceptionImpl("Date::Year", _("Out of range"));
+	return year;
+}
+
+int IBPP::Date::Month() const
+{
+	int month;
+	if (! IBPP::dtoi(mDate, 0, &month, 0))
+		throw LogicExceptionImpl("Date::Month", _("Out of range"));
+	return month;
+}
+
+int IBPP::Date::Day() const
+{
+	int day;
+	if (! IBPP::dtoi(mDate, 0, 0, &day))
+		throw LogicExceptionImpl("Date::Day", _("Out of range"));
+	return day;
 }
 
 void IBPP::Date::Add(int days)
 {
 	int newdate = mDate + days;		// days can be signed
 	if (! IBPP::dtoi(newdate, 0, 0, 0))
-		throw LogicExceptionImpl("Date::Add()", _("Out of range date"));
+		throw LogicExceptionImpl("Date::Add()", _("Out of range"));
 	mDate = newdate;
 }
 
-void IBPP::Date::StartOfMonth(void)
+void IBPP::Date::StartOfMonth()
 {
 	int year, month;
 	if (! IBPP::dtoi(mDate, &year, &month, 0))
-		throw LogicExceptionImpl("Date::StartOfMonth()", _("Out of range date"));
+		throw LogicExceptionImpl("Date::StartOfMonth()", _("Out of range"));
 	if (! IBPP::itod(&mDate, year, month, 1))		// First of same month
-		throw LogicExceptionImpl("Date::StartOfMonth()", _("Out of range date"));
+		throw LogicExceptionImpl("Date::StartOfMonth()", _("Out of range"));
 }
 
-void IBPP::Date::EndOfMonth(void)
+void IBPP::Date::EndOfMonth()
 {
 	int year, month;
 	if (! IBPP::dtoi(mDate, &year, &month, 0))
-		throw LogicExceptionImpl("Date::EndOfMonth()", _("Out of range date"));
+		throw LogicExceptionImpl("Date::EndOfMonth()", _("Out of range"));
 	if (++month > 12) { month = 1; year++; }
 	if (! IBPP::itod(&mDate, year, month, 1))	// First of next month
-		throw LogicExceptionImpl("Date::EndOfMonth()", _("Out of range date"));
+		throw LogicExceptionImpl("Date::EndOfMonth()", _("Out of range"));
 	mDate--;	// Last day of original month, all weird cases accounted for
 }
 
@@ -127,11 +150,6 @@ IBPP::Date& IBPP::Date::operator=(const IBPP::Date& assigned)
 // Please, understand that Peter Baum is not related to this IBPP project.
 // So __please__, do not contact him regarding IBPP matters.
 
-namespace
-{
-	const int Dec31_1899 = 693595;
-};
-
 //	Take a date, in its integer format as used in IBPP internals and splits
 //	it in year (4 digits), month (1-12), day (1-31)
 
@@ -147,7 +165,7 @@ bool IBPP::dtoi (int date, int *y, int *m, int *d)
 	// The "Rata Die" is the date specified as the number of days elapsed since
 	// 31 Dec of year 0. So 1 Jan 0001 is 1.
 
-    RataDie = date + Dec31_1899;	// Because IBPP sets the '0' on 31 Dec 1899.
+	RataDie = date + ibpp_internals::consts::Dec31_1899;	// Because IBPP sets the '0' on 31 Dec 1899.
 
     Z = RataDie + 306;
     H = 100*Z - 25;
@@ -178,7 +196,7 @@ bool IBPP::itod (int *pdate, int year, int month, int day)
     if (m < 3) { m += 12; y -= 1; }
     RataDie = d + (153*m - 457) / 5 + 365*y + y/4 - y/100 + y/400 - 306;
 
-    result = RataDie - Dec31_1899;   // Because IBPP sets the '0' on 31 Dec 1899
+	result = RataDie - ibpp_internals::consts::Dec31_1899;   // Because IBPP sets the '0' on 31 Dec 1899
 
 	// Validity control
 	if (result < IBPP::MinDate || result > IBPP::MaxDate)

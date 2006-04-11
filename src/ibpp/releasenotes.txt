@@ -5,24 +5,17 @@ Some general notes about the ibpp project
 
 ---------------------------------------------------------------------------
 
-The contents of this file are subject to the Mozilla Public License
-Version 1.0 (the "License"); you may not use this file except in
-compliance with the License. You may obtain a copy of the License at
-http://www.mozilla.org/MPL/
+(C) Copyright 2000-2006 T.I.P. Group S.A. and the IBPP Team (www.ibpp.org)
 
-Software distributed under the License is distributed on an "AS IS"
-basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+The contents of this file are subject to the IBPP License (the "License");
+you may not use this file except in compliance with the License.  You may
+obtain a copy of the License at http://www.ibpp.org or in the 'license.txt'
+file which must have been distributed along with this file.
+
+This software, distributed under the License, is distributed on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See the
 License for the specific language governing rights and limitations
 under the License.
-
-The Original Code is "IBPP 0.9" and all its associated documentation.
-
-The Initial Developer of the Original Code is T.I.P. Group S.A.
-Portions created by T.I.P. Group S.A. are
-Copyright (C) 2000 T.I.P Group S.A.
-All Rights Reserved.
-
-Contributor(s): ______________________________________.
 
 ---------------------------------------------------------------------------
 
@@ -45,7 +38,7 @@ website at http://www.ibpp.org.
 
 ---------------------------------------------------------------------------
 
-Release Notes for Version 2.4 (November, 2005)
+Release Notes for Version 2.5 (April 4, 2006)
 
 
 1/ Introduction
@@ -65,19 +58,81 @@ tasks : creating a database, modifying its structure, performing online backups,
 administering user accounts on the server and so on.
 
 More background information on http://www.ibpp.org website.
+This website now holds full reference documentation.
 
 
 2/ Installation
 
 There is no 'installation' per se because IBPP Project does not release
-binaries. It is much better / safer that you build your own binaries of the
-class library with your tools, while adjusting compiler settings to suit your
-host projects. Please refer to the file howtobuild.txt from this distribution
-for basic instructions. The online documentation on http://www.ibpp.org is a
-second source of information.
+binaries. It is much better / safer that you adjust your own programs build
+procedures to integrate the 'core' files of IBPP straight into your own
+productions.  Please refer to the file howtobuild.txt from this distribution
+for more complete instructions on how to do so.
 
 
-3/ New or Updated Features since Version 2.3
+3/ New or Updated Features since Version 2.4
+
+- Completely reworked the concepts of how to build IBPP : embed it in your
+own code and build procedure.  See howtobuild.txt for details.
+
+- Changed and enhanced the Service::AddUser, Service::ModifyUser and
+Service::GetUsers to use the new IBPP::User helper class. This breaks the
+backward compatibility of these 3 APIs. Though not the best thing to do, it was
+considered an acceptable mistake because these APIs are typically not called
+much from user code. The required update is easy and should not be too big.
+
+- Added std::string& Statement::Sql() to return the last prepared/executed SQL
+statement.
+
+- When Statement Get() and Set() face an incompatible type situation, the
+exception report has been enhanced to show the two conflicting types (the SQL
+column type and the variable data type).
+
+- Added exception class 'WrongType' derived from 'LogicException' to support
+the above.
+
+- Added comfort methods to classed Date and Time (Year(), ..., Hours(), ...)
+
+- Removed all access to the naked interface pointers from the public interface
+except through the Ptr<>::intf() method. Some methods overloads taking naked
+pointers have been dropped, only their versions using managed pointers subsists.
+This can break source code compatibility of *some* applications, but is a very
+easy fix to do in those applications source code.
+
+- Full MSVC6 compatibility which got partially lost in 2.4 versions has been
+revived.
+
+- Now, NUMERIC/DECIMAL (scaled columns) can be exchanged with integer data
+types. The plain scaled value is returned / expected.
+
+- Complete rewrite of all the events handling system.
+There is new first class citizen IBPP::Events. Events holds a set of events
+related to a specific instance of a connected Database. Upon creation of
+the Events object, one can request these events to be delivered in an
+asynchronous manner (NEW!) or in a synchronous (as before version 2.5).
+An application can register multiple sets of events on a same Database
+connection. Of course this change is completely source code incompatible
+with previous versions. Essentially, the changes only involve obtaining
+an Events object through EventsFactory(Database&, bool async).
+Then to replace previous methods calls as such:
+	Database::DefineEvent --> Events::Add
+	Database::DropEvent --> Events::Drop
+	Database::ClearEvents --> Events::Clear
+	Database::DispatchEvents --> Events::Dispatch
+The upgrade path is then nearly trivial.
+
+
+4/ Comments, Acknowledgments
+
+This 2.5 version is considered the best IBPP version available to date and we
+recommend all its users to upgrade at their earliest opportunity.
+
+We have a lot of people to thank. The ibpp.h file cites some of them. But many
+people suggested various kind of enhancements or were invaluable for their
+mentoring or expertise in various fields.
+
+
+5/ History section - What was New or Updated between Version 2.3 and 2.4
 
 Version 2.4 was initially meant essentially as a maintenance version. We chose
 to tag it 2.4 instead of 2.3.6 mostly because of the exception classes changes
@@ -158,18 +213,7 @@ So we ask users of IBPP not to start using IBPP::Row as is, consider it already
 deprecated in its current form. We will introduce something 'bigger' in the
 next major version (3.0).
 
-
-4/ Comments, Acknowledgments
-
-This 2.4 version is considered the best IBPP version available to date and we
-recommend all its users to upgrade at their earliest opportunity.
-
-We have a lot of people to thank. The ibpp.h file cites some of them. But many
-people suggested various kind of enhancements or were invaluable for their
-mentoring or expertise in various fields.
-
-
-5/ History section - What was New or Updated between Version 2.2 and 2.3
+6/ History section - What was New or Updated between Version 2.2 and 2.3
 
 - The Service interface now support sweep action. See ibpp.h for details:
 	virtual void Sweep(const std::string& dbfile) = 0;
@@ -205,7 +249,7 @@ in the future.
 Studio .NET 2003. All is required is to open the 'ibpp.sln' and then hit build.
 
 
-6/ History section - What was New or Updated between Version 2.1 and 2.2
+7/ History section - What was New or Updated between Version 2.1 and 2.2
 
 - Dates valid range has been extended, both in the Date and Timestamp classes.
 IBPP now fully support the range extending from 1 JAN 0001 to 31 DEC 9999. The

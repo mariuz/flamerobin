@@ -5,24 +5,17 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-//	The contents of this file are subject to the Mozilla Public License
-//	Version 1.0 (the "License"); you may not use this file except in
-//	compliance with the License. You may obtain a copy of the License at
-//	http://www.mozilla.org/MPL/
+//	(C) Copyright 2000-2006 T.I.P. Group S.A. and the IBPP Team (www.ibpp.org)
 //
-//	Software distributed under the License is distributed on an "AS IS"
-//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+//	The contents of this file are subject to the IBPP License (the "License");
+//	you may not use this file except in compliance with the License.  You may
+//	obtain a copy of the License at http://www.ibpp.org or in the 'license.txt'
+//	file which must have been distributed along with this file.
+//
+//	This software, distributed under the License, is distributed on an "AS IS"
+//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See the
 //	License for the specific language governing rights and limitations
 //	under the License.
-//
-//	The Original Code is "IBPP 0.9" and all its associated documentation.
-//
-//	The Initial Developer of the Original Code is T.I.P. Group S.A.
-//	Portions created by T.I.P. Group S.A. are
-//	Copyright (C) 2000 T.I.P Group S.A.
-//	All Rights Reserved.
-//
-//	Contributor(s): ______________________________________.
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -31,108 +24,24 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "ibpp.h"
-#include "_internals.h"
+#ifdef _MSC_VER
+#pragma warning(disable: 4786 4996)
+#ifndef _DEBUG
+#pragma warning(disable: 4702)
+#endif
+#endif
+
+#include "_ibpp.h"
 
 #ifdef HAS_HDRSTOP
 #pragma hdrstop
 #endif
 
-#include <limits>
-
 #include <math.h>
 
 using namespace ibpp_internals;
 
-/*
-// Fix to famous MSVC 6 variable scope bug
-// This fix will trigger warning C4127 at level 4 with MSVC 7.1 at least
-#ifdef IBPP_MSVC
-#define for if(true)for
-#endif
-*/
-
-namespace ibpp_internals
-{
-
-	const double dscales[19] =
-	{
-		1, 1E1, 1E2, 1E3, 1E4, 1E5, 1E6, 1E7, 1E8,
-		1E9, 1E10, 1E11, 1E12, 1E13, 1E14, 1E15,
-		1E16, 1E17, 1E18
-	};
-
-// Many compilers confuses those following min/max with macros min and max !
-#undef min
-#undef max
-
-#ifdef IBPP_DMC // Needs to break-down the declaration else compiler crash
-	const std::numeric_limits<short> short_limits;
-	const std::numeric_limits<long> long_limits;
-	const short minshort = short_limits.min();
-	const short maxshort = short_limits.max();
-	const long minlong = long_limits.min();
-	const long maxlong = long_limits.max();
-#else
-	const short minshort = std::numeric_limits<short>::min();
-	const short maxshort = std::numeric_limits<short>::max();
-	const long minlong = std::numeric_limits<long>::min();
-	const long maxlong = std::numeric_limits<long>::max();
-#endif
-
-};
-
 //	(((((((( OBJECT INTERFACE IMPLEMENTATION ))))))))
-
-void ArrayImpl::AttachDatabase(IBPP::IDatabase* database)
-{
-	if (database == 0) throw LogicExceptionImpl("Array::AttachDatabase",
-			_("Can't attach a 0 Database object."));
-
-	if (mDatabase != 0) mDatabase->DetachArray(this);
-	mDatabase = dynamic_cast<DatabaseImpl*>(database);
-	mDatabase->AttachArray(this);
-}
-
-void ArrayImpl::AttachTransaction(IBPP::ITransaction* transaction)
-{
-	if (transaction == 0) throw LogicExceptionImpl("Array::AttachTransaction",
-			_("Can't attach a 0 Transaction object."));
-
-	if (mTransaction != 0) mTransaction->DetachArray(this);
-	mTransaction = dynamic_cast<TransactionImpl*>(transaction);
-	mTransaction->AttachArray(this);
-}
-
-void ArrayImpl::DetachDatabase(void)
-{
-	if (mDatabase == 0) return;
-
-	mDatabase->DetachArray(this);
-	mDatabase = 0;
-}
-
-void ArrayImpl::DetachTransaction(void)
-{
-	if (mTransaction == 0) return;
-
-	mTransaction->DetachArray(this);
-	mTransaction = 0;
-}
-
-IBPP::IDatabase* ArrayImpl::Database(void) const
-{
-	if (mDatabase == 0) throw LogicExceptionImpl("Array::Database",
-			_("No Database is attached."));
-	return mDatabase;
-}
-
-IBPP::ITransaction* ArrayImpl::Transaction(void) const
-{
-	if (mTransaction == 0) throw LogicExceptionImpl("Array::Transaction",
-			_("No Transaction is attached."));
-	return mTransaction;
-}
 
 void ArrayImpl::Describe(const std::string& table, const std::string& column)
 {
@@ -182,7 +91,7 @@ void ArrayImpl::SetBounds(int dim, int low, int high)
 	AllocArrayBuffer();
 }
 
-IBPP::SDT ArrayImpl::ElementType(void)
+IBPP::SDT ArrayImpl::ElementType()
 {
 	if (! mDescribed)
 		throw LogicExceptionImpl("Array::ElementType",
@@ -209,7 +118,7 @@ IBPP::SDT ArrayImpl::ElementType(void)
 	return value;
 }
 
-int ArrayImpl::ElementSize(void)
+int ArrayImpl::ElementSize()
 {
 	if (! mDescribed)
 		throw LogicExceptionImpl("Array::ElementSize",
@@ -218,7 +127,7 @@ int ArrayImpl::ElementSize(void)
 	return mDesc.array_desc_length;
 }
 
-int ArrayImpl::ElementScale(void)
+int ArrayImpl::ElementScale()
 {
 	if (! mDescribed)
 		throw LogicExceptionImpl("Array::ElementScale",
@@ -227,7 +136,7 @@ int ArrayImpl::ElementScale(void)
 	return mDesc.array_desc_scale;
 }
 
-int ArrayImpl::Dimensions(void)
+int ArrayImpl::Dimensions()
 {
 	if (! mDescribed)
 		throw LogicExceptionImpl("Array::Dimensions",
@@ -365,9 +274,6 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 		case blr_short :
 			if (adtype == IBPP::adBool)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::ReadTo",
-						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(bool*)dst = (*(short*)src != 0) ? true : false;
@@ -377,9 +283,6 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			}
 			else if (adtype == IBPP::adInt16)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::ReadTo",
-						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(short*)dst = *(short*)src;
@@ -389,9 +292,6 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			}
 			else if (adtype == IBPP::adInt32)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::ReadTo",
-						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(int*)dst = (int)*(short*)src;
@@ -401,9 +301,6 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			}
 			else if (adtype == IBPP::adInt64)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::ReadTo",
-						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(int64_t*)dst = (int64_t)*(short*)src;
@@ -414,7 +311,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			else if (adtype == IBPP::adFloat)
 			{
 				// This SQL_SHORT is a NUMERIC(x,y), scale it !
-				double divisor = dscales[-mDesc.array_desc_scale];
+				double divisor = consts::dscales[-mDesc.array_desc_scale];
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(float*)dst = (float)(*(short*)src / divisor);
@@ -425,7 +322,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			else if (adtype == IBPP::adDouble)
 			{
 				// This SQL_SHORT is a NUMERIC(x,y), scale it !
-				double divisor = dscales[-mDesc.array_desc_scale];
+				double divisor = consts::dscales[-mDesc.array_desc_scale];
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(double*)dst = (double)(*(short*)src / divisor);
@@ -439,9 +336,6 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 		case blr_long :
 			if (adtype == IBPP::adBool)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::ReadTo",
-						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(bool*)dst = (*(long*)src != 0) ? true : false;
@@ -451,12 +345,9 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			}
 			else if (adtype == IBPP::adInt16)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::ReadTo",
-						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
-					if (*(long*)src < minshort || *(long*)src > maxshort)
+					if (*(long*)src < consts::min16 || *(long*)src > consts::max16)
 						throw LogicExceptionImpl("Array::ReadTo",
 							_("Out of range numeric conversion !"));
 					*(short*)dst = short(*(long*)src);
@@ -466,9 +357,6 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			}
 			else if (adtype == IBPP::adInt32)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::ReadTo",
-						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(long*)dst = *(long*)src;
@@ -478,9 +366,6 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			}
 			else if (adtype == IBPP::adInt64)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::ReadTo",
-						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(int64_t*)dst = (int64_t)*(long*)src;
@@ -491,7 +376,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			else if (adtype == IBPP::adFloat)
 			{
 				// This SQL_SHORT is a NUMERIC(x,y), scale it !
-				double divisor = dscales[-mDesc.array_desc_scale];
+				double divisor = consts::dscales[-mDesc.array_desc_scale];
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(float*)dst = (float)(*(long*)src / divisor);
@@ -502,7 +387,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			else if (adtype == IBPP::adDouble)
 			{
 				// This SQL_SHORT is a NUMERIC(x,y), scale it !
-				double divisor = dscales[-mDesc.array_desc_scale];
+				double divisor = consts::dscales[-mDesc.array_desc_scale];
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(double*)dst = (double)(*(long*)src / divisor);
@@ -516,9 +401,6 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 		case blr_int64 :
 			if (adtype == IBPP::adBool)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::ReadTo",
-						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(bool*)dst = (*(int64_t*)src != 0) ? true : false;
@@ -528,12 +410,9 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			}
 			else if (adtype == IBPP::adInt16)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::ReadTo",
-						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
-					if (*(int64_t*)src < minshort || *(int64_t*)src > maxshort)
+					if (*(int64_t*)src < consts::min16 || *(int64_t*)src > consts::max16)
 						throw LogicExceptionImpl("Array::ReadTo",
 							_("Out of range numeric conversion !"));
 					*(short*)dst = short(*(int64_t*)src);
@@ -543,12 +422,9 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			}
 			else if (adtype == IBPP::adInt32)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::ReadTo",
-						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
-					if (*(int64_t*)src < minlong || *(int64_t*)src > maxlong)
+					if (*(int64_t*)src < consts::min32 || *(int64_t*)src > consts::max32)
 						throw LogicExceptionImpl("Array::ReadTo",
 							_("Out of range numeric conversion !"));
 					*(long*)dst = (long)*(int64_t*)src;
@@ -558,9 +434,6 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			}
 			else if (adtype == IBPP::adInt64)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::ReadTo",
-						_("NUM/DEC with scale : use GetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(int64_t*)dst = *(int64_t*)src;
@@ -571,7 +444,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			else if (adtype == IBPP::adFloat)
 			{
 				// This SQL_SHORT is a NUMERIC(x,y), scale it !
-				double divisor = dscales[-mDesc.array_desc_scale];
+				double divisor = consts::dscales[-mDesc.array_desc_scale];
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(float*)dst = (float)(*(int64_t*)src / divisor);
@@ -582,7 +455,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			else if (adtype == IBPP::adDouble)
 			{
 				// This SQL_SHORT is a NUMERIC(x,y), scale it !
-				double divisor = dscales[-mDesc.array_desc_scale];
+				double divisor = consts::dscales[-mDesc.array_desc_scale];
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(double*)dst = (double)(*(int64_t*)src / divisor);
@@ -610,7 +483,7 @@ void ArrayImpl::ReadTo(IBPP::ADT adtype, void* data, int datacount)
 			if (mDesc.array_desc_scale != 0)
 			{
 				// Round to scale of NUMERIC(x,y)
-				double divisor = dscales[-mDesc.array_desc_scale];
+				double divisor = consts::dscales[-mDesc.array_desc_scale];
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(double*)dst =	(double)(*(double*)src / divisor);
@@ -741,9 +614,6 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 		case blr_short :
 			if (adtype == IBPP::adBool)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::WriteFrom",
-						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(short*)dst = short(*(bool*)src ? 1 : 0);
@@ -753,9 +623,6 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			}
 			else if (adtype == IBPP::adInt16)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::WriteFrom",
-						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(short*)dst = *(short*)src;
@@ -765,12 +632,9 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			}
 			else if (adtype == IBPP::adInt32)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::WriteFrom",
-						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
-					if (*(long*)src < minshort || *(long*)src > maxshort)
+					if (*(long*)src < consts::min16 || *(long*)src > consts::max16)
 						throw LogicExceptionImpl("Array::WriteFrom",
 							_("Out of range numeric conversion !"));
 					*(short*)dst = (short)*(int*)src;
@@ -780,12 +644,9 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			}
 			else if (adtype == IBPP::adInt64)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::WriteFrom",
-						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
-					if (*(int64_t*)src < minshort || *(int64_t*)src > maxshort)
+					if (*(int64_t*)src < consts::min16 || *(int64_t*)src > consts::max16)
 						throw LogicExceptionImpl("Array::WriteFrom",
 							_("Out of range numeric conversion !"));
 					*(short*)dst = (short)*(int64_t*)src;
@@ -796,7 +657,7 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			else if (adtype == IBPP::adFloat)
 			{
 				// This SQL_SHORT is a NUMERIC(x,y), scale it !
-				double multiplier = dscales[-mDesc.array_desc_scale];
+				double multiplier = consts::dscales[-mDesc.array_desc_scale];
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(short*)dst =
@@ -808,7 +669,7 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			else if (adtype == IBPP::adDouble)
 			{
 				// This SQL_SHORT is a NUMERIC(x,y), scale it !
-				double multiplier = dscales[-mDesc.array_desc_scale];
+				double multiplier = consts::dscales[-mDesc.array_desc_scale];
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(short*)dst =
@@ -823,9 +684,6 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 		case blr_long :
 			if (adtype == IBPP::adBool)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::WriteFrom",
-						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(long*)dst = *(bool*)src ? 1 : 0;
@@ -835,9 +693,6 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			}
 			else if (adtype == IBPP::adInt16)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::WriteFrom",
-						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(long*)dst = *(short*)src;
@@ -847,9 +702,6 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			}
 			else if (adtype == IBPP::adInt32)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::WriteFrom",
-						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(long*)dst = *(long*)src;
@@ -859,12 +711,9 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			}
 			else if (adtype == IBPP::adInt64)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::WriteFrom",
-						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
-					if (*(int64_t*)src < minlong || *(int64_t*)src > maxlong)
+					if (*(int64_t*)src < consts::min32 || *(int64_t*)src > consts::max32)
 						throw LogicExceptionImpl("Array::WriteFrom",
 							_("Out of range numeric conversion !"));
 					*(long*)dst = (long)*(int64_t*)src;
@@ -875,7 +724,7 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			else if (adtype == IBPP::adFloat)
 			{
 				// This SQL_INT is a NUMERIC(x,y), scale it !
-				double multiplier = dscales[-mDesc.array_desc_scale];
+				double multiplier = consts::dscales[-mDesc.array_desc_scale];
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(long*)dst =
@@ -887,7 +736,7 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			else if (adtype == IBPP::adDouble)
 			{
 				// This SQL_INT is a NUMERIC(x,y), scale it !
-				double multiplier = dscales[-mDesc.array_desc_scale];
+				double multiplier = consts::dscales[-mDesc.array_desc_scale];
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(long*)dst =
@@ -902,9 +751,6 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 		case blr_int64 :
 			if (adtype == IBPP::adBool)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::WriteFrom",
-						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(int64_t*)dst = *(bool*)src ? 1 : 0;
@@ -914,9 +760,6 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			}
 			else if (adtype == IBPP::adInt16)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::WriteFrom",
-						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(int64_t*)dst = *(short*)src;
@@ -926,9 +769,6 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			}
 			else if (adtype == IBPP::adInt32)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::WriteFrom",
-						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(int64_t*)dst = *(long*)src;
@@ -938,9 +778,6 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			}
 			else if (adtype == IBPP::adInt64)
 			{
-				if (mDesc.array_desc_scale != 0)
-					throw LogicExceptionImpl("Array::WriteFrom",
-						_("NUM/DEC with scale : use SetDouble()"));
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(int64_t*)dst = *(int64_t*)src;
@@ -951,7 +788,7 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			else if (adtype == IBPP::adFloat)
 			{
 				// This SQL_INT is a NUMERIC(x,y), scale it !
-				double multiplier = dscales[-mDesc.array_desc_scale];
+				double multiplier = consts::dscales[-mDesc.array_desc_scale];
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(int64_t*)dst =
@@ -963,7 +800,7 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			else if (adtype == IBPP::adDouble)
 			{
 				// This SQL_INT is a NUMERIC(x,y), scale it !
-				double multiplier = dscales[-mDesc.array_desc_scale];
+				double multiplier = consts::dscales[-mDesc.array_desc_scale];
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(int64_t*)dst =
@@ -994,7 +831,7 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 			if (mDesc.array_desc_scale != 0)
 			{
 				// Round to scale of NUMERIC(x,y)
-				double multiplier = dscales[-mDesc.array_desc_scale];
+				double multiplier = consts::dscales[-mDesc.array_desc_scale];
 				for (int i = 0; i < mElemCount; i++)
 				{
 					*(double*)dst =
@@ -1061,28 +898,39 @@ void ArrayImpl::WriteFrom(IBPP::ADT adtype, const void* data, int datacount)
 		throw SQLExceptionImpl(status, "Array::WriteFrom", _("Internal buffer size discrepancy."));
 }
 
-IBPP::IArray* ArrayImpl::AddRef(void)
+IBPP::Database ArrayImpl::DatabasePtr() const
+{
+	if (mDatabase == 0) throw LogicExceptionImpl("Array::DatabasePtr",
+			_("No Database is attached."));
+	return mDatabase;
+}
+
+IBPP::Transaction ArrayImpl::TransactionPtr() const
+{
+	if (mTransaction == 0) throw LogicExceptionImpl("Array::TransactionPtr",
+			_("No Transaction is attached."));
+	return mTransaction;
+}
+
+IBPP::IArray* ArrayImpl::AddRef()
 {
 	ASSERTION(mRefCount >= 0);
 	++mRefCount;
 	return this;
 }
 
-void ArrayImpl::Release(IBPP::IArray*& Self)
+void ArrayImpl::Release()
 {
-	if (this != dynamic_cast<ArrayImpl*>(Self))
-		throw LogicExceptionImpl("Array::Release", _("Invalid Release()"));
-
+	// Release cannot throw, except in DEBUG builds on assertion
 	ASSERTION(mRefCount >= 0);
-
 	--mRefCount;
-	if (mRefCount <= 0) delete this;
-	Self = 0;
+	try { if (mRefCount <= 0) delete this; }
+		catch (...) { }
 }
 
 //	(((((((( OBJECT INTERNAL METHODS ))))))))
 
-void ArrayImpl::Init(void)
+void ArrayImpl::Init()
 {
 	ResetId();
 	mDescribed = false;
@@ -1109,13 +957,13 @@ void ArrayImpl::GetId(ISC_QUAD* quad)
 	memcpy(quad, &mId, sizeof(mId));
 }
 
-void ArrayImpl::ResetId(void)
+void ArrayImpl::ResetId()
 {
 	memset(&mId, 0, sizeof(mId));
 	mIdAssigned = false;
 }
 
-void ArrayImpl::AllocArrayBuffer(void)
+void ArrayImpl::AllocArrayBuffer()
 {
 	// Clean previous buffer if any
 	if (mBuffer != 0) delete [] (char*)mBuffer;
@@ -1138,19 +986,58 @@ void ArrayImpl::AllocArrayBuffer(void)
 	mBuffer = (void*) new char[mBufferSize];
 }
 
+void ArrayImpl::AttachDatabaseImpl(DatabaseImpl* database)
+{
+	if (database == 0) throw LogicExceptionImpl("Array::AttachDatabase",
+			_("Can't attach a 0 Database object."));
+
+	if (mDatabase != 0) mDatabase->DetachArrayImpl(this);
+	mDatabase = database;
+	mDatabase->AttachArrayImpl(this);
+}
+
+void ArrayImpl::AttachTransactionImpl(TransactionImpl* transaction)
+{
+	if (transaction == 0) throw LogicExceptionImpl("Array::AttachTransaction",
+			_("Can't attach a 0 Transaction object."));
+
+	if (mTransaction != 0) mTransaction->DetachArrayImpl(this);
+	mTransaction = transaction;
+	mTransaction->AttachArrayImpl(this);
+}
+
+void ArrayImpl::DetachDatabaseImpl()
+{
+	if (mDatabase == 0) return;
+
+	mDatabase->DetachArrayImpl(this);
+	mDatabase = 0;
+}
+
+void ArrayImpl::DetachTransactionImpl()
+{
+	if (mTransaction == 0) return;
+
+	mTransaction->DetachArrayImpl(this);
+	mTransaction = 0;
+}
+
 ArrayImpl::ArrayImpl(DatabaseImpl* database, TransactionImpl* transaction)
 	: mRefCount(0)
 {
 	Init();
-	AttachDatabase(database);
-	if (transaction != 0) AttachTransaction(transaction);
+	AttachDatabaseImpl(database);
+	if (transaction != 0) AttachTransactionImpl(transaction);
 }
 
 ArrayImpl::~ArrayImpl()
 {
-	if (mTransaction != 0) mTransaction->DetachArray(this);
-	if (mDatabase != 0) mDatabase->DetachArray(this);
-	if (mBuffer != 0) delete [] (char*)mBuffer;
+	try { if (mTransaction != 0) mTransaction->DetachArrayImpl(this); }
+		catch (...) {}
+	try { if (mDatabase != 0) mDatabase->DetachArrayImpl(this); }
+		catch (...) {}
+	try { if (mBuffer != 0) delete [] (char*)mBuffer; }
+		catch (...) {}
 }
 
 //

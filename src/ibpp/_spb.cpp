@@ -5,24 +5,17 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-//	The contents of this file are subject to the Mozilla Public License
-//	Version 1.0 (the "License"); you may not use this file except in
-//	compliance with the License. You may obtain a copy of the License at
-//	http://www.mozilla.org/MPL/
+//	(C) Copyright 2000-2006 T.I.P. Group S.A. and the IBPP Team (www.ibpp.org)
 //
-//	Software distributed under the License is distributed on an "AS IS"
-//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+//	The contents of this file are subject to the IBPP License (the "License");
+//	you may not use this file except in compliance with the License.  You may
+//	obtain a copy of the License at http://www.ibpp.org or in the 'license.txt'
+//	file which must have been distributed along with this file.
+//
+//	This software, distributed under the License, is distributed on an "AS IS"
+//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See the
 //	License for the specific language governing rights and limitations
 //	under the License.
-//
-//	The Original Code is "IBPP 0.9" and all its associated documentation.
-//
-//	The Initial Developer of the Original Code is T.I.P. Group S.A.
-//	Portions created by T.I.P. Group S.A. are
-//	Copyright (C) 2000 T.I.P Group S.A.
-//	All Rights Reserved.
-//
-//	Contributor(s): ______________________________________.
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -32,8 +25,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "ibpp.h"
-#include "_internals.h"
+#ifdef _MSC_VER
+#pragma warning(disable: 4786 4996)
+#ifndef _DEBUG
+#pragma warning(disable: 4702)
+#endif
+#endif
+
+#include "_ibpp.h"
 
 #ifdef HAS_HDRSTOP
 #pragma hdrstop
@@ -41,9 +40,7 @@
 
 using namespace ibpp_internals;
 
-namespace {
-	const int BUFFERINCR = 128;
-};
+const int SPB::BUFFERINCR = 128;
 
 void SPB::Grow(int needed)
 {

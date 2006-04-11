@@ -77,8 +77,8 @@ bool GridTable::canFetchMoreRows()
     if (statementM.intf() == 0)
         return false;
     // there should be a better way here...
-    IBPP::ITransaction* tran = statementM->Transaction();
-    return (tran && tran->Started());
+    IBPP::Transaction tran = statementM->TransactionPtr();
+    return (tran != 0 && tran->Started());
 }
 //-----------------------------------------------------------------------------
 void GridTable::Clear()

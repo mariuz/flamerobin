@@ -1,0 +1,13 @@
+$Id$
+
+
+2006-04-11 (mghie):
+
+  Integration of IBPP sources taken from Subversion repository revision 68
+  ------------------------------------------------------------------------
+
+  ibpp/branch/ibpp-2-5/changelog.txt
+  ibpp/branch/ibpp-2-5/license.txt
+  ibpp/branch/ibpp-2-5/releasenotes.txt
+  ibpp/branch/ibpp-2-5/core/*.h
+  ibpp/branch/ibpp-2-5/core/*.cpp (except all_in_one.cpp)

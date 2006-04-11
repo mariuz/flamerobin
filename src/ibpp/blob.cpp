@@ -5,24 +5,17 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-//	The contents of this file are subject to the Mozilla Public License
-//	Version 1.0 (the "License"); you may not use this file except in
-//	compliance with the License. You may obtain a copy of the License at
-//	http://www.mozilla.org/MPL/
+//	(C) Copyright 2000-2006 T.I.P. Group S.A. and the IBPP Team (www.ibpp.org)
 //
-//	Software distributed under the License is distributed on an "AS IS"
-//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+//	The contents of this file are subject to the IBPP License (the "License");
+//	you may not use this file except in compliance with the License.  You may
+//	obtain a copy of the License at http://www.ibpp.org or in the 'license.txt'
+//	file which must have been distributed along with this file.
+//
+//	This software, distributed under the License, is distributed on an "AS IS"
+//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See the
 //	License for the specific language governing rights and limitations
 //	under the License.
-//
-//	The Original Code is "IBPP 0.9" and all its associated documentation.
-//
-//	The Initial Developer of the Original Code is T.I.P. Group S.A.
-//	Portions created by T.I.P. Group S.A. are
-//	Copyright (C) 2000 T.I.P Group S.A.
-//	All Rights Reserved.
-//
-//	Contributor(s): ______________________________________.
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -31,8 +24,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "ibpp.h"
-#include "_internals.h"
+#ifdef _MSC_VER
+#pragma warning(disable: 4786 4996)
+#ifndef _DEBUG
+#pragma warning(disable: 4702)
+#endif
+#endif
+
+#include "_ibpp.h"
 
 #ifdef HAS_HDRSTOP
 #pragma hdrstop
@@ -42,57 +41,7 @@ using namespace ibpp_internals;
 
 //	(((((((( OBJECT INTERFACE IMPLEMENTATION ))))))))
 
-void BlobImpl::AttachDatabase(IBPP::IDatabase* database)
-{
-	if (database == 0) throw LogicExceptionImpl("Blob::AttachDatabase",
-			_("Can't attach a NULL Database object."));
-
-	if (mDatabase != 0) mDatabase->DetachBlob(this);
-	mDatabase = dynamic_cast<DatabaseImpl*>(database);
-	mDatabase->AttachBlob(this);
-}
-
-void BlobImpl::AttachTransaction(IBPP::ITransaction* transaction)
-{
-	if (transaction == 0) throw LogicExceptionImpl("Blob::AttachTransaction",
-			_("Can't attach a NULL Transaction object."));
-
-	if (mTransaction != 0) mTransaction->DetachBlob(this);
-	mTransaction = dynamic_cast<TransactionImpl*>(transaction);
-	mTransaction->AttachBlob(this);
-}
-
-void BlobImpl::DetachDatabase(void)
-{
-	if (mDatabase == 0) return;
-
-	mDatabase->DetachBlob(this);
-	mDatabase = 0;
-}
-
-void BlobImpl::DetachTransaction(void)
-{
-	if (mTransaction == 0) return;
-
-	mTransaction->DetachBlob(this);
-	mTransaction = 0;
-}
-
-IBPP::IDatabase* BlobImpl::Database(void) const
-{
-	if (mDatabase == 0) throw LogicExceptionImpl("Blob::GetDatabase",
-			_("No Database is attached."));
-	return mDatabase;
-}
-
-IBPP::ITransaction* BlobImpl::Transaction(void) const
-{
-	if (mTransaction == 0) throw LogicExceptionImpl("Blob::GetTransaction",
-			_("No Transaction is attached."));
-	return mTransaction;
-}
-
-void BlobImpl::Open(void)
+void BlobImpl::Open()
 {
 	if (mHandle != 0)
 		throw LogicExceptionImpl("Blob::Open", _("Blob already opened."));
@@ -111,7 +60,7 @@ void BlobImpl::Open(void)
 	mWriteMode = false;
 }
 
-void BlobImpl::Create(void)
+void BlobImpl::Create()
 {
 	if (mHandle != 0)
 		throw LogicExceptionImpl("Blob::Create", _("Blob already opened."));
@@ -130,7 +79,7 @@ void BlobImpl::Create(void)
 	mWriteMode = true;
 }
 
-void BlobImpl::Close(void)
+void BlobImpl::Close()
 {
 	if (mHandle == 0) return;	// Not opened anyway
 
@@ -141,7 +90,7 @@ void BlobImpl::Close(void)
 	mHandle = 0;
 }
 
-void BlobImpl::Cancel(void)
+void BlobImpl::Cancel()
 {
 	if (mHandle == 0) return;	// Not opened anyway
 
@@ -299,28 +248,39 @@ void BlobImpl::Load(std::string& data)
 	mHandle = 0;
 }
 
-IBPP::IBlob* BlobImpl::AddRef(void)
+IBPP::Database BlobImpl::DatabasePtr() const
+{
+	if (mDatabase == 0) throw LogicExceptionImpl("Blob::DatabasePtr",
+			_("No Database is attached."));
+	return mDatabase;
+}
+
+IBPP::Transaction BlobImpl::TransactionPtr() const
+{
+	if (mTransaction == 0) throw LogicExceptionImpl("Blob::TransactionPtr",
+			_("No Transaction is attached."));
+	return mTransaction;
+}
+
+IBPP::IBlob* BlobImpl::AddRef()
 {
 	ASSERTION(mRefCount >= 0);
 	++mRefCount;
 	return this;
 }
 
-void BlobImpl::Release(IBPP::IBlob*& Self)
+void BlobImpl::Release()
 {
-	if (this != dynamic_cast<BlobImpl*>(Self))
-		throw LogicExceptionImpl("Blob::Release", _("Invalid Release()"));
-
+	// Release cannot throw, except in DEBUG builds on assertion
 	ASSERTION(mRefCount >= 0);
-
 	--mRefCount;
-	if (mRefCount <= 0) delete this;
-	Self = 0;
+	try { if (mRefCount <= 0) delete this; }
+		catch (...) { }
 }
 
 //	(((((((( OBJECT INTERNAL METHODS ))))))))
 
-void BlobImpl::Init(void)
+void BlobImpl::Init()
 {
 	mIdAssigned = false;
 	mWriteMode = false;
@@ -352,12 +312,48 @@ void BlobImpl::GetId(ISC_QUAD* quad)
 	memcpy(quad, &mId, sizeof(mId));
 }
 
+void BlobImpl::AttachDatabaseImpl(DatabaseImpl* database)
+{
+	if (database == 0) throw LogicExceptionImpl("Blob::AttachDatabase",
+			_("Can't attach a NULL Database object."));
+
+	if (mDatabase != 0) mDatabase->DetachBlobImpl(this);
+	mDatabase = database;
+	mDatabase->AttachBlobImpl(this);
+}
+
+void BlobImpl::AttachTransactionImpl(TransactionImpl* transaction)
+{
+	if (transaction == 0) throw LogicExceptionImpl("Blob::AttachTransaction",
+			_("Can't attach a NULL Transaction object."));
+
+	if (mTransaction != 0) mTransaction->DetachBlobImpl(this);
+	mTransaction = transaction;
+	mTransaction->AttachBlobImpl(this);
+}
+
+void BlobImpl::DetachDatabaseImpl()
+{
+	if (mDatabase == 0) return;
+
+	mDatabase->DetachBlobImpl(this);
+	mDatabase = 0;
+}
+
+void BlobImpl::DetachTransactionImpl()
+{
+	if (mTransaction == 0) return;
+
+	mTransaction->DetachBlobImpl(this);
+	mTransaction = 0;
+}
+
 BlobImpl::BlobImpl(DatabaseImpl* database, TransactionImpl* transaction)
 	: mRefCount(0)
 {
 	Init();
-	AttachDatabase(database);
-	if (transaction != 0) AttachTransaction(transaction);
+	AttachDatabaseImpl(database);
+	if (transaction != 0) AttachTransactionImpl(transaction);
 }
 
 BlobImpl::~BlobImpl()
@@ -369,10 +365,13 @@ BlobImpl::~BlobImpl()
 			if (mWriteMode) Cancel();
 			else Close();
 		}
-		if (mTransaction != 0) mTransaction->DetachBlob(this);
-		if (mDatabase != 0) mDatabase->DetachBlob(this);
 	}
-	catch (IBPP::Exception&) {}
+	catch (...) { }
+	
+	try { if (mTransaction != 0) mTransaction->DetachBlobImpl(this); }
+		catch (...) { }
+	try { if (mDatabase != 0) mDatabase->DetachBlobImpl(this); }
+		catch (...) { }
 }
 
 //

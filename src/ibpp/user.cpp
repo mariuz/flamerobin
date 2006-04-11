@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //	File    : $Id$
-//	Subject : IBPP, internal TPB class implementation
+//	Subject : IBPP, User class implementation
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -20,7 +20,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //	COMMENTS
-//	* TPB == Transaction Parameter Block/Buffer, see Interbase 6.0 C-API
 //	* Tabulations should be set every four characters when editing this file.
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,59 +37,32 @@
 #pragma hdrstop
 #endif
 
+#include <iostream>
+#include <sstream>
+#include <iomanip>
+
 using namespace ibpp_internals;
 
-const int TPB::BUFFERINCR = 128;
+//	Private implementation
 
-void TPB::Grow(int needed)
+void IBPP::User::copyfrom(const IBPP::User& r)
 {
-	if (mBuffer == 0) ++needed;	// Initial alloc will require one more byte
-	if ((mSize + needed) > mAlloc)
-	{
-		// We need to grow the buffer. We use increments of BUFFERINCR bytes.
-		needed = (needed / BUFFERINCR + 1) * BUFFERINCR;
-		char* newbuffer = new char[mAlloc + needed];
-		if (mBuffer == 0)
-		{
-			// Initial allocation, initialize the version tag
-			newbuffer[0] = isc_tpb_version3;
-			mSize = 1;
-		}
-		else
-		{
-			// Move the old buffer content to the new one
-			memcpy(newbuffer, mBuffer, mSize);
-			delete [] mBuffer;
-		}
-		mBuffer = newbuffer;
-		mAlloc += needed;
-	}
+	username = r.username;
+	password = r.password;
+	firstname = r.firstname;
+	middlename = r.middlename;
+	lastname = r.lastname;
+	userid = r.userid;
+	groupid = r.groupid;
 }
 
-void TPB::Insert(char item)
-{
-	Grow(1);
-	mBuffer[mSize++] = item;
-}
+//	Public implementation
 
-void TPB::Insert(const std::string& data)
+void IBPP::User::clear()
 {
-	int len = (int)data.length();
-	Grow(1 + len);
-	mBuffer[mSize++] = (char)len;
-	strncpy(&mBuffer[mSize], data.c_str(), len);
-	mSize += len;
-}
-
-void TPB::Reset()
-{
-	if (mSize != 0)
-	{
-		delete [] mBuffer;
-		mBuffer = 0;
-		mSize = 0;
-		mAlloc = 0;
-	}
+	username.erase(); password.erase();
+	firstname.erase(); middlename.erase(); lastname.erase();
+	userid = groupid = 0;
 }
 
 //

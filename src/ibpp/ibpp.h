@@ -1,29 +1,24 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //	File    : $Id$
-//	Subject : IBPP public header file. This is _the_ file you include in your
-//			  application files when developing with IBPP.
+//	Subject : IBPP public header file. This is _the_ only file you include in
+//			  your application files when developing with IBPP.
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-//	The contents of this file are subject to the Mozilla Public License
-//	Version 1.0 (the "License"); you may not use this file except in
-//	compliance with the License. You may obtain a copy of the License at
-//	http://www.mozilla.org/MPL/
+//	(C) Copyright 2000-2006 T.I.P. Group S.A. and the IBPP Team (www.ibpp.org)
 //
-//	Software distributed under the License is distributed on an "AS IS"
-//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+//	The contents of this file are subject to the IBPP License (the "License");
+//	you may not use this file except in compliance with the License.  You may
+//	obtain a copy of the License at http://www.ibpp.org or in the 'license.txt'
+//	file which must have been distributed along with this file.
+//
+//	This software, distributed under the License, is distributed on an "AS IS"
+//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See the
 //	License for the specific language governing rights and limitations
 //	under the License.
 //
-//	The Original Code is "IBPP 0.9" and all its associated documentation.
-//
-//	The Initial Developer of the Original Code is T.I.P. Group S.A.
-//	Portions created by T.I.P. Group S.A. are
-//	Copyright (C) 2000 T.I.P Group S.A.
-//	All Rights Reserved.
-//
-//	Contributor(s) to and since version 2.0 :
+//	Contributor(s):
 //
 //		Olivier Mascia, main coding
 //		Matt Hortman, initial linux port
@@ -41,14 +36,11 @@
 //	COMMENTS
 //	Tabulations should be set every four characters when editing this file.
 //
-//	When compiling an IBPP project (or IBPP library itself), the following
-//	defines should be made on the command-line (or in makefiles) according
-//	to the OS platform and compiler used.
+//	When compiling a project using IBPP, the following defines should be made
+//	on the command-line (or in makefiles) according to the OS platform and
+//	compiler used.
 //
 //	Select the platform:	IBPP_WINDOWS | IBPP_LINUX | IBPP_DARWIN
-//	Select the compiler:	IBPP_BCC | IBPP_GCC | IBPP_MSVC | IBPP_DMC
-//
-//	See the documentation and makefiles for more information.
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -59,9 +51,9 @@
 #error Please define IBPP_WINDOWS/IBPP_LINUX/IBPP_DARWIN before compiling !
 #endif
 
-#if !defined(IBPP_BCC) && !defined(IBPP_GCC) \
-	&& !defined(IBPP_MSVC) && !defined(IBPP_DMC)
-#error Please define IBPP_BCC/IBPP_GCC/IBPP_MSVC/IBPP_DMC before compiling !
+#if !defined(__BCPLUSPLUS__) && !defined(__GNUC__) \
+	&& !defined(_MSC_VER) && !defined(__DMC__)
+#error Your compiler is not recognized.
 #endif
 
 #if defined(IBPP_LINUX) || defined(IBPP_DARWIN)
@@ -75,14 +67,20 @@
 // the standard type 'int' is used. And where an exact integer size is required
 // the standard exact precision types definitions of C 99 standard are used.
 
-#if defined(IBPP_MSVC) || defined(IBPP_BCC)
+#if defined(_MSC_VER) || defined(__DMC__) || defined(__BCPLUSPLUS__)
 // C99 §7.18.1.1 Exact-width integer types (only those used by IBPP)
-typedef __int16 int16_t;
-typedef __int32 int32_t;
-typedef unsigned __int32 uint32_t;
-typedef __int64 int64_t;
+#if defined(_MSC_VER) && (_MSC_VER < 1300)	// MSVC 6 should be < 1300
+	typedef short int16_t;
+	typedef int int32_t;
+	typedef unsigned int uint32_t;
 #else
-#include <stdint.h>			// C99 (§7.18) integer types definitions
+	typedef __int16 int16_t;
+	typedef __int32 int32_t;
+	typedef unsigned __int32 uint32_t;
+#endif
+	typedef __int64 int64_t;
+#else
+	#include <stdint.h>			// C99 (§7.18) integer types definitions
 #endif
 
 #if !defined(_)
@@ -97,12 +95,12 @@ namespace IBPP
 {
 	//	Typically you use this constant in a call IBPP::CheckVersion as in:
 	//	if (! IBPP::CheckVersion(IBPP::Version)) { throw .... ; }
-	const uint32_t Version = 0x02040400; // Version == 2.4.4.0
+	const uint32_t Version = (2<<24) + (5<<16) + (1<<8) + 65; // Version == 2.5.1.65
 
 	//	Dates range checking
 	const int MinDate = -693594;	//  1 JAN 0001
 	const int MaxDate = 2958464;	// 31 DEC 9999
-
+	
 	//	Transaction Access Modes
 	enum TAM {amWrite, amRead};
 
@@ -118,7 +116,7 @@ namespace IBPP
 	//	Prepared Statement Types
 	enum STT {stUnknown, stUnsupported,
 		stSelect, stInsert, stUpdate, stDelete,	stDDL, stExecProcedure,
-		stSelectUpdate, stOther};
+		stSelectUpdate, stSetGenerator, stSavePoint};
 
 	//	SQL Data Types
 	enum SDT {sdArray, sdBlob, sdDate, sdTime, sdTimestamp, sdString,
@@ -156,13 +154,6 @@ namespace IBPP
 	// TransactionFactory Flags
 	enum TFF {tfIgnoreLimbo = 0x1, tfAutoCommit = 0x2, tfNoAutoUndo = 0x4};
 
-	//	Some forward declarations to keep the compiler happy
-	class IDatabase;
-	class ITransaction;
-	class IStatement;
-	class EventInterface;
-	class Timestamp;
-
 	/* IBPP never return any error codes. It throws exceptions.
 	 * On database engine reported errors, an IBPP::SQLException is thrown.
 	 * In all other cases, IBPP throws IBPP::LogicException.
@@ -175,6 +166,8 @@ namespace IBPP
 	 *                   IBPP::Exception
 	 *                 /                 \
 	 *    IBPP::LogicException    IBPP::SQLException
+	 *             |
+	 *      IBPP::WrongType
 	 */
 
 	class Exception : public std::exception
@@ -195,12 +188,18 @@ namespace IBPP
 	class SQLException : public Exception
 	{
 	public:
-		virtual int SqlCode(void) const throw() = 0;
-		virtual int EngineCode(void) const throw() = 0;
-
+		virtual int SqlCode() const throw() = 0;
+		virtual int EngineCode() const throw() = 0;
+		
 		virtual ~SQLException() throw();
 	};
 
+	class WrongType : public LogicException
+	{
+	public:
+		virtual ~WrongType() throw();
+	};
+	
 	/* Classes Date, Time, Timestamp and DBKey are 'helper' classes.  They help
 	 * in retrieving or setting some special SQL types. Dates, times and dbkeys
 	 * are often read and written as strings in SQL scripts. When programming
@@ -216,7 +215,9 @@ namespace IBPP
 	 * The full range goes from integer values IBPP::MinDate to IBPP::MaxDate
 	 * which means from 01 Jan 0001 to 31 Dec 9999. ( Which is inherently
 	 * incorrect as this assumes Gregorian calendar. ) */
-
+	
+	class Timestamp;	// Cross-reference between Timestamp, Date and Time
+	
 	class Date
 	{
 	protected:
@@ -229,10 +230,13 @@ namespace IBPP
 		void SetDate(int dt);
 		void GetDate(int& year, int& month, int& day) const;
 		int GetDate() const	{ return mDate; }
+		int Year() const;
+		int Month() const;
+		int Day() const;
 		void Add(int days);
 		void StartOfMonth();
 		void EndOfMonth();
-
+	
 		Date()			{ Clear(); };
 		Date(int dt)	{ SetDate(dt); }
 		Date(int year, int month, int day);
@@ -243,7 +247,7 @@ namespace IBPP
 		bool operator==(const Date& rv)	{ return mDate == rv.GetDate(); }
 		bool operator<(const Date& rv) { return mDate < rv.GetDate(); }
 
-		~Date() { };
+		virtual ~Date() { };
 	};
 
 	/* Class Time represent purely a Time. It is usefull in interactions
@@ -262,7 +266,10 @@ namespace IBPP
 		void GetTime(int& hour, int& minute, int& second) const;
 		void GetTime(int& hour, int& minute, int& second, int& tenthousandths) const;
 		int GetTime() const	{ return mTime; }
-
+		int Hours() const;
+		int Minutes() const;
+		int Seconds() const;
+		int SubSeconds() const;		// Actually tenthousandths of seconds
 		Time()			{ Clear(); }
 		Time(int tm)	{ SetTime(tm); }
 		Time(int hour, int minute, int second, int tenthousandths = 0);
@@ -273,7 +280,7 @@ namespace IBPP
 		bool operator==(const Time& rv)	{ return mTime == rv.GetTime(); }
 		bool operator<(const Time& rv) { return mTime < rv.GetTime(); }
 
-		~Time() { };
+		virtual ~Time() { };
 	};
 
 	/* Class Timestamp represent a date AND a time. It is usefull in
@@ -296,8 +303,8 @@ namespace IBPP
 		Timestamp(int y, int mo, int d, int h, int mi, int s, int t = 0)
 	  		{ Date::SetDate(y, mo, d); Time::SetTime(h, mi, s, t); }
 
-		Timestamp(const Timestamp& rv)				// Copy Constructor
-			{ mDate = rv.mDate; mTime = rv.mTime; }
+		Timestamp(const Timestamp& rv)
+			: Date(rv.mDate), Time(rv.mTime) {}	// Copy Constructor
 
 		Timestamp(const Date& rv)
 			{ mDate = rv.GetDate(); mTime = 0; }
@@ -348,6 +355,30 @@ namespace IBPP
 		~DBKey() { }
 	};
 
+	/* Class User wraps all the information about a user that the engine can manage. */
+
+	class User
+	{
+	public:
+		std::string username;
+		std::string password;
+		std::string firstname;
+		std::string middlename;
+		std::string lastname;
+		uint32_t userid;		// Only relevant on unixes
+		uint32_t groupid;		// Only relevant on unixes
+
+	private:
+		void copyfrom(const User& r);
+
+	public:
+		void clear();
+		User& operator=(const User& r)	{ copyfrom(r); return *this; }
+		User(const User& r)				{ copyfrom(r); }
+		User() : userid(0), groupid(0)	{ }
+		~User() { };
+	};
+
 	//	Interface Wrapper
 	template <class T>
 	class Ptr
@@ -356,25 +387,37 @@ namespace IBPP
 		T* mObject;
 
 	public:
-		void clear()			{ if (mObject != 0) mObject->Release(mObject); }
-		T* intf() const			{ return mObject; }
-		T* operator->() const	{ return mObject; }
+		void clear()
+		{
+			if (mObject != 0) { mObject->Release(); mObject = 0; }
+		}
+
+		T* intf() const						{ return mObject; }
+		T* operator->() const				{ return mObject; }
+
+		bool operator==(const T* p) const	{ return mObject == p; }
+		bool operator==(const Ptr& r) const	{ return mObject == r.mObject; }
+		bool operator!=(const T* p) const	{ return mObject != p; }
+		bool operator!=(const Ptr& r) const	{ return mObject != r.mObject; }
+
 		Ptr& operator=(T* p)
 		{
 			// AddRef _before_ Release gives correct behaviour on self-assigns
 			T* tmp = (p == 0 ? 0 : p->AddRef());	// Take care of 0
-			if (mObject != 0) mObject->Release(mObject);
+			if (mObject != 0) mObject->Release();
 			mObject = tmp; return *this;
 		}
+
 		Ptr& operator=(const Ptr& r)
 		{
 			// AddRef _before_ Release gives correct behaviour on self-assigns
 			T* tmp = (r.intf() == 0 ? 0 : r->AddRef());// Take care of 0
-			if (mObject != 0) mObject->Release(mObject);
+			if (mObject != 0) mObject->Release();
 			mObject = tmp; return *this;
 		}
-		Ptr(T* p)			{ mObject = (p == 0 ? 0 : p->AddRef()); }
-		Ptr(const Ptr& r)	{ mObject = (r.intf() == 0 ? 0 : r->AddRef()); }
+
+		Ptr(T* p) : mObject(p == 0 ? 0 : p->AddRef()) { }
+		Ptr(const Ptr& r) : mObject(r.intf() == 0 ? 0 : r->AddRef()) {  }
 
 		Ptr() : mObject(0) { }
 		~Ptr() { clear(); }
@@ -392,6 +435,15 @@ namespace IBPP
 	 * itself), you'll never have to care about AddRef/Release and you'll never
 	 * have to care about deleting your objects. */
 
+	class IBlob;			typedef Ptr<IBlob> Blob;
+	class IArray;			typedef Ptr<IArray> Array;
+	class IService;			typedef Ptr<IService> Service;
+	class IDatabase;		typedef Ptr<IDatabase> Database;
+	class ITransaction;		typedef Ptr<ITransaction> Transaction;
+	class IStatement;		typedef Ptr<IStatement> Statement;
+	class IEvents;			typedef Ptr<IEvents> Events;
+	class IRow;				typedef Ptr<IRow> Row;
+
 	/* IBlob is the interface to the blob capabilities of IBPP. Blob is the
 	 * object class you actually use in your programming. In Firebird, at the
 	 * row level, a blob is merely a handle to a blob, stored elsewhere in the
@@ -401,25 +453,25 @@ namespace IBPP
 	class IBlob
 	{
 	public:
-		virtual IDatabase* Database(void) const = 0;
-		virtual ITransaction* Transaction(void) const = 0;
-		virtual void Create(void) = 0;
-		virtual void Open(void) = 0;
-		virtual void Close(void) = 0;
-		virtual void Cancel(void) = 0;
+		virtual void Create() = 0;
+		virtual void Open() = 0;
+		virtual void Close() = 0;
+		virtual void Cancel() = 0;
 		virtual int Read(void*, int size) = 0;
 		virtual void Write(const void*, int size) = 0;
 		virtual void Info(int* Size, int* Largest, int* Segments) = 0;
-
+	
 		virtual void Save(const std::string& data) = 0;
 		virtual void Load(std::string& data) = 0;
 
-		virtual IBlob* AddRef(void) = 0;
-		virtual void Release(IBlob*&) = 0;
+		virtual Database DatabasePtr() const = 0;
+		virtual Transaction TransactionPtr() const = 0;
+
+		virtual IBlob* AddRef() = 0;
+		virtual void Release() = 0;
 
 		virtual ~IBlob() { };
 	};
-	typedef Ptr<IBlob> Blob;
 
 	/*	IArray is the interface to the array capabilities of IBPP. Array is the
 	* object class you actually use in your programming. With an Array object, you
@@ -428,24 +480,24 @@ namespace IBPP
 	class IArray
 	{
 	public:
-		virtual IDatabase* Database(void) const = 0;
-		virtual ITransaction* Transaction(void) const = 0;
 		virtual void Describe(const std::string& table, const std::string& column) = 0;
 		virtual void ReadTo(ADT, void* buffer, int elemcount) = 0;
 		virtual void WriteFrom(ADT, const void* buffer, int elemcount) = 0;
-		virtual SDT ElementType(void) = 0;
-		virtual int ElementSize(void) = 0;
-		virtual int ElementScale(void) = 0;
-		virtual int Dimensions(void) = 0;
+		virtual SDT ElementType() = 0;
+		virtual int ElementSize() = 0;
+		virtual int ElementScale() = 0;
+		virtual int Dimensions() = 0;
 		virtual void Bounds(int dim, int* low, int* high) = 0;
 		virtual void SetBounds(int dim, int low, int high) = 0;
 
-		virtual IArray* AddRef(void) = 0;
-		virtual void Release(IArray*&) = 0;
+		virtual Database DatabasePtr() const = 0;
+		virtual Transaction TransactionPtr() const = 0;
+
+		virtual IArray* AddRef() = 0;
+		virtual void Release() = 0;
 
 		virtual ~IArray() { };
 	};
-	typedef Ptr<IArray> Array;
 
 	/* IService is the interface to the service capabilities of IBPP. Service is
 	 * the object class you actually use in your programming. With a Service
@@ -455,18 +507,17 @@ namespace IBPP
 	class IService
 	{
 	public:
-	    virtual void Connect(void) = 0;
-		virtual bool Connected(void) = 0;
-		virtual void Disconnect(void) = 0;
+	    virtual void Connect() = 0;
+		virtual bool Connected() = 0;
+		virtual void Disconnect() = 0;
 
 		virtual void GetVersion(std::string& version) = 0;
 
-		virtual void AddUser(const std::string& username, const std::string& password,
-			const std::string& first, const std::string& middle, const std::string& last) = 0;
-		virtual void ModifyUser(const std::string& username, const std::string& password,
-			const std::string& first, const std::string& middle, const std::string& last) = 0;
+		virtual void AddUser(const User&) = 0;
+		virtual void GetUser(User&) = 0;
+		virtual void GetUsers(std::vector<User>&) = 0;
+		virtual void ModifyUser(const User&) = 0;
 		virtual void RemoveUser(const std::string& username) = 0;
-		virtual void ListUsers(std::vector<std::string>& users) = 0;
 
 		virtual void SetPageBuffers(const std::string& dbfile, int buffers) = 0;
 		virtual void SetSweepInterval(const std::string& dbfile, int sweep) = 0;
@@ -484,61 +535,54 @@ namespace IBPP
 		virtual void StartRestore(const std::string& bkfile, const std::string& dbfile,
 			int pagesize = 0, BRF flags = BRF(0)) = 0;
 
-		virtual const char* WaitMsg(void) = 0;	// With reporting (does not block)
-		virtual void Wait(void) = 0;			// Without reporting (does block)
+		virtual const char* WaitMsg() = 0;	// With reporting (does not block)
+		virtual void Wait() = 0;			// Without reporting (does block)
 
 		virtual IService* AddRef() = 0;
-		virtual void Release(IService*&) = 0;
+		virtual void Release() = 0;
 
 		virtual ~IService() { };
 	};
-	typedef Ptr<IService> Service;
 
 	/*	IDatabase is the interface to the database connections in IBPP. Database
 	 * is the object class you actually use in your programming. With a Database
 	 * object, you can create/drop/connect databases. */
 
+	class EventInterface;	// Cross-reference between EventInterface and IDatabase
+	
 	class IDatabase
 	{
 	public:
-		virtual const char* ServerName(void) const = 0;
-		virtual const char* DatabaseName(void) const = 0;
-		virtual const char* Username(void) const = 0;
-		virtual const char* UserPassword(void) const = 0;
-		virtual const char* RoleName(void) const = 0;
-		virtual const char* CharSet(void) const = 0;
-		virtual const char* CreateParams(void) const = 0;
+		virtual const char* ServerName() const = 0;
+		virtual const char* DatabaseName() const = 0;
+		virtual const char* Username() const = 0;
+		virtual const char* UserPassword() const = 0;
+		virtual const char* RoleName() const = 0;
+		virtual const char* CharSet() const = 0;
+		virtual const char* CreateParams() const = 0;
 
 		virtual void Info(int* ODS, int* ODSMinor, int* PageSize,
 			int* Pages,	int* Buffers, int* Sweep, bool* Sync,
 			bool* Reserve) = 0;
 		virtual void Statistics(int* Fetches, int* Marks,
 			int* Reads, int* Writes) = 0;
-		virtual void Counts(int* Insert, int* Update, int* Delete,
+		virtual void Counts(int* Insert, int* Update, int* Delete, 
 			int* ReadIdx, int* ReadSeq) = 0;
 		virtual void Users(std::vector<std::string>& users) = 0;
-		virtual int Dialect(void) = 0;
+		virtual int Dialect() = 0;
 
 		virtual void Create(int dialect) = 0;
-		virtual void Connect(void) = 0;
-		virtual bool Connected(void) = 0;
-		virtual void Inactivate(void) = 0;
-		virtual void Disconnect(void) = 0;
-		virtual void Drop(void) = 0;
+		virtual void Connect() = 0;
+		virtual bool Connected() = 0;
+		virtual void Inactivate() = 0;
+		virtual void Disconnect() = 0;
+		virtual void Drop() = 0;
 
-		virtual void DefineEvent(const std::string&, EventInterface*) = 0;
-#ifdef FR_NEW_EVENT_CODE
-		virtual void DropEvent(const std::string&) = 0;
-#endif
-		virtual void ClearEvents(void) = 0;		// Drop all events
-		virtual void DispatchEvents(void) = 0;
-
-		virtual IDatabase* AddRef(void) = 0;
-		virtual void Release(IDatabase*&) = 0;
+		virtual IDatabase* AddRef() = 0;
+		virtual void Release() = 0;
 
 	    virtual ~IDatabase() { };
 	};
-	typedef Ptr<IDatabase> Database;
 
 	/* ITransaction is the interface to the transaction connections in IBPP.
 	 * Transaction is the object class you actually use in your programming. A
@@ -551,25 +595,24 @@ namespace IBPP
 	class ITransaction
 	{
 	public:
-	    virtual void AttachDatabase(IDatabase* db, TAM am = amWrite,
+	    virtual void AttachDatabase(Database db, TAM am = amWrite,
 			TIL il = ilConcurrency, TLR lr = lrWait, TFF flags = TFF(0)) = 0;
-	    virtual void DetachDatabase(IDatabase* db) = 0;
-	 	virtual void AddReservation(IDatabase* db,
+	    virtual void DetachDatabase(Database db) = 0;
+	 	virtual void AddReservation(Database db,
 	 			const std::string& table, TTR tr) = 0;
 
-		virtual void Start(void) = 0;
-		virtual bool Started(void) = 0;
-	    virtual void Commit(void) = 0;
-	    virtual void Rollback(void) = 0;
-	    virtual void CommitRetain(void) = 0;
-		virtual void RollbackRetain(void) = 0;
+		virtual void Start() = 0;
+		virtual bool Started() = 0;
+	    virtual void Commit() = 0;
+	    virtual void Rollback() = 0;
+	    virtual void CommitRetain() = 0;
+		virtual void RollbackRetain() = 0;
 
-		virtual ITransaction* AddRef(void) = 0;
-		virtual void Release(ITransaction*&) = 0;
+		virtual ITransaction* AddRef() = 0;
+		virtual void Release() = 0;
 
 	    virtual ~ITransaction() { };
 	};
-	typedef Ptr<ITransaction> Transaction;
 
 	/*
 	 *	Class Row can hold all the values of a row (from a SELECT for instance).
@@ -578,9 +621,6 @@ namespace IBPP
 	class IRow
 	{
 	public:
-		virtual	IDatabase* Database(void) const = 0;
-		virtual ITransaction* Transaction(void) const = 0;
-
 		virtual void SetNull(int) = 0;
 		virtual void Set(int, bool) = 0;
 		virtual void Set(int, const void*, int) = 0;		// byte buffers
@@ -638,18 +678,20 @@ namespace IBPP
 		virtual int ColumnSubtype(int) = 0;
 		virtual int ColumnSize(int) = 0;
 		virtual int ColumnScale(int) = 0;
-		virtual int Columns(void) = 0;
-
+		virtual int Columns() = 0;
+		
 		virtual bool ColumnUpdated(int) = 0;
 		virtual bool Updated() = 0;
 
+		virtual	Database DatabasePtr() const = 0;
+		virtual Transaction TransactionPtr() const = 0;
+
 		virtual IRow* Clone() = 0;
 		virtual IRow* AddRef() = 0;
-		virtual void Release(IRow*&) = 0;
+		virtual void Release() = 0;
 
 	    virtual ~IRow() {};
 	};
-	typedef Ptr<IRow> Row;
 
 	/* IStatement is the interface to the statements execution in IBPP.
 	 * Statement is the object class you actually use in your programming. A
@@ -661,19 +703,18 @@ namespace IBPP
 	class IStatement
 	{
 	public:
-		virtual	IDatabase* Database(void) const = 0;
-		virtual ITransaction* Transaction(void) const = 0;
 		virtual void Prepare(const std::string&) = 0;
-		virtual void Execute(void) = 0;
+		virtual void Execute() = 0;
 		virtual void Execute(const std::string&) = 0;
 		virtual void ExecuteImmediate(const std::string&) = 0;
 		virtual void CursorExecute(const std::string& cursor) = 0;
 		virtual void CursorExecute(const std::string& cursor, const std::string&) = 0;
-		virtual bool Fetch(void) = 0;
+		virtual bool Fetch() = 0;
 		virtual bool Fetch(Row&) = 0;
-		virtual int AffectedRows(void) = 0;
-		virtual void Close(void) = 0;
-		virtual STT Type(void) = 0;
+		virtual int AffectedRows() = 0;
+		virtual void Close() = 0;
+		virtual std::string& Sql() = 0;
+		virtual STT Type() = 0;
 
 		virtual void SetNull(int) = 0;
 		virtual void Set(int, bool) = 0;
@@ -732,18 +773,21 @@ namespace IBPP
 		virtual int ColumnSubtype(int) = 0;
 		virtual int ColumnSize(int) = 0;
 		virtual int ColumnScale(int) = 0;
-		virtual int Columns(void) = 0;
+		virtual int Columns() = 0;
 
 		virtual SDT ParameterType(int) = 0;
 		virtual int ParameterSubtype(int) = 0;
 		virtual int ParameterSize(int) = 0;
 		virtual int ParameterScale(int) = 0;
-		virtual int Parameters(void) = 0;
+		virtual int Parameters() = 0;
 
 		virtual void Plan(std::string&) = 0;
 
-		virtual IStatement* AddRef(void) = 0;
-		virtual void Release(IStatement*&) = 0;
+		virtual	Database DatabasePtr() const = 0;
+		virtual Transaction TransactionPtr() const = 0;
+
+		virtual IStatement* AddRef() = 0;
+		virtual void Release() = 0;
 
 	    virtual ~IStatement() { };
 
@@ -763,7 +807,36 @@ namespace IBPP
 		virtual bool Get(int, double*) = 0;					// DEPRECATED
 		virtual bool Get(const std::string&, double*) = 0;	// DEPRECATED
 	};
-	typedef Ptr<IStatement> Statement;
+	
+	class IEvents
+	{
+	public:
+		virtual void Add(const std::string&, EventInterface*) = 0;
+		virtual void Drop(const std::string&) = 0;
+		virtual void List(std::vector<std::string>&) = 0;
+		virtual void Clear() = 0;				// Drop all events
+		virtual void Dispatch() = 0;			// Dispatch NON async events; else it's a no-op
+		virtual bool Asynchronous() const = 0;	// Tells if this set is asynchronous or not
+
+		virtual	Database DatabasePtr() const = 0;
+
+		virtual IEvents* AddRef() = 0;
+		virtual void Release() = 0;
+
+	    virtual ~IEvents() { };
+	};
+	
+	/* Class EventInterface is merely a pure interface.
+	 * It is _not_ implemented by IBPP. It is only a base class definition from
+	 * which your own event interface classes have to derive from.
+	 * Please read the reference guide at http://www.ibpp.org for more info. */
+
+	class EventInterface
+	{
+	public:
+		virtual void ibppEventHandler(Events, const std::string&, int) = 0;
+		virtual ~EventInterface() { };
+	};
 
 	//	--- Factories ---
 	//	These methods are the only way to get one of the above
@@ -777,67 +850,33 @@ namespace IBPP
 	//		db->Disconnect();
 	//	}
 
-	IService* ServiceFactory(const std::string& ServerName,
+	Service ServiceFactory(const std::string& ServerName,
 		const std::string& UserName, const std::string& UserPassword);
 
-	IDatabase* DatabaseFactory(const std::string& ServerName,
+	Database DatabaseFactory(const std::string& ServerName,
 		const std::string& DatabaseName, const std::string& UserName,
 			const std::string& UserPassword, const std::string& RoleName,
 				const std::string& CharSet, const std::string& CreateParams);
 
-	inline IDatabase* DatabaseFactory(const std::string& ServerName,
+	inline Database DatabaseFactory(const std::string& ServerName,
 		const std::string& DatabaseName, const std::string& UserName,
 			const std::string& UserPassword)
-		{ return DatabaseFactory(ServerName, DatabaseName, UserName, UserPassword, "", "", "");	}
+		{ return DatabaseFactory(ServerName, DatabaseName, UserName, UserPassword, "", "", ""); }
 
-	ITransaction* TransactionFactory(IDatabase* db, TAM am = amWrite,
+	Transaction TransactionFactory(Database db, TAM am = amWrite,
 		TIL il = ilConcurrency, TLR lr = lrWait, TFF flags = TFF(0));
 
-	inline ITransaction* TransactionFactory(Database& db, TAM am = amWrite,
-		TIL il = ilConcurrency, TLR lr = lrWait, TFF flags = TFF(0))
-			{ return TransactionFactory(db.intf(), am, il, lr, flags); }
-
-	//IRow* RowFactory(int dialect);
-
-	IStatement* StatementFactory(IDatabase* db, ITransaction* tr,
+	Statement StatementFactory(Database db, Transaction tr,
 		const std::string& sql);
 
-	inline IStatement* StatementFactory(IDatabase* db, ITransaction* tr)
+	inline Statement StatementFactory(Database db, Transaction tr)
 		{ return StatementFactory(db, tr, ""); }
 
-	inline IStatement* StatementFactory(Database& db, Transaction& tr,
-		const std::string& sql)
-			{ return StatementFactory(db.intf(), tr.intf(), sql); }
-
-	inline IStatement* StatementFactory(Database& db, Transaction& tr)
-			{ return StatementFactory(db.intf(), tr.intf(), ""); }
-
-	IBlob* BlobFactory(IDatabase* db, ITransaction* tr);
-	inline IBlob* BlobFactory(Database& db, Transaction& tr)
-		{ return BlobFactory(db.intf(), tr.intf()); }
-
-	IArray* ArrayFactory(IDatabase* db, ITransaction* tr);
-	inline IArray* ArrayFactory(Database& db, Transaction& tr)
-		{ return ArrayFactory(db.intf(), tr.intf()); }
-
-	/* Class EventInterface is merely a pure interface. It is _not_ implemented
-	 * by IBPP. It is just base class definition from which your own event
-	 * interface classes have to derive from.
-
-	 * The Event handling system from the class Database requires the programmer
-	 * to give an object pointer when defining a new event. When that event will
-	 * fire, IBPP will call the method ibppEventHandler on the object registered
-	 * with the event. So in order to catch events, the programmer must derive a
-	 * class from EventInterface, implement 'ibppEventHandler' to do anything
-	 * wanted when the event triggers and register an instance of that derived
-	 * class when defining the event trap. */
-
-	class EventInterface
-	{
-	public:
-		virtual void ibppEventHandler(IDatabase*, const std::string&, int) = 0;
-		virtual ~EventInterface() { };
-	};
+	Blob BlobFactory(Database db, Transaction tr);
+	
+	Array ArrayFactory(Database db, Transaction tr);
+	
+	Events EventsFactory(Database db, bool async);
 
 	/* IBPP uses a self initialization system. Each time an object that may
 	 * require the usage of the Interbase client C-API library is used, the
@@ -848,8 +887,8 @@ namespace IBPP
 	 * against a compatible version of the library. */
 
 	bool CheckVersion(uint32_t);
-	int GDSVersion(void);
-
+	int GDSVersion();
+	
 	/* On Win32 platform, ClientLibSearchPaths() allows to setup
 	 * one or multiple additional paths (separated with a ';') where IBPP
 	 * will look for the client library (before the default implicit search
@@ -858,8 +897,8 @@ namespace IBPP
 	 * from where to attempt loading the fbclient.dll / gds32.dll.
 	 * If called, this function must be called *early* by the application,
 	 * before *any* other function or object methods of IBPP.
-	 * This is a NO-OP on platforms other than Win32. */
-
+	 * Currently, this is a NO-OP on platforms other than Win32. */
+	 
 	void ClientLibSearchPaths(const std::string&);
 
 	/* Finally, here are some date and time conversion routines used by IBPP and
@@ -872,7 +911,7 @@ namespace IBPP
 	void ttoi(int itime, int* phour, int* pminute, int* psecond, int* ptt);
 	void itot(int* ptime, int hour, int minute, int second = 0, int tenthousandths = 0);
 
-};
+}
 
 #endif
 

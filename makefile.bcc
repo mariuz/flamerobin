@@ -68,34 +68,35 @@ STATICRTL = 0
 ### Variables: ###
 
 IBPP_CXXFLAGS = $(__RTL_TYPE) -I$(BCCDIR)\include -tWM $(__DEBUGINFO) \
-	$(__OPTIMIZE) -DIBPP_BCC -DIBPP_WINDOWS -I.\src\ibpp -I.\src\ibpp\fbheaders \
-	-Hu -H=bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.csm $(CPPFLAGS) $(CXXFLAGS)
+	$(__OPTIMIZE) -DIBPP_WINDOWS -I.\src\ibpp -Hu \
+	-H=bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.csm $(CPPFLAGS) $(CXXFLAGS)
 IBPP_OBJECTS =  \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__dpb.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__ibpp.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__ibs.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__rb.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__spb.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__tpb.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_array.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_blob.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_database.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_date.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_dbkey.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_events.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_exception.obj \
-	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_ibpp.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_row.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_service.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_statement.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_time.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_transaction.obj \
-	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__dpb.obj \
-	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__epb.obj \
-	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__ibs.obj \
-	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__rb.obj \
-	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__spb.obj \
-	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__tpb.obj
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_user.obj
 FLAMEROBIN_CXXFLAGS = $(__RTL_TYPE) -I$(BCCDIR)\include -tWM $(__DEBUGINFO) \
 	$(__OPTIMIZE) -I$(WXDIR)\include -I$(WXDIR)\contrib\include \
 	$(____flamerobin_UNICODE_DEFINE_p) $(____flamerobin_WXDEBUG_p) \
 	$(____flamerobin_DEBUGFLAG_p) -D_WINDOWS -D__WINDOWS__ -DWINVER=0x400 \
 	-DWIN32 -D__WIN32__ -D__WIN95__ -DSTRICT -D__WXMSW__ -DwxUSE_GUI=1 \
 	-DWIN32_LEAN_AND_MEAN \
-	-I$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(U_OPT)$(D_OPT) -DIBPP_BCC \
+	-I$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(U_OPT)$(D_OPT) \
 	-DIBPP_WINDOWS -I.\src -I.\src\ibpp -I.\res -Hu \
 	-H=bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.csm $(CPPFLAGS) $(CXXFLAGS)
 FLAMEROBIN_OBJECTS =  \
@@ -264,7 +265,7 @@ clean:
 	-if exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.ilf del bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.ilf
 	-if exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.ils del bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.ils
 
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib: bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_ibpp.obj  $(IBPP_OBJECTS)
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib: bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__ibpp.obj  $(IBPP_OBJECTS)
 	if exist $@ del $@
 	tlib /a /p4096 $@ @&&|
 	$(IBPP_OBJECTS)
@@ -274,6 +275,24 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerob
 	ilink32 -Tpe -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk  $(__DEBUGINFO) -L$(____flamerobin_WX_LIB_DIR_FILENAMES) -aa @&&|
 	c0w32.obj $(FLAMEROBIN_OBJECTS),$@,, wxmsw26$(U_OPT)$(D_OPT)_stc.lib wxmsw26$(U_OPT)$(D_OPT)_html.lib wxmsw26$(U_OPT)$(D_OPT)_adv.lib wxmsw26$(U_OPT)$(D_OPT)_core.lib wxbase26$(U_OPT)$(D_OPT)_xml.lib wxbase26$(U_OPT)$(D_OPT).lib wxexpat$(D_OPT).lib wxtiff$(D_OPT).lib wxjpeg$(D_OPT).lib wxpng$(D_OPT).lib wxzlib$(D_OPT).lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib   import32.lib cw32mt$(__RTL_TYPE_14).lib,, bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin.res
 |
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__dpb.obj: .\src\ibpp\_dpb.cpp
+	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__ibpp.obj: .\src\ibpp\_ibpp.cpp
+	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) -H $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__ibs.obj: .\src\ibpp\_ibs.cpp
+	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__rb.obj: .\src\ibpp\_rb.cpp
+	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__spb.obj: .\src\ibpp\_spb.cpp
+	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__tpb.obj: .\src\ibpp\_tpb.cpp
+	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_array.obj: .\src\ibpp\array.cpp
 	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) $**
@@ -290,11 +309,11 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_date.obj: .\src\ibpp\date.cpp
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_dbkey.obj: .\src\ibpp\dbkey.cpp
 	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) $**
 
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_exception.obj: .\src\ibpp\exception.cpp
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_events.obj: .\src\ibpp\events.cpp
 	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) $**
 
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_ibpp.obj: .\src\ibpp\ibpp.cpp
-	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) -H $**
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_exception.obj: .\src\ibpp\exception.cpp
+	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_row.obj: .\src\ibpp\row.cpp
 	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) $**
@@ -311,22 +330,7 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_time.obj: .\src\ibpp\time.cpp
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_transaction.obj: .\src\ibpp\transaction.cpp
 	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) $**
 
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__dpb.obj: .\src\ibpp\_dpb.cpp
-	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) $**
-
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__epb.obj: .\src\ibpp\_epb.cpp
-	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) $**
-
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__ibs.obj: .\src\ibpp\_ibs.cpp
-	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) $**
-
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__rb.obj: .\src\ibpp\_rb.cpp
-	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) $**
-
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__spb.obj: .\src\ibpp\_spb.cpp
-	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) $**
-
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__tpb.obj: .\src\ibpp\_tpb.cpp
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_user.obj: .\src\ibpp\user.cpp
 	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.obj: .\src\addconstrainthandler.cpp
@@ -579,5 +583,5 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_urihandler.obj: .\src\urihandler.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin.res: .\res\flamerobin.rc
-	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include -i$(WXDIR)\include -i$(WXDIR)\contrib\include $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) -d_WINDOWS -d__WINDOWS__ -dWINVER=0x400 -dWIN32 -d__WIN32__ -d__WIN95__ -dSTRICT -d__WXMSW__ -dwxUSE_GUI=1 -dWIN32_LEAN_AND_MEAN -i$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(U_OPT)$(D_OPT) -dIBPP_BCC -dIBPP_WINDOWS -i.\src -i.\src\ibpp -i.\res $**
+	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include -i$(WXDIR)\include -i$(WXDIR)\contrib\include $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) -d_WINDOWS -d__WINDOWS__ -dWINVER=0x400 -dWIN32 -d__WIN32__ -d__WIN95__ -dSTRICT -d__WXMSW__ -dwxUSE_GUI=1 -dWIN32_LEAN_AND_MEAN -i$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(U_OPT)$(D_OPT) -dIBPP_WINDOWS -i.\src -i.\src\ibpp -i.\res $**
 

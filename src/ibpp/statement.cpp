@@ -5,24 +5,17 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-//	The contents of this file are subject to the Mozilla Public License
-//	Version 1.0 (the "License"); you may not use this file except in
-//	compliance with the License. You may obtain a copy of the License at
-//	http://www.mozilla.org/MPL/
+//	(C) Copyright 2000-2006 T.I.P. Group S.A. and the IBPP Team (www.ibpp.org)
 //
-//	Software distributed under the License is distributed on an "AS IS"
-//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+//	The contents of this file are subject to the IBPP License (the "License");
+//	you may not use this file except in compliance with the License.  You may
+//	obtain a copy of the License at http://www.ibpp.org or in the 'license.txt'
+//	file which must have been distributed along with this file.
+//
+//	This software, distributed under the License, is distributed on an "AS IS"
+//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See the
 //	License for the specific language governing rights and limitations
 //	under the License.
-//
-//	The Original Code is "IBPP 0.9" and all its associated documentation.
-//
-//	The Initial Developer of the Original Code is T.I.P. Group S.A.
-//	Portions created by T.I.P. Group S.A. are
-//	Copyright (C) 2000 T.I.P Group S.A.
-//	All Rights Reserved.
-//
-//	Contributor(s): ______________________________________.
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -31,8 +24,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "ibpp.h"
-#include "_internals.h"
+#ifdef _MSC_VER
+#pragma warning(disable: 4786 4996)
+#ifndef _DEBUG
+#pragma warning(disable: 4702)
+#endif
+#endif
+
+#include "_ibpp.h"
 
 #ifdef HAS_HDRSTOP
 #pragma hdrstop
@@ -41,16 +40,6 @@
 using namespace ibpp_internals;
 
 //	(((((((( OBJECT INTERFACE IMPLEMENTATION ))))))))
-
-IBPP::IDatabase* StatementImpl::Database(void) const
-{
-	return mDatabase;
-}
-
-IBPP::ITransaction* StatementImpl::Transaction(void) const
-{
-	return mTransaction;
-}
 
 void StatementImpl::Prepare(const std::string& sql)
 {
@@ -67,7 +56,7 @@ void StatementImpl::Prepare(const std::string& sql)
 
 	// Saves the SQL sentence, only for reporting reasons in case of errors
 	mSql = sql;
-	
+
 	IBS status;
 
 	// Free all resources currently attached to this Statement, then allocate
@@ -81,7 +70,7 @@ void StatementImpl::Prepare(const std::string& sql)
 	// Empirical estimate of parameters count and output columns count.
 	// This is by far not an exact estimation, which would require parsing the
 	// SQL statement. If the SQL statement contains '?' and ',' in string
-	// constants, this count will obviously be wrong, but it will exagerated.
+	// constants, this count will obviously be wrong, but it will be exagerated.
 	// It won't hurt. We just try to not have to re-allocate those descriptors later.
 	// So we prefer to get them a little bit larger than needed than the other way.
 	int16_t inEstimate = 0;
@@ -92,14 +81,16 @@ void StatementImpl::Prepare(const std::string& sql)
 		if (sql[i] == ',') ++outEstimate;
 	}
 
+	/*
 	DebugStream()<< "Prepare(\""<< sql<< "\")"<< fds;
 	DebugStream()<< _("Estimation: ")<< inEstimate<< _(" IN parameters and ")
 			<< outEstimate<< _(" OUT columns")<< fds;
+	*/
 
 	// Allocates output descriptor and prepares the statement
 	mOutRow = new RowImpl(mDatabase->Dialect(), outEstimate, mDatabase, mTransaction);
 	mOutRow->AddRef();
-	
+
 	status.Reset();
 	(*gds.Call()->m_dsql_prepare)(status.Self(), mTransaction->GetHandlePtr(),
 		&mHandle, (short)sql.length(), const_cast<char*>(sql.c_str()),
@@ -136,7 +127,8 @@ void StatementImpl::Prepare(const std::string& sql)
 			case isc_info_sql_stmt_ddl :		mType = IBPP::stDDL; break;
 			case isc_info_sql_stmt_exec_procedure : mType = IBPP::stExecProcedure; break;
 			case isc_info_sql_stmt_select_for_upd : mType = IBPP::stSelectUpdate; break;
-			case isc_info_sql_stmt_set_generator :	mType = IBPP::stOther; break;
+			case isc_info_sql_stmt_set_generator :	mType = IBPP::stSetGenerator; break;
+			case isc_info_sql_stmt_savepoint :	mType = IBPP::stSavePoint; break;
 			default : mType = IBPP::stUnsupported;
 		}
 	}
@@ -150,8 +142,11 @@ void StatementImpl::Prepare(const std::string& sql)
 	if (mOutRow->Columns() == 0)
 	{
 		// Get rid of the output descriptor, if it wasn't required (no output)
-		mOutRow->Release(mOutRow);
+		mOutRow->Release();
+		mOutRow = 0;
+		/*
 		DebugStream()<< _("Dropped output descriptor which was not required")<< fds;
+		*/
 	}
 	else if (mOutRow->Columns() > mOutRow->AllocatedSize())
 	{
@@ -159,8 +154,10 @@ void StatementImpl::Prepare(const std::string& sql)
 		// The statement does not need to be prepared again, though the
 		// output columns must be described again.
 
+		/*
 		DebugStream()<< _("Resize output descriptor from ")
 			<< mOutRow->AllocatedSize()<< _(" to ")<< mOutRow->Columns()<< fds;
+		*/
 
 		mOutRow->Resize(mOutRow->Columns());
 		status.Reset();
@@ -178,7 +175,7 @@ void StatementImpl::Prepare(const std::string& sql)
 		// Ready an input descriptor
 		mInRow = new RowImpl(mDatabase->Dialect(), inEstimate, mDatabase, mTransaction);
 		mInRow->AddRef();
-		
+
 		status.Reset();
 		(*gds.Call()->m_dsql_describe_bind)(status.Self(), &mHandle, 1, mInRow->Self());
 		if (status.Errors())
@@ -191,8 +188,11 @@ void StatementImpl::Prepare(const std::string& sql)
 		if (mInRow->Columns() == 0)
 		{
 			// Get rid of the input descriptor, if it wasn't required (no parameters)
-			mInRow->Release(mInRow);
+			mInRow->Release();
+			mInRow = 0;
+			/*
 			DebugStream()<< _("Dropped input descriptor which was not required")<< fds;
+			*/
 		}
 		else if (mInRow->Columns() > mInRow->AllocatedSize())
 		{
@@ -200,10 +200,12 @@ void StatementImpl::Prepare(const std::string& sql)
 			// The statement does not need to be prepared again, though the
 			// parameters must be described again.
 
+			/*
 			DebugStream()<< _("Resize input descriptor from ")
 					<< mInRow->AllocatedSize()<< _(" to ")
 					<< mInRow->Columns()<< fds;
-			
+			*/
+
 			mInRow->Resize(mInRow->Columns());
 			status.Reset();
 			(*gds.Call()->m_dsql_describe_bind)(status.Self(), &mHandle, 1, mInRow->Self());
@@ -217,7 +219,16 @@ void StatementImpl::Prepare(const std::string& sql)
 	}
 
 	// Allocates variables of the input descriptor
-	if (mInRow != 0) mInRow->AllocVariables();
+	if (mInRow != 0)
+	{
+		// Turn on 'can be NULL' on each input parameter
+		for (int i = 0; i < mInRow->Columns(); i++)
+		{
+			XSQLVAR* var = &(mInRow->Self()->sqlvar[i]);
+			if (! (var->sqltype & 1)) var->sqltype += short(1);
+		}
+		mInRow->AllocVariables();
+	}
 
 	// Allocates variables of the output descriptor
 	if (mOutRow != 0) mOutRow->AllocVariables();
@@ -336,6 +347,7 @@ void StatementImpl::CursorExecute(const std::string& cursor, const std::string& 
 	}
 
 	mResultSetAvailable = true;
+	mCursorOpened = true;
 }
 
 void StatementImpl::ExecuteImmediate(const std::string& sql)
@@ -365,7 +377,7 @@ void StatementImpl::ExecuteImmediate(const std::string& sql)
 	}
 }
 
-int StatementImpl::AffectedRows(void)
+int StatementImpl::AffectedRows()
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::AffectedRows", _("No statement has been prepared."));
@@ -397,7 +409,7 @@ int StatementImpl::AffectedRows(void)
 	return count;
 }
 
-bool StatementImpl::Fetch(void)
+bool StatementImpl::Fetch()
 {
 	if (! mResultSetAvailable)
 		throw LogicExceptionImpl("Statement::Fetch",
@@ -407,6 +419,10 @@ bool StatementImpl::Fetch(void)
 	int code = (*gds.Call()->m_dsql_fetch)(status.Self(), &mHandle, 1, mOutRow->Self());
 	if (code == 100)	// This special code means "no more rows"
 	{
+		mResultSetAvailable = false;
+		// Oddly enough, fetching rows up to the last one seems to open
+		// an 'implicit' cursor that needs to be closed.
+		mCursorOpened = true;
 		CursorFree();	// Free the explicit or implicit cursor/result-set
 		return false;
 	}
@@ -434,6 +450,10 @@ bool StatementImpl::Fetch(IBPP::Row& row)
 					rowimpl->Self());
 	if (code == 100)	// This special code means "no more rows"
 	{
+		mResultSetAvailable = false;
+		// Oddly enough, fetching rows up to the last one seems to open
+		// an 'implicit' cursor that needs to be closed.
+		mCursorOpened = true;
 		CursorFree();	// Free the explicit or implicit cursor/result-set
 		row.clear();
 		return false;
@@ -449,15 +469,16 @@ bool StatementImpl::Fetch(IBPP::Row& row)
 	return true;
 }
 
-void StatementImpl::Close(void)
+void StatementImpl::Close()
 {
 	// Free all statement resources.
 	// Used before preparing a new statement or from destructor.
 
-	if (mInRow != 0) mInRow->Release(mInRow);
-	if (mOutRow != 0) mOutRow->Release(mOutRow);
+	if (mInRow != 0) { mInRow->Release(); mInRow = 0; }
+	if (mOutRow != 0) { mOutRow->Release(); mOutRow = 0; }
 
 	mResultSetAvailable = false;
+	mCursorOpened = false;
 	mType = IBPP::stUnknown;
 
 	if (mHandle != 0)
@@ -466,7 +487,7 @@ void StatementImpl::Close(void)
 		(*gds.Call()->m_dsql_free_statement)(status.Self(), &mHandle, DSQL_drop);
 		mHandle = 0;
 		if (status.Errors())
-			throw SQLExceptionImpl(status, "Statement::Close",
+			throw SQLExceptionImpl(status, "Statement::Close(DSQL_drop)",
 				_("isc_dsql_free_statement failed."));
 	}
 }
@@ -507,7 +528,7 @@ void StatementImpl::Set(int param, const void* bindata, int len)
 		throw LogicExceptionImpl("Statement::Set[void*]", _("No statement has been prepared."));
 	if (mInRow == 0)
 		throw LogicExceptionImpl("Statement::Set[void*]", _("The statement does not take parameters."));
-		
+
 	mInRow->Set(param, bindata, len);
 }
 
@@ -527,7 +548,7 @@ void StatementImpl::Set(int param, int16_t value)
 		throw LogicExceptionImpl("Statement::Set[int16_t]", _("No statement has been prepared."));
 	if (mInRow == 0)
 		throw LogicExceptionImpl("Statement::Set[int16_t]", _("The statement does not take parameters."));
-											
+
 	mInRow->Set(param, value);
 }
 
@@ -827,7 +848,7 @@ bool StatementImpl::Get(int column, IBPP::Array& array)
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
-	
+
 	return mOutRow->Get(column, array);
 }
 
@@ -837,7 +858,7 @@ const IBPP::Value StatementImpl::Get(int column)
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
 
-	return mOutRow->Get(column); 
+	return mOutRow->Get(column);
 }
 */
 
@@ -1039,7 +1060,7 @@ const IBPP::Value StatementImpl::Get(const std::string& name)
 }
 */
 
-int StatementImpl::Columns(void)
+int StatementImpl::Columns()
 {
 	if (mOutRow == 0)
 		throw LogicExceptionImpl("Statement::Columns", _("The row is not initialized."));
@@ -1119,7 +1140,7 @@ int StatementImpl::ColumnScale(int varnum)
 	return mOutRow->ColumnScale(varnum);
 }
 
-int StatementImpl::Parameters(void)
+int StatementImpl::Parameters()
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Statement::Parameters", _("No statement has been prepared."));
@@ -1169,7 +1190,17 @@ int StatementImpl::ParameterScale(int varnum)
 	return mInRow->ColumnScale(varnum);
 }
 
-IBPP::IStatement* StatementImpl::AddRef(void)
+IBPP::Database StatementImpl::DatabasePtr() const
+{
+	return mDatabase;
+}
+
+IBPP::Transaction StatementImpl::TransactionPtr() const
+{
+	return mTransaction;
+}
+
+IBPP::IStatement* StatementImpl::AddRef()
 {
 	ASSERTION(mRefCount >= 0);
 	++mRefCount;
@@ -1177,74 +1208,70 @@ IBPP::IStatement* StatementImpl::AddRef(void)
 	return this;
 }
 
-void StatementImpl::Release(IBPP::IStatement*& Self)
+void StatementImpl::Release()
 {
-	if (this != dynamic_cast<StatementImpl*>(Self))
-		throw LogicExceptionImpl("Statement::Release", _("Invalid Release()"));
-
+	// Release cannot throw, except in DEBUG builds on assertion
 	ASSERTION(mRefCount >= 0);
-
 	--mRefCount;
-
-	if (mRefCount <= 0) delete this;
-	Self = 0;
+	try { if (mRefCount <= 0) delete this; }
+		catch (...) { }
 }
 
 //	(((((((( OBJECT INTERNAL METHODS ))))))))
 
-void StatementImpl::AttachDatabase(DatabaseImpl* database)
+void StatementImpl::AttachDatabaseImpl(DatabaseImpl* database)
 {
 	if (database == 0)
 		throw LogicExceptionImpl("Statement::AttachDatabase",
 			_("Can't attach a 0 IDatabase object."));
 
-	if (mDatabase != 0) mDatabase->DetachStatement(this);
+	if (mDatabase != 0) mDatabase->DetachStatementImpl(this);
 	mDatabase = database;
-	mDatabase->AttachStatement(this);
+	mDatabase->AttachStatementImpl(this);
 }
 
-void StatementImpl::DetachDatabase(void)
+void StatementImpl::DetachDatabaseImpl()
 {
 	if (mDatabase == 0) return;
 
 	Close();
-	mDatabase->DetachStatement(this);
+	mDatabase->DetachStatementImpl(this);
 	mDatabase = 0;
 }
 
-void StatementImpl::AttachTransaction(TransactionImpl* transaction)
+void StatementImpl::AttachTransactionImpl(TransactionImpl* transaction)
 {
 	if (transaction == 0)
 		throw LogicExceptionImpl("Statement::AttachTransaction",
 			_("Can't attach a 0 ITransaction object."));
 
-	if (mTransaction != 0) mTransaction->DetachStatement(this);
+	if (mTransaction != 0) mTransaction->DetachStatementImpl(this);
 	mTransaction = transaction;
-	mTransaction->AttachStatement(this);
+	mTransaction->AttachStatementImpl(this);
 }
 
-void StatementImpl::DetachTransaction(void)
+void StatementImpl::DetachTransactionImpl()
 {
 	if (mTransaction == 0) return;
 
 	Close();
-	mTransaction->DetachStatement(this);
+	mTransaction->DetachStatementImpl(this);
 	mTransaction = 0;
 }
 
-void StatementImpl::CursorFree(void)
+void StatementImpl::CursorFree()
 {
-	if (mResultSetAvailable)
+	if (mCursorOpened)
 	{
+		mCursorOpened = false;
 		if (mHandle != 0)
 		{
 			IBS status;
 			(*gds.Call()->m_dsql_free_statement)(status.Self(), &mHandle, DSQL_close);
 			if (status.Errors())
-				throw SQLExceptionImpl(status, "StatementImpl::CursorFree",
+				throw SQLExceptionImpl(status, "StatementImpl::CursorFree(DSQL_close)",
 					_("isc_dsql_free_statement failed."));
 		}
-		mResultSetAvailable = false;
 	}
 }
 
@@ -1252,18 +1279,21 @@ StatementImpl::StatementImpl(DatabaseImpl* database, TransactionImpl* transactio
 	const std::string& sql)
 	: mRefCount(0), mHandle(0), mDatabase(0), mTransaction(0),
 	mInRow(0), mOutRow(0),
-	mResultSetAvailable(false), mType(IBPP::stUnknown)
+	mResultSetAvailable(false), mCursorOpened(false), mType(IBPP::stUnknown)
 {
-	AttachDatabase(database);
-	if (transaction != 0) AttachTransaction(transaction);
+	AttachDatabaseImpl(database);
+	if (transaction != 0) AttachTransactionImpl(transaction);
 	if (! sql.empty()) Prepare(sql);
 }
 
 StatementImpl::~StatementImpl()
 {
-	Close();
-	if (mTransaction != 0) mTransaction->DetachStatement(this);
-	if (mDatabase != 0) mDatabase->DetachStatement(this);
+	try { Close(); }
+		catch (...) { }
+	try { if (mTransaction != 0) mTransaction->DetachStatementImpl(this); }
+		catch (...) { }
+	try { if (mDatabase != 0) mDatabase->DetachStatementImpl(this); }
+		catch (...) { }
 }
 
 //

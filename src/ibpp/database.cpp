@@ -5,24 +5,17 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-//	The contents of this file are subject to the Mozilla Public License
-//	Version 1.0 (the "License"); you may not use this file except in
-//	compliance with the License. You may obtain a copy of the License at
-//	http://www.mozilla.org/MPL/
+//	(C) Copyright 2000-2006 T.I.P. Group S.A. and the IBPP Team (www.ibpp.org)
 //
-//	Software distributed under the License is distributed on an "AS IS"
-//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+//	The contents of this file are subject to the IBPP License (the "License");
+//	you may not use this file except in compliance with the License.  You may
+//	obtain a copy of the License at http://www.ibpp.org or in the 'license.txt'
+//	file which must have been distributed along with this file.
+//
+//	This software, distributed under the License, is distributed on an "AS IS"
+//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See the
 //	License for the specific language governing rights and limitations
 //	under the License.
-//
-//	The Original Code is "IBPP 0.9" and all its associated documentation.
-//
-//	The Initial Developer of the Original Code is T.I.P. Group S.A.
-//	Portions created by T.I.P. Group S.A. are
-//	Copyright (C) 2000 T.I.P Group S.A.
-//	All Rights Reserved.
-//
-//	Contributor(s): ______________________________________.
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -31,8 +24,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "ibpp.h"
-#include "_internals.h"
+#ifdef _MSC_VER
+#pragma warning(disable: 4786 4996)
+#ifndef _DEBUG
+#pragma warning(disable: 4702)
+#endif
+#endif
+
+#include "_ibpp.h"
 
 #ifdef HAS_HDRSTOP
 #pragma hdrstop
@@ -78,7 +77,7 @@ void DatabaseImpl::Create(int dialect)
 	Disconnect();
 }
 
-void DatabaseImpl::Connect(void)
+void DatabaseImpl::Connect()
 {
 	if (mHandle != 0) return;	// Already connected
 
@@ -158,40 +157,45 @@ void DatabaseImpl::Connect(void)
 	}
 }
 
-void DatabaseImpl::Inactivate(void)
+void DatabaseImpl::Inactivate()
 {
 	if (mHandle == 0) return;	// Not connected anyway
 
     IBS status;
 
-	// Cancel all pending event traps
-	ClearEvents();
-
     // Rollback any started transaction...
 	for (unsigned i = 0; i < mTransactions.size(); i++)
 	{
 		if (mTransactions[i]->Started())
-				mTransactions[i]->Rollback();
+			mTransactions[i]->Rollback();
 	}
+
+	// Cancel all pending event traps
+	for (unsigned i = 0; i < mEvents.size(); i++)
+		mEvents[i]->Clear();
 
 	// Let's detach from all Blobs
 	while (mBlobs.size() > 0)
-		mBlobs.back()->DetachDatabase();
+		mBlobs.back()->DetachDatabaseImpl();
 
 	// Let's detach from all Arrays
 	while (mArrays.size() > 0)
-		mArrays.back()->DetachDatabase();
+		mArrays.back()->DetachDatabaseImpl();
 
 	// Let's detach from all Statements
 	while (mStatements.size() > 0)
-		mStatements.back()->DetachDatabase();
+		mStatements.back()->DetachDatabaseImpl();
 
 	// Let's detach from all Transactions
 	while (mTransactions.size() > 0)
-		mTransactions.back()->DetachDatabase(this);
+		mTransactions.back()->DetachDatabaseImpl(this);
+
+	// Let's detach from all Events
+	while (mEvents.size() > 0)
+		mEvents.back()->DetachDatabaseImpl();
 }
 
-void DatabaseImpl::Disconnect(void)
+void DatabaseImpl::Disconnect()
 {
 	if (mHandle == 0) return;	// Not connected anyway
 
@@ -209,7 +213,7 @@ void DatabaseImpl::Disconnect(void)
 		throw SQLExceptionImpl(status, "Database::Disconnect", _("isc_detach_database failed"));
 }
 
-void DatabaseImpl::Drop(void)
+void DatabaseImpl::Drop()
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Database::Drop", _("Database must be connected."));
@@ -223,72 +227,6 @@ void DatabaseImpl::Drop(void)
     	throw SQLExceptionImpl(vector, "Database::Drop", _("isc_drop_database failed"));
 
     mHandle = 0;
-}
-
-void DatabaseImpl::DefineEvent(const std::string& eventname, IBPP::EventInterface* objref)
-{
-	if (eventname.empty())
-		throw LogicExceptionImpl("Database::DefineEvent", _("Null pointer reference detected."));
-
-	if (mEventsThrew)
-		throw LogicExceptionImpl("Database::DefineEvent", _("An error condition was "
-							"detected by the asynchronous EventHandler() method."));
-
-	if (mEvents == 0) mEvents = new EPB;
-	else CancelEvents();
-
-	mEvents->Define(eventname, objref);
-	QueueEvents();
-}
-
-#ifdef FR_NEW_EVENT_CODE
-void DatabaseImpl::DropEvent(const std::string& eventname)
-{
-	if (eventname.empty())
-		throw LogicExceptionImpl("Database::DropEvent", _("Null pointer reference detected."));
-
-	if (mEventsThrew)
-		throw LogicExceptionImpl("Database::DropEvent", _("An error condition was "
-							"detected by the asynchronous EventHandler() method."));
-
-	if (mEvents == 0) return;
-
-	CancelEvents();
-	mEvents->Drop(eventname);
-	QueueEvents();
-}
-#endif
-
-void DatabaseImpl::ClearEvents(void)
-{
-	CancelEvents();
-
-	if (mEvents != 0)
-	{
-		delete mEvents;
-		mEvents = 0;
-		mEventsId = 0;
-	}
-}
-
-void DatabaseImpl::DispatchEvents(void)
-{
-	// If no events registered, nothing to do of course.
-	// If we are still waiting for some events to fire, nothing to do, too.
-	if (mEvents == 0 || mEventsQueued) return;
-
-	if (mHandle == 0)
-		throw LogicExceptionImpl("Database::DispatchEvents", _("Database is not connected."));
-
-	if (mEventsThrew)
-		throw LogicExceptionImpl("Database::DispatchEvents", _("An error condition was "
-							"detected by the asynchronous EventHandler() method."));
-	
-	// Let's fire the events actions for all the events which triggered, if any.
-	if (mEventsTrapped) mEvents->FireActions(this);
-
-	// Requeue the events
-	QueueEvents();
 }
 
 void DatabaseImpl::Info(int* ODSMajor, int* ODSMinor,
@@ -413,28 +351,25 @@ void DatabaseImpl::Users(std::vector<std::string>& users)
 	return;
 }
 
-IBPP::IDatabase* DatabaseImpl::AddRef(void)
+IBPP::IDatabase* DatabaseImpl::AddRef()
 {
 	ASSERTION(mRefCount >= 0);
 	++mRefCount;
 	return this;
 }
 
-void DatabaseImpl::Release(IBPP::IDatabase*& Self)
+void DatabaseImpl::Release()
 {
-	if (this != dynamic_cast<DatabaseImpl*>(Self))
-		throw LogicExceptionImpl("Database::Release", _("Invalid Release()"));
-
+	// Release cannot throw, except in DEBUG builds on assertion
 	ASSERTION(mRefCount >= 0);
-
 	--mRefCount;
-	if (mRefCount <= 0) delete this;
-	Self = 0;
+	try { if (mRefCount <= 0) delete this; }
+		catch (...) { }
 }
 
 //	(((((((( OBJECT INTERNAL METHODS ))))))))
 
-void DatabaseImpl::AttachTransaction(TransactionImpl* tr)
+void DatabaseImpl::AttachTransactionImpl(TransactionImpl* tr)
 {
 	if (tr == 0)
 		throw LogicExceptionImpl("Database::AttachTransaction",
@@ -443,7 +378,7 @@ void DatabaseImpl::AttachTransaction(TransactionImpl* tr)
 	mTransactions.push_back(tr);
 }
 
-void DatabaseImpl::DetachTransaction(TransactionImpl* tr)
+void DatabaseImpl::DetachTransactionImpl(TransactionImpl* tr)
 {
 	if (tr == 0)
 		throw LogicExceptionImpl("Database::DetachTransaction",
@@ -452,7 +387,7 @@ void DatabaseImpl::DetachTransaction(TransactionImpl* tr)
 	mTransactions.erase(std::find(mTransactions.begin(), mTransactions.end(), tr));
 }
 
-void DatabaseImpl::AttachStatement(StatementImpl* st)
+void DatabaseImpl::AttachStatementImpl(StatementImpl* st)
 {
 	if (st == 0)
 		throw LogicExceptionImpl("Database::AttachStatement",
@@ -461,7 +396,7 @@ void DatabaseImpl::AttachStatement(StatementImpl* st)
 	mStatements.push_back(st);
 }
 
-void DatabaseImpl::DetachStatement(StatementImpl* st)
+void DatabaseImpl::DetachStatementImpl(StatementImpl* st)
 {
 	if (st == 0)
 		throw LogicExceptionImpl("Database::DetachStatement",
@@ -470,7 +405,7 @@ void DatabaseImpl::DetachStatement(StatementImpl* st)
 	mStatements.erase(std::find(mStatements.begin(), mStatements.end(), st));
 }
 
-void DatabaseImpl::AttachBlob(BlobImpl* bb)
+void DatabaseImpl::AttachBlobImpl(BlobImpl* bb)
 {
 	if (bb == 0)
 		throw LogicExceptionImpl("Database::AttachBlob",
@@ -479,7 +414,7 @@ void DatabaseImpl::AttachBlob(BlobImpl* bb)
 	mBlobs.push_back(bb);
 }
 
-void DatabaseImpl::DetachBlob(BlobImpl* bb)
+void DatabaseImpl::DetachBlobImpl(BlobImpl* bb)
 {
 	if (bb == 0)
 		throw LogicExceptionImpl("Database::DetachBlob",
@@ -488,7 +423,7 @@ void DatabaseImpl::DetachBlob(BlobImpl* bb)
 	mBlobs.erase(std::find(mBlobs.begin(), mBlobs.end(), bb));
 }
 
-void DatabaseImpl::AttachArray(ArrayImpl* ar)
+void DatabaseImpl::AttachArrayImpl(ArrayImpl* ar)
 {
 	if (ar == 0)
 		throw LogicExceptionImpl("Database::AttachArray",
@@ -497,7 +432,7 @@ void DatabaseImpl::AttachArray(ArrayImpl* ar)
 	mArrays.push_back(ar);
 }
 
-void DatabaseImpl::DetachArray(ArrayImpl* ar)
+void DatabaseImpl::DetachArrayImpl(ArrayImpl* ar)
 {
 	if (ar == 0)
 		throw LogicExceptionImpl("Database::DetachArray",
@@ -506,121 +441,22 @@ void DatabaseImpl::DetachArray(ArrayImpl* ar)
 	mArrays.erase(std::find(mArrays.begin(), mArrays.end(), ar));
 }
 
-void DatabaseImpl::QueueEvents(void)
+void DatabaseImpl::AttachEventsImpl(EventsImpl* ev)
 {
-	if (mEvents != 0 && (!mEventsQueued))
-	{
-		if (mHandle == 0)
-			throw LogicExceptionImpl("Database::QueueEvents",
-				  _("Database is not connected"));
+	if (ev == 0)
+		throw LogicExceptionImpl("Database::AttachEventsImpl",
+					_("Can't attach a null Events object."));
 
-#ifdef FR_NEW_EVENT_CODE
-		mEvents->ClearCounts();
-#endif
-
-		IBS vector;
-		mEventsTrapped = false;
-		mEventsQueued = true;
-		(*gds.Call()->m_que_events)(vector.Self(), &mHandle, &mEventsId,
-			short(mEvents->Size()), mEvents->EventsBuffer(),
-				(isc_callback)EventHandler, (char*)this);
-
-		if (vector.Errors())
-		{
-			mEventsId = 0;	// Should be, but better be safe
-			mEventsQueued = false;
-			throw SQLExceptionImpl(vector, "Database::QueueEvents",
-				_("isc_que_events failed"));
-		}
-	}
+	mEvents.push_back(ev);
 }
 
-#ifdef FR_NEW_EVENT_CODE
-void DatabaseImpl::CancelEvents(void)
+void DatabaseImpl::DetachEventsImpl(EventsImpl* ev)
 {
-	if (mEvents != 0 && mEventsQueued)
-	{
-		if (mHandle == 0) throw LogicExceptionImpl("Database::CancelEvents",
-			_("Database is not connected"));
+	if (ev == 0)
+		throw LogicExceptionImpl("Database::DetachEventsImpl",
+				_("Can't detach a null Events object."));
 
-		IBS vector;
-
-		// A call to cancel_events will call *once* the handler routine, even
-		// though no events had fired. This is why we first set mEventsQueued
-		// to false, so that we can be sure to dismiss those unwanted callbacks
-		// subsequent to the execution of isc_cancel_events().
-		mEventsQueued = false;
-		(*gds.Call()->m_cancel_events)(vector.Self(), &mHandle, &mEventsId);
-
-	    if (vector.Errors())
-		{
-			mEventsQueued = true;	// Need to restore this as cancel failed
-	    	throw SQLExceptionImpl(vector, "Database::CancelEvents",
-	    		_("isc_cancel_events failed"));
-		}
-
-		mEventsId = 0;	// Should be, but better be safe
-		mEventsThrew = false;	// Reset potential error condition
-	}
-}
-#else
-void DatabaseImpl::CancelEvents(void)
-{
-	if (mEvents != 0 && mEventsQueued)
-	{
-		if (mHandle == 0) throw LogicExceptionImpl("Database::CancelEvents",
-			_("Database is not connected"));
-
-		IBS vector;
-
-		// A call to cancel_events will call *once* the handler routine, even
-		// though no events had fired.
-		(*gds.Call()->m_cancel_events)(vector.Self(), &mHandle, &mEventsId);
-
-	    if (vector.Errors())
-	    	throw SQLExceptionImpl(vector, "Database::CancelEvents",
-	    		_("isc_cancel_events failed"));
-
-		mEventsId = 0;	// Should be, but better be safe
-		mEventsQueued = false;
-		mEventsThrew = false;	// Reset potential error condition
-	}
-}
-#endif
-
-void DatabaseImpl::EventUpdateCounts(int size, const char* tmpbuffer)
-{
-	if (size > mEvents->Size())
-	{
-		mEventsThrew = true;	// Take note. Will throw from another context.
-		return;
-	}
-
-	for (int i = 0; i < size; i++)
-		mEvents->ResultsBuffer()[i] = tmpbuffer[i];
-
-	mEventsTrapped = true;
-}
-
-// This function must keep this prototype to stay compatible with
-// what isc_que_events() expect
-void DatabaseImpl::EventHandler(const char* object,
-	short size, const char* tmpbuffer)
-{
-	// >>>>> This method is a STATIC member !! <<<<<
-	// Consider this method as a kind of "interrupt handler". It should do as
-	// few work as possible as quickly as possible and then return.
-
-	DatabaseImpl* db = (DatabaseImpl*)object;	// Ugly, but wanted, c-style cast
-
-#ifdef FR_NEW_EVENT_CODE
-	if (db->mEventsQueued && size != 0 && tmpbuffer != 0)
-#else
-	if (size != 0 && tmpbuffer != 0)
-#endif
-		db->EventUpdateCounts(size, tmpbuffer);
-
-	db->mEventsQueued = false;
+	mEvents.erase(std::find(mEvents.begin(), mEvents.end(), ev));
 }
 
 DatabaseImpl::DatabaseImpl(const std::string& ServerName, const std::string& DatabaseName,
@@ -632,15 +468,14 @@ DatabaseImpl::DatabaseImpl(const std::string& ServerName, const std::string& Dat
 	mServerName(ServerName), mDatabaseName(DatabaseName),
 	mUserName(UserName), mUserPassword(UserPassword), mRoleName(RoleName),
 	mCharSet(CharSet), mCreateParams(CreateParams),
-	mDialect(3), mEvents(0), mEventsId(0), mEventsQueued(false),
-	mEventsTrapped(false), mEventsThrew(false)
+	mDialect(3)
 {
 }
 
 DatabaseImpl::~DatabaseImpl()
 {
-	if (Connected())
-		try { Disconnect(); } catch(IBPP::Exception&) { }
+	try { if (Connected()) Disconnect(); }
+		catch(...) { }
 }
 
 //

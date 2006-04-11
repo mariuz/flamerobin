@@ -54,8 +54,8 @@ RSC=rc.exe
 # PROP Output_Dir "vcus"
 # PROP Intermediate_Dir "vcus\ibpp"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MT /Fdvcus\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcus\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MT /Fdvcus\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcus\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MT /Fdvcus\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcus\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MT /Fdvcus\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcus\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "IBPP_WINDOWS" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -77,8 +77,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "vcu"
 # PROP Intermediate_Dir "vcu\ibpp"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MD /Fdvcu\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcu\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MD /Fdvcu\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcu\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MD /Fdvcu\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcu\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MD /Fdvcu\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcu\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "IBPP_WINDOWS" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -100,8 +100,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "vcusd"
 # PROP Intermediate_Dir "vcusd\ibpp"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MTd /Zi /Gm /GZ /Fdvcusd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcusd\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MTd /Zi /Gm /GZ /Fdvcusd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcusd\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MTd /Zi /Gm /GZ /Fdvcusd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcusd\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MTd /Zi /Gm /GZ /Fdvcusd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcusd\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_WINDOWS" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -123,8 +123,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "vcud"
 # PROP Intermediate_Dir "vcud\ibpp"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MDd /Zi /Gm /GZ /Fdvcud\ibpp.pdb /Od /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcud\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MDd /Zi /Gm /GZ /Fdvcud\ibpp.pdb /Od /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcud\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MDd /Zi /Gm /GZ /Fdvcud\ibpp.pdb /Od /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcud\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MDd /Zi /Gm /GZ /Fdvcud\ibpp.pdb /Od /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcud\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_WINDOWS" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -146,8 +146,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "vcs"
 # PROP Intermediate_Dir "vcs\ibpp"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MT /Fdvcs\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcs\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MT /Fdvcs\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcs\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MT /Fdvcs\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcs\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MT /Fdvcs\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcs\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "IBPP_WINDOWS" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -169,8 +169,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "vc"
 # PROP Intermediate_Dir "vc\ibpp"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MD /Fdvc\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vc\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MD /Fdvc\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vc\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MD /Fdvc\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vc\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MD /Fdvc\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vc\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "IBPP_WINDOWS" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -192,8 +192,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "vcsd"
 # PROP Intermediate_Dir "vcsd\ibpp"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MTd /Zi /Gm /GZ /Fdvcsd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcsd\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MTd /Zi /Gm /GZ /Fdvcsd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcsd\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MTd /Zi /Gm /GZ /Fdvcsd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcsd\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MTd /Zi /Gm /GZ /Fdvcsd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcsd\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_WINDOWS" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -215,8 +215,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "vcd"
 # PROP Intermediate_Dir "vcd\ibpp"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MDd /Zi /Gm /GZ /Fdvcd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcd\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MDd /Zi /Gm /GZ /Fdvcd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcd\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MDd /Zi /Gm /GZ /Fdvcd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcd\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MDd /Zi /Gm /GZ /Fdvcd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcd\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_WINDOWS" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -238,8 +238,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "vcus"
 # PROP Intermediate_Dir "vcus\ibpp"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MT /Fdvcus\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcus\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MT /Fdvcus\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcus\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MT /Fdvcus\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcus\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MT /Fdvcus\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcus\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "IBPP_WINDOWS" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -261,8 +261,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "vcu"
 # PROP Intermediate_Dir "vcu\ibpp"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MD /Fdvcu\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcu\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MD /Fdvcu\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcu\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MD /Fdvcu\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcu\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MD /Fdvcu\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcu\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "IBPP_WINDOWS" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -284,8 +284,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "vcusd"
 # PROP Intermediate_Dir "vcusd\ibpp"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MTd /Zi /Gm /GZ /Fdvcusd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcusd\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MTd /Zi /Gm /GZ /Fdvcusd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcusd\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MTd /Zi /Gm /GZ /Fdvcusd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcusd\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MTd /Zi /Gm /GZ /Fdvcusd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcusd\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_WINDOWS" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -307,8 +307,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "vcud"
 # PROP Intermediate_Dir "vcud\ibpp"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MDd /Zi /Gm /GZ /Fdvcud\ibpp.pdb /Od /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcud\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MDd /Zi /Gm /GZ /Fdvcud\ibpp.pdb /Od /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcud\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MDd /Zi /Gm /GZ /Fdvcud\ibpp.pdb /Od /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcud\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MDd /Zi /Gm /GZ /Fdvcud\ibpp.pdb /Od /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcud\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_WINDOWS" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -330,8 +330,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "vcs"
 # PROP Intermediate_Dir "vcs\ibpp"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MT /Fdvcs\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcs\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MT /Fdvcs\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcs\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MT /Fdvcs\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcs\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MT /Fdvcs\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcs\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "IBPP_WINDOWS" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -353,8 +353,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "vc"
 # PROP Intermediate_Dir "vc\ibpp"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MD /Fdvc\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vc\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MD /Fdvc\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vc\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MD /Fdvc\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vc\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MD /Fdvc\ibpp.pdb /O1 /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vc\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "IBPP_WINDOWS" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -376,8 +376,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "vcsd"
 # PROP Intermediate_Dir "vcsd\ibpp"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MTd /Zi /Gm /GZ /Fdvcsd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcsd\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MTd /Zi /Gm /GZ /Fdvcsd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcsd\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MTd /Zi /Gm /GZ /Fdvcsd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcsd\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MTd /Zi /Gm /GZ /Fdvcsd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcsd\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_WINDOWS" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -399,8 +399,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "vcd"
 # PROP Intermediate_Dir "vcd\ibpp"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MDd /Zi /Gm /GZ /Fdvcd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcd\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
-# ADD CPP /nologo /FD /MDd /Zi /Gm /GZ /Fdvcd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"ibpp.h" /Fp"vcd\ibpp.pch" /I ".\src\ibpp" /I ".\src\ibpp\fbheaders" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_MSVC" /D "IBPP_WINDOWS" /c
+# ADD BASE CPP /nologo /FD /MDd /Zi /Gm /GZ /Fdvcd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcd\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_WINDOWS" /c
+# ADD CPP /nologo /FD /MDd /Zi /Gm /GZ /Fdvcd\ibpp.pdb /Od /GR /EHsc /W4 /Yu"_ibpp.h" /Fp"vcd\ibpp.pch" /I ".\src\ibpp" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "IBPP_WINDOWS" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -439,7 +439,9 @@ SOURCE=.\src\ibpp\_dpb.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\ibpp\_epb.cpp
+SOURCE=.\src\ibpp\_ibpp.cpp
+# ADD BASE CPP /Yc"_ibpp.h"
+# ADD CPP /Yc"_ibpp.h"
 # End Source File
 # Begin Source File
 
@@ -479,13 +481,11 @@ SOURCE=.\src\ibpp\dbkey.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\ibpp\exception.cpp
+SOURCE=.\src\ibpp\events.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\ibpp\ibpp.cpp
-# ADD BASE CPP /Yc"ibpp.h"
-# ADD CPP /Yc"ibpp.h"
+SOURCE=.\src\ibpp\exception.cpp
 # End Source File
 # Begin Source File
 
@@ -507,17 +507,25 @@ SOURCE=.\src\ibpp\time.cpp
 
 SOURCE=.\src\ibpp\transaction.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\src\ibpp\user.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\src\ibpp\_internals.h
+SOURCE=.\src\ibpp\_ibpp.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\ibpp\_msvcwarnings.h
+SOURCE=.\src\ibpp\ibase.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\ibpp\iberror.h
 # End Source File
 # Begin Source File
 

@@ -188,6 +188,7 @@ void EventWatcherFrame::updateControls()
 //-----------------------------------------------------------------------------
 void EventWatcherFrame::defineMonitoredEvents()
 {
+/* TODO
     // prevent timer from messing our business
     bool timerRunning = timerM.IsRunning();
     if (timerRunning)
@@ -209,9 +210,10 @@ void EventWatcherFrame::defineMonitoredEvents()
     updateControls();
     if (timerRunning)
         timerM.Start(50);
+*/
 }
 //-----------------------------------------------------------------------------
-void EventWatcherFrame::ibppEventHandler(IBPP::IDatabase*,
+void EventWatcherFrame::ibppEventHandler(IBPP::Events events,
     const std::string& name, int count)
 {
     if (!skipEventsM)
@@ -347,7 +349,7 @@ void EventWatcherFrame::addEvents(wxString& s)
         }
         if (!s2.IsEmpty() && listbox_monitored->FindString(s2) == wxNOT_FOUND)
         {
-            databaseM->getIBPPDatabase()->DefineEvent(wx2std(s2), this);
+// TODO            databaseM->getIBPPDatabase()->DefineEvent(wx2std(s2), this);
             listbox_monitored->Select(listbox_monitored->Append(s2));
         }
         if (p == -1)
@@ -399,6 +401,6 @@ void EventWatcherFrame::OnListBoxSelected(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void EventWatcherFrame::OnTimer(wxTimerEvent& WXUNUSED(event))
 {
-    databaseM->getIBPPDatabase()->DispatchEvents();
+// TODO    databaseM->getIBPPDatabase()->DispatchEvents();
 }
 //-----------------------------------------------------------------------------

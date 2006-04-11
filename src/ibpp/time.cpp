@@ -5,24 +5,17 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-//	The contents of this file are subject to the Mozilla Public License
-//	Version 1.0 (the "License"); you may not use this file except in
-//	compliance with the License. You may obtain a copy of the License at
-//	http://www.mozilla.org/MPL/
+//	(C) Copyright 2000-2006 T.I.P. Group S.A. and the IBPP Team (www.ibpp.org)
 //
-//	Software distributed under the License is distributed on an "AS IS"
-//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+//	The contents of this file are subject to the IBPP License (the "License");
+//	you may not use this file except in compliance with the License.  You may
+//	obtain a copy of the License at http://www.ibpp.org or in the 'license.txt'
+//	file which must have been distributed along with this file.
+//
+//	This software, distributed under the License, is distributed on an "AS IS"
+//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See the
 //	License for the specific language governing rights and limitations
 //	under the License.
-//
-//	The Original Code is "IBPP 0.9" and all its associated documentation.
-//
-//	The Initial Developer of the Original Code is T.I.P. Group S.A.
-//	Portions created by T.I.P. Group S.A. are
-//	Copyright (C) 2000 T.I.P Group S.A.
-//	All Rights Reserved.
-//
-//	Contributor(s): ______________________________________.
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -31,8 +24,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "ibpp.h"
-#include "_internals.h"
+#ifdef _MSC_VER
+#pragma warning(disable: 4786 4996)
+#ifndef _DEBUG
+#pragma warning(disable: 4702)
+#endif
+#endif
+
+#include "_ibpp.h"
 
 #ifdef HAS_HDRSTOP
 #pragma hdrstop
@@ -42,7 +41,7 @@
 
 using namespace ibpp_internals;
 
-void IBPP::Time::Now(void)
+void IBPP::Time::Now()
 {
 	time_t systime = time(0);
 	tm* loctime = localtime(&systime);
@@ -75,6 +74,34 @@ void IBPP::Time::GetTime(int& hour, int& minute, int& second) const
 void IBPP::Time::GetTime(int& hour, int& minute, int& second, int& tenthousandths) const
 {
 	IBPP::ttoi(mTime, &hour, &minute, &second, &tenthousandths);
+}
+
+int IBPP::Time::Hours() const
+{
+	int hours;
+	IBPP::ttoi(mTime, &hours, 0, 0, 0);
+	return hours;
+}
+
+int IBPP::Time::Minutes() const
+{
+	int minutes;
+	IBPP::ttoi(mTime, 0, &minutes, 0, 0);
+	return minutes;
+}
+
+int IBPP::Time::Seconds() const
+{
+	int seconds;
+	IBPP::ttoi(mTime, 0, 0, &seconds, 0);
+	return seconds;
+}
+
+int IBPP::Time::SubSeconds() const	// Actually tenthousandths of seconds
+{
+	int tenthousandths;
+	IBPP::ttoi(mTime, 0, 0, 0, &tenthousandths);
+	return tenthousandths;
 }
 
 IBPP::Time::Time(int hour, int minute, int second, int tenthousandths)
@@ -173,7 +200,7 @@ void decodeTimestamp(IBPP::Timestamp& ts, const ISC_TIMESTAMP& isc_ts)
 	decodeTime(ts, isc_ts.timestamp_time);
 }
 
-};
+}
 
 //
 //	EOF

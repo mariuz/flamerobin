@@ -6,209 +6,165 @@ History of Changes
 
 ---------------------------------------------------------------------------
 
-The contents of this file are subject to the Mozilla Public License
-Version 1.0 (the "License"); you may not use this file except in
-compliance with the License. You may obtain a copy of the License at
-http://www.mozilla.org/MPL/
+(C) Copyright 2000-2006 T.I.P. Group S.A. and the IBPP Team (www.ibpp.org)
 
-Software distributed under the License is distributed on an "AS IS"
-basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+The contents of this file are subject to the IBPP License (the "License");
+you may not use this file except in compliance with the License.  You may
+obtain a copy of the License at http://www.ibpp.org or in the 'license.txt'
+file which must have been distributed along with this file.
+
+This software, distributed under the License, is distributed on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See the
 License for the specific language governing rights and limitations
 under the License.
 
-The Original Code is "IBPP 0.9" and all its associated documentation.
-
-The Initial Developer of the Original Code is T.I.P. Group S.A.
-Portions created by T.I.P. Group S.A. are
-Copyright (C) 2000 T.I.P Group S.A.
-All Rights Reserved.
-
-Contributor(s): ______________________________________.
-
----------------------------------------------------------------------------
+--------------------------------------------------------------------------
 
 The most recent addition to this file is always on top and has the highest
 item number.
 
-12. November 7, 2005
+18. April 7, 2006
 
-- Added Database::DropEvent(const std::string&) to drop interest in a previously
-registered event (using Database::DefineEvent()).
+- Changed some public prototypes which were taking references to object. There
+were useage cases where this lead to passing temporaries by reference.
 
-- Cleaned some details of the current Events handling implementation such that
-false shadow counts are not reported when re-defining events after having dropped
-them.
+17. April 4, 2006
 
-11. September 27, 2005
+- Fixed an inconvenience when running under debugger. Upon some conditions the
+private method StatementImpl::CursorFree() could throw. In those cases where it
+could happen, it was caught internally, so the behaviour was correct, but this
+occasional flow of exceptions was disturbing. Had to rework some logic and to
+work-around a strange behaviour where a phantom cursor is implicitely opened
+when a result set is fetched up to and including its last row.
 
-- Again, huge editing, this time to simplify and revert to 'int' a lot of places
-where int32_t had been declared in the previous step and which are not needed. It is
-better to declare the interface using simple int where possible and use only specific
-size integers where needed for portability reasons between 32 and 64 bits systems.
-By the way, just a reminder : 16 bits systems are NOT supported by IBPP.
+16. April 4, 2006
 
-- Changed the date / time / timestamp support in order to get access to the sub-second
-precision, which is defined in ten thousandths of seconds in IB and FB.
-The operator int() has been dropped and replaced by methods GetDate() and GetTime().
-The method GetTime() can take an optional fourth parameter to get the sub-seconds.
-Same for method SetTime(). This is true for classes Time and Timestamp.
+- IBPP 2.5 has been released today, as of version 2.5.1.62.
 
-- Added int Statement::GetSubtype(int) returning, for a Blob column only, the subtype
-of the Blob as it is declared in the database metadata.
+15. April 2, 2006
 
+- Some code cleanup in the new Events implementation. Looks great.
 
-10. September 23, 2005
+14. April 2, 2006
 
-- Huge but simple code editing occured over all the source code base to
-correctly support LP64 and LLP64 models on 64 bits environments. Good news is
-that this only relies on using the C 99 standard exact precision integer types
-int16_t, int32_t and int64_t (int64_t had already been introduced in the source
-earlier).
+- Complete rewrite of all the events handling system.
+There is a new first class citizen IBPP::Events. Events holds a set of events
+related to a specific instance of a connected Database. Upon creation of
+the Events object, one can request these events to be delivered in an
+asynchronous manner (NEW!) or in a synchronous (as before version 2.5).
+An application can register multiple sets of events on a same Database
+connection. Of course this change is completely source code incompatible
+with previous versions. Essentially, the changes only involve obtaining
+an Events object through EventsFactory(Database&, bool async).
+Then to replace previous methods calls as such:
+	Database::DefineEvent --> Events::Add
+	Database::DropEvent --> Events::Drop
+	Database::ClearEvents --> Events::Clear
+	Database::DispatchEvents --> Events::Dispatch
+The upgrade path is nearly trivial.
 
-9. September 12, 2005
+13. March 31, 2006
 
-- The official way to build IBPP on Windows using Borland, Microsoft and Digital
-Mars compilers has changed. Previously the HOWTOBUILD.TXT files recommended to
-download and install MSYS. This is not required anymore though still applicable.
-All you need to do is to get a Win32 native port of GNU MAKE and SH. See the
-HOWTOBUILD.TXT file for details. This is easier / lighter and helps keep a
-single Makefile valid for all supported platforms, until some more complex
-configuration like eventually bakefiles start to be used. Really this is not
-so new. It has been a looong time that you could build IBPP that way, I just
-decided that it was a more simple / straighforward default procedure.
+- Reworked the work-around the input parameters handling. Now IBPP considers
+that each input parameter can be made SQL NULL. Why? Following an interesting
+discussion with core Firebird developers, it became clear that even though
+one can consider that FB forgets to signal the input parameters of a stored
+procedure as NULLABLE, the issue extends to even simpler statements as an
+UPDATE or INSERT. FB will describe based on the columns definitions, but even
+a NOT NULL column might accept a NULL in an INSERT or UPDATE. If there is a
+trigger which act upon that and turn the NULL in something else. So in the
+first place, it is best if IBPP does not restrict the user on submitting NULLs.
 
-- Note regarding MSVC. For building with MSVC 6, you have to proceed as
-described in HOWTOBUILD.TXT (using gnu make). No visual project is provided
-for MSVC 6 and no such will be provided. (Because it would then have to be
-maintained). For building with MSVC 7.1, you have two options. The Makefile
-way (as for MSVC 6) or the visual way using the provided ibpp.sln solution file.
-This solution file will be maintained (because _I_ use that method so can
-commit myself to maintain / support it).
+12. March 25, 2006
 
+- Added some comfort methods to Date and Time (Year(), Month(), Day(), Hours(),
+Minutes(), Seconds(), SubSeconds())
 
-8. September 10, 2005
+- All remaining methods which might have helped get a naked pointer (except
+Ptr<>::intf()) have been replaced by new prototypes returning managed pointers.
+Consequently, any overload taking a naked pointer has been superceded by
+versions only taking managed pointers.
 
-- A lot of small details changed in the implementation of various internals
-methods, as to stop using C++ exceptions in some specific cases. This makes for
-a cleaner design and better experience when running under debugger control.
-Thanks to Michael Hieke and some others for insisting on this.
+- The Factories themselves have been updated to return managed pointers.
 
+- Work around a limitation of FB/IB C-API where stored proc parameters cannot
+be made passed NULL.
 
-7. August 30, 2005
+11. March 17, 2006
 
-- Added void ClientLibSearchPaths(const std::string&);
-On Win32 platform, ClientLibSearchPaths() allows to setup one or multiple 
-additional paths (separated with a ';') where IBPP will look for the client 
-library (before the default implicit search locations). This is usefull for 
-applications distributed with a 'private' copy of Firebird, when the registry 
-is useless to identify the location from where to attempt loading the 
-fbclient.dll / gds32.dll. If called, this function must be called *early* by 
-the application, before *any* other function or object methods of IBPP. This 
-is currently a NO-OP on platforms other than Win32.
+- Now, NUMERIC/DECIMAL (scaled columns) can be exchanged with integer data
+types. The plain scaled value is returned / expected.
 
+10. March 16, 2006
 
-6. February 13, 2005
+- Now, revival of MSVC6 compatibility is complete.
 
-- Added methods Save(const std::string&) and Load(std::string) to class Blob.
-Those methods allow to easily read and write a full blob using a std::string.
-A Save(), is the equivalent of Create(), a loop of Write(), and Close().
-A Load(), is the equivalent of Open(), a loop of Read(), and Close().
+9. March 15, 2006
 
-- Extended the Statement::Set() and Statement::Get() in regards to blobs and
-std::string. Now one can directly Get(3, str) where str is a std::string and
-the column at hands is a blob. The blob is retrieved and stored to the string.
-The reverse is true for Set(3, str) where str is a std::string. It will be
-stored directly. For simple case useages, this allows to bypass the useage of
-any IBPP::Blob intermediate objects and, unless finer control is required
-(which Create/Open/Write/Read/Close offer), it it much simpler to use blobs
-from application code.
+- Code tweaks to bring back MSVC 6 compatibility:
+  - Use std::string::erase() instead of std::string::clear()
+  - #define for if(true)for  (this is activated only for MSVC6)
+  
+- Added a sample 'all_at_once.cpp' file including all others to streamline
+quick and dirty command line compiles. Had to move out constants from the
+unnamed namespace to allow this.
 
-- Statement::Get when acting on std::string type and on a SQL CHAR or VARCHAR)
-has been streamlined a bit to remove an unnecessary std::string copy. The string
-read is now being directly copied from the FB client buffer to the user
-std::string variable. Might have a minor impact on heavy string I/O.
+8. March 13, 2006
 
+- Added some code in tests.cpp to better exercise cases where a Database
+pointer if recycled (while still connected) for a new connection. This better
+exercise the destructors and lifetime management of the interface pointers.
 
-5. December 9, 2004, 18:00 GMT+1
+7. March 10, 2006
 
-- Change in the interface definition of methods using or returning 64 bits
-integers. The ibpp.h now uses the C99 standard (section 7.18) types which are
-defined by including the stdint.h header. This is perfectly fine using all
-compilers on which IBPP is maintained, except for one. Guess which one ? Yes,
-MSVC does not supply that header nor those typedefs in any other file. The
-solution is simple, ibpp.h does a typedef __int64 int64_t in case of the MSVC
-compilers.
+- Confining exceptions within destructors
 
+6. March 8, 2006
 
-4. November 6, 2004, 14:15 GMT+1
+- Decided to rework the Service methods to manage users. ListUsers() becomes
+GetUsers() taking a single vector<User>& as parameter : cleaner. And added
+GetUser() taking User& as parameter to get a single user infos.
 
-- Added bool Row::Updated(). Returns wether any column of the row was updated
-(wether Set() was called at least one time on one of the columns).
+- Fixed a bug in tests.cpp (ParameterType instead of ParameterSubtype). I
+thought I fixed this one earlier. Missed commit, I guess.
 
-- Added bool Row::ColumnUpdated(int). Returns wether a specific column was
-updated.
+5. March 7, 2006
 
+- Some warning fixups using -W -Wall -pedantic with gcc.
+- Fixup to the derivation of WrongTypeImpl exception.
 
-3. November 6, 2004, 11:45 GMT+1 --- Experiment in progress in CVS HEAD
+4. March 5, 2006
 
-- There is a new object named IBPP::Row. The internal XSDA class has been
-merged in the new Row/IRow/RowImpl class. There is no RowFactory(). The only
-way to get a Row is through Statement::Fetch(Row&).
+- Added std::string& Statement::Sql() to return the last sql statement prepared/executed.
 
-For now, this Row thing is not very interesting in itself. It seems only to
-duplicate what is already available through Statement methods. Instead of
-writing something like:
+- When Statement Get() and Set() face an incompatible type situation, the exception report has
+been enhanced to give the two conflicting types (the SQL column type and the variable data type).
 
-	while (st->Fetch())
-	{
-		st->Get(1, ...);
-		...
-	}
-
-we can now (optionally) write:
-
-	IBPP::Row r;
-	while (st->Fetch(r))
-	{
-		r->Get(1, ...);
-		...
-	}
-
-The Statement implementation itself has been revised to share code and uses
-an internal Row to implement the Set/Get methods and some others.
-
-One of the goals behind this IBPP:Row is to ease the writing of client side
-caches of result sets by the application programmers. It is conceptually much
-more easy to cache a list of rows than a list of lists of individual columns.
-Note that at the present time, the current Row interface might not yet be
-sufficient to achieve this goal perfectly. Interfaces changes will probably
-occur in the next days.
-
-But there are also more goals behind this one. Stay tuned.
-
-!! The code compiles and runs and should not bring any semantic differences to
-existing applications (as the full Statement interface is maintained). For some
-days though (while we test it extensively at TIP Group), there could some bugs
-lurking in the dark. We therefore recommend people not to use HEAD code for
-anything than tests until further notice. !!
+- Added exception class 'WrongType' derived from 'LogicException' to support the above.
 
 
-2. November 4, 2004 --- Exception revision
+3. March 2, 2006
 
-- Exception handling revision. The current code compiles with MSVC7.1. Other
-compilers / platform to be tested. There is now IBPP::Exception as a base class.
-SQLException specialization is thrown as result of an engine reported runtime
-error. LogicException specialization is thrown in all other cases.
-
-                    std::exception
-                           |
-                   IBPP::Exception
-                 /                 \
-    IBPP::LogicException    IBPP::SQLException
+Changed AddUser/GetUser/ModifyUser/ListUsers (not backward compatible but easy to
+upgrade) to use the new IBPP::User helper class.
 
 
-1. October 27, 2004 --- BUG FIX RELEASE 2.3.5.0
+2. March 1, 2006
 
-The HEAD code is synched with the branch 'rel_2_3' after the 2.3.5.0 release.
+Switched development to Subversion repository, now available at SourceForge.
+
+IBPP project didn't required the added facilities of Subversion compared to CVS.
+But, I, needed them. All my other projects (business projects) are hosted on
+Subversion. So as the main contributor to the code, I egoistically opted to
+simplify my developer's life. (O. Mascia).
+
+
+1. November 17, 2005
+
+- Fixed a wrong arithmetic overflow check in row.cpp. The bug surfaces only when
+attempting to Get() a 64 bits integer from the DB to a 32 bits integer variable.
+
+- Fixed a bug in SPB::InsertString leading to wrong behaviour on PPC processors.
+(Thanks Michael Hieke.)
 
 >>> EOF <<<

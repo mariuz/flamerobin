@@ -5,24 +5,17 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-//	The contents of this file are subject to the Mozilla Public License
-//	Version 1.0 (the "License"); you may not use this file except in
-//	compliance with the License. You may obtain a copy of the License at
-//	http://www.mozilla.org/MPL/
+//	(C) Copyright 2000-2006 T.I.P. Group S.A. and the IBPP Team (www.ibpp.org)
 //
-//	Software distributed under the License is distributed on an "AS IS"
-//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+//	The contents of this file are subject to the IBPP License (the "License");
+//	you may not use this file except in compliance with the License.  You may
+//	obtain a copy of the License at http://www.ibpp.org or in the 'license.txt'
+//	file which must have been distributed along with this file.
+//
+//	This software, distributed under the License, is distributed on an "AS IS"
+//	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See the
 //	License for the specific language governing rights and limitations
 //	under the License.
-//
-//	The Original Code is "IBPP 0.9" and all its associated documentation.
-//
-//	The Initial Developer of the Original Code is T.I.P. Group S.A.
-//	Portions created by T.I.P. Group S.A. are
-//	Copyright (C) 2000 T.I.P Group S.A.
-//	All Rights Reserved.
-//
-//	Contributor(s): ______________________________________.
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -31,60 +24,25 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "ibpp.h"
-#include "_internals.h"
+#ifdef _MSC_VER
+#pragma warning(disable: 4786 4996)
+#ifndef _DEBUG
+#pragma warning(disable: 4702)
+#endif
+#endif
+
+#include "_ibpp.h"
 
 #ifdef HAS_HDRSTOP
 #pragma hdrstop
 #endif
-
-#include <limits>
 
 #include <math.h>
 #include <time.h>
 
 using namespace ibpp_internals;
 
-namespace ibpp_internals
-{
-	const double dscales[19] =
-	{
-		1, 1E1, 1E2, 1E3, 1E4,	1E5, 1E6, 1E7, 1E8,
-		1E9, 1E10, 1E11, 1E12, 1E13, 1E14, 1E15,
-		1E16, 1E17, 1E18
-	};
-
-// Many compilers confuses those following min/max with macros min and max !
-#undef min
-#undef max
-
-#ifdef IBPP_DMC // Needs to break-down the declaration else compiler crash (!)
-	const std::numeric_limits<int16_t> i16_limits;
-	const std::numeric_limits<int32_t> i32_limits;
-	const int16_t min16 = i16_limits.min();
-	const int16_t max16 = i16_limits.max();
-	const int32_t min32 = i32_limits.min();
-	const int32_t max32 = i32_limits.max();
-#else
-	const int16_t min16 = std::numeric_limits<int16_t>::min();
-	const int16_t max16 = std::numeric_limits<int16_t>::max();
-	const int32_t min32 = std::numeric_limits<int32_t>::min();
-	const int32_t max32 = std::numeric_limits<int32_t>::max();
-#endif
-
-};
-
 //	(((((((( OBJECT INTERFACE IMPLEMENTATION ))))))))
-
-IBPP::IDatabase* RowImpl::Database(void) const
-{
-	return mDatabase;
-}
-
-IBPP::ITransaction* RowImpl::Transaction(void) const
-{
-	return mTransaction;
-}
 
 void RowImpl::SetNull(int param)
 {
@@ -164,7 +122,7 @@ void RowImpl::Set(int param, int32_t value)
 void RowImpl::Set(int param, int64_t value)
 {
 	if (mDescrArea == 0)
-		throw LogicExceptionImpl("Row::Set[int64]", _("The row is not initialized."));
+		throw LogicExceptionImpl("Row::Set[int64_t]", _("The row is not initialized."));
 
 	SetValue(param, ivInt64, &value);
 	mUpdated[param-1] = true;
@@ -233,10 +191,10 @@ void RowImpl::Set(int param, const IBPP::Blob& blob)
 {
 	if (mDescrArea == 0)
 		throw LogicExceptionImpl("Row::Set[Blob]", _("The row is not initialized."));
-	if (mDatabase != 0 && dynamic_cast<DatabaseImpl*>(blob->Database()) != mDatabase)
+	if (mDatabase != 0 && blob->DatabasePtr() != mDatabase)
 		throw LogicExceptionImpl("Row::Set[Blob]",
 			_("IBlob and Row attached to different databases"));
-	if (mTransaction != 0 && dynamic_cast<TransactionImpl*>(blob->Transaction()) != mTransaction)
+	if (mTransaction != 0 && blob->TransactionPtr() != mTransaction)
 		throw LogicExceptionImpl("Row::Set[Blob]",
 			_("IBlob and Row attached to different transactions"));
 
@@ -248,10 +206,10 @@ void RowImpl::Set(int param, const IBPP::Array& array)
 {
 	if (mDescrArea == 0)
 		throw LogicExceptionImpl("Row::Set[Array]", _("The row is not initialized."));
-	if (mDatabase != 0 && dynamic_cast<DatabaseImpl*>(array->Database()) != mDatabase)
+	if (mDatabase != 0 && array->DatabasePtr() != mDatabase)
 		throw LogicExceptionImpl("Row::Set[Array]",
 			_("IArray and Row attached to different databases"));
-	if (mTransaction != 0 && dynamic_cast<TransactionImpl*>(array->Transaction()) != mTransaction)
+	if (mTransaction != 0 && array->TransactionPtr() != mTransaction)
 		throw LogicExceptionImpl("Row::Set[Array]",
 			_("IArray and Row attached to different transactions"));
 
@@ -619,7 +577,7 @@ const IBPP::Value RowImpl::Get(const std::string& name)
 }
 */
 
-int RowImpl::Columns(void)
+int RowImpl::Columns()
 {
 	if (mDescrArea == 0)
 		throw LogicExceptionImpl("Row::Columns", _("The row is not initialized."));
@@ -673,7 +631,7 @@ int RowImpl::ColumnNum(const std::string& name)
 	}
 
 	throw LogicExceptionImpl("Row::ColumnNum", _("Could not find matching column."));
-#ifdef IBPP_DMC
+#ifdef __DMC__
 	return 0;	// DMC errronously warns here about a missing return
 #endif
 }
@@ -809,11 +767,14 @@ bool RowImpl::Updated()
 	return false;
 }
 
-IBPP::IRow* RowImpl::AddRef(void)
+IBPP::Database RowImpl::DatabasePtr() const
 {
-	ASSERTION(mRefCount >= 0);
-	++mRefCount;
-	return this;
+	return mDatabase;
+}
+
+IBPP::Transaction RowImpl::TransactionPtr() const
+{
+	return mTransaction;
 }
 
 IBPP::IRow* RowImpl::Clone()
@@ -824,29 +785,23 @@ IBPP::IRow* RowImpl::Clone()
 	return clone;
 }
 
-void RowImpl::Release(IBPP::IRow*& Self)
+IBPP::IRow* RowImpl::AddRef()
 {
-	if (this != dynamic_cast<RowImpl*>(Self))
-		throw LogicExceptionImpl("Row::Release", _("Invalid Release()"));
+	ASSERTION(mRefCount >= 0);
+	++mRefCount;
+	return this;
+}
 
+void RowImpl::Release()
+{
+	// Release cannot throw, except in DEBUG builds on assertion
 	ASSERTION(mRefCount >= 0);
 	--mRefCount;
-	if (mRefCount <= 0) delete this;
-	Self = 0;
+	try { if (mRefCount <= 0) delete this; }
+		catch (...) { }
 }
 
 //	(((((((( OBJECT INTERNAL METHODS ))))))))
-
-void RowImpl::Release(RowImpl*& Self)
-{
-	if (this != Self)
-		throw LogicExceptionImpl("RowImpl::Release", _("Invalid Release()"));
-
-	ASSERTION(mRefCount >= 0);
-	--mRefCount;
-	if (mRefCount <= 0) delete this;
-	Self = 0;
-}
 
 void RowImpl::SetValue(int varnum, IITYPE ivType, const void* value, int userlen)
 {
@@ -885,7 +840,8 @@ void RowImpl::SetValue(int varnum, IITYPE ivType, const void* value, int userlen
 				len = 1;
 				while (len < var->sqllen) var->sqldata[len++] = ' ';
 			}
-			else throw LogicExceptionImpl("RowImpl::SetValue", _("Incompatible types."));
+			else throw WrongTypeImpl("RowImpl::SetValue", var->sqltype, ivType,
+										_("Incompatible types."));
 			break;
 
 		case SQL_VARYING :
@@ -908,40 +864,29 @@ void RowImpl::SetValue(int varnum, IITYPE ivType, const void* value, int userlen
 				*(int16_t*)var->sqldata = (int16_t)1;
 				var->sqldata[2] = *(bool*)value ? 'T' : 'F';
 			}
-			else throw LogicExceptionImpl("RowImpl::SetValue", _("Incompatible types."));
+			else throw WrongTypeImpl("RowImpl::SetValue", var->sqltype, ivType,
+										_("Incompatible types."));
 			break;
 
 		case SQL_SHORT :
 			if (ivType == ivBool)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::SetValue",
-						_("NUM/DEC with scale : use SetDouble()"));
 				*(int16_t*)var->sqldata = int16_t(*(bool*)value ? 1 : 0);
 			}
 			else if (ivType == ivInt16)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::SetValue",
-						_("NUM/DEC with scale : use SetDouble()"));
 				*(int16_t*)var->sqldata = *(int16_t*)value;
 			}
 			else if (ivType == ivInt32)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::SetValue",
-						_("NUM/DEC with scale : use SetDouble()"));
-				if (*(int32_t*)value < min16 || *(int32_t*)value > max16)
+				if (*(int32_t*)value < consts::min16 || *(int32_t*)value > consts::max16)
 					throw LogicExceptionImpl("RowImpl::SetValue",
 						_("Out of range numeric conversion !"));
 				*(int16_t*)var->sqldata = (int16_t)*(int32_t*)value;
 			}
 			else if (ivType == ivInt64)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::SetValue",
-						_("NUM/DEC with scale : use SetDouble()"));
-				if (*(int64_t*)value < min16 || *(int64_t*)value > max16)
+				if (*(int64_t*)value < consts::min16 || *(int64_t*)value > consts::max16)
 					throw LogicExceptionImpl("RowImpl::SetValue",
 						_("Out of range numeric conversion !"));
 				*(int16_t*)var->sqldata = (int16_t)*(int64_t*)value;
@@ -949,48 +894,37 @@ void RowImpl::SetValue(int varnum, IITYPE ivType, const void* value, int userlen
 			else if (ivType == ivFloat)
 			{
 				// This SQL_SHORT is a NUMERIC(x,y), scale it !
-				double multiplier = dscales[-var->sqlscale];
+				double multiplier = consts::dscales[-var->sqlscale];
 				*(int16_t*)var->sqldata =
 					(int16_t)floor(*(float*)value * multiplier + 0.5);
 			}
 			else if (ivType == ivDouble)
 			{
 				// This SQL_SHORT is a NUMERIC(x,y), scale it !
-				double multiplier = dscales[-var->sqlscale];
+				double multiplier = consts::dscales[-var->sqlscale];
 				*(int16_t*)var->sqldata =
 					(int16_t)floor(*(double*)value * multiplier + 0.5);
 			}
-			else throw LogicExceptionImpl("RowImpl::SetValue", _("Incompatible types."));
+			else throw WrongTypeImpl("RowImpl::SetValue",  var->sqltype, ivType,
+										_("Incompatible types."));
 			break;
 
 		case SQL_LONG :
 			if (ivType == ivBool)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::SetValue",
-						_("NUM/DEC with scale : use SetDouble()"));
-				*(ISC_LONG*)var->sqldata = *(bool*)value ? 1L : 0L;
+				*(ISC_LONG*)var->sqldata = *(bool*)value ? 1 : 0;
 			}
 			else if (ivType == ivInt16)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::SetValue",
-						_("NUM/DEC with scale : use SetDouble()"));
 				*(ISC_LONG*)var->sqldata = *(int16_t*)value;
 			}
 			else if (ivType == ivInt32)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::SetValue",
-						_("NUM/DEC with scale : use SetDouble()"));
 				*(ISC_LONG*)var->sqldata = *(ISC_LONG*)value;
 			}
 			else if (ivType == ivInt64)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::SetValue",
-						_("NUM/DEC with scale : use SetDouble()"));
-				if (*(int64_t*)value < min32 || *(int64_t*)value > max32)
+				if (*(int64_t*)value < consts::min32 || *(int64_t*)value > consts::max32)
 					throw LogicExceptionImpl("RowImpl::SetValue",
 						_("Out of range numeric conversion !"));
 				*(ISC_LONG*)var->sqldata = (ISC_LONG)*(int64_t*)value;
@@ -998,79 +932,71 @@ void RowImpl::SetValue(int varnum, IITYPE ivType, const void* value, int userlen
 			else if (ivType == ivFloat)
 			{
 				// This SQL_LONG is a NUMERIC(x,y), scale it !
-				double multiplier = dscales[-var->sqlscale];
+				double multiplier = consts::dscales[-var->sqlscale];
 				*(ISC_LONG*)var->sqldata =
 					(ISC_LONG)floor(*(float*)value * multiplier + 0.5);
 			}
 			else if (ivType == ivDouble)
 			{
 				// This SQL_LONG is a NUMERIC(x,y), scale it !
-				double multiplier = dscales[-var->sqlscale];
+				double multiplier = consts::dscales[-var->sqlscale];
 				*(ISC_LONG*)var->sqldata =
 					(ISC_LONG)floor(*(double*)value * multiplier + 0.5);
 			}
-			else throw LogicExceptionImpl("RowImpl::SetValue", _("Incompatible types."));
+			else throw WrongTypeImpl("RowImpl::SetValue",  var->sqltype, ivType,
+										_("Incompatible types."));
 			break;
 
 		case SQL_INT64 :
 			if (ivType == ivBool)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::SetValue",
-						_("Numeric(x,y) field : use IStatement::GetDouble()"));
 				*(int64_t*)var->sqldata = *(bool*)value ? 1 : 0;
 			}
 			else if (ivType == ivInt16)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::SetValue",
-						_("NUM/DEC with scale : use SetDouble()"));
 				*(int64_t*)var->sqldata = *(int16_t*)value;
 			}
 			else if (ivType == ivInt32)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::SetValue",
-						_("NUM/DEC with scale : use SetDouble()"));
 				*(int64_t*)var->sqldata = *(int32_t*)value;
 			}
 			else if (ivType == ivInt64)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::SetValue",
-						_("Numeric(x,y) field : use IStatement::GetDouble()"));
 				*(int64_t*)var->sqldata = *(int64_t*)value;
 			}
 			else if (ivType == ivFloat)
 			{
 				// This SQL_INT64 is a NUMERIC(x,y), scale it !
-				double multiplier = dscales[-var->sqlscale];
+				double multiplier = consts::dscales[-var->sqlscale];
 				*(int64_t*)var->sqldata =
 					(int64_t)floor(*(float*)value * multiplier + 0.5);
 			}
 			else if (ivType == ivDouble)
 			{
 				// This SQL_INT64 is a NUMERIC(x,y), scale it !
-				double multiplier = dscales[-var->sqlscale];
+				double multiplier = consts::dscales[-var->sqlscale];
 				*(int64_t*)var->sqldata =
 					(int64_t)floor(*(double*)value * multiplier + 0.5);
 			}
-			else throw LogicExceptionImpl("RowImpl::SetValue", _("Incompatible types."));
+			else throw WrongTypeImpl("RowImpl::SetValue", var->sqltype, ivType,
+										_("Incompatible types."));
 			break;
 
 		case SQL_FLOAT :
 			if (ivType != ivFloat || var->sqlscale != 0)
-				throw LogicExceptionImpl("RowImpl::SetValue", _("Incompatible types."));
+				throw WrongTypeImpl("RowImpl::SetValue", var->sqltype, ivType,
+									_("Incompatible types."));
 			*(float*)var->sqldata = *(float*)value;
 			break;
 
 		case SQL_DOUBLE :
-			if (ivType != ivDouble) throw LogicExceptionImpl("RowImpl::SetValue",
+			if (ivType != ivDouble)
+				throw WrongTypeImpl("RowImpl::SetValue", var->sqltype, ivType,
 										_("Incompatible types."));
 			if (var->sqlscale != 0)
 			{
 				// Round to scale of NUMERIC(x,y)
-				double multiplier = dscales[-var->sqlscale];
+				double multiplier = consts::dscales[-var->sqlscale];
 				*(double*)var->sqldata =
 					floor(*(double*)value * multiplier + 0.5) / multiplier;
 			}
@@ -1079,26 +1005,23 @@ void RowImpl::SetValue(int varnum, IITYPE ivType, const void* value, int userlen
 
 		case SQL_TIMESTAMP :
 			if (ivType != ivTimestamp)
-				throw LogicExceptionImpl("RowImpl::SetValue", _("Incompatible types."));
-			{
-				encodeTimestamp(*(ISC_TIMESTAMP*)var->sqldata, *(IBPP::Timestamp*)value);
-			}
+				throw WrongTypeImpl("RowImpl::SetValue", var->sqltype, ivType,
+										_("Incompatible types."));
+			encodeTimestamp(*(ISC_TIMESTAMP*)var->sqldata, *(IBPP::Timestamp*)value);
 			break;
 
 		case SQL_TYPE_DATE :
-			if (ivType != ivDate) throw LogicExceptionImpl("RowImpl::SetValue",
+			if (ivType != ivDate)
+				throw WrongTypeImpl("RowImpl::SetValue", var->sqltype, ivType,
 										_("Incompatible types."));
-			{
-				encodeDate(*(ISC_DATE*)var->sqldata, *(IBPP::Date*)value);
-			}
+			encodeDate(*(ISC_DATE*)var->sqldata, *(IBPP::Date*)value);
 			break;
 
 		case SQL_TYPE_TIME :
-			if (ivType != ivTime) throw LogicExceptionImpl("RowImpl::SetValue",
-										_("Incompatible types."));
-			{
-				encodeTime(*(ISC_TIME*)var->sqldata, *(IBPP::Time*)value);
-			}
+			if (ivType != ivTime)
+				throw WrongTypeImpl("RowImpl::SetValue", var->sqltype, ivType,
+											_("Incompatible types."));
+			encodeTime(*(ISC_TIME*)var->sqldata, *(IBPP::Time*)value);
 			break;
 
 		case SQL_BLOB :
@@ -1113,12 +1036,13 @@ void RowImpl::SetValue(int varnum, IITYPE ivType, const void* value, int userlen
 				blob.Save(*(std::string*)value);
 				blob.GetId((ISC_QUAD*)var->sqldata);
 			}
-			else throw LogicExceptionImpl("RowImpl::SetValue",
-					_("Incompatible types."));
+			else throw WrongTypeImpl("RowImpl::SetValue", var->sqltype, ivType,
+										_("Incompatible types."));
 			break;
 
 		case SQL_ARRAY :
-			if (ivType != ivArray) throw LogicExceptionImpl("RowImpl::SetValue",
+			if (ivType != ivArray)
+				throw WrongTypeImpl("RowImpl::SetValue", var->sqltype, ivType,
 										_("Incompatible types."));
 			{
 				ArrayImpl* array = (ArrayImpl*)value;
@@ -1186,7 +1110,8 @@ void* RowImpl::GetValue(int varnum, IITYPE ivType, void* retvalue)
 				}
 				value = &mBools[varnum-1];
 			}
-			else throw LogicExceptionImpl("RowImpl::GetValue", _("Incompatible types."));
+			else throw WrongTypeImpl("RowImpl::GetValue", var->sqltype, ivType,
+										_("Incompatible types."));
 			break;
 
 		case SQL_VARYING :
@@ -1218,48 +1143,35 @@ void* RowImpl::GetValue(int varnum, IITYPE ivType, void* retvalue)
 				}
 				value = &mBools[varnum-1];
 			}
-			else throw LogicExceptionImpl("RowImpl::GetValue",
+			else throw WrongTypeImpl("RowImpl::GetValue", var->sqltype, ivType,
 										_("Incompatible types."));
 			break;
 
 		case SQL_SHORT :
 			if (ivType == ivInt16)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::GetValue",
-						_("NUM/DEC with scale : use GetDouble()"));
 				value = var->sqldata;
 			}
 			else if (ivType == ivBool)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::GetValue",
-						_("NUM/DEC with scale : use GetDouble()"));
-				if (*(int16_t*)var->sqldata == 0)
-					mBools[varnum-1] = 0;
+				if (*(int16_t*)var->sqldata == 0) mBools[varnum-1] = 0;
 				else mBools[varnum-1] = 1;
 				value = &mBools[varnum-1];
 			}
 			else if (ivType == ivInt32)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::GetValue",
-						_("NUM/DEC with scale : use GetDouble()"));
 				mInt32s[varnum-1] = *(int16_t*)var->sqldata;
 				value = &mInt32s[varnum-1];
 			}
 			else if (ivType == ivInt64)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::GetValue",
-						_("NUM/DEC with scale : use GetDouble()"));
 				mInt64s[varnum-1] = *(int16_t*)var->sqldata;
 				value = &mInt64s[varnum-1];
 			}
 			else if (ivType == ivFloat)
 			{
 				// This SQL_SHORT is a NUMERIC(x,y), scale it !
-				double divisor = dscales[-var->sqlscale];
+				double divisor = consts::dscales[-var->sqlscale];
 				mFloats[varnum-1] = (float)(*(int16_t*)var->sqldata / divisor);
 
 				value = &mFloats[varnum-1];
@@ -1267,39 +1179,29 @@ void* RowImpl::GetValue(int varnum, IITYPE ivType, void* retvalue)
 			else if (ivType == ivDouble)
 			{
 				// This SQL_SHORT is a NUMERIC(x,y), scale it !
-				double divisor = dscales[-var->sqlscale];
+				double divisor = consts::dscales[-var->sqlscale];
 				mNumerics[varnum-1] = *(int16_t*)var->sqldata / divisor;
 				value = &mNumerics[varnum-1];
 			}
-			else throw LogicExceptionImpl("RowImpl::GetValue", _("Incompatible types."));
+			else throw WrongTypeImpl("RowImpl::GetValue", var->sqltype, ivType,
+										_("Incompatible types."));
 			break;
 
 		case SQL_LONG :
 			if (ivType == ivInt32)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::GetValue",
-						_("NUM/DEC with scale : use GetDouble()"));
 				value = var->sqldata;
 			}
 			else if (ivType == ivBool)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::GetValue",
-						_("NUM/DEC with scale : use GetDouble()"));
-				if (*(int32_t*)var->sqldata == 0)
-					mBools[varnum-1] = 0;
+				if (*(int32_t*)var->sqldata == 0) mBools[varnum-1] = 0;
 				else mBools[varnum-1] = 1;
 				value = &mBools[varnum-1];
 			}
 			else if (ivType == ivInt16)
 			{
-				int32_t tmp;
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::GetValue",
-						_("NUM/DEC with scale : use GetDouble()"));
-				tmp = *(int32_t*)var->sqldata;
-				if (tmp < min16 || tmp > max16)
+				int32_t tmp = *(int32_t*)var->sqldata;
+				if (tmp < consts::min16 || tmp > consts::max16)
 					throw LogicExceptionImpl("RowImpl::GetValue",
 						_("Out of range numeric conversion !"));
 				mInt16s[varnum-1] = (int16_t)tmp;
@@ -1307,55 +1209,42 @@ void* RowImpl::GetValue(int varnum, IITYPE ivType, void* retvalue)
 			}
 			else if (ivType == ivInt64)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::GetValue",
-						_("NUM/DEC with scale : use GetDouble()"));
 				mInt64s[varnum-1] = *(int32_t*)var->sqldata;
 				value = &mInt64s[varnum-1];
 			}
 			else if (ivType == ivFloat)
 			{
 				// This SQL_LONG is a NUMERIC(x,y), scale it !
-				double divisor = dscales[-var->sqlscale];
+				double divisor = consts::dscales[-var->sqlscale];
 				mFloats[varnum-1] = (float)(*(int32_t*)var->sqldata / divisor);
 				value = &mFloats[varnum-1];
 			}
 			else if (ivType == ivDouble)
 			{
 				// This SQL_LONG is a NUMERIC(x,y), scale it !
-				double divisor = dscales[-var->sqlscale];
+				double divisor = consts::dscales[-var->sqlscale];
 				mNumerics[varnum-1] = *(int32_t*)var->sqldata / divisor;
 				value = &mNumerics[varnum-1];
 			}
-			else throw LogicExceptionImpl("RowImpl::GetValue", _("Incompatible types."));
+			else throw WrongTypeImpl("RowImpl::GetValue", var->sqltype, ivType,
+										_("Incompatible types."));
 			break;
 
 		case SQL_INT64 :
 			if (ivType == ivInt64)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::GetValue",
-						_("NUM/DEC with scale : use GetDouble()"));
 				value = var->sqldata;
 			}
 			else if (ivType == ivBool)
 			{
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::GetValue",
-						_("NUM/DEC with scale : use GetDouble()"));
-				if (*(int64_t*)var->sqldata == 0)
-					mBools[varnum-1] = 0;
+				if (*(int64_t*)var->sqldata == 0) mBools[varnum-1] = 0;
 				else mBools[varnum-1] = 1;
 				value = &mBools[varnum-1];
 			}
 			else if (ivType == ivInt16)
 			{
-				int64_t tmp;
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::GetValue",
-						_("NUM/DEC with scale : use GetDouble()"));
-				tmp = *(int64_t*)var->sqldata;
-				if (tmp < min16 || tmp > max16)
+				int64_t tmp = *(int64_t*)var->sqldata;
+				if (tmp < consts::min16 || tmp > consts::max16)
 					throw LogicExceptionImpl("RowImpl::GetValue",
 						_("Out of range numeric conversion !"));
 				mInt16s[varnum-1] = (int16_t)tmp;
@@ -1363,12 +1252,8 @@ void* RowImpl::GetValue(int varnum, IITYPE ivType, void* retvalue)
 			}
 			else if (ivType == ivInt32)
 			{
-				int64_t tmp;
-				if (var->sqlscale != 0)
-					throw LogicExceptionImpl("RowImpl::GetValue",
-						_("NUM/DEC with scale : use GetDouble()"));
-				tmp = *(int64_t*)var->sqldata;
-				if (tmp < min32 || tmp > min32)
+				int64_t tmp = *(int64_t*)var->sqldata;
+				if (tmp < consts::min32 || tmp > consts::max32)
 					throw LogicExceptionImpl("RowImpl::GetValue",
 						_("Out of range numeric conversion !"));
 				mInt32s[varnum-1] = (int32_t)tmp;
@@ -1377,33 +1262,36 @@ void* RowImpl::GetValue(int varnum, IITYPE ivType, void* retvalue)
 			else if (ivType == ivFloat)
 			{
 				// This SQL_INT64 is a NUMERIC(x,y), scale it !
-				double divisor = dscales[-var->sqlscale];
+				double divisor = consts::dscales[-var->sqlscale];
 				mFloats[varnum-1] = (float)(*(int64_t*)var->sqldata / divisor);
 				value = &mFloats[varnum-1];
 			}
 			else if (ivType == ivDouble)
 			{
 				// This SQL_INT64 is a NUMERIC(x,y), scale it !
-				double divisor = dscales[-var->sqlscale];
+				double divisor = consts::dscales[-var->sqlscale];
 				mNumerics[varnum-1] = *(int64_t*)var->sqldata / divisor;
 				value = &mNumerics[varnum-1];
 			}
-			else throw LogicExceptionImpl("RowImpl::GetValue", _("Incompatible types."));
+			else throw WrongTypeImpl("RowImpl::GetValue", var->sqltype, ivType,
+										_("Incompatible types."));
 			break;
 
 		case SQL_FLOAT :
-			if (ivType != ivFloat) throw LogicExceptionImpl("RowImpl::GetValue",
+			if (ivType != ivFloat)
+				throw WrongTypeImpl("RowImpl::GetValue", var->sqltype, ivType,
 										_("Incompatible types."));
 			value = var->sqldata;
 			break;
 
 		case SQL_DOUBLE :
-			if (ivType != ivDouble) throw LogicExceptionImpl("RowImpl::GetValue",
+			if (ivType != ivDouble)
+				throw WrongTypeImpl("RowImpl::GetValue", var->sqltype, ivType,
 										_("Incompatible types."));
 			if (var->sqlscale != 0)
 			{
 				// Round to scale y of NUMERIC(x,y)
-				double multiplier = dscales[-var->sqlscale];
+				double multiplier = consts::dscales[-var->sqlscale];
 				mNumerics[varnum-1] =
 					floor(*(double*)var->sqldata * multiplier + 0.5) / multiplier;
 				value = &mNumerics[varnum-1];
@@ -1413,29 +1301,26 @@ void* RowImpl::GetValue(int varnum, IITYPE ivType, void* retvalue)
 
 		case SQL_TIMESTAMP :
 			if (ivType != ivTimestamp)
-				throw LogicExceptionImpl("RowImpl::SetValue", _("Incompatible types."));
-			{
-				decodeTimestamp(*(IBPP::Timestamp*)retvalue, *(ISC_TIMESTAMP*)var->sqldata);
-				value = retvalue;
-			}
+				throw WrongTypeImpl("RowImpl::SetValue", var->sqltype, ivType,
+										_("Incompatible types."));
+			decodeTimestamp(*(IBPP::Timestamp*)retvalue, *(ISC_TIMESTAMP*)var->sqldata);
+			value = retvalue;
 			break;
 
 		case SQL_TYPE_DATE :
-			if (ivType != ivDate) throw LogicExceptionImpl("RowImpl::SetValue",
+			if (ivType != ivDate)
+				throw WrongTypeImpl("RowImpl::SetValue", var->sqltype, ivType,
 										_("Incompatible types."));
-			{
-				decodeDate(*(IBPP::Date*)retvalue, *(ISC_DATE*)var->sqldata);
-				value = retvalue;
-			}
+			decodeDate(*(IBPP::Date*)retvalue, *(ISC_DATE*)var->sqldata);
+			value = retvalue;
 			break;
 
 		case SQL_TYPE_TIME :
-			if (ivType != ivTime) throw LogicExceptionImpl("RowImpl::SetValue",
+			if (ivType != ivTime)
+				throw WrongTypeImpl("RowImpl::SetValue", var->sqltype, ivType,
 										_("Incompatible types."));
-			{
-				decodeTime(*(IBPP::Time*)retvalue, *(ISC_TIME*)var->sqldata);
-				value = retvalue;
-			}
+			decodeTime(*(IBPP::Time*)retvalue, *(ISC_TIME*)var->sqldata);
+			value = retvalue;
 			break;
 
 		case SQL_BLOB :
@@ -1453,13 +1338,14 @@ void* RowImpl::GetValue(int varnum, IITYPE ivType, void* retvalue)
 				blob.Load(*str);
 				value = retvalue;
 			}
-			else throw LogicExceptionImpl("RowImpl::GetValue",
-					_("Incompatible types."));
+			else throw WrongTypeImpl("RowImpl::GetValue", var->sqltype, ivType,
+										_("Incompatible types."));
 			break;
 			
 		case SQL_ARRAY :
-			if (ivType != ivArray) throw LogicExceptionImpl("RowImpl::GetValue",
-										_("Incompatible types."));
+			if (ivType != ivArray)
+				throw WrongTypeImpl("RowImpl::GetValue", var->sqltype, ivType,
+											_("Incompatible types."));
 			{
 				ArrayImpl* array = (ArrayImpl*)retvalue;
 				array->SetId((ISC_QUAD*)var->sqldata);
@@ -1474,7 +1360,7 @@ void* RowImpl::GetValue(int varnum, IITYPE ivType, void* retvalue)
 	return value;
 }
 
-void RowImpl::Free(void)
+void RowImpl::Free()
 {
 	if (mDescrArea != 0)
 	{
@@ -1553,7 +1439,7 @@ void RowImpl::Resize(int n)
 	mDescrArea->sqln = (int16_t)n;
 }
 
-void RowImpl::AllocVariables(void)
+void RowImpl::AllocVariables()
 {
 	int i;
 	for (i = 0; i < mDescrArea->sqld; i++)
@@ -1591,11 +1477,11 @@ void RowImpl::AllocVariables(void)
 			default : throw LogicExceptionImpl("RowImpl::AllocVariables",
 						_("Found an unknown sqltype !"));
 		}
-		if (var->sqltype & 1) var->sqlind = new int16_t(-1);	// 0 indicator
+		if (var->sqltype & 1) var->sqlind = new short(-1);	// 0 indicator
 	}
 }
 
-bool RowImpl::MissingValues(void)
+bool RowImpl::MissingValues()
 {
 	for (int i = 0; i < mDescrArea->sqld; i++)
 		if (! mUpdated[i]) return true;
@@ -1647,7 +1533,7 @@ RowImpl& RowImpl::operator=(const RowImpl& copied)
 			default : throw LogicExceptionImpl("RowImpl::Ctor",
 						_("Found an unknown sqltype !"));
 		}
-		if (var->sqltype & 1) var->sqlind = new int16_t(*org->sqlind);	// 0 indicator
+		if (var->sqltype & 1) var->sqlind = new short(*org->sqlind);	// 0 indicator
 	}
 
 	// Pointers init, real data copy
@@ -1667,7 +1553,7 @@ RowImpl& RowImpl::operator=(const RowImpl& copied)
 }
 
 RowImpl::RowImpl(const RowImpl& copied)
-	: mRefCount(0), mDescrArea(0)
+	: IBPP::IRow(), mRefCount(0), mDescrArea(0)
 {
 	// mRefCount and mDescrArea are set to 0 before using the assignment operator
 	*this = copied;		// The assignment operator does the real copy
@@ -1684,7 +1570,8 @@ RowImpl::RowImpl(int dialect, int n, DatabaseImpl* db, TransactionImpl* tr)
 
 RowImpl::~RowImpl()
 {
-	Free();
+	try { Free(); }
+		catch (...) { }
 }
 
 //

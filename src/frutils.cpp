@@ -74,7 +74,7 @@ void readBlob(IBPP::Statement& st, int column, wxString& result)
     if (st->IsNull(column))
         return;
 
-    IBPP::Blob b = IBPP::BlobFactory(st->Database(), st->Transaction());
+    IBPP::Blob b = IBPP::BlobFactory(st->DatabasePtr(), st->TransactionPtr());
     st->Get(column, b);
 
     try              // if blob is empty the exception is thrown
