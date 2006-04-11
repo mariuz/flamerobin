@@ -48,6 +48,10 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     const wxString& title)
     :wxDialog(parent, -1, title)
 {
+    // on some plaforms, some of control's constructor triggers the events
+    // since not all objects are created by that time - event handling code
+    // crashes
+    inConstructor = true;
     databaseM = object->getDatabase();
 
     wxBoxSizer *mainSizer;
@@ -290,6 +294,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     mainSizer->Add(mainPanel, 1, wxEXPAND, 0);
     SetSizerAndFit(mainSizer);
 
+    inConstructor = false;
     updateControls();
 }
 //-----------------------------------------------------------------------------
@@ -326,6 +331,9 @@ void PrivilegesDialog::loadRelationColumns()
 //-----------------------------------------------------------------------------
 void PrivilegesDialog::updateControls()
 {
+    if (inConstructor)
+        return;
+
     // enable left-size choices
     textctrl_user->Enable(radiobtn_user->GetValue());
     choice_trigger->Enable(radiobtn_trigger->GetValue());

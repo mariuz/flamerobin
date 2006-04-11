@@ -38,6 +38,7 @@ private:
     Database *databaseM;
     void enableRelationCheckboxes(bool enable, bool all);
     void loadRelationColumns();
+    bool inConstructor;
 
 protected:
     wxPanel *mainPanel;
