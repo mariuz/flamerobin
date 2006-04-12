@@ -74,7 +74,7 @@ bool GridTable::canFetchMoreRows()
     if (allRowsFetchedM || statementM->Type() != IBPP::stSelect)
         return false;
     // could this really happen?
-    if (statementM.intf() == 0)
+    if (statementM == 0)
         return false;
     // there should be a better way here...
     IBPP::Transaction tran = statementM->TransactionPtr();
@@ -222,7 +222,7 @@ wxString GridTable::getCellValueForInsert(int row, int col)
 //-----------------------------------------------------------------------------
 wxString GridTable::GetColLabelValue(int col)
 {
-    if (col < columnCountM && statementM.intf())
+    if (col < columnCountM && statementM != 0)
         return std2wx(statementM->ColumnAlias(col+1));
     else
         return wxEmptyString;
@@ -230,7 +230,7 @@ wxString GridTable::GetColLabelValue(int col)
 //-----------------------------------------------------------------------------
 IBPP::SDT GridTable::getColumnType(int col)
 {
-    if (col > columnCountM || statementM.intf() == 0)
+    if (statementM == 0 || columnCountM == 0)
         return IBPP::sdString;    // I wish there is sdUnknown :)
     else
     {
@@ -263,7 +263,7 @@ wxString GridTable::getTableName()
 {
     // TODO: using one table is not correct for JOINs or sub-SELECTs, so it
     //       should take e.g. the one that occurs most often
-    if (statementM.intf() == 0 || columnCountM == 0)
+    if (statementM == 0 || columnCountM == 0)
         return wxEmptyString;
     else
         return std2wx(statementM->ColumnTable(1));
