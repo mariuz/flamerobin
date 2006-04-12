@@ -317,10 +317,8 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         if (!getService(s, svc, &pd))   // if cancel pressed on one of dialogs
             return;
 
-        wxMessageBox(_("Connected"));
         std::vector<IBPP::User> usr;
         svc->GetUsers(usr);
-        wxMessageBox(_("Got users"));
         for (std::vector<IBPP::User>::iterator it = usr.begin();
             it != usr.end(); ++it)
         {
