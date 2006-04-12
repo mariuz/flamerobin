@@ -5,10 +5,10 @@ Building FlameRobin with Visual C++ .NET (version 7.1) should be easy using the
 provided project and solution files.
 
 To build FlameRobin you have to use the downloaded sources or to check-out the
-latest soruce from projects's Subversion tree. Subversion repository is
+latest source from projects's Subversion tree. Subversion repository is
 available at:
 
-https://svn.sourceforge.net/svnroot/flamerobin/trunk/flamerobin
+  https://svn.sourceforge.net/svnroot/flamerobin/trunk/flamerobin
 
 FlameRobin uses and needs the wxWidgets library.
 
@@ -34,6 +34,11 @@ find the necessary libraries. Adding them to your user environment works best.
 
 Be sure to select the same configuration for FlameRobin that you selected for
 wxWidgets, otherwise the linker will not find the needed libraries.
+
+Note for MSVC 2005 users: when you get a fatal error CVT1100 during linking of
+flamerobin, you should change the settings of the manifest tool. Go to the
+input and output section of the manifest tool within the configuration properties
+of the project's properties, and set Embed Manifest to No.
 
 
 If you have any questions about this, feel free to ask at our flamerobin-devel
