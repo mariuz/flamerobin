@@ -1255,7 +1255,7 @@ bool ExecuteSqlFrame::execute(wxString sql, bool prepareOnly)
         IBPP::STT type = statementM->Type();
         if (type == IBPP::stSelect)            // for select statements: show data
         {
-            grid_data->fill();
+            grid_data->fill(databaseM->getConnectionCharset());
             notebook_1->SetSelection(1);
             grid_data->SetFocus();
         }

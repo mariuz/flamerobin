@@ -38,12 +38,69 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   #include "wx/wx.h"
 #endif
 
+#include <wx/fontmap.h>
 #include <wx/grid.h>
+#include <wx/strconv.h>
 
 #include "converters.h"
 #include "gui/controls/DataGridCells.h"
 #include "gui/controls/DataGridTable.h"
 #include "ugly.h"
+//-----------------------------------------------------------------------------
+GridTableCharsetConverter::GridTableCharsetConverter()
+{
+    converterM = 0;
+}
+//-----------------------------------------------------------------------------
+GridTableCharsetConverter::~GridTableCharsetConverter()
+{
+    delete converterM;
+}
+//-----------------------------------------------------------------------------
+wxMBConv* GridTableCharsetConverter::getConverter()
+{
+    if (converterM)
+        return converterM;
+    else
+        return wxConvCurrent;
+}
+//-----------------------------------------------------------------------------
+wxString GridTableCharsetConverter::mapCharset(
+    const wxString& connectionCharset)
+{
+    wxString charset(connectionCharset.Upper().Trim());
+    charset.Trim(false);
+
+    // Firebird charsets WIN125X need to be replaced with either
+    // WINDOWS125X or CP125X - we take the latter
+    if (charset.Mid(0, 5) == wxT("WIN12"))
+        charset = wxT("CP12") + charset.Mid(5);
+
+    // Firebird charsets ISO8859-X are recognized as-is
+
+    // TODO: more necessary? Maybe a mapping table is better then...
+
+    return charset;
+}
+//-----------------------------------------------------------------------------
+void GridTableCharsetConverter::setConnectionCharset(
+    const wxString& connectionCharset)
+{
+    if (connectionCharsetM != connectionCharset)
+    {
+        if (converterM)
+        {
+            delete converterM;
+            converterM = 0;
+        }
+
+        connectionCharsetM = connectionCharset;
+        wxFontEncoding fe = wxFontMapper::Get()->CharsetToEncoding(
+            mapCharset(connectionCharset), false);
+        if (fe != wxFONTENCODING_SYSTEM)
+            converterM = new wxCSConv(fe);
+    }
+}
 //-----------------------------------------------------------------------------
 GridTable::GridTable(IBPP::Statement& s)
     : wxGridTableBase(), statementM(s)
@@ -289,11 +346,13 @@ wxString GridTable::GetValue(int row, int col)
         return wxT("[null]");
 }
 //-----------------------------------------------------------------------------
-void GridTable::initialFetch()
+void GridTable::initialFetch(const wxString& connectionCharset)
 {
     Clear();
     allRowsFetchedM = false;
     maxRowToFetchM = 100;
+
+    charsetConverterM.setConnectionCharset(connectionCharset);
     fetch();
 }
 //-----------------------------------------------------------------------------

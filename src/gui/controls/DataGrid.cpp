@@ -95,7 +95,7 @@ void DataGrid::copyToClipboard(const wxString cbText)
     wxTheClipboard->Close();
 }
 //-----------------------------------------------------------------------------
-void DataGrid::fill()
+void DataGrid::fill(const wxString& connectionCharset)
 {
     GridTable* table = dynamic_cast<GridTable*>(GetTable());
     if (!table)
@@ -103,7 +103,7 @@ void DataGrid::fill()
 
     wxBusyCursor bc;
     BeginBatch();
-    table->initialFetch();
+    table->initialFetch(connectionCharset);
 
     for (int i = 1; i <= table->GetNumberCols(); i++)
     {

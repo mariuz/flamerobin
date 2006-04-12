@@ -32,14 +32,28 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/grid.h>
 
 #include <ibpp.h>
+//-----------------------------------------------------------------------------
+class wxMBConv;
+class GridBaseCell;
+//-----------------------------------------------------------------------------
+class GridTableCharsetConverter
+{
+private:
+    wxString connectionCharsetM;
+    wxMBConv* converterM;
+public:
+    GridTableCharsetConverter();
+    ~GridTableCharsetConverter();
 
+    wxMBConv* getConverter();
+    static wxString mapCharset(const wxString& connectionCharset);
+    void setConnectionCharset(const wxString& connectionCharset);
+};
 //-----------------------------------------------------------------------------
 // this event is sent after new rows have been fetched
 BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_ROWCOUNT_CHANGED, 42)
 END_DECLARE_EVENT_TYPES()
-//-----------------------------------------------------------------------------
-class GridBaseCell; // no need to include frDataGridCells.h
 //-----------------------------------------------------------------------------
 class GridTable: public wxGridTableBase
 {
@@ -54,6 +68,7 @@ private:
 
     std::vector< std::vector<GridBaseCell*> > dataM;
     IBPP::Statement& statementM;
+    GridTableCharsetConverter charsetConverterM;
 public:
     GridTable(IBPP::Statement& s);
     ~GridTable();
@@ -63,7 +78,7 @@ public:
     wxString getCellValueForInsert(int row, int col);
     IBPP::SDT getColumnType(int col);
     wxString getTableName();
-    void initialFetch();
+    void initialFetch(const wxString& connectionCharset);
     bool isNullCell(int row, int col);
     bool isNumericColumn(int col);
     bool needsMoreRowsFetched();

@@ -37,7 +37,7 @@ public:
     DataGrid(wxWindow* parent, wxWindowID id);
     ~DataGrid();
 
-    void fill();
+    void fill(const wxString& connectionCharset);
 
 public:
     enum { ID_MENU_CELLFONT, ID_MENU_LABELFONT,
