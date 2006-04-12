@@ -36,6 +36,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 class Table;
 class Database;
+class Server;
 class ProgressDialog;
 //-----------------------------------------------------------------------------
 //! sets all controls to width of widest control
@@ -55,5 +56,7 @@ void reportLastError(const wxString& actionMsg);
 //! prompts for password if needed and connects to database
 bool connectDatabase(Database *db, wxWindow* parent,
     ProgressDialog* progressdialog = 0);
+//-----------------------------------------------------------------------------
+bool getService(Server* s, IBPP::Service& svc, ProgressDialog* pd);
 //-----------------------------------------------------------------------------
 #endif // FRUTILS_H

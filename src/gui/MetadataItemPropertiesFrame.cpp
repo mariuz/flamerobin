@@ -306,6 +306,48 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         }
     }
 
+    else if (cmd == wxT("users"))
+    {
+        Server* s = dynamic_cast<Server*>(object);
+        if (!s)
+            return;
+
+        IBPP::Service svc;
+        ProgressDialog pd(this, _("Connecting to server..."), 1);
+        if (!getService(s, svc, &pd))   // if cancel pressed on one of dialogs
+            return;
+
+        wxMessageBox(_("Connected"));
+        std::vector<IBPP::User> usr;
+        svc->GetUsers(usr);
+        wxMessageBox(_("Got users"));
+        for (std::vector<IBPP::User>::iterator it = usr.begin();
+            it != usr.end(); ++it)
+        {
+            User u(*it);
+            processHtmlCode(htmlpage, suffix, &u);
+        }
+    }
+
+    else if (cmd == wxT("userinfo"))
+    {
+        User *u = dynamic_cast<User *>(object);
+        if (!u)
+            return;
+        if (suffix == wxT("username"))
+            htmlpage += escapeHtmlChars(u->usernameM);
+        if (suffix == wxT("first_name"))
+            htmlpage += escapeHtmlChars(u->firstnameM);
+        if (suffix == wxT("middle_name"))
+            htmlpage += escapeHtmlChars(u->middlenameM);
+        if (suffix == wxT("last_name"))
+            htmlpage += escapeHtmlChars(u->lastnameM);
+        if (suffix == wxT("unix_user"))
+            htmlpage << u->useridM;
+        if (suffix == wxT("unix_group"))
+            htmlpage << u->groupidM;
+    }
+
     else if (cmd == wxT("object_description"))
     {
         wxString s = object->getDescription();

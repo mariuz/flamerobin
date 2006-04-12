@@ -44,6 +44,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
 #include "metadata/table.h"
+#include "metadata/server.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 using namespace std;
@@ -173,6 +174,33 @@ bool connectDatabase(Database *db, wxWindow* parent,
     {
         reportLastError(_("Error Connecting to Database"));
         return false;
+    }
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool getService(Server* s, IBPP::Service& svc, ProgressDialog* pd)
+{
+    if (!s->getService(svc, pd))
+    {
+        wxString msg;
+        if (pd->isCanceled())
+            msg = _("You've canceled the search for a usable username and password.");
+        else
+            msg = _("None of the credentials of the databases could be used.");
+        wxMessageBox(msg +
+            _("\nYou need to supply a valid username and password."),
+            _("Connecting to server"), wxOK|wxICON_INFORMATION);
+        wxString user = ::wxGetTextFromUser(_("Connecting to server"),
+            _("Enter username"));
+        if (user.IsEmpty())
+            return false;
+        wxString pass = ::wxGetPasswordFromUser(_("Connecting to server"),
+            _("Enter password"));
+        if (pass.IsEmpty())
+            return false;
+        svc = IBPP::ServiceFactory(wx2std(s->getConnectionString()),
+            wx2std(user), wx2std(pass));
+        svc->Connect();
     }
     return true;
 }

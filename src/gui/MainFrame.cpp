@@ -947,9 +947,11 @@ void MainFrame::OnMenuManageUsers(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
-    // TODO:
-    ::wxMessageBox(_("This feature is not yet implemented"),
-        _("Not in this version"), wxOK|wxICON_INFORMATION);
+    Server* s = tree_ctrl_1->getSelectedServer();
+    if (!checkValidServer(s))
+        return;
+
+    frameManager().showMetadataPropertyFrame(this, s);
 
     FR_CATCH
 }
@@ -1060,24 +1062,8 @@ void MainFrame::OnMenuGetServerVersion(wxCommandEvent& WXUNUSED(event))
         // retieving is complete
         ProgressDialog pd(this, _("Retrieving server version"), 1);
         IBPP::Service svc;
-        if (!s->getService(svc, &pd))
-        {
-            wxString msg;
-            if (pd.isCanceled())
-                msg = _("You've canceled the search for a usable username and password.");
-            else
-                msg = _("None of the credentials of the databases could be used.");
-            wxMessageBox(msg +
-                _("\nYou need to supply a valid username and password."),
-                _("Connecting to server"), wxOK|wxICON_INFORMATION);
-            wxString user = ::wxGetTextFromUser(_("Connecting to server"),
-                _("Enter username"));
-            wxString pass = ::wxGetPasswordFromUser(_("Connecting to server"),
-                _("Enter password"));
-            svc = IBPP::ServiceFactory(wx2std(s->getConnectionString()),
-                wx2std(user), wx2std(pass));
-            svc->Connect();
-        }
+        if (!getService(s, svc, &pd))   // if cancel pressed on one of dialogs
+            return;
         svc->GetVersion(version);
     }
     catch (IBPP::Exception& e)

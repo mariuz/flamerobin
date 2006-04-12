@@ -34,6 +34,28 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "metadata/collection.h"
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
+
+class User: public MetadataItem
+{
+public:
+    User(const IBPP::User& src)
+        :MetadataItem(), useridM(src.userid), groupidM(src.groupid)
+    {
+        usernameM = std2wx(src.username);
+        passwordM = std2wx(src.password);
+        firstnameM = std2wx(src.firstname);
+        middlenameM = std2wx(src.middlename);
+        lastnameM = std2wx(src.lastname);
+    }
+
+    wxString usernameM;
+    wxString passwordM;
+    wxString firstnameM;
+    wxString middlenameM;
+    wxString lastnameM;
+    uint32_t useridM;
+    uint32_t groupidM;
+};
 //-----------------------------------------------------------------------------
 // this is a coupled node (in visual sense). Server equals collection of
 // YDatabases in wxTree. that's why getChildren() method just copies, since
