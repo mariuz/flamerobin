@@ -109,6 +109,7 @@ wxBitmap getImage32(NodeType type)
     #include "function32.xpm"
     #include "generator32.xpm"
     #include "procedure32.xpm"
+    #include "server32.xpm"
     #include "table32.xpm"
     #include "trigger32.xpm"
     #include "view32.xpm"
@@ -128,6 +129,7 @@ wxBitmap getImage32(NodeType type)
     map[ntColumn]         = column_xpm;
     map[ntDomain]         = domain_xpm;
     map[ntDatabase]     = database32_xpm;
+    map[ntServer]     = server32_xpm;
     wxBitmap ret(map[type]);
 
     delete [] map;
