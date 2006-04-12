@@ -42,9 +42,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/ffile.h>
 #include <wx/file.h>
 
-#include <string>
-#include <vector>
-
 #include "controls/LogTextControl.h"
 #include "core/FRError.h"
 #include "gui/EventWatcherFrame.h"
@@ -86,7 +83,7 @@ void EventLogControl::logEvent(const wxString& name, int count)
 }
 //-----------------------------------------------------------------------------
 EventWatcherFrame::EventWatcherFrame(wxWindow *parent, Database *db)
-    : BaseFrame(parent, -1, wxEmptyString), databaseM(db), skipEventsM(false)
+    : BaseFrame(parent, -1, wxEmptyString), databaseM(db)
 {
     timerM.SetOwner(this, ID_timer);
     eventsM = 0;
@@ -234,17 +231,15 @@ void EventWatcherFrame::defineMonitoredEvents()
         for (int i = 0; i < listbox_monitored->GetCount(); i++)
             events.push_back(wx2std(listbox_monitored->GetString(i)));
 
-        skipEventsM = true; // used to catch phantom notifications
         eventsM->Clear();
-
         vector<string>::const_iterator it;
         for (it = events.begin(); it != events.end(); it++)
         {
             eventsM->Add(*it, this);
+            // make IBPP::Events pick up the initial event count
             eventsM->Dispatch();
         }
 
-        skipEventsM = false;
         updateControls();
         if (timerRunning)
             setTimerActive(true);
@@ -284,13 +279,7 @@ void EventWatcherFrame::updateMonitoringActive()
 void EventWatcherFrame::ibppEventHandler(IBPP::Events events,
     const std::string& name, int count)
 {
-    if (!skipEventsM)
-        eventlog_received->logEvent(std2wx(name), count);
-    // else
-    //      TODO: should we inform user anyway that he got those events?
-    //      perhaps display in log control, with gray/silver color?
-    //      I decided not to put anything as it can give a lot of output
-    //      when many events are registered
+    eventlog_received->logEvent(std2wx(name), count);
 }
 //-----------------------------------------------------------------------------
 //! closes window if database is removed (unregistered)

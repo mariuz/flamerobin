@@ -34,6 +34,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/listbox.h>
 #include <wx/panel.h>
 
+#include <string>
+
 #include "ibpp.h"
 
 #include "core/Observer.h"
@@ -48,9 +50,7 @@ class EventWatcherFrame : public BaseFrame, public IBPP::EventInterface, public 
 private:
     Database* databaseM;
     wxTimer timerM;
-
     IBPP::Events eventsM;
-    bool skipEventsM;
 
     wxPanel* panel_controls;
     wxStaticText* static_text_monitored;

@@ -23,6 +23,12 @@ under the License.
 The most recent addition to this file is always on top and has the highest
 item number.
 
+20. April 12, 200§
+
+- Thanks to FlameRobin team and Michael Hieke for detecting a discrepancy
+in the events counts when one Add(), Drop(), and re-Add() a same event in
+a same database connection. Counts could sometimes be wrong.
+
 19. April 11, 2006
 
 - Had to drop the new 'asynchronous' events support. It is flawed. Simply

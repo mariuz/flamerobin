@@ -96,7 +96,8 @@ void EventsImpl::Add(const std::string& eventname, IBPP::EventInterface* objref)
 				((prev_buffer_size==0) ? 1 : prev_buffer_size); // Byte after current content
 		*(it++) = static_cast<char>(eventname.length());
 		it = std::copy(eventname.begin(), eventname.end(), it);
-		*(it++) = 1; *(it++) = 0; *(it++) = 0; *it = 0; // We initialize the counts to 1
+		// We initialize the counts to (uint32_t)(-1) to initialize properly, see FireActions()
+		*(it++) = -1; *(it++) = -1; *(it++) = -1; *it = -1;
 	}
 
 	// copying new event to the results buffer to keep event_buffer_ and results_buffer_ consistant,
@@ -288,6 +289,10 @@ void EventsImpl::FireActions()
 				}
 				std::copy(rit.begin(), rit.end(), eit.begin());
 			}
+			// This handles initialization too, where vold == (uint32_t)(-1)
+			// Thanks to M. Hieke for this idea and related initialization to (-1)
+			if (vnew != vold)
+ 				std::copy(rit.begin(), rit.end(), eit.begin());
 		}
 	}
 }

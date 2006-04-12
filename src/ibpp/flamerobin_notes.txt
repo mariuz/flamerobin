@@ -1,11 +1,19 @@
 $Id$
 
 
+2006-04-12 (mghie):
+  updated to IBPP sources taken from Subversion repository revision 72
+  --------------------------------------------------------------------
+
+  * small fix to class EventsImpl removes calls to ibppEventHandler()
+    for initial event counts
+
+
 2006-04-11 (mghie):
   updated to IBPP sources taken from Subversion repository revision 70
   --------------------------------------------------------------------
 
-  (new 'asynchronous' events support had to be dropped)
+  * new 'asynchronous' events support had to be dropped
 
 
 2006-04-11 (mghie):
