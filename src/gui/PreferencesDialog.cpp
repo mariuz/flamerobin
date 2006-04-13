@@ -579,6 +579,9 @@ bool PreferencesDialog::parseDescriptionSetting(wxPanel* page, wxXmlNode* xmln,
 //-----------------------------------------------------------------------------
 bool PreferencesDialog::saveToConfig()
 {
+    // wxFileConfig::Flush() should only be called once
+    SubjectLocker locker(&configM);
+
     std::list<PrefDlgSetting*>::iterator it;
     for (it = settingsM.begin(); it != settingsM.end(); it++)
     {

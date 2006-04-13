@@ -35,15 +35,18 @@ class Observer;
 //-----------------------------------------------------------------------------
 class Subject
 {
+private:
     friend class SubjectLocker;
-protected:
-    std::list<Observer*> observersM;
+
     unsigned int locksCountM;
+    std::list<Observer*> observersM;
     bool needsNotifyObjectsM;
 protected:
     // make these protected, as instances of this class are bogus...
     Subject();
     virtual ~Subject();
+
+    virtual void lockedChanged(bool locked);
 public:
     unsigned int getLockCount();
     virtual bool isLocked();

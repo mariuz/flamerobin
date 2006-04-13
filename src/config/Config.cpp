@@ -68,6 +68,7 @@ Config::Config()
     standardPathsM.SetInstallPrefix(wxT(FR_INSTALL_PREFIX));
 #endif
     getConfig()->SetExpandEnvVars(false);
+    needsFlushM = false;
 }
 //-----------------------------------------------------------------------------
 Config::~Config()
@@ -86,6 +87,16 @@ wxFileConfig* Config::getConfig() const
             configFileName.GetFullPath(), wxT(""), wxCONFIG_USE_LOCAL_FILE);
     }
     return configM;
+}
+//-----------------------------------------------------------------------------
+void Config::lockedChanged(bool locked)
+{
+    // delay getConfig()->Flush() until object is completely unlocked again
+    if (!locked && needsFlushM)
+    {
+        needsFlushM = false;
+        getConfig()->Flush();
+    }
 }
 //-----------------------------------------------------------------------------
 //! return true if value exists, false if not
@@ -197,7 +208,11 @@ bool Config::getValue(wxString key, vector<wxString>& value)
 bool Config::setValue(wxString key, wxString value)
 {
     bool result = getConfig()->Write(key, value);
-    getConfig()->Flush();
+    if (!isLocked())
+        getConfig()->Flush();
+    else
+        needsFlushM = true;
+    notifyObservers();
     return result;
 }
 //-----------------------------------------------------------------------------

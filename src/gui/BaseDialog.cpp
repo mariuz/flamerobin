@@ -160,6 +160,9 @@ void BaseDialog::writeConfigSettings() const
 {
     if (config().get(wxT("FrameStorage"), false) && !IsIconized())
     {
+        // wxFileConfig::Flush() should only be called once
+        SubjectLocker locker(&config());
+
         // save window size to config.
         wxString itemPrefix = getStorageName();
         if (!itemPrefix.empty())

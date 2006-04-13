@@ -35,6 +35,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <map>
 #include <vector>
+
+#include "core/Subject.h"
 //-----------------------------------------------------------------------------
 enum StorageGranularity
 {
@@ -54,9 +56,25 @@ class wxFileConfig;
     #undef FR_CONFIG_USE_PRIVATE_STDPATHS
 #endif
 
-class Config
+class Config: public Subject
 {
+private:
+    mutable wxFileConfig* configM;
+    bool needsFlushM;
+    // performs lazy initialization of configM.
+    wxFileConfig* getConfig() const;
+#ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
+    wxStandardPaths standardPathsM;
+#endif
+    wxString getConfigFileName() const;
+    wxString homePathM;
+    wxString userHomePathM;
+protected:
+    virtual void lockedChanged(bool locked);
 public:
+    Config();
+    virtual ~Config();
+
     // return true if value exists, false if not
     virtual bool keyExists(const wxString& key) const;
     virtual bool getValue(wxString key, wxString& value);
@@ -114,19 +132,6 @@ public:
     bool setValue(wxString key, std::vector<wxString> value);
 
     static const wxString pathSeparator;
-
-    Config();
-    virtual ~Config();
-private:
-    mutable wxFileConfig* configM;
-    // performs lazy initialization of configM.
-    wxFileConfig* getConfig() const;
-#ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
-    wxStandardPaths standardPathsM;
-#endif
-    wxString getConfigFileName() const;
-    wxString homePathM;
-    wxString userHomePathM;
 };
 //-----------------------------------------------------------------------------
 Config& config();

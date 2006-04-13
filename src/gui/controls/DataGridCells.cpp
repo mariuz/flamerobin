@@ -43,11 +43,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <string>
 
 #include "config/Config.h"
+#include "core/Observer.h"
+#include "core/Subject.h"
 #include "gui/controls/DataGridCells.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 // GridCellFormats: class to cache config data for cell formatting
-class GridCellFormats
+class GridCellFormats: public Observer
 {
 private:
     bool loadedM;
@@ -59,6 +61,7 @@ public:
     GridCellFormats();
 
     static GridCellFormats& get();
+    virtual void update();
 
     wxString formatDouble(double value);
     wxString formatDate(int year, int month, int day);
@@ -68,12 +71,20 @@ public:
 GridCellFormats::GridCellFormats()
     : loadedM(false)
 {
+    config().attachObserver(this);
 }
 //-----------------------------------------------------------------------------
 GridCellFormats& GridCellFormats::get()
 {
     static GridCellFormats gcf;
     return gcf;
+}
+//-----------------------------------------------------------------------------
+void GridCellFormats::update()
+{
+    // we observe config() object, so we better do as little as possible
+    // I think this here is fast enough ;-)
+    loadedM = false;
 }
 //-----------------------------------------------------------------------------
 void GridCellFormats::ensureLoaded()

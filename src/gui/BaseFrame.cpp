@@ -103,6 +103,9 @@ void BaseFrame::doReadConfigSettings(const wxString& WXUNUSED(prefix))
 //-----------------------------------------------------------------------------
 void BaseFrame::writeConfigSettings() const
 {
+    // wxFileConfig::Flush() should only be called once
+    SubjectLocker locker(&config());
+
     // propagate call to children frames.
     const wxWindowList& children = GetChildren();
     wxWindowListNode *node = children.GetFirst();

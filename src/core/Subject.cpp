@@ -109,6 +109,8 @@ void Subject::notifyObservers()
 //-----------------------------------------------------------------------------
 void Subject::lockSubject()
 {
+    if (!locksCountM)
+        lockedChanged(true);
     ++locksCountM;
 }
 //-----------------------------------------------------------------------------
@@ -117,9 +119,17 @@ void Subject::unlockSubject()
     if (isLocked())
     {
         --locksCountM;
-        if (!isLocked() && needsNotifyObjectsM)
-            notifyObservers();
+        if (!isLocked())
+        {
+            lockedChanged(false);
+            if (needsNotifyObjectsM)
+                notifyObservers();
+        }
     }
+}
+//-----------------------------------------------------------------------------
+void Subject::lockedChanged(bool /*locked*/)
+{
 }
 //-----------------------------------------------------------------------------
 unsigned int Subject::getLockCount()
