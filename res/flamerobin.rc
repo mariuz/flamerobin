@@ -4,6 +4,9 @@
 // wxWidgets resources
 ////////////////////////////////////////////////////////////////////////
 
+// set this to 1 for Visual C++ 2005 
+// (build fails with duplicate manifest resources error)
+#define wxUSE_NO_MANIFEST 0
 #include "wx/msw/wx.rc"
 
 
@@ -45,11 +48,11 @@ BEGIN
         BLOCK LANG
         BEGIN
             VALUE "Comments", "FlameRobin: Multi platform Database Manager for Firebird Database Server\0"
-            VALUE "CompanyName", "FlameRobin development team\0"
+            VALUE "CompanyName", "FlameRobin Development Team\0"
             VALUE "FileDescription", "FlameRobin Database Manager\0"
             VALUE "FileVersion", "FlameRobin " FR_VERSION_STRING "\0"
             VALUE "InternalName", "FlameRobin\0"
-            VALUE "LegalCopyright", "Copyright © 2004-2005 FlameRobin development team\0"
+            VALUE "LegalCopyright", "Copyright © 2004-2006 FlameRobin Development Team\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "flamerobin.exe\0"
             VALUE "PrivateBuild", "\0"
