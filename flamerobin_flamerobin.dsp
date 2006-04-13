@@ -668,10 +668,6 @@ SOURCE=.\src\metadata\constraints.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\converters.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\metadata\database.cpp
 # End Source File
 # Begin Source File
@@ -1011,10 +1007,6 @@ SOURCE=.\src\metadata\column.h
 # Begin Source File
 
 SOURCE=.\src\metadata\constraints.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\converters.h
 # End Source File
 # Begin Source File
 

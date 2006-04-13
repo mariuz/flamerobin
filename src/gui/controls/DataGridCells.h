@@ -30,35 +30,19 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <wx/wx.h>
 
+#include "ibpp.h"
+//----------------------------------------------------------------------
+class wxMBConv;
 //----------------------------------------------------------------------
 // Abstract cell base class
-class GridBaseCell
+class GridCell
 {
 public:
-    virtual ~GridBaseCell();
+    virtual ~GridCell();
     virtual wxString getValue() = 0;
-};
-//----------------------------------------------------------------------
-// Cell class to show wxString representation of data
-//   Note that a class containing the data itself would both be cheaper
-//   (both memory and cycles) and allow for on-thy-fly changes to the
-//   display format).  Probably also easier to edit in an editable grid.
-//   Needs reconsideration in the future...
-class DataGridCell: public GridBaseCell
-{
-private:
-    wxString valueM;
-public:
-    DataGridCell(const wxString& value);
-    virtual wxString getValue();
-};
-//----------------------------------------------------------------------
-// Cell class to show "[...]" for field data without an obvious wxString
-// representation of the value (like array or blob fields)
-class DataNAGridCell: public GridBaseCell
-{
-public:
-    virtual wxString getValue();
+
+    static GridCell* createCell(IBPP::Statement& statement, int col,
+        wxMBConv* converter);
 };
 //----------------------------------------------------------------------
 #endif

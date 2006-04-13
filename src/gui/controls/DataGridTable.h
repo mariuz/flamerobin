@@ -34,7 +34,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <ibpp.h>
 //-----------------------------------------------------------------------------
 class wxMBConv;
-class GridBaseCell;
+class GridCell;
 //-----------------------------------------------------------------------------
 class GridTableCharsetConverter
 {
@@ -66,7 +66,7 @@ private:
     wxGridCellAttr* nullAttrM;
     wxGridCellAttr* nullAttrNumericM;
 
-    std::vector< std::vector<GridBaseCell*> > dataM;
+    std::vector< std::vector<GridCell*> > dataM;
     IBPP::Statement& statementM;
     GridTableCharsetConverter charsetConverterM;
 public:

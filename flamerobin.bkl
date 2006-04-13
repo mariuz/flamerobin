@@ -214,7 +214,6 @@
         $(SOURCEDIR)/core/ProgressIndicator.h
         $(SOURCEDIR)/core/Subject.h
         $(SOURCEDIR)/core/Visitor.h
-        $(SOURCEDIR)/converters.h
         $(SOURCEDIR)/dberror.h
         $(SOURCEDIR)/framemanager.h
         $(SOURCEDIR)/frtypes.h
@@ -306,7 +305,6 @@
         $(SOURCEDIR)/addconstrainthandler.cpp
         $(SOURCEDIR)/config/Config.cpp
         $(SOURCEDIR)/config/DatabaseConfig.cpp
-        $(SOURCEDIR)/converters.cpp
         $(SOURCEDIR)/core/Element.cpp
         $(SOURCEDIR)/core/FRError.cpp
         $(SOURCEDIR)/core/Observer.cpp

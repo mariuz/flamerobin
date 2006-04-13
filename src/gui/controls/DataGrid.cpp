@@ -46,6 +46,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/wfstream.h>
 
 #include "config/Config.h"
+#include "core/FRError.h"
 #include "gui/controls/DataGrid.h"
 #include "gui/controls/DataGridTable.h"
 #include "ugly.h"
@@ -219,6 +220,8 @@ void DataGrid::OnGridLabelRightClick(wxGridEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void DataGrid::OnIdle(wxIdleEvent& event)
 {
+    FR_TRY
+
     GridTable* table = dynamic_cast<GridTable*>(GetTable());
     // disconnect event handler if nothing more to be done, will be
     // re-registered on next successfull execution of select statement
@@ -236,6 +239,8 @@ void DataGrid::OnIdle(wxIdleEvent& event)
             event.RequestMore();
         AdjustScrollbars();
     }
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnMenuCellFont(wxCommandEvent& WXUNUSED(event))

@@ -80,7 +80,6 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Config.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.obj \
-	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_converters.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Element.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRError.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Observer.obj \
@@ -283,9 +282,6 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Config.obj: .\src\config\Config.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.obj: .\src\config\DatabaseConfig.cpp
-	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
-
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_converters.obj: .\src\converters.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Element.obj: .\src\core\Element.cpp

@@ -42,7 +42,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/grid.h>
 #include <wx/strconv.h>
 
-#include "converters.h"
 #include "gui/controls/DataGridCells.h"
 #include "gui/controls/DataGridTable.h"
 #include "ugly.h"
@@ -188,6 +187,7 @@ void GridTable::fetch()
     bool initial = !rowsFetchedM;
     // fetch more rows until maxRowToFetchM reached or 100 ms elapsed
     wxLongLong startms = ::wxGetLocalTimeMillis();
+    wxMBConv* converter = charsetConverterM.getConverter();
     do
     {
         try
@@ -211,19 +211,11 @@ void GridTable::fetch()
             break;
         rowsFetchedM++;
 
-        std::vector<GridBaseCell*> s;
+        std::vector<GridCell*> s;
         s.reserve(columnCountM);
-        for (int i=1; i<=statementM->Columns(); i++)
-        {
-            wxString value;
-            if (CreateString(statementM, i, value))
-            {
-                DataGridCell* cell = new DataGridCell(value);
-                s.push_back(cell);
-            }
-            else
-                s.push_back(0);
-        }
+
+        for (int i = 1; i <= columnCountM; i++)
+            s.push_back(GridCell::createCell(statementM, i, converter));
         dataM.push_back(s);
 
         if (!initial && (::wxGetLocalTimeMillis() - startms > 100))
@@ -268,7 +260,7 @@ wxString GridTable::getCellValueForInsert(int row, int col)
     if (col >= (int)dataM[row].size())
         return wxEmptyString;
 
-    GridBaseCell* cell = dataM[row][col];
+    GridCell* cell = dataM[row][col];
     if (!cell)
         return wxT("NULL");
     // return quoted text, but escape embedded quotes
@@ -339,7 +331,7 @@ wxString GridTable::GetValue(int row, int col)
     if (maxRowToFetchM < maxRowToFetch)
         maxRowToFetchM = maxRowToFetch;
 
-    GridBaseCell* cell = dataM[row][col];
+    GridCell* cell = dataM[row][col];
     if (cell)
         return cell->getValue();
     else

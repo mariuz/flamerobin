@@ -248,7 +248,7 @@
         </setting>
         <setting type="string">
             <caption>Time format:</caption>
-            <description>The following letters will be replaced:<br />h - hour, 0-24<br />H - hour, 00-24<br />m - minute, 0-59<br />M - minute, 00-59<br />s - second, 0-59<br />S - second, 00-59<br />All other characters are copied.</description>
+            <description>The following letters will be replaced:<br />h - hour, 0-24<br />H - hour, 00-24<br />m - minute, 0-59<br />M - minute, 00-59<br />s - second, 0-59<br />S - second, 00-59<br />T - millisecond, 000-999<br />All other characters are copied.</description>
             <key>TimeFormat</key>
             <default>H:M:S</default>
             <aligngroup>1</aligngroup>

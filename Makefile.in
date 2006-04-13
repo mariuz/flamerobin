@@ -42,7 +42,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_addconstrainthandler.o \
 	flamerobin_Config.o \
 	flamerobin_DatabaseConfig.o \
-	flamerobin_converters.o \
 	flamerobin_Element.o \
 	flamerobin_FRError.o \
 	flamerobin_Observer.o \
@@ -262,9 +261,6 @@ flamerobin_Config.o: $(srcdir)/src/config/Config.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_DatabaseConfig.o: $(srcdir)/src/config/DatabaseConfig.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/config/DatabaseConfig.cpp
-
-flamerobin_converters.o: $(srcdir)/src/converters.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/converters.cpp
 
 flamerobin_Element.o: $(srcdir)/src/core/Element.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/Element.cpp
