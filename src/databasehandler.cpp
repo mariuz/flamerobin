@@ -84,20 +84,24 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
 
     if (isEditSweep)
     {
-        long sweep = d->getInfo()->getSweep();
+        long oldSweep = d->getInfo()->getSweep();
 
         while (true)
         {
             wxString s;
+            long sweep = oldSweep;
             s = ::wxGetTextFromUser(_("Enter the sweep interval"),
-                _("Sweep interval"), wxString::Format(wxT("%d"), sweep));
+                _("Sweep Interval"), wxString::Format(wxT("%d"), sweep), w);
 
             // return from the iteration when the entered string is empty, in
             // case of cancelling the operation.
             if (s.IsEmpty())
-                    break;
+                break;
             if (!s.ToLong(&sweep))
-                    continue;
+                continue;
+            // return from the iteration when the interval has not changed
+            if (sweep == oldSweep)
+                break;
 
             svc->SetSweepInterval(wx2std(d->getPath()), sweep);
 
