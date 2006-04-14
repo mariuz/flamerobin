@@ -98,9 +98,13 @@ namespace sql_icons {
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
     BaseFrame(parent, id, title, pos, size, style, wxT("FlameRobin_main"))
 {
-    //mainPanelM = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize, 0);
     mainPanelM = new wxPanel(this);
-    tree_ctrl_1 = new myTreeCtrl(mainPanelM, wxDefaultPosition, wxDefaultSize, wxTR_HAS_BUTTONS|wxSUNKEN_BORDER);
+    tree_ctrl_1 = new myTreeCtrl(mainPanelM, wxDefaultPosition, wxDefaultSize,
+#if defined __WXGTK20__ || defined __WXMAC__
+        wxTR_NO_LINES |
+#endif
+        wxTR_HAS_BUTTONS | wxSUNKEN_BORDER);
+
     wxArrayString choices;  // load from config?
 
     searchPanelM = new wxPanel(mainPanelM, -1, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL|wxSUNKEN_BORDER);
@@ -216,10 +220,10 @@ void MainFrame::set_properties()
 {
     SetTitle(_("FlameRobin Database Admin"));
 
-    // Default tree looks pretty ugly on non-Windows platforms(GTK)
-    #ifndef __WXMSW__
-    tree_ctrl_1->SetIndent(10);
-    #endif
+    // Default (generic) tree looks pretty ugly on GTK 1
+#if defined(__WXGTK__) && !defined(__WXGTK20__)
+    tree_ctrl_1->SetIndent(12);
+#endif
 
     TreeItem* rootdata = new TreeItem(tree_ctrl_1);
     wxTreeItemId root = tree_ctrl_1->AddRoot(_("Firebird Servers"), tree_ctrl_1->getItemImage(ntRoot), -1, rootdata);
