@@ -509,8 +509,10 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         Privilege* p = dynamic_cast<Privilege*>(object);
         if (!p)
             return;
-        wxString okimage = wxT("<img src=\"") + config().getHtmlTemplatesPath() + wxT("ok.png\">");
-        wxString ok2image = wxT("<img src=\"") + config().getHtmlTemplatesPath() + wxT("ok2.png\">");
+        wxString okimage = wxT("<img src=\"") +
+            config().getHtmlTemplatesPath() + wxT("ok.png\">");
+        wxString ok2image = wxT("<img src=\"") +
+            config().getHtmlTemplatesPath() + wxT("ok2.png\">");
         // see which type
         std::vector<PrivilegeItem> list;
         p->getPrivileges(suffix, list);
@@ -528,7 +530,7 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
 
                 // wxHTML doesn't support TITLE or ALT property of IMG tag so
                 // we show grantor like this (display in status bar)
-                htmlpage += wxT("<a href=\"Granted by ") + (*it).grantor
+                htmlpage += wxT("<a href=\"info://      Granted by ") + (*it).grantor
                     + wxT("\">");
 
                 htmlpage += wxT("<img src=\"") +

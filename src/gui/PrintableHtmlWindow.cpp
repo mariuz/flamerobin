@@ -194,6 +194,8 @@ void PrintableHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
 
     wxString addr = link.GetHref();
     URI uri(addr);
+    if (uri.protocol == wxT("info"))    // not really a link
+        return;
     if (uri.protocol != wxT("fr"))      // call default handler for other protocols
     {
         wxHtmlWindow::OnLinkClicked(link);
