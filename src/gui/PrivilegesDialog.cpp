@@ -423,18 +423,27 @@ void PrivilegesDialog::updateControls()
     if (radiobtn_user->GetValue())
         grantee = textctrl_user->GetValue();
     else if (radiobtn_trigger->GetValue())
-        grantee = wxT("TRIGGER ") + choice_trigger->GetStringSelection();
+    {
+        grantee = wxT("TRIGGER ") + Identifier(
+                  choice_trigger->GetStringSelection()).getQuoted();
+    }
     else if (radiobtn_procedure->GetValue())
-        grantee = wxT("PROCEDURE ") + choice_procedure->GetStringSelection();
+    {
+        grantee = wxT("PROCEDURE ") + Identifier(
+                  choice_procedure->GetStringSelection()).getQuoted();
+    }
     else if (radiobtn_view->GetValue())
-        grantee = wxT("VIEW ") + choice_view->GetStringSelection();
+    {
+        grantee = wxT("VIEW ") + Identifier(
+                  choice_view->GetStringSelection()).getQuoted();
+    }
     bool grant = radiobox_action->GetSelection() == 0;
     bool grantoption = checkbox_grant_option->IsChecked();
     wxString sql(grant ? wxT("GRANT ") : wxT("REVOKE "));
     if (!grant && grantoption)
         sql << (isRole ? wxT("ADMIN") : wxT("GRANT")) << wxT(" OPTION FOR ");
     if (isRole)
-        sql << choice_memberof->GetStringSelection();
+        sql << Identifier(choice_memberof->GetStringSelection()).getQuoted();
     else if (isRelationChecked)
     {
         wxString priv;
@@ -461,19 +470,21 @@ void PrivilegesDialog::updateControls()
                         {
                             if (i != 0)
                                 priv += wxT(",");
-                            priv += listbox_columns->GetString(ai.Item(i));
+                            priv += Identifier(listbox_columns->GetString(
+                                ai.Item(i))).getQuoted();
                         }
                         priv += wxT(")");
                     }
                 }
             }
         }
-        sql << priv << wxT(" ON ") << choice_relations->GetStringSelection();
+        sql << priv << wxT(" ON ") << Identifier(
+            choice_relations->GetStringSelection()).getQuoted();
     }
     else if (isExecuteChecked)
     {
         sql << wxT("EXECUTE ON PROCEDURE ")
-            << choice_execute->GetStringSelection();
+            << Identifier(choice_execute->GetStringSelection()).getQuoted();
     }
 
     sql << (grant ? wxT(" TO ") : wxT(" FROM ")) << grantee;
