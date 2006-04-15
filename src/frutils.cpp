@@ -178,12 +178,12 @@ bool connectDatabase(Database *db, wxWindow* parent,
     return true;
 }
 //-----------------------------------------------------------------------------
-bool getService(Server* s, IBPP::Service& svc, ProgressDialog* pd)
+bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p)
 {
-    if (!s->getService(svc, pd))
+    if (!s->getService(svc, p))
     {
         wxString msg;
-        if (pd->isCanceled())
+        if (p->isCanceled())
             msg = _("You've canceled the search for a usable username and password.");
         else
             msg = _("None of the credentials of the databases could be used.");

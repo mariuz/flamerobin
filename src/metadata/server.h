@@ -38,14 +38,32 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 class User: public MetadataItem
 {
 public:
-    User(const IBPP::User& src)
+    User(Server *parent)
+        :MetadataItem()
+    {
+        setParent((MetadataItem *)parent);
+    }
+
+    User(const IBPP::User& src, Server *parent)
         :MetadataItem(), useridM(src.userid), groupidM(src.groupid)
     {
+        setParent((MetadataItem *)parent);
         usernameM = std2wx(src.username);
         passwordM = std2wx(src.password);
         firstnameM = std2wx(src.firstname);
         middlenameM = std2wx(src.middlename);
         lastnameM = std2wx(src.lastname);
+    }
+
+    void setIBPP(IBPP::User& dest) const
+    {
+        dest.username = wx2std(usernameM);
+        dest.password = wx2std(passwordM);
+        dest.firstname = wx2std(firstnameM);
+        dest.lastname = wx2std(lastnameM);
+        dest.middlename = wx2std(middlenameM);
+        dest.userid = useridM;
+        dest.groupid = groupidM;
     }
 
     wxString usernameM;
@@ -67,6 +85,7 @@ private:
     wxString portM;
 
     MetadataCollection<Database> databasesM;
+    std::vector<User> usersM;
 public:
     Server();
     Server(const Server& rhs);
@@ -84,6 +103,8 @@ public:
 
     // returns *connected* service
     bool getService(IBPP::Service& svc, ProgressIndicator* progressind = 0);
+
+    std::vector<User>* getUsers(ProgressIndicator* progressind);
 
     // setters/getters
     wxString getHostname() const;

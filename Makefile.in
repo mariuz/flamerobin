@@ -84,6 +84,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_SimpleHtmlFrame.o \
 	flamerobin_StatementHistoryFrame.o \
 	flamerobin_TriggerWizardDialog.o \
+	flamerobin_UserDialog.o \
 	flamerobin_images.o \
 	flamerobin_logger.o \
 	flamerobin_main.o \
@@ -387,6 +388,9 @@ flamerobin_StatementHistoryFrame.o: $(srcdir)/src/gui/StatementHistoryFrame.cpp 
 
 flamerobin_TriggerWizardDialog.o: $(srcdir)/src/gui/TriggerWizardDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/TriggerWizardDialog.cpp
+
+flamerobin_UserDialog.o: $(srcdir)/src/gui/UserDialog.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/UserDialog.cpp
 
 flamerobin_images.o: $(srcdir)/src/images.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/images.cpp

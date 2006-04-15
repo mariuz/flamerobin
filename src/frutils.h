@@ -38,6 +38,7 @@ class Table;
 class Database;
 class Server;
 class ProgressDialog;
+class ProgressIndicator;
 //-----------------------------------------------------------------------------
 //! sets all controls to width of widest control
 void adjustControlsMinWidth(std::list<wxWindow*> controls);
@@ -57,6 +58,6 @@ void reportLastError(const wxString& actionMsg);
 bool connectDatabase(Database *db, wxWindow* parent,
     ProgressDialog* progressdialog = 0);
 //-----------------------------------------------------------------------------
-bool getService(Server* s, IBPP::Service& svc, ProgressDialog* pd);
+bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p);
 //-----------------------------------------------------------------------------
 #endif // FRUTILS_H

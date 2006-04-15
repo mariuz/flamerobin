@@ -40,6 +40,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <wx/progdlg.h>
 
+#include "frutils.h"
 #include "config/Config.h"
 #include "core/Visitor.h"
 #include "metadata/MetadataItemVisitor.h"
@@ -181,6 +182,24 @@ const wxString Server::getItemPath() const
     // by not including the server part. Even more so if this class is bound
     // to disappear in the future.
     return wxT("");
+}
+//-----------------------------------------------------------------------------
+std::vector<User>* Server::getUsers(ProgressIndicator* progressind)
+{
+    usersM.clear();
+    IBPP::Service svc;
+    if (!::getService(this, svc, progressind))   // if cancel pressed on one of dialogs
+        return 0;
+
+    std::vector<IBPP::User> usr;
+    svc->GetUsers(usr);
+    for (std::vector<IBPP::User>::iterator it = usr.begin();
+        it != usr.end(); ++it)
+    {
+        User u(*it, this);
+        usersM.push_back(u);
+    }
+    return &usersM;
 }
 //-----------------------------------------------------------------------------
 bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind)

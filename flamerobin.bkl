@@ -250,6 +250,7 @@
         $(SOURCEDIR)/gui/SimpleHtmlFrame.h
         $(SOURCEDIR)/gui/StatementHistoryFrame.h
         $(SOURCEDIR)/gui/TriggerWizardDialog.h
+        $(SOURCEDIR)/gui/UserDialog.h
         $(SOURCEDIR)/images.h
         $(SOURCEDIR)/Isaac.h
         $(SOURCEDIR)/logger.h
@@ -347,6 +348,7 @@
         $(SOURCEDIR)/gui/SimpleHtmlFrame.cpp
         $(SOURCEDIR)/gui/StatementHistoryFrame.cpp
         $(SOURCEDIR)/gui/TriggerWizardDialog.cpp
+        $(SOURCEDIR)/gui/UserDialog.cpp
         $(SOURCEDIR)/images.cpp
         $(SOURCEDIR)/logger.cpp
         $(SOURCEDIR)/main.cpp

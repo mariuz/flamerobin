@@ -312,18 +312,14 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         if (!s)
             return;
 
-        IBPP::Service svc;
         ProgressDialog pd(this, _("Connecting to server..."), 1);
-        if (!getService(s, svc, &pd))   // if cancel pressed on one of dialogs
+        std::vector<User> *usr = s->getUsers(&pd);
+        if (!usr)
             return;
-
-        std::vector<IBPP::User> usr;
-        svc->GetUsers(usr);
-        for (std::vector<IBPP::User>::iterator it = usr.begin();
-            it != usr.end(); ++it)
+        for (std::vector<User>::iterator it = usr->begin();
+            it != usr->end(); ++it)
         {
-            User u(*it);
-            processHtmlCode(htmlpage, suffix, &u);
+            processHtmlCode(htmlpage, suffix, &(*it));
         }
     }
 
