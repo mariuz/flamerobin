@@ -101,6 +101,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridCells.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_LogTextControl.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TextControl.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CreateIndexDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseRegistrationDialog.obj \
@@ -113,7 +114,6 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MultilineEnterDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.obj \
-	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrivilegesDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ProgressDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.obj \
@@ -348,6 +348,9 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.obj: .\src\gui\controls\Dat
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_LogTextControl.obj: .\src\gui\controls\LogTextControl.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.obj: .\src\gui\controls\PrintableHtmlWindow.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TextControl.obj: .\src\gui\controls\TextControl.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
@@ -382,9 +385,6 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.obj: .\src\gui\Preferen
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.obj: .\src\gui\PreferencesDialogSettings.cpp
-	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
-
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.obj: .\src\gui\PrintableHtmlWindow.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrivilegesDialog.obj: .\src\gui\PrivilegesDialog.cpp

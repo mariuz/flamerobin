@@ -76,6 +76,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridCells.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_LogTextControl.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TextControl.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CreateIndexDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseRegistrationDialog.o \
@@ -88,7 +89,6 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MultilineEnterDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrivilegesDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ProgressDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.o \
@@ -308,6 +308,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.o: ./src/gui/controls/DataG
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_LogTextControl.o: ./src/gui/controls/LogTextControl.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.o: ./src/gui/controls/PrintableHtmlWindow.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TextControl.o: ./src/gui/controls/TextControl.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
@@ -342,9 +345,6 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.o: ./src/gui/Preference
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.o: ./src/gui/PreferencesDialogSettings.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
-
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.o: ./src/gui/PrintableHtmlWindow.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrivilegesDialog.o: ./src/gui/PrivilegesDialog.cpp

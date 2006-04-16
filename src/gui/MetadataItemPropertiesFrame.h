@@ -33,7 +33,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "core/Observer.h"
 #include "gui/BaseFrame.h"
-#include "gui/PrintableHtmlWindow.h"
+#include "gui/controls/PrintableHtmlWindow.h"
 #include "metadata/metadataitem.h"
 //-----------------------------------------------------------------------------
 class MetadataItemPropertiesFrame: public BaseFrame, public Observer

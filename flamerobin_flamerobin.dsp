@@ -596,7 +596,7 @@ SOURCE=.\src\gui\PreferencesDialogSettings.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gui\PrintableHtmlWindow.cpp
+SOURCE=.\src\gui\controls\PrintableHtmlWindow.cpp
 # End Source File
 # Begin Source File
 
@@ -938,7 +938,7 @@ SOURCE=.\src\gui\PreferencesDialog.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gui\PrintableHtmlWindow.h
+SOURCE=.\src\gui\controls\PrintableHtmlWindow.h
 # End Source File
 # Begin Source File
 

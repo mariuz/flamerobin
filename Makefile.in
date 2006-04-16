@@ -63,6 +63,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_DataGridCells.o \
 	flamerobin_DataGridTable.o \
 	flamerobin_LogTextControl.o \
+	flamerobin_PrintableHtmlWindow.o \
 	flamerobin_TextControl.o \
 	flamerobin_CreateIndexDialog.o \
 	flamerobin_DatabaseRegistrationDialog.o \
@@ -75,7 +76,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_MultilineEnterDialog.o \
 	flamerobin_PreferencesDialog.o \
 	flamerobin_PreferencesDialogSettings.o \
-	flamerobin_PrintableHtmlWindow.o \
 	flamerobin_PrivilegesDialog.o \
 	flamerobin_ProgressDialog.o \
 	flamerobin_ReorderFieldsDialog.o \
@@ -326,6 +326,9 @@ flamerobin_DataGridTable.o: $(srcdir)/src/gui/controls/DataGridTable.cpp $(FLAME
 flamerobin_LogTextControl.o: $(srcdir)/src/gui/controls/LogTextControl.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/controls/LogTextControl.cpp
 
+flamerobin_PrintableHtmlWindow.o: $(srcdir)/src/gui/controls/PrintableHtmlWindow.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/controls/PrintableHtmlWindow.cpp
+
 flamerobin_TextControl.o: $(srcdir)/src/gui/controls/TextControl.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/controls/TextControl.cpp
 
@@ -361,9 +364,6 @@ flamerobin_PreferencesDialog.o: $(srcdir)/src/gui/PreferencesDialog.cpp $(FLAMER
 
 flamerobin_PreferencesDialogSettings.o: $(srcdir)/src/gui/PreferencesDialogSettings.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/PreferencesDialogSettings.cpp
-
-flamerobin_PrintableHtmlWindow.o: $(srcdir)/src/gui/PrintableHtmlWindow.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/PrintableHtmlWindow.cpp
 
 flamerobin_PrivilegesDialog.o: $(srcdir)/src/gui/PrivilegesDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/PrivilegesDialog.cpp

@@ -230,6 +230,7 @@
         $(SOURCEDIR)/gui/controls/DataGridCells.h
         $(SOURCEDIR)/gui/controls/DataGridTable.h
         $(SOURCEDIR)/gui/controls/LogTextControl.h
+        $(SOURCEDIR)/gui/controls/PrintableHtmlWindow.h
         $(SOURCEDIR)/gui/controls/TextControl.h
         $(SOURCEDIR)/gui/CreateIndexDialog.h
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.h
@@ -241,7 +242,6 @@
         $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.h
         $(SOURCEDIR)/gui/MultilineEnterDialog.h
         $(SOURCEDIR)/gui/PreferencesDialog.h
-        $(SOURCEDIR)/gui/PrintableHtmlWindow.h
         $(SOURCEDIR)/gui/PrivilegesDialog.h
         $(SOURCEDIR)/gui/ProgressDialog.h
         $(SOURCEDIR)/gui/ReorderFieldsDialog.h
@@ -327,6 +327,7 @@
         $(SOURCEDIR)/gui/controls/DataGridCells.cpp
         $(SOURCEDIR)/gui/controls/DataGridTable.cpp
         $(SOURCEDIR)/gui/controls/LogTextControl.cpp
+        $(SOURCEDIR)/gui/controls/PrintableHtmlWindow.cpp
         $(SOURCEDIR)/gui/controls/TextControl.cpp
         $(SOURCEDIR)/gui/CreateIndexDialog.cpp
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.cpp
@@ -339,7 +340,6 @@
         $(SOURCEDIR)/gui/MultilineEnterDialog.cpp
         $(SOURCEDIR)/gui/PreferencesDialog.cpp
         $(SOURCEDIR)/gui/PreferencesDialogSettings.cpp
-        $(SOURCEDIR)/gui/PrintableHtmlWindow.cpp
         $(SOURCEDIR)/gui/PrivilegesDialog.cpp
         $(SOURCEDIR)/gui/ProgressDialog.cpp
         $(SOURCEDIR)/gui/ReorderFieldsDialog.cpp
