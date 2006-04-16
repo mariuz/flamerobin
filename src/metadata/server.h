@@ -66,8 +66,8 @@ public:
         dest.groupid = groupidM;
     }
 
-    bool operator<(const User& rhs) const 
-    { 
+    bool operator<(const User& rhs) const
+    {
         return usernameM < rhs.usernameM;
     }
 
@@ -91,6 +91,11 @@ private:
 
     MetadataCollection<Database> databasesM;
     std::vector<User> usersM;
+
+    wxString serviceUserM;
+    wxString servicePasswordM;
+    wxString serviceSysdbaPasswordM;
+
 public:
     Server();
     Server(const Server& rhs);
@@ -107,7 +112,11 @@ public:
     void createDatabase(Database *db, int pagesize = 4096, int dialect = 3);
 
     // returns *connected* service
-    bool getService(IBPP::Service& svc, ProgressIndicator* progressind = 0);
+    bool getService(IBPP::Service& svc, ProgressIndicator* progressind,
+        bool sysdba);
+    void setServiceUser(const wxString& user);
+    void setServicePassword(const wxString& pass);
+    void setServiceSysdbaPassword(const wxString& pass);
 
     std::vector<User>* getUsers(ProgressIndicator* progressind);
 

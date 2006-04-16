@@ -248,7 +248,7 @@ bool UserPropertiesHandler::handleURI(URI& uri)
     {
         ProgressDialog pd(w, _("Connecting to server..."), 1);
         IBPP::Service svc;
-        if (!getService(s, svc, &pd))
+        if (!getService(s, svc, &pd, true)) // true = need SYSDBA password
             return true;
 
         try
@@ -295,7 +295,7 @@ bool DropUserHandler::handleURI(URI& uri)
         return true;
     ProgressDialog pd(w, _("Connecting to server..."), 1);
     IBPP::Service svc;
-    if (!getService(s, svc, &pd))
+    if (!getService(s, svc, &pd, true)) // true = need SYSDBA password
         return true;
 
     try

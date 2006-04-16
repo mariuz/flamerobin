@@ -58,6 +58,7 @@ void reportLastError(const wxString& actionMsg);
 bool connectDatabase(Database *db, wxWindow* parent,
     ProgressDialog* progressdialog = 0);
 //-----------------------------------------------------------------------------
-bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p);
+bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
+    bool sysdba);
 //-----------------------------------------------------------------------------
 #endif // FRUTILS_H

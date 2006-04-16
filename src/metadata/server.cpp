@@ -188,7 +188,7 @@ std::vector<User>* Server::getUsers(ProgressIndicator* progressind)
 {
     usersM.clear();
     IBPP::Service svc;
-    if (!::getService(this, svc, progressind))   // if cancel pressed on one of dialogs
+    if (!::getService(this, svc, progressind, true))   // true = SYSDBA
         return 0;
 
     std::vector<IBPP::User> usr;
@@ -199,17 +199,78 @@ std::vector<User>* Server::getUsers(ProgressIndicator* progressind)
         User u(*it, this);
         usersM.push_back(u);
     }
-    
+
     std::sort(usersM.begin(), usersM.end());
     return &usersM;
 }
 //-----------------------------------------------------------------------------
-bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind)
+void Server::setServiceUser(const wxString& user)
+{
+    serviceUserM = user;
+}
+//-----------------------------------------------------------------------------
+void Server::setServicePassword(const wxString& pass)
+{
+    servicePasswordM = pass;
+}
+//-----------------------------------------------------------------------------
+void Server::setServiceSysdbaPassword(const wxString& pass)
+{
+    serviceSysdbaPasswordM = pass;
+}
+//-----------------------------------------------------------------------------
+bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
+    bool sysdba)
 {
     if (progressind)
     {
         progressind->initProgress(_("Connecting..."),
-            databasesM.getChildrenCount(), 0, 1);
+            databasesM.getChildrenCount() + 2, 0, 1);
+    }
+
+    // check if we already had some successful connections
+    if (!serviceSysdbaPasswordM.IsEmpty())  // we have sysdba pass
+    {
+        if (progressind)
+        {
+            progressind->setProgressMessage(_("Using current SYSDBA password"));
+            progressind->stepProgress();
+        }
+        try
+        {
+            svc = IBPP::ServiceFactory(wx2std(getConnectionString()),
+                "SYSDBA", wx2std(serviceSysdbaPasswordM));
+            svc->Connect();
+            return true;
+        }
+        catch(IBPP::Exception&)   // keep going if connect fails
+        {
+            serviceSysdbaPasswordM.Clear();
+        }
+    }
+    if (progressind && progressind->isCanceled())
+        return false;
+    // check if we have non-sysdba connection
+    if (!sysdba && !serviceUserM.IsEmpty())
+    {
+        if (progressind)
+        {
+            progressind->setProgressMessage(wxString::Format(
+                _("Using current %s password"), serviceUserM.c_str()));
+            progressind->stepProgress();
+        }
+        try
+        {
+            svc = IBPP::ServiceFactory(wx2std(getConnectionString()),
+                wx2std(serviceUserM), wx2std(servicePasswordM));
+            svc->Connect();
+            return true;
+        }
+        catch(IBPP::Exception&)   // keep going if connect fails
+        {
+            serviceUserM.Clear();
+            servicePasswordM.Clear();
+        }
     }
 
     // first try connected databases
@@ -223,6 +284,8 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind)
         // Use the user name and password of the connected user
         // instead of the stored ones.
         IBPP::Database& db = (*ci).getIBPPDatabase();
+        if (sysdba && std2wx(db->Username()).Upper() != wxT("SYSDBA"))
+            continue;
         if (progressind)
         {
             progressind->setProgressMessage(_("Using password of: ") +
@@ -234,6 +297,13 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind)
             svc = IBPP::ServiceFactory(wx2std(getConnectionString()),
                 db->Username(), db->UserPassword());
             svc->Connect();
+            if (sysdba)
+                serviceSysdbaPasswordM = std2wx(db->UserPassword());
+            else
+            {
+                serviceUserM = std2wx(db->Username());
+                servicePasswordM = std2wx(db->UserPassword());
+            }
             return true;
         }
         catch(IBPP::Exception&)   // keep going if connect fails
@@ -251,7 +321,7 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind)
             continue;
         wxString user = (*ci).getUsername();
         wxString pwd = (*ci).getDecryptedPassword();
-        if (pwd.IsEmpty())
+        if (pwd.IsEmpty() || sysdba && user.Upper() != wxT("SYSDBA"))
             continue;
         if (progressind)
         {
@@ -264,6 +334,13 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind)
             svc = IBPP::ServiceFactory(wx2std(getConnectionString()),
                 wx2std(user), wx2std(pwd));
             svc->Connect();
+            if (sysdba)
+                serviceSysdbaPasswordM = pwd;
+            else
+            {
+                serviceUserM = user;
+                servicePasswordM = pwd;
+            }
             return true;
         }
         catch(IBPP::Exception&)   // keep going if connect fails

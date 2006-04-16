@@ -1066,7 +1066,7 @@ void MainFrame::OnMenuGetServerVersion(wxCommandEvent& WXUNUSED(event))
         // retieving is complete
         ProgressDialog pd(this, _("Retrieving server version"), 1);
         IBPP::Service svc;
-        if (!getService(s, svc, &pd))   // if cancel pressed on one of dialogs
+        if (!getService(s, svc, &pd, false))    // false = no need for sysdba
             return;
         svc->GetVersion(version);
     }
