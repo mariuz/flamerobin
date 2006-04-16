@@ -413,6 +413,7 @@
         <if cond="FORMAT!='autoconf'">html-templates</if>
     </set>
     <set var="HTMLTEMPLATEFILES">
+        ALLloading.html
         DATABASE.html
         DDL.html
         DOMAIN.html
