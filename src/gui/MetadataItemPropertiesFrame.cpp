@@ -38,13 +38,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #include "wx/wx.h"
 #endif
 
-#include <fstream>
-#include <iomanip>
-#include <sstream>
-
 #include <wx/clipbrd.h>
 #include <wx/file.h>
 #include <wx/filedlg.h>
+
+#include <fstream>
+#include <iomanip>
+#include <sstream>
 
 #include "config/Config.h"
 #include "core/FRError.h"
@@ -57,7 +57,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "metadata/CreateDDLVisitor.h"
 #include "metadata/database.h"
 #include "metadata/exception.h"
-#include "metadata/metadataitem.h"
 #include "metadata/table.h"
 #include "metadata/view.h"
 #include "ugly.h"
@@ -118,10 +117,13 @@ wxString loadHtmlFile(const wxString& filename)
 }
 //-----------------------------------------------------------------------------
 //! MetadataItemPropertiesFrame class
-MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent, MetadataItem *object, int id):
-    BaseFrame(parent, id, wxT(""))
+MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
+        MetadataItem *object)
+    : BaseFrame(parent, wxID_ANY, wxEmptyString)
 {
     pageTypeM = ptSummary;
+    objectM = object;
+    htmlReloadRequestedM = false;
     storageNameM = wxT("unassigned");
 
     if (!object)
@@ -130,17 +132,18 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent, Metad
         return;
     }
 
-    objectM = object;
-    objectM->attachObserver(this);
-
-    window_1 = new PrintableHtmlWindow(this);
+    html_window = new PrintableHtmlWindow(this);
     CreateStatusBar();
-    wxString title = objectM->getName_().c_str();
-    window_1->SetRelatedFrame(this, title + wxT(": %s"));
-    window_1->SetRelatedStatusBar(0);
-    SetTitle(wxString::Format(_("%s: properties"), objectM->getName_().c_str()));
 
-    update();   // initial rendering
+    // request initial rendering
+    requestLoadPage(true);
+    objectM->attachObserver(this);
+    update();
+
+    wxString objName(objectM->getName_());
+    SetTitle(wxString::Format(_("%s: Properties"), objName.c_str()));
+    html_window->SetRelatedFrame(this, objName + wxT(": %s"));
+    html_window->SetRelatedStatusBar(0);
 
     wxBitmap bmp = getImage32(objectM->getType());
     wxIcon icon;
@@ -190,6 +193,24 @@ const wxString MetadataItemPropertiesFrame::getStorageName() const
     return storageNameM;
 }
 //-----------------------------------------------------------------------------
+//! defer (possibly expensive) creation and display of html page to idle time
+void MetadataItemPropertiesFrame::requestLoadPage(bool showLoadingPage)
+{
+    if (!htmlReloadRequestedM)
+    {
+        Connect(wxID_ANY, wxEVT_IDLE, 
+            wxIdleEventHandler(MetadataItemPropertiesFrame::OnIdle));
+        htmlReloadRequestedM = true;
+
+        if (showLoadingPage)
+        {
+            wxBusyCursor bc;
+            wxString path(config().getHtmlTemplatesPath());
+            processHtmlFile(path + wxT("ALLloading.html"));
+        }
+    }
+}
+//-----------------------------------------------------------------------------
 //! determine the path, load and display html page
 void MetadataItemPropertiesFrame::loadPage()
 {
@@ -218,6 +239,8 @@ void MetadataItemPropertiesFrame::loadPage()
             htmlpage += wxT("DDL.html");
             break;
     }
+
+    wxBusyCursor bc;
     processHtmlFile(htmlpage);  // load HTML template, parse, and fill the HTML control
 }
 //-----------------------------------------------------------------------------
@@ -972,14 +995,13 @@ void MetadataItemPropertiesFrame::processHtmlCode(wxString& htmlpage, wxString h
 //! processes the given html template file
 void MetadataItemPropertiesFrame::processHtmlFile(wxString fileName)
 {
-    using namespace std;
     wxString htmlpage;
     processHtmlCode(htmlpage, loadHtmlFile(fileName));
 
     int x = 0, y = 0;
-    window_1->GetViewStart(&x, &y);         // save scroll position
-    window_1->setPageSource(htmlpage);
-    window_1->Scroll(x, y);                 // restore scroll position
+    html_window->GetViewStart(&x, &y);         // save scroll position
+    html_window->setPageSource(htmlpage);
+    html_window->Scroll(x, y);                 // restore scroll position
 }
 //-----------------------------------------------------------------------------
 //! closes window if observed object gets removed (disconnecting, dropping, etc)
@@ -1011,7 +1033,7 @@ void MetadataItemPropertiesFrame::setPage(const wxString& type)
     // add more page types here when needed
     else
         pageTypeM = ptSummary;
-    loadPage();
+    requestLoadPage(true);
 }
 //-----------------------------------------------------------------------------
 //! recreate html page if something changes
@@ -1036,7 +1058,8 @@ void MetadataItemPropertiesFrame::update()
         t->checkAndLoadColumns();       // load column data if needed
         std::vector<MetadataItem*> temp;
         objectM->getChildren(temp);
-        for (std::vector<MetadataItem*>::iterator it = temp.begin(); it != temp.end(); ++it)
+        std::vector<MetadataItem *>::iterator it;
+        for (it = temp.begin(); it != temp.end(); ++it)
             (*it)->attachObserver(this);
     }
 
@@ -1051,10 +1074,21 @@ void MetadataItemPropertiesFrame::update()
         p->checkAndLoadParameters();        // load column data if needed
         std::vector<MetadataItem*> temp;
         objectM->getChildren(temp);
-        for (std::vector<MetadataItem *>::iterator it = temp.begin(); it != temp.end(); ++it)
+        std::vector<MetadataItem *>::iterator it;
+        for (it = temp.begin(); it != temp.end(); ++it)
             (*it)->attachObserver(this);
     }
 
+    // with this set to false updates to the same page do not show the
+    // "Please wait while the data is being loaded..." temporary page
+    // this results in less flicker, but may also seem less responsive
+    requestLoadPage(false);
+}
+//-----------------------------------------------------------------------------
+void MetadataItemPropertiesFrame::OnIdle(wxIdleEvent& WXUNUSED(event))
+{
+    Disconnect(wxID_ANY, wxEVT_IDLE);
+    htmlReloadRequestedM = false;
     loadPage();
 }
 //-----------------------------------------------------------------------------
@@ -1077,17 +1111,21 @@ bool PageHandler::handleURI(URI& uri)
     unsigned long mo;
     if (!ms.ToULong(&mo))
         return true;
-    MetadataItemPropertiesFrame* m = (MetadataItemPropertiesFrame*)mo;
+    MetadataItemPropertiesFrame* mpf = (MetadataItemPropertiesFrame*)mo;
     if (uri.getParam(wxT("target")) == wxT("new"))
     {
-        wxWindow* mainFrame = m->GetParent();
-        if (mainFrame)                                              // !delayed, force_new
-            m = frameManager().showMetadataPropertyFrame(mainFrame, m->getObservedObject(), false, true);
+        wxWindow* mainFrame = mpf->GetParent();
+        if (mainFrame)           
+        {
+            mpf = frameManager().showMetadataPropertyFrame(mainFrame,
+                                    // !delayed, force_new
+                mpf->getObservedObject(), false, true);
+        }
     }
 
-    if (m)
+    if (mpf)
     {
-        m->setPage(uri.getParam(wxT("type")));
+        mpf->setPage(uri.getParam(wxT("type")));
         frameManager().rebuildMenu();
     }
     return true;

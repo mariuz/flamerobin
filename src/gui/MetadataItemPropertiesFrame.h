@@ -25,16 +25,16 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#ifndef METADATAITEMPROPERTIESFRAME_H
-#define METADATAITEMPROPERTIESFRAME_H
+#ifndef FR_METADATAITEMPROPERTIESFRAME_H
+#define FR_METADATAITEMPROPERTIESFRAME_H
 //-----------------------------------------------------------------------------
 #include <wx/wx.h>
 #include <wx/wxhtml.h>
 
 #include "core/Observer.h"
 #include "gui/BaseFrame.h"
+#include "gui/PrintableHtmlWindow.h"
 #include "metadata/metadataitem.h"
-#include "PrintableHtmlWindow.h"
 //-----------------------------------------------------------------------------
 class MetadataItemPropertiesFrame: public BaseFrame, public Observer
 {
@@ -44,26 +44,36 @@ private:
 
     MetadataItem *objectM;
     void removeSubject(Subject* subject);
-
-    void do_layout();
-    void loadPage();    // force reload from outside
-    void processCommand(wxString cmd, MetadataItem *object, wxString& htmlpage);
-    void processHtmlCode(wxString& htmlpage, wxString htmlsource, MetadataItem *object = 0);
     void update();
-    // used to remember the value among calls to getStorageName(), needed because
-    // it's not possible to access objectM (see getStorageName()) after detaching from it.
+
+    bool htmlReloadRequestedM;
+    PrintableHtmlWindow* html_window;
+
+    // load page in idle handler, only request a reload in update()
+    void requestLoadPage(bool showLoadingPage);
+    void loadPage();
+    void processCommand(wxString cmd, MetadataItem* object,
+        wxString& htmlpage);
+    void processHtmlCode(wxString& htmlpage, wxString htmlsource,
+        MetadataItem* object = 0);
+
+    // used to remember the value among calls to getStorageName(),
+    // needed because it's not possible to access objectM
+    // (see getStorageName()) after detaching from it.
     mutable wxString storageNameM;
 protected:
-    PrintableHtmlWindow* window_1;
     virtual const wxString getName() const;
     virtual const wxString getStorageName() const;
     virtual const wxRect getDefaultRect() const;
 public:
-    MetadataItem *getObservedObject() const;
+    MetadataItemPropertiesFrame(wxWindow* parent, MetadataItem *object);
+
+    MetadataItem* getObservedObject() const;
     void processHtmlFile(wxString fileName);
     void setPage(const wxString& type);
-
-    MetadataItemPropertiesFrame(wxWindow* parent, MetadataItem *object, int id = -1);
+private:
+    // event handling
+    void OnIdle(wxIdleEvent& event);
 };
 //-----------------------------------------------------------------------------
-#endif // METADATAITEMPROPERTIESFRAME_H
+#endif // FR_METADATAITEMPROPERTIESFRAME_H
