@@ -66,6 +66,11 @@ public:
         dest.groupid = groupidM;
     }
 
+    bool operator<(const User& rhs) const 
+    { 
+        return usernameM < rhs.usernameM;
+    }
+
     wxString usernameM;
     wxString passwordM;
     wxString firstnameM;

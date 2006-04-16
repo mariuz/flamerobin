@@ -38,6 +38,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #pragma hdrstop
 #endif
 
+#include <algorithm>
+
 #include "frutils.h"
 #include "config/Config.h"
 #include "core/Visitor.h"
@@ -182,11 +184,6 @@ const wxString Server::getItemPath() const
     return wxT("");
 }
 //-----------------------------------------------------------------------------
-bool sortUsers(User& user1, User& user2)
-{
-    return user1.usernameM < user2.usernameM;
-}
-//-----------------------------------------------------------------------------
 std::vector<User>* Server::getUsers(ProgressIndicator* progressind)
 {
     usersM.clear();
@@ -202,7 +199,8 @@ std::vector<User>* Server::getUsers(ProgressIndicator* progressind)
         User u(*it, this);
         usersM.push_back(u);
     }
-    std::sort(usersM.begin(), usersM.end(), sortUsers);
+    
+    std::sort(usersM.begin(), usersM.end());
     return &usersM;
 }
 //-----------------------------------------------------------------------------
