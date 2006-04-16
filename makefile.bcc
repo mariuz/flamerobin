@@ -122,6 +122,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleHtmlFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TriggerWizardDialog.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UserDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.obj \
@@ -408,6 +409,9 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryFrame.obj: .\src\gui\Stat
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TriggerWizardDialog.obj: .\src\gui\TriggerWizardDialog.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UserDialog.obj: .\src\gui\UserDialog.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.obj: .\src\images.cpp

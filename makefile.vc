@@ -98,6 +98,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleHtmlFrame.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryFrame.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TriggerWizardDialog.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UserDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.obj \
@@ -401,6 +402,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryFrame.obj: .\src\gui\State
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TriggerWizardDialog.obj: .\src\gui\TriggerWizardDialog.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UserDialog.obj: .\src\gui\UserDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.obj: .\src\images.cpp
