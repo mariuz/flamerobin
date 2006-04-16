@@ -38,8 +38,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #pragma hdrstop
 #endif
 
-#include <wx/progdlg.h>
-
 #include "frutils.h"
 #include "config/Config.h"
 #include "core/Visitor.h"
