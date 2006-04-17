@@ -83,14 +83,14 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     fgSizer3->AddGrowableCol(1);
 
     radiobtn_user = new wxRadioButton(granteePanel, ID_radiobtn,
-        _("User/Role"));
+        _("User/Role:"));
     fgSizer3->Add(radiobtn_user, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     textctrl_user = new wxTextCtrl(granteePanel, ID_textctrl_user,
         wxT("PUBLIC"));
     fgSizer3->Add(textctrl_user, 0, wxALL|wxEXPAND, 5);
 
     radiobtn_trigger = new wxRadioButton(granteePanel, ID_radiobtn,
-        _("Trigger"));
+        _("Trigger:"));
     fgSizer3->Add(radiobtn_trigger, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     {
         MetadataCollection<Trigger>* tc = databaseM->getCollection<Trigger>();
@@ -109,7 +109,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
 
     fgSizer3->Add(choice_trigger, 0, wxALL|wxEXPAND, 5);
     radiobtn_procedure = new wxRadioButton(granteePanel, ID_radiobtn,
-         _("Procedure"));
+         _("Procedure:"));
     fgSizer3->Add(radiobtn_procedure, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     {
         MetadataCollection<Procedure>* tc =
@@ -128,7 +128,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     choice_procedure->Enable(false);
     fgSizer3->Add(choice_procedure, 0, wxALL|wxEXPAND, 5);
 
-    radiobtn_view = new wxRadioButton(granteePanel, ID_radiobtn, _("View"));
+    radiobtn_view = new wxRadioButton(granteePanel, ID_radiobtn, _("View:"));
     fgSizer3->Add(radiobtn_view, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     {
         MetadataCollection<View>* tc = databaseM->getCollection<View>();
@@ -283,7 +283,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     innerSizer->Add(10, 5, 0, wxALL, 0);
     wxBoxSizer *previewSqlSizer;
     previewSqlSizer = new wxBoxSizer(wxHORIZONTAL);
-    label_sql = new wxStaticText(mainPanel, wxID_ANY, wxT("SQL"));
+    label_sql = new wxStaticText(mainPanel, wxID_ANY, wxT("Preview SQL:"));
     previewSqlSizer->Add(label_sql, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     textbox_current_sql = new wxTextCtrl(mainPanel, wxID_ANY, wxT(""),
         wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
@@ -292,7 +292,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     textbox_current_sql->Enable(false);
     previewSqlSizer->Add(textbox_current_sql, 1,
         wxALL|wxALIGN_CENTER_VERTICAL, 5);
-    button_add = new wxButton(mainPanel, ID_button_add, _("&Add to list"));
+    button_add = new wxButton(mainPanel, ID_button_add, _("&Add To List"));
     previewSqlSizer->Add(button_add, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     innerSizer->Add(previewSqlSizer, 0, wxEXPAND|wxRIGHT|wxLEFT, 10);
 
@@ -301,22 +301,24 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     innerSizer->Add(m_staticline2, 0, wxALL|wxEXPAND, 6);
 
     label_statements = new wxStaticText(mainPanel, wxID_ANY,
-        _("List of SQL statements to execute"));
+        _("List of SQL statements to execute:"));
     innerSizer->Add(label_statements, 0,
         wxALIGN_BOTTOM|wxTOP|wxLEFT|wxEXPAND, 10);
-    listbox_statements = new wxListBox(mainPanel, wxID_ANY, wxDefaultPosition,
-        wxDefaultSize, 0, 0, 0);
+    listbox_statements = new wxListBox(mainPanel, ID_listbox_statements,
+        wxDefaultPosition, wxDefaultSize, 0, 0, 0);
     innerSizer->Add(listbox_statements, 1, wxEXPAND|wxRIGHT|wxLEFT, 10);
 
     wxBoxSizer *sizer_buttons;
     sizer_buttons = new wxBoxSizer(wxHORIZONTAL);
     button_remove = new wxButton(mainPanel, ID_button_remove,
-        _("Remove selected"), wxDefaultPosition, wxDefaultSize, 0);
+        _("&Remove Selected"), wxDefaultPosition, wxDefaultSize, 0);
+    button_remove->Enable(false);
     sizer_buttons->Add(button_remove, 0, wxALL, 5);
     sizer_buttons->Add(2, 2, 1, wxALL, 0);
-    button_execute = new wxButton(mainPanel, wxID_OK, _("Execute all"));
+    button_execute = new wxButton(mainPanel, wxID_OK, _("&Execute All"));
+    button_execute->Enable(false);
     sizer_buttons->Add(button_execute, 0, wxALL, 5);
-    button_close = new wxButton(mainPanel, wxID_CANCEL, _("Close"));
+    button_close = new wxButton(mainPanel, wxID_CANCEL, _("&Close"));
     sizer_buttons->Add(button_close, 0, wxALL, 5);
     innerSizer->Add(sizer_buttons, 0, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5);
     mainPanel->SetSizer(innerSizer);
@@ -516,6 +518,8 @@ BEGIN_EVENT_TABLE(PrivilegesDialog, wxDialog)
     EVT_CHOICE(PrivilegesDialog::ID_choice, PrivilegesDialog::OnSettingChanged)
     EVT_LISTBOX(PrivilegesDialog::ID_listbox,
         PrivilegesDialog::OnSettingChanged)
+    EVT_LISTBOX(PrivilegesDialog::ID_listbox_statements,
+        PrivilegesDialog::OnListBoxStatementsSelected)
     EVT_RADIOBOX(PrivilegesDialog::ID_radiobox_action,
         PrivilegesDialog::OnSettingChanged)
     EVT_RADIOBUTTON(PrivilegesDialog::ID_radiobtn,
@@ -524,9 +528,16 @@ BEGIN_EVENT_TABLE(PrivilegesDialog, wxDialog)
         PrivilegesDialog::OnSettingChanged)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
+void PrivilegesDialog::OnListBoxStatementsSelected(wxCommandEvent&
+    WXUNUSED(event))
+{
+    button_remove->Enable(listbox_statements->GetSelection() != wxNOT_FOUND);
+}
+//-----------------------------------------------------------------------------
 void PrivilegesDialog::OnButtonAddClick(wxCommandEvent& WXUNUSED(event))
 {
     listbox_statements->Append(textbox_current_sql->GetValue());
+    button_execute->Enable();
 }
 //-----------------------------------------------------------------------------
 void PrivilegesDialog::OnButtonRemoveClick(wxCommandEvent& WXUNUSED(event))
@@ -534,6 +545,9 @@ void PrivilegesDialog::OnButtonRemoveClick(wxCommandEvent& WXUNUSED(event))
     int sel = listbox_statements->GetSelection();
     if (sel != wxNOT_FOUND)
         listbox_statements->Delete(sel);
+    button_remove->Enable(false);
+    if (listbox_statements->GetCount() == 0)
+        button_execute->Enable(false);
 }
 //-----------------------------------------------------------------------------
 void PrivilegesDialog::OnSettingChanged(wxCommandEvent& WXUNUSED(event))

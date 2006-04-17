@@ -83,6 +83,7 @@ public:
     void OnSettingChanged(wxCommandEvent& event);
     void OnButtonAddClick(wxCommandEvent& event);
     void OnButtonRemoveClick(wxCommandEvent& event);
+    void OnListBoxStatementsSelected(wxCommandEvent& event);
 
     enum
     {
@@ -95,7 +96,8 @@ public:
         ID_listbox,
         ID_radiobox_action,
         ID_radiobtn,
-        ID_textctrl_user
+        ID_textctrl_user,
+        ID_listbox_statements
     };
 
     wxString getSqlStatements();
