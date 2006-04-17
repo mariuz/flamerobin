@@ -198,16 +198,16 @@ void MetadataItemPropertiesFrame::requestLoadPage(bool showLoadingPage)
 {
     if (!htmlReloadRequestedM)
     {
-        Connect(wxID_ANY, wxEVT_IDLE, 
-            wxIdleEventHandler(MetadataItemPropertiesFrame::OnIdle));
-        htmlReloadRequestedM = true;
-
         if (showLoadingPage)
         {
             wxBusyCursor bc;
             wxString path(config().getHtmlTemplatesPath());
             processHtmlFile(path + wxT("ALLloading.html"));
         }
+
+        Connect(wxID_ANY, wxEVT_IDLE, 
+            wxIdleEventHandler(MetadataItemPropertiesFrame::OnIdle));
+        htmlReloadRequestedM = true;
     }
 }
 //-----------------------------------------------------------------------------
