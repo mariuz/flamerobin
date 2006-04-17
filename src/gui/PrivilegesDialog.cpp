@@ -39,6 +39,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
 #include "metadata/trigger.h"
+#include "styleguide.h"
 #include "urihandler.h"
 #include "ExecuteSqlFrame.h"
 #include "PrivilegesDialog.h"
@@ -46,17 +47,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     const wxString& title)
-    :wxDialog(parent, -1, title)
+    :BaseDialog(parent, -1, title)
 {
     // on some plaforms, some of control's constructor triggers the events
     // since not all objects are created by that time - event handling code
     // crashes
     inConstructor = true;
     databaseM = object->getDatabase();
-
-    wxBoxSizer *mainSizer;
-    mainSizer = new wxBoxSizer(wxVERTICAL);
-    mainPanel = new wxPanel(this);
 
     wxBoxSizer *innerSizer;
     innerSizer = new wxBoxSizer(wxVERTICAL);
@@ -66,16 +63,18 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     topLeftSizer = new wxBoxSizer(wxVERTICAL);
     wxString choices1[] = { _("Grant"), _("Revoke") };
     int nchoices1 = sizeof(choices1) / sizeof(wxString);
-    radiobox_action = new wxRadioBox(mainPanel, ID_radiobox_action,
+    radiobox_action = new wxRadioBox(getControlsPanel(), ID_radiobox_action,
         _("Action"), wxDefaultPosition, wxDefaultSize, nchoices1, choices1,
         1, wxRA_SPECIFY_COLS);
-    topLeftSizer->Add(radiobox_action, 0, wxALL|wxEXPAND, 5);
+    topLeftSizer->Add(radiobox_action, 0, wxBOTTOM|wxEXPAND,
+        styleguide().getRelatedControlMargin(wxVERTICAL));
 
-    checkbox_grant_option = new wxCheckBox(mainPanel, ID_checkbox,
+    checkbox_grant_option = new wxCheckBox(getControlsPanel(), ID_checkbox,
         _("Grant/Admin option"));
-    topLeftSizer->Add(checkbox_grant_option, 0, wxALL|wxEXPAND, 5);
+    topLeftSizer->Add(checkbox_grant_option, 0, wxBOTTOM|wxEXPAND,
+        styleguide().getUnrelatedControlMargin(wxVERTICAL));
 
-    granteePanel = new wxPanel(mainPanel);
+    granteePanel = new wxPanel(getControlsPanel());
     wxStaticBoxSizer *granteeSizer = new wxStaticBoxSizer(wxVERTICAL,
         granteePanel, _("Grantee"));
     wxFlexGridSizer *fgSizer3;
@@ -106,8 +105,8 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
             choice_trigger->SetSelection(0);
     }
     choice_trigger->Enable(false);
-
     fgSizer3->Add(choice_trigger, 0, wxALL|wxEXPAND, 5);
+
     radiobtn_procedure = new wxRadioButton(granteePanel, ID_radiobtn,
          _("Procedure:"));
     fgSizer3->Add(radiobtn_procedure, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
@@ -146,12 +145,13 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     choice_view->Enable(false);
     fgSizer3->Add(choice_view, 0, wxALL|wxEXPAND, 5);
 
-    granteeSizer->Add(fgSizer3, 1, wxEXPAND, 5);
+    granteeSizer->Add(fgSizer3, 1, wxEXPAND, 0);
     granteePanel->SetSizer(granteeSizer);
-    topLeftSizer->Add(granteePanel, 1, wxEXPAND | wxALL, 5);
+    topLeftSizer->Add(granteePanel, 1, wxEXPAND | wxALL, 0);
     topSizer->Add(topLeftSizer, 0, wxEXPAND, 0);
-    topSizer->Add(12, 12, 0, wxALL, 5); // separate left and right parts
-    privilegesPanel = new wxPanel(mainPanel);
+    topSizer->Add(12, 12, 0, wxALL,     // separate left and right parts
+        styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
+    privilegesPanel = new wxPanel(getControlsPanel());
     wxBoxSizer *privilegesSizer;
     privilegesSizer = new wxBoxSizer(wxVERTICAL);
     m_staticText2 = new wxStaticText(privilegesPanel, wxID_ANY,
@@ -159,39 +159,41 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     wxFont font2(m_staticText2->GetFont());
     font2.SetWeight(wxBOLD);
     m_staticText2->SetFont(font2);
-    privilegesSizer->Add(m_staticText2, 0, wxALL|wxEXPAND, 4);
+    privilegesSizer->Add(m_staticText2, 0, wxBOTTOM|wxEXPAND,
+        styleguide().getControlLabelMargin());
 
     wxBoxSizer *relationPrivilegesSizer;
     relationPrivilegesSizer = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer *relPrivLeftSizer;
     relPrivLeftSizer = new wxBoxSizer(wxVERTICAL);
     checkbox_all = new wxCheckBox(privilegesPanel, ID_checkbox, wxT("All"));
-    relPrivLeftSizer->Add(checkbox_all, 0, wxALL|wxALIGN_CENTER_VERTICAL, 4);
+    relPrivLeftSizer->Add(checkbox_all, 0, wxALL|wxALIGN_CENTER_VERTICAL,
+        styleguide().getCheckboxSpacing());
 
     checkbox_select = new wxCheckBox(privilegesPanel, ID_checkbox,
         wxT("Select"));
     relPrivLeftSizer->Add(checkbox_select, 0,
-        wxALL|wxALIGN_CENTER_VERTICAL, 4);
+        wxALL|wxALIGN_CENTER_VERTICAL, styleguide().getCheckboxSpacing());
 
     checkbox_insert = new wxCheckBox(privilegesPanel, ID_checkbox,
         wxT("Insert"));
     relPrivLeftSizer->Add(checkbox_insert, 0,
-        wxALL|wxALIGN_CENTER_VERTICAL, 4);
+        wxALL|wxALIGN_CENTER_VERTICAL, styleguide().getCheckboxSpacing());
 
     checkbox_update = new wxCheckBox(privilegesPanel, ID_checkbox,
         wxT("Update"));
     relPrivLeftSizer->Add(checkbox_update, 0,
-        wxALL|wxALIGN_CENTER_VERTICAL, 4);
+        wxALL|wxALIGN_CENTER_VERTICAL, styleguide().getCheckboxSpacing());
 
     checkbox_delete = new wxCheckBox(privilegesPanel, ID_checkbox,
         wxT("Delete"));
     relPrivLeftSizer->Add(checkbox_delete, 0,
-        wxALL|wxALIGN_CENTER_VERTICAL, 4);
+        wxALL|wxALIGN_CENTER_VERTICAL, styleguide().getCheckboxSpacing());
 
     checkbox_references = new wxCheckBox(privilegesPanel, ID_checkbox,
         wxT("References"));
     relPrivLeftSizer->Add(checkbox_references, 0,
-        wxALL|wxALIGN_CENTER_VERTICAL, 4);
+        wxALL|wxALIGN_CENTER_VERTICAL, styleguide().getCheckboxSpacing());
     relationPrivilegesSizer->Add(relPrivLeftSizer, 0, wxEXPAND, 0);
     wxBoxSizer *relPrivRightSizer;
     relPrivRightSizer = new wxBoxSizer(wxVERTICAL);
@@ -221,11 +223,12 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
             choice_relations->SetSelection(relation_to_select);
     }
     choice_relations->Enable(false);
-    relPrivRightSizer->Add(choice_relations, 0, wxALL|wxEXPAND, 5);
+    relPrivRightSizer->Add(choice_relations, 0,
+        wxALL|wxEXPAND|wxALIGN_CENTER_VERTICAL, 0);
     listbox_columns = new wxListBox(privilegesPanel, ID_listbox,
         wxDefaultPosition, wxDefaultSize, 0, 0, wxLB_MULTIPLE);
-    relPrivRightSizer->Add(listbox_columns, 1, wxALL|wxEXPAND, 5);
-    relationPrivilegesSizer->Add(relPrivRightSizer, 1, wxEXPAND, 5);
+    relPrivRightSizer->Add(listbox_columns, 1, wxALL|wxEXPAND, 0);
+    relationPrivilegesSizer->Add(relPrivRightSizer, 1, wxEXPAND, 0);
     privilegesSizer->Add(relationPrivilegesSizer, 0, wxEXPAND, 0);
     wxFlexGridSizer *fgSizer2;
     fgSizer2 = new wxFlexGridSizer(2, 2, 0, 0);
@@ -233,7 +236,8 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
 
     checkbox_execute = new wxCheckBox(privilegesPanel, ID_checkbox,
         wxT("Execute"));
-    fgSizer2->Add(checkbox_execute, 0, wxALL|wxALIGN_CENTER_VERTICAL, 4);
+    fgSizer2->Add(checkbox_execute, 0, wxALL|wxALIGN_CENTER_VERTICAL,
+        styleguide().getCheckboxSpacing());
     {
         MetadataCollection<Procedure>* tc =
             databaseM->getCollection<Procedure>();
@@ -252,11 +256,13 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
             choice_execute->SetSelection(to_select);
     }
     choice_execute->Enable(false);
-    fgSizer2->Add(choice_execute, 0, wxEXPAND|wxALL, 5);
+    fgSizer2->Add(choice_execute, 0, wxEXPAND|wxALL|wxALIGN_CENTER_VERTICAL,
+        0);
 
     checkbox_memberof = new wxCheckBox(privilegesPanel, ID_checkbox,
         wxT("Member of"));
-    fgSizer2->Add(checkbox_memberof, 0, wxALL|wxALIGN_CENTER_VERTICAL, 4);
+    fgSizer2->Add(checkbox_memberof, 0, wxALL|wxALIGN_CENTER_VERTICAL,
+        styleguide().getCheckboxSpacing());
     {
         MetadataCollection<Role>* tc = databaseM->getCollection<Role>();
         wxArrayString choices;
@@ -274,56 +280,63 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
             choice_memberof->SetSelection(to_select);
     }
     choice_memberof->Enable(false);
-    fgSizer2->Add(choice_memberof, 0, wxALL|wxEXPAND, 5);
+    fgSizer2->Add(choice_memberof, 0, wxALL|wxEXPAND|wxALIGN_CENTER_VERTICAL,
+        0);
 
-    privilegesSizer->Add(fgSizer2, 1, wxEXPAND, 5);
+    privilegesSizer->Add(fgSizer2, 1, wxEXPAND|wxBOTTOM,
+        styleguide().getRelatedControlMargin(wxVERTICAL));
     privilegesPanel->SetSizer(privilegesSizer);
-    topSizer->Add(privilegesPanel, 1, wxEXPAND | wxALL, 5);
-    innerSizer->Add(topSizer, 0, wxEXPAND|wxTOP|wxRIGHT|wxLEFT, 10);
-    innerSizer->Add(10, 5, 0, wxALL, 0);
+    topSizer->Add(privilegesPanel, 1, wxEXPAND, 0);
+    innerSizer->Add(topSizer, 0, wxEXPAND, 0);
+    innerSizer->Add(styleguide().getUnrelatedControlMargin(wxVERTICAL),
+        1, 0, wxALL, 0);
     wxBoxSizer *previewSqlSizer;
     previewSqlSizer = new wxBoxSizer(wxHORIZONTAL);
-    label_sql = new wxStaticText(mainPanel, wxID_ANY, wxT("Preview SQL:"));
-    previewSqlSizer->Add(label_sql, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
-    textbox_current_sql = new wxTextCtrl(mainPanel, wxID_ANY, wxT(""),
+    label_sql = new wxStaticText(getControlsPanel(), wxID_ANY,
+        _("Preview SQL:"));
+    previewSqlSizer->Add(label_sql, 0, wxRIGHT|wxALIGN_CENTER_VERTICAL,
+        styleguide().getControlLabelMargin());
+    textbox_current_sql = new wxTextCtrl(getControlsPanel(), wxID_ANY, wxT(""),
         wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
     textbox_current_sql->SetBackgroundColour(
         wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
     textbox_current_sql->Enable(false);
-    previewSqlSizer->Add(textbox_current_sql, 1,
-        wxALL|wxALIGN_CENTER_VERTICAL, 5);
-    button_add = new wxButton(mainPanel, ID_button_add, _("&Add To List"));
-    previewSqlSizer->Add(button_add, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
-    innerSizer->Add(previewSqlSizer, 0, wxEXPAND|wxRIGHT|wxLEFT, 10);
+    previewSqlSizer->Add(textbox_current_sql, 1, wxALIGN_CENTER_VERTICAL, 0);
+    button_add = new wxButton(getControlsPanel(), ID_button_add,
+        _("&Add To List"));
+    previewSqlSizer->Add(button_add, 0, wxLEFT|wxALIGN_CENTER_VERTICAL,
+        styleguide().getRelatedControlMargin(wxHORIZONTAL));
+    innerSizer->Add(previewSqlSizer, 0, wxEXPAND|wxTOP,
+        styleguide().getRelatedControlMargin(wxVERTICAL));
 
-    m_staticline2 = new wxStaticLine(mainPanel, wxID_ANY, wxDefaultPosition,
-        wxDefaultSize, wxLI_HORIZONTAL);
-    innerSizer->Add(m_staticline2, 0, wxALL|wxEXPAND, 6);
+    m_staticline2 = new wxStaticLine(getControlsPanel(), wxID_ANY,
+        wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+    innerSizer->Add(m_staticline2, 0, wxTOP|wxEXPAND,
+        styleguide().getRelatedControlMargin(wxVERTICAL));
 
-    label_statements = new wxStaticText(mainPanel, wxID_ANY,
+    label_statements = new wxStaticText(getControlsPanel(), wxID_ANY,
         _("List of SQL statements to execute:"));
-    innerSizer->Add(label_statements, 0,
-        wxALIGN_BOTTOM|wxTOP|wxLEFT|wxEXPAND, 10);
-    listbox_statements = new wxListBox(mainPanel, ID_listbox_statements,
-        wxDefaultPosition, wxDefaultSize, 0, 0, 0);
-    innerSizer->Add(listbox_statements, 1, wxEXPAND|wxRIGHT|wxLEFT, 10);
+    innerSizer->Add(label_statements, 0, wxTOP,
+        styleguide().getUnrelatedControlMargin(wxVERTICAL));
+    listbox_statements = new wxListBox(getControlsPanel(),
+        ID_listbox_statements, wxDefaultPosition, wxDefaultSize, 0, 0, 0);
+    innerSizer->Add(listbox_statements, 1, wxEXPAND|wxTOP,
+        styleguide().getRelatedControlMargin(wxVERTICAL));
 
-    wxBoxSizer *sizer_buttons;
-    sizer_buttons = new wxBoxSizer(wxHORIZONTAL);
-    button_remove = new wxButton(mainPanel, ID_button_remove,
+    button_remove = new wxButton(getControlsPanel(), ID_button_remove,
         _("&Remove Selected"), wxDefaultPosition, wxDefaultSize, 0);
     button_remove->Enable(false);
-    sizer_buttons->Add(button_remove, 0, wxALL, 5);
-    sizer_buttons->Add(2, 2, 1, wxALL, 0);
-    button_execute = new wxButton(mainPanel, wxID_OK, _("&Execute All"));
+    button_execute = new wxButton(getControlsPanel(), wxID_OK,
+        _("&Execute All"));
     button_execute->Enable(false);
-    sizer_buttons->Add(button_execute, 0, wxALL, 5);
-    button_close = new wxButton(mainPanel, wxID_CANCEL, _("&Close"));
-    sizer_buttons->Add(button_close, 0, wxALL, 5);
-    innerSizer->Add(sizer_buttons, 0, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5);
-    mainPanel->SetSizer(innerSizer);
-    mainSizer->Add(mainPanel, 1, wxEXPAND, 0);
-    SetSizerAndFit(mainSizer);
+    button_close = new wxButton(getControlsPanel(), wxID_CANCEL, _("&Close"));
+
+    // create sizer for buttons -> styleguide class will align it correctly
+    wxSizer* sizerButtons = styleguide().createButtonSizer(button_execute,
+        button_close);
+    sizerButtons->Prepend(button_remove);
+    // use method in base class to set everything up
+    layoutSizers(innerSizer, sizerButtons);
 
     inConstructor = false;
     updateControls();
@@ -508,7 +521,7 @@ wxString PrivilegesDialog::getSqlStatements()
 }
 //-----------------------------------------------------------------------------
 //! event handling
-BEGIN_EVENT_TABLE(PrivilegesDialog, wxDialog)
+BEGIN_EVENT_TABLE(PrivilegesDialog, BaseDialog)
     EVT_BUTTON(PrivilegesDialog::ID_button_add,
         PrivilegesDialog::OnButtonAddClick)
     EVT_BUTTON(PrivilegesDialog::ID_button_remove,
@@ -590,7 +603,7 @@ bool ManagePrivilegesHandler::handleURI(URI& uri)
         {
             // create ExecuteSqlFrame with option to close at once
             ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1,
-                _("Grant and revoke privileges"));
+                _("Grant And Revoke Privileges"));
             esf->setDatabase(m->getDatabase());
             esf->setSql(statements);
             esf->executeAllStatements(false);

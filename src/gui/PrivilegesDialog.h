@@ -29,10 +29,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define FR_PRIVILEGESDIALOG_H
 
 #include <wx/statline.h>
+#include "BaseDialog.h"
 
 class Database;
 //-----------------------------------------------------------------------------
-class PrivilegesDialog : public wxDialog
+class PrivilegesDialog : public BaseDialog
 {
 private:
     Database *databaseM;
@@ -41,7 +42,6 @@ private:
     bool inConstructor;
 
 protected:
-    wxPanel *mainPanel;
     wxRadioBox *radiobox_action;
     wxCheckBox *checkbox_grant_option;
     wxPanel *granteePanel;
@@ -102,7 +102,7 @@ public:
 
     wxString getSqlStatements();
     PrivilegesDialog(wxWindow *parent, MetadataItem *object,
-        const wxString& title = wxT("Grant and revoke privileges"));
+        const wxString& title = _("Grant And Revoke Privileges"));
 
     DECLARE_EVENT_TABLE()
 };
