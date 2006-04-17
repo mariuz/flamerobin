@@ -54,7 +54,6 @@ protected:
     wxChoice *choice_procedure;
     wxRadioButton *radiobtn_view;
     wxChoice *choice_view;
-    wxPanel *privilegesPanel;
     wxStaticText *m_staticText2;
     wxCheckBox *checkbox_all;
     wxCheckBox *checkbox_select;

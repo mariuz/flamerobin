@@ -35,6 +35,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #endif
 
+#include <wx/gbsizer.h>
+
 #include "metadata/collection.h"
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
@@ -149,12 +151,11 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     granteePanel->SetSizer(granteeSizer);
     topLeftSizer->Add(granteePanel, 1, wxEXPAND | wxALL, 0);
     topSizer->Add(topLeftSizer, 0, wxEXPAND, 0);
-    topSizer->Add(12, 12, 0, wxALL,     // separate left and right parts
-        styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
-    privilegesPanel = new wxPanel(getControlsPanel());
+    // separate left and right parts
+    topSizer->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 1);
     wxBoxSizer *privilegesSizer;
     privilegesSizer = new wxBoxSizer(wxVERTICAL);
-    m_staticText2 = new wxStaticText(privilegesPanel, wxID_ANY,
+    m_staticText2 = new wxStaticText(getControlsPanel(), wxID_ANY,
         _("Privileges"));
     wxFont font2(m_staticText2->GetFont());
     font2.SetWeight(wxBOLD);
@@ -162,42 +163,43 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     privilegesSizer->Add(m_staticText2, 0, wxBOTTOM|wxEXPAND,
         styleguide().getControlLabelMargin());
 
-    wxBoxSizer *relationPrivilegesSizer;
-    relationPrivilegesSizer = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer *relPrivLeftSizer;
-    relPrivLeftSizer = new wxBoxSizer(wxVERTICAL);
-    checkbox_all = new wxCheckBox(privilegesPanel, ID_checkbox, wxT("All"));
-    relPrivLeftSizer->Add(checkbox_all, 0, wxALL|wxALIGN_CENTER_VERTICAL,
-        styleguide().getCheckboxSpacing());
+    wxGridBagSizer* bagSizer = new wxGridBagSizer(
+        styleguide().getRelatedControlMargin(wxVERTICAL),
+        styleguide().getControlLabelMargin());
 
-    checkbox_select = new wxCheckBox(privilegesPanel, ID_checkbox,
+    checkbox_all = new wxCheckBox(getControlsPanel(), ID_checkbox, wxT("All"));
+    checkbox_select = new wxCheckBox(getControlsPanel(), ID_checkbox,
         wxT("Select"));
-    relPrivLeftSizer->Add(checkbox_select, 0,
-        wxALL|wxALIGN_CENTER_VERTICAL, styleguide().getCheckboxSpacing());
-
-    checkbox_insert = new wxCheckBox(privilegesPanel, ID_checkbox,
+    checkbox_insert = new wxCheckBox(getControlsPanel(), ID_checkbox,
         wxT("Insert"));
-    relPrivLeftSizer->Add(checkbox_insert, 0,
-        wxALL|wxALIGN_CENTER_VERTICAL, styleguide().getCheckboxSpacing());
-
-    checkbox_update = new wxCheckBox(privilegesPanel, ID_checkbox,
+    checkbox_update = new wxCheckBox(getControlsPanel(), ID_checkbox,
         wxT("Update"));
-    relPrivLeftSizer->Add(checkbox_update, 0,
-        wxALL|wxALIGN_CENTER_VERTICAL, styleguide().getCheckboxSpacing());
-
-    checkbox_delete = new wxCheckBox(privilegesPanel, ID_checkbox,
+    checkbox_delete = new wxCheckBox(getControlsPanel(), ID_checkbox,
         wxT("Delete"));
-    relPrivLeftSizer->Add(checkbox_delete, 0,
-        wxALL|wxALIGN_CENTER_VERTICAL, styleguide().getCheckboxSpacing());
-
-    checkbox_references = new wxCheckBox(privilegesPanel, ID_checkbox,
+    checkbox_references = new wxCheckBox(getControlsPanel(), ID_checkbox,
         wxT("References"));
-    relPrivLeftSizer->Add(checkbox_references, 0,
-        wxALL|wxALIGN_CENTER_VERTICAL, styleguide().getCheckboxSpacing());
-    relationPrivilegesSizer->Add(relPrivLeftSizer, 0, wxEXPAND, 0);
-    wxBoxSizer *relPrivRightSizer;
-    relPrivRightSizer = new wxBoxSizer(wxVERTICAL);
+    checkbox_execute = new wxCheckBox(getControlsPanel(), ID_checkbox,
+        wxT("Execute"));
+    checkbox_memberof = new wxCheckBox(getControlsPanel(), ID_checkbox,
+        wxT("Member of"));
+    bagSizer->Add(checkbox_all, wxGBPosition(0, 0), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL);
+    bagSizer->Add(checkbox_select, wxGBPosition(1, 0), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL);
+    bagSizer->Add(checkbox_insert, wxGBPosition(2, 0), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL);
+    bagSizer->Add(checkbox_update, wxGBPosition(3, 0), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL);
+    bagSizer->Add(checkbox_delete, wxGBPosition(4, 0), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL);
+    bagSizer->Add(checkbox_references, wxGBPosition(5, 0), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL);
+    bagSizer->Add(checkbox_execute, wxGBPosition(6, 0), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL);
+    bagSizer->Add(checkbox_memberof, wxGBPosition(7, 0), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL);
 
+    // relations
     {
         wxArrayString choices;
         MetadataCollection<Table>* tt = databaseM->getCollection<Table>();
@@ -217,27 +219,21 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
                 relation_to_select = choices.GetCount();
             choices.Add((*it).getName_());
         }
-        choice_relations = new wxChoice(privilegesPanel, ID_choice,
+        choice_relations = new wxChoice(getControlsPanel(), ID_choice,
             wxDefaultPosition, wxDefaultSize, choices);
         if (!choices.IsEmpty())
             choice_relations->SetSelection(relation_to_select);
     }
     choice_relations->Enable(false);
-    relPrivRightSizer->Add(choice_relations, 0,
-        wxALL|wxEXPAND|wxALIGN_CENTER_VERTICAL, 0);
-    listbox_columns = new wxListBox(privilegesPanel, ID_listbox,
-        wxDefaultPosition, wxDefaultSize, 0, 0, wxLB_MULTIPLE);
-    relPrivRightSizer->Add(listbox_columns, 1, wxALL|wxEXPAND, 0);
-    relationPrivilegesSizer->Add(relPrivRightSizer, 1, wxEXPAND, 0);
-    privilegesSizer->Add(relationPrivilegesSizer, 0, wxEXPAND, 0);
-    wxFlexGridSizer *fgSizer2;
-    fgSizer2 = new wxFlexGridSizer(2, 2, 0, 0);
-    fgSizer2->AddGrowableCol(1);
+    bagSizer->Add(choice_relations, wxGBPosition(0, 1), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL|wxEXPAND);
 
-    checkbox_execute = new wxCheckBox(privilegesPanel, ID_checkbox,
-        wxT("Execute"));
-    fgSizer2->Add(checkbox_execute, 0, wxALL|wxALIGN_CENTER_VERTICAL,
-        styleguide().getCheckboxSpacing());
+    listbox_columns = new wxListBox(getControlsPanel(), ID_listbox,
+        wxDefaultPosition, wxDefaultSize, 0, 0, wxLB_MULTIPLE);
+    bagSizer->Add(listbox_columns, wxGBPosition(1, 1), wxGBSpan(5, 1),
+        wxEXPAND);
+
+    // procedures
     {
         MetadataCollection<Procedure>* tc =
             databaseM->getCollection<Procedure>();
@@ -250,19 +246,16 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
                 to_select = choices.GetCount();
             choices.Add((*it).getName_());
         }
-        choice_execute = new wxChoice(privilegesPanel, ID_choice,
+        choice_execute = new wxChoice(getControlsPanel(), ID_choice,
             wxDefaultPosition, wxDefaultSize, choices);
         if (!choices.IsEmpty())
             choice_execute->SetSelection(to_select);
     }
     choice_execute->Enable(false);
-    fgSizer2->Add(choice_execute, 0, wxEXPAND|wxALL|wxALIGN_CENTER_VERTICAL,
-        0);
+    bagSizer->Add(choice_execute, wxGBPosition(6, 1), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL|wxEXPAND);
 
-    checkbox_memberof = new wxCheckBox(privilegesPanel, ID_checkbox,
-        wxT("Member of"));
-    fgSizer2->Add(checkbox_memberof, 0, wxALL|wxALIGN_CENTER_VERTICAL,
-        styleguide().getCheckboxSpacing());
+    // roles
     {
         MetadataCollection<Role>* tc = databaseM->getCollection<Role>();
         wxArrayString choices;
@@ -274,19 +267,17 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
                 to_select = choices.GetCount();
             choices.Add((*it).getName_());
         }
-        choice_memberof = new wxChoice(privilegesPanel, ID_choice,
+        choice_memberof = new wxChoice(getControlsPanel(), ID_choice,
             wxDefaultPosition, wxDefaultSize, choices);
         if (!choices.IsEmpty())
             choice_memberof->SetSelection(to_select);
     }
     choice_memberof->Enable(false);
-    fgSizer2->Add(choice_memberof, 0, wxALL|wxEXPAND|wxALIGN_CENTER_VERTICAL,
-        0);
+    bagSizer->Add(choice_memberof, wxGBPosition(7, 1), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL|wxEXPAND);
 
-    privilegesSizer->Add(fgSizer2, 1, wxEXPAND|wxBOTTOM,
-        styleguide().getRelatedControlMargin(wxVERTICAL));
-    privilegesPanel->SetSizer(privilegesSizer);
-    topSizer->Add(privilegesPanel, 1, wxEXPAND, 0);
+    privilegesSizer->Add(bagSizer, 1, wxEXPAND, 0);
+    topSizer->Add(privilegesSizer, 1, wxEXPAND, 0);
     innerSizer->Add(topSizer, 0, wxEXPAND, 0);
     innerSizer->Add(styleguide().getUnrelatedControlMargin(wxVERTICAL),
         1, 0, wxALL, 0);
