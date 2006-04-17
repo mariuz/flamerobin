@@ -77,10 +77,9 @@ void ServerRegistrationDialog::createControls()
         _("Port number:"));
     text_ctrl_portnumber = new wxTextCtrl(getControlsPanel(),
         ID_textctrl_portnumber, wxEmptyString);
-    button_ok = new wxButton(getControlsPanel(), ID_button_ok,
+    button_ok = new wxButton(getControlsPanel(), wxID_SAVE,
         (isNewServerM) ? _("Register") : _("Save"));
-    button_cancel = new wxButton(getControlsPanel(), ID_button_cancel,
-        _("Cancel"));
+    button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
 }
 //-----------------------------------------------------------------------------
 const wxString ServerRegistrationDialog::getName() const
@@ -154,7 +153,7 @@ BEGIN_EVENT_TABLE(ServerRegistrationDialog, BaseDialog)
     EVT_TEXT(ServerRegistrationDialog::ID_textctrl_name, ServerRegistrationDialog::OnNameChange)
     EVT_TEXT(ServerRegistrationDialog::ID_textctrl_hostname, ServerRegistrationDialog::OnSettingsChange)
     EVT_TEXT(ServerRegistrationDialog::ID_textctrl_portnumber, ServerRegistrationDialog::OnSettingsChange)
-    EVT_BUTTON(ServerRegistrationDialog::ID_button_ok, ServerRegistrationDialog::OnOkButtonClick)
+    EVT_BUTTON(wxID_SAVE, ServerRegistrationDialog::OnOkButtonClick)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void ServerRegistrationDialog::OnNameChange(wxCommandEvent& WXUNUSED(event))

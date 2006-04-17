@@ -67,9 +67,7 @@ private:
     enum {
         ID_textctrl_name = 100,
         ID_textctrl_hostname,
-        ID_textctrl_portnumber,
-        ID_button_ok = wxID_OK,
-        ID_button_cancel = wxID_CANCEL
+        ID_textctrl_portnumber
     };
 
     void OnNameChange(wxCommandEvent& event);

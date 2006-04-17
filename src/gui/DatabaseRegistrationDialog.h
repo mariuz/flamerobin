@@ -88,9 +88,7 @@ private:
         ID_textcontrol_name,
         ID_textcontrol_username,
         ID_textcontrol_password,
-        ID_button_browse,
-        ID_button_ok,
-        ID_button_cancel = wxID_CANCEL
+        ID_button_browse
     };
 
     void OnBrowseButtonClick(wxCommandEvent& event);

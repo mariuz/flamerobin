@@ -95,9 +95,7 @@ class PreferencesDialog: public BaseDialog {
 public:
     enum {
         ID_treectrl_panes = 100,
-        ID_bookctrl_panes,
-        ID_button_save,
-        ID_button_cancel = wxID_CANCEL
+        ID_bookctrl_panes
     };
 
     PreferencesDialog(wxWindow* parent, const wxString& title,

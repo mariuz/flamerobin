@@ -144,10 +144,9 @@ void DatabaseRegistrationDialog::createControls()
     else
         checkbox_encrypted = 0;
 
-    button_ok = new wxButton(getControlsPanel(), ID_button_ok,
+    button_ok = new wxButton(getControlsPanel(), wxID_SAVE,
         (createM ? _("Create") : _("Save")));
-    button_cancel = new wxButton(getControlsPanel(), ID_button_cancel,
-        _("Cancel"));
+    button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
 }
 //-----------------------------------------------------------------------------
 const wxString DatabaseRegistrationDialog::getName() const
@@ -299,7 +298,7 @@ void DatabaseRegistrationDialog::updateIsDefaultName()
 //! event handling
 BEGIN_EVENT_TABLE(DatabaseRegistrationDialog, BaseDialog)
     EVT_BUTTON(DatabaseRegistrationDialog::ID_button_browse, DatabaseRegistrationDialog::OnBrowseButtonClick)
-    EVT_BUTTON(DatabaseRegistrationDialog::ID_button_ok, DatabaseRegistrationDialog::OnOkButtonClick)
+    EVT_BUTTON(wxID_SAVE, DatabaseRegistrationDialog::OnOkButtonClick)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_dbpath, DatabaseRegistrationDialog::OnSettingsChange)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_name, DatabaseRegistrationDialog::OnNameChange)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_password, DatabaseRegistrationDialog::OnSettingsChange)

@@ -312,8 +312,8 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
     bookctrl_1 = new Optionbook(getControlsPanel(), ID_bookctrl_panes,
         wxDefaultPosition, wxDefaultSize);
 
-    button_save = new wxButton(getControlsPanel(), ID_button_save, _("Save"));
-    button_cancel = new wxButton(getControlsPanel(), ID_button_cancel, _("Cancel"));
+    button_save = new wxButton(getControlsPanel(), wxID_SAVE, _("Save"));
+    button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
 
     // order of these is important: first create all controls, then set
     // their properties (may affect min size), then create sizer layout
@@ -625,7 +625,7 @@ void PreferencesDialog::setProperties()
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(PreferencesDialog, wxDialog)
-    EVT_BUTTON(PreferencesDialog::ID_button_save, PreferencesDialog::OnSaveButtonClick)
+    EVT_BUTTON(wxID_SAVE, PreferencesDialog::OnSaveButtonClick)
     EVT_TREE_SEL_CHANGED(PreferencesDialog::ID_treectrl_panes,
         PreferencesDialog::OnTreeSelChanged)
 END_EVENT_TABLE()
