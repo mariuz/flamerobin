@@ -53,9 +53,8 @@ public:
         ID_text_ctrl_log,
         ID_checkbox_showlog,
         ID_button_start,
-        ID_button_cancel,
 
-        ID_thread_output,
+        ID_thread_output = 500,
         ID_thread_finished
     };
     // events

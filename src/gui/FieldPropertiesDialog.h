@@ -112,10 +112,7 @@ private:
         ID_textctrl_generator_name,
         ID_radio_generator_existing,
         ID_choice_generator,
-        ID_checkbox_trigger,
-
-        ID_button_ok,
-        ID_button_cancel = wxID_CANCEL
+        ID_checkbox_trigger
     };
 
     void OnButtonEditDomainClick(wxCommandEvent& event);

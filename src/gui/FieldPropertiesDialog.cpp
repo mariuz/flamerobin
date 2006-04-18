@@ -161,9 +161,8 @@ void FieldPropertiesDialog::createControls()
     textctrl_sql = new wxTextCtrl(getControlsPanel(), wxID_ANY, wxEmptyString,
         wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
 
-    button_ok = new wxButton(getControlsPanel(), ID_button_ok, _("Execute"));
-    button_cancel = new wxButton(getControlsPanel(), ID_button_cancel,
-        _("Cancel"));
+    button_ok = new wxButton(getControlsPanel(), wxID_OK, _("Execute"));
+    button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::layoutControls()
@@ -702,8 +701,7 @@ void FieldPropertiesDialog::updateSqlStatement()
 BEGIN_EVENT_TABLE(FieldPropertiesDialog, BaseDialog)
     EVT_BUTTON(FieldPropertiesDialog::ID_button_edit_domain,
         FieldPropertiesDialog::OnButtonEditDomainClick)
-    EVT_BUTTON(FieldPropertiesDialog::ID_button_ok,
-        FieldPropertiesDialog::OnButtonOkClick)
+    EVT_BUTTON(wxID_OK, FieldPropertiesDialog::OnButtonOkClick)
     EVT_CHECKBOX(FieldPropertiesDialog::ID_checkbox_trigger,
         FieldPropertiesDialog::OnNeedsUpdateSql)
     EVT_CHOICE(FieldPropertiesDialog::ID_choice_charset,
