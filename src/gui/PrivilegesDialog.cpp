@@ -327,7 +327,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         button_close);
     sizerButtons->Prepend(button_remove);
     // use method in base class to set everything up
-    layoutSizers(innerSizer, sizerButtons);
+    layoutSizers(innerSizer, sizerButtons, true);
 
     inConstructor = false;
     updateControls();

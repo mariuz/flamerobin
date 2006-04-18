@@ -36,55 +36,54 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif //WX_PRECOMP
 
 #include "statementHistory.h"
+#include "styleguide.h"
 #include "ExecuteSqlFrame.h"
+//#include "StatementHistoryDialog.h"
 #include "StatementHistoryFrame.h"
 //-----------------------------------------------------------------------------
-StatementHistoryFrame::StatementHistoryFrame(ExecuteSqlFrame *parent,
+StatementHistoryDialog::StatementHistoryDialog(ExecuteSqlFrame *parent,
     StatementHistory *history, const wxString& title)
-    :BaseFrame(parent, -1, title), historyM(history),
+    :BaseDialog(parent, -1, title), historyM(history),
      isSearchingM(false)
 {
-    statusBarM = CreateStatusBar();
-    statusBarM->SetStatusText(
-        _("Searching with empty search box shows entire history."));
+    wxBoxSizer *innerSizer = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+    m_staticText2 = new wxStaticText(getControlsPanel(), wxID_ANY,
+        _("Search for:"), wxDefaultPosition, wxDefaultSize, 0);
+    topSizer->Add(m_staticText2, 0, wxALIGN_CENTER_VERTICAL|wxRIGHT,
+        styleguide().getControlLabelMargin());
 
-    wxBoxSizer *mainSizer;
-    mainSizer = new wxBoxSizer(wxVERTICAL);
-    m_panel1 = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-        wxTAB_TRAVERSAL);
-
-    wxBoxSizer *innerSizer;
-    innerSizer = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer *topSizer;
-    topSizer = new wxBoxSizer(wxHORIZONTAL);
-    m_staticText2 = new wxStaticText(m_panel1, wxID_ANY, wxT("Search for:"),
-        wxDefaultPosition, wxDefaultSize, 0);
-    topSizer->Add(m_staticText2, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
-
-    textctrl_search = new wxTextCtrl(m_panel1, wxID_ANY, wxT(""),
-        wxDefaultPosition, wxDefaultSize, 0);
-    topSizer->Add(textctrl_search, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5);
-
-    button_search = new wxButton(m_panel1, ID_button_search, wxT("&Search"),
-        wxDefaultPosition, wxDefaultSize, 0);
-    topSizer->Add(button_search, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
-
-    button_delete = new wxButton(m_panel1, ID_button_delete,
-        wxT("&Delete Selected"), wxDefaultPosition, wxDefaultSize, 0);
-    topSizer->Add(button_delete, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
-
-    button_copy = new wxButton(m_panel1, ID_button_copy,
-        wxT("&Copy to editor"), wxDefaultPosition, wxDefaultSize, 0);
-    topSizer->Add(button_copy, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
-
+    textctrl_search = new wxTextCtrl(getControlsPanel(), wxID_ANY, wxT(""));
+    button_search = new wxButton(getControlsPanel(), ID_button_search,
+        _("&Search"));
+    button_delete = new wxButton(getControlsPanel(), ID_button_delete,
+        _("&Delete Selected"), wxDefaultPosition, wxDefaultSize, 0);
+    topSizer->Add(textctrl_search, 1, wxRIGHT|wxALIGN_CENTER_VERTICAL,
+        styleguide().getRelatedControlMargin(wxHORIZONTAL));
+    topSizer->Add(button_search, 0, wxRIGHT|wxALIGN_CENTER_VERTICAL,
+        styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
+    topSizer->Add(button_delete, 0, wxALIGN_CENTER_VERTICAL, 0);
     innerSizer->Add(topSizer, 0, wxEXPAND, 5);
-    listbox_search = new wxListBox(m_panel1, ID_listbox_search,
-        wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_MULTIPLE);
-    innerSizer->Add(listbox_search, 1, wxALL|wxEXPAND, 5);
 
-    m_panel1->SetSizer(innerSizer);
-    mainSizer->Add(m_panel1, 1, wxEXPAND, 0);
-    this->SetSizerAndFit(mainSizer);
+    gauge_progress = new wxGauge(getControlsPanel(), wxID_ANY, 100);
+    innerSizer->Add(gauge_progress, 0, wxTOP|wxEXPAND,
+        styleguide().getRelatedControlMargin(wxVERTICAL));
+
+    listbox_search = new wxListBox(getControlsPanel(), ID_listbox_search,
+        wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_MULTIPLE);
+    innerSizer->Add(listbox_search, 1, wxTOP|wxEXPAND,
+        styleguide().getRelatedControlMargin(wxVERTICAL));
+
+    button_copy = new wxButton(getControlsPanel(), ID_button_copy,
+        _("C&opy Selection To Editor"), wxDefaultPosition, wxDefaultSize, 0);
+    button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL,
+        _("&Cancel"), wxDefaultPosition, wxDefaultSize, 0);
+
+    wxSizer* sizerButtons = styleguide().createButtonSizer(
+        button_copy, button_cancel);
+
+    // use method in base class to set everything up
+    layoutSizers(innerSizer, sizerButtons, true);
 
     #include "history.xpm"
     wxBitmap bmp = wxBitmap(history_xpm);
@@ -93,35 +92,48 @@ StatementHistoryFrame::StatementHistoryFrame(ExecuteSqlFrame *parent,
     SetIcon(icon);
 
     button_search->SetDefault();
+    button_copy->Enable(false);
+    button_delete->Enable(false);
     textctrl_search->SetFocus();
     // center on parent
     SetSize(620, 400);
     Centre();
 }
 //-----------------------------------------------------------------------------
-void StatementHistoryFrame::setSearching(bool searching)
+void StatementHistoryDialog::setSearching(bool searching)
 {
     isSearchingM = searching;
-    button_delete->Enable(!searching);
-    button_copy->Enable(!searching);
     if (searching)
+    {
+        button_delete->Enable(false);
+        button_copy->Enable(false);
         button_search->SetLabel(_("&Stop"));
+    }
     else
         button_search->SetLabel(_("&Search"));
 }
 //-----------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(StatementHistoryFrame, wxFrame)
-    EVT_BUTTON(StatementHistoryFrame::ID_button_search,
-        StatementHistoryFrame::OnButtonSearchClick)
-    EVT_BUTTON(StatementHistoryFrame::ID_button_delete,
-        StatementHistoryFrame::OnButtonDeleteClick)
-    EVT_BUTTON(StatementHistoryFrame::ID_button_copy,
-        StatementHistoryFrame::OnButtonCopyClick)
-    EVT_LISTBOX_DCLICK(StatementHistoryFrame::ID_listbox_search,
-        StatementHistoryFrame::OnListBoxSearchDoubleClick)
+BEGIN_EVENT_TABLE(StatementHistoryDialog, BaseDialog)
+    EVT_BUTTON(StatementHistoryDialog::ID_button_search,
+        StatementHistoryDialog::OnButtonSearchClick)
+    EVT_BUTTON(StatementHistoryDialog::ID_button_delete,
+        StatementHistoryDialog::OnButtonDeleteClick)
+    EVT_BUTTON(StatementHistoryDialog::ID_button_copy,
+        StatementHistoryDialog::OnButtonCopyClick)
+    EVT_LISTBOX(StatementHistoryDialog::ID_listbox_search,
+        StatementHistoryDialog::OnListBoxSelect)
+    EVT_LISTBOX_DCLICK(StatementHistoryDialog::ID_listbox_search,
+        StatementHistoryDialog::OnListBoxSearchDoubleClick)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
-void StatementHistoryFrame::OnButtonSearchClick(wxCommandEvent&
+void StatementHistoryDialog::OnListBoxSelect(wxCommandEvent& WXUNUSED(event))
+{
+    bool hasSelection = (listbox_search->GetSelection() != wxNOT_FOUND);
+    button_copy->Enable(hasSelection);
+    button_delete->Enable(hasSelection);
+}
+//-----------------------------------------------------------------------------
+void StatementHistoryDialog::OnButtonSearchClick(wxCommandEvent&
     WXUNUSED(event))
 {
     if (isSearchingM)
@@ -135,17 +147,17 @@ void StatementHistoryFrame::OnButtonSearchClick(wxCommandEvent&
     wxString searchString = textctrl_search->GetValue().Upper();
     setSearching(true);
     StatementHistory::Position total = historyM->size();
+    gauge_progress->SetRange((int)total);
     for (StatementHistory::Position p = total - 1; (int)p >= 0; --p)
     {
         wxYield();
         if (!isSearchingM)
         {
-            statusBarM->SetStatusText(_("Search stopped."));
+            gauge_progress->SetValue(0);
             return;
         }
 
-        statusBarM->SetStatusText(wxString::Format(
-            _("Searching %d of %d (%d%%)"), (int)p, (int)total, (int)p/total));
+        gauge_progress->SetValue((int)(total - p - 1));
         wxString s = historyM->get(p);
         if (searchString.IsEmpty() || s.Upper().Contains(searchString))
         {
@@ -157,10 +169,10 @@ void StatementHistoryFrame::OnButtonSearchClick(wxCommandEvent&
         }
     }
     setSearching(false);
-    statusBarM->SetStatusText(_("Search complete."));
+    gauge_progress->SetValue(0);
 }
 //-----------------------------------------------------------------------------
-void StatementHistoryFrame::OnButtonDeleteClick(wxCommandEvent&
+void StatementHistoryDialog::OnButtonDeleteClick(wxCommandEvent&
     WXUNUSED(event))
 {
     wxArrayInt temp;
@@ -185,23 +197,30 @@ void StatementHistoryFrame::OnButtonDeleteClick(wxCommandEvent&
         listbox_search->Delete(temp.Item(i));
 }
 //-----------------------------------------------------------------------------
-void StatementHistoryFrame::OnButtonCopyClick(wxCommandEvent& WXUNUSED(event))
+void StatementHistoryDialog::OnButtonCopyClick(wxCommandEvent& WXUNUSED(event))
 {
    // it is certain, but who knows...
     ExecuteSqlFrame *f = dynamic_cast<ExecuteSqlFrame *>(GetParent());
     if (!f)
         return;
 
-    int sel = listbox_search->GetSelection();
-    if (sel == wxNOT_FOUND)
+    wxArrayInt temp;
+    if (listbox_search->GetSelections(temp) == 0)
         return;
-    StatementHistory::Position item =
-        (StatementHistory::Position)listbox_search->GetClientData(sel);
-    f->setSql(historyM->get(item));
-    Destroy();
+
+    wxString sql;
+    for (size_t i=0; i<temp.GetCount(); ++i)
+    {
+        sql += historyM->get(
+            (StatementHistory::Position)listbox_search->GetClientData(
+                temp.Item(i)))
+            + wxT("\n");
+    }
+    f->setSql(sql);
+    EndModal(wxID_OK);
 }
 //-----------------------------------------------------------------------------
-void StatementHistoryFrame::OnListBoxSearchDoubleClick(wxCommandEvent& event)
+void StatementHistoryDialog::OnListBoxSearchDoubleClick(wxCommandEvent& event)
 {
    // it is certain, but who knows...
     ExecuteSqlFrame *f = dynamic_cast<ExecuteSqlFrame *>(GetParent());

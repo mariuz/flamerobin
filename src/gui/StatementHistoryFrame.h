@@ -26,27 +26,28 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 //-----------------------------------------------------------------------------
-#ifndef FR_StatementHistoryFrame_H
-#define FR_StatementHistoryFrame_H
+#ifndef FR_STATEMENTHISTORYDIALOG_H
+#define FR_STATEMENTHISTORYDIALOG_H
 
-#include "BaseFrame.h"
+#include "BaseDialog.h"
 
 class StatementHistory;
 class ExecuteSqlFrame;
 //-----------------------------------------------------------------------------
-class StatementHistoryFrame : public BaseFrame
+class StatementHistoryDialog : public BaseDialog
 {
 private:
     bool isSearchingM;
     StatementHistory *historyM;
     wxStatusBar *statusBarM;
-    wxPanel *m_panel1;
     wxStaticText *m_staticText2;
     wxTextCtrl *textctrl_search;
     wxButton *button_search;
     wxButton *button_delete;
     wxButton *button_copy;
+    wxButton *button_cancel;
     wxListBox *listbox_search;
+    wxGauge *gauge_progress;
     void setSearching(bool searching);
 
     enum    // event handling
@@ -59,9 +60,10 @@ private:
     void OnButtonSearchClick(wxCommandEvent& event);
     void OnButtonDeleteClick(wxCommandEvent& event);
     void OnButtonCopyClick(wxCommandEvent& event);
+    void OnListBoxSelect(wxCommandEvent& event);
     void OnListBoxSearchDoubleClick(wxCommandEvent& event);
 public:
-    StatementHistoryFrame(ExecuteSqlFrame *parent, StatementHistory *history,
+    StatementHistoryDialog(ExecuteSqlFrame *parent, StatementHistory *history,
         const wxString& title = wxT("SQL Statement History"));
 
     DECLARE_EVENT_TABLE()

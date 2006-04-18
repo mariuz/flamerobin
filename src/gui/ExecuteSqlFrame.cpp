@@ -976,8 +976,8 @@ void ExecuteSqlFrame::OnButtonNextClick(wxCommandEvent& WXUNUSED(event))
 void ExecuteSqlFrame::OnButtonHistoryClick(wxCommandEvent& WXUNUSED(event))
 {
     StatementHistory& sh = StatementHistory::get(databaseM);
-    StatementHistoryFrame *shf = new StatementHistoryFrame(this, &sh);
-    shf->Show();
+    StatementHistoryDialog *shf = new StatementHistoryDialog(this, &sh);
+    shf->ShowModal();
 }
 //-----------------------------------------------------------------------------
 //! enable/disable and show/hide controls depending of transaction status
