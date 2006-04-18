@@ -38,8 +38,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "statementHistory.h"
 #include "styleguide.h"
 #include "ExecuteSqlFrame.h"
-//#include "StatementHistoryDialog.h"
-#include "StatementHistoryFrame.h"
+#include "StatementHistoryDialog.h"
 //-----------------------------------------------------------------------------
 StatementHistoryDialog::StatementHistoryDialog(ExecuteSqlFrame *parent,
     StatementHistory *history, const wxString& title)
