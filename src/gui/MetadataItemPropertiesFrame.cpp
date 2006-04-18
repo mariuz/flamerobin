@@ -335,7 +335,7 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         if (!s)
             return;
 
-        ProgressDialog pd(this, _("Connecting to server..."), 1);
+        ProgressDialog pd(this, _("Connecting to Server..."), 1);
         std::vector<User> *usr = s->getUsers(&pd);
         if (!usr)
             return;
