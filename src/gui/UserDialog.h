@@ -39,25 +39,26 @@ class UserDialog: public BaseDialog
 {
 private:
     bool isNewUserM;
-    User *userM;
-    wxStaticText *m_staticText17;
-    wxTextCtrl *textctrl_username;
-    wxStaticText *m_staticText18;
-    wxTextCtrl *textctrl_password;
-    wxStaticText *m_staticText19;
-    wxTextCtrl *textctrl_confirm;
-    wxStaticText *m_staticText20;
-    wxSpinCtrl *spinctrl_userid;
-    wxStaticText *m_staticText21;
-    wxTextCtrl *textctrl_firstname;
-    wxStaticText *m_staticText22;
-    wxTextCtrl *textctrl_middlename;
-    wxStaticText *m_staticText23;
-    wxTextCtrl *textctrl_lastname;
-    wxStaticText *m_staticText24;
-    wxSpinCtrl *spinctrl_groupid;
-    wxButton* button_ok;
-    wxButton* button_cancel;
+    User* userM;
+
+    wxStaticText* labelUserNameM;
+    wxTextCtrl* textUserNameM;
+    wxStaticText* labelFirstNameM;
+    wxTextCtrl* textFirstNameM;
+    wxStaticText* labelMiddleNameM;
+    wxTextCtrl* textMiddleNameM;
+    wxStaticText* labelLastNameM;
+    wxTextCtrl* textLastNameM;
+    wxStaticText* labelPasswordM;
+    wxTextCtrl* textPasswordM;
+    wxStaticText* labelConfirmPasswordM;
+    wxTextCtrl* textConfirmPasswordM;
+    wxStaticText* labelUserIdM;
+    wxSpinCtrl* spinctrlUserIdM;
+    wxStaticText* labelGroupIdM;
+    wxSpinCtrl* spinctrlGroupIdM;
+    wxButton* buttonOkM;
+    wxButton* buttonCancelM;
 
     void createControls();
     void layoutControls();
@@ -67,16 +68,15 @@ private:
 protected:
     virtual const wxString getName() const;
 public:
-    UserDialog(wxWindow* parent, const wxString& title,
-        bool newUser);
+    UserDialog(wxWindow* parent, const wxString& title, bool isNewUser);
 
     void setUser(User* u);
 private:
     // event handling
     enum {
-        ID_textctrl = 1000,
-        ID_button_ok = wxID_OK,
-        ID_button_cancel = wxID_CANCEL
+        ID_textctrl_username = 1000,
+        ID_textctrl_password,
+        ID_textctrl_confirmpw
     };
 
     void OnOkButtonClick(wxCommandEvent& event);

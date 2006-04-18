@@ -38,19 +38,18 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #include "wx/wx.h"
 #endif
 
+#include <wx/gbsizer.h>
+
 #include "frutils.h"
 #include "gui/ProgressDialog.h"
+#include "gui/UserDialog.h"
 #include "metadata/server.h"
 #include "styleguide.h"
 #include "urihandler.h"
-#include "UserDialog.h"
 //-----------------------------------------------------------------------------
-UserDialog::UserDialog(wxWindow* parent,
-        const wxString& title, bool newUser)
-    : BaseDialog(parent, wxID_ANY, title), isNewUserM(newUser)
+UserDialog::UserDialog(wxWindow* parent, const wxString& title, bool isNewUser)
+    : BaseDialog(parent, wxID_ANY, title), isNewUserM(isNewUser), userM(0)
 {
-    userM = 0;
-
     createControls();
     setControlsProperties();
     layoutControls();
@@ -59,43 +58,40 @@ UserDialog::UserDialog(wxWindow* parent,
 //-----------------------------------------------------------------------------
 void UserDialog::createControls()
 {
-    m_staticText17 = new wxStaticText(getControlsPanel(), wxID_ANY,
-        wxT("User name"));
-    textctrl_username = new wxTextCtrl(getControlsPanel(), ID_textctrl);
-    m_staticText18 = new wxStaticText(getControlsPanel(), wxID_ANY,
-        wxT("Password"));
-    textctrl_password = new wxTextCtrl(getControlsPanel(), ID_textctrl,
-        wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
-    m_staticText19 = new wxStaticText(getControlsPanel(), wxID_ANY,
-        wxT("Confirm password"), wxDefaultPosition, wxDefaultSize, 0);
-    textctrl_confirm = new wxTextCtrl(getControlsPanel(), ID_textctrl,
-        wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
+    labelUserNameM = new wxStaticText(getControlsPanel(), wxID_ANY,
+        wxT("User name:"));
+    textUserNameM = new wxTextCtrl(getControlsPanel(), ID_textctrl_username);
+    labelFirstNameM = new wxStaticText(getControlsPanel(), wxID_ANY,
+        wxT("First name:"));
+    textFirstNameM = new wxTextCtrl(getControlsPanel(), wxID_ANY);
+    labelMiddleNameM = new wxStaticText(getControlsPanel(), wxID_ANY,
+        wxT("Middle name:"));
+    textMiddleNameM = new wxTextCtrl(getControlsPanel(), wxID_ANY);
+    labelLastNameM = new wxStaticText(getControlsPanel(), wxID_ANY,
+        wxT("Last name:"));
+    textLastNameM = new wxTextCtrl(getControlsPanel(), wxID_ANY);
 
-    m_staticText20 = new wxStaticText(getControlsPanel(), wxID_ANY,
-        wxT("Unix user ID"));
-    spinctrl_userid = new wxSpinCtrl(getControlsPanel(), wxID_ANY, wxT("0"),
+    labelPasswordM = new wxStaticText(getControlsPanel(), wxID_ANY,
+        wxT("Password:"));
+    textPasswordM = new wxTextCtrl(getControlsPanel(), ID_textctrl_password,
+        wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
+    labelConfirmPasswordM = new wxStaticText(getControlsPanel(), wxID_ANY,
+        wxT("Confirm password:"));
+    textConfirmPasswordM = new wxTextCtrl(getControlsPanel(),
+        ID_textctrl_confirmpw, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+        wxTE_PASSWORD);
+    labelUserIdM = new wxStaticText(getControlsPanel(), wxID_ANY, 
+        wxT("Unix user ID:"));
+    spinctrlUserIdM = new wxSpinCtrl(getControlsPanel(), wxID_ANY, wxT("0"),
+        wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 30000, 0);
+    labelGroupIdM = new wxStaticText(getControlsPanel(), wxID_ANY, 
+        wxT("Unix group ID:"));
+    spinctrlGroupIdM = new wxSpinCtrl(getControlsPanel(), wxID_ANY, wxT("0"),
         wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 30000, 0);
 
-    m_staticText21 = new wxStaticText(getControlsPanel(), wxID_ANY,
-        wxT("First name"));
-    textctrl_firstname = new wxTextCtrl(getControlsPanel(), wxID_ANY, wxT(""));
-    m_staticText22 = new wxStaticText(getControlsPanel(), wxID_ANY,
-        wxT("Middle name"));
-    textctrl_middlename = new wxTextCtrl(getControlsPanel(), wxID_ANY,
-        wxEmptyString);
-    m_staticText23 = new wxStaticText(getControlsPanel(), wxID_ANY,
-        wxT("Last name"));
-    textctrl_lastname = new wxTextCtrl(getControlsPanel(), wxID_ANY, wxT(""));
-
-    m_staticText24 = new wxStaticText(getControlsPanel(), wxID_ANY,
-        wxT("Unix group ID"));
-    spinctrl_groupid = new wxSpinCtrl(getControlsPanel(), wxID_ANY, wxT("0"),
-        wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 30000, 0);
-
-    button_ok = new wxButton(getControlsPanel(), ID_button_ok,
+    buttonOkM = new wxButton(getControlsPanel(), wxID_SAVE,
         (isNewUserM) ? _("Create") : _("Save"));
-    button_cancel = new wxButton(getControlsPanel(), ID_button_cancel,
-        _("Cancel"));
+    buttonCancelM = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
 }
 //-----------------------------------------------------------------------------
 const wxString UserDialog::getName() const
@@ -105,64 +101,79 @@ const wxString UserDialog::getName() const
 //-----------------------------------------------------------------------------
 void UserDialog::layoutControls()
 {
+    int dx = styleguide().getUnrelatedControlMargin(wxHORIZONTAL) 
+        - styleguide().getControlLabelMargin();
+    if (dx < 0)
+        dx = 0;
+
     // create sizer for controls
-    wxBoxSizer *controlsSizer = new wxBoxSizer(wxHORIZONTAL);
-    wxFlexGridSizer *fgSizer3 = new wxFlexGridSizer(2, 2, 0, 0);
-    fgSizer3->AddGrowableCol(1);
-    fgSizer3->Add(m_staticText17, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
-    fgSizer3->Add(textctrl_username, 0, wxALL|wxEXPAND, 5);
-    fgSizer3->Add(m_staticText18, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
-    fgSizer3->Add(textctrl_password, 0, wxALL|wxEXPAND, 5);
-    fgSizer3->Add(m_staticText19, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
-    fgSizer3->Add(textctrl_confirm, 0, wxALL|wxEXPAND, 5);
-    fgSizer3->Add(10, 10, 0, wxALL, 5);
-    fgSizer3->Add(1, 1, 0, wxALL, 5);   // dummy
-    fgSizer3->Add(m_staticText20, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
-    fgSizer3->Add(spinctrl_userid, 0, wxALL|wxEXPAND, 5);
+    wxGridBagSizer* controlsSizer = new wxGridBagSizer(
+        styleguide().getRelatedControlMargin(wxVERTICAL),
+        styleguide().getControlLabelMargin());
 
-    controlsSizer->Add(fgSizer3, 0, wxEXPAND, 5);
-    controlsSizer->Add(10, 10, 0, wxALL, 5);
+    controlsSizer->Add(labelUserNameM, wxGBPosition(0, 0), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL);
+    controlsSizer->Add(textUserNameM, wxGBPosition(0, 1), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    controlsSizer->Add(labelFirstNameM, wxGBPosition(1, 0), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL);
+    controlsSizer->Add(textFirstNameM, wxGBPosition(1, 1), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    controlsSizer->Add(labelMiddleNameM, wxGBPosition(2, 0), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL);
+    controlsSizer->Add(textMiddleNameM, wxGBPosition(2, 1), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    controlsSizer->Add(labelLastNameM, wxGBPosition(3, 0), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL);
+    controlsSizer->Add(textLastNameM, wxGBPosition(3, 1), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL | wxEXPAND);
 
-    wxFlexGridSizer *fgSizer4;
-    fgSizer4 = new wxFlexGridSizer(2, 2, 0, 0);
-    fgSizer4->AddGrowableCol(1);
-    fgSizer4->Add(m_staticText21, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
-    fgSizer4->Add(textctrl_firstname, 0, wxALL|wxEXPAND, 5);
-    fgSizer4->Add(m_staticText22, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
-    fgSizer4->Add(textctrl_middlename, 0, wxALL|wxEXPAND, 5);
-    fgSizer4->Add(m_staticText23, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
-    fgSizer4->Add(textctrl_lastname, 0, wxALL|wxEXPAND, 5);
-    fgSizer4->Add(10, 10, 0, wxALL, 5);
-    fgSizer4->Add(1, 1, 0, wxALL, 5); // dummy
-    fgSizer4->Add(m_staticText24, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
-    fgSizer4->Add(spinctrl_groupid, 0, wxALL|wxEXPAND, 5);
-    controlsSizer->Add(fgSizer4, 1, wxEXPAND, 5);
+    controlsSizer->Add(labelPasswordM, wxGBPosition(0, 2), wxDefaultSpan,
+        wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+    controlsSizer->Add(textPasswordM, wxGBPosition(0, 3), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    controlsSizer->Add(labelConfirmPasswordM, wxGBPosition(1, 2),
+        wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+    controlsSizer->Add(textConfirmPasswordM, wxGBPosition(1, 3),
+        wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    controlsSizer->Add(labelUserIdM, wxGBPosition(2, 2),
+        wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+    controlsSizer->Add(spinctrlUserIdM, wxGBPosition(2, 3),
+        wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    controlsSizer->Add(labelGroupIdM, wxGBPosition(3, 2),
+        wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+    controlsSizer->Add(spinctrlGroupIdM, wxGBPosition(3, 3),
+        wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+
+    controlsSizer->AddGrowableCol(1);
 
     // create sizer for buttons -> styleguide class will align it correctly
-    wxSizer* sizerButtons = styleguide().createButtonSizer(button_ok,
-        button_cancel);
+    wxSizer* buttonSizer = styleguide().createButtonSizer(buttonOkM,
+        buttonCancelM);
     // use method in base class to set everything up
-    layoutSizers(controlsSizer, sizerButtons);
+    layoutSizers(controlsSizer, buttonSizer);
 }
 //-----------------------------------------------------------------------------
 void UserDialog::setControlsProperties()
 {
-    button_ok->SetDefault();
+    textUserNameM->SetEditable(isNewUserM);
+    buttonOkM->SetDefault();
 }
 //-----------------------------------------------------------------------------
-void UserDialog::setUser(User *u)
+void UserDialog::setUser(User* u)
 {
+    wxASSERT(u != 0);
     userM = u;
     if (!isNewUserM)
     {
-        textctrl_username->SetValue(u->usernameM);
-        textctrl_password->SetValue(u->passwordM);
-        textctrl_confirm->SetValue(u->passwordM);
-        textctrl_firstname->SetValue(u->firstnameM);
-        textctrl_middlename->SetValue(u->middlenameM);
-        textctrl_lastname->SetValue(u->lastnameM);
-        spinctrl_userid->SetValue(u->useridM);
-        spinctrl_groupid->SetValue(u->groupidM);
+        textUserNameM->SetValue(u->usernameM);
+        textFirstNameM->SetValue(u->firstnameM);
+        textMiddleNameM->SetValue(u->middlenameM);
+        textLastNameM->SetValue(u->lastnameM);
+        textPasswordM->SetValue(u->passwordM);
+        textConfirmPasswordM->SetValue(u->passwordM);
+        spinctrlGroupIdM->SetValue(u->groupidM);
+        spinctrlUserIdM->SetValue(u->useridM);
     }
 
     updateButtons();
@@ -171,18 +182,18 @@ void UserDialog::setUser(User *u)
 //-----------------------------------------------------------------------------
 void UserDialog::updateButtons()
 {
-    wxString passwd = textctrl_password->GetValue();
-    wxString confirm = textctrl_confirm->GetValue();
-    button_ok->Enable(
-        !textctrl_username->GetValue().IsEmpty() &&
-        !passwd.IsEmpty() && passwd == confirm
-    );
+    wxString passwd = textPasswordM->GetValue();
+    wxString confirm = textConfirmPasswordM->GetValue();
+    buttonOkM->Enable(!textUserNameM->GetValue().IsEmpty()
+        && !passwd.IsEmpty() && passwd == confirm);
 }
 //-----------------------------------------------------------------------------
 //! event handling
 BEGIN_EVENT_TABLE(UserDialog, BaseDialog)
-    EVT_TEXT(UserDialog::ID_textctrl, UserDialog::OnSettingsChange)
-    EVT_BUTTON(UserDialog::ID_button_ok, UserDialog::OnOkButtonClick)
+    EVT_TEXT(UserDialog::ID_textctrl_username, UserDialog::OnSettingsChange)
+    EVT_TEXT(UserDialog::ID_textctrl_password, UserDialog::OnSettingsChange)
+    EVT_TEXT(UserDialog::ID_textctrl_confirmpw, UserDialog::OnSettingsChange)
+    EVT_BUTTON(wxID_SAVE, UserDialog::OnOkButtonClick)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void UserDialog::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
@@ -194,13 +205,13 @@ void UserDialog::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void UserDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    userM->usernameM = textctrl_username->GetValue();
-    userM->passwordM = textctrl_password->GetValue();
-    userM->firstnameM = textctrl_firstname->GetValue();
-    userM->middlenameM = textctrl_middlename->GetValue();
-    userM->lastnameM = textctrl_lastname->GetValue();
-    userM->useridM = spinctrl_userid->GetValue();
-    userM->groupidM = spinctrl_groupid->GetValue();
+    userM->usernameM = textUserNameM->GetValue();
+    userM->firstnameM = textFirstNameM->GetValue();
+    userM->middlenameM = textMiddleNameM->GetValue();
+    userM->lastnameM = textLastNameM->GetValue();
+    userM->passwordM = textPasswordM->GetValue();
+    userM->groupidM = spinctrlGroupIdM->GetValue();
+    userM->useridM = spinctrlUserIdM->GetValue();
     EndModal(wxID_OK);
 }
 //-----------------------------------------------------------------------------
@@ -217,17 +228,19 @@ const UserPropertiesHandler UserPropertiesHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool UserPropertiesHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("edit_user") && uri.action != wxT("add_user"))
+    bool addUser = uri.action == wxT("add_user");
+    bool editUser = uri.action == wxT("edit_user");
+    if (!addUser && !editUser)
         return false;
 
     wxWindow* w = getWindow(uri);
-    User *u;
-    Server *s;
-    wxString title(_("Modify user"));
-    if (uri.action == wxT("add_user"))
+    User* u = 0;
+    Server* s;
+    wxString title(_("Modify User"));
+    if (addUser)
     {
         s = (Server *)getObject(uri);
-        title = _("New user");
+        title = _("Create New User");
     }
     else
     {
@@ -236,17 +249,18 @@ bool UserPropertiesHandler::handleURI(URI& uri)
             return true;
         s = dynamic_cast<Server *>(u->getParent());
     }
-    User tempusr(s);
-    if (uri.action == wxT("add_user"))
-        u = &tempusr;
     if (!s)
         return true;
 
-    UserDialog d(w, title, uri.action == wxT("add_user"));
+    User tempusr(s);
+    if (addUser)
+        u = &tempusr;
+
+    UserDialog d(w, title, addUser);
     d.setUser(u);
     if (d.ShowModal() == wxID_OK)
     {
-        ProgressDialog pd(w, _("Connecting to server..."), 1);
+        ProgressDialog pd(w, _("Connecting to Server..."), 1);
         IBPP::Service svc;
         if (!getService(s, svc, &pd, true)) // true = need SYSDBA password
             return true;
@@ -255,7 +269,7 @@ bool UserPropertiesHandler::handleURI(URI& uri)
         {
             IBPP::User user;
             u->setIBPP(user);
-            if (uri.action == wxT("add_user"))
+            if (addUser)
                 svc->AddUser(user);
             else
                 svc->ModifyUser(user);
@@ -287,13 +301,14 @@ bool DropUserHandler::handleURI(URI& uri)
         return false;
 
     wxWindow* w = getWindow(uri);
-    User *u = (User *)getObject(uri);
+    User* u = (User*)getObject(uri);
     if (!u || !w)
         return true;
-    Server *s = dynamic_cast<Server *>(u->getParent());
+    Server* s = dynamic_cast<Server*>(u->getParent());
     if (!s)
         return true;
-    ProgressDialog pd(w, _("Connecting to server..."), 1);
+
+    ProgressDialog pd(w, _("Connecting to Server..."), 1);
     IBPP::Service svc;
     if (!getService(s, svc, &pd, true)) // true = need SYSDBA password
         return true;
