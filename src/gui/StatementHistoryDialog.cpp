@@ -64,7 +64,10 @@ StatementHistoryDialog::StatementHistoryDialog(ExecuteSqlFrame *parent,
     topSizer->Add(button_delete, 0, wxALIGN_CENTER_VERTICAL, 0);
     innerSizer->Add(topSizer, 0, wxEXPAND, 5);
 
-    gauge_progress = new wxGauge(getControlsPanel(), wxID_ANY, 100);
+    int gaugeHeight = wxSystemSettings::GetMetric(wxSYS_HSCROLL_Y);
+    gauge_progress = new wxGauge(getControlsPanel(), wxID_ANY, 100,
+        wxDefaultPosition, wxSize(100, gaugeHeight),
+        wxGA_HORIZONTAL | wxGA_SMOOTH);
     innerSizer->Add(gauge_progress, 0, wxTOP|wxEXPAND,
         styleguide().getRelatedControlMargin(wxVERTICAL));
 
