@@ -42,23 +42,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/ProgressDialog.h"
 #include "styleguide.h"
 //-----------------------------------------------------------------------------
-void recursiveLayout(wxSizer* sizer)
-{
-    if (sizer)
-    {
-        wxSizerItemList::compatibility_iterator
-            node = sizer->GetChildren().GetFirst();
-        while (node)
-        {
-            wxSizerItem *item = node->GetData();
-            if (item->GetSizer())
-                item->GetSizer()->Layout();
-            node = node->GetNext();
-        }
-        sizer->Layout();
-    }
-}
-//-----------------------------------------------------------------------------
 // ProgressDialog
 ProgressDialog::ProgressDialog(wxWindow* parent, const wxString& title,
         unsigned int levelCount, const wxPoint& pos, const wxSize& size)
@@ -75,7 +58,7 @@ ProgressDialog::ProgressDialog(wxWindow* parent, const wxString& title,
     enableOtherWindows(false);
     Show();
     Enable();
-    Update();
+    doUpdate();
 }
 //-----------------------------------------------------------------------------
 ProgressDialog::~ProgressDialog()
@@ -89,15 +72,24 @@ void ProgressDialog::createControls()
     for (unsigned int i = 1; i <= levelCountM; i++)
     {
         wxStaticText* label = new wxStaticText(getControlsPanel(), wxID_ANY,
-            wxEmptyString);
+            wxEmptyString, wxDefaultPosition, wxDefaultSize,
+            // don't resize the label, keep the same width as the gauge
+            wxST_NO_AUTORESIZE);
         labelsM.push_back(label);
         wxGauge* gauge = new wxGauge(getControlsPanel(), wxID_ANY, 100,
             wxDefaultPosition, wxSize(300, gaugeHeight),
             wxGA_HORIZONTAL | wxGA_SMOOTH);
         gaugesM.push_back(gauge);
     }
-    button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL,
-        _("Cancel"));
+    button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
+}
+//-----------------------------------------------------------------------------
+void ProgressDialog::doUpdate()
+{
+    Update();
+#ifdef __WXGTK__
+    // TODO: find the right incantation to update and show controls
+#endif
 }
 //-----------------------------------------------------------------------------
 void ProgressDialog::enableOtherWindows(bool enable)
@@ -160,7 +152,7 @@ void ProgressDialog::setCanceled()
         canceledM = true;
         button_cancel->Enable(false);
         setProgressMessage(_("Cancelling..."));
-        Update();
+        doUpdate();
     }
 }
 //-----------------------------------------------------------------------------
@@ -201,7 +193,7 @@ void ProgressDialog::initProgress(wxString progressMsg,
         setGaugeIndeterminate(gauge, false);
         gauge->SetRange(maxPosition);
         gauge->SetValue(startingPosition);
-        Update();
+        doUpdate();
     }
 }
 //-----------------------------------------------------------------------------
@@ -216,7 +208,7 @@ void ProgressDialog::initProgressIndeterminate(wxString progressMsg,
     {
         label->SetLabel(progressMsg);
         setGaugeIndeterminate(gauge, true);
-        Update();
+        doUpdate();
     }
 }
 //-----------------------------------------------------------------------------
@@ -228,7 +220,7 @@ void ProgressDialog::setProgressMessage(wxString progressMsg,
     wxStaticText* label = getLabelForLevel(progressLevel);
     if (label)
         label->SetLabel(progressMsg);
-    Update();
+    doUpdate();
 }
 //-----------------------------------------------------------------------------
 void ProgressDialog::setProgressPosition(unsigned int currentPosition,
@@ -239,7 +231,7 @@ void ProgressDialog::setProgressPosition(unsigned int currentPosition,
     wxGauge* gauge = getGaugeForLevel(progressLevel);
     if (gauge)
         gauge->SetValue(currentPosition);
-    Update();
+    doUpdate();
 }
 //-----------------------------------------------------------------------------
 void ProgressDialog::stepProgress(int stepAmount, unsigned int progressLevel)
@@ -252,7 +244,7 @@ void ProgressDialog::stepProgress(int stepAmount, unsigned int progressLevel)
         int pos = gauge->GetValue() + stepAmount;
         int maxPos = gauge->GetRange();
         gauge->SetValue((pos < 0) ? 0 : (pos > maxPos ? maxPos : pos));
-        Update();
+        doUpdate();
     }
 }
 //-----------------------------------------------------------------------------

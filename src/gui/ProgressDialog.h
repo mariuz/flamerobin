@@ -50,6 +50,7 @@ private:
     void createControls();
     void layoutControls();
 
+    void doUpdate();
     void enableOtherWindows(bool enable);
     void setCanceled();
 
