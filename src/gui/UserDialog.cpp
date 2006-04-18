@@ -308,7 +308,7 @@ bool DropUserHandler::handleURI(URI& uri)
     if (!s)
         return true;
 
-    if (wxNO == wxMessageBox(_("Are you sure?"), _("Removing user"),
+    if (wxNO == wxMessageBox(_("Are you sure?"), _("Removing User"),
         wxYES_NO|wxICON_QUESTION))
         return true;
 

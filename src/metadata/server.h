@@ -71,6 +71,11 @@ public:
         return usernameM < rhs.usernameM;
     }
 
+    virtual bool isSystem() const
+    {
+        return usernameM == wxT("SYSDBA");
+    }
+
     wxString usernameM;
     wxString passwordM;
     wxString firstnameM;

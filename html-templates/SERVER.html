@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>User management</title>
+  <title>User Management</title>
 </head>
 <body>
 <font size=+2>{%object_name%}</font><br>
@@ -19,8 +19,9 @@
     {%users:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
       <td valign="top" nowrap>
-          <a href="fr://drop_user?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
           <a href="fr://edit_user?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/view.png"></a>
+          {%NotSystem:
+          <a href="fr://drop_user?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>%}
       </td>
       <td nowrap valign="top">{%userinfo:username%}</td>
       <td nowrap valign="top">{%userinfo:first_name%}</td>

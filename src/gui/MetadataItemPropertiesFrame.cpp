@@ -205,7 +205,7 @@ void MetadataItemPropertiesFrame::requestLoadPage(bool showLoadingPage)
             processHtmlFile(path + wxT("ALLloading.html"));
         }
 
-        Connect(wxID_ANY, wxEVT_IDLE, 
+        Connect(wxID_ANY, wxEVT_IDLE,
             wxIdleEventHandler(MetadataItemPropertiesFrame::OnIdle));
         htmlReloadRequestedM = true;
     }
@@ -273,6 +273,12 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
 
     else if (cmd == wxT("fr_home"))
         htmlpage += config().getHomePath();
+
+    else if (cmd == wxT("NotSystem"))
+    {
+        if (!object->isSystem())
+            processHtmlCode(htmlpage, suffix, object);
+    }
 
     else if (cmd == wxT("header"))  // include another file
     {
@@ -1115,7 +1121,7 @@ bool PageHandler::handleURI(URI& uri)
     if (uri.getParam(wxT("target")) == wxT("new"))
     {
         wxWindow* mainFrame = mpf->GetParent();
-        if (mainFrame)           
+        if (mainFrame)
         {
             mpf = frameManager().showMetadataPropertyFrame(mainFrame,
                                     // !delayed, force_new
