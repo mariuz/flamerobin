@@ -80,11 +80,11 @@ void UserDialog::createControls()
     textConfirmPasswordM = new wxTextCtrl(getControlsPanel(),
         ID_textctrl_confirmpw, wxEmptyString, wxDefaultPosition, wxDefaultSize,
         wxTE_PASSWORD);
-    labelUserIdM = new wxStaticText(getControlsPanel(), wxID_ANY, 
+    labelUserIdM = new wxStaticText(getControlsPanel(), wxID_ANY,
         wxT("Unix user ID:"));
     spinctrlUserIdM = new wxSpinCtrl(getControlsPanel(), wxID_ANY, wxT("0"),
         wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 30000, 0);
-    labelGroupIdM = new wxStaticText(getControlsPanel(), wxID_ANY, 
+    labelGroupIdM = new wxStaticText(getControlsPanel(), wxID_ANY,
         wxT("Unix group ID:"));
     spinctrlGroupIdM = new wxSpinCtrl(getControlsPanel(), wxID_ANY, wxT("0"),
         wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 30000, 0);
@@ -101,7 +101,7 @@ const wxString UserDialog::getName() const
 //-----------------------------------------------------------------------------
 void UserDialog::layoutControls()
 {
-    int dx = styleguide().getUnrelatedControlMargin(wxHORIZONTAL) 
+    int dx = styleguide().getUnrelatedControlMargin(wxHORIZONTAL)
         - styleguide().getControlLabelMargin();
     if (dx < 0)
         dx = 0;
@@ -306,6 +306,10 @@ bool DropUserHandler::handleURI(URI& uri)
         return true;
     Server* s = dynamic_cast<Server*>(u->getParent());
     if (!s)
+        return true;
+
+    if (wxNO == wxMessageBox(_("Are you sure?"), _("Removing user"),
+        wxYES_NO|wxICON_QUESTION))
         return true;
 
     ProgressDialog pd(w, _("Connecting to Server..."), 1);
