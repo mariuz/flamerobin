@@ -184,6 +184,11 @@ const wxString Server::getItemPath() const
     return wxT("");
 }
 //-----------------------------------------------------------------------------
+bool Server::hasUsers() const
+{
+    return usersM.size() != 0;
+}
+//-----------------------------------------------------------------------------
 std::vector<User>* Server::getUsers(ProgressIndicator* progressind)
 {
     usersM.clear();

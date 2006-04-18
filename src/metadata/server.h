@@ -123,6 +123,7 @@ public:
     void setServicePassword(const wxString& pass);
     void setServiceSysdbaPassword(const wxString& pass);
 
+    bool hasUsers() const;
     std::vector<User>* getUsers(ProgressIndicator* progressind);
 
     // setters/getters
