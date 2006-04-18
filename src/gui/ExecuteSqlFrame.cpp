@@ -56,7 +56,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/controls/DataGridTable.h"
 #include "gui/ProgressDialog.h"
 #include "gui/ExecuteSqlFrame.h"
-#include "gui/StatementHistoryFrame.h"
+#include "gui/StatementHistoryDialog.h"
 #include "frutils.h"
 #include "logger.h"
 #include "metadata/CreateDDLVisitor.h"
