@@ -506,7 +506,7 @@ void PrivilegesDialog::updateControls()
 wxString PrivilegesDialog::getSqlStatements()
 {
     wxString stmt;
-    for (size_t i = 0; i<listbox_statements->GetCount(); i++)
+    for (int i = 0; i < listbox_statements->GetCount(); i++)
         stmt << listbox_statements->GetString(i) << wxT(";\n");
     return stmt;
 }
