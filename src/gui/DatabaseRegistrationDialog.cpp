@@ -261,6 +261,8 @@ void DatabaseRegistrationDialog::setDatabase(Database* db)
     text_ctrl_name->SetEditable(!connectAsM);
     text_ctrl_username->SetEditable(!isConnected);
     text_ctrl_password->SetEditable(!isConnected);
+    if (checkbox_encrypted)
+        checkbox_encrypted->Enable(!isConnected);
     combobox_charset->Enable(!isConnected);
     text_ctrl_role->SetEditable(!isConnected);
     if (connectAsM)
