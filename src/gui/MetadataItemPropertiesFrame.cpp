@@ -342,19 +342,19 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
             return;
 
         ProgressDialog pd(this, _("Connecting to Server..."), 1);
-        std::vector<User> *usr = s->getUsers(&pd);
-        if (!usr)
-            return;
-        for (std::vector<User>::iterator it = usr->begin();
-            it != usr->end(); ++it)
+        UserList* usr = s->getUsers(&pd);
+        if (!usr || !usr->size())
         {
-            processHtmlCode(htmlpage, suffix, &(*it));
+            Close();
+            return;
         }
+        for (UserListIterator it = usr->begin(); it != usr->end(); ++it)
+            processHtmlCode(htmlpage, suffix, &(*it));
     }
 
     else if (cmd == wxT("userinfo"))
     {
-        User *u = dynamic_cast<User *>(object);
+        User* u = dynamic_cast<User*>(object);
         if (!u)
             return;
         if (suffix == wxT("username"))

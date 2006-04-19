@@ -952,17 +952,8 @@ void MainFrame::OnMenuManageUsers(wxCommandEvent& WXUNUSED(event))
     FR_TRY
 
     Server* s = tree_ctrl_1->getSelectedServer();
-    if (!checkValidServer(s))
-        return;
-
-    MetadataItemPropertiesFrame *mpf =
+    if (checkValidServer(s))
         frameManager().showMetadataPropertyFrame(this, s);
-    // needed since property page uses idle event to load the info (see below)
-    wxYield();
-    // if password dialog is canceled, there are no users loaded, so we
-    // close the frame
-    if (!s->hasUsers())
-        mpf->Close();
 
     FR_CATCH
 }

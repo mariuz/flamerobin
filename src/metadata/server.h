@@ -84,6 +84,8 @@ public:
     uint32_t useridM;
     uint32_t groupidM;
 };
+typedef std::vector<User> UserList;
+typedef std::vector<User>::iterator UserListIterator;
 //-----------------------------------------------------------------------------
 // this is a coupled node (in visual sense). Server equals collection of
 // YDatabases in wxTree. that's why getChildren() method just copies, since
@@ -95,7 +97,7 @@ private:
     wxString portM;
 
     MetadataCollection<Database> databasesM;
-    std::vector<User> usersM;
+    UserList usersM;
 
     wxString serviceUserM;
     wxString servicePasswordM;
@@ -123,8 +125,7 @@ public:
     void setServicePassword(const wxString& pass);
     void setServiceSysdbaPassword(const wxString& pass);
 
-    bool hasUsers() const;
-    std::vector<User>* getUsers(ProgressIndicator* progressind);
+    UserList* getUsers(ProgressIndicator* progressind);
 
     // setters/getters
     wxString getHostname() const;
