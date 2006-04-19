@@ -204,16 +204,25 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
             sysdba ? _("Enter SYSDBA password") : _("Enter password"));
         if (pass.IsEmpty())
             return false;
-        svc = IBPP::ServiceFactory(wx2std(s->getConnectionString()),
-            wx2std(user), wx2std(pass));
-        svc->Connect();
-        // exception might be thrown. If not, we store the credentials:
-        if (sysdba)
-            s->setServiceSysdbaPassword(pass);
-        else
+        try
         {
-            s->setServiceUser(user);
-            s->setServicePassword(pass);
+            svc = IBPP::ServiceFactory(wx2std(s->getConnectionString()),
+                wx2std(user), wx2std(pass));
+            svc->Connect();
+            // exception might be thrown. If not, we store the credentials:
+            if (sysdba || user.Upper() == wxT("SYSDBA"))
+                s->setServiceSysdbaPassword(pass);
+            else
+            {
+                s->setServiceUser(user);
+                s->setServicePassword(pass);
+            }
+        }
+        catch(IBPP::Exception& e)
+        {
+            wxMessageBox(std2wx(e.ErrorMessage()), _("Error"),
+                wxICON_ERROR|wxOK);
+            return false;
         }
     }
     return true;
