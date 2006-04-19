@@ -636,7 +636,7 @@ SOURCE=.\src\sql\SqlTokenizer.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gui\StatementHistoryFrame.cpp
+SOURCE=.\src\gui\StatementHistoryDialog.cpp
 # End Source File
 # Begin Source File
 
@@ -982,7 +982,7 @@ SOURCE=.\src\sql\SqlTokenizer.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gui\StatementHistoryFrame.h
+SOURCE=.\src\gui\StatementHistoryDialog.h
 # End Source File
 # Begin Source File
 

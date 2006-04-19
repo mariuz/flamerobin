@@ -96,7 +96,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleHtmlFrame.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryFrame.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TriggerWizardDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UserDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.obj \
@@ -398,7 +398,7 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.obj: .\src\gui\Se
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleHtmlFrame.obj: .\src\gui\SimpleHtmlFrame.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryFrame.obj: .\src\gui\StatementHistoryFrame.cpp
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryDialog.obj: .\src\gui\StatementHistoryDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TriggerWizardDialog.obj: .\src\gui\TriggerWizardDialog.cpp
