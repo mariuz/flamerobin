@@ -64,7 +64,6 @@ private:
     void layoutControls();
     void setControlsProperties();
     void updateButtons();
-    void updateIsDefaultName();
 protected:
     virtual const wxString getName() const;
 public:

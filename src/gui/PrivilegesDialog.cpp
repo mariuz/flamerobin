@@ -57,12 +57,9 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     inConstructor = true;
     databaseM = object->getDatabase();
 
-    wxBoxSizer *innerSizer;
-    innerSizer = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer *topSizer;
-    topSizer = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer *topLeftSizer;
-    topLeftSizer = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer *innerSizer = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+    wxBoxSizer *topLeftSizer = new wxBoxSizer(wxVERTICAL);
     wxString choices1[] = { _("Grant"), _("Revoke") };
     int nchoices1 = sizeof(choices1) / sizeof(wxString);
     radiobox_action = new wxRadioBox(getControlsPanel(), ID_radiobox_action,
@@ -85,6 +82,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
 
     radiobtn_user = new wxRadioButton(granteePanel, ID_radiobtn,
         _("User/Role:"));
+    radiobtn_user->SetValue(true);  // not needed on GTK, but doesn't hurt
     fgSizer3->Add(radiobtn_user, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     textctrl_user = new wxTextCtrl(granteePanel, ID_textctrl_user,
         wxT("PUBLIC"));
@@ -153,8 +151,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     topSizer->Add(topLeftSizer, 0, wxEXPAND, 0);
     // separate left and right parts
     topSizer->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 1);
-    wxBoxSizer *privilegesSizer;
-    privilegesSizer = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer *privilegesSizer = new wxBoxSizer(wxVERTICAL);
     m_staticText2 = new wxStaticText(getControlsPanel(), wxID_ANY,
         _("Privileges"));
     wxFont font2(m_staticText2->GetFont());
@@ -281,8 +278,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     innerSizer->Add(topSizer, 0, wxEXPAND, 0);
     innerSizer->Add(styleguide().getUnrelatedControlMargin(wxVERTICAL),
         1, 0, wxALL, 0);
-    wxBoxSizer *previewSqlSizer;
-    previewSqlSizer = new wxBoxSizer(wxHORIZONTAL);
+    wxBoxSizer *previewSqlSizer = new wxBoxSizer(wxHORIZONTAL);
     label_sql = new wxStaticText(getControlsPanel(), wxID_ANY,
         _("Preview SQL:"));
     previewSqlSizer->Add(label_sql, 0, wxRIGHT|wxALIGN_CENTER_VERTICAL,
@@ -362,6 +358,11 @@ void PrivilegesDialog::loadRelationColumns()
             }
         }
     }
+}
+//-----------------------------------------------------------------------------
+const wxString PrivilegesDialog::getName() const
+{
+    return wxT("PrivilegesDialog");
 }
 //-----------------------------------------------------------------------------
 void PrivilegesDialog::updateControls()

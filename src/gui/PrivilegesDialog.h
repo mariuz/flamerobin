@@ -76,7 +76,8 @@ protected:
     wxButton *button_remove;
     wxButton *button_execute;
     wxButton *button_close;
-
+protected:
+    virtual const wxString getName() const;
 public:
     void updateControls();
     void OnSettingChanged(wxCommandEvent& event);
