@@ -85,7 +85,6 @@ public:
     uint32_t groupidM;
 };
 typedef std::vector<User> UserList;
-typedef std::vector<User>::iterator UserListIterator;
 //-----------------------------------------------------------------------------
 // this is a coupled node (in visual sense). Server equals collection of
 // YDatabases in wxTree. that's why getChildren() method just copies, since

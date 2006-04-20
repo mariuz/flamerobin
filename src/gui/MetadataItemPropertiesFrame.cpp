@@ -348,7 +348,7 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
             Close();
             return;
         }
-        for (UserListIterator it = usr->begin(); it != usr->end(); ++it)
+        for (UserList::iterator it = usr->begin(); it != usr->end(); ++it)
             processHtmlCode(htmlpage, suffix, &(*it));
     }
 
