@@ -130,7 +130,8 @@ END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void StatementHistoryDialog::OnListBoxSelect(wxCommandEvent& WXUNUSED(event))
 {
-    bool hasSelection = (listbox_search->GetSelection() != wxNOT_FOUND);
+    wxArrayInt sels;
+    bool hasSelection = (listbox_search->GetSelections(sels) > 0);
     button_copy->Enable(hasSelection);
     button_delete->Enable(hasSelection);
 }
