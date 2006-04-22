@@ -38,7 +38,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #include "wx/wx.h"
 #endif
 
-#include "styleguide.h"
+#include "gui/StyleGuide.h"
 //-----------------------------------------------------------------------------
 StyleGuide::StyleGuide()
 {

@@ -43,7 +43,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "config/Config.h"
 #include "gui/AdvancedMessageDialog.h"
-#include "styleguide.h"
+#include "gui/StyleGuide.h"
 //----------------------------------------------------------------------------
 AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent,
         const wxString& message, const wxString& caption, int style,

@@ -49,9 +49,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "frutils.h"
 #include "gui/controls/LogTextControl.h"
 #include "gui/RestoreFrame.h"
+#include "gui/StyleGuide.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
-#include "styleguide.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 // worker thread class to perform database restore

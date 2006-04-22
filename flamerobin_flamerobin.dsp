@@ -640,6 +640,14 @@ SOURCE=.\src\gui\StatementHistoryDialog.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\StyleGuide.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\msw\StyleGuideMSW.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\core\Subject.cpp
 # End Source File
 # Begin Source File
@@ -771,14 +779,6 @@ SOURCE=.\src\metadata\server.cpp
 # Begin Source File
 
 SOURCE=.\src\statementHistory.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\styleguide.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\styleguidemsw.cpp
 # End Source File
 # Begin Source File
 
@@ -986,6 +986,10 @@ SOURCE=.\src\gui\StatementHistoryDialog.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\StyleGuide.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\core\Subject.h
 # End Source File
 # Begin Source File
@@ -1107,10 +1111,6 @@ SOURCE=.\src\metadata\server.h
 # Begin Source File
 
 SOURCE=.\src\statementHistory.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\styleguide.h
 # End Source File
 # Begin Source File
 

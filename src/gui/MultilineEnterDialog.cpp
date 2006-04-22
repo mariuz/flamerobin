@@ -40,7 +40,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "gui/controls/TextControl.h"
 #include "gui/MultilineEnterDialog.h"
-#include "styleguide.h"
+#include "gui/StyleGuide.h"
 //-----------------------------------------------------------------------------
 bool GetMultilineTextFromUser(wxWindow* parent, const wxString& title,
     wxString& value, const wxString& caption, const wxString& buttonLabel)

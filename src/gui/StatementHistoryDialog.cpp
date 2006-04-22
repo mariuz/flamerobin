@@ -36,9 +36,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif //WX_PRECOMP
 
 #include "statementHistory.h"
-#include "styleguide.h"
-#include "ExecuteSqlFrame.h"
-#include "StatementHistoryDialog.h"
+#include "gui/ExecuteSqlFrame.h"
+#include "gui/StatementHistoryDialog.h"
+#include "gui/StyleGuide.h"
 //-----------------------------------------------------------------------------
 StatementHistoryDialog::StatementHistoryDialog(ExecuteSqlFrame *parent,
     StatementHistory *history, const wxString& title)

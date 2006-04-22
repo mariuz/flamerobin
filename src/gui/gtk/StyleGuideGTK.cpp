@@ -42,12 +42,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error Must not be included in project for Windows or OS X!!!
 #endif
 
-#include "styleguide.h"
+#include "gui/StyleGuide.h"
 //------------------------------------------------------------------------------
-class StyleGuideGeneric: public StyleGuide
+class StyleGuideGTK: public StyleGuide
 {
 public:
-    StyleGuideGeneric();
+    StyleGuideGTK();
     virtual wxSizer* createButtonSizer(wxButton* button_ok,
         wxButton* button_cancel);
     virtual int getBetweenButtonsMargin(wxOrientation orientation);
@@ -61,11 +61,11 @@ public:
     virtual int getEditorFontSize();
 };
 //------------------------------------------------------------------------------
-StyleGuideGeneric::StyleGuideGeneric()
+StyleGuideGTK::StyleGuideGTK()
 {
 }
 //------------------------------------------------------------------------------
-wxSizer* StyleGuideGeneric::createButtonSizer(wxButton* button_ok,
+wxSizer* StyleGuideGTK::createButtonSizer(wxButton* button_ok,
     wxButton* button_cancel)
 {
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -80,37 +80,37 @@ wxSizer* StyleGuideGeneric::createButtonSizer(wxButton* button_ok,
     return sizer;
 }
 //------------------------------------------------------------------------------
-int StyleGuideGeneric::getBetweenButtonsMargin(wxOrientation /*orientation*/)
+int StyleGuideGTK::getBetweenButtonsMargin(wxOrientation /*orientation*/)
 {
     return 6;
 }
 //------------------------------------------------------------------------------
-int StyleGuideGeneric::getBrowseButtonMargin()
+int StyleGuideGTK::getBrowseButtonMargin()
 {
     return 6;
 }
 //------------------------------------------------------------------------------
-int StyleGuideGeneric::getCheckboxSpacing()
+int StyleGuideGTK::getCheckboxSpacing()
 {
     return 6;
 }
 //------------------------------------------------------------------------------
-int StyleGuideGeneric::getControlLabelMargin()
+int StyleGuideGTK::getControlLabelMargin()
 {
     return 12;
 }
 //------------------------------------------------------------------------------
-int StyleGuideGeneric::getDialogMargin(wxDirection WXUNUSED(direction))
+int StyleGuideGTK::getDialogMargin(wxDirection WXUNUSED(direction))
 {
     return 12;
 }
 //------------------------------------------------------------------------------
-int StyleGuideGeneric::getFrameMargin(wxDirection direction)
+int StyleGuideGTK::getFrameMargin(wxDirection direction)
 {
     return 12;
 }
 //------------------------------------------------------------------------------
-int StyleGuideGeneric::getRelatedControlMargin(wxOrientation orientation)
+int StyleGuideGTK::getRelatedControlMargin(wxOrientation orientation)
 {
     switch (orientation)
     {
@@ -123,19 +123,19 @@ int StyleGuideGeneric::getRelatedControlMargin(wxOrientation orientation)
     }
 }
 //------------------------------------------------------------------------------
-int StyleGuideGeneric::getUnrelatedControlMargin(wxOrientation /*orientation*/)
+int StyleGuideGTK::getUnrelatedControlMargin(wxOrientation /*orientation*/)
 {
     return 18;
 }
 //------------------------------------------------------------------------------
-int StyleGuideGeneric::getEditorFontSize()
+int StyleGuideGTK::getEditorFontSize()
 {
     return 12;
 }
 //------------------------------------------------------------------------------
 StyleGuide& styleguide()
 {
-    static StyleGuideGeneric guide;
+    static StyleGuideGTK guide;
     return guide;
 }
 //------------------------------------------------------------------------------

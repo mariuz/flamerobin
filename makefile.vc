@@ -97,6 +97,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleHtmlFrame.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryDialog.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuide.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TriggerWizardDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UserDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.obj \
@@ -131,11 +132,10 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlStatement.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_styleguide.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_styleguidemsw.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_treeitem.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ugly.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_urihandler.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin.res
 IBPP_CXXFLAGS = /M$(__RTL_TYPE)$(__DEBUGINFO_0) /DWIN32 $(__DEBUGINFO) \
 	$(____DEBUGINFO) /Fdvc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.pdb $(__OPTIMIZE) /W4 \
@@ -401,6 +401,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleHtmlFrame.obj: .\src\gui\SimpleHtmlF
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryDialog.obj: .\src\gui\StatementHistoryDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuide.obj: .\src\gui\StyleGuide.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TriggerWizardDialog.obj: .\src\gui\TriggerWizardDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
@@ -503,12 +506,6 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.obj: .\src\sql\SqlTokenizer.c
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.obj: .\src\statementHistory.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_styleguide.obj: .\src\styleguide.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
-
-vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_styleguidemsw.obj: .\src\styleguidemsw.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
-
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_treeitem.obj: .\src\treeitem.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
@@ -516,6 +513,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ugly.obj: .\src\ugly.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_urihandler.obj: .\src\urihandler.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.obj: .\src\gui\msw\StyleGuideMSW.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin.res: .\res\flamerobin.rc

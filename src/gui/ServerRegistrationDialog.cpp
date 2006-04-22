@@ -39,8 +39,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include "gui/ServerRegistrationDialog.h"
+#include "gui/StyleGuide.h"
 #include "metadata/server.h"
-#include "styleguide.h"
 //-----------------------------------------------------------------------------
 ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent,
         const wxString& title, bool registerServer)

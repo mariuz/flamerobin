@@ -40,7 +40,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "config/Config.h"
 #include "gui/BaseDialog.h"
-#include "styleguide.h"
+#include "gui/StyleGuide.h"
 //-----------------------------------------------------------------------------
 BaseDialog::BaseDialog(wxWindow* parent, int id, const wxString& title,
         const wxPoint& pos, const wxSize& size, long style)

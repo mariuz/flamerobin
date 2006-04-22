@@ -42,9 +42,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "gui/ExecuteSqlFrame.h"
 #include "gui/FieldPropertiesDialog.h"
+#include "gui/StyleGuide.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
-#include "styleguide.h"
 #include "ugly.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------

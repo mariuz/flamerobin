@@ -42,8 +42,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "gui/CreateIndexDialog.h"
 #include "gui/ExecuteSqlFrame.h"
+#include "gui/StyleGuide.h"
 #include "metadata/table.h"
-#include "styleguide.h"
 #include "ugly.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------

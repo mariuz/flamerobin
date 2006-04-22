@@ -46,8 +46,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "core/FRError.h"
 #include "gui/EventWatcherFrame.h"
 #include "gui/MultilineEnterDialog.h"
+#include "gui/StyleGuide.h"
 #include "metadata/database.h"
-#include "styleguide.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 using namespace std;

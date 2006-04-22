@@ -39,8 +39,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include <wx/utils.h>
-#include "styleguide.h"
-#include "FindDialog.h"
+
+#include "gui/FindDialog.h"
+#include "gui/StyleGuide.h"
 //-----------------------------------------------------------------------------
 FindFlags::FindFlags()
 {

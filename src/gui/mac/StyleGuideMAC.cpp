@@ -42,7 +42,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error Include this only in project for Mac OS X!!!
 #endif
 
-#include "styleguide.h"
+#include "gui/StyleGuide.h"
 //------------------------------------------------------------------------------
 class StyleGuideMAC: public StyleGuide
 {
@@ -138,3 +138,4 @@ StyleGuide& styleguide()
     static StyleGuideMAC guide;
     return guide;
 }
+//------------------------------------------------------------------------------

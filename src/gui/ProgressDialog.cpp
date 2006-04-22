@@ -40,7 +40,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include "gui/ProgressDialog.h"
-#include "styleguide.h"
+#include "gui/StyleGuide.h"
 //-----------------------------------------------------------------------------
 // ProgressDialog
 ProgressDialog::ProgressDialog(wxWindow* parent, const wxString& title,

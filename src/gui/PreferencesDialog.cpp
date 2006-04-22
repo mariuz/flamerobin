@@ -48,9 +48,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "config/Config.h"
 #include "frutils.h"
+#include "gui/PreferencesDialog.h"
+#include "gui/StyleGuide.h"
 #include "images.h"
-#include "PreferencesDialog.h"
-#include "styleguide.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 static bool hasParamNode(wxXmlNode* node, const wxString& param)

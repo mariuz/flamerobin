@@ -42,9 +42,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/gbsizer.h>
 
 #include "gui/DatabaseRegistrationDialog.h"
+#include "gui/StyleGuide.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
-#include "styleguide.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent,

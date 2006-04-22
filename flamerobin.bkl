@@ -249,6 +249,7 @@
         $(SOURCEDIR)/gui/ServerRegistrationDialog.h
         $(SOURCEDIR)/gui/SimpleHtmlFrame.h
         $(SOURCEDIR)/gui/StatementHistoryDialog.h
+        $(SOURCEDIR)/gui/StyleGuide.h
         $(SOURCEDIR)/gui/TriggerWizardDialog.h
         $(SOURCEDIR)/gui/UserDialog.h
         $(SOURCEDIR)/images.h
@@ -284,7 +285,6 @@
         $(SOURCEDIR)/sql/SqlTokenizer.h
         $(SOURCEDIR)/myTreeCtrl.h
         $(SOURCEDIR)/statementHistory.h
-        $(SOURCEDIR)/styleguide.h
         $(SOURCEDIR)/treeitem.h
         $(SOURCEDIR)/ugly.h
         $(SOURCEDIR)/urihandler.h
@@ -292,13 +292,13 @@
 
     <set var="FR_PLATFORMSPECIFICSOURCES">
         <if cond="PLATFORM_UNIX=='1'">
-            $(SOURCEDIR)/styleguidegeneric.cpp
+            $(SOURCEDIR)/gui/gtk/StyleGuideGTK.cpp
         </if>
         <if cond="PLATFORM_MACOSX=='1'">
-            $(SOURCEDIR)/styleguidemac.cpp
+            $(SOURCEDIR)/gui/mac/StyleGuideMAC.cpp
         </if>
         <if cond="PLATFORM_WIN32=='1'">
-            $(SOURCEDIR)/styleguidemsw.cpp
+            $(SOURCEDIR)/gui/msw/StyleGuideMSW.cpp
         </if>
     </set>
 
@@ -347,6 +347,7 @@
         $(SOURCEDIR)/gui/ServerRegistrationDialog.cpp
         $(SOURCEDIR)/gui/SimpleHtmlFrame.cpp
         $(SOURCEDIR)/gui/StatementHistoryDialog.cpp
+        $(SOURCEDIR)/gui/StyleGuide.cpp
         $(SOURCEDIR)/gui/TriggerWizardDialog.cpp
         $(SOURCEDIR)/gui/UserDialog.cpp
         $(SOURCEDIR)/images.cpp
@@ -381,11 +382,11 @@
         $(SOURCEDIR)/sql/SqlStatement.cpp
         $(SOURCEDIR)/sql/SqlTokenizer.cpp
         $(SOURCEDIR)/statementHistory.cpp
-        $(SOURCEDIR)/styleguide.cpp
-        $(FR_PLATFORMSPECIFICSOURCES)
         $(SOURCEDIR)/treeitem.cpp
         $(SOURCEDIR)/ugly.cpp
         $(SOURCEDIR)/urihandler.cpp
+
+        $(FR_PLATFORMSPECIFICSOURCES)
     </set>
 
     <set var="CONFIGOPTIONSDIR">

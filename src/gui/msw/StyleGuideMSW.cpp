@@ -42,7 +42,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #error Include this only in project for Windows!!!
 #endif
 
-#include "styleguide.h"
+#include "gui/StyleGuide.h"
 #ifdef __GNUWIN32__
 #include "windows.h"
 #endif

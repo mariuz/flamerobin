@@ -48,9 +48,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "config/Config.h"
 #include "gui/BackupFrame.h"
 #include "gui/controls/LogTextControl.h"
+#include "gui/StyleGuide.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
-#include "styleguide.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 // worker thread class to perform database backup

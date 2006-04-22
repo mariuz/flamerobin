@@ -45,8 +45,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/xml/xml.h>
 
 #include "config/Config.h"
-#include "PreferencesDialog.h"
-#include "styleguide.h"
+#include "gui/PreferencesDialog.h"
+#include "gui/StyleGuide.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
 static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)

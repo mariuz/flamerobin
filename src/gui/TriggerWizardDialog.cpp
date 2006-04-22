@@ -38,12 +38,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #include "wx/wx.h"
 #endif
 
+#include "gui/ExecuteSqlFrame.h"
+#include "gui/StyleGuide.h"
+#include "gui/TriggerWizardDialog.h"
 #include "metadata/metadataitem.h"
-#include "ExecuteSqlFrame.h"
 #include "ugly.h"
-#include "styleguide.h"
 #include "urihandler.h"
-#include "TriggerWizardDialog.h"
 //-----------------------------------------------------------------------------
 TriggerWizardDialog::TriggerWizardDialog(wxWindow* parent, MetadataItem *item):
     BaseDialog(parent, -1, wxEmptyString)

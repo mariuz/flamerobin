@@ -83,6 +83,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_ServerRegistrationDialog.o \
 	flamerobin_SimpleHtmlFrame.o \
 	flamerobin_StatementHistoryDialog.o \
+	flamerobin_StyleGuide.o \
 	flamerobin_TriggerWizardDialog.o \
 	flamerobin_UserDialog.o \
 	flamerobin_images.o \
@@ -117,11 +118,10 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_SqlStatement.o \
 	flamerobin_SqlTokenizer.o \
 	flamerobin_statementHistory.o \
-	flamerobin_styleguide.o \
-	$(__FR_PLATFORMSPECIFICSOURCES_OBJECTS) \
 	flamerobin_treeitem.o \
 	flamerobin_ugly.o \
 	flamerobin_urihandler.o \
+	$(__FR_PLATFORMSPECIFICSOURCES_OBJECTS) \
 	$(__flamerobin___win32rc)
 FLAMEROBIN_ODEP =  $(___pch_flamerobin_wx_wxprec_h_gch___depname)
 IBPP_CXXFLAGS = $(__ibpp_PCH_INC) $(__IBPPPLATFORMDEFINE_p) \
@@ -163,11 +163,11 @@ COND_PLATFORM_OS2_1___flamerobin___os2_emxbindcmd = $(NM) flamerobin$(EXEEXT) \
 	| if grep -q pmwin.763 ; then emxbind -ep flamerobin$(EXEEXT) ; fi
 @COND_PLATFORM_OS2_1@__flamerobin___os2_emxbindcmd = $(COND_PLATFORM_OS2_1___flamerobin___os2_emxbindcmd)
 @COND_PLATFORM_MACOSX_1@__FR_PLATFORMSPECIFICSOURCES_OBJECTS \
-@COND_PLATFORM_MACOSX_1@	= flamerobin_styleguidemac.o
+@COND_PLATFORM_MACOSX_1@	= flamerobin_StyleGuideMAC.o
 @COND_PLATFORM_UNIX_1@__FR_PLATFORMSPECIFICSOURCES_OBJECTS \
-@COND_PLATFORM_UNIX_1@	= flamerobin_styleguidegeneric.o
+@COND_PLATFORM_UNIX_1@	= flamerobin_StyleGuideGTK.o
 @COND_PLATFORM_WIN32_1@__FR_PLATFORMSPECIFICSOURCES_OBJECTS \
-@COND_PLATFORM_WIN32_1@	= flamerobin_styleguidemsw.o
+@COND_PLATFORM_WIN32_1@	= flamerobin_StyleGuideMSW.o
 @COND_GCC_PCH_1@__flamerobin_PCH_INC = -I.pch/flamerobin
 @COND_GCC_PCH_1@___pch_flamerobin_wx_wxprec_h_gch___depname \
 @COND_GCC_PCH_1@	= .pch/flamerobin/wx/wxprec.h.gch
@@ -386,6 +386,9 @@ flamerobin_SimpleHtmlFrame.o: $(srcdir)/src/gui/SimpleHtmlFrame.cpp $(FLAMEROBIN
 flamerobin_StatementHistoryDialog.o: $(srcdir)/src/gui/StatementHistoryDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/StatementHistoryDialog.cpp
 
+flamerobin_StyleGuide.o: $(srcdir)/src/gui/StyleGuide.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/StyleGuide.cpp
+
 flamerobin_TriggerWizardDialog.o: $(srcdir)/src/gui/TriggerWizardDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/TriggerWizardDialog.cpp
 
@@ -488,18 +491,6 @@ flamerobin_SqlTokenizer.o: $(srcdir)/src/sql/SqlTokenizer.cpp $(FLAMEROBIN_ODEP)
 flamerobin_statementHistory.o: $(srcdir)/src/statementHistory.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/statementHistory.cpp
 
-flamerobin_styleguide.o: $(srcdir)/src/styleguide.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/styleguide.cpp
-
-flamerobin_styleguidegeneric.o: $(srcdir)/src/styleguidegeneric.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/styleguidegeneric.cpp
-
-flamerobin_styleguidemac.o: $(srcdir)/src/styleguidemac.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/styleguidemac.cpp
-
-flamerobin_styleguidemsw.o: $(srcdir)/src/styleguidemsw.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/styleguidemsw.cpp
-
 flamerobin_treeitem.o: $(srcdir)/src/treeitem.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/treeitem.cpp
 
@@ -508,6 +499,15 @@ flamerobin_ugly.o: $(srcdir)/src/ugly.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_urihandler.o: $(srcdir)/src/urihandler.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/urihandler.cpp
+
+flamerobin_StyleGuideGTK.o: $(srcdir)/src/gui/gtk/StyleGuideGTK.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/gtk/StyleGuideGTK.cpp
+
+flamerobin_StyleGuideMAC.o: $(srcdir)/src/gui/mac/StyleGuideMAC.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/mac/StyleGuideMAC.cpp
+
+flamerobin_StyleGuideMSW.o: $(srcdir)/src/gui/msw/StyleGuideMSW.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/msw/StyleGuideMSW.cpp
 
 flamerobin_flamerobin_rc.o: $(srcdir)/res/flamerobin.rc $(FLAMEROBIN_ODEP)
 	$(RESCOMP) -i$< -o$@ --define HAVE_FRCONFIG_H  $(____flamerobin_WXDEBUG_p_2) $(____flamerobin_DEBUGFLAG_p_2) $(__IBPPPLATFORMDEFINE_p_2) --include-dir . --include-dir $(srcdir)/src --include-dir $(srcdir)/src/ibpp --include-dir $(srcdir)/res --include-dir $(WXDIR)/include

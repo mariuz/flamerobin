@@ -37,14 +37,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <wx/gbsizer.h>
 
+#include "gui/ExecuteSqlFrame.h"
+#include "gui/PrivilegesDialog.h"
+#include "gui/StyleGuide.h"
 #include "metadata/collection.h"
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
 #include "metadata/trigger.h"
-#include "styleguide.h"
 #include "urihandler.h"
-#include "ExecuteSqlFrame.h"
-#include "PrivilegesDialog.h"
 
 //-----------------------------------------------------------------------------
 PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,

@@ -42,9 +42,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "frutils.h"
 #include "gui/ProgressDialog.h"
+#include "gui/StyleGuide.h"
 #include "gui/UserDialog.h"
 #include "metadata/server.h"
-#include "styleguide.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
 UserDialog::UserDialog(wxWindow* parent, const wxString& title, bool isNewUser)

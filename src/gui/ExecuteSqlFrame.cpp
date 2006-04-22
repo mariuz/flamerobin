@@ -57,6 +57,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/ProgressDialog.h"
 #include "gui/ExecuteSqlFrame.h"
 #include "gui/StatementHistoryDialog.h"
+#include "gui/StyleGuide.h"
 #include "frutils.h"
 #include "logger.h"
 #include "metadata/CreateDDLVisitor.h"
@@ -67,7 +68,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "sql/SimpleParser.h"
 #include "sql/SqlStatement.h"
 #include "statementHistory.h"
-#include "styleguide.h"
 #include "ugly.h"
 #include "urihandler.h"
 
