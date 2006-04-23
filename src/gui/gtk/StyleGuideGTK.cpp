@@ -48,16 +48,19 @@ class StyleGuideGTK: public StyleGuide
 {
 public:
     StyleGuideGTK();
-    virtual wxSizer* createButtonSizer(wxButton* button_ok,
-        wxButton* button_cancel);
+    virtual wxSizer* createButtonSizer(wxButton* affirmativeButton,
+        wxButton* negativeButton, wxButton* alternateButton = 0);
     virtual int getBetweenButtonsMargin(wxOrientation orientation);
     virtual int getBrowseButtonMargin();
     virtual int getCheckboxSpacing();
     virtual int getControlLabelMargin();
     virtual int getDialogMargin(wxDirection direction);
     virtual int getFrameMargin(wxDirection direction);
+    virtual int getMessageBoxIconMargin();
+    virtual int getMessageBoxBetweenTextMargin();
     virtual int getRelatedControlMargin(wxOrientation orientation);
     virtual int getUnrelatedControlMargin(wxOrientation orientation);
+
     virtual int getEditorFontSize();
 };
 //------------------------------------------------------------------------------
@@ -65,18 +68,22 @@ StyleGuideGTK::StyleGuideGTK()
 {
 }
 //------------------------------------------------------------------------------
-wxSizer* StyleGuideGTK::createButtonSizer(wxButton* button_ok,
-    wxButton* button_cancel)
+wxSizer* StyleGuideGTK::createButtonSizer(wxButton* affirmativeButton,
+    wxButton* negativeButton, wxButton* alternateButton)
+{
 {
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
     // right-align as per HIG
-    sizer->Add(0, 0, 1, wxEXPAND);
-    if (button_cancel != 0)
-        sizer->Add(button_cancel);
-    if (button_ok != 0 && button_cancel != 0)
-        sizer->Add(getBetweenButtonsMargin(wxHORIZONTAL), 0);
-    if (button_ok != 0)
-        sizer->Add(button_ok);
+    if (alternateButton)
+        sizer->Add(alternateButton);
+    if (alternateButton && (negativeButton || affirmativeButton)
+        sizer->AddSpacer(getBetweenButtonsMargin(wxHORIZONTAL));
+    if (negativeButton)
+        sizer->Add(negativeButton);
+    if (negativeButton && affirmativeButton)
+        sizer->AddSpacer(getBetweenButtonsMargin(wxHORIZONTAL));
+    if (affirmativeButton)
+        sizer->Add(affirmativeButton);
     return sizer;
 }
 //------------------------------------------------------------------------------
@@ -108,6 +115,16 @@ int StyleGuideGTK::getDialogMargin(wxDirection WXUNUSED(direction))
 int StyleGuideGTK::getFrameMargin(wxDirection direction)
 {
     return 12;
+}
+//------------------------------------------------------------------------------
+int StyleGuideGTK::getMessageBoxIconMargin()
+{
+    return 12;
+}
+//------------------------------------------------------------------------------
+int StyleGuideGTK::getMessageBoxBetweenTextMargin()
+{
+    return 24;
 }
 //------------------------------------------------------------------------------
 int StyleGuideGTK::getRelatedControlMargin(wxOrientation orientation)

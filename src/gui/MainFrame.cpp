@@ -559,7 +559,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
             _("All uncommitted transactions will be rolled back,\nand any changes will be lost."),
             AdvancedMessageDialogButtonsOkCancel(_("E&xit")), 
             config(), wxT("DIALOG_ConfirmQuit"));
-        if (res == wxCANCEL)
+        if (res != wxOK)
         {
             event.Veto();
             return;

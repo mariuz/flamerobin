@@ -31,6 +31,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifdef FR_NEWADVANCEDMESSAGEDIALOG
 
 #include <wx/wx.h>
+#include <wx/artprov.h>
 
 #include "config/Config.h"
 #include "gui/BaseDialog.h"
@@ -53,17 +54,11 @@ protected:
     void addAlternateButton(int id, const wxString& caption);
     void addNegativeButton(int id, const wxString& caption);
 public:
-    wxString& getAffirmativeButtonCaption();
-    int getAffirmativeButtonId();
-    bool getAffirmativeButtonUsed();
+    wxButton* createAffirmativeButton(wxWindow* parent);
+    wxButton* createAlternateButton(wxWindow* parent);
+    wxButton* createNegativeButton(wxWindow* parent);
 
-    wxString& getAlternateButtonCaption();
-    int getAlternateButtonId();
-    bool getAlternateButtonUsed();
-
-    wxString& getNegativeButtonCaption();
-    int getNegativeButtonId();
-    bool getNegativeButtonUsed();
+    int getNumberOfButtons();
 };
 //-----------------------------------------------------------------------------
 class AdvancedMessageDialogButtonsOk: public AdvancedMessageDialogButtons
@@ -79,16 +74,33 @@ public:
         const wxString buttonCancelCaption = _("&Cancel"));
 };
 //-----------------------------------------------------------------------------
-int showInformationDialog(wxWindow* parent, wxString primaryText,
-    wxString secondaryText, AdvancedMessageDialogButtons& buttons);
-int showInformationDialog(wxWindow* parent, wxString primaryText,
-    wxString secondaryText, AdvancedMessageDialogButtons buttons,
+class AdvancedMessageDialog: public BaseDialog
+{
+private:
+    wxControl* controlPrimaryTextM;
+    wxControl* controlSecondaryTextM;
+    wxCheckBox* checkBoxM;
+public:
+    AdvancedMessageDialog(wxWindow* parent, wxArtID iconId,
+        const wxString& primaryText, const wxString& secondaryText,
+        AdvancedMessageDialogButtons& buttons, bool showCheckBoxNeverAgain);
+
+    bool getDontShowAgain() const;
+private:
+    // event handling
+    void OnButtonClick(wxCommandEvent& event);
+};
+//-----------------------------------------------------------------------------
+int showInformationDialog(wxWindow* parent, const wxString& primaryText,
+    const wxString& secondaryText, AdvancedMessageDialogButtons& buttons);
+int showInformationDialog(wxWindow* parent, const wxString& primaryText,
+    const wxString& secondaryText, AdvancedMessageDialogButtons buttons,
     Config& config, wxString configKey);
 
-int showQuestionDialog(wxWindow* parent, wxString primaryText,
-    wxString secondaryText, AdvancedMessageDialogButtons& buttons);
-int showQuestionDialog(wxWindow* parent, wxString primaryText,
-    wxString secondaryText, AdvancedMessageDialogButtons buttons,
+int showQuestionDialog(wxWindow* parent, const wxString& primaryText,
+    const wxString& secondaryText, AdvancedMessageDialogButtons& buttons);
+int showQuestionDialog(wxWindow* parent, const wxString& primaryText,
+    const wxString& secondaryText, AdvancedMessageDialogButtons buttons,
     Config& config, wxString configKey);
 //-----------------------------------------------------------------------------
 #else // FR_NEWADVANCEDMESSAGEDIALOG

@@ -39,15 +39,19 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 class StyleGuide
 {
 public:
-    virtual wxSizer* createButtonSizer(wxButton* button_ok, wxButton* button_cancel) = 0;
+    virtual wxSizer* createButtonSizer(wxButton* affirmativeButton,
+        wxButton* negativeButton, wxButton* alternateButton = 0) = 0;
     virtual int getBetweenButtonsMargin(wxOrientation orientation) = 0;
     virtual int getBrowseButtonMargin() = 0;
     virtual int getCheckboxSpacing() = 0;
     virtual int getControlLabelMargin() = 0;
     virtual int getDialogMargin(wxDirection direction) = 0;
     virtual int getFrameMargin(wxDirection direction) = 0;
+    virtual int getMessageBoxIconMargin() = 0;
+    virtual int getMessageBoxBetweenTextMargin() = 0;
     virtual int getRelatedControlMargin(wxOrientation orientation) = 0;
     virtual int getUnrelatedControlMargin(wxOrientation orientation) = 0;
+
     virtual int getEditorFontSize() = 0;
 protected:
     StyleGuide();

@@ -58,15 +58,19 @@ private:
     int dbuToPixelVert(int dbu);
 public:
     StyleGuideMSW();
-    virtual wxSizer* createButtonSizer(wxButton* button_ok, wxButton* button_cancel);
+    virtual wxSizer* createButtonSizer(wxButton* affirmativeButton,
+        wxButton* negativeButton, wxButton* alternateButton = 0);
     virtual int getBetweenButtonsMargin(wxOrientation orientation);
     virtual int getBrowseButtonMargin();
     virtual int getCheckboxSpacing();
     virtual int getControlLabelMargin();
     virtual int getDialogMargin(wxDirection direction);
     virtual int getFrameMargin(wxDirection direction);
+    virtual int getMessageBoxIconMargin();
+    virtual int getMessageBoxBetweenTextMargin();
     virtual int getRelatedControlMargin(wxOrientation orientation);
     virtual int getUnrelatedControlMargin(wxOrientation orientation);
+
     virtual int getEditorFontSize();
 };
 //-----------------------------------------------------------------------------
@@ -82,7 +86,8 @@ void StyleGuideMSW::dbuNeeded()
     if (!dbuValidM)
     {
         HDC dc = GetDC(0);
-        HFONT fnt = (HFONT)SelectObject(dc, (HFONT)GetStockObject(DEFAULT_GUI_FONT));
+        HFONT fnt = (HFONT)SelectObject(dc, 
+            (HFONT)GetStockObject(DEFAULT_GUI_FONT));
 
         wxString s(wxT("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"));
         int len = int(s.Length());
@@ -109,17 +114,22 @@ int StyleGuideMSW::dbuToPixelVert(int dbu)
     return dbu * dbuVertM / 8;
 }
 //-----------------------------------------------------------------------------
-wxSizer* StyleGuideMSW::createButtonSizer(wxButton* button_ok, wxButton* button_cancel)
+wxSizer* StyleGuideMSW::createButtonSizer(wxButton* affirmativeButton,
+    wxButton* negativeButton, wxButton* alternateButton)
 {
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
     // right-align
-    sizer->Add(0, 0, 1, wxEXPAND);
-    if (button_ok != 0)
-        sizer->Add(button_ok);
-    if (button_ok != 0 && button_cancel != 0)
-        sizer->Add(getBetweenButtonsMargin(wxHORIZONTAL), 0);
-    if (button_cancel != 0)
-        sizer->Add(button_cancel);
+    sizer->AddStretchSpacer(1);
+    if (affirmativeButton)
+        sizer->Add(affirmativeButton);
+    if (affirmativeButton && (alternateButton || negativeButton))
+        sizer->AddSpacer(getBetweenButtonsMargin(wxHORIZONTAL));
+    if (alternateButton)
+        sizer->Add(alternateButton);
+    if (alternateButton && negativeButton)
+        sizer->AddSpacer(getBetweenButtonsMargin(wxHORIZONTAL));
+    if (negativeButton)
+        sizer->Add(negativeButton);
     return sizer;
 }
 //-----------------------------------------------------------------------------
@@ -179,6 +189,16 @@ int StyleGuideMSW::getFrameMargin(wxDirection direction)
         default:
             return 0;
     }
+}
+//-----------------------------------------------------------------------------
+int StyleGuideMSW::getMessageBoxIconMargin()
+{
+    return dbuToPixelHorz(12);
+}
+//-----------------------------------------------------------------------------
+int StyleGuideMSW::getMessageBoxBetweenTextMargin()
+{
+    return dbuToPixelVert(8);
 }
 //-----------------------------------------------------------------------------
 int StyleGuideMSW::getRelatedControlMargin(wxOrientation orientation)
