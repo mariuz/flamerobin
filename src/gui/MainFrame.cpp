@@ -552,6 +552,20 @@ void MainFrame::OnClose(wxCloseEvent& event)
     FR_TRY
 
     Raise();
+#ifdef FR_NEWADVANCEDMESSAGEDIALOG
+    if (event.CanVeto())
+    {
+        int res = showQuestionDialog(this, _("Do you really want to quit FlameRobin?"),
+            _("All uncommitted transactions will be rolled back,\nand any changes will be lost."),
+            AdvancedMessageDialogButtonsOkCancel(_("E&xit")), 
+            config(), wxT("DIALOG_ConfirmQuit"));
+        if (res == wxCANCEL)
+        {
+            event.Veto();
+            return;
+        }
+    }
+#else
     AdvancedMessageDialogButtons btns;
     btns.add(wxOK, _("E&xit"));
     btns.add(wxCANCEL, _("&Cancel"));
@@ -563,6 +577,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
         event.Veto();
         return;
     }
+#endif
     frameManager().setWindowMenu(0);    // tell it not to update menus anymore
 
     // the next few lines fix the (threading?) problem on some Linux distributions
@@ -1701,6 +1716,14 @@ void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
         return;
     if (!d->isConnected())
     {
+#ifdef FR_NEWADVANCEDMESSAGEDIALOG
+        int res = showQuestionDialog(this, _("Do you want to connect to the database?"),
+            _("The database is not connected. You first have to establish a database connection before you can execute SQL statements."),
+            AdvancedMessageDialogButtonsOkCancel(_("C&onnect")), 
+            config(), wxT("DIALOG_ConfirmConnectForQuery"));
+        if (res == wxOK)
+            connect();
+#else
         AdvancedMessageDialogButtons btns;
         btns.add(wxOK, _("C&onnect"));
         btns.add(wxCANCEL, _("&Cancel"));
@@ -1709,12 +1732,12 @@ void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
             wxT("DIALOG_ConfirmConnectForQuery")))
         {
             connect();
-            if (!d->isConnected())
-                return;
         }
-        else
-            return;
+#endif
     }
+    if (!d->isConnected())
+        return;
+
     wxBusyCursor bc;
     ExecuteSqlFrame* eff = new ExecuteSqlFrame(this, -1, wxString(_("Execute SQL statements")));
     eff->setDatabase(d);

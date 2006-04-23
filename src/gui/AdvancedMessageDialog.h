@@ -28,6 +28,71 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef FR_ADVANCEDMESSAGEDIALOG_H
 #define FR_ADVANCEDMESSAGEDIALOG_H
 //-----------------------------------------------------------------------------
+#ifdef FR_NEWADVANCEDMESSAGEDIALOG
+
+#include <wx/wx.h>
+
+#include "config/Config.h"
+#include "gui/BaseDialog.h"
+//-----------------------------------------------------------------------------
+class AdvancedMessageDialogButtons
+{
+private:
+    struct AdvancedMessageDialogButtonData
+    {
+        int id;
+        wxString caption;
+    };
+    AdvancedMessageDialogButtonData affirmativeButtonM;
+    AdvancedMessageDialogButtonData alternateButtonM;
+    AdvancedMessageDialogButtonData negativeButtonM;
+protected:
+    AdvancedMessageDialogButtons();
+
+    void addAffirmativeButton(int id, const wxString& caption);
+    void addAlternateButton(int id, const wxString& caption);
+    void addNegativeButton(int id, const wxString& caption);
+public:
+    wxString& getAffirmativeButtonCaption();
+    int getAffirmativeButtonId();
+    bool getAffirmativeButtonUsed();
+
+    wxString& getAlternateButtonCaption();
+    int getAlternateButtonId();
+    bool getAlternateButtonUsed();
+
+    wxString& getNegativeButtonCaption();
+    int getNegativeButtonId();
+    bool getNegativeButtonUsed();
+};
+//-----------------------------------------------------------------------------
+class AdvancedMessageDialogButtonsOk: public AdvancedMessageDialogButtons
+{
+public:
+    AdvancedMessageDialogButtonsOk(const wxString buttonOkCaption = _("OK"));
+};
+//-----------------------------------------------------------------------------
+class AdvancedMessageDialogButtonsOkCancel: public AdvancedMessageDialogButtons
+{
+public:
+    AdvancedMessageDialogButtonsOkCancel(const wxString buttonOkCaption,
+        const wxString buttonCancelCaption = _("&Cancel"));
+};
+//-----------------------------------------------------------------------------
+int showInformationDialog(wxWindow* parent, wxString primaryText,
+    wxString secondaryText, AdvancedMessageDialogButtons& buttons);
+int showInformationDialog(wxWindow* parent, wxString primaryText,
+    wxString secondaryText, AdvancedMessageDialogButtons buttons,
+    Config& config, wxString configKey);
+
+int showQuestionDialog(wxWindow* parent, wxString primaryText,
+    wxString secondaryText, AdvancedMessageDialogButtons& buttons);
+int showQuestionDialog(wxWindow* parent, wxString primaryText,
+    wxString secondaryText, AdvancedMessageDialogButtons buttons,
+    Config& config, wxString configKey);
+//-----------------------------------------------------------------------------
+#else // FR_NEWADVANCEDMESSAGEDIALOG
+//-----------------------------------------------------------------------------
 #include <wx/wx.h>
 #include <vector>
 #include <utility>
@@ -92,4 +157,6 @@ int AdvancedMessageBox(const wxString& message, const wxString& caption,
     int style = 0, AdvancedMessageDialogButtons* buttons = 0,
     wxWindow* parent = 0, const wxString& keyname = wxEmptyString);
 //----------------------------------------------------------------------------
-#endif
+#endif // FR_NEWADVANCEDMESSAGEDIALOG
+
+#endif // FR_ADVANCEDMESSAGEDIALOG_H

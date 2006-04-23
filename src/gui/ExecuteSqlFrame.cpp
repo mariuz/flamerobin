@@ -473,8 +473,14 @@ void SqlEditor::OnMenuSetFont(wxCommandEvent& WXUNUSED(event))
         config().setValue(wxT("SqlEditorCharset"), (*it).second);
     }
     setup();    // make control accept new settings
+#ifdef FR_NEWADVANCEDMESSAGEDIALOG
+    showInformationDialog(wxGetTopLevelParent(this), _("The SQL editor font has been changed."),
+        _("This setting affects only the SQL editor font. The font used in the result set data grid has to be changed separately."),
+        AdvancedMessageDialogButtonsOk(), config(), wxT("DIALOG_WarnFont"));
+#else
     AdvancedMessageBox(_("This setting only affects font in the editor.\nTo have characters displayed correctly in result grid,\nyou need to specify its font separately."),
         _("Font changed"), wxOK|wxICON_INFORMATION, 0, 0, wxT("DIALOG_WarnFont"));
+#endif
 }
 //-----------------------------------------------------------------------------
 ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title, const wxPoint& pos, const wxSize& size, long style):
