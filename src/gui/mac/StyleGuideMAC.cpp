@@ -48,37 +48,46 @@ class StyleGuideMAC: public StyleGuide
 {
 public:
     StyleGuideMAC();
-    virtual wxSizer* createButtonSizer(wxButton* button_ok, wxButton* button_cancel);
+    virtual wxSizer* createButtonSizer(wxButton* affirmativeButton,
+        wxButton* negativeButton, wxButton* alternateButton = 0);
     virtual int getBetweenButtonsMargin(wxOrientation orientation);
     virtual int getBrowseButtonMargin();
     virtual int getCheckboxSpacing();
     virtual int getControlLabelMargin();
     virtual int getDialogMargin(wxDirection direction);
-    virtual int getEditorFontSize();
     virtual int getFrameMargin(wxDirection direction);
+    virtual int getMessageBoxIconMargin();
+    virtual int getMessageBoxBetweenTextMargin();
     virtual int getRelatedControlMargin(wxOrientation orientation);
     virtual int getUnrelatedControlMargin(wxOrientation orientation);
+
+    virtual int getEditorFontSize();
 };
 //------------------------------------------------------------------------------
 StyleGuideMAC::StyleGuideMAC()
 {
 }
 //------------------------------------------------------------------------------
-wxSizer* StyleGuideMAC::createButtonSizer(wxButton* button_ok, wxButton* button_cancel)
+wxSizer* StyleGuideMAC::createButtonSizer(wxButton* affirmativeButton,
+    wxButton* negativeButton, wxButton* alternateButton)
 {
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
     // right-align
-    sizer->Add(0, 0, 1, wxEXPAND);
-    if (button_cancel != 0)
-        sizer->Add(button_cancel);
-    if (button_ok != 0 && button_cancel != 0)
-        sizer->Add(getBetweenButtonsMargin(wxHORIZONTAL), 0);
-    if (button_ok != 0)
-        sizer->Add(button_ok);
+    sizer->AddStretchSpacer(1);
+    if (alternateButton)
+        sizer->Add(alternateButton);
+    if (alternateButton && (negativeButton || affirmativeButton))
+        sizer->AddSpacer(2 * getBetweenButtonsMargin(wxHORIZONTAL));
+    if (negativeButton)
+        sizer->Add(negativeButton);
+    if (negativeButton && affirmativeButton)
+        sizer->AddSpacer(getBetweenButtonsMargin(wxHORIZONTAL));
+    if (affirmativeButton)
+        sizer->Add(affirmativeButton);
     return sizer;
 }
 //------------------------------------------------------------------------------
-int StyleGuideMAC::getBetweenButtonsMargin(wxOrientation WXUNUSED(orientation))
+int StyleGuideMAC::getBetweenButtonsMargin(wxOrientation /*orientation*/)
 {
     return 12;
 }
@@ -113,24 +122,34 @@ int StyleGuideMAC::getDialogMargin(wxDirection direction)
     }
 }
 //------------------------------------------------------------------------------
+int StyleGuideMAC::getFrameMargin(wxDirection /*direction*/)
+{
+    return 16;
+}
+//------------------------------------------------------------------------------
+int StyleGuideMAC::getMessageBoxIconMargin()
+{
+    return 16;
+}
+//------------------------------------------------------------------------------
+int StyleGuideMAC::getMessageBoxBetweenTextMargin()
+{
+    return 8;
+}
+//------------------------------------------------------------------------------
+int StyleGuideMAC::getRelatedControlMargin(wxOrientation /*orientation*/)
+{
+    return 12;
+}
+//------------------------------------------------------------------------------
+int StyleGuideMAC::getUnrelatedControlMargin(wxOrientation /*orientation*/)
+{
+    return 16;
+}
+//------------------------------------------------------------------------------
 int StyleGuideMAC::getEditorFontSize()
 {
     return 12;
-}
-//------------------------------------------------------------------------------
-int StyleGuideMAC::getFrameMargin(wxDirection direction)
-{
-    return 16;
-}
-//------------------------------------------------------------------------------
-int StyleGuideMAC::getRelatedControlMargin(wxOrientation WXUNUSED(orientation))
-{
-    return 12;
-}
-//------------------------------------------------------------------------------
-int StyleGuideMAC::getUnrelatedControlMargin(wxOrientation WXUNUSED(orientation))
-{
-    return 16;
 }
 //------------------------------------------------------------------------------
 StyleGuide& styleguide()

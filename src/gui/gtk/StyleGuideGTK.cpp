@@ -108,12 +108,12 @@ int StyleGuideGTK::getControlLabelMargin()
     return 12;
 }
 //------------------------------------------------------------------------------
-int StyleGuideGTK::getDialogMargin(wxDirection WXUNUSED(direction))
+int StyleGuideGTK::getDialogMargin(wxDirection /*direction*/)
 {
     return 12;
 }
 //------------------------------------------------------------------------------
-int StyleGuideGTK::getFrameMargin(wxDirection direction)
+int StyleGuideGTK::getFrameMargin(wxDirection /*direction*/)
 {
     return 12;
 }

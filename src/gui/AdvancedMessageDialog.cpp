@@ -129,15 +129,26 @@ AdvancedMessageDialogButtonsOkCancel::AdvancedMessageDialogButtonsOkCancel(
 AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent, wxArtID iconId,
         const wxString& primaryText, const wxString& secondaryText,
         AdvancedMessageDialogButtons& buttons, bool showCheckBoxNeverAgain)
-    : BaseDialog(parent, wxID_ANY, wxT("FlameRobin"), wxDefaultPosition,
+    : BaseDialog(parent, wxID_ANY, wxEmptyString, wxDefaultPosition,
         wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
 {
     checkBoxM = 0;
+#ifdef __WXMSW__
+    SetCaption(wxT("FlameRobin"));
+#endif
     wxBoxSizer* controlsSizer = new wxBoxSizer(wxHORIZONTAL);
 
+/* TODO
+#ifdef __WXMAC__
+    // application icon instead of message box icon
+    wxStaticBitmap* iconBmp = new wxStaticBitmap(getControlsPanel(), wxID_ANY,
+        
+#else
+*/
     // message box icon
     wxStaticBitmap* iconBmp = new wxStaticBitmap(getControlsPanel(), wxID_ANY,
         wxArtProvider::GetBitmap(iconId, wxART_MESSAGE_BOX));
+// #endif
     controlsSizer->Add(iconBmp);
     controlsSizer->AddSpacer(styleguide().getMessageBoxIconMargin());
 
@@ -211,7 +222,7 @@ AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent, wxArtID iconId,
 
     // create sizer for buttons -> styleguide class will align it correctly
     wxSizer* buttonSizer = styleguide().createButtonSizer(affirmativeButton,
-        alternateButton, negativeButton);
+        negativeButton, alternateButton);
     // use method in base class to set everything up
     layoutSizers(controlsSizer, buttonSizer);
 }
