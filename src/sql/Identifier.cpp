@@ -67,7 +67,7 @@ void Identifier::setFromSql(const wxString& source)
         p++;
     while (q > p && wxIsspace(*q))
         q--;
-    if (p >= q)
+    if (p > q) // p is first, q is last character, so they may be equal...
     {
         textM = wxEmptyString;
         return;
@@ -82,13 +82,14 @@ void Identifier::setFromSql(const wxString& source)
         textM.Replace(escapedChar + escapedChar, escapedChar);
         return;
     }
-    textM = source.Upper();
+    // set to uppercased input parameter, no leading and trailing whitespace
+    textM = wxString(p, q + 1).Upper();
 }
 //----------------------------------------------------------------------------
 bool Identifier::isQuoted(const wxString &s)
 {
     wxString::size_type p = s.Length();
-    return (s[0] == wxChar('\"') && p > 1 && s[p-1] == wxChar('\"'));
+    return (s[0] == wxChar('\"') && p > 1 && s[p - 1] == wxChar('\"'));
 }
 //----------------------------------------------------------------------------
 wxString& Identifier::escape(wxString& s)
