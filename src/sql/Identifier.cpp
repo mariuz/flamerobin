@@ -38,8 +38,80 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include "config/Config.h"
+#include "core/Observer.h"
+#include "core/Subject.h"
 #include "sql/Identifier.h"
 //----------------------------------------------------------------------------
+// IdentifierQuotes: class to cache config data for identifier quoting
+class IdentifierQuotes: public Observer
+{
+private:
+    bool loadedM;
+    void ensureLoaded();
+
+    bool quoteAlwaysM;
+    bool quoteCharsAreRegularM;
+    bool quoteMixedCaseM;
+public:
+    IdentifierQuotes();
+
+    static IdentifierQuotes& get();
+    virtual void update();
+
+    bool getQuoteAlways();
+    bool getQuoteCharsAreRegular();
+    bool getQuoteMixedCase();
+};
+//----------------------------------------------------------------------------
+IdentifierQuotes::IdentifierQuotes()
+    : loadedM(false)
+{
+    config().attachObserver(this);
+}
+//-----------------------------------------------------------------------------
+IdentifierQuotes& IdentifierQuotes::get()
+{
+    static IdentifierQuotes iq;
+    return iq;
+}
+//-----------------------------------------------------------------------------
+void IdentifierQuotes::update()
+{
+    // we observe config() object, so we better do as little as possible
+    loadedM = false;
+}
+//----------------------------------------------------------------------------
+void IdentifierQuotes::ensureLoaded()
+{
+    if (!loadedM)
+    {
+        quoteAlwaysM = !config().get(wxT("quoteOnlyWhenNeeded"), true);
+        quoteCharsAreRegularM = config().get(wxT("quoteCharsAreRegular"),
+            false);
+        quoteMixedCaseM = config().get(wxT("quoteMixedCase"), false);
+        loadedM = true;
+    }
+}
+//----------------------------------------------------------------------------
+bool IdentifierQuotes::getQuoteAlways()
+{
+    ensureLoaded();
+    return quoteAlwaysM;
+}
+//----------------------------------------------------------------------------
+bool IdentifierQuotes::getQuoteCharsAreRegular()
+{
+    ensureLoaded();
+    return quoteCharsAreRegularM;
+}
+//----------------------------------------------------------------------------
+bool IdentifierQuotes::getQuoteMixedCase()
+{
+    ensureLoaded();
+    return quoteMixedCaseM;
+}
+//----------------------------------------------------------------------------
+// Identifier class
 Identifier::Identifier(const wxString& source)
 {
     setText(source);
@@ -111,16 +183,35 @@ wxString& Identifier::quote(wxString &s)
     return s;
 }
 //----------------------------------------------------------------------------
+bool hasBothCases(const wxString& value)
+{
+    if (value.empty())
+        return false;
+
+    bool hasLower = false;
+    bool hasUpper = false;
+    const wxChar* p = value.c_str();
+    while (*p != 0)
+    {
+        if (*p >= 'A' && *p <= 'Z')
+            hasUpper = true;
+        if (*p >= 'a' && *p <= 'z')
+            hasLower = true;
+        if (hasUpper && hasLower)
+            return true;
+        p++;
+    }
+    return false;
+}
+//----------------------------------------------------------------------------
 wxString Identifier::userString(const wxString& s)
 {
     if (s.IsEmpty())
         return wxEmptyString;
     wxString ret(s);
-    bool alwaysQuote = !config().get(wxT("quoteOnlyWhenNeeded"), true);
-    bool quoteCharsAreRegular = config().get(wxT("quoteCharsAreRegular"), false);
-    if (alwaysQuote)
+    if (IdentifierQuotes::get().getQuoteAlways())
     {
-        if (quoteCharsAreRegular)
+        if (IdentifierQuotes::get().getQuoteCharsAreRegular())
             return quote(escape(ret));
         else
             return quote(escape(strip(ret)));
@@ -129,8 +220,7 @@ wxString Identifier::userString(const wxString& s)
     {
         if (isQuoted(ret))   // pass the quoted text as-it-is
             return ret;
-        bool quoteMixedCase = config().get(wxT("quoteMixedCase"), false);
-        if (quoteMixedCase && ret.Upper() != ret && ret.Lower() != ret)
+        if (IdentifierQuotes::get().getQuoteMixedCase() && hasBothCases(ret))
             return quote(escape(ret));
         if (Identifier::needsQuoting(ret.Upper()))    // special chars
             return quote(escape(ret));
@@ -217,9 +307,7 @@ wxString Identifier::get() const
 //----------------------------------------------------------------------------
 wxString Identifier::getQuoted() const
 {
-    // retrieved only once, needs restart to change (but it is much efficient)
-    bool alwaysQuote = !config().get(wxT("quoteOnlyWhenNeeded"), true);
-    if (alwaysQuote || needsQuoting(textM))
+    if (IdentifierQuotes::get().getQuoteAlways() || needsQuoting(textM))
     {
         wxString retval(textM);
         return quote(escape(retval));
