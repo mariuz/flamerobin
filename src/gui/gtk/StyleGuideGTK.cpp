@@ -74,6 +74,7 @@ wxSizer* StyleGuideGTK::createButtonSizer(wxButton* affirmativeButton,
 
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
     // right-align as per HIG
+    sizer->AddStretchSpacer(1);
     if (alternateButton)
         sizer->Add(alternateButton);
     if (alternateButton && (negativeButton || affirmativeButton))
