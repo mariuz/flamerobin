@@ -82,11 +82,17 @@ void ProgressDialog::createControls()
         gaugesM.push_back(gauge);
     }
     button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
+    button_cancel->SetDefault();
+    button_cancel->SetFocus();
 }
 //-----------------------------------------------------------------------------
 void ProgressDialog::doUpdate()
 {
+#ifdef __WXMAC__
+    wxYieldIfNeeded(); // calling Update() is too expensive (window compositing)
+#else
     Update();
+#endif
 #ifdef __WXGTK__
     // TODO: find the right incantation to update and show controls
 #endif
