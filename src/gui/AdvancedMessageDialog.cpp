@@ -147,6 +147,9 @@ AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent, wxArtID iconId,
         wxID_ANY, primaryText);
     wxFont primaryLabelFont(labelPrimary->GetFont());
     primaryLabelFont.SetWeight(wxBOLD);
+#ifdef __WXGTK__
+    primaryLabelFont.SetPointSize(primaryLabelFont.GetPointSize() * 4 / 3);
+#endif
     labelPrimary->SetFont(primaryLabelFont);
     textSizer->Add(labelPrimary, 0, wxEXPAND);
     textSizer->AddSpacer(styleguide().getMessageBoxBetweenTextMargin());
@@ -188,6 +191,22 @@ AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent, wxArtID iconId,
     {
         Connect(negativeButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
             wxCommandEventHandler(AdvancedMessageDialog::OnButtonClick));
+    }
+
+    if (affirmativeButton)
+    {
+        affirmativeButton->SetDefault();
+        affirmativeButton->SetFocus();
+    }
+    else if (alternateButton)
+    {
+        alternateButton->SetDefault();
+        alternateButton->SetFocus();
+    }
+    else if (negativeButton)
+    {
+        negativeButton->SetDefault();
+        negativeButton->SetFocus();
     }
 
     // create sizer for buttons -> styleguide class will align it correctly
