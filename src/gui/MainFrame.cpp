@@ -121,6 +121,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     SetStatusBarPane(-1);   // disable automatic fill
     set_properties();
     do_layout();
+    tree_ctrl_1->SetFocus();
 
     if (!config().get(wxT("showSearchBar"), true))
     {
@@ -557,7 +558,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
     {
         int res = showQuestionDialog(this, _("Do you really want to quit FlameRobin?"),
             _("All uncommitted transactions will be rolled back,\nand any changes will be lost."),
-            AdvancedMessageDialogButtonsOkCancel(_("E&xit")), 
+            AdvancedMessageDialogButtonsOkCancel(_("&Quit")), 
             config(), wxT("DIALOG_ConfirmQuit"));
         if (res != wxOK)
         {
@@ -567,7 +568,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
     }
 #else
     AdvancedMessageDialogButtons btns;
-    btns.add(wxOK, _("E&xit"));
+    btns.add(wxOK, _("&Quit"));
     btns.add(wxCANCEL, _("&Cancel"));
     if (event.CanVeto() && wxCANCEL ==
         AdvancedMessageBox(_("Do you really want to quit FlameRobin?\n\nAll uncommitted transactions will be rolled back,\nand any changes will be lost."),
