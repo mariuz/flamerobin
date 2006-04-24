@@ -97,6 +97,10 @@ void DatabaseRegistrationDialog::createControls()
         wxDefaultSize, wxTE_PASSWORD);
     text_ctrl_password->SetToolTip(
         _("Leave empty if you wish to be prompted for password every time"));
+    if (!connectAsM)
+        checkbox_encrypted = new wxCheckBox(getControlsPanel(), -1, _("Encrypt password"));
+    else
+        checkbox_encrypted = 0;
     label_charset = new wxStaticText(getControlsPanel(), -1, _("Charset:"));
 
     const wxString charset_choices[] = {
@@ -138,11 +142,6 @@ void DatabaseRegistrationDialog::createControls()
             wxDefaultPosition, wxDefaultSize,
             sizeof(dialect_choices) / sizeof(wxString), dialect_choices);
     }
-
-    if (!connectAsM)
-        checkbox_encrypted = new wxCheckBox(getControlsPanel(), -1, _("Encrypt password"));
-    else
-        checkbox_encrypted = 0;
 
     button_ok = new wxButton(getControlsPanel(), wxID_SAVE,
         (createM ? _("Create") : _("Save")));
