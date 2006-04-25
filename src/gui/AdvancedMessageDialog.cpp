@@ -134,7 +134,7 @@ AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent, wxArtID iconId,
 {
     checkBoxM = 0;
 #ifdef __WXMSW__
-    SetCaption(wxT("FlameRobin"));
+    SetTitle(wxT("FlameRobin"));
 #endif
     wxBoxSizer* controlsSizer = new wxBoxSizer(wxHORIZONTAL);
 
