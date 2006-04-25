@@ -182,7 +182,8 @@ bool Trigger::getSource(wxString& source) const
 //-----------------------------------------------------------------------------
 wxString Trigger::getTriggerType(int type)
 {
-    // For explanation: read sql.extensions file in Firebird's doc directory
+    // For explanation: read README.universal_triggers file in Firebird's
+    //                  doc/sql.extensions directory
     wxString result(type % 2 ? wxT("BEFORE ") : wxT("AFTER "));
     wxString types[] = { wxT("INSERT"), wxT("UPDATE"), wxT("DELETE") };
     type++;         // compensate for decrement
