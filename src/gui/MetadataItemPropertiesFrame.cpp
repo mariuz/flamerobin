@@ -65,6 +65,47 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //! converts chars that have special meaning in HTML, so they get displayed
 wxString escapeHtmlChars(wxString s, bool processNewlines = true)
 {
+    if (s.empty())
+        return s;
+#if 1
+    wxString result;
+    size_t start = 0, len = s.length();
+    while (start < len)
+    {
+        size_t stop = start;
+        while (stop < len)
+        {
+            const wxChar c = s[stop];
+            if (c == '&' || c == '<' || c == '>' || c == '"'
+                || (processNewlines && c == '\n'))
+            {
+                if (stop > start)
+                    result += s.Mid(start, stop - start);
+                if (c == '&')
+                    result += wxT("&amp;");
+                else if (c == '<')
+                    result += wxT("&lt;");
+                else if (c == '>')
+                    result += wxT("&gt;");
+                else if (c == '"')
+                    result += wxT("&quot;");
+                else if (c == '\n')
+                    result += wxT("<BR>");
+                else
+                    wxASSERT_MSG(false, wxT("escape not handled"));
+                // start processing *after* the replaced character
+                ++stop;
+                start = stop;
+                break;
+            }
+            ++stop;
+        }
+        if (stop > start)
+            result += s.Mid(start, stop - start);
+        start = stop;
+    }
+    return result;
+#else
     typedef std::pair<char, wxString> par;
     std::vector<par> symbol_table;
     symbol_table.push_back(par('&', wxT("&amp;")));      // this has to go first, since others use &
@@ -87,6 +128,7 @@ wxString escapeHtmlChars(wxString s, bool processNewlines = true)
         }
     }
     return s;
+#endif
 }
 //-----------------------------------------------------------------------------
 wxString loadHtmlFile(const wxString& filename)
