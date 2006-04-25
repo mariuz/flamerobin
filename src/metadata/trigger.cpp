@@ -182,32 +182,20 @@ bool Trigger::getSource(wxString& source) const
 //-----------------------------------------------------------------------------
 wxString Trigger::getTriggerType(int type)
 {
-    wxString res;
-
-    std::vector<wxString> prefix_types, suffix_types;
-    prefix_types.push_back(wxT("BEFORE"));
-    prefix_types.push_back(wxT("AFTER"));
-
-    suffix_types.push_back(wxT(""));
-    suffix_types.push_back(wxT("INSERT"));
-    suffix_types.push_back(wxT("UPDATE"));
-    suffix_types.push_back(wxT("DELETE"));
-
-    #define TRIGGER_ACTION_PREFIX(value) ((value + 1) & 1)
-    #define TRIGGER_ACTION_SUFFIX(value, slot) (((value + 1) >> (slot * 2 - 1)) & 3)
-
-    wxString result;
-    int prefix = TRIGGER_ACTION_PREFIX(type);
-    result = prefix_types[prefix];
-
-    int suffix = TRIGGER_ACTION_SUFFIX(type, 1);
-    result += wxT(" ") + suffix_types[suffix];
-    suffix = TRIGGER_ACTION_SUFFIX(type, 2);
-    if (suffix)
-        result += wxT(" OR ") + suffix_types[suffix];
-    suffix = TRIGGER_ACTION_SUFFIX(type, 3);
-    if (suffix)
-        result += wxT(" OR ") + suffix_types[suffix];
+    // For explanation: read sql.extensions file in Firebird's doc directory
+    wxString result(type % 2 ? wxT("BEFORE ") : wxT("AFTER "));
+    wxString types[] = { wxT("INSERT"), wxT("UPDATE"), wxT("DELETE") };
+    type++;         // compensate for decrement
+    type >>= 1;     // remove bit 0
+    for (int i = 0; i < 3; ++i, type >>= 2)
+    {
+        if (type % 4)
+        {
+            if (i)
+                result += wxT(" OR ");
+            result += types[ (type%4) - 1 ];
+        }
+    }
     return result;
 }
 //-----------------------------------------------------------------------------
