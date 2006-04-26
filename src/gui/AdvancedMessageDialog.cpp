@@ -126,6 +126,17 @@ AdvancedMessageDialogButtonsOkCancel::AdvancedMessageDialogButtonsOkCancel(
     addNegativeButton(wxID_CANCEL, buttonCancelCaption);
 }
 //-----------------------------------------------------------------------------
+wxSize getTextSize(const wxFont& font, const wxString& text)
+{
+    wxScreenDC dc;
+    dc.SetFont(font);
+    wxCoord w, h, wnl;
+    dc.GetMultiLineTextExtent(text, &w, &h);
+    // the (invisible) newline needs to be accounted for in MSW
+    dc.GetTextExtent(wxT("\n"), &wnl, 0);
+    return wxSize(w + wnl, h);
+}
+//-----------------------------------------------------------------------------
 AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent, wxArtID iconId,
         const wxString& primaryText, const wxString& secondaryText,
         AdvancedMessageDialogButtons& buttons, bool showCheckBoxNeverAgain)
@@ -154,6 +165,38 @@ AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent, wxArtID iconId,
 
     wxBoxSizer* textSizer = new wxBoxSizer(wxVERTICAL);
     // primary and secondary texts
+#if 1
+    wxTextCtrl* textMessages = new wxTextCtrl(getControlsPanel(),
+        wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+        wxNO_BORDER | wxTE_RICH | wxTE_READONLY | wxTE_MULTILINE);
+    textMessages->SetBackgroundColour(
+        getControlsPanel()->GetBackgroundColour());
+
+    wxFont fontPrimary(textMessages->GetFont());
+#ifdef __WXGTK__
+    fontPrimary.SetPointSize(fontPrimary.GetPointSize() * 4 / 3);
+#endif
+    fontPrimary.SetWeight(wxBOLD);
+    wxSize pts = getTextSize(fontPrimary, primaryText);
+
+    wxFont fontSecondary(textMessages->GetFont());
+    wxSize sts = getTextSize(fontSecondary, wxT("\n") + secondaryText);
+
+    wxSize sizeTexts(pts.GetWidth(), pts.GetHeight() + sts.GetHeight());
+    sizeTexts.SetWidth(
+        (pts.GetWidth() > sts.GetWidth()) ? pts.GetWidth() : sts.GetWidth());
+    textMessages->SetBestFittingSize(sizeTexts);
+    textMessages->SetSize(sizeTexts);
+
+    textMessages->SetDefaultStyle(
+        wxTextAttr(wxNullColour, wxNullColour, fontPrimary));
+    textMessages->AppendText(primaryText);
+    textMessages->SetDefaultStyle(
+        wxTextAttr(wxNullColour, wxNullColour, fontSecondary));
+    textMessages->AppendText(wxT("\n\n") + secondaryText);
+
+    textSizer->Add(textMessages, 0, wxEXPAND);
+#else
     wxStaticText* labelPrimary = new wxStaticText(getControlsPanel(),
         wxID_ANY, primaryText);
     wxFont primaryLabelFont(labelPrimary->GetFont());
@@ -167,7 +210,7 @@ AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent, wxArtID iconId,
     wxStaticText* labelSecondary = new wxStaticText(getControlsPanel(),
         wxID_ANY, secondaryText);
     textSizer->Add(labelSecondary, 0, wxEXPAND);
-    
+#endif    
     // checkbox for "Don't show/ask again"
     if (showCheckBoxNeverAgain)
     {
