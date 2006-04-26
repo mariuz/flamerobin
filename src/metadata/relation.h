@@ -33,6 +33,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "metadata/collection.h"
 #include "metadata/column.h"
+#include "metadata/constraints.h"
 #include "metadata/metadataitem.h"
 #include "metadata/privilege.h"
 #include "metadata/trigger.h"
@@ -43,7 +44,7 @@ class Relation: public MetadataItem
 {
 protected:
     void getDependentChecks(std::vector<CheckConstraint>& checks);
-    void getDependentViews(std::vector<Relation *>& views);
+    void getDependentViews(std::vector<Relation*>& views);
 
     MetadataCollection<Column> columnsM;
     std::vector<Privilege> privilegesM;
