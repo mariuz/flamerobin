@@ -1784,19 +1784,19 @@ const AlterViewHandler AlterViewHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool AlterViewHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("alter_view"))
+    if (uri.action != wxT("alter_relation"))
         return false;
 
-    View* v = (View*)getObject(uri);
+    Relation* r = (Relation*)getObject(uri);
     wxWindow* w = getWindow(uri);
-    if (!v || !w)
+    if (!r || !w)
         return true;
 
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1,
         _("Altering view"));
-    eff->setDatabase(v->getDatabase());
+    eff->setDatabase(r->getDatabase());
     eff->Show();
-    eff->setSql(v->getRebuildSql());
+    eff->setSql(r->getRebuildSql());
     return true;
 }
 //-----------------------------------------------------------------------------

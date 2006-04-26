@@ -33,17 +33,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 class View: public Relation
 {
-private:
-    void getDependentChecks(std::vector<CheckConstraint>& checks);
-    void getDependentViews(std::vector<View *>& views);
-
 public:
     View();
     wxString getCreateSqlTemplate() const;  // overrides MetadataItem::getCreateSqlTemplate()
 
     bool getSource(wxString& source);
     wxString getCreateSql();
-    wxString getRebuildSql();
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };

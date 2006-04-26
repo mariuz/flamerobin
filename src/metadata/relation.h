@@ -36,10 +36,15 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "metadata/metadataitem.h"
 #include "metadata/privilege.h"
 #include "metadata/trigger.h"
+
+class View;
 //-----------------------------------------------------------------------------
 class Relation: public MetadataItem
 {
 protected:
+    void getDependentChecks(std::vector<CheckConstraint>& checks);
+    void getDependentViews(std::vector<Relation *>& views);
+
     MetadataCollection<Column> columnsM;
     std::vector<Privilege> privilegesM;
 
@@ -61,6 +66,7 @@ public:
     MetadataCollection<Column>::const_iterator begin() const;
     MetadataCollection<Column>::const_iterator end() const;
 
+    wxString getRebuildSql();
     std::vector<Privilege>* getPrivileges();
     bool getChildren(std::vector<MetadataItem *>& temp);
     bool getTriggers(std::vector<Trigger *>& list,
