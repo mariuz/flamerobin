@@ -34,56 +34,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "metadata/collection.h"
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
+#include "metadata/User.h"
 
-class User: public MetadataItem
-{
-public:
-    User(Server *parent)
-        :MetadataItem()
-    {
-        setParent((MetadataItem *)parent);
-    }
-
-    User(const IBPP::User& src, Server *parent)
-        :MetadataItem(), useridM(src.userid), groupidM(src.groupid)
-    {
-        setParent((MetadataItem *)parent);
-        usernameM = std2wx(src.username);
-        passwordM = std2wx(src.password);
-        firstnameM = std2wx(src.firstname);
-        middlenameM = std2wx(src.middlename);
-        lastnameM = std2wx(src.lastname);
-    }
-
-    void setIBPP(IBPP::User& dest) const
-    {
-        dest.username = wx2std(usernameM);
-        dest.password = wx2std(passwordM);
-        dest.firstname = wx2std(firstnameM);
-        dest.lastname = wx2std(lastnameM);
-        dest.middlename = wx2std(middlenameM);
-        dest.userid = useridM;
-        dest.groupid = groupidM;
-    }
-
-    bool operator<(const User& rhs) const
-    {
-        return usernameM < rhs.usernameM;
-    }
-
-    virtual bool isSystem() const
-    {
-        return usernameM == wxT("SYSDBA");
-    }
-
-    wxString usernameM;
-    wxString passwordM;
-    wxString firstnameM;
-    wxString middlenameM;
-    wxString lastnameM;
-    uint32_t useridM;
-    uint32_t groupidM;
-};
 typedef std::vector<User> UserList;
 //-----------------------------------------------------------------------------
 // this is a coupled node (in visual sense). Server equals collection of

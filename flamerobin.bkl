@@ -279,6 +279,7 @@
         $(SOURCEDIR)/metadata/table.h
         $(SOURCEDIR)/metadata/trigger.h
         $(SOURCEDIR)/metadata/view.h
+        $(SOURCEDIR)/metadata/User.h
         $(SOURCEDIR)/sql/Identifier.h
         $(SOURCEDIR)/sql/SimpleParser.h
         $(SOURCEDIR)/sql/SqlStatement.h
@@ -374,6 +375,7 @@
         $(SOURCEDIR)/metadata/server.cpp
         $(SOURCEDIR)/metadata/table.cpp
         $(SOURCEDIR)/metadata/trigger.cpp
+        $(SOURCEDIR)/metadata/User.cpp
         $(SOURCEDIR)/metadata/view.cpp
         $(SOURCEDIR)/myTreeCtrl.cpp
         $(SOURCEDIR)/objectdescriptionhandler.cpp

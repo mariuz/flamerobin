@@ -110,6 +110,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_server.o \
 	flamerobin_table.o \
 	flamerobin_trigger.o \
+	flamerobin_User.o \
 	flamerobin_view.o \
 	flamerobin_myTreeCtrl.o \
 	flamerobin_objectdescriptionhandler.o \
@@ -466,6 +467,9 @@ flamerobin_table.o: $(srcdir)/src/metadata/table.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_trigger.o: $(srcdir)/src/metadata/trigger.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/trigger.cpp
+
+flamerobin_User.o: $(srcdir)/src/metadata/User.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/User.cpp
 
 flamerobin_view.o: $(srcdir)/src/metadata/view.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/view.cpp
