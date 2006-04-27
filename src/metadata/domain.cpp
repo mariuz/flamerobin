@@ -117,7 +117,12 @@ bool Domain::loadInfo()
         }
         isNotNullM = !st1->IsNull(8);
         readBlob(st1, 9, defaultM);
-        if (st1->IsNull(10))
+                
+		hasDefaultM = !st1->IsNull(9);
+		if (hasDefaultM) 
+			defaultM.Remove(0, 8);
+
+		if (st1->IsNull(10))
             collationM = wxEmptyString;
         else
         {
@@ -246,6 +251,13 @@ bool Domain::isNullable()
     if (!infoLoadedM)
         loadInfo();
     return !isNotNullM;
+}
+//-----------------------------------------------------------------------------
+bool Domain::hasDefault()
+{
+    if (!infoLoadedM)
+        loadInfo();
+    return hasDefaultM;
 }
 //-----------------------------------------------------------------------------
 void Domain::getDatatypeParts(wxString& type, wxString& size, wxString& scale)

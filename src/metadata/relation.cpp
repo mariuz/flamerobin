@@ -136,13 +136,18 @@ bool Relation::loadColumns()
             st1->Get(3, source);
             st1->Get(4, collation);
             readBlob(st1, 5, computedSrc);
-            readBlob(st1, 6, defaultSrc);
+
+			if (!st1->IsNull(6))
+			{
+	            readBlob(st1, 6, defaultSrc);
+				defaultSrc.Remove(0, 8);
+			}
 
             Column *cc = columnsM.add();
             cc->setName_(std2wx(name));
             cc->setParent(this);
             cc->Init(!st1->IsNull(2), std2wx(source),
-                computedSrc, std2wx(collation), defaultSrc);
+                computedSrc, std2wx(collation), defaultSrc, !st1->IsNull(6));
         }
 
         tr1->Commit();

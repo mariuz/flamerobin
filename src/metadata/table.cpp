@@ -109,9 +109,14 @@ wxString Table::getInsertStatement()
         }
         collist += (*i).getQuotedName();
 
-        if (!(*i).isNullable())
+        if (!(*i).isNullable() && (!(*i).hasDefault()))
             valist += wxT("*");
-        valist += (*i).getName_();
+
+		if (!(*i).hasDefault())
+            valist += (*i).getName_();
+		else
+			valist += (*i).getDefault();
+
     }
     sql += collist + wxT(")\n VALUES (\n") + valist + wxT("\n)");
     return sql;

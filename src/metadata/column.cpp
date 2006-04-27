@@ -58,7 +58,7 @@ Column::Column()
 //-----------------------------------------------------------------------------
 //! initialize properties
 void Column::Init(bool notnull, wxString source, wxString computedSource,
-    wxString collation, wxString defaultValue)
+    wxString collation, wxString defaultValue, bool hasDefault)
 {
     source.Trim();        // right trim everything
     collation.Trim();
@@ -67,6 +67,7 @@ void Column::Init(bool notnull, wxString source, wxString computedSource,
     computedSourceM = computedSource;
     collationM = collation;
     defaultM = defaultValue;
+	hasDefaultM = hasDefault;
 }
 //-----------------------------------------------------------------------------
 bool Column::isNullable(bool checkDomain) const
@@ -79,6 +80,18 @@ bool Column::isNullable(bool checkDomain) const
     if (d)
         return d->isNullable();
     return true;
+}
+//-----------------------------------------------------------------------------
+bool Column::hasDefault(bool checkDomain) const
+{
+	if (hasDefaultM)
+		return true;
+    if (!checkDomain)
+        return true;
+    Domain *d = getDomain();
+    if (d)
+        return d->hasDefault();
+    return false;
 }
 //-----------------------------------------------------------------------------
 bool Column::isPrimaryKey() const
@@ -186,7 +199,13 @@ wxString Column::getCollation() const
 //-----------------------------------------------------------------------------
 wxString Column::getDefault() const
 {
-    return defaultM;
+	if (defaultM.IsEmpty())
+	{
+		Domain *d = getDomain();
+		if (d)
+			return d->getDefault();
+	}
+	return defaultM;
 }
 //-----------------------------------------------------------------------------
 wxString Column::getDropSqlStatement() const

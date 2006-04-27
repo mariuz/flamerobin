@@ -35,7 +35,7 @@ class Domain: public MetadataItem
 {
 private:
     short datatypeM, subtypeM, lengthM, precisionM, scaleM;
-    bool isNotNullM;
+    bool isNotNullM, hasDefaultM;
     wxString charsetM, defaultM, collationM, checkM;
     bool infoLoadedM;
 protected:
@@ -54,6 +54,7 @@ public:
     wxString getCheckConstraint();
     wxString getCharset();
     bool isNullable();
+    bool hasDefault();
     virtual const wxString getTypeName() const;
     virtual wxString getCreateSqlTemplate() const;
     virtual wxString getPrintableName();

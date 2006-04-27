@@ -37,7 +37,7 @@ class Table;
 class Column: public MetadataItem
 {
 private:
-    bool notnullM, computedM;
+    bool notnullM, computedM, hasDefaultM;
     wxString sourceM, computedSourceM, collationM, defaultM;
 protected:
     virtual void loadDescription();
@@ -45,12 +45,13 @@ protected:
 public:
     Column();
     void Init(bool notnull, wxString source, wxString computedSource,
-        wxString collation, wxString defaultValue);
+        wxString collation, wxString defaultValue, bool hasDefault);
     virtual wxString getPrintableName();
     wxString getDatatype();
     virtual wxString getDropSqlStatement() const;
 
     bool isNullable(bool checkDomain = true) const;
+    bool hasDefault(bool checkDomain = true) const;
     bool isPrimaryKey() const;
     wxString getComputedSource() const;
     wxString getSource() const;

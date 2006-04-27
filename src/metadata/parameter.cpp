@@ -49,7 +49,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Parameter::Parameter(wxString source, int parameterType)
     : Column()
 {
-    Column::Init(true, source, wxT(""), wxT(""), wxT(""));
+    Column::Init(true, source, wxT(""), wxT(""), wxT(""), false);
     typeM = ntParameter;
     parameterTypeM = (parameterType == 0 ? ptInput : ptOutput);
 }
