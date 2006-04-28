@@ -124,6 +124,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_server.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_table.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_trigger.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_User.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_view.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_myTreeCtrl.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.obj \
@@ -480,6 +481,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_table.obj: .\src\metadata\table.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_trigger.obj: .\src\metadata\trigger.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_User.obj: .\src\metadata\User.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_view.obj: .\src\metadata\view.cpp
