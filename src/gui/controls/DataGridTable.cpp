@@ -73,11 +73,20 @@ wxString GridTableCharsetConverter::mapCharset(
     // Firebird charsets WIN125X need to be replaced with either
     // WINDOWS125X or CP125X - we take the latter
     if (charset.Mid(0, 5) == wxT("WIN12"))
-        charset = wxT("CP12") + charset.Mid(5);
+        return wxT("CP12") + charset.Mid(5);
 
-    // Firebird charsets ISO8859-X are recognized as-is
-
-    // TODO: more necessary? Maybe a mapping table is better then...
+    // Firebird charsets ISO8859-X (and some others) are recognized as-is
+    // all other mappings need to be added here...
+    struct CharsetMapping { const wxChar* connCS; const wxChar* convCS; };
+    static const CharsetMapping mappings[] = {
+        { wxT("UTF8"), wxT("UTF-8") }, { wxT("UNICODE_FSS"), wxT("UTF-8") }
+    };
+    int mappingCount = sizeof(mappings) / sizeof(CharsetMapping);
+    for (int i = 0; i < mappingCount; i++)
+    {
+        if (mappings[i].connCS == charset)
+            return mappings[i].convCS;
+    }
 
     return charset;
 }
