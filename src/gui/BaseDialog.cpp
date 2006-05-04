@@ -135,7 +135,7 @@ void BaseDialog::readConfigSettings()
             if (getConfigStoresHeight())
                 config().getValue(itemPrefix + Config::pathSeparator + wxT("height"), r.height);
             doReadConfigSettings(itemPrefix);
-            if (r.width > 0 && r.height > 0)
+            if (r.width > 0 || r.height > 0)
                 SetSize(r.width, r.height);
             // default to global setting, set to 0 to disable
             // restore the position if we don't want it centered
