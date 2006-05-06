@@ -2,23 +2,40 @@ Some of the images in this directory are taken from Ximian project,
 which released them under LGPL licence. See file LGPL for licence itself.
 
 Images covered with LGPL are:
+backup.xpm
 column.xpm
+column32.xpm
 database.xpm
+database32.xpm (same file as backup.xpm)
 domain.xpm
+domain32.xpm
+down.xpm
 function.xpm
+function32.xpm
 generator.xpm
+generator32.xpm
 generators.xpm
+history.xpm
+left.xpm
 object.xpm
 procedure.xpm
+procedure32.xpm
 procedures.xpm
+right.xpm
 root.xpm
-table.xpm
-tables.xpm
-trigger.xpm
-view.xpm
-up.xpm
-down.xpm
 save.xpm
 saveas.xpm
+search.xpm
+server.xpm
+server32.xpm
+table.xpm
+table32.xpm
+tables.xpm
+trigger.xpm
+trigger32.xpm
+up.xpm
+view.xpm
+view32.xpm
 
-All other images, are licenced as the rest of FlameRobin project.
+All other images, are licenced under Expat license as the rest of FlameRobin
+project.
