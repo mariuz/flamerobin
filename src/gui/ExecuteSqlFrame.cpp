@@ -1664,7 +1664,7 @@ bool DropColumnsHandler::handleURI(URI& uri)
     // get list of columns
     wxString sql;
     std::vector<wxString> list;
-    if (selectTableColumnsIntoVector(t, w, list))
+    if (selectRelationColumnsIntoVector(t, w, list))
     {
         for (std::vector<wxString>::iterator it = list.begin(); it != list.end(); ++it)
         {

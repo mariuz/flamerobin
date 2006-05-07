@@ -43,7 +43,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/ProgressDialog.h"
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
-#include "metadata/table.h"
+#include "metadata/relation.h"
 #include "metadata/server.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
@@ -101,10 +101,10 @@ void readBlob(IBPP::Statement& st, int column, wxString& result)
     b->Close();
 }
 //-----------------------------------------------------------------------------
-wxString selectTableColumns(Table* t, wxWindow* parent)
+wxString selectRelationColumns(Relation* t, wxWindow* parent)
 {
     vector<wxString> list;
-    selectTableColumnsIntoVector(t, parent, list);
+    selectRelationColumnsIntoVector(t, parent, list);
     wxString retval;
     for (vector<wxString>::iterator it = list.begin(); it != list.end(); ++it)
     {
@@ -115,7 +115,7 @@ wxString selectTableColumns(Table* t, wxWindow* parent)
     return retval;
 }
 //-----------------------------------------------------------------------------
-bool selectTableColumnsIntoVector(Table* t, wxWindow* parent, vector<wxString>& list)
+bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent, vector<wxString>& list)
 {
     t->checkAndLoadColumns();
     vector<MetadataItem*> temp;

@@ -134,18 +134,18 @@ bool AddConstraintHandler::handleURI(URI& uri)
 
     if (type == wxT("PK"))
     {
-        wxString columnlist = selectTableColumns(t, w);
+        wxString columnlist = selectRelationColumns(t, w);
         sql += wxT("\nprimary key (") + columnlist + wxT(")");
     }
     else if (type == wxT("FK"))
     {
-        wxString columnlist = selectTableColumns(t, w);
+        wxString columnlist = selectRelationColumns(t, w);
         if (columnlist == wxT(""))
             return true;
         Table* ref = selectTable(t->getDatabase(), w);
         if (!ref)
             return true;
-        wxString refcolumnlist = selectTableColumns(ref, w);
+        wxString refcolumnlist = selectRelationColumns(ref, w);
         if (refcolumnlist == wxT(""))
             return true;
         sql += wxT("\nforeign key (") + columnlist + wxT(") \nreferences ") + ref->getQuotedName()
@@ -171,7 +171,7 @@ bool AddConstraintHandler::handleURI(URI& uri)
     }
     else if (type == wxT("UNQ"))
     {
-        wxString columnlist = selectTableColumns(t, w);
+        wxString columnlist = selectRelationColumns(t, w);
         if (columnlist.IsEmpty())   // cancel
             return true;
         sql += wxT("\nunique (") + columnlist + wxT(")");

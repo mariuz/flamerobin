@@ -34,7 +34,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <ibpp.h>
 
-class Table;
+class Relation;
 class Database;
 class Server;
 class ProgressDialog;
@@ -47,8 +47,8 @@ void adjustControlsMinWidth(std::list<wxWindow*> controls);
 void readBlob(IBPP::Statement& st, int column, wxString& result);
 //-----------------------------------------------------------------------------
 //! displays a list of table columns and lets user select some
-wxString selectTableColumns(Table* t, wxWindow* parent);
-bool selectTableColumnsIntoVector(Table* t, wxWindow* parent,
+wxString selectRelationColumns(Relation* t, wxWindow* parent);
+bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent,
     std::vector<wxString>& list);
 //-----------------------------------------------------------------------------
 //! pops up message box with last error from database operations

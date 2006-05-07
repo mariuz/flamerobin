@@ -38,7 +38,6 @@ class PrivilegesDialog : public BaseDialog
 private:
     Database *databaseM;
     void enableRelationCheckboxes(bool enable, bool all);
-    void loadRelationColumns();
     bool inConstructor;
 
 protected:
@@ -86,6 +85,7 @@ public:
     void OnSettingChanged(wxCommandEvent& event);
     void OnButtonAddClick(wxCommandEvent& event);
     void OnButtonRemoveClick(wxCommandEvent& event);
+    void OnButtonBrowseClick(wxCommandEvent& event);
     void OnListBoxStatementsSelected(wxCommandEvent& event);
 
     enum
@@ -94,14 +94,13 @@ public:
         ID_button_close,
         ID_button_execute,
         ID_button_remove,
-        ID_button_browse_update,
-        ID_button_browse_references,
+        ID_button_browse,
         ID_checkbox,
         ID_choice,
         ID_listbox,
         ID_radiobox_action,
         ID_radiobtn,
-        ID_textctrl_user,
+        ID_textctrl,
         ID_listbox_statements,
     };
 
