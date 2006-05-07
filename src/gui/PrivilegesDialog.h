@@ -43,7 +43,6 @@ private:
 
 protected:
     wxRadioBox *radiobox_action;
-    wxCheckBox *checkbox_grant_option;
     wxPanel *granteePanel;
     wxStaticText *m_staticText3;
     wxRadioButton *radiobtn_user;
@@ -55,6 +54,13 @@ protected:
     wxRadioButton *radiobtn_view;
     wxChoice *choice_view;
     wxStaticText *m_staticText2;
+    wxRadioButton *radiobtn_relation;
+    wxRadioButton *radiobtn_execute;
+    wxRadioButton *radiobtn_memberof;
+    wxTextCtrl *textctrl_update;
+    wxTextCtrl *textctrl_references;
+    wxButton *button_update_browse;
+    wxButton *button_references_browse;
     wxCheckBox *checkbox_all;
     wxCheckBox *checkbox_select;
     wxCheckBox *checkbox_insert;
@@ -62,10 +68,7 @@ protected:
     wxCheckBox *checkbox_delete;
     wxCheckBox *checkbox_references;
     wxChoice *choice_relations;
-    wxListBox *listbox_columns;
-    wxCheckBox *checkbox_execute;
     wxChoice *choice_execute;
-    wxCheckBox *checkbox_memberof;
     wxChoice *choice_memberof;
     wxStaticText *label_sql;
     wxTextCtrl *textbox_current_sql;
@@ -91,13 +94,15 @@ public:
         ID_button_close,
         ID_button_execute,
         ID_button_remove,
+        ID_button_browse_update,
+        ID_button_browse_references,
         ID_checkbox,
         ID_choice,
         ID_listbox,
         ID_radiobox_action,
         ID_radiobtn,
         ID_textctrl_user,
-        ID_listbox_statements
+        ID_listbox_statements,
     };
 
     wxString getSqlStatements();

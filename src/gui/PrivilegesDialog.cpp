@@ -60,17 +60,18 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     wxBoxSizer *innerSizer = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer *topLeftSizer = new wxBoxSizer(wxVERTICAL);
-    wxString choices1[] = { _("Grant"), _("Revoke") };
+    wxString choices1[] =
+    {
+        _("Grant privilege"),
+        _("Grant privilege with grant/admin option"),
+        _("Revoke privilege"),
+        _("Revoke grant/admin option")
+    };
     int nchoices1 = sizeof(choices1) / sizeof(wxString);
     radiobox_action = new wxRadioBox(getControlsPanel(), ID_radiobox_action,
         _("Action"), wxDefaultPosition, wxDefaultSize, nchoices1, choices1,
         1, wxRA_SPECIFY_COLS);
     topLeftSizer->Add(radiobox_action, 0, wxBOTTOM|wxEXPAND,
-        styleguide().getRelatedControlMargin(wxVERTICAL));
-
-    checkbox_grant_option = new wxCheckBox(getControlsPanel(), ID_checkbox,
-        _("Grant/Admin option"));
-    topLeftSizer->Add(checkbox_grant_option, 0, wxBOTTOM|wxEXPAND,
         styleguide().getUnrelatedControlMargin(wxVERTICAL));
 
     granteePanel = new wxPanel(getControlsPanel());
@@ -151,50 +152,19 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     topSizer->Add(topLeftSizer, 0, wxEXPAND, 0);
     // separate left and right parts
     topSizer->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 1);
-    wxBoxSizer *privilegesSizer = new wxBoxSizer(wxVERTICAL);
-    m_staticText2 = new wxStaticText(getControlsPanel(), wxID_ANY,
-        _("Privileges"));
-    wxFont font2(m_staticText2->GetFont());
-    font2.SetWeight(wxBOLD);
-    m_staticText2->SetFont(font2);
-    privilegesSizer->Add(m_staticText2, 0, wxBOTTOM|wxEXPAND,
-        styleguide().getControlLabelMargin());
 
-    wxGridBagSizer* bagSizer = new wxGridBagSizer(
+    // PRIVILEGES: ---------------------------------------------------------
+
+    wxStaticBoxSizer *privilegesSizer = new wxStaticBoxSizer(wxVERTICAL,
+        getControlsPanel(), _("Privileges"));
+    wxFlexGridSizer *fgSizer4 = new wxFlexGridSizer(2, 2,
         styleguide().getRelatedControlMargin(wxVERTICAL),
         styleguide().getControlLabelMargin());
+    fgSizer4->AddGrowableCol(1);
 
-    checkbox_all = new wxCheckBox(getControlsPanel(), ID_checkbox, wxT("All"));
-    checkbox_select = new wxCheckBox(getControlsPanel(), ID_checkbox,
-        wxT("Select"));
-    checkbox_insert = new wxCheckBox(getControlsPanel(), ID_checkbox,
-        wxT("Insert"));
-    checkbox_update = new wxCheckBox(getControlsPanel(), ID_checkbox,
-        wxT("Update"));
-    checkbox_delete = new wxCheckBox(getControlsPanel(), ID_checkbox,
-        wxT("Delete"));
-    checkbox_references = new wxCheckBox(getControlsPanel(), ID_checkbox,
-        wxT("References"));
-    checkbox_execute = new wxCheckBox(getControlsPanel(), ID_checkbox,
-        wxT("Execute"));
-    checkbox_memberof = new wxCheckBox(getControlsPanel(), ID_checkbox,
-        wxT("Member of"));
-    bagSizer->Add(checkbox_all, wxGBPosition(0, 0), wxDefaultSpan,
-        wxALIGN_CENTER_VERTICAL);
-    bagSizer->Add(checkbox_select, wxGBPosition(1, 0), wxDefaultSpan,
-        wxALIGN_CENTER_VERTICAL);
-    bagSizer->Add(checkbox_insert, wxGBPosition(2, 0), wxDefaultSpan,
-        wxALIGN_CENTER_VERTICAL);
-    bagSizer->Add(checkbox_update, wxGBPosition(3, 0), wxDefaultSpan,
-        wxALIGN_CENTER_VERTICAL);
-    bagSizer->Add(checkbox_delete, wxGBPosition(4, 0), wxDefaultSpan,
-        wxALIGN_CENTER_VERTICAL);
-    bagSizer->Add(checkbox_references, wxGBPosition(5, 0), wxDefaultSpan,
-        wxALIGN_CENTER_VERTICAL);
-    bagSizer->Add(checkbox_execute, wxGBPosition(6, 0), wxDefaultSpan,
-        wxALIGN_CENTER_VERTICAL);
-    bagSizer->Add(checkbox_memberof, wxGBPosition(7, 0), wxDefaultSpan,
-        wxALIGN_CENTER_VERTICAL);
+    radiobtn_relation = new wxRadioButton(getControlsPanel(), ID_radiobtn,
+        _("Table/View"));
+    fgSizer4->Add(radiobtn_relation, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
 
     // relations
     {
@@ -222,15 +192,62 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
             choice_relations->SetSelection(relation_to_select);
     }
     choice_relations->Enable(false);
-    bagSizer->Add(choice_relations, wxGBPosition(0, 1), wxDefaultSpan,
-        wxALIGN_CENTER_VERTICAL|wxEXPAND);
+    fgSizer4->Add(choice_relations, 0, wxALIGN_CENTER_VERTICAL|wxEXPAND, 0);
 
-    listbox_columns = new wxListBox(getControlsPanel(), ID_listbox,
-        wxDefaultPosition, wxDefaultSize, 0, 0, wxLB_MULTIPLE);
-    bagSizer->Add(listbox_columns, wxGBPosition(1, 1), wxGBSpan(5, 1),
-        wxEXPAND);
+    checkbox_all = new wxCheckBox(getControlsPanel(), ID_checkbox, wxT("All"));
+    checkbox_select = new wxCheckBox(getControlsPanel(), ID_checkbox,
+        wxT("Select"));
+    checkbox_insert = new wxCheckBox(getControlsPanel(), ID_checkbox,
+        wxT("Insert"));
+    checkbox_update = new wxCheckBox(getControlsPanel(), ID_checkbox,
+        wxT("Update"));
+    checkbox_delete = new wxCheckBox(getControlsPanel(), ID_checkbox,
+        wxT("Delete"));
+    checkbox_references = new wxCheckBox(getControlsPanel(), ID_checkbox,
+        wxT("References"));
 
-    // procedures
+    int indentation = 20;
+    fgSizer4->Add(checkbox_all, 0, wxLEFT|wxALIGN_CENTER_VERTICAL|wxEXPAND,
+        indentation);
+    fgSizer4->AddSpacer(1);
+    fgSizer4->Add(checkbox_select, 0, wxLEFT|wxALIGN_CENTER_VERTICAL|wxEXPAND,
+        indentation);
+    fgSizer4->AddSpacer(1);
+    fgSizer4->Add(checkbox_insert, 0, wxLEFT|wxALIGN_CENTER_VERTICAL|wxEXPAND,
+        indentation);
+    fgSizer4->AddSpacer(1);
+
+    fgSizer4->Add(checkbox_update, 0, wxLEFT|wxALIGN_CENTER_VERTICAL|wxEXPAND,
+        indentation);
+    wxBoxSizer *bSizer2 = new wxBoxSizer(wxHORIZONTAL);
+    textctrl_update = new wxTextCtrl(getControlsPanel(), wxID_ANY);
+    bSizer2->Add(textctrl_update, 1, wxALIGN_CENTER_VERTICAL|wxEXPAND, 0);
+    button_update_browse = new wxButton(getControlsPanel(),
+        ID_button_browse_update, wxT("..."), wxDefaultPosition, wxDefaultSize,
+        wxBU_EXACTFIT);
+    bSizer2->Add(button_update_browse, 0, wxLEFT | wxALIGN_CENTER_VERTICAL,
+        styleguide().getBrowseButtonMargin());
+    fgSizer4->Add(bSizer2, 1, wxEXPAND, 0);
+
+    fgSizer4->Add(checkbox_delete, 0, wxLEFT|wxALIGN_CENTER_VERTICAL|wxEXPAND,
+        indentation);
+    fgSizer4->AddSpacer(1);
+    fgSizer4->Add(checkbox_references, 0,
+        wxLEFT|wxALIGN_CENTER_VERTICAL|wxEXPAND, indentation);
+    wxBoxSizer *bSizer3 = new wxBoxSizer(wxHORIZONTAL);
+    textctrl_references = new wxTextCtrl(getControlsPanel(), wxID_ANY);
+    bSizer3->Add(textctrl_references, 1, wxALIGN_CENTER_VERTICAL|wxEXPAND, 0);
+    button_references_browse = new wxButton(getControlsPanel(),
+        ID_button_browse_references, wxT("..."), wxDefaultPosition,
+        wxDefaultSize, wxBU_EXACTFIT);
+    bSizer3->Add(button_references_browse, 0, wxLEFT | wxALIGN_CENTER_VERTICAL,
+        styleguide().getBrowseButtonMargin());
+    fgSizer4->Add(bSizer3, 1, wxEXPAND, 0);
+
+    // procedure
+    radiobtn_execute = new wxRadioButton(getControlsPanel(), ID_radiobtn,
+        _("Procedure"));
+    fgSizer4->Add(radiobtn_execute, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     {
         MetadataCollection<Procedure>* tc =
             databaseM->getCollection<Procedure>();
@@ -249,10 +266,12 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
             choice_execute->SetSelection(to_select);
     }
     choice_execute->Enable(false);
-    bagSizer->Add(choice_execute, wxGBPosition(6, 1), wxDefaultSpan,
-        wxALIGN_CENTER_VERTICAL|wxEXPAND);
+    fgSizer4->Add(choice_execute, 0, wxEXPAND, 0);
 
     // roles
+    radiobtn_memberof = new wxRadioButton(getControlsPanel(), ID_choice,
+        _("Role"));
+    fgSizer4->Add(radiobtn_memberof, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     {
         MetadataCollection<Role>* tc = databaseM->getCollection<Role>();
         wxArrayString choices;
@@ -270,11 +289,11 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
             choice_memberof->SetSelection(to_select);
     }
     choice_memberof->Enable(false);
-    bagSizer->Add(choice_memberof, wxGBPosition(7, 1), wxDefaultSpan,
-        wxALIGN_CENTER_VERTICAL|wxEXPAND);
-
-    privilegesSizer->Add(bagSizer, 1, wxEXPAND, 0);
+    fgSizer4->Add(choice_memberof, 0, wxEXPAND, 0);
+    privilegesSizer->Add(fgSizer4, 1, wxEXPAND|wxALL, 5);
     topSizer->Add(privilegesSizer, 1, wxEXPAND, 0);
+    // PRIVILEGES done
+
     innerSizer->Add(topSizer, 0, wxEXPAND, 0);
     innerSizer->Add(styleguide().getUnrelatedControlMargin(wxVERTICAL),
         1, 0, wxALL, 0);
@@ -342,6 +361,7 @@ void PrivilegesDialog::enableRelationCheckboxes(bool enable, bool all)
 //-----------------------------------------------------------------------------
 void PrivilegesDialog::loadRelationColumns()
 {
+    /*
     static wxString lastRelation = wxT("-");
     if (lastRelation != choice_relations->GetStringSelection())
     {
@@ -358,6 +378,7 @@ void PrivilegesDialog::loadRelationColumns()
             }
         }
     }
+    */
 }
 //-----------------------------------------------------------------------------
 const wxString PrivilegesDialog::getName() const
@@ -370,6 +391,7 @@ void PrivilegesDialog::updateControls()
     if (inConstructor)
         return;
 
+#ifdef OLDSTUFF
     // enable left-size choices
     textctrl_user->Enable(radiobtn_user->GetValue());
     choice_trigger->Enable(radiobtn_trigger->GetValue());
@@ -378,7 +400,10 @@ void PrivilegesDialog::updateControls()
 
     // disable role granting for non-user grantees, part1/2 (see below)
     if (!radiobtn_user->GetValue())
-        checkbox_memberof->SetValue(false);
+    {
+        // FIXME
+        // radiobtn_memberof->SetValue(false);
+    }
 
     // enable right-side choices
     bool isUpdRefChecked = (checkbox_update->IsChecked() ||
@@ -444,8 +469,8 @@ void PrivilegesDialog::updateControls()
         grantee = wxT("VIEW ") + Identifier(
                   choice_view->GetStringSelection()).getQuoted();
     }
-    bool grant = radiobox_action->GetSelection() == 0;
-    bool grantoption = checkbox_grant_option->IsChecked();
+    bool grant = radiobox_action->GetSelection() < 2;
+    bool grantoption = radiobox_action->GetSelection() % 2;
     wxString sql(grant ? wxT("GRANT ") : wxT("REVOKE "));
     if (!grant && grantoption)
         sql << (isRole ? wxT("ADMIN") : wxT("GRANT")) << wxT(" OPTION FOR ");
@@ -502,6 +527,7 @@ void PrivilegesDialog::updateControls()
     }
 
     textbox_current_sql->SetValue(sql);
+#endif
 }
 //-----------------------------------------------------------------------------
 wxString PrivilegesDialog::getSqlStatements()
