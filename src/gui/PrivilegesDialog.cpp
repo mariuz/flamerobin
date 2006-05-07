@@ -153,14 +153,15 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     topSizer->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 1);
 
     // PRIVILEGES: ---------------------------------------------------------
+    wxPanel *privilegesPanel = new wxPanel(getControlsPanel());
     wxStaticBoxSizer *privilegesSizer = new wxStaticBoxSizer(wxVERTICAL,
-        getControlsPanel(), _("Privileges"));
+        privilegesPanel, _("Privileges"));
     wxFlexGridSizer *fgSizer4 = new wxFlexGridSizer(2, 2,
         styleguide().getRelatedControlMargin(wxVERTICAL),
         styleguide().getControlLabelMargin());
     fgSizer4->AddGrowableCol(1);
 
-    radiobtn_relation = new wxRadioButton(getControlsPanel(), ID_radiobtn,
+    radiobtn_relation = new wxRadioButton(privilegesPanel, ID_radiobtn,
         _("Table/View"));
     radiobtn_relation->SetValue(true);  // not needed on GTK, but doesn't hurt
     fgSizer4->Add(radiobtn_relation, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
@@ -185,7 +186,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
                 relation_to_select = choices.GetCount();
             choices.Add((*it).getName_());
         }
-        choice_relations = new wxChoice(getControlsPanel(), ID_choice,
+        choice_relations = new wxChoice(privilegesPanel, ID_choice,
             wxDefaultPosition, wxDefaultSize, choices);
         if (!choices.IsEmpty())
             choice_relations->SetSelection(relation_to_select);
@@ -193,16 +194,16 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     choice_relations->Enable(false);
     fgSizer4->Add(choice_relations, 0, wxALIGN_CENTER_VERTICAL|wxEXPAND, 0);
 
-    checkbox_all = new wxCheckBox(getControlsPanel(), ID_checkbox, wxT("All"));
-    checkbox_select = new wxCheckBox(getControlsPanel(), ID_checkbox,
+    checkbox_all = new wxCheckBox(privilegesPanel, ID_checkbox, wxT("All"));
+    checkbox_select = new wxCheckBox(privilegesPanel, ID_checkbox,
         wxT("Select"));
-    checkbox_insert = new wxCheckBox(getControlsPanel(), ID_checkbox,
+    checkbox_insert = new wxCheckBox(privilegesPanel, ID_checkbox,
         wxT("Insert"));
-    checkbox_update = new wxCheckBox(getControlsPanel(), ID_checkbox,
+    checkbox_update = new wxCheckBox(privilegesPanel, ID_checkbox,
         wxT("Update"));
-    checkbox_delete = new wxCheckBox(getControlsPanel(), ID_checkbox,
+    checkbox_delete = new wxCheckBox(privilegesPanel, ID_checkbox,
         wxT("Delete"));
-    checkbox_references = new wxCheckBox(getControlsPanel(), ID_checkbox,
+    checkbox_references = new wxCheckBox(privilegesPanel, ID_checkbox,
         wxT("References"));
 
     int indentation = 20;
@@ -219,12 +220,12 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     fgSizer4->Add(checkbox_update, 0, wxLEFT|wxALIGN_CENTER_VERTICAL|wxEXPAND,
         indentation);
     wxBoxSizer *bSizer2 = new wxBoxSizer(wxHORIZONTAL);
-    textctrl_update = new wxTextCtrl(getControlsPanel(), ID_textctrl, wxT(""),
+    textctrl_update = new wxTextCtrl(privilegesPanel, ID_textctrl, wxT(""),
         wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
     textctrl_update->SetBackgroundColour(
         wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
     bSizer2->Add(textctrl_update, 1, wxALIGN_CENTER_VERTICAL|wxEXPAND, 0);
-    button_update_browse = new wxButton(getControlsPanel(), ID_button_browse,
+    button_update_browse = new wxButton(privilegesPanel, ID_button_browse,
         wxT("..."), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
     bSizer2->Add(button_update_browse, 0, wxLEFT | wxALIGN_CENTER_VERTICAL,
         styleguide().getBrowseButtonMargin());
@@ -236,12 +237,12 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     fgSizer4->Add(checkbox_references, 0,
         wxLEFT|wxALIGN_CENTER_VERTICAL|wxEXPAND, indentation);
     wxBoxSizer *bSizer3 = new wxBoxSizer(wxHORIZONTAL);
-    textctrl_references = new wxTextCtrl(getControlsPanel(), ID_textctrl,
+    textctrl_references = new wxTextCtrl(privilegesPanel, ID_textctrl,
         wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
     textctrl_references->SetBackgroundColour(
         wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
     bSizer3->Add(textctrl_references, 1, wxALIGN_CENTER_VERTICAL|wxEXPAND, 0);
-    button_references_browse = new wxButton(getControlsPanel(),
+    button_references_browse = new wxButton(privilegesPanel,
         ID_button_browse, wxT("..."), wxDefaultPosition,
         wxDefaultSize, wxBU_EXACTFIT);
     bSizer3->Add(button_references_browse, 0, wxLEFT | wxALIGN_CENTER_VERTICAL,
@@ -249,7 +250,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     fgSizer4->Add(bSizer3, 1, wxEXPAND, 0);
 
     // procedure
-    radiobtn_execute = new wxRadioButton(getControlsPanel(), ID_radiobtn,
+    radiobtn_execute = new wxRadioButton(privilegesPanel, ID_radiobtn,
         _("Procedure"));
     fgSizer4->Add(radiobtn_execute, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     {
@@ -264,7 +265,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
                 to_select = choices.GetCount();
             choices.Add((*it).getName_());
         }
-        choice_execute = new wxChoice(getControlsPanel(), ID_choice,
+        choice_execute = new wxChoice(privilegesPanel, ID_choice,
             wxDefaultPosition, wxDefaultSize, choices);
         if (!choices.IsEmpty())
             choice_execute->SetSelection(to_select);
@@ -273,7 +274,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     fgSizer4->Add(choice_execute, 0, wxEXPAND, 0);
 
     // roles
-    radiobtn_memberof = new wxRadioButton(getControlsPanel(), ID_radiobtn,
+    radiobtn_memberof = new wxRadioButton(privilegesPanel, ID_radiobtn,
         _("Role"));
     fgSizer4->Add(radiobtn_memberof, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     {
@@ -287,15 +288,16 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
                 to_select = choices.GetCount();
             choices.Add((*it).getName_());
         }
-        choice_memberof = new wxChoice(getControlsPanel(), ID_choice,
+        choice_memberof = new wxChoice(privilegesPanel, ID_choice,
             wxDefaultPosition, wxDefaultSize, choices);
         if (!choices.IsEmpty())
             choice_memberof->SetSelection(to_select);
     }
     choice_memberof->Enable(false);
     fgSizer4->Add(choice_memberof, 0, wxEXPAND, 0);
-    privilegesSizer->Add(fgSizer4, 1, wxEXPAND|wxALL, 5);
-    topSizer->Add(privilegesSizer, 1, wxEXPAND, 0);
+	privilegesSizer->Add(fgSizer4, 1, wxEXPAND|wxALL, 5);
+	privilegesPanel->SetSizer(privilegesSizer);
+    topSizer->Add(privilegesPanel, 1, wxEXPAND, 0);
     // PRIVILEGES done
 
     innerSizer->Add(topSizer, 0, wxEXPAND, 0);
@@ -394,7 +396,7 @@ void PrivilegesDialog::updateControls()
     choice_memberof->Enable(isRole);
 
     bool hasRelPriv = false;
-    wxCheckBox* boxes[5] = { checkbox_select, checkbox_insert,
+    wxCheckBox* boxes[] = { checkbox_select, checkbox_insert, checkbox_all,
         checkbox_update, checkbox_delete, checkbox_references };
     for (int i = 0; i < sizeof(boxes)/sizeof(wxCheckBox *); i++)
         if (boxes[i]->IsChecked())
@@ -422,7 +424,7 @@ void PrivilegesDialog::updateControls()
     REVOKE [AOF] rolename                  FROM grantee
     */
 
-    bool hasSomething = isRelation || isProcedure || isRole;
+    bool hasSomething = (isRelation && hasRelPriv) || isProcedure || isRole;
     button_add->Enable(hasSomething);
     if (!hasSomething)
     {
