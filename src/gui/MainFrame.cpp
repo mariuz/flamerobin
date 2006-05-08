@@ -612,12 +612,16 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
+
+    wxString fb_client_ver = std2wx(IBPP::ClientVersion());
+
     wxString ib;
-    ib.Printf(_("This tool uses IBPP library version %d.%d.%d.%d\nand wxWidgets library version %d.%d.%d"),
+    ib.Printf(_("This tool uses IBPP library version %d.%d.%d.%d\nFirebird client library version %s\nand wxWidgets library version %d.%d.%d"),
         (IBPP::Version & 0xFF000000) >> 24,
         (IBPP::Version & 0x00FF0000) >> 16,
         (IBPP::Version & 0x0000FF00) >> 8,
         (IBPP::Version & 0x000000FF),
+        fb_client_ver.c_str(),
         wxMAJOR_VERSION,
         wxMINOR_VERSION,
         wxRELEASE_NUMBER
