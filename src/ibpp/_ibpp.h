@@ -336,6 +336,8 @@ typedef int			ISC_EXPORT proto_add_user (ISC_STATUS *, USER_SEC_DATA *);
 typedef int			ISC_EXPORT proto_delete_user (ISC_STATUS *, USER_SEC_DATA *);
 typedef int			ISC_EXPORT proto_modify_user (ISC_STATUS *, USER_SEC_DATA *);
 
+typedef void		ISC_EXPORT proto_get_client_version(char *);
+
 //
 //	Those API are only available in versions 6.x of the GDS32.DLL
 //
@@ -456,6 +458,8 @@ struct GDS
 	//proto_encode_sql_date*			m_encode_sql_date;
 	//proto_encode_sql_time*			m_encode_sql_time;
 	//proto_encode_timestamp*			m_encode_timestamp;
+
+	proto_get_client_version*			m_get_client_version;
 
 	// Constructor (No need for a specific destructor)
 	GDS()

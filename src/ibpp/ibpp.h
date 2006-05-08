@@ -887,6 +887,7 @@ namespace IBPP
 
 	bool CheckVersion(uint32_t);
 	int GDSVersion();
+	std::string ClientVersion();
 	
 	/* On Win32 platform, ClientLibSearchPaths() allows to setup
 	 * one or multiple additional paths (separated with a ';') where IBPP
