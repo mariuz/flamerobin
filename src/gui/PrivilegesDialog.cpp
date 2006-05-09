@@ -451,7 +451,7 @@ void PrivilegesDialog::updateControls()
                   choice_view->GetStringSelection()).getQuoted();
     }
     bool grant = radiobox_action->GetSelection() < 2;
-    bool grantoption = radiobox_action->GetSelection() % 2;
+    bool grantoption = (radiobox_action->GetSelection() % 2 == 1);
     wxString sql(grant ? wxT("GRANT ") : wxT("REVOKE "));
     if (!grant && grantoption)
         sql << (isRole ? wxT("ADMIN") : wxT("GRANT")) << wxT(" OPTION FOR ");
