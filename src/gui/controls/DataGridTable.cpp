@@ -103,7 +103,7 @@ void GridTableCharsetConverter::setConnectionCharset(
         }
 
         connectionCharsetM = connectionCharset;
-        wxFontEncoding fe = wxFontMapper::Get()->CharsetToEncoding(
+        wxFontEncoding fe = wxFontMapperBase::Get()->CharsetToEncoding(
             mapCharset(connectionCharset), false);
         if (fe != wxFONTENCODING_SYSTEM)
             converterM = new wxCSConv(fe);
