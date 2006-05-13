@@ -658,6 +658,14 @@ bool Database::parseCommitedSql(wxString sql)
     // TODO: check that there are no unwanted side-effects to this
     // SubjectLocker locker(this);
 
+    if (stm.actionIs(actGRANT))
+    {
+        MetadataItem *obj = stm.getObject();
+        if (obj)
+            obj->notifyObservers();
+        return true;
+    }
+
     if (stm.actionIs(actDROP, ntIndex))
     {
         // the affected table will recognize its index (if loaded)

@@ -82,15 +82,16 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db)
         if (stt != tkCOMMENT && stt != tkWHITESPACE)
         {
             tokensM.add(stt);
+            wxString ts(tokenizer.getCurrentTokenString());
+            tokenStringsM[tokensM.size() - 1] = ts;
             if (stt == tkIDENTIFIER || stt == tkSTRING)
             {
-                wxString ts(tokenizer.getCurrentTokenString());
-                tokenStringsM[tokensM.size() - 1] = ts;
                 if (stt == tkIDENTIFIER)
                 {
                     nameM.setFromSql(ts);
                     tokenizer.nextToken();
-                    break;
+                    if (tokensM[0] != kwGRANT && tokensM[0] != kwREVOKE)
+                        break;
                 }
             }
         }
@@ -115,6 +116,9 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db)
             actionM = actDECLARE; break;
         case kwDROP:
             actionM = actDROP; break;
+        case kwGRANT:
+        case kwREVOKE:
+            actionM = actGRANT; break;
         case kwRECREATE:
             actionM = actRECREATE; break;
         case kwSET:
@@ -130,6 +134,48 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db)
     {
         actionM = actCREATE_OR_ALTER;
         typeTokenIndex = 3;
+    }
+
+    // GRANT blah, blah blah ON [PROCEDURE] object_name TO ...
+    // REVOKE blah, blah, .. ON [PROCEDURE] object_name FROM ...
+    if (actionM == actGRANT)
+    {
+        size_t idx = 1;
+        while (idx < tokensM.size())
+        {
+            if (tokensM[idx++] == kwON)
+            {
+                if (tokensM[idx] == kwPROCEDURE)
+                {
+                    idx++;
+                    objectTypeM = ntProcedure;
+                }
+                nameM.setFromSql(tokenStringsM[idx]);
+                if (objectTypeM == ntUnknown)   // find relation
+                {
+                    if (!databaseM)
+                        return;
+                    objectM = databaseM->findByNameAndType(ntTable,
+                        nameM.get());
+                    if (objectM)
+                        objectTypeM = ntTable;
+                    else
+                    {
+                        objectM = databaseM->findByNameAndType(ntView,
+                            nameM.get());
+                    }
+                    if (objectM)
+                        objectTypeM = ntView;
+                }
+                return;
+            }
+        }
+        // GRANT role_name TO ...
+        nameM.setFromSql(tokenStringsM[1]);
+        objectM = databaseM->findByNameAndType(ntRole, nameM.get());
+        if (objectM)
+            objectTypeM = ntRole;
+        return;
     }
 
     // get object type
