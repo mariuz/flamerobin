@@ -78,21 +78,19 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db)
     {
         stt = tokenizer.getCurrentToken();
         if (stt == tkEOF)
-            return;// true;
+            break;
         if (stt != tkCOMMENT && stt != tkWHITESPACE)
         {
             tokensM.add(stt);
             wxString ts(tokenizer.getCurrentTokenString());
             tokenStringsM[tokensM.size() - 1] = ts;
-            if (stt == tkIDENTIFIER || stt == tkSTRING)
+            if (stt == tkIDENTIFIER)
             {
-                if (stt == tkIDENTIFIER)
-                {
-                    nameM.setFromSql(ts);
-                    tokenizer.nextToken();
-                    if (tokensM[0] != kwGRANT && tokensM[0] != kwREVOKE)
-                        break;
-                }
+                nameM.setFromSql(ts);
+                tokenizer.nextToken();
+                // break here since we don't want name to be overwritten
+                if (tokensM[0] != kwGRANT && tokensM[0] != kwREVOKE)
+                    break;
             }
         }
         tokenizer.nextToken();
