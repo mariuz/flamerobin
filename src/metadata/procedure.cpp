@@ -352,7 +352,7 @@ wxString Procedure::getAlterSql(bool full)
         sql += source;
     else
         sql += wxT("BEGIN EXIT; END");
-    sql += wxT("^\nSET TERM ; ^");
+    sql += wxT("^\nSET TERM ; ^\n");
     return sql;
 }
 //-----------------------------------------------------------------------------
