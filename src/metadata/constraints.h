@@ -33,17 +33,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "metadata/metadataitem.h"
 class Table;
 //-----------------------------------------------------------------------------
-// These could all be simple "struct"s but we want to add some functionality later
-//
 class Constraint: public MetadataItem
 {
 public:
-    virtual void acceptVisitor(MetadataItemVisitor* visitor);
     virtual Table* getTable() const;
     virtual bool isSystem() const;
 };
 //-----------------------------------------------------------------------------
-//! primary keys and uniques
 class ColumnConstraint: public Constraint
 {
 public:
@@ -54,6 +50,20 @@ public:
     wxString getColumnList() const;
     const_iterator begin() { return columnsM.begin(); };
     const_iterator end() { return columnsM.end(); };
+};
+//-----------------------------------------------------------------------------
+//! uniques
+class UniqueConstraint: public ColumnConstraint
+{
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
+//! primary keys
+class PrimaryKeyConstraint: public UniqueConstraint
+{
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
 //! checks
@@ -67,6 +77,7 @@ public:
 class ForeignKey: public ColumnConstraint
 {
 public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
     wxString referencedTableM;                   // referenced table
     std::vector<wxString> referencedColumnsM;    // referenced columns
     wxString updateActionM;

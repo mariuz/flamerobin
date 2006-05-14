@@ -30,22 +30,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define FR_CREATEDDLVISITOR_H
 
 #include "core/ProgressIndicator.h"
-#include "metadata/column.h"
-#include "metadata/database.h"
-#include "metadata/domain.h"
-#include "metadata/exception.h"
-#include "metadata/function.h"
-#include "metadata/generator.h"
-#include "metadata/metadataitem.h"
 #include "metadata/MetadataItemVisitor.h"
-#include "metadata/parameter.h"
-#include "metadata/procedure.h"
-#include "metadata/role.h"
-#include "metadata/root.h"
-#include "metadata/server.h"
-#include "metadata/table.h"
-#include "metadata/trigger.h"
-#include "metadata/view.h"
 //-----------------------------------------------------------------------------
 class CreateDDLVisitor: public MetadataItemVisitor
 {
@@ -69,7 +54,9 @@ public:
     virtual void visit(Domain& domain);
     virtual void visit(Exception& exception);
     virtual void visit(Function& function);
+    virtual void visit(ForeignKey& fk);
     virtual void visit(Generator& generator);
+    virtual void visit(PrimaryKeyConstraint& pk);
     virtual void visit(Procedure& procedure);
     virtual void visit(Parameter& parameter);
     virtual void visit(Role& role);
@@ -77,6 +64,7 @@ public:
     virtual void visit(Server& server);
     virtual void visit(Table& table);
     virtual void visit(Trigger& trigger);
+    virtual void visit(UniqueConstraint& unq);
     virtual void visit(View& view);
     virtual void visit(MetadataItem& metadataItem);
 };

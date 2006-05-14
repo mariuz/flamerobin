@@ -58,15 +58,18 @@ public:
     virtual void visit(Database& database);
     virtual void visit(Domain& domain);
     virtual void visit(Exception& exception);
+    virtual void visit(ForeignKey& fk);
     virtual void visit(Function& function);
     virtual void visit(Generator& generator);
     virtual void visit(Procedure& procedure);
     virtual void visit(Parameter& parameter);
+    virtual void visit(PrimaryKeyConstraint& pk);
     virtual void visit(Role& role);
     virtual void visit(Root& root);
     virtual void visit(Server& server);
     virtual void visit(Table& table);
     virtual void visit(Trigger& trigger);
+    virtual void visit(UniqueConstraint& unq);
     virtual void visit(View& view);
     virtual void visit(MetadataItem& metadataItem);
 };

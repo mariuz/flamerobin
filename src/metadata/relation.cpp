@@ -137,11 +137,11 @@ bool Relation::loadColumns()
             st1->Get(4, collation);
             readBlob(st1, 5, computedSrc);
 
-			if (!st1->IsNull(6))
-			{
-	            readBlob(st1, 6, defaultSrc);
-				defaultSrc.Remove(0, 8);
-			}
+            if (!st1->IsNull(6))
+            {
+                readBlob(st1, 6, defaultSrc);
+                defaultSrc.Remove(0, 8);
+            }
 
             Column *cc = columnsM.add();
             cc->setName_(std2wx(name));
@@ -276,7 +276,8 @@ wxString Relation::getRebuildSql()
     // 0. prepare stuff
     std::vector<Procedure *> procedures;
     std::vector<CheckConstraint> checks;
-    wxString privileges, triggers, dropViews, createViews;
+    wxString privileges, createTriggers, dropTriggers, dropViews, createViews;
+    wxString fkDrop, fkDropSelf, fkCreate, fkCreateSelf, pkDrop, pkCreate;
 
     // 1. build view list (dependency tree) - ordered by DROP
     std::vector<Relation *> viewList;
@@ -324,7 +325,13 @@ wxString Relation::getRebuildSql()
             //       for the time being: don't use a progress indicator
             CreateDDLVisitor cdv(0);
             (*it)->acceptVisitor(&cdv);
-            triggers += cdv.getSql() + wxT("\n");
+            createTriggers += cdv.getSql() + wxT("\n");
+
+            if (dynamic_cast<Table *>(this))
+            {
+                dropTriggers += wxT("DROP TRIGGER ") + (*it)->getQuotedName()
+                    + wxT(";\n");
+            }
         }
 
         const std::vector<Privilege>* priv = (*vi)->getPrivileges();
@@ -333,8 +340,83 @@ wxString Relation::getRebuildSql()
             for (std::vector<Privilege>::const_iterator ci = priv->begin();
                 ci != priv->end(); ++ci)
             {
-                privileges += (*ci).getSql() + wxT(";\n");
+                privileges += (*ci).getSql();
             }
+        }
+    }
+
+    // only for tables
+    Table *t1 = dynamic_cast<Table *>(this);
+    if (t1)
+    {
+        // add own check constraints as well
+        std::vector<CheckConstraint> *cc = t1->getCheckConstraints();
+        if (cc)
+            checks.insert(checks.end(), cc->begin(), cc->end());
+
+        // The following must be done in this order (and reverse for CREATE):
+        // a) drop and create foreign keys that reference this table
+        // find all tables from "tables" which have foreign keys with "table"
+        // and return them in "list"
+        Database *d = getDatabase();
+        if (!d)
+            return _("Error: database not set");
+        std::vector<ForeignKey> fkeys;
+        MetadataCollection<Table> *tabs = d->getCollection<Table>();
+        if (tabs)
+        {
+            for (MetadataCollection<Table>::iterator it = tabs->begin(); it !=
+                tabs->end(); ++it)
+            {
+                std::vector<ForeignKey> *fk = (*it).getForeignKeys();
+                if (fk)
+                {
+                    for (std::vector<ForeignKey>::iterator i2 = fk->begin();
+                        i2 != fk->end(); ++i2)
+                    {
+                        if ((*i2).referencedTableM == getName_())
+                            fkeys.insert(fkeys.end(), (*i2));
+                    }
+                }
+            }
+        }
+        // b) drop own primary and unique keys
+        PrimaryKeyConstraint* pk = t1->getPrimaryKey();
+        if (pk)
+        {
+            pkDrop += wxT("ALTER TABLE ") + getQuotedName() +
+                wxT(" DROP CONSTRAINT ") + pk->getQuotedName() + wxT(";\n");
+            CreateDDLVisitor cdv(0);
+            pk->acceptVisitor(&cdv);
+            pkCreate += cdv.getSql();
+        }
+        std::vector<UniqueConstraint>* c = t1->getUniqueConstraints();
+        if (c)
+        {
+            for (std::vector<UniqueConstraint>::iterator it = c->begin(); it != c->end(); ++it)
+            {
+                pkDrop += wxT("ALTER TABLE ") + getQuotedName() +
+                    wxT(" DROP CONSTRAINT ") + (*it).getQuotedName() + wxT(";\n");
+                CreateDDLVisitor cdv(0);
+                (*it).acceptVisitor(&cdv);
+                pkCreate += cdv.getSql();
+            }
+        }
+
+        // b) drop foreign keys (others' and own)
+        std::vector<ForeignKey> *fk = t1->getForeignKeys();
+        if (fk)
+            fkeys.insert(fkeys.end(), fk->begin(), fk->end());
+        for (std::vector<ForeignKey>::iterator i2 = fkeys.begin();
+            i2 != fkeys.end(); ++i2)
+        {
+            fkDrop += wxT("ALTER TABLE ") +
+                (*i2).getTable()->getQuotedName() +
+                wxT(" DROP CONSTRAINT ") +
+                (*i2).getQuotedName() + wxT(";\n");
+            CreateDDLVisitor cdv(0);
+            (*i2).acceptVisitor(&cdv);
+            fkCreate += cdv.getSql();
         }
     }
 
@@ -343,11 +425,10 @@ wxString Relation::getRebuildSql()
         it != checks.end(); ++it)
     {
         wxString cname = wxT("CONSTRAINT ") + (*it).getQuotedName();
+        dropChecks += wxT("ALTER TABLE ") + (*it).getTable()->getQuotedName()
+            + wxT(" DROP ") + cname + wxT(";\n");
         createChecks += wxT("ALTER TABLE ") +
-            (*it).getTable()->getQuotedName();
-        dropChecks = createChecks;
-        dropChecks += wxT(" DROP ") + cname + wxT(";\n");
-        createChecks += wxT(" ADD ");
+            (*it).getTable()->getQuotedName() + wxT(" ADD ");
         if (!(*it).isSystem())
             createChecks += cname;
         createChecks += wxT("\n  ") + (*it).sourceM + wxT(";\n");
@@ -355,6 +436,10 @@ wxString Relation::getRebuildSql()
 
     wxString sql(wxT("SET AUTODDL ON;\n\n"));
     sql += dropChecks;
+    sql += dropTriggers;
+    sql += fkDrop;
+    sql += fkDropSelf;
+    sql += pkDrop;
     for (std::vector<Procedure *>::iterator it = procedures.begin();
         it != procedures.end(); ++it)
     {
@@ -370,11 +455,14 @@ wxString Relation::getRebuildSql()
         sql += wxT("\n/* ------------------------------------------ */\n\n")
             + (*it)->getAlterSql(true);
     }
-    sql += triggers;
+    sql += createTriggers;
     sql += createChecks;
+    sql += pkCreate;
+    sql += fkCreateSelf;
+    sql += fkCreate;
     sql += privileges;
 
-    // TODO: restore view descriptions
+    // TODO: restore view and trigger descriptions
 
     return sql;
 }

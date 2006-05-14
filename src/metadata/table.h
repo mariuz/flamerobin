@@ -39,7 +39,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 class Table: public Relation
 {
 private:
-    ColumnConstraint primaryKeyM;           // table can have only one pk
+    PrimaryKeyConstraint primaryKeyM;           // table can have only one pk
     bool primaryKeyLoadedM;
     bool loadPrimaryKey();
 
@@ -51,7 +51,7 @@ private:
     bool checkConstraintsLoadedM;
     bool loadCheckConstraints();
 
-    std::vector<ColumnConstraint> uniqueConstraintsM;
+    std::vector<UniqueConstraint> uniqueConstraintsM;
     bool uniqueConstraintsLoadedM;
     bool loadUniqueConstraints();
 
@@ -70,10 +70,10 @@ public:
     virtual bool loadColumns();         // update the keys info too
     void invalidateIndices(const wxString& forIndex = wxEmptyString);
 
-    ColumnConstraint *getPrimaryKey();
+    PrimaryKeyConstraint *getPrimaryKey();
     std::vector<ForeignKey> *getForeignKeys();
     std::vector<CheckConstraint> *getCheckConstraints();
-    std::vector<ColumnConstraint> *getUniqueConstraints();
+    std::vector<UniqueConstraint> *getUniqueConstraints();
     std::vector<Index> *getIndices();
 
     wxString getInsertStatement();

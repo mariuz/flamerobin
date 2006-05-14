@@ -112,10 +112,10 @@ wxString Table::getInsertStatement()
         if (!(*i).isNullable() && (!(*i).hasDefault()))
             valist += wxT("*");
 
-		if (!(*i).hasDefault())
+        if (!(*i).hasDefault())
             valist += (*i).getName_();
-		else
-			valist += (*i).getDefault();
+        else
+            valist += (*i).getDefault();
 
     }
     sql += collist + wxT(")\n VALUES (\n") + valist + wxT("\n)");
@@ -266,7 +266,7 @@ bool Table::loadUniqueConstraints()
 
         st1->Set(1, wx2std(getName_()));
         st1->Execute();
-        ColumnConstraint *cc = 0;
+        UniqueConstraint *cc = 0;
         while (st1->Fetch())
         {
             std::string name, cname, ix;
@@ -280,7 +280,7 @@ bool Table::loadUniqueConstraints()
                 cc->columnsM.push_back(std2wx(name));
             else
             {
-                ColumnConstraint c;
+                UniqueConstraint c;
                 uniqueConstraintsM.push_back(c);
                 cc = &uniqueConstraintsM.back();
                 cc->indexName = std2wx(ix).Strip();
@@ -304,7 +304,7 @@ bool Table::loadUniqueConstraints()
     return false;
 }
 //-----------------------------------------------------------------------------
-ColumnConstraint *Table::getPrimaryKey()
+PrimaryKeyConstraint *Table::getPrimaryKey()
 {
     if (!loadPrimaryKey() || primaryKeyM.columnsM.empty())  // no primary key on table
         return 0;
@@ -325,7 +325,7 @@ std::vector<CheckConstraint> *Table::getCheckConstraints()
     return &checkConstraintsM;
 }
 //-----------------------------------------------------------------------------
-std::vector<ColumnConstraint> *Table::getUniqueConstraints()
+std::vector<UniqueConstraint> *Table::getUniqueConstraints()
 {
     if (!loadUniqueConstraints())
         return 0;

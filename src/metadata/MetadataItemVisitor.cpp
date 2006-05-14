@@ -69,12 +69,22 @@ void MetadataItemVisitor::visit(Exception&)
     defaultAction();
 };
 //-----------------------------------------------------------------------------
+void MetadataItemVisitor::visit(ForeignKey& fk)
+{
+    defaultAction();
+}
+//-----------------------------------------------------------------------------
 void MetadataItemVisitor::visit(Function&)
 {
     defaultAction();
 };
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visit(Generator&)
+{
+    defaultAction();
+};
+//-----------------------------------------------------------------------------
+void MetadataItemVisitor::visit(PrimaryKeyConstraint&)
 {
     defaultAction();
 };
@@ -110,6 +120,11 @@ void MetadataItemVisitor::visit(Table&)
 };
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visit(Trigger&)
+{
+    defaultAction();
+};
+//-----------------------------------------------------------------------------
+void MetadataItemVisitor::visit(UniqueConstraint&)
 {
     defaultAction();
 };

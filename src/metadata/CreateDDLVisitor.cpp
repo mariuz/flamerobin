@@ -40,6 +40,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include "metadata/CreateDDLVisitor.h"
+
+// forward declaration to keep compilers happy
+void addIndex(std::vector<Index> *ix, wxString& sql, ColumnConstraint *cc);
 //-----------------------------------------------------------------------------
 CreateDDLVisitor::CreateDDLVisitor(ProgressIndicator* progressIndicator)
     : MetadataItemVisitor()
@@ -159,8 +162,8 @@ void CreateDDLVisitor::visit(Database& d)
 
     try
     {
-        preSqlM << _("/* Please note that this script doesn't maintain\n");
-                << _("   proper order of creation for computed columns if\n");
+        preSqlM << _("/* Please note that this script doesn't maintain\n")
+                << _("   proper order of creation for computed columns if\n")
                 << _("   they reference other tables.  */\n\n");
         preSqlM << wxT("/********************* ROLES **********************/\n\n");
         iterateit<Role>(this, d, progressIndicatorM);
@@ -261,6 +264,41 @@ void CreateDDLVisitor::visit(Exception& e)
     sqlM = preSqlM + postSqlM;
 }
 //-----------------------------------------------------------------------------
+void CreateDDLVisitor::visit(ForeignKey& fk)
+{
+    Identifier reftab(fk.referencedTableM);
+    wxString src_col, dest_col;
+    for (std::vector<wxString>::const_iterator it = fk.begin(); it != fk.end(); ++it)
+    {
+        if (it != fk.begin())
+            src_col += wxT(",");
+        Identifier id(*it);
+        src_col += id.getQuoted();
+    }
+    for (std::vector<wxString>::const_iterator it = fk.referencedColumnsM.begin();
+        it != fk.referencedColumnsM.end(); ++it)
+    {
+        if (it != fk.referencedColumnsM.begin())
+            dest_col += wxT(",");
+        Identifier id(*it);
+        dest_col += id.getQuoted();
+    }
+    postSqlM += wxT("ALTER TABLE ") + fk.getTable()->getQuotedName() + wxT(" ADD");
+    if (!fk.isSystem())
+        postSqlM += wxT(" CONSTRAINT ") + fk.getQuotedName();
+    postSqlM += wxT("\n  FOREIGN KEY (") + src_col + wxT(") REFERENCES ")
+        + reftab.getQuoted() + wxT(" (") + dest_col + wxT(")");
+    wxString upd = fk.updateActionM;
+    if (!upd.IsEmpty() && upd != wxT("RESTRICT"))
+        postSqlM += wxT(" ON UPDATE ") + upd;
+    wxString del = fk.deleteActionM;
+    if (!del.IsEmpty() && del != wxT("RESTRICT"))
+        postSqlM += wxT(" ON DELETE ") + del;
+    addIndex(fk.getTable()->getIndices(), postSqlM, &fk);
+    postSqlM += wxT(";\n");
+    sqlM = postSqlM;
+}
+//-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Function& f)
 {
     preSqlM << f.getCreateSql() << wxT("\n");
@@ -291,6 +329,27 @@ void CreateDDLVisitor::visit(Generator& g)
              << name << wxT("';\n");
     }
     sqlM = preSqlM + postSqlM;
+}
+//-----------------------------------------------------------------------------
+void CreateDDLVisitor::visit(PrimaryKeyConstraint& pk)
+{
+    wxString sql;
+    if (!pk.isSystem())     // system one, noname
+        sql += wxT(" CONSTRAINT ") + pk.getQuotedName();
+    sql += wxT(" PRIMARY KEY (");
+
+    for (std::vector<wxString>::const_iterator it = pk.begin(); it != pk.end(); ++it)
+    {
+        if (it != pk.begin())
+            sql += wxT(",");
+        Identifier id(*it);
+        sql += id.getQuoted();
+    }
+    sql += wxT(")");
+    addIndex(pk.getTable()->getIndices(), sql, &pk);
+    preSqlM += wxT(",\n ") + sql;
+    sqlM = wxT("ALTER TABLE ") + pk.getTable()->getQuotedName() + wxT(" ADD") +
+        sql + wxT(";\n");
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Procedure& p)
@@ -422,89 +481,24 @@ void CreateDDLVisitor::visit(Table& t)
         visit(*it);
     }
 
-    // PRELOAD indexes as we might need them for PK,FK
     std::vector<Index> *ix = t.getIndices();
 
     // primary keys (detect the name and use CONSTRAINT name PRIMARY KEY... or PRIMARY KEY(col)
-    ColumnConstraint *pk = t.getPrimaryKey();
+    PrimaryKeyConstraint *pk = t.getPrimaryKey();
     if (pk)
-    {
-        preSqlM += wxT(",\n ");
-        if (!pk->isSystem())     // system one, noname
-            preSqlM += wxT(" CONSTRAINT ") + pk->getQuotedName();
-        preSqlM += wxT(" PRIMARY KEY (");
-
-        for (std::vector<wxString>::const_iterator it = pk->begin(); it != pk->end(); ++it)
-        {
-            if (it != pk->begin())
-                preSqlM += wxT(",");
-            Identifier id(*it);
-            preSqlM += id.getQuoted();
-        }
-        preSqlM += wxT(")");
-        addIndex(ix, preSqlM, pk);
-    }
+        visit(*pk);
 
     // unique constraints
-    std::vector<ColumnConstraint> *uc = t.getUniqueConstraints();
+    std::vector<UniqueConstraint> *uc = t.getUniqueConstraints();
     if (uc)
-    {
-        for (std::vector<ColumnConstraint>::iterator ci = uc->begin(); ci != uc->end(); ++ci)
-        {
-            preSqlM += wxT(",\n ");
-            if (!(*ci).isSystem())
-                preSqlM += wxT(" CONSTRAINT ") + (*ci).getQuotedName();
-            preSqlM += wxT(" UNIQUE (");
-            for (std::vector<wxString>::const_iterator it = (*ci).begin(); it != (*ci).end(); ++it)
-            {
-                if (it != (*ci).begin())
-                    preSqlM += wxT(",");
-                Identifier id(*it);
-                preSqlM += id.getQuoted();
-            }
-            preSqlM += wxT(")");
-            addIndex(ix, preSqlM, &(*ci));
-        }
-    }
+        for (std::vector<UniqueConstraint>::iterator it = uc->begin(); it != uc->end(); ++it)
+            visit(*it);
 
     // foreign keys
     std::vector<ForeignKey> *fk = t.getForeignKeys();
     if (fk)
-    {
-        for (std::vector<ForeignKey>::iterator ci = fk->begin(); ci != fk->end(); ++ci)
-        {
-            Identifier reftab((*ci).referencedTableM);
-            wxString src_col, dest_col;
-            for (std::vector<wxString>::const_iterator it = (*ci).begin(); it != (*ci).end(); ++it)
-            {
-                if (it != (*ci).begin())
-                    src_col += wxT(",");
-                Identifier id(*it);
-                src_col += id.getQuoted();
-            }
-            for (std::vector<wxString>::const_iterator it = (*ci).referencedColumnsM.begin();
-                it != (*ci).referencedColumnsM.end(); ++it)
-            {
-                if (it != (*ci).referencedColumnsM.begin())
-                    dest_col += wxT(",");
-                Identifier id(*it);
-                dest_col += id.getQuoted();
-            }
-            postSqlM += wxT("ALTER TABLE ") + t.getQuotedName() + wxT(" ADD");
-            if (!(*ci).isSystem())
-                postSqlM += wxT(" CONSTRAINT ") + (*ci).getQuotedName();
-            postSqlM += wxT("\n  FOREIGN KEY (") + src_col + wxT(") REFERENCES ")
-                + reftab.getQuoted() + wxT(" (") + dest_col + wxT(")");
-            wxString upd = (*ci).updateActionM;
-            if (!upd.IsEmpty() && upd != wxT("RESTRICT"))
-                postSqlM += wxT(" ON UPDATE ") + upd;
-            wxString del = (*ci).deleteActionM;
-            if (!del.IsEmpty() && del != wxT("RESTRICT"))
-                postSqlM += wxT(" ON DELETE ") + del;
-            addIndex(ix, postSqlM, &(*ci));
-            postSqlM += wxT(";\n");
-        }
-    }
+        for (std::vector<ForeignKey>::iterator it = fk->begin(); it != fk->end(); ++it)
+            visit(*it);
 
     // check constraints
     std::vector<CheckConstraint> *chk = t.getCheckConstraints();
@@ -546,13 +540,8 @@ void CreateDDLVisitor::visit(Table& t)
     // grant sel/ins/upd/del/ref/all ON [name] to [SP,user,role]
     const std::vector<Privilege>* priv = t.getPrivileges();
     if (priv)
-    {
-        for (std::vector<Privilege>::const_iterator ci = priv->begin();
-            ci != priv->end(); ++ci)
-        {
+        for (std::vector<Privilege>::const_iterator ci = priv->begin(); ci != priv->end(); ++ci)
             postSqlM += (*ci).getSql() + wxT("\n");
-        }
-    }
 
     preSqlM += wxT("\n);\n");
 
@@ -567,7 +556,7 @@ void CreateDDLVisitor::visit(Table& t)
                  << name << wxT("';\n");
     }
 
-    sqlM += preSqlM + wxT("\n") + postSqlM;
+    sqlM = preSqlM + wxT("\n") + postSqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(Trigger& t)
@@ -602,6 +591,26 @@ void CreateDDLVisitor::visit(Trigger& t)
              << name << wxT("';\n");
     }
     sqlM = preSqlM + postSqlM;
+}
+//-----------------------------------------------------------------------------
+void CreateDDLVisitor::visit(UniqueConstraint& unq)
+{
+    wxString sql;
+    if (!unq.isSystem())
+        sql += wxT(" CONSTRAINT ") + unq.getQuotedName();
+    preSqlM += wxT(" UNIQUE (");
+    for (std::vector<wxString>::const_iterator it = unq.begin(); it != unq.end(); ++it)
+    {
+        if (it != unq.begin())
+            sql += wxT(",");
+        Identifier id(*it);
+        sql += id.getQuoted();
+    }
+    sql += wxT(")");
+    addIndex(unq.getTable()->getIndices(), sql, &unq);
+    preSqlM += wxT(",\n ") + sql;
+    sqlM = wxT("ALTER TABLE ") + unq.getTable()->getQuotedName()
+        + wxT(" ADD") + sql + wxT(";\n");
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visit(View& v)

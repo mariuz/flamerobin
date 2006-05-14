@@ -500,7 +500,7 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         Table* t = dynamic_cast<Table*>(object);
         if (!t)
             return;
-        ColumnConstraint* pk = t->getPrimaryKey();
+        PrimaryKeyConstraint* pk = t->getPrimaryKey();
         if (!pk)
             return;
         processHtmlCode(htmlpage, suffix, pk);
@@ -535,10 +535,10 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         Table* t = dynamic_cast<Table*>(object);
         if (!t)
             return;
-        std::vector<ColumnConstraint>* c = t->getUniqueConstraints();
+        std::vector<UniqueConstraint>* c = t->getUniqueConstraints();
         if (!c)
             return;
-        for (std::vector<ColumnConstraint>::iterator it = c->begin(); it != c->end(); ++it)
+        for (std::vector<UniqueConstraint>::iterator it = c->begin(); it != c->end(); ++it)
             processHtmlCode(htmlpage, suffix, &(*it));
     }
 

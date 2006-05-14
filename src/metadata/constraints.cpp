@@ -95,7 +95,17 @@ wxString ForeignKey::getJoin(bool quoted) const
     return result;
 }
 //-----------------------------------------------------------------------------
-void Constraint::acceptVisitor(MetadataItemVisitor* visitor)
+void ForeignKey::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visit(*this);
+}
+//-----------------------------------------------------------------------------
+void UniqueConstraint::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visit(*this);
+}
+//-----------------------------------------------------------------------------
+void PrimaryKeyConstraint::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visit(*this);
 }
