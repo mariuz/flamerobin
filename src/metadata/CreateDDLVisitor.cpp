@@ -159,8 +159,9 @@ void CreateDDLVisitor::visit(Database& d)
 
     try
     {
-        preSqlM << _("/* Please note that this script doesn't handle\n")
-                << _("computed columns properly */\n\n");
+        preSqlM << _("/* Please note that this script doesn't maintain\n");
+                << _("   proper order of creation for computed columns if\n");
+                << _("   they reference other tables.  */\n\n");
         preSqlM << wxT("/********************* ROLES **********************/\n\n");
         iterateit<Role>(this, d, progressIndicatorM);
 
