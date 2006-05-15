@@ -370,13 +370,13 @@ void AdvancedSearchFrame::removeSubject(Subject* subject)
         rebuildList();
 
     // STEP2: Check for criteria
-    long i = 0;
+    long itemIndex = 0;
     for (std::vector<MetadataItem *>::iterator it = results.begin();
-        it != results.end(); ++it, i++)
+        it != results.end(); ++it, itemIndex++)
     {
         if ((*it) == subject)
         {
-            listctrl_results->DeleteItem(i);
+            listctrl_results->DeleteItem(itemIndex);
             results.erase(it);
             break;
         }
