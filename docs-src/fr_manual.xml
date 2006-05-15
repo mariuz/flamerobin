@@ -6,7 +6,7 @@
 -->
 <article id="frrelnotes">
   <articleinfo>
-    <title><application>FlameRobin</application> 0.6.0 ALPHA Manual</title>
+    <title><application>FlameRobin</application> 0.7.0 ALPHA Manual</title>
 
     <author>
       <firstname>Nando</firstname>
@@ -92,9 +92,9 @@
   <section id="frrelnotes-license">
     <title>License</title>
 
-    <para>FlameRobin is released under the Expat License.
-    You can find the complete license text in the file fr_license.html, or
-    <ulink url="http://www.flamerobin.org/license.html">here</ulink>.</para>
+    <para>FlameRobin is released under the Expat License. You can find the
+    complete license text in the file fr_license.html, or <ulink
+    url="http://www.flamerobin.org/license.html">here</ulink>.</para>
   </section>
 
   <section id="frrelnotes-changes">
@@ -196,7 +196,7 @@
   </section>
 
   <section id="frrelnotes-getting-started">
-    <title>Getting started</title>
+    <title>Getting started / basic features</title>
 
     <para>Upon first startup, FlameRobin will show a "Home" tree containing
     only the local server (localhost), and will invite you to create new
@@ -275,6 +275,9 @@
       convenience, FlameRobin will remember your search strings for further
       use. Click the arrow buttons next to the search box to move to the next
       and previous matches.</para>
+
+      <para>There is also an advanced metadata search feature, which is
+      described later.</para>
     </section>
 
     <section>
@@ -357,8 +360,9 @@
       <title>DDL extraction</title>
 
       <para>You can generate DDL (Data Definition Language) creation scripts
-      for any object you have in the database. Just open the DDL subpage of an
-      object's property page to see the code that creates it.</para>
+      for any object you have in the database, or even for the whole database.
+      Just open the DDL subpage of an object's property page to see the code
+      that creates it.</para>
 
       <para>Extracting DDL scripts is useful if you want to replicate an
       object's structure in a different database, or create a slightly
@@ -408,18 +412,71 @@
     <section>
       <title>User management</title>
 
-      <para>This feature is not yet implemented.</para>
+      <para>Current versions of Firebird use a central server-wide user
+      repository. FlameRobin allows you to add, modify and delete user
+      accounts (but it will not allow you to delete the SYSDBA predefined
+      user) by means of the "Manage users..." option in the Server menu (or
+      the server's context menu item, or the Object menu item with the same
+      caption). It is Firebird's security policy that you need to be SYSDBA to
+      use this feature.</para>
+
+      <note>
+        <para>The proper way to change the SYSDBA password on LInux is to run
+        the changeDBAPassword.sh script in Firebird's bin directory. Otherwise
+        Firebird's startup and shutdown scripts won't be updated.</para>
+      </note>
     </section>
 
     <section>
-      <title>Retrieving server version</title>
+      <title>Grant and revoke privileges</title>
+
+      <para>Every object in the database has a list of privileges that
+      identify the users and roles that can work with that object. On an
+      object's property page (in the "Privileges" subpage) you can view the
+      privleges associated with that object, and if you hover the mouse over
+      icons, you can see who granted them in the status bar. Clicking on the
+      "Grant and revoke privileges" link will open a dialog box that will help
+      granting and revoke privileges to that object (which you'll find
+      pre-selected in the dialog box) and/or other objects as well. The dialog
+      box allows you to build a list of grant/revoke SQL statements by
+      clicking on appropriate controls and then on the "Add To List" button.
+      When satisfied, click the "Execute All" button to run all the statements
+      in the SQL editor (which will also log them for future use, as with any
+      SQL statement executed in FlameRobin, if logging is enabled).</para>
+    </section>
+
+    <section>
+      <title>Server and client version</title>
 
       <para>Select "Retrieve server version" from the "Server" menu (or from a
       server's context menu) to see a dialog box with the server's version
       string. A server's version string reveals the exact build number of your
       Firebird server and the platform it is running on. For example, a
       version string equal to "WI-V1.5.2.4731 Firebird 1.5" means Firebird
-      1.5.2, build 4731, on Windows.</para>
+      1.5.2, build 4731, on Windows. You can also look at the version string
+      of the Firebird client FlameRobin is using, in the About box
+      (Help/About).</para>
+    </section>
+
+    <section>
+      <title>Advanced metadata search</title>
+
+      <para>This feature, which you can fire through the lens button in
+      FleameRobin's main window, allows you to perform more advanced search
+      operations in your database's metadata (or in more databases at the same
+      time). You can search with wildcards, search on object names and
+      descriptions, in the DDL definition (which includes the source code for
+      triggers and stored procedures), and do other, more specialized, search
+      operations. Just add all criteria you need through the Add buttons, and
+      then click the Start search button. The criteria will be concatenated
+      with an "and" boolean operator, that is all of them must be satisfied
+      for an object to be included in the SEARCH RESULTS pane.</para>
+
+      <para>This feature is provided on an experimental basis, as we're
+      currently looking for suggestions about how to improve both the user
+      interface and the capabilities. We already have some ideas that will
+      radically change the appearance of this dialog box, but we thought users
+      might want to try it out so they can give us some good tips.</para>
     </section>
   </section>
 
@@ -488,13 +545,6 @@
               flexible, but consumes more disk space and memory.</para>
             </listitem>
           </itemizedlist></para>
-      </section>
-
-      <section>
-        <title>Confirm quit</title>
-
-        <para>Set this option to have FlameRobin ask you for quit
-        confirmation.</para>
       </section>
     </section>
 
@@ -610,6 +660,13 @@
           marker is only a visual indicator, as FlameRobin will not enforce
           any limit to the length of text lines. You can also customize the
           column at which the marker will appear.</para>
+        </section>
+
+        <section>
+          <title>Tab size</title>
+
+          <para>Here you can set the number of space characters the SQL Editor
+          will render for each TAB.</para>
         </section>
 
         <section>
@@ -772,35 +829,6 @@
 
         <para>Set this option to display the "Description" column in a table's
         property page.</para>
-      </section>
-
-      <section>
-        <title>Grid header font</title>
-
-        <para>Choose a character font for the grid header (the column
-        names).</para>
-      </section>
-
-      <section>
-        <title>Grid cell font</title>
-
-        <para>Choose a character font for the grid cells (the data).</para>
-      </section>
-
-      <section>
-        <title>Re-format float and double precision numbers</title>
-
-        <para>If unchecked, decimal numbers are displayed as returned from
-        server; otherwise, they are formatted according to the specified
-        number of decimal digits.</para>
-      </section>
-
-      <section>
-        <title>Maximize data grid after execution of SELECT statement</title>
-
-        <para>Here you can turn off an useful feature that will enlarge the
-        data grid to the maximum available size when a SQL SELECT statement
-        returns more than a specified number of rows.</para>
       </section>
     </section>
 
@@ -998,24 +1026,7 @@
         in which you might want to connect to a database with a different
         character set (for example when you use different charsets for
         different tables or even columns, something Firebird allows), so here
-        you can turn off the warning for that particular database.</para>
-      </section>
-
-      <section>
-        <title>Store password encrypted</title>
-
-        <para>If you don't specify the password in the Database Registration
-        Info dialog box, then FlameRobin will ask you for it every time you
-        connect, otherwise it will connect without asking anything. In this
-        case, though, the password is stored in clear text inside
-        fr_databases.conf. Use this option to apply soft cryptography to the
-        password stored in fr_databases.conf so that it cannot be stolen by
-        the casual user.<note>
-            <para>This option only implements "security by obscurity". If you
-            are concerned about real security, though, we recommend that you
-            set the access permissions on fr_databases.conf accordingly at the
-            file system level.</para>
-          </note></para>
+        you can turn off the warning for that particular database</para>
       </section>
     </section>
 
@@ -1113,5 +1124,81 @@
     FlameRobin is configured so that these files are shared by several users
     (or concurrent instances of FlameRobin), then no precaution is taken to
     avoid overwriting other users' changes.</para>
+  </section>
+
+  <section>
+    <title>Advanced topics</title>
+
+    <para>This section will document some advanced topics about how FlameRobin
+    works. The topics are not necessarily related, and are grouped here only
+    for convenience.</para>
+
+    <section>
+      <title>Encrypted password storage</title>
+
+      <para>FlameRobin can use strong encryption to safely store your
+      passwords in the configuration file (fr_databases.conf). Here's how it
+      works in detail:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>all passwords (PW) are encrypted with a master password
+          (MPW)</para>
+        </listitem>
+
+        <listitem>
+          <para>the MPW alone is never saved into any file, it is only known
+          by the user</para>
+        </listitem>
+
+        <listitem>
+          <para>PW + MPW comprise the Cipher (which is stored in the .conf
+          file)</para>
+        </listitem>
+
+        <listitem>
+          <para>whenever a PW needs to be decrypted, the user is prompted for
+          the MPW</para>
+        </listitem>
+
+        <listitem>
+          <para>Cipher + MPW yield the PW</para>
+        </listitem>
+      </itemizedlist>
+
+      <section>
+        <title>Defense from "known plain-text" attack</title>
+
+        <para>If an attacker gets hold of FlameRobin's .conf file, and he
+        knows one of the PWs, he would be able to compute the MPW (as Cipher +
+        PW yield the MPW). In order to prevent this, FlameRobin uses the
+        following scheme:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>the string composed by MPW + username + database connection
+            string is used as a seed for some irreversible random number
+            generator (RNG) like ISAAC</para>
+          </listitem>
+
+          <listitem>
+            <para>the PW is encrypted with the numbers produced by the
+            RNG</para>
+          </listitem>
+
+          <listitem>
+            <para>since numbers are unique for each username + database
+            connection string, and RNG is not reversible, the attacker cannot
+            get MPW, and he also cannot decrypt any other password</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>For more information on ISAAC see:
+        http://en.wikipedia.org/wiki/ISAAC
+        http://www.burtleburtle.net/bob/rand/isaacafa.html</para>
+
+        <para></para>
+      </section>
+    </section>
   </section>
 </article>
