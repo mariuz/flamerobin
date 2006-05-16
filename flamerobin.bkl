@@ -566,6 +566,11 @@
             <install-to>$(DATADIR)/flamerobin/docs</install-to>
         </data-files>
         <data-files>
+            <srcdir>$(HTMLDOCSDIR)</srcdir>
+            <files>flamerobin.1</files>
+            <install-to>$(PREFIX)/man/man1</install-to>
+        </data-files>
+        <data-files>
             <srcdir>$(HTMLTEMPLATEDIR)</srcdir>
             <files>$(HTMLTEMPLATEFILES)</files>
             <install-to>$(DATADIR)/flamerobin/html-templates</install-to>
