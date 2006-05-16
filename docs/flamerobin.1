@@ -1,9 +1,9 @@
 .\" Copyright (c) 2006 Tamas Tevesz <ice@extreme.hu>
-.\" 
+.\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
 .\" copyright notice and this permission notice appear in all copies.
-.\" 
+.\"
 .\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 .\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 .\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -39,9 +39,9 @@ Manual menu item once the application is running.
 .Nm
 uses two directory hierarchies for its normal operation.
 The
-.Em home directory
-contains the dialog templates, the default configuration and the on-line
-documentation grouped into three sub-directories as follows:
+.Em data directory
+contains the templates for property pages, the default configuration and the
+on-line documentation grouped into three sub-directories as follows:
 .Bl -tag -width xxxxxxxxxxxxxx -compact
 .Pp
 .It Pa conf-defs
@@ -49,7 +49,7 @@ default configuration
 .It Pa docs
 on-line documentation
 .It Pa html-templates
-dialog templates
+templates for property pages
 .El
 .Pp
 The
@@ -64,7 +64,7 @@ this file stores the user's preferences related to the
 .Nm
 GUI.
 .It Pa history
-this directory holds the history, one item per file.
+this directory holds the SQL statement history, one item per file.
 .El
 .Pp
 .Nm
@@ -76,7 +76,7 @@ accepts several options, which are described as follows:
 Use
 .Ar directory
 as the
-.Em home directory
+.Em data directory
 (but see
 .Sx ENVIRONMENT
 below).
@@ -98,7 +98,7 @@ below).
 .It Ev FR_HOME
 Specifies an alternate location for the
 .Nm
-.Em home directory .
+.Em data directory .
 .Pp
 If both
 .Fl h
@@ -121,7 +121,7 @@ and this environment variable are set, the command line argument takes precedenc
 .It Pa /usr/share/flamerobin
 The default
 .Nm
-.Em home directory .
+.Em data directory .
 .It Pa ~/.flamerobin
 The default
 .Nm
@@ -145,12 +145,13 @@ no precaution is taken to avoid overwriting settings created by other users
 or other application instances.
 .Sh NOTES
 The specification of the
-.Em home directory
+.Em data directory
 and the
 .Em user home directory
 (regardless of whether they occur in the environment or on the command line)
 may be the literal string
-.Dq $app 
+.Dq $app
 which translates to a common data folder determined at compilation time, or
 .Dq $user
-which translates to the user local data directory.
+which translates to the user local data directory. These options currently have
+effect only on Windows platform.
