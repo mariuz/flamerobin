@@ -568,7 +568,7 @@
         <data-files>
             <srcdir>$(HTMLDOCSDIR)</srcdir>
             <files>flamerobin.1</files>
-            <install-to>$(PREFIX)/man/man1</install-to>
+            <install-to>@mandir@/man1</install-to>
         </data-files>
         <data-files>
             <srcdir>$(HTMLTEMPLATEDIR)</srcdir>

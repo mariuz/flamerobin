@@ -197,8 +197,8 @@ install: all
 	(cd $(srcdir)/conf-defs/ ; $(INSTALL_DATA)  fr_settings.confdef db_settings.confdef $(DESTDIR)$(datadir)/flamerobin/conf-defs)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/docs
 	(cd $(srcdir)/docs/ ; $(INSTALL_DATA)  fr_license.html fr_manual.html fr_whatsnew.html html.css $(DESTDIR)$(datadir)/flamerobin/docs)
-	$(INSTALL_DIR) $(DESTDIR)$(prefix)/man/man1
-	(cd $(srcdir)/docs/ ; $(INSTALL_DATA)  flamerobin.1 $(DESTDIR)$(prefix)/man/man1)
+	$(INSTALL_DIR) $(DESTDIR)@mandir@/man1
+	(cd $(srcdir)/docs/ ; $(INSTALL_DATA)  flamerobin.1 $(DESTDIR)@mandir@/man1)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/html-templates
 	(cd $(srcdir)/html-templates/ ; $(INSTALL_DATA)  ALLloading.html DATABASE.html DDL.html DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html PROCEDUREprivileges.html ROLE.html ROLEprivileges.html SERVER.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TABLEprivileges.html TRIGGER.html VIEW.html VIEWprivileges.html VIEWtriggers.html dependencies.html header.html compute.png drop.png ok.png ok2.png redx.png view.png $(DESTDIR)$(datadir)/flamerobin/html-templates)
 
