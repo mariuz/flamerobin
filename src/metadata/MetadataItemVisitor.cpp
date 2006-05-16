@@ -69,7 +69,7 @@ void MetadataItemVisitor::visit(Exception&)
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visit(ForeignKey& fk)
+void MetadataItemVisitor::visit(ForeignKey&)
 {
     defaultAction();
 }
