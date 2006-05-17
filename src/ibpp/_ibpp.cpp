@@ -246,8 +246,6 @@ GDS* GDS::Call()
 		IB_ENTRYPOINT(dsql_set_cursor_name);
 		IB_ENTRYPOINT(dsql_sql_info);
 
-		IB_ENTRYPOINT(get_client_version);
-
 		IB_ENTRYPOINT(service_attach);
 		IB_ENTRYPOINT(service_detach);
 		IB_ENTRYPOINT(service_start);
@@ -272,16 +270,6 @@ namespace IBPP
 	int GDSVersion()
 	{
 		return gds.Call()->mGDSVersion;
-	}
-
-	std::string ClientVersion(void)
-	{
-		// 200 should be enough. Expectent content is
-		// LI-V6.3.3.4870 Firebird 1.5
-		char buf[200];
-
-		gds.Call()->m_get_client_version(buf);
-		return std::string(buf);
 	}
 
 #ifdef IBPP_WINDOWS
