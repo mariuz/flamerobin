@@ -6,7 +6,7 @@
 -->
 <article id="frrelnotes">
   <articleinfo>
-    <title><application>FlameRobin</application> 0.7.0 ALPHA Manual</title>
+    <title><application>FlameRobin</application> 0.7.1 ALPHA Manual</title>
 
     <author>
       <firstname>Nando</firstname>
@@ -453,9 +453,30 @@
       string. A server's version string reveals the exact build number of your
       Firebird server and the platform it is running on. For example, a
       version string equal to "WI-V1.5.2.4731 Firebird 1.5" means Firebird
-      1.5.2, build 4731, on Windows. You can also look at the version string
-      of the Firebird client FlameRobin is using, in the About box
-      (Help/About).</para>
+      1.5.2, build 4731, on Windows.</para>
+
+      <note>
+        <para>Currently FlameRobin doesn't show the version string of the
+        Firebird client it is using, for these reasons:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Not all versions of Firebird support this feature, and
+            FlameRobin needs to stay compatible with all Firebird
+            versions.</para>
+          </listitem>
+
+          <listitem>
+            <para>At some point in the future FlameRobin will be able to load
+            different client libraries for different databases (at least on
+            platforms that support it). We will probably add the client
+            version display feature then.</para>
+          </listitem>
+        </itemizedlist>
+      </note>
+
+      <para> You can also look at the version string of the Firebird client
+      FlameRobin is using, in the About box (Help/About).</para>
     </section>
 
     <section>
