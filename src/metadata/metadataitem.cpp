@@ -556,7 +556,7 @@ wxString MetadataItem::getDropSqlStatement() const
 //-----------------------------------------------------------------------------
 void MetadataItem::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    visitor->visit(*this);
+    visitor->visitMetadataItem(*this);
 }
 //-----------------------------------------------------------------------------
 void MetadataItem::lockChildren()

@@ -1235,7 +1235,7 @@ const wxString Database::getTypeName() const
 //-----------------------------------------------------------------------------
 void Database::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    visitor->visit(*this);
+    visitor->visitDatabase(*this);
 }
 //-----------------------------------------------------------------------------
 Server* Database::getServer() const

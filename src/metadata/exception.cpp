@@ -135,6 +135,6 @@ wxString Exception::getAlterSql()
 //-----------------------------------------------------------------------------
 void Exception::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    visitor->visit(*this);
+    visitor->visitException(*this);
 }
 //-----------------------------------------------------------------------------

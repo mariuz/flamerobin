@@ -111,8 +111,3 @@ void Index::saveDescription(wxString description)
         description);
 }
 //-----------------------------------------------------------------------------
-void Index::acceptVisitor(MetadataItemVisitor* visitor)
-{
-    visitor->visit(*this);
-}
-//-----------------------------------------------------------------------------

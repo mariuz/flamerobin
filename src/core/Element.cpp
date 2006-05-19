@@ -41,11 +41,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Element.h"
 #include "Visitor.h"
 //-----------------------------------------------------------------------------
-void Element::acceptVisitor(Visitor* visitor)
-{
-    visitor->visit(*this);
-}
-//-----------------------------------------------------------------------------
 Element::~Element()
 {
 }

@@ -91,6 +91,6 @@ void Parameter::saveDescription(wxString description)
 //-----------------------------------------------------------------------------
 void Parameter::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    visitor->visit(*this);
+    visitor->visitParameter(*this);
 }
 //-----------------------------------------------------------------------------

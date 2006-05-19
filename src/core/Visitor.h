@@ -39,9 +39,6 @@ protected:
     Visitor() {};
     virtual ~Visitor() {};
     virtual void defaultAction();
-public:
-    virtual void visit(Element& element);
-public:
 };
 //-----------------------------------------------------------------------------
 #endif //FR_VISITOR_H

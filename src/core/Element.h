@@ -35,7 +35,7 @@ class Visitor;
 class Element
 {
 public:
-    virtual void acceptVisitor(Visitor* visitor);
+    //virtual void acceptVisitor(Visitor* visitor);
     virtual ~Element();
 };
 //-----------------------------------------------------------------------------

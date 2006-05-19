@@ -163,7 +163,7 @@ const wxString Server::getTypeName() const
 //-----------------------------------------------------------------------------
 void Server::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    visitor->visit(*this);
+    visitor->visitServer(*this);
 }
 //-----------------------------------------------------------------------------
 wxString Server::getConnectionString() const

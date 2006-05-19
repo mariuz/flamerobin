@@ -40,11 +40,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "Visitor.h"
 //-----------------------------------------------------------------------------
-void Visitor::visit(Element&)
-{
-    defaultAction();
-}
-//-----------------------------------------------------------------------------
 void Visitor::defaultAction()
 {
 }

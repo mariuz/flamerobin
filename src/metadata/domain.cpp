@@ -117,12 +117,12 @@ bool Domain::loadInfo()
         }
         isNotNullM = !st1->IsNull(8);
         readBlob(st1, 9, defaultM);
-                
-		hasDefaultM = !st1->IsNull(9);
-		if (hasDefaultM) 
-			defaultM.Remove(0, 8);
 
-		if (st1->IsNull(10))
+        hasDefaultM = !st1->IsNull(9);
+        if (hasDefaultM)
+            defaultM.Remove(0, 8);
+
+        if (st1->IsNull(10))
             collationM = wxEmptyString;
         else
         {
@@ -335,6 +335,6 @@ void Domain::saveDescription(wxString description)
 //-----------------------------------------------------------------------------
 void Domain::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    visitor->visit(*this);
+    visitor->visitDomain(*this);
 }
 //-----------------------------------------------------------------------------

@@ -67,7 +67,7 @@ void Column::Init(bool notnull, wxString source, wxString computedSource,
     computedSourceM = computedSource;
     collationM = collation;
     defaultM = defaultValue;
-	hasDefaultM = hasDefault;
+    hasDefaultM = hasDefault;
 }
 //-----------------------------------------------------------------------------
 bool Column::isNullable(bool checkDomain) const
@@ -84,8 +84,8 @@ bool Column::isNullable(bool checkDomain) const
 //-----------------------------------------------------------------------------
 bool Column::hasDefault(bool checkDomain) const
 {
-	if (hasDefaultM)
-		return true;
+    if (hasDefaultM)
+        return true;
     if (!checkDomain)
         return true;
     Domain *d = getDomain();
@@ -199,13 +199,13 @@ wxString Column::getCollation() const
 //-----------------------------------------------------------------------------
 wxString Column::getDefault() const
 {
-	if (defaultM.IsEmpty())
-	{
-		Domain *d = getDomain();
-		if (d)
-			return d->getDefault();
-	}
-	return defaultM;
+    if (defaultM.IsEmpty())
+    {
+        Domain *d = getDomain();
+        if (d)
+            return d->getDefault();
+    }
+    return defaultM;
 }
 //-----------------------------------------------------------------------------
 wxString Column::getDropSqlStatement() const
@@ -230,6 +230,6 @@ void Column::saveDescription(wxString description)
 //-----------------------------------------------------------------------------
 void Column::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    visitor->visit(*this);
+    visitor->visitColumn(*this);
 }
 //-----------------------------------------------------------------------------

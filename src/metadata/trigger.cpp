@@ -269,6 +269,6 @@ void Trigger::saveDescription(wxString description)
 //-----------------------------------------------------------------------------
 void Trigger::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    visitor->visit(*this);
+    visitor->visitTrigger(*this);
 }
 //-----------------------------------------------------------------------------

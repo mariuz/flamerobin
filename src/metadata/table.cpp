@@ -602,6 +602,6 @@ bool Table::tablesRelate(const std::vector<wxString>& tables, Table* table,
 //-----------------------------------------------------------------------------
 void Table::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    visitor->visit(*this);
+    visitor->visitTable(*this);
 }
 //-----------------------------------------------------------------------------

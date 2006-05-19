@@ -341,6 +341,6 @@ const unsigned int Root::getNextId()
 //-----------------------------------------------------------------------------
 void Root::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    visitor->visit(*this);
+    visitor->visitRoot(*this);
 }
 //-----------------------------------------------------------------------------

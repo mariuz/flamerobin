@@ -38,20 +38,20 @@ public:
     explicit ContextMenuMetadataItemVisitor(wxMenu* menu);
     virtual ~ContextMenuMetadataItemVisitor();
 
-    virtual void visit(Column& column);
-    virtual void visit(Database& database);
-    virtual void visit(Domain& domain);
-    virtual void visit(Exception& exception);
-    virtual void visit(Function& function);
-    virtual void visit(Generator& generator);
-    virtual void visit(MetadataItem& metadataItem);
-    virtual void visit(Procedure& procedure);
-    virtual void visit(Role& role);
-    virtual void visit(Root& root);
-    virtual void visit(Server& server);
-    virtual void visit(Table& table);
-    virtual void visit(Trigger& trigger);
-    virtual void visit(View& view);
+    virtual void visitColumn(Column& column);
+    virtual void visitDatabase(Database& database);
+    virtual void visitDomain(Domain& domain);
+    virtual void visitException(Exception& exception);
+    virtual void visitFunction(Function& function);
+    virtual void visitGenerator(Generator& generator);
+    virtual void visitMetadataItem(MetadataItem& metadataItem);
+    virtual void visitProcedure(Procedure& procedure);
+    virtual void visitRole(Role& role);
+    virtual void visitRoot(Root& root);
+    virtual void visitServer(Server& server);
+    virtual void visitTable(Table& table);
+    virtual void visitTrigger(Trigger& trigger);
+    virtual void visitView(View& view);
 
 private:
     wxMenu* menuM;

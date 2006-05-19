@@ -133,6 +133,6 @@ const wxString Generator::getTypeName() const
 //-----------------------------------------------------------------------------
 void Generator::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    visitor->visit(*this);
+    visitor->visitGenerator(*this);
 }
 //-----------------------------------------------------------------------------

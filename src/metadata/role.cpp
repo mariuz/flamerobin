@@ -171,6 +171,6 @@ const wxString Role::getTypeName() const
 //-----------------------------------------------------------------------------
 void Role::acceptVisitor(MetadataItemVisitor *visitor)
 {
-    visitor->visit(*this);
+    visitor->visitRole(*this);
 }
 //-----------------------------------------------------------------------------

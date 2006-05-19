@@ -50,13 +50,13 @@ ContextMenuMetadataItemVisitor::~ContextMenuMetadataItemVisitor()
 {
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visit(Column& column)
+void ContextMenuMetadataItemVisitor::visitColumn(Column& column)
 {
     if (column.getTable()) // only for table columns
         addRegularObjectMenu();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visit(Database&)
+void ContextMenuMetadataItemVisitor::visitDatabase(Database&)
 {
     menuM->Append(myTreeCtrl::Menu_Connect, _("&Connect"));
     menuM->Append(myTreeCtrl::Menu_ConnectAs, _("Connect &as..."));
@@ -88,29 +88,29 @@ void ContextMenuMetadataItemVisitor::visit(Database&)
     menuM->Append(myTreeCtrl::Menu_DatabaseProperties, _("Data&base Properties"));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visit(Domain&)
+void ContextMenuMetadataItemVisitor::visitDomain(Domain&)
 {
     addRegularObjectMenu();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visit(Exception&)
+void ContextMenuMetadataItemVisitor::visitException(Exception&)
 {
     addRegularObjectMenu();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visit(Function&)
+void ContextMenuMetadataItemVisitor::visitFunction(Function&)
 {
     addRegularObjectMenu();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visit(Generator&)
+void ContextMenuMetadataItemVisitor::visitGenerator(Generator&)
 {
     menuM->Append(myTreeCtrl::Menu_ShowGeneratorValue, _("Show &value"));
     menuM->Append(myTreeCtrl::Menu_SetGeneratorValue, _("&Set value"));
     addRegularObjectMenu();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visit(MetadataItem& metadataItem)
+void ContextMenuMetadataItemVisitor::visitMetadataItem(MetadataItem& metadataItem)
 {
     NodeType type = metadataItem.getType();
     if (type == ntFunctions)
@@ -127,19 +127,19 @@ void ContextMenuMetadataItemVisitor::visit(MetadataItem& metadataItem)
             menuM->Append(myTreeCtrl::Menu_CreateObject, _("Create &new..."));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visit(Procedure&)
+void ContextMenuMetadataItemVisitor::visitProcedure(Procedure&)
 {
     menuM->Append(myTreeCtrl::Menu_ExecuteProcedure, _("&Execute..."));
     addSelectMenu(false);       // false = not a table
     addRegularObjectMenu(true); // true = add Alter menu
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visit(Role&)
+void ContextMenuMetadataItemVisitor::visitRole(Role&)
 {
     addRegularObjectMenu();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visit(Root&)
+void ContextMenuMetadataItemVisitor::visitRoot(Root&)
 {
     menuM->Append(myTreeCtrl::Menu_RegisterServer, _("&Register server..."));
     menuM->AppendSeparator();
@@ -149,7 +149,7 @@ void ContextMenuMetadataItemVisitor::visit(Root&)
     menuM->Append(wxID_EXIT, _("&Quit"));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visit(Server&)
+void ContextMenuMetadataItemVisitor::visitServer(Server&)
 {
     menuM->Append(myTreeCtrl::Menu_RegisterDatabase, _("&Register existing database..."));
     menuM->Append(myTreeCtrl::Menu_CreateDatabase, _("Create &new database..."));
@@ -162,7 +162,7 @@ void ContextMenuMetadataItemVisitor::visit(Server&)
     menuM->Append(myTreeCtrl::Menu_ServerProperties, _("Server registration &info..."));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visit(Table&)
+void ContextMenuMetadataItemVisitor::visitTable(Table&)
 {
     menuM->Append(myTreeCtrl::Menu_Insert, _("&Insert into ..."));
     addSelectMenu(true);
@@ -170,12 +170,12 @@ void ContextMenuMetadataItemVisitor::visit(Table&)
     addRegularObjectMenu();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visit(Trigger&)
+void ContextMenuMetadataItemVisitor::visitTrigger(Trigger&)
 {
     addRegularObjectMenu(true); // true = add Alter menu
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visit(View&)
+void ContextMenuMetadataItemVisitor::visitView(View&)
 {
     addSelectMenu(false);       // false = not a table
     addRegularObjectMenu(true); // true = add Alter menu

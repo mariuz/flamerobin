@@ -199,6 +199,6 @@ void Function::saveDescription(wxString description)
 //-----------------------------------------------------------------------------
 void Function::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    visitor->visit(*this);
+    visitor->visitFunction(*this);
 }
 //-----------------------------------------------------------------------------

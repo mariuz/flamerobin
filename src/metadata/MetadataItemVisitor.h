@@ -54,24 +54,24 @@ public:
     MetadataItemVisitor();
     virtual ~MetadataItemVisitor();
 
-    virtual void visit(Column& dolumn);
-    virtual void visit(Database& database);
-    virtual void visit(Domain& domain);
-    virtual void visit(Exception& exception);
-    virtual void visit(ForeignKey& fk);
-    virtual void visit(Function& function);
-    virtual void visit(Generator& generator);
-    virtual void visit(Procedure& procedure);
-    virtual void visit(Parameter& parameter);
-    virtual void visit(PrimaryKeyConstraint& pk);
-    virtual void visit(Role& role);
-    virtual void visit(Root& root);
-    virtual void visit(Server& server);
-    virtual void visit(Table& table);
-    virtual void visit(Trigger& trigger);
-    virtual void visit(UniqueConstraint& unq);
-    virtual void visit(View& view);
-    virtual void visit(MetadataItem& metadataItem);
+    virtual void visitColumn(Column& dolumn);
+    virtual void visitDatabase(Database& database);
+    virtual void visitDomain(Domain& domain);
+    virtual void visitException(Exception& exception);
+    virtual void visitForeignKey(ForeignKey& fk);
+    virtual void visitFunction(Function& function);
+    virtual void visitGenerator(Generator& generator);
+    virtual void visitProcedure(Procedure& procedure);
+    virtual void visitParameter(Parameter& parameter);
+    virtual void visitPrimaryKeyConstraint(PrimaryKeyConstraint& pk);
+    virtual void visitRole(Role& role);
+    virtual void visitRoot(Root& root);
+    virtual void visitServer(Server& server);
+    virtual void visitTable(Table& table);
+    virtual void visitTrigger(Trigger& trigger);
+    virtual void visitUniqueConstraint(UniqueConstraint& unq);
+    virtual void visitView(View& view);
+    virtual void visitMetadataItem(MetadataItem& metadataItem);
 };
 //-----------------------------------------------------------------------------
 #endif //FR_METADATAITEMVISITOR_H

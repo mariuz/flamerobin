@@ -135,6 +135,6 @@ const wxString View::getTypeName() const
 //-----------------------------------------------------------------------------
 void View::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    visitor->visit(*this);
+    visitor->visitView(*this);
 }
 //-----------------------------------------------------------------------------

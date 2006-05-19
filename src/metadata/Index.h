@@ -60,7 +60,6 @@ public:
     IndexType getIndexType();
     wxString getFieldsAsString();
     std::vector<wxString> *getSegments();
-    virtual void acceptVisitor(MetadataItemVisitor* v);
 };
 //-----------------------------------------------------------------------------
 #endif

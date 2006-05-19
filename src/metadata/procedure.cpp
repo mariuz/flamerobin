@@ -458,6 +458,6 @@ void Procedure::saveDescription(wxString description)
 //-----------------------------------------------------------------------------
 void Procedure::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    visitor->visit(*this);
+    visitor->visitProcedure(*this);
 }
 //-----------------------------------------------------------------------------

@@ -49,92 +49,92 @@ MetadataItemVisitor::~MetadataItemVisitor()
 {
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visit(Column&)
+void MetadataItemVisitor::visitColumn(Column&)
 {
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visit(Database&)
+void MetadataItemVisitor::visitDatabase(Database&)
 {
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visit(Domain&)
+void MetadataItemVisitor::visitDomain(Domain&)
 {
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visit(Exception&)
+void MetadataItemVisitor::visitException(Exception&)
 {
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visit(ForeignKey&)
+void MetadataItemVisitor::visitForeignKey(ForeignKey&)
 {
     defaultAction();
 }
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visit(Function&)
+void MetadataItemVisitor::visitFunction(Function&)
 {
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visit(Generator&)
+void MetadataItemVisitor::visitGenerator(Generator&)
 {
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visit(PrimaryKeyConstraint&)
+void MetadataItemVisitor::visitPrimaryKeyConstraint(PrimaryKeyConstraint&)
 {
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visit(Procedure&)
+void MetadataItemVisitor::visitProcedure(Procedure&)
 {
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visit(Parameter&)
+void MetadataItemVisitor::visitParameter(Parameter&)
 {
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visit(Role&)
+void MetadataItemVisitor::visitRole(Role&)
 {
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visit(Root&)
+void MetadataItemVisitor::visitRoot(Root&)
 {
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visit(Server&)
+void MetadataItemVisitor::visitServer(Server&)
 {
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visit(Table&)
+void MetadataItemVisitor::visitTable(Table&)
 {
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visit(Trigger&)
+void MetadataItemVisitor::visitTrigger(Trigger&)
 {
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visit(UniqueConstraint&)
+void MetadataItemVisitor::visitUniqueConstraint(UniqueConstraint&)
 {
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visit(View&)
+void MetadataItemVisitor::visitView(View&)
 {
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visit(MetadataItem&)
+void MetadataItemVisitor::visitMetadataItem(MetadataItem&)
 {
     defaultAction();
 };
