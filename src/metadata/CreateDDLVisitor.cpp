@@ -103,7 +103,7 @@ void CreateDDLVisitor::visitColumn(Column& c)
 
     wxString defaultVal = c.getDefault();
     if (!defaultVal.IsEmpty())
-        preSqlM << wxT(" ") << defaultVal;     // already contains word DEFAULT
+        preSqlM << wxT(" DEFAULT ") << defaultVal;
     if (!c.isNullable(false))               // false = don't check domain
         preSqlM << wxT(" NOT NULL");
     wxString collate = c.getCollation();
@@ -220,7 +220,7 @@ void CreateDDLVisitor::visitDomain(Domain& d)
     preSqlM += wxT("\n");
     wxString dflt(d.getDefault());
     if (!dflt.IsEmpty())
-        preSqlM += wxT(" ") + dflt + wxT("\n");   // already contains DEFAULT keyword
+        preSqlM += wxT(" DEFAULT ") + dflt + wxT("\n");
     if (!d.isNullable())
         preSqlM += wxT(" NOT NULL\n");
     wxString check = d.getCheckConstraint();
