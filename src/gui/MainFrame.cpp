@@ -557,7 +557,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
     {
         int res = showQuestionDialog(this, _("Do you really want to quit FlameRobin?"),
             _("All uncommitted transactions will be rolled back, and any uncommitted changes will be lost."),
-            AdvancedMessageDialogButtonsOkCancel(_("&Quit")), 
+            AdvancedMessageDialogButtonsOkCancel(_("&Quit")),
             config(), wxT("DIALOG_ConfirmQuit"), _("Always quit without asking"));
         if (res != wxOK)
         {
@@ -884,6 +884,7 @@ void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 
     Database db;
     DatabaseRegistrationDialog drd(this, _("Register Existing Database"));
+    drd.setServer(s);
     drd.setDatabase(&db);
 
     if (drd.ShowModal() == wxID_OK)
@@ -902,6 +903,7 @@ void MainFrame::OnMenuRestoreIntoNewDatabase(wxCommandEvent& WXUNUSED(event))
 
     Database db;
     DatabaseRegistrationDialog drd(this, _("New database parameters"));
+    drd.setServer(s);
     drd.setDatabase(&db);
     if (drd.ShowModal() != wxID_OK)
         return;
@@ -1705,7 +1707,7 @@ void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
     {
         int res = showQuestionDialog(this, _("Do you want to connect to the database?"),
             _("The database is not connected. You first have to establish a database connection before you can execute SQL statements."),
-            AdvancedMessageDialogButtonsOkCancel(_("C&onnect")), 
+            AdvancedMessageDialogButtonsOkCancel(_("C&onnect")),
             config(), wxT("DIALOG_ConfirmConnectForQuery"), _("Always connect without asking"));
         if (res == wxOK)
             connect();
