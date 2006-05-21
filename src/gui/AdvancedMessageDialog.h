@@ -28,8 +28,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef FR_ADVANCEDMESSAGEDIALOG_H
 #define FR_ADVANCEDMESSAGEDIALOG_H
 //-----------------------------------------------------------------------------
-#ifdef FR_NEWADVANCEDMESSAGEDIALOG
-
 #include <wx/wx.h>
 #include <wx/artprov.h>
 
@@ -83,7 +81,8 @@ private:
 public:
     AdvancedMessageDialog(wxWindow* parent, wxArtID iconId,
         const wxString& primaryText, const wxString& secondaryText,
-        AdvancedMessageDialogButtons& buttons, bool showCheckBoxNeverAgain);
+        AdvancedMessageDialogButtons& buttons, 
+        const wxString& dontShowAgainText);
 
     bool getDontShowAgain() const;
 private:
@@ -95,80 +94,14 @@ int showInformationDialog(wxWindow* parent, const wxString& primaryText,
     const wxString& secondaryText, AdvancedMessageDialogButtons& buttons);
 int showInformationDialog(wxWindow* parent, const wxString& primaryText,
     const wxString& secondaryText, AdvancedMessageDialogButtons buttons,
-    Config& config, wxString configKey);
+    Config& config, const wxString& configKey,
+    const wxString& dontShowAgainText);
 
 int showQuestionDialog(wxWindow* parent, const wxString& primaryText,
     const wxString& secondaryText, AdvancedMessageDialogButtons& buttons);
 int showQuestionDialog(wxWindow* parent, const wxString& primaryText,
     const wxString& secondaryText, AdvancedMessageDialogButtons buttons,
-    Config& config, wxString configKey);
+    Config& config, const wxString& configKey,
+    const wxString& dontShowAgainText);
 //-----------------------------------------------------------------------------
-#else // FR_NEWADVANCEDMESSAGEDIALOG
-//-----------------------------------------------------------------------------
-#include <wx/wx.h>
-#include <vector>
-#include <utility>
-#include "gui/BaseDialog.h"
-//----------------------------------------------------------------------------
-class AdvancedMessageDialogButtons
-{
-public:
-    typedef std::pair<int,wxString> ButtonPair;
-    typedef std::vector< ButtonPair > ButtonCollection;
-    typedef ButtonCollection::const_iterator const_iterator;
-
-    void add(int id, const wxString& s)
-    {
-        buttonsM.push_back(ButtonPair(id,s));
-    }
-
-    const_iterator begin() const
-    {
-        return buttonsM.begin();
-    }
-
-    const_iterator end() const
-    {
-        return buttonsM.end();
-    }
-
-    void clear()
-    {
-        buttonsM.clear();
-    }
-
-    ButtonCollection::size_type size() const
-    {
-        return buttonsM.size();
-    }
-private:
-    ButtonCollection buttonsM;
-};
-//----------------------------------------------------------------------------
-// don't create instances of this class, use the AdvancedMessageBox function
-class AdvancedMessageDialog: public BaseDialog
-{
-protected:
-    wxString configKeyNameM;
-    wxCheckBox* checkBoxM;
-
-public:
-    AdvancedMessageDialog(wxWindow* parent, const wxString& message,
-        const wxString& caption, int style = 0,
-        AdvancedMessageDialogButtons* buttons = 0,
-        const wxString& name = wxEmptyString);
-
-    bool getDontShowAgain() const;
-
-    void OnButtonClick(wxCommandEvent& event);
-};
-//----------------------------------------------------------------------------
-// you can provide regular buttons in "style" parameter,
-// just like in wxMessageBox
-int AdvancedMessageBox(const wxString& message, const wxString& caption,
-    int style = 0, AdvancedMessageDialogButtons* buttons = 0,
-    wxWindow* parent = 0, const wxString& keyname = wxEmptyString);
-//----------------------------------------------------------------------------
-#endif // FR_NEWADVANCEDMESSAGEDIALOG
-
 #endif // FR_ADVANCEDMESSAGEDIALOG_H

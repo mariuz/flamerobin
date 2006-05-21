@@ -553,32 +553,18 @@ void MainFrame::OnClose(wxCloseEvent& event)
     FR_TRY
 
     Raise();
-#ifdef FR_NEWADVANCEDMESSAGEDIALOG
     if (event.CanVeto())
     {
         int res = showQuestionDialog(this, _("Do you really want to quit FlameRobin?"),
-            _("All uncommitted transactions will be rolled back,\nand any changes will be lost."),
+            _("All uncommitted transactions will be rolled back, and any uncommitted changes will be lost."),
             AdvancedMessageDialogButtonsOkCancel(_("&Quit")), 
-            config(), wxT("DIALOG_ConfirmQuit"));
+            config(), wxT("DIALOG_ConfirmQuit"), _("Always quit without asking"));
         if (res != wxOK)
         {
             event.Veto();
             return;
         }
     }
-#else
-    AdvancedMessageDialogButtons btns;
-    btns.add(wxOK, _("&Quit"));
-    btns.add(wxCANCEL, _("&Cancel"));
-    if (event.CanVeto() && wxCANCEL ==
-        AdvancedMessageBox(_("Do you really want to quit FlameRobin?\n\nAll uncommitted transactions will be rolled back,\nand any changes will be lost."),
-        wxT("FlameRobin"), wxICON_QUESTION, &btns, 0,
-        wxT("DIALOG_ConfirmQuit")))
-    {
-        event.Veto();
-        return;
-    }
-#endif
     frameManager().setWindowMenu(0);    // tell it not to update menus anymore
 
     // the next few lines fix the (threading?) problem on some Linux distributions
@@ -1717,24 +1703,12 @@ void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
         return;
     if (!d->isConnected())
     {
-#ifdef FR_NEWADVANCEDMESSAGEDIALOG
         int res = showQuestionDialog(this, _("Do you want to connect to the database?"),
             _("The database is not connected. You first have to establish a database connection before you can execute SQL statements."),
             AdvancedMessageDialogButtonsOkCancel(_("C&onnect")), 
-            config(), wxT("DIALOG_ConfirmConnectForQuery"));
+            config(), wxT("DIALOG_ConfirmConnectForQuery"), _("Always connect without asking"));
         if (res == wxOK)
             connect();
-#else
-        AdvancedMessageDialogButtons btns;
-        btns.add(wxOK, _("C&onnect"));
-        btns.add(wxCANCEL, _("&Cancel"));
-        if (wxOK == AdvancedMessageBox(_("The database is not connected. Do you want to connect?"),
-            wxT("FlameRobin"), wxICON_QUESTION, &btns, 0,
-            wxT("DIALOG_ConfirmConnectForQuery")))
-        {
-            connect();
-        }
-#endif
     }
     if (!d->isConnected())
         return;

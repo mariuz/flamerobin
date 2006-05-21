@@ -76,20 +76,14 @@ wxString MasterPassword::getMasterPassword()
     wxString& mp = getInstance().mpw;
     if (mp.IsEmpty())
     {
-#ifdef FR_NEWADVANCEDMESSAGEDIALOG
         wxString msg(_("If you are already using FlameRobin's encrypted passwords, please enter the master password now, it will be used for the entire session."));
         msg += wxT("\n\n");
         msg += _("If you are using FlameRobin's encrypted passwords for the first time, please enter your master password now.");
         msg += wxT("\n\n");
         msg += _("Please consult the manual for more information about the master password feature.");
         showInformationDialog(0, _("The master password is not valid."), msg,
-            AdvancedMessageDialogButtonsOk(), config(), wxT("DIALOG_MasterPasswordNotice"));
-#else
-        AdvancedMessageBox(
-            _("You should now enter the Master Password which\nis used to encrypt all passwords.\n\nIf you haven't used this feature before, then please\nenter the Master Password which will be used in future.\n\nYou can change the master password by\nselecting the appropriate option from View menu.\n\nPlease read the manual for more information."),
-            _("Master password required"),
-            wxOK, 0, 0, wxT("DIALOG_MasterPasswordNotice"));
-#endif
+            AdvancedMessageDialogButtonsOk(), config(), wxT("DIALOG_MasterPasswordNotice"),
+            _("Do not show this information again"));
         mp = wxGetPasswordFromUser(
             _("Please enter the master password"),
             _("Enter master password"));
