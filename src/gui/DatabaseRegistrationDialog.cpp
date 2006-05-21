@@ -316,7 +316,7 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
 //-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    if (serverM)
+    if (!databaseM->getParent() && serverM)
         databaseM->setParent(serverM);
 
     // Please note that the order of calls is important here:
