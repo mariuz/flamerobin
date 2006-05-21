@@ -520,3 +520,19 @@ int showQuestionDialog(wxWindow* parent, const wxString& primaryText,
         secondaryText, buttons, config, configKey, dontShowAgainText);
 }
 //-----------------------------------------------------------------------------
+int showWarningDialog(wxWindow* parent, const wxString& primaryText,
+    const wxString& secondaryText, AdvancedMessageDialogButtons& buttons)
+{
+    return showAdvancedMessageDialog(parent, wxICON_WARNING, primaryText,
+        secondaryText, buttons);
+}
+//-----------------------------------------------------------------------------
+int showWarningDialog(wxWindow* parent, const wxString& primaryText,
+    const wxString& secondaryText, AdvancedMessageDialogButtons buttons,
+    Config& config, const wxString& configKey,
+    const wxString& dontShowAgainText)
+{
+    return showAdvancedMessageDialog(parent, wxICON_WARNING, primaryText,
+        secondaryText, buttons, config, configKey, dontShowAgainText);
+}
+//-----------------------------------------------------------------------------

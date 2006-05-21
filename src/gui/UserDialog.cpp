@@ -42,7 +42,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "frutils.h"
 #ifdef __WXGTK__
-#include "gui/AdvancedMessageDialog.h"
+    #include "gui/AdvancedMessageDialog.h"
 #endif
 #include "gui/ProgressDialog.h"
 #include "gui/StyleGuide.h"
@@ -250,16 +250,15 @@ bool UserPropertiesHandler::handleURI(URI& uri)
         u = (User *)getObject(uri);
         if (!u)
             return true;
-        #ifdef __WXGTK__
+#ifdef __WXGTK__
         if (u->usernameM == wxT("SYSDBA"))
         {
-            AdvancedMessageBox(_("Please note that appropriate way to change SYSDBA password\nis to run changeDBAPassword.sh script in Firebird's bin directory.\n\nOtherwise the scripts won't be updated."),
-                _("Changing SYSDBA user"),
-                wxID_OK|wxICON_WARNING, 0, w,
-                wxT("DIALOG_warn_sysdba_change")
-            );
+            showWarningDialog(w, _("The password for the SYSDBA user should not be changed here."),
+                _("The appropriate way to change the password of the SYSDBA user is to run the changeDBAPassword.sh script in Firebird's bin directory.\n\nOtherwise the scripts will not be updated."),
+                AdvancedMessageDialogButtonsOk(), config(), wxT("DIALOG_warn_sysdba_change"),
+                _("Do not show this information again"));
         }
-        #endif
+#endif
         s = dynamic_cast<Server *>(u->getParent());
     }
     if (!s)
