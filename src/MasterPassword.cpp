@@ -81,7 +81,7 @@ wxString MasterPassword::getMasterPassword()
         msg += _("If you are using FlameRobin's encrypted passwords for the first time, please enter your master password now.");
         msg += wxT("\n\n");
         msg += _("Please consult the manual for more information about the master password feature.");
-        showInformationDialog(0, _("The master password is not valid."), msg,
+        showInformationDialog(0, _("Master Password is required."), msg,
             AdvancedMessageDialogButtonsOk(), config(), wxT("DIALOG_MasterPasswordNotice"),
             _("Do not show this information again"));
         mp = wxGetPasswordFromUser(

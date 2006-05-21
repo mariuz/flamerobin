@@ -316,7 +316,8 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
 //-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    databaseM->setParent(serverM);
+    if (serverM)
+        databaseM->setParent(serverM);
 
     // Please note that the order of calls is important here:
     // setPath and setUsername and setStoreEncryptedPassword
