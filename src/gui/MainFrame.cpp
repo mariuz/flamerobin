@@ -970,12 +970,15 @@ void MainFrame::OnMenuUnRegisterServer(wxCommandEvent& WXUNUSED(event))
     if (!checkValidServer(s))
         return;
 
-    if (wxCANCEL == wxMessageBox(_("Are you sure?"), _("Unregister server"), wxOK | wxCANCEL | wxICON_QUESTION))
-        return;
-
+    int res = showQuestionDialog(this, _("Do you really want to unregister this server?"),
+        _("The registration information for the server and all its registered databases will be deleted. This operation can not be undone."),
+        AdvancedMessageDialogButtonsOkCancel(_("Unregister")));
+    if (res == wxOK)
+    {
     Root* r = s->getRoot();
     if (r)
         r->removeServer(s);
+    }
 
     FR_CATCH
 }
@@ -1024,12 +1027,15 @@ void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
     wxCHECK_RET(!d->isConnected(),
         wxT("Can not unregister connected database"));
 
-    if (wxCANCEL == wxMessageBox(_("Are you sure?"), _("Unregister database"), wxOK | wxCANCEL | wxICON_QUESTION))
-        return;
-
+    int res = showQuestionDialog(this, _("Do you really want to unregister this database?"),
+        _("The registration information for the database will be deleted. This operation can not be undone."),
+        AdvancedMessageDialogButtonsOkCancel(_("Unregister")));
+    if (res == wxOK)
+    {
     Server* s = d->getServer();
     if (s)
         s->removeDatabase(d);
+    }
 
     FR_CATCH
 }
