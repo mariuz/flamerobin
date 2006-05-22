@@ -471,7 +471,7 @@ int showAdvancedMessageDialog(wxWindow* parent, int style,
 //-----------------------------------------------------------------------------
 int showAdvancedMessageDialog(wxWindow* parent, int style,
     const wxString& primaryText, const wxString& secondaryText,
-    AdvancedMessageDialogButtons buttons, Config& config,
+    AdvancedMessageDialogButtons& buttons, Config& config,
     const wxString& configKey, const wxString& dontShowAgainText)
 {
     int value;
@@ -489,7 +489,7 @@ int showAdvancedMessageDialog(wxWindow* parent, int style,
 }
 //-----------------------------------------------------------------------------
 int showInformationDialog(wxWindow* parent, const wxString& primaryText,
-    const wxString& secondaryText, AdvancedMessageDialogButtons& buttons)
+    const wxString& secondaryText, AdvancedMessageDialogButtons buttons)
 {
     return showAdvancedMessageDialog(parent, wxICON_INFORMATION, primaryText,
         secondaryText, buttons);
@@ -505,7 +505,7 @@ int showInformationDialog(wxWindow* parent, const wxString& primaryText,
 }
 //-----------------------------------------------------------------------------
 int showQuestionDialog(wxWindow* parent, const wxString& primaryText,
-    const wxString& secondaryText, AdvancedMessageDialogButtons& buttons)
+    const wxString& secondaryText, AdvancedMessageDialogButtons buttons)
 {
     return showAdvancedMessageDialog(parent, wxICON_QUESTION, primaryText,
         secondaryText, buttons);
@@ -521,7 +521,7 @@ int showQuestionDialog(wxWindow* parent, const wxString& primaryText,
 }
 //-----------------------------------------------------------------------------
 int showWarningDialog(wxWindow* parent, const wxString& primaryText,
-    const wxString& secondaryText, AdvancedMessageDialogButtons& buttons)
+    const wxString& secondaryText, AdvancedMessageDialogButtons buttons)
 {
     return showAdvancedMessageDialog(parent, wxICON_WARNING, primaryText,
         secondaryText, buttons);

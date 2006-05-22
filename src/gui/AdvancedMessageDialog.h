@@ -91,21 +91,21 @@ private:
 };
 //-----------------------------------------------------------------------------
 int showInformationDialog(wxWindow* parent, const wxString& primaryText,
-    const wxString& secondaryText, AdvancedMessageDialogButtons& buttons);
+    const wxString& secondaryText, AdvancedMessageDialogButtons buttons);
 int showInformationDialog(wxWindow* parent, const wxString& primaryText,
     const wxString& secondaryText, AdvancedMessageDialogButtons buttons,
     Config& config, const wxString& configKey,
     const wxString& dontShowAgainText);
 
 int showQuestionDialog(wxWindow* parent, const wxString& primaryText,
-    const wxString& secondaryText, AdvancedMessageDialogButtons& buttons);
+    const wxString& secondaryText, AdvancedMessageDialogButtons buttons);
 int showQuestionDialog(wxWindow* parent, const wxString& primaryText,
     const wxString& secondaryText, AdvancedMessageDialogButtons buttons,
     Config& config, const wxString& configKey,
     const wxString& dontShowAgainText);
 
 int showWarningDialog(wxWindow* parent, const wxString& primaryText,
-    const wxString& secondaryText, AdvancedMessageDialogButtons& buttons);
+    const wxString& secondaryText, AdvancedMessageDialogButtons buttons);
 int showWarningDialog(wxWindow* parent, const wxString& primaryText,
     const wxString& secondaryText, AdvancedMessageDialogButtons buttons,
     Config& config, const wxString& configKey,
