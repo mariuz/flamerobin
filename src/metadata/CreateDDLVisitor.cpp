@@ -598,7 +598,7 @@ void CreateDDLVisitor::visitUniqueConstraint(UniqueConstraint& unq)
     wxString sql;
     if (!unq.isSystem())
         sql += wxT(" CONSTRAINT ") + unq.getQuotedName();
-    preSqlM += wxT(" UNIQUE (");
+    sql += wxT(" UNIQUE (");
     for (std::vector<wxString>::const_iterator it = unq.begin(); it != unq.end(); ++it)
     {
         if (it != unq.begin())
