@@ -61,7 +61,8 @@ class MetadataItem: public Element, public Subject
 private:
     MetadataItem* parentM;
     wxString descriptionM;
-    bool descriptionLoadedM;
+    enum DescriptionState { dsNotLoaded, dsLoaded, dsNotAvailable };
+    DescriptionState descriptionLoadedM;
     void setDescriptionM(wxString description);
 
 protected:
@@ -126,6 +127,7 @@ public:
 
     // items description (in database)
     wxString getDescription();
+    bool isDescriptionAvailable();
     void setDescription(wxString description);
 
     // returns true if the metadata item is a system (as opposed to user-defined) item.

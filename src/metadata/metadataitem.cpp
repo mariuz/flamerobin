@@ -57,7 +57,7 @@ MetadataItem::MetadataItem()
 {
     parentM = 0;
     typeM = ntUnknown;
-    descriptionLoadedM = false;
+    descriptionLoadedM = dsNotLoaded;
 }
 //-----------------------------------------------------------------------------
 MetadataItem::~MetadataItem()
@@ -395,9 +395,16 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
     return false;
 }
 //-----------------------------------------------------------------------------
+bool MetadataItem::isDescriptionAvailable()
+{
+    if (descriptionLoadedM == dsNotLoaded)
+        loadDescription();
+    return descriptionLoadedM != dsNotAvailable;
+}
+//-----------------------------------------------------------------------------
 wxString MetadataItem::getDescription()
 {
-    if (!descriptionLoadedM)
+    if (descriptionLoadedM == dsNotLoaded)
         loadDescription();
     return descriptionM;
 }
@@ -437,12 +444,16 @@ void MetadataItem::loadDescription(wxString loadStatement)
         }
         tr1->Commit();
         desc = std2wx(value);
+        descriptionLoadedM = dsLoaded;
     }
-    catch (IBPP::Exception&)
+    catch (IBPP::SQLException &e)
     {
         // FB 2.0 supports descriptions for some objects that previous
         // FB versions don't
-        //desc = _("Description could not be loaded.");
+        if (e.SqlCode() != -206) // column does not belong to referenced table.
+            throw;
+        else
+            descriptionLoadedM = dsNotAvailable;
     }
 
     // set value, notify observers
@@ -496,10 +507,11 @@ void MetadataItem::setDescription(wxString description)
 //-----------------------------------------------------------------------------
 void MetadataItem::setDescriptionM(wxString description)
 {
-    if (!descriptionLoadedM || (descriptionM.compare(description) != 0))
+    if (descriptionLoadedM == dsNotLoaded || descriptionLoadedM == dsLoaded &&
+        (descriptionM.compare(description) != 0))
     {
         descriptionM = description;
-        descriptionLoadedM = true;
+        descriptionLoadedM = dsLoaded;
         // FIXME: This is correct, but leads to reentrancy problems with the
         //        current code.  Working on it...
         // notifyObservers();

@@ -415,10 +415,15 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
 
     else if (cmd == wxT("object_description"))
     {
-        wxString s = object->getDescription();
-        if (s == wxT(""))
-            s = wxT("No description");
-        htmlpage += escapeHtmlChars(s);
+        if (object->isDescriptionAvailable())
+        {
+            wxString s = object->getDescription();
+            if (s == wxT(""))
+                s = wxT("No description");
+            htmlpage += escapeHtmlChars(s);
+            if (!suffix.IsEmpty())
+                processHtmlCode(htmlpage, suffix, object);
+        }
     }
 
     else if (cmd == wxT("show_if_config"))
