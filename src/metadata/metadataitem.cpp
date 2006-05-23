@@ -438,7 +438,7 @@ void MetadataItem::loadDescription(wxString loadStatement)
         tr1->Commit();
         desc = std2wx(value);
     }
-    catch (IBPP::Exception &e)
+    catch (IBPP::Exception&)
     {
         // FB 2.0 supports descriptions for some objects that previous
         // FB versions don't
