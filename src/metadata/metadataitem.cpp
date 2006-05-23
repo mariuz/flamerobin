@@ -414,27 +414,39 @@ void MetadataItem::loadDescription(wxString loadStatement)
     if (!(d))
         throw FRError(wxT("No database assigned"));
 
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(wx2std(loadStatement));
-    st1->Set(1, wx2std(getName_()));
-    if (st1->Parameters() > 1)
-        st1->Set(2, wx2std(getParent()->getName_())); // table/view/SP name
-    st1->Execute();
-    st1->Fetch();
-
-    string value;
-    IBPP::Blob b = IBPP::BlobFactory(db, tr1);
-    if (!st1->IsNull(1))
+    wxString desc;
+    try
     {
-        st1->Get(1, b);
-        b->Load(value);
+        IBPP::Database& db = d->getIBPPDatabase();
+        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+        tr1->Start();
+        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+        st1->Prepare(wx2std(loadStatement));
+        st1->Set(1, wx2std(getName_()));
+        if (st1->Parameters() > 1)
+            st1->Set(2, wx2std(getParent()->getName_())); // table/view/SP name
+        st1->Execute();
+        st1->Fetch();
+
+        std::string value;
+        IBPP::Blob b = IBPP::BlobFactory(db, tr1);
+        if (!st1->IsNull(1))
+        {
+            st1->Get(1, b);
+            b->Load(value);
+        }
+        tr1->Commit();
+        desc = std2wx(value);
     }
-    tr1->Commit();
+    catch (IBPP::Exception &e)
+    {
+        // FB 2.0 supports descriptions for some objects that previous
+        // FB versions don't
+        //desc = _("Description could not be loaded.");
+    }
+
     // set value, notify observers
-    setDescriptionM(std2wx(value));
+    setDescriptionM(desc);
 }
 //-----------------------------------------------------------------------------
 void MetadataItem::saveDescription(wxString WXUNUSED(description))
