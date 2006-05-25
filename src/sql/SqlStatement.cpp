@@ -149,7 +149,14 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db)
                     objectTypeM = ntProcedure;
                 }
                 nameM.setFromSql(tokenStringsM[idx]);
-                if (objectTypeM == ntUnknown)   // find relation
+                if (objectTypeM == ntProcedure)
+                {
+                    objectM = databaseM->findByNameAndType(ntProcedure,
+                        nameM.get());
+                    if (!objectM)
+                        objectTypeM == ntUnknown;
+                }
+                else if (objectTypeM == ntUnknown)   // find relation
                 {
                     if (!databaseM)
                         return;
