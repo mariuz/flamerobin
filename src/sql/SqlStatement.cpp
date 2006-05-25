@@ -154,7 +154,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db)
                     objectM = databaseM->findByNameAndType(ntProcedure,
                         nameM.get());
                     if (!objectM)
-                        objectTypeM == ntUnknown;
+                        objectTypeM = ntUnknown;
                 }
                 else if (objectTypeM == ntUnknown)   // find relation
                 {
