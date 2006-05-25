@@ -6,7 +6,7 @@
 -->
 <article id="frrelnotes">
   <articleinfo>
-    <title><application>FlameRobin</application> 0.7.1 ALPHA Manual</title>
+    <title><application>FlameRobin</application> 0.7.2 ALPHA Manual</title>
 
     <author>
       <firstname>Nando</firstname>
@@ -475,7 +475,7 @@
         </itemizedlist>
       </note>
 
-      <para> You can also look at the version string of the Firebird client
+      <para>You can also look at the version string of the Firebird client
       FlameRobin is using, in the About box (Help/About).</para>
     </section>
 
