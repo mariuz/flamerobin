@@ -196,12 +196,14 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
         wxString user(wxT("SYSDBA"));
         if (!sysdba)
         {
-            user = ::wxGetTextFromUser(_("Connecting to server"), _("Enter username"));
+            user = ::wxGetTextFromUser(_("Enter name of user to connect as:"),
+                _("Connecting to Server"));
             if (user.IsEmpty())
                 return false;
         }
-        wxString pass = ::wxGetPasswordFromUser(_("Connecting to server"),
-            sysdba ? _("Enter SYSDBA password") : _("Enter password"));
+        wxString pass = ::wxGetPasswordFromUser(
+            wxString::Format(_("Enter the password for user %s:"), user.c_str()),
+            _("Connecting to Server"));
         if (pass.IsEmpty())
             return false;
         try
