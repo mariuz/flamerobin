@@ -104,7 +104,7 @@ bool PrefDlgSetting::addToSizer(wxSizer* sizer, PrefDlgSetting* previous)
             margin = styleguide().getUnrelatedControlMargin(wxVERTICAL);
         sizer->Add(0, margin);
     }
-    sizer->Add(hsizer, 0, wxEXPAND|wxFIXED_MINSIZE);
+    sizer->Add(hsizer, 0, wxEXPAND | wxFIXED_MINSIZE);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -268,7 +268,7 @@ PrefDlgCheckboxSetting::~PrefDlgCheckboxSetting()
 void PrefDlgCheckboxSetting::addControlsToSizer(wxSizer* sizer)
 {
     if (checkboxM)
-        sizer->Add(checkboxM, 1, wxEXPAND|wxFIXED_MINSIZE);
+        sizer->Add(checkboxM, 1, wxFIXED_MINSIZE);
 }
 //-----------------------------------------------------------------------------
 bool PrefDlgCheckboxSetting::createControl(bool WXUNUSED(ignoreerrors))
@@ -362,7 +362,7 @@ PrefDlgRadioboxSetting::PrefDlgRadioboxSetting(wxPanel* page, PrefDlgSetting* pa
 void PrefDlgRadioboxSetting::addControlsToSizer(wxSizer* sizer)
 {
     if (radioboxM)
-        sizer->Add(radioboxM, 1, wxEXPAND|wxFIXED_MINSIZE);
+        sizer->Add(radioboxM, 1, wxFIXED_MINSIZE);
 }
 //-----------------------------------------------------------------------------
 bool PrefDlgRadioboxSetting::createControl(bool ignoreerrors)
@@ -489,14 +489,14 @@ void PrefDlgIntEditSetting::addControlsToSizer(wxSizer* sizer)
     {
         if (captionBeforeM)
         {
-            sizer->Add(captionBeforeM, 0, wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL);
+            sizer->Add(captionBeforeM, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
             sizer->Add(styleguide().getControlLabelMargin(), 0);
         }
-        sizer->Add(spinctrlM, 0, wxEXPAND|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL);
+        sizer->Add(spinctrlM, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
         if (captionAfterM)
         {
             sizer->Add(styleguide().getControlLabelMargin(), 0);
-            sizer->Add(captionAfterM, 0, wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL);
+            sizer->Add(captionAfterM, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
         }
     }
 }
@@ -639,14 +639,14 @@ void PrefDlgStringEditSetting::addControlsToSizer(wxSizer* sizer)
     {
         if (captionBeforeM)
         {
-            sizer->Add(captionBeforeM, 0, wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL);
+            sizer->Add(captionBeforeM, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
             sizer->Add(styleguide().getControlLabelMargin(), 0);
         }
-        sizer->Add(textctrlM, 0, wxEXPAND|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL);
+        sizer->Add(textctrlM, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
         if (captionAfterM)
         {
             sizer->Add(styleguide().getControlLabelMargin(), 0);
-            sizer->Add(captionAfterM, 0, wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL);
+            sizer->Add(captionAfterM, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
         }
     }
 }
@@ -777,14 +777,14 @@ void PrefDlgChooserSetting::addControlsToSizer(wxSizer* sizer)
     {
         if (captionBeforeM)
         {
-            sizer->Add(captionBeforeM, 0, wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL);
+            sizer->Add(captionBeforeM, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
             sizer->Add(styleguide().getControlLabelMargin(), 0);
         }
-        sizer->Add(textctrlM, 1, wxEXPAND|wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL);
+        sizer->Add(textctrlM, 1, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
         if (browsebtnM)
         {
             sizer->Add(styleguide().getBrowseButtonMargin(), 0);
-            sizer->Add(browsebtnM, 0, wxFIXED_MINSIZE|wxALIGN_CENTER_VERTICAL);
+            sizer->Add(browsebtnM, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
         }
     }
 }
