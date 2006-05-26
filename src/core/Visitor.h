@@ -31,7 +31,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // [GoF] Visitor pattern. Abstract generic Visitor.
 
-class Element;
 //-----------------------------------------------------------------------------
 class Visitor
 {

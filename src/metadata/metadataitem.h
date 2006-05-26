@@ -34,7 +34,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 #include <vector>
 
-#include "core/Element.h"
 #include "core/Subject.h"
 #include "sql/Identifier.h"
 
@@ -56,7 +55,7 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
 //-----------------------------------------------------------------------------
 NodeType getTypeByName(wxString name);
 //-----------------------------------------------------------------------------
-class MetadataItem: public Element, public Subject
+class MetadataItem: public Subject
 {
 private:
     MetadataItem* parentM;

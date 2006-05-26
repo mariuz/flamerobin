@@ -528,10 +528,6 @@ SOURCE=.\src\gui\DatabaseRegistrationDialog.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\core\Element.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\gui\EventWatcherFrame.cpp
 # End Source File
 # Begin Source File
@@ -871,10 +867,6 @@ SOURCE=.\src\config\DatabaseConfig.h
 # Begin Source File
 
 SOURCE=.\src\gui\DatabaseRegistrationDialog.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\core\Element.h
 # End Source File
 # Begin Source File
 
