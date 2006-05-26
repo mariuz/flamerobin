@@ -132,7 +132,6 @@ public:
     // returns true if the metadata item is a system (as opposed to user-defined) item.
     virtual bool isSystem() const;
 
-    static const wxString pathSeparator;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------

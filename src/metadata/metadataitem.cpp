@@ -50,8 +50,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------
-const wxString MetadataItem::pathSeparator = wxT("/");
-//-----------------------------------------------------------------------------
 MetadataItem::MetadataItem()
     : Subject()
 {
@@ -75,8 +73,8 @@ const wxString MetadataItem::getItemPath() const
     if (parentM)
     {
         wxString parentItemPath = parentM->getItemPath();
-        if (parentItemPath != wxT(""))
-            result = parentItemPath + pathSeparator + result;
+        if (!parentItemPath.empty())
+            result = parentItemPath + wxT("/") + result;
     }
     return result;
 }
