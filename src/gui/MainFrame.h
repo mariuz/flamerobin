@@ -110,6 +110,7 @@ public:
     void OnMenuUpdateIfDatabaseConnected(wxUpdateUIEvent& event);
     void OnMenuUpdateIfDatabaseNotConnected(wxUpdateUIEvent& event);
     void OnMenuUpdateIfDatabaseSelected(wxUpdateUIEvent& event);
+    void OnMenuUpdateIfMetadataItemHasChildren(wxUpdateUIEvent& event);
 
     // other events
     void OnWindowMenuItem(wxCommandEvent& event);

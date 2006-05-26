@@ -358,6 +358,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(myTreeCtrl::Menu_ExecuteProcedure, MainFrame::OnMenuExecuteProcedure)
 
     EVT_MENU(myTreeCtrl::Menu_ShowAllGeneratorValues, MainFrame::OnMenuShowAllGeneratorValues)
+    EVT_UPDATE_UI(myTreeCtrl::Menu_ShowAllGeneratorValues, MainFrame::OnMenuUpdateIfMetadataItemHasChildren)
     EVT_MENU(myTreeCtrl::Menu_ShowGeneratorValue, MainFrame::OnMenuShowGeneratorValue)
     EVT_MENU(myTreeCtrl::Menu_SetGeneratorValue, MainFrame::OnMenuSetGeneratorValue)
 
@@ -1780,6 +1781,16 @@ void MainFrame::OnMenuUpdateIfDatabaseSelected(wxUpdateUIEvent& event)
 
     Database* d = tree_ctrl_1->getSelectedDatabase();
     event.Enable(d != 0);
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuUpdateIfMetadataItemHasChildren(wxUpdateUIEvent& event)
+{
+    FR_TRY
+
+    MetadataItem* mi = tree_ctrl_1->getSelectedMetadataItem();
+    event.Enable(mi != 0 && mi->getChildrenCount());
 
     FR_CATCH
 }
