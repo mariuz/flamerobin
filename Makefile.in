@@ -224,7 +224,7 @@ flamerobin$(EXEEXT): $(FLAMEROBIN_OBJECTS) $(LIBPREFIX)ibpp$(LIBEXT) $(__flamero
 @COND_GCC_PCH_1@.pch/flamerobin/wx/wxprec.h.gch: 
 @COND_GCC_PCH_1@	$(top_builddir)./bk-make-pch .pch/flamerobin/wx/wxprec.h.gch wx/wxprec.h $(CXX) $(FLAMEROBIN_CXXFLAGS)
 
-FlameRobin.app/Contents/PkgInfo: flamerobin$(EXEEXT) $(srcdir)/res/flamerobin.Info.plist $(srcdir)/res/flamerobin.icns
+FlameRobin.app/Contents/PkgInfo: flamerobin$(EXEEXT) $(srcdir)/res/flamerobin.Info.plist.in $(srcdir)/res/flamerobin.icns
 	mkdir -p FlameRobin.app/Contents
 	mkdir -p FlameRobin.app/Contents/MacOS
 	mkdir -p FlameRobin.app/Contents/Resources
@@ -245,8 +245,7 @@ FlameRobin.app/Contents/PkgInfo: flamerobin$(EXEEXT) $(srcdir)/res/flamerobin.In
 	/FR_VERSION_MINOR/ {mi = $$3} \
 	/FR_VERSION_RLS/ {rls = $$3} \
 	END {printf "%d.%d.%d", ma, mi, rls}'`/" \
-	-e "s/YEAR/`date '+%Y'`/" \
-	$(srcdir)/res/flamerobin.Info.plist > FlameRobin.app/Contents/Info.plist
+	-e "s/YEAR/`date '+%Y'`/" $(srcdir)/res/flamerobin.Info.plist.in > FlameRobin.app/Contents/Info.plist
 	
 	
 	cp -f $(srcdir)/res/flamerobin.icns FlameRobin.app/Contents/Resources

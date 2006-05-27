@@ -454,14 +454,14 @@
             <if cond="PLATFORM_MACOSX=='1'">$(BUNDLE)/PkgInfo</if>
         </set>
 
-        <set var="BUNDLE_PLIST">$(DOLLAR)(srcdir)/res/flamerobin.Info.plist</set>
+        <set var="BUNDLE_PLIST_IN">$(DOLLAR)(srcdir)/res/flamerobin.Info.plist.in</set>
         <set var="BUNDLE_ICONS">$(DOLLAR)(srcdir)/res/flamerobin.icns</set>
 
         <add-target target="$(BUNDLE_TGT)" type="action"/>
         <modify-target target="$(BUNDLE_TGT)">
             <!-- required data: -->
             <depends>$(id)</depends>
-            <depends-on-file>$(BUNDLE_PLIST)</depends-on-file>
+            <depends-on-file>$(BUNDLE_PLIST_IN)</depends-on-file>
             <depends-on-file>$(BUNDLE_ICONS)</depends-on-file>
 
             <command>
@@ -486,7 +486,7 @@
                                         /FR_VERSION_MINOR/ {mi = $$3} \
                                         /FR_VERSION_RLS/ {rls = $$3} \
                                         END {printf "%d.%d.%d", ma, mi, rls}'`/" \
-                    -e "s/YEAR/`date '+%Y'`/" $(BUNDLE_PLIST) > $(BUNDLE)/Info.plist
+                    -e "s/YEAR/`date '+%Y'`/" $(BUNDLE_PLIST_IN) > $(BUNDLE)/Info.plist
 
                 <!-- and copy resources and icons -->
                 cp -f $(BUNDLE_ICONS) $(BUNDLE)/Resources
