@@ -1,36 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
-<plist version="0.9">
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
 <dict>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundleIdentifier</key>
-	<string>org.flamerobin</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
 	<string>flamerobin</string>
+	<key>CFBundleGetInfoString</key>
+	<string>FlameRobin version VERSION, Copyright 2004-YEAR FlameRobin Team</string>
 	<key>CFBundleIconFile</key>
 	<string>flamerobin.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.flamerobin</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleLongVersionString</key>
+	<string>VERSION, Copyright 2004-YEAR FlameRobin Team</string>
 	<key>CFBundleName</key>
-	<string>flamerobin</string>
+	<string>FlameRobin</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>VERSION</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>0.6.0</string>
-	<key>CFBundleShortVersionString</key>
-	<string>0.6.0</string>
-	<key>CFBundleGetInfoString</key>
-	<string>flamerobin version 0.6.0, (c) 2004-2006 FlameRobin Team</string>
-	<key>CFBundleLongVersionString</key>
-	<string>0.6.0, (c) 2004-2006 FlameRobin Team</string>
-	<key>NSHumanReadableCopyright</key>
-	<string>Copyright 2004-2006 FlameRobin Team</string>
-	<key>LSRequiresCarbon</key>
-    <true/>
+	<string>VERSION</string>
 	<key>CSResourcesFileMapped</key>
 	<true/>
+	<key>LSRequiresCarbon</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright 2004-YEAR FlameRobin Team</string>
 </dict>
 </plist>

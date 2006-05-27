@@ -178,7 +178,7 @@ COND_PLATFORM_OS2_1___flamerobin___os2_emxbindcmd = $(NM) flamerobin$(EXEEXT) \
 @COND_PLATFORM_UNIX_1@__FIREBIRDLIBRARY_p = -lfbclient
 @COND_PLATFORM_MACOSX_1@__flamerobin_bundle___depname = flamerobin_bundle
 @COND_PLATFORM_MACOSX_1@____flamerobin_BUNDLE_TGT_REF_DEP \
-@COND_PLATFORM_MACOSX_1@	= flamerobin.app/Contents/PkgInfo
+@COND_PLATFORM_MACOSX_1@	= FlameRobin.app/Contents/PkgInfo
 @COND_GCC_PCH_1@__ibpp_PCH_INC = -I.pch/ibpp
 @COND_GCC_PCH_1@___pch_ibpp__ibpp_h_gch___depname = .pch/ibpp/_ibpp.h.gch
 @COND_PLATFORM_MACOSX_1@__IBPPPLATFORMDEFINE_p = -DIBPP_DARWIN
@@ -209,7 +209,7 @@ clean:
 	rm -rf ./.deps ./.pch
 	rm -f ./*.o
 	rm -f flamerobin$(EXEEXT)
-	rm -rf flamerobin.app
+	rm -rf FlameRobin.app
 	rm -f $(LIBPREFIX)ibpp$(LIBEXT)
 
 distclean: clean
@@ -224,27 +224,35 @@ flamerobin$(EXEEXT): $(FLAMEROBIN_OBJECTS) $(LIBPREFIX)ibpp$(LIBEXT) $(__flamero
 @COND_GCC_PCH_1@.pch/flamerobin/wx/wxprec.h.gch: 
 @COND_GCC_PCH_1@	$(top_builddir)./bk-make-pch .pch/flamerobin/wx/wxprec.h.gch wx/wxprec.h $(CXX) $(FLAMEROBIN_CXXFLAGS)
 
-flamerobin.app/Contents/PkgInfo: flamerobin$(EXEEXT) $(srcdir)/res/flamerobin.Info.plist $(srcdir)/res/flamerobin.icns
-	mkdir -p flamerobin.app/Contents
-	mkdir -p flamerobin.app/Contents/MacOS
-	mkdir -p flamerobin.app/Contents/Resources
-	mkdir -p flamerobin.app/Contents/SharedSupport
-	mkdir -p flamerobin.app/Contents/SharedSupport/conf-defs
-	mkdir -p flamerobin.app/Contents/SharedSupport/docs
-	mkdir -p flamerobin.app/Contents/SharedSupport/html-templates
+FlameRobin.app/Contents/PkgInfo: flamerobin$(EXEEXT) $(srcdir)/res/flamerobin.Info.plist $(srcdir)/res/flamerobin.icns
+	mkdir -p FlameRobin.app/Contents
+	mkdir -p FlameRobin.app/Contents/MacOS
+	mkdir -p FlameRobin.app/Contents/Resources
+	mkdir -p FlameRobin.app/Contents/SharedSupport
+	mkdir -p FlameRobin.app/Contents/SharedSupport/conf-defs
+	mkdir -p FlameRobin.app/Contents/SharedSupport/docs
+	mkdir -p FlameRobin.app/Contents/SharedSupport/html-templates
 	
 	
-	echo -n "APPL????" >flamerobin.app/Contents/PkgInfo
+	echo -n "APPL????" >FlameRobin.app/Contents/PkgInfo
 	
 	
-	ln -f flamerobin$(EXEEXT) flamerobin.app/Contents/MacOS/flamerobin
+	ln -f flamerobin$(EXEEXT) FlameRobin.app/Contents/MacOS/flamerobin
 	
 	
-	cp -f $(srcdir)/res/flamerobin.Info.plist flamerobin.app/Contents/Info.plist
-	cp -f $(srcdir)/res/flamerobin.icns flamerobin.app/Contents/Resources
-	cp -R $(srcdir)/conf-defs/* flamerobin.app/Contents/SharedSupport/conf-defs
-	cp -R $(srcdir)/docs/* flamerobin.app/Contents/SharedSupport/docs
-	cp -R $(srcdir)/html-templates/* flamerobin.app/Contents/SharedSupport/html-templates
+	sed -e "s/VERSION/`cat $(srcdir)/src/frversion.h | \
+	awk '/FR_VERSION_MAJOR/ {ma = $$3} \
+	/FR_VERSION_MINOR/ {mi = $$3} \
+	/FR_VERSION_RLS/ {rls = $$3} \
+	END {printf "%d.%d.%d", ma, mi, rls}'`/" \
+	-e "s/YEAR/`date '+%Y'`/" \
+	$(srcdir)/res/flamerobin.Info.plist > FlameRobin.app/Contents/Info.plist
+	
+	
+	cp -f $(srcdir)/res/flamerobin.icns FlameRobin.app/Contents/Resources
+	cp -R $(srcdir)/conf-defs/* FlameRobin.app/Contents/SharedSupport/conf-defs
+	cp -R $(srcdir)/docs/* FlameRobin.app/Contents/SharedSupport/docs
+	cp -R $(srcdir)/html-templates/* FlameRobin.app/Contents/SharedSupport/html-templates
 
 @COND_PLATFORM_MACOSX_1@flamerobin_bundle: $(____flamerobin_BUNDLE_TGT_REF_DEP)
 
