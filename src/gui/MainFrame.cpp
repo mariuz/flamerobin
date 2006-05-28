@@ -496,7 +496,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
     if (!config().get(wxT("ShowColumnsInTree"), true))   // if no columns in tree, then only Properties can be shown
         treeActivateAction = showProperties;
 
-    if (treeActivateAction == showColumnInfo && (nt == ntTable || nt == ntView || nt == ntProcedure))
+    if (treeActivateAction == showColumnInfo && (nt == ntTable || nt == ntSysTable || nt == ntView || nt == ntProcedure))
     {
         bool success;
         if (nt == ntProcedure)
@@ -520,6 +520,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
                 OnMenuObjectProperties(event);
                 break;
             case ntTable:
+            case ntSysTable:
             case ntView:
             case ntProcedure:
             case ntDomain:
@@ -1433,6 +1434,7 @@ void MainFrame::OnMenuLoadColumnsInfo(wxCommandEvent& WXUNUSED(event))
     switch (t->getType())
     {
         case ntTable:
+        case ntSysTable:
         case ntView:        success = ((Relation*)t)->checkAndLoadColumns();   break;
         case ntProcedure:   success = ((Procedure*)t)->checkAndLoadParameters();               break;
         default:            break;
@@ -1615,6 +1617,10 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
     Column* c = dynamic_cast<Column*>(m);
     if (c)
     {
+        // Return when we're dealing with a system column
+        if (c->isSystem())
+            return;
+
         URI uri = URI(wxT("fr://edit_field?parent_window=") + wxString::Format(wxT("%ld"), (uintptr_t)this)
             + wxT("&object_address=") + wxString::Format(wxT("%ld"), (uintptr_t)c));
         getURIProcessor().handleURI(uri);

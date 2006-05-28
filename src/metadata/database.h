@@ -131,6 +131,7 @@ private:
     MetadataCollection<Procedure> proceduresM;
     MetadataCollection<Role> rolesM;
     MetadataCollection<Table> tablesM;
+    MetadataCollection<Table> sysTablesM;
     MetadataCollection<Trigger> triggersM;
     MetadataCollection<View> viewsM;
 
@@ -143,6 +144,9 @@ private:
     wxString getTableForIndex(wxString indexName);
 
     mutable unsigned int idM;
+
+    bool showSysTables();
+
 protected:
     virtual void lockChildren();
     virtual void unlockChildren();

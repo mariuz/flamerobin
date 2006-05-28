@@ -52,8 +52,9 @@ ContextMenuMetadataItemVisitor::~ContextMenuMetadataItemVisitor()
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitColumn(Column& column)
 {
-    if (column.getTable()) // only for table columns
-        addRegularObjectMenu();
+    Table* t = column.getTable();
+    if (t) // only for table columns
+        addRegularObjectMenu(false, t->isSystem());
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitDatabase(Database&)
@@ -162,12 +163,18 @@ void ContextMenuMetadataItemVisitor::visitServer(Server&)
     menuM->Append(myTreeCtrl::Menu_ServerProperties, _("Server registration &info..."));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitTable(Table&)
+void ContextMenuMetadataItemVisitor::visitTable(Table& table)
 {
-    menuM->Append(myTreeCtrl::Menu_Insert, _("&Insert into ..."));
-    addSelectMenu(true);
-    menuM->Append(myTreeCtrl::Menu_CreateTriggerForTable, _("Create new &trigger..."));
-    addRegularObjectMenu();
+    // When a system table object is visited, only the select and regular object
+    // menus should be used. No modifications should be made to system objects,
+    // at least not from FR gui.
+    bool isSystem = table.isSystem();
+    if (!isSystem)
+        menuM->Append(myTreeCtrl::Menu_Insert, _("&Insert into ..."));
+    addSelectMenu(true, isSystem);
+    if (!isSystem)
+        menuM->Append(myTreeCtrl::Menu_CreateTriggerForTable, _("Create new &trigger..."));
+    addRegularObjectMenu(false, isSystem);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitTrigger(Trigger&)
@@ -181,7 +188,7 @@ void ContextMenuMetadataItemVisitor::visitView(View&)
     addRegularObjectMenu(true); // true = add Alter menu
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addSelectMenu(bool isTable)
+void ContextMenuMetadataItemVisitor::addSelectMenu(bool isTable, bool isSystem)
 {
     menuM->Append(myTreeCtrl::Menu_Browse, _("&Select * from ..."));
     menuM->Append(myTreeCtrl::Menu_BrowseColumns, _("Select &col1, col2, ... from ..."));
@@ -189,17 +196,20 @@ void ContextMenuMetadataItemVisitor::addSelectMenu(bool isTable)
     if (config().get(wxT("ShowColumnsInTree"), true))
     {
         menuM->Append(myTreeCtrl::Menu_LoadColumnsInfo, _("Show columns in&fo"));
-        if (isTable)
+        if (isTable && !isSystem)
             menuM->Append(myTreeCtrl::Menu_AddColumn, _("&Add column..."));
         menuM->AppendSeparator();
     }
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addRegularObjectMenu(bool alter)
+void ContextMenuMetadataItemVisitor::addRegularObjectMenu(bool alter, bool isSystem)
 {
-    if (alter)
-        menuM->Append(myTreeCtrl::Menu_AlterObject, _("&Alter..."));
-    menuM->Append(myTreeCtrl::Menu_DropObject, _("Dr&op..."));
+    if (!isSystem)
+    {
+        if (alter)
+            menuM->Append(myTreeCtrl::Menu_AlterObject, _("&Alter..."));
+        menuM->Append(myTreeCtrl::Menu_DropObject, _("Dr&op..."));
+    }
     menuM->Append(myTreeCtrl::Menu_ObjectProperties, _("Show P&roperties"));
 }
 //-----------------------------------------------------------------------------

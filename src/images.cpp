@@ -55,6 +55,8 @@ wxBitmap getImage(NodeType type)
     #include "procedures.xpm"
     #include "root.xpm"
     #include "server.xpm"
+    #include "systemtable.xpm"
+    #include "systemtables.xpm"
     #include "table.xpm"
     #include "tables.xpm"
     #include "trigger.xpm"
@@ -65,31 +67,31 @@ wxBitmap getImage(NodeType type)
     for (int i = 0; i < ntLastType; i++)
         map[i] = object_xpm;
 
-    map[ntUnknown]         = object_xpm;
+    map[ntUnknown]      = object_xpm;
     map[ntRoot]         = root_xpm;
-    map[ntServer]         = server_xpm;
+    map[ntServer]       = server_xpm;
     map[ntDatabase]     = database_xpm;
-    map[ntTable]         = table_xpm;
-    map[ntTables]         = tables_xpm;
+    map[ntTable]        = table_xpm;
+    map[ntTables]       = tables_xpm;
+    map[ntSysTable]     = systemtable_xpm;
+    map[ntSysTables]    = systemtables_xpm;
     map[ntView]         = view_xpm;
-    map[ntViews]         = view_xpm;
-    map[ntProcedure]     = procedure_xpm;
-    map[ntProcedures]     = procedures_xpm;
-    map[ntGenerator]     = generator_xpm;
+    map[ntViews]        = view_xpm;
+    map[ntProcedure]    = procedure_xpm;
+    map[ntProcedures]   = procedures_xpm;
+    map[ntGenerator]    = generator_xpm;
     map[ntFunction]     = function_xpm;
-    map[ntSysTable]     = table_xpm;
-    map[ntTrigger]         = trigger_xpm;
+    map[ntTrigger]      = trigger_xpm;
     map[ntTriggers]     = trigger_xpm;
-    map[ntGenerators]     = generators_xpm;
-    map[ntFunctions]     = function_xpm;
-    map[ntSysTables]     = tables_xpm;
-    map[ntColumn]         = column_xpm;
-    map[ntDomains]         = domain_xpm;
-    //map[ntRole]         = role_xpm;
-    //map[ntRoles]         = roles_xpm;
-    map[ntDomain]         = domain_xpm;
-    map[ntParameter]     = column_xpm;
-    map[ntPrimaryKey]    = key_xpm;
+    map[ntGenerators]   = generators_xpm;
+    map[ntFunctions]    = function_xpm;
+    map[ntColumn]       = column_xpm;
+    map[ntDomains]      = domain_xpm;
+    //map[ntRole]       = role_xpm;
+    //map[ntRoles]      = roles_xpm;
+    map[ntDomain]       = domain_xpm;
+    map[ntParameter]    = column_xpm;
+    map[ntPrimaryKey]   = key_xpm;
     map[ntComputed]     = function_xpm;
 
     wxBitmap ret(map[type]);
@@ -110,6 +112,7 @@ wxBitmap getImage32(NodeType type)
     #include "generator32.xpm"
     #include "procedure32.xpm"
     #include "server32.xpm"
+    #include "systemtable32.xpm"
     #include "table32.xpm"
     #include "trigger32.xpm"
     #include "view32.xpm"
@@ -118,18 +121,18 @@ wxBitmap getImage32(NodeType type)
     for (int i = 0; i < ntLastType; i++)
         map[i] = fricon_xpm;
 
-    map[ntUnknown]         = fricon_xpm;
-    map[ntTable]         = table_xpm;
+    map[ntUnknown]      = fricon_xpm;
+    map[ntTable]        = table_xpm;
+    map[ntSysTable]     = systemtable32_xpm;
     map[ntView]         = view_xpm;
-    map[ntProcedure]     = procedure_xpm;
-    map[ntGenerator]     = generator_xpm;
+    map[ntProcedure]    = procedure_xpm;
+    map[ntGenerator]    = generator_xpm;
     map[ntFunction]     = function_xpm;
-    map[ntSysTable]     = table_xpm;
-    map[ntTrigger]         = trigger_xpm;
-    map[ntColumn]         = column_xpm;
-    map[ntDomain]         = domain_xpm;
+    map[ntTrigger]      = trigger_xpm;
+    map[ntColumn]       = column_xpm;
+    map[ntDomain]       = domain_xpm;
     map[ntDatabase]     = database32_xpm;
-    map[ntServer]     = server32_xpm;
+    map[ntServer]       = server32_xpm;
     wxBitmap ret(map[type]);
 
     delete [] map;

@@ -83,6 +83,12 @@
                 </setting>
             </enables>
         </setting>
+        <setting type="checkbox">
+            <caption>Show system tables in tree</caption>
+            <description>If checked the system tables will be shown in the tree by default (remember that you can deviate from this per database)</description>
+            <key>ShowSystemTables</key>
+            <default>1</default>
+        </setting>
     </node>
     <node>
         <caption>SQL Editor</caption>

@@ -182,6 +182,9 @@ Database::Database()
     proceduresM.setProperties(this, wxT("Procedures"), ntProcedures);
     rolesM.setProperties(this, wxT("Roles"), ntRoles);
     tablesM.setProperties(this, wxT("Tables"), ntTables);
+
+    sysTablesM.setProperties(this, wxT("System tables"), ntSysTables);
+
     triggersM.setProperties(this, wxT("Triggers"), ntTriggers);
     viewsM.setProperties(this, wxT("Views"), ntViews);
 }
@@ -193,8 +196,9 @@ Database::Database(const Database& rhs)
     domainsM(rhs.domainsM), exceptionsM(rhs.exceptionsM),
     functionsM(rhs.functionsM), generatorsM(rhs.generatorsM),
     proceduresM(rhs.proceduresM), rolesM(rhs.rolesM), tablesM(rhs.tablesM),
-    triggersM(rhs.triggersM), viewsM(rhs.viewsM), collationsM(rhs.collationsM),
-    idM(rhs.idM), storeEncryptedPasswordM(rhs.storeEncryptedPasswordM)
+    sysTablesM(rhs.sysTablesM), triggersM(rhs.triggersM),
+    viewsM(rhs.viewsM), collationsM(rhs.collationsM), idM(rhs.idM),
+    storeEncryptedPasswordM(rhs.storeEncryptedPasswordM)
 {
     if (rhs.connectionCredentialsM)
         connectionCredentialsM = new Credentials(*connectionCredentialsM);
@@ -206,6 +210,7 @@ Database::Database(const Database& rhs)
     proceduresM.setParent(this);
     rolesM.setParent(this);
     tablesM.setParent(this);
+    sysTablesM.setParent(this);
     triggersM.setParent(this);
     viewsM.setParent(this);
 }
@@ -229,6 +234,7 @@ void Database::resetCredentials()
 void Database::getIdentifiers(std::vector<Identifier>& temp)
 {
     tablesM.getChildrenNames(temp);
+    sysTablesM.getChildrenNames(temp);
     viewsM.getChildrenNames(temp);
     proceduresM.getChildrenNames(temp);
     triggersM.getChildrenNames(temp);
@@ -245,6 +251,10 @@ wxString getLoadingSql(NodeType type)
     {
         case ntTable:       return wxT("select rr.rdb$relation_name from rdb$relations rr ")
             wxT(" where (rr.RDB$SYSTEM_FLAG = 0 or rr.RDB$SYSTEM_FLAG is null) ")
+            wxT(" and rr.RDB$VIEW_SOURCE is null order by 1");
+
+        case ntSysTable:    return wxT("select rr.rdb$relation_name from rdb$relations rr ")
+            wxT(" where (rr.RDB$SYSTEM_FLAG = 1) ")
             wxT(" and rr.RDB$VIEW_SOURCE is null order by 1");
 
         case ntView:        return wxT("select rr.rdb$relation_name from rdb$relations rr ")
@@ -468,6 +478,7 @@ bool Database::loadObjects(NodeType type, IBPP::Transaction& tr1,
     switch (type)
     {
         case ntTable:       tablesM.clear();        break;
+        case ntSysTable:    sysTablesM.clear();     break;
         case ntView:        viewsM.clear();         break;
         case ntProcedure:   proceduresM.clear();    break;
         case ntTrigger:     triggersM.clear();      break;
@@ -528,6 +539,7 @@ void Database::refreshByType(NodeType type)
     switch (type)
     {
         case ntTable:       tablesM.notifyObservers();      break;
+        case ntSysTable:    sysTablesM.notifyObservers();   break;
         case ntView:        viewsM.notifyObservers();       break;
         case ntProcedure:   proceduresM.notifyObservers();  break;
         case ntTrigger:     triggersM.notifyObservers();    break;
@@ -555,15 +567,16 @@ MetadataItem* Database::findByNameAndType(NodeType nt, wxString name)
 {
     switch (nt)
     {
-        case ntTable:       return tablesM.findByName(name);
-        case ntView:        return viewsM.findByName(name);
-        case ntTrigger:     return triggersM.findByName(name);
-        case ntProcedure:   return proceduresM.findByName(name);
-        case ntFunction:    return functionsM.findByName(name);
-        case ntGenerator:   return generatorsM.findByName(name);
-        case ntRole:        return rolesM.findByName(name);
-        case ntDomain:      return domainsM.findByName(name);
-        case ntException:   return exceptionsM.findByName(name);
+        case ntTable:       return tablesM.findByName(name);     break;
+        case ntSysTable:    return sysTablesM.findByName(name);  break;
+        case ntView:        return viewsM.findByName(name);      break;
+        case ntTrigger:     return triggersM.findByName(name);   break;
+        case ntProcedure:   return proceduresM.findByName(name); break;
+        case ntFunction:    return functionsM.findByName(name);  break;
+        case ntGenerator:   return generatorsM.findByName(name); break;
+        case ntRole:        return rolesM.findByName(name);      break;
+        case ntDomain:      return domainsM.findByName(name);    break;
+        case ntException:   return exceptionsM.findByName(name); break;
         default:
             return 0;
     };
@@ -603,6 +616,7 @@ void Database::dropObject(MetadataItem* object)
     switch (nt)
     {
         case ntTable:       tablesM.remove((Table*)object);            break;
+        case ntSysTable:    sysTablesM.remove((Table*)object);         break;
         case ntView:        viewsM.remove((View*)object);              break;
         case ntTrigger:     triggersM.remove((Trigger*)object);        break;
         case ntProcedure:   proceduresM.remove((Procedure*)object);    break;
@@ -622,6 +636,7 @@ bool Database::addObject(NodeType type, wxString name)
     switch (type)
     {
         case ntTable:       m = tablesM.add(name);      break;
+        case ntSysTable:    m = sysTablesM.add(name);   break;
         case ntView:        m = viewsM.add(name);       break;
         case ntProcedure:   m = proceduresM.add(name);  break;
         case ntTrigger:     m = triggersM.add(name);    break;
@@ -873,6 +888,7 @@ bool Database::connect(wxString password, ProgressIndicator* indicator)
         connectedM = true;
         notifyObservers();
         tablesM.setParent(this);
+        sysTablesM.setParent(this);
 
         bool canceled = (indicator && indicator->isCanceled());
         if (!canceled)
@@ -894,16 +910,20 @@ bool Database::connect(wxString password, ProgressIndicator* indicator)
             // load metadata information
             struct NodeTypeName { NodeType type; const wxChar* name; };
             static const NodeTypeName nodetypes[] = {
-                { ntTable, _("Tables") }, { ntView, _("Views") },
-                { ntProcedure, _("Procedures") }, { ntTrigger, _("Triggers") },
-                { ntRole, _("Roles") }, { ntDomain, _("Domains") },
-                { ntFunction, _("Functions") }, { ntGenerator, _("Generators") },
-                { ntException, _("Exceptions")  }
+                { ntTable, _("Tables") }, { ntSysTable, _("System tables") },
+                { ntView, _("Views") }, { ntProcedure, _("Procedures") },
+                { ntTrigger, _("Triggers") }, { ntRole, _("Roles") },
+                { ntDomain, _("Domains") }, { ntFunction, _("Functions") },
+                { ntGenerator, _("Generators") }, { ntException, _("Exceptions")  }
             };
 
             int typeCount = sizeof(nodetypes) / sizeof(NodeTypeName);
             for (int i = 0; i < typeCount; i++)
             {
+                // Only load system tables when they should be shown
+                if (nodetypes[i].type == ntSysTable && !showSysTables())
+                    continue;
+
                 if (indicator)
                 {
                     indicator->initProgress(wxString::Format(_("Loading %s..."),
@@ -974,6 +994,7 @@ bool Database::disconnect(bool onlyDBH)
         proceduresM.detachAllObservers();
         rolesM.detachAllObservers();
         tablesM.detachAllObservers();
+        sysTablesM.detachAllObservers();
         triggersM.detachAllObservers();
         viewsM.detachAllObservers();
         exceptionsM.detachAllObservers();
@@ -1028,6 +1049,9 @@ void Database::getCollections(std::vector<MetadataItem*>& temp)
     temp.push_back(&proceduresM);
     temp.push_back(&rolesM);
     temp.push_back(&tablesM);
+    // Only push back system tables when they should be shown
+    if (showSysTables())
+        temp.push_back(&sysTablesM);
     temp.push_back(&triggersM);
     temp.push_back(&viewsM);
 }
@@ -1041,6 +1065,7 @@ void Database::lockChildren()
     proceduresM.lockSubject();
     rolesM.lockSubject();
     tablesM.lockSubject();
+    sysTablesM.lockSubject();
     triggersM.lockSubject();
     viewsM.lockSubject();
 }
@@ -1054,6 +1079,7 @@ void Database::unlockChildren()
     proceduresM.unlockSubject();
     rolesM.unlockSubject();
     tablesM.unlockSubject();
+    sysTablesM.unlockSubject();
     triggersM.unlockSubject();
     viewsM.unlockSubject();
 }
@@ -1280,5 +1306,16 @@ void Database::setId(int id)
 DatabaseInfo* Database::getInfo() const
 {
     return const_cast<DatabaseInfo*>(&databaseInfoM);
+}
+//-----------------------------------------------------------------------------
+bool Database::showSysTables()
+{
+    const wxString SHOW_SYSTABLES = wxT("ShowSystemTables");
+
+    bool b;
+    if (!DatabaseConfig(this).getValue(SHOW_SYSTABLES, b))
+        b = config().get(SHOW_SYSTABLES, true);
+
+    return b;
 }
 //-----------------------------------------------------------------------------

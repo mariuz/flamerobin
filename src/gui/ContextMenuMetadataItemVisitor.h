@@ -56,8 +56,8 @@ public:
 private:
     wxMenu* menuM;
 
-    void addRegularObjectMenu(bool alter = false);
-    void addSelectMenu(bool isTable = false);
+    void addRegularObjectMenu(bool alter = false, bool isSystem = false);
+    void addSelectMenu(bool isTable = false, bool isSystem = false);
 };
 //-----------------------------------------------------------------------------
 #endif //FR_CONTEXTMENUMETADATAITEMVISITOR_H
