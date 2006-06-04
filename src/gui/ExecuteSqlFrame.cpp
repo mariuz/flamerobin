@@ -528,7 +528,7 @@ void ExecuteSqlFrame::set_properties()
         statusbar_1->SetStatusText(statusbar_fields[i], i);
     }
     grid_data = new DataGrid(notebook_pane_2, ID_grid_data);
-    grid_data->SetTable(new GridTable(statementM), true);
+    grid_data->SetTable(new DataGridTable(statementM), true);
     splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
 
     button_new->SetToolTip(_("New window"));
@@ -671,7 +671,7 @@ void ExecuteSqlFrame::OnSqlEditUpdateUI(wxStyledTextEvent& WXUNUSED(event))
     int p = styled_text_ctrl_sql->GetCurrentPos();
     int row = styled_text_ctrl_sql->GetCurrentLine();
     int col = p - styled_text_ctrl_sql->PositionFromLine(row);
-    statusbar_1->SetStatusText(wxString::Format(wxT("%d : %d"), col+1, row+1), 2);
+    statusbar_1->SetStatusText(wxString::Format(wxT("%d : %d"), row+1, col+1), 2);
 
     // check for braces, and highlight
     int c1 = styled_text_ctrl_sql->GetCharAt(p);
@@ -1256,7 +1256,7 @@ bool ExecuteSqlFrame::execute(wxString sql, bool prepareOnly)
         IBPP::STT type = statementM->Type();
         if (type == IBPP::stSelect)            // for select statements: show data
         {
-            grid_data->fill(databaseM->getConnectionCharset());
+            grid_data->fetchData(databaseM->getConnectionCharset());
             notebook_1->SetSelection(1);
             grid_data->SetFocus();
         }
