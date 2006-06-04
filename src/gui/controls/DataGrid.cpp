@@ -47,6 +47,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "config/Config.h"
 #include "core/FRError.h"
+#include "gui/AdvancedMessageDialog.h"
 #include "gui/controls/DataGrid.h"
 #include "gui/controls/DataGridTable.h"
 #include "ugly.h"
@@ -132,6 +133,19 @@ DataGridTable* DataGrid::getDataGridTable()
 {
     DataGridTable* table = dynamic_cast<DataGridTable*>(GetTable());
     return table;
+}
+//-----------------------------------------------------------------------------
+void DataGrid::notifyIfUnfetchedData()
+{
+    DataGridTable* table = getDataGridTable();
+    if (table && table->canFetchMoreRows())
+    {
+        showInformationDialog(wxGetTopLevelParent(this),
+            _("Not all records in the result set are copied to the clipboard."),
+            _("The result set has unfetched data. Only the records that have already been fetched will be copied. Use the \"Fetch all data\" command in the popup menu first if you want to copy the complete data set."),
+            AdvancedMessageDialogButtonsOk(), config(), wxT("DIALOG_InfoClipboardCopyUnfetched"),
+            _("Do not show this information again"));
+    }
 }
 //-----------------------------------------------------------------------------
 void DataGrid::showPopMenu(wxPoint cursorPos)
@@ -250,35 +264,39 @@ void DataGrid::OnMenuCellFont(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void DataGrid::OnMenuCopyToCB(wxCommandEvent& WXUNUSED(event))
 {
-    wxBusyCursor cr;
-    wxString sRows;
-    bool all = true;
-    for (int i = 0; i < GetNumberRows(); i++)
-    {
-        wxString sRow;
-        for (int j = 0; j < GetNumberCols(); j++)
-        {
-            if (IsInSelection(i, j))
-            {
-                // TODO: - align fields in columns ?
-                //       - fields with multiline strings don't really work...
-                if (!sRow.IsEmpty())
-                    sRow += wxT("\t");
-                sRow += GetCellValue(i, j);
-            }
-            else
-                all = false;
-        }
-        if (!sRow.IsEmpty())
-            sRows += sRow + wxTextBuffer::GetEOL();
-    }
-    if (!sRows.IsEmpty())
-        copyToClipboard(sRows);
+    FR_TRY
 
-    DataGridTable* table = getDataGridTable();
-    if (all && table && table->canFetchMoreRows())
-        wxMessageBox(_("There are more rows to fetch from database"),
-        _("Only the rows in the grid are copied"), wxOK|wxICON_INFORMATION);
+    bool all = true;
+    {
+        wxBusyCursor cr;
+        wxString sRows;
+        for (int i = 0; i < GetNumberRows(); i++)
+        {
+            wxString sRow;
+            for (int j = 0; j < GetNumberCols(); j++)
+            {
+                if (IsInSelection(i, j))
+                {
+                    // TODO: - align fields in columns ?
+                    //       - fields with multiline strings don't really work...
+                    if (!sRow.IsEmpty())
+                        sRow += wxT("\t");
+                    sRow += GetCellValue(i, j);
+                }
+                else
+                    all = false;
+            }
+            if (!sRow.IsEmpty())
+                sRows += sRow + wxTextBuffer::GetEOL();
+        }
+        if (!sRows.IsEmpty())
+            copyToClipboard(sRows);
+    }
+
+    if (all)
+        notifyIfUnfetchedData();
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnMenuCopyToCBAsInsert(wxCommandEvent& WXUNUSED(event))
@@ -329,9 +347,8 @@ void DataGrid::OnMenuCopyToCBAsInsert(wxCommandEvent& WXUNUSED(event))
     if (!sRows.IsEmpty())
         copyToClipboard(sRows);
 
-    if (all && table->canFetchMoreRows())
-        wxMessageBox(_("There are more rows to fetch from database"),
-        _("Only the rows in the grid are copied"), wxOK|wxICON_INFORMATION);
+    if (all)
+        notifyIfUnfetchedData();
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnMenuLabelFont(wxCommandEvent& WXUNUSED(event))
