@@ -189,7 +189,7 @@ wxString GridCellFormats::formatTime(int hour, int minute, int second,
 }
 //-----------------------------------------------------------------------------
 // StringGridCell: class with wxString representation of data
-class StringGridCell: public GridCell
+class StringGridCell: public DataGridCell
 {
 private:
     wxString valueM;
@@ -208,7 +208,7 @@ wxString StringGridCell::getValue()
     return valueM;
 }
 //-----------------------------------------------------------------------------
-inline GridCell* createCellForString(IBPP::Statement& statement, int col,
+inline DataGridCell* createCellForString(IBPP::Statement& statement, int col,
     wxMBConv* converter)
 {
     std::string cv;
@@ -219,7 +219,7 @@ inline GridCell* createCellForString(IBPP::Statement& statement, int col,
 }
 //-----------------------------------------------------------------------------
 // IntegerGridCell: class for integer and smallint data
-class IntegerGridCell: public GridCell
+class IntegerGridCell: public DataGridCell
 {
 private:
     int valueM;
@@ -229,7 +229,7 @@ public:
 };
 //-----------------------------------------------------------------------------
 IntegerGridCell::IntegerGridCell(int value)
-    : GridCell(), valueM(value) 
+    : DataGridCell(), valueM(value) 
 {
 }
 //-----------------------------------------------------------------------------
@@ -238,7 +238,7 @@ wxString IntegerGridCell::getValue()
     return wxString::Format(wxT("%d"), valueM); 
 }
 //-----------------------------------------------------------------------------
-inline GridCell* createCellForInteger(IBPP::Statement& statement, int col)
+inline DataGridCell* createCellForInteger(IBPP::Statement& statement, int col)
 {
     int cv;
     statement->Get(col, cv);
@@ -246,7 +246,7 @@ inline GridCell* createCellForInteger(IBPP::Statement& statement, int col)
 }
 //-----------------------------------------------------------------------------
 // LargeintGridCell: class for big integer (64 bit) data
-class LargeintGridCell: public GridCell
+class LargeintGridCell: public DataGridCell
 {
 private:
     int64_t valueM;
@@ -256,7 +256,7 @@ public:
 };
 //-----------------------------------------------------------------------------
 LargeintGridCell::LargeintGridCell(int64_t value)
-    : GridCell(), valueM(value) 
+    : DataGridCell(), valueM(value) 
 {
 }
 //-----------------------------------------------------------------------------
@@ -265,7 +265,7 @@ wxString LargeintGridCell::getValue()
     return wxLongLong(valueM).ToString(); 
 }
 //-----------------------------------------------------------------------------
-inline GridCell* createCellForLargeint(IBPP::Statement& statement, int col)
+inline DataGridCell* createCellForLargeint(IBPP::Statement& statement, int col)
 {
     int64_t cv;
     statement->Get(col, cv);
@@ -273,7 +273,7 @@ inline GridCell* createCellForLargeint(IBPP::Statement& statement, int col)
 }
 //-----------------------------------------------------------------------------
 // FloatGridCell class: class for single precision floating point data
-class FloatGridCell: public GridCell
+class FloatGridCell: public DataGridCell
 {
 private:
     float valueM;
@@ -283,7 +283,7 @@ public:
 };
 //-----------------------------------------------------------------------------
 FloatGridCell::FloatGridCell(float value)
-    : GridCell(), valueM(value)
+    : DataGridCell(), valueM(value)
 {
 }
 //-----------------------------------------------------------------------------
@@ -294,7 +294,7 @@ wxString FloatGridCell::getValue()
     return std2wx(oss.str());
 }
 //-----------------------------------------------------------------------------
-inline GridCell* createCellForFloat(IBPP::Statement& statement, int col)
+inline DataGridCell* createCellForFloat(IBPP::Statement& statement, int col)
 {
     float cv;
     statement->Get(col, cv);
@@ -303,7 +303,7 @@ inline GridCell* createCellForFloat(IBPP::Statement& statement, int col)
 //-----------------------------------------------------------------------------
 // DoubleGridCell class: class for double precision floating point and 
 //                       scaled integer (like INTEGER(18, 4)) data
-class DoubleGridCell: public GridCell
+class DoubleGridCell: public DataGridCell
 {
 private:
     double valueM;
@@ -314,7 +314,7 @@ public:
 };
 //-----------------------------------------------------------------------------
 DoubleGridCell::DoubleGridCell(double value, int scale)
-    : GridCell(), valueM(value), scaleM(scale)
+    : DataGridCell(), valueM(value), scaleM(scale)
 {
 }
 //-----------------------------------------------------------------------------
@@ -329,7 +329,7 @@ wxString DoubleGridCell::getValue()
     return GridCellFormats::get().formatDouble(valueM);
 }
 //-----------------------------------------------------------------------------
-inline GridCell* createCellForDouble(IBPP::Statement& statement, int col)
+inline DataGridCell* createCellForDouble(IBPP::Statement& statement, int col)
 {
     double cv;
     statement->Get(col, cv);
@@ -337,7 +337,7 @@ inline GridCell* createCellForDouble(IBPP::Statement& statement, int col)
 }
 //-----------------------------------------------------------------------------
 // DateGridCell: class for date data
-class DateGridCell: public GridCell
+class DateGridCell: public DataGridCell
 {
 private:
     int yearM, monthM, dayM;
@@ -347,7 +347,7 @@ public:
 };
 //-----------------------------------------------------------------------------
 DateGridCell::DateGridCell(int year, int month, int day)
-    : GridCell(), yearM(year), monthM(month), dayM(day)
+    : DataGridCell(), yearM(year), monthM(month), dayM(day)
 {
 }
 //-----------------------------------------------------------------------------
@@ -356,7 +356,7 @@ wxString DateGridCell::getValue()
     return GridCellFormats::get().formatDate(yearM, monthM, dayM); 
 }
 //-----------------------------------------------------------------------------
-inline GridCell* createCellForDate(IBPP::Statement& statement, int col)
+inline DataGridCell* createCellForDate(IBPP::Statement& statement, int col)
 {
     IBPP::Date cv;
     statement->Get(col, cv);
@@ -366,7 +366,7 @@ inline GridCell* createCellForDate(IBPP::Statement& statement, int col)
 }
 //-----------------------------------------------------------------------------
 // TimeGridCell: class for time data
-class TimeGridCell: public GridCell
+class TimeGridCell: public DataGridCell
 {
 private:
     int hourM, minuteM, secondM, milliSecondM;
@@ -376,7 +376,7 @@ public:
 };
 //-----------------------------------------------------------------------------
 TimeGridCell::TimeGridCell(int hour, int minute, int second, int milliSecond)
-    : GridCell(), hourM(hour), minuteM(minute), secondM(second)
+    : DataGridCell(), hourM(hour), minuteM(minute), secondM(second)
     , milliSecondM(milliSecond)
 {
 }
@@ -387,7 +387,7 @@ wxString TimeGridCell::getValue()
         milliSecondM); 
 }
 //-----------------------------------------------------------------------------
-inline GridCell* createCellForTime(IBPP::Statement& statement, int col)
+inline DataGridCell* createCellForTime(IBPP::Statement& statement, int col)
 {
     IBPP::Time cv;
     statement->Get(col, cv);
@@ -397,7 +397,7 @@ inline GridCell* createCellForTime(IBPP::Statement& statement, int col)
 }
 //-----------------------------------------------------------------------------
 // TimestampGridCell: class for timestamp (date and time) data
-class TimestampGridCell: public GridCell
+class TimestampGridCell: public DataGridCell
 {
 private:
     int yearM, monthM, dayM;
@@ -410,7 +410,7 @@ public:
 //-----------------------------------------------------------------------------
 TimestampGridCell::TimestampGridCell(int year, int month, int day,
         int hour, int minute, int second, int milliSecond)
-    : GridCell(), yearM(year), monthM(month), dayM(day)
+    : DataGridCell(), yearM(year), monthM(month), dayM(day)
     , hourM(hour), minuteM(minute), secondM(second), milliSecondM(milliSecond)
 {
 }
@@ -428,7 +428,7 @@ wxString TimestampGridCell::getValue()
         return date + wxT(" ") + time;
 }
 //-----------------------------------------------------------------------------
-inline GridCell* createCellForTimestamp(IBPP::Statement& statement, int col)
+inline DataGridCell* createCellForTimestamp(IBPP::Statement& statement, int col)
 {
     IBPP::Timestamp cv;
     statement->Get(col, cv);
@@ -442,7 +442,7 @@ inline GridCell* createCellForTimestamp(IBPP::Statement& statement, int col)
 //-----------------------------------------------------------------------------
 // DataNAGridCell: class to show "[...]" for fields without an obvious
 // wxString representation of the value (like array or blob fields)
-class DataNAGridCell: public GridCell
+class DataNAGridCell: public DataGridCell
 {
 public:
     virtual wxString getValue();
@@ -453,13 +453,13 @@ wxString DataNAGridCell::getValue()
     return wxString(wxT("[...]"));
 }
 //-----------------------------------------------------------------------------
-// GridCell: abstract base class
-GridCell::~GridCell()
+// DataGridCell: abstract base class
+DataGridCell::~DataGridCell()
 {
 }
 //-----------------------------------------------------------------------------
 // static method to create cell objects
-GridCell* GridCell::createCell(IBPP::Statement& statement, int col,
+DataGridCell* DataGridCell::createCell(IBPP::Statement& statement, int col,
     wxMBConv* converter)
 {
     if (statement->IsNull(col))

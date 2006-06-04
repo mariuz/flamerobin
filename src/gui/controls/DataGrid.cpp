@@ -96,9 +96,9 @@ void DataGrid::copyToClipboard(const wxString cbText)
     wxTheClipboard->Close();
 }
 //-----------------------------------------------------------------------------
-void DataGrid::fill(const wxString& connectionCharset)
+void DataGrid::fetchData(const wxString& connectionCharset)
 {
-    GridTable* table = dynamic_cast<GridTable*>(GetTable());
+    DataGridTable* table = getDataGridTable();
     if (!table)
         return;
 
@@ -126,6 +126,12 @@ void DataGrid::fill(const wxString& connectionCharset)
     // needed to make scrollbars show on large datasets
     Layout();
 #endif
+}
+//-----------------------------------------------------------------------------
+DataGridTable* DataGrid::getDataGridTable()
+{
+    DataGridTable* table = dynamic_cast<DataGridTable*>(GetTable());
+    return table;
 }
 //-----------------------------------------------------------------------------
 void DataGrid::showPopMenu(wxPoint cursorPos)
@@ -165,12 +171,6 @@ void DataGrid::updateRowHeights()
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_CONTEXT_MENU(DataGrid::OnContextMenu)
-
-#ifdef __WXGTK__
-    EVT_MOUSEWHEEL(DataGrid::OnMouseWheel)
-    EVT_SCROLLWIN_THUMBRELEASE(DataGrid::OnThumbRelease)
-#endif
-
     EVT_GRID_CELL_RIGHT_CLICK(DataGrid::OnGridCellRightClick)
     EVT_GRID_LABEL_RIGHT_CLICK(DataGrid::OnGridLabelRightClick)
     EVT_MENU(DataGrid::ID_MENU_CELLFONT, DataGrid::OnMenuCellFont)
@@ -181,6 +181,11 @@ BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_MENU(DataGrid::ID_MENU_LABELFONT, DataGrid::OnMenuLabelFont)
     EVT_MENU(DataGrid::ID_MENU_SAVEASHTML, DataGrid::OnMenuSaveAsHTML)
     EVT_UPDATE_UI(DataGrid::ID_MENU_SAVEASHTML, DataGrid::OnMenuUpdateIfHasSelection)
+
+#ifdef __WXGTK__
+    EVT_MOUSEWHEEL(DataGrid::OnMouseWheel)
+    EVT_SCROLLWIN_THUMBRELEASE(DataGrid::OnThumbRelease)
+#endif
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void DataGrid::OnContextMenu(wxContextMenuEvent& event)
@@ -222,7 +227,7 @@ void DataGrid::OnIdle(wxIdleEvent& event)
 {
     FR_TRY
 
-    GridTable* table = dynamic_cast<GridTable*>(GetTable());
+    DataGridTable* table = getDataGridTable();
     // disconnect event handler if nothing more to be done, will be
     // re-registered on next successfull execution of select statement
     if (!table || !table->canFetchMoreRows())
@@ -282,7 +287,7 @@ void DataGrid::OnMenuCopyToCB(wxCommandEvent& WXUNUSED(event))
     if (!sRows.IsEmpty())
         copyToClipboard(sRows);
 
-    GridTable* table = dynamic_cast<GridTable*>(GetTable());
+    DataGridTable* table = getDataGridTable();
     if (all && table && table->canFetchMoreRows())
         wxMessageBox(_("There are more rows to fetch from database"),
         _("Only the rows in the grid are copied"), wxOK|wxICON_INFORMATION);
@@ -292,7 +297,7 @@ void DataGrid::OnMenuCopyToCBAsInsert(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor cr;
 
-    GridTable* table = dynamic_cast<GridTable*>(GetTable());
+    DataGridTable* table = getDataGridTable();
     if (!table)
         return;
     // TODO: - using one table is not correct for JOINs or sub-SELECTs
@@ -401,7 +406,7 @@ void DataGrid::OnMenuSaveAsHTML(wxCommandEvent& WXUNUSED(event))
     }
     outStr.WriteString(wxT("</tr>\n"));
 
-    GridTable* table = dynamic_cast<GridTable*>(GetTable());
+    DataGridTable* table = getDataGridTable();
     // write table data
     for (int i = 0; i < rows; i++)
     {

@@ -34,16 +34,16 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <ibpp.h>
 //-----------------------------------------------------------------------------
 class wxMBConv;
-class GridCell;
+class DataGridCell;
 //-----------------------------------------------------------------------------
-class GridTableCharsetConverter
+class DataGridTableCharsetConverter
 {
 private:
     wxString connectionCharsetM;
     wxMBConv* converterM;
 public:
-    GridTableCharsetConverter();
-    ~GridTableCharsetConverter();
+    DataGridTableCharsetConverter();
+    ~DataGridTableCharsetConverter();
 
     wxMBConv* getConverter();
     static wxString mapCharset(const wxString& connectionCharset);
@@ -55,7 +55,7 @@ BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_ROWCOUNT_CHANGED, 42)
 END_DECLARE_EVENT_TYPES()
 //-----------------------------------------------------------------------------
-class GridTable: public wxGridTableBase
+class DataGridTable: public wxGridTableBase
 {
 private:
     bool allRowsFetchedM;
@@ -66,12 +66,12 @@ private:
     wxGridCellAttr* nullAttrM;
     wxGridCellAttr* nullAttrNumericM;
 
-    std::vector< std::vector<GridCell*> > dataM;
+    std::vector< std::vector<DataGridCell*> > dataM;
     IBPP::Statement& statementM;
-    GridTableCharsetConverter charsetConverterM;
+    DataGridTableCharsetConverter charsetConverterM;
 public:
-    GridTable(IBPP::Statement& s);
-    ~GridTable();
+    DataGridTable(IBPP::Statement& s);
+    ~DataGridTable();
 
     bool canFetchMoreRows();
     void fetch();

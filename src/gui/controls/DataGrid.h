@@ -27,25 +27,29 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #ifndef FR_DATAGRID_H
 #define FR_DATAGRID_H
-
+//----------------------------------------------------------------------
 #include <wx/wx.h>
 #include <wx/grid.h>
 
+class DataGridTable;
 //----------------------------------------------------------------------
 class DataGrid: public wxGrid {
+private:
+    void copyToClipboard(const wxString cbText);
+    DataGridTable* getDataGridTable();
+    void showPopMenu(wxPoint cursorPos);
+    void updateRowHeights();
 public:
     DataGrid(wxWindow* parent, wxWindowID id);
     ~DataGrid();
 
-    void fill(const wxString& connectionCharset);
-
-public:
+    void fetchData(const wxString& connectionCharset);
+private:
+    // event handling
     enum { ID_MENU_CELLFONT, ID_MENU_LABELFONT,
         ID_MENU_COPYTOCLIPBOARD, ID_MENU_COPYTOCLIPBOARDASINSERT,
         ID_MENU_SAVEASHTML };
 
-    void OnMouseWheel(wxMouseEvent& event);
-    void OnThumbRelease(wxScrollWinEvent& event);
     void OnContextMenu(wxContextMenuEvent& event);
     void OnGridCellRightClick(wxGridEvent& event);
     void OnGridLabelRightClick(wxGridEvent& event);
@@ -56,10 +60,8 @@ public:
     void OnMenuLabelFont(wxCommandEvent& event);
     void OnMenuSaveAsHTML(wxCommandEvent& event);
     void OnMenuUpdateIfHasSelection(wxUpdateUIEvent& event);
-private:
-    void copyToClipboard(const wxString cbText);
-    void showPopMenu(wxPoint cursorPos);
-    void updateRowHeights();
+    void OnMouseWheel(wxMouseEvent& event);
+    void OnThumbRelease(wxScrollWinEvent& event);
 
     DECLARE_EVENT_TABLE()
 };

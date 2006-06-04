@@ -35,13 +35,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 class wxMBConv;
 //----------------------------------------------------------------------
 // Abstract cell base class
-class GridCell
+class DataGridCell
 {
 public:
-    virtual ~GridCell();
+    virtual ~DataGridCell();
     virtual wxString getValue() = 0;
 
-    static GridCell* createCell(IBPP::Statement& statement, int col,
+    static DataGridCell* createCell(IBPP::Statement& statement, int col,
         wxMBConv* converter);
 };
 //----------------------------------------------------------------------

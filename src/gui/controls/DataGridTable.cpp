@@ -46,17 +46,17 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/controls/DataGridTable.h"
 #include "ugly.h"
 //-----------------------------------------------------------------------------
-GridTableCharsetConverter::GridTableCharsetConverter()
+DataGridTableCharsetConverter::DataGridTableCharsetConverter()
 {
     converterM = 0;
 }
 //-----------------------------------------------------------------------------
-GridTableCharsetConverter::~GridTableCharsetConverter()
+DataGridTableCharsetConverter::~DataGridTableCharsetConverter()
 {
     delete converterM;
 }
 //-----------------------------------------------------------------------------
-wxMBConv* GridTableCharsetConverter::getConverter()
+wxMBConv* DataGridTableCharsetConverter::getConverter()
 {
     if (converterM)
         return converterM;
@@ -64,7 +64,7 @@ wxMBConv* GridTableCharsetConverter::getConverter()
         return wxConvCurrent;
 }
 //-----------------------------------------------------------------------------
-wxString GridTableCharsetConverter::mapCharset(
+wxString DataGridTableCharsetConverter::mapCharset(
     const wxString& connectionCharset)
 {
     wxString charset(connectionCharset.Upper().Trim());
@@ -91,7 +91,7 @@ wxString GridTableCharsetConverter::mapCharset(
     return charset;
 }
 //-----------------------------------------------------------------------------
-void GridTableCharsetConverter::setConnectionCharset(
+void DataGridTableCharsetConverter::setConnectionCharset(
     const wxString& connectionCharset)
 {
     if (connectionCharsetM != connectionCharset)
@@ -110,7 +110,7 @@ void GridTableCharsetConverter::setConnectionCharset(
     }
 }
 //-----------------------------------------------------------------------------
-GridTable::GridTable(IBPP::Statement& s)
+DataGridTable::DataGridTable(IBPP::Statement& s)
     : wxGridTableBase(), statementM(s)
 {
     allRowsFetchedM = false;
@@ -126,7 +126,7 @@ GridTable::GridTable(IBPP::Statement& s)
     nullAttrNumericM->SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
 }
 //-----------------------------------------------------------------------------
-GridTable::~GridTable()
+DataGridTable::~DataGridTable()
 {
     Clear();
     nullAttrNumericM->DecRef();
@@ -134,7 +134,7 @@ GridTable::~GridTable()
 }
 //-----------------------------------------------------------------------------
 // implementation methods
-bool GridTable::canFetchMoreRows()
+bool DataGridTable::canFetchMoreRows()
 {
     if (allRowsFetchedM || statementM->Type() != IBPP::stSelect)
         return false;
@@ -146,7 +146,7 @@ bool GridTable::canFetchMoreRows()
     return (tran != 0 && tran->Started());
 }
 //-----------------------------------------------------------------------------
-void GridTable::Clear()
+void DataGridTable::Clear()
 {
     int oldrf = rowsFetchedM;
     int oldcc = columnCountM;
@@ -179,7 +179,7 @@ void GridTable::Clear()
     }
 }
 //-----------------------------------------------------------------------------
-void GridTable::fetch()
+void DataGridTable::fetch()
 {
     if (!canFetchMoreRows())
         return;
@@ -220,11 +220,11 @@ void GridTable::fetch()
             break;
         rowsFetchedM++;
 
-        std::vector<GridCell*> s;
+        std::vector<DataGridCell*> s;
         s.reserve(columnCountM);
 
         for (int i = 1; i <= columnCountM; i++)
-            s.push_back(GridCell::createCell(statementM, i, converter));
+            s.push_back(DataGridCell::createCell(statementM, i, converter));
         dataM.push_back(s);
 
         if (!initial && (::wxGetLocalTimeMillis() - startms > 100))
@@ -244,7 +244,7 @@ void GridTable::fetch()
     }
 }
 //-----------------------------------------------------------------------------
-wxGridCellAttr* GridTable::GetAttr(int row, int col,
+wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
     wxGridCellAttr::wxAttrKind kind)
 {
     if (row < rowsFetchedM && col < columnCountM && !dataM[row][col])
@@ -262,14 +262,14 @@ wxGridCellAttr* GridTable::GetAttr(int row, int col,
     return wxGridTableBase::GetAttr(row, col, kind);
 }
 //-----------------------------------------------------------------------------
-wxString GridTable::getCellValueForInsert(int row, int col)
+wxString DataGridTable::getCellValueForInsert(int row, int col)
 {
     if (row >= (int)dataM.size())
         return wxEmptyString;
     if (col >= (int)dataM[row].size())
         return wxEmptyString;
 
-    GridCell* cell = dataM[row][col];
+    DataGridCell* cell = dataM[row][col];
     if (!cell)
         return wxT("NULL");
     // return quoted text, but escape embedded quotes
@@ -278,7 +278,7 @@ wxString GridTable::getCellValueForInsert(int row, int col)
     return wxT("'") + s + wxT("'");
 }
 //-----------------------------------------------------------------------------
-wxString GridTable::GetColLabelValue(int col)
+wxString DataGridTable::GetColLabelValue(int col)
 {
     if (col < columnCountM && statementM != 0)
         return std2wx(statementM->ColumnAlias(col+1));
@@ -286,7 +286,7 @@ wxString GridTable::GetColLabelValue(int col)
         return wxEmptyString;
 }
 //-----------------------------------------------------------------------------
-IBPP::SDT GridTable::getColumnType(int col)
+IBPP::SDT DataGridTable::getColumnType(int col)
 {
     if (statementM == 0 || columnCountM == 0)
         return IBPP::sdString;    // I wish there is sdUnknown :)
@@ -307,17 +307,17 @@ IBPP::SDT GridTable::getColumnType(int col)
     }
 }
 //-----------------------------------------------------------------------------
-int GridTable::GetNumberCols()
+int DataGridTable::GetNumberCols()
 {
     return columnCountM;
 }
 //-----------------------------------------------------------------------------
-int GridTable::GetNumberRows()
+int DataGridTable::GetNumberRows()
 {
     return rowsFetchedM;
 }
 //-----------------------------------------------------------------------------
-wxString GridTable::getTableName()
+wxString DataGridTable::getTableName()
 {
     // TODO: using one table is not correct for JOINs or sub-SELECTs, so it
     //       should take e.g. the one that occurs most often
@@ -327,7 +327,7 @@ wxString GridTable::getTableName()
         return std2wx(statementM->ColumnTable(1));
 }
 //-----------------------------------------------------------------------------
-wxString GridTable::GetValue(int row, int col)
+wxString DataGridTable::GetValue(int row, int col)
 {
     if (row >= (int)dataM.size())
         return wxEmptyString;
@@ -340,14 +340,14 @@ wxString GridTable::GetValue(int row, int col)
     if (maxRowToFetchM < maxRowToFetch)
         maxRowToFetchM = maxRowToFetch;
 
-    GridCell* cell = dataM[row][col];
+    DataGridCell* cell = dataM[row][col];
     if (cell)
         return cell->getValue();
     else
         return wxT("[null]");
 }
 //-----------------------------------------------------------------------------
-void GridTable::initialFetch(const wxString& connectionCharset)
+void DataGridTable::initialFetch(const wxString& connectionCharset)
 {
     Clear();
     allRowsFetchedM = false;
@@ -357,12 +357,12 @@ void GridTable::initialFetch(const wxString& connectionCharset)
     fetch();
 }
 //-----------------------------------------------------------------------------
-bool GridTable::IsEmptyCell(int row, int col)
+bool DataGridTable::IsEmptyCell(int row, int col)
 {
     return row >= rowsFetchedM || col >= columnCountM;
 }
 //-----------------------------------------------------------------------------
-bool GridTable::isNullCell(int row, int col)
+bool DataGridTable::isNullCell(int row, int col)
 {
     if (row >= (int)dataM.size())
         return false;
@@ -371,7 +371,7 @@ bool GridTable::isNullCell(int row, int col)
     return (0 == dataM[row][col]);
 }
 //-----------------------------------------------------------------------------
-bool GridTable::isNumericColumn(int col)
+bool DataGridTable::isNumericColumn(int col)
 {
     switch (getColumnType(col))
     {
@@ -386,13 +386,13 @@ bool GridTable::isNumericColumn(int col)
     }
 }
 //-----------------------------------------------------------------------------
-bool GridTable::needsMoreRowsFetched()
+bool DataGridTable::needsMoreRowsFetched()
 {
     // more rows to fetch in OnIdle() ?
     return (rowsFetchedM < maxRowToFetchM && !allRowsFetchedM);
 }
 //-----------------------------------------------------------------------------
-void GridTable::SetValue(int WXUNUSED(row), int WXUNUSED(col),
+void DataGridTable::SetValue(int WXUNUSED(row), int WXUNUSED(col),
     const wxString& WXUNUSED(value))
 {
     // needs to be implemented for editable grid
