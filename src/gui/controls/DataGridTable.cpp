@@ -115,6 +115,7 @@ DataGridTable::DataGridTable(IBPP::Statement& s)
 {
     allRowsFetchedM = false;
     columnCountM = 0;
+    fetchAllRowsM = false;
     maxRowToFetchM = 100;
     rowsFetchedM = 0;
 
@@ -230,7 +231,7 @@ void DataGridTable::fetch()
         if (!initial && (::wxGetLocalTimeMillis() - startms > 100))
             break;
     }
-    while (rowsFetchedM < maxRowToFetchM);
+    while (fetchAllRowsM || rowsFetchedM < maxRowToFetchM);
 
     if (rowsFetchedM > oldrf && GetView())        // notify the grid
     {
@@ -305,6 +306,11 @@ IBPP::SDT DataGridTable::getColumnType(int col)
             return IBPP::sdString;
         }
     }
+}
+//-----------------------------------------------------------------------------
+bool DataGridTable::getFetchAllRows()
+{
+    return fetchAllRowsM;
 }
 //-----------------------------------------------------------------------------
 int DataGridTable::GetNumberCols()
@@ -388,8 +394,16 @@ bool DataGridTable::isNumericColumn(int col)
 //-----------------------------------------------------------------------------
 bool DataGridTable::needsMoreRowsFetched()
 {
-    // more rows to fetch in OnIdle() ?
-    return (rowsFetchedM < maxRowToFetchM && !allRowsFetchedM);
+    if (allRowsFetchedM)
+        return false;
+    // true if all rows are to be fetched, or more rows should be cached
+    // for more responsive grid scrolling
+    return (fetchAllRowsM || rowsFetchedM < maxRowToFetchM);
+}
+//-----------------------------------------------------------------------------
+void DataGridTable::setFetchAllRecords(bool fetchall)
+{
+    fetchAllRowsM = fetchall;
 }
 //-----------------------------------------------------------------------------
 void DataGridTable::SetValue(int WXUNUSED(row), int WXUNUSED(col),

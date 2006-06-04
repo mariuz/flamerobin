@@ -48,17 +48,22 @@ private:
     // event handling
     enum { ID_MENU_CELLFONT, ID_MENU_LABELFONT,
         ID_MENU_COPYTOCLIPBOARD, ID_MENU_COPYTOCLIPBOARDASINSERT,
-        ID_MENU_SAVEASHTML };
+        ID_MENU_SAVEASHTML,
+        ID_MENU_FETCHALL, ID_MENU_CANCELFETCHALL };
 
     void OnContextMenu(wxContextMenuEvent& event);
     void OnGridCellRightClick(wxGridEvent& event);
     void OnGridLabelRightClick(wxGridEvent& event);
     void OnIdle(wxIdleEvent& event);
+    void OnMenuCancelFetchAll(wxCommandEvent& event);
     void OnMenuCellFont(wxCommandEvent& event);
     void OnMenuCopyToCB(wxCommandEvent& event);
     void OnMenuCopyToCBAsInsert(wxCommandEvent& event);
+    void OnMenuFetchAll(wxCommandEvent& event);
     void OnMenuLabelFont(wxCommandEvent& event);
     void OnMenuSaveAsHTML(wxCommandEvent& event);
+    void OnMenuUpdateCancelFetchAll(wxUpdateUIEvent& event);
+    void OnMenuUpdateFetchAll(wxUpdateUIEvent& event);
     void OnMenuUpdateIfHasSelection(wxUpdateUIEvent& event);
     void OnMouseWheel(wxMouseEvent& event);
     void OnThumbRelease(wxScrollWinEvent& event);

@@ -137,6 +137,10 @@ DataGridTable* DataGrid::getDataGridTable()
 void DataGrid::showPopMenu(wxPoint cursorPos)
 {
     wxMenu m(0);
+    m.Append(ID_MENU_FETCHALL, _("Fetch all records"));
+    m.Append(ID_MENU_CANCELFETCHALL, _("Stop fetching all records"));
+    m.AppendSeparator();
+
     m.Append(ID_MENU_COPYTOCLIPBOARD, _("Copy"));
     m.Append(ID_MENU_COPYTOCLIPBOARDASINSERT, _("Copy as INSERT statements"));
     m.Append(ID_MENU_SAVEASHTML, _("Save as HTML file..."));
@@ -173,11 +177,15 @@ BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_CONTEXT_MENU(DataGrid::OnContextMenu)
     EVT_GRID_CELL_RIGHT_CLICK(DataGrid::OnGridCellRightClick)
     EVT_GRID_LABEL_RIGHT_CLICK(DataGrid::OnGridLabelRightClick)
+    EVT_MENU(DataGrid::ID_MENU_CANCELFETCHALL, DataGrid::OnMenuCancelFetchAll)
+    EVT_UPDATE_UI(DataGrid::ID_MENU_CANCELFETCHALL, DataGrid::OnMenuUpdateCancelFetchAll)
     EVT_MENU(DataGrid::ID_MENU_CELLFONT, DataGrid::OnMenuCellFont)
     EVT_MENU(DataGrid::ID_MENU_COPYTOCLIPBOARD, DataGrid::OnMenuCopyToCB)
     EVT_UPDATE_UI(DataGrid::ID_MENU_COPYTOCLIPBOARD, DataGrid::OnMenuUpdateIfHasSelection)
     EVT_MENU(DataGrid::ID_MENU_COPYTOCLIPBOARDASINSERT, DataGrid::OnMenuCopyToCBAsInsert)
     EVT_UPDATE_UI(DataGrid::ID_MENU_COPYTOCLIPBOARDASINSERT, DataGrid::OnMenuUpdateIfHasSelection)
+    EVT_MENU(DataGrid::ID_MENU_FETCHALL, DataGrid::OnMenuFetchAll)
+    EVT_UPDATE_UI(DataGrid::ID_MENU_FETCHALL, DataGrid::OnMenuUpdateFetchAll)
     EVT_MENU(DataGrid::ID_MENU_LABELFONT, DataGrid::OnMenuLabelFont)
     EVT_MENU(DataGrid::ID_MENU_SAVEASHTML, DataGrid::OnMenuSaveAsHTML)
     EVT_UPDATE_UI(DataGrid::ID_MENU_SAVEASHTML, DataGrid::OnMenuUpdateIfHasSelection)
@@ -191,26 +199,6 @@ END_EVENT_TABLE()
 void DataGrid::OnContextMenu(wxContextMenuEvent& event)
 {
     showPopMenu(event.GetPosition());
-}
-//-----------------------------------------------------------------------------
-void DataGrid::OnThumbRelease(wxScrollWinEvent& event)
-{
-    wxIdleEvent dummy;
-    OnIdle(dummy);
-    event.Skip();
-}
-//-----------------------------------------------------------------------------
-void DataGrid::OnMouseWheel(wxMouseEvent& event)
-{
-    int wheelrotation = event.GetWheelRotation();
-    int x, y;
-    GetViewStart(&x, &y);
-    if (wheelrotation < 0)
-        y += 5;
-    else
-        y -= 5;
-    Scroll(x,y);
-    AdjustScrollbars();
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnGridCellRightClick(wxGridEvent& event)
@@ -452,5 +440,53 @@ void DataGrid::OnMenuSaveAsHTML(wxCommandEvent& WXUNUSED(event))
 void DataGrid::OnMenuUpdateIfHasSelection(wxUpdateUIEvent& event)
 {
     event.Enable(IsSelection());
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnMenuCancelFetchAll(wxCommandEvent& WXUNUSED(event))
+{
+    DataGridTable* table = getDataGridTable();
+    if (table)
+        table->setFetchAllRecords(false);
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnMenuUpdateCancelFetchAll(wxUpdateUIEvent& event)
+{
+    DataGridTable* table = getDataGridTable();
+    event.Enable(table && table->canFetchMoreRows()
+        && table->getFetchAllRows());
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnMenuFetchAll(wxCommandEvent& WXUNUSED(event))
+{
+    DataGridTable* table = getDataGridTable();
+    if (table)
+        table->setFetchAllRecords(true);
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnMenuUpdateFetchAll(wxUpdateUIEvent& event)
+{
+    DataGridTable* table = getDataGridTable();
+    event.Enable(table && table->canFetchMoreRows()
+        && !table->getFetchAllRows());
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnMouseWheel(wxMouseEvent& event)
+{
+    int wheelrotation = event.GetWheelRotation();
+    int x, y;
+    GetViewStart(&x, &y);
+    if (wheelrotation < 0)
+        y += 5;
+    else
+        y -= 5;
+    Scroll(x,y);
+    AdjustScrollbars();
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnThumbRelease(wxScrollWinEvent& event)
+{
+    wxIdleEvent dummy;
+    OnIdle(dummy);
+    event.Skip();
 }
 //-----------------------------------------------------------------------------

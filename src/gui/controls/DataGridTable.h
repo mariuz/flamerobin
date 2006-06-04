@@ -60,6 +60,7 @@ class DataGridTable: public wxGridTableBase
 private:
     bool allRowsFetchedM;
     int columnCountM;
+    bool fetchAllRowsM;
     int maxRowToFetchM;
     int rowsFetchedM;
 
@@ -77,11 +78,13 @@ public:
     void fetch();
     wxString getCellValueForInsert(int row, int col);
     IBPP::SDT getColumnType(int col);
+    bool getFetchAllRows();
     wxString getTableName();
     void initialFetch(const wxString& connectionCharset);
     bool isNullCell(int row, int col);
     bool isNumericColumn(int col);
     bool needsMoreRowsFetched();
+    void setFetchAllRecords(bool fetchall);
 
     // methods of wxGridTableBase
     virtual void Clear();
