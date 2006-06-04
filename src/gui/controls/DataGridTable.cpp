@@ -155,6 +155,7 @@ void DataGridTable::Clear()
     allRowsFetchedM = true;
     columnCountM = 0;
     rowsFetchedM = 0;
+    fetchAllRowsM = false;
 
     for (size_t i = 0; i < dataM.size(); i++)
     {
