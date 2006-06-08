@@ -101,7 +101,7 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
         t = dynamic_cast<Table*>(m->getParent());
         column_list = t->getQuotedName() + wxT(".") + m->getQuotedName();
     }
-    if (m->getType() == ntTable)
+    if ((m->getType() == ntTable) || (m->getType() == ntSysTable))
     {
         t = dynamic_cast<Table*>(m);
         column_list = t->getQuotedName() + wxT(".*");

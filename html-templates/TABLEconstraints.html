@@ -17,7 +17,9 @@
     {%primary_key:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
       <td valign="top">
+        {%NotSystem:
           <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
+        %}
       </td>
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top">{%constraint_columns%}</td>
@@ -25,7 +27,9 @@
   </tbody>
 </table>
 <br>
-<a href="fr://add_constraint?type=PK&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">Add primary key</a>
+{%NotSystem:
+  <a href="fr://add_constraint?type=PK&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">Add primary key</a>
+%}
 <br><br>
 <table cellspacing=1 cellpadding=2 border=0 bgcolor=0>
   <tbody>
@@ -40,7 +44,9 @@
     {%foreign_keys:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
       <td nowrap valign="top">
+        {%NotSystem:
           <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
+        %}
       </td>
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top">{%constraint_columns%}</td>
@@ -52,7 +58,9 @@
   </tbody>
 </table>
 <br>
-<a href="fr://add_constraint?type=FK&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">Add foreign key</a>
+{%NotSystem:
+  <a href="fr://add_constraint?type=FK&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">Add foreign key</a>
+%}  
 <br><br>
 <table cellspacing=1 cellpadding=2 border=0 bgcolor=0>
   <tbody>
@@ -64,7 +72,9 @@
     {%unique_constraints:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
       <td nowrap valign="top">
+        {%NotSystem:
           <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
+        %}
       </td>
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top">{%constraint_columns%}</td>
@@ -72,7 +82,9 @@
   </tbody>
 </table>
 <br>
-<a href="fr://add_constraint?type=UNQ&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">Add unique</a>
+{%NotSystem:
+  <a href="fr://add_constraint?type=UNQ&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">Add unique</a>
+%}
 <br><br>
 <table cellspacing=1 cellpadding=2 border=0 bgcolor=0>
   <tbody>
@@ -84,7 +96,9 @@
     {%check_constraints:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
       <td nowrap valign="top">
+        {%NotSystem:
           <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
+        %}
       </td>
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top">{%check_source%}</td>
@@ -92,7 +106,9 @@
   </tbody>
 </table>
 <br>
+{%NotSystem:
 <a href="fr://add_constraint?type=CHK&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">Add check</a>
+%}
 <br>
 </body>
 </html>

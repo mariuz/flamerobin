@@ -174,13 +174,19 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
     for (int i = 0; i < type_count; i++)
         if (typeM == dep_types[i])
             mytype = i;
+
+    // views count as relations(tables) when other object refer to them
+    if (mytype == 1 && !ofObject)
+        mytype = 0;
+    // system tables should be treat as tables
+    if (typeM == ntSysTable)
+        mytype = 0;
+
     if (typeM == ntUnknown || mytype == -1)
     {
         lastError().setMessage(wxT("Unsupported type"));
         return false;
     }
-    if (mytype == 1 && !ofObject)   // views count as relations(tables) when other object refer to them
-        mytype = 0;
 
     try
     {
@@ -195,7 +201,7 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
             wxT("select RDB$") + o2 + wxT("_TYPE, RDB$") + o2 + wxT("_NAME, RDB$FIELD_NAME \n ")
             wxT(" from RDB$DEPENDENCIES \n ")
             wxT(" where RDB$") + o1 + wxT("_TYPE = ? and RDB$") + o1 + wxT("_NAME = ? \n ");
-        if ((typeM == ntTable || typeM == ntView) && ofObject)  // get deps for computed columns
+        if ((typeM == ntTable || typeM == ntSysTable || typeM == ntView) && ofObject)  // get deps for computed columns
         {                                                       // view needed to bind with generators
             sql += wxT(" union all \n")
                 wxT(" SELECT DISTINCT d.rdb$depended_on_type, d.rdb$depended_on_name, d.rdb$field_name \n")
@@ -215,7 +221,7 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
         st1->Prepare(wx2std(sql));
         st1->Set(1, mytype);
         st1->Set(2, wx2std(getName_()));
-        if (!ofObject || typeM == ntTable || typeM == ntView)
+        if (!ofObject || typeM == ntTable || typeM == ntSysTable || typeM == ntView)
             st1->Set(3, wx2std(getName_()));
         st1->Execute();
         MetadataItem* last = 0;
@@ -235,9 +241,13 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
                 continue;
             MetadataItem* current = d->findByNameAndType(t, std2wx(object_name));
             if (!current)
-            {                               // maybe it's a view masked as table
-                if (t == ntTable)
+            {
+                if (t == ntTable) {
+                    // maybe it's a view masked as table
                     current = d->findByNameAndType(ntView, std2wx(object_name));
+                    // or possibly a system table
+                    current = d->findByNameAndType(ntSysTable, std2wx(object_name));
+                }
                 if (!ofObject && t == ntTrigger)
                 {
                     // system trigger dependent of this object indicates possible check constraint on a table
@@ -280,7 +290,7 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
 
         // TODO: perhaps this could be moved to Table?
         //       call MetadataItem::getDependencies() and then add this
-        if (typeM == ntTable && ofObject)   // foreign keys of this table + computed columns
+        if ((typeM == ntTable || typeM == ntSysTable) && ofObject)   // foreign keys of this table + computed columns
         {
             Table *t = dynamic_cast<Table *>(this);
             vector<ForeignKey> *f = t->getForeignKeys();
@@ -344,7 +354,7 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
         }
 
         // TODO: perhaps this could be moved to Table?
-        if (typeM == ntTable && !ofObject)  // foreign keys of other tables
+        if ((typeM == ntTable || typeM == ntSysTable) && !ofObject)  // foreign keys of other tables
         {
             st1->Prepare(
                 "select r1.rdb$relation_name, i.rdb$field_name "

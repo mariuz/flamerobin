@@ -261,6 +261,7 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
             pages.push_back(wxT("Privileges")); // don't have dependencies
         switch (object->getType())
         {
+            case ntSysTable:
             case ntTable:
                 pages.push_back(wxT("Constraints"));
                 pages.push_back(wxT("Indices"));

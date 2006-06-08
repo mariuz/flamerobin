@@ -1048,10 +1048,10 @@ void Database::getCollections(std::vector<MetadataItem*>& temp)
     temp.push_back(&generatorsM);
     temp.push_back(&proceduresM);
     temp.push_back(&rolesM);
-    temp.push_back(&tablesM);
     // Only push back system tables when they should be shown
     if (showSysTables())
         temp.push_back(&sysTablesM);
+    temp.push_back(&tablesM);
     temp.push_back(&triggersM);
     temp.push_back(&viewsM);
 }
