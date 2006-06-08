@@ -47,6 +47,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "config/Config.h"
 #include "core/FRError.h"
+#include "core/StringUtils.h"
 #include "gui/AdvancedMessageDialog.h"
 #include "gui/controls/DataGrid.h"
 #include "gui/controls/DataGridTable.h"
@@ -449,7 +450,7 @@ void DataGrid::OnMenuSaveAsHTML(wxCommandEvent& WXUNUSED(event))
                 if (halign == wxALIGN_RIGHT)
                     outStr.WriteString(wxT(" align=right"));
                 outStr.WriteString(wxT(" nowrap>"));
-                outStr.WriteString(table->getCellValue(i, j));
+                outStr.WriteString(escapeHtmlChars(table->getCellValue(i, j)));
             }
             outStr.WriteString(wxT("</td>"));
         }
