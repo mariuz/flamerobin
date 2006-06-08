@@ -266,6 +266,10 @@ void DataGrid::OnMenuCopyToCB(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
+    DataGridTable* table = getDataGridTable();
+    if (!table)
+        return;
+
     bool all = true;
     {
         wxBusyCursor cr;
@@ -281,7 +285,7 @@ void DataGrid::OnMenuCopyToCB(wxCommandEvent& WXUNUSED(event))
                     //       - fields with multiline strings don't really work...
                     if (!sRow.IsEmpty())
                         sRow += wxT("\t");
-                    sRow += GetCellValue(i, j);
+                    sRow += table->getCellValue(i, j);
                 }
                 else
                     all = false;
@@ -445,7 +449,8 @@ void DataGrid::OnMenuSaveAsHTML(wxCommandEvent& WXUNUSED(event))
                 GetCellAlignment(i, j, &halign, &valign);
                 if (halign == wxALIGN_RIGHT)
                     outStr.WriteString(wxT(" align=right"));
-                outStr.WriteString(wxT(" nowrap>") + GetCellValue(i, j));
+                outStr.WriteString(wxT(" nowrap>"));
+                outStr.WriteString(table->getCellValue(i, j));
             }
             outStr.WriteString(wxT("</td>"));
         }

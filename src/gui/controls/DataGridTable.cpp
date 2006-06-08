@@ -264,6 +264,20 @@ wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
     return wxGridTableBase::GetAttr(row, col, kind);
 }
 //-----------------------------------------------------------------------------
+wxString DataGridTable::getCellValue(int row, int col)
+{
+    if (row >= (int)dataM.size())
+        return wxEmptyString;
+    if (col >= (int)dataM[row].size())
+        return wxEmptyString;
+
+    DataGridCell* cell = dataM[row][col];
+    if (cell)
+        return cell->getValue();
+    else
+        return wxT("[null]");
+}
+//-----------------------------------------------------------------------------
 wxString DataGridTable::getCellValueForInsert(int row, int col)
 {
     if (row >= (int)dataM.size())
@@ -349,7 +363,21 @@ wxString DataGridTable::GetValue(int row, int col)
 
     DataGridCell* cell = dataM[row][col];
     if (cell)
-        return cell->getValue();
+    {
+        wxString cellValue(cell->getValue());
+        // return first line of multi-line string only
+        for (size_t n = 0; n < cellValue.size(); ++n)
+        {
+            const wxChar c = cellValue[n];
+            if (c == '\r' || c == '\n')
+            {
+                cellValue.Truncate(n);
+                cellValue += wxT(" [...]");
+                break;
+            }
+        }
+        return cellValue;
+    }
     else
         return wxT("[null]");
 }

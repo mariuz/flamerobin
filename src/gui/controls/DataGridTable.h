@@ -76,6 +76,7 @@ public:
 
     bool canFetchMoreRows();
     void fetch();
+    wxString getCellValue(int row, int col);
     wxString getCellValueForInsert(int row, int col);
     IBPP::SDT getColumnType(int col);
     bool getFetchAllRows();
