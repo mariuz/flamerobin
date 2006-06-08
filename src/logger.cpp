@@ -44,7 +44,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "frversion.h"
 #include "logger.h"
 #include "metadata/database.h"
-#include "ugly.h"
 //----------------------------------------------------------------------------
 ExecutedStatement::ExecutedStatement(const wxString& st, const IBPP::STT& t,
         const wxString& term)

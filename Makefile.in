@@ -44,6 +44,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_DatabaseConfig.o \
 	flamerobin_FRError.o \
 	flamerobin_Observer.o \
+	flamerobin_StringUtils.o \
 	flamerobin_Subject.o \
 	flamerobin_Visitor.o \
 	flamerobin_databasehandler.o \
@@ -119,7 +120,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_SqlTokenizer.o \
 	flamerobin_statementHistory.o \
 	flamerobin_treeitem.o \
-	flamerobin_ugly.o \
 	flamerobin_urihandler.o \
 	$(__FR_PLATFORMSPECIFICSOURCES_OBJECTS) \
 	$(__flamerobin___win32rc)
@@ -277,6 +277,9 @@ flamerobin_FRError.o: $(srcdir)/src/core/FRError.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_Observer.o: $(srcdir)/src/core/Observer.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/Observer.cpp
+
+flamerobin_StringUtils.o: $(srcdir)/src/core/StringUtils.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/StringUtils.cpp
 
 flamerobin_Subject.o: $(srcdir)/src/core/Subject.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/Subject.cpp
@@ -502,9 +505,6 @@ flamerobin_statementHistory.o: $(srcdir)/src/statementHistory.cpp $(FLAMEROBIN_O
 
 flamerobin_treeitem.o: $(srcdir)/src/treeitem.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/treeitem.cpp
-
-flamerobin_ugly.o: $(srcdir)/src/ugly.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/ugly.cpp
 
 flamerobin_urihandler.o: $(srcdir)/src/urihandler.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/urihandler.cpp

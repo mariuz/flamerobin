@@ -46,13 +46,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <ibpp.h>
 
 #include "config/Config.h"
+#include "core/StringUtils.h"
 #include "frutils.h"
 #include "gui/controls/LogTextControl.h"
 #include "gui/RestoreFrame.h"
 #include "gui/StyleGuide.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
-#include "ugly.h"
 //-----------------------------------------------------------------------------
 // worker thread class to perform database restore
 class RestoreThread: public wxThread {

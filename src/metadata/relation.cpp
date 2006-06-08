@@ -40,6 +40,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <ibpp.h>
 
+#include "core/StringUtils.h"
 #include "dberror.h"
 #include "frutils.h"
 #include "metadata/CreateDDLVisitor.h"

@@ -42,7 +42,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/StyleGuide.h"
 #include "gui/TriggerWizardDialog.h"
 #include "metadata/metadataitem.h"
-#include "ugly.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
 TriggerWizardDialog::TriggerWizardDialog(wxWindow* parent, MetadataItem *item):

@@ -58,6 +58,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRError.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Observer.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StringUtils.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Subject.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Visitor.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_databasehandler.obj \
@@ -133,7 +134,6 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_treeitem.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ugly.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_urihandler.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin.res
@@ -282,6 +282,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRError.obj: .\src\core\FRError.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Observer.obj: .\src\core\Observer.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StringUtils.obj: .\src\core\StringUtils.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Subject.obj: .\src\core\Subject.cpp
@@ -507,9 +510,6 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.obj: .\src\statementHisto
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_treeitem.obj: .\src\treeitem.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
-
-vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ugly.obj: .\src\ugly.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_urihandler.obj: .\src\urihandler.cpp

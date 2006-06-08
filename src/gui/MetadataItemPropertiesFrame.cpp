@@ -48,6 +48,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "config/Config.h"
 #include "core/FRError.h"
+#include "core/StringUtils.h"
 #include "dberror.h"
 #include "framemanager.h"
 #include "frutils.h"
@@ -59,77 +60,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "metadata/exception.h"
 #include "metadata/table.h"
 #include "metadata/view.h"
-#include "ugly.h"
 #include "urihandler.h"
-//-----------------------------------------------------------------------------
-//! converts chars that have special meaning in HTML, so they get displayed
-wxString escapeHtmlChars(wxString s, bool processNewlines = true)
-{
-    if (s.empty())
-        return s;
-#if 1
-    wxString result;
-    size_t start = 0, len = s.length();
-    while (start < len)
-    {
-        size_t stop = start;
-        while (stop < len)
-        {
-            const wxChar c = s[stop];
-            if (c == '&' || c == '<' || c == '>' || c == '"'
-                || (processNewlines && c == '\n'))
-            {
-                if (stop > start)
-                    result += s.Mid(start, stop - start);
-                if (c == '&')
-                    result += wxT("&amp;");
-                else if (c == '<')
-                    result += wxT("&lt;");
-                else if (c == '>')
-                    result += wxT("&gt;");
-                else if (c == '"')
-                    result += wxT("&quot;");
-                else if (c == '\n')
-                    result += wxT("<BR>");
-                else
-                    wxASSERT_MSG(false, wxT("escape not handled"));
-                // start processing *after* the replaced character
-                ++stop;
-                start = stop;
-                break;
-            }
-            ++stop;
-        }
-        if (stop > start)
-            result += s.Mid(start, stop - start);
-        start = stop;
-    }
-    return result;
-#else
-    typedef std::pair<char, wxString> par;
-    std::vector<par> symbol_table;
-    symbol_table.push_back(par('&', wxT("&amp;")));      // this has to go first, since others use &
-    symbol_table.push_back(par('<', wxT("&lt;")));
-    symbol_table.push_back(par('>', wxT("&gt;")));
-    symbol_table.push_back(par('"', wxT("&quot;")));
-    if (processNewlines)                            // BR has to be at end, since it adds < and >
-        symbol_table.push_back(par('\n', wxT("<BR>")));
-
-    for (std::vector<par>::iterator it = symbol_table.begin(); it != symbol_table.end(); ++it)
-    {
-        wxString::size_type pos = 0;
-        while (pos < s.length())
-        {
-            pos = s.find((*it).first, pos);
-            if (pos == wxString::npos)
-                break;
-            s.replace(pos, 1, (*it).second);
-            pos++;
-        }
-    }
-    return s;
-#endif
-}
 //-----------------------------------------------------------------------------
 wxString loadHtmlFile(const wxString& filename)
 {

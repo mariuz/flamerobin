@@ -44,6 +44,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "config/Config.h"
 #include "config/DatabaseConfig.h"
 #include "core/FRError.h"
+#include "core/StringUtils.h"
 #include "dberror.h"
 #include "gui/AdvancedMessageDialog.h"
 #include "gui/AdvancedSearchFrame.h"
@@ -67,7 +68,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "myTreeCtrl.h"
 #include "treeitem.h"
 #include "frutils.h"
-#include "ugly.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
 bool checkValidDatabase(Database* database)

@@ -636,6 +636,10 @@ SOURCE=.\src\gui\StatementHistoryDialog.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\core\StringUtils.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\StyleGuide.cpp
 # End Source File
 # Begin Source File
@@ -791,10 +795,6 @@ SOURCE=.\src\treeitem.cpp
 # Begin Source File
 
 SOURCE=.\src\metadata\trigger.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\ugly.cpp
 # End Source File
 # Begin Source File
 
@@ -982,6 +982,10 @@ SOURCE=.\src\gui\StatementHistoryDialog.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\core\StringUtils.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\StyleGuide.h
 # End Source File
 # Begin Source File
@@ -1123,10 +1127,6 @@ SOURCE=.\src\treeitem.h
 # Begin Source File
 
 SOURCE=.\src\metadata\trigger.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\ugly.h
 # End Source File
 # Begin Source File
 

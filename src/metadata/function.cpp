@@ -40,10 +40,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <ibpp.h>
 
-#include "database.h"
-#include "domain.h"
-#include "function.h"
-#include "MetadataItemVisitor.h"
+#include "core/StringUtils.h"
+#include "metadata/database.h"
+#include "metadata/domain.h"
+#include "metadata/function.h"
+#include "metadata/MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 Function::Function()
 {

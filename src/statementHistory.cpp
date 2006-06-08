@@ -46,7 +46,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "metadata/database.h"
 #include "metadata/server.h"
 #include "statementHistory.h"
-#include "ugly.h"
 
 class Server;
 //-----------------------------------------------------------------------------

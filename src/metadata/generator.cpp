@@ -43,6 +43,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <ibpp.h>
 
+#include "core/StringUtils.h"
 #include "dberror.h"
 #include "metadata/database.h"
 #include "metadata/generator.h"

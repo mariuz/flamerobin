@@ -50,7 +50,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/AdvancedMessageDialog.h"
 #include "gui/controls/DataGrid.h"
 #include "gui/controls/DataGridTable.h"
-#include "ugly.h"
 
 //-----------------------------------------------------------------------------
 DataGrid::DataGrid(wxWindow* parent, wxWindowID id)

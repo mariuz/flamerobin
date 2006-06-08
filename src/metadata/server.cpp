@@ -40,9 +40,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <algorithm>
 
-#include "frutils.h"
 #include "config/Config.h"
+#include "core/StringUtils.h"
 #include "core/Visitor.h"
+#include "frutils.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/root.h"
 #include "metadata/server.h"

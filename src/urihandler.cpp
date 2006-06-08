@@ -41,7 +41,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <list>
 #include <algorithm>
 
-#include "ugly.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
 URI::URI()

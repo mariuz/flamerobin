@@ -44,7 +44,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/ReorderFieldsDialog.h"
 #include "gui/StyleGuide.h"
 #include "metadata/table.h"
-#include "ugly.h"
 #include "urihandler.h"
 
 //! included xpm files, so that icons are compiled into executable

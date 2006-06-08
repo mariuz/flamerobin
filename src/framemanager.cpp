@@ -39,7 +39,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <algorithm>
 
-#include "ugly.h"
 #include "metadata/database.h"
 #include "framemanager.h"
 //-----------------------------------------------------------------------------

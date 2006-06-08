@@ -42,9 +42,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/grid.h>
 #include <wx/strconv.h>
 
+#include "core/StringUtils.h"
 #include "gui/controls/DataGridCells.h"
 #include "gui/controls/DataGridTable.h"
-#include "ugly.h"
 //-----------------------------------------------------------------------------
 DataGridTableCharsetConverter::DataGridTableCharsetConverter()
 {

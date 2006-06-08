@@ -50,7 +50,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "metadata/root.h"
 #include "myTreeCtrl.h"
 #include "treeitem.h"
-#include "ugly.h"
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(myTreeCtrl, wxTreeCtrl)
     EVT_CONTEXT_MENU(myTreeCtrl::OnContextMenu)

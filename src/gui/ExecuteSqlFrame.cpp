@@ -49,6 +49,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/tokenzr.h>
 
 #include "config/Config.h"
+#include "core/StringUtils.h"
 #include "dberror.h"
 #include "framemanager.h"
 #include "gui/AdvancedMessageDialog.h"
@@ -68,7 +69,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "sql/SimpleParser.h"
 #include "sql/SqlStatement.h"
 #include "statementHistory.h"
-#include "ugly.h"
 #include "urihandler.h"
 
 //-----------------------------------------------------------------------------

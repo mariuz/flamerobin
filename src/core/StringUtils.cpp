@@ -40,10 +40,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <wx/encconv.h>
 
-#include "ugly.h"
-//-----------------------------------------------------------------------------
-//! ugly.cpp contains all ugly stuff with ifdefs and similar
-//! things that would otherwise make code ugly and unreadable
+#include "core/StringUtils.h"
 //-----------------------------------------------------------------------------
 //! converts wxString to std::string
 std::string wx2std(const wxString& input)
@@ -61,17 +58,49 @@ wxString std2wx(std::string input)
     return wxString(input.c_str(), *wxConvCurrent);
 }
 //-----------------------------------------------------------------------------
-//! return wxString for comparison, used to limit features to certain platforms
-wxString getPlatformName()
+//! converts chars that have special meaning in HTML, so they get displayed
+wxString escapeHtmlChars(wxString s, bool processNewlines)
 {
-#ifdef __WINDOWS__
-    return wxT("win");
-#elif defined(__MAC__) || defined(__APPLE__)
-    return wxT("mac");
-#elif defined(__UNIX__)
-    return wxT("unix");
-#elif
-    return wxT("undefined");
-#endif
+    if (s.empty())
+        return s;
+    wxString result;
+    size_t start = 0, len = s.length();
+    while (start < len)
+    {
+        size_t stop = start;
+        while (stop < len)
+        {
+            const wxChar c = s[stop];
+            if (c == '&' || c == '<' || c == '>' || c == '"'
+                || (processNewlines && (c == '\r' || c == '\n')))
+            {
+                if (stop > start)
+                    result += s.Mid(start, stop - start);
+                if (c == '&')
+                    result += wxT("&amp;");
+                else if (c == '<')
+                    result += wxT("&lt;");
+                else if (c == '>')
+                    result += wxT("&gt;");
+                else if (c == '"')
+                    result += wxT("&quot;");
+                else if (c == '\n')
+                    result += wxT("<BR>");
+                else if (c == '\r')
+                    /* swallow silently */;
+                else
+                    wxASSERT_MSG(false, wxT("escape not handled"));
+                // start processing *after* the replaced character
+                ++stop;
+                start = stop;
+                break;
+            }
+            ++stop;
+        }
+        if (stop > start)
+            result += s.Mid(start, stop - start);
+        start = stop;
+    }
+    return result;
 }
 //-----------------------------------------------------------------------------

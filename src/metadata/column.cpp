@@ -47,7 +47,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "database.h"
 #include "domain.h"
 #include "MetadataItemVisitor.h"
-#include "ugly.h"
 //-----------------------------------------------------------------------------
 //! new undefined column
 Column::Column()

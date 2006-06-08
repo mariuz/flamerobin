@@ -45,7 +45,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/StyleGuide.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
-#include "ugly.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
 using namespace std;

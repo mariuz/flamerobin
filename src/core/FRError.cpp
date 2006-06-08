@@ -38,8 +38,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #include "wx/wx.h"
 #endif
 
-#include "FRError.h"
-#include "ugly.h"
+#include "core/FRError.h"
+#include "core/StringUtils.h"
 //-----------------------------------------------------------------------------
 void handleException(const std::exception& e)
 {

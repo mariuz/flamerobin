@@ -44,9 +44,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "config/Config.h"
 #include "core/Observer.h"
-#include "core/Subject.h"
+#include "core/StringUtils.h"
 #include "gui/controls/DataGridCells.h"
-#include "ugly.h"
 //-----------------------------------------------------------------------------
 // GridCellFormats: class to cache config data for cell formatting
 class GridCellFormats: public Observer

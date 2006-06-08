@@ -211,6 +211,7 @@
         $(SOURCEDIR)/core/FRError.h
         $(SOURCEDIR)/core/Observer.h
         $(SOURCEDIR)/core/ProgressIndicator.h
+        $(SOURCEDIR)/core/StringUtils.h
         $(SOURCEDIR)/core/Subject.h
         $(SOURCEDIR)/core/Visitor.h
         $(SOURCEDIR)/dberror.h
@@ -286,7 +287,6 @@
         $(SOURCEDIR)/myTreeCtrl.h
         $(SOURCEDIR)/statementHistory.h
         $(SOURCEDIR)/treeitem.h
-        $(SOURCEDIR)/ugly.h
         $(SOURCEDIR)/urihandler.h
     </set>
 
@@ -308,6 +308,7 @@
         $(SOURCEDIR)/config/DatabaseConfig.cpp
         $(SOURCEDIR)/core/FRError.cpp
         $(SOURCEDIR)/core/Observer.cpp
+        $(SOURCEDIR)/core/StringUtils.cpp
         $(SOURCEDIR)/core/Subject.cpp
         $(SOURCEDIR)/core/Visitor.cpp
         $(SOURCEDIR)/databasehandler.cpp
@@ -383,7 +384,6 @@
         $(SOURCEDIR)/sql/SqlTokenizer.cpp
         $(SOURCEDIR)/statementHistory.cpp
         $(SOURCEDIR)/treeitem.cpp
-        $(SOURCEDIR)/ugly.cpp
         $(SOURCEDIR)/urihandler.cpp
 
         $(FR_PLATFORMSPECIFICSOURCES)

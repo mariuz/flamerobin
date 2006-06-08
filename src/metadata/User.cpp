@@ -38,6 +38,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #pragma hdrstop
 #endif
 
+#include "core/StringUtils.h"
 #include "metadata/server.h"
 #include "metadata/User.h"
 //-----------------------------------------------------------------------------

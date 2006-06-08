@@ -44,7 +44,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/MultilineEnterDialog.h"
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
-#include "ugly.h"
 #include "urihandler.h"
 
 class ObjectDescriptionHandler: public URIHandler

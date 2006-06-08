@@ -37,15 +37,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
-//-----------------------------------------------------------------------------
 
 #include "core/FRError.h"
+#include "core/StringUtils.h"
 #include "dberror.h"
 #include "metadata/server.h"
 #include "metadata/database.h"
-#include "ugly.h"
 #include "urihandler.h"
-
+//-----------------------------------------------------------------------------
 class DatabaseInfoHandler: public URIHandler
 {
 public:

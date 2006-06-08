@@ -25,12 +25,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-#ifndef UGLY_H
-#define UGLY_H
-
-// this file contains declarations for all functions in ugly.cpp
-// ugly.cpp contains all ugly stuff with ifdefs and similar
-// things that would otherwise make code ugly and unreadable
+#ifndef FR_STRINGUTILS_H
+#define FR_STRINGUTILS_H
 
 #include <wx/wx.h>
 
@@ -38,7 +34,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 std::string wx2std(const wxString& input);
 wxString std2wx(std::string input);
-
-wxString getPlatformName();
 //-----------------------------------------------------------------------------
-#endif // UGLY_H
+//! converts chars that have special meaning in HTML, so they get displayed
+wxString escapeHtmlChars(wxString s, bool processNewlines = true);
+//-----------------------------------------------------------------------------
+#endif // FR_STRINGUTILS_H

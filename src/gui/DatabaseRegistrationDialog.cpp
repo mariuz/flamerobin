@@ -41,11 +41,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/filename.h>
 #include <wx/gbsizer.h>
 
+#include "core/StringUtils.h"
 #include "gui/DatabaseRegistrationDialog.h"
 #include "gui/StyleGuide.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
-#include "ugly.h"
 //-----------------------------------------------------------------------------
 DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent,
         const wxString& title, bool createDB, bool connectAs)

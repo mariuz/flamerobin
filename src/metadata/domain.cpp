@@ -43,11 +43,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <ibpp.h>
 
+#include "core/StringUtils.h"
 #include "frutils.h"
-#include "database.h"
 #include "dberror.h"
-#include "domain.h"
-#include "MetadataItemVisitor.h"
+#include "metadata/database.h"
+#include "metadata/domain.h"
+#include "metadata/MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 Domain::Domain():
     MetadataItem()

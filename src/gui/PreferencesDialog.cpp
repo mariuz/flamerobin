@@ -51,7 +51,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/PreferencesDialog.h"
 #include "gui/StyleGuide.h"
 #include "images.h"
-#include "ugly.h"
 //-----------------------------------------------------------------------------
 static bool hasParamNode(wxXmlNode* node, const wxString& param)
 {
@@ -74,6 +73,20 @@ static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
         }
     }
     return defvalue;
+}
+//-----------------------------------------------------------------------------
+//! return wxString for comparison, used to limit features to certain platforms
+wxString getPlatformName()
+{
+#ifdef __WINDOWS__
+    return wxT("win");
+#elif defined(__MAC__) || defined(__APPLE__)
+    return wxT("mac");
+#elif defined(__UNIX__)
+    return wxT("unix");
+#elif
+    return wxT("undefined");
+#endif
 }
 //-----------------------------------------------------------------------------
 static void processPlatformProperty(wxXmlNode *node)

@@ -44,7 +44,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/ExecuteSqlFrame.h"
 #include "gui/StyleGuide.h"
 #include "metadata/table.h"
-#include "ugly.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
 using namespace std;

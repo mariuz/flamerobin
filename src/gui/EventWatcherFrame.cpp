@@ -44,11 +44,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "controls/LogTextControl.h"
 #include "core/FRError.h"
+#include "core/StringUtils.h"
 #include "gui/EventWatcherFrame.h"
 #include "gui/MultilineEnterDialog.h"
 #include "gui/StyleGuide.h"
 #include "metadata/database.h"
-#include "ugly.h"
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------

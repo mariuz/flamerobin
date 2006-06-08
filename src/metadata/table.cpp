@@ -40,13 +40,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <ibpp.h>
 
+#include "core/StringUtils.h"
 #include "core/Visitor.h"
 #include "dberror.h"
 #include "frutils.h"
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/table.h"
-#include "ugly.h"
 //-----------------------------------------------------------------------------
 Table::Table()
 {

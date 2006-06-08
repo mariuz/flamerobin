@@ -45,7 +45,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/controls/LogTextControl.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
-#include "ugly.h"
 //-----------------------------------------------------------------------------
 BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, Database* db)
     : BaseFrame(parent, -1, wxEmptyString, wxDefaultPosition, wxDefaultSize,

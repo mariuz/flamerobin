@@ -42,6 +42,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "config/Config.h"
 #include "config/DatabaseConfig.h"
+#include "core/StringUtils.h"
 #include "dberror.h"
 #include "MasterPassword.h"
 #include "metadata/database.h"
@@ -51,7 +52,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "sql/SimpleParser.h"
 #include "sql/SqlTokenizer.h"
 #include "sql/SqlStatement.h"
-#include "ugly.h"
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------

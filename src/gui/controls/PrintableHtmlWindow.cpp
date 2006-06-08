@@ -43,7 +43,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/filedlg.h>
 
 #include "images.h"
-#include "ugly.h"
 #include "urihandler.h"
 
 #include "core/FRError.h"

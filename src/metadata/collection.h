@@ -32,7 +32,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sstream>
 
 #include "metadata/metadataitem.h"
-#include "ugly.h"
 //-----------------------------------------------------------------------------
 template <class T>
 class MetadataCollection: public MetadataItem

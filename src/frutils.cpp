@@ -38,6 +38,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #include "wx/wx.h"
 #endif
 
+#include "core/StringUtils.h"
 #include "dberror.h"
 #include "frutils.h"
 #include "gui/ProgressDialog.h"
@@ -45,7 +46,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "metadata/metadataitem.h"
 #include "metadata/relation.h"
 #include "metadata/server.h"
-#include "ugly.h"
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------

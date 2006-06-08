@@ -40,6 +40,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <wx/gbsizer.h>
 
+#include "core/StringUtils.h"
 #include "frutils.h"
 #ifdef __WXGTK__
     #include "gui/AdvancedMessageDialog.h"

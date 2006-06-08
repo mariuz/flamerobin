@@ -39,12 +39,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include "dberror.h"
+#include "core/StringUtils.h"
 #include "core/Visitor.h"
-#include "MetadataItemVisitor.h"
-#include "role.h"
+#include "metadata/MetadataItemVisitor.h"
+#include "metadata/role.h"
 //-----------------------------------------------------------------------------
 Role::Role()
-    :MetadataItem()
+    : MetadataItem()
 {
     typeM = ntRole;
 }

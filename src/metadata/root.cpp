@@ -47,11 +47,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sstream>
 
 #include "config/Config.h"
+#include "core/StringUtils.h"
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/root.h"
 #include "metadata/server.h"
-#include "ugly.h"
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------
