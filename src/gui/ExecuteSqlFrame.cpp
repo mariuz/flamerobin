@@ -1803,6 +1803,10 @@ bool EditDDLHandler::handleURI(URI& uri)
     ExecuteSqlFrame* eff = new ExecuteSqlFrame(w->GetParent(), -1, wxT("DDL"));
     eff->setDatabase(m->getDatabase());
     eff->setSql(cdv.getSql());
+    // ProgressDialog needs to be hidden before ExecuteSqlFrame is shown,
+    // otherwise the HTML frame will be raised over the ExecuteSqlFrame
+    // when original Z-order is restored after pd has been destroyed
+    pd.Hide();
     eff->Show();
     return true;
 }
