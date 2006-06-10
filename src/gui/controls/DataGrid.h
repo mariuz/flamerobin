@@ -44,7 +44,7 @@ public:
     DataGrid(wxWindow* parent, wxWindowID id);
     ~DataGrid();
 
-    void fetchData(const wxString& connectionCharset);
+    void fetchData(wxMBConv* conv);
 private:
     // event handling
     enum { ID_MENU_CELLFONT, ID_MENU_LABELFONT,

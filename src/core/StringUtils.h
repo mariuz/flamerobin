@@ -27,15 +27,17 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #ifndef FR_STRINGUTILS_H
 #define FR_STRINGUTILS_H
-
-#include <wx/wx.h>
+//-----------------------------------------------------------------------------
+#include <wx/string.h>
 
 #include <string>
+
+class wxMBConv;
 //-----------------------------------------------------------------------------
-std::string wx2std(const wxString& input);
-wxString std2wx(std::string input);
+std::string wx2std(const wxString& input, wxMBConv* conv = wxConvCurrent);
+wxString std2wx(const std::string& input, wxMBConv* conv = wxConvCurrent);
 //-----------------------------------------------------------------------------
 //! converts chars that have special meaning in HTML, so they get displayed
-wxString escapeHtmlChars(wxString s, bool processNewlines = true);
+wxString escapeHtmlChars(const wxString& input, bool processNewlines = true);
 //-----------------------------------------------------------------------------
 #endif // FR_STRINGUTILS_H

@@ -43,39 +43,43 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "core/StringUtils.h"
 //-----------------------------------------------------------------------------
 //! converts wxString to std::string
-std::string wx2std(const wxString& input)
+std::string wx2std(const wxString& input, wxMBConv* conv)
 {
     if (input.empty())
         return "";
-    return std::string(input.mb_str(*wxConvCurrent));
+    if (!conv)
+        conv = wxConvCurrent;
+    return std::string(input.mb_str(*conv));
 }
 //-----------------------------------------------------------------------------
 //! converts std:string to wxString
-wxString std2wx(std::string input)
+wxString std2wx(const std::string& input, wxMBConv* conv)
 {
     if (input.empty())
         return wxEmptyString;
-    return wxString(input.c_str(), *wxConvCurrent);
+    if (!conv)
+        conv = wxConvCurrent;
+    return wxString(input.c_str(), *conv);
 }
 //-----------------------------------------------------------------------------
 //! converts chars that have special meaning in HTML, so they get displayed
-wxString escapeHtmlChars(wxString s, bool processNewlines)
+wxString escapeHtmlChars(const wxString& input, bool processNewlines)
 {
-    if (s.empty())
-        return s;
+    if (input.empty())
+        return input;
     wxString result;
-    size_t start = 0, len = s.length();
+    size_t start = 0, len = input.length();
     while (start < len)
     {
         size_t stop = start;
         while (stop < len)
         {
-            const wxChar c = s[stop];
+            const wxChar c = input[stop];
             if (c == '&' || c == '<' || c == '>' || c == '"'
                 || (processNewlines && (c == '\r' || c == '\n')))
             {
                 if (stop > start)
-                    result += s.Mid(start, stop - start);
+                    result += input.Mid(start, stop - start);
                 if (c == '&')
                     result += wxT("&amp;");
                 else if (c == '<')
@@ -98,7 +102,7 @@ wxString escapeHtmlChars(wxString s, bool processNewlines)
             ++stop;
         }
         if (stop > start)
-            result += s.Mid(start, stop - start);
+            result += input.Mid(start, stop - start);
         start = stop;
     }
     return result;

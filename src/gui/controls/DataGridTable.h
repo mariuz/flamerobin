@@ -33,22 +33,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <ibpp.h>
 //-----------------------------------------------------------------------------
-class wxMBConv;
 class DataGridCell;
-//-----------------------------------------------------------------------------
-class DataGridTableCharsetConverter
-{
-private:
-    wxString connectionCharsetM;
-    wxMBConv* converterM;
-public:
-    DataGridTableCharsetConverter();
-    ~DataGridTableCharsetConverter();
-
-    wxMBConv* getConverter();
-    static wxString mapCharset(const wxString& connectionCharset);
-    void setConnectionCharset(const wxString& connectionCharset);
-};
 //-----------------------------------------------------------------------------
 // this event is sent after new rows have been fetched
 BEGIN_DECLARE_EVENT_TYPES()
@@ -69,7 +54,7 @@ private:
 
     std::vector< std::vector<DataGridCell*> > dataM;
     IBPP::Statement& statementM;
-    DataGridTableCharsetConverter charsetConverterM;
+    wxMBConv* charsetConverterM;
 public:
     DataGridTable(IBPP::Statement& s);
     ~DataGridTable();
@@ -81,7 +66,7 @@ public:
     IBPP::SDT getColumnType(int col);
     bool getFetchAllRows();
     wxString getTableName();
-    void initialFetch(const wxString& connectionCharset);
+    void initialFetch(wxMBConv* conv);
     bool isNullCell(int row, int col);
     bool isNumericColumn(int col);
     bool needsMoreRowsFetched();

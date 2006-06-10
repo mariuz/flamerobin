@@ -208,13 +208,13 @@ wxString StringGridCell::getValue()
 }
 //-----------------------------------------------------------------------------
 inline DataGridCell* createCellForString(IBPP::Statement& statement, int col,
-    wxMBConv* converter)
+    wxMBConv* conv)
 {
     std::string cv;
     statement->Get(col, cv);
 
-    wxASSERT(converter != 0);
-    return new StringGridCell(wxString(cv.c_str(), *converter));
+    wxASSERT(conv != 0);
+    return new StringGridCell(std2wx(cv, conv));
 }
 //-----------------------------------------------------------------------------
 // IntegerGridCell: class for integer and smallint data

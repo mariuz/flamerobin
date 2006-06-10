@@ -77,9 +77,26 @@ public:
     DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
+// a helper class to manage the wxMBConv object necessary to translate from
+// and to the database connection charset
+// this should not be here, but where to put it?  FIXME...
+class DatabaseToSystemCharsetConversion
+{
+private:
+    wxString connectionCharsetM;
+    wxMBConv* converterM;
+public:
+    DatabaseToSystemCharsetConversion();
+    ~DatabaseToSystemCharsetConversion();
+
+    wxMBConv* getConverter();
+    static wxString mapCharset(const wxString& connectionCharset);
+    void setConnectionCharset(const wxString& connectionCharset);
+};
+//-----------------------------------------------------------------------------
 class ExecuteSqlFrame: public BaseFrame, public Observer {
 public:
-    void setDatabase(Database *db);
+    void setDatabase(Database* db);
     void showProperties(wxString objectName);
     enum {
         ID_button_new = 101,
@@ -106,8 +123,10 @@ public:
     bool execute(wxString sql, bool prepareOnly = false);
     void setSql(wxString sql);
 
-    ExecuteSqlFrame(wxWindow* parent, int id, wxString title, const wxPoint& pos=wxDefaultPosition,
-        const wxSize& size=wxDefaultSize, long style=wxDEFAULT_FRAME_STYLE);
+    ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
+        const wxPoint& pos = wxDefaultPosition, 
+        const wxSize& size = wxDefaultSize, 
+        long style = wxDEFAULT_FRAME_STYLE);
 
 private:
     std::vector<ExecutedStatement> executedStatementsM;
@@ -116,7 +135,8 @@ private:
     typedef enum { ttNormal, ttSql, ttError } TextType;
     void log(wxString s, TextType type = ttNormal);     // write messages to textbox
     void SplitScreen();
-    Database *databaseM;
+    Database* databaseM;
+    DatabaseToSystemCharsetConversion dbCharsetConversionM;
 
     StatementHistory::Position historyPositionM;
     wxString localBuffer;

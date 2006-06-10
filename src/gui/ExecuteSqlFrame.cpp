@@ -38,15 +38,16 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #include "wx/wx.h"
 #endif
 
+#include <wx/datetime.h>
+#include <wx/file.h>
+#include <wx/fontmap.h>
+#include <wx/fontdlg.h>
+#include <wx/tokenzr.h>
+
 #include <algorithm>
 #include <map>
 #include <sstream>
 #include <vector>
-
-#include <wx/datetime.h>
-#include <wx/file.h>
-#include <wx/fontdlg.h>
-#include <wx/tokenzr.h>
 
 #include "config/Config.h"
 #include "core/StringUtils.h"
@@ -478,8 +479,75 @@ void SqlEditor::OnMenuSetFont(wxCommandEvent& WXUNUSED(event))
         AdvancedMessageDialogButtonsOk(), config(), wxT("DIALOG_WarnFont"), _("Do not show this information again"));
 }
 //-----------------------------------------------------------------------------
-ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title, const wxPoint& pos, const wxSize& size, long style):
-    BaseFrame(parent, id, title, pos, size, style), Observer()
+DatabaseToSystemCharsetConversion::DatabaseToSystemCharsetConversion()
+{
+    converterM = 0;
+}
+//-----------------------------------------------------------------------------
+DatabaseToSystemCharsetConversion::~DatabaseToSystemCharsetConversion()
+{
+    delete converterM;
+}
+//-----------------------------------------------------------------------------
+wxMBConv* DatabaseToSystemCharsetConversion::getConverter()
+{
+    if (converterM)
+        return converterM;
+    return wxConvCurrent;
+}
+//-----------------------------------------------------------------------------
+wxString DatabaseToSystemCharsetConversion::mapCharset(
+    const wxString& connectionCharset)
+{
+    wxString charset(connectionCharset.Upper().Trim());
+    charset.Trim(false);
+
+    if (charset.empty() || charset == wxT("NONE"))
+        return wxEmptyString;
+
+    // Firebird charsets WIN125X need to be replaced with either
+    // WINDOWS125X or CP125X - we take the latter
+    if (charset.Mid(0, 5) == wxT("WIN12"))
+        return wxT("CP12") + charset.Mid(5);
+
+    // Firebird charsets ISO8859-X (and some others) are recognized as-is
+    // all other mappings need to be added here...
+    struct CharsetMapping { const wxChar* connCS; const wxChar* convCS; };
+    static const CharsetMapping mappings[] = {
+        { wxT("UTF8"), wxT("UTF-8") }, { wxT("UNICODE_FSS"), wxT("UTF-8") }
+    };
+    int mappingCount = sizeof(mappings) / sizeof(CharsetMapping);
+    for (int i = 0; i < mappingCount; i++)
+    {
+        if (mappings[i].connCS == charset)
+            return mappings[i].convCS;
+    }
+
+    return charset;
+}
+//-----------------------------------------------------------------------------
+void DatabaseToSystemCharsetConversion::setConnectionCharset(
+    const wxString& connectionCharset)
+{
+    if (connectionCharsetM != connectionCharset)
+    {
+        if (converterM)
+        {
+            delete converterM;
+            converterM = 0;
+        }
+
+        connectionCharsetM = connectionCharset;
+        wxFontEncoding fe = wxFontMapperBase::Get()->CharsetToEncoding(
+            mapCharset(connectionCharset), false);
+        if (fe != wxFONTENCODING_SYSTEM)
+            converterM = new wxCSConv(fe);
+    }
+}
+//-----------------------------------------------------------------------------
+ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
+        const wxPoint& pos, const wxSize& size, long style)
+    : BaseFrame(parent, id, title, pos, size, style), Observer()
 {
     panel_contents = new wxPanel(this, -1);
     button_new = new wxBitmapButton(panel_contents, ID_button_new, wxBitmap(sql_icons::new_xpm));
@@ -1227,7 +1295,7 @@ bool ExecuteSqlFrame::execute(wxString sql, bool prepareOnly)
         grid_data->ClearGrid(); // statement object will be invalidated, so clear the grid
         statementM = IBPP::StatementFactory(databaseM->getIBPPDatabase(), transactionM);
         log(_("Preparing query: " + sql), ttSql);
-        statementM->Prepare(wx2std(sql));
+        statementM->Prepare(wx2std(sql, dbCharsetConversionM.getConverter()));
 
         wxTimeSpan dif = wxDateTime::Now().Subtract(start);
         log(wxString(_("Prepare time: ")) + dif.Format(wxT("%H:%M:%S.")));
@@ -1256,7 +1324,7 @@ bool ExecuteSqlFrame::execute(wxString sql, bool prepareOnly)
         IBPP::STT type = statementM->Type();
         if (type == IBPP::stSelect)            // for select statements: show data
         {
-            grid_data->fetchData(databaseM->getConnectionCharset());
+            grid_data->fetchData(dbCharsetConversionM.getConverter());
             notebook_1->SetSelection(1);
             grid_data->SetFocus();
         }
@@ -1482,9 +1550,10 @@ void ExecuteSqlFrame::update()
         Close();
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::setDatabase(Database *db)
+void ExecuteSqlFrame::setDatabase(Database* db)
 {
     databaseM = db;
+    dbCharsetConversionM.setConnectionCharset(db->getConnectionCharset());
 
     wxString s = wxString::Format(wxT("%s@%s:%s"), db->getUsername().c_str(),
         db->getServer()->getName_().c_str(), db->getPath().c_str());

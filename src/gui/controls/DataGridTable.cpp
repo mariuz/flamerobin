@@ -38,77 +38,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   #include "wx/wx.h"
 #endif
 
-#include <wx/fontmap.h>
 #include <wx/grid.h>
-#include <wx/strconv.h>
 
 #include "core/StringUtils.h"
 #include "gui/controls/DataGridCells.h"
 #include "gui/controls/DataGridTable.h"
-//-----------------------------------------------------------------------------
-DataGridTableCharsetConverter::DataGridTableCharsetConverter()
-{
-    converterM = 0;
-}
-//-----------------------------------------------------------------------------
-DataGridTableCharsetConverter::~DataGridTableCharsetConverter()
-{
-    delete converterM;
-}
-//-----------------------------------------------------------------------------
-wxMBConv* DataGridTableCharsetConverter::getConverter()
-{
-    if (converterM)
-        return converterM;
-    else
-        return wxConvCurrent;
-}
-//-----------------------------------------------------------------------------
-wxString DataGridTableCharsetConverter::mapCharset(
-    const wxString& connectionCharset)
-{
-    wxString charset(connectionCharset.Upper().Trim());
-    charset.Trim(false);
-
-    // Firebird charsets WIN125X need to be replaced with either
-    // WINDOWS125X or CP125X - we take the latter
-    if (charset.Mid(0, 5) == wxT("WIN12"))
-        return wxT("CP12") + charset.Mid(5);
-
-    // Firebird charsets ISO8859-X (and some others) are recognized as-is
-    // all other mappings need to be added here...
-    struct CharsetMapping { const wxChar* connCS; const wxChar* convCS; };
-    static const CharsetMapping mappings[] = {
-        { wxT("UTF8"), wxT("UTF-8") }, { wxT("UNICODE_FSS"), wxT("UTF-8") }
-    };
-    int mappingCount = sizeof(mappings) / sizeof(CharsetMapping);
-    for (int i = 0; i < mappingCount; i++)
-    {
-        if (mappings[i].connCS == charset)
-            return mappings[i].convCS;
-    }
-
-    return charset;
-}
-//-----------------------------------------------------------------------------
-void DataGridTableCharsetConverter::setConnectionCharset(
-    const wxString& connectionCharset)
-{
-    if (connectionCharsetM != connectionCharset)
-    {
-        if (converterM)
-        {
-            delete converterM;
-            converterM = 0;
-        }
-
-        connectionCharsetM = connectionCharset;
-        wxFontEncoding fe = wxFontMapperBase::Get()->CharsetToEncoding(
-            mapCharset(connectionCharset), false);
-        if (fe != wxFONTENCODING_SYSTEM)
-            converterM = new wxCSConv(fe);
-    }
-}
 //-----------------------------------------------------------------------------
 DataGridTable::DataGridTable(IBPP::Statement& s)
     : wxGridTableBase(), statementM(s)
@@ -198,7 +132,6 @@ void DataGridTable::fetch()
     bool initial = !rowsFetchedM;
     // fetch more rows until maxRowToFetchM reached or 100 ms elapsed
     wxLongLong startms = ::wxGetLocalTimeMillis();
-    wxMBConv* converter = charsetConverterM.getConverter();
     do
     {
         try
@@ -226,7 +159,7 @@ void DataGridTable::fetch()
         s.reserve(columnCountM);
 
         for (int i = 1; i <= columnCountM; i++)
-            s.push_back(DataGridCell::createCell(statementM, i, converter));
+            s.push_back(DataGridCell::createCell(statementM, i, charsetConverterM));
         dataM.push_back(s);
 
         if (!initial && (::wxGetLocalTimeMillis() - startms > 100))
@@ -382,13 +315,16 @@ wxString DataGridTable::GetValue(int row, int col)
         return wxT("[null]");
 }
 //-----------------------------------------------------------------------------
-void DataGridTable::initialFetch(const wxString& connectionCharset)
+void DataGridTable::initialFetch(wxMBConv* conv)
 {
     Clear();
     allRowsFetchedM = false;
     maxRowToFetchM = 100;
 
-    charsetConverterM.setConnectionCharset(connectionCharset);
+    if (conv)
+        charsetConverterM = conv;
+    else
+        charsetConverterM = wxConvCurrent;
     fetch();
 }
 //-----------------------------------------------------------------------------
