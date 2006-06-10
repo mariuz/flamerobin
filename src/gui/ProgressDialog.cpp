@@ -88,13 +88,13 @@ void ProgressDialog::createControls()
 //-----------------------------------------------------------------------------
 void ProgressDialog::doUpdate()
 {
-#ifdef __WXMAC__
-    wxYieldIfNeeded(); // calling Update() is too expensive (window compositing)
-#else
+    // update all changed controls, and make sure they paint themselves...
+
+#ifndef __WXMAC__ // it is too expensive (window compositing)
     Update();
 #endif
-#ifdef __WXGTK__
-    // TODO: find the right incantation to update and show controls
+#ifndef __WXMSW__ // not necessary, painting is not done at idle time
+    wxYieldIfNeeded(); 
 #endif
 }
 //-----------------------------------------------------------------------------
