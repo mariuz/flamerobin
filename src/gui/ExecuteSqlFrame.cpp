@@ -502,8 +502,9 @@ wxString DatabaseToSystemCharsetConversion::mapCharset(
     wxString charset(connectionCharset.Upper().Trim());
     charset.Trim(false);
 
-    if (charset.empty() || charset == wxT("NONE"))
-        return wxEmptyString;
+    // fixes hang when character set name empty (invalid encoding is returned)
+    if (charset.empty())
+        charset = wxT("NONE");
 
     // Firebird charsets WIN125X need to be replaced with either
     // WINDOWS125X or CP125X - we take the latter
