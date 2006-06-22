@@ -206,6 +206,7 @@ public:
     bool parseCommitedSql(wxString sql);     // reads a DDL statement and does accordingly
 
     std::vector<wxString> getCollations(wxString charset);
+    bool isDefaultCollation(const wxString& charset, const wxString& collate);
 
     //! fill vector with names of all tables, views, etc.
     void getIdentifiers(std::vector<Identifier>& temp);

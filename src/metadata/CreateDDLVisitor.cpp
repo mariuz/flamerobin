@@ -81,6 +81,7 @@ void CreateDDLVisitor::visitColumn(Column& c)
         return;
     }
 
+    wxString collate = c.getCollation();
     Domain *d = c.getDomain();
     if (d)
     {
@@ -89,10 +90,12 @@ void CreateDDLVisitor::visitColumn(Column& c)
             preSqlM << d->getDatatypeAsString();
             wxString charset = d->getCharset();
             Database *db = d->getDatabase();
-            if (!charset.IsEmpty() && (!db
-                || db->getDatabaseCharset() != charset))
+            if (!charset.IsEmpty())
             {
-                preSqlM << wxT(" CHARACTER SET ") << charset;
+                if (!db || db->getDatabaseCharset() != charset)
+                    preSqlM << wxT(" CHARACTER SET ") << charset;
+                if (db && db->isDefaultCollation(charset, collate))
+                        collate.clear();    // don't show default collations
             }
         }
         else
@@ -106,9 +109,10 @@ void CreateDDLVisitor::visitColumn(Column& c)
         preSqlM << wxT(" DEFAULT ") << defaultVal;
     if (!c.isNullable(false))               // false = don't check domain
         preSqlM << wxT(" NOT NULL");
-    wxString collate = c.getCollation();
     if (!collate.IsEmpty())
+    {
         preSqlM << wxT(" COLLATE ") << collate;
+    }
     wxString description = c.getDescription();
     if (!description.IsEmpty())
     {

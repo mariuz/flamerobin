@@ -401,6 +401,16 @@ bool Database::fillVector(std::vector<wxString>& list, wxString sql)
     return false;
 }
 //-----------------------------------------------------------------------------
+bool Database::isDefaultCollation(const wxString& charset,
+    const wxString& collate)
+{
+    loadCollations();
+    // no collations for charset
+    if (collationsM.lower_bound(charset) == collationsM.upper_bound(charset))
+        return false;
+    return ((*(collationsM.lower_bound(charset))).second == collate);
+}
+//-----------------------------------------------------------------------------
 //! load charset-collation pairs if needed
 void Database::loadCollations()
 {
@@ -412,8 +422,11 @@ void Database::loadCollations()
         IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
         tr1->Start();
         IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
-        st1->Prepare("select c.rdb$character_set_name, k.rdb$collation_name from rdb$character_sets c"
-            " left outer join rdb$collations k on c.rdb$character_set_id = k.rdb$character_set_id order by 1, 2");
+        st1->Prepare("select c.rdb$character_set_name, k.rdb$collation_name "
+            " from rdb$character_sets c"
+            " left outer join rdb$collations k "
+            "   on c.rdb$character_set_id = k.rdb$character_set_id "
+            " order by c.rdb$character_set_name, k.rdb$collation_id");
         st1->Execute();
         while (st1->Fetch())
         {
