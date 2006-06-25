@@ -97,6 +97,7 @@ public:
 class ExecuteSqlFrame: public BaseFrame, public Observer {
 public:
     void setDatabase(Database* db);
+    Database *getDatabase();
     void showProperties(wxString objectName);
     enum {
         ID_button_new = 101,

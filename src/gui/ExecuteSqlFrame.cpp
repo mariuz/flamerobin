@@ -1560,6 +1560,11 @@ void ExecuteSqlFrame::update()
         Close();
 }
 //-----------------------------------------------------------------------------
+Database *ExecuteSqlFrame::getDatabase()
+{
+    return databaseM;
+}
+//-----------------------------------------------------------------------------
 void ExecuteSqlFrame::setDatabase(Database* db)
 {
     databaseM = db;

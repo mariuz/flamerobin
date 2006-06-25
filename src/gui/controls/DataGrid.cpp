@@ -49,8 +49,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "gui/AdvancedMessageDialog.h"
+#include "gui/ExecuteSqlFrame.h"
 #include "gui/controls/DataGrid.h"
 #include "gui/controls/DataGridTable.h"
+#include "metadata/database.h"
+#include "metadata/table.h"
 
 //-----------------------------------------------------------------------------
 DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
@@ -157,6 +160,7 @@ void DataGrid::showPopMenu(wxPoint cursorPos)
 
     m.Append(ID_MENU_COPYTOCLIPBOARD, _("Copy"));
     m.Append(ID_MENU_COPYTOCLIPBOARDASINSERT, _("Copy as INSERT statements"));
+    m.Append(ID_MENU_COPYTOCLIPBOARDASUPDATE, _("Copy as UPDATE statements"));
     m.Append(ID_MENU_SAVEASHTML, _("Save as HTML file..."));
     m.AppendSeparator();
 
@@ -198,6 +202,8 @@ BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_UPDATE_UI(DataGrid::ID_MENU_COPYTOCLIPBOARD, DataGrid::OnMenuUpdateIfHasSelection)
     EVT_MENU(DataGrid::ID_MENU_COPYTOCLIPBOARDASINSERT, DataGrid::OnMenuCopyToCBAsInsert)
     EVT_UPDATE_UI(DataGrid::ID_MENU_COPYTOCLIPBOARDASINSERT, DataGrid::OnMenuUpdateIfHasSelection)
+    EVT_MENU(DataGrid::ID_MENU_COPYTOCLIPBOARDASUPDATE, DataGrid::OnMenuCopyToCBAsUpdate)
+    EVT_UPDATE_UI(DataGrid::ID_MENU_COPYTOCLIPBOARDASUPDATE, DataGrid::OnMenuUpdateIfHasSelection)
     EVT_MENU(DataGrid::ID_MENU_FETCHALL, DataGrid::OnMenuFetchAll)
     EVT_UPDATE_UI(DataGrid::ID_MENU_FETCHALL, DataGrid::OnMenuUpdateFetchAll)
     EVT_MENU(DataGrid::ID_MENU_LABELFONT, DataGrid::OnMenuLabelFont)
@@ -346,6 +352,109 @@ void DataGrid::OnMenuCopyToCBAsInsert(wxCommandEvent& WXUNUSED(event))
             sRows += sValues;
             sRows += wxT(");");
             sRows += wxTextBuffer::GetEOL();
+        }
+    }
+    if (!sRows.IsEmpty())
+        copyToClipboard(sRows);
+
+    if (all)
+        notifyIfUnfetchedData();
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnMenuCopyToCBAsUpdate(wxCommandEvent& WXUNUSED(event))
+{
+    wxBusyCursor cr;
+
+    DataGridTable* table = getDataGridTable();
+    if (!table)
+        return;
+    // TODO: - using one table is not correct for JOINs or sub-SELECTs
+    //       -> should probably refuse to work if not from one table
+    //       - should probably refuse to create UPDATE for "[...]"
+    wxString tableName = table->getTableName();
+    wxString sRows;
+    bool all = true;
+    for (int i = 0; i < GetNumberRows(); i++)
+    {
+        wxString str;
+        for (int j = 0; j < GetNumberCols(); j++)
+        {
+            if (IsInSelection(i, j))
+            {
+                if (!str.IsEmpty())
+                    str += wxT(", ");
+                // NOTE: preloading the column names into a local wxString
+                //       array might be a worthy optimization
+                str += wxTextBuffer::GetEOL() + GetColLabelValue(j)
+                    + wxT(" = ") + table->getCellValueForInsert(i, j);
+            }
+            else
+                all = false;
+        }
+        if (!str.IsEmpty())
+        {
+            wxString where;
+            // find primary key (otherwise use all values)
+            Table *t = 0;
+            wxWindow* parent = GetParent();
+            while (parent)
+            {
+                if (dynamic_cast<ExecuteSqlFrame *>(parent))
+                    break;
+                parent = parent->GetParent();
+            }
+            ExecuteSqlFrame* frame = dynamic_cast<ExecuteSqlFrame *>(parent);
+            if (frame)
+            {
+                Database* db = frame->getDatabase();
+                if (db)
+                {
+                    t = dynamic_cast<Table *>(
+                        db->findByNameAndType(ntTable, tableName));
+                }
+            }
+            if (!t)
+            {
+                wxMessageBox(
+                    wxString::Format(_("Table %s cannot be found in database."),
+                        tableName.c_str()),
+                    _("Error"),
+                    wxOK|wxICON_ERROR);
+                return;
+            }
+            PrimaryKeyConstraint *pkc = t->getPrimaryKey();
+            // check if all PK components are available
+            if (pkc)
+            {
+                for (ColumnConstraint::const_iterator ci = pkc->begin();
+                    ci != pkc->end(); ++ci)
+                {
+                    bool found = false;
+                    for (int k = 0; k < GetNumberCols(); k++)
+                    {
+                        if ((*ci) == GetColLabelValue(k))
+                        {
+                            if (!where.IsEmpty())
+                                where += wxT(" AND ");
+                            where += (*ci) + wxT(" = ") +
+                                table->getCellValueForInsert(i, k);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                    {
+                        pkc = 0;    // as if PK doesn't exists
+                        break;
+                    }
+                }
+            }
+            // TODO: if (!pkc)   // WHERE all_cols = all_vals
+
+            sRows += wxT("UPDATE ") + tableName + wxT(" SET ") + str
+                + wxTextBuffer::GetEOL() + wxT("WHERE ") + where
+                + wxT(";") + wxTextBuffer::GetEOL();
+
         }
     }
     if (!sRows.IsEmpty())

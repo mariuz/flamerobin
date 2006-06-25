@@ -49,7 +49,7 @@ private:
     // event handling
     enum { ID_MENU_CELLFONT, ID_MENU_LABELFONT,
         ID_MENU_COPYTOCLIPBOARD, ID_MENU_COPYTOCLIPBOARDASINSERT,
-        ID_MENU_SAVEASHTML,
+        ID_MENU_COPYTOCLIPBOARDASUPDATE, ID_MENU_SAVEASHTML,
         ID_MENU_FETCHALL, ID_MENU_CANCELFETCHALL };
 
     void OnContextMenu(wxContextMenuEvent& event);
@@ -60,6 +60,7 @@ private:
     void OnMenuCellFont(wxCommandEvent& event);
     void OnMenuCopyToCB(wxCommandEvent& event);
     void OnMenuCopyToCBAsInsert(wxCommandEvent& event);
+    void OnMenuCopyToCBAsUpdate(wxCommandEvent& event);
     void OnMenuFetchAll(wxCommandEvent& event);
     void OnMenuLabelFont(wxCommandEvent& event);
     void OnMenuSaveAsHTML(wxCommandEvent& event);
