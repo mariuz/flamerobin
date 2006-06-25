@@ -1197,7 +1197,10 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
         strstrm >> second;
         strstrm >> third;
         if (first == "COMMIT")
-            commitTransaction();
+        {
+            if (!commitTransaction())
+                return false;
+        }
         else if (first == "ROLLBACK")
             rollbackTransaction();
         else if (first == "SET" && (second == "TERM" || second == "TERMINATOR"))
@@ -1347,7 +1350,10 @@ bool ExecuteSqlFrame::execute(wxString sql, bool prepareOnly)
             executedStatementsM.push_back(ExecutedStatement(sql, type, terminatorM));
             styled_text_ctrl_sql->SetFocus();
             if (type == IBPP::stDDL && autoCommitM)
-                commitTransaction();
+            {
+                if (!commitTransaction())
+                    retval = false;
+            }
         }
     }
     catch (IBPP::Exception &e)
@@ -1388,7 +1394,7 @@ void ExecuteSqlFrame::OnButtonPlanClick(wxCommandEvent& WXUNUSED(event))
     prepareAndExecute(true);
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::commitTransaction()
+bool ExecuteSqlFrame::commitTransaction()
 {
     wxBusyCursor cr;
 
@@ -1396,7 +1402,7 @@ void ExecuteSqlFrame::commitTransaction()
     if (!transactionM->Started())    // check
     {
         InTransaction(false);
-        return;
+        return true;    // nothing to commit, but it wasn't error
     }
 
     try
@@ -1436,24 +1442,27 @@ void ExecuteSqlFrame::commitTransaction()
         if (closeWhenTransactionDoneM)
         {
             Close();
-            return;
+            return true;
         }
     }
     catch (IBPP::Exception &e)
     {
         SplitScreen();
         log(std2wx(e.ErrorMessage()), ttError);
+        return false;
     }
     catch (...)
     {
         SplitScreen();
         log(_("ERROR!\nA non-IBPP C++ runtime exception occured!"), ttError);
+        return false;
     }
 
     notebook_1->SetSelection(0);
 
     // apparently is has to be at the end to have any effect
     styled_text_ctrl_sql->SetFocus();
+    return true;
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonRollbackClick(wxCommandEvent& WXUNUSED(event))

@@ -124,8 +124,8 @@ public:
     void setSql(wxString sql);
 
     ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
-        const wxPoint& pos = wxDefaultPosition, 
-        const wxSize& size = wxDefaultSize, 
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
         long style = wxDEFAULT_FRAME_STYLE);
 
 private:
@@ -148,7 +148,7 @@ private:
     IBPP::Transaction transactionM;
     IBPP::Statement statementM;
     void InTransaction(bool started);       // changes controls (enable/disable)
-    void commitTransaction();
+    bool commitTransaction();
     void rollbackTransaction();
 
     void autoComplete(bool force);
