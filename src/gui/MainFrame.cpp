@@ -1807,11 +1807,11 @@ void MainFrame::OnMenuUpdateIfMetadataItemHasChildren(wxUpdateUIEvent& event)
 //-----------------------------------------------------------------------------
 bool MainFrame::confirmDropItem(MetadataItem* item)
 {
-    wxString itemName = wxString::Format("%s: %s",
-        item->getTypeName().Lower(), item->getPrintableName());
+    wxString itemName = wxString::Format(wxT("%s: %s"),
+        item->getTypeName().Lower(), item->getPrintableName().c_str());
     return (wxYES == wxMessageBox(
-        wxString::Format(_("Are you sure to drop %s?"), itemName),
-        wxString::Format(_("Dropping %s"), itemName),
+        wxString::Format(_("Are you sure to drop %s?"), itemName.c_str()),
+        wxString::Format(_("Dropping %s"), itemName.c_str()),
         wxICON_QUESTION | wxYES_NO));
 }
 //-----------------------------------------------------------------------------
