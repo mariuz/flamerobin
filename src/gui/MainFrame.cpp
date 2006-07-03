@@ -1660,8 +1660,10 @@ void MainFrame::OnMenuDropDatabase(wxCommandEvent& WXUNUSED(event))
     FR_TRY
 
     Database* d = tree_ctrl_1->getSelectedDatabase();
-    if (!checkValidDatabase(d))
+
+    if (!confirmDropItem(d) || !checkValidDatabase(d))
         return;
+
     int result = wxMessageBox(
         _("Do you wish to keep the registration info?"),
         _("Dropping database: ")+d->getName_(),
@@ -1693,6 +1695,8 @@ void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
         return;
     MetadataItem* m = tree_ctrl_1->getSelectedMetadataItem();
     if (!m)
+        return;
+    if (!confirmDropItem(m))
         return;
 
     // TODO: We could first check if there are some dependant objects, and offer the user to
@@ -1799,5 +1803,15 @@ void MainFrame::OnMenuUpdateIfMetadataItemHasChildren(wxUpdateUIEvent& event)
     event.Enable(mi != 0 && mi->getChildrenCount());
 
     FR_CATCH
+}
+//-----------------------------------------------------------------------------
+bool MainFrame::confirmDropItem(MetadataItem* item)
+{
+    wxString itemName = wxString::Format("%s: %s",
+        item->getTypeName().Lower(), item->getPrintableName());
+    return (wxYES == wxMessageBox(
+        wxString::Format(_("Are you sure to drop %s?"), itemName),
+        wxString::Format(_("Dropping %s"), itemName),
+        wxICON_QUESTION | wxYES_NO));
 }
 //-----------------------------------------------------------------------------

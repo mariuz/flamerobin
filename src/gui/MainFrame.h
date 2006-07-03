@@ -147,6 +147,8 @@ private:
     void do_layout();
     void buildMainMenu();
 
+    bool confirmDropItem(MetadataItem* item);
+
 protected:
     myTreeCtrl* tree_ctrl_1;
     wxMenuBar* menuBarM;
