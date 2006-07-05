@@ -110,5 +110,12 @@ int showWarningDialog(wxWindow* parent, const wxString& primaryText,
     const wxString& secondaryText, AdvancedMessageDialogButtons buttons,
     Config& config, const wxString& configKey,
     const wxString& dontShowAgainText);
+
+int showErrorDialog(wxWindow* parent, const wxString& primaryText,
+    const wxString& secondaryText, AdvancedMessageDialogButtons buttons);
+int showErrorDialog(wxWindow* parent, const wxString& primaryText,
+    const wxString& secondaryText, AdvancedMessageDialogButtons buttons,
+    Config& config, const wxString& configKey,
+    const wxString& dontShowAgainText);
 //-----------------------------------------------------------------------------
 #endif // FR_ADVANCEDMESSAGEDIALOG_H

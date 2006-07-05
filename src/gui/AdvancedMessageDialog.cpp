@@ -536,3 +536,19 @@ int showWarningDialog(wxWindow* parent, const wxString& primaryText,
         secondaryText, buttons, config, configKey, dontShowAgainText);
 }
 //-----------------------------------------------------------------------------
+int showErrorDialog(wxWindow* parent, const wxString& primaryText,
+    const wxString& secondaryText, AdvancedMessageDialogButtons buttons)
+{
+    return showAdvancedMessageDialog(parent, wxICON_ERROR, primaryText,
+        secondaryText, buttons);
+}
+//-----------------------------------------------------------------------------
+int showErrorDialog(wxWindow* parent, const wxString& primaryText,
+    const wxString& secondaryText, AdvancedMessageDialogButtons buttons,
+    Config& config, const wxString& configKey,
+    const wxString& dontShowAgainText)
+{
+    return showAdvancedMessageDialog(parent, wxICON_ERROR, primaryText,
+        secondaryText, buttons, config, configKey, dontShowAgainText);
+}
+//-----------------------------------------------------------------------------
