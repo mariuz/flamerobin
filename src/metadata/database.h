@@ -168,7 +168,7 @@ public:
         {
             MetadataCollection<T>* p =
                 dynamic_cast<MetadataCollection<T>*>(*it);
-            if (p)
+            if (p && !p->isSystem())
                 return p;
         }
         return 0;

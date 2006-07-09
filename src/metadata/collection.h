@@ -113,6 +113,11 @@ public:
         return &itemsM.back();
     }
 
+    virtual bool isSystem() const
+    {
+        return typeM == ntSysTables;
+    };
+
     inline const_iterator begin() const
     {
         return itemsM.begin();
