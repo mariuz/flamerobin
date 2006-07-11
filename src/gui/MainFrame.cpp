@@ -1661,7 +1661,7 @@ void MainFrame::OnMenuDropDatabase(wxCommandEvent& WXUNUSED(event))
 
     Database* d = tree_ctrl_1->getSelectedDatabase();
 
-    if (!confirmDropItem(d) || !checkValidDatabase(d))
+    if (!checkValidDatabase(d) || !confirmDropItem(d))
         return;
 
     int result = wxMessageBox(
@@ -1807,11 +1807,13 @@ void MainFrame::OnMenuUpdateIfMetadataItemHasChildren(wxUpdateUIEvent& event)
 //-----------------------------------------------------------------------------
 bool MainFrame::confirmDropItem(MetadataItem* item)
 {
-    wxString itemName = wxString::Format(wxT("%s: %s"),
-        item->getTypeName().Lower(), item->getPrintableName().c_str());
-    return (wxYES == wxMessageBox(
-        wxString::Format(_("Are you sure to drop %s?"), itemName.c_str()),
-        wxString::Format(_("Dropping %s"), itemName.c_str()),
-        wxICON_QUESTION | wxYES_NO));
+    wxString msg(wxString::Format(
+        _("Are you sure you wish to drop the %s %s?"),
+        item->getTypeName().Lower().c_str(),
+        item->getName_().c_str()));
+    return wxOK == showQuestionDialog(this, msg,
+        _("Once you drop the object it is permanently removed from database."),
+        AdvancedMessageDialogButtonsOkCancel(_("&Drop")),
+        config(), wxT("DIALOG_ConfirmDrop"), _("Always drop without asking"));
 }
 //-----------------------------------------------------------------------------
