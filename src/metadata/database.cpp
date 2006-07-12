@@ -740,7 +740,8 @@ bool Database::parseCommitedSql(wxString sql)
     if (!object)
         return true;
 
-    if (stm.actionIs(actSET, ntGenerator))
+    if (stm.actionIs(actSET, ntGenerator) ||
+        stm.actionIs(actALTER, ntGenerator))
     {
         if (Generator* g = dynamic_cast<Generator*>(object))
             g->loadValue(true);

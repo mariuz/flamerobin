@@ -246,6 +246,7 @@ keywords.insert(wxT("schema"));
 keywords.insert(wxT("second"));
 keywords.insert(wxT("segment"));
 keywords.insert(wxT("select"));
+keywords.insert(wxT("sequence"));
 keywords.insert(wxT("set"));
 keywords.insert(wxT("shadow"));
 keywords.insert(wxT("shared"));

@@ -247,6 +247,7 @@
 { wxT("SECOND"), kwSECOND },
 { wxT("SEGMENT"), kwSEGMENT },
 { wxT("SELECT"), kwSELECT },
+{ wxT("SEQUENCE"), kwGENERATOR },
 { wxT("SET"), kwSET },
 { wxT("SHADOW"), kwSHADOW },
 { wxT("SHARED"), kwSHARED },
