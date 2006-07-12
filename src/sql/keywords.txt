@@ -163,6 +163,7 @@ keywords.insert(wxT("logfile"));
 keywords.insert(wxT("log_buffer_size"));
 keywords.insert(wxT("log_buf_size"));
 keywords.insert(wxT("long"));
+keywords.insert(wxT("lower"));
 keywords.insert(wxT("manual"));
 keywords.insert(wxT("max"));
 keywords.insert(wxT("maximum"));

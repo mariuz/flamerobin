@@ -98,6 +98,12 @@ void Function::loadInfo(bool force)
         return;
     }
 
+    wxString mechanismNames[] = { wxT("value"), wxT("reference"),
+        wxT("descriptor"), wxT("blob descriptor"), wxT("scalar array"),
+        wxT("null"), wxEmptyString };
+    wxString mechanismDDL[] = { wxT(" BY VALUE "), wxEmptyString,
+        wxT(" BY DESCRIPTOR "), wxEmptyString, wxT(" BY SCALAR ARRAY "),
+        wxT(" NULL "), wxEmptyString };
     IBPP::Database& db = d->getIBPPDatabase();
     definitionM = getName_() + wxT("(\n");
     try
@@ -137,16 +143,27 @@ void Function::loadInfo(bool force)
             entryPointM = std2wx(entryPoint).Strip();
             wxString datatype = Domain::datatype2string(type, scale,
                 precision, subtype, length);
+            if (type == 261)    // avoid subtype information for BLOB
+                datatype = wxT("blob");
+            int mechIndex = (mechanism < 0 ? -mechanism : mechanism);
+            if (mechIndex >= (sizeof(mechanismNames)/sizeof(wxString)))
+                mechIndex = (sizeof(mechanismNames)/sizeof(wxString)) - 1;
             wxString param = wxT("    ") + datatype + wxT(" by ")
-                + (mechanism == 0 ? wxT("value") : wxT("reference"));
-            if (mechanism == -1)
+                + mechanismNames[mechIndex];
+            if (mechanism < 0)
                 param += wxT(" FREE_IT");
             if (returnarg == retpos)    // output
             {
                 retstr = param;
-                retstrM = datatype;
-                if (mechanism == 0)
-                    retstrM += wxT(" BY VALUE ");
+                retstrM = datatype + mechanismDDL[mechIndex];
+                if (retpos != 0)
+                {
+                    retstrM = wxT("PARAMETER ");
+                    retstrM << retpos;
+                    if (!paramListM.IsEmpty())
+                        paramListM += wxT(", ");
+                    paramListM += datatype + mechanismDDL[mechIndex];
+                }
             }
             else
             {
@@ -157,9 +174,7 @@ void Function::loadInfo(bool force)
                 definitionM += param;
                 if (!paramListM.IsEmpty())
                     paramListM += wxT(", ");
-                paramListM += datatype;
-                if (mechanism == 0)
-                    paramListM += wxT(" BY VALUE ");
+                paramListM += datatype + mechanismDDL[mechIndex];
             }
         }
         definitionM += wxT("\n)\nreturns:\n") + retstr;
