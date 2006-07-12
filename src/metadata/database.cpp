@@ -811,6 +811,9 @@ bool Database::parseCommitedSql(wxString sql)
             case ntException:
                 dynamic_cast<Exception*>(object)->loadProperties(true);
                 break;
+            case ntFunction:
+                dynamic_cast<Function*>(object)->loadInfo(true);
+                break;
             case ntTrigger:
                 {
                     Trigger* tr = dynamic_cast<Trigger*>(object);

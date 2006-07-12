@@ -180,6 +180,8 @@ void Function::loadInfo(bool force)
         definitionM += wxT("\n)\nreturns:\n") + retstr;
         infoLoadedM = true;
         tr1->Commit();
+        if (force)
+            notifyObservers();
     }
     catch (IBPP::Exception &e)
     {

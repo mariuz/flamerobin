@@ -36,12 +36,12 @@ class Function: public MetadataItem
 private:
     wxString libraryNameM, entryPointM, definitionM, retstrM, paramListM;
     bool infoLoadedM;
-    void loadInfo(bool force = false);
 protected:
     virtual void loadDescription();
     virtual void saveDescription(wxString description);
 public:
     Function();
+    void loadInfo(bool force = false);
     virtual const wxString getTypeName() const;
     virtual wxString getCreateSqlTemplate() const;
     virtual wxString getDropSqlStatement() const;
