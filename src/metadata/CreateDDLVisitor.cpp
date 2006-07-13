@@ -312,8 +312,8 @@ void CreateDDLVisitor::visitFunction(Function& f)
         wxString name(f.getName_());
         description.Replace(wxT("'"), wxT("''"));
         name.Replace(wxT("'"), wxT("''"));
-        postSqlM << wxT("UPDATE RDB$FUNCITIONS set\n  RDB$DESCRIPTION = '")
-             << description << wxT("'\n  where RDB$FUNCITION_NAME = '")
+        postSqlM << wxT("UPDATE RDB$FUNCTIONS set\n  RDB$DESCRIPTION = '")
+             << description << wxT("'\n  where RDB$FUNCTION_NAME = '")
              << name << wxT("';\n");
     }
     sqlM = preSqlM + postSqlM;
