@@ -54,14 +54,30 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 BEGIN_EVENT_TABLE(myTreeCtrl, wxTreeCtrl)
     EVT_CONTEXT_MENU(myTreeCtrl::OnContextMenu)
     EVT_TREE_BEGIN_DRAG(myTreeCtrl::ID_tree_ctrl, myTreeCtrl::OnBeginDrag)
+    EVT_MOUSE_EVENTS(myTreeCtrl::OnMouse)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
+// EVT_TREE_BEGIN_DRAG handles dragging of items INSIDE the tree
 void myTreeCtrl::OnBeginDrag(wxTreeEvent& event)
 {
-    wxTreeItemId item = event.GetItem();
+    // we don't allow, but this event is Veto-ed by default
+    // we need to skip it, otherwise the X Window system locks up
+    // removing this handler also makes X lock up
+    event.Skip();
+}
+//-----------------------------------------------------------------------------
+// handles dragging of items OUTSIDE of the tree (see OnBeginDrag)
+void myTreeCtrl::OnMouse(wxMouseEvent& event)
+{
+    if (!event.Dragging())
+    {
+        event.Skip();
+        return;
+    }
+
+    wxTreeItemId item = GetSelection();
     if (item.IsOk())
     {
-        SelectItem(item);
         MetadataItem *m = getMetadataItem(item);
         if (!m)
             return;
