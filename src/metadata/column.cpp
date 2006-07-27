@@ -207,6 +207,11 @@ wxString Column::getDefault() const
     return defaultM;
 }
 //-----------------------------------------------------------------------------
+const wxString Column::getTypeName() const
+{
+    return wxT("COLUMN");
+}
+//-----------------------------------------------------------------------------
 wxString Column::getDropSqlStatement() const
 {
     return wxT("ALTER TABLE ") + getTable()->getQuotedName() + wxT(" DROP ") + getQuotedName();

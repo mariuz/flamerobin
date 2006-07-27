@@ -48,6 +48,7 @@ public:
         wxString collation, wxString defaultValue, bool hasDefault);
     virtual wxString getPrintableName();
     wxString getDatatype();
+    virtual const wxString getTypeName() const;
     virtual wxString getDropSqlStatement() const;
 
     bool isNullable(bool checkDomain = true) const;
