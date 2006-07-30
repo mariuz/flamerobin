@@ -10,7 +10,9 @@
 <table cellspacing=1 cellpadding=2 border=0 bgcolor=0>
   <tbody>
     <tr bgcolor="navy">
+      {%NotSystem:
       <td></td>
+      %}
       <td valign="top"><b><font color=white>Index name</font></b></td>
       <td valign="top"><b><font color=white>Type</font></b></td>
       <td valign="top"><b><font color=white>Active</font></b></td>
@@ -21,23 +23,26 @@
     </tr>
     {%indices:
     <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
+      {%ParentNotSystem:
       <td valign="top" nowrap>
           <a href="fr://index_action?type=DROP&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/drop.png"></a>
           <a href="fr://index_action?type=RECOMPUTE&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%fr_home%}/html-templates/compute.png"></a>
       </td>
+      %}
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top" align="center">{%index_type%}</td>
-      <td nowrap valign="top" align="center"><a
-        href="fr://index_action?type=TOGGLE_ACTIVE&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">{%index_active%}</a></td>
+      <td nowrap valign="top" align="center">{%ParentNotSystem:<a
+        href="fr://index_action?type=TOGGLE_ACTIVE&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">%}{%index_active%}{%ParentNotSystem:</a>%}</td>
       <td nowrap valign="top" align="center">{%index_unique%}</td>
       <td nowrap valign="top">{%index_fields%}</td>
       <td nowrap valign="top" align="right">{%index_stats%}</td>
-      <td nowrap valign="top"><font size=-1>{%object_description%} [<a
-        href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=INDEX&amp;object_name={%object_name%}">edit</a>]</font></td>
+      <td nowrap valign="top"><font size=-1>{%object_description%} {%ParentNotSystem:[<a
+        href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=INDEX&amp;object_name={%object_name%}">edit</a>]%}</font></td>
     </tr>%}
   </tbody>
 </table>
 <br><br>
+{%NotSystem:
 <a
 href="fr://add_index?parent_window={%parent_window%}&amp;object_address={%object_address%}">Create new index</a> | <a
 href="fr://recompute_all?parent_window={%parent_window%}&amp;object_address={%object_address%}">Recompute
@@ -53,5 +58,6 @@ statistics for all indices</a>
     <tr><td><img src="{%fr_home%}/html-templates/ok.png"></td><td>Make index inactive</td></tr>
     <tr><td><img src="{%fr_home%}/html-templates/redx.png"></td><td>Make index active</td></tr>
 </table>
+%}
 </body>
 </html>

@@ -253,6 +253,12 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
             processHtmlCode(htmlpage, suffix, object);
     }
 
+    else if (cmd == wxT("ParentNotSystem"))
+    {
+        if (object->getParent() && !object->getParent()->isSystem())
+            processHtmlCode(htmlpage, suffix, object);
+    }
+
     else if (cmd == wxT("header"))  // include another file
     {
         std::vector<wxString> pages;            // pages this object has
