@@ -540,7 +540,7 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
             database_count, current++, 1);
 
         std::vector<MetadataItem *> colls;
-        db->getCollections(colls);
+        db->getCollections(colls, false);   // false = not system objects
         for (std::vector<MetadataItem *>::iterator col = colls.begin(); col !=
             colls.end(); ++col)
         {

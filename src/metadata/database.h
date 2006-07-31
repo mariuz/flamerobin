@@ -156,13 +156,13 @@ public:
     Database(const Database& rhs);
 
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
-    void getCollections(std::vector<MetadataItem *>& temp);
+    void getCollections(std::vector<MetadataItem *>& temp, bool system);
 
     template<class T>
     MetadataCollection<T>* getCollection()
     {
         std::vector<MetadataItem *> temp;
-        getCollections(temp);
+        getCollections(temp, false);    // not system
         for (std::vector<MetadataItem *>::iterator it = temp.begin();
             it != temp.end(); ++it)
         {

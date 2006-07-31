@@ -1052,12 +1052,12 @@ bool Database::getChildren(std::vector<MetadataItem*>& temp)
     if (!connectedM)
         return false;
 
-    getCollections(temp);
+    getCollections(temp, true);
     return true;
 }
 //-----------------------------------------------------------------------------
 // returns vector of all subitems
-void Database::getCollections(std::vector<MetadataItem*>& temp)
+void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
 {
     temp.push_back(&domainsM);
     temp.push_back(&exceptionsM);
@@ -1066,7 +1066,7 @@ void Database::getCollections(std::vector<MetadataItem*>& temp)
     temp.push_back(&proceduresM);
     temp.push_back(&rolesM);
     // Only push back system tables when they should be shown
-    if (showSysTables())
+    if (system && showSysTables())
         temp.push_back(&sysTablesM);
     temp.push_back(&tablesM);
     temp.push_back(&triggersM);
