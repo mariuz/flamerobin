@@ -684,21 +684,22 @@ void ExecuteSqlFrame::do_layout()
     styled_text_ctrl_sql->SetFocus();
 }
 //-----------------------------------------------------------------------------
-// This function should probably go somewhere else, but we don't want SQL editor
-// to know about database class
 void ExecuteSqlFrame::showProperties(wxString objectName)
 {
     MetadataItem *m = databaseM->findByName(objectName);
     if (!m)
+        m = databaseM->findByName(objectName.Upper());
+
+    if (m)
     {
-        wxMessageBox(
-            wxString::Format(_("Object %s has not been found in this database."), objectName.c_str()),
-            _("Search failed."),
-            wxID_OK | wxICON_INFORMATION
-        );
+        frameManager().showMetadataPropertyFrame(GetParent(), m);
         return;
     }
-    frameManager().showMetadataPropertyFrame(GetParent(), m);
+
+    wxMessageBox(
+        wxString::Format(_("Object %s has not been found in this database."),
+            objectName.c_str()),
+        _("Search failed."), wxOK | wxICON_INFORMATION);
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
