@@ -241,6 +241,7 @@ bool Procedure::getSource(wxString& source)
         st1->Fetch();
         readBlob(st1, 1, source);
         tr1->Commit();
+        source.Trim(false);     // remove leading whitespace
         return true;
     }
     catch (IBPP::Exception &e)
