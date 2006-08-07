@@ -40,7 +40,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "MultiStatement.h"
 //-----------------------------------------------------------------------------
-MultiStatement::MultiStatement(const wxString& source, wxString& terminator)
+MultiStatement::MultiStatement(const wxString& sql, const wxString& terminator)
     :sqlM(source), terminatorM(terminator), atEndM(false)
 {
     oldPosM = searchPosM = 0;

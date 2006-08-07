@@ -39,8 +39,7 @@ private:
     const wxString& sqlM;
     wxString terminatorM;
 public:
-    MultiStatement(const wxString& source,
-        const wxString& terminator = wxT(";"));
+    MultiStatement(const wxString& sql, const wxString& terminator = wxT(";"));
 
     bool getNextStatement(wxString& sql);
     bool getStatementAt(wxString& sql, int position);
