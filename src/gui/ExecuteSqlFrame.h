@@ -60,6 +60,7 @@ public:
     };
 
     SqlEditor(wxWindow *parent, wxWindowID id, ExecuteSqlFrame *frame);
+    void markText(int start, int end);
     void OnContextMenu(wxContextMenuEvent& event);
     void OnKillFocus(wxFocusEvent& event);
     void OnMenuUndo(wxCommandEvent& event);
@@ -121,7 +122,8 @@ public:
     void prepareAndExecute(bool prepareOnly = false);
     bool parseStatements(const wxString& statements, bool autoExecute = false,
         bool prepareOnly = false, int selectionOffset = 0);
-    bool execute(wxString sql, bool prepareOnly = false);
+    bool execute(wxString sql, const wxString& terminator,
+        bool prepareOnly = false);
     void setSql(wxString sql);
 
     ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
@@ -143,7 +145,6 @@ private:
     wxString localBuffer;
     void updateHistoryButtons();
 
-    wxString terminatorM;
     bool autoCommitM;
     bool inTransactionM;
     IBPP::Transaction transactionM;

@@ -38,18 +38,89 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #include "wx/wx.h"
 #endif
 
+#include <sstream>
+#include "core/StringUtils.h"
+#include "sql/SimpleParser.h"
 #include "MultiStatement.h"
 //-----------------------------------------------------------------------------
+SingleStatement::SingleStatement(const wxString& sql, bool valid)
+    :sqlM(sql), isValidM(valid), typeM(stOther), thirdStringM(wxEmptyString)
+{
+    // copied from ExecuteSqlFrame
+    wxString sqlc(sql);
+    sqlc.erase(sqlc.find_last_not_of(wxT("\n\r\t ")) + 1);    // right-trim
+    std::stringstream strstrm;              // Search and intercept
+    std::string first, second, third;       // SET TERM and COMMIT statements
+    wxString strippedSql(sqlc);
+    SimpleParser::removeComments(strippedSql, wxT("/*"), wxT("*/"));
+    SimpleParser::removeComments(strippedSql, wxT("--"), wxT("\n"));
+    strstrm << wx2std(strippedSql.Upper());
+    strstrm >> first;
+    strstrm >> second;
+    strstrm >> third;
+    thirdStringM = std2wx(third);
+    if (first == "COMMIT")
+        typeM = stCommit;
+    else if (first == "ROLLBACK")
+        typeM = stRollback;
+    else if (first == "SET" && (second == "TERM" || second == "TERMINATOR"))
+        typeM = stSetTerm;
+    else if (first == "SET" && (second == "AUTO" || second == "AUTODDL"))
+        typeM = stSetAutoDDL;
+    else
+        typeM = stOther;
+}
+//-----------------------------------------------------------------------------
+bool SingleStatement::isCommitStatement() const
+{
+    return typeM == stCommit;
+}
+//-----------------------------------------------------------------------------
+bool SingleStatement::isRollbackStatement() const
+{
+    return typeM == stRollback;
+}
+//-----------------------------------------------------------------------------
+bool SingleStatement::isSetTermStatement(wxString& newTerm) const
+{
+    if (typeM != stSetTerm)
+        return false;
+
+    newTerm = thirdStringM;
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool SingleStatement::isSetAutoDDLStatement(wxString& newSetting) const
+{
+    if (typeM != stSetAutoDDL)
+        return false;
+
+    newSetting = thirdStringM;
+}
+//-----------------------------------------------------------------------------
+bool SingleStatement::isValid() const
+{
+    return isValidM && !sqlM.Strip().IsEmpty();
+}
+//-----------------------------------------------------------------------------
+wxString SingleStatement::getSql() const
+{
+    return sqlM;
+}
+//-----------------------------------------------------------------------------
 MultiStatement::MultiStatement(const wxString& sql, const wxString& terminator)
-    :sqlM(source), terminatorM(terminator), atEndM(false)
+    :sqlM(sql), terminatorM(terminator), atEndM(false)
 {
     oldPosM = searchPosM = 0;
 }
 //-----------------------------------------------------------------------------
-bool MultiStatement::getNextStatement(wxString& sql)
+SingleStatement MultiStatement::getNextStatement()
 {
     if (atEndM)    // end marked in previous iteration
-        return false;
+    {
+        SingleStatement is(wxEmptyString, false);   // false = invalid
+        return is;
+    }
 
     oldPosM = searchPosM;
     while (true)
@@ -96,24 +167,37 @@ bool MultiStatement::getNextStatement(wxString& sql)
         }
 
         lastPosM = (pos == wxString::npos ? sqlM.length() : pos);
-        sql = sqlM.substr(oldPosM, lastPosM - oldPosM);
-
+        SingleStatement ss(sqlM.substr(oldPosM, lastPosM - oldPosM));
         searchPosM = lastPosM + terminatorM.length();
         if (pos == wxString::npos)      // last statement
-            atEndM = true;               // mark the end (for next call)
-        return true;
+            atEndM = true;              // mark the end (for next call)
+
+        wxString newTerm;                   // change terminator
+        if (ss.isSetTermStatement(newTerm))
+        {
+            terminatorM = newTerm;
+            if (newTerm.IsEmpty())  // the caller should decide what to do as
+                return ss;          // we don't want to popup msgbox from here
+            if (atEndM)             // terminator is the last statement
+            {
+                SingleStatement is(wxEmptyString, false);   // false = invalid
+                return is;
+            }
+            oldPosM = searchPosM;
+            continue;
+        }
+        return ss;
     }
 }
 //-----------------------------------------------------------------------------
-bool MultiStatement::getStatementAt(wxString& sql, int position)
+SingleStatement MultiStatement::getStatementAt(int position)
 {
     oldPosM = searchPosM = 0;
     while (true)
     {
-        if (!getNextStatement(sql))
-            return false;
-        if (lastPosM >= position)
-            return true;
+        SingleStatement s = getNextStatement();
+        if (!s.isValid() || lastPosM >= position)   // found or at end
+            return s;
     }
 }
 //-----------------------------------------------------------------------------

@@ -115,6 +115,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_myTreeCtrl.o \
 	flamerobin_objectdescriptionhandler.o \
 	flamerobin_Identifier.o \
+	flamerobin_MultiStatement.o \
 	flamerobin_SimpleParser.o \
 	flamerobin_SqlStatement.o \
 	flamerobin_SqlTokenizer.o \
@@ -490,6 +491,9 @@ flamerobin_objectdescriptionhandler.o: $(srcdir)/src/objectdescriptionhandler.cp
 
 flamerobin_Identifier.o: $(srcdir)/src/sql/Identifier.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/Identifier.cpp
+
+flamerobin_MultiStatement.o: $(srcdir)/src/sql/MultiStatement.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/MultiStatement.cpp
 
 flamerobin_SimpleParser.o: $(srcdir)/src/sql/SimpleParser.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/SimpleParser.cpp

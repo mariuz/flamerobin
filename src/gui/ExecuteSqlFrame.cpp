@@ -67,6 +67,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "metadata/server.h"
 #include "metadata/view.h"
 #include "sql/Identifier.h"
+#include "sql/MultiStatement.h"
 #include "sql/SimpleParser.h"
 #include "sql/SqlStatement.h"
 #include "statementHistory.h"
@@ -228,6 +229,16 @@ SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id, ExecuteSqlFrame *frame)
         StyleSetCharacterSet(wxSTC_STYLE_DEFAULT, charset);
 
     setup();
+}
+//-----------------------------------------------------------------------------
+void SqlEditor::markText(int start, int end)
+{
+    centerCaret(true);
+    GotoPos(end);
+    GotoPos(start);
+    SetSelectionStart(start);
+    SetSelectionEnd(end);
+    centerCaret(false);
 }
 //-----------------------------------------------------------------------------
 //! This code has to be called each time the font has changed, so that the control updates
@@ -394,7 +405,7 @@ void SqlEditor::OnMenuFindSelected(wxCommandEvent& WXUNUSED(event))
 void SqlEditor::OnMenuExecuteSelected(wxCommandEvent& WXUNUSED(event))
 {
     if (config().get(wxT("TreatAsSingleStatement"), false))
-        frameM->execute(GetSelectedText());
+        frameM->execute(GetSelectedText(), wxT(";"));
     else
         frameM->parseStatements(GetSelectedText(), false, false, GetSelectionStart());
 }
@@ -857,26 +868,48 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
             }
         }
     }
+
+    /*
+    // table.COLUMN_AUTOCOMPLETE
+    if (c == '.' && !styled_text_ctrl_sql->AutoCompActive())
+    {
+        1. identify the table:
+            // parse the editor control to find the start of statement
+            // find FROM clause in the statement
+            // find table or alias in FROM that matches the text left of dot .
+        MultiStatement ms(styled_text_ctrl_sql->GetText());
+        SelectStatement st(ms.getStatementAt(pos));
+
+        int start = styled_text_ctrl_sql->WordStartPosition(pos-1, true);
+        if (start != -1)
+            wxString table = styled_text_ctrl_sql->GetTextRange(start, pos-1);
+
+        // 2. load columns if needed
+        if (no_columns)
+        {
+            if (config.get(wxT("AutoCompleteLoadingColumns", true)))
+                t->loadColumns();
+            else
+                return;
+        }
+
+        // 3. show drop down list
+        styled_text_ctrl_sql->AutoCompShow(0, columnsM);
+    }
+    */
+
+    // join table ON __autocomplete FK relation__
+    if (c == 'N' && pos > 1 && 'O' == styled_text_ctrl_sql->GetCharAt(pos-2))
+    {
+        // TODO:
+        // autocomplete JOIN table t2 ON ... write FK relation automatically
+    }
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::autoComplete(bool force)
 {
     if (styled_text_ctrl_sql->AutoCompActive())
         return;
-
-    // TODO: we can add support for . here
-    // Like this: user types name of some table (ex. EMPLOYEE) and when he types
-    // the dot (.), autocomplete shows list of all columns for Employee table
-    // Similar can be done for Views and Output-params of SP
-
-    // Returns the character byte at the position.
-    // int GetCharAt(int pos);
-
-    // TODO:
-    // It should also work with aliases by parsing the FROM clause
-    // FROM [object_name] [alias]
-    // (left|right|outer...) JOIN [object_name] [alias]
-    // Parser used for DnD could be used here once it supports table aliases
 
     int autoCompleteChars = 1;
     if (!force)
@@ -1094,7 +1127,7 @@ void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
         bool single = false;
         config().getValue(wxT("TreatAsSingleStatement"), single);
         if (single)
-            ok = execute(styled_text_ctrl_sql->GetSelectedText(), prepareOnly);
+            ok = execute(styled_text_ctrl_sql->GetSelectedText(), wxT(";"), prepareOnly);
         else
             ok = parseStatements(styled_text_ctrl_sql->GetSelectedText(), false, prepareOnly, styled_text_ctrl_sql->GetSelectionStart());
     }
@@ -1134,119 +1167,47 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
     wxBusyCursor cr;
     styled_text_ctrl_stats->Clear();
 
-    using namespace std;
-    terminatorM = wxT(";");
-    wxString commands = statements;
-
-    // find terminator, and execute the statement
-    wxString::size_type oldpos = 0;
-    wxString::size_type searchpos = 0;
+    MultiStatement ms(statements, wxT(";"));
     while (true)
     {
-        wxString::size_type pos = commands.find(terminatorM, searchpos);
-        wxString::size_type quote = commands.find(wxT("'"), searchpos);        // watch for quoted text
-        wxString::size_type comment1 = commands.find(wxT("/*"), searchpos);    // watch for commented text
-        wxString::size_type comment2 = commands.find(wxT("--"), searchpos);    // watch for commented text
+        SingleStatement ss = ms.getNextStatement();
+        if (!ss.isValid())
+            break;
 
-        // check if terminator is maybe inside quotes or comments
-        if (pos != wxString::npos)                                             // terminator found
-        {
-            // find the closest (check for quotes first)
-            if (quote != wxString::npos && quote < pos &&                      // found & before terminator
-                (comment1 == wxString::npos || quote < comment1) &&            // before comment1
-                (comment2 == wxString::npos || quote < comment2))              // before comment2
-            {
-                searchpos = commands.find(wxT("'"), quote+1);              // end quote
-                if (searchpos++ != wxString::npos)
-                    continue;
-                pos = wxString::npos;
-            }
-
-            // check for comment1
-            if (pos != wxString::npos &&
-                comment1 != wxString::npos && comment1 < pos &&                // found & before terminator
-                (comment2 == wxString::npos || comment1 < comment2))           // before comment2
-            {
-                searchpos = commands.find(wxT("*/"), comment1 + 1);        // end comment
-                if (searchpos++ != wxString::npos)
-                    continue;
-                pos = wxString::npos;
-            }
-
-            // check for comment2
-            if (pos != wxString::npos &&
-                comment2 != wxString::npos && comment2 < pos)                  // found & before terminator
-            {
-                searchpos = commands.find(wxT("\n"), comment2 + 1);        // end comment
-                if (searchpos++ != wxString::npos)
-                    continue;
-                pos = wxString::npos;
-            }
-        }
-
-        wxString::size_type lastpos = (pos == wxString::npos ? commands.length() : pos);
-        wxString sql = commands.substr(oldpos, lastpos-oldpos);
-        sql.erase(sql.find_last_not_of(wxT("\n\r\t ")) + 1);    // right-trim the statement
-
-        stringstream strstrm;            // Search and intercept
-        std::string first, second, third;    // SET TERM and COMMIT statements
-        wxString strippedSql(sql);
-        SimpleParser::removeComments(strippedSql, wxT("/*"), wxT("*/"));
-        SimpleParser::removeComments(strippedSql, wxT("--"), wxT("\n"));
-        strstrm << wx2std(strippedSql.Upper());
-        strstrm >> first;
-        strstrm >> second;
-        strstrm >> third;
-        if (first == "COMMIT")
+        wxString newTerminator, autoDDLSetting;
+        if (ss.isCommitStatement())
         {
             if (!commitTransaction())
                 return false;
         }
-        else if (first == "ROLLBACK")
+        else if (ss.isRollbackStatement())
             rollbackTransaction();
-        else if (first == "SET" && (second == "TERM" || second == "TERMINATOR"))
+        else if (ss.isSetTermStatement(newTerminator))
         {
-            searchpos = oldpos = lastpos + terminatorM.length();    // has to be here since terminator length can change
-            terminatorM = std2wx(third);
-            if (terminatorM.empty())
+            if (newTerminator.empty())
             {
                 ::wxMessageBox(_("SET TERM command found without terminator.\nStopping further execution."),
                     _("Warning."), wxOK | wxICON_WARNING);
-                terminatorM = wxT(";");
-                break;
+                return false;
             }
-            continue;
         }
-        else if (first == "SET" && (second == "AUTO" || second == "AUTODDL"))
+        else if (ss.isSetAutoDDLStatement(autoDDLSetting))
         {
-            if (third == "ON")
+            if (autoDDLSetting == "ON")
                 autoCommitM = true;
-            else if (third == "OFF")
+            else if (autoDDLSetting == "OFF")
                 autoCommitM = false;
             else
                 autoCommitM = !autoCommitM;
         }
-        else
+        else if (ss.getSql().length() && !execute(ss.getSql(),
+            ms.getTerminator(), prepareOnly))
         {
-            if (sql.length())
-            {
-                if (!execute(sql, prepareOnly))
-                {
-                    styled_text_ctrl_sql->centerCaret(true);
-                    styled_text_ctrl_sql->GotoPos(selectionOffset+(int)lastpos);
-                    styled_text_ctrl_sql->GotoPos(selectionOffset+(int)oldpos);
-                    styled_text_ctrl_sql->SetSelectionStart(selectionOffset+(int)oldpos);        // select the text in STC
-                    styled_text_ctrl_sql->SetSelectionEnd(selectionOffset+(int)lastpos);        // that failed to execute
-                    styled_text_ctrl_sql->centerCaret(false);
-                    styled_text_ctrl_sql->SetFocus();
-                    return false;
-                }
-            }
+            styled_text_ctrl_sql->markText(selectionOffset + ms.getStart(),
+                selectionOffset + ms.getEnd());
+            styled_text_ctrl_sql->SetFocus();
+            return false;
         }
-
-        if (pos == wxString::npos)    // last statement
-            break;
-        searchpos = oldpos = lastpos + terminatorM.length();
     }
 
     if (closeWhenDone)
@@ -1260,7 +1221,8 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
 }
 //-----------------------------------------------------------------------------
 //! when autoexecute is TRUE, program just waits user to click Commit/Rollback and closes window
-bool ExecuteSqlFrame::execute(wxString sql, bool prepareOnly)
+bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
+    bool prepareOnly)
 {
     // check if sql only contains comments
     wxString sqlclean(sql);
@@ -1348,7 +1310,7 @@ bool ExecuteSqlFrame::execute(wxString sql, bool prepareOnly)
             SqlStatement stm(sql, databaseM);
             if (stm.isDDL())
                 type = IBPP::stDDL;
-            executedStatementsM.push_back(ExecutedStatement(sql, type, terminatorM));
+            executedStatementsM.push_back(ExecutedStatement(sql, type, terminator));
             styled_text_ctrl_sql->SetFocus();
             if (type == IBPP::stDDL && autoCommitM)
             {

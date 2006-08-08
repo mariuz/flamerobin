@@ -28,6 +28,27 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef FR_MULTI_STATEMENT_H
 #define FR_MULTI_STATEMENT_H
 //-----------------------------------------------------------------------------
+class SingleStatement
+{
+private:
+    wxString sqlM;
+    wxString thirdStringM;
+    bool isValidM;
+    enum StatementType { stCommit, stRollback, stSetTerm, stSetAutoDDL,
+         stOther } typeM;
+
+public:
+    SingleStatement(const wxString& sql, bool valid = true);
+
+    bool isCommitStatement() const;
+    bool isRollbackStatement() const;
+    bool isSetTermStatement(wxString& newTerm) const;
+    bool isSetAutoDDLStatement(wxString& newSetting) const;
+    bool isValid() const;
+
+    wxString getSql() const;
+};
+//-----------------------------------------------------------------------------
 class MultiStatement
 {
 private:
@@ -41,8 +62,8 @@ private:
 public:
     MultiStatement(const wxString& sql, const wxString& terminator = wxT(";"));
 
-    bool getNextStatement(wxString& sql);
-    bool getStatementAt(wxString& sql, int position);
+    SingleStatement getNextStatement();
+    SingleStatement getStatementAt(int position);
 
     // get positions of last statement retrieved
     int getStart() const;

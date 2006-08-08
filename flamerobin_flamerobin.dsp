@@ -576,6 +576,10 @@ SOURCE=.\src\metadata\MetadataItemVisitor.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\sql\MultiStatement.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\MultilineEnterDialog.cpp
 # End Source File
 # Begin Source File
@@ -919,6 +923,10 @@ SOURCE=.\src\gui\MetadataItemPropertiesFrame.h
 # Begin Source File
 
 SOURCE=.\src\metadata\MetadataItemVisitor.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\sql\MultiStatement.h
 # End Source File
 # Begin Source File
 
