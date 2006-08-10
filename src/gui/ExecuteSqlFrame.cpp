@@ -1288,9 +1288,9 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
         }
         else if (ss.isSetAutoDDLStatement(autoDDLSetting))
         {
-            if (autoDDLSetting == "ON")
+            if (autoDDLSetting == wxT("ON"))
                 autoCommitM = true;
-            else if (autoDDLSetting == "OFF")
+            else if (autoDDLSetting == wxT("OFF"))
                 autoCommitM = false;
             else
                 autoCommitM = !autoCommitM;
