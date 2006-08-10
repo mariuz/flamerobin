@@ -167,7 +167,7 @@ SingleStatement MultiStatement::getNextStatement()
         }
 
         lastPosM = (pos == wxString::npos ? sqlM.length() : pos);
-        SingleStatement ss(sqlM.substr(oldPosM, lastPosM - oldPosM));
+        SingleStatement ss(sqlM.Mid(oldPosM, lastPosM - oldPosM));
         searchPosM = lastPosM + terminatorM.length();
         if (pos == wxString::npos)      // last statement
             atEndM = true;              // mark the end (for next call)

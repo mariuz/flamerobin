@@ -57,7 +57,7 @@ private:
     wxString::size_type lastPosM;
 
     bool atEndM;
-    const wxString& sqlM;
+    wxString sqlM;
     wxString terminatorM;
 public:
     MultiStatement(const wxString& sql, const wxString& terminator = wxT(";"));

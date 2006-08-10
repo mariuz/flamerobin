@@ -155,6 +155,7 @@ public:
     wxString getCurrentTokenString();
     bool isKeywordToken();
     bool nextToken();
+    bool jumpToken();   // skip whitespace and comments
 
     void setStatement(const wxString& statement);
 

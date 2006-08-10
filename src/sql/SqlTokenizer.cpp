@@ -108,6 +108,20 @@ void SqlTokenizer::init()
     nextToken();
 }
 //-----------------------------------------------------------------------------
+// same as nextToken, but skips whitespace and comments
+bool SqlTokenizer::jumpToken()
+{
+    while (true)
+    {
+        if (!nextToken())
+            return false;
+        SqlTokenType stt = getCurrentToken();
+        if (stt != tkWHITESPACE && stt != tkCOMMENT)
+            break;
+    }
+    return true;
+}
+//-----------------------------------------------------------------------------
 bool SqlTokenizer::nextToken()
 {
     sqlTokenStartM = sqlTokenEndM;

@@ -807,6 +807,101 @@ bool HasWord(wxString word, wxString& wordlist)
     return false;
 }
 //-----------------------------------------------------------------------------
+Relation* findRelation(std::multimap<wxString,wxString>& aliases, Database *db,
+    const wxString& alias, NodeType type)
+{
+    Relation *r = 0;
+    for (std::multimap<wxString, wxString>::iterator i =
+        aliases.lower_bound(alias); !r && i != aliases.upper_bound(alias); ++i)
+    {
+        r = dynamic_cast<Relation *>(db->findByNameAndType(type, (*i).second));
+        if (r)
+            return r;
+    }
+    // find by NAME in case user doesn't have from/into/etc. clause but
+    // is using FULL_RELATION_NAME.column syntax
+    Identifier id;
+    id.setFromSql(alias);
+    return dynamic_cast<Relation *>(db->findByNameAndType(type, id.get()));
+}
+//-----------------------------------------------------------------------------
+wxString getColumnsForObject(Database *db, const wxString& sql,
+    const wxString& objectAlias)
+{
+    // feed what's left to tokenizer
+    SqlTokenizer tokenizer(sql);
+    SqlTokenType search[] = { kwFROM, kwJOIN, kwUPDATE, kwINSERT };
+    SqlTokenType stt;
+    std::multimap<wxString, wxString> aliases;
+    while (true)
+    {
+        stt = tokenizer.getCurrentToken();
+        if (stt == tkEOF)
+            break;
+
+        //wxMessageBox(wxString::Format("Tok: %d, String: %s", stt,
+        //  tokenizer.getCurrentTokenString().c_str()), wxT("TOKEN"));
+
+        // find all [DELETE] FROM, JOIN, UPDATE, INSERT INTO tokens
+        for (int i=0; i < sizeof(search)/sizeof(SqlTokenType); ++i)
+        {
+            if (search[i] == stt)
+            {
+                if (stt == kwINSERT)    // find INTO
+                {
+                    tokenizer.jumpToken();
+                    if (kwINTO != tokenizer.getCurrentToken())
+                        break;
+                }
+                tokenizer.jumpToken();  // table name
+                if (tkIDENTIFIER != tokenizer.getCurrentToken())
+                    break;
+                Identifier id;
+                id.setFromSql(tokenizer.getCurrentTokenString());
+                wxString alias;
+                tokenizer.jumpToken();
+                if (tkIDENTIFIER == tokenizer.getCurrentToken())
+                    alias = tokenizer.getCurrentTokenString();
+                else
+                    alias = id.get();
+                //wxMessageBox(id.get(), alias);
+                aliases.insert(std::pair<wxString, wxString>(alias, id.get()));
+                break;
+            }
+        }
+        if (tkEOF == tokenizer.getCurrentToken())
+            break;
+        tokenizer.jumpToken();
+    }
+
+    // find TABLE in list of ALIASES
+    Relation *r = findRelation(aliases, db, objectAlias, ntTable);
+    if (!r)
+        r = findRelation(aliases, db, objectAlias, ntView);
+    if (!r)     // give up, relation is not found
+        return wxEmptyString;
+
+    if (r->begin() == r->end())   // no columns, load if needed
+    {
+        if (config().get(wxT("autoCompleteLoadColumns"), true))
+            r->loadColumns();
+        else
+            return wxEmptyString;
+    }
+
+    std::list<wxString> cols;
+    for (MetadataCollection<Column>::const_iterator c = r->begin();
+        c != r->end(); ++c)
+    {
+        cols.push_back((*c).getName_().Upper());
+    }
+    cols.sort();
+    wxString columns;
+    for (std::list<wxString>::iterator i = cols.begin(); i != cols.end(); ++i)
+        columns += (*i) + wxT(" ");
+    return columns;
+}
+//-----------------------------------------------------------------------------
 //! autocomplete stuff
 void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
 {
@@ -869,34 +964,34 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
         }
     }
 
-    /*
     // table.COLUMN_AUTOCOMPLETE
-    if (c == '.' && !styled_text_ctrl_sql->AutoCompActive())
+    if (c == '.' // && !styled_text_ctrl_sql->AutoCompActive()
+        && config().get(wxT("autoCompleteColumns"), true))
     {
-        1. identify the table:
-            // parse the editor control to find the start of statement
-            // find FROM clause in the statement
-            // find table or alias in FROM that matches the text left of dot .
-        MultiStatement ms(styled_text_ctrl_sql->GetText());
-        SelectStatement st(ms.getStatementAt(pos));
-
         int start = styled_text_ctrl_sql->WordStartPosition(pos-1, true);
-        if (start != -1)
-            wxString table = styled_text_ctrl_sql->GetTextRange(start, pos-1);
-
-        // 2. load columns if needed
-        if (no_columns)
+        if (start == -1)
+            return;
+        // quoted table name
+        if (pos > 1 && styled_text_ctrl_sql->GetCharAt(pos-2) == '"')
         {
-            if (config.get(wxT("AutoCompleteLoadingColumns", true)))
-                t->loadColumns();
-            else
-                return;
+            start = pos-3;
+            while (start && styled_text_ctrl_sql->GetCharAt(start) != '"')
+                --start;
         }
+        wxString table = styled_text_ctrl_sql->GetTextRange(start, pos-1);
+        MultiStatement ms(styled_text_ctrl_sql->GetText());
+        SingleStatement st = ms.getStatementAt(pos);
+        if (!st.isValid())
+            return;
 
-        // 3. show drop down list
-        styled_text_ctrl_sql->AutoCompShow(0, columnsM);
+        // TODO: feed st to tokenizer, split by UNION all,
+        // extract the part where cursor is in
+
+        wxString columns = getColumnsForObject(databaseM, st.getSql(), table);
+        if (columns.IsEmpty())
+            return;
+        styled_text_ctrl_sql->AutoCompShow(0, columns);
     }
-    */
 
     // join table ON __autocomplete FK relation__
     if (c == 'N' && pos > 1 && 'O' == styled_text_ctrl_sql->GetCharAt(pos-2))

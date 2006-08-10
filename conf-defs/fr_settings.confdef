@@ -195,6 +195,18 @@
                 <key>autoCompleteQuoted</key>
                 <default>1</default>
             </setting>
+            <setting type="checkbox">
+                <caption>Auto-complete columns when dot (.) is typed</caption>
+                <key>autoCompleteColumns</key>
+                <default>1</default>
+                <enables>
+                    <setting type="checkbox">
+                        <caption>Load columns when required for autocompletion</caption>
+                        <key>autoCompleteLoadColumns</key>
+                        <default>1</default>
+                    </setting>
+                </enables>
+            </setting>
         </node>
         <node>
             <caption>Statement History</caption>
