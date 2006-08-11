@@ -980,14 +980,33 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
         }
         wxString table = styled_text_ctrl_sql->GetTextRange(start, pos-1);
         MultiStatement ms(styled_text_ctrl_sql->GetText());
-        SingleStatement st = ms.getStatementAt(pos);
+        int offset;
+        SingleStatement st = ms.getStatementAt(pos, &offset);
         if (!st.isValid())
             return;
 
-        // TODO: feed st to tokenizer, split by UNION all,
-        // extract the part where cursor is in
+        // feed st to tokenizer, find UNION section we're in
+        wxString sql = st.getSql();
+        SqlTokenizer stok(sql);
+        int pstart = 0, pend = sql.length();
+        do
+        {
+            if (stok.getCurrentToken() == kwUNION)
+            {
+                int upos = stok.getCurrentTokenPosition();
+                if (pos - offset > upos)    // before cursor position
+                    pstart = upos;
+                if (pos - offset < upos)    // after cursor position
+                {
+                    pend = upos;
+                    break;
+                }
+            }
+        }
+        while (stok.nextToken());
+        sql = sql.Mid(pstart, pend-pstart);
 
-        wxString columns = getColumnsForObject(databaseM, st.getSql(), table);
+        wxString columns = getColumnsForObject(databaseM, sql, table);
         if (columns.IsEmpty())
             return;
         styled_text_ctrl_sql->AutoCompShow(0, columns);

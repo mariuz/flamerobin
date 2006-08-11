@@ -190,14 +190,19 @@ SingleStatement MultiStatement::getNextStatement()
     }
 }
 //-----------------------------------------------------------------------------
-SingleStatement MultiStatement::getStatementAt(int position)
+// optionally place the statement offset (start) into "offset" variable
+SingleStatement MultiStatement::getStatementAt(int position, int* offset)
 {
     oldPosM = searchPosM = 0;
     while (true)
     {
         SingleStatement s = getNextStatement();
         if (!s.isValid() || lastPosM >= position)   // found or at end
+        {
+            if (offset)
+                *offset = oldPosM;
             return s;
+        }
     }
 }
 //-----------------------------------------------------------------------------

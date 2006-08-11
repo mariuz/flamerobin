@@ -153,6 +153,7 @@ public:
 
     SqlTokenType getCurrentToken();
     wxString getCurrentTokenString();
+    int getCurrentTokenPosition();
     bool isKeywordToken();
     bool nextToken();
     bool jumpToken();   // skip whitespace and comments

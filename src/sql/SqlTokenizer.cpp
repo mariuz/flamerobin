@@ -108,6 +108,11 @@ void SqlTokenizer::init()
     nextToken();
 }
 //-----------------------------------------------------------------------------
+int SqlTokenizer::getCurrentTokenPosition()
+{
+    return (sqlTokenStartM - sqlM.c_str());
+}
+//-----------------------------------------------------------------------------
 // same as nextToken, but skips whitespace and comments
 bool SqlTokenizer::jumpToken()
 {

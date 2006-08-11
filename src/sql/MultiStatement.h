@@ -63,7 +63,7 @@ public:
     MultiStatement(const wxString& sql, const wxString& terminator = wxT(";"));
 
     SingleStatement getNextStatement();
-    SingleStatement getStatementAt(int position);
+    SingleStatement getStatementAt(int position, int* offset = 0);
 
     // get positions of last statement retrieved
     int getStart() const;
