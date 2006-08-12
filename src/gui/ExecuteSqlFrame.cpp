@@ -848,17 +848,17 @@ wxString getColumnsForObject(Database *db, const wxString& sql,
             {
                 if (stt == kwINSERT)    // find INTO
                 {
-                    tokenizer.jumpToken();
+                    tokenizer.jumpToken(false);
                     if (kwINTO != tokenizer.getCurrentToken())
                         break;
                 }
-                tokenizer.jumpToken();  // table/view/procedure name
+                tokenizer.jumpToken(false);  // table/view/procedure name
                 if (tkIDENTIFIER != tokenizer.getCurrentToken())
                     break;
                 Identifier id;
                 id.setFromSql(tokenizer.getCurrentTokenString());
                 wxString alias;
-                tokenizer.jumpToken();
+                tokenizer.jumpToken(true);
                 if (tkIDENTIFIER == tokenizer.getCurrentToken())
                     alias = tokenizer.getCurrentTokenString();
                 else
@@ -870,7 +870,7 @@ wxString getColumnsForObject(Database *db, const wxString& sql,
         }
         if (tkEOF == tokenizer.getCurrentToken())
             break;
-        tokenizer.jumpToken();
+        tokenizer.jumpToken(false);
     }
 
     // find TABLE or VIEW in list of ALIASES

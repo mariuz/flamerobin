@@ -156,7 +156,7 @@ public:
     int getCurrentTokenPosition();
     bool isKeywordToken();
     bool nextToken();
-    bool jumpToken();   // skip whitespace and comments
+    bool jumpToken(bool skipParenthesis);   // skip whitespace and comments
 
     void setStatement(const wxString& statement);
 

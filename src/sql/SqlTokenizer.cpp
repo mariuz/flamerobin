@@ -114,14 +114,14 @@ int SqlTokenizer::getCurrentTokenPosition()
 }
 //-----------------------------------------------------------------------------
 // same as nextToken, but skips whitespace, comments and parenthesis
-bool SqlTokenizer::jumpToken()
+bool SqlTokenizer::jumpToken(bool skipParenthesis)
 {
     while (true)
     {
         if (!nextToken())
             return false;
         SqlTokenType stt = getCurrentToken();
-        if (stt == tkPARENOPEN)
+        if (stt == tkPARENOPEN && skipParenthesis)
         {
             while (nextToken())
             {
