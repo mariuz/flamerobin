@@ -159,6 +159,31 @@ bool Procedure::checkAndLoadParameters(bool force)
     return parametersLoadedM;
 }
 //-----------------------------------------------------------------------------
+MetadataCollection<Parameter>::iterator Procedure::begin()
+{
+    // please - don't load here
+    // this code is used to get columns we want to alert about changes
+    // but if there aren't any columns, we don't want to waste time
+    // loading them
+    return parametersM.begin();
+}
+//-----------------------------------------------------------------------------
+MetadataCollection<Parameter>::iterator Procedure::end()
+{
+    // please see comment for begin()
+    return parametersM.end();
+}
+//-----------------------------------------------------------------------------
+MetadataCollection<Parameter>::const_iterator Procedure::begin() const
+{
+    return parametersM.begin();
+}
+//-----------------------------------------------------------------------------
+MetadataCollection<Parameter>::const_iterator Procedure::end() const
+{
+    return parametersM.end();
+}
+//-----------------------------------------------------------------------------
 //! returns false if error occurs, and places the error text in error variable
 bool Procedure::loadParameters()
 {

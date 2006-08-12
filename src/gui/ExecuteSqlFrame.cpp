@@ -807,28 +807,27 @@ bool HasWord(wxString word, wxString& wordlist)
     return false;
 }
 //-----------------------------------------------------------------------------
-Relation* findRelation(std::multimap<wxString,wxString>& aliases, Database *db,
+template <class T>
+T* findObject(std::multimap<wxString,wxString>& aliases, Database *db,
     const wxString& alias, NodeType type)
 {
-    Relation *r = 0;
     for (std::multimap<wxString, wxString>::iterator i =
-        aliases.lower_bound(alias); !r && i != aliases.upper_bound(alias); ++i)
+        aliases.lower_bound(alias); i != aliases.upper_bound(alias); ++i)
     {
-        r = dynamic_cast<Relation *>(db->findByNameAndType(type, (*i).second));
-        if (r)
-            return r;
+        T* t = dynamic_cast<T *>(db->findByNameAndType(type, (*i).second));
+        if (t)
+            return t;
     }
     // find by NAME in case user doesn't have from/into/etc. clause but
     // is using FULL_RELATION_NAME.column syntax
     Identifier id;
     id.setFromSql(alias);
-    return dynamic_cast<Relation *>(db->findByNameAndType(type, id.get()));
+    return dynamic_cast<T *>(db->findByNameAndType(type, id.get()));
 }
 //-----------------------------------------------------------------------------
 wxString getColumnsForObject(Database *db, const wxString& sql,
     const wxString& objectAlias)
 {
-    // feed what's left to tokenizer
     SqlTokenizer tokenizer(sql);
     SqlTokenType search[] = { kwFROM, kwJOIN, kwUPDATE, kwINSERT };
     SqlTokenType stt;
@@ -839,7 +838,7 @@ wxString getColumnsForObject(Database *db, const wxString& sql,
         if (stt == tkEOF)
             break;
 
-        //wxMessageBox(wxString::Format("Tok: %d, String: %s", stt,
+        //wxMessageBox(wxString::Format(wxT("Tok: %d, String: %s"), stt,
         //  tokenizer.getCurrentTokenString().c_str()), wxT("TOKEN"));
 
         // find all [DELETE] FROM, JOIN, UPDATE, INSERT INTO tokens
@@ -853,7 +852,7 @@ wxString getColumnsForObject(Database *db, const wxString& sql,
                     if (kwINTO != tokenizer.getCurrentToken())
                         break;
                 }
-                tokenizer.jumpToken();  // table name
+                tokenizer.jumpToken();  // table/view/procedure name
                 if (tkIDENTIFIER != tokenizer.getCurrentToken())
                     break;
                 Identifier id;
@@ -874,27 +873,47 @@ wxString getColumnsForObject(Database *db, const wxString& sql,
         tokenizer.jumpToken();
     }
 
-    // find TABLE in list of ALIASES
-    Relation *r = findRelation(aliases, db, objectAlias, ntTable);
-    if (!r)
-        r = findRelation(aliases, db, objectAlias, ntView);
-    if (!r)     // give up, relation is not found
-        return wxEmptyString;
-
-    if (r->begin() == r->end())   // no columns, load if needed
-    {
-        if (config().get(wxT("autoCompleteLoadColumns"), true))
-            r->loadColumns();
-        else
-            return wxEmptyString;
-    }
-
+    // find TABLE or VIEW in list of ALIASES
     std::list<wxString> cols;
-    for (MetadataCollection<Column>::const_iterator c = r->begin();
-        c != r->end(); ++c)
+    Relation *r = findObject<Relation>(aliases, db, objectAlias, ntTable);
+    if (!r)
+        r = findObject<Relation>(aliases, db, objectAlias, ntView);
+    if (r)
     {
-        cols.push_back((*c).getName_().Upper());
+        if (r->begin() == r->end())   // no columns, load if needed
+        {
+            if (config().get(wxT("autoCompleteLoadColumns"), true))
+                r->loadColumns();
+            else
+                return wxEmptyString;
+        }
+        for (MetadataCollection<Column>::const_iterator c = r->begin();
+            c != r->end(); ++c)
+        {
+            cols.push_back((*c).getName_().Upper());
+        }
     }
+    else    // find STORED PROCEDURE in list of ALIASES
+    {
+        Procedure *p = findObject<Procedure>(aliases, db, objectAlias,
+            ntProcedure);
+        if (!p) // give up, we couldn't match anything
+            return wxEmptyString;
+        if (p->begin() == p->end())
+        {
+            if (config().get(wxT("autoCompleteLoadColumns"), true))
+                p->checkAndLoadParameters();
+            else
+                return wxEmptyString;
+        }
+        for (MetadataCollection<Parameter>::const_iterator c = p->begin();
+            c != p->end(); ++c)
+        {
+            if ((*c).getParameterType() == ptOutput)
+                cols.push_back((*c).getName_().Upper());
+        }
+    }
+
     cols.sort();
     wxString columns;
     for (std::list<wxString>::iterator i = cols.begin(); i != cols.end(); ++i)

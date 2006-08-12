@@ -59,6 +59,11 @@ public:
     wxString getSelectStatement(bool withColumns);
     bool isSelectable();
 
+    MetadataCollection<Parameter>::iterator begin();
+    MetadataCollection<Parameter>::iterator end();
+    MetadataCollection<Parameter>::const_iterator begin() const;
+    MetadataCollection<Parameter>::const_iterator end() const;
+
     bool checkAndLoadParameters(bool force = false);
     bool getSource(wxString& source);
     wxString getAlterSql(bool full = true);
