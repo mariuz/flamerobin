@@ -899,7 +899,7 @@ wxString getColumnsForObject(Database *db, const wxString& sql,
     wxString columns;
     for (std::list<wxString>::iterator i = cols.begin(); i != cols.end(); ++i)
         columns += (*i) + wxT(" ");
-    return columns;
+    return columns.Strip();     // remove trailing space
 }
 //-----------------------------------------------------------------------------
 //! autocomplete stuff
@@ -965,8 +965,7 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
     }
 
     // table.COLUMN_AUTOCOMPLETE
-    if (c == '.' // && !styled_text_ctrl_sql->AutoCompActive()
-        && config().get(wxT("autoCompleteColumns"), true))
+    if (c == '.' && config().get(wxT("autoCompleteColumns"), true))
     {
         int start = styled_text_ctrl_sql->WordStartPosition(pos-1, true);
         if (start == -1)
