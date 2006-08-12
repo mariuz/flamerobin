@@ -153,6 +153,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_myTreeCtrl.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Identifier.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_IncompleteStatement.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MultiStatement.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleParser.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlStatement.obj \
@@ -503,6 +504,9 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.obj: .\src\objec
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Identifier.obj: .\src\sql\Identifier.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_IncompleteStatement.obj: .\src\sql\IncompleteStatement.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MultiStatement.obj: .\src\sql\MultiStatement.cpp

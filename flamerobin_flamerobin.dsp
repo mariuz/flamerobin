@@ -552,6 +552,10 @@ SOURCE=.\src\sql\Identifier.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\sql\IncompleteStatement.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\metadata\Index.cpp
 # End Source File
 # Begin Source File
@@ -895,6 +899,10 @@ SOURCE=.\src\gui\FindDialog.h
 # Begin Source File
 
 SOURCE=.\src\sql\Identifier.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\sql\IncompleteStatement.h
 # End Source File
 # Begin Source File
 

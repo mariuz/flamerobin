@@ -67,6 +67,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "metadata/server.h"
 #include "metadata/view.h"
 #include "sql/Identifier.h"
+#include "sql/IncompleteStatement.h"
 #include "sql/MultiStatement.h"
 #include "sql/SimpleParser.h"
 #include "sql/SqlStatement.h"
@@ -807,120 +808,6 @@ bool HasWord(wxString word, wxString& wordlist)
     return false;
 }
 //-----------------------------------------------------------------------------
-template <class T>
-T* findObject(std::multimap<wxString,wxString>& aliases, Database *db,
-    const wxString& alias, NodeType type)
-{
-    for (std::multimap<wxString, wxString>::iterator i =
-        aliases.lower_bound(alias); i != aliases.upper_bound(alias); ++i)
-    {
-        T* t = dynamic_cast<T *>(db->findByNameAndType(type, (*i).second));
-        if (t)
-            return t;
-    }
-    // find by NAME in case user doesn't have from/into/etc. clause but
-    // is using FULL_RELATION_NAME.column syntax
-    Identifier id;
-    id.setFromSql(alias);
-    return dynamic_cast<T *>(db->findByNameAndType(type, id.get()));
-}
-//-----------------------------------------------------------------------------
-wxString getColumnsForObject(Database *db, const wxString& sql,
-    const wxString& objectAlias)
-{
-    SqlTokenizer tokenizer(sql);
-    SqlTokenType search[] = { kwFROM, kwJOIN, kwUPDATE, kwINSERT };
-    SqlTokenType stt;
-    std::multimap<wxString, wxString> aliases;
-    while (true)
-    {
-        stt = tokenizer.getCurrentToken();
-        if (stt == tkEOF)
-            break;
-
-        //wxMessageBox(wxString::Format(wxT("Tok: %d, String: %s"), stt,
-        //  tokenizer.getCurrentTokenString().c_str()), wxT("TOKEN"));
-
-        // find all [DELETE] FROM, JOIN, UPDATE, INSERT INTO tokens
-        for (int i=0; i < sizeof(search)/sizeof(SqlTokenType); ++i)
-        {
-            if (search[i] == stt)
-            {
-                if (stt == kwINSERT)    // find INTO
-                {
-                    tokenizer.jumpToken(false);
-                    if (kwINTO != tokenizer.getCurrentToken())
-                        break;
-                }
-                tokenizer.jumpToken(false);  // table/view/procedure name
-                if (tkIDENTIFIER != tokenizer.getCurrentToken())
-                    break;
-                Identifier id;
-                id.setFromSql(tokenizer.getCurrentTokenString());
-                wxString alias;
-                tokenizer.jumpToken(true);
-                if (tkIDENTIFIER == tokenizer.getCurrentToken())
-                    alias = tokenizer.getCurrentTokenString();
-                else
-                    alias = id.get();
-                //wxMessageBox(id.get(), alias);
-                aliases.insert(std::pair<wxString, wxString>(alias, id.get()));
-                break;
-            }
-        }
-        if (tkEOF == tokenizer.getCurrentToken())
-            break;
-        tokenizer.jumpToken(false);
-    }
-
-    // find TABLE or VIEW in list of ALIASES
-    std::list<wxString> cols;
-    Relation *r = findObject<Relation>(aliases, db, objectAlias, ntTable);
-    if (!r)
-        r = findObject<Relation>(aliases, db, objectAlias, ntView);
-    if (r)
-    {
-        if (r->begin() == r->end())   // no columns, load if needed
-        {
-            if (config().get(wxT("autoCompleteLoadColumns"), true))
-                r->loadColumns();
-            else
-                return wxEmptyString;
-        }
-        for (MetadataCollection<Column>::const_iterator c = r->begin();
-            c != r->end(); ++c)
-        {
-            cols.push_back((*c).getName_().Upper());
-        }
-    }
-    else    // find STORED PROCEDURE in list of ALIASES
-    {
-        Procedure *p = findObject<Procedure>(aliases, db, objectAlias,
-            ntProcedure);
-        if (!p) // give up, we couldn't match anything
-            return wxEmptyString;
-        if (p->begin() == p->end())
-        {
-            if (config().get(wxT("autoCompleteLoadColumns"), true))
-                p->checkAndLoadParameters();
-            else
-                return wxEmptyString;
-        }
-        for (MetadataCollection<Parameter>::const_iterator c = p->begin();
-            c != p->end(); ++c)
-        {
-            if ((*c).getParameterType() == ptOutput)
-                cols.push_back((*c).getName_().Upper());
-        }
-    }
-
-    cols.sort();
-    wxString columns;
-    for (std::list<wxString>::iterator i = cols.begin(); i != cols.end(); ++i)
-        columns += (*i) + wxT(" ");
-    return columns.Strip();     // remove trailing space
-}
-//-----------------------------------------------------------------------------
 //! autocomplete stuff
 void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
 {
@@ -989,42 +876,15 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
         int start = styled_text_ctrl_sql->WordStartPosition(pos-1, true);
         if (start == -1)
             return;
-        // quoted table name
         if (pos > 1 && styled_text_ctrl_sql->GetCharAt(pos-2) == '"')
-        {
+        {   // quoted table name
             start = pos-3;
             while (start && styled_text_ctrl_sql->GetCharAt(start) != '"')
                 --start;
         }
         wxString table = styled_text_ctrl_sql->GetTextRange(start, pos-1);
-        MultiStatement ms(styled_text_ctrl_sql->GetText());
-        int offset;
-        SingleStatement st = ms.getStatementAt(pos, &offset);
-        if (!st.isValid())
-            return;
-
-        // feed st to tokenizer, find UNION section we're in
-        wxString sql = st.getSql();
-        SqlTokenizer stok(sql);
-        int pstart = 0, pend = sql.length();
-        do
-        {
-            if (stok.getCurrentToken() == kwUNION)
-            {
-                int upos = stok.getCurrentTokenPosition();
-                if (pos - offset > upos)    // before cursor position
-                    pstart = upos;
-                if (pos - offset < upos)    // after cursor position
-                {
-                    pend = upos;
-                    break;
-                }
-            }
-        }
-        while (stok.nextToken());
-        sql = sql.Mid(pstart, pend-pstart);
-
-        wxString columns = getColumnsForObject(databaseM, sql, table);
+        IncompleteStatement is(databaseM, styled_text_ctrl_sql->GetText());
+        wxString columns = is.getObjectColumns(table, pos);
         if (columns.IsEmpty())
             return;
         styled_text_ctrl_sql->AutoCompShow(0, columns);
@@ -1035,6 +895,10 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
     {
         // TODO:
         // autocomplete JOIN table t2 ON ... write FK relation automatically
+        // IncompleteStatement is(databaseM, styled_text_ctrl_sql->GetText());
+        // wxString join = is.getJoin(pos);
+        // if (!join.IsEmpty())
+        //    add "join" to sql editor
     }
 }
 //-----------------------------------------------------------------------------
