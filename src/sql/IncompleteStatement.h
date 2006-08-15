@@ -41,7 +41,8 @@ private:
     Relation *getCreateTriggerRelation(const wxString& sql);
     Relation *getAlterTriggerRelation(const wxString& sql);
     wxString getColumnsForObject(const wxString& sql,
-        const wxString& objectAlias);
+        const wxString& objectAlias, int cursorPos);
+    wxString extractBlockAtPosition(const wxString& sql, int pos) const;
 
     template <class T>
     T* findObject(std::multimap<wxString,wxString>& aliases,

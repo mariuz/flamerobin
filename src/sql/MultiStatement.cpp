@@ -105,6 +105,8 @@ bool SingleStatement::isValid() const
 //-----------------------------------------------------------------------------
 wxString SingleStatement::getSql() const
 {
+    if (!isValidM)
+        return wxEmptyString;
     return sqlM;
 }
 //-----------------------------------------------------------------------------

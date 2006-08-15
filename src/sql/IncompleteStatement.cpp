@@ -81,8 +81,9 @@ wxString IncompleteStatement::getObjectColumns(const wxString& table,
         }
     }
     while (stok.nextToken());
+    position -= (offset + pstart);
     sql = sql.Mid(pstart, pend-pstart);
-    return getColumnsForObject(sql, table);
+    return getColumnsForObject(sql, table, position);
 }
 //-----------------------------------------------------------------------------
 template <class T>
@@ -194,8 +195,43 @@ Relation *IncompleteStatement::getAlterTriggerRelation(const wxString& sql)
     return r;
 }
 //-----------------------------------------------------------------------------
+wxString IncompleteStatement::extractBlockAtPosition(const wxString& sql,
+    int pos) const
+{
+    // search for FOR..DO and BEGIN..END blocks
+    // find block where cursorPos is and extract the sql from it
+    SqlTokenizer tk(sql);
+    int start = 0, end = sql.length();
+    while (true)
+    {
+        SqlTokenType stt = tk.getCurrentToken();
+        if (stt == tkEOF)
+            break;
+        int cpos = tk.getCurrentTokenPosition();
+        if (stt == kwFOR || stt == kwBEGIN || stt == kwEND || stt == kwDO)
+        {
+            if (cpos > pos)
+            {
+                end = cpos;
+                break;
+            }
+            else
+                start = cpos;
+        }
+        tk.jumpToken(false);
+    }
+    wxString s;
+    if (start != 0 || end != sql.length())
+        s = sql.Mid(start, end - start);
+    else
+        s = sql;
+    // take the SQL and split by statements
+    MultiStatement mst(s);
+    return mst.getStatementAt(pos - start).getSql();
+}
+//-----------------------------------------------------------------------------
 wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
-    const wxString& objectAlias)
+    const wxString& objectAlias, int cursorPos)
 {
     Relation *r = 0;
     if (objectAlias.Upper() == wxT("OLD") || objectAlias.Upper() == wxT("NEW"))
@@ -210,12 +246,11 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
     std::multimap<wxString, wxString> aliases;
     if (!r)
     {
-        SqlTokenizer tokenizer(sql);
+        SqlTokenizer tokenizer(extractBlockAtPosition(sql, cursorPos));
         SqlTokenType search[] = { kwFROM, kwJOIN, kwUPDATE, kwINSERT };
-        SqlTokenType stt;
         while (true)
         {
-            stt = tokenizer.getCurrentToken();
+            SqlTokenType stt = tokenizer.getCurrentToken();
             if (stt == tkEOF)
                 break;
 
