@@ -96,6 +96,7 @@ bool SingleStatement::isSetAutoDDLStatement(wxString& newSetting) const
         return false;
 
     newSetting = thirdStringM;
+    return true;
 }
 //-----------------------------------------------------------------------------
 bool SingleStatement::isValid() const
@@ -199,7 +200,7 @@ SingleStatement MultiStatement::getStatementAt(int position, int* offset)
     while (true)
     {
         SingleStatement s = getNextStatement();
-        if (!s.isValid() || lastPosM >= position)   // found or at end
+        if (!s.isValid() || (int)lastPosM >= position)   // found or at end
         {
             if (offset)
                 *offset = oldPosM;

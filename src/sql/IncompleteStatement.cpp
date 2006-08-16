@@ -221,7 +221,7 @@ wxString IncompleteStatement::extractBlockAtPosition(const wxString& sql,
         tk.jumpToken(false);
     }
     wxString s;
-    if (start != 0 || end != sql.length())
+    if (start != 0 || end != (int)sql.length())
         s = sql.Mid(start, end - start);
     else
         s = sql;
