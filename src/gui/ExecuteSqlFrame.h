@@ -154,6 +154,7 @@ private:
     void rollbackTransaction();
 
     void autoComplete(bool force);
+    void autoCompleteColumns(int pos, int len = 0);
     void OnSqlEditUpdateUI(wxStyledTextEvent &event);
     void OnSqlEditCharAdded(wxStyledTextEvent &event);      // autocomplete stuff
     void OnSqlEditStartDrag(wxStyledTextEvent& event);      // enable click&remove selection

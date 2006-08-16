@@ -870,26 +870,6 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
         }
     }
 
-    // table.COLUMN_AUTOCOMPLETE
-    if (c == '.' && config().get(wxT("autoCompleteColumns"), true))
-    {
-        int start = styled_text_ctrl_sql->WordStartPosition(pos-1, true);
-        if (start == -1)
-            return;
-        if (pos > 1 && styled_text_ctrl_sql->GetCharAt(pos-2) == '"')
-        {   // quoted table name
-            start = pos-3;
-            while (start && styled_text_ctrl_sql->GetCharAt(start) != '"')
-                --start;
-        }
-        wxString table = styled_text_ctrl_sql->GetTextRange(start, pos-1);
-        IncompleteStatement is(databaseM, styled_text_ctrl_sql->GetText());
-        wxString columns = is.getObjectColumns(table, pos);
-        if (columns.IsEmpty())
-            return;
-        styled_text_ctrl_sql->AutoCompShow(0, columns);
-    }
-
     // join table ON __autocomplete FK relation__
     if (c == 'N' && pos > 1 && 'O' == styled_text_ctrl_sql->GetCharAt(pos-2))
     {
@@ -900,6 +880,26 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
         // if (!join.IsEmpty())
         //    add "join" to sql editor
     }
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::autoCompleteColumns(int pos, int len)
+{
+    int start = styled_text_ctrl_sql->WordStartPosition(pos-1, true);
+    if (start == -1)
+        return;
+    if (pos > 1 && styled_text_ctrl_sql->GetCharAt(pos-2) == '"')
+    {   // quoted table name
+        start = pos-3;
+        while (start && styled_text_ctrl_sql->GetCharAt(start) != '"')
+            --start;
+    }
+    wxString table = styled_text_ctrl_sql->GetTextRange(start, pos-1);
+    IncompleteStatement is(databaseM, styled_text_ctrl_sql->GetText());
+    wxString columns = is.getObjectColumns(table, pos);
+    if (columns.IsEmpty())
+        return;
+    if (HasWord(styled_text_ctrl_sql->GetTextRange(pos, pos+len), columns))
+        styled_text_ctrl_sql->AutoCompShow(len, columns);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::autoComplete(bool force)
@@ -917,6 +917,18 @@ void ExecuteSqlFrame::autoComplete(bool force)
 
     int pos = styled_text_ctrl_sql->GetCurrentPos();
     int start = styled_text_ctrl_sql->WordStartPosition(pos, true);
+    if (start > 2)
+    {
+        wxChar c = styled_text_ctrl_sql->GetCharAt(start - 1);
+        if (c == '"')
+            c = styled_text_ctrl_sql->GetCharAt(start - 2);
+        if (c == '.')
+        {
+            autoCompleteColumns(start, pos-start);
+            return;
+        }
+    }
+
     if (start != -1 && pos - start >= autoCompleteChars)
     {
         // GTK version crashes if nothing matches, so this check must be made for GTK

@@ -172,10 +172,15 @@
                         <key>AutoCompleteDisableWhenCalltipShown</key>
                         <default>1</default>
                     </setting>
+                    <setting type="checkbox">
+                        <caption>Allow auto-completion inside quoted text</caption>
+                        <key>autoCompleteQuoted</key>
+                        <default>1</default>
+                    </setting>
                 </enables>
             </setting>
             <setting type="radiobox">
-                <caption>Manually invoke auto-complete list on</caption>
+                <caption>Manually invoke completion list on</caption>
                 <key>AutoCompleteKey</key>
                 <default>0</default>
                 <option>
@@ -186,26 +191,14 @@
             </option>
             </setting>
             <setting type="checkbox">
-                <caption>Allow auto-completion with Enter</caption>
+                <caption>Confirm completion with Enter</caption>
                 <key>AutoCompleteWithEnter</key>
                 <default>0</default>
             </setting>
             <setting type="checkbox">
-                <caption>Allow auto-completion inside quoted text</caption>
-                <key>autoCompleteQuoted</key>
+                <caption>Load columns when required for completion</caption>
+                <key>autoCompleteLoadColumns</key>
                 <default>1</default>
-            </setting>
-            <setting type="checkbox">
-                <caption>Auto-complete columns when dot (.) is typed</caption>
-                <key>autoCompleteColumns</key>
-                <default>1</default>
-                <enables>
-                    <setting type="checkbox">
-                        <caption>Load columns when required for autocompletion</caption>
-                        <key>autoCompleteLoadColumns</key>
-                        <default>1</default>
-                    </setting>
-                </enables>
             </setting>
         </node>
         <node>
