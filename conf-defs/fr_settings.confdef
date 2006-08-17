@@ -193,7 +193,7 @@
             <setting type="checkbox">
                 <caption>Confirm completion with Enter</caption>
                 <key>AutoCompleteWithEnter</key>
-                <default>0</default>
+                <default>1</default>
             </setting>
             <setting type="checkbox">
                 <caption>Load columns when required for completion</caption>

@@ -992,9 +992,7 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
         }
         else if (key == WXK_RETURN)
         {
-            bool acEnter = false;
-            config().getValue(wxT("AutoCompleteWithEnter"), acEnter);
-            if (!acEnter)
+            if (!config().get(wxT("AutoCompleteWithEnter"), true))
                 styled_text_ctrl_sql->AutoCompCancel();
         }
     }
