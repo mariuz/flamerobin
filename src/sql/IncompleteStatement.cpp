@@ -308,7 +308,7 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
         for (MetadataCollection<Column>::const_iterator c = r->begin();
             c != r->end(); ++c)
         {
-            cols.push_back((*c).getName_().Upper());
+            cols.push_back((*c).getQuotedName());
         }
     }
     else    // find STORED PROCEDURE in list of ALIASES
@@ -328,7 +328,7 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
             c != p->end(); ++c)
         {
             if ((*c).getParameterType() == ptOutput)
-                cols.push_back((*c).getName_().Upper());
+                cols.push_back((*c).getQuotedName());
         }
     }
 

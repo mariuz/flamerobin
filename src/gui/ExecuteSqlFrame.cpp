@@ -268,6 +268,7 @@ void SqlEditor::setup()
     StyleSetItalic(1, TRUE);
     SetLexer(wxSTC_LEX_SQL);
     SetKeyWords(0, Identifier::getKeywords(true));    // true = lower_case
+    SetWordChars(wxT("_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\"$"));
 
     int tabSize = config().get(wxT("sqlEditorTabSize"), 4);
     SetTabWidth(tabSize);
@@ -795,16 +796,12 @@ void ExecuteSqlFrame::OnSqlEditUpdateUI(wxStyledTextEvent& WXUNUSED(event))
 //! returns true if there is a word in "wordlist" that starts with "word"
 bool HasWord(wxString word, wxString& wordlist)
 {
-    // entire wordlist is uppercase
     word.MakeUpper();
 
     wxStringTokenizer tkz(wordlist, wxT(" "));
     while (tkz.HasMoreTokens())
-    {
-        wxString token = tkz.GetNextToken();
-        if (token.StartsWith(word))
+        if (tkz.GetNextToken().Upper().StartsWith(word))
             return true;
-    }
     return false;
 }
 //-----------------------------------------------------------------------------
@@ -917,16 +914,10 @@ void ExecuteSqlFrame::autoComplete(bool force)
 
     int pos = styled_text_ctrl_sql->GetCurrentPos();
     int start = styled_text_ctrl_sql->WordStartPosition(pos, true);
-    if (start > 2)
+    if (start > 1 && styled_text_ctrl_sql->GetCharAt(start - 1) == '.')
     {
-        wxChar c = styled_text_ctrl_sql->GetCharAt(start - 1);
-        if (c == '"')
-            c = styled_text_ctrl_sql->GetCharAt(start - 2);
-        if (c == '.')
-        {
-            autoCompleteColumns(start, pos-start);
-            return;
-        }
+        autoCompleteColumns(start, pos-start);
+        return;
     }
 
     if (start != -1 && pos - start >= autoCompleteChars)
@@ -1565,6 +1556,25 @@ void ExecuteSqlFrame::removeSubject(Subject* subject)
         Close();
 }
 //-----------------------------------------------------------------------------
+static int CaseUnsensitiveCompare(const wxString& one, const wxString& two)
+{
+    // this would be the right solution, but it doesn't work well as it
+    // sorts the underscore character differently
+    // return one.CmpNoCase(two);
+
+    // we have to check for underscore first
+    int min = one.Length() > two.Length() ? two.Length() : one.Length();
+    for (int i = 0; i < min; ++i)
+    {
+        if (one[i] == '_' && two[i] != '_')
+            return 1;
+        if (one[i] != '_' && two[i] == '_')
+            return -1;
+        if (one[i] != two[i])
+            return one.CmpNoCase(two);
+    }
+    return one.CmpNoCase(two);
+}
 //! Creates a list for autocomplete feature
 
 //! The list consists of:
@@ -1586,8 +1596,9 @@ void ExecuteSqlFrame::setKeywords()
     std::vector<Identifier> v;
     databaseM->getIdentifiers(v);
     for (std::vector<Identifier>::const_iterator it = v.begin(); it != v.end(); ++it)
-        as.Add((*it).get());
-    as.Sort();    // The list has to be sorted for autocomplete to work properly
+        as.Add((*it).getQuoted());
+    // The list has to be sorted for autocomplete to work properly
+    as.Sort(CaseUnsensitiveCompare);
 
     keywordsM.Empty();                          // create final wxString from array
     for (size_t i = 0; i < as.GetCount(); ++i)  // words are separated with spaces
