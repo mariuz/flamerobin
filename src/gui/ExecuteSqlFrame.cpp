@@ -268,7 +268,12 @@ void SqlEditor::setup()
     StyleSetItalic(1, TRUE);
     SetLexer(wxSTC_LEX_SQL);
     SetKeyWords(0, Identifier::getKeywords(true));    // true = lower_case
-    SetWordChars(wxT("_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\"$"));
+    wxString chars(wxT("_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\"$"));
+    // see Document::SetDefaultCharClasses in stc/Document.cxx
+    for (int ch = 0x80; ch < 0x0100; ch++)
+        if (isalnum(ch))
+            chars += wxChar(ch);
+    SetWordChars(chars);
 
     int tabSize = config().get(wxT("sqlEditorTabSize"), 4);
     SetTabWidth(tabSize);
