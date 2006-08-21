@@ -114,10 +114,11 @@ void Function::loadInfo(bool force)
         st1->Prepare(
             "SELECT f.RDB$RETURN_ARGUMENT, a.RDB$MECHANISM, a.RDB$ARGUMENT_POSITION, "
             " a.RDB$FIELD_TYPE, a.RDB$FIELD_SCALE, a.RDB$FIELD_LENGTH, a.RDB$FIELD_SUB_TYPE, a.RDB$FIELD_PRECISION,"
-            " f.RDB$MODULE_NAME, f.RDB$ENTRYPOINT "
+            " f.RDB$MODULE_NAME, f.RDB$ENTRYPOINT, c.RDB$CHARACTER_SET_NAME "
             " FROM RDB$FUNCTIONS f"
             " LEFT OUTER JOIN RDB$FUNCTION_ARGUMENTS a ON f.RDB$FUNCTION_NAME = a.RDB$FUNCTION_NAME"
-            " WHERE f.RDB$FUNCTION_NAME = ?"
+            " LEFT OUTER JOIN RDB$CHARACTER_SETS c ON a.RDB$CHARACTER_SET_ID = c.RDB$CHARACTER_SET_ID"
+            " WHERE f.RDB$FUNCTION_NAME = ? "
             " ORDER BY a.RDB$ARGUMENT_POSITION"
         );
         st1->Set(1, wx2std(getName_()));
@@ -128,7 +129,7 @@ void Function::loadInfo(bool force)
         while (st1->Fetch())
         {
             short returnarg, mechanism, type, scale, length, subtype, precision, retpos;
-            std::string libraryName, entryPoint;
+            std::string libraryName, entryPoint, charset;
             st1->Get(1, returnarg);
             st1->Get(2, mechanism);
             st1->Get(3, retpos);
@@ -143,6 +144,13 @@ void Function::loadInfo(bool force)
             entryPointM = std2wx(entryPoint).Strip();
             wxString datatype = Domain::datatype2string(type, scale,
                 precision, subtype, length);
+            if (!st1->IsNull(11))
+            {
+                st1->Get(11, charset);
+                wxString chset(std2wx(charset).Strip());
+                if (d->getDatabaseCharset() != chset)
+                    datatype += wxT(" CHARACTER SET ") + chset;
+            }
             if (type == 261)    // avoid subtype information for BLOB
                 datatype = wxT("blob");
             int mechIndex = (mechanism < 0 ? -mechanism : mechanism);
