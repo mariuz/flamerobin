@@ -944,13 +944,16 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
         switch (key)
         {
             case WXK_F4:
-                OnButtonExecuteClick(e);
+                if (button_execute->IsEnabled())
+                    OnButtonExecuteClick(e);
                 return;         // needed on Linux
             case WXK_F5:
-                OnButtonCommitClick(e);
+                if (button_commit->IsEnabled())
+                    OnButtonCommitClick(e);
                 return;
             case WXK_F8:
-                OnButtonRollbackClick(e);
+                if (button_rollback->IsEnabled())
+                    OnButtonRollbackClick(e);
                 return;
             case WXK_F3:
                 styled_text_ctrl_sql->find(false);
