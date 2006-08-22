@@ -125,7 +125,7 @@ public:
     virtual const wxString getId() const;
 
     // items description (in database)
-    wxString getDescription();
+    wxString getDescription(bool force = false);
     bool isDescriptionAvailable();
     void setDescription(wxString description);
 

@@ -47,6 +47,7 @@
 { wxT("COLLATE"), kwCOLLATE },
 { wxT("COLLATION"), kwCOLLATION },
 { wxT("COLUMN"), kwCOLUMN },
+{ wxT("COMMENT"), kwCOMMENT },
 { wxT("COMMIT"), kwCOMMIT },
 { wxT("COMMITTED"), kwCOMMITTED },
 { wxT("COMPILETIME"), kwCOMPILETIME },

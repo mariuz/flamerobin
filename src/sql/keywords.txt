@@ -45,6 +45,7 @@ keywords.insert(wxT("coalesce"));
 keywords.insert(wxT("collate"));
 keywords.insert(wxT("collation"));
 keywords.insert(wxT("column"));
+keywords.insert(wxT("comment"));
 keywords.insert(wxT("commit"));
 keywords.insert(wxT("committed"));
 keywords.insert(wxT("compiletime"));

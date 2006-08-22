@@ -794,6 +794,13 @@ bool Database::parseCommitedSql(wxString sql)
         }
     }
 
+    if (stm.actionIs(actCOMMENT))
+    {
+        object->getDescription(true);   // force reload
+        object->notifyObservers();
+        return true;
+    }
+
     if (stm.actionIs(actALTER))
     {
         // TODO: this is a place where we would simply call virtual invalidate() function

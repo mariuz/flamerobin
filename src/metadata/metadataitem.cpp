@@ -411,9 +411,9 @@ bool MetadataItem::isDescriptionAvailable()
     return descriptionLoadedM != dsNotAvailable;
 }
 //-----------------------------------------------------------------------------
-wxString MetadataItem::getDescription()
+wxString MetadataItem::getDescription(bool force)
 {
-    if (descriptionLoadedM == dsNotLoaded)
+    if (force || descriptionLoadedM == dsNotLoaded)
         loadDescription();
     return descriptionM;
 }

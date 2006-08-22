@@ -87,13 +87,13 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db)
             if (stt == tkIDENTIFIER)
             {
                 nameM.setFromSql(ts);
-                tokenizer.nextToken();
+                tokenizer.jumpToken(false);
                 // break here since we don't want name to be overwritten
                 if (tokensM[0] != kwGRANT && tokensM[0] != kwREVOKE)
                     break;
             }
         }
-        tokenizer.nextToken();
+        tokenizer.jumpToken(false);
     }
 
     // needs at least action
@@ -108,6 +108,8 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db)
     {
         case kwALTER:
             actionM = actALTER; break;
+        case kwCOMMENT:
+            actionM = actCOMMENT; break;
         case kwCREATE:
             actionM = actCREATE; break;
         case kwDECLARE:
@@ -181,6 +183,13 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db)
         if (objectM)
             objectTypeM = ntRole;
         return;
+    }
+
+    // COMMENT ON COLUMN table.column
+    // COMMENT ON PARAMETER procedure.parameter
+    if (actionM == actCOMMENT)
+    {
+        // TODO: support comment for columns/parameters
     }
 
     // get object type

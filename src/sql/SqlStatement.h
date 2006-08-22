@@ -38,7 +38,7 @@ class Database;
 typedef enum
 {
     actNONE, actALTER, actCREATE, actCREATE_OR_ALTER, actDECLARE, actDROP,
-    actRECREATE, actSET, actUPDATE, actGRANT
+    actRECREATE, actSET, actUPDATE, actGRANT, actCOMMENT
 } SqlAction;
 //-----------------------------------------------------------------------------
 class TokenList
