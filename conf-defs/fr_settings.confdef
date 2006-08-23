@@ -89,6 +89,12 @@
             <key>ShowSystemTables</key>
             <default>1</default>
         </setting>
+        <setting type="checkbox">
+            <caption>Allow drag and drop query building</caption>
+            <description>This option can cause X11 lockup on Linux if you don't have patched version of wxWidgets</description>
+            <key>allowDragAndDrop</key>
+            <default>0</default>
+        </setting>
     </node>
     <node>
         <caption>SQL Editor</caption>

@@ -51,6 +51,44 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "myTreeCtrl.h"
 #include "treeitem.h"
 //-----------------------------------------------------------------------------
+//! Helper class to cache the config value and observe it's changes
+class DragAndDropConfig: public Observer
+{
+private:
+    bool loadedM;
+    bool allowDragM;
+public:
+    DragAndDropConfig();
+    static DragAndDropConfig& get();
+    virtual void update();
+    bool allowDnD();
+};
+//----------------------------------------------------------------------------
+DragAndDropConfig::DragAndDropConfig()
+    : loadedM(false)
+{
+    config().attachObserver(this);
+}
+//-----------------------------------------------------------------------------
+DragAndDropConfig& DragAndDropConfig::get()
+{
+    static DragAndDropConfig dndc;
+    return dndc;
+}
+//-----------------------------------------------------------------------------
+void DragAndDropConfig::update()
+{   // we observe config() object, so we better do as little as possible
+    loadedM = false;
+}
+//----------------------------------------------------------------------------
+bool DragAndDropConfig::allowDnD()
+{
+    if (!loadedM)
+        allowDragM = config().get(wxT("allowDragAndDrop"), false);
+    loadedM = true;
+    return allowDragM;
+}
+//-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(myTreeCtrl, wxTreeCtrl)
     EVT_CONTEXT_MENU(myTreeCtrl::OnContextMenu)
     EVT_TREE_BEGIN_DRAG(myTreeCtrl::ID_tree_ctrl, myTreeCtrl::OnBeginDrag)
@@ -69,7 +107,7 @@ void myTreeCtrl::OnBeginDrag(wxTreeEvent& event)
 // handles dragging of items OUTSIDE of the tree (see OnBeginDrag)
 void myTreeCtrl::OnMouse(wxMouseEvent& event)
 {
-    if (!event.Dragging())
+    if (!event.Dragging() || !DragAndDropConfig::get().allowDnD())
     {
         event.Skip();
         return;
