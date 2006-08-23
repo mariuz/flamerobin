@@ -89,8 +89,11 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db)
                 nameM.setFromSql(ts);
                 tokenizer.jumpToken(false);
                 // break here since we don't want name to be overwritten
-                if (tokensM[0] != kwGRANT && tokensM[0] != kwREVOKE)
+                if (tokensM[0] != kwGRANT && tokensM[0] != kwREVOKE
+                    && tokensM[0] != kwCOMMENT)
+                {
                     break;
+                }
             }
         }
         tokenizer.jumpToken(false);
@@ -185,11 +188,48 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db)
         return;
     }
 
-    // COMMENT ON COLUMN table.column
-    // COMMENT ON PARAMETER procedure.parameter
-    if (actionM == actCOMMENT)
+    // COMMENT ON COLUMN table.column IS
+    // COMMENT ON PARAMETER procedure.parameter IS
+    if (actionM == actCOMMENT && tokensM[1] == kwON)
     {
-        // TODO: support comment for columns/parameters
+        Identifier parent(tokenStringsM[3]);
+        Identifier child(tokenStringsM[4]);
+        if (tokensM[2] == kwCOLUMN)
+        {
+            Relation *r = dynamic_cast<Relation *>(
+                databaseM->findByNameAndType(ntTable, parent.get()));
+            if (r)
+            {
+                for (MetadataCollection<Column>::iterator i = r->begin();
+                    i != r->end(); ++i)
+                {
+                    if ((*i).getName_() == child.get())
+                    {
+                        objectTypeM = ntColumn;
+                        objectM = &(*i);
+                        return;
+                    }
+                }
+            }
+        }
+        if (tokensM[2] == kwPARAMETER)
+        {
+            Procedure *r = dynamic_cast<Procedure *>(
+                databaseM->findByNameAndType(ntProcedure, parent.get()));
+            if (r)
+            {
+                for (MetadataCollection<Parameter>::iterator i = r->begin();
+                    i != r->end(); ++i)
+                {
+                    if ((*i).getName_() == child.get())
+                    {
+                        objectTypeM = ntParameter;
+                        objectM = &(*i);
+                        return;
+                    }
+                }
+            }
+        }
     }
 
     // get object type
