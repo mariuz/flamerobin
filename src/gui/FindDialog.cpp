@@ -324,6 +324,8 @@ FindDialog::FindDialog(SearchableEditor *editor, wxWindow* parent, const wxStrin
     button_replace_in_selection = new wxButton(getControlsPanel(), ID_button_replace_in_selection, _("In selection"));
 
     do_layout();
+    text_ctrl_find->SetFocus();
+    button_find->SetDefault();
 }
 //-----------------------------------------------------------------------------
 void FindDialog::do_layout()
