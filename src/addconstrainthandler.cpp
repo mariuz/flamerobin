@@ -134,6 +134,8 @@ bool AddConstraintHandler::handleURI(URI& uri)
     if (type == wxT("PK"))
     {
         wxString columnlist = selectRelationColumns(t, w);
+        if (columnlist.IsEmpty())   // cancel
+            return true;
         sql += wxT("\nprimary key (") + columnlist + wxT(")");
     }
     else if (type == wxT("FK"))
