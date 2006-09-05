@@ -6,7 +6,7 @@
 -->
 <article id="frrelnotes">
   <articleinfo>
-    <title><application>FlameRobin</application> 0.7.2 ALPHA Manual</title>
+    <title><application>FlameRobin</application> 0.7.5 ALPHA Manual</title>
 
     <author>
       <firstname>Nando</firstname>
@@ -313,25 +313,50 @@
       selectable stored procedures with parameters, just the select statement
       appears in the SQL editor, so you should fill the parameter values (if
       you have any) and click the Execute button to see the data.</para>
+
+      <para>FlameRobin's data grid fetches data from the server in small
+      chunks, so that you don't have to wait for the fetch to complete if you
+      only look at the first few pages of rows. You can have the grid fetch
+      all data (in background) through the Fetch all records command in the
+      grid's context menu. Fetching a very large result set might take some
+      time, so if you change your mind you can use the Stop fetching all
+      records command.</para>
     </section>
 
-    <section>
+    <section id="frmanual-running-sql-statements">
       <title>Running SQL statements and scripts</title>
 
-      <para>Of course you can use the SQL editor window to execute arbitrary
-      SQL statements. You can open a SQL editor window by right clicking on a
-      database node and choosing "Run a query". The SQL editor tool offers
-      script execution capabilities (including SET AUTODDL and SET TERM
-      support), load/save buttons, auto-completion and call-tip features,
-      commit/rollback, some execution statistics (including but not limited to
-      the query PLAN), and a data export tool.</para>
+      <para>Of course you can use the SQL editor window to create and execute
+      arbitrary SQL statements. FlameRobin provides a rather advanced and
+      sophisticated, yet simple to use SQL editor. You can open a SQL editor
+      window by right clicking on a database node and choosing "Run a query".
+      The SQL editor tool offers script execution capabilities (including SET
+      AUTODDL and SET TERM support), load/save buttons, auto-completion and
+      call-tip features, commit/rollback, some execution statistics (including
+      but not limited to the query PLAN), a data export tool and more.</para>
+
+      <para>To execute a script (meaning a sequence of more than one SQL
+      statements), just load it (or type it in) and run it. To execute a
+      single statement when more statements are present in the editor, select
+      it before clicking the Run button.</para>
+
+      <para>Auto-completion can be invoked automatically or manually (see the
+      rich set of configuration options about it), and supports table and
+      column names, procedure and function parameters, and so on.</para>
 
       <para>To activate the data export tool, right click on the data grid.
       The data export tool is currently able to copy the data to the
-      clipboard, generate SQL INSERT statements or export the data to a HTML
-      file. All options work on the whole grid contents or just the selected
-      parts. You can also multiple-select several different grid "islands" and
-      have the tool export them.</para>
+      clipboard, generate SQL INSERT or UPDATE statements or export the data
+      to a HTML file. All options work on the whole grid contents or just the
+      selected parts. You can also multiple-select several different grid
+      "islands" and have the tool export them. This is particularly handy when
+      generating INSERT or UPDATE statements.</para>
+
+      <para>For SELECT statements, you can also drag and drop objects from the
+      tree view to visually build queries (provided the appropriate
+      configuration option is enabled). Dragging and dropping tables will
+      automatically create JOIN conditions (based on existing foreign key
+      definitions) in the statement you are building.</para>
     </section>
 
     <section>
@@ -361,8 +386,8 @@
 
       <para>You can generate DDL (Data Definition Language) creation scripts
       for any object you have in the database, or even for the whole database.
-      Just open the DDL subpage of an object's property page to see the code
-      that creates it.</para>
+      Just open the DDL subpage of an object's property page to see the DDL
+      code that creates the object.</para>
 
       <para>Extracting DDL scripts is useful if you want to replicate an
       object's structure in a different database, or create a slightly
@@ -601,6 +626,43 @@
         wish that a double click on a table/view or procedure node opens the
         relevant property page or expands the subtree.</para>
       </section>
+
+      <section id="frmanual-show-sys-tables">
+        <title>Show system tables in tree</title>
+
+        <para>The metadata for a Firebird database is stored in the database
+        itself, in a set of tables whose names start with RDB$, called the
+        system tables. There is usually no point in working with Firebird's
+        system tables directly, as FlameRobin already queries them and
+        translates the information in friendlier form for you: the tree view,
+        object property pages and various dialogs all display information
+        coming from the system tables. FlameRobin also allows to change the
+        database metadata in a safe way (that is, keeping the database
+        structure's integrity), something which is not guaranteed if you try
+        to edit the system tables directly.</para>
+
+        <para>For the rare cases in which a direct look at the system tables
+        is required, and you know exactly where and how to look, you can
+        enable this option, which will add all system tables for a database to
+        the tree. This will impose a slight performance penalty upon
+        connection.</para>
+
+        <para>You can override this setting at the database level.</para>
+      </section>
+
+      <section>
+        <title>Allow drag and drop query building</title>
+
+        <para>The SQL editor allows you to drag and drop objects from the tree
+        view to visually build queries (see <link
+        linkend="frmanual-running-sql-statements">the relevant
+        section</link>). This feature may occasionally hang FlameRobin on
+        Linux, so we are proving this option to switch it off until the
+        problem is corrected in the wxWidgets library. Plus, you might want to
+        disable the feature, if you don't use it, in order to avoid spurious
+        start-drag operations when working with the mouse on the tree
+        view.</para>
+      </section>
     </section>
 
     <section>
@@ -705,30 +767,32 @@
             keep it enabled, then you can set a certain number of characters
             you'll have to type before code completion kicks in, and choose to
             disable code completion when a call-tip is displayed (as it would
-            close the call-tip window).</para>
+            close the call-tip window) or inside quoted text.</para>
           </section>
 
           <section>
-            <title>Manually invoke auto-complete list on</title>
+            <title>Manually invoke completion list on</title>
 
             <para>Code completion may also be invoked manually. Here you
             select how (Ctrl+Space or Tab key).</para>
           </section>
 
           <section>
-            <title>Allow auto-completion with Enter</title>
+            <title>Confirm completion with Enter</title>
 
             <para>Set this option to have the currently selected item in the
             code completion window copied to the text buffer when you hit
-            Enter. Otherwise you can use Tab key for that.</para>
+            Enter. Otherwise you can use the Tab key for that.</para>
           </section>
 
           <section>
-            <title>Allow auto-completion inside quoted text</title>
+            <title>Load columns when required for completion</title>
 
-            <para>By default, FlameRobin will disable auto-completion inside
-            quoted text. If for some reason you need it, here you can enable
-            it.</para>
+            <para>FlameRobin only loads column definition data when requested
+            to do so (for example, when you double click a table name in the
+            tree view). Set this option to let FlameRobin load missing column
+            information automatically when needed to show an auto-complete
+            list.</para>
           </section>
         </section>
 
@@ -980,7 +1044,7 @@
       </section>
     </section>
 
-    <section>
+    <section id="frmanual-conf-logging">
       <title>Logging</title>
 
       <para>The SQL Editor can log all executed statements to a text file
@@ -1030,6 +1094,18 @@
     it.</para>
 
     <section>
+      <title>Main Tree View</title>
+
+      <section>
+        <title>Show system tables in tree</title>
+
+        <para>This is a database-level override of the global option with the
+        same name described <link
+        linkend="frmanual-show-sys-tables">here</link>.</para>
+      </section>
+    </section>
+
+    <section>
       <title>Connection</title>
 
       <para>This page holds options that apply to database connection and
@@ -1054,10 +1130,12 @@
     <section>
       <title>Logging</title>
 
-      <para>Please see the section about global logging. The options are the
-      same here, but they apply to the current database only. There is an
-      additional option to turn off logging for a particular database only
-      while leaving it active for all the other databases.</para>
+      <para>Please see the section about <link
+      linkend="frmanual-conf-logging">global logging configuration</link>. The
+      options are the same here, but they apply to the current database only.
+      There is an additional option to turn off logging for a particular
+      database only, while leaving it active for all the other
+      databases.</para>
     </section>
   </section>
 
