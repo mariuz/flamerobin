@@ -164,6 +164,7 @@ void TreeItem::update()
     }
 
     // remove delete items - one by one
+    bool itemsDeleted = false;
     wxTreeItemIdValue cookie;
     wxTreeItemId item = treeM->GetFirstChild(id, cookie);
     while (item.IsOk())
@@ -180,8 +181,7 @@ void TreeItem::update()
         // delete tree node and all children if metadata item not found
         if (itChild == children.end())
         {
-            if (treeM->GetChildrenCount(item, false) == 1)
-                treeM->Collapse(id);
+            itemsDeleted = true;
             treeM->DeleteChildren(item);
             treeM->Delete(item);
             item = treeM->GetFirstChild(id, cookie);
@@ -189,6 +189,9 @@ void TreeItem::update()
         }
         item = treeM->GetNextChild(id, cookie);
     }
+    // force-collapse node if all children deleted
+    if (itemsDeleted && 0 == treeM->GetChildrenCount(id, false))
+        treeM->Collapse(id);
 
     treeM->SetItemBold(id, treeM->ItemHasChildren(id));
     if (object->orderedChildren())
