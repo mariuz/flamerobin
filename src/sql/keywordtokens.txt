@@ -24,10 +24,11 @@
 { wxT("BEGIN"), kwBEGIN },
 { wxT("BETWEEN"), kwBETWEEN },
 { wxT("BIGINT"), kwBIGINT },
+{ wxT("BIT_LENGTH"), kwBIT_LENGTH },    // fb2.0
 { wxT("BLOB"), kwBLOB },
 { wxT("BLOBEDIT"), kwBLOBEDIT },
 { wxT("BOOLEAN"), kwBOOLEAN },
-{ wxT("BOTH"), kwBOTH },
+{ wxT("BOTH"), kwBOTH },                // fb2.0
 { wxT("BREAK"), kwBREAK },
 { wxT("BUFFER"), kwBUFFER },
 { wxT("BY"), kwBY },
@@ -35,14 +36,14 @@
 { wxT("CASCADE"), kwCASCADE },
 { wxT("CASE"), kwCASE },
 { wxT("CAST"), kwCAST },
-{ wxT("CHAR"), kwCHAR },
+{ wxT("CHAR"), kwCHAR },                // fb2.0
 { wxT("CHARACTER"), kwCHARACTER },
-{ wxT("CHARACTER_LENGTH"), kwCHARACTER_LENGTH },
+{ wxT("CHARACTER_LENGTH"), kwCHARACTER_LENGTH },    // fb2.0
 { wxT("CHAR_LENGTH"), kwCHAR_LENGTH },
 { wxT("CHECK"), kwCHECK },
 { wxT("CHECK_POINT_LEN"), kwCHECK_POINT_LEN },
 { wxT("CHECK_POINT_LENGTH"), kwCHECK_POINT_LENGTH },
-{ wxT("CLOSE"), kwCLOSE },
+{ wxT("CLOSE"), kwCLOSE },                              // fb2.0
 { wxT("COALESCE"), kwCOALESCE },
 { wxT("COLLATE"), kwCOLLATE },
 { wxT("COLLATION"), kwCOLLATION },
@@ -59,6 +60,7 @@
 { wxT("CONTINUE"), kwCONTINUE },
 { wxT("COUNT"), kwCOUNT },
 { wxT("CREATE"), kwCREATE },
+{ wxT("CROSS"), kwCROSS },          // fb2.0
 { wxT("CSTRING"), kwCSTRING },
 { wxT("CURRENT"), kwCURRENT },
 { wxT("CURRENT_CONNECTION"), kwCURRENT_CONNECTION },
@@ -106,7 +108,7 @@
 { wxT("EXTERNAL"), kwEXTERNAL },
 { wxT("EXTRACT"), kwEXTRACT },
 { wxT("FALSE"), kwFALSE },
-{ wxT("FETCH"), kwFETCH },
+{ wxT("FETCH"), kwFETCH },              // fb2.0
 { wxT("FILE"), kwFILE },
 { wxT("FILTER"), kwFILTER },
 { wxT("FIRST"), kwFIRST },
@@ -154,7 +156,7 @@
 { wxT("LAST"), kwLAST },
 { wxT("LC_MESSAGES"), kwLC_MESSAGES },
 { wxT("LC_TYPE"), kwLC_TYPE },
-{ wxT("LEADING"), kwLEADING },
+{ wxT("LEADING"), kwLEADING },          // fb2.0
 { wxT("LEAVE"), kwLEAVE },
 { wxT("LEFT"), kwLEFT },
 { wxT("LENGTH"), kwLENGTH },
@@ -166,6 +168,7 @@
 { wxT("LOG_BUFFER_SIZE"), kwLOG_BUFFER_SIZE },
 { wxT("LOG_BUF_SIZE"), kwLOG_BUF_SIZE },
 { wxT("LONG"), kwLONG },
+{ wxT("LOWER"), kwLOWER },              // fb2.0
 { wxT("MANUAL"), kwMANUAL },
 { wxT("MAX"), kwMAX },
 { wxT("MAXIMUM"), kwMAXIMUM },
@@ -191,11 +194,11 @@
 { wxT("NUMERIC"), kwNUMERIC },
 { wxT("NUM_LOG_BUFFERS"), kwNUM_LOG_BUFFERS },
 { wxT("NUM_LOG_BUFS"), kwNUM_LOG_BUFS },
-{ wxT("OCTET_LENGTH"), kwOCTET_LENGTH },
+{ wxT("OCTET_LENGTH"), kwOCTET_LENGTH },        // fb2.0
 { wxT("OF"), kwOF },
 { wxT("ON"), kwON },
 { wxT("ONLY"), kwONLY },
-{ wxT("OPEN"), kwOPEN },
+{ wxT("OPEN"), kwOPEN },                        // fb2.0
 { wxT("OPTION"), kwOPTION },
 { wxT("OR"), kwOR },
 { wxT("ORDER"), kwORDER },
@@ -240,7 +243,7 @@
 { wxT("RIGHT"), kwRIGHT },
 { wxT("ROLE"), kwROLE },
 { wxT("ROLLBACK"), kwROLLBACK },
-{ wxT("ROWS"), kwROWS },
+{ wxT("ROWS"), kwROWS },                    // fb2.0
 { wxT("ROW_COUNT"), kwROW_COUNT },
 { wxT("RUNTIME"), kwRUNTIME },
 { wxT("SAVEPOINT"), kwSAVEPOINT },
@@ -282,12 +285,12 @@
 { wxT("TIME"), kwTIME },
 { wxT("TIMESTAMP"), kwTIMESTAMP },
 { wxT("TO"), kwTO },
-{ wxT("TRAILING"), kwTRAILING },
+{ wxT("TRAILING"), kwTRAILING },            // fb2.0
 { wxT("TRANSACTION"), kwTRANSACTION },
 { wxT("TRANSLATE"), kwTRANSLATE },
 { wxT("TRANSLATION"), kwTRANSLATION },
 { wxT("TRIGGER"), kwTRIGGER },
-{ wxT("TRIM"), kwTRIM },
+{ wxT("TRIM"), kwTRIM },                    // fb2.0
 { wxT("TRUE"), kwTRUE },
 { wxT("TYPE"), kwTYPE },
 { wxT("UNCOMMITTED"), kwUNCOMMITTED },

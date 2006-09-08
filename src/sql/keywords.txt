@@ -15,6 +15,7 @@ keywords.insert(wxT("at"));
 keywords.insert(wxT("auto"));
 keywords.insert(wxT("autoddl"));
 keywords.insert(wxT("avg"));
+keywords.insert(wxT("backup"));     // fb2.0
 keywords.insert(wxT("based"));
 keywords.insert(wxT("basename"));
 keywords.insert(wxT("base_name"));
@@ -22,10 +23,12 @@ keywords.insert(wxT("before"));
 keywords.insert(wxT("begin"));
 keywords.insert(wxT("between"));
 keywords.insert(wxT("bigint"));
+keywords.insert(wxT("bit_length")); // fb2.0
 keywords.insert(wxT("blob"));
 keywords.insert(wxT("blobedit"));
+keywords.insert(wxT("block"));      // fb2.0
 keywords.insert(wxT("boolean"));
-keywords.insert(wxT("both"));
+keywords.insert(wxT("both"));       // fb2.0
 keywords.insert(wxT("break"));
 keywords.insert(wxT("buffer"));
 keywords.insert(wxT("by"));
@@ -43,9 +46,9 @@ keywords.insert(wxT("check_point_length"));
 keywords.insert(wxT("close"));
 keywords.insert(wxT("coalesce"));
 keywords.insert(wxT("collate"));
-keywords.insert(wxT("collation"));
+keywords.insert(wxT("collation"));  // fb2.0
 keywords.insert(wxT("column"));
-keywords.insert(wxT("comment"));
+keywords.insert(wxT("comment"));    // fb2.0
 keywords.insert(wxT("commit"));
 keywords.insert(wxT("committed"));
 keywords.insert(wxT("compiletime"));
@@ -57,6 +60,7 @@ keywords.insert(wxT("containing"));
 keywords.insert(wxT("continue"));
 keywords.insert(wxT("count"));
 keywords.insert(wxT("create"));
+keywords.insert(wxT("cross"));      // fb2.0
 keywords.insert(wxT("cstring"));
 keywords.insert(wxT("current"));
 keywords.insert(wxT("current_connection"));
@@ -82,6 +86,7 @@ keywords.insert(wxT("desc"));
 keywords.insert(wxT("descending"));
 keywords.insert(wxT("describe"));
 keywords.insert(wxT("descriptor"));
+keywords.insert(wxT("difference"));     // fb2.0
 keywords.insert(wxT("disconnect"));
 keywords.insert(wxT("display"));
 keywords.insert(wxT("distinct"));
@@ -129,7 +134,7 @@ keywords.insert(wxT("having"));
 keywords.insert(wxT("help"));
 keywords.insert(wxT("hour"));
 keywords.insert(wxT("if"));
-keywords.insert(wxT("iif"));
+keywords.insert(wxT("iif"));        // fb2.0
 keywords.insert(wxT("immediate"));
 keywords.insert(wxT("in"));
 keywords.insert(wxT("inactive"));
@@ -181,6 +186,7 @@ keywords.insert(wxT("names"));
 keywords.insert(wxT("national"));
 keywords.insert(wxT("natural"));
 keywords.insert(wxT("nchar"));
+keywords.insert(wxT("next"));       // fb2.0
 keywords.insert(wxT("no"));
 keywords.insert(wxT("noauto"));
 keywords.insert(wxT("not"));
@@ -231,9 +237,11 @@ keywords.insert(wxT("references"));
 keywords.insert(wxT("release"));
 keywords.insert(wxT("reserv"));
 keywords.insert(wxT("reserving"));
+keywords.insert(wxT("restart"));    // fb2.0
 keywords.insert(wxT("restrict"));
 keywords.insert(wxT("retain"));
 keywords.insert(wxT("return"));
+keywords.insert(wxT("returning"));      // fb2.0
 keywords.insert(wxT("returning_values"));
 keywords.insert(wxT("returns"));
 keywords.insert(wxT("revoke"));
@@ -244,11 +252,12 @@ keywords.insert(wxT("rows"));
 keywords.insert(wxT("row_count"));
 keywords.insert(wxT("runtime"));
 keywords.insert(wxT("savepoint"));
+keywords.insert(wxT("scalar_array"));   // fb2.0
 keywords.insert(wxT("schema"));
 keywords.insert(wxT("second"));
 keywords.insert(wxT("segment"));
 keywords.insert(wxT("select"));
-keywords.insert(wxT("sequence"));
+keywords.insert(wxT("sequence"));       // fb2.0
 keywords.insert(wxT("set"));
 keywords.insert(wxT("shadow"));
 keywords.insert(wxT("shared"));
@@ -298,7 +307,7 @@ keywords.insert(wxT("update"));
 keywords.insert(wxT("updating"));
 keywords.insert(wxT("upper"));
 keywords.insert(wxT("user"));
-keywords.insert(wxT("using"));
+keywords.insert(wxT("using"));  // up to fb2.0
 keywords.insert(wxT("value"));
 keywords.insert(wxT("values"));
 keywords.insert(wxT("varchar"));
