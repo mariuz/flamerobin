@@ -68,14 +68,14 @@ STATICRTL = 0
 ### Variables: ###
 
 FLAMEROBIN_CXXFLAGS = $(__RTL_TYPE) -I$(BCCDIR)\include -tWM $(__DEBUGINFO) \
-	$(__OPTIMIZE) -I$(WXDIR)\include -I$(WXDIR)\contrib\include \
-	$(____flamerobin_UNICODE_DEFINE_p) $(____flamerobin_WXDEBUG_p) \
-	$(____flamerobin_DEBUGFLAG_p) -D_WINDOWS -D__WINDOWS__ -DWINVER=0x400 \
-	-DWIN32 -D__WIN32__ -D__WIN95__ -DSTRICT -D__WXMSW__ -DwxUSE_GUI=1 \
-	-DWIN32_LEAN_AND_MEAN \
+	$(__OPTIMIZE) $(____flamerobin_UNICODE_DEFINE_p) \
+	$(____flamerobin_WXDEBUG_p) $(____flamerobin_DEBUGFLAG_p) -D_WINDOWS \
+	-D__WINDOWS__ -DWINVER=0x400 -DWIN32 -D__WIN32__ -D__WIN95__ -DSTRICT \
+	-D__WXMSW__ -DwxUSE_GUI=1 -DWIN32_LEAN_AND_MEAN \
 	-I$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(U_OPT)$(D_OPT) \
-	-DIBPP_WINDOWS -I.\src -I.\src\ibpp -I.\res -Hu \
-	-H=bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.csm $(CPPFLAGS) $(CXXFLAGS)
+	-I$(WXDIR)\contrib\include -I$(WXDIR)\include -DIBPP_WINDOWS -I.\src \
+	-I.\src\ibpp -I.\res -Hu -H=bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.csm \
+	$(CPPFLAGS) $(CXXFLAGS)
 FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Config.obj \
@@ -534,7 +534,7 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.obj: .\src\gui\msw\StyleGui
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin.res: .\res\flamerobin.rc
-	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include -i$(WXDIR)\include -i$(WXDIR)\contrib\include $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) -d_WINDOWS -d__WINDOWS__ -dWINVER=0x400 -dWIN32 -d__WIN32__ -d__WIN95__ -dSTRICT -d__WXMSW__ -dwxUSE_GUI=1 -dWIN32_LEAN_AND_MEAN -i$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(U_OPT)$(D_OPT) -dIBPP_WINDOWS -i.\src -i.\src\ibpp -i.\res $**
+	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) -d_WINDOWS -d__WINDOWS__ -dWINVER=0x400 -dWIN32 -d__WIN32__ -d__WIN95__ -dSTRICT -d__WXMSW__ -dwxUSE_GUI=1 -dWIN32_LEAN_AND_MEAN -i$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(U_OPT)$(D_OPT) -i$(WXDIR)\contrib\include -i$(WXDIR)\include -dIBPP_WINDOWS -i.\src -i.\src\ibpp -i.\res $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__dpb.obj: .\src\ibpp\_dpb.cpp
 	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) $**
