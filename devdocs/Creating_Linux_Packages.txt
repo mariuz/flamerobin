@@ -1,0 +1,23 @@
+Linux .tar.bz2 packages are made by building the executable, stripping it and
+packing the directory with needed files. I usually hand-edit Makefile and
+change the paths, so that user can simply type:
+
+make install
+
+after unpacking it.
+
+Here are few things to remember (a simple reminder for me):
+
+1. Change ginstall to install in Makefile
+
+I build packages on Slackware and it detects ginstall, which isn't available
+on most newer versions of other distributions. In fact, I think ginstall was
+from my old Mandrake 9.0. It doesn't matter where it came from, just to remove
+it.
+
+2. Exclude TIFF library when building
+
+FlameRobin doesn't show any tiff images anyway, and many times it conflicts
+with libtiff versions of other distributions. I guess same could be done for
+gif and other stuff we don't use, so I'll just build a special version of
+wxWidgets, just for the purpose of FR release.
