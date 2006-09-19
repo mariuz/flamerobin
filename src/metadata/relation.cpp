@@ -295,6 +295,11 @@ wxString Relation::getRebuildSql()
             createViews = v->getCreateSql() + wxT("\n") + createViews;
         }
         std::vector<Dependency> list;               // procedures
+        std::vector<Trigger *> trigs;
+        // the following two lines are maybe not needed as own triggers should
+        // be listed as dependencies as well:
+        (*vi)->getTriggers(trigs, Trigger::afterTrigger);   // own triggers
+        (*vi)->getTriggers(trigs, Trigger::beforeTrigger);
         if ((*vi)->getDependencies(list, false))
         {
             for (std::vector<Dependency>::iterator it = list.begin();
@@ -307,13 +312,18 @@ wxString Relation::getRebuildSql()
                 {
                     procedures.push_back(p);
                 }
+
+                Trigger *t = dynamic_cast<Trigger *>(
+                    (*it).getDependentObject());
+                if (t && trigs.end() == std::find(trigs.begin(), trigs.end(),
+                    t))
+                {
+                    trigs.push_back(t);
+                }
             }
         }
         (*vi)->getDependentChecks(checks);
 
-        std::vector<Trigger *> trigs;
-        (*vi)->getTriggers(trigs, Trigger::afterTrigger);
-        (*vi)->getTriggers(trigs, Trigger::beforeTrigger);
         for (std::vector<Trigger *>::iterator it = trigs.begin();
             it != trigs.end(); ++it)
         {
@@ -328,11 +338,10 @@ wxString Relation::getRebuildSql()
             (*it)->acceptVisitor(&cdv);
             createTriggers += cdv.getSql() + wxT("\n");
 
-            if (dynamic_cast<Table *>(this))
-            {
-                dropTriggers += wxT("DROP TRIGGER ") + (*it)->getQuotedName()
-                    + wxT(";\n");
-            }
+            // view's triggers would be dropped together with view anyway
+            // but it is much simpler this way
+            dropTriggers += wxT("DROP TRIGGER ") + (*it)->getQuotedName()
+                + wxT(";\n");
         }
 
         const std::vector<Privilege>* priv = (*vi)->getPrivileges();
