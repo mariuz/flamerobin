@@ -125,6 +125,7 @@ public:
     bool execute(wxString sql, const wxString& terminator,
         bool prepareOnly = false);
     void setSql(wxString sql);
+    void clearStats();
 
     ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
         const wxPoint& pos = wxDefaultPosition,

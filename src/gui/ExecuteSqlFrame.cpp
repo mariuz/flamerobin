@@ -411,6 +411,9 @@ void SqlEditor::OnMenuFindSelected(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void SqlEditor::OnMenuExecuteSelected(wxCommandEvent& WXUNUSED(event))
 {
+    if (config().get(wxT("SQLEditorExecuteClears"), false))
+        frameM->clearStats();
+
     if (config().get(wxT("TreatAsSingleStatement"), false))
         frameM->execute(GetSelectedText(), wxT(";"));
     else
@@ -1111,13 +1114,15 @@ void ExecuteSqlFrame::setSql(wxString sql)
     styled_text_ctrl_sql->SetText(sql);
 }
 //-----------------------------------------------------------------------------
+void ExecuteSqlFrame::clearStats()
+{
+    if (config().get(wxT("SQLEditorExecuteClears"), false))
+        styled_text_ctrl_stats->ClearAll();
+}
+//-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonExecuteClick(wxCommandEvent& WXUNUSED(event))
 {
-    bool clearMessages = false;
-    config().getValue(wxT("SQLEditorExecuteClears"), clearMessages);
-    if (clearMessages)
-        styled_text_ctrl_stats->ClearAll();
-
+    clearStats();
     prepareAndExecute(false);
 }
 //-----------------------------------------------------------------------------
@@ -1152,6 +1157,7 @@ void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
 //! adapted so we don't have to change all the other code that utilizes SQL editor
 void ExecuteSqlFrame::executeAllStatements(bool closeWhenDone)
 {
+    clearStats();
     bool ok = parseStatements(styled_text_ctrl_sql->GetText(), closeWhenDone);
     if (config().get(wxT("historyStoreGenerated"), true) &&
         (ok || config().get(wxT("historyStoreUnsuccessful"), true)))
@@ -1170,8 +1176,6 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
     bool closeWhenDone, bool prepareOnly, int selectionOffset)
 {
     wxBusyCursor cr;
-    styled_text_ctrl_stats->Clear();
-
     MultiStatement ms(statements, wxT(";"));
     while (true)
     {
@@ -1401,7 +1405,6 @@ bool ExecuteSqlFrame::commitTransaction()
         //databaseM->parseAll();
 
         executedStatementsM.clear();
-        styled_text_ctrl_stats->ClearAll();
 
         // workaround for STC bug with 100% CPU load during Idle(),
         // it was supposed to be fixed in wxWidgets versions 2.5.4 and later,
