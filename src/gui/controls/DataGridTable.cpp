@@ -248,7 +248,13 @@ IBPP::SDT DataGridTable::getColumnType(int col)
         catch (IBPP::Exception& e)
         {
             // perhaps we should clear the statement, since something is obviously wrong
-            columnCountM = col - 1;
+            if (columnCountM > col - 1) 
+            {
+                wxGridTableMessage colMsg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED,
+                    0, columnCountM + 1 - col);
+                GetView()->ProcessTableMessage(colMsg);
+                columnCountM = col - 1;
+            }
             ::wxMessageBox(std2wx(e.ErrorMessage()),
                             _("An IBPP error occurred."), wxOK|wxICON_ERROR);
             return IBPP::sdString;
