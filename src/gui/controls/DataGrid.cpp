@@ -510,7 +510,13 @@ void DataGrid::OnMenuSaveAsHTML(wxCommandEvent& WXUNUSED(event))
         return;
     wxTextOutputStream outStr(fos);
 
-    outStr.WriteString(wxT("<html><body><table bgcolor=black cellspacing=1 cellpadding=3 border=0><tr>\n"));
+    outStr.WriteString(wxT(
+        "<html><head><META \
+            HTTP-EQUIV=\"Content-Type\" content=\"text/html; charset=utf-8\">\
+        </head>\
+        <body bgcolor=white>\
+        <table bgcolor=black cellspacing=1 cellpadding=3 border=0>\
+            <tr>\n"));
     // write table header
     outStr.WriteString(wxT("<tr>"));
     for (int i = 0; i < cols; i++)
