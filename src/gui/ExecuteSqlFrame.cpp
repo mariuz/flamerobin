@@ -895,7 +895,7 @@ void ExecuteSqlFrame::autoCompleteColumns(int pos, int len)
     if (pos > 1 && styled_text_ctrl_sql->GetCharAt(pos-2) == '"')
     {   // quoted table name
         start = pos-3;
-        while (start && styled_text_ctrl_sql->GetCharAt(start) != '"')
+        while (start > -1 && styled_text_ctrl_sql->GetCharAt(start) != '"')
             --start;
     }
     wxString table = styled_text_ctrl_sql->GetTextRange(start, pos-1);

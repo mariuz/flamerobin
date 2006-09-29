@@ -113,28 +113,23 @@ int SqlTokenizer::getCurrentTokenPosition()
     return (sqlTokenStartM - sqlM.c_str());
 }
 //-----------------------------------------------------------------------------
-// same as nextToken, but skips whitespace, comments and parenthesis
+// same as nextToken, but skips whitespace, comments and optionally parenthesis
 bool SqlTokenizer::jumpToken(bool skipParenthesis)
 {
+    int parencount = 0;
     while (true)
     {
         if (!nextToken())
             return false;
         SqlTokenType stt = getCurrentToken();
         if (stt == tkPARENOPEN && skipParenthesis)
-        {
-            while (nextToken())
-            {
-                if (getCurrentToken() == tkPARENCLOSE)
-                {
-                    nextToken();
-                    stt = getCurrentToken();
-                    break;
-                }
-            }
-        }
-        if (stt != tkWHITESPACE && stt != tkCOMMENT)
+            parencount++;
+        if (stt != tkWHITESPACE && stt != tkCOMMENT && parencount == 0)
             break;
+        if (stt == tkPARENCLOSE && skipParenthesis)
+            parencount--;
+        if (parencount < 0)
+            parencount = 0;
     }
     return true;
 }

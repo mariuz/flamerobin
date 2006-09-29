@@ -231,8 +231,11 @@ wxString IncompleteStatement::extractBlockAtPosition(const wxString& sql,
 }
 //-----------------------------------------------------------------------------
 wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
-    const wxString& objectAlias, int cursorPos)
+    const wxString& objectSqlAlias, int cursorPos)
 {
+    Identifier idAlias;
+    idAlias.setFromSql(objectSqlAlias);
+    wxString objectAlias(idAlias.get());
     Relation *r = 0;
     if (objectAlias.Upper() == wxT("OLD") || objectAlias.Upper() == wxT("NEW"))
     {
@@ -276,7 +279,11 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
                     wxString alias;
                     tokenizer.jumpToken(true);
                     if (tkIDENTIFIER == tokenizer.getCurrentToken())
-                        alias = tokenizer.getCurrentTokenString();
+                    {   // aliases can also be quoted, and case insensitive
+                        Identifier ida;
+                        ida.setFromSql(tokenizer.getCurrentTokenString());
+                        alias = ida.get();
+                    }
                     else
                         alias = id.get();
                     //wxMessageBox(id.get(), alias);
