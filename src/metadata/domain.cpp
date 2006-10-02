@@ -174,14 +174,12 @@ wxString Domain::datatype2string(short datatype, short scale, short precision,
     // LONG&INT64: INT/SMALLINT (prec=0), DECIMAL(sub_type=2), NUMERIC(sub_type=1)
     if (datatype == 7 || datatype == 8 || datatype == 16)
     {
-        if (scale == 0)
+        if (scale == 0 && (datatype == 7 || datatype == 8))
         {
             if (datatype == 7)
                 return wxT("Smallint");
-            else if (datatype == 8)
-                return wxT("Integer");
             else
-                return wxT("Numeric(18,0)");
+                return wxT("Integer");
         }
         else
         {
