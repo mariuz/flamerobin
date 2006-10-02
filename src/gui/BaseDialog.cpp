@@ -102,7 +102,6 @@ void BaseDialog::updateColors(wxWindow *parent)
     if (parent == 0)
         parent = this;
     const wxColour silver = wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE);
-    const wxColour white  = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
     wxWindowList& l = parent->GetChildren();
     for (wxWindowListNode *n = l.GetFirst(); n; n = n->GetNext())
     {
@@ -113,9 +112,12 @@ void BaseDialog::updateColors(wxWindow *parent)
             continue;
         }
 
+        // wxNullColour = reset to default. We must use that instead of
+        // white or wxSYS_COLOUR_WINDOW or whatever since it only wxNullColour
+        // works properly with wxGTK
         wxTextCtrl *tc = dynamic_cast<wxTextCtrl *>(o);
         if (tc)
-            tc->SetBackgroundColour(tc->IsEditable() ? white : silver);
+            tc->SetBackgroundColour(tc->IsEditable() ? wxNullColour : silver);
     }
 
 }
