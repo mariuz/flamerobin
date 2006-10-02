@@ -525,6 +525,8 @@ void CreateDDLVisitor::visitTable(Table& t)
             if ((*ci).isSystem())
                 continue;
             postSqlM += wxT("CREATE ");
+            if ((*ci).isUnique())
+                postSqlM += wxT("UNIQUE ");
             if ((*ci).getIndexType() == Index::itDescending)
                 postSqlM += wxT("DESCENDING ");
             postSqlM += wxT("INDEX ") + (*ci).getQuotedName() + wxT(" ON ")
