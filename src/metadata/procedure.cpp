@@ -351,8 +351,10 @@ wxString Procedure::getAlterSql(bool full)
                     input += wxT(" (\n    ");
                 else
                     input += wxT(",\n    ");
-                input += (*it).getQuotedName() + wxT(" ") +
-                    dm->getDatatypeAsString();
+                input += (*it).getQuotedName() + wxT(" ")
+                    + dm->getDatatypeAsString();
+                if (dm->hasDefault())
+                    input += wxT(" DEFAULT ") + dm->getDefault();
                 if (!charset.IsEmpty() && charset != db->getDatabaseCharset())
                     input += wxT(" CHARACTER SET ") + dm->getCharset();
             }
