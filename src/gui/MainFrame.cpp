@@ -493,32 +493,38 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
     enum { showProperties = 0, showColumnInfo };
     int treeActivateAction = showProperties;
     config().getValue(wxT("OnTreeActivate"), treeActivateAction);
-    if (!config().get(wxT("ShowColumnsInTree"), true))   // if no columns in tree, then only Properties can be shown
+    // if no columns in tree, then only Properties can be shown
+    if (!config().get(wxT("ShowColumnsInTree"), true))
         treeActivateAction = showProperties;
 
-    if (treeActivateAction == showColumnInfo && (nt == ntTable || nt == ntSysTable || nt == ntView || nt == ntProcedure))
+    if (treeActivateAction == showColumnInfo && (nt == ntTable
+        || nt == ntSysTable || nt == ntView || nt == ntProcedure))
     {
-        bool success;
-        if (nt == ntProcedure)
-            success = (static_cast<Procedure*>(m))->checkAndLoadParameters();
-        else
-            success = (static_cast<Relation*>(m))->checkAndLoadColumns();
-        if (!success)
-            reportLastError(_("Error Loading Information"));
+        if (!tree_ctrl_1->ItemHasChildren(item))
+        {
+            wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
+                myTreeCtrl::Menu_LoadColumnsInfo);
+            AddPendingEvent(event);
+            return;
+        }
     }
     else
     {
         switch (nt)
         {
             case ntDatabase:
-                connect();
+                if (!dynamic_cast<Database *>(m)->isConnected())
+                {
+                    wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
+                        myTreeCtrl::Menu_Connect);
+                    AddPendingEvent(event);
+                    return;
+                }
                 break;
             case ntGenerator:
                 showGeneratorValue(dynamic_cast<Generator*>(m));
                 break;
             case ntColumn:
-                OnMenuObjectProperties(event);
-                break;
             case ntTable:
             case ntSysTable:
             case ntView:
@@ -528,13 +534,18 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             case ntTrigger:
             case ntException:
             case ntRole:
-                frameManager().showMetadataPropertyFrame(this, m, true);
-                break;
+                {
+                    wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
+                        myTreeCtrl::Menu_ObjectProperties);
+                    AddPendingEvent(event);
+                }
+                return;
             default:
                 break;
         };
     }
 
+    // Windows tree control automatically does it
 #ifdef __WXGTK__
     bool toggle = true;
     config().getValue(wxT("ToggleNodeOnTreeActivate"), toggle);
