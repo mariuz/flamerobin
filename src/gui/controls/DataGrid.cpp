@@ -565,9 +565,7 @@ void DataGrid::OnMenuSaveAsHTML(wxCommandEvent& WXUNUSED(event))
                 if (halign == wxALIGN_RIGHT)
                     outStr.WriteString(wxT(" align=right"));
                 outStr.WriteString(wxT(" nowrap>"));
-                wxString value(escapeHtmlChars(table->getCellValue(i, j)),
-                    wxConvUTF8);
-                outStr.WriteString(value);
+                outStr.WriteString(escapeHtmlChars(table->getCellValue(i, j)));
             }
             outStr.WriteString(wxT("</td>"));
         }
