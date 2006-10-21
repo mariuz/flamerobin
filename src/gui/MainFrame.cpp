@@ -1234,6 +1234,7 @@ bool MainFrame::connect()
                 }
             }
         }
+        tree_ctrl_1->Expand(tree_ctrl_1->GetSelection());
     }
 
     updateStatusbarText();
@@ -1467,6 +1468,10 @@ void MainFrame::OnMenuLoadColumnsInfo(wxCommandEvent& WXUNUSED(event))
                _("Information"), wxOK | wxICON_INFORMATION);
         }
     }
+
+    wxTreeItemId id = tree_ctrl_1->GetSelection();
+    if (id.IsOk() && tree_ctrl_1->ItemHasChildren(id))
+        tree_ctrl_1->Expand(id);
 
     FR_CATCH
 }
