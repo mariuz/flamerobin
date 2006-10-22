@@ -1168,10 +1168,14 @@ void ExecuteSqlFrame::executeAllStatements(bool closeWhenDone)
         historyPositionM = sh.size();
         updateHistoryButtons();
     }
+
+	if (closeWhenDone && autoCommitM && !inTransactionM)
+		Close();
 }
 //-----------------------------------------------------------------------------
 //! Parses all sql statements in STC
 //! when autoexecute is TRUE, program just waits user to click Commit/Rollback and closes window
+//! when autocommit DDL is also set then frame is closed at once if commit was successful
 bool ExecuteSqlFrame::parseStatements(const wxString& statements,
     bool closeWhenDone, bool prepareOnly, int selectionOffset)
 {

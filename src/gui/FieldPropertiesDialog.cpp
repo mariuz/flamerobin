@@ -819,27 +819,32 @@ bool ColumnPropertiesHandler::handleURI(URI& uri)
         t = c->getTable();
     }
 
-    FieldPropertiesDialog fpd(w, t, c);
-    // NOTE: this has been moved here from OnOkButtonClick() to make frame
-    //       activation work properly.  Basically activation of another
-    //       frame has to happen outside wxDialog::ShowModal(), because it
-    //       does at the end re-focus the last focused control, raising
-    //       the parent frame over the newly created sql execution frame
-    if (fpd.ShowModal() == wxID_OK)
-    {
-        wxString statements(fpd.getStatementsToExecute());
-        // nothing to be done
-        if (!statements.IsEmpty())
-        {
-            // create ExecuteSqlFrame with option to close at once
-            ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1,
-                fpd.getStatementTitle());
-            esf->setDatabase(t->getDatabase());
-            esf->setSql(statements);
-            esf->executeAllStatements(false);   // statement may contain the
-            esf->Show();                        // COMMIT, so let's give user
-        }                                       // a chance to cancel
-    }
+	wxString statements, title;
+	{	// we want FPD to go out of scope and get destroyed since the action in
+		// ESF can destroy the field, and take down the FPD. Accessing FPD in turn
+		// leads to mysterious crash
+		FieldPropertiesDialog fpd(w, t, c);
+		// NOTE: this has been moved here from OnOkButtonClick() to make frame
+		//       activation work properly.  Basically activation of another
+		//       frame has to happen outside wxDialog::ShowModal(), because it
+		//       does at the end re-focus the last focused control, raising
+		//       the parent frame over the newly created sql execution frame
+		if (fpd.ShowModal() == wxID_OK)
+		{
+			statements = fpd.getStatementsToExecute();
+			title = fpd.getStatementTitle();
+		}
+	}
+
+	if (!statements.IsEmpty())
+	{
+		// create ExecuteSqlFrame with option to close at once
+		ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1, title);
+		esf->setDatabase(t->getDatabase());
+		esf->setSql(statements);
+		esf->Show();
+		esf->executeAllStatements(true);
+	}
     return true;
 }
 //-----------------------------------------------------------------------------

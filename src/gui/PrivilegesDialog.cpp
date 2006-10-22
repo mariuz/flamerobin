@@ -615,7 +615,7 @@ bool ManagePrivilegesHandler::handleURI(URI& uri)
                 _("Grant And Revoke Privileges"));
             esf->setDatabase(m->getDatabase());
             esf->setSql(statements);
-            esf->executeAllStatements(false);
+            esf->executeAllStatements(true);
             esf->Show();
         }
     }
