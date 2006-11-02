@@ -149,7 +149,10 @@ public:
 
     virtual wxSize CalcSizeFromPage(const wxSize& sizePage) const { return sizePage; }
     virtual int GetSelection() const { return m_selection; }
+    // this is sloppy, SetSelection should actually send a notification event,
+    // while ChangeSelection() should not...
     virtual int SetSelection(size_t n);
+    virtual int ChangeSelection(size_t n) { return SetSelection(n); }
     virtual wxString GetPageText(size_t n) const;
     virtual bool SetPageText(size_t n, const wxString& strText);
     virtual int GetPageImage(size_t /*n*/) const { return -1; }
