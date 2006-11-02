@@ -195,7 +195,7 @@ void EventWatcherFrame::addEvents(wxString& s)
     // deselect all items so user can cleanly see what is added
     for (int ix = 0; ix < listbox_monitored->GetCount(); ++ix)
     {
-        if (listbox_monitored->Selected(ix))
+        if (listbox_monitored->IsSelected(ix))
             listbox_monitored->Deselect(ix);
     }
     while (true)
