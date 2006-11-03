@@ -2,7 +2,7 @@
 <makefile>
     <using module="datafiles"/>
 
-<!-- only needed on MSW, on Unix wx-config will find this for us -->
+<!-- necessary if wx-config can not be used -->
     <option name="WXDIR" category="path" never_empty="1">
         <values></values>
         <default-value></default-value>
@@ -176,8 +176,7 @@
 
             <lib-path>$(WX_LIB_DIR)</lib-path>
 
-            <!-- another nice thing that wx-config will take care of
-                 on Unix... -->
+            <!-- another nice thing that wx-config will take care of -->
             <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_stc</sys-lib>
             <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_html</sys-lib>
             <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_adv</sys-lib>
@@ -537,7 +536,7 @@
             <include>$(DOLLAR)(srcdir)/src</include>
             <include>$(DOLLAR)(srcdir)/src/ibpp</include>
             <include>$(DOLLAR)(srcdir)/res</include>
-            <res-include>$(DOLLAR)(WXDIR)/include</res-include>
+            <set var="__win32rc_flags" append="1">@WX_INCLUDES@</set>
         </if>
         <if cond="FORMAT!='autoconf'">
             <include>./src</include>

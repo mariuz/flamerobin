@@ -53,6 +53,22 @@ fi
 
 AC_DEFINE_UNQUOTED(FR_INSTALL_PREFIX, "$FR_PREFIX")
 
+dnl -----------------------------------------------------------------------
+dnl wxWidgets include directories to find wx.rc
+dnl -----------------------------------------------------------------------
+
+WX_INCLUDES=""
+for opt in $WX_CPPFLAGS
+do
+    case "$opt" in
+        -I*)
+            WX_INCLUDES="$WX_INCLUDES --include-dir `echo "$opt" | sed 's/^-I//'`" 
+            ;;
+    esac
+done
+AC_SUBST(WX_INCLUDES)
+
+
 
 AC_CONFIG_HEADERS([ frconfig.h:frconfig.h.in ])
 AC_CONFIG_FILES([ Makefile ])

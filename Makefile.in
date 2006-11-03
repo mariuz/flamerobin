@@ -527,7 +527,7 @@ flamerobin_StyleGuideMSW.o: $(srcdir)/src/gui/msw/StyleGuideMSW.cpp $(FLAMEROBIN
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/msw/StyleGuideMSW.cpp
 
 flamerobin_flamerobin_rc.o: $(srcdir)/res/flamerobin.rc $(FLAMEROBIN_ODEP)
-	$(RESCOMP) -i$< -o$@ --define HAVE_FRCONFIG_H  $(____flamerobin_WXDEBUG_p_2) $(____flamerobin_DEBUGFLAG_p_2) $(__IBPPPLATFORMDEFINE_p_2) --include-dir . --include-dir $(srcdir)/src --include-dir $(srcdir)/src/ibpp --include-dir $(srcdir)/res --include-dir $(WXDIR)/include
+	$(RESCOMP) -i$< -o$@ --define HAVE_FRCONFIG_H  $(____flamerobin_WXDEBUG_p_2) $(____flamerobin_DEBUGFLAG_p_2) $(__IBPPPLATFORMDEFINE_p_2) --include-dir . --include-dir $(srcdir)/src --include-dir $(srcdir)/src/ibpp --include-dir $(srcdir)/res @WX_INCLUDES@
 
 ibpp__dpb.o: $(srcdir)/src/ibpp/_dpb.cpp $(IBPP_ODEP)
 	$(CXXC) -c -o $@ $(IBPP_CXXFLAGS) $(srcdir)/src/ibpp/_dpb.cpp
