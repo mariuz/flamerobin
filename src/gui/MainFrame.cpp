@@ -476,7 +476,7 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 }
 //-----------------------------------------------------------------------------
 //! handle double-click on item (or press Enter)
-void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
+void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
 {
     FR_TRY
 
