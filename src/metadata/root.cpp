@@ -242,8 +242,21 @@ void Root::removeServer(Server* server)
     save();
 }
 //-----------------------------------------------------------------------------
+// helper for Root::save()
+void rsAddChildNode(wxXmlNode* parentNode, const wxString nodeName,
+    const wxString nodeContent)
+{
+    if (!nodeContent.IsEmpty())
+    {
+        wxXmlNode* propn = new wxXmlNode(wxXML_ELEMENT_NODE, nodeName);
+        parentNode->AddChild(propn);
+        propn->AddChild(new wxXmlNode(wxXML_TEXT_NODE, wxEmptyString,
+            nodeContent));
+    } 
+}
+//-----------------------------------------------------------------------------
 // browses the server nodes, and their database nodes
-// saves everything to servers.xml file
+// saves everything to fr_databases.conf file
 // returns: false if file cannot be opened for writing, true otherwise
 //
 bool Root::save()
@@ -255,6 +268,45 @@ bool Root::save()
     wxString dir = wxPathOnly(getFileName());
     if (!wxDirExists(dir))
         wxMkdir(dir);
+#if 0
+    wxXmlDocument doc;
+    wxXmlNode* rn = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("root"));
+    doc.SetRoot(rn);
+
+    rsAddChildNode(rn, wxT("nextId"), wxString::Format(wxT("%d"), nextIdM));
+
+    for (std::list<Server>::iterator its = serversM.begin();
+        its != serversM.end(); ++its)
+    {
+        wxXmlNode* srvn = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("server"));
+        rn->AddChild(srvn);
+        
+        rsAddChildNode(srvn, wxT("name"), its->getName_());
+        rsAddChildNode(srvn, wxT("host"), its->getHostname());
+        rsAddChildNode(srvn, wxT("port"), its->getPort());
+
+        for (std::list<Database>::iterator itdb = its->getDatabases()->begin();
+            itdb != its->getDatabases()->end(); ++itdb)
+        {
+            itdb->resetCredentials();    // clean up eventual extra credentials
+
+            wxXmlNode* dbn = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("database"));
+            srvn->AddChild(dbn);
+
+            rsAddChildNode(dbn, wxT("id"), itdb->getId());
+            rsAddChildNode(dbn, wxT("name"), itdb->getName_());
+            rsAddChildNode(dbn, wxT("path"), itdb->getPath());
+            rsAddChildNode(dbn, wxT("charset"), itdb->getConnectionCharset());
+            rsAddChildNode(dbn, wxT("username"), itdb->getUsername());
+            rsAddChildNode(dbn, wxT("password"), itdb->getRawPassword());
+            rsAddChildNode(dbn, wxT("encrypted"),
+                (itdb->getStoreEncryptedPassword() ? wxT("1") : wxT("0")));
+            rsAddChildNode(dbn, wxT("role"), itdb->getRole());
+        }
+    }
+    if (!doc.Save(getFileName()))
+        return false;
+#else
     ofstream file(wx2std(getFileName()).c_str());
     if (!file)
         return false;
@@ -287,6 +339,7 @@ bool Root::save()
     file << "</root>\n";
 
     file.close();
+#endif
     dirtyM = false;
     return true;
 }
