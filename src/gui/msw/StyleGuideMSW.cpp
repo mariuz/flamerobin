@@ -44,7 +44,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "gui/StyleGuide.h"
 #ifdef __GNUWIN32__
-#include "windows.h"
+#include "wx/msw/wrapwin.h" // for "windows.h"
 #endif
 //-----------------------------------------------------------------------------
 class StyleGuideMSW: public StyleGuide

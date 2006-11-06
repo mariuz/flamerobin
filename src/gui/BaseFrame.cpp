@@ -38,8 +38,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #include "wx/wx.h"
 #endif
 
-#ifdef __WIN32__
-    #include "windows.h"
+#if defined(__WXMSW__)
+    #include "wx/msw/wrapwin.h" // for "windows.h"
 #endif
 
 #include "config/Config.h"
