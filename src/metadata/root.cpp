@@ -268,7 +268,7 @@ bool Root::save()
     wxString dir = wxPathOnly(getFileName());
     if (!wxDirExists(dir))
         wxMkdir(dir);
-#if 0
+
     wxXmlDocument doc;
     wxXmlNode* rn = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("root"));
     doc.SetRoot(rn);
@@ -306,40 +306,6 @@ bool Root::save()
     }
     if (!doc.Save(getFileName()))
         return false;
-#else
-    ofstream file(wx2std(getFileName()).c_str());
-    if (!file)
-        return false;
-    file << "<?xml version='1.0' encoding='ISO-8859-1'?>\n";
-    file << "<root>\n";
-    file << "\t<nextId>" << nextIdM << "</nextId>\n";
-    for (std::list<Server>::iterator it = serversM.begin(); it != serversM.end(); ++it)
-    {
-        file << "\t<server>\n";
-        file << "\t\t<name>" << wx2std(it->getName_()) << "</name>\n";
-        file << "\t\t<host>" << wx2std(it->getHostname()) << "</host>\n";
-        file << "\t\t<port>" << wx2std(it->getPort()) << "</port>\n";
-
-        for (std::list<Database>::iterator it2 = it->getDatabases()->begin(); it2 != it->getDatabases()->end(); ++it2)
-        {
-            it2->resetCredentials();    // clean up eventual extra credentials
-            file << "\t\t<database>\n";
-            file << "\t\t\t<id>" << wx2std(it2->getId()) << "</id>\n";
-            file << "\t\t\t<name>" << wx2std(it2->getName_()) << "</name>\n";
-            file << "\t\t\t<path>" << wx2std(it2->getPath()) << "</path>\n";
-            file << "\t\t\t<charset>" << wx2std(it2->getConnectionCharset()) << "</charset>\n";
-            file << "\t\t\t<username>" << wx2std(it2->getUsername()) << "</username>\n";
-            file << "\t\t\t<password>" << wx2std(it2->getRawPassword()) << "</password>\n";
-            file << "\t\t\t<encrypted>" << (it2->getStoreEncryptedPassword() ? "1" : "0") << "</encrypted>\n";
-            file << "\t\t\t<role>" << wx2std(it2->getRole()) << "</role>\n";
-            file << "\t\t</database>\n";
-        }
-        file << "\t</server>\n";
-    }
-    file << "</root>\n";
-
-    file.close();
-#endif
     dirtyM = false;
     return true;
 }
