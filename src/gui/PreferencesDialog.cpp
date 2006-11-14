@@ -181,6 +181,9 @@ bool Optionbook::Create(wxWindow *parent, wxWindowID id, const wxPoint& pos,
 {
     style &= ~wxBORDER_MASK;
     style |= wxBORDER_NONE;
+#if wxCHECK_VERSION(2, 7, 1)
+    style |= wxBK_LEFT;
+#endif
     return wxControl::Create(parent, id, pos, size, style,
         wxDefaultValidator, name);
 }
