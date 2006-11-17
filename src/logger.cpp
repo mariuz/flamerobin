@@ -91,7 +91,7 @@ bool Logger::log2database(Config *cfg, const SqlStatement& stm, Database* db)
     catch (IBPP::Exception &e)
     {
         showWarningDialog(0, _("Logging to database failed"),
-            e.ErrorMessage(), AdvancedMessageDialogButtonsOk());
+            std2wx(e.ErrorMessage()), AdvancedMessageDialogButtonsOk());
     }
     catch (...)
     {
@@ -225,7 +225,7 @@ bool Logger::prepareDatabase(Database *db)
     catch (IBPP::Exception &e)
     {
         showWarningDialog(0, _("Creation of logging objects failed"),
-            e.ErrorMessage(), AdvancedMessageDialogButtonsOk());
+            std2wx(e.ErrorMessage()), AdvancedMessageDialogButtonsOk());
     }
     catch (...)
     {
