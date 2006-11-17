@@ -64,9 +64,11 @@ size_t TokenList::size() const
 //-----------------------------------------------------------------------------
 // STATEMENT
 //-----------------------------------------------------------------------------
-SqlStatement::SqlStatement(const wxString& sql, Database *db)
+SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
+    terminator)
     :actionM(actNONE), objectTypeM(ntUnknown), databaseM(db), objectM(0),
-     identifierTokenIndexM(0), isAlterColumnM(false), isDatatypeM(false)
+     identifierTokenIndexM(0), isAlterColumnM(false), isDatatypeM(false),
+     terminatorM(terminator), statementM(sql)
 {
     // use the tokenizer to split the statements into a vector of tokens
     // also keep the token strings for identifiers and strings
@@ -351,14 +353,26 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db)
     }
 }
 //-----------------------------------------------------------------------------
-Relation* SqlStatement::getCreateTriggerRelation()
+wxString SqlStatement::getStatement() const
+{
+    return statementM;
+}
+//-----------------------------------------------------------------------------
+wxString SqlStatement::getTerminator() const
+{
+    return terminatorM;
+}
+//-----------------------------------------------------------------------------
+Relation* SqlStatement::getCreateTriggerRelation() const
 {
     if (objectTypeM == ntTrigger && databaseM
         && tokensM[identifierTokenIndexM + 1] == kwFOR
         && tokensM[identifierTokenIndexM + 2] == tkIDENTIFIER)
     {
         Identifier id;
-        id.setFromSql(tokenStringsM[identifierTokenIndexM + 2]);
+        std::map<int, wxString>::const_iterator ci =
+            tokenStringsM.find(identifierTokenIndexM+2);
+        id.setFromSql((*ci).second);
         return databaseM->findRelation(id);
     }
     return 0;
@@ -382,7 +396,7 @@ bool SqlStatement::isDatatype() const
     return isDatatypeM;
 }
 //-----------------------------------------------------------------------------
-MetadataItem* SqlStatement::getObject()
+MetadataItem* SqlStatement::getObject() const
 {
     return objectM;
 }
@@ -392,17 +406,17 @@ NodeType SqlStatement::getObjectType() const
     return objectTypeM;
 }
 //-----------------------------------------------------------------------------
-Identifier SqlStatement::getIdentifier()
+Identifier SqlStatement::getIdentifier() const
 {
     return nameM;
 }
 //-----------------------------------------------------------------------------
-wxString SqlStatement::getName()
+wxString SqlStatement::getName() const
 {
     return nameM.get();
 }
 //-----------------------------------------------------------------------------
-wxString SqlStatement::getFieldName()
+wxString SqlStatement::getFieldName() const
 {
     return fieldNameM.get();
 }

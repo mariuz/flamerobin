@@ -42,6 +42,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/BaseFrame.h"
 #include "gui/FindDialog.h"
 #include "logger.h"
+#include "sql/SqlStatement.h"
 #include "metadata/database.h"
 #include "statementHistory.h"
 //-----------------------------------------------------------------------------
@@ -133,7 +134,7 @@ public:
         long style = wxDEFAULT_FRAME_STYLE);
 
 private:
-    std::vector<ExecutedStatement> executedStatementsM;
+    std::vector<SqlStatement> executedStatementsM;
     wxString filenameM;
 
     typedef enum { ttNormal, ttSql, ttError } TextType;

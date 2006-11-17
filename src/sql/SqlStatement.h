@@ -54,19 +54,22 @@ public:
 class SqlStatement
 {
 public:
-    SqlStatement(const wxString& sql, Database *db);
+    SqlStatement(const wxString& sql, Database *db,
+        const wxString& terminator = wxT(";"));
 
     bool isDDL() const;
     SqlAction getAction() const;
     bool actionIs(const SqlAction& act, NodeType nt = ntUnknown) const;
     NodeType getObjectType() const;
-    MetadataItem* getObject();
-    Identifier getIdentifier();
-    wxString getName();
-    wxString getFieldName();
+    MetadataItem* getObject() const;
+    Identifier getIdentifier() const;
+    wxString getName() const;
+    wxString getFieldName() const;
+    wxString getTerminator() const;
+    wxString getStatement() const;
     bool isAlterColumn() const;
     bool isDatatype() const;
-    Relation* getCreateTriggerRelation();
+    Relation* getCreateTriggerRelation() const;
 
 protected:
     TokenList tokensM;
@@ -81,6 +84,8 @@ protected:
     Identifier fieldNameM;  // table columns
     bool isAlterColumnM;
     bool isDatatypeM;
+    wxString terminatorM;
+    wxString statementM;
 };
 //-----------------------------------------------------------------------------
 #endif

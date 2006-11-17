@@ -44,6 +44,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "metadata/table.h"
 #include "metadata/trigger.h"
 #include "metadata/view.h"
+#include "sql/SqlStatement.h"
 //-----------------------------------------------------------------------------
 class Server;
 //-----------------------------------------------------------------------------
@@ -203,7 +204,7 @@ public:
     void refreshByType(NodeType type);
     void dropObject(MetadataItem *object);
     bool addObject(NodeType type, wxString name);
-    bool parseCommitedSql(wxString sql);     // reads a DDL statement and does accordingly
+    bool parseCommitedSql(const SqlStatement& stm);     // reads a DDL statement and does accordingly
 
     std::vector<wxString> getCollations(wxString charset);
     bool isDefaultCollation(const wxString& charset, const wxString& collate);

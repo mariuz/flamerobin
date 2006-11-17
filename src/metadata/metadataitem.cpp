@@ -90,6 +90,25 @@ const wxString MetadataItem::getId() const
     return getName_();
 }
 //-----------------------------------------------------------------------------
+wxString getNameOfType(NodeType type)
+{
+    switch (type)
+    {
+        case ntTable:       return (wxT("TABLE"));
+        case ntView:        return (wxT("VIEW"));
+        case ntProcedure:   return (wxT("PROCEDURE"));
+        case ntTrigger:     return (wxT("TRIGGER"));
+        case ntGenerator:   return (wxT("GENERATOR"));
+        case ntFunction:    return (wxT("FUNCTION"));
+        case ntDomain:      return (wxT("DOMAIN"));
+        case ntRole:        return (wxT("ROLE"));
+        case ntColumn:      return (wxT("COLUMN"));
+        case ntException:   return (wxT("EXCEPTION"));
+        default:
+            return wxT("");
+    }
+}
+//-----------------------------------------------------------------------------
 NodeType getTypeByName(wxString name)
 {
     if (name == wxT("TABLE"))

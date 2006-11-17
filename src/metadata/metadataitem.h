@@ -54,6 +54,7 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
 } NodeType;
 //-----------------------------------------------------------------------------
 NodeType getTypeByName(wxString name);
+wxString getNameOfType(NodeType type);
 //-----------------------------------------------------------------------------
 class MetadataItem: public Subject
 {

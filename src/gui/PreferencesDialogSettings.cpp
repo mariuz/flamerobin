@@ -610,6 +610,7 @@ public:
 
     virtual bool createControl(bool ignoreerrors);
     virtual bool loadFromConfig(Config& config);
+    virtual bool parseProperty(wxXmlNode* xmln);
     virtual bool saveToConfig(Config& config);
 protected:
     virtual void addControlsToSizer(wxSizer* sizer);
@@ -622,6 +623,7 @@ private:
     wxStaticText* captionBeforeM;
     wxTextCtrl* textctrlM;
     wxString defaultM;
+    int expandM;
 };
 //-----------------------------------------------------------------------------
 PrefDlgStringEditSetting::PrefDlgStringEditSetting(wxPanel* page, PrefDlgSetting* parent)
@@ -630,6 +632,7 @@ PrefDlgStringEditSetting::PrefDlgStringEditSetting(wxPanel* page, PrefDlgSetting
     captionAfterM = 0;
     captionBeforeM = 0;
     textctrlM = 0;
+    expandM = 0;
 }
 //-----------------------------------------------------------------------------
 void PrefDlgStringEditSetting::addControlsToSizer(wxSizer* sizer)
@@ -641,7 +644,7 @@ void PrefDlgStringEditSetting::addControlsToSizer(wxSizer* sizer)
             sizer->Add(captionBeforeM, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
             sizer->Add(styleguide().getControlLabelMargin(), 0);
         }
-        sizer->Add(textctrlM, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
+        sizer->Add(textctrlM, expandM, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
         if (captionAfterM)
         {
             sizer->Add(styleguide().getControlLabelMargin(), 0);
@@ -707,6 +710,22 @@ bool PrefDlgStringEditSetting::loadFromConfig(Config& config)
         textctrlM->SetValue(value);
     }
     return true;
+}
+//-----------------------------------------------------------------------------
+bool PrefDlgStringEditSetting::parseProperty(wxXmlNode* xmln)
+{
+    if (xmln->GetType() == wxXML_ELEMENT_NODE)
+    {
+        wxString name(xmln->GetName());
+        if (name == wxT("expand"))
+        {
+            wxString value(getNodeContent(xmln, wxEmptyString));
+            long l;
+            if (!value.IsEmpty() && value.ToLong(&l))
+                expandM = l;
+        }
+    }
+    return PrefDlgSetting::parseProperty(xmln);
 }
 //-----------------------------------------------------------------------------
 bool PrefDlgStringEditSetting::saveToConfig(Config& config)

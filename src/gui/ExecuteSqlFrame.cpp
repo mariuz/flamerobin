@@ -1320,10 +1320,10 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                 log(wxT("") + s);
                 statusbar_1->SetStatusText(s, 1);
             }
-            SqlStatement stm(sql, databaseM);
+            SqlStatement stm(sql, databaseM, terminator);
             if (stm.isDDL())
                 type = IBPP::stDDL;
-            executedStatementsM.push_back(ExecutedStatement(sql, type, terminator));
+            executedStatementsM.push_back(stm);
             styled_text_ctrl_sql->SetFocus();
             if (type == IBPP::stDDL && autoCommitM)
             {
@@ -1391,16 +1391,15 @@ bool ExecuteSqlFrame::commitTransaction()
 
         SubjectLocker locker(databaseM);
         // log statements, done before parsing in case parsing crashes FR
-        for (std::vector<ExecutedStatement>::const_iterator it = executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
+        for (std::vector<SqlStatement>::const_iterator it = executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
             if (!Logger::logStatement(*it, databaseM))
                 break;
 
         // parse all successfully executed statements
-        for (std::vector<ExecutedStatement>::const_iterator it = executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
+        for (std::vector<SqlStatement>::const_iterator it = executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
         {
-            if ((*it).type == IBPP::stDDL)
-                if (!databaseM->parseCommitedSql((*it).statement))
-                    ::wxMessageBox(lastError().getMessage(), _("A non-fatal error occurred."), wxOK | wxICON_INFORMATION);
+            if (!databaseM->parseCommitedSql(*it))
+                ::wxMessageBox(lastError().getMessage(), _("A non-fatal error occurred."), wxOK | wxICON_INFORMATION);
         }
 
         // possible future version (see database.cpp file for details: ONLY IF FIRST solution is used from database.cpp)

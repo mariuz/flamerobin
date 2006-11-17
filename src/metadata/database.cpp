@@ -677,11 +677,10 @@ bool Database::addObject(NodeType type, wxString name)
 // alter table [name] alter [column] type [domain or datatype]
 // declare external function [name]
 // set null flag via system tables update
-bool Database::parseCommitedSql(wxString sql)
+bool Database::parseCommitedSql(const SqlStatement& stm)
 {
-    SqlStatement stm(sql, this);
     if (!stm.isDDL())
-        return true;    // false or true?
+        return true;    // return false only on IBPP exception
 
     // TODO: check that there are no unwanted side-effects to this
     // SubjectLocker locker(this);

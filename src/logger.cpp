@@ -41,38 +41,73 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/filename.h>
 
 #include "config/DatabaseConfig.h"
+#include "core/StringUtils.h"
 #include "frversion.h"
+#include "gui/AdvancedMessageDialog.h"
 #include "logger.h"
 #include "metadata/database.h"
 //----------------------------------------------------------------------------
-ExecutedStatement::ExecutedStatement(const wxString& st, const IBPP::STT& t,
-        const wxString& term)
-    :statement(st), type(t), terminator(term)
+bool Logger::log2database(Config *cfg, const SqlStatement& stm, Database* db)
 {
+    IBPP::Transaction tr = IBPP::TransactionFactory(db->getIBPPDatabase());
+    try
+    {
+        tr->Start();
+        IBPP::Statement st = IBPP::StatementFactory(db->getIBPPDatabase(), tr);
+
+        // find next id
+        wxString sql = wxT("SELECT gen_id(FLAMEROBIN$GEN, 1) FROM rdb$database");
+        if (cfg->get(wxT("LoggingUsesCustomSelect"), false))
+        {
+            sql = cfg->get(wxT("LoggingCustomSelect"),
+                wxString(wxT("SELECT 1+MAX(ID) FROM FLAMEROBIN$LOG")));
+        }
+        st->Prepare(wx2std(sql));
+        st->Execute();
+        int cnt = 1;
+        if (st->Fetch() && !st->IsNull(1))
+            st->Get(1, cnt);
+
+        st->Prepare("INSERT INTO FLAMEROBIN$LOG (id, object_type, \
+            object_name, sql_statement) values (?,?,?,?)");
+        st->Set(1, cnt);
+        st->Set(2, wx2std(getNameOfType(stm.getObjectType())));
+        st->Set(3, wx2std(stm.getName()));
+        st->Set(4, wx2std(stm.getStatement()));  // FIXME: WRITE BLOB!!!
+        st->Execute();
+        tr->Commit();
+        return true;
+    }
+    catch (IBPP::Exception &e)
+    {
+        showWarningDialog(0, _("Logging to database failed"),
+            e.ErrorMessage(), AdvancedMessageDialogButtonsOk());
+    }
+    catch (...)
+    {
+        showWarningDialog(0, _("Logging to database failed"),
+            _("Unexpected C++ exception"), AdvancedMessageDialogButtonsOk());
+    }
+    return false;
 }
 //----------------------------------------------------------------------------
-bool Logger::log2database(const ExecutedStatement& /*st*/, Database* /*db*/)
-{
-    return true;
-}
-//----------------------------------------------------------------------------
-bool Logger::log2file(Config *cfg, const ExecutedStatement& st,
+bool Logger::log2file(Config *cfg, const SqlStatement& st,
     Database *db, const wxString& filename)
 {
     enum { singleFile=0, multiFile };
     int logToFileType;
     cfg->getValue(wxT("LogToFileType"), logToFileType);
 
-    wxString sql = st.statement;
+    wxString sql = st.getStatement();
     bool logSetTerm = false;
     cfg->getValue(wxT("LogSetTerm"), logSetTerm);
     // add term. to statement if missing
-    if (logToFileType == singleFile || logSetTerm && st.terminator != wxT(";"))
+    if (logToFileType == singleFile || logSetTerm && st.getTerminator() != wxT(";"))
     {
         sql.Trim();
-        wxString::size_type pos = sql.rfind(st.terminator);
-        if (pos == wxString::npos || pos < sql.length() - st.terminator.length())
-            sql += st.terminator;
+        wxString::size_type pos = sql.rfind(st.getTerminator());
+        if (pos == wxString::npos || pos < sql.length() - st.getTerminator().length())
+            sql += st.getTerminator();
     }
 
     wxFile f;
@@ -119,16 +154,16 @@ bool Logger::log2file(Config *cfg, const ExecutedStatement& st,
     }
     else
         f.Write(wxT("\n"));
-    if (logSetTerm && st.terminator != wxT(";"))
-        f.Write(wxT("SET TERM ") + st.terminator + wxT(" ;\n"));
+    if (logSetTerm && st.getTerminator() != wxT(";"))
+        f.Write(wxT("SET TERM ") + st.getTerminator() + wxT(" ;\n"));
     f.Write(sql);
-    if (logSetTerm && st.terminator != wxT(";"))
-        f.Write(wxT("\nSET TERM ; ") + st.terminator + wxT("\n"));
+    if (logSetTerm && st.getTerminator() != wxT(";"))
+        f.Write(wxT("\nSET TERM ; ") + st.getTerminator() + wxT("\n"));
     f.Close();
     return true;
 }
 //----------------------------------------------------------------------------
-bool Logger::logStatement(const ExecutedStatement& st, Database* db)
+bool Logger::logStatement(const SqlStatement& st, Database* db)
 {
     DatabaseConfig dc(db);
     bool result = logStatementByConfig(&dc, st, db);
@@ -141,12 +176,59 @@ bool Logger::logStatement(const ExecutedStatement& st, Database* db)
         return result;
 }
 //---------------------------------------------------------------------------
-bool Logger::logStatementByConfig(Config* cfg, const ExecutedStatement& st,
+bool Logger::prepareDatabase(Database *db)
+{
+    IBPP::Transaction tr = IBPP::TransactionFactory(db->getIBPPDatabase());
+    try
+    {
+        // create table
+        if (db->findByNameAndType(ntTable, wxT("FLAMEROBIN$LOG")) == 0)
+        {
+            tr->Start();
+            IBPP::Statement st = IBPP::StatementFactory(db->getIBPPDatabase(), tr);
+            st->Prepare("create table FLAMEROBIN$LOG ( \
+                id integer not null, \
+                object_type varchar(10), \
+                object_name char(31), \
+                sql_statement blob sub_type 1, \
+                executed_at timestamp default current_timestamp, \
+                user_name char(8) default current_user )");
+            st->Execute();
+            tr->Commit();
+            db->addObject(ntTable, wxT("FLAMEROBIN$LOG"));
+        }
+
+        // create generator
+        if (db->findByNameAndType(ntGenerator, wxT("FLAMEROBIN$GEN")) == 0)
+        {
+            tr->Start();
+            IBPP::Statement st = IBPP::StatementFactory(db->getIBPPDatabase(), tr);
+            st->Prepare("create generator FLAMEROBIN$GEN");
+            st->Execute();
+            tr->Commit();
+            db->addObject(ntGenerator, wxT("FLAMEROBIN$GEN"));
+        }
+        return true;
+    }
+    catch (IBPP::Exception &e)
+    {
+        showWarningDialog(0, _("Creation of logging objects failed"),
+            e.ErrorMessage(), AdvancedMessageDialogButtonsOk());
+    }
+    catch (...)
+    {
+        showWarningDialog(0, _("Creation of logging objects failed"),
+            _("Unexpected C++ exception"), AdvancedMessageDialogButtonsOk());
+    }
+    return false;
+}
+//---------------------------------------------------------------------------
+bool Logger::logStatementByConfig(Config* cfg, const SqlStatement& st,
     Database *db)
 {
     bool logDML = false;
     cfg->getValue(wxT("LogDML"), logDML);
-    if (!logDML && st.type != IBPP::stDDL)    // logging not needed
+    if (!logDML && !st.isDDL())    // logging not needed
         return true;
 
     bool logToFile = false;
@@ -169,8 +251,9 @@ bool Logger::logStatementByConfig(Config* cfg, const ExecutedStatement& st,
     cfg->getValue(wxT("LogToDatabase"), logToDb);
     if (logToDb)
     {
-        //prepareDatabase();    <- create log table, generator, etc.
-        return log2database(st, db);            // <- log it
+        if (!prepareDatabase(db))
+            return false;
+        return log2database(cfg, st, db);            // <- log it
     }
     return true;
 }

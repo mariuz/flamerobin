@@ -31,16 +31,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // Functions used to log successfully executed statements
 // in database or textual files
 #include <ibpp.h>
-//-----------------------------------------------------------------------------
-class ExecutedStatement
-{
-public:
-    wxString statement;
-    IBPP::STT type;
-    wxString terminator;
-    ExecutedStatement(const wxString& st, const IBPP::STT& t,
-        const wxString& term);
-};
+#include "sql/SqlStatement.h"
 //-----------------------------------------------------------------------------
 class Database;
 class Config;
@@ -48,11 +39,12 @@ class Config;
 class Logger            // maybe we'll extend this later
 {
 private:
-    static bool log2database(const ExecutedStatement& st, Database *db);
-    static bool log2file(Config *, const ExecutedStatement& st, Database *db, const wxString& filename);
-    static bool logStatementByConfig(Config *cfg, const ExecutedStatement& st, Database *db);
+    static bool prepareDatabase(Database *db);
+    static bool log2database(Config *, const SqlStatement& st, Database *db);
+    static bool log2file(Config *, const SqlStatement& st, Database *db, const wxString& filename);
+    static bool logStatementByConfig(Config *cfg, const SqlStatement& st, Database *db);
 public:
-    static bool logStatement(const ExecutedStatement& st, Database *db);
+    static bool logStatement(const SqlStatement& st, Database *db);
 };
 //-----------------------------------------------------------------------------
 #endif
