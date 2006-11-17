@@ -96,6 +96,12 @@ END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void myTreeCtrl::OnBeginDrag(wxTreeEvent& event)
 {
+    if (!DragAndDropConfig::get().allowDnD())
+    {
+        event.Skip();
+        return;
+    }
+
     wxTreeItemId item = event.GetItem();
     if (item.IsOk())
     {
