@@ -71,9 +71,19 @@ bool Logger::log2database(Config *cfg, const SqlStatement& stm, Database* db)
         st->Prepare("INSERT INTO FLAMEROBIN$LOG (id, object_type, \
             object_name, sql_statement) values (?,?,?,?)");
         st->Set(1, cnt);
-        st->Set(2, wx2std(getNameOfType(stm.getObjectType())));
-        st->Set(3, wx2std(stm.getName()));
-        st->Set(4, wx2std(stm.getStatement()));  // FIXME: WRITE BLOB!!!
+        if (stm.isDDL())
+        {
+            st->Set(2, wx2std(getNameOfType(stm.getObjectType())));
+            st->Set(3, wx2std(stm.getName()));
+        }
+        else
+        {
+            st->SetNull(2);
+            st->SetNull(3);
+        }
+        IBPP::Blob bl = IBPP::BlobFactory(st->DatabasePtr(), tr);
+        bl->Save(wx2std(stm.getStatement()));
+        st->Set(4, bl);
         st->Execute();
         tr->Commit();
         return true;
