@@ -79,7 +79,7 @@ public:
     };
 
     void OnBeginDrag(wxTreeEvent &event);
-    void OnMouse(wxMouseEvent &event);
+    //void OnMouse(wxMouseEvent &event);
     void OnContextMenu(wxContextMenuEvent& event);
 
     // Returns observed metadata item based on specified tree item
