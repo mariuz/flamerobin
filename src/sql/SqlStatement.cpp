@@ -175,9 +175,9 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
                     {
                         objectM = databaseM->findByNameAndType(ntView,
                             nameM.get());
+                        if (objectM)
+                            objectTypeM = ntView;
                     }
-                    if (objectM)
-                        objectTypeM = ntView;
                 }
                 return;
             }
