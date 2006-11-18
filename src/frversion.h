@@ -2,5 +2,5 @@
 
 #define FR_VERSION_MAJOR    0
 #define FR_VERSION_MINOR    7
-#define FR_VERSION_RLS      5
+#define FR_VERSION_RLS      6
 #define FR_VERSION_SVN      "$Rev$"
