@@ -42,7 +42,7 @@ nmake -f makefile.vc <BUILD OPTIONS>
 Build options can be any of the following:
 
 WXDIR=<dir> - tells the makefile where to find the root wxWidgets directory
-DEBUG=<0,1> - tells whether to build debug (1) or release (0) build
+FINAL=<0,1> - tells whether to build debug (0) or release (1) build
 USEDLL=<0,1> - tells whether to link against wx static or dynamic libs
 UNICODE=<0,1> - tells whether to link against wx ansi or unicode build
 
