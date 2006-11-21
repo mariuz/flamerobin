@@ -77,8 +77,8 @@ SimpleHtmlFrame::SimpleHtmlFrame(wxWindow* parent, const wxFileName& fileName)
     fileNameM = fileName.GetFullName();
     setIdString(this, getFrameId(fileName));
 
-#include "fricon.xpm"
-    wxBitmap bmp(fricon_xpm);
+    #include "flamerobin.xpm"
+    wxBitmap bmp(flamerobin_xpm);
     wxIcon icon;
     icon.CopyFromBitmap(bmp);
     SetIcon(icon);

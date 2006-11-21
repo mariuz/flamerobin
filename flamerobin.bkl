@@ -449,6 +449,11 @@
         view.png
     </set>
 
+    <set var="RESOURCEDIR">
+        <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/res</if>
+        <if cond="FORMAT!='autoconf'">res</if>
+    </set>
+
 
     <define-tag name="mac-app-bundle" rules="exe">
         <!-- bundle directory: -->
@@ -583,6 +588,16 @@
             <srcdir>$(HTMLTEMPLATEDIR)</srcdir>
             <files>$(HTMLTEMPLATEFILES)</files>
             <install-to>$(DATADIR)/flamerobin/html-templates</install-to>
+        </data-files>
+        <data-files>
+            <srcdir>$(RESOURCEDIR)</srcdir>
+            <files>flamerobin.desktop</files>
+            <install-to>$(DATADIR)/applications</install-to>
+        </data-files>
+        <data-files>
+            <srcdir>$(RESOURCEDIR)</srcdir>
+            <files>flamerobin.xpm</files>
+            <install-to>$(DATADIR)/pixmaps</install-to>
         </data-files>
     </if>
 

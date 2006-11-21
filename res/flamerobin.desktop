@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=FlameRobin
+GenericName=FlameRobin
+Comment=Administration Tool for Firebird DBMS
+Exec=flamerobin
+Icon=flamerobin.xpm
+Type=Application
+Terminal=false
+Encoding=UTF-8
+Categories=Application;Development;

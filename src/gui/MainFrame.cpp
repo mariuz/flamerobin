@@ -257,8 +257,8 @@ void MainFrame::set_properties()
     if (firstServer.IsOk())
         tree_ctrl_1->SelectItem(firstServer);
 
-    #include "fricon.xpm"
-    wxBitmap bmp(fricon_xpm);
+    #include "flamerobin.xpm"
+    wxBitmap bmp(flamerobin_xpm);
     wxIcon icon;
     icon.CopyFromBitmap(bmp);
     SetIcon(icon);

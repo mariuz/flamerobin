@@ -103,7 +103,7 @@ wxBitmap getImage(NodeType type)
 wxBitmap getImage32(NodeType type)
 {
     // default image
-    #include "fricon.xpm"
+    #include "flamerobin.xpm"
 
     #include "column32.xpm"
     #include "database32.xpm"
@@ -119,9 +119,9 @@ wxBitmap getImage32(NodeType type)
 
     char ***map = new char**[ntLastType];
     for (int i = 0; i < ntLastType; i++)
-        map[i] = fricon_xpm;
+        map[i] = flamerobin_xpm;
 
-    map[ntUnknown]      = fricon_xpm;
+    map[ntUnknown]      = flamerobin_xpm;
     map[ntTable]        = table_xpm;
     map[ntSysTable]     = systemtable32_xpm;
     map[ntView]         = view_xpm;
