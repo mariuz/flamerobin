@@ -56,7 +56,7 @@ bool Logger::log2database(Config *cfg, const SqlStatement& stm, Database* db)
         IBPP::Statement st = IBPP::StatementFactory(db->getIBPPDatabase(), tr);
 
         // find next id
-        wxString sql = wxT("SELECT gen_id(FLAMEROBIN$GEN, 1) FROM rdb$database");
+        wxString sql = wxT("SELECT gen_id(FLAMEROBIN$LOG_GEN, 1) FROM rdb$database");
         if (cfg->get(wxT("LoggingUsesCustomSelect"), false))
         {
             sql = cfg->get(wxT("LoggingCustomSelect"),
@@ -210,14 +210,14 @@ bool Logger::prepareDatabase(Database *db)
         }
 
         // create generator
-        if (db->findByNameAndType(ntGenerator, wxT("FLAMEROBIN$GEN")) == 0)
+        if (db->findByNameAndType(ntGenerator, wxT("FLAMEROBIN$LOG_GEN")) == 0)
         {
             tr->Start();
             IBPP::Statement st = IBPP::StatementFactory(db->getIBPPDatabase(), tr);
-            st->Prepare("create generator FLAMEROBIN$GEN");
+            st->Prepare("create generator FLAMEROBIN$LOG_GEN");
             st->Execute();
             tr->Commit();
-            db->addObject(ntGenerator, wxT("FLAMEROBIN$GEN"));
+			db->addObject(ntGenerator, wxT("FLAMEROBIN$LOG_GEN"));
             db->refreshByType(ntGenerator);
         }
         return true;

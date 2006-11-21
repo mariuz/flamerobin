@@ -6,7 +6,7 @@
 -->
 <article id="frrelnotes">
   <articleinfo>
-    <title><application>FlameRobin</application> 0.7.5 ALPHA Manual</title>
+    <title><application>FlameRobin</application> 0.7.6 ALPHA Manual</title>
 
     <author>
       <firstname>Nando</firstname>
@@ -523,6 +523,22 @@
       interface and the capabilities. We already have some ideas that will
       radically change the appearance of this dialog box, but we thought users
       might want to try it out so they can give us some good tips.</para>
+    </section>
+
+    <section>
+      <title>Logging</title>
+
+      <para>The SQL Editor can log all executed statements to a text file, a
+      set of text files or a database table. This gives you the ability to
+      work visually and produce scripts to easily replicate sequences of
+      operations on other databases. For database logging, in a future
+      release, FlameRobin will also provide a visual interface to the log
+      table, so that you can view a list of modifications to an object.</para>
+
+      <para>Look <link linkend="frmanual-conf-logging">here</link> for the
+      options you use to configure this feature globally, and <link
+      linkend="frmanual-dbconf-logging">here</link> for database-level logging
+      options.</para>
     </section>
   </section>
 
@@ -1047,11 +1063,11 @@
     <section id="frmanual-conf-logging">
       <title>Logging</title>
 
-      <para>The SQL Editor can log all executed statements to a text file
-      (and, in a future release, to a database table). This gives you the
-      ability to work visually and produce scripts to easily replicate
-      sequences of operations on other databases. Here you set the options to
-      tune this feature.</para>
+      <para>The SQL Editor can log all executed statements to a text file, a
+      set of text files or a database table. Here you set the relevant options
+      for file-based logging, while logging to a database table is decided
+      <link linkend="frmanual-dbconf-logging">on a per-database
+      basis</link>.</para>
 
       <section>
         <title>Log DML statements</title>
@@ -1127,7 +1143,7 @@
       </section>
     </section>
 
-    <section>
+    <section id="frmanual-dbconf-logging">
       <title>Logging</title>
 
       <para>Please see the section about <link
@@ -1136,6 +1152,18 @@
       There is an additional option to turn off logging for a particular
       database only, while leaving it active for all the other
       databases.</para>
+
+      <para>There are also additional options to enable logging to a database
+      table. The table is called <symbol>FLAMEROBIN$LOG</symbol> and it is
+      created automatically the first time it's needed. Each record written to
+      this table gets an ID fetched by executing a SELECT statement that you
+      can customize. By default, FlameRobin fetches the values from a
+      generator called <symbol>FLAMEROBIN$LOG_GEN</symbol>, which is created
+      on demand as well. You might want to set a custom SELECT statement if
+      you want to use the ID as some kind of metadata version number for your
+      database, in which case you define the logic to follow when generating
+      new IDs. For example, you could write a stored procedure and have
+      FlameRobin call it.</para>
     </section>
   </section>
 
