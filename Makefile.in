@@ -205,7 +205,7 @@ install: all
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/applications
 	(cd $(srcdir)/res/ ; $(INSTALL_DATA)  flamerobin.desktop $(DESTDIR)$(datadir)/applications)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/pixmaps
-	(cd $(srcdir)/res/ ; $(INSTALL_DATA)  flamerobin.xpm $(DESTDIR)$(datadir)/pixmaps)
+	(cd $(srcdir)/res/ ; $(INSTALL_DATA)  flamerobin.png $(DESTDIR)$(datadir)/pixmaps)
 
 uninstall: 
 

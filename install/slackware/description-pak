@@ -1,0 +1,9 @@
+Flamerobin is a GUI administration tool for Firebird DBMS
+
+Its goals are to be:
+- lightweight
+- cross-platform (Linux, Windows, MacOSX, FreeBSD, Solaris)
+- dependent only on other open source software
+
+Homepage: http://www.flamerobin.org/
+

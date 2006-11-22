@@ -596,7 +596,7 @@
         </data-files>
         <data-files>
             <srcdir>$(RESOURCEDIR)</srcdir>
-            <files>flamerobin.xpm</files>
+            <files>flamerobin.png</files>
             <install-to>$(DATADIR)/pixmaps</install-to>
         </data-files>
     </if>
