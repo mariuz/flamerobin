@@ -50,7 +50,7 @@ private:
     enum { ID_MENU_CELLFONT, ID_MENU_LABELFONT,
         ID_MENU_COPYTOCLIPBOARD, ID_MENU_COPYTOCLIPBOARDASINSERT,
         ID_MENU_COPYTOCLIPBOARDASUPDATE, ID_MENU_SAVEASHTML,
-        ID_MENU_FETCHALL, ID_MENU_CANCELFETCHALL };
+        ID_MENU_FETCHALL, ID_MENU_CANCELFETCHALL, ID_MENU_SAVEASCSV };
 
     void OnContextMenu(wxContextMenuEvent& event);
     void OnGridCellRightClick(wxGridEvent& event);
@@ -69,6 +69,7 @@ private:
     void OnMenuUpdateIfHasSelection(wxUpdateUIEvent& event);
     void OnMouseWheel(wxMouseEvent& event);
     void OnThumbRelease(wxScrollWinEvent& event);
+    void OnMenuSaveAsCSV(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()
 };

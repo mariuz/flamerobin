@@ -54,7 +54,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/controls/DataGridTable.h"
 #include "metadata/database.h"
 #include "metadata/table.h"
-
 //-----------------------------------------------------------------------------
 DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
     : wxGrid(parent, id)
@@ -162,6 +161,7 @@ void DataGrid::showPopMenu(wxPoint cursorPos)
     m.Append(ID_MENU_COPYTOCLIPBOARDASINSERT, _("Copy as INSERT statements"));
     m.Append(ID_MENU_COPYTOCLIPBOARDASUPDATE, _("Copy as UPDATE statements"));
     m.Append(ID_MENU_SAVEASHTML, _("Save as HTML file..."));
+    m.Append(ID_MENU_SAVEASCSV, _("Save as CSV file..."));
     m.AppendSeparator();
 
     m.Append(ID_MENU_LABELFONT, _("Set header font"));
@@ -209,6 +209,8 @@ BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_MENU(DataGrid::ID_MENU_LABELFONT, DataGrid::OnMenuLabelFont)
     EVT_MENU(DataGrid::ID_MENU_SAVEASHTML, DataGrid::OnMenuSaveAsHTML)
     EVT_UPDATE_UI(DataGrid::ID_MENU_SAVEASHTML, DataGrid::OnMenuUpdateIfHasSelection)
+    EVT_MENU(DataGrid::ID_MENU_SAVEASCSV, DataGrid::OnMenuSaveAsCSV)
+    EVT_UPDATE_UI(DataGrid::ID_MENU_SAVEASCSV, DataGrid::OnMenuUpdateIfHasSelection)
 
 #ifdef __WXGTK__
     EVT_MOUSEWHEEL(DataGrid::OnMouseWheel)
@@ -476,6 +478,102 @@ void DataGrid::OnMenuLabelFont(wxCommandEvent& WXUNUSED(event))
         AutoSizeColumns();
         ForceRefresh();
     }
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnMenuSaveAsCSV(wxCommandEvent& WXUNUSED(event))
+{
+    DataGridTable* table = getDataGridTable();
+    if (!table) return;
+
+    wxString fname = ::wxFileSelector(_("Save data in selected cells as"),
+        wxEmptyString, wxEmptyString, wxT("*.csv"),
+        _("CSV files (*.csv)|*.csv|All files (*.*)|*.*"),
+        wxSAVE|wxCHANGE_DIR|wxOVERWRITE_PROMPT, this);
+    if (fname.empty())
+        return;
+
+    wxBusyCursor cr;
+    bool all = true;
+
+    FR_TRY
+
+    //user can decide in popup menu fetchAll();
+
+    // find all columns that have at least one cell selected
+    std::vector<bool> selCols;
+    int cols = GetNumberCols();
+    selCols.reserve(cols);
+    for (int j = 0; j < cols; j++)
+        selCols.push_back(false);
+
+    int rows = GetNumberRows();
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            if (IsInSelection(i, j))
+                selCols[j] = true;
+        }
+    }
+
+    const wxString sCOMMA(wxT(","));
+    const wxString sTAB(wxT("\t"));
+    const wxString sAPS(wxT("\""));
+    const wxString sEOL(wxT("\n"));
+    wxString sDLM = sTAB;
+
+    bool dlmiscomma = false;
+    config().getValue(wxT("CSVDelimiterIsComma"), dlmiscomma);
+    if (dlmiscomma)
+        sDLM = sCOMMA;
+
+    // write CSV file
+    wxFileOutputStream fos(fname);
+    if (!fos.Ok()) // TODO: report error
+        return;
+    wxTextOutputStream outStr(fos);
+
+    wxString sHeader;
+    for (int j = 0; j < cols; j++)
+    {
+        if (selCols[j])
+        {
+            if (!sHeader.IsEmpty())
+                sHeader += sDLM;
+            if (sDLM == sCOMMA)
+                sHeader += sAPS + GetColLabelValue(j) + sAPS;
+            else
+                sHeader += GetColLabelValue(j);
+        }
+    }
+    if (!sHeader.IsEmpty())
+        outStr.WriteString(sHeader + sEOL);
+
+    for (int i = 0; i < rows; i++)
+    {
+        wxString sRow;
+        for (int j = 0; j < cols; j++)
+        {
+            if (selCols[j])
+            {
+                if (!sRow.IsEmpty())
+                    sRow += sDLM;
+                if (sDLM == sCOMMA)
+                    sRow += table->getCellValueForCSV(i, j);
+                else
+                    sRow += GetCellValue(i, j);
+            }
+            else
+                all = false;
+        }
+        if (!sRow.IsEmpty())
+            outStr.WriteString(sRow + sEOL); // wxTextBuffer::GetEOL();
+    }
+
+    if (all)
+        notifyIfUnfetchedData();
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnMenuSaveAsHTML(wxCommandEvent& WXUNUSED(event))

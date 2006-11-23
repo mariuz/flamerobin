@@ -227,6 +227,31 @@ wxString DataGridTable::getCellValueForInsert(int row, int col)
     return wxT("'") + s + wxT("'");
 }
 //-----------------------------------------------------------------------------
+wxString DataGridTable::getCellValueForCSV(int row, int col)
+{
+    if (row >= (int)dataM.size())
+        return wxEmptyString;
+    if (col >= (int)dataM[row].size())
+        return wxEmptyString;
+
+    DataGridCell* cell = dataM[row][col];
+
+    const wxString sAPOS(wxT("\""));
+    wxString s(sAPOS + wxT("NULL") + sAPOS);
+
+    if (!cell)
+        return s;
+
+    if (isNumericColumn(col+1)) //+1 for ibpp
+        return cell->getValue();
+
+    // return quoted text, but escape embedded quotes
+    s = cell->getValue();
+    s.Replace(sAPOS, sAPOS+sAPOS);
+
+    return sAPOS + s + sAPOS;
+}
+//-----------------------------------------------------------------------------
 wxString DataGridTable::GetColLabelValue(int col)
 {
     if (col < columnCountM && statementM != 0)
@@ -248,12 +273,12 @@ IBPP::SDT DataGridTable::getColumnType(int col)
         catch (IBPP::Exception& e)
         {
             // perhaps we should clear the statement, since something is obviously wrong
-            if (columnCountM > col - 1) 
+            if (columnCountM > col - 1)
             {
                 wxGridTableMessage colMsg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED,
                     0, columnCountM + 1 - col);
                 GetView()->ProcessTableMessage(colMsg);
-                columnCountM = col - 1;
+            columnCountM = col - 1;
             }
             ::wxMessageBox(std2wx(e.ErrorMessage()),
                             _("An IBPP error occurred."), wxOK|wxICON_ERROR);

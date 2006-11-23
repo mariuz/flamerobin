@@ -63,6 +63,7 @@ public:
     void fetch();
     wxString getCellValue(int row, int col);
     wxString getCellValueForInsert(int row, int col);
+    wxString getCellValueForCSV(int row, int col);
     IBPP::SDT getColumnType(int col);
     bool getFetchAllRows();
     wxString getTableName();
