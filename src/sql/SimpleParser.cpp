@@ -193,6 +193,7 @@ wxString::size_type SimpleParser::getTableNames(std::vector<wxString>& list, wxS
 }
 //-----------------------------------------------------------------------------
 //! removes comments from sql statements, with taking care of single quotes
+// FIXME: this doesn't handle nested comments properly
 void SimpleParser::removeComments(wxString& sql, const wxString startComment, const wxString endComment)
 {
     using namespace std;
@@ -206,7 +207,10 @@ void SimpleParser::removeComments(wxString& sql, const wxString startComment, co
         wxString::size_type quote = sql.find(wxT("'"), oldpos);
         if (quote != wxString::npos && quote < pos)    // move to the next quote
         {
-            oldpos = 1 + sql.find(wxT("'"), quote+1);    // end quote
+            oldpos = sql.find(wxT("'"), quote+1);   // end quote
+            if (oldpos == wxString::npos)           // rest of the statement
+                return;                             // is quoted
+            oldpos++;
             continue;
         }
 
