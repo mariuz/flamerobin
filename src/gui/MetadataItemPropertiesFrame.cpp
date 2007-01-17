@@ -106,7 +106,12 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
     }
 
     html_window = new PrintableHtmlWindow(this);
-    CreateStatusBar();
+
+    wxStatusBar *sb = CreateStatusBar();
+    Database* d = objectM->getDatabase();
+    wxString s = d->getUsername() + wxT("@") + d->getConnectionString()
+        + wxT(" (") + d->getConnectionCharset() + wxT(")");
+    sb->SetStatusText(s);
 
     // request initial rendering
     requestLoadPage(true);
@@ -116,7 +121,6 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
     wxString objName(objectM->getName_());
     SetTitle(wxString::Format(_("%s: Properties"), objName.c_str()));
     html_window->SetRelatedFrame(this, objName + wxT(": %s"));
-    html_window->SetRelatedStatusBar(0);
 
     wxBitmap bmp = getImage32(objectM->getType());
     wxIcon icon;
