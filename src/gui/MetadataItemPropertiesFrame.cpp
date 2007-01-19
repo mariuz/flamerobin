@@ -109,9 +109,14 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
 
     wxStatusBar *sb = CreateStatusBar();
     Database* d = objectM->getDatabase();
-    wxString s = d->getUsername() + wxT("@") + d->getConnectionString()
-        + wxT(" (") + d->getConnectionCharset() + wxT(")");
-    sb->SetStatusText(s);
+    if (d)  // server property page doesn't have a database, so don't crash
+    {
+        wxString s = d->getUsername() + wxT("@") + d->getConnectionString()
+            + wxT(" (") + d->getConnectionCharset() + wxT(")");
+        sb->SetStatusText(s);
+    }
+    else
+        sb->SetStatusText(objectM->getPrintableName());
 
     // request initial rendering
     requestLoadPage(true);
