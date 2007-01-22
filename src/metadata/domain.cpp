@@ -302,6 +302,17 @@ wxString Domain::getPrintableName()
     return retval;
 }
 //-----------------------------------------------------------------------------
+wxString Domain::getAlterSqlTemplate() const
+{
+    return wxT("ALTER DOMAIN ") + getQuotedName() + wxT("\n")
+        wxT("  SET DEFAULT { literal | NULL | USER }\n")
+        wxT("  | DROP DEFAULT\n")
+        wxT("  | ADD [CONSTRAINT] CHECK (condition)\n")
+        wxT("  | DROP CONSTRAINT\n")
+        wxT("  | new_name\n")
+        wxT("  | TYPE new_datatype;\n");
+}
+//-----------------------------------------------------------------------------
 wxString Domain::getCreateSqlTemplate() const
 {
     return  wxT("CREATE DOMAIN domain_name\n")

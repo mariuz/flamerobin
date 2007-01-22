@@ -724,9 +724,34 @@ END_EVENT_TABLE()
 void FieldPropertiesDialog::OnButtonEditDomainClick(wxCommandEvent&
     WXUNUSED(event))
 {
+    if (getIsNewDomainSelected())
+    {
+        // no domain selected
+        return;
+    }
+
+    // TODO:
     // create DomainPropertiesFrame & show it
     // when done, reload domain definition
     // updateDomainInfo(wx2std(cb_domains->GetValue()));
+
+    // Currently we just open the SQL editor and close this dialog
+    wxString domain = choice_domain->GetStringSelection();
+    Database *db = tableM->getDatabase();
+    Domain *d = dynamic_cast<Domain *>(db->findByNameAndType(ntDomain,
+        domain));
+    if (!d)
+    {
+        // domain not found
+        return;
+    }
+
+    ExecuteSqlFrame *esf = new ExecuteSqlFrame(GetParent(), -1,
+        _("Alter domain"));
+    esf->setDatabase(db);
+    esf->setSql(d->getAlterSqlTemplate());
+    esf->Show();
+    EndModal(wxID_CANCEL);
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::OnButtonOkClick(wxCommandEvent& WXUNUSED(event))
@@ -819,32 +844,32 @@ bool ColumnPropertiesHandler::handleURI(URI& uri)
         t = c->getTable();
     }
 
-	wxString statements, title;
-	{	// we want FPD to go out of scope and get destroyed since the action in
-		// ESF can destroy the field, and take down the FPD. Accessing FPD in turn
-		// leads to mysterious crash
-		FieldPropertiesDialog fpd(w, t, c);
-		// NOTE: this has been moved here from OnOkButtonClick() to make frame
-		//       activation work properly.  Basically activation of another
-		//       frame has to happen outside wxDialog::ShowModal(), because it
-		//       does at the end re-focus the last focused control, raising
-		//       the parent frame over the newly created sql execution frame
-		if (fpd.ShowModal() == wxID_OK)
-		{
-			statements = fpd.getStatementsToExecute();
-			title = fpd.getStatementTitle();
-		}
-	}
+    wxString statements, title;
+    {   // we want FPD to go out of scope and get destroyed since the action in
+        // ESF can destroy the field, and take down the FPD. Accessing FPD in turn
+        // leads to mysterious crash
+        FieldPropertiesDialog fpd(w, t, c);
+        // NOTE: this has been moved here from OnOkButtonClick() to make frame
+        //       activation work properly.  Basically activation of another
+        //       frame has to happen outside wxDialog::ShowModal(), because it
+        //       does at the end re-focus the last focused control, raising
+        //       the parent frame over the newly created sql execution frame
+        if (fpd.ShowModal() == wxID_OK)
+        {
+            statements = fpd.getStatementsToExecute();
+            title = fpd.getStatementTitle();
+        }
+    }
 
-	if (!statements.IsEmpty())
-	{
-		// create ExecuteSqlFrame with option to close at once
-		ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1, title);
-		esf->setDatabase(t->getDatabase());
-		esf->setSql(statements);
-		esf->Show();
-		esf->executeAllStatements(true);
-	}
+    if (!statements.IsEmpty())
+    {
+        // create ExecuteSqlFrame with option to close at once
+        ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1, title);
+        esf->setDatabase(t->getDatabase());
+        esf->setSql(statements);
+        esf->Show();
+        esf->executeAllStatements(true);
+    }
     return true;
 }
 //-----------------------------------------------------------------------------

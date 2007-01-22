@@ -57,6 +57,7 @@ public:
     bool hasDefault();
     virtual const wxString getTypeName() const;
     virtual wxString getCreateSqlTemplate() const;
+    wxString getAlterSqlTemplate() const;
     virtual wxString getPrintableName();
     virtual void acceptVisitor(MetadataItemVisitor* v);
 };
