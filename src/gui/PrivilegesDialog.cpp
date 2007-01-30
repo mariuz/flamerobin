@@ -295,8 +295,8 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     }
     choice_memberof->Enable(false);
     fgSizer4->Add(choice_memberof, 0, wxEXPAND, 0);
-	privilegesSizer->Add(fgSizer4, 1, wxEXPAND|wxALL, 5);
-	privilegesPanel->SetSizer(privilegesSizer);
+    privilegesSizer->Add(fgSizer4, 1, wxEXPAND|wxALL, 5);
+    privilegesPanel->SetSizer(privilegesSizer);
     topSizer->Add(privilegesPanel, 1, wxEXPAND, 0);
     // PRIVILEGES done
 
@@ -433,8 +433,9 @@ void PrivilegesDialog::updateControls()
     }
 
     wxString grantee;
+    // some usernames need quoting
     if (radiobtn_user->GetValue())
-        grantee = textctrl_user->GetValue();
+        grantee = wxT("\"") + textctrl_user->GetValue() + wxT("\"");
     else if (radiobtn_trigger->GetValue())
     {
         grantee = wxT("TRIGGER ") + Identifier(
