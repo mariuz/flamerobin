@@ -743,7 +743,7 @@ bool Database::parseCommitedSql(const SqlStatement& stm)
         stm.actionIs(actALTER, ntGenerator))
     {
         if (Generator* g = dynamic_cast<Generator*>(object))
-            g->loadValue(true);
+            g->loadValue();
         return true;
     }
 

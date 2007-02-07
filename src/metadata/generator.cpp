@@ -72,11 +72,8 @@ void Generator::setValue(int64_t value)
     }
 }
 //-----------------------------------------------------------------------------
-bool Generator::loadValue(bool force)
+bool Generator::loadValue()
 {
-    if (!force && valueLoadedM)
-        return true;
-
     Database *d = getDatabase();
     if (!d)
     {

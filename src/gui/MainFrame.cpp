@@ -1266,7 +1266,7 @@ void MainFrame::showGeneratorValue(Generator* g)
 {
     if (!g)
         return;
-    if (!g->loadValue(true))
+    if (!g->loadValue())
         reportLastError(_("Error Loading Generator Value"));
 }
 //-----------------------------------------------------------------------------

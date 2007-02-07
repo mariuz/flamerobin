@@ -42,7 +42,7 @@ public:
     // overrides MetadataItem::getCreateSqlTemplate()
     wxString getCreateSqlTemplate() const;
 
-    bool loadValue(bool force = false);
+    bool loadValue();
     int64_t getValue();
 
     virtual wxString getPrintableName();

@@ -1926,7 +1926,7 @@ bool EditGeneratorValueHandler::handleURI(URI& uri)
     if (!g || !w)
         return true;
 
-    g->loadValue(true);    // force reload of value from database
+    g->loadValue();
     int64_t oldvalue = g->getValue();
     Database *db = g->getDatabase();
     if (!db)
