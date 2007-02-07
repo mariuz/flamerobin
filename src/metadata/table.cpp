@@ -460,11 +460,11 @@ bool Table::loadIndices()
         IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
         st1->Prepare(
             "SELECT i.rdb$index_name, i.rdb$unique_flag, i.rdb$index_inactive, "
-            " i.rdb$index_type, i.rdb$statistics, s.rdb$field_name, "
-            " rc.rdb$constraint_name"
+            " i.rdb$index_type, i.rdb$statistics, "
+			" s.rdb$field_name, rc.rdb$constraint_name, i.rdb$expression_source"
             " from rdb$indices i"
-            " join rdb$index_segments s on i.rdb$index_name = s.rdb$index_name"
-            " left outer join rdb$relation_constraints rc "
+            " left join rdb$index_segments s on i.rdb$index_name = s.rdb$index_name"
+            " left join rdb$relation_constraints rc "
             "   on rc.rdb$index_name = i.rdb$index_name "
             " where i.rdb$relation_name = ?"
             " order by i.rdb$index_id, s.rdb$field_position "
@@ -475,7 +475,7 @@ bool Table::loadIndices()
         Index* i = 0;
         while (st1->Fetch())
         {
-            std::string name, fname;
+            std::string name, fname, expression;
             short unq, inactive, type;
             double statistics;
             st1->Get(1, name);
@@ -493,6 +493,7 @@ bool Table::loadIndices()
                 st1->Get(4, type);
             st1->Get(5, statistics);
             st1->Get(6, fname);
+			st1->Get(8, expression);
             name.erase(name.find_last_not_of(" ") + 1);
             fname.erase(fname.find_last_not_of(" ") + 1);
 
@@ -505,7 +506,8 @@ bool Table::loadIndices()
                     inactive == 0,
                     type == 0,
                     statistics,
-                    !st1->IsNull(7)
+                    !st1->IsNull(7),
+					std2wx(expression)
                 );
                 indicesM.push_back(x);
                 i = &indicesM.back();

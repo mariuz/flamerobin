@@ -44,7 +44,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 Index::Index(bool unique, bool active, bool ascending, double statistics,
-    bool system)
+    bool system, wxString expression)
 {
     typeM = ntIndex;
     uniqueFlagM = unique;
@@ -52,6 +52,7 @@ Index::Index(bool unique, bool active, bool ascending, double statistics,
     indexTypeM = (ascending ? itAscending : itDescending);
     statisticsM = statistics;
     isSystemM = system;
+	expressionM = expression;
 }
 //-----------------------------------------------------------------------------
 bool Index::isSystem() const
@@ -81,14 +82,19 @@ std::vector<wxString> *Index::getSegments()
 //-----------------------------------------------------------------------------
 wxString Index::getFieldsAsString()
 {
-    wxString retval;
-    for (std::vector<wxString>::iterator it = segmentsM.begin(); it != segmentsM.end(); ++it)
-    {
-        if (!retval.empty())
-            retval += wxT(",");
-        retval += (*it);
-    }
-    return retval;
+    if (!expressionM.IsEmpty())
+		return expressionM;
+	else
+	{
+	    wxString retval;
+		for (std::vector<wxString>::iterator it = segmentsM.begin(); it != segmentsM.end(); ++it)
+	    {
+		    if (!retval.empty())
+			    retval += wxT(",");
+	        retval += (*it);
+		}
+		return retval;
+	}
 }
 //-----------------------------------------------------------------------------
 Index::IndexType Index::getIndexType()
@@ -109,5 +115,10 @@ void Index::saveDescription(wxString description)
         wxT("update RDB$INDICES set RDB$DESCRIPTION = ? ")
         wxT("where RDB$INDEX_NAME = ?"),
         description);
+}
+//-----------------------------------------------------------------------------
+wxString Index::getExpression() const
+{
+	return expressionM;
 }
 //-----------------------------------------------------------------------------

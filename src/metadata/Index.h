@@ -46,18 +46,22 @@ private:
     IndexType indexTypeM;
     double statisticsM;
     std::vector<wxString> segmentsM;
+	wxString expressionM;
 protected:
     virtual void loadDescription();
     virtual void saveDescription(wxString description);
 public:
     Index(bool unique, bool active, bool ascending, double statistics,
-        bool system);
+        bool system, wxString expression);
 
     virtual bool isSystem() const;
     bool isActive();
     bool isUnique();
     double getStatistics();
+	wxString getExpression() const;
     IndexType getIndexType();
+	// Returns a list of index fields, or the expression source if
+	// the index is an expression-based index.
     wxString getFieldsAsString();
     std::vector<wxString> *getSegments();
 };
