@@ -50,6 +50,66 @@ WXDIR *must* be specified (or set as an environment variable), but the rest
 default to 0 and are optional.
 
 -------------------------------
+-- MSW - Visual C++ 2005 Express Build Instructions
+-------------------------------
+
+Microsoft Visual C++ Express is a freeware version of MS Visual Studio. 
+There are two ways to build FlameRobin. One is via the dsp/dsw
+project files, and the other is via the makefile.vc command line makefile.
+
+* Using the dsp/dsw/sln projects *
+
+Double click on flamerobin\flamerobin_flamerobin.sln, select a build configuration by
+going to the Build menu, selecting "Set build configuration" and then
+picking a config, then build!
+
+* Using the makefiles *
+To use the makefiles, start up a command line and navigate to the
+flamerobin directory. There, run the following command:
+
+nmake -f makefile.vc <BUILD OPTIONS>
+
+Build options can be any of the following:
+
+WXDIR=<dir> - tells the makefile where to find the root wxWidgets directory
+FINAL=<0,1> - tells whether to build debug (0) or release (1) build
+USEDLL=<0,1> - tells whether to link against wx static or dynamic libs
+UNICODE=<0,1> - tells whether to link against wx ansi or unicode build
+
+WXDIR *must* be specified (or set as an environment variable), but the rest
+default to 0 and are optional.
+
+-------------------------------
+-- MSW - Building wxWidgets with Visual C++ 2005 Express
+-------------------------------
+
+Unpack the archive somewhere, for example c:\wxWin260:
+
+* Using the dsp/dsw/sln projects *
+
+Double click on build\msw\wx.dsw, convert to new format, select a build configuration by
+going to the Build menu, selecting "Set build configuration" and then 
+picking a config, then build!
+
+Double click on contrib\build\stc\stc.dsw, convert to new format, select a build configuration by going to the Build menu, selecting "Set build configuration" and then
+picking a config, then build!
+
+
+* Using the makefiles *
+Open MS-DOS prompt and go into "build\msw" directory:
+set WXWIN=c:\wxWin260
+set WXDIR=c:\wxWin260
+nmake -f makefile.vc BUILD=release RUNTIME_LIBS=static
+cd ..\..
+cd contrib\build\stc
+nmake -f makefile.vc BUILD=release RUNTIME_LIBS=static
+
+As you can see, it is important to build STC package too. It is for
+wxStyledTextControl which is used in many places in FlameRobin.
+
+
+
+-------------------------------
 -- MSW - Borland's Free C++ Build Instructions
 -------------------------------
 
