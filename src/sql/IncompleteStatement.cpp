@@ -301,6 +301,8 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
         r = findObject<Relation>(aliases, objectAlias, ntTable);
         if (!r)
             r = findObject<Relation>(aliases, objectAlias, ntView);
+        if (!r)
+            r = findObject<Relation>(aliases, objectAlias, ntSysTable);
     }
     std::list<wxString> cols;
     if (r)
