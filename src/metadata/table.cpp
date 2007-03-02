@@ -461,7 +461,7 @@ bool Table::loadIndices()
         st1->Prepare(
             "SELECT i.rdb$index_name, i.rdb$unique_flag, i.rdb$index_inactive, "
             " i.rdb$index_type, i.rdb$statistics, "
-			" s.rdb$field_name, rc.rdb$constraint_name, i.rdb$expression_source"
+            " s.rdb$field_name, rc.rdb$constraint_name, i.rdb$expression_source"
             " from rdb$indices i"
             " left join rdb$index_segments s on i.rdb$index_name = s.rdb$index_name"
             " left join rdb$relation_constraints rc "
@@ -475,7 +475,8 @@ bool Table::loadIndices()
         Index* i = 0;
         while (st1->Fetch())
         {
-            std::string name, fname, expression;
+            std::string name, fname;
+            wxString expression;
             short unq, inactive, type;
             double statistics;
             st1->Get(1, name);
@@ -493,7 +494,7 @@ bool Table::loadIndices()
                 st1->Get(4, type);
             st1->Get(5, statistics);
             st1->Get(6, fname);
-			st1->Get(8, expression);
+            readBlob(st1, 8, expression);
             name.erase(name.find_last_not_of(" ") + 1);
             fname.erase(fname.find_last_not_of(" ") + 1);
 
@@ -507,7 +508,7 @@ bool Table::loadIndices()
                     type == 0,
                     statistics,
                     !st1->IsNull(7),
-					std2wx(expression)
+                    expression
                 );
                 indicesM.push_back(x);
                 i = &indicesM.back();
