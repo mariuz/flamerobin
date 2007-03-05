@@ -461,13 +461,13 @@ bool Table::loadIndices()
         st1->Prepare(
             "SELECT i.rdb$index_name, i.rdb$unique_flag, i.rdb$index_inactive, "
             " i.rdb$index_type, i.rdb$statistics, "
-            " s.rdb$field_name, rc.rdb$constraint_name, i.rdb$expression_source"
-            " from rdb$indices i"
-            " left join rdb$index_segments s on i.rdb$index_name = s.rdb$index_name"
+            " s.rdb$field_name, rc.rdb$constraint_name, i.rdb$expression_source "
+            " from rdb$indices i "
+            " left join rdb$index_segments s on i.rdb$index_name = s.rdb$index_name "
             " left join rdb$relation_constraints rc "
             "   on rc.rdb$index_name = i.rdb$index_name "
-            " where i.rdb$relation_name = ?"
-            " order by i.rdb$index_id, s.rdb$field_position "
+            " where i.rdb$relation_name = ? "
+            " order by i.rdb$index_name, s.rdb$field_position "
         );
 
         st1->Set(1, wx2std(getName_()));
