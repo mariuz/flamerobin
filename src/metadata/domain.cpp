@@ -121,7 +121,12 @@ bool Domain::loadInfo()
 
         hasDefaultM = !st1->IsNull(9);
         if (hasDefaultM)
-            defaultM.Remove(0, 8);
+        {
+            // Some users reported two spaces before DEFAULT word in source
+            // Perhaps some other tools can put garbage here? Should we
+            // parse it as SQL to clean up comments, whitespace, etc?
+            defaultM.Trim(false).Remove(0, 8);
+        }
 
         if (st1->IsNull(10))
             collationM = wxEmptyString;

@@ -141,7 +141,10 @@ bool Relation::loadColumns()
             if (!st1->IsNull(6))
             {
                 readBlob(st1, 6, defaultSrc);
-                defaultSrc.Remove(0, 8);
+                // Some users reported two spaces before DEFAULT word in source
+                // Perhaps some other tools can put garbage here? Should we
+                // parse it as SQL to clean up comments, whitespace, etc?
+                defaultSrc.Trim(false).Remove(0, 8);
             }
 
             Column *cc = columnsM.add();
