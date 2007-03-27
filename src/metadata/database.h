@@ -100,7 +100,6 @@ public:
     int getPageSize();
     int getBuffers();
     int getPages();
-    int getSize();
 
     int getOldestTransaction();
     int getNextTransaction();

@@ -848,13 +848,16 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         if (!d)
             return;
 
-        int size = d->getInfo()->getSize();
-        if (size > 1048576)
-            htmlpage += wxString::Format(wxT("%0.2fGB"), size/1048576.0);
-        else if (size > 1024)
-            htmlpage += wxString::Format(wxT("%0.2fMB"), size/1024.0);
+        float size = (float)d->getInfo()->getPageSize() * d->getInfo()->getPages();
+        const float kilo = 1024.0;
+        const float mega = kilo * kilo;
+        const float giga = kilo * mega;
+        if (size >= giga)
+            htmlpage += wxString::Format(wxT("%0.2fGB"), size / giga);
+        else if (size >= mega)
+            htmlpage += wxString::Format(wxT("%0.2fMB"), size / mega);
         else
-            htmlpage << size << wxT("kB");
+            htmlpage += wxString::Format(wxT("%0.2fkB"), size / kilo);
     }
     else if (cmd == wxT("forced_writes"))
     {

@@ -150,11 +150,6 @@ bool DatabaseInfo::getReadOnly()
     return readOnlyM;
 }
 //-----------------------------------------------------------------------------
-int DatabaseInfo::getSize()
-{
-    return ((pagesM * pageSizeM) / 1024);
-}
-//-----------------------------------------------------------------------------
 int DatabaseInfo::getSweep()
 {
     return sweepM;
