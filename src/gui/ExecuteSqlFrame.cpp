@@ -532,7 +532,10 @@ wxString DatabaseToSystemCharsetConversion::mapCharset(
     if (charset.Mid(0, 5) == wxT("WIN12"))
         return wxT("CP12") + charset.Mid(5);
 
-    // Firebird charsets ISO8859-X (and some others) are recognized as-is
+    // Firebird charsets ISO8859_X
+    if (charset.Mid(0, 8) == wxT("ISO8859_"))
+        return wxT("ISO-8859-") + charset.Mid(8);
+
     // all other mappings need to be added here...
     struct CharsetMapping { const wxChar* connCS; const wxChar* convCS; };
     static const CharsetMapping mappings[] = {
