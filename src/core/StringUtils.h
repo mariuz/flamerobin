@@ -40,4 +40,8 @@ wxString std2wx(const std::string& input, wxMBConv* conv = wxConvCurrent);
 //! converts chars that have special meaning in HTML, so they get displayed
 wxString escapeHtmlChars(const wxString& input, bool processNewlines = true);
 //-----------------------------------------------------------------------------
+//! returns string suitable for HTML META charset tag (used only if no
+//  conversion to UTF-8 is available, i.e. in non-Unicode build
+wxString getHtmlCharset();
+//-----------------------------------------------------------------------------
 #endif // FR_STRINGUTILS_H

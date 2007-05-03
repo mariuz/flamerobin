@@ -610,8 +610,9 @@ void DataGrid::OnMenuSaveAsHTML(wxCommandEvent& WXUNUSED(event))
 
     outStr.WriteString(wxT(
         "<html><head><META \
-            HTTP-EQUIV=\"Content-Type\" content=\"text/html; charset=utf-8\">\
-        </head>\
+            HTTP-EQUIV=\"Content-Type\" content=\"text/html; charset="));
+    outStr.WriteString(getHtmlCharset());
+    outStr.WriteString(wxT("\"></head>\
         <body bgcolor=white>\
         <table bgcolor=black cellspacing=1 cellpadding=3 border=0>\
             <tr>\n"));
