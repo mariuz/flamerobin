@@ -228,7 +228,7 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
                 wxT(" LEFT JOIN rdb$dependencies d ON d.rdb$dependent_name = f.rdb$field_source \n")
                 wxT(" WHERE d.rdb$dependent_type = 3 AND f.rdb$relation_name = ? \n");
         }
-        if (!ofObject)                      // find tables that have calculated columns based on "this" object
+        if (!ofObject) // find tables that have calculated columns based on "this" object
         {
             sql += wxT("union all \n")
                 wxT(" SELECT distinct cast(0 as smallint), f.rdb$relation_name, d.rdb$field_name \n")
@@ -265,7 +265,8 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
                     // maybe it's a view masked as table
                     current = d->findByNameAndType(ntView, std2wx(object_name));
                     // or possibly a system table
-                    current = d->findByNameAndType(ntSysTable, std2wx(object_name));
+                    if (!current)
+                        current = d->findByNameAndType(ntSysTable, std2wx(object_name));
                 }
                 if (!ofObject && t == ntTrigger)
                 {
