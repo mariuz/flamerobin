@@ -122,7 +122,7 @@ wxString SearchableEditor::convertBackslashes(const wxString& source)
         if (result.Mid(p+2, 2).ToULong(&number, 16))
         {
             result.Remove(p, 3);
-            result.SetChar(p, number);
+            result[p] = (wxChar)number;
         }
         else
         {

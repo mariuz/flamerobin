@@ -120,7 +120,7 @@ wxString GridCellFormats::formatDate(int year, int month, int day)
     wxString result;
     for (wxString::iterator c = dateFormatM.begin(); c != dateFormatM.end(); c++)
     {
-        switch (*c)
+        switch ((wxChar)*c)
         {
             case 'd':
                 result += wxString::Format(wxT("%d"), day);
@@ -156,7 +156,7 @@ wxString GridCellFormats::formatTime(int hour, int minute, int second,
     wxString result;
     for (wxString::iterator c = timeFormatM.begin(); c != timeFormatM.end(); c++)
     {
-        switch (*c)
+        switch ((wxChar)*c)
         {
             case 'h':
                 result += wxString::Format(wxT("%d"), hour);

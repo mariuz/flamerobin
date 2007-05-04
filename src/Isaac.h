@@ -126,7 +126,7 @@ public:
         for (int i=0; i<256; ++i)
             ctxM.randrsl[i]=(ub4)0;
         for (int i=0; masterpw[i] && i<256; ++i)
-            ctxM.randrsl[i] = masterpw[i];
+            ctxM.randrsl[i] = (wxChar)masterpw[i];
         randinit(&ctxM);
         isaac(&ctxM);
     }
@@ -138,7 +138,7 @@ public:
         for (int i=0; i<33; ++i)
             pw[i] = 0;
         for (int i=0; i < (int) pwd.Length() && i<32; ++i)
-            pw[i] = (ub4)pwd[i];
+            pw[i] = (ub4)(wxChar)pwd[i];
 
         for (int j=0; j<32; ++j)
             result += wxString::Format(wxT("%08lx"), pw[j] ^ ctxM.randrsl[j]);

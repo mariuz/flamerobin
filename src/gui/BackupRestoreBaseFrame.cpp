@@ -262,17 +262,17 @@ void BackupRestoreBaseFrame::OnThreadOutput(wxCommandEvent& WXUNUSED(event))
         wxString s(threadMsgsM[i]);
         if (s.Length() == 0)
             continue;
-        switch (s.GetChar(0))
+        switch ((wxChar)s[0])
         {
-        case 'e':
-            msgKindsM.Add((int)error_message);
-            break;
-        case 'i':
-            msgKindsM.Add((int)important_message);
-            break;
-        case 'p':
-            msgKindsM.Add((int)progress_message);
-            break;
+            case 'e':
+                msgKindsM.Add((int)error_message);
+                break;
+            case 'i':
+                msgKindsM.Add((int)important_message);
+                break;
+            case 'p':
+                msgKindsM.Add((int)progress_message);
+                break;
         }
         // this depends on server type, so just in case...
         if (s.Last() != '\n')

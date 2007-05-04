@@ -864,7 +864,7 @@ wxStaticText* PrefDlgChooserSetting::getLabel()
 //-----------------------------------------------------------------------------
 bool PrefDlgChooserSetting::hasControls() const
 {
-    return (captionM) || (textctrlM) ||(browsebtnM);
+    return (captionBeforeM) || (textctrlM) ||(browsebtnM);
 }
 //-----------------------------------------------------------------------------
 bool PrefDlgChooserSetting::loadFromConfig(Config& config)
