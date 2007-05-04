@@ -231,7 +231,7 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
         if (!ofObject) // find tables that have calculated columns based on "this" object
         {
             sql += wxT("union all \n")
-                wxT(" SELECT distinct cast(0 as smallint), f.rdb$relation_name, d.rdb$field_name \n")
+                wxT(" SELECT distinct cast(0 as smallint), f.rdb$relation_name, f.rdb$field_name \n")
                 wxT(" from rdb$relation_fields f \n")
                 wxT(" left join rdb$dependencies d on d.rdb$dependent_name = f.rdb$field_source \n")
                 wxT(" where d.rdb$dependent_type = 3 and d.rdb$depended_on_name = ? ");
