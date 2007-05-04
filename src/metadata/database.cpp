@@ -158,7 +158,7 @@ int DatabaseInfo::getSweep()
 void DatabaseInfo::loadInfo(const IBPP::Database* database)
 {
     (*database)->Info(&odsM, &odsMinorM, &pageSizeM, &pagesM,
-        &buffersM, &sweepM, &forcedWritesM, &reserveM);
+        &buffersM, &sweepM, &forcedWritesM, &reserveM, &readOnlyM);
     dialectM = (*database)->Dialect();
 }
 //-----------------------------------------------------------------------------

@@ -865,7 +865,7 @@ public:
 
 	void Info(int* ODSMajor, int* ODSMinor,
 		int* PageSize, int* Pages, int* Buffers, int* Sweep,
-		bool* SyncWrites, bool* Reserve);
+		bool* SyncWrites, bool* Reserve, bool* ReadOnly);
 	void Statistics(int* Fetches, int* Marks, int* Reads, int* Writes);
 	void Counts(int* Insert, int* Update, int* Delete,
 		int* ReadIdx, int* ReadSeq);

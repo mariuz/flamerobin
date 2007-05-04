@@ -231,7 +231,7 @@ void DatabaseImpl::Drop()
 
 void DatabaseImpl::Info(int* ODSMajor, int* ODSMinor,
 	int* PageSize, int* Pages, int* Buffers, int* Sweep,
-	bool* Sync, bool* Reserve)
+	bool* Sync, bool* Reserve, bool* ReadOnly)
 {
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Database::Info", _("Database is not connected."));
@@ -244,6 +244,7 @@ void DatabaseImpl::Info(int* ODSMajor, int* ODSMinor,
 					isc_info_sweep_interval,
 					isc_info_forced_writes,
 					isc_info_no_reserve,
+                    isc_info_db_read_only,
 					isc_info_end};
     IBS status;
 	RB result(256);
@@ -264,6 +265,8 @@ void DatabaseImpl::Info(int* ODSMajor, int* ODSMinor,
 		*Sync = result.GetValue(isc_info_forced_writes) == 1 ? true : false;
 	if (Reserve != 0)
 		*Reserve = result.GetValue(isc_info_no_reserve) == 1 ? false : true;
+    if (ReadOnly != 0)
+        *ReadOnly = result.GetValue(isc_info_db_read_only) == 1 ? true : false;
 }
 
 void DatabaseImpl::Statistics(int* Fetches, int* Marks, int* Reads, int* Writes)

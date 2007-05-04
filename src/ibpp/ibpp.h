@@ -563,7 +563,7 @@ namespace IBPP
 
 		virtual void Info(int* ODS, int* ODSMinor, int* PageSize,
 			int* Pages,	int* Buffers, int* Sweep, bool* Sync,
-			bool* Reserve) = 0;
+			bool* Reserve, bool* ReadOnly) = 0;
 		virtual void Statistics(int* Fetches, int* Marks,
 			int* Reads, int* Writes) = 0;
 		virtual void Counts(int* Insert, int* Update, int* Delete, 
