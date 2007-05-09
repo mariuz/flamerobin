@@ -128,7 +128,7 @@ void DatabaseRegistrationDialog::createControls()
         label_pagesize = new wxStaticText(getControlsPanel(), -1,
             _("Page size:"));
         const wxString pagesize_choices[] = {
-            _("Default"), wxT("1024"), wxT("2048"), wxT("4096"), wxT("8192"), wxT("16384")
+            _("Default"), wxT("1024"), wxT("2048"), wxT("4096"), wxT("8192"), wxT("16384"), wxT("32768")
         };
         choice_pagesize = new wxChoice(getControlsPanel(), -1,
             wxDefaultPosition, wxDefaultSize,
