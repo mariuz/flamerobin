@@ -488,7 +488,11 @@ void DataGrid::OnMenuSaveAsCSV(wxCommandEvent& WXUNUSED(event))
     wxString fname = ::wxFileSelector(_("Save data in selected cells as"),
         wxEmptyString, wxEmptyString, wxT("*.csv"),
         _("CSV files (*.csv)|*.csv|All files (*.*)|*.*"),
-        wxSAVE|wxCHANGE_DIR|wxOVERWRITE_PROMPT, this);
+#if wxCHECK_VERSION(2, 8, 0)
+        wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT, this);
+#else
+        wxSAVE | wxCHANGE_DIR | wxOVERWRITE_PROMPT, this);
+#endif
     if (fname.empty())
         return;
 
@@ -581,7 +585,11 @@ void DataGrid::OnMenuSaveAsHTML(wxCommandEvent& WXUNUSED(event))
     wxString fname = ::wxFileSelector(_("Save data in selected cells as"),
         wxEmptyString, wxEmptyString, wxT("*.html"),
         _("HTML files (*.html)|*.html|All files (*.*)|*.*"),
-        wxSAVE|wxCHANGE_DIR|wxOVERWRITE_PROMPT, this);
+#if wxCHECK_VERSION(2, 8, 0)
+        wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT, this);
+#else
+        wxSAVE | wxCHANGE_DIR | wxOVERWRITE_PROMPT, this);
+#endif
     if (fname.empty())
         return;
 

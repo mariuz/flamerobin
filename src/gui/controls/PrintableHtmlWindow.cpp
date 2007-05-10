@@ -147,8 +147,14 @@ void PrintableHtmlWindow::OnMenuNewWindow(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void PrintableHtmlWindow::OnMenuSave(wxCommandEvent& WXUNUSED(event))
 {
-    wxString filename = wxFileSelector(_("Save as HTML..."), wxEmptyString, GetOpenedPageTitle(), wxT("*.html"),
-        _("HTML files (*.html)|*.html|All files (*.*)|*.*"), wxSAVE|wxOVERWRITE_PROMPT);
+    wxString filename = wxFileSelector(_("Save as HTML..."), wxEmptyString,
+        GetOpenedPageTitle(), wxT("*.html"),
+        _("HTML files (*.html)|*.html|All files (*.*)|*.*"),
+#if wxCHECK_VERSION(2, 8, 0)
+        wxFD_SAVE | wxFD_OVERWRITE_PROMPT, this);
+#else
+        wxSAVE | wxOVERWRITE_PROMPT, this);
+#endif
     if (!filename.IsEmpty())
     {
         wxFile f;

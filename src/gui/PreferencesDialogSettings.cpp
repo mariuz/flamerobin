@@ -813,7 +813,12 @@ void PrefDlgChooserSetting::chooseFile()
     wxFileName::SplitPath(textctrlM->GetValue(), &path, 0, 0);
 
     wxString filename = ::wxFileSelector(_("Select File"), path,
-        wxEmptyString, wxEmptyString, _("All files (*.*)|*.*"), wxSAVE,
+        wxEmptyString, wxEmptyString, _("All files (*.*)|*.*"),
+#if wxCHECK_VERSION(2, 8, 0)
+        wxFD_SAVE,
+#else
+        wxSAVE,
+#endif
         ::wxGetTopLevelParent(textctrlM));
     if (!filename.IsEmpty())
         textctrlM->SetValue(filename);

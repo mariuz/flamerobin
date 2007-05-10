@@ -402,7 +402,12 @@ void RestoreFrame::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
     wxFileName origName(text_ctrl_filename->GetValue());
     wxString filename = ::wxFileSelector(_("Select Backup File"),
         origName.GetPath(), origName.GetName(), wxEmptyString,
-        _("All files (*.*)|*.*"), wxOPEN, this);
+        _("All files (*.*)|*.*"), 
+#if wxCHECK_VERSION(2, 8, 0)
+        wxFD_OPEN, this);
+#else
+        wxOPEN, this);
+#endif
     if (!filename.empty())
         text_ctrl_filename->SetValue(filename);
 }

@@ -163,6 +163,7 @@
             <define>WIN32_LEAN_AND_MEAN</define>
 
             <set var="WX_PORT">wxmsw</set>
+<!-- set this to 28 for wxWidgets 2.8.X, to 29 for wxWidgets CVS HEAD -->
             <set var="WX_VERSION">26</set>
 
             <set var="WX_LIB_DIR" make_var="1">
@@ -183,6 +184,10 @@
             <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_core</sys-lib>
             <sys-lib>wxbase$(WX_VERSION)$(U_OPT)$(D_OPT)_xml</sys-lib>
             <sys-lib>wxbase$(WX_VERSION)$(U_OPT)$(D_OPT)</sys-lib>
+<!-- uncomment this for wxWidgets 2.9.X (CVS HEAD) -->
+<!--
+            <sys-lib>wxscintilla$(D_OPT)</sys-lib>
+-->
             <sys-lib>wxexpat$(D_OPT)</sys-lib>
             <sys-lib>wxtiff$(D_OPT)</sys-lib>
             <sys-lib>wxjpeg$(D_OPT)</sys-lib>
