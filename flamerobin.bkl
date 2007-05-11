@@ -184,10 +184,9 @@
             <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_core</sys-lib>
             <sys-lib>wxbase$(WX_VERSION)$(U_OPT)$(D_OPT)_xml</sys-lib>
             <sys-lib>wxbase$(WX_VERSION)$(U_OPT)$(D_OPT)</sys-lib>
-<!-- uncomment this for wxWidgets 2.9.X (CVS HEAD) -->
-<!--
-            <sys-lib>wxscintilla$(D_OPT)</sys-lib>
--->
+            <if cond="WX_VERSION>='29'">
+                <sys-lib>wxscintilla$(D_OPT)</sys-lib>
+            </if>
             <sys-lib>wxexpat$(D_OPT)</sys-lib>
             <sys-lib>wxtiff$(D_OPT)</sys-lib>
             <sys-lib>wxjpeg$(D_OPT)</sys-lib>
