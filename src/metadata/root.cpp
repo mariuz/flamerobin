@@ -270,6 +270,9 @@ bool Root::save()
         wxMkdir(dir);
 
     wxXmlDocument doc;
+#if !wxUSE_UNICODE
+    doc.SetFileEncoding(getHtmlCharset());
+#endif
     wxXmlNode* rn = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("root"));
     doc.SetRoot(rn);
 
