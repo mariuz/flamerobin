@@ -56,6 +56,8 @@ public:
 
     enum {
         Menu_RegisterServer = 600, Menu_Manual, Menu_RelNotes, Menu_License,
+        Menu_URLHomePage, Menu_URLProjectPage, Menu_URLFeatureRequest,
+        Menu_URLBugReport,
         Menu_NewObject, Menu_DatabaseRegistrationInfo, Menu_RegisterDatabase,
         Menu_CreateDatabase, Menu_ManageUsers, Menu_UnRegisterServer,
         Menu_ServerProperties, Menu_Reconnect, Menu_ConnectAs,

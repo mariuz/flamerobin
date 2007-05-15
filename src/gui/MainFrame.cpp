@@ -191,6 +191,15 @@ void MainFrame::buildMainMenu()
     helpMenu->Append(myTreeCtrl::Menu_Manual, _("&Manual"));
     helpMenu->Append(myTreeCtrl::Menu_RelNotes, _("&What's new"));
     helpMenu->Append(myTreeCtrl::Menu_License, _("&License"));
+
+    newMenu = new wxMenu();
+    newMenu->Append(myTreeCtrl::Menu_URLHomePage, _("Home page"));
+    newMenu->Append(myTreeCtrl::Menu_URLProjectPage, _("SourceForge project page"));
+    newMenu->Append(myTreeCtrl::Menu_URLFeatureRequest, _("Feature requests"));
+    newMenu->Append(myTreeCtrl::Menu_URLBugReport, _("Bug reports"));
+    helpMenu->AppendSeparator();
+    helpMenu->Append(wxID_ANY, _("FlameRobin on the web"), newMenu);
+
 #ifndef __WXMAC__
     helpMenu->AppendSeparator();
 #endif
@@ -217,6 +226,12 @@ void MainFrame::showDocsHtmlFile(const wxString& fileName)
     showHtmlFile(this, fullFileName);
 }
 //-----------------------------------------------------------------------------
+void MainFrame::showUrl(const wxString& url)
+{
+    if (!wxLaunchDefaultBrowser(url))
+        wxLogError(_T("Failed to open URL \"%s\""), url.c_str());
+}
+//-----------------------------------------------------------------------------
 void MainFrame::set_properties()
 {
     SetTitle(_("FlameRobin Database Admin"));
@@ -227,7 +242,8 @@ void MainFrame::set_properties()
 #endif
 
     TreeItem* rootdata = new TreeItem(tree_ctrl_1);
-    wxTreeItemId root = tree_ctrl_1->AddRoot(_("Firebird Servers"), tree_ctrl_1->getItemImage(ntRoot), -1, rootdata);
+    wxTreeItemId root = tree_ctrl_1->AddRoot(_("Firebird Servers"),
+        tree_ctrl_1->getItemImage(ntRoot), -1, rootdata);
     // link wxTree root node with rootNodeM
     getGlobalRoot().attachObserver(rootdata);
 
@@ -302,6 +318,10 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(myTreeCtrl::Menu_Manual, MainFrame::OnMenuManual)
     EVT_MENU(myTreeCtrl::Menu_RelNotes, MainFrame::OnMenuRelNotes)
     EVT_MENU(myTreeCtrl::Menu_License, MainFrame::OnMenuLicense)
+    EVT_MENU(myTreeCtrl::Menu_URLHomePage, MainFrame::OnMenuURLHomePage)
+    EVT_MENU(myTreeCtrl::Menu_URLProjectPage, MainFrame::OnMenuURLProjectPage)
+    EVT_MENU(myTreeCtrl::Menu_URLFeatureRequest, MainFrame::OnMenuURLFeatureRequest)
+    EVT_MENU(myTreeCtrl::Menu_URLBugReport, MainFrame::OnMenuURLBugReport)
     EVT_MENU(wxID_PREFERENCES, MainFrame::OnMenuConfigure)
 
     EVT_MENU(myTreeCtrl::Menu_RegisterDatabase, MainFrame::OnMenuRegisterDatabase)
@@ -678,6 +698,42 @@ void MainFrame::OnMenuLicense(wxCommandEvent& WXUNUSED(event))
     FR_TRY
 
     showDocsHtmlFile(wxT("fr_license.html"));
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuURLHomePage(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    showUrl(wxT("http://www.flamerobin.org"));
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuURLProjectPage(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    showUrl(wxT("http://sourceforge.net/projects/flamerobin"));
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuURLFeatureRequest(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    showUrl(wxT("http://sourceforge.net/tracker/?atid=699237&group_id=124340"));
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuURLBugReport(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    showUrl(wxT("http://sourceforge.net/tracker/?atid=699234&group_id=124340"));
 
     FR_CATCH
 }

@@ -50,6 +50,10 @@ public:
     void OnMenuManual(wxCommandEvent& event);
     void OnMenuRelNotes(wxCommandEvent& event);
     void OnMenuLicense(wxCommandEvent& event);
+    void OnMenuURLHomePage(wxCommandEvent& event);
+    void OnMenuURLProjectPage(wxCommandEvent& event);
+    void OnMenuURLFeatureRequest(wxCommandEvent& event);
+    void OnMenuURLBugReport(wxCommandEvent& event);
     void OnMenuConfigure(wxCommandEvent& event);
     void OnMenuRegisterDatabase(wxCommandEvent& event);
     void OnMenuDatabaseRegistrationInfo(wxCommandEvent& event);
@@ -142,6 +146,7 @@ private:
     void updateStatusbarText();
 
     void showDocsHtmlFile(const wxString& fileName);
+    void showUrl(const wxString& url);
 
     void set_properties();
     void do_layout();
