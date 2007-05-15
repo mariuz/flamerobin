@@ -112,7 +112,7 @@ wxString escapeHtmlChars(const wxString& input, bool processNewlines)
 //  conversion to UTF-8 is available, i.e. in non-Unicode build
 wxString getHtmlCharset()
 {
-#ifndef __WX_UNICODE__
+#if !wxUSE_UNICODE
     struct CharsetMapping {
         wxFontEncoding encoding;
         const wxChar* htmlCS;
