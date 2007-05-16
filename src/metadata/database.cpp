@@ -949,9 +949,9 @@ bool Database::connect(wxString password, ProgressIndicator* indicator)
 
                 if (indicator)
                 {
-                    wxString typeName(nodetypes[i].name);
+                    wxString typeName(wxGetTranslation(nodetypes[i].name));
                     indicator->initProgress(wxString::Format(_("Loading %s..."),
-                        wxGetTranslation(typeName).c_str()), typeCount, i);
+                        typeName.c_str()), typeCount, i);
                 }
                 loadObjects(nodetypes[i].type, tr1, indicator);
                 if (indicator && indicator->isCanceled())
