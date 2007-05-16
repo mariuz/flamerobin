@@ -928,11 +928,16 @@ bool Database::connect(wxString password, ProgressIndicator* indicator)
             // load metadata information
             struct NodeTypeName { NodeType type; const wxChar* name; };
             static const NodeTypeName nodetypes[] = {
-                { ntTable, _("Tables") }, { ntSysTable, _("System tables") },
-                { ntView, _("Views") }, { ntProcedure, _("Procedures") },
-                { ntTrigger, _("Triggers") }, { ntRole, _("Roles") },
-                { ntDomain, _("Domains") }, { ntFunction, _("Functions") },
-                { ntGenerator, _("Generators") }, { ntException, _("Exceptions")  }
+                { ntTable, wxTRANSLATE("Tables") },
+                { ntSysTable, wxTRANSLATE("System tables") },
+                { ntView, wxTRANSLATE("Views") },
+                { ntProcedure, wxTRANSLATE("Procedures") },
+                { ntTrigger, wxTRANSLATE("Triggers") },
+                { ntRole, wxTRANSLATE("Roles") },
+                { ntDomain, wxTRANSLATE("Domains") },
+                { ntFunction, wxTRANSLATE("Functions") },
+                { ntGenerator, wxTRANSLATE("Generators") },
+                { ntException, wxTRANSLATE("Exceptions") }
             };
 
             int typeCount = sizeof(nodetypes) / sizeof(NodeTypeName);
@@ -944,8 +949,9 @@ bool Database::connect(wxString password, ProgressIndicator* indicator)
 
                 if (indicator)
                 {
+                    wxString typeName(nodetypes[i].name);
                     indicator->initProgress(wxString::Format(_("Loading %s..."),
-                        nodetypes[i].name), typeCount, i);
+                        wxGetTranslation(typeName).c_str()), typeCount, i);
                 }
                 loadObjects(nodetypes[i].type, tr1, indicator);
                 if (indicator && indicator->isCanceled())
