@@ -182,7 +182,7 @@ void DataGridTable::fetch()
 wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
     wxGridCellAttr::wxAttrKind kind)
 {
-    if (row < rowsFetchedM && col < columnCountM && !dataM[row][col])
+    if (isNullCell(row, col))
     {
         // wxGrid columns run from 0 to columnCountM - 1
         // IBPP::Statement columns run from 1 to Columns()
@@ -199,9 +199,7 @@ wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
 //-----------------------------------------------------------------------------
 wxString DataGridTable::getCellValue(int row, int col)
 {
-    if (row >= (int)dataM.size())
-        return wxEmptyString;
-    if (col >= (int)dataM[row].size())
+    if (!isValidCellPos(row, col))
         return wxEmptyString;
 
     DataGridCell* cell = dataM[row][col];
@@ -213,9 +211,7 @@ wxString DataGridTable::getCellValue(int row, int col)
 //-----------------------------------------------------------------------------
 wxString DataGridTable::getCellValueForInsert(int row, int col)
 {
-    if (row >= (int)dataM.size())
-        return wxEmptyString;
-    if (col >= (int)dataM[row].size())
+    if (!isValidCellPos(row, col))
         return wxEmptyString;
 
     DataGridCell* cell = dataM[row][col];
@@ -229,27 +225,21 @@ wxString DataGridTable::getCellValueForInsert(int row, int col)
 //-----------------------------------------------------------------------------
 wxString DataGridTable::getCellValueForCSV(int row, int col)
 {
-    if (row >= (int)dataM.size())
-        return wxEmptyString;
-    if (col >= (int)dataM[row].size())
+    if (!isValidCellPos(row, col))
         return wxEmptyString;
 
     DataGridCell* cell = dataM[row][col];
-
-    const wxString sAPOS(wxT("\""));
-    wxString s(sAPOS + wxT("NULL") + sAPOS);
-
     if (!cell)
-        return s;
+        return wxT("\"NULL\"");
 
     if (isNumericColumn(col+1)) //+1 for ibpp
         return cell->getValue();
 
     // return quoted text, but escape embedded quotes
-    s = cell->getValue();
-    s.Replace(sAPOS, sAPOS+sAPOS);
+    wxString s(cell->getValue());
+    s.Replace(wxT("\""), wxT("\"\""));
 
-    return sAPOS + s + sAPOS;
+    return wxT("\"") + s + wxT("\"");
 }
 //-----------------------------------------------------------------------------
 wxString DataGridTable::GetColLabelValue(int col)
@@ -314,9 +304,7 @@ wxString DataGridTable::getTableName()
 //-----------------------------------------------------------------------------
 wxString DataGridTable::GetValue(int row, int col)
 {
-    if (row >= (int)dataM.size())
-        return wxEmptyString;
-    if (col >= (int)dataM[row].size())
+    if (!isValidCellPos(row, col))
         return wxEmptyString;
 
     // keep between 200 and 250 more rows fetched for better responsiveness
@@ -326,24 +314,19 @@ wxString DataGridTable::GetValue(int row, int col)
         maxRowToFetchM = maxRowToFetch;
 
     DataGridCell* cell = dataM[row][col];
-    if (cell)
-    {
-        wxString cellValue(cell->getValue());
-        // return first line of multi-line string only
-        for (size_t n = 0; n < cellValue.size(); ++n)
-        {
-            const wxChar c = cellValue[n];
-            if (c == '\r' || c == '\n')
-            {
-                cellValue.Truncate(n);
-                cellValue += wxT(" [...]");
-                break;
-            }
-        }
-        return cellValue;
-    }
-    else
+    if (!cell)
         return wxT("[null]");
+
+    wxString cellValue(cell->getValue());
+    // return first line of multi-line string only
+    int nl = cellValue.Find(wxT("\n"));
+    if (nl != wxNOT_FOUND)
+    {
+        cellValue.Truncate(nl);
+        cellValue.Trim();
+        cellValue += wxT(" [...]"); // and show that there is more data...
+    }
+    return cellValue;
 }
 //-----------------------------------------------------------------------------
 void DataGridTable::initialFetch(wxMBConv* conv)
@@ -361,16 +344,12 @@ void DataGridTable::initialFetch(wxMBConv* conv)
 //-----------------------------------------------------------------------------
 bool DataGridTable::IsEmptyCell(int row, int col)
 {
-    return row >= rowsFetchedM || col >= columnCountM;
+    return row < 0 || col < 0 || row >= rowsFetchedM || col >= columnCountM;
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::isNullCell(int row, int col)
 {
-    if (row >= (int)dataM.size())
-        return false;
-    if (col >= (int)dataM[row].size())
-        return false;
-    return (0 == dataM[row][col]);
+    return isValidCellPos(row, col) && dataM[row][col] == 0;
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::isNumericColumn(int col)
@@ -386,6 +365,12 @@ bool DataGridTable::isNumericColumn(int col)
         default:
             return false;
     }
+}
+//-----------------------------------------------------------------------------
+bool DataGridTable::isValidCellPos(int row, int col)
+{
+    return (row >= 0 && col >= 0 && row < (int)dataM.size()
+        && col < (int)dataM[row].size());
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::needsMoreRowsFetched()

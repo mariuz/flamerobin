@@ -55,6 +55,8 @@ private:
     std::vector< std::vector<DataGridCell*> > dataM;
     IBPP::Statement& statementM;
     wxMBConv* charsetConverterM;
+
+    bool isValidCellPos(int row, int col);
 public:
     DataGridTable(IBPP::Statement& s);
     ~DataGridTable();
