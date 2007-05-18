@@ -196,7 +196,7 @@ Database::Database(const Database& rhs)
     storeEncryptedPasswordM(rhs.storeEncryptedPasswordM)
 {
     if (rhs.connectionCredentialsM)
-        connectionCredentialsM = new Credentials(*connectionCredentialsM);
+        connectionCredentialsM = new Credentials(*rhs.connectionCredentialsM);
 
     domainsM.setParent(this);
     exceptionsM.setParent(this);
