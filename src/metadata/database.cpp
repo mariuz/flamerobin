@@ -210,6 +210,11 @@ Database::Database(const Database& rhs)
     viewsM.setParent(this);
 }
 //-----------------------------------------------------------------------------
+Database::~Database()
+{
+    resetCredentials();
+}
+//-----------------------------------------------------------------------------
 void Database::prepareTemporaryCredentials()
 {
     resetCredentials();

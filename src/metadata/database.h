@@ -154,6 +154,7 @@ protected:
 public:
     Database();
     Database(const Database& rhs);
+    ~Database();
 
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
     void getCollections(std::vector<MetadataItem *>& temp, bool system);
