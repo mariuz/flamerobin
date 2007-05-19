@@ -788,20 +788,23 @@ void ExecuteSqlFrame::OnSqlEditUpdateUI(wxStyledTextEvent& WXUNUSED(event))
     else
         styled_text_ctrl_sql->BraceBadLight(wxSTC_INVALID_POSITION);    // remove light
 
-    if (styled_text_ctrl_sql->GetTextLength() > 0)
+    if (filenameM.IsEmpty())
     {
-        for (int i=0; i<styled_text_ctrl_sql->GetLineCount(); ++i)
+        if (styled_text_ctrl_sql->GetTextLength() > 0)
         {
-            wxString t = styled_text_ctrl_sql->GetLine(i).Trim();
-            if (!t.IsEmpty())
+            for (int i=0; i<styled_text_ctrl_sql->GetLineCount(); ++i)
             {
-                SetTitle(t);
-                break;
+                wxString t = styled_text_ctrl_sql->GetLine(i).Trim();
+                if (!t.IsEmpty())
+                {
+                    SetTitle(t);
+                    break;
+                }
             }
         }
+        else
+            SetTitle(_("Execute SQL statements"));
     }
-    else
-        SetTitle(_("Execute SQL statements"));
 }
 //-----------------------------------------------------------------------------
 //! returns true if there is a word in "wordlist" that starts with "word"
@@ -1030,7 +1033,10 @@ void ExecuteSqlFrame::OnButtonLoadClick(wxCommandEvent& WXUNUSED(event))
         return;
 
     if (styled_text_ctrl_sql->LoadFile(fd.GetPath()))
+    {
         filenameM = fd.GetPath();
+        SetTitle(filenameM);
+    }
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonSaveAsClick(wxCommandEvent& WXUNUSED(event))
@@ -1047,6 +1053,7 @@ void ExecuteSqlFrame::OnButtonSaveAsClick(wxCommandEvent& WXUNUSED(event))
         return;
 
     filenameM = fd.GetPath();
+    SetTitle(filenameM);
     styled_text_ctrl_sql->SaveFile(fd.GetPath());
     statusbar_1->SetStatusText((_("File saved")), 2);
 }
@@ -1180,8 +1187,8 @@ void ExecuteSqlFrame::executeAllStatements(bool closeWhenDone)
         updateHistoryButtons();
     }
 
-	if (closeWhenDone && autoCommitM && !inTransactionM)
-		Close();
+    if (closeWhenDone && autoCommitM && !inTransactionM)
+        Close();
 }
 //-----------------------------------------------------------------------------
 //! Parses all sql statements in STC
