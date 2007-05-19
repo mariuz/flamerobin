@@ -1009,6 +1009,7 @@ bool Database::disconnect(bool onlyDBH)
         generatorsM.clear();
         proceduresM.clear();
         rolesM.clear();
+        sysTablesM.clear();
         tablesM.clear();
         triggersM.clear();
         viewsM.clear();
@@ -1022,6 +1023,7 @@ bool Database::disconnect(bool onlyDBH)
         generatorsM.detachAllObservers();
         proceduresM.detachAllObservers();
         rolesM.detachAllObservers();
+        sysTablesM.detachAllObservers();
         tablesM.detachAllObservers();
         sysTablesM.detachAllObservers();
         triggersM.detachAllObservers();
