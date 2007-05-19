@@ -1025,7 +1025,6 @@ bool Database::disconnect(bool onlyDBH)
         rolesM.detachAllObservers();
         sysTablesM.detachAllObservers();
         tablesM.detachAllObservers();
-        sysTablesM.detachAllObservers();
         triggersM.detachAllObservers();
         viewsM.detachAllObservers();
         exceptionsM.detachAllObservers();
