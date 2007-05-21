@@ -80,6 +80,7 @@ Root::Root()
 {
     setName_(wxT("Home"));
     typeM = ntRoot;
+    unregLocalDatabasesM = 0;
 }
 //-----------------------------------------------------------------------------
 void Root::disconnectAllDatabases()
@@ -237,9 +238,37 @@ Server* Root::addServer(Server& server)
 void Root::removeServer(Server* server)
 {
     serversM.remove(server);
-    dirtyM = true;
-    notifyObservers();
-    save();
+    if (server == unregLocalDatabasesM)
+    {
+        unregLocalDatabasesM = 0;
+        notifyObservers();
+    }
+    else
+    {
+        dirtyM = true;
+        notifyObservers();
+        save();
+    }
+}
+//-----------------------------------------------------------------------------
+Database* Root::addUnregisteredDatabase(Database& database)
+{
+    // on-demand creation of parent node for unregistred databases
+    if (!unregLocalDatabasesM)
+    {
+        Server server;
+        server.setName_(_("Unregistered local databases"));
+        server.setHostname(wxT("localhost"));
+
+        unregLocalDatabasesM = serversM.add(server);
+        unregLocalDatabasesM->setParent(this);
+        notifyObservers();
+    }
+
+    Database* db = unregLocalDatabasesM->addDatabase(database);
+    db->setParent(unregLocalDatabasesM);
+    unregLocalDatabasesM->notifyObservers();
+    return db;
 }
 //-----------------------------------------------------------------------------
 // helper for Root::save()
@@ -281,6 +310,11 @@ bool Root::save()
     for (std::list<Server>::iterator its = serversM.begin();
         its != serversM.end(); ++its)
     {
+        // do not save the dummy server node for databases that were opened
+        // either via command line switch or via drag and drop
+        if (&(*its) == unregLocalDatabasesM)
+            continue;
+
         wxXmlNode* srvn = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("server"));
         rn->AddChild(srvn);
         

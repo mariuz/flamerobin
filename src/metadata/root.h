@@ -28,6 +28,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef FR_ROOT_H
 #define FR_ROOT_H
 //-----------------------------------------------------------------------------
+#include "metadata/database.h"
 #include "metadata/metadataitem.h"
 #include "metadata/server.h"
 
@@ -37,6 +38,8 @@ class Root: public MetadataItem
 {
 private:
     MetadataCollection<Server> serversM;
+    Server* unregLocalDatabasesM;
+
     wxString fileNameM;
     wxString getFileName();
     bool dirtyM;
@@ -54,6 +57,8 @@ public:
 
     Server* addServer(Server& server);
     void removeServer(Server* server);
+
+    Database* addUnregisteredDatabase(Database& database);
 
     virtual bool getChildren(std::vector<MetadataItem*>& temp);
     virtual bool orderedChildren() const;

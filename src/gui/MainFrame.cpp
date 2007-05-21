@@ -39,6 +39,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include <wx/clipbrd.h>
+#include <wx/dnd.h>
 #include <wx/tokenzr.h>
 
 #include "config/Config.h"
@@ -88,6 +89,23 @@ bool checkValidServer(Server* server)
     return false;
 }
 //-----------------------------------------------------------------------------
+//! helper class to enable drag and drop of database files to the tree ctrl
+#if wxUSE_DRAG_AND_DROP
+class DnDDatabaseFile : public wxFileDropTarget
+{
+private:
+    MainFrame* frameM;
+public:
+    DnDDatabaseFile(MainFrame* frame) { frameM = frame; }
+    virtual bool OnDropFiles(wxCoord, wxCoord, const wxArrayString& filenames)
+    {
+        for (size_t i = 0; i < filenames.GetCount(); i++)
+            frameM->openUnregisteredDatabase(filenames[i]);
+        return true;
+    }
+};
+#endif
+//-----------------------------------------------------------------------------
 //! included xpm files, so that icons are compiled into executable
 namespace sql_icons {
 #include "left.xpm"
@@ -122,7 +140,9 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     set_properties();
     do_layout();
     tree_ctrl_1->SetFocus();
-
+#if wxUSE_DRAG_AND_DROP
+    tree_ctrl_1->SetDropTarget(new DnDDatabaseFile(this));
+#endif
     if (!config().get(wxT("showSearchBar"), true))
     {
         inner_sizer->Show(searchPanelM, false, true);    // recursive
@@ -666,7 +686,7 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
     msg += wxT("\n\n");
     msg += ib;
     msg += wxT("\n\n");
-    msg += _("Copyright (c) 2004-2006  FlameRobin Development Team");
+    msg += _("Copyright (c) 2004-2007  FlameRobin Development Team");
     msg += wxT("\n");
     msg += _("http://www.flamerobin.org");
 
@@ -1887,5 +1907,36 @@ bool MainFrame::confirmDropItem(MetadataItem* item)
         _("Once you drop the object it is permanently removed from database."),
         AdvancedMessageDialogButtonsOkCancel(_("&Drop")),
         config(), wxT("DIALOG_ConfirmDrop"), _("Always drop without asking"));
+}
+//-----------------------------------------------------------------------------
+bool MainFrame::openUnregisteredDatabase(const wxString& dbpath)
+{
+    FR_TRY
+
+    Database tempDb;
+    tempDb.setPath(dbpath);
+    tempDb.setName_(tempDb.extractNameFromConnectionString());
+
+    wxString iscUser, iscPassword;
+    if (!wxGetEnv(wxT("ISC_USER"), &iscUser))
+        iscUser = wxT("SYSDBA");
+    tempDb.setUsername(iscUser);
+    if (!wxGetEnv(wxT("ISC_PASSWORD"), &iscPassword))
+        iscPassword = wxEmptyString;
+    tempDb.setRawPassword(iscPassword);
+
+    DatabaseRegistrationDialog drd(this, _("Database Connection Settings"));
+    drd.setDatabase(&tempDb);
+    if (drd.ShowModal() == wxID_OK)
+    {
+        Database* db = getGlobalRoot().addUnregisteredDatabase(tempDb);
+        tree_ctrl_1->selectMetadataItem(db);
+        if (db && connectDatabase(db, this))
+            return true;
+    }
+
+    FR_CATCH
+
+    return false;
 }
 //-----------------------------------------------------------------------------

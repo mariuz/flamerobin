@@ -104,15 +104,18 @@ void DatabaseRegistrationDialog::createControls()
     label_charset = new wxStaticText(getControlsPanel(), -1, _("Charset:"));
 
     const wxString charset_choices[] = {
-        wxT("NONE"),        wxT("ASCII"),       wxT("BIG_5"),       wxT("CYRL"),        wxT("DOS437"),
-        wxT("DOS737"),      wxT("DOS775"),      wxT("DOS850"),      wxT("DOS852"),      wxT("DOS857"),
-        wxT("DOS858"),      wxT("DOS860"),      wxT("DOS861"),      wxT("DOS862"),      wxT("DOS863"),
-        wxT("DOS864"),      wxT("DOS865"),      wxT("DOS866"),      wxT("DOS869"),      wxT("EUCJ_0208"),
-        wxT("GB_2312"),     wxT("ISO8859_1"),   wxT("ISO8859_2"),   wxT("ISO8859_3"),   wxT("ISO8859_4"),
-        wxT("ISO8859_5"),   wxT("ISO8859_6"),   wxT("ISO8859_7"),   wxT("ISO8859_8"),   wxT("ISO8859_9"),
-        wxT("ISO8859_13"),  wxT("KSC_5601"),    wxT("NEXT"),        wxT("OCTETS"),      wxT("SJIS_0208"),
-        wxT("UNICODE_FSS"), wxT("UTF8"),       wxT("WIN1250"),     wxT("WIN1251"),     wxT("WIN1252"),
-        wxT("WIN1253"),     wxT("WIN1254"),     wxT("WIN1255"),     wxT("WIN1256"),     wxT("WIN1257")
+        wxT("NONE"),        wxT("ASCII"),       wxT("BIG_5"),       wxT("CYRL"),
+        wxT("DOS437"),      wxT("DOS737"),      wxT("DOS775"),      wxT("DOS850"),
+        wxT("DOS852"),      wxT("DOS857"),      wxT("DOS858"),      wxT("DOS860"),
+        wxT("DOS861"),      wxT("DOS862"),      wxT("DOS863"),      wxT("DOS864"),
+        wxT("DOS865"),      wxT("DOS866"),      wxT("DOS869"),      wxT("EUCJ_0208"),
+        wxT("GB_2312"),     wxT("ISO8859_1"),   wxT("ISO8859_2"),   wxT("ISO8859_3"),
+        wxT("ISO8859_4"),   wxT("ISO8859_5"),   wxT("ISO8859_6"),   wxT("ISO8859_7"),
+        wxT("ISO8859_8"),   wxT("ISO8859_9"),   wxT("ISO8859_13"),  wxT("KSC_5601"),
+        wxT("NEXT"),        wxT("OCTETS"),      wxT("SJIS_0208"),   wxT("UNICODE_FSS"),
+        wxT("UTF8"),        wxT("WIN1250"),     wxT("WIN1251"),     wxT("WIN1252"),
+        wxT("WIN1253"),     wxT("WIN1254"),     wxT("WIN1255"),     wxT("WIN1256"),
+        wxT("WIN1257")
     };
 
     combobox_charset = new wxComboBox(getControlsPanel(), -1, wxT("NONE"),

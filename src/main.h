@@ -30,9 +30,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 //#include "config/Configurable.h"
 //-----------------------------------------------------------------------------
+class MainFrame;
+
 class Application: public wxApp
 {
 private:
+    // Open databases whose file names were given as command line parameters
+    wxArrayString cmdlineParamsM;
+    void openDatabasesFromParams(MainFrame* frFrame);
     // Reads the environment variables that influence FR's behaviour.
     void checkEnvironment();
     // Reads the command line params that influence FR's behaviour.

@@ -140,6 +140,8 @@ public:
     MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE);
 
+    bool openUnregisteredDatabase(const wxString& dbpath);
+
 private:
     bool connect();
     void showGeneratorValue(Generator* g);

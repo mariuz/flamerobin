@@ -105,6 +105,7 @@ bool Application::OnInit()
     SetTopWindow(main_frame);
     main_frame->Show();
 
+    openDatabasesFromParams(main_frame);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -140,8 +141,13 @@ void Application::checkEnvironment()
 void Application::parseCommandLine()
 {
     wxCmdLineParser parser(wxGetApp().argc, wxGetApp().argv);
-    parser.AddOption(wxT("h"), wxT("home"));
-    parser.AddOption(wxT("uh"), wxT("user-home"));
+    parser.AddOption(wxT("h"), wxT("home"), _("Set FlameRobin's home path"));
+    parser.AddOption(wxT("uh"), wxT("user-home"),
+        _("Set FlameRobin's user home path"));
+    // open databases given as command line parameters
+    parser.AddParam(_("File name of database to open"), wxCMD_LINE_VAL_STRING,
+        wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE);
+
     if (parser.Parse() == 0)
     {
         wxString paramValue;
@@ -150,6 +156,9 @@ void Application::parseCommandLine()
 
         if (parser.Found(wxT("user-home"), &paramValue))
             config().setUserHomePath(translatePathMacros(paramValue));
+
+        for (size_t i = 0; i < parser.GetParamCount(); i++)
+            cmdlineParamsM.Add(parser.GetParam(i));
     }
 }
 //-----------------------------------------------------------------------------
@@ -166,5 +175,15 @@ const wxString Application::translatePathMacros(const wxString path) const
 const wxString Application::getConfigurableObjectId() const
 {
     return wxT("");
+}
+//-----------------------------------------------------------------------------
+void Application::openDatabasesFromParams(MainFrame* frFrame)
+{
+    if (cmdlineParamsM.GetCount())
+    {
+        for (size_t i = 0; i < cmdlineParamsM.GetCount(); i++)
+            frFrame->openUnregisteredDatabase(cmdlineParamsM[i]);
+        cmdlineParamsM.Clear();
+    }
 }
 //-----------------------------------------------------------------------------
