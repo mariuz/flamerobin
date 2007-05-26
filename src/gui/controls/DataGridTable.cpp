@@ -41,7 +41,6 @@
 #include <wx/grid.h>
 
 #include "core/StringUtils.h"
-#include "gui/controls/DataGridCells.h"
 #include "gui/controls/DataGridTable.h"
 //-----------------------------------------------------------------------------
 DataGridTable::DataGridTable(IBPP::Statement& s)
