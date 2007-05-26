@@ -1,24 +1,24 @@
 /*
-Copyright (c) 2004, 2005, 2006 The FlameRobin Development Team
+  Copyright (c) 2004-2007 The FlameRobin Development Team
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
 
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
   $Id$
@@ -48,10 +48,8 @@ DataGridTable::DataGridTable(IBPP::Statement& s)
     : wxGridTableBase(), statementM(s)
 {
     allRowsFetchedM = false;
-    columnCountM = 0;
     fetchAllRowsM = false;
     maxRowToFetchM = 100;
-    rowsFetchedM = 0;
 
     nullAttrM = new wxGridCellAttr();
     nullAttrM->SetTextColour(*wxRED);
@@ -83,35 +81,24 @@ bool DataGridTable::canFetchMoreRows()
 //-----------------------------------------------------------------------------
 void DataGridTable::Clear()
 {
-    int oldrf = rowsFetchedM;
-    int oldcc = columnCountM;
-
     allRowsFetchedM = true;
-    columnCountM = 0;
-    rowsFetchedM = 0;
     fetchAllRowsM = false;
 
-    for (size_t i = 0; i < dataM.size(); i++)
-    {
-        for (size_t j = 0; j < dataM[i].size(); j++)
-            delete dataM[i][j];
-    }
-    dataM.clear();
+    unsigned oldCols = rowsM.getRowFieldCount();
+    unsigned oldRows = rowsM.getRowCount();
+    rowsM.clear();
 
-    if (GetView())
+    if (GetView() && oldRows > 0)
     {
-        if (oldrf)
-        {
-            wxGridTableMessage rowMsg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED,
-                0, oldrf);
-            GetView()->ProcessTableMessage(rowMsg);
-        }
-        if (oldcc)
-        {
-            wxGridTableMessage colMsg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED,
-                0, oldcc);
-            GetView()->ProcessTableMessage(colMsg);
-        }
+        wxGridTableMessage rowMsg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED,
+            0, oldRows);
+        GetView()->ProcessTableMessage(rowMsg);
+    }
+    if (GetView() && oldCols > 0)
+    {
+        wxGridTableMessage colMsg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED,
+            0, oldCols);
+        GetView()->ProcessTableMessage(colMsg);
     }
 }
 //-----------------------------------------------------------------------------
@@ -119,17 +106,10 @@ void DataGridTable::fetch()
 {
     if (!canFetchMoreRows())
         return;
-    if (columnCountM == 0 && GetView())
-    {
-        columnCountM = statementM->Columns();
-        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED,
-            columnCountM);
-        GetView()->ProcessTableMessage(msg);
-    }
 
-    int oldrf = rowsFetchedM;
     // fetch the first 100 rows no matter how long it takes
-    bool initial = !rowsFetchedM;
+    unsigned oldRows = rowsM.getRowCount();
+    bool initial = oldRows == 0;
     // fetch more rows until maxRowToFetchM reached or 100 ms elapsed
     wxLongLong startms = ::wxGetLocalTimeMillis();
     do
@@ -153,28 +133,21 @@ void DataGridTable::fetch()
         }
         if (allRowsFetchedM)
             break;
-        rowsFetchedM++;
-
-        std::vector<DataGridCell*> s;
-        s.reserve(columnCountM);
-
-        for (int i = 1; i <= columnCountM; i++)
-            s.push_back(DataGridCell::createCell(statementM, i, charsetConverterM));
-        dataM.push_back(s);
+        rowsM.addRow(statementM, charsetConverterM);
 
         if (!initial && (::wxGetLocalTimeMillis() - startms > 100))
             break;
     }
-    while (fetchAllRowsM || rowsFetchedM < maxRowToFetchM);
+    while (fetchAllRowsM || rowsM.getRowCount() < maxRowToFetchM);
 
-    if (rowsFetchedM > oldrf && GetView())        // notify the grid
+    if (rowsM.getRowCount() > oldRows && GetView())   // notify the grid
     {
         wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED,
-            rowsFetchedM - oldrf);
+            rowsM.getRowCount() - oldRows);
         GetView()->ProcessTableMessage(msg);
         // used in frame to update status bar
         wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
-        evt.SetExtraLong(rowsFetchedM);
+        evt.SetExtraLong(rowsM.getRowCount());
         wxPostEvent(GetView(), evt);
     }
 }
@@ -182,11 +155,9 @@ void DataGridTable::fetch()
 wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
     wxGridCellAttr::wxAttrKind kind)
 {
-    if (isNullCell(row, col))
+    if (rowsM.isFieldNull(row, col))
     {
-        // wxGrid columns run from 0 to columnCountM - 1
-        // IBPP::Statement columns run from 1 to Columns()
-        if (isNumericColumn(col + 1))
+        if (rowsM.isRowFieldNumeric(col))
         {
             nullAttrNumericM->IncRef();
             return nullAttrNumericM;
@@ -202,11 +173,9 @@ wxString DataGridTable::getCellValue(int row, int col)
     if (!isValidCellPos(row, col))
         return wxEmptyString;
 
-    DataGridCell* cell = dataM[row][col];
-    if (cell)
-        return cell->getValue();
-    else
+    if (rowsM.isFieldNull(row, col))
         return wxT("[null]");
+    return rowsM.getFieldValue(row, col);
 }
 //-----------------------------------------------------------------------------
 wxString DataGridTable::getCellValueForInsert(int row, int col)
@@ -214,11 +183,10 @@ wxString DataGridTable::getCellValueForInsert(int row, int col)
     if (!isValidCellPos(row, col))
         return wxEmptyString;
 
-    DataGridCell* cell = dataM[row][col];
-    if (!cell)
+    if (rowsM.isFieldNull(row, col))
         return wxT("NULL");
     // return quoted text, but escape embedded quotes
-    wxString s(cell->getValue());
+    wxString s(rowsM.getFieldValue(row, col));
     s.Replace(wxT("'"), wxT("''"));
     return wxT("'") + s + wxT("'");
 }
@@ -228,53 +196,20 @@ wxString DataGridTable::getCellValueForCSV(int row, int col)
     if (!isValidCellPos(row, col))
         return wxEmptyString;
 
-    DataGridCell* cell = dataM[row][col];
-    if (!cell)
+    if (rowsM.isFieldNull(row, col))
         return wxT("\"NULL\"");
-
-    if (isNumericColumn(col+1)) //+1 for ibpp
-        return cell->getValue();
+    wxString s(rowsM.getFieldValue(row, col));
+    if (rowsM.isRowFieldNumeric(col))
+        return s;
 
     // return quoted text, but escape embedded quotes
-    wxString s(cell->getValue());
     s.Replace(wxT("\""), wxT("\"\""));
-
     return wxT("\"") + s + wxT("\"");
 }
 //-----------------------------------------------------------------------------
 wxString DataGridTable::GetColLabelValue(int col)
 {
-    if (col < columnCountM && statementM != 0)
-        return std2wx(statementM->ColumnAlias(col+1));
-    else
-        return wxEmptyString;
-}
-//-----------------------------------------------------------------------------
-IBPP::SDT DataGridTable::getColumnType(int col)
-{
-    if (statementM == 0 || columnCountM == 0)
-        return IBPP::sdString;    // I wish there is sdUnknown :)
-    else
-    {
-        try
-        {
-            return statementM->ColumnType(col);
-        }
-        catch (IBPP::Exception& e)
-        {
-            // perhaps we should clear the statement, since something is obviously wrong
-            if (columnCountM > col - 1)
-            {
-                wxGridTableMessage colMsg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED,
-                    0, columnCountM + 1 - col);
-                GetView()->ProcessTableMessage(colMsg);
-            columnCountM = col - 1;
-            }
-            ::wxMessageBox(std2wx(e.ErrorMessage()),
-                            _("An IBPP error occurred."), wxOK|wxICON_ERROR);
-            return IBPP::sdString;
-        }
-    }
+    return rowsM.getRowFieldName(col);
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::getFetchAllRows()
@@ -284,22 +219,21 @@ bool DataGridTable::getFetchAllRows()
 //-----------------------------------------------------------------------------
 int DataGridTable::GetNumberCols()
 {
-    return columnCountM;
+    return rowsM.getRowFieldCount();
 }
 //-----------------------------------------------------------------------------
 int DataGridTable::GetNumberRows()
 {
-    return rowsFetchedM;
+    return rowsM.getRowCount();
 }
 //-----------------------------------------------------------------------------
 wxString DataGridTable::getTableName()
 {
     // TODO: using one table is not correct for JOINs or sub-SELECTs, so it
     //       should take e.g. the one that occurs most often
-    if (statementM == 0 || columnCountM == 0)
+    if (statementM == 0 || statementM->Columns() == 0)
         return wxEmptyString;
-    else
-        return std2wx(statementM->ColumnTable(1));
+    return std2wx(statementM->ColumnTable(1));
 }
 //-----------------------------------------------------------------------------
 wxString DataGridTable::GetValue(int row, int col)
@@ -309,15 +243,14 @@ wxString DataGridTable::GetValue(int row, int col)
 
     // keep between 200 and 250 more rows fetched for better responsiveness
     // (but make the count of fetched rows a multiple of 50)
-    int maxRowToFetch = 50 * (row / 50 + 5);
+    unsigned maxRowToFetch = 50 * (row / 50 + 5);
     if (maxRowToFetchM < maxRowToFetch)
         maxRowToFetchM = maxRowToFetch;
 
-    DataGridCell* cell = dataM[row][col];
-    if (!cell)
+    if (rowsM.isFieldNull(row, col))
         return wxT("[null]");
+    wxString cellValue(rowsM.getFieldValue(row, col));
 
-    wxString cellValue(cell->getValue());
     // return first line of multi-line string only
     int nl = cellValue.Find(wxT("\n"));
     if (nl != wxNOT_FOUND)
@@ -339,38 +272,50 @@ void DataGridTable::initialFetch(wxMBConv* conv)
         charsetConverterM = conv;
     else
         charsetConverterM = wxConvCurrent;
+
+    try
+    {
+        rowsM.initialize(statementM);
+    }
+    catch (IBPP::Exception& e)
+    {
+        ::wxMessageBox(std2wx(e.ErrorMessage()),
+            _("An IBPP error occurred."), wxOK | wxICON_ERROR);
+    }
+    catch (...)
+    {
+        ::wxMessageBox(_("A system error occurred!"), _("Error"),
+            wxOK | wxICON_ERROR);
+    }
+
+    if (GetView())
+    {
+        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_COLS_APPENDED,
+            rowsM.getRowFieldCount());
+        GetView()->ProcessTableMessage(msg);
+    }
     fetch();
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::IsEmptyCell(int row, int col)
 {
-    return row < 0 || col < 0 || row >= rowsFetchedM || col >= columnCountM;
+    return !isValidCellPos(row, col);
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::isNullCell(int row, int col)
 {
-    return isValidCellPos(row, col) && dataM[row][col] == 0;
+    return rowsM.isFieldNull(row, col);
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::isNumericColumn(int col)
 {
-    switch (getColumnType(col))
-    {
-        case IBPP::sdFloat:
-        case IBPP::sdDouble:
-        case IBPP::sdInteger:
-        case IBPP::sdSmallint:
-        case IBPP::sdLargeint:
-            return true;
-        default:
-            return false;
-    }
+    return rowsM.isRowFieldNumeric(col);
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::isValidCellPos(int row, int col)
 {
-    return (row >= 0 && col >= 0 && row < (int)dataM.size()
-        && col < (int)dataM[row].size());
+    return (row >= 0 && col >= 0 && row < (int)rowsM.getRowCount()
+        && col < (int)rowsM.getRowFieldCount());
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::needsMoreRowsFetched()
@@ -379,7 +324,7 @@ bool DataGridTable::needsMoreRowsFetched()
         return false;
     // true if all rows are to be fetched, or more rows should be cached
     // for more responsive grid scrolling
-    return (fetchAllRowsM || rowsFetchedM < maxRowToFetchM);
+    return (fetchAllRowsM || rowsM.getRowCount() < maxRowToFetchM);
 }
 //-----------------------------------------------------------------------------
 void DataGridTable::setFetchAllRecords(bool fetchall)

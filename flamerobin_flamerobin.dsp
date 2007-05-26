@@ -512,7 +512,7 @@ SOURCE=.\src\gui\controls\DataGrid.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gui\controls\DataGridCells.cpp
+SOURCE=.\src\gui\controls\DataGridRows.cpp
 # End Source File
 # Begin Source File
 
@@ -862,7 +862,7 @@ SOURCE=.\src\gui\controls\DataGrid.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gui\controls\DataGridCells.h
+SOURCE=.\src\gui\controls\DataGridRows.h
 # End Source File
 # Begin Source File
 

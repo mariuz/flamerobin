@@ -98,7 +98,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ContextMenuMetadataItemVisitor.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGrid.obj \
-	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridCells.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRows.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_LogTextControl.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.obj \
@@ -341,7 +341,7 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ContextMenuMetadataItemVisitor.obj: .\src
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGrid.obj: .\src\gui\controls\DataGrid.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridCells.obj: .\src\gui\controls\DataGridCells.cpp
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRows.obj: .\src\gui\controls\DataGridRows.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.obj: .\src\gui\controls\DataGridTable.cpp
