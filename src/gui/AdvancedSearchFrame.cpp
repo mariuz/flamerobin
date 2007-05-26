@@ -648,7 +648,7 @@ void AdvancedSearchFrame::OnButtonAddDatabaseClick(wxCommandEvent& WXUNUSED(even
 {
     if (choice_database->GetSelection() == 0)   // all connected databases
     {
-        for (int i=1; i<choice_database->GetCount(); ++i)
+        for (int i = 1; i < (int)choice_database->GetCount(); ++i)
         {
             Database *db = (Database *)choice_database->GetClientData(i);
             if (db && db->isConnected())

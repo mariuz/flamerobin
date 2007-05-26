@@ -119,7 +119,7 @@ void ReorderFieldsDialog::moveSelected(int moveby)
     int newpos = sel + moveby;
     if (newpos < 0)
         newpos = 0;
-    if (newpos >= list_box_fields->GetCount())
+    if (newpos >= (int)list_box_fields->GetCount())
         newpos = list_box_fields->GetCount() - 1;
     if (newpos != sel)
     {
@@ -163,7 +163,7 @@ void ReorderFieldsDialog::updateButtons()
 const wxString ReorderFieldsDialog::getStatementsToExecute()
 {
     wxString sql;
-    for (int i = 0; i < list_box_fields->GetCount(); ++i)
+    for (int i = 0; i < (int)list_box_fields->GetCount(); ++i)
     {
         Identifier temp(list_box_fields->GetString(i));
         sql += wxString::Format(wxT("ALTER TABLE %s ALTER %s POSITION %d;\n"),
@@ -194,7 +194,7 @@ void ReorderFieldsDialog::OnDownButtonClick(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ReorderFieldsDialog::OnFirstButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    moveSelected(-list_box_fields->GetCount());
+    moveSelected(-(int)list_box_fields->GetCount());
 }
 //-----------------------------------------------------------------------------
 void ReorderFieldsDialog::OnLastButtonClick(wxCommandEvent& WXUNUSED(event))

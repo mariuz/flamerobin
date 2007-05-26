@@ -193,7 +193,7 @@ void EventWatcherFrame::updateControls()
 void EventWatcherFrame::addEvents(wxString& s)
 {
     // deselect all items so user can cleanly see what is added
-    for (int ix = 0; ix < listbox_monitored->GetCount(); ++ix)
+    for (int ix = 0; ix < (int)listbox_monitored->GetCount(); ++ix)
     {
         if (listbox_monitored->IsSelected(ix))
             listbox_monitored->Deselect(ix);
@@ -228,7 +228,7 @@ void EventWatcherFrame::defineMonitoredEvents()
 
         // get a list of events to be monitored
         vector<string> events;
-        for (int i = 0; i < listbox_monitored->GetCount(); i++)
+        for (int i = 0; i < (int)listbox_monitored->GetCount(); i++)
             events.push_back(wx2std(listbox_monitored->GetString(i)));
 
         eventsM->Clear();
@@ -368,7 +368,7 @@ void EventWatcherFrame::OnButtonSaveClick(wxCommandEvent& WXUNUSED(event))
 
     wxBusyCursor wait;
     wxString s;
-    for (int i = 0; i < listbox_monitored->GetCount(); ++i)
+    for (int i = 0; i < (int)listbox_monitored->GetCount(); ++i)
         s += listbox_monitored->GetString(i) + wxT("\n");
 
     wxFile f;
