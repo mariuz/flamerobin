@@ -40,6 +40,7 @@
 
 #include <wx/grid.h>
 
+#include "config/Config.h"
 #include "core/StringUtils.h"
 #include "gui/controls/DataGridTable.h"
 //-----------------------------------------------------------------------------
@@ -48,6 +49,7 @@ DataGridTable::DataGridTable(IBPP::Statement& s)
 {
     allRowsFetchedM = false;
     fetchAllRowsM = false;
+    config().getValue(wxT("GridFetchAllRecords"), fetchAllRowsM);
     maxRowToFetchM = 100;
 
     nullAttrM = new wxGridCellAttr();
@@ -82,6 +84,7 @@ void DataGridTable::Clear()
 {
     allRowsFetchedM = true;
     fetchAllRowsM = false;
+    config().getValue(wxT("GridFetchAllRecords"), fetchAllRowsM);
 
     unsigned oldCols = rowsM.getRowFieldCount();
     unsigned oldRows = rowsM.getRowCount();
@@ -137,7 +140,7 @@ void DataGridTable::fetch()
         if (!initial && (::wxGetLocalTimeMillis() - startms > 100))
             break;
     }
-    while (fetchAllRowsM || rowsM.getRowCount() < maxRowToFetchM);
+    while ((fetchAllRowsM && !initial) || rowsM.getRowCount() < maxRowToFetchM);
 
     if (rowsM.getRowCount() > oldRows && GetView())   // notify the grid
     {

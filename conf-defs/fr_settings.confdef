@@ -309,6 +309,11 @@
                 </setting>
             </enables>
         </setting>
+        <setting type="checkbox">
+            <caption>Automatically fetch all records in result set</caption>
+            <key>GridFetchAllRecords</key>
+            <default>0</default>
+        </setting>
     </node>
     <node>
         <caption>Property Pages</caption>
