@@ -32,6 +32,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "gui/BaseDialog.h"
 
+class FileTextControl;
+
 class Server;
 class Database;
 //-----------------------------------------------------------------------------
@@ -46,7 +48,7 @@ private:
     wxStaticText* label_name;
     wxTextCtrl* text_ctrl_name;
     wxStaticText* label_dbpath;
-    wxTextCtrl* text_ctrl_dbpath;
+    FileTextControl* text_ctrl_dbpath;
     wxButton* button_browse;
     wxStaticText* label_username;
     wxTextCtrl* text_ctrl_username;

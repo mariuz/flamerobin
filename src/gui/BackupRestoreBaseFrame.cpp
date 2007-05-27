@@ -42,6 +42,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "config/Config.h"
 #include "gui/BackupRestoreBaseFrame.h"
+#include "gui/controls/DndTextControls.h"
 #include "gui/controls/LogTextControl.h"
 #include "metadata/database.h"
 #include "metadata/server.h"

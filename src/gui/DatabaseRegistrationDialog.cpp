@@ -42,6 +42,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/gbsizer.h>
 
 #include "core/StringUtils.h"
+#include "gui/controls/DndTextControls.h"
 #include "gui/DatabaseRegistrationDialog.h"
 #include "gui/StyleGuide.h"
 #include "metadata/database.h"
@@ -80,11 +81,11 @@ const wxString DatabaseRegistrationDialog::buildName(const wxString& dbPath) con
 void DatabaseRegistrationDialog::createControls()
 {
     label_name = new wxStaticText(getControlsPanel(), -1, _("Display name:"));
-    text_ctrl_name = new wxTextCtrl(getControlsPanel(), ID_textcontrol_name,
-        wxEmptyString);
+    text_ctrl_name = new wxTextCtrl(getControlsPanel(),
+        ID_textcontrol_name, wxEmptyString);
     label_dbpath = new wxStaticText(getControlsPanel(), -1,
         _("Database path:"));
-    text_ctrl_dbpath = new wxTextCtrl(getControlsPanel(),
+    text_ctrl_dbpath = new FileTextControl(getControlsPanel(),
         ID_textcontrol_dbpath, wxEmptyString);
     button_browse = new wxButton(getControlsPanel(), ID_button_browse,
         wxT("..."), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);

@@ -34,6 +34,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "gui/BaseFrame.h"
 
+class FileTextControl;
 class LogTextControl;
 
 class Server;
@@ -95,7 +96,7 @@ private:
 protected:
     wxPanel* panel_controls;
     wxStaticText* label_filename;
-    wxTextCtrl* text_ctrl_filename;
+    FileTextControl* text_ctrl_filename;
     wxButton* button_browse;
     wxCheckBox* checkbox_showlog;
     wxButton* button_start;

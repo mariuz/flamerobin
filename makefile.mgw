@@ -75,6 +75,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGrid.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRows.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DndTextControls.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_LogTextControl.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TextControl.o \
@@ -305,6 +306,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRows.o: ./src/gui/controls/DataGr
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.o: ./src/gui/controls/DataGridTable.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DndTextControls.o: ./src/gui/controls/DndTextControls.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_LogTextControl.o: ./src/gui/controls/LogTextControl.cpp

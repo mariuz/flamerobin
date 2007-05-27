@@ -62,6 +62,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_DataGrid.o \
 	flamerobin_DataGridRows.o \
 	flamerobin_DataGridTable.o \
+	flamerobin_DndTextControls.o \
 	flamerobin_LogTextControl.o \
 	flamerobin_PrintableHtmlWindow.o \
 	flamerobin_TextControl.o \
@@ -337,6 +338,9 @@ flamerobin_DataGridRows.o: $(srcdir)/src/gui/controls/DataGridRows.cpp $(FLAMERO
 
 flamerobin_DataGridTable.o: $(srcdir)/src/gui/controls/DataGridTable.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/controls/DataGridTable.cpp
+
+flamerobin_DndTextControls.o: $(srcdir)/src/gui/controls/DndTextControls.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/controls/DndTextControls.cpp
 
 flamerobin_LogTextControl.o: $(srcdir)/src/gui/controls/LogTextControl.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/controls/LogTextControl.cpp

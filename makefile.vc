@@ -76,6 +76,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGrid.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRows.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DndTextControls.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_LogTextControl.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TextControl.obj \
@@ -338,6 +339,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRows.obj: .\src\gui\controls\DataG
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.obj: .\src\gui\controls\DataGridTable.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DndTextControls.obj: .\src\gui\controls\DndTextControls.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_LogTextControl.obj: .\src\gui\controls\LogTextControl.cpp

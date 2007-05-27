@@ -48,6 +48,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "core/StringUtils.h"
 #include "config/Config.h"
 #include "gui/BackupFrame.h"
+#include "gui/controls/DndTextControls.h"
 #include "gui/controls/LogTextControl.h"
 #include "gui/StyleGuide.h"
 #include "metadata/database.h"
@@ -201,8 +202,8 @@ void BackupFrame::createControls()
         wxTAB_TRAVERSAL | wxCLIP_CHILDREN | wxNO_FULL_REPAINT_ON_RESIZE);
     label_filename = new wxStaticText(panel_controls, wxID_ANY,
         _("Backup file:"));
-    text_ctrl_filename = new wxTextCtrl(panel_controls, ID_text_ctrl_filename,
-        wxEmptyString);
+    text_ctrl_filename = new FileTextControl(panel_controls,
+        ID_text_ctrl_filename, wxEmptyString);
     button_browse = new wxButton(panel_controls, ID_button_browse, _("..."),
         wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
 
