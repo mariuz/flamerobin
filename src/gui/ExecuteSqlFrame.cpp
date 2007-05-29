@@ -1,24 +1,24 @@
 /*
-Copyright (c) 2004, 2005, 2006 The FlameRobin Development Team
+  Copyright (c) 2004-2007 The FlameRobin Development Team
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
 
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
   $Id$
@@ -39,6 +39,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include <wx/datetime.h>
+#include <wx/dnd.h>
 #include <wx/file.h>
 #include <wx/fontmap.h>
 #include <wx/fontdlg.h>
@@ -73,14 +74,67 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "sql/SqlStatement.h"
 #include "statementHistory.h"
 #include "urihandler.h"
+//-----------------------------------------------------------------------------
+class SqlEditorDropTarget : public wxDropTarget
+{
+public:
+    SqlEditorDropTarget(ExecuteSqlFrame* frame, SqlEditor* editor,
+        Database* database);
+    virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def);
+    virtual bool OnDropFiles(wxCoord x, wxCoord y,
+        const wxArrayString& filenames);
+    virtual bool OnDropText(wxCoord x, wxCoord y, const wxString& text);
+private:
+    ExecuteSqlFrame* frameM;
+    SqlEditor* editorM;
+    Database* databaseM;
+    
+    wxFileDataObject* fileDataM;
+    wxTextDataObject* textDataM;
+};
+//-----------------------------------------------------------------------------
+SqlEditorDropTarget::SqlEditorDropTarget(ExecuteSqlFrame* frame,
+        SqlEditor* editor, Database* database)
+    : frameM(frame), editorM(editor), databaseM(database)
+{
+    wxDataObjectComposite* dataobj = new wxDataObjectComposite;
+    dataobj->Add(fileDataM = new wxFileDataObject);
+    dataobj->Add(textDataM = new wxTextDataObject);
+    SetDataObject(dataobj);
+}
+//-----------------------------------------------------------------------------
+wxDragResult SqlEditorDropTarget::OnData(wxCoord x, wxCoord y,
+    wxDragResult def)
+{
+    if (!GetData())
+        return wxDragNone;
 
+    wxDataObjectComposite* dataobj = (wxDataObjectComposite*) m_dataObject;
+    // test for wxDF_FILENAME
+    if (dataobj->GetReceivedFormat() == fileDataM->GetFormat())
+    {
+        if (OnDropFiles(x, y, fileDataM->GetFilenames()))
+            return def;
+    }
+    else
+    // try everything else as dropped text
+    if (OnDropText(x, y, textDataM->GetText()))
+        return def;
+    return wxDragNone;
+}
+//-----------------------------------------------------------------------------
+bool SqlEditorDropTarget::OnDropFiles(wxCoord, wxCoord,
+    const wxArrayString& filenames)
+{
+    return (filenames.GetCount() == 1 && frameM->loadSqlFile(filenames[0]));
+}
 //-----------------------------------------------------------------------------
 // TODO: This needs to be reworked to use the tokenizer
 //       Perhaps we could have a SelectStatement class, that would be able to:
 //       - load the select statement
 //       - alter some of it (add new table, column, etc.)
 //       - dump statement back to editor
-bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
+bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
 {
     if (text.Mid(0, 7) != wxT("OBJECT:"))
         return false;
@@ -116,7 +170,7 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
     }
 
     // setup complete. now the actual stuff:
-    wxString sql = ownerM->GetText().Upper();
+    wxString sql = editorM->GetText().Upper();
 
     // currently we don't support having comments and quotes (it's complicated)
     //if (!SimpleParser::stripSql(sql))
@@ -127,7 +181,7 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
     if (psel == wxString::npos)                            // simple select statement
     {
         sql = wxT("SELECT ") + column_list + wxT("\nFROM ") + t->getQuotedName();
-        ownerM->SetText(sql);
+        editorM->SetText(sql);
         return true;
     }
 
@@ -190,7 +244,7 @@ bool DnDText::OnDropText(wxCoord, wxCoord, const wxString& text)
     sql.insert(pfrom, wxT(",\n"));
     sql.insert(pfrom+1, column_list);
 
-    ownerM->SetText(sql);
+    editorM->SetText(sql);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -1029,14 +1083,17 @@ void ExecuteSqlFrame::OnButtonLoadClick(wxCommandEvent& WXUNUSED(event))
         wxOPEN | wxCHANGE_DIR);
 #endif
 
-    if (wxID_OK != fd.ShowModal())
-        return;
-
-    if (styled_text_ctrl_sql->LoadFile(fd.GetPath()))
-    {
-        filenameM = fd.GetPath();
-        SetTitle(filenameM);
-    }
+    if (wxID_OK == fd.ShowModal())
+        loadSqlFile(fd.GetPath());
+}
+//-----------------------------------------------------------------------------
+bool ExecuteSqlFrame::loadSqlFile(const wxString& filename)
+{
+    if (!styled_text_ctrl_sql->LoadFile(filename))
+        return false;
+    filenameM = filename;
+    SetTitle(filenameM);
+    return true;
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonSaveAsClick(wxCommandEvent& WXUNUSED(event))
@@ -1577,7 +1634,8 @@ void ExecuteSqlFrame::setDatabase(Database* db)
     updateHistoryButtons();
 
     // set drop target for DnD
-    styled_text_ctrl_sql->SetDropTarget(new DnDText(styled_text_ctrl_sql, databaseM));
+    styled_text_ctrl_sql->SetDropTarget(
+        new SqlEditorDropTarget(this, styled_text_ctrl_sql, databaseM));
 }
 //-----------------------------------------------------------------------------
 //! closes window if database is removed (unregistered)
