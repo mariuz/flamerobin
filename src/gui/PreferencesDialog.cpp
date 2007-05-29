@@ -1,24 +1,24 @@
 /*
-Copyright (c) 2004, 2005, 2006 The FlameRobin Development Team
+  Copyright (c) 2004-2007 The FlameRobin Development Team
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
 
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
   $Id$
@@ -432,9 +432,15 @@ void PreferencesDialog::layout()
     sizerRight->Add(bookctrl_1, 1, wxEXPAND);
 
     wxBoxSizer* sizerControls = new wxBoxSizer(wxHORIZONTAL);
+#if wxCHECK_VERSION(2, 8, 0)
+    sizerControls->Add(treectrl_1, 0, wxEXPAND);
+    sizerControls->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 0);
+    sizerControls->Add(sizerRight, 1, wxEXPAND);
+#else
     sizerControls->Add(treectrl_1, 2, wxEXPAND);
     sizerControls->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 0);
     sizerControls->Add(sizerRight, 5, wxEXPAND);
+#endif
 
     // create sizer for buttons -> styleguide class will align it correctly
     wxSizer* sizerButtons = styleguide().createButtonSizer(button_save, button_cancel);
@@ -541,6 +547,7 @@ bool PreferencesDialog::parseDescriptionNode(wxTreeItemId parent, wxXmlNode* xml
         if (description.IsEmpty())
             description = caption;
     }
+    treectrl_1->ExpandAllChildren(item);
 
     // add all settings controls of this page to a sizer
     wxBoxSizer* sizerPage = new wxBoxSizer(wxVERTICAL);
@@ -630,6 +637,10 @@ void PreferencesDialog::setProperties()
     imageListM.Add(getImage(ntTable));
     imageListM.Add(getImage(ntDomain));
     treectrl_1->SetImageList(&imageListM);
+
+#if wxCHECK_VERSION(2, 8, 0)
+    treectrl_1->SetQuickBestSize(false);
+#endif
 
     // show category description in colors for highlighted text
     panel_categ->SetBackgroundColour(
