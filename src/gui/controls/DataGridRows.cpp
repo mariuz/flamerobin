@@ -813,9 +813,9 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
     // and string array length when all fields contain data
     for (unsigned col = 1; col <= colCount; ++col)
     {
-        wxString colName(std2wx(statement->ColumnName(col)));
+        wxString colName(std2wx(statement->ColumnAlias(col)));
         if (colName.empty())
-            colName = std2wx(statement->ColumnAlias(col));
+            colName = std2wx(statement->ColumnName(col));
 
         IBPP::SDT type = statement->ColumnType(col);
         if (statement->ColumnScale(col))
