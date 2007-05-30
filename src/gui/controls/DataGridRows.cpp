@@ -369,6 +369,7 @@ public:
     IntegerColumnDef(const wxString& name, unsigned offset);
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
+    virtual bool isNumeric();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter);
 };
@@ -392,6 +393,11 @@ unsigned IntegerColumnDef::getBufferSize()
     return sizeof(int);
 }
 //-----------------------------------------------------------------------------
+bool IntegerColumnDef::isNumeric()
+{
+    return true;
+}
+//-----------------------------------------------------------------------------
 void IntegerColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     const IBPP::Statement& statement, wxMBConv*)
 {
@@ -410,6 +416,7 @@ public:
     Int64ColumnDef(const wxString& name, unsigned offset);
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
+    virtual bool isNumeric();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter);
 };
@@ -431,6 +438,11 @@ wxString Int64ColumnDef::getAsString(DataGridRowBuffer* buffer)
 unsigned Int64ColumnDef::getBufferSize()
 {
     return sizeof(int64_t);
+}
+//-----------------------------------------------------------------------------
+bool Int64ColumnDef::isNumeric()
+{
+    return true;
 }
 //-----------------------------------------------------------------------------
 void Int64ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
@@ -602,6 +614,7 @@ public:
     FloatColumnDef(const wxString& name, unsigned offset);
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
+    virtual bool isNumeric();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter);
 };
@@ -628,6 +641,11 @@ unsigned FloatColumnDef::getBufferSize()
     return sizeof(float);
 }
 //-----------------------------------------------------------------------------
+bool FloatColumnDef::isNumeric()
+{
+    return true;
+}
+//-----------------------------------------------------------------------------
 void FloatColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     const IBPP::Statement& statement, wxMBConv*)
 {
@@ -646,6 +664,7 @@ public:
     DoubleColumnDef(const wxString& name, unsigned offset);
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
+    virtual bool isNumeric();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter);
 };
@@ -677,6 +696,11 @@ wxString DoubleColumnDef::getAsString(DataGridRowBuffer* buffer)
 unsigned DoubleColumnDef::getBufferSize()
 {
     return sizeof(double) + sizeof(int);
+}
+//-----------------------------------------------------------------------------
+bool DoubleColumnDef::isNumeric()
+{
+    return true;
 }
 //-----------------------------------------------------------------------------
 void DoubleColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
