@@ -37,7 +37,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <wx/gbsizer.h>
 
-#include "gui/ExecuteSqlFrame.h"
+#include "gui/ExecuteSql.h"
 #include "gui/PrivilegesDialog.h"
 #include "gui/StyleGuide.h"
 #include "metadata/collection.h"
@@ -611,13 +611,8 @@ bool ManagePrivilegesHandler::handleURI(URI& uri)
         // nothing to be done
         if (!statements.IsEmpty())
         {
-            // create ExecuteSqlFrame with option to close at once
-            ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1,
-                _("Grant And Revoke Privileges"));
-            esf->setDatabase(m->getDatabase());
-            esf->setSql(statements);
-            esf->executeAllStatements(true);
-            esf->Show();
+            execSql(w, _("Grant And Revoke Privileges"), m->getDatabase(),
+                statements, true);
         }
     }
     return true;

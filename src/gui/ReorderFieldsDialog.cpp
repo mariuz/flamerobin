@@ -40,7 +40,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <string>
 
-#include "gui/ExecuteSqlFrame.h"
+#include "gui/ExecuteSql.h"
 #include "gui/ReorderFieldsDialog.h"
 #include "gui/StyleGuide.h"
 #include "metadata/table.h"
@@ -236,12 +236,8 @@ bool ReorderFieldsHandler::handleURI(URI& uri)
     //       the parent frame over the newly created sql execution frame
     if (rfd.ShowModal() == wxID_OK)
     {
-        // create ExecuteSqlFrame with option to close at once
-        ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1, rfd.GetTitle());
-        esf->setDatabase(t->getDatabase());
-        esf->setSql(rfd.getStatementsToExecute());
-        esf->executeAllStatements(true);
-        esf->Show();
+        execSql(w, rfd.GetTitle(), t->getDatabase(),
+            rfd.getStatementsToExecute(), true);
     }
     return true;
 }

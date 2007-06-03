@@ -53,7 +53,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/ContextMenuMetadataItemVisitor.h"
 #include "gui/DatabaseRegistrationDialog.h"
 #include "gui/EventWatcherFrame.h"
-#include "gui/ExecuteSqlFrame.h"
+#include "gui/ExecuteSql.h"
 #include "gui/MainFrame.h"
 #include "gui/PreferencesDialog.h"
 #include "gui/ProgressDialog.h"
@@ -816,11 +816,8 @@ void MainFrame::OnMenuInsert(wxCommandEvent& WXUNUSED(event))
     if (!t)
         return;
 
-    wxString sql = t->getInsertStatement();
-    ExecuteSqlFrame* eff = new ExecuteSqlFrame(this, -1, wxString(_("Execute SQL statements")));
-    eff->setDatabase(d);
-    eff->setSql(sql);
-    eff->Show();
+    showSql(this, wxString(_("Execute SQL statements")), d,
+        t->getInsertStatement());
 
     FR_CATCH
 }
@@ -848,10 +845,8 @@ void MainFrame::OnMenuExecuteProcedure(wxCommandEvent& WXUNUSED(event))
     if (!p)
         return;
 
-    ExecuteSqlFrame* eff = new ExecuteSqlFrame(this, -1, wxString(_("Executing procedure")));
-    eff->setDatabase(p->getDatabase());
-    eff->setSql(p->getExecuteStatement());
-    eff->Show();
+    showSql(this, wxString(_("Executing procedure")), p->getDatabase(),
+        p->getExecuteStatement());
 
     FR_CATCH
 }
@@ -890,12 +885,10 @@ void MainFrame::OnMenuBrowse(wxCommandEvent& WXUNUSED(event))
         sql = p->getSelectStatement(false); // false = without columns info (just *)
     }
 
-    ExecuteSqlFrame* eff = new ExecuteSqlFrame(this, -1, wxString(_("Execute SQL statements")));
-    eff->setDatabase(d);
-    eff->Show();
-    eff->setSql(sql);
-    if (t != ntProcedure)
-        eff->executeAllStatements();
+    if (t == ntProcedure)
+        showSql(this, wxString(_("Execute SQL statements")), d, sql);
+    else
+        execSql(this, wxString(_("Execute SQL statements")), d, sql, false);
 
     FR_CATCH
 }
@@ -952,13 +945,10 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
         sql += wxT("\nFROM ") + i->getQuotedName();
     }
 
-    ExecuteSqlFrame* eff = new ExecuteSqlFrame(this, -1, wxString(_("Execute SQL statements")));
-    eff->setDatabase(d);
-    eff->Show();
-    eff->setSql(sql);
-    eff->Update();
-    if (t != ntProcedure)
-        eff->executeAllStatements();
+    if (t == ntProcedure)
+        showSql(this, wxString(_("Execute SQL statements")), d, sql);
+    else
+        execSql(this, wxString(_("Execute SQL statements")), d, sql, false);
 
     FR_CATCH
 }
@@ -1491,7 +1481,7 @@ void MainFrame::showCreateTemplate(const MetadataItem* m)
     // TODO: add a call for wizards. For example, we can have NewTableWizard which is a frame with grid in which
     // user can enter column data for new table (name, datatype, null option, collation, default, etc.) and also
     // enter a name for new table, etc. Wizard should return a bunch of DDL statements as a wxString which would we
-    // pass to ExecuteSqlFrame.
+    // pass to ExecSqlFrame.
 
     wxString sql = m->getCreateSqlTemplate();
     if (sql == wxT(""))
@@ -1504,10 +1494,7 @@ void MainFrame::showCreateTemplate(const MetadataItem* m)
     if (!checkValidDatabase(db))
         return;
 
-    ExecuteSqlFrame* eff = new ExecuteSqlFrame(this, -1, wxEmptyString);
-    eff->setDatabase(db);
-    eff->setSql(sql);
-    eff->Show();
+    showSql(this, wxEmptyString, db, sql);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuLoadColumnsInfo(wxCommandEvent& WXUNUSED(event))
@@ -1734,15 +1721,14 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
     if (!db || !p && !v && !t)
         return;
 
-    ExecuteSqlFrame* eff = new ExecuteSqlFrame(this, -1, wxString(_("Alter object")));
-    eff->setDatabase(db);
+    wxString sql;
     if (p)
-        eff->setSql(p->getAlterSql());
+        sql = p->getAlterSql();
     else if (v)
-        eff->setSql(v->getRebuildSql());
+        sql = v->getRebuildSql();
     else if (t)
-        eff->setSql(t->getAlterSql());
-    eff->Show();
+        sql = t->getAlterSql();
+    showSql(this, wxString(_("Alter object")), db, sql);
 
     FR_CATCH
 }
@@ -1794,17 +1780,12 @@ void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
     // TODO: We could first check if there are some dependant objects, and offer the user to
     //       either drop dependencies, or drop those objects too. Then we should create a bunch of
     //       sql statements that do it.
-    wxString sql = m->getDropSqlStatement();
-    ExecuteSqlFrame* eff = new ExecuteSqlFrame(this, -1, sql);
-    eff->setDatabase(d);
-    eff->Show();
-    eff->setSql(sql);
-    eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
+    execSql(this, wxEmptyString, d, m->getDropSqlStatement(), true);
 
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
-//! create new ExecuteSqlFrame and attach database object to it
+//! create new ExecSqlFrame and attach database object to it
 void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
@@ -1825,9 +1806,7 @@ void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
         return;
 
     wxBusyCursor bc;
-    ExecuteSqlFrame* eff = new ExecuteSqlFrame(this, -1, wxString(_("Execute SQL statements")));
-    eff->setDatabase(d);
-    eff->Show();
+    showSql(this, wxString(_("Execute SQL statements")), d, wxEmptyString);
 
     FR_CATCH
 }

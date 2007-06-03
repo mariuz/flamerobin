@@ -36,11 +36,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif //WX_PRECOMP
 
 #include "statementHistory.h"
-#include "gui/ExecuteSqlFrame.h"
 #include "gui/StatementHistoryDialog.h"
 #include "gui/StyleGuide.h"
 //-----------------------------------------------------------------------------
-StatementHistoryDialog::StatementHistoryDialog(ExecuteSqlFrame *parent,
+StatementHistoryDialog::StatementHistoryDialog(wxWindow *parent,
     StatementHistory *history, const wxString& title)
     :BaseDialog(parent, -1, title), historyM(history),
      isSearchingM(false)
@@ -202,37 +201,34 @@ void StatementHistoryDialog::OnButtonDeleteClick(wxCommandEvent&
 //-----------------------------------------------------------------------------
 void StatementHistoryDialog::OnButtonCopyClick(wxCommandEvent& WXUNUSED(event))
 {
-   // it is certain, but who knows...
-    ExecuteSqlFrame *f = dynamic_cast<ExecuteSqlFrame *>(GetParent());
-    if (!f)
-        return;
-
     wxArrayInt temp;
     if (listbox_search->GetSelections(temp) == 0)
         return;
 
-    wxString sql;
+    sqlM.Empty();
     for (size_t i=0; i<temp.GetCount(); ++i)
     {
-        sql += historyM->get(
+        sqlM += historyM->get(
             (StatementHistory::Position)listbox_search->GetClientData(
                 temp.Item(i)))
             + wxT("\n");
     }
-    f->setSql(sql);
     EndModal(wxID_OK);
 }
 //-----------------------------------------------------------------------------
 void StatementHistoryDialog::OnListBoxSearchDoubleClick(wxCommandEvent& event)
 {
-   // it is certain, but who knows...
-    ExecuteSqlFrame *f = dynamic_cast<ExecuteSqlFrame *>(GetParent());
     StatementHistory::Position item =
         (StatementHistory::Position)event.GetClientData();
-    if (!f || (int)item < 0)
+    if ((int)item < 0)
         return;
-    f->setSql(historyM->get(item));
-    Destroy();
+    sqlM = historyM->get(item);
+    EndModal(wxID_OK);
+}
+//-----------------------------------------------------------------------------
+wxString StatementHistoryDialog::getSql() const
+{
+    return sqlM;
 }
 //-----------------------------------------------------------------------------
 

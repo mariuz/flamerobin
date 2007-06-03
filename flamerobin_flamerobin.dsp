@@ -536,6 +536,10 @@ SOURCE=.\src\gui\EventWatcherFrame.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\ExecuteSql.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\ExecuteSqlFrame.cpp
 # End Source File
 # Begin Source File
@@ -887,6 +891,10 @@ SOURCE=.\src\gui\controls\DndTextControls.h
 # Begin Source File
 
 SOURCE=.\src\gui\EventWatcherFrame.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\ExecuteSql.h
 # End Source File
 # Begin Source File
 

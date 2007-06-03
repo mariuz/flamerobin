@@ -41,7 +41,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <vector>
 
 #include "gui/CreateIndexDialog.h"
-#include "gui/ExecuteSqlFrame.h"
+#include "gui/ExecuteSql.h"
 #include "gui/StyleGuide.h"
 #include "metadata/table.h"
 #include "urihandler.h"
@@ -255,14 +255,7 @@ bool TableIndicesHandler::handleURI(URI& uri)
         }
     }
     if (!sql.IsEmpty())
-    {
-        // create ExecuteSqlFrame with option to close at once
-        ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1, frameCaption);
-        esf->setDatabase(t->getDatabase());
-        esf->setSql(sql);
-        esf->executeAllStatements(true);
-        esf->Show();
-    }
+        execSql(w, frameCaption, t->getDatabase(), sql, true);
     return true;
 }
 //-----------------------------------------------------------------------------

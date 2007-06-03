@@ -40,7 +40,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <wx/gbsizer.h>
 
-#include "gui/ExecuteSqlFrame.h"
+#include "gui/ExecuteSql.h"
 #include "gui/FieldPropertiesDialog.h"
 #include "gui/StyleGuide.h"
 #include "metadata/column.h"
@@ -746,11 +746,7 @@ void FieldPropertiesDialog::OnButtonEditDomainClick(wxCommandEvent&
         return;
     }
 
-    ExecuteSqlFrame *esf = new ExecuteSqlFrame(GetParent(), -1,
-        _("Alter domain"));
-    esf->setDatabase(db);
-    esf->setSql(d->getAlterSqlTemplate());
-    esf->Show();
+    showSql(GetParent(), _("Alter domain"), db, d->getAlterSqlTemplate());
     EndModal(wxID_CANCEL);
 }
 //-----------------------------------------------------------------------------
@@ -862,14 +858,7 @@ bool ColumnPropertiesHandler::handleURI(URI& uri)
     }
 
     if (!statements.IsEmpty())
-    {
-        // create ExecuteSqlFrame with option to close at once
-        ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1, title);
-        esf->setDatabase(t->getDatabase());
-        esf->setSql(statements);
-        esf->Show();
-        esf->executeAllStatements(true);
-    }
+        execSql(w, title, t->getDatabase(), statements, true);
     return true;
 }
 //-----------------------------------------------------------------------------

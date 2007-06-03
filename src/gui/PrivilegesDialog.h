@@ -32,6 +32,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "BaseDialog.h"
 
 class Database;
+class MetadataItem;
 //-----------------------------------------------------------------------------
 class PrivilegesDialog : public BaseDialog
 {

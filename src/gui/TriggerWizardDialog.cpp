@@ -38,10 +38,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #include "wx/wx.h"
 #endif
 
-#include "gui/ExecuteSqlFrame.h"
+#include "gui/ExecuteSql.h"
 #include "gui/StyleGuide.h"
 #include "gui/TriggerWizardDialog.h"
-#include "metadata/metadataitem.h"
+#include "metadata/table.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
 TriggerWizardDialog::TriggerWizardDialog(wxWindow* parent, MetadataItem *item):
@@ -208,14 +208,7 @@ bool CreateTriggerHandler::handleURI(URI& uri)
     {
         wxString statement(twd.getSqlStatement());
         if (!statement.IsEmpty())
-        {
-            // create ExecuteSqlFrame with option to close at once
-            ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1,
-                _("Creating new trigger"));
-            esf->setDatabase(t->getDatabase());
-            esf->setSql(statement);
-            esf->Show();
-        }
+            showSql(w, _("Creating new trigger"), t->getDatabase(), statement);
     }
     return true;
 }

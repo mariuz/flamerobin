@@ -43,7 +43,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "dberror.h"
 #include "frutils.h"
-#include "gui/ExecuteSqlFrame.h"
+#include "gui/ExecuteSql.h"
 #include "gui/MultilineEnterDialog.h"
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
@@ -183,11 +183,7 @@ bool AddConstraintHandler::handleURI(URI& uri)
         return true;
     }
 
-    ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, wxT(""));
-    eff->setDatabase(db);
-    eff->Show();
-    eff->setSql(sql);
-    eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
+    execSql(w, wxT(""),db, sql, true);  // true = commit + close at once
     return true;
 }
 //-----------------------------------------------------------------------------

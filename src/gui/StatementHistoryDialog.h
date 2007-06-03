@@ -32,11 +32,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "BaseDialog.h"
 
 class StatementHistory;
-class ExecuteSqlFrame;
 //-----------------------------------------------------------------------------
 class StatementHistoryDialog : public BaseDialog
 {
 private:
+    wxString sqlM;
     bool isSearchingM;
     StatementHistory *historyM;
     wxStatusBar *statusBarM;
@@ -63,8 +63,9 @@ private:
     void OnListBoxSelect(wxCommandEvent& event);
     void OnListBoxSearchDoubleClick(wxCommandEvent& event);
 public:
-    StatementHistoryDialog(ExecuteSqlFrame *parent, StatementHistory *history,
+    StatementHistoryDialog(wxWindow *parent, StatementHistory *history,
         const wxString& title = wxT("SQL Statement History"));
+    wxString getSql() const;
 
     DECLARE_EVENT_TABLE()
 };

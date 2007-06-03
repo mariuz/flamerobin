@@ -88,7 +88,7 @@ private:
     ExecuteSqlFrame* frameM;
     SqlEditor* editorM;
     Database* databaseM;
-    
+
     wxFileDataObject* fileDataM;
     wxTextDataObject* textDataM;
 };
@@ -1164,7 +1164,8 @@ void ExecuteSqlFrame::OnButtonHistoryClick(wxCommandEvent& WXUNUSED(event))
 {
     StatementHistory& sh = StatementHistory::get(databaseM);
     StatementHistoryDialog *shf = new StatementHistoryDialog(this, &sh);
-    shf->ShowModal();
+    if (shf->ShowModal() == wxID_OK)
+        setSql(shf->getSql());
 }
 //-----------------------------------------------------------------------------
 //! enable/disable and show/hide controls depending of transaction status

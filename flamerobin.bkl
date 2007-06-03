@@ -241,6 +241,7 @@
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.h
         $(SOURCEDIR)/gui/EventWatcherFrame.h
         $(SOURCEDIR)/gui/ExecuteSqlFrame.h
+        $(SOURCEDIR)/gui/ExecuteSql.h
         $(SOURCEDIR)/gui/FieldPropertiesDialog.h
         $(SOURCEDIR)/gui/FindDialog.h
         $(SOURCEDIR)/gui/MainFrame.h
@@ -341,6 +342,7 @@
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.cpp
         $(SOURCEDIR)/gui/EventWatcherFrame.cpp
         $(SOURCEDIR)/gui/ExecuteSqlFrame.cpp
+        $(SOURCEDIR)/gui/ExecuteSql.cpp
         $(SOURCEDIR)/gui/FieldPropertiesDialog.cpp
         $(SOURCEDIR)/gui/FindDialog.cpp
         $(SOURCEDIR)/gui/MainFrame.cpp

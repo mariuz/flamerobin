@@ -46,7 +46,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 SingleStatement::SingleStatement(const wxString& sql, bool valid)
     :sqlM(sql), isValidM(valid), typeM(stOther), thirdStringM(wxEmptyString)
 {
-    // copied from ExecuteSqlFrame
+    // copied from ExecSqlFrame
     wxString sqlc(sql);
     sqlc.erase(sqlc.find_last_not_of(wxT("\n\r\t ")) + 1);    // right-trim
     std::stringstream strstrm;              // Search and intercept
