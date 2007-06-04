@@ -25,10 +25,23 @@
 
 */
 //-----------------------------------------------------------------------------
-#include <wx/wx.h>
-#include "metadata/database.h"
+// For compilers that support precompilation, includes "wx/wx.h".
+#include "wx/wxprec.h"
+
+#ifdef __BORLANDC__
+    #pragma hdrstop
+#endif
+
+// for all others, include the necessary headers (this file is usually all you
+// need because it includes almost all "standard" wxWindows headers
+#ifndef WX_PRECOMP
+    #include "wx/wx.h"
+#endif
+
+#include "gui/ExecuteSql.h"
 #include "gui/ExecuteSqlFrame.h"
-#include "ExecuteSql.h"
+
+class Database;
 //-----------------------------------------------------------------------------
 ExecuteSqlFrame* showSql(wxWindow* parent, const wxString& title,
     Database *database, const wxString &sql)
