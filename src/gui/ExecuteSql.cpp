@@ -40,8 +40,6 @@
 
 #include "gui/ExecuteSql.h"
 #include "gui/ExecuteSqlFrame.h"
-
-class Database;
 //-----------------------------------------------------------------------------
 ExecuteSqlFrame* showSql(wxWindow* parent, const wxString& title,
     Database *database, const wxString &sql)
