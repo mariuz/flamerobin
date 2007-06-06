@@ -51,6 +51,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/AdvancedSearchFrame.h"
 #include "gui/BackupFrame.h"
 #include "gui/ContextMenuMetadataItemVisitor.h"
+#include "gui/DataGeneratorFrame.h"
 #include "gui/DatabaseRegistrationDialog.h"
 #include "gui/EventWatcherFrame.h"
 #include "gui/ExecuteSql.h"
@@ -365,6 +366,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_UPDATE_UI(myTreeCtrl::Menu_GetServerVersion, MainFrame::OnMenuUpdateIfServerSelected)
     EVT_MENU(myTreeCtrl::Menu_MonitorEvents, MainFrame::OnMenuMonitorEvents)
     EVT_UPDATE_UI(myTreeCtrl::Menu_MonitorEvents, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_MENU(myTreeCtrl::Menu_GenerateData, MainFrame::OnMenuGenerateData)
+    EVT_UPDATE_UI(myTreeCtrl::Menu_GenerateData, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_MENU(myTreeCtrl::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuDatabaseRegistrationInfo)
     EVT_UPDATE_UI(myTreeCtrl::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuUpdateIfDatabaseSelected)
     EVT_MENU(myTreeCtrl::Menu_Backup, MainFrame::OnMenuBackup)
@@ -1165,6 +1168,20 @@ void MainFrame::OnMenuGetServerVersion(wxCommandEvent& WXUNUSED(event))
 
     wxMessageBox(std2wx(version), _("Server version"),
         wxOK|wxICON_INFORMATION);
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuGenerateData(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    Database* db = tree_ctrl_1->getSelectedDatabase();
+    if (!checkValidDatabase(db))
+        return;
+
+    DataGeneratorFrame* f = new DataGeneratorFrame(this, db);
+    f->Show();
 
     FR_CATCH
 }

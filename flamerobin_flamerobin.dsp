@@ -508,6 +508,10 @@ SOURCE=.\src\gui\CreateIndexDialog.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\DataGeneratorFrame.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\controls\DataGrid.cpp
 # End Source File
 # Begin Source File
@@ -863,6 +867,10 @@ SOURCE=.\src\metadata\CreateDDLVisitor.h
 # Begin Source File
 
 SOURCE=.\src\gui\CreateIndexDialog.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\DataGeneratorFrame.h
 # End Source File
 # Begin Source File
 

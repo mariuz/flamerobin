@@ -69,6 +69,7 @@ public:
     void OnMenuShowConnectedUsers(wxCommandEvent& event);
     void OnMenuGetServerVersion(wxCommandEvent& event);
     void OnMenuMonitorEvents(wxCommandEvent& event);
+    void OnMenuGenerateData(wxCommandEvent& event);
     void OnMenuBackup(wxCommandEvent& event);
     void OnMenuQuery(wxCommandEvent& event);
     void OnMenuInsert(wxCommandEvent& event);

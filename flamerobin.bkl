@@ -238,6 +238,7 @@
         $(SOURCEDIR)/gui/controls/PrintableHtmlWindow.h
         $(SOURCEDIR)/gui/controls/TextControl.h
         $(SOURCEDIR)/gui/CreateIndexDialog.h
+        $(SOURCEDIR)/gui/DataGeneratorFrame.h
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.h
         $(SOURCEDIR)/gui/EventWatcherFrame.h
         $(SOURCEDIR)/gui/ExecuteSqlFrame.h
@@ -339,6 +340,7 @@
         $(SOURCEDIR)/gui/controls/PrintableHtmlWindow.cpp
         $(SOURCEDIR)/gui/controls/TextControl.cpp
         $(SOURCEDIR)/gui/CreateIndexDialog.cpp
+        $(SOURCEDIR)/gui/DataGeneratorFrame.cpp
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.cpp
         $(SOURCEDIR)/gui/EventWatcherFrame.cpp
         $(SOURCEDIR)/gui/ExecuteSqlFrame.cpp

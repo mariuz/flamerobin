@@ -81,6 +81,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TextControl.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CreateIndexDialog.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGeneratorFrame.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseRegistrationDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_EventWatcherFrame.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ExecuteSqlFrame.obj \
@@ -355,6 +356,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TextControl.obj: .\src\gui\controls\TextCo
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CreateIndexDialog.obj: .\src\gui\CreateIndexDialog.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGeneratorFrame.obj: .\src\gui\DataGeneratorFrame.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseRegistrationDialog.obj: .\src\gui\DatabaseRegistrationDialog.cpp
