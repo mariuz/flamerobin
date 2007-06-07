@@ -948,10 +948,6 @@ bool Database::connect(wxString password, ProgressIndicator* indicator)
             int typeCount = sizeof(nodetypes) / sizeof(NodeTypeName);
             for (int i = 0; i < typeCount; i++)
             {
-                // Only load system tables when they should be shown
-                if (nodetypes[i].type == ntSysTable && !showSysTables())
-                    continue;
-
                 if (indicator)
                 {
                     wxString typeName(wxGetTranslation(nodetypes[i].name));
