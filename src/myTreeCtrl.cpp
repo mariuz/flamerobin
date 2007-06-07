@@ -122,6 +122,9 @@ void myTreeCtrl::OnBeginDrag(wxTreeEvent& event)
 //! Creates context menu
 void myTreeCtrl::OnContextMenu(wxContextMenuEvent& event)
 {
+    if (!allowContextMenuM)
+        return;
+
     // select item under the mouse first, since right-click doesn't change selection under GTK
     wxPoint pos = ScreenToClient(event.GetPosition());
     int flags;
@@ -154,7 +157,13 @@ void myTreeCtrl::OnContextMenu(wxContextMenuEvent& event)
 myTreeCtrl::myTreeCtrl(wxWindow* parent, const wxPoint& pos, const wxSize& size, long style):
     wxTreeCtrl(parent, ID_tree_ctrl, pos, size, style)
 {
+    allowContextMenuM = true;
     loadImages();
+}
+//-----------------------------------------------------------------------------
+void myTreeCtrl::allowContextMenu(bool doAllow)
+{
+    allowContextMenuM = doAllow;
 }
 //-----------------------------------------------------------------------------
 //! Override wxWidgets method, since it's buggy (doesn't handle negative values properly)

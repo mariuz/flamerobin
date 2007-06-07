@@ -36,18 +36,28 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/button.h>
 #include <wx/splitter.h>
 
+#include <map>
+
 #include "core/Observer.h"
 #include "gui/BaseFrame.h"
 
 class Database;
+class Column;
+class myTreeCtrl;
+class GeneratorSettings;
 //-----------------------------------------------------------------------------
 class DataGeneratorFrame: public BaseFrame, public Observer
 {
     DECLARE_EVENT_TABLE()
 protected:
+    bool loadingM;  // prevent updates until loaded
+    std::map<wxString, GeneratorSettings *> settingsM;
+    std::map<wxString, int> tableRecordsM;
     Database* databaseM;
     virtual const wxString getName() const;
     virtual const wxRect getDefaultRect() const;
+    void showColumnSettings(bool show);
+    GeneratorSettings* getSettings(Column *c);
 
     enum
     {
@@ -62,7 +72,7 @@ protected:
     wxSplitterWindow* mainSplitter;
     wxPanel* leftPanel;
     wxStaticText* leftLabel;
-    wxTreeCtrl* mainTree;
+    myTreeCtrl* mainTree;
     wxPanel* rightPanel;
     wxStaticText* rightLabel;
     wxStaticText* tableLabel;
@@ -95,8 +105,10 @@ protected:
     void OnSaveButtonClick(wxCommandEvent& event);
     void OnLoadButtonClick(wxCommandEvent& event);
     void OnGenerateButtonClick(wxCommandEvent& event);
+    void OnTreeSelectionChanged(wxTreeEvent& event);
 public:
     DataGeneratorFrame(wxWindow* parent, Database* db);
+    ~DataGeneratorFrame();
     void removeSubject(Subject* subject);
     void update();
 };

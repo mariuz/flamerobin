@@ -38,17 +38,75 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #include "wx/wx.h"
 #endif
 
+#include <wx/arrstr.h>
 #include <wx/ffile.h>
 #include <wx/file.h>
 
+#include "core/FRError.h"
+#include "myTreeCtrl.h"
+#include "treeitem.h"
+#include "gui/ProgressDialog.h"
 #include "metadata/database.h"
 #include "DataGeneratorFrame.h"
 //-----------------------------------------------------------------------------
-DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
-    :BaseFrame(parent,-1, wxT("")), databaseM(db)
+class GeneratorSettings
 {
+public:
+    typedef enum { vtSkip, vtRange, vtColumn, vtFile } ValueType;
+    ValueType valueType;
+    wxString range;
+    wxString sourceColumn;
+    wxString fileName;
+    bool randomValues;
+    int nullPercent;
+};
+//-----------------------------------------------------------------------------
+void loadColumns(Database *db, wxArrayString& as, ProgressDialog& pd)
+{
+    MetadataCollection<Table>* t = db->getCollection<Table>();
+    pd.initProgress(_("Loading tables"), t->getChildrenCount());
+
+    // load list of tables and columns from database
+    for (MetadataCollection<Table>::iterator it = t->begin();
+        it != t->end(); ++it)
+    {
+        pd.setProgressMessage((*it).getName_());
+        pd.stepProgress();
+        if (pd.isCanceled())
+            return;
+
+        (*it).checkAndLoadColumns();
+        for (MetadataCollection<Column>::iterator i2 = (*it).begin();
+            i2 != (*it).end(); ++i2)
+        {
+            as.Add((*it).getQuotedName() + wxT(".") + (*i2).getQuotedName());
+        }
+    }
+    as.Sort();
+    // prepend
+    as.Insert(wxT("[none]"), 0);
+}
+//-----------------------------------------------------------------------------
+DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
+    :BaseFrame(parent,-1, wxT("")), databaseM(db), loadingM(true)
+{
+    #include "procedure32.xpm"
+    wxBitmap bmp(procedure_xpm);
+    wxIcon icon;
+    icon.CopyFromBitmap(bmp);
+    SetIcon(icon);
+
+    ProgressDialog pd(this, _("Loading table columns..."), 1);
+    pd.Show();
+    wxArrayString columns;
+    loadColumns(db, columns, pd);
+
+
     SetTitle(_("Test Data Generator"));
-    //SetSizeHints( wxDefaultSize, wxDefaultSize );
+    // just in case some tree event escapes us
+    // TODO: we need proper event handling for tree to allow multiple
+    //       tree controls that are completely functional
+    SetExtraStyle(wxWS_EX_BLOCK_EVENTS);
 
     wxBoxSizer* outerSizer;
     outerSizer = new wxBoxSizer( wxVERTICAL );
@@ -70,7 +128,11 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     leftLabel = new wxStaticText( leftPanel, wxID_ANY, wxT("Select tables and columns"), wxDefaultPosition, wxDefaultSize, 0 );
     leftPanelSizer->Add( leftLabel, 0, wxALL|wxEXPAND, 5 );
 
-    mainTree = new wxTreeCtrl( leftPanel, wxID_ANY, wxDefaultPosition, wxSize(200,100), wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT);
+    mainTree = new myTreeCtrl(leftPanel, wxDefaultPosition, wxDefaultSize,
+#if defined __WXGTK20__ || defined __WXMAC__
+        wxTR_NO_LINES |
+#endif
+        wxTR_HAS_BUTTONS | wxSUNKEN_BORDER);
     leftPanelSizer->Add( mainTree, 1, wxALL|wxEXPAND, 5 );
 
     leftPanel->SetSizer( leftPanelSizer );
@@ -93,7 +155,8 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     recordsLabel = new wxStaticText( rightPanel, wxID_ANY, wxT("Number of records to create:"), wxDefaultPosition, wxDefaultSize, 0 );
     recordsSizer->Add( recordsLabel, 0, wxALIGN_CENTER_VERTICAL|wxLEFT, 10 );
 
-    spinRecords = new wxSpinCtrl( rightPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0);
+    spinRecords = new wxSpinCtrl( rightPanel, wxID_ANY, wxEmptyString, wxDefaultPosition,
+        wxDefaultSize, wxSP_ARROW_KEYS, 0, 100000, 0);
     recordsSizer->Add( spinRecords, 0, wxRIGHT|wxLEFT, 10 );
 
     rightPanelSizer->Add( recordsSizer, 0, wxEXPAND, 5 );
@@ -128,9 +191,8 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     radioColumn = new wxRadioButton( rightPanel, wxID_ANY, wxT("Value from column:"), wxDefaultPosition, wxDefaultSize, 0);
     flexSizer->Add( radioColumn, 0, wxALIGN_CENTER_VERTICAL, 5 );
 
-    wxString valueChoiceChoices[] = {  };
-    int valueChoiceNChoices = sizeof( valueChoiceChoices ) / sizeof( wxString );
-    valueChoice = new wxChoice( rightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, valueChoiceNChoices, valueChoiceChoices, 0 );
+    valueChoice = new wxChoice( rightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+        columns );
     flexSizer->Add( valueChoice, 0, wxEXPAND, 5 );
 
     radioFile = new wxRadioButton( rightPanel, wxID_ANY, wxT("Value from file"), wxDefaultPosition, wxDefaultSize, 0);
@@ -158,7 +220,8 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     nullLabel = new wxStaticText( rightPanel, wxID_ANY, wxT("Percentage of NULLs:"), wxDefaultPosition, wxDefaultSize, 0 );
     nullSizer->Add( nullLabel, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxLEFT, 10 );
 
-    nullSpin = new wxSpinCtrl( rightPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0);
+    nullSpin = new wxSpinCtrl( rightPanel, wxID_ANY, wxEmptyString, wxDefaultPosition,
+        wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0);
     nullSizer->Add( nullSpin, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
     nullPercentLabel = new wxStaticText( rightPanel, wxID_ANY, wxT("%"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -172,9 +235,8 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     copyLabel = new wxStaticText( rightPanel, wxID_ANY, wxT("Copy settings from"), wxDefaultPosition, wxDefaultSize, 0 );
     copySizer->Add( copyLabel, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxRIGHT, 10 );
 
-    wxString copyChoiceChoices[] = {  };
-    int copyChoiceNChoices = sizeof( copyChoiceChoices ) / sizeof( wxString );
-    copyChoice = new wxChoice( rightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, copyChoiceNChoices, copyChoiceChoices, 0 );
+    copyChoice = new wxChoice( rightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+        columns, 0 );
     copySizer->Add( copyChoice, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
     copyButton = new wxButton( rightPanel, ID_button_copy, wxT("Copy"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
@@ -216,6 +278,37 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     outerSizer->Fit(this);
     outerSizer->SetSizeHints(this);
     mainSplitter->UpdateSize();
+
+    mainTree->allowContextMenu(false);
+    TreeItem* rootdata = new TreeItem(mainTree);
+    wxTreeItemId root = mainTree->AddRoot(_("Tables"),
+        mainTree->getItemImage(ntTables), -1, rootdata);
+    db->getCollection<Table>()->attachObserver(rootdata);
+    rootdata->update();
+    mainTree->Expand(root);
+
+    // we need to manually update each table (that's bad)
+    wxTreeItemIdValue cookie;
+    wxTreeItemId node = mainTree->GetFirstChild(root, cookie);
+    if (node.IsOk())
+        mainTree->SelectItem(node);
+    for (; node.IsOk(); node = mainTree->GetNextChild(root, cookie))
+    {
+        TreeItem *d = (TreeItem *)(mainTree->GetItemData(node));
+        if (d)
+            d->update();
+    }
+
+    loadingM = false;
+}
+//-----------------------------------------------------------------------------
+DataGeneratorFrame::~DataGeneratorFrame()
+{
+    for (std::map<wxString, GeneratorSettings *>::iterator it =
+        settingsM.begin(); it!= settingsM.end(); ++it)
+    {
+        delete (*it).second;
+    }
 }
 //-----------------------------------------------------------------------------
 const wxString DataGeneratorFrame::getName() const
@@ -248,10 +341,242 @@ BEGIN_EVENT_TABLE( DataGeneratorFrame, BaseFrame )
     EVT_BUTTON( ID_button_save, DataGeneratorFrame::OnSaveButtonClick )
     EVT_BUTTON( ID_button_load, DataGeneratorFrame::OnLoadButtonClick )
     EVT_BUTTON( ID_button_generate, DataGeneratorFrame::OnGenerateButtonClick )
+    EVT_TREE_SEL_CHANGED(myTreeCtrl::ID_tree_ctrl, DataGeneratorFrame::OnTreeSelectionChanged)
 END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+// prehaps using values from config() would be nice
+wxString getDefaultRange(Domain *d)
+{
+    wxString dt, size, scale;
+    d->getDatatypeParts(dt, size, scale);
+
+    if (dt == wxT("Smallint") || dt == wxT("Float"))
+        return wxT("0-100");
+
+    if (   dt == wxT("Numeric") || dt == wxT("Integer")
+        || dt == wxT("Decimal") || dt == wxT("Double precision"))
+    {
+        return wxT("0-2000000");
+    }
+
+    if (dt == wxT("Char") || dt == wxT("Varchar"))
+    {
+        long l;
+        size.ToLong(&l);
+        return wxString(wxChar('N'), l);
+    }
+
+    if (dt == wxT("Timestamp"))
+        return wxT("01.01.1980 00:00:00-31.12.2005 23:59:59");
+
+    if (dt == wxT("Date"))
+        return wxT("01.01.1980-31.12.2005");
+
+    if (dt == wxT("Time"))
+        return wxT("00:00:00-23:59:59");
+
+    return wxEmptyString;
+}
+//-----------------------------------------------------------------------------
+GeneratorSettings* DataGeneratorFrame::getSettings(Column *c)
+{
+    Table *tab = c->getTable();
+    if (!tab)
+        throw FRError(_("Table not set"));
+    wxString s = tab->getQuotedName() + wxT(".") + c->getQuotedName();
+    std::map<wxString, GeneratorSettings *>::iterator it = settingsM.find(s);
+    if (it != settingsM.end())    // not found
+        return (*it).second;
+
+    // check FK info
+    wxString fkc;
+    std::vector<ForeignKey> *fk = tab->getForeignKeys();
+    for (std::vector<ForeignKey>::iterator fi = fk->begin(); fi != fk->end();
+        ++fi)
+    {
+        int cnt = 0;
+        for (std::vector<wxString>::const_iterator ci = (*fi).begin();
+            ci != (*fi).end(); ++ci, ++cnt)
+        {
+            Identifier id(*ci);
+            if (id.getQuoted() == c->getQuotedName())
+            {
+                Identifier table((*fi).referencedTableM);
+                Identifier column((*fi).referencedColumnsM[cnt]);
+                fkc = table.getQuoted() + wxT(".") + column.getQuoted();
+                break;
+            }
+        }
+        if (!fkc.IsEmpty())
+            break;
+    }
+
+    // check primary/unique
+    bool isUnique = false;
+    PrimaryKeyConstraint *pk = tab->getPrimaryKey();
+    if (pk)
+    {
+        for (std::vector<wxString>::const_iterator ci = pk->begin();
+            ci != pk->end(); ++ci)
+        {
+            Identifier id(*ci);
+            if (id.getQuoted() == c->getQuotedName())
+            {
+                isUnique = true;
+                break;
+            }
+        }
+    }
+    if (!isUnique)
+    {
+        std::vector<UniqueConstraint> *uq = tab->getUniqueConstraints();
+        for (std::vector<UniqueConstraint>::iterator ui = uq->begin();
+            !isUnique && ui != uq->end(); ++ui)
+        {
+            for (std::vector<wxString>::const_iterator ci = (*ui).begin();
+                ci != (*ui).end(); ++ci)
+            {
+                Identifier id(*ci);
+                if (id.getQuoted() == c->getQuotedName())
+                {
+                    isUnique = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    // It would be cool if we could detect simple check constraints:
+    // value in (1, 2, 3, 4)
+    // value between 1 and 4
+    // value < 5
+    // value = 1 or value = 2 or value = 3 or value = 4
+
+    GeneratorSettings *gs = new GeneratorSettings;
+    settingsM.insert(std::pair<wxString, GeneratorSettings*>(s, gs));
+    gs->randomValues = !isUnique;
+    gs->sourceColumn = wxT("[none]");
+    gs->nullPercent = (c->isNullable() ? 50 : 0);
+    gs->valueType = GeneratorSettings::vtRange;
+    gs->range = getDefaultRange(c->getDomain());
+    if (!c->getComputedSource().IsEmpty())
+        gs->valueType = GeneratorSettings::vtSkip;
+    else if (!fkc.IsEmpty())
+    {
+        gs->valueType = GeneratorSettings::vtColumn;
+        gs->sourceColumn = fkc;
+    }
+    return gs;
+}
+//-----------------------------------------------------------------------------
+void DataGeneratorFrame::showColumnSettings(bool show)
+{
+    if (loadingM)
+        return;
+    //rangeText->Enable(show);
+    //fileText->Enable(show);
+    // ... etc.
+
+    wxWindow *ww[] = {
+        columnLabel, valuetypeLabel, radioSkip,     radioRange,
+        rangeText,   radioColumn,    valueChoice,   radioFile,
+        fileText,    fileButton,     nullLabel,     randomCheckbox,
+        nullSpin,    copyLabel,      copyChoice,    nullPercentLabel,
+        copyButton };
+    for (int i = 0; i < sizeof(ww)/sizeof(wxWindow *); ++i)
+        if (ww[i])
+            ww[i]->Show(show);
+}
+//-----------------------------------------------------------------------------
+void DataGeneratorFrame::OnTreeSelectionChanged(wxTreeEvent& event)
+{
+    if (loadingM)
+        return;
+
+    FR_TRY
+
+    wxTreeItemId olditem = event.GetOldItem();
+    if (olditem.IsOk())
+    {
+        // save previous settings
+        MetadataItem *m = mainTree->getMetadataItem(olditem);
+        Table *tab = dynamic_cast<Table *>(m);
+        if (tab)
+        {
+            int rec = spinRecords->GetValue();
+            wxString tname = tab->getQuotedName();
+            std::map<wxString, int>::iterator i1 =
+                tableRecordsM.find(tname);
+            if (i1 == tableRecordsM.end())
+                tableRecordsM.insert(std::pair<wxString,int>(tname, rec));
+            else
+                (*i1).second = rec;
+        }
+        Column *col = dynamic_cast<Column *>(m);
+        if (col)
+        {
+            GeneratorSettings *gs = getSettings(col);
+            gs->range = rangeText->GetValue();
+            gs->fileName = fileText->GetValue();
+            gs->sourceColumn = valueChoice->GetStringSelection();
+            wxRadioButton *btns[4] = { radioSkip, radioRange, radioColumn,
+                radioFile };
+            for (int i=0; i<4; ++i)
+                if (btns[i]->GetValue())
+                    gs->valueType = (GeneratorSettings::ValueType)i;
+            gs->randomValues = randomCheckbox->IsChecked();
+            gs->nullPercent = nullSpin->GetValue();
+        }
+    }
+
+    wxTreeItemId newitem = event.GetItem();
+    if (!newitem.IsOk())
+        return;
+
+    MetadataItem *m = mainTree->getMetadataItem(newitem);
+    Table *tab = dynamic_cast<Table *>(m);
+    Column *col = dynamic_cast<Column *>(m);
+    showColumnSettings(col != 0);
+    if (!tab && col)
+        tab = col->getTable();
+    if (!tab)
+        return;
+
+    wxString tablename = tab->getQuotedName();
+    tableLabel->SetLabel(wxT("Table: ") + tab->getName_());
+    int records = 200; // TODO: load default from config
+    std::map<wxString, int>::iterator i1 = tableRecordsM.find(tablename);
+    if (i1 != tableRecordsM.end())
+        records = (*i1).second;
+    spinRecords->SetValue(records);
+    skipCheckbox->SetValue(records > 0);
+
+    if (!col)
+        return;
+    columnLabel->SetLabel(wxT("Column: ") + col->getName_());
+
+    // copy settings from gs to controls
+    GeneratorSettings *gs = getSettings(col);
+    rangeText->SetValue(gs->range);
+    fileText->SetValue(gs->fileName);
+    valueChoice->SetStringSelection(gs->sourceColumn);
+    switch (gs->valueType)
+    {
+        case GeneratorSettings::vtSkip:   radioSkip->SetValue(true);   break;
+        case GeneratorSettings::vtRange:  radioRange->SetValue(true);  break;
+        case GeneratorSettings::vtColumn: radioColumn->SetValue(true); break;
+        case GeneratorSettings::vtFile:   radioFile->SetValue(true);   break;
+    }
+    randomCheckbox->SetValue(gs->randomValues);
+    nullSpin->SetValue(gs->nullPercent);
+
+    FR_CATCH
+}
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnLoadButtonClick(wxCommandEvent& WXUNUSED(event))
 {
+    FR_TRY
+
     wxFileDialog fd(this, _("Select file to load"), wxT(""), wxT(""),
         _("Text files (*.txt)|*.txt|All files (*.*)|*.*"),
 #if wxCHECK_VERSION(2, 8, 0)
@@ -274,10 +599,14 @@ void DataGeneratorFrame::OnLoadButtonClick(wxCommandEvent& WXUNUSED(event))
     f.Close();
 
     // TODO: update internal settings structures
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 {
+    FR_TRY
+
     wxFileDialog fd(this, _("Select file to save"), wxT(""), wxT(""),
         _("Text files (*.txt)|*.txt|All files (*.*)|*.*"),
 #if wxCHECK_VERSION(2, 8, 0)
@@ -304,17 +633,31 @@ void DataGeneratorFrame::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
     if (f.IsOpened())
         f.Close();
     */
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnCopyButtonClick(wxCommandEvent& WXUNUSED(event))
 {
+    FR_TRY
+
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnFileButtonClick(wxCommandEvent& WXUNUSED(event))
 {
+    FR_TRY
+
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnGenerateButtonClick(wxCommandEvent& WXUNUSED(event))
 {
+    FR_TRY
+
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------

@@ -44,6 +44,7 @@ private:
     void loadImages();
     // recursive function used by selectMetadataItem
     bool findMetadataItem(MetadataItem *item, wxTreeItemId parent);
+    bool allowContextMenuM;
 
 protected:
     short m_spacing;    // fix wxWidgets bug (or lack of feature)
@@ -100,6 +101,8 @@ public:
     wxTreeItemId getNextItem(wxTreeItemId current);
     wxTreeItemId getPreviousItem(wxTreeItemId current);
     bool findText(const wxString& text, bool forward = true);
+
+    void allowContextMenu(bool doAllow = true);
 
     myTreeCtrl(wxWindow* parent, const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, long style = wxTR_HAS_BUTTONS);
