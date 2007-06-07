@@ -181,7 +181,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
 #if defined __WXGTK20__ || defined __WXMAC__
         wxTR_NO_LINES |
 #endif
-        wxTR_HAS_BUTTONS | wxSUNKEN_BORDER);
+        wxTR_HAS_BUTTONS | wxSUNKEN_BORDER | wxTR_HIDE_ROOT );
     leftPanelSizer->Add( mainTree, 1, wxALL|wxEXPAND, 5 );
 
     leftPanel->SetSizer( leftPanelSizer );
@@ -741,6 +741,18 @@ void DataGeneratorFrame::OnFileButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
+    wxFileDialog fd(this, _("Select file to load"), wxT(""), wxT(""),
+        _("Text files (*.txt)|*.txt|All files (*.*)|*.*"),
+#if wxCHECK_VERSION(2, 8, 0)
+        wxFD_OPEN | wxFD_CHANGE_DIR);
+#else
+        wxOPEN | wxCHANGE_DIR);
+#endif
+    if (wxID_OK != fd.ShowModal())
+        return;
+
+    fileText->SetValue(fd.GetPath());
+    radioFile->SetValue(true);
 
     FR_CATCH
 }
@@ -800,6 +812,7 @@ void DataGeneratorFrame::OnGenerateButtonClick(wxCommandEvent& WXUNUSED(event))
         }
     }
 
+    // Topological sorting:
     // take out independent tables one by one and remove them from
     // dependency lists of those depending on them
     while (!deps.empty())
