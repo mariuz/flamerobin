@@ -188,7 +188,6 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     leftPanel->Layout();
     leftPanelSizer->Fit( leftPanel );
     rightPanel = new wxPanel( mainSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-    wxBoxSizer* rightPanelSizer;
     rightPanelSizer = new wxBoxSizer( wxVERTICAL );
 
     rightLabel = new wxStaticText( rightPanel, wxID_ANY, wxT("Configure"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -210,7 +209,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
 
     rightPanelSizer->Add( recordsSizer, 0, wxEXPAND, 5 );
 
-    skipCheckbox = new wxCheckBox( rightPanel, wxID_ANY, wxT("Skip this table"), wxDefaultPosition, wxDefaultSize, 0 );
+    skipCheckbox = new wxCheckBox( rightPanel, ID_checkbox_skip, wxT("Skip this table"), wxDefaultPosition, wxDefaultSize, 0 );
 
     rightPanelSizer->Add( skipCheckbox, 0, wxBOTTOM|wxRIGHT|wxLEFT, 8 );
 
@@ -336,6 +335,8 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     rootdata->update();
     mainTree->Expand(root);
 
+    loadingM = false;
+
     // we need to manually update each table (that's bad)
     wxTreeItemIdValue cookie;
     wxTreeItemId node = mainTree->GetFirstChild(root, cookie);
@@ -347,8 +348,6 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
         if (d)
             d->update();
     }
-
-    loadingM = false;
 }
 //-----------------------------------------------------------------------------
 DataGeneratorFrame::~DataGeneratorFrame()
@@ -390,8 +389,17 @@ BEGIN_EVENT_TABLE( DataGeneratorFrame, BaseFrame )
     EVT_BUTTON( ID_button_save, DataGeneratorFrame::OnSaveButtonClick )
     EVT_BUTTON( ID_button_load, DataGeneratorFrame::OnLoadButtonClick )
     EVT_BUTTON( ID_button_generate, DataGeneratorFrame::OnGenerateButtonClick )
+    EVT_CHECKBOX(ID_checkbox_skip, DataGeneratorFrame::OnSkipCheckboxClick)
     EVT_TREE_SEL_CHANGED(myTreeCtrl::ID_tree_ctrl, DataGeneratorFrame::OnTreeSelectionChanged)
 END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+void DataGeneratorFrame::OnSkipCheckboxClick(wxCommandEvent& event)
+{
+    if (event.IsChecked())
+        spinRecords->SetValue(0);
+    else
+        spinRecords->SetValue(200); // TODO: load default from config
+}
 //-----------------------------------------------------------------------------
 // prehaps using values from config() would be nice
 wxString getDefaultRange(Domain *d)
@@ -532,6 +540,7 @@ void DataGeneratorFrame::showColumnSettings(bool show)
     for (int i = 0; i < sizeof(ww)/sizeof(wxWindow *); ++i)
         if (ww[i])
             ww[i]->Show(show);
+    rightPanelSizer->Layout();
 }
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnTreeSelectionChanged(wxTreeEvent& event)
@@ -547,6 +556,9 @@ void DataGeneratorFrame::OnTreeSelectionChanged(wxTreeEvent& event)
         // save previous settings
         MetadataItem *m = mainTree->getMetadataItem(olditem);
         Table *tab = dynamic_cast<Table *>(m);
+        Column *col = dynamic_cast<Column *>(m);
+        if (!tab && col)
+            tab = col->getTable();
         if (tab)
         {
             int rec = spinRecords->GetValue();
@@ -558,7 +570,6 @@ void DataGeneratorFrame::OnTreeSelectionChanged(wxTreeEvent& event)
             else
                 (*i1).second = rec;
         }
-        Column *col = dynamic_cast<Column *>(m);
         if (col)
         {
             GeneratorSettings *gs = getSettings(col);
@@ -595,7 +606,7 @@ void DataGeneratorFrame::OnTreeSelectionChanged(wxTreeEvent& event)
     if (i1 != tableRecordsM.end())
         records = (*i1).second;
     spinRecords->SetValue(records);
-    skipCheckbox->SetValue(records > 0);
+    skipCheckbox->SetValue(records <= 0);
 
     if (!col)
         return;

@@ -65,8 +65,11 @@ protected:
         ID_button_save,
         ID_button_load,
         ID_button_generate,
-        ID_button_copy
+        ID_button_copy,
+        ID_checkbox_skip
     };
+
+    wxBoxSizer* rightPanelSizer;
 
     wxPanel* outerPanel;
     wxSplitterWindow* mainSplitter;
@@ -105,6 +108,7 @@ protected:
     void OnSaveButtonClick(wxCommandEvent& event);
     void OnLoadButtonClick(wxCommandEvent& event);
     void OnGenerateButtonClick(wxCommandEvent& event);
+    void OnSkipCheckboxClick(wxCommandEvent& event);
     void OnTreeSelectionChanged(wxTreeEvent& event);
 public:
     DataGeneratorFrame(wxWindow* parent, Database* db);
