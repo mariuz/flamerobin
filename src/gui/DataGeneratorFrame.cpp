@@ -45,6 +45,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "core/FRError.h"
 #include "myTreeCtrl.h"
 #include "treeitem.h"
+#include "gui/AdvancedMessageDialog.h"
 #include "gui/ProgressDialog.h"
 #include "metadata/database.h"
 #include "DataGeneratorFrame.h"
@@ -59,7 +60,55 @@ public:
     wxString fileName;
     bool randomValues;
     int nullPercent;
+
+    wxString toString();    // returns the settings as a single-line string
+    void fromString(const wxString& s); // loads settings from a string
 };
+//-----------------------------------------------------------------------------
+wxString GeneratorSettings::toString()
+{
+    wxString s;
+    s += wxString::Format(wxT("%d%d%d|"),
+        (int)valueType,
+        (randomValues ? 1 : 0),
+        nullPercent);
+    s += range + wxT("|");
+    s += sourceColumn + wxT("|");
+    s += fileName;
+    return s;
+}
+//-----------------------------------------------------------------------------
+void GeneratorSettings::fromString(const wxString& s)
+{
+    long l;
+    if (!s.Mid(0, 1).ToLong(&l))
+        throw FRError(_("Bad input for field: valueType"));
+    valueType = (ValueType)l;
+
+    if (!s.Mid(1, 1).ToLong(&l))
+        throw FRError(_("Bad input from field: randomValues"));
+    randomValues = (l == 1);
+
+    size_t p = s.find(wxT("|"));
+    if (p == wxString::npos || !s.Mid(2, p-2).ToLong(&l))
+        throw FRError(_("Bad input for field: nullPercent"));
+    nullPercent = l;
+
+    size_t q = s.find(wxT("|"), p+1);
+    if (q == wxString::npos)
+        throw FRError(_("Bad input for field: range"));
+    range = s.Mid(p+1, q-p-1);
+
+    p = s.find(wxT("|"), q+1);
+    if (p ==  wxString::npos)
+        throw FRError(_("Bad input for field: sourceColumn"));
+    sourceColumn = s.Mid(q+1, p-q-1);
+
+    q = s.find(wxT("|"), q+1);
+    if (q ==  wxString::npos)
+        throw FRError(_("Bad input for field: fileName"));
+    fileName = s.Mid(p+1, q-p-1);
+}
 //-----------------------------------------------------------------------------
 void loadColumns(Database *db, wxArrayString& as, ProgressDialog& pd)
 {
@@ -103,7 +152,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
 
 
     SetTitle(_("Test Data Generator"));
-    // just in case some tree event escapes us
+    // prevent tree events from reaching the main frame
     // TODO: we need proper event handling for tree to allow multiple
     //       tree controls that are completely functional
     SetExtraStyle(wxWS_EX_BLOCK_EVENTS);
@@ -182,7 +231,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
 
     flexSizer->Add( 0, 0, 1, wxALL, 5 );
 
-    radioRange = new wxRadioButton( rightPanel, wxID_ANY, wxT("Range"), wxDefaultPosition, wxDefaultSize, 0);
+    radioRange = new wxRadioButton( rightPanel, wxID_ANY, wxT("Range/mask"), wxDefaultPosition, wxDefaultSize, 0);
     flexSizer->Add( radioRange, 0, wxALIGN_CENTER_VERTICAL, 5 );
 
     rangeText = new wxTextCtrl( rightPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
@@ -473,9 +522,6 @@ void DataGeneratorFrame::showColumnSettings(bool show)
 {
     if (loadingM)
         return;
-    //rangeText->Enable(show);
-    //fileText->Enable(show);
-    // ... etc.
 
     wxWindow *ww[] = {
         columnLabel, valuetypeLabel, radioSkip,     radioRange,
@@ -588,17 +634,45 @@ void DataGeneratorFrame::OnLoadButtonClick(wxCommandEvent& WXUNUSED(event))
         return;
 
     wxFFile f(fd.GetPath());
-    if (!f.IsOpened())
+    wxString s;
+    if (!f.IsOpened() || !f.ReadAll(&s))
     {
         wxMessageBox(_("Cannot open file."), _("Error"), wxOK|wxICON_ERROR);
         return;
     }
     wxBusyCursor wait;
-    wxString s;
-    f.ReadAll(&s);
+
+    // parse line by line
+    size_t start = 0;
+    size_t p;
+    wxString name, definition;
+    for (bool first = true; true; start = p+1)
+    {
+        p = s.find(wxT("\n"), start);
+        if (p == wxString::npos)
+            break;
+
+        if (first)
+        {
+            name = s.Mid(start, p-start);
+            if (name.Trim().IsEmpty())
+                break;
+            first = false;
+            continue;
+        }
+
+        definition = s.Mid(start, p-start);
+        GeneratorSettings *gs = new GeneratorSettings;
+        gs->fromString(definition);
+        settingsM.insert(std::pair<wxString, GeneratorSettings *>(name, gs));
+        first = true;
+    }
+
     f.Close();
 
-    // TODO: update internal settings structures
+    showInformationDialog(this, _("Settings loaded"),
+        _("The setting where successfully loaded from file."),
+        AdvancedMessageDialogButtonsOk());
 
     FR_CATCH
 }
@@ -620,19 +694,26 @@ void DataGeneratorFrame::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 
     wxBusyCursor wait;
 
-    // TODO: save internal settings structures
-    /*
-
+    // save internal settings structures
     wxFile f;
-    if (!f.Open(fd.GetPath(), wxFile::write) || !f.Write(s))
+    if (!f.Open(fd.GetPath(), wxFile::write))
     {
         wxMessageBox(_("Cannot write to file."), _("Error"), wxOK|wxICON_ERROR);
         return;
     }
 
+    for (std::map<wxString, GeneratorSettings *>::iterator it =
+        settingsM.begin(); it!= settingsM.end(); ++it)
+    {
+        f.Write((*it).first + wxT("\n") + (*it).second->toString() + wxT("\n"));
+    }
+
     if (f.IsOpened())
         f.Close();
-    */
+
+    showInformationDialog(this, _("Settings saved"),
+        _("The setting where successfully saved to the file."),
+        AdvancedMessageDialogButtonsOk());
 
     FR_CATCH
 }
