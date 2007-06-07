@@ -601,7 +601,7 @@ void DataGeneratorFrame::OnTreeSelectionChanged(wxTreeEvent& event)
 
     wxString tablename = tab->getQuotedName();
     tableLabel->SetLabel(wxT("Table: ") + tab->getName_());
-    int records = 200; // TODO: load default from config
+    int records = 0;    // tables are not filled by default
     std::map<wxString, int>::iterator i1 = tableRecordsM.find(tablename);
     if (i1 != tableRecordsM.end())
         records = (*i1).second;
@@ -745,10 +745,97 @@ void DataGeneratorFrame::OnFileButtonClick(wxCommandEvent& WXUNUSED(event))
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
+// only used in function below
+class TableDep
+{
+public:
+    TableDep(Table *t, std::map<wxString, int>& needs)
+    {
+        table = t;
+        std::vector<ForeignKey> *fk = t->getForeignKeys();
+        for (std::vector<ForeignKey>::iterator fi = fk->begin();
+            fi != fk->end(); ++fi)
+        {
+            Identifier id((*fi).referencedTableM);
+            if (id.getQuoted() == t->getQuotedName())   // self reference
+                continue;
+            if (needs.find(id.getQuoted()) != needs.end())
+                dependsOn.push_back(id.getQuoted());
+        }
+    }
+    void remove(const wxString& table)
+    {
+        std::list<wxString>::iterator it = std::find(dependsOn.begin(),
+            dependsOn.end(), table);
+        if (it != dependsOn.end())
+            dependsOn.erase(it);
+    }
+
+    Table *table;
+    std::list<wxString> dependsOn;
+};
+//-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnGenerateButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
+    std::list<TableDep *> deps;
+    std::list<Table *> order;
+
+    // collect list of tables
+    // if some table is dropped from the database, it would be
+    // removed from tree, but it will remain in tableRecordsM
+    // That's why we just search for existing tables that are
+    // also present in tableRecordsM
+    MetadataCollection<Table>* t = databaseM->getCollection<Table>();
+    for (MetadataCollection<Table>::iterator it = t->begin();
+        it != t->end(); ++it)
+    {
+        std::map<wxString, int>::iterator i2 =
+            tableRecordsM.find((*it).getQuotedName());
+        if (i2 != tableRecordsM.end() && (*i2).second > 0)
+        {
+            TableDep *td = new TableDep(&(*it), tableRecordsM);
+            deps.push_back(td);
+        }
+    }
+
+    // take out independent tables one by one and remove them from
+    // dependency lists of those depending on them
+    while (!deps.empty())
+    {
+        for (std::list<TableDep *>::iterator it = deps.begin();
+            it != deps.end(); ++it)
+        {
+            if ((*it)->dependsOn.size() != 0)   // has dependencies
+                continue;
+            order.push_back((*it)->table);
+            wxString tablename = (*it)->table->getQuotedName();
+            for (std::list<TableDep *>::iterator i2 = deps.begin();
+                i2 != deps.end(); ++i2)
+            {
+                (*i2)->remove(tablename);
+            }
+
+            delete (*it);
+            deps.erase(it);
+            break;
+        }
+    }
+
+
+    // generate data
+    for (std::list<Table *>::iterator it = order.begin();
+        it != order.end(); ++it)
+    {
+
+        wxMessageBox((*it)->getName_());
+
+        // collect columns + create insert statement
+        // for (i = 0; i < records; i++)
+        //     createDataForEachColumn into parameters
+        //     execute;
+    }
 
     FR_CATCH
 }
