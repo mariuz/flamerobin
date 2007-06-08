@@ -50,6 +50,38 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "metadata/database.h"
 #include "DataGeneratorFrame.h"
 //-----------------------------------------------------------------------------
+// only used in function OnGenerateButtonClick
+class TableDep
+{
+public:
+    TableDep(Table *t, std::map<wxString, int>& needs)
+    {
+        table = t;
+        std::vector<ForeignKey> *fk = t->getForeignKeys();
+        for (std::vector<ForeignKey>::iterator fi = fk->begin();
+            fi != fk->end(); ++fi)
+        {
+            Identifier id((*fi).referencedTableM);
+            if (id.getQuoted() == t->getQuotedName())   // self reference
+                continue;
+            std::map<wxString, int>::iterator it =
+                needs.find(id.getQuoted());
+            if (it != needs.end() && (*it).second > 0)
+                dependsOn.push_back(id.getQuoted());
+        }
+    }
+    void remove(const wxString& table)
+    {
+        std::list<wxString>::iterator it = std::find(dependsOn.begin(),
+            dependsOn.end(), table);
+        if (it != dependsOn.end())
+            dependsOn.erase(it);
+    }
+
+    Table *table;
+    std::list<wxString> dependsOn;
+};
+//-----------------------------------------------------------------------------
 class GeneratorSettings
 {
 public:
@@ -367,18 +399,6 @@ void DataGeneratorFrame::update()
         Close();
 }
 //-----------------------------------------------------------------------------
-BEGIN_EVENT_TABLE( DataGeneratorFrame, BaseFrame )
-    EVT_BUTTON( ID_button_file, DataGeneratorFrame::OnFileButtonClick )
-    EVT_BUTTON( ID_button_copy, DataGeneratorFrame::OnCopyButtonClick )
-    EVT_BUTTON( ID_button_save, DataGeneratorFrame::OnSaveButtonClick )
-    EVT_BUTTON( ID_button_load, DataGeneratorFrame::OnLoadButtonClick )
-    EVT_BUTTON( ID_button_generate, DataGeneratorFrame::OnGenerateButtonClick )
-    EVT_CHECKBOX(ID_checkbox_skip, DataGeneratorFrame::OnSkipCheckboxClick)
-    EVT_CHOICE(ID_choice_value, DataGeneratorFrame::OnTableValueChoiceChange)
-    EVT_CHOICE(ID_choice_copy, DataGeneratorFrame::OnTableCopyChoiceChange)
-    EVT_TREE_SEL_CHANGED(myTreeCtrl::ID_tree_ctrl, DataGeneratorFrame::OnTreeSelectionChanged)
-END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
 bool DataGeneratorFrame::loadColumns(const wxString& tableName, wxChoice* c)
 {
     Identifier id;
@@ -394,45 +414,6 @@ bool DataGeneratorFrame::loadColumns(const wxString& tableName, wxChoice* c)
         c->Append((*it).getQuotedName());
     }
     return true;
-}
-//-----------------------------------------------------------------------------
-void DataGeneratorFrame::OnTableValueChoiceChange(wxCommandEvent& event)
-{
-    FR_TRY
-
-    if (loadColumns(event.GetString(), valueColumnChoice))
-    {
-        valueColumnChoice->SetSelection(0);
-        valueSizer->Layout();
-        radioColumn->SetValue(true);
-    }
-
-    FR_CATCH
-}
-//-----------------------------------------------------------------------------
-void DataGeneratorFrame::OnTableCopyChoiceChange(wxCommandEvent& event)
-{
-    FR_TRY
-
-    if (loadColumns(event.GetString(), copyColumnChoice))
-    {
-        copyColumnChoice->SetSelection(0);
-        copySizer->Layout();
-    }
-
-    FR_CATCH
-}
-//-----------------------------------------------------------------------------
-void DataGeneratorFrame::OnSkipCheckboxClick(wxCommandEvent& event)
-{
-    FR_TRY
-
-    if (event.IsChecked())
-        spinRecords->SetValue(0);
-    else
-        spinRecords->SetValue(200); // TODO: load default from config
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 // prehaps using values from config() would be nice
@@ -578,6 +559,96 @@ void DataGeneratorFrame::showColumnSettings(bool show)
     rightPanelSizer->Layout();
 }
 //-----------------------------------------------------------------------------
+void DataGeneratorFrame::saveSetting(wxTreeItemId item)
+{
+    if (!item.IsOk())
+        return;
+
+    // save previous settings
+    MetadataItem *m = mainTree->getMetadataItem(item);
+    Table *tab = dynamic_cast<Table *>(m);
+    Column *col = dynamic_cast<Column *>(m);
+    if (!tab && col)
+        tab = col->getTable();
+    if (tab)
+    {
+        int rec = spinRecords->GetValue();
+        wxString tname = tab->getQuotedName();
+        std::map<wxString, int>::iterator i1 =
+            tableRecordsM.find(tname);
+        if (i1 == tableRecordsM.end())
+            tableRecordsM.insert(std::pair<wxString,int>(tname, rec));
+        else
+            (*i1).second = rec;
+    }
+    if (col)
+    {
+        GeneratorSettings *gs = getSettings(col);
+        gs->range = rangeText->GetValue();
+        gs->fileName = fileText->GetValue();
+        gs->sourceTable = valueChoice->GetStringSelection();
+        gs->sourceColumn = valueColumnChoice->GetStringSelection();
+        wxRadioButton *btns[4] = { radioSkip, radioRange, radioColumn,
+            radioFile };
+        for (int i=0; i<4; ++i)
+            if (btns[i]->GetValue())
+                gs->valueType = (GeneratorSettings::ValueType)i;
+        gs->randomValues = randomCheckbox->IsChecked();
+        gs->nullPercent = nullSpin->GetValue();
+    }
+}
+//-----------------------------------------------------------------------------
+BEGIN_EVENT_TABLE( DataGeneratorFrame, BaseFrame )
+    EVT_BUTTON( ID_button_file, DataGeneratorFrame::OnFileButtonClick )
+    EVT_BUTTON( ID_button_copy, DataGeneratorFrame::OnCopyButtonClick )
+    EVT_BUTTON( ID_button_save, DataGeneratorFrame::OnSaveButtonClick )
+    EVT_BUTTON( ID_button_load, DataGeneratorFrame::OnLoadButtonClick )
+    EVT_BUTTON( ID_button_generate, DataGeneratorFrame::OnGenerateButtonClick )
+    EVT_CHECKBOX(ID_checkbox_skip, DataGeneratorFrame::OnSkipCheckboxClick)
+    EVT_CHOICE(ID_choice_value, DataGeneratorFrame::OnTableValueChoiceChange)
+    EVT_CHOICE(ID_choice_copy, DataGeneratorFrame::OnTableCopyChoiceChange)
+    EVT_TREE_SEL_CHANGED(myTreeCtrl::ID_tree_ctrl, DataGeneratorFrame::OnTreeSelectionChanged)
+END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+void DataGeneratorFrame::OnTableValueChoiceChange(wxCommandEvent& event)
+{
+    FR_TRY
+
+    if (loadColumns(event.GetString(), valueColumnChoice))
+    {
+        valueColumnChoice->SetSelection(0);
+        valueSizer->Layout();
+        radioColumn->SetValue(true);
+    }
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void DataGeneratorFrame::OnTableCopyChoiceChange(wxCommandEvent& event)
+{
+    FR_TRY
+
+    if (loadColumns(event.GetString(), copyColumnChoice))
+    {
+        copyColumnChoice->SetSelection(0);
+        copySizer->Layout();
+    }
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void DataGeneratorFrame::OnSkipCheckboxClick(wxCommandEvent& event)
+{
+    FR_TRY
+
+    if (event.IsChecked())
+        spinRecords->SetValue(0);
+    else
+        spinRecords->SetValue(200); // TODO: load default from config
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnTreeSelectionChanged(wxTreeEvent& event)
 {
     if (loadingM)
@@ -585,42 +656,7 @@ void DataGeneratorFrame::OnTreeSelectionChanged(wxTreeEvent& event)
 
     FR_TRY
 
-    wxTreeItemId olditem = event.GetOldItem();
-    if (olditem.IsOk())
-    {
-        // save previous settings
-        MetadataItem *m = mainTree->getMetadataItem(olditem);
-        Table *tab = dynamic_cast<Table *>(m);
-        Column *col = dynamic_cast<Column *>(m);
-        if (!tab && col)
-            tab = col->getTable();
-        if (tab)
-        {
-            int rec = spinRecords->GetValue();
-            wxString tname = tab->getQuotedName();
-            std::map<wxString, int>::iterator i1 =
-                tableRecordsM.find(tname);
-            if (i1 == tableRecordsM.end())
-                tableRecordsM.insert(std::pair<wxString,int>(tname, rec));
-            else
-                (*i1).second = rec;
-        }
-        if (col)
-        {
-            GeneratorSettings *gs = getSettings(col);
-            gs->range = rangeText->GetValue();
-            gs->fileName = fileText->GetValue();
-            gs->sourceTable = valueChoice->GetStringSelection();
-            gs->sourceColumn = valueColumnChoice->GetStringSelection();
-            wxRadioButton *btns[4] = { radioSkip, radioRange, radioColumn,
-                radioFile };
-            for (int i=0; i<4; ++i)
-                if (btns[i]->GetValue())
-                    gs->valueType = (GeneratorSettings::ValueType)i;
-            gs->randomValues = randomCheckbox->IsChecked();
-            gs->nullPercent = nullSpin->GetValue();
-        }
-    }
+    saveSetting(event.GetOldItem());
 
     wxTreeItemId newitem = event.GetItem();
     if (!newitem.IsOk())
@@ -746,6 +782,8 @@ void DataGeneratorFrame::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
+    saveSetting(mainTree->GetSelection());  // save current item if changed
+
     wxFileDialog fd(this, _("Select file to save"), wxT(""), wxT(""),
         _("Text files (*.txt)|*.txt|All files (*.*)|*.*"),
 #if wxCHECK_VERSION(2, 8, 0)
@@ -811,39 +849,11 @@ void DataGeneratorFrame::OnFileButtonClick(wxCommandEvent& WXUNUSED(event))
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
-// only used in function below
-class TableDep
-{
-public:
-    TableDep(Table *t, std::map<wxString, int>& needs)
-    {
-        table = t;
-        std::vector<ForeignKey> *fk = t->getForeignKeys();
-        for (std::vector<ForeignKey>::iterator fi = fk->begin();
-            fi != fk->end(); ++fi)
-        {
-            Identifier id((*fi).referencedTableM);
-            if (id.getQuoted() == t->getQuotedName())   // self reference
-                continue;
-            if (needs.find(id.getQuoted()) != needs.end())
-                dependsOn.push_back(id.getQuoted());
-        }
-    }
-    void remove(const wxString& table)
-    {
-        std::list<wxString>::iterator it = std::find(dependsOn.begin(),
-            dependsOn.end(), table);
-        if (it != dependsOn.end())
-            dependsOn.erase(it);
-    }
-
-    Table *table;
-    std::list<wxString> dependsOn;
-};
-//-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnGenerateButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
+
+    saveSetting(mainTree->GetSelection());  // save current item if changed
 
     std::list<TableDep *> deps;
     std::list<Table *> order;

@@ -58,6 +58,7 @@ protected:
     virtual const wxRect getDefaultRect() const;
     void showColumnSettings(bool show);
     GeneratorSettings* getSettings(Column *c);
+    void saveSetting(wxTreeItemId item);
     bool loadColumns(const wxString& tableName, wxChoice* c);
 
     enum
