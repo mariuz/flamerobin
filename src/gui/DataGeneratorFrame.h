@@ -58,6 +58,7 @@ protected:
     virtual const wxRect getDefaultRect() const;
     void showColumnSettings(bool show);
     GeneratorSettings* getSettings(Column *c);
+    bool loadColumns(const wxString& tableName, wxChoice* c);
 
     enum
     {
@@ -66,10 +67,14 @@ protected:
         ID_button_load,
         ID_button_generate,
         ID_button_copy,
-        ID_checkbox_skip
+        ID_checkbox_skip,
+        ID_choice_value,
+        ID_choice_copy
     };
 
     wxBoxSizer* rightPanelSizer;
+    wxBoxSizer* valueSizer;
+    wxBoxSizer* copySizer;
 
     wxPanel* outerPanel;
     wxSplitterWindow* mainSplitter;
@@ -89,6 +94,7 @@ protected:
     wxTextCtrl* rangeText;
     wxRadioButton* radioColumn;
     wxChoice* valueChoice;
+    wxChoice* valueColumnChoice;
     wxRadioButton* radioFile;
     wxTextCtrl* fileText;
     wxButton* fileButton;
@@ -98,6 +104,7 @@ protected:
     wxStaticText* nullPercentLabel;
     wxStaticText* copyLabel;
     wxChoice* copyChoice;
+    wxChoice* copyColumnChoice;
     wxButton* copyButton;
     wxButton* saveButton;
     wxButton* loadButton;
@@ -109,6 +116,8 @@ protected:
     void OnLoadButtonClick(wxCommandEvent& event);
     void OnGenerateButtonClick(wxCommandEvent& event);
     void OnSkipCheckboxClick(wxCommandEvent& event);
+    void OnTableValueChoiceChange(wxCommandEvent& event);
+    void OnTableCopyChoiceChange(wxCommandEvent& event);
     void OnTreeSelectionChanged(wxTreeEvent& event);
 public:
     DataGeneratorFrame(wxWindow* parent, Database* db);
