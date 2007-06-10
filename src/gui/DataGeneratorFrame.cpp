@@ -960,11 +960,11 @@ wxString getCharFromRange(const wxString& range, bool rnd, int recNo,
     // sequential: we support stuff like 001,002,003 or AAA,AAB,AAC
     //             by converting the record counter to number with n-th base
     //             where n is a number of characters in valueset
-    int power = valueset.Length();
-    int base = recNo;
+    int base = valueset.Length();
+    int record = recNo;
     for (int i=0; i<chars-charNo-1; i++)    // get the charNo-th digit
-        base /= power;
-    return valueset.Mid(base % power, 1);
+        record /= base;
+    return valueset.Mid(record % base, 1);
 }
 //-----------------------------------------------------------------------------
 // format for values:
