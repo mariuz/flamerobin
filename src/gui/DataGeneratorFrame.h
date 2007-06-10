@@ -43,8 +43,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 class Database;
 class Column;
+class Table;
 class myTreeCtrl;
 class GeneratorSettings;
+class TableDep;
 //-----------------------------------------------------------------------------
 class DataGeneratorFrame: public BaseFrame, public Observer
 {
@@ -60,6 +62,8 @@ protected:
     GeneratorSettings* getSettings(Column *c);
     void saveSetting(wxTreeItemId item);
     bool loadColumns(const wxString& tableName, wxChoice* c);
+    bool sortTables(std::list<TableDep *>& deps, std::list<Table *>& order);
+    void generateData(std::list<Table *>& order);
 
     enum
     {

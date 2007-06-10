@@ -42,7 +42,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/ffile.h>
 #include <wx/file.h>
 
+//#include "ibpp/ibpp.h"
+
 #include "core/FRError.h"
+#include "core/StringUtils.h"
 #include "myTreeCtrl.h"
 #include "treeitem.h"
 #include "gui/AdvancedMessageDialog.h"
@@ -433,9 +436,10 @@ wxString getDefaultRange(Domain *d)
 
     if (dt == wxT("Char") || dt == wxT("Varchar"))
     {
-        long l;
-        size.ToLong(&l);
-        return wxString(wxChar('N'), l);
+        if (size == wxT("1"))
+            return wxT("[a-z]");
+        else
+            return size + wxT("[a-z]");
     }
 
     if (dt == wxT("Timestamp"))
@@ -858,6 +862,20 @@ void DataGeneratorFrame::OnGenerateButtonClick(wxCommandEvent& WXUNUSED(event))
     std::list<TableDep *> deps;
     std::list<Table *> order;
 
+    if (sortTables(deps, order))
+        generateData(order);
+
+    // perhaps add a comment like: "A total of XYZ records were inserted."
+    showInformationDialog(this, _("Generator done"),
+        _("Data generation completed."),
+        AdvancedMessageDialogButtonsOk());
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+bool DataGeneratorFrame::sortTables(std::list<TableDep *>& deps,
+    std::list<Table *>& order)
+{
     // collect list of tables
     // if some table is dropped from the database, it would be
     // removed from tree, but it will remain in tableRecordsM
@@ -913,24 +931,135 @@ void DataGeneratorFrame::OnGenerateButtonClick(wxCommandEvent& WXUNUSED(event))
             {
                 delete (*it);
             }
-            return;
+            return false;
         }
     }
+    return true;
+}
+//-----------------------------------------------------------------------------
+void setString(IBPP::Statement st, int param, GeneratorSettings* gs)
+{
+    //if (gs->nullPercent > random(100))
+    {
+        st->SetNull(param);
+        return;
+    }
+    // switch on value type and do accordingly
+}
+//-----------------------------------------------------------------------------
+void setNumber(IBPP::Statement st, int param, GeneratorSettings* gs)
+{
+    //if (gs->nullPercent > random(100))
+    {
+        st->SetNull(param);
+        return;
+    }
+    // switch on value type and do accordingly
+}
+//-----------------------------------------------------------------------------
+void setDatetime(IBPP::Statement st, int param, GeneratorSettings* gs)
+{
+    //if (gs->nullPercent > random(100))
+    {
+        st->SetNull(param);
+        return;
+    }
+    // switch on value type and do accordingly
+}
+//-----------------------------------------------------------------------------
+void setParam(IBPP::Statement st, int param, GeneratorSettings* gs)
+{
+    switch (st->ParameterType(param))
+    {
+        case IBPP::sdString:
+            setString(st, param, gs);
+        case IBPP::sdSmallint:
+        case IBPP::sdInteger:
+        case IBPP::sdLargeint:
+        case IBPP::sdFloat:
+        case IBPP::sdDouble:
+            setNumber(st, param, gs);
+        case IBPP::sdDate:
+        case IBPP::sdTime:
+        case IBPP::sdTimestamp:
+            setDatetime(st, param, gs);
+        //case sdBlob:
+        //case sdArray:
+        default:
+            st->SetNull(param);
+    };
+}
+//-----------------------------------------------------------------------------
+void DataGeneratorFrame::generateData(std::list<Table *>& order)
+{
+    ProgressDialog pd(this, _("Generating data"), 2);
+    pd.Show();
+    pd.initProgress(_("Inserting into tables"), order.size());
 
+    // one big transaction (perhaps this should be configurable)
+    IBPP::Transaction tr =
+        IBPP::TransactionFactory(databaseM->getIBPPDatabase());
+    tr->Start();
 
-    // generate data
     for (std::list<Table *>::iterator it = order.begin();
         it != order.end(); ++it)
     {
+        pd.setProgressMessage((*it)->getName_(), 1);
+        pd.stepProgress();
 
-        wxMessageBox((*it)->getName_());
+        std::map<wxString, int>::iterator i2 =
+            tableRecordsM.find((*it)->getQuotedName());
+        int records = (*i2).second;
+
+        pd.initProgress(wxString::Format(_("Inserting %d records."), records),
+            records, 0, 2);
 
         // collect columns + create insert statement
-        // for (i = 0; i < records; i++)
-        //     createDataForEachColumn into parameters
-        //     execute;
+        wxString ins = wxT("INSERT INTO ") + (*it)->getQuotedName()
+            + wxT(" (");
+        wxString params(wxT(") VALUES ("));
+        (*it)->checkAndLoadColumns();
+        bool first = true;
+        std::vector<GeneratorSettings *> colSet;
+        for (MetadataCollection<Column>::iterator col = (*it)->begin();
+            col != (*it)->end(); ++col)
+        {
+            std::map<wxString, GeneratorSettings *>::iterator si =
+                settingsM.find((*it)->getQuotedName() + wxT(".")
+                + (*col).getQuotedName());
+            if (si != settingsM.end() && (*si).second->valueType !=
+                GeneratorSettings::vtSkip)
+            {
+                if (first)
+                    first = false;
+                else
+                {
+                    ins += wxT(", ");
+                    params += wxT(",");
+                }
+                ins += (*col).getQuotedName();
+                params += wxT("?");
+                colSet.push_back((*si).second);
+            }
+        }
+        if (first)  // no columns
+            continue;
+
+        IBPP::Statement st =
+            IBPP::StatementFactory(databaseM->getIBPPDatabase(), tr);
+        st->Prepare(wx2std(ins + params + wxT(")")));
+
+        for (int i = 0; i < records; i++)
+        {
+            if (pd.isCanceled())
+                return;
+            pd.stepProgress(1, 2);
+            for (int p = 0; p < st->Parameters(); ++p)
+                setParam(st, p+1, colSet[p]);
+            st->Execute();
+        }
     }
 
-    FR_CATCH
+    tr->Commit();
 }
 //-----------------------------------------------------------------------------
