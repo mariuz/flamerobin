@@ -42,7 +42,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/ffile.h>
 #include <wx/file.h>
 
-//#include "ibpp/ibpp.h"
+// needed for random
+#include <stdlib.h>
 
 #include "core/FRError.h"
 #include "core/StringUtils.h"
@@ -52,6 +53,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/ProgressDialog.h"
 #include "metadata/database.h"
 #include "DataGeneratorFrame.h"
+//-----------------------------------------------------------------------------
+// returns a value between 0 and (maxval-1)
+// I wrote this as I don't know how much is rand from stdlib portable
+int frRandom(double maxval)
+{
+    return (int)(maxval*rand()/(RAND_MAX+1.0));
+}
 //-----------------------------------------------------------------------------
 // only used in function OnGenerateButtonClick
 class TableDep
@@ -437,9 +445,9 @@ wxString getDefaultRange(Domain *d)
     if (dt == wxT("Char") || dt == wxT("Varchar"))
     {
         if (size == wxT("1"))
-            return wxT("[a-z]");
+            return wxT("[a-z,A-Z]");
         else
-            return size + wxT("[a-z]");
+            return size + wxT("[a-z,A-Z]");
     }
 
     if (dt == wxT("Timestamp"))
@@ -937,7 +945,75 @@ bool DataGeneratorFrame::sortTables(std::list<TableDep *>& deps,
     return true;
 }
 //-----------------------------------------------------------------------------
-void setString(IBPP::Statement st, int param, GeneratorSettings* gs)
+wxString getCharFromRange(const wxString& range, bool rnd, int recNo,
+    int charNo, int chars)
+{
+    wxString valueset;
+    // TODO: break range on commas
+        // find if 1 or 3 chars (z-x)
+            // if 1, just add to valueset
+            // if 3, add all betwen z and x (for loop)
+
+    if (rnd)
+        return valueset.Mid(frRandom(valueset.Length()), 1);
+
+    // sequential: we support stuff like 001,002,003 or AAA,AAB,AAC
+    //             by converting the record counter to number with n-th base
+    //             where n is a number of characters in valueset
+    int power = valueset.Length();
+    int base = recNo;
+    for (int i=0; i<chars-charNo-1; i++)    // get the charNo-th digit
+        base /= power;
+    return valueset.Mid(base % power, 1);
+}
+//-----------------------------------------------------------------------------
+// format for values:
+// number[value or range(s)]
+// example: 25[a-z,A-Z,0-9] means: 25 letters or numbers
+// example: 10[a,x,5]       means: 10 chars, each either of 'a', 'x' or '5'
+void setString(IBPP::Statement st, int param, GeneratorSettings* gs, int recNo)
+{
+    //if (gs->nullPercent > random(100))
+    {
+        st->SetNull(param);
+        return;
+    }
+
+    // switch on value type and do accordingly
+    if (gs->valueType == GeneratorSettings::vtRange)
+    {
+        wxString value;
+        long chars = 1;
+        int start = 0;
+        while (start < gs->range.Length())
+        {
+            if (gs->range.Mid(start, 1) == wxT("["))
+            {
+                int p = gs->range.find(wxT("]"), start+1);
+                if (p == wxString::npos)    // invalid mask
+                    throw FRError(_("Invalid mask"));
+                for (int i = 0; i < chars; i++)
+                {
+                    value += getCharFromRange(gs->range.Mid(start+1,
+                        p-start-1), gs->randomValues, recNo, i, chars);
+                }
+                start = p+1;
+                chars = 1;
+            }
+            else
+            {
+                int p = gs->range.find(wxT("["), start+1);
+                if (p == wxString::npos)    // invalid mask
+                    throw FRError(_("Invalid mask"));
+                gs->range.Mid(start, p-start).ToLong(&chars);
+                start = p;
+            }
+        }
+        st->Set(param, wx2std(value));
+    }
+}
+//-----------------------------------------------------------------------------
+void setNumber(IBPP::Statement st, int param, GeneratorSettings* gs, int recNo)
 {
     //if (gs->nullPercent > random(100))
     {
@@ -947,7 +1023,8 @@ void setString(IBPP::Statement st, int param, GeneratorSettings* gs)
     // switch on value type and do accordingly
 }
 //-----------------------------------------------------------------------------
-void setNumber(IBPP::Statement st, int param, GeneratorSettings* gs)
+void setDatetime(IBPP::Statement st, int param, GeneratorSettings* gs,
+    int recNo)
 {
     //if (gs->nullPercent > random(100))
     {
@@ -957,32 +1034,22 @@ void setNumber(IBPP::Statement st, int param, GeneratorSettings* gs)
     // switch on value type and do accordingly
 }
 //-----------------------------------------------------------------------------
-void setDatetime(IBPP::Statement st, int param, GeneratorSettings* gs)
-{
-    //if (gs->nullPercent > random(100))
-    {
-        st->SetNull(param);
-        return;
-    }
-    // switch on value type and do accordingly
-}
-//-----------------------------------------------------------------------------
-void setParam(IBPP::Statement st, int param, GeneratorSettings* gs)
+void setParam(IBPP::Statement st, int param, GeneratorSettings* gs, int recNo)
 {
     switch (st->ParameterType(param))
     {
         case IBPP::sdString:
-            setString(st, param, gs);
+            setString(st, param, gs, recNo);
         case IBPP::sdSmallint:
         case IBPP::sdInteger:
         case IBPP::sdLargeint:
         case IBPP::sdFloat:
         case IBPP::sdDouble:
-            setNumber(st, param, gs);
+            setNumber(st, param, gs, recNo);
         case IBPP::sdDate:
         case IBPP::sdTime:
         case IBPP::sdTimestamp:
-            setDatetime(st, param, gs);
+            setDatetime(st, param, gs, recNo);
         //case sdBlob:
         //case sdArray:
         default:
@@ -1055,7 +1122,7 @@ void DataGeneratorFrame::generateData(std::list<Table *>& order)
                 return;
             pd.stepProgress(1, 2);
             for (int p = 0; p < st->Parameters(); ++p)
-                setParam(st, p+1, colSet[p]);
+                setParam(st, p+1, colSet[p], i);
             st->Execute();
         }
     }
