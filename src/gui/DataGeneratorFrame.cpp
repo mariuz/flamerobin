@@ -988,6 +988,51 @@ wxString getCharFromRange(const wxString& range, bool rnd, int recNo,
     return valueset.Mid(record % base, 1);
 }
 //-----------------------------------------------------------------------------
+template<typename T>
+void setColumnValue(IBPP::Statement st, int param,
+    GeneratorSettings *gs, int recNo)
+{
+    IBPP::Statement st2 =
+        IBPP::StatementFactory(st->DatabasePtr(), st->TransactionPtr());
+
+    wxString sql = wxT("SELECT ") + gs->sourceColumn + wxT(" FROM ")
+        + gs->sourceTable + wxT(" WHERE ") + gs->sourceColumn
+        + wxT(" IS NOT NULL");
+    if (!gs->randomValues)
+        sql += wxT(" ORDER BY 1");
+    st2->Prepare(wx2std(sql));
+    st2->Execute();
+    std::vector<T> values;
+    while (st2->Fetch())
+    {
+        T value;
+        st2->Get(1, value);
+        values.push_back(value);
+        if (values.size() > recNo && !gs->randomValues)
+        {
+            st->Set(param, value);
+            return;
+        }
+        if (values.size() > 99 && gs->randomValues)
+            break;
+    }
+    if (values.size() == 0)
+    {
+        if (gs->nullPercent > 0)
+        {
+            st->SetNull(param);
+            return;
+        }
+        else
+            throw FRError(_("No records found in table: ") + gs->sourceTable);
+    }
+
+    if (gs->randomValues)
+        st->Set(param, values[frRandom(values.size())]);
+    else
+        st->Set(param, values[recNo % values.size()]);
+}
+//-----------------------------------------------------------------------------
 // format for values:
 // number[value or range(s)]
 // example: 25[az,AZ,09] means: 25 letters or numbers
@@ -1035,6 +1080,11 @@ void DataGeneratorFrame::setString(IBPP::Statement st, int param,
         }
 
         st->Set(param, wx2std(value, dbCharsetConversionM.getConverter()));
+    }
+
+    if (gs->valueType == GeneratorSettings::vtColumn)   // copy from column
+    {
+        setColumnValue<std::string>(st, param, gs, recNo);
     }
 }
 //-----------------------------------------------------------------------------
@@ -1120,23 +1170,20 @@ void DataGeneratorFrame::generateData(std::list<Table *>& order)
         for (MetadataCollection<Column>::iterator col = (*it)->begin();
             col != (*it)->end(); ++col)
         {
-            std::map<wxString, GeneratorSettings *>::iterator si =
-                settingsM.find((*it)->getQuotedName() + wxT(".")
-                + (*col).getQuotedName());
-            if (si != settingsM.end() && (*si).second->valueType !=
-                GeneratorSettings::vtSkip)
+            GeneratorSettings *gs = getSettings(&(*col));   // load or create
+            if (gs->valueType == GeneratorSettings::vtSkip)
+                continue;
+
+            if (first)
+                first = false;
+            else
             {
-                if (first)
-                    first = false;
-                else
-                {
-                    ins += wxT(", ");
-                    params += wxT(",");
-                }
-                ins += (*col).getQuotedName();
-                params += wxT("?");
-                colSet.push_back((*si).second);
+                ins += wxT(", ");
+                params += wxT(",");
             }
+            ins += (*col).getQuotedName();
+            params += wxT("?");
+            colSet.push_back(gs);
         }
         if (first)  // no columns
             continue;
