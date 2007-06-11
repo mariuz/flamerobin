@@ -156,7 +156,11 @@ void TreeItem::update()
     {
         if (treeM->ItemHasChildren(id))
         {
-            treeM->Collapse(id);
+            if (id != treeM->GetRootItem() ||
+                (treeM->GetWindowStyle() & wxTR_HIDE_ROOT) == 0)
+            {
+                treeM->Collapse(id);
+            }
             treeM->DeleteChildren(id);
             treeM->SetItemBold(id, false);
         }
@@ -190,8 +194,12 @@ void TreeItem::update()
         item = treeM->GetNextChild(id, cookie);
     }
     // force-collapse node if all children deleted
-    if (itemsDeleted && 0 == treeM->GetChildrenCount(id, false))
+    if (itemsDeleted && 0 == treeM->GetChildrenCount(id, false) &&
+       (item != treeM->GetRootItem() ||
+        (treeM->GetWindowStyle() & wxTR_HIDE_ROOT) == 0) )
+    {
         treeM->Collapse(id);
+    }
 
     treeM->SetItemBold(id, treeM->ItemHasChildren(id));
     if (object->orderedChildren())
