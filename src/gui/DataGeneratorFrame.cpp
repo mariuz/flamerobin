@@ -170,6 +170,8 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     icon.CopyFromBitmap(bmp);
     SetIcon(icon);
 
+    dbCharsetConversionM.setConnectionCharset(db->getConnectionCharset());
+
     SetTitle(_("Test Data Generator"));
     // prevent tree events from reaching the main frame
     // TODO: we need proper event handling for tree to allow multiple
@@ -366,7 +368,6 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
         mainTree->getItemImage(ntTables), -1, rootdata);
     db->getCollection<Table>()->attachObserver(rootdata);
     rootdata->update();
-    mainTree->Expand(root);
 
     loadingM = false;
 
@@ -445,9 +446,9 @@ wxString getDefaultRange(Domain *d)
     if (dt == wxT("Char") || dt == wxT("Varchar"))
     {
         if (size == wxT("1"))
-            return wxT("[a-z,A-Z]");
+            return wxT("[az,AZ]");
         else
-            return size + wxT("[a-z,A-Z]");
+            return size + wxT("[az,AZ]");
     }
 
     if (dt == wxT("Timestamp"))
@@ -656,7 +657,7 @@ void DataGeneratorFrame::OnSkipCheckboxClick(wxCommandEvent& event)
     if (event.IsChecked())
         spinRecords->SetValue(0);
     else
-        spinRecords->SetValue(200); // TODO: load default from config
+        spinRecords->SetValue(10); // TODO: load default from config
 
     FR_CATCH
 }
@@ -945,14 +946,34 @@ bool DataGeneratorFrame::sortTables(std::list<TableDep *>& deps,
     return true;
 }
 //-----------------------------------------------------------------------------
+// range = comma separated list of values or ranges
 wxString getCharFromRange(const wxString& range, bool rnd, int recNo,
     int charNo, int chars)
 {
     wxString valueset;
-    // TODO: break range on commas
-        // find if 1 or 3 chars (z-x)
-            // if 1, just add to valueset
-            // if 3, add all betwen z and x (for loop)
+    size_t start = 0;
+    while (start < range.Length())
+    {
+        // last
+        wxString one = range.Mid(start);
+        size_t p = range.find(wxT(","), start);
+        if (p != wxString::npos)
+        {
+            one = range.Mid(start, p-start);
+            start = p + 1;
+        }
+        else
+            start = range.Length(); // exit on next loop
+        if (one.Length() == 1)
+            valueset += one;
+        else if (one.Length() == 2)     // range
+        {
+            for (wxChar c = one[0]; c <= one[1]; c++)
+                valueset += c;
+        }
+        else
+            throw FRError(_("Bad range: section length not 1 or 2: ") + one);
+    }
 
     if (rnd)
         return valueset.Mid(frRandom(valueset.Length()), 1);
@@ -969,11 +990,12 @@ wxString getCharFromRange(const wxString& range, bool rnd, int recNo,
 //-----------------------------------------------------------------------------
 // format for values:
 // number[value or range(s)]
-// example: 25[a-z,A-Z,0-9] means: 25 letters or numbers
+// example: 25[az,AZ,09] means: 25 letters or numbers
 // example: 10[a,x,5]       means: 10 chars, each either of 'a', 'x' or '5'
-void setString(IBPP::Statement st, int param, GeneratorSettings* gs, int recNo)
+void DataGeneratorFrame::setString(IBPP::Statement st, int param,
+    GeneratorSettings* gs, int recNo)
 {
-    //if (gs->nullPercent > random(100))
+    if (gs->nullPercent > frRandom(100))
     {
         st->SetNull(param);
         return;
@@ -991,7 +1013,7 @@ void setString(IBPP::Statement st, int param, GeneratorSettings* gs, int recNo)
             {
                 int p = gs->range.find(wxT("]"), start+1);
                 if (p == wxString::npos)    // invalid mask
-                    throw FRError(_("Invalid mask"));
+                    throw FRError(_("Invalid mask: missing ]"));
                 for (int i = 0; i < chars; i++)
                 {
                     value += getCharFromRange(gs->range.Mid(start+1,
@@ -1004,12 +1026,15 @@ void setString(IBPP::Statement st, int param, GeneratorSettings* gs, int recNo)
             {
                 int p = gs->range.find(wxT("["), start+1);
                 if (p == wxString::npos)    // invalid mask
-                    throw FRError(_("Invalid mask"));
-                gs->range.Mid(start, p-start).ToLong(&chars);
+                    throw FRError(_("Invalid mask, missing ["));
+                wxString number = gs->range.Mid(start, p-start);
+                if (!number.ToLong(&chars))
+                    throw FRError(_("Bad number: ")+number);
                 start = p;
             }
         }
-        st->Set(param, wx2std(value));
+
+        st->Set(param, wx2std(value, dbCharsetConversionM.getConverter()));
     }
 }
 //-----------------------------------------------------------------------------
@@ -1034,22 +1059,26 @@ void setDatetime(IBPP::Statement st, int param, GeneratorSettings* gs,
     // switch on value type and do accordingly
 }
 //-----------------------------------------------------------------------------
-void setParam(IBPP::Statement st, int param, GeneratorSettings* gs, int recNo)
+void DataGeneratorFrame::setParam(IBPP::Statement st, int param,
+    GeneratorSettings* gs, int recNo)
 {
     switch (st->ParameterType(param))
     {
         case IBPP::sdString:
             setString(st, param, gs, recNo);
+            break;
         case IBPP::sdSmallint:
         case IBPP::sdInteger:
         case IBPP::sdLargeint:
         case IBPP::sdFloat:
         case IBPP::sdDouble:
             setNumber(st, param, gs, recNo);
+            break;
         case IBPP::sdDate:
         case IBPP::sdTime:
         case IBPP::sdTimestamp:
             setDatetime(st, param, gs, recNo);
+            break;
         //case sdBlob:
         //case sdArray:
         default:

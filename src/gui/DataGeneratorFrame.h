@@ -39,6 +39,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <map>
 
 #include "core/Observer.h"
+#include "core/StringUtils.h"
 #include "gui/BaseFrame.h"
 
 class Database;
@@ -55,6 +56,7 @@ protected:
     bool loadingM;  // prevent updates until loaded
     std::map<wxString, GeneratorSettings *> settingsM;
     std::map<wxString, int> tableRecordsM;
+    DatabaseToSystemCharsetConversion dbCharsetConversionM;
     Database* databaseM;
     virtual const wxString getName() const;
     virtual const wxRect getDefaultRect() const;
@@ -64,6 +66,11 @@ protected:
     bool loadColumns(const wxString& tableName, wxChoice* c);
     bool sortTables(std::list<TableDep *>& deps, std::list<Table *>& order);
     void generateData(std::list<Table *>& order);
+
+    void setParam( IBPP::Statement st, int param, GeneratorSettings* gs,
+        int recNo);
+    void setString(IBPP::Statement st, int param, GeneratorSettings* gs,
+        int recNo);
 
     enum
     {
