@@ -1118,7 +1118,7 @@ void setNumber(IBPP::Statement st, int param, GeneratorSettings* gs, int recNo)
             {
                 long l;
                 if (!one.ToLong(&l))
-                    FRError(_("Invalid number: ") + one);
+                    throw FRError(_("Invalid number: ") + one);
                 ranges.push_back(std::pair<long,long>(l, l));
                 rangesize++;
             }
@@ -1126,7 +1126,7 @@ void setNumber(IBPP::Statement st, int param, GeneratorSettings* gs, int recNo)
             {
                 long l1, l2;
                 if (!one.Mid(0, p).ToLong(&l1) || !one.Mid(p+1).ToLong(&l2))
-                    FRError(_("Invalid range: ") + one);
+                    throw FRError(_("Invalid range: ") + one);
                 ranges.push_back(std::pair<long,long>(l1, l2));
                 rangesize += (l2-l1+1);
             }
