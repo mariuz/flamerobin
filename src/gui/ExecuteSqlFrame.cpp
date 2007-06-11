@@ -41,7 +41,7 @@
 #include <wx/datetime.h>
 #include <wx/dnd.h>
 #include <wx/file.h>
-#include <wx/fontmap.h>
+//#include <wx/fontmap.h>
 #include <wx/fontdlg.h>
 #include <wx/tokenzr.h>
 
@@ -552,76 +552,6 @@ void SqlEditor::OnMenuSetFont(wxCommandEvent& WXUNUSED(event))
     showInformationDialog(wxGetTopLevelParent(this), _("The SQL editor font has been changed."),
         _("This setting affects only the SQL editor font. The font used in the result set data grid has to be changed separately."),
         AdvancedMessageDialogButtonsOk(), config(), wxT("DIALOG_WarnFont"), _("Do not show this information again"));
-}
-//-----------------------------------------------------------------------------
-DatabaseToSystemCharsetConversion::DatabaseToSystemCharsetConversion()
-{
-    converterM = 0;
-}
-//-----------------------------------------------------------------------------
-DatabaseToSystemCharsetConversion::~DatabaseToSystemCharsetConversion()
-{
-    delete converterM;
-}
-//-----------------------------------------------------------------------------
-wxMBConv* DatabaseToSystemCharsetConversion::getConverter()
-{
-    if (converterM)
-        return converterM;
-    return wxConvCurrent;
-}
-//-----------------------------------------------------------------------------
-wxString DatabaseToSystemCharsetConversion::mapCharset(
-    const wxString& connectionCharset)
-{
-    wxString charset(connectionCharset.Upper().Trim());
-    charset.Trim(false);
-
-    // fixes hang when character set name empty (invalid encoding is returned)
-    if (charset.empty())
-        charset = wxT("NONE");
-
-    // Firebird charsets WIN125X need to be replaced with either
-    // WINDOWS125X or CP125X - we take the latter
-    if (charset.Mid(0, 5) == wxT("WIN12"))
-        return wxT("CP12") + charset.Mid(5);
-
-    // Firebird charsets ISO8859_X
-    if (charset.Mid(0, 8) == wxT("ISO8859_"))
-        return wxT("ISO-8859-") + charset.Mid(8);
-
-    // all other mappings need to be added here...
-    struct CharsetMapping { const wxChar* connCS; const wxChar* convCS; };
-    static const CharsetMapping mappings[] = {
-        { wxT("UTF8"), wxT("UTF-8") }, { wxT("UNICODE_FSS"), wxT("UTF-8") }
-    };
-    int mappingCount = sizeof(mappings) / sizeof(CharsetMapping);
-    for (int i = 0; i < mappingCount; i++)
-    {
-        if (mappings[i].connCS == charset)
-            return mappings[i].convCS;
-    }
-
-    return charset;
-}
-//-----------------------------------------------------------------------------
-void DatabaseToSystemCharsetConversion::setConnectionCharset(
-    const wxString& connectionCharset)
-{
-    if (connectionCharsetM != connectionCharset)
-    {
-        if (converterM)
-        {
-            delete converterM;
-            converterM = 0;
-        }
-
-        connectionCharsetM = connectionCharset;
-        wxFontEncoding fe = wxFontMapperBase::Get()->CharsetToEncoding(
-            mapCharset(connectionCharset), false);
-        if (fe != wxFONTENCODING_SYSTEM)
-            converterM = new wxCSConv(fe);
-    }
 }
 //-----------------------------------------------------------------------------
 ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
