@@ -38,6 +38,7 @@
 #include <ibpp.h>
 
 #include "core/Observer.h"
+#include "core/StringUtils.h"
 #include "gui/BaseFrame.h"
 #include "gui/FindDialog.h"
 #include "logger.h"
@@ -76,23 +77,6 @@ public:
     void OnMenuSetFont(wxCommandEvent& event);
     void OnMenuWrap(wxCommandEvent& event);
     DECLARE_EVENT_TABLE()
-};
-//-----------------------------------------------------------------------------
-// a helper class to manage the wxMBConv object necessary to translate from
-// and to the database connection charset
-// this should not be here, but where to put it?  FIXME...
-class DatabaseToSystemCharsetConversion
-{
-private:
-    wxString connectionCharsetM;
-    wxMBConv* converterM;
-public:
-    DatabaseToSystemCharsetConversion();
-    ~DatabaseToSystemCharsetConversion();
-
-    wxMBConv* getConverter();
-    static wxString mapCharset(const wxString& connectionCharset);
-    void setConnectionCharset(const wxString& connectionCharset);
 };
 //-----------------------------------------------------------------------------
 class ExecuteSqlFrame: public BaseFrame, public Observer {

@@ -44,4 +44,20 @@ wxString escapeHtmlChars(const wxString& input, bool processNewlines = true);
 //  conversion to UTF-8 is available, i.e. in non-Unicode build
 wxString getHtmlCharset();
 //-----------------------------------------------------------------------------
+// a helper class to manage the wxMBConv object necessary to translate from
+// and to the database connection charset
+class DatabaseToSystemCharsetConversion
+{
+private:
+    wxString connectionCharsetM;
+    wxMBConv* converterM;
+public:
+    DatabaseToSystemCharsetConversion();
+    ~DatabaseToSystemCharsetConversion();
+
+    wxMBConv* getConverter();
+    static wxString mapCharset(const wxString& connectionCharset);
+    void setConnectionCharset(const wxString& connectionCharset);
+};
+//-----------------------------------------------------------------------------
 #endif // FR_STRINGUTILS_H
