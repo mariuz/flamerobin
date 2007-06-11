@@ -989,7 +989,21 @@ wxString getCharFromRange(const wxString& range, bool rnd, int recNo,
 }
 //-----------------------------------------------------------------------------
 template<typename T>
-void setColumnValue(IBPP::Statement st, int param,
+void setFromFile(IBPP::Statement st, int param,
+    GeneratorSettings *gs, int recNo)
+{
+    // load strings from file to vector
+    // select (random/sequential) string from vector
+    wxString selected;
+
+    // convert string to datatype
+    T val;
+    selected >> val;        //<- this won't work for IBPP types
+    st->Set(param, val);
+}
+//-----------------------------------------------------------------------------
+template<typename T>
+void setFromOther(IBPP::Statement st, int param,
     GeneratorSettings *gs, int recNo)
 {
     IBPP::Statement st2 =
@@ -1040,12 +1054,6 @@ void setColumnValue(IBPP::Statement st, int param,
 void DataGeneratorFrame::setString(IBPP::Statement st, int param,
     GeneratorSettings* gs, int recNo)
 {
-    if (gs->nullPercent > frRandom(100))
-    {
-        st->SetNull(param);
-        return;
-    }
-
     // switch on value type and do accordingly
     if (gs->valueType == GeneratorSettings::vtRange)
     {
@@ -1078,51 +1086,121 @@ void DataGeneratorFrame::setString(IBPP::Statement st, int param,
                 start = p;
             }
         }
-
         st->Set(param, wx2std(value, dbCharsetConversionM.getConverter()));
-    }
-
-    if (gs->valueType == GeneratorSettings::vtColumn)   // copy from column
-    {
-        setColumnValue<std::string>(st, param, gs, recNo);
     }
 }
 //-----------------------------------------------------------------------------
+// gs->range = x,x-y,...
+template<typename T>
 void setNumber(IBPP::Statement st, int param, GeneratorSettings* gs, int recNo)
 {
-    //if (gs->nullPercent > random(100))
-    {
-        st->SetNull(param);
-        return;
-    }
     // switch on value type and do accordingly
+    if (gs->valueType == GeneratorSettings::vtRange)
+    {
+        std::vector< std::pair<long,long> > ranges;
+        long rangesize = 0;
+        size_t start = 0;
+        while (start < gs->range.Length())
+        {
+            // last
+            wxString one = gs->range.Mid(start);
+            size_t p = gs->range.find(wxT(","), start);
+            if (p != wxString::npos)
+            {
+                one = gs->range.Mid(start, p-start);
+                start = p + 1;
+            }
+            else
+                start = gs->range.Length(); // exit on next loop
+
+            p = one.find(wxT("-"));
+            if (p == wxString::npos)
+            {
+                long l;
+                if (!one.ToLong(&l))
+                    FRError(_("Invalid number: ") + one);
+                ranges.push_back(std::pair<long,long>(l, l));
+                rangesize++;
+            }
+            else
+            {
+                long l1, l2;
+                if (!one.Mid(0, p).ToLong(&l1) || !one.Mid(p+1).ToLong(&l2))
+                    FRError(_("Invalid range: ") + one);
+                ranges.push_back(std::pair<long,long>(l1, l2));
+                rangesize += (l2-l1+1);
+            }
+        }
+
+        long toget = (gs->randomValues ?
+            frRandom(rangesize) : (recNo % rangesize));
+
+        for (std::vector< std::pair<long,long> >::iterator it =
+            ranges.begin(); it != ranges.end(); ++it)
+        {
+            long sz = (*it).second - (*it).first + 1;
+            if (sz > toget)
+            {
+                st->Set(param, (T)((*it).first + toget));
+                return;
+            }
+            toget -= sz;
+        }
+    }
 }
 //-----------------------------------------------------------------------------
 void setDatetime(IBPP::Statement st, int param, GeneratorSettings* gs,
     int recNo)
 {
-    //if (gs->nullPercent > random(100))
-    {
-        st->SetNull(param);
-        return;
-    }
-    // switch on value type and do accordingly
+
 }
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::setParam(IBPP::Statement st, int param,
     GeneratorSettings* gs, int recNo)
 {
+    if (gs->nullPercent > frRandom(100))
+    {
+        st->SetNull(param);
+        return;
+    }
+
+    if (gs->valueType == GeneratorSettings::vtColumn)   // copy from column
+    {
+        switch (st->ParameterType(param))
+        {
+            case IBPP::sdString:
+                setFromOther<std::string>(st, param, gs, recNo);  break;
+            case IBPP::sdSmallint:
+                setFromOther<int16_t>(st, param, gs, recNo);      break;
+            case IBPP::sdInteger:
+                setFromOther<int32_t>(st, param, gs, recNo);      break;
+            case IBPP::sdLargeint:
+                setFromOther<int64_t>(st, param, gs, recNo);      break;
+            case IBPP::sdFloat:
+                setFromOther<float>(st, param, gs, recNo);        break;
+            case IBPP::sdDouble:
+                setFromOther<double>(st, param, gs, recNo);       break;
+            case IBPP::sdDate:
+                setFromOther<IBPP::Date>(st, param, gs, recNo);   break;
+            case IBPP::sdTime:
+                setFromOther<IBPP::Time>(st, param, gs, recNo);   break;
+            case IBPP::sdTimestamp:
+                setFromOther<IBPP::Timestamp>(st, param, gs, recNo);  break;
+            //case sdBlob:
+            //case sdArray:
+        };
+        return;
+    }
+
     switch (st->ParameterType(param))
     {
-        case IBPP::sdString:
-            setString(st, param, gs, recNo);
-            break;
-        case IBPP::sdSmallint:
-        case IBPP::sdInteger:
-        case IBPP::sdLargeint:
-        case IBPP::sdFloat:
-        case IBPP::sdDouble:
-            setNumber(st, param, gs, recNo);
+        case IBPP::sdString:   setString(st, param, gs, recNo);          break;
+        case IBPP::sdSmallint: setNumber<int16_t>(st, param, gs, recNo); break;
+        case IBPP::sdInteger:  setNumber<int32_t>(st, param, gs, recNo); break;
+        case IBPP::sdLargeint: setNumber<int64_t>(st, param, gs, recNo); break;
+        case IBPP::sdFloat:    setNumber<float>  (st, param, gs, recNo); break;
+        case IBPP::sdDouble:   setNumber<double> (st, param, gs, recNo); break;
+
             break;
         case IBPP::sdDate:
         case IBPP::sdTime:
