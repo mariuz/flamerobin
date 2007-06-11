@@ -1054,40 +1054,36 @@ void setFromOther(IBPP::Statement st, int param,
 void DataGeneratorFrame::setString(IBPP::Statement st, int param,
     GeneratorSettings* gs, int recNo)
 {
-    // switch on value type and do accordingly
-    if (gs->valueType == GeneratorSettings::vtRange)
+    wxString value;
+    long chars = 1;
+    int start = 0;
+    while (start < gs->range.Length())
     {
-        wxString value;
-        long chars = 1;
-        int start = 0;
-        while (start < gs->range.Length())
+        if (gs->range.Mid(start, 1) == wxT("["))
         {
-            if (gs->range.Mid(start, 1) == wxT("["))
+            int p = gs->range.find(wxT("]"), start+1);
+            if (p == wxString::npos)    // invalid mask
+                throw FRError(_("Invalid mask: missing ]"));
+            for (int i = 0; i < chars; i++)
             {
-                int p = gs->range.find(wxT("]"), start+1);
-                if (p == wxString::npos)    // invalid mask
-                    throw FRError(_("Invalid mask: missing ]"));
-                for (int i = 0; i < chars; i++)
-                {
-                    value += getCharFromRange(gs->range.Mid(start+1,
-                        p-start-1), gs->randomValues, recNo, i, chars);
-                }
-                start = p+1;
-                chars = 1;
+                value += getCharFromRange(gs->range.Mid(start+1,
+                    p-start-1), gs->randomValues, recNo, i, chars);
             }
-            else
-            {
-                int p = gs->range.find(wxT("["), start+1);
-                if (p == wxString::npos)    // invalid mask
-                    throw FRError(_("Invalid mask, missing ["));
-                wxString number = gs->range.Mid(start, p-start);
-                if (!number.ToLong(&chars))
-                    throw FRError(_("Bad number: ")+number);
-                start = p;
-            }
+            start = p+1;
+            chars = 1;
         }
-        st->Set(param, wx2std(value, dbCharsetConversionM.getConverter()));
+        else
+        {
+            int p = gs->range.find(wxT("["), start+1);
+            if (p == wxString::npos)    // invalid mask
+                throw FRError(_("Invalid mask, missing ["));
+            wxString number = gs->range.Mid(start, p-start);
+            if (!number.ToLong(&chars))
+                throw FRError(_("Bad number: ")+number);
+            start = p;
+        }
     }
+    st->Set(param, wx2std(value, dbCharsetConversionM.getConverter()));
 }
 //-----------------------------------------------------------------------------
 // gs->range = x,x-y,...
@@ -1192,26 +1188,33 @@ void DataGeneratorFrame::setParam(IBPP::Statement st, int param,
         return;
     }
 
-    switch (st->ParameterType(param))
+    if (gs->valueType == GeneratorSettings::vtRange)
     {
-        case IBPP::sdString:   setString(st, param, gs, recNo);          break;
-        case IBPP::sdSmallint: setNumber<int16_t>(st, param, gs, recNo); break;
-        case IBPP::sdInteger:  setNumber<int32_t>(st, param, gs, recNo); break;
-        case IBPP::sdLargeint: setNumber<int64_t>(st, param, gs, recNo); break;
-        case IBPP::sdFloat:    setNumber<float>  (st, param, gs, recNo); break;
-        case IBPP::sdDouble:   setNumber<double> (st, param, gs, recNo); break;
-
-            break;
-        case IBPP::sdDate:
-        case IBPP::sdTime:
-        case IBPP::sdTimestamp:
-            setDatetime(st, param, gs, recNo);
-            break;
-        //case sdBlob:
-        //case sdArray:
-        default:
-            st->SetNull(param);
-    };
+        switch (st->ParameterType(param))
+        {
+            case IBPP::sdString:
+                setString(st, param, gs, recNo);          break;
+            case IBPP::sdSmallint:
+                setNumber<int16_t>(st, param, gs, recNo); break;
+            case IBPP::sdInteger:
+                setNumber<int32_t>(st, param, gs, recNo); break;
+            case IBPP::sdLargeint:
+                setNumber<int64_t>(st, param, gs, recNo); break;
+            case IBPP::sdFloat:
+                setNumber<float>  (st, param, gs, recNo); break;
+            case IBPP::sdDouble:
+                setNumber<double> (st, param, gs, recNo); break;
+            case IBPP::sdDate:
+            case IBPP::sdTime:
+            case IBPP::sdTimestamp:
+                setDatetime(st, param, gs, recNo);
+                break;
+            //case sdBlob:
+            //case sdArray:
+            default:
+                st->SetNull(param);
+        };
+    }
 }
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::generateData(std::list<Table *>& order)
