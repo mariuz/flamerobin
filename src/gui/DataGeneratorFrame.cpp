@@ -1090,65 +1090,199 @@ void DataGeneratorFrame::setString(IBPP::Statement st, int param,
 template<typename T>
 void setNumber(IBPP::Statement st, int param, GeneratorSettings* gs, int recNo)
 {
-    // switch on value type and do accordingly
-    if (gs->valueType == GeneratorSettings::vtRange)
+    std::vector< std::pair<long,long> > ranges;
+    long rangesize = 0;
+    size_t start = 0;
+    while (start < gs->range.Length())
     {
-        std::vector< std::pair<long,long> > ranges;
-        long rangesize = 0;
-        size_t start = 0;
-        while (start < gs->range.Length())
+        // last
+        wxString one = gs->range.Mid(start);
+        size_t p = gs->range.find(wxT(","), start);
+        if (p != wxString::npos)
         {
-            // last
-            wxString one = gs->range.Mid(start);
-            size_t p = gs->range.find(wxT(","), start);
-            if (p != wxString::npos)
-            {
-                one = gs->range.Mid(start, p-start);
-                start = p + 1;
-            }
-            else
-                start = gs->range.Length(); // exit on next loop
-
-            p = one.find(wxT("-"));
-            if (p == wxString::npos)
-            {
-                long l;
-                if (!one.ToLong(&l))
-                    throw FRError(_("Invalid number: ") + one);
-                ranges.push_back(std::pair<long,long>(l, l));
-                rangesize++;
-            }
-            else
-            {
-                long l1, l2;
-                if (!one.Mid(0, p).ToLong(&l1) || !one.Mid(p+1).ToLong(&l2))
-                    throw FRError(_("Invalid range: ") + one);
-                ranges.push_back(std::pair<long,long>(l1, l2));
-                rangesize += (l2-l1+1);
-            }
+            one = gs->range.Mid(start, p-start);
+            start = p + 1;
         }
+        else
+            start = gs->range.Length(); // exit on next loop
 
-        long toget = (gs->randomValues ?
-            frRandom(rangesize) : (recNo % rangesize));
-
-        for (std::vector< std::pair<long,long> >::iterator it =
-            ranges.begin(); it != ranges.end(); ++it)
+        p = one.find(wxT("-"));
+        if (p == wxString::npos)
         {
-            long sz = (*it).second - (*it).first + 1;
-            if (sz > toget)
-            {
-                st->Set(param, (T)((*it).first + toget));
-                return;
-            }
-            toget -= sz;
+            long l;
+            if (!one.ToLong(&l))
+                throw FRError(_("Invalid number: ") + one);
+            ranges.push_back(std::pair<long,long>(l, l));
+            rangesize++;
+        }
+        else
+        {
+            long l1, l2;
+            if (!one.Mid(0, p).ToLong(&l1) || !one.Mid(p+1).ToLong(&l2))
+                throw FRError(_("Invalid range: ") + one);
+            ranges.push_back(std::pair<long,long>(l1, l2));
+            rangesize += (l2-l1+1);
         }
     }
+
+    long toget = (gs->randomValues ?
+        frRandom(rangesize) : (recNo % rangesize));
+
+    for (std::vector< std::pair<long,long> >::iterator it =
+        ranges.begin(); it != ranges.end(); ++it)
+    {
+        long sz = (*it).second - (*it).first + 1;
+        if (sz > toget)
+        {
+            st->Set(param, (T)((*it).first + toget));
+            return;
+        }
+        toget -= sz;
+    }
+}
+//-----------------------------------------------------------------------------
+// dd.mm.yyyy
+void str2date(const wxString& str, int& date)
+{
+    long d,m,y;
+    if (!str.Mid(0,2).ToLong(&d) || !str.Mid(3,2).ToLong(&m) ||
+        !str.Mid(6,4).ToLong(&y) || !IBPP::itod(&date, y,m,d))
+    {
+        throw FRError(_("Invalid date: ") + str);
+    }
+}
+//-----------------------------------------------------------------------------
+// HH:MM:SS
+void str2time(const wxString& str, int& mytime)
+{
+    long h,m,s;
+    if (!str.Mid(0,2).ToLong(&h) || !str.Mid(3,2).ToLong(&m) ||
+        !str.Mid(6,2).ToLong(&s))
+    {
+        throw FRError(_("Invalid time: ") + str);
+    }
+    IBPP::itot(&mytime, h,m,s,0);
 }
 //-----------------------------------------------------------------------------
 void setDatetime(IBPP::Statement st, int param, GeneratorSettings* gs,
     int recNo)
 {
+    std::vector< std::pair<int,int> > dateRanges;
+    std::vector< std::pair<int,int> > timeRanges;
+    int dateRangesize = 0;
+    int timeRangesize = 0;
 
+    IBPP::SDT dt = st->ParameterType(param);
+    size_t start = 0;
+    while (start < gs->range.Length())
+    {
+        // last
+        wxString one = gs->range.Mid(start);
+        size_t p = gs->range.find(wxT(","), start);
+        if (p != wxString::npos)
+        {
+            one = gs->range.Mid(start, p-start);
+            start = p + 1;
+        }
+        else
+            start = gs->range.Length(); // exit on next loop
+
+        // convert first value
+        int date, time;
+        if ((dt == IBPP::sdDate || dt == IBPP::sdTimestamp))
+            str2date(one.Mid(0,10), date);
+        if (dt == IBPP::sdTime)
+            str2time(one.Mid(0,8), time);
+        if (dt == IBPP::sdTimestamp)
+            str2time(one.Mid(11,8), time);
+
+        p = one.find(wxT("-"));
+        if (p == wxString::npos)
+        {
+            if (dt == IBPP::sdDate || dt == IBPP::sdTimestamp)
+            {
+                dateRanges.push_back(std::pair<int,int>(date, date));
+                dateRangesize++;
+            }
+            if (dt == IBPP::sdTime || dt == IBPP::sdTimestamp)
+            {
+                timeRanges.push_back(std::pair<int,int>(time, time));
+                timeRangesize++;
+            }
+        }
+        else    // range, convert second date/time
+        {
+            int date2, time2;
+            if (dt == IBPP::sdDate)
+                str2date(one.Mid(11,10), date2);
+            if (dt == IBPP::sdTimestamp)
+                str2date(one.Mid(20,10), date2);
+            if (dt == IBPP::sdTime)
+                str2time(one.Mid( 9, 8), time2);
+            if (dt == IBPP::sdTimestamp)
+                str2time(one.Mid(31, 8), time2);
+
+            if (dt == IBPP::sdDate || dt == IBPP::sdTimestamp)
+            {
+                dateRanges.push_back(std::pair<int,int>(date, date2));
+                dateRangesize += (date2-date+1);
+            }
+            if (dt == IBPP::sdTime || dt == IBPP::sdTimestamp)
+            {
+                timeRanges.push_back(std::pair<int,int>(time, time2));
+                timeRangesize += ((time2-time) / 10000 + 1);
+            }
+        }
+    }
+
+    int dateToGet, timeToGet;
+    if (gs->randomValues)
+    {
+        dateToGet = (dateRangesize ? frRandom(dateRangesize) : 0);
+        timeToGet = (timeRangesize ? frRandom(timeRangesize) : 0);
+    }
+    else
+    {
+        dateToGet = (dateRangesize ? recNo % dateRangesize : 0);
+        timeToGet = (timeRangesize ? recNo % timeRangesize : 0);
+    }
+
+    int myDate = 0;
+    int myTime = 0;
+    for (std::vector< std::pair<int,int> >::iterator it =
+        dateRanges.begin(); it != dateRanges.end(); ++it)
+    {
+        int sz = (*it).second - (*it).first + 1;
+        if (sz > dateToGet)
+        {
+            myDate = ((*it).first + dateToGet);
+            break;
+        }
+        dateToGet -= sz;
+    }
+    for (std::vector< std::pair<int,int> >::iterator it =
+        timeRanges.begin(); it != timeRanges.end(); ++it)
+    {
+        int sz = ((*it).second - (*it).first)/10000 + 1;
+        if (sz > timeToGet)
+        {
+            myTime = ((*it).first + timeToGet*10000);
+            break;
+        }
+        timeToGet -= sz;
+    }
+
+    if (dt == IBPP::sdDate)
+        st->Set(param, IBPP::Date(myDate));
+    if (dt == IBPP::sdTime)
+        st->Set(param, IBPP::Time(myTime));
+    if (dt == IBPP::sdTimestamp)
+    {
+        int y, mo, d, h, mi, s, t;
+        IBPP::dtoi(myDate, &y, &mo, &d);
+        IBPP::ttoi(myTime, &h, &mi, &s, &t);
+        st->Set(param, IBPP::Timestamp(y, mo, d, h, mi, s, t));
+    }
 }
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::setParam(IBPP::Statement st, int param,
