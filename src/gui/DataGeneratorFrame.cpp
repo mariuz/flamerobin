@@ -657,7 +657,7 @@ void DataGeneratorFrame::OnSkipCheckboxClick(wxCommandEvent& event)
     if (event.IsChecked())
         spinRecords->SetValue(0);
     else
-        spinRecords->SetValue(10); // TODO: load default from config
+        spinRecords->SetValue(200); // TODO: load default from config
 
     FR_CATCH
 }
@@ -929,7 +929,7 @@ bool DataGeneratorFrame::sortTables(std::list<Table *>& order)
         if (!removed)
         {
             showWarningDialog(this, _("Circular dependency"),
-                _("A circular dependency was detected among your tables. We are unable to determine to correct order of tables for insert."),
+                _("A circular dependency was detected among your tables. We are unable to determine to correct order of tables for insert. Currently, the only cure is to first generate data for just one of the tables."),
                 AdvancedMessageDialogButtonsOk());
 
             // release memory
@@ -1346,6 +1346,34 @@ void DataGeneratorFrame::setParam(IBPP::Statement st, int param,
             default:
                 st->SetNull(param);
         };
+    }
+
+    if (gs->valueType == GeneratorSettings::vtFile)
+    {
+        switch (st->ParameterType(param))
+        {
+            case IBPP::sdString:
+                setFromFile<std::string>(st, param, gs, recNo);  break;
+            case IBPP::sdSmallint:
+                setFromFile<int16_t>(st, param, gs, recNo);      break;
+            case IBPP::sdInteger:
+                setFromFile<int32_t>(st, param, gs, recNo);      break;
+            case IBPP::sdLargeint:
+                setFromFile<int64_t>(st, param, gs, recNo);      break;
+            case IBPP::sdFloat:
+                setFromFile<float>(st, param, gs, recNo);        break;
+            case IBPP::sdDouble:
+                setFromFile<double>(st, param, gs, recNo);       break;
+            case IBPP::sdDate:
+                setFromFile<IBPP::Date>(st, param, gs, recNo);   break;
+            case IBPP::sdTime:
+                setFromFile<IBPP::Time>(st, param, gs, recNo);   break;
+            case IBPP::sdTimestamp:
+                setFromFile<IBPP::Timestamp>(st, param, gs, recNo);  break;
+            //case sdBlob:
+            //case sdArray:
+        };
+        return;
     }
 }
 //-----------------------------------------------------------------------------
