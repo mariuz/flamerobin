@@ -868,10 +868,8 @@ void DataGeneratorFrame::OnGenerateButtonClick(wxCommandEvent& WXUNUSED(event))
 
     saveSetting(mainTree->GetSelection());  // save current item if changed
 
-    std::list<TableDep *> deps;
     std::list<Table *> order;
-
-    if (sortTables(deps, order))
+    if (sortTables(order))
         generateData(order);
 
     // perhaps add a comment like: "A total of XYZ records were inserted."
@@ -882,14 +880,14 @@ void DataGeneratorFrame::OnGenerateButtonClick(wxCommandEvent& WXUNUSED(event))
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
-bool DataGeneratorFrame::sortTables(std::list<TableDep *>& deps,
-    std::list<Table *>& order)
+bool DataGeneratorFrame::sortTables(std::list<Table *>& order)
 {
     // collect list of tables
     // if some table is dropped from the database, it would be
     // removed from tree, but it will remain in tableRecordsM
     // That's why we just search for existing tables that are
     // also present in tableRecordsM
+    std::list<TableDep *> deps;
     MetadataCollection<Table>* t = databaseM->getCollection<Table>();
     for (MetadataCollection<Table>::iterator it = t->begin();
         it != t->end(); ++it)
