@@ -995,9 +995,11 @@ void setFromFile(IBPP::Statement st, int param,
     wxString selected;
 
     // convert string to datatype
+    /*
     T val;
     selected >> val;        //<- this won't work for IBPP types
     st->Set(param, val);
+    */ // commented until I figure out how to do it with GCC 3.3.x
 }
 //-----------------------------------------------------------------------------
 template<typename T>
