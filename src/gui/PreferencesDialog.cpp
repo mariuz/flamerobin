@@ -547,7 +547,11 @@ bool PreferencesDialog::parseDescriptionNode(wxTreeItemId parent, wxXmlNode* xml
         if (description.IsEmpty())
             description = caption;
     }
+#if wxCHECK_VERSION(2, 8, 0)
     treectrl_1->ExpandAllChildren(item);
+#else
+    treectrl_1->Expand(item);
+#endif
 
     // add all settings controls of this page to a sizer
     wxBoxSizer* sizerPage = new wxBoxSizer(wxVERTICAL);

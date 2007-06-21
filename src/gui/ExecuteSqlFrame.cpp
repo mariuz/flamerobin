@@ -98,7 +98,9 @@ SqlEditorDropTarget::SqlEditorDropTarget(ExecuteSqlFrame* frame,
     : frameM(frame), editorM(editor), databaseM(database)
 {
     wxDataObjectComposite* dataobj = new wxDataObjectComposite;
+#if wxCHECK_VERSION(2, 8, 0)
     dataobj->Add(fileDataM = new wxFileDataObject);
+#endif
     dataobj->Add(textDataM = new wxTextDataObject);
     SetDataObject(dataobj);
 }
@@ -109,6 +111,7 @@ wxDragResult SqlEditorDropTarget::OnData(wxCoord x, wxCoord y,
     if (!GetData())
         return wxDragNone;
 
+#if wxCHECK_VERSION(2, 8, 0)
     wxDataObjectComposite* dataobj = (wxDataObjectComposite*) m_dataObject;
     // test for wxDF_FILENAME
     if (dataobj->GetReceivedFormat() == fileDataM->GetFormat())
@@ -117,6 +120,7 @@ wxDragResult SqlEditorDropTarget::OnData(wxCoord x, wxCoord y,
             return def;
     }
     else
+#endif
     // try everything else as dropped text
     if (OnDropText(x, y, textDataM->GetText()))
         return def;
