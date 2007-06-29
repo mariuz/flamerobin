@@ -63,6 +63,7 @@ protected:
     void showColumnSettings(bool show);
     GeneratorSettings* getSettings(Column *c);
     void saveSetting(wxTreeItemId item);
+    void loadSetting(wxTreeItemId newitem);
     bool loadColumns(const wxString& tableName, wxChoice* c);
     bool sortTables(std::list<Table *>& order);
     void generateData(std::list<Table *>& order);

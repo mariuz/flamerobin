@@ -42,6 +42,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/ffile.h>
 #include <wx/file.h>
 
+#include <wx/filename.h>
+#include <wx/wfstream.h>
+#include <wx/xml/xml.h>
+
 // needed for random
 #include <stdlib.h>
 
@@ -93,6 +97,55 @@ public:
     std::list<wxString> dependsOn;
 };
 //-----------------------------------------------------------------------------
+// helper for saving settings
+void dsAddChildNode(wxXmlNode* parentNode, const wxString nodeName,
+    const wxString nodeContent)
+{
+    if (!nodeContent.IsEmpty())
+    {
+        wxXmlNode* propn = new wxXmlNode(wxXML_ELEMENT_NODE, nodeName);
+        parentNode->AddChild(propn);
+        propn->AddChild(new wxXmlNode(wxXML_TEXT_NODE, wxEmptyString,
+            nodeContent));
+    }
+}
+//-----------------------------------------------------------------------------
+// used for loading settings from XML file
+static const wxString getNodeContent(wxXmlNode* node)
+{
+    for (wxXmlNode* n = node->GetChildren(); (n); n = n->GetNext())
+    {
+        if (n->GetType() == wxXML_TEXT_NODE
+            || n->GetType() == wxXML_CDATA_SECTION_NODE)
+        {
+            return n->GetContent();
+        }
+    }
+    return wxEmptyString;
+}
+//-----------------------------------------------------------------------------
+// used for loading settings from XML file
+void parseTable(wxXmlNode* xmln, std::map<wxString, int>& tr)
+{
+    wxASSERT(xmln);
+    wxString tablename;
+    long records = 0;
+    for (xmln = xmln->GetChildren(); (xmln); xmln = xmln->GetNext())
+    {
+        if (xmln->GetType() != wxXML_ELEMENT_NODE)
+            continue;
+
+        wxString value(getNodeContent(xmln));
+        if (xmln->GetName() == wxT("name"))
+            tablename = value;
+        else if (xmln->GetName() == wxT("records"))
+            value.ToLong(&records);
+    }
+
+    if (!tablename.IsEmpty())
+        tr.insert(std::pair<wxString, int>(tablename, records));
+}
+//-----------------------------------------------------------------------------
 class GeneratorSettings
 {
 public:
@@ -105,60 +158,62 @@ public:
     bool randomValues;
     int nullPercent;
 
-    wxString toString();    // returns the settings as a single-line string
-    void fromString(const wxString& s); // loads settings from a string
+    void toXML(wxXmlNode *parent);
+    wxString fromXML(wxXmlNode *parent);    // returns column name
 };
 //-----------------------------------------------------------------------------
-wxString GeneratorSettings::toString()
+void GeneratorSettings::toXML(wxXmlNode *parent)
 {
-    wxString s;
-    s += wxString::Format(wxT("%d%d%d|"),
-        (int)valueType,
-        (randomValues ? 1 : 0),
-        nullPercent);
-    s += range + wxT("|");
-    s += sourceTable + wxT("|");
-    s += sourceColumn + wxT("|");
-    s += fileName;
-    return s;
+    dsAddChildNode(parent, wxT("valueType"),
+        wxString::Format(wxT("%d"), (int)valueType));
+    dsAddChildNode(parent, wxT("range"), range);
+    dsAddChildNode(parent, wxT("sourceTable"), sourceTable);
+    dsAddChildNode(parent, wxT("sourceColumn"), sourceColumn);
+    dsAddChildNode(parent, wxT("fileName"), fileName);
+    dsAddChildNode(parent, wxT("randomValues"),
+        randomValues ? wxT("1") : wxT("0"));
+    dsAddChildNode(parent, wxT("nullPercent"),
+        wxString::Format(wxT("%d"), nullPercent));
 }
 //-----------------------------------------------------------------------------
-void GeneratorSettings::fromString(const wxString& s)
+wxString GeneratorSettings::fromXML(wxXmlNode *parent)
 {
+    wxASSERT(xmln);
+    wxString colname;
     long l;
-    if (!s.Mid(0, 1).ToLong(&l))
-        throw FRError(_("Bad input for field: valueType"));
-    valueType = (ValueType)l;
+    wxXmlNode *xmln;
+    for (xmln = parent->GetChildren(); (xmln); xmln = xmln->GetNext())
+    {
+        if (xmln->GetType() != wxXML_ELEMENT_NODE)
+            continue;
 
-    if (!s.Mid(1, 1).ToLong(&l))
-        throw FRError(_("Bad input from field: randomValues"));
-    randomValues = (l == 1);
-
-    size_t p = s.find(wxT("|"));
-    if (p == wxString::npos || !s.Mid(2, p-2).ToLong(&l))
-        throw FRError(_("Bad input for field: nullPercent"));
-    nullPercent = l;
-
-    size_t q = s.find(wxT("|"), p+1);
-    if (q == wxString::npos)
-        throw FRError(_("Bad input for field: range"));
-    range = s.Mid(p+1, q-p-1);
-
-    p = s.find(wxT("|"), q+1);
-    if (p ==  wxString::npos)
-        throw FRError(_("Bad input for field: sourceTable"));
-    sourceTable = s.Mid(q+1, p-q-1);
-
-    q=p;
-    p = s.find(wxT("|"), q+1);
-    if (p ==  wxString::npos)
-        throw FRError(_("Bad input for field: sourceColumn"));
-    sourceColumn = s.Mid(q+1, p-q-1);
-
-    q = s.find(wxT("|"), q+1);
-    if (q ==  wxString::npos)
-        throw FRError(_("Bad input for field: fileName"));
-    fileName = s.Mid(p+1, q-p-1);
+        wxString value(getNodeContent(xmln));
+        if (xmln->GetName() == wxT("name"))
+            colname = value;
+        else if (xmln->GetName() == wxT("valueType"))
+        {
+            if (!value.ToLong(&l))
+                return wxEmptyString;
+            valueType = (ValueType)l;
+        }
+        else if (xmln->GetName() == wxT("range"))
+            range = value;
+        else if (xmln->GetName() == wxT("sourceTable"))
+            sourceTable = value;
+        else if (xmln->GetName() == wxT("sourceColumn"))
+            sourceColumn = value;
+        else if (xmln->GetName() == wxT("fileName"))
+            fileName = value;
+        else if (xmln->GetName() == wxT("randomValues"))
+            randomValues = (value == wxT("1"));
+        else if (xmln->GetName() == wxT("nullPercent"))
+        {
+            if (!value.ToLong(&l))
+                return wxEmptyString;
+            nullPercent = (int)l;
+        }
+    }
+    return colname;
 }
 //-----------------------------------------------------------------------------
 DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
@@ -669,9 +724,14 @@ void DataGeneratorFrame::OnTreeSelectionChanged(wxTreeEvent& event)
 
     FR_TRY
 
-    saveSetting(event.GetOldItem());
+    saveSetting(event.GetOldItem());    // save old item
+    loadSetting(event.GetItem());       // load new item
 
-    wxTreeItemId newitem = event.GetItem();
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void DataGeneratorFrame::loadSetting(wxTreeItemId newitem)
+{
     if (!newitem.IsOk())
         return;
 
@@ -729,8 +789,6 @@ void DataGeneratorFrame::OnTreeSelectionChanged(wxTreeEvent& event)
     }
     randomCheckbox->SetValue(gs->randomValues);
     nullSpin->SetValue(gs->nullPercent);
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnLoadButtonClick(wxCommandEvent& WXUNUSED(event))
@@ -738,51 +796,68 @@ void DataGeneratorFrame::OnLoadButtonClick(wxCommandEvent& WXUNUSED(event))
     FR_TRY
 
     wxFileDialog fd(this, _("Select file to load"), wxT(""), wxT(""),
-        _("Text files (*.txt)|*.txt|All files (*.*)|*.*"),
+        _("XML files (*.xml)|*.xml|All files (*.*)|*.*"),
 #if wxCHECK_VERSION(2, 8, 0)
         wxFD_OPEN | wxFD_CHANGE_DIR);
 #else
         wxOPEN | wxCHANGE_DIR);
 #endif
+
     if (wxID_OK != fd.ShowModal())
         return;
 
-    wxFFile f(fd.GetPath());
-    wxString s;
-    if (!f.IsOpened() || !f.ReadAll(&s))
+    wxXmlDocument doc;
+    wxXmlNode *root = 0;
+    wxFileInputStream stream(fd.GetPath());
+    if (stream.Ok() && doc.Load(stream) && doc.IsOk())
     {
-        wxMessageBox(_("Cannot open file."), _("Error"), wxOK|wxICON_ERROR);
+        root = doc.GetRoot();
+        if (root->GetName() != wxT("dgf_root"))
+            root = 0;
+    }
+
+    if (root == 0)
+    {
+        showWarningDialog(this, _("Settings not loaded (1)"),
+            _("There was an error while loading."),
+            AdvancedMessageDialogButtonsOk());
         return;
     }
-    wxBusyCursor wait;
 
-    // parse line by line
-    size_t start = 0;
-    size_t p;
-    wxString name, definition;
-    for (bool first = true; true; start = p+1)
+    // delete current settings
+    for (std::map<wxString, GeneratorSettings *>::iterator it =
+        settingsM.begin(); it!= settingsM.end(); ++it)
     {
-        p = s.find(wxT("\n"), start);
-        if (p == wxString::npos)
-            break;
+        delete (*it).second;
+    }
+    settingsM.clear();
+    tableRecordsM.clear();
 
-        if (first)
-        {
-            name = s.Mid(start, p-start);
-            if (name.Trim().IsEmpty())
-                break;
-            first = false;
+    for (wxXmlNode* xmln = doc.GetRoot()->GetChildren();
+        (xmln); xmln = xmln->GetNext())
+    {
+        if (xmln->GetType() != wxXML_ELEMENT_NODE)
             continue;
+        if (xmln->GetName() == wxT("column"))
+        {
+            GeneratorSettings *gs = new GeneratorSettings;
+            wxString name = gs->fromXML(xmln);
+            if (name.IsEmpty())
+            {
+                showWarningDialog(this, _("Settings not loaded"),
+                    _("There was an error while loading."),
+                    AdvancedMessageDialogButtonsOk());
+                return;
+            }
+            settingsM.insert(
+                std::pair<wxString, GeneratorSettings *>(name, gs));
         }
-
-        definition = s.Mid(start, p-start);
-        GeneratorSettings *gs = new GeneratorSettings;
-        gs->fromString(definition);
-        settingsM.insert(std::pair<wxString, GeneratorSettings *>(name, gs));
-        first = true;
+        if (xmln->GetName() == wxT("table"))
+            parseTable(xmln, tableRecordsM);
     }
 
-    f.Close();
+    // update the current node
+    loadSetting(mainTree->GetSelection());
 
     showInformationDialog(this, _("Settings loaded"),
         _("The setting where successfully loaded from file."),
@@ -798,7 +873,7 @@ void DataGeneratorFrame::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
     saveSetting(mainTree->GetSelection());  // save current item if changed
 
     wxFileDialog fd(this, _("Select file to save"), wxT(""), wxT(""),
-        _("Text files (*.txt)|*.txt|All files (*.*)|*.*"),
+        _("XML files (*.xml)|*.xml|All files (*.*)|*.*"),
 #if wxCHECK_VERSION(2, 8, 0)
         wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT);
 #else
@@ -810,26 +885,47 @@ void DataGeneratorFrame::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 
     wxBusyCursor wait;
 
-    // save internal settings structures
-    wxFile f;
-    if (!f.Open(fd.GetPath(), wxFile::write))
+    wxString dir = wxPathOnly(fd.GetPath());
+    if (!wxDirExists(dir))
+        wxMkdir(dir);
+
+    wxXmlDocument doc;
+    wxXmlNode* root = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("dgf_root"));
+    doc.SetRoot(root);
+
+    // save tables
+    for (std::map<wxString, int>::iterator it = tableRecordsM.begin();
+        it != tableRecordsM.end(); ++it)
     {
-        wxMessageBox(_("Cannot write to file."), _("Error"), wxOK|wxICON_ERROR);
-        return;
+        wxXmlNode* node = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("table"));
+        root->AddChild(node);
+        dsAddChildNode(node, wxT("name"), (*it).first);
+        dsAddChildNode(node, wxT("records"),
+            wxString::Format(wxT("%d"), (*it).second));
     }
 
+    // save columns
     for (std::map<wxString, GeneratorSettings *>::iterator it =
         settingsM.begin(); it!= settingsM.end(); ++it)
     {
-        f.Write((*it).first + wxT("\n") + (*it).second->toString() + wxT("\n"));
+        wxXmlNode* cs = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("column"));
+        root->AddChild(cs);
+        dsAddChildNode(cs, wxT("name"), (*it).first);
+        (*it).second->toXML(cs);
     }
 
-    if (f.IsOpened())
-        f.Close();
-
-    showInformationDialog(this, _("Settings saved"),
-        _("The setting where successfully saved to the file."),
-        AdvancedMessageDialogButtonsOk());
+    if (doc.Save(fd.GetPath()))
+    {
+        showInformationDialog(this, _("Settings saved"),
+            _("The setting where successfully saved to the file."),
+            AdvancedMessageDialogButtonsOk());
+    }
+    else
+    {
+        showWarningDialog(this, _("Settings not saved"),
+            _("There was an error while writing."),
+            AdvancedMessageDialogButtonsOk());
+    }
 
     FR_CATCH
 }
