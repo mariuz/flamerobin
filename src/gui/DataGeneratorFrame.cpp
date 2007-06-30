@@ -44,6 +44,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <wx/filename.h>
 #include <wx/wfstream.h>
+#include <wx/txtstrm.h>
 #include <wx/xml/xml.h>
 
 // needed for random
@@ -238,7 +239,6 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
 
     outerPanel = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
         wxTAB_TRAVERSAL | wxCLIP_CHILDREN | wxNO_FULL_REPAINT_ON_RESIZE);
-        //wxTAB_TRAVERSAL );
     wxBoxSizer* innerSizer;
     innerSizer = new wxBoxSizer( wxVERTICAL );
 
@@ -323,7 +323,6 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
         tables.Add((*it).getQuotedName());
     }
     tables.Sort();
-    // prepend
     wxArrayString empty;
 
     valueSizer = new wxBoxSizer( wxHORIZONTAL );
@@ -426,7 +425,6 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
 
     loadingM = false;
 
-    // we need to manually update each table (that's bad)
     wxTreeItemIdValue cookie;
     wxTreeItemId node = mainTree->GetFirstChild(root, cookie);
     if (node.IsOk())
@@ -1082,20 +1080,70 @@ wxString getCharFromRange(const wxString& range, bool rnd, int recNo,
     return valueset.Mid(record % base, 1);
 }
 //-----------------------------------------------------------------------------
-template<typename T>
+template <typename T>
+T getIntValue(const wxString& s)
+{
+    wxLongLong_t ll;
+    if (!s.ToLongLong(&ll))
+        throw FRError(_("Invalid numeric value: ")+s);
+    return (T)ll;
+}
+//-----------------------------------------------------------------------------
 void setFromFile(IBPP::Statement st, int param,
     GeneratorSettings *gs, int recNo)
 {
     // load strings from file to vector
+    wxFileInputStream stream(gs->fileName);
+    if (!stream.Ok())
+        throw FRError(_("Cannot open file: ")+gs->fileName);
+    wxTextInputStream text(stream);
+
+    std::vector<wxString> values;
+    while (true)
+    {
+        wxString s = text.ReadLine();
+        if (s.IsEmpty())
+            break;
+        values.push_back(s);
+    }
+    if (values.empty())
+        return;
+
     // select (random/sequential) string from vector
     wxString selected;
+    if (gs->randomValues)
+        selected = values[frRandom(values.size())];
+    else
+        selected = values[recNo % values.size()];
 
     // convert string to datatype
-    /*
-    T val;
-    selected >> val;        //<- this won't work for IBPP types
-    st->Set(param, val);
-    */ // commented until I figure out how to do it with GCC 3.3.x
+    switch (st->ParameterType(param))
+    {
+        case IBPP::sdString:
+            st->Set(param, wx2std(selected));   break;
+        case IBPP::sdSmallint:
+            st->Set(param, getIntValue<int16_t>(selected)); break;
+        case IBPP::sdInteger:
+            st->Set(param, getIntValue<int32_t>(selected)); break;
+        case IBPP::sdLargeint:
+            st->Set(param, getIntValue<int64_t>(selected)); break;
+        case IBPP::sdFloat:
+        case IBPP::sdDouble:
+        {
+            double d;
+            if (!selected.ToDouble(&d))
+                throw FRError(_("Invalid numeric value: ")+selected);
+            st->Set(param, d);
+            break;
+        }
+        case IBPP::sdDate:
+        case IBPP::sdTime:
+        case IBPP::sdTimestamp:
+            // TODO
+            break;
+        //case sdBlob:
+        //case sdArray:
+    };
 }
 //-----------------------------------------------------------------------------
 template<typename T>
@@ -1447,32 +1495,7 @@ void DataGeneratorFrame::setParam(IBPP::Statement st, int param,
     }
 
     if (gs->valueType == GeneratorSettings::vtFile)
-    {
-        switch (st->ParameterType(param))
-        {
-            case IBPP::sdString:
-                setFromFile<std::string>(st, param, gs, recNo);  break;
-            case IBPP::sdSmallint:
-                setFromFile<int16_t>(st, param, gs, recNo);      break;
-            case IBPP::sdInteger:
-                setFromFile<int32_t>(st, param, gs, recNo);      break;
-            case IBPP::sdLargeint:
-                setFromFile<int64_t>(st, param, gs, recNo);      break;
-            case IBPP::sdFloat:
-                setFromFile<float>(st, param, gs, recNo);        break;
-            case IBPP::sdDouble:
-                setFromFile<double>(st, param, gs, recNo);       break;
-            case IBPP::sdDate:
-                setFromFile<IBPP::Date>(st, param, gs, recNo);   break;
-            case IBPP::sdTime:
-                setFromFile<IBPP::Time>(st, param, gs, recNo);   break;
-            case IBPP::sdTimestamp:
-                setFromFile<IBPP::Timestamp>(st, param, gs, recNo);  break;
-            //case sdBlob:
-            //case sdArray:
-        };
-        return;
-    }
+        setFromFile(st, param, gs, recNo);
 }
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::generateData(std::list<Table *>& order)
