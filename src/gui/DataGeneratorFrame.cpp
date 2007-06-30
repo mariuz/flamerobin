@@ -1207,8 +1207,10 @@ void setFromFile(IBPP::Statement st, int param,
             st->Set(param, IBPP::Timestamp(y, mo, d, h, mi, s, t));
             break;
         }
-        //case sdBlob:
-        //case sdArray:
+        case IBPP::sdBlob:
+            throw FRError(_("Blob datatype not supported"));
+        case IBPP::sdArray:
+            throw FRError(_("Array datatype not supported"));
     };
 }
 //-----------------------------------------------------------------------------
@@ -1503,8 +1505,10 @@ void DataGeneratorFrame::setParam(IBPP::Statement st, int param,
                 setFromOther<IBPP::Time>(st, param, gs, recNo);   break;
             case IBPP::sdTimestamp:
                 setFromOther<IBPP::Timestamp>(st, param, gs, recNo);  break;
-            //case sdBlob:
-            //case sdArray:
+            case IBPP::sdBlob:
+                throw FRError(_("Blob datatype not supported"));
+            case IBPP::sdArray:
+                throw FRError(_("Array datatype not supported"));
         };
         return;
     }
@@ -1530,8 +1534,10 @@ void DataGeneratorFrame::setParam(IBPP::Statement st, int param,
             case IBPP::sdTimestamp:
                 setDatetime(st, param, gs, recNo);
                 break;
-            //case sdBlob:
-            //case sdArray:
+            case IBPP::sdBlob:
+                throw FRError(_("Blob datatype not supported"));
+            case IBPP::sdArray:
+                throw FRError(_("Array datatype not supported"));
             default:
                 st->SetNull(param);
         };
