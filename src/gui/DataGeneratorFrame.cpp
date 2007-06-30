@@ -66,6 +66,29 @@ int frRandom(double maxval)
     return (int)(maxval*rand()/(RAND_MAX+1.0));
 }
 //-----------------------------------------------------------------------------
+// dd.mm.yyyy
+void str2date(const wxString& str, int& date)
+{
+    long d,m,y;
+    if (!str.Mid(0,2).ToLong(&d) || !str.Mid(3,2).ToLong(&m) ||
+        !str.Mid(6,4).ToLong(&y) || !IBPP::itod(&date, y,m,d))
+    {
+        throw FRError(_("Invalid date: ") + str);
+    }
+}
+//-----------------------------------------------------------------------------
+// HH:MM:SS
+void str2time(const wxString& str, int& mytime)
+{
+    long h,m,s;
+    if (!str.Mid(0,2).ToLong(&h) || !str.Mid(3,2).ToLong(&m) ||
+        !str.Mid(6,2).ToLong(&s))
+    {
+        throw FRError(_("Invalid time: ") + str);
+    }
+    IBPP::itot(&mytime, h,m,s,0);
+}
+//-----------------------------------------------------------------------------
 // only used in function OnGenerateButtonClick
 class TableDep
 {
@@ -1080,15 +1103,6 @@ wxString getCharFromRange(const wxString& range, bool rnd, int recNo,
     return valueset.Mid(record % base, 1);
 }
 //-----------------------------------------------------------------------------
-template <typename T>
-T getIntValue(const wxString& s)
-{
-    wxLongLong_t ll;
-    if (!s.ToLongLong(&ll))
-        throw FRError(_("Invalid numeric value: ")+s);
-    return (T)ll;
-}
-//-----------------------------------------------------------------------------
 void setFromFile(IBPP::Statement st, int param,
     GeneratorSettings *gs, int recNo)
 {
@@ -1117,30 +1131,82 @@ void setFromFile(IBPP::Statement st, int param,
         selected = values[recNo % values.size()];
 
     // convert string to datatype
-    switch (st->ParameterType(param))
+    int mydate, mytime;
+    IBPP::SDT dt = st->ParameterType(param);
+    if (st->ParameterScale(param))
+        dt = IBPP::sdDouble;
+    switch (dt)
     {
         case IBPP::sdString:
             st->Set(param, wx2std(selected));   break;
         case IBPP::sdSmallint:
-            st->Set(param, getIntValue<int16_t>(selected)); break;
+        {
+            long l;
+            if (!selected.ToLong(&l))
+                throw FRError(_("Invalid long (smallint) value: ")+selected);
+            int16_t t = l;
+            st->Set(param, t);
+            break;
+        }
         case IBPP::sdInteger:
-            st->Set(param, getIntValue<int32_t>(selected)); break;
+        {
+            long l;
+            if (!selected.ToLong(&l))
+                throw FRError(_("Invalid long numeric value: ")+selected);
+            int32_t t = l;
+            st->Set(param, t);
+            break;
+        }
         case IBPP::sdLargeint:
-            st->Set(param, getIntValue<int64_t>(selected)); break;
+        {
+            wxLongLong_t ll;
+            if (!selected.ToLongLong(&ll))
+            {
+                // perhaps it is not supported, try regular Long value
+                long l;
+                if (!selected.ToLong(&l))
+                    throw FRError(_("Invalid long long numeric value: ")+selected);
+                ll = l;
+            }
+            int64_t t = ll;
+            st->Set(param, t);
+            break;
+        }
         case IBPP::sdFloat:
+        {
+            double d;
+            if (!selected.ToDouble(&d))
+                throw FRError(_("Invalid float value: ")+selected);
+            float f = d;
+            st->Set(param, f);
+            break;
+        }
         case IBPP::sdDouble:
         {
             double d;
             if (!selected.ToDouble(&d))
-                throw FRError(_("Invalid numeric value: ")+selected);
+                throw FRError(_("Invalid double numeric value: ")+selected);
             st->Set(param, d);
             break;
         }
-        case IBPP::sdDate:
         case IBPP::sdTime:
-        case IBPP::sdTimestamp:
-            // TODO
+            str2time(selected, mytime);
+            st->Set(param, IBPP::Time(mytime));
             break;
+        case IBPP::sdDate:
+            str2date(selected, mydate);
+            st->Set(param, IBPP::Date(mydate));
+            break;
+        case IBPP::sdTimestamp:
+        {
+            str2date(selected, mydate);
+            str2time(selected.Mid(11), mytime);
+            int y, mo, d, h, mi, s, t;
+            IBPP::dtoi(mydate, &y, &mo, &d);
+            IBPP::ttoi(mytime, &h, &mi, &s, &t);
+            st->Set(param, IBPP::Timestamp(y, mo, d, h, mi, s, t));
+            break;
+        }
         //case sdBlob:
         //case sdArray:
     };
@@ -1283,29 +1349,6 @@ void setNumber(IBPP::Statement st, int param, GeneratorSettings* gs, int recNo)
         }
         toget -= sz;
     }
-}
-//-----------------------------------------------------------------------------
-// dd.mm.yyyy
-void str2date(const wxString& str, int& date)
-{
-    long d,m,y;
-    if (!str.Mid(0,2).ToLong(&d) || !str.Mid(3,2).ToLong(&m) ||
-        !str.Mid(6,4).ToLong(&y) || !IBPP::itod(&date, y,m,d))
-    {
-        throw FRError(_("Invalid date: ") + str);
-    }
-}
-//-----------------------------------------------------------------------------
-// HH:MM:SS
-void str2time(const wxString& str, int& mytime)
-{
-    long h,m,s;
-    if (!str.Mid(0,2).ToLong(&h) || !str.Mid(3,2).ToLong(&m) ||
-        !str.Mid(6,2).ToLong(&s))
-    {
-        throw FRError(_("Invalid time: ") + str);
-    }
-    IBPP::itot(&mytime, h,m,s,0);
 }
 //-----------------------------------------------------------------------------
 void setDatetime(IBPP::Statement st, int param, GeneratorSettings* gs,
