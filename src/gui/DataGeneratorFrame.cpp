@@ -182,9 +182,26 @@ public:
     bool randomValues;
     int nullPercent;
 
+    GeneratorSettings();
+    GeneratorSettings(GeneratorSettings* other);
     void toXML(wxXmlNode *parent);
     wxString fromXML(wxXmlNode *parent);    // returns column name
 };
+//-----------------------------------------------------------------------------
+GeneratorSettings::GeneratorSettings()
+{
+}
+//-----------------------------------------------------------------------------
+GeneratorSettings::GeneratorSettings(GeneratorSettings* other)
+{
+    valueType = other->valueType;
+    range = other->range;
+    sourceTable = other->sourceTable;
+    sourceColumn = other->sourceColumn;
+    fileName = other->fileName;
+    randomValues = other->randomValues;
+    nullPercent = other->nullPercent;
+}
 //-----------------------------------------------------------------------------
 void GeneratorSettings::toXML(wxXmlNode *parent)
 {
@@ -539,6 +556,7 @@ wxString getDefaultRange(Domain *d)
     return wxEmptyString;
 }
 //-----------------------------------------------------------------------------
+// returns the setting or creates a default one
 GeneratorSettings* DataGeneratorFrame::getSettings(Column *c)
 {
     Table *tab = c->getTable();
@@ -546,7 +564,7 @@ GeneratorSettings* DataGeneratorFrame::getSettings(Column *c)
         throw FRError(_("Table not set"));
     wxString s = tab->getQuotedName() + wxT(".") + c->getQuotedName();
     std::map<wxString, GeneratorSettings *>::iterator it = settingsM.find(s);
-    if (it != settingsM.end())    // not found
+    if (it != settingsM.end())    // found
         return (*it).second;
 
     // check FK info
@@ -955,6 +973,41 @@ void DataGeneratorFrame::OnCopyButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
+    MetadataItem *m = mainTree->getMetadataItem(mainTree->GetSelection());
+    Column *col = dynamic_cast<Column *>(m);
+    if (!col)   // this should never happen as the Copy button should not
+        return; // be visible if column is not selected
+    Table *tab = col->getTable();
+    if (!tab)
+        throw FRError(_("Table not found."));
+
+    // copy settings
+    wxString name = copyChoice->GetStringSelection() + wxT(".") +
+        copyColumnChoice->GetStringSelection();
+    std::map<wxString, GeneratorSettings *>::iterator it =
+        settingsM.find(name);
+    if (it == settingsM.end())  // no settings
+    {
+        showWarningDialog(this, _("Nothing to copy"),
+            _("That column doesn't have any settings defined."),
+            AdvancedMessageDialogButtonsOk());
+        return;
+    }
+
+    GeneratorSettings *n = new GeneratorSettings((*it).second);
+
+    wxString c = tab->getQuotedName() + wxT(".") + col->getQuotedName();
+    it = settingsM.find(c);
+    if (it == settingsM.end())  // this should not happen either, but still
+        settingsM.insert(std::pair<wxString, GeneratorSettings *>(c, n));
+    else
+    {
+        delete (*it).second;
+        (*it).second = n;
+    }
+
+    // update the current node
+    loadSetting(mainTree->GetSelection());
 
     FR_CATCH
 }
