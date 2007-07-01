@@ -282,7 +282,10 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     wxBoxSizer* innerSizer;
     innerSizer = new wxBoxSizer( wxVERTICAL );
 
-    mainSplitter = new wxSplitterWindow( outerPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_3D);
+    mainSplitter = new wxSplitterWindow( outerPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+		// wx docs say that wxSP_NOBORDER is default, but it obviously is not the case on MSW
+		// (I tried on Windows 98)
+		wxSP_NOBORDER);
     mainSplitter->SetMinimumPaneSize(100);
     mainSplitter->SetSashGravity( 0.5 );
 
@@ -295,9 +298,10 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
 
     mainTree = new myTreeCtrl(leftPanel, wxDefaultPosition, wxDefaultSize,
 #if defined __WXGTK20__ || defined __WXMAC__
-        wxTR_NO_LINES |
+		// doesn't seem to work on MSW when root is hidden
+        wxTR_NO_LINES | wxTR_HIDE_ROOT
 #endif
-        wxTR_HAS_BUTTONS | wxSUNKEN_BORDER | wxTR_HIDE_ROOT );
+        wxTR_HAS_BUTTONS | wxSUNKEN_BORDER );
     leftPanelSizer->Add( mainTree, 1, wxALL|wxEXPAND, 5 );
 
     leftPanel->SetSizer( leftPanelSizer );
