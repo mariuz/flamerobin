@@ -219,7 +219,7 @@ void GeneratorSettings::toXML(wxXmlNode *parent)
 //-----------------------------------------------------------------------------
 wxString GeneratorSettings::fromXML(wxXmlNode *parent)
 {
-    wxASSERT(xmln);
+    wxASSERT(parent);
     wxString colname;
     long l;
     wxXmlNode *xmln;
