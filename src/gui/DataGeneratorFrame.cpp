@@ -299,7 +299,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     mainTree = new myTreeCtrl(leftPanel, wxDefaultPosition, wxDefaultSize,
 #if defined __WXGTK20__ || defined __WXMAC__
 		// doesn't seem to work on MSW when root is hidden
-        wxTR_NO_LINES | wxTR_HIDE_ROOT
+        wxTR_NO_LINES | wxTR_HIDE_ROOT |
 #endif
         wxTR_HAS_BUTTONS | wxSUNKEN_BORDER );
     leftPanelSizer->Add( mainTree, 1, wxALL|wxEXPAND, 5 );
