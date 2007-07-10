@@ -61,13 +61,11 @@ Config& config()
 }
 //-----------------------------------------------------------------------------
 Config::Config()
-    : homePathM(wxT("")), userHomePathM(wxT("")), configM(0)
+    : homePathM(wxT("")), userHomePathM(wxT("")), configM(0), needsFlushM(false)
 {
 #ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
     standardPathsM.SetInstallPrefix(wxT(FR_INSTALL_PREFIX));
 #endif
-    getConfig()->SetExpandEnvVars(false);
-    needsFlushM = false;
 }
 //-----------------------------------------------------------------------------
 Config::~Config()
@@ -84,6 +82,7 @@ wxFileConfig* Config::getConfig() const
             wxMkdir(configFileName.GetPath());
         configM = new wxFileConfig(wxT(""), wxT(""),
             configFileName.GetFullPath(), wxT(""), wxCONFIG_USE_LOCAL_FILE);
+        configM->SetExpandEnvVars(false);
     }
     return configM;
 }
