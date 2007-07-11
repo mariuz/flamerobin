@@ -50,7 +50,7 @@ std::string wx2std(const wxString& input, wxMBConv* conv)
         return "";
     if (!conv)
         conv = wxConvCurrent;
-    wxWX2MBbuf buf(input.mb_str(*conv));
+    const wxWX2MBbuf buf(input.mb_str(*conv));
     // conversion may fail and return 0, which isn't a safe value to pass 
     // to std:string constructor
     if (!buf)
