@@ -40,6 +40,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <ibpp.h>
 
+#include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "core/Visitor.h"
 #include "dberror.h"
@@ -56,6 +57,39 @@ Table::Table()
     checkConstraintsLoadedM = false;
     uniqueConstraintsLoadedM = false;
     indicesLoadedM = false;
+    externalPathLoadedM = false;
+}
+//-----------------------------------------------------------------------------
+wxString Table::getExternalPath()
+{
+    if (externalPathLoadedM)
+        return externalPathM;
+
+    Database *d = getDatabase();
+    if (!d)
+        throw FRError(wxT("database not set"));
+    IBPP::Database& db = d->getIBPPDatabase();
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+    st1->Prepare(
+        " select rdb$external_file from rdb$relations "
+        " where rdb$relation_name = ?"
+    );
+
+    st1->Set(1, wx2std(getName_()));
+    st1->Execute();
+    if (st1->Fetch() && !st1->IsNull(1))
+    {
+        std::string file;
+        st1->Get(1, file);
+        externalPathM = std2wx(file);
+    }
+    else
+        externalPathM = wxEmptyString;
+    tr1->Commit();
+    externalPathLoadedM = true;
+    return externalPathM;
 }
 //-----------------------------------------------------------------------------
 void Table::invalidateIndices(const wxString& forIndex)

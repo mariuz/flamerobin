@@ -59,6 +59,9 @@ private:
     bool indicesLoadedM;
     bool loadIndices();
 
+    bool externalPathLoadedM;
+    wxString externalPathM;
+
 public:
     Table();
 
@@ -69,6 +72,8 @@ public:
 
     virtual bool loadColumns();         // update the keys info too
     void invalidateIndices(const wxString& forIndex = wxEmptyString);
+
+    wxString getExternalPath();
 
     PrimaryKeyConstraint *getPrimaryKey();
     std::vector<ForeignKey> *getForeignKeys();

@@ -476,7 +476,14 @@ void addIndex(std::vector<Index> *ix, wxString& sql, ColumnConstraint *cc)
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visitTable(Table& t)
 {
-    preSqlM += wxT("CREATE TABLE ") + t.getQuotedName() + wxT("\n(\n  ");
+    preSqlM += wxT("CREATE TABLE ") + t.getQuotedName();
+    wxString external = t.getExternalPath();
+    if (!external.IsEmpty())
+    {
+        external.Replace(wxT("'"), wxT("''"));
+        preSqlM += wxT(" EXTERNAL '") + external + wxT("'");
+    }
+    preSqlM += wxT("\n(\n  ");
     t.checkAndLoadColumns();
     for (MetadataCollection<Column>::iterator it=t.begin(); it!=t.end(); ++it)
     {
