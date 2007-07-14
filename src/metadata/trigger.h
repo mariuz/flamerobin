@@ -48,10 +48,10 @@ public:
     enum firingTimeType { afterTrigger, beforeTrigger };
     wxString getCreateSqlTemplate() const;  // overrides MetadataItem::getCreateSqlTemplate()
 
-    bool loadInfo(bool force = false);
-    bool getTriggerInfo(wxString& object, bool& active, int& position, wxString& type);
-    bool getSource(wxString& source) const;
-    bool getRelation(wxString& relation);
+    void loadInfo(bool force = false);
+    void getTriggerInfo(wxString& object, bool& active, int& position, wxString& type);
+    wxString getSource() const;
+    wxString getRelation();
     static wxString getTriggerType(int flags);
     firingTimeType getFiringTime();
     wxString getAlterSql();

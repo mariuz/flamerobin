@@ -712,10 +712,6 @@ SOURCE=.\src\databasehandler.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\dberror.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\metadata\domain.cpp
 # End Source File
 # Begin Source File
@@ -1067,10 +1063,6 @@ SOURCE=.\src\metadata\constraints.h
 # Begin Source File
 
 SOURCE=.\src\metadata\database.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\dberror.h
 # End Source File
 # Begin Source File
 

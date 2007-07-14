@@ -39,7 +39,7 @@ private:
     std::vector<Privilege> privilegesM;
     MetadataCollection<Parameter> parametersM;
     bool parametersLoadedM;
-    bool loadParameters();
+    void loadParameters();
 protected:
     virtual void loadDescription();
     virtual void saveDescription(wxString description);
@@ -64,8 +64,8 @@ public:
     MetadataCollection<Parameter>::const_iterator begin() const;
     MetadataCollection<Parameter>::const_iterator end() const;
 
-    bool checkAndLoadParameters(bool force = false);
-    bool getSource(wxString& source);
+    void checkAndLoadParameters(bool force = false);
+    wxString getSource();
     wxString getAlterSql(bool full = true);
     wxString getDefinition();   // used for calltip in sql editor
     std::vector<Privilege>* getPrivileges();

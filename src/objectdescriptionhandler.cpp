@@ -38,9 +38,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #include "wx/wx.h"
 #endif
 //-----------------------------------------------------------------------------
-
-#include "core/FRError.h"
-#include "dberror.h"
 #include "gui/MultilineEnterDialog.h"
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"

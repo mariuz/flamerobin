@@ -43,7 +43,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "config/Config.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
-#include "dberror.h"
 #include "frutils.h"
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
@@ -174,14 +173,11 @@ Root* MetadataItem::getRoot() const
 //-----------------------------------------------------------------------------
 //! ofObject = true   => returns list of objects this object depends on
 //! ofObject = false  => returns list of objects that depend on this object
-bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
+void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
 {
     Database* d = getDatabase();
     if (!d)
-    {
-        lastError().setMessage(wxT("Database not set"));
-        return false;
-    }
+        throw FRError(_("Database not set"));
 
     int mytype = -1;            // map DBH type to RDB$DEPENDENT TYPE
     NodeType dep_types[] = {    ntTable,    ntView,     ntTrigger,  ntUnknown,  ntUnknown,
@@ -202,226 +198,210 @@ bool MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
         mytype = 0;
 
     if (typeM == ntUnknown || mytype == -1)
+        throw FRError(_("Unsupported type"));
+    IBPP::Database& db = d->getIBPPDatabase();
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+
+    wxString o1 = (ofObject ? wxT("DEPENDENT") : wxT("DEPENDED_ON"));
+    wxString o2 = (ofObject ? wxT("DEPENDED_ON") : wxT("DEPENDENT"));
+    wxString sql =
+        wxT("select RDB$") + o2 + wxT("_TYPE, RDB$") + o2 + wxT("_NAME, RDB$FIELD_NAME \n ")
+        wxT(" from RDB$DEPENDENCIES \n ")
+        wxT(" where RDB$") + o1 + wxT("_TYPE = ? and RDB$") + o1 + wxT("_NAME = ? \n ");
+    if ((typeM == ntTable || typeM == ntSysTable || typeM == ntView) && ofObject)  // get deps for computed columns
+    {                                                       // view needed to bind with generators
+        sql += wxT(" union all \n")
+            wxT(" SELECT DISTINCT d.rdb$depended_on_type, d.rdb$depended_on_name, d.rdb$field_name \n")
+            wxT(" FROM rdb$relation_fields f \n")
+            wxT(" LEFT JOIN rdb$dependencies d ON d.rdb$dependent_name = f.rdb$field_source \n")
+            wxT(" WHERE d.rdb$dependent_type = 3 AND f.rdb$relation_name = ? \n");
+    }
+    if (!ofObject) // find tables that have calculated columns based on "this" object
     {
-        lastError().setMessage(wxT("Unsupported type"));
-        return false;
+        sql += wxT("union all \n")
+            wxT(" SELECT distinct cast(0 as smallint), f.rdb$relation_name, f.rdb$field_name \n")
+            wxT(" from rdb$relation_fields f \n")
+            wxT(" left join rdb$dependencies d on d.rdb$dependent_name = f.rdb$field_source \n")
+            wxT(" where d.rdb$dependent_type = 3 and d.rdb$depended_on_name = ? ");
+    }
+    sql += wxT(" order by 1, 2, 3");
+    st1->Prepare(wx2std(sql));
+    st1->Set(1, mytype);
+    st1->Set(2, wx2std(getName_()));
+    if (!ofObject || typeM == ntTable || typeM == ntSysTable || typeM == ntView)
+        st1->Set(3, wx2std(getName_()));
+    st1->Execute();
+    MetadataItem* last = 0;
+    Dependency* dep = 0;
+    while (st1->Fetch())
+    {
+        std::string object_name, field_name;
+        int object_type;
+        st1->Get(1, &object_type);
+        st1->Get(2, object_name);
+        object_name.erase(object_name.find_last_not_of(" ") + 1);     // trim
+
+        if (object_type > type_count)   // some system object, not interesting for us
+            continue;
+        NodeType t = dep_types[object_type];
+        if (t == ntUnknown)             // ditto
+            continue;
+        MetadataItem* current = d->findByNameAndType(t, std2wx(object_name));
+        if (!current)
+        {
+            if (t == ntTable) {
+                // maybe it's a view masked as table
+                current = d->findByNameAndType(ntView, std2wx(object_name));
+                // or possibly a system table
+                if (!current)
+                    current = d->findByNameAndType(ntSysTable, std2wx(object_name));
+            }
+            if (!ofObject && t == ntTrigger)
+            {
+                // system trigger dependent of this object indicates possible check constraint on a table
+                // that references this object. So, let's check if this trigger is used for check constraint
+                // and get that table's name
+                IBPP::Statement st2 = IBPP::StatementFactory(db, tr1);
+                st2->Prepare(
+                    "select r.rdb$relation_name from rdb$relation_constraints r "
+                    " join rdb$check_constraints c on r.rdb$constraint_name=c.rdb$constraint_name "
+                    " and r.rdb$constraint_type = 'CHECK' where c.rdb$trigger_name = ? "
+                );
+                st2->Set(1, object_name);
+                st2->Execute();
+                if (st2->Fetch()) // table using that trigger found
+                {
+                    std::string tablecheck;
+                    st2->Get(1, tablecheck);
+                    tablecheck.erase(tablecheck.find_last_not_of(" ")+1);
+                    if (getName_() != std2wx(tablecheck))    // avoid self-reference
+                        current = d->findByNameAndType(ntTable, std2wx(tablecheck));
+                }
+            }
+            if (!current)
+                continue;
+        }
+        if (current != last)            // new object
+        {
+            Dependency de(current);
+            list.push_back(de);
+            dep = &list.back();
+            last = current;
+        }
+        if (!st1->IsNull(3))
+        {
+            st1->Get(3, field_name);
+            field_name.erase(field_name.find_last_not_of(" ") + 1);       // trim
+            dep->addField(std2wx(field_name));
+        }
     }
 
-    try
+    // TODO: perhaps this could be moved to Table?
+    //       call MetadataItem::getDependencies() and then add this
+    if ((typeM == ntTable || typeM == ntSysTable) && ofObject)   // foreign keys of this table + computed columns
     {
-        IBPP::Database& db = d->getIBPPDatabase();
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-
-        wxString o1 = (ofObject ? wxT("DEPENDENT") : wxT("DEPENDED_ON"));
-        wxString o2 = (ofObject ? wxT("DEPENDED_ON") : wxT("DEPENDENT"));
-        wxString sql =
-            wxT("select RDB$") + o2 + wxT("_TYPE, RDB$") + o2 + wxT("_NAME, RDB$FIELD_NAME \n ")
-            wxT(" from RDB$DEPENDENCIES \n ")
-            wxT(" where RDB$") + o1 + wxT("_TYPE = ? and RDB$") + o1 + wxT("_NAME = ? \n ");
-        if ((typeM == ntTable || typeM == ntSysTable || typeM == ntView) && ofObject)  // get deps for computed columns
-        {                                                       // view needed to bind with generators
-            sql += wxT(" union all \n")
-                wxT(" SELECT DISTINCT d.rdb$depended_on_type, d.rdb$depended_on_name, d.rdb$field_name \n")
-                wxT(" FROM rdb$relation_fields f \n")
-                wxT(" LEFT JOIN rdb$dependencies d ON d.rdb$dependent_name = f.rdb$field_source \n")
-                wxT(" WHERE d.rdb$dependent_type = 3 AND f.rdb$relation_name = ? \n");
-        }
-        if (!ofObject) // find tables that have calculated columns based on "this" object
+        Table *t = dynamic_cast<Table *>(this);
+        vector<ForeignKey> *f = t->getForeignKeys();
+        for (vector<ForeignKey>::const_iterator it = f->begin(); it != f->end(); ++it)
         {
-            sql += wxT("union all \n")
-                wxT(" SELECT distinct cast(0 as smallint), f.rdb$relation_name, f.rdb$field_name \n")
-                wxT(" from rdb$relation_fields f \n")
-                wxT(" left join rdb$dependencies d on d.rdb$dependent_name = f.rdb$field_source \n")
-                wxT(" where d.rdb$dependent_type = 3 and d.rdb$depended_on_name = ? ");
+            MetadataItem *table = d->findByNameAndType(ntTable,
+                (*it).referencedTableM);
+            if (!table)
+            {
+                throw FRError(wxString::Format(_("Table %s not found."),
+                    (*it).referencedTableM.c_str()));
+            }
+            Dependency de(table);
+            de.setFields((*it).referencedColumnsM);
+            list.push_back(de);
         }
-        sql += wxT(" order by 1, 2, 3");
-        st1->Prepare(wx2std(sql));
-        st1->Set(1, mytype);
-        st1->Set(2, wx2std(getName_()));
-        if (!ofObject || typeM == ntTable || typeM == ntSysTable || typeM == ntView)
-            st1->Set(3, wx2std(getName_()));
+
+        // Add check constraints here (CHECKS are checked via system triggers), example:
+        // table1::check( table1.field1 > select max(field2) from table2 )
+        // So, table vs any object from this ^^^ select
+        // Algorithm: 1.find all system triggers bound to that CHECK constraint
+        //            2.find dependencies for those system triggers
+        //            3.display those dependencies as deps. of this table
+        st1->Prepare("select distinct c.rdb$trigger_name from rdb$relation_constraints r "
+            " join rdb$check_constraints c on r.rdb$constraint_name=c.rdb$constraint_name "
+            " and r.rdb$constraint_type = 'CHECK' where r.rdb$relation_name= ? "
+        );
+        st1->Set(1, wx2std(getName_()));
         st1->Execute();
-        MetadataItem* last = 0;
-        Dependency* dep = 0;
+        vector<Dependency> tempdep;
         while (st1->Fetch())
         {
-            std::string object_name, field_name;
-            int object_type;
-            st1->Get(1, &object_type);
-            st1->Get(2, object_name);
-            object_name.erase(object_name.find_last_not_of(" ") + 1);     // trim
-
-            if (object_type > type_count)   // some system object, not interesting for us
-                continue;
-            NodeType t = dep_types[object_type];
-            if (t == ntUnknown)             // ditto
-                continue;
-            MetadataItem* current = d->findByNameAndType(t, std2wx(object_name));
-            if (!current)
+            std::string s;
+            st1->Get(1, s);
+            s.erase(s.find_last_not_of(" ")+1);
+            Trigger t;
+            t.setName_(std2wx(s));
+            t.setParent(d);
+            t.getDependencies(tempdep, true);
+        }
+        // remove duplicates, and self-references from "tempdep"
+        while (true)
+        {
+            std::vector<Dependency>::iterator to_remove = tempdep.end();
+            for (std::vector<Dependency>::iterator it = tempdep.begin(); it != tempdep.end(); ++it)
             {
-                if (t == ntTable) {
-                    // maybe it's a view masked as table
-                    current = d->findByNameAndType(ntView, std2wx(object_name));
-                    // or possibly a system table
-                    if (!current)
-                        current = d->findByNameAndType(ntSysTable, std2wx(object_name));
-                }
-                if (!ofObject && t == ntTrigger)
+                if ((*it).getDependentObject() == this)
                 {
-                    // system trigger dependent of this object indicates possible check constraint on a table
-                    // that references this object. So, let's check if this trigger is used for check constraint
-                    // and get that table's name
-                    IBPP::Statement st2 = IBPP::StatementFactory(db, tr1);
-                    st2->Prepare(
-                        "select r.rdb$relation_name from rdb$relation_constraints r "
-                        " join rdb$check_constraints c on r.rdb$constraint_name=c.rdb$constraint_name "
-                        " and r.rdb$constraint_type = 'CHECK' where c.rdb$trigger_name = ? "
-                    );
-                    st2->Set(1, object_name);
-                    st2->Execute();
-                    if (st2->Fetch()) // table using that trigger found
-                    {
-                        std::string tablecheck;
-                        st2->Get(1, tablecheck);
-                        tablecheck.erase(tablecheck.find_last_not_of(" ")+1);
-                        if (getName_() != std2wx(tablecheck))    // avoid self-reference
-                            current = d->findByNameAndType(ntTable, std2wx(tablecheck));
-                    }
+                    to_remove = it;
+                    break;
                 }
-                if (!current)
-                    continue;
+                to_remove = std::find(it + 1, tempdep.end(), (*it));
+                if (to_remove != tempdep.end())
+                    break;
             }
-            if (current != last)            // new object
+            if (to_remove == tempdep.end())
+                break;
+            else
+                tempdep.erase(to_remove);
+        }
+        list.insert(list.end(), tempdep.begin(), tempdep.end());
+    }
+
+    // TODO: perhaps this could be moved to Table?
+    if ((typeM == ntTable || typeM == ntSysTable) && !ofObject)  // foreign keys of other tables
+    {
+        st1->Prepare(
+            "select r1.rdb$relation_name, i.rdb$field_name "
+            " from rdb$relation_constraints r1 "
+            " join rdb$ref_constraints c on r1.rdb$constraint_name = c.rdb$constraint_name "
+            " join rdb$relation_constraints r2 on c.RDB$CONST_NAME_UQ = r2.rdb$constraint_name "
+            " join rdb$index_segments i on r1.rdb$index_name=i.rdb$index_name "
+            " where r2.rdb$relation_name=? "
+            " and r1.rdb$constraint_type='FOREIGN KEY' "
+        );
+        st1->Set(1, wx2std(getName_()));
+        st1->Execute();
+        std::string lasttable;
+        Dependency *dep = 0;
+        while (st1->Fetch())
+        {
+            std::string table_name, field_name;
+            st1->Get(1, table_name);
+            st1->Get(2, field_name);
+            table_name.erase(table_name.find_last_not_of(" ")+1);       // trim
+            field_name.erase(field_name.find_last_not_of(" ")+1);       // trim
+            if (table_name != lasttable)    // new
             {
-                Dependency de(current);
+                MetadataItem* table = d->findByNameAndType(ntTable, std2wx(table_name));
+                if (!table)
+                    continue;           // dummy check
+                Dependency de(table);
                 list.push_back(de);
                 dep = &list.back();
-                last = current;
+                lasttable = table_name;
             }
-            if (!st1->IsNull(3))
-            {
-                st1->Get(3, field_name);
-                field_name.erase(field_name.find_last_not_of(" ") + 1);       // trim
-                dep->addField(std2wx(field_name));
-            }
+            dep->addField(std2wx(field_name));
         }
-
-        // TODO: perhaps this could be moved to Table?
-        //       call MetadataItem::getDependencies() and then add this
-        if ((typeM == ntTable || typeM == ntSysTable) && ofObject)   // foreign keys of this table + computed columns
-        {
-            Table *t = dynamic_cast<Table *>(this);
-            vector<ForeignKey> *f = t->getForeignKeys();
-            for (vector<ForeignKey>::const_iterator it = f->begin(); it != f->end(); ++it)
-            {
-                MetadataItem *table = d->findByNameAndType(ntTable, (*it).referencedTableM);
-                if (!table)
-                {
-                    lastError().setMessage(wxT("Table ") + (*it).referencedTableM + wxT(" not found."));
-                    return false;
-                }
-                Dependency de(table);
-                de.setFields((*it).referencedColumnsM);
-                list.push_back(de);
-            }
-
-            // Add check constraints here (CHECKS are checked via system triggers), example:
-            // table1::check( table1.field1 > select max(field2) from table2 )
-            // So, table vs any object from this ^^^ select
-            // Algorithm: 1.find all system triggers bound to that CHECK constraint
-            //            2.find dependencies for those system triggers
-            //            3.display those dependencies as deps. of this table
-            st1->Prepare("select distinct c.rdb$trigger_name from rdb$relation_constraints r "
-                " join rdb$check_constraints c on r.rdb$constraint_name=c.rdb$constraint_name "
-                " and r.rdb$constraint_type = 'CHECK' where r.rdb$relation_name= ? "
-            );
-            st1->Set(1, wx2std(getName_()));
-            st1->Execute();
-            vector<Dependency> tempdep;
-            while (st1->Fetch())
-            {
-                std::string s;
-                st1->Get(1, s);
-                s.erase(s.find_last_not_of(" ")+1);
-                Trigger t;
-                t.setName_(std2wx(s));
-                t.setParent(d);
-                t.getDependencies(tempdep, true);
-            }
-            // remove duplicates, and self-references from "tempdep"
-            while (true)
-            {
-                std::vector<Dependency>::iterator to_remove = tempdep.end();
-                for (std::vector<Dependency>::iterator it = tempdep.begin(); it != tempdep.end(); ++it)
-                {
-                    if ((*it).getDependentObject() == this)
-                    {
-                        to_remove = it;
-                        break;
-                    }
-                    to_remove = std::find(it + 1, tempdep.end(), (*it));
-                    if (to_remove != tempdep.end())
-                        break;
-                }
-                if (to_remove == tempdep.end())
-                    break;
-                else
-                    tempdep.erase(to_remove);
-            }
-            list.insert(list.end(), tempdep.begin(), tempdep.end());
-        }
-
-        // TODO: perhaps this could be moved to Table?
-        if ((typeM == ntTable || typeM == ntSysTable) && !ofObject)  // foreign keys of other tables
-        {
-            st1->Prepare(
-                "select r1.rdb$relation_name, i.rdb$field_name "
-                " from rdb$relation_constraints r1 "
-                " join rdb$ref_constraints c on r1.rdb$constraint_name = c.rdb$constraint_name "
-                " join rdb$relation_constraints r2 on c.RDB$CONST_NAME_UQ = r2.rdb$constraint_name "
-                " join rdb$index_segments i on r1.rdb$index_name=i.rdb$index_name "
-                " where r2.rdb$relation_name=? "
-                " and r1.rdb$constraint_type='FOREIGN KEY' "
-            );
-            st1->Set(1, wx2std(getName_()));
-            st1->Execute();
-            std::string lasttable;
-            Dependency *dep = 0;
-            while (st1->Fetch())
-            {
-                std::string table_name, field_name;
-                st1->Get(1, table_name);
-                st1->Get(2, field_name);
-                table_name.erase(table_name.find_last_not_of(" ")+1);       // trim
-                field_name.erase(field_name.find_last_not_of(" ")+1);       // trim
-                if (table_name != lasttable)    // new
-                {
-                    MetadataItem* table = d->findByNameAndType(ntTable, std2wx(table_name));
-                    if (!table)
-                        continue;           // dummy check
-                    Dependency de(table);
-                    list.push_back(de);
-                    dep = &list.back();
-                    lasttable = table_name;
-                }
-                dep->addField(std2wx(field_name));
-            }
-        }
-
-        tr1->Commit();
-        return true;
     }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-    return false;
+
+    tr1->Commit();
 }
 //-----------------------------------------------------------------------------
 bool MetadataItem::isDescriptionAvailable()

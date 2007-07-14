@@ -40,9 +40,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <ibpp.h>
 
+#include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "core/Visitor.h"
-#include "dberror.h"
 #include "frutils.h"
 #include "metadata/collection.h"
 #include "metadata/database.h"
@@ -55,51 +55,29 @@ View::View()
 }
 //-----------------------------------------------------------------------------
 //! returns false if an error occurs
-bool View::getSource(wxString& source)
+wxString View::getSource()
 {
-    source = wxT("");
     Database *d = getDatabase();
     if (!d)
-    {
-        lastError().setMessage(wxT("Database not set."));
-        return false;
-    }
-
+        throw FRError(_("database not set"));
     IBPP::Database& db = d->getIBPPDatabase();
-
-    try
-    {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare("select rdb$view_source from rdb$relations where rdb$relation_name = ?");
-        st1->Set(1, wx2std(getName_()));
-        st1->Execute();
-        st1->Fetch();
-        readBlob(st1, 1, source);
-        tr1->Commit();
-        return true;
-    }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-
-    return false;
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+    st1->Prepare("select rdb$view_source from rdb$relations where rdb$relation_name = ?");
+    st1->Set(1, wx2std(getName_()));
+    st1->Execute();
+    st1->Fetch();
+    wxString source;
+    readBlob(st1, 1, source);
+    tr1->Commit();
+    return source;
 }
 //-----------------------------------------------------------------------------
 wxString View::getCreateSql()
 {
-    wxString src;
-    if (!checkAndLoadColumns())
-        return lastError().getMessage();
-    if (!getSource(src))
-        return lastError().getMessage();
-
+    checkAndLoadColumns();
+    wxString src = getSource();
     wxString sql;
     sql += wxT("CREATE VIEW ") + getQuotedName() + wxT(" (");
 

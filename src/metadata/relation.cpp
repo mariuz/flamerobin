@@ -41,7 +41,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <ibpp.h>
 
 #include "core/StringUtils.h"
-#include "dberror.h"
+#include "core/FRError.h"
 #include "frutils.h"
 #include "metadata/CreateDDLVisitor.h"
 #include "metadata/database.h"
@@ -91,98 +91,79 @@ MetadataCollection<Column>::const_iterator Relation::end() const
     return columnsM.end();
 }
 //-----------------------------------------------------------------------------
-bool Relation::checkAndLoadColumns()
+void Relation::checkAndLoadColumns()
 {
-    return (!columnsM.empty() || loadColumns());
+    if (columnsM.empty())
+        loadColumns();
 }
 //-----------------------------------------------------------------------------
 //! returns false if error occurs, and places the error text in error variable
-bool Relation::loadColumns()
+void Relation::loadColumns()
 {
     columnsM.clear();
     Database *d = getDatabase();
     if (!d)
-    {
-        lastError().setMessage(wxT("database not set"));
-        return false;
-    }
-
+        throw FRError(_("Database not set"));
     IBPP::Database& db = d->getIBPPDatabase();
 
-    try
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+    st1->Prepare(
+        "select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source, "
+        " l.rdb$collation_name,f.rdb$computed_source,r.rdb$default_source"
+        " from rdb$fields f"
+        " join rdb$relation_fields r "
+        "     on f.rdb$field_name=r.rdb$field_source"
+        " left outer join rdb$collations l "
+        "     on l.rdb$collation_id = r.rdb$collation_id "
+        "     and l.rdb$character_set_id = f.rdb$character_set_id"
+        " where r.rdb$relation_name = ?"
+        " order by r.rdb$field_position"
+    );
+
+    st1->Set(1, wx2std(getName_()));
+    st1->Execute();
+    while (st1->Fetch())
     {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare(
-            "select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source, "
-            " l.rdb$collation_name,f.rdb$computed_source,r.rdb$default_source"
-            " from rdb$fields f"
-            " join rdb$relation_fields r "
-            "     on f.rdb$field_name=r.rdb$field_source"
-            " left outer join rdb$collations l "
-            "     on l.rdb$collation_id = r.rdb$collation_id "
-            "     and l.rdb$character_set_id = f.rdb$character_set_id"
-            " where r.rdb$relation_name = ?"
-            " order by r.rdb$field_position"
-        );
+        std::string name, source, collation;
+        wxString computedSrc, defaultSrc;
+        st1->Get(1, name);
+        st1->Get(3, source);
+        st1->Get(4, collation);
+        readBlob(st1, 5, computedSrc);
 
-        st1->Set(1, wx2std(getName_()));
-        st1->Execute();
-        while (st1->Fetch())
+        if (!st1->IsNull(6))
         {
-            std::string name, source, collation;
-            wxString computedSrc, defaultSrc;
-            st1->Get(1, name);
-            st1->Get(3, source);
-            st1->Get(4, collation);
-            readBlob(st1, 5, computedSrc);
-
-            if (!st1->IsNull(6))
-            {
-                readBlob(st1, 6, defaultSrc);
-                // Some users reported two spaces before DEFAULT word in source
-                // Perhaps some other tools can put garbage here? Should we
-                // parse it as SQL to clean up comments, whitespace, etc?
-                defaultSrc.Trim(false).Remove(0, 8);
-            }
-
-            Column *cc = columnsM.add();
-            cc->setName_(std2wx(name));
-            cc->setParent(this);
-            cc->Init(!st1->IsNull(2), std2wx(source),
-                computedSrc, std2wx(collation), defaultSrc, !st1->IsNull(6));
+            readBlob(st1, 6, defaultSrc);
+            // Some users reported two spaces before DEFAULT word in source
+            // Perhaps some other tools can put garbage here? Should we
+            // parse it as SQL to clean up comments, whitespace, etc?
+            defaultSrc.Trim(false).Remove(0, 8);
         }
 
-        tr1->Commit();
-        notifyObservers();
-        return true;
-    }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
+        Column *cc = columnsM.add();
+        cc->setName_(std2wx(name));
+        cc->setParent(this);
+        cc->Init(!st1->IsNull(2), std2wx(source),
+            computedSrc, std2wx(collation), defaultSrc, !st1->IsNull(6));
     }
 
-    return false;
+    tr1->Commit();
+    notifyObservers();
 }
 //-----------------------------------------------------------------------------
 //! holds all views + self (even if it's a table)
 void Relation::getDependentViews(std::vector<Relation *>& views)
 {
     std::vector<Dependency> list;
-    if (getDependencies(list, false))
+    getDependencies(list, false);
+    for (std::vector<Dependency>::iterator it = list.begin();
+        it != list.end(); ++it)
     {
-        for (std::vector<Dependency>::iterator it = list.begin();
-            it != list.end(); ++it)
-        {
-            View *v = dynamic_cast<View *>((*it).getDependentObject());
-            if (v && views.end() == std::find(views.begin(), views.end(), v))
-                v->getDependentViews(views);
-        }
+        View *v = dynamic_cast<View *>((*it).getDependentObject());
+        if (v && views.end() == std::find(views.begin(), views.end(), v))
+            v->getDependentViews(views);
     }
 
     // add self
@@ -193,65 +174,54 @@ void Relation::getDependentChecks(std::vector<CheckConstraint>& checks)
 {
     Database *d = getDatabase();
     if (!d)
-        return;
+        throw FRError(_("database not set"));
     IBPP::Database& db = d->getIBPPDatabase();
-    try
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+    st1->Prepare(
+        "select c.rdb$constraint_name, t.rdb$relation_name, "
+        "   t.rdb$trigger_source "
+        "from rdb$check_constraints c "
+        "join rdb$triggers t on c.rdb$trigger_name = t.rdb$trigger_name "
+        "join rdb$dependencies d on "
+        "   t.rdb$trigger_name = d.rdb$dependent_name "
+        "where d.rdb$depended_on_name = ? "
+        "and d.rdb$dependent_type = 2 and d.rdb$depended_on_type = 0 "
+        "and t.rdb$trigger_type = 1 and d.rdb$field_name is null "
+    );
+
+    st1->Set(1, wx2std(getName_()));
+    st1->Execute();
+    while (st1->Fetch())
     {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare(
-            "select c.rdb$constraint_name, t.rdb$relation_name, "
-            "   t.rdb$trigger_source "
-            "from rdb$check_constraints c "
-            "join rdb$triggers t on c.rdb$trigger_name = t.rdb$trigger_name "
-            "join rdb$dependencies d on "
-            "   t.rdb$trigger_name = d.rdb$dependent_name "
-            "where d.rdb$depended_on_name = ? "
-            "and d.rdb$dependent_type = 2 and d.rdb$depended_on_type = 0 "
-            "and t.rdb$trigger_type = 1 and d.rdb$field_name is null "
-        );
+        wxString source;
+        std::string table, cname;
+        st1->Get(1, cname);
+        st1->Get(2, table);
+        readBlob(st1, 3, source);
+        wxString consname = std2wx(cname).Strip();
+        Table *tab = dynamic_cast<Table *>(d->findByNameAndType(ntTable,
+            std2wx(table).Strip()));
+        if (!tab)
+            continue;
 
-        st1->Set(1, wx2std(getName_()));
-        st1->Execute();
-        while (st1->Fetch())
-        {
-            wxString source;
-            std::string table, cname;
-            st1->Get(1, cname);
-            st1->Get(2, table);
-            readBlob(st1, 3, source);
-            wxString consname = std2wx(cname).Strip();
-            Table *tab = dynamic_cast<Table *>(d->findByNameAndType(ntTable,
-                std2wx(table).Strip()));
-            if (!tab)
-                continue;
+        // check if it exists
+        std::vector<CheckConstraint>::iterator it;
+        for (it = checks.begin(); it != checks.end(); ++it)
+            if ((*it).getTable() == tab && (*it).getName_() == consname)
+                break;
 
-            // check if it exists
-            std::vector<CheckConstraint>::iterator it;
-            for (it = checks.begin(); it != checks.end(); ++it)
-                if ((*it).getTable() == tab && (*it).getName_() == consname)
-                    break;
+        if (it != checks.end())     // already there
+            continue;
 
-            if (it != checks.end())     // already there
-                continue;
-
-            CheckConstraint c;
-            c.setParent(tab);
-            c.setName_(consname);
-            c.sourceM = source;
-            checks.push_back(c);
-        }
-        tr1->Commit();
+        CheckConstraint c;
+        c.setParent(tab);
+        c.setName_(consname);
+        c.sourceM = source;
+        checks.push_back(c);
     }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
+    tr1->Commit();
 }
 //-----------------------------------------------------------------------------
 // STEPS:
@@ -303,26 +273,24 @@ wxString Relation::getRebuildSql()
         // be listed as dependencies as well:
         (*vi)->getTriggers(trigs, Trigger::afterTrigger);   // own triggers
         (*vi)->getTriggers(trigs, Trigger::beforeTrigger);
-        if ((*vi)->getDependencies(list, false))
+        (*vi)->getDependencies(list, false);
+        for (std::vector<Dependency>::iterator it = list.begin();
+            it != list.end(); ++it)
         {
-            for (std::vector<Dependency>::iterator it = list.begin();
-                it != list.end(); ++it)
+            Procedure *p = dynamic_cast<Procedure *>(
+                (*it).getDependentObject());
+            if (p && procedures.end() == std::find(procedures.begin(),
+                procedures.end(), p))
             {
-                Procedure *p = dynamic_cast<Procedure *>(
-                    (*it).getDependentObject());
-                if (p && procedures.end() == std::find(procedures.begin(),
-                    procedures.end(), p))
-                {
-                    procedures.push_back(p);
-                }
+                procedures.push_back(p);
+            }
 
-                Trigger *t = dynamic_cast<Trigger *>(
-                    (*it).getDependentObject());
-                if (t && trigs.end() == std::find(trigs.begin(), trigs.end(),
-                    t))
-                {
-                    trigs.push_back(t);
-                }
+            Trigger *t = dynamic_cast<Trigger *>(
+                (*it).getDependentObject());
+            if (t && trigs.end() == std::find(trigs.begin(), trigs.end(),
+                t))
+            {
+                trigs.push_back(t);
             }
         }
         (*vi)->getDependentChecks(checks);
@@ -485,109 +453,78 @@ std::vector<Privilege>* Relation::getPrivileges()
     // load privileges from database and return the pointer to collection
     Database *d = getDatabase();
     if (!d)
-    {
-        lastError().setMessage(wxT("database not set"));
-        return 0;
-    }
+        throw FRError(_("database not set"));
     privilegesM.clear();
     IBPP::Database& db = d->getIBPPDatabase();
-    try
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+    st1->Prepare(
+        "select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
+        "RDB$GRANT_OPTION, RDB$FIELD_NAME "
+        "from RDB$USER_PRIVILEGES "
+        "where RDB$RELATION_NAME = ? and rdb$object_type = 0 "
+        "order by rdb$user, rdb$user_type, rdb$grant_option, rdb$privilege"
+    );
+    st1->Set(1, wx2std(getName_()));
+    st1->Execute();
+    std::string lastuser;
+    int lasttype = -1;
+    Privilege *pr = 0;
+    while (st1->Fetch())
     {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare(
-            "select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
-            "RDB$GRANT_OPTION, RDB$FIELD_NAME "
-            "from RDB$USER_PRIVILEGES "
-            "where RDB$RELATION_NAME = ? and rdb$object_type = 0 "
-            "order by rdb$user, rdb$user_type, rdb$grant_option, rdb$privilege"
-        );
-        st1->Set(1, wx2std(getName_()));
-        st1->Execute();
-        std::string lastuser;
-        int lasttype = -1;
-        Privilege *pr = 0;
-        while (st1->Fetch())
+        std::string user, grantor, privilege, field;
+        int usertype, grantoption = 0;
+        st1->Get(1, user);
+        st1->Get(2, usertype);
+        st1->Get(3, grantor);
+        st1->Get(4, privilege);
+        if (!st1->IsNull(5))
+            st1->Get(5, grantoption);
+        st1->Get(6, field);
+        if (!pr || user != lastuser || usertype != lasttype)
         {
-            std::string user, grantor, privilege, field;
-            int usertype, grantoption = 0;
-            st1->Get(1, user);
-            st1->Get(2, usertype);
-            st1->Get(3, grantor);
-            st1->Get(4, privilege);
-            if (!st1->IsNull(5))
-                st1->Get(5, grantoption);
-            st1->Get(6, field);
-            if (!pr || user != lastuser || usertype != lasttype)
-            {
-                Privilege p(this, std2wx(user).Strip(), usertype);
-                privilegesM.push_back(p);
-                pr = &privilegesM.back();
-                lastuser = user;
-                lasttype = usertype;
-            }
-            pr->addPrivilege(privilege[0], std2wx(grantor).Strip(),
-                grantoption == 1, std2wx(field).Strip());
+            Privilege p(this, std2wx(user).Strip(), usertype);
+            privilegesM.push_back(p);
+            pr = &privilegesM.back();
+            lastuser = user;
+            lasttype = usertype;
         }
-        tr1->Commit();
-        return &privilegesM;
+        pr->addPrivilege(privilege[0], std2wx(grantor).Strip(),
+            grantoption == 1, std2wx(field).Strip());
     }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-    return 0;
+    tr1->Commit();
+    return &privilegesM;
 }
 //-----------------------------------------------------------------------------
 //! load list of triggers for relation
 //! link them to triggers in database's collection
-bool Relation::getTriggers(std::vector<Trigger *>& list, Trigger::firingTimeType beforeOrAfter)
+void Relation::getTriggers(std::vector<Trigger *>& list,
+    Trigger::firingTimeType beforeOrAfter)
 {
     Database *d = getDatabase();
     if (!d)
-    {
-        lastError().setMessage(wxT("database not set"));
-        return false;
-    }
-
+        throw FRError(_("database not set"));
     IBPP::Database& db = d->getIBPPDatabase();
-    try
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+    st1->Prepare(
+        "select rdb$trigger_name from rdb$triggers where rdb$relation_name = ? "
+        "order by rdb$trigger_sequence"
+    );
+    st1->Set(1, wx2std(getName_()));
+    st1->Execute();
+    while (st1->Fetch())
     {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare(
-            "select rdb$trigger_name from rdb$triggers where rdb$relation_name = ? "
-            "order by rdb$trigger_sequence"
-        );
-        st1->Set(1, wx2std(getName_()));
-        st1->Execute();
-        while (st1->Fetch())
-        {
-            std::string name;
-            st1->Get(1, name);
-            name.erase(name.find_last_not_of(" ") + 1);
-            Trigger* t = dynamic_cast<Trigger*>(d->findByNameAndType(ntTrigger, std2wx(name)));
-            if (t && t->getFiringTime() == beforeOrAfter)
-                list.push_back(t);
-        }
-        tr1->Commit();
-        return true;
+        std::string name;
+        st1->Get(1, name);
+        name.erase(name.find_last_not_of(" ") + 1);
+        Trigger* t = dynamic_cast<Trigger*>(d->findByNameAndType(ntTrigger, std2wx(name)));
+        if (t && t->getFiringTime() == beforeOrAfter)
+            list.push_back(t);
     }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-    return false;
+    tr1->Commit();
 }
 //-----------------------------------------------------------------------------
 bool Relation::getChildren(std::vector<MetadataItem*>& temp)

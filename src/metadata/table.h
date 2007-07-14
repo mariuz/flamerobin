@@ -41,23 +41,23 @@ class Table: public Relation
 private:
     PrimaryKeyConstraint primaryKeyM;           // table can have only one pk
     bool primaryKeyLoadedM;
-    bool loadPrimaryKey();
+    void loadPrimaryKey();
 
     std::vector<ForeignKey> foreignKeysM;
     bool foreignKeysLoadedM;
-    bool loadForeignKeys();
+    void loadForeignKeys();
 
     std::vector<CheckConstraint> checkConstraintsM;
     bool checkConstraintsLoadedM;
-    bool loadCheckConstraints();
+    void loadCheckConstraints();
 
     std::vector<UniqueConstraint> uniqueConstraintsM;
     bool uniqueConstraintsLoadedM;
-    bool loadUniqueConstraints();
+    void loadUniqueConstraints();
 
     std::vector<Index> indicesM;
     bool indicesLoadedM;
-    bool loadIndices();
+    void loadIndices();
 
     bool externalPathLoadedM;
     wxString externalPathM;
@@ -70,7 +70,7 @@ public:
 
     virtual wxString getCreateSqlTemplate() const;
 
-    virtual bool loadColumns();         // update the keys info too
+    virtual void loadColumns();         // update the keys info too
     void invalidateIndices(const wxString& forIndex = wxEmptyString);
 
     wxString getExternalPath();

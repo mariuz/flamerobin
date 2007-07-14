@@ -61,7 +61,6 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Subject.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Visitor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_databasehandler.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_dberror.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_framemanager.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.o \
@@ -266,9 +265,6 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Visitor.o: ./src/core/Visitor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_databasehandler.o: ./src/databasehandler.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
-
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_dberror.o: ./src/dberror.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_framemanager.o: ./src/framemanager.cpp

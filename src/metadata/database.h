@@ -137,7 +137,7 @@ private:
 
     std::multimap<wxString, wxString> collationsM;
     void loadCollations();
-    bool loadObjects(NodeType type, IBPP::Transaction& tr1,
+    void loadObjects(NodeType type, IBPP::Transaction& tr1,
         ProgressIndicator* indicator = 0);
 
     // small help for parser
@@ -184,18 +184,18 @@ public:
 
     void clear();               // sets all values to empty wxString
     bool isConnected() const;
-    bool connect(wxString password, ProgressIndicator* indicator = 0);
-    bool disconnect(bool onlyDBH = false);
-    bool reconnect() const;
+    void connect(wxString password, ProgressIndicator* indicator = 0);
+    void disconnect(bool onlyDBH = false);
+    void reconnect() const;
     void prepareTemporaryCredentials();
     void resetCredentials();
-    bool drop();
+    void drop();
 
     wxString loadDomainNameForColumn(wxString table, wxString field);
     Domain* loadMissingDomain(wxString name);
     //wxString getLoadingSql(NodeType type);
 
-    bool loadGeneratorValues();
+    void loadGeneratorValues();
     Relation* getRelationForTrigger(Trigger* trigger);
 
     MetadataItem* findByNameAndType(NodeType nt, wxString name);
@@ -204,7 +204,7 @@ public:
     void refreshByType(NodeType type);
     void dropObject(MetadataItem *object);
     bool addObject(NodeType type, wxString name);
-    bool parseCommitedSql(const SqlStatement& stm);     // reads a DDL statement and does accordingly
+    void parseCommitedSql(const SqlStatement& stm);     // reads a DDL statement and does accordingly
 
     std::vector<wxString> getCollations(wxString charset);
     bool isDefaultCollation(const wxString& charset, const wxString& collate);
@@ -213,7 +213,7 @@ public:
     void getIdentifiers(std::vector<Identifier>& temp);
 
     //! fill vector with result of sql statement
-    bool fillVector(std::vector<wxString>& list, wxString sql);
+    void fillVector(std::vector<wxString>& list, wxString sql);
 
     wxString getPath() const;
     wxString getDatabaseCharset() const;

@@ -218,7 +218,6 @@
         $(SOURCEDIR)/core/StringUtils.h
         $(SOURCEDIR)/core/Subject.h
         $(SOURCEDIR)/core/Visitor.h
-        $(SOURCEDIR)/dberror.h
         $(SOURCEDIR)/framemanager.h
         $(SOURCEDIR)/frtypes.h
         $(SOURCEDIR)/frutils.h
@@ -321,7 +320,6 @@
         $(SOURCEDIR)/core/Subject.cpp
         $(SOURCEDIR)/core/Visitor.cpp
         $(SOURCEDIR)/databasehandler.cpp
-        $(SOURCEDIR)/dberror.cpp
         $(SOURCEDIR)/framemanager.cpp
         $(SOURCEDIR)/frprec.cpp
         $(SOURCEDIR)/frutils.cpp

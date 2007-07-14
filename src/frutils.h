@@ -51,9 +51,6 @@ wxString selectRelationColumns(Relation* t, wxWindow* parent);
 bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent,
     std::vector<wxString>& list);
 //-----------------------------------------------------------------------------
-//! pops up message box with last error from database operations
-void reportLastError(const wxString& actionMsg);
-//-----------------------------------------------------------------------------
 //! prompts for password if needed and connects to database
 bool connectDatabase(Database *db, wxWindow* parent,
     ProgressDialog* progressdialog = 0);

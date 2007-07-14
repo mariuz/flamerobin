@@ -52,7 +52,7 @@
 
 #include "config/Config.h"
 #include "core/StringUtils.h"
-#include "dberror.h"
+#include "core/FRError.h"
 #include "framemanager.h"
 #include "gui/AdvancedMessageDialog.h"
 #include "gui/controls/DataGrid.h"
@@ -1401,15 +1401,18 @@ bool ExecuteSqlFrame::commitTransaction()
 
         SubjectLocker locker(databaseM);
         // log statements, done before parsing in case parsing crashes FR
-        for (std::vector<SqlStatement>::const_iterator it = executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
+        for (std::vector<SqlStatement>::const_iterator it =
+            executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
+        {
             if (!Logger::logStatement(*it, databaseM))
                 break;
+        }
 
         // parse all successfully executed statements
-        for (std::vector<SqlStatement>::const_iterator it = executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
+        for (std::vector<SqlStatement>::const_iterator it =
+            executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
         {
-            if (!databaseM->parseCommitedSql(*it))
-                ::wxMessageBox(lastError().getMessage(), _("A non-fatal error occurred."), wxOK | wxICON_INFORMATION);
+            databaseM->parseCommitedSql(*it);
         }
 
         // possible future version (see database.cpp file for details: ONLY IF FIRST solution is used from database.cpp)

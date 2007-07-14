@@ -41,7 +41,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <ibpp.h>
 
 #include "core/StringUtils.h"
-#include "dberror.h"
+#include "core/FRError.h"
 #include "frutils.h"
 #include "metadata/collection.h"
 #include "metadata/database.h"
@@ -149,14 +149,13 @@ wxString Procedure::getExecuteStatement()
     return sql;
 }
 //-----------------------------------------------------------------------------
-bool Procedure::checkAndLoadParameters(bool force)
+void Procedure::checkAndLoadParameters(bool force)
 {
     if (force || !parametersLoadedM)
     {
         loadParameters();
         notifyObservers();
     }
-    return parametersLoadedM;
 }
 //-----------------------------------------------------------------------------
 MetadataCollection<Parameter>::iterator Procedure::begin()
@@ -185,100 +184,62 @@ MetadataCollection<Parameter>::const_iterator Procedure::end() const
 }
 //-----------------------------------------------------------------------------
 //! returns false if error occurs, and places the error text in error variable
-bool Procedure::loadParameters()
+void Procedure::loadParameters()
 {
+    parametersLoadedM = false;
     parametersM.clear();
     Database* d = getDatabase();
     if (!d)
-    {
-        lastError().setMessage(wxT("database not set"));
-        parametersLoadedM = false;
-        return false;
-    }
-
+        throw FRError(_("database not set"));
     IBPP::Database& db = d->getIBPPDatabase();
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+    st1->Prepare(
+        "select p.rdb$parameter_name, p.rdb$field_source, p.rdb$parameter_type"
+        " from rdb$procedure_parameters p"
+        " where p.rdb$PROCEDURE_name = ? "
+        " order by p.rdb$parameter_type, rdb$PARAMETER_number "
+    );
+    st1->Set(1, wx2std(getName_()));
+    st1->Execute();
 
-    try
+    while (st1->Fetch())
     {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare(
-            "select p.rdb$parameter_name, p.rdb$field_source, p.rdb$parameter_type"
-            " from rdb$procedure_parameters p"
-            " where p.rdb$PROCEDURE_name = ? "
-            " order by p.rdb$parameter_type, rdb$PARAMETER_number "
-        );
-        st1->Set(1, wx2std(getName_()));
-        st1->Execute();
+        std::string column_name, source;
+        short partype;
+        st1->Get(1, column_name);
+        st1->Get(2, source);
+        st1->Get(3, &partype);
 
-        while (st1->Fetch())
-        {
-            std::string column_name, source;
-            short partype;
-            st1->Get(1, column_name);
-            st1->Get(2, source);
-            st1->Get(3, &partype);
-
-            Parameter p(std2wx(source), partype);
-            p.setName_(std2wx(column_name));
-            Parameter* pp = parametersM.add(p);
-            pp->setParent(this);
-        }
-
-        tr1->Commit();
-        parametersLoadedM = true;
-        return true;
-    }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
+        Parameter p(std2wx(source), partype);
+        p.setName_(std2wx(column_name));
+        Parameter* pp = parametersM.add(p);
+        pp->setParent(this);
     }
 
-    parametersLoadedM = false;
-    return false;
+    tr1->Commit();
+    parametersLoadedM = true;
 }
 //-----------------------------------------------------------------------------
-//! returns false if an error occurs
-bool Procedure::getSource(wxString& source)
+wxString Procedure::getSource()
 {
     Database* d = getDatabase();
     if (!d)
-    {
-        lastError().setMessage(wxT("Database not set."));
-        return false;
-    }
-
+        parametersLoadedM = false;
     IBPP::Database& db = d->getIBPPDatabase();
-
-    try
-    {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare("select rdb$procedure_source from rdb$procedures where rdb$procedure_name = ?");
-        st1->Set(1, wx2std(getName_()));
-        st1->Execute();
-        st1->Fetch();
-        readBlob(st1, 1, source);
-        tr1->Commit();
-        source.Trim(false);     // remove leading whitespace
-        return true;
-    }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-
-    return false;
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+    st1->Prepare("select rdb$procedure_source from rdb$procedures where rdb$procedure_name = ?");
+    st1->Set(1, wx2std(getName_()));
+    st1->Execute();
+    st1->Fetch();
+    wxString source;
+    readBlob(st1, 1, source);
+    tr1->Commit();
+    source.Trim(false);     // remove leading whitespace
+    return source;
 }
 //-----------------------------------------------------------------------------
 wxString Procedure::getDefinition()
@@ -327,13 +288,8 @@ wxString Procedure::getDefinition()
 //-----------------------------------------------------------------------------
 wxString Procedure::getAlterSql(bool full)
 {
-    if (!parametersLoadedM && !loadParameters())
-        return lastError().getMessage();
-
-    wxString source;
-    if (!getSource(source))
-        return lastError().getMessage();
-
+    if (!parametersLoadedM)
+        loadParameters();
     Database *db = getDatabase();
 
     wxString sql = wxT("SET TERM ^ ;\nALTER PROCEDURE ") + getQuotedName();
@@ -378,7 +334,7 @@ wxString Procedure::getAlterSql(bool full)
     }
     sql += wxT("\nAS\n");
     if (full)
-        sql += source;
+        sql += getSource();
     else
         sql += wxT("BEGIN EXIT; END");
     sql += wxT("^\nSET TERM ; ^\n");
@@ -390,63 +346,48 @@ std::vector<Privilege>* Procedure::getPrivileges()
     // load privileges from database and return the pointer to collection
     Database *d = getDatabase();
     if (!d)
-    {
-        lastError().setMessage(wxT("database not set"));
-        return 0;
-    }
+        throw FRError(_("database not set"));
     privilegesM.clear();
     IBPP::Database& db = d->getIBPPDatabase();
-    try
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+    st1->Prepare(
+        "select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
+        "RDB$GRANT_OPTION, RDB$FIELD_NAME "
+        "from RDB$USER_PRIVILEGES "
+        "where RDB$RELATION_NAME = ? and rdb$object_type = 5 "
+        "order by rdb$user, rdb$user_type, rdb$privilege"
+    );
+    st1->Set(1, wx2std(getName_()));
+    st1->Execute();
+    std::string lastuser;
+    int lasttype = -1;
+    Privilege *pr = 0;
+    while (st1->Fetch())
     {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare(
-            "select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
-            "RDB$GRANT_OPTION, RDB$FIELD_NAME "
-            "from RDB$USER_PRIVILEGES "
-            "where RDB$RELATION_NAME = ? and rdb$object_type = 5 "
-            "order by rdb$user, rdb$user_type, rdb$privilege"
-        );
-        st1->Set(1, wx2std(getName_()));
-        st1->Execute();
-        std::string lastuser;
-        int lasttype = -1;
-        Privilege *pr = 0;
-        while (st1->Fetch())
+        std::string user, grantor, privilege, field;
+        int usertype, grantoption = 0;
+        st1->Get(1, user);
+        st1->Get(2, usertype);
+        st1->Get(3, grantor);
+        st1->Get(4, privilege);
+        if (!st1->IsNull(5))
+            st1->Get(5, grantoption);
+        st1->Get(6, field);
+        if (!pr || user != lastuser || usertype != lasttype)
         {
-            std::string user, grantor, privilege, field;
-            int usertype, grantoption = 0;
-            st1->Get(1, user);
-            st1->Get(2, usertype);
-            st1->Get(3, grantor);
-            st1->Get(4, privilege);
-            if (!st1->IsNull(5))
-                st1->Get(5, grantoption);
-            st1->Get(6, field);
-            if (!pr || user != lastuser || usertype != lasttype)
-            {
-                Privilege p(this, std2wx(user).Strip(), usertype);
-                privilegesM.push_back(p);
-                pr = &privilegesM.back();
-                lastuser = user;
-                lasttype = usertype;
-            }
-            pr->addPrivilege(privilege[0], std2wx(grantor).Strip(),
-                grantoption == 1);
+            Privilege p(this, std2wx(user).Strip(), usertype);
+            privilegesM.push_back(p);
+            pr = &privilegesM.back();
+            lastuser = user;
+            lasttype = usertype;
         }
-        tr1->Commit();
-        return &privilegesM;
+        pr->addPrivilege(privilege[0], std2wx(grantor).Strip(),
+            grantoption == 1);
     }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-    return 0;
+    tr1->Commit();
+    return &privilegesM;
 }
 //-----------------------------------------------------------------------------
 wxString Procedure::getCreateSqlTemplate() const

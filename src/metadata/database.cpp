@@ -42,8 +42,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "config/Config.h"
 #include "config/DatabaseConfig.h"
+#include "core/FRError.h"
 #include "core/StringUtils.h"
-#include "dberror.h"
 #include "MasterPassword.h"
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
@@ -286,35 +286,22 @@ wxString getLoadingSql(NodeType type)
 // This could be moved to Column class
 wxString Database::loadDomainNameForColumn(wxString table, wxString field)
 {
-    try
-    {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
-        st1->Prepare(
-            "select rdb$field_source from rdb$relation_fields where rdb$relation_name = ? and rdb$field_name = ?"
-        );
-        st1->Set(1, wx2std(table));
-        st1->Set(2, wx2std(field));
-        st1->Execute();
-        st1->Fetch();
-        std::string domain;
-        st1->Get(1, domain);
-        tr1->Commit();
-        domain.erase(domain.find_last_not_of(" ") + 1);
-        return std2wx(domain);
-    }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-
-    ::wxMessageBox(lastError().getMessage(), _("Postprocessing error."), wxOK|wxICON_WARNING);
-    return wxT("");
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
+    st1->Prepare(
+        "select rdb$field_source from rdb$relation_fields "
+        "where rdb$relation_name = ? and rdb$field_name = ?"
+    );
+    st1->Set(1, wx2std(table));
+    st1->Set(2, wx2std(field));
+    st1->Execute();
+    st1->Fetch();
+    std::string domain;
+    st1->Get(1, domain);
+    tr1->Commit();
+    domain.erase(domain.find_last_not_of(" ") + 1);
+    return std2wx(domain);
 }
 //-----------------------------------------------------------------------------
 //! returns all collations for a given charset
@@ -332,73 +319,50 @@ std::vector<wxString> Database::getCollations(wxString charset)
 //-----------------------------------------------------------------------------
 Domain *Database::loadMissingDomain(wxString name)
 {
-    try
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
+    st1->Prepare(
+        "select count(*) from rdb$fields f "
+        "left outer join rdb$types t on f.rdb$field_type=t.rdb$type "
+        "where t.rdb$field_name='RDB$FIELD_TYPE' and f.rdb$field_name = ?"
+    );
+    st1->Set(1, wx2std(name));
+    st1->Execute();
+    if (st1->Fetch())
     {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
-        st1->Prepare(
-            "select count(*) from rdb$fields f left outer join rdb$types t on f.rdb$field_type=t.rdb$type "
-            "where t.rdb$field_name='RDB$FIELD_TYPE' and f.rdb$field_name = ?"
-        );
-        st1->Set(1, wx2std(name));
-        st1->Execute();
-        if (st1->Fetch())
+        int c;
+        st1->Get(1, c);
+        if (c > 0)
         {
-            int c;
-            st1->Get(1, c);
-            if (c > 0)
-            {
-                Domain* d = domainsM.add(name); // add domain to collection
-                d->setParent(this);
-                if (name.substr(0, 4) != wxT("RDB$"))
-                    refreshByType(ntDomain);
-                return d;
-            }
+            Domain* d = domainsM.add(name); // add domain to collection
+            d->setParent(this);
+            if (name.substr(0, 4) != wxT("RDB$"))
+                refreshByType(ntDomain);
+            return d;
         }
-        tr1->Commit();
     }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
+    tr1->Commit();
     return 0;
 }
 //-----------------------------------------------------------------------------
 //! small helper function, reads sql and fills the vector with values
 // this can be made template function in future
-bool Database::fillVector(std::vector<wxString>& list, wxString sql)
+void Database::fillVector(std::vector<wxString>& list, wxString sql)
 {
-    try
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
+    st1->Prepare(wx2std(sql));
+    st1->Execute();
+    while (st1->Fetch())
     {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
-        st1->Prepare(wx2std(sql));
-        st1->Execute();
-        while (st1->Fetch())
-        {
-            std::string s;
-            st1->Get(1, s);
-            s.erase(s.find_last_not_of(" ") + 1); // trim
-            list.push_back(std2wx(s));
-        }
-        tr1->Commit();
-        return true;
+        std::string s;
+        st1->Get(1, s);
+        s.erase(s.find_last_not_of(" ") + 1); // trim
+        list.push_back(std2wx(s));
     }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-    return false;
+    tr1->Commit();
 }
 //-----------------------------------------------------------------------------
 bool Database::isDefaultCollation(const wxString& charset,
@@ -417,75 +381,48 @@ void Database::loadCollations()
     if (!collationsM.empty())
         return;
 
-    try
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
+    st1->Prepare("select c.rdb$character_set_name, k.rdb$collation_name "
+        " from rdb$character_sets c"
+        " left outer join rdb$collations k "
+        "   on c.rdb$character_set_id = k.rdb$character_set_id "
+        " order by c.rdb$character_set_name, k.rdb$collation_id");
+    st1->Execute();
+    while (st1->Fetch())
     {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
-        st1->Prepare("select c.rdb$character_set_name, k.rdb$collation_name "
-            " from rdb$character_sets c"
-            " left outer join rdb$collations k "
-            "   on c.rdb$character_set_id = k.rdb$character_set_id "
-            " order by c.rdb$character_set_name, k.rdb$collation_id");
-        st1->Execute();
-        while (st1->Fetch())
-        {
-            std::string charset, collation;
-            st1->Get(1, charset);
-            st1->Get(2, collation);
-            charset.erase(charset.find_last_not_of(" ") + 1);
-            collation.erase(collation.find_last_not_of(" ") + 1);
-            collationsM.insert(std::multimap<wxString, wxString>::value_type(std2wx(charset), std2wx(collation)));
-        }
-        tr1->Commit();
-        return;
+        std::string charset, collation;
+        st1->Get(1, charset);
+        st1->Get(2, collation);
+        charset.erase(charset.find_last_not_of(" ") + 1);
+        collation.erase(collation.find_last_not_of(" ") + 1);
+        collationsM.insert(std::multimap<wxString, wxString>::value_type(
+            std2wx(charset), std2wx(collation)));
     }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-
-    ::wxMessageBox(lastError().getMessage(), _("Error while loading collations."), wxOK|wxICON_WARNING);
+    tr1->Commit();
 }
 //-----------------------------------------------------------------------------
 wxString Database::getTableForIndex(wxString indexName)
 {
-    try
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
+    st1->Prepare("SELECT rdb$relation_name from rdb$indices where rdb$index_name = ?");
+    st1->Set(1, wx2std(indexName));
+    st1->Execute();
+    if (st1->Fetch())
     {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
-        st1->Prepare("SELECT rdb$relation_name from rdb$indices where rdb$index_name = ?");
-        st1->Set(1, wx2std(indexName));
-        st1->Execute();
-        if (st1->Fetch())
-        {
-            std::string retval;
-            st1->Get(1, retval);
-            retval.erase(retval.find_last_not_of(" ") + 1);
-            return std2wx(retval);
-        }
+        std::string retval;
+        st1->Get(1, retval);
+        retval.erase(retval.find_last_not_of(" ") + 1);
+        return std2wx(retval);
     }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-
-    ::wxMessageBox(lastError().getMessage(),
-        _("Error while loading table for index."), wxOK | wxICON_WARNING);
     return wxT("");
 }
 //-----------------------------------------------------------------------------
 //! load list of objects of type "type" from database, and fill the DBH
-bool Database::loadObjects(NodeType type, IBPP::Transaction& tr1,
+void Database::loadObjects(NodeType type, IBPP::Transaction& tr1,
     ProgressIndicator* indicator)
 {
     switch (type)
@@ -500,50 +437,34 @@ bool Database::loadObjects(NodeType type, IBPP::Transaction& tr1,
         case ntFunction:    functionsM.clear();     break;
         case ntDomain:      domainsM.clear();       break;
         case ntException:   exceptionsM.clear();    break;
-        default:            return false;
+        default:            return;
     };
 
     SubjectLocker locker(this);
-    try
+    IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
+    st1->Prepare(wx2std(getLoadingSql(type)));
+    st1->Execute();
+    while (st1->Fetch())
     {
-        IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
-        st1->Prepare(wx2std(getLoadingSql(type)));
-        st1->Execute();
-        while (st1->Fetch())
-        {
-            std::string name;
-            st1->Get(1, name);
-            name.erase(name.find_last_not_of(" ") + 1);
-            addObject(type, std2wx(name));
+        std::string name;
+        st1->Get(1, name);
+        name.erase(name.find_last_not_of(" ") + 1);
+        addObject(type, std2wx(name));
 
-            if (indicator && indicator->isCanceled())
-                break;
-        }
-        refreshByType(type);
-        return true;
+        if (indicator && indicator->isCanceled())
+            break;
     }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-
-    return false;
+    refreshByType(type);
 }
 //-----------------------------------------------------------------------------
-bool Database::loadGeneratorValues()
+void Database::loadGeneratorValues()
 {
     for (MetadataCollection<Generator>::iterator it = generatorsM.begin();
         it != generatorsM.end(); ++it)
     {
-        if (!(*it).loadValue())
-            return false;
+        (*it).loadValue();
     }
     // generatorsM.notify() not necessary, loadValue() notifies
-    return true;
 }
 //-----------------------------------------------------------------------------
 //! Notify the observers that collection has changed
@@ -614,8 +535,10 @@ Relation* Database::findRelation(const Identifier& name)
 //-----------------------------------------------------------------------------
 Relation* Database::getRelationForTrigger(Trigger* trigger)
 {
-    wxString relName;
-    if (!trigger || !trigger->getRelation(relName))
+    if (!trigger)
+        return 0;
+    wxString relName = trigger->getRelation();
+    if (relName.IsEmpty())
         return 0;
     return findRelation(Identifier(relName));
 }
@@ -677,10 +600,10 @@ bool Database::addObject(NodeType type, wxString name)
 // alter table [name] alter [column] type [domain or datatype]
 // declare external function [name]
 // set null flag via system tables update
-bool Database::parseCommitedSql(const SqlStatement& stm)
+void Database::parseCommitedSql(const SqlStatement& stm)
 {
     if (!stm.isDDL())
-        return true;    // return false only on IBPP exception
+        return;    // return false only on IBPP exception
 
     // TODO: check that there are no unwanted side-effects to this
     // SubjectLocker locker(this);
@@ -690,7 +613,7 @@ bool Database::parseCommitedSql(const SqlStatement& stm)
         MetadataItem *obj = stm.getObject();
         if (obj)
             obj->notifyObservers();
-        return true;
+        return;
     }
 
     if (stm.actionIs(actDROP, ntIndex))
@@ -699,7 +622,7 @@ bool Database::parseCommitedSql(const SqlStatement& stm)
         MetadataCollection<Table>::iterator it;
         for (it = tablesM.begin(); it != tablesM.end(); ++it)
             (*it).invalidateIndices(stm.getName());
-        return true;
+        return;
     }
 
     // handle "CREATE INDEX", "ALTER INDEX" and "SET STATISTICS INDEX"
@@ -710,7 +633,7 @@ bool Database::parseCommitedSql(const SqlStatement& stm)
         MetadataItem* m = findByNameAndType(ntTable, tableName);
         if (Table* t = dynamic_cast<Table*>(m))
             t->invalidateIndices();
-        return true;
+        return;
     }
 
     // update all TABLEs and VIEWs on "DROP TRIGGER"
@@ -732,19 +655,19 @@ bool Database::parseCommitedSql(const SqlStatement& stm)
         Relation *r = stm.getCreateTriggerRelation();
         if (r)
             r->notifyObservers();
-        return true;
+        return;
     }
 
     MetadataItem *object = stm.getObject();
     if (!object)
-        return true;
+        return;
 
     if (stm.actionIs(actSET, ntGenerator) ||
         stm.actionIs(actALTER, ntGenerator))
     {
         if (Generator* g = dynamic_cast<Generator*>(object))
             g->loadValue();
-        return true;
+        return;
     }
 
     if (stm.actionIs(actDROP))
@@ -765,7 +688,7 @@ bool Database::parseCommitedSql(const SqlStatement& stm)
                     it++;
             }
         }
-        return true;
+        return;
     }
 
     if (stm.isAlterColumn())
@@ -797,22 +720,21 @@ bool Database::parseCommitedSql(const SqlStatement& stm)
     {
         object->getDescription(true);   // force reload
         object->notifyObservers();
-        return true;
+        return;
     }
 
     if (stm.actionIs(actALTER))
     {
         // TODO: this is a place where we would simply call virtual invalidate() function
         // and object would do wherever it needs to
-        bool success = true;
         switch (stm.getObjectType())
         {
             case ntTable:
             case ntView:
-                success = dynamic_cast<Relation*>(object)->loadColumns();
+                dynamic_cast<Relation*>(object)->loadColumns();
                 break;
             case ntProcedure:
-                success = dynamic_cast<Procedure*>(object)->checkAndLoadParameters(true); // force reload
+                dynamic_cast<Procedure*>(object)->checkAndLoadParameters(true); // force reload
                 break;
             case ntException:
                 dynamic_cast<Exception*>(object)->loadProperties(true);
@@ -833,71 +755,38 @@ bool Database::parseCommitedSql(const SqlStatement& stm)
                     break;
                 }
             case ntDomain:
-                if (!dynamic_cast<Domain *>(object)->loadInfo())
-                    success = false;
-                else    // notify all table columns with that domain
-                {
-                    for (MetadataCollection<Table>::iterator it = tablesM.begin(); it != tablesM.end(); ++it)
-                        for (MetadataCollection<Column>::iterator i2 = (*it).begin(); i2 != (*it).end(); ++i2)
-                            if ((*i2).getSource() == stm.getName())
-                                (*i2).notifyObservers();
-                }
+                dynamic_cast<Domain *>(object)->loadInfo();
+                // notify all table columns with that domain
+                for (MetadataCollection<Table>::iterator it = tablesM.begin(); it != tablesM.end(); ++it)
+                    for (MetadataCollection<Column>::iterator i2 = (*it).begin(); i2 != (*it).end(); ++i2)
+                        if ((*i2).getSource() == stm.getName())
+                            (*i2).notifyObservers();
                 break;
             default:
                 object->notifyObservers();
                 break;
         }
-        if (!success)
-            return false;
     }
-    return true;
 }
 //-----------------------------------------------------------------------------
-bool Database::drop()
+void Database::drop()
 {
-    try
-    {
-        databaseM->Drop();
-        return true;
-    }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-    return false;
+    databaseM->Drop();
 }
 //-----------------------------------------------------------------------------
-bool Database::reconnect() const
+void Database::reconnect() const
 {
-    try
-    {
-        databaseM->Disconnect();
-        databaseM->Connect();
-
-        return true;
-    }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-    return false;
+    databaseM->Disconnect();
+    databaseM->Connect();
 }
 //-----------------------------------------------------------------------------
 // the caller of this function should check whether the database object has the
 // password set, and if it does not, it should provide the password
 //               and if it does, just provide that password
-bool Database::connect(wxString password, ProgressIndicator* indicator)
+void Database::connect(wxString password, ProgressIndicator* indicator)
 {
     if (connectedM)
-        return true;
+        return;
 
     try
     {
@@ -970,76 +859,60 @@ bool Database::connect(wxString password, ProgressIndicator* indicator)
 
         if (connectedM)
             databaseInfoM.loadInfo(&databaseM);
-
-        return true;
-    }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
     }
     catch (...)
     {
-        lastError().setMessage(_("System error."));
+        try
+        {
+            disconnect();
+            databaseM.clear();
+        }
+        catch (...) // we don't care as we already have an error to report
+        {
+        }
+        throw;
     }
-
-    disconnect();
-    databaseM.clear();
-    return false;
 }
 //-----------------------------------------------------------------------------
-bool Database::disconnect(bool onlyDBH)
+void Database::disconnect(bool onlyDBH)
 {
     if (!connectedM && !onlyDBH)
-        return true;
+        return;
 
-    try
-    {
-        if (!onlyDBH)
-            databaseM->Disconnect();
-        resetCredentials();     // "forget" temporary username/password
-        connectedM = false;
+    if (!onlyDBH)
+        databaseM->Disconnect();
+    resetCredentials();     // "forget" temporary username/password
+    connectedM = false;
 
-        // remove entire DBH beneath
-        domainsM.clear();
-        functionsM.clear();
-        generatorsM.clear();
-        proceduresM.clear();
-        rolesM.clear();
-        sysTablesM.clear();
-        tablesM.clear();
-        triggersM.clear();
-        viewsM.clear();
-        exceptionsM.clear();
+    // remove entire DBH beneath
+    domainsM.clear();
+    functionsM.clear();
+    generatorsM.clear();
+    proceduresM.clear();
+    rolesM.clear();
+    sysTablesM.clear();
+    tablesM.clear();
+    triggersM.clear();
+    viewsM.clear();
+    exceptionsM.clear();
 
-        // this a special case for Database only since it doesn't destroy its subitems
-        // but only hides them (i.e. getChildren returns nothing, but items are present)
-        // so observers must get removed
-        domainsM.detachAllObservers();
-        functionsM.detachAllObservers();
-        generatorsM.detachAllObservers();
-        proceduresM.detachAllObservers();
-        rolesM.detachAllObservers();
-        sysTablesM.detachAllObservers();
-        tablesM.detachAllObservers();
-        triggersM.detachAllObservers();
-        viewsM.detachAllObservers();
-        exceptionsM.detachAllObservers();
+    // this a special case for Database only since it doesn't destroy its subitems
+    // but only hides them (i.e. getChildren returns nothing, but items are present)
+    // so observers must get removed
+    domainsM.detachAllObservers();
+    functionsM.detachAllObservers();
+    generatorsM.detachAllObservers();
+    proceduresM.detachAllObservers();
+    rolesM.detachAllObservers();
+    sysTablesM.detachAllObservers();
+    tablesM.detachAllObservers();
+    triggersM.detachAllObservers();
+    viewsM.detachAllObservers();
+    exceptionsM.detachAllObservers();
 
-        if (config().get(wxT("HideDisconnectedDatabases"), false))
-            getServer()->notifyObservers();
-        notifyObservers();
-        return true;
-    }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-
-    return false;
+    if (config().get(wxT("HideDisconnectedDatabases"), false))
+        getServer()->notifyObservers();
+    notifyObservers();
 }
 //-----------------------------------------------------------------------------
 void Database::clear()

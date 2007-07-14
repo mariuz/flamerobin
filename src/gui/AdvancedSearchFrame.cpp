@@ -35,7 +35,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #endif
 
-#include "dberror.h"
+//#include "core/FRError.h"
 #include "frutils.h"
 #include "ContextMenuMetadataItemVisitor.h"
 #include "metadata/metadataitem.h"

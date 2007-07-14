@@ -43,7 +43,7 @@ protected:
     virtual void saveDescription(wxString description);
 public:
     Domain();
-    bool loadInfo();
+    void loadInfo();
 
     static wxString datatype2string(short datatype, short scale,
         short precision, short subtype, short length);

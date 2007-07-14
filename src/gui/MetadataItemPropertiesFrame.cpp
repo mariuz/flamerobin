@@ -49,7 +49,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "config/Config.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
-#include "dberror.h"
 #include "framemanager.h"
 #include "frutils.h"
 #include "gui/MetadataItemPropertiesFrame.h"
@@ -396,7 +395,8 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         if (!r)
             return;
         std::vector<MetadataItem*> tmp;
-        if (r->checkAndLoadColumns() && r->getChildren(tmp))
+        r->checkAndLoadColumns();
+        if (r->getChildren(tmp))
         {
             for (std::vector<MetadataItem*>::iterator it = tmp.begin(); it != tmp.end(); ++it)
                 processHtmlCode(htmlpage, suffix, *it);
@@ -409,19 +409,13 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         if (!r)
             return;
         std::vector<Trigger*> tmp;
-        bool result;
         if (suffix.substr(0, 5) == wxT("after"))
-            result = r->getTriggers(tmp, Trigger::afterTrigger);
+            r->getTriggers(tmp, Trigger::afterTrigger);
         else
-            result = r->getTriggers(tmp, Trigger::beforeTrigger);
+            r->getTriggers(tmp, Trigger::beforeTrigger);
         suffix.erase(0, 5);
-        if (result)
-        {
-            for (std::vector<Trigger*>::iterator it = tmp.begin(); it != tmp.end(); ++it)
-                processHtmlCode(htmlpage, suffix, *it);
-        }
-        else
-            ::wxMessageBox(lastError().getMessage(), _("Error"), wxOK);
+        for (std::vector<Trigger*>::iterator it = tmp.begin(); it != tmp.end(); ++it)
+            processHtmlCode(htmlpage, suffix, *it);
     }
 
     else if (cmd == wxT("depends_on") || cmd == wxT("depend_of"))
@@ -430,13 +424,12 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         if (!m)
             return;
         std::vector<Dependency> tmp;
-        if (m->getDependencies(tmp, cmd == wxT("depends_on")))
+        m->getDependencies(tmp, cmd == wxT("depends_on"));
+        for (std::vector<Dependency>::iterator it = tmp.begin();
+            it != tmp.end(); ++it)
         {
-            for (std::vector<Dependency>::iterator it = tmp.begin(); it != tmp.end(); ++it)
-                processHtmlCode(htmlpage, suffix, &(*it));
+            processHtmlCode(htmlpage, suffix, &(*it));
         }
-        else
-            ::wxMessageBox(lastError().getMessage(), _("Error"), wxOK);
     }
 
     else if (cmd == wxT("dependency_columns"))
@@ -666,7 +659,8 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
 
         SubjectLocker locker(p);
         std::vector<MetadataItem*> tmp;
-        if (p->checkAndLoadParameters() && p->getChildren(tmp))
+        p->checkAndLoadParameters();
+        if (p->getChildren(tmp))
         {
             ParameterType pt = (cmd == wxT("input_parameters")) ? ptInput : ptOutput;
             std::vector<MetadataItem*>::iterator it;
@@ -681,19 +675,17 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
     else if (cmd == wxT("view_source"))
     {
         View* v = dynamic_cast<View*>(object);
-        wxString src;
-        if (!v || !v->getSource(src))
+        if (!v)
             return;
-        htmlpage += escapeHtmlChars(src, false);
+        htmlpage += escapeHtmlChars(v->getSource(), false);
     }
 
     else if (cmd == wxT("procedure_source"))
     {
         Procedure* p = dynamic_cast<Procedure*>(object);
-        wxString src;
-        if (!p || !p->getSource(src))
+        if (!p)
             return;
-        htmlpage += escapeHtmlChars(src, false);
+        htmlpage += escapeHtmlChars(p->getSource(), false);
     }
 
     else if (cmd == wxT("role_owner"))
@@ -707,10 +699,9 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
     else if (cmd == wxT("trigger_source"))
     {
         Trigger* t = dynamic_cast<Trigger*>(object);
-        wxString src;
-        if (!t || !t->getSource(src))
+        if (!t)
             return;
-        htmlpage += escapeHtmlChars(src, false);
+        htmlpage += escapeHtmlChars(t->getSource(), false);
     }
 
     else if (cmd == wxT("trigger_info"))
@@ -719,8 +710,9 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         wxString object, type;
         bool active;
         int position;
-        if (!t || !t->getTriggerInfo(object, active, position, type))
+        if (!t)
             return;
+        t->getTriggerInfo(object, active, position, type);
         wxString s(active ? wxT("Active ") : wxT("Inactive "));
         s << type << wxT(" trigger for ") << object << wxT(" at position ") << position;
         htmlpage += escapeHtmlChars(s, false);

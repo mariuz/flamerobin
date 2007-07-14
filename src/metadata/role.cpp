@@ -38,7 +38,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #pragma hdrstop
 #endif
 
-#include "dberror.h"
+#include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "core/Visitor.h"
 #include "metadata/MetadataItemVisitor.h"
@@ -55,94 +55,67 @@ std::vector<Privilege>* Role::getPrivileges()
     // load privileges from database and return the pointer to collection
     Database *d = getDatabase();
     if (!d)
-    {
-        lastError().setMessage(wxT("database not set"));
-        return 0;
-    }
+        throw FRError(_("database not set"));
     privilegesM.clear();
     IBPP::Database& db = d->getIBPPDatabase();
-    try
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+    st1->Prepare(
+        "select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
+        "RDB$GRANT_OPTION "
+        "from RDB$USER_PRIVILEGES "
+        "where RDB$RELATION_NAME = ? and rdb$object_type = 13 "
+        "order by rdb$user, rdb$user_type, rdb$privilege"
+    );
+    st1->Set(1, wx2std(getName_()));
+    st1->Execute();
+    std::string lastuser;
+    int lasttype = -1;
+    Privilege *pr = 0;
+    while (st1->Fetch())
     {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare(
-            "select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
-            "RDB$GRANT_OPTION "
-            "from RDB$USER_PRIVILEGES "
-            "where RDB$RELATION_NAME = ? and rdb$object_type = 13 "
-            "order by rdb$user, rdb$user_type, rdb$privilege"
-        );
-        st1->Set(1, wx2std(getName_()));
-        st1->Execute();
-        std::string lastuser;
-        int lasttype = -1;
-        Privilege *pr = 0;
-        while (st1->Fetch())
+        std::string user, grantor, privilege;
+        int usertype, grantoption = 0;
+        st1->Get(1, user);
+        st1->Get(2, usertype);
+        st1->Get(3, grantor);
+        st1->Get(4, privilege);
+        if (!st1->IsNull(5))
+            st1->Get(5, grantoption);
+        if (!pr || user != lastuser || usertype != lasttype)
         {
-            std::string user, grantor, privilege;
-            int usertype, grantoption = 0;
-            st1->Get(1, user);
-            st1->Get(2, usertype);
-            st1->Get(3, grantor);
-            st1->Get(4, privilege);
-            if (!st1->IsNull(5))
-                st1->Get(5, grantoption);
-            if (!pr || user != lastuser || usertype != lasttype)
-            {
-                Privilege p(this, std2wx(user).Strip(), usertype);
-                privilegesM.push_back(p);
-                pr = &privilegesM.back();
-                lastuser = user;
-                lasttype = usertype;
-            }
-            pr->addPrivilege(privilege[0], std2wx(grantor).Strip(),
-                grantoption != 0);  // ADMIN OPTION = 2
+            Privilege p(this, std2wx(user).Strip(), usertype);
+            privilegesM.push_back(p);
+            pr = &privilegesM.back();
+            lastuser = user;
+            lasttype = usertype;
         }
-        tr1->Commit();
-        return &privilegesM;
+        pr->addPrivilege(privilege[0], std2wx(grantor).Strip(),
+            grantoption != 0);  // ADMIN OPTION = 2
     }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-    return 0;
+    tr1->Commit();
+    return &privilegesM;
 }
 //-----------------------------------------------------------------------------
 wxString Role::getRoleOwner()
 {
     Database* d = getDatabase();
     if (!d)
-        return _("ERROR: Database not set");
+        throw FRError(_("database not set"));
     IBPP::Database& db = d->getIBPPDatabase();
-
-    try
-    {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare(
-            "select rdb$owner_name from rdb$roles where rdb$role_name = ?");
-        st1->Set(1, wx2std(getName_()));
-        st1->Execute();
-        st1->Fetch();
-        std::string name;
-        st1->Get(1, name);
-        tr1->Commit();
-        return std2wx(name).Strip();
-    }
-    catch (IBPP::Exception &e)
-    {
-        return std2wx(e.ErrorMessage());
-    }
-    catch (...)
-    {
-        return _("System error.");
-    }
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+    st1->Prepare(
+        "select rdb$owner_name from rdb$roles where rdb$role_name = ?");
+    st1->Set(1, wx2std(getName_()));
+    st1->Execute();
+    st1->Fetch();
+    std::string name;
+    st1->Get(1, name);
+    tr1->Commit();
+    return std2wx(name).Strip();
 }
 //-----------------------------------------------------------------------------
 void Role::loadDescription()

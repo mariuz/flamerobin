@@ -43,9 +43,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <ibpp.h>
 
+#include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "core/Visitor.h"
-#include "dberror.h"
 #include "frutils.h"
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
@@ -58,126 +58,89 @@ Trigger::Trigger()
     infoIsLoadedM = false;
 }
 //-----------------------------------------------------------------------------
-bool Trigger::getTriggerInfo(wxString& object, bool& active, int& position, wxString& type)
+void Trigger::getTriggerInfo(wxString& object, bool& active, int& position,
+    wxString& type)
 {
-    if (!infoIsLoadedM && !loadInfo())
-        return false;
+    if (!infoIsLoadedM)
+        loadInfo();
     object = objectM;
     active = activeM;
     position = positionM;
     type = triggerTypeM;
-    return true;
 }
 //-----------------------------------------------------------------------------
-bool Trigger::getRelation(wxString& relation)
+wxString Trigger::getRelation()
 {
     if (!infoIsLoadedM)
-        if (!loadInfo())
-            return false;
-    relation = objectM;
-    return true;
+        loadInfo();
+    return objectM;
 }
 //-----------------------------------------------------------------------------
-bool Trigger::loadInfo(bool force)
+void Trigger::loadInfo(bool force)
 {
     infoIsLoadedM = false;
     Database *d = getDatabase();
     if (!d)
-    {
-        lastError().setMessage(wxT("database not set"));
-        return false;
-    }
-
+        throw FRError(_("database not set"));
     IBPP::Database& db = d->getIBPPDatabase();
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+    st1->Prepare(
+        "select t.rdb$relation_name, t.rdb$trigger_sequence, "
+        "t.rdb$trigger_inactive, t.rdb$trigger_type "
+        "from rdb$triggers t where rdb$trigger_name = ? "
+    );
 
-    try
+    st1->Set(1, wx2std(getName_()));
+    st1->Execute();
+    if (st1->Fetch())
     {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare(
-            "select t.rdb$relation_name, t.rdb$trigger_sequence, t.rdb$trigger_inactive, t.rdb$trigger_type "
-            "from rdb$triggers t where rdb$trigger_name = ? "
-        );
+        std::string objectName;
+        st1->Get(1, objectName);
+        objectM = std2wx(objectName);
+        objectM.erase(objectM.find_last_not_of(wxT(" ")) + 1);
+        st1->Get(2, &positionM);
 
-        st1->Set(1, wx2std(getName_()));
-        st1->Execute();
-        if (st1->Fetch())
-        {
-            std::string objectName;
-            st1->Get(1, objectName);
-            objectM = std2wx(objectName);
-            objectM.erase(objectM.find_last_not_of(wxT(" ")) + 1);
-            st1->Get(2, &positionM);
+        short temp;
+        if (st1->IsNull(3))
+            temp = 0;
+        else
+            st1->Get(3, &temp);
+        activeM = (temp == 0);
 
-            short temp;
-            if (st1->IsNull(3))
-                temp = 0;
-            else
-                st1->Get(3, &temp);
-            activeM = (temp == 0);
-
-            int ttype;
-            st1->Get(4, &ttype);
-            triggerTypeM = getTriggerType(ttype);
-            tr1->Commit();
-            infoIsLoadedM = true;
-            if (force)
-                notifyObservers();
-        }
-        else    // maybe trigger was dropped?
-        {
-            //wxMessageBox("Trigger does not exist in database");
-            return false;
-        }
-        return true;
+        int ttype;
+        st1->Get(4, &ttype);
+        triggerTypeM = getTriggerType(ttype);
+        tr1->Commit();
+        infoIsLoadedM = true;
+        if (force)
+            notifyObservers();
     }
-    catch (IBPP::Exception &e)
+    else    // maybe trigger was dropped?
     {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
+        //wxMessageBox("Trigger does not exist in database");
+        objectM = wxEmptyString;
     }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-
-    return false;
 }
 //-----------------------------------------------------------------------------
-bool Trigger::getSource(wxString& source) const
+wxString Trigger::getSource() const
 {
     Database* d = getDatabase();
     if (!d)
-    {
-        lastError().setMessage(wxT("database not set"));
-        return false;
-    }
-
+        throw FRError(_("database not set"));
     IBPP::Database& db = d->getIBPPDatabase();
-
-    try
-    {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare("select rdb$trigger_source from rdb$triggers where rdb$trigger_name = ?");
-        st1->Set(1, wx2std(getName_()));
-        st1->Execute();
-        st1->Fetch();
-        readBlob(st1, 1, source);
-        tr1->Commit();
-        return true;
-    }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-
-    return false;
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+    st1->Prepare("select rdb$trigger_source from rdb$triggers where rdb$trigger_name = ?");
+    st1->Set(1, wx2std(getName_()));
+    st1->Execute();
+    st1->Fetch();
+    wxString source;
+    readBlob(st1, 1, source);
+    tr1->Commit();
+    return source;
 }
 //-----------------------------------------------------------------------------
 wxString Trigger::getTriggerType(int type)
@@ -212,13 +175,12 @@ Trigger::firingTimeType Trigger::getFiringTime()
 //-----------------------------------------------------------------------------
 wxString Trigger::getAlterSql()
 {
-    wxString object, source, type;
+    wxString object, type;
     bool active;
     int position;
 
-    if (!getTriggerInfo(object, active, position, type) || !getSource(source))
-        return lastError().getMessage();
-
+    getTriggerInfo(object, active, position, type);
+    wxString source = getSource();
     wxString sql;
     sql << wxT("SET TERM ^ ;\nALTER TRIGGER ") << getQuotedName();
     if (active)

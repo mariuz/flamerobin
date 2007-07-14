@@ -180,16 +180,15 @@ Relation *IncompleteStatement::getAlterTriggerRelation(const wxString& sql)
         id.setFromSql(trigName);
         Trigger *t = dynamic_cast<Trigger *>(databaseM->findByNameAndType(
             ntTrigger, id.get()));
-        wxString relName;
-        if (t && t->getRelation(relName))
+        if (!t)
+            return 0;
+        wxString relName = t->getRelation();
+        r = dynamic_cast<Relation *>(databaseM->findByNameAndType(ntTable,
+            relName));
+        if (!r)
         {
-            r = dynamic_cast<Relation *>(databaseM->findByNameAndType(ntTable,
-                relName));
-            if (!r)
-            {
-                r = dynamic_cast<Relation *>(databaseM->findByNameAndType(
-                    ntView, relName));
-            }
+            r = dynamic_cast<Relation *>(databaseM->findByNameAndType(
+                ntView, relName));
         }
     }
     return r;

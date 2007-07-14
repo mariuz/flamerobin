@@ -46,7 +46,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "config/DatabaseConfig.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
-#include "dberror.h"
 #include "gui/AdvancedMessageDialog.h"
 #include "gui/AdvancedSearchFrame.h"
 #include "gui/BackupFrame.h"
@@ -1255,10 +1254,8 @@ void MainFrame::OnMenuReconnect(wxCommandEvent& WXUNUSED(event))
         return;
 
     ::wxBeginBusyCursor();
-    bool ok = d->reconnect();
+    d->reconnect();
     ::wxEndBusyCursor();
-    if (!ok)
-        reportLastError(_("Error Reconnecting Database"));
 
     FR_CATCH
 }
@@ -1335,8 +1332,7 @@ void MainFrame::OnMenuDisconnect(wxCommandEvent& WXUNUSED(event))
         return;
 
     tree_ctrl_1->Freeze();
-    if (!d->disconnect())
-        reportLastError(_("Error Disconnecting Database"));
+    d->disconnect();
 
     FR_CATCH
 
@@ -1347,10 +1343,8 @@ void MainFrame::OnMenuDisconnect(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::showGeneratorValue(Generator* g)
 {
-    if (!g)
-        return;
-    if (!g->loadValue())
-        reportLastError(_("Error Loading Generator Value"));
+    if (g)
+        g->loadValue();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuShowGeneratorValue(wxCommandEvent& WXUNUSED(event))
@@ -1383,10 +1377,7 @@ void MainFrame::OnMenuShowAllGeneratorValues(wxCommandEvent& WXUNUSED(event))
 
     Database* d = tree_ctrl_1->getSelectedDatabase();
     if (checkValidDatabase(d))
-    {
-        if (!d->loadGeneratorValues())
-            reportLastError(_("Error Loading Generator Value"));
-    }
+        d->loadGeneratorValues();
 
     FR_CATCH
 }
@@ -1522,21 +1513,14 @@ void MainFrame::OnMenuLoadColumnsInfo(wxCommandEvent& WXUNUSED(event))
     if (!t)
         return;
 
-    bool success = true;
     switch (t->getType())
     {
         case ntTable:
         case ntSysTable:
-        case ntView:        success = ((Relation*)t)->checkAndLoadColumns();   break;
-        case ntProcedure:   success = ((Procedure*)t)->checkAndLoadParameters();               break;
+        case ntView:        ((Relation*)t)->checkAndLoadColumns();     break;
+        case ntProcedure:   ((Procedure*)t)->checkAndLoadParameters(); break;
         default:            break;
     };
-
-    if (!success)
-    {
-        reportLastError(_("Error Loading Information"));
-        return;
-    }
 
     if (t->getType() == ntProcedure)
     {
@@ -1765,11 +1749,7 @@ void MainFrame::OnMenuDropDatabase(wxCommandEvent& WXUNUSED(event))
         wxYES_NO|wxCANCEL|wxICON_QUESTION);
     if (result == wxCANCEL)
         return;
-    if (!d->drop())
-    {
-        reportLastError(_("Error dropping database."));
-        return;
-    }
+    d->drop();
     d->disconnect(true);    // true = just remove the child nodes
     if (result == wxNO)
     {   // unregister

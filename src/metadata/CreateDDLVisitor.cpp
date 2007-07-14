@@ -574,12 +574,12 @@ void CreateDDLVisitor::visitTable(Table& t)
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visitTrigger(Trigger& t)
 {
-    wxString object, source, type, relation;
+    wxString object, type;
     bool active;
     int position;
     t.getTriggerInfo(object, active, position, type);
-    t.getSource(source);
-    t.getRelation(relation);
+    wxString source = t.getSource();
+    wxString relation = t.getRelation();
 
     preSqlM << wxT("SET TERM ^ ;\nCREATE TRIGGER ") << t.getQuotedName()
          << wxT(" FOR ") << relation;

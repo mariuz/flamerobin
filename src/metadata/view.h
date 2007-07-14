@@ -37,7 +37,7 @@ public:
     View();
     wxString getCreateSqlTemplate() const;  // overrides MetadataItem::getCreateSqlTemplate()
 
-    bool getSource(wxString& source);
+    wxString getSource();
     wxString getCreateSql();
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);

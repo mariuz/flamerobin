@@ -43,9 +43,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <ibpp.h>
 
+#include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "frutils.h"
-#include "dberror.h"
 #include "metadata/database.h"
 #include "metadata/domain.h"
 #include "metadata/MetadataItemVisitor.h"
@@ -54,105 +54,88 @@ Domain::Domain():
     MetadataItem()
 {
     typeM = ntDomain;
-    infoLoadedM = false;    // I had a 2 hour session with debugger to found out that this was missing
+    infoLoadedM = false;
 }
 //-----------------------------------------------------------------------------
-bool Domain::loadInfo()
+void Domain::loadInfo()
 {
     Database *d = getDatabase();
     if (!d)
-    {
-        //wxMessageBox(_("Domain::loadInfo, database = 0"), _("WARNING"), wxICON_WARNING|wxOK);
-        return false;
-    }
+        throw FRError(_("Domain::loadInfo, database = 0"));
     IBPP::Database& db = d->getIBPPDatabase();
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+    st1->Prepare(
+        "select t.rdb$type, f.rdb$field_sub_type, f.rdb$field_length,"
+        " f.rdb$field_precision, f.rdb$field_scale, c.rdb$character_set_name, "
+        " f.rdb$character_length, f.rdb$null_flag, f.rdb$default_source, "
+        " l.rdb$collation_name, f.rdb$validation_source "
+        " from rdb$fields f"
+        " join rdb$types t on f.rdb$field_type=t.rdb$type"
+        " left outer join rdb$character_sets c "
+            " on c.rdb$character_set_id = f.rdb$character_set_id"
+        " left outer join rdb$collations l "
+            " on l.rdb$collation_id = f.rdb$collation_id "
+            " and l.rdb$character_set_id = f.rdb$character_set_id"
+        " where f.rdb$field_name = ?"
+        " and t.rdb$field_name='RDB$FIELD_TYPE'"
+    );
 
-    try
+    st1->Set(1, wx2std(getName_()));
+    st1->Execute();
+    if (!st1->Fetch())
+        throw FRError(_("Domain not found."));
+    st1->Get(1, &datatypeM);
+    if (st1->IsNull(2))
+        subtypeM = 0;
+    else
+        st1->Get(2, &subtypeM);
+    st1->Get(3, &lengthM);
+    if (!st1->IsNull(7))        // use rdb$character_length for character types
+        st1->Get(7, &lengthM);
+    if (st1->IsNull(4))
+        precisionM = 0;
+    else
+        st1->Get(4, &precisionM);
+    if (st1->IsNull(5))
+        scaleM = 0;
+    else
+        st1->Get(5, &scaleM);
+    if (st1->IsNull(6))
+        charsetM = wxT("");
+    else
     {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare(
-            "select t.rdb$type, f.rdb$field_sub_type, f.rdb$field_length,"
-            " f.rdb$field_precision, f.rdb$field_scale, c.rdb$character_set_name, f.rdb$character_length,"
-            " f.rdb$null_flag, f.rdb$default_source, l.rdb$collation_name, f.rdb$validation_source "
-            " from rdb$fields f"
-            " join rdb$types t on f.rdb$field_type=t.rdb$type"
-            " left outer join rdb$character_sets c on c.rdb$character_set_id = f.rdb$character_set_id"
-            " left outer join rdb$collations l on l.rdb$collation_id = f.rdb$collation_id "
-                " and l.rdb$character_set_id = f.rdb$character_set_id"
-            " where f.rdb$field_name = ?"
-            " and t.rdb$field_name='RDB$FIELD_TYPE'"
-        );
-
-        st1->Set(1, wx2std(getName_()));
-        st1->Execute();
-        if (!st1->Fetch())
-        {
-            //wxMessageBox(_("Domain not found."), _("Warning."), wxICON_WARNING|wxOK);
-            return false;
-        }
-        st1->Get(1, &datatypeM);
-        if (st1->IsNull(2))
-            subtypeM = 0;
-        else
-            st1->Get(2, &subtypeM);
-        st1->Get(3, &lengthM);
-        if (!st1->IsNull(7))        // use rdb$character_length for character types
-            st1->Get(7, &lengthM);
-        if (st1->IsNull(4))
-            precisionM = 0;
-        else
-            st1->Get(4, &precisionM);
-        if (st1->IsNull(5))
-            scaleM = 0;
-        else
-            st1->Get(5, &scaleM);
-        if (st1->IsNull(6))
-            charsetM = wxT("");
-        else
-        {
-            std::string charset;
-            st1->Get(6, charset);
-            charsetM = std2wx(charset).Strip();
-        }
-        isNotNullM = !st1->IsNull(8);
-        readBlob(st1, 9, defaultM);
-
-        hasDefaultM = !st1->IsNull(9);
-        if (hasDefaultM)
-        {
-            // Some users reported two spaces before DEFAULT word in source
-            // Perhaps some other tools can put garbage here? Should we
-            // parse it as SQL to clean up comments, whitespace, etc?
-            defaultM.Trim(false).Remove(0, 8);
-        }
-
-        if (st1->IsNull(10))
-            collationM = wxEmptyString;
-        else
-        {
-            std::string coll;
-            st1->Get(10, coll);
-            collationM = std2wx(coll).Strip();
-        }
-        readBlob(st1, 11, checkM);
-
-        tr1->Commit();
-        if (!isSystem())
-            notifyObservers();
-        infoLoadedM = true;
-        return true;
+        std::string charset;
+        st1->Get(6, charset);
+        charsetM = std2wx(charset).Strip();
     }
-    catch (IBPP::Exception &e)
+    isNotNullM = !st1->IsNull(8);
+    readBlob(st1, 9, defaultM);
+
+    hasDefaultM = !st1->IsNull(9);
+    if (hasDefaultM)
     {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
+        // Some users reported two spaces before DEFAULT word in source
+        // Perhaps some other tools can put garbage here? Should we
+        // parse it as SQL to clean up comments, whitespace, etc?
+        defaultM.Trim(false).Remove(0, 8);
     }
-    catch (...)
+
+    if (st1->IsNull(10))
+        collationM = wxEmptyString;
+    else
     {
-        lastError().setMessage(_("System error."));
+        std::string coll;
+        st1->Get(10, coll);
+        collationM = std2wx(coll).Strip();
     }
-    return false;
+    readBlob(st1, 11, checkM);
+
+    tr1->Commit();
+    if (!isSystem())
+        notifyObservers();
+    infoLoadedM = true;
 }
 //-----------------------------------------------------------------------------
 //! returns column's datatype as human readable wxString.
@@ -169,14 +152,15 @@ wxString Domain::datatype2string(short datatype, short scale, short precision,
 {
     std::ostringstream retval;      // this will be returned
 
-    // special case (mess that some tools (ex. IBExpert) make by only setting scale and not changing type)
+    // special case (mess that some tools (ex. IBExpert) make by only
+    // setting scale and not changing type)
     if (datatype == 27 && scale < 0)
     {
         retval << "Numeric(15," << -scale << ")";
         return std2wx(retval.str());
     }
 
-    // LONG&INT64: INT/SMALLINT (prec=0), DECIMAL(sub_type=2), NUMERIC(sub_type=1)
+    // INTEGERs (prec=0), DECIMAL(sub_type=2), NUMERIC(sub_type=1)
     if (datatype == 7 || datatype == 8 || datatype == 16)
     {
         if (scale == 0 && (datatype == 7 || datatype == 8))
@@ -220,7 +204,8 @@ wxString Domain::datatype2string(short datatype, short scale, short precision,
         }
     }
 
-    if (datatype == 14 || datatype == 37 || datatype == 40) // char, varchar & cstring, add (length)
+    // char, varchar & cstring, add (length)
+    if (datatype == 14 || datatype == 37 || datatype == 40)
         retval << "(" << length << ")";
 
     if (datatype == 261)    // blob

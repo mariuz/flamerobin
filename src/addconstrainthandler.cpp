@@ -41,7 +41,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 #include <sstream>
 
-#include "dberror.h"
 #include "frutils.h"
 #include "gui/ExecuteSql.h"
 #include "gui/MultilineEnterDialog.h"
@@ -107,21 +106,18 @@ bool AddConstraintHandler::handleURI(URI& uri)
     wxString default_value;
     wxString prefix = type + wxT("_") + t->getName_();
     std::vector<wxString> cnames;
-    if (db->fillVector(cnames,
+    db->fillVector(cnames,
         wxT("select rdb$constraint_name from rdb$relation_constraints ")
         wxT("where rdb$relation_name = '") + t->getName_()
-        + wxT("' and rdb$constraint_name starting with '") + prefix + wxT("' order by 1")))
+        + wxT("' and rdb$constraint_name starting with '") + prefix
+        + wxT("' order by 1"));
+    int i = 0;
+    do
     {
-        int i = 0;
-        do
-        {
-            i++;
-            default_value = prefix + wxString::Format(wxT("_%d"), i);
-        }
-        while (std::find(cnames.begin(), cnames.end(), default_value) != cnames.end());
+        i++;
+        default_value = prefix + wxString::Format(wxT("_%d"), i);
     }
-    else
-        default_value = prefix;
+    while (std::find(cnames.begin(), cnames.end(), default_value) != cnames.end());
 
     wxString cname = ::wxGetTextFromUser(_("Enter constraint name"),
         _("Adding new table constraint"), default_value, w);

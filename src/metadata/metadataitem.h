@@ -84,7 +84,7 @@ public:
     virtual void lockSubject();
     virtual void unlockSubject();
 
-    bool getDependencies(std::vector<Dependency>& list, bool ofObject);  // load from db
+    void getDependencies(std::vector<Dependency>& list, bool ofObject);  // load from db
 
     Database *getDatabase() const;
     Root* getRoot() const;

@@ -43,8 +43,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <ibpp.h>
 
+#include "core/FRError.h"
 #include "core/StringUtils.h"
-#include "dberror.h"
 #include "metadata/database.h"
 #include "metadata/generator.h"
 #include "metadata/MetadataItemVisitor.h"
@@ -76,36 +76,18 @@ bool Generator::loadValue()
 {
     Database *d = getDatabase();
     if (!d)
-    {
-        lastError().setMessage(wxT("Database not set."));
-        return false;
-    }
-
+        throw FRError(_("Database not set."));
     IBPP::Database& db = d->getIBPPDatabase();
-
-    try
-    {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare("select gen_id(" + wx2std(getQuotedName()) + ", 0) from rdb$database");
-        st1->Execute();
-        st1->Fetch();
-        int64_t value;
-        st1->Get(1, &value);
-        tr1->Commit();
-        setValue(value);
-        return true;
-    }
-    catch (IBPP::Exception &e)
-    {
-        lastError().setMessage(std2wx(e.ErrorMessage()));
-    }
-    catch (...)
-    {
-        lastError().setMessage(_("System error."));
-    }
-    return false;
+    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
+    tr1->Start();
+    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
+    st1->Prepare("select gen_id(" + wx2std(getQuotedName()) + ", 0) from rdb$database");
+    st1->Execute();
+    st1->Fetch();
+    int64_t value;
+    st1->Get(1, &value);
+    tr1->Commit();
+    setValue(value);
 }
 //-----------------------------------------------------------------------------
 wxString Generator::getPrintableName()

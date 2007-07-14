@@ -38,8 +38,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #include "wx/wx.h"
 #endif
 
+#include "core/FRError.h"
 #include "core/StringUtils.h"
-#include "dberror.h"
 #include "frutils.h"
 #include "gui/ProgressDialog.h"
 #include "metadata/database.h"
@@ -137,11 +137,6 @@ bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent, vector<wxStr
     return true;
 }
 //-----------------------------------------------------------------------------
-void reportLastError(const wxString& actionMsg)
-{
-    wxMessageBox(lastError().getMessage(), actionMsg, wxOK | wxICON_ERROR);
-}
-//-----------------------------------------------------------------------------
 bool connectDatabase(Database *db, wxWindow* parent,
     ProgressDialog* progressdialog)
 {
@@ -159,21 +154,15 @@ bool connectDatabase(Database *db, wxWindow* parent,
 
     wxString caption(wxString::Format(wxT("Connecting with Database \"%s\""),
         db->getName_().c_str()));
-    bool ok;
     if (progressdialog)
     {
         progressdialog->setProgressMessage(caption);
-        ok = db->connect(pass, progressdialog);
+        db->connect(pass, progressdialog);
     }
     else
     {
         ProgressDialog pd(parent, caption, 1);
-        ok = db->connect(pass, &pd);;
-    }
-    if (!ok)
-    {
-        reportLastError(_("Error Connecting to Database"));
-        return false;
+        db->connect(pass, &pd);;
     }
     return true;
 }

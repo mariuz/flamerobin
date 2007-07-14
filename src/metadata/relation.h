@@ -58,8 +58,8 @@ public:
     virtual void lockChildren();
     virtual void unlockChildren();
 
-    bool checkAndLoadColumns();
-    virtual bool loadColumns();
+    void checkAndLoadColumns();
+    virtual void loadColumns();
     Column *addColumn(Column &c);
 
     MetadataCollection<Column>::iterator begin();
@@ -70,7 +70,7 @@ public:
     wxString getRebuildSql();
     std::vector<Privilege>* getPrivileges();
     bool getChildren(std::vector<MetadataItem *>& temp);
-    bool getTriggers(std::vector<Trigger *>& list,
+    void getTriggers(std::vector<Trigger *>& list,
         Trigger::firingTimeType beforeOrAfter);
 };
 //-----------------------------------------------------------------------------

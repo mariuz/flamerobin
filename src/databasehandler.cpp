@@ -38,9 +38,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #include "wx/wx.h"
 #endif
 
-#include "core/FRError.h"
 #include "core/StringUtils.h"
-#include "dberror.h"
 #include "metadata/server.h"
 #include "metadata/database.h"
 #include "urihandler.h"
@@ -141,4 +139,3 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
     return true;
 }
 //-----------------------------------------------------------------------------
-
