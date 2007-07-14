@@ -80,13 +80,13 @@ void str2date(const wxString& str, int& date)
 // HH:MM:SS
 void str2time(const wxString& str, int& mytime)
 {
-    long h,m,s;
-    if (!str.Mid(0,2).ToLong(&h) || !str.Mid(3,2).ToLong(&m) ||
-        !str.Mid(6,2).ToLong(&s))
+    long h = 0, m = 0, s = 0;
+    if (!str.Mid(0, 2).ToLong(&h) || !str.Mid(3, 2).ToLong(&m)
+        || !str.Mid(6, 2).ToLong(&s))
     {
         throw FRError(_("Invalid time: ") + str);
     }
-    IBPP::itot(&mytime, h,m,s,0);
+    IBPP::itot(&mytime, h, m, s, 0);
 }
 //-----------------------------------------------------------------------------
 // only used in function OnGenerateButtonClick
@@ -1273,7 +1273,7 @@ void setFromFile(IBPP::Statement st, int param,
 //-----------------------------------------------------------------------------
 template<typename T>
 void setFromOther(IBPP::Statement st, int param,
-    GeneratorSettings *gs, int recNo)
+    GeneratorSettings *gs, size_t recNo)
 {
     IBPP::Statement st2 =
         IBPP::StatementFactory(st->DatabasePtr(), st->TransactionPtr());
@@ -1325,12 +1325,12 @@ void DataGeneratorFrame::setString(IBPP::Statement st, int param,
 {
     wxString value;
     long chars = 1;
-    int start = 0;
+    size_t start = 0;
     while (start < gs->range.Length())
     {
         if (gs->range.Mid(start, 1) == wxT("["))
         {
-            int p = gs->range.find(wxT("]"), start+1);
+            size_t p = gs->range.find(wxT("]"), start+1);
             if (p == wxString::npos)    // invalid mask
                 throw FRError(_("Invalid mask: missing ]"));
             for (int i = 0; i < chars; i++)
@@ -1343,7 +1343,7 @@ void DataGeneratorFrame::setString(IBPP::Statement st, int param,
         }
         else
         {
-            int p = gs->range.find(wxT("["), start+1);
+            size_t p = gs->range.find(wxT("["), start+1);
             if (p == wxString::npos)    // invalid mask
                 throw FRError(_("Invalid mask, missing ["));
             wxString number = gs->range.Mid(start, p-start);
