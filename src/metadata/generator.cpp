@@ -72,7 +72,7 @@ void Generator::setValue(int64_t value)
     }
 }
 //-----------------------------------------------------------------------------
-bool Generator::loadValue()
+void Generator::loadValue()
 {
     Database *d = getDatabase();
     if (!d)
