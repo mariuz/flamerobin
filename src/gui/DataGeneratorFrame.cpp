@@ -283,9 +283,9 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     innerSizer = new wxBoxSizer( wxVERTICAL );
 
     mainSplitter = new wxSplitterWindow( outerPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-		// wx docs say that wxSP_NOBORDER is default, but it obviously is not the case on MSW
-		// (I tried on Windows 98)
-		wxSP_NOBORDER);
+        // wx docs say that wxSP_NOBORDER is default, but it obviously is not the case on MSW
+        // (I tried on Windows 98)
+        wxSP_NOBORDER);
     mainSplitter->SetMinimumPaneSize(100);
     mainSplitter->SetSashGravity( 0.5 );
 
@@ -298,7 +298,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
 
     mainTree = new myTreeCtrl(leftPanel, wxDefaultPosition, wxDefaultSize,
 #if defined __WXGTK20__ || defined __WXMAC__
-		// doesn't seem to work on MSW when root is hidden
+        // doesn't seem to work on MSW when root is hidden
         wxTR_NO_LINES | wxTR_HIDE_ROOT |
 #endif
         wxTR_HAS_BUTTONS | wxSUNKEN_BORDER );
@@ -1205,27 +1205,23 @@ void setFromFile(IBPP::Statement st, int param,
             st->Set(param, t);
             break;
         }
+        case IBPP::sdLargeint:
+#if wxCHECK_VERSION(2, 8, 0)
+        {
+            wxLongLong_t ll;
+            if (!selected.ToLongLong(&ll))
+                throw FRError(_("Invalid long long numeric value: ")+selected);
+            int64_t t = ll;
+            st->Set(param, t);
+            break;
+        }
+#endif
         case IBPP::sdInteger:
         {
             long l;
             if (!selected.ToLong(&l))
                 throw FRError(_("Invalid long numeric value: ")+selected);
             int32_t t = l;
-            st->Set(param, t);
-            break;
-        }
-        case IBPP::sdLargeint:
-        {
-            wxLongLong_t ll;
-            if (!selected.ToLongLong(&ll))
-            {
-                // perhaps it is not supported, try regular Long value
-                long l;
-                if (!selected.ToLong(&l))
-                    throw FRError(_("Invalid long long numeric value: ")+selected);
-                ll = l;
-            }
-            int64_t t = ll;
             st->Set(param, t);
             break;
         }
