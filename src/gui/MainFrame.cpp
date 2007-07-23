@@ -397,6 +397,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(myTreeCtrl::Menu_LoadColumnsInfo, MainFrame::OnMenuLoadColumnsInfo)
     EVT_MENU(myTreeCtrl::Menu_AddColumn, MainFrame::OnMenuAddColumn)
     EVT_MENU(myTreeCtrl::Menu_CreateTriggerForTable, MainFrame::OnMenuCreateTriggerForTable)
+    EVT_MENU(myTreeCtrl::Menu_CreateProcedureForTable, MainFrame::OnMenuCreateProcedureForTable)
     EVT_MENU(myTreeCtrl::Menu_ExecuteProcedure, MainFrame::OnMenuExecuteProcedure)
 
     EVT_MENU(myTreeCtrl::Menu_ShowAllGeneratorValues, MainFrame::OnMenuShowAllGeneratorValues)
@@ -835,6 +836,19 @@ void MainFrame::OnMenuCreateTriggerForTable(wxCommandEvent& WXUNUSED(event))
         wxString::Format(wxT("%ld"), (uintptr_t)this) +
         wxT("&object_address=") + wxString::Format(wxT("%ld"), (uintptr_t)i));
     getURIProcessor().handleURI(uri);
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuCreateProcedureForTable(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    Table *t = dynamic_cast<Table*>(tree_ctrl_1->getSelectedMetadataItem());
+    if (!t)
+        return;
+    showSql(this, wxString(_("Creating procedure")), t->getDatabase(),
+        t->getProcedureTemplate());
 
     FR_CATCH
 }

@@ -174,7 +174,12 @@ void ContextMenuMetadataItemVisitor::visitTable(Table& table)
         menuM->Append(myTreeCtrl::Menu_Insert, _("&Insert into ..."));
     addSelectMenu(true, isSystem);
     if (!isSystem)
-        menuM->Append(myTreeCtrl::Menu_CreateTriggerForTable, _("Create new &trigger..."));
+    {
+        menuM->Append(myTreeCtrl::Menu_CreateTriggerForTable,
+            _("Create new &trigger..."));
+        menuM->Append(myTreeCtrl::Menu_CreateProcedureForTable,
+            _("Create selectable &procedure"));
+    }
     addRegularObjectMenu(false, isSystem);
 }
 //-----------------------------------------------------------------------------

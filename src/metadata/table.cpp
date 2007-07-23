@@ -125,6 +125,35 @@ void Table::loadColumns()           // update the keys info too
     Relation::loadColumns();
 }
 //-----------------------------------------------------------------------------
+wxString Table::getProcedureTemplate()
+{
+    checkAndLoadColumns();
+    wxString spname = wxT("SP_") + getName_();
+    Identifier id(spname);
+    wxString sql = wxT("SET TERM !! ;\nCREATE PROCEDURE ") + id.getQuoted() +
+        wxT("\nRETURNS (");
+    wxString collist, valist, parlist;
+    for (MetadataCollection<Column>::iterator i = columnsM.begin();
+         i != columnsM.end(); ++i)
+    {
+        if (!collist.empty())
+        {
+            valist += wxT(", ");
+            collist += wxT(", ");
+            parlist += wxT(",");
+        }
+        parlist += wxT("\n\t") + (*i).getQuotedName() + wxT(" ") +
+            (*i).getDatatype();
+        collist += (*i).getQuotedName();
+        valist += wxT(":") + (*i).getQuotedName();
+    }
+    sql += parlist;
+    sql += wxT(")\nAS\nBEGIN\n\tFOR SELECT ") + collist + wxT("\n\t    FROM ")
+        + getQuotedName() + wxT("\n\t    INTO ") + valist
+        + wxT("\n\tDO SUSPEND;\nEND!!\nSET TERM ; !!\n");
+    return sql;
+}
+//-----------------------------------------------------------------------------
 wxString Table::getInsertStatement()
 {
     checkAndLoadColumns();
