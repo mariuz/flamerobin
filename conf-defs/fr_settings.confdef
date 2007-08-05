@@ -134,6 +134,11 @@
             <default>0</default>
         </setting>
         <setting type="checkbox">
+            <caption>Display detailed query statistics</caption>
+            <key>SQLEditorShowStats</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
             <caption>Enable call-tips for procedures and functions</caption>
             <description>Shows call-tips for stored procedures and UDFs when bracket is opened</description>
             <key>SQLEditorCalltips</key>
@@ -267,7 +272,7 @@
             <caption>Time format:</caption>
             <description>The following letters will be replaced:<br />h - hour, 0-24<br />H - hour, 00-24<br />m - minute, 0-59<br />M - minute, 00-59<br />s - second, 0-59<br />S - second, 00-59<br />T - millisecond, 000-999<br />All other characters are copied.</description>
             <key>TimeFormat</key>
-            <default>H:M:S</default>
+            <default>H:M:S.T</default>
             <aligngroup>1</aligngroup>
         </setting>
         <setting type="font">

@@ -1282,6 +1282,15 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             InTransaction(true);
         }
 
+        int fetch1, mark1, read1, write1, ins1, upd1, del1, ridx1, rseq1;
+        int fetch2, mark2, read2, write2, ins2, upd2, del2, ridx2, rseq2;
+        if (!prepareOnly && config().get(wxT("SQLEditorShowStats"), true))
+        {
+            databaseM->getIBPPDatabase()->
+                Statistics(&fetch1, &mark1, &read1, &write1);
+            databaseM->getIBPPDatabase()->
+                Counts(&ins1, &upd1, &del1, &ridx1, &rseq1);
+        }
         grid_data->ClearGrid(); // statement object will be invalidated, so clear the grid
         statementM = IBPP::StatementFactory(databaseM->getIBPPDatabase(), transactionM);
         log(_("Preparing query: " + sql), ttSql);
@@ -1307,26 +1316,45 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         log(wxEmptyString);
         log(wxEmptyString);
         log(_("Executing..."));
-        styled_text_ctrl_stats->Update();            // let GUI update the controls
+        styled_text_ctrl_stats->Update();        // let GUI update the controls
         statementM->Execute();
         log(_("Done."));
 
         IBPP::STT type = statementM->Type();
-        if (type == IBPP::stSelect)            // for select statements: show data
+        if (type == IBPP::stSelect)        // for select statements: show data
         {
             grid_data->fetchData(dbCharsetConversionM.getConverter());
             notebook_1->SetSelection(1);
             grid_data->SetFocus();
         }
-        else                                // for other statements: show rows affected
+
+        if (config().get(wxT("SQLEditorShowStats"), true))
         {
-            wxString::size_type p = sql.find_first_not_of(wxT(" \n\t\r"));    // left trim
+            databaseM->getIBPPDatabase()->Statistics(
+                &fetch2, &mark2, &read2, &write2);
+            databaseM->getIBPPDatabase()->
+                Counts(&ins2, &upd2, &del2, &ridx2, &rseq2);
+            log(wxString::Format(
+                _("%d fetches, %d marks, %d reads, %d writes."),
+                fetch2-fetch1, mark2-mark1, read2-read1, write2-write1));
+            log(wxString::Format(
+                _("%d inserts, %d updates, %d deletes, %d index, %d seq."),
+                ins2-ins1, upd2-upd1, del2-del1, ridx2-ridx1, rseq2-rseq1));
+        }
+
+        if (type != IBPP::stSelect) // for other statements: show rows affected
+        {   // left trim
+            wxString::size_type p = sql.find_first_not_of(wxT(" \n\t\r"));
             if (p != wxString::npos && p > 0)
                 sql.erase(0, p);
-            if (type == IBPP::stInsert || type == IBPP::stDelete || type == IBPP::stExecProcedure
-                || type == IBPP::stUpdate)
+            if (type == IBPP::stInsert || type == IBPP::stDelete
+                || type == IBPP::stExecProcedure || type == IBPP::stUpdate)
             {
-                wxString s = wxString::Format(_("%d row(s) affected."), statementM->AffectedRows());
+                wxString addon;
+                if (statementM->AffectedRows() % 10 != 1)
+                    addon = wxT("s");
+                wxString s = wxString::Format(_("%d row%s affected directly."),
+                    statementM->AffectedRows(), addon.c_str());
                 log(wxT("") + s);
                 statusbar_1->SetStatusText(s, 1);
             }
