@@ -1282,12 +1282,12 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             InTransaction(true);
         }
 
-        int fetch1, mark1, read1, write1, ins1, upd1, del1, ridx1, rseq1;
-        int fetch2, mark2, read2, write2, ins2, upd2, del2, ridx2, rseq2;
+        int fetch1, mark1, read1, write1, ins1, upd1, del1, ridx1, rseq1, mem1;
+        int fetch2, mark2, read2, write2, ins2, upd2, del2, ridx2, rseq2, mem2;
         if (!prepareOnly && config().get(wxT("SQLEditorShowStats"), true))
         {
             databaseM->getIBPPDatabase()->
-                Statistics(&fetch1, &mark1, &read1, &write1);
+                Statistics(&fetch1, &mark1, &read1, &write1, &mem1);
             databaseM->getIBPPDatabase()->
                 Counts(&ins1, &upd1, &del1, &ridx1, &rseq1);
         }
@@ -1331,7 +1331,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         if (config().get(wxT("SQLEditorShowStats"), true))
         {
             databaseM->getIBPPDatabase()->Statistics(
-                &fetch2, &mark2, &read2, &write2);
+                &fetch2, &mark2, &read2, &write2, &mem2);
             databaseM->getIBPPDatabase()->
                 Counts(&ins2, &upd2, &del2, &ridx2, &rseq2);
             log(wxString::Format(
@@ -1340,6 +1340,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             log(wxString::Format(
                 _("%d inserts, %d updates, %d deletes, %d index, %d seq."),
                 ins2-ins1, upd2-upd1, del2-del1, ridx2-ridx1, rseq2-rseq1));
+            log(wxString::Format(_("Delta memory: %d bytes."), mem2-mem1));
         }
 
         if (type != IBPP::stSelect) // for other statements: show rows affected
