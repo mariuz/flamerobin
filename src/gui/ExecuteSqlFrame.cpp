@@ -1282,7 +1282,8 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             InTransaction(true);
         }
 
-        int fetch1, mark1, read1, write1, ins1, upd1, del1, ridx1, rseq1, mem1;
+        int fetch1 = 0, mark1 = 0, read1 = 0, write1 = 0, ins1 = 0, upd1 = 0,
+            del1 = 0, ridx1 = 0, rseq1 = 0, mem1 = 0;
         int fetch2, mark2, read2, write2, ins2, upd2, del2, ridx2, rseq2, mem2;
         if (!prepareOnly && config().get(wxT("SQLEditorShowStats"), true))
         {
