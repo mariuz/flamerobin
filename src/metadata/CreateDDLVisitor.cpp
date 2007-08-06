@@ -72,15 +72,18 @@ wxString CreateDDLVisitor::getSuffixSql() const
 // this one is not called from "outside", but from visit(Table) function
 void CreateDDLVisitor::visitColumn(Column& c)
 {
-    preSqlM << c.getQuotedName() << wxT(" ");
-
     wxString computed = c.getComputedSource();
     if (!computed.IsEmpty())
     {
-        preSqlM << wxT("COMPUTED BY ") << computed;
+        wxString add = wxT("ALTER TABLE ") + c.getTable()->getQuotedName()
+            + wxT(" ADD ") + c.getQuotedName() + wxT(" COMPUTED BY ")
+            + computed + wxT(";\n");
+        postSqlM << add;
+        sqlM << add;
         return;
     }
 
+    preSqlM << c.getQuotedName() << wxT(" ");
     wxString collate = c.getCollation();
     Domain *d = c.getDomain();
     if (d)
@@ -159,16 +162,11 @@ void iterateit(CreateDDLVisitor* v, Database& db, ProgressIndicator* pi)
 // build the sql script for entire database
 void CreateDDLVisitor::visitDatabase(Database& d)
 {
-    // TODO: use progressIndicatorM to show what's going on, and check for
-    //       isCanceled()
     if (progressIndicatorM)
         progressIndicatorM->initProgress(wxEmptyString, 10, 0, 1);
 
     try
     {
-        preSqlM << _("/* Please note that this script doesn't maintain\n")
-                << _("   proper order of creation for computed columns if\n")
-                << _("   they reference other tables.  */\n\n");
         preSqlM << wxT("/********************* ROLES **********************/\n\n");
         iterateit<Role>(this, d, progressIndicatorM);
 
@@ -189,6 +187,7 @@ void CreateDDLVisitor::visitDatabase(Database& d)
 
         preSqlM << wxT("/********************* VIEWS **********************/\n\n");
         // TODO: build dependecy tree first, and order views by it
+        //       also include computed columns of tables?
         iterateit<View>(this, d, progressIndicatorM);
 
         preSqlM << wxT("/******************* EXCEPTIONS *******************/\n\n");
@@ -487,7 +486,7 @@ void CreateDDLVisitor::visitTable(Table& t)
     t.checkAndLoadColumns();
     for (MetadataCollection<Column>::iterator it=t.begin(); it!=t.end(); ++it)
     {
-        if (it != t.begin())
+        if (it != t.begin() && (*it).getComputedSource().IsEmpty())
             preSqlM += wxT(",\n  ");
         visitColumn(*it);
     }
