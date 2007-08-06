@@ -174,6 +174,7 @@ protected:
     void removeSubject(Subject* subject);
     void update();
     bool closeWhenTransactionDoneM;
+    bool loadingM;
 
     wxPanel* panel_contents;
 

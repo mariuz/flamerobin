@@ -246,6 +246,7 @@ wxString Identifier::getKeywords(bool lowerCase)
     wxString& s = (lowerCase ? resultLower : resultUpper);
     if (s.IsEmpty())
     {
+        s.Alloc(20480);
         for (keywordContainer::const_iterator it = getKeywordSet().begin();
             it != getKeywordSet().end(); ++it)
         {

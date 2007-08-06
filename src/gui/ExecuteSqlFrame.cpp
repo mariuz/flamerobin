@@ -562,6 +562,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
         const wxPoint& pos, const wxSize& size, long style)
     : BaseFrame(parent, id, title, pos, size, style), Observer()
 {
+    loadingM = true;
     panel_contents = new wxPanel(this, -1);
     button_new = new wxBitmapButton(panel_contents, ID_button_new, wxBitmap(sql_icons::new_xpm));
     button_load = new wxBitmapButton(panel_contents, ID_button_load, wxBitmap(sql_icons::load_xpm));
@@ -588,9 +589,9 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
     styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
     styled_text_ctrl_stats->StyleSetForeground(1, *wxRED);
     styled_text_ctrl_stats->StyleSetForeground(2, *wxBLUE);
-
     set_properties();
     do_layout();
+    loadingM = false;
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::set_properties()
@@ -749,6 +750,9 @@ void ExecuteSqlFrame::OnSqlEditStartDrag(wxStyledTextEvent& WXUNUSED(event))
 //! display editor col:row in StatusBar and do highlighting of braces ()
 void ExecuteSqlFrame::OnSqlEditUpdateUI(wxStyledTextEvent& WXUNUSED(event))
 {
+    if (loadingM)
+        return;
+
     // print x:y coordinates in status bar
     int p = styled_text_ctrl_sql->GetCurrentPos();
     int row = styled_text_ctrl_sql->GetCurrentLine();
@@ -1647,6 +1651,7 @@ void ExecuteSqlFrame::setKeywords()
     // so it can reload this list if something changes
 
     wxArrayString as;
+    as.Alloc(8192);             // pre-alloc 8k
     const Identifier::keywordContainer& k = Identifier::getKeywordSet();
     for (Identifier::keywordContainer::const_iterator ci = k.begin(); ci != k.end(); ++ci)
         as.Add((*ci).Upper());
@@ -1659,8 +1664,9 @@ void ExecuteSqlFrame::setKeywords()
     // The list has to be sorted for autocomplete to work properly
     as.Sort(CaseUnsensitiveCompare);
 
-    keywordsM.Empty();                          // create final wxString from array
-    for (size_t i = 0; i < as.GetCount(); ++i)  // words are separated with spaces
+    keywordsM.Empty();          // create final wxString from array
+    keywordsM.Alloc(20480);     // preallocate 20kB
+    for (size_t i = 0; i < as.GetCount(); ++i)  // separate words with spaces
         keywordsM += as.Item(i) + wxT(" ");
 }
 //-----------------------------------------------------------------------------
