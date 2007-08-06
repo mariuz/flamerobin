@@ -69,7 +69,7 @@ void Domain::loadInfo()
     st1->Prepare(
         "select t.rdb$type, f.rdb$field_sub_type, f.rdb$field_length,"
         " f.rdb$field_precision, f.rdb$field_scale, c.rdb$character_set_name, "
-        " f.rdb$character_length, f.rdb$null_flag, f.rdb$default_source, "
+        " c.rdb$bytes_per_character, f.rdb$null_flag, f.rdb$default_source, "
         " l.rdb$collation_name, f.rdb$validation_source "
         " from rdb$fields f"
         " join rdb$types t on f.rdb$field_type=t.rdb$type"
@@ -92,8 +92,13 @@ void Domain::loadInfo()
     else
         st1->Get(2, &subtypeM);
     st1->Get(3, &lengthM);
-    if (!st1->IsNull(7))        // use rdb$character_length for character types
-        st1->Get(7, &lengthM);
+    // rdb$character_length does not work properly with computed columns
+    if (!st1->IsNull(7))
+    {
+        int bpc;
+        st1->Get(7, bpc);
+        lengthM /= bpc;
+    }
     if (st1->IsNull(4))
         precisionM = 0;
     else
