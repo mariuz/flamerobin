@@ -44,6 +44,8 @@ public:
     virtual ~ResultsetColumnDef();
 
     virtual wxString getAsString(DataGridRowBuffer* buffer) = 0;
+    virtual void setFromString(DataGridRowBuffer* buffer,
+        const wxString& source) = 0;
     virtual unsigned getBufferSize() = 0;
     wxString getName();
     virtual bool isNumeric();

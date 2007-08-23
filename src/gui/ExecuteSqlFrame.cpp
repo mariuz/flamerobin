@@ -1,24 +1,24 @@
 /*
   Copyright (c) 2004-2007 The FlameRobin Development Team
 
-  Permission is hereby granted, free of charge, to any person obtaining
-  a copy of this software and associated documentation files (the
-  "Software"), to deal in the Software without restriction, including
-  without limitation the rights to use, copy, modify, merge, publish,
-  distribute, sublicense, and/or sell copies of the Software, and to
-  permit persons to whom the Software is furnished to do so, subject to
-  the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
 
-  The above copyright notice and this permission notice shall be included
-  in all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
 
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
   $Id$
@@ -576,7 +576,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
     button_rollback = new wxButton(panel_contents, ID_button_rollback, _("Rollback (F8)"));
     button_plan = new wxButton(panel_contents, ID_button_plan, _("Show plan"));
     button_toggle = new wxButton(panel_contents, ID_button_toggle, _("Toggle view"));
-
+    button_delete = new wxButton(panel_contents, ID_button_delete, _("Delete row"));
     splitter_window_1 = new wxSplitterWindow(panel_contents, -1);
     panel_splitter_bottom = new wxPanel(splitter_window_1, -1);
     notebook_1 = new wxNotebook(panel_splitter_bottom, -1, wxDefaultPosition, wxDefaultSize, 0);
@@ -589,6 +589,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
     styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
     styled_text_ctrl_stats->StyleSetForeground(1, *wxRED);
     styled_text_ctrl_stats->StyleSetForeground(2, *wxBLUE);
+
     set_properties();
     do_layout();
     loadingM = false;
@@ -600,13 +601,15 @@ void ExecuteSqlFrame::set_properties()
     SetSize(wxSize(628, 488));
     int statusbar_widths[] = { -2, 100, 60, -1 };
     statusbar_1->SetStatusWidths(4, statusbar_widths);
-    const wxString statusbar_fields[] = {
+    const wxString statusbar_fields[] =
+    {
         wxT("user @ database"),
         wxT("rows fetched"),
         wxT("cursor position"),
         wxT("Transaction status")
     };
-    for(int i = 0; i < statusbar_1->GetFieldsCount(); ++i) {
+    for(int i = 0; i < statusbar_1->GetFieldsCount(); ++i)
+    {
         statusbar_1->SetStatusText(statusbar_fields[i], i);
     }
     grid_data = new DataGrid(notebook_pane_2, ID_grid_data);
@@ -661,6 +664,7 @@ void ExecuteSqlFrame::do_layout()
     sizer_3->Add(button_plan, 0, wxALL, 3);
     sizer_3->Add(10, 5, 0, 0, 0);
     sizer_3->Add(button_toggle, 0, wxALL, 3);
+    sizer_3->Add(button_delete, 0, wxALL, 3);
     sizer_2->Add(sizer_3, 0, wxALL|wxEXPAND, 2);
     sizer_4->Add(styled_text_ctrl_sql, 1, wxEXPAND, 0);
     panel_splitter_top->SetAutoLayout(true);
@@ -734,6 +738,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_rollback, ExecuteSqlFrame::OnButtonRollbackClick)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_plan, ExecuteSqlFrame::OnButtonPlanClick)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_toggle, ExecuteSqlFrame::OnButtonToggleClick)
+    EVT_BUTTON(ExecuteSqlFrame::ID_button_delete, ExecuteSqlFrame::OnButtonDeleteClick)
     EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_ROWCOUNT_CHANGED, \
         ExecuteSqlFrame::OnGridRowCountChanged)
 END_EVENT_TABLE()
@@ -782,21 +787,21 @@ void ExecuteSqlFrame::OnSqlEditUpdateUI(wxStyledTextEvent& WXUNUSED(event))
 
     if (filenameM.IsEmpty())
     {
-        if (styled_text_ctrl_sql->GetTextLength() > 0)
+    if (styled_text_ctrl_sql->GetTextLength() > 0)
+    {
+        for (int i=0; i<styled_text_ctrl_sql->GetLineCount(); ++i)
         {
-            for (int i=0; i<styled_text_ctrl_sql->GetLineCount(); ++i)
+            wxString t = styled_text_ctrl_sql->GetLine(i).Trim();
+            if (!t.IsEmpty())
             {
-                wxString t = styled_text_ctrl_sql->GetLine(i).Trim();
-                if (!t.IsEmpty())
-                {
-                    SetTitle(t);
-                    break;
-                }
+                SetTitle(t);
+                break;
             }
         }
-        else
-            SetTitle(_("Execute SQL statements"));
     }
+    else
+        SetTitle(_("Execute SQL statements"));
+}
 }
 //-----------------------------------------------------------------------------
 //! returns true if there is a word in "wordlist" that starts with "word"
@@ -1018,7 +1023,7 @@ void ExecuteSqlFrame::OnButtonLoadClick(wxCommandEvent& WXUNUSED(event))
 #if wxCHECK_VERSION(2, 8, 0)
         wxFD_OPEN | wxFD_CHANGE_DIR);
 #else
-        wxOPEN | wxCHANGE_DIR);
+        wxOPEN|wxCHANGE_DIR);
 #endif
 
     if (wxID_OK == fd.ShowModal())
@@ -1041,7 +1046,7 @@ void ExecuteSqlFrame::OnButtonSaveAsClick(wxCommandEvent& WXUNUSED(event))
 #if wxCHECK_VERSION(2, 8, 0)
         wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT);
 #else
-        wxSAVE | wxCHANGE_DIR | wxOVERWRITE_PROMPT);
+        wxSAVE |wxCHANGE_DIR | wxOVERWRITE_PROMPT);
 #endif
 
     if (wxID_OK != fd.ShowModal())
@@ -1322,12 +1327,12 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         log(wxEmptyString);
         log(wxEmptyString);
         log(_("Executing..."));
-        styled_text_ctrl_stats->Update();        // let GUI update the controls
+        styled_text_ctrl_stats->Update();            // let GUI update the controls
         statementM->Execute();
         log(_("Done."));
 
         IBPP::STT type = statementM->Type();
-        if (type == IBPP::stSelect)        // for select statements: show data
+        if (type == IBPP::stSelect)            // for select statements: show data
         {
             grid_data->fetchData(dbCharsetConversionM.getConverter());
             notebook_1->SetSelection(1);
@@ -1413,6 +1418,17 @@ void ExecuteSqlFrame::OnButtonCommitClick(wxCommandEvent& WXUNUSED(event))
 void ExecuteSqlFrame::OnButtonPlanClick(wxCommandEvent& WXUNUSED(event))
 {
     prepareAndExecute(true);
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnButtonDeleteClick(wxCommandEvent& event)
+{
+    if ( grid_data->getDataGridTable() )
+    {
+        int pos = grid_data->GetGridCursorRow();
+        grid_data->BeginBatch();
+        grid_data->DeleteRows(pos, 1);
+        grid_data->EndBatch();
+    }
 }
 //-----------------------------------------------------------------------------
 bool ExecuteSqlFrame::commitTransaction()
@@ -1664,7 +1680,7 @@ void ExecuteSqlFrame::setKeywords()
     // The list has to be sorted for autocomplete to work properly
     as.Sort(CaseUnsensitiveCompare);
 
-    keywordsM.Empty();          // create final wxString from array
+    keywordsM.Empty();                          // create final wxString from array
     keywordsM.Alloc(20480);     // preallocate 20kB
     for (size_t i = 0; i < as.GetCount(); ++i)  // separate words with spaces
         keywordsM += as.Item(i) + wxT(" ");

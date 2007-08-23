@@ -36,7 +36,6 @@ class DataGridTable;
 class DataGrid: public wxGrid {
 private:
     void copyToClipboard(const wxString cbText);
-    DataGridTable* getDataGridTable();
     void notifyIfUnfetchedData();
     void showPopMenu(wxPoint cursorPos);
     void updateRowHeights();
@@ -44,6 +43,7 @@ public:
     DataGrid(wxWindow* parent, wxWindowID id);
     ~DataGrid();
 
+    DataGridTable* getDataGridTable();
     void fetchData(wxMBConv* conv);
 private:
     // event handling

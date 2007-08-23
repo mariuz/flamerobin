@@ -334,10 +334,18 @@ void DataGridTable::setFetchAllRecords(bool fetchall)
     fetchAllRowsM = fetchall;
 }
 //-----------------------------------------------------------------------------
-void DataGridTable::SetValue(int WXUNUSED(row), int WXUNUSED(col),
-    const wxString& WXUNUSED(value))
+void DataGridTable::SetValue(int row, int col, const wxString& value)
 {
     // needs to be implemented for editable grid
+
+    // 1. write a new value to data
+    // 2. flag row&cell as 'dirty'
+    rowsM.setFieldValue(row, col, value);
+}
+//-----------------------------------------------------------------------------
+bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
+{
+    // execute the DELETE statement
 }
 //-----------------------------------------------------------------------------
 DEFINE_EVENT_TYPE(wxEVT_FRDG_ROWCOUNT_CHANGED)
