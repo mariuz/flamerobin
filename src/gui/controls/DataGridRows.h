@@ -75,6 +75,7 @@ public:
     bool isFieldNull(unsigned row, unsigned col);
     void setFieldValue(unsigned row, unsigned col,
         const wxString& value);
+    bool removeRows(size_t from, size_t count);
 };
 //----------------------------------------------------------------------
 #endif

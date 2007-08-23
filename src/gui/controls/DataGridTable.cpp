@@ -41,6 +41,7 @@
 #include <wx/grid.h>
 
 #include "config/Config.h"
+#include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "gui/controls/DataGridTable.h"
 //-----------------------------------------------------------------------------
@@ -82,6 +83,8 @@ bool DataGridTable::canFetchMoreRows()
 //-----------------------------------------------------------------------------
 void DataGridTable::Clear()
 {
+    FR_TRY
+
     allRowsFetchedM = true;
     fetchAllRowsM = false;
     config().getValue(wxT("GridFetchAllRecords"), fetchAllRowsM);
@@ -102,6 +105,8 @@ void DataGridTable::Clear()
             0, oldCols);
         GetView()->ProcessTableMessage(colMsg);
     }
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGridTable::fetch()
@@ -157,6 +162,8 @@ void DataGridTable::fetch()
 wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
     wxGridCellAttr::wxAttrKind kind)
 {
+    FR_TRY
+
     if (rowsM.isFieldNull(row, col))
     {
         if (rowsM.isRowFieldNumeric(col))
@@ -168,6 +175,8 @@ wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
         return nullAttrM;
     }
     return wxGridTableBase::GetAttr(row, col, kind);
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 wxString DataGridTable::getCellValue(int row, int col)
@@ -211,7 +220,11 @@ wxString DataGridTable::getCellValueForCSV(int row, int col)
 //-----------------------------------------------------------------------------
 wxString DataGridTable::GetColLabelValue(int col)
 {
+    FR_TRY
+
     return rowsM.getRowFieldName(col);
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::getFetchAllRows()
@@ -221,18 +234,26 @@ bool DataGridTable::getFetchAllRows()
 //-----------------------------------------------------------------------------
 int DataGridTable::GetNumberCols()
 {
+    FR_TRY
+
     return rowsM.getRowFieldCount();
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 int DataGridTable::GetNumberRows()
 {
+    FR_TRY
+
     return rowsM.getRowCount();
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 wxString DataGridTable::getTableName()
 {
-    // TODO: using one table is not correct for JOINs or sub-SELECTs, so it
-    //       should take e.g. the one that occurs most often
+    // TODO: using one table is not correct for JOINs or sub-SELECTs, so we
+    //       should build separate statements for each table
     if (statementM == 0 || statementM->Columns() == 0)
         return wxEmptyString;
     return std2wx(statementM->ColumnTable(1));
@@ -240,6 +261,8 @@ wxString DataGridTable::getTableName()
 //-----------------------------------------------------------------------------
 wxString DataGridTable::GetValue(int row, int col)
 {
+    FR_TRY
+
     if (!isValidCellPos(row, col))
         return wxEmptyString;
 
@@ -262,6 +285,8 @@ wxString DataGridTable::GetValue(int row, int col)
         cellValue += wxT(" [...]"); // and show that there is more data...
     }
     return cellValue;
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGridTable::initialFetch(wxMBConv* conv)
@@ -301,7 +326,11 @@ void DataGridTable::initialFetch(wxMBConv* conv)
 //-----------------------------------------------------------------------------
 bool DataGridTable::IsEmptyCell(int row, int col)
 {
+    FR_TRY
+
     return !isValidCellPos(row, col);
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::isNullCell(int row, int col)
@@ -336,16 +365,44 @@ void DataGridTable::setFetchAllRecords(bool fetchall)
 //-----------------------------------------------------------------------------
 void DataGridTable::SetValue(int row, int col, const wxString& value)
 {
+    FR_TRY
+
     // needs to be implemented for editable grid
 
     // 1. write a new value to data
     // 2. flag row&cell as 'dirty'
     rowsM.setFieldValue(row, col, value);
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
 {
-    // execute the DELETE statement
+    FR_TRY
+
+    // begin transaction
+    // execute the DELETE statement (only if row's type is UPDATE)
+
+    // remove rows from internal storage
+    if (!rowsM.removeRows(pos, numRows))
+        return false;
+
+    // commit transaction
+
+    // notify visual control
+    if (GetView() && numRows > 0)
+    {
+        wxGridTableMessage rowMsg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED,
+            pos, numRows);
+        GetView()->ProcessTableMessage(rowMsg);
+
+        // used in frame to update status bar
+        wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
+        evt.SetExtraLong(rowsM.getRowCount());
+        wxPostEvent(GetView(), evt);
+    }
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 DEFINE_EVENT_TYPE(wxEVT_FRDG_ROWCOUNT_CHANGED)

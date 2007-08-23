@@ -1422,11 +1422,10 @@ void ExecuteSqlFrame::OnButtonPlanClick(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonDeleteClick(wxCommandEvent& event)
 {
-    if ( grid_data->getDataGridTable() )
+    if (grid_data->getDataGridTable() && grid_data->GetNumberRows())
     {
-        int pos = grid_data->GetGridCursorRow();
         grid_data->BeginBatch();
-        grid_data->DeleteRows(pos, 1);
+        grid_data->DeleteRows(grid_data->GetGridCursorRow(), 1);
         grid_data->EndBatch();
     }
 }
@@ -1572,6 +1571,8 @@ void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent &event)
     long rowsFetched = event.GetExtraLong();
     s.Printf(_("%d rows fetched"), rowsFetched);
     statusbar_1->SetStatusText(s, 1);
+
+    button_delete->Enable(rowsFetched > 0);
 
     // TODO: we could make some bool flag, so that this happens only once per execute()
     //       to fix the problem when user does the select, unsplits the window

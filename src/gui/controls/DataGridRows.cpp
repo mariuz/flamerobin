@@ -45,6 +45,7 @@
 #include <string>
 
 #include "config/Config.h"
+#include "core/FRError.h"
 #include "core/Observer.h"
 #include "core/StringUtils.h"
 #include "frtypes.h"
@@ -401,9 +402,16 @@ void IntegerColumnDef::setFromString(DataGridRowBuffer* buffer,
         const wxString& source)
 {
     wxASSERT(buffer);
+    if (source.IsEmpty())
+    {
+        buffer->setFieldNull(offsetM/sizeof(int), true);
+        return;
+    }
+    else
+        buffer->setFieldNull(offsetM/sizeof(int), false);
     long value;
-    if (!source.ToLong(&value)) // TODO: warning: Invalid number
-        value = 0;
+    if (!source.ToLong(&value))
+        throw FRError(_("Invalid numeric value"));
     buffer->setValue(offsetM, (int)value);
 }
 //-----------------------------------------------------------------------------
@@ -460,9 +468,16 @@ void Int64ColumnDef::setFromString(DataGridRowBuffer* buffer,
         const wxString& source)
 {
     wxASSERT(buffer);
+    if (source.IsEmpty())
+    {
+        buffer->setFieldNull(offsetM/sizeof(int64_t), true);
+        return;
+    }
+    else
+        buffer->setFieldNull(offsetM/sizeof(int64_t), false);
     int64_t value;
-    if (!source.ToLongLong(&value)) // TODO: warning: Invalid number
-        value = 0;
+    if (!source.ToLongLong(&value))
+        throw FRError(_("Invalid numeric value"));
     buffer->setValue(offsetM, value);
 }
 //-----------------------------------------------------------------------------
@@ -889,6 +904,23 @@ void DataGridRows::clear()
         columnDefsM.clear();
     }
     bufferSizeM = 0;
+}
+//-----------------------------------------------------------------------------
+bool DataGridRows::removeRows(size_t from, size_t count)
+{
+    std::vector<DataGridRowBuffer*>::iterator i2, it = buffersM.begin();
+    from += count - 1;
+    while (from--)
+        if (++it == buffersM.end())
+            return false;
+    while (count--)
+    {
+        i2 = it;
+        it--;
+        delete (*i2);
+        buffersM.erase(i2);
+    }
+    return true;
 }
 //-----------------------------------------------------------------------------
 unsigned DataGridRows::getRowCount()

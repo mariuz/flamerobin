@@ -480,6 +480,8 @@ void DataGrid::OnMenuCopyToCBAsUpdate(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void DataGrid::OnMenuLabelFont(wxCommandEvent& WXUNUSED(event))
 {
+    FR_TRY
+
     wxFont f = ::wxGetFontFromUser(this, GetLabelFont());
     if (f.Ok())
     {
@@ -490,6 +492,8 @@ void DataGrid::OnMenuLabelFont(wxCommandEvent& WXUNUSED(event))
         AutoSizeColumns();
         ForceRefresh();
     }
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnMenuSaveAsCSV(wxCommandEvent& WXUNUSED(event))
@@ -594,6 +598,8 @@ void DataGrid::OnMenuSaveAsCSV(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void DataGrid::OnMenuSaveAsHTML(wxCommandEvent& WXUNUSED(event))
 {
+    FR_TRY
+
     wxString fname = ::wxFileSelector(_("Save data in selected cells as"),
         wxEmptyString, wxEmptyString, wxT("*.html"),
         _("HTML files (*.html)|*.html|All files (*.*)|*.*"),
@@ -691,6 +697,8 @@ void DataGrid::OnMenuSaveAsHTML(wxCommandEvent& WXUNUSED(event))
         outStr.WriteString(wxT("</tr>\n"));
     }
     outStr.WriteString(wxT("</table></body></html>\n"));
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnMenuUpdateIfHasSelection(wxUpdateUIEvent& event)
@@ -700,34 +708,52 @@ void DataGrid::OnMenuUpdateIfHasSelection(wxUpdateUIEvent& event)
 //-----------------------------------------------------------------------------
 void DataGrid::OnMenuCancelFetchAll(wxCommandEvent& WXUNUSED(event))
 {
+    FR_TRY
+
     DataGridTable* table = getDataGridTable();
     if (table)
         table->setFetchAllRecords(false);
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnMenuUpdateCancelFetchAll(wxUpdateUIEvent& event)
 {
+    FR_TRY
+
     DataGridTable* table = getDataGridTable();
     event.Enable(table && table->canFetchMoreRows()
         && table->getFetchAllRows());
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnMenuFetchAll(wxCommandEvent& WXUNUSED(event))
 {
+    FR_TRY
+
     DataGridTable* table = getDataGridTable();
     if (table)
         table->setFetchAllRecords(true);
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnMenuUpdateFetchAll(wxUpdateUIEvent& event)
 {
+    FR_TRY
+
     DataGridTable* table = getDataGridTable();
     event.Enable(table && table->canFetchMoreRows()
         && !table->getFetchAllRows());
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnMouseWheel(wxMouseEvent& event)
 {
+    FR_TRY
+
     int wheelrotation = event.GetWheelRotation();
     int x, y;
     GetViewStart(&x, &y);
@@ -737,11 +763,18 @@ void DataGrid::OnMouseWheel(wxMouseEvent& event)
         y -= 5;
     Scroll(x,y);
     AdjustScrollbars();
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnThumbRelease(wxScrollWinEvent& event)
 {
+    FR_TRY
+
     wxIdleEvent dummy;
     OnIdle(dummy);
     event.Skip();
-}//-----------------------------------------------------------------------------
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
