@@ -613,7 +613,7 @@ void ExecuteSqlFrame::set_properties()
         statusbar_1->SetStatusText(statusbar_fields[i], i);
     }
     grid_data = new DataGrid(notebook_pane_2, ID_grid_data);
-    grid_data->SetTable(new DataGridTable(statementM), true);
+    grid_data->SetTable(new DataGridTable(statementM, databaseM), true);
     splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
 
     button_new->SetToolTip(_("New window"));

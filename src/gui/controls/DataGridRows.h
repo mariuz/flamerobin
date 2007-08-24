@@ -39,6 +39,8 @@ class ResultsetColumnDef
 {
 private:
     wxString nameM;
+protected:
+    bool readOnlyM;
 public:
     ResultsetColumnDef(const wxString& name);
     virtual ~ResultsetColumnDef();
@@ -49,6 +51,7 @@ public:
     virtual unsigned getBufferSize() = 0;
     wxString getName();
     virtual bool isNumeric();
+    bool isReadOnly();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter) = 0;
 };

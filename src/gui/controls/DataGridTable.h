@@ -33,6 +33,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <ibpp.h>
 
+#include "metadata/database.h"
 #include "gui/controls/DataGridRows.h"
 //-----------------------------------------------------------------------------
 class DataGridCell;
@@ -53,12 +54,13 @@ private:
     wxGridCellAttr* nullAttrNumericM;
     DataGridRows rowsM;
 
+    Database *databaseM;
     IBPP::Statement& statementM;
     wxMBConv* charsetConverterM;
 
     bool isValidCellPos(int row, int col);
 public:
-    DataGridTable(IBPP::Statement& s);
+    DataGridTable(IBPP::Statement& s, Database *db);
     ~DataGridTable();
 
     bool canFetchMoreRows();

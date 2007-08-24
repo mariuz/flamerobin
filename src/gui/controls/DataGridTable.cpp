@@ -45,8 +45,8 @@
 #include "core/StringUtils.h"
 #include "gui/controls/DataGridTable.h"
 //-----------------------------------------------------------------------------
-DataGridTable::DataGridTable(IBPP::Statement& s)
-    : wxGridTableBase(), statementM(s)
+DataGridTable::DataGridTable(IBPP::Statement& s, Database *db)
+    : wxGridTableBase(), statementM(s), databaseM(db)
 {
     allRowsFetchedM = false;
     fetchAllRowsM = false;

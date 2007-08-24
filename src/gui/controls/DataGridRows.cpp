@@ -413,7 +413,7 @@ bool GridCellFormats::parseTime(wxString::iterator& si, int& hr, int& mn,
 //-----------------------------------------------------------------------------
 // ResultsetColumnDef class
 ResultsetColumnDef::ResultsetColumnDef(const wxString& name)
-    : nameM(name)
+    : nameM(name), readOnlyM(true)
 {
 }
 //-----------------------------------------------------------------------------
@@ -429,6 +429,11 @@ wxString ResultsetColumnDef::getName()
 bool ResultsetColumnDef::isNumeric()
 {
     return false;
+}
+//-----------------------------------------------------------------------------
+bool ResultsetColumnDef::isReadOnly()
+{
+    return readOnlyM;
 }
 //-----------------------------------------------------------------------------
 // DummyColumnDef class
@@ -488,6 +493,7 @@ public:
 IntegerColumnDef::IntegerColumnDef(const wxString& name, unsigned offset)
     : ResultsetColumnDef(name), offsetM(offset)
 {
+    readOnlyM = false;  // override default
 }
 //-----------------------------------------------------------------------------
 wxString IntegerColumnDef::getAsString(DataGridRowBuffer* buffer)
@@ -547,6 +553,7 @@ public:
 Int64ColumnDef::Int64ColumnDef(const wxString& name, unsigned offset)
     : ResultsetColumnDef(name), offsetM(offset)
 {
+    readOnlyM = false;  // override default
 }
 //-----------------------------------------------------------------------------
 wxString Int64ColumnDef::getAsString(DataGridRowBuffer* buffer)
@@ -605,6 +612,7 @@ public:
 DateColumnDef::DateColumnDef(const wxString& name, unsigned offset)
     : ResultsetColumnDef(name), offsetM(offset)
 {
+    readOnlyM = false;  // override default
 }
 //-----------------------------------------------------------------------------
 wxString DateColumnDef::getAsString(DataGridRowBuffer* buffer)
@@ -669,6 +677,7 @@ public:
 TimeColumnDef::TimeColumnDef(const wxString& name, unsigned offset)
     : ResultsetColumnDef(name), offsetM(offset)
 {
+    readOnlyM = false;  // override default
 }
 //-----------------------------------------------------------------------------
 wxString TimeColumnDef::getAsString(DataGridRowBuffer* buffer)
@@ -732,6 +741,7 @@ public:
 TimestampColumnDef::TimestampColumnDef(const wxString& name, unsigned offset)
     : ResultsetColumnDef(name), offsetM(offset)
 {
+    readOnlyM = false;  // override default
 }
 //-----------------------------------------------------------------------------
 wxString TimestampColumnDef::getAsString(DataGridRowBuffer* buffer)
@@ -829,6 +839,7 @@ public:
 FloatColumnDef::FloatColumnDef(const wxString& name, unsigned offset)
     : ResultsetColumnDef(name), offsetM(offset)
 {
+    readOnlyM = false;  // override default
 }
 //-----------------------------------------------------------------------------
 wxString FloatColumnDef::getAsString(DataGridRowBuffer* buffer)
@@ -891,6 +902,7 @@ public:
 DoubleColumnDef::DoubleColumnDef(const wxString& name, unsigned offset)
     : ResultsetColumnDef(name), offsetM(offset)
 {
+    readOnlyM = false;  // override default
 }
 //-----------------------------------------------------------------------------
 wxString DoubleColumnDef::getAsString(DataGridRowBuffer* buffer)
@@ -961,6 +973,7 @@ public:
 StringColumnDef::StringColumnDef(const wxString& name, unsigned stringIndex)
     : ResultsetColumnDef(name), indexM(stringIndex)
 {
+    readOnlyM = false;  // override default
 }
 //-----------------------------------------------------------------------------
 wxString StringColumnDef::getAsString(DataGridRowBuffer* buffer)
@@ -1088,6 +1101,12 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
     bufferSizeM = 0;
     unsigned stringIndex = 0;
 
+    // we need collect all the table names and find their primary keys
+    // if all PK columns are available in the list, that table's fields are
+    // editable (unless they are computed fields). We can also configure NULL
+    // behavior here
+    // We need Database * at this point
+
     // create column definitions and compute the necessary buffer size
     // and string array length when all fields contain data
     for (unsigned col = 1; col <= colCount; ++col)
@@ -1095,6 +1114,8 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
         wxString colName(std2wx(statement->ColumnAlias(col)));
         if (colName.empty())
             colName = std2wx(statement->ColumnName(col));
+        //wxString tabName(std2wx(statement->ColumnTable(col)));
+
 
         IBPP::SDT type = statement->ColumnType(col);
         if (statement->ColumnScale(col))
@@ -1168,6 +1189,8 @@ bool DataGridRows::isFieldNull(unsigned row, unsigned col)
 void DataGridRows::setFieldValue(unsigned row, unsigned col,
     const wxString& value)
 {
+    if (columnDefsM[col]->isReadOnly())
+        return;
     if (!dynamic_cast<StringColumnDef*>(columnDefsM[col]) && value.IsEmpty())
     {
         buffersM[row]->setFieldNull(col, true);
