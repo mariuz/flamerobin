@@ -296,6 +296,8 @@ bool GridCellFormats::parseDate(wxString::iterator& si, int& year, int& month,
 {
     ensureLoaded();
 
+    // allow the user to only enter D, D.M or D.M.Y
+    bool dayIsSet = false;
     for (wxString::iterator c = dateFormatM.begin();
         c != dateFormatM.end(); c++)
     {
@@ -305,20 +307,21 @@ bool GridCellFormats::parseDate(wxString::iterator& si, int& year, int& month,
             case 'D':
                 if (!getNumber(si, day))
                     return false;
+                dayIsSet = true;
                 break;
             case 'm':
             case 'M':
                 if (!getNumber(si, month))
-                    return false;
+                    return dayIsSet;
                 break;
             case 'y':
             case 'Y':
                 if (!getNumber(si, year))
-                    return false;
+                    return dayIsSet;
                 break;
             default:        // other characters must match
                 if (*c != *si)
-                    return false;
+                    return dayIsSet;
                 si++;
                 break;
         }
@@ -371,6 +374,8 @@ bool GridCellFormats::parseTime(wxString::iterator& si, int& hr, int& mn,
 {
     ensureLoaded();
 
+    // we allow the user to only enter H, or H:M or H:M:S
+    bool hourIsSet = false;
     for (wxString::iterator c = timeFormatM.begin(); c != timeFormatM.end();
         c++)
     {
@@ -380,24 +385,25 @@ bool GridCellFormats::parseTime(wxString::iterator& si, int& hr, int& mn,
             case 'H':
                 if (!getNumber(si, hr))
                     return false;
+                hourIsSet = true;
                 break;
             case 'm':
             case 'M':
                 if (!getNumber(si, mn))
-                    return false;
+                    return hourIsSet;
                 break;
             case 's':
             case 'S':
                 if (!getNumber(si, sc))
-                    return false;
+                    return hourIsSet;
                 break;
             case 'T':
                 if (!getNumber(si, ml))
-                    return false;
+                    return hourIsSet;
                 break;
             default:
                 if (*c != *si)
-                    return false;
+                    return hourIsSet;
                 si++;
                 break;
         }
@@ -618,16 +624,17 @@ void DateColumnDef::setFromString(DataGridRowBuffer* buffer,
         const wxString& source, unsigned col)
 {
     wxASSERT(buffer);
-    int idt, y, m, d;
+    int y = wxDateTime::Now().GetYear();    // defaults
+    int m = wxDateTime::Now().GetMonth() + 1;
+    int d = wxDateTime::Now().GetDay();
     wxString temp(source);
     temp.Trim(true);
     temp.Trim(false);
     wxString::iterator it = temp.begin();
     if (!GridCellFormats::get().parseDate(it, y, m, d))
         throw FRError(_("Cannot parse date"));
-    if (!IBPP::itod(&idt, y, m, d))
-        throw FRError(_("Cannot convert date"));
-    buffer->setValue(offsetM, idt);
+    IBPP::Date idt(y, m, d);
+    buffer->setValue(offsetM, idt.GetDate());
 }
 //-----------------------------------------------------------------------------
 unsigned DateColumnDef::getBufferSize()
@@ -682,15 +689,15 @@ void TimeColumnDef::setFromString(DataGridRowBuffer* buffer,
         const wxString& source, unsigned col)
 {
     wxASSERT(buffer);
-    int idt, hr = 0, mn = 0, sc = 0, ms = 0;
+    int hr = 0, mn = 0, sc = 0, ms = 0;
     wxString temp(source);
     temp.Trim(true);
     temp.Trim(false);
     wxString::iterator it = temp.begin();
     if (!GridCellFormats::get().parseTime(it, hr, mn, sc, ms))
         throw FRError(_("Cannot parse time"));
-    IBPP::itot(&idt, hr, mn, sc, ms);
-    buffer->setValue(offsetM, idt);
+    IBPP::Time itm(hr, mn, sc, ms);
+    buffer->setValue(offsetM, itm.GetTime());
 }
 //-----------------------------------------------------------------------------
 unsigned TimeColumnDef::getBufferSize()
@@ -763,23 +770,29 @@ void TimestampColumnDef::setFromString(DataGridRowBuffer* buffer,
     temp.Trim(false);
     wxString::iterator it = temp.begin();
     // get date
-    int idt, y, m, d;
+    int y = wxDateTime::Now().GetYear();    // defaults
+    int m = wxDateTime::Now().GetMonth() + 1;
+    int d = wxDateTime::Now().GetDay();
     if (!GridCellFormats::get().parseDate(it, y, m, d))
         throw FRError(_("Cannot parse date"));
-    if (!IBPP::itod(&idt, y, m, d))
-        throw FRError(_("Cannot convert date"));
-    buffer->setValue(offsetM, idt);
+    IBPP::Date idt(y, m, d);
 
     // skip spaces and commas ", "
     while ((wxChar)*it == wxChar(',') || (wxChar)*it == wxChar(' '))
         it++;
 
-    // get time
+    // get time (if available)
     int hr = 0, mn = 0, sc = 0, ms = 0;
-    if (!GridCellFormats::get().parseTime(it, hr, mn, sc, ms))
-        throw FRError(_("Cannot parse time"));
-    IBPP::itot(&idt, hr, mn, sc, ms);
-    buffer->setValue(offsetM + sizeof(int), idt);
+    int itme = 0;
+    if (GridCellFormats::get().parseTime(it, hr, mn, sc, ms))
+    {
+        IBPP::Time itm(hr, mn, sc, ms);
+        itme = itm.GetTime();
+    }
+
+    // all done, set the value
+    buffer->setValue(offsetM, idt.GetDate());
+    buffer->setValue(offsetM + sizeof(int), itme);
 }
 //-----------------------------------------------------------------------------
 unsigned TimestampColumnDef::getBufferSize()
