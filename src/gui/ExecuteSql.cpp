@@ -44,8 +44,7 @@
 ExecuteSqlFrame* showSql(wxWindow* parent, const wxString& title,
     Database *database, const wxString &sql)
 {
-    ExecuteSqlFrame *eff = new ExecuteSqlFrame(parent, -1, title);
-    eff->setDatabase(database);
+    ExecuteSqlFrame *eff = new ExecuteSqlFrame(parent, -1, title, database);
     eff->Show();
     eff->setSql(sql);
     return eff;

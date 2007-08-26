@@ -58,6 +58,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/controls/DataGrid.h"
 #include "gui/controls/DataGridTable.h"
 #include "gui/ProgressDialog.h"
+#include "gui/ExecuteSql.h"
 #include "gui/ExecuteSqlFrame.h"
 #include "gui/StatementHistoryDialog.h"
 #include "gui/StyleGuide.h"
@@ -559,8 +560,8 @@ void SqlEditor::OnMenuSetFont(wxCommandEvent& WXUNUSED(event))
 }
 //-----------------------------------------------------------------------------
 ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
-        const wxPoint& pos, const wxSize& size, long style)
-    : BaseFrame(parent, id, title, pos, size, style), Observer()
+        Database *db, const wxPoint& pos, const wxSize& size, long style)
+    :BaseFrame(parent, id, title, pos, size, style), Observer(), databaseM(db)
 {
     loadingM = true;
     panel_contents = new wxPanel(this, -1);
@@ -592,6 +593,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
 
     set_properties();
     do_layout();
+    setDatabase(db);    // must come after set_properties
     loadingM = false;
 }
 //-----------------------------------------------------------------------------
@@ -1011,8 +1013,9 @@ void ExecuteSqlFrame::OnClose(wxCloseEvent& event)
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonNewClick(wxCommandEvent& WXUNUSED(event))
 {
-    ExecuteSqlFrame *eff = new ExecuteSqlFrame(GetParent(), -1, _("Execute SQL statements"));
-    eff->setDatabase(databaseM);
+    ExecuteSqlFrame *eff = new ExecuteSqlFrame(GetParent(), -1,
+        _("Execute SQL statements"), databaseM);
+    // TODO: automatically copy selection to a new window
     eff->Show();
 }
 //-----------------------------------------------------------------------------
@@ -1773,11 +1776,7 @@ bool DropColumnHandler::handleURI(URI& uri)
     if (uri.action == wxT("drop_constraint"))
         sql += wxT("CONSTRAINT ");
     sql += c->getQuotedName();
-    ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, _("Dropping field"));
-    eff->setDatabase(c->getDatabase());
-    eff->Show();
-    eff->setSql(sql);
-    eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
+    execSql(w, _("Dropping field"), c->getDatabase(), sql, true);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -1812,11 +1811,7 @@ bool DropColumnsHandler::handleURI(URI& uri)
             Identifier temp(*it);
             sql += wxT("ALTER TABLE ") + t->getQuotedName() + wxT(" DROP ") + temp.getQuoted() + wxT(";\n");
         }
-        ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, _("Dropping fields"));
-        eff->setDatabase(t->getDatabase());
-        eff->Show();
-        eff->setSql(sql);
-        eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
+        execSql(w, _("Dropping fields"), t->getDatabase(), sql, true);
     }
     return true;
 }
@@ -1842,11 +1837,7 @@ bool DropObjectHandler::handleURI(URI& uri)
     if (!m || !w)
         return true;
 
-    ExecuteSqlFrame* eff = new ExecuteSqlFrame(w->GetParent(), -1, wxT("DROP"));
-    eff->setDatabase(m->getDatabase());
-    eff->Show();
-    eff->setSql(m->getDropSqlStatement());
-    eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
+    execSql(w, _("DROP"), m->getDatabase(), m->getDropSqlStatement(), true);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -1877,8 +1868,8 @@ bool EditDDLHandler::handleURI(URI& uri)
     if (pd.isCanceled())
         return true;
 
-    ExecuteSqlFrame* eff = new ExecuteSqlFrame(w->GetParent(), -1, wxT("DDL"));
-    eff->setDatabase(m->getDatabase());
+    ExecuteSqlFrame* eff = new ExecuteSqlFrame(w->GetParent(), -1, wxT("DDL"),
+        m->getDatabase());
     eff->setSql(cdv.getSql());
     // ProgressDialog needs to be hidden before ExecuteSqlFrame is shown,
     // otherwise the HTML frame will be raised over the ExecuteSqlFrame
@@ -1909,10 +1900,8 @@ bool EditProcedureHandler::handleURI(URI& uri)
     if (!p || !w)
         return true;
 
-    ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing stored procedure"));
-    eff->setDatabase(p->getDatabase());
-    eff->Show();
-    eff->setSql(p->getAlterSql());
+    showSql(w->GetParent(), _("Editing stored procedure"), p->getDatabase(),
+        p->getAlterSql());
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -1937,11 +1926,8 @@ bool AlterViewHandler::handleURI(URI& uri)
     if (!r || !w)
         return true;
 
-    ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1,
-        _("Altering view"));
-    eff->setDatabase(r->getDatabase());
-    eff->Show();
-    eff->setSql(r->getRebuildSql());
+    showSql(w->GetParent(), _("Altering view"), r->getDatabase(),
+        r->getRebuildSql());
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -1966,10 +1952,8 @@ bool EditTriggerHandler::handleURI(URI& uri)
     if (!t || !w)
         return true;
 
-    ExecuteSqlFrame *eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing trigger"));
-    eff->setDatabase(t->getDatabase());
-    eff->Show();
-    eff->setSql(t->getAlterSql());
+    showSql(w->GetParent(), _("Editing trigger"), t->getDatabase(),
+        t->getAlterSql());
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -2004,17 +1988,18 @@ bool EditGeneratorValueHandler::handleURI(URI& uri)
     }
 
     wxString value = wxGetTextFromUser(_("Changing generator value"), _("Enter new value"),
-// MH: I have no idea if this works on all systems... but it should be better
+#ifndef wxLongLong
+    // MH: I have no idea if this works on all systems... but it should be better
+    // MB: we'll use wxLongLong wherever it is available
         wxLongLong(oldvalue).ToString(), w);
-//        wxString::Format(wxT("%d"), oldvalue), w);
+#else
+        wxString::Format(wxT("%d"), oldvalue), w);
+#endif
+
     if (value != wxT(""))
     {
         wxString sql = wxT("SET GENERATOR ") + g->getQuotedName() + wxT(" TO ") + value + wxT(";");
-        ExecuteSqlFrame *esf = new ExecuteSqlFrame(w, -1, sql);
-        esf->setDatabase(db);
-        esf->Show();
-        esf->setSql(sql);
-        esf->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
+        execSql(w, sql, db, sql, true);
     }
     return true;
 }
@@ -2040,10 +2025,8 @@ bool EditExceptionHandler::handleURI(URI& uri)
     if (!e || !w)
         return true;
 
-    ExecuteSqlFrame* eff = new ExecuteSqlFrame(w->GetParent(), -1, _("Editing exception"));
-    eff->setDatabase(e->getDatabase());
-    eff->Show();
-    eff->setSql(e->getAlterSql());
+    showSql(w->GetParent(), _("Editing exception"), e->getDatabase(),
+        e->getAlterSql());
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -2077,11 +2060,7 @@ bool IndexActionHandler::handleURI(URI& uri)
     else if (type == wxT("TOGGLE_ACTIVE"))
         sql = wxT("ALTER INDEX ") + i->getQuotedName() + (i->isActive() ? wxT(" INACTIVE") : wxT(" ACTIVE"));
 
-    ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, wxEmptyString);
-    eff->setDatabase(i->getDatabase());
-    eff->Show();
-    eff->setSql(sql);
-    eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
+    execSql(w, wxEmptyString, i->getDatabase(), sql, true);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -2117,11 +2096,7 @@ bool ActivateTriggersHandler::handleURI(URI& uri)
         sql += wxT("ACTIVE;\n");
     }
 
-    ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, wxEmptyString);
-    eff->setDatabase(t->getDatabase());
-    eff->Show();
-    eff->setSql(sql);
-    eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
+    execSql(w, wxEmptyString, t->getDatabase(), sql, true);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -2150,11 +2125,7 @@ bool ActivateTriggerHandler::handleURI(URI& uri)
         sql += wxT("IN");
     sql += wxT("ACTIVE;\n");
 
-    ExecuteSqlFrame *eff = new ExecuteSqlFrame(w, -1, wxEmptyString);
-    eff->setDatabase(t->getDatabase());
-    eff->Show();
-    eff->setSql(sql);
-    eff->executeAllStatements(true);        // true = user must commit/rollback + frame is closed at once
+    execSql(w, wxEmptyString, t->getDatabase(), sql, true);
     return true;
 }
 //-----------------------------------------------------------------------------

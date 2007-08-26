@@ -33,9 +33,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <ibpp.h>
 
-#include "metadata/database.h"
 #include "gui/controls/DataGridRows.h"
 //-----------------------------------------------------------------------------
+class Database;
 class DataGridCell;
 //-----------------------------------------------------------------------------
 // this event is sent after new rows have been fetched
@@ -75,6 +75,7 @@ public:
     bool isNumericColumn(int col);
     bool needsMoreRowsFetched();
     void setFetchAllRecords(bool fetchall);
+    void saveEditorChanges(int currentRow);
 
     // methods of wxGridTableBase
     virtual void Clear();

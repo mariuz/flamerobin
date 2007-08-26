@@ -31,7 +31,10 @@
 #include <vector>
 
 #include <ibpp.h>
+
+#include "metadata/constraints.h"
 //----------------------------------------------------------------------
+class Database;
 class DataGridRowBuffer;
 class wxMBConv;
 //----------------------------------------------------------------------
@@ -41,8 +44,10 @@ private:
     wxString nameM;
 protected:
     bool readOnlyM;
+    bool nullableM;
 public:
-    ResultsetColumnDef(const wxString& name);
+    ResultsetColumnDef(const wxString& name, bool readOnly = true,
+        bool nullable = false);
     virtual ~ResultsetColumnDef();
 
     virtual wxString getAsString(DataGridRowBuffer* buffer) = 0;
@@ -52,6 +57,7 @@ public:
     wxString getName();
     virtual bool isNumeric();
     bool isReadOnly();
+    bool isNullable();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter) = 0;
 };
@@ -59,9 +65,14 @@ public:
 class DataGridRows
 {
 private:
+    IBPP::Statement statementM;
     std::vector<ResultsetColumnDef*> columnDefsM;
     std::vector<DataGridRowBuffer*> buffersM;
+    std::map<wxString, UniqueConstraint *> statementTablesM;
     unsigned bufferSizeM;
+
+    void getColumnInfo(Database *db, unsigned col, bool& readOnly,
+        bool& nullable);
 public:
     DataGridRows();
     ~DataGridRows();
@@ -71,7 +82,7 @@ public:
     unsigned getRowCount();
     unsigned getRowFieldCount();
     wxString getRowFieldName(unsigned col);
-    bool initialize(const IBPP::Statement& statement);
+    bool initialize(const IBPP::Statement& statement, Database *);
     bool isRowFieldNumeric(unsigned col);
 
     wxString getFieldValue(unsigned row, unsigned col);

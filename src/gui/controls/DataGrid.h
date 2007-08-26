@@ -33,7 +33,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 class DataGridTable;
 //----------------------------------------------------------------------
-class DataGrid: public wxGrid {
+class DataGrid: public wxGrid
+{
 private:
     void copyToClipboard(const wxString cbText);
     void notifyIfUnfetchedData();
@@ -55,6 +56,7 @@ private:
     void OnContextMenu(wxContextMenuEvent& event);
     void OnGridCellRightClick(wxGridEvent& event);
     void OnGridLabelRightClick(wxGridEvent& event);
+//    void OnGridSelectCell(wxGridEvent& event);
     void OnIdle(wxIdleEvent& event);
     void OnMenuCancelFetchAll(wxCommandEvent& event);
     void OnMenuCellFont(wxCommandEvent& event);

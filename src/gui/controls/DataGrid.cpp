@@ -195,6 +195,7 @@ BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_CONTEXT_MENU(DataGrid::OnContextMenu)
     EVT_GRID_CELL_RIGHT_CLICK(DataGrid::OnGridCellRightClick)
     EVT_GRID_LABEL_RIGHT_CLICK(DataGrid::OnGridLabelRightClick)
+//    EVT_GRID_SELECT_CELL(DataGrid::OnGridSelectCell)
     EVT_MENU(DataGrid::ID_MENU_CANCELFETCHALL, DataGrid::OnMenuCancelFetchAll)
     EVT_UPDATE_UI(DataGrid::ID_MENU_CANCELFETCHALL, DataGrid::OnMenuUpdateCancelFetchAll)
     EVT_MENU(DataGrid::ID_MENU_CELLFONT, DataGrid::OnMenuCellFont)
@@ -233,6 +234,19 @@ void DataGrid::OnGridLabelRightClick(wxGridEvent& WXUNUSED(event))
 {
     showPopMenu(ScreenToClient(::wxGetMousePosition()));
 }
+//-----------------------------------------------------------------------------
+/*
+void DataGrid::OnGridSelectCell(wxGridEvent& event)
+{
+    FR_TRY
+
+    DataGridTable* table = getDataGridTable();
+    if (table)
+        table->saveEditorChanges(event.GetRow());
+    event.Skip();
+
+    FR_CATCH
+}*/
 //-----------------------------------------------------------------------------
 void DataGrid::OnIdle(wxIdleEvent& event)
 {
@@ -325,8 +339,9 @@ void DataGrid::OnMenuCopyToCBAsInsert(wxCommandEvent& WXUNUSED(event))
         wxBusyCursor cr;
 
     // TODO: - using one table is not correct for JOINs or sub-SELECTs
-    //       -> should probably refuse to work if not from one table
+    //       - should probably refuse to work if not from one table
     //       - should probably refuse to create INSERT for "[...]"
+    //       - table&PK info is available in DataGridRows::statementTablesM
     wxString tableName = table->getTableName();
     // NOTE: this has been reworked (compared to myDataGrid), because
     //       not all rows have necessarily the same fields selected
@@ -382,8 +397,9 @@ void DataGrid::OnMenuCopyToCBAsUpdate(wxCommandEvent& WXUNUSED(event))
     {
         wxBusyCursor cr;
     // TODO: - using one table is not correct for JOINs or sub-SELECTs
-    //       -> should probably refuse to work if not from one table
+    //       - should probably refuse to work if not from one table
     //       - should probably refuse to create UPDATE for "[...]"
+    //       - we have this info in DataGridRows::statementTablesM
     wxString tableName = table->getTableName();
     wxString sRows;
     for (int i = 0; i < GetNumberRows(); i++)

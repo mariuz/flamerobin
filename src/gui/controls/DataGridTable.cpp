@@ -44,6 +44,7 @@
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "gui/controls/DataGridTable.h"
+#include "metadata/database.h"
 //-----------------------------------------------------------------------------
 DataGridTable::DataGridTable(IBPP::Statement& s, Database *db)
     : wxGridTableBase(), statementM(s), databaseM(db)
@@ -254,6 +255,8 @@ wxString DataGridTable::getTableName()
 {
     // TODO: using one table is not correct for JOINs or sub-SELECTs, so we
     //       should build separate statements for each table
+    //       DataGridRows::statementTablesM contains that list
+    //       (together with PK/UNQ info)
     if (statementM == 0 || statementM->Columns() == 0)
         return wxEmptyString;
     return std2wx(statementM->ColumnTable(1));
@@ -302,7 +305,7 @@ void DataGridTable::initialFetch(wxMBConv* conv)
 
     try
     {
-        rowsM.initialize(statementM);
+        rowsM.initialize(statementM, databaseM);
     }
     catch (IBPP::Exception& e)
     {
@@ -363,14 +366,17 @@ void DataGridTable::setFetchAllRecords(bool fetchall)
     fetchAllRowsM = fetchall;
 }
 //-----------------------------------------------------------------------------
+void DataGridTable::saveEditorChanges(int currentRow)
+{
+    //rowsM.updateEditedRow(currentRow);
+}
+//-----------------------------------------------------------------------------
 void DataGridTable::SetValue(int row, int col, const wxString& value)
 {
     FR_TRY
 
-    // needs to be implemented for editable grid
-
-    // 1. write a new value to data
-    // 2. flag row&cell as 'dirty'
+    // creates a duplicate of the row (so we can monitor changed values,
+    // have PK/UNQ data, and revert them possibly)
     rowsM.setFieldValue(row, col, value);
 
     FR_CATCH
@@ -380,14 +386,9 @@ bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
 {
     FR_TRY
 
-    // begin transaction
-    // execute the DELETE statement (only if row's type is UPDATE)
-
     // remove rows from internal storage
     if (!rowsM.removeRows(pos, numRows))
         return false;
-
-    // commit transaction
 
     // notify visual control
     if (GetView() && numRows > 0)

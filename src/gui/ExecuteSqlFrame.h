@@ -79,9 +79,9 @@ public:
     DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
-class ExecuteSqlFrame: public BaseFrame, public Observer {
+class ExecuteSqlFrame: public BaseFrame, public Observer
+{
 public:
-    void setDatabase(Database* db);
     Database *getDatabase();
     void showProperties(wxString objectName);
     enum {
@@ -116,7 +116,7 @@ public:
     void setSql(wxString sql);
     void clearStats();
 
-    ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
+    ExecuteSqlFrame(wxWindow* parent, int id, wxString title, Database *db,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxDEFAULT_FRAME_STYLE);
@@ -130,6 +130,7 @@ private:
     void SplitScreen();
     Database* databaseM;
     DatabaseToSystemCharsetConversion dbCharsetConversionM;
+    void setDatabase(Database* db);
 
     StatementHistory::Position historyPositionM;
     wxString localBuffer;

@@ -50,6 +50,7 @@
 #include "core/StringUtils.h"
 #include "frtypes.h"
 #include "gui/controls/DataGridRows.h"
+#include "metadata/database.h"
 //-----------------------------------------------------------------------------
 // DataGridRowBuffer class
 class DataGridRowBuffer
@@ -60,6 +61,7 @@ private:
     std::vector<wxString> stringsM;
 public:
     DataGridRowBuffer(unsigned fieldCount);
+    DataGridRowBuffer(const DataGridRowBuffer* other);
     ~DataGridRowBuffer();
 
     wxString getString(unsigned index);
@@ -81,6 +83,13 @@ DataGridRowBuffer::DataGridRowBuffer(unsigned fieldCount)
     // initialize with field count, all fields initially NULL
     // there's no need to preallocate the uint8 buffer or string array
     nullFieldsM.resize(fieldCount, true);
+}
+//-----------------------------------------------------------------------------
+DataGridRowBuffer::DataGridRowBuffer(const DataGridRowBuffer* other)
+{
+    nullFieldsM = other->nullFieldsM;
+    dataM = other->dataM;
+    stringsM = other->stringsM;
 }
 //-----------------------------------------------------------------------------
 DataGridRowBuffer::~DataGridRowBuffer()
@@ -412,8 +421,9 @@ bool GridCellFormats::parseTime(wxString::iterator& si, int& hr, int& mn,
 }
 //-----------------------------------------------------------------------------
 // ResultsetColumnDef class
-ResultsetColumnDef::ResultsetColumnDef(const wxString& name)
-    : nameM(name), readOnlyM(true)
+ResultsetColumnDef::ResultsetColumnDef(const wxString& name, bool readonly,
+    bool nullable)
+    : nameM(name), readOnlyM(readonly), nullableM(nullable)
 {
 }
 //-----------------------------------------------------------------------------
@@ -434,6 +444,11 @@ bool ResultsetColumnDef::isNumeric()
 bool ResultsetColumnDef::isReadOnly()
 {
     return readOnlyM;
+}
+//-----------------------------------------------------------------------------
+bool ResultsetColumnDef::isNullable()
+{
+    return nullableM;
 }
 //-----------------------------------------------------------------------------
 // DummyColumnDef class
@@ -480,7 +495,8 @@ class IntegerColumnDef : public ResultsetColumnDef
 private:
     unsigned offsetM;
 public:
-    IntegerColumnDef(const wxString& name, unsigned offset);
+    IntegerColumnDef(const wxString& name, unsigned offset, bool readOnly,
+        bool nullable);
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
     virtual bool isNumeric();
@@ -490,8 +506,9 @@ public:
         const wxString& source, unsigned col);
 };
 //-----------------------------------------------------------------------------
-IntegerColumnDef::IntegerColumnDef(const wxString& name, unsigned offset)
-    : ResultsetColumnDef(name), offsetM(offset)
+IntegerColumnDef::IntegerColumnDef(const wxString& name, unsigned offset,
+    bool readOnly, bool nullable)
+    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
 {
     readOnlyM = false;  // override default
 }
@@ -540,7 +557,8 @@ class Int64ColumnDef : public ResultsetColumnDef
 private:
     unsigned offsetM;
 public:
-    Int64ColumnDef(const wxString& name, unsigned offset);
+    Int64ColumnDef(const wxString& name, unsigned offset, bool readOnly,
+        bool nullable);
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
     virtual bool isNumeric();
@@ -550,10 +568,10 @@ public:
         const wxString& source, unsigned col);
 };
 //-----------------------------------------------------------------------------
-Int64ColumnDef::Int64ColumnDef(const wxString& name, unsigned offset)
-    : ResultsetColumnDef(name), offsetM(offset)
+Int64ColumnDef::Int64ColumnDef(const wxString& name, unsigned offset,
+    bool readOnly, bool nullable)
+    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
 {
-    readOnlyM = false;  // override default
 }
 //-----------------------------------------------------------------------------
 wxString Int64ColumnDef::getAsString(DataGridRowBuffer* buffer)
@@ -600,7 +618,8 @@ class DateColumnDef : public ResultsetColumnDef
 private:
     unsigned offsetM;
 public:
-    DateColumnDef(const wxString& name, unsigned offset);
+    DateColumnDef(const wxString& name, unsigned offset, bool readOnly,
+        bool nullable);
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
@@ -609,10 +628,10 @@ public:
         const wxString& source, unsigned col);
 };
 //-----------------------------------------------------------------------------
-DateColumnDef::DateColumnDef(const wxString& name, unsigned offset)
-    : ResultsetColumnDef(name), offsetM(offset)
+DateColumnDef::DateColumnDef(const wxString& name, unsigned offset,
+    bool readOnly, bool nullable)
+    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
 {
-    readOnlyM = false;  // override default
 }
 //-----------------------------------------------------------------------------
 wxString DateColumnDef::getAsString(DataGridRowBuffer* buffer)
@@ -665,7 +684,8 @@ class TimeColumnDef : public ResultsetColumnDef
 private:
     unsigned offsetM;
 public:
-    TimeColumnDef(const wxString& name, unsigned offset);
+    TimeColumnDef(const wxString& name, unsigned offset, bool readOnly,
+        bool nullable);
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
@@ -674,10 +694,10 @@ public:
         const wxString& source, unsigned col);
 };
 //-----------------------------------------------------------------------------
-TimeColumnDef::TimeColumnDef(const wxString& name, unsigned offset)
-    : ResultsetColumnDef(name), offsetM(offset)
+TimeColumnDef::TimeColumnDef(const wxString& name, unsigned offset,
+    bool readOnly, bool nullable)
+    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
 {
-    readOnlyM = false;  // override default
 }
 //-----------------------------------------------------------------------------
 wxString TimeColumnDef::getAsString(DataGridRowBuffer* buffer)
@@ -729,7 +749,8 @@ class TimestampColumnDef : public ResultsetColumnDef
 private:
     unsigned offsetM;
 public:
-    TimestampColumnDef(const wxString& name, unsigned offset);
+    TimestampColumnDef(const wxString& name, unsigned offset, bool readOnly,
+        bool nullable);
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
@@ -738,8 +759,9 @@ public:
         const wxString& source, unsigned col);
 };
 //-----------------------------------------------------------------------------
-TimestampColumnDef::TimestampColumnDef(const wxString& name, unsigned offset)
-    : ResultsetColumnDef(name), offsetM(offset)
+TimestampColumnDef::TimestampColumnDef(const wxString& name, unsigned offset,
+    bool readOnly, bool nullable)
+    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
 {
     readOnlyM = false;  // override default
 }
@@ -826,7 +848,8 @@ class FloatColumnDef : public ResultsetColumnDef
 private:
     unsigned offsetM;
 public:
-    FloatColumnDef(const wxString& name, unsigned offset);
+    FloatColumnDef(const wxString& name, unsigned offset, bool readOnly,
+        bool nullable);
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
     virtual bool isNumeric();
@@ -836,10 +859,10 @@ public:
         const wxString& source, unsigned col);
 };
 //-----------------------------------------------------------------------------
-FloatColumnDef::FloatColumnDef(const wxString& name, unsigned offset)
-    : ResultsetColumnDef(name), offsetM(offset)
+FloatColumnDef::FloatColumnDef(const wxString& name, unsigned offset,
+    bool readOnly, bool nullable)
+    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
 {
-    readOnlyM = false;  // override default
 }
 //-----------------------------------------------------------------------------
 wxString FloatColumnDef::getAsString(DataGridRowBuffer* buffer)
@@ -889,7 +912,8 @@ class DoubleColumnDef : public ResultsetColumnDef
 private:
     unsigned offsetM;
 public:
-    DoubleColumnDef(const wxString& name, unsigned offset);
+    DoubleColumnDef(const wxString& name, unsigned offset, bool readOnly,
+        bool nullable);
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
     virtual bool isNumeric();
@@ -899,10 +923,10 @@ public:
         const wxString& source, unsigned col);
 };
 //-----------------------------------------------------------------------------
-DoubleColumnDef::DoubleColumnDef(const wxString& name, unsigned offset)
-    : ResultsetColumnDef(name), offsetM(offset)
+DoubleColumnDef::DoubleColumnDef(const wxString& name, unsigned offset,
+    bool readOnly, bool nullable)
+    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
 {
-    readOnlyM = false;  // override default
 }
 //-----------------------------------------------------------------------------
 wxString DoubleColumnDef::getAsString(DataGridRowBuffer* buffer)
@@ -961,7 +985,8 @@ class StringColumnDef : public ResultsetColumnDef
 private:
     unsigned indexM;
 public:
-    StringColumnDef(const wxString& name, unsigned stringIndex);
+    StringColumnDef(const wxString& name, unsigned stringIndex, bool readOnly,
+        bool nullable);
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
@@ -970,10 +995,10 @@ public:
         const wxString& source, unsigned col);
 };
 //-----------------------------------------------------------------------------
-StringColumnDef::StringColumnDef(const wxString& name, unsigned stringIndex)
-    : ResultsetColumnDef(name), indexM(stringIndex)
+StringColumnDef::StringColumnDef(const wxString& name, unsigned stringIndex,
+    bool readOnly, bool nullable)
+    : ResultsetColumnDef(name, readOnly, nullable), indexM(stringIndex)
 {
-    readOnlyM = false;  // override default
 }
 //-----------------------------------------------------------------------------
 wxString StringColumnDef::getAsString(DataGridRowBuffer* buffer)
@@ -1054,11 +1079,57 @@ void DataGridRows::clear()
         for_each(columnDefsM.begin(), columnDefsM.end(), freeColumnDef);
         columnDefsM.clear();
     }
+    statementTablesM.clear();
     bufferSizeM = 0;
+}
+//-----------------------------------------------------------------------------
+wxString escapeQuotes(const wxString& input)
+{
+    wxString sCopy(input);
+    sCopy.Replace(wxT("'"), wxT("''"));
+    return sCopy;
 }
 //-----------------------------------------------------------------------------
 bool DataGridRows::removeRows(size_t from, size_t count)
 {
+    if (count > 1)
+        throw(_("Multiple row deletion not supported (yet)"));
+
+    // execute the DELETE statement(s)
+    IBPP::Statement st = IBPP::StatementFactory(statementM->DatabasePtr(),
+        statementM->TransactionPtr());
+    if (statementTablesM.size() > 1)
+    {
+        // TODO: either show a dialog for the user to choose or think of a way
+        //       to be smart and detect which table user really wants to delete
+        throw FRError(_("Multiple tables present."));
+    }
+
+    wxString stm = wxT("DELETE FROM ")
+        + Identifier((*(statementTablesM.begin())).first).getQuoted()
+        + wxT(" WHERE ");
+    UniqueConstraint *uq = (*(statementTablesM.begin())).second;
+    for (ColumnConstraint::const_iterator ci = uq->begin(); ci != uq->end();
+        ++ci)
+    {
+        for (unsigned c2 = 1; c2 <= statementM->Columns(); ++c2)
+        {
+            wxString cn(std2wx(statementM->ColumnName(c2)));
+            if (cn == (*ci))    // this is the column, add to where clause
+            {
+                if (ci != uq->begin())
+                    stm += wxT(" AND ");
+                stm += Identifier(cn).getQuoted() + wxT(" = '");
+                stm += escapeQuotes(
+                    columnDefsM[c2-1]->getAsString(buffersM[from]));
+                stm += wxT("'");
+            }
+        }
+    }
+//    wxMessageBox(stm);    TODO: log this to statistics tab of SQL editor (using events perhaps?)
+    st->Prepare(wx2std(stm));
+    st->Execute();
+
     std::vector<DataGridRowBuffer*>::iterator i2, it = buffersM.begin();
     from += count - 1;
     while (from--)
@@ -1091,8 +1162,103 @@ wxString DataGridRows::getRowFieldName(unsigned col)
     return wxEmptyString;
 }
 //-----------------------------------------------------------------------------
-bool DataGridRows::initialize(const IBPP::Statement& statement)
+void checkColumnsPresent(const IBPP::Statement& statement,
+    UniqueConstraint** locator)
 {
+    wxString tableName = (*locator)->getTable()->getName_();
+    for (ColumnConstraint::const_iterator ci = (*locator)->begin(); ci !=
+        (*locator)->end(); ++ci)
+    {
+        bool found = false;
+        for (unsigned c2 = 1; c2 <= statement->Columns(); ++c2)
+        {
+            wxString cn(std2wx(statement->ColumnName(c2)));
+            wxString tn(std2wx(statement->ColumnTable(c2)));
+            if (cn == (*ci) && tn == tableName)
+            {
+                found = true;
+                break;
+            }
+        }
+        if (!found)     // some columns missing
+        {
+            *locator = 0;
+            break;
+        }
+    }
+}
+// We need collect all the table names and find their primary/unique keys.
+// If all PK/UNQ columns are available in the list, that table's fields are
+// editable (unless they are computed fields). We also read NULL info here.
+void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
+    bool& nullable)
+{
+    wxString tabName(std2wx(statementM->ColumnTable(col)));
+    Table *t = dynamic_cast<Table *>(db->findRelation(Identifier(tabName)));
+
+    UniqueConstraint *locator = 0;  // used to build WHERE clause
+    std::map<wxString, UniqueConstraint *>::iterator tabIt =
+        statementTablesM.find(tabName);
+    if (tabIt == statementTablesM.end() && t)   // table not checked before
+    {
+        UniqueConstraint *locator = t->getPrimaryKey();
+        if (locator)    // check if this PK is usable (all fields present)
+            checkColumnsPresent(statementM, &locator);
+        if (!locator)   // PK not present or not usable, try UNQ
+        {
+            std::vector<UniqueConstraint> *uq = t->getUniqueConstraints();
+            if (uq)
+            {
+                for (std::vector<UniqueConstraint>::iterator ui = uq->begin();
+                    ui != uq->end(); ++ui)
+                {
+                    locator = &(*ui);
+                    checkColumnsPresent(statementM, &locator);
+                    if (locator)
+                        break;
+                }
+            }
+        }
+        statementTablesM.insert(
+            std::pair<wxString, UniqueConstraint*>(tabName, locator));
+        tabIt = statementTablesM.find(tabName);
+    }
+    locator = (*tabIt).second;
+
+    readOnly = (locator == 0);
+    nullable = false;
+    if (!readOnly)  // table is not RO, but column might be, so we search
+    {
+        wxString cn(std2wx(statementM->ColumnName(col)));
+        Column *c = 0;
+        t->checkAndLoadColumns();
+        for (MetadataCollection<Column>::iterator it = t->begin();
+            it != t->end(); ++it)
+        {
+            if ((*it).getName_() == cn)    // column found
+            {
+                c = &(*it);
+                break;
+            }
+        }
+        readOnly = (c == 0 || !c->getComputedSource().IsEmpty());
+        if (!readOnly)  // it is editable, so check if nullable
+            nullable = c->isNullable();
+    }
+
+    /*wxMessageBox(wxString::Format(wxT("TABLE: %s (RO=%d), COLUMN: %s (RO=%d, NULL=%d)"),
+        tabName.c_str(),
+        locator ? 0 : 1,
+        std2wx(statementM->ColumnName(col)).c_str(),
+        readOnly ? 1 : 0,
+        nullable ? 1 : 0)
+    );*/
+}
+//-----------------------------------------------------------------------------
+bool DataGridRows::initialize(const IBPP::Statement& statement, Database *db)
+{
+    statementM = statement;
+
     clear();
     // column definitions may have an index into the string array,
     // an offset into the buffer, or use no data at all
@@ -1101,21 +1267,16 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
     bufferSizeM = 0;
     unsigned stringIndex = 0;
 
-    // we need collect all the table names and find their primary keys
-    // if all PK columns are available in the list, that table's fields are
-    // editable (unless they are computed fields). We can also configure NULL
-    // behavior here
-    // We need Database * at this point
-
-    // create column definitions and compute the necessary buffer size
+    // Create column definitions and compute the necessary buffer size
     // and string array length when all fields contain data
     for (unsigned col = 1; col <= colCount; ++col)
     {
+        bool readOnly, nullable;
+        getColumnInfo(db, col, readOnly, nullable);
+
         wxString colName(std2wx(statement->ColumnAlias(col)));
         if (colName.empty())
             colName = std2wx(statement->ColumnName(col));
-        //wxString tabName(std2wx(statement->ColumnTable(col)));
-
 
         IBPP::SDT type = statement->ColumnType(col);
         if (statement->ColumnScale(col))
@@ -1125,32 +1286,32 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
         switch (type)
         {
             case IBPP::sdDate:
-                columnDef = new DateColumnDef(colName, bufferSizeM);
+                columnDef = new DateColumnDef(colName, bufferSizeM, readOnly, nullable);
                 break;
             case IBPP::sdTime:
-                columnDef = new TimeColumnDef(colName, bufferSizeM);
+                columnDef = new TimeColumnDef(colName, bufferSizeM, readOnly, nullable);
                 break;
             case IBPP::sdTimestamp:
-                columnDef = new TimestampColumnDef(colName, bufferSizeM);
+                columnDef = new TimestampColumnDef(colName, bufferSizeM, readOnly, nullable);
                 break;
 
             case IBPP::sdSmallint:
             case IBPP::sdInteger:
-                columnDef = new IntegerColumnDef(colName, bufferSizeM);
+                columnDef = new IntegerColumnDef(colName, bufferSizeM, readOnly, nullable);
                 break;
             case IBPP::sdLargeint:
-                columnDef = new Int64ColumnDef(colName, bufferSizeM);
+                columnDef = new Int64ColumnDef(colName, bufferSizeM, readOnly, nullable);
                 break;
 
             case IBPP::sdFloat:
-                columnDef = new FloatColumnDef(colName, bufferSizeM);
+                columnDef = new FloatColumnDef(colName, bufferSizeM, readOnly, nullable);
                 break;
             case IBPP::sdDouble:
-                columnDef = new DoubleColumnDef(colName, bufferSizeM);
+                columnDef = new DoubleColumnDef(colName, bufferSizeM, readOnly, nullable);
                 break;
 
             case IBPP::sdString:
-                columnDef = new StringColumnDef(colName, stringIndex);
+                columnDef = new StringColumnDef(colName, stringIndex, readOnly, nullable);
                 ++stringIndex;
                 break;
             default:
@@ -1190,13 +1351,76 @@ void DataGridRows::setFieldValue(unsigned row, unsigned col,
     const wxString& value)
 {
     if (columnDefsM[col]->isReadOnly())
-        return;
-    if (!dynamic_cast<StringColumnDef*>(columnDefsM[col]) && value.IsEmpty())
     {
-        buffersM[row]->setFieldNull(col, true);
+        throw FRError(_("This column is not editable."));
         return;
     }
-    columnDefsM[col]->setFromString(buffersM[row], value, col);
-    buffersM[row]->setFieldNull(col, false);
+
+    // user wants to store null
+    bool newIsNull = (!dynamic_cast<StringColumnDef*>(columnDefsM[col])
+        && value.IsEmpty());
+    if (newIsNull && !columnDefsM[col]->isNullable())
+        throw FRError(_("This column does not accept NULLs."));
+
+    // to ensure atomicity, we create a temporary buffer, try to store value
+    // in it and also in database. if anything fails, we revert to the values
+    // from temp buffer
+    DataGridRowBuffer *oldRecord = new DataGridRowBuffer(buffersM[row]);
+    try
+    {
+        if (newIsNull)
+            buffersM[row]->setFieldNull(col, true);
+        else
+        {
+            columnDefsM[col]->setFromString(buffersM[row], value, col);
+            buffersM[row]->setFieldNull(col, false);
+        }
+
+        // run the UPDATE statement
+        IBPP::Statement st = IBPP::StatementFactory(statementM->DatabasePtr(), statementM->TransactionPtr());
+        wxString table(std2wx(statementM->ColumnTable(col+1)));
+        wxString stm = wxT("UPDATE ") + Identifier(table).getQuoted()
+            + wxT(" SET ")
+            + Identifier(std2wx(statementM->ColumnName(col+1))).getQuoted();
+        if (newIsNull)
+            stm += wxT(" = NULL WHERE ");
+        else
+        {
+            stm += wxT(" = '")
+                + escapeQuotes(columnDefsM[col]->getAsString(buffersM[row]))
+                + wxT("' WHERE ");
+        }
+        std::map<wxString, UniqueConstraint *>::iterator it =
+            statementTablesM.find(table);
+        if (it == statementTablesM.end())
+            throw FRError(_("This column should not be editable"));
+        for (ColumnConstraint::const_iterator ci = (*it).second->begin(); ci !=
+            (*it).second->end(); ++ci)
+        {
+            for (unsigned c2 = 1; c2 <= statementM->Columns(); ++c2)
+            {
+                wxString cn(std2wx(statementM->ColumnName(c2)));
+                if (cn == (*ci))    // this is the column, add to where clause
+                {
+                    if (ci != (*it).second->begin())
+                        stm += wxT(" AND ");
+                    stm += Identifier(cn).getQuoted() + wxT(" = '");
+                    stm += escapeQuotes(
+                        columnDefsM[c2-1]->getAsString(oldRecord));
+                    stm += wxT("'");
+                }
+            }
+        }
+//        wxMessageBox(stm);    TODO: log this to statistics tab of SQL editor (using events perhaps?)
+        st->Prepare(wx2std(stm));
+        st->Execute();
+        delete oldRecord;
+    }
+    catch(...)
+    {
+        delete buffersM[row];       // delete the new record as it is invalid
+        buffersM[row] = oldRecord;
+        throw;
+    }
 }
 //-----------------------------------------------------------------------------
