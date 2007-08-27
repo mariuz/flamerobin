@@ -743,6 +743,8 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_delete, ExecuteSqlFrame::OnButtonDeleteClick)
     EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_ROWCOUNT_CHANGED, \
         ExecuteSqlFrame::OnGridRowCountChanged)
+    EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_STATEMENT, \
+        ExecuteSqlFrame::OnGridStatementExecuted)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 // Avoiding the annoying thing that you cannot click inside the selection and have it deselected and have caret there
@@ -1594,6 +1596,11 @@ void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent &event)
             splitter_window_1->Unsplit(panel_splitter_top);        // show grid only
         }
     }
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnGridStatementExecuted(wxCommandEvent &event)
+{
+    log(event.GetString(), ttSql);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::update()

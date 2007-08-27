@@ -170,6 +170,7 @@ private:
     void OnButtonWrapClick(wxCommandEvent &event);
     void OnButtonPlanClick(wxCommandEvent &event);
     void OnGridRowCountChanged(wxCommandEvent &event);
+    void OnGridStatementExecuted(wxCommandEvent &event);
 
     // begin wxGlade: ExecuteSqlFrame::methods
     void set_properties();

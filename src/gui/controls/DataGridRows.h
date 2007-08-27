@@ -87,9 +87,9 @@ public:
 
     wxString getFieldValue(unsigned row, unsigned col);
     bool isFieldNull(unsigned row, unsigned col);
-    void setFieldValue(unsigned row, unsigned col,
+    wxString setFieldValue(unsigned row, unsigned col,
         const wxString& value);
-    bool removeRows(size_t from, size_t count);
+    bool removeRows(size_t from, size_t count, wxString& statement);
 };
 //----------------------------------------------------------------------
 #endif

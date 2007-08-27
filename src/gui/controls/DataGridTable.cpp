@@ -366,18 +366,16 @@ void DataGridTable::setFetchAllRecords(bool fetchall)
     fetchAllRowsM = fetchall;
 }
 //-----------------------------------------------------------------------------
-void DataGridTable::saveEditorChanges(int currentRow)
-{
-    //rowsM.updateEditedRow(currentRow);
-}
-//-----------------------------------------------------------------------------
 void DataGridTable::SetValue(int row, int col, const wxString& value)
 {
     FR_TRY
 
-    // creates a duplicate of the row (so we can monitor changed values,
-    // have PK/UNQ data, and revert them possibly)
-    rowsM.setFieldValue(row, col, value);
+    wxString statement = rowsM.setFieldValue(row, col, value);
+
+    // used in frame to show executed statements
+    wxCommandEvent evt(wxEVT_FRDG_STATEMENT, GetView()->GetId());
+    evt.SetString(statement);
+    wxPostEvent(GetView(), evt);
 
     FR_CATCH
 }
@@ -387,7 +385,8 @@ bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
     FR_TRY
 
     // remove rows from internal storage
-    if (!rowsM.removeRows(pos, numRows))
+    wxString statement;
+    if (!rowsM.removeRows(pos, numRows, statement))
         return false;
 
     // notify visual control
@@ -401,10 +400,16 @@ bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
         wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
         evt.SetExtraLong(rowsM.getRowCount());
         wxPostEvent(GetView(), evt);
+
+        // used in frame to show executed statements
+        wxCommandEvent evt2(wxEVT_FRDG_STATEMENT, GetView()->GetId());
+        evt2.SetString(statement);
+        wxPostEvent(GetView(), evt2);
     }
 
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 DEFINE_EVENT_TYPE(wxEVT_FRDG_ROWCOUNT_CHANGED)
+DEFINE_EVENT_TYPE(wxEVT_FRDG_STATEMENT)
 //-----------------------------------------------------------------------------

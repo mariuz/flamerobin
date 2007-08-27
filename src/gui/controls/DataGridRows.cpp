@@ -1090,7 +1090,7 @@ wxString escapeQuotes(const wxString& input)
     return sCopy;
 }
 //-----------------------------------------------------------------------------
-bool DataGridRows::removeRows(size_t from, size_t count)
+bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
 {
     if (count > 1)
         throw(_("Multiple row deletion not supported (yet)"));
@@ -1105,7 +1105,7 @@ bool DataGridRows::removeRows(size_t from, size_t count)
         throw FRError(_("Multiple tables present."));
     }
 
-    wxString stm = wxT("DELETE FROM ")
+    stm = wxT("DELETE FROM ")
         + Identifier((*(statementTablesM.begin())).first).getQuoted()
         + wxT(" WHERE ");
     UniqueConstraint *uq = (*(statementTablesM.begin())).second;
@@ -1126,7 +1126,6 @@ bool DataGridRows::removeRows(size_t from, size_t count)
             }
         }
     }
-//    wxMessageBox(stm);    TODO: log this to statistics tab of SQL editor (using events perhaps?)
     st->Prepare(wx2std(stm));
     st->Execute();
 
@@ -1347,14 +1346,12 @@ bool DataGridRows::isFieldNull(unsigned row, unsigned col)
     return buffersM[row]->isFieldNull(col);
 }
 //-----------------------------------------------------------------------------
-void DataGridRows::setFieldValue(unsigned row, unsigned col,
+// returns the executed SQL statement
+wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
     const wxString& value)
 {
     if (columnDefsM[col]->isReadOnly())
-    {
         throw FRError(_("This column is not editable."));
-        return;
-    }
 
     // user wants to store null
     bool newIsNull = (!dynamic_cast<StringColumnDef*>(columnDefsM[col])
@@ -1411,10 +1408,10 @@ void DataGridRows::setFieldValue(unsigned row, unsigned col,
                 }
             }
         }
-//        wxMessageBox(stm);    TODO: log this to statistics tab of SQL editor (using events perhaps?)
         st->Prepare(wx2std(stm));
         st->Execute();
         delete oldRecord;
+        return stm;
     }
     catch(...)
     {

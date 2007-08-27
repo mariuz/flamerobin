@@ -38,9 +38,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 class Database;
 class DataGridCell;
 //-----------------------------------------------------------------------------
-// this event is sent after new rows have been fetched
 BEGIN_DECLARE_EVENT_TYPES()
+    // this event is sent after new rows have been fetched
     DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_ROWCOUNT_CHANGED, 42)
+    // this event is sent when statement is executed because of user edits
+    DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_STATEMENT, 43)
 END_DECLARE_EVENT_TYPES()
 //-----------------------------------------------------------------------------
 class DataGridTable: public wxGridTableBase
@@ -75,7 +77,6 @@ public:
     bool isNumericColumn(int col);
     bool needsMoreRowsFetched();
     void setFetchAllRecords(bool fetchall);
-    void saveEditorChanges(int currentRow);
 
     // methods of wxGridTableBase
     virtual void Clear();
