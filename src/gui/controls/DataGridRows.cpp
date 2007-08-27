@@ -510,7 +510,6 @@ IntegerColumnDef::IntegerColumnDef(const wxString& name, unsigned offset,
     bool readOnly, bool nullable)
     : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
 {
-    readOnlyM = false;  // override default
 }
 //-----------------------------------------------------------------------------
 wxString IntegerColumnDef::getAsString(DataGridRowBuffer* buffer)
@@ -763,7 +762,6 @@ TimestampColumnDef::TimestampColumnDef(const wxString& name, unsigned offset,
     bool readOnly, bool nullable)
     : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
 {
-    readOnlyM = false;  // override default
 }
 //-----------------------------------------------------------------------------
 wxString TimestampColumnDef::getAsString(DataGridRowBuffer* buffer)
@@ -1374,7 +1372,8 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
         }
 
         // run the UPDATE statement
-        IBPP::Statement st = IBPP::StatementFactory(statementM->DatabasePtr(), statementM->TransactionPtr());
+        IBPP::Statement st = IBPP::StatementFactory(statementM->DatabasePtr(),
+            statementM->TransactionPtr());
         wxString table(std2wx(statementM->ColumnTable(col+1)));
         wxString stm = wxT("UPDATE ") + Identifier(table).getQuoted()
             + wxT(" SET ")
@@ -1387,10 +1386,15 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
                 + escapeQuotes(columnDefsM[col]->getAsString(buffersM[row]))
                 + wxT("' WHERE ");
         }
+
         std::map<wxString, UniqueConstraint *>::iterator it =
             statementTablesM.find(table);
-        if (it == statementTablesM.end())
+
+        // MB: please do not remove this check. Although it is not needed,
+        //     it helped me detect some subtle bugs much easier
+        if (it == statementTablesM.end() || (*it).second == 0)
             throw FRError(_("This column should not be editable"));
+
         for (ColumnConstraint::const_iterator ci = (*it).second->begin(); ci !=
             (*it).second->end(); ++ci)
         {
