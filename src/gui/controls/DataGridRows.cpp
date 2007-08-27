@@ -1195,13 +1195,20 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
 {
     wxString tabName(std2wx(statementM->ColumnTable(col)));
     Table *t = dynamic_cast<Table *>(db->findRelation(Identifier(tabName)));
+    if (!t)
+    {
+        readOnly = true;
+        return;
+    }
 
     UniqueConstraint *locator = 0;  // used to build WHERE clause
     std::map<wxString, UniqueConstraint *>::iterator tabIt =
         statementTablesM.find(tabName);
-    if (tabIt == statementTablesM.end() && t)   // table not checked before
+    if (tabIt != statementTablesM.end())    // table checked before
+        locator = (*tabIt).second;
+    else
     {
-        UniqueConstraint *locator = t->getPrimaryKey();
+        locator = t->getPrimaryKey();
         if (locator)    // check if this PK is usable (all fields present)
             checkColumnsPresent(statementM, &locator);
         if (!locator)   // PK not present or not usable, try UNQ
@@ -1221,9 +1228,7 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
         }
         statementTablesM.insert(
             std::pair<wxString, UniqueConstraint*>(tabName, locator));
-        tabIt = statementTablesM.find(tabName);
     }
-    locator = (*tabIt).second;
 
     readOnly = (locator == 0);
     nullable = false;
@@ -1246,7 +1251,7 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
             nullable = c->isNullable();
     }
 
-    /*wxMessageBox(wxString::Format(wxT("TABLE: %s (RO=%d), COLUMN: %s (RO=%d, NULL=%d)"),
+    /* wxMessageBox(wxString::Format(wxT("TABLE: %s (RO=%d), COLUMN: %s (RO=%d, NULL=%d)"),
         tabName.c_str(),
         locator ? 0 : 1,
         std2wx(statementM->ColumnName(col)).c_str(),
@@ -1331,6 +1336,13 @@ bool DataGridRows::isRowFieldNumeric(unsigned col)
     if (col >= columnDefsM.size())
         return false;
     return columnDefsM[col]->isNumeric();
+}
+//-----------------------------------------------------------------------------
+bool DataGridRows::isColumnReadonly(unsigned col)
+{
+    if (col >= columnDefsM.size())
+        return false;
+    return columnDefsM[col]->isReadOnly();
 }
 //-----------------------------------------------------------------------------
 wxString DataGridRows::getFieldValue(unsigned row, unsigned col)

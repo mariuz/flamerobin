@@ -53,7 +53,9 @@ private:
     unsigned maxRowToFetchM;
 
     wxGridCellAttr* nullAttrM;
+    wxGridCellAttr* nullAttrReadonlyM;
     wxGridCellAttr* nullAttrNumericM;
+    wxGridCellAttr* nullAttrNumericReadonlyM;
     DataGridRows rowsM;
 
     Database *databaseM;
@@ -75,6 +77,7 @@ public:
     void initialFetch(wxMBConv* conv);
     bool isNullCell(int row, int col);
     bool isNumericColumn(int col);
+    bool isReadonlyColumn(int col);
     bool needsMoreRowsFetched();
     void setFetchAllRecords(bool fetchall);
 

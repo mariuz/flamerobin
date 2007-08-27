@@ -84,6 +84,7 @@ public:
     wxString getRowFieldName(unsigned col);
     bool initialize(const IBPP::Statement& statement, Database *);
     bool isRowFieldNumeric(unsigned col);
+    bool isColumnReadonly(unsigned col);
 
     wxString getFieldValue(unsigned row, unsigned col);
     bool isFieldNull(unsigned row, unsigned col);

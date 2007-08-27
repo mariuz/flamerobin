@@ -115,6 +115,8 @@ void DataGrid::fetchData(wxMBConv* conv)
         ca->SetAlignment(
             (table->isNumericColumn(i)) ? wxALIGN_RIGHT : wxALIGN_LEFT,
             wxALIGN_CENTRE);
+        ca->SetBackgroundColour(
+            (table->isReadonlyColumn(i)) ? wxColour(240, 240, 240):*wxWHITE);
         SetColAttr(i, ca);
     }
     AutoSizeColumns();

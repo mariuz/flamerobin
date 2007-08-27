@@ -57,15 +57,28 @@ DataGridTable::DataGridTable(IBPP::Statement& s, Database *db)
     nullAttrM = new wxGridCellAttr();
     nullAttrM->SetTextColour(*wxRED);
     nullAttrM->SetAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
+
+    nullAttrReadonlyM = new wxGridCellAttr();
+    nullAttrReadonlyM->SetTextColour(*wxRED);
+    nullAttrReadonlyM->SetAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
+    nullAttrReadonlyM->SetBackgroundColour(wxColour(240, 240, 240));
+
     nullAttrNumericM = new wxGridCellAttr();
     nullAttrNumericM->SetTextColour(*wxRED);
     nullAttrNumericM->SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
+
+    nullAttrNumericReadonlyM = new wxGridCellAttr();
+    nullAttrNumericReadonlyM->SetTextColour(*wxRED);
+    nullAttrNumericReadonlyM->SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
+    nullAttrNumericReadonlyM->SetBackgroundColour(wxColour(240, 240, 240));
 }
 //-----------------------------------------------------------------------------
 DataGridTable::~DataGridTable()
 {
     Clear();
     nullAttrNumericM->DecRef();
+    nullAttrNumericReadonlyM->DecRef();
+    nullAttrReadonlyM->DecRef();
     nullAttrM->DecRef();
 }
 //-----------------------------------------------------------------------------
@@ -169,8 +182,21 @@ wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
     {
         if (rowsM.isRowFieldNumeric(col))
         {
-            nullAttrNumericM->IncRef();
-            return nullAttrNumericM;
+            if (rowsM.isColumnReadonly(col))
+            {
+                nullAttrNumericReadonlyM->IncRef();
+                return nullAttrNumericReadonlyM;
+            }
+            else
+            {
+                nullAttrNumericM->IncRef();
+                return nullAttrNumericM;
+            }
+        }
+        if (rowsM.isColumnReadonly(col))
+        {
+            nullAttrReadonlyM->IncRef();
+            return nullAttrReadonlyM;
         }
         nullAttrM->IncRef();
         return nullAttrM;
@@ -344,6 +370,11 @@ bool DataGridTable::isNullCell(int row, int col)
 bool DataGridTable::isNumericColumn(int col)
 {
     return rowsM.isRowFieldNumeric(col);
+}
+//-----------------------------------------------------------------------------
+bool DataGridTable::isReadonlyColumn(int col)
+{
+    return rowsM.isColumnReadonly(col);
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::isValidCellPos(int row, int col)
