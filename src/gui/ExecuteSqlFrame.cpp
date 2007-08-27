@@ -952,6 +952,8 @@ void ExecuteSqlFrame::autoComplete(bool force)
 //! handle function keys (F5, F8, F4, ...)
 void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
 {
+    FR_TRY
+
     wxCommandEvent e;
     int key = event.GetKeyCode();
     if (!event.HasModifiers())
@@ -1011,6 +1013,8 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
         }
     }
     event.Skip();
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnClose(wxCloseEvent& event)
@@ -1151,8 +1155,12 @@ void ExecuteSqlFrame::clearStats()
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonExecuteClick(wxCommandEvent& WXUNUSED(event))
 {
+    FR_TRY
+
     clearStats();
     prepareAndExecute(false);
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
@@ -1422,12 +1430,20 @@ void ExecuteSqlFrame::SplitScreen()
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonCommitClick(wxCommandEvent& WXUNUSED(event))
 {
+    FR_TRY
+
     commitTransaction();
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonPlanClick(wxCommandEvent& WXUNUSED(event))
 {
+    FR_TRY
+
     prepareAndExecute(true);
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonDeleteClick(wxCommandEvent& event)
@@ -1536,8 +1552,12 @@ bool ExecuteSqlFrame::commitTransaction()
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonRollbackClick(wxCommandEvent& WXUNUSED(event))
 {
+    FR_TRY
+
     wxBusyCursor cr;
     rollbackTransaction();
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::rollbackTransaction()
