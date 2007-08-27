@@ -1103,17 +1103,20 @@ bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
         throw FRError(_("Multiple tables present."));
     }
 
+    std::map<wxString, UniqueConstraint *>::iterator toDel =
+        statementTablesM.begin();
     stm = wxT("DELETE FROM ")
-        + Identifier((*(statementTablesM.begin())).first).getQuoted()
+        + Identifier((*toDel).first).getQuoted()
         + wxT(" WHERE ");
-    UniqueConstraint *uq = (*(statementTablesM.begin())).second;
+    UniqueConstraint *uq = (*toDel).second;
     for (ColumnConstraint::const_iterator ci = uq->begin(); ci != uq->end();
         ++ci)
     {
         for (unsigned c2 = 1; c2 <= statementM->Columns(); ++c2)
         {
             wxString cn(std2wx(statementM->ColumnName(c2)));
-            if (cn == (*ci))    // this is the column, add to where clause
+            wxString tn(std2wx(statementM->ColumnTable(c2)));
+            if (cn == (*ci) && tn == (*toDel).first)    // column found
             {
                 if (ci != uq->begin())
                     stm += wxT(" AND ");
@@ -1401,7 +1404,8 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
             for (unsigned c2 = 1; c2 <= statementM->Columns(); ++c2)
             {
                 wxString cn(std2wx(statementM->ColumnName(c2)));
-                if (cn == (*ci))    // this is the column, add to where clause
+                wxString tn(std2wx(statementM->ColumnTable(c2)));
+                if (cn == (*ci) && tn == table) // found it, add to WHERE list
                 {
                     if (ci != (*it).second->begin())
                         stm += wxT(" AND ");
