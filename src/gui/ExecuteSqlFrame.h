@@ -97,12 +97,10 @@ public:
         ID_button_rollback,
         ID_button_toggle,
         ID_button_delete,
+        ID_button_insert,
         ID_button_plan,
         ID_grid_data,
-        ID_stc_sql,
-        ID_button_addrow,
-        ID_button_delrow,
-        ID_button_add
+        ID_stc_sql
     };
 
     // query parsing and execution
@@ -167,6 +165,7 @@ private:
     void OnButtonRollbackClick(wxCommandEvent &event);
     void OnButtonToggleClick(wxCommandEvent &event);
     void OnButtonDeleteClick(wxCommandEvent &event);
+    void OnButtonInsertClick(wxCommandEvent &event);
     void OnButtonWrapClick(wxCommandEvent &event);
     void OnButtonPlanClick(wxCommandEvent &event);
     void OnGridRowCountChanged(wxCommandEvent &event);
@@ -198,6 +197,7 @@ protected:
     wxButton* button_plan;
     wxButton* button_toggle;
     wxButton* button_delete;
+    wxButton* button_insert;
     wxSplitterWindow* splitter_window_1;
     wxPanel* panel_splitter_top;
     wxPanel* panel_splitter_bottom;

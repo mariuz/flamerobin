@@ -578,6 +578,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
     button_plan = new wxButton(panel_contents, ID_button_plan, _("Show plan"));
     button_toggle = new wxButton(panel_contents, ID_button_toggle, _("Toggle view"));
     button_delete = new wxButton(panel_contents, ID_button_delete, _("Delete row"));
+    button_insert = new wxButton(panel_contents, ID_button_insert, _("Insert row"));
     splitter_window_1 = new wxSplitterWindow(panel_contents, -1);
     panel_splitter_bottom = new wxPanel(splitter_window_1, -1);
     notebook_1 = new wxNotebook(panel_splitter_bottom, -1, wxDefaultPosition, wxDefaultSize, 0);
@@ -629,6 +630,8 @@ void ExecuteSqlFrame::set_properties()
     button_commit->SetToolTip(_("F5 - Commit transaction"));
     button_rollback->SetToolTip(_("F8 - Rollback transaction"));
     button_plan->SetToolTip(_("Show execution plan for query"));
+    button_delete->SetToolTip(_("Delete row of selected cell"));
+    button_insert->SetToolTip(_("Insert a new row in recordset"));
 
     splitter_window_1->Unsplit();
 
@@ -667,6 +670,7 @@ void ExecuteSqlFrame::do_layout()
     sizer_3->Add(10, 5, 0, 0, 0);
     sizer_3->Add(button_toggle, 0, wxALL, 3);
     sizer_3->Add(button_delete, 0, wxALL, 3);
+    sizer_3->Add(button_insert, 0, wxALL, 3);
     sizer_2->Add(sizer_3, 0, wxALL|wxEXPAND, 2);
     sizer_4->Add(styled_text_ctrl_sql, 1, wxEXPAND, 0);
     panel_splitter_top->SetAutoLayout(true);
@@ -741,6 +745,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_plan, ExecuteSqlFrame::OnButtonPlanClick)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_toggle, ExecuteSqlFrame::OnButtonToggleClick)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_delete, ExecuteSqlFrame::OnButtonDeleteClick)
+    EVT_BUTTON(ExecuteSqlFrame::ID_button_insert, ExecuteSqlFrame::OnButtonInsertClick)
     EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_ROWCOUNT_CHANGED, \
         ExecuteSqlFrame::OnGridRowCountChanged)
     EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_STATEMENT, \
@@ -1427,12 +1432,34 @@ void ExecuteSqlFrame::OnButtonPlanClick(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnButtonDeleteClick(wxCommandEvent& event)
 {
+    FR_TRY
+
     if (grid_data->getDataGridTable() && grid_data->GetNumberRows())
     {
         grid_data->BeginBatch();
         grid_data->DeleteRows(grid_data->GetGridCursorRow(), 1);
         grid_data->EndBatch();
     }
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnButtonInsertClick(wxCommandEvent& event)
+{
+    FR_TRY
+
+    if (grid_data->getDataGridTable())
+    {
+        // show list of tables for user to select into which one to insert
+
+        // show dialog to enter values
+
+        // run the insert statement
+
+        // add new row to grid
+    }
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 bool ExecuteSqlFrame::commitTransaction()
