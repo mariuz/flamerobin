@@ -1446,7 +1446,7 @@ void ExecuteSqlFrame::OnButtonPlanClick(wxCommandEvent& WXUNUSED(event))
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnButtonDeleteClick(wxCommandEvent& event)
+void ExecuteSqlFrame::OnButtonDeleteClick(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
@@ -1460,7 +1460,7 @@ void ExecuteSqlFrame::OnButtonDeleteClick(wxCommandEvent& event)
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnButtonInsertClick(wxCommandEvent& event)
+void ExecuteSqlFrame::OnButtonInsertClick(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 

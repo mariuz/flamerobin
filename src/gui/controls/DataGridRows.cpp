@@ -461,7 +461,7 @@ public:
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter);
     virtual void setFromString(DataGridRowBuffer* buffer,
-        const wxString& source, unsigned col);
+        const wxString& source);
 };
 //-----------------------------------------------------------------------------
 DummyColumnDef::DummyColumnDef(const wxString& name)
@@ -485,7 +485,7 @@ void DummyColumnDef::setValue(DataGridRowBuffer* /*buffer*/, unsigned /*col*/,
 }
 //-----------------------------------------------------------------------------
 void DummyColumnDef::setFromString(DataGridRowBuffer* /* buffer */,
-         const wxString& /* source */, unsigned /* col */)
+         const wxString& /* source */)
 {
 }
 //-----------------------------------------------------------------------------
@@ -503,7 +503,7 @@ public:
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter);
     virtual void setFromString(DataGridRowBuffer* buffer,
-        const wxString& source, unsigned col);
+        const wxString& source);
 };
 //-----------------------------------------------------------------------------
 IntegerColumnDef::IntegerColumnDef(const wxString& name, unsigned offset,
@@ -522,7 +522,7 @@ wxString IntegerColumnDef::getAsString(DataGridRowBuffer* buffer)
 }
 //-----------------------------------------------------------------------------
 void IntegerColumnDef::setFromString(DataGridRowBuffer* buffer,
-        const wxString& source, unsigned col)
+        const wxString& source)
 {
     wxASSERT(buffer);
     long value;
@@ -564,7 +564,7 @@ public:
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter);
     virtual void setFromString(DataGridRowBuffer* buffer,
-        const wxString& source, unsigned col);
+        const wxString& source);
 };
 //-----------------------------------------------------------------------------
 Int64ColumnDef::Int64ColumnDef(const wxString& name, unsigned offset,
@@ -583,7 +583,7 @@ wxString Int64ColumnDef::getAsString(DataGridRowBuffer* buffer)
 }
 //-----------------------------------------------------------------------------
 void Int64ColumnDef::setFromString(DataGridRowBuffer* buffer,
-        const wxString& source, unsigned col)
+        const wxString& source)
 {
     wxASSERT(buffer);
     int64_t value;
@@ -624,7 +624,7 @@ public:
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter);
     virtual void setFromString(DataGridRowBuffer* buffer,
-        const wxString& source, unsigned col);
+        const wxString& source);
 };
 //-----------------------------------------------------------------------------
 DateColumnDef::DateColumnDef(const wxString& name, unsigned offset,
@@ -647,7 +647,7 @@ wxString DateColumnDef::getAsString(DataGridRowBuffer* buffer)
 }
 //-----------------------------------------------------------------------------
 void DateColumnDef::setFromString(DataGridRowBuffer* buffer,
-        const wxString& source, unsigned col)
+        const wxString& source)
 {
     wxASSERT(buffer);
     int y = wxDateTime::Now().GetYear();    // defaults
@@ -690,7 +690,7 @@ public:
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter);
     virtual void setFromString(DataGridRowBuffer* buffer,
-        const wxString& source, unsigned col);
+        const wxString& source);
 };
 //-----------------------------------------------------------------------------
 TimeColumnDef::TimeColumnDef(const wxString& name, unsigned offset,
@@ -714,7 +714,7 @@ wxString TimeColumnDef::getAsString(DataGridRowBuffer* buffer)
 }
 //-----------------------------------------------------------------------------
 void TimeColumnDef::setFromString(DataGridRowBuffer* buffer,
-        const wxString& source, unsigned col)
+        const wxString& source)
 {
     wxASSERT(buffer);
     int hr = 0, mn = 0, sc = 0, ms = 0;
@@ -755,7 +755,7 @@ public:
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter);
     virtual void setFromString(DataGridRowBuffer* buffer,
-        const wxString& source, unsigned col);
+        const wxString& source);
 };
 //-----------------------------------------------------------------------------
 TimestampColumnDef::TimestampColumnDef(const wxString& name, unsigned offset,
@@ -792,7 +792,7 @@ wxString TimestampColumnDef::getAsString(DataGridRowBuffer* buffer)
 }
 //-----------------------------------------------------------------------------
 void TimestampColumnDef::setFromString(DataGridRowBuffer* buffer,
-        const wxString& source, unsigned col)
+        const wxString& source)
 {
     wxASSERT(buffer);
     wxString temp(source);
@@ -854,7 +854,7 @@ public:
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter);
     virtual void setFromString(DataGridRowBuffer* buffer,
-        const wxString& source, unsigned col);
+        const wxString& source);
 };
 //-----------------------------------------------------------------------------
 FloatColumnDef::FloatColumnDef(const wxString& name, unsigned offset,
@@ -876,7 +876,7 @@ wxString FloatColumnDef::getAsString(DataGridRowBuffer* buffer)
 }
 //-----------------------------------------------------------------------------
 void FloatColumnDef::setFromString(DataGridRowBuffer* buffer,
-        const wxString& source, unsigned col)
+        const wxString& source)
 {
     wxASSERT(buffer);
     double d;
@@ -918,7 +918,7 @@ public:
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter);
     virtual void setFromString(DataGridRowBuffer* buffer,
-        const wxString& source, unsigned col);
+        const wxString& source);
 };
 //-----------------------------------------------------------------------------
 DoubleColumnDef::DoubleColumnDef(const wxString& name, unsigned offset,
@@ -947,7 +947,7 @@ wxString DoubleColumnDef::getAsString(DataGridRowBuffer* buffer)
 }
 //-----------------------------------------------------------------------------
 void DoubleColumnDef::setFromString(DataGridRowBuffer* buffer,
-        const wxString& source, unsigned col)
+        const wxString& source)
 {
     wxASSERT(buffer);
     double d;
@@ -990,7 +990,7 @@ public:
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter);
     virtual void setFromString(DataGridRowBuffer* buffer,
-        const wxString& source, unsigned col);
+        const wxString& source);
 };
 //-----------------------------------------------------------------------------
 StringColumnDef::StringColumnDef(const wxString& name, unsigned stringIndex,
@@ -1006,7 +1006,7 @@ wxString StringColumnDef::getAsString(DataGridRowBuffer* buffer)
 }
 //-----------------------------------------------------------------------------
 void StringColumnDef::setFromString(DataGridRowBuffer* buffer,
-        const wxString& source, unsigned col)
+        const wxString& source)
 {
     wxASSERT(buffer);
     buffer->setString(indexM, source);
@@ -1112,7 +1112,7 @@ bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
     for (ColumnConstraint::const_iterator ci = uq->begin(); ci != uq->end();
         ++ci)
     {
-        for (unsigned c2 = 1; c2 <= statementM->Columns(); ++c2)
+        for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
         {
             wxString cn(std2wx(statementM->ColumnName(c2)));
             wxString tn(std2wx(statementM->ColumnTable(c2)));
@@ -1170,7 +1170,7 @@ void checkColumnsPresent(const IBPP::Statement& statement,
         (*locator)->end(); ++ci)
     {
         bool found = false;
-        for (unsigned c2 = 1; c2 <= statement->Columns(); ++c2)
+        for (int c2 = 1; c2 <= statement->Columns(); ++c2)
         {
             wxString cn(std2wx(statement->ColumnName(c2)));
             wxString tn(std2wx(statement->ColumnTable(c2)));
@@ -1382,7 +1382,7 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
             buffersM[row]->setFieldNull(col, true);
         else
         {
-            columnDefsM[col]->setFromString(buffersM[row], value, col);
+            columnDefsM[col]->setFromString(buffersM[row], value);
             buffersM[row]->setFieldNull(col, false);
         }
 
@@ -1413,7 +1413,7 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
         for (ColumnConstraint::const_iterator ci = (*it).second->begin(); ci !=
             (*it).second->end(); ++ci)
         {
-            for (unsigned c2 = 1; c2 <= statementM->Columns(); ++c2)
+            for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
             {
                 wxString cn(std2wx(statementM->ColumnName(c2)));
                 wxString tn(std2wx(statementM->ColumnTable(c2)));
