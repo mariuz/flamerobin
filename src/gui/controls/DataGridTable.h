@@ -73,6 +73,7 @@ public:
     wxString getCellValueForInsert(int row, int col);
     wxString getCellValueForCSV(int row, int col);
     bool getFetchAllRows();
+    wxColour getReadonlyColour();
     wxString getTableName();
     void initialFetch(wxMBConv* conv);
     bool isNullCell(int row, int col);

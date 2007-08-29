@@ -61,7 +61,8 @@ DataGridTable::DataGridTable(IBPP::Statement& s, Database *db)
     nullAttrReadonlyM = new wxGridCellAttr();
     nullAttrReadonlyM->SetTextColour(*wxRED);
     nullAttrReadonlyM->SetAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
-    nullAttrReadonlyM->SetBackgroundColour(wxColour(240, 240, 240));
+    nullAttrReadonlyM->SetReadOnly(true);
+    nullAttrReadonlyM->SetBackgroundColour(getReadonlyColour());
 
     nullAttrNumericM = new wxGridCellAttr();
     nullAttrNumericM->SetTextColour(*wxRED);
@@ -70,7 +71,8 @@ DataGridTable::DataGridTable(IBPP::Statement& s, Database *db)
     nullAttrNumericReadonlyM = new wxGridCellAttr();
     nullAttrNumericReadonlyM->SetTextColour(*wxRED);
     nullAttrNumericReadonlyM->SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
-    nullAttrNumericReadonlyM->SetBackgroundColour(wxColour(240, 240, 240));
+    nullAttrNumericReadonlyM->SetReadOnly(true);
+    nullAttrNumericReadonlyM->SetBackgroundColour(getReadonlyColour());
 }
 //-----------------------------------------------------------------------------
 DataGridTable::~DataGridTable()
@@ -275,6 +277,11 @@ int DataGridTable::GetNumberRows()
     return rowsM.getRowCount();
 
     FR_CATCH
+}
+//-----------------------------------------------------------------------------
+wxColour DataGridTable::getReadonlyColour()
+{
+    return wxColour(240, 240, 240);
 }
 //-----------------------------------------------------------------------------
 wxString DataGridTable::getTableName()
