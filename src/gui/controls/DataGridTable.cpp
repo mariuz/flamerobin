@@ -269,17 +269,21 @@ int DataGridTable::GetNumberRows()
 //-----------------------------------------------------------------------------
 wxColour DataGridTable::getReadonlyColour()
 {
-    wxColour colourReadOnly;
+    static wxColour colourReadOnly;
     if (!colourReadOnly.IsOk())
     {
-        // compute a colour that is at 20% between "white" and "gray"
+        // compute a colour that is between "white" and "gray"
         // (but use the actual system colours instead of hard-coded values)
-        wxColour colourWnd(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
-        int r = colourWnd.Red(), g = colourWnd.Green(), b = colourWnd.Blue();
-        wxColour colourGray(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
-        colourReadOnly.Set(r + (colourGray.Red() - r) / 5,
-            g + (colourGray.Green() - g) / 5,
-            b + (colourGray.Blue() - b) / 5);
+        wxColour c(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
+        int r1 = c.Red(), g1 = c.Green(), b1 = c.Blue();
+        c = wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE);
+        int r2 = c.Red(), g2 = c.Green(), b2 = c.Blue();
+        // start at 50 %, and use progressively lighter colours for larger
+        // distances between white and gray
+        int distance = abs(r1 - r2) + abs(g1 - g2) + abs(b1 - b2);
+        int scale = (distance >= 192) ? distance / 64 : 2;
+        colourReadOnly.Set(r1 + (r2 - r1) / scale,
+            g1 + (g2 - g1) / scale, b1 + (b2 - b1) / scale);
     }
     return colourReadOnly;
 }
