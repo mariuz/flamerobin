@@ -178,8 +178,6 @@ void DataGridTable::fetch()
 wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
     wxGridCellAttr::wxAttrKind kind)
 {
-    FR_TRY
-
     if (rowsM.isFieldNull(row, col))
     {
         if (rowsM.isRowFieldNumeric(col))
@@ -204,8 +202,6 @@ wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
         return nullAttrM;
     }
     return wxGridTableBase::GetAttr(row, col, kind);
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 wxString DataGridTable::getCellValue(int row, int col)
@@ -249,11 +245,7 @@ wxString DataGridTable::getCellValueForCSV(int row, int col)
 //-----------------------------------------------------------------------------
 wxString DataGridTable::GetColLabelValue(int col)
 {
-    FR_TRY
-
     return rowsM.getRowFieldName(col);
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::getFetchAllRows()
@@ -263,20 +255,12 @@ bool DataGridTable::getFetchAllRows()
 //-----------------------------------------------------------------------------
 int DataGridTable::GetNumberCols()
 {
-    FR_TRY
-
     return rowsM.getRowFieldCount();
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 int DataGridTable::GetNumberRows()
 {
-    FR_TRY
-
     return rowsM.getRowCount();
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 wxColour DataGridTable::getReadonlyColour()
@@ -297,8 +281,6 @@ wxString DataGridTable::getTableName()
 //-----------------------------------------------------------------------------
 wxString DataGridTable::GetValue(int row, int col)
 {
-    FR_TRY
-
     if (!isValidCellPos(row, col))
         return wxEmptyString;
 
@@ -321,8 +303,6 @@ wxString DataGridTable::GetValue(int row, int col)
         cellValue += wxT(" [...]"); // and show that there is more data...
     }
     return cellValue;
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGridTable::initialFetch(wxMBConv* conv)
@@ -362,11 +342,7 @@ void DataGridTable::initialFetch(wxMBConv* conv)
 //-----------------------------------------------------------------------------
 bool DataGridTable::IsEmptyCell(int row, int col)
 {
-    FR_TRY
-
     return !isValidCellPos(row, col);
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::isNullCell(int row, int col)
@@ -444,8 +420,10 @@ bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
         evt2.SetString(statement);
         wxPostEvent(GetView(), evt2);
     }
+    return true;
 
     FR_CATCH
+    return false;
 }
 //-----------------------------------------------------------------------------
 DEFINE_EVENT_TYPE(wxEVT_FRDG_ROWCOUNT_CHANGED)
