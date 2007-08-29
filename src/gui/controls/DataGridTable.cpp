@@ -56,23 +56,27 @@ DataGridTable::DataGridTable(IBPP::Statement& s, Database *db)
 
     nullAttrM = new wxGridCellAttr();
     nullAttrM->SetTextColour(*wxRED);
+    nullAttrM->SetBackgroundColour(
+        wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
     nullAttrM->SetAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
 
     nullAttrReadonlyM = new wxGridCellAttr();
     nullAttrReadonlyM->SetTextColour(*wxRED);
+    nullAttrReadonlyM->SetBackgroundColour(getReadonlyColour());
     nullAttrReadonlyM->SetAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
     nullAttrReadonlyM->SetReadOnly(true);
-    nullAttrReadonlyM->SetBackgroundColour(getReadonlyColour());
 
     nullAttrNumericM = new wxGridCellAttr();
     nullAttrNumericM->SetTextColour(*wxRED);
+    nullAttrNumericM->SetBackgroundColour(
+        wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
     nullAttrNumericM->SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
 
     nullAttrNumericReadonlyM = new wxGridCellAttr();
     nullAttrNumericReadonlyM->SetTextColour(*wxRED);
+    nullAttrNumericReadonlyM->SetBackgroundColour(getReadonlyColour());
     nullAttrNumericReadonlyM->SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
     nullAttrNumericReadonlyM->SetReadOnly(true);
-    nullAttrNumericReadonlyM->SetBackgroundColour(getReadonlyColour());
 }
 //-----------------------------------------------------------------------------
 DataGridTable::~DataGridTable()
@@ -265,7 +269,19 @@ int DataGridTable::GetNumberRows()
 //-----------------------------------------------------------------------------
 wxColour DataGridTable::getReadonlyColour()
 {
-    return wxColour(240, 240, 240);
+    wxColour colourReadOnly;
+    if (!colourReadOnly.IsOk())
+    {
+        // compute a colour that is at 20% between "white" and "gray"
+        // (but use the actual system colours instead of hard-coded values)
+        wxColour colourWnd(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
+        int r = colourWnd.Red(), g = colourWnd.Green(), b = colourWnd.Blue();
+        wxColour colourGray(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
+        colourReadOnly.Set(r + (colourGray.Red() - r) / 5,
+            g + (colourGray.Green() - g) / 5,
+            b + (colourGray.Blue() - b) / 5);
+    }
+    return colourReadOnly;
 }
 //-----------------------------------------------------------------------------
 wxString DataGridTable::getTableName()
