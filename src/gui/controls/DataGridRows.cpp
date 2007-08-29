@@ -431,6 +431,12 @@ ResultsetColumnDef::~ResultsetColumnDef()
 {
 }
 //-----------------------------------------------------------------------------
+// needed to avoid strange date&time formatting if such column is PK/UNQ
+wxString ResultsetColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
+{
+    return getAsString(buffer);
+}
+//-----------------------------------------------------------------------------
 wxString ResultsetColumnDef::getName()
 {
     return nameM;
@@ -619,6 +625,7 @@ private:
 public:
     DateColumnDef(const wxString& name, unsigned offset, bool readOnly,
         bool nullable);
+    virtual wxString getAsFirebirdString(DataGridRowBuffer* buffer);
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
@@ -644,6 +651,19 @@ wxString DateColumnDef::getAsString(DataGridRowBuffer* buffer)
     int year, month, day;
     date.GetDate(year, month, day);
     return GridCellFormats::get().formatDate(year, month, day);
+}
+//-----------------------------------------------------------------------------
+wxString DateColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
+{
+    wxASSERT(buffer);
+    int value;
+    if (!buffer->getValue(offsetM, value))
+        return wxEmptyString;
+
+    IBPP::Date date(value);
+    int year, month, day;
+    date.GetDate(year, month, day);
+    return wxString::Format(wxT("%d-%d-%d"), year, month, day);
 }
 //-----------------------------------------------------------------------------
 void DateColumnDef::setFromString(DataGridRowBuffer* buffer,
@@ -685,6 +705,7 @@ private:
 public:
     TimeColumnDef(const wxString& name, unsigned offset, bool readOnly,
         bool nullable);
+    virtual wxString getAsFirebirdString(DataGridRowBuffer* buffer);
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
@@ -710,6 +731,20 @@ wxString TimeColumnDef::getAsString(DataGridRowBuffer* buffer)
     int hour, minute, second, tenththousands;
     time.GetTime(hour, minute, second, tenththousands);
     return GridCellFormats::get().formatTime(hour, minute, second,
+        tenththousands / 10);
+}
+//-----------------------------------------------------------------------------
+wxString TimeColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
+{
+    wxASSERT(buffer);
+    int value;
+    if (!buffer->getValue(offsetM, value))
+        return wxEmptyString;
+
+    IBPP::Time time(value);
+    int hour, minute, second, tenththousands;
+    time.GetTime(hour, minute, second, tenththousands);
+    return wxString::Format(wxT("%d:%d:%d.%d"), hour, minute, second,
         tenththousands / 10);
 }
 //-----------------------------------------------------------------------------
@@ -750,6 +785,7 @@ private:
 public:
     TimestampColumnDef(const wxString& name, unsigned offset, bool readOnly,
         bool nullable);
+    virtual wxString getAsFirebirdString(DataGridRowBuffer* buffer);
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
@@ -789,6 +825,28 @@ wxString TimestampColumnDef::getAsString(DataGridRowBuffer* buffer)
         return timeStr;
     else
         return dateStr + wxT(", ") + timeStr;
+}
+//-----------------------------------------------------------------------------
+wxString TimestampColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
+{
+    wxASSERT(buffer);
+    int value;
+    if (!buffer->getValue(offsetM, value))
+        return wxEmptyString;
+    IBPP::Date date(value);
+
+    if (!buffer->getValue(offsetM + sizeof(int), value))
+        return wxEmptyString;
+    IBPP::Time time(value);
+
+    int year, month, day, hour, minute, second, tenththousands;
+    date.GetDate(year, month, day);
+    time.GetTime(hour, minute, second, tenththousands);
+
+    wxString dateStr = wxString::Format(wxT("%d-%d-%d"), year, month, day);
+    wxString timeStr = wxString::Format(wxT("%d:%d:%d.%d"), hour, minute,
+        second, tenththousands / 10);
+    return dateStr + wxT(", ") + timeStr;
 }
 //-----------------------------------------------------------------------------
 void TimestampColumnDef::setFromString(DataGridRowBuffer* buffer,
@@ -1122,7 +1180,7 @@ bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
                     stm += wxT(" AND ");
                 stm += Identifier(cn).getQuoted() + wxT(" = '");
                 stm += escapeQuotes(
-                    columnDefsM[c2-1]->getAsString(buffersM[from]));
+                    columnDefsM[c2-1]->getAsFirebirdString(buffersM[from]));
                 stm += wxT("'");
             }
         }
@@ -1397,8 +1455,8 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
             stm += wxT(" = NULL WHERE ");
         else
         {
-            stm += wxT(" = '")
-                + escapeQuotes(columnDefsM[col]->getAsString(buffersM[row]))
+            stm += wxT(" = '") + escapeQuotes(
+                columnDefsM[col]->getAsFirebirdString(buffersM[row]))
                 + wxT("' WHERE ");
         }
 
@@ -1423,8 +1481,9 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
                         stm += wxT(" AND ");
                     stm += Identifier(cn).getQuoted() + wxT(" = '");
                     stm += escapeQuotes(
-                        columnDefsM[c2-1]->getAsString(oldRecord));
+                        columnDefsM[c2-1]->getAsFirebirdString(oldRecord));
                     stm += wxT("'");
+                    break;
                 }
             }
         }

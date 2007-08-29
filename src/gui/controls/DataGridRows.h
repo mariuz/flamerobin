@@ -50,6 +50,7 @@ public:
         bool nullable = false);
     virtual ~ResultsetColumnDef();
 
+    virtual wxString getAsFirebirdString(DataGridRowBuffer* buffer);
     virtual wxString getAsString(DataGridRowBuffer* buffer) = 0;
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source) = 0;
