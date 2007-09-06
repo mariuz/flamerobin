@@ -29,6 +29,8 @@
 #define DATAGRIDROWS_H
 //-----------------------------------------------------------------------------
 #include <vector>
+#include <map>
+#include <list>
 
 #include <ibpp.h>
 
@@ -70,6 +72,7 @@ private:
     std::vector<ResultsetColumnDef*> columnDefsM;
     std::vector<DataGridRowBuffer*> buffersM;
     std::map<wxString, UniqueConstraint *> statementTablesM;
+    std::list<UniqueConstraint> dbKeysM;
     unsigned bufferSizeM;
 
     void getColumnInfo(Database *db, unsigned col, bool& readOnly,

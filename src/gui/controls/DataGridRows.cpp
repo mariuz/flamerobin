@@ -1067,6 +1067,7 @@ void StringColumnDef::setFromString(DataGridRowBuffer* buffer,
         const wxString& source)
 {
     wxASSERT(buffer);
+    // TODO: if CHARACTER SET OCTETS - check if it is a valid hexdec string
     buffer->setString(indexM, source);
 }
 //-----------------------------------------------------------------------------
@@ -1081,7 +1082,15 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     wxASSERT(buffer);
     std::string value;
     statement->Get(col, value);
-    buffer->setString(indexM, std2wx(value, converter));
+    if (statement->ColumnSubtype(col) != 1)
+        buffer->setString(indexM, std2wx(value, converter));
+    else    // charset OCTETS
+    {
+        wxString val;
+        for (std::string::size_type p = 0; p < value.length(); p++)
+            val += wxString::Format(wxT("%02x"), uint8_t(value[p]));
+        buffer->setString(indexM, val);
+    }
 }
 //-----------------------------------------------------------------------------
 // DataGridRows class
@@ -1136,6 +1145,7 @@ void DataGridRows::clear()
         columnDefsM.clear();
     }
     statementTablesM.clear();
+    dbKeysM.clear();
     bufferSizeM = 0;
 }
 //-----------------------------------------------------------------------------
@@ -1248,6 +1258,7 @@ void checkColumnsPresent(const IBPP::Statement& statement,
 // We need collect all the table names and find their primary/unique keys.
 // If all PK/UNQ columns are available in the list, that table's fields are
 // editable (unless they are computed fields). We also read NULL info here.
+// We also use RDB$DB_KEY column if present
 void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
     bool& nullable)
 {
@@ -1282,6 +1293,19 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
                     if (locator)
                         break;
                 }
+            }
+        }
+        if (!locator)   // neither PK nor UNQ found, look for RDB$DB_KEY
+        {
+            UniqueConstraint uc;
+            uc.columnsM.push_back(wxT("DB_KEY"));
+            uc.setParent(t);
+            locator = &uc;
+            checkColumnsPresent(statementM, &locator);
+            if (locator)    // DB_KEY present
+            {
+                dbKeysM.push_back(uc);
+                locator = &dbKeysM.back();
             }
         }
         statementTablesM.insert(
@@ -1417,6 +1441,18 @@ bool DataGridRows::isFieldNull(unsigned row, unsigned col)
     return buffersM[row]->isFieldNull(col);
 }
 //-----------------------------------------------------------------------------
+std::string wxHex2stdStr(const wxString& hexStr)
+{
+    std::string retval;
+    for (size_t p = 0; p < hexStr.Length(); p+=2)
+    {
+        long l;
+        if (!hexStr.Mid(p, 2).ToLong(&l, 16) || l > 255 || l < 0)
+            throw FRError(_("Not a valid hexadecimal value."));
+        retval += (unsigned char)l;
+    }
+    return retval;
+}
 // returns the executed SQL statement
 wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
     const wxString& value)
@@ -1468,9 +1504,16 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
         if (it == statementTablesM.end() || (*it).second == 0)
             throw FRError(_("This column should not be editable"));
 
+        bool dbkey = false;
         for (ColumnConstraint::const_iterator ci = (*it).second->begin(); ci !=
             (*it).second->end(); ++ci)
         {
+            if ((*ci) == wxT("DB_KEY"))
+            {
+                stm += wxT(" RDB$DB_KEY = ?");
+                dbkey = true;
+                break;
+            }
             for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
             {
                 wxString cn(std2wx(statementM->ColumnName(c2)));
@@ -1488,6 +1531,20 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
             }
         }
         st->Prepare(wx2std(stm));
+        if (dbkey)  // find the column and set the parameter
+        {
+            for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
+            {
+                wxString cn(std2wx(statementM->ColumnName(c2)));
+                wxString tn(std2wx(statementM->ColumnTable(c2)));
+                if (cn == wxT("DB_KEY") && tn == table)
+                {
+                    std::string dbkey = wxHex2stdStr(
+                        columnDefsM[c2-1]->getAsString(oldRecord));
+                    st->Set(1, dbkey);
+                }
+            }
+        }
         st->Execute();
         delete oldRecord;
         return stm;
