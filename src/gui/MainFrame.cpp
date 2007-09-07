@@ -886,6 +886,12 @@ void MainFrame::OnMenuBrowse(wxCommandEvent& WXUNUSED(event))
     wxString sql(wxT("select * from "));
     sql += i->getQuotedName();
 
+    if (t == ntTable)
+    {   // TODO: add DB_KEY only when table doesn't have a PK/UNQ constraint
+        sql = wxT("select t.*, t.rdb$db_key from ") + i->getQuotedName()
+            + wxT(" t");
+    }
+
     if (t == ntProcedure)
     {
         Procedure* p = dynamic_cast<Procedure*>(i);
@@ -957,6 +963,10 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
             else
                 sql += wxT(", ");
             sql += (*it)->getQuotedName();
+        }
+        if (t == ntTable)
+        {   // TODO: add DB_KEY only when table doesn't have a PK/UNQ constraint
+            sql += wxT(", RDB$DB_KEY");
         }
         sql += wxT("\nFROM ") + i->getQuotedName();
     }
