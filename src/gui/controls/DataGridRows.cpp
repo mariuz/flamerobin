@@ -1248,7 +1248,7 @@ wxString escapeQuotes(const wxString& input)
 bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
 {
     if (count > 1)
-        throw(_("Multiple row deletion not supported (yet)"));
+        throw(FRError(_("Multiple row deletion not supported (yet)")));
 
     // execute the DELETE statement(s)
     if (statementTablesM.size() > 1)
