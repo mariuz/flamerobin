@@ -77,6 +77,8 @@ private:
 
     void getColumnInfo(Database *db, unsigned col, bool& readOnly,
         bool& nullable);
+    void addWhereAndExecute(UniqueConstraint* uq, wxString& stm,
+        const wxString& table, DataGridRowBuffer *buffer);
 public:
     DataGridRows();
     ~DataGridRows();

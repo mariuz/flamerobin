@@ -1251,8 +1251,6 @@ bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
         throw(_("Multiple row deletion not supported (yet)"));
 
     // execute the DELETE statement(s)
-    IBPP::Statement st = IBPP::StatementFactory(statementM->DatabasePtr(),
-        statementM->TransactionPtr());
     if (statementTablesM.size() > 1)
     {
         // TODO: either show a dialog for the user to choose or think of a way
@@ -1265,27 +1263,7 @@ bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
     stm = wxT("DELETE FROM ")
         + Identifier((*toDel).first).getQuoted()
         + wxT(" WHERE ");
-    UniqueConstraint *uq = (*toDel).second;
-    for (ColumnConstraint::const_iterator ci = uq->begin(); ci != uq->end();
-        ++ci)
-    {
-        for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
-        {
-            wxString cn(std2wx(statementM->ColumnName(c2)));
-            wxString tn(std2wx(statementM->ColumnTable(c2)));
-            if (cn == (*ci) && tn == (*toDel).first)    // column found
-            {
-                if (ci != uq->begin())
-                    stm += wxT(" AND ");
-                stm += Identifier(cn).getQuoted() + wxT(" = '");
-                stm += escapeQuotes(
-                    columnDefsM[c2-1]->getAsFirebirdString(buffersM[from]));
-                stm += wxT("'");
-            }
-        }
-    }
-    st->Prepare(wx2std(stm));
-    st->Execute();
+    addWhereAndExecute((*toDel).second, stm, (*toDel).first, buffersM[from]);
 
     std::vector<DataGridRowBuffer*>::iterator i2, it = buffersM.begin();
     from += count - 1;
@@ -1542,6 +1520,59 @@ bool DataGridRows::isFieldNull(unsigned row, unsigned col)
     return buffersM[row]->isFieldNull(col);
 }
 //-----------------------------------------------------------------------------
+void DataGridRows::addWhereAndExecute(UniqueConstraint* uq, wxString& stm,
+    const wxString& table, DataGridRowBuffer *buffer)
+{
+    bool dbkey = false;
+    for (ColumnConstraint::const_iterator ci = uq->begin(); ci !=
+        uq->end(); ++ci)
+    {
+        if ((*ci) == wxT("DB_KEY"))
+        {
+            stm += wxT(" RDB$DB_KEY = ?");
+            dbkey = true;
+            break;
+        }
+        for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
+        {
+            wxString cn(std2wx(statementM->ColumnName(c2)));
+            wxString tn(std2wx(statementM->ColumnTable(c2)));
+            if (cn == (*ci) && tn == table) // found it, add to WHERE list
+            {
+                if (ci != uq->begin())
+                    stm += wxT(" AND ");
+                stm += Identifier(cn).getQuoted() + wxT(" = '");
+                stm += escapeQuotes(
+                    columnDefsM[c2-1]->getAsFirebirdString(buffer));
+                stm += wxT("'");
+                break;
+            }
+        }
+    }
+    IBPP::Statement st = IBPP::StatementFactory(statementM->DatabasePtr(),
+        statementM->TransactionPtr());
+    st->Prepare(wx2std(stm));
+    if (dbkey)  // find the column and set the parameter
+    {
+        for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
+        {
+            wxString cn(std2wx(statementM->ColumnName(c2)));
+            wxString tn(std2wx(statementM->ColumnTable(c2)));
+            if (cn == wxT("DB_KEY") && tn == table)
+            {
+                DBKeyColumnDef *dbk =
+                    dynamic_cast<DBKeyColumnDef *>(columnDefsM[c2-1]);
+                if (!dbk)
+                    throw FRError(_("Invalid Column"));
+                IBPP::DBKey dbkey;
+                dbk->getDBKey(dbkey, buffer);
+                st->Set(1, dbkey);
+            }
+        }
+    }
+    st->Execute();
+}
+//-----------------------------------------------------------------------------
 // returns the executed SQL statement
 wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
     const wxString& value)
@@ -1570,8 +1601,6 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
         }
 
         // run the UPDATE statement
-        IBPP::Statement st = IBPP::StatementFactory(statementM->DatabasePtr(),
-            statementM->TransactionPtr());
         wxString table(std2wx(statementM->ColumnTable(col+1)));
         wxString stm = wxT("UPDATE ") + Identifier(table).getQuoted()
             + wxT(" SET ")
@@ -1593,52 +1622,7 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
         if (it == statementTablesM.end() || (*it).second == 0)
             throw FRError(_("This column should not be editable"));
 
-        bool dbkey = false;
-        for (ColumnConstraint::const_iterator ci = (*it).second->begin(); ci !=
-            (*it).second->end(); ++ci)
-        {
-            if ((*ci) == wxT("DB_KEY"))
-            {
-                stm += wxT(" RDB$DB_KEY = ?");
-                dbkey = true;
-                break;
-            }
-            for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
-            {
-                wxString cn(std2wx(statementM->ColumnName(c2)));
-                wxString tn(std2wx(statementM->ColumnTable(c2)));
-                if (cn == (*ci) && tn == table) // found it, add to WHERE list
-                {
-                    if (ci != (*it).second->begin())
-                        stm += wxT(" AND ");
-                    stm += Identifier(cn).getQuoted() + wxT(" = '");
-                    stm += escapeQuotes(
-                        columnDefsM[c2-1]->getAsFirebirdString(oldRecord));
-                    stm += wxT("'");
-                    break;
-                }
-            }
-        }
-        st->Prepare(wx2std(stm));
-        if (dbkey)  // find the column and set the parameter
-        {
-            for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
-            {
-                wxString cn(std2wx(statementM->ColumnName(c2)));
-                wxString tn(std2wx(statementM->ColumnTable(c2)));
-                if (cn == wxT("DB_KEY") && tn == table)
-                {
-                    DBKeyColumnDef *dbk =
-                        dynamic_cast<DBKeyColumnDef *>(columnDefsM[c2-1]);
-                    if (!dbk)
-                        throw FRError(_("Invalid Column"));
-                    IBPP::DBKey dbkey;
-                    dbk->getDBKey(dbkey, oldRecord);
-                    st->Set(1, dbkey);
-                }
-            }
-        }
-        st->Execute();
+        addWhereAndExecute((*it).second, stm, table, oldRecord);
         delete oldRecord;
         return stm;
     }
