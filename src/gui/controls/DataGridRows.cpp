@@ -69,6 +69,7 @@ public:
     bool getValue(unsigned offset, float& value);
     bool getValue(unsigned offset, int& value);
     bool getValue(unsigned offset, int64_t& value);
+    bool getValue(unsigned offset, IBPP::DBKey& value, unsigned size);
     bool isFieldNull(unsigned num);
     void setFieldNull(unsigned num, bool isNull);
     void setString(unsigned num, const wxString& value);
@@ -76,6 +77,7 @@ public:
     void setValue(unsigned offset, float value);
     void setValue(unsigned offset, int value);
     void setValue(unsigned offset, int64_t value);
+    void setValue(unsigned offset, IBPP::DBKey value);
 };
 //-----------------------------------------------------------------------------
 DataGridRowBuffer::DataGridRowBuffer(unsigned fieldCount)
@@ -133,6 +135,15 @@ bool DataGridRowBuffer::getValue(unsigned offset, int64_t& value)
     return true;
 }
 //-----------------------------------------------------------------------------
+bool DataGridRowBuffer::getValue(unsigned offset, IBPP::DBKey& value,
+    unsigned size)
+{
+    if (offset + size > dataM.size())
+        return false;
+    value.SetKey(&dataM[offset], size);
+    return true;
+}
+//-----------------------------------------------------------------------------
 bool DataGridRowBuffer::isFieldNull(unsigned num)
 {
     return (num < nullFieldsM.size() && nullFieldsM[num]);
@@ -177,6 +188,13 @@ void DataGridRowBuffer::setValue(unsigned offset, int64_t value)
     if (offset + sizeof(int64_t) > dataM.size())
         dataM.resize(offset + sizeof(int64_t), 0);
     *((int64_t*)&dataM[offset]) = value;
+}
+//-----------------------------------------------------------------------------
+void DataGridRowBuffer::setValue(unsigned offset, IBPP::DBKey value)
+{
+    if (offset + value.Size() > dataM.size())
+        dataM.resize(offset + value.Size(), 0);
+    value.GetKey(&dataM[offset], value.Size());
 }
 //-----------------------------------------------------------------------------
 // GridCellFormats: class to cache config data for cell formatting
@@ -615,6 +633,77 @@ void Int64ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     int64_t value;
     statement->Get(col, value);
     buffer->setValue(offsetM, value);
+}
+//-----------------------------------------------------------------------------
+// DBKeyColumnDef class
+class DBKeyColumnDef : public ResultsetColumnDef
+{
+private:
+    unsigned offsetM;
+    unsigned sizeM;
+public:
+    DBKeyColumnDef(const wxString& name, unsigned offset, unsigned size);
+    virtual wxString getAsString(DataGridRowBuffer* buffer);
+    virtual unsigned getBufferSize();
+    virtual bool isNumeric();
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        const IBPP::Statement& statement, wxMBConv* converter);
+    virtual void setFromString(DataGridRowBuffer* buffer,
+        const wxString& source);
+    void getDBKey(IBPP::DBKey& dbkey, DataGridRowBuffer* buffer);
+};
+//-----------------------------------------------------------------------------
+DBKeyColumnDef::DBKeyColumnDef(const wxString& name, unsigned offset,
+    unsigned size)
+    : ResultsetColumnDef(name, true, false), offsetM(offset), sizeM(size)
+{
+}
+//-----------------------------------------------------------------------------
+wxString DBKeyColumnDef::getAsString(DataGridRowBuffer* buffer)
+{
+    wxASSERT(buffer);
+    wxString ret;
+    for (int i=0; i<sizeM/8; i++)
+    {
+        if (i > 0)
+            ret += wxT("-");
+        int v1, v2;
+        buffer->getValue(offsetM+i*8, v1);
+        buffer->getValue(offsetM+i*8+4, v2);
+        ret += wxString::Format(wxT("%08x:%08x"), (unsigned)v1, (unsigned)v2);
+    }
+    return ret;
+}
+//-----------------------------------------------------------------------------
+void DBKeyColumnDef::setFromString(DataGridRowBuffer* buffer,
+        const wxString& source)
+{
+    // should never be editable
+}
+//-----------------------------------------------------------------------------
+unsigned DBKeyColumnDef::getBufferSize()
+{
+    return sizeM;
+}
+//-----------------------------------------------------------------------------
+bool DBKeyColumnDef::isNumeric()
+{
+    return false;
+}
+//-----------------------------------------------------------------------------
+void DBKeyColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    const IBPP::Statement& statement, wxMBConv*)
+{
+    wxASSERT(buffer);
+    IBPP::DBKey value;
+    statement->Get(col, value);
+    buffer->setValue(offsetM, value);
+}
+//-----------------------------------------------------------------------------
+void DBKeyColumnDef::getDBKey(IBPP::DBKey& dbkey, DataGridRowBuffer* buffer)
+{
+    wxASSERT(buffer);
+    buffer->getValue(offsetM, dbkey, sizeM);
 }
 //-----------------------------------------------------------------------------
 // DateColumnDef class
@@ -1262,6 +1351,13 @@ void checkColumnsPresent(const IBPP::Statement& statement,
 void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
     bool& nullable)
 {
+    if (statementM->ColumnType(col) == IBPP::sdString
+        && statementM->ColumnSubtype(col) == 1) // charset OCTETS
+    {                       // TODO: to make those editable, we need to
+        readOnly = true;    // enter values as parameters. This should
+        return;             // probably be done together with BLOB support
+    }
+
     wxString tabName(std2wx(statementM->ColumnTable(col)));
     Table *t = dynamic_cast<Table *>(db->findRelation(Identifier(tabName)));
     if (!t)
@@ -1370,41 +1466,46 @@ bool DataGridRows::initialize(const IBPP::Statement& statement, Database *db)
             type = IBPP::sdDouble;
 
         ResultsetColumnDef* columnDef = 0;
-        switch (type)
+        if (std::string(statement->ColumnName(col)) == "DB_KEY")
+            columnDef = new DBKeyColumnDef(colName, bufferSizeM, 8);
+        else
         {
-            case IBPP::sdDate:
-                columnDef = new DateColumnDef(colName, bufferSizeM, readOnly, nullable);
-                break;
-            case IBPP::sdTime:
-                columnDef = new TimeColumnDef(colName, bufferSizeM, readOnly, nullable);
-                break;
-            case IBPP::sdTimestamp:
-                columnDef = new TimestampColumnDef(colName, bufferSizeM, readOnly, nullable);
-                break;
+            switch (type)
+            {
+                case IBPP::sdDate:
+                    columnDef = new DateColumnDef(colName, bufferSizeM, readOnly, nullable);
+                    break;
+                case IBPP::sdTime:
+                    columnDef = new TimeColumnDef(colName, bufferSizeM, readOnly, nullable);
+                    break;
+                case IBPP::sdTimestamp:
+                    columnDef = new TimestampColumnDef(colName, bufferSizeM, readOnly, nullable);
+                    break;
 
-            case IBPP::sdSmallint:
-            case IBPP::sdInteger:
-                columnDef = new IntegerColumnDef(colName, bufferSizeM, readOnly, nullable);
-                break;
-            case IBPP::sdLargeint:
-                columnDef = new Int64ColumnDef(colName, bufferSizeM, readOnly, nullable);
-                break;
+                case IBPP::sdSmallint:
+                case IBPP::sdInteger:
+                    columnDef = new IntegerColumnDef(colName, bufferSizeM, readOnly, nullable);
+                    break;
+                case IBPP::sdLargeint:
+                    columnDef = new Int64ColumnDef(colName, bufferSizeM, readOnly, nullable);
+                    break;
 
-            case IBPP::sdFloat:
-                columnDef = new FloatColumnDef(colName, bufferSizeM, readOnly, nullable);
-                break;
-            case IBPP::sdDouble:
-                columnDef = new DoubleColumnDef(colName, bufferSizeM, readOnly, nullable);
-                break;
+                case IBPP::sdFloat:
+                    columnDef = new FloatColumnDef(colName, bufferSizeM, readOnly, nullable);
+                    break;
+                case IBPP::sdDouble:
+                    columnDef = new DoubleColumnDef(colName, bufferSizeM, readOnly, nullable);
+                    break;
 
-            case IBPP::sdString:
-                columnDef = new StringColumnDef(colName, stringIndex, readOnly, nullable);
-                ++stringIndex;
-                break;
-            default:
-                // IBPP::sdArray and IBPP::sdBlob not really handled ATM
-                columnDef = new DummyColumnDef(colName);
-                break;
+                case IBPP::sdString:
+                    columnDef = new StringColumnDef(colName, stringIndex, readOnly, nullable);
+                    ++stringIndex;
+                    break;
+                default:
+                    // IBPP::sdArray and IBPP::sdBlob not really handled ATM
+                    columnDef = new DummyColumnDef(colName);
+                    break;
+            }
         }
         wxASSERT(columnDef);
         bufferSizeM += columnDef->getBufferSize();
@@ -1441,18 +1542,6 @@ bool DataGridRows::isFieldNull(unsigned row, unsigned col)
     return buffersM[row]->isFieldNull(col);
 }
 //-----------------------------------------------------------------------------
-std::string wxHex2stdStr(const wxString& hexStr)
-{
-    std::string retval;
-    for (size_t p = 0; p < hexStr.Length(); p+=2)
-    {
-        long l;
-        if (!hexStr.Mid(p, 2).ToLong(&l, 16) || l > 255 || l < 0)
-            throw FRError(_("Not a valid hexadecimal value."));
-        retval += (unsigned char)l;
-    }
-    return retval;
-}
 // returns the executed SQL statement
 wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
     const wxString& value)
@@ -1539,8 +1628,12 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
                 wxString tn(std2wx(statementM->ColumnTable(c2)));
                 if (cn == wxT("DB_KEY") && tn == table)
                 {
-                    std::string dbkey = wxHex2stdStr(
-                        columnDefsM[c2-1]->getAsString(oldRecord));
+                    DBKeyColumnDef *dbk =
+                        dynamic_cast<DBKeyColumnDef *>(columnDefsM[c2-1]);
+                    if (!dbk)
+                        throw FRError(_("Invalid Column"));
+                    IBPP::DBKey dbkey;
+                    dbk->getDBKey(dbkey, oldRecord);
                     st->Set(1, dbkey);
                 }
             }
