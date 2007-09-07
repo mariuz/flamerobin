@@ -168,7 +168,8 @@ wxColour RgbHsvConversion::getColour()
         wxASSERT(hsvValidM);
         calcRgbFromHsv();
     }
-    return wxColour(255 * redM, 255 * greenM, 255 * blueM);
+    return wxColour((unsigned char)(255.0 * redM),
+        (unsigned char)(255.0 * greenM), (unsigned char)(255.0 * blueM));
 }
 //-----------------------------------------------------------------------------
 float RgbHsvConversion::getValue()
