@@ -74,7 +74,11 @@ public:
     wxString getCellValueForCSV(int row, int col);
     bool getFetchAllRows();
     wxColour getReadonlyColour();
+
+    // TODO: these should be replaced with a better function that covers all
     wxString getTableName();
+    void getTableNames(wxArrayString& tables);
+
     void initialFetch(wxMBConv* conv);
     bool isNullCell(int row, int col);
     bool isNumericColumn(int col);

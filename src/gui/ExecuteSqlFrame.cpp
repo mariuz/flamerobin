@@ -1464,15 +1464,29 @@ void ExecuteSqlFrame::OnButtonInsertClick(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
-    if (grid_data->getDataGridTable())
+    DataGridTable *tb = grid_data->getDataGridTable();
+    if (tb)
     {
-        // show list of tables for user to select into which one to insert
+        wxArrayString tables;
+        tb->getTableNames(tables);
+        wxString tab;
+        if (tables.GetCount() == 0)
+            throw FRError(_("No valid tables found."));
+        if (tables.GetCount() == 1)
+            tab = tables[0];
+        else
+        {   // show list of tables for user to select into which one to insert
+            tab = wxGetSingleChoice(_("Select a table"),
+                _("Multiple tables found"), tables, this);
+            if (tab.IsEmpty())
+                return;
+        }
 
         // show dialog to enter values
 
         // run the insert statement
 
-        // add new row to grid
+        // add new row to grid & position the cursor there
     }
 
     FR_CATCH

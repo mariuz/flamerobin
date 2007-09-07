@@ -125,9 +125,9 @@ void RgbHsvConversion::calcRgbFromHsv()
     q = valM * (1.0 - satM * f);
     t = valM * (1.0 - satM * (1.0 - f));
 
-    switch (sector) 
+    switch (sector)
     {
-        case 0: 
+        case 0:
             redM = valM;
             greenM = t;
             blueM = p;
@@ -456,6 +456,18 @@ wxString DataGridTable::getTableName()
     if (statementM == 0 || statementM->Columns() == 0)
         return wxEmptyString;
     return std2wx(statementM->ColumnTable(1));
+}
+//-----------------------------------------------------------------------------
+void DataGridTable::getTableNames(wxArrayString& tables)
+{
+    if (statementM == 0)
+        return;
+    for (int i=0; i<statementM->Columns(); i++)
+    {
+        wxString tn(std2wx(statementM->ColumnTable(i+1)));
+        if (wxNOT_FOUND == tables.Index(tn))
+            tables.Add(tn);
+    }
 }
 //-----------------------------------------------------------------------------
 wxString DataGridTable::GetValue(int row, int col)
