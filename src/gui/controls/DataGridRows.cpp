@@ -551,7 +551,7 @@ void IntegerColumnDef::setFromString(DataGridRowBuffer* buffer,
     wxASSERT(buffer);
     long value;
     if (!source.ToLong(&value))
-        throw FRError(_("Invalid numeric value"));
+        throw FRError(_("Invalid integer numeric value"));
     buffer->setValue(offsetM, (int)value);
 }
 //-----------------------------------------------------------------------------
@@ -612,7 +612,13 @@ void Int64ColumnDef::setFromString(DataGridRowBuffer* buffer,
     wxASSERT(buffer);
     int64_t value;
     if (!source.ToLongLong(&value))
-        throw FRError(_("Invalid numeric value"));
+    {
+        // perhaps underlying library doesn't support 64bit, we try 32:
+        long l;
+        if (!source.ToLong(&l)) // nope, that fails as well
+            throw FRError(_("Invalid 64bit numeric value"));
+        value = l;
+    }
     buffer->setValue(offsetM, value);
 }
 //-----------------------------------------------------------------------------
@@ -1028,7 +1034,7 @@ void FloatColumnDef::setFromString(DataGridRowBuffer* buffer,
     wxASSERT(buffer);
     double d;
     if (!source.ToDouble(&d))
-        throw FRError(_("Invalid numeric value"));
+        throw FRError(_("Invalid float numeric value"));
     buffer->setValue(offsetM, (float)d);
 }
 //-----------------------------------------------------------------------------
@@ -1099,7 +1105,7 @@ void DoubleColumnDef::setFromString(DataGridRowBuffer* buffer,
     wxASSERT(buffer);
     double d;
     if (!source.ToDouble(&d))
-        throw FRError(_("Invalid numeric value"));
+        throw FRError(_("Invalid double numeric value"));
     buffer->setValue(offsetM, d);
 }
 //-----------------------------------------------------------------------------
