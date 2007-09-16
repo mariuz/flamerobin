@@ -43,7 +43,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //-----------------------------------------------------------------------------
 void handleException(const std::exception& e)
 {
-    wxMessageBox(std2wx(e.what()), _("Error"), wxOK | wxICON_ERROR);
+    wxMessageBox(std2wx(e.what()), _("Error"), wxOK | wxICON_ERROR,
+        wxGetTopLevelParent(wxGetActiveWindow()));
 }
 //-----------------------------------------------------------------------------
 FRError::FRError(const wxString& message)
