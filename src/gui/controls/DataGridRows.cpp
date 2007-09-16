@@ -1451,7 +1451,7 @@ bool DataGridRows::initialize(const IBPP::Statement& statement, Database *db)
 
         ResultsetColumnDef* columnDef = 0;
         if (std::string(statement->ColumnName(col)) == "DB_KEY")
-            columnDef = new DBKeyColumnDef(colName, bufferSizeM, 8);
+            columnDef = new DBKeyColumnDef(colName, bufferSizeM, statement->ColumnSize(col));
         else
         {
             switch (type)
