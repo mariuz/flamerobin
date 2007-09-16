@@ -392,7 +392,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_UPDATE_UI(myTreeCtrl::Menu_DatabaseProperties, MainFrame::OnMenuUpdateIfDatabaseConnected)
 
     EVT_MENU(myTreeCtrl::Menu_Insert, MainFrame::OnMenuInsert)
-    EVT_MENU(myTreeCtrl::Menu_Browse, MainFrame::OnMenuBrowse)
     EVT_MENU(myTreeCtrl::Menu_BrowseColumns, MainFrame::OnMenuBrowseColumns)
     EVT_MENU(myTreeCtrl::Menu_LoadColumnsInfo, MainFrame::OnMenuLoadColumnsInfo)
     EVT_MENU(myTreeCtrl::Menu_AddColumn, MainFrame::OnMenuAddColumn)
@@ -867,54 +866,6 @@ void MainFrame::OnMenuExecuteProcedure(wxCommandEvent& WXUNUSED(event))
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
-void MainFrame::OnMenuBrowse(wxCommandEvent& WXUNUSED(event))
-{
-    FR_TRY
-
-    MetadataItem* i = tree_ctrl_1->getSelectedMetadataItem();
-    if (!i)
-        return;
-
-    NodeType t = i->getType();
-    if (t != ntTable && t != ntView && t != ntSysTable && t != ntProcedure)
-        return;
-
-    Database* d = i->getDatabase();
-    if (!d)
-        return;
-
-    wxString sql(wxT("select * from "));
-    sql += i->getQuotedName();
-
-    if (t == ntTable)
-    {   // TODO: add DB_KEY only when table doesn't have a PK/UNQ constraint
-        sql = wxT("select t.*, t.rdb$db_key from ") + i->getQuotedName()
-            + wxT(" t");
-    }
-
-    if (t == ntProcedure)
-    {
-        Procedure* p = dynamic_cast<Procedure*>(i);
-        if (!p)
-            return;
-
-        if (!p->isSelectable())
-        {
-            ::wxMessageBox(_("This procedure is not selectable"),
-                _("Cannot create statement"), wxOK|wxICON_INFORMATION);
-            return;
-        }
-        sql = p->getSelectStatement(false); // false = without columns info (just *)
-    }
-
-    if (t == ntProcedure)
-        showSql(this, wxString(_("Execute SQL statements")), d, sql);
-    else
-        execSql(this, wxString(_("Execute SQL statements")), d, sql, false);
-
-    FR_CATCH
-}
-//-----------------------------------------------------------------------------
 void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
@@ -923,21 +874,16 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
     if (!i)
         return;
 
-    NodeType t = i->getType();
-    if (t != ntTable && t != ntView && t != ntSysTable && t != ntProcedure)
-        return;
-
+    Table *t = dynamic_cast<Table *>(i);
+    View *v = dynamic_cast<View *>(i);
+    Procedure *p = dynamic_cast<Procedure *>(i);
     Database* d = i->getDatabase();
-    if (!d)
+    if (!d || (!t && !p && !v))
         return;
 
     wxString sql;
-    if (t == ntProcedure)
+    if (p)
     {
-        Procedure* p = dynamic_cast<Procedure*>(i);
-        if (!p)
-            return;
-
         if (!p->isSelectable())
         {
             ::wxMessageBox(_("This procedure is not selectable"),
@@ -948,15 +894,16 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
     }
     else
     {
-        if (t == ntTable)
-            ((Table*)i)->checkAndLoadColumns();
+        if (t)
+            t->checkAndLoadColumns();
         else
-            ((View*)i)->checkAndLoadColumns();
+            v->checkAndLoadColumns();
         sql = wxT("SELECT ");
         std::vector<MetadataItem*> temp;
         i->getChildren(temp);
         bool first = true;
-        for (std::vector<MetadataItem*>::const_iterator it = temp.begin(); it != temp.end(); ++it)
+        for (std::vector<MetadataItem*>::const_iterator it = temp.begin();
+            it != temp.end(); ++it)
         {
             if (first)
                 first = false;
@@ -964,14 +911,15 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
                 sql += wxT(", ");
             sql += (*it)->getQuotedName();
         }
-        if (t == ntTable)
-        {   // TODO: add DB_KEY only when table doesn't have a PK/UNQ constraint
-            sql += wxT(", RDB$DB_KEY");
+        if (t)  // add DB_KEY only when table doesn't have a PK/UNQ constraint
+        {
+            if (!t->getPrimaryKey() && t->getUniqueConstraints()->size() == 0)
+                sql += wxT(", RDB$DB_KEY");
         }
         sql += wxT("\nFROM ") + i->getQuotedName();
     }
 
-    if (t == ntProcedure)
+    if (p)
         showSql(this, wxString(_("Execute SQL statements")), d, sql);
     else
         execSql(this, wxString(_("Execute SQL statements")), d, sql, false);

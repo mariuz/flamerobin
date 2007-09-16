@@ -196,8 +196,7 @@ void ContextMenuMetadataItemVisitor::visitView(View&)
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::addSelectMenu(bool isTable, bool isSystem)
 {
-    menuM->Append(myTreeCtrl::Menu_Browse, _("&Select * from ..."));
-    menuM->Append(myTreeCtrl::Menu_BrowseColumns, _("Select &col1, col2, ... from ..."));
+    menuM->Append(myTreeCtrl::Menu_BrowseColumns, _("&Select from ..."));
     menuM->AppendSeparator();
     if (config().get(wxT("ShowColumnsInTree"), true))
     {

@@ -74,7 +74,6 @@ public:
     void OnMenuQuery(wxCommandEvent& event);
     void OnMenuInsert(wxCommandEvent& event);
     void OnMenuBrowseColumns(wxCommandEvent& event);
-    void OnMenuBrowse(wxCommandEvent& event);
     void OnMenuRestore(wxCommandEvent& event);
     void OnMenuShowAllGeneratorValues(wxCommandEvent& event);
     void OnMenuShowGeneratorValue(wxCommandEvent& event);
