@@ -60,6 +60,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/ProgressDialog.h"
 #include "gui/ExecuteSql.h"
 #include "gui/ExecuteSqlFrame.h"
+#include "gui/InsertDialog.h"
 #include "gui/StatementHistoryDialog.h"
 #include "gui/StyleGuide.h"
 #include "frutils.h"
@@ -1483,10 +1484,16 @@ void ExecuteSqlFrame::OnButtonInsertClick(wxCommandEvent& WXUNUSED(event))
         }
 
         // show dialog to enter values
+        InsertDialog id(this, tab, tb);
+        while (true)
+        {
+            if (wxID_OK != id.ShowModal())
+                break;
 
-        // run the insert statement
+            // run the insert statement
 
-        // add new row to grid & position the cursor there
+            // add new row to grid & position the cursor there
+        }
     }
 
     FR_CATCH

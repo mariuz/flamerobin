@@ -572,6 +572,10 @@ SOURCE=.\src\metadata\Index.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\InsertDialog.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\controls\LogTextControl.cpp
 # End Source File
 # Begin Source File
@@ -927,6 +931,10 @@ SOURCE=.\src\sql\IncompleteStatement.h
 # Begin Source File
 
 SOURCE=.\src\metadata\Index.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\InsertDialog.h
 # End Source File
 # Begin Source File
 

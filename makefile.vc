@@ -87,6 +87,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ExecuteSql.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FindDialog.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_InsertDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemPropertiesFrame.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MultilineEnterDialog.obj \
@@ -373,6 +374,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesDialog.obj: .\src\gui\Field
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FindDialog.obj: .\src\gui\FindDialog.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_InsertDialog.obj: .\src\gui\InsertDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.obj: .\src\gui\MainFrame.cpp

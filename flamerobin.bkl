@@ -244,6 +244,7 @@
         $(SOURCEDIR)/gui/ExecuteSql.h
         $(SOURCEDIR)/gui/FieldPropertiesDialog.h
         $(SOURCEDIR)/gui/FindDialog.h
+        $(SOURCEDIR)/gui/InsertDialog.h
         $(SOURCEDIR)/gui/MainFrame.h
         $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.h
         $(SOURCEDIR)/gui/MultilineEnterDialog.h
@@ -345,6 +346,7 @@
         $(SOURCEDIR)/gui/ExecuteSql.cpp
         $(SOURCEDIR)/gui/FieldPropertiesDialog.cpp
         $(SOURCEDIR)/gui/FindDialog.cpp
+        $(SOURCEDIR)/gui/InsertDialog.cpp
         $(SOURCEDIR)/gui/MainFrame.cpp
         $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.cpp
         $(SOURCEDIR)/gui/MultilineEnterDialog.cpp

@@ -35,6 +35,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "gui/controls/DataGridRows.h"
 //-----------------------------------------------------------------------------
+class Column;
 class Database;
 class DataGridCell;
 //-----------------------------------------------------------------------------
@@ -78,6 +79,8 @@ public:
     // TODO: these should be replaced with a better function that covers all
     wxString getTableName();
     void getTableNames(wxArrayString& tables);
+    void getFields(const wxString& table, std::set<Column *>& fields);
+    Database *getDatabase();
 
     void initialFetch(wxMBConv* conv);
     bool isNullCell(int row, int col);

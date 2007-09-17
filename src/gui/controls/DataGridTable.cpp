@@ -41,6 +41,7 @@
 #include <wx/grid.h>
 
 #include <algorithm>
+#include <set>
 
 #include "config/Config.h"
 #include "core/FRError.h"
@@ -467,8 +468,62 @@ void DataGridTable::getTableNames(wxArrayString& tables)
     {
         wxString tn(std2wx(statementM->ColumnTable(i+1)));
         if (wxNOT_FOUND == tables.Index(tn))
-            tables.Add(tn);
+        {
+            // check if table exists in metadata
+            Table *t = dynamic_cast<Table *>(databaseM->findRelation(
+                Identifier(tn)));
+            if (!t)
+                continue;
+
+            // check if table's column is 'real'
+            wxString cn(std2wx(statementM->ColumnName(i+1)));
+            for (MetadataCollection<Column>::iterator it = t->begin();
+                it != t->end(); ++it)
+            {
+                if ((*it).getName_() == cn
+                    && (*it).getComputedSource().IsEmpty())
+                {
+                    tables.Add(tn);
+                    break;
+                }
+            }
+        }
     }
+}
+//-----------------------------------------------------------------------------
+// all fields of that table
+void DataGridTable::getFields(const wxString& table,
+    std::set<Column *>& fields)
+{
+    if (statementM == 0)
+        return;
+    Table *t = dynamic_cast<Table *>(databaseM->
+        findRelation(Identifier(table)));
+    if (!t)
+        return;
+    for (int i=0; i<statementM->Columns(); i++)
+    {
+        wxString tn(std2wx(statementM->ColumnTable(i+1)));
+        if (tn != table)
+            continue;
+        wxString fn(std2wx(statementM->ColumnName(i+1)));
+        // check if field exists in the table (and is not computed)
+        for (MetadataCollection<Column>::iterator it = t->begin();
+            it != t->end(); ++it)
+        {
+            if ((*it).getName_() == fn && (*it).getComputedSource().IsEmpty())
+            {
+                if (fields.find(&(*it)) == fields.end())
+                    fields.insert(&(*it));
+                break;
+            }
+        }
+    }
+}
+//-----------------------------------------------------------------------------
+Database *DataGridTable::getDatabase()
+{
+    return databaseM;
 }
 //-----------------------------------------------------------------------------
 wxString DataGridTable::GetValue(int row, int col)
