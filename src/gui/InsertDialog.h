@@ -39,9 +39,14 @@ class InsertDialog: public BaseDialog
 public:
     InsertDialog(wxWindow* parent, const wxString& tableName, DataGridTable *);
     void OnOkButtonClick(wxCommandEvent& event);
+    void OnChoiceChange(wxCommandEvent& event);
+
+    enum { ID_Choice = 1001 };
 
 private:
+    std::map<wxChoice *, wxTextCtrl *> relationsM;
     wxString tableNameM;
+    void updateControls(wxChoice *c, wxTextCtrl *t);
     void set_properties();
     void do_layout();
 

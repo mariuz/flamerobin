@@ -65,6 +65,8 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
         st->SetFont(f);
     }
 
+    // if you add/remove something here, make sure you update the
+    // OnChoiceChange event handler and updateControls function
     wxString choices[] = {
         _(""), _("NULL"), _("Skip (N/A)"), _("Hexadecimal"), _("Octal"),
         _("CURRENT_DATE"), _("CURRENT_TIME"), _("CURRENT_TIMESTAMP"),
@@ -83,16 +85,24 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
             (*it)->getDatatype());
         flexSizerM->Add(label1, 0, wxALIGN_CENTER_VERTICAL);
 
-        wxChoice *choice1 = new wxChoice(getControlsPanel(), wxID_ANY,
+        wxChoice *choice1 = new wxChoice(getControlsPanel(), ID_Choice,
             wxDefaultPosition, wxDefaultSize,
             sizeof(choices)/sizeof(wxString), choices, 0);
-        if (!(*it)->hasDefault() && (*it)->isNullable())
-            choice1->SetStringSelection(wxT("NULL"));
         flexSizerM->Add(choice1, 0, wxALIGN_CENTER_VERTICAL|wxEXPAND);
 
         wxTextCtrl *text1 = new wxTextCtrl(getControlsPanel(), wxID_ANY,
             (*it)->getDefault());
         flexSizerM->Add(text1, 0, wxALIGN_CENTER_VERTICAL|wxEXPAND);
+
+        relationsM[choice1] = text1;
+        if (!(*it)->hasDefault() && (*it)->isNullable())
+        {
+            choice1->SetStringSelection(wxT("NULL"));
+            updateControls(choice1, text1); // disable editing
+        }
+
+        // TODO: if table has active BEFORE INSERT trigger that depends on:
+        // this field and some generator -> activate generator option
     }
 
     button_ok = new wxButton(getControlsPanel(), wxID_OK,
@@ -145,14 +155,50 @@ bool InsertDialog::getConfigStoresHeight() const
     return false;
 }
 //-----------------------------------------------------------------------------
+void InsertDialog::updateControls(wxChoice *c, wxTextCtrl *t)
+{
+    int option = c->GetSelection();
+    // _(""), _("NULL"), _("Skip (N/A)"), _("Hexadecimal"), _("Octal"),
+    // _("CURRENT_DATE"), _("CURRENT_TIME"), _("CURRENT_TIMESTAMP"),
+    // _("CURRENT_USER"), _("File..."), _("Generator...") };
+    bool editable = (option == 0 || option == 3 || option == 4);
+    if (!editable)
+        t->SetValue(wxEmptyString);
+    t->SetEditable(editable);
+    updateColors(this);
+}
+//-----------------------------------------------------------------------------
 //! event handling
 BEGIN_EVENT_TABLE(InsertDialog, BaseDialog)
     EVT_BUTTON(wxID_OK, InsertDialog::OnOkButtonClick)
+    EVT_CHOICE(InsertDialog::ID_Choice, InsertDialog::OnChoiceChange)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     // do some stuff & if all ok:
     EndModal(wxID_OK);
+}
+//-----------------------------------------------------------------------------
+void InsertDialog::OnChoiceChange(wxCommandEvent& event)
+{
+    wxChoice *c = dynamic_cast<wxChoice *>(event.GetEventObject());
+    if (!c || relationsM.find(c) == relationsM.end())
+        return;
+    int option = event.GetSelection();
+    wxTextCtrl *tx = relationsM[c];
+    updateControls(c, tx);
+
+    // _(""), _("NULL"), _("Skip (N/A)"), _("Hexadecimal"), _("Octal"),
+    // _("CURRENT_DATE"), _("CURRENT_TIME"), _("CURRENT_TIMESTAMP"),
+    // _("CURRENT_USER"), _("File..."), _("Generator...") };
+    if (option == 9)
+    {
+        // select file and store in tx
+    }
+    if (option == 10)
+    {
+        // select generator name and store in tx
+    }
 }
 //-----------------------------------------------------------------------------
