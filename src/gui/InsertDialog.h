@@ -33,18 +33,41 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "gui/BaseDialog.h"
 class DataGridTable;
+class DataGridRowBuffer;
+class Column;
+class ResultsetColumnDef;
+// link all column info in the same place:
+class InsertColumnInfo
+{
+public:
+    InsertColumnInfo(wxChoice *c, wxTextCtrl *t, Column *f,
+        ResultsetColumnDef *r, int idx)
+        :choice(c), textCtrl(t), column(f), columnDef(r), index(idx)
+    {
+    };
+    wxChoice *choice;
+    wxTextCtrl *textCtrl;
+    Column *column;
+    ResultsetColumnDef *columnDef;
+    int index;
+};
 //-----------------------------------------------------------------------------
 class InsertDialog: public BaseDialog
 {
 public:
     InsertDialog(wxWindow* parent, const wxString& tableName, DataGridTable *);
+    virtual ~InsertDialog();
     void OnOkButtonClick(wxCommandEvent& event);
     void OnChoiceChange(wxCommandEvent& event);
+    void OnEditFocusLost(wxFocusEvent& event);
+    void editFocusLost(wxTextCtrl *tx);
 
     enum { ID_Choice = 1001 };
 
 private:
-    std::map<wxChoice *, wxTextCtrl *> relationsM;
+    std::vector<InsertColumnInfo> columnsM;
+    DataGridTable *gridTableM;
+    DataGridRowBuffer *bufferM;
     wxString tableNameM;
     void updateControls(wxChoice *c, wxTextCtrl *t);
     void set_properties();

@@ -516,6 +516,10 @@ SOURCE=.\src\gui\controls\DataGrid.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\controls\DataGridRowBuffer.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\controls\DataGridRows.cpp
 # End Source File
 # Begin Source File
@@ -875,6 +879,10 @@ SOURCE=.\src\gui\DataGeneratorFrame.h
 # Begin Source File
 
 SOURCE=.\src\gui\controls\DataGrid.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\controls\DataGridRowBuffer.h
 # End Source File
 # Begin Source File
 

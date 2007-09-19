@@ -38,6 +38,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 class Column;
 class Database;
 class DataGridCell;
+class ResultsetColumnDef;
+class DataGridRowBuffer;
 //-----------------------------------------------------------------------------
 BEGIN_DECLARE_EVENT_TYPES()
     // this event is sent after new rows have been fetched
@@ -70,6 +72,7 @@ public:
 
     bool canFetchMoreRows();
     void fetch();
+    void addRow(DataGridRowBuffer *buffer);
     wxString getCellValue(int row, int col);
     wxString getCellValueForInsert(int row, int col);
     wxString getCellValueForCSV(int row, int col);
@@ -79,7 +82,8 @@ public:
     // TODO: these should be replaced with a better function that covers all
     wxString getTableName();
     void getTableNames(wxArrayString& tables);
-    void getFields(const wxString& table, std::set<Column *>& fields);
+    typedef std::map<Column *, std::pair<ResultsetColumnDef*,int> > FieldSet;
+    void getFields(const wxString& table, FieldSet& fields);
     Database *getDatabase();
 
     void initialFetch(wxMBConv* conv);

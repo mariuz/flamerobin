@@ -72,6 +72,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ContextMenuMetadataItemVisitor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGrid.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRowBuffer.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRows.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DndTextControls.o \
@@ -299,6 +300,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ContextMenuMetadataItemVisitor.o: ./src/g
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGrid.o: ./src/gui/controls/DataGrid.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRowBuffer.o: ./src/gui/controls/DataGridRowBuffer.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRows.o: ./src/gui/controls/DataGridRows.cpp

@@ -1485,15 +1485,7 @@ void ExecuteSqlFrame::OnButtonInsertClick(wxCommandEvent& WXUNUSED(event))
 
         // show dialog to enter values
         InsertDialog id(this, tab, tb);
-        while (true)
-        {
-            if (wxID_OK != id.ShowModal())
-                break;
-
-            // run the insert statement
-
-            // add new row to grid & position the cursor there
-        }
+        id.ShowModal();
     }
 
     FR_CATCH

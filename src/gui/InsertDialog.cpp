@@ -40,14 +40,25 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <set>
 
+#include "core/FRError.h"
 #include "metadata/column.h"
+#include "gui/controls/DataGridRowBuffer.h"
 #include "gui/controls/DataGridTable.h"
 #include "gui/StyleGuide.h"
 #include "gui/InsertDialog.h"
+/*
+    The dialog creates a DataGridRowBuffer, and uses ResultsetColumnDefs from
+    the active grid to format the values. I.e. new potential row is created
+    and filled with values as the user types them.
+
+    When all values are entered, we try to INSERT into database, and if all
+    goes well, the prepared row buffer is simply added to the grid.
+*/
 //-----------------------------------------------------------------------------
 InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
     DataGridTable *gridTable):
-    BaseDialog(parent, -1, wxEmptyString), tableNameM(tableName)
+    BaseDialog(parent, -1, wxEmptyString), tableNameM(tableName), bufferM(0),
+    gridTableM(gridTable)
 {
 	flexSizerM = new wxFlexGridSizer( 2, 4, 8, 8 );
 	flexSizerM->AddGrowableCol( 3 );
@@ -72,17 +83,20 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
         _("CURRENT_DATE"), _("CURRENT_TIME"), _("CURRENT_TIMESTAMP"),
         _("CURRENT_USER"), _("File..."), _("Generator...") };
 
-    std::set<Column *> fields;
+    // initialize the buffer with NULLs
+    bufferM = new DataGridRowBuffer(gridTable->GetNumberCols());
+
+    DataGridTable::FieldSet fields;
     gridTable->getFields(tableName, fields);
-    for (std::set<Column *>::iterator it = fields.begin(); it != fields.end();
-        ++it)
+    for (DataGridTable::FieldSet::iterator it = fields.begin();
+        it != fields.end(); ++it)
     {
         wxStaticText *label1 = new wxStaticText(getControlsPanel(), wxID_ANY,
-            (*it)->getName_());
+            (*it).first->getName_());
         flexSizerM->Add(label1, 0, wxALIGN_CENTER_VERTICAL);
 
         label1 = new wxStaticText(getControlsPanel(), wxID_ANY,
-            (*it)->getDatatype());
+            (*it).first->getDatatype());
         flexSizerM->Add(label1, 0, wxALIGN_CENTER_VERTICAL);
 
         wxChoice *choice1 = new wxChoice(getControlsPanel(), ID_Choice,
@@ -91,22 +105,33 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
         flexSizerM->Add(choice1, 0, wxALIGN_CENTER_VERTICAL|wxEXPAND);
 
         wxTextCtrl *text1 = new wxTextCtrl(getControlsPanel(), wxID_ANY,
-            (*it)->getDefault());
+            (*it).first->getDefault(), wxDefaultPosition, wxDefaultSize,
+            (*it).second.first->isNumeric() ? wxTE_RIGHT : 0);
         flexSizerM->Add(text1, 0, wxALIGN_CENTER_VERTICAL|wxEXPAND);
 
-        relationsM[choice1] = text1;
-        if (!(*it)->hasDefault() && (*it)->isNullable())
+        text1->Connect(wxEVT_KILL_FOCUS,
+            wxFocusEventHandler(InsertDialog::OnEditFocusLost), 0, this);
+
+        if (!(*it).first->hasDefault())
         {
-            choice1->SetStringSelection(wxT("NULL"));
-            updateControls(choice1, text1); // disable editing
+            if ((*it).first->isNullable())
+            {
+                choice1->SetStringSelection(wxT("NULL"));
+                updateControls(choice1, text1); // disable editing
+            }
+            else if ((*it).second.first->isNumeric())
+                text1->SetValue(wxT("0"));
         }
+
+        InsertColumnInfo ici(choice1, text1, (*it).first, (*it).second.first,
+            (*it).second.second);
+        columnsM.push_back(ici);
 
         // TODO: if table has active BEFORE INSERT trigger that depends on:
         // this field and some generator -> activate generator option
     }
 
-    button_ok = new wxButton(getControlsPanel(), wxID_OK,
-        _("&Insert"));
+    button_ok = new wxButton(getControlsPanel(), wxID_OK, _("&Insert"));
     button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL,
         _("&Cancel"));
 
@@ -122,6 +147,11 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
     wxIcon icon;
     icon.CopyFromBitmap(bmp);
     SetIcon(icon);
+}
+//-----------------------------------------------------------------------------
+InsertDialog::~InsertDialog()
+{
+    delete bufferM;
 }
 //-----------------------------------------------------------------------------
 void InsertDialog::set_properties()
@@ -174,20 +204,86 @@ BEGIN_EVENT_TABLE(InsertDialog, BaseDialog)
     EVT_CHOICE(InsertDialog::ID_Choice, InsertDialog::OnChoiceChange)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
+void InsertDialog::OnEditFocusLost(wxFocusEvent& event)
+{
+    FR_TRY
+
+    // txt control lost the focus, we reformat the value
+    wxTextCtrl *tx = dynamic_cast<wxTextCtrl *>(event.GetEventObject());
+    if (!tx)
+        return;
+
+    std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
+    for (; it != columnsM.end(); ++it)
+        if ((*it).textCtrl == tx)
+            break;
+    if (it == columnsM.end())
+        return;
+    if ((*it).choice->GetSelection() == 0)  // we only care for strings
+        return;
+
+    // write data to buffer and retrieve the formatted value
+    bufferM->setFieldNull((*it).index, false);
+
+    wxString previous =  (*it).columnDef->getAsString(bufferM);
+    try
+    {
+        (*it).columnDef->setFromString(bufferM, tx->GetValue());
+        tx->SetValue((*it).columnDef->getAsString(bufferM));
+    }
+    catch(...)
+    {
+        tx->SetValue(previous);     // we take the old value from buffer
+
+        // This is commented out as it doesn't work nice:
+        // 1. there is reentrancy problem (easily fixed with some bool flag)
+        // 2. user might want to simply close the dialog, changing the
+        //    focus here prevents that (at least with wxGTK 2.8.4)
+        // If you know a way around that, uncomment these 2 lines:
+        //tx->SetFocus();
+        //tx->SetSelection(-1, -1);   // select all
+
+        throw;
+    }
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
 void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
+    FR_TRY
+
+    // write all regular values to buffer once more
+    // + write special values using database query: generator, CURRENT_*, etc.
+    // + build INSERT statement in the same loop
+
+    // run INSERT statement
+
+    // add buffer to the table and set internal buffer marker to zero
+    // (to prevent deletion in destructor)
+    gridTableM->addRow(bufferM);
+    bufferM = 0;
+
     // do some stuff & if all ok:
     EndModal(wxID_OK);
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void InsertDialog::OnChoiceChange(wxCommandEvent& event)
 {
+    FR_TRY
+
     wxChoice *c = dynamic_cast<wxChoice *>(event.GetEventObject());
-    if (!c || relationsM.find(c) == relationsM.end())
+    if (!c)
         return;
+    // find related text control
+    std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
+    for (; it != columnsM.end(); ++it)
+        if ((*it).choice == c)
+            break;
     int option = event.GetSelection();
-    wxTextCtrl *tx = relationsM[c];
-    updateControls(c, tx);
+    updateControls(c, (*it).textCtrl);
 
     // _(""), _("NULL"), _("Skip (N/A)"), _("Hexadecimal"), _("Octal"),
     // _("CURRENT_DATE"), _("CURRENT_TIME"), _("CURRENT_TIMESTAMP"),
@@ -200,5 +296,7 @@ void InsertDialog::OnChoiceChange(wxCommandEvent& event)
     {
         // select generator name and store in tx
     }
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------

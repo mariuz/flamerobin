@@ -49,153 +49,9 @@
 #include "core/Observer.h"
 #include "core/StringUtils.h"
 #include "frtypes.h"
+#include "gui/controls/DataGridRowBuffer.h"
 #include "gui/controls/DataGridRows.h"
 #include "metadata/database.h"
-//-----------------------------------------------------------------------------
-// DataGridRowBuffer class
-class DataGridRowBuffer
-{
-private:
-    std::vector<bool> nullFieldsM;
-    std::vector<uint8_t> dataM;
-    std::vector<wxString> stringsM;
-public:
-    DataGridRowBuffer(unsigned fieldCount);
-    DataGridRowBuffer(const DataGridRowBuffer* other);
-    ~DataGridRowBuffer();
-
-    wxString getString(unsigned index);
-    bool getValue(unsigned offset, double& value);
-    bool getValue(unsigned offset, float& value);
-    bool getValue(unsigned offset, int& value);
-    bool getValue(unsigned offset, int64_t& value);
-    bool getValue(unsigned offset, IBPP::DBKey& value, unsigned size);
-    bool isFieldNull(unsigned num);
-    void setFieldNull(unsigned num, bool isNull);
-    void setString(unsigned num, const wxString& value);
-    void setValue(unsigned offset, double value);
-    void setValue(unsigned offset, float value);
-    void setValue(unsigned offset, int value);
-    void setValue(unsigned offset, int64_t value);
-    void setValue(unsigned offset, IBPP::DBKey value);
-};
-//-----------------------------------------------------------------------------
-DataGridRowBuffer::DataGridRowBuffer(unsigned fieldCount)
-{
-    // initialize with field count, all fields initially NULL
-    // there's no need to preallocate the uint8 buffer or string array
-    nullFieldsM.resize(fieldCount, true);
-}
-//-----------------------------------------------------------------------------
-DataGridRowBuffer::DataGridRowBuffer(const DataGridRowBuffer* other)
-{
-    nullFieldsM = other->nullFieldsM;
-    dataM = other->dataM;
-    stringsM = other->stringsM;
-}
-//-----------------------------------------------------------------------------
-DataGridRowBuffer::~DataGridRowBuffer()
-{
-}
-//-----------------------------------------------------------------------------
-wxString DataGridRowBuffer::getString(unsigned index)
-{
-    return stringsM[index];
-}
-//-----------------------------------------------------------------------------
-bool DataGridRowBuffer::getValue(unsigned offset, double& value)
-{
-    if (offset + sizeof(double) > dataM.size())
-        return false;
-    value = *((double*)&dataM[offset]);
-    return true;
-}
-//-----------------------------------------------------------------------------
-bool DataGridRowBuffer::getValue(unsigned offset, float& value)
-{
-    if (offset + sizeof(float) > dataM.size())
-        return false;
-    value = *((float*)&dataM[offset]);
-    return true;
-}
-//-----------------------------------------------------------------------------
-bool DataGridRowBuffer::getValue(unsigned offset, int& value)
-{
-    if (offset + sizeof(int) > dataM.size())
-        return false;
-    value = *((int*)&dataM[offset]);
-    return true;
-}
-//-----------------------------------------------------------------------------
-bool DataGridRowBuffer::getValue(unsigned offset, int64_t& value)
-{
-    if (offset + sizeof(int64_t) > dataM.size())
-        return false;
-    value = *((int64_t*)&dataM[offset]);
-    return true;
-}
-//-----------------------------------------------------------------------------
-bool DataGridRowBuffer::getValue(unsigned offset, IBPP::DBKey& value,
-    unsigned size)
-{
-    if (offset + size > dataM.size())
-        return false;
-    value.SetKey(&dataM[offset], size);
-    return true;
-}
-//-----------------------------------------------------------------------------
-bool DataGridRowBuffer::isFieldNull(unsigned num)
-{
-    return (num < nullFieldsM.size() && nullFieldsM[num]);
-}
-//-----------------------------------------------------------------------------
-void DataGridRowBuffer::setFieldNull(unsigned num, bool isNull)
-{
-    if (num < nullFieldsM.size())
-        nullFieldsM[num] = isNull;
-}
-//-----------------------------------------------------------------------------
-void DataGridRowBuffer::setString(unsigned num, const wxString& value)
-{
-    if (num >= stringsM.size())
-        stringsM.resize(num + 1, wxEmptyString);
-    stringsM[num] = value;
-}
-//-----------------------------------------------------------------------------
-void DataGridRowBuffer::setValue(unsigned offset, double value)
-{
-    if (offset + sizeof(double) > dataM.size())
-        dataM.resize(offset + sizeof(double), 0);
-    *((double*)&dataM[offset]) = value;
-}
-//-----------------------------------------------------------------------------
-void DataGridRowBuffer::setValue(unsigned offset, float value)
-{
-    if (offset + sizeof(float) > dataM.size())
-        dataM.resize(offset + sizeof(float), 0);
-    *((float*)&dataM[offset]) = value;
-}
-//-----------------------------------------------------------------------------
-void DataGridRowBuffer::setValue(unsigned offset, int value)
-{
-    if (offset + sizeof(int) > dataM.size())
-        dataM.resize(offset + sizeof(int), 0);
-    *((int*)&dataM[offset]) = value;
-}
-//-----------------------------------------------------------------------------
-void DataGridRowBuffer::setValue(unsigned offset, int64_t value)
-{
-    if (offset + sizeof(int64_t) > dataM.size())
-        dataM.resize(offset + sizeof(int64_t), 0);
-    *((int64_t*)&dataM[offset]) = value;
-}
-//-----------------------------------------------------------------------------
-void DataGridRowBuffer::setValue(unsigned offset, IBPP::DBKey value)
-{
-    if (offset + value.Size() > dataM.size())
-        dataM.resize(offset + value.Size(), 0);
-    value.GetKey(&dataM[offset], value.Size());
-}
 //-----------------------------------------------------------------------------
 // GridCellFormats: class to cache config data for cell formatting
 class GridCellFormats: public Observer
@@ -1197,6 +1053,18 @@ DataGridRows::DataGridRows()
 DataGridRows::~DataGridRows()
 {
     clear();
+}
+//-----------------------------------------------------------------------------
+ResultsetColumnDef* DataGridRows::getColumnDef(unsigned col)
+{
+    return columnDefsM[col];
+}
+//-----------------------------------------------------------------------------
+void DataGridRows::addRow(DataGridRowBuffer *buffer)
+{
+    if (buffersM.size() == buffersM.capacity())
+        buffersM.reserve(buffersM.capacity() + 1024);
+    buffersM.push_back(buffer);
 }
 //-----------------------------------------------------------------------------
 bool DataGridRows::addRow(const IBPP::Statement& statement,

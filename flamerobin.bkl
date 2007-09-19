@@ -230,6 +230,7 @@
         $(SOURCEDIR)/gui/BaseFrame.h
         $(SOURCEDIR)/gui/ContextMenuMetadataItemVisitor.h
         $(SOURCEDIR)/gui/controls/DataGrid.h
+        $(SOURCEDIR)/gui/controls/DataGridRowBuffer.h
         $(SOURCEDIR)/gui/controls/DataGridRows.h
         $(SOURCEDIR)/gui/controls/DataGridTable.h
         $(SOURCEDIR)/gui/controls/DndTextControls.h
@@ -332,6 +333,7 @@
         $(SOURCEDIR)/gui/BaseFrame.cpp
         $(SOURCEDIR)/gui/ContextMenuMetadataItemVisitor.cpp
         $(SOURCEDIR)/gui/controls/DataGrid.cpp
+        $(SOURCEDIR)/gui/controls/DataGridRowBuffer.cpp
         $(SOURCEDIR)/gui/controls/DataGridRows.cpp
         $(SOURCEDIR)/gui/controls/DataGridTable.cpp
         $(SOURCEDIR)/gui/controls/DndTextControls.cpp

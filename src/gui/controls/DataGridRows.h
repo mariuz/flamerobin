@@ -97,6 +97,9 @@ public:
     wxString setFieldValue(unsigned row, unsigned col,
         const wxString& value);
     bool removeRows(size_t from, size_t count, wxString& statement);
+
+    ResultsetColumnDef *getColumnDef(unsigned col);
+    void addRow(DataGridRowBuffer *);
 };
 //----------------------------------------------------------------------
 #endif

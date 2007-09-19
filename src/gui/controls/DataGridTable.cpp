@@ -46,6 +46,7 @@
 #include "config/Config.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
+#include "gui/controls/DataGridRows.h"
 #include "gui/controls/DataGridTable.h"
 #include "metadata/database.h"
 //-----------------------------------------------------------------------------
@@ -329,6 +330,20 @@ void DataGridTable::fetch()
     }
 }
 //-----------------------------------------------------------------------------
+void DataGridTable::addRow(DataGridRowBuffer *buffer)
+{
+    rowsM.addRow(buffer);
+    if (GetView())  // notify the grid
+    {
+        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, 1);
+        GetView()->ProcessTableMessage(msg);
+        // used in frame to update status bar
+        wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
+        evt.SetExtraLong(rowsM.getRowCount());
+        wxPostEvent(GetView(), evt);
+    }
+}
+//-----------------------------------------------------------------------------
 wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
     wxGridCellAttr::wxAttrKind kind)
 {
@@ -493,7 +508,7 @@ void DataGridTable::getTableNames(wxArrayString& tables)
 //-----------------------------------------------------------------------------
 // all fields of that table
 void DataGridTable::getFields(const wxString& table,
-    std::set<Column *>& fields)
+    DataGridTable::FieldSet& fields)
 {
     if (statementM == 0)
         return;
@@ -513,8 +528,25 @@ void DataGridTable::getFields(const wxString& table,
         {
             if ((*it).getName_() == fn && (*it).getComputedSource().IsEmpty())
             {
+                // field found in table and not computed
                 if (fields.find(&(*it)) == fields.end())
-                    fields.insert(&(*it));
+                {
+                    std::pair<ResultsetColumnDef *, int>
+                        p(rowsM.getColumnDef(i), i);
+                    fields.insert
+                    (
+                        std::pair
+                        <
+                            Column *,
+                            std::pair
+                            <
+                                ResultsetColumnDef *,
+                                int
+                            >
+                        >
+                        (&(*it), p)
+                    );
+                }
                 break;
             }
         }

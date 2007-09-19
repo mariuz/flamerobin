@@ -59,6 +59,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_BaseFrame.o \
 	flamerobin_ContextMenuMetadataItemVisitor.o \
 	flamerobin_DataGrid.o \
+	flamerobin_DataGridRowBuffer.o \
 	flamerobin_DataGridRows.o \
 	flamerobin_DataGridTable.o \
 	flamerobin_DndTextControls.o \
@@ -331,6 +332,9 @@ flamerobin_ContextMenuMetadataItemVisitor.o: $(srcdir)/src/gui/ContextMenuMetada
 
 flamerobin_DataGrid.o: $(srcdir)/src/gui/controls/DataGrid.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/controls/DataGrid.cpp
+
+flamerobin_DataGridRowBuffer.o: $(srcdir)/src/gui/controls/DataGridRowBuffer.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/controls/DataGridRowBuffer.cpp
 
 flamerobin_DataGridRows.o: $(srcdir)/src/gui/controls/DataGridRows.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/controls/DataGridRows.cpp
