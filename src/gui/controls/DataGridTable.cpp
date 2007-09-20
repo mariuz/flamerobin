@@ -330,7 +330,7 @@ void DataGridTable::fetch()
     }
 }
 //-----------------------------------------------------------------------------
-void DataGridTable::addRow(DataGridRowBuffer *buffer)
+void DataGridTable::addRow(DataGridRowBuffer *buffer, const wxString& sql)
 {
     rowsM.addRow(buffer);
     if (GetView())  // notify the grid
@@ -341,6 +341,11 @@ void DataGridTable::addRow(DataGridRowBuffer *buffer)
         wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
         evt.SetExtraLong(rowsM.getRowCount());
         wxPostEvent(GetView(), evt);
+
+        // used in frame to show executed statements
+        wxCommandEvent evt2(wxEVT_FRDG_STATEMENT, GetView()->GetId());
+        evt2.SetString(sql);
+        wxPostEvent(GetView(), evt2);
     }
 }
 //-----------------------------------------------------------------------------

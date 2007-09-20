@@ -1484,7 +1484,7 @@ void ExecuteSqlFrame::OnButtonInsertClick(wxCommandEvent& WXUNUSED(event))
         }
 
         // show dialog to enter values
-        InsertDialog id(this, tab, tb);
+        InsertDialog id(this, tab, tb, statementM);
         id.ShowModal();
     }
 

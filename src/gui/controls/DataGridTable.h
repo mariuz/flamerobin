@@ -72,7 +72,7 @@ public:
 
     bool canFetchMoreRows();
     void fetch();
-    void addRow(DataGridRowBuffer *buffer);
+    void addRow(DataGridRowBuffer *buffer, const wxString& sql);
     wxString getCellValue(int row, int col);
     wxString getCellValueForInsert(int row, int col);
     wxString getCellValueForCSV(int row, int col);

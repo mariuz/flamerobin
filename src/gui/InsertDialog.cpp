@@ -41,6 +41,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <set>
 
 #include "core/FRError.h"
+#include "core/StringUtils.h"
 #include "metadata/column.h"
 #include "gui/controls/DataGridRowBuffer.h"
 #include "gui/controls/DataGridTable.h"
@@ -56,9 +57,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 //-----------------------------------------------------------------------------
 InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
-    DataGridTable *gridTable):
-    BaseDialog(parent, -1, wxEmptyString), tableNameM(tableName), bufferM(0),
-    gridTableM(gridTable)
+    DataGridTable *gridTable, IBPP::Statement& st)
+    :BaseDialog(parent, -1, wxEmptyString), tableNameM(tableName), bufferM(0),
+    gridTableM(gridTable), statementM(st)
 {
 	flexSizerM = new wxFlexGridSizer( 2, 4, 8, 8 );
 	flexSizerM->AddGrowableCol( 3 );
@@ -76,8 +77,9 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
         st->SetFont(f);
     }
 
+    // TODO: we need a better way to handle this
     // if you add/remove something here, make sure you update the
-    // OnChoiceChange event handler and updateControls function
+    // in all the places in this file
     wxString choices[] = {
         _(""), _("NULL"), _("Skip (N/A)"), _("Hexadecimal"), _("Octal"),
         _("CURRENT_DATE"), _("CURRENT_TIME"), _("CURRENT_TIMESTAMP"),
@@ -192,7 +194,7 @@ void InsertDialog::updateControls(wxChoice *c, wxTextCtrl *t)
     // _("CURRENT_DATE"), _("CURRENT_TIME"), _("CURRENT_TIMESTAMP"),
     // _("CURRENT_USER"), _("File..."), _("Generator...") };
     bool editable = (option == 0 || option == 3 || option == 4);
-    if (!editable)
+    if (!editable && option < 9)
         t->SetValue(wxEmptyString);
     t->SetEditable(editable);
     updateColors(this);
@@ -219,8 +221,15 @@ void InsertDialog::OnEditFocusLost(wxFocusEvent& event)
             break;
     if (it == columnsM.end())
         return;
-    if ((*it).choice->GetSelection() == 0)  // we only care for strings
+    if ((*it).choice->GetSelection() != 0)  // we only care for strings
         return;
+
+    if (tx->GetValue().IsEmpty())   // we assume null for non-string columns
+    {
+        bufferM->setFieldNull((*it).index, true);
+        (*it).choice->SetSelection(1);
+        return;
+    }
 
     // write data to buffer and retrieve the formatted value
     bufferM->setFieldNull((*it).index, false);
@@ -249,22 +258,101 @@ void InsertDialog::OnEditFocusLost(wxFocusEvent& event)
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
+void InsertDialog::preloadSpecialColumns()
+{
+    // step 1: build list of CURRENT_* and generator values
+    wxString sql(wxT("SELECT "));
+    bool first = true;
+    for (std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
+        it != columnsM.end(); ++it)
+    {
+        int sel = (*it).choice->GetSelection();
+        if (sel < 5 || sel == 9)
+            continue;
+        if (first)
+            first = false;
+        else
+            sql += wxT(",");
+        if (sel == 10) // generator
+            sql += wxT("GEN_ID(") + (*it).textCtrl->GetValue() + wxT(", 1)");
+        else
+            sql += (*it).choice->GetStringSelection();
+    }
+
+    // step 2: load those from the database
+    IBPP::Statement st1 = IBPP::StatementFactory(statementM->DatabasePtr(),
+        statementM->TransactionPtr());
+    if (!first) // we do need some data
+    {
+        sql += wxT(" FROM RDB$DATABASE");
+        st1->Prepare(wx2std(sql));
+        st1->Execute();
+        st1->Fetch();
+    }
+
+    // step 3: save values into buffer and edit controls
+    //         so that the next run doesn't reload generators
+    unsigned col = 1;
+    for (std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
+        it != columnsM.end(); ++it)
+    {
+        int sel = (*it).choice->GetSelection();
+        if (sel < 5 || sel == 9)
+            continue;
+        (*it).columnDef->setValue(bufferM, col++, st1, wxConvCurrent);
+        if (sel != 10)  // what follows is only for generators
+            continue;
+        (*it).textCtrl->SetValue((*it).columnDef->getAsString(bufferM));
+        (*it).choice->SetSelection(0);  // treat as regular value
+    }
+}
+//-----------------------------------------------------------------------------
 void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
-    // write all regular values to buffer once more
-    // + write special values using database query: generator, CURRENT_*, etc.
-    // + build INSERT statement in the same loop
+    preloadSpecialColumns();
 
-    // run INSERT statement
+    wxString stm = wxT("INSERT INTO ") + tableNameM + wxT(" (");
+    wxString val = wxT(") VALUES (");
+    bool first = true;
+    for (std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
+        it != columnsM.end(); ++it)
+    {
+        int sel = (*it).choice->GetSelection();
+        if (sel == 2)   // skip
+            continue;
+
+        if (first)
+            first = false;
+        else
+        {
+            stm += wxT(",");
+            val += wxT(",");
+        }
+        stm += (*it).column->getQuotedName();
+        if (sel == 9)
+        {
+                // file (we need ? parameters and load content from file)
+        }
+        else if (sel == 1)  // NULL
+            val += wxT("NULL");
+        else
+            val += wxT("'")+(*it).columnDef->getAsFirebirdString(bufferM)+wxT("'");
+    }
+
+    IBPP::Statement st1 = IBPP::StatementFactory(statementM->DatabasePtr(),
+        statementM->TransactionPtr());
+    stm += val + wxT(")");
+    st1->Prepare(wx2std(stm));
+    // load blobs here and Set parameters
+    st1->Execute();
 
     // add buffer to the table and set internal buffer marker to zero
     // (to prevent deletion in destructor)
-    gridTableM->addRow(bufferM);
+    gridTableM->addRow(bufferM, stm);
     bufferM = 0;
 
-    // do some stuff & if all ok:
     EndModal(wxID_OK);
 
     FR_CATCH

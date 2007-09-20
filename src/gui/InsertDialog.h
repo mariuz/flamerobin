@@ -31,6 +31,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <wx/image.h>
 
+#include "ibpp/ibpp.h"
 #include "gui/BaseDialog.h"
 class DataGridTable;
 class DataGridRowBuffer;
@@ -55,7 +56,8 @@ public:
 class InsertDialog: public BaseDialog
 {
 public:
-    InsertDialog(wxWindow* parent, const wxString& tableName, DataGridTable *);
+    InsertDialog(wxWindow* parent, const wxString& tableName, DataGridTable *,
+        IBPP::Statement& st);
     virtual ~InsertDialog();
     void OnOkButtonClick(wxCommandEvent& event);
     void OnChoiceChange(wxCommandEvent& event);
@@ -65,6 +67,8 @@ public:
     enum { ID_Choice = 1001 };
 
 private:
+    void preloadSpecialColumns();
+    IBPP::Statement& statementM;
     std::vector<InsertColumnInfo> columnsM;
     DataGridTable *gridTableM;
     DataGridRowBuffer *bufferM;
