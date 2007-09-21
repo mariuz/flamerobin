@@ -82,7 +82,7 @@ public:
     // TODO: these should be replaced with a better function that covers all
     wxString getTableName();
     void getTableNames(wxArrayString& tables);
-    typedef std::map<Column *, std::pair<ResultsetColumnDef*,int> > FieldSet;
+    typedef std::map<int, std::pair<ResultsetColumnDef*,Column *> > FieldSet;
     void getFields(const wxString& table, FieldSet& fields);
     Database *getDatabase();
 

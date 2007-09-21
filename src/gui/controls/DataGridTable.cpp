@@ -352,7 +352,7 @@ void DataGridTable::addRow(DataGridRowBuffer *buffer, const wxString& sql)
 wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
     wxGridCellAttr::wxAttrKind kind)
 {
-    if (rowsM.isFieldNull(row, col))
+    if (rowsM.isFieldNull(row, col) || rowsM.isFieldNA(row, col))
     {
         if (rowsM.isRowFieldNumeric(col))
         {
@@ -383,6 +383,8 @@ wxString DataGridTable::getCellValue(int row, int col)
     if (!isValidCellPos(row, col))
         return wxEmptyString;
 
+    if (rowsM.isFieldNA(row, col))
+        return wxT("N/A");
     if (rowsM.isFieldNull(row, col))
         return wxT("[null]");
     return rowsM.getFieldValue(row, col);
@@ -390,7 +392,7 @@ wxString DataGridTable::getCellValue(int row, int col)
 //-----------------------------------------------------------------------------
 wxString DataGridTable::getCellValueForInsert(int row, int col)
 {
-    if (!isValidCellPos(row, col))
+    if (!isValidCellPos(row, col) || rowsM.isFieldNA(row, col))
         return wxEmptyString;
 
     if (rowsM.isFieldNull(row, col))
@@ -403,7 +405,7 @@ wxString DataGridTable::getCellValueForInsert(int row, int col)
 //-----------------------------------------------------------------------------
 wxString DataGridTable::getCellValueForCSV(int row, int col)
 {
-    if (!isValidCellPos(row, col))
+    if (!isValidCellPos(row, col) || rowsM.isFieldNA(row, col))
         return wxEmptyString;
 
     if (rowsM.isFieldNull(row, col))
@@ -513,7 +515,7 @@ void DataGridTable::getTableNames(wxArrayString& tables)
 //-----------------------------------------------------------------------------
 // all fields of that table
 void DataGridTable::getFields(const wxString& table,
-    DataGridTable::FieldSet& fields)
+    DataGridTable::FieldSet& flds)
 {
     if (statementM == 0)
         return;
@@ -521,6 +523,8 @@ void DataGridTable::getFields(const wxString& table,
         findRelation(Identifier(table)));
     if (!t)
         return;
+    typedef std::map<Column *, std::pair<ResultsetColumnDef*,int> > TempMap;
+    TempMap fields;
     for (int i=0; i<statementM->Columns(); i++)
     {
         wxString tn(std2wx(statementM->ColumnTable(i+1)));
@@ -543,11 +547,7 @@ void DataGridTable::getFields(const wxString& table,
                         std::pair
                         <
                             Column *,
-                            std::pair
-                            <
-                                ResultsetColumnDef *,
-                                int
-                            >
+                            std::pair<ResultsetColumnDef *, int>
                         >
                         (&(*it), p)
                     );
@@ -555,6 +555,23 @@ void DataGridTable::getFields(const wxString& table,
                 break;
             }
         }
+    }
+
+    // we have item list sorted by column *, but user probably expects the
+    // same order as in the grid, so we sort it
+    for (TempMap::iterator it = fields.begin(); it != fields.end(); ++it)
+    {
+        std::pair<ResultsetColumnDef *, Column *> p(
+            (*it).second.first, (*it).first);
+        flds.insert
+        (
+            std::pair
+            <
+                int,
+                std::pair<ResultsetColumnDef *, Column *>
+            >
+            ((*it).second.second, p)
+        );
     }
 }
 //-----------------------------------------------------------------------------
@@ -574,6 +591,8 @@ wxString DataGridTable::GetValue(int row, int col)
     if (maxRowToFetchM < maxRowToFetch)
         maxRowToFetchM = maxRowToFetch;
 
+    if (rowsM.isFieldNA(row, col))
+        return wxT("N/A");
     if (rowsM.isFieldNull(row, col))
         return wxT("[null]");
     wxString cellValue(rowsM.getFieldValue(row, col));

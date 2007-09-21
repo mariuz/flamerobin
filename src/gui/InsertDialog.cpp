@@ -114,20 +114,23 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
         st->SetFont(f);
     }
 
-    // initialize the buffer with NULLs
     bufferM = new DataGridRowBuffer(gridTable->GetNumberCols());
+    for (unsigned u = 0; u < gridTable->GetNumberCols(); u++)
+        bufferM->setFieldNA(u, true);
 
     DataGridTable::FieldSet fields;
     gridTable->getFields(tableName, fields);
     for (DataGridTable::FieldSet::iterator it = fields.begin();
         it != fields.end(); ++it)
     {
+        Column *c = (*it).second.second;
+        ResultsetColumnDef *def = (*it).second.first;
         wxStaticText *label1 = new wxStaticText(getControlsPanel(), wxID_ANY,
-            (*it).first->getName_());
+            c->getName_());
         flexSizerM->Add(label1, 0, wxALIGN_CENTER_VERTICAL);
 
         label1 = new wxStaticText(getControlsPanel(), wxID_ANY,
-            (*it).first->getDatatype());
+            c->getDatatype());
         flexSizerM->Add(label1, 0, wxALIGN_CENTER_VERTICAL);
 
         wxChoice *choice1 = new wxChoice(getControlsPanel(), ID_Choice,
@@ -138,26 +141,25 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
         choice1->SetSelection(0);
 
         wxTextCtrl *text1 = new wxTextCtrl(getControlsPanel(), wxID_ANY,
-            (*it).first->getDefault(), wxDefaultPosition, wxDefaultSize,
-            (*it).second.first->isNumeric() ? wxTE_RIGHT : 0);
+            c->getDefault(), wxDefaultPosition, wxDefaultSize,
+            def->isNumeric() ? wxTE_RIGHT : 0);
         flexSizerM->Add(text1, 0, wxALIGN_CENTER_VERTICAL|wxEXPAND);
 
         text1->Connect(wxEVT_KILL_FOCUS,
             wxFocusEventHandler(InsertDialog::OnEditFocusLost), 0, this);
 
-        if (!(*it).first->hasDefault())
+        if (!c->hasDefault())
         {
-            if ((*it).first->isNullable())
+            if (c->isNullable())
             {
                 choice1->SetStringSelection(wxT("NULL"));
                 updateControls(choice1, text1); // disable editing
             }
-            else if ((*it).second.first->isNumeric())
+            else if (def->isNumeric())
                 text1->SetValue(wxT("0"));
         }
 
-        InsertColumnInfo ici(choice1, text1, (*it).first, (*it).second.first,
-            (*it).second.second);
+        InsertColumnInfo ici(choice1, text1, c, def, (*it).first);
         columnsM.push_back(ici);
 
         // TODO: if table has active BEFORE INSERT trigger that depends on:
@@ -170,6 +172,8 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
 
     set_properties();
     do_layout();
+    if (columnsM.size())
+        columnsM[0].choice->SetFocus();
 
     // TODO: if dialog height is greater than screen height: reduce to 80%
     //       (it should show scrollbars?)
@@ -218,12 +222,12 @@ bool InsertDialog::getConfigStoresHeight() const
     return false;
 }
 //-----------------------------------------------------------------------------
-void InsertDialog::updateControls(wxChoice *c, wxTextCtrl *t)
+void InsertDialog::updateControls(wxChoice *c, wxTextCtrl *tx)
 {
     InsertOption ix = (InsertOption)(c->GetSelection());
     if (!optionAllowsCustomValue(ix))
-        t->SetValue(wxEmptyString);
-    t->SetEditable(optionIsEditable(ix));
+        tx->SetValue(wxEmptyString);
+    tx->SetEditable(optionIsEditable(ix));
     updateColors(this);
 }
 //-----------------------------------------------------------------------------
@@ -256,14 +260,14 @@ void InsertDialog::storeValues()
                     (*it).textCtrl->SetValue((*it)
                         .columnDef->getAsString(bufferM));
                     bufferM->setFieldNull((*it).index, false);
-                    //bufferM->setNA((*it).index, false);
+                    bufferM->setFieldNA((*it).index, false);
                     break;
                 case ioSkip:
-                    //bufferM->setNA((*it).index, true);
+                    bufferM->setFieldNA((*it).index, true);
                     break;
                 case ioNull:
                     bufferM->setFieldNull((*it).index, true);
-                    //bufferM->setNA((*it).index, false);
+                    bufferM->setFieldNA((*it).index, false);
                     break;
                 default:
                     break;
@@ -323,6 +327,7 @@ void InsertDialog::preloadSpecialColumns()
             continue;
         (*it).textCtrl->SetValue((*it).columnDef->getAsString(bufferM));
         (*it).choice->SetSelection(ioRegular);  // treat as regular value
+        updateControls((*it).choice, (*it).textCtrl);
     }
 }
 //-----------------------------------------------------------------------------
@@ -354,6 +359,7 @@ void InsertDialog::OnEditFocusLost(wxFocusEvent& event)
         // TODO: check if column's type is (VAR)CHAR and allow empty string
         bufferM->setFieldNull((*it).index, true);
         (*it).choice->SetSelection(ioNull);
+        updateControls((*it).choice, (*it).textCtrl);
         return;
     }
 
@@ -462,17 +468,14 @@ void InsertDialog::OnChoiceChange(wxCommandEvent& event)
     for (; it != columnsM.end(); ++it)
         if ((*it).choice == c)
             break;
-    int option = event.GetSelection();
     updateControls(c, (*it).textCtrl);
 
-    // _(""), _("NULL"), _("Skip (N/A)"), _("Hexadecimal"), _("Octal"),
-    // _("CURRENT_DATE"), _("CURRENT_TIME"), _("CURRENT_TIMESTAMP"),
-    // _("CURRENT_USER"), _("File..."), _("Generator...") };
-    if (option == 9)
+    InsertOption option = (InsertOption)(event.GetSelection());
+    if (option == ioFile)
     {
         // select file and store in tx
     }
-    if (option == 10)
+    if (option == ioGenerator)
     {
         // select generator name and store in tx
     }

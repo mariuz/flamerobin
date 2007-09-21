@@ -50,6 +50,7 @@ DataGridRowBuffer::DataGridRowBuffer(unsigned fieldCount)
 //-----------------------------------------------------------------------------
 DataGridRowBuffer::DataGridRowBuffer(const DataGridRowBuffer* other)
 {
+    naFieldsM = other->naFieldsM;
     nullFieldsM = other->nullFieldsM;
     dataM = other->dataM;
     stringsM = other->stringsM;
@@ -105,6 +106,22 @@ bool DataGridRowBuffer::getValue(unsigned offset, IBPP::DBKey& value,
         return false;
     value.SetKey(&dataM[offset], size);
     return true;
+}
+//-----------------------------------------------------------------------------
+bool DataGridRowBuffer::isFieldNA(unsigned num)
+{   // not NA by default
+    return (num < naFieldsM.size() && naFieldsM[num]);
+}
+//-----------------------------------------------------------------------------
+void DataGridRowBuffer::setFieldNA(unsigned num, bool isNA)
+{
+    if (num < naFieldsM.size())
+        naFieldsM[num] = isNA;
+    else if (isNA)  // we need to resize and set
+    {
+        naFieldsM.resize(num + 1, false);
+        naFieldsM[num] = true;
+    }
 }
 //-----------------------------------------------------------------------------
 bool DataGridRowBuffer::isFieldNull(unsigned num)

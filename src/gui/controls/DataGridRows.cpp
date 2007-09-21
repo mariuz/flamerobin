@@ -1394,6 +1394,13 @@ bool DataGridRows::isFieldNull(unsigned row, unsigned col)
     return buffersM[row]->isFieldNull(col);
 }
 //-----------------------------------------------------------------------------
+bool DataGridRows::isFieldNA(unsigned row, unsigned col)
+{
+    if (row >= buffersM.size())
+        return false;
+    return buffersM[row]->isFieldNA(col);
+}
+//-----------------------------------------------------------------------------
 void DataGridRows::addWhereAndExecute(UniqueConstraint* uq, wxString& stm,
     const wxString& table, DataGridRowBuffer *buffer)
 {

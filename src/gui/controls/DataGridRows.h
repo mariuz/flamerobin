@@ -94,6 +94,7 @@ public:
 
     wxString getFieldValue(unsigned row, unsigned col);
     bool isFieldNull(unsigned row, unsigned col);
+    bool isFieldNA(unsigned row, unsigned col);
     wxString setFieldValue(unsigned row, unsigned col,
         const wxString& value);
     bool removeRows(size_t from, size_t count, wxString& statement);

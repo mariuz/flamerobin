@@ -74,7 +74,7 @@ private:
     DataGridTable *gridTableM;
     DataGridRowBuffer *bufferM;
     wxString tableNameM;
-    void updateControls(wxChoice *c, wxTextCtrl *t);
+    void updateControls(wxChoice *c, wxTextCtrl *tx);
     void set_properties();
     void do_layout();
 

@@ -36,6 +36,7 @@ class DataGridRowBuffer
 {
 private:
     std::vector<bool> nullFieldsM;
+    std::vector<bool> naFieldsM;
     std::vector<uint8_t> dataM;
     std::vector<wxString> stringsM;
 public:
@@ -51,6 +52,8 @@ public:
     bool getValue(unsigned offset, IBPP::DBKey& value, unsigned size);
     bool isFieldNull(unsigned num);
     void setFieldNull(unsigned num, bool isNull);
+    bool isFieldNA(unsigned num);
+    void setFieldNA(unsigned num, bool isNA);
     void setString(unsigned num, const wxString& value);
     void setValue(unsigned offset, double value);
     void setValue(unsigned offset, float value);
