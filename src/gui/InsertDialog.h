@@ -67,6 +67,7 @@ public:
     enum { ID_Choice = 1001 };
 
 private:
+    void storeValues();
     void preloadSpecialColumns();
     IBPP::Statement& statementM;
     std::vector<InsertColumnInfo> columnsM;
