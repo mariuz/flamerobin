@@ -33,6 +33,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "ibpp/ibpp.h"
 #include "gui/BaseDialog.h"
+class Database;
 class DataGridTable;
 class DataGridRowBuffer;
 class Column;
@@ -57,7 +58,7 @@ class InsertDialog: public BaseDialog
 {
 public:
     InsertDialog(wxWindow* parent, const wxString& tableName, DataGridTable *,
-        IBPP::Statement& st);
+        IBPP::Statement& st, Database *db);
     virtual ~InsertDialog();
     void OnOkButtonClick(wxCommandEvent& event);
     void OnChoiceChange(wxCommandEvent& event);
@@ -67,6 +68,7 @@ public:
     enum { ID_Choice = 1001 };
 
 private:
+    Database *databaseM;
     void storeValues();
     void preloadSpecialColumns();
     IBPP::Statement& statementM;

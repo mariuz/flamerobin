@@ -43,6 +43,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "metadata/column.h"
+#include "metadata/database.h"
 #include "gui/controls/DataGridRowBuffer.h"
 #include "gui/controls/DataGridTable.h"
 #include "gui/StyleGuide.h"
@@ -92,10 +93,34 @@ namespace InsertOptions
 };
 using namespace InsertOptions;
 //-----------------------------------------------------------------------------
+Generator *findAutoincGenerator(std::vector<Trigger *>& triggers, Column *c)
+{
+    for (std::vector<Trigger *>::iterator tt = triggers.begin();
+        tt != triggers.end(); ++tt)
+    {
+        std::vector<Dependency> list;
+        (*tt)->getDependencies(list, true);
+        Generator *gen = 0;
+        bool found = false;
+        for (std::vector<Dependency>::iterator di = list.begin();
+            di != list.end(); ++di)
+        {
+            MetadataItem *m = (*di).getDependentObject();
+            if (!gen)
+                gen = dynamic_cast<Generator *>(m);
+            if (c->getTable() == m && (*di).getFields() == c->getName_())
+                found = true;
+        }
+        if (found && gen)
+            return gen;
+    }
+    return 0;
+}
+//-----------------------------------------------------------------------------
 InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
-    DataGridTable *gridTable, IBPP::Statement& st)
+    DataGridTable *gridTable, IBPP::Statement& st, Database *db)
     :BaseDialog(parent, -1, wxEmptyString), tableNameM(tableName), bufferM(0),
-    gridTableM(gridTable), statementM(st)
+    gridTableM(gridTable), statementM(st), databaseM(db)
 {
     flexSizerM = new wxFlexGridSizer( 2, 4, 8, 8 );
     flexSizerM->AddGrowableCol( 3 );
@@ -120,6 +145,15 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
 
     DataGridTable::FieldSet fields;
     gridTable->getFields(tableName, fields);
+
+    // preload triggers
+    std::vector<Trigger *> triggers;
+    if (!fields.empty()) // not empty
+    {
+        Table *t = (*(fields.begin())).second.second->getTable();
+        t->getTriggers(triggers, Trigger::beforeTrigger);
+    }
+
     for (DataGridTable::FieldSet::iterator it = fields.begin();
         it != fields.end(); ++it)
     {
@@ -138,7 +172,7 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
                 / sizeof(wxString), insertOptionStrings, 0);
         flexSizerM->Add(choice1, 0, wxALIGN_CENTER_VERTICAL|wxEXPAND);
         // wxWidgets seem to default to -1 for some reason
-        choice1->SetSelection(0);
+        choice1->SetSelection(ioRegular);
 
         wxTextCtrl *text1 = new wxTextCtrl(getControlsPanel(), wxID_ANY,
             c->getDefault(), wxDefaultPosition, wxDefaultSize,
@@ -152,7 +186,7 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
         {
             if (c->isNullable())
             {
-                choice1->SetStringSelection(wxT("NULL"));
+                choice1->SetSelection(ioNull);
                 updateControls(choice1, text1); // disable editing
             }
             else if (def->isNumeric())
@@ -162,8 +196,13 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
         InsertColumnInfo ici(choice1, text1, c, def, (*it).first);
         columnsM.push_back(ici);
 
-        // TODO: if table has active BEFORE INSERT trigger that depends on:
-        // this field and some generator -> activate generator option
+        Generator *gen = findAutoincGenerator(triggers, c);
+        if (gen)
+        {
+            choice1->SetSelection(ioGenerator);
+            updateControls(choice1, text1);
+            text1->SetValue(gen->getQuotedName());
+        }
     }
 
     button_ok = new wxButton(getControlsPanel(), wxID_OK, _("&Insert"));
@@ -322,7 +361,10 @@ void InsertDialog::preloadSpecialColumns()
         InsertOption sel = (InsertOption)((*it).choice->GetSelection());
         if (!optionValueLoadedFromDatabase(sel))
             continue;
-        (*it).columnDef->setValue(bufferM, col++, st1, wxConvCurrent);
+        bufferM->setFieldNA((*it).index, false);
+        bufferM->setFieldNull((*it).index, st1->IsNull(col));
+        if (!st1->IsNull(col))
+            (*it).columnDef->setValue(bufferM, col++, st1, wxConvCurrent);
         if (sel != ioGenerator)  // what follows is only for generators
             continue;
         (*it).textCtrl->SetValue((*it).columnDef->getAsString(bufferM));
@@ -478,6 +520,15 @@ void InsertDialog::OnChoiceChange(wxCommandEvent& event)
     if (option == ioGenerator)
     {
         // select generator name and store in tx
+        wxArrayString as;
+        for (MetadataCollection<Generator>::const_iterator ci =
+            databaseM->generatorsBegin(); ci != databaseM->generatorsEnd();
+            ++ci)
+        {
+            as.Add((*ci).getQuotedName());
+        }
+        (*it).textCtrl->SetValue(::wxGetSingleChoice(_("Select a generator"),
+            _("Generator"), as, this));
     }
 
     FR_CATCH

@@ -918,9 +918,10 @@ class DoubleColumnDef : public ResultsetColumnDef
 {
 private:
     unsigned offsetM;
+    short scaleM;
 public:
     DoubleColumnDef(const wxString& name, unsigned offset, bool readOnly,
-        bool nullable);
+        bool nullable, short scale);
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
     virtual bool isNumeric();
@@ -931,8 +932,9 @@ public:
 };
 //-----------------------------------------------------------------------------
 DoubleColumnDef::DoubleColumnDef(const wxString& name, unsigned offset,
-    bool readOnly, bool nullable)
-    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
+    bool readOnly, bool nullable, short scale)
+    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset),
+      scaleM(scale)
 {
 }
 //-----------------------------------------------------------------------------
@@ -943,13 +945,10 @@ wxString DoubleColumnDef::getAsString(DataGridRowBuffer* buffer)
     if (!buffer->getValue(offsetM, value))
         return wxEmptyString;
 
-    int scale;
-    if (!buffer->getValue(offsetM + sizeof(double), scale))
-        scale = 0;
-    if (scale)
+    if (scaleM)
     {
         std::ostringstream oss;
-        oss << std::fixed << std::setprecision(scale) << value;
+        oss << std::fixed << std::setprecision(scaleM) << value;
         return std2wx(oss.str());
     }
     return GridCellFormats::get().formatDouble(value);
@@ -967,7 +966,7 @@ void DoubleColumnDef::setFromString(DataGridRowBuffer* buffer,
 //-----------------------------------------------------------------------------
 unsigned DoubleColumnDef::getBufferSize()
 {
-    return sizeof(double) + sizeof(int);
+    return sizeof(double);
 }
 //-----------------------------------------------------------------------------
 bool DoubleColumnDef::isNumeric()
@@ -982,8 +981,6 @@ void DoubleColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     double value;
     statement->Get(col, value);
     buffer->setValue(offsetM, value);
-    int scale = statement->ColumnScale(col);
-    buffer->setValue(offsetM + sizeof(double), scale);
 }
 //-----------------------------------------------------------------------------
 // StringColumnDef class
@@ -1346,7 +1343,7 @@ bool DataGridRows::initialize(const IBPP::Statement& statement, Database *db)
                     columnDef = new FloatColumnDef(colName, bufferSizeM, readOnly, nullable);
                     break;
                 case IBPP::sdDouble:
-                    columnDef = new DoubleColumnDef(colName, bufferSizeM, readOnly, nullable);
+                    columnDef = new DoubleColumnDef(colName, bufferSizeM, readOnly, nullable, statement->ColumnScale(col));
                     break;
 
                 case IBPP::sdString:
