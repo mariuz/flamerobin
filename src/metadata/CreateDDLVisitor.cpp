@@ -535,17 +535,24 @@ void CreateDDLVisitor::visitTable(Table& t)
                 postSqlM += wxT("UNIQUE ");
             if ((*ci).getIndexType() == Index::itDescending)
                 postSqlM += wxT("DESCENDING ");
-            postSqlM += wxT("INDEX ") + (*ci).getQuotedName() + wxT(" ON ")
-                + t.getQuotedName() + wxT(" (");
-            std::vector<wxString> *cols = (*ci).getSegments();
-            for (std::vector<wxString>::const_iterator it = cols->begin(); it != cols->end(); ++it)
+            postSqlM += wxT("INDEX ") + (*ci).getQuotedName() + wxT(" ON ") + t.getQuotedName();
+            wxString expre = (*ci).getExpression();
+            if (!expre.IsEmpty())
+                postSqlM += wxT(" COMPUTED BY ") + expre;
+            else
             {
-                if (it != cols->begin())
-                    postSqlM += wxT(",");
-                Identifier id(*it);
-                postSqlM += id.getQuoted();
+                postSqlM += wxT(" (");
+                std::vector<wxString> *cols = (*ci).getSegments();
+                for (std::vector<wxString>::const_iterator it = cols->begin(); it != cols->end(); ++it)
+                {
+                    if (it != cols->begin())
+                        postSqlM += wxT(",");
+                    Identifier id(*it);
+                    postSqlM += id.getQuoted();
+                }
+                postSqlM += wxT(")");
             }
-            postSqlM += wxT(");\n");
+            postSqlM += wxT(";\n");
         }
     }
 
