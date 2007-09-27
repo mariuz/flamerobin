@@ -77,9 +77,10 @@ namespace InsertOptions
         ioDate, ioTime, ioTimestamp, ioUser, ioFile, ioGenerator
     } InsertOption;
 
+    // null is also editable
     bool optionIsEditable(InsertOption i)
     {
-        return (i == ioRegular || i == ioHex || i == ioOctal);
+        return (i == ioRegular || i == ioHex || i == ioOctal || i == ioNull);
     }
     bool optionAllowsCustomValue(InsertOption i)
     {
@@ -174,13 +175,15 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
         // wxWidgets seem to default to -1 for some reason
         choice1->SetSelection(ioRegular);
 
-        wxTextCtrl *text1 = new wxTextCtrl(getControlsPanel(), wxID_ANY,
+        wxTextCtrl *text1 = new wxTextCtrl(getControlsPanel(), ID_TextCtrl,
             c->getDefault(), wxDefaultPosition, wxDefaultSize,
             def->isNumeric() ? wxTE_RIGHT : 0);
         flexSizerM->Add(text1, 0, wxALIGN_CENTER_VERTICAL|wxEXPAND);
 
         text1->Connect(wxEVT_KILL_FOCUS,
             wxFocusEventHandler(InsertDialog::OnEditFocusLost), 0, this);
+        text1->Connect(wxEVT_SET_FOCUS,
+            wxFocusEventHandler(InsertDialog::OnEditFocusSet), 0, this);
 
         if (!c->hasDefault())
         {
@@ -268,6 +271,15 @@ void InsertDialog::updateControls(wxChoice *c, wxTextCtrl *tx)
         tx->SetValue(wxEmptyString);
     tx->SetEditable(optionIsEditable(ix));
     updateColors(this);
+    if (ix == ioNull)
+    {
+        tx->SetDefaultStyle(wxTextAttr(*wxRED));
+        tx->SetValue(wxT("[null]"));
+    }
+    else
+    {
+        tx->SetDefaultStyle(wxTextAttr(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT)));
+    }
 }
 //-----------------------------------------------------------------------------
 void InsertDialog::storeValues()
@@ -377,7 +389,51 @@ void InsertDialog::preloadSpecialColumns()
 BEGIN_EVENT_TABLE(InsertDialog, BaseDialog)
     EVT_BUTTON(wxID_OK, InsertDialog::OnOkButtonClick)
     EVT_CHOICE(InsertDialog::ID_Choice, InsertDialog::OnChoiceChange)
+//    EVT_TEXT(InsertDialog::ID_TextCtrl, InsertDialog::OnEditTextUpdated)
 END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+void InsertDialog::OnEditTextUpdated(wxCommandEvent& event)
+{
+/*
+    FR_TRY
+
+    wxTextCtrl *tx = dynamic_cast<wxTextCtrl *>(event.GetEventObject());
+    if (!tx || tx->GetValue().IsEmpty() || tx->GetValue() == wxT("[null]"))
+        return;
+
+    std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
+    for (; it != columnsM.end(); ++it)
+        if ((*it).textCtrl == tx)
+            break;
+    if (it == columnsM.end() || (*it).choice->GetSelection() != ioNull)
+        return;
+    (*it).choice->SetSelection(ioRegular);
+    updateControls((*it).choice, tx);
+
+    FR_CATCH
+*/
+}
+//-----------------------------------------------------------------------------
+// clear the text from NULL field when focused
+void InsertDialog::OnEditFocusSet(wxFocusEvent& event)
+{
+    FR_TRY
+
+    wxTextCtrl *tx = dynamic_cast<wxTextCtrl *>(event.GetEventObject());
+    if (!tx)
+        return;
+
+    std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
+    for (; it != columnsM.end(); ++it)
+        if ((*it).textCtrl == tx)
+            break;
+    if (it == columnsM.end())   // this should never happen
+        return;
+    if ((*it).choice->GetSelection() == ioNull)
+        tx->SetValue(wxEmptyString);
+
+    FR_CATCH
+}
 //-----------------------------------------------------------------------------
 void InsertDialog::OnEditFocusLost(wxFocusEvent& event)
 {
@@ -394,8 +450,11 @@ void InsertDialog::OnEditFocusLost(wxFocusEvent& event)
             break;
     if (it == columnsM.end())   // this should never happen
         return;
-    if ((*it).choice->GetSelection() != ioRegular)  // we only care for strings
+    if ((*it).choice->GetSelection() != ioNull &&
+        (*it).choice->GetSelection() != ioRegular)
+    {
         return;
+    }
     if (tx->GetValue().IsEmpty())   // we assume null for non-string columns
     {
         // TODO: check if column's type is (VAR)CHAR and allow empty string
@@ -406,6 +465,8 @@ void InsertDialog::OnEditFocusLost(wxFocusEvent& event)
     }
 
     // write data to buffer and retrieve the formatted value
+    (*it).choice->SetSelection(ioRegular);
+    updateControls((*it).choice, (*it).textCtrl);
     bufferM->setFieldNull((*it).index, false);
 
     wxString previous = (*it).columnDef->getAsString(bufferM);
@@ -510,9 +571,13 @@ void InsertDialog::OnChoiceChange(wxCommandEvent& event)
     for (; it != columnsM.end(); ++it)
         if ((*it).choice == c)
             break;
-    updateControls(c, (*it).textCtrl);
 
     InsertOption option = (InsertOption)(event.GetSelection());
+    if (optionIsEditable(option))
+        (*it).textCtrl->Clear();
+
+    updateControls(c, (*it).textCtrl);
+
     if (option == ioFile)
     {
         // select file and store in tx

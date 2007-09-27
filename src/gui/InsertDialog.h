@@ -62,10 +62,12 @@ public:
     virtual ~InsertDialog();
     void OnOkButtonClick(wxCommandEvent& event);
     void OnChoiceChange(wxCommandEvent& event);
+    void OnEditTextUpdated(wxCommandEvent& event);
+    void OnEditFocusSet(wxFocusEvent& event);
     void OnEditFocusLost(wxFocusEvent& event);
     void editFocusLost(wxTextCtrl *tx);
 
-    enum { ID_Choice = 1001 };
+    enum { ID_Choice = 1001, ID_TextCtrl };
 
 private:
     Database *databaseM;
