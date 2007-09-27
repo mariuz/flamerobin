@@ -47,13 +47,14 @@ public:
     void Init(bool notnull, wxString source, wxString computedSource,
         wxString collation, wxString defaultValue, bool hasDefault);
     virtual wxString getPrintableName();
-    wxString getDatatype();
+    wxString getDatatype(bool useConfig = true);
     virtual const wxString getTypeName() const;
     virtual wxString getDropSqlStatement() const;
 
     bool isNullable(bool checkDomain = true) const;
     bool hasDefault(bool checkDomain = true) const;
     bool isPrimaryKey() const;
+    bool isString() const;
     wxString getComputedSource() const;
     wxString getSource() const;
     wxString getCollation() const;

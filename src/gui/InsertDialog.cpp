@@ -64,6 +64,7 @@ namespace InsertOptions
         wxT(""),
         wxT("NULL"),
         wxTRANSLATE("Skip (N/A)"),
+        wxTRANSLATE("Column default"),
         wxTRANSLATE("Hexadecimal"),
         wxTRANSLATE("Octal"),
         wxT("CURRENT_DATE"),
@@ -73,7 +74,7 @@ namespace InsertOptions
         wxTRANSLATE("File..."),
         wxTRANSLATE("Generator...")
     };
-    typedef enum { ioRegular = 0, ioNull, ioSkip, ioHex, ioOctal,
+    typedef enum { ioRegular = 0, ioNull, ioSkip, ioDefault, ioHex, ioOctal,
         ioDate, ioTime, ioTimestamp, ioUser, ioFile, ioGenerator
     } InsertOption;
 
@@ -84,12 +85,13 @@ namespace InsertOptions
     }
     bool optionAllowsCustomValue(InsertOption i)
     {
-        return (optionIsEditable(i) && i != ioFile && i != ioGenerator);
+        return (optionIsEditable(i) || i == ioFile || i == ioGenerator
+            || i == ioDefault);
     }
     bool optionValueLoadedFromDatabase(InsertOption i)
     {
         return (i == ioDate || i == ioTime || i == ioTimestamp
-            || i == ioUser || i == ioGenerator);
+            || i == ioUser || i == ioGenerator || i == ioDefault);
     }
 };
 using namespace InsertOptions;
@@ -185,7 +187,12 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
         text1->Connect(wxEVT_SET_FOCUS,
             wxFocusEventHandler(InsertDialog::OnEditFocusSet), 0, this);
 
-        if (!c->hasDefault())
+        if (c->hasDefault())
+        {
+            choice1->SetSelection(ioDefault);
+            updateControls(choice1, text1); // disable editing
+        }
+        else
         {
             if (c->isNullable())
             {
@@ -349,6 +356,17 @@ void InsertDialog::preloadSpecialColumns()
             sql += wxT(",");
         if (sel == ioGenerator) // generator
             sql += wxT("GEN_ID(") + (*it).textCtrl->GetValue() + wxT(", 1)");
+        else if (sel == ioDefault)
+        {
+            if (!(*it).column->isString())
+                sql += wxT("CAST(");
+            sql += (*it).textCtrl->GetValue();
+            if (!(*it).column->isString())
+            {   // false = no custom formatting, just the pure type
+                sql += wxT(" AS ") + (*it).column->getDatatype(false)
+                    + wxT(")");
+            }
+        }
         else
             sql += (*it).choice->GetStringSelection();
     }
@@ -458,6 +476,8 @@ void InsertDialog::OnEditFocusLost(wxFocusEvent& event)
     if (tx->GetValue().IsEmpty())   // we assume null for non-string columns
     {
         // TODO: check if column's type is (VAR)CHAR and allow empty string
+        // if ((*it).column->isString() ...
+        // but maybe it is better the way it works now (i.e. NULL is default)
         bufferM->setFieldNull((*it).index, true);
         (*it).choice->SetSelection(ioNull);
         updateControls((*it).choice, (*it).textCtrl);
@@ -582,6 +602,11 @@ void InsertDialog::OnChoiceChange(wxCommandEvent& event)
     {
         // select file and store in tx
     }
+    if (option == ioDefault)
+    {
+        (*it).textCtrl->SetValue((*it).column->getDefault());
+    }
+
     if (option == ioGenerator)
     {
         // select generator name and store in tx
@@ -592,8 +617,15 @@ void InsertDialog::OnChoiceChange(wxCommandEvent& event)
         {
             as.Add((*ci).getQuotedName());
         }
-        (*it).textCtrl->SetValue(::wxGetSingleChoice(_("Select a generator"),
+        wxString s(::wxGetSingleChoice(_("Select a generator"),
             _("Generator"), as, this));
+        if (s.IsEmpty())
+        {
+            c->SetSelection(ioNull);
+            updateControls(c, (*it).textCtrl);
+        }
+        else
+            (*it).textCtrl->SetValue(s);
     }
 
     FR_CATCH

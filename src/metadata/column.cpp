@@ -108,7 +108,7 @@ bool Column::isPrimaryKey() const
 }
 //-----------------------------------------------------------------------------
 //! retrieve datatype from domain if possible
-wxString Column::getDatatype()
+wxString Column::getDatatype(bool useConfig)
 {
     enum
     {
@@ -116,8 +116,9 @@ wxString Column::getDatatype()
         showFormula,
         showAll
     };
-    int flag = showFormula;
-    config().getValue(wxT("ShowComputed"), flag);
+    int flag = (useConfig ? showFormula : showType);
+    if (useConfig)
+        config().getValue(wxT("ShowComputed"), flag);
     // view columns are all computed and have their source empty
     if (flag == showFormula && !computedSourceM.empty())
         return computedSourceM;
@@ -136,8 +137,9 @@ wxString Column::getDatatype()
         showDomain,
         showBoth
     };
-    int show = showBoth;
-    config().getValue(wxT("ShowDomains"), show);
+    int show = (useConfig ? showBoth : showDatatype);
+    if (useConfig)
+        config().getValue(wxT("ShowDomains"), show);
 
     if (!d || d->isSystem() || show == showBoth || show == showDatatype)
         ret += datatype;
@@ -152,6 +154,12 @@ wxString Column::getDatatype()
     if (flag == showAll && !computedSourceM.empty())
         ret += wxT(" (") + computedSourceM + wxT(")");
     return ret;
+}
+//-----------------------------------------------------------------------------
+bool Column::isString() const
+{
+    Domain *d = getDomain();
+    return (d ? d->isString() : false);
 }
 //-----------------------------------------------------------------------------
 //! printable name = column_name + column_datatype [+ not null]

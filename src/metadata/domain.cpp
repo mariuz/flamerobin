@@ -143,6 +143,13 @@ void Domain::loadInfo()
     infoLoadedM = true;
 }
 //-----------------------------------------------------------------------------
+bool Domain::isString()
+{
+    if (!infoLoadedM)
+        loadInfo();
+    return (datatypeM == 14 || datatypeM == 10 || datatypeM == 37);
+}
+//-----------------------------------------------------------------------------
 //! returns column's datatype as human readable wxString.
 wxString Domain::getDatatypeAsString()
 {

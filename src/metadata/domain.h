@@ -55,6 +55,7 @@ public:
     wxString getCharset();
     bool isNullable();
     bool hasDefault();
+    bool isString();
     virtual const wxString getTypeName() const;
     virtual wxString getCreateSqlTemplate() const;
     wxString getAlterSqlTemplate() const;
