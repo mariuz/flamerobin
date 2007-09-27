@@ -280,12 +280,13 @@ void InsertDialog::updateControls(wxChoice *c, wxTextCtrl *tx)
     updateColors(this);
     if (ix == ioNull)
     {
-        tx->SetDefaultStyle(wxTextAttr(*wxRED));
+        tx->SetForegroundColour(*wxRED);
         tx->SetValue(wxT("[null]"));
     }
     else
     {
-        tx->SetDefaultStyle(wxTextAttr(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT)));
+        tx->SetForegroundColour(
+            wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
     }
 }
 //-----------------------------------------------------------------------------
