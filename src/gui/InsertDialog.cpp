@@ -449,7 +449,11 @@ void InsertDialog::OnEditFocusSet(wxFocusEvent& event)
     if (it == columnsM.end())   // this should never happen
         return;
     if ((*it).choice->GetSelection() == ioNull)
+    {
+        tx->SetForegroundColour(
+            wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
         tx->SetValue(wxEmptyString);
+    }
 
     FR_CATCH
 }
