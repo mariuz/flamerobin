@@ -1494,7 +1494,8 @@ void ExecuteSqlFrame::OnButtonDeleteClick(wxCommandEvent& WXUNUSED(event))
     else
     {
         while (count--)
-            grid_data->DeleteRows(ai.Item(count), 1);
+            if (!grid_data->DeleteRows(ai.Item(count), 1))
+                return;
     }
 
     // grid_data->EndBatch();   // see comment for BeginBatch above

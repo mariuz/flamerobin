@@ -1107,6 +1107,7 @@ void DataGridRows::clear()
         columnDefsM.clear();
     }
     statementTablesM.clear();
+    deleteFromM = statementTablesM.end();
     dbKeysM.clear();
     bufferSizeM = 0;
 }
@@ -1120,23 +1121,34 @@ wxString escapeQuotes(const wxString& input)
 //-----------------------------------------------------------------------------
 bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
 {
-    // execute the DELETE statement(s)
-    if (statementTablesM.size() > 1)
+    // only ask for the first time
+    if (deleteFromM == statementTablesM.end())
     {
-        // TODO: either show a dialog for the user to choose or think of a way
-        //       to be smart and detect which table user really wants to delete
-        throw FRError(_("Multiple tables present."));
+        if (statementTablesM.size() > 1)
+        {
+            wxArrayString tables;
+            for (std::map<wxString, UniqueConstraint *>::iterator it =
+                statementTablesM.begin(); it != statementTablesM.end(); ++it)
+            {
+                tables.Add((*it).first);
+            }
+            wxString tab = wxGetSingleChoice(_("Select a table"),
+                    _("Multiple tables found"), tables, 0);
+            if (tab.IsEmpty())
+                return false;
+            deleteFromM = statementTablesM.find(tab);
+        }
+        else
+            deleteFromM = statementTablesM.begin();
     }
 
-    std::map<wxString, UniqueConstraint *>::iterator toDel =
-        statementTablesM.begin();
     for (size_t pos = 0; pos < count; ++pos)
     {
         if (pos > 0)
             stm += wxTextBuffer::GetEOL();
         wxString s = wxT("DELETE FROM ")
-            + Identifier((*toDel).first).getQuoted() + wxT(" WHERE ");
-        addWhereAndExecute((*toDel).second, s, (*toDel).first,
+            + Identifier((*deleteFromM).first).getQuoted() + wxT(" WHERE ");
+        addWhereAndExecute((*deleteFromM).second, s, (*deleteFromM).first,
             buffersM[from+pos]);
         stm += s + wxT(";");
     }

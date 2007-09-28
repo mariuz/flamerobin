@@ -72,6 +72,7 @@ private:
     std::vector<ResultsetColumnDef*> columnDefsM;
     std::vector<DataGridRowBuffer*> buffersM;
     std::map<wxString, UniqueConstraint *> statementTablesM;
+    std::map<wxString, UniqueConstraint *>::iterator deleteFromM;
     std::list<UniqueConstraint> dbKeysM;
     unsigned bufferSizeM;
 
