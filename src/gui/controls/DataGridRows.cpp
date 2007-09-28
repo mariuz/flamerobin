@@ -38,6 +38,8 @@
     #include "wx/wx.h"
 #endif
 
+#include <wx/textbuf.h>
+
 #include <algorithm>
 #include <bitset>
 #include <iomanip>
@@ -1118,9 +1120,6 @@ wxString escapeQuotes(const wxString& input)
 //-----------------------------------------------------------------------------
 bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
 {
-    if (count > 1)
-        throw(FRError(_("Multiple row deletion not supported (yet)")));
-
     // execute the DELETE statement(s)
     if (statementTablesM.size() > 1)
     {
@@ -1131,10 +1130,16 @@ bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
 
     std::map<wxString, UniqueConstraint *>::iterator toDel =
         statementTablesM.begin();
-    stm = wxT("DELETE FROM ")
-        + Identifier((*toDel).first).getQuoted()
-        + wxT(" WHERE ");
-    addWhereAndExecute((*toDel).second, stm, (*toDel).first, buffersM[from]);
+    for (size_t pos = 0; pos < count; ++pos)
+    {
+        if (pos > 0)
+            stm += wxTextBuffer::GetEOL();
+        wxString s = wxT("DELETE FROM ")
+            + Identifier((*toDel).first).getQuoted() + wxT(" WHERE ");
+        addWhereAndExecute((*toDel).second, s, (*toDel).first,
+            buffersM[from+pos]);
+        stm += s + wxT(";");
+    }
 
     std::vector<DataGridRowBuffer*>::iterator i2, it = buffersM.begin();
     from += count - 1;

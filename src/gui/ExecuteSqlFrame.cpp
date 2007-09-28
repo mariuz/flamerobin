@@ -1451,12 +1451,53 @@ void ExecuteSqlFrame::OnButtonDeleteClick(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
-    if (grid_data->getDataGridTable() && grid_data->GetNumberRows())
+    if (!grid_data->getDataGridTable() || !grid_data->GetNumberRows())
+        return;
+
+    // M.B. when this is enabled the grid behaves strange on GTK2 (wx2.8.6)
+    // when deleting multiple items. I didn't test other platforms
+    // grid_data->BeginBatch();
+
+    // M.B. This only works good when rows are selected by clicking on row
+    // header and it is impossible to select a range which is off screen
+    // - even using shift key (I only tried with GTK2 wx2.8.6).
+    // wxArrayInt ai = grid_data->GetSelectedRows();
+    // size_t count = ai.GetCount();
+
+    // ...therefore, we iterate the rows ourselves
+    wxArrayInt ai;
+    size_t count = 0;
+    for (int i = 0; i < grid_data->GetNumberRows(); i++)
     {
-        grid_data->BeginBatch();
-        grid_data->DeleteRows(grid_data->GetGridCursorRow(), 1);
-        grid_data->EndBatch();
+        for (int j = 0; j < grid_data->GetNumberCols(); j++)
+        {
+            if (grid_data->IsInSelection(i, j))
+            {
+                count++;
+                ai.Add(i);
+                break;
+            }
+        }
     }
+
+    if (count > 1 && wxOK != showQuestionDialog(this,
+        _("Multiple rows selected"),
+        wxString::Format(_("Are you sure you wish to delete %d rows?"),
+            count),
+        AdvancedMessageDialogButtonsOkCancel(_("Delete"))))
+    {
+        return;
+    }
+
+    if (count == 0) // else - delete the row with cursor
+        grid_data->DeleteRows(grid_data->GetGridCursorRow(), 1);
+    else
+    {
+        while (count--)
+            grid_data->DeleteRows(ai.Item(count), 1);
+    }
+
+    // grid_data->EndBatch();   // see comment for BeginBatch above
 
     FR_CATCH
 }
