@@ -35,7 +35,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/BaseDialog.h"
 class Database;
 class DataGridTable;
-class DataGridRowBuffer;
+class InsertedGridRowBuffer;
 class Column;
 class ResultsetColumnDef;
 // link all column info in the same place:
@@ -76,9 +76,10 @@ private:
     IBPP::Statement& statementM;
     std::vector<InsertColumnInfo> columnsM;
     DataGridTable *gridTableM;
-    DataGridRowBuffer *bufferM;
+    InsertedGridRowBuffer *bufferM;
     wxString tableNameM;
     void updateControls(wxChoice *c, wxTextCtrl *tx);
+    void setStringOption(InsertColumnInfo& ici, const wxString& s);
     void set_properties();
     void do_layout();
 

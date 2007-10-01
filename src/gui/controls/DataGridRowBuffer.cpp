@@ -50,14 +50,10 @@ DataGridRowBuffer::DataGridRowBuffer(unsigned fieldCount)
 //-----------------------------------------------------------------------------
 DataGridRowBuffer::DataGridRowBuffer(const DataGridRowBuffer* other)
 {
-    naFieldsM = other->naFieldsM;
     nullFieldsM = other->nullFieldsM;
     dataM = other->dataM;
     stringsM = other->stringsM;
-}
-//-----------------------------------------------------------------------------
-DataGridRowBuffer::~DataGridRowBuffer()
-{
+    blobsM = other->blobsM;
 }
 //-----------------------------------------------------------------------------
 wxString DataGridRowBuffer::getString(unsigned index)
@@ -65,6 +61,13 @@ wxString DataGridRowBuffer::getString(unsigned index)
     if (index >= stringsM.size())
         return wxEmptyString;
     return stringsM[index];
+}
+//-----------------------------------------------------------------------------
+IBPP::Blob* DataGridRowBuffer::getBlob(unsigned index)
+{
+    if (index >= blobsM.size())
+        return 0;
+    return &(blobsM[index]);
 }
 //-----------------------------------------------------------------------------
 bool DataGridRowBuffer::getValue(unsigned offset, double& value)
@@ -109,19 +112,13 @@ bool DataGridRowBuffer::getValue(unsigned offset, IBPP::DBKey& value,
 }
 //-----------------------------------------------------------------------------
 bool DataGridRowBuffer::isFieldNA(unsigned num)
-{   // not NA by default
-    return (num < naFieldsM.size() && naFieldsM[num]);
+{
+    return false;
 }
 //-----------------------------------------------------------------------------
-void DataGridRowBuffer::setFieldNA(unsigned num, bool isNA)
+void DataGridRowBuffer::setFieldNA(unsigned /* num */, bool /* isNA */)
 {
-    if (num < naFieldsM.size())
-        naFieldsM[num] = isNA;
-    else if (isNA)  // we need to resize and set
-    {
-        naFieldsM.resize(num + 1, false);
-        naFieldsM[num] = true;
-    }
+    // should never happen
 }
 //-----------------------------------------------------------------------------
 bool DataGridRowBuffer::isFieldNull(unsigned num)
@@ -140,6 +137,13 @@ void DataGridRowBuffer::setString(unsigned num, const wxString& value)
     if (num >= stringsM.size())
         stringsM.resize(num + 1, wxEmptyString);
     stringsM[num] = value;
+}
+//-----------------------------------------------------------------------------
+void DataGridRowBuffer::setBlob(unsigned num, IBPP::Blob value)
+{
+    if (num >= blobsM.size())
+        blobsM.resize(num + 1);
+    blobsM[num] = value;
 }
 //-----------------------------------------------------------------------------
 void DataGridRowBuffer::setValue(unsigned offset, double value)
@@ -175,5 +179,32 @@ void DataGridRowBuffer::setValue(unsigned offset, IBPP::DBKey value)
     if (offset + value.Size() > dataM.size())
         dataM.resize(offset + value.Size(), 0);
     value.GetKey(&dataM[offset], value.Size());
+}
+//-----------------------------------------------------------------------------
+InsertedGridRowBuffer::InsertedGridRowBuffer(unsigned fieldCount)
+    :DataGridRowBuffer(fieldCount)
+{
+}
+//-----------------------------------------------------------------------------
+InsertedGridRowBuffer::InsertedGridRowBuffer(const InsertedGridRowBuffer* b2)
+    :DataGridRowBuffer(b2)
+{
+    naFieldsM = b2->naFieldsM;
+}
+//-----------------------------------------------------------------------------
+bool InsertedGridRowBuffer::isFieldNA(unsigned num)
+{
+    return (num < naFieldsM.size() && naFieldsM[num]);
+}
+//-----------------------------------------------------------------------------
+void InsertedGridRowBuffer::setFieldNA(unsigned num, bool isNA)
+{
+    if (num < naFieldsM.size())
+        naFieldsM[num] = isNA;
+    else if (isNA)  // we need to resize and set
+    {
+        naFieldsM.resize(num + 1, false);
+        naFieldsM[num] = true;
+    }
 }
 //-----------------------------------------------------------------------------

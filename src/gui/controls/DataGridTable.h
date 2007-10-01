@@ -59,6 +59,8 @@ private:
     wxGridCellAttr* nullAttrReadonlyM;
     wxGridCellAttr* nullAttrNumericM;
     wxGridCellAttr* nullAttrNumericReadonlyM;
+    wxGridCellAttr* readonlyAttrM;
+    wxGridCellAttr* readonlyNumericAttrM;
     DataGridRows rowsM;
 
     Database *databaseM;

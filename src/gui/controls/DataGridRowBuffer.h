@@ -34,17 +34,17 @@
 // DataGridRowBuffer class
 class DataGridRowBuffer
 {
-private:
+protected:
     std::vector<bool> nullFieldsM;
-    std::vector<bool> naFieldsM;
     std::vector<uint8_t> dataM;
     std::vector<wxString> stringsM;
+    std::vector<IBPP::Blob> blobsM;
 public:
     DataGridRowBuffer(unsigned fieldCount);
     DataGridRowBuffer(const DataGridRowBuffer* other);
-    ~DataGridRowBuffer();
 
     wxString getString(unsigned index);
+    IBPP::Blob *getBlob(unsigned index);
     bool getValue(unsigned offset, double& value);
     bool getValue(unsigned offset, float& value);
     bool getValue(unsigned offset, int& value);
@@ -52,14 +52,29 @@ public:
     bool getValue(unsigned offset, IBPP::DBKey& value, unsigned size);
     bool isFieldNull(unsigned num);
     void setFieldNull(unsigned num, bool isNull);
-    bool isFieldNA(unsigned num);
-    void setFieldNA(unsigned num, bool isNA);
+    virtual bool isFieldNA(unsigned num);
+    virtual void setFieldNA(unsigned num, bool isNA);
     void setString(unsigned num, const wxString& value);
+    void setBlob(unsigned num, IBPP::Blob b);
     void setValue(unsigned offset, double value);
     void setValue(unsigned offset, float value);
     void setValue(unsigned offset, int value);
     void setValue(unsigned offset, int64_t value);
     void setValue(unsigned offset, IBPP::DBKey value);
+};
+//-----------------------------------------------------------------------------
+// class for rows inserted by user - to minimize memory usage of regular rows
+// and also speed up code in DataGridRows::isFieldReadonly
+class InsertedGridRowBuffer: public DataGridRowBuffer
+{
+protected:
+    std::vector<bool> naFieldsM;
+public:
+    InsertedGridRowBuffer(unsigned fieldCount);
+    InsertedGridRowBuffer(const InsertedGridRowBuffer* other);
+
+    virtual bool isFieldNA(unsigned num);
+    virtual void setFieldNA(unsigned num, bool isNA);
 };
 //-----------------------------------------------------------------------------
 #endif

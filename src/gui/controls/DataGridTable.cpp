@@ -228,6 +228,16 @@ DataGridTable::DataGridTable(IBPP::Statement& s, Database *db)
     nullAttrNumericReadonlyM->SetBackgroundColour(getReadonlyColour());
     nullAttrNumericReadonlyM->SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
     nullAttrNumericReadonlyM->SetReadOnly(true);
+
+    readonlyAttrM = new wxGridCellAttr();
+    readonlyAttrM->SetBackgroundColour(getReadonlyColour());
+    readonlyAttrM->SetAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
+    readonlyAttrM->SetReadOnly(true);
+
+    readonlyNumericAttrM = new wxGridCellAttr();
+    readonlyNumericAttrM->SetBackgroundColour(getReadonlyColour());
+    readonlyNumericAttrM->SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
+    readonlyNumericAttrM->SetReadOnly(true);
 }
 //-----------------------------------------------------------------------------
 DataGridTable::~DataGridTable()
@@ -237,6 +247,8 @@ DataGridTable::~DataGridTable()
     nullAttrNumericReadonlyM->DecRef();
     nullAttrReadonlyM->DecRef();
     nullAttrM->DecRef();
+    readonlyAttrM->DecRef();
+    readonlyNumericAttrM->DecRef();
 }
 //-----------------------------------------------------------------------------
 // implementation methods
@@ -356,7 +368,7 @@ wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
     {
         if (rowsM.isRowFieldNumeric(col))
         {
-            if (rowsM.isColumnReadonly(col))
+            if (rowsM.isFieldReadonly(row, col))
             {
                 nullAttrNumericReadonlyM->IncRef();
                 return nullAttrNumericReadonlyM;
@@ -367,13 +379,26 @@ wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
                 return nullAttrNumericM;
             }
         }
-        if (rowsM.isColumnReadonly(col))
+        if (rowsM.isFieldReadonly(row, col))
         {
             nullAttrReadonlyM->IncRef();
             return nullAttrReadonlyM;
         }
         nullAttrM->IncRef();
         return nullAttrM;
+    }
+    if (rowsM.isFieldReadonly(row, col))
+    {
+        if (rowsM.isRowFieldNumeric(col))
+        {
+            readonlyNumericAttrM->IncRef();
+            return readonlyNumericAttrM;
+        }
+        else
+        {
+            readonlyAttrM->IncRef();
+            return readonlyAttrM;
+        }
     }
     return wxGridTableBase::GetAttr(row, col, kind);
 }

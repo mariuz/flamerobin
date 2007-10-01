@@ -318,6 +318,11 @@ wxString ResultsetColumnDef::getName()
     return nameM;
 }
 //-----------------------------------------------------------------------------
+unsigned ResultsetColumnDef::getIndex()
+{
+    return 0;
+}
+//-----------------------------------------------------------------------------
 bool ResultsetColumnDef::isNumeric()
 {
     return false;
@@ -985,6 +990,64 @@ void DoubleColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     buffer->setValue(offsetM, value);
 }
 //-----------------------------------------------------------------------------
+class BlobColumnDef : public ResultsetColumnDef
+{
+private:
+    unsigned indexM;
+public:
+    BlobColumnDef(const wxString& name, unsigned blobIndex, bool readOnly,
+        bool nullable);
+    virtual unsigned getIndex();
+    virtual wxString getAsString(DataGridRowBuffer* buffer);
+    virtual unsigned getBufferSize();
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        const IBPP::Statement& statement, wxMBConv* converter);
+    virtual void setFromString(DataGridRowBuffer* buffer,
+        const wxString& source);
+};
+//-----------------------------------------------------------------------------
+BlobColumnDef::BlobColumnDef(const wxString& name, unsigned blobIndex,
+    bool readOnly, bool nullable)
+    : ResultsetColumnDef(name, readOnly, nullable), indexM(blobIndex)
+{
+    readOnlyM = true;   // TODO: uncomment this when we make BlobDialog
+}
+//-----------------------------------------------------------------------------
+unsigned BlobColumnDef::getIndex()
+{
+    return indexM;
+}
+//-----------------------------------------------------------------------------
+wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
+{
+    //wxASSERT(buffer);
+    // show some starting characters for textual blobs?
+    return wxT("[BLOB]");
+}
+//-----------------------------------------------------------------------------
+void BlobColumnDef::setFromString(DataGridRowBuffer* buffer,
+        const wxString& source)
+{
+    wxASSERT(buffer);
+    // TODO: is this called from anywhere? - blobs will have a custom editor
+    // buffer->setString(indexM, source);
+}
+//-----------------------------------------------------------------------------
+unsigned BlobColumnDef::getBufferSize()
+{
+    return 0;
+}
+//-----------------------------------------------------------------------------
+void BlobColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    const IBPP::Statement& statement, wxMBConv* converter)
+{
+    wxASSERT(buffer);
+    IBPP::Blob b = IBPP::BlobFactory(statement->DatabasePtr(),
+        statement->TransactionPtr());
+    statement->Get(col, b);
+    buffer->setBlob(indexM, b);
+}
+//-----------------------------------------------------------------------------
 // StringColumnDef class
 class StringColumnDef : public ResultsetColumnDef
 {
@@ -993,6 +1056,7 @@ private:
 public:
     StringColumnDef(const wxString& name, unsigned stringIndex, bool readOnly,
         bool nullable);
+    virtual unsigned getIndex();
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
@@ -1005,6 +1069,11 @@ StringColumnDef::StringColumnDef(const wxString& name, unsigned stringIndex,
     bool readOnly, bool nullable)
     : ResultsetColumnDef(name, readOnly, nullable), indexM(stringIndex)
 {
+}
+//-----------------------------------------------------------------------------
+unsigned StringColumnDef::getIndex()
+{
+    return indexM;
 }
 //-----------------------------------------------------------------------------
 wxString StringColumnDef::getAsString(DataGridRowBuffer* buffer)
@@ -1315,6 +1384,7 @@ bool DataGridRows::initialize(const IBPP::Statement& statement, Database *db)
     columnDefsM.reserve(colCount);
     bufferSizeM = 0;
     unsigned stringIndex = 0;
+    unsigned blobIndex = 0;
 
     // Create column definitions and compute the necessary buffer size
     // and string array length when all fields contain data
@@ -1367,8 +1437,12 @@ bool DataGridRows::initialize(const IBPP::Statement& statement, Database *db)
                     columnDef = new StringColumnDef(colName, stringIndex, readOnly, nullable);
                     ++stringIndex;
                     break;
+                case IBPP::sdBlob:
+                    columnDef = new BlobColumnDef(colName, blobIndex, readOnly, nullable);
+                    ++blobIndex;
+                    break;
                 default:
-                    // IBPP::sdArray and IBPP::sdBlob not really handled ATM
+                    // IBPP::sdArray not really handled ATM
                     columnDef = new DummyColumnDef(colName);
                     break;
             }
@@ -1392,6 +1466,40 @@ bool DataGridRows::isColumnReadonly(unsigned col)
     if (col >= columnDefsM.size())
         return false;
     return columnDefsM[col]->isReadOnly();
+}
+//-----------------------------------------------------------------------------
+bool DataGridRows::isFieldReadonly(unsigned row, unsigned col)
+{
+    if (col >= columnDefsM.size() || row >= buffersM.size())
+        return false;
+    if (columnDefsM[col]->isReadOnly())
+        return true;
+
+    // if row is loaded from the database and not inserted by user, we don't
+    // need to check anything else
+    if (!dynamic_cast<InsertedGridRowBuffer *>(buffersM[row]))
+        return false;
+
+    wxString table(std2wx(statementM->ColumnTable(col+1)));
+    std::map<wxString, UniqueConstraint *>::iterator it =
+        statementTablesM.find(table);
+    if (it == statementTablesM.end() || (*it).second == 0)
+        return true;
+
+    // check if some of PK/UNQ columns contains N/A for that row
+    for (ColumnConstraint::const_iterator ci = (*it).second->begin(); ci !=
+        (*it).second->end(); ++ci)
+    {
+        for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
+        {
+            if ((*ci) != std2wx(statementM->ColumnName(c2)))
+                continue;
+            wxString tn(std2wx(statementM->ColumnTable(c2)));
+            if (tn == table && buffersM[row]->isFieldNA(c2-1))
+                return true;
+        }
+    }
+    return false;
 }
 //-----------------------------------------------------------------------------
 wxString DataGridRows::getFieldValue(unsigned row, unsigned col)
@@ -1434,6 +1542,8 @@ void DataGridRows::addWhereAndExecute(UniqueConstraint* uq, wxString& stm,
             wxString tn(std2wx(statementM->ColumnTable(c2)));
             if (cn == (*ci) && tn == table) // found it, add to WHERE list
             {
+                if (buffer->isFieldNA(c2-1))
+                    throw FRError(_("N/A value in key column."));
                 if (ci != uq->begin())
                     stm += wxT(" AND ");
                 stm += Identifier(cn).getQuoted() + wxT(" = '");
@@ -1459,6 +1569,8 @@ void DataGridRows::addWhereAndExecute(UniqueConstraint* uq, wxString& stm,
                     dynamic_cast<DBKeyColumnDef *>(columnDefsM[c2-1]);
                 if (!dbk)
                     throw FRError(_("Invalid Column"));
+                if (buffer->isFieldNA(c2-1))
+                    throw FRError(_("N/A value in DB_KEY column."));
                 IBPP::DBKey dbkey;
                 dbk->getDBKey(dbkey, buffer);
                 st->Set(1, dbkey);
@@ -1484,9 +1596,17 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
     // to ensure atomicity, we create a temporary buffer, try to store value
     // in it and also in database. if anything fails, we revert to the values
     // from temp buffer
-    DataGridRowBuffer *oldRecord = new DataGridRowBuffer(buffersM[row]);
+    DataGridRowBuffer *oldRecord;
+    // we create a copy of appropriate type
+    InsertedGridRowBuffer *test =
+        dynamic_cast<InsertedGridRowBuffer *>(buffersM[row]);
+    if (test)
+        oldRecord = new InsertedGridRowBuffer(test);
+    else
+        oldRecord = new DataGridRowBuffer(buffersM[row]);
     try
     {
+        buffersM[row]->setFieldNA(col, false);
         if (newIsNull)
             buffersM[row]->setFieldNull(col, true);
         else

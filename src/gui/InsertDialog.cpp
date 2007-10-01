@@ -38,6 +38,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #include "wx/wx.h"
 #endif
 
+#include <wx/ffile.h>
 #include <set>
 
 #include "core/FRError.h"
@@ -66,7 +67,6 @@ namespace InsertOptions
         wxTRANSLATE("Skip (N/A)"),
         wxTRANSLATE("Column default"),
         wxTRANSLATE("Hexadecimal"),
-        wxTRANSLATE("Octal"),
         wxT("CURRENT_DATE"),
         wxT("CURRENT_TIME"),
         wxT("CURRENT_TIMESTAMP"),
@@ -74,14 +74,14 @@ namespace InsertOptions
         wxTRANSLATE("File..."),
         wxTRANSLATE("Generator...")
     };
-    typedef enum { ioRegular = 0, ioNull, ioSkip, ioDefault, ioHex, ioOctal,
+    typedef enum { ioRegular = 0, ioNull, ioSkip, ioDefault, ioHex,
         ioDate, ioTime, ioTimestamp, ioUser, ioFile, ioGenerator
     } InsertOption;
 
     // null is also editable
     bool optionIsEditable(InsertOption i)
     {
-        return (i == ioRegular || i == ioHex || i == ioOctal || i == ioNull);
+        return (i == ioRegular || i == ioHex || i == ioNull);
     }
     bool optionAllowsCustomValue(InsertOption i)
     {
@@ -142,7 +142,7 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
         st->SetFont(f);
     }
 
-    bufferM = new DataGridRowBuffer(gridTable->GetNumberCols());
+    bufferM = new InsertedGridRowBuffer(gridTable->GetNumberCols());
     for (unsigned u = 0; u < gridTable->GetNumberCols(); u++)
         bufferM->setFieldNA(u, true);
 
@@ -190,14 +190,14 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
         if (c->hasDefault())
         {
             choice1->SetSelection(ioDefault);
-            updateControls(choice1, text1); // disable editing
+            updateControls(choice1, text1);
         }
         else
         {
             if (c->isNullable())
             {
                 choice1->SetSelection(ioNull);
-                updateControls(choice1, text1); // disable editing
+                updateControls(choice1, text1);
             }
             else if (def->isNumeric())
                 text1->SetValue(wxT("0"));
@@ -302,14 +302,26 @@ void InsertDialog::storeValues()
         {
             if (sel == ioHex)
             {
-                // TODO: convert hex string to regular string and set
-                // value = regular string
-                sel = ioRegular;
-            }
-            if (sel == ioOctal)
-            {
-                // TODO: convert octal string to regular string and set
-                // value = regular string
+                if ((*it).columnDef->isNumeric())   // hex -> dec
+                {
+                    long l;                     // should we support 64bit?
+                    if (!value.ToLong(&l, 16))
+                        throw FRError(_("Invalid hexadecimal number"));
+                    value.Printf(wxT("%d"), l);
+                }
+                else    // convert hex string to regular string and set
+                {
+                    wxString result;
+                    for (size_t i = 0; i < value.Len(); i+=2)
+                    {
+                        unsigned long l;
+                        if (!value.Mid(i, 2).ToULong(&l, 16))
+                            throw FRError(_("Invalid hexadecimal character"));
+                        result += wxChar(l);
+                    }
+                    value = result;
+                }
+                (*it).choice->SetSelection(ioRegular);
                 sel = ioRegular;
             }
             switch (sel)
@@ -318,6 +330,8 @@ void InsertDialog::storeValues()
                     (*it).columnDef->setFromString(bufferM, value);
                     (*it).textCtrl->SetValue((*it)
                         .columnDef->getAsString(bufferM));
+                    // there is no break; here deliberately!
+                case ioFile:
                     bufferM->setFieldNull((*it).index, false);
                     bufferM->setFieldNA((*it).index, false);
                     break;
@@ -408,30 +422,7 @@ void InsertDialog::preloadSpecialColumns()
 BEGIN_EVENT_TABLE(InsertDialog, BaseDialog)
     EVT_BUTTON(wxID_OK, InsertDialog::OnOkButtonClick)
     EVT_CHOICE(InsertDialog::ID_Choice, InsertDialog::OnChoiceChange)
-//    EVT_TEXT(InsertDialog::ID_TextCtrl, InsertDialog::OnEditTextUpdated)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
-void InsertDialog::OnEditTextUpdated(wxCommandEvent& event)
-{
-/*
-    FR_TRY
-
-    wxTextCtrl *tx = dynamic_cast<wxTextCtrl *>(event.GetEventObject());
-    if (!tx || tx->GetValue().IsEmpty() || tx->GetValue() == wxT("[null]"))
-        return;
-
-    std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
-    for (; it != columnsM.end(); ++it)
-        if ((*it).textCtrl == tx)
-            break;
-    if (it == columnsM.end() || (*it).choice->GetSelection() != ioNull)
-        return;
-    (*it).choice->SetSelection(ioRegular);
-    updateControls((*it).choice, tx);
-
-    FR_CATCH
-*/
-}
 //-----------------------------------------------------------------------------
 // clear the text from NULL field when focused
 void InsertDialog::OnEditFocusSet(wxFocusEvent& event)
@@ -462,7 +453,6 @@ void InsertDialog::OnEditFocusLost(wxFocusEvent& event)
 {
     FR_TRY
 
-    // txt control lost the focus, we reformat the value
     wxTextCtrl *tx = dynamic_cast<wxTextCtrl *>(event.GetEventObject());
     if (!tx)
         return;
@@ -480,9 +470,9 @@ void InsertDialog::OnEditFocusLost(wxFocusEvent& event)
     }
     if (tx->GetValue().IsEmpty())   // we assume null for non-string columns
     {
-        // TODO: check if column's type is (VAR)CHAR and allow empty string
+        // here we can change the NULL behaviour for string columns, i.e.
+        // whether empty field is NULL or ''
         // if ((*it).column->isString() ...
-        // but maybe it is better the way it works now (i.e. NULL is default)
         bufferM->setFieldNull((*it).index, true);
         (*it).choice->SetSelection(ioNull);
         updateControls((*it).choice, (*it).textCtrl);
@@ -564,12 +554,26 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
     for (std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
         it != columnsM.end(); ++it)
     {
-        InsertOption sel = (InsertOption)((*it).choice->GetSelection());
-        if (sel == ioFile)
+        if ((InsertOption)((*it).choice->GetSelection()) != ioFile)
+            continue;
+        wxFFile fl((*it).textCtrl->GetValue(), wxT("rb"));
+        if (!fl.IsOpened())
+            throw FRError(_("Cannot open BLOB file."));
+        IBPP::Blob b = IBPP::BlobFactory(st1->DatabasePtr(),
+            st1->TransactionPtr());
+        b->Create();
+        uint8_t buffer[32768];
+        while (!fl.Eof())
         {
-            // load blob data from file: (*it).textCtrl->GetValue();
-            // statementM->Set(index++, BLOB);
+            size_t len = fl.Read(buffer, 32767);    // slow when not 32k
+            if (len < 1)
+                break;
+            b->Write(buffer, len);
         }
+        fl.Close();
+        b->Close();
+        st1->Set(index++, b);
+        bufferM->setBlob((*it).columnDef->getIndex(), b);
     }
 
     st1->Execute();
@@ -582,6 +586,18 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
     EndModal(wxID_OK);
 
     FR_CATCH
+}
+//-----------------------------------------------------------------------------
+// helper function for OnChoiceChange
+void InsertDialog::setStringOption(InsertColumnInfo& ici, const wxString& s)
+{
+    if (!s.IsEmpty())
+        ici.textCtrl->SetValue(s);
+    else
+    {
+        ici.choice->SetSelection(ioNull);
+        updateControls(ici.choice, ici.textCtrl);
+    }
 }
 //-----------------------------------------------------------------------------
 void InsertDialog::OnChoiceChange(wxCommandEvent& event)
@@ -604,13 +620,10 @@ void InsertDialog::OnChoiceChange(wxCommandEvent& event)
     updateControls(c, (*it).textCtrl);
 
     if (option == ioFile)
-    {
-        // select file and store in tx
-    }
+        setStringOption(*it, ::wxFileSelector(_("Select a file")));
+
     if (option == ioDefault)
-    {
-        (*it).textCtrl->SetValue((*it).column->getDefault());
-    }
+        setStringOption(*it, (*it).column->getDefault());
 
     if (option == ioGenerator)
     {
@@ -624,13 +637,7 @@ void InsertDialog::OnChoiceChange(wxCommandEvent& event)
         }
         wxString s(::wxGetSingleChoice(_("Select a generator"),
             _("Generator"), as, this));
-        if (s.IsEmpty())
-        {
-            c->SetSelection(ioNull);
-            updateControls(c, (*it).textCtrl);
-        }
-        else
-            (*it).textCtrl->SetValue(s);
+        setStringOption(*it, s);
     }
 
     FR_CATCH

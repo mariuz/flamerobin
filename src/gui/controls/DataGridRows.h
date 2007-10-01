@@ -58,6 +58,7 @@ public:
         const wxString& source) = 0;
     virtual unsigned getBufferSize() = 0;
     wxString getName();
+    virtual unsigned getIndex(); // for strings and blobs
     virtual bool isNumeric();
     bool isReadOnly();
     bool isNullable();
@@ -92,6 +93,7 @@ public:
     bool initialize(const IBPP::Statement& statement, Database *);
     bool isRowFieldNumeric(unsigned col);
     bool isColumnReadonly(unsigned col);
+    bool isFieldReadonly(unsigned row, unsigned col);
 
     wxString getFieldValue(unsigned row, unsigned col);
     bool isFieldNull(unsigned row, unsigned col);
