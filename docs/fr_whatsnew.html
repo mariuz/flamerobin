@@ -8,6 +8,58 @@
 http://sourceforge.net/tracker/?group_id=124340&amp;atid=699234</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.8.0 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- DataGrid: ability to edit (UPDATE) existing rows directly in the grid<br>
+- DataGrid: ability to add (INSERT) rows in the grid (with BLOB support)<br>
+- DataGrid: ability to remove (DELETE) one or multiple rows from the grid<br>
+- DataGrid: all features of editable grid work even for joins and complex queries<br>
+- DataGrid: data can now be exported as CSV values<br>
+- A basic Test Data Generator (please test, we need your feedback to improve it)<br>
+- Ability to create a selectable stored procedure for a table<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- DataGrid: Major improvement on memory consumption and speed<br>
+- DataGrid: Columns are named after aliases when available<br>
+- DataGrid: CHARACTER SET OCTETS columns shown as hexadecimal strings<br>
+- DataGrid: Proper display of DB_KEY columns<br>
+- DataGrid: New config option: automatically fetch all records (use with care)<br>
+- Property pages show database path instead of useless internal link info<br>
+- Property pages of system tables are now closed upon disconnecting<br>
+- Property pages now show owner for tables, views and procedures<br>
+- Fixed DDL extraction for usernames in GRANT statements<br>
+- Fixed DDL extraction for expression based indexes<br>
+- Fixed DDL extraction for multisegment indexes<br>
+- Fixed DDL extraction for external tables<br>
+- Fixed DDL extraction for computed columns (char and varchar size)<br>
+- Enabled drag&amp;drop of files into backup, restore and database dialog<br>
+- Generator values can be reloaded now<br>
+- Basic 'edit domain' functionality via SQL<br>
+- SQL Editor: Enabled autocompletion for columns of system tables<br>
+- SQL Editor: Filename shown in dialog title<br>
+- SQL Editor: Files can be opened by drag&amp;drop into editor window<br>
+- SQL Editor: Detailed query execution statistics<br>
+- SQL Editor: Improved startup speed<br>
+- Fixed DDL extraction for DEFAULTs<br>
+- Database size display now supports databases bigger than 2GB<br>
+- Database read-only status is now reported correctly<br>
+- Fixed charset conversion for ISO8859_x character sets<br>
+- Fixed charset conversion for UTF8 in ANSI build<br>
+- Fixed parsing bug that can hang the program at 100% CPU usage<br>
+- Fixed crash when Manage Users option is called from the Server menu<br>
+- Fixed crash when charset conversion fails<br>
+- Start arguments -u and -uh are now respected for fr_settings.conf as well<br>
+- UDFs that views depend on are now shown in Dependencies page<br>
+- Various minor bugfixes<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 0.7.6 ALPHA</font><br>
 <br><br>
 <font size=+1 color="#AA0000"><B>New features</B></font><br>
