@@ -327,7 +327,7 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
         wxSUNKEN_BORDER | wxTR_DEFAULT_STYLE | wxTR_HAS_BUTTONS | wxTR_HIDE_ROOT);
     panel_categ = new wxPanel(getControlsPanel(), wxID_ANY, wxDefaultPosition,
         wxDefaultSize, wxSUNKEN_BORDER);
-    static_text_categ = new wxStaticText(panel_categ, wxID_ANY, wxEmptyString);
+    static_text_categ = new wxStaticText(panel_categ, wxID_ANY, wxT("Dummy min size text"));
     bookctrl_1 = new Optionbook(getControlsPanel(), ID_bookctrl_panes,
         wxDefaultPosition, wxDefaultSize);
 
@@ -432,7 +432,7 @@ void PreferencesDialog::layout()
     sizerRight->Add(bookctrl_1, 1, wxEXPAND);
 
     wxBoxSizer* sizerControls = new wxBoxSizer(wxHORIZONTAL);
-#if wxCHECK_VERSION(2, 8, 0)
+#if wxCHECK_VERSION(2, 8, 0) && defined(__WXMSW__)
     sizerControls->Add(treectrl_1, 0, wxEXPAND);
     sizerControls->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 0);
     sizerControls->Add(sizerRight, 1, wxEXPAND);
