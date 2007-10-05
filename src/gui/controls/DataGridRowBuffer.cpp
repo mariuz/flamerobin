@@ -111,7 +111,7 @@ bool DataGridRowBuffer::getValue(unsigned offset, IBPP::DBKey& value,
     return true;
 }
 //-----------------------------------------------------------------------------
-bool DataGridRowBuffer::isFieldNA(unsigned num)
+bool DataGridRowBuffer::isFieldNA(unsigned /*num*/)
 {
     return false;
 }

@@ -143,7 +143,7 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
     }
 
     bufferM = new InsertedGridRowBuffer(gridTable->GetNumberCols());
-    for (unsigned u = 0; u < gridTable->GetNumberCols(); u++)
+    for (unsigned u = 0; (int)u < gridTable->GetNumberCols(); u++)
         bufferM->setFieldNA(u, true);
 
     DataGridTable::FieldSet fields;

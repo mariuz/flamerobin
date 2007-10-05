@@ -532,7 +532,7 @@ wxString DBKeyColumnDef::getAsString(DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
     wxString ret;
-    for (int i=0; i<sizeM/8; i++)
+    for (int i = 0; i < (int)sizeM / 8; i++)
     {
         if (i > 0)
             ret += wxT("-");
@@ -544,8 +544,8 @@ wxString DBKeyColumnDef::getAsString(DataGridRowBuffer* buffer)
     return ret;
 }
 //-----------------------------------------------------------------------------
-void DBKeyColumnDef::setFromString(DataGridRowBuffer* buffer,
-        const wxString& source)
+void DBKeyColumnDef::setFromString(DataGridRowBuffer* /*buffer*/,
+	const wxString& /*source*/)
 {
     // should never be editable
 }
@@ -1018,17 +1018,17 @@ unsigned BlobColumnDef::getIndex()
     return indexM;
 }
 //-----------------------------------------------------------------------------
-wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
+wxString BlobColumnDef::getAsString(DataGridRowBuffer* /*buffer*/)
 {
-    //wxASSERT(buffer);
+    // wxASSERT(buffer);
     // show some starting characters for textual blobs?
     return wxT("[BLOB]");
 }
 //-----------------------------------------------------------------------------
-void BlobColumnDef::setFromString(DataGridRowBuffer* buffer,
-        const wxString& source)
+void BlobColumnDef::setFromString(DataGridRowBuffer* /*buffer*/,
+	const wxString& /*source*/)
 {
-    wxASSERT(buffer);
+    // wxASSERT(buffer);
     // TODO: is this called from anywhere? - blobs will have a custom editor
     // buffer->setString(indexM, source);
 }
@@ -1039,7 +1039,7 @@ unsigned BlobColumnDef::getBufferSize()
 }
 //-----------------------------------------------------------------------------
 void BlobColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
-    const IBPP::Statement& statement, wxMBConv* converter)
+    const IBPP::Statement& statement, wxMBConv* /*converter*/)
 {
     wxASSERT(buffer);
     IBPP::Blob b = IBPP::BlobFactory(statement->DatabasePtr(),
