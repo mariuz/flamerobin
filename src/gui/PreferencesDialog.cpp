@@ -432,7 +432,7 @@ void PreferencesDialog::layout()
     sizerRight->Add(bookctrl_1, 1, wxEXPAND);
 
     wxBoxSizer* sizerControls = new wxBoxSizer(wxHORIZONTAL);
-#if wxCHECK_VERSION(2, 8, 0) && defined(__WXMSW__)
+#if wxCHECK_VERSION(2, 8, 0) && !defined(__WXMAC__)
     sizerControls->Add(treectrl_1, 0, wxEXPAND);
     sizerControls->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 0);
     sizerControls->Add(sizerRight, 1, wxEXPAND);
