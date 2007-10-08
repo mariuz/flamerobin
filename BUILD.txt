@@ -1,28 +1,31 @@
-flamerobin Build Instructions
--------------------------------
-Below are build instructions for flamerobin on all supported build environments.
+FlameRobin Build Instructions
+-----------------------------
+Below are build instructions for FlameRobin on all supported build environments.
 
 Instructions assume that you have already compiled wxWidgets.
 There are some tips regarding that at the end of this file.
 
--------------------------------
--- Common to all builds
--------------------------------
+--------------------------
+-- Common to all builds --
+--------------------------
 
 FR must be built with the same settings for debug/release, Ansi/Unicode etc.
 as the wxWidgets library.  Failing to do so will usually lead to compile or
-link errors.
+link errors. This does not apply completely to Linux/GCC build, as you can
+build wx in release mode and FlameRobin in debug mode - in case you just want
+to debug FR code, and not code of wxWidgets.
 
 Before building on Windows, you MUST set a WXDIR environment variable which
-points to your wxWidgets root directory. To do this, go to
+points to your wxWidgets root directory (unless you use MinGW and configure
+script to build a Makefile). To do this, go to:
 Start->Control Panel->System and select the "Advanced" tab. Then, click the
 "Environment Variables" button and add WXDIR to the user or system env vars.
 If you are using Windows98, you can set the variable from the command line,
 using the "set" command.
 
--------------------------------
--- MSW - Visual C++ Build Instructions
--------------------------------
+-----------------------------------------
+-- MSW - Visual C++ Build Instructions --
+-----------------------------------------
 
 There are two ways to build using Microsoft Visual C++. One is via the dsp/dsw
 project files, and the other is via the makefile.vc command line makefile.
@@ -49,19 +52,19 @@ UNICODE=<0,1> - tells whether to link against wx ansi or unicode build
 WXDIR *must* be specified (or set as an environment variable), but the rest
 default to 0 and are optional.
 
--------------------------------
--- MSW - Visual C++ 2005 Express Build Instructions
--------------------------------
+------------------------------------------------------
+-- MSW - Visual C++ 2005 Express Build Instructions --
+------------------------------------------------------
 
-Microsoft Visual C++ Express is a freeware version of MS Visual Studio. 
+Microsoft Visual C++ Express is a freeware version of MS Visual Studio.
 There are two ways to build FlameRobin. One is via the dsp/dsw
 project files, and the other is via the makefile.vc command line makefile.
 
 * Using the dsp/dsw/sln projects *
 
-Double click on flamerobin\flamerobin_flamerobin.sln, select a build configuration by
-going to the Build menu, selecting "Set build configuration" and then
-picking a config, then build!
+Double click on flamerobin\flamerobin_flamerobin.sln, select a build
+configuration by going to the Build menu, selecting "Set build configuration"
+and then picking a config, then build!
 
 * Using the makefiles *
 To use the makefiles, start up a command line and navigate to the
@@ -79,20 +82,21 @@ UNICODE=<0,1> - tells whether to link against wx ansi or unicode build
 WXDIR *must* be specified (or set as an environment variable), but the rest
 default to 0 and are optional.
 
--------------------------------
--- MSW - Building wxWidgets with Visual C++ 2005 Express
--------------------------------
+-----------------------------------------------------------
+-- MSW - Building wxWidgets with Visual C++ 2005 Express --
+-----------------------------------------------------------
 
 Unpack the archive somewhere, for example c:\wxWin260:
 
 * Using the dsp/dsw/sln projects *
 
-Double click on build\msw\wx.dsw, convert to new format, select a build configuration by
-going to the Build menu, selecting "Set build configuration" and then 
-picking a config, then build!
+Double click on build\msw\wx.dsw, convert to new format, select a build
+configuration by going to the Build menu, selecting "Set build configuration"
+and then picking a config, then build!
 
-Double click on contrib\build\stc\stc.dsw, convert to new format, select a build configuration by going to the Build menu, selecting "Set build configuration" and then
-picking a config, then build!
+Double click on contrib\build\stc\stc.dsw, convert to new format, select a
+build configuration by going to the Build menu, selecting "Set build
+configuration" and then picking a config, then build!
 
 
 * Using the makefiles *
@@ -107,11 +111,15 @@ nmake -f makefile.vc BUILD=release RUNTIME_LIBS=static
 As you can see, it is important to build STC package too. It is for
 wxStyledTextControl which is used in many places in FlameRobin.
 
+If you wish to build an executable that is small in size (just like the
+official one), you need to build wx from the command line using modified
+makefile.vc. Just edit the makefile.vc and change the __OPTIMIZEFLAG setting
+from /O2 to /O1.
 
 
--------------------------------
--- MSW - Borland's Free C++ Build Instructions
--------------------------------
+-------------------------------------------------
+-- MSW - Borland's Free C++ Build Instructions --
+-------------------------------------------------
 
 Borland's Free C++ Compiler (in short BCC) is a freeware version of
 Borland's C++ compiler used in C++ Builder product:
@@ -127,8 +135,8 @@ started to work until 0.7.0. Since 0.7.2 it works again. This build is NOT
 OFFICIALLY SUPPORTED by our team, although it may work for you. In case you
 want to give it a shot, here's how:
 
-Assuming that you have wxWidgets installed in c:\wxwin260, you should open MS-DOS
-prompt, cd to flamerobin root directory, and execute:
+Assuming that you have wxWidgets installed in c:\wxwin260, you should open
+MS-DOS prompt, cd to flamerobin root directory, and execute:
 
 set WXDIR=c:\wxwin260
 make -f makefile.bcc STATICRTL=1 FINAL=1
@@ -140,14 +148,14 @@ make -f makefile.bcc STATICRTL=1 FINAL=0
 
 for debug build. Explanantion:
 
-WXDIR=<dir>     - tells the makefile where to find the root wxWidgets directory
-FINAL=<0,1>     - tells whether to build debug (0) or release (1) build
-STATICRTL=<0,1> - tells whether to link against wx static(1) or dynamic(0) libs
+WXDIR=<dir>     - tells the makefile where to find the root wx directory
+FINAL=<0,1>     - tells to build debug(0) or release(1) build
+STATICRTL=<0,1> - tells to link against wx static(1) or dynamic(0) libs
 
 
--------------------------------
--- Unix - Autoconf Build Instructions
--------------------------------
+----------------------------------------
+-- Unix - Autoconf Build Instructions --
+----------------------------------------
 To build on Unix or MinGW, simply open a command line, cd into the flamerobin
 root directory, and execute the following commands:
 
@@ -177,9 +185,9 @@ question there.
 
 
 
--------------------------------
--- MSW - Building wxWidgets with Borland's Free C++ Compiler
--------------------------------
+---------------------------------------------------------------
+-- MSW - Building wxWidgets with Borland's Free C++ Compiler --
+---------------------------------------------------------------
 
 Unpack the archive somewhere, for example c:\wxWin260, open MS-DOS prompt
 and go into "build\msw" directory:
@@ -195,9 +203,9 @@ As you can see, it is important to build STC package too. It is for
 wxStyledTextControl which is used in many places in FlameRobin.
 
 
--------------------------------
--- Unix - Building wxWidgets with configure
--------------------------------
+----------------------------------------------
+-- Unix - Building wxWidgets with configure --
+----------------------------------------------
 
 Unpack the sources, enter "build" directory and run "./configure". There
 are many options you may like to set, run "./configure --help" to find about
@@ -213,3 +221,5 @@ is used in many places in FlameRobin. Enter "contrib/src/stc" directory:
 make
 make install
 
+Depending on your --prefix setting, you might need to run 'make install' as
+superuser (root).
