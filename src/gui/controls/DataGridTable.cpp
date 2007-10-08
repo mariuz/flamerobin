@@ -70,7 +70,11 @@ RgbHsvConversion::RgbHsvConversion(const wxColour& colour)
     redM = colour.Red() / 255.0;
     greenM = colour.Green() / 255.0;
     blueM = colour.Blue() / 255.0;
+#if wxCHECK_VERSION(2, 8, 0)
     rgbValidM = colour.IsOk();
+#else
+    rgbValidM = colour.Ok();
+#endif
     hueM = 0.0;
     satM = 0.0;
     valM = 0.0;
@@ -467,7 +471,11 @@ int DataGridTable::GetNumberRows()
 wxColour DataGridTable::getReadonlyColour()
 {
     static wxColour colourReadOnly;
+#if wxCHECK_VERSION(2, 8, 0)
     if (!colourReadOnly.IsOk())
+#else
+    if (!colourReadOnly.Ok())
+#endif
     {
         // first try to compute a colour that is between "white" and "gray"
         // (but use the actual system colours instead of hard-coded values)

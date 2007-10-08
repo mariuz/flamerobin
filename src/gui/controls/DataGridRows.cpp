@@ -38,6 +38,7 @@
     #include "wx/wx.h"
 #endif
 
+#include <wx/datetime.h>
 #include <wx/textbuf.h>
 
 #include <algorithm>
@@ -470,11 +471,13 @@ wxString Int64ColumnDef::getAsString(DataGridRowBuffer* buffer)
 }
 //-----------------------------------------------------------------------------
 void Int64ColumnDef::setFromString(DataGridRowBuffer* buffer,
-        const wxString& source)
+    const wxString& source)
 {
     wxASSERT(buffer);
     int64_t value;
+#if wxCHECK_VERSION(2, 8, 0)
     if (!source.ToLongLong(&value))
+#endif
     {
         // perhaps underlying library doesn't support 64bit, we try 32:
         long l;
