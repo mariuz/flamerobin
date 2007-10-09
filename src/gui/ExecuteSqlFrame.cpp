@@ -1508,7 +1508,7 @@ void ExecuteSqlFrame::OnButtonInsertClick(wxCommandEvent& WXUNUSED(event))
     FR_TRY
 
     DataGridTable *tb = grid_data->getDataGridTable();
-    if (tb)
+    if (tb && grid_data->GetNumberCols())
     {
         wxArrayString tables;
         tb->getTableNames(tables);
