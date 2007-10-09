@@ -1,4 +1,4 @@
-;Copyright (c) 2004, 2005, 2006 The FlameRobin Development Team
+;Copyright (c) 2004-2007 The FlameRobin Development Team
 ;
 ;Permission is hereby granted, free of charge, to any person obtaining
 ;a copy of this software and associated documentation files (the
@@ -48,6 +48,7 @@ SolidCompression=true
 OutputDir=.\output
 InternalCompressLevel=ultra
 ShowLanguageDialog=yes
+PrivilegesRequired=none
 
 [Tasks]
 Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:AdditionalIcons}
