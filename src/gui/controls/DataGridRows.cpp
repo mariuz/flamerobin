@@ -474,18 +474,21 @@ void Int64ColumnDef::setFromString(DataGridRowBuffer* buffer,
     const wxString& source)
 {
     wxASSERT(buffer);
-    int64_t value;
+
 #if wxCHECK_VERSION(2, 8, 0)
-    if (!source.ToLongLong(&value))
-#endif
+	wxLongLong_t ll;
+    if (source.ToLongLong(&ll))
     {
-        // perhaps underlying library doesn't support 64bit, we try 32:
-        long l;
-        if (!source.ToLong(&l)) // nope, that fails as well
-            throw FRError(_("Invalid 64bit numeric value"));
-        value = l;
+        buffer->setValue(offsetM, (int64_t)ll);
+        return;
     }
-    buffer->setValue(offsetM, value);
+#endif
+
+    // perhaps underlying library doesn't support 64bit, we try 32:
+    long l;
+    if (!source.ToLong(&l)) // nope, that fails as well
+        throw FRError(_("Invalid 64bit numeric value"));
+    buffer->setValue(offsetM, (int64_t)l);
 }
 //-----------------------------------------------------------------------------
 unsigned Int64ColumnDef::getBufferSize()
