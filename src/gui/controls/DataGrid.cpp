@@ -196,89 +196,7 @@ void DataGrid::updateRowHeights()
     SetScrollLineY(h);
 }
 //-----------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(DataGrid, wxGrid)
-    EVT_CONTEXT_MENU(DataGrid::OnContextMenu)
-    EVT_GRID_CELL_RIGHT_CLICK(DataGrid::OnGridCellRightClick)
-    EVT_GRID_LABEL_RIGHT_CLICK(DataGrid::OnGridLabelRightClick)
-//    EVT_GRID_SELECT_CELL(DataGrid::OnGridSelectCell)
-    EVT_MENU(DataGrid::ID_MENU_CANCELFETCHALL, DataGrid::OnMenuCancelFetchAll)
-    EVT_UPDATE_UI(DataGrid::ID_MENU_CANCELFETCHALL, DataGrid::OnMenuUpdateCancelFetchAll)
-    EVT_MENU(DataGrid::ID_MENU_CELLFONT, DataGrid::OnMenuCellFont)
-    EVT_MENU(DataGrid::ID_MENU_COPYTOCLIPBOARD, DataGrid::OnMenuCopyToCB)
-    EVT_UPDATE_UI(DataGrid::ID_MENU_COPYTOCLIPBOARD, DataGrid::OnMenuUpdateIfHasSelection)
-    EVT_MENU(DataGrid::ID_MENU_COPYTOCLIPBOARDASINSERT, DataGrid::OnMenuCopyToCBAsInsert)
-    EVT_UPDATE_UI(DataGrid::ID_MENU_COPYTOCLIPBOARDASINSERT, DataGrid::OnMenuUpdateIfHasSelection)
-    EVT_MENU(DataGrid::ID_MENU_COPYTOCLIPBOARDASUPDATE, DataGrid::OnMenuCopyToCBAsUpdate)
-    EVT_UPDATE_UI(DataGrid::ID_MENU_COPYTOCLIPBOARDASUPDATE, DataGrid::OnMenuUpdateIfHasSelection)
-    EVT_MENU(DataGrid::ID_MENU_FETCHALL, DataGrid::OnMenuFetchAll)
-    EVT_UPDATE_UI(DataGrid::ID_MENU_FETCHALL, DataGrid::OnMenuUpdateFetchAll)
-//	EVT_GRID_EDITOR_HIDDEN( DataGrid::OnEditorHidden )
-    EVT_MENU(DataGrid::ID_MENU_LABELFONT, DataGrid::OnMenuLabelFont)
-    EVT_MENU(DataGrid::ID_MENU_SAVEASHTML, DataGrid::OnMenuSaveAsHTML)
-    EVT_UPDATE_UI(DataGrid::ID_MENU_SAVEASHTML, DataGrid::OnMenuUpdateIfHasSelection)
-    EVT_MENU(DataGrid::ID_MENU_SAVEASCSV, DataGrid::OnMenuSaveAsCSV)
-    EVT_UPDATE_UI(DataGrid::ID_MENU_SAVEASCSV, DataGrid::OnMenuUpdateIfHasSelection)
-
-#ifdef __WXGTK__
-    EVT_MOUSEWHEEL(DataGrid::OnMouseWheel)
-    EVT_SCROLLWIN_THUMBRELEASE(DataGrid::OnThumbRelease)
-#endif
-END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
-void DataGrid::OnContextMenu(wxContextMenuEvent& event)
-{
-    showPopMenu(event.GetPosition());
-}
-//-----------------------------------------------------------------------------
-void DataGrid::OnGridCellRightClick(wxGridEvent& event)
-{
-    showPopMenu(event.GetPosition());
-}
-//-----------------------------------------------------------------------------
-void DataGrid::OnGridLabelRightClick(wxGridEvent& WXUNUSED(event))
-{
-    showPopMenu(ScreenToClient(::wxGetMousePosition()));
-}
-//-----------------------------------------------------------------------------
-/*
-void DataGrid::OnGridSelectCell(wxGridEvent& event)
-{
-    FR_TRY
-
-    DataGridTable* table = getDataGridTable();
-    if (table)
-        table->saveEditorChanges(event.GetRow());
-    event.Skip();
-
-    FR_CATCH
-}*/
-//-----------------------------------------------------------------------------
-void DataGrid::OnIdle(wxIdleEvent& event)
-{
-    FR_TRY
-
-    DataGridTable* table = getDataGridTable();
-    // disconnect event handler if nothing more to be done, will be
-    // re-registered on next successfull execution of select statement
-    if (!table || !table->canFetchMoreRows())
-    {
-        Disconnect(wxID_ANY, wxEVT_IDLE);
-        return;
-    }
-    // fetch more rows until row cache is filled or timeslice is spent, and
-    // request another wxEVT_IDLE event if row cache has not been filled
-    if (table->needsMoreRowsFetched())
-    {
-        table->fetch();
-        if (table->needsMoreRowsFetched())
-            event.RequestMore();
-        AdjustScrollbars();
-    }
-
-    FR_CATCH
-}
-//-----------------------------------------------------------------------------
-void DataGrid::OnMenuCellFont(wxCommandEvent& WXUNUSED(event))
+void DataGrid::setCellFont()
 {
     wxFont f = ::wxGetFontFromUser(this, GetDefaultCellFont());
     if (f.Ok())
@@ -290,10 +208,8 @@ void DataGrid::OnMenuCellFont(wxCommandEvent& WXUNUSED(event))
     }
 }
 //-----------------------------------------------------------------------------
-void DataGrid::OnMenuCopyToCB(wxCommandEvent& WXUNUSED(event))
+void DataGrid::copyToCB()
 {
-    FR_TRY
-
     DataGridTable* table = getDataGridTable();
     if (!table)
         return;
@@ -327,14 +243,10 @@ void DataGrid::OnMenuCopyToCB(wxCommandEvent& WXUNUSED(event))
 
     if (all)
         notifyIfUnfetchedData();
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
-void DataGrid::OnMenuCopyToCBAsInsert(wxCommandEvent& WXUNUSED(event))
+void DataGrid::copyToCBAsInsert()
 {
-    FR_TRY
-
     DataGridTable* table = getDataGridTable();
     if (!table)
         return;
@@ -386,14 +298,10 @@ void DataGrid::OnMenuCopyToCBAsInsert(wxCommandEvent& WXUNUSED(event))
     }
     if (all)
         notifyIfUnfetchedData();
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
-void DataGrid::OnMenuCopyToCBAsUpdate(wxCommandEvent& WXUNUSED(event))
+void DataGrid::copyToCBAsUpdate()
 {
-    FR_TRY
-
     DataGridTable* table = getDataGridTable();
     if (!table)
         return;
@@ -495,14 +403,10 @@ void DataGrid::OnMenuCopyToCBAsUpdate(wxCommandEvent& WXUNUSED(event))
     }
     if (all)
         notifyIfUnfetchedData();
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
-void DataGrid::OnMenuLabelFont(wxCommandEvent& WXUNUSED(event))
+void DataGrid::setHeaderFont()
 {
-    FR_TRY
-
     wxFont f = ::wxGetFontFromUser(this, GetLabelFont());
     if (f.Ok())
     {
@@ -513,14 +417,10 @@ void DataGrid::OnMenuLabelFont(wxCommandEvent& WXUNUSED(event))
         AutoSizeColumns();
         ForceRefresh();
     }
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
-void DataGrid::OnMenuSaveAsCSV(wxCommandEvent& WXUNUSED(event))
+void DataGrid::saveAsCSV()
 {
-    FR_TRY
-
     DataGridTable* table = getDataGridTable();
     if (!table)
         return;
@@ -613,14 +513,10 @@ void DataGrid::OnMenuSaveAsCSV(wxCommandEvent& WXUNUSED(event))
 
     if (all)
         notifyIfUnfetchedData();
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
-void DataGrid::OnMenuSaveAsHTML(wxCommandEvent& WXUNUSED(event))
+void DataGrid::saveAsHTML()
 {
-    FR_TRY
-
     wxString fname = ::wxFileSelector(_("Save data in selected cells as"),
         wxEmptyString, wxEmptyString, wxT("*.html"),
         _("HTML files (*.html)|*.html|All files (*.*)|*.*"),
@@ -718,6 +614,151 @@ void DataGrid::OnMenuSaveAsHTML(wxCommandEvent& WXUNUSED(event))
         outStr.WriteString(wxT("</tr>\n"));
     }
     outStr.WriteString(wxT("</table></body></html>\n"));
+}
+//-----------------------------------------------------------------------------
+void DataGrid::cancelFetchAll()
+{
+    DataGridTable* table = getDataGridTable();
+    if (table)
+        table->setFetchAllRecords(false);
+}
+//-----------------------------------------------------------------------------
+BEGIN_EVENT_TABLE(DataGrid, wxGrid)
+    EVT_CONTEXT_MENU(DataGrid::OnContextMenu)
+    EVT_GRID_CELL_RIGHT_CLICK(DataGrid::OnGridCellRightClick)
+    EVT_GRID_LABEL_RIGHT_CLICK(DataGrid::OnGridLabelRightClick)
+//    EVT_GRID_SELECT_CELL(DataGrid::OnGridSelectCell)
+    EVT_MENU(DataGrid::ID_MENU_CANCELFETCHALL, DataGrid::OnMenuCancelFetchAll)
+    EVT_UPDATE_UI(DataGrid::ID_MENU_CANCELFETCHALL, DataGrid::OnMenuUpdateCancelFetchAll)
+    EVT_MENU(DataGrid::ID_MENU_CELLFONT, DataGrid::OnMenuCellFont)
+    EVT_MENU(DataGrid::ID_MENU_COPYTOCLIPBOARD, DataGrid::OnMenuCopyToCB)
+    EVT_UPDATE_UI(DataGrid::ID_MENU_COPYTOCLIPBOARD, DataGrid::OnMenuUpdateIfHasSelection)
+    EVT_MENU(DataGrid::ID_MENU_COPYTOCLIPBOARDASINSERT, DataGrid::OnMenuCopyToCBAsInsert)
+    EVT_UPDATE_UI(DataGrid::ID_MENU_COPYTOCLIPBOARDASINSERT, DataGrid::OnMenuUpdateIfHasSelection)
+    EVT_MENU(DataGrid::ID_MENU_COPYTOCLIPBOARDASUPDATE, DataGrid::OnMenuCopyToCBAsUpdate)
+    EVT_UPDATE_UI(DataGrid::ID_MENU_COPYTOCLIPBOARDASUPDATE, DataGrid::OnMenuUpdateIfHasSelection)
+    EVT_MENU(DataGrid::ID_MENU_FETCHALL, DataGrid::OnMenuFetchAll)
+    EVT_UPDATE_UI(DataGrid::ID_MENU_FETCHALL, DataGrid::OnMenuUpdateFetchAll)
+//  EVT_GRID_EDITOR_HIDDEN( DataGrid::OnEditorHidden )
+    EVT_MENU(DataGrid::ID_MENU_LABELFONT, DataGrid::OnMenuLabelFont)
+    EVT_MENU(DataGrid::ID_MENU_SAVEASHTML, DataGrid::OnMenuSaveAsHTML)
+    EVT_UPDATE_UI(DataGrid::ID_MENU_SAVEASHTML, DataGrid::OnMenuUpdateIfHasSelection)
+    EVT_MENU(DataGrid::ID_MENU_SAVEASCSV, DataGrid::OnMenuSaveAsCSV)
+    EVT_UPDATE_UI(DataGrid::ID_MENU_SAVEASCSV, DataGrid::OnMenuUpdateIfHasSelection)
+
+#ifdef __WXGTK__
+    EVT_MOUSEWHEEL(DataGrid::OnMouseWheel)
+    EVT_SCROLLWIN_THUMBRELEASE(DataGrid::OnThumbRelease)
+#endif
+END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+void DataGrid::OnContextMenu(wxContextMenuEvent& event)
+{
+    showPopMenu(event.GetPosition());
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnGridCellRightClick(wxGridEvent& event)
+{
+    showPopMenu(event.GetPosition());
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnGridLabelRightClick(wxGridEvent& WXUNUSED(event))
+{
+    showPopMenu(ScreenToClient(::wxGetMousePosition()));
+}
+//-----------------------------------------------------------------------------
+/*
+void DataGrid::OnGridSelectCell(wxGridEvent& event)
+{
+    FR_TRY
+
+    DataGridTable* table = getDataGridTable();
+    if (table)
+        table->saveEditorChanges(event.GetRow());
+    event.Skip();
+
+    FR_CATCH
+}*/
+//-----------------------------------------------------------------------------
+void DataGrid::OnIdle(wxIdleEvent& event)
+{
+    FR_TRY
+
+    DataGridTable* table = getDataGridTable();
+    // disconnect event handler if nothing more to be done, will be
+    // re-registered on next successfull execution of select statement
+    if (!table || !table->canFetchMoreRows())
+    {
+        Disconnect(wxID_ANY, wxEVT_IDLE);
+        return;
+    }
+    // fetch more rows until row cache is filled or timeslice is spent, and
+    // request another wxEVT_IDLE event if row cache has not been filled
+    if (table->needsMoreRowsFetched())
+    {
+        table->fetch();
+        if (table->needsMoreRowsFetched())
+            event.RequestMore();
+        AdjustScrollbars();
+    }
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnMenuCellFont(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+    setCellFont();
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnMenuCopyToCB(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+    copyToCB();
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnMenuCopyToCBAsInsert(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+    copyToCBAsInsert();
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnMenuCopyToCBAsUpdate(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+    copyToCBAsUpdate();
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnMenuLabelFont(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+    setHeaderFont();
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnMenuSaveAsCSV(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+    saveAsCSV();
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnMenuSaveAsHTML(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+    saveAsHTML();
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnMenuCancelFetchAll(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    cancelFetchAll();
 
     FR_CATCH
 }
@@ -725,17 +766,6 @@ void DataGrid::OnMenuSaveAsHTML(wxCommandEvent& WXUNUSED(event))
 void DataGrid::OnMenuUpdateIfHasSelection(wxUpdateUIEvent& event)
 {
     event.Enable(IsSelection());
-}
-//-----------------------------------------------------------------------------
-void DataGrid::OnMenuCancelFetchAll(wxCommandEvent& WXUNUSED(event))
-{
-    FR_TRY
-
-    DataGridTable* table = getDataGridTable();
-    if (table)
-        table->setFetchAllRecords(false);
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnMenuUpdateCancelFetchAll(wxUpdateUIEvent& event)

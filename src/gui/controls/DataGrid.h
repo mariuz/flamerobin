@@ -66,14 +66,28 @@ private:
     void OnMenuFetchAll(wxCommandEvent& event);
     void OnMenuLabelFont(wxCommandEvent& event);
     void OnMenuSaveAsHTML(wxCommandEvent& event);
+    void OnMenuSaveAsCSV(wxCommandEvent& event);
     void OnMenuUpdateCancelFetchAll(wxUpdateUIEvent& event);
     void OnMenuUpdateFetchAll(wxUpdateUIEvent& event);
     void OnMenuUpdateIfHasSelection(wxUpdateUIEvent& event);
     void OnMouseWheel(wxMouseEvent& event);
     void OnThumbRelease(wxScrollWinEvent& event);
-    void OnMenuSaveAsCSV(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()
+public:
+    void copyToCB();
+    void copyToCBAsInsert();
+    void copyToCBAsUpdate();
+    void saveAsHTML();
+    void saveAsCSV();
+
+    void setHeaderFont();
+    void setCellFont();
+
+    void cancelFetchAll();
+
+    void InsertRow();
+    void DeleteRow();
 };
 //----------------------------------------------------------------------
 #endif
