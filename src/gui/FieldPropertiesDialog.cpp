@@ -53,7 +53,7 @@ struct DatatypeProperties
 {
     //wxString name;    // doesn't work with Borland
     //wxChar name[];    // doesn't work with MSVC
-    wxChar* name;
+    const wxChar* name;
     bool hasSize;
     bool hasScale;
     bool isChar;
