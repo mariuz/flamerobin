@@ -86,7 +86,7 @@ default to 0 and are optional.
 -- MSW - Building wxWidgets with Visual C++ 2005 Express --
 -----------------------------------------------------------
 
-Unpack the archive somewhere, for example c:\wxWin260:
+Unpack the archive somewhere, for example c:\wxWin286:
 
 * Using the dsp/dsw/sln projects *
 
@@ -101,8 +101,8 @@ configuration" and then picking a config, then build!
 
 * Using the makefiles *
 Open MS-DOS prompt and go into "build\msw" directory:
-set WXWIN=c:\wxWin260
-set WXDIR=c:\wxWin260
+set WXWIN=c:\wxWin286
+set WXDIR=c:\wxWin286
 nmake -f makefile.vc BUILD=release RUNTIME_LIBS=static
 cd ..\..
 cd contrib\build\stc
@@ -135,15 +135,15 @@ started to work until 0.7.0. Since 0.7.2 it works again. This build is NOT
 OFFICIALLY SUPPORTED by our team, although it may work for you. In case you
 want to give it a shot, here's how:
 
-Assuming that you have wxWidgets installed in c:\wxwin260, you should open
+Assuming that you have wxWidgets installed in c:\wxwin286, you should open
 MS-DOS prompt, cd to flamerobin root directory, and execute:
 
-set WXDIR=c:\wxwin260
+set WXDIR=c:\wxwin286
 make -f makefile.bcc STATICRTL=1 FINAL=1
 
 for release build, or
 
-set WXDIR=c:\wxwin260
+set WXDIR=c:\wxwin286
 make -f makefile.bcc STATICRTL=1 FINAL=0
 
 for debug build. Explanantion:
@@ -189,11 +189,11 @@ question there.
 -- MSW - Building wxWidgets with Borland's Free C++ Compiler --
 ---------------------------------------------------------------
 
-Unpack the archive somewhere, for example c:\wxWin260, open MS-DOS prompt
+Unpack the archive somewhere, for example c:\wxWin286, open MS-DOS prompt
 and go into "build\msw" directory:
 
-set WXWIN=c:\wxWin260
-set WXDIR=c:\wxWin260
+set WXWIN=c:\wxWin286
+set WXDIR=c:\wxWin286
 make -f makefile.bcc BUILD=release RUNTIME_LIBS=static
 cd ..\..
 cd contrib\build\stc
@@ -211,7 +211,7 @@ Unpack the sources, enter "build" directory and run "./configure". There
 are many options you may like to set, run "./configure --help" to find about
 them. We assume Gtk2 static release build with Unicode support:
 
-./configure --disable-shared --disable-debug --prefix=/opt/wxwidgets
+./configure --disable-shared --disable-debug --enable-unicode --prefix=/opt/wxwidgets
 make
 make install
 
