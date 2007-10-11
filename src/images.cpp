@@ -40,6 +40,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "metadata/metadataitem.h"
 //-----------------------------------------------------------------------------
+typedef const char* xpm_t;
+//-----------------------------------------------------------------------------
 wxBitmap getImage(NodeType type)
 {
     #include "object.xpm"
@@ -63,7 +65,7 @@ wxBitmap getImage(NodeType type)
     #include "view.xpm"
     #include "key.xpm"
 
-    char ***map = new char**[ntLastType];
+    xpm_t** map = new xpm_t*[ntLastType];
     for (int i = 0; i < ntLastType; i++)
         map[i] = object_xpm;
 
@@ -117,7 +119,7 @@ wxBitmap getImage32(NodeType type)
     #include "trigger32.xpm"
     #include "view32.xpm"
 
-    char ***map = new char**[ntLastType];
+    xpm_t** map = new xpm_t*[ntLastType];
     for (int i = 0; i < ntLastType; i++)
         map[i] = flamerobin_xpm;
 
