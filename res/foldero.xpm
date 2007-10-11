@@ -26,7 +26,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-static char * foldero_xpm[] = {
+static const char * foldero_xpm[] = {
 "16 16 64 1",
 " 	c None",
 ".	c #000000",

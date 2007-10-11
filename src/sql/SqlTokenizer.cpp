@@ -66,7 +66,7 @@ SqlTokenType SqlTokenizer::getKeywordTokenType(const wxString& possibleKeyword)
     static KeywordMap keywords;
     if (keywords.empty())
     {
-        static const struct {wxChar* name; SqlTokenType type; } entries[] =
+        static const struct {const wxChar* name; SqlTokenType type; } entries[] =
         {
             #include "keywordtokens.txt"
             // this element makes for simpler code: all lines in the file can

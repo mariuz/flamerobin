@@ -1,5 +1,5 @@
 /* XPM */
-static char * systemtable32_xpm[] = {
+static const char * systemtable32_xpm[] = {
 "32 32 93 2",
 "  	c None",
 ". 	c #141414",

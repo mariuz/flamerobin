@@ -26,7 +26,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-static char * sqlicon_xpm[] = {
+static const char * sqlicon_xpm[] = {
 "32 32 4 1",
 " 	c None",
 ".	c #007800",

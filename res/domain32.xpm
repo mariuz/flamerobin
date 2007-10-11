@@ -1,5 +1,5 @@
 /* XPM */
-static char * domain_xpm[] = {
+static const char * domain_xpm[] = {
 "32 32 280 2",
 "  	c None",
 ". 	c #000000",

@@ -26,7 +26,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-static char * flamerobin_xpm[] = {
+static const char * flamerobin_xpm[] = {
 "32 32 345 2",
 "   c None",
 ".  c #C1D6E0",
