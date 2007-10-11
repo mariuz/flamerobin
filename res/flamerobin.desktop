@@ -6,5 +6,4 @@ Exec=flamerobin
 Icon=/usr/share/pixmaps/flamerobin.png
 Type=Application
 Terminal=false
-Encoding=UTF-8
-Categories=Application;Development;Database;
+Categories=Development;Database;GTK
