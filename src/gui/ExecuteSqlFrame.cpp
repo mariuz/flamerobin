@@ -256,14 +256,20 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
 //-----------------------------------------------------------------------------
 //! included xpm files, so that icons are compiled into executable
 namespace sql_icons {
-#include "new.xpm"
+#include "delete16.xpm"
+#include "execute16.xpm"
+#include "history.xpm"
+#include "insert16.xpm"
+#include "left.xpm"
 #include "load.xpm"
+#include "ok.xpm"
+#include "new.xpm"
 #include "save.xpm"
 #include "saveas.xpm"
 #include "sqlicon.xpm"
-#include "left.xpm"
+#include "redx.xpm"
 #include "right.xpm"
-#include "history.xpm"
+#include "procedure.xpm"
 };
 //-----------------------------------------------------------------------------
 // Setup the Scintilla editor
@@ -357,16 +363,8 @@ void SqlEditor::setup()
 BEGIN_EVENT_TABLE(SqlEditor, wxStyledTextCtrl)
     EVT_CONTEXT_MENU(SqlEditor::OnContextMenu)
     EVT_KILL_FOCUS(SqlEditor::OnKillFocus)
-    EVT_MENU(SqlEditor::ID_MENU_UNDO,             SqlEditor::OnMenuUndo)
-    EVT_MENU(SqlEditor::ID_MENU_REDO,             SqlEditor::OnMenuRedo)
-    EVT_MENU(SqlEditor::ID_MENU_CUT,              SqlEditor::OnMenuCut)
-    EVT_MENU(SqlEditor::ID_MENU_COPY,             SqlEditor::OnMenuCopy)
-    EVT_MENU(SqlEditor::ID_MENU_PASTE,            SqlEditor::OnMenuPaste)
-    EVT_MENU(SqlEditor::ID_MENU_DELETE,           SqlEditor::OnMenuDelete)
-    EVT_MENU(SqlEditor::ID_MENU_SELECT_ALL,       SqlEditor::OnMenuSelectAll)
     EVT_MENU(SqlEditor::ID_MENU_EXECUTE_SELECTED, SqlEditor::OnMenuExecuteSelected)
     EVT_MENU(SqlEditor::ID_MENU_FIND_SELECTED,    SqlEditor::OnMenuFindSelected)
-    EVT_MENU(SqlEditor::ID_MENU_FIND,             SqlEditor::OnMenuFind)
     EVT_MENU(SqlEditor::ID_MENU_WRAP,             SqlEditor::OnMenuWrap)
     EVT_MENU(SqlEditor::ID_MENU_SET_FONT,         SqlEditor::OnMenuSetFont)
 END_EVENT_TABLE()
@@ -374,15 +372,15 @@ END_EVENT_TABLE()
 void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
 {
     wxMenu m(0);
-    m.Append(ID_MENU_UNDO, _("&Undo"));
-    m.Append(ID_MENU_REDO, _("&Redo"));
+    m.Append(wxID_UNDO, _("&Undo"));
+    m.Append(wxID_REDO, _("&Redo"));
     m.AppendSeparator();
-    m.Append(ID_MENU_CUT,    _("Cu&t"));
-    m.Append(ID_MENU_COPY,   _("&Copy"));
-    m.Append(ID_MENU_PASTE,  _("&Paste"));
-    m.Append(ID_MENU_DELETE, _("&Delete"));
+    m.Append(wxID_CUT,    _("Cu&t"));
+    m.Append(wxID_COPY,   _("&Copy"));
+    m.Append(wxID_PASTE,  _("&Paste"));
+    m.Append(wxID_DELETE, _("&Delete"));
     m.AppendSeparator();
-    m.Append(ID_MENU_SELECT_ALL,       _("Select &All"));
+    m.Append(wxID_SELECTALL,       _("Select &All"));
     m.Append(ID_MENU_EXECUTE_SELECTED, _("E&xecute selected"));
 
     int slen = GetSelectionEnd() - GetSelectionStart();
@@ -396,20 +394,20 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
     }
 
     m.AppendSeparator();
-    m.Append(ID_MENU_FIND,          _("&Find and replace"));
+    m.Append(wxID_REPLACE,          _("&Find and replace"));
     m.Append(ID_MENU_SET_FONT,      _("Set F&ont"));
     m.AppendCheckItem(ID_MENU_WRAP, _("&Wrap"));
     if (wxSTC_WRAP_WORD == GetWrapMode())
         m.Check(ID_MENU_WRAP, true);
 
     // disable stuff
-    m.Enable(ID_MENU_UNDO, CanUndo());
-    m.Enable(ID_MENU_REDO, CanRedo());
+    m.Enable(wxID_UNDO, CanUndo());
+    m.Enable(wxID_REDO, CanRedo());
     if (slen == 0)        // nothing is selected
     {
-        m.Enable(ID_MENU_CUT,              false);
-        m.Enable(ID_MENU_COPY,             false);
-        m.Enable(ID_MENU_DELETE,           false);
+        m.Enable(wxID_CUT,              false);
+        m.Enable(wxID_COPY,             false);
+        m.Enable(wxID_DELETE,           false);
         m.Enable(ID_MENU_EXECUTE_SELECTED, false);
     }
 
@@ -423,41 +421,6 @@ void SqlEditor::OnKillFocus(wxFocusEvent& event)
     if (CallTipActive())
         CallTipCancel();
     event.Skip();   // let the STC do it's job
-}
-//-----------------------------------------------------------------------------
-void SqlEditor::OnMenuUndo(wxCommandEvent& WXUNUSED(event))
-{
-    Undo();
-}
-//-----------------------------------------------------------------------------
-void SqlEditor::OnMenuRedo(wxCommandEvent& WXUNUSED(event))
-{
-    Redo();
-}
-//-----------------------------------------------------------------------------
-void SqlEditor::OnMenuCut(wxCommandEvent& WXUNUSED(event))
-{
-    Cut();
-}
-//-----------------------------------------------------------------------------
-void SqlEditor::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
-{
-    Copy();
-}
-//-----------------------------------------------------------------------------
-void SqlEditor::OnMenuPaste(wxCommandEvent& WXUNUSED(event))
-{
-    Paste();
-}
-//-----------------------------------------------------------------------------
-void SqlEditor::OnMenuDelete(wxCommandEvent& WXUNUSED(event))
-{
-    Clear();
-}
-//-----------------------------------------------------------------------------
-void SqlEditor::OnMenuSelectAll(wxCommandEvent& WXUNUSED(event))
-{
-    SelectAll();
 }
 //-----------------------------------------------------------------------------
 void SqlEditor::OnMenuFindSelected(wxCommandEvent& WXUNUSED(event))
@@ -478,11 +441,6 @@ void SqlEditor::OnMenuExecuteSelected(wxCommandEvent& WXUNUSED(event))
         frameM->execute(GetSelectedText(), wxT(";"));
     else
         frameM->parseStatements(GetSelectedText(), false, false, GetSelectionStart());
-}
-//-----------------------------------------------------------------------------
-void SqlEditor::OnMenuFind(wxCommandEvent& WXUNUSED(event))
-{
-    find(true);        // calls SearchableEditor::find(), true means that new search is needed
 }
 //-----------------------------------------------------------------------------
 void SqlEditor::OnMenuWrap(wxCommandEvent& WXUNUSED(event))
@@ -565,21 +523,9 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
     :BaseFrame(parent, id, title, pos, size, style), Observer(), databaseM(db)
 {
     loadingM = true;
+    buildToolbar();
+
     panel_contents = new wxPanel(this, -1);
-    button_new = new wxBitmapButton(panel_contents, ID_button_new, wxBitmap(sql_icons::new_xpm));
-    button_load = new wxBitmapButton(panel_contents, ID_button_load, wxBitmap(sql_icons::load_xpm));
-    button_save = new wxBitmapButton(panel_contents, ID_button_save, wxBitmap(sql_icons::save_xpm));
-    button_saveas = new wxBitmapButton(panel_contents, ID_button_saveas, wxBitmap(sql_icons::saveas_xpm));
-    button_prev = new wxBitmapButton(panel_contents, ID_button_prev, wxBitmap(sql_icons::left_xpm));
-    button_next = new wxBitmapButton(panel_contents, ID_button_next, wxBitmap(sql_icons::right_xpm));
-    button_history = new wxBitmapButton(panel_contents, ID_button_history, wxBitmap(sql_icons::history_xpm));
-    button_execute = new wxButton(panel_contents, ID_button_execute, _("Execute (F4)"));
-    button_commit = new wxButton(panel_contents, ID_button_commit, _("Commit (F5)"));
-    button_rollback = new wxButton(panel_contents, ID_button_rollback, _("Rollback (F8)"));
-    button_plan = new wxButton(panel_contents, ID_button_plan, _("Show plan"));
-    button_toggle = new wxButton(panel_contents, ID_button_toggle, _("Toggle view"));
-    button_delete = new wxButton(panel_contents, ID_button_delete, _("Delete row"));
-    button_insert = new wxButton(panel_contents, ID_button_insert, _("Insert row"));
     splitter_window_1 = new wxSplitterWindow(panel_contents, -1);
     panel_splitter_bottom = new wxPanel(splitter_window_1, -1);
     notebook_1 = new wxNotebook(panel_splitter_bottom, -1, wxDefaultPosition, wxDefaultSize, 0);
@@ -597,6 +543,123 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
     do_layout();
     setDatabase(db);    // must come after set_properties
     loadingM = false;
+    buildMainMenu();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::buildToolbar()
+{
+    //toolBarM = CreateToolBar( wxTB_FLAT|wxTB_HORIZONTAL|wxTB_TEXT, wxID_ANY );
+    toolBarM = CreateToolBar( wxTB_FLAT|wxTB_HORIZONTAL, wxID_ANY );
+    toolBarM->SetToolBitmapSize( wxSize( 16,16 ) );
+
+    toolBarM->AddTool( wxID_NEW, _("New"), wxBitmap(sql_icons::new_xpm), wxNullBitmap,
+        wxITEM_NORMAL, _("New window"), _("New window") );
+    toolBarM->AddTool( wxID_OPEN, _("Open"), wxBitmap(sql_icons::load_xpm), wxNullBitmap,
+        wxITEM_NORMAL, _("Load a file"), _("Load a file") );
+    toolBarM->AddTool( wxID_SAVE, _("Save"), wxBitmap(sql_icons::save_xpm), wxNullBitmap,
+        wxITEM_NORMAL,  _("Save to file"), _("Save to file") );
+    toolBarM->AddTool( wxID_SAVEAS, _("Save as"), wxBitmap(sql_icons::saveas_xpm), wxNullBitmap,
+        wxITEM_NORMAL, _("Save under different name"), _("Save under different name") );
+    toolBarM->AddSeparator();
+
+    toolBarM->AddTool( Menu_History_Previous, _("Back"), wxBitmap(sql_icons::left_xpm), wxNullBitmap,
+        wxITEM_NORMAL, _("Go to previous statement"), _("Go to previous statement") );
+    toolBarM->AddTool( Menu_History_Next, _("Next"), wxBitmap(sql_icons::right_xpm), wxNullBitmap,
+        wxITEM_NORMAL, _("Go to next statement"), _("Go to next statement") );
+    toolBarM->AddTool( Menu_History_Search, _("History"), wxBitmap(sql_icons::history_xpm), wxNullBitmap,
+        wxITEM_NORMAL, _("Browse and search statement history"), _("Browse and search statement history") );
+    toolBarM->AddSeparator();
+
+    toolBarM->AddTool( Menu_Query_Execute, _("Execute"), wxBitmap(sql_icons::execute16_xpm), wxNullBitmap,
+        wxITEM_NORMAL, _("F4 - Execute statement(s)"), _("F4 - Execute statement(s)") );
+    toolBarM->AddTool( Menu_Query_Commit, _("Commit"), wxBitmap(sql_icons::ok_xpm), wxNullBitmap,
+        wxITEM_NORMAL, _("F5 - Commit transaction"), _("F5 - Commit transaction") );
+    toolBarM->AddTool( Menu_Query_Rollback, _("Rollback"), wxBitmap(sql_icons::redx_xpm), wxNullBitmap,
+        wxITEM_NORMAL, _("F8 - Rollback transaction"), _("F8 - Rollback transaction") );
+    toolBarM->AddTool( Menu_Query_Show_plan, _("Show plan"), wxBitmap(sql_icons::procedure_xpm), wxNullBitmap,
+        wxITEM_NORMAL, _("Show query execution plan"), _("Show query execution plan") );
+    toolBarM->AddSeparator();
+
+    toolBarM->AddTool( Menu_DataGrid_Insert_row, _("Insert row"), wxBitmap(sql_icons::insert16_xpm), wxNullBitmap,
+        wxITEM_NORMAL, _("Insert a new row in recordset"), _("Insert a new row in recordset") );
+    toolBarM->AddTool( Menu_DataGrid_Delete_row, _("Delete row"), wxBitmap(sql_icons::delete16_xpm), wxNullBitmap,
+        wxITEM_NORMAL, _("Delete row(s) from recordset"), _("Delete row(s) from recordset") );
+
+    toolBarM->Realize();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::buildMainMenu()
+{
+    menuBarM = new wxMenuBar();
+
+    wxMenu* fileMenu = new wxMenu();                    // dynamic menus, created at runtime
+    fileMenu->Append(wxID_NEW,      _("&New..."));
+    fileMenu->Append(wxID_OPEN,     _("&Open..."));
+    fileMenu->Append(wxID_SAVE,     _("&Save"));
+    fileMenu->Append(wxID_SAVEAS,   _("Save &As..."));
+    fileMenu->AppendSeparator();
+    fileMenu->Append(wxID_CLOSE,    _("&Close"));
+    menuBarM->Append(fileMenu, _("&File"));
+
+    wxMenu* editMenu = new wxMenu();
+    editMenu->Append(wxID_UNDO,         _("&Undo"));
+    editMenu->Append(wxID_REDO,         _("&Redo"));
+    editMenu->AppendSeparator();
+    editMenu->Append(wxID_CUT,          _("Cu&t"));
+    editMenu->Append(wxID_COPY,         _("&Copy"));
+    editMenu->Append(wxID_PASTE,        _("&Paste"));
+    editMenu->Append(wxID_DELETE,       _("&Delete"));
+    editMenu->AppendSeparator();
+    editMenu->Append(wxID_SELECTALL,    _("Select &all"));
+    editMenu->AppendSeparator();
+    editMenu->Append(wxID_REPLACE,      _("Fi&nd and Replace"));
+    menuBarM->Append(editMenu, _("&Edit"));
+
+    wxMenu* viewMenu = new wxMenu();
+    viewMenu->Append(Menu_View_Editor,          _("Ed&itor"));
+    viewMenu->Append(Menu_View_Statistics,      _("&Statistics"));
+    viewMenu->Append(Menu_View_Data,            _("&Data"));
+    viewMenu->Append(Menu_View_Split_view,      _("Sp&lit view"));
+    viewMenu->AppendSeparator();
+    viewMenu->Append(Menu_View_Set_editor_font, _("Se&t editor font"));
+    viewMenu->AppendSeparator();
+    viewMenu->Append(Menu_View_Focus_editor,    _("Focus &editor"));
+    viewMenu->Append(Menu_View_Focus_grid,      _("Focus &grid"));
+    viewMenu->AppendSeparator();
+    viewMenu->AppendCheckItem(Menu_View_Wrap_long_lines,    _("&Wrap long lines"));
+    menuBarM->Append(viewMenu, _("&View"));
+
+    wxMenu* historyMenu = new wxMenu();
+    historyMenu->Append(Menu_History_Next,      _("&Next"));
+    historyMenu->Append(Menu_History_Previous,  _("&Previous"));
+    historyMenu->Append(Menu_History_Search,    _("&Search"));
+    menuBarM->Append(historyMenu, _("&History"));
+
+    wxMenu* queryMenu = new wxMenu();
+    queryMenu->Append(Menu_Query_Execute,           _("&Execute"));
+    queryMenu->Append(Menu_Query_Show_plan,         _("Show &plan"));
+    queryMenu->Append(Menu_Query_Execute_selection, _("Execu&te selection"));
+    queryMenu->AppendSeparator();
+    queryMenu->Append(Menu_Query_Commit,             _("&Commit"));
+    queryMenu->Append(Menu_Query_Rollback,           _("&Rollback"));
+    menuBarM->Append(queryMenu, _("&Query"));
+
+    wxMenu* gridMenu = new wxMenu();
+    gridMenu->Append(Menu_DataGrid_Insert_row,      _("I&nsert row"));
+    gridMenu->Append(Menu_DataGrid_Delete_row,      _("&Delete row"));
+    gridMenu->AppendSeparator();
+    gridMenu->Append(Menu_DataGrid_Copy,            _("&Copy"));
+    gridMenu->Append(Menu_DataGrid_Copy_as_insert,  _("Copy as &insert statements"));
+    gridMenu->Append(Menu_DataGrid_Copy_as_update,  _("Copy as &update statements"));
+    gridMenu->AppendSeparator();
+    gridMenu->Append(Menu_DataGrid_Save_as_html,    _("Save as &html"));
+    gridMenu->Append(Menu_DataGrid_Save_as_csv,     _("Save as &csv"));
+    gridMenu->AppendSeparator();
+    gridMenu->Append(Menu_DataGrid_Set_header_font, _("Set &header font"));
+    gridMenu->Append(Menu_DataGrid_Set_cell_font,   _("Set ce&ll font"));
+    menuBarM->Append(gridMenu, _("&Data Grid"));
+
+    SetMenuBar(menuBarM);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::set_properties()
@@ -619,21 +682,6 @@ void ExecuteSqlFrame::set_properties()
     grid_data = new DataGrid(notebook_pane_2, ID_grid_data);
     grid_data->SetTable(new DataGridTable(statementM, databaseM), true);
     splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
-
-    button_new->SetToolTip(_("New window"));
-    button_load->SetToolTip(_("Load"));
-    button_save->SetToolTip(_("Save"));
-    button_saveas->SetToolTip(_("Save As..."));
-    button_prev->SetToolTip(_("Previous"));
-    button_next->SetToolTip(_("Next"));
-    button_history->SetToolTip(_("Statement History"));
-    button_execute->SetToolTip(_("F4 - Execute SQL statement"));
-    button_commit->SetToolTip(_("F5 - Commit transaction"));
-    button_rollback->SetToolTip(_("F8 - Rollback transaction"));
-    button_plan->SetToolTip(_("Show execution plan for query"));
-    button_delete->SetToolTip(_("Delete row of selected cell"));
-    button_insert->SetToolTip(_("Insert a new row in recordset"));
-
     splitter_window_1->Unsplit();
 
     wxBitmap bmp = wxBitmap(sql_icons::sqlicon_xpm);
@@ -655,24 +703,6 @@ void ExecuteSqlFrame::do_layout()
     wxBoxSizer* sizer_7 = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer* sizer_6 = new wxBoxSizer(wxHORIZONTAL);
     wxBoxSizer* sizer_4 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
-    sizer_3->Add(button_new, 0, wxALL, 1);
-    sizer_3->Add(button_load, 0, wxALL, 1);
-    sizer_3->Add(button_save, 0, wxALL, 1);
-    sizer_3->Add(button_saveas, 0, wxALL, 1);
-    sizer_3->Add(button_prev, 0, wxALL, 1);
-    sizer_3->Add(button_next, 0, wxALL, 1);
-    sizer_3->Add(button_history, 0, wxALL, 1);
-    sizer_3->Add(10, 5, 0, 0, 0);
-    sizer_3->Add(button_execute, 0, wxALL, 3);
-    sizer_3->Add(button_commit, 0, wxALL, 3);
-    sizer_3->Add(button_rollback, 0, wxALL, 3);
-    sizer_3->Add(button_plan, 0, wxALL, 3);
-    sizer_3->Add(10, 5, 0, 0, 0);
-    sizer_3->Add(button_toggle, 0, wxALL, 3);
-    sizer_3->Add(button_delete, 0, wxALL, 3);
-    sizer_3->Add(button_insert, 0, wxALL, 3);
-    sizer_2->Add(sizer_3, 0, wxALL|wxEXPAND, 2);
     sizer_4->Add(styled_text_ctrl_sql, 1, wxEXPAND, 0);
     panel_splitter_top->SetAutoLayout(true);
     panel_splitter_top->SetSizer(sizer_4);
@@ -733,20 +763,92 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_CHAR_HOOK(ExecuteSqlFrame::OnKeyDown)
     EVT_CLOSE(ExecuteSqlFrame::OnClose)
 
-    EVT_BUTTON(ExecuteSqlFrame::ID_button_new, ExecuteSqlFrame::OnButtonNewClick)
-    EVT_BUTTON(ExecuteSqlFrame::ID_button_load, ExecuteSqlFrame::OnButtonLoadClick)
-    EVT_BUTTON(ExecuteSqlFrame::ID_button_save, ExecuteSqlFrame::OnButtonSaveClick)
-    EVT_BUTTON(ExecuteSqlFrame::ID_button_saveas, ExecuteSqlFrame::OnButtonSaveAsClick)
-    EVT_BUTTON(ExecuteSqlFrame::ID_button_prev, ExecuteSqlFrame::OnButtonPrevClick)
-    EVT_BUTTON(ExecuteSqlFrame::ID_button_next, ExecuteSqlFrame::OnButtonNextClick)
-    EVT_BUTTON(ExecuteSqlFrame::ID_button_history, ExecuteSqlFrame::OnButtonHistoryClick)
-    EVT_BUTTON(ExecuteSqlFrame::ID_button_execute, ExecuteSqlFrame::OnButtonExecuteClick)
-    EVT_BUTTON(ExecuteSqlFrame::ID_button_commit, ExecuteSqlFrame::OnButtonCommitClick)
-    EVT_BUTTON(ExecuteSqlFrame::ID_button_rollback, ExecuteSqlFrame::OnButtonRollbackClick)
-    EVT_BUTTON(ExecuteSqlFrame::ID_button_plan, ExecuteSqlFrame::OnButtonPlanClick)
-    EVT_BUTTON(ExecuteSqlFrame::ID_button_toggle, ExecuteSqlFrame::OnButtonToggleClick)
-    EVT_BUTTON(ExecuteSqlFrame::ID_button_delete, ExecuteSqlFrame::OnButtonDeleteClick)
-    EVT_BUTTON(ExecuteSqlFrame::ID_button_insert, ExecuteSqlFrame::OnButtonInsertClick)
+    EVT_MENU(wxID_NEW,      ExecuteSqlFrame::OnMenuNew)
+    EVT_MENU(wxID_OPEN,     ExecuteSqlFrame::OnMenuOpen)
+    EVT_MENU(wxID_SAVE,     ExecuteSqlFrame::OnMenuSave)
+    EVT_MENU(wxID_SAVEAS,   ExecuteSqlFrame::OnMenuSaveAs)
+    EVT_MENU(wxID_CLOSE,    ExecuteSqlFrame::OnMenuClose)
+
+    EVT_MENU(wxID_UNDO,     ExecuteSqlFrame::OnMenuUndo)
+    EVT_MENU(wxID_REDO,     ExecuteSqlFrame::OnMenuRedo)
+    EVT_MENU(wxID_CUT,      ExecuteSqlFrame::OnMenuCut)
+    EVT_MENU(wxID_COPY,     ExecuteSqlFrame::OnMenuCopy)
+    EVT_MENU(wxID_PASTE,    ExecuteSqlFrame::OnMenuPaste)
+    EVT_MENU(wxID_DELETE,   ExecuteSqlFrame::OnMenuDelete)
+    EVT_MENU(wxID_SELECTALL,ExecuteSqlFrame::OnMenuSelectAll)
+    EVT_MENU(wxID_REPLACE,  ExecuteSqlFrame::OnMenuReplace)
+
+    EVT_UPDATE_UI(wxID_UNDO,    ExecuteSqlFrame::OnMenuUpdateUndo)
+    EVT_UPDATE_UI(wxID_REDO,    ExecuteSqlFrame::OnMenuUpdateRedo)
+    EVT_UPDATE_UI(wxID_CUT,     ExecuteSqlFrame::OnMenuUpdateCut)
+    EVT_UPDATE_UI(wxID_COPY,    ExecuteSqlFrame::OnMenuUpdateCopy)
+    EVT_UPDATE_UI(wxID_PASTE,   ExecuteSqlFrame::OnMenuUpdatePaste)
+    EVT_UPDATE_UI(wxID_DELETE,  ExecuteSqlFrame::OnMenuUpdateDelete)
+
+
+    EVT_MENU(ExecuteSqlFrame::Menu_View_Editor,
+        ExecuteSqlFrame::OnMenuEditor)
+    EVT_MENU(ExecuteSqlFrame::Menu_View_Statistics,
+        ExecuteSqlFrame::OnMenuStatistics)
+    EVT_MENU(ExecuteSqlFrame::Menu_View_Data,
+        ExecuteSqlFrame::OnMenuData)
+    EVT_MENU(ExecuteSqlFrame::Menu_View_Split_view,
+        ExecuteSqlFrame::OnMenuSplitView)
+    EVT_MENU(ExecuteSqlFrame::Menu_View_Set_editor_font,
+        ExecuteSqlFrame::OnMenuSetEditorFont)
+    EVT_MENU(ExecuteSqlFrame::Menu_View_Wrap_long_lines,
+        ExecuteSqlFrame::OnMenuToggleWrap)
+    EVT_MENU(ExecuteSqlFrame::Menu_View_Focus_editor,
+        ExecuteSqlFrame::OnMenuFocusEditor)
+    EVT_MENU(ExecuteSqlFrame::Menu_View_Focus_grid,
+        ExecuteSqlFrame::OnMenuFocusGrid)
+
+    EVT_MENU(ExecuteSqlFrame::Menu_History_Next,    ExecuteSqlFrame::OnMenuHistoryNext)
+    EVT_MENU(ExecuteSqlFrame::Menu_History_Previous,ExecuteSqlFrame::OnMenuHistoryPrev)
+    EVT_MENU(ExecuteSqlFrame::Menu_History_Search,  ExecuteSqlFrame::OnMenuHistorySearch)
+
+    EVT_UPDATE_UI(ExecuteSqlFrame::Menu_History_Next,
+        ExecuteSqlFrame::OnMenuUpdateHistoryNext)
+    EVT_UPDATE_UI(ExecuteSqlFrame::Menu_History_Previous,
+        ExecuteSqlFrame::OnMenuUpdateHistoryPrev)
+
+    EVT_MENU(ExecuteSqlFrame::Menu_Query_Execute,   ExecuteSqlFrame::OnMenuExecute)
+    EVT_MENU(ExecuteSqlFrame::Menu_Query_Show_plan, ExecuteSqlFrame::OnMenuShowPlan)
+    EVT_MENU(ExecuteSqlFrame::Menu_Query_Execute_selection,
+        ExecuteSqlFrame::OnMenuExecuteSelection)
+    EVT_MENU(ExecuteSqlFrame::Menu_Query_Commit,    ExecuteSqlFrame::OnMenuCommit)
+    EVT_MENU(ExecuteSqlFrame::Menu_Query_Rollback,  ExecuteSqlFrame::OnMenuRollback)
+
+    EVT_MENU(ExecuteSqlFrame::Menu_DataGrid_Insert_row,
+        ExecuteSqlFrame::OnMenuGridInsertRow)
+    EVT_MENU(ExecuteSqlFrame::Menu_DataGrid_Delete_row,
+        ExecuteSqlFrame::OnMenuGridDeleteRow)
+    EVT_MENU(ExecuteSqlFrame::Menu_DataGrid_Copy,
+        ExecuteSqlFrame::OnMenuGridCopy)
+    EVT_MENU(ExecuteSqlFrame::Menu_DataGrid_Copy_as_insert,
+        ExecuteSqlFrame::OnMenuGridCopyAsInsert)
+    EVT_MENU(ExecuteSqlFrame::Menu_DataGrid_Copy_as_update,
+        ExecuteSqlFrame::OnMenuGridCopyAsUpdate)
+    EVT_MENU(ExecuteSqlFrame::Menu_DataGrid_Save_as_html,
+        ExecuteSqlFrame::OnMenuGridSaveAsHtml)
+    EVT_MENU(ExecuteSqlFrame::Menu_DataGrid_Save_as_csv,
+        ExecuteSqlFrame::OnMenuGridSaveAsCsv)
+    EVT_MENU(ExecuteSqlFrame::Menu_DataGrid_Set_header_font,
+        ExecuteSqlFrame::OnMenuGridGridHeaderFont)
+    EVT_MENU(ExecuteSqlFrame::Menu_DataGrid_Set_cell_font,
+        ExecuteSqlFrame::OnMenuGridGridCellFont)
+
+    EVT_UPDATE_UI(ExecuteSqlFrame::Menu_DataGrid_Copy,
+        ExecuteSqlFrame::OnMenuUpdateGridCopy)
+    EVT_UPDATE_UI(ExecuteSqlFrame::Menu_DataGrid_Copy_as_insert,
+        ExecuteSqlFrame::OnMenuUpdateGridCopyAsInsert)
+    EVT_UPDATE_UI(ExecuteSqlFrame::Menu_DataGrid_Copy_as_update,
+        ExecuteSqlFrame::OnMenuUpdateGridCopyAsUpdate)
+    EVT_UPDATE_UI(ExecuteSqlFrame::Menu_DataGrid_Save_as_html,
+        ExecuteSqlFrame::OnMenuUpdateGridSaveAsHtml)
+    EVT_UPDATE_UI(ExecuteSqlFrame::Menu_DataGrid_Save_as_csv,
+        ExecuteSqlFrame::OnMenuUpdateGridSaveAsCsv)
+
     EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_ROWCOUNT_CHANGED, \
         ExecuteSqlFrame::OnGridRowCountChanged)
     EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_STATEMENT, \
@@ -962,16 +1064,16 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
         switch (key)
         {
             case WXK_F4:
-                if (button_execute->IsEnabled())
-                    OnButtonExecuteClick(e);
+                if (toolBarM->GetToolEnabled(Menu_Query_Execute))
+                    OnMenuExecute(e);
                 return;         // needed on Linux
             case WXK_F5:
-                if (button_commit->IsEnabled())
-                    OnButtonCommitClick(e);
+                if (toolBarM->GetToolEnabled(Menu_Query_Commit))
+                    OnMenuCommit(e);
                 return;
             case WXK_F8:
-                if (button_rollback->IsEnabled())
-                    OnButtonRollbackClick(e);
+                if (toolBarM->GetToolEnabled(Menu_Query_Rollback))
+                    OnMenuRollback(e);
                 return;
             case WXK_F3:
                 styled_text_ctrl_sql->find(false);
@@ -1023,15 +1125,17 @@ void ExecuteSqlFrame::OnClose(wxCloseEvent& event)
     BaseFrame::OnClose(event);
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnButtonNewClick(wxCommandEvent& WXUNUSED(event))
+void ExecuteSqlFrame::OnMenuNew(wxCommandEvent& WXUNUSED(event))
 {
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(GetParent(), -1,
         _("Execute SQL statements"), databaseM);
-    // TODO: automatically copy selection to a new window
+    eff->styled_text_ctrl_sql->SetText(
+        styled_text_ctrl_sql->GetSelectedText()
+        );
     eff->Show();
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnButtonLoadClick(wxCommandEvent& WXUNUSED(event))
+void ExecuteSqlFrame::OnMenuOpen(wxCommandEvent& WXUNUSED(event))
 {
     wxFileDialog fd(this, _("Select file to load"), wxT(""), wxT(""),
         _("SQL Scripts (*.sql)|*.sql|All files (*.*)|*.*"),
@@ -1045,16 +1149,18 @@ void ExecuteSqlFrame::OnButtonLoadClick(wxCommandEvent& WXUNUSED(event))
         loadSqlFile(fd.GetPath());
 }
 //-----------------------------------------------------------------------------
-bool ExecuteSqlFrame::loadSqlFile(const wxString& filename)
+void ExecuteSqlFrame::OnMenuSave(wxCommandEvent& event)
 {
-    if (!styled_text_ctrl_sql->LoadFile(filename))
-        return false;
-    filenameM = filename;
-    SetTitle(filenameM);
-    return true;
+    if (filenameM.IsEmpty())
+        OnMenuSaveAs(event);
+    else
+    {
+        styled_text_ctrl_sql->SaveFile(filenameM);
+        statusbar_1->SetStatusText((_("File saved")), 2);
+    }
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnButtonSaveAsClick(wxCommandEvent& WXUNUSED(event))
+void ExecuteSqlFrame::OnMenuSaveAs(wxCommandEvent& WXUNUSED(event))
 {
     wxFileDialog fd(this, _("Select file to save"), wxT(""), wxT(""),
         _("SQL Scripts (*.sql)|*.sql|All files (*.*)|*.*"),
@@ -1073,38 +1179,162 @@ void ExecuteSqlFrame::OnButtonSaveAsClick(wxCommandEvent& WXUNUSED(event))
     statusbar_1->SetStatusText((_("File saved")), 2);
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnButtonSaveClick(wxCommandEvent& event)
+void ExecuteSqlFrame::OnMenuClose(wxCommandEvent& WXUNUSED(event))
 {
-    if (filenameM.IsEmpty())
-        OnButtonSaveAsClick(event);
-    else
+    this->Close();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUndo(wxCommandEvent& WXUNUSED(event))
+{
+    styled_text_ctrl_sql->Undo();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuRedo(wxCommandEvent& WXUNUSED(event))
+{
+    styled_text_ctrl_sql->Redo();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuCut(wxCommandEvent& WXUNUSED(event))
+{
+    styled_text_ctrl_sql->Cut();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
+{
+    styled_text_ctrl_sql->Copy();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuPaste(wxCommandEvent& WXUNUSED(event))
+{
+    styled_text_ctrl_sql->Paste();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuDelete(wxCommandEvent& WXUNUSED(event))
+{
+    styled_text_ctrl_sql->Clear();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuSelectAll(wxCommandEvent& WXUNUSED(event))
+{
+    styled_text_ctrl_sql->SelectAll();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuReplace(wxCommandEvent &WXUNUSED(event))
+{
+    styled_text_ctrl_sql->find(true);
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateUndo(wxUpdateUIEvent& event)
+{
+    event.Enable(styled_text_ctrl_sql->CanUndo());
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateRedo(wxUpdateUIEvent& event)
+{
+    event.Enable(styled_text_ctrl_sql->CanRedo());
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateCopy(wxUpdateUIEvent& event)
+{
+    event.Enable((styled_text_ctrl_sql->GetSelectedText().Len()>0));
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateCut(wxUpdateUIEvent& event)
+{
+    event.Enable((styled_text_ctrl_sql->GetSelectedText().Len()>0));
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateDelete(wxUpdateUIEvent& event)
+{
+    event.Enable((styled_text_ctrl_sql->GetSelectedText().Len()>0));
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdatePaste(wxUpdateUIEvent& event)
+{
+    event.Enable(styled_text_ctrl_sql->CanPaste());
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuEditor(wxCommandEvent& WXUNUSED(event))
+{
+    if (splitter_window_1->IsSplit())                    // screen is split -> show second
+        splitter_window_1->Unsplit(panel_splitter_bottom);
+    else if (!panel_splitter_top->IsShown()) // second is shown -> show first
     {
-        styled_text_ctrl_sql->SaveFile(filenameM);
-        statusbar_1->SetStatusText((_("File saved")), 2);
+        panel_splitter_top->Show();
+        panel_splitter_bottom->Show();
+        splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
+        splitter_window_1->Unsplit(panel_splitter_bottom);
     }
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::updateHistoryButtons()
+void ExecuteSqlFrame::OnMenuData(wxCommandEvent& WXUNUSED(event))
 {
-    StatementHistory& sh = StatementHistory::get(databaseM);
-    button_prev->Enable(historyPositionM > 0 && sh.size() > 0);
-    button_next->Enable(sh.size() > historyPositionM);
-}
-//-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnButtonPrevClick(wxCommandEvent& WXUNUSED(event))
-{
-    StatementHistory& sh = StatementHistory::get(databaseM);
-    if (historyPositionM > 0 && sh.size() > 0)
+    if (splitter_window_1->IsSplit())                    // screen is split -> show second
+        splitter_window_1->Unsplit(panel_splitter_top);
+    else if (!panel_splitter_bottom->IsShown()) // second is shown -> show first
     {
-        if (historyPositionM == sh.size())  // we're on local buffer => store it
-            localBuffer = styled_text_ctrl_sql->GetText();
-        historyPositionM--;
-        styled_text_ctrl_sql->SetText(sh.get(historyPositionM));
+        panel_splitter_top->Show();
+        panel_splitter_bottom->Show();
+        splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
+        splitter_window_1->Unsplit(panel_splitter_top);
     }
-    updateHistoryButtons();
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnButtonNextClick(wxCommandEvent& WXUNUSED(event))
+void ExecuteSqlFrame::OnMenuStatistics(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    prepareAndExecute(true);
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuSplitView(wxCommandEvent& WXUNUSED(event))
+{
+    if(!splitter_window_1->IsSplit()){
+        panel_splitter_top->Show();
+        panel_splitter_bottom->Show();
+        splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
+    }
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuSetEditorFont(wxCommandEvent& event)
+{
+    styled_text_ctrl_sql->OnMenuSetFont(event);
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuToggleWrap(wxCommandEvent& WXUNUSED(event))
+{
+    styled_text_ctrl_sql->SetWrapMode(
+        styled_text_ctrl_sql->GetWrapMode() == wxSTC_WRAP_WORD
+        ? wxSTC_WRAP_NONE : wxSTC_WRAP_WORD
+    );
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuFocusEditor(wxCommandEvent& WXUNUSED(event))
+{
+    if (!panel_splitter_top->IsShown())
+    {
+        panel_splitter_top->Show();
+        panel_splitter_bottom->Show();
+        splitter_window_1->SplitHorizontally(panel_splitter_top,
+            panel_splitter_bottom);
+    }
+    styled_text_ctrl_sql->SetFocus();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuFocusGrid(wxCommandEvent& WXUNUSED(event))
+{
+    if (!panel_splitter_bottom->IsShown())
+    {
+        panel_splitter_top->Show();
+        panel_splitter_bottom->Show();
+        splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
+    }
+    grid_data->SetFocus();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuHistoryNext(wxCommandEvent& WXUNUSED(event))
 {
     StatementHistory& sh = StatementHistory::get(databaseM);
     if (historyPositionM != sh.size())  // we're already at the end?
@@ -1118,12 +1348,233 @@ void ExecuteSqlFrame::OnButtonNextClick(wxCommandEvent& WXUNUSED(event))
     updateHistoryButtons();
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnButtonHistoryClick(wxCommandEvent& WXUNUSED(event))
+void ExecuteSqlFrame::OnMenuHistoryPrev(wxCommandEvent& WXUNUSED(event))
+{
+    StatementHistory& sh = StatementHistory::get(databaseM);
+    if (historyPositionM > 0 && sh.size() > 0)
+    {
+        if (historyPositionM == sh.size())  // we're on local buffer => store it
+            localBuffer = styled_text_ctrl_sql->GetText();
+        historyPositionM--;
+        styled_text_ctrl_sql->SetText(sh.get(historyPositionM));
+    }
+    updateHistoryButtons();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuHistorySearch(wxCommandEvent& WXUNUSED(event))
 {
     StatementHistory& sh = StatementHistory::get(databaseM);
     StatementHistoryDialog *shf = new StatementHistoryDialog(this, &sh);
     if (shf->ShowModal() == wxID_OK)
         setSql(shf->getSql());
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateHistoryNext(wxUpdateUIEvent& event)
+{
+    StatementHistory& sh = StatementHistory::get(databaseM);
+    event.Enable(sh.size() > historyPositionM);
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateHistoryPrev(wxUpdateUIEvent& event)
+{
+    StatementHistory& sh = StatementHistory::get(databaseM);
+    event.Enable(historyPositionM > 0 && sh.size() > 0);
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuExecute(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    clearStats();
+    prepareAndExecute(false);
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuShowPlan(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    prepareAndExecute(true);
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuExecuteSelection(wxCommandEvent& WXUNUSED(event))
+{
+    if (config().get(wxT("SQLEditorExecuteClears"), false))
+        clearStats();
+
+    if (config().get(wxT("TreatAsSingleStatement"), false))
+        execute(styled_text_ctrl_sql->GetSelectedText(), wxT(";"));
+    else
+        parseStatements(styled_text_ctrl_sql->GetSelectedText(),
+            false,
+            false,
+            styled_text_ctrl_sql->GetSelectionStart()
+            );
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuGridInsertRow(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    DataGridTable *tb = grid_data->getDataGridTable();
+    if (tb && grid_data->GetNumberCols())
+    {
+        wxArrayString tables;
+        tb->getTableNames(tables);
+        wxString tab;
+        if (tables.GetCount() == 0)
+            throw FRError(_("No valid tables found."));
+        if (tables.GetCount() == 1)
+            tab = tables[0];
+        else
+        {   // show list of tables for user to select into which one to insert
+            tab = wxGetSingleChoice(_("Select a table"),
+                _("Multiple tables found"), tables, this);
+            if (tab.IsEmpty())
+                return;
+        }
+
+        // show dialog to enter values
+        InsertDialog id(this, tab, tb, statementM, databaseM);
+        id.ShowModal();
+    }
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuGridDeleteRow(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    if (!grid_data->getDataGridTable() || !grid_data->GetNumberRows())
+        return;
+
+    // M.B. when this is enabled the grid behaves strange on GTK2 (wx2.8.6)
+    // when deleting multiple items. I didn't test other platforms
+    // grid_data->BeginBatch();
+
+    // M.B. This only works good when rows are selected by clicking on row
+    // header and it is impossible to select a range which is off screen
+    // - even using shift key (I only tried with GTK2 wx2.8.6).
+    // wxArrayInt ai = grid_data->GetSelectedRows();
+    // size_t count = ai.GetCount();
+
+    // ...therefore, we iterate the rows ourselves
+    wxArrayInt ai;
+    size_t count = 0;
+    for (int i = 0; i < grid_data->GetNumberRows(); i++)
+    {
+        for (int j = 0; j < grid_data->GetNumberCols(); j++)
+        {
+            if (grid_data->IsInSelection(i, j))
+            {
+                count++;
+                ai.Add(i);
+                break;
+            }
+        }
+    }
+
+    if (count > 1 && wxOK != showQuestionDialog(this,
+        _("Multiple rows selected"),
+        wxString::Format(_("Are you sure you wish to delete %d rows?"),
+            count),
+        AdvancedMessageDialogButtonsOkCancel(_("Delete"))))
+    {
+        return;
+    }
+
+    if (count == 0) // else - delete the row with cursor
+        grid_data->DeleteRows(grid_data->GetGridCursorRow(), 1);
+    else
+    {
+        while (count--)
+            if (!grid_data->DeleteRows(ai.Item(count), 1))
+                return;
+    }
+
+    // grid_data->EndBatch();   // see comment for BeginBatch above
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuGridCopy(wxCommandEvent& WXUNUSED(event))
+{
+    grid_data->copyToCB();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuGridCopyAsInsert(wxCommandEvent& WXUNUSED(event))
+{
+    grid_data->copyToCBAsInsert();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuGridCopyAsUpdate(wxCommandEvent& WXUNUSED(event))
+{
+    grid_data->copyToCBAsUpdate();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuGridSaveAsHtml(wxCommandEvent& WXUNUSED(event))
+{
+    grid_data->saveAsHTML();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuGridSaveAsCsv(wxCommandEvent& WXUNUSED(event))
+{
+    grid_data->saveAsCSV();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuGridGridHeaderFont(wxCommandEvent& WXUNUSED(event))
+{
+    grid_data->setHeaderFont();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuGridGridCellFont(wxCommandEvent& WXUNUSED(event))
+{
+    grid_data->setCellFont();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateGridCopy(wxUpdateUIEvent& event)
+{
+    event.Enable(grid_data->IsSelection());
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateGridCopyAsInsert(wxUpdateUIEvent& event)
+{
+    event.Enable(grid_data->IsSelection());
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateGridCopyAsUpdate(wxUpdateUIEvent& event)
+{
+    event.Enable(grid_data->IsSelection());
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateGridSaveAsHtml(wxUpdateUIEvent& event)
+{
+    event.Enable(grid_data->IsSelection());
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateGridSaveAsCsv(wxUpdateUIEvent& event)
+{
+    event.Enable(grid_data->IsSelection());
+}
+//-----------------------------------------------------------------------------
+bool ExecuteSqlFrame::loadSqlFile(const wxString& filename)
+{
+    if (!styled_text_ctrl_sql->LoadFile(filename))
+        return false;
+    filenameM = filename;
+    SetTitle(filenameM);
+    return true;
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::updateHistoryButtons()
+{
+    StatementHistory& sh = StatementHistory::get(databaseM);
+    toolBarM->EnableTool(Menu_History_Previous, historyPositionM > 0 && sh.size() > 0);
+    toolBarM->EnableTool(Menu_History_Next, sh.size() > historyPositionM);
 }
 //-----------------------------------------------------------------------------
 //! enable/disable and show/hide controls depending of transaction status
@@ -1139,8 +1590,8 @@ void ExecuteSqlFrame::InTransaction(bool started)
         grid_data->ClearGrid();
         statusbar_1->SetStatusText(wxEmptyString, 1);
     }
-    button_commit->Enable(started);
-    button_rollback->Enable(started);
+    toolBarM->EnableTool(Menu_Query_Commit, started);
+    toolBarM->EnableTool(Menu_Query_Rollback, started);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::setSql(wxString sql)
@@ -1152,16 +1603,6 @@ void ExecuteSqlFrame::clearStats()
 {
     if (config().get(wxT("SQLEditorExecuteClears"), false))
         styled_text_ctrl_stats->ClearAll();
-}
-//-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnButtonExecuteClick(wxCommandEvent& WXUNUSED(event))
-{
-    FR_TRY
-
-    clearStats();
-    prepareAndExecute(false);
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
@@ -1264,8 +1705,8 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
     if (closeWhenDone)
     {
         closeWhenTransactionDoneM = true;
-        button_execute->Disable();
-        button_commit->SetFocus();
+        toolBarM->EnableTool(Menu_Query_Execute, false);
+        // TODO: HOWTO focus toolbar button? button_commit->SetFocus();
     }
 
     return true;
@@ -1429,106 +1870,11 @@ void ExecuteSqlFrame::SplitScreen()
     }
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnButtonCommitClick(wxCommandEvent& WXUNUSED(event))
+void ExecuteSqlFrame::OnMenuCommit(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
     commitTransaction();
-
-    FR_CATCH
-}
-//-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnButtonPlanClick(wxCommandEvent& WXUNUSED(event))
-{
-    FR_TRY
-
-    prepareAndExecute(true);
-
-    FR_CATCH
-}
-//-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnButtonDeleteClick(wxCommandEvent& WXUNUSED(event))
-{
-    FR_TRY
-
-    if (!grid_data->getDataGridTable() || !grid_data->GetNumberRows())
-        return;
-
-    // M.B. when this is enabled the grid behaves strange on GTK2 (wx2.8.6)
-    // when deleting multiple items. I didn't test other platforms
-    // grid_data->BeginBatch();
-
-    // M.B. This only works good when rows are selected by clicking on row
-    // header and it is impossible to select a range which is off screen
-    // - even using shift key (I only tried with GTK2 wx2.8.6).
-    // wxArrayInt ai = grid_data->GetSelectedRows();
-    // size_t count = ai.GetCount();
-
-    // ...therefore, we iterate the rows ourselves
-    wxArrayInt ai;
-    size_t count = 0;
-    for (int i = 0; i < grid_data->GetNumberRows(); i++)
-    {
-        for (int j = 0; j < grid_data->GetNumberCols(); j++)
-        {
-            if (grid_data->IsInSelection(i, j))
-            {
-                count++;
-                ai.Add(i);
-                break;
-            }
-        }
-    }
-
-    if (count > 1 && wxOK != showQuestionDialog(this,
-        _("Multiple rows selected"),
-        wxString::Format(_("Are you sure you wish to delete %d rows?"),
-            count),
-        AdvancedMessageDialogButtonsOkCancel(_("Delete"))))
-    {
-        return;
-    }
-
-    if (count == 0) // else - delete the row with cursor
-        grid_data->DeleteRows(grid_data->GetGridCursorRow(), 1);
-    else
-    {
-        while (count--)
-            if (!grid_data->DeleteRows(ai.Item(count), 1))
-                return;
-    }
-
-    // grid_data->EndBatch();   // see comment for BeginBatch above
-
-    FR_CATCH
-}
-//-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnButtonInsertClick(wxCommandEvent& WXUNUSED(event))
-{
-    FR_TRY
-
-    DataGridTable *tb = grid_data->getDataGridTable();
-    if (tb && grid_data->GetNumberCols())
-    {
-        wxArrayString tables;
-        tb->getTableNames(tables);
-        wxString tab;
-        if (tables.GetCount() == 0)
-            throw FRError(_("No valid tables found."));
-        if (tables.GetCount() == 1)
-            tab = tables[0];
-        else
-        {   // show list of tables for user to select into which one to insert
-            tab = wxGetSingleChoice(_("Select a table"),
-                _("Multiple tables found"), tables, this);
-            if (tab.IsEmpty())
-                return;
-        }
-
-        // show dialog to enter values
-        InsertDialog id(this, tab, tb, statementM, databaseM);
-        id.ShowModal();
-    }
 
     FR_CATCH
 }
@@ -1605,7 +1951,7 @@ bool ExecuteSqlFrame::commitTransaction()
     return true;
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnButtonRollbackClick(wxCommandEvent& WXUNUSED(event))
+void ExecuteSqlFrame::OnMenuRollback(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
@@ -1657,7 +2003,8 @@ void ExecuteSqlFrame::rollbackTransaction()
 //-----------------------------------------------------------------------------
 //! toggle the views in the following order:
 //! ... -> SQL_entry_box -> Split View -> Stats&Data -> ...
-void ExecuteSqlFrame::OnButtonToggleClick(wxCommandEvent& WXUNUSED(event))
+/*
+void ExecuteSqlFrame::OnMenuButtonToggleClick(wxCommandEvent& WXUNUSED(event))
 {
     if (splitter_window_1->IsSplit())                    // screen is split -> show second
         splitter_window_1->Unsplit(panel_splitter_top);
@@ -1671,6 +2018,7 @@ void ExecuteSqlFrame::OnButtonToggleClick(wxCommandEvent& WXUNUSED(event))
         splitter_window_1->Unsplit(panel_splitter_bottom);
     }
 }
+*/
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent &event)
 {
@@ -1679,7 +2027,7 @@ void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent &event)
     s.Printf(_("%d rows fetched"), rowsFetched);
     statusbar_1->SetStatusText(s, 1);
 
-    button_delete->Enable(rowsFetched > 0);
+    toolBarM->EnableTool(Menu_DataGrid_Delete_row, rowsFetched > 0);
 
     // TODO: we could make some bool flag, so that this happens only once per execute()
     //       to fix the problem when user does the select, unsplits the window

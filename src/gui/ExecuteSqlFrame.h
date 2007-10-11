@@ -55,9 +55,9 @@ private:
     ExecuteSqlFrame *frameM;
     void setup();
 public:
-    enum { ID_MENU_UNDO = 300, ID_MENU_REDO, ID_MENU_CUT, ID_MENU_COPY, ID_MENU_PASTE, ID_MENU_DELETE,
-        ID_MENU_SELECT_ALL, ID_MENU_EXECUTE_SELECTED, ID_MENU_FIND_SELECTED, ID_MENU_WRAP, ID_MENU_SET_FONT,
-        ID_MENU_FIND
+    enum {
+        ID_MENU_EXECUTE_SELECTED = 300,
+        ID_MENU_FIND_SELECTED, ID_MENU_WRAP, ID_MENU_SET_FONT, ID_MENU_FIND
     };
 
     SqlEditor(wxWindow *parent, wxWindowID id, ExecuteSqlFrame *frame);
@@ -85,24 +85,44 @@ public:
     Database *getDatabase();
     void showProperties(wxString objectName);
     enum {
-        ID_button_new = 101,
-        ID_button_load,
-        ID_button_save,
-        ID_button_saveas,
-        ID_button_prev,
-        ID_button_next,
-        ID_button_history,
-        ID_button_execute,
-        ID_button_commit,
-        ID_button_rollback,
-        ID_button_toggle,
-        ID_button_delete,
-        ID_button_insert,
-        ID_button_plan,
-        ID_grid_data,
+        ID_grid_data = 101,
         ID_stc_sql
     };
 
+    enum {
+        //View:
+        Menu_View_Editor = 401,
+        Menu_View_Statistics,
+        Menu_View_Data,
+        Menu_View_Split_view,
+        Menu_View_Wrap_long_lines,
+        Menu_View_Set_editor_font,
+        Menu_View_Focus_grid,
+        Menu_View_Focus_editor,
+
+        //History
+        Menu_History_Next,
+        Menu_History_Previous,
+        Menu_History_Search,
+
+        //Query
+        Menu_Query_Execute,
+        Menu_Query_Show_plan,
+        Menu_Query_Execute_selection,
+        Menu_Query_Commit,
+        Menu_Query_Rollback,
+
+        //Data grid
+        Menu_DataGrid_Insert_row,
+        Menu_DataGrid_Delete_row,
+        Menu_DataGrid_Copy,
+        Menu_DataGrid_Copy_as_insert,
+        Menu_DataGrid_Copy_as_update,
+        Menu_DataGrid_Save_as_html,
+        Menu_DataGrid_Save_as_csv,
+        Menu_DataGrid_Set_header_font,
+        Menu_DataGrid_Set_cell_font
+    };
     // query parsing and execution
     void executeAllStatements(bool autoExecute = false);
     void prepareAndExecute(bool prepareOnly = false);
@@ -149,27 +169,73 @@ private:
     void OnSqlEditStartDrag(wxStyledTextEvent& event);      // enable click&remove selection
     wxString keywordsM;     // text used for autocomplete
     void setKeywords();
+    void buildMainMenu();
+    void buildToolbar();
 
     // events
     void OnClose(wxCloseEvent& event);
     void OnKeyDown(wxKeyEvent &event);
-    void OnButtonNewClick(wxCommandEvent &event);
-    void OnButtonLoadClick(wxCommandEvent &event);
-    void OnButtonSaveClick(wxCommandEvent &event);
-    void OnButtonSaveAsClick(wxCommandEvent &event);
-    void OnButtonPrevClick(wxCommandEvent &event);
-    void OnButtonNextClick(wxCommandEvent &event);
-    void OnButtonHistoryClick(wxCommandEvent &event);
-    void OnButtonExecuteClick(wxCommandEvent &event);
-    void OnButtonCommitClick(wxCommandEvent &event);
-    void OnButtonRollbackClick(wxCommandEvent &event);
-    void OnButtonToggleClick(wxCommandEvent &event);
-    void OnButtonDeleteClick(wxCommandEvent &event);
-    void OnButtonInsertClick(wxCommandEvent &event);
-    void OnButtonWrapClick(wxCommandEvent &event);
-    void OnButtonPlanClick(wxCommandEvent &event);
     void OnGridRowCountChanged(wxCommandEvent &event);
     void OnGridStatementExecuted(wxCommandEvent &event);
+
+    // menu events
+    void OnMenuNew(wxCommandEvent &event);
+    void OnMenuOpen(wxCommandEvent &event);
+    void OnMenuSave(wxCommandEvent &event);
+    void OnMenuSaveAs(wxCommandEvent &event);
+    void OnMenuClose(wxCommandEvent &event);
+
+    void OnMenuUndo(wxCommandEvent &event);
+    void OnMenuUpdateUndo(wxUpdateUIEvent& event);
+    void OnMenuRedo(wxCommandEvent &event);
+    void OnMenuUpdateRedo(wxUpdateUIEvent& event);
+    void OnMenuCut(wxCommandEvent &event);
+    void OnMenuUpdateCut(wxUpdateUIEvent& event);
+    void OnMenuCopy(wxCommandEvent &event);
+    void OnMenuUpdateCopy(wxUpdateUIEvent& event);
+    void OnMenuPaste(wxCommandEvent &event);
+    void OnMenuUpdatePaste(wxUpdateUIEvent& event);
+    void OnMenuDelete(wxCommandEvent &event);
+    void OnMenuUpdateDelete(wxUpdateUIEvent& event);
+    void OnMenuSelectAll(wxCommandEvent &event);
+    void OnMenuReplace(wxCommandEvent &event);
+
+    void OnMenuEditor(wxCommandEvent &event);
+    void OnMenuStatistics(wxCommandEvent &event);
+    void OnMenuData(wxCommandEvent &event);
+    void OnMenuSplitView(wxCommandEvent &event);
+    void OnMenuSetEditorFont(wxCommandEvent &event);
+    void OnMenuToggleWrap(wxCommandEvent &event);
+    void OnMenuFocusEditor(wxCommandEvent &event);
+    void OnMenuFocusGrid(wxCommandEvent &event);
+
+    void OnMenuHistoryNext(wxCommandEvent &event);
+    void OnMenuUpdateHistoryNext(wxUpdateUIEvent& event);
+    void OnMenuHistoryPrev(wxCommandEvent &event);
+    void OnMenuUpdateHistoryPrev(wxUpdateUIEvent& event);
+    void OnMenuHistorySearch(wxCommandEvent &event);
+
+    void OnMenuExecute(wxCommandEvent &event);
+    void OnMenuShowPlan(wxCommandEvent &event);
+    void OnMenuExecuteSelection(wxCommandEvent &event);
+    void OnMenuUpdateExecuteSelection(wxUpdateUIEvent& event);
+    void OnMenuCommit(wxCommandEvent &event);
+    void OnMenuRollback(wxCommandEvent &event);
+
+    void OnMenuGridInsertRow(wxCommandEvent &event);
+    void OnMenuGridDeleteRow(wxCommandEvent &event);
+    void OnMenuGridCopy(wxCommandEvent &event);
+    void OnMenuUpdateGridCopy(wxUpdateUIEvent& event);
+    void OnMenuGridCopyAsInsert(wxCommandEvent &event);
+    void OnMenuUpdateGridCopyAsInsert(wxUpdateUIEvent& event);
+    void OnMenuGridCopyAsUpdate(wxCommandEvent &event);
+    void OnMenuUpdateGridCopyAsUpdate(wxUpdateUIEvent& event);
+    void OnMenuGridSaveAsHtml(wxCommandEvent &event);
+    void OnMenuUpdateGridSaveAsHtml(wxUpdateUIEvent& event);
+    void OnMenuGridSaveAsCsv(wxCommandEvent &event);
+    void OnMenuUpdateGridSaveAsCsv(wxUpdateUIEvent& event);
+    void OnMenuGridGridHeaderFont(wxCommandEvent &event);
+    void OnMenuGridGridCellFont(wxCommandEvent &event);
 
     // begin wxGlade: ExecuteSqlFrame::methods
     void set_properties();
@@ -184,20 +250,6 @@ protected:
 
     wxPanel* panel_contents;
 
-    wxBitmapButton* button_new;
-    wxBitmapButton* button_load;
-    wxBitmapButton* button_save;
-    wxBitmapButton* button_saveas;
-    wxBitmapButton* button_prev;
-    wxBitmapButton* button_next;
-    wxBitmapButton* button_history;
-    wxButton* button_execute;
-    wxButton* button_commit;
-    wxButton* button_rollback;
-    wxButton* button_plan;
-    wxButton* button_toggle;
-    wxButton* button_delete;
-    wxButton* button_insert;
     wxSplitterWindow* splitter_window_1;
     wxPanel* panel_splitter_top;
     wxPanel* panel_splitter_bottom;
@@ -209,6 +261,9 @@ protected:
     wxStyledTextCtrl* styled_text_ctrl_stats;
 
     wxStatusBar* statusbar_1;
+
+    wxMenuBar* menuBarM;
+    wxToolBar* toolBarM;
 
     virtual const wxString getName() const;
     virtual void doReadConfigSettings(const wxString& prefix);
