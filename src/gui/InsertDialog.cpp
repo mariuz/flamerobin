@@ -453,6 +453,9 @@ void InsertDialog::OnEditFocusLost(wxFocusEvent& event)
 {
     FR_TRY
 
+    if (!databaseM) // dialog already closed
+        return;
+
     wxTextCtrl *tx = dynamic_cast<wxTextCtrl *>(event.GetEventObject());
     if (!tx)
         return;
@@ -583,6 +586,7 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
     gridTableM->addRow(bufferM, stm);
     bufferM = 0;
 
+    databaseM = 0;  // prevent other event handlers from making problems
     EndModal(wxID_OK);
 
     FR_CATCH
@@ -603,6 +607,9 @@ void InsertDialog::setStringOption(InsertColumnInfo& ici, const wxString& s)
 void InsertDialog::OnChoiceChange(wxCommandEvent& event)
 {
     FR_TRY
+
+    if (!databaseM)
+        return;
 
     wxChoice *c = dynamic_cast<wxChoice *>(event.GetEventObject());
     if (!c)
