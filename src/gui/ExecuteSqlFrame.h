@@ -68,46 +68,6 @@ class ExecuteSqlFrame: public BaseFrame, public Observer
 public:
     Database *getDatabase();
     void showProperties(wxString objectName);
-    enum {
-        ID_grid_data = 101,
-        ID_stc_sql
-    };
-
-    enum {
-        //View:
-        Menu_View_Editor = 401,
-        Menu_View_Statistics,
-        Menu_View_Data,
-        Menu_View_Split_view,
-        Menu_View_Wrap_long_lines,
-        Menu_View_Set_editor_font,
-        Menu_Find_Selected_Object,
-        Menu_View_Focus_grid,
-        Menu_View_Focus_editor,
-
-        //History
-        Menu_History_Next,
-        Menu_History_Previous,
-        Menu_History_Search,
-
-        //Query
-        Menu_Query_Execute,
-        Menu_Query_Show_plan,
-        Menu_Query_Execute_selection,
-        Menu_Query_Commit,
-        Menu_Query_Rollback,
-
-        //Data grid
-        Menu_DataGrid_Insert_row,
-        Menu_DataGrid_Delete_row,
-        Menu_DataGrid_Copy,
-        Menu_DataGrid_Copy_as_insert,
-        Menu_DataGrid_Copy_as_update,
-        Menu_DataGrid_Save_as_html,
-        Menu_DataGrid_Save_as_csv,
-        Menu_DataGrid_Set_header_font,
-        Menu_DataGrid_Set_cell_font
-    };
     // query parsing and execution
     void executeAllStatements(bool autoExecute = false);
     void prepareAndExecute(bool prepareOnly = false);
@@ -123,6 +83,11 @@ public:
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxDEFAULT_FRAME_STYLE);
+
+    enum {
+        ID_grid_data = 101,
+        ID_stc_sql
+    };
 
 private:
     std::vector<SqlStatement> executedStatementsM;
@@ -210,17 +175,17 @@ private:
     void OnMenuGridInsertRow(wxCommandEvent &event);
     void OnMenuGridDeleteRow(wxCommandEvent &event);
     void OnMenuGridCopy(wxCommandEvent &event);
-    void OnMenuUpdateGridCopy(wxUpdateUIEvent& event);
     void OnMenuGridCopyAsInsert(wxCommandEvent &event);
-    void OnMenuUpdateGridCopyAsInsert(wxUpdateUIEvent& event);
     void OnMenuGridCopyAsUpdate(wxCommandEvent &event);
-    void OnMenuUpdateGridCopyAsUpdate(wxUpdateUIEvent& event);
     void OnMenuGridSaveAsHtml(wxCommandEvent &event);
-    void OnMenuUpdateGridSaveAsHtml(wxUpdateUIEvent& event);
     void OnMenuGridSaveAsCsv(wxCommandEvent &event);
-    void OnMenuUpdateGridSaveAsCsv(wxUpdateUIEvent& event);
     void OnMenuGridGridHeaderFont(wxCommandEvent &event);
     void OnMenuGridGridCellFont(wxCommandEvent &event);
+    void OnMenuGridFetchAll(wxCommandEvent &event);
+    void OnMenuGridCancelFetchAll(wxCommandEvent &event);
+    void OnMenuUpdateGridHasSelection(wxUpdateUIEvent& event);
+    void OnMenuUpdateGridFetchAll(wxUpdateUIEvent& event);
+    void OnMenuUpdateGridCancelFetchAll(wxUpdateUIEvent& event);
 
     void OnMenuFindSelectedObject(wxCommandEvent& event);
 

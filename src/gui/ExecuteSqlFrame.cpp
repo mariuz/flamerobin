@@ -63,6 +63,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/InsertDialog.h"
 #include "gui/StatementHistoryDialog.h"
 #include "gui/StyleGuide.h"
+#include "gui/menus.h"
 #include "frutils.h"
 #include "logger.h"
 #include "metadata/CreateDDLVisitor.h"
@@ -376,7 +377,7 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
     m.Append(wxID_DELETE, _("&Delete"));
     m.AppendSeparator();
     m.Append(wxID_SELECTALL,       _("Select &All"));
-    m.Append(ExecuteSqlFrame::Menu_Query_Execute_selection,
+    m.Append(Menus::Query_Execute_selection,
         _("E&xecute selected"));
 
     int slen = GetSelectionEnd() - GetSelectionStart();
@@ -386,16 +387,16 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
         size_t p = sel.find_first_of(wxT("\n\r\t"));
         if (p != wxString::npos)
             sel.Remove(p);
-        m.Append(ExecuteSqlFrame::Menu_Find_Selected_Object,
+        m.Append(Menus::Find_Selected_Object,
             _("S&how properties for ") + sel);
     }
 
     m.AppendSeparator();
     m.Append(wxID_REPLACE,          _("&Find and replace"));
-    m.Append(ExecuteSqlFrame::Menu_View_Set_editor_font, _("Set F&ont"));
-    m.AppendCheckItem(ExecuteSqlFrame::Menu_View_Wrap_long_lines, _("&Wrap"));
+    m.Append(Menus::View_Set_editor_font, _("Set F&ont"));
+    m.AppendCheckItem(Menus::View_Wrap_long_lines, _("&Wrap"));
     if (wxSTC_WRAP_WORD == GetWrapMode())
-        m.Check(ExecuteSqlFrame::Menu_View_Wrap_long_lines, true);
+        m.Check(Menus::View_Wrap_long_lines, true);
 
     // disable stuff
     m.Enable(wxID_UNDO, CanUndo());
@@ -405,7 +406,7 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
         m.Enable(wxID_CUT,              false);
         m.Enable(wxID_COPY,             false);
         m.Enable(wxID_DELETE,           false);
-        m.Enable(ExecuteSqlFrame::Menu_Query_Execute_selection, false);
+        m.Enable(Menus::Query_Execute_selection, false);
     }
 
     PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
@@ -534,27 +535,27 @@ void ExecuteSqlFrame::buildToolbar()
         wxITEM_NORMAL, _("Save under different name"), _("Save under different name") );
     toolBarM->AddSeparator();
 
-    toolBarM->AddTool( Menu_History_Previous, _("Back"), wxBitmap(sql_icons::left_xpm), wxNullBitmap,
+    toolBarM->AddTool( Menus::History_Previous, _("Back"), wxBitmap(sql_icons::left_xpm), wxNullBitmap,
         wxITEM_NORMAL, _("Go to previous statement"), _("Go to previous statement") );
-    toolBarM->AddTool( Menu_History_Next, _("Next"), wxBitmap(sql_icons::right_xpm), wxNullBitmap,
+    toolBarM->AddTool( Menus::History_Next, _("Next"), wxBitmap(sql_icons::right_xpm), wxNullBitmap,
         wxITEM_NORMAL, _("Go to next statement"), _("Go to next statement") );
-    toolBarM->AddTool( Menu_History_Search, _("History"), wxBitmap(sql_icons::history_xpm), wxNullBitmap,
+    toolBarM->AddTool( Menus::History_Search, _("History"), wxBitmap(sql_icons::history_xpm), wxNullBitmap,
         wxITEM_NORMAL, _("Browse and search statement history"), _("Browse and search statement history") );
     toolBarM->AddSeparator();
 
-    toolBarM->AddTool( Menu_Query_Execute, _("Execute"), wxBitmap(sql_icons::execute16_xpm), wxNullBitmap,
+    toolBarM->AddTool( Menus::Query_Execute, _("Execute"), wxBitmap(sql_icons::execute16_xpm), wxNullBitmap,
         wxITEM_NORMAL, _("F4 - Execute statement(s)"), _("F4 - Execute statement(s)") );
-    toolBarM->AddTool( Menu_Query_Commit, _("Commit"), wxBitmap(sql_icons::ok_xpm), wxNullBitmap,
+    toolBarM->AddTool( Menus::Query_Commit, _("Commit"), wxBitmap(sql_icons::ok_xpm), wxNullBitmap,
         wxITEM_NORMAL, _("F5 - Commit transaction"), _("F5 - Commit transaction") );
-    toolBarM->AddTool( Menu_Query_Rollback, _("Rollback"), wxBitmap(sql_icons::redx_xpm), wxNullBitmap,
+    toolBarM->AddTool( Menus::Query_Rollback, _("Rollback"), wxBitmap(sql_icons::redx_xpm), wxNullBitmap,
         wxITEM_NORMAL, _("F8 - Rollback transaction"), _("F8 - Rollback transaction") );
-    toolBarM->AddTool( Menu_Query_Show_plan, _("Show plan"), wxBitmap(sql_icons::procedure_xpm), wxNullBitmap,
+    toolBarM->AddTool( Menus::Query_Show_plan, _("Show plan"), wxBitmap(sql_icons::procedure_xpm), wxNullBitmap,
         wxITEM_NORMAL, _("Show query execution plan"), _("Show query execution plan") );
     toolBarM->AddSeparator();
 
-    toolBarM->AddTool( Menu_DataGrid_Insert_row, _("Insert row"), wxBitmap(sql_icons::insert16_xpm), wxNullBitmap,
+    toolBarM->AddTool( Menus::DataGrid_Insert_row, _("Insert row"), wxBitmap(sql_icons::insert16_xpm), wxNullBitmap,
         wxITEM_NORMAL, _("Insert a new row in recordset"), _("Insert a new row in recordset") );
-    toolBarM->AddTool( Menu_DataGrid_Delete_row, _("Delete row"), wxBitmap(sql_icons::delete16_xpm), wxNullBitmap,
+    toolBarM->AddTool( Menus::DataGrid_Delete_row, _("Delete row"), wxBitmap(sql_icons::delete16_xpm), wxNullBitmap,
         wxITEM_NORMAL, _("Delete row(s) from recordset"), _("Delete row(s) from recordset") );
 
     toolBarM->Realize();
@@ -588,47 +589,50 @@ void ExecuteSqlFrame::buildMainMenu()
     menuBarM->Append(editMenu, _("&Edit"));
 
     wxMenu* viewMenu = new wxMenu();
-    viewMenu->AppendRadioItem(Menu_View_Editor,          _("Ed&itor"));
-    viewMenu->AppendRadioItem(Menu_View_Statistics,      _("&Statistics"));
-    viewMenu->AppendRadioItem(Menu_View_Data,            _("&Data"));
-    viewMenu->AppendRadioItem(Menu_View_Split_view,      _("Sp&lit view"));
+    viewMenu->AppendRadioItem(Menus::View_Editor,          _("Ed&itor"));
+    viewMenu->AppendRadioItem(Menus::View_Statistics,      _("&Statistics"));
+    viewMenu->AppendRadioItem(Menus::View_Data,            _("&Data"));
+    viewMenu->AppendRadioItem(Menus::View_Split_view,      _("Sp&lit view"));
     viewMenu->AppendSeparator();
-    viewMenu->Append(Menu_View_Set_editor_font, _("Se&t editor font"));
+    viewMenu->Append(Menus::View_Set_editor_font, _("Se&t editor font"));
     viewMenu->AppendSeparator();
-    viewMenu->Append(Menu_View_Focus_editor,    _("Focus &editor"));
-    viewMenu->Append(Menu_View_Focus_grid,      _("Focus &grid"));
+    viewMenu->Append(Menus::View_Focus_editor,    _("Focus &editor"));
+    viewMenu->Append(Menus::View_Focus_grid,      _("Focus &grid"));
     viewMenu->AppendSeparator();
-    viewMenu->AppendCheckItem(Menu_View_Wrap_long_lines,    _("&Wrap long lines"));
+    viewMenu->AppendCheckItem(Menus::View_Wrap_long_lines,    _("&Wrap long lines"));
     menuBarM->Append(viewMenu, _("&View"));
 
     wxMenu* historyMenu = new wxMenu();
-    historyMenu->Append(Menu_History_Next,      _("&Next"));
-    historyMenu->Append(Menu_History_Previous,  _("&Previous"));
-    historyMenu->Append(Menu_History_Search,    _("&Search"));
+    historyMenu->Append(Menus::History_Next,      _("&Next"));
+    historyMenu->Append(Menus::History_Previous,  _("&Previous"));
+    historyMenu->Append(Menus::History_Search,    _("&Search"));
     menuBarM->Append(historyMenu, _("&History"));
 
     wxMenu* queryMenu = new wxMenu();
-    queryMenu->Append(Menu_Query_Execute,           _("&Execute"));
-    queryMenu->Append(Menu_Query_Show_plan,         _("Show &plan"));
-    queryMenu->Append(Menu_Query_Execute_selection, _("Execu&te selection"));
+    queryMenu->Append(Menus::Query_Execute,           _("&Execute"));
+    queryMenu->Append(Menus::Query_Show_plan,         _("Show &plan"));
+    queryMenu->Append(Menus::Query_Execute_selection, _("Execu&te selection"));
     queryMenu->AppendSeparator();
-    queryMenu->Append(Menu_Query_Commit,             _("&Commit"));
-    queryMenu->Append(Menu_Query_Rollback,           _("&Rollback"));
+    queryMenu->Append(Menus::Query_Commit,             _("&Commit"));
+    queryMenu->Append(Menus::Query_Rollback,           _("&Rollback"));
     menuBarM->Append(queryMenu, _("&Query"));
 
     wxMenu* gridMenu = new wxMenu();
-    gridMenu->Append(Menu_DataGrid_Insert_row,      _("I&nsert row"));
-    gridMenu->Append(Menu_DataGrid_Delete_row,      _("&Delete row"));
+    gridMenu->Append(Menus::DataGrid_Insert_row,      _("I&nsert row"));
+    gridMenu->Append(Menus::DataGrid_Delete_row,      _("&Delete row"));
     gridMenu->AppendSeparator();
-    gridMenu->Append(Menu_DataGrid_Copy,            _("&Copy"));
-    gridMenu->Append(Menu_DataGrid_Copy_as_insert,  _("Copy as &insert statements"));
-    gridMenu->Append(Menu_DataGrid_Copy_as_update,  _("Copy as &update statements"));
+    gridMenu->Append(Menus::DataGrid_Copy,            _("&Copy"));
+    gridMenu->Append(Menus::DataGrid_Copy_as_insert,  _("Copy as &insert statements"));
+    gridMenu->Append(Menus::DataGrid_Copy_as_update,  _("Copy as &update statements"));
     gridMenu->AppendSeparator();
-    gridMenu->Append(Menu_DataGrid_Save_as_html,    _("Save as &html"));
-    gridMenu->Append(Menu_DataGrid_Save_as_csv,     _("Save as &csv"));
+    gridMenu->Append(Menus::DataGrid_FetchAll,        _("&Fetch all records"));
+    gridMenu->Append(Menus::DataGrid_CancelFetchAll,  _("&Stop fetching all records"));
     gridMenu->AppendSeparator();
-    gridMenu->Append(Menu_DataGrid_Set_header_font, _("Set &header font"));
-    gridMenu->Append(Menu_DataGrid_Set_cell_font,   _("Set ce&ll font"));
+    gridMenu->Append(Menus::DataGrid_Save_as_html,    _("Save as &html"));
+    gridMenu->Append(Menus::DataGrid_Save_as_csv,     _("Save as &csv"));
+    gridMenu->AppendSeparator();
+    gridMenu->Append(Menus::DataGrid_Set_header_font, _("Set h&eader font"));
+    gridMenu->Append(Menus::DataGrid_Set_cell_font,   _("Set ce&ll font"));
     menuBarM->Append(gridMenu, _("&Data Grid"));
 
     SetMenuBar(menuBarM);
@@ -757,72 +761,49 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_UPDATE_UI(wxID_PASTE,   ExecuteSqlFrame::OnMenuUpdatePaste)
     EVT_UPDATE_UI(wxID_DELETE,  ExecuteSqlFrame::OnMenuUpdateDelete)
 
+    EVT_MENU(Menus::View_Editor,          ExecuteSqlFrame::OnMenuEditor)
+    EVT_MENU(Menus::View_Statistics,      ExecuteSqlFrame::OnMenuStatistics)
+    EVT_MENU(Menus::View_Data,            ExecuteSqlFrame::OnMenuData)
+    EVT_MENU(Menus::View_Split_view,      ExecuteSqlFrame::OnMenuSplitView)
+    EVT_MENU(Menus::View_Set_editor_font, ExecuteSqlFrame::OnMenuSetEditorFont)
+    EVT_MENU(Menus::View_Wrap_long_lines, ExecuteSqlFrame::OnMenuToggleWrap)
+    EVT_MENU(Menus::View_Focus_editor,    ExecuteSqlFrame::OnMenuFocusEditor)
+    EVT_MENU(Menus::View_Focus_grid,      ExecuteSqlFrame::OnMenuFocusGrid)
 
-    EVT_MENU(ExecuteSqlFrame::Menu_View_Editor,
-        ExecuteSqlFrame::OnMenuEditor)
-    EVT_MENU(ExecuteSqlFrame::Menu_View_Statistics,
-        ExecuteSqlFrame::OnMenuStatistics)
-    EVT_MENU(ExecuteSqlFrame::Menu_View_Data,
-        ExecuteSqlFrame::OnMenuData)
-    EVT_MENU(ExecuteSqlFrame::Menu_View_Split_view,
-        ExecuteSqlFrame::OnMenuSplitView)
-    EVT_MENU(ExecuteSqlFrame::Menu_View_Set_editor_font,
-        ExecuteSqlFrame::OnMenuSetEditorFont)
-    EVT_MENU(ExecuteSqlFrame::Menu_View_Wrap_long_lines,
-        ExecuteSqlFrame::OnMenuToggleWrap)
-    EVT_MENU(ExecuteSqlFrame::Menu_View_Focus_editor,
-        ExecuteSqlFrame::OnMenuFocusEditor)
-    EVT_MENU(ExecuteSqlFrame::Menu_View_Focus_grid,
-        ExecuteSqlFrame::OnMenuFocusGrid)
+    EVT_MENU(Menus::Find_Selected_Object,   ExecuteSqlFrame::OnMenuFindSelectedObject)
 
-    EVT_MENU(ExecuteSqlFrame::Menu_Find_Selected_Object,
-        ExecuteSqlFrame::OnMenuFindSelectedObject)
+    EVT_MENU(Menus::History_Next,     ExecuteSqlFrame::OnMenuHistoryNext)
+    EVT_MENU(Menus::History_Previous, ExecuteSqlFrame::OnMenuHistoryPrev)
+    EVT_MENU(Menus::History_Search,   ExecuteSqlFrame::OnMenuHistorySearch)
 
-    EVT_MENU(ExecuteSqlFrame::Menu_History_Next,    ExecuteSqlFrame::OnMenuHistoryNext)
-    EVT_MENU(ExecuteSqlFrame::Menu_History_Previous,ExecuteSqlFrame::OnMenuHistoryPrev)
-    EVT_MENU(ExecuteSqlFrame::Menu_History_Search,  ExecuteSqlFrame::OnMenuHistorySearch)
+    EVT_UPDATE_UI(Menus::History_Next,     ExecuteSqlFrame::OnMenuUpdateHistoryNext)
+    EVT_UPDATE_UI(Menus::History_Previous, ExecuteSqlFrame::OnMenuUpdateHistoryPrev)
 
-    EVT_UPDATE_UI(ExecuteSqlFrame::Menu_History_Next,
-        ExecuteSqlFrame::OnMenuUpdateHistoryNext)
-    EVT_UPDATE_UI(ExecuteSqlFrame::Menu_History_Previous,
-        ExecuteSqlFrame::OnMenuUpdateHistoryPrev)
+    EVT_MENU(Menus::Query_Execute,           ExecuteSqlFrame::OnMenuExecute)
+    EVT_MENU(Menus::Query_Show_plan,         ExecuteSqlFrame::OnMenuShowPlan)
+    EVT_MENU(Menus::Query_Execute_selection, ExecuteSqlFrame::OnMenuExecuteSelection)
+    EVT_MENU(Menus::Query_Commit,            ExecuteSqlFrame::OnMenuCommit)
+    EVT_MENU(Menus::Query_Rollback,          ExecuteSqlFrame::OnMenuRollback)
 
-    EVT_MENU(ExecuteSqlFrame::Menu_Query_Execute,   ExecuteSqlFrame::OnMenuExecute)
-    EVT_MENU(ExecuteSqlFrame::Menu_Query_Show_plan, ExecuteSqlFrame::OnMenuShowPlan)
-    EVT_MENU(ExecuteSqlFrame::Menu_Query_Execute_selection,
-        ExecuteSqlFrame::OnMenuExecuteSelection)
-    EVT_MENU(ExecuteSqlFrame::Menu_Query_Commit,    ExecuteSqlFrame::OnMenuCommit)
-    EVT_MENU(ExecuteSqlFrame::Menu_Query_Rollback,  ExecuteSqlFrame::OnMenuRollback)
+    EVT_MENU(Menus::DataGrid_Insert_row,      ExecuteSqlFrame::OnMenuGridInsertRow)
+    EVT_MENU(Menus::DataGrid_Delete_row,      ExecuteSqlFrame::OnMenuGridDeleteRow)
+    EVT_MENU(Menus::DataGrid_Copy,            ExecuteSqlFrame::OnMenuGridCopy)
+    EVT_MENU(Menus::DataGrid_Copy_as_insert,  ExecuteSqlFrame::OnMenuGridCopyAsInsert)
+    EVT_MENU(Menus::DataGrid_Copy_as_update,  ExecuteSqlFrame::OnMenuGridCopyAsUpdate)
+    EVT_MENU(Menus::DataGrid_Save_as_html,    ExecuteSqlFrame::OnMenuGridSaveAsHtml)
+    EVT_MENU(Menus::DataGrid_Save_as_csv,     ExecuteSqlFrame::OnMenuGridSaveAsCsv)
+    EVT_MENU(Menus::DataGrid_Set_header_font, ExecuteSqlFrame::OnMenuGridGridHeaderFont)
+    EVT_MENU(Menus::DataGrid_Set_cell_font,   ExecuteSqlFrame::OnMenuGridGridCellFont)
+    EVT_MENU(Menus::DataGrid_FetchAll,        ExecuteSqlFrame::OnMenuGridFetchAll)
+    EVT_MENU(Menus::DataGrid_CancelFetchAll,  ExecuteSqlFrame::OnMenuGridCancelFetchAll)
 
-    EVT_MENU(ExecuteSqlFrame::Menu_DataGrid_Insert_row,
-        ExecuteSqlFrame::OnMenuGridInsertRow)
-    EVT_MENU(ExecuteSqlFrame::Menu_DataGrid_Delete_row,
-        ExecuteSqlFrame::OnMenuGridDeleteRow)
-    EVT_MENU(ExecuteSqlFrame::Menu_DataGrid_Copy,
-        ExecuteSqlFrame::OnMenuGridCopy)
-    EVT_MENU(ExecuteSqlFrame::Menu_DataGrid_Copy_as_insert,
-        ExecuteSqlFrame::OnMenuGridCopyAsInsert)
-    EVT_MENU(ExecuteSqlFrame::Menu_DataGrid_Copy_as_update,
-        ExecuteSqlFrame::OnMenuGridCopyAsUpdate)
-    EVT_MENU(ExecuteSqlFrame::Menu_DataGrid_Save_as_html,
-        ExecuteSqlFrame::OnMenuGridSaveAsHtml)
-    EVT_MENU(ExecuteSqlFrame::Menu_DataGrid_Save_as_csv,
-        ExecuteSqlFrame::OnMenuGridSaveAsCsv)
-    EVT_MENU(ExecuteSqlFrame::Menu_DataGrid_Set_header_font,
-        ExecuteSqlFrame::OnMenuGridGridHeaderFont)
-    EVT_MENU(ExecuteSqlFrame::Menu_DataGrid_Set_cell_font,
-        ExecuteSqlFrame::OnMenuGridGridCellFont)
-
-    EVT_UPDATE_UI(ExecuteSqlFrame::Menu_DataGrid_Copy,
-        ExecuteSqlFrame::OnMenuUpdateGridCopy)
-    EVT_UPDATE_UI(ExecuteSqlFrame::Menu_DataGrid_Copy_as_insert,
-        ExecuteSqlFrame::OnMenuUpdateGridCopyAsInsert)
-    EVT_UPDATE_UI(ExecuteSqlFrame::Menu_DataGrid_Copy_as_update,
-        ExecuteSqlFrame::OnMenuUpdateGridCopyAsUpdate)
-    EVT_UPDATE_UI(ExecuteSqlFrame::Menu_DataGrid_Save_as_html,
-        ExecuteSqlFrame::OnMenuUpdateGridSaveAsHtml)
-    EVT_UPDATE_UI(ExecuteSqlFrame::Menu_DataGrid_Save_as_csv,
-        ExecuteSqlFrame::OnMenuUpdateGridSaveAsCsv)
+    EVT_UPDATE_UI(Menus::DataGrid_Copy,           ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
+    EVT_UPDATE_UI(Menus::DataGrid_Copy_as_insert, ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
+    EVT_UPDATE_UI(Menus::DataGrid_Copy_as_update, ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
+    EVT_UPDATE_UI(Menus::DataGrid_Save_as_html,   ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
+    EVT_UPDATE_UI(Menus::DataGrid_Save_as_csv,    ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
+    EVT_UPDATE_UI(Menus::DataGrid_FetchAll,       ExecuteSqlFrame::OnMenuUpdateGridFetchAll)
+    EVT_UPDATE_UI(Menus::DataGrid_CancelFetchAll, ExecuteSqlFrame::OnMenuUpdateGridCancelFetchAll)
 
     EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_ROWCOUNT_CHANGED, \
         ExecuteSqlFrame::OnGridRowCountChanged)
@@ -1048,15 +1029,15 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
         switch (key)
         {
             case WXK_F4:
-                if (toolBarM->GetToolEnabled(Menu_Query_Execute))
+                if (toolBarM->GetToolEnabled(Menus::Query_Execute))
                     OnMenuExecute(e);
                 return;         // needed on Linux
             case WXK_F5:
-                if (toolBarM->GetToolEnabled(Menu_Query_Commit))
+                if (toolBarM->GetToolEnabled(Menus::Query_Commit))
                     OnMenuCommit(e);
                 return;
             case WXK_F8:
-                if (toolBarM->GetToolEnabled(Menu_Query_Rollback))
+                if (toolBarM->GetToolEnabled(Menus::Query_Rollback))
                     OnMenuRollback(e);
                 return;
             case WXK_F3:
@@ -1413,6 +1394,24 @@ void ExecuteSqlFrame::OnMenuExecuteSelection(wxCommandEvent& WXUNUSED(event))
             );
 }
 //-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuGridFetchAll(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    grid_data->fetchAll();
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuGridCancelFetchAll(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    grid_data->cancelFetchAll();
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridInsertRow(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
@@ -1534,29 +1533,23 @@ void ExecuteSqlFrame::OnMenuGridGridCellFont(wxCommandEvent& WXUNUSED(event))
     grid_data->setCellFont();
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuUpdateGridCopy(wxUpdateUIEvent& event)
+void ExecuteSqlFrame::OnMenuUpdateGridHasSelection(wxUpdateUIEvent& event)
 {
     event.Enable(grid_data->IsSelection());
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuUpdateGridCopyAsInsert(wxUpdateUIEvent& event)
+void ExecuteSqlFrame::OnMenuUpdateGridFetchAll(wxUpdateUIEvent& event)
 {
-    event.Enable(grid_data->IsSelection());
+    DataGridTable* table = grid_data->getDataGridTable();
+    event.Enable(table && table->canFetchMoreRows()
+        && !table->getFetchAllRows());
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuUpdateGridCopyAsUpdate(wxUpdateUIEvent& event)
+void ExecuteSqlFrame::OnMenuUpdateGridCancelFetchAll(wxUpdateUIEvent& event)
 {
-    event.Enable(grid_data->IsSelection());
-}
-//-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuUpdateGridSaveAsHtml(wxUpdateUIEvent& event)
-{
-    event.Enable(grid_data->IsSelection());
-}
-//-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuUpdateGridSaveAsCsv(wxUpdateUIEvent& event)
-{
-    event.Enable(grid_data->IsSelection());
+    DataGridTable* table = grid_data->getDataGridTable();
+    event.Enable(table && table->canFetchMoreRows()
+        && table->getFetchAllRows());
 }
 //-----------------------------------------------------------------------------
 bool ExecuteSqlFrame::loadSqlFile(const wxString& filename)
@@ -1571,8 +1564,8 @@ bool ExecuteSqlFrame::loadSqlFile(const wxString& filename)
 void ExecuteSqlFrame::updateHistoryButtons()
 {
     StatementHistory& sh = StatementHistory::get(databaseM);
-    toolBarM->EnableTool(Menu_History_Previous, historyPositionM > 0 && sh.size() > 0);
-    toolBarM->EnableTool(Menu_History_Next, sh.size() > historyPositionM);
+    toolBarM->EnableTool(Menus::History_Previous, historyPositionM > 0 && sh.size() > 0);
+    toolBarM->EnableTool(Menus::History_Next, sh.size() > historyPositionM);
 }
 //-----------------------------------------------------------------------------
 //! enable/disable and show/hide controls depending of transaction status
@@ -1588,8 +1581,8 @@ void ExecuteSqlFrame::InTransaction(bool started)
         grid_data->ClearGrid();
         statusbar_1->SetStatusText(wxEmptyString, 1);
     }
-    toolBarM->EnableTool(Menu_Query_Commit, started);
-    toolBarM->EnableTool(Menu_Query_Rollback, started);
+    toolBarM->EnableTool(Menus::Query_Commit, started);
+    toolBarM->EnableTool(Menus::Query_Rollback, started);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::setSql(wxString sql)
@@ -1703,7 +1696,7 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
     if (closeWhenDone)
     {
         closeWhenTransactionDoneM = true;
-        toolBarM->EnableTool(Menu_Query_Execute, false);
+        toolBarM->EnableTool(Menus::Query_Execute, false);
         // TODO: HOWTO focus toolbar button? button_commit->SetFocus();
     }
 
@@ -2025,7 +2018,7 @@ void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent &event)
     s.Printf(_("%d rows fetched"), rowsFetched);
     statusbar_1->SetStatusText(s, 1);
 
-    toolBarM->EnableTool(Menu_DataGrid_Delete_row, rowsFetched > 0);
+    toolBarM->EnableTool(Menus::DataGrid_Delete_row, rowsFetched > 0);
 
     // TODO: we could make some bool flag, so that this happens only once per execute()
     //       to fix the problem when user does the select, unsplits the window

@@ -47,32 +47,13 @@ public:
     DataGridTable* getDataGridTable();
     void fetchData(wxMBConv* conv);
 private:
-    // event handling
-    enum { ID_MENU_CELLFONT, ID_MENU_LABELFONT,
-        ID_MENU_COPYTOCLIPBOARD, ID_MENU_COPYTOCLIPBOARDASINSERT,
-        ID_MENU_COPYTOCLIPBOARDASUPDATE, ID_MENU_SAVEASHTML,
-        ID_MENU_FETCHALL, ID_MENU_CANCELFETCHALL, ID_MENU_SAVEASCSV };
-
     void OnContextMenu(wxContextMenuEvent& event);
     void OnGridCellRightClick(wxGridEvent& event);
     void OnGridLabelRightClick(wxGridEvent& event);
-//    void OnGridSelectCell(wxGridEvent& event);
+    //    void OnGridSelectCell(wxGridEvent& event);
     void OnIdle(wxIdleEvent& event);
-    void OnMenuCancelFetchAll(wxCommandEvent& event);
-    void OnMenuCellFont(wxCommandEvent& event);
-    void OnMenuCopyToCB(wxCommandEvent& event);
-    void OnMenuCopyToCBAsInsert(wxCommandEvent& event);
-    void OnMenuCopyToCBAsUpdate(wxCommandEvent& event);
-    void OnMenuFetchAll(wxCommandEvent& event);
-    void OnMenuLabelFont(wxCommandEvent& event);
-    void OnMenuSaveAsHTML(wxCommandEvent& event);
-    void OnMenuSaveAsCSV(wxCommandEvent& event);
-    void OnMenuUpdateCancelFetchAll(wxUpdateUIEvent& event);
-    void OnMenuUpdateFetchAll(wxUpdateUIEvent& event);
-    void OnMenuUpdateIfHasSelection(wxUpdateUIEvent& event);
     void OnMouseWheel(wxMouseEvent& event);
     void OnThumbRelease(wxScrollWinEvent& event);
-
     DECLARE_EVENT_TABLE()
 public:
     void copyToCB();
@@ -85,6 +66,7 @@ public:
     void setCellFont();
 
     void cancelFetchAll();
+    void fetchAll();
 
     void InsertRow();
     void DeleteRow();

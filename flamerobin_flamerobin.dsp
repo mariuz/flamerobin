@@ -1126,6 +1126,10 @@ SOURCE=.\src\main.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\menus.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\metadata\metadataitem.h
 # End Source File
 # Begin Source File

@@ -260,6 +260,7 @@
         $(SOURCEDIR)/gui/StyleGuide.h
         $(SOURCEDIR)/gui/TriggerWizardDialog.h
         $(SOURCEDIR)/gui/UserDialog.h
+        $(SOURCEDIR)/menus.h
         $(SOURCEDIR)/images.h
         $(SOURCEDIR)/Isaac.h
         $(SOURCEDIR)/logger.h
