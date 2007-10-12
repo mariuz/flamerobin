@@ -529,6 +529,7 @@ void DataGridTable::getTableNames(wxArrayString& tables)
                 Identifier(tn)));
             if (!t)
                 continue;
+            t->checkAndLoadColumns();
 
             // check if table's column is 'real'
             wxString cn(std2wx(statementM->ColumnName(i+1)));

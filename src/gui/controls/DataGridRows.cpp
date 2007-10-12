@@ -1217,6 +1217,9 @@ bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
             deleteFromM = statementTablesM.begin();
     }
 
+    if (deleteFromM == statementTablesM.end() || (*deleteFromM).second == 0)
+        return false;
+
     for (size_t pos = 0; pos < count; ++pos)
     {
         if (pos > 0)
