@@ -610,9 +610,10 @@ void ExecuteSqlFrame::buildMainMenu()
     menuBarM->Append(historyMenu, _("&History"));
 
     wxMenu* queryMenu = new wxMenu();
-    queryMenu->Append(Cmds::Query_Execute,           _("&Execute"));
-    queryMenu->Append(Cmds::Query_Show_plan,         _("Show &plan"));
-    queryMenu->Append(Cmds::Query_Execute_selection, _("Execu&te selection"));
+    queryMenu->Append(Cmds::Query_Execute,             _("&Execute"));
+    queryMenu->Append(Cmds::Query_Show_plan,           _("Show &plan"));
+    queryMenu->Append(Cmds::Query_Execute_selection,   _("Execu&te selection"));
+    queryMenu->Append(Cmds::Query_Execute_from_cursor, _("Exec&ute from cursor"));
     queryMenu->AppendSeparator();
     queryMenu->Append(Cmds::Query_Commit,             _("&Commit"));
     queryMenu->Append(Cmds::Query_Rollback,           _("&Rollback"));
@@ -780,11 +781,12 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::History_Next,     ExecuteSqlFrame::OnMenuUpdateHistoryNext)
     EVT_UPDATE_UI(Cmds::History_Previous, ExecuteSqlFrame::OnMenuUpdateHistoryPrev)
 
-    EVT_MENU(Cmds::Query_Execute,           ExecuteSqlFrame::OnMenuExecute)
-    EVT_MENU(Cmds::Query_Show_plan,         ExecuteSqlFrame::OnMenuShowPlan)
-    EVT_MENU(Cmds::Query_Execute_selection, ExecuteSqlFrame::OnMenuExecuteSelection)
-    EVT_MENU(Cmds::Query_Commit,            ExecuteSqlFrame::OnMenuCommit)
-    EVT_MENU(Cmds::Query_Rollback,          ExecuteSqlFrame::OnMenuRollback)
+    EVT_MENU(Cmds::Query_Execute,             ExecuteSqlFrame::OnMenuExecute)
+    EVT_MENU(Cmds::Query_Show_plan,           ExecuteSqlFrame::OnMenuShowPlan)
+    EVT_MENU(Cmds::Query_Execute_selection,   ExecuteSqlFrame::OnMenuExecuteSelection)
+    EVT_MENU(Cmds::Query_Execute_from_cursor, ExecuteSqlFrame::OnMenuExecuteFromCursor)
+    EVT_MENU(Cmds::Query_Commit,              ExecuteSqlFrame::OnMenuCommit)
+    EVT_MENU(Cmds::Query_Rollback,            ExecuteSqlFrame::OnMenuRollback)
 
     EVT_MENU(Cmds::DataGrid_Insert_row,      ExecuteSqlFrame::OnMenuGridInsertRow)
     EVT_MENU(Cmds::DataGrid_Delete_row,      ExecuteSqlFrame::OnMenuGridDeleteRow)
@@ -1378,6 +1380,20 @@ void ExecuteSqlFrame::OnMenuShowPlan(wxCommandEvent& WXUNUSED(event))
     prepareAndExecute(true);
 
     FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuExecuteFromCursor(wxCommandEvent& WXUNUSED(event))
+{
+    if (config().get(wxT("SQLEditorExecuteClears"), false))
+        clearStats();
+
+    wxString sql(
+        styled_text_ctrl_sql->GetTextRange(
+            styled_text_ctrl_sql->GetCurrentPos(),
+            styled_text_ctrl_sql->GetLength()
+        )
+    );
+    parseStatements(sql, false, false, styled_text_ctrl_sql->GetCurrentPos());
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuExecuteSelection(wxCommandEvent& WXUNUSED(event))

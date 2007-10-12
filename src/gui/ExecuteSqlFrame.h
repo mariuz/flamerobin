@@ -168,6 +168,7 @@ private:
     void OnMenuExecute(wxCommandEvent &event);
     void OnMenuShowPlan(wxCommandEvent &event);
     void OnMenuExecuteSelection(wxCommandEvent &event);
+    void OnMenuExecuteFromCursor(wxCommandEvent &event);
     void OnMenuUpdateExecuteSelection(wxUpdateUIEvent& event);
     void OnMenuCommit(wxCommandEvent &event);
     void OnMenuRollback(wxCommandEvent &event);

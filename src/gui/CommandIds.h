@@ -50,6 +50,7 @@ namespace Cmds
         Query_Execute,
         Query_Show_plan,
         Query_Execute_selection,
+        Query_Execute_from_cursor,
         Query_Commit,
         Query_Rollback,
 
