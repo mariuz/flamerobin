@@ -158,6 +158,10 @@ void DataGrid::notifyIfUnfetchedData()
 void DataGrid::showPopMenu(wxPoint cursorPos)
 {
     wxMenu m(0);
+
+    // TODO: clean this up to use MenuIDs from ExecuteSqlFrame
+    //       no need to duplicate event handling
+    //       PLUS: create a separate file with global set of MenuIDs
     m.Append(ID_MENU_FETCHALL, _("Fetch all records"));
     m.Append(ID_MENU_CANCELFETCHALL, _("Stop fetching all records"));
     m.AppendSeparator();
