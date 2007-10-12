@@ -273,10 +273,9 @@ namespace sql_icons {
 };
 //-----------------------------------------------------------------------------
 // Setup the Scintilla editor
-SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id, ExecuteSqlFrame *frame)
+SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id)
     : SearchableEditor(parent, id)
 {
-    frameM = frame;
     wxString s;
     if (config().getValue(wxT("SqlEditorFont"), s) && !s.empty())
     {
@@ -363,10 +362,6 @@ void SqlEditor::setup()
 BEGIN_EVENT_TABLE(SqlEditor, wxStyledTextCtrl)
     EVT_CONTEXT_MENU(SqlEditor::OnContextMenu)
     EVT_KILL_FOCUS(SqlEditor::OnKillFocus)
-    EVT_MENU(SqlEditor::ID_MENU_EXECUTE_SELECTED, SqlEditor::OnMenuExecuteSelected)
-    EVT_MENU(SqlEditor::ID_MENU_FIND_SELECTED,    SqlEditor::OnMenuFindSelected)
-    EVT_MENU(SqlEditor::ID_MENU_WRAP,             SqlEditor::OnMenuWrap)
-    EVT_MENU(SqlEditor::ID_MENU_SET_FONT,         SqlEditor::OnMenuSetFont)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
@@ -381,7 +376,8 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
     m.Append(wxID_DELETE, _("&Delete"));
     m.AppendSeparator();
     m.Append(wxID_SELECTALL,       _("Select &All"));
-    m.Append(ID_MENU_EXECUTE_SELECTED, _("E&xecute selected"));
+    m.Append(ExecuteSqlFrame::Menu_Query_Execute_selection,
+        _("E&xecute selected"));
 
     int slen = GetSelectionEnd() - GetSelectionStart();
     if (slen && slen < 50)     // something (small) is selected
@@ -390,15 +386,16 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
         size_t p = sel.find_first_of(wxT("\n\r\t"));
         if (p != wxString::npos)
             sel.Remove(p);
-        m.Append(ID_MENU_FIND_SELECTED, _("S&how properties for ") + sel);
+        m.Append(ExecuteSqlFrame::Menu_Find_Selected_Object,
+            _("S&how properties for ") + sel);
     }
 
     m.AppendSeparator();
     m.Append(wxID_REPLACE,          _("&Find and replace"));
-    m.Append(ID_MENU_SET_FONT,      _("Set F&ont"));
-    m.AppendCheckItem(ID_MENU_WRAP, _("&Wrap"));
+    m.Append(ExecuteSqlFrame::Menu_View_Set_editor_font, _("Set F&ont"));
+    m.AppendCheckItem(ExecuteSqlFrame::Menu_View_Wrap_long_lines, _("&Wrap"));
     if (wxSTC_WRAP_WORD == GetWrapMode())
-        m.Check(ID_MENU_WRAP, true);
+        m.Check(ExecuteSqlFrame::Menu_View_Wrap_long_lines, true);
 
     // disable stuff
     m.Enable(wxID_UNDO, CanUndo());
@@ -408,7 +405,7 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
         m.Enable(wxID_CUT,              false);
         m.Enable(wxID_COPY,             false);
         m.Enable(wxID_DELETE,           false);
-        m.Enable(ID_MENU_EXECUTE_SELECTED, false);
+        m.Enable(ExecuteSqlFrame::Menu_Query_Execute_selection, false);
     }
 
     PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
@@ -423,32 +420,7 @@ void SqlEditor::OnKillFocus(wxFocusEvent& event)
     event.Skip();   // let the STC do it's job
 }
 //-----------------------------------------------------------------------------
-void SqlEditor::OnMenuFindSelected(wxCommandEvent& WXUNUSED(event))
-{
-    wxString sel = GetSelectedText();
-    int p = sel.Find(wxT(" "));
-    if (p != -1)
-        sel.Remove(p);
-    frameM->showProperties(sel);
-}
-//-----------------------------------------------------------------------------
-void SqlEditor::OnMenuExecuteSelected(wxCommandEvent& WXUNUSED(event))
-{
-    if (config().get(wxT("SQLEditorExecuteClears"), false))
-        frameM->clearStats();
-
-    if (config().get(wxT("TreatAsSingleStatement"), false))
-        frameM->execute(GetSelectedText(), wxT(";"));
-    else
-        frameM->parseStatements(GetSelectedText(), false, false, GetSelectionStart());
-}
-//-----------------------------------------------------------------------------
-void SqlEditor::OnMenuWrap(wxCommandEvent& WXUNUSED(event))
-{
-    SetWrapMode(GetWrapMode() == wxSTC_WRAP_WORD ? wxSTC_WRAP_NONE : wxSTC_WRAP_WORD);
-}
-//-----------------------------------------------------------------------------
-void SqlEditor::OnMenuSetFont(wxCommandEvent& WXUNUSED(event))
+void SqlEditor::setFont()
 {
     // step 1 of 2: set font
     wxFont f, f2;
@@ -533,7 +505,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
     notebook_pane_2 = new wxPanel(notebook_1, -1);
     panel_splitter_top = new wxPanel(splitter_window_1, -1);
     statusbar_1 = CreateStatusBar(4);
-    styled_text_ctrl_sql = new SqlEditor(panel_splitter_top, ID_stc_sql, this);
+    styled_text_ctrl_sql = new SqlEditor(panel_splitter_top, ID_stc_sql);
     styled_text_ctrl_stats = new wxStyledTextCtrl(notebook_pane_1, -1);
     styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
     styled_text_ctrl_stats->StyleSetForeground(1, *wxRED);
@@ -803,6 +775,9 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(ExecuteSqlFrame::Menu_View_Focus_grid,
         ExecuteSqlFrame::OnMenuFocusGrid)
 
+    EVT_MENU(ExecuteSqlFrame::Menu_Find_Selected_Object,
+        ExecuteSqlFrame::OnMenuFindSelectedObject)
+
     EVT_MENU(ExecuteSqlFrame::Menu_History_Next,    ExecuteSqlFrame::OnMenuHistoryNext)
     EVT_MENU(ExecuteSqlFrame::Menu_History_Previous,ExecuteSqlFrame::OnMenuHistoryPrev)
     EVT_MENU(ExecuteSqlFrame::Menu_History_Search,  ExecuteSqlFrame::OnMenuHistorySearch)
@@ -1052,6 +1027,15 @@ void ExecuteSqlFrame::autoComplete(bool force)
     }
 }
 //-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuFindSelectedObject(wxCommandEvent& WXUNUSED(event))
+{
+    wxString sel = styled_text_ctrl_sql->GetSelectedText();
+    int p = sel.Find(wxT(" "));
+    if (p != -1)
+        sel.Remove(p);
+    showProperties(sel);
+}
+//-----------------------------------------------------------------------------
 //! handle function keys (F5, F8, F4, ...)
 void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
 {
@@ -1269,6 +1253,8 @@ void ExecuteSqlFrame::OnMenuEditor(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuData(wxCommandEvent& WXUNUSED(event))
 {
+    FR_TRY
+
     if (splitter_window_1->IsSplit())                    // screen is split -> show second
         splitter_window_1->Unsplit(panel_splitter_top);
     else if (!panel_splitter_bottom->IsShown()) // second is shown -> show first
@@ -1278,13 +1264,25 @@ void ExecuteSqlFrame::OnMenuData(wxCommandEvent& WXUNUSED(event))
         splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
         splitter_window_1->Unsplit(panel_splitter_top);
     }
+    notebook_1->SetSelection(1);
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuStatistics(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
 
-    prepareAndExecute(true);
+    if (splitter_window_1->IsSplit())                    // screen is split -> show second
+        splitter_window_1->Unsplit(panel_splitter_top);
+    else if (!panel_splitter_bottom->IsShown()) // second is shown -> show first
+    {
+        panel_splitter_top->Show();
+        panel_splitter_bottom->Show();
+        splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
+        splitter_window_1->Unsplit(panel_splitter_top);
+    }
+    notebook_1->SetSelection(0);
 
     FR_CATCH
 }
@@ -1298,9 +1296,9 @@ void ExecuteSqlFrame::OnMenuSplitView(wxCommandEvent& WXUNUSED(event))
     }
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuSetEditorFont(wxCommandEvent& event)
+void ExecuteSqlFrame::OnMenuSetEditorFont(wxCommandEvent& WXUNUSED(event))
 {
-    styled_text_ctrl_sql->OnMenuSetFont(event);
+    styled_text_ctrl_sql->setFont();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuToggleWrap(wxCommandEvent& WXUNUSED(event))

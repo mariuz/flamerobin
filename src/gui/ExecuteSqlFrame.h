@@ -52,30 +52,14 @@ class ExecuteSqlFrame;
 class SqlEditor: public SearchableEditor
 {
 private:
-    ExecuteSqlFrame *frameM;
     void setup();
 public:
-    enum {
-        ID_MENU_EXECUTE_SELECTED = 300,
-        ID_MENU_FIND_SELECTED, ID_MENU_WRAP, ID_MENU_SET_FONT, ID_MENU_FIND
-    };
-
-    SqlEditor(wxWindow *parent, wxWindowID id, ExecuteSqlFrame *frame);
+    SqlEditor(wxWindow *parent, wxWindowID id);
     void markText(int start, int end);
+    void setFont();
+
     void OnContextMenu(wxContextMenuEvent& event);
     void OnKillFocus(wxFocusEvent& event);
-    void OnMenuUndo(wxCommandEvent& event);
-    void OnMenuRedo(wxCommandEvent& event);
-    void OnMenuCut(wxCommandEvent& event);
-    void OnMenuCopy(wxCommandEvent& event);
-    void OnMenuPaste(wxCommandEvent& event);
-    void OnMenuDelete(wxCommandEvent& event);
-    void OnMenuSelectAll(wxCommandEvent& event);
-    void OnMenuFindSelected(wxCommandEvent& event);
-    void OnMenuExecuteSelected(wxCommandEvent& event);
-    void OnMenuFind(wxCommandEvent& event);
-    void OnMenuSetFont(wxCommandEvent& event);
-    void OnMenuWrap(wxCommandEvent& event);
     DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
@@ -97,6 +81,7 @@ public:
         Menu_View_Split_view,
         Menu_View_Wrap_long_lines,
         Menu_View_Set_editor_font,
+        Menu_Find_Selected_Object,
         Menu_View_Focus_grid,
         Menu_View_Focus_editor,
 
@@ -236,6 +221,8 @@ private:
     void OnMenuUpdateGridSaveAsCsv(wxUpdateUIEvent& event);
     void OnMenuGridGridHeaderFont(wxCommandEvent &event);
     void OnMenuGridGridCellFont(wxCommandEvent &event);
+
+    void OnMenuFindSelectedObject(wxCommandEvent& event);
 
     // begin wxGlade: ExecuteSqlFrame::methods
     void set_properties();
