@@ -588,10 +588,10 @@ void ExecuteSqlFrame::buildMainMenu()
     menuBarM->Append(editMenu, _("&Edit"));
 
     wxMenu* viewMenu = new wxMenu();
-    viewMenu->Append(Menu_View_Editor,          _("Ed&itor"));
-    viewMenu->Append(Menu_View_Statistics,      _("&Statistics"));
-    viewMenu->Append(Menu_View_Data,            _("&Data"));
-    viewMenu->Append(Menu_View_Split_view,      _("Sp&lit view"));
+    viewMenu->AppendRadioItem(Menu_View_Editor,          _("Ed&itor"));
+    viewMenu->AppendRadioItem(Menu_View_Statistics,      _("&Statistics"));
+    viewMenu->AppendRadioItem(Menu_View_Data,            _("&Data"));
+    viewMenu->AppendRadioItem(Menu_View_Split_view,      _("Sp&lit view"));
     viewMenu->AppendSeparator();
     viewMenu->Append(Menu_View_Set_editor_font, _("Se&t editor font"));
     viewMenu->AppendSeparator();
