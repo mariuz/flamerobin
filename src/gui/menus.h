@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-  $Id:  $
+  $Id$
 
 */
 #ifndef FR_MENUS_H
