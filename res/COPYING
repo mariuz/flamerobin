@@ -1,4 +1,5 @@
 Some of the images in this directory are taken from Ximian project,
+and others from KDE's Crystal Project (everaldo.com)
 which released them under LGPL licence. See file LGPL for licence itself.
 
 Images covered with LGPL are:
@@ -36,6 +37,12 @@ trigger32.xpm
 up.xpm
 view.xpm
 view32.xpm
+
+Crystal Project's:
+execute24.xpm
+history24.xpm
+plan24.xpm
+
 
 All other images, are licenced under Expat license as the rest of FlameRobin
 project.

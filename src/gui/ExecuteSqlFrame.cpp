@@ -258,14 +258,14 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
 //-----------------------------------------------------------------------------
 //! included xpm files, so that icons are compiled into executable
 namespace sql_icons {
-#include "delete16.xpm"
-#include "execute16.xpm"
-#include "history.xpm"
-#include "insert16.xpm"
-#include "ok.xpm"
+#include "delete24.xpm"
+#include "execute24.xpm"
+#include "history24.xpm"
+#include "insert24.xpm"
+#include "plan24.xpm"
+#include "ok24.xpm"
 #include "sqlicon.xpm"
 #include "redx.xpm"
-#include "procedure.xpm"
 };
 //-----------------------------------------------------------------------------
 // Setup the Scintilla editor
@@ -518,7 +518,7 @@ void ExecuteSqlFrame::buildToolbar()
 {
     //toolBarM = CreateToolBar( wxTB_FLAT|wxTB_HORIZONTAL|wxTB_TEXT, wxID_ANY );
     toolBarM = CreateToolBar( wxTB_FLAT|wxTB_HORIZONTAL, wxID_ANY );
-    toolBarM->SetToolBitmapSize( wxSize( 16,16 ) );
+    toolBarM->SetToolBitmapSize( wxSize( 24,24 ) );
 
     toolBarM->AddTool( wxID_NEW, _("New"),
         wxArtProvider::GetBitmap(wxART_NEW, wxART_TOOLBAR), wxNullBitmap,
@@ -540,27 +540,27 @@ void ExecuteSqlFrame::buildToolbar()
     toolBarM->AddTool( wxID_FORWARD, _("Next"),
         wxArtProvider::GetBitmap(wxART_GO_FORWARD, wxART_TOOLBAR), wxNullBitmap,
         wxITEM_NORMAL, _("Go to next statement"), _("Go to next statement") );
-    toolBarM->AddTool( Cmds::History_Search, _("History"), wxBitmap(sql_icons::history_xpm), wxNullBitmap,
+    toolBarM->AddTool( Cmds::History_Search, _("History"), wxBitmap(sql_icons::history24_xpm), wxNullBitmap,
         wxITEM_NORMAL, _("Browse and search statement history"), _("Browse and search statement history") );
     toolBarM->AddSeparator();
 
-    toolBarM->AddTool( Cmds::Query_Execute, _("Execute"), wxBitmap(sql_icons::execute16_xpm), wxNullBitmap,
+    toolBarM->AddTool( Cmds::Query_Execute, _("Execute"), wxBitmap(sql_icons::execute24_xpm), wxNullBitmap,
         wxITEM_NORMAL, _("F4 - Execute statement(s)"), _("F4 - Execute statement(s)") );
+    toolBarM->AddTool( Cmds::Query_Show_plan, _("Show plan"), wxBitmap(sql_icons::plan24_xpm), wxNullBitmap,
+        wxITEM_NORMAL, _("Show query execution plan"), _("Show query execution plan") );
     toolBarM->AddTool( Cmds::Query_Commit, _("Commit"),
-        wxBitmap(sql_icons::ok_xpm), wxNullBitmap,
+        wxBitmap(sql_icons::ok24_xpm), wxNullBitmap,
         //wxArtProvider::GetBitmap(wxART_TICK_MARK, wxART_TOOLBAR), wxNullBitmap,
         wxITEM_NORMAL, _("F5 - Commit transaction"), _("F5 - Commit transaction") );
     toolBarM->AddTool( Cmds::Query_Rollback, _("Rollback"),
          wxBitmap(sql_icons::redx_xpm), wxNullBitmap,
         //wxArtProvider::GetBitmap(wxART_CROSS_MARK, wxART_TOOLBAR), wxNullBitmap,
         wxITEM_NORMAL, _("F8 - Rollback transaction"), _("F8 - Rollback transaction") );
-    toolBarM->AddTool( Cmds::Query_Show_plan, _("Show plan"), wxBitmap(sql_icons::procedure_xpm), wxNullBitmap,
-        wxITEM_NORMAL, _("Show query execution plan"), _("Show query execution plan") );
     toolBarM->AddSeparator();
 
-    toolBarM->AddTool( Cmds::DataGrid_Insert_row, _("Insert row"), wxBitmap(sql_icons::insert16_xpm), wxNullBitmap,
+    toolBarM->AddTool( Cmds::DataGrid_Insert_row, _("Insert row"), wxBitmap(sql_icons::insert24_xpm), wxNullBitmap,
         wxITEM_NORMAL, _("Insert a new row in recordset"), _("Insert a new row in recordset") );
-    toolBarM->AddTool( Cmds::DataGrid_Delete_row, _("Delete row"), wxBitmap(sql_icons::delete16_xpm), wxNullBitmap,
+    toolBarM->AddTool( Cmds::DataGrid_Delete_row, _("Delete row"), wxBitmap(sql_icons::delete24_xpm), wxNullBitmap,
         wxITEM_NORMAL, _("Delete row(s) from recordset"), _("Delete row(s) from recordset") );
 
     toolBarM->Realize();
