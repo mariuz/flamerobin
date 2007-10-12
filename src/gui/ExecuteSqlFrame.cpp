@@ -38,6 +38,7 @@
     #include "wx/wx.h"
 #endif
 
+#include <wx/artprov.h>
 #include <wx/datetime.h>
 #include <wx/dnd.h>
 #include <wx/file.h>
@@ -261,15 +262,9 @@ namespace sql_icons {
 #include "execute16.xpm"
 #include "history.xpm"
 #include "insert16.xpm"
-#include "left.xpm"
-#include "load.xpm"
 #include "ok.xpm"
-#include "new.xpm"
-#include "save.xpm"
-#include "saveas.xpm"
 #include "sqlicon.xpm"
 #include "redx.xpm"
-#include "right.xpm"
 #include "procedure.xpm"
 };
 //-----------------------------------------------------------------------------
@@ -525,19 +520,25 @@ void ExecuteSqlFrame::buildToolbar()
     toolBarM = CreateToolBar( wxTB_FLAT|wxTB_HORIZONTAL, wxID_ANY );
     toolBarM->SetToolBitmapSize( wxSize( 16,16 ) );
 
-    toolBarM->AddTool( wxID_NEW, _("New"), wxBitmap(sql_icons::new_xpm), wxNullBitmap,
+    toolBarM->AddTool( wxID_NEW, _("New"),
+        wxArtProvider::GetBitmap(wxART_NEW, wxART_TOOLBAR), wxNullBitmap,
         wxITEM_NORMAL, _("New window"), _("New window") );
-    toolBarM->AddTool( wxID_OPEN, _("Open"), wxBitmap(sql_icons::load_xpm), wxNullBitmap,
+    toolBarM->AddTool( wxID_OPEN, _("Open"),
+        wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_TOOLBAR), wxNullBitmap,
         wxITEM_NORMAL, _("Load a file"), _("Load a file") );
-    toolBarM->AddTool( wxID_SAVE, _("Save"), wxBitmap(sql_icons::save_xpm), wxNullBitmap,
+    toolBarM->AddTool( wxID_SAVE, _("Save"),
+        wxArtProvider::GetBitmap(wxART_FILE_SAVE, wxART_TOOLBAR), wxNullBitmap,
         wxITEM_NORMAL,  _("Save to file"), _("Save to file") );
-    toolBarM->AddTool( wxID_SAVEAS, _("Save as"), wxBitmap(sql_icons::saveas_xpm), wxNullBitmap,
+    toolBarM->AddTool( wxID_SAVEAS, _("Save as"),
+        wxArtProvider::GetBitmap(wxART_FILE_SAVE_AS, wxART_TOOLBAR), wxNullBitmap,
         wxITEM_NORMAL, _("Save under different name"), _("Save under different name") );
     toolBarM->AddSeparator();
 
-    toolBarM->AddTool( Cmds::History_Previous, _("Back"), wxBitmap(sql_icons::left_xpm), wxNullBitmap,
+    toolBarM->AddTool( Cmds::History_Previous, _("Back"),
+        wxArtProvider::GetBitmap(wxART_GO_BACK, wxART_TOOLBAR), wxNullBitmap,
         wxITEM_NORMAL, _("Go to previous statement"), _("Go to previous statement") );
-    toolBarM->AddTool( Cmds::History_Next, _("Next"), wxBitmap(sql_icons::right_xpm), wxNullBitmap,
+    toolBarM->AddTool( Cmds::History_Next, _("Next"),
+        wxArtProvider::GetBitmap(wxART_GO_FORWARD, wxART_TOOLBAR), wxNullBitmap,
         wxITEM_NORMAL, _("Go to next statement"), _("Go to next statement") );
     toolBarM->AddTool( Cmds::History_Search, _("History"), wxBitmap(sql_icons::history_xpm), wxNullBitmap,
         wxITEM_NORMAL, _("Browse and search statement history"), _("Browse and search statement history") );
