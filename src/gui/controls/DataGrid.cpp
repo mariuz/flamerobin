@@ -1,24 +1,24 @@
 /*
-Copyright (c) 2004, 2005, 2006 The FlameRobin Development Team
+  Copyright (c) 2004-2007 The FlameRobin Development Team
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
 
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
   $Id$
@@ -49,9 +49,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "gui/AdvancedMessageDialog.h"
+#include "gui/CommandIds.h"
 #include "gui/controls/DataGrid.h"
 #include "gui/controls/DataGridTable.h"
-#include "gui/menus.h"
 #include "metadata/database.h"
 #include "metadata/table.h"
 //-----------------------------------------------------------------------------
@@ -162,19 +162,19 @@ void DataGrid::showPopMenu(wxPoint cursorPos)
     // TODO: clean this up to use MenuIDs from ExecuteSqlFrame
     //       no need to duplicate event handling
     //       PLUS: create a separate file with global set of MenuIDs
-    m.Append(Menus::DataGrid_FetchAll, _("Fetch all records"));
-    m.Append(Menus::DataGrid_CancelFetchAll, _("Stop fetching all records"));
+    m.Append(Cmds::DataGrid_FetchAll, _("Fetch all records"));
+    m.Append(Cmds::DataGrid_CancelFetchAll, _("Stop fetching all records"));
     m.AppendSeparator();
 
-    m.Append(Menus::DataGrid_Copy, _("Copy"));
-    m.Append(Menus::DataGrid_Copy_as_insert, _("Copy as INSERT statements"));
-    m.Append(Menus::DataGrid_Copy_as_update, _("Copy as UPDATE statements"));
-    m.Append(Menus::DataGrid_Save_as_html, _("Save as HTML file..."));
-    m.Append(Menus::DataGrid_Save_as_csv, _("Save as CSV file..."));
+    m.Append(Cmds::DataGrid_Copy, _("Copy"));
+    m.Append(Cmds::DataGrid_Copy_as_insert, _("Copy as INSERT statements"));
+    m.Append(Cmds::DataGrid_Copy_as_update, _("Copy as UPDATE statements"));
+    m.Append(Cmds::DataGrid_Save_as_html, _("Save as HTML file..."));
+    m.Append(Cmds::DataGrid_Save_as_csv, _("Save as CSV file..."));
     m.AppendSeparator();
 
-    m.Append(Menus::DataGrid_Set_header_font, _("Set header font"));
-    m.Append(Menus::DataGrid_Set_cell_font, _("Set cell font"));
+    m.Append(Cmds::DataGrid_Set_header_font, _("Set header font"));
+    m.Append(Cmds::DataGrid_Set_cell_font, _("Set cell font"));
     PopupMenu(&m, cursorPos);
 }
 //-----------------------------------------------------------------------------

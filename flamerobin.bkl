@@ -164,7 +164,7 @@
 
             <set var="WX_PORT">wxmsw</set>
 <!-- set this to 28 for wxWidgets 2.8.X, to 29 for wxWidgets CVS HEAD -->
-            <set var="WX_VERSION">26</set>
+            <set var="WX_VERSION">28</set>
 
             <set var="WX_LIB_DIR" make_var="1">
                 <if cond="USEDLL=='1'">$(WXDIR)/lib/$(COMPILER)_dll</if>
@@ -228,6 +228,7 @@
         $(SOURCEDIR)/gui/BackupRestoreBaseFrame.h
         $(SOURCEDIR)/gui/BaseDialog.h
         $(SOURCEDIR)/gui/BaseFrame.h
+        $(SOURCEDIR)/gui/CommandIds.h
         $(SOURCEDIR)/gui/ContextMenuMetadataItemVisitor.h
         $(SOURCEDIR)/gui/controls/DataGrid.h
         $(SOURCEDIR)/gui/controls/DataGridRowBuffer.h
@@ -260,7 +261,6 @@
         $(SOURCEDIR)/gui/StyleGuide.h
         $(SOURCEDIR)/gui/TriggerWizardDialog.h
         $(SOURCEDIR)/gui/UserDialog.h
-        $(SOURCEDIR)/menus.h
         $(SOURCEDIR)/images.h
         $(SOURCEDIR)/Isaac.h
         $(SOURCEDIR)/logger.h

@@ -24,10 +24,10 @@
   $Id$
 
 */
-#ifndef FR_MENUS_H
-#define FR_MENUS_H
+#ifndef FR_COMMANDIDS_H
+#define FR_COMMANDIDS_H
 //----------------------------------------------------------------------------
-namespace Menus
+namespace Cmds
 {
     enum {
         // SQL View:
