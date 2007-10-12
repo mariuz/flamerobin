@@ -639,7 +639,7 @@ void ExecuteSqlFrame::buildMainMenu()
     gridMenu->AppendSeparator();
     gridMenu->Append(Cmds::DataGrid_Set_header_font, _("Set h&eader font"));
     gridMenu->Append(Cmds::DataGrid_Set_cell_font,   _("Set cell f&ont"));
-    menuBarM->Append(gridMenu, _("&Data Grid"));
+    menuBarM->Append(gridMenu, _("&Grid"));
 
     SetMenuBar(menuBarM);
 }
