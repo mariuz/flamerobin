@@ -534,10 +534,10 @@ void ExecuteSqlFrame::buildToolbar()
         wxITEM_NORMAL, _("Save under different name"), _("Save under different name") );
     toolBarM->AddSeparator();
 
-    toolBarM->AddTool( Cmds::History_Previous, _("Back"),
+    toolBarM->AddTool( wxID_BACKWARD, _("Back"),
         wxArtProvider::GetBitmap(wxART_GO_BACK, wxART_TOOLBAR), wxNullBitmap,
         wxITEM_NORMAL, _("Go to previous statement"), _("Go to previous statement") );
-    toolBarM->AddTool( Cmds::History_Next, _("Next"),
+    toolBarM->AddTool( wxID_FORWARD, _("Next"),
         wxArtProvider::GetBitmap(wxART_GO_FORWARD, wxART_TOOLBAR), wxNullBitmap,
         wxITEM_NORMAL, _("Go to next statement"), _("Go to next statement") );
     toolBarM->AddTool( Cmds::History_Search, _("History"), wxBitmap(sql_icons::history_xpm), wxNullBitmap,
@@ -546,9 +546,13 @@ void ExecuteSqlFrame::buildToolbar()
 
     toolBarM->AddTool( Cmds::Query_Execute, _("Execute"), wxBitmap(sql_icons::execute16_xpm), wxNullBitmap,
         wxITEM_NORMAL, _("F4 - Execute statement(s)"), _("F4 - Execute statement(s)") );
-    toolBarM->AddTool( Cmds::Query_Commit, _("Commit"), wxBitmap(sql_icons::ok_xpm), wxNullBitmap,
+    toolBarM->AddTool( Cmds::Query_Commit, _("Commit"),
+        wxBitmap(sql_icons::ok_xpm), wxNullBitmap,
+        //wxArtProvider::GetBitmap(wxART_TICK_MARK, wxART_TOOLBAR), wxNullBitmap,
         wxITEM_NORMAL, _("F5 - Commit transaction"), _("F5 - Commit transaction") );
-    toolBarM->AddTool( Cmds::Query_Rollback, _("Rollback"), wxBitmap(sql_icons::redx_xpm), wxNullBitmap,
+    toolBarM->AddTool( Cmds::Query_Rollback, _("Rollback"),
+         wxBitmap(sql_icons::redx_xpm), wxNullBitmap,
+        //wxArtProvider::GetBitmap(wxART_CROSS_MARK, wxART_TOOLBAR), wxNullBitmap,
         wxITEM_NORMAL, _("F8 - Rollback transaction"), _("F8 - Rollback transaction") );
     toolBarM->AddTool( Cmds::Query_Show_plan, _("Show plan"), wxBitmap(sql_icons::procedure_xpm), wxNullBitmap,
         wxITEM_NORMAL, _("Show query execution plan"), _("Show query execution plan") );
@@ -590,10 +594,10 @@ void ExecuteSqlFrame::buildMainMenu()
     menuBarM->Append(editMenu, _("&Edit"));
 
     wxMenu* viewMenu = new wxMenu();
-    viewMenu->AppendRadioItem(Cmds::View_Editor,          _("Ed&itor"));
+    viewMenu->AppendRadioItem(Cmds::View_Editor,          _("Edit&or"));
     viewMenu->AppendRadioItem(Cmds::View_Statistics,      _("&Statistics"));
     viewMenu->AppendRadioItem(Cmds::View_Data,            _("&Data"));
-    viewMenu->AppendRadioItem(Cmds::View_Split_view,      _("Sp&lit view"));
+    viewMenu->AppendRadioItem(Cmds::View_Split_view,      _("Split &view"));
     viewMenu->AppendSeparator();
     viewMenu->Append(Cmds::View_Set_editor_font, _("Se&t editor font"));
     viewMenu->AppendSeparator();
@@ -604,15 +608,15 @@ void ExecuteSqlFrame::buildMainMenu()
     menuBarM->Append(viewMenu, _("&View"));
 
     wxMenu* historyMenu = new wxMenu();
-    historyMenu->Append(Cmds::History_Next,      _("&Next"));
-    historyMenu->Append(Cmds::History_Previous,  _("&Previous"));
+    historyMenu->Append(wxID_FORWARD,   _("&Next"));
+    historyMenu->Append(wxID_BACKWARD,  _("&Previous"));
     historyMenu->Append(Cmds::History_Search,    _("&Search"));
     menuBarM->Append(historyMenu, _("&History"));
 
     wxMenu* queryMenu = new wxMenu();
     queryMenu->Append(Cmds::Query_Execute,             _("&Execute"));
     queryMenu->Append(Cmds::Query_Show_plan,           _("Show &plan"));
-    queryMenu->Append(Cmds::Query_Execute_selection,   _("Execu&te selection"));
+    queryMenu->Append(Cmds::Query_Execute_selection,   _("Execute &selection"));
     queryMenu->Append(Cmds::Query_Execute_from_cursor, _("Exec&ute from cursor"));
     queryMenu->AppendSeparator();
     queryMenu->Append(Cmds::Query_Commit,             _("&Commit"));
@@ -624,17 +628,17 @@ void ExecuteSqlFrame::buildMainMenu()
     gridMenu->Append(Cmds::DataGrid_Delete_row,      _("&Delete row"));
     gridMenu->AppendSeparator();
     gridMenu->Append(Cmds::DataGrid_Copy,            _("&Copy"));
-    gridMenu->Append(Cmds::DataGrid_Copy_as_insert,  _("Copy as &insert statements"));
+    gridMenu->Append(Cmds::DataGrid_Copy_as_insert,  _("Copy &as insert statements"));
     gridMenu->Append(Cmds::DataGrid_Copy_as_update,  _("Copy as &update statements"));
     gridMenu->AppendSeparator();
     gridMenu->Append(Cmds::DataGrid_FetchAll,        _("&Fetch all records"));
     gridMenu->Append(Cmds::DataGrid_CancelFetchAll,  _("&Stop fetching all records"));
     gridMenu->AppendSeparator();
     gridMenu->Append(Cmds::DataGrid_Save_as_html,    _("Save as &html"));
-    gridMenu->Append(Cmds::DataGrid_Save_as_csv,     _("Save as &csv"));
+    gridMenu->Append(Cmds::DataGrid_Save_as_csv,     _("Save as cs&v"));
     gridMenu->AppendSeparator();
     gridMenu->Append(Cmds::DataGrid_Set_header_font, _("Set h&eader font"));
-    gridMenu->Append(Cmds::DataGrid_Set_cell_font,   _("Set ce&ll font"));
+    gridMenu->Append(Cmds::DataGrid_Set_cell_font,   _("Set cell f&ont"));
     menuBarM->Append(gridMenu, _("&Data Grid"));
 
     SetMenuBar(menuBarM);
@@ -774,12 +778,11 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
 
     EVT_MENU(Cmds::Find_Selected_Object,   ExecuteSqlFrame::OnMenuFindSelectedObject)
 
-    EVT_MENU(Cmds::History_Next,     ExecuteSqlFrame::OnMenuHistoryNext)
-    EVT_MENU(Cmds::History_Previous, ExecuteSqlFrame::OnMenuHistoryPrev)
-    EVT_MENU(Cmds::History_Search,   ExecuteSqlFrame::OnMenuHistorySearch)
-
-    EVT_UPDATE_UI(Cmds::History_Next,     ExecuteSqlFrame::OnMenuUpdateHistoryNext)
-    EVT_UPDATE_UI(Cmds::History_Previous, ExecuteSqlFrame::OnMenuUpdateHistoryPrev)
+    EVT_MENU(wxID_FORWARD,         ExecuteSqlFrame::OnMenuHistoryNext)
+    EVT_MENU(wxID_BACKWARD,        ExecuteSqlFrame::OnMenuHistoryPrev)
+    EVT_MENU(Cmds::History_Search, ExecuteSqlFrame::OnMenuHistorySearch)
+    EVT_UPDATE_UI(wxID_FORWARD,    ExecuteSqlFrame::OnMenuUpdateHistoryNext)
+    EVT_UPDATE_UI(wxID_BACKWARD,   ExecuteSqlFrame::OnMenuUpdateHistoryPrev)
 
     EVT_MENU(Cmds::Query_Execute,             ExecuteSqlFrame::OnMenuExecute)
     EVT_MENU(Cmds::Query_Show_plan,           ExecuteSqlFrame::OnMenuShowPlan)
@@ -1327,7 +1330,6 @@ void ExecuteSqlFrame::OnMenuHistoryNext(wxCommandEvent& WXUNUSED(event))
         else
             styled_text_ctrl_sql->SetText(sh.get(historyPositionM));
     }
-    updateHistoryButtons();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuHistoryPrev(wxCommandEvent& WXUNUSED(event))
@@ -1340,7 +1342,6 @@ void ExecuteSqlFrame::OnMenuHistoryPrev(wxCommandEvent& WXUNUSED(event))
         historyPositionM--;
         styled_text_ctrl_sql->SetText(sh.get(historyPositionM));
     }
-    updateHistoryButtons();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuHistorySearch(wxCommandEvent& WXUNUSED(event))
@@ -1578,13 +1579,6 @@ bool ExecuteSqlFrame::loadSqlFile(const wxString& filename)
     return true;
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::updateHistoryButtons()
-{
-    StatementHistory& sh = StatementHistory::get(databaseM);
-    toolBarM->EnableTool(Cmds::History_Previous, historyPositionM > 0 && sh.size() > 0);
-    toolBarM->EnableTool(Cmds::History_Next, sh.size() > historyPositionM);
-}
-//-----------------------------------------------------------------------------
 //! enable/disable and show/hide controls depending of transaction status
 void ExecuteSqlFrame::InTransaction(bool started)
 {
@@ -1637,7 +1631,6 @@ void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
         StatementHistory& sh = StatementHistory::get(databaseM);
         sh.add(styled_text_ctrl_sql->GetText());
         historyPositionM = sh.size();
-        updateHistoryButtons();
     }
 }
 //-----------------------------------------------------------------------------
@@ -1653,7 +1646,6 @@ void ExecuteSqlFrame::executeAllStatements(bool closeWhenDone)
         StatementHistory& sh = StatementHistory::get(databaseM);
         sh.add(styled_text_ctrl_sql->GetText());
         historyPositionM = sh.size();
-        updateHistoryButtons();
     }
 
     if (closeWhenDone && autoCommitM && !inTransactionM)
@@ -2089,7 +2081,6 @@ void ExecuteSqlFrame::setDatabase(Database* db)
     setKeywords();           // set words for autocomplete feature
 
     historyPositionM = StatementHistory::get(databaseM).size();
-    updateHistoryButtons();
 
     // set drop target for DnD
     styled_text_ctrl_sql->SetDropTarget(

@@ -42,8 +42,6 @@ namespace Cmds
         View_Focus_editor,
 
         // SQL History
-        History_Next,
-        History_Previous,
         History_Search,
 
         // SQL Query

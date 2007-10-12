@@ -102,7 +102,6 @@ private:
 
     StatementHistory::Position historyPositionM;
     wxString localBuffer;
-    void updateHistoryButtons();
 
     bool autoCommitM;
     bool inTransactionM;
