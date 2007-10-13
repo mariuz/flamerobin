@@ -52,8 +52,9 @@
 #include <vector>
 
 #include "config/Config.h"
-#include "core/StringUtils.h"
+#include "core/ArtProvider.h"
 #include "core/FRError.h"
+#include "core/StringUtils.h"
 #include "framemanager.h"
 #include "gui/AdvancedMessageDialog.h"
 #include "gui/CommandIds.h"
@@ -258,10 +259,8 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
 //-----------------------------------------------------------------------------
 //! included xpm files, so that icons are compiled into executable
 namespace sql_icons {
-#include "delete24.xpm"
 #include "execute24.xpm"
 #include "history24.xpm"
-#include "insert24.xpm"
 #include "plan24.xpm"
 #include "ok24.xpm"
 #include "sqlicon.xpm"
@@ -518,27 +517,34 @@ void ExecuteSqlFrame::buildToolbar()
 {
     //toolBarM = CreateToolBar( wxTB_FLAT|wxTB_HORIZONTAL|wxTB_TEXT, wxID_ANY );
     toolBarM = CreateToolBar( wxTB_FLAT|wxTB_HORIZONTAL, wxID_ANY );
-    toolBarM->SetToolBitmapSize( wxSize( 24,24 ) );
+
+    wxSize bmpSize(toolBarM->GetToolBitmapSize());
+    // it would be better to provide proper 16x15 bitmaps, but for now...
+    if (bmpSize.GetHeight() == 15)
+    {
+        bmpSize.SetHeight(16);
+	    toolBarM->SetToolBitmapSize(bmpSize);
+    }
 
     toolBarM->AddTool( wxID_NEW, _("New"),
-        wxArtProvider::GetBitmap(wxART_NEW, wxART_TOOLBAR), wxNullBitmap,
+        wxArtProvider::GetBitmap(wxART_NEW, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, _("New window"), _("New window") );
     toolBarM->AddTool( wxID_OPEN, _("Open"),
-        wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_TOOLBAR), wxNullBitmap,
+        wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, _("Load a file"), _("Load a file") );
     toolBarM->AddTool( wxID_SAVE, _("Save"),
-        wxArtProvider::GetBitmap(wxART_FILE_SAVE, wxART_TOOLBAR), wxNullBitmap,
+        wxArtProvider::GetBitmap(wxART_FILE_SAVE, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL,  _("Save to file"), _("Save to file") );
     toolBarM->AddTool( wxID_SAVEAS, _("Save as"),
-        wxArtProvider::GetBitmap(wxART_FILE_SAVE_AS, wxART_TOOLBAR), wxNullBitmap,
+        wxArtProvider::GetBitmap(wxART_FILE_SAVE_AS, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, _("Save under different name"), _("Save under different name") );
     toolBarM->AddSeparator();
 
     toolBarM->AddTool( wxID_BACKWARD, _("Back"),
-        wxArtProvider::GetBitmap(wxART_GO_BACK, wxART_TOOLBAR), wxNullBitmap,
+        wxArtProvider::GetBitmap(wxART_GO_BACK, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, _("Go to previous statement"), _("Go to previous statement") );
     toolBarM->AddTool( wxID_FORWARD, _("Next"),
-        wxArtProvider::GetBitmap(wxART_GO_FORWARD, wxART_TOOLBAR), wxNullBitmap,
+        wxArtProvider::GetBitmap(wxART_GO_FORWARD, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, _("Go to next statement"), _("Go to next statement") );
     toolBarM->AddTool( Cmds::History_Search, _("History"), wxBitmap(sql_icons::history24_xpm), wxNullBitmap,
         wxITEM_NORMAL, _("Browse and search statement history"), _("Browse and search statement history") );
@@ -558,9 +564,11 @@ void ExecuteSqlFrame::buildToolbar()
         wxITEM_NORMAL, _("F8 - Rollback transaction"), _("F8 - Rollback transaction") );
     toolBarM->AddSeparator();
 
-    toolBarM->AddTool( Cmds::DataGrid_Insert_row, _("Insert row"), wxBitmap(sql_icons::insert24_xpm), wxNullBitmap,
+    toolBarM->AddTool( Cmds::DataGrid_Insert_row, _("Insert row"),
+        wxArtProvider::GetBitmap(ART_InsertRow, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, _("Insert a new row in recordset"), _("Insert a new row in recordset") );
-    toolBarM->AddTool( Cmds::DataGrid_Delete_row, _("Delete row"), wxBitmap(sql_icons::delete24_xpm), wxNullBitmap,
+    toolBarM->AddTool( Cmds::DataGrid_Delete_row, _("Delete row"),
+        wxArtProvider::GetBitmap(ART_DeleteRow, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, _("Delete row(s) from recordset"), _("Delete row(s) from recordset") );
 
     toolBarM->Realize();

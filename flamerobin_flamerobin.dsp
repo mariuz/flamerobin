@@ -476,6 +476,10 @@ SOURCE=.\src\gui\AdvancedSearchFrame.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\core\ArtProvider.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\BackupFrame.cpp
 # End Source File
 # Begin Source File
@@ -839,6 +843,10 @@ SOURCE=.\src\gui\AdvancedMessageDialog.h
 # Begin Source File
 
 SOURCE=.\src\gui\AdvancedSearchFrame.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\core\ArtProvider.h
 # End Source File
 # Begin Source File
 

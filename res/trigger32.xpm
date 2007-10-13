@@ -1,5 +1,5 @@
 /* XPM */
-static const char * trigger_xpm[] = {
+static const char * trigger32_xpm[] = {
 "32 32 58 1",
 " 	c None",
 ".	c #000000",

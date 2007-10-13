@@ -1,24 +1,24 @@
 /*
-Copyright (c) 2004, 2005, 2006 The FlameRobin Development Team
+  Copyright (c) 2004-2007 The FlameRobin Development Team
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
 
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
   $Id$
@@ -38,106 +38,88 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #include "wx/wx.h"
 #endif
 
+#include "core/ArtProvider.h"
 #include "metadata/metadataitem.h"
-//-----------------------------------------------------------------------------
-typedef const char* xpm_t;
 //-----------------------------------------------------------------------------
 wxBitmap getImage(NodeType type)
 {
-    #include "object.xpm"
-    #include "column.xpm"
-    #include "database.xpm"
-    #include "domain.xpm"
-    //#include "images/folder.xpm" // unused
-    //#include "images/foldero.xpm" // unused
-    #include "function.xpm"
-    #include "generator.xpm"
-    #include "generators.xpm"
-    #include "procedure.xpm"
-    #include "procedures.xpm"
-    #include "root.xpm"
-    #include "server.xpm"
-    #include "systemtable.xpm"
-    #include "systemtables.xpm"
-    #include "table.xpm"
-    #include "tables.xpm"
-    #include "trigger.xpm"
-    #include "view.xpm"
-    #include "key.xpm"
-
-    xpm_t** map = new xpm_t*[ntLastType];
-    for (int i = 0; i < ntLastType; i++)
-        map[i] = object_xpm;
-
-    map[ntUnknown]      = object_xpm;
-    map[ntRoot]         = root_xpm;
-    map[ntServer]       = server_xpm;
-    map[ntDatabase]     = database_xpm;
-    map[ntTable]        = table_xpm;
-    map[ntTables]       = tables_xpm;
-    map[ntSysTable]     = systemtable_xpm;
-    map[ntSysTables]    = systemtables_xpm;
-    map[ntView]         = view_xpm;
-    map[ntViews]        = view_xpm;
-    map[ntProcedure]    = procedure_xpm;
-    map[ntProcedures]   = procedures_xpm;
-    map[ntGenerator]    = generator_xpm;
-    map[ntFunction]     = function_xpm;
-    map[ntTrigger]      = trigger_xpm;
-    map[ntTriggers]     = trigger_xpm;
-    map[ntGenerators]   = generators_xpm;
-    map[ntFunctions]    = function_xpm;
-    map[ntColumn]       = column_xpm;
-    map[ntDomains]      = domain_xpm;
-    //map[ntRole]       = role_xpm;
-    //map[ntRoles]      = roles_xpm;
-    map[ntDomain]       = domain_xpm;
-    map[ntParameter]    = column_xpm;
-    map[ntPrimaryKey]   = key_xpm;
-    map[ntComputed]     = function_xpm;
-
-    wxBitmap ret(map[type]);
-
-    delete [] map;
-    return ret;
+    wxSize sz(16, 16);
+    switch (type)
+    {
+        case ntColumn:
+            return wxArtProvider::GetIcon(ART_Column, wxART_OTHER, sz);
+        case ntComputed:
+            return wxArtProvider::GetIcon(ART_Function, wxART_OTHER, sz);
+        case ntDatabase:
+            return wxArtProvider::GetIcon(ART_Database, wxART_OTHER, sz);
+        case ntDomain:
+        case ntDomains:
+            return wxArtProvider::GetIcon(ART_Domain, wxART_OTHER, sz);
+        case ntFunction:
+        case ntFunctions:
+            return wxArtProvider::GetIcon(ART_Function, wxART_OTHER, sz);
+        case ntGenerator:
+            return wxArtProvider::GetIcon(ART_Generator, wxART_OTHER, sz);
+        case ntGenerators:
+            return wxArtProvider::GetIcon(ART_Generators, wxART_OTHER, sz);
+        case ntParameter:
+            return wxArtProvider::GetIcon(ART_Column, wxART_OTHER, sz);
+        case ntPrimaryKey:
+            return wxArtProvider::GetIcon(ART_PrimaryKey, wxART_OTHER, sz);
+        case ntProcedure:
+            return wxArtProvider::GetIcon(ART_Procedure, wxART_OTHER, sz);
+        case ntProcedures:
+            return wxArtProvider::GetIcon(ART_Procedures, wxART_OTHER, sz);
+        case ntRoot:
+            return wxArtProvider::GetIcon(ART_Root, wxART_OTHER, sz);
+        case ntServer:
+            return wxArtProvider::GetIcon(ART_Server, wxART_OTHER, sz);
+        case ntSysTable:
+            return wxArtProvider::GetIcon(ART_SystemTable, wxART_OTHER, sz);
+        case ntSysTables:
+            return wxArtProvider::GetIcon(ART_SystemTables, wxART_OTHER, sz);
+        case ntTable:
+            return wxArtProvider::GetIcon(ART_Table, wxART_OTHER, sz);
+        case ntTables:
+            return wxArtProvider::GetIcon(ART_Tables, wxART_OTHER, sz);
+        case ntTrigger:
+        case ntTriggers:
+            return wxArtProvider::GetIcon(ART_Trigger, wxART_OTHER, sz);
+        case ntView:
+        case ntViews:
+            return wxArtProvider::GetIcon(ART_View, wxART_OTHER, sz);
+    }
+    return wxArtProvider::GetIcon(ART_Object, wxART_OTHER, sz);
 }
 //-----------------------------------------------------------------------------
 wxBitmap getImage32(NodeType type)
 {
-    // default image
-    #include "flamerobin.xpm"
-
-    #include "column32.xpm"
-    #include "database32.xpm"
-    #include "domain32.xpm"
-    #include "function32.xpm"
-    #include "generator32.xpm"
-    #include "procedure32.xpm"
-    #include "server32.xpm"
-    #include "systemtable32.xpm"
-    #include "table32.xpm"
-    #include "trigger32.xpm"
-    #include "view32.xpm"
-
-    xpm_t** map = new xpm_t*[ntLastType];
-    for (int i = 0; i < ntLastType; i++)
-        map[i] = flamerobin_xpm;
-
-    map[ntUnknown]      = flamerobin_xpm;
-    map[ntTable]        = table_xpm;
-    map[ntSysTable]     = systemtable32_xpm;
-    map[ntView]         = view_xpm;
-    map[ntProcedure]    = procedure_xpm;
-    map[ntGenerator]    = generator_xpm;
-    map[ntFunction]     = function_xpm;
-    map[ntTrigger]      = trigger_xpm;
-    map[ntColumn]       = column_xpm;
-    map[ntDomain]       = domain_xpm;
-    map[ntDatabase]     = database32_xpm;
-    map[ntServer]       = server32_xpm;
-    wxBitmap ret(map[type]);
-
-    delete [] map;
-    return ret;
+    wxSize sz(32, 32);
+    switch (type)
+    {
+        case ntColumn:
+            return wxArtProvider::GetIcon(ART_Column, wxART_OTHER, sz);
+        case ntDatabase:
+            return wxArtProvider::GetIcon(ART_Database, wxART_OTHER, sz);
+        case ntDomain:
+            return wxArtProvider::GetIcon(ART_Domain, wxART_OTHER, sz);
+        case ntFunction:
+            return wxArtProvider::GetIcon(ART_Function, wxART_OTHER, sz);
+        case ntGenerator:
+            return wxArtProvider::GetIcon(ART_Generator, wxART_OTHER, sz);
+        case ntProcedure:
+            return wxArtProvider::GetIcon(ART_Procedure, wxART_OTHER, sz);
+        case ntServer:
+            return wxArtProvider::GetIcon(ART_Server, wxART_OTHER, sz);
+        case ntSysTable:
+            return wxArtProvider::GetIcon(ART_SystemTable, wxART_OTHER, sz);
+        case ntTable:
+            return wxArtProvider::GetIcon(ART_Table, wxART_OTHER, sz);
+        case ntTrigger:
+            return wxArtProvider::GetIcon(ART_Trigger, wxART_OTHER, sz);
+        case ntView:
+            return wxArtProvider::GetIcon(ART_View, wxART_OTHER, sz);
+    }
+    return wxArtProvider::GetIcon(ART_FlameRobin, wxART_OTHER, sz);
 }
 //-----------------------------------------------------------------------------

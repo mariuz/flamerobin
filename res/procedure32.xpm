@@ -1,5 +1,5 @@
 /* XPM */
-static const char * procedure_xpm[] = {
+static const char * procedure32_xpm[] = {
 "32 32 256 2",
 "  	c None",
 ". 	c #141414",

@@ -62,6 +62,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Config.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRError.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Observer.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StringUtils.obj \
@@ -288,6 +289,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Config.obj: .\src\config\Config.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.obj: .\src\config\DatabaseConfig.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.obj: .\src\core\ArtProvider.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRError.obj: .\src\core\FRError.cpp

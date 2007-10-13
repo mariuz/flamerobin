@@ -1,5 +1,5 @@
 /* XPM */
-static const char * backup_xpm[] = {
+static const char * backup32_xpm[] = {
 "32 32 188 2",
 "  	c None",
 ". 	c #141414",

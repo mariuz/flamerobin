@@ -1,24 +1,24 @@
 /*
-Copyright (c) 2004, 2005, 2006 The FlameRobin Development Team
+  Copyright (c) 2004-2007 The FlameRobin Development Team
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
 
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
   $Id$
@@ -44,6 +44,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "config/Config.h"
 #include "config/DatabaseConfig.h"
+#include "core/ArtProvider.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "gui/AdvancedMessageDialog.h"
@@ -116,6 +117,8 @@ namespace sql_icons {
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
     BaseFrame(parent, id, title, pos, size, style, wxT("FlameRobin_main"))
 {
+    wxArtProvider::Push(new ArtProvider);
+
     mainPanelM = new wxPanel(this);
     tree_ctrl_1 = new myTreeCtrl(mainPanelM, wxDefaultPosition, wxDefaultSize,
 #if defined __WXGTK20__ || defined __WXMAC__
@@ -293,11 +296,7 @@ void MainFrame::set_properties()
     if (firstServer.IsOk())
         tree_ctrl_1->SelectItem(firstServer);
 
-    #include "flamerobin.xpm"
-    wxBitmap bmp(flamerobin_xpm);
-    wxIcon icon;
-    icon.CopyFromBitmap(bmp);
-    SetIcon(icon);
+    SetIcon(wxArtProvider::GetIcon(ART_FlameRobin, wxART_FRAME_ICON));
 }
 //-----------------------------------------------------------------------------
 void MainFrame::do_layout()

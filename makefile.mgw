@@ -55,6 +55,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Config.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRError.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Observer.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StringUtils.o \
@@ -249,6 +250,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Config.o: ./src/config/Config.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.o: ./src/config/DatabaseConfig.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.o: ./src/core/ArtProvider.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRError.o: ./src/core/FRError.cpp
