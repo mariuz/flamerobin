@@ -546,7 +546,8 @@ void ExecuteSqlFrame::buildToolbar()
     toolBarM->AddTool( wxID_FORWARD, _("Next"),
         wxArtProvider::GetBitmap(wxART_GO_FORWARD, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, _("Go to next statement"), _("Go to next statement") );
-    toolBarM->AddTool( Cmds::History_Search, _("History"), wxBitmap(sql_icons::history24_xpm), wxNullBitmap,
+    toolBarM->AddTool( Cmds::History_Search, _("History"),
+        wxArtProvider::GetBitmap(ART_History, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, _("Browse and search statement history"), _("Browse and search statement history") );
     toolBarM->AddSeparator();
 
@@ -674,7 +675,7 @@ void ExecuteSqlFrame::set_properties()
     splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
     splitter_window_1->Unsplit();
 
-    wxBitmap bmp = wxBitmap(sql_icons::sqlicon_xpm);
+    wxBitmap bmp = wxBitmap(sql_icons::sqlicon32_xpm);
     wxIcon icon;
     icon.CopyFromBitmap(bmp);
     SetIcon(icon);

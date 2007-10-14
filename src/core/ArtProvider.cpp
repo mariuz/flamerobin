@@ -38,12 +38,15 @@
     #include "wx/wx.h"
 #endif
 
+#include <wx/filename.h>
+
+#include "config/Config.h"
 #include "core/ArtProvider.h"
 //-----------------------------------------------------------------------------
 // these have size 32x32
 #include "flamerobin.xpm"
 
-#include "backup.xpm"
+#include "backup32.xpm"
 #include "column32.xpm"
 #include "database32.xpm"
 #include "domain32.xpm"
@@ -59,6 +62,7 @@
 // these have size 24x24
 #include "delete24.xpm"
 #include "insert24.xpm"
+#include "history24.xpm"
 
 // these have size 16x16
 #include "column.xpm"
@@ -68,6 +72,7 @@
 #include "function.xpm"
 #include "generator.xpm"
 #include "generators.xpm"
+#include "history.xpm"
 #include "insert16.xpm"
 #include "key.xpm"
 #include "object.xpm"
@@ -85,8 +90,12 @@
 wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
     const wxArtClient& client, const wxSize& size)
 {
+    wxBitmap loadedBmp(loadBitmapFromFile(id, size));
+    if (loadedBmp.IsOk())
+        return loadedBmp;
+
     if (id == ART_FlameRobin)
-        return wxBitmap(flamerobin_xpm);
+        return wxBitmap(flamerobin32_xpm);
 
     if (client == wxART_FRAME_ICON || size == wxSize(32, 32))
     {
@@ -122,6 +131,8 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(delete24_xpm);
         if (id == ART_InsertRow)
             return wxBitmap(insert24_xpm);
+        if (id == ART_History)
+            return wxBitmap(history24_xpm);
     }
 
     if (size == wxSize(16, 16))
@@ -138,6 +149,8 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(generator_xpm);
         if (id == ART_Generators)
             return wxBitmap(generators_xpm);
+        if (id == ART_History)
+            return wxBitmap(history_xpm);
         if (id == ART_Object)
             return wxBitmap(object_xpm);
         if (id == ART_PrimaryKey)
@@ -168,6 +181,36 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
         if (id == ART_InsertRow)
             return wxBitmap(insert16_xpm);
     }
+    return wxNullBitmap;
+}
+//-----------------------------------------------------------------------------
+wxBitmap ArtProvider::loadBitmapFromFile(const wxArtID& id, wxSize size)
+{
+    wxString name(id.Lower());
+    if (name.substr(0, 4) == wxT("art_"))
+        name.erase(0, 4);
+    if (size == wxDefaultSize)
+        size = wxSize(32, 32);
+    wxFileName fname(config().getImagesPath() + name
+        + wxString::Format(wxT("_%dx%d"), size.GetWidth(), size.GetHeight()));
+
+    wxArrayString imgExts;
+    imgExts.Add(wxT("bmp"));
+    imgExts.Add(wxT("png"));
+
+    for (size_t i = 0; i < imgExts.GetCount(); ++i)
+    {
+        fname.SetExt(imgExts[i]);
+        wxLogDebug(wxT("Trying to load image file \"%s\""),
+            fname.GetFullPath().c_str());
+        if (fname.FileExists())
+        {
+            wxImage img(fname.GetFullPath());
+            if (img.IsOk() && wxSize(img.GetWidth(), img.GetHeight()) == size)
+                return wxBitmap(img);
+        }
+    }
+
     return wxNullBitmap;
 }
 //-----------------------------------------------------------------------------
