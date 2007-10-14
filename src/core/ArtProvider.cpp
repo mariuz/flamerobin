@@ -63,6 +63,7 @@
 #include "delete24.xpm"
 #include "insert24.xpm"
 #include "history24.xpm"
+#include "execute24.xpm"
 
 // these have size 16x16
 #include "column.xpm"
@@ -133,6 +134,8 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(insert24_xpm);
         if (id == ART_History)
             return wxBitmap(history24_xpm);
+        if (id == ART_ExecuteStatement)
+            return wxBitmap(execute24_xpm);
     }
 
     if (size == wxSize(16, 16))

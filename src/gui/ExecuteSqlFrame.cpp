@@ -518,7 +518,10 @@ void ExecuteSqlFrame::buildToolbar()
     //toolBarM = CreateToolBar( wxTB_FLAT|wxTB_HORIZONTAL|wxTB_TEXT, wxID_ANY );
     toolBarM = CreateToolBar( wxTB_FLAT|wxTB_HORIZONTAL, wxID_ANY );
 
-    wxSize bmpSize(toolBarM->GetToolBitmapSize());
+#ifdef __WXGTK20__
+    wxSize bmpSize(24,24);
+#endif
+
     // it would be better to provide proper 16x15 bitmaps, but for now...
     if (bmpSize.GetHeight() == 15)
     {
@@ -551,7 +554,8 @@ void ExecuteSqlFrame::buildToolbar()
         wxITEM_NORMAL, _("Browse and search statement history"), _("Browse and search statement history") );
     toolBarM->AddSeparator();
 
-    toolBarM->AddTool( Cmds::Query_Execute, _("Execute"), wxBitmap(sql_icons::execute24_xpm), wxNullBitmap,
+    toolBarM->AddTool( Cmds::Query_Execute, _("Execute"),
+        wxArtProvider::GetBitmap(ART_ExecuteStatement, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, _("F4 - Execute statement(s)"), _("F4 - Execute statement(s)") );
     toolBarM->AddTool( Cmds::Query_Show_plan, _("Show plan"), wxBitmap(sql_icons::plan24_xpm), wxNullBitmap,
         wxITEM_NORMAL, _("Show query execution plan"), _("Show query execution plan") );
