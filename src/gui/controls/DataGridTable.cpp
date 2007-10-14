@@ -202,7 +202,7 @@ void RgbHsvConversion::setValue(float value)
 }
 //-----------------------------------------------------------------------------
 DataGridTable::DataGridTable(IBPP::Statement& s, Database *db)
-    : wxGridTableBase(), statementM(s), databaseM(db)
+    : wxGridTableBase(), statementM(s), databaseM(db), nullFlagM(false)
 {
     allRowsFetchedM = false;
     fetchAllRowsM = false;
@@ -255,6 +255,11 @@ DataGridTable::~DataGridTable()
     readonlyNumericAttrM->DecRef();
 }
 //-----------------------------------------------------------------------------
+void DataGridTable::setNullFlag(bool isNull)
+{
+    nullFlagM = isNull;
+}
+//-----------------------------------------------------------------------------
 // implementation methods
 bool DataGridTable::canFetchMoreRows()
 {
@@ -271,6 +276,8 @@ bool DataGridTable::canFetchMoreRows()
 void DataGridTable::Clear()
 {
     FR_TRY
+
+    nullFlagM = false;
 
     allRowsFetchedM = true;
     fetchAllRowsM = false;
@@ -721,7 +728,8 @@ void DataGridTable::SetValue(int row, int col, const wxString& value)
 {
     FR_TRY
 
-    wxString statement = rowsM.setFieldValue(row, col, value);
+    wxString statement = rowsM.setFieldValue(row, col, value, nullFlagM);
+    nullFlagM = false;  // reset
 
     // used in frame to show executed statements
     wxCommandEvent evt(wxEVT_FRDG_STATEMENT, GetView()->GetId());

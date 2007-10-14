@@ -50,10 +50,11 @@ private:
     void OnContextMenu(wxContextMenuEvent& event);
     void OnGridCellRightClick(wxGridEvent& event);
     void OnGridLabelRightClick(wxGridEvent& event);
-    //    void OnGridSelectCell(wxGridEvent& event);
     void OnIdle(wxIdleEvent& event);
     void OnMouseWheel(wxMouseEvent& event);
     void OnThumbRelease(wxScrollWinEvent& event);
+    void OnEditorCreated(wxGridEditorCreatedEvent& event);
+    void OnEditorKeyDown(wxKeyEvent& event);
     DECLARE_EVENT_TABLE()
 public:
     void copyToCB();

@@ -627,13 +627,42 @@ BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_CONTEXT_MENU(DataGrid::OnContextMenu)
     EVT_GRID_CELL_RIGHT_CLICK(DataGrid::OnGridCellRightClick)
     EVT_GRID_LABEL_RIGHT_CLICK(DataGrid::OnGridLabelRightClick)
-    //    EVT_GRID_SELECT_CELL(DataGrid::OnGridSelectCell)
+    EVT_GRID_EDITOR_CREATED(DataGrid::OnEditorCreated)
     //  EVT_GRID_EDITOR_HIDDEN( DataGrid::OnEditorHidden )
 #ifdef __WXGTK__
     EVT_MOUSEWHEEL(DataGrid::OnMouseWheel)
     EVT_SCROLLWIN_THUMBRELEASE(DataGrid::OnThumbRelease)
 #endif
 END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+void DataGrid::OnEditorCreated(wxGridEditorCreatedEvent& event)
+{
+    wxTextCtrl *editor = dynamic_cast<wxTextCtrl *>(event.GetControl());
+    if (!editor)
+        return;
+
+    editor->Connect(wxEVT_KEY_DOWN,
+        wxKeyEventHandler(DataGrid::OnEditorKeyDown),
+        0, this);
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnEditorKeyDown(wxKeyEvent& event)
+{
+    if (event.GetKeyCode() == WXK_DELETE)
+    {
+        wxTextCtrl *editor = dynamic_cast<wxTextCtrl *>(
+            event.GetEventObject());
+        DataGridTable *table = getDataGridTable();
+        if (editor && table && editor->GetValue().IsEmpty())
+        {
+            table->setNullFlag(true);
+            editor->SetValue(wxT("[null]"));
+            editor->SetSelection(-1,-1);
+            return; // prevent control from deleting [null]
+        }
+    }
+    event.Skip();
+}
 //-----------------------------------------------------------------------------
 void DataGrid::OnContextMenu(wxContextMenuEvent& event)
 {

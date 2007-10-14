@@ -63,6 +63,8 @@ private:
     wxGridCellAttr* readonlyNumericAttrM;
     DataGridRows rowsM;
 
+    bool nullFlagM;
+
     Database *databaseM;
     IBPP::Statement& statementM;
     wxMBConv* charsetConverterM;
@@ -94,6 +96,8 @@ public:
     bool isReadonlyColumn(int col);
     bool needsMoreRowsFetched();
     void setFetchAllRecords(bool fetchall);
+
+    void setNullFlag(bool isNull);
 
     // methods of wxGridTableBase
     virtual void Clear();

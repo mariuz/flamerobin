@@ -99,7 +99,7 @@ public:
     bool isFieldNull(unsigned row, unsigned col);
     bool isFieldNA(unsigned row, unsigned col);
     wxString setFieldValue(unsigned row, unsigned col,
-        const wxString& value);
+        const wxString& value, bool setNull = false);
     bool removeRows(size_t from, size_t count, wxString& statement);
 
     ResultsetColumnDef *getColumnDef(unsigned col);

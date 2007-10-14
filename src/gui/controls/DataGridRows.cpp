@@ -1591,14 +1591,15 @@ void DataGridRows::addWhereAndExecute(UniqueConstraint* uq, wxString& stm,
 //-----------------------------------------------------------------------------
 // returns the executed SQL statement
 wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
-    const wxString& value)
+    const wxString& value, bool setNull)
 {
     if (columnDefsM[col]->isReadOnly())
         throw FRError(_("This column is not editable."));
 
     // user wants to store null
-    bool newIsNull = (!dynamic_cast<StringColumnDef*>(columnDefsM[col])
-        && value.IsEmpty());
+    bool newIsNull = (
+        !dynamic_cast<StringColumnDef*>(columnDefsM[col]) && value.IsEmpty()
+        || setNull && value == wxT("[null]") );
     if (newIsNull && !columnDefsM[col]->isNullable())
         throw FRError(_("This column does not accept NULLs."));
 
