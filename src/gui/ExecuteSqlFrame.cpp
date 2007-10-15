@@ -519,15 +519,11 @@ void ExecuteSqlFrame::buildToolbar()
     toolBarM = CreateToolBar( wxTB_FLAT|wxTB_HORIZONTAL, wxID_ANY );
 
 #ifdef __WXGTK20__
-    wxSize bmpSize(24,24);
+    wxSize bmpSize(24, 24);
+#else
+    wxSize bmpSize(16, 16);
 #endif
-
-    // it would be better to provide proper 16x15 bitmaps, but for now...
-    if (bmpSize.GetHeight() == 15)
-    {
-        bmpSize.SetHeight(16);
-	    toolBarM->SetToolBitmapSize(bmpSize);
-    }
+	toolBarM->SetToolBitmapSize(bmpSize);
 
     toolBarM->AddTool( wxID_NEW, _("New"),
         wxArtProvider::GetBitmap(wxART_NEW, wxART_TOOLBAR, bmpSize), wxNullBitmap,
