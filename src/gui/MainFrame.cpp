@@ -117,7 +117,11 @@ namespace sql_icons {
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
     BaseFrame(parent, id, title, pos, size, style, wxT("FlameRobin_main"))
 {
+#if wxCHECK_VERSION(2, 8, 0)
     wxArtProvider::Push(new ArtProvider);
+#else
+    wxArtProvider::PushProvider(new ArtProvider);
+#endif
 
     mainPanelM = new wxPanel(this);
     tree_ctrl_1 = new myTreeCtrl(mainPanelM, wxDefaultPosition, wxDefaultSize,

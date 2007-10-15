@@ -92,7 +92,11 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
     const wxArtClient& client, const wxSize& size)
 {
     wxBitmap loadedBmp(loadBitmapFromFile(id, size));
+#if wxCHECK_VERSION(2, 8, 0)
     if (loadedBmp.IsOk())
+#else
+    if (loadedBmp.Ok())
+#endif
         return loadedBmp;
 
     if (id == ART_FlameRobin)
@@ -209,7 +213,12 @@ wxBitmap ArtProvider::loadBitmapFromFile(const wxArtID& id, wxSize size)
         if (fname.FileExists())
         {
             wxImage img(fname.GetFullPath());
-            if (img.IsOk() && wxSize(img.GetWidth(), img.GetHeight()) == size)
+#if wxCHECK_VERSION(2, 8, 0)
+            if (img.IsOk()
+#else
+            if (img.Ok()
+#endif
+            && wxSize(img.GetWidth(), img.GetHeight()) == size)
                 return wxBitmap(img);
         }
     }
