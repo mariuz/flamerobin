@@ -1119,8 +1119,8 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
 }
 //-----------------------------------------------------------------------------
 // DataGridRows class
-DataGridRows::DataGridRows()
-    : bufferSizeM(0)
+DataGridRows::DataGridRows(Database *db)
+    : bufferSizeM(0), databaseM(db)
 {
 }
 //-----------------------------------------------------------------------------
@@ -1563,9 +1563,13 @@ void DataGridRows::addWhereAndExecute(UniqueConstraint* uq, wxString& stm,
             }
         }
     }
+
+    DatabaseToSystemCharsetConversion dtscc;
+    dtscc.setConnectionCharset(databaseM->getConnectionCharset());
+
     IBPP::Statement st = IBPP::StatementFactory(statementM->DatabasePtr(),
         statementM->TransactionPtr());
-    st->Prepare(wx2std(stm));
+    st->Prepare(wx2std(stm, dtscc.getConverter()));
     if (dbkey)  // find the column and set the parameter
     {
         for (int c2 = 1; c2 <= statementM->Columns(); ++c2)

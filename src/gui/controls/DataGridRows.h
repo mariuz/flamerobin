@@ -69,6 +69,7 @@ public:
 class DataGridRows
 {
 private:
+    Database *databaseM;
     IBPP::Statement statementM;
     std::vector<ResultsetColumnDef*> columnDefsM;
     std::vector<DataGridRowBuffer*> buffersM;
@@ -82,7 +83,7 @@ private:
     void addWhereAndExecute(UniqueConstraint* uq, wxString& stm,
         const wxString& table, DataGridRowBuffer *buffer);
 public:
-    DataGridRows();
+    DataGridRows(Database *db);
     ~DataGridRows();
 
     bool addRow(const IBPP::Statement& statement, wxMBConv* converter);

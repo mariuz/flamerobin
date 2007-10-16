@@ -202,7 +202,8 @@ void RgbHsvConversion::setValue(float value)
 }
 //-----------------------------------------------------------------------------
 DataGridTable::DataGridTable(IBPP::Statement& s, Database *db)
-    : wxGridTableBase(), statementM(s), databaseM(db), nullFlagM(false)
+    : wxGridTableBase(), statementM(s), databaseM(db), nullFlagM(false),
+      rowsM(db)
 {
     allRowsFetchedM = false;
     fetchAllRowsM = false;
