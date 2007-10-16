@@ -783,8 +783,14 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::Query_Show_plan,           ExecuteSqlFrame::OnMenuShowPlan)
     EVT_MENU(Cmds::Query_Execute_selection,   ExecuteSqlFrame::OnMenuExecuteSelection)
     EVT_MENU(Cmds::Query_Execute_from_cursor, ExecuteSqlFrame::OnMenuExecuteFromCursor)
+    EVT_UPDATE_UI(Cmds::Query_Execute,             ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
+    EVT_UPDATE_UI(Cmds::Query_Show_plan,           ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
+    EVT_UPDATE_UI(Cmds::Query_Execute_selection,   ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
+    EVT_UPDATE_UI(Cmds::Query_Execute_from_cursor, ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
     EVT_MENU(Cmds::Query_Commit,              ExecuteSqlFrame::OnMenuCommit)
     EVT_MENU(Cmds::Query_Rollback,            ExecuteSqlFrame::OnMenuRollback)
+    EVT_UPDATE_UI(Cmds::Query_Commit,         ExecuteSqlFrame::OnMenuUpdateWhenInTransaction)
+    EVT_UPDATE_UI(Cmds::Query_Rollback,       ExecuteSqlFrame::OnMenuUpdateWhenInTransaction)
 
     EVT_MENU(Cmds::DataGrid_Insert_row,      ExecuteSqlFrame::OnMenuGridInsertRow)
     EVT_MENU(Cmds::DataGrid_Delete_row,      ExecuteSqlFrame::OnMenuGridDeleteRow)
@@ -1220,6 +1226,11 @@ void ExecuteSqlFrame::OnMenuUpdatePaste(wxUpdateUIEvent& event)
     event.Enable(styled_text_ctrl_sql->CanPaste());
 }
 //-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateWhenInTransaction(wxUpdateUIEvent& event)
+{
+    event.Enable(inTransactionM);
+}
+//-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuEditor(wxCommandEvent& WXUNUSED(event))
 {
     if (splitter_window_1->IsSplit())                    // screen is split -> show second
@@ -1587,8 +1598,6 @@ void ExecuteSqlFrame::InTransaction(bool started)
         grid_data->ClearGrid();
         statusbar_1->SetStatusText(wxEmptyString, 1);
     }
-    toolBarM->EnableTool(Cmds::Query_Commit, started);
-    toolBarM->EnableTool(Cmds::Query_Rollback, started);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::setSql(wxString sql)
@@ -1700,11 +1709,15 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
     if (closeWhenDone)
     {
         closeWhenTransactionDoneM = true;
-        toolBarM->EnableTool(Cmds::Query_Execute, false);
         // TODO: HOWTO focus toolbar button? button_commit->SetFocus();
     }
 
     return true;
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible(wxUpdateUIEvent& event)
+{
+    event.Enable(!closeWhenTransactionDoneM);
 }
 //-----------------------------------------------------------------------------
 //! when autoexecute is TRUE, program just waits user to click Commit/Rollback and closes window

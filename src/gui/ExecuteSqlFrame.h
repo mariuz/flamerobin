@@ -168,9 +168,11 @@ private:
     void OnMenuShowPlan(wxCommandEvent &event);
     void OnMenuExecuteSelection(wxCommandEvent &event);
     void OnMenuExecuteFromCursor(wxCommandEvent &event);
-    void OnMenuUpdateExecuteSelection(wxUpdateUIEvent& event);
     void OnMenuCommit(wxCommandEvent &event);
     void OnMenuRollback(wxCommandEvent &event);
+    void OnMenuUpdateExecuteSelection(wxUpdateUIEvent& event);
+    void OnMenuUpdateWhenInTransaction(wxUpdateUIEvent& event);
+    void OnMenuUpdateWhenExecutePossible(wxUpdateUIEvent& event);
 
     void OnMenuGridInsertRow(wxCommandEvent &event);
     void OnMenuGridDeleteRow(wxCommandEvent &event);
