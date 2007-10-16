@@ -544,10 +544,13 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
         }
     }
 
+    DatabaseToSystemCharsetConversion dtscc;
+    dtscc.setConnectionCharset(databaseM->getConnectionCharset());
+
     IBPP::Statement st1 = IBPP::StatementFactory(statementM->DatabasePtr(),
         statementM->TransactionPtr());
     stm += val + wxT(")");
-    st1->Prepare(wx2std(stm));
+    st1->Prepare(wx2std(stm, dtscc.getConverter()));
 
     // load blobs
     int index = 1;
