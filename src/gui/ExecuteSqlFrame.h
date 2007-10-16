@@ -175,7 +175,9 @@ private:
     void OnMenuUpdateWhenExecutePossible(wxUpdateUIEvent& event);
 
     void OnMenuGridInsertRow(wxCommandEvent &event);
+    void OnMenuUpdateGridInsertRow(wxUpdateUIEvent& event);
     void OnMenuGridDeleteRow(wxCommandEvent &event);
+    void OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event);
     void OnMenuGridCopy(wxCommandEvent &event);
     void OnMenuGridCopyAsInsert(wxCommandEvent &event);
     void OnMenuGridCopyAsUpdate(wxCommandEvent &event);

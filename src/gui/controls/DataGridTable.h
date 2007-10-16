@@ -96,6 +96,7 @@ public:
     bool isReadonlyColumn(int col);
     bool needsMoreRowsFetched();
     void setFetchAllRecords(bool fetchall);
+    bool canRemoveRow(size_t row);
 
     void setNullFlag(bool isNull);
 

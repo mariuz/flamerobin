@@ -711,6 +711,11 @@ bool DataGridTable::isValidCellPos(int row, int col)
         && col < (int)rowsM.getRowFieldCount());
 }
 //-----------------------------------------------------------------------------
+bool DataGridTable::canRemoveRow(size_t row)
+{
+    return rowsM.canRemoveRow(row);
+}
+//-----------------------------------------------------------------------------
 bool DataGridTable::needsMoreRowsFetched()
 {
     if (allRowsFetchedM)

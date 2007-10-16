@@ -68,9 +68,6 @@ public:
 
     void cancelFetchAll();
     void fetchAll();
-
-    void InsertRow();
-    void DeleteRow();
 };
 //----------------------------------------------------------------------
 #endif

@@ -1194,31 +1194,65 @@ wxString escapeQuotes(const wxString& input)
     return sCopy;
 }
 //-----------------------------------------------------------------------------
+bool DataGridRows::canRemoveRow(size_t row)
+{
+    // find table with valid constraint
+    for (std::map<wxString, UniqueConstraint *>::iterator it =
+        statementTablesM.begin(); it != statementTablesM.end(); ++it)
+    {
+        if ((*it).second == 0)
+            continue;
+        // check if some of PK/UNQ columns contains N/A for that row
+        bool tableok = true;
+        for (ColumnConstraint::const_iterator ci = (*it).second->begin();
+            ci != (*it).second->end(); ++ci)
+        {
+            for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
+            {
+                if ((*ci) != std2wx(statementM->ColumnName(c2)))
+                    continue;
+                wxString tn(std2wx(statementM->ColumnTable(c2)));
+                if (tn == (*it).first && buffersM[row]->isFieldNA(c2-1))
+                {
+                    tableok = false;
+                    break;
+                }
+            }
+        }
+        if (tableok)
+            return true;
+    }
+    return false;
+}
+//-----------------------------------------------------------------------------
 bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
 {
-    // only ask for the first time
-    if (deleteFromM == statementTablesM.end())
+    if (statementTablesM.begin() == statementTablesM.end())
+        return false;
+
+    if (deleteFromM == statementTablesM.end())  // only ask for the first time
     {
-        if (statementTablesM.size() > 1)
+        wxArrayString tables;
+        for (std::map<wxString, UniqueConstraint *>::iterator it =
+            statementTablesM.begin(); it != statementTablesM.end(); ++it)
         {
-            wxArrayString tables;
-            for (std::map<wxString, UniqueConstraint *>::iterator it =
-                statementTablesM.begin(); it != statementTablesM.end(); ++it)
-            {
+            if ((*it).second != 0)
                 tables.Add((*it).first);
-            }
-            wxString tab = wxGetSingleChoice(_("Select a table"),
-                    _("Multiple tables found"), tables, 0);
+        }
+        if (tables.GetCount() == 0) // no tables found
+            return false;
+        wxString tab;
+        if (tables.GetCount() == 1) // exactly one table
+            tab = tables[0];
+        else
+        {
+            tab = wxGetSingleChoice(_("Select a table"),
+                _("Multiple tables found"), tables, 0);
             if (tab.IsEmpty())
                 return false;
-            deleteFromM = statementTablesM.find(tab);
         }
-        else
-            deleteFromM = statementTablesM.begin();
+        deleteFromM = statementTablesM.find(tab);
     }
-
-    if (deleteFromM == statementTablesM.end() || (*deleteFromM).second == 0)
-        return false;
 
     for (size_t pos = 0; pos < count; ++pos)
     {
@@ -1234,7 +1268,7 @@ bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
     std::vector<DataGridRowBuffer*>::iterator i2, it = buffersM.begin();
     from += count - 1;
     while (from--)
-        if (++it == buffersM.end())
+        if (++it == buffersM.end())     // should never happen
             return false;
     while (count--)
     {

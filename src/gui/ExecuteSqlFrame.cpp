@@ -804,6 +804,8 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::DataGrid_FetchAll,        ExecuteSqlFrame::OnMenuGridFetchAll)
     EVT_MENU(Cmds::DataGrid_CancelFetchAll,  ExecuteSqlFrame::OnMenuGridCancelFetchAll)
 
+    EVT_UPDATE_UI(Cmds::DataGrid_Insert_row,     ExecuteSqlFrame::OnMenuUpdateGridInsertRow)
+    EVT_UPDATE_UI(Cmds::DataGrid_Delete_row,     ExecuteSqlFrame::OnMenuUpdateGridDeleteRow)
     EVT_UPDATE_UI(Cmds::DataGrid_Copy,           ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
     EVT_UPDATE_UI(Cmds::DataGrid_Copy_as_insert, ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
     EVT_UPDATE_UI(Cmds::DataGrid_Copy_as_update, ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
@@ -2028,14 +2030,64 @@ void ExecuteSqlFrame::OnMenuButtonToggleClick(wxCommandEvent& WXUNUSED(event))
 }
 */
 //-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateGridInsertRow(wxUpdateUIEvent& event)
+{
+    bool enable = false;
+    DataGridTable *tb = grid_data->getDataGridTable();
+    if (tb && grid_data->GetNumberCols())
+    {
+        wxArrayString tables;
+        tb->getTableNames(tables);
+        if (tables.GetCount() > 0)
+            enable = true;
+    }
+    event.Enable(enable);
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event)
+{
+    DataGridTable *tb = grid_data->getDataGridTable();
+
+    // light but imprecise version
+    //event.Enable(tb && grid_data->GetNumberRows());
+
+    // heavy but more accurate version
+    if (!tb || !grid_data->GetNumberRows())
+    {
+        event.Enable(false);
+        return;
+    }
+
+    bool hasSelection = false;
+    for (int i = 0; i < grid_data->GetNumberRows(); i++)
+    {
+        for (int j = 0; j < grid_data->GetNumberCols(); j++)
+        {
+            if (grid_data->IsInSelection(i, j))
+            {
+                if (!tb->canRemoveRow(i))
+                {
+                    event.Enable(false);
+                    return;
+                }
+                hasSelection = true;
+                break;
+            }
+        }
+    }
+
+    if (hasSelection)
+        event.Enable(true);
+    else
+        event.Enable(tb->canRemoveRow(grid_data->GetGridCursorRow()));
+}
+//-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent &event)
 {
     wxString s;
     long rowsFetched = event.GetExtraLong();
     s.Printf(_("%d rows fetched"), rowsFetched);
     statusbar_1->SetStatusText(s, 1);
-
-    toolBarM->EnableTool(Cmds::DataGrid_Delete_row, rowsFetched > 0);
 
     // TODO: we could make some bool flag, so that this happens only once per execute()
     //       to fix the problem when user does the select, unsplits the window
