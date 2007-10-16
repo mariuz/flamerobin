@@ -24,6 +24,7 @@ BK_MAKE_PCH = @BK_MAKE_PCH@
 srcdir = @srcdir@
 bindir = @bindir@
 datadir = @datadir@
+datarootdir = @datarootdir@
 LIBS = @LIBS@
 LDFLAGS_GUI = @LDFLAGS_GUI@
 AR = @AR@
