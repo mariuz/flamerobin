@@ -45,6 +45,7 @@
 //-----------------------------------------------------------------------------
 // these have size 32x32
 #include "flamerobin.xpm"
+#include "sqlicon.xpm"
 
 #include "backup32.xpm"
 #include "column32.xpm"
@@ -64,12 +65,16 @@
 #include "insert24.xpm"
 #include "history24.xpm"
 #include "execute24.xpm"
+#include "ok24.xpm"
+#include "plan24.xpm"
+#include "redx24.xpm"
 
 // these have size 16x16
 #include "column.xpm"
 #include "database.xpm"
 #include "delete16.xpm"
 #include "domain.xpm"
+#include "execute16.xpm"
 #include "function.xpm"
 #include "generator.xpm"
 #include "generators.xpm"
@@ -77,8 +82,11 @@
 #include "insert16.xpm"
 #include "key.xpm"
 #include "object.xpm"
+#include "ok.xpm"
+#include "plan16.xpm"
 #include "procedure.xpm"
 #include "procedures.xpm"
+#include "redx.xpm"
 #include "root.xpm"
 #include "server.xpm"
 #include "systemtable.xpm"
@@ -101,6 +109,9 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
 
     if (id == ART_FlameRobin)
         return wxBitmap(flamerobin32_xpm);
+
+    if (id == ART_ExecuteSqlFrame)
+        return wxBitmap(sqlicon32_xpm);
 
     if (client == wxART_FRAME_ICON || size == wxSize(32, 32))
     {
@@ -132,24 +143,34 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
 
     if (size == wxSize(24, 24))
     {
+        if (id == ART_CommitTransaction)
+            return wxBitmap(ok24_xpm);
         if (id == ART_DeleteRow)
             return wxBitmap(delete24_xpm);
-        if (id == ART_InsertRow)
-            return wxBitmap(insert24_xpm);
-        if (id == ART_History)
-            return wxBitmap(history24_xpm);
         if (id == ART_ExecuteStatement)
             return wxBitmap(execute24_xpm);
+        if (id == ART_History)
+            return wxBitmap(history24_xpm);
+        if (id == ART_InsertRow)
+            return wxBitmap(insert24_xpm);
+        if (id == ART_RollbackTransaction)
+            return wxBitmap(redx24_xpm);
+        if (id == ART_ShowExecutionPlan)
+            return wxBitmap(plan24_xpm);
     }
 
     if (size == wxSize(16, 16))
     {
         if (id == ART_Column)
             return wxBitmap(column_xpm);
+        if (id == ART_CommitTransaction)
+            return wxBitmap(ok_xpm);
         if (id == ART_Database)
             return wxBitmap(database_xpm);
         if (id == ART_Domain)
             return wxBitmap(domain_xpm);
+        if (id == ART_ExecuteStatement)
+            return wxBitmap(execute16_xpm);
         if (id == ART_Function)
             return wxBitmap(function_xpm);
         if (id == ART_Generator)
@@ -166,10 +187,14 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(procedure_xpm);
         if (id == ART_Procedures)
             return wxBitmap(procedures_xpm);
+        if (id == ART_RollbackTransaction)
+            return wxBitmap(redx_xpm);
         if (id == ART_Root)
             return wxBitmap(root_xpm);
         if (id == ART_Server)
             return wxBitmap(server_xpm);
+        if (id == ART_ShowExecutionPlan)
+            return wxBitmap(plan16_xpm);
         if (id == ART_SystemTable)
             return wxBitmap(systemtable_xpm);
         if (id == ART_SystemTables)

@@ -257,16 +257,6 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
     return true;
 }
 //-----------------------------------------------------------------------------
-//! included xpm files, so that icons are compiled into executable
-namespace sql_icons {
-#include "execute24.xpm"
-#include "history24.xpm"
-#include "plan24.xpm"
-#include "ok24.xpm"
-#include "sqlicon.xpm"
-#include "redx.xpm"
-};
-//-----------------------------------------------------------------------------
 // Setup the Scintilla editor
 SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id)
     : SearchableEditor(parent, id)
@@ -553,15 +543,14 @@ void ExecuteSqlFrame::buildToolbar()
     toolBarM->AddTool( Cmds::Query_Execute, _("Execute"),
         wxArtProvider::GetBitmap(ART_ExecuteStatement, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, _("F4 - Execute statement(s)"), _("F4 - Execute statement(s)") );
-    toolBarM->AddTool( Cmds::Query_Show_plan, _("Show plan"), wxBitmap(sql_icons::plan24_xpm), wxNullBitmap,
+    toolBarM->AddTool( Cmds::Query_Show_plan, _("Show plan"),
+        wxArtProvider::GetBitmap(ART_ShowExecutionPlan, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, _("Show query execution plan"), _("Show query execution plan") );
     toolBarM->AddTool( Cmds::Query_Commit, _("Commit"),
-        wxBitmap(sql_icons::ok24_xpm), wxNullBitmap,
-        //wxArtProvider::GetBitmap(wxART_TICK_MARK, wxART_TOOLBAR), wxNullBitmap,
+        wxArtProvider::GetBitmap(ART_CommitTransaction, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, _("F5 - Commit transaction"), _("F5 - Commit transaction") );
     toolBarM->AddTool( Cmds::Query_Rollback, _("Rollback"),
-         wxBitmap(sql_icons::redx_xpm), wxNullBitmap,
-        //wxArtProvider::GetBitmap(wxART_CROSS_MARK, wxART_TOOLBAR), wxNullBitmap,
+         wxArtProvider::GetBitmap(ART_RollbackTransaction, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, _("F8 - Rollback transaction"), _("F8 - Rollback transaction") );
     toolBarM->AddSeparator();
 
@@ -675,10 +664,7 @@ void ExecuteSqlFrame::set_properties()
     splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
     splitter_window_1->Unsplit();
 
-    wxBitmap bmp = wxBitmap(sql_icons::sqlicon32_xpm);
-    wxIcon icon;
-    icon.CopyFromBitmap(bmp);
-    SetIcon(icon);
+    SetIcon(wxArtProvider::GetIcon(ART_ExecuteSqlFrame, wxART_FRAME_ICON));
 
     keywordsM = wxT("");
     closeWhenTransactionDoneM = false;

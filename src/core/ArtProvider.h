@@ -31,6 +31,7 @@
 #include <wx/artprov.h>
 //-----------------------------------------------------------------------------
 #define ART_FlameRobin              wxART_MAKE_ART_ID(ART_FlameRobin)
+#define ART_ExecuteSqlFrame         wxART_MAKE_ART_ID(ART_ExecuteSqlFrame)
 
 #define ART_Backup                  wxART_MAKE_ART_ID(ART_Backup)
 #define ART_Column                  wxART_MAKE_ART_ID(ART_Column)
