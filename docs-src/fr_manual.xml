@@ -451,7 +451,7 @@
       the Object menu), will open the SQL Editor on a CREATE PROCEDURE
       statement; the procedure fetches and returns all records in the table,
       and has an output parameter for each column. Since this is a pretty
-      common pattern, it is intended to be modofied to suit your needs rather
+      common pattern, it is intended to be modified to suit your needs rather
       than used as-is.</para>
     </section>
 
@@ -694,7 +694,7 @@
       <section>
         <title>Show columns and parameters in tree</title>
 
-        <para>Enable this option to have table/view columns and pro cedure
+        <para>Enable this option to have table/view columns and procedure
         parameters displayed as tree nodes; otherwise, the tree stops at the
         table/view or procedure level. In case you choose to have columns and
         parameters displayed as tree nodes, you can also indicate whether you
