@@ -6,7 +6,7 @@
 -->
 <article id="frrelnotes">
   <articleinfo>
-    <title><application>FlameRobin</application> 0.7.6 ALPHA Manual</title>
+    <title><application>FlameRobin</application> 0.8.1 ALPHA Manual</title>
 
     <author>
       <firstname>Nando</firstname>
@@ -226,11 +226,17 @@
       connection properties so you don't have to re-enter them every time.
       Locate the correct server in the tree, right click it and choose
       "Register existing database...". You will have to enter a display name,
-      the database path (or alias name), the user name and password (note: the
-      password is stored as plain text in fr_databases.conf. For security
-      reasons, we recommend you to NOT specify it in this dialog: FlameRobin
-      will then prompt you for the password each time you connect to the
-      database). You can also optionally specify a connection charset and
+      type in or locate (or drag and drop) the database path (or alias name),
+      the user name and password.</para>
+
+      <note>
+        <para>If you don't specify the password, FlameRobin will prompt for it
+        every time you try to connect to the database, which is the most
+        secure option. If you want to specify the password, you can have
+        FlameRobin optionally encrypt it in the configuration file.</para>
+      </note>
+
+      <para>You can also optionally specify a connection charset and
       role.</para>
     </section>
 
@@ -286,25 +292,25 @@
       <para>You can view and/or change the properties of every object you see
       in the tree by choosing the "Properties..." option from the object's
       context menu or from the "Object" menu. Please note that currently not
-      all object types are supported, but you'll find almost all of them.
-      Trying to show the property page for an object of an unsupported type
-      will result in an error message. The property page is a HTML window with
-      a summary of the object's properties and links which open other pages or
-      specific editors. Some of the options are not yet available, but you can
-      edit almost all aspects of the most common objects (tables, views,
-      stored procedures, and so on). Please have a look at fr_whatsnew.html to
-      see, well, what's new.<note>
+      all object types are supported in full (domain editing, for example, is
+      very basic ATM), but you'll find some level of support for all of them.
+      The property page is a HTML window with a summary of the object's
+      properties and links which open other pages or specific editors. Some of
+      the options are not yet available, but you can edit almost all aspects
+      of the most common objects (tables, views, stored procedures, and so
+      on). Please have a look at fr_whatsnew.html to see, well, what's
+      new.<note>
           <para>Although we try to test the features as much as we can, this
           is ALPHA software and you should only use it to work on backup
           copies of your databases, or perform backup copies before using
           FlameRobin on them. Having said that, we have to add that many users
           (including us) have been using FlameRobin in their everyday Firebird
-          development for more than a year now without problems.</para>
+          development for several years now without major problems.</para>
         </note></para>
     </section>
 
     <section>
-      <title>Browsing data</title>
+      <title>Browsing and editing data</title>
 
       <para>After connecting to a database, locate a table, view or selectable
       stored procedure of your interest in the tree and right-click it.
@@ -318,9 +324,23 @@
       chunks, so that you don't have to wait for the fetch to complete if you
       only look at the first few pages of rows. You can have the grid fetch
       all data (in background) through the Fetch all records command in the
-      grid's context menu. Fetching a very large result set might take some
-      time, so if you change your mind you can use the Stop fetching all
-      records command.</para>
+      grid's context menu (there is also a configuration option to make
+      complete fetching the default behaviour, something we usually don't
+      recommend). Fetching a very large result set might take some time, so if
+      you change your mind you can use the Stop fetching all records
+      command.</para>
+
+      <para>You can change the data through direct editing in the grid, add
+      new records by means of the Insert button (which opens a specialized
+      dialog box) and delete the currently selected record(s) by clicking the
+      Delete button. Confirm any changes by clicking the Commit button, or
+      cancel them through the Rollback button.</para>
+
+      <note>
+        <para>Emptying a cell that displays a string field will set the
+        field's value to ''; if you want to set it to null, then delete all
+        contents and then hit the DEL key once more.</para>
+      </note>
     </section>
 
     <section id="frmanual-running-sql-statements">
@@ -332,13 +352,14 @@
       window by right clicking on a database node and choosing "Run a query".
       The SQL editor tool offers script execution capabilities (including SET
       AUTODDL and SET TERM support), load/save buttons, auto-completion and
-      call-tip features, commit/rollback, some execution statistics (including
-      but not limited to the query PLAN), a data export tool and more.</para>
+      call-tip features, commit/rollback, detailed execution statistics
+      (including but not limited to the query PLAN), a data export tool and
+      more.</para>
 
       <para>To execute a script (meaning a sequence of more than one SQL
-      statements), just load it (or type it in) and run it. To execute a
-      single statement when more statements are present in the editor, select
-      it before clicking the Run button.</para>
+      statements), just load it (or drag and drop a file, or type it in) and
+      run it. To execute a single statement when more statements are present
+      in the editor, select it before clicking the Run button.</para>
 
       <para>Auto-completion can be invoked automatically or manually (see the
       rich set of configuration options about it), and supports table and
@@ -357,6 +378,10 @@
       configuration option is enabled). Dragging and dropping tables will
       automatically create JOIN conditions (based on existing foreign key
       definitions) in the statement you are building.</para>
+
+      <para>FlameRobin will try to let you edit whatever result set your
+      SELECT statement returns, or part of it. Fields that you cannot edit
+      will be displayed in a special background colour in the grid.</para>
     </section>
 
     <section>
@@ -367,11 +392,17 @@
       restore a backup file over the current database (you will have to
       disconnect first). Choose "Restore backup into new database..." (this
       time on the server node) to create a new database from a backup file.
-      Note: it is usually considered bad practice to restore a backup file
-      over an existing database. The Backup and Restore tools work in
-      background, so you are allowed to continue working with FlameRobin while
-      they proceed. You can work on a database while it is being backed up,
-      but you can't work on a database while you are restoring it.</para>
+      You can drag and drop files in these windows.</para>
+
+      <note>
+        <para>It is considered bad practice to restore a backup file over an
+        existing database. </para>
+      </note>
+
+      <para>The Backup and Restore tools work in background, so you are
+      allowed to continue working with FlameRobin while they proceed. You can
+      work on a database while it is being backed up, but you can't work on a
+      database while you are restoring it.</para>
     </section>
   </section>
 
@@ -395,7 +426,7 @@
     </section>
 
     <section>
-      <title>Rebuild View functionality</title>
+      <title>Alter View functionality</title>
 
       <para>Firebird doesn't have an ALTER VIEW DDL command, which means that
       if you want to modify a view definition you need to DROP and CREATE it
@@ -408,8 +439,20 @@
       script that drops all the objects that depend on the view (in the
       correct order), drops and recreates the view, then recreates all the
       objects (again, in the correct order). The script is pasted into the SQL
-      editor window so you can modify it and recreate everything with a single
-      click.</para>
+      editor window so you can modify the view definition and recreate
+      everything with a single click.</para>
+    </section>
+
+    <section>
+      <title>Creating a selectable stored procedure for a table</title>
+
+      <para>This feature, that you can use through the Create selectable
+      procedure command in each table's context menu (or the namesake item in
+      the Object menu), will open the SQL Editor on a CREATE PROCEDURE
+      statement; the procedure fetches and returns all records in the table,
+      and has an output parameter for each column. Since this is a pretty
+      common pattern, it is intended to be modofied to suit your needs rather
+      than used as-is.</para>
     </section>
 
     <section>
@@ -540,6 +583,22 @@
       linkend="frmanual-dbconf-logging">here</link> for database-level logging
       options.</para>
     </section>
+
+    <section>
+      <title>Test data generator</title>
+
+      <para>FlameRobin includes a test data generator which you can use to
+      create test databases with dummy data values. You can launch it through
+      the Database/Advanced/Test data generator. In the resulting dialog box
+      you can select the tables for which you want to generate data, how many
+      records you want to generate for each table, and the data generation
+      strategy on a per-colum basis. Among the available strategies you'll
+      find sequential values, random values, values taken from other columns,
+      values loaded from external files, and a customizable NULL ratio. Your
+      settings can be saved to an XML file and reloaded later. When you're
+      ready, hit Generate data and the database will be filled with test
+      data.</para>
+    </section>
   </section>
 
   <section id="frrelnotes-configuration">
@@ -635,7 +694,7 @@
       <section>
         <title>Show columns and parameters in tree</title>
 
-        <para>Enable this option to have table/view columns and procedure
+        <para>Enable this option to have table/view columns and pro cedure
         parameters displayed as tree nodes; otherwise, the tree stops at the
         table/view or procedure level. In case you choose to have columns and
         parameters displayed as tree nodes, you can also indicate whether you
@@ -741,6 +800,16 @@
         </section>
 
         <section>
+          <title>Display detailed query statistics</title>
+
+          <para>Enable this option to have the SQL Editor show detailed
+          statistic information for each query, in addition to the query PLAN.
+          This includes number of fetches, marks, reads, writes; number of
+          inserts, updates, deletes; number of indexed vs sequential reads;
+          delta memory; execution time.</para>
+        </section>
+
+        <section>
           <title>Enable call-tips for procedures and functions</title>
 
           <para>When this option is enabled, then each time you type an open
@@ -751,7 +820,7 @@
         </section>
 
         <section>
-          <title>Show long line marker</title>
+          <title> Show long line marker</title>
 
           <para>Activate this option to have the editor display a vertical
           line that visually marks the place where a line break would occur if
@@ -909,6 +978,14 @@
         <para>Here you can turn off an useful feature that will enlarge the
         data grid to the maximum available size when a SQL SELECT statement
         returns more than a specified number of rows.</para>
+      </section>
+
+      <section>
+        <title>Automatically fetch all records in result set</title>
+
+        <para>Makes it so the grid will automatically fetch all records
+        whenever a SELECT statement is executed, instead of doing it in
+        batches.</para>
       </section>
     </section>
 
