@@ -535,12 +535,15 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
 
     NodeType nt = m->getType();
 
-    enum { showProperties = 0, showColumnInfo };
+    enum { showProperties = 0, showColumnInfo, selectFromOrExecute };
     int treeActivateAction = showProperties;
     config().getValue(wxT("OnTreeActivate"), treeActivateAction);
     // if no columns in tree, then only Properties can be shown
-    if (!config().get(wxT("ShowColumnsInTree"), true))
-        treeActivateAction = showProperties;
+    if (treeActivateAction == showColumnInfo)
+    {
+        if (!config().get(wxT("ShowColumnsInTree"), true))
+            treeActivateAction = showProperties;
+    }
 
     if (treeActivateAction == showColumnInfo && (nt == ntTable
         || nt == ntSysTable || nt == ntView || nt == ntProcedure))
@@ -552,6 +555,14 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
             AddPendingEvent(event);
             return;
         }
+    }
+    else if (treeActivateAction == selectFromOrExecute && (nt == ntTable
+        || nt == ntSysTable || nt == ntView || nt == ntProcedure))
+    {
+        wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
+            myTreeCtrl::Menu_BrowseColumns);
+        AddPendingEvent(event);
+        return;
     }
     else
     {

@@ -80,6 +80,9 @@
                     <option>
                         <caption>Show column info</caption>
                     </option>
+                    <option>
+                        <caption>Select from relation or procedure</caption>
+                    </option>
                 </setting>
             </enables>
         </setting>
