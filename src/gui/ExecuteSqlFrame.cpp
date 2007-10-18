@@ -2033,53 +2033,70 @@ void ExecuteSqlFrame::OnMenuButtonToggleClick(wxCommandEvent& WXUNUSED(event))
 void ExecuteSqlFrame::OnMenuUpdateGridInsertRow(wxUpdateUIEvent& event)
 {
     bool enable = false;
-    DataGridTable *tb = grid_data->getDataGridTable();
-    if (tb && grid_data->GetNumberCols())
+    // not using standard FR_TRY..FR_CATCH because these events happen
+    // often and it would flood the user with dialogs
+    try
     {
-        wxArrayString tables;
-        tb->getTableNames(tables);
-        if (tables.GetCount() > 0)
-            enable = true;
+        DataGridTable *tb = grid_data->getDataGridTable();
+        if (tb && grid_data->GetNumberCols())
+        {
+            wxArrayString tables;
+            tb->getTableNames(tables);
+            if (tables.GetCount() > 0)
+                enable = true;
+        }
+    }
+    catch(...)
+    {
     }
     event.Enable(enable);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event)
 {
-    DataGridTable *tb = grid_data->getDataGridTable();
-
-    // light but imprecise version
-    //event.Enable(tb && grid_data->GetNumberRows());
-
-    // heavy but more accurate version
-    if (!tb || !grid_data->GetNumberRows())
+    // not using standard FR_TRY..FR_CATCH because these events happen
+    // often and it would flood the user with dialogs
+    try
     {
-        event.Enable(false);
-        return;
-    }
+        DataGridTable *tb = grid_data->getDataGridTable();
 
-    bool hasSelection = false;
-    for (int i = 0; i < grid_data->GetNumberRows(); i++)
-    {
-        for (int j = 0; j < grid_data->GetNumberCols(); j++)
+        // light but imprecise version
+        //event.Enable(tb && grid_data->GetNumberRows());
+
+        // heavy but more accurate version
+        if (!tb || !grid_data->GetNumberRows())
         {
-            if (grid_data->IsInSelection(i, j))
+            event.Enable(false);
+            return;
+        }
+
+        bool hasSelection = false;
+        for (int i = 0; i < grid_data->GetNumberRows(); i++)
+        {
+            for (int j = 0; j < grid_data->GetNumberCols(); j++)
             {
-                if (!tb->canRemoveRow(i))
+                if (grid_data->IsInSelection(i, j))
                 {
-                    event.Enable(false);
-                    return;
+                    if (!tb->canRemoveRow(i))
+                    {
+                        event.Enable(false);
+                        return;
+                    }
+                    hasSelection = true;
+                    break;
                 }
-                hasSelection = true;
-                break;
             }
         }
-    }
 
-    if (hasSelection)
-        event.Enable(true);
-    else
-        event.Enable(tb->canRemoveRow(grid_data->GetGridCursorRow()));
+        if (hasSelection)
+            event.Enable(true);
+        else
+            event.Enable(tb->canRemoveRow(grid_data->GetGridCursorRow()));
+    }
+    catch(...)
+    {
+        event.Enable(false);
+    }
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent &event)
