@@ -1,6 +1,7 @@
+@echo off
+
 rem $Id$
 
-@echo off
 setlocal
 
 rem execute svn info, extract "Revision: 1234" line, and take SVN rev from there
