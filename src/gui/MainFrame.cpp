@@ -668,20 +668,13 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
     );
 
     wxString msg;
+#ifdef FR_VERSION_SVN
+    msg.Printf(_("FlameRobin %d.%d.%d.%d"),
+        FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS, FR_VERSION_SVN);
+#else
     msg.Printf(_("FlameRobin %d.%d.%d"),
         FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS);
-
-/*  Commented out for the time being, because the revision string in
-    frversion.h is only updated when the file is modifed, or when a full
-    checkout or export happens :-(
-
-    // extract revision number from string "$Rev: NNNN "
-    wxStringTokenizer tknzr(wxT(FR_VERSION_SVN));
-    tknzr.NextToken();
-    unsigned long revision;
-    if (wxString(tknzr.GetNextToken()).ToULong(&revision))
-        msg += wxString::Format(wxT(".%u"), revision);
-*/
+#endif
 
 #if wxUSE_UNICODE
     msg += wxT(" Unicode");

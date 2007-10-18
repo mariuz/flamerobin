@@ -534,6 +534,17 @@
         </modify-target>
     </define-tag>
 
+    <if cond="FORMAT=='autoconf'">
+        <set var="SVN_REV_SCRIPT">
+            <if cond="FORMAT=='autoconf'">./update-svn-rev.sh</if>
+            <if cond="FORMAT!='autoconf'">update-svn-rev.cmd</if>
+        </set>
+        <action id="svn-rev">
+            <command>cd $(DOLLAR)(srcdir) &amp;&amp; $(SVN_REV_SCRIPT)</command>
+            <dependency-of>all</dependency-of>
+        </action>
+    </if>
+
     <exe id="flamerobin" template="fr_common,wx">
         <app-type>gui</app-type>
 
@@ -573,7 +584,6 @@
             <mac-app-bundle>$(id)</mac-app-bundle>
         </if>
     </exe>
-
 
 <!-- install FlameRobin executable -->
 

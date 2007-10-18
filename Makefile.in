@@ -24,7 +24,6 @@ BK_MAKE_PCH = @BK_MAKE_PCH@
 srcdir = @srcdir@
 bindir = @bindir@
 datadir = @datadir@
-datarootdir = @datarootdir@
 LIBS = @LIBS@
 LDFLAGS_GUI = @LDFLAGS_GUI@
 AR = @AR@
@@ -201,7 +200,7 @@ COND_PLATFORM_OS2_1___flamerobin___os2_emxbindcmd = $(NM) flamerobin$(EXEEXT) \
 
 ### Targets: ###
 
-all: flamerobin$(EXEEXT) $(__flamerobin_bundle___depname) $(LIBPREFIX)ibpp$(LIBEXT)
+all: svn-rev flamerobin$(EXEEXT) $(__flamerobin_bundle___depname) $(LIBPREFIX)ibpp$(LIBEXT)
 
 install: all
 	$(INSTALL_DIR) $(DESTDIR)$(bindir)
@@ -239,6 +238,9 @@ clean:
 
 distclean: clean
 	rm -f config.cache config.log config.status bk-deps bk-make-pch shared-ld-sh Makefile
+
+svn-rev: 
+	cd $(srcdir) && ./update-svn-rev.sh
 
 flamerobin$(EXEEXT): $(FLAMEROBIN_OBJECTS) $(LIBPREFIX)ibpp$(LIBEXT) $(__flamerobin___win32rc) $(LIBPREFIX)ibpp$(LIBEXT)
 	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) -L. $(LDFLAGS)   $(LDFLAGS_GUI)  $(LIBS) -libpp $(FIREBIRDFRAMEWORK) $(__FIREBIRDLIBRARY_p)
