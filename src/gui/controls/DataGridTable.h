@@ -69,6 +69,7 @@ private:
     IBPP::Statement& statementM;
     wxMBConv* charsetConverterM;
 
+    int getStatementColCount();
     bool isValidCellPos(int row, int col);
 public:
     DataGridTable(IBPP::Statement& s, Database *db);

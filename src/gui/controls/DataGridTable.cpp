@@ -264,14 +264,8 @@ void DataGridTable::setNullFlag(bool isNull)
 // implementation methods
 bool DataGridTable::canFetchMoreRows()
 {
-    if (allRowsFetchedM || statementM->Type() != IBPP::stSelect)
-        return false;
-    // could this really happen?
-    if (statementM == 0)
-        return false;
-    // there should be a better way here...
-    IBPP::Transaction tran = statementM->TransactionPtr();
-    return (tran != 0 && tran->Started());
+    // this will also handle a closed result set
+    return !allRowsFetchedM && getStatementColCount() > 0;
 }
 //-----------------------------------------------------------------------------
 void DataGridTable::Clear()
@@ -512,22 +506,40 @@ wxColour DataGridTable::getReadonlyColour()
     return colourReadOnly;
 }
 //-----------------------------------------------------------------------------
+int DataGridTable::getStatementColCount()
+{
+    if (statementM == 0)
+        return 0;
+    switch (statementM->Type())
+    {
+        case IBPP::stSelect:
+        case IBPP::stSelectUpdate:
+            return statementM->Columns();
+        default:
+            return 0;
+    }
+}
+//-----------------------------------------------------------------------------
 wxString DataGridTable::getTableName()
 {
     // TODO: using one table is not correct for JOINs or sub-SELECTs, so we
     //       should build separate statements for each table
     //       DataGridRows::statementTablesM contains that list
     //       (together with PK/UNQ info)
-    if (statementM == 0 || statementM->Columns() == 0)
+    if (getStatementColCount() == 0)
         return wxEmptyString;
     return std2wx(statementM->ColumnTable(1));
 }
 //-----------------------------------------------------------------------------
 void DataGridTable::getTableNames(wxArrayString& tables)
 {
-    if (statementM == 0)
+    int colCount = getStatementColCount();
+    if (colCount == 0)
+    {
+        tables.clear();
         return;
-    for (int i=0; i<statementM->Columns(); i++)
+    }
+    for (int i = 0; i < colCount; i++)
     {
         wxString tn(std2wx(statementM->ColumnTable(i+1)));
         if (wxNOT_FOUND == tables.Index(tn))
@@ -559,7 +571,8 @@ void DataGridTable::getTableNames(wxArrayString& tables)
 void DataGridTable::getFields(const wxString& table,
     DataGridTable::FieldSet& flds)
 {
-    if (statementM == 0)
+    int colCount = getStatementColCount();
+    if (colCount == 0)
         return;
     Table *t = dynamic_cast<Table *>(databaseM->
         findRelation(Identifier(table)));
@@ -567,7 +580,7 @@ void DataGridTable::getFields(const wxString& table,
         return;
     typedef std::map<Column *, std::pair<ResultsetColumnDef*,int> > TempMap;
     TempMap fields;
-    for (int i=0; i<statementM->Columns(); i++)
+    for (int i = 0; i < colCount; i++)
     {
         wxString tn(std2wx(statementM->ColumnTable(i+1)));
         if (tn != table)
