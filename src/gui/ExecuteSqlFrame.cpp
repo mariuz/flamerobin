@@ -375,13 +375,6 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
             _("S&how properties for ") + sel);
     }
 
-    m.AppendSeparator();
-    m.Append(wxID_REPLACE,          _("&Find and replace"));
-    m.Append(Cmds::View_Set_editor_font, _("Set F&ont"));
-    m.AppendCheckItem(Cmds::View_Wrap_long_lines, _("&Wrap"));
-    if (wxSTC_WRAP_WORD == GetWrapMode())
-        m.Check(Cmds::View_Wrap_long_lines, true);
-
     // disable stuff
     m.Enable(wxID_UNDO, CanUndo());
     m.Enable(wxID_REDO, CanRedo());
@@ -481,6 +474,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
 {
     loadingM = true;
     buildToolbar();
+    buildMainMenu();
 
     panel_contents = new wxPanel(this, -1);
     splitter_window_1 = new wxSplitterWindow(panel_contents, -1);
@@ -500,7 +494,6 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
     do_layout();
     setDatabase(db);    // must come after set_properties
     loadingM = false;
-    buildMainMenu();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::buildToolbar()
@@ -513,7 +506,7 @@ void ExecuteSqlFrame::buildToolbar()
 #else
     wxSize bmpSize(16, 16);
 #endif
-	toolBarM->SetToolBitmapSize(bmpSize);
+    toolBarM->SetToolBitmapSize(bmpSize);
 
     toolBarM->AddTool( wxID_NEW, _("New"),
         wxArtProvider::GetBitmap(wxART_NEW, wxART_TOOLBAR, bmpSize), wxNullBitmap,
@@ -608,6 +601,7 @@ void ExecuteSqlFrame::buildMainMenu()
     wxMenu* historyMenu = new wxMenu();
     historyMenu->Append(wxID_FORWARD,   _("&Next"));
     historyMenu->Append(wxID_BACKWARD,  _("&Previous"));
+    historyMenu->AppendSeparator();
     historyMenu->Append(Cmds::History_Search,    _("&Search"));
     menuBarM->Append(historyMenu, _("&History"));
 
@@ -1599,6 +1593,7 @@ void ExecuteSqlFrame::InTransaction(bool started)
         splitter_window_1->Unsplit(panel_splitter_bottom);        // show sql entry window
         grid_data->ClearGrid();
         statusbar_1->SetStatusText(wxEmptyString, 1);
+        menuBarM->Check(Cmds::View_Editor, true);
     }
 }
 //-----------------------------------------------------------------------------
@@ -1722,6 +1717,30 @@ void ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible(wxUpdateUIEvent& event)
     event.Enable(!closeWhenTransactionDoneM);
 }
 //-----------------------------------------------------------------------------
+wxString IBPPtype2string(IBPP::SDT t, int subtype, int size, int scale)
+{
+    if (scale != 0)
+        return wxString::Format(wxT("NUMERIC(%d,%d)"), size==4 ? 9:18, scale);
+
+    switch (t)
+    {
+        case IBPP::sdArray:   return wxT("ARRAY");
+        case IBPP::sdBlob:    return wxString::Format(wxT("BLOB SUB_TYPE %d"),
+            subtype);
+        case IBPP::sdDate:    return wxT("DATE");
+        case IBPP::sdTime:    return wxT("TIME");
+        case IBPP::sdTimestamp:   return wxT("TIMESTAMP");
+        case IBPP::sdString:      return wxString::Format(wxT("STRING(%d)"),
+            size);
+        case IBPP::sdSmallint:    return wxT("SMALLINT");
+        case IBPP::sdInteger:     return wxT("INTEGER");
+        case IBPP::sdLargeint:    return wxT("BIGINT");
+        case IBPP::sdFloat:       return wxT("FLOAT");
+        case IBPP::sdDouble:      return wxT("DOUBLE PRECISION");
+        default:            return wxT("UNKNOWN");
+    }
+}
+//-----------------------------------------------------------------------------
 //! when autoexecute is TRUE, program just waits user to click Commit/Rollback and closes window
 bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     bool prepareOnly)
@@ -1782,6 +1801,25 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
 
         try
         {
+            if (doShowStats)    // show column info
+            {
+                for (int i = 1; i <= statementM->Columns(); i++)
+                {
+                    log(wxString::Format(
+                        _("Field #%02d: %s.%s Alias:%s Type:%s"),
+                        i,
+                        std2wx(statementM->ColumnTable(i)).c_str(),
+                        std2wx(statementM->ColumnName(i)).c_str(),
+                        std2wx(statementM->ColumnAlias(i)).c_str(),
+                        IBPPtype2string(
+                            statementM->ColumnType(i),
+                            statementM->ColumnSubtype(i),
+                            statementM->ColumnSize(i),
+                            statementM->ColumnScale(i)).c_str()
+                    ), ttSql);
+                }
+            }
+
             std::string plan;            // for some statements (DDL) it is never available
             statementM->Plan(plan);        // for INSERTs, it is available sometimes (insert into ... select ... )
             log(std2wx(plan));            // but if it not, IBPP throws the exception
@@ -1877,6 +1915,7 @@ void ExecuteSqlFrame::SplitScreen()
         panel_splitter_top->Show();
         panel_splitter_bottom->Show();
         splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
+        menuBarM->Check(Cmds::View_Split_view, true);
     }
 }
 //-----------------------------------------------------------------------------
@@ -2121,6 +2160,7 @@ void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent &event)
         {
             //SplitScreen();    // not needed atm, might be later (see TODO above)
             splitter_window_1->Unsplit(panel_splitter_top);        // show grid only
+            menuBarM->Check(Cmds::View_Data, true);
         }
     }
 }
