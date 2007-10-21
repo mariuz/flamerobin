@@ -393,6 +393,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_UPDATE_UI(myTreeCtrl::Menu_DatabasePreferences, MainFrame::OnMenuUpdateIfDatabaseSelected)
     EVT_MENU(myTreeCtrl::Menu_DatabaseProperties, MainFrame::OnMenuDatabaseProperties)
     EVT_UPDATE_UI(myTreeCtrl::Menu_DatabaseProperties, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_MENU(myTreeCtrl::Menu_ExtractDatabaseDDL, MainFrame::OnMenuDatabaseExtractDDL)
+    EVT_UPDATE_UI(myTreeCtrl::Menu_ExtractDatabaseDDL, MainFrame::OnMenuUpdateIfDatabaseConnected)
 
     EVT_MENU(myTreeCtrl::Menu_Insert, MainFrame::OnMenuInsert)
     EVT_MENU(myTreeCtrl::Menu_BrowseColumns, MainFrame::OnMenuBrowseColumns)
@@ -780,6 +782,22 @@ void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
         pd.ShowModal();
         pdSelection = pd.getSelectedPage();
     }
+
+    FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuDatabaseExtractDDL(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
+
+    MetadataItem* m = tree_ctrl_1->getSelectedDatabase();
+    if (!m)
+        return;
+
+    URI uri = URI(wxT("fr://edit_ddl?parent_window=") +
+        wxString::Format(wxT("%ld"), (uintptr_t)this) +
+        wxT("&object_address=") + wxString::Format(wxT("%ld"), (uintptr_t)m));
+    getURIProcessor().handleURI(uri);
 
     FR_CATCH
 }

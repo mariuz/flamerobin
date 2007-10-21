@@ -71,7 +71,7 @@ public:
         Menu_AddColumn, Menu_CreateTriggerForTable, Menu_RestoreIntoNew,
         Menu_MonitorEvents, Menu_GetServerVersion, Menu_AlterObject,
         Menu_DropDatabase, Menu_DatabaseProperties, Menu_GenerateData,
-        Menu_CreateProcedureForTable,
+        Menu_CreateProcedureForTable, Menu_ExtractDatabaseDDL,
 
         // view menu
         Menu_ToggleStatusBar, Menu_ToggleSearchBar, Menu_ToggleDisconnected,

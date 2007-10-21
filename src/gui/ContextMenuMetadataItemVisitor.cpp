@@ -85,6 +85,7 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database&)
     advanced->Append(myTreeCtrl::Menu_MonitorEvents, _("&Monitor events"));
     advanced->Append(myTreeCtrl::Menu_DatabasePreferences, _("Database &preferences..."));
     advanced->Append(myTreeCtrl::Menu_GenerateData, _("&Test data generator..."));
+    advanced->Append(myTreeCtrl::Menu_ExtractDatabaseDDL, _("&Extract metadata DDL..."));
 
     menuM->AppendSeparator();
     menuM->Append(myTreeCtrl::Menu_DatabaseProperties, _("Data&base Properties"));
