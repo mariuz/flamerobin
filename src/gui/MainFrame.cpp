@@ -1713,19 +1713,23 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
     FR_TRY
 
     Database *db = tree_ctrl_1->getSelectedDatabase();
-    Procedure* p = dynamic_cast<Procedure *>(tree_ctrl_1->getSelectedMetadataItem());
+    Procedure* p = dynamic_cast<Procedure *>(
+        tree_ctrl_1->getSelectedMetadataItem());
+    if (p)
+    {
+        URI uri(wxT("fr://edit_procedure?parent_window=")
+            + wxString::Format(wxT("%ld"), (uintptr_t)this)
+            + wxT("&object_address=")
+            + wxString::Format(wxT("%ld"), (uintptr_t)p));
+        getURIProcessor().handleURI(uri);
+        return;
+    }
     View* v = dynamic_cast<View *>(tree_ctrl_1->getSelectedMetadataItem());
     Trigger* t = dynamic_cast<Trigger *>(tree_ctrl_1->getSelectedMetadataItem());
     if (!db || !p && !v && !t)
         return;
 
-    wxString sql;
-    if (p)
-        sql = p->getAlterSql();
-    else if (v)
-        sql = v->getRebuildSql();
-    else if (t)
-        sql = t->getAlterSql();
+    wxString sql(v ? v->getRebuildSql() : t->getAlterSql());
     showSql(this, wxString(_("Alter object")), db, sql);
 
     FR_CATCH

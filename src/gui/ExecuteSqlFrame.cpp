@@ -2473,8 +2473,10 @@ bool EditProcedureHandler::handleURI(URI& uri)
     if (!p || !w)
         return true;
 
+    CreateDDLVisitor cdv;
+    p->acceptVisitor(&cdv);
     showSql(w->GetParent(), _("Editing stored procedure"), p->getDatabase(),
-        p->getAlterSql());
+        cdv.getSuffixSql());
     return true;
 }
 //-----------------------------------------------------------------------------
