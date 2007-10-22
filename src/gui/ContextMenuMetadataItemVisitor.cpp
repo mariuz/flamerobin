@@ -1,24 +1,24 @@
 /*
-Copyright (c) 2004, 2005, 2006 The FlameRobin Development Team
+  Copyright (c) 2004-2007 The FlameRobin Development Team
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
 
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
   $Id$
@@ -38,7 +38,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/menu.h>
 
 #include "config/Config.h"
-#include "ContextMenuMetadataItemVisitor.h"
+#include "gui/ContextMenuMetadataItemVisitor.h"
 #include "myTreeCtrl.h"
 //-----------------------------------------------------------------------------
 ContextMenuMetadataItemVisitor::ContextMenuMetadataItemVisitor(wxMenu* menu)
@@ -53,8 +53,8 @@ ContextMenuMetadataItemVisitor::~ContextMenuMetadataItemVisitor()
 void ContextMenuMetadataItemVisitor::visitColumn(Column& column)
 {
     Table* t = column.getTable();
-    if (t) // only for table columns
-        addRegularObjectMenu(false, t->isSystem());
+    if (t && !t->isSystem()) // only for columns of non-system tables
+        addRegularObjectMenu(false, true);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitDatabase(Database&)
@@ -93,24 +93,24 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database&)
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitDomain(Domain&)
 {
-    addRegularObjectMenu();
+    addRegularObjectMenu(false, true);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitException(Exception&)
 {
-    addRegularObjectMenu();
+    addRegularObjectMenu(false, true);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitFunction(Function&)
 {
-    addRegularObjectMenu();
+    addRegularObjectMenu(false, true);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitGenerator(Generator&)
 {
     menuM->Append(myTreeCtrl::Menu_ShowGeneratorValue, _("Show &value"));
     menuM->Append(myTreeCtrl::Menu_SetGeneratorValue, _("&Set value"));
-    addRegularObjectMenu();
+    addRegularObjectMenu(false, true);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitMetadataItem(MetadataItem& metadataItem)
@@ -130,16 +130,19 @@ void ContextMenuMetadataItemVisitor::visitMetadataItem(MetadataItem& metadataIte
             menuM->Append(myTreeCtrl::Menu_CreateObject, _("Create &new..."));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitProcedure(Procedure&)
+void ContextMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
 {
     menuM->Append(myTreeCtrl::Menu_ExecuteProcedure, _("&Execute..."));
-    addSelectMenu(false);       // false = not a table
-    addRegularObjectMenu(true); // true = add Alter menu
+    bool isSelectable = procedure.isSelectable();
+    if (!isSelectable)
+        menuM->AppendSeparator();
+    addSelectMenu(isSelectable, false); // selectable?, can not add columns
+    addRegularObjectMenu(true, true); // add Alter and Drop menu
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitRole(Role&)
 {
-    addRegularObjectMenu();
+    addRegularObjectMenu(false, true);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitRoot(Root&)
@@ -173,7 +176,7 @@ void ContextMenuMetadataItemVisitor::visitTable(Table& table)
     bool isSystem = table.isSystem();
     if (!isSystem)
         menuM->Append(myTreeCtrl::Menu_Insert, _("&Insert into ..."));
-    addSelectMenu(true, isSystem);
+    addSelectMenu(true, !isSystem); // selectable, can add columns if user
     if (!isSystem)
     {
         menuM->Append(myTreeCtrl::Menu_CreateTriggerForTable,
@@ -181,41 +184,54 @@ void ContextMenuMetadataItemVisitor::visitTable(Table& table)
         menuM->Append(myTreeCtrl::Menu_CreateProcedureForTable,
             _("Create selectable &procedure"));
     }
-    addRegularObjectMenu(false, isSystem);
+    addRegularObjectMenu(false, !isSystem);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitTrigger(Trigger&)
 {
-    addRegularObjectMenu(true); // true = add Alter menu
+    addRegularObjectMenu(true, true); // add Alter and Drop menu
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitView(View&)
 {
-    addSelectMenu(false);       // false = not a table
-    addRegularObjectMenu(true); // true = add Alter menu
+    addSelectMenu(true, false); // selectable, can not add columns
+    addRegularObjectMenu(true, true); // add Alter and Drop menu
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addSelectMenu(bool isTable, bool isSystem)
+void ContextMenuMetadataItemVisitor::addSelectMenu(bool isSelectable,
+    bool canAddColumn)
 {
-    menuM->Append(myTreeCtrl::Menu_BrowseColumns, _("&Select from ..."));
-    menuM->AppendSeparator();
+    unsigned added = 0;
+    if (isSelectable)
+    {
+        menuM->Append(myTreeCtrl::Menu_BrowseColumns, _("&Select from ..."));
+        ++added;
+    }
     if (config().get(wxT("ShowColumnsInTree"), true))
     {
+        if (added)
+            menuM->AppendSeparator(); // between "Select from" and this one
         menuM->Append(myTreeCtrl::Menu_LoadColumnsInfo, _("Show columns in&fo"));
-        if (isTable && !isSystem)
-            menuM->Append(myTreeCtrl::Menu_AddColumn, _("&Add column..."));
-        menuM->AppendSeparator();
+        ++added;
     }
+    if (canAddColumn)
+    {
+        if (isSelectable && added < 2)
+            menuM->AppendSeparator(); // between "Select from" and this one
+        menuM->Append(myTreeCtrl::Menu_AddColumn, _("&Add column..."));
+        ++added;
+    }
+    if (added)
+        menuM->AppendSeparator();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addRegularObjectMenu(bool alter, bool isSystem)
+void ContextMenuMetadataItemVisitor::addRegularObjectMenu(bool addAlter,
+    bool addDrop)
 {
-    if (!isSystem)
-    {
-        if (alter)
-            menuM->Append(myTreeCtrl::Menu_AlterObject, _("&Alter..."));
+    if (addAlter)
+        menuM->Append(myTreeCtrl::Menu_AlterObject, _("&Alter..."));
+    if (addDrop)
         menuM->Append(myTreeCtrl::Menu_DropObject, _("Dr&op..."));
-    }
     menuM->Append(myTreeCtrl::Menu_ObjectProperties, _("Show P&roperties"));
 }
 //-----------------------------------------------------------------------------

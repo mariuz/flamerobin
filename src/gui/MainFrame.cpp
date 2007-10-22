@@ -906,16 +906,10 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
     if (!d || (!t && !p && !v))
         return;
 
-    wxString sql;
     if (p)
     {
-        if (!p->isSelectable())
-        {
-            ::wxMessageBox(_("This procedure is not selectable"),
-                _("Cannot create statement"), wxOK|wxICON_INFORMATION);
-            return;
-        }
-        sql = p->getSelectStatement(true);  // true = with columns info
+        showSql(this, wxString(_("Execute SQL statements")), d,
+            p->getSelectStatement());
     }
     else
     {
@@ -923,7 +917,8 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
             t->checkAndLoadColumns();
         else
             v->checkAndLoadColumns();
-        sql = wxT("SELECT ");
+
+        wxString sql(wxT("SELECT "));
         std::vector<MetadataItem*> temp;
         i->getChildren(temp);
         bool first = true;
@@ -942,12 +937,8 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
                 sql += wxT(", RDB$DB_KEY");
         }
         sql += wxT("\nFROM ") + i->getQuotedName();
-    }
-
-    if (p)
-        showSql(this, wxString(_("Execute SQL statements")), d, sql);
-    else
         execSql(this, wxString(_("Execute SQL statements")), d, sql, false);
+    }
 
     FR_CATCH
 }

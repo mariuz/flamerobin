@@ -50,6 +50,8 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/procedure.h"
 //-----------------------------------------------------------------------------
+typedef MetadataCollection <Parameter>::const_iterator ParameterCollCIter;
+//-----------------------------------------------------------------------------
 Procedure::Procedure()
 {
     parametersM.setParent(this);
@@ -92,18 +94,22 @@ bool Procedure::isSelectable()
 {
     if (!parametersLoadedM)
         loadParameters();
-    for (MetadataCollection <Parameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
+    for (ParameterCollCIter it = parametersM.begin(); it != parametersM.end();
+        ++it)
+    {
         if ((*it).getParameterType() == ptOutput)
             return true;
+    }
     return false;
 }
 //-----------------------------------------------------------------------------
-wxString Procedure::getSelectStatement(bool withColumns)
+wxString Procedure::getSelectStatement()
 {
     if (!parametersLoadedM)
         loadParameters();
     wxString collist, parlist;
-    for (MetadataCollection <Parameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
+    for (ParameterCollCIter it = parametersM.begin(); it != parametersM.end();
+        ++it)
     {
         if ((*it).getParameterType() == ptInput)
         {
@@ -119,12 +125,7 @@ wxString Procedure::getSelectStatement(bool withColumns)
         }
     }
 
-    wxString sql = wxT("SELECT ");
-    if (withColumns)
-        sql += collist;
-    else
-        sql += wxT("* ");
-    sql += wxT("\nFROM ") + getQuotedName();
+    wxString sql = wxT("SELECT ") + collist + wxT("\nFROM ") + getQuotedName();
     if (!parlist.empty())
         sql += wxT("(") + parlist + wxT(")");
     return sql;
@@ -135,7 +136,8 @@ wxString Procedure::getExecuteStatement()
     if (!parametersLoadedM)
         loadParameters();
     wxString parlist;
-    for (MetadataCollection <Parameter>::const_iterator it = parametersM.begin(); it != parametersM.end(); ++it)
+    for (ParameterCollCIter it = parametersM.begin(); it != parametersM.end();
+        ++it)
     {
         if ((*it).getParameterType() == ptInput)
         {
