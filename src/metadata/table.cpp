@@ -133,24 +133,39 @@ wxString Table::getProcedureTemplate()
     wxString sql = wxT("SET TERM !! ;\nCREATE PROCEDURE ") + id.getQuoted() +
         wxT("\nRETURNS (");
     wxString collist, valist, parlist;
+    Database *db = getDatabase();
+    if (!db)
+        throw FRError(_("Database not found"));
+    wxString dbcharset = db->getDatabaseCharset();
     for (MetadataCollection<Column>::iterator i = columnsM.begin();
          i != columnsM.end(); ++i)
     {
+        wxString datatype;
+        Domain *d = (*i).getDomain();
+        if (!d)
+            datatype = (*i).getDatatype();
+        else
+        {
+            datatype = d->getDatatypeAsString();
+            wxString charset(d->getCharset());
+            if (!charset.IsEmpty() && dbcharset != charset)
+                datatype += wxT(" CHARACTER SET ") + charset;
+        }
+
         if (!collist.empty())
         {
             valist += wxT(", ");
             collist += wxT(", ");
             parlist += wxT(",");
         }
-        parlist += wxT("\n\t") + (*i).getQuotedName() + wxT(" ") +
-            (*i).getDatatype();
-        collist += (*i).getQuotedName();
+        parlist += wxT("\n\t") + (*i).getQuotedName() + wxT(" ") + datatype;
+        collist += wxT("a.") + (*i).getQuotedName();
         valist += wxT(":") + (*i).getQuotedName();
     }
     sql += parlist;
     sql += wxT(")\nAS\nBEGIN\n\tFOR SELECT ") + collist + wxT("\n\t    FROM ")
-        + getQuotedName() + wxT("\n\t    INTO ") + valist
-        + wxT("\n\tDO SUSPEND;\nEND!!\nSET TERM ; !!\n");
+        + getQuotedName() + wxT(" a\n\t    INTO ") + valist
+        + wxT("\n\tDO\n\tBEGIN\n\t\tSUSPEND;\n\tEND\nEND!!\nSET TERM ; !!\n");
     return sql;
 }
 //-----------------------------------------------------------------------------
