@@ -96,8 +96,8 @@ void TreeItem::update()
         treeM->SetItemText(id, itemText);
 
     NodeType ndt = object->getType();
-    bool affectedBySetting = (ndt == ntTable || ndt == ntView
-        || ndt == ntProcedure);
+    bool affectedBySetting = (ndt == ntTable || ndt == ntSysTable
+        || ndt == ntView || ndt == ntProcedure);
     bool showColumns = !affectedBySetting ||
         config().get(wxT("ShowColumnsInTree"), true);
 
