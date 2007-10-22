@@ -929,14 +929,14 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
                 first = false;
             else
                 sql += wxT(", ");
-            sql += (*it)->getQuotedName();
+            sql += wxT("a.") + (*it)->getQuotedName();
         }
         if (t)  // add DB_KEY only when table doesn't have a PK/UNQ constraint
         {
             if (!t->getPrimaryKey() && t->getUniqueConstraints()->size() == 0)
-                sql += wxT(", RDB$DB_KEY");
+                sql += wxT(", a.RDB$DB_KEY");
         }
-        sql += wxT("\nFROM ") + i->getQuotedName();
+        sql += wxT("\nFROM ") + i->getQuotedName() + wxT(" a");
         execSql(this, wxString(_("Execute SQL statements")), d, sql, false);
     }
 

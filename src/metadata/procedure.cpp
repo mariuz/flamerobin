@@ -121,13 +121,15 @@ wxString Procedure::getSelectStatement()
         {
             if (!collist.empty())
                 collist += wxT(", ");
-            collist += (*it).getQuotedName();
+            collist += wxT("a.") + (*it).getQuotedName();
         }
     }
 
-    wxString sql = wxT("SELECT ") + collist + wxT("\nFROM ") + getQuotedName();
+    wxString sql = wxT("SELECT ") + collist + wxT("\nFROM ")
+        + getQuotedName();
     if (!parlist.empty())
         sql += wxT("(") + parlist + wxT(")");
+    sql += wxT(" a");
     return sql;
 }
 //-----------------------------------------------------------------------------

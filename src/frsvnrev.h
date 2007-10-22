@@ -1,1 +1,1 @@
-#define FR_VERSION_SVN 1473
+#define FR_VERSION_SVN 1478
