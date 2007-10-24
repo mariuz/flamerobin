@@ -51,6 +51,8 @@ void showAboutBox(wxWindow* parent)
 {
 #if defined wxUSE_ABOUTDLG && (defined __WXMAC__ || defined __WXGTK__)
 
+    wxUnusedVar(parent);
+
     wxAboutDialogInfo info;
 	
     info.SetName(wxT("FlameRobin"));
@@ -132,7 +134,7 @@ void showAboutBox(wxWindow* parent)
     msg += wxT("\n");
     msg += _("http://www.flamerobin.org");
 
-    ::wxMessageBox(msg, _("About FlameRobin"), wxOK | wxICON_INFORMATION);
+    wxMessageBox(msg, _("About FlameRobin"), wxOK | wxICON_INFORMATION, parent);
 
 #endif
 }
