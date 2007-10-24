@@ -55,6 +55,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_framemanager.o \
 	flamerobin_frprec.o \
 	flamerobin_frutils.o \
+	flamerobin_AboutBox.o \
 	flamerobin_AdvancedMessageDialog.o \
 	flamerobin_AdvancedSearchFrame.o \
 	flamerobin_BackupFrame.o \
@@ -328,6 +329,9 @@ flamerobin_frprec.o: $(srcdir)/src/frprec.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_frutils.o: $(srcdir)/src/frutils.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/frutils.cpp
+
+flamerobin_AboutBox.o: $(srcdir)/src/gui/AboutBox.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/AboutBox.cpp
 
 flamerobin_AdvancedMessageDialog.o: $(srcdir)/src/gui/AdvancedMessageDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/AdvancedMessageDialog.cpp

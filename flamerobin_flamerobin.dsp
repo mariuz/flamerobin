@@ -468,6 +468,10 @@ LINK32=link.exe
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\src\gui\AboutBox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\AdvancedMessageDialog.cpp
 # End Source File
 # Begin Source File
@@ -836,6 +840,10 @@ SOURCE=.\src\metadata\view.cpp
 # Begin Group "Header Files"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\src\gui\AboutBox.h
+# End Source File
 # Begin Source File
 
 SOURCE=.\src\gui\AdvancedMessageDialog.h

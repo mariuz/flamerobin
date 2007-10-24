@@ -65,6 +65,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_framemanager.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AboutBox.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AdvancedMessageDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AdvancedSearchFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupFrame.o \
@@ -280,6 +281,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.o: ./src/frprec.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.o: ./src/frutils.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AboutBox.o: ./src/gui/AboutBox.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AdvancedMessageDialog.o: ./src/gui/AdvancedMessageDialog.cpp

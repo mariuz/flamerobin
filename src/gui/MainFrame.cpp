@@ -47,6 +47,7 @@
 #include "core/ArtProvider.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
+#include "gui/AboutBox.h"
 #include "gui/AdvancedMessageDialog.h"
 #include "gui/AdvancedSearchFrame.h"
 #include "gui/BackupFrame.h"
@@ -63,7 +64,6 @@
 #include "gui/SimpleHtmlFrame.h"
 #include "framemanager.h"
 #include "frtypes.h"
-#include "frversion.h"
 #include "main.h"
 #include "metadata/metadataitem.h"
 #include "metadata/root.h"
@@ -672,40 +672,8 @@ void MainFrame::OnMenuQuit(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-
-    wxString ib;
-    ib.Printf(_("This tool uses IBPP library version %d.%d.%d.%d\nand wxWidgets library version %d.%d.%d"),
-        (IBPP::Version & 0xFF000000) >> 24,
-        (IBPP::Version & 0x00FF0000) >> 16,
-        (IBPP::Version & 0x0000FF00) >> 8,
-        (IBPP::Version & 0x000000FF),
-        wxMAJOR_VERSION,
-        wxMINOR_VERSION,
-        wxRELEASE_NUMBER
-    );
-
-    wxString msg;
-#ifdef FR_VERSION_SVN
-    msg.Printf(_("FlameRobin %d.%d.%d.%d"),
-        FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS, FR_VERSION_SVN);
-#else
-    msg.Printf(_("FlameRobin %d.%d.%d"),
-        FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS);
-#endif
-
-#if wxUSE_UNICODE
-    msg += wxT(" Unicode");
-#endif
-    msg += wxT("\n");
-    msg += _("Database administration tool for Firebird RDBMS");
-    msg += wxT("\n\n");
-    msg += ib;
-    msg += wxT("\n\n");
-    msg += _("Copyright (c) 2004-2007  FlameRobin Development Team");
-    msg += wxT("\n");
-    msg += _("http://www.flamerobin.org");
-
-    ::wxMessageBox(msg, _("About FlameRobin"), wxOK | wxICON_INFORMATION);
+	
+	showAboutBox(this);
 
     FR_CATCH
 }
