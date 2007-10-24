@@ -107,15 +107,9 @@ public:
 };
 #endif
 //-----------------------------------------------------------------------------
-//! included xpm files, so that icons are compiled into executable
-namespace sql_icons {
-#include "left.xpm"
-#include "right.xpm"
-#include "search.xpm"
-};
-//-----------------------------------------------------------------------------
-MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
-    BaseFrame(parent, id, title, pos, size, style, wxT("FlameRobin_main"))
+MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title,
+        const wxPoint& pos, const wxSize& size, long style)
+    : BaseFrame(parent, id, title, pos, size, style, wxT("FlameRobin_main"))
 {
 #if wxCHECK_VERSION(2, 8, 0)
     wxArtProvider::Push(new ArtProvider);
@@ -132,12 +126,17 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
 
     wxArrayString choices;  // load from config?
 
-    searchPanelM = new wxPanel(mainPanelM, -1, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL|wxSUNKEN_BORDER);
-    searchBoxM = new wxComboBox(searchPanelM, ID_search_box, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-        choices, wxCB_DROPDOWN|wxCB_SORT);
-    button_prev = new wxBitmapButton(searchPanelM, ID_button_prev, wxBitmap(sql_icons::left_xpm));
-    button_next = new wxBitmapButton(searchPanelM, ID_button_next, wxBitmap(sql_icons::right_xpm));
-    button_advanced = new wxBitmapButton(searchPanelM, ID_button_advanced, wxBitmap(sql_icons::search_xpm));
+    searchPanelM = new wxPanel(mainPanelM, -1, wxDefaultPosition, wxDefaultSize,
+        wxTAB_TRAVERSAL | wxSUNKEN_BORDER);
+    searchBoxM = new wxComboBox(searchPanelM, ID_search_box, wxEmptyString,
+        wxDefaultPosition, wxDefaultSize, choices, wxCB_DROPDOWN | wxCB_SORT);
+    wxSize btnBmpSize(16, 16);
+    button_prev = new wxBitmapButton(searchPanelM, ID_button_prev,
+        wxArtProvider::GetBitmap(wxART_GO_BACK, wxART_TOOLBAR, btnBmpSize));
+    button_next = new wxBitmapButton(searchPanelM, ID_button_next,
+        wxArtProvider::GetBitmap(wxART_GO_FORWARD, wxART_TOOLBAR, btnBmpSize));
+    button_advanced = new wxBitmapButton(searchPanelM, ID_button_advanced,
+        wxArtProvider::GetBitmap(wxART_FIND, wxART_TOOLBAR, btnBmpSize));
     button_advanced->SetToolTip(_("Advanced metadata search"));
     button_prev->SetToolTip(_("Previous match"));
     button_next->SetToolTip(_("Next match"));
@@ -152,8 +151,8 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
 #endif
     if (!config().get(wxT("showSearchBar"), true))
     {
-        inner_sizer->Show(searchPanelM, false, true);    // recursive
-        inner_sizer->Layout();
+        searchPanelSizerM->Show(searchPanelM, false, true);    // recursive
+        searchPanelSizerM->Layout();
     }
 }
 //-----------------------------------------------------------------------------
@@ -305,22 +304,27 @@ void MainFrame::set_properties()
 //-----------------------------------------------------------------------------
 void MainFrame::do_layout()
 {
-    wxBoxSizer* outer_sizer = new wxBoxSizer(wxVERTICAL);
-    outer_sizer->Add(mainPanelM, 1, wxEXPAND, 0);
-    inner_sizer = new wxBoxSizer(wxVERTICAL);
-    inner_sizer->Add(tree_ctrl_1, 1, wxEXPAND, 0);
+    wxSizer* sizerCB = new wxBoxSizer(wxVERTICAL);
+    sizerCB->AddStretchSpacer(1);
+    sizerCB->Add(searchBoxM, 0, wxEXPAND);
+    sizerCB->AddStretchSpacer(1);
 
-    sizer_search = new wxBoxSizer(wxHORIZONTAL);
-    sizer_search->Add(searchBoxM, 1, wxEXPAND, 0);
-    sizer_search->Add(button_prev);
-    sizer_search->Add(button_next);
-    sizer_search->Add(button_advanced);
-    searchPanelM->SetSizer(sizer_search);
+    wxSizer* sizerSearch = new wxBoxSizer(wxHORIZONTAL);
+    sizerSearch->Add(sizerCB, 1, wxEXPAND);
+    sizerSearch->Add(button_prev);
+    sizerSearch->Add(button_next);
+    sizerSearch->Add(button_advanced);
+    searchPanelM->SetSizer(sizerSearch);
 
-    inner_sizer->Add(searchPanelM, 0, wxEXPAND);
-    mainPanelM->SetSizer(inner_sizer);
+    searchPanelSizerM = new wxBoxSizer(wxVERTICAL);
+    searchPanelSizerM->Add(tree_ctrl_1, 1, wxEXPAND);
+    searchPanelSizerM->Add(searchPanelM, 0, wxEXPAND);
+    mainPanelM->SetSizer(searchPanelSizerM);
+
+    wxBoxSizer* sizerAll = new wxBoxSizer(wxVERTICAL);
+    sizerAll->Add(mainPanelM, 1, wxEXPAND, 0);
     SetAutoLayout(true);
-    SetSizer(outer_sizer);
+    SetSizer(sizerAll);
     Layout();
 }
 //-----------------------------------------------------------------------------
@@ -1575,8 +1579,8 @@ void MainFrame::OnMenuToggleSearchBar(wxCommandEvent& event)
 
     bool show = event.IsChecked();
     config().setValue(wxT("showSearchBar"), show);
-    inner_sizer->Show(searchPanelM, show, true);    // recursive
-    inner_sizer->Layout();
+    searchPanelSizerM->Show(searchPanelM, show, true);    // recursive
+    searchPanelSizerM->Layout();
 
     FR_CATCH
 }

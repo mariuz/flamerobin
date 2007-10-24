@@ -227,8 +227,9 @@ wxBitmap ArtProvider::loadBitmapFromFile(const wxArtID& id, wxSize size)
         + wxString::Format(wxT("_%dx%d"), size.GetWidth(), size.GetHeight()));
 
     wxArrayString imgExts;
-    imgExts.Add(wxT("bmp"));
     imgExts.Add(wxT("png"));
+    imgExts.Add(wxT("xpm"));
+    imgExts.Add(wxT("bmp"));
 
     for (size_t i = 0; i < imgExts.GetCount(); ++i)
     {

@@ -1,24 +1,24 @@
 /*
-Copyright (c) 2004, 2005, 2006 The FlameRobin Development Team
+  Copyright (c) 2004-2007 The FlameRobin Development Team
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
 
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
   $Id$
@@ -40,6 +40,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <string>
 
+#include "core/ArtProvider.h"
 #include "gui/ExecuteSql.h"
 #include "gui/ReorderFieldsDialog.h"
 #include "gui/StyleGuide.h"
@@ -71,11 +72,16 @@ void ReorderFieldsDialog::createControls()
     const wxString fields_choices[] = {
         _("List of fields")
     };
-    list_box_fields = new wxListBox(getControlsPanel(), ID_list_box_fields, wxDefaultPosition,
-        wxDefaultSize, 1, fields_choices, wxLB_SINGLE);
+    list_box_fields = new wxListBox(getControlsPanel(), ID_list_box_fields,
+        wxDefaultPosition, wxDefaultSize, 1, fields_choices, wxLB_SINGLE);
+    wxSize bmpSize(16, 16);
+    // TODO: ART_GO_UP_FIRST missing
     button_first = new wxBitmapButton(getControlsPanel(), ID_button_first, wxBitmap(reorder_icons::up_xpm));
-    button_up = new wxBitmapButton(getControlsPanel(), ID_button_up, wxBitmap(reorder_icons::up_xpm));
-    button_down = new wxBitmapButton(getControlsPanel(), ID_button_down, wxBitmap(reorder_icons::down_xpm));
+    button_up = new wxBitmapButton(getControlsPanel(), ID_button_up,
+        wxArtProvider::GetBitmap(wxART_GO_UP, wxART_TOOLBAR, bmpSize));
+    button_down = new wxBitmapButton(getControlsPanel(), ID_button_down,
+        wxArtProvider::GetBitmap(wxART_GO_DOWN, wxART_TOOLBAR, bmpSize));
+    // TODO: ART_GO_DOWN_LAST missing
     button_last = new wxBitmapButton(getControlsPanel(), ID_button_last, wxBitmap(reorder_icons::down_xpm));
     button_ok = new wxButton(getControlsPanel(), wxID_OK, _("Reorder"));
     button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
