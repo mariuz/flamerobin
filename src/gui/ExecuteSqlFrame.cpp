@@ -1469,37 +1469,33 @@ wxArrayInt getSelectedGridRows(DataGrid* grid)
     wxArrayInt rows;
     if (grid)
     {
+        // add fully selected rows
         rows = grid->GetSelectedRows();
+
+        // add rows in selection blocks that span all columns
+        wxGridCellCoordsArray tlCells(grid->GetSelectionBlockTopLeft());
+        wxGridCellCoordsArray brCells(grid->GetSelectionBlockBottomRight());
+        wxASSERT(tlCells.GetCount() == brCells.GetCount());
+        for (size_t i = 0; i < tlCells.GetCount(); ++i)
+        {
+            wxGridCellCoords tl = tlCells[i];
+            wxGridCellCoords br = brCells[i];
+            if (tl.GetCol() == 0 && br.GetCol() == grid->GetNumberCols() - 1)
+            {
+                for (int j = tl.GetRow(); j <= br.GetRow(); ++j)
+                {
+                    // overlapping blocks should have been joined,
+                    // but better safe than sorry...
+                    if (rows.Index(j) == wxNOT_FOUND)
+                        rows.Add(j);
+                }
+            }
+        }
+        // add the row of the active cell if nothing else is selected
         if (!rows.GetCount())
             rows.Add(grid->GetGridCursorRow());
     }
     return rows;
-
-/* M.H.: this was the old row selection code, please adapt here if
-         it does not work properly, see also discussion on dev list
-
-    // M.B. This only works good when rows are selected by clicking on row
-    // header and it is impossible to select a range which is off screen
-    // - even using shift key (I only tried with GTK2 wx2.8.6).
-    // wxArrayInt ai = grid_data->GetSelectedRows();
-    // size_t count = ai.GetCount();
-
-    // ...therefore, we iterate the rows ourselves
-    wxArrayInt ai;
-    size_t count = 0;
-    for (int i = 0; i < grid_data->GetNumberRows(); i++)
-    {
-        for (int j = 0; j < grid_data->GetNumberCols(); j++)
-        {
-            if (grid_data->IsInSelection(i, j))
-            {
-                count++;
-                ai.Add(i);
-                break;
-            }
-        }
-    }
-*/
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridDeleteRow(wxCommandEvent& WXUNUSED(event))
