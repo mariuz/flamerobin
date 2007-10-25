@@ -2084,49 +2084,39 @@ void ExecuteSqlFrame::OnMenuUpdateGridInsertRow(wxUpdateUIEvent& event)
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event)
 {
-    // not using standard FR_TRY..FR_CATCH because these events happen
-    // often and it would flood the user with dialogs
-    try
-    {
-        DataGridTable *tb = grid_data->getDataGridTable();
+    FR_TRY
 
-        // light but imprecise version
-        //event.Enable(tb && grid_data->GetNumberRows());
-
-        // heavy but more accurate version
-        if (!tb || !grid_data->GetNumberRows())
-        {
-            event.Enable(false);
-            return;
-        }
-
-        bool hasSelection = false;
-        for (int i = 0; i < grid_data->GetNumberRows(); i++)
-        {
-            for (int j = 0; j < grid_data->GetNumberCols(); j++)
-            {
-                if (grid_data->IsInSelection(i, j))
-                {
-                    if (!tb->canRemoveRow(i))
-                    {
-                        event.Enable(false);
-                        return;
-                    }
-                    hasSelection = true;
-                    break;
-                }
-            }
-        }
-
-        if (hasSelection)
-            event.Enable(true);
-        else
-            event.Enable(tb->canRemoveRow(grid_data->GetGridCursorRow()));
-    }
-    catch(...)
+    DataGridTable *tb = grid_data->getDataGridTable();
+    if (!tb || !grid_data->GetNumberRows())
     {
         event.Enable(false);
+        return;
     }
+
+    bool colsSelected = grid_data->GetSelectedCols().GetCount() == 0;
+    bool deletableRows = false;
+
+    if (!colsSelected)
+    {
+        wxArrayInt selRows(grid_data->GetSelectedRows());
+        if (selRows.GetCount() > 0)
+        {
+            for (size_t i = 0; !deletableRows && i < selRows.GetCount(); ++i)
+            {
+                if (tb->canRemoveRow(selRows[i]))
+                    deletableRows = true;
+            }
+        }
+        else
+            deletableRows = tb->canRemoveRow(grid_data->GetGridCursorRow());
+    }
+
+    event.Enable(!colsSelected && deletableRows);
+    return;
+
+    FR_CATCH
+
+    event.Enable(false);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent &event)

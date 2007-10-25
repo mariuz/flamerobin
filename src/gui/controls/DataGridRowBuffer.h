@@ -34,11 +34,14 @@
 // DataGridRowBuffer class
 class DataGridRowBuffer
 {
+private:
+    TriState isDeletableM;
 protected:
     std::vector<bool> nullFieldsM;
     std::vector<uint8_t> dataM;
     std::vector<wxString> stringsM;
     std::vector<IBPP::Blob> blobsM;
+    void invalidateIsDeletable();
 public:
     DataGridRowBuffer(unsigned fieldCount);
     DataGridRowBuffer(const DataGridRowBuffer* other);
@@ -61,6 +64,9 @@ public:
     void setValue(unsigned offset, int value);
     void setValue(unsigned offset, int64_t value);
     void setValue(unsigned offset, IBPP::DBKey value);
+
+    TriState isDeletable();
+    void setIsDeletable(bool value);
 };
 //-----------------------------------------------------------------------------
 // class for rows inserted by user - to minimize memory usage of regular rows

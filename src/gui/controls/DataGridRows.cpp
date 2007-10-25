@@ -1194,33 +1194,39 @@ wxString escapeQuotes(const wxString& input)
 //-----------------------------------------------------------------------------
 bool DataGridRows::canRemoveRow(size_t row)
 {
-    // find table with valid constraint
-    for (std::map<wxString, UniqueConstraint *>::iterator it =
-        statementTablesM.begin(); it != statementTablesM.end(); ++it)
+    if (row >= buffersM.size())
+        return false;
+    if (buffersM[row]->isDeletable() == unknown)
     {
-        if ((*it).second == 0)
-            continue;
-        // check if some of PK/UNQ columns contains N/A for that row
-        bool tableok = true;
-        for (ColumnConstraint::const_iterator ci = (*it).second->begin();
-            ci != (*it).second->end(); ++ci)
+        // find table with valid constraint
+        bool tableok = false;
+        for (std::map<wxString, UniqueConstraint *>::iterator it =
+            statementTablesM.begin(); !tableok && it != statementTablesM.end();
+            ++it)
         {
-            for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
+            if ((*it).second == 0)
+                continue;
+            // check if some of PK/UNQ columns contains N/A for that row
+            tableok = true;
+            for (ColumnConstraint::const_iterator ci = (*it).second->begin();
+                ci != (*it).second->end(); ++ci)
             {
-                if ((*ci) != std2wx(statementM->ColumnName(c2)))
-                    continue;
-                wxString tn(std2wx(statementM->ColumnTable(c2)));
-                if (tn == (*it).first && buffersM[row]->isFieldNA(c2-1))
+                for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
                 {
-                    tableok = false;
-                    break;
+                    if ((*ci) != std2wx(statementM->ColumnName(c2)))
+                        continue;
+                    wxString tn(std2wx(statementM->ColumnTable(c2)));
+                    if (tn == (*it).first && buffersM[row]->isFieldNA(c2-1))
+                    {
+                        tableok = false;
+                        break;
+                    }
                 }
             }
         }
-        if (tableok)
-            return true;
+        buffersM[row]->setIsDeletable(tableok);
     }
-    return false;
+    return (buffersM[row]->isDeletable() == isTrue);
 }
 //-----------------------------------------------------------------------------
 bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
