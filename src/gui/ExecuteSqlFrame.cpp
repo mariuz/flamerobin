@@ -1462,16 +1462,21 @@ void ExecuteSqlFrame::OnMenuGridInsertRow(wxCommandEvent& WXUNUSED(event))
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuGridDeleteRow(wxCommandEvent& WXUNUSED(event))
+// this returns an array of row numbers of fully selected rows, or the number
+// of the active row
+wxArrayInt getSelectedGridRows(DataGrid* grid)
 {
-    FR_TRY
+    wxArrayInt rows;
+    if (grid)
+    {
+        rows = grid->GetSelectedRows();
+        if (!rows.GetCount())
+            rows.Add(grid->GetGridCursorRow());
+    }
+    return rows;
 
-    if (!grid_data->getDataGridTable() || !grid_data->GetNumberRows())
-        return;
-
-    // M.B. when this is enabled the grid behaves strange on GTK2 (wx2.8.6)
-    // when deleting multiple items. I didn't test other platforms
-    // grid_data->BeginBatch();
+/* M.H.: this was the old row selection code, please adapt here if
+         it does not work properly, see also discussion on dev list
 
     // M.B. This only works good when rows are selected by clicking on row
     // header and it is impossible to select a range which is off screen
@@ -1494,23 +1499,36 @@ void ExecuteSqlFrame::OnMenuGridDeleteRow(wxCommandEvent& WXUNUSED(event))
             }
         }
     }
+*/
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuGridDeleteRow(wxCommandEvent& WXUNUSED(event))
+{
+    FR_TRY
 
-    if (count > 1 && wxOK != showQuestionDialog(this,
-        _("Multiple rows selected"),
-        wxString::Format(_("Are you sure you wish to delete %d rows?"),
-            count),
-        AdvancedMessageDialogButtonsOkCancel(_("Delete"))))
-    {
+    if (!grid_data->getDataGridTable() || !grid_data->GetNumberRows())
         return;
+
+    // M.B. when this is enabled the grid behaves strange on GTK2 (wx2.8.6)
+    // when deleting multiple items. I didn't test other platforms
+    // grid_data->BeginBatch();
+
+    wxArrayInt rows(getSelectedGridRows(grid_data));
+    size_t count = rows.GetCount();
+    if (count > 1)
+    {
+        bool agreed = wxOK == showQuestionDialog(this,
+            _("Do you really want to delete multiple rows?"),
+            wxString::Format(_("You have more than one row selected. Are you sure you wish to delete all %d selected rows?"), count),
+            AdvancedMessageDialogButtonsOkCancel(_("Delete")));
+        if (!agreed)
+            return;
     }
 
-    if (count == 0) // else - delete the row with cursor
-        grid_data->DeleteRows(grid_data->GetGridCursorRow(), 1);
-    else
+    for (size_t i = rows.GetCount(); i > 0;)
     {
-        while (count--)
-            if (!grid_data->DeleteRows(ai.Item(count), 1))
-                return;
+        if (!grid_data->DeleteRows(rows[--i], 1))
+            break;
     }
 
     // grid_data->EndBatch();   // see comment for BeginBatch above
@@ -2098,17 +2116,12 @@ void ExecuteSqlFrame::OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event)
 
     if (!colsSelected)
     {
-        wxArrayInt selRows(grid_data->GetSelectedRows());
-        if (selRows.GetCount() > 0)
+        wxArrayInt selRows(getSelectedGridRows(grid_data));
+        for (size_t i = 0; !deletableRows && i < selRows.GetCount(); ++i)
         {
-            for (size_t i = 0; !deletableRows && i < selRows.GetCount(); ++i)
-            {
-                if (tb->canRemoveRow(selRows[i]))
-                    deletableRows = true;
-            }
+            if (tb->canRemoveRow(selRows[i]))
+                deletableRows = true;
         }
-        else
-            deletableRows = tb->canRemoveRow(grid_data->GetGridCursorRow());
     }
 
     event.Enable(!colsSelected && deletableRows);

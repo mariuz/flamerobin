@@ -99,6 +99,43 @@ void DataGrid::copyToClipboard(const wxString cbText)
     wxTheClipboard->Close();
 }
 //-----------------------------------------------------------------------------
+void DataGrid::extendSelection(int direction)
+{
+    // extend selection of cell selection blocks
+    wxGridCellCoordsArray tlCells(GetSelectionBlockTopLeft());
+    wxGridCellCoordsArray brCells(GetSelectionBlockBottomRight());
+    wxASSERT(tlCells.GetCount() == brCells.GetCount());
+    for (size_t i = 0; i < tlCells.GetCount(); ++i)
+    {
+        wxGridCellCoords tl = tlCells[i];
+        wxGridCellCoords br = brCells[i];
+        if (direction & wxHORIZONTAL)
+        {
+            for (int r = tl.GetRow(); r <= br.GetRow(); ++r)
+                SelectRow(r, true);
+        }
+        if (direction & wxVERTICAL)
+        {
+            for (int c = tl.GetCol(); c <= br.GetCol(); ++c)
+                SelectCol(c, true);
+        }
+    }
+
+    // extend selection of single selected cells
+    // if no other selection then extend selection of active cell
+    wxGridCellCoordsArray selCells(GetSelectedCells());
+    if (!tlCells.GetCount() && !brCells.GetCount() && !selCells.GetCount())
+        selCells.Add(wxGridCellCoords(GetGridCursorRow(), GetGridCursorCol()));
+    for (size_t i = 0; i < selCells.GetCount(); ++i)
+    {
+        wxGridCellCoords cc = selCells[i];
+        if (direction & wxHORIZONTAL)
+            SelectRow(cc.GetRow(), true);
+        if (direction & wxVERTICAL)
+            SelectCol(cc.GetCol(), true);
+    }
+}
+//-----------------------------------------------------------------------------
 void DataGrid::fetchData(wxMBConv* conv)
 {
     DataGridTable* table = getDataGridTable();
@@ -629,6 +666,7 @@ BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_GRID_LABEL_RIGHT_CLICK(DataGrid::OnGridLabelRightClick)
     EVT_GRID_EDITOR_CREATED(DataGrid::OnEditorCreated)
     //  EVT_GRID_EDITOR_HIDDEN( DataGrid::OnEditorHidden )
+    EVT_KEY_DOWN(DataGrid::OnKeyDown)
 #ifdef __WXGTK__
     EVT_MOUSEWHEEL(DataGrid::OnMouseWheel)
     EVT_SCROLLWIN_THUMBRELEASE(DataGrid::OnThumbRelease)
@@ -715,6 +753,24 @@ void DataGrid::OnIdle(wxIdleEvent& event)
     }
 
     FR_CATCH
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnKeyDown(wxKeyEvent& event)
+{
+    if (event.GetKeyCode() == WXK_SPACE)
+    {
+        if (event.GetModifiers() == wxMOD_CONTROL)
+        {
+            extendSelection(wxVERTICAL);
+            return;
+        }
+        if (event.GetModifiers() == wxMOD_SHIFT)
+        {
+            extendSelection(wxHORIZONTAL);
+            return;
+        }
+    }
+    event.Skip();
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnMouseWheel(wxMouseEvent& event)
