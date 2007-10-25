@@ -2093,7 +2093,7 @@ void ExecuteSqlFrame::OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event)
         return;
     }
 
-    bool colsSelected = grid_data->GetSelectedCols().GetCount() == 0;
+    bool colsSelected = grid_data->GetSelectedCols().GetCount() > 0;
     bool deletableRows = false;
 
     if (!colsSelected)
