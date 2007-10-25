@@ -1134,7 +1134,7 @@ ResultsetColumnDef* DataGridRows::getColumnDef(unsigned col)
     return columnDefsM[col];
 }
 //-----------------------------------------------------------------------------
-void DataGridRows::addRow(DataGridRowBuffer *buffer)
+void DataGridRows::addRow(DataGridRowBuffer* buffer)
 {
     if (buffersM.size() == buffersM.capacity())
         buffersM.reserve(buffersM.capacity() + 1024);
@@ -1144,10 +1144,8 @@ void DataGridRows::addRow(DataGridRowBuffer *buffer)
 bool DataGridRows::addRow(const IBPP::Statement& statement,
     wxMBConv* converter)
 {
-    if (buffersM.size() == buffersM.capacity())
-        buffersM.reserve(buffersM.capacity() + 1024);
     DataGridRowBuffer* buffer = new DataGridRowBuffer(columnDefsM.size());
-    buffersM.push_back(buffer);
+    addRow(buffer);
 
     // starts with last column -> with highest buffer offset and
     // string array index to allocate all needed memory at once

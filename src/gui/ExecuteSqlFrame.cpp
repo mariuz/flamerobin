@@ -2071,24 +2071,15 @@ void ExecuteSqlFrame::OnMenuButtonToggleClick(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUpdateGridInsertRow(wxUpdateUIEvent& event)
 {
-    bool enable = false;
-    // not using standard FR_TRY..FR_CATCH because these events happen
-    // often and it would flood the user with dialogs
-    try
-    {
-        DataGridTable *tb = grid_data->getDataGridTable();
-        if (tb && grid_data->GetNumberCols())
-        {
-            wxArrayString tables;
-            tb->getTableNames(tables);
-            if (tables.GetCount() > 0)
-                enable = true;
-        }
-    }
-    catch(...)
-    {
-    }
-    event.Enable(enable);
+    FR_TRY
+
+    DataGridTable* tb = grid_data->getDataGridTable();
+    event.Enable(tb && tb->canInsertRows());
+    return;
+
+    FR_CATCH
+
+    event.Enable(false);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event)

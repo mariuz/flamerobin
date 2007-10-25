@@ -667,6 +667,7 @@ void DataGridTable::initialFetch(wxMBConv* conv)
 {
     Clear();
     allRowsFetchedM = false;
+    canInsertRowsM = unknown;
     maxRowToFetchM = 100;
 
     if (conv)
@@ -722,6 +723,17 @@ bool DataGridTable::isValidCellPos(int row, int col)
 {
     return (row >= 0 && col >= 0 && row < (int)rowsM.getRowCount()
         && col < (int)rowsM.getRowFieldCount());
+}
+//-----------------------------------------------------------------------------
+bool DataGridTable::canInsertRows()
+{
+    if (canInsertRowsM == unknown)
+    {
+        wxArrayString tables;
+        getTableNames(tables);
+        canInsertRowsM = (tables.GetCount() > 0) ? isTrue : isFalse;
+    }
+    return (canInsertRowsM == isTrue);
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::canRemoveRow(size_t row)

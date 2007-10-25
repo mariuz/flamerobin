@@ -33,6 +33,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <ibpp.h>
 
+#include "frtypes.h"
 #include "gui/controls/DataGridRows.h"
 //-----------------------------------------------------------------------------
 class Column;
@@ -54,6 +55,7 @@ private:
     bool allRowsFetchedM;
     bool fetchAllRowsM;
     unsigned maxRowToFetchM;
+    TriState canInsertRowsM;
 
     wxGridCellAttr* nullAttrM;
     wxGridCellAttr* nullAttrReadonlyM;
@@ -97,6 +99,7 @@ public:
     bool isReadonlyColumn(int col);
     bool needsMoreRowsFetched();
     void setFetchAllRecords(bool fetchall);
+    bool canInsertRows();
     bool canRemoveRow(size_t row);
 
     void setNullFlag(bool isNull);
