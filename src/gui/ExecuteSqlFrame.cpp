@@ -1482,13 +1482,11 @@ wxArrayInt getSelectedGridRows(DataGrid* grid)
             wxGridCellCoords br = brCells[i];
             if (tl.GetCol() == 0 && br.GetCol() == grid->GetNumberCols() - 1)
             {
-                for (int j = tl.GetRow(); j <= br.GetRow(); ++j)
-                {
-                    // overlapping blocks should have been joined,
-                    // but better safe than sorry...
-                    if (rows.Index(j) == wxNOT_FOUND)
-                        rows.Add(j);
-                }
+                size_t len = br.GetRow() - tl.GetRow() + 1;
+                size_t first = rows.GetCount();
+                rows.SetCount(first + len);
+                for (size_t j = 0; j < len; ++j)
+                    rows[first + j] = tl.GetRow() + j;
             }
         }
         // add the row of the active cell if nothing else is selected
