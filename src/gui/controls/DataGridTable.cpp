@@ -209,51 +209,13 @@ DataGridTable::DataGridTable(IBPP::Statement& s, Database *db)
     fetchAllRowsM = false;
     config().getValue(wxT("GridFetchAllRecords"), fetchAllRowsM);
     maxRowToFetchM = 100;
-
-    nullAttrM = new wxGridCellAttr();
-    nullAttrM->SetTextColour(*wxRED);
-    nullAttrM->SetBackgroundColour(
-        wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
-    nullAttrM->SetAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
-
-    nullAttrReadonlyM = new wxGridCellAttr();
-    nullAttrReadonlyM->SetTextColour(*wxRED);
-    nullAttrReadonlyM->SetBackgroundColour(getReadonlyColour());
-    nullAttrReadonlyM->SetAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
-    nullAttrReadonlyM->SetReadOnly(true);
-
-    nullAttrNumericM = new wxGridCellAttr();
-    nullAttrNumericM->SetTextColour(*wxRED);
-    nullAttrNumericM->SetBackgroundColour(
-        wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
-    nullAttrNumericM->SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
-
-    nullAttrNumericReadonlyM = new wxGridCellAttr();
-    nullAttrNumericReadonlyM->SetTextColour(*wxRED);
-    nullAttrNumericReadonlyM->SetBackgroundColour(getReadonlyColour());
-    nullAttrNumericReadonlyM->SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
-    nullAttrNumericReadonlyM->SetReadOnly(true);
-
-    readonlyAttrM = new wxGridCellAttr();
-    readonlyAttrM->SetBackgroundColour(getReadonlyColour());
-    readonlyAttrM->SetAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
-    readonlyAttrM->SetReadOnly(true);
-
-    readonlyNumericAttrM = new wxGridCellAttr();
-    readonlyNumericAttrM->SetBackgroundColour(getReadonlyColour());
-    readonlyNumericAttrM->SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
-    readonlyNumericAttrM->SetReadOnly(true);
+    cellAttriM = new wxGridCellAttr();
 }
 //-----------------------------------------------------------------------------
 DataGridTable::~DataGridTable()
 {
     Clear();
-    nullAttrNumericM->DecRef();
-    nullAttrNumericReadonlyM->DecRef();
-    nullAttrReadonlyM->DecRef();
-    nullAttrM->DecRef();
-    readonlyAttrM->DecRef();
-    readonlyNumericAttrM->DecRef();
+    cellAttriM->DecRef();
 }
 //-----------------------------------------------------------------------------
 void DataGridTable::setNullFlag(bool isNull)
@@ -370,43 +332,32 @@ void DataGridTable::addRow(DataGridRowBuffer *buffer, const wxString& sql)
 wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
     wxGridCellAttr::wxAttrKind kind)
 {
-    if (rowsM.isFieldNull(row, col) || rowsM.isFieldNA(row, col))
-    {
-        if (rowsM.isRowFieldNumeric(col))
-        {
-            if (rowsM.isFieldReadonly(row, col))
-            {
-                nullAttrNumericReadonlyM->IncRef();
-                return nullAttrNumericReadonlyM;
-            }
-            else
-            {
-                nullAttrNumericM->IncRef();
-                return nullAttrNumericM;
-            }
-        }
-        if (rowsM.isFieldReadonly(row, col))
-        {
-            nullAttrReadonlyM->IncRef();
-            return nullAttrReadonlyM;
-        }
-        nullAttrM->IncRef();
-        return nullAttrM;
-    }
-    if (rowsM.isFieldReadonly(row, col))
-    {
-        if (rowsM.isRowFieldNumeric(col))
-        {
-            readonlyNumericAttrM->IncRef();
-            return readonlyNumericAttrM;
-        }
-        else
-        {
-            readonlyAttrM->IncRef();
-            return readonlyAttrM;
-        }
-    }
-    return wxGridTableBase::GetAttr(row, col, kind);
+    bool isNull = rowsM.isFieldNull(row, col);
+    bool isNA = rowsM.isFieldNA(row, col);
+    bool isRO = rowsM.isFieldReadonly(row, col);
+    bool isNumeric = rowsM.isRowFieldNumeric(col);
+
+    if (!isNull && !isNA && !isRO && !isNumeric)
+        return wxGridTableBase::GetAttr(row, col, kind);
+
+    if (isNull || isNA)
+        cellAttriM->SetTextColour(*wxRED);
+    else
+        cellAttriM->SetTextColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
+
+    if (isRO)
+        cellAttriM->SetBackgroundColour(getReadonlyColour());
+    else
+        cellAttriM->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
+    cellAttriM->SetReadOnly(isRO);
+
+    if (isNumeric)
+        cellAttriM->SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
+    else
+        cellAttriM->SetAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
+
+    cellAttriM->IncRef();
+    return cellAttriM;
 }
 //-----------------------------------------------------------------------------
 wxString DataGridTable::getCellValue(int row, int col)
