@@ -39,6 +39,4 @@
     #include <stdint.h>
 #endif
 
-typedef enum TriState { unknown, isTrue, isFalse };
-
 #endif // FRTYPES_H

@@ -29,19 +29,23 @@
 #define FR_DATAGRIDROWBUFFER_H
 
 #include "ibpp/ibpp.h"
-#include "frtypes.h"
 //-----------------------------------------------------------------------------
 // DataGridRowBuffer class
 class DataGridRowBuffer
 {
 private:
-    TriState isDeletableM;
+    // use bits instead of bool here to use less memory
+    int isModifiedM:1;
+    int isDeletedM:1;
+    int isDeletableIsSetM:1;
+    int isDeletableM:1;
 protected:
     std::vector<bool> nullFieldsM;
     std::vector<uint8_t> dataM;
     std::vector<wxString> stringsM;
     std::vector<IBPP::Blob> blobsM;
     void invalidateIsDeletable();
+    void setIsModified(bool value);
 public:
     DataGridRowBuffer(unsigned fieldCount);
     DataGridRowBuffer(const DataGridRowBuffer* other);
@@ -65,8 +69,13 @@ public:
     void setValue(unsigned offset, int64_t value);
     void setValue(unsigned offset, IBPP::DBKey value);
 
-    TriState isDeletable();
+    virtual bool isInserted();
+    bool isFieldModified(unsigned num);
+    bool isDeletable();
+    bool isDeletableIsSet();
     void setIsDeletable(bool value);
+    bool isDeleted();
+    void setIsDeleted(bool value);
 };
 //-----------------------------------------------------------------------------
 // class for rows inserted by user - to minimize memory usage of regular rows
@@ -79,6 +88,7 @@ public:
     InsertedGridRowBuffer(unsigned fieldCount);
     InsertedGridRowBuffer(const InsertedGridRowBuffer* other);
 
+    virtual bool isInserted();
     virtual bool isFieldNA(unsigned num);
     virtual void setFieldNA(unsigned num, bool isNA);
 };

@@ -43,7 +43,10 @@
 //-----------------------------------------------------------------------------
 DataGridRowBuffer::DataGridRowBuffer(unsigned fieldCount)
 {
-    isDeletableM = unknown;
+    isModifiedM = 0;
+    isDeletedM = 0;
+    isDeletableIsSetM = 0;
+    isDeletableM = 0;
     // initialize with field count, all fields initially NULL
     // there's no need to preallocate the uint8 buffer or string array
     nullFieldsM.resize(fieldCount, true);
@@ -55,6 +58,10 @@ DataGridRowBuffer::DataGridRowBuffer(const DataGridRowBuffer* other)
     dataM = other->dataM;
     stringsM = other->stringsM;
     blobsM = other->blobsM;
+
+    isModifiedM = other->isModifiedM;
+    isDeletedM = other->isDeletedM;
+    isDeletableIsSetM = other->isDeletableIsSetM;
     isDeletableM = other->isDeletableM;
 }
 //-----------------------------------------------------------------------------
@@ -194,19 +201,53 @@ void DataGridRowBuffer::setValue(unsigned offset, IBPP::DBKey value)
     invalidateIsDeletable();
 }
 //-----------------------------------------------------------------------------
-void DataGridRowBuffer::invalidateIsDeletable()
+bool DataGridRowBuffer::isInserted()
 {
-    isDeletableM = unknown;
+    return false;
 }
 //-----------------------------------------------------------------------------
-TriState DataGridRowBuffer::isDeletable()
+bool DataGridRowBuffer::isFieldModified(unsigned /*num*/)
 {
-    return isDeletableM;
+    // TODO: maintain on a per-field basis
+    return isModifiedM != 0;
+}
+//-----------------------------------------------------------------------------
+void DataGridRowBuffer::setIsModified(bool value)
+{
+    isModifiedM = (value) ? 1 : 0;
+}
+//-----------------------------------------------------------------------------
+void DataGridRowBuffer::invalidateIsDeletable()
+{
+    isDeletableIsSetM = 0;
+    isDeletableM = 0;
+}
+//-----------------------------------------------------------------------------
+bool DataGridRowBuffer::isDeletable()
+{
+    wxASSERT(isDeletableIsSetM);
+    return isDeletableM != 0;
+}
+//-----------------------------------------------------------------------------
+bool DataGridRowBuffer::isDeletableIsSet()
+{
+    return isDeletableIsSetM != 0;
 }
 //-----------------------------------------------------------------------------
 void DataGridRowBuffer::setIsDeletable(bool value)
 {
-    isDeletableM = (value) ? isTrue : isFalse;
+    isDeletableIsSetM = 1;
+    isDeletableM = value;
+}
+//-----------------------------------------------------------------------------
+bool DataGridRowBuffer::isDeleted()
+{
+    return isDeletedM != 0;
+}
+//-----------------------------------------------------------------------------
+void DataGridRowBuffer::setIsDeleted(bool value)
+{
+    isDeletedM = (value) ? 1 : 0;
 }
 //-----------------------------------------------------------------------------
 InsertedGridRowBuffer::InsertedGridRowBuffer(unsigned fieldCount)
@@ -218,6 +259,11 @@ InsertedGridRowBuffer::InsertedGridRowBuffer(const InsertedGridRowBuffer* b2)
     :DataGridRowBuffer(b2)
 {
     naFieldsM = b2->naFieldsM;
+}
+//-----------------------------------------------------------------------------
+bool InsertedGridRowBuffer::isInserted()
+{
+    return true;
 }
 //-----------------------------------------------------------------------------
 bool InsertedGridRowBuffer::isFieldNA(unsigned num)

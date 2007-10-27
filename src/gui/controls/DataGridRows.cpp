@@ -1196,7 +1196,7 @@ bool DataGridRows::canRemoveRow(size_t row)
 {
     if (row >= buffersM.size())
         return false;
-    if (buffersM[row]->isDeletable() == unknown)
+    if (!buffersM[row]->isDeletableIsSet())
     {
         // find table with valid constraint
         bool tableok = false;
@@ -1226,7 +1226,7 @@ bool DataGridRows::canRemoveRow(size_t row)
         }
         buffersM[row]->setIsDeletable(tableok);
     }
-    return (buffersM[row]->isDeletable() == isTrue);
+    return buffersM[row]->isDeletable();
 }
 //-----------------------------------------------------------------------------
 bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
@@ -1272,14 +1272,19 @@ bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
     std::vector<DataGridRowBuffer*>::iterator i2, it = buffersM.begin();
     from += count - 1;
     while (from--)
+    {
         if (++it == buffersM.end())     // should never happen
             return false;
+    }
     while (count--)
     {
         i2 = it;
         it--;
+/*
         delete (*i2);
         buffersM.erase(i2);
+*/
+        (*i2)->setIsDeleted(true);
     }
     return true;
 }
@@ -1501,7 +1506,7 @@ bool DataGridRows::initialize(const IBPP::Statement& statement, Database *db)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool DataGridRows::isRowFieldNumeric(unsigned col)
+bool DataGridRows::isColumnNumeric(unsigned col)
 {
     if (col >= columnDefsM.size())
         return false;
@@ -1515,6 +1520,23 @@ bool DataGridRows::isColumnReadonly(unsigned col)
     return columnDefsM[col]->isReadOnly();
 }
 //-----------------------------------------------------------------------------
+bool DataGridRows::getFieldInfo(unsigned row, unsigned col,
+    DataGridFieldInfo& info)
+{
+    if (col >= columnDefsM.size() || row >= buffersM.size())
+        return false;
+    info.rowInserted = buffersM[row]->isInserted();
+    info.rowDeleted = buffersM[row]->isDeleted();
+    info.fieldReadOnly = info.rowDeleted
+        || isColumnReadonly(col) || isFieldReadonly(row, col);
+    info.fieldModified = !info.rowDeleted
+        && buffersM[row]->isFieldModified(col);
+    info.fieldNull = buffersM[row]->isFieldNull(col);
+    info.fieldNA = buffersM[row]->isFieldNA(col);
+    info.fieldNumeric = isColumnNumeric(col);
+    return true;
+}
+//-----------------------------------------------------------------------------
 bool DataGridRows::isFieldReadonly(unsigned row, unsigned col)
 {
     if (col >= columnDefsM.size() || row >= buffersM.size())
@@ -1524,8 +1546,10 @@ bool DataGridRows::isFieldReadonly(unsigned row, unsigned col)
 
     // if row is loaded from the database and not inserted by user, we don't
     // need to check anything else
-    if (!dynamic_cast<InsertedGridRowBuffer *>(buffersM[row]))
+    if (!buffersM[row]->isInserted())
         return false;
+
+    // TODO: this needs to be cached too
 
     wxString table(std2wx(statementM->ColumnTable(col+1)));
     std::map<wxString, UniqueConstraint *>::iterator it =

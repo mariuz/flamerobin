@@ -207,6 +207,8 @@ DataGridTable::DataGridTable(IBPP::Statement& s, Database *db)
 {
     allRowsFetchedM = false;
     fetchAllRowsM = false;
+    canInsertRowsIsSetM = false;
+    canInsertRowsM = false;
     config().getValue(wxT("GridFetchAllRecords"), fetchAllRowsM);
     maxRowToFetchM = 100;
     cellAttriM = new wxGridCellAttr();
@@ -332,29 +334,45 @@ void DataGridTable::addRow(DataGridRowBuffer *buffer, const wxString& sql)
 wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
     wxGridCellAttr::wxAttrKind kind)
 {
-    bool isNull = rowsM.isFieldNull(row, col);
-    bool isNA = rowsM.isFieldNA(row, col);
-    bool isRO = rowsM.isFieldReadonly(row, col);
-    bool isNumeric = rowsM.isRowFieldNumeric(col);
-
-    if (!isNull && !isNA && !isRO && !isNumeric)
+    DataGridFieldInfo info;
+    if (!rowsM.getFieldInfo(row, col, info))
         return wxGridTableBase::GetAttr(row, col, kind);
 
-    if (isNull || isNA)
-        cellAttriM->SetTextColour(*wxRED);
-    else
-        cellAttriM->SetTextColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
+    bool useAttri = info.rowInserted || info.rowDeleted || info.fieldReadOnly
+        || info.fieldModified || info.fieldNull || info.fieldNA
+        || info.fieldNumeric;
+    if (!useAttri)
+        return wxGridTableBase::GetAttr(row, col, kind);
 
-    if (isRO)
-        cellAttriM->SetBackgroundColour(getReadonlyColour());
+    // text colour
+    wxColour textCol;
+    if (info.fieldNull || info.fieldNA)
+        textCol = *wxRED;
+    else if (info.fieldModified)
+        textCol = *wxBLUE;
     else
-        cellAttriM->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
-    cellAttriM->SetReadOnly(isRO);
+        textCol = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT);
+    cellAttriM->SetTextColour(textCol);
 
-    if (isNumeric)
+    // background colour
+    wxColour bgCol;
+    if (info.rowInserted)
+        bgCol = wxColour(235, 255, 200);
+    else if (info.rowDeleted)
+        bgCol = wxColour(255, 208, 208);
+    else if (info.fieldReadOnly)
+        bgCol = getReadonlyColour();
+    else
+        bgCol = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
+    cellAttriM->SetBackgroundColour(bgCol);
+
+    // text alignment
+    if (info.fieldNumeric)
         cellAttriM->SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
     else
         cellAttriM->SetAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
+
+    cellAttriM->SetReadOnly(info.fieldReadOnly);
 
     cellAttriM->IncRef();
     return cellAttriM;
@@ -393,7 +411,7 @@ wxString DataGridTable::getCellValueForCSV(int row, int col)
     if (rowsM.isFieldNull(row, col))
         return wxT("\"NULL\"");
     wxString s(rowsM.getFieldValue(row, col));
-    if (rowsM.isRowFieldNumeric(col))
+    if (rowsM.isColumnNumeric(col))
         return s;
 
     // return quoted text, but escape embedded quotes
@@ -618,7 +636,8 @@ void DataGridTable::initialFetch(wxMBConv* conv)
 {
     Clear();
     allRowsFetchedM = false;
-    canInsertRowsM = unknown;
+    canInsertRowsIsSetM = false;
+    canInsertRowsM = false;
     maxRowToFetchM = 100;
 
     if (conv)
@@ -662,7 +681,7 @@ bool DataGridTable::isNullCell(int row, int col)
 //-----------------------------------------------------------------------------
 bool DataGridTable::isNumericColumn(int col)
 {
-    return rowsM.isRowFieldNumeric(col);
+    return rowsM.isColumnNumeric(col);
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::isReadonlyColumn(int col)
@@ -678,13 +697,14 @@ bool DataGridTable::isValidCellPos(int row, int col)
 //-----------------------------------------------------------------------------
 bool DataGridTable::canInsertRows()
 {
-    if (canInsertRowsM == unknown)
+    if (!canInsertRowsIsSetM)
     {
         wxArrayString tables;
         getTableNames(tables);
-        canInsertRowsM = (tables.GetCount() > 0) ? isTrue : isFalse;
+        canInsertRowsIsSetM = true;
+        canInsertRowsM = tables.GetCount() > 0;
     }
-    return (canInsertRowsM == isTrue);
+    return canInsertRowsM;
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::canRemoveRow(size_t row)
@@ -730,9 +750,11 @@ bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
     if (!rowsM.removeRows(pos, numRows, statement))
         return false;
 
+/*
     // notify visual control
     if (GetView() && numRows > 0)
     {
+        GetView()->ForceRefresh();
         wxGridTableMessage rowMsg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED,
             pos, numRows);
         GetView()->ProcessTableMessage(rowMsg);
@@ -741,15 +763,20 @@ bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
         wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
         evt.SetExtraLong(rowsM.getRowCount());
         wxPostEvent(GetView(), evt);
-
-        // used in frame to show executed statements
-        wxCommandEvent evt2(wxEVT_FRDG_STATEMENT, GetView()->GetId());
-        evt2.SetString(statement);
-        wxPostEvent(GetView(), evt2);
     }
+*/
+    // used in frame to show executed statements
+    wxCommandEvent evt2(wxEVT_FRDG_STATEMENT, GetView()->GetId());
+    evt2.SetString(statement);
+    wxPostEvent(GetView(), evt2);
+
+    if (GetView() && numRows > 0)
+        GetView()->ForceRefresh();
+
     return true;
 
     FR_CATCH
+
     return false;
 }
 //-----------------------------------------------------------------------------

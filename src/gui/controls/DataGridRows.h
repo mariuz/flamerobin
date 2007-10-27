@@ -66,6 +66,17 @@ public:
         const IBPP::Statement& statement, wxMBConv* converter) = 0;
 };
 //----------------------------------------------------------------------
+struct DataGridFieldInfo
+{
+    bool rowInserted;
+    bool rowDeleted;
+    bool fieldReadOnly;
+    bool fieldModified;
+    bool fieldNull;
+    bool fieldNA;
+    bool fieldNumeric;
+};
+//----------------------------------------------------------------------
 class DataGridRows
 {
 private:
@@ -78,12 +89,12 @@ private:
     std::list<UniqueConstraint> dbKeysM;
     unsigned bufferSizeM;
 
-    void getColumnInfo(Database *db, unsigned col, bool& readOnly,
+    void getColumnInfo(Database* db, unsigned col, bool& readOnly,
         bool& nullable);
     void addWhereAndExecute(UniqueConstraint* uq, wxString& stm,
         const wxString& table, DataGridRowBuffer *buffer);
 public:
-    DataGridRows(Database *db);
+    DataGridRows(Database* db);
     ~DataGridRows();
 
     bool addRow(const IBPP::Statement& statement, wxMBConv* converter);
@@ -91,21 +102,23 @@ public:
     unsigned getRowCount();
     unsigned getRowFieldCount();
     wxString getRowFieldName(unsigned col);
-    bool initialize(const IBPP::Statement& statement, Database *);
-    bool isRowFieldNumeric(unsigned col);
-    bool isColumnReadonly(unsigned col);
-    bool isFieldReadonly(unsigned row, unsigned col);
+    bool initialize(const IBPP::Statement& statement, Database* db);
 
-    wxString getFieldValue(unsigned row, unsigned col);
+    bool isColumnNumeric(unsigned col);
+    bool isColumnReadonly(unsigned col);
+    bool getFieldInfo(unsigned row, unsigned col, DataGridFieldInfo& info);
+    bool isFieldReadonly(unsigned row, unsigned col);
     bool isFieldNull(unsigned row, unsigned col);
     bool isFieldNA(unsigned row, unsigned col);
+
+    wxString getFieldValue(unsigned row, unsigned col);
     wxString setFieldValue(unsigned row, unsigned col,
         const wxString& value, bool setNull = false);
-    bool removeRows(size_t from, size_t count, wxString& statement);
     bool canRemoveRow(size_t row);
+    bool removeRows(size_t from, size_t count, wxString& statement);
 
-    ResultsetColumnDef *getColumnDef(unsigned col);
-    void addRow(DataGridRowBuffer *);
+    ResultsetColumnDef* getColumnDef(unsigned col);
+    void addRow(DataGridRowBuffer* buffer);
 };
 //----------------------------------------------------------------------
 #endif

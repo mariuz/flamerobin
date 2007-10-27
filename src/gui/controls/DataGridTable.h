@@ -55,7 +55,8 @@ private:
     bool allRowsFetchedM;
     bool fetchAllRowsM;
     unsigned maxRowToFetchM;
-    TriState canInsertRowsM;
+    bool canInsertRowsIsSetM;
+    bool canInsertRowsM;
 
     wxGridCellAttr* cellAttriM;
     DataGridRows rowsM;
