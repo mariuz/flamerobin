@@ -603,6 +603,8 @@ void ExecuteSqlFrame::buildMainMenu()
     historyMenu->Append(wxID_BACKWARD,  _("&Previous"));
     historyMenu->AppendSeparator();
     historyMenu->Append(Cmds::History_Search,    _("&Search"));
+    historyMenu->AppendSeparator();
+    historyMenu->AppendCheckItem(Cmds::History_EnableLogging, _("&Enable logging"));
     menuBarM->Append(historyMenu, _("&History"));
 
     wxMenu* queryMenu = new wxMenu();
@@ -634,6 +636,9 @@ void ExecuteSqlFrame::buildMainMenu()
     menuBarM->Append(gridMenu, _("&Grid"));
 
     SetMenuBar(menuBarM);
+
+    // logging is always enabled by default
+    menuBarM->Check(Cmds::History_EnableLogging, true);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::set_properties()
@@ -1961,11 +1966,15 @@ bool ExecuteSqlFrame::commitTransaction()
 
         SubjectLocker locker(databaseM);
         // log statements, done before parsing in case parsing crashes FR
-        for (std::vector<SqlStatement>::const_iterator it =
-            executedStatementsM.begin(); it != executedStatementsM.end(); ++it)
+        if (menuBarM->IsChecked(Cmds::History_EnableLogging))
         {
-            if (!Logger::logStatement(*it, databaseM))
-                break;
+            for (std::vector<SqlStatement>::const_iterator it =
+                executedStatementsM.begin(); it != executedStatementsM.end();
+                ++it)
+            {
+                if (!Logger::logStatement(*it, databaseM))
+                    break;
+            }
         }
 
         // parse all successfully executed statements

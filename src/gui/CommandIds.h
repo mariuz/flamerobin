@@ -43,6 +43,7 @@ namespace Cmds
 
         // SQL History
         History_Search,
+        History_EnableLogging,
 
         // SQL Query
         Query_Execute,
