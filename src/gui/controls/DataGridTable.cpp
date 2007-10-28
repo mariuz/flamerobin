@@ -356,10 +356,10 @@ wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
 
     // background colour
     wxColour bgCol;
-    if (info.rowInserted)
-        bgCol = wxColour(235, 255, 200);
-    else if (info.rowDeleted)
+    if (info.rowDeleted)
         bgCol = wxColour(255, 208, 208);
+    else if (info.rowInserted)
+        bgCol = wxColour(235, 255, 200);
     else if (info.fieldReadOnly)
         bgCol = getReadonlyColour();
     else
