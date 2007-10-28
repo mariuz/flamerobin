@@ -330,7 +330,7 @@ void MainFrame::do_layout()
 //-----------------------------------------------------------------------------
 const wxRect MainFrame::getDefaultRect() const
 {
-    return wxRect(-1, -1, 257, 367);
+    return wxRect(-1, -1, 360, 480);
 }
 //-----------------------------------------------------------------------------
 myTreeCtrl* MainFrame::getTreeCtrl()
