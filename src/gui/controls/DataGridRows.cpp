@@ -640,10 +640,17 @@ void DateColumnDef::setFromString(DataGridRowBuffer* buffer,
     wxString temp(source);
     temp.Trim(true);
     temp.Trim(false);
-    wxString::iterator it = temp.begin();
-    if (!GridCellFormats::get().parseDate(it, y, m, d))
-        throw FRError(_("Cannot parse date"));
-    IBPP::Date idt(y, m, d);
+
+    IBPP::Date idt;
+    if (temp == wxT("DATE") || temp == wxT("TODAY") || temp == wxT("NOW"))
+        idt.Today();
+    else
+    {
+        wxString::iterator it = temp.begin();
+        if (!GridCellFormats::get().parseDate(it, y, m, d))
+            throw FRError(_("Cannot parse date"));
+        idt.SetDate(y, m, d);
+    }
     buffer->setValue(offsetM, idt.GetDate());
 }
 //-----------------------------------------------------------------------------
@@ -720,10 +727,17 @@ void TimeColumnDef::setFromString(DataGridRowBuffer* buffer,
     wxString temp(source);
     temp.Trim(true);
     temp.Trim(false);
-    wxString::iterator it = temp.begin();
-    if (!GridCellFormats::get().parseTime(it, hr, mn, sc, ms))
-        throw FRError(_("Cannot parse time"));
-    IBPP::Time itm(hr, mn, sc, ms);
+
+    IBPP::Time itm;
+    if (temp == wxT("TIME") || temp == wxT("NOW"))
+        itm.Now();
+    else
+    {
+        wxString::iterator it = temp.begin();
+        if (!GridCellFormats::get().parseTime(it, hr, mn, sc, ms))
+            throw FRError(_("Cannot parse time"));
+        itm.SetTime(hr, mn, sc, 10 * ms);
+    }
     buffer->setValue(offsetM, itm.GetTime());
 }
 //-----------------------------------------------------------------------------
@@ -820,31 +834,36 @@ void TimestampColumnDef::setFromString(DataGridRowBuffer* buffer,
     wxString temp(source);
     temp.Trim(true);
     temp.Trim(false);
-    wxString::iterator it = temp.begin();
-    // get date
-    int y = wxDateTime::Now().GetYear();    // defaults
-    int m = wxDateTime::Now().GetMonth() + 1;
-    int d = wxDateTime::Now().GetDay();
-    if (!GridCellFormats::get().parseDate(it, y, m, d))
-        throw FRError(_("Cannot parse date"));
-    IBPP::Date idt(y, m, d);
 
-    // skip spaces and commas ", "
-    while ((wxChar)*it == wxChar(',') || (wxChar)*it == wxChar(' '))
-        it++;
-
-    // get time (if available)
-    int hr = 0, mn = 0, sc = 0, ms = 0;
-    int itme = 0;
-    if (GridCellFormats::get().parseTime(it, hr, mn, sc, ms))
+    IBPP::Timestamp its;
+    if (temp == wxT("NOW"))
+        its.Now();
+    else if (temp == wxT("DATE") || temp == wxT("TODAY"))
+        its.Today();
+    else
     {
-        IBPP::Time itm(hr, mn, sc, ms);
-        itme = itm.GetTime();
+        wxString::iterator it = temp.begin();
+        // get date
+        int y = wxDateTime::Now().GetYear();    // defaults
+        int m = wxDateTime::Now().GetMonth() + 1;
+        int d = wxDateTime::Now().GetDay();
+        if (!GridCellFormats::get().parseDate(it, y, m, d))
+            throw FRError(_("Cannot parse date"));
+        its.SetDate(y, m, d);
+
+        // skip spaces and commas ", "
+        while ((wxChar)*it == wxChar(',') || (wxChar)*it == wxChar(' '))
+            it++;
+
+        // get time (if available)
+        int hr = 0, mn = 0, sc = 0, ms = 0;
+        if (GridCellFormats::get().parseTime(it, hr, mn, sc, ms))
+            its.SetTime(hr, mn, sc, 10 * ms);
     }
 
     // all done, set the value
-    buffer->setValue(offsetM, idt.GetDate());
-    buffer->setValue(offsetM + sizeof(int), itme);
+    buffer->setValue(offsetM, its.GetDate());
+    buffer->setValue(offsetM + sizeof(int), its.GetTime());
 }
 //-----------------------------------------------------------------------------
 unsigned TimestampColumnDef::getBufferSize()
