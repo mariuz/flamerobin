@@ -261,7 +261,7 @@ vc$(U_OPT)$(R_OPT)$(D_OPT):
 
 ### Targets: ###
 
-all: vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib
+all: svn-rev vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib
 
 clean: 
 	-if exist vc$(U_OPT)$(R_OPT)$(D_OPT)\*.obj del vc$(U_OPT)$(R_OPT)$(D_OPT)\*.obj
@@ -271,6 +271,9 @@ clean:
 	-if exist vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.ilk del vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.ilk
 	-if exist vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.pdb del vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.pdb
 	-if exist vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib del vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib
+
+svn-rev: 
+	cd $(srcdir) && update-svn-rev.cmd
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.obj  $(FLAMEROBIN_OBJECTS) vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin.res vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib
 	link /NOLOGO /OUT:$@ $(LDFLAGS)  $(__DEBUGINFO_5) /nologo /subsystem:windows /machine:I386 /LIBPATH:$(____flamerobin_WX_LIB_DIR_FILENAMES) /SUBSYSTEM:WINDOWS @<<

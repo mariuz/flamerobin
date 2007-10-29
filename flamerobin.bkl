@@ -536,7 +536,7 @@
         </modify-target>
     </define-tag>
 
-    <if cond="FORMAT=='autoconf'">
+    <if cond="FORMAT!='msvc6prj'">
         <set var="SVN_REV_SCRIPT">
             <if cond="FORMAT=='autoconf'">./update-svn-rev.sh</if>
             <if cond="FORMAT!='autoconf'">update-svn-rev.cmd</if>

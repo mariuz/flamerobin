@@ -259,7 +259,7 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT):
 
 ### Targets: ###
 
-all: bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib
+all: svn-rev bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib
 
 clean: 
 	-if exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\*.obj del bcc$(U_OPT)$(R_OPT)$(D_OPT)\*.obj
@@ -272,6 +272,9 @@ clean:
 	-if exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.ilf del bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.ilf
 	-if exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.ils del bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.ils
 	-if exist bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib del bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib
+
+svn-rev: 
+	cd $(srcdir) && update-svn-rev.cmd
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.obj  $(FLAMEROBIN_OBJECTS) bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib  bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin.res bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib
 	ilink32 -Tpe -q $(LDFLAGS) -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk  $(__DEBUGINFO) -L$(____flamerobin_WX_LIB_DIR_FILENAMES) -aa @&&|
