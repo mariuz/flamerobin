@@ -223,7 +223,7 @@ bool GridCellFormats::parseDate(wxString::iterator& si, int& year, int& month,
                 break;
             default:        // other characters must match
                 if (*c != *si)
-                    return *si == wxChar("\0");
+                    return !(*si);
                 si++;
                 break;
         }
