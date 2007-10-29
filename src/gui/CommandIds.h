@@ -35,6 +35,7 @@ namespace Cmds
         View_Statistics,
         View_Data,
         View_Split_view,
+        View_Toggle_view,
         View_Wrap_long_lines,
         View_Set_editor_font,
         Find_Selected_Object,

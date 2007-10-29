@@ -553,6 +553,11 @@ void ExecuteSqlFrame::buildToolbar()
     toolBarM->AddTool( Cmds::DataGrid_Delete_row, _("Delete row"),
         wxArtProvider::GetBitmap(ART_DeleteRow, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, _("Delete row(s) from recordset"), _("Delete row(s) from recordset") );
+    toolBarM->AddSeparator();
+
+    toolBarM->AddTool( Cmds::View_Toggle_view, _("Toggle view"),
+        wxArtProvider::GetBitmap(ART_ToggleView, wxART_TOOLBAR, bmpSize), wxNullBitmap,
+        wxITEM_NORMAL, _("Toggle current view"), _("Toggle current view") );
 
     toolBarM->Realize();
 }
@@ -812,6 +817,8 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::DataGrid_Save_as_csv,    ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
     EVT_UPDATE_UI(Cmds::DataGrid_FetchAll,       ExecuteSqlFrame::OnMenuUpdateGridFetchAll)
     EVT_UPDATE_UI(Cmds::DataGrid_CancelFetchAll, ExecuteSqlFrame::OnMenuUpdateGridCancelFetchAll)
+
+    EVT_MENU(Cmds::View_Toggle_view, ExecuteSqlFrame::OnMenuToggleClick)
 
     EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_ROWCOUNT_CHANGED, \
         ExecuteSqlFrame::OnGridRowCountChanged)
@@ -1313,6 +1320,7 @@ void ExecuteSqlFrame::OnMenuFocusEditor(wxCommandEvent& WXUNUSED(event))
             panel_splitter_bottom);
     }
     styled_text_ctrl_sql->SetFocus();
+    menuBarM->Check(Cmds::View_Editor, true);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuFocusGrid(wxCommandEvent& WXUNUSED(event))
@@ -1324,6 +1332,7 @@ void ExecuteSqlFrame::OnMenuFocusGrid(wxCommandEvent& WXUNUSED(event))
         splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
     }
     grid_data->SetFocus();
+    menuBarM->Check(Cmds::View_Data, true);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuHistoryNext(wxCommandEvent& WXUNUSED(event))
@@ -2073,22 +2082,27 @@ void ExecuteSqlFrame::rollbackTransaction()
 //-----------------------------------------------------------------------------
 //! toggle the views in the following order:
 //! ... -> SQL_entry_box -> Split View -> Stats&Data -> ...
-/*
-void ExecuteSqlFrame::OnMenuButtonToggleClick(wxCommandEvent& WXUNUSED(event))
+void ExecuteSqlFrame::OnMenuToggleClick(wxCommandEvent& WXUNUSED(event))
 {
-    if (splitter_window_1->IsSplit())                    // screen is split -> show second
+    if (splitter_window_1->IsSplit())       // screen is split -> show second
+    {
         splitter_window_1->Unsplit(panel_splitter_top);
-    else if (panel_splitter_top->IsShown())        // first is shown -> split again
+        menuBarM->Check(Cmds::View_Data, true);
+    }
+    else if (panel_splitter_top->IsShown()) // first is shown -> split again
+    {
         SplitScreen();
-    else                                        // second is shown -> show first
+        menuBarM->Check(Cmds::View_Split_view, true);
+    }
+    else                                    // second is shown -> show first
     {
         panel_splitter_top->Show();
         panel_splitter_bottom->Show();
         splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
         splitter_window_1->Unsplit(panel_splitter_bottom);
+        menuBarM->Check(Cmds::View_Editor, true);
     }
 }
-*/
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUpdateGridInsertRow(wxUpdateUIEvent& event)
 {

@@ -57,6 +57,7 @@
 #include "server32.xpm"
 #include "systemtable32.xpm"
 #include "table32.xpm"
+#include "toggle32.xpm"
 #include "trigger32.xpm"
 #include "view32.xpm"
 
@@ -68,6 +69,7 @@
 #include "ok24.xpm"
 #include "plan24.xpm"
 #include "redx24.xpm"
+#include "toggle24.xpm"
 
 // these have size 16x16
 #include "column.xpm"
@@ -93,6 +95,7 @@
 #include "systemtables.xpm"
 #include "table.xpm"
 #include "tables.xpm"
+#include "toggle16.xpm"
 #include "trigger.xpm"
 #include "view.xpm"
 //-----------------------------------------------------------------------------
@@ -137,6 +140,8 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(table32_xpm);
         if (id == ART_Trigger)
             return wxBitmap(trigger32_xpm);
+        if (id == ART_ToggleView)
+            return wxBitmap(toggle32_xpm);
         if (id == ART_View)
             return wxBitmap(view32_xpm);
     }
@@ -157,6 +162,8 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(redx24_xpm);
         if (id == ART_ShowExecutionPlan)
             return wxBitmap(plan24_xpm);
+        if (id == ART_ToggleView)
+            return wxBitmap(toggle24_xpm);
     }
 
     if (size == wxSize(16, 16))
@@ -212,6 +219,8 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(delete16_xpm);
         if (id == ART_InsertRow)
             return wxBitmap(insert16_xpm);
+        if (id == ART_ToggleView)
+            return wxBitmap(toggle16_xpm);
     }
     return wxNullBitmap;
 }

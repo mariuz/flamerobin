@@ -55,6 +55,7 @@
 
 #define ART_DeleteRow               wxART_MAKE_ART_ID(ART_DeleteRow)
 #define ART_InsertRow               wxART_MAKE_ART_ID(ART_InsertRow)
+#define ART_ToggleView              wxART_MAKE_ART_ID(ART_ToggleView)
 
 #define ART_History                 wxART_MAKE_ART_ID(ART_History)
 #define ART_ExecuteStatement        wxART_MAKE_ART_ID(ART_ExecuteStatement)

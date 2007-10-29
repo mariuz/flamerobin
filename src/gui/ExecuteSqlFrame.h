@@ -157,6 +157,7 @@ private:
     void OnMenuToggleWrap(wxCommandEvent &event);
     void OnMenuFocusEditor(wxCommandEvent &event);
     void OnMenuFocusGrid(wxCommandEvent &event);
+    void OnMenuToggleClick(wxCommandEvent &event);  // toolbar
 
     void OnMenuHistoryNext(wxCommandEvent &event);
     void OnMenuUpdateHistoryNext(wxUpdateUIEvent& event);
