@@ -631,20 +631,26 @@ wxString DateColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
 }
 //-----------------------------------------------------------------------------
 void DateColumnDef::setFromString(DataGridRowBuffer* buffer,
-        const wxString& source)
+    const wxString& source)
 {
     wxASSERT(buffer);
-    int y = wxDateTime::Now().GetYear();    // defaults
-    int m = wxDateTime::Now().GetMonth() + 1;
-    int d = wxDateTime::Now().GetDay();
+    IBPP::Date idt;
+    idt.Today();
+    int y = idt.Year();  // defaults
+    int m = idt.Month();
+    int d = idt.Day();
+
     wxString temp(source);
     temp.Trim(true);
     temp.Trim(false);
 
-    IBPP::Date idt;
-    if (temp == wxT("DATE") || temp == wxT("TODAY") || temp == wxT("NOW"))
-        idt.Today();
-    else
+    if (temp.CmpNoCase(wxT("TOMORROW")) == 0)
+        idt.Add(1);
+    else if (temp.CmpNoCase(wxT("YESTERDAY")) == 0)
+        idt.Add(-1);
+    else if (temp.CmpNoCase(wxT("DATE")) != 0 
+        && temp.CmpNoCase(wxT("NOW")) != 0
+        && temp.CmpNoCase(wxT("TODAY")) != 0)
     {
         wxString::iterator it = temp.begin();
         if (!GridCellFormats::get().parseDate(it, y, m, d))
@@ -720,20 +726,20 @@ wxString TimeColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
 }
 //-----------------------------------------------------------------------------
 void TimeColumnDef::setFromString(DataGridRowBuffer* buffer,
-        const wxString& source)
+    const wxString& source)
 {
     wxASSERT(buffer);
-    int hr = 0, mn = 0, sc = 0, ms = 0;
+    IBPP::Time itm;
+    itm.Now();
+
     wxString temp(source);
     temp.Trim(true);
     temp.Trim(false);
 
-    IBPP::Time itm;
-    if (temp == wxT("TIME") || temp == wxT("NOW"))
-        itm.Now();
-    else
+    if (temp.CmpNoCase(wxT("TIME")) != 0 && temp.CmpNoCase(wxT("NOW")) != 0)
     {
         wxString::iterator it = temp.begin();
+        int hr = 0, mn = 0, sc = 0, ms = 0;
         if (!GridCellFormats::get().parseTime(it, hr, mn, sc, ms))
             throw FRError(_("Cannot parse time"));
         itm.SetTime(hr, mn, sc, 10 * ms);
@@ -831,22 +837,27 @@ void TimestampColumnDef::setFromString(DataGridRowBuffer* buffer,
         const wxString& source)
 {
     wxASSERT(buffer);
+    IBPP::Timestamp its;
+    its.Today(); // defaults to no time
+
     wxString temp(source);
     temp.Trim(true);
     temp.Trim(false);
 
-    IBPP::Timestamp its;
-    if (temp == wxT("NOW"))
-        its.Now();
-    else if (temp == wxT("DATE") || temp == wxT("TODAY"))
-        its.Today();
-    else
+    if (temp.CmpNoCase(wxT("TOMORROW")) == 0)
+        its.Add(1);
+    else if (temp.CmpNoCase(wxT("YESTERDAY")) == 0)
+        its.Add(-1);
+    else if (temp.CmpNoCase(wxT("NOW")) == 0) 
+        its.Now(); // with time
+    else if (temp.CmpNoCase(wxT("DATE")) != 0
+        && temp.CmpNoCase(wxT("TODAY")) != 0)
     {
         wxString::iterator it = temp.begin();
         // get date
-        int y = wxDateTime::Now().GetYear();    // defaults
-        int m = wxDateTime::Now().GetMonth() + 1;
-        int d = wxDateTime::Now().GetDay();
+        int y = its.Year();  // defaults
+        int m = its.Month();
+        int d = its.Day();
         if (!GridCellFormats::get().parseDate(it, y, m, d))
             throw FRError(_("Cannot parse date"));
         its.SetDate(y, m, d);
