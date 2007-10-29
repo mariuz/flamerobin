@@ -278,6 +278,7 @@ bool GridCellFormats::parseTime(wxString::iterator& si, int& hr, int& mn,
 
     // we allow the user to only enter H, or H:M or H:M:S
     bool hourIsSet = false;
+    int tempMn, tempSc, tempMl;
     for (wxString::iterator c = timeFormatM.begin(); c != timeFormatM.end();
         c++)
     {
@@ -285,23 +286,26 @@ bool GridCellFormats::parseTime(wxString::iterator& si, int& hr, int& mn,
         {
             case 'h':
             case 'H':
-                if (!getNumber(si, hr))
+                if (!(getNumber(si, hr) && hr >= 0 && hr <= 23))
                     return false;
                 hourIsSet = true;
                 break;
             case 'm':
             case 'M':
-                if (!getNumber(si, mn))
+                if (!(getNumber(si, tempMn) && tempMn >= 0 && tempMn <= 59))
                     return hourIsSet;
+                mn = tempMn;
                 break;
             case 's':
             case 'S':
-                if (!getNumber(si, sc))
+                if (!(getNumber(si, tempSc) && tempSc >= 0 && tempSc <= 59))
                     return hourIsSet;
+                sc = tempSc;
                 break;
             case 'T':
-                if (!getNumber(si, ml))
+                if (!(getNumber(si, tempMl) && tempMl >= 0 && tempMl <= 999))
                     return hourIsSet;
+                ml = tempMl;
                 break;
             default:
                 if (*c != *si)
