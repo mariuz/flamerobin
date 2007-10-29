@@ -2095,7 +2095,7 @@ void ExecuteSqlFrame::OnMenuUpdateGridInsertRow(wxUpdateUIEvent& event)
     FR_TRY
 
     DataGridTable* tb = grid_data->getDataGridTable();
-    event.Enable(tb && tb->canInsertRows());
+    event.Enable(inTransactionM && tb && tb->canInsertRows());
     return;
 
     FR_CATCH

@@ -240,6 +240,7 @@ void DataGridTable::Clear()
 
     allRowsFetchedM = true;
     fetchAllRowsM = false;
+    canInsertRowsIsSetM = false;
     config().getValue(wxT("GridFetchAllRecords"), fetchAllRowsM);
 
     unsigned oldCols = rowsM.getRowFieldCount();
