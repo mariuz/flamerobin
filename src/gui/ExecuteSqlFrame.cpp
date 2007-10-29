@@ -2098,7 +2098,8 @@ void ExecuteSqlFrame::OnMenuToggleClick(wxCommandEvent& WXUNUSED(event))
     {
         panel_splitter_top->Show();
         panel_splitter_bottom->Show();
-        splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
+        splitter_window_1->SplitHorizontally(panel_splitter_top,
+            panel_splitter_bottom);
         splitter_window_1->Unsplit(panel_splitter_bottom);
         menuBarM->Check(Cmds::View_Editor, true);
     }
