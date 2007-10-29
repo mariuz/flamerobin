@@ -182,8 +182,6 @@ bool GridCellFormats::parseDate(wxString::iterator& si, int& year, int& month,
 {
     ensureLoaded();
 
-    // allow the user to only enter D, D.M or D.M.Y
-    bool dayIsSet = false;
     for (wxString::iterator c = dateFormatM.begin();
         c != dateFormatM.end(); c++)
     {
@@ -191,23 +189,41 @@ bool GridCellFormats::parseDate(wxString::iterator& si, int& year, int& month,
         {
             case 'd':
             case 'D':
-                if (!getNumber(si, day))
+                if (!(getNumber(si, day) && day >= 1 && day <= 31))
                     return false;
-                dayIsSet = true;
                 break;
             case 'm':
             case 'M':
-                if (!getNumber(si, month))
-                    return dayIsSet;
+                if (!(getNumber(si, month) && month >= 1 && month <= 12))
+                    return false;
                 break;
             case 'y':
+                if (!getNumber(si, year))
+                    return false;
+                // see http://www.firebirdsql.org/doc/contrib/FirebirdDateLiterals.html
+                if (year < 100)
+                {
+                    int thisYear = wxDateTime::Now().GetYear();
+                    int cy = thisYear / 100;
+                    int yearBefore = 100 * cy + year;
+                    int yearAfter = yearBefore;
+                    if (yearBefore > thisYear)
+                        yearBefore -= 100;
+                    else
+                        yearAfter += 100;
+                    if (thisYear - yearBefore <= yearAfter - thisYear)
+                        year = yearBefore;
+                    else
+                        year = yearAfter;
+                }
+                break;
             case 'Y':
                 if (!getNumber(si, year))
-                    return dayIsSet;
+                    return false;
                 break;
             default:        // other characters must match
                 if (*c != *si)
-                    return dayIsSet;
+                    return false;
                 si++;
                 break;
         }
