@@ -121,6 +121,13 @@ void TreeItem::update()
             }
 
             itemText = (*itChild)->getPrintableName();
+            // only show first line of multiline text (computed columns)
+            size_t newline_pos = itemText.find_first_of(wxT("\n\r"));
+            if (newline_pos != wxString::npos)
+            {
+                itemText.Truncate(newline_pos);
+                itemText += wxT("...");
+            }
             wxTreeItemId item = findSubNode(*itChild);
 
             if (!item.IsOk())
