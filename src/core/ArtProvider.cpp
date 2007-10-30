@@ -39,7 +39,7 @@
 #endif
 
 #include <wx/filename.h>
-
+#include <wx/mstream.h>
 #include "config/Config.h"
 #include "core/ArtProvider.h"
 //-----------------------------------------------------------------------------
@@ -82,7 +82,7 @@
 #include "generators.xpm"
 #include "history.xpm"
 #include "insert16.xpm"
-#include "key.xpm"
+#include "pk16_png.cpp"
 #include "object.xpm"
 #include "ok.xpm"
 #include "plan16.xpm"
@@ -189,7 +189,10 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
         if (id == ART_Object)
             return wxBitmap(object_xpm);
         if (id == ART_PrimaryKey)
-            return wxBitmap(key_xpm);
+        {
+            wxMemoryInputStream is(pk16_png, sizeof(pk16_png));
+            return wxBitmap(wxImage(is, wxBITMAP_TYPE_ANY, -1), -1);
+        }
         if (id == ART_Procedure)
             return wxBitmap(procedure_xpm);
         if (id == ART_Procedures)
