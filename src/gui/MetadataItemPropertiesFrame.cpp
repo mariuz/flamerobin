@@ -635,8 +635,8 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
     {
         Column* c = dynamic_cast<Column*>(object);
         if (c)
-        {
-            htmlpage += c->getDatatype();
+        {   // needs newlines escaped for computed column source
+            htmlpage += escapeHtmlChars(c->getDatatype());
             // TODO: make the domain name (if any) a link to the domain's property page?
         }
     }
