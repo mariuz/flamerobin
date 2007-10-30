@@ -75,7 +75,7 @@ public:
     wxString formatDate(int year, int month, int day);
     wxString formatTime(int hour, int minute, int second, int milliSecond);
     bool parseDate(wxString::iterator& start, wxString::iterator end,
-        int& year, int& month, int& day);
+        bool consumeAll, int& year, int& month, int& day);
     bool parseTime(wxString::iterator& start, wxString::iterator end,
         int& hr, int& mn, int& sc, int& ml);
 };
@@ -180,7 +180,7 @@ bool getNumber(wxString::iterator& ci, int& toSet)
 }
 //-----------------------------------------------------------------------------
 bool GridCellFormats::parseDate(wxString::iterator& start,
-    wxString::iterator end, int& year, int& month, int& day)
+    wxString::iterator end, bool consumeAll, int& year, int& month, int& day)
 {
     ensureLoaded();
 
@@ -191,15 +191,21 @@ bool GridCellFormats::parseDate(wxString::iterator& start,
         {
             case 'd':
             case 'D':
+                if (!consumeAll && (*start < wxChar('0') || *start > wxChar('9')))
+                    return true;
                 if (!(getNumber(start, day) && day >= 1 && day <= 31))
                     return false;
                 break;
             case 'm':
             case 'M':
+                if (!consumeAll && (*start < wxChar('0') || *start > wxChar('9')))
+                    return true;
                 if (!(getNumber(start, month) && month >= 1 && month <= 12))
                     return false;
                 break;
             case 'y':
+                if (!consumeAll && (*start < wxChar('0') || *start > wxChar('9')))
+                    return true;
                 if (!getNumber(start, year))
                     return false;
                 // see http://www.firebirdsql.org/doc/contrib/FirebirdDateLiterals.html
@@ -220,12 +226,14 @@ bool GridCellFormats::parseDate(wxString::iterator& start,
                 }
                 break;
             case 'Y':
+                if (!consumeAll && (*start < wxChar('0') || *start > wxChar('9')))
+                    return true;
                 if (!getNumber(start, year))
                     return false;
                 break;
             default:        // other characters must match
                 if (*c != *start)
-                    return false;
+                    return !consumeAll;
                 ++start;
                 break;
         }
@@ -668,7 +676,7 @@ void DateColumnDef::setFromString(DataGridRowBuffer* buffer,
         && temp.CmpNoCase(wxT("TODAY")) != 0)
     {
         wxString::iterator it = temp.begin();
-        if (!GridCellFormats::get().parseDate(it, temp.end(), y, m, d))
+        if (!GridCellFormats::get().parseDate(it, temp.end(), true, y, m, d))
             throw FRError(_("Cannot parse date"));
         idt.SetDate(y, m, d);
     }
@@ -873,7 +881,8 @@ void TimestampColumnDef::setFromString(DataGridRowBuffer* buffer,
         int m = its.Month();
         int d = its.Day();
         wxString::iterator it = temp.begin();
-        if (!GridCellFormats::get().parseDate(it, temp.end(), y, m, d))
+        // do not consume all chars, leave them for (optional) time value
+        if (!GridCellFormats::get().parseDate(it, temp.end(), false, y, m, d))
             throw FRError(_("Cannot parse date"));
         its.SetDate(y, m, d);
 
