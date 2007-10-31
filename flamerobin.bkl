@@ -538,11 +538,11 @@
 
     <if cond="FORMAT!='msvc6prj'">
         <set var="SVN_REV_SCRIPT">
-            <if cond="FORMAT=='autoconf'">./update-svn-rev.sh</if>
+            <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/update-svn-rev.sh</if>
             <if cond="FORMAT!='autoconf'">update-svn-rev.cmd</if>
         </set>
         <action id="svn-rev">
-            <command>cd $(DOLLAR)(srcdir) &amp;&amp; $(SVN_REV_SCRIPT)</command>
+            <command>$(SVN_REV_SCRIPT)</command>
             <dependency-of>all</dependency-of>
         </action>
     </if>
@@ -564,8 +564,8 @@
         <precomp-headers-gen>$(SOURCEDIR)/frprec.cpp</precomp-headers-gen>
 
         <define>$(IBPPPLATFORMDEFINE)</define>
+        <include>.</include>
         <if cond="FORMAT=='autoconf'">
-            <include>.</include>
             <include>$(DOLLAR)(srcdir)/src</include>
             <include>$(DOLLAR)(srcdir)/src/ibpp</include>
             <include>$(DOLLAR)(srcdir)/res</include>

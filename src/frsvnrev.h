@@ -1,1 +1,0 @@
-#undef FR_VERSION_SVN

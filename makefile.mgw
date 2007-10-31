@@ -49,7 +49,7 @@ FLAMEROBIN_CXXFLAGS = -mthreads $(__DEBUGINFO) $(__OPTIMIZE) -W -Wall \
 	-DWINVER=0x400 -DWIN32 -D__WIN32__ -D__WIN95__ -DSTRICT -D__WXMSW__ \
 	-DwxUSE_GUI=1 -DWIN32_LEAN_AND_MEAN \
 	-I$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(U_OPT)$(D_OPT) \
-	-I$(WXDIR)\contrib\include -I$(WXDIR)\include -DIBPP_WINDOWS -I.\src \
+	-I$(WXDIR)\contrib\include -I$(WXDIR)\include -DIBPP_WINDOWS -I. -I.\src \
 	-I.\src\ibpp -I.\res $(CPPFLAGS) $(CXXFLAGS)
 FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.o \
@@ -237,7 +237,7 @@ clean:
 	-if exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a del gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a
 
 svn-rev: 
-	cd $(srcdir) && update-svn-rev.cmd
+	update-svn-rev.cmd
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS) gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a
 	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) $(LDFLAGS) -mthreads $(__DEBUGINFO) -L$(____flamerobin_WX_LIB_DIR_FILENAMES) -Wl,--subsystem,windows -mwindows  -lwxmsw28$(U_OPT)$(D_OPT)_stc -lwxmsw28$(U_OPT)$(D_OPT)_html -lwxmsw28$(U_OPT)$(D_OPT)_adv -lwxmsw28$(U_OPT)$(D_OPT)_core -lwxbase28$(U_OPT)$(D_OPT)_xml -lwxbase28$(U_OPT)$(D_OPT) -lwxexpat$(D_OPT) -lwxtiff$(D_OPT) -lwxjpeg$(D_OPT) -lwxpng$(D_OPT) -lwxzlib$(D_OPT) -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lcomctl32 -lrpcrt4 -lwsock32 gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a
@@ -521,7 +521,7 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.o: ./src/gui/msw/StyleGuide
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o: ./res/flamerobin.rc
-	windres --use-temp-file -i$< -o$@  $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) --define HAVE_W32API_H --define _WINDOWS --define __WINDOWS__ --define WINVER=0x400 --define WIN32 --define __WIN32__ --define __WIN95__ --define STRICT --define __WXMSW__ --define wxUSE_GUI=1 --define WIN32_LEAN_AND_MEAN --include-dir $(__flamerobin_WX_LIB_DIR)/msw$(U_OPT)$(D_OPT) --include-dir $(WXDIR)/contrib/include --include-dir $(WXDIR)/include --define IBPP_WINDOWS --include-dir ./src --include-dir ./src/ibpp --include-dir ./res
+	windres --use-temp-file -i$< -o$@  $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) --define HAVE_W32API_H --define _WINDOWS --define __WINDOWS__ --define WINVER=0x400 --define WIN32 --define __WIN32__ --define __WIN95__ --define STRICT --define __WXMSW__ --define wxUSE_GUI=1 --define WIN32_LEAN_AND_MEAN --include-dir $(__flamerobin_WX_LIB_DIR)/msw$(U_OPT)$(D_OPT) --include-dir $(WXDIR)/contrib/include --include-dir $(WXDIR)/include --define IBPP_WINDOWS --include-dir . --include-dir ./src --include-dir ./src/ibpp --include-dir ./res
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__dpb.o: ./src/ibpp/_dpb.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
