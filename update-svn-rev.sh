@@ -1,12 +1,13 @@
 #/bin/sh
 
-if test -d .svn ; then
-  ACTVERSION=`svn info | awk '/Revision/{print $2}'`
+FRDIR=`dirname $0`
+if test -d $FRDIR/.svn ; then
+  ACTVERSION=`svn info $FRDIR | awk '/Revision/{print $2}'`
 else
   ACTVERSION=""; 
 fi
 
-if test -f src/frsvnrev.h ; then
+if test -f frsvnrev.h ; then
   HEADERVERSION=`awk '/FR_VERSION_SVN/{print $3}' frsvnrev.h`
 else
   HEADERVERSION="";
