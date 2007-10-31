@@ -37,6 +37,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include <wx/cmdline.h>
+#include <wx/sysopt.h>
 #include <wx/utils.h>
 
 #include <exception>
@@ -100,6 +101,15 @@ bool Application::OnInit()
     }
 
     wxImage::AddHandler(new wxPNGHandler);
+
+	/* we might be needing this
+#ifdef __WXMSW__
+	if (wxTheApp->GetComCtl32Version() >= 600 && ::wxDisplayDepth() >= 32)
+		wxSystemOptions::SetOption(wxT("msw.remap"), 2);
+	else
+		wxSystemOptions::SetOption(wxT("msw.remap"), 0);
+#endif
+	*/
 
     MainFrame* main_frame = new MainFrame(0, -1, wxT(""));
     SetTopWindow(main_frame);
