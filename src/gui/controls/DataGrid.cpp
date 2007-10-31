@@ -759,12 +759,22 @@ void DataGrid::OnKeyDown(wxKeyEvent& event)
 {
     if (event.GetKeyCode() == WXK_SPACE)
     {
+#if wxCHECK_VERSION(2, 8, 0)
         if (event.GetModifiers() == wxMOD_CONTROL)
+#else
+		if (event.ControlDown() && !event.AltDown() && !event.ShiftDown()
+			&& !event.MetaDown())
+#endif
         {
             extendSelection(wxVERTICAL);
             return;
         }
+#if wxCHECK_VERSION(2, 8, 0)
         if (event.GetModifiers() == wxMOD_SHIFT)
+#else
+		if (event.ShiftDown() && !event.AltDown() && !event.ControlDown()
+			&& !event.MetaDown())
+#endif
         {
             extendSelection(wxHORIZONTAL);
             return;

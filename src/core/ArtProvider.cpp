@@ -39,6 +39,7 @@
 #endif
 
 #include <wx/filename.h>
+#include <wx/image.h>
 #include <wx/mstream.h>
 #include "config/Config.h"
 #include "core/ArtProvider.h"
