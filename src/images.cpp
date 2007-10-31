@@ -55,6 +55,8 @@ wxBitmap getImage(NodeType type)
         case ntDomain:
         case ntDomains:
             return wxArtProvider::GetIcon(ART_Domain, wxART_OTHER, sz);
+        case ntForeignKey:
+            return wxArtProvider::GetIcon(ART_ForeignKey, wxART_OTHER, sz);
         case ntFunction:
         case ntFunctions:
             return wxArtProvider::GetIcon(ART_Function, wxART_OTHER, sz);
@@ -64,6 +66,8 @@ wxBitmap getImage(NodeType type)
             return wxArtProvider::GetIcon(ART_Generators, wxART_OTHER, sz);
         case ntParameter:
             return wxArtProvider::GetIcon(ART_Column, wxART_OTHER, sz);
+        case ntPrimaryForeignKey:
+            return wxArtProvider::GetIcon(ART_PrimaryAndForeignKey, wxART_OTHER, sz);
         case ntPrimaryKey:
             return wxArtProvider::GetIcon(ART_PrimaryKey, wxART_OTHER, sz);
         case ntProcedure:

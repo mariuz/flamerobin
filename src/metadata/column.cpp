@@ -107,6 +107,27 @@ bool Column::isPrimaryKey() const
     return false;
 }
 //-----------------------------------------------------------------------------
+bool Column::isForeignKey() const
+{
+    Table* t = getTable();
+    if (!t) // view/SP
+        return false;
+    std::vector<ForeignKey> *fks = t->getForeignKeys();
+    if (!fks)
+        return false;
+    for (std::vector<ForeignKey>::iterator it = fks->begin();
+        it != fks->end(); ++it)
+    {
+        for (std::vector<wxString>::const_iterator c2 = (*it).begin();
+            c2 != (*it).end(); ++c2)
+        {
+            if ((*c2) == getName_())
+                return true;
+        }
+    }
+    return false;
+}
+//-----------------------------------------------------------------------------
 //! retrieve datatype from domain if possible
 wxString Column::getDatatype(bool useConfig)
 {

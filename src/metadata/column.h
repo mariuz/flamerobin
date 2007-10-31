@@ -53,6 +53,7 @@ public:
 
     bool isNullable(bool checkDomain = true) const;
     bool hasDefault(bool checkDomain = true) const;
+    bool isForeignKey() const;
     bool isPrimaryKey() const;
     bool isString() const;
     wxString getComputedSource() const;

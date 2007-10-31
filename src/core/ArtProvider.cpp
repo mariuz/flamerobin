@@ -80,12 +80,14 @@
 #include "delete16.xpm"
 #include "domain.xpm"
 #include "execute16.xpm"
+#include "fk16_png.cpp"
 #include "function.xpm"
 #include "generator.xpm"
 #include "generators.xpm"
 #include "history.xpm"
 #include "insert16.xpm"
 #include "pk16_png.cpp"
+#include "pkfk16_png.cpp"
 #include "object.xpm"
 #include "ok.xpm"
 #include "plan16.xpm"
@@ -209,6 +211,8 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(domain_xpm);
         if (id == ART_ExecuteStatement)
             return wxBitmap(execute16_xpm);
+        if (id == ART_ForeignKey)
+            return bitmapFromEmbeddedPNG(fk16_png, sizeof(fk16_png));
         if (id == ART_Function)
             return wxBitmap(function_xpm);
         if (id == ART_Generator)
@@ -219,6 +223,8 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(history_xpm);
         if (id == ART_Object)
             return wxBitmap(object_xpm);
+        if (id == ART_PrimaryAndForeignKey)
+            return bitmapFromEmbeddedPNG(pkfk16_png, sizeof(pkfk16_png));
         if (id == ART_PrimaryKey)
             return bitmapFromEmbeddedPNG(pk16_png, sizeof(pk16_png));
         if (id == ART_Procedure)

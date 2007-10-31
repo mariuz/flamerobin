@@ -138,8 +138,14 @@ void TreeItem::update()
                 if (object->getType() == ntTable)
                 {
                     Column* c = static_cast<Column*>(*itChild);
-                    if (c->isPrimaryKey())
+                    bool isPK = c->isPrimaryKey();
+                    bool isFK = c->isForeignKey();
+                    if (isPK && isFK)
+                        image = treeM->getItemImage(ntPrimaryForeignKey);
+                    else if (isPK)
                         image = treeM->getItemImage(ntPrimaryKey);
+                    else if (isFK)
+                        image = treeM->getItemImage(ntForeignKey);
                     else if (!c->getComputedSource().IsEmpty())
                         image = treeM->getItemImage(ntComputed);
                 }
