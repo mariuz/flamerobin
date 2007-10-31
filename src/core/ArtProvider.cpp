@@ -41,6 +41,8 @@
 #include <wx/filename.h>
 #include <wx/image.h>
 #include <wx/mstream.h>
+#include <wx/utils.h>
+
 #include "config/Config.h"
 #include "core/ArtProvider.h"
 //-----------------------------------------------------------------------------
@@ -99,6 +101,34 @@
 #include "toggle16.xpm"
 #include "trigger.xpm"
 #include "view.xpm"
+//-----------------------------------------------------------------------------
+wxBitmap bitmapFromEmbeddedPNG(const unsigned char* data, size_t len)
+{
+    static int createMask = -1;
+    if (createMask == -1)
+    {
+        int verMajor, verMinor;
+        switch (wxGetOsVersion(&verMajor, &verMinor))
+        {
+            case wxOS_WINDOWS_9X:
+                createMask = 1;
+                break;
+            case wxOS_WINDOWS_NT:
+                createMask = (verMajor > 5 || verMinor > 0) ? 0 : 1;
+                break;
+            default:
+                createMask = 0;
+                break;
+        }
+    }
+
+    wxMemoryInputStream is(data, len);
+    wxImage img(is);
+    // work around the transparency problems of Windows versions before XP
+    if (createMask == 1)
+        img.ConvertAlphaToMask();
+    return wxBitmap(img);
+}
 //-----------------------------------------------------------------------------
 wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
     const wxArtClient& client, const wxSize& size)
@@ -190,10 +220,7 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
         if (id == ART_Object)
             return wxBitmap(object_xpm);
         if (id == ART_PrimaryKey)
-        {
-            wxMemoryInputStream is(pk16_png, sizeof(pk16_png));
-            return wxBitmap(wxImage(is, wxBITMAP_TYPE_ANY, -1), -1);
-        }
+            return bitmapFromEmbeddedPNG(pk16_png, sizeof(pk16_png));
         if (id == ART_Procedure)
             return wxBitmap(procedure_xpm);
         if (id == ART_Procedures)
