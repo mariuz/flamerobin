@@ -66,6 +66,7 @@ namespace Cmds
         DataGrid_Save_as_csv,
         DataGrid_Set_header_font,
         DataGrid_Set_cell_font,
+        DataGrid_Log_changes,
 
         // for easier copy/paste of above items (no need to mess with comma
         Last_menu

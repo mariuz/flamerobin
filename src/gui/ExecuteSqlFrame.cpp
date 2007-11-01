@@ -638,6 +638,8 @@ void ExecuteSqlFrame::buildMainMenu()
     gridMenu->AppendSeparator();
     gridMenu->Append(Cmds::DataGrid_Set_header_font, _("Set h&eader font"));
     gridMenu->Append(Cmds::DataGrid_Set_cell_font,   _("Set cell f&ont"));
+    gridMenu->AppendSeparator();
+    gridMenu->AppendCheckItem(Cmds::DataGrid_Log_changes, _("&Log data changes"));
     menuBarM->Append(gridMenu, _("&Grid"));
 
     SetMenuBar(menuBarM);
@@ -2180,6 +2182,11 @@ void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent &event)
 void ExecuteSqlFrame::OnGridStatementExecuted(wxCommandEvent &event)
 {
     log(event.GetString(), ttSql);
+    if (menuBarM->IsChecked(Cmds::DataGrid_Log_changes))
+    {
+        SqlStatement stm(event.GetString(), databaseM);
+        executedStatementsM.push_back(stm);
+    }
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::update()
