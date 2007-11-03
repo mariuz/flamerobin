@@ -128,7 +128,7 @@ wxBitmap bitmapFromEmbeddedPNG(const unsigned char* data, size_t len)
     wxImage img(is);
     // work around the transparency problems of Windows versions before XP
     if (createMask == 1)
-        img.ConvertAlphaToMask();
+        img.ConvertAlphaToMask(16);
     return wxBitmap(img);
 }
 //-----------------------------------------------------------------------------
