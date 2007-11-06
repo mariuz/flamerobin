@@ -1,7 +1,7 @@
 #/bin/sh
 
 FRDIR=`dirname $0`
-SVNREVFILE=src/svnrev.h
+SVNREVFILE=src/frsvnrev.h
 
 if test -d $FRDIR/.svn ; then
   ACTVERSION=`svn info $FRDIR | awk '/Revision/{print $2}'`
