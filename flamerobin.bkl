@@ -538,7 +538,7 @@
 
     <if cond="FORMAT!='msvc6prj'">
         <set var="SVN_REV_SCRIPT">
-            <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/update-svn-rev.sh</if>
+            <if cond="FORMAT=='autoconf'">cd $(DOLLAR)(srcdir) &amp;&amp; ./update-svn-rev.sh</if>
             <if cond="FORMAT!='autoconf'">update-svn-rev.cmd</if>
         </set>
         <action id="svn-rev">

@@ -241,7 +241,7 @@ distclean: clean
 	rm -f config.cache config.log config.status bk-deps bk-make-pch shared-ld-sh Makefile
 
 svn-rev: 
-	$(srcdir)/update-svn-rev.sh
+	cd $(srcdir) && ./update-svn-rev.sh
 
 flamerobin$(EXEEXT): $(FLAMEROBIN_OBJECTS) $(LIBPREFIX)ibpp$(LIBEXT) $(__flamerobin___win32rc) $(LIBPREFIX)ibpp$(LIBEXT)
 	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) -L. $(LDFLAGS)   $(LDFLAGS_GUI)  $(LIBS) -libpp $(FIREBIRDFRAMEWORK) $(__FIREBIRDLIBRARY_p)

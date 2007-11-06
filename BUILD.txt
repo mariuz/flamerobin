@@ -34,8 +34,9 @@ project files, and the other is via the makefile.vc command line makefile.
 
 Since custom build steps are not set up for the Visual Studio build the
 update-svn-rev.cmd script is not automatically run during the build, so the
-frsvnrev.h file may be missing or outdated. Please run the update-svn-rev.cmd
-manually after a checkout of the sources and each svn update.
+src/frsvnrev.h file may be missing or outdated. Please run the
+update-svn-rev.cmd manually after a checkout of the sources and each svn
+update.
 
 Double click on flamerobin\flamerobin.dsw, select a build configuration by
 going to the Build menu, selecting "Set build configuration" and then
