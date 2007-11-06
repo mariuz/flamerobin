@@ -112,10 +112,19 @@ wxBitmap bitmapFromEmbeddedPNG(const unsigned char* data, size_t len)
         int verMajor, verMinor;
         switch (wxGetOsVersion(&verMajor, &verMinor))
         {
+#if wxCHECK_VERSION(2, 8, 0)
             case wxOS_WINDOWS_9X:
+#else
+            case wxWIN95:
+            case wxWIN32S:
+#endif
                 createMask = 1;
                 break;
+#if wxCHECK_VERSION(2, 8, 0)
             case wxOS_WINDOWS_NT:
+#else
+            case wxWINDOWS_NT:
+#endif
                 createMask = (verMajor > 5 || verMinor > 0) ? 0 : 1;
                 break;
             default:
