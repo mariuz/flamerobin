@@ -129,7 +129,8 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title,
     searchPanelM = new wxPanel(mainPanelM, -1, wxDefaultPosition, wxDefaultSize,
         wxTAB_TRAVERSAL | wxSUNKEN_BORDER);
     searchBoxM = new wxComboBox(searchPanelM, ID_search_box, wxEmptyString,
-        wxDefaultPosition, wxDefaultSize, choices, wxCB_DROPDOWN | wxCB_SORT);
+        wxDefaultPosition, wxDefaultSize, choices,
+        wxCB_DROPDOWN | wxCB_SORT | wxTE_PROCESS_ENTER);
     wxSize btnBmpSize(16, 16);
     button_prev = new wxBitmapButton(searchPanelM, ID_button_prev,
         wxArtProvider::GetBitmap(wxART_GO_BACK, wxART_TOOLBAR, btnBmpSize));
