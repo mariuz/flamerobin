@@ -1,24 +1,24 @@
 /*
-Copyright (c) 2004, 2005, 2006 The FlameRobin Development Team
+  Copyright (c) 2004-2007 The FlameRobin Development Team
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
 
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
   $Id$
@@ -46,7 +46,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "urihandler.h"
 
 #include "core/FRError.h"
-#include "PrintableHtmlWindow.h"
+#include "gui/controls/PrintableHtmlWindow.h"
 //-----------------------------------------------------------------------------
 HtmlPrinter::HtmlPrinter()
 {
@@ -66,34 +66,34 @@ HtmlPrinter::~HtmlPrinter()
 }
 //-----------------------------------------------------------------------------
 //! PrintableHtmlWindow class
-PrintableHtmlWindow::PrintableHtmlWindow(wxWindow *parent)
+PrintableHtmlWindow::PrintableHtmlWindow(wxWindow* parent)
     : wxHtmlWindow(parent, -1)
 {
-    #ifdef __WXGTK20__
+#ifdef __WXGTK20__
     // default fonts are just too big on GTK2
     int sizes[] = { 7, 8, 10, 12, 16, 22, 30 };
     SetFonts(wxEmptyString, wxEmptyString, sizes);
-    #endif
+#endif
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(PrintableHtmlWindow, wxHtmlWindow)
     EVT_RIGHT_UP(PrintableHtmlWindow::OnRightUp)
-    EVT_MENU(PrintableHtmlWindow::ID_MENU_COPY, PrintableHtmlWindow::OnMenuCopy)
-    EVT_MENU(PrintableHtmlWindow::ID_MENU_NEW_WINDOW, PrintableHtmlWindow::OnMenuNewWindow)
-    EVT_MENU(PrintableHtmlWindow::ID_MENU_SAVE, PrintableHtmlWindow::OnMenuSave)
-    EVT_MENU(PrintableHtmlWindow::ID_MENU_PRINT, PrintableHtmlWindow::OnMenuPrint)
-    EVT_MENU(PrintableHtmlWindow::ID_MENU_PREVIEW, PrintableHtmlWindow::OnMenuPreview)
+    EVT_MENU(wxID_COPY, PrintableHtmlWindow::OnMenuCopy)
+    EVT_MENU(wxID_NEW, PrintableHtmlWindow::OnMenuNewWindow)
+    EVT_MENU(wxID_SAVE, PrintableHtmlWindow::OnMenuSave)
+    EVT_MENU(wxID_PRINT, PrintableHtmlWindow::OnMenuPrint)
+    EVT_MENU(wxID_PREVIEW, PrintableHtmlWindow::OnMenuPreview)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void PrintableHtmlWindow::OnRightUp(wxMouseEvent& event)
 {
     wxMenu m(0);
-    m.Append(ID_MENU_NEW_WINDOW, _("&Open link in a new window"));
-    m.Append(ID_MENU_COPY,       _("&Copy"));
+    m.Append(wxID_NEW, _("&Open link in a new window"));
+    m.Append(wxID_COPY, _("&Copy"));
     m.AppendSeparator();
-    m.Append(ID_MENU_SAVE,      _("&Save as HTML file..."));
-    m.Append(ID_MENU_PREVIEW,   _("Print pre&view..."));
-    m.Append(ID_MENU_PRINT,     _("&Print..."));
+    m.Append(wxID_SAVE, _("&Save as HTML file..."));
+    m.Append(wxID_PREVIEW, _("Print pre&view..."));
+    m.Append(wxID_PRINT, _("&Print..."));
 
     bool isLink = false;
     if (m_Cell) // taken from wx's htmlwin.cpp
@@ -113,9 +113,8 @@ void PrintableHtmlWindow::OnRightUp(wxMouseEvent& event)
         }
     }
 
-    m.Enable(ID_MENU_NEW_WINDOW, isLink);
-    if (SelectionToText().IsEmpty())
-        m.Enable(ID_MENU_COPY, false);
+    m.Enable(wxID_NEW, isLink);
+    m.Enable(wxID_COPY, !SelectionToText().IsEmpty());
     PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
 }
 //-----------------------------------------------------------------------------
