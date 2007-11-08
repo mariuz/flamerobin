@@ -1,24 +1,24 @@
 /*
-Copyright (c) 2004, 2005, 2006 The FlameRobin Development Team
+  Copyright (c) 2004-2007 The FlameRobin Development Team
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
 
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
   $Id$
@@ -320,9 +320,9 @@ FindDialog::FindDialog(SearchableEditor *editor, wxWindow* parent, const wxStrin
     if (flags.has(se::FROM_TOP))
         checkbox_fromtop   = new wxCheckBox(getControlsPanel(), -1, _("Start search from top"));
 
-    button_find = new wxButton(getControlsPanel(), ID_button_find, _("Find"));
-    button_replace = new wxButton(getControlsPanel(), ID_button_replace, _("Replace"));
-    button_replace_all = new wxButton(getControlsPanel(), ID_button_replace_all, _("Replace all"));
+    button_find = new wxButton(getControlsPanel(), wxID_FIND, _("Find"));
+    button_replace = new wxButton(getControlsPanel(), wxID_REPLACE, _("Replace"));
+    button_replace_all = new wxButton(getControlsPanel(), wxID_REPLACE_ALL, _("Replace all"));
     button_replace_in_selection = new wxButton(getControlsPanel(), ID_button_replace_in_selection, _("In selection"));
 
     do_layout();
@@ -401,9 +401,9 @@ void FindDialog::setup()
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(FindDialog, BaseDialog)
-    EVT_BUTTON(FindDialog::ID_button_find, FindDialog::OnFindButtonClick)
-    EVT_BUTTON(FindDialog::ID_button_replace, FindDialog::OnReplaceButtonClick)
-    EVT_BUTTON(FindDialog::ID_button_replace_all, FindDialog::OnReplaceAllButtonClick)
+    EVT_BUTTON(wxID_FIND, FindDialog::OnFindButtonClick)
+    EVT_BUTTON(wxID_REPLACE, FindDialog::OnReplaceButtonClick)
+    EVT_BUTTON(wxID_REPLACE_ALL, FindDialog::OnReplaceAllButtonClick)
     EVT_BUTTON(FindDialog::ID_button_replace_in_selection, FindDialog::OnReplaceInSelectionButtonClick)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
