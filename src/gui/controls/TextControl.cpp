@@ -1,24 +1,24 @@
 /*
-Copyright (c) 2004, 2005, 2006 The FlameRobin Development Team
+  Copyright (c) 2004-2007 The FlameRobin Development Team
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
 
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
   $Id$
@@ -76,9 +76,16 @@ BEGIN_EVENT_TABLE(TextControl, wxStyledTextCtrl)
     EVT_MENU(wxID_CUT, TextControl::OnCommandCut)
     EVT_MENU(wxID_COPY, TextControl::OnCommandCopy)
     EVT_MENU(wxID_PASTE, TextControl::OnCommandPaste)
-    EVT_MENU(wxID_CLEAR, TextControl::OnCommandDelete)
+    EVT_MENU(wxID_DELETE, TextControl::OnCommandDelete)
     EVT_MENU(wxID_SELECTALL, TextControl::OnCommandSelectAll)
-    EVT_STC_START_DRAG(wxID_ANY, TextControl::OnStartDrag)
+
+    EVT_UPDATE_UI(wxID_UNDO, TextControl::OnCommandUpdateUndo)
+    EVT_UPDATE_UI(wxID_REDO, TextControl::OnCommandUpdateRedo)
+    EVT_UPDATE_UI(wxID_CUT, TextControl::OnCommandUpdateCut)
+    EVT_UPDATE_UI(wxID_COPY, TextControl::OnCommandUpdateCopy)
+    EVT_UPDATE_UI(wxID_PASTE, TextControl::OnCommandUpdatePaste)
+    EVT_UPDATE_UI(wxID_DELETE, TextControl::OnCommandUpdateDelete)
+    EVT_UPDATE_UI(wxID_SELECTALL, TextControl::OnCommandUpdateSelectAll)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void TextControl::OnCommandUndo(wxCommandEvent& WXUNUSED(event))
@@ -116,6 +123,41 @@ void TextControl::OnCommandSelectAll(wxCommandEvent& WXUNUSED(event))
     SelectAll();
 }
 //-----------------------------------------------------------------------------
+void TextControl::OnCommandUpdateUndo(wxUpdateUIEvent& event)
+{
+    event.Enable(CanUndo());
+}
+//-----------------------------------------------------------------------------
+void TextControl::OnCommandUpdateRedo(wxUpdateUIEvent& event)
+{
+    event.Enable(CanRedo());
+}
+//-----------------------------------------------------------------------------
+void TextControl::OnCommandUpdateCut(wxUpdateUIEvent& event)
+{
+    event.Enable(!GetReadOnly() && GetSelectionStart() != GetSelectionEnd());
+}
+//-----------------------------------------------------------------------------
+void TextControl::OnCommandUpdateCopy(wxUpdateUIEvent& event)
+{
+    event.Enable(GetSelectionStart() != GetSelectionEnd());
+}
+//-----------------------------------------------------------------------------
+void TextControl::OnCommandUpdatePaste(wxUpdateUIEvent& event)
+{
+    event.Enable(!GetReadOnly());
+}
+//-----------------------------------------------------------------------------
+void TextControl::OnCommandUpdateDelete(wxUpdateUIEvent& event)
+{
+    event.Enable(!GetReadOnly() && GetSelectionStart() != GetSelectionEnd());
+}
+//-----------------------------------------------------------------------------
+void TextControl::OnCommandUpdateSelectAll(wxUpdateUIEvent& event)
+{
+    event.Enable(CanUndo());
+}
+//-----------------------------------------------------------------------------
 void TextControl::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
 {
     wxMenu m(0);
@@ -125,33 +167,10 @@ void TextControl::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
     m.Append(wxID_CUT, _("Cu&t"));
     m.Append(wxID_COPY, _("&Copy"));
     m.Append(wxID_PASTE, _("&Paste"));
-    m.Append(wxID_CLEAR, _("&Delete"));
+    m.Append(wxID_DELETE, _("&Delete"));
     m.AppendSeparator();
     m.Append(wxID_SELECTALL, _("Select &All"));
 
-    // enable/disable commands according to control state
-    m.Enable(wxID_UNDO, CanUndo());
-    m.Enable(wxID_REDO, CanRedo());
-    bool hasSelection = GetSelectionStart() != GetSelectionEnd();
-    m.Enable(wxID_CUT, hasSelection);
-    m.Enable(wxID_COPY, hasSelection);
-    m.Enable(wxID_CLEAR, hasSelection);
-    m.Enable(wxID_PASTE, CanPaste());
-
     PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
-}
-//-----------------------------------------------------------------------------
-// TODO: Is this still necessary (?), because it works for me as-is
-// Fix the annoying thing that you can not click inside the selection and
-// have it deselect the text and position the caret there
-void TextControl::OnStartDrag(wxStyledTextEvent& event) // WXUNUSED(event))
-{
-    event.Skip();
-/*
-    wxPoint mp = wxGetMousePosition();
-    int p = PositionFromPoint(ScreenToClient(mp));
-    SetSelectionStart(p);
-    SetSelectionEnd(p);
-*/
 }
 //-----------------------------------------------------------------------------
