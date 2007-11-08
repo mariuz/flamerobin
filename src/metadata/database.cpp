@@ -820,7 +820,11 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
             }
 
             // load metadata information
+#if wxCHECK_VERSION(2, 9, 0)
+            struct NodeTypeName { NodeType type; const char* name; };
+#else
             struct NodeTypeName { NodeType type; const wxChar* name; };
+#endif
             static const NodeTypeName nodetypes[] = {
                 { ntTable, wxTRANSLATE("Tables") },
                 { ntSysTable, wxTRANSLATE("System tables") },
