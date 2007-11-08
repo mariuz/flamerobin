@@ -155,7 +155,9 @@ bool SearchableEditor::find(bool newSearch)
         fd = new FindDialog(this, ::wxGetTopLevelParent(this));
     if (newSearch || findTextM.IsEmpty())
     {
-        fd->Show();
+        // do not re-center dialog if it is already visible
+        if (!fd->IsShown())
+            fd->Show();
         return false;    // <- caller shouldn't care about this
     }
 
