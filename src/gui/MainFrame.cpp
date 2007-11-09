@@ -218,15 +218,11 @@ void MainFrame::buildMainMenu()
     helpMenu->Append(myTreeCtrl::Menu_Manual, _("&Manual"));
     helpMenu->Append(myTreeCtrl::Menu_RelNotes, _("&What's new"));
     helpMenu->Append(myTreeCtrl::Menu_License, _("&License"));
-
-    newMenu = new wxMenu();
-    newMenu->Append(myTreeCtrl::Menu_URLHomePage, _("Home page"));
-    newMenu->Append(myTreeCtrl::Menu_URLProjectPage, _("SourceForge project page"));
-    newMenu->Append(myTreeCtrl::Menu_URLFeatureRequest, _("Feature requests"));
-    newMenu->Append(myTreeCtrl::Menu_URLBugReport, _("Bug reports"));
     helpMenu->AppendSeparator();
-    helpMenu->Append(wxID_ANY, _("FlameRobin on the web"), newMenu);
-
+    helpMenu->Append(myTreeCtrl::Menu_URLHomePage, _("FlameRobin &home page"));
+    helpMenu->Append(myTreeCtrl::Menu_URLProjectPage, _("SourceForge &project page"));
+    helpMenu->Append(myTreeCtrl::Menu_URLFeatureRequest, _("SourceForge &feature requests"));
+    helpMenu->Append(myTreeCtrl::Menu_URLBugReport, _("SourceForge &bug reports"));
 #ifndef __WXMAC__
     helpMenu->AppendSeparator();
 #endif
