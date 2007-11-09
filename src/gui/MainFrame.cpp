@@ -569,7 +569,6 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
         wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
             myTreeCtrl::Menu_BrowseColumns);
         AddPendingEvent(event);
-        return;
     }
     else
     {
@@ -800,7 +799,10 @@ void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))
         wxString::Format(_("%s preferences"), d->getName_().c_str()),
         dc, wxT("db_settings.confdef"));
     if (pd.isOk() && pd.loadFromConfig())
+    {
+        pd.selectPage(0);
         pd.ShowModal();
+    }
 
     FR_CATCH
 }
