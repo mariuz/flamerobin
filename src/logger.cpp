@@ -124,7 +124,12 @@ bool Logger::log2file(Config *cfg, const SqlStatement& st,
     if (logToFileType == multiFile)
     {   // filename should contain stuff like: %d, %02d, %05d, etc.
         if (filename.find_last_of(wxT("%")) == wxString::npos) // % not found
+        {
+            showWarningDialog(0, _("Logging to file failed"),
+                _("Multiple file option selected, but path string does not contain the % character"),
+                AdvancedMessageDialogButtonsOk());
             return false;
+        }
         wxString test;
         int start = 1;
         cfg->getValue(wxT("IncrementalLogFileStart"), start);
@@ -134,7 +139,12 @@ bool Logger::log2file(Config *cfg, const SqlStatement& st,
             wxFileName fn(test);
 
             if (!wxDirExists(fn.GetPath()))  // directory doesn't exist
+            {
+                showWarningDialog(0, _("Logging to file failed"),
+                    wxString::Format(_("Directory %s does not exist"), fn.GetPath().c_str()),
+                    AdvancedMessageDialogButtonsOk());
                 return false;
+            }
 
             if (!wxFileExists(test))
             {
@@ -143,11 +153,19 @@ bool Logger::log2file(Config *cfg, const SqlStatement& st,
             }
         }
         if (!f.IsOpened())
+        {
+            showWarningDialog(0, _("Logging to file failed"),
+                _("Cannot open log file."), AdvancedMessageDialogButtonsOk());
             return false;
+        }
     }
-    else
-        if (!f.Open(filename, wxFile::write_append )) // cannot open
-            return false;
+    else if (!f.Open(filename, wxFile::write_append )) // cannot open
+    {
+        showWarningDialog(0, _("Logging to file failed"),
+            _("Cannot open log file for writing."),
+            AdvancedMessageDialogButtonsOk());
+        return false;
+    }
 
     bool loggingAddHeader = true;
     cfg->getValue(wxT("LoggingAddHeader"), loggingAddHeader);
@@ -180,10 +198,9 @@ bool Logger::logStatement(const SqlStatement& st, Database* db)
     if (!dc.get(wxT("ExcludeFromGlobalLogging"), false))
     {
         Config& globalConfig = config();
-        return logStatementByConfig(&globalConfig, st, db);
+        result = result && logStatementByConfig(&globalConfig, st, db);
     }
-    else
-        return result;
+    return result;
 }
 //---------------------------------------------------------------------------
 bool Logger::prepareDatabase(Database *db)
@@ -251,9 +268,9 @@ bool Logger::logStatementByConfig(Config* cfg, const SqlStatement& st,
         cfg->getValue(wxT("LogFile"), logFilename);
         if (logFilename.empty())
         {
-            ::wxMessageBox(
+            showWarningDialog(0,
                 _("Logging to file enabled, but log filename not set"),
-                _("Warning, no filename"), wxICON_WARNING|wxOK
+                _("No filename"), AdvancedMessageDialogButtonsOk()
             );
             return false;
         }

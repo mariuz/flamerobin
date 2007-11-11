@@ -476,7 +476,12 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
     buildToolbar();
     buildMainMenu();
 
-    panel_contents = new wxPanel(this, -1);
+    panel_contents = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize,
+        wxTAB_TRAVERSAL
+#ifdef __WXGTK12__
+        | wxSUNKEN_BORDER
+#endif
+    );
     splitter_window_1 = new wxSplitterWindow(panel_contents, -1);
     panel_splitter_bottom = new wxPanel(splitter_window_1, -1);
     notebook_1 = new wxNotebook(panel_splitter_bottom, -1, wxDefaultPosition, wxDefaultSize, 0);
@@ -1062,9 +1067,6 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
                 return;
         };
     }
-
-    // TODO: we might need Ctrl+N for new window, Ctrl+S for Save, etc. but it cannot be caught from here
-    //       since OnKeyDown() doesn't seem to catch letters, only special keys
 
     if (wxWindow::FindFocus() == styled_text_ctrl_sql)
     {
@@ -1829,7 +1831,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
 
         try
         {
-            if (doShowStats)    // show column info
+            if (doShowStats /* && type == IBPP::stSelect */)    // show column info
             {
                 for (int i = 1; i <= statementM->Columns(); i++)
                 {
@@ -1847,12 +1849,18 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                     ), ttSql);
                 }
             }
+        }
+        catch(IBPP::Exception &)    // reading column info might fail,
+        {                           // but we still want to show the plan
+        }                           // so we have separate exception handlers
 
+        try
+        {
             std::string plan;            // for some statements (DDL) it is never available
             statementM->Plan(plan);        // for INSERTs, it is available sometimes (insert into ... select ... )
             log(std2wx(plan));            // but if it not, IBPP throws the exception
         }
-        catch(IBPP::Exception&)
+        catch(IBPP::Exception &e)
         {
             log(_("Plan not available."));
         }
