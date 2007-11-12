@@ -1850,17 +1850,17 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                 }
             }
         }
-        catch(IBPP::Exception &)    // reading column info might fail,
-        {                           // but we still want to show the plan
-        }                           // so we have separate exception handlers
+        catch(IBPP::Exception&)    // reading column info might fail,
+        {                          // but we still want to show the plan
+        }                          // so we have separate exception handlers
 
         try
         {
             std::string plan;            // for some statements (DDL) it is never available
-            statementM->Plan(plan);        // for INSERTs, it is available sometimes (insert into ... select ... )
-            log(std2wx(plan));            // but if it not, IBPP throws the exception
+            statementM->Plan(plan);      // for INSERTs, it is available sometimes (insert into ... select ... )
+            log(std2wx(plan));           // but if it not, IBPP throws the exception
         }
-        catch(IBPP::Exception &e)
+        catch(IBPP::Exception&)
         {
             log(_("Plan not available."));
         }

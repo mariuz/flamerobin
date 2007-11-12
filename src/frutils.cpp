@@ -1,24 +1,24 @@
 /*
-Copyright (c) 2004, 2005, 2006 The FlameRobin Development Team
+  Copyright (c) 2004-2007 The FlameRobin Development Team
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
 
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
   $Id$
@@ -42,6 +42,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "core/StringUtils.h"
 #include "frutils.h"
 #include "gui/ProgressDialog.h"
+#include "gui/UsernamePasswordDialog.h"
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
 #include "metadata/relation.h"
@@ -140,17 +141,17 @@ bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent, vector<wxStr
 bool connectDatabase(Database *db, wxWindow* parent,
     ProgressDialog* progressdialog)
 {
-    wxString pass;
-    if (db->getDecryptedPassword().empty())
+    wxString pass(db->getDecryptedPassword());
+    if (pass.empty())
     {
-        wxString message(_("Enter password for user: "));
-        message += db->getUsername();
-        pass = ::wxGetPasswordFromUser(message, _("Connecting to database"));
-        if (pass.IsEmpty())
-            return false;
-    }
-    else
-        pass = db->getDecryptedPassword();
+        UsernamePasswordDialog upd(wxGetActiveWindow(),
+            _("Database Credentials"), db->getUsername(), true, // don't allow different username
+            _("Please enter the the database user's password:"));
+        if (upd.ShowModal() == wxID_OK)
+            pass = upd.getPassword();
+    }        
+    if (pass.empty())
+        return false;
 
     wxString caption(wxString::Format(wxT("Connecting with Database \"%s\""),
         db->getName_().c_str()));
@@ -173,40 +174,36 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
     if (!s->getService(svc, p, sysdba))
     {
         wxString msg;
-        if (p->isCanceled())
-            msg = _("You've canceled the search for a usable username and password.");
-        else
-            msg = _("None of the credentials of the databases could be used.");
         if (sysdba)
-            msg << _("\nYou need to supply a valid password for SYSDBA.");
+            msg = _("Please enter the database administrator password:");
         else
-            msg << _("\nYou need to supply a valid username and password.");
-        wxMessageBox(msg, _("Connecting to server"), wxOK|wxICON_INFORMATION);
-        wxString user(wxT("SYSDBA"));
-        if (!sysdba)
         {
-            user = ::wxGetTextFromUser(_("Enter name of user to connect as:"),
-                _("Connecting to Server"));
-            if (user.IsEmpty())
-                return false;
+            if (p->isCanceled())
+                msg = _("You have canceled the search for a usable username and password.");
+            else
+                msg = _("None of the known database credentials could be used.");
+            msg = msg + wxT("\n") + _("Please enter a valid username and password:");
         }
-        wxString pass = ::wxGetPasswordFromUser(
-            wxString::Format(_("Enter the password for user %s:"), user.c_str()),
-            _("Connecting to Server"));
-        if (pass.IsEmpty())
+
+        UsernamePasswordDialog upd(wxGetActiveWindow(),
+            _("Database Credentials"), wxT("SYSDBA"), sysdba, msg);
+        if (upd.ShowModal() != wxID_OK)
             return false;
+        wxString username(upd.getUsername());
+        wxString password(upd.getPassword());
+
         try
         {
             svc = IBPP::ServiceFactory(wx2std(s->getConnectionString()),
-                wx2std(user), wx2std(pass));
+                wx2std(username), wx2std(password));
             svc->Connect();
             // exception might be thrown. If not, we store the credentials:
-            if (sysdba || user.Upper() == wxT("SYSDBA"))
-                s->setServiceSysdbaPassword(pass);
+            if (sysdba || username.Upper() == wxT("SYSDBA"))
+                s->setServiceSysdbaPassword(password);
             else
             {
-                s->setServiceUser(user);
-                s->setServicePassword(pass);
+                s->setServiceUser(username);
+                s->setServicePassword(password);
             }
         }
         catch(IBPP::Exception& e)

@@ -1124,8 +1124,8 @@ void MainFrame::OnMenuGetServerVersion(wxCommandEvent& WXUNUSED(event))
         return;
     }
 
-    wxMessageBox(std2wx(version), _("Server version"),
-        wxOK|wxICON_INFORMATION);
+    wxMessageBox(std2wx(version), _("Server Version"),
+        wxOK | wxICON_INFORMATION);
 
     FR_CATCH
 }

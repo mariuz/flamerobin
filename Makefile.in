@@ -95,6 +95,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_StyleGuide.o \
 	flamerobin_TriggerWizardDialog.o \
 	flamerobin_UserDialog.o \
+	flamerobin_UsernamePasswordDialog.o \
 	flamerobin_images.o \
 	flamerobin_logger.o \
 	flamerobin_main.o \
@@ -449,6 +450,9 @@ flamerobin_TriggerWizardDialog.o: $(srcdir)/src/gui/TriggerWizardDialog.cpp $(FL
 
 flamerobin_UserDialog.o: $(srcdir)/src/gui/UserDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/UserDialog.cpp
+
+flamerobin_UsernamePasswordDialog.o: $(srcdir)/src/gui/UsernamePasswordDialog.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/UsernamePasswordDialog.cpp
 
 flamerobin_images.o: $(srcdir)/src/images.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/images.cpp

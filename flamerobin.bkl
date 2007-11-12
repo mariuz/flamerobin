@@ -263,6 +263,7 @@
         $(SOURCEDIR)/gui/StyleGuide.h
         $(SOURCEDIR)/gui/TriggerWizardDialog.h
         $(SOURCEDIR)/gui/UserDialog.h
+        $(SOURCEDIR)/gui/UsernamePasswordDialog.h
         $(SOURCEDIR)/images.h
         $(SOURCEDIR)/Isaac.h
         $(SOURCEDIR)/logger.h
@@ -369,6 +370,7 @@
         $(SOURCEDIR)/gui/StyleGuide.cpp
         $(SOURCEDIR)/gui/TriggerWizardDialog.cpp
         $(SOURCEDIR)/gui/UserDialog.cpp
+        $(SOURCEDIR)/gui/UsernamePasswordDialog.cpp
         $(SOURCEDIR)/images.cpp
         $(SOURCEDIR)/logger.cpp
         $(SOURCEDIR)/main.cpp

@@ -704,6 +704,10 @@ SOURCE=.\src\gui\UserDialog.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\UsernamePasswordDialog.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\core\Visitor.cpp
 # End Source File
 # Begin Source File
@@ -1079,6 +1083,10 @@ SOURCE=.\src\metadata\User.h
 # Begin Source File
 
 SOURCE=.\src\gui\UserDialog.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\UsernamePasswordDialog.h
 # End Source File
 # Begin Source File
 

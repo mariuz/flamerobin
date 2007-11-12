@@ -51,6 +51,7 @@
 #include "gui/controls/DndTextControls.h"
 #include "gui/controls/LogTextControl.h"
 #include "gui/StyleGuide.h"
+#include "gui/UsernamePasswordDialog.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
 //-----------------------------------------------------------------------------
@@ -382,21 +383,17 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     verboseMsgsM = checkbox_showlog->IsChecked();
     clearLog();
 
-    // TODO: create a global helper function
-    //   bool getDatabasePassword(wxFrame* parent, Database* db, wxString password);
-    // this would simplify the next lines to
-    //   if (!getDatabasePassword(this, databaseM, password))
-    //       return;
-
     wxString password = databaseM->getDecryptedPassword();
     if (password.empty())
     {
-        wxString msg;
-        msg.Printf(_("Enter password for user %s:"), databaseM->getUsername().c_str());
-        password = ::wxGetPasswordFromUser(msg, _("Connecting To Server"));
-        if (password.empty())
-            return;
+        UsernamePasswordDialog upd(this, _("Database Credentials"),
+            databaseM->getUsername(), false, // allow different username
+            _("Please enter a valid username and password:"));
+        if (upd.ShowModal() == wxID_OK)
+            password = upd.getPassword();
     }
+    if (password.empty())
+        return;
 
     int flags = (int)IBPP::brVerbose; // this will be ORed in anyway
     if (checkbox_checksum->IsChecked())
