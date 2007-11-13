@@ -158,10 +158,7 @@ wxString Procedure::getExecuteStatement()
 void Procedure::checkAndLoadParameters(bool force)
 {
     if (force || !parametersLoadedM)
-    {
         loadParameters();
-        notifyObservers();
-    }
 }
 //-----------------------------------------------------------------------------
 MetadataCollection<Parameter>::iterator Procedure::begin()
@@ -226,6 +223,7 @@ void Procedure::loadParameters()
 
     tr1->Commit();
     parametersLoadedM = true;
+    notifyObservers();
 }
 //-----------------------------------------------------------------------------
 wxString Procedure::getOwner()
