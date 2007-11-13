@@ -735,6 +735,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                 break;
             case ntProcedure:
                 dynamic_cast<Procedure*>(object)->checkAndLoadParameters(true); // force reload
+                dynamic_cast<Procedure*>(object)->checkDependentProcedures();
                 break;
             case ntException:
                 dynamic_cast<Exception*>(object)->loadProperties(true);

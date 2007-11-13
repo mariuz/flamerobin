@@ -71,6 +71,8 @@ public:
     wxString getDefinition();   // used for calltip in sql editor
     std::vector<Privilege>* getPrivileges();
 
+    void checkDependentProcedures();
+
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };

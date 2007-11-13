@@ -152,6 +152,7 @@ public:
 
     Dependency(MetadataItem *object);
     wxString getFields() const;
+    void getFields(std::vector<wxString>& fields) const;
     void addField(const wxString& name);
     void setFields(const std::vector<wxString>& fields);
     bool operator== (const Dependency& other) const;

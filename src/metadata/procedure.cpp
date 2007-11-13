@@ -38,6 +38,9 @@
     #pragma hdrstop
 #endif
 
+// needed for platform independent EOL
+#include <wx/textbuf.h>
+
 #include <string>
 
 #include <ibpp.h>
@@ -45,6 +48,7 @@
 #include "core/StringUtils.h"
 #include "core/FRError.h"
 #include "frutils.h"
+#include "gui/AdvancedMessageDialog.h"
 #include "metadata/collection.h"
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
@@ -365,6 +369,65 @@ wxString Procedure::getAlterSql(bool full)
         sql += wxT("BEGIN EXIT; END");
     sql += wxT("^\nSET TERM ; ^\n");
     return sql;
+}
+//-----------------------------------------------------------------------------
+void Procedure::checkDependentProcedures()
+{
+    // check dependencies and parameters
+    checkAndLoadParameters();
+    std::vector<Dependency> deps;
+    getDependencies(deps, false);
+
+    // if there is a dependency, but parameter doesn't exist, warn the user
+    int count = 0;
+    wxString missing;
+    for (std::vector<Dependency>::iterator it = deps.begin();
+        it != deps.end(); ++it)
+    {
+        std::vector<wxString> fields;
+        (*it).getFields(fields);
+        for (std::vector<wxString>::const_iterator ci = fields.begin();
+            ci != fields.end(); ++ci)
+        {
+            bool found = false;
+            for (MetadataCollection<Parameter>::iterator i2 = begin();
+                i2 != end(); ++i2)
+            {
+                if ((*i2).getName_() == (*ci))
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found && ++count < 20)
+            {
+                missing += wxString::Format(
+                    _("Procedure %s depends on parameter %s.%s"),
+                    (*it).getName_().c_str(),
+                    (*ci).c_str(),
+                    wxTextBuffer::GetEOL()
+                );
+            }
+        }
+    }
+    if (count > 0)
+    {
+        if (count > 19)
+        {
+            missing += wxTextBuffer::GetEOL()
+            + wxString::Format(_("%d total dependencies (20 shown)."), count);
+        }
+        showWarningDialog(0,
+            _("Dependencies broken"),
+            wxString::Format(
+                _("Some other procedures depend on %s:%s%s%s"),
+                getName_().c_str(),
+                wxTextBuffer::GetEOL(),
+                wxTextBuffer::GetEOL(),
+                missing.c_str()),
+            AdvancedMessageDialogButtonsOk()
+        );
+    }
 }
 //-----------------------------------------------------------------------------
 std::vector<Privilege>* Procedure::getPrivileges()

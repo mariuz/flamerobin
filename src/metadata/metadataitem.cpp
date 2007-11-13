@@ -648,6 +648,15 @@ Dependency::Dependency(MetadataItem *object)
     objectM = object;
 }
 //-----------------------------------------------------------------------------
+void Dependency::getFields(std::vector<wxString>& fields) const
+{
+    for (std::vector<wxString>::const_iterator it = fieldsM.begin();
+        it != fieldsM.end(); ++it)
+    {
+        fields.push_back(*it);
+    }
+}
+//-----------------------------------------------------------------------------
 wxString Dependency::getFields() const
 {
     wxString temp;
