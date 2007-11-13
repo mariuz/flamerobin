@@ -43,6 +43,8 @@ history24.xpm
 toggle16.xpm
 toggle24.xpm
 toggle32.xpm
+role16.png
+exception16.png <- slightly modified to remove "shining"
 
 All other images, are licenced under Expat license as the rest of FlameRobin
 project.

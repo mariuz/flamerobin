@@ -79,6 +79,7 @@
 #include "database.xpm"
 #include "delete16.xpm"
 #include "domain.xpm"
+#include "exception16_png.cpp"
 #include "execute16.xpm"
 #include "fk16_png.cpp"
 #include "function.xpm"
@@ -94,6 +95,7 @@
 #include "procedure.xpm"
 #include "procedures.xpm"
 #include "redx.xpm"
+#include "role16_png.cpp"
 #include "root.xpm"
 #include "server.xpm"
 #include "systemtable.xpm"
@@ -222,6 +224,10 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(domain_xpm);
         if (id == ART_Domains)
             return wxBitmap(domain_xpm);
+        if (id == ART_Exception)
+            return bitmapFromEmbeddedPNG(exception16_png, sizeof(exception16_png));
+        if (id == ART_Exceptions)
+            return bitmapFromEmbeddedPNG(exception16_png, sizeof(exception16_png));
         if (id == ART_ExecuteStatement)
             return wxBitmap(execute16_xpm);
         if (id == ART_ForeignKey)
@@ -250,6 +256,10 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(procedure_xpm);
         if (id == ART_Procedures)
             return wxBitmap(procedures_xpm);
+        if (id == ART_Role)
+            return bitmapFromEmbeddedPNG(role16_png, sizeof(role16_png));
+        if (id == ART_Roles)
+            return bitmapFromEmbeddedPNG(role16_png, sizeof(role16_png));
         if (id == ART_RollbackTransaction)
             return wxBitmap(redx_xpm);
         if (id == ART_Root)
@@ -282,6 +292,7 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
         if (id == ART_ToggleView)
             return wxBitmap(toggle16_xpm);
     }
+//    return wxBitmap(toggle16_xpm);
     return wxNullBitmap;
 }
 //-----------------------------------------------------------------------------
