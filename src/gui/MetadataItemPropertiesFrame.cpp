@@ -675,11 +675,11 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         p->checkAndLoadParameters();
         if (p->getChildren(tmp))
         {
-            ParameterType pt = (cmd == wxT("input_parameters")) ? ptInput : ptOutput;
+            bool parOut = (cmd == wxT("output_parameters"));
             std::vector<MetadataItem*>::iterator it;
             for (it = tmp.begin(); it != tmp.end(); ++it)
             {
-                if ((dynamic_cast<Parameter*>(*it))->getParameterType() == pt)
+                if ((dynamic_cast<Parameter*>(*it))->isOutputParameter() == parOut)
                     processHtmlCode(htmlpage, suffix, *it);
             }
         }

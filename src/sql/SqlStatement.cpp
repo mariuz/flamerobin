@@ -225,7 +225,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
                 {
                     if ((*i).getName_() == child.get())
                     {
-                        objectTypeM = ntParameter;
+                        objectTypeM = ntParameterInput;
                         objectM = &(*i);
                         return;
                     }

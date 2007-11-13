@@ -97,7 +97,7 @@ bool Procedure::isSelectable()
     for (ParameterCollCIter it = parametersM.begin(); it != parametersM.end();
         ++it)
     {
-        if ((*it).getParameterType() == ptOutput)
+        if ((*it).isOutputParameter())
             return true;
     }
     return false;
@@ -111,17 +111,17 @@ wxString Procedure::getSelectStatement()
     for (ParameterCollCIter it = parametersM.begin(); it != parametersM.end();
         ++it)
     {
-        if ((*it).getParameterType() == ptInput)
-        {
-            if (!parlist.empty())
-                parlist += wxT(", ");
-            parlist += (*it).getQuotedName();
-        }
-        else
+        if ((*it).isOutputParameter())
         {
             if (!collist.empty())
                 collist += wxT(", ");
             collist += wxT("a.") + (*it).getQuotedName();
+        }
+        else
+        {
+            if (!parlist.empty())
+                parlist += wxT(", ");
+            parlist += (*it).getQuotedName();
         }
     }
 
@@ -141,7 +141,7 @@ wxString Procedure::getExecuteStatement()
     for (ParameterCollCIter it = parametersM.begin(); it != parametersM.end();
         ++it)
     {
-        if ((*it).getParameterType() == ptInput)
+        if (!(*it).isOutputParameter())
         {
             if (!parlist.empty())
                 parlist += wxT(", ");
@@ -278,31 +278,31 @@ wxString Procedure::getDefinition()
     for (MetadataCollection <Parameter>::const_iterator it =
         parametersM.begin(); it != parametersM.end(); ++it)
     {
-        if ((*it).getParameterType() == ptInput)
-            lastInput = it;
-        else
+        if ((*it).isOutputParameter())
             lastOutput = it;
+        else
+            lastInput = it;
     }
     for (MetadataCollection <Parameter>::const_iterator it =
         parametersM.begin(); it != parametersM.end(); ++it)
     {
         // No need to quote domains, as currently only regular datatypes can be
         // used for SP parameters
-        if ((*it).getParameterType() == ptInput)
-        {
-            parlist += wxT("    ") + (*it).getQuotedName() + wxT(" ")
-                + (*it).getDomain()->getDatatypeAsString();
-            if (it != lastInput)
-                parlist += wxT(",");
-            parlist += wxT("\n");
-        }
-        else
+        if ((*it).isOutputParameter())
         {
             collist += wxT("    ") + (*it).getQuotedName() + wxT(" ")
                 + (*it).getDomain()->getDatatypeAsString();
             if (it != lastOutput)
                 collist += wxT(",");
             collist += wxT("\n");
+        }
+        else
+        {
+            parlist += wxT("    ") + (*it).getQuotedName() + wxT(" ")
+                + (*it).getDomain()->getDatatypeAsString();
+            if (it != lastInput)
+                parlist += wxT(",");
+            parlist += wxT("\n");
         }
     }
     wxString retval = getQuotedName();
@@ -329,7 +329,18 @@ wxString Procedure::getAlterSql(bool full)
         {
             Domain *dm = (*it).getDomain();
             wxString charset = dm->getCharset();
-            if ((*it).getParameterType() == ptInput)
+            if ((*it).isOutputParameter())
+            {
+                if (output.empty())
+                    output += wxT("\nRETURNS (\n    ");
+                else
+                    output += wxT(",\n    ");
+                output += (*it).getQuotedName() + wxT(" ") +
+                    dm->getDatatypeAsString();
+                if (!charset.IsEmpty() && charset != db->getDatabaseCharset())
+                    output += wxT(" CHARACTER SET ") + dm->getCharset();
+            }
+            else
             {
                 if (input.empty())
                     input += wxT(" (\n    ");
@@ -341,17 +352,6 @@ wxString Procedure::getAlterSql(bool full)
                     input += wxT(" DEFAULT ") + dm->getDefault();
                 if (!charset.IsEmpty() && charset != db->getDatabaseCharset())
                     input += wxT(" CHARACTER SET ") + dm->getCharset();
-            }
-            else
-            {
-                if (output.empty())
-                    output += wxT("\nRETURNS (\n    ");
-                else
-                    output += wxT(",\n    ");
-                output += (*it).getQuotedName() + wxT(" ") +
-                    dm->getDatatypeAsString();
-                if (!charset.IsEmpty() && charset != db->getDatabaseCharset())
-                    output += wxT(" CHARACTER SET ") + dm->getCharset();
             }
         }
 

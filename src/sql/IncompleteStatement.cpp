@@ -335,7 +335,7 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
         for (MetadataCollection<Parameter>::const_iterator c = p->begin();
             c != p->end(); ++c)
         {
-            if ((*c).getParameterType() == ptOutput)
+            if ((*c).isOutputParameter())
                 cols.push_back((*c).getQuotedName());
         }
     }

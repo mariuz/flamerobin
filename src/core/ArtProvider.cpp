@@ -214,15 +214,21 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(column_xpm);
         if (id == ART_CommitTransaction)
             return wxBitmap(ok_xpm);
+        if (id == ART_Computed)
+            return wxBitmap(function_xpm);
         if (id == ART_Database)
             return wxBitmap(database_xpm);
         if (id == ART_Domain)
+            return wxBitmap(domain_xpm);
+        if (id == ART_Domains)
             return wxBitmap(domain_xpm);
         if (id == ART_ExecuteStatement)
             return wxBitmap(execute16_xpm);
         if (id == ART_ForeignKey)
             return bitmapFromEmbeddedPNG(fk16_png, sizeof(fk16_png));
         if (id == ART_Function)
+            return wxBitmap(function_xpm);
+        if (id == ART_Functions)
             return wxBitmap(function_xpm);
         if (id == ART_Generator)
             return wxBitmap(generator_xpm);
@@ -232,6 +238,10 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(history_xpm);
         if (id == ART_Object)
             return wxBitmap(object_xpm);
+        if (id == ART_ParameterInput)
+            return wxBitmap(column_xpm);
+        if (id == ART_ParameterOutput)
+            return wxBitmap(column_xpm);
         if (id == ART_PrimaryAndForeignKey)
             return bitmapFromEmbeddedPNG(pkfk16_png, sizeof(pkfk16_png));
         if (id == ART_PrimaryKey)
@@ -258,7 +268,11 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(tables_xpm);
         if (id == ART_Trigger)
             return wxBitmap(trigger_xpm);
+        if (id == ART_Triggers)
+            return wxBitmap(trigger_xpm);
         if (id == ART_View)
+            return wxBitmap(view_xpm);
+        if (id == ART_Views)
             return wxBitmap(view_xpm);
 
         if (id == ART_DeleteRow)
