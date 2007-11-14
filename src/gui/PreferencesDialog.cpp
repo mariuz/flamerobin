@@ -89,7 +89,7 @@ wxString getPlatformName()
 #endif
 }
 //-----------------------------------------------------------------------------
-static void processPlatformProperty(wxXmlNode *node)
+static void processPlatformAttribute(wxXmlNode *node)
 {
     wxString s;
     bool isok;
@@ -98,7 +98,11 @@ static void processPlatformProperty(wxXmlNode *node)
     while (c)
     {
         isok = false;
+#if wxCHECK_VERSION(2, 9, 0)
+        if (!c->GetAttribute(wxT("platform"), &s))
+#else
         if (!c->GetPropVal(wxT("platform"), &s))
+#endif
             isok = true;
         else
         {
@@ -113,7 +117,7 @@ static void processPlatformProperty(wxXmlNode *node)
 
         if (isok)
         {
-            processPlatformProperty(c);
+            processPlatformAttribute(c);
             c = c->GetNext();
         }
         else
@@ -474,7 +478,7 @@ void PreferencesDialog::loadDescriptionFile(const wxFileName& filename)
             filename.GetFullPath().c_str());
         return;
     }
-    processPlatformProperty(xmlr);
+    processPlatformAttribute(xmlr);
     debugDescriptionM = hasParamNode(xmlr, wxT("debug"));
 
     wxTreeItemId root = treectrl_1->AddRoot(wxEmptyString);
@@ -568,7 +572,11 @@ bool PreferencesDialog::parseDescriptionNode(wxTreeItemId parent, wxXmlNode* xml
 bool PreferencesDialog::parseDescriptionSetting(wxPanel* page, wxXmlNode* xmln,
     PrefDlgSetting* enabledby)
 {
+#if wxCHECK_VERSION(2, 9, 0)
+    wxString type(xmln->GetAttribute(wxT("type"), wxEmptyString));
+#else
     wxString type(xmln->GetPropVal(wxT("type"), wxEmptyString));
+#endif
     PrefDlgSetting* setting = createPrefDlgSetting(page, type, enabledby);
     // ignore unknown settings unless debug mode is active
     if (setting == 0)
