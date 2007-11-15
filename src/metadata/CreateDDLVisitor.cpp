@@ -1,24 +1,24 @@
 /*
-Copyright (c) 2004, 2005, 2006 The FlameRobin Development Team
+  Copyright (c) 2004-2007 The FlameRobin Development Team
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
 
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
   $Id$
@@ -39,7 +39,18 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     #include "wx/wx.h"
 #endif
 
+#include <vector>
+
+#include "metadata/column.h"
+#include "metadata/constraints.h"
 #include "metadata/CreateDDLVisitor.h"
+#include "metadata/database.h"
+#include "metadata/domain.h"
+#include "metadata/generator.h"
+#include "metadata/Index.h"
+#include "metadata/role.h"
+#include "metadata/table.h"
+#include "metadata/view.h"
 
 // forward declaration to keep compilers happy
 void addIndex(std::vector<Index> *ix, wxString& sql, ColumnConstraint *cc);
@@ -413,11 +424,6 @@ void CreateDDLVisitor::visitProcedure(Procedure& p)
     preSqlM << temp << wxT("\n");
 }
 //-----------------------------------------------------------------------------
-void CreateDDLVisitor::visitParameter(Parameter&)
-{
-    // empty
-}
-//-----------------------------------------------------------------------------
 void CreateDDLVisitor::visitRole(Role& r)
 {
     preSqlM += wxT("CREATE ROLE ") + r.getQuotedName() + wxT(";\n");
@@ -443,16 +449,6 @@ void CreateDDLVisitor::visitRole(Role& r)
                  << name << wxT("';\n");
     }
     sqlM = preSqlM + wxT("\n") + postSqlM;
-}
-//-----------------------------------------------------------------------------
-void CreateDDLVisitor::visitRoot(Root&)
-{
-    // empty
-}
-//-----------------------------------------------------------------------------
-void CreateDDLVisitor::visitServer(Server&)
-{
-    // empty
 }
 //-----------------------------------------------------------------------------
 // used by visit(Table)
@@ -680,10 +676,5 @@ void CreateDDLVisitor::visitView(View& v)
     }
 
     sqlM += preSqlM + wxT("\n") + postSqlM;
-}
-//-----------------------------------------------------------------------------
-void CreateDDLVisitor::visitMetadataItem(MetadataItem&)
-{
-    // empty
 }
 //-----------------------------------------------------------------------------

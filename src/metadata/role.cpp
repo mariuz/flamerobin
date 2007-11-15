@@ -38,9 +38,12 @@
     #pragma hdrstop
 #endif
 
+#include <ibpp.h>
+
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "core/Visitor.h"
+#include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/role.h"
 //-----------------------------------------------------------------------------

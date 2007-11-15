@@ -31,7 +31,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <wx/wx.h>
 #include <wx/image.h>
 
-#include "ibpp/ibpp.h"
+#include <ibpp.h>
+
 #include "gui/BaseDialog.h"
 class Database;
 class DataGridTable;

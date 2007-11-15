@@ -57,6 +57,7 @@
 #include "metadata/CreateDDLVisitor.h"
 #include "metadata/database.h"
 #include "metadata/exception.h"
+#include "metadata/server.h"
 #include "metadata/table.h"
 #include "metadata/view.h"
 #include "urihandler.h"

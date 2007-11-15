@@ -39,6 +39,8 @@
 
 #include "config/Config.h"
 #include "gui/ContextMenuMetadataItemVisitor.h"
+#include "metadata/database.h"
+#include "metadata/table.h"
 #include "myTreeCtrl.h"
 //-----------------------------------------------------------------------------
 ContextMenuMetadataItemVisitor::ContextMenuMetadataItemVisitor(wxMenu* menu)
