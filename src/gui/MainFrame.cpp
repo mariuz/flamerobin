@@ -51,6 +51,7 @@
 #include "gui/AdvancedMessageDialog.h"
 #include "gui/AdvancedSearchFrame.h"
 #include "gui/BackupFrame.h"
+#include "gui/CommandIds.h"
 #include "gui/ContextMenuMetadataItemVisitor.h"
 #include "gui/DataGeneratorFrame.h"
 #include "gui/DatabaseRegistrationDialog.h"
@@ -162,9 +163,9 @@ void MainFrame::buildMainMenu()
     menuBarM = new wxMenuBar();
 
     wxMenu* databaseMenu = new wxMenu();                    // dynamic menus, created at runtime
-    databaseMenu->Append(myTreeCtrl::Menu_RegisterDatabase, _("R&egister existing database..."));
-    databaseMenu->Append(myTreeCtrl::Menu_CreateDatabase, _("Create &new database..."));
-    databaseMenu->Append(myTreeCtrl::Menu_RestoreIntoNew, _("Restore bac&kup into new database..."));
+    databaseMenu->Append(Cmds::Menu_RegisterDatabase, _("R&egister existing database..."));
+    databaseMenu->Append(Cmds::Menu_CreateDatabase, _("Create &new database..."));
+    databaseMenu->Append(Cmds::Menu_RestoreIntoNew, _("Restore bac&kup into new database..."));
     databaseMenu->AppendSeparator();
     ContextMenuMetadataItemVisitor cmvd(databaseMenu);
     Database dummy;
@@ -183,46 +184,46 @@ void MainFrame::buildMainMenu()
 #endif
 
     wxMenu* viewMenu = new wxMenu();
-    viewMenu->AppendCheckItem(myTreeCtrl::Menu_ToggleStatusBar, _("&Status bar"));
-    viewMenu->AppendCheckItem(myTreeCtrl::Menu_ToggleSearchBar, _("S&earch bar"));
-    viewMenu->AppendCheckItem(myTreeCtrl::Menu_ToggleDisconnected, _("&Disconnected databases"));
+    viewMenu->AppendCheckItem(Cmds::Menu_ToggleStatusBar, _("&Status bar"));
+    viewMenu->AppendCheckItem(Cmds::Menu_ToggleSearchBar, _("S&earch bar"));
+    viewMenu->AppendCheckItem(Cmds::Menu_ToggleDisconnected, _("&Disconnected databases"));
     viewMenu->AppendSeparator();
     viewMenu->Append(wxID_PREFERENCES, _("P&references..."));
     menuBarM->Append(viewMenu, _("&View"));
     frameManager().setWindowMenu(viewMenu);
 
     wxMenu* serverMenu = new wxMenu();
-    serverMenu->Append(myTreeCtrl::Menu_RegisterServer, _("&Register server..."));
-    serverMenu->Append(myTreeCtrl::Menu_UnRegisterServer, _("&Unregister server"));
-    serverMenu->Append(myTreeCtrl::Menu_ServerProperties, _("Server registration &info..."));
+    serverMenu->Append(Cmds::Menu_RegisterServer, _("&Register server..."));
+    serverMenu->Append(Cmds::Menu_UnRegisterServer, _("&Unregister server"));
+    serverMenu->Append(Cmds::Menu_ServerProperties, _("Server registration &info..."));
     serverMenu->AppendSeparator();
-    serverMenu->Append(myTreeCtrl::Menu_GetServerVersion, _("Retrieve server &version"));
-    serverMenu->Append(myTreeCtrl::Menu_ManageUsers, _("&Manage users..."));
+    serverMenu->Append(Cmds::Menu_GetServerVersion, _("Retrieve server &version"));
+    serverMenu->Append(Cmds::Menu_ManageUsers, _("&Manage users..."));
     menuBarM->Append(serverMenu, _("&Server"));
 
     objectMenuM = new wxMenu();
     wxMenu* newMenu = new wxMenu();
-    newMenu->Append(myTreeCtrl::Menu_CreateDomain,      _("&Domain"));
-    newMenu->Append(myTreeCtrl::Menu_CreateException,   _("&Exception"));
-    newMenu->Append(myTreeCtrl::Menu_CreateFunction,    _("&Function"));
-    newMenu->Append(myTreeCtrl::Menu_CreateGenerator,   _("&Generator"));
-    newMenu->Append(myTreeCtrl::Menu_CreateProcedure,   _("&Procedure"));
-    newMenu->Append(myTreeCtrl::Menu_CreateRole,        _("&Role"));
-    newMenu->Append(myTreeCtrl::Menu_CreateTable,       _("&Table"));
-    newMenu->Append(myTreeCtrl::Menu_CreateTrigger,     _("Tr&igger"));
-    newMenu->Append(myTreeCtrl::Menu_CreateView,        _("&View"));
-    objectMenuM->Append(myTreeCtrl::Menu_NewObject, _("&New"), newMenu);
+    newMenu->Append(Cmds::Menu_CreateDomain,      _("&Domain"));
+    newMenu->Append(Cmds::Menu_CreateException,   _("&Exception"));
+    newMenu->Append(Cmds::Menu_CreateFunction,    _("&Function"));
+    newMenu->Append(Cmds::Menu_CreateGenerator,   _("&Generator"));
+    newMenu->Append(Cmds::Menu_CreateProcedure,   _("&Procedure"));
+    newMenu->Append(Cmds::Menu_CreateRole,        _("&Role"));
+    newMenu->Append(Cmds::Menu_CreateTable,       _("&Table"));
+    newMenu->Append(Cmds::Menu_CreateTrigger,     _("Tr&igger"));
+    newMenu->Append(Cmds::Menu_CreateView,        _("&View"));
+    objectMenuM->Append(Cmds::Menu_NewObject, _("&New"), newMenu);
     menuBarM->Append(objectMenuM, _("&Object"));
 
     wxMenu* helpMenu = new wxMenu();
-    helpMenu->Append(myTreeCtrl::Menu_Manual, _("&Manual"));
-    helpMenu->Append(myTreeCtrl::Menu_RelNotes, _("&What's new"));
-    helpMenu->Append(myTreeCtrl::Menu_License, _("&License"));
+    helpMenu->Append(Cmds::Menu_Manual, _("&Manual"));
+    helpMenu->Append(Cmds::Menu_RelNotes, _("&What's new"));
+    helpMenu->Append(Cmds::Menu_License, _("&License"));
     helpMenu->AppendSeparator();
-    helpMenu->Append(myTreeCtrl::Menu_URLHomePage, _("FlameRobin &home page"));
-    helpMenu->Append(myTreeCtrl::Menu_URLProjectPage, _("SourceForge &project page"));
-    helpMenu->Append(myTreeCtrl::Menu_URLFeatureRequest, _("SourceForge &feature requests"));
-    helpMenu->Append(myTreeCtrl::Menu_URLBugReport, _("SourceForge &bug reports"));
+    helpMenu->Append(Cmds::Menu_URLHomePage, _("FlameRobin &home page"));
+    helpMenu->Append(Cmds::Menu_URLProjectPage, _("SourceForge &project page"));
+    helpMenu->Append(Cmds::Menu_URLFeatureRequest, _("SourceForge &feature requests"));
+    helpMenu->Append(Cmds::Menu_URLBugReport, _("SourceForge &bug reports"));
 #ifndef __WXMAC__
     helpMenu->AppendSeparator();
 #endif
@@ -232,15 +233,15 @@ void MainFrame::buildMainMenu()
 
     // update checkboxes
     config().setValue(wxT("HideDisconnectedDatabases"), false);
-    viewMenu->Check(myTreeCtrl::Menu_ToggleDisconnected, true);
+    viewMenu->Check(Cmds::Menu_ToggleDisconnected, true);
     if (config().get(wxT("showStatusBar"), true))
     {
         CreateStatusBar();
-        viewMenu->Check(myTreeCtrl::Menu_ToggleStatusBar, true);
+        viewMenu->Check(Cmds::Menu_ToggleStatusBar, true);
         GetStatusBar()->SetStatusText(_("[No database selected]"));
     }
     if (config().get(wxT("showSearchBar"), true))
-        viewMenu->Check(myTreeCtrl::Menu_ToggleSearchBar, true);
+        viewMenu->Check(Cmds::Menu_ToggleSearchBar, true);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::showDocsHtmlFile(const wxString& fileName)
@@ -336,88 +337,88 @@ myTreeCtrl* MainFrame::getTreeCtrl()
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
-    EVT_MENU(myTreeCtrl::Menu_RegisterServer, MainFrame::OnMenuRegisterServer)
+    EVT_MENU(Cmds::Menu_RegisterServer, MainFrame::OnMenuRegisterServer)
     EVT_MENU(wxID_EXIT, MainFrame::OnMenuQuit)
     EVT_MENU(wxID_ABOUT, MainFrame::OnMenuAbout)
-    EVT_MENU(myTreeCtrl::Menu_Manual, MainFrame::OnMenuManual)
-    EVT_MENU(myTreeCtrl::Menu_RelNotes, MainFrame::OnMenuRelNotes)
-    EVT_MENU(myTreeCtrl::Menu_License, MainFrame::OnMenuLicense)
-    EVT_MENU(myTreeCtrl::Menu_URLHomePage, MainFrame::OnMenuURLHomePage)
-    EVT_MENU(myTreeCtrl::Menu_URLProjectPage, MainFrame::OnMenuURLProjectPage)
-    EVT_MENU(myTreeCtrl::Menu_URLFeatureRequest, MainFrame::OnMenuURLFeatureRequest)
-    EVT_MENU(myTreeCtrl::Menu_URLBugReport, MainFrame::OnMenuURLBugReport)
+    EVT_MENU(Cmds::Menu_Manual, MainFrame::OnMenuManual)
+    EVT_MENU(Cmds::Menu_RelNotes, MainFrame::OnMenuRelNotes)
+    EVT_MENU(Cmds::Menu_License, MainFrame::OnMenuLicense)
+    EVT_MENU(Cmds::Menu_URLHomePage, MainFrame::OnMenuURLHomePage)
+    EVT_MENU(Cmds::Menu_URLProjectPage, MainFrame::OnMenuURLProjectPage)
+    EVT_MENU(Cmds::Menu_URLFeatureRequest, MainFrame::OnMenuURLFeatureRequest)
+    EVT_MENU(Cmds::Menu_URLBugReport, MainFrame::OnMenuURLBugReport)
     EVT_MENU(wxID_PREFERENCES, MainFrame::OnMenuConfigure)
 
-    EVT_MENU(myTreeCtrl::Menu_RegisterDatabase, MainFrame::OnMenuRegisterDatabase)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_RegisterDatabase, MainFrame::OnMenuUpdateIfServerSelected)
-    EVT_MENU(myTreeCtrl::Menu_CreateDatabase, MainFrame::OnMenuCreateDatabase)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_CreateDatabase, MainFrame::OnMenuUpdateIfServerSelected)
-    EVT_MENU(myTreeCtrl::Menu_RestoreIntoNew, MainFrame::OnMenuRestoreIntoNewDatabase)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_RestoreIntoNew, MainFrame::OnMenuUpdateIfServerSelected)
-    EVT_MENU(myTreeCtrl::Menu_ManageUsers, MainFrame::OnMenuManageUsers)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_ManageUsers, MainFrame::OnMenuUpdateIfServerSelected)
-    EVT_MENU(myTreeCtrl::Menu_UnRegisterServer, MainFrame::OnMenuUnRegisterServer)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_UnRegisterServer, MainFrame::OnMenuUpdateUnRegisterServer)
-    EVT_MENU(myTreeCtrl::Menu_ServerProperties, MainFrame::OnMenuServerProperties)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_ServerProperties, MainFrame::OnMenuUpdateIfServerSelected)
+    EVT_MENU(Cmds::Menu_RegisterDatabase, MainFrame::OnMenuRegisterDatabase)
+    EVT_UPDATE_UI(Cmds::Menu_RegisterDatabase, MainFrame::OnMenuUpdateIfServerSelected)
+    EVT_MENU(Cmds::Menu_CreateDatabase, MainFrame::OnMenuCreateDatabase)
+    EVT_UPDATE_UI(Cmds::Menu_CreateDatabase, MainFrame::OnMenuUpdateIfServerSelected)
+    EVT_MENU(Cmds::Menu_RestoreIntoNew, MainFrame::OnMenuRestoreIntoNewDatabase)
+    EVT_UPDATE_UI(Cmds::Menu_RestoreIntoNew, MainFrame::OnMenuUpdateIfServerSelected)
+    EVT_MENU(Cmds::Menu_ManageUsers, MainFrame::OnMenuManageUsers)
+    EVT_UPDATE_UI(Cmds::Menu_ManageUsers, MainFrame::OnMenuUpdateIfServerSelected)
+    EVT_MENU(Cmds::Menu_UnRegisterServer, MainFrame::OnMenuUnRegisterServer)
+    EVT_UPDATE_UI(Cmds::Menu_UnRegisterServer, MainFrame::OnMenuUpdateUnRegisterServer)
+    EVT_MENU(Cmds::Menu_ServerProperties, MainFrame::OnMenuServerProperties)
+    EVT_UPDATE_UI(Cmds::Menu_ServerProperties, MainFrame::OnMenuUpdateIfServerSelected)
 
-    EVT_MENU(myTreeCtrl::Menu_UnRegisterDatabase, MainFrame::OnMenuUnRegisterDatabase)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_UnRegisterDatabase, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
-    EVT_MENU(myTreeCtrl::Menu_ShowConnectedUsers, MainFrame::OnMenuShowConnectedUsers)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_ShowConnectedUsers, MainFrame::OnMenuUpdateIfDatabaseConnected)
-    EVT_MENU(myTreeCtrl::Menu_GetServerVersion, MainFrame::OnMenuGetServerVersion)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_GetServerVersion, MainFrame::OnMenuUpdateIfServerSelected)
-    EVT_MENU(myTreeCtrl::Menu_MonitorEvents, MainFrame::OnMenuMonitorEvents)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_MonitorEvents, MainFrame::OnMenuUpdateIfDatabaseConnected)
-    EVT_MENU(myTreeCtrl::Menu_GenerateData, MainFrame::OnMenuGenerateData)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_GenerateData, MainFrame::OnMenuUpdateIfDatabaseConnected)
-    EVT_MENU(myTreeCtrl::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuDatabaseRegistrationInfo)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuUpdateIfDatabaseSelected)
-    EVT_MENU(myTreeCtrl::Menu_Backup, MainFrame::OnMenuBackup)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_Backup, MainFrame::OnMenuUpdateIfDatabaseSelected)
-    EVT_MENU(myTreeCtrl::Menu_Restore, MainFrame::OnMenuRestore)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_Restore, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
-    EVT_MENU(myTreeCtrl::Menu_Connect, MainFrame::OnMenuConnect)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_Connect, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
-    EVT_MENU(myTreeCtrl::Menu_ConnectAs, MainFrame::OnMenuConnectAs)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_ConnectAs, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
-    EVT_MENU(myTreeCtrl::Menu_Disconnect, MainFrame::OnMenuDisconnect)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_Disconnect, MainFrame::OnMenuUpdateIfDatabaseConnected)
-    EVT_MENU(myTreeCtrl::Menu_Reconnect, MainFrame::OnMenuReconnect)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_Reconnect, MainFrame::OnMenuUpdateIfDatabaseConnected)
-    EVT_MENU(myTreeCtrl::Menu_DropDatabase, MainFrame::OnMenuDropDatabase)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_DropDatabase, MainFrame::OnMenuUpdateIfDatabaseConnected)
-    EVT_MENU(myTreeCtrl::Menu_Query, MainFrame::OnMenuQuery)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_Query, MainFrame::OnMenuUpdateIfDatabaseSelected)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_NewObject, MainFrame::OnMenuUpdateIfDatabaseConnected)
-    EVT_MENU(myTreeCtrl::Menu_DatabasePreferences, MainFrame::OnMenuDatabasePreferences)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_DatabasePreferences, MainFrame::OnMenuUpdateIfDatabaseSelected)
-    EVT_MENU(myTreeCtrl::Menu_DatabaseProperties, MainFrame::OnMenuDatabaseProperties)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_DatabaseProperties, MainFrame::OnMenuUpdateIfDatabaseConnected)
-    EVT_MENU(myTreeCtrl::Menu_ExtractDatabaseDDL, MainFrame::OnMenuDatabaseExtractDDL)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_ExtractDatabaseDDL, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_MENU(Cmds::Menu_UnRegisterDatabase, MainFrame::OnMenuUnRegisterDatabase)
+    EVT_UPDATE_UI(Cmds::Menu_UnRegisterDatabase, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
+    EVT_MENU(Cmds::Menu_ShowConnectedUsers, MainFrame::OnMenuShowConnectedUsers)
+    EVT_UPDATE_UI(Cmds::Menu_ShowConnectedUsers, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_MENU(Cmds::Menu_GetServerVersion, MainFrame::OnMenuGetServerVersion)
+    EVT_UPDATE_UI(Cmds::Menu_GetServerVersion, MainFrame::OnMenuUpdateIfServerSelected)
+    EVT_MENU(Cmds::Menu_MonitorEvents, MainFrame::OnMenuMonitorEvents)
+    EVT_UPDATE_UI(Cmds::Menu_MonitorEvents, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_MENU(Cmds::Menu_GenerateData, MainFrame::OnMenuGenerateData)
+    EVT_UPDATE_UI(Cmds::Menu_GenerateData, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_MENU(Cmds::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuDatabaseRegistrationInfo)
+    EVT_UPDATE_UI(Cmds::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuUpdateIfDatabaseSelected)
+    EVT_MENU(Cmds::Menu_Backup, MainFrame::OnMenuBackup)
+    EVT_UPDATE_UI(Cmds::Menu_Backup, MainFrame::OnMenuUpdateIfDatabaseSelected)
+    EVT_MENU(Cmds::Menu_Restore, MainFrame::OnMenuRestore)
+    EVT_UPDATE_UI(Cmds::Menu_Restore, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
+    EVT_MENU(Cmds::Menu_Connect, MainFrame::OnMenuConnect)
+    EVT_UPDATE_UI(Cmds::Menu_Connect, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
+    EVT_MENU(Cmds::Menu_ConnectAs, MainFrame::OnMenuConnectAs)
+    EVT_UPDATE_UI(Cmds::Menu_ConnectAs, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
+    EVT_MENU(Cmds::Menu_Disconnect, MainFrame::OnMenuDisconnect)
+    EVT_UPDATE_UI(Cmds::Menu_Disconnect, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_MENU(Cmds::Menu_Reconnect, MainFrame::OnMenuReconnect)
+    EVT_UPDATE_UI(Cmds::Menu_Reconnect, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_MENU(Cmds::Menu_DropDatabase, MainFrame::OnMenuDropDatabase)
+    EVT_UPDATE_UI(Cmds::Menu_DropDatabase, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_MENU(Cmds::Menu_Query, MainFrame::OnMenuQuery)
+    EVT_UPDATE_UI(Cmds::Menu_Query, MainFrame::OnMenuUpdateIfDatabaseSelected)
+    EVT_UPDATE_UI(Cmds::Menu_NewObject, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_MENU(Cmds::Menu_DatabasePreferences, MainFrame::OnMenuDatabasePreferences)
+    EVT_UPDATE_UI(Cmds::Menu_DatabasePreferences, MainFrame::OnMenuUpdateIfDatabaseSelected)
+    EVT_MENU(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuDatabaseProperties)
+    EVT_UPDATE_UI(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_MENU(Cmds::Menu_ExtractDatabaseDDL, MainFrame::OnMenuDatabaseExtractDDL)
+    EVT_UPDATE_UI(Cmds::Menu_ExtractDatabaseDDL, MainFrame::OnMenuUpdateIfDatabaseConnected)
 
-    EVT_MENU(myTreeCtrl::Menu_Insert, MainFrame::OnMenuInsert)
-    EVT_MENU(myTreeCtrl::Menu_BrowseColumns, MainFrame::OnMenuBrowseColumns)
-    EVT_MENU(myTreeCtrl::Menu_LoadColumnsInfo, MainFrame::OnMenuLoadColumnsInfo)
-    EVT_MENU(myTreeCtrl::Menu_AddColumn, MainFrame::OnMenuAddColumn)
-    EVT_MENU(myTreeCtrl::Menu_CreateTriggerForTable, MainFrame::OnMenuCreateTriggerForTable)
-    EVT_MENU(myTreeCtrl::Menu_CreateProcedureForTable, MainFrame::OnMenuCreateProcedureForTable)
-    EVT_MENU(myTreeCtrl::Menu_ExecuteProcedure, MainFrame::OnMenuExecuteProcedure)
+    EVT_MENU(Cmds::Menu_Insert, MainFrame::OnMenuInsert)
+    EVT_MENU(Cmds::Menu_BrowseColumns, MainFrame::OnMenuBrowseColumns)
+    EVT_MENU(Cmds::Menu_LoadColumnsInfo, MainFrame::OnMenuLoadColumnsInfo)
+    EVT_MENU(Cmds::Menu_AddColumn, MainFrame::OnMenuAddColumn)
+    EVT_MENU(Cmds::Menu_CreateTriggerForTable, MainFrame::OnMenuCreateTriggerForTable)
+    EVT_MENU(Cmds::Menu_CreateProcedureForTable, MainFrame::OnMenuCreateProcedureForTable)
+    EVT_MENU(Cmds::Menu_ExecuteProcedure, MainFrame::OnMenuExecuteProcedure)
 
-    EVT_MENU(myTreeCtrl::Menu_ShowAllGeneratorValues, MainFrame::OnMenuShowAllGeneratorValues)
-    EVT_UPDATE_UI(myTreeCtrl::Menu_ShowAllGeneratorValues, MainFrame::OnMenuUpdateIfMetadataItemHasChildren)
-    EVT_MENU(myTreeCtrl::Menu_ShowGeneratorValue, MainFrame::OnMenuShowGeneratorValue)
-    EVT_MENU(myTreeCtrl::Menu_SetGeneratorValue, MainFrame::OnMenuSetGeneratorValue)
+    EVT_MENU(Cmds::Menu_ShowAllGeneratorValues, MainFrame::OnMenuShowAllGeneratorValues)
+    EVT_UPDATE_UI(Cmds::Menu_ShowAllGeneratorValues, MainFrame::OnMenuUpdateIfMetadataItemHasChildren)
+    EVT_MENU(Cmds::Menu_ShowGeneratorValue, MainFrame::OnMenuShowGeneratorValue)
+    EVT_MENU(Cmds::Menu_SetGeneratorValue, MainFrame::OnMenuSetGeneratorValue)
 
-    EVT_MENU(myTreeCtrl::Menu_CreateObject, MainFrame::OnMenuCreateObject)
-    EVT_MENU(myTreeCtrl::Menu_AlterObject, MainFrame::OnMenuAlterObject)
-    EVT_MENU(myTreeCtrl::Menu_DropObject, MainFrame::OnMenuDropObject)
-    EVT_MENU(myTreeCtrl::Menu_ObjectProperties, MainFrame::OnMenuObjectProperties)
+    EVT_MENU(Cmds::Menu_CreateObject, MainFrame::OnMenuCreateObject)
+    EVT_MENU(Cmds::Menu_AlterObject, MainFrame::OnMenuAlterObject)
+    EVT_MENU(Cmds::Menu_DropObject, MainFrame::OnMenuDropObject)
+    EVT_MENU(Cmds::Menu_ObjectProperties, MainFrame::OnMenuObjectProperties)
 
-    EVT_MENU(myTreeCtrl::Menu_ToggleStatusBar, MainFrame::OnMenuToggleStatusBar)
-    EVT_MENU(myTreeCtrl::Menu_ToggleSearchBar, MainFrame::OnMenuToggleSearchBar)
-    EVT_MENU(myTreeCtrl::Menu_ToggleDisconnected, MainFrame::OnMenuToggleDisconnected)
+    EVT_MENU(Cmds::Menu_ToggleStatusBar, MainFrame::OnMenuToggleStatusBar)
+    EVT_MENU(Cmds::Menu_ToggleSearchBar, MainFrame::OnMenuToggleSearchBar)
+    EVT_MENU(Cmds::Menu_ToggleDisconnected, MainFrame::OnMenuToggleDisconnected)
 
     EVT_TEXT_ENTER(MainFrame::ID_search_box, MainFrame::OnSearchBoxEnter)
     EVT_TEXT(MainFrame::ID_search_box, MainFrame::OnSearchTextChange)
@@ -425,15 +426,15 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_BUTTON(MainFrame::ID_button_prev, MainFrame::OnButtonPrevClick)
     EVT_BUTTON(MainFrame::ID_button_next, MainFrame::OnButtonNextClick)
 
-    EVT_MENU(myTreeCtrl::Menu_CreateDomain,     MainFrame::OnMenuCreateDomain)
-    EVT_MENU(myTreeCtrl::Menu_CreateException,  MainFrame::OnMenuCreateException)
-    EVT_MENU(myTreeCtrl::Menu_CreateFunction,   MainFrame::OnMenuCreateFunction)
-    EVT_MENU(myTreeCtrl::Menu_CreateGenerator,  MainFrame::OnMenuCreateGenerator)
-    EVT_MENU(myTreeCtrl::Menu_CreateProcedure,  MainFrame::OnMenuCreateProcedure)
-    EVT_MENU(myTreeCtrl::Menu_CreateRole,       MainFrame::OnMenuCreateRole)
-    EVT_MENU(myTreeCtrl::Menu_CreateTable,      MainFrame::OnMenuCreateTable)
-    EVT_MENU(myTreeCtrl::Menu_CreateTrigger,    MainFrame::OnMenuCreateTrigger)
-    EVT_MENU(myTreeCtrl::Menu_CreateView,       MainFrame::OnMenuCreateView)
+    EVT_MENU(Cmds::Menu_CreateDomain,     MainFrame::OnMenuCreateDomain)
+    EVT_MENU(Cmds::Menu_CreateException,  MainFrame::OnMenuCreateException)
+    EVT_MENU(Cmds::Menu_CreateFunction,   MainFrame::OnMenuCreateFunction)
+    EVT_MENU(Cmds::Menu_CreateGenerator,  MainFrame::OnMenuCreateGenerator)
+    EVT_MENU(Cmds::Menu_CreateProcedure,  MainFrame::OnMenuCreateProcedure)
+    EVT_MENU(Cmds::Menu_CreateRole,       MainFrame::OnMenuCreateRole)
+    EVT_MENU(Cmds::Menu_CreateTable,      MainFrame::OnMenuCreateTable)
+    EVT_MENU(Cmds::Menu_CreateTrigger,    MainFrame::OnMenuCreateTrigger)
+    EVT_MENU(Cmds::Menu_CreateView,       MainFrame::OnMenuCreateView)
 
     EVT_MENU_OPEN(MainFrame::OnMainMenuOpen)
     EVT_MENU_RANGE(5000, 6000, MainFrame::OnWindowMenuItem)
@@ -554,7 +555,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
         if (!tree_ctrl_1->ItemHasChildren(item))
         {
             wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
-                myTreeCtrl::Menu_LoadColumnsInfo);
+                Cmds::Menu_LoadColumnsInfo);
             AddPendingEvent(event);
             return;
         }
@@ -563,7 +564,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
         || nt == ntSysTable || nt == ntView || nt == ntProcedure))
     {
         wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
-            myTreeCtrl::Menu_BrowseColumns);
+            Cmds::Menu_BrowseColumns);
         AddPendingEvent(event);
     }
     else
@@ -574,7 +575,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
                 if (!dynamic_cast<Database *>(m)->isConnected())
                 {
                     wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
-                        myTreeCtrl::Menu_Connect);
+                        Cmds::Menu_Connect);
                     AddPendingEvent(event);
                     return;
                 }
@@ -594,7 +595,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
             case ntRole:
                 {
                     wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
-                        myTreeCtrl::Menu_ObjectProperties);
+                        Cmds::Menu_ObjectProperties);
                     AddPendingEvent(event);
                 }
                 return;

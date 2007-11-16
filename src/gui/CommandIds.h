@@ -68,6 +68,31 @@ namespace Cmds
         DataGrid_Set_cell_font,
         DataGrid_Log_changes,
 
+        Menu_RegisterServer = 600, Menu_Manual, Menu_RelNotes, Menu_License,
+        Menu_URLHomePage, Menu_URLProjectPage, Menu_URLFeatureRequest,
+        Menu_URLBugReport,
+        Menu_NewObject, Menu_DatabaseRegistrationInfo, Menu_RegisterDatabase,
+        Menu_CreateDatabase, Menu_ManageUsers, Menu_UnRegisterServer,
+        Menu_ServerProperties, Menu_Reconnect, Menu_ConnectAs,
+        Menu_ExecuteProcedure, Menu_UnRegisterDatabase, Menu_Backup,
+        Menu_Restore, Menu_Connect, Menu_Disconnect, Menu_Query,
+        Menu_ShowConnectedUsers, Menu_CreateObject, Menu_DatabasePreferences,
+        Menu_ShowAllGeneratorValues, Menu_BrowseColumns,
+        Menu_Insert, Menu_LoadColumnsInfo, Menu_ObjectProperties,
+        Menu_DropObject, Menu_ShowGeneratorValue, Menu_SetGeneratorValue,
+        Menu_AddColumn, Menu_CreateTriggerForTable, Menu_RestoreIntoNew,
+        Menu_MonitorEvents, Menu_GetServerVersion, Menu_AlterObject,
+        Menu_DropDatabase, Menu_DatabaseProperties, Menu_GenerateData,
+        Menu_CreateProcedureForTable, Menu_ExtractDatabaseDDL,
+
+        // view menu
+        Menu_ToggleStatusBar, Menu_ToggleSearchBar, Menu_ToggleDisconnected,
+
+        // create new ... (stuff)
+        Menu_CreateDomain, Menu_CreateException, Menu_CreateFunction,
+        Menu_CreateGenerator, Menu_CreateProcedure, Menu_CreateRole,
+        Menu_CreateTable, Menu_CreateTrigger, Menu_CreateView,
+
         // for easier copy/paste of above items (no need to mess with comma
         Last_menu
     };
