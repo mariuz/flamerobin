@@ -66,20 +66,17 @@ void Subject::attachObserver(Observer* observer)
     {
         observer->addSubject(this);
         observersM.push_back(observer);
+        observer->update();
     }
 }
 //-----------------------------------------------------------------------------
 void Subject::detachObserver(Observer* observer)
 {
-    if(!observer)
+    if (!observer)
         return;
 
     observer->removeSubject(this);
     observersM.erase(find(observersM.begin(), observersM.end(), observer));
-/*  // TODO: remove this when no negative side-effects
-    if(!observersM.size())
-        locksCountM = 0;
-*/
 }
 //-----------------------------------------------------------------------------
 void Subject::detachAllObservers()
@@ -87,9 +84,6 @@ void Subject::detachAllObservers()
     for (ObserverIterator i = observersM.begin(); i != observersM.end(); ++i)
         (*i)->removeSubject(this);
     observersM.clear();
-/*  // TODO: remove this when no negative side-effects
-    locksCountM = 0;
-*/
 }
 //-----------------------------------------------------------------------------
 void Subject::notifyObservers()

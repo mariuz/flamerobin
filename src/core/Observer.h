@@ -37,10 +37,12 @@ class Observer
 protected:
     // pointer to objects that it is watching
     std::list<Subject*> subjectsM;
+    // protected since only Subject and descending classes have to call it
+    friend class Subject;
+    virtual void update() = 0;
 public:
     Observer();
     virtual ~Observer();
-    virtual void update() = 0;
 
     Subject* getFirstSubject();
     void addSubject(Subject* subject);

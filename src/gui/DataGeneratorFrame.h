@@ -134,11 +134,12 @@ protected:
     void OnTableValueChoiceChange(wxCommandEvent& event);
     void OnTableCopyChoiceChange(wxCommandEvent& event);
     void OnTreeSelectionChanged(wxTreeEvent& event);
+protected:
+    virtual void update();
 public:
     DataGeneratorFrame(wxWindow* parent, Database* db);
     ~DataGeneratorFrame();
     void removeSubject(Subject* subject);
-    void update();
 };
 //-----------------------------------------------------------------------------
 #endif

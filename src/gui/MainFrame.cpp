@@ -69,7 +69,6 @@
 #include "metadata/metadataitem.h"
 #include "metadata/root.h"
 #include "myTreeCtrl.h"
-#include "treeitem.h"
 #include "frutils.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
@@ -265,12 +264,8 @@ void MainFrame::set_properties()
     tree_ctrl_1->SetIndent(12);
 #endif
 
-    TreeItem* rootdata = new TreeItem(tree_ctrl_1);
-    wxTreeItemId root = tree_ctrl_1->AddRoot(_("Firebird Servers"),
-        tree_ctrl_1->getItemImage(ntRoot), -1, rootdata);
-    // link wxTree root node with rootNodeM
-    getGlobalRoot().attachObserver(rootdata);
-
+    wxTreeItemId rootNode = tree_ctrl_1->addRootNode(_("Firebird Servers"),
+        &getGlobalRoot());
     getGlobalRoot().load();
     if (tree_ctrl_1->GetCount() <= 1)
     {
@@ -289,11 +284,11 @@ void MainFrame::set_properties()
         s.setHostname(wxT("localhost"));
         getGlobalRoot().addServer(s);
     }
-    tree_ctrl_1->Expand(root);
+    tree_ctrl_1->Expand(rootNode);
 
     // make the first server active
     wxTreeItemIdValue cookie;
-    wxTreeItemId firstServer = tree_ctrl_1->GetFirstChild(root, cookie);
+    wxTreeItemId firstServer = tree_ctrl_1->GetFirstChild(rootNode, cookie);
     if (firstServer.IsOk())
         tree_ctrl_1->SelectItem(firstServer);
 

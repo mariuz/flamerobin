@@ -52,11 +52,12 @@ private:
     bool quoteAlwaysM;
     bool quoteCharsAreRegularM;
     bool quoteMixedCaseM;
+protected:
+    virtual void update();
 public:
     IdentifierQuotes();
 
     static IdentifierQuotes& get();
-    virtual void update();
 
     bool getQuoteAlways();
     bool getQuoteCharsAreRegular();

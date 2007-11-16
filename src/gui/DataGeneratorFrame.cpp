@@ -54,7 +54,6 @@
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "myTreeCtrl.h"
-#include "treeitem.h"
 #include "gui/AdvancedMessageDialog.h"
 #include "gui/DataGeneratorFrame.h"
 #include "gui/ProgressDialog.h"
@@ -459,16 +458,13 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     mainSplitter->UpdateSize();
 
     mainTree->allowContextMenu(false);
-    TreeItem* rootdata = new TreeItem(mainTree);
-    wxTreeItemId root = mainTree->AddRoot(_("Tables"),
-        mainTree->getItemImage(ntTables), -1, rootdata);
-    db->getCollection<Table>()->attachObserver(rootdata);
-    rootdata->update();
+    wxTreeItemId rootNode = mainTree->addRootNode(_("Tables"),
+        db->getCollection<Table>());
 
     loadingM = false;
 
     wxTreeItemIdValue cookie;
-    wxTreeItemId node = mainTree->GetFirstChild(root, cookie);
+    wxTreeItemId node = mainTree->GetFirstChild(rootNode, cookie);
     if (node.IsOk())
         mainTree->SelectItem(node);
 }
@@ -781,12 +777,8 @@ void DataGeneratorFrame::loadSetting(wxTreeItemId newitem)
     Column *col = dynamic_cast<Column *>(m);
     showColumnSettings(col != 0);
     if (tab)
-    {
         tab->checkAndLoadColumns();
-        TreeItem *d = (TreeItem *)(mainTree->GetItemData(newitem));
-        d->update();
-    }
-    if (!tab && col)
+    else if (col)
         tab = col->getTable();
     if (!tab)
         return;

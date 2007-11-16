@@ -65,11 +65,12 @@ private:
     wxString dateFormatM;
     wxString timeFormatM;
     void ensureLoaded();
+protected:
+    virtual void update();
 public:
     GridCellFormats();
 
     static GridCellFormats& get();
-    virtual void update();
 
     wxString formatDouble(double value);
     wxString formatDate(int year, int month, int day);

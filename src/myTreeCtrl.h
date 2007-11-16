@@ -59,6 +59,8 @@ public:
     //void OnMouse(wxMouseEvent &event);
     void OnContextMenu(wxContextMenuEvent& event);
 
+    wxTreeItemId addRootNode(const wxString& caption, MetadataItem* rootItem);
+
     // Returns observed metadata item based on specified tree item
     MetadataItem *getMetadataItem(wxTreeItemId item);
 
