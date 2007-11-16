@@ -77,6 +77,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRowBuffer.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRows.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DBHTreeControl.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DndTextControls.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_LogTextControl.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.o \
@@ -132,7 +133,6 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_trigger.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_User.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_view.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_myTreeCtrl.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Identifier.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_IncompleteStatement.o \
@@ -141,7 +141,6 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlStatement.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_treeitem.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_urihandler.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o
@@ -323,6 +322,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRows.o: ./src/gui/controls/DataGr
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.o: ./src/gui/controls/DataGridTable.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DBHTreeControl.o: ./src/gui/controls/DBHTreeControl.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DndTextControls.o: ./src/gui/controls/DndTextControls.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
@@ -488,9 +490,6 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_User.o: ./src/metadata/User.cpp
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_view.o: ./src/metadata/view.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_myTreeCtrl.o: ./src/myTreeCtrl.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
-
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.o: ./src/objectdescriptionhandler.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
@@ -513,9 +512,6 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.o: ./src/sql/SqlTokenizer.cp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.o: ./src/statementHistory.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
-
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_treeitem.o: ./src/treeitem.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_urihandler.o: ./src/urihandler.cpp

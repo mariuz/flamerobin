@@ -516,6 +516,10 @@ SOURCE=.\src\gui\CreateIndexDialog.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\controls\DBHTreeControl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\DataGeneratorFrame.cpp
 # End Source File
 # Begin Source File
@@ -782,10 +786,6 @@ SOURCE=.\src\metadata\metadataitem.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\myTreeCtrl.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\objectdescriptionhandler.cpp
 # End Source File
 # Begin Source File
@@ -823,10 +823,6 @@ SOURCE=.\src\statementHistory.cpp
 # Begin Source File
 
 SOURCE=.\src\metadata\table.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\treeitem.cpp
 # End Source File
 # Begin Source File
 
@@ -895,6 +891,10 @@ SOURCE=.\src\metadata\CreateDDLVisitor.h
 # Begin Source File
 
 SOURCE=.\src\gui\CreateIndexDialog.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\controls\DBHTreeControl.h
 # End Source File
 # Begin Source File
 
@@ -1158,10 +1158,6 @@ SOURCE=.\src\metadata\metadataitem.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\myTreeCtrl.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\metadata\parameter.h
 # End Source File
 # Begin Source File
@@ -1195,10 +1191,6 @@ SOURCE=.\src\statementHistory.h
 # Begin Source File
 
 SOURCE=.\src\metadata\table.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\treeitem.h
 # End Source File
 # Begin Source File
 

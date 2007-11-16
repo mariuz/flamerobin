@@ -53,8 +53,8 @@
 #include "core/ArtProvider.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
-#include "myTreeCtrl.h"
 #include "gui/AdvancedMessageDialog.h"
+#include "gui/controls/DBHTreeControl.h"
 #include "gui/DataGeneratorFrame.h"
 #include "gui/ProgressDialog.h"
 #include "metadata/database.h"
@@ -293,7 +293,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     leftLabel = new wxStaticText( leftPanel, wxID_ANY, wxT("Select tables and columns"), wxDefaultPosition, wxDefaultSize, 0 );
     leftPanelSizer->Add( leftLabel, 0, wxALL|wxEXPAND, 5 );
 
-    mainTree = new myTreeCtrl(leftPanel, wxDefaultPosition, wxDefaultSize,
+    mainTree = new DBHTreeControl(leftPanel, wxDefaultPosition, wxDefaultSize,
 #if defined __WXGTK20__ || defined __WXMAC__
         // doesn't seem to work on MSW when root is hidden
         wxTR_NO_LINES | wxTR_HIDE_ROOT |
@@ -712,7 +712,7 @@ BEGIN_EVENT_TABLE( DataGeneratorFrame, BaseFrame )
     EVT_CHECKBOX(ID_checkbox_skip, DataGeneratorFrame::OnSkipCheckboxClick)
     EVT_CHOICE(ID_choice_value, DataGeneratorFrame::OnTableValueChoiceChange)
     EVT_CHOICE(ID_choice_copy, DataGeneratorFrame::OnTableCopyChoiceChange)
-    EVT_TREE_SEL_CHANGED(myTreeCtrl::ID_tree_ctrl, DataGeneratorFrame::OnTreeSelectionChanged)
+    EVT_TREE_SEL_CHANGED(DBHTreeControl::ID_tree_ctrl, DataGeneratorFrame::OnTreeSelectionChanged)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnTableValueChoiceChange(wxCommandEvent& event)

@@ -38,7 +38,8 @@
 #include "metadata/generator.h"
 #include "metadata/metadataitem.h"
 #include "metadata/root.h"
-#include "myTreeCtrl.h"
+//-----------------------------------------------------------------------------
+class DBHTreeControl;
 //-----------------------------------------------------------------------------
 class MainFrame: public BaseFrame
 {
@@ -138,7 +139,7 @@ public:
     void OnButtonPrevClick(wxCommandEvent &event);
     void OnButtonNextClick(wxCommandEvent &event);
 
-    myTreeCtrl* getTreeCtrl();
+    DBHTreeControl* getTreeCtrl();
     MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE);
 
@@ -159,7 +160,7 @@ private:
     bool confirmDropItem(MetadataItem* item);
 
 protected:
-    myTreeCtrl* tree_ctrl_1;
+    DBHTreeControl* treeMainM;
     wxMenuBar* menuBarM;
     wxMenu* windowMenuM;        // dynamic menu
     wxMenu* objectMenuM;

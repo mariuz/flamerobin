@@ -25,19 +25,20 @@
 
 */
 
-#ifndef FR_MYTREECTRL_H
-#define FR_MYTREECTRL_H
+#ifndef FR_DBHTREECONTROL_H
+#define FR_DBHTREECONTROL_H
 
 #include <wx/wx.h>
 #include <wx/treectrl.h>
 
 #include <map>
+
 #include "metadata/metadataitem.h"
 
 class Database;
 class Server;
 //-----------------------------------------------------------------------------
-class myTreeCtrl: public wxTreeCtrl
+class DBHTreeControl: public wxTreeCtrl
 {
 private:
     std::map<int, int> imageMapM;
@@ -80,10 +81,10 @@ public:
 
     void allowContextMenu(bool doAllow = true);
 
-    myTreeCtrl(wxWindow* parent, const wxPoint& pos = wxDefaultPosition,
+    DBHTreeControl(wxWindow* parent, const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, long style = wxTR_HAS_BUTTONS);
 
     DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
-#endif
+#endif // FR_DBHTREECONTROL_H

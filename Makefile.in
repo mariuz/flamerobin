@@ -67,6 +67,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_DataGridRowBuffer.o \
 	flamerobin_DataGridRows.o \
 	flamerobin_DataGridTable.o \
+	flamerobin_DBHTreeControl.o \
 	flamerobin_DndTextControls.o \
 	flamerobin_LogTextControl.o \
 	flamerobin_PrintableHtmlWindow.o \
@@ -122,7 +123,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_trigger.o \
 	flamerobin_User.o \
 	flamerobin_view.o \
-	flamerobin_myTreeCtrl.o \
 	flamerobin_objectdescriptionhandler.o \
 	flamerobin_Identifier.o \
 	flamerobin_IncompleteStatement.o \
@@ -131,7 +131,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_SqlStatement.o \
 	flamerobin_SqlTokenizer.o \
 	flamerobin_statementHistory.o \
-	flamerobin_treeitem.o \
 	flamerobin_urihandler.o \
 	$(__FR_PLATFORMSPECIFICSOURCES_OBJECTS) \
 	$(__flamerobin___win32rc)
@@ -367,6 +366,9 @@ flamerobin_DataGridRows.o: $(srcdir)/src/gui/controls/DataGridRows.cpp $(FLAMERO
 flamerobin_DataGridTable.o: $(srcdir)/src/gui/controls/DataGridTable.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/controls/DataGridTable.cpp
 
+flamerobin_DBHTreeControl.o: $(srcdir)/src/gui/controls/DBHTreeControl.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/controls/DBHTreeControl.cpp
+
 flamerobin_DndTextControls.o: $(srcdir)/src/gui/controls/DndTextControls.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/controls/DndTextControls.cpp
 
@@ -532,9 +534,6 @@ flamerobin_User.o: $(srcdir)/src/metadata/User.cpp $(FLAMEROBIN_ODEP)
 flamerobin_view.o: $(srcdir)/src/metadata/view.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/view.cpp
 
-flamerobin_myTreeCtrl.o: $(srcdir)/src/myTreeCtrl.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/myTreeCtrl.cpp
-
 flamerobin_objectdescriptionhandler.o: $(srcdir)/src/objectdescriptionhandler.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/objectdescriptionhandler.cpp
 
@@ -558,9 +557,6 @@ flamerobin_SqlTokenizer.o: $(srcdir)/src/sql/SqlTokenizer.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_statementHistory.o: $(srcdir)/src/statementHistory.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/statementHistory.cpp
-
-flamerobin_treeitem.o: $(srcdir)/src/treeitem.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/treeitem.cpp
 
 flamerobin_urihandler.o: $(srcdir)/src/urihandler.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/urihandler.cpp

@@ -236,6 +236,7 @@
         $(SOURCEDIR)/gui/controls/DataGridRowBuffer.h
         $(SOURCEDIR)/gui/controls/DataGridRows.h
         $(SOURCEDIR)/gui/controls/DataGridTable.h
+        $(SOURCEDIR)/gui/controls/DBHTreeControl.h
         $(SOURCEDIR)/gui/controls/DndTextControls.h
         $(SOURCEDIR)/gui/controls/LogTextControl.h
         $(SOURCEDIR)/gui/controls/PrintableHtmlWindow.h
@@ -298,9 +299,7 @@
         $(SOURCEDIR)/sql/SimpleParser.h
         $(SOURCEDIR)/sql/SqlStatement.h
         $(SOURCEDIR)/sql/SqlTokenizer.h
-        $(SOURCEDIR)/myTreeCtrl.h
         $(SOURCEDIR)/statementHistory.h
-        $(SOURCEDIR)/treeitem.h
         $(SOURCEDIR)/urihandler.h
     </set>
 
@@ -342,6 +341,7 @@
         $(SOURCEDIR)/gui/controls/DataGridRowBuffer.cpp
         $(SOURCEDIR)/gui/controls/DataGridRows.cpp
         $(SOURCEDIR)/gui/controls/DataGridTable.cpp
+        $(SOURCEDIR)/gui/controls/DBHTreeControl.cpp
         $(SOURCEDIR)/gui/controls/DndTextControls.cpp
         $(SOURCEDIR)/gui/controls/LogTextControl.cpp
         $(SOURCEDIR)/gui/controls/PrintableHtmlWindow.cpp
@@ -397,7 +397,6 @@
         $(SOURCEDIR)/metadata/trigger.cpp
         $(SOURCEDIR)/metadata/User.cpp
         $(SOURCEDIR)/metadata/view.cpp
-        $(SOURCEDIR)/myTreeCtrl.cpp
         $(SOURCEDIR)/objectdescriptionhandler.cpp
         $(SOURCEDIR)/sql/Identifier.cpp
         $(SOURCEDIR)/sql/IncompleteStatement.cpp
@@ -406,7 +405,6 @@
         $(SOURCEDIR)/sql/SqlStatement.cpp
         $(SOURCEDIR)/sql/SqlTokenizer.cpp
         $(SOURCEDIR)/statementHistory.cpp
-        $(SOURCEDIR)/treeitem.cpp
         $(SOURCEDIR)/urihandler.cpp
 
         $(FR_PLATFORMSPECIFICSOURCES)

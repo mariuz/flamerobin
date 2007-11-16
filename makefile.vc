@@ -84,6 +84,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRowBuffer.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRows.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DBHTreeControl.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DndTextControls.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_LogTextControl.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.obj \
@@ -139,7 +140,6 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_trigger.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_User.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_view.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_myTreeCtrl.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Identifier.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_IncompleteStatement.obj \
@@ -148,7 +148,6 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlStatement.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_treeitem.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_urihandler.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin.res
@@ -362,6 +361,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRows.obj: .\src\gui\controls\DataG
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.obj: .\src\gui\controls\DataGridTable.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DBHTreeControl.obj: .\src\gui\controls\DBHTreeControl.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DndTextControls.obj: .\src\gui\controls\DndTextControls.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
@@ -527,9 +529,6 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_User.obj: .\src\metadata\User.cpp
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_view.obj: .\src\metadata\view.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_myTreeCtrl.obj: .\src\myTreeCtrl.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
-
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.obj: .\src\objectdescriptionhandler.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
@@ -552,9 +551,6 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.obj: .\src\sql\SqlTokenizer.c
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.obj: .\src\statementHistory.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
-
-vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_treeitem.obj: .\src\treeitem.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_urihandler.obj: .\src\urihandler.cpp

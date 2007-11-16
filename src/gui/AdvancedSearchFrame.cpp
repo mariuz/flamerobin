@@ -37,15 +37,16 @@
 
 //#include "core/FRError.h"
 #include "frutils.h"
-#include "ContextMenuMetadataItemVisitor.h"
+#include "gui/AdvancedSearchFrame.h"
+#include "gui/ContextMenuMetadataItemVisitor.h"
+#include "gui/controls/DBHTreeControl.h"
+#include "gui/MainFrame.h"
+#include "gui/ProgressDialog.h"
+#include "metadata/CreateDDLVisitor.h"
+#include "metadata/database.h"
 #include "metadata/metadataitem.h"
 #include "metadata/root.h"
 #include "metadata/server.h"
-#include "metadata/database.h"
-#include "metadata/CreateDDLVisitor.h"
-#include "ProgressDialog.h"
-#include "MainFrame.h"
-#include "AdvancedSearchFrame.h"
 //-----------------------------------------------------------------------------
 // derived class since we need to catch size event
 class AdjustableListCtrl: public wxListCtrl
@@ -440,7 +441,7 @@ void AdvancedSearchFrame::OnListCtrlResultsItemSelected(wxListEvent& event)
     MainFrame *mf = dynamic_cast<MainFrame *>(GetParent());
     if (mf)
     {
-        myTreeCtrl *tree = mf->getTreeCtrl();
+        DBHTreeControl* tree = mf->getTreeCtrl();
         if (tree)
             tree->selectMetadataItem(m);
     }

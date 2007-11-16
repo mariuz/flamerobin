@@ -47,7 +47,7 @@
 class Database;
 class Column;
 class Table;
-class myTreeCtrl;
+class DBHTreeControl;
 class GeneratorSettings;
 //class TableDep;
 //-----------------------------------------------------------------------------
@@ -95,7 +95,7 @@ protected:
     wxSplitterWindow* mainSplitter;
     wxPanel* leftPanel;
     wxStaticText* leftLabel;
-    myTreeCtrl* mainTree;
+    DBHTreeControl* mainTree;
     wxPanel* rightPanel;
     wxStaticText* rightLabel;
     wxStaticText* tableLabel;
