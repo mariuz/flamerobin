@@ -39,76 +39,7 @@
 #endif
 
 #include "core/ArtProvider.h"
-#include "metadata/metadataitem.h"
-//-----------------------------------------------------------------------------
-wxBitmap getImage(NodeType type)
-{
-    wxSize sz(16, 16);
-    switch (type)
-    {
-        case ntColumn:
-            return wxArtProvider::GetIcon(ART_Column, wxART_OTHER, sz);
-        case ntComputed:
-            return wxArtProvider::GetIcon(ART_Computed, wxART_OTHER, sz);
-        case ntDatabase:
-            return wxArtProvider::GetIcon(ART_Database, wxART_OTHER, sz);
-        case ntDomain:
-            return wxArtProvider::GetIcon(ART_Domain, wxART_OTHER, sz);
-        case ntDomains:
-            return wxArtProvider::GetIcon(ART_Domains, wxART_OTHER, sz);
-        case ntException:
-            return wxArtProvider::GetIcon(ART_Exception, wxART_OTHER, sz);
-        case ntExceptions:
-            return wxArtProvider::GetIcon(ART_Exceptions, wxART_OTHER, sz);
-        case ntForeignKey:
-            return wxArtProvider::GetIcon(ART_ForeignKey, wxART_OTHER, sz);
-        case ntFunction:
-            return wxArtProvider::GetIcon(ART_Function, wxART_OTHER, sz);
-        case ntFunctions:
-            return wxArtProvider::GetIcon(ART_Functions, wxART_OTHER, sz);
-        case ntGenerator:
-            return wxArtProvider::GetIcon(ART_Generator, wxART_OTHER, sz);
-        case ntGenerators:
-            return wxArtProvider::GetIcon(ART_Generators, wxART_OTHER, sz);
-        case ntParameterInput:
-            return wxArtProvider::GetIcon(ART_ParameterInput, wxART_OTHER, sz);
-        case ntParameterOutput:
-            return wxArtProvider::GetIcon(ART_ParameterOutput, wxART_OTHER, sz);
-        case ntPrimaryForeignKey:
-            return wxArtProvider::GetIcon(ART_PrimaryAndForeignKey, wxART_OTHER, sz);
-        case ntPrimaryKey:
-            return wxArtProvider::GetIcon(ART_PrimaryKey, wxART_OTHER, sz);
-        case ntProcedure:
-            return wxArtProvider::GetIcon(ART_Procedure, wxART_OTHER, sz);
-        case ntProcedures:
-            return wxArtProvider::GetIcon(ART_Procedures, wxART_OTHER, sz);
-        case ntRole:
-            return wxArtProvider::GetIcon(ART_Role, wxART_OTHER, sz);
-        case ntRoles:
-            return wxArtProvider::GetIcon(ART_Roles, wxART_OTHER, sz);
-        case ntRoot:
-            return wxArtProvider::GetIcon(ART_Root, wxART_OTHER, sz);
-        case ntServer:
-            return wxArtProvider::GetIcon(ART_Server, wxART_OTHER, sz);
-        case ntSysTable:
-            return wxArtProvider::GetIcon(ART_SystemTable, wxART_OTHER, sz);
-        case ntSysTables:
-            return wxArtProvider::GetIcon(ART_SystemTables, wxART_OTHER, sz);
-        case ntTable:
-            return wxArtProvider::GetIcon(ART_Table, wxART_OTHER, sz);
-        case ntTables:
-            return wxArtProvider::GetIcon(ART_Tables, wxART_OTHER, sz);
-        case ntTrigger:
-            return wxArtProvider::GetIcon(ART_Trigger, wxART_OTHER, sz);
-        case ntTriggers:
-            return wxArtProvider::GetIcon(ART_Triggers, wxART_OTHER, sz);
-        case ntView:
-            return wxArtProvider::GetIcon(ART_View, wxART_OTHER, sz);
-        case ntViews:
-            return wxArtProvider::GetIcon(ART_Views, wxART_OTHER, sz);
-    }
-    return wxArtProvider::GetIcon(ART_Object, wxART_OTHER, sz);
-}
+#include "images.h"
 //-----------------------------------------------------------------------------
 wxBitmap getImage32(NodeType type)
 {

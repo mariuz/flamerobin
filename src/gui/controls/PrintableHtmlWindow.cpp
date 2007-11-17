@@ -42,7 +42,6 @@
 #include <wx/file.h>
 #include <wx/filedlg.h>
 
-#include "images.h"
 #include "urihandler.h"
 
 #include "core/FRError.h"

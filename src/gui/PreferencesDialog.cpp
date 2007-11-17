@@ -41,16 +41,17 @@
 #include <algorithm>
 #include <vector>
 
+#include <wx/artprov.h>
 #include <wx/bookctrl.h>
 #include <wx/tokenzr.h>
 #include <wx/wfstream.h>
 #include <wx/xml/xml.h>
 
 #include "config/Config.h"
+#include "core/ArtProvider.h"
 #include "frutils.h"
 #include "gui/PreferencesDialog.h"
 #include "gui/StyleGuide.h"
-#include "images.h"
 //-----------------------------------------------------------------------------
 static bool hasParamNode(wxXmlNode* node, const wxString& param)
 {
@@ -641,13 +642,14 @@ void PreferencesDialog::selectPage(int index)
 void PreferencesDialog::setProperties()
 {
     // setup image list for tree control
-    imageListM.Create(16, 16);
-    imageListM.Add(getImage(ntColumn));
-    imageListM.Add(getImage(ntProcedure));
-    imageListM.Add(getImage(ntTrigger));
-    imageListM.Add(getImage(ntUnknown));
-    imageListM.Add(getImage(ntTable));
-    imageListM.Add(getImage(ntDomain));
+    wxSize sz(16, 16);
+    imageListM.Create(sz.GetWidth(), sz.GetHeight());
+    imageListM.Add(wxArtProvider::GetIcon(ART_Column, wxART_OTHER, sz));
+    imageListM.Add(wxArtProvider::GetIcon(ART_Procedure, wxART_OTHER, sz));
+    imageListM.Add(wxArtProvider::GetIcon(ART_Trigger, wxART_OTHER, sz));
+    imageListM.Add(wxArtProvider::GetIcon(ART_Object, wxART_OTHER, sz));
+    imageListM.Add(wxArtProvider::GetIcon(ART_Table, wxART_OTHER, sz));
+    imageListM.Add(wxArtProvider::GetIcon(ART_Domain, wxART_OTHER, sz));
     treectrl_1->SetImageList(&imageListM);
 
 #if wxCHECK_VERSION(2, 8, 0)

@@ -38,18 +38,21 @@
     #include "wx/wx.h"
 #endif
 
-#include <wx/imaglist.h>
+#include <wx/artprov.h>
 #include <wx/dataobj.h>
 #include <wx/dnd.h>
+#include <wx/imaglist.h>
 
 #include <algorithm>
+#include <map>
 #include <vector>
 
 #include "config/Config.h"
+#include "core/ArtProvider.h"
 #include "core/Observer.h"
 #include "gui/ContextMenuMetadataItemVisitor.h"
 #include "gui/controls/DBHTreeControl.h"
-#include "images.h"
+// nearly all headers in src/metadata would be necessary, but...
 #include "metadata/root.h"
 //-----------------------------------------------------------------------------
 // DBHTreeConfigCache: class to cache config data for tree control behaviour
@@ -106,6 +109,150 @@ bool DBHTreeConfigCache::getShowColumns()
 {
     ensureCacheValid();
     return showColumnsM;
+}
+//-----------------------------------------------------------------------------
+// DBHTreeImageList class
+class DBHTreeImageList: public wxImageList
+{
+private:
+    std::map<wxArtID, int> artIdIndicesM;
+    void addImage(const wxArtID& art);
+public:
+    DBHTreeImageList();
+
+    static DBHTreeImageList& get();
+    int getImageIndex(const wxArtID& id);
+    int getImageIndex(NodeType type);
+};
+//-----------------------------------------------------------------------------
+DBHTreeImageList::DBHTreeImageList()
+    : wxImageList(16, 16)
+{
+
+    addImage(ART_Object);
+    addImage(ART_Column);
+    addImage(ART_Computed);
+    addImage(ART_Database);
+    addImage(ART_Domain);
+    addImage(ART_Domains);
+    addImage(ART_Exception);
+    addImage(ART_Exceptions);
+    addImage(ART_ForeignKey);
+    addImage(ART_Function);
+    addImage(ART_Functions);
+    addImage(ART_Generator);
+    addImage(ART_Generators);
+    addImage(ART_ParameterInput);
+    addImage(ART_ParameterOutput);
+    addImage(ART_PrimaryAndForeignKey);
+    addImage(ART_PrimaryKey);
+    addImage(ART_Procedure);
+    addImage(ART_Procedures);
+    addImage(ART_Role);
+    addImage(ART_Roles);
+    addImage(ART_Root);
+    addImage(ART_Server);
+    addImage(ART_SystemTable);
+    addImage(ART_SystemTables);
+    addImage(ART_Table);
+    addImage(ART_Tables);
+    addImage(ART_Trigger);
+    addImage(ART_Triggers);
+    addImage(ART_View);
+    addImage(ART_Views);
+}
+//-----------------------------------------------------------------------------
+/*static*/ DBHTreeImageList& DBHTreeImageList::get()
+{
+    static DBHTreeImageList til;
+    return til;
+}
+//-----------------------------------------------------------------------------
+void DBHTreeImageList::addImage(const wxArtID& art)
+{
+    wxBitmap bmp(wxArtProvider::GetBitmap(art, wxART_OTHER, wxSize(16, 16)));
+    if (!bmp.Ok())
+        return;
+    wxIcon icon;
+    icon.CopyFromBitmap(bmp);
+    artIdIndicesM[art] = Add(icon);
+}
+//-----------------------------------------------------------------------------
+int DBHTreeImageList::getImageIndex(const wxArtID& id)
+{
+    std::map<wxArtID, int>::const_iterator it = artIdIndicesM.find(id);
+    if (it != artIdIndicesM.end())
+        return (*it).second;
+    return -1;
+}
+//-----------------------------------------------------------------------------
+int DBHTreeImageList::getImageIndex(NodeType type)
+{
+    wxArtID id(ART_Object);
+    switch (type)
+    {
+        case ntColumn:
+            id = ART_Column; break;
+        case ntComputed:
+            id = ART_Computed; break;
+        case ntDatabase:
+            id = ART_Database; break;
+        case ntDomain:
+            id = ART_Domain; break;
+        case ntDomains:
+            id = ART_Domains; break;
+        case ntException:
+            id = ART_Exception; break;
+        case ntExceptions:
+            id = ART_Exceptions; break;
+        case ntForeignKey:
+            id = ART_ForeignKey; break;
+        case ntFunction:
+            id = ART_Function; break;
+        case ntFunctions:
+            id = ART_Functions; break;
+        case ntGenerator:
+            id = ART_Generator; break;
+        case ntGenerators:
+            id = ART_Generators; break;
+        case ntParameterInput:
+            id = ART_ParameterInput; break;
+        case ntParameterOutput:
+            id = ART_ParameterOutput; break;
+        case ntPrimaryForeignKey:
+            id = ART_PrimaryAndForeignKey; break;
+        case ntPrimaryKey:
+            id = ART_PrimaryKey; break;
+        case ntProcedure:
+            id = ART_Procedure; break;
+        case ntProcedures:
+            id = ART_Procedures; break;
+        case ntRole:
+            id = ART_Role; break;
+        case ntRoles:
+            id = ART_Roles; break;
+        case ntRoot:
+            id = ART_Root; break;
+        case ntServer:
+            id = ART_Server; break;
+        case ntSysTable:
+            id = ART_SystemTable; break;
+        case ntSysTables:
+            id = ART_SystemTables; break;
+        case ntTable:
+            id = ART_Table; break;
+        case ntTables:
+            id = ART_Tables; break;
+        case ntTrigger:
+            id = ART_Trigger; break;
+        case ntTriggers:
+            id = ART_Triggers; break;
+        case ntView:
+            id = ART_View; break;
+        case ntViews:
+            id = ART_Views; break;
+    }
+    return getImageIndex(id);
 }
 //-----------------------------------------------------------------------------
 // DBHTreeItemVisitor class
@@ -168,7 +315,7 @@ void DBHTreeItemVisitor::setNodeProperties(MetadataItem* metadataItem)
     nodeVisibleM = true;
     nodeTextBoldM = false;
     nodeTextM = metadataItem->getPrintableName();
-    nodeImageIndexM = treeM->getItemImageIndex(metadataItem->getType());
+    nodeImageIndexM = DBHTreeImageList::get().getImageIndex(metadataItem->getType());
     showChildrenM = metadataItem->getChildrenCount() > 0;
 }
 //-----------------------------------------------------------------------------
@@ -187,13 +334,13 @@ void DBHTreeItemVisitor::visitColumn(Column& column)
     bool isPK = column.isPrimaryKey();
     bool isFK = column.isForeignKey();
     if (isPK && isFK)
-        nodeImageIndexM = treeM->getItemImageIndex(ntPrimaryForeignKey);
+        nodeImageIndexM = DBHTreeImageList::get().getImageIndex(ART_PrimaryAndForeignKey);
     else if (isPK)
-        nodeImageIndexM = treeM->getItemImageIndex(ntPrimaryKey);
+        nodeImageIndexM = DBHTreeImageList::get().getImageIndex(ART_PrimaryKey);
     else if (isFK)
-        nodeImageIndexM = treeM->getItemImageIndex(ntForeignKey);
+        nodeImageIndexM = DBHTreeImageList::get().getImageIndex(ART_ForeignKey);
     else if (!column.getComputedSource().IsEmpty())
-        nodeImageIndexM = treeM->getItemImageIndex(ntComputed);
+        nodeImageIndexM = DBHTreeImageList::get().getImageIndex(ART_Computed);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitDatabase(Database& database)
@@ -512,11 +659,13 @@ void DBHTreeControl::OnContextMenu(wxContextMenuEvent& event)
     PopupMenu(&MyMenu, pos);
 }
 //-----------------------------------------------------------------------------
-DBHTreeControl::DBHTreeControl(wxWindow* parent, const wxPoint& pos, const wxSize& size, long style):
-    wxTreeCtrl(parent, ID_tree_ctrl, pos, size, style)
+DBHTreeControl::DBHTreeControl(wxWindow* parent, const wxPoint& pos,
+        const wxSize& size, long style)
+    : wxTreeCtrl(parent, ID_tree_ctrl, pos, size, style)
 {
     allowContextMenuM = true;
-    loadImages();
+    // create copy of static image list, set to be autodeleted
+    AssignImageList(new wxImageList(DBHTreeImageList::get()));
 }
 //-----------------------------------------------------------------------------
 void DBHTreeControl::allowContextMenu(bool doAllow)
@@ -535,7 +684,8 @@ wxTreeItemId DBHTreeControl::addRootNode(const wxString& caption,
     MetadataItem* rootItem)
 {
     wxASSERT(rootItem);
-    wxTreeItemId id = AddRoot(caption, getItemImageIndex(rootItem->getType()));
+    wxTreeItemId id = AddRoot(caption,
+        DBHTreeImageList::get().getImageIndex(rootItem->getType()));
     DBHTreeItem* rootdata = new DBHTreeItem(this);
     SetItemData(id, rootdata);
     rootItem->attachObserver(rootdata);
@@ -581,31 +731,6 @@ MetadataItem* DBHTreeControl::getMetadataItem(wxTreeItemId item)
         return 0;
 
     return ti->getObservedMetadata();
-}
-//-----------------------------------------------------------------------------
-//! returns index of image in wxImageList for given NodeType
-int DBHTreeControl::getItemImageIndex(NodeType t)
-{
-    return imageMapM[t];
-}
-//-----------------------------------------------------------------------------
-//! creates wxImageList from icons in tree
-void DBHTreeControl::loadImages()
-{
-    for (int i=0; i<ntLastType; i++)
-        imageMapM[i] = 0;
-
-    wxImageList* imageList = new wxImageList(16, 16);
-    for (int i=0; i<ntLastType; i++)
-    {
-        wxBitmap bmp(getImage((NodeType)i));
-        if (!bmp.Ok())
-            continue;
-        wxIcon icon;
-        icon.CopyFromBitmap(bmp);
-        imageMapM[i] = imageList->Add(icon);
-    }
-    AssignImageList(imageList);    // autodeleted
 }
 //-----------------------------------------------------------------------------
 // recursively searches children for item

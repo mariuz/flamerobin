@@ -31,25 +31,17 @@
 #include <wx/wx.h>
 #include <wx/treectrl.h>
 
-#include <map>
-
 #include "metadata/metadataitem.h"
 
-class DBHTreeItemVisitor;
 class Database;
 class Server;
 //-----------------------------------------------------------------------------
 class DBHTreeControl: public wxTreeCtrl
 {
 private:
-    std::map<int, int> imageMapM;
-    void loadImages();
     // recursive function used by selectMetadataItem
     bool findMetadataItem(MetadataItem *item, wxTreeItemId parent);
     bool allowContextMenuM;
-
-    friend class DBHTreeItemVisitor;
-    int getItemImageIndex(NodeType t);
 
 protected:
     short m_spacing;    // fix wxWidgets bug (or lack of feature)
