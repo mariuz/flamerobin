@@ -48,8 +48,6 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
     ntTrigger, ntTriggers, ntGenerator, ntGenerators, ntFunction, ntFunctions,
     ntSysTable, ntSysTables, ntException, ntExceptions, ntDomain, ntDomains,
     ntRole, ntRoles, ntColumn, ntParameterInput, ntParameterOutput, ntIndex,
-    // these are used only for images
-    ntPrimaryKey, ntComputed, ntPrimaryForeignKey, ntForeignKey,
     ntLastType
 } NodeType;
 //-----------------------------------------------------------------------------

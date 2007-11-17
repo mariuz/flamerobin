@@ -193,8 +193,6 @@ int DBHTreeImageList::getImageIndex(NodeType type)
     {
         case ntColumn:
             id = ART_Column; break;
-        case ntComputed:
-            id = ART_Computed; break;
         case ntDatabase:
             id = ART_Database; break;
         case ntDomain:
@@ -205,8 +203,6 @@ int DBHTreeImageList::getImageIndex(NodeType type)
             id = ART_Exception; break;
         case ntExceptions:
             id = ART_Exceptions; break;
-        case ntForeignKey:
-            id = ART_ForeignKey; break;
         case ntFunction:
             id = ART_Function; break;
         case ntFunctions:
@@ -219,10 +215,6 @@ int DBHTreeImageList::getImageIndex(NodeType type)
             id = ART_ParameterInput; break;
         case ntParameterOutput:
             id = ART_ParameterOutput; break;
-        case ntPrimaryForeignKey:
-            id = ART_PrimaryAndForeignKey; break;
-        case ntPrimaryKey:
-            id = ART_PrimaryKey; break;
         case ntProcedure:
             id = ART_Procedure; break;
         case ntProcedures:
