@@ -339,3 +339,29 @@ void Config::setUserHomePath(const wxString& userHomePath)
     userHomePathM = userHomePath;
 }
 //-----------------------------------------------------------------------------
+// class ConfigCache
+ConfigCache::ConfigCache(Config& config)
+    : Observer(), cacheValidM(false)
+{
+    config.attachObserver(this);
+}
+//-----------------------------------------------------------------------------
+void ConfigCache::ensureCacheValid()
+{
+    if (!cacheValidM)
+    {
+        loadFromConfig();
+        cacheValidM = true;
+    }
+}
+//-----------------------------------------------------------------------------
+void ConfigCache::loadFromConfig()
+{
+}
+//-----------------------------------------------------------------------------
+void ConfigCache::update()
+{
+    // next call to ensureCacheValid() will reload the cached information
+    cacheValidM = false;
+}
+//-----------------------------------------------------------------------------

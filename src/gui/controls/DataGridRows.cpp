@@ -57,16 +57,14 @@
 #include "metadata/database.h"
 //-----------------------------------------------------------------------------
 // GridCellFormats: class to cache config data for cell formatting
-class GridCellFormats: public Observer
+class GridCellFormats: public ConfigCache
 {
 private:
-    bool loadedM;
     int precisionForDoubleM;
     wxString dateFormatM;
     wxString timeFormatM;
-    void ensureLoaded();
 protected:
-    virtual void update();
+    virtual void loadFromConfig();
 public:
     GridCellFormats();
 
@@ -82,9 +80,8 @@ public:
 };
 //-----------------------------------------------------------------------------
 GridCellFormats::GridCellFormats()
-    : loadedM(false)
+    : ConfigCache(config())
 {
-    config().attachObserver(this);
 }
 //-----------------------------------------------------------------------------
 GridCellFormats& GridCellFormats::get()
@@ -93,31 +90,19 @@ GridCellFormats& GridCellFormats::get()
     return gcf;
 }
 //-----------------------------------------------------------------------------
-void GridCellFormats::update()
+void GridCellFormats::loadFromConfig()
 {
-    // we observe config() object, so we better do as little as possible
-    // I think this here is fast enough ;-)
-    loadedM = false;
-}
-//-----------------------------------------------------------------------------
-void GridCellFormats::ensureLoaded()
-{
-    if (!loadedM)
-    {
-        precisionForDoubleM = config().get(wxT("NumberPrecision"), 2);
-        if (!config().get(wxT("ReformatNumbers"), false))
-            precisionForDoubleM = -1;
+    precisionForDoubleM = config().get(wxT("NumberPrecision"), 2);
+    if (!config().get(wxT("ReformatNumbers"), false))
+        precisionForDoubleM = -1;
 
-        dateFormatM = config().get(wxT("DateFormat"), wxString(wxT("D.M.Y")));
-        timeFormatM = config().get(wxT("TimeFormat"), wxString(wxT("H:M:S.T")));
-
-        loadedM = true;
-    }
+    dateFormatM = config().get(wxT("DateFormat"), wxString(wxT("D.M.Y")));
+    timeFormatM = config().get(wxT("TimeFormat"), wxString(wxT("H:M:S.T")));
 }
 //-----------------------------------------------------------------------------
 wxString GridCellFormats::formatDouble(double value)
 {
-    ensureLoaded();
+    ensureCacheValid();
 
     std::ostringstream oss;
     oss << std::fixed;
@@ -129,7 +114,7 @@ wxString GridCellFormats::formatDouble(double value)
 //-----------------------------------------------------------------------------
 wxString GridCellFormats::formatDate(int year, int month, int day)
 {
-    ensureLoaded();
+    ensureCacheValid();
 
     wxString result;
     for (wxString::iterator c = dateFormatM.begin(); c != dateFormatM.end(); c++)
@@ -183,7 +168,7 @@ bool getNumber(wxString::iterator& ci, int& toSet)
 bool GridCellFormats::parseDate(wxString::iterator& start,
     wxString::iterator end, bool consumeAll, int& year, int& month, int& day)
 {
-    ensureLoaded();
+    ensureCacheValid();
 
     for (wxString::iterator c = dateFormatM.begin();
         c != dateFormatM.end() && start != end; ++c)
@@ -245,7 +230,7 @@ bool GridCellFormats::parseDate(wxString::iterator& start,
 wxString GridCellFormats::formatTime(int hour, int minute, int second,
     int milliSecond)
 {
-    ensureLoaded();
+    ensureCacheValid();
 
     wxString result;
     for (wxString::iterator c = timeFormatM.begin(); c != timeFormatM.end();
@@ -285,7 +270,7 @@ wxString GridCellFormats::formatTime(int hour, int minute, int second,
 bool GridCellFormats::parseTime(wxString::iterator& start,
     wxString::iterator end, int& hr, int& mn, int& sc, int& ml)
 {
-    ensureLoaded();
+    ensureCacheValid();
 
     for (wxString::iterator c = timeFormatM.begin();
         c != timeFormatM.end() && start != end; c++)

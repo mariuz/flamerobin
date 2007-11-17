@@ -36,6 +36,7 @@
 #include <map>
 #include <vector>
 
+#include "core/Observer.h"
 #include "core/Subject.h"
 //-----------------------------------------------------------------------------
 enum StorageGranularity
@@ -137,5 +138,20 @@ public:
 };
 //-----------------------------------------------------------------------------
 Config& config();
+//-----------------------------------------------------------------------------
+// class ConfigCache
+// used to cache settings in a Config instance, observes the instance to
+// reload the information when necessary (reloads on-demand)
+class ConfigCache: public Observer
+{
+private:
+    bool cacheValidM;
+protected:
+    void ensureCacheValid();
+    virtual void loadFromConfig();
+    virtual void update();
+public:
+    ConfigCache(Config& config);
+};
 //-----------------------------------------------------------------------------
 #endif

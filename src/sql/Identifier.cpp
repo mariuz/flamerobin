@@ -43,17 +43,14 @@
 #include "sql/Identifier.h"
 //----------------------------------------------------------------------------
 // IdentifierQuotes: class to cache config data for identifier quoting
-class IdentifierQuotes: public Observer
+class IdentifierQuotes: public ConfigCache
 {
 private:
-    bool loadedM;
-    void ensureLoaded();
-
     bool quoteAlwaysM;
     bool quoteCharsAreRegularM;
     bool quoteMixedCaseM;
 protected:
-    virtual void update();
+    virtual void loadFromConfig();
 public:
     IdentifierQuotes();
 
@@ -65,9 +62,9 @@ public:
 };
 //----------------------------------------------------------------------------
 IdentifierQuotes::IdentifierQuotes()
-    : loadedM(false)
+    : ConfigCache(config()), quoteAlwaysM(false),
+        quoteCharsAreRegularM(false), quoteMixedCaseM(true)
 {
-    config().attachObserver(this);
 }
 //-----------------------------------------------------------------------------
 IdentifierQuotes& IdentifierQuotes::get()
@@ -76,39 +73,28 @@ IdentifierQuotes& IdentifierQuotes::get()
     return iq;
 }
 //-----------------------------------------------------------------------------
-void IdentifierQuotes::update()
+void IdentifierQuotes::loadFromConfig()
 {
-    // we observe config() object, so we better do as little as possible
-    loadedM = false;
-}
-//----------------------------------------------------------------------------
-void IdentifierQuotes::ensureLoaded()
-{
-    if (!loadedM)
-    {
-        quoteAlwaysM = !config().get(wxT("quoteOnlyWhenNeeded"), true);
-        quoteCharsAreRegularM = config().get(wxT("quoteCharsAreRegular"),
-            false);
-        quoteMixedCaseM = config().get(wxT("quoteMixedCase"), false);
-        loadedM = true;
-    }
+    quoteAlwaysM = !config().get(wxT("quoteOnlyWhenNeeded"), true);
+    quoteCharsAreRegularM = config().get(wxT("quoteCharsAreRegular"), false);
+    quoteMixedCaseM = config().get(wxT("quoteMixedCase"), false);
 }
 //----------------------------------------------------------------------------
 bool IdentifierQuotes::getQuoteAlways()
 {
-    ensureLoaded();
+    ensureCacheValid();
     return quoteAlwaysM;
 }
 //----------------------------------------------------------------------------
 bool IdentifierQuotes::getQuoteCharsAreRegular()
 {
-    ensureLoaded();
+    ensureCacheValid();
     return quoteCharsAreRegularM;
 }
 //----------------------------------------------------------------------------
 bool IdentifierQuotes::getQuoteMixedCase()
 {
-    ensureLoaded();
+    ensureCacheValid();
     return quoteMixedCaseM;
 }
 //----------------------------------------------------------------------------

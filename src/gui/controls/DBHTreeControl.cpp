@@ -52,43 +52,60 @@
 #include "images.h"
 #include "metadata/root.h"
 //-----------------------------------------------------------------------------
-//! Helper class to cache the config value and observe it's changes
-class DragAndDropConfig: public Observer
+// DBHTreeConfigCache: class to cache config data for tree control behaviour
+class DBHTreeConfigCache: public ConfigCache
 {
 private:
-    bool loadedM;
     bool allowDragM;
+    bool hideDisconnectedDatabasesM;
+    bool showColumnsM;
 protected:
-    virtual void update();
+    virtual void loadFromConfig();
 public:
-    DragAndDropConfig();
-    static DragAndDropConfig& get();
+    DBHTreeConfigCache();
+    
+    static DBHTreeConfigCache& get();
+
     bool allowDnD();
+    bool getHideDisconnectedDatabases();
+    bool getShowColumns();
 };
 //----------------------------------------------------------------------------
-DragAndDropConfig::DragAndDropConfig()
-    : loadedM(false)
+DBHTreeConfigCache::DBHTreeConfigCache()
+    : ConfigCache(config())
 {
-    config().attachObserver(this);
 }
 //-----------------------------------------------------------------------------
-DragAndDropConfig& DragAndDropConfig::get()
+DBHTreeConfigCache& DBHTreeConfigCache::get()
 {
-    static DragAndDropConfig dndc;
+    static DBHTreeConfigCache dndc;
     return dndc;
 }
 //-----------------------------------------------------------------------------
-void DragAndDropConfig::update()
-{   // we observe config() object, so we better do as little as possible
-    loadedM = false;
+void DBHTreeConfigCache::loadFromConfig()
+{
+    allowDragM = config().get(wxT("allowDragAndDrop"), false);
+    hideDisconnectedDatabasesM = config().get(wxT("HideDisconnectedDatabases"),
+        false);
+    showColumnsM = config().get(wxT("ShowColumnsInTree"), true);
 }
 //----------------------------------------------------------------------------
-bool DragAndDropConfig::allowDnD()
+bool DBHTreeConfigCache::allowDnD()
 {
-    if (!loadedM)
-        allowDragM = config().get(wxT("allowDragAndDrop"), false);
-    loadedM = true;
+    ensureCacheValid();
     return allowDragM;
+}
+//-----------------------------------------------------------------------------
+bool DBHTreeConfigCache::getHideDisconnectedDatabases()
+{
+    ensureCacheValid();
+    return hideDisconnectedDatabasesM;
+}
+//-----------------------------------------------------------------------------
+bool DBHTreeConfigCache::getShowColumns()
+{
+    ensureCacheValid();
+    return showColumnsM;
 }
 //-----------------------------------------------------------------------------
 // DBHTreeItem is a special kind of observer, which observes special kind
@@ -143,9 +160,6 @@ void DBHTreeItem::update()
     if (!object)
         return;
 
-    bool hideDisconnected = config().get(wxT("HideDisconnectedDatabases"),
-        false);
-
     // check current item
     wxString itemText(object->getPrintableName());
     if (treeM->GetItemText(id) != itemText)
@@ -154,8 +168,8 @@ void DBHTreeItem::update()
     NodeType ndt = object->getType();
     bool affectedBySetting = (ndt == ntTable || ndt == ntSysTable
         || ndt == ntView || ndt == ntProcedure);
-    bool showColumns = !affectedBySetting ||
-        config().get(wxT("ShowColumnsInTree"), true);
+    bool showColumns = !affectedBySetting
+        || DBHTreeConfigCache::get().getShowColumns();
 
     // check subitems
     std::vector<MetadataItem*> children;
@@ -169,7 +183,7 @@ void DBHTreeItem::update()
             if ((*itChild)->getType() == ntDomain && (*itChild)->isSystem())
                 continue;
             // hide disconnected databases
-            if (hideDisconnected)
+            if (DBHTreeConfigCache::get().getHideDisconnectedDatabases())
             {
                 Database* db = dynamic_cast<Database*>(*itChild);
                 if (db && !db->isConnected())
@@ -247,7 +261,8 @@ void DBHTreeItem::update()
         itChild = find(children.begin(), children.end(),
             treeM->getMetadataItem(item));
         // we may need to hide disconnected databases
-        if (hideDisconnected && itChild != children.end())
+        if (DBHTreeConfigCache::get().getHideDisconnectedDatabases()
+            && itChild != children.end())
         {
             Database* db = dynamic_cast<Database*>(*itChild);
             if (db && !db->isConnected())
@@ -284,7 +299,7 @@ END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void DBHTreeControl::OnBeginDrag(wxTreeEvent& event)
 {
-    if (!DragAndDropConfig::get().allowDnD())
+    if (!DBHTreeConfigCache::get().allowDnD())
     {
         event.Skip();
         return;
@@ -316,8 +331,10 @@ void DBHTreeControl::OnContextMenu(wxContextMenuEvent& event)
     // select item under the mouse first, since right-click doesn't change selection under GTK
     wxPoint pos = ScreenToClient(event.GetPosition());
     int flags;
+    const int checkFlags = wxTREE_HITTEST_ONITEMBUTTON
+        | wxTREE_HITTEST_ONITEMICON | wxTREE_HITTEST_ONITEMLABEL;
     wxTreeItemId item = HitTest(pos, flags);
-    if (item.IsOk() && (flags & (wxTREE_HITTEST_ONITEMBUTTON|wxTREE_HITTEST_ONITEMICON|wxTREE_HITTEST_ONITEMLABEL)))
+    if (item.IsOk() && (flags & checkFlags))
         SelectItem(item);
     else
     {
