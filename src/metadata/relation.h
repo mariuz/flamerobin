@@ -26,8 +26,8 @@
 */
 
 //-----------------------------------------------------------------------------
-#ifndef FR_METADATAITEMWITHCOLUMNS_H
-#define FR_METADATAITEMWITHCOLUMNS_H
+#ifndef FR_RELATION_H
+#define FR_RELATION_H
 
 #include <vector>
 
@@ -37,8 +37,6 @@
 #include "metadata/metadataitem.h"
 #include "metadata/privilege.h"
 #include "metadata/trigger.h"
-
-class View;
 //-----------------------------------------------------------------------------
 class Relation: public MetadataItem
 {
@@ -76,4 +74,4 @@ public:
         Trigger::firingTimeType beforeOrAfter);
 };
 //-----------------------------------------------------------------------------
-#endif
+#endif // FR_RELATION_H

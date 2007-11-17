@@ -61,7 +61,6 @@ public:
     Database* addUnregisteredDatabase(Database& database);
 
     virtual bool getChildren(std::vector<MetadataItem*>& temp);
-    virtual bool orderedChildren() const;
 
     bool load();
     bool save();

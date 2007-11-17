@@ -62,6 +62,8 @@ private:
     bool allowDragM;
     bool hideDisconnectedDatabasesM;
     bool showColumnsM;
+    bool sortDatabasesM;
+    bool sortServersM;
 protected:
     virtual void loadFromConfig();
 public:
@@ -72,6 +74,8 @@ public:
     bool allowDnD();
     bool getHideDisconnectedDatabases();
     bool getShowColumns();
+    bool getSortDatabases();
+    bool getSortServers();
 };
 //----------------------------------------------------------------------------
 DBHTreeConfigCache::DBHTreeConfigCache()
@@ -91,6 +95,8 @@ void DBHTreeConfigCache::loadFromConfig()
     hideDisconnectedDatabasesM = config().get(wxT("HideDisconnectedDatabases"),
         false);
     showColumnsM = config().get(wxT("ShowColumnsInTree"), true);
+    sortDatabasesM = config().get(wxT("OrderDatabasesInTree"), false);
+    sortServersM = config().get(wxT("OrderServersInTree"), false);
 }
 //----------------------------------------------------------------------------
 bool DBHTreeConfigCache::allowDnD()
@@ -111,6 +117,18 @@ bool DBHTreeConfigCache::getShowColumns()
     return showColumnsM;
 }
 //-----------------------------------------------------------------------------
+bool DBHTreeConfigCache::getSortDatabases()
+{
+    ensureCacheValid();
+    return sortDatabasesM;
+}
+//-----------------------------------------------------------------------------
+bool DBHTreeConfigCache::getSortServers()
+{
+    ensureCacheValid();
+    return sortServersM;
+}
+//-----------------------------------------------------------------------------
 // DBHTreeImageList class
 class DBHTreeImageList: public wxImageList
 {
@@ -128,7 +146,6 @@ public:
 DBHTreeImageList::DBHTreeImageList()
     : wxImageList(16, 16)
 {
-
     addImage(ART_Object);
     addImage(ART_Column);
     addImage(ART_Computed);
@@ -258,6 +275,7 @@ private:
     wxString nodeTextM;
     int nodeImageIndexM;
     bool showChildrenM;
+    bool sortChildrenM;
 
     void setNodeProperties(MetadataItem* metadataItem);
 protected:
@@ -270,6 +288,7 @@ public:
     bool getNodeTextBold() { return nodeTextBoldM; };
     int getNodeImage() { return nodeImageIndexM; };
     bool getShowChildren() { return showChildrenM; };
+    bool getSortChildren() { return sortChildrenM; };
 
     virtual void visitColumn(Column& column);
     virtual void visitDatabase(Database& database);
@@ -291,7 +310,7 @@ public:
 DBHTreeItemVisitor::DBHTreeItemVisitor(DBHTreeControl* tree)
     : MetadataItemVisitor(), treeM(tree), nodeVisibleM(true),
         nodeTextBoldM(false), nodeTextM(), nodeImageIndexM(-1),
-        showChildrenM(false)
+        showChildrenM(false), sortChildrenM(false)
 {
 }
 //-----------------------------------------------------------------------------
@@ -309,6 +328,7 @@ void DBHTreeItemVisitor::setNodeProperties(MetadataItem* metadataItem)
     nodeTextM = metadataItem->getPrintableName();
     nodeImageIndexM = DBHTreeImageList::get().getImageIndex(metadataItem->getType());
     showChildrenM = metadataItem->getChildrenCount() > 0;
+    sortChildrenM = false;
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitColumn(Column& column)
@@ -391,6 +411,7 @@ void DBHTreeItemVisitor::visitRoot(Root& root)
     nodeTextBoldM = true;
     // show Server nodes even though Root::getChildrenCount() returns 0
     showChildrenM = true;
+    sortChildrenM = DBHTreeConfigCache::get().getSortServers();
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitServer(Server& server)
@@ -400,6 +421,7 @@ void DBHTreeItemVisitor::visitServer(Server& server)
     nodeTextBoldM = true;
     // show Database nodes even though Server::getChildrenCount() returns 0
     showChildrenM = true;
+    sortChildrenM = DBHTreeConfigCache::get().getSortDatabases();
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitTable(Table& table)
@@ -580,7 +602,7 @@ void DBHTreeItem::update()
 
     treeM->SetItemBold(id, tivObject.getNodeTextBold()
         || treeM->ItemHasChildren(id));
-    if (object->orderedChildren())
+    if (tivObject.getSortChildren())
         treeM->SortChildren(id);
 }
 //-----------------------------------------------------------------------------

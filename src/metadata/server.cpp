@@ -80,13 +80,6 @@ bool Server::getChildren(vector<MetadataItem*>& temp)
     return databasesM.getChildren(temp);
 }
 //-----------------------------------------------------------------------------
-bool Server::orderedChildren() const
-{
-    bool ordered = false;
-    config().getValue(wxT("OrderDatabasesInTree"), ordered);
-    return ordered;
-}
-//-----------------------------------------------------------------------------
 // returns pointer to object in vector
 Database* Server::addDatabase(Database& db)
 {

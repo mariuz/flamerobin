@@ -52,13 +52,13 @@
         <caption>Main Tree View</caption>
         <image>2</image>
         <setting type="checkbox">
-            <caption>Order server entries alphabetically</caption>
+            <caption>Sort server entries alphabetically</caption>
             <description>If unchecked the server entries will be shown in registration order.</description>
             <key>OrderServersInTree</key>
             <default>0</default>
         </setting>
         <setting type="checkbox">
-            <caption>Order database entries alphabetically</caption>
+            <caption>Sort database entries alphabetically</caption>
             <description>If unchecked the database entries will be shown in registration order.</description>
             <key>OrderDatabasesInTree</key>
             <default>0</default>

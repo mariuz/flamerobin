@@ -62,7 +62,6 @@ public:
     virtual void unlockChildren();
 
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
-    virtual bool orderedChildren() const;
     Database* addDatabase(Database&);
     void removeDatabase(Database*);
     MetadataCollection<Database> *getDatabases();

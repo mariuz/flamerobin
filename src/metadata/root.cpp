@@ -359,13 +359,6 @@ bool Root::getChildren(vector<MetadataItem *>& temp)
     return serversM.getChildren(temp);
 }
 //-----------------------------------------------------------------------------
-bool Root::orderedChildren() const
-{
-    bool ordered = false;
-    config().getValue(wxT("OrderServersInTree"), ordered);
-    return ordered;
-}
-//-----------------------------------------------------------------------------
 void Root::lockChildren()
 {
     serversM.lockSubject();
