@@ -35,6 +35,7 @@
 
 #include "metadata/metadataitem.h"
 
+class DBHTreeItemVisitor;
 class Database;
 class Server;
 //-----------------------------------------------------------------------------
@@ -46,6 +47,9 @@ private:
     // recursive function used by selectMetadataItem
     bool findMetadataItem(MetadataItem *item, wxTreeItemId parent);
     bool allowContextMenuM;
+
+    friend class DBHTreeItemVisitor;
+    int getItemImageIndex(NodeType t);
 
 protected:
     short m_spacing;    // fix wxWidgets bug (or lack of feature)
@@ -72,7 +76,6 @@ public:
 
     // Selects the tree item represented by the metadata item
     bool selectMetadataItem(MetadataItem* item);
-    int getItemImage(NodeType t);
 
     wxTreeItemId getLastItem(wxTreeItemId id);
     wxTreeItemId getNextItem(wxTreeItemId current);
