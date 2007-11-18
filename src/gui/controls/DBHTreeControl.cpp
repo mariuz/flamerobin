@@ -450,26 +450,26 @@ void DBHTreeItemVisitor::visitMetadataItem(MetadataItem& metadataItem)
 //-----------------------------------------------------------------------------
 // DBHTreeItem is a special kind of observer, which observes special kind
 // of subjects: MetadataItem instances
-class DBHTreeItem: public wxTreeItemData, public Observer
+class DBHTreeItemData: public wxTreeItemData, public Observer
 {
 private:
     DBHTreeControl* treeM;
 protected:
     virtual void update();
 public:
-    DBHTreeItem(DBHTreeControl* tree);
+    DBHTreeItemData(DBHTreeControl* tree);
 
     wxTreeItemId findSubNode(MetadataItem* item);
     MetadataItem* getObservedMetadata();
 };
 //-----------------------------------------------------------------------------
-DBHTreeItem::DBHTreeItem(DBHTreeControl* tree)
+DBHTreeItemData::DBHTreeItemData(DBHTreeControl* tree)
     : Observer(), treeM(tree)
 {
 }
 //-----------------------------------------------------------------------------
 //! returns tree subnode that points to given metadata object
-wxTreeItemId DBHTreeItem::findSubNode(MetadataItem* item)
+wxTreeItemId DBHTreeItemData::findSubNode(MetadataItem* item)
 {
     wxTreeItemIdValue cookie;
     wxTreeItemId id = GetId();
@@ -482,7 +482,7 @@ wxTreeItemId DBHTreeItem::findSubNode(MetadataItem* item)
     return wxTreeItemId();
 }
 //-----------------------------------------------------------------------------
-MetadataItem* DBHTreeItem::getObservedMetadata()
+MetadataItem* DBHTreeItemData::getObservedMetadata()
 {
     // first observed Subject is always the represented MetadataItem*
     return (dynamic_cast<MetadataItem*>(getFirstSubject()));
@@ -490,7 +490,7 @@ MetadataItem* DBHTreeItem::getObservedMetadata()
 //-----------------------------------------------------------------------------
 //! parent nodes are responsible for "insert" / "delete"
 //! node is responsible for "update"
-void DBHTreeItem::update()
+void DBHTreeItemData::update()
 {
     wxTreeItemId id = GetId();
     if (!id.IsOk())
@@ -523,7 +523,7 @@ void DBHTreeItem::update()
             wxTreeItemId childId = findSubNode(*itChild);
             if (!childId.IsOk())
             {   
-                DBHTreeItem* newItem = new DBHTreeItem(treeM);
+                DBHTreeItemData* newItem = new DBHTreeItemData(treeM);
                 (*itChild)->attachObserver(newItem);
                 if (prevId.IsOk())
                 {
@@ -642,10 +642,17 @@ void DBHTreeControl::OnContextMenu(wxContextMenuEvent& event)
     if (!allowContextMenuM)
         return;
 
-    // select item under the mouse first, since right-click doesn't change selection under GTK
+    // select item under the mouse first, since right-click doesn't change
+    // the selection under GTK
+    // NOTE: removing the SelectItem() call for wxMSW does not work either,
+    // because commands will be enabled for the selected, not for the
+    // highlighted item :-(
     wxPoint pos = ScreenToClient(event.GetPosition());
     int flags;
     const int checkFlags = wxTREE_HITTEST_ONITEMBUTTON
+#ifdef __WXMSW__
+        | wxTREE_HITTEST_ONITEMINDENT | wxTREE_HITTEST_ONITEMRIGHT
+#endif
         | wxTREE_HITTEST_ONITEMICON | wxTREE_HITTEST_ONITEMLABEL;
     wxTreeItemId item = HitTest(pos, flags);
     if (item.IsOk() && (flags & checkFlags))
@@ -694,44 +701,40 @@ void DBHTreeControl::SetSpacing(short spacing)
     m_spacing = spacing;
 }
 //-----------------------------------------------------------------------------
-wxTreeItemId DBHTreeControl::addRootNode(const wxString& caption,
-    MetadataItem* rootItem)
+wxTreeItemId DBHTreeControl::addRootNode(MetadataItem* rootItem)
 {
     wxASSERT(rootItem);
-    wxTreeItemId id = AddRoot(caption,
-        DBHTreeImageList::get().getImageIndex(rootItem->getType()));
-    DBHTreeItem* rootdata = new DBHTreeItem(this);
+    // no need to set node text and image index, because
+    // rootItem->attachObserver() will call DBHTreeItemData::update()
+    wxTreeItemId id = AddRoot(wxEmptyString, -1);
+    DBHTreeItemData* rootdata = new DBHTreeItemData(this);
     SetItemData(id, rootdata);
     rootItem->attachObserver(rootdata);
     return id;
 }
 //-----------------------------------------------------------------------------
 //! returns the object that selected wxTree node observes
-MetadataItem *DBHTreeControl::getSelectedMetadataItem()
+MetadataItem* DBHTreeControl::getSelectedMetadataItem()
 {
     return getMetadataItem(GetSelection());
 }
 //-----------------------------------------------------------------------------
 //! returns the database of the object that selected wxTree node observes
-Database *DBHTreeControl::getSelectedDatabase()
+Database* DBHTreeControl::getSelectedDatabase()
 {
-    MetadataItem *m = getSelectedMetadataItem();
-    if (!m)
-        return 0;
-    return m->getDatabase();
+    MetadataItem* m = getSelectedMetadataItem();
+    return (m) ? m->getDatabase() : 0;
 }
 //-----------------------------------------------------------------------------
 //! returns the server of the object that selected wxTree node observes
-Server *DBHTreeControl::getSelectedServer()
+Server* DBHTreeControl::getSelectedServer()
 {
-    MetadataItem *m = getSelectedMetadataItem();
-    Server *s = dynamic_cast<Server *>(m);
+    MetadataItem* m = getSelectedMetadataItem();
+    Server* s = dynamic_cast<Server*>(m);
     if (s)
         return s;
-    Database *d = getSelectedDatabase();
-    if (!d)
-        return 0;
-    return d->getServer();
+    Database* d = getSelectedDatabase();
+    return (d) ? d->getServer() : 0;
 }
 //-----------------------------------------------------------------------------
 //! returns the object that some wxTree node observes
@@ -740,11 +743,8 @@ MetadataItem* DBHTreeControl::getMetadataItem(wxTreeItemId item)
     if (!item.IsOk())
         return 0;
 
-    DBHTreeItem* ti = (DBHTreeItem*)GetItemData(item);
-    if (!ti)
-        return 0;
-
-    return ti->getObservedMetadata();
+    DBHTreeItemData* tid = (DBHTreeItemData*)GetItemData(item);
+    return (tid) ? tid->getObservedMetadata() : 0;
 }
 //-----------------------------------------------------------------------------
 // recursively searches children for item

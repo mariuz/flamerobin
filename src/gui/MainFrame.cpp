@@ -265,8 +265,7 @@ void MainFrame::set_properties()
     treeMainM->SetIndent(12);
 #endif
 
-    wxTreeItemId rootNode = treeMainM->addRootNode(_("Firebird Servers"),
-        &getGlobalRoot());
+    wxTreeItemId rootNode = treeMainM->addRootNode(&getGlobalRoot());
     getGlobalRoot().load();
     if (treeMainM->GetCount() <= 1)
     {

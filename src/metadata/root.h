@@ -28,10 +28,10 @@
 #ifndef FR_ROOT_H
 #define FR_ROOT_H
 //-----------------------------------------------------------------------------
-#include "metadata/database.h"
 #include "metadata/metadataitem.h"
 #include "metadata/server.h"
 
+class Database;
 class wxXmlNode;
 //-----------------------------------------------------------------------------
 class Root: public MetadataItem

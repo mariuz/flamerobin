@@ -458,8 +458,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     mainSplitter->UpdateSize();
 
     mainTree->allowContextMenu(false);
-    wxTreeItemId rootNode = mainTree->addRootNode(_("Tables"),
-        db->getCollection<Table>());
+    wxTreeItemId rootNode = mainTree->addRootNode(db->getCollection<Table>());
 
     loadingM = false;
 
