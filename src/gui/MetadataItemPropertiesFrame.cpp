@@ -121,7 +121,6 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
     // request initial rendering
     requestLoadPage(true);
     objectM->attachObserver(this);
-    update();
 
     wxString objName(objectM->getName_());
     SetTitle(wxString::Format(_("%s: Properties"), objName.c_str()));

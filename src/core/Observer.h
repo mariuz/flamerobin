@@ -34,11 +34,16 @@ class Subject;
 //-----------------------------------------------------------------------------
 class Observer
 {
+private:
+    bool updatingM;
 protected:
     // pointer to objects that it is watching
     std::list<Subject*> subjectsM;
-    // protected since only Subject and descending classes have to call it
+    // call doUpdate() instead of update() from Subject
+    // to prevent recursive calls
     friend class Subject;
+    void doUpdate();
+    // protected since only Subject and descending classes have to call it
     virtual void update() = 0;
 public:
     Observer();

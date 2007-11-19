@@ -530,7 +530,6 @@ void DBHTreeItemData::update()
             if (!childId.IsOk())
             {   
                 DBHTreeItemData* newItem = new DBHTreeItemData(treeM);
-                (*itChild)->attachObserver(newItem);
                 if (prevId.IsOk())
                 {
                     childId = treeM->InsertItem(id, prevId,
@@ -542,8 +541,9 @@ void DBHTreeItemData::update()
                     childId = treeM->PrependItem(id, tivChild.getNodeText(),
                         tivChild.getNodeImage(), -1, newItem);
                 }
-                // to populate the tree this has to be recursive
-                newItem->update();
+                // attachObserver() will call update() on the newly created
+                // child node.  This will correctly populate the tree
+                (*itChild)->attachObserver(newItem);
             }
             else
             {

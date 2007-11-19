@@ -66,7 +66,7 @@ void Subject::attachObserver(Observer* observer)
     {
         observer->addSubject(this);
         observersM.push_back(observer);
-        observer->update();
+        observer->doUpdate();
     }
 }
 //-----------------------------------------------------------------------------
@@ -95,7 +95,7 @@ void Subject::notifyObservers()
         // make sure there are no reentrancy problems
         ++locksCountM;
         for (ObserverIterator i = observersM.begin(); i != observersM.end(); ++i)
-            (*i)->update();
+            (*i)->doUpdate();
         --locksCountM;
         needsNotifyObjectsM = false;
     }

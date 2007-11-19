@@ -47,6 +47,7 @@
 using namespace std;
 //-----------------------------------------------------------------------------
 Observer::Observer()
+    : updatingM(false)
 {
 }
 //-----------------------------------------------------------------------------
@@ -57,6 +58,24 @@ Observer::~Observer()
         list<Subject*>::iterator it = subjectsM.begin();
         // object will be removed by removeObservedObject()
         (*it)->detachObserver(this);
+    }
+}
+//-----------------------------------------------------------------------------
+void Observer::doUpdate()
+{
+    if (!updatingM)
+    {
+        updatingM = true;
+        try
+        {
+            update();
+        }
+        catch (...)
+        {
+            updatingM = false;
+            throw;
+        }
+        updatingM = false;
     }
 }
 //-----------------------------------------------------------------------------
