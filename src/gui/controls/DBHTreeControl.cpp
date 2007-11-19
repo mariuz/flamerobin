@@ -691,8 +691,13 @@ DBHTreeControl::DBHTreeControl(wxWindow* parent, const wxPoint& pos,
     : wxTreeCtrl(parent, ID_tree_ctrl, pos, size, style)
 {
     allowContextMenuM = true;
+/*  FIXME: dows not play nice with wxGenericImageList...
+           need to check whether sharing the image list has bad side-effects!
+
     // create copy of static image list, set to be autodeleted
     AssignImageList(new wxImageList(DBHTreeImageList::get()));
+*/
+    SetImageList(&DBHTreeImageList::get());
 }
 //-----------------------------------------------------------------------------
 void DBHTreeControl::allowContextMenu(bool doAllow)
