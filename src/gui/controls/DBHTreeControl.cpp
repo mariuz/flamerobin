@@ -149,7 +149,8 @@ DBHTreeImageList::DBHTreeImageList()
     addImage(ART_Object);
     addImage(ART_Column);
     addImage(ART_Computed);
-    addImage(ART_Database);
+    addImage(ART_DatabaseConnected);
+    addImage(ART_DatabaseDisconnected);
     addImage(ART_Domain);
     addImage(ART_Domains);
     addImage(ART_Exception);
@@ -211,7 +212,7 @@ int DBHTreeImageList::getImageIndex(NodeType type)
         case ntColumn:
             id = ART_Column; break;
         case ntDatabase:
-            id = ART_Database; break;
+            id = ART_DatabaseConnected; break;
         case ntDomain:
             id = ART_Domain; break;
         case ntDomains:
@@ -358,6 +359,11 @@ void DBHTreeItemVisitor::visitColumn(Column& column)
 void DBHTreeItemVisitor::visitDatabase(Database& database)
 {
     setNodeProperties(dynamic_cast<MetadataItem*>(&database));
+    // show different images for connected and disconnected databases
+    if (database.isConnected())
+        nodeImageIndexM = DBHTreeImageList::get().getImageIndex(ART_DatabaseConnected);
+    else
+        nodeImageIndexM = DBHTreeImageList::get().getImageIndex(ART_DatabaseDisconnected);
     // hide disconnected databases
     if (DBHTreeConfigCache::get().getHideDisconnectedDatabases())
         nodeVisibleM = database.isConnected();

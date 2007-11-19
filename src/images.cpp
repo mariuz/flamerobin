@@ -49,7 +49,7 @@ wxBitmap getImage32(NodeType type)
         case ntColumn:
             return wxArtProvider::GetIcon(ART_Column, wxART_OTHER, sz);
         case ntDatabase:
-            return wxArtProvider::GetIcon(ART_Database, wxART_OTHER, sz);
+            return wxArtProvider::GetIcon(ART_DatabaseConnected, wxART_OTHER, sz);
         case ntDomain:
             return wxArtProvider::GetIcon(ART_Domain, wxART_OTHER, sz);
         case ntFunction:

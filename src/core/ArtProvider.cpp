@@ -166,7 +166,9 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(backup32_xpm);
         if (id == ART_Column)
             return wxBitmap(column32_xpm);
-        if (id == ART_Database)
+        if (id == ART_DatabaseConnected)
+            return wxBitmap(database32_xpm);
+        if (id == ART_DatabaseDisconnected)
             return wxBitmap(database32_xpm);
         if (id == ART_Domain)
             return wxBitmap(domain32_xpm);
@@ -218,7 +220,9 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(ok_xpm);
         if (id == ART_Computed)
             return wxBitmap(function_xpm);
-        if (id == ART_Database)
+        if (id == ART_DatabaseConnected)
+            return wxBitmap(database_xpm);
+        if (id == ART_DatabaseDisconnected)
             return wxBitmap(database_xpm);
         if (id == ART_Domain)
             return wxBitmap(domain_xpm);
