@@ -1,6 +1,14 @@
 $Id$
 
 
+2007-11-20 (babuskov):
+
+  added detailed statistic counts (hopefully to be integrated upstream)
+  ---------------------------------------------------------------------
+  
+  * Detailed per-relation update/insert/delete counts
+
+  
 2006-04-12 (mghie):
   updated to IBPP sources taken from Subversion repository revision 72
   --------------------------------------------------------------------

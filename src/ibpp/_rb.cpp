@@ -129,6 +129,41 @@ int RB::GetCountValue(char token)
 	return value;
 }
 
+void RB::GetDetailedCounts(IBPP::DatabaseCounts& counts, char token)
+{
+    char *p = FindToken(token);
+
+	if (p == 0)
+		throw LogicExceptionImpl("RB::GetCountValue", _("Token not found."));
+
+	// len is the number of bytes in the following array
+	int len = (*gds.Call()->m_vax_integer)(p+1, 2);
+	p += 3;
+	while (len > 0)
+	{
+        // Each array item is 6 bytes : 2 bytes for the relation_id
+        // and 4 bytes for the count value
+        int id    = (*gds.Call()->m_vax_integer)(p,   2);
+        int value = (*gds.Call()->m_vax_integer)(p+2, 4);
+
+        IBPP::DatabaseCounts::iterator it = counts.find(id);
+        if (it == counts.end())
+        {
+            IBPP::CountInfo ci;
+            counts.insert(std::pair<int, IBPP::CountInfo>(id, ci));
+            it = counts.find(id);
+        }
+        if (token == isc_info_insert_count)
+            (*it).second.inserts += value;
+        if (token == isc_info_update_count)
+            (*it).second.updates += value;
+        if (token == isc_info_delete_count)
+            (*it).second.deletes += value;
+        p += 6;
+        len -= 6;
+	}
+}
+
 int RB::GetValue(char token, char subtoken)
 {
 	int value;

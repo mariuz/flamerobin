@@ -1771,6 +1771,54 @@ wxString IBPPtype2string(IBPP::SDT t, int subtype, int size, int scale)
     }
 }
 //-----------------------------------------------------------------------------
+void ExecuteSqlFrame::compareCounts(IBPP::DatabaseCounts& one,
+    IBPP::DatabaseCounts& two)
+{
+    for (IBPP::DatabaseCounts::iterator it = two.begin(); it != two.end();
+        ++it)
+    {
+        wxString s;
+        IBPP::DatabaseCounts::iterator i2 = one.find((*it).first);
+        IBPP::CountInfo c;
+        IBPP::CountInfo& r1 = (*it).second;
+        IBPP::CountInfo& r2 = c;
+        if (i2 != one.end())
+            r2 = (*i2).second;
+        if (r1.inserts > r2.inserts)
+            s += wxString::Format(_("%d inserts. "), r1.inserts - r2.inserts);
+        if (r1.updates > r2.updates)
+            s += wxString::Format(_("%d updates. "), r1.updates - r2.updates);
+        if (r1.deletes > r2.deletes)
+            s += wxString::Format(_("%d deletes. "), r1.deletes - r2.deletes);
+        if (!s.IsEmpty())
+        {
+            wxString relName;
+            try
+            {
+                IBPP::Statement st = IBPP::StatementFactory(
+                    databaseM->getIBPPDatabase(), transactionM);
+                st->Prepare(
+                    "select rdb$relation_name "
+                    "from rdb$relations where rdb$relation_id = ?");
+                st->Set(1, (*it).first);
+                st->Execute();
+                if (st->Fetch())
+                {
+                    std::string rel;
+                    st->Get(1, rel);
+                    relName = std2wx(rel).Strip();
+                }
+            }
+            catch (...)
+            {
+            }
+            if (relName.IsEmpty())
+                relName.Format(_("Relation #%d"), (*it).first);
+            log(relName + wxT(": ") + s, ttSql);
+        }
+    }
+}
+//-----------------------------------------------------------------------------
 //! when autoexecute is TRUE, program just waits user to click Commit/Rollback and closes window
 bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     bool prepareOnly)
@@ -1813,6 +1861,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         int fetch1 = 0, mark1 = 0, read1 = 0, write1 = 0, ins1 = 0, upd1 = 0,
             del1 = 0, ridx1 = 0, rseq1 = 0, mem1 = 0;
         int fetch2, mark2, read2, write2, ins2, upd2, del2, ridx2, rseq2, mem2;
+        IBPP::DatabaseCounts counts1, counts2;
         bool doShowStats = config().get(wxT("SQLEditorShowStats"), true);
         if (!prepareOnly && doShowStats)
         {
@@ -1820,6 +1869,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                 Statistics(&fetch1, &mark1, &read1, &write1, &mem1);
             databaseM->getIBPPDatabase()->
                 Counts(&ins1, &upd1, &del1, &ridx1, &rseq1);
+            databaseM->getIBPPDatabase()->DetailedCounts(counts1);
         }
         grid_data->ClearGrid(); // statement object will be invalidated, so clear the grid
         statementM = IBPP::StatementFactory(databaseM->getIBPPDatabase(), transactionM);
@@ -1896,6 +1946,8 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                 _("%d inserts, %d updates, %d deletes, %d index, %d seq."),
                 ins2-ins1, upd2-upd1, del2-del1, ridx2-ridx1, rseq2-rseq1));
             log(wxString::Format(_("Delta memory: %d bytes."), mem2-mem1));
+            databaseM->getIBPPDatabase()->DetailedCounts(counts2);
+            compareCounts(counts1, counts2);
         }
 
         if (type != IBPP::stSelect) // for other statements: show rows affected

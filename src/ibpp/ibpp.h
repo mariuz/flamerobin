@@ -88,6 +88,7 @@
 #endif
 
 #include <exception>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -550,6 +551,16 @@ namespace IBPP
 
     class EventInterface;   // Cross-reference between EventInterface and IDatabase
 
+    class CountInfo
+    {
+    public:
+        CountInfo(): inserts(0), updates(0), deletes(0) {};
+        int inserts;
+        int updates;
+        int deletes;
+    };
+    typedef std::map<int, CountInfo> DatabaseCounts; // int = relation ID
+
     class IDatabase
     {
     public:
@@ -568,6 +579,7 @@ namespace IBPP
             int* Reads, int* Writes, int* CurrentMemory ) = 0;
         virtual void Counts(int* Insert, int* Update, int* Delete,
             int* ReadIdx, int* ReadSeq) = 0;
+        virtual void DetailedCounts(DatabaseCounts& counts) = 0;
         virtual void Users(std::vector<std::string>& users) = 0;
         virtual int Dialect() = 0;
 

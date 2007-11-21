@@ -566,6 +566,7 @@ public:
     void Reset();
     int GetValue(char token);
     int GetCountValue(char token);
+    void GetDetailedCounts(IBPP::DatabaseCounts& counts, char token);
     int GetValue(char token, char subtoken);
     bool GetBool(char token);
     int GetString(char token, std::string& data);
@@ -869,6 +870,7 @@ public:
     void Statistics(int* Fetches, int* Marks, int* Reads, int* Writes, int* CurrentMemory);
     void Counts(int* Insert, int* Update, int* Delete,
         int* ReadIdx, int* ReadSeq);
+    void DetailedCounts(IBPP::DatabaseCounts& counts);
     void Users(std::vector<std::string>& users);
     int Dialect() { return mDialect; }
 

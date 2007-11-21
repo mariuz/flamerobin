@@ -78,6 +78,8 @@ public:
     bool loadSqlFile(const wxString& filename);
     void setSql(wxString sql);
     void clearStats();
+    void compareCounts(IBPP::DatabaseCounts& one,
+        IBPP::DatabaseCounts& two);
 
     ExecuteSqlFrame(wxWindow* parent, int id, wxString title, Database *db,
         const wxPoint& pos = wxDefaultPosition,
