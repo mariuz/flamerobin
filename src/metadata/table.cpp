@@ -492,7 +492,10 @@ void Table::loadIndices()
             type = 0;
         else
             st1->Get(4, type);
-        st1->Get(5, statistics);
+        if (st1->IsNull(5))     // this can happen, see bug #1825725
+            statistics = -1;
+        else
+            st1->Get(5, statistics);
         st1->Get(6, fname);
         readBlob(st1, 8, expression);
         name.erase(name.find_last_not_of(" ") + 1);
