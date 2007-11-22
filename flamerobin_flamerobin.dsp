@@ -612,6 +612,10 @@ SOURCE=.\src\metadata\MetadataItemVisitor.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\engine\MetadataLoader.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\sql\MultiStatement.cpp
 # End Source File
 # Begin Source File
@@ -991,6 +995,10 @@ SOURCE=.\src\gui\MetadataItemPropertiesFrame.h
 # Begin Source File
 
 SOURCE=.\src\metadata\MetadataItemVisitor.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\engine\MetadataLoader.h
 # End Source File
 # Begin Source File
 

@@ -42,6 +42,7 @@
 
 #include "core/StringUtils.h"
 #include "core/FRError.h"
+#include "engine/MetadataLoader.h"
 #include "frutils.h"
 #include "metadata/CreateDDLVisitor.h"
 #include "metadata/database.h"
@@ -123,12 +124,12 @@ void Relation::loadColumns()
     Database *d = getDatabase();
     if (!d)
         throw FRError(_("Database not set"));
-    IBPP::Database& db = d->getIBPPDatabase();
 
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(
+    SubjectLocker lock(this);
+    MetadataLoader* loader = d->getMetadataLoader();
+    loader->transactionStart();
+
+    IBPP::Statement& st1 = loader->getStatement(
         "select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source, "
         " l.rdb$collation_name,f.rdb$computed_source,r.rdb$default_source"
         " from rdb$fields f"
@@ -139,10 +140,10 @@ void Relation::loadColumns()
         "     and l.rdb$character_set_id = f.rdb$character_set_id"
         " where r.rdb$relation_name = ?"
         " order by r.rdb$field_position"
+        " for update"
     );
-
     st1->Set(1, wx2std(getName_()));
-    st1->Execute();
+    st1->CursorExecute("relation_loadcolumns");
     while (st1->Fetch())
     {
         std::string name, source, collation;
@@ -167,8 +168,7 @@ void Relation::loadColumns()
         cc->Init(!st1->IsNull(2), std2wx(source),
             computedSrc, std2wx(collation), defaultSrc, !st1->IsNull(6));
     }
-
-    tr1->Commit();
+    loader->transactionCommit();
     notifyObservers();
 }
 //-----------------------------------------------------------------------------

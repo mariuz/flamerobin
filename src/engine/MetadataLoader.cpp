@@ -37,71 +37,97 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
-//-----------------------------------------------------------------------------
-#include <algorithm>
-#include <list>
 
-#include "core/Observer.h"
-#include "core/Subject.h"
+#include "engine/MetadataLoader.h"
+#include "metadata/database.h"
 //-----------------------------------------------------------------------------
-class ObserverLocker
-{
-private:
-    unsigned* lockPtrM;
-public:
-    ObserverLocker(unsigned* lock);
-    ~ObserverLocker();
-};
-//-----------------------------------------------------------------------------
-ObserverLocker::ObserverLocker(unsigned* lock)
-    : lockPtrM(lock)
-{
-    if (lockPtrM)
-        ++(*lockPtrM);
-}
-//-----------------------------------------------------------------------------
-ObserverLocker::~ObserverLocker()
-{
-    if (lockPtrM)
-        --(*lockPtrM);
-}
-//-----------------------------------------------------------------------------
-Observer::Observer()
-    : updateLockM(0)
+MetadataLoader::MetadataLoader(Database& database, unsigned maxStatements)
+    : databaseM(database.getIBPPDatabase()), transactionM(),
+        transactionLevelM(0), statementsM(), maxStatementsM(maxStatements)
 {
 }
 //-----------------------------------------------------------------------------
-Observer::~Observer()
+void MetadataLoader::transactionStart()
 {
-    while (!subjectsM.empty())
+    ++transactionLevelM;
+    if (transactionM == 0)
+        transactionM = IBPP::TransactionFactory(databaseM, IBPP::amRead);
+    if (!transactionM->Started())
+        transactionM->Start();
+}
+//-----------------------------------------------------------------------------
+void MetadataLoader::transactionCommit()
+{
+    if (--transactionLevelM == 0 && transactionM != 0)
     {
-        std::list<Subject*>::iterator it = subjectsM.begin();
-        // object will be removed by removeObservedObject()
-        (*it)->detachObserver(this);
+        statementsM.clear();
+        transactionM->Commit();
+        transactionM = 0;
     }
 }
 //-----------------------------------------------------------------------------
-void Observer::doUpdate()
+bool MetadataLoader::transactionStarted()
 {
-    ObserverLocker lock(&updateLockM);
-    if (updateLockM == 1)
-        update();
+    return (transactionM != 0 && transactionM->Started());
 }
 //-----------------------------------------------------------------------------
-Subject* Observer::getFirstSubject()
+MetadataLoader::IBPPStatementListIterator MetadataLoader::findStatement(
+    const std::string& sql)
 {
-    if (subjectsM.empty())
-        return 0;
-    return *(subjectsM.begin());
+    for (IBPPStatementListIterator it = statementsM.begin();
+        it != statementsM.end(); ++it)
+    {
+        if ((*it)->Sql() == sql)
+            return it;
+    }
+    return statementsM.end();
 }
 //-----------------------------------------------------------------------------
-void Observer::addSubject(Subject* subject)
+IBPP::Statement& MetadataLoader::getStatement(const std::string& sql)
 {
-    subjectsM.push_back(subject);
+    wxASSERT(transactionStarted());
+
+    IBPP::Statement stmt;
+    IBPPStatementListIterator it = findStatement(sql);
+    if (it != statementsM.end())
+    {
+        stmt = (*it);
+        statementsM.erase(it);
+    }
+    else
+    {
+        stmt = IBPP::StatementFactory(databaseM, transactionM, sql);
+    }
+    statementsM.push_front(stmt);
+    limitListSize();
+    return statementsM.front();
 }
 //-----------------------------------------------------------------------------
-void Observer::removeSubject(Subject* subject)
+void MetadataLoader::limitListSize()
 {
-    subjectsM.erase(find(subjectsM.begin(), subjectsM.end(), subject));
+    if (maxStatementsM)
+    {
+        while (statementsM.size() > maxStatementsM)
+            statementsM.remove(statementsM.back());
+    }
+}
+//-----------------------------------------------------------------------------
+void MetadataLoader::releaseStatements()
+{
+    statementsM.clear();
+    if (transactionM != 0 && transactionM->Started())
+    {
+        transactionM->Commit();
+        transactionLevelM = 0;
+    }
+}
+//-----------------------------------------------------------------------------
+void MetadataLoader::setMaximumConcurrentStatements(unsigned count)
+{
+    if (maxStatementsM != count)
+    {
+        maxStatementsM = count;
+        limitListSize();
+    }
 }
 //-----------------------------------------------------------------------------

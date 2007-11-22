@@ -163,11 +163,10 @@ void DatabaseInfo::loadInfo(const IBPP::Database* database)
 }
 //-----------------------------------------------------------------------------
 Database::Database()
-    : MetadataItem(), idM(0), storeEncryptedPasswordM(false)
+    : MetadataItem(), metadataLoaderM(0), connectedM(false), connectionCredentialsM(0),
+    storeEncryptedPasswordM(false), idM(0)
 {
     typeM = ntDatabase;
-    connectedM = false;
-    connectionCredentialsM = 0;
 
     // has to be here, since notify() might be called before initChildren()
     domainsM.setProperties(this, wxT("Domains"), ntDomains);
@@ -185,15 +184,16 @@ Database::Database()
 }
 //-----------------------------------------------------------------------------
 Database::Database(const Database& rhs)
-    : MetadataItem(rhs), databaseM(rhs.databaseM), connectedM(rhs.connectedM),
-    databaseCharsetM(rhs.databaseCharsetM), pathM(rhs.pathM),
-    credentialsM(rhs.credentialsM), connectionCredentialsM(0),
-    domainsM(rhs.domainsM), exceptionsM(rhs.exceptionsM),
-    functionsM(rhs.functionsM), generatorsM(rhs.generatorsM),
-    proceduresM(rhs.proceduresM), rolesM(rhs.rolesM), tablesM(rhs.tablesM),
-    sysTablesM(rhs.sysTablesM), triggersM(rhs.triggersM),
-    viewsM(rhs.viewsM), collationsM(rhs.collationsM), idM(rhs.idM),
-    storeEncryptedPasswordM(rhs.storeEncryptedPasswordM)
+    : MetadataItem(rhs), databaseM(rhs.databaseM),
+        metadataLoaderM(0), connectedM(rhs.connectedM),
+        databaseCharsetM(rhs.databaseCharsetM), pathM(rhs.pathM),
+        credentialsM(rhs.credentialsM), connectionCredentialsM(0),
+        domainsM(rhs.domainsM), exceptionsM(rhs.exceptionsM),
+        functionsM(rhs.functionsM), generatorsM(rhs.generatorsM),
+        proceduresM(rhs.proceduresM), rolesM(rhs.rolesM), tablesM(rhs.tablesM),
+        sysTablesM(rhs.sysTablesM), triggersM(rhs.triggersM),
+        viewsM(rhs.viewsM), collationsM(rhs.collationsM), idM(rhs.idM), 
+        storeEncryptedPasswordM(rhs.storeEncryptedPasswordM)
 {
     if (rhs.connectionCredentialsM)
         connectionCredentialsM = new Credentials(*rhs.connectionCredentialsM);
@@ -286,20 +286,19 @@ wxString getLoadingSql(NodeType type)
 // This could be moved to Column class
 wxString Database::loadDomainNameForColumn(wxString table, wxString field)
 {
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
-    st1->Prepare(
-        "select rdb$field_source from rdb$relation_fields "
-        "where rdb$relation_name = ? and rdb$field_name = ?"
+    getMetadataLoader()->transactionStart();
+    IBPP::Statement& st1 = getMetadataLoader()->getStatement(
+        "select rdb$field_source from rdb$relation_fields"
+        " where rdb$relation_name = ? and rdb$field_name = ?"
+        " for update"
     );
     st1->Set(1, wx2std(table));
     st1->Set(2, wx2std(field));
-    st1->Execute();
+    st1->CursorExecute("database_loaddomainforcolumn");
     st1->Fetch();
     std::string domain;
     st1->Get(1, domain);
-    tr1->Commit();
+    getMetadataLoader()->transactionCommit();
     domain.erase(domain.find_last_not_of(" ") + 1);
     return std2wx(domain);
 }
@@ -317,18 +316,17 @@ std::vector<wxString> Database::getCollations(wxString charset)
     return temp;
 }
 //-----------------------------------------------------------------------------
-Domain *Database::loadMissingDomain(wxString name)
+Domain* Database::loadMissingDomain(wxString name)
 {
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
-    st1->Prepare(
-        "select count(*) from rdb$fields f "
-        "left outer join rdb$types t on f.rdb$field_type=t.rdb$type "
-        "where t.rdb$field_name='RDB$FIELD_TYPE' and f.rdb$field_name = ?"
+    getMetadataLoader()->transactionStart();
+    IBPP::Statement& st1 = getMetadataLoader()->getStatement(
+        "select count(*) from rdb$fields f"
+        " left outer join rdb$types t on f.rdb$field_type=t.rdb$type"
+        " where t.rdb$field_name='RDB$FIELD_TYPE' and f.rdb$field_name = ?"
+        " for update"
     );
     st1->Set(1, wx2std(name));
-    st1->Execute();
+    st1->CursorExecute("database_loadmissingdomain");
     if (st1->Fetch())
     {
         int c;
@@ -342,7 +340,7 @@ Domain *Database::loadMissingDomain(wxString name)
             return d;
         }
     }
-    tr1->Commit();
+    getMetadataLoader()->transactionCommit();
     return 0;
 }
 //-----------------------------------------------------------------------------
@@ -350,10 +348,8 @@ Domain *Database::loadMissingDomain(wxString name)
 // this can be made template function in future
 void Database::fillVector(std::vector<wxString>& list, wxString sql)
 {
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
-    st1->Prepare(wx2std(sql));
+    getMetadataLoader()->transactionStart();
+    IBPP::Statement& st1 = getMetadataLoader()->getStatement(wx2std(sql));
     st1->Execute();
     while (st1->Fetch())
     {
@@ -362,7 +358,7 @@ void Database::fillVector(std::vector<wxString>& list, wxString sql)
         s.erase(s.find_last_not_of(" ") + 1); // trim
         list.push_back(std2wx(s));
     }
-    tr1->Commit();
+    getMetadataLoader()->transactionCommit();
 }
 //-----------------------------------------------------------------------------
 bool Database::isDefaultCollation(const wxString& charset,
@@ -405,25 +401,27 @@ void Database::loadCollations()
 //-----------------------------------------------------------------------------
 wxString Database::getTableForIndex(wxString indexName)
 {
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
-    st1->Prepare("SELECT rdb$relation_name from rdb$indices where rdb$index_name = ?");
+    getMetadataLoader()->transactionStart();
+    IBPP::Statement& st1 = getMetadataLoader()->getStatement(
+        "SELECT rdb$relation_name from rdb$indices where rdb$index_name = ?"
+        " for update");
     st1->Set(1, wx2std(indexName));
-    st1->Execute();
+    st1->CursorExecute("database_gettableforindex");
+
+    wxString tableName;
     if (st1->Fetch())
     {
         std::string retval;
         st1->Get(1, retval);
         retval.erase(retval.find_last_not_of(" ") + 1);
-        return std2wx(retval);
+        tableName = std2wx(retval);
     }
-    return wxT("");
+    getMetadataLoader()->transactionCommit();
+    return tableName;
 }
 //-----------------------------------------------------------------------------
 //! load list of objects of type "type" from database, and fill the DBH
-void Database::loadObjects(NodeType type, IBPP::Transaction& tr1,
-    ProgressIndicator* indicator)
+void Database::loadObjects(NodeType type, ProgressIndicator* indicator)
 {
     switch (type)
     {
@@ -441,8 +439,9 @@ void Database::loadObjects(NodeType type, IBPP::Transaction& tr1,
     };
 
     SubjectLocker locker(this);
-    IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
-    st1->Prepare(wx2std(getLoadingSql(type)));
+    getMetadataLoader()->transactionStart();
+    IBPP::Statement& st1 = getMetadataLoader()->getStatement(
+        wx2std(getLoadingSql(type)));
     st1->Execute();
     while (st1->Fetch())
     {
@@ -454,6 +453,7 @@ void Database::loadObjects(NodeType type, IBPP::Transaction& tr1,
         if (indicator && indicator->isCanceled())
             break;
     }
+    getMetadataLoader()->transactionCommit();
     refreshByType(type);
 }
 //-----------------------------------------------------------------------------
@@ -803,15 +803,14 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
         tablesM.setParent(this);
         sysTablesM.setParent(this);
 
+        getMetadataLoader()->transactionStart();
+
         bool canceled = (indicator && indicator->isCanceled());
         if (!canceled)
         {
-            IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
-            tr1->Start();
-
             // load database charset
-            IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
-            st1->Prepare("select rdb$character_set_name from rdb$database");
+            IBPP::Statement& st1 = metadataLoaderM->getStatement(
+                "select rdb$character_set_name from rdb$database");
             st1->Execute();
             if (st1->Fetch())
             {
@@ -848,7 +847,7 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
                     indicator->initProgress(wxString::Format(_("Loading %s..."),
                         typeName.c_str()), typeCount, i);
                 }
-                loadObjects(nodetypes[i].type, tr1, indicator);
+                loadObjects(nodetypes[i].type, indicator);
                 if (indicator && indicator->isCanceled())
                 {
                     canceled = true;
@@ -857,13 +856,14 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
             }
             if (!canceled && indicator)
                 indicator->initProgress(_("Complete"), typeCount, typeCount);
-            tr1->Commit();
         }
         if (canceled)
             disconnect();
 
         if (connectedM)
             databaseInfoM.loadInfo(&databaseM);
+
+        getMetadataLoader()->transactionCommit();
     }
     catch (...)
     {
@@ -886,6 +886,8 @@ void Database::disconnect(bool onlyDBH)
 
     if (!onlyDBH)
         databaseM->Disconnect();
+    delete metadataLoaderM;
+    metadataLoaderM = 0;
     resetCredentials();     // "forget" temporary username/password
     connectedM = false;
 
@@ -932,6 +934,13 @@ void Database::clear()
 bool Database::isConnected() const
 {
     return connectedM;
+}
+//-----------------------------------------------------------------------------
+MetadataLoader* Database::getMetadataLoader()
+{
+    if (metadataLoaderM == 0)
+        metadataLoaderM = new MetadataLoader(*this, 8);
+    return metadataLoaderM;
 }
 //-----------------------------------------------------------------------------
 bool Database::getChildren(std::vector<MetadataItem*>& temp)

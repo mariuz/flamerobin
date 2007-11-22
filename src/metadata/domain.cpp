@@ -45,6 +45,7 @@
 
 #include "core/FRError.h"
 #include "core/StringUtils.h"
+#include "engine/MetadataLoader.h"
 #include "frutils.h"
 #include "metadata/database.h"
 #include "metadata/domain.h"
@@ -62,11 +63,11 @@ void Domain::loadInfo()
     Database *d = getDatabase();
     if (!d)
         throw FRError(_("Domain::loadInfo, database = 0"));
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(
+
+    MetadataLoader* loader = d->getMetadataLoader();
+    loader->transactionStart();
+
+    IBPP::Statement& st1 = loader->getStatement(
         "select t.rdb$type, f.rdb$field_sub_type, f.rdb$field_length,"
         " f.rdb$field_precision, f.rdb$field_scale, c.rdb$character_set_name, "
         " c.rdb$bytes_per_character, f.rdb$null_flag, f.rdb$default_source, "
@@ -80,10 +81,11 @@ void Domain::loadInfo()
             " and l.rdb$character_set_id = f.rdb$character_set_id"
         " where f.rdb$field_name = ?"
         " and t.rdb$field_name='RDB$FIELD_TYPE'"
+        " for update"
     );
 
     st1->Set(1, wx2std(getName_()));
-    st1->Execute();
+    st1->CursorExecute("domain_loadinfo");
     if (!st1->Fetch())
         throw FRError(_("Domain not found."));
     st1->Get(1, &datatypeM);
@@ -137,7 +139,8 @@ void Domain::loadInfo()
     }
     readBlob(st1, 11, checkM);
 
-    tr1->Commit();
+    loader->transactionCommit();
+
     if (!isSystem())
         notifyObservers();
     infoLoadedM = true;

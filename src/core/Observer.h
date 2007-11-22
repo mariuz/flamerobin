@@ -35,7 +35,7 @@ class Subject;
 class Observer
 {
 private:
-    bool updatingM;
+    unsigned updateLockM;
 protected:
     // pointer to objects that it is watching
     std::list<Subject*> subjectsM;
