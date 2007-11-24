@@ -55,6 +55,7 @@
 #include "core/ArtProvider.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
+#include "engine/MetadataLoader.h"
 #include "framemanager.h"
 #include "gui/AdvancedMessageDialog.h"
 #include "gui/CommandIds.h"
@@ -2513,6 +2514,10 @@ bool EditDDLHandler::handleURI(URI& uri)
     wxWindow* w = getWindow(uri);
     if (!m || !w)
         return true;
+
+    // use a single read-only transaction for metadata loading
+    Database* d = m->getDatabase(wxT("EditDDLHandler::handleURI"));
+    MetadataLoaderTransaction tr((d) ? d->getMetadataLoader() : 0);
 
     ProgressDialog pd(w, _("Extracting DDL Definitions"), 2);
     CreateDDLVisitor cdv(&pd);

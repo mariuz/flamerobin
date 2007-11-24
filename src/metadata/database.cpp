@@ -465,6 +465,14 @@ void Database::loadObjects(NodeType type, ProgressIndicator* indicator)
 //-----------------------------------------------------------------------------
 void Database::loadGeneratorValues()
 {
+    MetadataLoader* loader = getMetadataLoader();
+    // first start a transaction for metadata loading, then lock the database
+    // when objects go out of scope and are destroyed, database will be
+    // unlocked before the transaction is committed - any update() calls on
+    // observers can possibly use the same transaction
+    MetadataLoaderTransaction tr(loader);
+    SubjectLocker lock(this);
+
     for (MetadataCollection<Generator>::iterator it = generatorsM.begin();
         it != generatorsM.end(); ++it)
     {
