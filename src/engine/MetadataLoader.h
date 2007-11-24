@@ -34,12 +34,15 @@
 #include <ibpp.h>
 
 class Database;
+class MetadataLoaderTransaction;
 //-----------------------------------------------------------------------------
 class MetadataLoader
 {
 private:
     typedef std::list<IBPP::Statement> IBPPStatementList;
     typedef std::list<IBPP::Statement>::iterator IBPPStatementListIterator;
+
+    friend class MetadataLoaderTransaction;
 
     IBPP::Database databaseM;
     IBPP::Transaction transactionM;
@@ -52,6 +55,19 @@ private:
     IBPPStatementListIterator findStatement(const std::string& sql);
     // Releases any assigned statement objects beyond the list size limit.
     void limitListSize();
+
+    // A read-only transaction is used to read metadata from the database.
+    // The first call of transactionStart() starts the transaction, further
+    // calls only increment transactionLevelM.  Calls to transactionCommit()
+    // decrease transactionLevelM, when it reaches 0 the transaction itself
+    // is committed.
+    // Methods are private, use of MetadataLoaderTransaction class is
+    // exception-safe and allows for proper synchronization with locks
+    // on metadata items (first unlock the object, then commit transaction)
+    void transactionStart();
+    void transactionCommit();
+    bool transactionStarted();
+
 public:
     // Creates MetadataLoader object for the database, which will use
     // a maximum of maxStatements assigned IBPP::Statement objects to
@@ -60,15 +76,6 @@ public:
     // of the statementsM list, and could possibly consume a lot of the
     // available server ressources!
     MetadataLoader(Database& database, unsigned maxStatements = 1);
-
-    // A read-only transaction is used to read metadata from the database.
-    // The first call of transactionStart() starts the transaction, further
-    // calls only increment transactionLevelM.  Calls to transactionCommit()
-    // decrease transactionLevelM, when it reaches 0 the transaction itself
-    // is committed.
-    void transactionStart();
-    void transactionCommit();
-    bool transactionStarted();
 
     // returns a reference to a prepared IBPP::Statement object for the
     // sql statement, either recycled, newly created, or newly prepared
@@ -83,6 +90,15 @@ public:
     // statementsM list, and could possibly consume a lot of the available
     // server ressources!
     void setMaximumConcurrentStatements(unsigned count);
+};
+//-----------------------------------------------------------------------------
+class MetadataLoaderTransaction
+{
+private:
+    MetadataLoader* loaderM;
+public:
+    MetadataLoaderTransaction(MetadataLoader* loader);
+    ~MetadataLoaderTransaction();
 };
 //-----------------------------------------------------------------------------
 #endif //FR_METADATALOADER_H

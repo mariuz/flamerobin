@@ -44,6 +44,7 @@
 #include "config/DatabaseConfig.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
+#include "engine/MetadataLoader.h"
 #include "MasterPassword.h"
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
@@ -286,8 +287,10 @@ wxString getLoadingSql(NodeType type)
 // This could be moved to Column class
 wxString Database::loadDomainNameForColumn(wxString table, wxString field)
 {
-    getMetadataLoader()->transactionStart();
-    IBPP::Statement& st1 = getMetadataLoader()->getStatement(
+    MetadataLoader* loader = getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    IBPP::Statement& st1 = loader->getStatement(
         "select rdb$field_source from rdb$relation_fields"
         " where rdb$relation_name = ? and rdb$field_name = ?"
     );
@@ -297,7 +300,6 @@ wxString Database::loadDomainNameForColumn(wxString table, wxString field)
     st1->Fetch();
     std::string domain;
     st1->Get(1, domain);
-    getMetadataLoader()->transactionCommit();
     domain.erase(domain.find_last_not_of(" ") + 1);
     return std2wx(domain);
 }
@@ -317,8 +319,10 @@ std::vector<wxString> Database::getCollations(wxString charset)
 //-----------------------------------------------------------------------------
 Domain* Database::loadMissingDomain(wxString name)
 {
-    getMetadataLoader()->transactionStart();
-    IBPP::Statement& st1 = getMetadataLoader()->getStatement(
+    MetadataLoader* loader = getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    IBPP::Statement& st1 = loader->getStatement(
         "select count(*) from rdb$fields f"
         " left outer join rdb$types t on f.rdb$field_type=t.rdb$type"
         " where t.rdb$field_name='RDB$FIELD_TYPE' and f.rdb$field_name = ?"
@@ -338,7 +342,6 @@ Domain* Database::loadMissingDomain(wxString name)
             return d;
         }
     }
-    getMetadataLoader()->transactionCommit();
     return 0;
 }
 //-----------------------------------------------------------------------------
@@ -346,8 +349,10 @@ Domain* Database::loadMissingDomain(wxString name)
 // this can be made template function in future
 void Database::fillVector(std::vector<wxString>& list, wxString sql)
 {
-    getMetadataLoader()->transactionStart();
-    IBPP::Statement& st1 = getMetadataLoader()->getStatement(wx2std(sql));
+    MetadataLoader* loader = getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    IBPP::Statement& st1 = loader->getStatement(wx2std(sql));
     st1->Execute();
     while (st1->Fetch())
     {
@@ -356,7 +361,6 @@ void Database::fillVector(std::vector<wxString>& list, wxString sql)
         s.erase(s.find_last_not_of(" ") + 1); // trim
         list.push_back(std2wx(s));
     }
-    getMetadataLoader()->transactionCommit();
 }
 //-----------------------------------------------------------------------------
 bool Database::isDefaultCollation(const wxString& charset,
@@ -375,10 +379,11 @@ void Database::loadCollations()
     if (!collationsM.empty())
         return;
 
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(databaseM, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(databaseM, tr1);
-    st1->Prepare("select c.rdb$character_set_name, k.rdb$collation_name "
+    MetadataLoader* loader = getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    IBPP::Statement& st1 = loader->getStatement(
+        "select c.rdb$character_set_name, k.rdb$collation_name "
         " from rdb$character_sets c"
         " left outer join rdb$collations k "
         "   on c.rdb$character_set_id = k.rdb$character_set_id "
@@ -394,13 +399,14 @@ void Database::loadCollations()
         collationsM.insert(std::multimap<wxString, wxString>::value_type(
             std2wx(charset), std2wx(collation)));
     }
-    tr1->Commit();
 }
 //-----------------------------------------------------------------------------
 wxString Database::getTableForIndex(wxString indexName)
 {
-    getMetadataLoader()->transactionStart();
-    IBPP::Statement& st1 = getMetadataLoader()->getStatement(
+    MetadataLoader* loader = getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    IBPP::Statement& st1 = loader->getStatement(
         "SELECT rdb$relation_name from rdb$indices where rdb$index_name = ?");
     st1->Set(1, wx2std(indexName));
     st1->Execute();
@@ -413,7 +419,6 @@ wxString Database::getTableForIndex(wxString indexName)
         retval.erase(retval.find_last_not_of(" ") + 1);
         tableName = std2wx(retval);
     }
-    getMetadataLoader()->transactionCommit();
     return tableName;
 }
 //-----------------------------------------------------------------------------
@@ -435,10 +440,15 @@ void Database::loadObjects(NodeType type, ProgressIndicator* indicator)
         default:            return;
     };
 
-    SubjectLocker locker(this);
-    getMetadataLoader()->transactionStart();
-    IBPP::Statement& st1 = getMetadataLoader()->getStatement(
-        wx2std(getLoadingSql(type)));
+    MetadataLoader* loader = getMetadataLoader();
+    // first start a transaction for metadata loading, then lock the database
+    // when objects go out of scope and are destroyed, database will be
+    // unlocked before the transaction is committed - any update() calls on
+    // observers can possibly use the same transaction
+    MetadataLoaderTransaction tr(loader);
+    SubjectLocker lock(this);
+
+    IBPP::Statement& st1 = loader->getStatement(wx2std(getLoadingSql(type)));
     st1->Execute();
     while (st1->Fetch())
     {
@@ -450,7 +460,6 @@ void Database::loadObjects(NodeType type, ProgressIndicator* indicator)
         if (indicator && indicator->isCanceled())
             break;
     }
-    getMetadataLoader()->transactionCommit();
     refreshByType(type);
 }
 //-----------------------------------------------------------------------------
@@ -800,7 +809,13 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
         tablesM.setParent(this);
         sysTablesM.setParent(this);
 
-        getMetadataLoader()->transactionStart();
+        // first start a transaction for metadata loading, then lock the
+        // database
+        // when objects go out of scope and are destroyed, database will be
+        // unlocked before the transaction is committed - any update() calls
+        // on observers can possibly use the same transaction
+        MetadataLoaderTransaction tr(getMetadataLoader());
+        SubjectLocker lock(this);
 
         bool canceled = (indicator && indicator->isCanceled());
         if (!canceled)
@@ -859,8 +874,6 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
 
         if (connectedM)
             databaseInfoM.loadInfo(&databaseM);
-
-        getMetadataLoader()->transactionCommit();
     }
     catch (...)
     {

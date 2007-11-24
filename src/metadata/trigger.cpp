@@ -46,6 +46,7 @@
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "core/Visitor.h"
+#include "engine/MetadataLoader.h"
 #include "frutils.h"
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
@@ -82,11 +83,11 @@ void Trigger::loadInfo(bool force)
     Database *d = getDatabase();
     if (!d)
         throw FRError(_("database not set"));
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(
+
+    MetadataLoader* loader = d->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    IBPP::Statement& st1 = loader->getStatement(
         "select t.rdb$relation_name, t.rdb$trigger_sequence, "
         "t.rdb$trigger_inactive, t.rdb$trigger_type "
         "from rdb$triggers t where rdb$trigger_name = ? "
@@ -112,7 +113,6 @@ void Trigger::loadInfo(bool force)
         int ttype;
         st1->Get(4, &ttype);
         triggerTypeM = getTriggerType(ttype);
-        tr1->Commit();
         infoIsLoadedM = true;
         if (force)
             notifyObservers();
@@ -129,17 +129,17 @@ wxString Trigger::getSource() const
     Database* d = getDatabase();
     if (!d)
         throw FRError(_("database not set"));
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare("select rdb$trigger_source from rdb$triggers where rdb$trigger_name = ?");
+
+    MetadataLoader* loader = d->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    IBPP::Statement& st1 = loader->getStatement(
+        "select rdb$trigger_source from rdb$triggers where rdb$trigger_name = ?");
     st1->Set(1, wx2std(getName_()));
     st1->Execute();
     st1->Fetch();
     wxString source;
     readBlob(st1, 1, source);
-    tr1->Commit();
     return source;
 }
 //-----------------------------------------------------------------------------

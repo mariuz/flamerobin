@@ -131,3 +131,16 @@ void MetadataLoader::setMaximumConcurrentStatements(unsigned count)
     }
 }
 //-----------------------------------------------------------------------------
+MetadataLoaderTransaction::MetadataLoaderTransaction(MetadataLoader* loader)
+    : loaderM(loader)
+{
+    if (loaderM)
+        loaderM->transactionStart();
+}
+//-----------------------------------------------------------------------------
+MetadataLoaderTransaction::~MetadataLoaderTransaction()
+{
+    if (loaderM)
+        loaderM->transactionCommit();
+}
+//-----------------------------------------------------------------------------

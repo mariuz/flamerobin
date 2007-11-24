@@ -65,7 +65,7 @@ void Domain::loadInfo()
         throw FRError(_("Domain::loadInfo, database = 0"));
 
     MetadataLoader* loader = d->getMetadataLoader();
-    loader->transactionStart();
+    MetadataLoaderTransaction tr(loader);
 
     IBPP::Statement& st1 = loader->getStatement(
         "select t.rdb$type, f.rdb$field_sub_type, f.rdb$field_length,"
@@ -137,8 +137,6 @@ void Domain::loadInfo()
         collationM = std2wx(coll).Strip();
     }
     readBlob(st1, 11, checkM);
-
-    loader->transactionCommit();
 
     if (!isSystem())
         notifyObservers();

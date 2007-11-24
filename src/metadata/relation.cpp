@@ -125,9 +125,13 @@ void Relation::loadColumns()
     if (!d)
         throw FRError(_("Database not set"));
 
-    SubjectLocker lock(this);
     MetadataLoader* loader = d->getMetadataLoader();
-    loader->transactionStart();
+    // first start a transaction for metadata loading, then lock the relation
+    // when objects go out of scope and are destroyed, object will be unlocked
+    // before the transaction is committed - any update() calls on observers
+    // can possibly use the same transaction
+    MetadataLoaderTransaction tr(loader);
+    SubjectLocker lock(this);
 
     IBPP::Statement& st1 = loader->getStatement(
         "select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source, "
@@ -167,7 +171,6 @@ void Relation::loadColumns()
         cc->Init(!st1->IsNull(2), std2wx(source),
             computedSrc, std2wx(collation), defaultSrc, !st1->IsNull(6));
     }
-    loader->transactionCommit();
     notifyObservers();
 }
 //-----------------------------------------------------------------------------

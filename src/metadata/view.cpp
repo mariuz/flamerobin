@@ -43,6 +43,7 @@
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "core/Visitor.h"
+#include "engine/MetadataLoader.h"
 #include "frutils.h"
 #include "metadata/collection.h"
 #include "metadata/database.h"
@@ -60,17 +61,17 @@ wxString View::getSource()
     Database *d = getDatabase();
     if (!d)
         throw FRError(_("database not set"));
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare("select rdb$view_source from rdb$relations where rdb$relation_name = ?");
+
+    MetadataLoader* loader = d->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    IBPP::Statement st1 = loader->getStatement(
+        "select rdb$view_source from rdb$relations where rdb$relation_name = ?");
     st1->Set(1, wx2std(getName_()));
     st1->Execute();
     st1->Fetch();
     wxString source;
     readBlob(st1, 1, source);
-    tr1->Commit();
     return source;
 }
 //-----------------------------------------------------------------------------
