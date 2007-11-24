@@ -290,11 +290,10 @@ wxString Database::loadDomainNameForColumn(wxString table, wxString field)
     IBPP::Statement& st1 = getMetadataLoader()->getStatement(
         "select rdb$field_source from rdb$relation_fields"
         " where rdb$relation_name = ? and rdb$field_name = ?"
-        " for update"
     );
     st1->Set(1, wx2std(table));
     st1->Set(2, wx2std(field));
-    st1->CursorExecute("database_loaddomainforcolumn");
+    st1->Execute();
     st1->Fetch();
     std::string domain;
     st1->Get(1, domain);
@@ -323,10 +322,9 @@ Domain* Database::loadMissingDomain(wxString name)
         "select count(*) from rdb$fields f"
         " left outer join rdb$types t on f.rdb$field_type=t.rdb$type"
         " where t.rdb$field_name='RDB$FIELD_TYPE' and f.rdb$field_name = ?"
-        " for update"
     );
     st1->Set(1, wx2std(name));
-    st1->CursorExecute("database_loadmissingdomain");
+    st1->Execute();
     if (st1->Fetch())
     {
         int c;
@@ -403,10 +401,9 @@ wxString Database::getTableForIndex(wxString indexName)
 {
     getMetadataLoader()->transactionStart();
     IBPP::Statement& st1 = getMetadataLoader()->getStatement(
-        "SELECT rdb$relation_name from rdb$indices where rdb$index_name = ?"
-        " for update");
+        "SELECT rdb$relation_name from rdb$indices where rdb$index_name = ?");
     st1->Set(1, wx2std(indexName));
-    st1->CursorExecute("database_gettableforindex");
+    st1->Execute();
 
     wxString tableName;
     if (st1->Fetch())

@@ -81,11 +81,10 @@ void Domain::loadInfo()
             " and l.rdb$character_set_id = f.rdb$character_set_id"
         " where f.rdb$field_name = ?"
         " and t.rdb$field_name='RDB$FIELD_TYPE'"
-        " for update"
     );
 
     st1->Set(1, wx2std(getName_()));
-    st1->CursorExecute("domain_loadinfo");
+    st1->Execute();
     if (!st1->Fetch())
         throw FRError(_("Domain not found."));
     st1->Get(1, &datatypeM);

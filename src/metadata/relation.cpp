@@ -140,10 +140,9 @@ void Relation::loadColumns()
         "     and l.rdb$character_set_id = f.rdb$character_set_id"
         " where r.rdb$relation_name = ?"
         " order by r.rdb$field_position"
-        " for update"
     );
     st1->Set(1, wx2std(getName_()));
-    st1->CursorExecute("relation_loadcolumns");
+    st1->Execute();
     while (st1->Fetch())
     {
         std::string name, source, collation;
