@@ -56,7 +56,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     // since not all objects are created by that time - event handling code
     // crashes
     inConstructor = true;
-    databaseM = object->getDatabase();
+    databaseM = object->findDatabase();
 
     wxBoxSizer *innerSizer = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -611,7 +611,7 @@ bool ManagePrivilegesHandler::handleURI(URI& uri)
         // nothing to be done
         if (!statements.IsEmpty())
         {
-            execSql(w, _("Grant And Revoke Privileges"), m->getDatabase(),
+            execSql(w, _("Grant And Revoke Privileges"), m->findDatabase(),
                 statements, true);
         }
     }

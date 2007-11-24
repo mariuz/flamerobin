@@ -49,6 +49,7 @@
 #include "config/Config.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
+#include "engine/MetadataLoader.h"
 #include "framemanager.h"
 #include "frutils.h"
 #include "gui/MetadataItemPropertiesFrame.h"
@@ -108,7 +109,7 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
     html_window = new PrintableHtmlWindow(this);
 
     wxStatusBar *sb = CreateStatusBar();
-    Database* d = objectM->getDatabase();
+    Database* d = objectM->findDatabase();
     if (d)  // server property page doesn't have a database, so don't crash
     {
         wxString s = d->getUsername() + wxT("@") + d->getConnectionString()
@@ -118,6 +119,10 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
     else
         sb->SetStatusText(objectM->getPrintableName());
 
+    // start a transaction for metadata loading and lock the object
+    MetadataLoaderTransaction tr((d) ? d->getMetadataLoader() : 0);
+    SubjectLocker lock(objectM);
+    
     // request initial rendering
     requestLoadPage(true);
     objectM->attachObserver(this);
@@ -222,6 +227,12 @@ void MetadataItemPropertiesFrame::loadPage()
     }
 
     wxBusyCursor bc;
+
+    // start a transaction for metadata loading and lock the object
+    Database* d = objectM->findDatabase();
+    MetadataLoaderTransaction tr((d) ? d->getMetadataLoader() : 0);
+    SubjectLocker lock(objectM);
+
     processHtmlFile(htmlpage);  // load HTML template, parse, and fill the HTML control
 }
 //-----------------------------------------------------------------------------
@@ -1153,7 +1164,7 @@ bool PropertiesHandler::handleURI(URI& uri)
     MetadataItemPropertiesFrame* parent = dynamic_cast<MetadataItemPropertiesFrame*>(getWindow(uri));
     if (!parent)
         return true;
-    Database* d = parent->getObservedObject()->getDatabase();
+    Database* d = parent->getObservedObject()->findDatabase();
     if (!d)
         return true;
     NodeType n = getTypeByName(uri.getParam(wxT("object_type")));

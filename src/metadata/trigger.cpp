@@ -80,10 +80,8 @@ wxString Trigger::getRelation()
 void Trigger::loadInfo(bool force)
 {
     infoIsLoadedM = false;
-    Database *d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
 
+    Database* d = getDatabase(wxT("Trigger::loadInfo"));
     MetadataLoader* loader = d->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 
@@ -126,10 +124,7 @@ void Trigger::loadInfo(bool force)
 //-----------------------------------------------------------------------------
 wxString Trigger::getSource() const
 {
-    Database* d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
-
+    Database* d = getDatabase(wxT("Trigger::getSource"));
     MetadataLoader* loader = d->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 

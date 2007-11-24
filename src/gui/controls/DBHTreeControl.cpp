@@ -734,7 +734,7 @@ MetadataItem* DBHTreeControl::getSelectedMetadataItem()
 Database* DBHTreeControl::getSelectedDatabase()
 {
     MetadataItem* m = getSelectedMetadataItem();
-    return (m) ? m->getDatabase() : 0;
+    return (m) ? m->findDatabase() : 0;
 }
 //-----------------------------------------------------------------------------
 //! returns the server of the object that selected wxTree node observes

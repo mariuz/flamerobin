@@ -58,10 +58,7 @@ View::View()
 //! returns false if an error occurs
 wxString View::getSource()
 {
-    Database *d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
-
+    Database* d = getDatabase(wxT("View::getSource"));
     MetadataLoader* loader = d->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 

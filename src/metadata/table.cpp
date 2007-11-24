@@ -43,6 +43,7 @@
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "core/Visitor.h"
+#include "engine/MetadataLoader.h"
 #include "frutils.h"
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
@@ -64,14 +65,11 @@ wxString Table::getExternalPath()
     if (externalPathLoadedM)
         return externalPathM;
 
-    Database *d = getDatabase();
-    if (!d)
-        throw FRError(wxT("database not set"));
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(
+    Database* d = getDatabase(wxT("Table::getExternalPath"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    IBPP::Statement& st1 = loader->getStatement(
         " select rdb$external_file from rdb$relations "
         " where rdb$relation_name = ?"
     );
@@ -86,7 +84,6 @@ wxString Table::getExternalPath()
     }
     else
         externalPathM = wxEmptyString;
-    tr1->Commit();
     externalPathLoadedM = true;
     return externalPathM;
 }
@@ -133,9 +130,8 @@ wxString Table::getProcedureTemplate()
     wxString sql = wxT("SET TERM !! ;\nCREATE PROCEDURE ") + id.getQuoted() +
         wxT("\nRETURNS (");
     wxString collist, valist, parlist;
-    Database *db = getDatabase();
-    if (!db)
-        throw FRError(_("Database not found"));
+
+    Database* db = getDatabase(wxT("Table::getProcedureTemplate"));
     wxString dbcharset = db->getDatabaseCharset();
     for (MetadataCollection<Column>::iterator i = columnsM.begin();
          i != columnsM.end(); ++i)
@@ -204,16 +200,18 @@ void Table::loadCheckConstraints()
 {
     if (checkConstraintsLoadedM)
         return;
-
     checkConstraintsM.clear();
-    Database *d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(
+
+    Database* d = getDatabase(wxT("Table::loadCheckConstraints"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    // first start a transaction for metadata loading, then lock the table
+    // when objects go out of scope and are destroyed, table will be unlocked
+    // before the transaction is committed - any update() calls on observers
+    // can possibly use the same transaction
+    MetadataLoaderTransaction tr(loader);
+    SubjectLocker lock(this);
+
+    IBPP::Statement& st1 = loader->getStatement(
         "select r.rdb$constraint_name, t.rdb$trigger_source "
         " from rdb$relation_constraints r "
         " join rdb$check_constraints c on r.rdb$constraint_name=c.rdb$constraint_name and r.rdb$constraint_type = 'CHECK'"
@@ -237,7 +235,6 @@ void Table::loadCheckConstraints()
         c.sourceM = source;
         checkConstraintsM.push_back(c);
     }
-    tr1->Commit();
     checkConstraintsLoadedM = true;
 }
 //-----------------------------------------------------------------------------
@@ -246,16 +243,18 @@ void Table::loadPrimaryKey()
 {
     if (primaryKeyLoadedM)
         return;
-
     primaryKeyM.columnsM.clear();
-    Database *d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(
+
+    Database* d = getDatabase(wxT("Table::loadPrimaryKey"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    // first start a transaction for metadata loading, then lock the table
+    // when objects go out of scope and are destroyed, table will be unlocked
+    // before the transaction is committed - any update() calls on observers
+    // can possibly use the same transaction
+    MetadataLoaderTransaction tr(loader);
+    SubjectLocker lock(this);
+
+    IBPP::Statement& st1 = loader->getStatement(
         "select r.rdb$constraint_name, i.rdb$field_name, r.rdb$index_name "
         "from rdb$relation_constraints r, rdb$index_segments i "
         "where r.rdb$relation_name=? and r.rdb$index_name=i.rdb$index_name and "
@@ -275,7 +274,6 @@ void Table::loadPrimaryKey()
         primaryKeyM.columnsM.push_back(std2wx(name).Strip());
         primaryKeyM.indexName = std2wx(ix).Strip();
     }
-    tr1->Commit();
     primaryKeyM.setParent(this);
     primaryKeyLoadedM = true;
 }
@@ -285,16 +283,18 @@ void Table::loadUniqueConstraints()
 {
     if (uniqueConstraintsLoadedM)
         return;
-
     uniqueConstraintsM.clear();
-    Database *d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(
+
+    Database* d = getDatabase(wxT("Table::loadUniqueConstraints"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    // first start a transaction for metadata loading, then lock the table
+    // when objects go out of scope and are destroyed, table will be unlocked
+    // before the transaction is committed - any update() calls on observers
+    // can possibly use the same transaction
+    MetadataLoaderTransaction tr(loader);
+    SubjectLocker lock(this);
+
+    IBPP::Statement& st1 = loader->getStatement(
         "select r.rdb$constraint_name, i.rdb$field_name, r.rdb$index_name "
         "from rdb$relation_constraints r, rdb$index_segments i "
         "where r.rdb$relation_name=? and r.rdb$index_name=i.rdb$index_name and "
@@ -326,7 +326,6 @@ void Table::loadUniqueConstraints()
             cc->setParent(this);
         }
     }
-    tr1->Commit();
     uniqueConstraintsLoadedM = true;
 }
 //-----------------------------------------------------------------------------
@@ -367,17 +366,18 @@ void Table::loadForeignKeys()
 {
     if (foreignKeysLoadedM)
         return;
-
     foreignKeysM.clear();
-    Database *d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    IBPP::Statement st2 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(
+
+    Database* d = getDatabase(wxT("Table::loadForeignKeys"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    // first start a transaction for metadata loading, then lock the table
+    // when objects go out of scope and are destroyed, table will be unlocked
+    // before the transaction is committed - any update() calls on observers
+    // can possibly use the same transaction
+    MetadataLoaderTransaction tr(loader);
+    SubjectLocker lock(this);
+
+    IBPP::Statement& st1 = loader->getStatement(
         "select r.rdb$constraint_name, i.rdb$field_name, c.rdb$update_rule, "
         " c.rdb$delete_rule, c.RDB$CONST_NAME_UQ, r.rdb$index_name "
         "from rdb$relation_constraints r, rdb$index_segments i, rdb$ref_constraints c "
@@ -386,7 +386,7 @@ void Table::loadForeignKeys()
         "and (r.rdb$constraint_type='FOREIGN KEY') order by 1, i.rdb$field_position"
     );
 
-    st2->Prepare(
+    IBPP::Statement& st2 = loader->getStatement(
         "select r.rdb$relation_name, i.rdb$field_name"
         " from rdb$relation_constraints r"
         " join rdb$index_segments i on i.rdb$index_name = r.rdb$index_name "
@@ -440,7 +440,6 @@ void Table::loadForeignKeys()
             fkp->columnsM.push_back(std2wx(name));
         }
     }
-    tr1->Commit();
     foreignKeysLoadedM = true;
 }
 //-----------------------------------------------------------------------------
@@ -449,16 +448,18 @@ void Table::loadIndices()
 {
     if (indicesLoadedM)
         return;
-
     indicesM.clear();
-    Database *d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(
+
+    Database* d = getDatabase(wxT("Table::loadIndices"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    // first start a transaction for metadata loading, then lock the table
+    // when objects go out of scope and are destroyed, table will be unlocked
+    // before the transaction is committed - any update() calls on observers
+    // can possibly use the same transaction
+    MetadataLoaderTransaction tr(loader);
+    SubjectLocker lock(this);
+
+    IBPP::Statement& st1 = loader->getStatement(
         "SELECT i.rdb$index_name, i.rdb$unique_flag, i.rdb$index_inactive, "
         " i.rdb$index_type, i.rdb$statistics, "
         " s.rdb$field_name, rc.rdb$constraint_name, i.rdb$expression_source "
@@ -520,7 +521,6 @@ void Table::loadIndices()
             i->setParent(this);
         }
     }
-    tr1->Commit();
     indicesLoadedM = true;
 }
 //-----------------------------------------------------------------------------
@@ -572,7 +572,7 @@ bool Table::tablesRelate(const std::vector<wxString>& tables, Table* table,
                 if ((*i2) == (*it).getName_())
                 {
                     // find foreign keys for that table
-                    Database* d = table->getDatabase();
+                    Database* d = table->getDatabase(wxT("Table::tablesRelate"));
                     Table* other_table = dynamic_cast<Table*>(d->findByNameAndType(ntTable, (*i2)));
                     if (!other_table)
                         break;

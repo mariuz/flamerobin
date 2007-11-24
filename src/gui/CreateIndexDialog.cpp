@@ -255,7 +255,7 @@ bool TableIndicesHandler::handleURI(URI& uri)
         }
     }
     if (!sql.IsEmpty())
-        execSql(w, frameCaption, t->getDatabase(), sql, true);
+        execSql(w, frameCaption, t->findDatabase(), sql, true);
     return true;
 }
 //-----------------------------------------------------------------------------

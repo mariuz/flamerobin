@@ -196,10 +196,8 @@ void Procedure::loadParameters()
 {
     parametersLoadedM = false;
     parametersM.clear();
-    Database* d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
 
+    Database* d = getDatabase(wxT("Procedure::loadParameters"));
     MetadataLoader* loader = d->getMetadataLoader();
     // first start a transaction for metadata loading, then lock the procedure
     // when objects go out of scope and are destroyed, procedure will be
@@ -237,10 +235,7 @@ void Procedure::loadParameters()
 //-----------------------------------------------------------------------------
 wxString Procedure::getOwner()
 {
-    Database* d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
-
+    Database* d = getDatabase(wxT("Procedure::getOwner"));
     MetadataLoader* loader = d->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 
@@ -256,13 +251,9 @@ wxString Procedure::getOwner()
 //-----------------------------------------------------------------------------
 wxString Procedure::getSource()
 {
-    Database* d = getDatabase();
-    if (!d)
-    {
-        parametersLoadedM = false;
-        throw FRError(_("database not set"));
-    }
+    parametersLoadedM = false;
 
+    Database* d = getDatabase(wxT("Procedure::getSource"));
     MetadataLoader* loader = d->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 
@@ -325,7 +316,8 @@ wxString Procedure::getAlterSql(bool full)
 {
     if (!parametersLoadedM)
         loadParameters();
-    Database *db = getDatabase();
+
+    Database* db = getDatabase(wxT("Procedure::getAlterSql"));
 
     wxString sql = wxT("SET TERM ^ ;\nALTER PROCEDURE ") + getQuotedName();
     if (!parametersM.empty())
@@ -438,10 +430,7 @@ void Procedure::checkDependentProcedures()
 std::vector<Privilege>* Procedure::getPrivileges()
 {
     // load privileges from database and return the pointer to collection
-    Database *d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
-
+    Database* d = getDatabase(wxT("Procedure::getPrivileges"));
     MetadataLoader* loader = d->getMetadataLoader();
     // first start a transaction for metadata loading, then lock the procedure
     // when objects go out of scope and are destroyed, procedure will be

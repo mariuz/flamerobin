@@ -91,7 +91,7 @@ void FrameManager::rebuildMenu()
         MetadataItem *m = mf->getObservedObject();
         if (!m)
             continue;
-        Database *db = m->getDatabase();
+        Database* db = m->findDatabase();
         if (!db)
             continue;
 

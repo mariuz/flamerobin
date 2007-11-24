@@ -84,7 +84,10 @@ public:
 
     void getDependencies(std::vector<Dependency>& list, bool ofObject);  // load from db
 
-    Database *getDatabase() const;
+    // will return 0 if not database is assigned
+    Database* findDatabase() const;
+    // will throw FRError if not database is assigned
+    Database* getDatabase(const wxString& callingMethod) const;
     Root* getRoot() const;
 
     virtual bool getChildren(std::vector<MetadataItem *>& temp);

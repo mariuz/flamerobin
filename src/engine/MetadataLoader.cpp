@@ -71,6 +71,13 @@ bool MetadataLoader::transactionStarted()
     return (transactionM != 0 && transactionM->Started());
 }
 //-----------------------------------------------------------------------------
+IBPP::Statement MetadataLoader::createStatement(const std::string& sql)
+{
+    wxASSERT(transactionStarted());
+
+    return IBPP::StatementFactory(databaseM, transactionM, sql);
+}
+//-----------------------------------------------------------------------------
 MetadataLoader::IBPPStatementListIterator MetadataLoader::findStatement(
     const std::string& sql)
 {
@@ -129,6 +136,13 @@ void MetadataLoader::setMaximumConcurrentStatements(unsigned count)
         maxStatementsM = count;
         limitListSize();
     }
+}
+//-----------------------------------------------------------------------------
+IBPP::Blob MetadataLoader::createBlob()
+{
+    wxASSERT(transactionStarted());
+
+    return IBPP::BlobFactory(databaseM, transactionM);
 }
 //-----------------------------------------------------------------------------
 MetadataLoaderTransaction::MetadataLoaderTransaction(MetadataLoader* loader)

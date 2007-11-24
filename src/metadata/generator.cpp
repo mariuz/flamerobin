@@ -45,6 +45,7 @@
 
 #include "core/FRError.h"
 #include "core/StringUtils.h"
+#include "engine/MetadataLoader.h"
 #include "metadata/database.h"
 #include "metadata/generator.h"
 #include "metadata/MetadataItemVisitor.h"
@@ -74,19 +75,17 @@ void Generator::setValue(int64_t value)
 //-----------------------------------------------------------------------------
 void Generator::loadValue()
 {
-    Database *d = getDatabase();
-    if (!d)
-        throw FRError(_("Database not set."));
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare("select gen_id(" + wx2std(getQuotedName()) + ", 0) from rdb$database");
+    Database* d = getDatabase(wxT("Generator::loadValue"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    // do not use cached statements, because this can not be reused
+    IBPP::Statement st1 = loader->createStatement(
+        "select gen_id(" + wx2std(getQuotedName()) + ", 0) from rdb$database");
     st1->Execute();
     st1->Fetch();
     int64_t value;
     st1->Get(1, &value);
-    tr1->Commit();
     setValue(value);
 }
 //-----------------------------------------------------------------------------

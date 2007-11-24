@@ -60,10 +60,7 @@ Domain::Domain():
 //-----------------------------------------------------------------------------
 void Domain::loadInfo()
 {
-    Database *d = getDatabase();
-    if (!d)
-        throw FRError(_("Domain::loadInfo, database = 0"));
-
+    Database* d = getDatabase(wxT("Domain::loadInfo"));
     MetadataLoader* loader = d->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 

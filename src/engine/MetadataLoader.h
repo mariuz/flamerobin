@@ -77,6 +77,11 @@ public:
     // available server ressources!
     MetadataLoader(Database& database, unsigned maxStatements = 1);
 
+    // Creates a prepared IBPP::Statement object for the sql statement.
+    // Should be used in cases where sql is unique and can not be reused,
+    // but should still use the same transaction.  This way the cached
+    // statements will not be replaced.
+    IBPP::Statement createStatement(const std::string& sql);
     // returns a reference to a prepared IBPP::Statement object for the
     // sql statement, either recycled, newly created, or newly prepared
     // using the least recently used IBPP::Statement in statementsM
@@ -90,6 +95,9 @@ public:
     // statementsM list, and could possibly consume a lot of the available
     // server ressources!
     void setMaximumConcurrentStatements(unsigned count);
+
+    // Creates an IBPP::Blob object using the database and transaction
+    IBPP::Blob createBlob();
 };
 //-----------------------------------------------------------------------------
 class MetadataLoaderTransaction

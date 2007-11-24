@@ -57,10 +57,7 @@ Role::Role()
 std::vector<Privilege>* Role::getPrivileges()
 {
     // load privileges from database and return the pointer to collection
-    Database *d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
-
+    Database* d = getDatabase(wxT("Role::getPrivileges"));
     MetadataLoader* loader = d->getMetadataLoader();
     // first start a transaction for metadata loading, then lock the role
     // when objects go out of scope and are destroyed, role will be
@@ -109,10 +106,7 @@ std::vector<Privilege>* Role::getPrivileges()
 //-----------------------------------------------------------------------------
 wxString Role::getOwner()
 {
-    Database* d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
-
+    Database* d = getDatabase(wxT("Role::getOwner"));
     MetadataLoader* loader = d->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 

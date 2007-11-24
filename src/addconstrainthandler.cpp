@@ -102,7 +102,7 @@ bool AddConstraintHandler::handleURI(URI& uri)
         return true;
 
     // Find first available constraint name:
-    Database *db = t->getDatabase();
+    Database* db = t->getDatabase(wxT("AddConstraintHandler::handleURI"));
     wxString default_value;
     wxString prefix = type + wxT("_") + t->getName_();
     std::vector<wxString> cnames;
@@ -139,7 +139,7 @@ bool AddConstraintHandler::handleURI(URI& uri)
         wxString columnlist = selectRelationColumns(t, w);
         if (columnlist == wxT(""))
             return true;
-        Table* ref = selectTable(t->getDatabase(), w);
+        Table* ref = selectTable(t->findDatabase(), w);
         if (!ref)
             return true;
         wxString refcolumnlist = selectRelationColumns(ref, w);
