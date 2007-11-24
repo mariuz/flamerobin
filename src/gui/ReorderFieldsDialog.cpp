@@ -58,12 +58,11 @@ ReorderFieldsDialog::ReorderFieldsDialog(wxWindow* parent, Table* table)
 {
     tableM = table;
     tableM->checkAndLoadColumns();
-    tableM->attachObserver(this);
 
     SetTitle(_("Reordering Fields of Table ") + table->getName_());
     createControls();
     layoutControls();
-    update();
+    tableM->attachObserver(this);
     button_ok->SetDefault();
 }
 //-----------------------------------------------------------------------------

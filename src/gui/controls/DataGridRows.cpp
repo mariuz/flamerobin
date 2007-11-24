@@ -1237,6 +1237,9 @@ bool DataGridRows::canRemoveRow(size_t row)
 {
     if (row >= buffersM.size())
         return false;
+    // check that it is safe to call statementM->Columns()
+    if (statementM->Type() == IBPP::stUnknown)
+        return false;
     if (!buffersM[row]->isDeletableIsSet())
     {
         // find table with valid constraint
