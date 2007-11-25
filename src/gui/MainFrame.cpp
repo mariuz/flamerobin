@@ -532,6 +532,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
     if (!m)
         return;
 
+    wxBusyCursor wait;
     NodeType nt = m->getType();
 
     enum { showProperties = 0, showColumnInfo, selectFromOrExecute };
@@ -664,7 +665,7 @@ void MainFrame::OnMenuQuit(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-	
+
 	showAboutBox(this);
 
     FR_CATCH

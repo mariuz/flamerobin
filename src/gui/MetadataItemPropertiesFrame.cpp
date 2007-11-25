@@ -122,7 +122,7 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
     // start a transaction for metadata loading and lock the object
     MetadataLoaderTransaction tr((d) ? d->getMetadataLoader() : 0);
     SubjectLocker lock(objectM);
-    
+
     // request initial rendering
     requestLoadPage(true);
     objectM->attachObserver(this);
@@ -1101,6 +1101,7 @@ void MetadataItemPropertiesFrame::OnIdle(wxIdleEvent& WXUNUSED(event))
     FR_TRY
 
     Disconnect(wxID_ANY, wxEVT_IDLE);
+    wxBusyCursor bc;
     htmlReloadRequestedM = false;
     loadPage();
 
