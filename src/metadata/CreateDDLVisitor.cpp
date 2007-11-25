@@ -103,7 +103,7 @@ void CreateDDLVisitor::visitColumn(Column& c)
         {
             preSqlM << d->getDatatypeAsString();
             wxString charset = d->getCharset();
-            Database *db = d->getDatabase();
+            Database* db = d->findDatabase();
             if (!charset.IsEmpty())
             {
                 if (!db || db->getDatabaseCharset() != charset)
@@ -228,7 +228,7 @@ void CreateDDLVisitor::visitDomain(Domain& d)
     preSqlM += wxT("CREATE DOMAIN ") + d.getQuotedName() + wxT("\n AS ") +
             d.getDatatypeAsString();
     wxString charset = d.getCharset();
-    Database *db = d.getDatabase();
+    Database* db = d.findDatabase();
     if (!charset.IsEmpty() && (!db || db->getDatabaseCharset() != charset))
         preSqlM += wxT(" CHARACTER SET ") + charset;
     preSqlM += wxT("\n");

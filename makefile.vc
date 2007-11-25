@@ -69,6 +69,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Subject.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Visitor.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_databasehandler.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataLoader.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_framemanager.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.obj \
@@ -314,6 +315,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Visitor.obj: .\src\core\Visitor.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_databasehandler.obj: .\src\databasehandler.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataLoader.obj: .\src\engine\MetadataLoader.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_framemanager.obj: .\src\framemanager.cpp

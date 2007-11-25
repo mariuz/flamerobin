@@ -42,6 +42,7 @@
 
 #include "core/StringUtils.h"
 #include "core/FRError.h"
+#include "engine/MetadataLoader.h"
 #include "metadata/database.h"
 #include "metadata/exception.h"
 #include "metadata/MetadataItemVisitor.h"
@@ -78,17 +79,16 @@ void Exception::loadProperties(bool force)
     if (!force && propertiesLoadedM)
         return;
 
-    Database* d = getDatabase();
-    if (!d)
-        throw FRError(_("Exception::loadProperties - Database not set"));
-
     messageM = wxT("");
     numberM = 0;
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare("select RDB$MESSAGE, RDB$EXCEPTION_NUMBER from RDB$EXCEPTIONS where RDB$EXCEPTION_NAME = ?");
+
+    Database* d = getDatabase(wxT("Exception::loadProperties"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    IBPP::Statement& st1 = loader->getStatement(
+        "select RDB$MESSAGE, RDB$EXCEPTION_NUMBER from RDB$EXCEPTIONS"
+        " where RDB$EXCEPTION_NAME = ?");
     st1->Set(1, wx2std(getName_()));
     st1->Execute();
     st1->Fetch();
@@ -96,7 +96,6 @@ void Exception::loadProperties(bool force)
     st1->Get(1, message);
     messageM = std2wx(message);
     st1->Get(2, numberM);
-    tr1->Commit();
     propertiesLoadedM = true;
     notifyObservers();
 }

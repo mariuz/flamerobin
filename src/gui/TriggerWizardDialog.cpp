@@ -205,7 +205,7 @@ bool CreateTriggerHandler::handleURI(URI& uri)
     {
         wxString statement(twd.getSqlStatement());
         if (!statement.IsEmpty())
-            showSql(w, _("Creating new trigger"), t->getDatabase(), statement);
+            showSql(w, _("Creating new trigger"), t->findDatabase(), statement);
     }
     return true;
 }

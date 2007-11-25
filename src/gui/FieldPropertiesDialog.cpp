@@ -268,7 +268,7 @@ void FieldPropertiesDialog::update()
 bool FieldPropertiesDialog::getDomainInfo(const wxString& domain,
     wxString& type, wxString& size, wxString& scale, wxString& charset)
 {
-    Database* db = tableM->getDatabase();
+    Database* db = tableM->findDatabase();
     if (db)
     {
         MetadataCollection<Domain>::const_iterator it;
@@ -447,10 +447,11 @@ void FieldPropertiesDialog::loadCharsets()
     choice_charset->Clear();
     choice_charset->Append(wxT("NONE"));
 
-    if (tableM && tableM->getDatabase())
+    Database* db = (tableM) ? tableM->findDatabase() : 0;
+    if (tableM && db)
     {
         vector<wxString> charsets;
-        tableM->getDatabase()->fillVector(charsets,
+        db->fillVector(charsets,
             wxT("select rdb$character_set_name from rdb$character_sets order by 1"));
         for (vector<wxString>::iterator it = charsets.begin();
             it != charsets.end(); ++it)
@@ -467,10 +468,11 @@ void FieldPropertiesDialog::loadCollations()
     choice_collate->Freeze();
     choice_collate->Clear();
 
-    if (tableM && tableM->getDatabase())
+    Database* db = (tableM) ? tableM->findDatabase() : 0;
+    if (tableM && db)
     {
         wxString charset(choice_charset->GetStringSelection());
-        vector<wxString> cols = tableM->getDatabase()->getCollations(charset);
+        vector<wxString> cols = db->getCollations(charset);
         for (vector<wxString>::iterator it = cols.begin(); it != cols.end(); it++)
             choice_collate->Append(*it);
     }
@@ -489,9 +491,9 @@ void FieldPropertiesDialog::loadDomains()
             choice_domain->SetSelection(0);
     }
 
-    if (tableM && tableM->getDatabase())
+    Database* db = (tableM) ? tableM->findDatabase() : 0;
+    if (tableM && db)
     {
-        Database* db = tableM->getDatabase();
         MetadataCollection<Domain>::const_iterator it;
         for (it = db->domainsBegin(); it != db->domainsEnd(); ++it)
         {
@@ -511,9 +513,9 @@ void FieldPropertiesDialog::loadGeneratorNames()
     choice_generator->Freeze();
     choice_generator->Clear();
 
-    if (tableM && tableM->getDatabase())
+    Database* db = (tableM) ? tableM->findDatabase() : 0;
+    if (tableM && db)
     {
-        Database* db = tableM->getDatabase();
         MetadataCollection<Generator>::const_iterator it;
         for (it = db->generatorsBegin(); it != db->generatorsEnd(); ++it)
             choice_generator->Append((*it).getName_());
@@ -734,7 +736,8 @@ void FieldPropertiesDialog::OnButtonEditDomainClick(wxCommandEvent&
 
     // Currently we just open the SQL editor and close this dialog
     wxString domain = choice_domain->GetStringSelection();
-    Database *db = tableM->getDatabase();
+    Database* db = tableM->getDatabase(
+        wxT("FieldPropertiesDialog::OnButtonEditDomainClick"));
     Domain *d = dynamic_cast<Domain *>(db->findByNameAndType(ntDomain,
         domain));
     if (!d)
@@ -855,7 +858,7 @@ bool ColumnPropertiesHandler::handleURI(URI& uri)
     }
 
     if (!statements.IsEmpty())
-        execSql(w, title, t->getDatabase(), statements, true);
+        execSql(w, title, t->findDatabase(), statements, true);
     return true;
 }
 //-----------------------------------------------------------------------------

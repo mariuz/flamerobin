@@ -47,6 +47,7 @@
 
 #include "core/StringUtils.h"
 #include "core/FRError.h"
+#include "engine/MetadataLoader.h"
 #include "frutils.h"
 #include "gui/AdvancedMessageDialog.h"
 #include "metadata/collection.h"
@@ -195,14 +196,17 @@ void Procedure::loadParameters()
 {
     parametersLoadedM = false;
     parametersM.clear();
-    Database* d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(
+
+    Database* d = getDatabase(wxT("Procedure::loadParameters"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    // first start a transaction for metadata loading, then lock the procedure
+    // when objects go out of scope and are destroyed, procedure will be
+    // unlocked before the transaction is committed - any update() calls on
+    // observers can possibly use the same transaction
+    MetadataLoaderTransaction tr(loader);
+    SubjectLocker lock(this);
+
+    IBPP::Statement st1 = loader->getStatement(
         "select p.rdb$parameter_name, p.rdb$field_source, p.rdb$parameter_type"
         " from rdb$procedure_parameters p"
         " where p.rdb$PROCEDURE_name = ? "
@@ -225,49 +229,41 @@ void Procedure::loadParameters()
         pp->setParent(this);
     }
 
-    tr1->Commit();
     parametersLoadedM = true;
     notifyObservers();
 }
 //-----------------------------------------------------------------------------
 wxString Procedure::getOwner()
 {
-    Database* d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare("select rdb$owner_name from rdb$procedures where rdb$procedure_name = ?");
+    Database* d = getDatabase(wxT("Procedure::getOwner"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    IBPP::Statement st1 = loader->getStatement(
+        "select rdb$owner_name from rdb$procedures where rdb$procedure_name = ?");
     st1->Set(1, wx2std(getName_()));
     st1->Execute();
     st1->Fetch();
     std::string name;
     st1->Get(1, name);
-    tr1->Commit();
     return std2wx(name).Trim();
 }
 //-----------------------------------------------------------------------------
 wxString Procedure::getSource()
 {
-    Database* d = getDatabase();
-    if (!d)
-    {
-        parametersLoadedM = false;
-        throw FRError(_("database not set"));
-    }
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare("select rdb$procedure_source from rdb$procedures where rdb$procedure_name = ?");
+    parametersLoadedM = false;
+
+    Database* d = getDatabase(wxT("Procedure::getSource"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    IBPP::Statement st1 = loader->getStatement(
+        "select rdb$procedure_source from rdb$procedures where rdb$procedure_name = ?");
     st1->Set(1, wx2std(getName_()));
     st1->Execute();
     st1->Fetch();
     wxString source;
     readBlob(st1, 1, source);
-    tr1->Commit();
     source.Trim(false);     // remove leading whitespace
     return source;
 }
@@ -320,7 +316,8 @@ wxString Procedure::getAlterSql(bool full)
 {
     if (!parametersLoadedM)
         loadParameters();
-    Database *db = getDatabase();
+
+    Database* db = getDatabase(wxT("Procedure::getAlterSql"));
 
     wxString sql = wxT("SET TERM ^ ;\nALTER PROCEDURE ") + getQuotedName();
     if (!parametersM.empty())
@@ -433,15 +430,18 @@ void Procedure::checkDependentProcedures()
 std::vector<Privilege>* Procedure::getPrivileges()
 {
     // load privileges from database and return the pointer to collection
-    Database *d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
+    Database* d = getDatabase(wxT("Procedure::getPrivileges"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    // first start a transaction for metadata loading, then lock the procedure
+    // when objects go out of scope and are destroyed, procedure will be
+    // unlocked before the transaction is committed - any update() calls on
+    // observers can possibly use the same transaction
+    MetadataLoaderTransaction tr(loader);
+    SubjectLocker lock(this);
+
     privilegesM.clear();
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(
+
+    IBPP::Statement st1 = loader->getStatement(
         "select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
         "RDB$GRANT_OPTION, RDB$FIELD_NAME "
         "from RDB$USER_PRIVILEGES "
@@ -475,7 +475,6 @@ std::vector<Privilege>* Procedure::getPrivileges()
         pr->addPrivilege(privilege[0], std2wx(grantor).Strip(),
             grantoption == 1);
     }
-    tr1->Commit();
     return &privilegesM;
 }
 //-----------------------------------------------------------------------------

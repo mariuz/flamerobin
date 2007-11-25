@@ -55,6 +55,7 @@
 #include "core/ArtProvider.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
+#include "engine/MetadataLoader.h"
 #include "framemanager.h"
 #include "gui/AdvancedMessageDialog.h"
 #include "gui/CommandIds.h"
@@ -153,7 +154,7 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
         return false;
     MetadataItem *m = (MetadataItem *)address;
 
-    Database *db = m->getDatabase();
+    Database* db = m->findDatabase();
     if (db != databaseM)
     {
         wxMessageBox(_("Cannot use objects from different databases."), _("Wrong database."), wxOK | wxICON_WARNING);
@@ -2255,7 +2256,7 @@ void ExecuteSqlFrame::update()
         Close();
 }
 //-----------------------------------------------------------------------------
-Database *ExecuteSqlFrame::getDatabase()
+Database* ExecuteSqlFrame::getDatabase()
 {
     return databaseM;
 }
@@ -2428,7 +2429,7 @@ bool DropColumnHandler::handleURI(URI& uri)
     if (uri.action == wxT("drop_constraint"))
         sql += wxT("CONSTRAINT ");
     sql += c->getQuotedName();
-    execSql(w, _("Dropping field"), c->getDatabase(), sql, true);
+    execSql(w, _("Dropping field"), c->findDatabase(), sql, true);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -2463,7 +2464,7 @@ bool DropColumnsHandler::handleURI(URI& uri)
             Identifier temp(*it);
             sql += wxT("ALTER TABLE ") + t->getQuotedName() + wxT(" DROP ") + temp.getQuoted() + wxT(";\n");
         }
-        execSql(w, _("Dropping fields"), t->getDatabase(), sql, true);
+        execSql(w, _("Dropping fields"), t->findDatabase(), sql, true);
     }
     return true;
 }
@@ -2489,7 +2490,7 @@ bool DropObjectHandler::handleURI(URI& uri)
     if (!m || !w)
         return true;
 
-    execSql(w, _("DROP"), m->getDatabase(), m->getDropSqlStatement(), true);
+    execSql(w, _("DROP"), m->findDatabase(), m->getDropSqlStatement(), true);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -2514,6 +2515,10 @@ bool EditDDLHandler::handleURI(URI& uri)
     if (!m || !w)
         return true;
 
+    // use a single read-only transaction for metadata loading
+    Database* d = m->getDatabase(wxT("EditDDLHandler::handleURI"));
+    MetadataLoaderTransaction tr((d) ? d->getMetadataLoader() : 0);
+
     ProgressDialog pd(w, _("Extracting DDL Definitions"), 2);
     CreateDDLVisitor cdv(&pd);
     m->acceptVisitor(&cdv);
@@ -2521,7 +2526,7 @@ bool EditDDLHandler::handleURI(URI& uri)
         return true;
 
     ExecuteSqlFrame* eff = new ExecuteSqlFrame(w->GetParent(), -1, wxT("DDL"),
-        m->getDatabase());
+        m->findDatabase());
     eff->setSql(cdv.getSql());
     // ProgressDialog needs to be hidden before ExecuteSqlFrame is shown,
     // otherwise the HTML frame will be raised over the ExecuteSqlFrame
@@ -2554,7 +2559,7 @@ bool EditProcedureHandler::handleURI(URI& uri)
 
     CreateDDLVisitor cdv;
     p->acceptVisitor(&cdv);
-    showSql(w->GetParent(), _("Editing stored procedure"), p->getDatabase(),
+    showSql(w->GetParent(), _("Editing stored procedure"), p->findDatabase(),
         cdv.getSuffixSql());
     return true;
 }
@@ -2580,7 +2585,7 @@ bool AlterViewHandler::handleURI(URI& uri)
     if (!r || !w)
         return true;
 
-    showSql(w->GetParent(), _("Altering view"), r->getDatabase(),
+    showSql(w->GetParent(), _("Altering view"), r->findDatabase(),
         r->getRebuildSql());
     return true;
 }
@@ -2606,7 +2611,7 @@ bool EditTriggerHandler::handleURI(URI& uri)
     if (!t || !w)
         return true;
 
-    showSql(w->GetParent(), _("Editing trigger"), t->getDatabase(),
+    showSql(w->GetParent(), _("Editing trigger"), t->findDatabase(),
         t->getAlterSql());
     return true;
 }
@@ -2634,12 +2639,7 @@ bool EditGeneratorValueHandler::handleURI(URI& uri)
 
     g->loadValue();
     int64_t oldvalue = g->getValue();
-    Database *db = g->getDatabase();
-    if (!db)
-    {
-        wxMessageBox(_("No database assigned"), _("Warning"), wxOK | wxICON_ERROR);
-        return true;
-    }
+    Database* db = g->getDatabase(wxT("EditGeneratorValueHandler::handleURI"));
 
     wxString value = wxGetTextFromUser(_("Changing generator value"), _("Enter new value"),
 #ifndef wxLongLong
@@ -2679,7 +2679,7 @@ bool EditExceptionHandler::handleURI(URI& uri)
     if (!e || !w)
         return true;
 
-    showSql(w->GetParent(), _("Editing exception"), e->getDatabase(),
+    showSql(w->GetParent(), _("Editing exception"), e->findDatabase(),
         e->getAlterSql());
     return true;
 }
@@ -2714,7 +2714,7 @@ bool IndexActionHandler::handleURI(URI& uri)
     else if (type == wxT("TOGGLE_ACTIVE"))
         sql = wxT("ALTER INDEX ") + i->getQuotedName() + (i->isActive() ? wxT(" INACTIVE") : wxT(" ACTIVE"));
 
-    execSql(w, wxEmptyString, i->getDatabase(), sql, true);
+    execSql(w, wxEmptyString, i->findDatabase(), sql, true);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -2750,7 +2750,7 @@ bool ActivateTriggersHandler::handleURI(URI& uri)
         sql += wxT("ACTIVE;\n");
     }
 
-    execSql(w, wxEmptyString, t->getDatabase(), sql, true);
+    execSql(w, wxEmptyString, t->findDatabase(), sql, true);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -2779,7 +2779,7 @@ bool ActivateTriggerHandler::handleURI(URI& uri)
         sql += wxT("IN");
     sql += wxT("ACTIVE;\n");
 
-    execSql(w, wxEmptyString, t->getDatabase(), sql, true);
+    execSql(w, wxEmptyString, t->findDatabase(), sql, true);
     return true;
 }
 //-----------------------------------------------------------------------------

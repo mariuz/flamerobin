@@ -42,6 +42,7 @@
 
 #include "core/StringUtils.h"
 #include "core/FRError.h"
+#include "engine/MetadataLoader.h"
 #include "frutils.h"
 #include "metadata/CreateDDLVisitor.h"
 #include "metadata/database.h"
@@ -93,20 +94,17 @@ MetadataCollection<Column>::const_iterator Relation::end() const
 //-----------------------------------------------------------------------------
 wxString Relation::getOwner()
 {
-    Database* d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare("select rdb$owner_name from rdb$relations where rdb$relation_name = ?");
+    Database* d = getDatabase(wxT("Relation::getOwner"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    IBPP::Statement& st1 = loader->getStatement(
+        "select rdb$owner_name from rdb$relations where rdb$relation_name = ?");
     st1->Set(1, wx2std(getName_()));
     st1->Execute();
     st1->Fetch();
     std::string name;
     st1->Get(1, name);
-    tr1->Commit();
     return std2wx(name).Trim();
 }
 //-----------------------------------------------------------------------------
@@ -120,15 +118,17 @@ void Relation::checkAndLoadColumns()
 void Relation::loadColumns()
 {
     columnsM.clear();
-    Database *d = getDatabase();
-    if (!d)
-        throw FRError(_("Database not set"));
-    IBPP::Database& db = d->getIBPPDatabase();
 
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(
+    Database *d = getDatabase(wxT("Relation::loadColumns"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    // first start a transaction for metadata loading, then lock the relation
+    // when objects go out of scope and are destroyed, object will be unlocked
+    // before the transaction is committed - any update() calls on observers
+    // can possibly use the same transaction
+    MetadataLoaderTransaction tr(loader);
+    SubjectLocker lock(this);
+
+    IBPP::Statement& st1 = loader->getStatement(
         "select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source, "
         " l.rdb$collation_name,f.rdb$computed_source,r.rdb$default_source"
         " from rdb$fields f"
@@ -140,7 +140,6 @@ void Relation::loadColumns()
         " where r.rdb$relation_name = ?"
         " order by r.rdb$field_position"
     );
-
     st1->Set(1, wx2std(getName_()));
     st1->Execute();
     while (st1->Fetch())
@@ -167,8 +166,6 @@ void Relation::loadColumns()
         cc->Init(!st1->IsNull(2), std2wx(source),
             computedSrc, std2wx(collation), defaultSrc, !st1->IsNull(6));
     }
-
-    tr1->Commit();
     notifyObservers();
 }
 //-----------------------------------------------------------------------------
@@ -191,14 +188,16 @@ void Relation::getDependentViews(std::vector<Relation *>& views)
 //-----------------------------------------------------------------------------
 void Relation::getDependentChecks(std::vector<CheckConstraint>& checks)
 {
-    Database *d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(
+    Database* d = getDatabase(wxT("Relation::getDependentChecks"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    // first start a transaction for metadata loading, then lock the relation
+    // when objects go out of scope and are destroyed, object will be unlocked
+    // before the transaction is committed - any update() calls on observers
+    // can possibly use the same transaction
+    MetadataLoaderTransaction tr(loader);
+    SubjectLocker lock(this);
+
+    IBPP::Statement& st1 = loader->getStatement(
         "select c.rdb$constraint_name, t.rdb$relation_name, "
         "   t.rdb$trigger_source "
         "from rdb$check_constraints c "
@@ -240,7 +239,6 @@ void Relation::getDependentChecks(std::vector<CheckConstraint>& checks)
         c.sourceM = source;
         checks.push_back(c);
     }
-    tr1->Commit();
 }
 //-----------------------------------------------------------------------------
 // STEPS:
@@ -358,9 +356,7 @@ wxString Relation::getRebuildSql()
         // a) drop and create foreign keys that reference this table
         // find all tables from "tables" which have foreign keys with "table"
         // and return them in "list"
-        Database *d = getDatabase();
-        if (!d)
-            return _("Error: database not set");
+        Database *d = getDatabase(wxT("Relation::getRebuildSql"));
         std::vector<ForeignKey> fkeys;
         MetadataCollection<Table> *tabs = d->getCollection<Table>();
         if (tabs)
@@ -470,15 +466,16 @@ wxString Relation::getRebuildSql()
 std::vector<Privilege>* Relation::getPrivileges()
 {
     // load privileges from database and return the pointer to collection
-    Database *d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
-    privilegesM.clear();
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(
+    Database* d = getDatabase(wxT("Relation::getPrivileges"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    // first start a transaction for metadata loading, then lock the relation
+    // when objects go out of scope and are destroyed, object will be unlocked
+    // before the transaction is committed - any update() calls on observers
+    // can possibly use the same transaction
+    MetadataLoaderTransaction tr(loader);
+    SubjectLocker lock(this);
+
+    IBPP::Statement& st1 = loader->getStatement(
         "select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
         "RDB$GRANT_OPTION, RDB$FIELD_NAME "
         "from RDB$USER_PRIVILEGES "
@@ -512,7 +509,6 @@ std::vector<Privilege>* Relation::getPrivileges()
         pr->addPrivilege(privilege[0], std2wx(grantor).Strip(),
             grantoption == 1, std2wx(field).Strip());
     }
-    tr1->Commit();
     return &privilegesM;
 }
 //-----------------------------------------------------------------------------
@@ -521,14 +517,11 @@ std::vector<Privilege>* Relation::getPrivileges()
 void Relation::getTriggers(std::vector<Trigger *>& list,
     Trigger::firingTimeType beforeOrAfter)
 {
-    Database *d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(
+    Database* d = getDatabase(wxT("Relation::getTriggers"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    IBPP::Statement& st1 = loader->getStatement(
         "select rdb$trigger_name from rdb$triggers where rdb$relation_name = ? "
         "order by rdb$trigger_sequence"
     );
@@ -543,7 +536,6 @@ void Relation::getTriggers(std::vector<Trigger *>& list,
         if (t && t->getFiringTime() == beforeOrAfter)
             list.push_back(t);
     }
-    tr1->Commit();
 }
 //-----------------------------------------------------------------------------
 bool Relation::getChildren(std::vector<MetadataItem*>& temp)

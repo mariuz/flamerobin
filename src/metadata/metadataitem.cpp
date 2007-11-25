@@ -43,6 +43,7 @@
 #include "config/Config.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
+#include "engine/MetadataLoader.h"
 #include "frutils.h"
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
@@ -162,9 +163,20 @@ MetadataItem* MetadataItem::getParentObjectOfType(NodeType type) const
     return m;
 }
 //-----------------------------------------------------------------------------
-Database *MetadataItem::getDatabase() const
+Database* MetadataItem::findDatabase() const
 {
     return dynamic_cast<Database*>(getParentObjectOfType(ntDatabase));
+}
+//-----------------------------------------------------------------------------
+Database* MetadataItem::getDatabase(const wxString& callingMethod) const
+{
+    Database* database = findDatabase();
+    if (!database)
+    {
+        throw FRError(wxString::Format(_("%s - no database assigned"), 
+            callingMethod.c_str()));
+    }
+    return database;
 }
 //-----------------------------------------------------------------------------
 Root* MetadataItem::getRoot() const
@@ -176,9 +188,7 @@ Root* MetadataItem::getRoot() const
 //! ofObject = false  => returns list of objects that depend on this object
 void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
 {
-    Database* d = getDatabase();
-    if (!d)
-        throw FRError(_("Database not set"));
+    Database* d = getDatabase(wxT("MetadataItem::getDependencies"));
 
     int mytype = -1;            // map DBH type to RDB$DEPENDENT TYPE
     NodeType dep_types[] = {    ntTable,    ntView,     ntTrigger,  ntUnknown,  ntUnknown,
@@ -426,19 +436,14 @@ void MetadataItem::loadDescription()
 //-----------------------------------------------------------------------------
 void MetadataItem::loadDescription(wxString loadStatement)
 {
-    // FIXME: implement findDatabase() vs. getDatabase()
-    Database *d = getDatabase();
-    if (!(d))
-        throw FRError(wxT("No database assigned"));
+    Database* d = getDatabase(wxT("MetadataItem::loadDescription"));
 
     wxString desc;
     try
     {
-        IBPP::Database& db = d->getIBPPDatabase();
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare(wx2std(loadStatement));
+        MetadataLoader* loader = d->getMetadataLoader();
+        MetadataLoaderTransaction tr(loader);
+        IBPP::Statement& st1 = loader->getStatement(wx2std(loadStatement));
         st1->Set(1, wx2std(getName_()));
         if (st1->Parameters() > 1)
             st1->Set(2, wx2std(getParent()->getName_())); // table/view/SP name
@@ -446,14 +451,13 @@ void MetadataItem::loadDescription(wxString loadStatement)
         st1->Fetch();
 
         std::string value;
-        IBPP::Blob b = IBPP::BlobFactory(db, tr1);
         if (!st1->IsNull(1))
         {
+            IBPP::Blob b = loader->createBlob();
             st1->Get(1, b);
             b->Load(value);
+            desc = std2wx(value);
         }
-        tr1->Commit();
-        desc = std2wx(value);
         descriptionLoadedM = dsLoaded;
     }
     catch (IBPP::SQLException &e)
@@ -480,10 +484,7 @@ void MetadataItem::saveDescription(wxString WXUNUSED(description))
 void MetadataItem::saveDescription(wxString saveStatement,
     wxString description)
 {
-    // FIXME: implement findDatabase() vs. getDatabase()
-    Database *d = getDatabase();
-    if (!(d))
-        throw FRError(wxT("No database assigned"));
+    Database* d = getDatabase(wxT("MetadataItem::saveDescription"));
 
     IBPP::Database& db = d->getIBPPDatabase();
     IBPP::Transaction tr1 = IBPP::TransactionFactory(db);

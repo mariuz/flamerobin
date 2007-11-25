@@ -41,6 +41,7 @@
 #include <ibpp.h>
 
 #include "core/StringUtils.h"
+#include "engine/MetadataLoader.h"
 #include "metadata/database.h"
 #include "metadata/domain.h"
 #include "metadata/function.h"
@@ -91,114 +92,98 @@ void Function::loadInfo(bool force)
     if (infoLoadedM && !force)
         return;
 
-    Database* d = getDatabase();
-    if (!d)
-    {
-        definitionM = wxT("Error");
-        return;
-    }
-
+    bool first = true;
+    paramListM = wxEmptyString;
+    wxString retstr;
+    definitionM = getName_() + wxT("(\n");
+        
     wxString mechanismNames[] = { wxT("value"), wxT("reference"),
         wxT("descriptor"), wxT("blob descriptor"), wxT("scalar array"),
         wxT("null"), wxEmptyString };
     wxString mechanismDDL[] = { wxT(" BY VALUE "), wxEmptyString,
         wxT(" BY DESCRIPTOR "), wxEmptyString, wxT(" BY SCALAR ARRAY "),
         wxT(" NULL "), wxEmptyString };
-    IBPP::Database& db = d->getIBPPDatabase();
-    definitionM = getName_() + wxT("(\n");
-    try
+
+    Database* d = getDatabase(wxT("Function::loadInfo"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    IBPP::Statement& st1 = loader->getStatement(
+        "SELECT f.RDB$RETURN_ARGUMENT, a.RDB$MECHANISM, a.RDB$ARGUMENT_POSITION, "
+        " a.RDB$FIELD_TYPE, a.RDB$FIELD_SCALE, a.RDB$FIELD_LENGTH, a.RDB$FIELD_SUB_TYPE, a.RDB$FIELD_PRECISION,"
+        " f.RDB$MODULE_NAME, f.RDB$ENTRYPOINT, c.RDB$CHARACTER_SET_NAME "
+        " FROM RDB$FUNCTIONS f"
+        " LEFT OUTER JOIN RDB$FUNCTION_ARGUMENTS a ON f.RDB$FUNCTION_NAME = a.RDB$FUNCTION_NAME"
+        " LEFT OUTER JOIN RDB$CHARACTER_SETS c ON a.RDB$CHARACTER_SET_ID = c.RDB$CHARACTER_SET_ID"
+        " WHERE f.RDB$FUNCTION_NAME = ? "
+        " ORDER BY a.RDB$ARGUMENT_POSITION"
+    );
+    st1->Set(1, wx2std(getName_()));
+    st1->Execute();
+    while (st1->Fetch())
     {
-        IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-        tr1->Start();
-        IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-        st1->Prepare(
-            "SELECT f.RDB$RETURN_ARGUMENT, a.RDB$MECHANISM, a.RDB$ARGUMENT_POSITION, "
-            " a.RDB$FIELD_TYPE, a.RDB$FIELD_SCALE, a.RDB$FIELD_LENGTH, a.RDB$FIELD_SUB_TYPE, a.RDB$FIELD_PRECISION,"
-            " f.RDB$MODULE_NAME, f.RDB$ENTRYPOINT, c.RDB$CHARACTER_SET_NAME "
-            " FROM RDB$FUNCTIONS f"
-            " LEFT OUTER JOIN RDB$FUNCTION_ARGUMENTS a ON f.RDB$FUNCTION_NAME = a.RDB$FUNCTION_NAME"
-            " LEFT OUTER JOIN RDB$CHARACTER_SETS c ON a.RDB$CHARACTER_SET_ID = c.RDB$CHARACTER_SET_ID"
-            " WHERE f.RDB$FUNCTION_NAME = ? "
-            " ORDER BY a.RDB$ARGUMENT_POSITION"
-        );
-        st1->Set(1, wx2std(getName_()));
-        st1->Execute();
-        bool first = true;
-        paramListM = wxEmptyString;
-        wxString retstr;
-        while (st1->Fetch())
+        short returnarg, mechanism, type, scale, length, subtype, precision, retpos;
+        std::string libraryName, entryPoint, charset;
+        st1->Get(1, returnarg);
+        st1->Get(2, mechanism);
+        st1->Get(3, retpos);
+        st1->Get(4, type);
+        st1->Get(5, scale);
+        st1->Get(6, length);
+        st1->Get(7, subtype);
+        st1->Get(8, precision);
+        st1->Get(9, libraryName);
+        libraryNameM = std2wx(libraryName).Strip();
+        st1->Get(10, entryPoint);
+        entryPointM = std2wx(entryPoint).Strip();
+        wxString datatype = Domain::datatype2string(type, scale,
+            precision, subtype, length);
+        if (!st1->IsNull(11))
         {
-            short returnarg, mechanism, type, scale, length, subtype, precision, retpos;
-            std::string libraryName, entryPoint, charset;
-            st1->Get(1, returnarg);
-            st1->Get(2, mechanism);
-            st1->Get(3, retpos);
-            st1->Get(4, type);
-            st1->Get(5, scale);
-            st1->Get(6, length);
-            st1->Get(7, subtype);
-            st1->Get(8, precision);
-            st1->Get(9, libraryName);
-            libraryNameM = std2wx(libraryName).Strip();
-            st1->Get(10, entryPoint);
-            entryPointM = std2wx(entryPoint).Strip();
-            wxString datatype = Domain::datatype2string(type, scale,
-                precision, subtype, length);
-            if (!st1->IsNull(11))
+            st1->Get(11, charset);
+            wxString chset(std2wx(charset).Strip());
+            if (d->getDatabaseCharset() != chset)
+                datatype += wxT(" CHARACTER SET ") + chset;
+        }
+        if (type == 261)    // avoid subtype information for BLOB
+            datatype = wxT("blob");
+
+        int mechIndex = (mechanism < 0 ? -mechanism : mechanism);
+        if (mechIndex >= (sizeof(mechanismNames)/sizeof(wxString)))
+            mechIndex = (sizeof(mechanismNames)/sizeof(wxString)) - 1;
+        wxString param = wxT("    ") + datatype + wxT(" by ")
+            + mechanismNames[mechIndex];
+        if (mechanism < 0)
+            param += wxT(" FREE_IT");
+        if (returnarg == retpos)    // output
+        {
+            retstr = param;
+            retstrM = datatype + mechanismDDL[mechIndex];
+            if (retpos != 0)
             {
-                st1->Get(11, charset);
-                wxString chset(std2wx(charset).Strip());
-                if (d->getDatabaseCharset() != chset)
-                    datatype += wxT(" CHARACTER SET ") + chset;
-            }
-            if (type == 261)    // avoid subtype information for BLOB
-                datatype = wxT("blob");
-            int mechIndex = (mechanism < 0 ? -mechanism : mechanism);
-            if (mechIndex >= (sizeof(mechanismNames)/sizeof(wxString)))
-                mechIndex = (sizeof(mechanismNames)/sizeof(wxString)) - 1;
-            wxString param = wxT("    ") + datatype + wxT(" by ")
-                + mechanismNames[mechIndex];
-            if (mechanism < 0)
-                param += wxT(" FREE_IT");
-            if (returnarg == retpos)    // output
-            {
-                retstr = param;
-                retstrM = datatype + mechanismDDL[mechIndex];
-                if (retpos != 0)
-                {
-                    retstrM = wxT("PARAMETER ");
-                    retstrM << retpos;
-                    if (!paramListM.IsEmpty())
-                        paramListM += wxT(", ");
-                    paramListM += datatype + mechanismDDL[mechIndex];
-                }
-            }
-            else
-            {
-                if (first)
-                    first = false;
-                else
-                    definitionM += wxT(",\n");
-                definitionM += param;
+                retstrM = wxT("PARAMETER ");
+                retstrM << retpos;
                 if (!paramListM.IsEmpty())
                     paramListM += wxT(", ");
                 paramListM += datatype + mechanismDDL[mechIndex];
             }
         }
-        definitionM += wxT("\n)\nreturns:\n") + retstr;
-        infoLoadedM = true;
-        tr1->Commit();
-        if (force)
-            notifyObservers();
+        else
+        {
+            if (first)
+                first = false;
+            else
+                definitionM += wxT(",\n");
+            definitionM += param;
+            if (!paramListM.IsEmpty())
+                paramListM += wxT(", ");
+            paramListM += datatype + mechanismDDL[mechIndex];
+        }
     }
-    catch (IBPP::Exception &e)
-    {
-        definitionM = std2wx(e.ErrorMessage());
-    }
-    catch (...)
-    {
-        definitionM = _("System error.");
-    }
+    definitionM += wxT("\n)\nreturns:\n") + retstr;
+    infoLoadedM = true;
+    if (force)
+        notifyObservers();
 }
 //-----------------------------------------------------------------------------
 wxString Function::getHtmlHeader()

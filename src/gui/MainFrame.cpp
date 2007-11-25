@@ -471,7 +471,7 @@ void MainFrame::OnMainMenuOpen(wxMenuEvent& event)
     if (objectMenuM->GetMenuItemCount() == 1)
         objectMenuM->AppendSeparator();
 
-    if (m->getDatabase() != 0 && dynamic_cast<Database*>(m) == 0)  // has to be subitem of database
+    if (m->findDatabase() != 0 && dynamic_cast<Database*>(m) == 0)  // has to be subitem of database
     {
         ContextMenuMetadataItemVisitor cmv(objectMenuM);
         m->acceptVisitor(&cmv);
@@ -532,6 +532,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
     if (!m)
         return;
 
+    wxBusyCursor wait;
     NodeType nt = m->getType();
 
     enum { showProperties = 0, showColumnInfo, selectFromOrExecute };
@@ -664,7 +665,7 @@ void MainFrame::OnMenuQuit(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 {
     FR_TRY
-	
+
 	showAboutBox(this);
 
     FR_CATCH
@@ -838,7 +839,7 @@ void MainFrame::OnMenuCreateProcedureForTable(wxCommandEvent& WXUNUSED(event))
     Table *t = dynamic_cast<Table*>(treeMainM->getSelectedMetadataItem());
     if (!t)
         return;
-    showSql(this, wxString(_("Creating procedure")), t->getDatabase(),
+    showSql(this, wxString(_("Creating procedure")), t->findDatabase(),
         t->getProcedureTemplate());
 
     FR_CATCH
@@ -852,7 +853,7 @@ void MainFrame::OnMenuExecuteProcedure(wxCommandEvent& WXUNUSED(event))
     if (!p)
         return;
 
-    showSql(this, wxString(_("Executing procedure")), p->getDatabase(),
+    showSql(this, wxString(_("Executing procedure")), p->findDatabase(),
         p->getExecuteStatement());
 
     FR_CATCH
@@ -869,7 +870,7 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
     Table *t = dynamic_cast<Table *>(i);
     View *v = dynamic_cast<View *>(i);
     Procedure *p = dynamic_cast<Procedure *>(i);
-    Database* d = i->getDatabase();
+    Database* d = i->findDatabase();
     if (!d || (!t && !p && !v))
         return;
 

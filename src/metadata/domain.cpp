@@ -45,6 +45,7 @@
 
 #include "core/FRError.h"
 #include "core/StringUtils.h"
+#include "engine/MetadataLoader.h"
 #include "frutils.h"
 #include "metadata/database.h"
 #include "metadata/domain.h"
@@ -59,14 +60,11 @@ Domain::Domain():
 //-----------------------------------------------------------------------------
 void Domain::loadInfo()
 {
-    Database *d = getDatabase();
-    if (!d)
-        throw FRError(_("Domain::loadInfo, database = 0"));
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(
+    Database* d = getDatabase(wxT("Domain::loadInfo"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    IBPP::Statement& st1 = loader->getStatement(
         "select t.rdb$type, f.rdb$field_sub_type, f.rdb$field_length,"
         " f.rdb$field_precision, f.rdb$field_scale, c.rdb$character_set_name, "
         " c.rdb$bytes_per_character, f.rdb$null_flag, f.rdb$default_source, "
@@ -137,7 +135,6 @@ void Domain::loadInfo()
     }
     readBlob(st1, 11, checkM);
 
-    tr1->Commit();
     if (!isSystem())
         notifyObservers();
     infoLoadedM = true;

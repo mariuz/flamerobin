@@ -44,10 +44,30 @@
 #include "core/Observer.h"
 #include "core/Subject.h"
 //-----------------------------------------------------------------------------
-using namespace std;
+class ObserverLocker
+{
+private:
+    unsigned* lockPtrM;
+public:
+    ObserverLocker(unsigned* lock);
+    ~ObserverLocker();
+};
+//-----------------------------------------------------------------------------
+ObserverLocker::ObserverLocker(unsigned* lock)
+    : lockPtrM(lock)
+{
+    if (lockPtrM)
+        ++(*lockPtrM);
+}
+//-----------------------------------------------------------------------------
+ObserverLocker::~ObserverLocker()
+{
+    if (lockPtrM)
+        --(*lockPtrM);
+}
 //-----------------------------------------------------------------------------
 Observer::Observer()
-    : updatingM(false)
+    : updateLockM(0)
 {
 }
 //-----------------------------------------------------------------------------
@@ -55,7 +75,7 @@ Observer::~Observer()
 {
     while (!subjectsM.empty())
     {
-        list<Subject*>::iterator it = subjectsM.begin();
+        std::list<Subject*>::iterator it = subjectsM.begin();
         // object will be removed by removeObservedObject()
         (*it)->detachObserver(this);
     }
@@ -63,20 +83,9 @@ Observer::~Observer()
 //-----------------------------------------------------------------------------
 void Observer::doUpdate()
 {
-    if (!updatingM)
-    {
-        updatingM = true;
-        try
-        {
-            update();
-        }
-        catch (...)
-        {
-            updatingM = false;
-            throw;
-        }
-        updatingM = false;
-    }
+    ObserverLocker lock(&updateLockM);
+    if (updateLockM == 1)
+        update();
 }
 //-----------------------------------------------------------------------------
 Subject* Observer::getFirstSubject()

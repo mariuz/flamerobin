@@ -46,6 +46,7 @@
 #include "metadata/view.h"
 #include "sql/SqlStatement.h"
 //-----------------------------------------------------------------------------
+class MetadataLoader;
 class Server;
 //-----------------------------------------------------------------------------
 class Credentials
@@ -114,6 +115,8 @@ class Database: public MetadataItem
 {
 private:
     IBPP::Database databaseM;
+    MetadataLoader* metadataLoaderM;
+
     bool connectedM;
     wxString databaseCharsetM;
 
@@ -137,8 +140,7 @@ private:
 
     std::multimap<wxString, wxString> collationsM;
     void loadCollations();
-    void loadObjects(NodeType type, IBPP::Transaction& tr1,
-        ProgressIndicator* indicator = 0);
+    void loadObjects(NodeType type, ProgressIndicator* indicator = 0);
 
     // small help for parser
     wxString getTableForIndex(wxString indexName);
@@ -190,6 +192,8 @@ public:
     void prepareTemporaryCredentials();
     void resetCredentials();
     void drop();
+
+    MetadataLoader* getMetadataLoader();
 
     wxString loadDomainNameForColumn(wxString table, wxString field);
     Domain* loadMissingDomain(wxString name);

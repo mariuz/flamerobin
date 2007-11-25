@@ -433,6 +433,9 @@ bool StatementImpl::Fetch()
 			_("isc_dsql_fetch failed."));
 	}
 
+    // Close the 'implicit' cursor to allow for forther Execute() calls
+    // on the prepared statement without fetching up to the last row
+	mCursorOpened = true;
 	return true;
 }
 

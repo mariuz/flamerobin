@@ -194,13 +194,15 @@ wxString Column::getPrintableName()
 //-----------------------------------------------------------------------------
 Domain *Column::getDomain() const
 {
-    Database *d = getDatabase();
+    Database* d = findDatabase();
     if (!d)
         return 0;
-    for (MetadataCollection<Domain>::const_iterator it = d->domainsBegin(); it != d->domainsEnd(); ++it)
+    for (MetadataCollection<Domain>::const_iterator it = d->domainsBegin();
+        it != d->domainsEnd(); ++it)
+    {
         if ((*it).getName_() == sourceM)
             return (Domain *)&(*it);
-
+    }
     // since we haven't find the domain, check the database
     return d->loadMissingDomain(sourceM);
 }

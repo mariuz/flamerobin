@@ -219,6 +219,7 @@
         $(SOURCEDIR)/core/StringUtils.h
         $(SOURCEDIR)/core/Subject.h
         $(SOURCEDIR)/core/Visitor.h
+        $(SOURCEDIR)/engine/MetadataLoader.h
         $(SOURCEDIR)/framemanager.h
         $(SOURCEDIR)/frtypes.h
         $(SOURCEDIR)/frutils.h
@@ -326,6 +327,7 @@
         $(SOURCEDIR)/core/Subject.cpp
         $(SOURCEDIR)/core/Visitor.cpp
         $(SOURCEDIR)/databasehandler.cpp
+        $(SOURCEDIR)/engine/MetadataLoader.cpp
         $(SOURCEDIR)/framemanager.cpp
         $(SOURCEDIR)/frprec.cpp
         $(SOURCEDIR)/frutils.cpp

@@ -43,6 +43,7 @@
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "core/Visitor.h"
+#include "engine/MetadataLoader.h"
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/role.h"
@@ -56,15 +57,18 @@ Role::Role()
 std::vector<Privilege>* Role::getPrivileges()
 {
     // load privileges from database and return the pointer to collection
-    Database *d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
+    Database* d = getDatabase(wxT("Role::getPrivileges"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    // first start a transaction for metadata loading, then lock the role
+    // when objects go out of scope and are destroyed, role will be
+    // unlocked before the transaction is committed - any update() calls on
+    // observers can possibly use the same transaction
+    MetadataLoaderTransaction tr(loader);
+    SubjectLocker lock(this);
+
     privilegesM.clear();
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(
+
+    IBPP::Statement st1 = loader->getStatement(
         "select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
         "RDB$GRANT_OPTION "
         "from RDB$USER_PRIVILEGES "
@@ -97,27 +101,22 @@ std::vector<Privilege>* Role::getPrivileges()
         pr->addPrivilege(privilege[0], std2wx(grantor).Strip(),
             grantoption != 0);  // ADMIN OPTION = 2
     }
-    tr1->Commit();
     return &privilegesM;
 }
 //-----------------------------------------------------------------------------
 wxString Role::getOwner()
 {
-    Database* d = getDatabase();
-    if (!d)
-        throw FRError(_("database not set"));
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db, IBPP::amRead);
-    tr1->Start();
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(
+    Database* d = getDatabase(wxT("Role::getOwner"));
+    MetadataLoader* loader = d->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    IBPP::Statement st1 = loader->getStatement(
         "select rdb$owner_name from rdb$roles where rdb$role_name = ?");
     st1->Set(1, wx2std(getName_()));
     st1->Execute();
     st1->Fetch();
     std::string name;
     st1->Get(1, name);
-    tr1->Commit();
     return std2wx(name).Trim();
 }
 //-----------------------------------------------------------------------------
