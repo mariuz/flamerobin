@@ -81,7 +81,7 @@
                         <caption>Show column info</caption>
                     </option>
                     <option>
-                        <caption>Select from relation or procedure</caption>
+                        <caption>Select from relation or execute procedure</caption>
                     </option>
                 </setting>
             </enables>

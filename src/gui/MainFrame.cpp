@@ -553,14 +553,19 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
             wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
                 Cmds::Menu_LoadColumnsInfo);
             AddPendingEvent(event);
-            return;
         }
     }
-    else if (treeActivateAction == selectFromOrExecute && (nt == ntTable
-        || nt == ntSysTable || nt == ntView || nt == ntProcedure))
+    else if (treeActivateAction == selectFromOrExecute 
+        && (nt == ntTable || nt == ntSysTable || nt == ntView))
     {
         wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
             Cmds::Menu_BrowseColumns);
+        AddPendingEvent(event);
+    }
+    else if (treeActivateAction == selectFromOrExecute && (nt == ntProcedure))
+    {
+        wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
+            Cmds::Menu_ExecuteProcedure);
         AddPendingEvent(event);
     }
     else
