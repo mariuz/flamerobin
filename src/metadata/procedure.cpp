@@ -95,68 +95,43 @@ void Procedure::unlockChildren()
     parametersM.unlockSubject();
 }
 //-----------------------------------------------------------------------------
-bool Procedure::isSelectable()
-{
-    if (!parametersLoadedM)
-        loadParameters();
-    for (ParameterCollCIter it = parametersM.begin(); it != parametersM.end();
-        ++it)
-    {
-        if ((*it).isOutputParameter())
-            return true;
-    }
-    return false;
-}
-//-----------------------------------------------------------------------------
-wxString Procedure::getSelectStatement()
-{
-    if (!parametersLoadedM)
-        loadParameters();
-    wxString collist, parlist;
-    for (ParameterCollCIter it = parametersM.begin(); it != parametersM.end();
-        ++it)
-    {
-        if ((*it).isOutputParameter())
-        {
-            if (!collist.empty())
-                collist += wxT(", ");
-            collist += wxT("a.") + (*it).getQuotedName();
-        }
-        else
-        {
-            if (!parlist.empty())
-                parlist += wxT(", ");
-            parlist += (*it).getQuotedName();
-        }
-    }
-
-    wxString sql = wxT("SELECT ") + collist + wxT("\nFROM ")
-        + getQuotedName();
-    if (!parlist.empty())
-        sql += wxT("(") + parlist + wxT(")");
-    sql += wxT(" a");
-    return sql;
-}
-//-----------------------------------------------------------------------------
 wxString Procedure::getExecuteStatement()
 {
     if (!parametersLoadedM)
         loadParameters();
-    wxString parlist;
+    wxString columns, params;
     for (ParameterCollCIter it = parametersM.begin(); it != parametersM.end();
         ++it)
     {
-        if (!(*it).isOutputParameter())
+        if ((*it).isOutputParameter())
         {
-            if (!parlist.empty())
-                parlist += wxT(", ");
-            parlist += (*it).getQuotedName();
+            if (!columns.empty())
+                columns += wxT(", ");
+            columns += wxT("p.") + (*it).getQuotedName();
+        }
+        else
+        {
+            if (!params.empty())
+                params += wxT(", ");
+            params += (*it).getQuotedName();
         }
     }
 
-    wxString sql = wxT("EXECUTE PROCEDURE ") + getQuotedName();
-    if (!parlist.empty())
-        sql += wxT("(") + parlist + wxT(")");
+    wxString sql;
+    if (!columns.empty())
+    {
+        sql = wxT("SELECT ") + columns + wxT("\nFROM ")
+          + getQuotedName();
+        if (!params.empty())
+            sql += wxT("(") + params + wxT(")");
+        sql += wxT(" p");
+    }
+    else
+    {
+        sql = wxT("EXECUTE PROCEDURE ") + getQuotedName();
+        if (!params.empty())
+            sql += wxT("(") + params + wxT(")");
+    }
     return sql;
 }
 //-----------------------------------------------------------------------------

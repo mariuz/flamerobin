@@ -867,46 +867,34 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
     if (!i)
         return;
 
-    Table *t = dynamic_cast<Table *>(i);
-    View *v = dynamic_cast<View *>(i);
-    Procedure *p = dynamic_cast<Procedure *>(i);
+    Relation* r = dynamic_cast<Relation*>(i);
     Database* d = i->findDatabase();
-    if (!d || (!t && !p && !v))
+    if (!d || !r)
         return;
 
-    if (p)
-    {
-        showSql(this, wxString(_("Execute SQL statements")), d,
-            p->getSelectStatement());
-    }
-    else
-    {
-        if (t)
-            t->checkAndLoadColumns();
-        else
-            v->checkAndLoadColumns();
+    r->checkAndLoadColumns();
 
-        wxString sql(wxT("SELECT "));
-        std::vector<MetadataItem*> temp;
-        i->getChildren(temp);
-        bool first = true;
-        for (std::vector<MetadataItem*>::const_iterator it = temp.begin();
-            it != temp.end(); ++it)
-        {
-            if (first)
-                first = false;
-            else
-                sql += wxT(", ");
-            sql += wxT("a.") + (*it)->getQuotedName();
-        }
-        if (t)  // add DB_KEY only when table doesn't have a PK/UNQ constraint
-        {
-            if (!t->getPrimaryKey() && t->getUniqueConstraints()->size() == 0)
-                sql += wxT(", a.RDB$DB_KEY");
-        }
-        sql += wxT("\nFROM ") + i->getQuotedName() + wxT(" a");
-        execSql(this, wxString(_("Execute SQL statements")), d, sql, false);
+    wxString sql(wxT("SELECT "));
+    std::vector<MetadataItem*> temp;
+    i->getChildren(temp);
+    bool first = true;
+    for (std::vector<MetadataItem*>::const_iterator it = temp.begin();
+        it != temp.end(); ++it)
+    {
+        if (first)
+            first = false;
+        else
+            sql += wxT(", ");
+        sql += wxT("a.") + (*it)->getQuotedName();
     }
+    // add DB_KEY only when table doesn't have a PK/UNQ constraint
+    if (Table* t = dynamic_cast<Table*>(r))
+    {
+        if (!t->getPrimaryKey() && t->getUniqueConstraints()->size() == 0)
+            sql += wxT(", a.RDB$DB_KEY");
+    }
+    sql += wxT("\nFROM ") + i->getQuotedName() + wxT(" a");
+    execSql(this, wxString(_("Execute SQL statements")), d, sql, false);
 
     FR_CATCH
 }

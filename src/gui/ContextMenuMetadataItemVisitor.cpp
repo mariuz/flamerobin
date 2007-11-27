@@ -132,13 +132,11 @@ void ContextMenuMetadataItemVisitor::visitMetadataItem(MetadataItem& metadataIte
             menuM->Append(Cmds::Menu_CreateObject, _("Create &new..."));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
+void ContextMenuMetadataItemVisitor::visitProcedure(Procedure&)
 {
     menuM->Append(Cmds::Menu_ExecuteProcedure, _("&Execute..."));
-    bool isSelectable = procedure.isSelectable();
-    if (!isSelectable)
-        menuM->AppendSeparator();
-    addSelectMenu(isSelectable, false); // selectable?, can not add columns
+    menuM->AppendSeparator();
+    addSelectMenu(false, false); // selectable?, can not add columns
     addRegularObjectMenu(true, true); // add Alter and Drop menu
 }
 //-----------------------------------------------------------------------------

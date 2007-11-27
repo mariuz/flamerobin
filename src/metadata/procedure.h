@@ -56,8 +56,6 @@ public:
     Parameter *addParameter(Parameter &c);
 
     wxString getExecuteStatement();
-    wxString getSelectStatement();
-    bool isSelectable();
 
     MetadataCollection<Parameter>::iterator begin();
     MetadataCollection<Parameter>::iterator end();
