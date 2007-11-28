@@ -318,7 +318,7 @@ void SqlEditor::setup()
     StyleSetItalic(2, TRUE);
     StyleSetItalic(1, TRUE);
     SetLexer(wxSTC_LEX_SQL);
-    SetKeyWords(0, Identifier::getKeywords(true));    // true = lower_case
+    SetKeyWords(0, SqlTokenizer::getKeywordsString(SqlTokenizer::kwLowerCase));
     wxString chars(wxT("_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\"$"));
     // see Document::SetDefaultCharClasses in stc/Document.cxx
     for (int ch = 0x80; ch < 0x0100; ch++)
@@ -2323,11 +2323,7 @@ void ExecuteSqlFrame::setKeywords()
     // we can also make ExecuteSqlFrame observer of YTables/YViews/... objects
     // so it can reload this list if something changes
 
-    wxArrayString as;
-    as.Alloc(8192);             // pre-alloc 8k
-    const Identifier::keywordContainer& k = Identifier::getKeywordSet();
-    for (Identifier::keywordContainer::const_iterator ci = k.begin(); ci != k.end(); ++ci)
-        as.Add((*ci).Upper());
+    wxArrayString as(SqlTokenizer::getKeywords(SqlTokenizer::kwDefaultCase));
 
     // get list od database objects' names
     std::vector<Identifier> v;

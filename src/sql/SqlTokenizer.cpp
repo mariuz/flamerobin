@@ -39,8 +39,8 @@
 #endif
 
 #include <algorithm>
-#include <map>
 
+#include "config/Config.h"
 #include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------
 SqlTokenizer::SqlTokenizer()
@@ -55,14 +55,9 @@ SqlTokenizer::SqlTokenizer(const wxString& statement)
     init();
 }
 //-----------------------------------------------------------------------------
-SqlTokenType SqlTokenizer::getKeywordTokenType(const wxString& possibleKeyword)
+/*static*/
+const SqlTokenizer::KeywordMap& SqlTokenizer::getKeywordMap()
 {
-    if (possibleKeyword.IsEmpty())
-        return tkIDENTIFIER;
-
-    typedef std::map<wxString, SqlTokenType> KeywordMap;
-    typedef std::map<wxString, SqlTokenType>::value_type KeywordEntry;
-
     static KeywordMap keywords;
     if (keywords.empty())
     {
@@ -79,10 +74,66 @@ SqlTokenType SqlTokenizer::getKeywordTokenType(const wxString& possibleKeyword)
                 entries[i].type));
         }
     }
-    KeywordMap::const_iterator pos = keywords.find(possibleKeyword);
+    return keywords;
+}
+//-----------------------------------------------------------------------------
+/*static*/
+wxArrayString SqlTokenizer::getKeywords(KeywordCase kwc)
+{
+    const KeywordMap& keywordsMap = getKeywordMap();
+    wxArrayString keywords;
+    keywords.Alloc(keywordsMap.size());
+
+    bool upperCase = (kwc == kwUpperCase) || (kwc == kwDefaultCase 
+        && config().get(wxT("SQLKeywordsUpperCase"), false));
+    for (KeywordMap::const_iterator it = keywordsMap.begin();
+        it != keywordsMap.end(); ++it)
+    {
+        if (upperCase)
+            keywords.Add(((*it).first).Upper());
+        else
+            keywords.Add(((*it).first).Lower());
+    }
+    keywords.Sort();
+    return keywords;
+}
+//-----------------------------------------------------------------------------
+/*static*/
+wxString SqlTokenizer::getKeywordsString(KeywordCase kwc)
+{
+    wxArrayString keywordsArray(getKeywords(kwc));
+    wxString keywords;
+    for (size_t i = 0; i < keywordsArray.size(); ++i)
+    {
+        if (i)
+            keywords += wxT(" ");
+        keywords += keywordsArray[i];
+    }
+    return keywords;
+}
+//-----------------------------------------------------------------------------
+/*static*/
+SqlTokenType SqlTokenizer::getKeywordTokenType(const wxString& word)
+{
+    if (word.IsEmpty())
+        return tkIDENTIFIER;
+
+    const KeywordMap& keywords = getKeywordMap();
+    KeywordMap::const_iterator pos = keywords.find(word);
     if (pos != keywords.end())
         return (*pos).second;
     return tkIDENTIFIER;
+}
+//-----------------------------------------------------------------------------
+/*static*/
+bool SqlTokenizer::isReservedWord(const wxString& word)
+{
+    if (word.IsEmpty())
+        return false;
+
+    const KeywordMap& keywords = getKeywordMap();
+    KeywordMap::const_iterator pos = keywords.find(word);
+    return pos != keywords.end();
 }
 //-----------------------------------------------------------------------------
 SqlTokenType SqlTokenizer::getCurrentToken()

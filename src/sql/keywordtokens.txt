@@ -17,6 +17,7 @@
 { wxT("AUTO"), kwAUTO },
 { wxT("AUTODDL"), kwAUTODDL },
 { wxT("AVG"), kwAVG },
+// TODO { wxT("BACKUP"), kwBACKUP },            // fb2.0
 { wxT("BASED"), kwBASED },
 { wxT("BASENAME"), kwBASENAME },
 { wxT("BASE_NAME"), kwBASE_NAME },
@@ -27,6 +28,7 @@
 { wxT("BIT_LENGTH"), kwBIT_LENGTH },    // fb2.0
 { wxT("BLOB"), kwBLOB },
 { wxT("BLOBEDIT"), kwBLOBEDIT },
+// TODO { wxT("BLOCK"), kwBLOCK },              // fb2.0
 { wxT("BOOLEAN"), kwBOOLEAN },
 { wxT("BOTH"), kwBOTH },                // fb2.0
 { wxT("BREAK"), kwBREAK },
@@ -86,6 +88,7 @@
 { wxT("DESCENDING"), kwDESCENDING },
 { wxT("DESCRIBE"), kwDESCRIBE },
 { wxT("DESCRIPTOR"), kwDESCRIPTOR },
+// TODO { wxT("DIFFERENCE"), kwDIFFERENCE }, // fb2.0
 { wxT("DISCONNECT"), kwDISCONNECT },
 { wxT("DISPLAY"), kwDISPLAY },
 { wxT("DISTINCT"), kwDISTINCT },
@@ -185,6 +188,7 @@
 { wxT("NATIONAL"), kwNATIONAL },
 { wxT("NATURAL"), kwNATURAL },
 { wxT("NCHAR"), kwNCHAR },
+// TODO { wxT("NEXT"), kwNEXT },
 { wxT("NO"), kwNO },
 { wxT("NOAUTO"), kwNOAUTO },
 { wxT("NOT"), kwNOT },
@@ -234,9 +238,11 @@
 { wxT("RELEASE"), kwRELEASE },
 { wxT("RESERV"), kwRESERV },
 { wxT("RESERVING"), kwRESERVING },
+// TODO { wxT("RESTART"), kwRESTART },
 { wxT("RESTRICT"), kwRESTRICT },
 { wxT("RETAIN"), kwRETAIN },
 { wxT("RETURN"), kwRETURN },
+// TODO { wxT("RETURNING"), kwRETURNING },
 { wxT("RETURNING_VALUES"), kwRETURNING_VALUES },
 { wxT("RETURNS"), kwRETURNS },
 { wxT("REVOKE"), kwREVOKE },
@@ -247,6 +253,7 @@
 { wxT("ROW_COUNT"), kwROW_COUNT },
 { wxT("RUNTIME"), kwRUNTIME },
 { wxT("SAVEPOINT"), kwSAVEPOINT },
+// TODO { wxT("SCALAR_ARRAY"), kwSCALAR_ARRAY },
 { wxT("SCHEMA"), kwSCHEMA },
 { wxT("SECOND"), kwSECOND },
 { wxT("SEGMENT"), kwSEGMENT },

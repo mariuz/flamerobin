@@ -41,6 +41,7 @@
 #include "core/Observer.h"
 #include "core/Subject.h"
 #include "sql/Identifier.h"
+#include "sql/SqlTokenizer.h"
 //----------------------------------------------------------------------------
 // IdentifierQuotes: class to cache config data for identifier quoting
 class IdentifierQuotes: public ConfigCache
@@ -215,44 +216,6 @@ wxString Identifier::userString(const wxString& s)
     }
 }
 //----------------------------------------------------------------------------
-const Identifier::keywordContainer& Identifier::getKeywordSet()
-{
-    // placed here, so others can't access it until it is initialized
-    static keywordContainer keywords;
-    if (keywords.empty())   // load
-    {
-        #include "keywords.txt"
-    }
-    return keywords;
-}
-//----------------------------------------------------------------------------
-wxString Identifier::getKeywords(bool lowerCase)
-{
-    static wxString resultLower;
-    static wxString resultUpper;
-    wxString& s = (lowerCase ? resultLower : resultUpper);
-    if (s.IsEmpty())
-    {
-        s.Alloc(20480);
-        for (keywordContainer::const_iterator it = getKeywordSet().begin();
-            it != getKeywordSet().end(); ++it)
-        {
-            s += (lowerCase ? (*it) : (*it).Upper()) + wxT(" ");
-        }
-    }
-    return s;
-}
-//----------------------------------------------------------------------------
-bool Identifier::isReserved(const wxString& s)
-{
-    // needed to be like this, since RogueWave std library does not implement
-    // operator == for const_iterator vs iterator, and find() returns a
-    // non-const iterator.
-    const Identifier::keywordContainer& k = Identifier::getKeywordSet();
-    Identifier::keywordContainer::const_iterator ci = k.find(s.Lower());
-    return (ci != k.end());
-}
-//----------------------------------------------------------------------------
 bool Identifier::needsQuoting(const wxString& s)
 {
     if (s.IsEmpty())
@@ -272,7 +235,7 @@ bool Identifier::needsQuoting(const wxString& s)
         p++;
     }
     // may still need quotes if reserved word
-    return isReserved(s);
+    return SqlTokenizer::isReservedWord(s);
 }
 //----------------------------------------------------------------------------
 bool Identifier::equals(const Identifier& rhs) const

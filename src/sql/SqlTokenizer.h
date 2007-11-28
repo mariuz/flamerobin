@@ -28,7 +28,8 @@
 #ifndef FR_SQLTOKENIZER_H
 #define FR_SQLTOKENIZER_H
 //-----------------------------------------------------------------------------
-#include <wx/wx.h>
+#include <wx/string.h>
+#include <map>
 //-----------------------------------------------------------------------------
 enum SqlTokenType {
     /*
@@ -132,12 +133,17 @@ enum SqlTokenType {
 class SqlTokenizer
 {
 private:
+    typedef std::map<wxString, SqlTokenType> KeywordMap;
+    typedef std::map<wxString, SqlTokenType>::value_type KeywordEntry;
+
     wxString sqlM;
     wxString termM;
     const wxChar* sqlTokenStartM;
     const wxChar* sqlTokenEndM;
     SqlTokenType sqlTokenTypeM;
     void init();
+
+    static const KeywordMap& getKeywordMap();
 
     void defaultToken();
     void keywordIdentifierToken();
@@ -160,9 +166,15 @@ public:
 
     void setStatement(const wxString& statement);
 
+    enum KeywordCase { kwDefaultCase, kwLowerCase, kwUpperCase };
+    // returns array of keyword strings
+    static wxArrayString getKeywords(KeywordCase kwc);
+    // returns all keywords in one string, separated by spaces
+    static wxString getKeywordsString(KeywordCase kwc);
     // returns TokenType of parameter string if possibleKeyword is a keyword,
     // returns tkIdentifier otherwise
-    static SqlTokenType getKeywordTokenType(const wxString& possibleKeyword);
+    static SqlTokenType getKeywordTokenType(const wxString& word);
+    static bool isReservedWord(const wxString& word);
 };
 //-----------------------------------------------------------------------------
 #endif // FR_SQLTOKENIZER_H

@@ -338,15 +338,20 @@
         </setting>
     </node>
     <node>
-        <caption>Object Names</caption>
+        <caption>Sql Statement Generation</caption>
         <image>5</image>
+        <setting type="checkbox">
+            <caption>Use UPPER CASE keywords</caption>
+            <key>SQLKeywordsUpperCase</key>
+            <default>1</default>
+        </setting>
         <setting type="checkbox">
             <caption>Quote names only when needed</caption>
             <key>quoteOnlyWhenNeeded</key>
             <default>1</default>
             <enables>
                 <setting type="checkbox">
-                    <caption>Quote names in mixed case (both uppercase and lowercase characters)</caption>
+                    <caption>Quote names in mixed case (both upper case and lower case characters)</caption>
                     <key>quoteMixedCase</key>
                     <default>0</default>
                 </setting>
@@ -356,6 +361,7 @@
             <caption>Treat quote characters like other characters</caption>
             <key>quoteCharsAreRegular</key>
             <default>0</default>
+            <related /><!-- this moves the checkbox closer to the previous one -->
         </setting>
     </node>
     <node>

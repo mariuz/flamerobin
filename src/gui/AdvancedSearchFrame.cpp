@@ -28,14 +28,15 @@
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-#pragma hdrstop
+    #pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
-#include <wx/wx.h>
+    #include <wx/wx.h>
 #endif
 
-//#include "core/FRError.h"
+#include <set>
+
 #include "frutils.h"
 #include "gui/AdvancedSearchFrame.h"
 #include "gui/ContextMenuMetadataItemVisitor.h"
