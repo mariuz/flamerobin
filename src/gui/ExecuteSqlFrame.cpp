@@ -484,17 +484,22 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
 #endif
     );
     splitter_window_1 = new wxSplitterWindow(panel_contents, -1);
-    panel_splitter_bottom = new wxPanel(splitter_window_1, -1);
-    notebook_1 = new wxNotebook(panel_splitter_bottom, -1, wxDefaultPosition, wxDefaultSize, 0);
+    styled_text_ctrl_sql = new SqlEditor(splitter_window_1, ID_stc_sql);
+
+    notebook_1 = new wxNotebook(splitter_window_1, -1, wxDefaultPosition,
+        wxDefaultSize, 0);
     notebook_pane_1 = new wxPanel(notebook_1, -1);
-    notebook_pane_2 = new wxPanel(notebook_1, -1);
-    panel_splitter_top = new wxPanel(splitter_window_1, -1);
-    statusbar_1 = CreateStatusBar(4);
-    styled_text_ctrl_sql = new SqlEditor(panel_splitter_top, ID_stc_sql);
     styled_text_ctrl_stats = new wxStyledTextCtrl(notebook_pane_1, -1);
     styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
     styled_text_ctrl_stats->StyleSetForeground(1, *wxRED);
     styled_text_ctrl_stats->StyleSetForeground(2, *wxBLUE);
+    notebook_1->AddPage(notebook_pane_1, _("Statistics"));
+
+    notebook_pane_2 = new wxPanel(notebook_1, -1);
+    grid_data = new DataGrid(notebook_pane_2, ID_grid_data);
+    notebook_1->AddPage(notebook_pane_2, _("Data"));
+
+    statusbar_1 = CreateStatusBar(4);
 
     set_properties();
     do_layout();
@@ -671,10 +676,8 @@ void ExecuteSqlFrame::set_properties()
     {
         statusbar_1->SetStatusText(statusbar_fields[i], i);
     }
-    grid_data = new DataGrid(notebook_pane_2, ID_grid_data);
     grid_data->SetTable(new DataGridTable(statementM, databaseM), true);
-    splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
-    splitter_window_1->Unsplit();
+    splitter_window_1->Initialize(styled_text_ctrl_sql);
 
     SetIcon(wxArtProvider::GetIcon(ART_ExecuteSqlFrame, wxART_FRAME_ICON));
 
@@ -685,44 +688,22 @@ void ExecuteSqlFrame::set_properties()
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::do_layout()
 {
-    // begin wxGlade: ExecuteSqlFrame::do_layout
-    wxBoxSizer* sizer_1 = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer* sizer_2 = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer* sizer_5 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_7 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_6 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_4 = new wxBoxSizer(wxHORIZONTAL);
-    sizer_4->Add(styled_text_ctrl_sql, 1, wxEXPAND, 0);
-    panel_splitter_top->SetAutoLayout(true);
-    panel_splitter_top->SetSizer(sizer_4);
-    sizer_4->Fit(panel_splitter_top);
-    sizer_4->SetSizeHints(panel_splitter_top);
-    sizer_6->Add(styled_text_ctrl_stats, 1, wxEXPAND, 0);
-    notebook_pane_1->SetAutoLayout(true);
-    notebook_pane_1->SetSizer(sizer_6);
-    sizer_6->Fit(notebook_pane_1);
-    sizer_6->SetSizeHints(notebook_pane_1);
-    sizer_7->Add(grid_data, 1, wxEXPAND, 0);
-    notebook_pane_2->SetAutoLayout(true);
-    notebook_pane_2->SetSizer(sizer_7);
-    sizer_7->Fit(notebook_pane_2);
-    sizer_7->SetSizeHints(notebook_pane_2);
-    notebook_1->AddPage(notebook_pane_1, _("Statistics"));
-    notebook_1->AddPage(notebook_pane_2, _("Data"));
-    sizer_5->Add(/* new wxNotebookSizer(notebook_1)*/ notebook_1, 1, wxEXPAND, 0);
-    panel_splitter_bottom->SetAutoLayout(true);
-    panel_splitter_bottom->SetSizer(sizer_5);
-    sizer_5->Fit(panel_splitter_bottom);
-    sizer_5->SetSizeHints(panel_splitter_bottom);
-    sizer_2->Add(splitter_window_1, 1, wxEXPAND, 0);
-    panel_contents->SetAutoLayout(true);
-    panel_contents->SetSizer(sizer_2);
-    sizer_2->Fit(panel_contents);
-    sizer_2->SetSizeHints(panel_contents);
-    sizer_1->Add(panel_contents, 1, wxEXPAND, 0);
-    SetAutoLayout(true);
-    SetSizer(sizer_1);
-    Layout();
+    // log control notebook pane
+    wxBoxSizer* sizerPane1 = new wxBoxSizer(wxHORIZONTAL);
+    sizerPane1->Add(styled_text_ctrl_stats, 1, wxEXPAND);
+    notebook_pane_1->SetSizer(sizerPane1);
+
+    // data grid notebook pane
+    wxBoxSizer* sizerPane2 = new wxBoxSizer(wxHORIZONTAL);
+    sizerPane2->Add(grid_data, 1, wxEXPAND);
+    notebook_pane_2->SetSizer(sizerPane2);
+
+    // splitter is only control in panel_contents
+    wxBoxSizer* sizerContents = new wxBoxSizer(wxHORIZONTAL);
+    sizerContents->Add(splitter_window_1, 1, wxEXPAND);
+    panel_contents->SetSizer(sizerContents);
+    sizerContents->Fit(this);
+    sizerContents->SetSizeHints(this);
 
     styled_text_ctrl_sql->SetFocus();
 }
@@ -774,9 +755,9 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_UPDATE_UI(wxID_PASTE,   ExecuteSqlFrame::OnMenuUpdatePaste)
     EVT_UPDATE_UI(wxID_DELETE,  ExecuteSqlFrame::OnMenuUpdateDelete)
 
-    EVT_MENU(Cmds::View_Editor,          ExecuteSqlFrame::OnMenuEditor)
-    EVT_MENU(Cmds::View_Statistics,      ExecuteSqlFrame::OnMenuStatistics)
-    EVT_MENU(Cmds::View_Data,            ExecuteSqlFrame::OnMenuData)
+    EVT_MENU(Cmds::View_Editor,          ExecuteSqlFrame::OnMenuUnsplitView)
+    EVT_MENU(Cmds::View_Statistics,      ExecuteSqlFrame::OnMenuUnsplitView)
+    EVT_MENU(Cmds::View_Data,            ExecuteSqlFrame::OnMenuUnsplitView)
     EVT_MENU(Cmds::View_Split_view,      ExecuteSqlFrame::OnMenuSplitView)
     EVT_MENU(Cmds::View_Set_editor_font, ExecuteSqlFrame::OnMenuSetEditorFont)
     EVT_MENU(Cmds::View_Wrap_long_lines, ExecuteSqlFrame::OnMenuToggleWrap)
@@ -1244,62 +1225,63 @@ void ExecuteSqlFrame::OnMenuUpdateWhenInTransaction(wxUpdateUIEvent& event)
     event.Enable(inTransactionM);
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuEditor(wxCommandEvent& WXUNUSED(event))
-{
-    if (splitter_window_1->IsSplit())                    // screen is split -> show second
-        splitter_window_1->Unsplit(panel_splitter_bottom);
-    else if (!panel_splitter_top->IsShown()) // second is shown -> show first
-    {
-        panel_splitter_top->Show();
-        panel_splitter_bottom->Show();
-        splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
-        splitter_window_1->Unsplit(panel_splitter_bottom);
-    }
-}
-//-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuData(wxCommandEvent& WXUNUSED(event))
+void ExecuteSqlFrame::OnMenuUnsplitView(wxCommandEvent& event)
 {
     FR_TRY
 
-    if (splitter_window_1->IsSplit())                    // screen is split -> show second
-        splitter_window_1->Unsplit(panel_splitter_top);
-    else if (!panel_splitter_bottom->IsShown()) // second is shown -> show first
-    {
-        panel_splitter_top->Show();
-        panel_splitter_bottom->Show();
-        splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
-        splitter_window_1->Unsplit(panel_splitter_top);
-    }
-    notebook_1->SetSelection(1);
+    wxWindow* focusControl;
+    if (event.GetId() == Cmds::View_Editor)
+        focusControl = styled_text_ctrl_sql;
+    else if (event.GetId() == Cmds::View_Statistics)
+        focusControl = styled_text_ctrl_stats;
+    else if (event.GetId() == Cmds::View_Data)
+        focusControl = grid_data;
+    else
+        wxCHECK_RET(false, wxT("event id not handled"));
 
-    FR_CATCH
-}
-//-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuStatistics(wxCommandEvent& WXUNUSED(event))
-{
-    FR_TRY
+    // select notebook pane first (could still be invisible)
+    if (focusControl == styled_text_ctrl_stats)
+        notebook_1->SetSelection(0);
+    else if (focusControl == grid_data)
+        notebook_1->SetSelection(1);
 
-    if (splitter_window_1->IsSplit())                    // screen is split -> show second
-        splitter_window_1->Unsplit(panel_splitter_top);
-    else if (!panel_splitter_bottom->IsShown()) // second is shown -> show first
+    if (splitter_window_1->IsSplit())
     {
-        panel_splitter_top->Show();
-        panel_splitter_bottom->Show();
-        splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
-        splitter_window_1->Unsplit(panel_splitter_top);
+        // show single splitter window pane
+        if (focusControl == styled_text_ctrl_sql)
+            splitter_window_1->Unsplit(notebook_1);
+        else
+            splitter_window_1->Unsplit(styled_text_ctrl_sql);
     }
-    notebook_1->SetSelection(0);
+    else if (focusControl == styled_text_ctrl_sql)
+    {
+        // switch splitter window pane if necessary
+        splitter_window_1->ReplaceWindow(splitter_window_1->GetWindow1(),
+            styled_text_ctrl_sql);
+        styled_text_ctrl_sql->Show();
+        notebook_1->Hide();
+    }
+    else
+    {
+        // switch splitter window pane if necessary
+        splitter_window_1->ReplaceWindow(splitter_window_1->GetWindow1(),
+            notebook_1);
+        notebook_1->Show();
+        styled_text_ctrl_sql->Hide();
+    }
+    focusControl->SetFocus();
 
     FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuSplitView(wxCommandEvent& WXUNUSED(event))
 {
-    if(!splitter_window_1->IsSplit()){
-        panel_splitter_top->Show();
-        panel_splitter_bottom->Show();
-        splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
-    }
+    FR_TRY
+
+    if (!splitter_window_1->IsSplit())
+        splitter_window_1->SplitHorizontally(styled_text_ctrl_sql, notebook_1);
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuSetEditorFont(wxCommandEvent& WXUNUSED(event))
@@ -1317,25 +1299,17 @@ void ExecuteSqlFrame::OnMenuToggleWrap(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuFocusEditor(wxCommandEvent& WXUNUSED(event))
 {
-    if (!panel_splitter_top->IsShown())
-    {
-        panel_splitter_top->Show();
-        panel_splitter_bottom->Show();
-        splitter_window_1->SplitHorizontally(panel_splitter_top,
-            panel_splitter_bottom);
-    }
+    if (!styled_text_ctrl_sql->IsShown())
+        splitter_window_1->SplitHorizontally(styled_text_ctrl_sql, notebook_1);
     styled_text_ctrl_sql->SetFocus();
     menuBarM->Check(Cmds::View_Editor, true);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuFocusGrid(wxCommandEvent& WXUNUSED(event))
 {
-    if (!panel_splitter_bottom->IsShown())
-    {
-        panel_splitter_top->Show();
-        panel_splitter_bottom->Show();
-        splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
-    }
+    if (!notebook_1->IsShown())
+        splitter_window_1->SplitHorizontally(styled_text_ctrl_sql, notebook_1);
+    notebook_1->SetSelection(1);
     grid_data->SetFocus();
     menuBarM->Check(Cmds::View_Data, true);
 }
@@ -1621,7 +1595,7 @@ void ExecuteSqlFrame::InTransaction(bool started)
         statusbar_1->SetStatusText(_("Transaction started"), 3);
     else
     {
-        splitter_window_1->Unsplit(panel_splitter_bottom);        // show sql entry window
+        splitter_window_1->Unsplit(notebook_1);        // show sql entry window
         grid_data->ClearGrid();
         statusbar_1->SetStatusText(wxEmptyString, 1);
         menuBarM->Check(Cmds::View_Editor, true);
@@ -2001,9 +1975,7 @@ void ExecuteSqlFrame::SplitScreen()
 {
     if (!splitter_window_1->IsSplit())                    // split screen if needed
     {
-        panel_splitter_top->Show();
-        panel_splitter_bottom->Show();
-        splitter_window_1->SplitHorizontally(panel_splitter_top, panel_splitter_bottom);
+        splitter_window_1->SplitHorizontally(styled_text_ctrl_sql, notebook_1);
         menuBarM->Check(Cmds::View_Split_view, true);
     }
 }
@@ -2147,25 +2119,27 @@ void ExecuteSqlFrame::rollbackTransaction()
 //! ... -> SQL_entry_box -> Split View -> Stats&Data -> ...
 void ExecuteSqlFrame::OnMenuToggleClick(wxCommandEvent& WXUNUSED(event))
 {
+    FR_TRY
+
     if (splitter_window_1->IsSplit())       // screen is split -> show second
     {
-        splitter_window_1->Unsplit(panel_splitter_top);
+        splitter_window_1->Unsplit(styled_text_ctrl_sql);
         menuBarM->Check(Cmds::View_Data, true);
     }
-    else if (panel_splitter_top->IsShown()) // first is shown -> split again
+    else if (splitter_window_1->GetWindow1() == styled_text_ctrl_sql) // first is shown -> split again
     {
         SplitScreen();
         menuBarM->Check(Cmds::View_Split_view, true);
     }
     else                                    // second is shown -> show first
     {
-        panel_splitter_top->Show();
-        panel_splitter_bottom->Show();
-        splitter_window_1->SplitHorizontally(panel_splitter_top,
-            panel_splitter_bottom);
-        splitter_window_1->Unsplit(panel_splitter_bottom);
+        splitter_window_1->ReplaceWindow(notebook_1, styled_text_ctrl_sql);
+        styled_text_ctrl_sql->Show();
+        notebook_1->Hide();
         menuBarM->Check(Cmds::View_Editor, true);
     }
+
+    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUpdateGridInsertRow(wxUpdateUIEvent& event)
@@ -2234,7 +2208,7 @@ void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent &event)
         if (rowsFetched >= rowsNeeded)
         {
             //SplitScreen();    // not needed atm, might be later (see TODO above)
-            splitter_window_1->Unsplit(panel_splitter_top);        // show grid only
+            splitter_window_1->Unsplit(styled_text_ctrl_sql); // show grid only
             menuBarM->Check(Cmds::View_Data, true);
         }
     }

@@ -151,9 +151,7 @@ private:
     void OnMenuSelectAll(wxCommandEvent &event);
     void OnMenuReplace(wxCommandEvent &event);
 
-    void OnMenuEditor(wxCommandEvent &event);
-    void OnMenuStatistics(wxCommandEvent &event);
-    void OnMenuData(wxCommandEvent &event);
+    void OnMenuUnsplitView(wxCommandEvent &event);
     void OnMenuSplitView(wxCommandEvent &event);
     void OnMenuSetEditorFont(wxCommandEvent &event);
     void OnMenuToggleWrap(wxCommandEvent &event);
@@ -211,8 +209,6 @@ protected:
     wxPanel* panel_contents;
 
     wxSplitterWindow* splitter_window_1;
-    wxPanel* panel_splitter_top;
-    wxPanel* panel_splitter_bottom;
     SqlEditor* styled_text_ctrl_sql;
     wxNotebook* notebook_1;
     wxPanel* notebook_pane_1;
