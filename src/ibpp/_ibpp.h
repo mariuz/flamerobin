@@ -1086,7 +1086,7 @@ public:
     void AttachTransactionImpl(TransactionImpl*);
     void DetachTransactionImpl();
 
-    StatementImpl(DatabaseImpl*, TransactionImpl*, const std::string&);
+    StatementImpl(DatabaseImpl*, TransactionImpl*);
     ~StatementImpl();
 
     //  (((((((( OBJECT INTERFACE ))))))))

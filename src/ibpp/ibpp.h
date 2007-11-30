@@ -877,11 +877,16 @@ namespace IBPP
     Transaction TransactionFactory(Database db, TAM am = amWrite,
         TIL il = ilConcurrency, TLR lr = lrWait, TFF flags = TFF(0));
 
-    Statement StatementFactory(Database db, Transaction tr,
-        const std::string& sql);
+    Statement StatementFactory(Database db, Transaction tr);
 
-    inline Statement StatementFactory(Database db, Transaction tr)
-        { return StatementFactory(db, tr, ""); }
+    inline Statement StatementFactory(Database db, Transaction tr,
+        const std::string& sql)
+    {
+            Statement st = StatementFactory(db, tr);
+            if (!sql.empty())
+                st->Prepare(sql);
+            return st;
+    }
 
     Blob BlobFactory(Database db, Transaction tr);
 

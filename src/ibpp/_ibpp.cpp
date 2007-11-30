@@ -310,13 +310,11 @@ namespace IBPP
 									am, il, lr, flags);
 	}
 
-	Statement StatementFactory(Database db, Transaction tr,
-		const std::string& sql)
+	Statement StatementFactory(Database db, Transaction tr)
 	{
 		(void)gds.Call();			// Triggers the initialization, if needed
 		return new StatementImpl(	dynamic_cast<DatabaseImpl*>(db.intf()),
-									dynamic_cast<TransactionImpl*>(tr.intf()),
-									sql);
+									dynamic_cast<TransactionImpl*>(tr.intf()));
 	}
 
 	Blob BlobFactory(Database db, Transaction tr)

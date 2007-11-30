@@ -1278,15 +1278,13 @@ void StatementImpl::CursorFree()
 	}
 }
 
-StatementImpl::StatementImpl(DatabaseImpl* database, TransactionImpl* transaction,
-	const std::string& sql)
+StatementImpl::StatementImpl(DatabaseImpl* database, TransactionImpl* transaction)
 	: mRefCount(0), mHandle(0), mDatabase(0), mTransaction(0),
 	mInRow(0), mOutRow(0),
 	mResultSetAvailable(false), mCursorOpened(false), mType(IBPP::stUnknown)
 {
 	AttachDatabaseImpl(database);
 	if (transaction != 0) AttachTransactionImpl(transaction);
-	if (! sql.empty()) Prepare(sql);
 }
 
 StatementImpl::~StatementImpl()
