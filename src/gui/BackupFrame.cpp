@@ -383,14 +383,18 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     verboseMsgsM = checkbox_showlog->IsChecked();
     clearLog();
 
+    wxString username = databaseM->getUsername();
     wxString password = databaseM->getDecryptedPassword();
     if (password.empty())
     {
         UsernamePasswordDialog upd(this, _("Database Credentials"),
-            databaseM->getUsername(), false, // allow different username
+            username, false, // allow different username
             _("Please enter a valid username and password:"));
         if (upd.ShowModal() == wxID_OK)
+        {
+            username = upd.getUsername();
             password = upd.getPassword();
+        }
     }
     if (password.empty())
         return;
@@ -409,9 +413,10 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     if (checkbox_extern->IsChecked())
         flags |= (int)IBPP::brConvertExtTables;
 
-    BackupThread* thread = new BackupThread(this, serverM->getConnectionString(),
-        databaseM->getUsername(), password, databaseM->getPath(),
-        text_ctrl_filename->GetValue(), (IBPP::BRF)flags);
+    BackupThread* thread = new BackupThread(this,
+        serverM->getConnectionString(), username, password,
+        databaseM->getPath(), text_ctrl_filename->GetValue(),
+        (IBPP::BRF)flags);
     startThread(thread);
     updateControls();
 }

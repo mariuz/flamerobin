@@ -1089,6 +1089,10 @@ wxString Database::getRawPassword() const
 //-----------------------------------------------------------------------------
 wxString Database::getDecryptedPassword() const
 {
+    // if we already have an established connection return that password
+    if (databaseM != 0 && databaseM->Connected())
+        return std2wx(databaseM->UserPassword());
+
     // temporary connection
     if (connectionCredentialsM)
         return connectionCredentialsM->getPassword();
@@ -1097,7 +1101,7 @@ wxString Database::getDecryptedPassword() const
         return wxEmptyString;
 
     if (storeEncryptedPasswordM)
-        return decryptPassword(raw, getUsername()+getConnectionString());
+        return decryptPassword(raw, getUsername() + getConnectionString());
     else
         return raw;
 }

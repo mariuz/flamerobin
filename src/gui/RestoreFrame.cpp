@@ -419,14 +419,18 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     verboseMsgsM = checkbox_showlog->IsChecked();
     clearLog();
 
+    wxString username = databaseM->getUsername();
     wxString password = databaseM->getDecryptedPassword();
     if (password.empty())
     {
         UsernamePasswordDialog upd(this, _("Database Credentials"),
-            databaseM->getUsername(), false, // allow different username
+            username, false, // allow different username
             _("Please enter a valid username and password:"));
         if (upd.ShowModal() == wxID_OK)
+        {
+            username = upd.getUsername();
             password = upd.getPassword();
+        }
     }
     if (password.empty())
         return;
@@ -450,7 +454,7 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
         pagesize = 0;
 
     RestoreThread* thread = new RestoreThread(this, serverM->getConnectionString(),
-        databaseM->getUsername(), password, text_ctrl_filename->GetValue(),
+        username, password, text_ctrl_filename->GetValue(),
         databaseM->getPath(), pagesize, (IBPP::BRF)flags);
     startThread(thread);
     updateControls();
