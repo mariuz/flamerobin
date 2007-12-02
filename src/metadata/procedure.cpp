@@ -226,8 +226,6 @@ wxString Procedure::getOwner()
 //-----------------------------------------------------------------------------
 wxString Procedure::getSource()
 {
-    parametersLoadedM = false;
-
     Database* d = getDatabase(wxT("Procedure::getSource"));
     MetadataLoader* loader = d->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
