@@ -789,8 +789,12 @@ void Database::drop()
     databaseM->Drop();
 }
 //-----------------------------------------------------------------------------
-void Database::reconnect() const
+void Database::reconnect()
 {
+    // must recreate, because IBPP::Database member will become invalid
+    delete metadataLoaderM;
+    metadataLoaderM = 0;
+
     databaseM->Disconnect();
     databaseM->Connect();
 }

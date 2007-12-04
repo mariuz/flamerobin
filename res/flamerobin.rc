@@ -52,7 +52,7 @@ BEGIN
             VALUE "FileDescription", "FlameRobin Database Manager\0"
             VALUE "FileVersion", "FlameRobin " FR_VERSION_STRING "\0"
             VALUE "InternalName", "FlameRobin\0"
-            VALUE "LegalCopyright", "Copyright © 2004-2006 FlameRobin Development Team\0"
+            VALUE "LegalCopyright", "Copyright © 2004-2007 FlameRobin Development Team\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "flamerobin.exe\0"
             VALUE "PrivateBuild", "\0"

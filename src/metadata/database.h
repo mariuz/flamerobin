@@ -188,7 +188,7 @@ public:
     bool isConnected() const;
     void connect(wxString password, ProgressIndicator* indicator = 0);
     void disconnect(bool onlyDBH = false);
-    void reconnect() const;
+    void reconnect();
     void prepareTemporaryCredentials();
     void resetCredentials();
     void drop();
