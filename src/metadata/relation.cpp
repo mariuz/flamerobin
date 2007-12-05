@@ -468,6 +468,9 @@ std::vector<Privilege>* Relation::getPrivileges()
     // load privileges from database and return the pointer to collection
     Database* d = getDatabase(wxT("Relation::getPrivileges"));
     MetadataLoader* loader = d->getMetadataLoader();
+
+    privilegesM.clear();
+
     // first start a transaction for metadata loading, then lock the relation
     // when objects go out of scope and are destroyed, object will be unlocked
     // before the transaction is committed - any update() calls on observers
