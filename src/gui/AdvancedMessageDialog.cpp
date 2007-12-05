@@ -229,7 +229,7 @@ wxSize TextWrapEngine::computeWrappedExtent(wxDC& dc, const wxString& text,
     const wxChar* p = text.c_str();
     const wxChar* pWrap = 0;
     const wxChar* r = p;
-    while (*p)
+    while (p && *p)
     {
         // scan over non-whitespace
         while (*r > ' ')
@@ -237,7 +237,7 @@ wxSize TextWrapEngine::computeWrappedExtent(wxDC& dc, const wxString& text,
         int w;
         dc.GetTextExtent(wxString(p, r), &w, 0);
         if (w <= wrapWidth) // partial line fits in wrapWidth
-            pWrap = r; 
+            pWrap = r;
         if (w > wrapWidth || *r == 0)
         {
             int h;
@@ -246,7 +246,7 @@ wxSize TextWrapEngine::computeWrappedExtent(wxDC& dc, const wxString& text,
             textH += h;
             p = pWrap;
             // scan over whitespace
-            while (*p != 0 && *p <= ' ')
+            while (p && *p != 0 && *p <= ' ')
                 p++;
             pWrap = 0;
         }
@@ -265,7 +265,7 @@ wxString TextWrapEngine::wrapLine(wxDC& dc, const wxString& text,
     const wxChar* p = text.c_str();
     const wxChar* pWrap = 0;
     const wxChar* r = p;
-    while (*p)
+    while (p && *p)
     {
         // scan over non-whitespace
         while (*r > ' ')
@@ -274,7 +274,7 @@ wxString TextWrapEngine::wrapLine(wxDC& dc, const wxString& text,
         int w;
         dc.GetTextExtent(partialLine, &w, 0);
         if (w <= wrapWidth) // partial line fits in wrapWidth
-            pWrap = r; 
+            pWrap = r;
         if (w > wrapWidth || *r == 0)
         {
             if (!result.empty())
@@ -282,7 +282,7 @@ wxString TextWrapEngine::wrapLine(wxDC& dc, const wxString& text,
             result += wxString(p, pWrap);
             p = pWrap;
             // scan over whitespace
-            while (*p != 0 && *p <= ' ')
+            while (p && *p != 0 && *p <= ' ')
                 p++;
             pWrap = 0;
         }
@@ -347,7 +347,7 @@ AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent, wxArtID iconId,
         false, primaryTextWrapped, 0);
     labelPrimary->SetLabel(primaryTextWrapped);
 
-    TextWrapEngine::computeWordWrap(secondaryText, secondaryLabelFont, 
+    TextWrapEngine::computeWordWrap(secondaryText, secondaryLabelFont,
         wrapWidth, false, secondaryTextWrapped, 0);
     labelSecondary->SetLabel(secondaryTextWrapped);
 
