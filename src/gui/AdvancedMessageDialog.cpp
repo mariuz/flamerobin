@@ -226,6 +226,7 @@ wxSize TextWrapEngine::computeWrappedExtent(wxDC& dc, const wxString& text,
 {
     int textW = 0, textH = 0;
 
+	const wxChar* const pos = text.c_str();
     const wxChar* p = text.c_str();
     const wxChar* pWrap = 0;
     const wxChar* r = p;
@@ -235,13 +236,13 @@ wxSize TextWrapEngine::computeWrappedExtent(wxDC& dc, const wxString& text,
         while (*r > ' ')
             r++;
         int w;
-        dc.GetTextExtent(wxString(p, r), &w, 0);
+        dc.GetTextExtent(text.Mid(p-pos, r-p), &w, 0);
         if (w <= wrapWidth) // partial line fits in wrapWidth
             pWrap = r;
         if (w > wrapWidth || *r == 0)
         {
             int h;
-            dc.GetTextExtent(wxString(p, pWrap), &w, &h);
+            dc.GetTextExtent(text.Mid(p-pos, pWrap-p), &w, &h);
             textW = (w > textW) ? w : textW;
             textH += h;
             p = pWrap;
@@ -262,6 +263,7 @@ wxString TextWrapEngine::wrapLine(wxDC& dc, const wxString& text,
 {
     wxString result;
 
+	const wxChar* const pos = text.c_str();
     const wxChar* p = text.c_str();
     const wxChar* pWrap = 0;
     const wxChar* r = p;
@@ -270,7 +272,7 @@ wxString TextWrapEngine::wrapLine(wxDC& dc, const wxString& text,
         // scan over non-whitespace
         while (*r > ' ')
             r++;
-        wxString partialLine(p, r);
+        wxString partialLine = text.Mid(p-pos, r-p);
         int w;
         dc.GetTextExtent(partialLine, &w, 0);
         if (w <= wrapWidth) // partial line fits in wrapWidth
@@ -279,7 +281,7 @@ wxString TextWrapEngine::wrapLine(wxDC& dc, const wxString& text,
         {
             if (!result.empty())
                 result += wxT("\n");
-            result += wxString(p, pWrap);
+            result += text.Mid(p-pos, pWrap-p);
             p = pWrap;
             // scan over whitespace
             while (p && *p != 0 && *p <= ' ')
