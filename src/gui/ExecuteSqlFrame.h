@@ -121,7 +121,7 @@ private:
     wxString keywordsM;     // text used for autocomplete
     void setKeywords();
     void buildMainMenu();
-    void buildToolbar();
+    void buildToolbar(Database *);
 
     // events
     void OnClose(wxCloseEvent& event);

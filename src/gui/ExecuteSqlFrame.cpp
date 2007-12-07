@@ -474,7 +474,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
     :BaseFrame(parent, id, title, pos, size, style), Observer(), databaseM(db)
 {
     loadingM = true;
-    buildToolbar();
+    buildToolbar(db);
     buildMainMenu();
 
     panel_contents = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize,
@@ -507,10 +507,17 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
     loadingM = false;
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::buildToolbar()
+void ExecuteSqlFrame::buildToolbar(Database *db)
 {
     //toolBarM = CreateToolBar( wxTB_FLAT|wxTB_HORIZONTAL|wxTB_TEXT, wxID_ANY );
     toolBarM = CreateToolBar( wxTB_FLAT|wxTB_HORIZONTAL, wxID_ANY );
+
+	// this is needed since toolbar tools overwrite the text in status bar
+	// I believe wxToolbar should use Push and Pop to set the text, but it
+	// doesn't seem to happen. This way we at least see the path to current
+	// database while mouse is hovering over icons.
+	wxString s = wxString::Format(wxT("%s@%s:%s"), db->getUsername().c_str(),
+        db->getServer()->getName_().c_str(), db->getPath().c_str());
 
 #ifdef __WXGTK20__
     wxSize bmpSize(24, 24);
@@ -521,54 +528,54 @@ void ExecuteSqlFrame::buildToolbar()
 
     toolBarM->AddTool( wxID_NEW, _("New"),
         wxArtProvider::GetBitmap(wxART_NEW, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("New window"), _("New window") );
+        wxITEM_NORMAL, _("New window"), s);
     toolBarM->AddTool( wxID_OPEN, _("Open"),
         wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("Load a file"), _("Load a file") );
+        wxITEM_NORMAL, _("Load a file"), s );
     toolBarM->AddTool( wxID_SAVE, _("Save"),
         wxArtProvider::GetBitmap(wxART_FILE_SAVE, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL,  _("Save to file"), _("Save to file") );
+        wxITEM_NORMAL,  _("Save to file"), s );
     toolBarM->AddTool( wxID_SAVEAS, _("Save as"),
         wxArtProvider::GetBitmap(wxART_FILE_SAVE_AS, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("Save under different name"), _("Save under different name") );
+        wxITEM_NORMAL, _("Save under different name"), s );
     toolBarM->AddSeparator();
 
     toolBarM->AddTool( wxID_BACKWARD, _("Back"),
         wxArtProvider::GetBitmap(wxART_GO_BACK, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("Go to previous statement"), _("Go to previous statement") );
+        wxITEM_NORMAL, _("Go to previous statement"), s );
     toolBarM->AddTool( wxID_FORWARD, _("Next"),
         wxArtProvider::GetBitmap(wxART_GO_FORWARD, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("Go to next statement"), _("Go to next statement") );
+        wxITEM_NORMAL, _("Go to next statement"), s );
     toolBarM->AddTool( Cmds::History_Search, _("History"),
         wxArtProvider::GetBitmap(ART_History, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("Browse and search statement history"), _("Browse and search statement history") );
+        wxITEM_NORMAL, _("Browse and search statement history"), s );
     toolBarM->AddSeparator();
 
     toolBarM->AddTool( Cmds::Query_Execute, _("Execute"),
         wxArtProvider::GetBitmap(ART_ExecuteStatement, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("F4 - Execute statement(s)"), _("F4 - Execute statement(s)") );
+        wxITEM_NORMAL, _("F4 - Execute statement(s)"),s );
     toolBarM->AddTool( Cmds::Query_Show_plan, _("Show plan"),
         wxArtProvider::GetBitmap(ART_ShowExecutionPlan, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("Show query execution plan"), _("Show query execution plan") );
+        wxITEM_NORMAL, _("Show query execution plan"), s );
     toolBarM->AddTool( Cmds::Query_Commit, _("Commit"),
         wxArtProvider::GetBitmap(ART_CommitTransaction, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("F5 - Commit transaction"), _("F5 - Commit transaction") );
+        wxITEM_NORMAL, _("F5 - Commit transaction"), s );
     toolBarM->AddTool( Cmds::Query_Rollback, _("Rollback"),
          wxArtProvider::GetBitmap(ART_RollbackTransaction, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("F8 - Rollback transaction"), _("F8 - Rollback transaction") );
+        wxITEM_NORMAL, _("F8 - Rollback transaction"), s );
     toolBarM->AddSeparator();
 
     toolBarM->AddTool( Cmds::DataGrid_Insert_row, _("Insert row"),
         wxArtProvider::GetBitmap(ART_InsertRow, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("Insert a new row in recordset"), _("Insert a new row in recordset") );
+        wxITEM_NORMAL, _("Insert a new row in recordset"), s );
     toolBarM->AddTool( Cmds::DataGrid_Delete_row, _("Delete row"),
         wxArtProvider::GetBitmap(ART_DeleteRow, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("Delete row(s) from recordset"), _("Delete row(s) from recordset") );
+        wxITEM_NORMAL, _("Delete row(s) from recordset"), s );
     toolBarM->AddSeparator();
 
     toolBarM->AddTool( Cmds::View_Toggle_view, _("Toggle view"),
         wxArtProvider::GetBitmap(ART_ToggleView, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("Toggle current view"), _("Toggle current view") );
+        wxITEM_NORMAL, _("Toggle current view"), s );
 
     toolBarM->Realize();
 }
@@ -2242,6 +2249,8 @@ void ExecuteSqlFrame::setDatabase(Database* db)
 
     wxString s = wxString::Format(wxT("%s@%s:%s"), db->getUsername().c_str(),
         db->getServer()->getName_().c_str(), db->getPath().c_str());
+    // doesn't seem to work properly as wxToolbar overwrites it
+    //statusbar_1->PushStatusText(s, 0);
     statusbar_1->SetStatusText(s, 0);
 
     transactionM = IBPP::TransactionFactory(databaseM->getIBPPDatabase());
