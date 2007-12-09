@@ -41,31 +41,32 @@
 #include <sstream>
 #include "core/StringUtils.h"
 #include "sql/SimpleParser.h"
+#include "sql/SqlTokenizer.h"
 #include "MultiStatement.h"
 //-----------------------------------------------------------------------------
 SingleStatement::SingleStatement(const wxString& sql, bool valid)
     :sqlM(sql), isValidM(valid), typeM(stOther), thirdStringM(wxEmptyString)
 {
-    // copied from ExecSqlFrame
-    wxString sqlc(sql);
-    sqlc.erase(sqlc.find_last_not_of(wxT("\n\r\t ")) + 1);    // right-trim
-    std::stringstream strstrm;              // Search and intercept
-    std::string first, second, third;       // SET TERM and COMMIT statements
-    wxString strippedSql(sqlc);
-    SimpleParser::removeComments(strippedSql, wxT("/*"), wxT("*/"));
-    SimpleParser::removeComments(strippedSql, wxT("--"), wxT("\n"));
-    strstrm << wx2std(strippedSql.Upper());
-    strstrm >> first;
-    strstrm >> second;
-    strstrm >> third;
-    thirdStringM = std2wx(third);
-    if (first == "COMMIT")
+	SqlTokenType tkn[3] = { tkEOF, tkEOF, tkEOF };
+	SqlTokenizer tk(sql);
+	for (int i = 0; i < 3; tk.nextToken())
+	{
+		SqlTokenType stt = tk.getCurrentToken();
+		if (stt == tkWHITESPACE || stt == tkCOMMENT)
+			continue;
+		if (stt == tkEOF)
+			break;
+		if (i == 2)
+			thirdStringM = tk.getCurrentTokenString();
+		tkn[i++] = stt;
+	}
+    if (tkn[0] == kwCOMMIT)
         typeM = stCommit;
-    else if (first == "ROLLBACK")
+    else if (tkn[0] == kwROLLBACK)
         typeM = stRollback;
-    else if (first == "SET" && (second == "TERM" || second == "TERMINATOR"))
+    else if (tkn[0] == kwSET && tkn[1] == kwTERMINATOR)
         typeM = stSetTerm;
-    else if (first == "SET" && (second == "AUTO" || second == "AUTODDL"))
+    else if (tkn[0] == kwSET && (tkn[1] == kwAUTO || tkn[1] == kwAUTODDL))
         typeM = stSetAutoDDL;
     else
         typeM = stOther;

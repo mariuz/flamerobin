@@ -84,7 +84,7 @@ wxArrayString SqlTokenizer::getKeywords(KeywordCase kwc)
     wxArrayString keywords;
     keywords.Alloc(keywordsMap.size());
 
-    bool upperCase = (kwc == kwUpperCase) || (kwc == kwDefaultCase 
+    bool upperCase = (kwc == kwUpperCase) || (kwc == kwDefaultCase
         && config().get(wxT("SQLKeywordsUpperCase"), false));
     for (KeywordMap::const_iterator it = keywordsMap.begin();
         it != keywordsMap.end(); ++it)
@@ -226,14 +226,24 @@ void SqlTokenizer::setStatement(const wxString& statement)
 //-----------------------------------------------------------------------------
 void SqlTokenizer::defaultToken()
 {
-    if (wxStricmp(sqlTokenStartM, termM.c_str()) == 0)
-    {
-        sqlTokenTypeM = tkTERM;
-        sqlTokenEndM = sqlTokenStartM + termM.Length();
-        return;
-    }
-    sqlTokenTypeM = tkUNKNOWN;
-    sqlTokenEndM++;
+	if (wxStricmp(sqlTokenStartM, termM.c_str()) == 0)
+	{
+		sqlTokenTypeM = tkTERM;
+		sqlTokenEndM = sqlTokenStartM + termM.Length();
+		return;
+	}
+
+	// this is needed for new terminator string
+	while (true)
+	{
+		// increase the size until we hit either whitespace, terminator or EOF
+		sqlTokenEndM++;
+		if (*sqlTokenEndM == 0 || wxIsspace(*sqlTokenEndM))
+			break;
+		if (wxStricmp(sqlTokenEndM, termM.c_str()) == 0)
+			break;
+	}
+	sqlTokenTypeM = tkUNKNOWN;
 }
 //-----------------------------------------------------------------------------
 void SqlTokenizer::keywordIdentifierToken()

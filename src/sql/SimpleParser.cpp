@@ -43,6 +43,7 @@
 
 #include "Identifier.h"
 #include "SimpleParser.h"
+#include "SqlTokenizer.h"
 //-----------------------------------------------------------------------------
 // returns false if errors occur
 bool SimpleParser::stripSql(wxString &sql)
@@ -190,36 +191,5 @@ wxString::size_type SimpleParser::getTableNames(std::vector<wxString>& list, wxS
 
     // never gets here
     //return retval;
-}
-//-----------------------------------------------------------------------------
-//! removes comments from sql statements, with taking care of single quotes
-// FIXME: this doesn't handle nested comments properly
-void SimpleParser::removeComments(wxString& sql, const wxString startComment, const wxString endComment)
-{
-    using namespace std;
-    wxString::size_type oldpos = 0;
-    while (true)
-    {
-        wxString::size_type pos = sql.find(startComment, oldpos);
-        if (pos == wxString::npos)
-            break;
-
-        wxString::size_type quote = sql.find(wxT("'"), oldpos);
-        if (quote != wxString::npos && quote < pos)    // move to the next quote
-        {
-            oldpos = sql.find(wxT("'"), quote+1);   // end quote
-            if (oldpos == wxString::npos)           // rest of the statement
-                return;                             // is quoted
-            oldpos++;
-            continue;
-        }
-
-        oldpos = sql.find(endComment, pos + startComment.length());
-        if (oldpos == wxString::npos)    // unclosed comment
-            break;
-
-        sql.erase(pos, oldpos - pos + endComment.length());
-        oldpos = pos;
-    }
 }
 //-----------------------------------------------------------------------------

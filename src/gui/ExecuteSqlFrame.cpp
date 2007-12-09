@@ -1806,19 +1806,19 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     bool prepareOnly)
 {
     // check if sql only contains comments
-    wxString sqlclean(sql);
-    sqlclean += wxT("\n");                                            // just in case -- comment is on last line
-    SimpleParser::removeComments(sqlclean, wxT("/*"), wxT("*/"));
-    SimpleParser::removeComments(sqlclean, wxT("--"), wxT("\n"));
-    while (true)
+    SqlTokenizer tk(sql);
+    bool hasStatements = false;
+    do
     {
-        wxString::size_type pos = sqlclean.find(wxT(";"));        // remove ;
-        if (pos == wxString::npos)
-            break;
-        sqlclean.erase(pos, 1);
+		SqlTokenType stt = tk.getCurrentToken();
+		if (stt != tkWHITESPACE && stt != tkCOMMENT && stt != tkEOF)
+		{
+			hasStatements = true;
+			break;
+		}
     }
-    sqlclean.erase(sqlclean.find_last_not_of(wxT(" \n\t\r")) + 1);    // trim
-    if (sqlclean.empty())
+    while (tk.nextToken());
+    if (!hasStatements)
     {
         log(_("Parsed query: " + sql), ttSql);
         log(_("Empty statement detected, bailing out..."));

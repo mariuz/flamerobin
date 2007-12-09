@@ -286,6 +286,7 @@
 { wxT("SUSPEND"), kwSUSPEND },
 { wxT("TABLE"), kwTABLE },
 { wxT("TEMPORARY"), kwTEMPORARY },
+{ wxT("TERM"), kwTERMINATOR },
 { wxT("TERMINATOR"), kwTERMINATOR },
 { wxT("THEN"), kwTHEN },
 { wxT("TIES"), kwTIES },
