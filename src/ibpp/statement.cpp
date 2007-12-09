@@ -75,7 +75,8 @@ void StatementImpl::Prepare(const std::string& sql)
 	// So we prefer to get them a little bit larger than needed than the other way.
 	int16_t inEstimate = 0;
 	int16_t outEstimate = 1;
-	for (size_t i = 0; i < strlen(sql.c_str()); i++)
+	size_t len = strlen(sql.c_str());
+	for (size_t i = 0; i < len; i++)
 	{
 		if (sql[i] == '?') ++inEstimate;
 		if (sql[i] == ',') ++outEstimate;
