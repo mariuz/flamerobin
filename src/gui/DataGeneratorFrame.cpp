@@ -716,41 +716,29 @@ END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnTableValueChoiceChange(wxCommandEvent& event)
 {
-    FR_TRY
-
     if (loadColumns(event.GetString(), valueColumnChoice))
     {
         valueColumnChoice->SetSelection(0);
         valueSizer->Layout();
         radioColumn->SetValue(true);
     }
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnTableCopyChoiceChange(wxCommandEvent& event)
 {
-    FR_TRY
-
     if (loadColumns(event.GetString(), copyColumnChoice))
     {
         copyColumnChoice->SetSelection(0);
         copySizer->Layout();
     }
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnSkipCheckboxClick(wxCommandEvent& event)
 {
-    FR_TRY
-
     if (event.IsChecked())
         spinRecords->SetValue(0);
     else
         spinRecords->SetValue(200); // TODO: load default from config
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnTreeSelectionChanged(wxTreeEvent& event)
@@ -758,12 +746,8 @@ void DataGeneratorFrame::OnTreeSelectionChanged(wxTreeEvent& event)
     if (loadingM)
         return;
 
-    FR_TRY
-
     saveSetting(event.GetOldItem());    // save old item
     loadSetting(event.GetItem());       // load new item
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::loadSetting(wxTreeItemId newitem)
@@ -825,8 +809,6 @@ void DataGeneratorFrame::loadSetting(wxTreeItemId newitem)
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnLoadButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    FR_TRY
-
     wxFileDialog fd(this, _("Select file to load"), wxT(""), wxT(""),
         _("XML files (*.xml)|*.xml|All files (*.*)|*.*"),
 #if wxCHECK_VERSION(2, 8, 0)
@@ -894,14 +876,10 @@ void DataGeneratorFrame::OnLoadButtonClick(wxCommandEvent& WXUNUSED(event))
     showInformationDialog(this, _("Settings loaded"),
         _("The setting where successfully loaded from file."),
         AdvancedMessageDialogButtonsOk());
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    FR_TRY
-
     saveSetting(mainTree->GetSelection());  // save current item if changed
 
     wxFileDialog fd(this, _("Select file to save"), wxT(""), wxT(""),
@@ -958,14 +936,10 @@ void DataGeneratorFrame::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
             _("There was an error while writing."),
             AdvancedMessageDialogButtonsOk());
     }
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnCopyButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    FR_TRY
-
     MetadataItem *m = mainTree->getMetadataItem(mainTree->GetSelection());
     Column *col = dynamic_cast<Column *>(m);
     if (!col)   // this should never happen as the Copy button should not
@@ -1001,14 +975,10 @@ void DataGeneratorFrame::OnCopyButtonClick(wxCommandEvent& WXUNUSED(event))
 
     // update the current node
     loadSetting(mainTree->GetSelection());
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnFileButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    FR_TRY
-
     wxFileDialog fd(this, _("Select file to load"), wxT(""), wxT(""),
         _("Text files (*.txt)|*.txt|All files (*.*)|*.*"),
 #if wxCHECK_VERSION(2, 8, 0)
@@ -1021,14 +991,10 @@ void DataGeneratorFrame::OnFileButtonClick(wxCommandEvent& WXUNUSED(event))
 
     fileText->SetValue(fd.GetPath());
     radioFile->SetValue(true);
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGeneratorFrame::OnGenerateButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    FR_TRY
-
     saveSetting(mainTree->GetSelection());  // save current item if changed
 
     std::list<Table *> order;
@@ -1039,8 +1005,6 @@ void DataGeneratorFrame::OnGenerateButtonClick(wxCommandEvent& WXUNUSED(event))
     showInformationDialog(this, _("Generator done"),
         _("Data generation completed."),
         AdvancedMessageDialogButtonsOk());
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 bool DataGeneratorFrame::sortTables(std::list<Table *>& order)

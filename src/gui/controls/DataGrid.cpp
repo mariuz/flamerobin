@@ -720,20 +720,14 @@ void DataGrid::OnGridLabelRightClick(wxGridEvent& WXUNUSED(event))
 /*
 void DataGrid::OnGridSelectCell(wxGridEvent& event)
 {
-    FR_TRY
-
     DataGridTable* table = getDataGridTable();
     if (table)
         table->saveEditorChanges(event.GetRow());
     event.Skip();
-
-    FR_CATCH
 }*/
 //-----------------------------------------------------------------------------
 void DataGrid::OnIdle(wxIdleEvent& event)
 {
-    FR_TRY
-
     DataGridTable* table = getDataGridTable();
     // disconnect event handler if nothing more to be done, will be
     // re-registered on next successfull execution of select statement
@@ -751,8 +745,6 @@ void DataGrid::OnIdle(wxIdleEvent& event)
             event.RequestMore();
         AdjustScrollbars();
     }
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnKeyDown(wxKeyEvent& event)
@@ -785,8 +777,6 @@ void DataGrid::OnKeyDown(wxKeyEvent& event)
 //-----------------------------------------------------------------------------
 void DataGrid::OnMouseWheel(wxMouseEvent& event)
 {
-    FR_TRY
-
     int wheelrotation = event.GetWheelRotation();
     int x, y;
     GetViewStart(&x, &y);
@@ -796,18 +786,12 @@ void DataGrid::OnMouseWheel(wxMouseEvent& event)
         y -= 5;
     Scroll(x,y);
     AdjustScrollbars();
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnThumbRelease(wxScrollWinEvent& event)
 {
-    FR_TRY
-
     wxIdleEvent dummy;
     OnIdle(dummy);
     event.Skip();
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------

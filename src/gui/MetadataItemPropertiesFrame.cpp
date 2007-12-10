@@ -1098,14 +1098,10 @@ void MetadataItemPropertiesFrame::update()
 //-----------------------------------------------------------------------------
 void MetadataItemPropertiesFrame::OnIdle(wxIdleEvent& WXUNUSED(event))
 {
-    FR_TRY
-
     Disconnect(wxID_ANY, wxEVT_IDLE);
     wxBusyCursor bc;
     htmlReloadRequestedM = false;
     loadPage();
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 //! PageHandler class

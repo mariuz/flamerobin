@@ -41,12 +41,6 @@
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 //-----------------------------------------------------------------------------
-void handleException(const std::exception& e)
-{
-    wxMessageBox(std2wx(e.what()), _("Error"), wxOK | wxICON_ERROR,
-        wxGetTopLevelParent(wxGetActiveWindow()));
-}
-//-----------------------------------------------------------------------------
 FRError::FRError(const wxString& message)
 {
     messageM = wx2std(message);

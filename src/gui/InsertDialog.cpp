@@ -424,8 +424,6 @@ END_EVENT_TABLE()
 // clear the text from NULL field when focused
 void InsertDialog::OnEditFocusSet(wxFocusEvent& event)
 {
-    FR_TRY
-
     wxTextCtrl *tx = dynamic_cast<wxTextCtrl *>(event.GetEventObject());
     if (!tx)
         return;
@@ -442,14 +440,10 @@ void InsertDialog::OnEditFocusSet(wxFocusEvent& event)
             wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
         tx->SetValue(wxEmptyString);
     }
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void InsertDialog::OnEditFocusLost(wxFocusEvent& event)
 {
-    FR_TRY
-
     if (!databaseM) // dialog already closed
         return;
 
@@ -504,14 +498,10 @@ void InsertDialog::OnEditFocusLost(wxFocusEvent& event)
 
         throw;
     }
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    FR_TRY
-
     storeValues();
     preloadSpecialColumns();
 
@@ -588,8 +578,6 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 
     databaseM = 0;  // prevent other event handlers from making problems
     EndModal(wxID_OK);
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 // helper function for OnChoiceChange
@@ -606,8 +594,6 @@ void InsertDialog::setStringOption(InsertColumnInfo& ici, const wxString& s)
 //-----------------------------------------------------------------------------
 void InsertDialog::OnChoiceChange(wxCommandEvent& event)
 {
-    FR_TRY
-
     if (!databaseM)
         return;
 
@@ -646,7 +632,5 @@ void InsertDialog::OnChoiceChange(wxCommandEvent& event)
             _("Generator"), as, this));
         setStringOption(*it, s);
     }
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------

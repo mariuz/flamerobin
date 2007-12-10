@@ -35,13 +35,6 @@
 #include <string>
 #include <exception>
 //-----------------------------------------------------------------------------
-#define FR_TRY try {
-
-#define FR_CATCH } catch (const std::exception& e) \
-    { handleException(e); }
-//-----------------------------------------------------------------------------
-void handleException(const std::exception& e);
-//-----------------------------------------------------------------------------
 class FRError: public std::exception
 {
 private:

@@ -234,8 +234,6 @@ bool DataGridTable::canFetchMoreRows()
 //-----------------------------------------------------------------------------
 void DataGridTable::Clear()
 {
-    FR_TRY
-
     nullFlagM = false;
 
     allRowsFetchedM = true;
@@ -259,8 +257,6 @@ void DataGridTable::Clear()
             0, oldCols);
         GetView()->ProcessTableMessage(colMsg);
     }
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void DataGridTable::fetch()
@@ -729,8 +725,6 @@ void DataGridTable::setFetchAllRecords(bool fetchall)
 //-----------------------------------------------------------------------------
 void DataGridTable::SetValue(int row, int col, const wxString& value)
 {
-    FR_TRY
-
     wxString statement = rowsM.setFieldValue(row, col, value, nullFlagM);
     nullFlagM = false;  // reset
 
@@ -738,14 +732,10 @@ void DataGridTable::SetValue(int row, int col, const wxString& value)
     wxCommandEvent evt(wxEVT_FRDG_STATEMENT, GetView()->GetId());
     evt.SetString(statement);
     wxPostEvent(GetView(), evt);
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
 {
-    FR_TRY
-
     // remove rows from internal storage
     wxString statement;
     if (!rowsM.removeRows(pos, numRows, statement))
@@ -775,10 +765,6 @@ bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
         GetView()->ForceRefresh();
 
     return true;
-
-    FR_CATCH
-
-    return false;
 }
 //-----------------------------------------------------------------------------
 DEFINE_EVENT_TYPE(wxEVT_FRDG_ROWCOUNT_CHANGED)

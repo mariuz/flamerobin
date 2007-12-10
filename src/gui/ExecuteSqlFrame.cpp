@@ -1031,8 +1031,6 @@ void ExecuteSqlFrame::OnMenuFindSelectedObject(wxCommandEvent& WXUNUSED(event))
 //! handle function keys (F5, F8, F4, ...)
 void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
 {
-    FR_TRY
-
     wxCommandEvent e;
     int key = event.GetKeyCode();
     if (!event.HasModifiers())
@@ -1089,8 +1087,6 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
         }
     }
     event.Skip();
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnClose(wxCloseEvent& event)
@@ -1234,8 +1230,6 @@ void ExecuteSqlFrame::OnMenuUpdateWhenInTransaction(wxUpdateUIEvent& event)
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUnsplitView(wxCommandEvent& event)
 {
-    FR_TRY
-
     wxWindow* focusControl;
     if (event.GetId() == Cmds::View_Editor)
         focusControl = styled_text_ctrl_sql;
@@ -1277,18 +1271,12 @@ void ExecuteSqlFrame::OnMenuUnsplitView(wxCommandEvent& event)
         styled_text_ctrl_sql->Hide();
     }
     focusControl->SetFocus();
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuSplitView(wxCommandEvent& WXUNUSED(event))
 {
-    FR_TRY
-
     if (!splitter_window_1->IsSplit())
         splitter_window_1->SplitHorizontally(styled_text_ctrl_sql, notebook_1);
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuSetEditorFont(wxCommandEvent& WXUNUSED(event))
@@ -1368,21 +1356,13 @@ void ExecuteSqlFrame::OnMenuUpdateHistoryPrev(wxUpdateUIEvent& event)
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuExecute(wxCommandEvent& WXUNUSED(event))
 {
-    FR_TRY
-
     clearStats();
     prepareAndExecute(false);
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuShowPlan(wxCommandEvent& WXUNUSED(event))
 {
-    FR_TRY
-
     prepareAndExecute(true);
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuExecuteFromCursor(wxCommandEvent& WXUNUSED(event))
@@ -1416,26 +1396,16 @@ void ExecuteSqlFrame::OnMenuExecuteSelection(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridFetchAll(wxCommandEvent& WXUNUSED(event))
 {
-    FR_TRY
-
     grid_data->fetchAll();
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridCancelFetchAll(wxCommandEvent& WXUNUSED(event))
 {
-    FR_TRY
-
     grid_data->cancelFetchAll();
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridInsertRow(wxCommandEvent& WXUNUSED(event))
 {
-    FR_TRY
-
     DataGridTable *tb = grid_data->getDataGridTable();
     if (tb && grid_data->GetNumberCols())
     {
@@ -1458,8 +1428,6 @@ void ExecuteSqlFrame::OnMenuGridInsertRow(wxCommandEvent& WXUNUSED(event))
         InsertDialog id(this, tab, tb, statementM, databaseM);
         id.ShowModal();
     }
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 // this returns an array of row numbers of fully selected rows, or the number
@@ -1498,8 +1466,6 @@ wxArrayInt getSelectedGridRows(DataGrid* grid)
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridDeleteRow(wxCommandEvent& WXUNUSED(event))
 {
-    FR_TRY
-
     if (!grid_data->getDataGridTable() || !grid_data->GetNumberRows())
         return;
 
@@ -1526,8 +1492,6 @@ void ExecuteSqlFrame::OnMenuGridDeleteRow(wxCommandEvent& WXUNUSED(event))
     }
 
     // grid_data->EndBatch();   // see comment for BeginBatch above
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridCopy(wxCommandEvent& WXUNUSED(event))
@@ -1989,11 +1953,7 @@ void ExecuteSqlFrame::SplitScreen()
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuCommit(wxCommandEvent& WXUNUSED(event))
 {
-    FR_TRY
-
     commitTransaction();
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 bool ExecuteSqlFrame::commitTransaction()
@@ -2074,12 +2034,8 @@ bool ExecuteSqlFrame::commitTransaction()
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuRollback(wxCommandEvent& WXUNUSED(event))
 {
-    FR_TRY
-
     wxBusyCursor cr;
     rollbackTransaction();
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::rollbackTransaction()
@@ -2126,8 +2082,6 @@ void ExecuteSqlFrame::rollbackTransaction()
 //! ... -> SQL_entry_box -> Split View -> Stats&Data -> ...
 void ExecuteSqlFrame::OnMenuToggleClick(wxCommandEvent& WXUNUSED(event))
 {
-    FR_TRY
-
     if (splitter_window_1->IsSplit())       // screen is split -> show second
     {
         splitter_window_1->Unsplit(styled_text_ctrl_sql);
@@ -2145,27 +2099,16 @@ void ExecuteSqlFrame::OnMenuToggleClick(wxCommandEvent& WXUNUSED(event))
         notebook_1->Hide();
         menuBarM->Check(Cmds::View_Editor, true);
     }
-
-    FR_CATCH
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUpdateGridInsertRow(wxUpdateUIEvent& event)
 {
-    FR_TRY
-
     DataGridTable* tb = grid_data->getDataGridTable();
     event.Enable(inTransactionM && tb && tb->canInsertRows());
-    return;
-
-    FR_CATCH
-
-    event.Enable(false);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event)
 {
-    FR_TRY
-
     DataGridTable *tb = grid_data->getDataGridTable();
     if (!tb || !grid_data->GetNumberRows())
     {
@@ -2187,11 +2130,6 @@ void ExecuteSqlFrame::OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event)
     }
 
     event.Enable(!colsSelected && deletableRows);
-    return;
-
-    FR_CATCH
-
-    event.Enable(false);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent &event)
