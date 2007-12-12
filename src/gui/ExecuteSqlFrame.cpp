@@ -182,10 +182,6 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
     // setup complete. now the actual stuff:
     wxString sql = editorM->GetText().Upper();
 
-    // currently we don't support having comments and quotes (it's complicated)
-    //if (!SimpleParser::stripSql(sql))
-    //    return true;
-
     wxString::size_type psel, pfrom;
     psel = sql.find(wxT("SELECT"));
     if (psel == wxString::npos)                            // simple select statement

@@ -45,45 +45,6 @@
 #include "SimpleParser.h"
 #include "SqlTokenizer.h"
 //-----------------------------------------------------------------------------
-// returns false if errors occur
-bool SimpleParser::stripSql(wxString &sql)
-{
-    while (true)    // strip quotes and brackets
-    {
-        wxString::size_type p1, p2;
-        p1 = sql.find(wxT("/*"));
-        p2 = sql.find(wxT("'"));
-        if (p1 == wxString::npos && p2 == wxString::npos)    // no more
-            break;
-
-        if (p1 != wxString::npos && (p1 < p2 || p2 == wxString::npos))
-        {
-            p2 = sql.find(wxT("*/"), p1);
-            if (p2 == wxString::npos)
-            {
-                wxMessageBox(_("Cannot parse sql, please close the comments."), _("Error."), wxOK|wxICON_WARNING);
-                return false;
-            }
-            sql.erase(p1, p2 - p1 + 1);
-            continue;
-        }
-
-        if (p2 != wxString::npos && (p2 < p1 || p1 == wxString::npos))
-        {
-            p1 = p2;
-            p2 = sql.find(wxT("'"), p1+1);
-            if (p2 == wxString::npos)
-            {
-                wxMessageBox(_("Cannot parse sql, please close the quotes."), _("Error."), wxOK|wxICON_WARNING);
-                return false;
-            }
-            sql.erase(p1, p2 - p1 + 1);
-            continue;
-        }
-    }
-    return true;
-}
-//-----------------------------------------------------------------------------
 // get next token from sql wxString
 // returns number of characters removed
 wxString::size_type SimpleParser::nextToken(wxString& in, wxString& out)
