@@ -36,7 +36,7 @@ enum SqlTokenType {
      * these are token types used by SqlTokenizer class
      */
     tkEOF, tkUNKNOWN, tkWHITESPACE, tkCOMMENT,
-    tkTERM, tkPARENOPEN, tkPARENCLOSE, tkEQUALS,
+    tkTERM, tkPARENOPEN, tkPARENCLOSE, tkEQUALS, tkCOMMA,
     tkSTRING, tkIDENTIFIER,
 
     tk_KEYWORDS_START_HERE,

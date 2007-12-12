@@ -145,7 +145,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Identifier.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_IncompleteStatement.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MultiStatement.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleParser.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SelectStatement.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlStatement.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.obj \
@@ -545,7 +545,7 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_IncompleteStatement.obj: .\src\sql\Incompl
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MultiStatement.obj: .\src\sql\MultiStatement.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleParser.obj: .\src\sql\SimpleParser.cpp
+vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SelectStatement.obj: .\src\sql\SelectStatement.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) $**
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlStatement.obj: .\src\sql\SqlStatement.cpp

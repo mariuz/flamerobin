@@ -24,18 +24,38 @@
   $Id$
 
 */
-
-#ifndef FR_PARSER_H
-#define FR_PARSER_H
+//-----------------------------------------------------------------------------
+#ifndef FR_SELECT_STATEMENT_H
+#define FR_SELECT_STATEMENT_H
 
 #include <vector>
+#include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------
-// collection of functions to parse SQL scripts
-class SimpleParser
+//! Provides a way to:
+//! - parse the user supplied SELECT statement into components
+//! - add/remove tables and columns to it
+//! - build a statement from scratch (by ADDing to blank statement)
+class SelectStatement
 {
+private:
+	wxString sqlM;
+	SqlTokenizer tokenizerM;
+	int posSelectM, posFromM, posFromEndM;
+	void add(const wxString& toAdd, int position);
+
 public:
-    static wxString::size_type nextToken(wxString& in, wxString& out);
-    static wxString::size_type getTableNames(std::vector<wxString>& list, wxString sql);
+    SelectStatement(const wxString& sql);
+
+	bool isValidSelectStatement();	// needs to have SELECT and FROM at least
+	void setStatement(const wxString& sql);
+	wxString getStatement();
+
+	void getTables(std::vector<wxString>& tables);
+	void getColumns(std::vector<wxString>& columns);
+
+	void addTable(const wxString& name, const wxString& joinType,
+		const wxString& joinList);
+	void addColumn(const wxString& columnList);	// adds as-is currently
 };
 //-----------------------------------------------------------------------------
 #endif

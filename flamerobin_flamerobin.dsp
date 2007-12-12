@@ -656,15 +656,15 @@ SOURCE=.\src\gui\RestoreFrame.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\sql\SelectStatement.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\ServerRegistrationDialog.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\gui\SimpleHtmlFrame.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\sql\SimpleParser.cpp
 # End Source File
 # Begin Source File
 
@@ -1042,15 +1042,15 @@ SOURCE=.\src\gui\RestoreFrame.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\sql\SelectStatement.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\ServerRegistrationDialog.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\gui\SimpleHtmlFrame.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\sql\SimpleParser.h
 # End Source File
 # Begin Source File
 

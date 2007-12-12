@@ -128,7 +128,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_Identifier.o \
 	flamerobin_IncompleteStatement.o \
 	flamerobin_MultiStatement.o \
-	flamerobin_SimpleParser.o \
+	flamerobin_SelectStatement.o \
 	flamerobin_SqlStatement.o \
 	flamerobin_SqlTokenizer.o \
 	flamerobin_statementHistory.o \
@@ -550,8 +550,8 @@ flamerobin_IncompleteStatement.o: $(srcdir)/src/sql/IncompleteStatement.cpp $(FL
 flamerobin_MultiStatement.o: $(srcdir)/src/sql/MultiStatement.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/MultiStatement.cpp
 
-flamerobin_SimpleParser.o: $(srcdir)/src/sql/SimpleParser.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/SimpleParser.cpp
+flamerobin_SelectStatement.o: $(srcdir)/src/sql/SelectStatement.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/SelectStatement.cpp
 
 flamerobin_SqlStatement.o: $(srcdir)/src/sql/SqlStatement.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/SqlStatement.cpp

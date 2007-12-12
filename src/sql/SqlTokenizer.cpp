@@ -207,6 +207,8 @@ bool SqlTokenizer::nextToken()
         symbolToken(tkPARENCLOSE);
     else if (c == '=')
         symbolToken(tkEQUALS);
+    else if (c == ',')
+		symbolToken(tkCOMMA);
     else if (c == '/' && *(sqlTokenEndM + 1) == '*')
         multilineCommentToken();
     else if (c == '-' && *(sqlTokenEndM + 1) == '-')

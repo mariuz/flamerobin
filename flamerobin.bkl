@@ -297,7 +297,7 @@
         $(SOURCEDIR)/sql/Identifier.h
         $(SOURCEDIR)/sql/IncompleteStatement.h
         $(SOURCEDIR)/sql/MultiStatement.h
-        $(SOURCEDIR)/sql/SimpleParser.h
+        $(SOURCEDIR)/sql/SelectStatement.h
         $(SOURCEDIR)/sql/SqlStatement.h
         $(SOURCEDIR)/sql/SqlTokenizer.h
         $(SOURCEDIR)/statementHistory.h
@@ -403,7 +403,7 @@
         $(SOURCEDIR)/sql/Identifier.cpp
         $(SOURCEDIR)/sql/IncompleteStatement.cpp
         $(SOURCEDIR)/sql/MultiStatement.cpp
-        $(SOURCEDIR)/sql/SimpleParser.cpp
+        $(SOURCEDIR)/sql/SelectStatement.cpp
         $(SOURCEDIR)/sql/SqlStatement.cpp
         $(SOURCEDIR)/sql/SqlTokenizer.cpp
         $(SOURCEDIR)/statementHistory.cpp

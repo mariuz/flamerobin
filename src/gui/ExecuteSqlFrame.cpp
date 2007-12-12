@@ -76,7 +76,7 @@
 #include "sql/Identifier.h"
 #include "sql/IncompleteStatement.h"
 #include "sql/MultiStatement.h"
-#include "sql/SimpleParser.h"
+#include "sql/SelectStatement.h"
 #include "sql/SqlStatement.h"
 #include "statementHistory.h"
 #include "urihandler.h"
@@ -157,7 +157,8 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
     Database* db = m->findDatabase();
     if (db != databaseM)
     {
-        wxMessageBox(_("Cannot use objects from different databases."), _("Wrong database."), wxOK | wxICON_WARNING);
+        wxMessageBox(_("Cannot use objects from different databases."),
+			_("Wrong database."), wxOK | wxICON_WARNING);
         return false;
     }
 
@@ -171,59 +172,58 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
     if ((m->getType() == ntTable) || (m->getType() == ntSysTable))
     {
         t = dynamic_cast<Table*>(m);
+        // TODO: add all columns so that user can remove them easily
         column_list = t->getQuotedName() + wxT(".*");
     }
     if (t == 0)
     {
-        wxMessageBox(_("Only tables and table columns can be dropped."), _("Object type not supported."), wxOK | wxICON_WARNING);
+        wxMessageBox(_("Only tables and table columns can be dropped."),
+			_("Object type not supported."), wxOK | wxICON_WARNING);
         return false;
     }
 
-    // setup complete. now the actual stuff:
-    wxString sql = editorM->GetText().Upper();
+	SelectStatement sstm(editorM->GetText());
+	if (!sstm.isValidSelectStatement())
+	{
+		// question("Invalid SELECT statement, do you wish to overwrite?");
+		// if wxNO then
+		//	return true;
+		// else
+			sstm.setStatement(wxT("SELECT FROM ")); // blank statement
+	}
 
-    wxString::size_type psel, pfrom;
-    psel = sql.find(wxT("SELECT"));
-    if (psel == wxString::npos)                            // simple select statement
-    {
-        sql = wxT("SELECT ") + column_list + wxT("\nFROM ") + t->getQuotedName();
-        editorM->SetText(sql);
-        return true;
-    }
-
-    pfrom = sql.find(wxT("FROM"), psel);
-    if (pfrom == wxString::npos)
-    {
-        wxMessageBox(_("SELECT present, but FROM missing."), _("Unable to parse the statement"), wxOK | wxICON_WARNING);
-        return true;
-    }
+	// add the column(s)
+	sstm.addColumn(column_list);
 
     // read in the table names, and find position where FROM clause ends
     std::vector<wxString> tableNames;
-    wxString::size_type from_end = pfrom + SimpleParser::getTableNames(tableNames, sql.substr(pfrom));
+    sstm.getTables(tableNames);
 
     // if table is not there, add it
-    if (std::find(tableNames.begin(), tableNames.end(), t->getName_()) == tableNames.end())
+    if (std::find(tableNames.begin(), tableNames.end(), t->getName_())
+		== tableNames.end())
     {
         std::vector<ForeignKey> relatedTables;
-        if (Table::tablesRelate(tableNames, t, relatedTables))    // foreign keys
+        if (Table::tablesRelate(tableNames, t, relatedTables)) // foreign keys
         {
             wxArrayString as;
-            for (std::vector<ForeignKey>::iterator it = relatedTables.begin(); it != relatedTables.end(); ++it)
+            for (std::vector<ForeignKey>::iterator it = relatedTables.begin();
+				it != relatedTables.end(); ++it)
             {
-                wxString addme = (*it).referencedTableM + wxT(":  ") + (*it).getJoin(false); // false = unquoted
+                wxString addme = (*it).referencedTableM + wxT(":  ")
+					+ (*it).getJoin(false); // false = unquoted
                 if (as.Index(addme) == wxNOT_FOUND)
                     as.Add(addme);
             }
             wxString join_list;
             if (as.GetCount() > 1)    // let the user decide
             {
-
-                int selected = ::wxGetSingleChoiceIndex(_("Multiple foreign keys found"),
+                int selected = ::wxGetSingleChoiceIndex(
+					_("Multiple foreign keys found"),
                     _("Select the desired table"), as);
                 if (selected == -1)
                     return false;
-                join_list = relatedTables[selected].getJoin(true); // true = quoted
+                join_list = relatedTables[selected].getJoin(true /*quoted*/);
             }
             else
                 join_list = relatedTables[0].getJoin(true);
@@ -231,26 +231,16 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
             // FIXME: dummy test value
             // can_be_null = (check if any of the FK fields can be null)
             bool can_be_null = true;
-
-            wxString insert = (can_be_null ? wxT(" LEFT") : wxT(""));
-            insert += wxT(" JOIN ") + t->getQuotedName() + wxT(" ON ") + join_list;
-            insert = wxT("\n") + insert + wxT(" ");
-            sql.insert(from_end, insert);
+            wxString joinType = (can_be_null ? wxT("LEFT JOIN"):wxT("JOIN"));
+			sstm.addTable(t->getQuotedName(), joinType, join_list);
         }
         else
         {
-            sql.insert(pfrom + 5, wxT(" "));
-            if (!tableNames.empty())
-                sql.insert(pfrom + 5, wxT(","));
-            sql.insert(pfrom + 5, t->getQuotedName());
+			sstm.addTable(t->getQuotedName(), wxT("CARTESIAN"), wxT(""));
         }
     }
 
-    // add columns to SELECT. Possible solutions include either psel+8 or pfrom + 1. I picked pfrom + 1.
-    sql.insert(pfrom, wxT(",\n"));
-    sql.insert(pfrom+1, column_list);
-
-    editorM->SetText(sql);
+    editorM->SetText(sstm.getStatement());
     return true;
 }
 //-----------------------------------------------------------------------------
