@@ -38,29 +38,27 @@
     #pragma hdrstop
 #endif
 
-//#include "config/Config.h"
-//#include "sql/Identifier.h"
 #include "sql/SelectStatement.h"
 #include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------
 SelectStatement::SelectStatement(const wxString& sql)
 {
-	setStatement(sql);
+    setStatement(sql);
 }
 //-----------------------------------------------------------------------------
 bool SelectStatement::isValidSelectStatement()
 {
-	return (posSelectM != -1 && posFromM != -1);
+    return (posSelectM != -1 && posFromM != -1);
 }
 //-----------------------------------------------------------------------------
 void SelectStatement::setStatement(const wxString& sql)
 {
-	sqlM = sql;
-	posSelectM = posFromM = posFromEndM = -1;
-	tokenizerM.setStatement(sql);
+    sqlM = sql;
+    posSelectM = posFromM = posFromEndM = -1;
+    tokenizerM.setStatement(sql);
 
-	// find SELECT and FROM position
-	int paren = 0;
+    // find SELECT and FROM position
+    int paren = 0;
     do
     {
         SqlTokenType stt = tokenizerM.getCurrentToken();
@@ -69,57 +67,57 @@ void SelectStatement::setStatement(const wxString& sql)
 
         // check parenthesis to ignore nested select statements
         if (stt == tkPARENOPEN)
-			paren++;
-		if (stt == tkPARENCLOSE && paren > 0)
-			paren--;
+            paren++;
+        if (stt == tkPARENCLOSE && paren > 0)
+            paren--;
 
         if (paren == 0)
         {
-        	if (stt == kwSELECT)
-				posSelectM = tokenizerM.getCurrentTokenPosition();
-			if (posSelectM != -1 && stt == kwFROM)
-				posFromM = tokenizerM.getCurrentTokenPosition();
-			if (posFromM != -1
-				&& (stt == kwWHERE || stt == kwGROUP || stt == kwORDER) )
-			{
-				posFromEndM = tokenizerM.getCurrentTokenPosition();
-			}
+            if (stt == kwSELECT)
+                posSelectM = tokenizerM.getCurrentTokenPosition();
+            if (posSelectM != -1 && stt == kwFROM)
+                posFromM = tokenizerM.getCurrentTokenPosition();
+            if (posFromM != -1
+                && (stt == kwWHERE || stt == kwGROUP || stt == kwORDER) )
+            {
+                posFromEndM = tokenizerM.getCurrentTokenPosition();
+            }
         }
     }
     while (tokenizerM.nextToken());
 
     if (posSelectM != -1 && posFromM != -1 && posFromEndM == -1)
-    	posFromEndM = tokenizerM.getCurrentTokenPosition();
+        posFromEndM = tokenizerM.getCurrentTokenPosition();
 }
 //-----------------------------------------------------------------------------
 wxString SelectStatement::getStatement()
 {
-	return sqlM;
+    return sqlM;
 }
 //-----------------------------------------------------------------------------
 // start from SELECT position and look for COMMA
 void SelectStatement::getColumns(std::vector<wxString>& columns)
 {
-	// reset to tokenizer to SELECT position (inefficient, but what to do)
-	tokenizerM.setStatement(sqlM);
-	while (posSelectM != tokenizerM.getCurrentTokenPosition())
-		if (!tokenizerM.nextToken())
-			return;	// throw?
+    // reset to tokenizer to SELECT position (inefficient, but what to do)
+    tokenizerM.setStatement(sqlM);
+    while (posSelectM != tokenizerM.getCurrentTokenPosition())
+        if (!tokenizerM.nextToken())
+            return; // throw?
 
-	wxString columnName;
+    wxString columnName;
     while (tokenizerM.jumpToken(true /* skip parenthesis */))
     {
         SqlTokenType stt = tokenizerM.getCurrentToken();
-		if (stt == kwFROM)
-			break;	// we're done here, no more tables
-		if (columnName.IsEmpty() && stt == tkIDENTIFIER)
-		{
-			columnName = tokenizerM.getCurrentTokenString();
-			columns.push_back(columnName);
-			continue;
-		}
-		if (stt == tkCOMMA)
-			columnName.Clear();
+        if (stt == kwFROM)
+            break;  // we're done here, no more tables
+        if (columnName.IsEmpty() && stt == tkIDENTIFIER)
+        {
+            columnName = tokenizerM.getCurrentTokenString();
+            columns.push_back(columnName);
+            continue;
+        }
+        if (stt == tkCOMMA)
+            columnName.Clear();
     }
 }
 //-----------------------------------------------------------------------------
@@ -133,68 +131,68 @@ LEFT JOIN t5 alias2 ON ...
 // FIXME: support table aliases should be added
 void SelectStatement::getTables(std::vector<wxString>& tables)
 {
-	// reset to tokenizer to FROM position (inefficient, but what to do)
-	tokenizerM.setStatement(sqlM);
-	while (posFromM != tokenizerM.getCurrentTokenPosition())
-		if (!tokenizerM.nextToken())
-			return;	// throw?
+    // reset to tokenizer to FROM position (inefficient, but what to do)
+    tokenizerM.setStatement(sqlM);
+    while (posFromM != tokenizerM.getCurrentTokenPosition())
+        if (!tokenizerM.nextToken())
+            return; // throw?
 
-	// find SELECT and FROM position
-	wxString tableName;
+    // find SELECT and FROM position
+    wxString tableName;
     while (tokenizerM.jumpToken(true /* skip parenthesis */))
     {
         SqlTokenType stt = tokenizerM.getCurrentToken();
-		if (stt == kwWHERE || stt == kwGROUP || stt == kwORDER)
-			break;	// we're done here, no more tables
-		if (tableName.IsEmpty() && stt == tkIDENTIFIER)
-		{
-			tableName = tokenizerM.getCurrentTokenString();
-			tables.push_back(tableName);
-			continue;
-		}
-		if (stt == tkCOMMA || stt == kwJOIN)
-			tableName.Clear();
+        if (stt == kwWHERE || stt == kwGROUP || stt == kwORDER)
+            break;  // we're done here, no more tables
+        if (tableName.IsEmpty() && stt == tkIDENTIFIER)
+        {
+            tableName = tokenizerM.getCurrentTokenString();
+            tables.push_back(tableName);
+            continue;
+        }
+        if (stt == tkCOMMA || stt == kwJOIN)
+            tableName.Clear();
     }
 }
 //-----------------------------------------------------------------------------
 void SelectStatement::add(const wxString& toAdd, int position)
 {
-	wxString s(sqlM.Left(position));
+    wxString s(sqlM.Left(position));
 
-	// always add extra space in case we're adding to the end of the
-	// statement
-	s += wxT(" ") + toAdd;
+    // always add extra space in case we're adding to the end of the
+    // statement
+    s += wxT(" ") + toAdd;
 
-	s += sqlM.Mid(position);
-	setStatement(s);
+    s += sqlM.Mid(position);
+    setStatement(s);
 }
 //-----------------------------------------------------------------------------
 void SelectStatement::addTable(const wxString& name, const wxString& joinType,
-	const wxString& joinList)
+    const wxString& joinList)
 {
-	if (joinType == wxT("CARTESIAN"))
-	{
-		std::vector<wxString> s;
-		getTables(s);
-		if (s.empty())
-			add(name + wxT(" "), posFromM + 5);	// 5 = strlen("FROM ");
-		else
-			add(name + wxT(", "), posFromM + 5);	// 5 = strlen("FROM ");
-	}
-	else
-	{
-		add(joinType + wxT(" ") + name + wxT(" ON ") + joinList + wxT(" "),
-			posFromEndM);
-	}
+    if (joinType == wxT("CARTESIAN"))
+    {
+        std::vector<wxString> s;
+        getTables(s);
+        if (s.empty())
+            add(name + wxT(" "), posFromM + 5); // 5 = strlen("FROM ");
+        else
+            add(name + wxT(", "), posFromM + 5);    // 5 = strlen("FROM ");
+    }
+    else
+    {
+        add(joinType + wxT(" ") + name + wxT(" ON ") + joinList + wxT(" "),
+            posFromEndM);
+    }
 }
 //-----------------------------------------------------------------------------
 void SelectStatement::addColumn(const wxString& columnList)
 {
-	std::vector<wxString> s;
-	getColumns(s);
-	if (s.empty())
-		add(columnList + wxT(" "), posSelectM + 7);	// 7 = strlen("SELECT ");
-	else
-		add(columnList + wxT(", "), posSelectM + 7);
+    std::vector<wxString> s;
+    getColumns(s);
+    if (s.empty())
+        add(columnList + wxT(" "), posSelectM + 7); // 7 = strlen("SELECT ");
+    else
+        add(columnList + wxT(", "), posSelectM + 7);
 }
 //-----------------------------------------------------------------------------

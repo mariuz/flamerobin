@@ -31,31 +31,31 @@
 #include <vector>
 #include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------
-//! Provides a way to:
+//! Should provide a way to:
 //! - parse the user supplied SELECT statement into components
 //! - add/remove tables and columns to it
 //! - build a statement from scratch (by ADDing to blank statement)
 class SelectStatement
 {
 private:
-	wxString sqlM;
-	SqlTokenizer tokenizerM;
-	int posSelectM, posFromM, posFromEndM;
-	void add(const wxString& toAdd, int position);
+    wxString sqlM;
+    SqlTokenizer tokenizerM;
+    int posSelectM, posFromM, posFromEndM;
+    void add(const wxString& toAdd, int position);
 
 public:
     SelectStatement(const wxString& sql);
 
-	bool isValidSelectStatement();	// needs to have SELECT and FROM at least
-	void setStatement(const wxString& sql);
-	wxString getStatement();
+    bool isValidSelectStatement();  // needs to have SELECT and FROM at least
+    void setStatement(const wxString& sql);
+    wxString getStatement();
 
-	void getTables(std::vector<wxString>& tables);
-	void getColumns(std::vector<wxString>& columns);
+    void getTables(std::vector<wxString>& tables);
+    void getColumns(std::vector<wxString>& columns);
 
-	void addTable(const wxString& name, const wxString& joinType,
-		const wxString& joinList);
-	void addColumn(const wxString& columnList);	// adds as-is currently
+    void addTable(const wxString& name, const wxString& joinType,
+        const wxString& joinList);
+    void addColumn(const wxString& columnList); // adds as-is currently
 };
 //-----------------------------------------------------------------------------
 #endif
