@@ -50,9 +50,8 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/parameter.h"
 #include "metadata/root.h"
-#include "sql/SimpleParser.h"
-#include "sql/SqlTokenizer.h"
 #include "sql/SqlStatement.h"
+#include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------

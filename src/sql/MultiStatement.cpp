@@ -40,9 +40,8 @@
 
 #include <sstream>
 #include "core/StringUtils.h"
-#include "sql/SimpleParser.h"
+#include "sql/MultiStatement.h"
 #include "sql/SqlTokenizer.h"
-#include "MultiStatement.h"
 //-----------------------------------------------------------------------------
 SingleStatement::SingleStatement(const wxString& sql, bool valid)
     :sqlM(sql), isValidM(valid), typeM(stOther), thirdStringM(wxEmptyString)
