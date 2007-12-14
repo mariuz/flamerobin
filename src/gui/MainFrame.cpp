@@ -1120,9 +1120,10 @@ void MainFrame::OnMenuDisconnect(wxCommandEvent& WXUNUSED(event))
     }
     catch (...)
     {
-        wxSafeYield();
-        treeMainM->Thaw();
     }
+
+    wxSafeYield();
+    treeMainM->Thaw();
     updateStatusbarText();
 }
 //-----------------------------------------------------------------------------
