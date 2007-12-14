@@ -64,6 +64,7 @@
 #include <vector>
 #include <sstream>
 #include <cstdarg>
+#include <cstring>
 
 #ifdef _DEBUG
 #define ASSERTION(x)    {if (!(x)) {throw LogicExceptionImpl("ASSERTION", \
@@ -1067,11 +1068,11 @@ private:
     DatabaseImpl* mDatabase;        // Attached database
     TransactionImpl* mTransaction;  // Attached transaction
     RowImpl* mInRow;
-    //bool* mInMissing;         // Quels paramètres n'ont pas été spécifiés
+    //bool* mInMissing;         // Quels paramÃ¨tres n'ont pas Ã©tÃ© spÃ©cifiÃ©s
     RowImpl* mOutRow;
     bool mResultSetAvailable;   // Executed and result set is available
     bool mCursorOpened;         // dsql_set_cursor_name was called
-    IBPP::STT mType;            // Type de requète
+    IBPP::STT mType;            // Type de requÃ¨te
     std::string mSql;           // Last SQL statement prepared or executed
 
     // Internal Methods
@@ -1256,8 +1257,8 @@ private:
     ISC_QUAD            mId;
     bool                mDescribed;
     ISC_ARRAY_DESC      mDesc;
-    DatabaseImpl*       mDatabase;      // Database attachée
-    TransactionImpl*    mTransaction;   // Transaction attachée
+    DatabaseImpl*       mDatabase;      // Database attachÃ©e
+    TransactionImpl*    mTransaction;   // Transaction attachÃ©e
     void*               mBuffer;        // Buffer for native data
     int                 mBufferSize;    // Size of this buffer in bytes
     int                 mElemCount;     // Count of elements in this array
