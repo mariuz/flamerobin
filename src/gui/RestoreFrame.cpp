@@ -403,7 +403,7 @@ void RestoreFrame::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxFileName origName(text_ctrl_filename->GetValue());
     wxString filename = ::wxFileSelector(_("Select Backup File"),
-        origName.GetPath(), origName.GetName(), wxT("*.fbk"),
+        origName.GetPath(), origName.GetFullName(), wxT("*.fbk"),
         _("Backup file (*.fbk, *.gbk)|*.fbk;*.gbk|All files (*.*)|*.*"),
 #if wxCHECK_VERSION(2, 8, 0)
         wxFD_OPEN, this);
