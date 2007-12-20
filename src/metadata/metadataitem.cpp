@@ -609,7 +609,8 @@ void MetadataItem::setType(NodeType type)
 //-----------------------------------------------------------------------------
 bool MetadataItem::isSystem() const
 {
-    return getName_().substr(0, 4) == wxT("RDB$");
+	wxString prefix(getName_().substr(0, 4));
+    return prefix == wxT("RDB$") || prefix == wxT("MON$");
 }
 //-----------------------------------------------------------------------------
 wxString MetadataItem::getDropSqlStatement() const
