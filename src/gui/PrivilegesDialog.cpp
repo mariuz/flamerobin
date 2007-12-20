@@ -435,7 +435,9 @@ void PrivilegesDialog::updateControls()
     wxString grantee;
     // some usernames need quoting
     if (radiobtn_user->GetValue())
-        grantee = wxT("\"") + textctrl_user->GetValue() + wxT("\"");
+    {
+        grantee = Identifier::userString(textctrl_user->GetValue());
+    }
     else if (radiobtn_trigger->GetValue())
     {
         grantee = wxT("TRIGGER ") + Identifier(
