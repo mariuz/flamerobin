@@ -173,7 +173,7 @@ Database* MetadataItem::getDatabase(const wxString& callingMethod) const
     Database* database = findDatabase();
     if (!database)
     {
-        throw FRError(wxString::Format(_("%s - no database assigned"), 
+        throw FRError(wxString::Format(_("%s - no database assigned"),
             callingMethod.c_str()));
     }
     return database;
@@ -204,7 +204,7 @@ void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
     // views count as relations(tables) when other object refer to them
     if (mytype == 1 && !ofObject)
         mytype = 0;
-    // system tables should be treat as tables
+    // system tables should be treated as tables
     if (typeM == ntSysTable)
         mytype = 0;
 
@@ -221,28 +221,56 @@ void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
         wxT("select RDB$") + o2 + wxT("_TYPE, RDB$") + o2 + wxT("_NAME, RDB$FIELD_NAME \n ")
         wxT(" from RDB$DEPENDENCIES \n ")
         wxT(" where RDB$") + o1 + wxT("_TYPE = ? and RDB$") + o1 + wxT("_NAME = ? \n ");
+    int params = 1;
     if ((typeM == ntTable || typeM == ntSysTable || typeM == ntView) && ofObject)  // get deps for computed columns
     {                                                       // view needed to bind with generators
-        sql += wxT(" union all \n")
+        sql += wxT(" union  \n")
             wxT(" SELECT DISTINCT d.rdb$depended_on_type, d.rdb$depended_on_name, d.rdb$field_name \n")
             wxT(" FROM rdb$relation_fields f \n")
             wxT(" LEFT JOIN rdb$dependencies d ON d.rdb$dependent_name = f.rdb$field_source \n")
             wxT(" WHERE d.rdb$dependent_type = 3 AND f.rdb$relation_name = ? \n");
+        params++;
     }
     if (!ofObject) // find tables that have calculated columns based on "this" object
     {
-        sql += wxT("union all \n")
+        sql += wxT("union  \n")
             wxT(" SELECT distinct cast(0 as smallint), f.rdb$relation_name, f.rdb$field_name \n")
             wxT(" from rdb$relation_fields f \n")
             wxT(" left join rdb$dependencies d on d.rdb$dependent_name = f.rdb$field_source \n")
             wxT(" where d.rdb$dependent_type = 3 and d.rdb$depended_on_name = ? ");
+        params++;
     }
+    // get the exact table and fields for views
+    // rdb$dependencies covers deps. for WHERE clauses in SELECTs in VIEW body
+    // but we also need mapping for column list in SELECT. These 2 queries cover it:
+    if (ofObject && typeM == ntView)
+    {
+		sql += wxT(" union \n")
+			wxT(" select distinct cast(0 as smallint), vr.RDB$RELATION_NAME, f.RDB$BASE_FIELD \n")
+			wxT(" from RDB$RELATION_FIELDS f \n")
+			wxT(" join RDB$VIEW_RELATIONS vr on f.RDB$VIEW_CONTEXT = vr.RDB$VIEW_CONTEXT \n")
+			wxT("   and f.RDB$RELATION_NAME = vr.RDB$VIEW_NAME \n")
+			wxT(" where f.rdb$relation_name = ? \n");
+		params++;
+    }
+    // views can depend on other views as well
+    // we might need to add procedures here one day when Firebird gains support for it
+    if (!ofObject && (typeM == ntView || typeM == ntTable || typeM == ntSysTable))
+    {
+		sql += wxT(" union \n")
+			wxT(" select distinct cast(0 as smallint), f.RDB$RELATION_NAME, f.RDB$BASE_FIELD \n")
+			wxT(" from RDB$RELATION_FIELDS f \n")
+			wxT(" join RDB$VIEW_RELATIONS vr on f.RDB$VIEW_CONTEXT = vr.RDB$VIEW_CONTEXT \n")
+			wxT("   and f.RDB$RELATION_NAME = vr.RDB$VIEW_NAME \n")
+			wxT(" where vr.rdb$relation_name = ? \n");
+		params++;
+    }
+
     sql += wxT(" order by 1, 2, 3");
     st1->Prepare(wx2std(sql));
     st1->Set(1, mytype);
-    st1->Set(2, wx2std(getName_()));
-    if (!ofObject || typeM == ntTable || typeM == ntSysTable || typeM == ntView)
-        st1->Set(3, wx2std(getName_()));
+    for (int i = 0; i < params; i++)
+		st1->Set(2+i, wx2std(getName_()));
     st1->Execute();
     MetadataItem* last = 0;
     Dependency* dep = 0;
