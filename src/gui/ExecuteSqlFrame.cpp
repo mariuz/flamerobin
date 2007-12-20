@@ -1675,7 +1675,7 @@ void ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible(wxUpdateUIEvent& event)
 //-----------------------------------------------------------------------------
 wxString IBPPtype2string(IBPP::SDT t, int subtype, int size, int scale)
 {
-    if (scale != 0)
+    if (scale > 0)
         return wxString::Format(wxT("NUMERIC(%d,%d)"), size==4 ? 9:18, scale);
 
     switch (t)

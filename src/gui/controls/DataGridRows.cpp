@@ -657,7 +657,7 @@ void DateColumnDef::setFromString(DataGridRowBuffer* buffer,
         idt.Add(1);
     else if (temp.CmpNoCase(wxT("YESTERDAY")) == 0)
         idt.Add(-1);
-    else if (temp.CmpNoCase(wxT("DATE")) != 0 
+    else if (temp.CmpNoCase(wxT("DATE")) != 0
         && temp.CmpNoCase(wxT("NOW")) != 0
         && temp.CmpNoCase(wxT("TODAY")) != 0)
     {
@@ -857,7 +857,7 @@ void TimestampColumnDef::setFromString(DataGridRowBuffer* buffer,
         its.Add(1);
     else if (temp.CmpNoCase(wxT("YESTERDAY")) == 0)
         its.Add(-1);
-    else if (temp.CmpNoCase(wxT("NOW")) == 0) 
+    else if (temp.CmpNoCase(wxT("NOW")) == 0)
         its.Now(); // with time
     else if (temp.CmpNoCase(wxT("DATE")) != 0
         && temp.CmpNoCase(wxT("TODAY")) != 0)
@@ -1494,7 +1494,7 @@ bool DataGridRows::initialize(const IBPP::Statement& statement, Database *db)
             colName = std2wx(statement->ColumnName(col));
 
         IBPP::SDT type = statement->ColumnType(col);
-        if (statement->ColumnScale(col))
+        if (statement->ColumnScale(col) > 0)
             type = IBPP::sdDouble;
 
         ResultsetColumnDef* columnDef = 0;
