@@ -65,8 +65,8 @@ HtmlPrinter::~HtmlPrinter()
 }
 //-----------------------------------------------------------------------------
 //! PrintableHtmlWindow class
-PrintableHtmlWindow::PrintableHtmlWindow(wxWindow* parent)
-    : wxHtmlWindow(parent, -1)
+PrintableHtmlWindow::PrintableHtmlWindow(wxWindow* parent, wxWindowID id)
+    : wxHtmlWindow(parent, id)
 {
 #ifdef __WXGTK20__
     // default fonts are just too big on GTK2

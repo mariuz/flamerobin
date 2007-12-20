@@ -31,6 +31,11 @@
 #include <wx/wx.h>
 #include <wx/wxhtml.h>
 
+// wx 2.6 doesn't support wxHtmlCellEvent
+#if wxCHECK_VERSION(2, 8, 0)
+#include <wx/html/htmlwin.h>
+#endif
+
 #include "core/Observer.h"
 #include "gui/BaseFrame.h"
 #include "gui/controls/PrintableHtmlWindow.h"
@@ -41,6 +46,8 @@ class MetadataItemPropertiesFrame: public BaseFrame, public Observer
 private:
     enum { ptSummary, ptConstraints, ptDependencies, ptTriggers,
         ptTableIndices, ptDDL, ptPrivileges } pageTypeM;
+
+	enum { HtmlWindowID = 42 };
 
     MetadataItem *objectM;
     bool htmlReloadRequestedM;
@@ -73,6 +80,11 @@ public:
 private:
     // event handling
     void OnIdle(wxIdleEvent& event);
+
+#if wxCHECK_VERSION(2, 8, 0)
+    void OnHtmlCellHover(wxHtmlCellEvent &event);
+    DECLARE_EVENT_TABLE()
+#endif
 };
 //-----------------------------------------------------------------------------
 #endif // FR_METADATAITEMPROPERTIESFRAME_H

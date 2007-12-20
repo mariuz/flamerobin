@@ -49,7 +49,7 @@ private:
     wxString pageSourceM;
     wxString tempLinkM;     // set before context menu pops up, and used in handler for menu item
 public:
-    PrintableHtmlWindow(wxWindow* parent);
+    PrintableHtmlWindow(wxWindow* parent, wxWindowID id = wxID_ANY);
     void setPageSource(const wxString& html);
 protected:
     virtual void OnLinkClicked(const wxHtmlLinkInfo& link);

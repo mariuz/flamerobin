@@ -42,6 +42,10 @@
 #include <wx/file.h>
 #include <wx/filedlg.h>
 
+#if wxCHECK_VERSION(2, 8, 0)
+#include <wx/tipwin.h>
+#endif
+
 #include <fstream>
 #include <iomanip>
 #include <sstream>
@@ -106,7 +110,7 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
         return;
     }
 
-    html_window = new PrintableHtmlWindow(this);
+    html_window = new PrintableHtmlWindow(this, HtmlWindowID);
 
     wxStatusBar *sb = CreateStatusBar();
     Database* d = objectM->findDatabase();
@@ -565,8 +569,8 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
                 }
 
                 // wxHTML doesn't support TITLE or ALT property of IMG tag so
-                // we show grantor like this (display in status bar)
-                htmlpage += wxT("<a href=\"info://      Granted by ") + (*it).grantor
+                // we use our custom 'link hower' handler to show it
+                htmlpage += wxT("<a href=\"info://Granted by ") + (*it).grantor
                     + wxT("\">");
 
                 htmlpage += wxT("<img src=\"") +
@@ -575,12 +579,7 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
                     htmlpage += wxT("ok2.png\"");
                 else
                     htmlpage += wxT("ok.png\"");
-                // wxHTML doesn't seem to support this
-                htmlpage += wxT(" TITLE=\"Granted by ") + (*it).grantor
-                    + wxT("\">");
-
-                // see wxHTML comment above
-                htmlpage += wxT("</a>");
+                htmlpage += wxT("\"></a>");
 
                 if ((*it).columns.size())
                 {
@@ -1096,6 +1095,13 @@ void MetadataItemPropertiesFrame::update()
     requestLoadPage(false);
 }
 //-----------------------------------------------------------------------------
+#if wxCHECK_VERSION(2, 8, 0)
+BEGIN_EVENT_TABLE(MetadataItemPropertiesFrame, BaseFrame)
+    EVT_HTML_CELL_HOVER(MetadataItemPropertiesFrame::HtmlWindowID,
+		MetadataItemPropertiesFrame::OnHtmlCellHover)
+END_EVENT_TABLE()
+#endif
+//-----------------------------------------------------------------------------
 void MetadataItemPropertiesFrame::OnIdle(wxIdleEvent& WXUNUSED(event))
 {
     Disconnect(wxID_ANY, wxEVT_IDLE);
@@ -1103,6 +1109,36 @@ void MetadataItemPropertiesFrame::OnIdle(wxIdleEvent& WXUNUSED(event))
     htmlReloadRequestedM = false;
     loadPage();
 }
+//-----------------------------------------------------------------------------
+#if wxCHECK_VERSION(2, 8, 0)
+void MetadataItemPropertiesFrame::OnHtmlCellHover(wxHtmlCellEvent& event)
+{
+	wxHtmlCell *c = event.GetCell();
+	if (!c)
+		return;
+	wxHtmlLinkInfo *lnk = c->GetLink();
+	if (!lnk)
+		return;
+
+	wxString addr = lnk->GetHref();
+    URI uri(addr);
+    if (uri.protocol == wxT("info"))    // special
+    {
+		//		GetStatusBar()->SetStatusText(uri.action);
+
+		// I'm having a hard time trying to convert this to screen coordinates
+		// since parent's coords cannot be retrieved(?)
+		//wxRect r(c->GetPosX(), c->GetPosY(), c->GetWidth(), c->GetHeight());
+
+		// M.B. So I decided to use a 21x9 box around the mouse
+		wxRect r(::wxGetMousePosition().x - 10, ::wxGetMousePosition().y - 4,
+			21, 9);
+
+		wxTipWindow *tw = new wxTipWindow(this, uri.action);
+		tw->SetBoundingRect(r);
+    }
+}
+#endif
 //-----------------------------------------------------------------------------
 //! PageHandler class
 class PageHandler: public URIHandler
