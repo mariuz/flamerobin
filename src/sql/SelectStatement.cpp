@@ -38,6 +38,8 @@
     #pragma hdrstop
 #endif
 
+#include <wx/textbuf.h>
+
 #include "sql/SelectStatement.h"
 #include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------
@@ -164,7 +166,7 @@ void SelectStatement::add(const wxString& toAdd, int position)
 
     // always add extra space in case we're adding to the end of the
     // statement
-    s += wxT(" ") + toAdd;
+    s += wxTextBuffer::GetEOL() + toAdd;
 
     s += sqlM.Mid(position);
     setStatement(s);
