@@ -77,8 +77,8 @@ void SelectStatement::setStatement(const wxString& sql)
                 posSelectM = tokenizerM.getCurrentTokenPosition();
             if (posSelectM != -1 && stt == kwFROM)
                 posFromM = tokenizerM.getCurrentTokenPosition();
-            if (posFromM != -1
-                && (stt == kwWHERE || stt == kwGROUP || stt == kwORDER) )
+            if (posFromM != -1 && (stt == kwWHERE || stt == kwGROUP
+				|| stt == kwORDER || stt == kwPLAN || stt == kwROWS))
             {
                 posFromEndM = tokenizerM.getCurrentTokenPosition();
             }
