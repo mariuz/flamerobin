@@ -142,8 +142,11 @@ void SelectStatement::getTables(std::vector<wxString>& tables)
     while (tokenizerM.jumpToken(true /* skip parenthesis */))
     {
         SqlTokenType stt = tokenizerM.getCurrentToken();
-        if (stt == kwWHERE || stt == kwGROUP || stt == kwORDER)
+        if (stt == kwWHERE || stt == kwGROUP || stt == kwORDER
+			|| stt == kwPLAN || stt == kwROWS)
+		{
             break;  // we're done here, no more tables
+		}
         if (tableName.IsEmpty() && stt == tkIDENTIFIER)
         {
             tableName = tokenizerM.getCurrentTokenString();
