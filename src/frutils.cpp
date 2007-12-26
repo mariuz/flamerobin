@@ -38,6 +38,9 @@
     #include "wx/wx.h"
 #endif
 
+#include <fstream>
+#include <sstream>
+
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "frutils.h"
@@ -149,7 +152,7 @@ bool connectDatabase(Database *db, wxWindow* parent,
             _("Please enter the the database user's password:"));
         if (upd.ShowModal() == wxID_OK)
             pass = upd.getPassword();
-    }        
+    }
     if (pass.empty())
         return false;
 
@@ -214,5 +217,38 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
         }
     }
     return true;
+}
+//-----------------------------------------------------------------------------
+wxString loadEntireFile(const wxString& filename)
+{
+    wxFileName localFileName = filename;
+    return loadEntireFile(localFileName);
+}
+//-----------------------------------------------------------------------------
+wxString loadEntireFile(const wxFileName& filename)
+{
+    if (!filename.FileExists())
+    {
+        wxString msg;
+        msg.Printf(_("The file \"%s\" does not exist."),
+            filename.GetFullPath().c_str());
+        throw FRError(msg);
+    }
+
+	// read entire file into wxString buffer
+    std::ifstream filex(wx2std(filename.GetFullPath()).c_str());
+    if (!filex)
+    {
+        wxString msg;
+        msg.Printf(_("The file \"%s\" cannot be opened."),
+            filename.GetFullPath().c_str());
+        throw FRError(msg);
+    }
+
+    std::stringstream ss;
+    ss << filex.rdbuf();
+    wxString s(std2wx(ss.str()));
+    filex.close();
+    return s;
 }
 //-----------------------------------------------------------------------------

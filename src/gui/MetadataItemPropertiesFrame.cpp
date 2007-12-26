@@ -67,33 +67,6 @@
 #include "metadata/view.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
-wxString loadHtmlFile(const wxString& filename)
-{
-    wxFileName localFileName = filename;
-    if (!localFileName.FileExists())
-    {
-        wxString msg;
-        msg.Printf(_("The file \"%s\" does not exist."),
-            localFileName.GetFullPath().c_str());
-        throw FRError(msg);
-    }
-
-    std::ifstream file(wx2std(filename).c_str()); // read entire file into wxString buffer
-    if (!file)
-    {
-        wxString msg;
-        msg.Printf(_("The file \"%s\" cannot be opened."),
-            filename.c_str());
-        throw FRError(msg);
-    }
-
-    std::stringstream ss;
-    ss << file.rdbuf();
-    wxString s(std2wx(ss.str()));
-    file.close();
-    return s;
-}
-//-----------------------------------------------------------------------------
 //! MetadataItemPropertiesFrame class
 MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
         MetadataItem *object)
@@ -307,7 +280,7 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
             case ntRole:
                 pages.push_back(wxT("DDL"));
         };
-        wxString page = loadHtmlFile(config().getHtmlTemplatesPath()
+        wxString page = loadEntireFile(config().getHtmlTemplatesPath()
             + wxT("header.html"));
         bool first = true;
         while (!page.Strip().IsEmpty())
@@ -1006,7 +979,7 @@ void MetadataItemPropertiesFrame::processHtmlCode(wxString& htmlpage, wxString h
 void MetadataItemPropertiesFrame::processHtmlFile(wxString fileName)
 {
     wxString htmlpage;
-    processHtmlCode(htmlpage, loadHtmlFile(fileName));
+    processHtmlCode(htmlpage, loadEntireFile(fileName));
 
     int x = 0, y = 0;
     html_window->GetViewStart(&x, &y);         // save scroll position

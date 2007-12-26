@@ -29,6 +29,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define FRUTILS_H
 //-----------------------------------------------------------------------------
 #include <wx/wx.h>
+#include <wx/filename.h>
 
 #include <list>
 
@@ -57,5 +58,9 @@ bool connectDatabase(Database *db, wxWindow* parent,
 //-----------------------------------------------------------------------------
 bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
     bool sysdba);
+//-----------------------------------------------------------------------------
+//! loads the file into wxString
+wxString loadEntireFile(const wxString& filename);
+wxString loadEntireFile(const wxFileName& filename);
 //-----------------------------------------------------------------------------
 #endif // FRUTILS_H
