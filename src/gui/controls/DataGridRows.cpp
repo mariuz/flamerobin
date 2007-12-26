@@ -1182,26 +1182,33 @@ void DataGridRows::addRow(DataGridRowBuffer* buffer)
     buffersM.push_back(buffer);
 }
 //-----------------------------------------------------------------------------
-bool DataGridRows::addRow(const IBPP::Statement& statement,
+void DataGridRows::addRow(const IBPP::Statement& statement,
     wxMBConv* converter)
 {
     DataGridRowBuffer* buffer = new DataGridRowBuffer(columnDefsM.size());
+	// if anything fails, make sure we release the memory
+	try
+	{
+		// starts with last column -> with highest buffer offset and
+		// string array index to allocate all needed memory at once
+		unsigned col = columnDefsM.size();
+		do
+		{
+			// IBPP column counts are 1-based, not 0-based...
+			unsigned colIBPP = col--;
+			bool isNull = statement->IsNull(colIBPP);
+			buffer->setFieldNull(col, isNull);
+			if (!isNull)
+				columnDefsM[col]->setValue(buffer, colIBPP, statement, converter);
+		}
+		while (col > 0);
+	}
+	catch(...)
+	{
+		delete buffer;
+		throw;
+	}
     addRow(buffer);
-
-    // starts with last column -> with highest buffer offset and
-    // string array index to allocate all needed memory at once
-    unsigned col = columnDefsM.size();
-    do
-    {
-        // IBPP column counts are 1-based, not 0-based...
-        unsigned colIBPP = col--;
-        bool isNull = statement->IsNull(colIBPP);
-        buffer->setFieldNull(col, isNull);
-        if (!isNull)
-            columnDefsM[col]->setValue(buffer, colIBPP, statement, converter);
-    }
-    while (col > 0);
-    return true;
 }
 //-----------------------------------------------------------------------------
     void freeBuffer(DataGridRowBuffer* buffer) { delete buffer; }

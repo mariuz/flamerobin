@@ -1805,12 +1805,17 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         wxTimeSpan dif = wxDateTime::Now().Subtract(start);
         log(wxString(_("Prepare time: ")) + dif.Format(wxT("%H:%M:%S.")));
 
+		// we don't check IBPP::Select since Firebird 2.0 has a new feature
+		// INSERT ... RETURNING which isn't detected as stSelect by IBPP
+		bool hasColumns = false;
         try
         {
+			int cols = statementM->Columns();
             if (doShowStats /* && type == IBPP::stSelect */)    // show column info
             {
-                for (int i = 1; i <= statementM->Columns(); i++)
+                for (int i = 1; i <= cols; i++)
                 {
+                	hasColumns = true;
                     log(wxString::Format(
                         _("Field #%02d: %s.%s Alias:%s Type:%s"),
                         i,
@@ -1852,7 +1857,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         log(_("Done."));
 
         IBPP::STT type = statementM->Type();
-        if (type == IBPP::stSelect)            // for select statements: show data
+        if (hasColumns)            // for select statements: show data
         {
             grid_data->fetchData(dbCharsetConversionM.getConverter());
             notebook_1->SetSelection(1);
@@ -1884,13 +1889,21 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             if (type == IBPP::stInsert || type == IBPP::stDelete
                 || type == IBPP::stExecProcedure || type == IBPP::stUpdate)
             {
-                wxString addon;
-                if (statementM->AffectedRows() % 10 != 1)
-                    addon = wxT("s");
-                wxString s = wxString::Format(_("%d row%s affected directly."),
-                    statementM->AffectedRows(), addon.c_str());
-                log(wxT("") + s);
-                statusbar_1->SetStatusText(s, 1);
+            	// INSERT INTO..RETURNING and EXECUTE PROCEDURE may throw
+            	// when they return a single record
+            	try
+            	{
+					wxString addon;
+					if (statementM->AffectedRows() % 10 != 1)
+						addon = wxT("s");
+					wxString s = wxString::Format(_("%d row%s affected directly."),
+						statementM->AffectedRows(), addon.c_str());
+					log(wxT("") + s);
+					statusbar_1->SetStatusText(s, 1);
+            	}
+            	catch (IBPP::Exception&)
+            	{
+            	}
             }
             SqlStatement stm(sql, databaseM, terminator);
             if (stm.isDDL())

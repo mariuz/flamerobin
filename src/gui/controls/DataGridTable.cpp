@@ -259,6 +259,22 @@ void DataGridTable::Clear()
     }
 }
 //-----------------------------------------------------------------------------
+void DataGridTable::fetchOne()
+{
+	rowsM.addRow(statementM, charsetConverterM);
+	allRowsFetchedM = true;
+
+    if (GetView())   // notify the grid
+    {
+        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, 1);
+        GetView()->ProcessTableMessage(msg);
+        // used in frame to update status bar
+        wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
+        evt.SetExtraLong(1);
+        wxPostEvent(GetView(), evt);
+    }
+}
+//-----------------------------------------------------------------------------
 void DataGridTable::fetch()
 {
     if (!canFetchMoreRows())
@@ -480,6 +496,7 @@ int DataGridTable::getStatementColCount()
     {
         case IBPP::stSelect:
         case IBPP::stSelectUpdate:
+        case IBPP::stExecProcedure:
             return statementM->Columns();
         default:
             return 0;
@@ -663,7 +680,11 @@ void DataGridTable::initialFetch(wxMBConv* conv)
             rowsM.getRowFieldCount());
         GetView()->ProcessTableMessage(msg);
     }
-    fetch();
+
+    if (statementM->Type() == IBPP::stExecProcedure)
+    	fetchOne();
+    else
+		fetch();
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::IsEmptyCell(int row, int col)

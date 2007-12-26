@@ -97,7 +97,7 @@ public:
     DataGridRows(Database* db);
     ~DataGridRows();
 
-    bool addRow(const IBPP::Statement& statement, wxMBConv* converter);
+    void addRow(const IBPP::Statement& statement, wxMBConv* converter);
     void clear();
     unsigned getRowCount();
     unsigned getRowFieldCount();
