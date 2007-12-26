@@ -496,7 +496,6 @@ int DataGridTable::getStatementColCount()
     {
         case IBPP::stSelect:
         case IBPP::stSelectUpdate:
-        case IBPP::stExecProcedure:
             return statementM->Columns();
         default:
             return 0;

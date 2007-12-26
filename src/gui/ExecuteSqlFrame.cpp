@@ -1811,11 +1811,11 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         try
         {
 			int cols = statementM->Columns();
-            if (doShowStats /* && type == IBPP::stSelect */)    // show column info
-            {
-                for (int i = 1; i <= cols; i++)
-                {
-                	hasColumns = true;
+			for (int i = 1; i <= cols; i++)
+			{
+				hasColumns = true;
+				if (doShowStats)
+				{
                     log(wxString::Format(
                         _("Field #%02d: %s.%s Alias:%s Type:%s"),
                         i,
