@@ -192,7 +192,7 @@ wxString Column::getPrintableName()
     return ret;
 }
 //-----------------------------------------------------------------------------
-Domain *Column::getDomain() const
+Domain* Column::getDomain() const
 {
     Database* d = findDatabase();
     if (!d)
@@ -203,7 +203,7 @@ Domain *Column::getDomain() const
         if ((*it).getName_() == sourceM)
             return (Domain *)&(*it);
     }
-    // since we haven't find the domain, check the database
+    // since we haven't found the domain, check the database
     return d->loadMissingDomain(sourceM);
 }
 //-----------------------------------------------------------------------------

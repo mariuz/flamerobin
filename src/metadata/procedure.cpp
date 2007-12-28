@@ -299,8 +299,10 @@ wxString Procedure::getAlterSql(bool full)
         for (MetadataCollection <Parameter>::const_iterator it =
             parametersM.begin(); it != parametersM.end(); ++it)
         {
-            Domain *dm = (*it).getDomain();
-            wxString charset = dm->getCharset();
+            wxString charset;
+            Domain* dm = (*it).getDomain();
+            if (dm)
+                charset = dm->getCharset();
             if ((*it).isOutputParameter())
             {
                 if (output.empty())
@@ -308,9 +310,9 @@ wxString Procedure::getAlterSql(bool full)
                 else
                     output += wxT(",\n    ");
                 output += (*it).getQuotedName() + wxT(" ") +
-                    dm->getDatatypeAsString();
+                    ((dm) ? dm->getDatatypeAsString() : (*it).getSource());
                 if (!charset.IsEmpty() && charset != db->getDatabaseCharset())
-                    output += wxT(" CHARACTER SET ") + dm->getCharset();
+                    output += wxT(" CHARACTER SET ") + charset;
             }
             else
             {
@@ -318,12 +320,12 @@ wxString Procedure::getAlterSql(bool full)
                     input += wxT(" (\n    ");
                 else
                     input += wxT(",\n    ");
-                input += (*it).getQuotedName() + wxT(" ")
-                    + dm->getDatatypeAsString();
-                if (dm->hasDefault())
+                input += (*it).getQuotedName() + wxT(" ") +
+                    ((dm) ? dm->getDatatypeAsString() : (*it).getSource());
+                if (dm && dm->hasDefault())
                     input += wxT(" DEFAULT ") + dm->getDefault();
                 if (!charset.IsEmpty() && charset != db->getDatabaseCharset())
-                    input += wxT(" CHARACTER SET ") + dm->getCharset();
+                    input += wxT(" CHARACTER SET ") + charset;
             }
         }
 

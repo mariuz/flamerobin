@@ -62,9 +62,9 @@ Parameter::Parameter()
 wxString Parameter::getPrintableName()
 {
     wxString ret;
-    ret = (typeM == ntParameterInput ? wxT("in ") : wxT("out ")) + getName_()
-        + wxT(" ") + getDomain()->getDatatypeAsString();
-    return ret;
+    ret = (typeM == ntParameterInput ? wxT("in ") : wxT("out ")) + getName_();
+    Domain* d = getDomain();
+    return ret + wxT(" ") + ((d) ? d->getDatatypeAsString() : getSource());
 }
 //-----------------------------------------------------------------------------
 bool Parameter::isOutputParameter() const
