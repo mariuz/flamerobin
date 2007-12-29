@@ -162,6 +162,7 @@ STATICRTL=<0,1> - tells to link against wx static(1) or dynamic(0) libs
 ----------------------------------------
 -- Unix - Autoconf Build Instructions --
 ----------------------------------------
+
 To build on Unix or MinGW, simply open a command line, cd into the flamerobin
 root directory, and execute the following commands:
 
@@ -189,6 +190,36 @@ should build the flamerobin executable. If you experience any problems,
 please check the flamerobin developer mailing list archive, or ask a
 question there.
 
+
+--------------------------------------------
+-- Mac OS X - Autoconf Build Instructions --
+--------------------------------------------
+
+To build FlameRobin on Mac OS X 10.5 for compatibility with 10.4, open
+a command line, cd into the flamerobin root directory, and execute the
+following commands:
+
+mkdir ppcu
+cd ppcu
+../configure --disable-debug --disable-dependency-tracking \
+  CFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc" \
+  LDFLAGS="-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch ppc" \
+  CXXFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc" \
+  --with-wx-config=/my/path/to/wx-config_for_ppc_unicode
+make
+
+cd ..
+mkdir i386u
+cd i386u
+../configure --disable-debug --disable-dependency-tracking \
+  CFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386" \
+  LDFLAGS="-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch i386" \
+  CXXFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386" \
+  --with-wx-config=/my/path/to/wx-config_for_i386_unicode
+make
+
+The resulting bundles differ only in the flamerobin executable, the lipo
+tool can be used to make a Universal Build out of them.
 
 
 ---------------------------------------------------------------
