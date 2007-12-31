@@ -800,6 +800,8 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
         ExecuteSqlFrame::OnGridRowCountChanged)
     EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_STATEMENT, \
         ExecuteSqlFrame::OnGridStatementExecuted)
+
+    EVT_GRID_CMD_LABEL_LEFT_DCLICK(ExecuteSqlFrame::ID_grid_data, ExecuteSqlFrame::OnGridLabelLeftDClick)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 // Avoiding the annoying thing that you cannot click inside the selection and have it deselected and have caret there
@@ -2160,6 +2162,21 @@ void ExecuteSqlFrame::OnGridStatementExecuted(wxCommandEvent &event)
         SqlStatement stm(event.GetString(), databaseM);
         executedStatementsM.push_back(stm);
     }
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnGridLabelLeftDClick(wxGridEvent& event)
+{
+    DataGridTable* table = grid_data->getDataGridTable();
+	if (!table)
+		return;
+
+	int column = 1 + event.GetCol();
+	SelectStatement sstm(std2wx(statementM->Sql()));
+
+	// rebuild SQL statement with different ORDER BY clause
+	sstm.orderBy(column);
+	
+	execute(sstm.getStatement(), wxEmptyString);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::update()

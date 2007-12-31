@@ -56,6 +56,8 @@ public:
     void addTable(const wxString& name, const wxString& joinType,
         const wxString& joinList);
     void addColumn(const wxString& columnList); // adds as-is currently
+    
+    void orderBy(int column);
 };
 //-----------------------------------------------------------------------------
 #endif

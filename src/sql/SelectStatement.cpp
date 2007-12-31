@@ -201,3 +201,33 @@ void SelectStatement::addColumn(const wxString& columnList)
         add(columnList + wxT(", "), posSelectM + 7);
 }
 //-----------------------------------------------------------------------------
+// covers only the most basic cases
+void SelectStatement::orderBy(int column)
+{
+	// look for ORDER BY.
+    tokenizerM.setStatement(sqlM);
+    bool hasOrder = false;
+    int pos = -1;
+    while (tokenizerM.jumpToken(true /* skip parenthesis */))
+    {
+        SqlTokenType stt = tokenizerM.getCurrentToken();
+        if (stt == kwORDER)
+        	hasOrder = true;
+        if (hasOrder && stt == kwBY)
+        {
+        	pos = tokenizerM.getCurrentTokenPosition() + 2;
+        	break;
+        }
+    }
+    wxString coltoadd;
+    coltoadd.Printf(wxT("%d"), column);
+	// if !found, add ORDER BY at the end
+    if (pos == -1)
+    {
+	    sqlM += wxTextBuffer::GetEOL() + wxString(wxT("ORDER BY ")) 
+	    	+ coltoadd;
+	}
+	else
+		add(coltoadd + wxT(", "), pos);
+}
+//-----------------------------------------------------------------------------
