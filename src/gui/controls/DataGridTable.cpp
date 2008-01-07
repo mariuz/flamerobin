@@ -381,11 +381,13 @@ wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
 
     // text alignment
     if (info.fieldNumeric)
-        cellAttriM->SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
+        cellAttriM->SetAlignment(wxALIGN_RIGHT, wxALIGN_TOP);
     else
-        cellAttriM->SetAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
+        cellAttriM->SetAlignment(wxALIGN_LEFT, wxALIGN_TOP);
 
     cellAttriM->SetReadOnly(info.fieldReadOnly);
+
+    cellAttriM->SetOverflow(false);
 
     cellAttriM->IncRef();
     return cellAttriM;
@@ -634,6 +636,7 @@ wxString DataGridTable::GetValue(int row, int col)
         return wxT("[null]");
     wxString cellValue(rowsM.getFieldValue(row, col));
 
+#if 0
     // return first line of multi-line string only
     int nl = cellValue.Find(wxT("\n"));
     if (nl != wxNOT_FOUND)
@@ -642,6 +645,7 @@ wxString DataGridTable::GetValue(int row, int col)
         cellValue.Trim();
         cellValue += wxT(" [...]"); // and show that there is more data...
     }
+#endif
     return cellValue;
 }
 //-----------------------------------------------------------------------------

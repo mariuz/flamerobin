@@ -151,12 +151,13 @@ void DataGrid::fetchData(wxMBConv* conv)
         wxGridCellAttr *ca = new wxGridCellAttr;
         ca->SetAlignment(
             (table->isNumericColumn(i)) ? wxALIGN_RIGHT : wxALIGN_LEFT,
-            wxALIGN_CENTRE);
+            wxALIGN_TOP);
         if (table->isReadonlyColumn(i))
         {
             ca->SetReadOnly(true);
             ca->SetBackgroundColour(table->getReadonlyColour());
         }
+        ca->SetOverflow(false);
         SetColAttr(i, ca);
     }
     AutoSizeColumns();
@@ -225,13 +226,14 @@ void DataGrid::updateRowHeights()
 #endif
 
     wxScreenDC dc;
-    // adjust height of grid header row (extra 2 pixels for border)
+    // adjust height of grid header row (extra 3 pixels for border)
     dc.SetFont(GetLabelFont());
-    SetColLabelSize(dc.GetCharHeight() + extraHeight + 2);
+    SetColLabelSize(dc.GetCharHeight() + extraHeight + 3);
 
-    // adjust height of rows, and make grid scroll by that amount
+    // adjust height of rows (extra pixel for grid lines)
+    // and make grid scroll by that amount
     dc.SetFont(GetDefaultCellFont());
-    int h = dc.GetCharHeight() + extraHeight;
+    int h = dc.GetCharHeight() + extraHeight + 1;
     SetRowMinimalAcceptableHeight(h);
     SetDefaultRowSize(h, true);
     SetScrollLineY(h);
