@@ -238,12 +238,16 @@ void SqlTokenizer::defaultToken()
 	// this is needed for new terminator string
 	while (true)
 	{
-		// increase the size until we hit either whitespace, terminator or EOF
+		// increase the size until we hit either whitespace, comma, 
+		// terminator or EOF
 		sqlTokenEndM++;
-		if (*sqlTokenEndM == 0 || wxIsspace(*sqlTokenEndM))
+		if (*sqlTokenEndM == 0 
+			|| *sqlTokenEndM == ','
+			|| wxIsspace(*sqlTokenEndM)
+			|| wxStricmp(sqlTokenEndM, termM.c_str()) == 0	)
+		{
 			break;
-		if (wxStricmp(sqlTokenEndM, termM.c_str()) == 0)
-			break;
+		}
 	}
 	sqlTokenTypeM = tkUNKNOWN;
 }
