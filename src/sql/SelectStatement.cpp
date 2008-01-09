@@ -217,7 +217,7 @@ void SelectStatement::orderBy(int column)
         {
         	pos = tokenizerM.getCurrentTokenPosition() + 2;
         	break;
-        }
+		}
     }
     wxString coltoadd;
     coltoadd.Printf(wxT("%d"), column);
@@ -228,6 +228,24 @@ void SelectStatement::orderBy(int column)
 	    	+ coltoadd;
 	}
 	else
-		add(coltoadd + wxT(", "), pos);
+	{
+		// Are we already using that column?
+		tokenizerM.jumpToken(true);
+		if (coltoadd != tokenizerM.getCurrentTokenString())
+		{	
+			add(coltoadd + wxT(", "), pos);	// No. Add it
+			return;
+		}
+		
+		// Yes. Remove ASC or DESC and add the opposite
+		tokenizerM.jumpToken(true);
+		SqlTokenType stt = tokenizerM.getCurrentToken();
+		int p = tokenizerM.getCurrentTokenPosition();
+		wxString s = tokenizerM.getCurrentTokenString();
+		if (stt == kwDESCENDING || stt == kwASCENDING) // remove
+			sqlM.Remove(p, s.Length());
+		if (stt != kwDESCENDING)	// add desc if there wasn't
+			add(wxT("DESC "), p);
+	}
 }
 //-----------------------------------------------------------------------------
