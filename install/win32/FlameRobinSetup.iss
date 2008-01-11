@@ -85,7 +85,7 @@ Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\FlameRobin; Filenam
 
 [Run]
 Filename: {app}\flamerobin.exe; Description: {cm:LaunchProgram,FlameRobin}; Flags: nowait postinstall skipifsilent
-Filename: {app}\docs\fr_whatsnew.html; Description: Show Release Notes; StatusMsg: Showing Release notes; Flags: nowait shellexec postinstall
+Filename: {app}\docs\fr_whatsnew.html; Description: Show Release Notes; StatusMsg: Showing Release notes; Flags: nowait shellexec postinstall skipifsilent
 
 [UninstallDelete]
 Type: files; Name: {app}\flamerobin.url
