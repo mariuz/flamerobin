@@ -1075,7 +1075,7 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
 	if (!textualM && !config().get(wxT("GridShowBinaryBlobs"), false))
 		return wxT("[BINARY]");    
 		
-	int kb = config().get(wxT("DataGridFetchBlobAmount"), 1);
+	int kb = 1024 * config().get(wxT("DataGridFetchBlobAmount"), 1);
 	wxString result;
 	IBPP::Blob *b0 = buffer->getBlob(indexM);
 	if (!b0)
@@ -1085,12 +1085,14 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
 	if (!s.IsEmpty())
 		return s;
 	b->Open();
-	while (kb--)
+
+	while (kb)
 	{
 		char buffer[1025];
 		int size = b->Read((void*)buffer, 1024);
 		if (size < 1)
 			break;
+		kb -= size;
 		if (textualM)
 		{
 			std::string s(buffer, size);
@@ -1113,8 +1115,6 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
 					result += wxT("\n");
 			}
 		}
-		if (size < 1024)
-			break;
 	}
 	b->Close();
 	buffer->setString(indexM, result);	// store for future calls
