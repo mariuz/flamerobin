@@ -1040,11 +1040,11 @@ void DoubleColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
 class BlobColumnDef : public ResultsetColumnDef
 {
 private:
-    unsigned indexM;
+    unsigned indexM, stringIndexM;
     bool textualM;
 public:
-    BlobColumnDef(const wxString& name, unsigned blobIndex, bool readOnly,
-        bool nullable, bool textual);
+    BlobColumnDef(const wxString& name, bool readOnly, bool nullable, 
+    	unsigned stringIndex, unsigned blobIndex, bool textual);
     virtual unsigned getIndex();
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
@@ -1054,10 +1054,10 @@ public:
         const wxString& source);
 };
 //-----------------------------------------------------------------------------
-BlobColumnDef::BlobColumnDef(const wxString& name, unsigned blobIndex,
-    bool readOnly, bool nullable, bool textual)
+BlobColumnDef::BlobColumnDef(const wxString& name, bool readOnly, 
+	bool nullable, unsigned stringIndex, unsigned blobIndex, bool textual)
     : ResultsetColumnDef(name, readOnly, nullable), indexM(blobIndex),
-      textualM(textual)
+      textualM(textual), stringIndexM(stringIndex)
 {
     readOnlyM = true;   // TODO: uncomment this when we make BlobDialog
 }
@@ -1081,12 +1081,12 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
 	if (!b0)
 		return wxT("");
 	IBPP::Blob b = *b0;
-	wxString s = buffer->getString(indexM);	// already loaded?
+	wxString s = buffer->getString(stringIndexM);	// already loaded?
 	if (!s.IsEmpty())
 		return s;
 	b->Open();
 
-	while (kb)
+	while (kb > 0)
 	{
 		char buffer[1025];
 		int size = b->Read((void*)buffer, 1024);
@@ -1117,7 +1117,7 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
 		}
 	}
 	b->Close();
-	buffer->setString(indexM, result);	// store for future calls
+	buffer->setString(stringIndexM, result); // store for future calls
 	return result;
 }
 //-----------------------------------------------------------------------------
@@ -1590,7 +1590,7 @@ bool DataGridRows::initialize(const IBPP::Statement& statement, Database *db)
                     ++stringIndex;
                     break;
                 case IBPP::sdBlob:
-                    columnDef = new BlobColumnDef(colName, blobIndex, readOnly, nullable, statement->ColumnSubtype(col) == 1);
+                    columnDef = new BlobColumnDef(colName, readOnly, nullable, stringIndex, blobIndex, statement->ColumnSubtype(col) == 1);
                     ++blobIndex;	// stores blob handle
                     ++stringIndex;	// stored blob data (fetched on demand)
                     break;
