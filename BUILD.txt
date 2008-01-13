@@ -252,7 +252,7 @@ them. We assume Gtk2 static release build with Unicode support:
 make
 make install
 
-Now, you have to compile STC library. It is for wxStyledTextControl which
+Now, you have to compile STC library. It is needed for wxStyledTextControl which
 is used in many places in FlameRobin. Enter "contrib/src/stc" directory:
 
 make
