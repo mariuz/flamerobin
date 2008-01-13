@@ -197,9 +197,7 @@ void DataGrid::showPopMenu(wxPoint cursorPos)
 {
     wxMenu m(0);
 
-    // TODO: clean this up to use MenuIDs from ExecuteSqlFrame
-    //       no need to duplicate event handling
-    //       PLUS: create a separate file with global set of MenuIDs
+    // TODO: merge this with ExecuteSqlFrame's menu
     m.Append(Cmds::DataGrid_FetchAll, _("Fetch all records"));
     m.Append(Cmds::DataGrid_CancelFetchAll, _("Stop fetching all records"));
     m.AppendSeparator();
@@ -258,6 +256,7 @@ void DataGrid::copyToCB()
         return;
 
     bool all = true;
+    bool any = false;
     {
         wxBusyCursor cr;
         wxString sRows;
@@ -273,6 +272,7 @@ void DataGrid::copyToCB()
                     if (!sRow.IsEmpty())
                         sRow += wxT("\t");
                     sRow += table->getCellValue(i, j);
+                    any = true;
                 }
                 else
                     all = false;
@@ -284,6 +284,11 @@ void DataGrid::copyToCB()
             copyToClipboard(sRows);
     }
 
+	if (!any)	// no cells selected -> copy a single cell
+	{
+		copyToClipboard(table->getCellValue(GetGridCursorRow(), 
+			GetGridCursorCol()));
+	}
     if (all)
         notifyIfUnfetchedData();
 }

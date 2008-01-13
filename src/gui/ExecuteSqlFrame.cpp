@@ -786,7 +786,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
 
     EVT_UPDATE_UI(Cmds::DataGrid_Insert_row,     ExecuteSqlFrame::OnMenuUpdateGridInsertRow)
     EVT_UPDATE_UI(Cmds::DataGrid_Delete_row,     ExecuteSqlFrame::OnMenuUpdateGridDeleteRow)
-    EVT_UPDATE_UI(Cmds::DataGrid_Copy,           ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
+    EVT_UPDATE_UI(Cmds::DataGrid_Copy,           ExecuteSqlFrame::OnMenuUpdateGridHasData)
     EVT_UPDATE_UI(Cmds::DataGrid_Copy_as_insert, ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
     EVT_UPDATE_UI(Cmds::DataGrid_Copy_as_update, ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
     EVT_UPDATE_UI(Cmds::DataGrid_Save_as_html,   ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
@@ -2100,6 +2100,12 @@ void ExecuteSqlFrame::OnMenuUpdateGridInsertRow(wxUpdateUIEvent& event)
 {
     DataGridTable* tb = grid_data->getDataGridTable();
     event.Enable(inTransactionM && tb && tb->canInsertRows());
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateGridHasData(wxUpdateUIEvent& event)
+{
+    event.Enable(grid_data->getDataGridTable() 
+    	&& grid_data->GetNumberRows());
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event)

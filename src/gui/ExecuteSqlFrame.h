@@ -190,6 +190,7 @@ private:
     void OnMenuGridFetchAll(wxCommandEvent &event);
     void OnMenuGridCancelFetchAll(wxCommandEvent &event);
     void OnMenuUpdateGridHasSelection(wxUpdateUIEvent& event);
+    void OnMenuUpdateGridHasData(wxUpdateUIEvent& event);
     void OnMenuUpdateGridFetchAll(wxUpdateUIEvent& event);
     void OnMenuUpdateGridCancelFetchAll(wxUpdateUIEvent& event);
 
