@@ -709,9 +709,11 @@ void DataGrid::OnEditorKeyDown(wxKeyEvent& event)
     event.Skip();
 }
 //-----------------------------------------------------------------------------
-void DataGrid::OnContextMenu(wxContextMenuEvent& event)
+void DataGrid::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
 {
-    showPopMenu(event.GetPosition());
+    // this doesn't work properly when cell editor is active
+    //	showPopMenu(event.GetPosition());
+    showPopMenu(ScreenToClient(::wxGetMousePosition()));
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnGridCellRightClick(wxGridEvent& event)
