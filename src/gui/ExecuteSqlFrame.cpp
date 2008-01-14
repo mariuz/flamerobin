@@ -158,7 +158,7 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
     if (db != databaseM)
     {
         wxMessageBox(_("Cannot use objects from different databases."),
-			_("Wrong database."), wxOK | wxICON_WARNING);
+            _("Wrong database."), wxOK | wxICON_WARNING);
         return false;
     }
 
@@ -178,22 +178,22 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
     if (t == 0)
     {
         wxMessageBox(_("Only tables and table columns can be dropped."),
-			_("Object type not supported."), wxOK | wxICON_WARNING);
+            _("Object type not supported."), wxOK | wxICON_WARNING);
         return false;
     }
 
-	SelectStatement sstm(editorM->GetText());
-	if (!sstm.isValidSelectStatement())
-	{
-		// question("Invalid SELECT statement, do you wish to overwrite?");
-		// if wxNO then
-		//	return true;
-		// else
-			sstm.setStatement(wxT("SELECT FROM ")); // blank statement
-	}
+    SelectStatement sstm(editorM->GetText());
+    if (!sstm.isValidSelectStatement())
+    {
+        // question("Invalid SELECT statement, do you wish to overwrite?");
+        // if wxNO then
+        //  return true;
+        // else
+            sstm.setStatement(wxT("SELECT FROM ")); // blank statement
+    }
 
-	// add the column(s)
-	sstm.addColumn(column_list);
+    // add the column(s)
+    sstm.addColumn(column_list);
 
     // read in the table names, and find position where FROM clause ends
     std::vector<wxString> tableNames;
@@ -201,17 +201,17 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
 
     // if table is not there, add it
     if (std::find(tableNames.begin(), tableNames.end(), t->getName_())
-		== tableNames.end())
+        == tableNames.end())
     {
         std::vector<ForeignKey> relatedTables;
         if (Table::tablesRelate(tableNames, t, relatedTables)) // foreign keys
         {
             wxArrayString as;
             for (std::vector<ForeignKey>::iterator it = relatedTables.begin();
-				it != relatedTables.end(); ++it)
+                it != relatedTables.end(); ++it)
             {
                 wxString addme = (*it).referencedTableM + wxT(":  ")
-					+ (*it).getJoin(false); // false = unquoted
+                    + (*it).getJoin(false); // false = unquoted
                 if (as.Index(addme) == wxNOT_FOUND)
                     as.Add(addme);
             }
@@ -219,7 +219,7 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
             if (as.GetCount() > 1)    // let the user decide
             {
                 int selected = ::wxGetSingleChoiceIndex(
-					_("Multiple foreign keys found"),
+                    _("Multiple foreign keys found"),
                     _("Select the desired table"), as);
                 if (selected == -1)
                     return false;
@@ -232,11 +232,11 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
             // can_be_null = (check if any of the FK fields can be null)
             bool can_be_null = true;
             wxString joinType = (can_be_null ? wxT("LEFT JOIN"):wxT("JOIN"));
-			sstm.addTable(t->getQuotedName(), joinType, join_list);
+            sstm.addTable(t->getQuotedName(), joinType, join_list);
         }
         else
         {
-			sstm.addTable(t->getQuotedName(), wxT("CARTESIAN"), wxT(""));
+            sstm.addTable(t->getQuotedName(), wxT("CARTESIAN"), wxT(""));
         }
     }
 
@@ -1807,17 +1807,17 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         wxTimeSpan dif = wxDateTime::Now().Subtract(start);
         log(wxString(_("Prepare time: ")) + dif.Format(wxT("%H:%M:%S.")));
 
-		// we don't check IBPP::Select since Firebird 2.0 has a new feature
-		// INSERT ... RETURNING which isn't detected as stSelect by IBPP
-		bool hasColumns = false;
+        // we don't check IBPP::Select since Firebird 2.0 has a new feature
+        // INSERT ... RETURNING which isn't detected as stSelect by IBPP
+        bool hasColumns = false;
         try
         {
-			int cols = statementM->Columns();
-			for (int i = 1; i <= cols; i++)
-			{
-				hasColumns = true;
-				if (doShowStats)
-				{
+            int cols = statementM->Columns();
+            for (int i = 1; i <= cols; i++)
+            {
+                hasColumns = true;
+                if (doShowStats)
+                {
                     log(wxString::Format(
                         _("Field #%02d: %s.%s Alias:%s Type:%s"),
                         i,
@@ -1891,21 +1891,21 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             if (type == IBPP::stInsert || type == IBPP::stDelete
                 || type == IBPP::stExecProcedure || type == IBPP::stUpdate)
             {
-            	// INSERT INTO..RETURNING and EXECUTE PROCEDURE may throw
-            	// when they return a single record
-            	try
-            	{
-					wxString addon;
-					if (statementM->AffectedRows() % 10 != 1)
-						addon = wxT("s");
-					wxString s = wxString::Format(_("%d row%s affected directly."),
-						statementM->AffectedRows(), addon.c_str());
-					log(wxT("") + s);
-					statusbar_1->SetStatusText(s, 1);
-            	}
-            	catch (IBPP::Exception&)
-            	{
-            	}
+                // INSERT INTO..RETURNING and EXECUTE PROCEDURE may throw
+                // when they return a single record
+                try
+                {
+                    wxString addon;
+                    if (statementM->AffectedRows() % 10 != 1)
+                        addon = wxT("s");
+                    wxString s = wxString::Format(_("%d row%s affected directly."),
+                        statementM->AffectedRows(), addon.c_str());
+                    log(wxT("") + s);
+                    statusbar_1->SetStatusText(s, 1);
+                }
+                catch (IBPP::Exception&)
+                {
+                }
             }
             SqlStatement stm(sql, databaseM, terminator);
             if (stm.isDDL())
@@ -2104,8 +2104,8 @@ void ExecuteSqlFrame::OnMenuUpdateGridInsertRow(wxUpdateUIEvent& event)
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUpdateGridHasData(wxUpdateUIEvent& event)
 {
-    event.Enable(grid_data->getDataGridTable() 
-    	&& grid_data->GetNumberRows());
+    event.Enable(grid_data->getDataGridTable()
+        && grid_data->GetNumberRows());
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event)
@@ -2173,16 +2173,16 @@ void ExecuteSqlFrame::OnGridStatementExecuted(wxCommandEvent &event)
 void ExecuteSqlFrame::OnGridLabelLeftDClick(wxGridEvent& event)
 {
     DataGridTable* table = grid_data->getDataGridTable();
-	if (!table)
-		return;
+    if (!table)
+        return;
 
-	int column = 1 + event.GetCol();
-	SelectStatement sstm(std2wx(statementM->Sql()));
+    int column = 1 + event.GetCol();
+    SelectStatement sstm(std2wx(statementM->Sql()));
 
-	// rebuild SQL statement with different ORDER BY clause
-	sstm.orderBy(column);
-	
-	execute(sstm.getStatement(), wxEmptyString);
+    // rebuild SQL statement with different ORDER BY clause
+    sstm.orderBy(column);
+
+    execute(sstm.getStatement(), wxEmptyString);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::update()

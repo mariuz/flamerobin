@@ -74,9 +74,9 @@ SimpleHtmlFrame::SimpleHtmlFrame(wxWindow* parent, const wxFileName& fileName)
     html_window->SetRelatedFrame(this, wxT("%s"));
     html_window->SetRelatedStatusBar(0);
 
-	// we don't use LoadPage here since we need PrintableHtmlWindow to
-	// store a copy of HTML source for printing and SaveAsFile actions
-	html_window->setPageSource(loadEntireFile(fileName));
+    // we don't use LoadPage here since we need PrintableHtmlWindow to
+    // store a copy of HTML source for printing and SaveAsFile actions
+    html_window->setPageSource(loadEntireFile(fileName));
 
     fileNameM = fileName.GetFullName();
     setIdString(this, getFrameId(fileName));

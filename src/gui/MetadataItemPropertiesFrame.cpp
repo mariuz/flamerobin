@@ -1071,7 +1071,7 @@ void MetadataItemPropertiesFrame::update()
 #if wxCHECK_VERSION(2, 8, 0)
 BEGIN_EVENT_TABLE(MetadataItemPropertiesFrame, BaseFrame)
     EVT_HTML_CELL_HOVER(MetadataItemPropertiesFrame::HtmlWindowID,
-		MetadataItemPropertiesFrame::OnHtmlCellHover)
+        MetadataItemPropertiesFrame::OnHtmlCellHover)
 END_EVENT_TABLE()
 #endif
 //-----------------------------------------------------------------------------
@@ -1086,29 +1086,29 @@ void MetadataItemPropertiesFrame::OnIdle(wxIdleEvent& WXUNUSED(event))
 #if wxCHECK_VERSION(2, 8, 0)
 void MetadataItemPropertiesFrame::OnHtmlCellHover(wxHtmlCellEvent& event)
 {
-	wxHtmlCell *c = event.GetCell();
-	if (!c)
-		return;
-	wxHtmlLinkInfo *lnk = c->GetLink();
-	if (!lnk)
-		return;
+    wxHtmlCell *c = event.GetCell();
+    if (!c)
+        return;
+    wxHtmlLinkInfo *lnk = c->GetLink();
+    if (!lnk)
+        return;
 
-	wxString addr = lnk->GetHref();
+    wxString addr = lnk->GetHref();
     URI uri(addr);
     if (uri.protocol == wxT("info"))    // special
     {
-		//		GetStatusBar()->SetStatusText(uri.action);
+        //      GetStatusBar()->SetStatusText(uri.action);
 
-		// I'm having a hard time trying to convert this to screen coordinates
-		// since parent's coords cannot be retrieved(?)
-		//wxRect r(c->GetPosX(), c->GetPosY(), c->GetWidth(), c->GetHeight());
+        // I'm having a hard time trying to convert this to screen coordinates
+        // since parent's coords cannot be retrieved(?)
+        //wxRect r(c->GetPosX(), c->GetPosY(), c->GetWidth(), c->GetHeight());
 
-		// M.B. So I decided to use a 21x9 box around the mouse
-		wxRect r(::wxGetMousePosition().x - 10, ::wxGetMousePosition().y - 4,
-			21, 9);
+        // M.B. So I decided to use a 21x9 box around the mouse
+        wxRect r(::wxGetMousePosition().x - 10, ::wxGetMousePosition().y - 4,
+            21, 9);
 
-		wxTipWindow *tw = new wxTipWindow(this, uri.action);
-		tw->SetBoundingRect(r);
+        wxTipWindow *tw = new wxTipWindow(this, uri.action);
+        tw->SetBoundingRect(r);
     }
 }
 #endif

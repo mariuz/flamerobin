@@ -80,7 +80,7 @@ void SelectStatement::setStatement(const wxString& sql)
             if (posSelectM != -1 && stt == kwFROM)
                 posFromM = tokenizerM.getCurrentTokenPosition();
             if (posFromM != -1 && (stt == kwWHERE || stt == kwGROUP
-				|| stt == kwORDER || stt == kwPLAN || stt == kwROWS))
+                || stt == kwORDER || stt == kwPLAN || stt == kwROWS))
             {
                 posFromEndM = tokenizerM.getCurrentTokenPosition();
             }
@@ -145,10 +145,10 @@ void SelectStatement::getTables(std::vector<wxString>& tables)
     {
         SqlTokenType stt = tokenizerM.getCurrentToken();
         if (stt == kwWHERE || stt == kwGROUP || stt == kwORDER
-			|| stt == kwPLAN || stt == kwROWS)
-		{
+            || stt == kwPLAN || stt == kwROWS)
+        {
             break;  // we're done here, no more tables
-		}
+        }
         if (tableName.IsEmpty() && stt == tkIDENTIFIER)
         {
             tableName = tokenizerM.getCurrentTokenString();
@@ -204,7 +204,7 @@ void SelectStatement::addColumn(const wxString& columnList)
 // covers only the most basic cases
 void SelectStatement::orderBy(int column)
 {
-	// look for ORDER BY.
+    // look for ORDER BY.
     tokenizerM.setStatement(sqlM);
     bool hasOrder = false;
     int pos = -1;
@@ -212,40 +212,40 @@ void SelectStatement::orderBy(int column)
     {
         SqlTokenType stt = tokenizerM.getCurrentToken();
         if (stt == kwORDER)
-        	hasOrder = true;
+            hasOrder = true;
         if (hasOrder && stt == kwBY)
         {
-        	pos = tokenizerM.getCurrentTokenPosition() + 2;
-        	break;
-		}
+            pos = tokenizerM.getCurrentTokenPosition() + 2;
+            break;
+        }
     }
     wxString coltoadd;
     coltoadd.Printf(wxT("%d"), column);
-	// if !found, add ORDER BY at the end
+    // if !found, add ORDER BY at the end
     if (pos == -1)
     {
-	    sqlM += wxTextBuffer::GetEOL() + wxString(wxT("ORDER BY ")) 
-	    	+ coltoadd;
-	}
-	else
-	{
-		// Are we already using that column?
-		tokenizerM.jumpToken(true);
-		if (coltoadd != tokenizerM.getCurrentTokenString())
-		{	
-			add(coltoadd + wxT(", "), pos);	// No. Add it
-			return;
-		}
-		
-		// Yes. Remove ASC or DESC and add the opposite
-		tokenizerM.jumpToken(true);
-		SqlTokenType stt = tokenizerM.getCurrentToken();
-		int p = tokenizerM.getCurrentTokenPosition();
-		wxString s = tokenizerM.getCurrentTokenString();
-		if (stt == kwDESCENDING || stt == kwASCENDING) // remove
-			sqlM.Remove(p, s.Length());
-		if (stt != kwDESCENDING)	// add desc if there wasn't
-			add(wxT("DESC "), p);
-	}
+        sqlM += wxTextBuffer::GetEOL() + wxString(wxT("ORDER BY "))
+            + coltoadd;
+    }
+    else
+    {
+        // Are we already using that column?
+        tokenizerM.jumpToken(true);
+        if (coltoadd != tokenizerM.getCurrentTokenString())
+        {
+            add(coltoadd + wxT(", "), pos); // No. Add it
+            return;
+        }
+
+        // Yes. Remove ASC or DESC and add the opposite
+        tokenizerM.jumpToken(true);
+        SqlTokenType stt = tokenizerM.getCurrentToken();
+        int p = tokenizerM.getCurrentTokenPosition();
+        wxString s = tokenizerM.getCurrentTokenString();
+        if (stt == kwDESCENDING || stt == kwASCENDING) // remove
+            sqlM.Remove(p, s.Length());
+        if (stt != kwDESCENDING)    // add desc if there wasn't
+            add(wxT("DESC "), p);
+    }
 }
 //-----------------------------------------------------------------------------

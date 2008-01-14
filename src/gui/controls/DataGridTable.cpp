@@ -261,8 +261,8 @@ void DataGridTable::Clear()
 //-----------------------------------------------------------------------------
 void DataGridTable::fetchOne()
 {
-	rowsM.addRow(statementM, charsetConverterM);
-	allRowsFetchedM = true;
+    rowsM.addRow(statementM, charsetConverterM);
+    allRowsFetchedM = true;
 
     if (GetView())   // notify the grid
     {
@@ -685,9 +685,9 @@ void DataGridTable::initialFetch(wxMBConv* conv)
     }
 
     if (statementM->Type() == IBPP::stExecProcedure)
-    	fetchOne();
+        fetchOne();
     else
-		fetch();
+        fetch();
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::IsEmptyCell(int row, int col)

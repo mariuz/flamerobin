@@ -284,11 +284,11 @@ void DataGrid::copyToCB()
             copyToClipboard(sRows);
     }
 
-	if (!any)	// no cells selected -> copy a single cell
-	{
-		copyToClipboard(table->getCellValue(GetGridCursorRow(), 
-			GetGridCursorCol()));
-	}
+    if (!any)   // no cells selected -> copy a single cell
+    {
+        copyToClipboard(table->getCellValue(GetGridCursorRow(),
+            GetGridCursorCol()));
+    }
     if (all)
         notifyIfUnfetchedData();
 }
@@ -712,7 +712,7 @@ void DataGrid::OnEditorKeyDown(wxKeyEvent& event)
 void DataGrid::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
 {
     // this doesn't work properly when cell editor is active
-    //	showPopMenu(event.GetPosition());
+    //  showPopMenu(event.GetPosition());
     showPopMenu(ScreenToClient(::wxGetMousePosition()));
 }
 //-----------------------------------------------------------------------------
@@ -763,8 +763,8 @@ void DataGrid::OnKeyDown(wxKeyEvent& event)
 #if wxCHECK_VERSION(2, 8, 0)
         if (event.GetModifiers() == wxMOD_CONTROL)
 #else
-		if (event.ControlDown() && !event.AltDown() && !event.ShiftDown()
-			&& !event.MetaDown())
+        if (event.ControlDown() && !event.AltDown() && !event.ShiftDown()
+            && !event.MetaDown())
 #endif
         {
             extendSelection(wxVERTICAL);
@@ -773,8 +773,8 @@ void DataGrid::OnKeyDown(wxKeyEvent& event)
 #if wxCHECK_VERSION(2, 8, 0)
         if (event.GetModifiers() == wxMOD_SHIFT)
 #else
-		if (event.ShiftDown() && !event.AltDown() && !event.ControlDown()
-			&& !event.MetaDown())
+        if (event.ShiftDown() && !event.AltDown() && !event.ControlDown()
+            && !event.MetaDown())
 #endif
         {
             extendSelection(wxHORIZONTAL);

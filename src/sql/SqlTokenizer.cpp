@@ -208,7 +208,7 @@ bool SqlTokenizer::nextToken()
     else if (c == '=')
         symbolToken(tkEQUALS);
     else if (c == ',')
-		symbolToken(tkCOMMA);
+        symbolToken(tkCOMMA);
     else if (c == '/' && *(sqlTokenEndM + 1) == '*')
         multilineCommentToken();
     else if (c == '-' && *(sqlTokenEndM + 1) == '-')
@@ -228,28 +228,28 @@ void SqlTokenizer::setStatement(const wxString& statement)
 //-----------------------------------------------------------------------------
 void SqlTokenizer::defaultToken()
 {
-	if (wxStricmp(sqlTokenStartM, termM.c_str()) == 0)
-	{
-		sqlTokenTypeM = tkTERM;
-		sqlTokenEndM = sqlTokenStartM + termM.Length();
-		return;
-	}
+    if (wxStricmp(sqlTokenStartM, termM.c_str()) == 0)
+    {
+        sqlTokenTypeM = tkTERM;
+        sqlTokenEndM = sqlTokenStartM + termM.Length();
+        return;
+    }
 
-	// this is needed for new terminator string
-	while (true)
-	{
-		// increase the size until we hit either whitespace, comma, 
-		// terminator or EOF
-		sqlTokenEndM++;
-		if (*sqlTokenEndM == 0 
-			|| *sqlTokenEndM == ','
-			|| wxIsspace(*sqlTokenEndM)
-			|| wxStricmp(sqlTokenEndM, termM.c_str()) == 0	)
-		{
-			break;
-		}
-	}
-	sqlTokenTypeM = tkUNKNOWN;
+    // this is needed for new terminator string
+    while (true)
+    {
+        // increase the size until we hit either whitespace, comma,
+        // terminator or EOF
+        sqlTokenEndM++;
+        if (*sqlTokenEndM == 0
+            || *sqlTokenEndM == ','
+            || wxIsspace(*sqlTokenEndM)
+            || wxStricmp(sqlTokenEndM, termM.c_str()) == 0  )
+        {
+            break;
+        }
+    }
+    sqlTokenTypeM = tkUNKNOWN;
 }
 //-----------------------------------------------------------------------------
 void SqlTokenizer::keywordIdentifierToken()

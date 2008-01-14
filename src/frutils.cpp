@@ -235,7 +235,7 @@ wxString loadEntireFile(const wxFileName& filename)
         throw FRError(msg);
     }
 
-	// read entire file into wxString buffer
+    // read entire file into wxString buffer
     std::ifstream filex(wx2std(filename.GetFullPath()).c_str());
     if (!filex)
     {

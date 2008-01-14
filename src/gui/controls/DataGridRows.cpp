@@ -485,7 +485,7 @@ void Int64ColumnDef::setFromString(DataGridRowBuffer* buffer,
     wxASSERT(buffer);
 
 #if wxCHECK_VERSION(2, 8, 0)
-	wxLongLong_t ll;
+    wxLongLong_t ll;
     if (source.ToLongLong(&ll))
     {
         buffer->setValue(offsetM, (int64_t)ll);
@@ -560,7 +560,7 @@ wxString DBKeyColumnDef::getAsString(DataGridRowBuffer* buffer)
 }
 //-----------------------------------------------------------------------------
 void DBKeyColumnDef::setFromString(DataGridRowBuffer* /*buffer*/,
-	const wxString& /*source*/)
+    const wxString& /*source*/)
 {
     // should never be editable
 }
@@ -1043,8 +1043,8 @@ private:
     unsigned indexM, stringIndexM;
     bool textualM;
 public:
-    BlobColumnDef(const wxString& name, bool readOnly, bool nullable, 
-    	unsigned stringIndex, unsigned blobIndex, bool textual);
+    BlobColumnDef(const wxString& name, bool readOnly, bool nullable,
+        unsigned stringIndex, unsigned blobIndex, bool textual);
     virtual unsigned getIndex();
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
@@ -1054,8 +1054,8 @@ public:
         const wxString& source);
 };
 //-----------------------------------------------------------------------------
-BlobColumnDef::BlobColumnDef(const wxString& name, bool readOnly, 
-	bool nullable, unsigned stringIndex, unsigned blobIndex, bool textual)
+BlobColumnDef::BlobColumnDef(const wxString& name, bool readOnly,
+    bool nullable, unsigned stringIndex, unsigned blobIndex, bool textual)
     : ResultsetColumnDef(name, readOnly, nullable), indexM(blobIndex),
       textualM(textual), stringIndexM(stringIndex)
 {
@@ -1071,58 +1071,58 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
     if (!config().get(wxT("DataGridFetchBlobs"), true))
-    	return wxT("[BLOB]");
-	if (!textualM && !config().get(wxT("GridShowBinaryBlobs"), false))
-		return wxT("[BINARY]");    
-		
-	int kb = 1024 * config().get(wxT("DataGridFetchBlobAmount"), 1);
-	wxString result;
-	IBPP::Blob *b0 = buffer->getBlob(indexM);
-	if (!b0)
-		return wxT("");
-	IBPP::Blob b = *b0;
-	wxString s = buffer->getString(stringIndexM);	// already loaded?
-	if (!s.IsEmpty())
-		return s;
-	b->Open();
+        return wxT("[BLOB]");
+    if (!textualM && !config().get(wxT("GridShowBinaryBlobs"), false))
+        return wxT("[BINARY]");
 
-	while (kb > 0)
-	{
-		char buffer[1025];
-		int size = b->Read((void*)buffer, 1024);
-		if (size < 1)
-			break;
-		kb -= size;
-		if (textualM)
-		{
-			std::string s(buffer, size);
-			result += std2wx(s);	// TODO: wxMBConv needed
-		}
-		else    // binary (show as hexadecimal)
-		{
-			for (int i=0; i<size; i+=8)
-			{
-				int last = 8;
-				if (i+last >= size)
-					last = size - i;
-				for (int j=0; j<last; j++)
-				{
-					result += wxString::Format(wxT("%02X"), 
-						(unsigned char)(buffer[i+j]));
-				}
-				result += wxT(" ");
-				if (((i + 8) % 32) == 0)
-					result += wxT("\n");
-			}
-		}
-	}
-	b->Close();
-	buffer->setString(stringIndexM, result); // store for future calls
-	return result;
+    int kb = 1024 * config().get(wxT("DataGridFetchBlobAmount"), 1);
+    wxString result;
+    IBPP::Blob *b0 = buffer->getBlob(indexM);
+    if (!b0)
+        return wxT("");
+    IBPP::Blob b = *b0;
+    wxString s = buffer->getString(stringIndexM);   // already loaded?
+    if (!s.IsEmpty())
+        return s;
+    b->Open();
+
+    while (kb > 0)
+    {
+        char buffer[1025];
+        int size = b->Read((void*)buffer, 1024);
+        if (size < 1)
+            break;
+        kb -= size;
+        if (textualM)
+        {
+            std::string s(buffer, size);
+            result += std2wx(s);    // TODO: wxMBConv needed
+        }
+        else    // binary (show as hexadecimal)
+        {
+            for (int i=0; i<size; i+=8)
+            {
+                int last = 8;
+                if (i+last >= size)
+                    last = size - i;
+                for (int j=0; j<last; j++)
+                {
+                    result += wxString::Format(wxT("%02X"),
+                        (unsigned char)(buffer[i+j]));
+                }
+                result += wxT(" ");
+                if (((i + 8) % 32) == 0)
+                    result += wxT("\n");
+            }
+        }
+    }
+    b->Close();
+    buffer->setString(stringIndexM, result); // store for future calls
+    return result;
 }
 //-----------------------------------------------------------------------------
 void BlobColumnDef::setFromString(DataGridRowBuffer* /*buffer*/,
-	const wxString& /*source*/)
+    const wxString& /*source*/)
 {
     // wxASSERT(buffer);
     // TODO: is this called from anywhere? - blobs will have a custom editor
@@ -1235,28 +1235,28 @@ void DataGridRows::addRow(const IBPP::Statement& statement,
     wxMBConv* converter)
 {
     DataGridRowBuffer* buffer = new DataGridRowBuffer(columnDefsM.size());
-	// if anything fails, make sure we release the memory
-	try
-	{
-		// starts with last column -> with highest buffer offset and
-		// string array index to allocate all needed memory at once
-		unsigned col = columnDefsM.size();
-		do
-		{
-			// IBPP column counts are 1-based, not 0-based...
-			unsigned colIBPP = col--;
-			bool isNull = statement->IsNull(colIBPP);
-			buffer->setFieldNull(col, isNull);
-			if (!isNull)
-				columnDefsM[col]->setValue(buffer, colIBPP, statement, converter);
-		}
-		while (col > 0);
-	}
-	catch(...)
-	{
-		delete buffer;
-		throw;
-	}
+    // if anything fails, make sure we release the memory
+    try
+    {
+        // starts with last column -> with highest buffer offset and
+        // string array index to allocate all needed memory at once
+        unsigned col = columnDefsM.size();
+        do
+        {
+            // IBPP column counts are 1-based, not 0-based...
+            unsigned colIBPP = col--;
+            bool isNull = statement->IsNull(colIBPP);
+            buffer->setFieldNull(col, isNull);
+            if (!isNull)
+                columnDefsM[col]->setValue(buffer, colIBPP, statement, converter);
+        }
+        while (col > 0);
+    }
+    catch(...)
+    {
+        delete buffer;
+        throw;
+    }
     addRow(buffer);
 }
 //-----------------------------------------------------------------------------
@@ -1591,8 +1591,8 @@ bool DataGridRows::initialize(const IBPP::Statement& statement, Database *db)
                     break;
                 case IBPP::sdBlob:
                     columnDef = new BlobColumnDef(colName, readOnly, nullable, stringIndex, blobIndex, statement->ColumnSubtype(col) == 1);
-                    ++blobIndex;	// stores blob handle
-                    ++stringIndex;	// stored blob data (fetched on demand)
+                    ++blobIndex;    // stores blob handle
+                    ++stringIndex;  // stored blob data (fetched on demand)
                     break;
                 default:
                     // IBPP::sdArray not really handled ATM

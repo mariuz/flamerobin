@@ -128,7 +128,7 @@ private:
     void OnKeyDown(wxKeyEvent &event);
     void OnGridRowCountChanged(wxCommandEvent &event);
     void OnGridStatementExecuted(wxCommandEvent &event);
-	void OnGridLabelLeftDClick(wxGridEvent& event);
+    void OnGridLabelLeftDClick(wxGridEvent& event);
 
     // menu events
     void OnMenuNew(wxCommandEvent &event);
