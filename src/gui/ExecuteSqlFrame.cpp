@@ -1073,6 +1073,9 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnClose(wxCloseEvent& event)
 {
+    // prevent editor from updating the invalid dataset
+    if (grid_data->IsCellEditControlEnabled())
+        grid_data->EnableCellEditControl(false);
     BaseFrame::OnClose(event);
 }
 //-----------------------------------------------------------------------------
@@ -1207,7 +1210,7 @@ void ExecuteSqlFrame::OnMenuUpdatePaste(wxUpdateUIEvent& event)
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUpdateWhenInTransaction(wxUpdateUIEvent& event)
 {
-    event.Enable(inTransactionM);
+    event.Enable(inTransactionM && !grid_data->IsCellEditControlEnabled());
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUnsplitView(wxCommandEvent& event)

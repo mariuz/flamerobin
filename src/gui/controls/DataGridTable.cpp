@@ -753,9 +753,12 @@ void DataGridTable::SetValue(int row, int col, const wxString& value)
     nullFlagM = false;  // reset
 
     // used in frame to show executed statements
-    wxCommandEvent evt(wxEVT_FRDG_STATEMENT, GetView()->GetId());
-    evt.SetString(statement);
-    wxPostEvent(GetView(), evt);
+    if (GetView())
+    {
+        wxCommandEvent evt(wxEVT_FRDG_STATEMENT, GetView()->GetId());
+        evt.SetString(statement);
+        wxPostEvent(GetView(), evt);
+    }
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
