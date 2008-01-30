@@ -525,6 +525,8 @@ void DBHTreeItemData::update()
         {
             DBHTreeItemVisitor tivChild(treeM);
             (*itChild)->acceptVisitor(&tivChild);
+            if (!tivChild.getNodeVisible())
+                continue;
 
             wxTreeItemId childId = findSubNode(*itChild);
             if (!childId.IsOk())
