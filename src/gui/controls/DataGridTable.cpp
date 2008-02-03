@@ -48,6 +48,7 @@
 #include "core/StringUtils.h"
 #include "gui/controls/DataGridRows.h"
 #include "gui/controls/DataGridTable.h"
+#include "gui/AdvancedMessageDialog.h"
 #include "metadata/database.h"
 //-----------------------------------------------------------------------------
 class RgbHsvConversion
@@ -749,49 +750,79 @@ void DataGridTable::setFetchAllRecords(bool fetchall)
 //-----------------------------------------------------------------------------
 void DataGridTable::SetValue(int row, int col, const wxString& value)
 {
-    wxString statement = rowsM.setFieldValue(row, col, value, nullFlagM);
-    nullFlagM = false;  // reset
-
-    // used in frame to show executed statements
-    if (GetView())
+    // We need explicit exception handling here since wxGrid gets
+    // into inconsistent state if exeption is thrown from here
+    // (as this is not regular event-handler, but a virtual function)
+    // An exception may be thrown when user string cannot be converted
+    // to the actual column's data type, or when Firebird rejects the
+    // UPDATE statement. See bug report #1882666 at sf.net.
+    try
     {
-        wxCommandEvent evt(wxEVT_FRDG_STATEMENT, GetView()->GetId());
-        evt.SetString(statement);
-        wxPostEvent(GetView(), evt);
+        wxString statement = rowsM.setFieldValue(row, col, value, 
+            nullFlagM);
+        nullFlagM = false;  // reset
+
+        // used in frame to show executed statements
+        if (GetView())
+        {
+            wxCommandEvent evt(wxEVT_FRDG_STATEMENT, 
+                GetView()->GetId());
+            evt.SetString(statement);
+            wxPostEvent(GetView(), evt);
+        }
+    }
+    catch (const FRError& err)
+    {
+        showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()), 
+            _("Invalid data"), std2wx(err.what()), 
+            AdvancedMessageDialogButtonsOk());
+    }
+    catch (const IBPP::Exception& e)
+    {
+        showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()), 
+            _("Database error"), std2wx(e.what()), 
+            AdvancedMessageDialogButtonsOk());
+    }
+    catch (...)
+    {
+        showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()), 
+            _("System error"), _("Unhandled exception"), 
+            AdvancedMessageDialogButtonsOk());
     }
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
 {
-    // remove rows from internal storage
-    wxString statement;
-    if (!rowsM.removeRows(pos, numRows, statement))
-        return false;
-
-/*
-    // notify visual control
-    if (GetView() && numRows > 0)
+    // Needs explicit exception handling (see comment for SetValue)
+    try
     {
-        GetView()->ForceRefresh();
-        wxGridTableMessage rowMsg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED,
-            pos, numRows);
-        GetView()->ProcessTableMessage(rowMsg);
+        // remove rows from internal storage
+        wxString statement;
+        if (!rowsM.removeRows(pos, numRows, statement))
+            return false;
 
-        // used in frame to update status bar
-        wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
-        evt.SetExtraLong(rowsM.getRowCount());
-        wxPostEvent(GetView(), evt);
+        // used in frame to show executed statements
+        wxCommandEvent evt2(wxEVT_FRDG_STATEMENT, GetView()->GetId());
+        evt2.SetString(statement);
+        wxPostEvent(GetView(), evt2);
+
+        if (GetView() && numRows > 0)
+            GetView()->ForceRefresh();
+        return true;
     }
-*/
-    // used in frame to show executed statements
-    wxCommandEvent evt2(wxEVT_FRDG_STATEMENT, GetView()->GetId());
-    evt2.SetString(statement);
-    wxPostEvent(GetView(), evt2);
-
-    if (GetView() && numRows > 0)
-        GetView()->ForceRefresh();
-
-    return true;
+    catch (const IBPP::Exception& e)
+    {
+        showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()), 
+            _("Database error"), std2wx(e.what()), 
+            AdvancedMessageDialogButtonsOk());
+    }
+    catch (...)
+    {
+        showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()), 
+            _("System error"), _("Unhandled exception"), 
+            AdvancedMessageDialogButtonsOk());
+    }   
+    return false;
 }
 //-----------------------------------------------------------------------------
 DEFINE_EVENT_TYPE(wxEVT_FRDG_ROWCOUNT_CHANGED)

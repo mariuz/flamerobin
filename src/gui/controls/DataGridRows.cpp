@@ -1380,10 +1380,6 @@ bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
     {
         i2 = it;
         it--;
-/*
-        delete (*i2);
-        buffersM.erase(i2);
-*/
         (*i2)->setIsDeleted(true);
     }
     return true;

@@ -8,7 +8,7 @@
   distribute, sublicense, and/or sell copies of the Software, and to
   permit persons to whom the Software is furnished to do so, subject to
   the following conditions:
-
+d
   The above copyright notice and this permission notice shall be included
   in all copies or substantial portions of the Software.
 
@@ -1470,9 +1470,14 @@ void ExecuteSqlFrame::OnMenuGridDeleteRow(wxCommandEvent& WXUNUSED(event))
             return;
     }
 
-    for (size_t i = rows.GetCount(); i > 0;)
+    // Since we are not really removing the rows (only changing the color)
+    // we can go from first to last. If we decide to revert to old code
+    // we should go from last to first.
+    for (size_t i = 0; i < rows.GetCount(); i++)
     {
-        if (!grid_data->DeleteRows(rows[--i], 1))
+        if (grid_data->DeleteRows(rows[i], 1))
+            grid_data->DeselectRow(rows[i]);
+        else
             break;
     }
 
