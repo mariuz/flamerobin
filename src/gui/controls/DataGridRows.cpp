@@ -1153,6 +1153,7 @@ public:
     StringColumnDef(const wxString& name, unsigned stringIndex, bool readOnly,
         bool nullable);
     virtual unsigned getIndex();
+    virtual wxString getAsFirebirdString(DataGridRowBuffer* buffer);
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
@@ -1170,6 +1171,15 @@ StringColumnDef::StringColumnDef(const wxString& name, unsigned stringIndex,
 unsigned StringColumnDef::getIndex()
 {
     return indexM;
+}
+//-----------------------------------------------------------------------------
+wxString StringColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
+{
+    wxASSERT(buffer);
+    wxString s(buffer->getString(indexM));
+    // SF bug #1889800: quote chars have to be escaped
+    s.Replace(wxT("'"), wxT("''"));
+    return s;
 }
 //-----------------------------------------------------------------------------
 wxString StringColumnDef::getAsString(DataGridRowBuffer* buffer)
