@@ -87,10 +87,11 @@ wxString Index::getFieldsAsString()
 	else
 	{
 	    wxString retval;
-		for (std::vector<wxString>::iterator it = segmentsM.begin(); it != segmentsM.end(); ++it)
+		for (std::vector<wxString>::iterator it = segmentsM.begin(); 
+			it != segmentsM.end(); ++it)
 	    {
 		    if (!retval.empty())
-			    retval += wxT(",");
+			    retval += wxT(", ");
 	        retval += (*it);
 		}
 		return retval;

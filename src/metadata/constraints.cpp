@@ -56,7 +56,7 @@ wxString ColumnConstraint::getColumnList() const
     for (std::vector<wxString>::const_iterator it = columnsM.begin(); it != columnsM.end(); ++it)
     {
         if (it != columnsM.begin())
-            result += wxT(",");
+            result += wxT(", ");
         result += (*it);
     }
     return result;
@@ -69,7 +69,7 @@ wxString ForeignKey::getReferencedColumnList() const
          it != referencedColumnsM.end(); ++it)
     {
         if (it != referencedColumnsM.begin())
-            result += wxT(",");
+            result += wxT(", ");
         result += (*it);
     }
     return result;
