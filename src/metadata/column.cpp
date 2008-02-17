@@ -187,7 +187,8 @@ bool Column::isString() const
 wxString Column::getPrintableName()
 {
     wxString ret = getName_() + wxT(" ") + getDatatype();
-    if (notnullM)
+    Domain *d = getDomain();
+    if (notnullM || d && !d->isNullable())
         ret += wxT(" not null");
     return ret;
 }

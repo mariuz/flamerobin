@@ -1417,10 +1417,17 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
     }
     View* v = dynamic_cast<View *>(treeMainM->getSelectedMetadataItem());
     Trigger* t = dynamic_cast<Trigger *>(treeMainM->getSelectedMetadataItem());
-    if (!db || !p && !v && !t)
+    Domain *dm = dynamic_cast<Domain *>(treeMainM->getSelectedMetadataItem());
+    if (!db || !p && !v && !t && !dm)
         return;
 
-    wxString sql(v ? v->getRebuildSql() : t->getAlterSql());
+    wxString sql;
+    if (v)
+    	sql = v->getRebuildSql();
+    else if (t)
+    	sql = t->getAlterSql();
+    else if (dm)
+    	sql = dm->getAlterSqlTemplate();
     showSql(this, wxString(_("Alter object")), db, sql);
 }
 //-----------------------------------------------------------------------------

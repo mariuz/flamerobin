@@ -95,7 +95,7 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database&)
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitDomain(Domain&)
 {
-    addRegularObjectMenu(false, true);
+    addRegularObjectMenu(true, true);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitException(Exception&)
