@@ -285,7 +285,7 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
                     }
                     else
                         alias = id.get();
-                    //wxMessageBox(id.get(), alias);
+                    //wxMessageBox(id.get()+wxT(" ")+alias);
                     aliases.insert(std::pair<wxString, wxString>(alias,
                         id.get()));
                     break;

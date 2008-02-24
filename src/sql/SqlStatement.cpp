@@ -149,7 +149,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
         if (identifierTokenIndexM == 2)
         {
             identifierTokenIndexM = 4;
-            name.setFromSql(tokenStringsM[4];
+            nameM.setFromSql(tokenStringsM[4]);
         }
     }
 
