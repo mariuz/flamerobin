@@ -146,6 +146,11 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
     {
         actionM = actCREATE_OR_ALTER;
         typeTokenIndex = 3;
+        if (identifierTokenIndexM == 2)
+        {
+            identifierTokenIndexM = 4;
+            name.setFromSql(tokenStringsM[4];
+        }
     }
 
     // GRANT blah, blah blah ON [PROCEDURE] object_name TO ...
@@ -343,7 +348,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             size_t fieldNameIndex = identifierTokenIndexM + 2;
             if (tokensM[fieldNameIndex] == kwCOLUMN)
                 fieldNameIndex++;
-            if (tokensM[fieldNameIndex] == tkIDENTIFIER && tokensM[fieldNameIndex + 1] == kwTYPE)
+            if (tokensM[fieldNameIndex + 1] == kwTYPE)
             {
                 isAlterColumnM = true;
                 fieldNameM.setFromSql(tokenStringsM[fieldNameIndex]);
