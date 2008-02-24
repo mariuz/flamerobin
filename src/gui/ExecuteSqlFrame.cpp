@@ -2021,10 +2021,10 @@ bool ExecuteSqlFrame::commitTransaction()
         log(std2wx(e.ErrorMessage()), ttError);
         return false;
     }
-    catch (...)
+    catch (std::exception &se)
     {
         SplitScreen();
-        log(_("ERROR!\nA non-IBPP C++ runtime exception occured!"), ttError);
+        log(wxString(_("ERROR!\n")) + std2wx(se.what()), ttError);
         return false;
     }
 

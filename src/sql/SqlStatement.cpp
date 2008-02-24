@@ -105,7 +105,14 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
     if (tokensM.size() < 1)
         return; // true;
 
-    identifierTokenIndexM = tokensM.size() - 1;
+    if (nameM.get().IsEmpty()) // non-reserved keyword used as identifier?
+    {
+        nameM.setFromSql(tokenStringsM[2]); // we take a lucky guess
+        identifierTokenIndexM = 2;          // ex.: CREATE DOMAIN CASCADE 
+    }
+    else
+        identifierTokenIndexM = tokensM.size() - 1;
+    
     size_t typeTokenIndex = 1;
 
     // get action

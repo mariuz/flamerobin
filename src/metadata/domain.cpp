@@ -83,7 +83,7 @@ void Domain::loadInfo()
     st1->Set(1, wx2std(getName_()));
     st1->Execute();
     if (!st1->Fetch())
-        throw FRError(_("Domain not found."));
+        throw FRError(_("Domain not found: ") + getName_());
     st1->Get(1, &datatypeM);
     if (st1->IsNull(2))
         subtypeM = 0;
