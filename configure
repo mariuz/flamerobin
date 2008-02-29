@@ -642,6 +642,10 @@ WX_CXXFLAGS_ONLY
 WX_LIBS
 WX_LIBS_STATIC
 WX_VERSION
+WX_RESCOMP
+WX_VERSION_MAJOR
+WX_VERSION_MINOR
+WX_VERSION_MICRO
 RANLIB
 INSTALL_PROGRAM
 INSTALL_SCRIPT
@@ -704,6 +708,7 @@ COND_FINAL_1
 COND_GCC_PCH_1
 COND_ICC_PCH_1
 COND_PLATFORM_MACOSX_1
+COND_PLATFORM_MAC_0
 COND_PLATFORM_MAC_1
 COND_PLATFORM_OS2_1
 COND_PLATFORM_UNIX_1
@@ -2567,6 +2572,7 @@ fi
 
 # Check for wxWindows
 
+
     if test x${WX_CONFIG_NAME+set} != xset ; then
      WX_CONFIG_NAME=wx-config
   fi
@@ -2650,7 +2656,7 @@ echo $ECHO_N "checking for wxWidgets version >= $min_wx_version... $ECHO_C" >&6;
 echo $ECHO_N "checking for wxWidgets version >= $min_wx_version ()... $ECHO_C" >&6; }
     fi
 
-    WX_CONFIG_WITH_ARGS="$WX_CONFIG_PATH $wx_config_args  stc,std"
+            WX_CONFIG_WITH_ARGS="$WX_CONFIG_PATH $wx_config_args "
 
     WX_VERSION=`$WX_CONFIG_WITH_ARGS --version 2>/dev/null`
     wx_config_major_version=`echo $WX_VERSION | \
@@ -2689,14 +2695,13 @@ echo $ECHO_N "checking for wxWidgets version >= $min_wx_version ()... $ECHO_C" >
 
 
     if test -n "$wx_ver_ok"; then
-
       { echo "$as_me:$LINENO: result: yes (version $WX_VERSION)" >&5
 echo "${ECHO_T}yes (version $WX_VERSION)" >&6; }
-      WX_LIBS=`$WX_CONFIG_WITH_ARGS --libs`
+      WX_LIBS=`$WX_CONFIG_WITH_ARGS --libs stc,std`
 
                               { echo "$as_me:$LINENO: checking for wxWidgets static library" >&5
 echo $ECHO_N "checking for wxWidgets static library... $ECHO_C" >&6; }
-      WX_LIBS_STATIC=`$WX_CONFIG_WITH_ARGS --static --libs 2>/dev/null`
+      WX_LIBS_STATIC=`$WX_CONFIG_WITH_ARGS --static --libs stc,std 2>/dev/null`
       if test "x$WX_LIBS_STATIC" = "x"; then
         { echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
@@ -2722,17 +2727,33 @@ echo "${ECHO_T}yes" >&6; }
         fi
       fi
 
+            wx_has_rescomp=""
+      if test $wx_config_major_version -gt 2; then
+        wx_has_rescomp=yes
+      else
+        if test $wx_config_major_version -eq 2; then
+           if test $wx_config_minor_version -ge 7; then
+              wx_has_rescomp=yes
+           fi
+        fi
+      fi
+      if test "x$wx_has_rescomp" = x ; then
+                  WX_RESCOMP=
+      else
+         WX_RESCOMP=`$WX_CONFIG_WITH_ARGS --rescomp`
+      fi
+
       if test "x$wx_has_cppflags" = x ; then
-                  WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags`
+                  WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags stc,std`
          WX_CPPFLAGS=$WX_CFLAGS
          WX_CXXFLAGS=$WX_CFLAGS
 
          WX_CFLAGS_ONLY=$WX_CFLAGS
          WX_CXXFLAGS_ONLY=$WX_CFLAGS
       else
-                  WX_CPPFLAGS=`$WX_CONFIG_WITH_ARGS --cppflags`
-         WX_CXXFLAGS=`$WX_CONFIG_WITH_ARGS --cxxflags`
-         WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags`
+                  WX_CPPFLAGS=`$WX_CONFIG_WITH_ARGS --cppflags stc,std`
+         WX_CXXFLAGS=`$WX_CONFIG_WITH_ARGS --cxxflags stc,std`
+         WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags stc,std`
 
          WX_CFLAGS_ONLY=`echo $WX_CFLAGS | sed "s@^$WX_CPPFLAGS *@@"`
          WX_CXXFLAGS_ONLY=`echo $WX_CXXFLAGS | sed "s@^$WX_CFLAGS *@@"`
@@ -2755,6 +2776,32 @@ echo "${ECHO_T}no (version $WX_VERSION is not new enough)" >&6; }
        WX_CXXFLAGS=""
        WX_LIBS=""
        WX_LIBS_STATIC=""
+       WX_RESCOMP=""
+
+       if test ! -z ""; then
+
+          wx_error_message="
+    The configuration you asked for $PACKAGE_NAME requires a wxWidgets
+    build with the following settings:
+
+    but such build is not available.
+
+    To see the wxWidgets builds available on this system, please use
+    'wx-config --list' command. To use the default build, returned by
+    'wx-config --selected-config', use the options with their 'auto'
+    default values."
+
+       fi
+
+       wx_error_message="
+    The requested wxWidgets build couldn't be found.
+    $wx_error_message
+
+    If you still get this error, then check that 'wx-config' is
+    in path, the directory where wxWidgets libraries are installed
+    (returned by 'wx-config --libs' command) is in LD_LIBRARY_PATH
+    or equivalent variable and wxWidgets version is 2.6.0 or above."
+
 
         { { echo "$as_me:$LINENO: error:
      	   wxWindows must be installed on your system
@@ -2784,6 +2831,8 @@ echo "$as_me: error:
     WX_CXXFLAGS=""
     WX_LIBS=""
     WX_LIBS_STATIC=""
+    WX_RESCOMP=""
+
 
         { { echo "$as_me:$LINENO: error:
      	   wxWindows must be installed on your system
@@ -2811,6 +2860,15 @@ echo "$as_me: error:
 
 
 
+
+
+
+
+
+
+      WX_VERSION_MAJOR="$wx_config_major_version"
+  WX_VERSION_MINOR="$wx_config_minor_version"
+  WX_VERSION_MICRO="$wx_config_micro_version"
 
 
 
@@ -5531,7 +5589,7 @@ fi
     BAKEFILE_BAKEFILE_M4_VERSION="0.2.2"
 
 
-BAKEFILE_AUTOCONF_INC_M4_VERSION="0.2.2"
+BAKEFILE_AUTOCONF_INC_M4_VERSION="0.2.3"
 
 
 
@@ -5780,6 +5838,11 @@ EOF
     COND_PLATFORM_MACOSX_1="#"
     if test "x$PLATFORM_MACOSX" = "x1" ; then
         COND_PLATFORM_MACOSX_1=""
+    fi
+
+    COND_PLATFORM_MAC_0="#"
+    if test "x$PLATFORM_MAC" = "x0" ; then
+        COND_PLATFORM_MAC_0=""
     fi
 
     COND_PLATFORM_MAC_1="#"
@@ -6558,6 +6621,10 @@ WX_CXXFLAGS_ONLY!$WX_CXXFLAGS_ONLY$ac_delim
 WX_LIBS!$WX_LIBS$ac_delim
 WX_LIBS_STATIC!$WX_LIBS_STATIC$ac_delim
 WX_VERSION!$WX_VERSION$ac_delim
+WX_RESCOMP!$WX_RESCOMP$ac_delim
+WX_VERSION_MAJOR!$WX_VERSION_MAJOR$ac_delim
+WX_VERSION_MINOR!$WX_VERSION_MINOR$ac_delim
+WX_VERSION_MICRO!$WX_VERSION_MICRO$ac_delim
 RANLIB!$RANLIB$ac_delim
 INSTALL_PROGRAM!$INSTALL_PROGRAM$ac_delim
 INSTALL_SCRIPT!$INSTALL_SCRIPT$ac_delim
@@ -6586,10 +6653,6 @@ DLLIMP_SUFFIX!$DLLIMP_SUFFIX$ac_delim
 LIBPREFIX!$LIBPREFIX$ac_delim
 LIBEXT!$LIBEXT$ac_delim
 DLLPREFIX!$DLLPREFIX$ac_delim
-DLLPREFIX_MODULE!$DLLPREFIX_MODULE$ac_delim
-dlldir!$dlldir$ac_delim
-CC!$CC$ac_delim
-CFLAGS!$CFLAGS$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -6631,6 +6694,10 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+DLLPREFIX_MODULE!$DLLPREFIX_MODULE$ac_delim
+dlldir!$dlldir$ac_delim
+CC!$CC$ac_delim
+CFLAGS!$CFLAGS$ac_delim
 ac_ct_CC!$ac_ct_CC$ac_delim
 AIX_CXX_LD!$AIX_CXX_LD$ac_delim
 SHARED_LD_CC!$SHARED_LD_CC$ac_delim
@@ -6661,6 +6728,7 @@ COND_FINAL_1!$COND_FINAL_1$ac_delim
 COND_GCC_PCH_1!$COND_GCC_PCH_1$ac_delim
 COND_ICC_PCH_1!$COND_ICC_PCH_1$ac_delim
 COND_PLATFORM_MACOSX_1!$COND_PLATFORM_MACOSX_1$ac_delim
+COND_PLATFORM_MAC_0!$COND_PLATFORM_MAC_0$ac_delim
 COND_PLATFORM_MAC_1!$COND_PLATFORM_MAC_1$ac_delim
 COND_PLATFORM_OS2_1!$COND_PLATFORM_OS2_1$ac_delim
 COND_PLATFORM_UNIX_1!$COND_PLATFORM_UNIX_1$ac_delim
@@ -6675,7 +6743,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 42; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 47; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
