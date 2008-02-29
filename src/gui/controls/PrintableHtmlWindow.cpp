@@ -125,15 +125,7 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
 //-----------------------------------------------------------------------------
 void PrintableHtmlWindow::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
 {
-    if (wxTheClipboard->Open())
-    {
-        // the primary selection is used when text is selected with the mouse
-        // if UsePrimarySelection() is not called we therefore copy to
-        // primary too, and nothing can be pasted (Ctrl+V) in other programs
-        wxTheClipboard->UsePrimarySelection(false);
-        wxTheClipboard->SetData( new wxTextDataObject(SelectionToText()) );
-        wxTheClipboard->Close();
-    }
+    CopySelection();
 }
 //-----------------------------------------------------------------------------
 void PrintableHtmlWindow::OnMenuNewWindow(wxCommandEvent& WXUNUSED(event))
