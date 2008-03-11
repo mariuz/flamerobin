@@ -873,6 +873,11 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
             return;
 
         htmlpage += wxString() << d->getInfo()->getODS();
+        if (d->getInfo()->getODSMinor())
+        {
+            htmlpage += wxT(".");
+            htmlpage += wxString() << d->getInfo()->getODSMinor();
+        }
     }
     else if (cmd == wxT("oldest_transaction"))
     {
