@@ -6,7 +6,7 @@
 -->
 <article id="frrelnotes">
   <articleinfo>
-    <title><application>FlameRobin</application> 0.8.1 ALPHA Manual</title>
+    <title><application>FlameRobin</application> 0.8.6 Manual</title>
 
     <author>
       <firstname>Nando</firstname>
@@ -24,22 +24,23 @@
   <section>
     <title>About this manual</title>
 
-    <para>Currently this manual is incomplete, and it will probably stay
-    incomplete until FlameRobin reaches version 1.0. Nonetheless, we try to
-    make sure that the information included here is accurate also for ALPHA
-    releases.</para>
+    <para>We try to keep all the features in FlameRobin usable in an intuitive
+    manner. However, there are things that you still need to know if you want
+    to grasp the full power of the application, and this manual contains
+    details about them. In this document, you will find an overview of the
+    features, a description of all configuration parameters and advanced
+    installation and customization notes.</para>
   </section>
 
   <section id="frrelnotes-alphatest">
     <title>About the ALPHA test program</title>
 
-    <para>Welcome to the FlameRobin Alpha test! We thank you for evaluating
-    this software and encourage you to send comments, bug reports and feature
-    requests back to us so we can make a better product. We remind you that
-    this is Alpha quality software so you shouldn't expect it to work
-    flawlessly (although we've been using it for daily work for a long time
-    now). The main purpose of this early release is finding bugs and tune the
-    user interface, for which we need feedback from the prospect users.</para>
+    <para>Lots of people have been using FlameRobin in day-to-day work for a
+    long time now. Yet, we still consider the software in ALPHA state until it
+    reaches feature-completeness, which will come with release 1.0. FlameRobin
+    is very near to that state. Meanwhile, we thank you for evaluating and
+    using this software and encourage you to send comments, bug reports and
+    feature requests back to us so we can make it a better product.</para>
   </section>
 
   <section id="frrelnotes-what-fr-is">
@@ -57,17 +58,17 @@
   <section id="frrelnotes-what-fr-is-not">
     <title>What FlameRobin is NOT</title>
 
-    <para>Currently FlameRobin is not a full-featured administration tool, as
-    there are plenty available for Firebird from several different parties.
-    Our first goal with FlameRobin is to provide people not used to the
-    command line with a GUI tool to get started with Firebird. Our longer-term
-    goal is to develop a richer tool mainly for the Linux platform; while
-    there are several rich and mature GUI tools under Windows, some of them
-    available for free or for a modest price, there isn't any for Linux.
-    Another goal of the project is for a "lite" edition of FlameRobin to be
-    bundled with the Firebird server to serve as a starting kit for new users.
-    This bundle may be distributed by the Firebird Project itself or by some
-    third party.</para>
+    <para>FlameRobin is not a full-featured administration tool with lots of
+    bells and whistles, as there are plenty available for Firebird from
+    several different parties. Our first goal with FlameRobin is to provide
+    people not used to the command line with a GUI tool to get started with
+    Firebird. Our longer-term goal is to develop a richer tool mainly for the
+    Linux platform; while there are several rich and mature GUI tools under
+    Windows, some of them available for free or for a modest price, there
+    isn't any for Linux. Another goal of the project is for a "lite" edition
+    of FlameRobin to be bundled with the Firebird server to serve as a
+    starting kit for new users. This bundle may be distributed by the Firebird
+    Project itself or by some third party.</para>
   </section>
 
   <section id="frrelnotes-who-we-are">
@@ -101,7 +102,7 @@
     <title>What's new?</title>
 
     <para>Please refer to fr_whatsnew.html for a detailed history of all the
-    changes since the previous ALPHA release.</para>
+    changes since the previous release.</para>
   </section>
 
   <section id="frrelnotes-installation">
@@ -263,7 +264,11 @@
 
       <para>Just double click on the database name in the tree, or right click
       it and choose "Connect" or "Connect as...". Choose "Disconnect" to close
-      the connection to the database.</para>
+      the connection to the database. This causes the load of essential
+      metadata information. FlameRobin tries to play well with slow network
+      connections by delaying metadata retrieval as much as possible, yet
+      connecting to a database still needs some data transfer beyond the
+      connection itself.</para>
     </section>
 
     <section>
@@ -330,16 +335,37 @@
       you change your mind you can use the Stop fetching all records
       command.</para>
 
+      <para>Once you have some data in the grid, you can re-sort the data by
+      double clicking on column headers.</para>
+
       <para>You can change the data through direct editing in the grid, add
       new records by means of the Insert button (which opens a specialized
       dialog box) and delete the currently selected record(s) by clicking the
       Delete button. Confirm any changes by clicking the Commit button, or
-      cancel them through the Rollback button.</para>
+      cancel them through the Rollback button. Deleted records are still
+      displayed (on a red background color) until you commit, just in case you
+      change your mind.</para>
 
       <note>
         <para>Emptying a cell that displays a string field will set the
         field's value to ''; if you want to set it to null, then delete all
         contents and then hit the DEL key once more.</para>
+      </note>
+
+      <note>
+        <para>You can type the strings "NOW", "DATE", "TODAY", "TOMORROW",
+        "YESTERDAY" in cells of type date or timestamp, and the strings "NOW"
+        and "TIME" in cells of type time. They will be translated by
+        FlameRobin to their respective meanings.</para>
+      </note>
+
+      <note>
+        <para>FlameRobin handles all interactive edit operations by generating
+        corresponding SQL statements. By default they are all logged in the
+        history, but you can turn logging off for an instance of the SQL
+        editor through the History/Enable logging menu command. You can also
+        to turn logging off globally or for a particular database, through the
+        preferences.</para>
       </note>
     </section>
 
@@ -353,13 +379,17 @@
       The SQL editor tool offers script execution capabilities (including SET
       AUTODDL and SET TERM support), load/save buttons, auto-completion and
       call-tip features, commit/rollback, detailed execution statistics
-      (including but not limited to the query PLAN), a data export tool and
-      more.</para>
+      (including but not limited to the query PLAN and the number of records
+      inserted, deleted, updated in each affected table), a data export tool
+      and more.</para>
 
       <para>To execute a script (meaning a sequence of more than one SQL
       statements), just load it (or drag and drop a file, or type it in) and
       run it. To execute a single statement when more statements are present
       in the editor, select it before clicking the Run button.</para>
+
+      <para>You can use the drop-down menus or the context menu in the SQL
+      editor as well as the buttons.</para>
 
       <para>Auto-completion can be invoked automatically or manually (see the
       rich set of configuration options about it), and supports table and
@@ -368,10 +398,10 @@
       <para>To activate the data export tool, right click on the data grid.
       The data export tool is currently able to copy the data to the
       clipboard, generate SQL INSERT or UPDATE statements or export the data
-      to a HTML file. All options work on the whole grid contents or just the
-      selected parts. You can also multiple-select several different grid
-      "islands" and have the tool export them. This is particularly handy when
-      generating INSERT or UPDATE statements.</para>
+      to a HTML or CSV file. All options work on the whole grid contents or
+      just the selected parts. You can also multiple-select several different
+      grid "islands" and have the tool export them. This is particularly handy
+      to generate customized INSERT or UPDATE statements.</para>
 
       <para>For SELECT statements, you can also drag and drop objects from the
       tree view to visually build queries (provided the appropriate
@@ -396,7 +426,7 @@
 
       <note>
         <para>It is considered bad practice to restore a backup file over an
-        existing database. </para>
+        existing database.</para>
       </note>
 
       <para>The Backup and Restore tools work in background, so you are
@@ -423,6 +453,9 @@
       <para>Extracting DDL scripts is useful if you want to replicate an
       object's structure in a different database, or create a slightly
       different object in the same database.</para>
+
+      <para>A shortcut command for extracting the entire database metadata is
+      available in the Advanced submenu of the database's context menu.</para>
     </section>
 
     <section>
@@ -702,6 +735,16 @@
         relevant property page or expands the subtree.</para>
       </section>
 
+      <section>
+        <title>When table, view or stored procedure is activated</title>
+
+        <para>Here you choose what should happen when you double click on a
+        table, view or stored procedure node in the tree. Available options
+        include opening the property page, show columns as sub-nodes of the
+        selected node or select from the table, view or stored procedure to
+        see the data.</para>
+      </section>
+
       <section id="frmanual-show-sys-tables">
         <title>Show system tables in tree</title>
 
@@ -820,7 +863,7 @@
         </section>
 
         <section>
-          <title> Show long line marker</title>
+          <title>Show long line marker</title>
 
           <para>Activate this option to have the editor display a vertical
           line that visually marks the place where a line break would occur if
@@ -987,6 +1030,19 @@
         whenever a SELECT statement is executed, instead of doing it in
         batches.</para>
       </section>
+
+      <section>
+        <title>Show BLOB data in the grid</title>
+
+        <para>Check this option if you want to see data fetched from BLOB
+        fields in the grid. By default FlameRobin doesn't fetch BLOBs. You can
+        also set a threshold, thus telling FlameRobin to fetch at most a
+        specified amount of data for each BLOB. This allows you to see the
+        first part of every BLOB field automatically without risking to
+        download huge amounts of data for no gain. Check the "Show data for
+        binary BLOBs" if you want the above settings applied to binary BLOBs
+        as well (by default they are applied to text BLOBs only).</para>
+      </section>
     </section>
 
     <section>
@@ -1011,12 +1067,19 @@
     </section>
 
     <section>
-      <title>Object names</title>
+      <title>Sql Statement generation</title>
 
-      <para>This page offers options to customize the way FlameRobin deals
-      with object names in general, and quoted identifiers in particular. If
-      you don't know how quoted identifiers work in Firebird, you should leave
-      these settings to their default values.</para>
+      <para>This page offers options to customize the way FlameRobin generated
+      SQL code, deals with object names in general, and quoted identifiers in
+      particular. If you don't know how quoted identifiers work in Firebird,
+      you should leave the relevant settings to their default values.</para>
+
+      <section>
+        <title>Use UPPER CASE keywords</title>
+
+        <para>Uncheck this option if you prefer FlameRobin to use lowercase
+        keywords in generated SQL code.</para>
+      </section>
 
       <section>
         <title>Quote names only when needed</title>
@@ -1245,13 +1308,15 @@
   </section>
 
   <section>
-    <title>The FlameRobin environment</title>
+    <title>Customizing the FlameRobin environment</title>
 
     <para>FlameRobin needs, or creates, some external files. This section
     documents what these files contain, and where they are found. While
     FlameRobin is installed with usable default settings, it is possible to
-    fine-tune the installation for special uses or multiple users. The
-    information provided here is valuable in this regard.</para>
+    fine-tune the installation for special uses or multiple users. For
+    example, you can change the icons, the HTML templates used as property
+    pages for the objects in a database, or where FlameRobin stores and looks
+    for its configuration files.</para>
 
     <para>FlameRobin uses the following files and folders:</para>
 
