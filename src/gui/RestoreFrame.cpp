@@ -117,7 +117,7 @@ void* RestoreThread::Entry()
             if (TestDestroy())
             {
                 now = wxDateTime::Now();
-                msg.Printf(_("Database restore cancelled %s"),
+                msg.Printf(_("Database restore canceled %s"),
                     now.FormatTime().c_str());
                 logImportant(msg);
                 break;
@@ -139,7 +139,7 @@ void* RestoreThread::Entry()
     catch (IBPP::Exception& e)
     {
         now = wxDateTime::Now();
-        msg.Printf(_("Database restore cancelled %s due to IBPP exception:\n\n"),
+        msg.Printf(_("Database restore canceled %s due to IBPP exception:\n\n"),
             now.FormatTime().c_str());
         msg += std2wx(e.ErrorMessage());
         logError(msg);
@@ -147,7 +147,7 @@ void* RestoreThread::Entry()
     catch (...)
     {
         now = wxDateTime::Now();
-        msg.Printf(_("Database restore cancelled %s due to exception"),
+        msg.Printf(_("Database restore canceled %s due to exception"),
             now.FormatTime().c_str());
         logError(msg);
     }

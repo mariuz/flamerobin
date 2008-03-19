@@ -114,7 +114,7 @@ void* BackupThread::Entry()
             if (TestDestroy())
             {
                 now = wxDateTime::Now();
-                msg.Printf(_("Database backup cancelled %s"),
+                msg.Printf(_("Database backup canceled %s"),
                     now.FormatTime().c_str());
                 logImportant(msg);
                 break;
@@ -136,7 +136,7 @@ void* BackupThread::Entry()
     catch (IBPP::Exception& e)
     {
         now = wxDateTime::Now();
-        msg.Printf(_("Database backup cancelled %s due to IBPP exception:\n\n"),
+        msg.Printf(_("Database backup canceled %s due to IBPP exception:\n\n"),
             now.FormatTime().c_str());
         msg += std2wx(e.ErrorMessage());
         logError(msg);
@@ -144,7 +144,7 @@ void* BackupThread::Entry()
     catch (...)
     {
         now = wxDateTime::Now();
-        msg.Printf(_("Database backup cancelled %s due to exception"),
+        msg.Printf(_("Database backup canceled %s due to exception"),
             now.FormatTime().c_str());
         logError(msg);
     }
