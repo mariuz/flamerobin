@@ -209,6 +209,9 @@ void DataGrid::showPopMenu(wxPoint cursorPos)
     m.Append(Cmds::DataGrid_Save_as_csv, _("Save as CSV file..."));
     m.AppendSeparator();
 
+    m.Append(Cmds::DataGrid_ImportBlob, _("Import BLOB from file..."));
+    m.AppendSeparator();
+
     m.Append(Cmds::DataGrid_Set_header_font, _("Set header font"));
     m.Append(Cmds::DataGrid_Set_cell_font, _("Set cell font"));
     PopupMenu(&m, cursorPos);

@@ -748,6 +748,18 @@ void DataGridTable::setFetchAllRecords(bool fetchall)
     fetchAllRowsM = fetchall;
 }
 //-----------------------------------------------------------------------------
+void DataGridTable::importBlobFile(const wxString& filename, int row, int col)
+{
+    rowsM.importBlobFile(filename, row, col);
+    
+    // tell the grid it's done
+    if (GetView())
+    {
+        wxGridTableMessage msg(this, wxGRIDTABLE_REQUEST_VIEW_GET_VALUES);
+        GetView()->ProcessTableMessage(msg);
+    }
+}
+//-----------------------------------------------------------------------------
 void DataGridTable::SetValue(int row, int col, const wxString& value)
 {
     // We need explicit exception handling here since wxGrid gets

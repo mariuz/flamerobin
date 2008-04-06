@@ -39,6 +39,7 @@
 #endif
 
 #include <wx/datetime.h>
+#include <wx/ffile.h>
 #include <wx/textbuf.h>
 
 #include <algorithm>
@@ -1045,6 +1046,7 @@ private:
 public:
     BlobColumnDef(const wxString& name, bool readOnly, bool nullable,
         unsigned stringIndex, unsigned blobIndex, bool textual);
+    void reset(DataGridRowBuffer* buffer);
     virtual unsigned getIndex();
     virtual wxString getAsString(DataGridRowBuffer* buffer);
     virtual unsigned getBufferSize();
@@ -1060,6 +1062,11 @@ BlobColumnDef::BlobColumnDef(const wxString& name, bool readOnly,
       textualM(textual), stringIndexM(stringIndex)
 {
     readOnlyM = true;   // TODO: uncomment this when we make BlobDialog
+}
+//-----------------------------------------------------------------------------
+void BlobColumnDef::reset(DataGridRowBuffer* buffer)
+{
+    buffer->setString(stringIndexM, wxEmptyString);
 }
 //-----------------------------------------------------------------------------
 unsigned BlobColumnDef::getIndex()
@@ -1374,8 +1381,9 @@ bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
             stm += wxTextBuffer::GetEOL();
         wxString s = wxT("DELETE FROM ")
             + Identifier((*deleteFromM).first).getQuoted() + wxT(" WHERE ");
-        addWhereAndExecute((*deleteFromM).second, s, (*deleteFromM).first,
-            buffersM[from+pos]);
+        IBPP::Statement st = addWhere((*deleteFromM).second, s, 
+            (*deleteFromM).first, buffersM[from+pos]);
+        st->Execute();
         stm += s + wxT(";");
     }
 
@@ -1701,7 +1709,7 @@ bool DataGridRows::isFieldNA(unsigned row, unsigned col)
     return buffersM[row]->isFieldNA(col);
 }
 //-----------------------------------------------------------------------------
-void DataGridRows::addWhereAndExecute(UniqueConstraint* uq, wxString& stm,
+IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
     const wxString& table, DataGridRowBuffer *buffer)
 {
     bool dbkey = false;
@@ -1755,11 +1763,63 @@ void DataGridRows::addWhereAndExecute(UniqueConstraint* uq, wxString& stm,
                     throw FRError(_("N/A value in DB_KEY column."));
                 IBPP::DBKey dbkey;
                 dbk->getDBKey(dbkey, buffer);
-                st->Set(1, dbkey);
+                // if updating BLOB, param = 2, else param = 1
+                st->Set(st->Parameters(), dbkey);
             }
         }
     }
-    st->Execute();
+    return st;
+}
+//-----------------------------------------------------------------------------
+void DataGridRows::importBlobFile(const wxString& filename, unsigned row, 
+    unsigned col)
+{
+    // upload data to database
+    wxString table(std2wx(statementM->ColumnTable(col+1)));
+    wxString stm = wxT("UPDATE ") + Identifier(table).getQuoted()
+        + wxT(" SET ")
+        + Identifier(std2wx(statementM->ColumnName(col+1))).getQuoted()
+        + wxT(" = ? WHERE ");
+    std::map<wxString, UniqueConstraint *>::iterator it =
+        statementTablesM.find(table);
+
+    // MB: please do not remove this check. Although it is not needed,
+    //     it helped me detect some subtle bugs much easier
+    if (it == statementTablesM.end() || (*it).second == 0)
+        throw FRError(_("Blob table not found."));
+
+    IBPP::Statement st = addWhere((*it).second, stm, table, buffersM[row]);
+
+    // load blob
+    wxFFile fl(filename, wxT("rb"));
+    if (!fl.IsOpened())
+        throw FRError(_("Cannot open BLOB file."));
+    
+    // TODO: show progress dialog using this: wxFileOffset len = fl.Length();
+    
+    IBPP::Blob b = IBPP::BlobFactory(st->DatabasePtr(),
+        st->TransactionPtr());
+    b->Create();
+    uint8_t buffer[32768];
+    while (!fl.Eof())
+    {
+        size_t len = fl.Read(buffer, 32767);    // slow when not 32k
+        if (len < 1)
+            break;
+        b->Write(buffer, len);
+    }
+    fl.Close();
+    b->Close();
+    st->Set(1, b);
+    st->Execute();  // we execute before updating internal storage
+    
+    buffersM[row]->setBlob(columnDefsM[col]->getIndex(), b);
+    buffersM[row]->setFieldNull(col, false);
+    buffersM[row]->setFieldNA(col, false);
+    BlobColumnDef *bcd = dynamic_cast<BlobColumnDef *>(columnDefsM[col]);
+    if (!bcd)
+        throw FRError(_("Not a BLOB column."));
+    bcd->reset(buffersM[row]);  // reset cached blob data
 }
 //-----------------------------------------------------------------------------
 // returns the executed SQL statement
@@ -1820,7 +1880,8 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
         if (it == statementTablesM.end() || (*it).second == 0)
             throw FRError(_("This column should not be editable"));
 
-        addWhereAndExecute((*it).second, stm, table, oldRecord);
+        IBPP::Statement st = addWhere((*it).second, stm, table, oldRecord);
+        st->Execute();
         delete oldRecord;
         return stm;
     }

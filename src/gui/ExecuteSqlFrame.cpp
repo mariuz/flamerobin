@@ -774,6 +774,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
 
     EVT_MENU(Cmds::DataGrid_Insert_row,      ExecuteSqlFrame::OnMenuGridInsertRow)
     EVT_MENU(Cmds::DataGrid_Delete_row,      ExecuteSqlFrame::OnMenuGridDeleteRow)
+    EVT_MENU(Cmds::DataGrid_ImportBlob,      ExecuteSqlFrame::OnMenuGridImportBlob)
     EVT_MENU(Cmds::DataGrid_Copy,            ExecuteSqlFrame::OnMenuGridCopy)
     EVT_MENU(Cmds::DataGrid_Copy_as_insert,  ExecuteSqlFrame::OnMenuGridCopyAsInsert)
     EVT_MENU(Cmds::DataGrid_Copy_as_update,  ExecuteSqlFrame::OnMenuGridCopyAsUpdate)
@@ -786,6 +787,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
 
     EVT_UPDATE_UI(Cmds::DataGrid_Insert_row,     ExecuteSqlFrame::OnMenuUpdateGridInsertRow)
     EVT_UPDATE_UI(Cmds::DataGrid_Delete_row,     ExecuteSqlFrame::OnMenuUpdateGridDeleteRow)
+//    EVT_UPDATE_UI(Cmds::DataGrid_ImportBlob,     ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob)
     EVT_UPDATE_UI(Cmds::DataGrid_Copy,           ExecuteSqlFrame::OnMenuUpdateGridHasData)
     EVT_UPDATE_UI(Cmds::DataGrid_Copy_as_insert, ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
     EVT_UPDATE_UI(Cmds::DataGrid_Copy_as_update, ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
@@ -1387,6 +1389,26 @@ void ExecuteSqlFrame::OnMenuGridFetchAll(wxCommandEvent& WXUNUSED(event))
 void ExecuteSqlFrame::OnMenuGridCancelFetchAll(wxCommandEvent& WXUNUSED(event))
 {
     grid_data->cancelFetchAll();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuGridImportBlob(wxCommandEvent& WXUNUSED(event))
+{
+    DataGridTable* dgt = grid_data->getDataGridTable();    
+    if (!dgt || !grid_data->GetNumberRows())
+        return;
+        
+    //if (!dgt->isBlobColumn(grid_data->GetGridCursorCol()))
+    //{
+    //    throw FRError(_("Not a BLOB column"));
+    //}
+    wxString filename = ::wxFileSelector(_("Select a file"));
+    if (filename.IsEmpty())
+        return;
+        
+    wxBusyCursor wait; // TODO: remove once we add a progress dialog
+        
+    dgt->importBlobFile(filename, grid_data->GetGridCursorRow(), 
+        grid_data->GetGridCursorCol());
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridInsertRow(wxCommandEvent& WXUNUSED(event))

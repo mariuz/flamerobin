@@ -91,7 +91,7 @@ private:
 
     void getColumnInfo(Database* db, unsigned col, bool& readOnly,
         bool& nullable);
-    void addWhereAndExecute(UniqueConstraint* uq, wxString& stm,
+    IBPP::Statement addWhere(UniqueConstraint* uq, wxString& stm,
         const wxString& table, DataGridRowBuffer *buffer);
 public:
     DataGridRows(Database* db);
@@ -114,6 +114,7 @@ public:
     wxString getFieldValue(unsigned row, unsigned col);
     wxString setFieldValue(unsigned row, unsigned col,
         const wxString& value, bool setNull = false);
+    void importBlobFile(const wxString& filename, unsigned row, unsigned col);
     bool canRemoveRow(size_t row);
     bool removeRows(size_t from, size_t count, wxString& statement);
 

@@ -100,7 +100,7 @@ public:
     bool canRemoveRow(size_t row);
 
     void setNullFlag(bool isNull);
-
+        
     // methods of wxGridTableBase
     virtual void Clear();
     virtual wxGridCellAttr* GetAttr(int row, int col,
@@ -114,6 +114,9 @@ public:
     virtual bool IsEmptyCell(int row, int col);
     virtual void SetValue(int row, int col, const wxString& value);
     virtual bool DeleteRows(size_t pos, size_t numRows);
+
+    // BLOBs can be huge, so we don't use SetValue for that
+    void importBlobFile(const wxString& filename, int row, int col);
 };
 //-----------------------------------------------------------------------------
 #endif
