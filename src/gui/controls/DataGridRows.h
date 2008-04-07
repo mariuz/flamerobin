@@ -106,6 +106,7 @@ public:
 
     bool isColumnNumeric(unsigned col);
     bool isColumnReadonly(unsigned col);
+    bool isBlobColumn(unsigned col);
     bool getFieldInfo(unsigned row, unsigned col, DataGridFieldInfo& info);
     bool isFieldReadonly(unsigned row, unsigned col);
     bool isFieldNull(unsigned row, unsigned col);
@@ -115,6 +116,7 @@ public:
     wxString setFieldValue(unsigned row, unsigned col,
         const wxString& value, bool setNull = false);
     void importBlobFile(const wxString& filename, unsigned row, unsigned col);
+    void exportBlobFile(const wxString& filename, unsigned row, unsigned col);
     bool canRemoveRow(size_t row);
     bool removeRows(size_t from, size_t count, wxString& statement);
 

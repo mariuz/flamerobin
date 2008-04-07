@@ -1771,6 +1771,17 @@ IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
     return st;
 }
 //-----------------------------------------------------------------------------
+bool DataGridRows::isBlobColumn(unsigned col)
+{
+    return (0 != dynamic_cast<BlobColumnDef *>(columnDefsM[col]));
+}
+//-----------------------------------------------------------------------------
+void DataGridRows::exportBlobFile(const wxString& filename, unsigned row, 
+    unsigned col)
+{
+    // TODO
+}
+//-----------------------------------------------------------------------------
 void DataGridRows::importBlobFile(const wxString& filename, unsigned row, 
     unsigned col)
 {

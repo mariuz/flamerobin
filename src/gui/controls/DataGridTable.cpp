@@ -760,6 +760,16 @@ void DataGridTable::importBlobFile(const wxString& filename, int row, int col)
     }
 }
 //-----------------------------------------------------------------------------
+void DataGridTable::exportBlobFile(const wxString& filename, int row, int col)
+{
+    rowsM.exportBlobFile(filename, row, col);
+}
+//-----------------------------------------------------------------------------
+bool DataGridTable::isBlobColumn(int col)
+{
+    return rowsM.isBlobColumn(col);
+}
+//-----------------------------------------------------------------------------
 void DataGridTable::SetValue(int row, int col, const wxString& value)
 {
     // We need explicit exception handling here since wxGrid gets

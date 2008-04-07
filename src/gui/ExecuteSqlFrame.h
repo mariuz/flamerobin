@@ -181,7 +181,8 @@ private:
     void OnMenuGridDeleteRow(wxCommandEvent &event);
     void OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event);
     void OnMenuGridImportBlob(wxCommandEvent &event);
-//    void OnMenuUpdateGridIsCellBlob(wxUpdateUIEvent& event);
+    void OnMenuGridExportBlob(wxCommandEvent &event);
+    void OnMenuUpdateGridCellIsBlob(wxUpdateUIEvent& event);
     void OnMenuGridCopy(wxCommandEvent &event);
     void OnMenuGridCopyAsInsert(wxCommandEvent &event);
     void OnMenuGridCopyAsUpdate(wxCommandEvent &event);

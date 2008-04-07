@@ -210,6 +210,7 @@ void DataGrid::showPopMenu(wxPoint cursorPos)
     m.AppendSeparator();
 
     m.Append(Cmds::DataGrid_ImportBlob, _("Import BLOB from file..."));
+    m.Append(Cmds::DataGrid_ExportBlob, _("Save BLOB to file..."));
     m.AppendSeparator();
 
     m.Append(Cmds::DataGrid_Set_header_font, _("Set header font"));

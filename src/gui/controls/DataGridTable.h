@@ -94,6 +94,7 @@ public:
     bool isNullCell(int row, int col);
     bool isNumericColumn(int col);
     bool isReadonlyColumn(int col);
+    bool isBlobColumn(int col);
     bool needsMoreRowsFetched();
     void setFetchAllRecords(bool fetchall);
     bool canInsertRows();
@@ -117,6 +118,7 @@ public:
 
     // BLOBs can be huge, so we don't use SetValue for that
     void importBlobFile(const wxString& filename, int row, int col);
+    void exportBlobFile(const wxString& filename, int row, int col);
 };
 //-----------------------------------------------------------------------------
 #endif
