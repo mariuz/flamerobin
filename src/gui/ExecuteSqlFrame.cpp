@@ -1427,9 +1427,10 @@ void ExecuteSqlFrame::OnMenuGridImportBlob(wxCommandEvent& WXUNUSED(event))
     if (filename.IsEmpty())
         return;
         
-    wxBusyCursor wait; // TODO: remove once we add a progress dialog
+    ProgressDialog pd(this, _("Importing BLOB from file"));
+    pd.Show();
     dgt->importBlobFile(filename, grid_data->GetGridCursorRow(), 
-        grid_data->GetGridCursorCol());
+        grid_data->GetGridCursorCol(), &pd);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridInsertRow(wxCommandEvent& WXUNUSED(event))

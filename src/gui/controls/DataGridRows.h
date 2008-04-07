@@ -38,6 +38,7 @@
 //----------------------------------------------------------------------
 class Database;
 class DataGridRowBuffer;
+class ProgressIndicator;
 class wxMBConv;
 //----------------------------------------------------------------------
 class ResultsetColumnDef
@@ -115,8 +116,10 @@ public:
     wxString getFieldValue(unsigned row, unsigned col);
     wxString setFieldValue(unsigned row, unsigned col,
         const wxString& value, bool setNull = false);
-    void importBlobFile(const wxString& filename, unsigned row, unsigned col);
-    void exportBlobFile(const wxString& filename, unsigned row, unsigned col);
+    void importBlobFile(const wxString& filename, unsigned row, unsigned col,
+        ProgressIndicator *pi);
+    void exportBlobFile(const wxString& filename, unsigned row, unsigned col,
+        ProgressIndicator *pi);
     bool canRemoveRow(size_t row);
     bool removeRows(size_t from, size_t count, wxString& statement);
 

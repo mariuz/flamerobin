@@ -41,6 +41,7 @@ class Database;
 class DataGridCell;
 class ResultsetColumnDef;
 class DataGridRowBuffer;
+class ProgressIndicator;
 //-----------------------------------------------------------------------------
 BEGIN_DECLARE_EVENT_TYPES()
     // this event is sent after new rows have been fetched
@@ -117,8 +118,10 @@ public:
     virtual bool DeleteRows(size_t pos, size_t numRows);
 
     // BLOBs can be huge, so we don't use SetValue for that
-    void importBlobFile(const wxString& filename, int row, int col);
-    void exportBlobFile(const wxString& filename, int row, int col);
+    void importBlobFile(const wxString& filename, int row, int col,
+        ProgressIndicator *pi = 0);
+    void exportBlobFile(const wxString& filename, int row, int col,
+        ProgressIndicator *pi = 0);
 };
 //-----------------------------------------------------------------------------
 #endif

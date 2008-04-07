@@ -748,9 +748,10 @@ void DataGridTable::setFetchAllRecords(bool fetchall)
     fetchAllRowsM = fetchall;
 }
 //-----------------------------------------------------------------------------
-void DataGridTable::importBlobFile(const wxString& filename, int row, int col)
+void DataGridTable::importBlobFile(const wxString& filename, int row, int col,
+    ProgressIndicator *pi)
 {
-    rowsM.importBlobFile(filename, row, col);
+    rowsM.importBlobFile(filename, row, col, pi);
     
     // tell the grid it's done
     if (GetView())
@@ -760,9 +761,10 @@ void DataGridTable::importBlobFile(const wxString& filename, int row, int col)
     }
 }
 //-----------------------------------------------------------------------------
-void DataGridTable::exportBlobFile(const wxString& filename, int row, int col)
+void DataGridTable::exportBlobFile(const wxString& filename, int row, int col,
+    ProgressIndicator *pi)
 {
-    rowsM.exportBlobFile(filename, row, col);
+    rowsM.exportBlobFile(filename, row, col, pi);
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::isBlobColumn(int col)

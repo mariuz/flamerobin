@@ -51,6 +51,7 @@
 #include "config/Config.h"
 #include "core/FRError.h"
 #include "core/Observer.h"
+#include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
 #include "frtypes.h"
 #include "gui/controls/DataGridRowBuffer.h"
@@ -1777,15 +1778,20 @@ bool DataGridRows::isBlobColumn(unsigned col)
 }
 //-----------------------------------------------------------------------------
 void DataGridRows::exportBlobFile(const wxString& filename, unsigned row, 
-    unsigned col)
+    unsigned col, ProgressIndicator *pi)
 {
     // TODO
 }
 //-----------------------------------------------------------------------------
 void DataGridRows::importBlobFile(const wxString& filename, unsigned row, 
-    unsigned col)
+    unsigned col, ProgressIndicator *pi)
 {
-    // upload data to database
+    wxFFile fl(filename, wxT("rb"));
+    if (!fl.IsOpened())
+        throw FRError(_("Cannot open BLOB file."));
+    if (pi)
+        pi->initProgress(_("Loading..."), fl.Length()); // wxFileOffset
+
     wxString table(std2wx(statementM->ColumnTable(col+1)));
     wxString stm = wxT("UPDATE ") + Identifier(table).getQuoted()
         + wxT(" SET ")
@@ -1793,21 +1799,9 @@ void DataGridRows::importBlobFile(const wxString& filename, unsigned row,
         + wxT(" = ? WHERE ");
     std::map<wxString, UniqueConstraint *>::iterator it =
         statementTablesM.find(table);
-
-    // MB: please do not remove this check. Although it is not needed,
-    //     it helped me detect some subtle bugs much easier
     if (it == statementTablesM.end() || (*it).second == 0)
         throw FRError(_("Blob table not found."));
-
-    IBPP::Statement st = addWhere((*it).second, stm, table, buffersM[row]);
-
-    // load blob
-    wxFFile fl(filename, wxT("rb"));
-    if (!fl.IsOpened())
-        throw FRError(_("Cannot open BLOB file."));
-    
-    // TODO: show progress dialog using this: wxFileOffset len = fl.Length();
-    
+    IBPP::Statement st = addWhere((*it).second, stm, table, buffersM[row]);    
     IBPP::Blob b = IBPP::BlobFactory(st->DatabasePtr(),
         st->TransactionPtr());
     b->Create();
@@ -1815,12 +1809,16 @@ void DataGridRows::importBlobFile(const wxString& filename, unsigned row,
     while (!fl.Eof())
     {
         size_t len = fl.Read(buffer, 32767);    // slow when not 32k
-        if (len < 1)
+        if (len < 1 || pi && pi->isCanceled())
             break;
         b->Write(buffer, len);
+        if (pi)
+            pi->stepProgress(len);
     }
     fl.Close();
     b->Close();
+    if (pi && pi->isCanceled())
+        return;
     st->Set(1, b);
     st->Execute();  // we execute before updating internal storage
     
