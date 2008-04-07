@@ -1780,7 +1780,30 @@ bool DataGridRows::isBlobColumn(unsigned col)
 void DataGridRows::exportBlobFile(const wxString& filename, unsigned row, 
     unsigned col, ProgressIndicator *pi)
 {
-    // TODO
+    wxFFile fl(filename, wxT("wb+"));
+    if (!fl.IsOpened())
+        throw FRError(_("Cannot open destination file."));
+    IBPP::Blob *b0 = buffersM[row]->getBlob(columnDefsM[col]->getIndex());
+    if (!b0)
+        throw FRError(_("BLOB data not valid"));
+    IBPP::Blob b = *b0;
+    b->Open();
+    int size;
+    b->Info(&size, 0, 0);
+    if (pi)
+        pi->initProgress(_("Saving..."), size);
+    while (!pi || !pi->isCanceled())
+    {
+        uint8_t buffer[32768];
+        int size = b->Read((void*)buffer, 32767);
+        if (size < 1)
+            break;
+        fl.Write(buffer, size);
+        if (pi)
+            pi->stepProgress(size);
+    }
+    fl.Close();
+    b->Close();
 }
 //-----------------------------------------------------------------------------
 void DataGridRows::importBlobFile(const wxString& filename, unsigned row, 

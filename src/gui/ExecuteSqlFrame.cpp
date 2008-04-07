@@ -1407,13 +1407,14 @@ void ExecuteSqlFrame::OnMenuGridExportBlob(wxCommandEvent& WXUNUSED(event))
         return;
     if (!dgt->isBlobColumn(grid_data->GetGridCursorCol()))
         throw FRError(_("Not a BLOB column"));
-    wxString filename = ::wxFileSelector(_("Select a file"));
+    wxString filename = ::wxFileSelector(_("Select a file"), wxT(""),
+        wxT(""), wxT(""), wxT("*"), wxSAVE | wxOVERWRITE_PROMPT, this);
     if (filename.IsEmpty())
         return;
-        
-    wxBusyCursor wait; // TODO: remove once we add a progress dialog
+    ProgressDialog pd(this, _("Saving BLOB to file"));
+    pd.Show();
     dgt->exportBlobFile(filename, grid_data->GetGridCursorRow(), 
-        grid_data->GetGridCursorCol());
+        grid_data->GetGridCursorCol(), &pd);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridImportBlob(wxCommandEvent& WXUNUSED(event))
@@ -1423,8 +1424,9 @@ void ExecuteSqlFrame::OnMenuGridImportBlob(wxCommandEvent& WXUNUSED(event))
         return;
     if (!dgt->isBlobColumn(grid_data->GetGridCursorCol()))
         throw FRError(_("Not a BLOB column"));
-    wxString filename = ::wxFileSelector(_("Select a file"));
-    if (filename.IsEmpty())
+    wxString filename = ::wxFileSelector(_("Select a file"), wxT(""),
+        wxT(""), wxT(""), wxT("*"), wxOPEN | wxFILE_MUST_EXIST, this);
+   if (filename.IsEmpty())
         return;
         
     ProgressDialog pd(this, _("Importing BLOB from file"));
