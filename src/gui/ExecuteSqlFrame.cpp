@@ -8,7 +8,7 @@
   distribute, sublicense, and/or sell copies of the Software, and to
   permit persons to whom the Software is furnished to do so, subject to
   the following conditions:
-d
+
   The above copyright notice and this permission notice shall be included
   in all copies or substantial portions of the Software.
 
@@ -627,6 +627,9 @@ void ExecuteSqlFrame::buildMainMenu()
     gridMenu->Append(Cmds::DataGrid_Copy,            _("&Copy"));
     gridMenu->Append(Cmds::DataGrid_Copy_as_insert,  _("Copy &as insert statements"));
     gridMenu->Append(Cmds::DataGrid_Copy_as_update,  _("Copy as &update statements"));
+    gridMenu->AppendSeparator();
+    gridMenu->Append(Cmds::DataGrid_ImportBlob, _("Import BLOB from file..."));
+    gridMenu->Append(Cmds::DataGrid_ExportBlob, _("Save BLOB to file..."));
     gridMenu->AppendSeparator();
     gridMenu->Append(Cmds::DataGrid_FetchAll,        _("&Fetch all records"));
     gridMenu->Append(Cmds::DataGrid_CancelFetchAll,  _("&Stop fetching all records"));
