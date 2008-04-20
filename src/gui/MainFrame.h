@@ -31,6 +31,7 @@
 #include <wx/wx.h>
 #include <wx/image.h>
 #include <wx/treectrl.h>
+#include <wx/aui/aui.h>
 
 #include <vector>
 
@@ -38,8 +39,10 @@
 #include "metadata/generator.h"
 #include "metadata/metadataitem.h"
 #include "metadata/root.h"
+#include "framemanager.h"
 //-----------------------------------------------------------------------------
 class DBHTreeControl;
+class LabelPanel;
 //-----------------------------------------------------------------------------
 class MainFrame: public BaseFrame
 {
@@ -124,6 +127,7 @@ public:
     void OnMainMenuOpen(wxMenuEvent& event);
     void OnTreeSelectionChanged(wxTreeEvent& event);
     void OnTreeItemActivate(wxTreeEvent& event);
+    void OnNotebookPageClose(wxAuiNotebookEvent& event);
     void OnClose(wxCloseEvent& event);
 
     // search stuff (IDs 600+ are taken!)
@@ -131,7 +135,8 @@ public:
         ID_button_advanced = 401,
         ID_button_prev,
         ID_button_next,
-        ID_search_box
+        ID_search_box,
+        ID_notebook
     };
     void OnSearchTextChange(wxCommandEvent& event);
     void OnSearchBoxEnter(wxCommandEvent& event);
@@ -145,6 +150,8 @@ public:
 
     bool openUnregisteredDatabase(const wxString& dbpath);
 
+    virtual void showPanel(wxWindow *panel, const wxString& title);
+    virtual void removePanel(wxWindow *panel);
 private:
     bool connect();
     void showGeneratorValue(Generator* g);
@@ -171,6 +178,10 @@ protected:
     wxBitmapButton* button_prev;
     wxBitmapButton* button_next;
     wxBitmapButton* button_advanced;
+
+    wxAuiManager auiManagerM;
+    wxAuiNotebook* notebookM;
+    LabelPanel *labelPanelM;
 
     virtual const wxString getName() const;
     virtual const wxRect getDefaultRect() const;

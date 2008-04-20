@@ -40,6 +40,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 
 #include "metadata/database.h"
+#include "gui/MetadataItemPropertiesFrame.h"
 #include "framemanager.h"
 //-----------------------------------------------------------------------------
 FrameManager& frameManager()
@@ -66,12 +67,15 @@ void FrameManager::setWindowMenu(wxMenu *windowMenu)
 }
 //-----------------------------------------------------------------------------
 // TODO: currently we just clear and rebuild from scratch
-//       we could implement more efficient algorithm later (find the one that is gone and remove, etc)
+//       we could implement more efficient algorithm later 
+//       (find the one that is gone and remove, etc)
 void FrameManager::rebuildMenu()
 {
     if (windowMenuM == 0)
         return;
 
+    /* this is currently not used?
+     * 
     // remove all items
     while (windowMenuM->GetMenuItemCount() > regularItemsM)
         windowMenuM->Destroy(windowMenuM->FindItemByPosition(regularItemsM));
@@ -82,67 +86,68 @@ void FrameManager::rebuildMenu()
     std::map<Database *, wxMenu *> dmm;
 
     // build submenus
-    int id = 5000;    // these menu IDs start from "safe" 5000 and upwards to 6000 (let's hope users won't open 1001 windows)
-    for (ItemFrameMap::iterator it = mipFramesM.begin(); it != mipFramesM.end(); ++it)
+    int id = 5000;    // start from "safe" 5000 and upwards to 6000
+    for (ItemPanelMap::iterator it = mipPanelsM.begin(); 
+        it != mipPanelsM.end(); ++it)
     {
-        MetadataItemPropertiesFrame *mf = dynamic_cast<MetadataItemPropertiesFrame *>((*it).second.frame);
-        if (!mf)
-            continue;
-        MetadataItem *m = mf->getObservedObject();
+        MetadataItem *m = (*it).second.panel->getObservedObject();
         if (!m)
             continue;
         Database* db = m->findDatabase();
         if (!db)
             continue;
 
-        if (dmm.find(db) == dmm.end())        // add database if not already there
-            dmm.insert(dmm.begin(), std::pair<Database*, wxMenu*>(db, new wxMenu));
+        if (dmm.find(db) == dmm.end())  // add database if not already there
+        {
+            dmm.insert(dmm.begin(), 
+                std::pair<Database*, wxMenu*>(db, new wxMenu));
+        }
         (dmm[db])->Append(id, mf->GetTitle());
         (*it).second.id = id;
         ++id;
     }
 
     // wxWidgets manual says that we should insert the submenus at end
-    for (std::map<Database *, wxMenu *>::iterator it = dmm.begin(); it != dmm.end(); ++it)
+    for (std::map<Database *, wxMenu *>::iterator it = dmm.begin(); 
+        it != dmm.end(); ++it)
+    {
         windowMenuM->Append(-1, (*it).first->getName_(), (*it).second);
+    }
 
-    if (windowMenuM->GetMenuItemCount() == regularItemsM)    // remove the separator if nothing is beneath
+    // remove the separator if nothing is beneath
+    if (windowMenuM->GetMenuItemCount() == regularItemsM)    
         windowMenuM->Destroy(windowMenuM->FindItemByPosition(regularItemsM-1));
+        */
 }
 //-----------------------------------------------------------------------------
 void FrameManager::bringOnTop(int id)
 {
-    for (ItemFrameMap::iterator it = mipFramesM.begin(); it != mipFramesM.end(); ++it)
+    for (ItemPanelMap::iterator it = mipPanelsM.begin(); 
+        it != mipPanelsM.end(); ++it)
     {
         if ((*it).second.id == id)
         {
-            MetadataItemPropertiesFrame* mipf = dynamic_cast<MetadataItemPropertiesFrame *>((*it).second.frame);
-            if (mipf)
-            {
-                mipf->Show();
-                mipf->Raise();
-            }
+            (*it).second.panel->showIt();
             break;
         }
     }
 }
 //-----------------------------------------------------------------------------
-void FrameManager::removeFrame(BaseFrame* frame)
+void FrameManager::removeFrame(MetadataItemPropertiesPanel* panel)
 {
-    if (frame)
-    {
-        removeFrame(frame, mipFramesM);
-    }
+    if (panel)
+        removeFrame(panel, mipPanelsM);
 }
 //-----------------------------------------------------------------------------
-void FrameManager::removeFrame(BaseFrame* frame, ItemFrameMap& frames)
+void FrameManager::removeFrame(MetadataItemPropertiesPanel* panel, 
+    ItemPanelMap& frames)
 {
-    ItemFrameMap::iterator it;
+    ItemPanelMap::iterator it;
     for (it = frames.begin(); it != frames.end();)
     {
-        if ((*it).second.frame == frame)
+        if ((*it).second.panel == panel)
         {
-            mipFramesM.erase(it);
+            mipPanelsM.erase(it);
             it = frames.begin();
         }
         else
@@ -151,33 +156,52 @@ void FrameManager::removeFrame(BaseFrame* frame, ItemFrameMap& frames)
     rebuildMenu();
 }
 //-----------------------------------------------------------------------------
-MetadataItemPropertiesFrame* FrameManager::showMetadataPropertyFrame(wxWindow* parent,
-    MetadataItem* item, bool delayed, bool force_new)
+MetadataItemPropertiesPanel* FrameManager::showMetadataPropertyFrame(
+    wxWindow* parent, MetadataItem* item, bool delayed, bool force_new)
 {
-    MetadataItemPropertiesFrame* mipf = 0;
-    ItemFrameMap::iterator it = mipFramesM.find(item);
-    if (it != mipFramesM.end())
-        mipf = dynamic_cast<MetadataItemPropertiesFrame *>((*it).second.frame);
-    if (!mipf || force_new)
+    MetadataItemPropertiesPanel* mpp = 0;
+    ItemPanelMap::iterator it = mipPanelsM.find(item);
+    if (it != mipPanelsM.end())
+        mpp = (*it).second.panel;
+        
+    if (!mpp || force_new)
     {
-        mipf = new MetadataItemPropertiesFrame(parent, item);
-        FrameAndId fai(mipf, 0);
-        mipFramesM.insert(mipFramesM.begin(), std::pair<MetadataItem*, FrameAndId>(item, fai));
+        MetadataItemPropertiesPanel* newp = 0;
+        // if that frame already shows another object, force new frame
+        if (force_new || dynamic_cast<MetadataItemPropertiesFrame *>(parent))
+        {
+            // MainFrame should be parent of all MIPFrames
+            MetadataItemPropertiesFrame* m = new MetadataItemPropertiesFrame(
+                 wxTheApp->GetTopWindow(), item);
+            newp = m->getPanel();
+        }
+        else
+        {
+            newp = new MetadataItemPropertiesPanel(
+                dynamic_cast<BaseFrame *>(parent), item);
+        }
+        if (!mpp)   // new panel created, register it
+        {
+            PanelAndId fai(newp, 0);
+            mipPanelsM.insert(mipPanelsM.begin(), 
+                std::pair<MetadataItem*, PanelAndId>(item, fai));
+        }
+        mpp = newp;
     }
+        
     if (delayed)
     {
         wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, ID_ACTIVATE_FRAME);
-        event.SetEventObject(mipf);
+        event.SetEventObject(mpp);
         AddPendingEvent(event);
     }
     else
     {
-        mipf->Show();
-        mipf->Raise();
+        mpp->showIt();
     }
     if (!force_new)     // forced ones would rebuild themselves anyway
         rebuildMenu();
-    return mipf;
+    return mpp;
 }
 //-----------------------------------------------------------------------------
 //! event handlers
@@ -187,11 +211,9 @@ END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void FrameManager::OnCommandEvent(wxCommandEvent& event)
 {
-    wxFrame* frame = dynamic_cast<wxFrame*>(event.GetEventObject());
-    if (frame)
-    {
-        frame->Show();
-        frame->Raise();
-    }
+    MetadataItemPropertiesPanel* panel = dynamic_cast<
+        MetadataItemPropertiesPanel*>(event.GetEventObject());
+    if (panel)
+        panel->showIt();
 }
 //-----------------------------------------------------------------------------

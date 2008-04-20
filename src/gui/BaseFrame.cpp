@@ -69,7 +69,6 @@ bool BaseFrame::Show(bool show)
 //-----------------------------------------------------------------------------
 bool BaseFrame::Destroy()
 {
-    frameManager().removeFrame(this);
     writeConfigSettings();
     return wxFrame::Destroy();
 }

@@ -36,12 +36,13 @@
 #include <wx/html/htmlwin.h>
 #endif
 
+#include "framemanager.h"
 #include "core/Observer.h"
 #include "gui/BaseFrame.h"
 #include "gui/controls/PrintableHtmlWindow.h"
 #include "metadata/metadataitem.h"
 //-----------------------------------------------------------------------------
-class MetadataItemPropertiesFrame: public BaseFrame, public Observer
+class MetadataItemPropertiesPanel: public wxPanel, public Observer
 {
 private:
     enum { ptSummary, ptConstraints, ptDependencies, ptTriggers,
@@ -66,17 +67,16 @@ private:
     // (see getStorageName()) after detaching from it.
     mutable wxString storageNameM;
 protected:
-    virtual const wxString getName() const;
-    virtual const wxString getStorageName() const;
-    virtual const wxRect getDefaultRect() const;
     virtual void removeSubject(Subject* subject);
     virtual void update();
 public:
-    MetadataItemPropertiesFrame(wxWindow* parent, MetadataItem *object);
+    MetadataItemPropertiesPanel(wxWindow *parent, MetadataItem *object);
+    virtual ~MetadataItemPropertiesPanel();
 
     MetadataItem* getObservedObject() const;
     void processHtmlFile(wxString fileName);
     void setPage(const wxString& type);
+    void showIt();
 private:
     // event handling
     void OnIdle(wxIdleEvent& event);
@@ -85,6 +85,32 @@ private:
     void OnHtmlCellHover(wxHtmlCellEvent &event);
     DECLARE_EVENT_TABLE()
 #endif
+};
+//-----------------------------------------------------------------------------
+class MetadataItemPropertiesFrame: public BaseFrame
+{
+private:
+    MetadataItemPropertiesPanel *panelM;
+    
+    // used to remember the value among calls to getStorageName(),
+    // needed because it's not possible to access objectM
+    // (see getStorageName()) after detaching from it.
+    mutable wxString storageNameM;
+protected:
+    virtual const wxString getName() const;
+    virtual const wxString getStorageName() const;
+    virtual const wxRect getDefaultRect() const;
+public:
+    MetadataItemPropertiesFrame(wxWindow* parent, MetadataItem *object);
+
+    virtual void showPanel(wxWindow *panel, const wxString& title);
+    virtual void removePanel(wxWindow *panel);
+        
+    MetadataItemPropertiesPanel *getPanel() { return panelM; }
+    MetadataItem* getObservedObject() const { return panelM->getObservedObject(); };
+    void processHtmlFile(wxString fileName) { panelM->processHtmlFile(fileName); };
+    void setPage(const wxString& type) { panelM->setPage(type); };
+private:
 };
 //-----------------------------------------------------------------------------
 #endif // FR_METADATAITEMPROPERTIESFRAME_H

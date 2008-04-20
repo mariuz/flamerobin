@@ -33,19 +33,19 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <map>
 
 #include "gui/BaseFrame.h"
-#include "gui/MetadataItemPropertiesFrame.h"
 #include "metadata/metadataitem.h"
+class MetadataItemPropertiesPanel;
 //--------------------------------------------------------------------------------------
-class FrameAndId
+class PanelAndId
 {
 public:
-    BaseFrame *frame;
+    MetadataItemPropertiesPanel *panel;
     int id;
-    FrameAndId(BaseFrame *f, int i)
-        :frame(f), id(i) {};
+    PanelAndId(MetadataItemPropertiesPanel *p, int i)
+        :panel(p), id(i) {};
 };
 //--------------------------------------------------------------------------------------
-typedef std::multimap<MetadataItem*, FrameAndId> ItemFrameMap;
+typedef std::multimap<MetadataItem*, PanelAndId> ItemPanelMap;
 //--------------------------------------------------------------------------------------
 class FrameManager: public wxEvtHandler
 {
@@ -57,9 +57,9 @@ public:
     void rebuildMenu();
     void bringOnTop(int id);
 
-    void removeFrame(BaseFrame* frame);
-    MetadataItemPropertiesFrame* showMetadataPropertyFrame(wxWindow* parent, MetadataItem* item,
-        bool delayed = false, bool force_new = false);
+    void removeFrame(MetadataItemPropertiesPanel* panel);
+    MetadataItemPropertiesPanel* showMetadataPropertyFrame(wxWindow* parent, 
+        MetadataItem* item, bool delayed = false, bool force_new = false);
 
     void OnCommandEvent(wxCommandEvent& event);
 protected:
@@ -67,11 +67,11 @@ protected:
     DECLARE_EVENT_TABLE()
 private:
     size_t regularItemsM;
-    ItemFrameMap mipFramesM;
+    ItemPanelMap mipPanelsM;
     wxMenu* windowMenuM;
     wxMenuBar* menuBarM;
 
-    void removeFrame(BaseFrame* frame, ItemFrameMap& frames);
+    void removeFrame(MetadataItemPropertiesPanel* frame, ItemPanelMap& panels);
 };
 //--------------------------------------------------------------------------------------
 FrameManager& frameManager();

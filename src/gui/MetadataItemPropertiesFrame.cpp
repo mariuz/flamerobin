@@ -72,6 +72,45 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
         MetadataItem *object)
     : BaseFrame(parent, wxID_ANY, wxEmptyString)
 {
+    wxStatusBar *sb = CreateStatusBar();
+
+    Database* d = object->findDatabase();
+    if (d)  // server property page doesn't have a database, so don't crash
+    {
+        wxString s = d->getUsername() + wxT("@") + d->getConnectionString()
+            + wxT(" (") + d->getConnectionCharset() + wxT(")");
+        sb->SetStatusText(s);
+    }
+    else
+        sb->SetStatusText(object->getPrintableName());
+
+    wxString objName(object->getName_());
+    SetTitle(wxString::Format(_("%s: Properties"), objName.c_str()));
+
+    wxBitmap bmp = getImage32(object->getType());
+    wxIcon icon;
+    icon.CopyFromBitmap(bmp);
+    SetIcon(icon);
+    
+    panelM = new MetadataItemPropertiesPanel(this, object);
+	
+	//SetSizeHints( wxDefaultSize, wxDefaultSize );
+	
+	wxBoxSizer* bSizer1 = new wxBoxSizer( wxVERTICAL );
+    bSizer1->Add( panelM, 1, wxEXPAND, 0 );
+    SetSizer( bSizer1 );
+	Layout();
+}
+//-----------------------------------------------------------------------------
+MetadataItemPropertiesPanel::~MetadataItemPropertiesPanel()
+{
+    frameManager().removeFrame(this);
+}
+//-----------------------------------------------------------------------------
+MetadataItemPropertiesPanel::MetadataItemPropertiesPanel(
+    wxWindow *parent, MetadataItem *object)
+    :wxPanel(parent, wxID_ANY)
+{
     pageTypeM = ptSummary;
     objectM = object;
     htmlReloadRequestedM = false;
@@ -84,18 +123,22 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
     }
 
     html_window = new PrintableHtmlWindow(this, HtmlWindowID);
-
-    wxStatusBar *sb = CreateStatusBar();
-    Database* d = objectM->findDatabase();
-    if (d)  // server property page doesn't have a database, so don't crash
+    MetadataItemPropertiesFrame *frame = dynamic_cast<
+        MetadataItemPropertiesFrame *>(parent);
+    if (frame)
     {
-        wxString s = d->getUsername() + wxT("@") + d->getConnectionString()
-            + wxT(" (") + d->getConnectionCharset() + wxT(")");
-        sb->SetStatusText(s);
+        wxString objName(object->getName_());
+        html_window->SetRelatedFrame(frame, objName + wxT(": %s"));
     }
-    else
-        sb->SetStatusText(objectM->getPrintableName());
 
+	wxBoxSizer* bSizer2 = new wxBoxSizer( wxVERTICAL );
+	bSizer2->Add( html_window, 1, wxEXPAND, 0 );
+	SetSizer( bSizer2 );
+	Layout();
+	//bSizer2->Fit(this);
+
+
+    Database* d = objectM->findDatabase();
     // start a transaction for metadata loading and lock the object
     MetadataLoaderTransaction tr((d) ? d->getMetadataLoader() : 0);
     SubjectLocker lock(objectM);
@@ -103,15 +146,26 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
     // request initial rendering
     requestLoadPage(true);
     objectM->attachObserver(this);
-
-    wxString objName(objectM->getName_());
-    SetTitle(wxString::Format(_("%s: Properties"), objName.c_str()));
-    html_window->SetRelatedFrame(this, objName + wxT(": %s"));
-
-    wxBitmap bmp = getImage32(objectM->getType());
-    wxIcon icon;
-    icon.CopyFromBitmap(bmp);
-    SetIcon(icon);
+}
+//-----------------------------------------------------------------------------
+void MetadataItemPropertiesPanel::showIt()
+{
+    for (wxWindow *w = GetParent(); w; w = w->GetParent())
+    {
+        BaseFrame *parent = dynamic_cast<BaseFrame *>(w);
+        if (parent)
+        {
+            parent->showPanel(this, objectM->getName_());
+            break;
+        }
+    }
+}
+//-----------------------------------------------------------------------------
+void MetadataItemPropertiesFrame::showPanel(wxWindow *panel,
+    const wxString& title)
+{
+    Show();
+    Raise();
 }
 //-----------------------------------------------------------------------------
 const wxRect MetadataItemPropertiesFrame::getDefaultRect() const
@@ -124,7 +178,7 @@ const wxString MetadataItemPropertiesFrame::getName() const
     return wxT("MIPFrame");
 }
 //-----------------------------------------------------------------------------
-MetadataItem *MetadataItemPropertiesFrame::getObservedObject() const
+MetadataItem *MetadataItemPropertiesPanel::getObservedObject() const
 {
     return objectM;
 }
@@ -143,10 +197,12 @@ const wxString MetadataItemPropertiesFrame::getStorageName() const
                 storageNameM = getName();
                 break;
             case sgObjectType:
-                storageNameM = getName() + Config::pathSeparator + objectM->getTypeName();
+                storageNameM = getName() + Config::pathSeparator 
+                    + panelM->getObservedObject()->getTypeName();
                 break;
             case sgObject:
-                storageNameM = getName() + Config::pathSeparator + objectM->getItemPath();
+                storageNameM = getName() + Config::pathSeparator 
+                    + panelM->getObservedObject()->getItemPath();
                 break;
             default:
                 storageNameM = wxT("");
@@ -157,7 +213,7 @@ const wxString MetadataItemPropertiesFrame::getStorageName() const
 }
 //-----------------------------------------------------------------------------
 //! defer (possibly expensive) creation and display of html page to idle time
-void MetadataItemPropertiesFrame::requestLoadPage(bool showLoadingPage)
+void MetadataItemPropertiesPanel::requestLoadPage(bool showLoadingPage)
 {
     if (!htmlReloadRequestedM)
     {
@@ -169,13 +225,13 @@ void MetadataItemPropertiesFrame::requestLoadPage(bool showLoadingPage)
         }
 
         Connect(wxID_ANY, wxEVT_IDLE,
-            wxIdleEventHandler(MetadataItemPropertiesFrame::OnIdle));
+            wxIdleEventHandler(MetadataItemPropertiesPanel::OnIdle));
         htmlReloadRequestedM = true;
     }
 }
 //-----------------------------------------------------------------------------
 //! determine the path, load and display html page
-void MetadataItemPropertiesFrame::loadPage()
+void MetadataItemPropertiesPanel::loadPage()
 {
     wxString htmlpage = config().getHtmlTemplatesPath();
     switch (pageTypeM)
@@ -217,7 +273,7 @@ void MetadataItemPropertiesFrame::loadPage()
 //
 //! command is in format:   {%action:data%}
 //! data field can be empty
-void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *object, wxString& htmlpage)
+void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *object, wxString& htmlpage)
 {
     wxString::size_type pos = cmd.find(':');
     wxString suffix;
@@ -317,7 +373,7 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
         if (!s)
             return;
 
-        ProgressDialog pd(this, _("Connecting to Server..."), 1);
+        ProgressDialog pd(GetParent(), _("Connecting to Server..."), 1);
         UserList* usr = s->getUsers(&pd);
         if (!usr || !usr->size())
         {
@@ -768,7 +824,7 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
 
     else if (cmd == wxT("object_ddl"))
     {
-        ProgressDialog pd(this, _("Extracting DDL Definitions"), 2);
+        ProgressDialog pd(GetParent(), _("Extracting DDL Definitions"), 2);
 
         CreateDDLVisitor cdv(&pd);
         object->acceptVisitor(&cdv);
@@ -932,7 +988,7 @@ void MetadataItemPropertiesFrame::processCommand(wxString cmd, MetadataItem *obj
 }
 //-----------------------------------------------------------------------------
 //! processes html template code given in the htmlsource wxString
-void MetadataItemPropertiesFrame::processHtmlCode(wxString& htmlpage, wxString htmlsource, MetadataItem *object)
+void MetadataItemPropertiesPanel::processHtmlCode(wxString& htmlpage, wxString htmlsource, MetadataItem *object)
 {
     if (object == 0)
         object = objectM;
@@ -981,7 +1037,7 @@ void MetadataItemPropertiesFrame::processHtmlCode(wxString& htmlpage, wxString h
 }
 //-----------------------------------------------------------------------------
 //! processes the given html template file
-void MetadataItemPropertiesFrame::processHtmlFile(wxString fileName)
+void MetadataItemPropertiesPanel::processHtmlFile(wxString fileName)
 {
     wxString htmlpage;
     processHtmlCode(htmlpage, loadEntireFile(fileName));
@@ -993,18 +1049,31 @@ void MetadataItemPropertiesFrame::processHtmlFile(wxString fileName)
 }
 //-----------------------------------------------------------------------------
 //! closes window if observed object gets removed (disconnecting, dropping, etc)
-void MetadataItemPropertiesFrame::removeSubject(Subject* subject)
+void MetadataItemPropertiesPanel::removeSubject(Subject* subject)
 {
     Observer::removeSubject(subject);
     // main observed object is getting destroyed
     if (subject == objectM)
     {
         objectM = 0;
-        Close();
+        for (wxWindow *w = GetParent(); w; w = w->GetParent())
+        {
+            BaseFrame *f = dynamic_cast<BaseFrame *>(w);
+            if (f)
+            {
+                f->removePanel(this);
+                break;
+            }
+        }
     }
 }
 //-----------------------------------------------------------------------------
-void MetadataItemPropertiesFrame::setPage(const wxString& type)
+void MetadataItemPropertiesFrame::removePanel(wxWindow *panel)
+{
+    Close();
+}
+//-----------------------------------------------------------------------------
+void MetadataItemPropertiesPanel::setPage(const wxString& type)
 {
     if (type == wxT("constraints"))
         pageTypeM = ptConstraints;
@@ -1025,13 +1094,21 @@ void MetadataItemPropertiesFrame::setPage(const wxString& type)
 }
 //-----------------------------------------------------------------------------
 //! recreate html page if something changes
-void MetadataItemPropertiesFrame::update()
+void MetadataItemPropertiesPanel::update()
 {
     Database *db = dynamic_cast<Database *>(objectM);
     if (db && !db->isConnected())
     {
         objectM = 0;
-        Close();
+        for (wxWindow *w = GetParent(); w; w = w->GetParent())
+        {
+            BaseFrame *f = dynamic_cast<BaseFrame *>(w);
+            if (f)
+            {
+                f->removePanel(this);
+                break;
+            }
+        }
         return;
     }
 
@@ -1074,13 +1151,13 @@ void MetadataItemPropertiesFrame::update()
 }
 //-----------------------------------------------------------------------------
 #if wxCHECK_VERSION(2, 8, 0)
-BEGIN_EVENT_TABLE(MetadataItemPropertiesFrame, BaseFrame)
-    EVT_HTML_CELL_HOVER(MetadataItemPropertiesFrame::HtmlWindowID,
-        MetadataItemPropertiesFrame::OnHtmlCellHover)
+BEGIN_EVENT_TABLE(MetadataItemPropertiesPanel, wxPanel)
+    EVT_HTML_CELL_HOVER(MetadataItemPropertiesPanel::HtmlWindowID,
+        MetadataItemPropertiesPanel::OnHtmlCellHover)
 END_EVENT_TABLE()
 #endif
 //-----------------------------------------------------------------------------
-void MetadataItemPropertiesFrame::OnIdle(wxIdleEvent& WXUNUSED(event))
+void MetadataItemPropertiesPanel::OnIdle(wxIdleEvent& WXUNUSED(event))
 {
     Disconnect(wxID_ANY, wxEVT_IDLE);
     wxBusyCursor bc;
@@ -1089,7 +1166,7 @@ void MetadataItemPropertiesFrame::OnIdle(wxIdleEvent& WXUNUSED(event))
 }
 //-----------------------------------------------------------------------------
 #if wxCHECK_VERSION(2, 8, 0)
-void MetadataItemPropertiesFrame::OnHtmlCellHover(wxHtmlCellEvent& event)
+void MetadataItemPropertiesPanel::OnHtmlCellHover(wxHtmlCellEvent& event)
 {
     wxHtmlCell *c = event.GetCell();
     if (!c)
@@ -1132,28 +1209,21 @@ bool PageHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("page"))
         return false;
-
-    wxString ms = uri.getParam(wxT("parent_window"));     // window
-    unsigned long mo;
-    if (!ms.ToULong(&mo))
+        
+    MetadataItemPropertiesPanel* mpp = dynamic_cast<
+        MetadataItemPropertiesPanel*>(getWindow(uri));
+    if (!mpp)
         return true;
-    MetadataItemPropertiesFrame* mpf = (MetadataItemPropertiesFrame*)mo;
+        
     if (uri.getParam(wxT("target")) == wxT("new"))
     {
-        wxWindow* mainFrame = mpf->GetParent();
-        if (mainFrame)
-        {
-            mpf = frameManager().showMetadataPropertyFrame(mainFrame,
-                                    // !delayed, force_new
-                mpf->getObservedObject(), false, true);
-        }
+        mpp = frameManager().showMetadataPropertyFrame(
+            ::wxGetTopLevelParent(mpp),
+            mpp->getObservedObject(), false, true); // !delayed, force_new
     }
 
-    if (mpf)
-    {
-        mpf->setPage(uri.getParam(wxT("type")));
-        frameManager().rebuildMenu();
-    }
+    mpp->setPage(uri.getParam(wxT("type")));
+    frameManager().rebuildMenu();
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -1172,25 +1242,33 @@ bool PropertiesHandler::handleURI(URI& uri)
     if (uri.action != wxT("properties"))
         return false;
 
-    MetadataItemPropertiesFrame* parent = dynamic_cast<MetadataItemPropertiesFrame*>(getWindow(uri));
+    MetadataItemPropertiesPanel* parent = dynamic_cast<
+        MetadataItemPropertiesPanel*>(getWindow(uri));
     if (!parent)
         return true;
     Database* d = parent->getObservedObject()->findDatabase();
     if (!d)
         return true;
     NodeType n = getTypeByName(uri.getParam(wxT("object_type")));
-    MetadataItem* object = d->findByNameAndType(n, uri.getParam(wxT("object_name")));
+    MetadataItem* object = d->findByNameAndType(n, 
+        uri.getParam(wxT("object_name")));
     if (!object)
     {
-        ::wxMessageBox(_("Cannot find destination object\nThis should never happen."), _("Error"), wxICON_ERROR);
+        ::wxMessageBox(
+            _("Cannot find destination object\nThis should never happen."), 
+            _("Error"), wxICON_ERROR);
         return true;
     }
 
-    // check if window with properties of that object is already open and show it
-    wxWindow* mainFrame = parent->GetParent();
-    if (mainFrame)
-        frameManager().showMetadataPropertyFrame(mainFrame, object, false,
-            uri.getParam(wxT("target")) == wxT("new"));
+    for (wxWindow *w = parent->GetParent(); w; w = w->GetParent())
+    {
+        if (dynamic_cast<BaseFrame *>(w))
+        {
+            frameManager().showMetadataPropertyFrame(w, object, false, 
+                uri.getParam(wxT("target")) == wxT("new"));
+            break;
+        }
+    }
     return true;
 }
 //-----------------------------------------------------------------------------
