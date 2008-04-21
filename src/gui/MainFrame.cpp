@@ -120,17 +120,17 @@ public:
         panelLabelM = new wxStaticText(this, wxID_ANY, wxT(""));
         //panelLabel->Wrap( -1 );
         panelSizer->Add(panelLabelM, 0, wxALL, 5 );
-        
-        listCtrlM = new wxListCtrl(this, wxID_ANY, wxDefaultPosition, 
+
+        listCtrlM = new wxListCtrl(this, wxID_ANY, wxDefaultPosition,
             wxDefaultSize, wxLC_LIST | wxLC_SINGLE_SEL | wxSUNKEN_BORDER);
         panelSizer->Add(listCtrlM, 1, wxEXPAND, 0 );
-        
+
         SetSizer(panelSizer);
         Layout();
         panelSizer->Fit(this);
         Show();
     }
-    
+
     wxListCtrl* getListCtrl() { return listCtrlM; }
     void setLabel(const wxString& label) { panelLabelM->SetLabel(label); }
 };
@@ -154,9 +154,9 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title,
         wxTR_HAS_BUTTONS | wxSUNKEN_BORDER);
 
     labelPanelM = new LabelPanel(this);
-    notebookM = new wxAuiNotebook(this, ID_notebook, wxDefaultPosition, 
+    notebookM = new wxAuiNotebook(this, ID_notebook, wxDefaultPosition,
         wxDefaultSize, wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_WINDOWLIST_BUTTON);
-    notebookM->AddPage(labelPanelM, wxT("Items"), true);    // true = select    
+    notebookM->AddPage(labelPanelM, wxT("Items"), true);    // true = select
 
     wxArrayString choices;  // load from config?
 
@@ -354,7 +354,7 @@ void MainFrame::do_layout()
         .Name(wxT("tree")).MinSize(260, -1).Caption(wxT("Firebird databases"))
         .Left().CloseButton(false).MaximizeButton(true)
     );
-    
+
     auiManagerM.AddPane(notebookM, wxAuiPaneInfo().CenterPane());
     auiManagerM.Update();
     Layout();
@@ -384,14 +384,14 @@ void MainFrame::showPanel(wxWindow *panel, const wxString& title)
     }
 }
 //-----------------------------------------------------------------------------
-void MainFrame::removePanel(wxWindow *panel) 
+void MainFrame::removePanel(wxWindow *panel)
 {
     if (notebookM)
     {
         int pg = notebookM->GetPageIndex(panel);
         if (pg != wxNOT_FOUND)
             notebookM->RemovePage(pg);
-    }    
+    }
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
@@ -578,7 +578,7 @@ void MainFrame::updateStatusbarText()
 void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 {
     updateStatusbarText();
-    
+
     // switch notebook to show the "Items" page
     int pg = notebookM->GetPageIndex(labelPanelM);
     if (pg == wxNOT_FOUND)  // Create it?
@@ -586,10 +586,10 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
         return;
     }
     notebookM->SetSelection(pg);
-    
+
     // TODO: listctrl should show what tree shows, but it should also contain
     //       info about metadata items, provide context menu and double-click
-    //       action for each of them and Observe the items for removal, 
+    //       action for each of them and Observe the items for removal,
     //       changes and adding new ones.
     //       i.e. we need a special, separate class for this
     wxListCtrl *lc = labelPanelM->getListCtrl();
@@ -604,8 +604,8 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
     {
         lc->InsertItem(0, treeMainM->GetItemText(id),
             treeMainM->GetItemImage(id));
-    }   
-    
+    }
+
     wxString path;
     while (t.IsOk())
     {
@@ -613,7 +613,7 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
             path = wxT(" > ") + path;
         path = treeMainM->GetItemText(t) + path;
         t = treeMainM->GetItemParent(t);
-    }     
+    }
     labelPanelM->setLabel(path);
 }
 //-----------------------------------------------------------------------------
@@ -651,7 +651,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& WXUNUSED(event))
             AddPendingEvent(event);
         }
     }
-    else if (treeActivateAction == selectFromOrExecute 
+    else if (treeActivateAction == selectFromOrExecute
         && (nt == ntTable || nt == ntSysTable || nt == ntView))
     {
         wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
@@ -746,7 +746,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
 
     wxTheClipboard->Flush();
     BaseFrame::OnClose(event);
-    
+
     // this is a must, otherwise FR crashes
     auiManagerM.UnInit();
 }
@@ -758,7 +758,7 @@ void MainFrame::OnMenuQuit(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 {
-	showAboutBox(this);
+    showAboutBox(this);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuManual(wxCommandEvent& WXUNUSED(event))
@@ -1503,12 +1503,12 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
     if (c)
     {
         // Return when we're dealing with a system column
-        if (c->isSystem())
+        if (c->isSystem() || !c->getTable())
             return;
 
-        URI uri = URI(wxT("fr://edit_field?parent_window=") 
+        URI uri = URI(wxT("fr://edit_field?parent_window=")
             + wxString::Format(wxT("%ld"), (uintptr_t)this)
-            + wxT("&object_address=") + wxString::Format(wxT("%ld"), 
+            + wxT("&object_address=") + wxString::Format(wxT("%ld"),
             (uintptr_t)c));
         getURIProcessor().handleURI(uri);
     }
@@ -1538,11 +1538,11 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
 
     wxString sql;
     if (v)
-    	sql = v->getRebuildSql();
+        sql = v->getRebuildSql();
     else if (t)
-    	sql = t->getAlterSql();
+        sql = t->getAlterSql();
     else if (dm)
-    	sql = dm->getAlterSqlTemplate();
+        sql = dm->getAlterSqlTemplate();
     showSql(this, wxString(_("Alter object")), db, sql);
 }
 //-----------------------------------------------------------------------------
