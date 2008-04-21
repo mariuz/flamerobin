@@ -56,6 +56,7 @@ private:
 public:
     SqlEditor(wxWindow *parent, wxWindowID id);
     void markText(int start, int end);
+    void setChars(bool firebirdIdentifierOnly);
     void setFont();
 
     void OnContextMenu(wxContextMenuEvent& event);

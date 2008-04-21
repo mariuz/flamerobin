@@ -279,6 +279,21 @@ void SqlEditor::markText(int start, int end)
     centerCaret(false);
 }
 //-----------------------------------------------------------------------------
+void SqlEditor::setChars(bool firebirdIdentifierOnly)
+{
+    SetKeyWords(0, SqlTokenizer::getKeywordsString(SqlTokenizer::kwLowerCase));
+    wxString chars(wxT("_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\"$"));
+
+    if (!firebirdIdentifierOnly)
+    {
+        // see Document::SetDefaultCharClasses in stc/Document.cxx
+        for (int ch = 0x80; ch < 0x0100; ch++)
+            if (isalnum(ch))
+                chars += wxChar(ch);
+    }
+    SetWordChars(chars);
+}
+//-----------------------------------------------------------------------------
 //! This code has to be called each time the font has changed, so that the control updates
 void SqlEditor::setup()
 {
@@ -304,13 +319,7 @@ void SqlEditor::setup()
     StyleSetItalic(2, TRUE);
     StyleSetItalic(1, TRUE);
     SetLexer(wxSTC_LEX_SQL);
-    SetKeyWords(0, SqlTokenizer::getKeywordsString(SqlTokenizer::kwLowerCase));
-    wxString chars(wxT("_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\"$"));
-    // see Document::SetDefaultCharClasses in stc/Document.cxx
-    for (int ch = 0x80; ch < 0x0100; ch++)
-        if (isalnum(ch))
-            chars += wxChar(ch);
-    SetWordChars(chars);
+    setChars(false);
 
     int tabSize = config().get(wxT("sqlEditorTabSize"), 4);
     SetTabWidth(tabSize);
@@ -960,14 +969,20 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::autoCompleteColumns(int pos, int len)
 {
-    int start = styled_text_ctrl_sql->WordStartPosition(pos-1, true);
-    if (start == -1)
-        return;
-    if (pos > 1 && styled_text_ctrl_sql->GetCharAt(pos-2) == '"')
-    {   // quoted table name
+    int start;
+    if (pos > 2 && styled_text_ctrl_sql->GetCharAt(pos-2) == '"')
+    {   // first we check if object name is quoted
         start = pos-3;
         while (start > -1 && styled_text_ctrl_sql->GetCharAt(start) != '"')
             --start;
+    }
+    else
+    {   // only allow chars valid for FB identifier
+        styled_text_ctrl_sql->setChars(true);
+        start = styled_text_ctrl_sql->WordStartPosition(pos-1, true);
+        styled_text_ctrl_sql->setChars(false); // reset to default behavior
+        if (start == -1)
+            return;
     }
     wxString table = styled_text_ctrl_sql->GetTextRange(start, pos-1);
     IncompleteStatement is(databaseM, styled_text_ctrl_sql->GetText());
