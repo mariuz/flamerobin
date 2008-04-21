@@ -161,8 +161,8 @@ void MetadataItemPropertiesPanel::showIt()
     }
 }
 //-----------------------------------------------------------------------------
-void MetadataItemPropertiesFrame::showPanel(wxWindow *panel,
-    const wxString& title)
+void MetadataItemPropertiesFrame::showPanel(wxWindow* /*panel*/,
+    const wxString& /*title*/)
 {
     Show();
     Raise();
@@ -1068,7 +1068,7 @@ void MetadataItemPropertiesPanel::removeSubject(Subject* subject)
     }
 }
 //-----------------------------------------------------------------------------
-void MetadataItemPropertiesFrame::removePanel(wxWindow *panel)
+void MetadataItemPropertiesFrame::removePanel(wxWindow* /*panel*/)
 {
     Close();
 }

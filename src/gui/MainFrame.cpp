@@ -598,7 +598,7 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
     wxTreeItemId t = treeMainM->GetSelection();
     if (!t.IsOk())
         return;
-    wxTreeItemIdValue cookie;
+//    wxTreeItemIdValue cookie;
     for (wxTreeItemId id = treeMainM->GetLastChild(t); id.IsOk();
         id = treeMainM->GetPrevSibling(id))
     {
