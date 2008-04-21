@@ -178,6 +178,7 @@
             <lib-path>$(WX_LIB_DIR)</lib-path>
 
             <!-- another nice thing that wx-config will take care of -->
+            <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_aui</sys-lib>
             <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_stc</sys-lib>
             <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_html</sys-lib>
             <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_adv</sys-lib>

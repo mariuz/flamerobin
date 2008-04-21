@@ -284,7 +284,7 @@ svn-rev:
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.obj  $(FLAMEROBIN_OBJECTS) vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin.res vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib
 	link /NOLOGO /OUT:$@ $(LDFLAGS)  $(__DEBUGINFO_5) /pdb:"vc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.pdb" /nologo /subsystem:windows /machine:I386 $(______flamerobin_WX_LIB_DIR_FILENAMES_2_p) /SUBSYSTEM:WINDOWS @<<
-	$(FLAMEROBIN_OBJECTS)  wxmsw28$(U_OPT)$(D_OPT)_stc.lib wxmsw28$(U_OPT)$(D_OPT)_html.lib wxmsw28$(U_OPT)$(D_OPT)_adv.lib wxmsw28$(U_OPT)$(D_OPT)_core.lib wxbase28$(U_OPT)$(D_OPT)_xml.lib wxbase28$(U_OPT)$(D_OPT).lib wxexpat$(D_OPT).lib wxtiff$(D_OPT).lib wxjpeg$(D_OPT).lib wxpng$(D_OPT).lib wxzlib$(D_OPT).lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib
+	$(FLAMEROBIN_OBJECTS)  wxmsw28$(U_OPT)$(D_OPT)_aui.lib wxmsw28$(U_OPT)$(D_OPT)_stc.lib wxmsw28$(U_OPT)$(D_OPT)_html.lib wxmsw28$(U_OPT)$(D_OPT)_adv.lib wxmsw28$(U_OPT)$(D_OPT)_core.lib wxbase28$(U_OPT)$(D_OPT)_xml.lib wxbase28$(U_OPT)$(D_OPT).lib wxexpat$(D_OPT).lib wxtiff$(D_OPT).lib wxjpeg$(D_OPT).lib wxpng$(D_OPT).lib wxzlib$(D_OPT).lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib
 <<
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib: vc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__ibpp.obj  $(IBPP_OBJECTS)
