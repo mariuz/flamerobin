@@ -389,7 +389,7 @@ void MainFrame::removePanel(wxWindow *panel)
     {
         int pg = notebookM->GetPageIndex(panel);
         if (pg != wxNOT_FOUND)
-            notebookM->RemovePage(pg);
+            notebookM->DeletePage(pg);
     }
 }
 //-----------------------------------------------------------------------------
@@ -498,7 +498,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     //EVT_MENU_RANGE(5000, 6000, MainFrame::OnWindowMenuItem)
     EVT_TREE_SEL_CHANGED(DBHTreeControl::ID_tree_ctrl, MainFrame::OnTreeSelectionChanged)
     EVT_TREE_ITEM_ACTIVATED(DBHTreeControl::ID_tree_ctrl, MainFrame::OnTreeItemActivate)
-    EVT_AUINOTEBOOK_PAGE_CLOSE(MainFrame::ID_notebook, MainFrame::OnNotebookPageClose)
+    //EVT_AUINOTEBOOK_PAGE_CLOSE(MainFrame::ID_notebook, MainFrame::OnNotebookPageClose)
 
     EVT_CLOSE(MainFrame::OnClose)
 END_EVENT_TABLE()

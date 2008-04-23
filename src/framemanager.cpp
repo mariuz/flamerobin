@@ -142,16 +142,13 @@ void FrameManager::removeFrame(MetadataItemPropertiesPanel* panel)
 void FrameManager::removeFrame(MetadataItemPropertiesPanel* panel, 
     ItemPanelMap& frames)
 {
-    ItemPanelMap::iterator it;
-    for (it = frames.begin(); it != frames.end();)
+    for (ItemPanelMap::iterator it = frames.begin(); it != frames.end(); ++it)
     {
         if ((*it).second.panel == panel)
         {
             mipPanelsM.erase(it);
-            it = frames.begin();
+            break;
         }
-        else
-            it++;
     }
     rebuildMenu();
 }
