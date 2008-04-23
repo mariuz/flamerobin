@@ -118,7 +118,6 @@ public:
     {
         wxBoxSizer* panelSizer = new wxBoxSizer( wxVERTICAL );
         panelLabelM = new wxStaticText(this, wxID_ANY, wxT(""));
-        //panelLabel->Wrap( -1 );
         panelSizer->Add(panelLabelM, 0, wxALL, 5 );
 
         listCtrlM = new wxListCtrl(this, wxID_ANY, wxDefaultPosition,
@@ -153,10 +152,10 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title,
 #endif
         wxTR_HAS_BUTTONS | wxSUNKEN_BORDER);
 
-    labelPanelM = new LabelPanel(this);
+    //labelPanelM = new LabelPanel(this);
     notebookM = new wxAuiNotebook(this, ID_notebook, wxDefaultPosition,
         wxDefaultSize, wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_WINDOWLIST_BUTTON);
-    notebookM->AddPage(labelPanelM, wxT("Items"), true);    // true = select
+    //notebookM->AddPage(labelPanelM, wxT("Items"), true);    // true = select
 
     wxArrayString choices;  // load from config?
 
@@ -507,8 +506,8 @@ END_EVENT_TABLE()
 void MainFrame::OnNotebookPageClose(wxAuiNotebookEvent& event)
 {
     // prevent closing of "Items"
-    if (event.GetSelection() == 0)
-        event.Veto();
+    //if (event.GetSelection() == 0)
+    //    event.Veto();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMainMenuOpen(wxMenuEvent& event)
@@ -579,6 +578,7 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 {
     updateStatusbarText();
 
+    /* currently disabled until we decide on the new AUI interface for it
     // switch notebook to show the "Items" page
     int pg = notebookM->GetPageIndex(labelPanelM);
     if (pg == wxNOT_FOUND)  // Create it?
@@ -598,7 +598,6 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
     wxTreeItemId t = treeMainM->GetSelection();
     if (!t.IsOk())
         return;
-//    wxTreeItemIdValue cookie;
     for (wxTreeItemId id = treeMainM->GetLastChild(t); id.IsOk();
         id = treeMainM->GetPrevSibling(id))
     {
@@ -615,6 +614,7 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
         t = treeMainM->GetItemParent(t);
     }
     labelPanelM->setLabel(path);
+    */
 }
 //-----------------------------------------------------------------------------
 //! handle double-click on item (or press Enter)

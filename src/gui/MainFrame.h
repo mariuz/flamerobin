@@ -181,7 +181,7 @@ protected:
 
     wxAuiManager auiManagerM;
     wxAuiNotebook* notebookM;
-    LabelPanel *labelPanelM;
+    //LabelPanel *labelPanelM;
 
     virtual const wxString getName() const;
     virtual const wxRect getDefaultRect() const;
