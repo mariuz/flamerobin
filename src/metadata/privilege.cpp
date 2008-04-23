@@ -148,8 +148,8 @@ wxString Privilege::getSql(bool withGrantOption) const
     if (dynamic_cast<Procedure *>(parentObjectM))
         ret += wxT("PROCEDURE ");
     Identifier id(granteeM);
-    ret += parentObjectM->getQuotedName()
-        + wxT(" TO ") + granteeTypeToString(granteeTypeM) + id.getQuoted();
+    ret += parentObjectM->getQuotedName() + wxT(" TO ")
+        + granteeTypeToString(granteeTypeM) + wxT(" ") + id.getQuoted();
 
     if (withGrantOption)
         ret += wxT(" WITH GRANT OPTION");
