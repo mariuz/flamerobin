@@ -83,7 +83,7 @@ void Subject::detachAllObservers()
 {
     for (ObserverIterator i = observersM.begin(); i != observersM.end();)
     {
-        Observer *o = *i;   // move the iterator to a 'safe' place because
+        Observer* o = *i;   // move the iterator to a 'safe' place because
         ++i;                // some observers might remove themselves
         o->removeSubject(this);
     }
@@ -98,8 +98,12 @@ void Subject::notifyObservers()
     {
         // make sure there are no reentrancy problems
         ++locksCountM;
-        for (ObserverIterator i = observersM.begin(); i != observersM.end(); ++i)
-            (*i)->doUpdate();
+        for (ObserverIterator i = observersM.begin(); i != observersM.end();)
+        {
+            Observer* o = *i;   // move the iterator to a 'safe' place because
+            ++i;                // some observers might remove themselves
+            o->doUpdate();
+        }
         --locksCountM;
         needsNotifyObjectsM = false;
     }
