@@ -81,8 +81,12 @@ void Subject::detachObserver(Observer* observer)
 //-----------------------------------------------------------------------------
 void Subject::detachAllObservers()
 {
-    for (ObserverIterator i = observersM.begin(); i != observersM.end(); ++i)
-        (*i)->removeSubject(this);
+    for (ObserverIterator i = observersM.begin(); i != observersM.end();)
+    {
+        Observer *o = *i;   // move the iterator to a 'safe' place because
+        ++i;                // some observers might remove themselves
+        o->removeSubject(this);
+    }
     observersM.clear();
 }
 //-----------------------------------------------------------------------------
