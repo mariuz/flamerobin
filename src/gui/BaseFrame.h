@@ -84,9 +84,6 @@ public:
     virtual bool Show(bool show = TRUE);
     virtual bool Destroy();
 
-    virtual void showPanel(wxWindow* /*panel*/, const wxString& /*title*/) {};
-    virtual void removePanel(wxWindow* /*panel*/) {};
-    
 protected:
     // event handling
     void OnClose(wxCloseEvent& event);

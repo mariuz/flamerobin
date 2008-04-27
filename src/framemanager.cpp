@@ -57,69 +57,6 @@ FrameManager::~FrameManager()
 {
 }
 //-----------------------------------------------------------------------------
-void FrameManager::setWindowMenu(wxMenu *windowMenu)
-{
-    windowMenuM = windowMenu;
-
-    // remember number of items that shouldn't be touched
-    if (windowMenu)
-        regularItemsM = windowMenu->GetMenuItemCount() + 1;
-}
-//-----------------------------------------------------------------------------
-// TODO: currently we just clear and rebuild from scratch
-//       we could implement more efficient algorithm later 
-//       (find the one that is gone and remove, etc)
-void FrameManager::rebuildMenu()
-{
-    if (windowMenuM == 0)
-        return;
-
-    /* this is currently not used?
-     * 
-    // remove all items
-    while (windowMenuM->GetMenuItemCount() > regularItemsM)
-        windowMenuM->Destroy(windowMenuM->FindItemByPosition(regularItemsM));
-    if (windowMenuM->GetMenuItemCount() == regularItemsM-1)
-        windowMenuM->AppendSeparator();
-
-    // each database has it's submenu
-    std::map<Database *, wxMenu *> dmm;
-
-    // build submenus
-    int id = 5000;    // start from "safe" 5000 and upwards to 6000
-    for (ItemPanelMap::iterator it = mipPanelsM.begin(); 
-        it != mipPanelsM.end(); ++it)
-    {
-        MetadataItem *m = (*it).second.panel->getObservedObject();
-        if (!m)
-            continue;
-        Database* db = m->findDatabase();
-        if (!db)
-            continue;
-
-        if (dmm.find(db) == dmm.end())  // add database if not already there
-        {
-            dmm.insert(dmm.begin(), 
-                std::pair<Database*, wxMenu*>(db, new wxMenu));
-        }
-        (dmm[db])->Append(id, mf->GetTitle());
-        (*it).second.id = id;
-        ++id;
-    }
-
-    // wxWidgets manual says that we should insert the submenus at end
-    for (std::map<Database *, wxMenu *>::iterator it = dmm.begin(); 
-        it != dmm.end(); ++it)
-    {
-        windowMenuM->Append(-1, (*it).first->getName_(), (*it).second);
-    }
-
-    // remove the separator if nothing is beneath
-    if (windowMenuM->GetMenuItemCount() == regularItemsM)    
-        windowMenuM->Destroy(windowMenuM->FindItemByPosition(regularItemsM-1));
-        */
-}
-//-----------------------------------------------------------------------------
 void FrameManager::bringOnTop(int id)
 {
     for (ItemPanelMap::iterator it = mipPanelsM.begin(); 
@@ -150,40 +87,42 @@ void FrameManager::removeFrame(MetadataItemPropertiesPanel* panel,
             break;
         }
     }
-    rebuildMenu();
 }
 //-----------------------------------------------------------------------------
 MetadataItemPropertiesPanel* FrameManager::showMetadataPropertyFrame(
-    wxWindow* parent, MetadataItem* item, bool delayed, bool force_new)
+    MetadataItem* item, bool delayed, bool force_new, bool new_tab)
 {
     MetadataItemPropertiesPanel* mpp = 0;
     ItemPanelMap::iterator it = mipPanelsM.find(item);
     if (it != mipPanelsM.end())
         mpp = (*it).second.panel;
-        
-    if (!mpp || force_new)
+    
+    // doesn't exists || forced creation of duplicate
+    if (!mpp || force_new || new_tab)
     {
-        MetadataItemPropertiesPanel* newp = 0;
-        // if that frame already shows another object, force new frame
-        if (force_new || dynamic_cast<MetadataItemPropertiesFrame *>(parent))
+        // find frame showing the same database
+        MetadataItemPropertiesFrame *mf = 0;
+        if (!force_new)
         {
-            // MainFrame should be parent of all MIPFrames
-            MetadataItemPropertiesFrame* m = new MetadataItemPropertiesFrame(
-                 wxTheApp->GetTopWindow(), item);
-            newp = m->getPanel();
+            for (it = mipPanelsM.begin(); it != mipPanelsM.end(); ++it)
+            {
+                if ((*it).first->findDatabase() == item->findDatabase())
+                {
+                    mf = (*it).second.panel->getParentFrame();
+                    break;
+                }
+            }
         }
-        else
-        {
-            newp = new MetadataItemPropertiesPanel(
-                dynamic_cast<BaseFrame *>(parent), item);
+        
+        if (force_new || !mf)
+        {   // MainFrame is the parent of all MIPFrames
+            mf = new MetadataItemPropertiesFrame(wxTheApp->GetTopWindow(), 
+                item);
         }
-        if (!mpp)   // new panel created, register it
-        {
-            PanelAndId fai(newp, 0);
-            mipPanelsM.insert(mipPanelsM.begin(), 
-                std::pair<MetadataItem*, PanelAndId>(item, fai));
-        }
-        mpp = newp;
+        mpp = new MetadataItemPropertiesPanel(mf, item);
+        PanelAndId fai(mpp, 0);
+        mipPanelsM.insert(mipPanelsM.begin(), 
+            std::pair<MetadataItem*, PanelAndId>(item, fai));
     }
         
     if (delayed)
@@ -196,8 +135,6 @@ MetadataItemPropertiesPanel* FrameManager::showMetadataPropertyFrame(
     {
         mpp->showIt();
     }
-    if (!force_new)     // forced ones would rebuild themselves anyway
-        rebuildMenu();
     return mpp;
 }
 //-----------------------------------------------------------------------------

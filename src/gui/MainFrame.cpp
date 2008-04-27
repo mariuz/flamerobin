@@ -107,33 +107,6 @@ public:
 };
 #endif
 //-----------------------------------------------------------------------------
-class LabelPanel: public wxPanel
-{
-protected:
-    wxListCtrl* listCtrlM;
-    wxStaticText* panelLabelM;
-public:
-    LabelPanel(wxWindow* parent, wxWindowID id = wxID_ANY)
-        :wxPanel(parent, id)
-    {
-        wxBoxSizer* panelSizer = new wxBoxSizer( wxVERTICAL );
-        panelLabelM = new wxStaticText(this, wxID_ANY, wxT(""));
-        panelSizer->Add(panelLabelM, 0, wxALL, 5 );
-
-        listCtrlM = new wxListCtrl(this, wxID_ANY, wxDefaultPosition,
-            wxDefaultSize, wxLC_LIST | wxLC_SINGLE_SEL | wxSUNKEN_BORDER);
-        panelSizer->Add(listCtrlM, 1, wxEXPAND, 0 );
-
-        SetSizer(panelSizer);
-        Layout();
-        panelSizer->Fit(this);
-        Show();
-    }
-
-    wxListCtrl* getListCtrl() { return listCtrlM; }
-    void setLabel(const wxString& label) { panelLabelM->SetLabel(label); }
-};
-//-----------------------------------------------------------------------------
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title,
         const wxPoint& pos, const wxSize& size, long style)
     : BaseFrame(parent, id, title, pos, size, style, wxT("FlameRobin_main"))
@@ -151,11 +124,6 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title,
         wxTR_NO_LINES |
 #endif
         wxTR_HAS_BUTTONS | wxSUNKEN_BORDER);
-
-    //labelPanelM = new LabelPanel(this);
-    notebookM = new wxAuiNotebook(this, ID_notebook, wxDefaultPosition,
-        wxDefaultSize, wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_WINDOWLIST_BUTTON);
-    //notebookM->AddPage(labelPanelM, wxT("Items"), true);    // true = select
 
     wxArrayString choices;  // load from config?
 
@@ -222,7 +190,7 @@ void MainFrame::buildMainMenu()
     viewMenu->AppendSeparator();
     viewMenu->Append(wxID_PREFERENCES, _("P&references..."));
     menuBarM->Append(viewMenu, _("&View"));
-    frameManager().setWindowMenu(viewMenu);
+//    frameManager().setWindowMenu(viewMenu);
 
     wxMenu* serverMenu = new wxMenu();
     serverMenu->Append(Cmds::Menu_RegisterServer, _("&Register server..."));
@@ -347,15 +315,11 @@ void MainFrame::do_layout()
     searchPanelSizerM->Add(treeMainM, 1, wxEXPAND);
     searchPanelSizerM->Add(searchPanelM, 0, wxEXPAND);
     mainPanelM->SetSizer(searchPanelSizerM);
-
-    auiManagerM.SetManagedWindow(this);
-    auiManagerM.AddPane(mainPanelM, wxAuiPaneInfo()
-        .Name(wxT("tree")).MinSize(260, -1).Caption(wxT("Firebird databases"))
-        .Left().CloseButton(false).MaximizeButton(true)
-    );
-
-    auiManagerM.AddPane(notebookM, wxAuiPaneInfo().CenterPane());
-    auiManagerM.Update();
+    
+    wxBoxSizer* sizerAll = new wxBoxSizer(wxVERTICAL);
+    sizerAll->Add(mainPanelM, 1, wxEXPAND, 0);
+    SetAutoLayout(true);
+    SetSizer(sizerAll);
     Layout();
 }
 //-----------------------------------------------------------------------------
@@ -367,30 +331,6 @@ const wxRect MainFrame::getDefaultRect() const
 DBHTreeControl* MainFrame::getTreeCtrl()
 {
     return treeMainM;
-}
-//-----------------------------------------------------------------------------
-void MainFrame::showPanel(wxWindow *panel, const wxString& title)
-{
-    if (notebookM)
-    {
-        int pg = notebookM->GetPageIndex(panel);
-        if (pg != wxNOT_FOUND)
-            notebookM->SetSelection(pg);
-        else
-            notebookM->AddPage(panel, title, true);
-        Show();
-        Raise();
-    }
-}
-//-----------------------------------------------------------------------------
-void MainFrame::removePanel(wxWindow *panel)
-{
-    if (notebookM)
-    {
-        int pg = notebookM->GetPageIndex(panel);
-        if (pg != wxNOT_FOUND)
-            notebookM->DeletePage(pg);
-    }
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
@@ -494,21 +434,11 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(Cmds::Menu_CreateView,       MainFrame::OnMenuCreateView)
 
     EVT_MENU_OPEN(MainFrame::OnMainMenuOpen)
-    // Window menu is not used anymore
-    //EVT_MENU_RANGE(5000, 6000, MainFrame::OnWindowMenuItem)
     EVT_TREE_SEL_CHANGED(DBHTreeControl::ID_tree_ctrl, MainFrame::OnTreeSelectionChanged)
     EVT_TREE_ITEM_ACTIVATED(DBHTreeControl::ID_tree_ctrl, MainFrame::OnTreeItemActivate)
-    //EVT_AUINOTEBOOK_PAGE_CLOSE(MainFrame::ID_notebook, MainFrame::OnNotebookPageClose)
 
     EVT_CLOSE(MainFrame::OnClose)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
-void MainFrame::OnNotebookPageClose(wxAuiNotebookEvent& event)
-{
-    // prevent closing of "Items"
-    //if (event.GetSelection() == 0)
-    //    event.Veto();
-}
 //-----------------------------------------------------------------------------
 void MainFrame::OnMainMenuOpen(wxMenuEvent& event)
 {
@@ -730,7 +660,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
             return;
         }
     }
-    frameManager().setWindowMenu(0);    // tell it not to update menus anymore
+    //frameManager().setWindowMenu(0);    // tell it not to update menus anymore
 
     // the next few lines fix the (threading?) problem on some Linux distributions
     // which leave FlameRobin running if there were connected databases upon exit.
@@ -746,9 +676,6 @@ void MainFrame::OnClose(wxCloseEvent& event)
 
     wxTheClipboard->Flush();
     BaseFrame::OnClose(event);
-
-    // this is a must, otherwise FR crashes
-    auiManagerM.UnInit();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuQuit(wxCommandEvent& WXUNUSED(event))
@@ -827,7 +754,7 @@ void MainFrame::OnMenuDatabaseProperties(wxCommandEvent& WXUNUSED(event))
     if (!d)
         return;
 
-    frameManager().showMetadataPropertyFrame(this, d);
+    frameManager().showMetadataPropertyFrame(d);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))
@@ -990,7 +917,7 @@ void MainFrame::OnMenuManageUsers(wxCommandEvent& WXUNUSED(event))
 {
     Server* s = treeMainM->getSelectedServer();
     if (checkValidServer(s))
-        frameManager().showMetadataPropertyFrame(this, s);
+        frameManager().showMetadataPropertyFrame(s);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUnRegisterServer(wxCommandEvent& WXUNUSED(event))
@@ -1513,7 +1440,7 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
         getURIProcessor().handleURI(uri);
     }
     else
-        frameManager().showMetadataPropertyFrame(this, m);
+        frameManager().showMetadataPropertyFrame(m);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))

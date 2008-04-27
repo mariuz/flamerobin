@@ -57,6 +57,7 @@ protected:
     void OnRightUp(wxMouseEvent& event);
     void OnMenuCopy(wxCommandEvent& event);
     void OnMenuNewWindow(wxCommandEvent& event);
+    void OnMenuNewTab(wxCommandEvent& event);
     void OnMenuSave(wxCommandEvent& event);
     void OnMenuPrint(wxCommandEvent& event);
     void OnMenuPreview(wxCommandEvent& event);

@@ -53,13 +53,12 @@ public:
     FrameManager();
     ~FrameManager();
 
-    void setWindowMenu(wxMenu *windowMenu);
-    void rebuildMenu();
     void bringOnTop(int id);
 
     void removeFrame(MetadataItemPropertiesPanel* panel);
-    MetadataItemPropertiesPanel* showMetadataPropertyFrame(wxWindow* parent, 
-        MetadataItem* item, bool delayed = false, bool force_new = false);
+    MetadataItemPropertiesPanel* showMetadataPropertyFrame(
+        MetadataItem* item, bool delayed = false, bool force_new = false,
+        bool new_tab = false);
 
     void OnCommandEvent(wxCommandEvent& event);
 protected:

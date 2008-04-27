@@ -79,6 +79,7 @@ BEGIN_EVENT_TABLE(PrintableHtmlWindow, wxHtmlWindow)
     EVT_RIGHT_UP(PrintableHtmlWindow::OnRightUp)
     EVT_MENU(wxID_COPY, PrintableHtmlWindow::OnMenuCopy)
     EVT_MENU(wxID_NEW, PrintableHtmlWindow::OnMenuNewWindow)
+    EVT_MENU(wxID_ADD, PrintableHtmlWindow::OnMenuNewTab)
     EVT_MENU(wxID_SAVE, PrintableHtmlWindow::OnMenuSave)
     EVT_MENU(wxID_PRINT, PrintableHtmlWindow::OnMenuPrint)
     EVT_MENU(wxID_PREVIEW, PrintableHtmlWindow::OnMenuPreview)
@@ -88,6 +89,7 @@ void PrintableHtmlWindow::OnRightUp(wxMouseEvent& event)
 {
     wxMenu m(0);
     m.Append(wxID_NEW, _("&Open link in a new window"));
+    m.Append(wxID_ADD, _("Open link in a new &tab"));
     m.Append(wxID_COPY, _("&Copy"));
     m.AppendSeparator();
     m.Append(wxID_SAVE, _("&Save as HTML file..."));
@@ -113,6 +115,7 @@ void PrintableHtmlWindow::OnRightUp(wxMouseEvent& event)
     }
 
     m.Enable(wxID_NEW, isLink);
+    m.Enable(wxID_ADD, isLink);
     m.Enable(wxID_COPY, !SelectionToText().IsEmpty());
     PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
 }
@@ -128,15 +131,34 @@ void PrintableHtmlWindow::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
     CopySelection();
 }
 //-----------------------------------------------------------------------------
+void PrintableHtmlWindow::OnMenuNewTab(wxCommandEvent& WXUNUSED(event))
+{
+    wxString addr = tempLinkM;
+    URI uri(addr);
+    // we don't support "new tab" for non-fr protocols
+    if (uri.protocol != wxT("fr"))
+        return;
+    uri.addParam(wxT("target=new_tab"));
+    if (!getURIProcessor().handleURI(uri))
+    {
+        ::wxMessageBox(_("Feature not yet implemented."), _("Information"), 
+            wxICON_INFORMATION | wxOK);
+    }
+}
+//-----------------------------------------------------------------------------
 void PrintableHtmlWindow::OnMenuNewWindow(wxCommandEvent& WXUNUSED(event))
 {
     wxString addr = tempLinkM;
     URI uri(addr);
-    if (uri.protocol != wxT("fr"))              // we don't support "new window" for non-fr protocols
+    // we don't support "new window" for non-fr protocols
+    if (uri.protocol != wxT("fr"))
         return;
     uri.addParam(wxT("target=new"));
     if (!getURIProcessor().handleURI(uri))
-        ::wxMessageBox(_("Feature not yet implemented."), _("Information"), wxICON_INFORMATION | wxOK);
+    {
+        ::wxMessageBox(_("Feature not yet implemented."), _("Information"), 
+            wxICON_INFORMATION | wxOK);
+    }
 }
 //-----------------------------------------------------------------------------
 void PrintableHtmlWindow::OnMenuSave(wxCommandEvent& WXUNUSED(event))
@@ -178,14 +200,16 @@ void PrintableHtmlWindow::OnMenuSave(wxCommandEvent& WXUNUSED(event))
 void PrintableHtmlWindow::OnMenuPreview(wxCommandEvent& WXUNUSED(event))
 {
     HtmlPrinter::getHEP()->SetHeader(GetOpenedPageTitle());
-    HtmlPrinter::getHEP()->SetFooter(_("Printed from FlameRobin - www.flamerobin.org"));
+    HtmlPrinter::getHEP()->SetFooter(
+        _("Printed from FlameRobin - www.flamerobin.org"));
     HtmlPrinter::getHEP()->PreviewText(pageSourceM);
 }
 //-----------------------------------------------------------------------------
 void PrintableHtmlWindow::OnMenuPrint(wxCommandEvent& WXUNUSED(event))
 {
     HtmlPrinter::getHEP()->SetHeader(GetOpenedPageTitle());
-    HtmlPrinter::getHEP()->SetFooter(_("Printed from FlameRobin - www.flamerobin.org"));
+    HtmlPrinter::getHEP()->SetFooter(
+        _("Printed from FlameRobin - www.flamerobin.org"));
     HtmlPrinter::getHEP()->PrintText(pageSourceM);
 }
 //-----------------------------------------------------------------------------
@@ -196,12 +220,15 @@ void PrintableHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
     URI uri(addr);
     if (uri.protocol == wxT("info"))    // not really a link
         return;
-    if (uri.protocol != wxT("fr"))      // call default handler for other protocols
+    if (uri.protocol != wxT("fr")) // call default handler for other protocols
     {
         wxHtmlWindow::OnLinkClicked(link);
         return;
     }
     if (!getURIProcessor().handleURI(uri))
-        ::wxMessageBox(_("Feature not yet implemented."), _("Information"), wxICON_INFORMATION|wxOK);
+    {
+        ::wxMessageBox(_("Feature not yet implemented."), _("Information"), 
+        wxICON_INFORMATION|wxOK);
+    }
 }
 //-----------------------------------------------------------------------------

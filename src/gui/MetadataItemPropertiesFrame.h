@@ -30,6 +30,7 @@
 //-----------------------------------------------------------------------------
 #include <wx/wx.h>
 #include <wx/wxhtml.h>
+#include <wx/aui/aui.h>
 
 // wx 2.6 doesn't support wxHtmlCellEvent
 #if wxCHECK_VERSION(2, 8, 0)
@@ -41,6 +42,7 @@
 #include "gui/BaseFrame.h"
 #include "gui/controls/PrintableHtmlWindow.h"
 #include "metadata/metadataitem.h"
+class MetadataItemPropertiesFrame;
 //-----------------------------------------------------------------------------
 class MetadataItemPropertiesPanel: public wxPanel, public Observer
 {
@@ -48,7 +50,7 @@ private:
     enum { ptSummary, ptConstraints, ptDependencies, ptTriggers,
         ptTableIndices, ptDDL, ptPrivileges } pageTypeM;
 
-	enum { HtmlWindowID = 42 };
+    enum { HtmlWindowID = 42 };
 
     MetadataItem *objectM;
     bool htmlReloadRequestedM;
@@ -62,21 +64,19 @@ private:
     void processHtmlCode(wxString& htmlpage, wxString htmlsource,
         MetadataItem* object = 0);
 
-    // used to remember the value among calls to getStorageName(),
-    // needed because it's not possible to access objectM
-    // (see getStorageName()) after detaching from it.
-    mutable wxString storageNameM;
 protected:
     virtual void removeSubject(Subject* subject);
     virtual void update();
 public:
-    MetadataItemPropertiesPanel(wxWindow *parent, MetadataItem *object);
+    MetadataItemPropertiesPanel(MetadataItemPropertiesFrame* parent, 
+        MetadataItem *object);
     virtual ~MetadataItemPropertiesPanel();
 
     MetadataItem* getObservedObject() const;
     void processHtmlFile(wxString fileName);
     void setPage(const wxString& type);
     void showIt();
+    MetadataItemPropertiesFrame *getParentFrame();
 private:
     // event handling
     void OnIdle(wxIdleEvent& event);
@@ -90,8 +90,6 @@ private:
 class MetadataItemPropertiesFrame: public BaseFrame
 {
 private:
-    MetadataItemPropertiesPanel *panelM;
-    
     // used to remember the value among calls to getStorageName(),
     // needed because it's not possible to access objectM
     // (see getStorageName()) after detaching from it.
@@ -102,15 +100,22 @@ protected:
     virtual const wxRect getDefaultRect() const;
 public:
     MetadataItemPropertiesFrame(wxWindow* parent, MetadataItem *object);
+//    virtual ~MetadataItemPropertiesFrame() {};
 
-    virtual void showPanel(wxWindow *panel, const wxString& title);
-    virtual void removePanel(wxWindow *panel);
-        
-    MetadataItemPropertiesPanel *getPanel() { return panelM; }
-    MetadataItem* getObservedObject() const { return panelM->getObservedObject(); };
-    void processHtmlFile(wxString fileName) { panelM->processHtmlFile(fileName); };
-    void setPage(const wxString& type) { panelM->setPage(type); };
+    enum { ID_notebook = 43 };
+
+    void showPanel(wxWindow *panel, const wxString& title);
+    void removePanel(wxWindow *panel);
+            
+    //MetadataItemPropertiesPanel *getItemPanel(MetadataItem *item);
+
+    void OnClose(wxCloseEvent& event);
+    void OnNotebookPageClose(wxAuiNotebookEvent& event);
 private:
+    wxAuiManager auiManagerM;
+    wxAuiNotebook* notebookM;
+
+    DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
 #endif // FR_METADATAITEMPROPERTIESFRAME_H

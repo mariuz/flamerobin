@@ -715,7 +715,7 @@ void ExecuteSqlFrame::showProperties(wxString objectName)
 
     if (m)
     {
-        frameManager().showMetadataPropertyFrame(GetParent(), m);
+        frameManager().showMetadataPropertyFrame(m);
         return;
     }
 

@@ -127,7 +127,6 @@ public:
     void OnMainMenuOpen(wxMenuEvent& event);
     void OnTreeSelectionChanged(wxTreeEvent& event);
     void OnTreeItemActivate(wxTreeEvent& event);
-    void OnNotebookPageClose(wxAuiNotebookEvent& event);
     void OnClose(wxCloseEvent& event);
 
     // search stuff (IDs 600+ are taken!)
@@ -149,9 +148,6 @@ public:
         const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE);
 
     bool openUnregisteredDatabase(const wxString& dbpath);
-
-    virtual void showPanel(wxWindow *panel, const wxString& title);
-    virtual void removePanel(wxWindow *panel);
 private:
     bool connect();
     void showGeneratorValue(Generator* g);
@@ -178,10 +174,6 @@ protected:
     wxBitmapButton* button_prev;
     wxBitmapButton* button_next;
     wxBitmapButton* button_advanced;
-
-    wxAuiManager auiManagerM;
-    wxAuiNotebook* notebookM;
-    //LabelPanel *labelPanelM;
 
     virtual const wxString getName() const;
     virtual const wxRect getDefaultRect() const;
