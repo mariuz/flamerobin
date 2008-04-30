@@ -15,12 +15,12 @@ else
   HEADERVERSION="";
 fi
 
-if test -n $ACTVERSION ; then
-  if test -z $HEADERVERSION || test $ACTVERSION -gt $HEADERVERSION ; then
+if test -n "$ACTVERSION" ; then
+  if test -z "$HEADERVERSION" || test $ACTVERSION -gt $HEADERVERSION ; then
     echo "Writing svn revision $ACTVERSION to $SVNREVFILE"
     echo "#define FR_VERSION_SVN $ACTVERSION" > $SVNREVFILE;
   fi
-elif test -n $HEADERVERSION ; then
+elif test -n "$HEADERVERSION" ; then
   echo "Deleting svn revision from $SVNREVFILE"
   echo "#undef FR_VERSION_SVN" > $SVNREVFILE
 fi
