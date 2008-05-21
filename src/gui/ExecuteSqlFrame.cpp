@@ -1426,7 +1426,13 @@ void ExecuteSqlFrame::OnMenuGridExportBlob(wxCommandEvent& WXUNUSED(event))
     if (!dgt->isBlobColumn(grid_data->GetGridCursorCol()))
         throw FRError(_("Not a BLOB column"));
     wxString filename = ::wxFileSelector(_("Select a file"), wxT(""),
-        wxT(""), wxT(""), wxT("*"), wxSAVE | wxOVERWRITE_PROMPT, this);
+        wxT(""), wxT(""), wxT("*"),
+#if wxCHECK_VERSION(2, 8, 0)
+		wxFD_SAVE | wxFD_OVERWRITE_PROMPT, this);
+#else
+		wxSAVE | wxOVERWRITE_PROMPT, this);
+#endif
+		
     if (filename.IsEmpty())
         return;
     ProgressDialog pd(this, _("Saving BLOB to file"));
@@ -1443,7 +1449,12 @@ void ExecuteSqlFrame::OnMenuGridImportBlob(wxCommandEvent& WXUNUSED(event))
     if (!dgt->isBlobColumn(grid_data->GetGridCursorCol()))
         throw FRError(_("Not a BLOB column"));
     wxString filename = ::wxFileSelector(_("Select a file"), wxT(""),
-        wxT(""), wxT(""), wxT("*"), wxOPEN | wxFILE_MUST_EXIST, this);
+        wxT(""), wxT(""), wxT("*"),
+#if wxCHECK_VERSION(2, 8, 0)
+		wxFD_OPEN | wxFD_FILE_MUST_EXIST, this);
+#else
+		wxOPEN | wxFILE_MUST_EXIST, this);
+#endif
    if (filename.IsEmpty())
         return;
         
