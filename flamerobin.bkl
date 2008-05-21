@@ -163,8 +163,8 @@
             <define>WIN32_LEAN_AND_MEAN</define>
 
             <set var="WX_PORT">wxmsw</set>
-<!-- set this to 28 for wxWidgets 2.8.X, to 29 for wxWidgets CVS HEAD -->
-            <set var="WX_VERSION">28</set>
+<!-- set this to 28 for wxWidgets 2.8.X, to 29 for wxWidgets SVN HEAD -->
+            <set var="WX_VERSION">29</set>
 
             <set var="WX_LIB_DIR" make_var="1">
                 <if cond="USEDLL=='1'">$(WXDIR)/lib/$(COMPILER)_dll</if>
