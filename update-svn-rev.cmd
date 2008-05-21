@@ -24,9 +24,15 @@ if "%HEADERREV%" EQU "%SVNREV%" goto :EOF
 goto :EOF
 
 :no-svn-ref
+if not exist %SVNREVFILE% goto :no-header-file
 rem don't write file if SVN ref is already unset
 if "%HEADERREV%" EQU "" goto :EOF
 @echo Deleting svn revision from %SVNREVFILE%
+@echo #undef FR_VERSION_SVN > %SVNREVFILE%
+goto :EOF
+
+:no-header-file
+@echo Creating %SVNREVFILE% without svn revision
 @echo #undef FR_VERSION_SVN > %SVNREVFILE%
 goto :EOF
 
