@@ -68,7 +68,7 @@ protected:
     virtual void removeSubject(Subject* subject);
     virtual void update();
 public:
-    MetadataItemPropertiesPanel(MetadataItemPropertiesFrame* parent, 
+    MetadataItemPropertiesPanel(MetadataItemPropertiesFrame* parent,
         MetadataItem *object);
     virtual ~MetadataItemPropertiesPanel();
 
@@ -100,13 +100,16 @@ protected:
     virtual const wxRect getDefaultRect() const;
 public:
     MetadataItemPropertiesFrame(wxWindow* parent, MetadataItem *object);
-//    virtual ~MetadataItemPropertiesFrame() {};
+    virtual ~MetadataItemPropertiesFrame()
+    {
+        auiManagerM.UnInit();
+    }
 
     enum { ID_notebook = 43 };
 
     void showPanel(wxWindow *panel, const wxString& title);
     void removePanel(wxWindow *panel);
-            
+
     //MetadataItemPropertiesPanel *getItemPanel(MetadataItem *item);
 
     void OnClose(wxCloseEvent& event);

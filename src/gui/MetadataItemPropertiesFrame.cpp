@@ -84,7 +84,7 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
     }
     else
         sb->SetStatusText(object->getPrintableName());
-    
+
     wxIcon icon;
     if (d /* TODO: && config().get(wxT("Links in a new window")) */ )
     {
@@ -94,14 +94,14 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
     }
     else
     {
-        SetTitle(object->getPrintableName());    
+        SetTitle(object->getPrintableName());
         wxBitmap bmp = getImage32(object->getType());
         icon.CopyFromBitmap(bmp);
     }
     SetIcon(icon);
 
     notebookM = new wxAuiNotebook(this, ID_notebook, wxDefaultPosition,
-        wxDefaultSize, wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_WINDOWLIST_BUTTON 
+        wxDefaultSize, wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_WINDOWLIST_BUTTON
         | wxAUI_NB_TAB_EXTERNAL_MOVE);
 
     auiManagerM.SetManagedWindow(this);
@@ -199,11 +199,11 @@ const wxString MetadataItemPropertiesFrame::getStorageName() const
              * TODO: this should only works with c) option
              * i.e. the 'always open in new window' setting
             case sgObjectType:
-                storageNameM = getName() + Config::pathSeparator 
+                storageNameM = getName() + Config::pathSeparator
                     + panelM->getObservedObject()->getTypeName();
                 break;
             case sgObject:
-                storageNameM = getName() + Config::pathSeparator 
+                storageNameM = getName() + Config::pathSeparator
                     + panelM->getObservedObject()->getItemPath();
                 break;
                 */
@@ -1082,7 +1082,7 @@ void MetadataItemPropertiesFrame::removePanel(wxWindow* panel)
     int pg = notebookM->GetPageIndex(panel);
     if (pg == wxNOT_FOUND)
         return;
-        
+
     notebookM->DeletePage(pg);
     if (notebookM->GetPageCount() < 1)
         Close();
@@ -1131,7 +1131,14 @@ void MetadataItemPropertiesPanel::update()
         objectM = 0;
         MetadataItemPropertiesFrame* f = getParentFrame();
         if (f)
-            f->removePanel(this);
+            f->Close();
+
+            // MB: This code used to use:
+            //f->removePanel(this);
+            // which would allow us to mix property pages from different
+            // databases in the same Frame, but there are some mysterious
+            // reasons why it causes heap corruption with MSVC
+
         return;
     }
 
@@ -1182,12 +1189,12 @@ END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(MetadataItemPropertiesFrame, BaseFrame)
     EVT_CLOSE(MetadataItemPropertiesFrame::OnClose)
-    EVT_AUINOTEBOOK_PAGE_CLOSE(MetadataItemPropertiesFrame::ID_notebook, 
+    EVT_AUINOTEBOOK_PAGE_CLOSE(MetadataItemPropertiesFrame::ID_notebook,
         MetadataItemPropertiesFrame::OnNotebookPageClose)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 // when last tab is closed, close the frame
-void MetadataItemPropertiesFrame::OnNotebookPageClose(wxAuiNotebookEvent& 
+void MetadataItemPropertiesFrame::OnNotebookPageClose(wxAuiNotebookEvent&
     WXUNUSED(event))
 {
     // seems that page count returns pages before event not after
@@ -1199,7 +1206,6 @@ void MetadataItemPropertiesFrame::OnNotebookPageClose(wxAuiNotebookEvent&
 void MetadataItemPropertiesFrame::OnClose(wxCloseEvent& event)
 {
     BaseFrame::OnClose(event);
-    auiManagerM.UnInit();
 }
 //-----------------------------------------------------------------------------
 void MetadataItemPropertiesPanel::OnIdle(wxIdleEvent& WXUNUSED(event))
@@ -1254,12 +1260,12 @@ bool PageHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("page"))
         return false;
-        
+
     MetadataItemPropertiesPanel* mpp = dynamic_cast<
         MetadataItemPropertiesPanel*>(getWindow(uri));
     if (!mpp)
         return true;
-        
+
     if (uri.getParam(wxT("target")) == wxT("new"))
     {
         mpp = frameManager().showMetadataPropertyFrame(
@@ -1299,17 +1305,17 @@ bool PropertiesHandler::handleURI(URI& uri)
     if (!d)
         return true;
     NodeType n = getTypeByName(uri.getParam(wxT("object_type")));
-    MetadataItem* object = d->findByNameAndType(n, 
+    MetadataItem* object = d->findByNameAndType(n,
         uri.getParam(wxT("object_name")));
     if (!object)
     {
         ::wxMessageBox(
-            _("Cannot find destination object\nThis should never happen."), 
+            _("Cannot find destination object\nThis should never happen."),
             _("Error"), wxICON_ERROR);
         return true;
     }
 
-    frameManager().showMetadataPropertyFrame(object, false, 
+    frameManager().showMetadataPropertyFrame(object, false,
         uri.getParam(wxT("target")) == wxT("new"),
         uri.getParam(wxT("target")) == wxT("new_tab"));
     return true;
