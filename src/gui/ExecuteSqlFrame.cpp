@@ -1420,7 +1420,7 @@ void ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob(wxUpdateUIEvent& event)
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridExportBlob(wxCommandEvent& WXUNUSED(event))
 {
-    DataGridTable* dgt = grid_data->getDataGridTable();    
+    DataGridTable* dgt = grid_data->getDataGridTable();
     if (!dgt || !grid_data->GetNumberRows())
         return;
     if (!dgt->isBlobColumn(grid_data->GetGridCursorCol()))
@@ -1428,22 +1428,22 @@ void ExecuteSqlFrame::OnMenuGridExportBlob(wxCommandEvent& WXUNUSED(event))
     wxString filename = ::wxFileSelector(_("Select a file"), wxT(""),
         wxT(""), wxT(""), wxT("*"),
 #if wxCHECK_VERSION(2, 8, 0)
-		wxFD_SAVE | wxFD_OVERWRITE_PROMPT, this);
+        wxFD_SAVE | wxFD_OVERWRITE_PROMPT, this);
 #else
-		wxSAVE | wxOVERWRITE_PROMPT, this);
+        wxSAVE | wxOVERWRITE_PROMPT, this);
 #endif
-		
+
     if (filename.IsEmpty())
         return;
     ProgressDialog pd(this, _("Saving BLOB to file"));
     pd.Show();
-    dgt->exportBlobFile(filename, grid_data->GetGridCursorRow(), 
+    dgt->exportBlobFile(filename, grid_data->GetGridCursorRow(),
         grid_data->GetGridCursorCol(), &pd);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridImportBlob(wxCommandEvent& WXUNUSED(event))
 {
-    DataGridTable* dgt = grid_data->getDataGridTable();    
+    DataGridTable* dgt = grid_data->getDataGridTable();
     if (!dgt || !grid_data->GetNumberRows())
         return;
     if (!dgt->isBlobColumn(grid_data->GetGridCursorCol()))
@@ -1451,16 +1451,16 @@ void ExecuteSqlFrame::OnMenuGridImportBlob(wxCommandEvent& WXUNUSED(event))
     wxString filename = ::wxFileSelector(_("Select a file"), wxT(""),
         wxT(""), wxT(""), wxT("*"),
 #if wxCHECK_VERSION(2, 8, 0)
-		wxFD_OPEN | wxFD_FILE_MUST_EXIST, this);
+        wxFD_OPEN | wxFD_FILE_MUST_EXIST, this);
 #else
-		wxOPEN | wxFILE_MUST_EXIST, this);
+        wxOPEN | wxFILE_MUST_EXIST, this);
 #endif
    if (filename.IsEmpty())
         return;
-        
+
     ProgressDialog pd(this, _("Importing BLOB from file"));
     pd.Show();
-    dgt->importBlobFile(filename, grid_data->GetGridCursorRow(), 
+    dgt->importBlobFile(filename, grid_data->GetGridCursorRow(),
         grid_data->GetGridCursorCol(), &pd);
 }
 //-----------------------------------------------------------------------------
@@ -2541,8 +2541,8 @@ bool EditDDLHandler::handleURI(URI& uri)
     if (pd.isCanceled())
         return true;
 
-    ExecuteSqlFrame* eff = new ExecuteSqlFrame(w->GetParent(), -1, wxT("DDL"),
-        m->findDatabase());
+    ExecuteSqlFrame* eff = new ExecuteSqlFrame(wxTheApp->GetTopWindow(), -1,
+        wxT("DDL"), m->findDatabase());
     eff->setSql(cdv.getSql());
     // ProgressDialog needs to be hidden before ExecuteSqlFrame is shown,
     // otherwise the HTML frame will be raised over the ExecuteSqlFrame
