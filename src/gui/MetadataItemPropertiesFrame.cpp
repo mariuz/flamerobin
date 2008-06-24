@@ -1049,6 +1049,13 @@ void MetadataItemPropertiesPanel::processHtmlFile(wxString fileName)
     html_window->GetViewStart(&x, &y);         // save scroll position
     html_window->setPageSource(htmlpage);
     html_window->Scroll(x, y);                 // restore scroll position
+
+    // set title
+    if (getParentFrame())
+    {
+        getParentFrame()->setTabTitle(this, objectM->getName_() + wxT(": ")
+            + html_window->GetOpenedPageTitle());
+    }
 }
 //-----------------------------------------------------------------------------
 //! closes window if observed object gets removed (disconnecting, dropping, etc)
@@ -1075,6 +1082,15 @@ MetadataItemPropertiesFrame* MetadataItemPropertiesPanel::getParentFrame()
             return f;
     }
     return 0;
+}
+//-----------------------------------------------------------------------------
+void MetadataItemPropertiesFrame::setTabTitle(wxWindow *panel,
+    const wxString& title)
+{
+    int pg = notebookM->GetPageIndex(panel);
+    if (pg == wxNOT_FOUND)
+        return;
+    notebookM->SetPageText(pg, title);
 }
 //-----------------------------------------------------------------------------
 void MetadataItemPropertiesFrame::removePanel(wxWindow* panel)

@@ -41,7 +41,6 @@
 #include "core/StringUtils.h"
 #include "gui/BaseFrame.h"
 #include "gui/FindDialog.h"
-#include "logger.h"
 #include "sql/SqlStatement.h"
 #include "metadata/database.h"
 #include "statementHistory.h"

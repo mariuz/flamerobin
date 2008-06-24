@@ -109,6 +109,7 @@ public:
 
     void showPanel(wxWindow *panel, const wxString& title);
     void removePanel(wxWindow *panel);
+    void setTabTitle(wxWindow *panel, const wxString& title);
 
     //MetadataItemPropertiesPanel *getItemPanel(MetadataItem *item);
 

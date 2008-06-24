@@ -45,6 +45,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "frversion.h"
 #include "gui/AdvancedMessageDialog.h"
 #include "logger.h"
+#include "sql/SqlStatement.h"
 #include "metadata/database.h"
 //----------------------------------------------------------------------------
 bool Logger::log2database(Config *cfg, const SqlStatement& stm, Database* db)
@@ -234,7 +235,7 @@ bool Logger::prepareDatabase(Database *db)
             st->Prepare("create generator FLAMEROBIN$LOG_GEN");
             st->Execute();
             tr->Commit();
-			db->addObject(ntGenerator, wxT("FLAMEROBIN$LOG_GEN"));
+            db->addObject(ntGenerator, wxT("FLAMEROBIN$LOG_GEN"));
             db->refreshByType(ntGenerator);
         }
         return true;

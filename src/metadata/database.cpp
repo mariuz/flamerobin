@@ -43,6 +43,7 @@
 #include "config/Config.h"
 #include "config/DatabaseConfig.h"
 #include "core/FRError.h"
+#include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
 #include "engine/MetadataLoader.h"
 #include "MasterPassword.h"
@@ -192,7 +193,7 @@ Database::Database(const Database& rhs)
         functionsM(rhs.functionsM), generatorsM(rhs.generatorsM),
         proceduresM(rhs.proceduresM), rolesM(rhs.rolesM), tablesM(rhs.tablesM),
         sysTablesM(rhs.sysTablesM), triggersM(rhs.triggersM),
-        viewsM(rhs.viewsM), collationsM(rhs.collationsM), idM(rhs.idM), 
+        viewsM(rhs.viewsM), collationsM(rhs.collationsM), idM(rhs.idM),
         storeEncryptedPasswordM(rhs.storeEncryptedPasswordM)
 {
     if (rhs.connectionCredentialsM)

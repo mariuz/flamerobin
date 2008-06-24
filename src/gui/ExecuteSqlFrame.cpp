@@ -464,9 +464,26 @@ void SqlEditor::setFont()
         AdvancedMessageDialogButtonsOk(), config(), wxT("DIALOG_WarnFont"), _("Do not show this information again"));
 }
 //-----------------------------------------------------------------------------
-ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* parent, int id, wxString title,
+// MB: we don't use the 'parent' parameter here, because of some ugly bugs.
+//     For example, if user clicks the 'drop trigger' link on the trigger
+//     property page, it creates new ExecuteSqlFrame with trigger property
+//     page as a parent. When dropping SQL statement is committed, it destroys
+//     the trigger object and the observer pattern takes the trigger property
+//     page down with it - since it is the parent of ExecuteSqlFrame it takes
+//     down the ExecuteSqlFrame as well, and the code in commitTransaction
+//     function keeps executing in an invalid object.
+//     This is equivallent to 'delete this' in the middle of some function
+//
+//     I have hard-coded the app's top window as the parent to all SQL frames
+//     here as a sure way to prevent the problem. I didn't go into removing
+//     the parent parameter everywhere as we might want to find some nice way
+//     to make this work, and maybe we won't want to have the top frame as a
+//     parent sometime.
+ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
+        wxString title,
         Database *db, const wxPoint& pos, const wxSize& size, long style)
-    :BaseFrame(parent, id, title, pos, size, style), Observer(), databaseM(db)
+    :BaseFrame(wxTheApp->GetTopWindow(), id, title, pos, size, style),
+    Observer(), databaseM(db)
 {
     loadingM = true;
     buildToolbar();

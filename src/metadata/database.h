@@ -32,7 +32,6 @@
 
 #include <ibpp.h>
 
-#include "core/ProgressIndicator.h"
 #include "metadata/collection.h"
 #include "metadata/domain.h"
 #include "metadata/exception.h"
@@ -44,10 +43,11 @@
 #include "metadata/table.h"
 #include "metadata/trigger.h"
 #include "metadata/view.h"
-#include "sql/SqlStatement.h"
 //-----------------------------------------------------------------------------
 class MetadataLoader;
+class ProgressIndicator;
 class Server;
+class SqlStatement;
 //-----------------------------------------------------------------------------
 class Credentials
 {

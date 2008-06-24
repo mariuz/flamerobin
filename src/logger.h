@@ -31,7 +31,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // Functions used to log successfully executed statements
 // in database or textual files
 #include <ibpp.h>
-#include "sql/SqlStatement.h"
+class SqlStatement;
 //-----------------------------------------------------------------------------
 class Database;
 class Config;

@@ -41,6 +41,7 @@
 #include <algorithm>
 
 #include "config/Config.h"
+#include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
 #include "core/Visitor.h"
 #include "frutils.h"
