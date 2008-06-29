@@ -43,16 +43,15 @@ class ResultsetColumnDef;
 class InsertColumnInfo
 {
 public:
-    InsertColumnInfo(wxChoice *c, wxTextCtrl *t, Column *f,
+    InsertColumnInfo(int gridRow, Column *f,
         ResultsetColumnDef *r, int idx)
-        :choice(c), textCtrl(t), column(f), columnDef(r), index(idx)
+        :row(gridRow), column(f), columnDef(r), index(idx)
     {
     };
-    wxChoice *choice;
-    wxTextCtrl *textCtrl;
+    int row;    // insert grid row
     Column *column;
     ResultsetColumnDef *columnDef;
-    int index;
+    int index;  // column index in dataset
 };
 //-----------------------------------------------------------------------------
 class InsertDialog: public BaseDialog
@@ -62,13 +61,12 @@ public:
         IBPP::Statement& st, Database *db);
     virtual ~InsertDialog();
     void OnOkButtonClick(wxCommandEvent& event);
-    void OnChoiceChange(wxCommandEvent& event);
-    //void OnEditTextUpdated(wxCommandEvent& event);
-    void OnEditFocusSet(wxFocusEvent& event);
-    void OnEditFocusLost(wxFocusEvent& event);
-    void editFocusLost(wxTextCtrl *tx);
+    void OnGridCellChange(wxGridEvent& event);
 
-    enum { ID_Choice = 1001, ID_TextCtrl };
+    void OnCellEditorCreated(wxGridEditorCreatedEvent& event);
+    void OnEditorKeyDown(wxKeyEvent& event);
+
+    enum { ID_Choice = 1001, ID_Grid };
 
 private:
     Database *databaseM;
@@ -79,7 +77,7 @@ private:
     DataGridTable *gridTableM;
     InsertedGridRowBuffer *bufferM;
     wxString tableNameM;
-    void updateControls(wxChoice *c, wxTextCtrl *tx);
+    void updateControls(int row);
     void setStringOption(InsertColumnInfo& ici, const wxString& s);
     void set_properties();
     void do_layout();
@@ -89,7 +87,7 @@ protected:
     wxStaticText* labelDataType;
     wxStaticText* labelModifiers;
     wxStaticText* labelValue;
-    wxFlexGridSizer* flexSizerM;
+    wxGrid *gridM;
 
     wxButton* button_ok;
     wxButton* button_cancel;

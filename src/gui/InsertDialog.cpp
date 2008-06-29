@@ -94,6 +94,16 @@ namespace InsertOptions
         return (i == ioDate || i == ioTime || i == ioTimestamp
             || i == ioUser || i == ioGenerator || i == ioDefault);
     }
+
+    InsertOption getInsertOption(wxGrid* grid, int row)
+    {
+        wxString opt = grid->GetCellValue(row, 2);
+        for (int i=0; i<sizeof(insertOptionStrings)/sizeof(wxString); ++i)
+            if (insertOptionStrings[i] == opt)
+                return (InsertOption)i;
+        return ioRegular;
+    }
+
 };
 using namespace InsertOptions;
 //-----------------------------------------------------------------------------
@@ -121,34 +131,54 @@ Generator *findAutoincGenerator(std::vector<Trigger *>& triggers, Column *c)
     return 0;
 }
 //-----------------------------------------------------------------------------
+// MB: When editor is shown for NULL field, we want to reset the color from
+// red to black, so that user does not see the red letters.
+// I tried to do that in InsertDialog::OnCellEditorCreated. However, it
+// does not work there because Show() is called *after* creating.
+// Then I tried to set it in InsertDialog::OnEditorKeyDown, however, it
+// turns black only after the second character. The reason is that the
+// first KeyDown event is caught by the grid control and sent to
+// the editor via StartingKey function without posting the key event to it
+class GridCellEditorWithProperColor: public wxGridCellTextEditor
+{
+public:
+    virtual void Show(bool show, wxGridCellAttr *attr = (wxGridCellAttr *)NULL)
+    {
+        wxGridCellTextEditor::Show(show, attr);
+        GetControl()->SetForegroundColour(
+            wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
+    }
+};
+//-----------------------------------------------------------------------------
 InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
     DataGridTable *gridTable, IBPP::Statement& st, Database *db)
     :BaseDialog(parent, -1, wxEmptyString), tableNameM(tableName), bufferM(0),
     gridTableM(gridTable), statementM(st), databaseM(db)
 {
-    flexSizerM = new wxFlexGridSizer( 2, 4, 8, 8 );
-    flexSizerM->AddGrowableCol( 3 );
-    flexSizerM->SetFlexibleDirection( wxBOTH );
+    DataGridTable::FieldSet fields;
+    gridTable->getFields(tableName, fields);
+
+    // 500 should be reasonable for enough rows on the screen, but not too much
+    gridM = new wxGrid(getControlsPanel(), ID_Grid, wxDefaultPosition,
+        fields.size() < 12 ? wxDefaultSize : wxSize(-1, 500),
+        wxWANTS_CHARS | wxSUNKEN_BORDER);
+    gridM->SetRowLabelSize(50);
+    gridM->DisableDragRowSize();
+    gridM->SetRowLabelAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
+    gridM->SetColLabelAlignment(wxALIGN_LEFT,  wxALIGN_CENTRE);
+    gridM->SetDefaultCellAlignment(wxALIGN_LEFT,  wxALIGN_CENTRE);
 
     wxString labels[] = {
         wxTRANSLATE("Field name"), wxTRANSLATE("Data type"),
         wxTRANSLATE("Special"),    wxTRANSLATE("Value") };
-    for (int i=0; i<sizeof(labels)/sizeof(wxString); ++i)
-    {
-        wxStaticText *st = new wxStaticText(getControlsPanel(), wxID_ANY,
-            labels[i]);
-        flexSizerM->Add(st);
-        wxFont f = st->GetFont();
-        f.SetWeight(wxFONTWEIGHT_BOLD);
-        st->SetFont(f);
-    }
 
     bufferM = new InsertedGridRowBuffer(gridTable->GetNumberCols());
     for (unsigned u = 0; (int)u < gridTable->GetNumberCols(); u++)
         bufferM->setFieldNA(u, true);
 
-    DataGridTable::FieldSet fields;
-    gridTable->getFields(tableName, fields);
+    gridM->CreateGrid(fields.size(), sizeof(labels)/sizeof(wxString));
+    for (int i=0; i<sizeof(labels)/sizeof(wxString); ++i)
+        gridM->SetColLabelValue(i, labels[i]);
 
     // preload triggers
     std::vector<Trigger *> triggers;
@@ -158,61 +188,65 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
         t->getTriggers(triggers, Trigger::beforeTrigger);
     }
 
+    wxGridCellChoiceEditor *types = new wxGridCellChoiceEditor(
+        sizeof(insertOptionStrings)/sizeof(wxString),
+        insertOptionStrings);
+    wxGridCellAttr *ca = new wxGridCellAttr();
+    ca->SetEditor(types);
+    ca->SetBackgroundColour(wxColour(255, 255, 197));
+    gridM->SetColAttr(2, ca);
+
+    wxGridCellAttr *cro = new wxGridCellAttr();
+    cro->SetBackgroundColour(gridM->GetLabelBackgroundColour());
+    cro->SetReadOnly();
+    gridM->SetColAttr(0, cro);
+    gridM->SetColAttr(1, cro);
+
+    GridCellEditorWithProperColor *gce = new GridCellEditorWithProperColor;
+    wxGridCellAttr *gca = new wxGridCellAttr();
+    gca->SetEditor(gce);
+    gridM->SetColAttr(3, gca);
+
+    int row = 0;
     for (DataGridTable::FieldSet::iterator it = fields.begin();
-        it != fields.end(); ++it)
+        it != fields.end(); ++it, ++row)
     {
         Column *c = (*it).second.second;
         ResultsetColumnDef *def = (*it).second.first;
-        wxStaticText *label1 = new wxStaticText(getControlsPanel(), wxID_ANY,
-            c->getName_());
-        flexSizerM->Add(label1, 0, wxALIGN_CENTER_VERTICAL);
 
-        label1 = new wxStaticText(getControlsPanel(), wxID_ANY,
-            c->getDatatype());
-        flexSizerM->Add(label1, 0, wxALIGN_CENTER_VERTICAL);
+        gridM->SetRowLabelValue(row, wxString::Format(wxT("%d"), row+1));
+        gridM->SetCellValue(row, 0, c->getName_());
+        gridM->SetCellValue(row, 1, c->getDatatype());
 
-        wxChoice *choice1 = new wxChoice(getControlsPanel(), ID_Choice,
-            wxDefaultPosition, wxDefaultSize, sizeof(insertOptionStrings)
-                / sizeof(wxString), insertOptionStrings, 0);
-        flexSizerM->Add(choice1, 0, wxALIGN_CENTER_VERTICAL|wxEXPAND);
-        // wxWidgets seem to default to -1 for some reason
-        choice1->SetSelection(ioRegular);
-
-        wxTextCtrl *text1 = new wxTextCtrl(getControlsPanel(), ID_TextCtrl,
-            c->getDefault(), wxDefaultPosition, wxDefaultSize,
-            def->isNumeric() ? wxTE_RIGHT : 0);
-        flexSizerM->Add(text1, 0, wxALIGN_CENTER_VERTICAL|wxEXPAND);
-
-        text1->Connect(wxEVT_KILL_FOCUS,
-            wxFocusEventHandler(InsertDialog::OnEditFocusLost), 0, this);
-        text1->Connect(wxEVT_SET_FOCUS,
-            wxFocusEventHandler(InsertDialog::OnEditFocusSet), 0, this);
+        gridM->SetCellAlignment(
+            def->isNumeric() ? wxALIGN_RIGHT : wxALIGN_LEFT, row, 3);
 
         if (c->hasDefault())
         {
-            choice1->SetSelection(ioDefault);
-            updateControls(choice1, text1);
+            gridM->SetCellValue(row, 2, insertOptionStrings[ioDefault]);
+            gridM->SetCellValue(row, 3, c->getDefault());
+            updateControls(row);
         }
         else
         {
             if (c->isNullable())
             {
-                choice1->SetSelection(ioNull);
-                updateControls(choice1, text1);
+                gridM->SetCellValue(row, 2, insertOptionStrings[ioNull]);
+                updateControls(row);
             }
             else if (def->isNumeric())
-                text1->SetValue(wxT("0"));
+                gridM->SetCellValue(row, 3, wxT("0"));
         }
 
-        InsertColumnInfo ici(choice1, text1, c, def, (*it).first);
+        InsertColumnInfo ici(row, c, def, (*it).first);
         columnsM.push_back(ici);
 
         Generator *gen = findAutoincGenerator(triggers, c);
         if (gen)
         {
-            choice1->SetSelection(ioGenerator);
-            updateControls(choice1, text1);
-            text1->SetValue(gen->getQuotedName());
+            gridM->SetCellValue(row, 2, insertOptionStrings[ioGenerator]);
+            updateControls(row);
+            gridM->SetCellValue(row, 3, gen->getQuotedName());
         }
     }
 
@@ -222,11 +256,9 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
 
     set_properties();
     do_layout();
-    if (columnsM.size())
-        columnsM[0].choice->SetFocus();
-
-    // TODO: if dialog height is greater than screen height: reduce to 80%
-    //       (it should show scrollbars?)
+    if (gridM->GetNumberRows() > 0)
+        gridM->SetGridCursor(0, 3);
+    gridM->SetFocus();
 
     // until we find something better
     SetIcon(wxArtProvider::GetIcon(ART_Trigger, wxART_FRAME_ICON));
@@ -245,12 +277,19 @@ void InsertDialog::set_properties()
 //-----------------------------------------------------------------------------
 void InsertDialog::do_layout()
 {
-    wxBoxSizer* sizerControls = new wxBoxSizer(wxVERTICAL);
-    sizerControls->Add(flexSizerM, 0, wxEXPAND, 0);
+    gridM->AutoSize();
+    wxScreenDC sdc;
+    wxSize sz = sdc.GetTextExtent(wxT("CURRENT_TIMESTAMP WWW"));
+    gridM->SetColSize(2, sz.GetWidth());
+    gridM->SetColSize(3, sz.GetWidth());    // reasonable default width?
+    gridM->ForceRefresh();
+
+    wxSizer* sizerControls = new wxBoxSizer(wxVERTICAL);
+    sizerControls->Add(gridM, 1, wxEXPAND, 0);
 
     wxSizer* sizerButtons =
         styleguide().createButtonSizer(button_ok, button_cancel);
-    layoutSizers(sizerControls, sizerButtons);
+    layoutSizers(sizerControls, sizerButtons, true);
 }
 //-----------------------------------------------------------------------------
 const wxString InsertDialog::getName() const
@@ -268,21 +307,21 @@ bool InsertDialog::getConfigStoresHeight() const
     return false;
 }
 //-----------------------------------------------------------------------------
-void InsertDialog::updateControls(wxChoice *c, wxTextCtrl *tx)
+void InsertDialog::updateControls(int row)
 {
-    InsertOption ix = (InsertOption)(c->GetSelection());
+    InsertOption ix = getInsertOption(gridM, row);
     if (!optionAllowsCustomValue(ix))
-        tx->SetValue(wxEmptyString);
-    tx->SetEditable(optionIsEditable(ix));
+        gridM->SetCellValue(row, 3, wxEmptyString);
+    gridM->SetReadOnly(row, 3, !optionIsEditable(ix));
     updateColors(this);
     if (ix == ioNull)
     {
-        tx->SetForegroundColour(*wxRED);
-        tx->SetValue(wxT("[null]"));
+        gridM->SetCellTextColour(row, 3, *wxRED);
+        gridM->SetCellValue(row, 3, wxT("[null]"));
     }
     else
     {
-        tx->SetForegroundColour(
+        gridM->SetCellTextColour(row, 3,
             wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
     }
 }
@@ -292,9 +331,9 @@ void InsertDialog::storeValues()
     for (std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
         it != columnsM.end(); ++it)
     {
-        InsertOption sel = (InsertOption)((*it).choice->GetSelection());
+        InsertOption sel = getInsertOption(gridM, (*it).row);
         wxString previous = (*it).columnDef->getAsString(bufferM);
-        wxString value = (*it).textCtrl->GetValue();
+        wxString value = gridM->GetCellValue((*it).row, 3);
         try
         {
             if (sel == ioHex)
@@ -318,15 +357,16 @@ void InsertDialog::storeValues()
                     }
                     value = result;
                 }
-                (*it).choice->SetSelection(ioRegular);
+                gridM->SetCellValue((*it).row, 2,
+                    insertOptionStrings[ioRegular]);
                 sel = ioRegular;
             }
             switch (sel)
             {
                 case ioRegular:
                     (*it).columnDef->setFromString(bufferM, value);
-                    (*it).textCtrl->SetValue((*it)
-                        .columnDef->getAsString(bufferM));
+                    gridM->SetCellValue((*it).row, 3,
+                        (*it).columnDef->getAsString(bufferM));
                     // there is no break; here deliberately!
                 case ioFile:
                     bufferM->setFieldNull((*it).index, false);
@@ -345,7 +385,7 @@ void InsertDialog::storeValues()
         }
         catch(...)
         {   // we take the old value from buffer
-            (*it).textCtrl->SetValue(previous);
+            gridM->SetCellValue((*it).row, 3, previous);
             throw;
         }
     }
@@ -359,7 +399,7 @@ void InsertDialog::preloadSpecialColumns()
     for (std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
         it != columnsM.end(); ++it)
     {
-        InsertOption sel = (InsertOption)((*it).choice->GetSelection());
+        InsertOption sel = getInsertOption(gridM, (*it).row);
         if (!optionValueLoadedFromDatabase(sel))
             continue;
         if (first)
@@ -367,20 +407,21 @@ void InsertDialog::preloadSpecialColumns()
         else
             sql += wxT(",");
         if (sel == ioGenerator) // generator
-            sql += wxT("GEN_ID(") + (*it).textCtrl->GetValue() + wxT(", 1)");
+            sql += wxT("GEN_ID(") + gridM->GetCellValue((*it).row, 3)
+                + wxT(", 1)");
         else if (sel == ioDefault)
         {
             if (!(*it).column->isString())
                 sql += wxT("CAST(");
-            sql += (*it).textCtrl->GetValue();
+            sql += gridM->GetCellValue((*it).row, 3);
             if (!(*it).column->isString())
             {   // false = no custom formatting, just the pure type
                 sql += wxT(" AS ") + (*it).column->getDatatype(false)
                     + wxT(")");
             }
         }
-        else
-            sql += (*it).choice->GetStringSelection();
+        else // CURRENT_ USER/DATE/TIMESTAMP...
+            sql += gridM->GetCellValue((*it).row, 2);
     }
 
     // step 2: load those from the database
@@ -400,104 +441,56 @@ void InsertDialog::preloadSpecialColumns()
     for (std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
         it != columnsM.end(); ++it)
     {
-        InsertOption sel = (InsertOption)((*it).choice->GetSelection());
+        InsertOption sel = getInsertOption(gridM, (*it).row);
         if (!optionValueLoadedFromDatabase(sel))
             continue;
         bufferM->setFieldNA((*it).index, false);
         bufferM->setFieldNull((*it).index, st1->IsNull(col));
         if (!st1->IsNull(col))
-            (*it).columnDef->setValue(bufferM, col++, st1, wxConvCurrent);
+            (*it).columnDef->setValue(bufferM, col, st1, wxConvCurrent);
+        ++col;
         if (sel != ioGenerator)  // what follows is only for generators
             continue;
-        (*it).textCtrl->SetValue((*it).columnDef->getAsString(bufferM));
-        (*it).choice->SetSelection(ioRegular);  // treat as regular value
-        updateControls((*it).choice, (*it).textCtrl);
+        gridM->SetCellValue((*it).row, 3,
+            (*it).columnDef->getAsString(bufferM));
+        gridM->SetCellValue((*it).row, 2,
+            insertOptionStrings[ioRegular]);  // treat as regular value
+        updateControls((*it).row);
     }
 }
 //-----------------------------------------------------------------------------
 //! event handling
 BEGIN_EVENT_TABLE(InsertDialog, BaseDialog)
+    EVT_GRID_CMD_CELL_CHANGE(InsertDialog::ID_Grid,
+        InsertDialog::OnGridCellChange)
+    EVT_GRID_CMD_EDITOR_CREATED(InsertDialog::ID_Grid,
+        InsertDialog::OnCellEditorCreated)
     EVT_BUTTON(wxID_OK, InsertDialog::OnOkButtonClick)
-    EVT_CHOICE(InsertDialog::ID_Choice, InsertDialog::OnChoiceChange)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
-// clear the text from NULL field when focused
-void InsertDialog::OnEditFocusSet(wxFocusEvent& event)
+void InsertDialog::OnCellEditorCreated(wxGridEditorCreatedEvent& event)
 {
-    wxTextCtrl *tx = dynamic_cast<wxTextCtrl *>(event.GetEventObject());
-    if (!tx)
+    wxTextCtrl *editor = dynamic_cast<wxTextCtrl *>(event.GetControl());
+    if (!editor)
         return;
-
-    std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
-    for (; it != columnsM.end(); ++it)
-        if ((*it).textCtrl == tx)
-            break;
-    if (it == columnsM.end())   // this should never happen
-        return;
-    if ((*it).choice->GetSelection() == ioNull)
-    {
-        tx->SetForegroundColour(
-            wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-        tx->SetValue(wxEmptyString);
-    }
+    editor->Connect(wxEVT_KEY_DOWN,
+        wxKeyEventHandler(InsertDialog::OnEditorKeyDown),
+        0, this);
 }
 //-----------------------------------------------------------------------------
-void InsertDialog::OnEditFocusLost(wxFocusEvent& event)
+void InsertDialog::OnEditorKeyDown(wxKeyEvent& event)
 {
-    if (!databaseM) // dialog already closed
-        return;
-
-    wxTextCtrl *tx = dynamic_cast<wxTextCtrl *>(event.GetEventObject());
-    if (!tx)
-        return;
-
-    std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
-    for (; it != columnsM.end(); ++it)
-        if ((*it).textCtrl == tx)
-            break;
-    if (it == columnsM.end())   // this should never happen
-        return;
-    if ((*it).choice->GetSelection() != ioNull &&
-        (*it).choice->GetSelection() != ioRegular)
+    wxTextCtrl *editor = dynamic_cast<wxTextCtrl *>(event.GetEventObject());
+    if (event.GetKeyCode() == WXK_DELETE && editor->GetValue().IsEmpty())
     {
+        // dismiss editor and set null
+        gridM->HideCellEditControl();
+        int row = gridM->GetGridCursorRow();
+        gridM->SetCellValue(row, 2, insertOptionStrings[ioNull]);
+        updateControls(row);
         return;
     }
-    if (tx->GetValue().IsEmpty())   // we assume null for non-string columns
-    {
-        // here we can change the NULL behaviour for string columns, i.e.
-        // whether empty field is NULL or ''
-        // if ((*it).column->isString() ...
-        bufferM->setFieldNull((*it).index, true);
-        (*it).choice->SetSelection(ioNull);
-        updateControls((*it).choice, (*it).textCtrl);
-        return;
-    }
-
-    // write data to buffer and retrieve the formatted value
-    (*it).choice->SetSelection(ioRegular);
-    updateControls((*it).choice, (*it).textCtrl);
-    bufferM->setFieldNull((*it).index, false);
-
-    wxString previous = (*it).columnDef->getAsString(bufferM);
-    try
-    {
-        (*it).columnDef->setFromString(bufferM, tx->GetValue());
-        tx->SetValue((*it).columnDef->getAsString(bufferM));
-    }
-    catch(...)
-    {
-        tx->SetValue(previous);     // we take the old value from buffer
-
-        // This is commented out as it doesn't work nice:
-        // 1. there is reentrancy problem (easily fixed with some bool flag)
-        // 2. user might want to simply close the dialog, changing the
-        //    focus here prevents that (at least with wxGTK 2.8.4)
-        // If you know a way around that, uncomment these 2 lines:
-        //tx->SetFocus();
-        //tx->SetSelection(-1, -1);   // select all
-
-        throw;
-    }
+    event.Skip();
 }
 //-----------------------------------------------------------------------------
 void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
@@ -511,7 +504,7 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
     for (std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
         it != columnsM.end(); ++it)
     {
-        InsertOption sel = (InsertOption)((*it).choice->GetSelection());
+        InsertOption sel = getInsertOption(gridM, (*it).row);
         if (sel == ioSkip)   // skip
             continue;
 
@@ -525,7 +518,7 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
         stm += (*it).column->getQuotedName();
         if (sel == ioFile)
             val += wxT("?");
-        else if (sel == ioNull)  // NULL
+        else if (sel == ioNull || bufferM->isFieldNull((*it).index))
             val += wxT("NULL");
         else
         {
@@ -547,9 +540,9 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
     for (std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
         it != columnsM.end(); ++it)
     {
-        if ((InsertOption)((*it).choice->GetSelection()) != ioFile)
+        if (getInsertOption(gridM, (*it).row) != ioFile)
             continue;
-        wxFFile fl((*it).textCtrl->GetValue(), wxT("rb"));
+        wxFFile fl(gridM->GetCellValue((*it).row, 3), wxT("rb"));
         if (!fl.IsOpened())
             throw FRError(_("Cannot open BLOB file."));
         IBPP::Blob b = IBPP::BlobFactory(st1->DatabasePtr(),
@@ -584,53 +577,86 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 void InsertDialog::setStringOption(InsertColumnInfo& ici, const wxString& s)
 {
     if (!s.IsEmpty())
-        ici.textCtrl->SetValue(s);
+        gridM->SetCellValue(ici.row, 3, s);
     else
     {
-        ici.choice->SetSelection(ioNull);
-        updateControls(ici.choice, ici.textCtrl);
+        gridM->SetCellValue(ici.row, 2, insertOptionStrings[ioNull]);
+        updateControls(ici.row);
     }
 }
 //-----------------------------------------------------------------------------
-void InsertDialog::OnChoiceChange(wxCommandEvent& event)
+void InsertDialog::OnGridCellChange(wxGridEvent& event)
 {
-    if (!databaseM)
+    if (!databaseM) // dialog already closed
         return;
 
-    wxChoice *c = dynamic_cast<wxChoice *>(event.GetEventObject());
-    if (!c)
+    static wxMutex m;       // prevent reentrancy since we set the value
+    wxMutexLocker ml(m);
+    if (!ml.IsOk())
         return;
-    // find related text control
-    std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
-    for (; it != columnsM.end(); ++it)
-        if ((*it).choice == c)
-            break;
 
-    InsertOption option = (InsertOption)(event.GetSelection());
-    if (optionIsEditable(option))
-        (*it).textCtrl->Clear();
+    int row = event.GetRow();
+    InsertOption option = getInsertOption(gridM, row);
 
-    updateControls(c, (*it).textCtrl);
-
-    if (option == ioFile)
-        setStringOption(*it, ::wxFileSelector(_("Select a file")));
-
-    if (option == ioDefault)
-        setStringOption(*it, (*it).column->getDefault());
-
-    if (option == ioGenerator)
+    if (event.GetCol() == 3)
     {
-        // select generator name and store in tx
-        wxArrayString as;
-        for (MetadataCollection<Generator>::const_iterator ci =
-            databaseM->generatorsBegin(); ci != databaseM->generatorsEnd();
-            ++ci)
+        if (option != ioNull && option != ioRegular)
+            return;
+        wxString cellValue = gridM->GetCellValue(row, 3);
+        if (cellValue.IsEmpty())   // we assume null for non-string columns
         {
-            as.Add((*ci).getQuotedName());
+            // here we can change the NULL behaviour for string columns, i.e.
+            // whether empty field is NULL or ''
+            // if ((*it).column->isString() ...
+            bufferM->setFieldNull(columnsM[row].index, true);
+            gridM->SetCellValue(row, 2, insertOptionStrings[ioNull]);
+            updateControls(row);
+            return;
         }
-        wxString s(::wxGetSingleChoice(_("Select a generator"),
-            _("Generator"), as, this));
-        setStringOption(*it, s);
+        // write data to buffer and retrieve the formatted value
+        try
+        {
+            columnsM[row].columnDef->setFromString(bufferM, cellValue);
+        }
+        catch(...)
+        {
+            event.Veto();
+            throw;
+        }
+        gridM->SetCellValue(row, 3,
+            columnsM[row].columnDef->getAsString(bufferM));
+        gridM->SetCellValue(row, 2, insertOptionStrings[ioRegular]);
+        updateControls(row);
+        bufferM->setFieldNull(columnsM[row].index, false);
+        bufferM->setFieldNA(columnsM[row].index, false);
+    }
+    else if (event.GetCol() == 2)
+    {
+        if (optionIsEditable(option))
+            gridM->SetCellValue(row, 3, wxEmptyString);
+
+        updateControls(row);
+
+        if (option == ioFile)
+            setStringOption(columnsM[row], ::wxFileSelector(_("Select a file")));
+
+        if (option == ioDefault)
+            setStringOption(columnsM[row], columnsM[row].column->getDefault());
+
+        if (option == ioGenerator)
+        {
+            // select generator name and store in tx
+            wxArrayString as;
+            for (MetadataCollection<Generator>::const_iterator ci =
+                databaseM->generatorsBegin(); ci != databaseM->generatorsEnd();
+                ++ci)
+            {
+                as.Add((*ci).getQuotedName());
+            }
+            wxString s(::wxGetSingleChoice(_("Select a generator"),
+                _("Generator"), as, this));
+            setStringOption(columnsM[row], s);
+        }
     }
 }
 //-----------------------------------------------------------------------------

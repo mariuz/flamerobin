@@ -49,6 +49,7 @@ protected:
 public:
     DataGridRowBuffer(unsigned fieldCount);
     DataGridRowBuffer(const DataGridRowBuffer* other);
+    virtual ~DataGridRowBuffer() {};
 
     wxString getString(unsigned index);
     IBPP::Blob *getBlob(unsigned index);
