@@ -577,14 +577,15 @@ void CreateDDLVisitor::visitTable(Table& t)
 void CreateDDLVisitor::visitTrigger(Trigger& t)
 {
     wxString object, type;
-    bool active;
+    bool active, db;
     int position;
-    t.getTriggerInfo(object, active, position, type);
+    t.getTriggerInfo(object, active, position, type, db);
     wxString source = t.getSource();
-    wxString relation = t.getRelation();
+    wxString relation = t.getTriggerRelation();
 
-    preSqlM << wxT("SET TERM ^ ;\nCREATE TRIGGER ") << t.getQuotedName()
-         << wxT(" FOR ") << relation;
+    preSqlM << wxT("SET TERM ^ ;\nCREATE TRIGGER ") << t.getQuotedName();
+    if (!db)
+        preSqlM << wxT(" FOR ") << relation;
     if (active)
         preSqlM << wxT(" ACTIVE\n");
     else

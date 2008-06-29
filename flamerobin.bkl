@@ -440,6 +440,7 @@
     <set var="HTMLTEMPLATEFILES">
         ALLloading.html
         DATABASE.html
+        DATABASEtriggers.html
         DDL.html
         DOMAIN.html
         EXCEPTION.html

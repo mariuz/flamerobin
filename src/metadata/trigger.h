@@ -35,6 +35,7 @@ class Trigger: public MetadataItem
 {
 private:
     bool infoIsLoadedM;
+    bool isDatabaseTriggerM;
     wxString objectM;
     bool activeM;
     int positionM;
@@ -45,15 +46,16 @@ protected:
 public:
     Trigger();
 
-    enum firingTimeType { afterTrigger, beforeTrigger };
+    enum fireTimeType { afterTrigger, beforeTrigger, databaseTrigger };
     wxString getCreateSqlTemplate() const;  // overrides MetadataItem::getCreateSqlTemplate()
 
     void loadInfo(bool force = false);
-    void getTriggerInfo(wxString& object, bool& active, int& position, wxString& type);
+    void getTriggerInfo(wxString& object, bool& active, int& position,
+        wxString& type, bool& isDatabaseTrigger);
     wxString getSource() const;
-    wxString getRelation();
+    wxString getTriggerRelation();
     static wxString getTriggerType(int flags);
-    firingTimeType getFiringTime();
+    fireTimeType getFiringTime();
     wxString getAlterSql();
 
     virtual const wxString getTypeName() const;

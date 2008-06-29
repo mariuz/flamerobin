@@ -320,6 +320,8 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
         pages.push_back(wxT("Summary"));
         if (object->getType() == ntRole)        // special case, roles
             pages.push_back(wxT("Privileges")); // don't have dependencies
+        if (object->getType() == ntDatabase)
+            pages.push_back(wxT("Triggers"));   // FB 2.1
         switch (object->getType())
         {
             case ntSysTable:
@@ -463,17 +465,24 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
         }
     }
 
-    else if (cmd == wxT("triggers")) // table triggers,  triggers:after or triggers:befor  <- not a typo
+    // table triggers,  triggers:after or triggers:befor  <- not a typo
+    else if (cmd == wxT("triggers"))
     {
         Relation* r = dynamic_cast<Relation*>(object);
-        if (!r)
+        Database* d = dynamic_cast<Database*>(object);
+        if (!r && !d)
             return;
         std::vector<Trigger*> tmp;
-        if (suffix.substr(0, 5) == wxT("after"))
-            r->getTriggers(tmp, Trigger::afterTrigger);
-        else
-            r->getTriggers(tmp, Trigger::beforeTrigger);
-        suffix.erase(0, 5);
+        if (r)
+        {
+            if (suffix.substr(0, 5) == wxT("after"))
+                r->getTriggers(tmp, Trigger::afterTrigger);
+            else
+                r->getTriggers(tmp, Trigger::beforeTrigger);
+            suffix.erase(0, 5);
+        }
+        else // d
+            d->getDatabaseTriggers(tmp);
         for (std::vector<Trigger*>::iterator it = tmp.begin(); it != tmp.end(); ++it)
             processHtmlCode(htmlpage, suffix, *it);
     }
@@ -755,13 +764,16 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
     {
         Trigger* t = dynamic_cast<Trigger*>(object);
         wxString object, type;
-        bool active;
+        bool active, isDBtrigger;
         int position;
         if (!t)
             return;
-        t->getTriggerInfo(object, active, position, type);
+        t->getTriggerInfo(object, active, position, type, isDBtrigger);
         wxString s(active ? wxT("Active ") : wxT("Inactive "));
-        s << type << wxT(" trigger for ") << object << wxT(" at position ") << position;
+        s << type << wxT(" trigger ");
+        if (!isDBtrigger)
+            s << wxT("for ") << object;
+        s << wxT(" at position ") << position;
         htmlpage += escapeHtmlChars(s, false);
     }
 

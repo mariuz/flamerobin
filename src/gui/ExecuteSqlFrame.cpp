@@ -2763,19 +2763,30 @@ const ActivateTriggersHandler ActivateTriggersHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool ActivateTriggersHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("activate_triggers") && uri.action != wxT("deactivate_triggers"))
+    if (uri.action != wxT("activate_triggers")
+        && uri.action != wxT("deactivate_triggers"))
+    {
         return false;
+    }
 
-    Table* t = (Table*)getObject(uri);
+    MetadataItem *m = (MetadataItem *)getObject(uri);
+    Table* t = dynamic_cast<Table*>(m);
+    Database* d = dynamic_cast<Database*>(m);
     wxWindow* w = getWindow(uri);
-    if (!t || !w)
+    if ((!t && !d) || !w)
         return true;
 
     std::vector<Trigger*> list;
-    t->getTriggers(list, Trigger::afterTrigger);
-    t->getTriggers(list, Trigger::beforeTrigger);
+    if (t)
+    {
+        t->getTriggers(list, Trigger::afterTrigger);
+        t->getTriggers(list, Trigger::beforeTrigger);
+    }
+    else
+        d->getDatabaseTriggers(list);
     wxString sql;
-    for (std::vector<Trigger*>::iterator it = list.begin(); it != list.end(); ++it)
+    for (std::vector<Trigger*>::iterator it = list.begin(); it != list.end();
+        ++it)
     {
         sql += wxT("ALTER TRIGGER ") + (*it)->getQuotedName() + wxT(" ");
         if (uri.action == wxT("deactivate_triggers"))
@@ -2783,7 +2794,7 @@ bool ActivateTriggersHandler::handleURI(URI& uri)
         sql += wxT("ACTIVE;\n");
     }
 
-    execSql(w, wxEmptyString, t->findDatabase(), sql, true);
+    execSql(w, wxEmptyString, d ? d : t->findDatabase(), sql, true);
     return true;
 }
 //-----------------------------------------------------------------------------

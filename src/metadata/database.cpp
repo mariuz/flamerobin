@@ -304,6 +304,29 @@ wxString Database::loadDomainNameForColumn(wxString table, wxString field)
     return std2wx(domain);
 }
 //-----------------------------------------------------------------------------
+void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
+{
+    MetadataLoader* loader = getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    IBPP::Statement& st1 = loader->getStatement(
+        "select rdb$trigger_name from rdb$triggers "
+        "where rdb$relation_name is null "
+        "order by rdb$trigger_sequence"
+    );
+    st1->Execute();
+    while (st1->Fetch())
+    {
+        std::string name;
+        st1->Get(1, name);
+        name.erase(name.find_last_not_of(" ") + 1);
+        Trigger* t = dynamic_cast<Trigger*>(findByNameAndType(ntTrigger,
+            std2wx(name)));
+        if (t)
+            list.push_back(t);
+    }
+}
+//-----------------------------------------------------------------------------
 //! returns all collations for a given charset
 std::vector<wxString> Database::getCollations(wxString charset)
 {
@@ -551,7 +574,7 @@ Relation* Database::getRelationForTrigger(Trigger* trigger)
 {
     if (!trigger)
         return 0;
-    wxString relName = trigger->getRelation();
+    wxString relName = trigger->getTriggerRelation();
     if (relName.IsEmpty())
         return 0;
     return findRelation(Identifier(relName));
@@ -640,8 +663,8 @@ void Database::parseCommitedSql(const SqlStatement& stm)
     }
 
     // handle "CREATE INDEX", "ALTER INDEX" and "SET STATISTICS INDEX"
-    if (stm.getObjectType() == ntIndex && (
-        stm.actionIs(actCREATE) || stm.actionIs(actALTER) || stm.actionIs(actSET)))
+    if (stm.getObjectType() == ntIndex && ( stm.actionIs(actCREATE)
+        || stm.actionIs(actALTER) || stm.actionIs(actSET)))
     {
         wxString tableName = getTableForIndex(stm.getName());
         MetadataItem* m = findByNameAndType(ntTable, tableName);
@@ -650,7 +673,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
         return;
     }
 
-    // update all TABLEs and VIEWs on "DROP TRIGGER"
+    // update all TABLEs, VIEWs and DATABASE on "DROP TRIGGER"
     if (stm.actionIs(actDROP, ntTrigger))
     {
         MetadataCollection<Table>::iterator itt;
@@ -659,16 +682,19 @@ void Database::parseCommitedSql(const SqlStatement& stm)
         MetadataCollection<View>::iterator itv;
         for (itv = viewsM.begin(); itv != viewsM.end(); itv++)
             (*itv).notifyObservers();
+        notifyObservers();
     }
 
     if (stm.actionIs(actCREATE) || stm.actionIs(actDECLARE))
     {
-        if (addObject(stm.getObjectType(), stm.getName())) // inserts object into collection
+        if (addObject(stm.getObjectType(), stm.getName()))
             refreshByType(stm.getObjectType());
-        // when trigger created -> force relations to update their property pages
+        // when trigger created: force relations to update their property pages
         Relation *r = stm.getCreateTriggerRelation();
         if (r)
             r->notifyObservers();
+        else if (stm.getObjectType() == ntTrigger) // database trigger probably
+            notifyObservers();
         return;
     }
 
@@ -766,6 +792,8 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                         Relation* r = getRelationForTrigger(tr);
                         if (r)
                             r->notifyObservers();
+                        else  // database trigger
+                            notifyObservers();
                     }
                     break;
                 }

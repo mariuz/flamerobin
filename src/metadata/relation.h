@@ -71,7 +71,7 @@ public:
     std::vector<Privilege>* getPrivileges();
     bool getChildren(std::vector<MetadataItem *>& temp);
     void getTriggers(std::vector<Trigger *>& list,
-        Trigger::firingTimeType beforeOrAfter);
+        Trigger::fireTimeType beforeOrAfter);
 };
 //-----------------------------------------------------------------------------
 #endif // FR_RELATION_H

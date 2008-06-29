@@ -60,20 +60,23 @@ Trigger::Trigger()
 }
 //-----------------------------------------------------------------------------
 void Trigger::getTriggerInfo(wxString& object, bool& active, int& position,
-    wxString& type)
+    wxString& type, bool& isDatabaseTrigger)
 {
     if (!infoIsLoadedM)
         loadInfo();
+    isDatabaseTrigger = isDatabaseTriggerM;
     object = objectM;
     active = activeM;
     position = positionM;
     type = triggerTypeM;
 }
 //-----------------------------------------------------------------------------
-wxString Trigger::getRelation()
+wxString Trigger::getTriggerRelation()
 {
     if (!infoIsLoadedM)
         loadInfo();
+    if (isDatabaseTriggerM)
+        return wxEmptyString;
     return objectM;
 }
 //-----------------------------------------------------------------------------
@@ -95,10 +98,14 @@ void Trigger::loadInfo(bool force)
     st1->Execute();
     if (st1->Fetch())
     {
-        std::string objectName;
-        st1->Get(1, objectName);
-        objectM = std2wx(objectName);
-        objectM.erase(objectM.find_last_not_of(wxT(" ")) + 1);
+        isDatabaseTriggerM = st1->IsNull(1);
+        if (!isDatabaseTriggerM)
+        {
+            std::string objectName;
+            st1->Get(1, objectName);
+            objectM = std2wx(objectName);
+            objectM.erase(objectM.find_last_not_of(wxT(" ")) + 1);
+        }
         st1->Get(2, &positionM);
 
         short temp;
@@ -140,6 +147,14 @@ wxString Trigger::getSource() const
 //-----------------------------------------------------------------------------
 wxString Trigger::getTriggerType(int type)
 {
+    if (type >= 8192 && type <= 8196)   // database triggers
+    {
+        wxString ttype[] = {
+            wxT("CONNECT"), wxT("DISCONNECT"), wxT("TRANSACTION START"),
+            wxT("TRANSACTION COMMIT"), wxT("TRANSACTION ROLLBACK") };
+        return wxString(wxT("ON ")) + ttype[type - 8192];
+    }
+
     // For explanation: read README.universal_triggers file in Firebird's
     //                  doc/sql.extensions directory
     wxString result(type % 2 ? wxT("BEFORE ") : wxT("AFTER "));
@@ -158,10 +173,12 @@ wxString Trigger::getTriggerType(int type)
     return result;
 }
 //-----------------------------------------------------------------------------
-Trigger::firingTimeType Trigger::getFiringTime()
+Trigger::fireTimeType Trigger::getFiringTime()
 {
     if (!infoIsLoadedM)
         loadInfo();
+    if (isDatabaseTriggerM)
+        return databaseTrigger;
     if (triggerTypeM.substr(0, 6) == wxT("BEFORE"))
         return beforeTrigger;
     else
@@ -171,10 +188,10 @@ Trigger::firingTimeType Trigger::getFiringTime()
 wxString Trigger::getAlterSql()
 {
     wxString object, type;
-    bool active;
+    bool active, db;
     int position;
 
-    getTriggerInfo(object, active, position, type);
+    getTriggerInfo(object, active, position, type, db);
     wxString source = getSource();
     wxString sql;
     sql << wxT("SET TERM ^ ;\nALTER TRIGGER ") << getQuotedName();
@@ -182,7 +199,8 @@ wxString Trigger::getAlterSql()
         sql << wxT(" ACTIVE\n");
     else
         sql << wxT(" INACTIVE\n");
-    sql << type;
+    if (!db)
+        sql << type;
     sql << wxT(" POSITION ");
     sql << position << wxT("\n");
     sql << source;
@@ -192,16 +210,18 @@ wxString Trigger::getAlterSql()
 //-----------------------------------------------------------------------------
 wxString Trigger::getCreateSqlTemplate() const
 {
-    return  wxT("SET TERM ^ ;\n\n")
-            wxT("CREATE TRIGGER name FOR table/view \n")
-            wxT(" [IN]ACTIVE \n")
-            wxT(" {BEFORE | AFTER} INSERT OR UPDATE OR DELETE \n")
-            wxT(" POSITION number \n")
-            wxT("AS \n")
-            wxT("BEGIN \n")
-            wxT("    /* enter trigger code here */ \n")
-            wxT("END^\n\n")
-            wxT("SET TERM ; ^\n");
+    return
+    wxT("SET TERM ^ ;\n\n")
+    wxT("CREATE TRIGGER name [FOR table/view] \n")
+    wxT(" [IN]ACTIVE \n")
+    wxT(" [ON {[DIS]CONNECT | TRANSACTION {START | COMMIT | ROLLBACK}} ] \n")
+    wxT(" [{BEFORE | AFTER} INSERT OR UPDATE OR DELETE] \n")
+    wxT(" POSITION number \n")
+    wxT("AS \n")
+    wxT("BEGIN \n")
+    wxT("    /* enter trigger code here */ \n")
+    wxT("END^\n\n")
+    wxT("SET TERM ; ^\n");
 }
 //-----------------------------------------------------------------------------
 const wxString Trigger::getTypeName() const

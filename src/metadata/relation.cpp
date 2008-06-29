@@ -518,7 +518,7 @@ std::vector<Privilege>* Relation::getPrivileges()
 //! load list of triggers for relation
 //! link them to triggers in database's collection
 void Relation::getTriggers(std::vector<Trigger *>& list,
-    Trigger::firingTimeType beforeOrAfter)
+    Trigger::fireTimeType beforeOrAfter)
 {
     Database* d = getDatabase(wxT("Relation::getTriggers"));
     MetadataLoader* loader = d->getMetadataLoader();
@@ -535,7 +535,8 @@ void Relation::getTriggers(std::vector<Trigger *>& list,
         std::string name;
         st1->Get(1, name);
         name.erase(name.find_last_not_of(" ") + 1);
-        Trigger* t = dynamic_cast<Trigger*>(d->findByNameAndType(ntTrigger, std2wx(name)));
+        Trigger* t = dynamic_cast<Trigger*>(d->findByNameAndType(ntTrigger,
+            std2wx(name)));
         if (t && t->getFiringTime() == beforeOrAfter)
             list.push_back(t);
     }

@@ -182,7 +182,9 @@ Relation *IncompleteStatement::getAlterTriggerRelation(const wxString& sql)
             ntTrigger, id.get()));
         if (!t)
             return 0;
-        wxString relName = t->getRelation();
+        wxString relName = t->getTriggerRelation();
+        if (relName.IsEmpty())  // database trigger
+            return 0;
         r = dynamic_cast<Relation *>(databaseM->findByNameAndType(ntTable,
             relName));
         if (!r)

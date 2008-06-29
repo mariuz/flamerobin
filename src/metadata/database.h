@@ -219,6 +219,9 @@ public:
     //! fill vector with result of sql statement
     void fillVector(std::vector<wxString>& list, wxString sql);
 
+    //! gets the database triggers (FB2.1+)
+    void getDatabaseTriggers(std::vector<Trigger *>& list);
+
     wxString getPath() const;
     wxString getDatabaseCharset() const;
     wxString getConnectionCharset() const;
