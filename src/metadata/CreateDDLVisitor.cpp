@@ -77,7 +77,7 @@ wxString CreateDDLVisitor::getPrefixSql() const
 //-----------------------------------------------------------------------------
 wxString CreateDDLVisitor::getSuffixSql() const
 {
-    return postSqlM;
+    return postSqlM + grantSqlM;
 }
 //-----------------------------------------------------------------------------
 // this one is not called from "outside", but from visit(Table) function
@@ -214,7 +214,7 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         return;
     }
 
-    sqlM = preSqlM + wxT("\n") + postSqlM;
+    sqlM = preSqlM + wxT("\n") + postSqlM + grantSqlM;
     if (progressIndicatorM)
     {
         progressIndicatorM->setProgressMessage(_("Extraction complete."));
@@ -378,7 +378,7 @@ void CreateDDLVisitor::visitProcedure(Procedure& p)
         for (std::vector<Privilege>::const_iterator ci = priv->begin();
             ci != priv->end(); ++ci)
         {
-            temp += (*ci).getSql() + wxT("\n");
+            grantSqlM += (*ci).getSql() + wxT("\n");
         }
     }
 
@@ -416,7 +416,7 @@ void CreateDDLVisitor::visitProcedure(Procedure& p)
 
     postSqlM << temp << wxT("\n");
     temp.Replace(wxT("ALTER"), wxT("CREATE"), false);   // just first
-    sqlM << temp;
+    sqlM << temp << grantSqlM;
 
     // create empty procedure body (for database DDL dump)
     temp = p.getAlterSql(false);    // false = only headers
@@ -435,7 +435,7 @@ void CreateDDLVisitor::visitRole(Role& r)
         for (std::vector<Privilege>::const_iterator ci = priv->begin();
             ci != priv->end(); ++ci)
         {
-            postSqlM += (*ci).getSql();
+            grantSqlM += (*ci).getSql();
         }
     }
     wxString description = r.getDescription();
@@ -448,7 +448,7 @@ void CreateDDLVisitor::visitRole(Role& r)
                  << description << wxT("'\nwhere RDB$ROLE_NAME = '")
                  << name << wxT("';\n");
     }
-    sqlM = preSqlM + wxT("\n") + postSqlM;
+    sqlM = preSqlM + wxT("\n") + postSqlM + grantSqlM;
 }
 //-----------------------------------------------------------------------------
 // used by visit(Table)
@@ -556,7 +556,7 @@ void CreateDDLVisitor::visitTable(Table& t)
     const std::vector<Privilege>* priv = t.getPrivileges();
     if (priv)
         for (std::vector<Privilege>::const_iterator ci = priv->begin(); ci != priv->end(); ++ci)
-            postSqlM += (*ci).getSql() + wxT("\n");
+            grantSqlM += (*ci).getSql() + wxT("\n");
 
     preSqlM += wxT("\n);\n");
 
@@ -571,7 +571,7 @@ void CreateDDLVisitor::visitTable(Table& t)
                  << name << wxT("';\n");
     }
 
-    sqlM = preSqlM + wxT("\n") + postSqlM;
+    sqlM = preSqlM + wxT("\n") + postSqlM + grantSqlM;
 }
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visitTrigger(Trigger& t)
@@ -640,7 +640,7 @@ void CreateDDLVisitor::visitView(View& v)
         for (std::vector<Privilege>::const_iterator ci = priv->begin();
             ci != priv->end(); ++ci)
         {
-            postSqlM += (*ci).getSql() + wxT("\n");
+            grantSqlM += (*ci).getSql() + wxT("\n");
         }
     }
     wxString name(v.getName_());
@@ -676,6 +676,6 @@ void CreateDDLVisitor::visitView(View& v)
         }
     }
 
-    sqlM += preSqlM + wxT("\n") + postSqlM;
+    sqlM += preSqlM + wxT("\n") + postSqlM + grantSqlM;
 }
 //-----------------------------------------------------------------------------

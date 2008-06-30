@@ -39,6 +39,7 @@ private:
 
     wxString preSqlM;   // used for scripts to create entire database
     wxString postSqlM;  // sometimes it's the same as sqlM, sometimes not
+    wxString grantSqlM; // grant statements at the very end (for easy diff)
 
     ProgressIndicator* progressIndicatorM;
 
