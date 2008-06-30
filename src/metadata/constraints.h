@@ -38,6 +38,7 @@ class Constraint: public MetadataItem
 public:
     virtual Table* getTable() const;
     virtual bool isSystem() const;
+    virtual const wxString getTypeName() const;
 };
 //-----------------------------------------------------------------------------
 class ColumnConstraint: public Constraint

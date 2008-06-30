@@ -46,8 +46,13 @@
 //-----------------------------------------------------------------------------
 bool Constraint::isSystem() const
 {
-    return (getName_().StartsWith(wxT("RDB$")) 
+    return (getName_().StartsWith(wxT("RDB$"))
         || getName_().StartsWith(wxT("INTEG_")));
+}
+//-----------------------------------------------------------------------------
+const wxString Constraint::getTypeName() const
+{
+    return wxT("CONSTRAINT");
 }
 //-----------------------------------------------------------------------------
 wxString ColumnConstraint::getColumnList() const

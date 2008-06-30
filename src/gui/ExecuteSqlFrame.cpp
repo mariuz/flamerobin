@@ -2462,6 +2462,18 @@ bool DropColumnHandler::handleURI(URI& uri)
     if (uri.action == wxT("drop_constraint"))
         sql += wxT("CONSTRAINT ");
     sql += c->getQuotedName();
+
+    wxString msg(wxString::Format(
+        _("Are you sure you wish to drop the %s %s?"),
+        c->getTypeName().Lower().c_str(),
+        c->getName_().c_str()));
+    if (wxOK != showQuestionDialog(w, msg,
+        _("Once you drop the object it is permanently removed from database."),
+        AdvancedMessageDialogButtonsOkCancel(_("&Drop")),
+        config(), wxT("DIALOG_ConfirmDrop"), _("Always drop without asking")))
+    {
+        return true;
+    }
     execSql(w, _("Dropping field"), c->findDatabase(), sql, true);
     return true;
 }
@@ -2523,6 +2535,17 @@ bool DropObjectHandler::handleURI(URI& uri)
     if (!m || !w)
         return true;
 
+    wxString msg(wxString::Format(
+        _("Are you sure you wish to drop the %s %s?"),
+        m->getTypeName().Lower().c_str(),
+        m->getName_().c_str()));
+    if (wxOK != showQuestionDialog(w, msg,
+        _("Once you drop the object it is permanently removed from database."),
+        AdvancedMessageDialogButtonsOkCancel(_("&Drop")),
+        config(), wxT("DIALOG_ConfirmDrop"), _("Always drop without asking")))
+    {
+        return true;
+    }
     execSql(w, _("DROP"), m->findDatabase(), m->getDropSqlStatement(), true);
     return true;
 }
@@ -2741,7 +2764,19 @@ bool IndexActionHandler::handleURI(URI& uri)
     wxString sql;
     wxString type = uri.getParam(wxT("type"));        // type of operation
     if (type == wxT("DROP"))
+    {
+        wxString msg(wxString::Format(
+            _("Are you sure you wish to drop the index %s?"),
+            i->getName_().c_str()));
+        if (wxOK != showQuestionDialog(w, msg,
+            _("Once you drop the object it is permanently removed from database."),
+            AdvancedMessageDialogButtonsOkCancel(_("&Drop")),
+            config(), wxT("DIALOG_ConfirmDrop"), _("Always drop without asking")))
+        {
+            return true;
+        }
         sql = wxT("DROP INDEX ") + i->getQuotedName();
+    }
     else if (type == wxT("RECOMPUTE"))
         sql = wxT("SET STATISTICS INDEX ") + i->getQuotedName();
     else if (type == wxT("TOGGLE_ACTIVE"))
