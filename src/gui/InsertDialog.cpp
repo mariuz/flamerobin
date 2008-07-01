@@ -250,6 +250,9 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
         }
     }
 
+    checkboxInsertAnother = new wxCheckBox(getControlsPanel(), wxID_ANY,
+        _("Keep dialog open after inserting"));
+
     button_ok = new wxButton(getControlsPanel(), wxID_OK, _("&Insert"));
     button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL,
         _("&Cancel"));
@@ -292,6 +295,10 @@ void InsertDialog::do_layout()
 
     wxSizer* sizerControls = new wxBoxSizer(wxVERTICAL);
     sizerControls->Add(gridM, 1, wxEXPAND, 0);
+
+    sizerControls->AddSpacer(
+        styleguide().getUnrelatedControlMargin(wxVERTICAL));
+    sizerControls->Add(checkboxInsertAnother, 0, wxEXPAND);
 
     wxSizer* sizerButtons =
         styleguide().createButtonSizer(button_ok, button_cancel);
@@ -580,10 +587,17 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
     // add buffer to the table and set internal buffer marker to zero
     // (to prevent deletion in destructor)
     gridTableM->addRow(bufferM, stm);
-    bufferM = 0;
 
-    databaseM = 0;  // prevent other event handlers from making problems
-    Close();
+    if (checkboxInsertAnother->IsChecked())
+    {
+        bufferM = new InsertedGridRowBuffer(bufferM);
+    }
+    else
+    {
+        bufferM = 0;
+        databaseM = 0;  // prevent other event handlers from making problems
+        Close();
+    }
 }
 //-----------------------------------------------------------------------------
 // helper function for OnChoiceChange

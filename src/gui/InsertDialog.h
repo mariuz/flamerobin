@@ -89,6 +89,7 @@ protected:
     wxStaticText* labelDataType;
     wxStaticText* labelModifiers;
     wxStaticText* labelValue;
+    wxCheckBox* checkboxInsertAnother;
     wxGrid *gridM;
 
     wxButton* button_ok;
