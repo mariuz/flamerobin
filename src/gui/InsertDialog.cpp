@@ -264,8 +264,14 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
     SetIcon(wxArtProvider::GetIcon(ART_Trigger, wxART_FRAME_ICON));
 }
 //-----------------------------------------------------------------------------
+void InsertDialog::OnClose(wxCloseEvent& event)
+{
+    Destroy();
+}
+//-----------------------------------------------------------------------------
 InsertDialog::~InsertDialog()
 {
+    GetParent()->Enable();
     delete bufferM;
 }
 //-----------------------------------------------------------------------------
@@ -466,6 +472,8 @@ BEGIN_EVENT_TABLE(InsertDialog, BaseDialog)
     EVT_GRID_CMD_EDITOR_CREATED(InsertDialog::ID_Grid,
         InsertDialog::OnCellEditorCreated)
     EVT_BUTTON(wxID_OK, InsertDialog::OnOkButtonClick)
+    EVT_BUTTON(wxID_CANCEL, InsertDialog::OnCancelButtonClick)
+    EVT_CLOSE(InsertDialog::OnClose)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void InsertDialog::OnCellEditorCreated(wxGridEditorCreatedEvent& event)
@@ -491,6 +499,11 @@ void InsertDialog::OnEditorKeyDown(wxKeyEvent& event)
         return;
     }
     event.Skip();
+}
+//-----------------------------------------------------------------------------
+void InsertDialog::OnCancelButtonClick(wxCommandEvent& WXUNUSED(event))
+{
+    Close();
 }
 //-----------------------------------------------------------------------------
 void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
@@ -570,7 +583,7 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
     bufferM = 0;
 
     databaseM = 0;  // prevent other event handlers from making problems
-    EndModal(wxID_OK);
+    Close();
 }
 //-----------------------------------------------------------------------------
 // helper function for OnChoiceChange

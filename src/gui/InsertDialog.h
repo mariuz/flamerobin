@@ -61,6 +61,8 @@ public:
         IBPP::Statement& st, Database *db);
     virtual ~InsertDialog();
     void OnOkButtonClick(wxCommandEvent& event);
+    void OnCancelButtonClick(wxCommandEvent& event);
+    void OnClose(wxCloseEvent& event);
     void OnGridCellChange(wxGridEvent& event);
 
     void OnCellEditorCreated(wxGridEditorCreatedEvent& event);

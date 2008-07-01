@@ -1502,8 +1502,10 @@ void ExecuteSqlFrame::OnMenuGridInsertRow(wxCommandEvent& WXUNUSED(event))
         }
 
         // show dialog to enter values
-        InsertDialog id(this, tab, tb, statementM, databaseM);
-        id.ShowModal();
+        InsertDialog* id = new InsertDialog(this, tab, tb, statementM,
+            databaseM);
+        id->Show();
+        Disable();
     }
 }
 //-----------------------------------------------------------------------------
