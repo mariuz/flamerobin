@@ -37,6 +37,9 @@ private:
     int64_t valueM;
     bool valueLoadedM;
     void setValue(int64_t value);
+protected:
+    virtual void loadDescription();
+    virtual void saveDescription(wxString description);
 public:
     Generator();
     // overrides MetadataItem::getCreateSqlTemplate()

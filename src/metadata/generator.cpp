@@ -99,6 +99,21 @@ wxString Generator::getPrintableName()
     return std2wx(ss.str());
 }
 //-----------------------------------------------------------------------------
+void Generator::loadDescription()
+{
+    MetadataItem::loadDescription(
+        wxT("select RDB$DESCRIPTION from RDB$GENERATORS ")
+        wxT("where RDB$GENERATOR_NAME = ?"));
+}
+//-----------------------------------------------------------------------------
+void Generator::saveDescription(wxString description)
+{
+    MetadataItem::saveDescription(
+        wxT("update RDB$GENERATORS set RDB$DESCRIPTION = ? ")
+        wxT("where RDB$GENERATOR_NAME = ?"),
+        description);
+}
+//-----------------------------------------------------------------------------
 wxString Generator::getCreateSqlTemplate() const
 {
     return  wxT("CREATE GENERATOR name;\n")
