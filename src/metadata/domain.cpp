@@ -114,15 +114,19 @@ void Domain::loadInfo()
         charsetM = std2wx(charset).Strip();
     }
     isNotNullM = !st1->IsNull(8);
-    readBlob(st1, 9, defaultM);
 
     hasDefaultM = !st1->IsNull(9);
     if (hasDefaultM)
     {
+        readBlob(st1, 9, defaultM);
+
         // Some users reported two spaces before DEFAULT word in source
-        // Perhaps some other tools can put garbage here? Should we
-        // parse it as SQL to clean up comments, whitespace, etc?
-        defaultM.Trim(false).Remove(0, 8);
+        // Also, equals sign is also allowed in newer FB versions
+        // Trim(false) is trim-left
+        if (defaultM.Trim(false).StartsWith(wxT("DEFAULT")))
+            defaultM.Remove(0, 8);
+        else if (defaultM.StartsWith(wxT("="))) // "=" or "= "
+            defaultM.Remove(0, 1).Trim(false);
     }
 
     if (st1->IsNull(10))
