@@ -46,8 +46,8 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/parameter.h"
 //-----------------------------------------------------------------------------
-Parameter::Parameter(wxString source, int parameterType)
-    : Column()
+Parameter::Parameter(wxString source, int parameterType, int mechanism)
+    : Column(), parameterMechanismM(mechanism)
 {
     Column::Init(true, source, wxT(""), wxT(""), wxT(""), false);
     typeM = (parameterType == 0) ? ntParameterInput : ntParameterOutput;
@@ -61,15 +61,18 @@ Parameter::Parameter()
 //-----------------------------------------------------------------------------
 wxString Parameter::getPrintableName()
 {
-    wxString ret;
-    ret = (typeM == ntParameterInput ? wxT("in ") : wxT("out ")) + getName_();
-    Domain* d = getDomain();
-    return ret + wxT(" ") + ((d) ? d->getDatatypeAsString() : getSource());
+    return (typeM == ntParameterInput ? wxT("in ") : wxT("out "))
+        + Column::getPrintableName();
 }
 //-----------------------------------------------------------------------------
 bool Parameter::isOutputParameter() const
 {
     return typeM == ntParameterOutput;
+}
+//-----------------------------------------------------------------------------
+int Parameter::getMechanism() const
+{
+    return parameterMechanismM;
 }
 //-----------------------------------------------------------------------------
 void Parameter::loadDescription()

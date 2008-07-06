@@ -35,11 +35,14 @@
 class Parameter: public Column
 {
 protected:
+    int parameterMechanismM;    // -1 none, 0 domain, 1 type_of
+
     virtual void loadDescription();
     virtual void saveDescription(wxString description);
 public:
     Parameter();
-    Parameter(wxString source, int parameterType);
+    Parameter(wxString source, int parameterType, int mechanism);
+    int getMechanism() const;
     wxString getPrintableName();
     bool isOutputParameter() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
