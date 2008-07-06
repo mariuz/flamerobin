@@ -109,7 +109,7 @@ void CreateDDLVisitor::visitColumn(Column& c)
                 if (!db || db->getDatabaseCharset() != charset)
                     preSqlM << wxT(" CHARACTER SET ") << charset;
                 if (db && db->isDefaultCollation(charset, collate))
-                        collate.clear();    // don't show default collations
+                    collate.clear();    // don't show default collations
             }
         }
         else
@@ -471,7 +471,11 @@ void addIndex(std::vector<Index> *ix, wxString& sql, ColumnConstraint *cc)
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visitTable(Table& t)
 {
-    preSqlM += wxT("CREATE TABLE ") + t.getQuotedName();
+    int type = t.getRelationType();
+    preSqlM += wxT("CREATE ");
+    if (type == 4 || type == 5)
+        preSqlM += wxT("GLOBAL TEMPORARY ");
+    preSqlM += wxT("TABLE ") + t.getQuotedName();
     wxString external = t.getExternalPath();
     if (!external.IsEmpty())
     {
@@ -558,7 +562,10 @@ void CreateDDLVisitor::visitTable(Table& t)
         for (std::vector<Privilege>::const_iterator ci = priv->begin(); ci != priv->end(); ++ci)
             grantSqlM += (*ci).getSql() + wxT("\n");
 
-    preSqlM += wxT("\n);\n");
+    preSqlM += wxT("\n)");
+    if (type == 4)
+        preSqlM += wxT("\nON COMMIT PRESERVE ROWS");
+    preSqlM += wxT(";\n");
 
     wxString description = t.getDescription();
     if (!description.IsEmpty())

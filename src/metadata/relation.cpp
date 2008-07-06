@@ -49,12 +49,14 @@
 #include "metadata/relation.h"
 //-----------------------------------------------------------------------------
 Relation::Relation()
+    :relationInfoLoadedM(false)
 {
     columnsM.setParent(this);
 }
 //-----------------------------------------------------------------------------
 Relation::Relation(const Relation& rhs)
-    : MetadataItem(rhs), columnsM(rhs.columnsM)
+    : MetadataItem(rhs), columnsM(rhs.columnsM),
+      relationInfoLoadedM(rhs.relationInfoLoadedM)
 {
     columnsM.setParent(this);
 }
@@ -92,20 +94,46 @@ MetadataCollection<Column>::const_iterator Relation::end() const
     return columnsM.end();
 }
 //-----------------------------------------------------------------------------
-wxString Relation::getOwner()
+void Relation::loadInfo()
 {
-    Database* d = getDatabase(wxT("Relation::getOwner"));
+    Database* d = getDatabase(wxT("Relation::loadInfo"));
     MetadataLoader* loader = d->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 
-    IBPP::Statement& st1 = loader->getStatement(
-        "select rdb$owner_name from rdb$relations where rdb$relation_name = ?");
+    DatabaseInfo *dbi = d->getInfo();
+    int ods = dbi->getODS();
+    int minor = dbi->getODSMinor();
+    std::string sql;
+    if (ods < 11 || ods == 11 && minor < 1)
+        sql = "select rdb$owner_name, 0 from rdb$relations where rdb$relation_name = ?";
+    else
+        sql = "select rdb$owner_name, rdb$relation_type from rdb$relations where rdb$relation_name = ?";
+
+    IBPP::Statement& st1 = loader->getStatement(sql);
     st1->Set(1, wx2std(getName_()));
     st1->Execute();
-    st1->Fetch();
-    std::string name;
-    st1->Get(1, name);
-    return std2wx(name).Trim();
+    if (st1->Fetch())
+    {
+        std::string name;
+        st1->Get(1, name);
+        ownerM = std2wx(name).Trim();
+        st1->Get(2, relationTypeM);
+        relationInfoLoadedM = true;
+    }
+}
+//-----------------------------------------------------------------------------
+wxString Relation::getOwner()
+{
+    if (!relationInfoLoadedM)
+        loadInfo();
+    return ownerM;
+}
+//-----------------------------------------------------------------------------
+int Relation::getRelationType()
+{
+    if (!relationInfoLoadedM)
+        loadInfo();
+    return relationTypeM;
 }
 //-----------------------------------------------------------------------------
 void Relation::checkAndLoadColumns()

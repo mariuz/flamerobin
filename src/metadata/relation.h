@@ -41,6 +41,11 @@
 class Relation: public MetadataItem
 {
 protected:
+    int relationTypeM;
+    wxString ownerM;
+    bool relationInfoLoadedM;
+    void loadInfo();
+
     void getDependentChecks(std::vector<CheckConstraint>& checks);
     void getDependentViews(std::vector<Relation*>& views);
 
@@ -57,6 +62,7 @@ public:
     virtual void unlockChildren();
 
     wxString getOwner();
+    int getRelationType();
 
     void checkAndLoadColumns();
     virtual void loadColumns();
