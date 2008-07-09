@@ -2395,6 +2395,8 @@ void ExecuteSqlFrame::log(wxString s, TextType type)
 
     styled_text_ctrl_stats->StartStyling(startpos, 255);
     styled_text_ctrl_stats->SetStyling(endpos-startpos-1, style);
+
+    ::wxSafeYield();
     styled_text_ctrl_stats->ScrollToLine(
         styled_text_ctrl_stats->GetLineCount()-1);
 }
