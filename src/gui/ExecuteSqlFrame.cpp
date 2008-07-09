@@ -2395,7 +2395,8 @@ void ExecuteSqlFrame::log(wxString s, TextType type)
 
     styled_text_ctrl_stats->StartStyling(startpos, 255);
     styled_text_ctrl_stats->SetStyling(endpos-startpos-1, style);
-    styled_text_ctrl_stats->GotoPos(endpos);
+    styled_text_ctrl_stats->ScrollToLine(
+        styled_text_ctrl_stats->GetLineCount()-1);
 }
 //-----------------------------------------------------------------------------
 const wxString ExecuteSqlFrame::getName() const
