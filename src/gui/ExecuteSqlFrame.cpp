@@ -464,6 +464,32 @@ void SqlEditor::setFont()
         AdvancedMessageDialogButtonsOk(), config(), wxT("DIALOG_WarnFont"), _("Do not show this information again"));
 }
 //-----------------------------------------------------------------------------
+class ScrollAtEnd
+{
+private:
+    wxStyledTextCtrl *controlM;
+public:
+    ScrollAtEnd(wxStyledTextCtrl *c)
+        :controlM(c)
+    {
+    }
+    ~ScrollAtEnd()
+    {
+        scroll();
+    }
+    void scroll()
+    {
+        // wxYield used because:
+        // - wxSafeYield is much slower
+        // TODO:
+        // - we should really disable controls manually, and add a STOP button
+        //   to stop execution of long scripts (5000 inserts for example)
+        //   STOP button should be enabled so SafeYield is not usable
+        ::wxYield();
+        controlM->ScrollToLine(controlM->GetLineCount()-1);
+    }
+};
+//-----------------------------------------------------------------------------
 // MB: we don't use the 'parent' parameter here, because of some ugly bugs.
 //     For example, if user clicks the 'drop trigger' link on the trigger
 //     property page, it creates new ExecuteSqlFrame with trigger property
@@ -1853,6 +1879,8 @@ void ExecuteSqlFrame::compareCounts(IBPP::DatabaseCounts& one,
 bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     bool prepareOnly)
 {
+    ScrollAtEnd sae(styled_text_ctrl_stats);
+
     // check if sql only contains comments
     SqlTokenizer tk(sql);
     bool hasStatements = false;
@@ -1904,6 +1932,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         grid_data->ClearGrid(); // statement object will be invalidated, so clear the grid
         statementM = IBPP::StatementFactory(databaseM->getIBPPDatabase(), transactionM);
         log(_("Preparing query: " + sql), ttSql);
+        sae.scroll();
         statementM->Prepare(wx2std(sql, dbCharsetConversionM.getConverter()));
 
         wxTimeSpan dif = wxDateTime::Now().Subtract(start);
@@ -1956,7 +1985,8 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         log(wxEmptyString);
         log(wxEmptyString);
         log(_("Executing..."));
-        styled_text_ctrl_stats->Update();            // let GUI update the controls
+        //styled_text_ctrl_stats->Update();            // let GUI update the controls
+        sae.scroll();
         statementM->Execute();
         log(_("Done."));
 
@@ -2056,6 +2086,7 @@ void ExecuteSqlFrame::OnMenuCommit(wxCommandEvent& WXUNUSED(event))
 bool ExecuteSqlFrame::commitTransaction()
 {
     wxBusyCursor cr;
+    ScrollAtEnd sae(styled_text_ctrl_stats);
 
     // grid_data->stopFetching();
     if (!transactionM->Started())    // check
@@ -2067,6 +2098,7 @@ bool ExecuteSqlFrame::commitTransaction()
     try
     {
         log(_("Commiting transaction..."));
+        sae.scroll();
         transactionM->Commit();
         log(_("Done."));
         statusbar_1->SetStatusText(_("Transaction commited"), 3);
@@ -2137,6 +2169,8 @@ void ExecuteSqlFrame::OnMenuRollback(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::rollbackTransaction()
 {
+    ScrollAtEnd sae(styled_text_ctrl_stats);
+
     // grid_data->stopFetching();
     if (!transactionM->Started())    // check
     {
@@ -2148,6 +2182,7 @@ void ExecuteSqlFrame::rollbackTransaction()
     try
     {
         log(_("Rolling back the transaction..."));
+        sae.scroll();
         transactionM->Rollback();
         log(_("Done."));
         statusbar_1->SetStatusText(_("Transaction rolled back."), 3);
@@ -2264,6 +2299,7 @@ void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent &event)
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnGridStatementExecuted(wxCommandEvent &event)
 {
+    ScrollAtEnd sae(styled_text_ctrl_stats);
     log(event.GetString(), ttSql);
     if (menuBarM->IsChecked(Cmds::DataGrid_Log_changes))
     {
@@ -2395,10 +2431,6 @@ void ExecuteSqlFrame::log(wxString s, TextType type)
 
     styled_text_ctrl_stats->StartStyling(startpos, 255);
     styled_text_ctrl_stats->SetStyling(endpos-startpos-1, style);
-
-    ::wxSafeYield();
-    styled_text_ctrl_stats->ScrollToLine(
-        styled_text_ctrl_stats->GetLineCount()-1);
 }
 //-----------------------------------------------------------------------------
 const wxString ExecuteSqlFrame::getName() const
