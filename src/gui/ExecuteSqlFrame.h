@@ -68,13 +68,9 @@ class ExecuteSqlFrame: public BaseFrame, public Observer
 public:
     Database *getDatabase();
     void showProperties(wxString objectName);
-    // query parsing and execution
+
     void executeAllStatements(bool autoExecute = false);
-    void prepareAndExecute(bool prepareOnly = false);
-    bool parseStatements(const wxString& statements, bool autoExecute = false,
-        bool prepareOnly = false, int selectionOffset = 0);
-    bool execute(wxString sql, const wxString& terminator,
-        bool prepareOnly = false);
+
     bool loadSqlFile(const wxString& filename);
     void setSql(wxString sql);
     void clearStats();
@@ -92,6 +88,13 @@ public:
     };
 
 private:
+    // query parsing and execution
+    void prepareAndExecute(bool prepareOnly = false);
+    bool parseStatements(const wxString& statements, bool autoExecute = false,
+        bool prepareOnly = false, int selectionOffset = 0);
+    bool execute(wxString sql, const wxString& terminator,
+        bool prepareOnly = false);
+
     std::vector<SqlStatement> executedStatementsM;
     wxString filenameM;
 

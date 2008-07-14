@@ -479,13 +479,6 @@ public:
     }
     void scroll()
     {
-        // wxYield used because:
-        // - wxSafeYield is much slower
-        // TODO:
-        // - we should really disable controls manually, and add a STOP button
-        //   to stop execution of long scripts (5000 inserts for example)
-        //   STOP button should be enabled so SafeYield is not usable
-        ::wxYield();
         controlM->ScrollToLine(controlM->GetLineCount()-1);
     }
 };
@@ -1698,14 +1691,10 @@ void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
 {
     bool hasSelection = styled_text_ctrl_sql->GetSelectionStart()
         != styled_text_ctrl_sql->GetSelectionEnd();
-    bool only = false;
     bool ok;
-    config().getValue(wxT("OnlyExecuteSelected"), only);
-    if (only && hasSelection)    // something is selected
+    if (hasSelection && config().get(wxT("OnlyExecuteSelected"), false))
     {
-        bool single = false;
-        config().getValue(wxT("TreatAsSingleStatement"), single);
-        if (single)
+        if (config().get(wxT("TreatAsSingleStatement"), false))
         {
             ok = execute(styled_text_ctrl_sql->GetSelectedText(), wxT(";"),
                 prepareOnly);
@@ -1756,8 +1745,6 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
     bool closeWhenDone, bool prepareOnly, int selectionOffset)
 {
     wxBusyCursor cr;
-    ScrollAtEnd sae(styled_text_ctrl_stats);
-
     MultiStatement ms(statements, wxT(";"));
     while (true)
     {
@@ -1807,6 +1794,7 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
         // TODO: HOWTO focus toolbar button? button_commit->SetFocus();
     }
 
+    ScrollAtEnd sae(styled_text_ctrl_stats);
     log(_("Script execution finished."));
     return true;
 }
@@ -1998,7 +1986,6 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         log(wxEmptyString);
         log(wxEmptyString);
         log(_("Executing..."));
-        //styled_text_ctrl_stats->Update();            // let GUI update the controls
         sae.scroll();
         statementM->Execute();
         log(_("Done."));
@@ -2084,16 +2071,17 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::splitScreen()
 {
-    if (!splitter_window_1->IsSplit())                    // split screen if needed
+    if (!splitter_window_1->IsSplit()) // split screen if needed
     {
         splitter_window_1->SplitHorizontally(styled_text_ctrl_sql, notebook_1);
         menuBarM->Check(Cmds::View_Split_view, true);
+        ::wxYield();
     }
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuCommit(wxCommandEvent& WXUNUSED(event))
 {
-    if (commitTransaction())
+    if (commitTransaction() && !closeWhenTransactionDoneM)
         splitter_window_1->Unsplit(notebook_1); // show sql entry window
 }
 //-----------------------------------------------------------------------------
@@ -2178,7 +2166,7 @@ bool ExecuteSqlFrame::commitTransaction()
 void ExecuteSqlFrame::OnMenuRollback(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor cr;
-    if (rollbackTransaction())
+    if (rollbackTransaction() && !closeWhenTransactionDoneM)
         splitter_window_1->Unsplit(notebook_1); // show sql entry window
 }
 //-----------------------------------------------------------------------------
