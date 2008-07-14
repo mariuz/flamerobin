@@ -105,7 +105,8 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
         | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER );
 
     auiManagerM.SetManagedWindow(this);
-    auiManagerM.AddPane(notebookM, wxAuiPaneInfo().CenterPane());
+    auiManagerM.AddPane(notebookM,
+        wxAuiPaneInfo().CenterPane().PaneBorder(false));
     auiManagerM.Update();
 }
 //-----------------------------------------------------------------------------

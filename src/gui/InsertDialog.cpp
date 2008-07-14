@@ -267,7 +267,7 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
     SetIcon(wxArtProvider::GetIcon(ART_Trigger, wxART_FRAME_ICON));
 }
 //-----------------------------------------------------------------------------
-void InsertDialog::OnClose(wxCloseEvent& event)
+void InsertDialog::OnClose(wxCloseEvent& WXUNUSED(event))
 {
     Destroy();
 }
