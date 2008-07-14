@@ -97,7 +97,7 @@ private:
 
     typedef enum { ttNormal, ttSql, ttError } TextType;
     void log(wxString s, TextType type = ttNormal);     // write messages to textbox
-    void SplitScreen();
+    void splitScreen();
     Database* databaseM;
     DatabaseToSystemCharsetConversion dbCharsetConversionM;
     void setDatabase(Database* db);
@@ -109,9 +109,9 @@ private:
     bool inTransactionM;
     IBPP::Transaction transactionM;
     IBPP::Statement statementM;
-    void InTransaction(bool started);       // changes controls (enable/disable)
+    void inTransaction(bool started);       // changes controls (enable/disable)
     bool commitTransaction();
-    void rollbackTransaction();
+    bool rollbackTransaction();
 
     void autoComplete(bool force);
     void autoCompleteColumns(int pos, int len = 0);

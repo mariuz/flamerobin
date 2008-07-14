@@ -543,6 +543,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     set_properties();
     do_layout();
     setDatabase(db);    // must come after set_properties
+    splitter_window_1->Unsplit(notebook_1); // show sql entry window only
     loadingM = false;
 }
 //-----------------------------------------------------------------------------
@@ -1668,15 +1669,14 @@ bool ExecuteSqlFrame::loadSqlFile(const wxString& filename)
 }
 //-----------------------------------------------------------------------------
 //! enable/disable and show/hide controls depending of transaction status
-void ExecuteSqlFrame::InTransaction(bool started)
+void ExecuteSqlFrame::inTransaction(bool started)
 {
     inTransactionM = started;
-    SplitScreen();
+    splitScreen();
     if (started)
         statusbar_1->SetStatusText(_("Transaction started"), 3);
     else
     {
-        splitter_window_1->Unsplit(notebook_1);        // show sql entry window
         grid_data->ClearGrid();
         statusbar_1->SetStatusText(wxEmptyString, 1);
         menuBarM->Check(Cmds::View_Editor, true);
@@ -1696,7 +1696,8 @@ void ExecuteSqlFrame::clearStats()
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
 {
-    bool hasSelection = styled_text_ctrl_sql->GetSelectionStart() != styled_text_ctrl_sql->GetSelectionEnd();
+    bool hasSelection = styled_text_ctrl_sql->GetSelectionStart()
+        != styled_text_ctrl_sql->GetSelectionEnd();
     bool only = false;
     bool ok;
     config().getValue(wxT("OnlyExecuteSelected"), only);
@@ -1705,12 +1706,21 @@ void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
         bool single = false;
         config().getValue(wxT("TreatAsSingleStatement"), single);
         if (single)
-            ok = execute(styled_text_ctrl_sql->GetSelectedText(), wxT(";"), prepareOnly);
+        {
+            ok = execute(styled_text_ctrl_sql->GetSelectedText(), wxT(";"),
+                prepareOnly);
+        }
         else
-            ok = parseStatements(styled_text_ctrl_sql->GetSelectedText(), false, prepareOnly, styled_text_ctrl_sql->GetSelectionStart());
+        {
+            ok = parseStatements(styled_text_ctrl_sql->GetSelectedText(),
+                false, prepareOnly, styled_text_ctrl_sql->GetSelectionStart());
+        }
     }
     else
-        ok = parseStatements(styled_text_ctrl_sql->GetText(), false, prepareOnly);
+    {
+        ok = parseStatements(styled_text_ctrl_sql->GetText(), false,
+            prepareOnly);
+    }
 
     if (ok || config().get(wxT("historyStoreUnsuccessful"), true))
     {
@@ -1746,6 +1756,8 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
     bool closeWhenDone, bool prepareOnly, int selectionOffset)
 {
     wxBusyCursor cr;
+    ScrollAtEnd sae(styled_text_ctrl_stats);
+
     MultiStatement ms(statements, wxT(";"));
     while (true)
     {
@@ -1795,6 +1807,7 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
         // TODO: HOWTO focus toolbar button? button_commit->SetFocus();
     }
 
+    log(_("Script execution finished."));
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -1913,7 +1926,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         {
             log(_("Starting transaction..."));
             transactionM->Start();
-            InTransaction(true);
+            inTransaction(true);
         }
 
         int fetch1 = 0, mark1 = 0, read1 = 0, write1 = 0, ins1 = 0, upd1 = 0,
@@ -2053,13 +2066,13 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     }
     catch (IBPP::Exception &e)
     {
-        SplitScreen();
+        splitScreen();
         log(std2wx(e.ErrorMessage()) + wxT("\n"), ttError);
         retval = false;
     }
     catch (...)
     {
-        SplitScreen();
+        splitScreen();
         log(_("SYSTEM ERROR!"), ttError);
         retval = false;
     }
@@ -2069,7 +2082,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     return retval;
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::SplitScreen()
+void ExecuteSqlFrame::splitScreen()
 {
     if (!splitter_window_1->IsSplit())                    // split screen if needed
     {
@@ -2080,7 +2093,8 @@ void ExecuteSqlFrame::SplitScreen()
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuCommit(wxCommandEvent& WXUNUSED(event))
 {
-    commitTransaction();
+    if (commitTransaction())
+        splitter_window_1->Unsplit(notebook_1); // show sql entry window
 }
 //-----------------------------------------------------------------------------
 bool ExecuteSqlFrame::commitTransaction()
@@ -2091,7 +2105,7 @@ bool ExecuteSqlFrame::commitTransaction()
     // grid_data->stopFetching();
     if (!transactionM->Started())    // check
     {
-        InTransaction(false);
+        inTransaction(false);
         return true;    // nothing to commit, but it wasn't error
     }
 
@@ -2102,7 +2116,7 @@ bool ExecuteSqlFrame::commitTransaction()
         transactionM->Commit();
         log(_("Done."));
         statusbar_1->SetStatusText(_("Transaction commited"), 3);
-        InTransaction(false);
+        inTransaction(false);
 
         SubjectLocker locker(databaseM);
         // log statements, done before parsing in case parsing crashes FR
@@ -2143,13 +2157,13 @@ bool ExecuteSqlFrame::commitTransaction()
     }
     catch (IBPP::Exception &e)
     {
-        SplitScreen();
+        splitScreen();
         log(std2wx(e.ErrorMessage()), ttError);
         return false;
     }
     catch (std::exception &se)
     {
-        SplitScreen();
+        splitScreen();
         log(wxString(_("ERROR!\n")) + std2wx(se.what()), ttError);
         return false;
     }
@@ -2164,10 +2178,11 @@ bool ExecuteSqlFrame::commitTransaction()
 void ExecuteSqlFrame::OnMenuRollback(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor cr;
-    rollbackTransaction();
+    if (rollbackTransaction())
+        splitter_window_1->Unsplit(notebook_1); // show sql entry window
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::rollbackTransaction()
+bool ExecuteSqlFrame::rollbackTransaction()
 {
     ScrollAtEnd sae(styled_text_ctrl_stats);
 
@@ -2175,8 +2190,8 @@ void ExecuteSqlFrame::rollbackTransaction()
     if (!transactionM->Started())    // check
     {
         executedStatementsM.clear();
-        InTransaction(false);
-        return;
+        inTransaction(false);
+        return true;
     }
 
     try
@@ -2186,28 +2201,31 @@ void ExecuteSqlFrame::rollbackTransaction()
         transactionM->Rollback();
         log(_("Done."));
         statusbar_1->SetStatusText(_("Transaction rolled back."), 3);
-        InTransaction(false);
+        inTransaction(false);
         executedStatementsM.clear();
 
         if (closeWhenTransactionDoneM)
         {
             Close();
-            return;
+            return true;
         }
     }
     catch (IBPP::Exception &e)
     {
-        SplitScreen();
+        splitScreen();
         log(std2wx(e.ErrorMessage()), ttError);
+        return false;
     }
     catch (...)
     {
-        SplitScreen();
+        splitScreen();
         log(_("ERROR!\nA non-IBPP C++ runtime exception occured !"), ttError);
+        return false;
     }
 
     notebook_1->SetSelection(0);
     styled_text_ctrl_sql->SetFocus();
+    return true;
 }
 //-----------------------------------------------------------------------------
 //! toggle the views in the following order:
@@ -2221,7 +2239,7 @@ void ExecuteSqlFrame::OnMenuToggleClick(wxCommandEvent& WXUNUSED(event))
     }
     else if (splitter_window_1->GetWindow1() == styled_text_ctrl_sql) // first is shown -> split again
     {
-        SplitScreen();
+        splitScreen();
         menuBarM->Check(Cmds::View_Split_view, true);
     }
     else                                    // second is shown -> show first
@@ -2290,7 +2308,7 @@ void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent &event)
         config().getValue(wxT("MaximizeGridRowsNeeded"), rowsNeeded);
         if (rowsFetched >= rowsNeeded)
         {
-            //SplitScreen();    // not needed atm, might be later (see TODO above)
+            //splitScreen();    // not needed atm, might be later (see TODO above)
             splitter_window_1->Unsplit(styled_text_ctrl_sql); // show grid only
             menuBarM->Check(Cmds::View_Data, true);
         }
@@ -2349,7 +2367,7 @@ void ExecuteSqlFrame::setDatabase(Database* db)
     db->attachObserver(this);    // observe database object
 
     executedStatementsM.clear();
-    InTransaction(false);    // enable/disable controls
+    inTransaction(false);    // enable/disable controls
     setKeywords();           // set words for autocomplete feature
 
     historyPositionM = StatementHistory::get(databaseM).size();
