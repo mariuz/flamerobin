@@ -188,6 +188,16 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
         t->getTriggers(triggers, Trigger::beforeTrigger);
     }
 
+    // columns 0, 1: gray, read-only
+    for (int col = 0; col <= 1; ++col)
+    {
+        wxGridCellAttr *cro = new wxGridCellAttr();
+        cro->SetBackgroundColour(gridM->GetLabelBackgroundColour());
+        cro->SetReadOnly();
+        gridM->SetColAttr(col, cro);
+    }
+
+    // column 2: selection with "special" colour
     wxGridCellChoiceEditor *types = new wxGridCellChoiceEditor(
         sizeof(insertOptionStrings)/sizeof(wxString),
         insertOptionStrings);
@@ -196,12 +206,7 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
     ca->SetBackgroundColour(wxColour(255, 255, 197));
     gridM->SetColAttr(2, ca);
 
-    wxGridCellAttr *cro = new wxGridCellAttr();
-    cro->SetBackgroundColour(gridM->GetLabelBackgroundColour());
-    cro->SetReadOnly();
-    gridM->SetColAttr(0, cro);
-    gridM->SetColAttr(1, cro);
-
+    // column 3: editable
     GridCellEditorWithProperColor *gce = new GridCellEditorWithProperColor;
     wxGridCellAttr *gca = new wxGridCellAttr();
     gca->SetEditor(gce);
@@ -269,18 +274,25 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
 //-----------------------------------------------------------------------------
 void InsertDialog::OnClose(wxCloseEvent& WXUNUSED(event))
 {
+    // make sure parent window is properly activated again
+    wxWindow* p = GetParent();
+    if (p)
+    {
+        p->Enable();
+        Hide();
+        p->Raise();
+    }
     Destroy();
 }
 //-----------------------------------------------------------------------------
 InsertDialog::~InsertDialog()
 {
-    GetParent()->Enable();
     delete bufferM;
 }
 //-----------------------------------------------------------------------------
 void InsertDialog::set_properties()
 {
-    SetTitle(_("Insert into ") + tableNameM);
+    SetTitle(_("Insert Record(s) Into Table ") + tableNameM);
     button_ok->SetDefault();
 }
 //-----------------------------------------------------------------------------
