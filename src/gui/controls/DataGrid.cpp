@@ -303,51 +303,57 @@ void DataGrid::copyToCBAsInsert()
     if (!table)
         return;
 
-    bool all = true;
+    if (!IsSelection()) // no selection -> select the current cell
     {
+        SelectBlock(GetGridCursorRow(), GetGridCursorCol(),
+            GetGridCursorRow(), GetGridCursorCol());
+    }
+
+    bool all = true;
+    {   // begin busy cursor
         wxBusyCursor cr;
 
-    // TODO: - using one table is not correct for JOINs or sub-SELECTs
-    //       - should probably refuse to work if not from one table
-    //       - should probably refuse to create INSERT for "[...]"
-    //       - table&PK info is available in DataGridRows::statementTablesM
-    wxString tableName = table->getTableName();
-    // NOTE: this has been reworked (compared to myDataGrid), because
-    //       not all rows have necessarily the same fields selected
-    wxString sRows;
-    for (int i = 0; i < GetNumberRows(); i++)
-    {
-        wxString sCols;
-        wxString sValues;
-        for (int j = 0; j < GetNumberCols(); j++)
+        // TODO: - using one table is not correct for JOINs or sub-SELECTs
+        //       - should probably refuse to work if not from one table
+        //       - should probably refuse to create INSERT for "[...]"
+        //       - table&PK info is available in DataGridRows::statementTablesM
+        wxString tableName = table->getTableName();
+        // NOTE: this has been reworked (compared to myDataGrid), because
+        //       not all rows have necessarily the same fields selected
+        wxString sRows;
+        for (int i = 0; i < GetNumberRows(); i++)
         {
-            if (IsInSelection(i, j))
+            wxString sCols;
+            wxString sValues;
+            for (int j = 0; j < GetNumberCols(); j++)
             {
-                if (!sCols.IsEmpty())
-                    sCols += wxT(", ");
-                // NOTE: preloading the column names into a local wxString
-                //       array might be a worthy optimization
-                sCols += GetColLabelValue(j);
-                if (!sValues.IsEmpty())
-                    sValues += wxT(", ");
-                sValues += table->getCellValueForInsert(i, j);
+                if (IsInSelection(i, j))
+                {
+                    if (!sCols.IsEmpty())
+                        sCols += wxT(", ");
+                    // NOTE: preloading the column names into a local wxString
+                    //       array might be a worthy optimization
+                    sCols += GetColLabelValue(j);
+                    if (!sValues.IsEmpty())
+                        sValues += wxT(", ");
+                    sValues += table->getCellValueForInsert(i, j);
+                }
+                else
+                    all = false;
             }
-            else
-                all = false;
+            if (!sCols.IsEmpty())
+            {
+                sRows += wxT("INSERT INTO ") + tableName + wxT(" (");
+                sRows += sCols;
+                sRows += wxT(") VALUES (");
+                sRows += sValues;
+                sRows += wxT(");");
+                sRows += wxTextBuffer::GetEOL();
+            }
         }
-        if (!sCols.IsEmpty())
-        {
-            sRows += wxT("INSERT INTO ") + tableName + wxT(" (");
-            sRows += sCols;
-            sRows += wxT(") VALUES (");
-            sRows += sValues;
-            sRows += wxT(");");
-            sRows += wxTextBuffer::GetEOL();
-        }
-    }
-    if (!sRows.IsEmpty())
-        copyToClipboard(sRows);
-    }
+        if (!sRows.IsEmpty())
+            copyToClipboard(sRows);
+    }   // end busy cursor
     if (all)
         notifyIfUnfetchedData();
 }
@@ -358,90 +364,94 @@ void DataGrid::copyToCBAsUpdate()
     if (!table)
         return;
 
+    if (!IsSelection()) // no selection -> select the current cell
+    {
+        SelectBlock(GetGridCursorRow(), GetGridCursorCol(),
+            GetGridCursorRow(), GetGridCursorCol());
+    }
+
     bool all = true;
-    {
+    {   // begin busy cursor
         wxBusyCursor cr;
-    // TODO: - using one table is not correct for JOINs or sub-SELECTs
-    //       - should probably refuse to work if not from one table
-    //       - should probably refuse to create UPDATE for "[...]"
-    //       - we have this info in DataGridRows::statementTablesM
-    wxString tableName = table->getTableName();
-    wxString sRows;
-    for (int i = 0; i < GetNumberRows(); i++)
-    {
-        wxString str;
-        for (int j = 0; j < GetNumberCols(); j++)
+        // TODO: - using one table is not correct for JOINs or sub-SELECTs
+        //       - should probably refuse to work if not from one table
+        //       - should probably refuse to create UPDATE for "[...]"
+        //       - we have this info in DataGridRows::statementTablesM
+        wxString tableName = table->getTableName();
+        wxString sRows;
+        for (int i = 0; i < GetNumberRows(); i++)
         {
-            if (IsInSelection(i, j))
+            wxString str;
+            for (int j = 0; j < GetNumberCols(); j++)
             {
-                if (!str.IsEmpty())
-                    str += wxT(", ");
-                // NOTE: preloading the column names into a local wxString
-                //       array might be a worthy optimization
-                str += wxTextBuffer::GetEOL() + GetColLabelValue(j)
-                    + wxT(" = ") + table->getCellValueForInsert(i, j);
-            }
-            else
-                all = false;
-        }
-        if (!str.IsEmpty())
-        {
-            wxString where;
-            // find primary key (otherwise use all values)
-            Table *t = 0;
-            Database* db = table->getDatabase();
-            if (db)
-            {
-                t = dynamic_cast<Table *>(
-                    db->findByNameAndType(ntTable, tableName));
-            }
-            if (!t)
-            {
-                wxMessageBox(
-                    wxString::Format(_("Table %s cannot be found in database."),
-                        tableName.c_str()),
-                    _("Error"),
-                    wxOK|wxICON_ERROR);
-                return;
-            }
-            PrimaryKeyConstraint *pkc = t->getPrimaryKey();
-            // check if all PK components are available
-            if (pkc)
-            {
-                for (ColumnConstraint::const_iterator ci = pkc->begin();
-                    ci != pkc->end(); ++ci)
+                if (IsInSelection(i, j))
                 {
-                    bool found = false;
-                    for (int k = 0; k < GetNumberCols(); k++)
+                    if (!str.IsEmpty())
+                        str += wxT(", ");
+                    // NOTE: preloading the column names into a local wxString
+                    //       array might be a worthy optimization
+                    str += wxTextBuffer::GetEOL() + GetColLabelValue(j)
+                        + wxT(" = ") + table->getCellValueForInsert(i, j);
+                }
+                else
+                    all = false;
+            }
+            if (!str.IsEmpty())
+            {
+                wxString where;
+                // find primary key (otherwise use all values)
+                Table *t = 0;
+                Database* db = table->getDatabase();
+                if (db)
+                {
+                    t = dynamic_cast<Table *>(
+                        db->findByNameAndType(ntTable, tableName));
+                }
+                if (!t)
+                {
+                    wxMessageBox(wxString::Format(
+                        _("Table %s cannot be found in database."),
+                        tableName.c_str()),
+                        _("Error"), wxOK|wxICON_ERROR);
+                    return;
+                }
+                PrimaryKeyConstraint *pkc = t->getPrimaryKey();
+                // check if all PK components are available
+                if (pkc)
+                {
+                    for (ColumnConstraint::const_iterator ci = pkc->begin();
+                        ci != pkc->end(); ++ci)
                     {
-                        if ((*ci) == GetColLabelValue(k))
+                        bool found = false;
+                        for (int k = 0; k < GetNumberCols(); k++)
                         {
-                            if (!where.IsEmpty())
-                                where += wxT(" AND ");
-                            where += (*ci) + wxT(" = ") +
-                                table->getCellValueForInsert(i, k);
-                            found = true;
+                            if ((*ci) == GetColLabelValue(k))
+                            {
+                                if (!where.IsEmpty())
+                                    where += wxT(" AND ");
+                                where += (*ci) + wxT(" = ") +
+                                    table->getCellValueForInsert(i, k);
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found)
+                        {
+                            pkc = 0;    // as if PK doesn't exists
                             break;
                         }
                     }
-                    if (!found)
-                    {
-                        pkc = 0;    // as if PK doesn't exists
-                        break;
-                    }
                 }
+                // TODO: if (!pkc)   // WHERE all_cols = all_vals
+
+                sRows += wxT("UPDATE ") + tableName + wxT(" SET ") + str
+                    + wxTextBuffer::GetEOL() + wxT("WHERE ") + where
+                    + wxT(";") + wxTextBuffer::GetEOL();
             }
-            // TODO: if (!pkc)   // WHERE all_cols = all_vals
-
-            sRows += wxT("UPDATE ") + tableName + wxT(" SET ") + str
-                + wxTextBuffer::GetEOL() + wxT("WHERE ") + where
-                + wxT(";") + wxTextBuffer::GetEOL();
-
         }
-    }
-    if (!sRows.IsEmpty())
-        copyToClipboard(sRows);
-    }
+        if (!sRows.IsEmpty())
+            copyToClipboard(sRows);
+    }   // end busy cursor
     if (all)
         notifyIfUnfetchedData();
 }
