@@ -120,6 +120,7 @@ private:
     void autoCompleteColumns(int pos, int len = 0);
     void OnSqlEditUpdateUI(wxStyledTextEvent &event);
     void OnSqlEditCharAdded(wxStyledTextEvent &event);      // autocomplete stuff
+    void OnSqlEditChanged(wxStyledTextEvent &event);        // update title
     void OnSqlEditStartDrag(wxStyledTextEvent& event);      // enable click&remove selection
     wxString keywordsM;     // text used for autocomplete
     void setKeywords();

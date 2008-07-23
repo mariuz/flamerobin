@@ -765,6 +765,7 @@ void ExecuteSqlFrame::showProperties(wxString objectName)
 BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_STC_UPDATEUI(ExecuteSqlFrame::ID_stc_sql, ExecuteSqlFrame::OnSqlEditUpdateUI)
     EVT_STC_CHARADDED(ExecuteSqlFrame::ID_stc_sql, ExecuteSqlFrame::OnSqlEditCharAdded)
+    EVT_STC_CHANGE(ExecuteSqlFrame::ID_stc_sql, ExecuteSqlFrame::OnSqlEditChanged)
     EVT_STC_START_DRAG(ExecuteSqlFrame::ID_stc_sql, ExecuteSqlFrame::OnSqlEditStartDrag)
     EVT_CHAR_HOOK(ExecuteSqlFrame::OnKeyDown)
     EVT_CLOSE(ExecuteSqlFrame::OnClose)
@@ -898,24 +899,6 @@ void ExecuteSqlFrame::OnSqlEditUpdateUI(wxStyledTextEvent& WXUNUSED(event))
     }
     else
         styled_text_ctrl_sql->BraceBadLight(wxSTC_INVALID_POSITION);    // remove light
-
-    if (filenameM.IsEmpty())
-    {
-    if (styled_text_ctrl_sql->GetTextLength() > 0)
-    {
-        for (int i=0; i<styled_text_ctrl_sql->GetLineCount(); ++i)
-        {
-            wxString t = styled_text_ctrl_sql->GetLine(i).Trim();
-            if (!t.IsEmpty())
-            {
-                SetTitle(t);
-                break;
-            }
-        }
-    }
-    else
-        SetTitle(_("Execute SQL statements"));
-}
 }
 //-----------------------------------------------------------------------------
 //! returns true if there is a word in "wordlist" that starts with "word"
@@ -1001,6 +984,57 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
         // wxString join = is.getJoin(pos);
         // if (!join.IsEmpty())
         //    add "join" to sql editor
+    }
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnSqlEditChanged(wxStyledTextEvent& WXUNUSED(event))
+{
+    if (filenameM.IsEmpty())
+    {
+        if (styled_text_ctrl_sql->GetTextLength() > 0)
+        {
+            SqlTokenizer tk(styled_text_ctrl_sql->GetText());
+            SqlTokenType lookfor[] = {
+                kwALTER, kwCREATE, kwDECLARE, kwDROP, kwEXECUTE, kwINSERT,
+                kwRECREATE, kwREVOKE, kwGRANT, kwSELECT, kwUPDATE, kwDELETE,
+                tkIDENTIFIER
+            };
+            wxString names[] = {
+                wxT("a"), wxT("c"), wxT("decl"), wxT("drop"), wxT("x"),
+                wxT("i"), wxT("recr"), wxT("rev"), wxT("grnt"), wxT("s"),
+                wxT("u"), wxT("del")
+            };
+            int cnt = 0;
+            wxString title;
+            do
+            {
+                SqlTokenType stt = tk.getCurrentToken();
+                for (int i=0; i<sizeof(lookfor)/sizeof(SqlTokenType); i++)
+                {
+                    if (lookfor[i] == stt)
+                    {
+                        if (cnt == 1)
+                            title += wxT(" ");
+                        if (stt == tkIDENTIFIER)
+                            title += tk.getCurrentTokenString();
+                        else
+                            title += names[i];
+                        if (stt == kwSELECT)    // special case, look for FROM
+                            while (tk.getCurrentToken() != kwFROM)
+                                if (!tk.jumpToken(true))
+                                    break;
+                        if (++cnt == 2) // use 2 tokens for title
+                            break;
+                    }
+                }
+            }
+            while (cnt < 2 && tk.jumpToken(true /* skip parenthesis */));
+            SetTitle(title);
+        }
+        else
+        {
+            SetTitle(_("Execute SQL statements"));
+        }
     }
 }
 //-----------------------------------------------------------------------------
