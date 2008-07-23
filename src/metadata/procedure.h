@@ -63,6 +63,7 @@ public:
     MetadataCollection<Parameter>::const_iterator end() const;
 
     void checkAndLoadParameters(bool force = false);
+    bool isParameterInfoLoaded() const;
     wxString getOwner();
     wxString getSource();
     wxString getAlterSql(bool full = true);

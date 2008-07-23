@@ -71,6 +71,11 @@ Procedure::Procedure(const Procedure& rhs)
     parametersM.setParent(this);
 }
 //-----------------------------------------------------------------------------
+bool Procedure::isParameterInfoLoaded() const
+{
+    return parametersLoadedM;
+}
+//-----------------------------------------------------------------------------
 Parameter* Procedure::addParameter(Parameter &c)
 {
     if (!parametersLoadedM)

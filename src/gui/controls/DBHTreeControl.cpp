@@ -68,7 +68,7 @@ protected:
     virtual void loadFromConfig();
 public:
     DBHTreeConfigCache();
-    
+
     static DBHTreeConfigCache& get();
 
     bool allowDnD();
@@ -396,6 +396,9 @@ void DBHTreeItemVisitor::visitGenerator(Generator& generator)
 void DBHTreeItemVisitor::visitProcedure(Procedure& procedure)
 {
     setNodeProperties(dynamic_cast<MetadataItem*>(&procedure));
+    // make node caption bold when parameter data is loaded (even if no child)
+    if (procedure.isParameterInfoLoaded())
+        nodeTextBoldM = true;
     // show Parameter nodes if Config setting is on
     showChildrenM = DBHTreeConfigCache::get().getShowColumns();
 }
@@ -530,7 +533,7 @@ void DBHTreeItemData::update()
 
             wxTreeItemId childId = findSubNode(*itChild);
             if (!childId.IsOk())
-            {   
+            {
                 DBHTreeItemData* newItem = new DBHTreeItemData(treeM);
                 if (prevId.IsOk())
                 {
