@@ -260,6 +260,29 @@
                 <default>1</default>
             </setting>
         </node>
+        <node>
+            <caption>Window title</caption>
+            <description>Text shown in SQL Editor window title</description>
+            <image>0</image>
+            <setting type="radiobox">
+                <caption>SQL keywords are shown in window title</caption>
+                <description>Keywords like SELECT, INSERT, CREATE, etc. can be abbreviated so more text can fit in the title and taskbar entry</description>
+                <key>sqlEditorWindowKeywords</key>
+                <default>1</default>
+                <option>
+                    <caption>exactly as typed (ex. INSERT or insert)</caption>
+                </option>
+                <option>
+                    <caption>short form (ex. ins)</caption>
+                </option>
+                <option>
+                    <caption>very short form (ex. i)</caption>
+                </option>
+                <option>
+                    <caption>show first line of statement (ex. INSERT INTO t1 VALUES ...)</caption>
+                </option>
+            </setting>
+        </node>
     </node>
     <node>
         <caption>Data Grid</caption>
@@ -334,11 +357,11 @@
                     <maxvalue>16000</maxvalue>
                     <default>1</default>
                 </setting>
-				<setting type="checkbox">
-					<caption>Show data for binary BLOBs</caption>
-					<key>GridShowBinaryBlobs</key>
-					<default>0</default>
-				</setting>
+                <setting type="checkbox">
+                    <caption>Show data for binary BLOBs</caption>
+                    <key>GridShowBinaryBlobs</key>
+                    <default>0</default>
+                </setting>
             </enables>
         </setting>
     </node>

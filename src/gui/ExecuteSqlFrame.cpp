@@ -989,53 +989,92 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnSqlEditChanged(wxStyledTextEvent& WXUNUSED(event))
 {
-    if (filenameM.IsEmpty())
+    if (!filenameM.IsEmpty())
+        return;
+    if (styled_text_ctrl_sql->GetTextLength() < 1)
     {
-        if (styled_text_ctrl_sql->GetTextLength() > 0)
-        {
-            SqlTokenizer tk(styled_text_ctrl_sql->GetText());
-            SqlTokenType lookfor[] = {
-                kwALTER, kwCREATE, kwDECLARE, kwDROP, kwEXECUTE, kwINSERT,
-                kwRECREATE, kwREVOKE, kwGRANT, kwSELECT, kwUPDATE, kwDELETE,
-                tkIDENTIFIER
-            };
-            wxString names[] = {
-                wxT("a"), wxT("c"), wxT("decl"), wxT("drop"), wxT("x"),
-                wxT("i"), wxT("recr"), wxT("rev"), wxT("grnt"), wxT("s"),
-                wxT("u"), wxT("del")
-            };
-            int cnt = 0;
-            wxString title;
-            do
-            {
-                SqlTokenType stt = tk.getCurrentToken();
-                for (int i=0; i<sizeof(lookfor)/sizeof(SqlTokenType); i++)
-                {
-                    if (lookfor[i] == stt)
-                    {
-                        if (cnt == 1)
-                            title += wxT(" ");
-                        if (stt == tkIDENTIFIER)
-                            title += tk.getCurrentTokenString();
-                        else
-                            title += names[i];
-                        if (stt == kwSELECT)    // special case, look for FROM
-                            while (tk.getCurrentToken() != kwFROM)
-                                if (!tk.jumpToken(true))
-                                    break;
-                        if (++cnt == 2) // use 2 tokens for title
-                            break;
-                    }
-                }
-            }
-            while (cnt < 2 && tk.jumpToken(true /* skip parenthesis */));
-            SetTitle(title);
-        }
+        SetTitle(_("Execute SQL statements"));
+        return;
+    }
+
+    const wxString& txt = styled_text_ctrl_sql->GetText();
+    size_t p = txt.find(wxT("@FR-TITLE@"));
+    if (p != wxString::npos)
+    {
+        size_t q = txt.find(wxT("*/"), p);
+        if (q == wxString::npos)
+            q = txt.find_first_of(wxT("\n\r"), p);
+        if (q != wxString::npos)
+            SetTitle(txt.substr(p+11, q - p - 11));
         else
+            SetTitle(txt.substr(p+11));
+        return;
+    }
+
+    SqlTokenizer tk(styled_text_ctrl_sql->GetText());
+    const SqlTokenType lookfor[] = {
+        kwALTER, kwCREATE, kwDECLARE, kwDROP, kwEXECUTE, kwINSERT,
+        kwRECREATE, kwREVOKE, kwGRANT, kwSELECT, kwUPDATE, kwDELETE,
+        tkIDENTIFIER
+    };
+    const wxString namesShort[] = {
+        wxT("alt"), wxT("cre"), wxT("dclr"), wxT("drop"), wxT("exec"),
+        wxT("ins"), wxT("recr"), wxT("rvk"), wxT("grnt"), wxT("sel"),
+        wxT("upd"), wxT("del")
+    };
+    const wxString namesVeryShort[] = {
+        wxT("a"), wxT("c"), wxT("decl"), wxT("drop"), wxT("x"),
+        wxT("i"), wxT("recr"), wxT("rev"), wxT("grnt"), wxT("s"),
+        wxT("u"), wxT("del")
+    };
+    const wxString* names = 0;
+    int setting = config().get(wxT("sqlEditorWindowKeywords"), 1);
+    if (setting == 1)
+        names = &namesShort[0];
+    else if (setting == 2)
+        names = &namesVeryShort[0];
+
+    int cnt = 0;
+    wxString title;
+    do
+    {
+        SqlTokenType stt = tk.getCurrentToken();
+        for (int i=0; i<sizeof(lookfor)/sizeof(SqlTokenType); i++)
         {
-            SetTitle(_("Execute SQL statements"));
+            if (lookfor[i] == stt)
+            {
+                if (setting == 3)   // entire statement till end of line
+                {
+                    p = tk.getCurrentTokenPosition();
+                    size_t q = txt.find_first_of(wxT("\n\r;"), p);
+                    if (q == wxString::npos)
+                        title = txt.substr(p);
+                    else
+                        title = txt.substr(p, q-p);
+                    cnt = 10;   // flag to exit outer do..while loop
+                    break;
+                }
+                if (cnt == 1)
+                    title += wxT(" ");
+                if (stt == tkIDENTIFIER || setting == 0)
+                    title += tk.getCurrentTokenString();
+                else
+                    title += names[i];
+                if (stt == kwSELECT)    // special case, find table name
+                    while (tk.getCurrentToken() != kwFROM)
+                        if (!tk.jumpToken(true))
+                            break;
+                if (stt == kwGRANT || stt == kwREVOKE)   // find grantee
+                    while (tk.getCurrentToken() != kwON)
+                        if (!tk.jumpToken(true))
+                            break;
+                if (++cnt == 2) // use 2 tokens for title
+                    break;
+            }
         }
     }
+    while (cnt < 2 && tk.jumpToken(true /* skip parenthesis */));
+    SetTitle(title);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::autoCompleteColumns(int pos, int len)
