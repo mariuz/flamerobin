@@ -261,8 +261,8 @@
             </setting>
         </node>
         <node>
-            <caption>Window title</caption>
-            <description>Text shown in SQL Editor window title</description>
+            <caption>Window Title</caption>
+            <description>SQL Editor Window Title</description>
             <image>0</image>
             <setting type="radiobox">
                 <caption>SQL keywords are shown in window title</caption>
@@ -273,13 +273,13 @@
                     <caption>exactly as typed (ex. INSERT or insert)</caption>
                 </option>
                 <option>
-                    <caption>short form (ex. ins)</caption>
+                    <caption>in short form (ex. ins)</caption>
                 </option>
                 <option>
-                    <caption>very short form (ex. i)</caption>
+                    <caption>in very short form (ex. i)</caption>
                 </option>
                 <option>
-                    <caption>show first line of statement (ex. INSERT INTO t1 VALUES ...)</caption>
+                    <caption>as first line of statement (ex. INSERT INTO t1 VALUES ...)</caption>
                 </option>
             </setting>
         </node>
