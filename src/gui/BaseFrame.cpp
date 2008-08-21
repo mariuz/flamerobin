@@ -76,10 +76,10 @@ bool BaseFrame::Destroy()
 void BaseFrame::readConfigSettings()
 {
     // load position and size from config; it values are not set, they will be untouched
-      wxRect r = getDefaultRect();
+    wxRect r = getDefaultRect();
     bool enabled = false;
     bool maximized = false;
-     if (config().getValue(wxT("FrameStorage"), enabled) && enabled)
+    if (config().getValue(wxT("FrameStorage"), enabled) && enabled)
     {
         wxString itemPrefix = getStorageName();
         if (!itemPrefix.empty())
