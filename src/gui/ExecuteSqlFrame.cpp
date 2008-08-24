@@ -2499,6 +2499,7 @@ void ExecuteSqlFrame::setKeywords()
 void ExecuteSqlFrame::log(wxString s, TextType type)
 {
     int startpos = styled_text_ctrl_stats->GetLength();
+    styled_text_ctrl_stats->SetCurrentPos(startpos);
     styled_text_ctrl_stats->AddText(s + wxT("\n"));
     int endpos = styled_text_ctrl_stats->GetLength();
 
