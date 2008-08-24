@@ -1791,6 +1791,21 @@ void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
         sh.add(styled_text_ctrl_sql->GetText());
         historyPositionM = sh.size();
     }
+
+    if (!inTransactionM)
+    {
+        // show sql entry window only
+        if (splitter_window_1->IsSplit())
+            splitter_window_1->Unsplit(notebook_1);
+        else
+        {
+            splitter_window_1->ReplaceWindow(splitter_window_1->GetWindow1(),
+                styled_text_ctrl_sql);
+            styled_text_ctrl_sql->Show();
+            notebook_1->Hide();
+        }
+        styled_text_ctrl_sql->SetFocus();
+    }
 }
 //-----------------------------------------------------------------------------
 //! adapted so we don't have to change all the other code that utilizes SQL editor
