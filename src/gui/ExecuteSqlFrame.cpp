@@ -628,7 +628,7 @@ void ExecuteSqlFrame::buildMainMenu()
     editMenu->Append(wxID_PASTE,        _("&Paste"));
     editMenu->Append(wxID_DELETE,       _("&Delete"));
     editMenu->AppendSeparator();
-    editMenu->Append(wxID_SELECTALL,    _("Select &all"));
+    editMenu->Append(wxID_SELECTALL,    _("Select &all\tCtrl+A"));
     editMenu->AppendSeparator();
     editMenu->Append(wxID_REPLACE,      _("Fi&nd and Replace"));
     menuBarM->Append(editMenu, _("&Edit"));
@@ -1302,7 +1302,11 @@ void ExecuteSqlFrame::OnMenuDelete(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuSelectAll(wxCommandEvent& WXUNUSED(event))
 {
-    styled_text_ctrl_sql->SelectAll();
+    wxWindow* focused = FindFocus();
+    if (focused == styled_text_ctrl_sql)
+        styled_text_ctrl_sql->SelectAll();
+    else if (gridHasFocus())
+        grid_data->SelectAll();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuReplace(wxCommandEvent &WXUNUSED(event))
@@ -2551,6 +2555,17 @@ void ExecuteSqlFrame::doWriteConfigSettings(const wxString& prefix) const
 const wxRect ExecuteSqlFrame::getDefaultRect() const
 {
     return wxRect(-1, -1, 528, 486);
+}
+//-----------------------------------------------------------------------------
+bool ExecuteSqlFrame::gridHasFocus()
+{
+    wxWindow* focused = FindFocus();
+    if (!focused || !grid_data || !grid_data->IsShown())
+        return false;
+    return focused == grid_data || focused == grid_data->GetGridWindow()
+        || focused == grid_data->GetGridColLabelWindow()
+        || focused == grid_data->GetGridRowLabelWindow()
+        || focused == grid_data->GetGridCornerLabelWindow();
 }
 //-----------------------------------------------------------------------------
 //! also used to drop constraints

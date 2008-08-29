@@ -126,6 +126,7 @@ private:
     void setKeywords();
     void buildMainMenu();
     void buildToolbar();
+    bool gridHasFocus();
 
     // events
     void OnClose(wxCloseEvent& event);
