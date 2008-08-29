@@ -624,7 +624,7 @@ void ExecuteSqlFrame::buildMainMenu()
     editMenu->Append(wxID_REDO,         _("&Redo"));
     editMenu->AppendSeparator();
     editMenu->Append(wxID_CUT,          _("Cu&t"));
-    editMenu->Append(wxID_COPY,         _("&Copy"));
+    editMenu->Append(wxID_COPY,         _("&Copy\tCtrl+C"));
     editMenu->Append(wxID_PASTE,        _("&Paste"));
     editMenu->Append(wxID_DELETE,       _("&Delete"));
     editMenu->AppendSeparator();
@@ -670,7 +670,7 @@ void ExecuteSqlFrame::buildMainMenu()
     gridMenu->Append(Cmds::DataGrid_Insert_row,      _("I&nsert row"));
     gridMenu->Append(Cmds::DataGrid_Delete_row,      _("&Delete row"));
     gridMenu->AppendSeparator();
-    gridMenu->Append(Cmds::DataGrid_Copy,            _("&Copy"));
+    gridMenu->Append(wxID_COPY,                      _("&Copy"));
     gridMenu->Append(Cmds::DataGrid_Copy_as_insert,  _("Copy &as insert statements"));
     gridMenu->Append(Cmds::DataGrid_Copy_as_update,  _("Copy as &update statements"));
     gridMenu->AppendSeparator();
@@ -826,7 +826,6 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::DataGrid_Delete_row,      ExecuteSqlFrame::OnMenuGridDeleteRow)
     EVT_MENU(Cmds::DataGrid_ImportBlob,      ExecuteSqlFrame::OnMenuGridImportBlob)
     EVT_MENU(Cmds::DataGrid_ExportBlob,      ExecuteSqlFrame::OnMenuGridExportBlob)
-    EVT_MENU(Cmds::DataGrid_Copy,            ExecuteSqlFrame::OnMenuGridCopy)
     EVT_MENU(Cmds::DataGrid_Copy_as_insert,  ExecuteSqlFrame::OnMenuGridCopyAsInsert)
     EVT_MENU(Cmds::DataGrid_Copy_as_update,  ExecuteSqlFrame::OnMenuGridCopyAsUpdate)
     EVT_MENU(Cmds::DataGrid_Save_as_html,    ExecuteSqlFrame::OnMenuGridSaveAsHtml)
@@ -840,7 +839,6 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::DataGrid_Delete_row,     ExecuteSqlFrame::OnMenuUpdateGridDeleteRow)
     EVT_UPDATE_UI(Cmds::DataGrid_ImportBlob,     ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob)
     EVT_UPDATE_UI(Cmds::DataGrid_ExportBlob,     ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob)
-    EVT_UPDATE_UI(Cmds::DataGrid_Copy,           ExecuteSqlFrame::OnMenuUpdateGridHasData)
     EVT_UPDATE_UI(Cmds::DataGrid_Copy_as_insert, ExecuteSqlFrame::OnMenuUpdateGridHasData)
     EVT_UPDATE_UI(Cmds::DataGrid_Copy_as_update, ExecuteSqlFrame::OnMenuUpdateGridHasData)
     EVT_UPDATE_UI(Cmds::DataGrid_Save_as_html,   ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
@@ -1287,7 +1285,10 @@ void ExecuteSqlFrame::OnMenuCut(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
 {
-    styled_text_ctrl_sql->Copy();
+    if (FindFocus() == styled_text_ctrl_sql)
+        styled_text_ctrl_sql->Copy();
+    else if (gridHasFocus())
+        grid_data->copyToCB();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuPaste(wxCommandEvent& WXUNUSED(event))
@@ -1302,8 +1303,7 @@ void ExecuteSqlFrame::OnMenuDelete(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuSelectAll(wxCommandEvent& WXUNUSED(event))
 {
-    wxWindow* focused = FindFocus();
-    if (focused == styled_text_ctrl_sql)
+    if (FindFocus() == styled_text_ctrl_sql)
         styled_text_ctrl_sql->SelectAll();
     else if (gridHasFocus())
         grid_data->SelectAll();
@@ -1326,7 +1326,12 @@ void ExecuteSqlFrame::OnMenuUpdateRedo(wxUpdateUIEvent& event)
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUpdateCopy(wxUpdateUIEvent& event)
 {
-    event.Enable((styled_text_ctrl_sql->GetSelectedText().Len()>0));
+    bool enableCmd = false;
+    if (FindFocus() == styled_text_ctrl_sql)
+        enableCmd = styled_text_ctrl_sql->GetSelectedText().Len() > 0;
+    else if (gridHasFocus())
+        enableCmd = grid_data->getDataGridTable() && grid_data->GetNumberRows();
+    event.Enable(enableCmd);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUpdateCut(wxUpdateUIEvent& event)
@@ -1673,11 +1678,6 @@ void ExecuteSqlFrame::OnMenuGridDeleteRow(wxCommandEvent& WXUNUSED(event))
     }
 
     // grid_data->EndBatch();   // see comment for BeginBatch above
-}
-//-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuGridCopy(wxCommandEvent& WXUNUSED(event))
-{
-    grid_data->copyToCB();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridCopyAsInsert(wxCommandEvent& WXUNUSED(event))

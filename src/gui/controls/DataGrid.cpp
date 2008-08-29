@@ -202,7 +202,7 @@ void DataGrid::showPopMenu(wxPoint cursorPos)
     m.Append(Cmds::DataGrid_CancelFetchAll, _("Stop fetching all records"));
     m.AppendSeparator();
 
-    m.Append(Cmds::DataGrid_Copy, _("Copy"));
+    m.Append(wxID_COPY, _("Copy\tCtrl+C"));
     m.Append(Cmds::DataGrid_Copy_as_insert, _("Copy as INSERT statements"));
     m.Append(Cmds::DataGrid_Copy_as_update, _("Copy as UPDATE statements"));
     m.Append(Cmds::DataGrid_Save_as_html, _("Save as HTML file..."));

@@ -61,7 +61,6 @@ namespace Cmds
         DataGrid_CancelFetchAll,
         DataGrid_ExportBlob,
         DataGrid_ImportBlob,
-        DataGrid_Copy,
         DataGrid_Copy_as_insert,
         DataGrid_Copy_as_update,
         DataGrid_Save_as_html,

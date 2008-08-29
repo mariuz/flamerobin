@@ -188,7 +188,6 @@ private:
     void OnMenuGridImportBlob(wxCommandEvent &event);
     void OnMenuGridExportBlob(wxCommandEvent &event);
     void OnMenuUpdateGridCellIsBlob(wxUpdateUIEvent& event);
-    void OnMenuGridCopy(wxCommandEvent &event);
     void OnMenuGridCopyAsInsert(wxCommandEvent &event);
     void OnMenuGridCopyAsUpdate(wxCommandEvent &event);
     void OnMenuGridSaveAsHtml(wxCommandEvent &event);
