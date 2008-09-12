@@ -477,9 +477,14 @@ public:
     {
         scroll();
     }
+    void cancel()
+    {
+        controlM = 0;
+    }
     void scroll()
     {
-        controlM->ScrollToLine(controlM->GetLineCount()-1);
+        if (controlM)
+            controlM->ScrollToLine(controlM->GetLineCount()-1);
     }
 };
 //-----------------------------------------------------------------------------
@@ -1265,7 +1270,7 @@ void ExecuteSqlFrame::OnMenuSaveAs(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuClose(wxCommandEvent& WXUNUSED(event))
 {
-    this->Close();
+    Close();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUndo(wxCommandEvent& WXUNUSED(event))
@@ -1968,7 +1973,6 @@ void ExecuteSqlFrame::compareCounts(IBPP::DatabaseCounts& one,
     }
 }
 //-----------------------------------------------------------------------------
-//! when autoexecute is TRUE, program just waits user to click Commit/Rollback and closes window
 bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     bool prepareOnly)
 {
@@ -2173,7 +2177,12 @@ void ExecuteSqlFrame::splitScreen()
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuCommit(wxCommandEvent& WXUNUSED(event))
 {
-    if (commitTransaction() && !closeWhenTransactionDoneM)
+    // we need this because sometimes, somehow, Close() which is called in
+    // commitTransaction() can destroy the object (at least, with wxGTK 2.8.8)
+    // before closeWhenTransactionDoneM is checked and if the dummy memory
+    // location returns false, we have a crash
+    bool doClose = closeWhenTransactionDoneM;
+    if (commitTransaction() && !doClose)
         splitter_window_1->Unsplit(notebook_1); // show sql entry window
 }
 //-----------------------------------------------------------------------------
@@ -2231,6 +2240,7 @@ bool ExecuteSqlFrame::commitTransaction()
         styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
         if (closeWhenTransactionDoneM)
         {
+            sae.cancel();
             Close();
             return true;
         }
@@ -2258,7 +2268,9 @@ bool ExecuteSqlFrame::commitTransaction()
 void ExecuteSqlFrame::OnMenuRollback(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor cr;
-    if (rollbackTransaction() && !closeWhenTransactionDoneM)
+    // see comments for OnMenuCommit to learn why this temp. variable is needed
+    bool closeIt = closeWhenTransactionDoneM;
+    if (rollbackTransaction() && !closeIt)
         splitter_window_1->Unsplit(notebook_1); // show sql entry window
 }
 //-----------------------------------------------------------------------------
@@ -2286,6 +2298,7 @@ bool ExecuteSqlFrame::rollbackTransaction()
 
         if (closeWhenTransactionDoneM)
         {
+            sae.cancel();
             Close();
             return true;
         }
