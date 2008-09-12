@@ -527,7 +527,7 @@ wxString getDefaultRange(Domain *d)
     if (dt == wxT("Smallint") || dt == wxT("Float"))
         return wxT("0-100");
 
-    if (   dt == wxT("Numeric") || dt == wxT("Integer")
+    if (   dt == wxT("Numeric") || dt == wxT("Integer") || dt == wxT("Bigint")
         || dt == wxT("Decimal") || dt == wxT("Double precision"))
     {
         return wxT("0-2000000");
