@@ -173,7 +173,7 @@ wxString Domain::datatype2string(short datatype, short scale, short precision,
         return std2wx(retval.str());
     }
 
-    // INTEGERs (prec=0), DECIMAL(sub_type=2), NUMERIC(sub_type=1)
+    // INTEGER(prec=0), DECIMAL(sub_type=2), NUMERIC(sub_t=1), BIGINT(sub_t=0)
     if (datatype == 7 || datatype == 8 || datatype == 16)
     {
         if (scale == 0 && (datatype == 7 || datatype == 8))
@@ -185,6 +185,8 @@ wxString Domain::datatype2string(short datatype, short scale, short precision,
         }
         else
         {
+            if (subtype == 0)
+                return wxT("Bigint");
             retval << (subtype == 2 ? "Decimal(" : "Numeric(");
             if (precision <= 0 || precision > 18)
                 retval << 18;
