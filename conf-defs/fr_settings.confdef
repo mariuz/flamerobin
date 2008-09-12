@@ -301,6 +301,14 @@
             <default>H:M:S.T</default>
             <aligngroup>1</aligngroup>
         </setting>
+        <setting type="string">
+            <caption>Timestamp format:</caption>
+            <description>The following letters will be replaced:<br />d - day of month, 1-31<br />D - day of month, 01-31<br />n - month, 1-12<br />N - month, 01-12<br />y - year, 00-99<br />Y - year, 0000-9999<br />h - hour, 0-24<br />H - hour, 00-24<br />m - minute, 0-59<br />M - minute, 00-59<br />s - second, 0-59<br />S - second, 00-59<br />T - millisecond, 000-999<br />All other characters are copied.</description>
+            <key>TimestampFormat</key>
+            <default>D.N.Y, H:M:S.T</default>
+            <aligngroup>1</aligngroup>
+            <expand>1</expand>
+        </setting>
         <setting type="font">
             <caption>Grid header font:</caption>
             <key>DataGridHeaderFont</key>

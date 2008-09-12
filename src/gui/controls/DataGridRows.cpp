@@ -65,6 +65,7 @@ private:
     int precisionForDoubleM;
     wxString dateFormatM;
     wxString timeFormatM;
+    wxString timestampFormatM;
 protected:
     virtual void loadFromConfig();
 public:
@@ -75,10 +76,14 @@ public:
     wxString formatDouble(double value);
     wxString formatDate(int year, int month, int day);
     wxString formatTime(int hour, int minute, int second, int milliSecond);
+    wxString formatTimestamp(int year, int month, int day,
+        int hour, int minute, int second, int milliSecond);
     bool parseDate(wxString::iterator& start, wxString::iterator end,
         bool consumeAll, int& year, int& month, int& day);
     bool parseTime(wxString::iterator& start, wxString::iterator end,
         int& hr, int& mn, int& sc, int& ml);
+    bool parseTimestamp(wxString::iterator& start, wxString::iterator end,
+        int& year, int& month, int& day, int& hr, int& mn, int& sc, int& ml);
 };
 //-----------------------------------------------------------------------------
 GridCellFormats::GridCellFormats()
@@ -100,6 +105,8 @@ void GridCellFormats::loadFromConfig()
 
     dateFormatM = config().get(wxT("DateFormat"), wxString(wxT("D.M.Y")));
     timeFormatM = config().get(wxT("TimeFormat"), wxString(wxT("H:M:S.T")));
+    timestampFormatM = config().get(wxT("TimestampFormat"),
+        wxString(wxT("D.N.Y, H:M:S.T")));
 }
 //-----------------------------------------------------------------------------
 wxString GridCellFormats::formatDouble(double value)
@@ -302,6 +309,146 @@ bool GridCellFormats::parseTime(wxString::iterator& start,
                 if (*c != *start)
                     return false;
                 start++;
+                break;
+        }
+    }
+    return true;
+}
+//-----------------------------------------------------------------------------
+wxString GridCellFormats::formatTimestamp(int year, int month, int day,
+    int hour, int minute, int second, int milliSecond)
+{
+    ensureCacheValid();
+
+    wxString result;
+    for (wxString::iterator c = timestampFormatM.begin();
+        c != timestampFormatM.end(); c++)
+    {
+        switch ((wxChar)*c)
+        {
+            case 'd':
+                result += wxString::Format(wxT("%d"), day);
+                break;
+            case 'D':
+                result += wxString::Format(wxT("%02d"), day);
+                break;
+            case 'n':
+                result += wxString::Format(wxT("%d"), month);
+                break;
+            case 'N':
+                result += wxString::Format(wxT("%02d"), month);
+                break;
+            case 'y':
+                result += wxString::Format(wxT("%02d"), year % 100);
+                break;
+            case 'Y':
+                result += wxString::Format(wxT("%04d"), year);
+                break;
+            case 'h':
+                result += wxString::Format(wxT("%d"), hour);
+                break;
+            case 'H':
+                result += wxString::Format(wxT("%02d"), hour);
+                break;
+            case 'm':
+                result += wxString::Format(wxT("%d"), minute);
+                break;
+            case 'M':
+                result += wxString::Format(wxT("%02d"), minute);
+                break;
+            case 's':
+                result += wxString::Format(wxT("%d"), second);
+                break;
+            case 'S':
+                result += wxString::Format(wxT("%02d"), second);
+                break;
+            case 'T':
+                result += wxString::Format(wxT("%03d"), milliSecond);
+                break;
+            default:
+                result += *c;
+                break;
+        }
+    }
+    return result;
+}
+//-----------------------------------------------------------------------------
+bool GridCellFormats::parseTimestamp(wxString::iterator& start,
+    wxString::iterator end, int& year, int& month, int& day,
+    int& hr, int& mn, int& sc, int& ml)
+{
+    ensureCacheValid();
+
+    for (wxString::iterator c = timestampFormatM.begin();
+        c != timestampFormatM.end() && start != end; ++c)
+    {
+        switch ((wxChar)*c)
+        {
+            case 'd':
+            case 'D':
+                if (*start < wxChar('0') || *start > wxChar('9'))
+                    return true;
+                if (!(getNumber(start, day) && day >= 1 && day <= 31))
+                    return false;
+                break;
+            case 'n':
+            case 'N':
+                if (*start < wxChar('0') || *start > wxChar('9'))
+                    return true;
+                if (!(getNumber(start, month) && month >= 1 && month <= 12))
+                    return false;
+                break;
+            case 'y':
+                if (*start < wxChar('0') || *start > wxChar('9'))
+                    return true;
+                if (!getNumber(start, year))
+                    return false;
+                // see http://www.firebirdsql.org/doc/contrib/FirebirdDateLiterals.html
+                if (year < 100)
+                {
+                    int thisYear = wxDateTime::Now().GetYear();
+                    int cy = thisYear / 100;
+                    int yearBefore = 100 * cy + year;
+                    int yearAfter = yearBefore;
+                    if (yearBefore > thisYear)
+                        yearBefore -= 100;
+                    else
+                        yearAfter += 100;
+                    if (thisYear - yearBefore <= yearAfter - thisYear)
+                        year = yearBefore;
+                    else
+                        year = yearAfter;
+                }
+                break;
+            case 'Y':
+                if (*start < wxChar('0') || *start > wxChar('9'))
+                    return true;
+                if (!getNumber(start, year))
+                    return false;
+                break;
+            case 'h':
+            case 'H':
+                if (!(getNumber(start, hr) && hr >= 0 && hr <= 23))
+                    return false;
+                break;
+            case 'm':
+            case 'M':
+                if (!(getNumber(start, mn) && mn >= 0 && mn <= 59))
+                    return false;
+                break;
+            case 's':
+            case 'S':
+                if (!(getNumber(start, sc) && sc >= 0 && sc <= 59))
+                    return false;
+                break;
+            case 'T':
+                if (!(getNumber(start, ml) && ml >= 0 && ml <= 999))
+                    return false;
+                break;
+            default:        // other characters must match
+                if (*c != *start)
+                    return false;
+                ++start;
                 break;
         }
     }
@@ -811,15 +958,8 @@ wxString TimestampColumnDef::getAsString(DataGridRowBuffer* buffer)
     date.GetDate(year, month, day);
     time.GetTime(hour, minute, second, tenththousands);
 
-    wxString dateStr = GridCellFormats::get().formatDate(year, month, day);
-    wxString timeStr = GridCellFormats::get().formatTime(hour, minute, second,
-        tenththousands / 10);
-    if (timeStr.empty())
-        return dateStr;
-    else if (dateStr.empty())
-        return timeStr;
-    else
-        return dateStr + wxT(", ") + timeStr;
+    return GridCellFormats::get().formatTimestamp(year, month, day,
+        hour, minute, second, tenththousands / 10);
 }
 //-----------------------------------------------------------------------------
 wxString TimestampColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
@@ -838,10 +978,8 @@ wxString TimestampColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
     date.GetDate(year, month, day);
     time.GetTime(hour, minute, second, tenththousands);
 
-    wxString dateStr = wxString::Format(wxT("%d-%d-%d"), year, month, day);
-    wxString timeStr = wxString::Format(wxT("%d:%d:%d.%d"), hour, minute,
-        second, tenththousands / 10);
-    return dateStr + wxT(", ") + timeStr;
+    return wxString::Format(wxT("%d-%d-%d, %d:%d:%d.%d"), year, month, day,
+        hour, minute, second, tenththousands / 10);
 }
 //-----------------------------------------------------------------------------
 void TimestampColumnDef::setFromString(DataGridRowBuffer* buffer,
@@ -868,20 +1006,14 @@ void TimestampColumnDef::setFromString(DataGridRowBuffer* buffer,
         int y = its.Year();  // defaults
         int m = its.Month();
         int d = its.Day();
-        wxString::iterator it = temp.begin();
-        // do not consume all chars, leave them for (optional) time value
-        if (!GridCellFormats::get().parseDate(it, temp.end(), false, y, m, d))
-            throw FRError(_("Cannot parse date"));
-        its.SetDate(y, m, d);
-
-        // skip spaces and commas ", "
-        while ((wxChar)*it == wxChar(',') || (wxChar)*it == wxChar(' '))
-            it++;
-
-        // get time (if available)
         int hr = 0, mn = 0, sc = 0, ms = 0;
-        if (!GridCellFormats::get().parseTime(it, temp.end(), hr, mn, sc, ms))
-            throw FRError(_("Cannot parse time"));
+        wxString::iterator it = temp.begin();
+        if (!GridCellFormats::get().parseTimestamp(it, temp.end(),
+            y, m, d, hr, mn, sc, ms))
+        {
+            throw FRError(_("Cannot parse timestamp"));
+        }
+        its.SetDate(y, m, d);
         its.SetTime(hr, mn, sc, 10 * ms);
     }
 
@@ -1382,7 +1514,7 @@ bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
             stm += wxTextBuffer::GetEOL();
         wxString s = wxT("DELETE FROM ")
             + Identifier((*deleteFromM).first).getQuoted() + wxT(" WHERE ");
-        IBPP::Statement st = addWhere((*deleteFromM).second, s, 
+        IBPP::Statement st = addWhere((*deleteFromM).second, s,
             (*deleteFromM).first, buffersM[from+pos]);
         st->Execute();
         stm += s + wxT(";");
@@ -1777,7 +1909,7 @@ bool DataGridRows::isBlobColumn(unsigned col)
     return (0 != dynamic_cast<BlobColumnDef *>(columnDefsM[col]));
 }
 //-----------------------------------------------------------------------------
-void DataGridRows::exportBlobFile(const wxString& filename, unsigned row, 
+void DataGridRows::exportBlobFile(const wxString& filename, unsigned row,
     unsigned col, ProgressIndicator *pi)
 {
     wxFFile fl(filename, wxT("wb+"));
@@ -1806,7 +1938,7 @@ void DataGridRows::exportBlobFile(const wxString& filename, unsigned row,
     b->Close();
 }
 //-----------------------------------------------------------------------------
-void DataGridRows::importBlobFile(const wxString& filename, unsigned row, 
+void DataGridRows::importBlobFile(const wxString& filename, unsigned row,
     unsigned col, ProgressIndicator *pi)
 {
     wxFFile fl(filename, wxT("rb"));
@@ -1824,7 +1956,7 @@ void DataGridRows::importBlobFile(const wxString& filename, unsigned row,
         statementTablesM.find(table);
     if (it == statementTablesM.end() || (*it).second == 0)
         throw FRError(_("Blob table not found."));
-    IBPP::Statement st = addWhere((*it).second, stm, table, buffersM[row]);    
+    IBPP::Statement st = addWhere((*it).second, stm, table, buffersM[row]);
     IBPP::Blob b = IBPP::BlobFactory(st->DatabasePtr(),
         st->TransactionPtr());
     b->Create();
@@ -1844,7 +1976,7 @@ void DataGridRows::importBlobFile(const wxString& filename, unsigned row,
         return;
     st->Set(1, b);
     st->Execute();  // we execute before updating internal storage
-    
+
     buffersM[row]->setBlob(columnDefsM[col]->getIndex(), b);
     buffersM[row]->setFieldNull(col, false);
     buffersM[row]->setFieldNA(col, false);
