@@ -94,6 +94,7 @@ private:
     // needed because it's not possible to access objectM
     // (see getStorageName()) after detaching from it.
     mutable wxString storageNameM;
+    void setStorageName(MetadataItem *object);
 protected:
     virtual const wxString getName() const;
     virtual const wxString getStorageName() const;
@@ -110,11 +111,13 @@ public:
     void showPanel(wxWindow *panel, const wxString& title);
     void removePanel(wxWindow *panel);
     void setTabTitle(wxWindow *panel, const wxString& title);
+    void setWindowTitle(MetadataItem *object);
 
     //MetadataItemPropertiesPanel *getItemPanel(MetadataItem *item);
 
     void OnClose(wxCloseEvent& event);
     void OnNotebookPageClose(wxAuiNotebookEvent& event);
+    void OnNotebookPageChanged(wxAuiNotebookEvent& event);
 private:
     wxAuiManager auiManagerM;
     wxAuiNotebook* notebookM;

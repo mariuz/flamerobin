@@ -39,6 +39,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <algorithm>
 
+#include "config/Config.h"
 #include "metadata/database.h"
 #include "gui/MetadataItemPropertiesFrame.h"
 #include "framemanager.h"
@@ -59,7 +60,7 @@ FrameManager::~FrameManager()
 //-----------------------------------------------------------------------------
 void FrameManager::bringOnTop(int id)
 {
-    for (ItemPanelMap::iterator it = mipPanelsM.begin(); 
+    for (ItemPanelMap::iterator it = mipPanelsM.begin();
         it != mipPanelsM.end(); ++it)
     {
         if ((*it).second.id == id)
@@ -76,7 +77,7 @@ void FrameManager::removeFrame(MetadataItemPropertiesPanel* panel)
         removeFrame(panel, mipPanelsM);
 }
 //-----------------------------------------------------------------------------
-void FrameManager::removeFrame(MetadataItemPropertiesPanel* panel, 
+void FrameManager::removeFrame(MetadataItemPropertiesPanel* panel,
     ItemPanelMap& frames)
 {
     for (ItemPanelMap::iterator it = frames.begin(); it != frames.end(); ++it)
@@ -90,19 +91,27 @@ void FrameManager::removeFrame(MetadataItemPropertiesPanel* panel,
 }
 //-----------------------------------------------------------------------------
 MetadataItemPropertiesPanel* FrameManager::showMetadataPropertyFrame(
-    MetadataItem* item, bool delayed, bool force_new, bool new_tab)
+    MetadataItem* item, bool delayed, bool new_frame, bool new_tab)
 {
     MetadataItemPropertiesPanel* mpp = 0;
     ItemPanelMap::iterator it = mipPanelsM.find(item);
     if (it != mipPanelsM.end())
         mpp = (*it).second.panel;
-    
+
+    // when user selected preference to open in new window and
+    // property page does not exist, and new tab is not explicitly requested
+    if (!mpp && !new_tab && !new_frame)
+    {
+        if (!config().get(wxT("linksOpenInTabs"), true))
+            new_frame = true;
+    }
+
     // doesn't exists || forced creation of duplicate
-    if (!mpp || force_new || new_tab)
+    if (!mpp || new_frame || new_tab)
     {
         // find frame showing the same database
         MetadataItemPropertiesFrame *mf = 0;
-        if (!force_new)
+        if (!new_frame) // either a new tab, or does not exists
         {
             for (it = mipPanelsM.begin(); it != mipPanelsM.end(); ++it)
             {
@@ -113,18 +122,18 @@ MetadataItemPropertiesPanel* FrameManager::showMetadataPropertyFrame(
                 }
             }
         }
-        
-        if (force_new || !mf)
+
+        if (new_frame || !mf)   // not exists, or new frame forced
         {   // MainFrame is the parent of all MIPFrames
-            mf = new MetadataItemPropertiesFrame(wxTheApp->GetTopWindow(), 
+            mf = new MetadataItemPropertiesFrame(wxTheApp->GetTopWindow(),
                 item);
         }
         mpp = new MetadataItemPropertiesPanel(mf, item);
         PanelAndId fai(mpp, 0);
-        mipPanelsM.insert(mipPanelsM.begin(), 
+        mipPanelsM.insert(mipPanelsM.begin(),
             std::pair<MetadataItem*, PanelAndId>(item, fai));
     }
-        
+
     if (delayed)
     {
         wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, ID_ACTIVATE_FRAME);

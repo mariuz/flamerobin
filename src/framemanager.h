@@ -57,7 +57,7 @@ public:
 
     void removeFrame(MetadataItemPropertiesPanel* panel);
     MetadataItemPropertiesPanel* showMetadataPropertyFrame(
-        MetadataItem* item, bool delayed = false, bool force_new = false,
+        MetadataItem* item, bool delayed = false, bool new_frame = false,
         bool new_tab = false);
 
     void OnCommandEvent(wxCommandEvent& event);

@@ -386,6 +386,11 @@
             <key>displayColumnDescription</key>
             <default>1</default>
         </setting>
+        <setting type="checkbox">
+            <caption>Open in tabs</caption>
+            <key>linksOpenInTabs</key>
+            <default>1</default>
+        </setting>
     </node>
     <node>
         <caption>Sql Statement Generation</caption>
