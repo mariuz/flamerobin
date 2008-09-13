@@ -67,7 +67,7 @@ void Domain::loadInfo()
     IBPP::Statement& st1 = loader->getStatement(
         "select t.rdb$type, f.rdb$field_sub_type, f.rdb$field_length,"
         " f.rdb$field_precision, f.rdb$field_scale, c.rdb$character_set_name, "
-        " c.rdb$bytes_per_character, f.rdb$null_flag, f.rdb$default_source, "
+        " f.rdb$character_length, f.rdb$null_flag, f.rdb$default_source, "
         " l.rdb$collation_name, f.rdb$validation_source "
         " from rdb$fields f"
         " join rdb$types t on f.rdb$field_type=t.rdb$type"
@@ -89,14 +89,10 @@ void Domain::loadInfo()
         subtypeM = 0;
     else
         st1->Get(2, &subtypeM);
-    st1->Get(3, &lengthM);
-    // rdb$character_length does not work properly with computed columns
-    if (!st1->IsNull(7))
-    {
-        int bpc;
-        st1->Get(7, bpc);
-        lengthM /= bpc;
-    }
+    if (st1->IsNull(7))
+        st1->Get(3, &lengthM);
+    else
+        st1->Get(7, &lengthM);
     if (st1->IsNull(4))
         precisionM = 0;
     else
