@@ -90,6 +90,8 @@ private:
 class MetadataItemPropertiesFrame: public BaseFrame
 {
 private:
+    wxString databaseNameM;
+
     // used to remember the value among calls to getStorageName(),
     // needed because it's not possible to access objectM
     // (see getStorageName()) after detaching from it.
@@ -111,7 +113,6 @@ public:
     void showPanel(wxWindow *panel, const wxString& title);
     void removePanel(wxWindow *panel);
     void setTabTitle(wxWindow *panel, const wxString& title);
-    void setWindowTitle(MetadataItem *object);
 
     //MetadataItemPropertiesPanel *getItemPanel(MetadataItem *item);
 

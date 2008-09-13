@@ -91,7 +91,8 @@ void FrameManager::removeFrame(MetadataItemPropertiesPanel* panel,
 }
 //-----------------------------------------------------------------------------
 MetadataItemPropertiesPanel* FrameManager::showMetadataPropertyFrame(
-    MetadataItem* item, bool delayed, bool new_frame, bool new_tab)
+    MetadataItem* item, bool delayed, bool new_frame, bool new_tab,
+    MetadataItemPropertiesFrame *windowHint)
 {
     MetadataItemPropertiesPanel* mpp = 0;
     ItemPanelMap::iterator it = mipPanelsM.find(item);
@@ -118,7 +119,8 @@ MetadataItemPropertiesPanel* FrameManager::showMetadataPropertyFrame(
                 if ((*it).first->findDatabase() == item->findDatabase())
                 {
                     mf = (*it).second.panel->getParentFrame();
-                    break;
+                    if (!windowHint || mf == windowHint)
+                        break;
                 }
             }
         }

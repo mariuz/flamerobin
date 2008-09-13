@@ -87,13 +87,12 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
     else
         sb->SetStatusText(object->getPrintableName());
 
-    setWindowTitle(object);
-
     wxIcon icon;
     if (d && config().get(wxT("linksOpenInTabs"), true))
     {
         wxBitmap bmp = getImage32(d->getType());
         icon.CopyFromBitmap(bmp);
+        databaseNameM = d->getPrintableName();
     }
     else  // when linksOpenInTabs, only the server node
     {
@@ -110,6 +109,11 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
     auiManagerM.AddPane(notebookM,
         wxAuiPaneInfo().CenterPane().PaneBorder(false));
     auiManagerM.Update();
+
+    Connect(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CLOSE, wxAuiNotebookEventHandler(
+        MetadataItemPropertiesFrame::OnNotebookPageClose), NULL, this);
+    Connect(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGED, wxAuiNotebookEventHandler(
+        MetadataItemPropertiesFrame::OnNotebookPageChanged), NULL, this);
 }
 //-----------------------------------------------------------------------------
 const wxRect MetadataItemPropertiesFrame::getDefaultRect() const
@@ -174,23 +178,6 @@ void MetadataItemPropertiesFrame::setTabTitle(wxWindow *panel,
     notebookM->SetPageText(pg, title);
 }
 //-----------------------------------------------------------------------------
-void MetadataItemPropertiesFrame::setWindowTitle(MetadataItem *object)
-{
-    Database* d = object->findDatabase();
-    if (d && config().get(wxT("linksOpenInTabs"), true))
-    {
-        if (d == object)   // prevent 2x the same text
-            SetTitle(d->getPrintableName());
-        else
-        {
-            SetTitle(d->getPrintableName() + wxT(" - ")
-                + object->getPrintableName());
-        }
-    }
-    else
-        SetTitle(object->getPrintableName());
-}
-//-----------------------------------------------------------------------------
 void MetadataItemPropertiesFrame::showPanel(wxWindow* panel,
     const wxString& title)
 {
@@ -245,10 +232,7 @@ void MetadataItemPropertiesPanel::showIt()
 {
     MetadataItemPropertiesFrame *f = getParentFrame();
     if (f)
-    {
         f->showPanel(this, objectM->getName_());
-        f->setWindowTitle(objectM);
-    }
 }
 //-----------------------------------------------------------------------------
 MetadataItem *MetadataItemPropertiesPanel::getObservedObject() const
@@ -1238,10 +1222,6 @@ END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(MetadataItemPropertiesFrame, BaseFrame)
     EVT_CLOSE(MetadataItemPropertiesFrame::OnClose)
-    EVT_AUINOTEBOOK_PAGE_CLOSE(MetadataItemPropertiesFrame::ID_notebook,
-        MetadataItemPropertiesFrame::OnNotebookPageClose)
-    EVT_AUINOTEBOOK_PAGE_CHANGED(MetadataItemPropertiesFrame::ID_notebook,
-        MetadataItemPropertiesFrame::OnNotebookPageChanged)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 // when last tab is closed, close the frame
@@ -1258,16 +1238,22 @@ void MetadataItemPropertiesFrame::OnNotebookPageClose(wxAuiNotebookEvent&
 void MetadataItemPropertiesFrame::OnNotebookPageChanged(wxAuiNotebookEvent&
     event)
 {
-    MetadataItemPropertiesPanel *mp =
-        dynamic_cast<MetadataItemPropertiesPanel *>(
-            notebookM->GetPage(event.GetSelection()));
-    if (!mp)
+    int sel = event.GetSelection();
+    if (sel == wxNOT_FOUND)
         return;
-    setWindowTitle(mp->getObservedObject());
+    if (databaseNameM.IsEmpty())
+        SetTitle(notebookM->GetPageText(sel));
+    else
+        SetTitle(databaseNameM + wxT(" - ") + notebookM->GetPageText(sel));
 }
 //-----------------------------------------------------------------------------
 void MetadataItemPropertiesFrame::OnClose(wxCloseEvent& event)
 {
+    Disconnect(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CLOSE, wxAuiNotebookEventHandler(
+        MetadataItemPropertiesFrame::OnNotebookPageClose), NULL, this);
+    Disconnect(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGED,
+        wxAuiNotebookEventHandler(
+        MetadataItemPropertiesFrame::OnNotebookPageChanged), NULL, this);
     BaseFrame::OnClose(event);
 }
 //-----------------------------------------------------------------------------
@@ -1337,7 +1323,8 @@ bool PageHandler::handleURI(URI& uri)
     else if (uri.getParam(wxT("target")) == wxT("new_tab"))
     {
         mpp = frameManager().showMetadataPropertyFrame(
-            mpp->getObservedObject(), false, false, true); // true = new_tab
+            mpp->getObservedObject(), false, false, true,
+            mpp->getParentFrame()); // true = new_tab
     }
 
     mpp->setPage(uri.getParam(wxT("type")));
@@ -1380,7 +1367,8 @@ bool PropertiesHandler::handleURI(URI& uri)
 
     frameManager().showMetadataPropertyFrame(object, false,
         uri.getParam(wxT("target")) == wxT("new"),
-        uri.getParam(wxT("target")) == wxT("new_tab"));
+        uri.getParam(wxT("target")) == wxT("new_tab"),
+        parent->getParentFrame());
     return true;
 }
 //-----------------------------------------------------------------------------

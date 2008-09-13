@@ -35,6 +35,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gui/BaseFrame.h"
 #include "metadata/metadataitem.h"
 class MetadataItemPropertiesPanel;
+class MetadataItemPropertiesFrame;
 //--------------------------------------------------------------------------------------
 class PanelAndId
 {
@@ -58,7 +59,7 @@ public:
     void removeFrame(MetadataItemPropertiesPanel* panel);
     MetadataItemPropertiesPanel* showMetadataPropertyFrame(
         MetadataItem* item, bool delayed = false, bool new_frame = false,
-        bool new_tab = false);
+        bool new_tab = false, MetadataItemPropertiesFrame *windowHint = 0);
 
     void OnCommandEvent(wxCommandEvent& event);
 protected:
