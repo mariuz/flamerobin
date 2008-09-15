@@ -59,7 +59,7 @@ void parachute()
     if (wxYES == ::wxMessageBox(::wxGetTranslation(
         wxT("A fatal error has occured. If you know how to\n")
         wxT("reproduce the problem, please submit the bug report at:\n")
-        wxT("http://sourceforge.net/tracker/?group_id=124340&atid=699234\n\n")
+        wxT("http://www.flamerobin.org/bugs.php\n\n")
         wxT("The program can try to keep running so that you\n")
         wxT("can save your data. Do you wish to try?\n")),
         _("Fatal error"), wxYES_NO | wxICON_ERROR))
@@ -107,14 +107,14 @@ bool Application::OnInit()
 
     wxImage::AddHandler(new wxPNGHandler);
 
-	/* we might be needing this
+    /* we might be needing this
 #ifdef __WXMSW__
-	if (wxTheApp->GetComCtl32Version() >= 600 && ::wxDisplayDepth() >= 32)
-		wxSystemOptions::SetOption(wxT("msw.remap"), 2);
-	else
-		wxSystemOptions::SetOption(wxT("msw.remap"), 0);
+    if (wxTheApp->GetComCtl32Version() >= 600 && ::wxDisplayDepth() >= 32)
+        wxSystemOptions::SetOption(wxT("msw.remap"), 2);
+    else
+        wxSystemOptions::SetOption(wxT("msw.remap"), 0);
 #endif
-	*/
+    */
 
     MainFrame* main_frame = new MainFrame(0, -1, wxT(""));
     SetTopWindow(main_frame);
