@@ -8,14 +8,14 @@
 http://sourceforge.net/tracker/?group_id=124340&amp;atid=699234</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
-<font size=+2>Changes in FlameRobin 0.8.7 ALPHA</font><br>
+<font size=+2>Changes in FlameRobin 0.9.0 ALPHA</font><br>
 <br><br>
 <font size=+1 color="#AA0000"><B>New features</B></font><br>
 <br>
 - 100% Firebird 2.1 compatible<br>
 - Tab-based property pages for database object (like Firefox browser)<br>
 - DataGrid: load and save to file options for BLOB data.<br>
-- A new improved dialog for inserting new rows.<br>
+- A new, improved dialog for inserting new rows.<br>
 <br><br>
 <font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
 <br>
@@ -25,11 +25,17 @@ http://sourceforge.net/tracker/?group_id=124340&amp;atid=699234</font><br>
 - Firebird 2.1: Support for domains as stored procedure parameter types<br>
 - Firebird 2.1: Detect when the equals sign (=) is used instead of DEFAULT<br>
 - SQL Editor: Improved autocomplete for table columns<br>
-- SQL Editor: Smarter window title<br>
+- SQL Editor: Smarter window title, user configurable<br>
 - SQL Editor: fixed problems with scolling of log control<br>
 - SQL Editor: removed flicker when executing scripts with COMMITs or AUTODLL ON<br>
+- SQL Editor: fixed crashes when COMMIT closes the window<br>
 - DataGrid: Copy as Update and Insert for single cell does not require cell to be selected anymore<br>
+- DataGrid: Timestamps have display format of their own (not date+time anymore)<br>
+- DataGrid: Fixed doubling of quotes entered in edited fields.<br>
+- Procedure nodes in tree indicate when parameter info has been loaded<br>
 - DLL extraction for GRANTs fixed<br>
+- DDL extraction for BIGINT separated from NUMERIC(18,0)<br>
+- DDL extraction for CHAR columns in system tables fixed<br>
 - Fixed random crashes when dropping object from its property page<br>
 - Implemented missing prompt for dropping of some objects<br>
 - GRANT statements moved to end of database DDL script for easier diffs<br>
