@@ -1432,13 +1432,6 @@ void DataGridRows::clear()
     bufferSizeM = 0;
 }
 //-----------------------------------------------------------------------------
-wxString escapeQuotes(const wxString& input)
-{
-    wxString sCopy(input);
-    sCopy.Replace(wxT("'"), wxT("''"));
-    return sCopy;
-}
-//-----------------------------------------------------------------------------
 bool DataGridRows::canRemoveRow(size_t row)
 {
     if (row >= buffersM.size())
@@ -1866,8 +1859,7 @@ IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
                 if (ci != uq->begin())
                     stm += wxT(" AND ");
                 stm += Identifier(cn).getQuoted() + wxT(" = '");
-                stm += escapeQuotes(
-                    columnDefsM[c2-1]->getAsFirebirdString(buffer));
+                stm += columnDefsM[c2-1]->getAsFirebirdString(buffer);
                 stm += wxT("'");
                 break;
             }
@@ -2031,8 +2023,8 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
             stm += wxT(" = NULL WHERE ");
         else
         {
-            stm += wxT(" = '") + escapeQuotes(
-                columnDefsM[col]->getAsFirebirdString(buffersM[row]))
+            stm += wxT(" = '") +
+                columnDefsM[col]->getAsFirebirdString(buffersM[row])
                 + wxT("' WHERE ");
         }
 
