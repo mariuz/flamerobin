@@ -1176,6 +1176,7 @@ class BlobColumnDef : public ResultsetColumnDef
 private:
     unsigned indexM, stringIndexM;
     bool textualM;
+    wxMBConv* converterM;
 public:
     BlobColumnDef(const wxString& name, bool readOnly, bool nullable,
         unsigned stringIndex, unsigned blobIndex, bool textual);
@@ -1216,7 +1217,7 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
         return wxT("[BINARY]");
 
     int kb = 1024 * config().get(wxT("DataGridFetchBlobAmount"), 1);
-    wxString result;
+    std::string result;
     IBPP::Blob *b0 = buffer->getBlob(indexM);
     if (!b0)
         return wxT("");
@@ -1236,7 +1237,7 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
         if (textualM)
         {
             std::string s(buffer, size);
-            result += std2wx(s);    // TODO: wxMBConv needed
+            result += s;    // we don't convert here due to incomplete strings
         }
         else    // binary (show as hexadecimal)
         {
@@ -1247,18 +1248,27 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
                     last = size - i;
                 for (int j=0; j<last; j++)
                 {
-                    result += wxString::Format(wxT("%02X"),
-                        (unsigned char)(buffer[i+j]));
+                    result += wx2std(wxString::Format(wxT("%02X"),
+                        (unsigned char)(buffer[i+j])));
                 }
-                result += wxT(" ");
+                result += " ";
                 if (((i + 8) % 32) == 0)
-                    result += wxT("\n");
+                    result += "\n";
             }
         }
     }
     b->Close();
-    buffer->setString(stringIndexM, result); // store for future calls
-    return result;
+    wxString wxs(std2wx(result, converterM));
+    if (kb <= 0)    // there was more data to fetch
+    {               // incomplete strings might not get translated properly
+        while (wxs.IsEmpty() && result.length() > 0)
+        {
+            result.erase(result.length()-1, 1); // remove last byte
+            wxs = std2wx(result, converterM);   // try converting again
+        }
+    }
+    buffer->setString(stringIndexM, wxs);
+    return wxs;
 }
 //-----------------------------------------------------------------------------
 void BlobColumnDef::setFromString(DataGridRowBuffer* /*buffer*/,
@@ -1275,13 +1285,14 @@ unsigned BlobColumnDef::getBufferSize()
 }
 //-----------------------------------------------------------------------------
 void BlobColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
-    const IBPP::Statement& statement, wxMBConv* /*converter*/)
+    const IBPP::Statement& statement, wxMBConv* converter)
 {
     wxASSERT(buffer);
     IBPP::Blob b = IBPP::BlobFactory(statement->DatabasePtr(),
         statement->TransactionPtr());
     statement->Get(col, b);
     buffer->setBlob(indexM, b);
+    converterM = converter; // store for later when we fetch the data
 }
 //-----------------------------------------------------------------------------
 // StringColumnDef class
