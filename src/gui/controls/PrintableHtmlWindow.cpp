@@ -41,6 +41,7 @@
 #include <wx/clipbrd.h>
 #include <wx/file.h>
 #include <wx/filedlg.h>
+#include <wx/platform.h>
 
 #include "urihandler.h"
 
@@ -225,6 +226,19 @@ void PrintableHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
         wxHtmlWindow::OnLinkClicked(link);
         return;
     }
+
+    // open in new tab if control/command key is down
+    // open in new window if shift key is down
+    bool openInTab;
+    if (wxPlatformInfo::Get().GetOperatingSystemId() & wxOS_MAC)
+        openInTab = ::wxGetKeyState(WXK_COMMAND);
+    else
+        openInTab = ::wxGetKeyState(WXK_CONTROL);
+    if (openInTab)
+        uri.addParam(wxT("target=new_tab"));
+    else if (::wxGetKeyState(WXK_SHIFT))
+        uri.addParam(wxT("target=new"));
+
     if (!getURIProcessor().handleURI(uri))
     {
         ::wxMessageBox(_("Feature not yet implemented."), _("Information"), 
