@@ -74,18 +74,18 @@ wxString escapeHtmlChars(const wxString& input, bool processNewlines)
     if (input.empty())
         return input;
     wxString result;
-    size_t start = 0, len = input.length();
-    while (start < len)
+    wxString::const_iterator start = input.begin();
+    while (start != input.end())
     {
-        size_t stop = start;
-        while (stop < len)
+        wxString::const_iterator stop = start;
+        while (stop != input.end())
         {
-            const wxChar c = input[stop];
+            const wxChar c = *stop;
             if (c == '&' || c == '<' || c == '>' || c == '"'
-                || (processNewlines && (c == '\r' || c == '\n')))
+                || c == '\r' || (processNewlines && c == '\n'))
             {
                 if (stop > start)
-                    result += input.Mid(start, stop - start);
+                    result += wxString(start, stop);
                 if (c == '&')
                     result += wxT("&amp;");
                 else if (c == '<')
@@ -108,7 +108,7 @@ wxString escapeHtmlChars(const wxString& input, bool processNewlines)
             ++stop;
         }
         if (stop > start)
-            result += input.Mid(start, stop - start);
+            result += wxString(start, stop);
         start = stop;
     }
     return result;
