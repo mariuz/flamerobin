@@ -900,7 +900,7 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
         if (!d)
             return;
 
-        htmlpage += d->getInfo()->getCreated();
+        htmlpage += d->getInfo().getCreated();
     }
     else if (cmd == wxT("default_charset"))
     {
@@ -916,7 +916,7 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
         if (!d)
             return;
 
-        htmlpage += wxString() << d->getInfo()->getDialect();
+        htmlpage += wxString() << d->getInfo().getDialect();
     }
     else if (cmd == wxT("filesize"))
     {
@@ -924,7 +924,7 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
         if (!d)
             return;
 
-        float size = (float)d->getInfo()->getPageSize() * d->getInfo()->getPages();
+        int64_t size = d->getInfo().getSizeInBytes();
         const float kilo = 1024.0;
         const float mega = kilo * kilo;
         const float giga = kilo * mega;
@@ -944,7 +944,7 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
         wxString okimage = wxT("<img src=\"") + config().getHtmlTemplatesPath() + wxT("ok.png\">");
         wxString ximage = wxT("<img src=\"") + config().getHtmlTemplatesPath() + wxT("redx.png\">");
 
-        htmlpage += (d->getInfo()->getForcedWrites() ? okimage : ximage);
+        htmlpage += (d->getInfo().getForcedWrites() ? okimage : ximage);
     }
     else if (cmd == wxT("fullpath"))
     {
@@ -960,7 +960,7 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
         if (!d)
             return;
 
-        htmlpage += wxString() << d->getInfo()->getNextTransaction();
+        htmlpage += wxString() << d->getInfo().getNextTransaction();
     }
     else if (cmd == wxT("ods_version"))
     {
@@ -968,11 +968,11 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
         if (!d)
             return;
 
-        htmlpage += wxString() << d->getInfo()->getODS();
-        if (d->getInfo()->getODSMinor())
+        htmlpage += wxString() << d->getInfo().getODS();
+        if (d->getInfo().getODSMinor())
         {
             htmlpage += wxT(".");
-            htmlpage += wxString() << d->getInfo()->getODSMinor();
+            htmlpage += wxString() << d->getInfo().getODSMinor();
         }
     }
     else if (cmd == wxT("oldest_transaction"))
@@ -981,7 +981,7 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
         if (!d)
             return;
 
-        htmlpage += wxString() << d->getInfo()->getOldestTransaction();
+        htmlpage += wxString() << d->getInfo().getOldestTransaction();
     }
     else if (cmd == wxT("page_buffers"))
     {
@@ -989,7 +989,7 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
         if (!d)
             return;
 
-        htmlpage += wxString() << d->getInfo()->getBuffers();
+        htmlpage += wxString() << d->getInfo().getBuffers();
     }
     else if (cmd == wxT("page_size"))
     {
@@ -997,7 +997,7 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
         if (!d)
             return;
 
-        htmlpage += wxString() << d->getInfo()->getPageSize();
+        htmlpage += wxString() << d->getInfo().getPageSize();
     }
     else if (cmd == wxT("pages"))
     {
@@ -1005,14 +1005,14 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
         if (!d)
             return;
 
-        htmlpage += wxString() << d->getInfo()->getPages();
+        htmlpage += wxString() << d->getInfo().getPages();
     }
     else if (cmd == wxT("read_only"))
     {
         Database* d = dynamic_cast<Database*>(object);
         if (!d)
             return;
-        if (d->getInfo()->getReadOnly())
+        if (d->getInfo().getReadOnly())
             htmlpage += wxT("true");
     else
             htmlpage += wxT("false");
@@ -1023,7 +1023,7 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
         if (!d)
             return;
 
-        htmlpage += wxString() << d->getInfo()->getSweep();
+        htmlpage += wxString() << d->getInfo().getSweep();
     }
 }
 //-----------------------------------------------------------------------------

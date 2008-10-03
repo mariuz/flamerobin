@@ -81,7 +81,7 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
 
     if (isEditSweep)
     {
-        long oldSweep = d->getInfo()->getSweep();
+        long oldSweep = d->getInfo().getSweep();
 
         while (true)
         {
@@ -108,15 +108,14 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
             // Server.
             db->Disconnect();
             db->Connect();
-            d->getInfo()->loadInfo(&db);
-            d->notifyObservers();
+            d->loadInfo();
             break;
         }
     }
 
     if (isEditForcedWrites)
     {
-        bool forced = !d->getInfo()->getForcedWrites();
+        bool forced = !d->getInfo().getForcedWrites();
 
         // disconnect the database before changing SyncWrites. When the
         // database remains connected, you can set SyncWrites for about
@@ -131,8 +130,7 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
 
         // load the database info because the value of forced writes been
         // changed.
-        d->getInfo()->loadInfo(&db);
-        d->notifyObservers();
+        d->loadInfo();
     }
 
     svc->Disconnect();

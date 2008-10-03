@@ -96,76 +96,104 @@ wxString Credentials::getRole() const
     return roleM;
 }
 //-----------------------------------------------------------------------------
-int DatabaseInfo::getBuffers()
+int DatabaseInfo::getBuffers() const
 {
     return buffersM;
 }
 //-----------------------------------------------------------------------------
-wxString DatabaseInfo::getCreated()
+wxString DatabaseInfo::getCreated() const
 {
     return wxT("not supported");
 }
 //-----------------------------------------------------------------------------
-int DatabaseInfo::getDialect()
+int DatabaseInfo::getDialect() const
 {
     return dialectM;
 }
 //-----------------------------------------------------------------------------
-bool DatabaseInfo::getForcedWrites()
+bool DatabaseInfo::getForcedWrites() const
 {
     return forcedWritesM;
 }
 //-----------------------------------------------------------------------------
-int DatabaseInfo::getNextTransaction()
+int DatabaseInfo::getNextTransaction() const
 {
     return nextTransactionM;
 }
 //-----------------------------------------------------------------------------
-int DatabaseInfo::getODS()
+int DatabaseInfo::getODS() const
 {
     return odsM;
 }
 //-----------------------------------------------------------------------------
-int DatabaseInfo::getODSMinor()
+int DatabaseInfo::getODSMinor() const
 {
     return odsMinorM;
 }
 //-----------------------------------------------------------------------------
-int DatabaseInfo::getOldestTransaction()
+bool DatabaseInfo::getODSVersionIsHigherOrEqualTo(int versionMajor) const
+{
+    return odsM >= versionMajor;
+}
+//-----------------------------------------------------------------------------
+bool DatabaseInfo::getODSVersionIsHigherOrEqualTo(int versionMajor,
+    int versionMinor) const
+{
+    return odsM > versionMajor
+        || (odsM == versionMajor && odsMinorM >= versionMinor);
+}
+//-----------------------------------------------------------------------------
+int DatabaseInfo::getOldestTransaction() const
 {
     return oldestTransactionM;
 }
 //-----------------------------------------------------------------------------
-int DatabaseInfo::getPageSize()
+int DatabaseInfo::getPageSize() const
 {
     return pageSizeM;
 }
 //-----------------------------------------------------------------------------
-int DatabaseInfo::getPages()
+int DatabaseInfo::getPages() const
 {
     return pagesM;
 }
 //-----------------------------------------------------------------------------
-bool DatabaseInfo::getReadOnly()
+bool DatabaseInfo::getReadOnly() const
 {
     return readOnlyM;
 }
 //-----------------------------------------------------------------------------
-int DatabaseInfo::getSweep()
+int64_t DatabaseInfo::getSizeInBytes() const
+{
+    return getPages() * getPageSize();
+}
+//-----------------------------------------------------------------------------
+int DatabaseInfo::getSweep() const
 {
     return sweepM;
 }
 //-----------------------------------------------------------------------------
-void DatabaseInfo::loadInfo(const IBPP::Database* database)
+void DatabaseInfo::load(const IBPP::Database database)
 {
-    (*database)->Info(&odsM, &odsMinorM, &pageSizeM, &pagesM,
+    database->Info(&odsM, &odsMinorM, &pageSizeM, &pagesM,
         &buffersM, &sweepM, &forcedWritesM, &reserveM, &readOnlyM);
-    dialectM = (*database)->Dialect();
+    dialectM = database->Dialect();
+    loadTimeMillisM = ::wxGetLocalTimeMillis();
+}
+//-----------------------------------------------------------------------------
+void DatabaseInfo::reloadIfNecessary(const IBPP::Database database)
+{
+    wxLongLong millisNow = ::wxGetLocalTimeMillis();
+    // value may jump or even actually decrease, for instance on timezone
+    // change or when daylight saving time ends...
+    wxLongLong millisDelta = millisNow - loadTimeMillisM;
+    if (millisDelta >= 1000 || millisDelta <= -1000)
+        load(database);
 }
 //-----------------------------------------------------------------------------
 Database::Database()
-    : MetadataItem(), metadataLoaderM(0), connectedM(false), connectionCredentialsM(0),
-    storeEncryptedPasswordM(false), idM(0)
+    : MetadataItem(), metadataLoaderM(0), connectedM(false),
+        connectionCredentialsM(0), storeEncryptedPasswordM(false), idM(0)
 {
     typeM = ntDatabase;
 
@@ -913,7 +941,7 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
             disconnect();
 
         if (connectedM)
-            databaseInfoM.loadInfo(&databaseM);
+            databaseInfoM.load(databaseM);
     }
     catch (...)
     {
@@ -1270,9 +1298,16 @@ void Database::setId(int id)
     idM = id;
 }
 //-----------------------------------------------------------------------------
-DatabaseInfo* Database::getInfo() const
+const DatabaseInfo& Database::getInfo()
 {
-    return const_cast<DatabaseInfo*>(&databaseInfoM);
+    databaseInfoM.reloadIfNecessary(databaseM);
+    return databaseInfoM;
+}
+//-----------------------------------------------------------------------------
+void Database::loadInfo()
+{
+    databaseInfoM.load(databaseM);
+    notifyObservers();
 }
 //-----------------------------------------------------------------------------
 bool Database::showSysTables()

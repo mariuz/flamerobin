@@ -28,10 +28,13 @@
 #ifndef FR_DATABASE_H
 #define FR_DATABASE_H
 //-----------------------------------------------------------------------------
+#include <wx/timer.h>
+
 #include <map>
 
 #include <ibpp.h>
 
+#include "frtypes.h"
 #include "metadata/collection.h"
 #include "metadata/domain.h"
 #include "metadata/exception.h"
@@ -44,6 +47,7 @@
 #include "metadata/trigger.h"
 #include "metadata/view.h"
 //-----------------------------------------------------------------------------
+class Database;
 class MetadataLoader;
 class ProgressIndicator;
 class Server;
@@ -70,6 +74,7 @@ public:
 //-----------------------------------------------------------------------------
 class DatabaseInfo
 {
+    friend Database;
 private:
     int odsM;
     int odsMinorM;
@@ -88,27 +93,31 @@ private:
     bool forcedWritesM;
     bool reserveM;
 
+    mutable wxLongLong loadTimeMillisM;
+    void load(const IBPP::Database database);
+    void reloadIfNecessary(const IBPP::Database database);
 public:
-    void loadInfo(const IBPP::Database* database);
+    wxString getCreated() const;
 
-    wxString getCreated();
+    int getODS() const;
+    int getODSMinor() const;
+    bool getODSVersionIsHigherOrEqualTo(int versionMajor) const;
+    bool getODSVersionIsHigherOrEqualTo(int versionMajor, int versionMinor) const;
 
-    int getODS();
-    int getODSMinor();
+    int getDialect() const;
 
-    int getDialect();
+    int getPageSize() const;
+    int getBuffers() const;
+    int getPages() const;
+    int64_t getSizeInBytes() const;
 
-    int getPageSize();
-    int getBuffers();
-    int getPages();
+    int getOldestTransaction() const;
+    int getNextTransaction() const;
 
-    int getOldestTransaction();
-    int getNextTransaction();
+    int getSweep() const;
 
-    int getSweep();
-
-    bool getReadOnly();
-    bool getForcedWrites();
+    bool getReadOnly() const;
+    bool getForcedWrites() const;
 };
 //-----------------------------------------------------------------------------
 class Database: public MetadataItem
@@ -250,7 +259,8 @@ public:
     void setId(int id);
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 
-    DatabaseInfo* getInfo() const;
+    const DatabaseInfo& getInfo();
+    void loadInfo();
 };
 //----------------------------------------------------------------------------
 #endif

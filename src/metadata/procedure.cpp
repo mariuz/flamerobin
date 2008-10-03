@@ -189,16 +189,14 @@ void Procedure::loadParameters()
     std::string sql(
         "select p.rdb$parameter_name, p.rdb$field_source, p.rdb$parameter_type"
     );
-    DatabaseInfo *dbi = d->getInfo();
-    int ods = dbi->getODS();
-    int minor = dbi->getODSMinor();
-    if (ods > 11 || ods == 11 && minor > 0)
+    if (d->getInfo().getODSVersionIsHigherOrEqualTo(11))
         sql += ", RDB$PARAMETER_MECHANISM ";
     else
         sql += ", -1 ";
     sql +=  " from rdb$procedure_parameters p"
             " where p.rdb$PROCEDURE_name = ? "
             " order by p.rdb$parameter_type, rdb$PARAMETER_number ";
+
     IBPP::Statement st1 = loader->getStatement(sql);
     st1->Set(1, wx2std(getName_()));
     st1->Execute();

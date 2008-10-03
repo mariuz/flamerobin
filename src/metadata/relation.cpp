@@ -100,14 +100,12 @@ void Relation::loadInfo()
     MetadataLoader* loader = d->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 
-    DatabaseInfo *dbi = d->getInfo();
-    int ods = dbi->getODS();
-    int minor = dbi->getODSMinor();
-    std::string sql;
-    if (ods < 11 || ods == 11 && minor < 1)
-        sql = "select rdb$owner_name, 0 from rdb$relations where rdb$relation_name = ?";
+    std::string sql("select rdb$owner_name, ");
+    if (d->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+        sql += "rdb$relation_type";
     else
-        sql = "select rdb$owner_name, rdb$relation_type from rdb$relations where rdb$relation_name = ?";
+        sql += "0";
+    sql += " from rdb$relations where rdb$relation_name = ?";
 
     IBPP::Statement& st1 = loader->getStatement(sql);
     st1->Set(1, wx2std(getName_()));
