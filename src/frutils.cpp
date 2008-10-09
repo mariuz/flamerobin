@@ -156,7 +156,7 @@ bool connectDatabase(Database *db, wxWindow* parent,
     if (pass.empty())
         return false;
 
-    wxString caption(wxString::Format(wxT("Connecting with Database \"%s\""),
+    wxString caption(wxString::Format(_("Connecting to Database \"%s\""),
         db->getName_().c_str()));
     if (progressdialog)
     {
