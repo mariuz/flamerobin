@@ -74,7 +74,7 @@ public:
 //-----------------------------------------------------------------------------
 class DatabaseInfo
 {
-    friend Database;
+    friend class Database;
 private:
     int odsM;
     int odsMinorM;
