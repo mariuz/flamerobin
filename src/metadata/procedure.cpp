@@ -189,7 +189,7 @@ void Procedure::loadParameters()
     std::string sql(
         "select p.rdb$parameter_name, p.rdb$field_source, p.rdb$parameter_type"
     );
-    if (d->getInfo().getODSVersionIsHigherOrEqualTo(11))
+    if (d->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
         sql += ", RDB$PARAMETER_MECHANISM ";
     else
         sql += ", -1 ";
