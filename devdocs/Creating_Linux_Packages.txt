@@ -21,3 +21,10 @@ FlameRobin doesn't show any tiff images anyway, and many times it conflicts
 with libtiff versions of other distributions. I guess same could be done for
 gif and other stuff we don't use, so I'll just build a special version of
 wxWidgets, just for the purpose of FR release.
+
+Some other libs. may also have different versions, but wxWidgets has own
+version of those, so here's a configure line for wxWidgets:
+
+./configure --disable-debug --disable-shared --enable-unicode \
+--with-libjpeg=builtin --with-libtiff=builtin --with-expat=builtin \
+--with-libpng=builtin --with-zlib=builtin
