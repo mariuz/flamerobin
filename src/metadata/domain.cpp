@@ -119,7 +119,7 @@ void Domain::loadInfo()
         // Some users reported two spaces before DEFAULT word in source
         // Also, equals sign is also allowed in newer FB versions
         // Trim(false) is trim-left
-        if (defaultM.Trim(false).StartsWith(wxT("DEFAULT")))
+        if (defaultM.Trim(false).Upper().StartsWith(wxT("DEFAULT")))
             defaultM.Remove(0, 8);
         else if (defaultM.StartsWith(wxT("="))) // "=" or "= "
             defaultM.Remove(0, 1).Trim(false);
