@@ -355,13 +355,24 @@ void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
     }
 }
 //-----------------------------------------------------------------------------
+CharacterSet Database::getCharsetById(int id)
+{
+    loadCollations();
+    for (std::multimap<CharacterSet, wxString>::iterator it =
+        collationsM.begin(); it != collationsM.end(); ++it)
+    {
+        if ((*it).first.getId() == id)
+            return (*it).first;
+    }
+    throw FRError(_("Character set not found."));
+}
+//-----------------------------------------------------------------------------
 //! returns all collations for a given charset
-std::vector<wxString> Database::getCollations(wxString charset)
+std::vector<wxString> Database::getCollations(const wxString& charset)
 {
     loadCollations();
     std::vector<wxString> temp;
-    std::multimap<wxString, wxString>::iterator low, high;
-
+    std::multimap<CharacterSet, wxString>::iterator low, high;
     high = collationsM.upper_bound(charset);
     for (low = collationsM.lower_bound(charset); low != high; ++low)
         temp.push_back((*low).second);
@@ -434,7 +445,8 @@ void Database::loadCollations()
     MetadataLoaderTransaction tr(loader);
 
     IBPP::Statement& st1 = loader->getStatement(
-        "select c.rdb$character_set_name, k.rdb$collation_name "
+        "select c.rdb$character_set_name, k.rdb$collation_name, "
+        " c.RDB$CHARACTER_SET_ID, c.RDB$BYTES_PER_CHARACTER "
         " from rdb$character_sets c"
         " left outer join rdb$collations k "
         "   on c.rdb$character_set_id = k.rdb$character_set_id "
@@ -443,12 +455,16 @@ void Database::loadCollations()
     while (st1->Fetch())
     {
         std::string charset, collation;
+        int charsetId, bytesPerChar;
         st1->Get(1, charset);
         st1->Get(2, collation);
+        st1->Get(3, &charsetId);
+        st1->Get(4, &bytesPerChar);
         charset.erase(charset.find_last_not_of(" ") + 1);
+        CharacterSet cs(std2wx(charset), charsetId, bytesPerChar);
         collation.erase(collation.find_last_not_of(" ") + 1);
-        collationsM.insert(std::multimap<wxString, wxString>::value_type(
-            std2wx(charset), std2wx(collation)));
+        collationsM.insert(std::multimap<CharacterSet, wxString>::value_type(
+            cs, std2wx(collation)));
     }
 }
 //-----------------------------------------------------------------------------

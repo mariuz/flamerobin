@@ -1901,27 +1901,30 @@ void ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible(wxUpdateUIEvent& event)
     event.Enable(!closeWhenTransactionDoneM);
 }
 //-----------------------------------------------------------------------------
-wxString IBPPtype2string(IBPP::SDT t, int subtype, int size, int scale)
+wxString IBPPtype2string(Database *db, IBPP::SDT t, int subtype, int size,
+    int scale)
 {
     if (scale > 0)
         return wxString::Format(wxT("NUMERIC(%d,%d)"), size==4 ? 9:18, scale);
-
+    if (t == IBPP::sdString)
+    {
+        int bpc = db->getCharsetById(subtype).getBytesPerChar();
+        return wxString::Format(wxT("STRING(%d)"), bpc ? size/bpc : size);
+    }
     switch (t)
     {
-        case IBPP::sdArray:   return wxT("ARRAY");
-        case IBPP::sdBlob:    return wxString::Format(wxT("BLOB SUB_TYPE %d"),
-            subtype);
-        case IBPP::sdDate:    return wxT("DATE");
-        case IBPP::sdTime:    return wxT("TIME");
-        case IBPP::sdTimestamp:   return wxT("TIMESTAMP");
-        case IBPP::sdString:      return wxString::Format(wxT("STRING(%d)"),
-            size);
-        case IBPP::sdSmallint:    return wxT("SMALLINT");
-        case IBPP::sdInteger:     return wxT("INTEGER");
-        case IBPP::sdLargeint:    return wxT("BIGINT");
-        case IBPP::sdFloat:       return wxT("FLOAT");
-        case IBPP::sdDouble:      return wxT("DOUBLE PRECISION");
-        default:            return wxT("UNKNOWN");
+        case IBPP::sdArray:     return wxT("ARRAY");
+        case IBPP::sdBlob:      return wxString::Format(
+                                    wxT("BLOB SUB_TYPE %d"), subtype);
+        case IBPP::sdDate:      return wxT("DATE");
+        case IBPP::sdTime:      return wxT("TIME");
+        case IBPP::sdTimestamp: return wxT("TIMESTAMP");
+        case IBPP::sdSmallint:  return wxT("SMALLINT");
+        case IBPP::sdInteger:   return wxT("INTEGER");
+        case IBPP::sdLargeint:  return wxT("BIGINT");
+        case IBPP::sdFloat:     return wxT("FLOAT");
+        case IBPP::sdDouble:    return wxT("DOUBLE PRECISION");
+        default:                return wxT("UNKNOWN");
     }
 }
 //-----------------------------------------------------------------------------
@@ -2053,6 +2056,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                         std2wx(statementM->ColumnName(i)).c_str(),
                         std2wx(statementM->ColumnAlias(i)).c_str(),
                         IBPPtype2string(
+                            databaseM,
                             statementM->ColumnType(i),
                             statementM->ColumnSubtype(i),
                             statementM->ColumnSize(i),

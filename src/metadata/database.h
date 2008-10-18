@@ -53,6 +53,35 @@ class ProgressIndicator;
 class Server;
 class SqlStatement;
 //-----------------------------------------------------------------------------
+class CharacterSet
+{
+private:
+    wxString nameM;
+    int idM;
+    int bytesPerCharM;
+public:
+    CharacterSet(const wxString& name, int id = -1, int bytesPerChar = -1)
+        :nameM(name), idM(id), bytesPerCharM(bytesPerChar)
+    {
+    }
+    bool operator< (const CharacterSet& other) const
+    {
+        return nameM < other.nameM;
+    }
+    int getBytesPerChar() const
+    {
+        return bytesPerCharM;
+    }
+    int getId() const
+    {
+        return idM;
+    }
+    wxString getName() const
+    {
+        return nameM;
+    }
+};
+//-----------------------------------------------------------------------------
 class Credentials
 {
 private:
@@ -147,7 +176,7 @@ private:
     MetadataCollection<Trigger> triggersM;
     MetadataCollection<View> viewsM;
 
-    std::multimap<wxString, wxString> collationsM;
+    std::multimap<CharacterSet, wxString> collationsM;
     void loadCollations();
     void loadObjects(NodeType type, ProgressIndicator* indicator = 0);
 
@@ -219,7 +248,8 @@ public:
     bool addObject(NodeType type, wxString name);
     void parseCommitedSql(const SqlStatement& stm);     // reads a DDL statement and does accordingly
 
-    std::vector<wxString> getCollations(wxString charset);
+    CharacterSet getCharsetById(int id);
+    std::vector<wxString> getCollations(const wxString& charset);
     bool isDefaultCollation(const wxString& charset, const wxString& collate);
 
     //! fill vector with names of all tables, views, etc.
