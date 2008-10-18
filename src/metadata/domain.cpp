@@ -65,19 +65,18 @@ void Domain::loadInfo()
     MetadataLoaderTransaction tr(loader);
 
     IBPP::Statement& st1 = loader->getStatement(
-        "select t.rdb$type, f.rdb$field_sub_type, f.rdb$field_length,"
+        "select f.rdb$field_type, f.rdb$field_sub_type, f.rdb$field_length,"
         " f.rdb$field_precision, f.rdb$field_scale, c.rdb$character_set_name, "
         " f.rdb$character_length, f.rdb$null_flag, f.rdb$default_source, "
-        " l.rdb$collation_name, f.rdb$validation_source "
+        " l.rdb$collation_name, f.rdb$validation_source, f.rdb$computed_blr, "
+        " c.rdb$bytes_per_character "
         " from rdb$fields f"
-        " join rdb$types t on f.rdb$field_type=t.rdb$type"
         " left outer join rdb$character_sets c "
             " on c.rdb$character_set_id = f.rdb$character_set_id"
         " left outer join rdb$collations l "
             " on l.rdb$collation_id = f.rdb$collation_id "
             " and l.rdb$character_set_id = f.rdb$character_set_id"
         " where f.rdb$field_name = ?"
-        " and t.rdb$field_name='RDB$FIELD_TYPE'"
     );
 
     st1->Set(1, wx2std(getName_()));
@@ -89,10 +88,20 @@ void Domain::loadInfo()
         subtypeM = 0;
     else
         st1->Get(2, &subtypeM);
-    if (st1->IsNull(7))
-        st1->Get(3, &lengthM);
-    else
-        st1->Get(7, &lengthM);
+
+    // determine the (var)char field length
+    // - system tables use field_len and char_len is null
+    // - computed columns have field_len/bytes_per_char, char_len is 0
+    // - view columns have field_len/bytes_per_char, char_len is null
+    // - regular table columns and SP params have field_len/bytes_per_char
+    //   they also have proper char_len, but we don't use it now
+    st1->Get(3, &lengthM);
+    int bpc = 0;   // bytes per char
+    if (!st1->IsNull(13))
+        st1->Get(13, &bpc);
+    if (bpc && (!st1->IsNull(7) || !st1->IsNull(12)))
+        lengthM /= bpc;
+
     if (st1->IsNull(4))
         precisionM = 0;
     else
