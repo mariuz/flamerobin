@@ -1300,9 +1300,10 @@ class StringColumnDef : public ResultsetColumnDef
 {
 private:
     unsigned indexM;
+    int charSizeM;
 public:
     StringColumnDef(const wxString& name, unsigned stringIndex, bool readOnly,
-        bool nullable);
+        bool nullable, int charSize);
     virtual unsigned getIndex();
     virtual wxString getAsFirebirdString(DataGridRowBuffer* buffer);
     virtual wxString getAsString(DataGridRowBuffer* buffer);
@@ -1314,8 +1315,9 @@ public:
 };
 //-----------------------------------------------------------------------------
 StringColumnDef::StringColumnDef(const wxString& name, unsigned stringIndex,
-    bool readOnly, bool nullable)
-    : ResultsetColumnDef(name, readOnly, nullable), indexM(stringIndex)
+    bool readOnly, bool nullable, int charSize)
+    : ResultsetColumnDef(name, readOnly, nullable), indexM(stringIndex),
+      charSizeM(charSize)
 {
 }
 //-----------------------------------------------------------------------------
@@ -1358,13 +1360,18 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     wxASSERT(buffer);
     std::string value;
     statement->Get(col, value);
-    if (statement->ColumnSubtype(col) != 1)
-        buffer->setString(indexM, std2wx(value, converter));
-    else    // charset OCTETS
+    if (statement->ColumnSubtype(col) == 1)   // charset OCTETS
     {
         wxString val;
         for (std::string::size_type p = 0; p < value.length(); p++)
             val += wxString::Format(wxT("%02x"), uint8_t(value[p]));
+        buffer->setString(indexM, val);
+    }
+    else
+    {
+        wxString val(std2wx(value, converter));
+        if (val.Length() > charSizeM)
+            val.Truncate(charSizeM);
         buffer->setString(indexM, val);
     }
 }
@@ -1737,9 +1744,16 @@ bool DataGridRows::initialize(const IBPP::Statement& statement, Database *db)
                     break;
 
                 case IBPP::sdString:
-                    columnDef = new StringColumnDef(colName, stringIndex, readOnly, nullable);
+                {
+                    CharacterSet cs = db->getCharsetById(statement->ColumnSubtype(col));
+                    int bpc = cs.getBytesPerChar();
+                    int size = statement->ColumnSize(col);
+                    if (bpc)
+                        size /= bpc;
+                    columnDef = new StringColumnDef(colName, stringIndex, readOnly, nullable, size);
                     ++stringIndex;
                     break;
+                }
                 case IBPP::sdBlob:
                     columnDef = new BlobColumnDef(colName, readOnly, nullable, stringIndex, blobIndex, statement->ColumnSubtype(col) == 1);
                     ++blobIndex;    // stores blob handle
