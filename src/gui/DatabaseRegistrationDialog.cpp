@@ -308,11 +308,7 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
 {
     wxString path = ::wxFileSelector(_("Select database file"), wxT(""), wxT(""), wxT(""),
         _("Firebird database files (*.fdb, *.gdb)|*.fdb;*.gdb|All files (*.*)|*.*"),
-#if wxCHECK_VERSION(2, 8, 0)
         wxFD_OPEN, this);
-#else
-        wxOPEN, this);
-#endif
     if (!path.empty())
         text_ctrl_dbpath->SetValue(path);
 }

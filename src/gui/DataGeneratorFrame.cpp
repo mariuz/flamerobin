@@ -811,12 +811,7 @@ void DataGeneratorFrame::OnLoadButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxFileDialog fd(this, _("Select file to load"), wxT(""), wxT(""),
         _("XML files (*.xml)|*.xml|All files (*.*)|*.*"),
-#if wxCHECK_VERSION(2, 8, 0)
         wxFD_OPEN | wxFD_CHANGE_DIR);
-#else
-        wxOPEN | wxCHANGE_DIR);
-#endif
-
     if (wxID_OK != fd.ShowModal())
         return;
 
@@ -884,12 +879,7 @@ void DataGeneratorFrame::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 
     wxFileDialog fd(this, _("Select file to save"), wxT(""), wxT(""),
         _("XML files (*.xml)|*.xml|All files (*.*)|*.*"),
-#if wxCHECK_VERSION(2, 8, 0)
         wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT);
-#else
-        wxSAVE |wxCHANGE_DIR | wxOVERWRITE_PROMPT);
-#endif
-
     if (wxID_OK != fd.ShowModal())
         return;
 
@@ -981,11 +971,7 @@ void DataGeneratorFrame::OnFileButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxFileDialog fd(this, _("Select file to load"), wxT(""), wxT(""),
         _("Text files (*.txt)|*.txt|All files (*.*)|*.*"),
-#if wxCHECK_VERSION(2, 8, 0)
         wxFD_OPEN | wxFD_CHANGE_DIR);
-#else
-        wxOPEN | wxCHANGE_DIR);
-#endif
     if (wxID_OK != fd.ShowModal())
         return;
 
@@ -1159,7 +1145,6 @@ void setFromFile(IBPP::Statement st, int param,
             break;
         }
         case IBPP::sdLargeint:
-#if wxCHECK_VERSION(2, 8, 0)
         {
             wxLongLong_t ll;
             if (!selected.ToLongLong(&ll))
@@ -1168,7 +1153,6 @@ void setFromFile(IBPP::Statement st, int param,
             st->Set(param, t);
             break;
         }
-#endif
         case IBPP::sdInteger:
         {
             long l;

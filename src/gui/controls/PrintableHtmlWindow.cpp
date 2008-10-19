@@ -167,34 +167,30 @@ void PrintableHtmlWindow::OnMenuSave(wxCommandEvent& WXUNUSED(event))
     wxString filename = wxFileSelector(_("Save as HTML..."), wxEmptyString,
         GetOpenedPageTitle(), wxT("*.html"),
         _("HTML files (*.html)|*.html|All files (*.*)|*.*"),
-#if wxCHECK_VERSION(2, 8, 0)
         wxFD_SAVE | wxFD_OVERWRITE_PROMPT, this);
-#else
-        wxSAVE | wxOVERWRITE_PROMPT, this);
-#endif
-    if (!filename.IsEmpty())
+    if (filename.IsEmpty())
+        return;
+
+    wxFile f;
+    if (f.Open(filename, wxFile::write))
     {
-        wxFile f;
-        if (f.Open(filename, wxFile::write))
+        wxString ns(pageSourceM);
+        while (true)    // remove links, but leave text
         {
-            wxString ns(pageSourceM);
-            while (true)    // remove links, but leave text
-            {
-                int p1 = ns.Upper().find(wxT("<A"));
-                if (p1 == -1)
-                    break;
-                int pb = ns.Upper().find(wxT(">"), p1);
-                if (pb == -1)
-                    break;
-                int p2 = ns.Upper().find(wxT("</A>"), pb);
-                if (p2 == -1)
-                    break;
-                ns.Remove(p2, 4);
-                ns.Remove(p1, pb - p1 + 1);
-            }
-            f.Write(ns);
-            f.Close();
+            int p1 = ns.Upper().find(wxT("<A"));
+            if (p1 == -1)
+                break;
+            int pb = ns.Upper().find(wxT(">"), p1);
+            if (pb == -1)
+                break;
+            int p2 = ns.Upper().find(wxT("</A>"), pb);
+            if (p2 == -1)
+                break;
+            ns.Remove(p2, 4);
+            ns.Remove(p1, pb - p1 + 1);
         }
+        f.Write(ns);
+        f.Close();
     }
 }
 //-----------------------------------------------------------------------------

@@ -31,11 +31,7 @@
 #include <wx/wx.h>
 #include <wx/wxhtml.h>
 #include <wx/aui/aui.h>
-
-// wx 2.6 doesn't support wxHtmlCellEvent
-#if wxCHECK_VERSION(2, 8, 0)
 #include <wx/html/htmlwin.h>
-#endif
 
 #include "framemanager.h"
 #include "core/Observer.h"
@@ -81,10 +77,8 @@ private:
     // event handling
     void OnIdle(wxIdleEvent& event);
 
-#if wxCHECK_VERSION(2, 8, 0)
     void OnHtmlCellHover(wxHtmlCellEvent &event);
     DECLARE_EVENT_TABLE()
-#endif
 };
 //-----------------------------------------------------------------------------
 class MetadataItemPropertiesFrame: public BaseFrame

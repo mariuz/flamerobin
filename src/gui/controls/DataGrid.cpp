@@ -480,11 +480,7 @@ void DataGrid::saveAsCSV()
     wxString fname = ::wxFileSelector(_("Save data in selected cells as"),
         wxEmptyString, wxEmptyString, wxT("*.csv"),
         _("CSV files (*.csv)|*.csv|All files (*.*)|*.*"),
-#if wxCHECK_VERSION(2, 8, 0)
         wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT, this);
-#else
-        wxSAVE | wxCHANGE_DIR | wxOVERWRITE_PROMPT, this);
-#endif
     if (fname.empty())
         return;
 
@@ -572,11 +568,7 @@ void DataGrid::saveAsHTML()
     wxString fname = ::wxFileSelector(_("Save data in selected cells as"),
         wxEmptyString, wxEmptyString, wxT("*.html"),
         _("HTML files (*.html)|*.html|All files (*.*)|*.*"),
-#if wxCHECK_VERSION(2, 8, 0)
         wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT, this);
-#else
-        wxSAVE|wxCHANGE_DIR|wxOVERWRITE_PROMPT, this);
-#endif
     if (fname.empty())
         return;
 
@@ -775,22 +767,12 @@ void DataGrid::OnKeyDown(wxKeyEvent& event)
 {
     if (event.GetKeyCode() == WXK_SPACE)
     {
-#if wxCHECK_VERSION(2, 8, 0)
         if (event.GetModifiers() == wxMOD_CONTROL)
-#else
-        if (event.ControlDown() && !event.AltDown() && !event.ShiftDown()
-            && !event.MetaDown())
-#endif
         {
             extendSelection(wxVERTICAL);
             return;
         }
-#if wxCHECK_VERSION(2, 8, 0)
         if (event.GetModifiers() == wxMOD_SHIFT)
-#else
-        if (event.ShiftDown() && !event.AltDown() && !event.ControlDown()
-            && !event.MetaDown())
-#endif
         {
             extendSelection(wxHORIZONTAL);
             return;

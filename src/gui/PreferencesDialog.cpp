@@ -185,10 +185,7 @@ bool Optionbook::Create(wxWindow *parent, wxWindowID id, const wxPoint& pos,
     const wxSize& size, long style, const wxString& name)
 {
     style &= ~wxBORDER_MASK;
-    style |= wxBORDER_NONE;
-#if wxCHECK_VERSION(2, 7, 1)
-    style |= wxBK_LEFT;
-#endif
+    style |= wxBORDER_NONE | wxBK_LEFT;
     return wxControl::Create(parent, id, pos, size, style,
         wxDefaultValidator, name);
 }
@@ -437,7 +434,7 @@ void PreferencesDialog::layout()
     sizerRight->Add(bookctrl_1, 1, wxEXPAND);
 
     wxBoxSizer* sizerControls = new wxBoxSizer(wxHORIZONTAL);
-#if wxCHECK_VERSION(2, 8, 0) && !defined(__WXMAC__)
+#if !defined(__WXMAC__)
     sizerControls->Add(treectrl_1, 0, wxEXPAND);
     sizerControls->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 0);
     sizerControls->Add(sizerRight, 1, wxEXPAND);
@@ -552,11 +549,7 @@ bool PreferencesDialog::parseDescriptionNode(wxTreeItemId parent, wxXmlNode* xml
         if (description.IsEmpty())
             description = caption;
     }
-#if wxCHECK_VERSION(2, 8, 0)
     treectrl_1->ExpandAllChildren(item);
-#else
-    treectrl_1->Expand(item);
-#endif
 
     // add all settings controls of this page to a sizer
     wxBoxSizer* sizerPage = new wxBoxSizer(wxVERTICAL);
@@ -651,10 +644,7 @@ void PreferencesDialog::setProperties()
     imageListM.Add(wxArtProvider::GetIcon(ART_Table, wxART_OTHER, sz));
     imageListM.Add(wxArtProvider::GetIcon(ART_Domain, wxART_OTHER, sz));
     treectrl_1->SetImageList(&imageListM);
-
-#if wxCHECK_VERSION(2, 8, 0)
     treectrl_1->SetQuickBestSize(false);
-#endif
 
     // show category description in colors for highlighted text
     panel_categ->SetBackgroundColour(

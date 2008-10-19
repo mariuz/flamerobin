@@ -331,11 +331,7 @@ void EventWatcherFrame::OnButtonLoadClick(wxCommandEvent& WXUNUSED(event))
 {
     wxFileDialog fd(this, _("Select file to load"), wxT(""), wxT(""),
         _("Text files (*.txt)|*.txt|All files (*.*)|*.*"),
-#if wxCHECK_VERSION(2, 8, 0)
         wxFD_OPEN | wxFD_CHANGE_DIR);
-#else
-        wxOPEN | wxCHANGE_DIR);
-#endif
     if (wxID_OK != fd.ShowModal())
         return;
 
@@ -357,12 +353,7 @@ void EventWatcherFrame::OnButtonSaveClick(wxCommandEvent& WXUNUSED(event))
 {
     wxFileDialog fd(this, _("Select file to save"), wxT(""), wxT(""),
         _("Text files (*.txt)|*.txt|All files (*.*)|*.*"),
-#if wxCHECK_VERSION(2, 8, 0)
         wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT);
-#else
-        wxSAVE |wxCHANGE_DIR | wxOVERWRITE_PROMPT);
-#endif
-
     if (wxID_OK != fd.ShowModal())
         return;
 

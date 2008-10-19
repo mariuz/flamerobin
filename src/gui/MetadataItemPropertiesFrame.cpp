@@ -41,10 +41,7 @@
 #include <wx/clipbrd.h>
 #include <wx/file.h>
 #include <wx/filedlg.h>
-
-#if wxCHECK_VERSION(2, 8, 0)
 #include <wx/tipwin.h>
-#endif
 
 #include <fstream>
 #include <iomanip>
@@ -1213,12 +1210,10 @@ void MetadataItemPropertiesPanel::update()
     requestLoadPage(false);
 }
 //-----------------------------------------------------------------------------
-#if wxCHECK_VERSION(2, 8, 0)
 BEGIN_EVENT_TABLE(MetadataItemPropertiesPanel, wxPanel)
     EVT_HTML_CELL_HOVER(MetadataItemPropertiesPanel::HtmlWindowID,
         MetadataItemPropertiesPanel::OnHtmlCellHover)
 END_EVENT_TABLE()
-#endif
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(MetadataItemPropertiesFrame, BaseFrame)
     EVT_CLOSE(MetadataItemPropertiesFrame::OnClose)
@@ -1265,7 +1260,6 @@ void MetadataItemPropertiesPanel::OnIdle(wxIdleEvent& WXUNUSED(event))
     loadPage();
 }
 //-----------------------------------------------------------------------------
-#if wxCHECK_VERSION(2, 8, 0)
 void MetadataItemPropertiesPanel::OnHtmlCellHover(wxHtmlCellEvent& event)
 {
     wxHtmlCell *c = event.GetCell();
@@ -1293,7 +1287,6 @@ void MetadataItemPropertiesPanel::OnHtmlCellHover(wxHtmlCellEvent& event)
         tw->SetBoundingRect(r);
     }
 }
-#endif
 //-----------------------------------------------------------------------------
 //! PageHandler class
 class PageHandler: public URIHandler

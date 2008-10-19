@@ -369,11 +369,7 @@ void BackupFrame::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
     wxString filename = ::wxFileSelector(_("Select Backup File"),
         origName.GetPath(), origName.GetFullName(), wxT("*.fbk"),
         _("Backup file (*.fbk)|*.fbk|All files (*.*)|*.*"),
-#if wxCHECK_VERSION(2, 8, 0)
         wxFD_SAVE | wxFD_OVERWRITE_PROMPT, this);
-#else
-        wxSAVE | wxOVERWRITE_PROMPT, this);
-#endif
     if (!filename.empty())
         text_ctrl_filename->SetValue(filename);
 }

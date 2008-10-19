@@ -104,9 +104,7 @@ SqlEditorDropTarget::SqlEditorDropTarget(ExecuteSqlFrame* frame,
     : frameM(frame), editorM(editor), databaseM(database)
 {
     wxDataObjectComposite* dataobj = new wxDataObjectComposite;
-#if wxCHECK_VERSION(2, 8, 0)
     dataobj->Add(fileDataM = new wxFileDataObject);
-#endif
     dataobj->Add(textDataM = new wxTextDataObject);
     SetDataObject(dataobj);
 }
@@ -117,7 +115,6 @@ wxDragResult SqlEditorDropTarget::OnData(wxCoord x, wxCoord y,
     if (!GetData())
         return wxDragNone;
 
-#if wxCHECK_VERSION(2, 8, 0)
     wxDataObjectComposite* dataobj = (wxDataObjectComposite*) m_dataObject;
     // test for wxDF_FILENAME
     if (dataobj->GetReceivedFormat() == fileDataM->GetFormat())
@@ -126,7 +123,6 @@ wxDragResult SqlEditorDropTarget::OnData(wxCoord x, wxCoord y,
             return def;
     }
     else
-#endif
     // try everything else as dropped text
     if (OnDropText(x, y, textDataM->GetText()))
         return def;
@@ -1230,12 +1226,7 @@ void ExecuteSqlFrame::OnMenuOpen(wxCommandEvent& WXUNUSED(event))
 {
     wxFileDialog fd(this, _("Select file to load"), wxT(""), wxT(""),
         _("SQL Scripts (*.sql)|*.sql|All files (*.*)|*.*"),
-#if wxCHECK_VERSION(2, 8, 0)
         wxFD_OPEN | wxFD_CHANGE_DIR);
-#else
-        wxOPEN|wxCHANGE_DIR);
-#endif
-
     if (wxID_OK == fd.ShowModal())
         loadSqlFile(fd.GetPath());
 }
@@ -1255,12 +1246,7 @@ void ExecuteSqlFrame::OnMenuSaveAs(wxCommandEvent& WXUNUSED(event))
 {
     wxFileDialog fd(this, _("Select file to save"), wxT(""), wxT(""),
         _("SQL Scripts (*.sql)|*.sql|All files (*.*)|*.*"),
-#if wxCHECK_VERSION(2, 8, 0)
         wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT);
-#else
-        wxSAVE |wxCHANGE_DIR | wxOVERWRITE_PROMPT);
-#endif
-
     if (wxID_OK != fd.ShowModal())
         return;
 
@@ -1553,14 +1539,10 @@ void ExecuteSqlFrame::OnMenuGridExportBlob(wxCommandEvent& WXUNUSED(event))
         throw FRError(_("Not a BLOB column"));
     wxString filename = ::wxFileSelector(_("Select a file"), wxT(""),
         wxT(""), wxT(""), wxT("*"),
-#if wxCHECK_VERSION(2, 8, 0)
         wxFD_SAVE | wxFD_OVERWRITE_PROMPT, this);
-#else
-        wxSAVE | wxOVERWRITE_PROMPT, this);
-#endif
-
     if (filename.IsEmpty())
         return;
+
     ProgressDialog pd(this, _("Saving BLOB to file"));
     pd.Show();
     dgt->exportBlobFile(filename, grid_data->GetGridCursorRow(),
@@ -1576,11 +1558,7 @@ void ExecuteSqlFrame::OnMenuGridImportBlob(wxCommandEvent& WXUNUSED(event))
         throw FRError(_("Not a BLOB column"));
     wxString filename = ::wxFileSelector(_("Select a file"), wxT(""),
         wxT(""), wxT(""), wxT("*"),
-#if wxCHECK_VERSION(2, 8, 0)
         wxFD_OPEN | wxFD_FILE_MUST_EXIST, this);
-#else
-        wxOPEN | wxFILE_MUST_EXIST, this);
-#endif
    if (filename.IsEmpty())
         return;
 
