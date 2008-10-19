@@ -190,7 +190,7 @@ wxString Domain::datatype2string(short datatype, short scale, short precision,
         }
         else
         {
-            if (subtype == 0)
+            if (scale == 0 && subtype == 0)
                 return wxT("Bigint");
             retval << (subtype == 2 ? "Decimal(" : "Numeric(");
             if (precision <= 0 || precision > 18)
