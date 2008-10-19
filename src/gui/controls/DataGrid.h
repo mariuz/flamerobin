@@ -39,7 +39,7 @@ private:
     void copyToClipboard(const wxString cbText);
     void extendSelection(int direction);
     void notifyIfUnfetchedData();
-    void showPopMenu(wxPoint cursorPos);
+    void showPopupMenu(wxPoint cursorPos);
     void updateRowHeights();
 public:
     DataGrid(wxWindow* parent, wxWindowID id);

@@ -193,10 +193,11 @@ void DataGrid::notifyIfUnfetchedData()
     }
 }
 //-----------------------------------------------------------------------------
-void DataGrid::showPopMenu(wxPoint cursorPos)
+void DataGrid::showPopupMenu(wxPoint cursorPos)
 {
-    wxMenu m(0);
+    SetFocus();
 
+    wxMenu m(0);
     // TODO: merge this with ExecuteSqlFrame's menu
     m.Append(Cmds::DataGrid_FetchAll, _("Fetch all records"));
     m.Append(Cmds::DataGrid_CancelFetchAll, _("Stop fetching all records"));
@@ -727,17 +728,17 @@ void DataGrid::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
 {
     // this doesn't work properly when cell editor is active
     //  showPopMenu(event.GetPosition());
-    showPopMenu(ScreenToClient(::wxGetMousePosition()));
+    showPopupMenu(ScreenToClient(::wxGetMousePosition()));
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnGridCellRightClick(wxGridEvent& event)
 {
-    showPopMenu(event.GetPosition());
+    showPopupMenu(event.GetPosition());
 }
 //-----------------------------------------------------------------------------
 void DataGrid::OnGridLabelRightClick(wxGridEvent& WXUNUSED(event))
 {
-    showPopMenu(ScreenToClient(::wxGetMousePosition()));
+    showPopupMenu(ScreenToClient(::wxGetMousePosition()));
 }
 //-----------------------------------------------------------------------------
 /*

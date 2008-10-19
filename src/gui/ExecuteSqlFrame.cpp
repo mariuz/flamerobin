@@ -347,6 +347,8 @@ END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
 {
+    SetFocus();
+
     wxMenu m(0);
     m.Append(wxID_UNDO, _("&Undo"));
     m.Append(wxID_REDO, _("&Redo"));
