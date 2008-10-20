@@ -1144,7 +1144,7 @@ void ExecuteSqlFrame::OnMenuFindSelectedObject(wxCommandEvent& WXUNUSED(event))
 }
 //-----------------------------------------------------------------------------
 //! handle function keys (F5, F8, F4, ...)
-void ExecuteSqlFrame::OnKeyDown(wxKeyEvent &event)
+void ExecuteSqlFrame::OnKeyDown(wxKeyEvent& event)
 {
     wxCommandEvent e;
     int key = event.GetKeyCode();
@@ -1475,7 +1475,7 @@ void ExecuteSqlFrame::OnMenuUpdateHistoryPrev(wxUpdateUIEvent& event)
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuExecute(wxCommandEvent& WXUNUSED(event))
 {
-    clearStats();
+    clearLogBeforeExecution();
     prepareAndExecute(false);
 }
 //-----------------------------------------------------------------------------
@@ -1486,8 +1486,7 @@ void ExecuteSqlFrame::OnMenuShowPlan(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuExecuteFromCursor(wxCommandEvent& WXUNUSED(event))
 {
-    if (config().get(wxT("SQLEditorExecuteClears"), false))
-        clearStats();
+    clearLogBeforeExecution();
 
     wxString sql(
         styled_text_ctrl_sql->GetTextRange(
@@ -1500,9 +1499,7 @@ void ExecuteSqlFrame::OnMenuExecuteFromCursor(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuExecuteSelection(wxCommandEvent& WXUNUSED(event))
 {
-    if (config().get(wxT("SQLEditorExecuteClears"), false))
-        clearStats();
-
+    clearLogBeforeExecution();
     if (config().get(wxT("TreatAsSingleStatement"), false))
         execute(styled_text_ctrl_sql->GetSelectedText(), wxT(";"));
     else
@@ -1743,7 +1740,7 @@ void ExecuteSqlFrame::setSql(wxString sql)
     styled_text_ctrl_sql->SetText(sql);
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::clearStats()
+void ExecuteSqlFrame::clearLogBeforeExecution()
 {
     if (config().get(wxT("SQLEditorExecuteClears"), false))
         styled_text_ctrl_stats->ClearAll();
@@ -1800,7 +1797,7 @@ void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
 //! adapted so we don't have to change all the other code that utilizes SQL editor
 void ExecuteSqlFrame::executeAllStatements(bool closeWhenDone)
 {
-    clearStats();
+    clearLogBeforeExecution();
     bool ok = parseStatements(styled_text_ctrl_sql->GetText(), closeWhenDone);
     if (config().get(wxT("historyStoreGenerated"), true) &&
         (ok || config().get(wxT("historyStoreUnsuccessful"), true)))
@@ -2365,7 +2362,7 @@ void ExecuteSqlFrame::OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event)
     event.Enable(!colsSelected && deletableRows);
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent &event)
+void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent& event)
 {
     wxString s;
     long rowsFetched = event.GetExtraLong();
@@ -2392,7 +2389,7 @@ void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent &event)
     }
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnGridStatementExecuted(wxCommandEvent &event)
+void ExecuteSqlFrame::OnGridStatementExecuted(wxCommandEvent& event)
 {
     ScrollAtEnd sae(styled_text_ctrl_stats);
     log(event.GetString(), ttSql);
@@ -2410,6 +2407,8 @@ void ExecuteSqlFrame::OnGridLabelLeftDClick(wxGridEvent& event)
         return;
 
     int column = 1 + event.GetCol();
+    if (column < 1 || column > table->GetNumberCols())
+        return;
     SelectStatement sstm(std2wx(statementM->Sql()));
 
     // rebuild SQL statement with different ORDER BY clause
@@ -2422,11 +2421,6 @@ void ExecuteSqlFrame::update()
 {
     if (!databaseM->isConnected())
         Close();
-}
-//-----------------------------------------------------------------------------
-Database* ExecuteSqlFrame::getDatabase()
-{
-    return databaseM;
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::setDatabase(Database* db)

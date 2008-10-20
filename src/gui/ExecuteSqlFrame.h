@@ -66,27 +66,15 @@ public:
 class ExecuteSqlFrame: public BaseFrame, public Observer
 {
 public:
-    Database *getDatabase();
-    void showProperties(wxString objectName);
-
-    void executeAllStatements(bool autoExecute = false);
-
-    bool loadSqlFile(const wxString& filename);
-    void setSql(wxString sql);
-    void clearStats();
-    void compareCounts(IBPP::DatabaseCounts& one,
-        IBPP::DatabaseCounts& two);
-
     ExecuteSqlFrame(wxWindow* parent, int id, wxString title, Database *db,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxDEFAULT_FRAME_STYLE);
 
-    enum {
-        ID_grid_data = 101,
-        ID_stc_sql
-    };
+    bool loadSqlFile(const wxString& filename);
+    void setSql(wxString sql);
 
+    void executeAllStatements(bool autoExecute = false);
 private:
     // query parsing and execution
     void prepareAndExecute(bool prepareOnly = false);
@@ -98,8 +86,14 @@ private:
     std::vector<SqlStatement> executedStatementsM;
     wxString filenameM;
 
+    void compareCounts(IBPP::DatabaseCounts& one, IBPP::DatabaseCounts& two);
+
+    void showProperties(wxString objectName);
+
     typedef enum { ttNormal, ttSql, ttError } TextType;
     void log(wxString s, TextType type = ttNormal);     // write messages to textbox
+    void clearLogBeforeExecution();
+
     void splitScreen();
     Database* databaseM;
     DatabaseToSystemCharsetConversion dbCharsetConversionM;
@@ -118,9 +112,9 @@ private:
 
     void autoComplete(bool force);
     void autoCompleteColumns(int pos, int len = 0);
-    void OnSqlEditUpdateUI(wxStyledTextEvent &event);
-    void OnSqlEditCharAdded(wxStyledTextEvent &event);      // autocomplete stuff
-    void OnSqlEditChanged(wxStyledTextEvent &event);        // update title
+    void OnSqlEditUpdateUI(wxStyledTextEvent& event);
+    void OnSqlEditCharAdded(wxStyledTextEvent& event);      // autocomplete stuff
+    void OnSqlEditChanged(wxStyledTextEvent& event);        // update title
     void OnSqlEditStartDrag(wxStyledTextEvent& event);      // enable click&remove selection
     wxString keywordsM;     // text used for autocomplete
     void setKeywords();
@@ -130,72 +124,71 @@ private:
 
     // events
     void OnClose(wxCloseEvent& event);
-    void OnKeyDown(wxKeyEvent &event);
-    void OnGridRowCountChanged(wxCommandEvent &event);
-    void OnGridStatementExecuted(wxCommandEvent &event);
+    void OnKeyDown(wxKeyEvent& event);
+    void OnGridRowCountChanged(wxCommandEvent& event);
+    void OnGridStatementExecuted(wxCommandEvent& event);
     void OnGridLabelLeftDClick(wxGridEvent& event);
 
     // menu events
-    void OnMenuNew(wxCommandEvent &event);
-    void OnMenuOpen(wxCommandEvent &event);
-    void OnMenuSave(wxCommandEvent &event);
-    void OnMenuSaveAs(wxCommandEvent &event);
-    void OnMenuClose(wxCommandEvent &event);
+    void OnMenuNew(wxCommandEvent& event);
+    void OnMenuOpen(wxCommandEvent& event);
+    void OnMenuSave(wxCommandEvent& event);
+    void OnMenuSaveAs(wxCommandEvent& event);
+    void OnMenuClose(wxCommandEvent& event);
 
-    void OnMenuUndo(wxCommandEvent &event);
+    void OnMenuUndo(wxCommandEvent& event);
     void OnMenuUpdateUndo(wxUpdateUIEvent& event);
-    void OnMenuRedo(wxCommandEvent &event);
+    void OnMenuRedo(wxCommandEvent& event);
     void OnMenuUpdateRedo(wxUpdateUIEvent& event);
-    void OnMenuCut(wxCommandEvent &event);
+    void OnMenuCut(wxCommandEvent& event);
     void OnMenuUpdateCut(wxUpdateUIEvent& event);
-    void OnMenuCopy(wxCommandEvent &event);
+    void OnMenuCopy(wxCommandEvent& event);
     void OnMenuUpdateCopy(wxUpdateUIEvent& event);
-    void OnMenuPaste(wxCommandEvent &event);
+    void OnMenuPaste(wxCommandEvent& event);
     void OnMenuUpdatePaste(wxUpdateUIEvent& event);
-    void OnMenuDelete(wxCommandEvent &event);
+    void OnMenuDelete(wxCommandEvent& event);
     void OnMenuUpdateDelete(wxUpdateUIEvent& event);
-    void OnMenuSelectAll(wxCommandEvent &event);
-    void OnMenuReplace(wxCommandEvent &event);
+    void OnMenuSelectAll(wxCommandEvent& event);
+    void OnMenuReplace(wxCommandEvent& event);
 
-    void OnMenuUnsplitView(wxCommandEvent &event);
-    void OnMenuSplitView(wxCommandEvent &event);
-    void OnMenuSetEditorFont(wxCommandEvent &event);
-    void OnMenuToggleWrap(wxCommandEvent &event);
-    void OnMenuFocusEditor(wxCommandEvent &event);
-    void OnMenuFocusGrid(wxCommandEvent &event);
-    void OnMenuToggleClick(wxCommandEvent &event);  // toolbar
+    void OnMenuUnsplitView(wxCommandEvent& event);
+    void OnMenuSplitView(wxCommandEvent& event);
+    void OnMenuSetEditorFont(wxCommandEvent& event);
+    void OnMenuToggleWrap(wxCommandEvent& event);
+    void OnMenuFocusEditor(wxCommandEvent& event);
+    void OnMenuFocusGrid(wxCommandEvent& event);
+    void OnMenuToggleClick(wxCommandEvent& event);  // toolbar
 
-    void OnMenuHistoryNext(wxCommandEvent &event);
+    void OnMenuHistoryNext(wxCommandEvent& event);
     void OnMenuUpdateHistoryNext(wxUpdateUIEvent& event);
-    void OnMenuHistoryPrev(wxCommandEvent &event);
+    void OnMenuHistoryPrev(wxCommandEvent& event);
     void OnMenuUpdateHistoryPrev(wxUpdateUIEvent& event);
-    void OnMenuHistorySearch(wxCommandEvent &event);
+    void OnMenuHistorySearch(wxCommandEvent& event);
 
-    void OnMenuExecute(wxCommandEvent &event);
-    void OnMenuShowPlan(wxCommandEvent &event);
-    void OnMenuExecuteSelection(wxCommandEvent &event);
-    void OnMenuExecuteFromCursor(wxCommandEvent &event);
-    void OnMenuCommit(wxCommandEvent &event);
-    void OnMenuRollback(wxCommandEvent &event);
-    void OnMenuUpdateExecuteSelection(wxUpdateUIEvent& event);
+    void OnMenuExecute(wxCommandEvent& event);
+    void OnMenuShowPlan(wxCommandEvent& event);
+    void OnMenuExecuteSelection(wxCommandEvent& event);
+    void OnMenuExecuteFromCursor(wxCommandEvent& event);
+    void OnMenuCommit(wxCommandEvent& event);
+    void OnMenuRollback(wxCommandEvent& event);
     void OnMenuUpdateWhenInTransaction(wxUpdateUIEvent& event);
     void OnMenuUpdateWhenExecutePossible(wxUpdateUIEvent& event);
 
-    void OnMenuGridInsertRow(wxCommandEvent &event);
+    void OnMenuGridInsertRow(wxCommandEvent& event);
     void OnMenuUpdateGridInsertRow(wxUpdateUIEvent& event);
-    void OnMenuGridDeleteRow(wxCommandEvent &event);
+    void OnMenuGridDeleteRow(wxCommandEvent& event);
     void OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event);
-    void OnMenuGridImportBlob(wxCommandEvent &event);
-    void OnMenuGridExportBlob(wxCommandEvent &event);
+    void OnMenuGridImportBlob(wxCommandEvent& event);
+    void OnMenuGridExportBlob(wxCommandEvent& event);
     void OnMenuUpdateGridCellIsBlob(wxUpdateUIEvent& event);
-    void OnMenuGridCopyAsInsert(wxCommandEvent &event);
-    void OnMenuGridCopyAsUpdate(wxCommandEvent &event);
-    void OnMenuGridSaveAsHtml(wxCommandEvent &event);
-    void OnMenuGridSaveAsCsv(wxCommandEvent &event);
-    void OnMenuGridGridHeaderFont(wxCommandEvent &event);
-    void OnMenuGridGridCellFont(wxCommandEvent &event);
-    void OnMenuGridFetchAll(wxCommandEvent &event);
-    void OnMenuGridCancelFetchAll(wxCommandEvent &event);
+    void OnMenuGridCopyAsInsert(wxCommandEvent& event);
+    void OnMenuGridCopyAsUpdate(wxCommandEvent& event);
+    void OnMenuGridSaveAsHtml(wxCommandEvent& event);
+    void OnMenuGridSaveAsCsv(wxCommandEvent& event);
+    void OnMenuGridGridHeaderFont(wxCommandEvent& event);
+    void OnMenuGridGridCellFont(wxCommandEvent& event);
+    void OnMenuGridFetchAll(wxCommandEvent& event);
+    void OnMenuGridCancelFetchAll(wxCommandEvent& event);
     void OnMenuUpdateGridHasSelection(wxUpdateUIEvent& event);
     void OnMenuUpdateGridHasData(wxUpdateUIEvent& event);
     void OnMenuUpdateGridFetchAll(wxUpdateUIEvent& event);
@@ -203,12 +196,15 @@ private:
 
     void OnMenuFindSelectedObject(wxCommandEvent& event);
 
-    // begin wxGlade: ExecuteSqlFrame::methods
     void set_properties();
     void do_layout();
-    // end wxGlade
 
 protected:
+    enum {
+        ID_grid_data = 101,
+        ID_stc_sql
+    };
+
     void removeSubject(Subject* subject);
     virtual void update();
 
