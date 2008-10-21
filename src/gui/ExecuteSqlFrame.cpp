@@ -775,8 +775,8 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
 
     EVT_MENU(wxID_NEW,      ExecuteSqlFrame::OnMenuNew)
     EVT_MENU(wxID_OPEN,     ExecuteSqlFrame::OnMenuOpen)
-    EVT_MENU(wxID_SAVE,     ExecuteSqlFrame::OnMenuSave)
-    EVT_MENU(wxID_SAVEAS,   ExecuteSqlFrame::OnMenuSaveAs)
+    EVT_MENU(wxID_SAVE,     ExecuteSqlFrame::OnMenuSaveOrSaveAs)
+    EVT_MENU(wxID_SAVEAS,   ExecuteSqlFrame::OnMenuSaveOrSaveAs)
     EVT_MENU(wxID_CLOSE,    ExecuteSqlFrame::OnMenuClose)
 
     EVT_MENU(wxID_UNDO,     ExecuteSqlFrame::OnMenuUndo)
@@ -990,7 +990,7 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnSqlEditChanged(wxStyledTextEvent& WXUNUSED(event))
 {
-    if (!filenameM.IsEmpty())
+    if (filenameM.IsOk())
         return;
     if (styled_text_ctrl_sql->GetTextLength() < 1)
     {
@@ -1216,44 +1216,43 @@ void ExecuteSqlFrame::OnMenuNew(wxCommandEvent& WXUNUSED(event))
 {
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(GetParent(), -1,
         _("Execute SQL statements"), databaseM);
-    eff->styled_text_ctrl_sql->SetText(
-        styled_text_ctrl_sql->GetSelectedText()
-        );
+    eff->setSql(styled_text_ctrl_sql->GetSelectedText());
     eff->Show();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuOpen(wxCommandEvent& WXUNUSED(event))
 {
-    wxFileDialog fd(this, _("Select file to load"), wxT(""), wxT(""),
-        _("SQL Scripts (*.sql)|*.sql|All files (*.*)|*.*"),
+    wxFileDialog fd(this, _("Open File"),
+        filenameM.GetPath(), filenameM.GetName(),
+        _("SQL script files (*.sql)|*.sql|All files (*.*)|*.*"),
         wxFD_OPEN | wxFD_CHANGE_DIR);
     if (wxID_OK == fd.ShowModal())
         loadSqlFile(fd.GetPath());
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuSave(wxCommandEvent& event)
+void ExecuteSqlFrame::OnMenuSaveOrSaveAs(wxCommandEvent& event)
 {
-    if (filenameM.IsEmpty())
-        OnMenuSaveAs(event);
-    else
+    wxString filename(filenameM.GetFullPath());
+    if (event.GetId() == wxID_SAVEAS || !filenameM.IsOk())
     {
-        styled_text_ctrl_sql->SaveFile(filenameM);
+        wxFileDialog fd(this, _("Save File As"),
+            filenameM.GetPath(), filenameM.GetName(),
+            _("SQL script files (*.sql)|*.sql|All files (*.*)|*.*"),
+            wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT);
+        if (wxID_OK != fd.ShowModal())
+            return;
+        filename = fd.GetPath();
+    }
+
+    if (styled_text_ctrl_sql->SaveFile(filename))
+    {
+        if (filename.compare(filenameM.GetFullPath()) != 0)
+        {
+            filenameM = filename;
+            SetTitle(filename);
+        }
         statusbar_1->SetStatusText((_("File saved")), 2);
     }
-}
-//-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuSaveAs(wxCommandEvent& WXUNUSED(event))
-{
-    wxFileDialog fd(this, _("Select file to save"), wxT(""), wxT(""),
-        _("SQL Scripts (*.sql)|*.sql|All files (*.*)|*.*"),
-        wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT);
-    if (wxID_OK != fd.ShowModal())
-        return;
-
-    filenameM = fd.GetPath();
-    SetTitle(filenameM);
-    styled_text_ctrl_sql->SaveFile(fd.GetPath());
-    statusbar_1->SetStatusText((_("File saved")), 2);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuClose(wxCommandEvent& WXUNUSED(event))
@@ -1435,9 +1434,9 @@ void ExecuteSqlFrame::OnMenuHistoryNext(wxCommandEvent& WXUNUSED(event))
     {
         historyPositionM++;
         if (historyPositionM == sh.size())
-            styled_text_ctrl_sql->SetText(localBuffer);
+            setSql(localBuffer);
         else
-            styled_text_ctrl_sql->SetText(sh.get(historyPositionM));
+            setSql(sh.get(historyPositionM));
     }
 }
 //-----------------------------------------------------------------------------
@@ -1449,7 +1448,7 @@ void ExecuteSqlFrame::OnMenuHistoryPrev(wxCommandEvent& WXUNUSED(event))
         if (historyPositionM == sh.size())  // we're on local buffer => store it
             localBuffer = styled_text_ctrl_sql->GetText();
         historyPositionM--;
-        styled_text_ctrl_sql->SetText(sh.get(historyPositionM));
+        setSql(sh.get(historyPositionM));
     }
 }
 //-----------------------------------------------------------------------------
@@ -1716,7 +1715,7 @@ bool ExecuteSqlFrame::loadSqlFile(const wxString& filename)
     if (!styled_text_ctrl_sql->LoadFile(filename))
         return false;
     filenameM = filename;
-    SetTitle(filenameM);
+    SetTitle(filename);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -2273,7 +2272,7 @@ bool ExecuteSqlFrame::rollbackTransaction()
         sae.scroll();
         transactionM->Rollback();
         log(_("Done."));
-        statusbar_1->SetStatusText(_("Transaction rolled back."), 3);
+        statusbar_1->SetStatusText(_("Transaction rolled back"), 3);
         inTransaction(false);
         executedStatementsM.clear();
 

@@ -29,6 +29,7 @@
 #define EXECUTESQLFRAME_H
 //-----------------------------------------------------------------------------
 #include <wx/wx.h>
+#include <wx/filename.h>
 #include <wx/grid.h>
 #include <wx/image.h>
 #include <wx/notebook.h>
@@ -84,7 +85,7 @@ private:
         bool prepareOnly = false);
 
     std::vector<SqlStatement> executedStatementsM;
-    wxString filenameM;
+    wxFileName filenameM;
 
     void compareCounts(IBPP::DatabaseCounts& one, IBPP::DatabaseCounts& two);
 
@@ -132,8 +133,7 @@ private:
     // menu events
     void OnMenuNew(wxCommandEvent& event);
     void OnMenuOpen(wxCommandEvent& event);
-    void OnMenuSave(wxCommandEvent& event);
-    void OnMenuSaveAs(wxCommandEvent& event);
+    void OnMenuSaveOrSaveAs(wxCommandEvent& event);
     void OnMenuClose(wxCommandEvent& event);
 
     void OnMenuUndo(wxCommandEvent& event);
