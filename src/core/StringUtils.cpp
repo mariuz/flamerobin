@@ -82,7 +82,7 @@ wxString escapeHtmlChars(const wxString& input, bool processNewlines)
         {
             const wxChar c = *stop;
             if (c == '&' || c == '<' || c == '>' || c == '"'
-                || c == '\r' || (processNewlines && c == '\n'))
+                || (processNewlines && (c == '\r' || c == '\n')))
             {
                 if (stop > start)
                     result += wxString(start, stop);
