@@ -79,8 +79,18 @@ wxString CommandManager::getShortcutText(int id)
     int flags, keyCode;
     if (findShortcutFor(id, flags, keyCode))
     {
-        wxAcceleratorEntry ae(flags, keyCode, id);
-        return ae.ToString();
+        // with different flags != wxACCEL_NORMAL ToString() will return stuff
+        // like "Alt-Ctrl-X" -> fix this to read "Ctrl+Alt+X" instead
+        wxString flagsText;
+        if (flags & wxACCEL_SHIFT)
+            flagsText += _("Shift+");
+        if (flags & wxACCEL_CTRL)
+            flagsText += _("Ctrl+");
+        if (flags & wxACCEL_ALT)
+            flagsText += _("Alt+");
+
+        wxAcceleratorEntry ae(wxACCEL_NORMAL, keyCode, id);
+        return flagsText + ae.ToString();
     }
     return wxEmptyString;
 }
