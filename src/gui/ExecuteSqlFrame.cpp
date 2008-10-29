@@ -801,6 +801,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_STC_CHARADDED(ExecuteSqlFrame::ID_stc_sql, ExecuteSqlFrame::OnSqlEditCharAdded)
     EVT_STC_CHANGE(ExecuteSqlFrame::ID_stc_sql, ExecuteSqlFrame::OnSqlEditChanged)
     EVT_STC_START_DRAG(ExecuteSqlFrame::ID_stc_sql, ExecuteSqlFrame::OnSqlEditStartDrag)
+    EVT_SPLITTER_UNSPLIT(wxID_ANY, ExecuteSqlFrame::OnSplitterUnsplit)
     EVT_CHAR_HOOK(ExecuteSqlFrame::OnKeyDown)
     EVT_CHILD_FOCUS(ExecuteSqlFrame::OnChildFocus)
     EVT_CLOSE(ExecuteSqlFrame::OnClose)
@@ -2379,6 +2380,19 @@ void ExecuteSqlFrame::OnGridLabelLeftDClick(wxGridEvent& event)
     sstm.orderBy(column);
 
     execute(sstm.getStatement(), wxEmptyString);
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnSplitterUnsplit(wxSplitterEvent& WXUNUSED(event))
+{
+    if (splitter_window_1->GetWindow1() == styled_text_ctrl_sql)
+        setViewMode(vmEditor);
+    else if (splitter_window_1->GetWindow1() == notebook_1)
+    {
+        if (notebook_1->GetSelection() == 0)
+            setViewMode(vmLogCtrl);
+        else
+            setViewMode(vmGrid);
+    }
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::update()

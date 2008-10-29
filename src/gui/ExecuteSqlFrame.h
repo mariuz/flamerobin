@@ -139,6 +139,7 @@ private:
     void OnGridRowCountChanged(wxCommandEvent& event);
     void OnGridStatementExecuted(wxCommandEvent& event);
     void OnGridLabelLeftDClick(wxGridEvent& event);
+    void OnSplitterUnsplit(wxSplitterEvent& event);
     void OnIdle(wxIdleEvent& event);
 
     // menu events
