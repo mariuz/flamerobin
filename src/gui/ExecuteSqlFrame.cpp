@@ -265,6 +265,12 @@ SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id)
     setup();
 }
 //-----------------------------------------------------------------------------
+bool SqlEditor::hasSelection()
+{
+    return GetSelectionStart() != GetSelectionEnd();
+}
+//-----------------------------------------------------------------------------
+
 void SqlEditor::markText(int start, int end)
 {
     centerCaret(true);
@@ -539,7 +545,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     set_properties();
     do_layout();
     setDatabase(db);    // must come after set_properties
-    splitter_window_1->Unsplit(notebook_1); // show sql entry window only
+    setViewMode(false, vmEditor);
     loadingM = false;
 }
 //-----------------------------------------------------------------------------
@@ -594,17 +600,17 @@ void ExecuteSqlFrame::buildToolbar()
         wxITEM_NORMAL, _("F8 - Rollback transaction"));
     toolBarM->AddSeparator();
 
-    toolBarM->AddTool( Cmds::DataGrid_Insert_row, _("Insert row"),
+    toolBarM->AddTool( Cmds::DataGrid_Insert_row, _("Insert row(s)"),
         wxArtProvider::GetBitmap(ART_InsertRow, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("Insert a new row in recordset"));
-    toolBarM->AddTool( Cmds::DataGrid_Delete_row, _("Delete row"),
+        wxITEM_NORMAL, _("Insert row(s) into recordset"));
+    toolBarM->AddTool( Cmds::DataGrid_Delete_row, _("Delete row(s)"),
         wxArtProvider::GetBitmap(ART_DeleteRow, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, _("Delete row(s) from recordset"));
     toolBarM->AddSeparator();
 
-    toolBarM->AddTool( Cmds::View_Toggle_view, _("Toggle view"),
+    toolBarM->AddTool( Cmds::View_SplitView, _("Toggle split view"),
         wxArtProvider::GetBitmap(ART_ToggleView, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("Toggle current view"));
+        wxITEM_CHECK, _("Toggle split view"));
 
     toolBarM->Realize();
 }
@@ -637,15 +643,13 @@ void ExecuteSqlFrame::buildMainMenu()
     menuBarM->Append(editMenu, _("&Edit"));
 
     wxMenu* viewMenu = new wxMenu();
-    viewMenu->AppendRadioItem(Cmds::View_Editor,          _("Edit&or"));
-    viewMenu->AppendRadioItem(Cmds::View_Statistics,      _("&Statistics"));
-    viewMenu->AppendRadioItem(Cmds::View_Data,            _("&Data"));
-    viewMenu->AppendRadioItem(Cmds::View_Split_view,      _("Split &view"));
+    viewMenu->AppendRadioItem(Cmds::View_Editor, _("Sql &editor\tCtrl+Alt+E"));
+    viewMenu->AppendRadioItem(Cmds::View_Statistics, _("&Log view\tCtrl+Alt+L"));
+    viewMenu->AppendRadioItem(Cmds::View_Data, _("&Data grid\tCtrl+Alt+D"));
     viewMenu->AppendSeparator();
-    viewMenu->Append(Cmds::View_Set_editor_font, _("Se&t editor font"));
+    viewMenu->AppendCheckItem(Cmds::View_SplitView, _("&Split view\tCtrl+Alt+S"));
     viewMenu->AppendSeparator();
-    viewMenu->Append(Cmds::View_Focus_editor,    _("Focus &editor"));
-    viewMenu->Append(Cmds::View_Focus_grid,      _("Focus &grid"));
+    viewMenu->Append(Cmds::View_Set_editor_font, _("Set editor &font"));
     viewMenu->AppendSeparator();
     viewMenu->AppendCheckItem(Cmds::View_Wrap_long_lines,    _("&Wrap long lines"));
     menuBarM->Append(viewMenu, _("&View"));
@@ -717,7 +721,8 @@ void ExecuteSqlFrame::set_properties()
     }
     grid_data->SetTable(new DataGridTable(statementM, databaseM), true);
     splitter_window_1->Initialize(styled_text_ctrl_sql);
-
+    viewModeM = vmEditor;
+    
     SetIcon(wxArtProvider::GetIcon(ART_ExecuteSqlFrame, wxART_FRAME_ICON));
 
     keywordsM = wxT("");
@@ -743,8 +748,6 @@ void ExecuteSqlFrame::do_layout()
     panel_contents->SetSizer(sizerContents);
     sizerContents->Fit(this);
     sizerContents->SetSizeHints(this);
-
-    styled_text_ctrl_sql->SetFocus();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::showProperties(wxString objectName)
@@ -771,7 +774,9 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_STC_CHANGE(ExecuteSqlFrame::ID_stc_sql, ExecuteSqlFrame::OnSqlEditChanged)
     EVT_STC_START_DRAG(ExecuteSqlFrame::ID_stc_sql, ExecuteSqlFrame::OnSqlEditStartDrag)
     EVT_CHAR_HOOK(ExecuteSqlFrame::OnKeyDown)
+    EVT_CHILD_FOCUS(ExecuteSqlFrame::OnChildFocus)
     EVT_CLOSE(ExecuteSqlFrame::OnClose)
+    EVT_IDLE(ExecuteSqlFrame::OnIdle)
 
     EVT_MENU(wxID_NEW,      ExecuteSqlFrame::OnMenuNew)
     EVT_MENU(wxID_OPEN,     ExecuteSqlFrame::OnMenuOpen)
@@ -795,14 +800,16 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_UPDATE_UI(wxID_PASTE,   ExecuteSqlFrame::OnMenuUpdatePaste)
     EVT_UPDATE_UI(wxID_DELETE,  ExecuteSqlFrame::OnMenuUpdateDelete)
 
-    EVT_MENU(Cmds::View_Editor,          ExecuteSqlFrame::OnMenuUnsplitView)
-    EVT_MENU(Cmds::View_Statistics,      ExecuteSqlFrame::OnMenuUnsplitView)
-    EVT_MENU(Cmds::View_Data,            ExecuteSqlFrame::OnMenuUnsplitView)
-    EVT_MENU(Cmds::View_Split_view,      ExecuteSqlFrame::OnMenuSplitView)
+    EVT_MENU(Cmds::View_Editor, ExecuteSqlFrame::OnMenuSelectView)
+    EVT_UPDATE_UI(Cmds::View_Editor, ExecuteSqlFrame::OnMenuUpdateSelectView)
+    EVT_MENU(Cmds::View_Statistics, ExecuteSqlFrame::OnMenuSelectView)
+    EVT_UPDATE_UI(Cmds::View_Statistics, ExecuteSqlFrame::OnMenuUpdateSelectView)
+    EVT_MENU(Cmds::View_Data, ExecuteSqlFrame::OnMenuSelectView)
+    EVT_UPDATE_UI(Cmds::View_Data, ExecuteSqlFrame::OnMenuUpdateSelectView)
+    EVT_MENU(Cmds::View_SplitView, ExecuteSqlFrame::OnMenuSplitView)
+    EVT_UPDATE_UI(Cmds::View_SplitView, ExecuteSqlFrame::OnMenuUpdateSplitView)
     EVT_MENU(Cmds::View_Set_editor_font, ExecuteSqlFrame::OnMenuSetEditorFont)
     EVT_MENU(Cmds::View_Wrap_long_lines, ExecuteSqlFrame::OnMenuToggleWrap)
-    EVT_MENU(Cmds::View_Focus_editor,    ExecuteSqlFrame::OnMenuFocusEditor)
-    EVT_MENU(Cmds::View_Focus_grid,      ExecuteSqlFrame::OnMenuFocusGrid)
 
     EVT_MENU(Cmds::Find_Selected_Object,   ExecuteSqlFrame::OnMenuFindSelectedObject)
 
@@ -849,7 +856,6 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::DataGrid_FetchAll,       ExecuteSqlFrame::OnMenuUpdateGridFetchAll)
     EVT_UPDATE_UI(Cmds::DataGrid_CancelFetchAll, ExecuteSqlFrame::OnMenuUpdateGridCancelFetchAll)
 
-    EVT_MENU(Cmds::View_Toggle_view, ExecuteSqlFrame::OnMenuToggleClick)
 
     EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_ROWCOUNT_CHANGED, \
         ExecuteSqlFrame::OnGridRowCountChanged)
@@ -1204,6 +1210,18 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent& event)
     event.Skip();
 }
 //-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnChildFocus(wxChildFocusEvent& WXUNUSED(event))
+{
+    doUpdateFocusedControlM = true;
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnIdle(wxIdleEvent& event)
+{
+    if (doUpdateFocusedControlM)
+        updateViewMode();
+    event.Skip();
+}
+//-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnClose(wxCloseEvent& event)
 {
     // prevent editor from updating the invalid dataset
@@ -1262,42 +1280,84 @@ void ExecuteSqlFrame::OnMenuClose(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUndo(wxCommandEvent& WXUNUSED(event))
 {
-    styled_text_ctrl_sql->Undo();
+    if (viewModeM == vmEditor)
+        styled_text_ctrl_sql->Undo();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateUndo(wxUpdateUIEvent& event)
+{
+    event.Enable(viewModeM == vmEditor && styled_text_ctrl_sql->CanUndo());
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuRedo(wxCommandEvent& WXUNUSED(event))
 {
-    styled_text_ctrl_sql->Redo();
+    if (viewModeM == vmEditor)
+        styled_text_ctrl_sql->Redo();
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuCut(wxCommandEvent& WXUNUSED(event))
+void ExecuteSqlFrame::OnMenuUpdateRedo(wxUpdateUIEvent& event)
 {
-    styled_text_ctrl_sql->Cut();
+    event.Enable(viewModeM == vmEditor && styled_text_ctrl_sql->CanRedo());
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
 {
-    if (FindFocus() == styled_text_ctrl_sql)
+    if (viewModeM == vmEditor)
         styled_text_ctrl_sql->Copy();
-    else if (gridHasFocus())
+    else if (viewModeM == vmGrid)
         grid_data->copyToCB();
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuPaste(wxCommandEvent& WXUNUSED(event))
+void ExecuteSqlFrame::OnMenuUpdateCopy(wxUpdateUIEvent& event)
 {
-    styled_text_ctrl_sql->Paste();
+    bool enableCmd = false;
+    if (viewModeM == vmEditor)
+        enableCmd = styled_text_ctrl_sql->hasSelection();
+    else if (viewModeM == vmGrid)
+        enableCmd = grid_data->getDataGridTable() && grid_data->GetNumberRows();
+    event.Enable(enableCmd);
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuCut(wxCommandEvent& WXUNUSED(event))
+{
+    if (viewModeM == vmEditor)
+        styled_text_ctrl_sql->Cut();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateCut(wxUpdateUIEvent& event)
+{
+    event.Enable(viewModeM == vmEditor && styled_text_ctrl_sql->hasSelection());
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuDelete(wxCommandEvent& WXUNUSED(event))
 {
-    styled_text_ctrl_sql->Clear();
+    if (viewModeM == vmEditor)
+        styled_text_ctrl_sql->Clear();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateDelete(wxUpdateUIEvent& event)
+{
+    event.Enable(viewModeM == vmEditor && styled_text_ctrl_sql->hasSelection());
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuPaste(wxCommandEvent& WXUNUSED(event))
+{
+    if (viewModeM == vmEditor)
+        styled_text_ctrl_sql->Paste();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdatePaste(wxUpdateUIEvent& event)
+{
+    event.Enable(viewModeM == vmEditor && styled_text_ctrl_sql->CanPaste());
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuSelectAll(wxCommandEvent& WXUNUSED(event))
 {
-    if (FindFocus() == styled_text_ctrl_sql)
+    if (viewModeM == vmEditor)
         styled_text_ctrl_sql->SelectAll();
-    else if (gridHasFocus())
+    else if (viewModeM == vmLogCtrl)
+        styled_text_ctrl_stats->SelectAll();
+    else if (viewModeM == vmGrid)
         grid_data->SelectAll();
 }
 //-----------------------------------------------------------------------------
@@ -1306,95 +1366,41 @@ void ExecuteSqlFrame::OnMenuReplace(wxCommandEvent &WXUNUSED(event))
     styled_text_ctrl_sql->find(true);
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuUpdateUndo(wxUpdateUIEvent& event)
-{
-    event.Enable(styled_text_ctrl_sql->CanUndo());
-}
-//-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuUpdateRedo(wxUpdateUIEvent& event)
-{
-    event.Enable(styled_text_ctrl_sql->CanRedo());
-}
-//-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuUpdateCopy(wxUpdateUIEvent& event)
-{
-    bool enableCmd = false;
-    if (FindFocus() == styled_text_ctrl_sql)
-        enableCmd = styled_text_ctrl_sql->GetSelectedText().Len() > 0;
-    else if (gridHasFocus())
-        enableCmd = grid_data->getDataGridTable() && grid_data->GetNumberRows();
-    event.Enable(enableCmd);
-}
-//-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuUpdateCut(wxUpdateUIEvent& event)
-{
-    event.Enable((styled_text_ctrl_sql->GetSelectedText().Len()>0));
-}
-//-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuUpdateDelete(wxUpdateUIEvent& event)
-{
-    event.Enable((styled_text_ctrl_sql->GetSelectedText().Len()>0));
-}
-//-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuUpdatePaste(wxUpdateUIEvent& event)
-{
-    event.Enable(styled_text_ctrl_sql->CanPaste());
-}
-//-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUpdateWhenInTransaction(wxUpdateUIEvent& event)
 {
     event.Enable(inTransactionM && !grid_data->IsCellEditControlEnabled());
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuUnsplitView(wxCommandEvent& event)
+void ExecuteSqlFrame::OnMenuSelectView(wxCommandEvent& event)
 {
-    wxWindow* focusControl;
     if (event.GetId() == Cmds::View_Editor)
-        focusControl = styled_text_ctrl_sql;
+        setViewMode(vmEditor);
     else if (event.GetId() == Cmds::View_Statistics)
-        focusControl = styled_text_ctrl_stats;
+        setViewMode(vmLogCtrl);
     else if (event.GetId() == Cmds::View_Data)
-        focusControl = grid_data;
+        setViewMode(vmGrid);
     else
         wxCHECK_RET(false, wxT("event id not handled"));
-
-    // select notebook pane first (could still be invisible)
-    if (focusControl == styled_text_ctrl_stats)
-        notebook_1->SetSelection(0);
-    else if (focusControl == grid_data)
-        notebook_1->SetSelection(1);
-
-    if (splitter_window_1->IsSplit())
-    {
-        // show single splitter window pane
-        if (focusControl == styled_text_ctrl_sql)
-            splitter_window_1->Unsplit(notebook_1);
-        else
-            splitter_window_1->Unsplit(styled_text_ctrl_sql);
-    }
-    else if (focusControl == styled_text_ctrl_sql)
-    {
-        // switch splitter window pane if necessary
-        splitter_window_1->ReplaceWindow(splitter_window_1->GetWindow1(),
-            styled_text_ctrl_sql);
-        styled_text_ctrl_sql->Show();
-        notebook_1->Hide();
-    }
-    else
-    {
-        // switch splitter window pane if necessary
-        splitter_window_1->ReplaceWindow(splitter_window_1->GetWindow1(),
-            notebook_1);
-        notebook_1->Show();
-        styled_text_ctrl_sql->Hide();
-    }
-    focusControl->SetFocus();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateSelectView(wxUpdateUIEvent& event)
+{
+    if (event.GetId() == Cmds::View_Editor && viewModeM == vmEditor)
+        event.Check(true);
+    else if (event.GetId() == Cmds::View_Statistics && viewModeM == vmLogCtrl)
+        event.Check(true);
+    else if (event.GetId() == Cmds::View_Data && viewModeM == vmGrid)
+        event.Check(true);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuSplitView(wxCommandEvent& WXUNUSED(event))
 {
-    if (!splitter_window_1->IsSplit())
-        splitter_window_1->SplitHorizontally(styled_text_ctrl_sql, notebook_1);
+    setViewMode(!splitter_window_1->IsSplit(), viewModeM);
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateSplitView(wxUpdateUIEvent& event)
+{
+    event.Check(splitter_window_1->IsSplit());
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuSetEditorFont(wxCommandEvent& WXUNUSED(event))
@@ -1404,27 +1410,9 @@ void ExecuteSqlFrame::OnMenuSetEditorFont(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuToggleWrap(wxCommandEvent& WXUNUSED(event))
 {
+    const int mode = styled_text_ctrl_sql->GetWrapMode();
     styled_text_ctrl_sql->SetWrapMode(
-        styled_text_ctrl_sql->GetWrapMode() == wxSTC_WRAP_WORD
-        ? wxSTC_WRAP_NONE : wxSTC_WRAP_WORD
-    );
-}
-//-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuFocusEditor(wxCommandEvent& WXUNUSED(event))
-{
-    if (!styled_text_ctrl_sql->IsShown())
-        splitter_window_1->SplitHorizontally(styled_text_ctrl_sql, notebook_1);
-    styled_text_ctrl_sql->SetFocus();
-    menuBarM->Check(Cmds::View_Editor, true);
-}
-//-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuFocusGrid(wxCommandEvent& WXUNUSED(event))
-{
-    if (!notebook_1->IsShown())
-        splitter_window_1->SplitHorizontally(styled_text_ctrl_sql, notebook_1);
-    notebook_1->SetSelection(1);
-    grid_data->SetFocus();
-    menuBarM->Check(Cmds::View_Data, true);
+        (mode == wxSTC_WRAP_WORD) ? wxSTC_WRAP_NONE : wxSTC_WRAP_WORD);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuHistoryNext(wxCommandEvent& WXUNUSED(event))
@@ -1730,7 +1718,6 @@ void ExecuteSqlFrame::inTransaction(bool started)
     {
         grid_data->ClearGrid();
         statusbar_1->SetStatusText(wxEmptyString, 1);
-        menuBarM->Check(Cmds::View_Editor, true);
     }
 }
 //-----------------------------------------------------------------------------
@@ -1778,19 +1765,7 @@ void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
     }
 
     if (!inTransactionM)
-    {
-        // show sql entry window only
-        if (splitter_window_1->IsSplit())
-            splitter_window_1->Unsplit(notebook_1);
-        else
-        {
-            splitter_window_1->ReplaceWindow(splitter_window_1->GetWindow1(),
-                styled_text_ctrl_sql);
-            styled_text_ctrl_sql->Show();
-            notebook_1->Hide();
-        }
-        styled_text_ctrl_sql->SetFocus();
-    }
+        setViewMode(false, vmEditor);
 }
 //-----------------------------------------------------------------------------
 //! adapted so we don't have to change all the other code that utilizes SQL editor
@@ -2070,8 +2045,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         if (hasColumns)            // for select statements: show data
         {
             grid_data->fetchData(dbCharsetConversionM.getConverter());
-            notebook_1->SetSelection(1);
-            grid_data->SetFocus();
+            setViewMode(vmGrid);
         }
 
         if (doShowStats)
@@ -2119,7 +2093,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             if (stm.isDDL())
                 type = IBPP::stDDL;
             executedStatementsM.push_back(stm);
-            styled_text_ctrl_sql->SetFocus();
+            setViewMode(vmEditor);
             if (type == IBPP::stDDL && autoCommitM)
             {
                 if (!commitTransaction())
@@ -2150,7 +2124,6 @@ void ExecuteSqlFrame::splitScreen()
     if (!splitter_window_1->IsSplit()) // split screen if needed
     {
         splitter_window_1->SplitHorizontally(styled_text_ctrl_sql, notebook_1);
-        menuBarM->Check(Cmds::View_Split_view, true);
         ::wxYield();
     }
 }
@@ -2163,7 +2136,7 @@ void ExecuteSqlFrame::OnMenuCommit(wxCommandEvent& WXUNUSED(event))
     // location returns false, we have a crash
     bool doClose = closeWhenTransactionDoneM;
     if (commitTransaction() && !doClose)
-        splitter_window_1->Unsplit(notebook_1); // show sql entry window
+        setViewMode(false, vmEditor);
 }
 //-----------------------------------------------------------------------------
 bool ExecuteSqlFrame::commitTransaction()
@@ -2241,7 +2214,7 @@ bool ExecuteSqlFrame::commitTransaction()
     notebook_1->SetSelection(0);
 
     // apparently is has to be at the end to have any effect
-    styled_text_ctrl_sql->SetFocus();
+    setViewMode(vmEditor);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -2251,7 +2224,7 @@ void ExecuteSqlFrame::OnMenuRollback(wxCommandEvent& WXUNUSED(event))
     // see comments for OnMenuCommit to learn why this temp. variable is needed
     bool closeIt = closeWhenTransactionDoneM;
     if (rollbackTransaction() && !closeIt)
-        splitter_window_1->Unsplit(notebook_1); // show sql entry window
+        setViewMode(false, vmEditor);
 }
 //-----------------------------------------------------------------------------
 bool ExecuteSqlFrame::rollbackTransaction()
@@ -2297,31 +2270,8 @@ bool ExecuteSqlFrame::rollbackTransaction()
     }
 
     notebook_1->SetSelection(0);
-    styled_text_ctrl_sql->SetFocus();
+    setViewMode(vmEditor);
     return true;
-}
-//-----------------------------------------------------------------------------
-//! toggle the views in the following order:
-//! ... -> SQL_entry_box -> Split View -> Stats&Data -> ...
-void ExecuteSqlFrame::OnMenuToggleClick(wxCommandEvent& WXUNUSED(event))
-{
-    if (splitter_window_1->IsSplit())       // screen is split -> show second
-    {
-        splitter_window_1->Unsplit(styled_text_ctrl_sql);
-        menuBarM->Check(Cmds::View_Data, true);
-    }
-    else if (splitter_window_1->GetWindow1() == styled_text_ctrl_sql) // first is shown -> split again
-    {
-        splitScreen();
-        menuBarM->Check(Cmds::View_Split_view, true);
-    }
-    else                                    // second is shown -> show first
-    {
-        splitter_window_1->ReplaceWindow(notebook_1, styled_text_ctrl_sql);
-        styled_text_ctrl_sql->Show();
-        notebook_1->Hide();
-        menuBarM->Check(Cmds::View_Editor, true);
-    }
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUpdateGridInsertRow(wxUpdateUIEvent& event)
@@ -2382,8 +2332,7 @@ void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent& event)
         if (rowsFetched >= rowsNeeded)
         {
             //splitScreen();    // not needed atm, might be later (see TODO above)
-            splitter_window_1->Unsplit(styled_text_ctrl_sql); // show grid only
-            menuBarM->Check(Cmds::View_Data, true);
+            setViewMode(false, vmGrid);
         }
     }
 }
@@ -2556,6 +2505,82 @@ bool ExecuteSqlFrame::gridHasFocus()
         || focused == grid_data->GetGridColLabelWindow()
         || focused == grid_data->GetGridRowLabelWindow()
         || focused == grid_data->GetGridCornerLabelWindow();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::setViewMode(ViewMode mode)
+{
+    setViewMode(splitter_window_1->IsSplit(), mode);
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::setViewMode(bool splitView, ViewMode mode)
+{
+    wxCHECK_RET(mode == vmEditor || mode == vmLogCtrl || mode == vmGrid,
+        wxT("Try to set invalid view mode"));
+    viewModeM = mode;
+
+    // select notebook pane first (could still be invisible)
+    if (mode == vmLogCtrl)
+        notebook_1->SetSelection(0);
+    else if (mode == vmGrid)
+        notebook_1->SetSelection(1);
+
+    // split if necessary
+    if (splitView && !splitter_window_1->IsSplit())
+    {
+        styled_text_ctrl_sql->Show();
+        notebook_1->Show();
+        splitter_window_1->SplitHorizontally(styled_text_ctrl_sql,
+            notebook_1);
+    }
+    
+    // unsplit or switch panes if necessary
+    if (!splitView)
+    {
+        if (mode == vmEditor)
+        {
+            if (splitter_window_1->IsSplit())
+                splitter_window_1->Unsplit(notebook_1);
+            else if (splitter_window_1->GetWindow1() == notebook_1)
+            {
+                splitter_window_1->ReplaceWindow(notebook_1,
+                    styled_text_ctrl_sql);
+            }
+            styled_text_ctrl_sql->Show();
+            notebook_1->Hide();
+        }
+        else
+        {
+            if (splitter_window_1->IsSplit())
+                splitter_window_1->Unsplit(styled_text_ctrl_sql);
+            else if (splitter_window_1->GetWindow1() == styled_text_ctrl_sql)
+            {
+                splitter_window_1->ReplaceWindow(styled_text_ctrl_sql,
+                    notebook_1);
+            }
+            notebook_1->Show();
+            styled_text_ctrl_sql->Hide();
+        }
+    }
+
+    if (mode == vmEditor)
+        styled_text_ctrl_sql->SetFocus();
+    else if (mode == vmLogCtrl)
+        styled_text_ctrl_stats->SetFocus();
+    else if (mode == vmGrid)
+        grid_data->SetFocus();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::updateViewMode()
+{
+    doUpdateFocusedControlM = false;
+
+    wxWindow* focused = FindFocus();
+    if (focused == styled_text_ctrl_sql)
+        viewModeM = vmEditor;
+    else if (focused == styled_text_ctrl_stats)
+        viewModeM = vmLogCtrl;
+    else if (focused == grid_data)
+        viewModeM = vmGrid;
 }
 //-----------------------------------------------------------------------------
 //! also used to drop constraints

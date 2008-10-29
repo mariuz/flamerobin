@@ -34,13 +34,10 @@ namespace Cmds
         View_Editor = 401,
         View_Statistics,
         View_Data,
-        View_Split_view,
-        View_Toggle_view,
+        View_SplitView,
         View_Wrap_long_lines,
         View_Set_editor_font,
         Find_Selected_Object,
-        View_Focus_grid,
-        View_Focus_editor,
 
         // SQL History
         History_Search,

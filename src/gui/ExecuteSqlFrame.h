@@ -59,6 +59,8 @@ public:
     void setChars(bool firebirdIdentifierOnly);
     void setFont();
 
+    bool hasSelection();
+
     void OnContextMenu(wxContextMenuEvent& event);
     void OnKillFocus(wxFocusEvent& event);
     DECLARE_EVENT_TABLE()
@@ -123,12 +125,21 @@ private:
     void buildToolbar();
     bool gridHasFocus();
 
+    bool doUpdateFocusedControlM;
+    enum ViewMode { vmNotebook, vmEditor, vmLogCtrl, vmGrid, vmGridEditor };
+    ViewMode viewModeM;
+    void setViewMode(ViewMode mode);
+    void setViewMode(bool splitView, ViewMode mode);
+    void updateViewMode();
+
     // events
+    void OnChildFocus(wxChildFocusEvent& event);
     void OnClose(wxCloseEvent& event);
     void OnKeyDown(wxKeyEvent& event);
     void OnGridRowCountChanged(wxCommandEvent& event);
     void OnGridStatementExecuted(wxCommandEvent& event);
     void OnGridLabelLeftDClick(wxGridEvent& event);
+    void OnIdle(wxIdleEvent& event);
 
     // menu events
     void OnMenuNew(wxCommandEvent& event);
@@ -151,13 +162,12 @@ private:
     void OnMenuSelectAll(wxCommandEvent& event);
     void OnMenuReplace(wxCommandEvent& event);
 
-    void OnMenuUnsplitView(wxCommandEvent& event);
+    void OnMenuSelectView(wxCommandEvent& event);
+    void OnMenuUpdateSelectView(wxUpdateUIEvent& event);
     void OnMenuSplitView(wxCommandEvent& event);
+    void OnMenuUpdateSplitView(wxUpdateUIEvent& event);
     void OnMenuSetEditorFont(wxCommandEvent& event);
     void OnMenuToggleWrap(wxCommandEvent& event);
-    void OnMenuFocusEditor(wxCommandEvent& event);
-    void OnMenuFocusGrid(wxCommandEvent& event);
-    void OnMenuToggleClick(wxCommandEvent& event);  // toolbar
 
     void OnMenuHistoryNext(wxCommandEvent& event);
     void OnMenuUpdateHistoryNext(wxUpdateUIEvent& event);
