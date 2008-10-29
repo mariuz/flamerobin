@@ -1,0 +1,139 @@
+/*
+  Copyright (c) 2004-2008 The FlameRobin Development Team
+
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
+
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+  $Id$
+
+*/
+//-----------------------------------------------------------------------------
+// For compilers that support precompilation, includes "wx/wx.h".
+#include "wx/wxprec.h"
+
+#ifdef __BORLANDC__
+    #pragma hdrstop
+#endif
+
+// for all others, include the necessary headers (this file is usually all you
+// need because it includes almost all "standard" wxWindows headers
+#ifndef WX_PRECOMP
+    #include "wx/wx.h"
+#endif
+
+#include <wx/accel.h>
+#include <wx/stockitem.h>
+
+#include "gui/CommandIds.h"
+#include "gui/CommandManager.h"
+//-----------------------------------------------------------------------------
+CommandManager::CommandManager()
+{
+    init();
+}
+//-----------------------------------------------------------------------------
+bool CommandManager::findShortcutFor(int id, int& flags, int& keyCode)
+{
+    // standard commands
+    wxAcceleratorEntry ae(wxGetStockAccelerator(id));
+    if (ae.IsOk())
+    {
+        flags = ae.GetFlags();
+        keyCode = ae.GetKeyCode();
+        return true;
+    }
+
+    // our own commands
+    ShortCutDataMap::const_iterator it;
+    it = shortcutsM.find(id);
+    if (it != shortcutsM.end())
+    {
+        ShortCutData scd(it->second);
+        flags = scd.flags;
+        keyCode = scd.keyCode;
+        return true;
+    }
+
+    return false;
+}
+//-----------------------------------------------------------------------------
+wxString CommandManager::getShortcutText(int id)
+{
+    int flags, keyCode;
+    if (findShortcutFor(id, flags, keyCode))
+    {
+        wxAcceleratorEntry ae(flags, keyCode, id);
+        return ae.ToString();
+    }
+    return wxEmptyString;
+}
+//-----------------------------------------------------------------------------
+wxString CommandManager::getMainMenuItemText(wxString text, int id)
+{
+    wxString shortcut(getShortcutText(id));
+    return (shortcut.empty() ? text : text + wxT("\t") + shortcut);
+}
+//-----------------------------------------------------------------------------
+wxString CommandManager::getPopupMenuItemText(wxString text, int id)
+{
+    bool appendShortcuts = false;
+    // user interface guidelines state that popup menus should not
+    // show keyboard shortcuts
+    // could however be activated for wxGTK here...
+    if (appendShortcuts)
+    {
+        wxString shortcut(getShortcutText(id));
+        if (!shortcut.empty())
+            return text + wxT("\t") + shortcut;
+    }
+    return text;
+}
+//-----------------------------------------------------------------------------
+wxString CommandManager::getToolbarHint(wxString text, int id)
+{
+    wxString shortcut(getShortcutText(id));
+    return (shortcut.empty() ? text : text + wxT(" (") + shortcut + wxT(")"));
+}
+//-----------------------------------------------------------------------------
+void CommandManager::init()
+{
+    ShortCutData scd;
+
+    // statement execution commands
+    scd.flags = wxACCEL_NORMAL;
+    scd.keyCode = WXK_F4;
+    shortcutsM.insert(ShortCutDataPair(Cmds::Query_Execute, scd));
+    scd.keyCode = WXK_F5;
+    shortcutsM.insert(ShortCutDataPair(Cmds::Query_Commit, scd));
+    scd.keyCode = WXK_F8;
+    shortcutsM.insert(ShortCutDataPair(Cmds::Query_Rollback, scd));
+
+    // view commands
+    scd.flags = wxACCEL_CTRL | wxACCEL_ALT;
+    scd.keyCode = 'E';
+    shortcutsM.insert(ShortCutDataPair(Cmds::View_Editor, scd));
+    scd.keyCode = 'L';
+    shortcutsM.insert(ShortCutDataPair(Cmds::View_Statistics, scd));
+    scd.keyCode = 'D';
+    shortcutsM.insert(ShortCutDataPair(Cmds::View_Data, scd));
+    scd.keyCode = 'S';
+    shortcutsM.insert(ShortCutDataPair(Cmds::View_SplitView, scd));
+}
+//-----------------------------------------------------------------------------

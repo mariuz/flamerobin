@@ -500,6 +500,10 @@ SOURCE=.\src\gui\BaseFrame.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\CommandManager.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\config\Config.cpp
 # End Source File
 # Begin Source File
@@ -879,6 +883,10 @@ SOURCE=.\src\gui\BaseFrame.h
 # Begin Source File
 
 SOURCE=.\src\gui\CommandIds.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\CommandManager.h
 # End Source File
 # Begin Source File
 

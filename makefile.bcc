@@ -98,6 +98,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupRestoreBaseFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseFrame.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CommandManager.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ContextMenuMetadataItemVisitor.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGrid.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRowBuffer.obj \
@@ -356,6 +357,9 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseDialog.obj: .\src\gui\BaseDialog.cpp
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseFrame.obj: .\src\gui\BaseFrame.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\BaseFrame.cpp
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CommandManager.obj: .\src\gui\CommandManager.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\CommandManager.cpp
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ContextMenuMetadataItemVisitor.obj: .\src\gui\ContextMenuMetadataItemVisitor.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\ContextMenuMetadataItemVisitor.cpp

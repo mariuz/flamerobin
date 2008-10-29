@@ -59,6 +59,7 @@
 #include "framemanager.h"
 #include "gui/AdvancedMessageDialog.h"
 #include "gui/CommandIds.h"
+#include "gui/CommandManager.h"
 #include "gui/controls/DataGrid.h"
 #include "gui/controls/DataGridTable.h"
 #include "gui/ProgressDialog.h"
@@ -514,8 +515,10 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     Observer(), databaseM(db)
 {
     loadingM = true;
-    buildToolbar();
-    buildMainMenu();
+
+    CommandManager cm;
+    buildToolbar(cm);
+    buildMainMenu(cm);
 
     panel_contents = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize,
         wxTAB_TRAVERSAL
@@ -549,10 +552,10 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     loadingM = false;
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::buildToolbar()
+void ExecuteSqlFrame::buildToolbar(CommandManager& cm)
 {
     //toolBarM = CreateToolBar( wxTB_FLAT|wxTB_HORIZONTAL|wxTB_TEXT, wxID_ANY );
-    toolBarM = CreateToolBar( wxTB_FLAT|wxTB_HORIZONTAL, wxID_ANY );
+    toolBarM = CreateToolBar( wxTB_FLAT | wxTB_HORIZONTAL, wxID_ANY );
 
 #ifdef __WXGTK20__
     wxSize bmpSize(24, 24);
@@ -563,115 +566,140 @@ void ExecuteSqlFrame::buildToolbar()
 
     toolBarM->AddTool( wxID_NEW, _("New"),
         wxArtProvider::GetBitmap(wxART_NEW, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("New window"));
+        wxITEM_NORMAL, cm.getToolbarHint(_("New window"), wxID_NEW));
     toolBarM->AddTool( wxID_OPEN, _("Open"),
         wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("Load a file"));
+        wxITEM_NORMAL, cm.getToolbarHint(_("Load a file"), wxID_OPEN));
     toolBarM->AddTool( wxID_SAVE, _("Save"),
         wxArtProvider::GetBitmap(wxART_FILE_SAVE, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL,  _("Save to file"));
+        wxITEM_NORMAL, cm.getToolbarHint(_("Save to file"), wxID_SAVE));
     toolBarM->AddTool( wxID_SAVEAS, _("Save as"),
         wxArtProvider::GetBitmap(wxART_FILE_SAVE_AS, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("Save under different name"));
+        wxITEM_NORMAL, cm.getToolbarHint(_("Save under different name"), wxID_SAVEAS));
     toolBarM->AddSeparator();
 
     toolBarM->AddTool( wxID_BACKWARD, _("Back"),
         wxArtProvider::GetBitmap(wxART_GO_BACK, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("Go to previous statement"));
+        wxITEM_NORMAL, cm.getToolbarHint(_("Go to previous statement"), wxID_BACKWARD));
     toolBarM->AddTool( wxID_FORWARD, _("Next"),
         wxArtProvider::GetBitmap(wxART_GO_FORWARD, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("Go to next statement"));
+        wxITEM_NORMAL, cm.getToolbarHint(_("Go to next statement"), wxID_FORWARD));
     toolBarM->AddTool( Cmds::History_Search, _("History"),
         wxArtProvider::GetBitmap(ART_History, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("Browse and search statement history"));
+        wxITEM_NORMAL, cm.getToolbarHint(_("Browse and search statement history"), Cmds::History_Search));
     toolBarM->AddSeparator();
 
     toolBarM->AddTool( Cmds::Query_Execute, _("Execute"),
         wxArtProvider::GetBitmap(ART_ExecuteStatement, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("F4 - Execute statement(s)"));
+        wxITEM_NORMAL, cm.getToolbarHint(_("Execute statement(s)"), Cmds::Query_Execute));
     toolBarM->AddTool( Cmds::Query_Show_plan, _("Show plan"),
         wxArtProvider::GetBitmap(ART_ShowExecutionPlan, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("Show query execution plan"));
+        wxITEM_NORMAL, cm.getToolbarHint(_("Show query execution plan"), Cmds::Query_Show_plan));
     toolBarM->AddTool( Cmds::Query_Commit, _("Commit"),
         wxArtProvider::GetBitmap(ART_CommitTransaction, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("F5 - Commit transaction"));
+        wxITEM_NORMAL, cm.getToolbarHint(_("Commit transaction"), Cmds::Query_Commit));
     toolBarM->AddTool( Cmds::Query_Rollback, _("Rollback"),
          wxArtProvider::GetBitmap(ART_RollbackTransaction, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("F8 - Rollback transaction"));
+        wxITEM_NORMAL, cm.getToolbarHint(_("Rollback transaction"), Cmds::Query_Rollback));
     toolBarM->AddSeparator();
 
     toolBarM->AddTool( Cmds::DataGrid_Insert_row, _("Insert row(s)"),
         wxArtProvider::GetBitmap(ART_InsertRow, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("Insert row(s) into recordset"));
+        wxITEM_NORMAL, cm.getToolbarHint(_("Insert row(s) into recordset"), Cmds::DataGrid_Insert_row));
     toolBarM->AddTool( Cmds::DataGrid_Delete_row, _("Delete row(s)"),
         wxArtProvider::GetBitmap(ART_DeleteRow, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, _("Delete row(s) from recordset"));
+        wxITEM_NORMAL, cm.getToolbarHint(_("Delete row(s) from recordset"), Cmds::DataGrid_Delete_row));
     toolBarM->AddSeparator();
 
     toolBarM->AddTool( Cmds::View_SplitView, _("Toggle split view"),
         wxArtProvider::GetBitmap(ART_ToggleView, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_CHECK, _("Toggle split view"));
+        wxITEM_CHECK, cm.getToolbarHint(_("Toggle split view"), Cmds::View_SplitView));
 
     toolBarM->Realize();
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::buildMainMenu()
+void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
 {
     menuBarM = new wxMenuBar();
 
-    wxMenu* fileMenu = new wxMenu();                    // dynamic menus, created at runtime
-    fileMenu->Append(wxID_NEW,      _("&New..."));
-    fileMenu->Append(wxID_OPEN,     _("&Open..."));
-    fileMenu->Append(wxID_SAVE,     _("&Save"));
-    fileMenu->Append(wxID_SAVEAS,   _("Save &As..."));
+    wxMenu* fileMenu = new wxMenu(); // dynamic menus, created at runtime
+    fileMenu->Append(wxID_NEW,
+        cm.getMainMenuItemText(_("&New..."), wxID_NEW));
+    fileMenu->Append(wxID_OPEN,
+        cm.getMainMenuItemText(_("&Open..."), wxID_OPEN));
+    fileMenu->Append(wxID_SAVE,
+        cm.getMainMenuItemText(_("&Save"), wxID_SAVE));
+    fileMenu->Append(wxID_SAVEAS,
+        cm.getMainMenuItemText(_("Save &As..."), wxID_SAVEAS));
     fileMenu->AppendSeparator();
-    fileMenu->Append(wxID_CLOSE,    _("&Close"));
+    fileMenu->Append(wxID_CLOSE,
+        cm.getMainMenuItemText(_("&Close"), wxID_CLOSE));
     menuBarM->Append(fileMenu, _("&File"));
 
     wxMenu* editMenu = new wxMenu();
-    editMenu->Append(wxID_UNDO,         _("&Undo"));
-    editMenu->Append(wxID_REDO,         _("&Redo"));
+    editMenu->Append(wxID_UNDO,
+        cm.getMainMenuItemText(_("&Undo"), wxID_UNDO));
+    editMenu->Append(wxID_REDO,
+        cm.getMainMenuItemText(_("&Redo"), wxID_REDO));
     editMenu->AppendSeparator();
-    editMenu->Append(wxID_CUT,          _("Cu&t"));
-    editMenu->Append(wxID_COPY,         _("&Copy\tCtrl+C"));
-    editMenu->Append(wxID_PASTE,        _("&Paste"));
-    editMenu->Append(wxID_DELETE,       _("&Delete"));
+    editMenu->Append(wxID_CUT,
+        cm.getMainMenuItemText(_("Cu&t"), wxID_CUT));
+    editMenu->Append(wxID_COPY,
+        cm.getMainMenuItemText(_("&Copy"), wxID_COPY));
+    editMenu->Append(wxID_PASTE,
+        cm.getMainMenuItemText(_("&Paste"), wxID_PASTE));
+    editMenu->Append(wxID_DELETE,
+        cm.getMainMenuItemText(_("&Delete"), wxID_DELETE));
     editMenu->AppendSeparator();
-    editMenu->Append(wxID_SELECTALL,    _("Select &all\tCtrl+A"));
+    editMenu->Append(wxID_SELECTALL,
+        cm.getMainMenuItemText(_("Select &all"), wxID_SELECTALL));
     editMenu->AppendSeparator();
-    editMenu->Append(wxID_REPLACE,      _("Fi&nd and Replace"));
+    editMenu->Append(wxID_REPLACE,
+        cm.getMainMenuItemText(_("Fi&nd and replace"), wxID_REPLACE));
     menuBarM->Append(editMenu, _("&Edit"));
 
     wxMenu* viewMenu = new wxMenu();
-    viewMenu->AppendRadioItem(Cmds::View_Editor, _("Sql &editor\tCtrl+Alt+E"));
-    viewMenu->AppendRadioItem(Cmds::View_Statistics, _("&Log view\tCtrl+Alt+L"));
-    viewMenu->AppendRadioItem(Cmds::View_Data, _("&Data grid\tCtrl+Alt+D"));
+    viewMenu->AppendRadioItem(Cmds::View_Editor,
+        cm.getMainMenuItemText(_("Sql &editor"), Cmds::View_Editor));
+    viewMenu->AppendRadioItem(Cmds::View_Statistics,
+        cm.getMainMenuItemText(_("&Log view"), Cmds::View_Statistics));
+    viewMenu->AppendRadioItem(Cmds::View_Data,
+        cm.getMainMenuItemText(_("&Data grid"), Cmds::View_Data));
     viewMenu->AppendSeparator();
-    viewMenu->AppendCheckItem(Cmds::View_SplitView, _("&Split view\tCtrl+Alt+S"));
+    viewMenu->AppendCheckItem(Cmds::View_SplitView,
+        cm.getMainMenuItemText(_("&Split view"), Cmds::View_SplitView));
     viewMenu->AppendSeparator();
     viewMenu->Append(Cmds::View_Set_editor_font, _("Set editor &font"));
     viewMenu->AppendSeparator();
-    viewMenu->AppendCheckItem(Cmds::View_Wrap_long_lines,    _("&Wrap long lines"));
+    viewMenu->AppendCheckItem(Cmds::View_Wrap_long_lines,
+        _("&Wrap long lines"));
     menuBarM->Append(viewMenu, _("&View"));
 
     wxMenu* historyMenu = new wxMenu();
-    historyMenu->Append(wxID_FORWARD,   _("&Next"));
-    historyMenu->Append(wxID_BACKWARD,  _("&Previous"));
+    historyMenu->Append(wxID_FORWARD, _("&Next"));
+    historyMenu->Append(wxID_BACKWARD, _("&Previous"));
     historyMenu->AppendSeparator();
-    historyMenu->Append(Cmds::History_Search,    _("&Search"));
+    historyMenu->Append(Cmds::History_Search, _("&Search"));
     historyMenu->AppendSeparator();
-    historyMenu->AppendCheckItem(Cmds::History_EnableLogging, _("&Enable logging"));
+    historyMenu->AppendCheckItem(Cmds::History_EnableLogging,
+        _("&Enable logging"));
     menuBarM->Append(historyMenu, _("&History"));
 
-    wxMenu* queryMenu = new wxMenu();
-    queryMenu->Append(Cmds::Query_Execute,             _("&Execute"));
-    queryMenu->Append(Cmds::Query_Show_plan,           _("Show &plan"));
-    queryMenu->Append(Cmds::Query_Execute_selection,   _("Execute &selection"));
-    queryMenu->Append(Cmds::Query_Execute_from_cursor, _("Exec&ute from cursor"));
-    queryMenu->AppendSeparator();
-    queryMenu->Append(Cmds::Query_Commit,             _("&Commit"));
-    queryMenu->Append(Cmds::Query_Rollback,           _("&Rollback"));
-    menuBarM->Append(queryMenu, _("&Query"));
+    wxMenu* statementMenu = new wxMenu();
+    statementMenu->Append(Cmds::Query_Execute,
+        cm.getMainMenuItemText(_("&Execute"), Cmds::Query_Execute));
+    statementMenu->Append(Cmds::Query_Show_plan,
+        cm.getMainMenuItemText(_("Show execution &plan"), Cmds::Query_Show_plan));
+    statementMenu->Append(Cmds::Query_Execute_selection,
+        cm.getMainMenuItemText(_("Execute &selection"), Cmds::Query_Execute_selection));
+    statementMenu->Append(Cmds::Query_Execute_from_cursor,
+        cm.getMainMenuItemText(_("Exec&ute from cursor"), Cmds::Query_Execute_from_cursor));
+    statementMenu->AppendSeparator();
+    statementMenu->Append(Cmds::Query_Commit,
+        cm.getMainMenuItemText(_("&Commit transaction"), Cmds::Query_Commit));
+    statementMenu->Append(Cmds::Query_Rollback,
+        cm.getMainMenuItemText(_("&Rollback transaction"), Cmds::Query_Rollback));
+    menuBarM->Append(statementMenu, _("&Statement"));
 
     wxMenu* gridMenu = new wxMenu();
     gridMenu->Append(Cmds::DataGrid_Insert_row,      _("I&nsert row"));
@@ -1149,7 +1177,7 @@ void ExecuteSqlFrame::OnMenuFindSelectedObject(wxCommandEvent& WXUNUSED(event))
     showProperties(sel);
 }
 //-----------------------------------------------------------------------------
-//! handle function keys (F5, F8, F4, ...)
+//! handle function keys
 void ExecuteSqlFrame::OnKeyDown(wxKeyEvent& event)
 {
     wxCommandEvent e;
@@ -1158,18 +1186,6 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent& event)
     {
         switch (key)
         {
-            case WXK_F4:
-                if (toolBarM->GetToolEnabled(Cmds::Query_Execute))
-                    OnMenuExecute(e);
-                return;         // needed on Linux
-            case WXK_F5:
-                if (toolBarM->GetToolEnabled(Cmds::Query_Commit))
-                    OnMenuCommit(e);
-                return;
-            case WXK_F8:
-                if (toolBarM->GetToolEnabled(Cmds::Query_Rollback))
-                    OnMenuRollback(e);
-                return;
             case WXK_F3:
                 styled_text_ctrl_sql->find(false);
                 return;
@@ -2494,17 +2510,6 @@ void ExecuteSqlFrame::doWriteConfigSettings(const wxString& prefix) const
 const wxRect ExecuteSqlFrame::getDefaultRect() const
 {
     return wxRect(-1, -1, 528, 486);
-}
-//-----------------------------------------------------------------------------
-bool ExecuteSqlFrame::gridHasFocus()
-{
-    wxWindow* focused = FindFocus();
-    if (!focused || !grid_data || !grid_data->IsShown())
-        return false;
-    return focused == grid_data || focused == grid_data->GetGridWindow()
-        || focused == grid_data->GetGridColLabelWindow()
-        || focused == grid_data->GetGridRowLabelWindow()
-        || focused == grid_data->GetGridCornerLabelWindow();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::setViewMode(ViewMode mode)

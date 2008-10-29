@@ -46,6 +46,7 @@
 #include "metadata/database.h"
 #include "statementHistory.h"
 //-----------------------------------------------------------------------------
+class CommandManager;
 class DataGrid;
 class ExecuteSqlFrame;
 //-----------------------------------------------------------------------------
@@ -121,9 +122,8 @@ private:
     void OnSqlEditStartDrag(wxStyledTextEvent& event);      // enable click&remove selection
     wxString keywordsM;     // text used for autocomplete
     void setKeywords();
-    void buildMainMenu();
-    void buildToolbar();
-    bool gridHasFocus();
+    void buildMainMenu(CommandManager& cm);
+    void buildToolbar(CommandManager& cm);
 
     bool doUpdateFocusedControlM;
     enum ViewMode { vmNotebook, vmEditor, vmLogCtrl, vmGrid, vmGridEditor };

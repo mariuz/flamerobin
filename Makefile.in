@@ -64,6 +64,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_BackupRestoreBaseFrame.o \
 	flamerobin_BaseDialog.o \
 	flamerobin_BaseFrame.o \
+	flamerobin_CommandManager.o \
 	flamerobin_ContextMenuMetadataItemVisitor.o \
 	flamerobin_DataGrid.o \
 	flamerobin_DataGridRowBuffer.o \
@@ -356,6 +357,9 @@ flamerobin_BaseDialog.o: $(srcdir)/src/gui/BaseDialog.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_BaseFrame.o: $(srcdir)/src/gui/BaseFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/BaseFrame.cpp
+
+flamerobin_CommandManager.o: $(srcdir)/src/gui/CommandManager.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/CommandManager.cpp
 
 flamerobin_ContextMenuMetadataItemVisitor.o: $(srcdir)/src/gui/ContextMenuMetadataItemVisitor.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/ContextMenuMetadataItemVisitor.cpp
