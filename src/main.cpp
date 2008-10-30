@@ -115,6 +115,7 @@ bool Application::OnInit()
         wxSystemOptions::SetOption(wxT("msw.remap"), 0);
 #endif
     */
+    wxSystemOptions::SetOption(wxT("mac.listctrl.always_use_generic"), true);
 
     MainFrame* main_frame = new MainFrame(0, -1, wxT(""));
     SetTopWindow(main_frame);
