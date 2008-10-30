@@ -39,11 +39,11 @@
 #endif
 
 #include <wx/artprov.h>
-#include <wx/datetime.h>
 #include <wx/dnd.h>
 #include <wx/file.h>
 //#include <wx/fontmap.h>
 #include <wx/fontdlg.h>
+#include <wx/stopwatch.h>
 #include <wx/tokenzr.h>
 
 #include <algorithm>
@@ -1934,6 +1934,21 @@ void ExecuteSqlFrame::compareCounts(IBPP::DatabaseCounts& one,
     }
 }
 //-----------------------------------------------------------------------------
+wxString millisToTimeString(long millis)
+{
+    if (millis >= 60 * 1000)
+    {
+        int hh = millis / (60 * 60 * 1000);
+        millis -= 60 * 60 * 1000 * hh;
+        int mm = millis / (60 * 1000);
+        millis -= 60 * 1000 * mm;
+        int ss = (millis + 500) / 1000;
+        return wxString::Format(wxT("%d:%.2d:%.2d (hh:mm:ss)"), hh, mm, ss);
+    }
+    else
+        return wxString::Format(wxT("%.3fs"), 0.001 * millis);
+}
+//-----------------------------------------------------------------------------
 bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     bool prepareOnly)
 {
@@ -1961,8 +1976,8 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
 
     if (styled_text_ctrl_sql->AutoCompActive())
         styled_text_ctrl_sql->AutoCompCancel();    // remove the list if needed
-    wxDateTime start = wxDateTime::Now();
     notebook_1->SetSelection(0);
+    wxStopWatch stopwatch;
     bool retval = true;
 
     try
@@ -1992,9 +2007,8 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         log(_("Preparing query: " + sql), ttSql);
         sae.scroll();
         statementM->Prepare(wx2std(sql, dbCharsetConversionM.getConverter()));
-
-        wxTimeSpan dif = wxDateTime::Now().Subtract(start);
-        log(wxString(_("Prepare time: ")) + dif.Format(wxT("%H:%M:%S.")));
+        log(wxString::Format(_("Prepare time: %s"),
+            millisToTimeString(stopwatch.Time())));
 
         // we don't check IBPP::Select since Firebird 2.0 has a new feature
         // INSERT ... RETURNING which isn't detected as stSelect by IBPP
@@ -2121,8 +2135,8 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         retval = false;
     }
 
-    wxTimeSpan dif = wxDateTime::Now().Subtract(start);
-    log(wxString(_("Execute time: ")) + dif.Format(wxT("%H:%M:%S.")));
+    log(wxString::Format(_("Total execution time: %s"),
+        millisToTimeString(stopwatch.Time())));
     return retval;
 }
 //-----------------------------------------------------------------------------
