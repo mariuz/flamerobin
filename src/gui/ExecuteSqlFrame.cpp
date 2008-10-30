@@ -350,6 +350,8 @@ END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
 {
+    if (AutoCompActive() || CallTipActive())
+        return;
     SetFocus();
 
     wxMenu m(0);
@@ -375,18 +377,6 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
         m.Append(Cmds::Find_Selected_Object,
             _("S&how properties for ") + sel);
     }
-
-    // disable stuff
-    m.Enable(wxID_UNDO, CanUndo());
-    m.Enable(wxID_REDO, CanRedo());
-    if (slen == 0)        // nothing is selected
-    {
-        m.Enable(wxID_CUT,              false);
-        m.Enable(wxID_COPY,             false);
-        m.Enable(wxID_DELETE,           false);
-        m.Enable(Cmds::Query_Execute_selection, false);
-    }
-
     PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
 }
 //-----------------------------------------------------------------------------
