@@ -1191,7 +1191,10 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent& event)
             int acc = acSpace;
             config().getValue(wxT("AutoCompleteKey"), acc);
             if (acc == acSpace && event.ControlDown() && key == WXK_SPACE)
+            {
                 autoComplete(true);
+                return;
+            }
 
             // TAB completion works when there is no white space before cursor and there is no selection
             if (acc == acTab && key == WXK_TAB && styled_text_ctrl_sql->GetSelectionStart() == styled_text_ctrl_sql->GetSelectionEnd())
@@ -2008,7 +2011,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         sae.scroll();
         statementM->Prepare(wx2std(sql, dbCharsetConversionM.getConverter()));
         log(wxString::Format(_("Prepare time: %s"),
-            millisToTimeString(stopwatch.Time())));
+            millisToTimeString(stopwatch.Time()).c_str()));
 
         // we don't check IBPP::Select since Firebird 2.0 has a new feature
         // INSERT ... RETURNING which isn't detected as stSelect by IBPP
@@ -2136,7 +2139,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     }
 
     log(wxString::Format(_("Total execution time: %s"),
-        millisToTimeString(stopwatch.Time())));
+        millisToTimeString(stopwatch.Time()).c_str()));
     return retval;
 }
 //-----------------------------------------------------------------------------

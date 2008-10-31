@@ -203,7 +203,8 @@ mkdir ppcu
 cd ppcu
 ../configure --disable-debug --disable-dependency-tracking \
   CFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc" \
-  LDFLAGS="-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch ppc" \
+  LDFLAGS="-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch ppc \
+    -Wl,-macosx_version_min -Wl,10.4" \
   CXXFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc" \
   --with-wx-config=/my/path/to/wx-config_for_ppc_unicode
 make
@@ -213,7 +214,8 @@ mkdir i386u
 cd i386u
 ../configure --disable-debug --disable-dependency-tracking \
   CFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386" \
-  LDFLAGS="-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch i386" \
+  LDFLAGS="-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch i386 \
+    -Wl,-macosx_version_min -Wl,10.4" \
   CXXFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386" \
   --with-wx-config=/my/path/to/wx-config_for_i386_unicode
 make
