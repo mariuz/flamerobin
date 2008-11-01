@@ -505,6 +505,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     Observer(), databaseM(db)
 {
     loadingM = true;
+    updateEditorCaretPosM = true;
 
     CommandManager cm;
     buildToolbar(cm);
@@ -900,12 +901,17 @@ void ExecuteSqlFrame::OnSqlEditUpdateUI(wxStyledTextEvent& WXUNUSED(event))
         return;
 
     // print x:y coordinates in status bar
-    int p = styled_text_ctrl_sql->GetCurrentPos();
+    updateEditorCaretPosM = true;
+    // mghie: do not update the statusbar from here, because that slows
+    //        everything down a lot on Mac OS X
+/*
     int row = styled_text_ctrl_sql->GetCurrentLine();
     int col = p - styled_text_ctrl_sql->PositionFromLine(row);
     statusbar_1->SetStatusText(wxString::Format(wxT("%d : %d"), row+1, col+1), 2);
+*/
 
     // check for braces, and highlight
+    int p = styled_text_ctrl_sql->GetCurrentPos();
     int c1 = styled_text_ctrl_sql->GetCharAt(p);
     int c2 = (p > 1 ? styled_text_ctrl_sql->GetCharAt(p-1) : 0);
 
@@ -1229,6 +1235,16 @@ void ExecuteSqlFrame::OnIdle(wxIdleEvent& event)
 {
     if (doUpdateFocusedControlM)
         updateViewMode();
+    if (updateEditorCaretPosM)
+    {
+        updateEditorCaretPosM = false;
+
+        int p = styled_text_ctrl_sql->GetCurrentPos();
+        int row = styled_text_ctrl_sql->GetCurrentLine();
+        int col = p - styled_text_ctrl_sql->PositionFromLine(row);
+        statusbar_1->SetStatusText(wxString::Format(wxT("%d : %d"),
+            row + 1, col + 1), 2);
+    }
     event.Skip();
 }
 //-----------------------------------------------------------------------------

@@ -132,6 +132,8 @@ private:
     void setViewMode(bool splitView, ViewMode mode);
     void updateViewMode();
 
+    bool updateEditorCaretPosM;
+
     // events
     void OnChildFocus(wxChildFocusEvent& event);
     void OnClose(wxCloseEvent& event);
