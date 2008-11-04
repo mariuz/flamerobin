@@ -886,12 +886,15 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 // Avoiding the annoying thing that you cannot click inside the selection and have it deselected and have caret there
-void ExecuteSqlFrame::OnSqlEditStartDrag(wxStyledTextEvent& WXUNUSED(event))
+void ExecuteSqlFrame::OnSqlEditStartDrag(wxStyledTextEvent& event)
 {
     wxPoint mp = ::wxGetMousePosition();
     int p = styled_text_ctrl_sql->PositionFromPoint(styled_text_ctrl_sql->ScreenToClient(mp));
     styled_text_ctrl_sql->SetSelectionStart(p);    // deselect text
     styled_text_ctrl_sql->SetSelectionEnd(p);
+    // cancel drag operation, because drag and drop editing is disabled
+    // by our own SqlEditorDropTarget anyway
+    event.SetDragText(wxEmptyString);
 }
 //-----------------------------------------------------------------------------
 //! display editor col:row in StatusBar and do highlighting of braces ()
