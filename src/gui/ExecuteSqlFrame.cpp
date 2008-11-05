@@ -2552,6 +2552,16 @@ const wxRect ExecuteSqlFrame::getDefaultRect() const
     return wxRect(-1, -1, 528, 486);
 }
 //-----------------------------------------------------------------------------
+bool ExecuteSqlFrame::Show(bool show)
+{
+    bool retval = BaseFrame::Show(show);
+    // bug reported 2008-08-19 by Valdir Marcos: status bar position wrong
+    // when ExecuteSqlFrame is created in maximized state
+    if (IsMaximized())
+        SendSizeEvent();
+    return retval;
+}
+//-----------------------------------------------------------------------------
 void ExecuteSqlFrame::setViewMode(ViewMode mode)
 {
     setViewMode(splitter_window_1->IsSplit(), mode);

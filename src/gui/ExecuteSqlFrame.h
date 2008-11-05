@@ -79,6 +79,8 @@ public:
     void setSql(wxString sql);
 
     void executeAllStatements(bool autoExecute = false);
+
+    virtual bool Show(bool show = TRUE);
 private:
     // query parsing and execution
     void prepareAndExecute(bool prepareOnly = false);

@@ -46,10 +46,6 @@ ExecuteSqlFrame* showSql(wxWindow* parent, const wxString& title,
 {
     ExecuteSqlFrame* eff = new ExecuteSqlFrame(parent, -1, title, database);
     eff->Show();
-    // bug reported 2008-08-19 by Valdir Marcos: status bar position wrong
-    // when ExecuteSqlFrame is created in maximized state
-    if (eff->IsMaximized())
-        eff->SendSizeEvent();
     eff->setSql(sql);
     return eff;
 }
