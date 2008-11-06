@@ -603,13 +603,19 @@ MetadataItem* Database::findByNameAndType(NodeType nt, wxString name)
 Relation* Database::findRelation(const Identifier& name)
 {
     for (MetadataCollection<Table>::iterator it = tablesM.begin();
-        it != tablesM.end(); it++)
+        it != tablesM.end(); ++it)
     {
         if ((*it).getIdentifier().equals(name))
             return &(*it);
     }
     for (MetadataCollection<View>::iterator it = viewsM.begin();
-        it != viewsM.end(); it++)
+        it != viewsM.end(); ++it)
+    {
+        if ((*it).getIdentifier().equals(name))
+            return &(*it);
+    }
+    for (MetadataCollection<Table>::iterator it = sysTablesM.begin();
+        it != sysTablesM.end(); ++it)
     {
         if ((*it).getIdentifier().equals(name))
             return &(*it);

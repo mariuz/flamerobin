@@ -118,6 +118,6 @@ void PrimaryKeyConstraint::acceptVisitor(MetadataItemVisitor* visitor)
 //-----------------------------------------------------------------------------
 Table* Constraint::getTable() const
 {
-    return dynamic_cast<Table *>(getParentObjectOfType(ntTable));
+    return getParentObjectByType<Table>();
 }
 //-----------------------------------------------------------------------------

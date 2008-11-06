@@ -66,6 +66,21 @@ private:
 protected:
     Identifier identifierM;
     NodeType typeM;
+
+    template <class T>
+    T* getParentObjectByType() const
+    {
+        MetadataItem *m = getParent();
+        while (m)
+        {
+            T* t = dynamic_cast<T*>(m);
+            if (t)
+                return t;
+            m = m->getParent();
+        }
+        return 0;
+    }
+
     MetadataItem* getParentObjectOfType(NodeType type) const;
 
     virtual void loadDescription();
