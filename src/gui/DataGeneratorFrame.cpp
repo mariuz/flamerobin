@@ -262,9 +262,6 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
 {
     // until we find something better
     SetIcon(wxArtProvider::GetIcon(ART_Procedure, wxART_FRAME_ICON));
-
-    dbCharsetConversionM.setConnectionCharset(db->getConnectionCharset());
-
     SetTitle(_("Test Data Generator"));
     // prevent tree events from reaching the main frame
     // TODO: we need proper event handling for tree to allow multiple
@@ -1285,7 +1282,7 @@ void DataGeneratorFrame::setString(IBPP::Statement st, int param,
             start = p;
         }
     }
-    st->Set(param, wx2std(value, dbCharsetConversionM.getConverter()));
+    st->Set(param, wx2std(value, databaseM->getCharsetConverter()));
 }
 //-----------------------------------------------------------------------------
 // gs->range = x,x-y,...

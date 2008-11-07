@@ -28,7 +28,7 @@
 #ifndef FR_DATABASE_H
 #define FR_DATABASE_H
 //-----------------------------------------------------------------------------
-#include <wx/timer.h>
+#include <wx/strconv.h>
 
 #include <map>
 
@@ -163,6 +163,9 @@ private:
     Credentials* connectionCredentialsM;
     bool storeEncryptedPasswordM;
 
+    wxMBConv* charsetConverterM;
+    void createCharsetConverter();
+
     DatabaseInfo databaseInfoM;
 
     MetadataCollection<Domain> domainsM;
@@ -291,6 +294,8 @@ public:
 
     const DatabaseInfo& getInfo();
     void loadInfo();
+
+    wxMBConv* getCharsetConverter() const;
 };
 //----------------------------------------------------------------------------
 #endif

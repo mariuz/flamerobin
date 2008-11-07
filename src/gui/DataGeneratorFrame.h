@@ -58,7 +58,6 @@ protected:
     bool loadingM;  // prevent updates until loaded
     std::map<wxString, GeneratorSettings *> settingsM;
     std::map<wxString, int> tableRecordsM;
-    DatabaseToSystemCharsetConversion dbCharsetConversionM;
     Database* databaseM;
     virtual const wxString getName() const;
     virtual const wxRect getDefaultRect() const;

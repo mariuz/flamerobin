@@ -2032,7 +2032,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         statementM = IBPP::StatementFactory(databaseM->getIBPPDatabase(), transactionM);
         log(_("Preparing query: " + sql), ttSql);
         sae.scroll();
-        statementM->Prepare(wx2std(sql, dbCharsetConversionM.getConverter()));
+        statementM->Prepare(wx2std(sql, databaseM->getCharsetConverter()));
         log(wxString::Format(_("Prepare time: %s"),
             millisToTimeString(stopwatch.Time()).c_str()));
 
@@ -2091,7 +2091,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         IBPP::STT type = statementM->Type();
         if (hasColumns)            // for select statements: show data
         {
-            grid_data->fetchData(dbCharsetConversionM.getConverter());
+            grid_data->fetchData(databaseM->getCharsetConverter());
             setViewMode(vmGrid);
         }
 
@@ -2434,7 +2434,6 @@ void ExecuteSqlFrame::update()
 void ExecuteSqlFrame::setDatabase(Database* db)
 {
     databaseM = db;
-    dbCharsetConversionM.setConnectionCharset(db->getConnectionCharset());
 
     wxString s = wxString::Format(wxT("%s@%s:%s"), db->getUsername().c_str(),
         db->getServer()->getName_().c_str(), db->getPath().c_str());

@@ -74,13 +74,13 @@ wxString Table::getExternalPath()
         " where rdb$relation_name = ?"
     );
 
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     if (st1->Fetch() && !st1->IsNull(1))
     {
         std::string file;
         st1->Get(1, file);
-        externalPathM = std2wx(file);
+        externalPathM = std2wx(file, d->getCharsetConverter());
     }
     else
         externalPathM = wxEmptyString;
@@ -219,19 +219,20 @@ void Table::loadCheckConstraints()
         " where r.rdb$relation_name=?"
     );
 
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     while (st1->Fetch())
     {
+        std::string s;
+        st1->Get(1, s);
+        wxString cname(std2wxIdentifier(s, d->getCharsetConverter()));
         wxString source;
-        std::string cname;
-        st1->Get(1, cname);
         readBlob(st1, 2, source);
-        cname.erase(cname.find_last_not_of(" ") + 1);
         source.erase(source.find_last_not_of(wxT(" ")) + 1);
+
         CheckConstraint c;
         c.setParent(this);
-        c.setName_(std2wx(cname));
+        c.setName_(cname);
         c.sourceM = source;
         checkConstraintsM.push_back(c);
     }
@@ -261,18 +262,21 @@ void Table::loadPrimaryKey()
         "(r.rdb$constraint_type='PRIMARY KEY') order by r.rdb$constraint_name, i.rdb$field_position"
     );
 
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     while (st1->Fetch())
     {
-        std::string name, cname, ix;
-        st1->Get(1, cname);
-        st1->Get(2, name);
-        st1->Get(3, ix);
+        std::string s;
+        st1->Get(1, s);
+        wxString cname(std2wxIdentifier(s, d->getCharsetConverter()));
+        st1->Get(2, s);
+        wxString fname(std2wxIdentifier(s, d->getCharsetConverter()));
+        st1->Get(3, s);
+        wxString ixname(std2wxIdentifier(s, d->getCharsetConverter()));
 
-        primaryKeyM.setName_(std2wx(cname).Strip());
-        primaryKeyM.columnsM.push_back(std2wx(name).Strip());
-        primaryKeyM.indexName = std2wx(ix).Strip();
+        primaryKeyM.setName_(cname);
+        primaryKeyM.columnsM.push_back(fname);
+        primaryKeyM.indexName = ixname;
     }
     primaryKeyM.setParent(this);
     primaryKeyLoadedM = true;
@@ -301,28 +305,29 @@ void Table::loadUniqueConstraints()
         "(r.rdb$constraint_type='UNIQUE') order by r.rdb$constraint_name, i.rdb$field_position"
     );
 
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     UniqueConstraint *cc = 0;
     while (st1->Fetch())
     {
-        std::string name, cname, ix;
-        st1->Get(1, cname);
-        st1->Get(2, name);
-        st1->Get(3, ix);
-        name.erase(name.find_last_not_of(" ") + 1);
-        cname.erase(cname.find_last_not_of(" ") + 1);
+        std::string s;
+        st1->Get(1, s);
+        wxString cname(std2wxIdentifier(s, d->getCharsetConverter()));
+        st1->Get(2, s);
+        wxString fname(std2wxIdentifier(s, d->getCharsetConverter()));
+        st1->Get(3, s);
+        wxString ixname(std2wxIdentifier(s, d->getCharsetConverter()));
 
-        if (cc && cc->getName_() == std2wx(cname))
-            cc->columnsM.push_back(std2wx(name));
+        if (cc && cc->getName_() == cname)
+            cc->columnsM.push_back(fname);
         else
         {
             UniqueConstraint c;
             uniqueConstraintsM.push_back(c);
             cc = &uniqueConstraintsM.back();
-            cc->indexName = std2wx(ix).Strip();
-            cc->setName_(std2wx(cname));
-            cc->columnsM.push_back(std2wx(name));
+            cc->indexName = ixname;
+            cc->setName_(cname);
+            cc->columnsM.push_back(fname);
             cc->setParent(this);
         }
     }
@@ -394,50 +399,51 @@ void Table::loadForeignKeys()
         " order by i.rdb$field_position "
     );
 
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     ForeignKey *fkp = 0;
     while (st1->Fetch())
     {
-        std::string name, cname, update_rule, delete_rule, ref_constraint;
-        std::string ix;
-        st1->Get(1, cname);
-        st1->Get(2, name);
-        st1->Get(3, update_rule);
-        st1->Get(4, delete_rule);
+        std::string s;
+        st1->Get(1, s);
+        wxString cname(std2wxIdentifier(s, d->getCharsetConverter()));
+        st1->Get(2, s);
+        wxString fname(std2wxIdentifier(s, d->getCharsetConverter()));
+        st1->Get(3, s);
+        wxString update_rule(std2wxIdentifier(s, d->getCharsetConverter()));
+        st1->Get(4, s);
+        wxString delete_rule(std2wxIdentifier(s, d->getCharsetConverter()));
+        std::string ref_constraint;
         st1->Get(5, ref_constraint);
-        st1->Get(6, ix);
+        st1->Get(6, s);
+        wxString ixname(std2wxIdentifier(s, d->getCharsetConverter()));
 
-        name.erase(name.find_last_not_of(" ") + 1);
-        cname.erase(cname.find_last_not_of(" ") + 1);
-        ref_constraint.erase(ref_constraint.find_last_not_of(" ") + 1);
-
-        if (fkp && fkp->getName_() == std2wx(cname)) // add column
-            fkp->columnsM.push_back(std2wx(name));
+        if (fkp && fkp->getName_() == cname) // add column
+            fkp->columnsM.push_back(fname);
         else
         {
             ForeignKey fk;
             foreignKeysM.push_back(fk);
             fkp = &foreignKeysM.back();
-            fkp->setName_(std2wx(cname));
+            fkp->setName_(cname);
             fkp->setParent(this);
-            fkp->updateActionM = std2wx(update_rule).Strip();
-            fkp->deleteActionM = std2wx(delete_rule).Strip();
-            fkp->indexName = std2wx(ix).Strip();
+            fkp->updateActionM = update_rule;
+            fkp->deleteActionM = delete_rule;
+            fkp->indexName = ixname;
 
             st2->Set(1, ref_constraint);
             st2->Execute();
-            std::string rtable, rcolumn;
+            std::string rtable;
             while (st2->Fetch())
             {
                 st2->Get(1, rtable);
-                st2->Get(2, rcolumn);
-                rcolumn.erase(rcolumn.find_last_not_of(" ") + 1);
-                fkp->referencedColumnsM.push_back(std2wx(rcolumn));
+                st2->Get(2, s);
+                fkp->referencedColumnsM.push_back(
+                    std2wxIdentifier(s, d->getCharsetConverter()));
             }
-            rtable.erase(rtable.find_last_not_of(" ") + 1);
-            fkp->referencedTableM = std2wx(rtable);
-            fkp->columnsM.push_back(std2wx(name));
+            fkp->referencedTableM = std2wxIdentifier(rtable,
+                d->getCharsetConverter());
+            fkp->columnsM.push_back(fname);
         }
     }
     foreignKeysLoadedM = true;
@@ -471,16 +477,16 @@ void Table::loadIndices()
         " order by i.rdb$index_name, s.rdb$field_position "
     );
 
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     Index* i = 0;
     while (st1->Fetch())
     {
-        std::string name, fname;
-        wxString expression;
+        std::string s;
+        st1->Get(1, s);
+        wxString ixname(std2wxIdentifier(s, d->getCharsetConverter()));
+
         short unq, inactive, type;
-        double statistics;
-        st1->Get(1, name);
         if (st1->IsNull(2))     // null = non-unique
             unq = 0;
         else
@@ -493,17 +499,19 @@ void Table::loadIndices()
             type = 0;
         else
             st1->Get(4, type);
+        double statistics;
         if (st1->IsNull(5))     // this can happen, see bug #1825725
             statistics = -1;
         else
             st1->Get(5, statistics);
-        st1->Get(6, fname);
-        readBlob(st1, 8, expression);
-        name.erase(name.find_last_not_of(" ") + 1);
-        fname.erase(fname.find_last_not_of(" ") + 1);
 
-        if (i && i->getName_() == std2wx(name))
-            i->getSegments()->push_back(std2wx(fname));
+        st1->Get(6, s);
+        wxString fname(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString expression;
+        readBlob(st1, 8, expression);
+
+        if (i && i->getName_() == ixname)
+            i->getSegments()->push_back(fname);
         else
         {
             Index x(
@@ -516,8 +524,8 @@ void Table::loadIndices()
             );
             indicesM.push_back(x);
             i = &indicesM.back();
-            i->setName_(std2wx(name));
-            i->getSegments()->push_back(std2wx(fname));
+            i->setName_(ixname);
+            i->getSegments()->push_back(fname);
             i->setParent(this);
         }
     }

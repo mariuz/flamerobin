@@ -94,17 +94,16 @@ void Trigger::loadInfo(bool force)
         "from rdb$triggers t where rdb$trigger_name = ? "
     );
 
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     if (st1->Fetch())
     {
         isDatabaseTriggerM = st1->IsNull(1);
         if (!isDatabaseTriggerM)
         {
-            std::string objectName;
-            st1->Get(1, objectName);
-            objectM = std2wx(objectName);
-            objectM.erase(objectM.find_last_not_of(wxT(" ")) + 1);
+            std::string objname;
+            st1->Get(1, objname);
+            objectM = std2wxIdentifier(objname, d->getCharsetConverter());
         }
         st1->Get(2, &positionM);
 
@@ -137,7 +136,7 @@ wxString Trigger::getSource() const
 
     IBPP::Statement& st1 = loader->getStatement(
         "select rdb$trigger_source from rdb$triggers where rdb$trigger_name = ?");
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     st1->Fetch();
     wxString source;

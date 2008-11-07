@@ -108,13 +108,13 @@ void Relation::loadInfo()
     sql += " from rdb$relations where rdb$relation_name = ?";
 
     IBPP::Statement& st1 = loader->getStatement(sql);
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     if (st1->Fetch())
     {
         std::string name;
         st1->Get(1, name);
-        ownerM = std2wx(name).Trim();
+        ownerM = std2wx(name, d->getCharsetConverter()).Trim();
         st1->Get(2, relationTypeM);
         relationInfoLoadedM = true;
     }
@@ -166,7 +166,7 @@ void Relation::loadColumns()
         " where r.rdb$relation_name = ?"
         " order by r.rdb$field_position"
     );
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     while (st1->Fetch())
     {
@@ -187,10 +187,11 @@ void Relation::loadColumns()
         }
 
         Column *cc = columnsM.add();
-        cc->setName_(std2wx(name));
+        cc->setName_(std2wx(name, d->getCharsetConverter()));
         cc->setParent(this);
-        cc->Init(!st1->IsNull(2), std2wx(source),
-            computedSrc, std2wx(collation), defaultSrc, !st1->IsNull(6));
+        cc->Init(!st1->IsNull(2), std2wx(source, d->getCharsetConverter()),
+            computedSrc, std2wx(collation, d->getCharsetConverter()),
+            defaultSrc, !st1->IsNull(6));
     }
     notifyObservers();
 }
@@ -235,7 +236,7 @@ void Relation::getDependentChecks(std::vector<CheckConstraint>& checks)
         "and t.rdb$trigger_type = 1 and d.rdb$field_name is null "
     );
 
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     while (st1->Fetch())
     {
@@ -244,9 +245,9 @@ void Relation::getDependentChecks(std::vector<CheckConstraint>& checks)
         st1->Get(1, cname);
         st1->Get(2, table);
         readBlob(st1, 3, source);
-        wxString consname = std2wx(cname).Strip();
-        Table *tab = dynamic_cast<Table *>(d->findByNameAndType(ntTable,
-            std2wx(table).Strip()));
+        wxString consname = std2wx(cname, d->getCharsetConverter()).Strip();
+        Table* tab = dynamic_cast<Table*>(d->findByNameAndType(ntTable,
+            std2wx(table, d->getCharsetConverter()).Strip()));
         if (!tab)
             continue;
 
@@ -511,7 +512,7 @@ std::vector<Privilege>* Relation::getPrivileges()
         "where RDB$RELATION_NAME = ? and rdb$object_type = 0 "
         "order by rdb$user, rdb$user_type, rdb$grant_option, rdb$privilege"
     );
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     std::string lastuser;
     int lasttype = -1;
@@ -529,14 +530,16 @@ std::vector<Privilege>* Relation::getPrivileges()
         st1->Get(6, field);
         if (!pr || user != lastuser || usertype != lasttype)
         {
-            Privilege p(this, std2wx(user).Strip(), usertype);
+            Privilege p(this, std2wx(user, d->getCharsetConverter()).Strip(),
+                usertype);
             privilegesM.push_back(p);
             pr = &privilegesM.back();
             lastuser = user;
             lasttype = usertype;
         }
-        pr->addPrivilege(privilege[0], std2wx(grantor).Strip(),
-            grantoption == 1, std2wx(field).Strip());
+        pr->addPrivilege(privilege[0],
+            std2wx(grantor, d->getCharsetConverter()).Strip(),
+            grantoption == 1, std2wx(field, d->getCharsetConverter()).Strip());
     }
     return &privilegesM;
 }
@@ -554,15 +557,14 @@ void Relation::getTriggers(std::vector<Trigger *>& list,
         "select rdb$trigger_name from rdb$triggers where rdb$relation_name = ? "
         "order by rdb$trigger_sequence"
     );
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     while (st1->Fetch())
     {
         std::string name;
         st1->Get(1, name);
-        name.erase(name.find_last_not_of(" ") + 1);
         Trigger* t = dynamic_cast<Trigger*>(d->findByNameAndType(ntTrigger,
-            std2wx(name)));
+            std2wxIdentifier(name, d->getCharsetConverter())));
         if (t && t->getFiringTime() == beforeOrAfter)
             list.push_back(t);
     }

@@ -102,7 +102,6 @@ private:
 
     void splitScreen();
     Database* databaseM;
-    DatabaseToSystemCharsetConversion dbCharsetConversionM;
     void setDatabase(Database* db);
 
     StatementHistory::Position historyPositionM;

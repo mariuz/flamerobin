@@ -36,6 +36,8 @@ class wxMBConv;
 //-----------------------------------------------------------------------------
 std::string wx2std(const wxString& input, wxMBConv* conv = wxConvCurrent);
 wxString std2wx(const std::string& input, wxMBConv* conv = wxConvCurrent);
+
+wxString std2wxIdentifier(const std::string& input, wxMBConv* conv);
 //-----------------------------------------------------------------------------
 //! converts chars that have special meaning in HTML, so they get displayed
 wxString escapeHtmlChars(const wxString& input, bool processNewlines = true);
@@ -43,21 +45,5 @@ wxString escapeHtmlChars(const wxString& input, bool processNewlines = true);
 //! returns string suitable for HTML META charset tag (used only if no
 //  conversion to UTF-8 is available, i.e. in non-Unicode build
 wxString getHtmlCharset();
-//-----------------------------------------------------------------------------
-// a helper class to manage the wxMBConv object necessary to translate from
-// and to the database connection charset
-class DatabaseToSystemCharsetConversion
-{
-private:
-    wxString connectionCharsetM;
-    wxMBConv* converterM;
-public:
-    DatabaseToSystemCharsetConversion();
-    ~DatabaseToSystemCharsetConversion();
-
-    wxMBConv* getConverter();
-    static wxString mapCharset(const wxString& connectionCharset);
-    void setConnectionCharset(const wxString& connectionCharset);
-};
 //-----------------------------------------------------------------------------
 #endif // FR_STRINGUTILS_H

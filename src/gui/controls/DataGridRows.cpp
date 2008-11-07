@@ -1889,12 +1889,9 @@ IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
         }
     }
 
-    DatabaseToSystemCharsetConversion dtscc;
-    dtscc.setConnectionCharset(databaseM->getConnectionCharset());
-
     IBPP::Statement st = IBPP::StatementFactory(statementM->DatabasePtr(),
         statementM->TransactionPtr());
-    st->Prepare(wx2std(stm, dtscc.getConverter()));
+    st->Prepare(wx2std(stm, databaseM->getCharsetConverter()));
     if (dbkey)  // find the column and set the parameter
     {
         for (int c2 = 1; c2 <= statementM->Columns(); ++c2)

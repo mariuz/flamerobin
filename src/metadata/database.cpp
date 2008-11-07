@@ -38,6 +38,9 @@
     #pragma hdrstop
 #endif
 
+#include <wx/encconv.h>
+#include <wx/fontmap.h>
+
 #include <sstream>
 
 #include "config/Config.h"
@@ -193,7 +196,8 @@ void DatabaseInfo::reloadIfNecessary(const IBPP::Database database)
 //-----------------------------------------------------------------------------
 Database::Database()
     : MetadataItem(), metadataLoaderM(0), connectedM(false),
-        connectionCredentialsM(0), storeEncryptedPasswordM(false), idM(0)
+        connectionCredentialsM(0), charsetConverterM(0),
+        storeEncryptedPasswordM(false), idM(0)
 {
     typeM = ntDatabase;
 
@@ -214,7 +218,7 @@ Database::Database()
 //-----------------------------------------------------------------------------
 Database::Database(const Database& rhs)
     : MetadataItem(rhs), databaseM(rhs.databaseM),
-        metadataLoaderM(0), connectedM(rhs.connectedM),
+        metadataLoaderM(0), connectedM(false), charsetConverterM(0),
         databaseCharsetM(rhs.databaseCharsetM), pathM(rhs.pathM),
         credentialsM(rhs.credentialsM), connectionCredentialsM(0),
         domainsM(rhs.domainsM), exceptionsM(rhs.exceptionsM),
@@ -242,6 +246,7 @@ Database::Database(const Database& rhs)
 Database::~Database()
 {
     resetCredentials();
+    delete charsetConverterM;
 }
 //-----------------------------------------------------------------------------
 void Database::prepareTemporaryCredentials()
@@ -518,14 +523,15 @@ void Database::loadObjects(NodeType type, ProgressIndicator* indicator)
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(this);
 
-    IBPP::Statement& st1 = loader->getStatement(wx2std(getLoadingSql(type)));
+    IBPP::Statement& st1 = loader->getStatement(wx2std(getLoadingSql(type),
+        getCharsetConverter()));
     st1->Execute();
     while (st1->Fetch())
     {
         std::string name;
         st1->Get(1, name);
         name.erase(name.find_last_not_of(" ") + 1);
-        addObject(type, std2wx(name));
+        addObject(type, std2wx(name, getCharsetConverter()));
 
         if (indicator && indicator->isCanceled())
             break;
@@ -890,6 +896,8 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
 
     try
     {
+        createCharsetConverter();
+
         if (indicator)
             indicator->initProgressIndeterminate(wxT("Establishing connection..."));
         databaseM = IBPP::DatabaseFactory("", wx2std(getConnectionString()),
@@ -1344,5 +1352,56 @@ bool Database::showSysTables()
         b = config().get(SHOW_SYSTABLES, true);
 
     return b;
+}
+//-----------------------------------------------------------------------------
+wxString mapConnectionCharsetToSystemCharset(const wxString& connectionCharset)
+{
+    wxString charset(connectionCharset.Upper().Trim());
+    charset.Trim(false);
+
+    // fixes hang when character set name empty (invalid encoding is returned)
+    if (charset.empty())
+        charset = wxT("NONE");
+
+    // Firebird charsets WIN125X need to be replaced with either
+    // WINDOWS125X or CP125X - we take the latter
+    if (charset.Mid(0, 5) == wxT("WIN12"))
+        return wxT("CP12") + charset.Mid(5);
+
+    // Firebird charsets ISO8859_X
+    if (charset.Mid(0, 8) == wxT("ISO8859_"))
+        return wxT("ISO-8859-") + charset.Mid(8);
+
+    // all other mappings need to be added here...
+    struct CharsetMapping { const wxChar* connCS; const wxChar* convCS; };
+    static const CharsetMapping mappings[] = {
+        { wxT("UTF8"), wxT("UTF-8") }, { wxT("UNICODE_FSS"), wxT("UTF-8") }
+    };
+    int mappingCount = sizeof(mappings) / sizeof(CharsetMapping);
+    for (int i = 0; i < mappingCount; i++)
+    {
+        if (mappings[i].connCS == charset)
+            return mappings[i].convCS;
+    }
+
+    return charset;
+}
+//-----------------------------------------------------------------------------
+void Database::createCharsetConverter()
+{
+    delete charsetConverterM;
+    charsetConverterM = 0;
+
+    wxString cs(mapConnectionCharsetToSystemCharset(getConnectionCharset()));
+    wxFontEncoding fe = wxFontMapperBase::Get()->CharsetToEncoding(cs, false);
+    if (fe != wxFONTENCODING_SYSTEM)
+        charsetConverterM = new wxCSConv(fe);
+}
+//-----------------------------------------------------------------------------
+wxMBConv* Database::getCharsetConverter() const
+{
+    if (charsetConverterM)
+        return charsetConverterM;
+    return wxConvCurrent;
 }
 //-----------------------------------------------------------------------------
