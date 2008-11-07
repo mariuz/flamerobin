@@ -37,6 +37,8 @@
 
 #include <set>
 
+#include <wx/stc/stc.h>
+
 #include "frutils.h"
 #include "gui/AdvancedSearchFrame.h"
 #include "gui/ContextMenuMetadataItemVisitor.h"
@@ -233,9 +235,16 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent)
     bottom_splitter_panel = new wxPanel(splitter1, wxID_ANY, wxDefaultPosition,
         wxDefaultSize, wxTAB_TRAVERSAL);
     wxBoxSizer *bottom_splitter_sizer = new wxBoxSizer(wxVERTICAL);
-    stc_ddl = new wxTextCtrl(bottom_splitter_panel, wxID_ANY,
-        _("DDL for selected objects"), wxDefaultPosition, wxDefaultSize,
-        wxTE_MULTILINE|wxTE_WORDWRAP);
+    stc_ddl = new wxStyledTextCtrl(bottom_splitter_panel, wxID_ANY,
+        wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
+    stc_ddl->SetWrapMode(wxSTC_WRAP_WORD);
+    stc_ddl->SetMarginWidth(1, 0);  // turn off the folding margin
+    stc_ddl->StyleSetForeground(1, *wxWHITE);
+    stc_ddl->StyleSetBackground(1, *wxBLUE);
+    stc_ddl->StyleSetForeground(2, *wxWHITE);
+    stc_ddl->StyleSetBackground(2, *wxRED);
+    stc_ddl->SetText(_("DDL for selected objects"));
+
     bottom_splitter_sizer->Add(stc_ddl, 1, wxEXPAND, 0);
     bottom_splitter_panel->SetSizer(bottom_splitter_sizer);
     splitter1->SplitHorizontally(top_splitter_panel,bottom_splitter_panel,0);
@@ -437,7 +446,27 @@ void AdvancedSearchFrame::OnListCtrlResultsItemSelected(wxListEvent& event)
     {
         CreateDDLVisitor cdv;
         m->acceptVisitor(&cdv);
-        stc_ddl->SetValue(cdv.getSql());
+        wxString sql(cdv.getSql());
+        stc_ddl->SetText(sql);
+        sql.MakeUpper();
+        // highlight the found text
+        int color = 0;  // alternate red and blue color for different words
+        for (CriteriaCollection::const_iterator ci =
+            searchCriteriaM.lower_bound(CriteriaItem::ctDDL); ci !=
+            searchCriteriaM.upper_bound(CriteriaItem::ctDDL); ++ci, ++color)
+        {
+            int len = (*ci).second.value.Length() - 2;
+            wxString sfind((*ci).second.value.Mid(1, len));
+            int p = -1;
+            while (true)
+            {
+                p = sql.find(sfind, p+1);
+                if (p == wxString::npos)
+                    break;
+                stc_ddl->StartStyling(p, 255);
+                stc_ddl->SetStyling(len, 1+color%2);
+            }
+        }
     }
     MainFrame *mf = dynamic_cast<MainFrame *>(GetParent());
     if (mf)

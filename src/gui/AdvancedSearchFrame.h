@@ -66,6 +66,7 @@ public:
 class MetadataItem;
 class AdjustableListCtrl;   // declaration in cpp file
 class MainFrame;
+class wxStyledTextCtrl;
 //-----------------------------------------------------------------------------
 class AdvancedSearchFrame : public BaseFrame, public Observer
 {
@@ -113,7 +114,7 @@ protected:
     wxPanel *top_splitter_panel;
     AdjustableListCtrl *listctrl_results;
     wxPanel *bottom_splitter_panel;
-    wxTextCtrl *stc_ddl;
+    wxStyledTextCtrl *stc_ddl;
 
 public:
     AdvancedSearchFrame(MainFrame *parent);
