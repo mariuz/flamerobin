@@ -29,6 +29,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define FRUTILS_H
 //-----------------------------------------------------------------------------
 #include <wx/wx.h>
+#include <wx/strconv.h>
 #include <wx/filename.h>
 
 #include <list>
@@ -45,7 +46,8 @@ class ProgressIndicator;
 void adjustControlsMinWidth(std::list<wxWindow*> controls);
 //-----------------------------------------------------------------------------
 //! reads blob from statement into wxString
-void readBlob(IBPP::Statement& st, int column, wxString& result);
+void readBlob(IBPP::Statement& st, int column, wxString& result,
+    wxMBConv* conv);
 //-----------------------------------------------------------------------------
 //! displays a list of table columns and lets user select some
 wxString selectRelationColumns(Relation* t, wxWindow* parent);

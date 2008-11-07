@@ -73,7 +73,8 @@ void adjustControlsMinWidth(list<wxWindow*> controls)
     }
 }
 //-----------------------------------------------------------------------------
-void readBlob(IBPP::Statement& st, int column, wxString& result)
+void readBlob(IBPP::Statement& st, int column, wxString& result,
+    wxMBConv* conv)
 {
     result = wxT("");
     if (st->IsNull(column))
@@ -101,7 +102,7 @@ void readBlob(IBPP::Statement& st, int column, wxString& result)
         readBuffer[size] = 0;
         resultBuffer += readBuffer;
     }
-    result = std2wx(resultBuffer);
+    result = std2wx(resultBuffer, conv);
     b->Close();
 }
 //-----------------------------------------------------------------------------

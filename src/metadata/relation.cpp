@@ -114,7 +114,7 @@ void Relation::loadInfo()
     {
         std::string name;
         st1->Get(1, name);
-        ownerM = std2wx(name, d->getCharsetConverter()).Trim();
+        ownerM = std2wxIdentifier(name, d->getCharsetConverter());
         st1->Get(2, relationTypeM);
         relationInfoLoadedM = true;
     }
@@ -170,16 +170,18 @@ void Relation::loadColumns()
     st1->Execute();
     while (st1->Fetch())
     {
-        std::string name, source, collation;
+        std::string s;
+        st1->Get(1, s);
+        wxString fname(std2wxIdentifier(s, d->getCharsetConverter()));
+        st1->Get(3, s);
+        wxString source(std2wxIdentifier(s, d->getCharsetConverter()));
+        st1->Get(4, s);
+        wxString collation(std2wxIdentifier(s, d->getCharsetConverter()));
         wxString computedSrc, defaultSrc;
-        st1->Get(1, name);
-        st1->Get(3, source);
-        st1->Get(4, collation);
-        readBlob(st1, 5, computedSrc);
-
+        readBlob(st1, 5, computedSrc, d->getCharsetConverter());
         if (!st1->IsNull(6))
         {
-            readBlob(st1, 6, defaultSrc);
+            readBlob(st1, 6, defaultSrc, d->getCharsetConverter());
             // Some users reported two spaces before DEFAULT word in source
             // Perhaps some other tools can put garbage here? Should we
             // parse it as SQL to clean up comments, whitespace, etc?
@@ -187,10 +189,9 @@ void Relation::loadColumns()
         }
 
         Column *cc = columnsM.add();
-        cc->setName_(std2wx(name, d->getCharsetConverter()));
+        cc->setName_(fname);
         cc->setParent(this);
-        cc->Init(!st1->IsNull(2), std2wx(source, d->getCharsetConverter()),
-            computedSrc, std2wx(collation, d->getCharsetConverter()),
+        cc->Init(!st1->IsNull(2), source,  computedSrc, collation,
             defaultSrc, !st1->IsNull(6));
     }
     notifyObservers();
@@ -240,21 +241,24 @@ void Relation::getDependentChecks(std::vector<CheckConstraint>& checks)
     st1->Execute();
     while (st1->Fetch())
     {
+        std::string s;
+        st1->Get(1, s);
+        wxString cname(std2wxIdentifier(s, d->getCharsetConverter()));
+        st1->Get(2, s);
+        wxString table(std2wxIdentifier(s, d->getCharsetConverter()));
+
         wxString source;
-        std::string table, cname;
-        st1->Get(1, cname);
-        st1->Get(2, table);
-        readBlob(st1, 3, source);
-        wxString consname = std2wx(cname, d->getCharsetConverter()).Strip();
+        readBlob(st1, 3, source, d->getCharsetConverter());
+
         Table* tab = dynamic_cast<Table*>(d->findByNameAndType(ntTable,
-            std2wx(table, d->getCharsetConverter()).Strip()));
+            table));
         if (!tab)
             continue;
 
         // check if it exists
         std::vector<CheckConstraint>::iterator it;
         for (it = checks.begin(); it != checks.end(); ++it)
-            if ((*it).getTable() == tab && (*it).getName_() == consname)
+            if ((*it).getTable() == tab && (*it).getName_() == cname)
                 break;
 
         if (it != checks.end())     // already there
@@ -262,7 +266,7 @@ void Relation::getDependentChecks(std::vector<CheckConstraint>& checks)
 
         CheckConstraint c;
         c.setParent(tab);
-        c.setName_(consname);
+        c.setName_(cname);
         c.sourceM = source;
         checks.push_back(c);
     }
@@ -538,8 +542,8 @@ std::vector<Privilege>* Relation::getPrivileges()
             lasttype = usertype;
         }
         pr->addPrivilege(privilege[0],
-            std2wx(grantor, d->getCharsetConverter()).Strip(),
-            grantoption == 1, std2wx(field, d->getCharsetConverter()).Strip());
+            std2wxIdentifier(grantor, d->getCharsetConverter()),
+            grantoption == 1, std2wxIdentifier(field, d->getCharsetConverter()));
     }
     return &privilegesM;
 }

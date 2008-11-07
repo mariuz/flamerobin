@@ -79,7 +79,7 @@ void Domain::loadInfo()
         " where f.rdb$field_name = ?"
     );
 
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     if (!st1->Fetch())
         throw FRError(_("Domain not found: ") + getName_());
@@ -114,16 +114,16 @@ void Domain::loadInfo()
         charsetM = wxT("");
     else
     {
-        std::string charset;
-        st1->Get(6, charset);
-        charsetM = std2wx(charset).Strip();
+        std::string s;
+        st1->Get(6, s);
+        charsetM = std2wxIdentifier(s, d->getCharsetConverter());
     }
     isNotNullM = !st1->IsNull(8);
 
     hasDefaultM = !st1->IsNull(9);
     if (hasDefaultM)
     {
-        readBlob(st1, 9, defaultM);
+        readBlob(st1, 9, defaultM, d->getCharsetConverter());
 
         // Some users reported two spaces before DEFAULT word in source
         // Also, equals sign is also allowed in newer FB versions
@@ -138,11 +138,11 @@ void Domain::loadInfo()
         collationM = wxEmptyString;
     else
     {
-        std::string coll;
-        st1->Get(10, coll);
-        collationM = std2wx(coll).Strip();
+        std::string s;
+        st1->Get(10, s);
+        collationM = std2wxIdentifier(s, d->getCharsetConverter());
     }
-    readBlob(st1, 11, checkM);
+    readBlob(st1, 11, checkM, d->getCharsetConverter());
 
     if (!isSystem())
         notifyObservers();

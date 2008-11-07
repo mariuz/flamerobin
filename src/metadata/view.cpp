@@ -68,7 +68,7 @@ wxString View::getSource()
     st1->Execute();
     st1->Fetch();
     wxString source;
-    readBlob(st1, 1, source);
+    readBlob(st1, 1, source, d->getCharsetConverter());
     return source;
 }
 //-----------------------------------------------------------------------------

@@ -198,20 +198,24 @@ void Procedure::loadParameters()
             " order by p.rdb$parameter_type, rdb$PARAMETER_number ";
 
     IBPP::Statement st1 = loader->getStatement(sql);
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
 
     while (st1->Fetch())
     {
-        std::string column_name, source;
+        std::string s;
+        st1->Get(1, s);
+        wxString column_name(std2wxIdentifier(s, d->getCharsetConverter()));
+        st1->Get(2, s);
+        wxString source(std2wxIdentifier(s, d->getCharsetConverter()));
+
         short partype, mechanism = -1;
-        st1->Get(1, column_name);
-        st1->Get(2, source);
         st1->Get(3, &partype);
         if (!st1->IsNull(4))
             st1->Get(4, mechanism);
-        Parameter p(std2wx(source), partype, mechanism);
-        p.setName_(std2wx(column_name));
+
+        Parameter p(source, partype, mechanism);
+        p.setName_(column_name);
         Parameter* pp = parametersM.add(p);
         pp->setParent(this);
     }
@@ -228,12 +232,12 @@ wxString Procedure::getOwner()
 
     IBPP::Statement st1 = loader->getStatement(
         "select rdb$owner_name from rdb$procedures where rdb$procedure_name = ?");
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     st1->Fetch();
     std::string name;
     st1->Get(1, name);
-    return std2wx(name).Trim();
+    return std2wxIdentifier(name, d->getCharsetConverter());
 }
 //-----------------------------------------------------------------------------
 wxString Procedure::getSource()
@@ -244,11 +248,11 @@ wxString Procedure::getSource()
 
     IBPP::Statement st1 = loader->getStatement(
         "select rdb$procedure_source from rdb$procedures where rdb$procedure_name = ?");
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     st1->Fetch();
     wxString source;
-    readBlob(st1, 1, source);
+    readBlob(st1, 1, source, d->getCharsetConverter());
     source.Trim(false);     // remove leading whitespace
     return source;
 }
@@ -462,7 +466,7 @@ std::vector<Privilege>* Procedure::getPrivileges()
         "where RDB$RELATION_NAME = ? and rdb$object_type = 5 "
         "order by rdb$user, rdb$user_type, rdb$privilege"
     );
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     std::string lastuser;
     int lasttype = -1;
@@ -480,14 +484,15 @@ std::vector<Privilege>* Procedure::getPrivileges()
         st1->Get(6, field);
         if (!pr || user != lastuser || usertype != lasttype)
         {
-            Privilege p(this, std2wx(user).Strip(), usertype);
+            Privilege p(this, std2wxIdentifier(user, d->getCharsetConverter()),
+                usertype);
             privilegesM.push_back(p);
             pr = &privilegesM.back();
             lastuser = user;
             lasttype = usertype;
         }
-        pr->addPrivilege(privilege[0], std2wx(grantor).Strip(),
-            grantoption == 1);
+        pr->addPrivilege(privilege[0],
+            std2wx(grantor, d->getCharsetConverter()), grantoption == 1);
     }
     return &privilegesM;
 }

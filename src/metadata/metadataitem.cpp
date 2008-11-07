@@ -267,35 +267,37 @@ void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
     }
 
     sql += wxT(" order by 1, 2, 3");
-    st1->Prepare(wx2std(sql));
+    st1->Prepare(wx2std(sql, d->getCharsetConverter()));
     st1->Set(1, mytype);
     for (int i = 0; i < params; i++)
-		st1->Set(2+i, wx2std(getName_()));
+		st1->Set(2 + i, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     MetadataItem* last = 0;
     Dependency* dep = 0;
     while (st1->Fetch())
     {
-        std::string object_name, field_name;
         int object_type;
         st1->Get(1, &object_type);
-        st1->Get(2, object_name);
-        object_name.erase(object_name.find_last_not_of(" ") + 1);     // trim
-
         if (object_type > type_count)   // some system object, not interesting for us
             continue;
         NodeType t = dep_types[object_type];
         if (t == ntUnknown)             // ditto
             continue;
-        MetadataItem* current = d->findByNameAndType(t, std2wx(object_name));
+
+        std::string objname_std;
+        st1->Get(2, objname_std);
+        wxString objname(std2wxIdentifier(objname_std,
+            d->getCharsetConverter()));
+
+        MetadataItem* current = d->findByNameAndType(t, objname);
         if (!current)
         {
             if (t == ntTable) {
                 // maybe it's a view masked as table
-                current = d->findByNameAndType(ntView, std2wx(object_name));
+                current = d->findByNameAndType(ntView, objname);
                 // or possibly a system table
                 if (!current)
-                    current = d->findByNameAndType(ntSysTable, std2wx(object_name));
+                    current = d->findByNameAndType(ntSysTable, objname);
             }
             if (!ofObject && t == ntTrigger)
             {
@@ -308,15 +310,15 @@ void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
                     " join rdb$check_constraints c on r.rdb$constraint_name=c.rdb$constraint_name "
                     " and r.rdb$constraint_type = 'CHECK' where c.rdb$trigger_name = ? "
                 );
-                st2->Set(1, object_name);
+                st2->Set(1, objname_std);
                 st2->Execute();
                 if (st2->Fetch()) // table using that trigger found
                 {
-                    std::string tablecheck;
-                    st2->Get(1, tablecheck);
-                    tablecheck.erase(tablecheck.find_last_not_of(" ")+1);
-                    if (getName_() != std2wx(tablecheck))    // avoid self-reference
-                        current = d->findByNameAndType(ntTable, std2wx(tablecheck));
+                    std::string s;
+                    st2->Get(1, s);
+                    wxString tablecheck(std2wxIdentifier(s, d->getCharsetConverter()));
+                    if (getName_() != tablecheck)    // avoid self-reference
+                        current = d->findByNameAndType(ntTable, tablecheck);
                 }
             }
             if (!current)
@@ -331,9 +333,9 @@ void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
         }
         if (!st1->IsNull(3))
         {
-            st1->Get(3, field_name);
-            field_name.erase(field_name.find_last_not_of(" ") + 1);       // trim
-            dep->addField(std2wx(field_name));
+            std::string s;
+            st1->Get(3, s);
+            dep->addField(std2wxIdentifier(s, d->getCharsetConverter()));
         }
     }
 
@@ -367,16 +369,15 @@ void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
             " join rdb$check_constraints c on r.rdb$constraint_name=c.rdb$constraint_name "
             " and r.rdb$constraint_type = 'CHECK' where r.rdb$relation_name= ? "
         );
-        st1->Set(1, wx2std(getName_()));
+        st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
         st1->Execute();
         vector<Dependency> tempdep;
         while (st1->Fetch())
         {
             std::string s;
             st1->Get(1, s);
-            s.erase(s.find_last_not_of(" ")+1);
             Trigger t;
-            t.setName_(std2wx(s));
+            t.setName_(std2wxIdentifier(s, d->getCharsetConverter()));
             t.setParent(d);
             t.getDependencies(tempdep, true);
         }
@@ -415,20 +416,21 @@ void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
             " where r2.rdb$relation_name=? "
             " and r1.rdb$constraint_type='FOREIGN KEY' "
         );
-        st1->Set(1, wx2std(getName_()));
+        st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
         st1->Execute();
-        std::string lasttable;
-        Dependency *dep = 0;
+        wxString lasttable;
+        Dependency* dep = 0;
         while (st1->Fetch())
         {
-            std::string table_name, field_name;
-            st1->Get(1, table_name);
-            st1->Get(2, field_name);
-            table_name.erase(table_name.find_last_not_of(" ")+1);       // trim
-            field_name.erase(field_name.find_last_not_of(" ")+1);       // trim
+            std::string s;
+            st1->Get(1, s);
+            wxString table_name(std2wxIdentifier(s, d->getCharsetConverter()));
+            st1->Get(2, s);
+            wxString field_name(std2wxIdentifier(s, d->getCharsetConverter()));
+
             if (table_name != lasttable)    // new
             {
-                MetadataItem* table = d->findByNameAndType(ntTable, std2wx(table_name));
+                MetadataItem* table = d->findByNameAndType(ntTable, table_name);
                 if (!table)
                     continue;           // dummy check
                 Dependency de(table);
@@ -436,7 +438,7 @@ void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
                 dep = &list.back();
                 lasttable = table_name;
             }
-            dep->addField(std2wx(field_name));
+            dep->addField(field_name);
         }
     }
 
@@ -471,10 +473,12 @@ void MetadataItem::loadDescription(wxString loadStatement)
     {
         MetadataLoader* loader = d->getMetadataLoader();
         MetadataLoaderTransaction tr(loader);
-        IBPP::Statement& st1 = loader->getStatement(wx2std(loadStatement));
-        st1->Set(1, wx2std(getName_()));
+        IBPP::Statement& st1 = loader->getStatement(
+            wx2std(loadStatement, d->getCharsetConverter()));
+        st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+        // table/view/SP name
         if (st1->Parameters() > 1)
-            st1->Set(2, wx2std(getParent()->getName_())); // table/view/SP name
+            st1->Set(2, wx2std(getParent()->getName_(), d->getCharsetConverter()));
         st1->Execute();
         st1->Fetch();
 
@@ -484,7 +488,7 @@ void MetadataItem::loadDescription(wxString loadStatement)
             IBPP::Blob b = loader->createBlob();
             st1->Get(1, b);
             b->Load(value);
-            desc = std2wx(value);
+            desc = std2wx(value, d->getCharsetConverter());
         }
         descriptionLoadedM = dsLoaded;
     }
@@ -519,19 +523,19 @@ void MetadataItem::saveDescription(wxString saveStatement,
     tr1->Start();
 
     IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(wx2std(saveStatement));
+    st1->Prepare(wx2std(saveStatement, d->getCharsetConverter()));
 
     if (!description.empty())
     {
         IBPP::Blob b = IBPP::BlobFactory(db, tr1);
-        b->Save(wx2std(description));
+        b->Save(wx2std(description, d->getCharsetConverter()));
         st1->Set(1, b);
     }
     else
         st1->SetNull(1);
-    st1->Set(2, wx2std(getName_()));
+    st1->Set(2, wx2std(getName_(), d->getCharsetConverter()));
     if (st1->Parameters() > 2)
-        st1->Set(3, wx2std(getParent()->getName_()));
+        st1->Set(3, wx2std(getParent()->getName_(), d->getCharsetConverter()));
     st1->Execute();
     tr1->Commit();
     // set value, notify observers

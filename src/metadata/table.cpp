@@ -227,8 +227,7 @@ void Table::loadCheckConstraints()
         st1->Get(1, s);
         wxString cname(std2wxIdentifier(s, d->getCharsetConverter()));
         wxString source;
-        readBlob(st1, 2, source);
-        source.erase(source.find_last_not_of(wxT(" ")) + 1);
+        readBlob(st1, 2, source, d->getCharsetConverter());
 
         CheckConstraint c;
         c.setParent(this);
@@ -508,7 +507,7 @@ void Table::loadIndices()
         st1->Get(6, s);
         wxString fname(std2wxIdentifier(s, d->getCharsetConverter()));
         wxString expression;
-        readBlob(st1, 8, expression);
+        readBlob(st1, 8, expression, d->getCharsetConverter());
 
         if (i && i->getName_() == ixname)
             i->getSegments()->push_back(fname);
