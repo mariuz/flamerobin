@@ -75,7 +75,9 @@ wxString std2wxIdentifier(const std::string& input, wxMBConv* conv)
     if (!conv)
         conv = wxConvCurrent;
     // trim trailing whitespace
-    return wxString(input.c_str(), *conv, input.find_last_not_of(" "));
+    size_t last = input.find_last_not_of(" ");
+    return wxString(input.c_str(), *conv,
+        (last == std::string::npos) ? std::string::npos : last + 1);
 }
 //-----------------------------------------------------------------------------
 //! converts chars that have special meaning in HTML, so they get displayed

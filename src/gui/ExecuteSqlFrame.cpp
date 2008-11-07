@@ -1945,9 +1945,9 @@ void ExecuteSqlFrame::compareCounts(IBPP::DatabaseCounts& one,
                 st->Execute();
                 if (st->Fetch())
                 {
-                    std::string rel;
-                    st->Get(1, rel);
-                    relName = std2wx(rel).Strip();
+                    std::string s;
+                    st->Get(1, s);
+                    relName = std2wxIdentifier(s, databaseM->getCharsetConverter());
                 }
             }
             catch (...)
@@ -2047,12 +2047,15 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                 hasColumns = true;
                 if (doShowStats)
                 {
+                    wxString tablename(std2wxIdentifier(statementM->ColumnTable(i),
+                        databaseM->getCharsetConverter()));
+                    wxString colname(std2wxIdentifier(statementM->ColumnName(i),
+                        databaseM->getCharsetConverter()));
+                    wxString aliasname(std2wxIdentifier(statementM->ColumnAlias(i),
+                        databaseM->getCharsetConverter()));
                     log(wxString::Format(
                         _("Field #%02d: %s.%s Alias:%s Type:%s"),
-                        i,
-                        std2wx(statementM->ColumnTable(i)).c_str(),
-                        std2wx(statementM->ColumnName(i)).c_str(),
-                        std2wx(statementM->ColumnAlias(i)).c_str(),
+                        i, tablename.c_str(), colname.c_str(), aliasname.c_str(),
                         IBPPtype2string(
                             databaseM,
                             statementM->ColumnType(i),
