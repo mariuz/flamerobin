@@ -85,7 +85,7 @@ wxString getPlatformName()
     return wxT("mac");
 #elif defined(__UNIX__)
     return wxT("unix");
-#elif
+#else
     return wxT("undefined");
 #endif
 }
