@@ -360,6 +360,9 @@ void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
 //-----------------------------------------------------------------------------
 CharacterSet Database::getCharsetById(int id)
 {
+    // if it contains both charset and collation as 2 bytes
+    id %= 256;
+
     loadCollations();
     for (std::multimap<CharacterSet, wxString>::iterator it =
         collationsM.begin(); it != collationsM.end(); ++it)
