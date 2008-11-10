@@ -2641,8 +2641,14 @@ void ExecuteSqlFrame::updateViewMode()
         viewModeM = vmEditor;
     else if (focused == styled_text_ctrl_stats)
         viewModeM = vmLogCtrl;
-    else if (focused == grid_data)
+    else if (focused == grid_data || grid_data->IsCellEditControlEnabled()
+        || focused == grid_data->GetGridWindow()
+        || focused == grid_data->GetGridColLabelWindow()
+        || focused == grid_data->GetGridRowLabelWindow()
+        || focused == grid_data->GetGridCornerLabelWindow())
+    {
         viewModeM = vmGrid;
+    }
 }
 //-----------------------------------------------------------------------------
 //! also used to drop constraints
