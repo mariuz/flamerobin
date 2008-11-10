@@ -461,7 +461,7 @@ void AdvancedSearchFrame::OnListCtrlResultsItemSelected(wxListEvent& event)
             while (true)
             {
                 p = sql.find(sfind, p+1);
-                if (p == wxString::npos)
+                if (p == int(wxString::npos))
                     break;
                 stc_ddl->StartStyling(p, 255);
                 stc_ddl->SetStyling(len, 1+color%2);
