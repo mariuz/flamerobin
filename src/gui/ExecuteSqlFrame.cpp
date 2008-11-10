@@ -745,7 +745,7 @@ void ExecuteSqlFrame::set_properties()
     grid_data->SetTable(new DataGridTable(statementM, databaseM), true);
     splitter_window_1->Initialize(styled_text_ctrl_sql);
     viewModeM = vmEditor;
-    
+
     SetIcon(wxArtProvider::GetIcon(ART_ExecuteSqlFrame, wxART_FRAME_ICON));
 
     keywordsM = wxT("");
@@ -2154,10 +2154,10 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             }
         }
     }
-    catch (IBPP::Exception &e)
+    catch (std::exception &e)
     {
         splitScreen();
-        log(std2wx(e.ErrorMessage()) + wxT("\n"), ttError);
+        log(_("Error: ") + std2wx(e.what()) + wxT("\n"), ttError);
         retval = false;
     }
     catch (...)
@@ -2597,7 +2597,7 @@ void ExecuteSqlFrame::setViewMode(bool splitView, ViewMode mode)
         splitter_window_1->SplitHorizontally(styled_text_ctrl_sql,
             notebook_1);
     }
-    
+
     // unsplit or switch panes if necessary
     if (!splitView)
     {

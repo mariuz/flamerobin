@@ -59,12 +59,10 @@ Column::Column()
 void Column::Init(bool notnull, wxString source, wxString computedSource,
     wxString collation, wxString defaultValue, bool hasDefault)
 {
-    source.Trim();        // right trim everything
-    collation.Trim();
     notnullM = notnull;
-    sourceM = source;
+    sourceM = source.Strip(wxString::both);
     computedSourceM = computedSource;
-    collationM = collation;
+    collationM = collation.Strip(wxString::both);
     defaultM = defaultValue;
     hasDefaultM = hasDefault;
 }
