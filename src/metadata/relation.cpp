@@ -170,13 +170,14 @@ void Relation::loadColumns()
     st1->Execute();
     while (st1->Fetch())
     {
-        std::string s;
+        std::string s, coll;
         st1->Get(1, s);
         wxString fname(std2wxIdentifier(s, d->getCharsetConverter()));
         st1->Get(3, s);
         wxString source(std2wxIdentifier(s, d->getCharsetConverter()));
-        st1->Get(4, s);
-        wxString collation(std2wxIdentifier(s, d->getCharsetConverter()));
+        if (!st1->IsNull(4))
+            st1->Get(4, coll);
+        wxString collation(std2wxIdentifier(coll, d->getCharsetConverter()));
         wxString computedSrc, defaultSrc;
         readBlob(st1, 5, computedSrc, d->getCharsetConverter());
         if (!st1->IsNull(6))
