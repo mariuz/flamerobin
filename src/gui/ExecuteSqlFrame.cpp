@@ -2070,11 +2070,14 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         {                          // but we still want to show the plan
         }                          // so we have separate exception handlers
 
+        // for some statements (DDL) it is never available
+        // for INSERTs, it is available sometimes (insert into ... select ... )
+        // but if it not, IBPP throws an exception
         try
         {
-            std::string plan;            // for some statements (DDL) it is never available
-            statementM->Plan(plan);      // for INSERTs, it is available sometimes (insert into ... select ... )
-            log(std2wx(plan));           // but if it not, IBPP throws the exception
+            std::string plan;
+            statementM->Plan(plan);
+            log(std2wx(plan, databaseM->getCharsetConverter()));
         }
         catch(IBPP::Exception&)
         {

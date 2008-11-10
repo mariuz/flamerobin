@@ -505,7 +505,8 @@ wxString DataGridTable::getTableName()
     //       (together with PK/UNQ info)
     if (getStatementColCount() == 0)
         return wxEmptyString;
-    return std2wx(statementM->ColumnTable(1));
+    return std2wxIdentifier(statementM->ColumnTable(1),
+        databaseM->getCharsetConverter());
 }
 //-----------------------------------------------------------------------------
 void DataGridTable::getTableNames(wxArrayString& tables)
@@ -518,7 +519,8 @@ void DataGridTable::getTableNames(wxArrayString& tables)
     }
     for (int i = 0; i < colCount; i++)
     {
-        wxString tn(std2wx(statementM->ColumnTable(i+1)));
+        wxString tn(std2wxIdentifier(statementM->ColumnTable(i + 1),
+            databaseM->getCharsetConverter()));
         if (wxNOT_FOUND == tables.Index(tn))
         {
             // check if table exists in metadata
@@ -529,7 +531,8 @@ void DataGridTable::getTableNames(wxArrayString& tables)
             t->checkAndLoadColumns();
 
             // check if table's column is 'real'
-            wxString cn(std2wx(statementM->ColumnName(i+1)));
+            wxString cn(std2wxIdentifier(statementM->ColumnName(i + 1),
+                databaseM->getCharsetConverter()));
             for (MetadataCollection<Column>::iterator it = t->begin();
                 it != t->end(); ++it)
             {
@@ -559,10 +562,12 @@ void DataGridTable::getFields(const wxString& table,
     TempMap fields;
     for (int i = 0; i < colCount; i++)
     {
-        wxString tn(std2wx(statementM->ColumnTable(i+1)));
+        wxString tn(std2wxIdentifier(statementM->ColumnTable(i + 1),
+            databaseM->getCharsetConverter()));
         if (tn != table)
             continue;
-        wxString fn(std2wx(statementM->ColumnName(i+1)));
+        wxString fn(std2wxIdentifier(statementM->ColumnName(i + 1),
+            databaseM->getCharsetConverter()));
         // check if field exists in the table (and is not computed)
         for (MetadataCollection<Column>::iterator it = t->begin();
             it != t->end(); ++it)

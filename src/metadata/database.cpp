@@ -367,10 +367,13 @@ CharacterSet Database::getCharsetById(int id)
         if ((*it).first.getId() == id)
             return (*it).first;
     }
+#if 1
     static CharacterSet invalidCharacterSet(wxT("unknown character set"),
         -1, 0);
     return invalidCharacterSet;
-//    throw FRError(_("Character set not found."));
+#else
+    throw FRError(_("Character set not found."));
+#endif
 }
 //-----------------------------------------------------------------------------
 //! returns all collations for a given charset

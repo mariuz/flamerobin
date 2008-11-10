@@ -318,7 +318,17 @@ void DataGrid::copyToCBAsInsert()
         //       - should probably refuse to work if not from one table
         //       - should probably refuse to create INSERT for "[...]"
         //       - table&PK info is available in DataGridRows::statementTablesM
-        wxString tableName = table->getTableName();
+        Identifier tableId(table->getTableName());
+
+        // load the (quoted if necessary) column names into an array
+        wxArrayString columnNames;
+        columnNames.Alloc(GetNumberRows());
+        for (int i = 0; i < GetNumberRows(); i++)
+        {
+            Identifier colId(GetColLabelValue(i));
+            columnNames.Add(colId.getQuoted());
+        }
+
         // NOTE: this has been reworked (compared to myDataGrid), because
         //       not all rows have necessarily the same fields selected
         wxString sRows;
@@ -332,9 +342,7 @@ void DataGrid::copyToCBAsInsert()
                 {
                     if (!sCols.IsEmpty())
                         sCols += wxT(", ");
-                    // NOTE: preloading the column names into a local wxString
-                    //       array might be a worthy optimization
-                    sCols += GetColLabelValue(j);
+                    sCols += columnNames[j];
                     if (!sValues.IsEmpty())
                         sValues += wxT(", ");
                     sValues += table->getCellValueForInsert(i, j);
@@ -344,7 +352,7 @@ void DataGrid::copyToCBAsInsert()
             }
             if (!sCols.IsEmpty())
             {
-                sRows += wxT("INSERT INTO ") + tableName + wxT(" (");
+                sRows += wxT("INSERT INTO ") + tableId.getQuoted() + wxT(" (");
                 sRows += sCols;
                 sRows += wxT(") VALUES (");
                 sRows += sValues;
@@ -378,7 +386,17 @@ void DataGrid::copyToCBAsUpdate()
         //       - should probably refuse to work if not from one table
         //       - should probably refuse to create UPDATE for "[...]"
         //       - we have this info in DataGridRows::statementTablesM
-        wxString tableName = table->getTableName();
+        Identifier tableId(table->getTableName());
+
+        // load the (quoted if necessary) column names into an array
+        wxArrayString columnNames;
+        columnNames.Alloc(GetNumberRows());
+        for (int i = 0; i < GetNumberRows(); i++)
+        {
+            Identifier colId(GetColLabelValue(i));
+            columnNames.Add(colId.getQuoted());
+        }
+
         wxString sRows;
         for (int i = 0; i < GetNumberRows(); i++)
         {
@@ -389,9 +407,7 @@ void DataGrid::copyToCBAsUpdate()
                 {
                     if (!str.IsEmpty())
                         str += wxT(", ");
-                    // NOTE: preloading the column names into a local wxString
-                    //       array might be a worthy optimization
-                    str += wxTextBuffer::GetEOL() + GetColLabelValue(j)
+                    str += wxTextBuffer::GetEOL() + columnNames[j]
                         + wxT(" = ") + table->getCellValueForInsert(i, j);
                 }
                 else
@@ -406,13 +422,13 @@ void DataGrid::copyToCBAsUpdate()
                 if (db)
                 {
                     t = dynamic_cast<Table *>(
-                        db->findByNameAndType(ntTable, tableName));
+                        db->findByNameAndType(ntTable, tableId.get()));
                 }
                 if (!t)
                 {
                     wxMessageBox(wxString::Format(
                         _("Table %s cannot be found in database."),
-                        tableName.c_str()),
+                        tableId.get().c_str()),
                         _("Error"), wxOK|wxICON_ERROR);
                     return;
                 }
@@ -445,8 +461,8 @@ void DataGrid::copyToCBAsUpdate()
                 }
                 // TODO: if (!pkc)   // WHERE all_cols = all_vals
 
-                sRows += wxT("UPDATE ") + tableName + wxT(" SET ") + str
-                    + wxTextBuffer::GetEOL() + wxT("WHERE ") + where
+                sRows += wxT("UPDATE ") + tableId.getQuoted() + wxT(" SET ")
+                    + str + wxTextBuffer::GetEOL() + wxT("WHERE ") + where
                     + wxT(";") + wxTextBuffer::GetEOL();
             }
         }

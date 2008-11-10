@@ -1474,9 +1474,12 @@ bool DataGridRows::canRemoveRow(size_t row)
             {
                 for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
                 {
-                    if ((*ci) != std2wx(statementM->ColumnName(c2)))
+                    wxString cn(std2wxIdentifier(statementM->ColumnName(c2),
+                        databaseM->getCharsetConverter()));
+                    if ((*ci) != cn)
                         continue;
-                    wxString tn(std2wx(statementM->ColumnTable(c2)));
+                    wxString tn(std2wxIdentifier(statementM->ColumnTable(c2),
+                        databaseM->getCharsetConverter()));
                     if (tn == (*it).first && buffersM[row]->isFieldNA(c2-1))
                     {
                         tableok = false;
@@ -1564,8 +1567,8 @@ wxString DataGridRows::getRowFieldName(unsigned col)
     return wxEmptyString;
 }
 //-----------------------------------------------------------------------------
-void checkColumnsPresent(const IBPP::Statement& statement,
-    UniqueConstraint** locator)
+void checkColumnsPresent(const Database* database,
+    const IBPP::Statement& statement, UniqueConstraint** locator)
 {
     wxString tableName = (*locator)->getTable()->getName_();
     for (ColumnConstraint::const_iterator ci = (*locator)->begin(); ci !=
@@ -1574,8 +1577,10 @@ void checkColumnsPresent(const IBPP::Statement& statement,
         bool found = false;
         for (int c2 = 1; c2 <= statement->Columns(); ++c2)
         {
-            wxString cn(std2wx(statement->ColumnName(c2)));
-            wxString tn(std2wx(statement->ColumnTable(c2)));
+            wxString cn(std2wxIdentifier(statement->ColumnName(c2),
+                database->getCharsetConverter()));
+            wxString tn(std2wxIdentifier(statement->ColumnTable(c2),
+                database->getCharsetConverter()));
             if (cn == (*ci) && tn == tableName)
             {
                 found = true;
@@ -1603,7 +1608,8 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
         return;             // probably be done together with BLOB support
     }
 
-    wxString tabName(std2wx(statementM->ColumnTable(col)));
+    wxString tabName(std2wxIdentifier(statementM->ColumnTable(col),
+        databaseM->getCharsetConverter()));
     Table *t = dynamic_cast<Table *>(db->findRelation(Identifier(tabName)));
     if (!t)
     {
@@ -1620,7 +1626,7 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
     {
         locator = t->getPrimaryKey();
         if (locator)    // check if this PK is usable (all fields present)
-            checkColumnsPresent(statementM, &locator);
+            checkColumnsPresent(databaseM, statementM, &locator);
         if (!locator)   // PK not present or not usable, try UNQ
         {
             std::vector<UniqueConstraint> *uq = t->getUniqueConstraints();
@@ -1630,7 +1636,7 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
                     ui != uq->end(); ++ui)
                 {
                     locator = &(*ui);
-                    checkColumnsPresent(statementM, &locator);
+                    checkColumnsPresent(databaseM, statementM, &locator);
                     if (locator)
                         break;
                 }
@@ -1642,7 +1648,7 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
             uc.columnsM.push_back(wxT("DB_KEY"));
             uc.setParent(t);
             locator = &uc;
-            checkColumnsPresent(statementM, &locator);
+            checkColumnsPresent(databaseM, statementM, &locator);
             if (locator)    // DB_KEY present
             {
                 dbKeysM.push_back(uc);
@@ -1657,7 +1663,8 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
     nullable = false;
     if (!readOnly)  // table is not RO, but column might be, so we search
     {
-        wxString cn(std2wx(statementM->ColumnName(col)));
+        wxString cn(std2wxIdentifier(statementM->ColumnName(col),
+            databaseM->getCharsetConverter()));
         Column *c = 0;
         t->checkAndLoadColumns();
         for (MetadataCollection<Column>::iterator it = t->begin();
@@ -1821,7 +1828,8 @@ bool DataGridRows::isFieldReadonly(unsigned row, unsigned col)
 
     // TODO: this needs to be cached too
 
-    wxString table(std2wx(statementM->ColumnTable(col+1)));
+    wxString table(std2wxIdentifier(statementM->ColumnTable(col + 1),
+        databaseM->getCharsetConverter()));
     std::map<wxString, UniqueConstraint *>::iterator it =
         statementTablesM.find(table);
     if (it == statementTablesM.end() || (*it).second == 0)
@@ -1833,9 +1841,12 @@ bool DataGridRows::isFieldReadonly(unsigned row, unsigned col)
     {
         for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
         {
-            if ((*ci) != std2wx(statementM->ColumnName(c2)))
+            wxString cn(std2wxIdentifier(statementM->ColumnName(c2),
+                databaseM->getCharsetConverter()));
+            if ((*ci) != cn)
                 continue;
-            wxString tn(std2wx(statementM->ColumnTable(c2)));
+            wxString tn(std2wxIdentifier(statementM->ColumnTable(c2),
+                databaseM->getCharsetConverter()));
             if (tn == table && buffersM[row]->isFieldNA(c2-1))
                 return true;
         }
@@ -1879,8 +1890,10 @@ IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
         }
         for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
         {
-            wxString cn(std2wx(statementM->ColumnName(c2)));
-            wxString tn(std2wx(statementM->ColumnTable(c2)));
+            wxString cn(std2wxIdentifier(statementM->ColumnName(c2),
+                databaseM->getCharsetConverter()));
+            wxString tn(std2wxIdentifier(statementM->ColumnTable(c2),
+                databaseM->getCharsetConverter()));
             if (cn == (*ci) && tn == table) // found it, add to WHERE list
             {
                 if (buffer->isFieldNA(c2-1))
@@ -1902,8 +1915,10 @@ IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
     {
         for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
         {
-            wxString cn(std2wx(statementM->ColumnName(c2)));
-            wxString tn(std2wx(statementM->ColumnTable(c2)));
+            wxString cn(std2wxIdentifier(statementM->ColumnName(c2),
+                databaseM->getCharsetConverter()));
+            wxString tn(std2wxIdentifier(statementM->ColumnTable(c2),
+                databaseM->getCharsetConverter()));
             if (cn == wxT("DB_KEY") && tn == table)
             {
                 DBKeyColumnDef *dbk =
@@ -1965,16 +1980,19 @@ void DataGridRows::importBlobFile(const wxString& filename, unsigned row,
     if (pi)
         pi->initProgress(_("Loading..."), fl.Length()); // wxFileOffset
 
-    wxString table(std2wx(statementM->ColumnTable(col+1)));
-    wxString stm = wxT("UPDATE ") + Identifier(table).getQuoted()
-        + wxT(" SET ")
-        + Identifier(std2wx(statementM->ColumnName(col+1))).getQuoted()
+    wxString tn(std2wxIdentifier(statementM->ColumnTable(col + 1),
+        databaseM->getCharsetConverter()));
+    wxString cn(std2wxIdentifier(statementM->ColumnName(col + 1),
+        databaseM->getCharsetConverter()));
+        
+    wxString stm = wxT("UPDATE ") + Identifier(tn).getQuoted()
+        + wxT(" SET ") + Identifier(cn).getQuoted()
         + wxT(" = ? WHERE ");
     std::map<wxString, UniqueConstraint *>::iterator it =
-        statementTablesM.find(table);
+        statementTablesM.find(tn);
     if (it == statementTablesM.end() || (*it).second == 0)
         throw FRError(_("Blob table not found."));
-    IBPP::Statement st = addWhere((*it).second, stm, table, buffersM[row]);
+    IBPP::Statement st = addWhere((*it).second, stm, tn, buffersM[row]);
     IBPP::Blob b = IBPP::BlobFactory(st->DatabasePtr(),
         st->TransactionPtr());
     b->Create();
@@ -2041,10 +2059,12 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
         }
 
         // run the UPDATE statement
-        wxString table(std2wx(statementM->ColumnTable(col+1)));
-        wxString stm = wxT("UPDATE ") + Identifier(table).getQuoted()
-            + wxT(" SET ")
-            + Identifier(std2wx(statementM->ColumnName(col+1))).getQuoted();
+        wxString tn(std2wxIdentifier(statementM->ColumnTable(col + 1),
+            databaseM->getCharsetConverter()));
+        wxString cn(std2wxIdentifier(statementM->ColumnName(col + 1),
+            databaseM->getCharsetConverter()));
+        wxString stm = wxT("UPDATE ") + Identifier(tn).getQuoted()
+            + wxT(" SET ") + Identifier(cn).getQuoted();
         if (newIsNull)
             stm += wxT(" = NULL WHERE ");
         else
@@ -2055,14 +2075,14 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
         }
 
         std::map<wxString, UniqueConstraint *>::iterator it =
-            statementTablesM.find(table);
+            statementTablesM.find(tn);
 
         // MB: please do not remove this check. Although it is not needed,
         //     it helped me detect some subtle bugs much easier
         if (it == statementTablesM.end() || (*it).second == 0)
             throw FRError(_("This column should not be editable"));
 
-        IBPP::Statement st = addWhere((*it).second, stm, table, oldRecord);
+        IBPP::Statement st = addWhere((*it).second, stm, tn, oldRecord);
         st->Execute();
         delete oldRecord;
         return stm;

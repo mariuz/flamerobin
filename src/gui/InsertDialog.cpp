@@ -292,7 +292,8 @@ InsertDialog::~InsertDialog()
 //-----------------------------------------------------------------------------
 void InsertDialog::set_properties()
 {
-    SetTitle(_("Insert Record(s) Into Table ") + tableNameM);
+    SetTitle(wxString::Format(_("Insert Record(s) Into Table \"%s\""),
+        tableNameM.c_str()));
     button_ok->SetDefault();
 }
 //-----------------------------------------------------------------------------
@@ -530,7 +531,8 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
     storeValues();
     preloadSpecialColumns();
 
-    wxString stm = wxT("INSERT INTO ") + tableNameM + wxT(" (");
+    Identifier tableId(tableNameM);
+    wxString stm = wxT("INSERT INTO ") + tableId.getQuoted() + wxT(" (");
     wxString val = wxT(") VALUES (");
     bool first = true;
     for (std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
