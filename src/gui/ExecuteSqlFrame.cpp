@@ -2094,7 +2094,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         IBPP::STT type = statementM->Type();
         if (hasColumns)            // for select statements: show data
         {
-            grid_data->fetchData(databaseM->getCharsetConverter());
+            grid_data->fetchData();
             setViewMode(vmGrid);
         }
 
@@ -2407,7 +2407,8 @@ void ExecuteSqlFrame::OnGridLabelLeftDClick(wxGridEvent& event)
     int column = 1 + event.GetCol();
     if (column < 1 || column > table->GetNumberCols())
         return;
-    SelectStatement sstm(std2wx(statementM->Sql()));
+    SelectStatement sstm(std2wx(statementM->Sql(),
+        databaseM->getCharsetConverter()));
 
     // rebuild SQL statement with different ORDER BY clause
     sstm.orderBy(column);

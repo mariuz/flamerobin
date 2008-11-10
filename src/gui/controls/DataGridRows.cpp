@@ -1397,8 +1397,7 @@ void DataGridRows::addRow(DataGridRowBuffer* buffer)
     buffersM.push_back(buffer);
 }
 //-----------------------------------------------------------------------------
-void DataGridRows::addRow(const IBPP::Statement& statement,
-    wxMBConv* converter)
+void DataGridRows::addRow(const IBPP::Statement& statement)
 {
     DataGridRowBuffer* buffer = new DataGridRowBuffer(columnDefsM.size());
     // if anything fails, make sure we release the memory
@@ -1414,7 +1413,10 @@ void DataGridRows::addRow(const IBPP::Statement& statement,
             bool isNull = statement->IsNull(colIBPP);
             buffer->setFieldNull(col, isNull);
             if (!isNull)
-                columnDefsM[col]->setValue(buffer, colIBPP, statement, converter);
+            {
+                columnDefsM[col]->setValue(buffer, colIBPP, statement,
+                    databaseM->getCharsetConverter());
+            }
         }
         while (col > 0);
     }
@@ -1681,7 +1683,7 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
     );*/
 }
 //-----------------------------------------------------------------------------
-bool DataGridRows::initialize(const IBPP::Statement& statement, Database *db)
+bool DataGridRows::initialize(const IBPP::Statement& statement)
 {
     statementM = statement;
 
@@ -1699,11 +1701,15 @@ bool DataGridRows::initialize(const IBPP::Statement& statement, Database *db)
     for (unsigned col = 1; col <= colCount; ++col)
     {
         bool readOnly, nullable;
-        getColumnInfo(db, col, readOnly, nullable);
+        getColumnInfo(databaseM, col, readOnly, nullable);
 
-        wxString colName(std2wx(statement->ColumnAlias(col)));
+        wxString colName(std2wx(statement->ColumnAlias(col),
+            databaseM->getCharsetConverter()));
         if (colName.empty())
-            colName = std2wx(statement->ColumnName(col));
+        {
+            colName = std2wx(statement->ColumnName(col),
+                databaseM->getCharsetConverter());
+        }
 
         IBPP::SDT type = statement->ColumnType(col);
         if (statement->ColumnScale(col) > 0)
@@ -1743,7 +1749,7 @@ bool DataGridRows::initialize(const IBPP::Statement& statement, Database *db)
 
                 case IBPP::sdString:
                 {
-                    CharacterSet cs = db->getCharsetById(statement->ColumnSubtype(col));
+                    CharacterSet cs = databaseM->getCharsetById(statement->ColumnSubtype(col));
                     int bpc = cs.getBytesPerChar();
                     int size = statement->ColumnSize(col);
                     if (bpc)

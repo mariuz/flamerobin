@@ -136,7 +136,7 @@ void DataGrid::extendSelection(int direction)
     }
 }
 //-----------------------------------------------------------------------------
-void DataGrid::fetchData(wxMBConv* conv)
+void DataGrid::fetchData()
 {
     DataGridTable* table = getDataGridTable();
     if (!table)
@@ -144,7 +144,7 @@ void DataGrid::fetchData(wxMBConv* conv)
 
     wxBusyCursor bc;
     BeginBatch();
-    table->initialFetch(conv);
+    table->initialFetch();
 
     for (int i = 0; i < table->GetNumberCols(); i++)
     {

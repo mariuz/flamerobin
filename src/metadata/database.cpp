@@ -327,14 +327,13 @@ wxString Database::loadDomainNameForColumn(wxString table, wxString field)
         "select rdb$field_source from rdb$relation_fields"
         " where rdb$relation_name = ? and rdb$field_name = ?"
     );
-    st1->Set(1, wx2std(table));
-    st1->Set(2, wx2std(field));
+    st1->Set(1, wx2std(table, getCharsetConverter()));
+    st1->Set(2, wx2std(field, getCharsetConverter()));
     st1->Execute();
     st1->Fetch();
     std::string domain;
     st1->Get(1, domain);
-    domain.erase(domain.find_last_not_of(" ") + 1);
-    return std2wx(domain);
+    return std2wxIdentifier(domain, getCharsetConverter());
 }
 //-----------------------------------------------------------------------------
 void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
@@ -352,9 +351,8 @@ void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
     {
         std::string name;
         st1->Get(1, name);
-        name.erase(name.find_last_not_of(" ") + 1);
         Trigger* t = dynamic_cast<Trigger*>(findByNameAndType(ntTrigger,
-            std2wx(name)));
+            std2wxIdentifier(name, getCharsetConverter())));
         if (t)
             list.push_back(t);
     }
@@ -397,7 +395,7 @@ Domain* Database::loadMissingDomain(wxString name)
         " left outer join rdb$types t on f.rdb$field_type=t.rdb$type"
         " where t.rdb$field_name='RDB$FIELD_TYPE' and f.rdb$field_name = ?"
     );
-    st1->Set(1, wx2std(name));
+    st1->Set(1, wx2std(name, getCharsetConverter()));
     st1->Execute();
     if (st1->Fetch())
     {
@@ -422,14 +420,14 @@ void Database::fillVector(std::vector<wxString>& list, wxString sql)
     MetadataLoader* loader = getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 
-    IBPP::Statement& st1 = loader->getStatement(wx2std(sql));
+    IBPP::Statement& st1 = loader->getStatement(wx2std(sql,
+        getCharsetConverter()));
     st1->Execute();
     while (st1->Fetch())
     {
         std::string s;
         st1->Get(1, s);
-        s.erase(s.find_last_not_of(" ") + 1); // trim
-        list.push_back(std2wx(s));
+        list.push_back(std2wxIdentifier(s, getCharsetConverter()));
     }
 }
 //-----------------------------------------------------------------------------
@@ -462,17 +460,17 @@ void Database::loadCollations()
     st1->Execute();
     while (st1->Fetch())
     {
-        std::string charset, collation;
+        std::string s;
+        st1->Get(1, s);
+        wxString charset(std2wxIdentifier(s, getCharsetConverter()));
+        st1->Get(2, s);
+        wxString collation(std2wxIdentifier(s, getCharsetConverter()));
         int charsetId, bytesPerChar;
-        st1->Get(1, charset);
-        st1->Get(2, collation);
         st1->Get(3, &charsetId);
         st1->Get(4, &bytesPerChar);
-        charset.erase(charset.find_last_not_of(" ") + 1);
-        CharacterSet cs(std2wx(charset), charsetId, bytesPerChar);
-        collation.erase(collation.find_last_not_of(" ") + 1);
+        CharacterSet cs(charset, charsetId, bytesPerChar);
         collationsM.insert(std::multimap<CharacterSet, wxString>::value_type(
-            cs, std2wx(collation)));
+            cs, collation));
     }
 }
 //-----------------------------------------------------------------------------
@@ -483,16 +481,15 @@ wxString Database::getTableForIndex(wxString indexName)
 
     IBPP::Statement& st1 = loader->getStatement(
         "SELECT rdb$relation_name from rdb$indices where rdb$index_name = ?");
-    st1->Set(1, wx2std(indexName));
+    st1->Set(1, wx2std(indexName, getCharsetConverter()));
     st1->Execute();
 
     wxString tableName;
     if (st1->Fetch())
     {
-        std::string retval;
-        st1->Get(1, retval);
-        retval.erase(retval.find_last_not_of(" ") + 1);
-        tableName = std2wx(retval);
+        std::string s;
+        st1->Get(1, s);
+        tableName = std2wxIdentifier(s, getCharsetConverter());
     }
     return tableName;
 }
@@ -530,8 +527,7 @@ void Database::loadObjects(NodeType type, ProgressIndicator* indicator)
     {
         std::string name;
         st1->Get(1, name);
-        name.erase(name.find_last_not_of(" ") + 1);
-        addObject(type, std2wx(name, getCharsetConverter()));
+        addObject(type, std2wxIdentifier(name, getCharsetConverter()));
 
         if (indicator && indicator->isCanceled())
             break;
@@ -927,9 +923,9 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
             st1->Execute();
             if (st1->Fetch())
             {
-                std::string databaseCharset;
-                st1->Get(1, databaseCharset);
-                databaseCharsetM = std2wx(databaseCharset).Strip();
+                std::string s;
+                st1->Get(1, s);
+                databaseCharsetM = std2wxIdentifier(s, getCharsetConverter());
             }
 
             // load metadata information

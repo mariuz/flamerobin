@@ -91,7 +91,7 @@ public:
     void getFields(const wxString& table, FieldSet& fields);
     Database *getDatabase();
 
-    void initialFetch(wxMBConv* conv);
+    void initialFetch();
     bool isNullCell(int row, int col);
     bool isNumericColumn(int col);
     bool isReadonlyColumn(int col);

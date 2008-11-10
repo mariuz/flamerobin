@@ -258,7 +258,7 @@ void DataGridTable::Clear()
 //-----------------------------------------------------------------------------
 void DataGridTable::fetchOne()
 {
-    rowsM.addRow(statementM, charsetConverterM);
+    rowsM.addRow(statementM);
     allRowsFetchedM = true;
 
     if (GetView())   // notify the grid
@@ -303,7 +303,7 @@ void DataGridTable::fetch()
         }
         if (allRowsFetchedM)
             break;
-        rowsM.addRow(statementM, charsetConverterM);
+        rowsM.addRow(statementM);
 
         if (!initial && (::wxGetLocalTimeMillis() - startms > 100))
             break;
@@ -642,7 +642,7 @@ wxString DataGridTable::GetValue(int row, int col)
     return cellValue;
 }
 //-----------------------------------------------------------------------------
-void DataGridTable::initialFetch(wxMBConv* conv)
+void DataGridTable::initialFetch()
 {
     Clear();
     allRowsFetchedM = false;
@@ -650,14 +650,9 @@ void DataGridTable::initialFetch(wxMBConv* conv)
     canInsertRowsM = false;
     maxRowToFetchM = 100;
 
-    if (conv)
-        charsetConverterM = conv;
-    else
-        charsetConverterM = wxConvCurrent;
-
     try
     {
-        rowsM.initialize(statementM, databaseM);
+        rowsM.initialize(statementM);
     }
     catch (IBPP::Exception& e)
     {

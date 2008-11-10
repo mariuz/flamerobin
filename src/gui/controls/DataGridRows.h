@@ -81,7 +81,7 @@ struct DataGridFieldInfo
 class DataGridRows
 {
 private:
-    Database *databaseM;
+    Database* databaseM;
     IBPP::Statement statementM;
     std::vector<ResultsetColumnDef*> columnDefsM;
     std::vector<DataGridRowBuffer*> buffersM;
@@ -98,12 +98,12 @@ public:
     DataGridRows(Database* db);
     ~DataGridRows();
 
-    void addRow(const IBPP::Statement& statement, wxMBConv* converter);
+    void addRow(const IBPP::Statement& statement);
     void clear();
     unsigned getRowCount();
     unsigned getRowFieldCount();
     wxString getRowFieldName(unsigned col);
-    bool initialize(const IBPP::Statement& statement, Database* db);
+    bool initialize(const IBPP::Statement& statement);
 
     bool isColumnNumeric(unsigned col);
     bool isColumnReadonly(unsigned col);
