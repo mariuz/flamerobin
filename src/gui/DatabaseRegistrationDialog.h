@@ -50,6 +50,8 @@ private:
     wxStaticText* label_dbpath;
     FileTextControl* text_ctrl_dbpath;
     wxButton* button_browse;
+    wxStaticText* label_authentication;
+    wxChoice* choice_authentication;
     wxStaticText* label_username;
     wxTextCtrl* text_ctrl_username;
     wxStaticText* label_password;
@@ -62,7 +64,6 @@ private:
     wxChoice* choice_pagesize;
     wxStaticText* label_dialect;
     wxChoice* choice_dialect;
-    wxCheckBox* checkbox_encrypted;
     wxButton* button_ok;
     wxButton* button_cancel;
 
@@ -70,8 +71,14 @@ private:
     void createControls();
     void layoutControls();
     void setControlsProperties();
+    void updateAuthenticationMode();
     void updateButtons();
     void updateIsDefaultName();
+
+    wxArrayString getAuthenticationChoices() const;
+    wxArrayString getDatabaseCharsetChoices() const;
+    wxArrayString getDatabaseDialectChoices() const;
+    wxArrayString getDatabasePagesizeChoices() const;
 protected:
     virtual const wxString getName() const;
     virtual bool getConfigStoresHeight() const;
@@ -90,9 +97,11 @@ private:
         ID_textcontrol_name,
         ID_textcontrol_username,
         ID_textcontrol_password,
-        ID_button_browse
+        ID_button_browse,
+        ID_choice_authentication
     };
 
+    void OnAuthenticationChange(wxCommandEvent& event);
     void OnBrowseButtonClick(wxCommandEvent& event);
     void OnNameChange(wxCommandEvent& event);
     void OnOkButtonClick(wxCommandEvent& event);

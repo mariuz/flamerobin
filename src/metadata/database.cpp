@@ -197,7 +197,7 @@ void DatabaseInfo::reloadIfNecessary(const IBPP::Database database)
 Database::Database()
     : MetadataItem(), metadataLoaderM(0), connectedM(false),
         connectionCredentialsM(0), charsetConverterM(0),
-        storeEncryptedPasswordM(false), idM(0)
+        authenticationModeM(amSavedPassword), idM(0)
 {
     typeM = ntDatabase;
 
@@ -226,7 +226,7 @@ Database::Database(const Database& rhs)
         proceduresM(rhs.proceduresM), rolesM(rhs.rolesM), tablesM(rhs.tablesM),
         sysTablesM(rhs.sysTablesM), triggersM(rhs.triggersM),
         viewsM(rhs.viewsM), collationsM(rhs.collationsM), idM(rhs.idM),
-        storeEncryptedPasswordM(rhs.storeEncryptedPasswordM)
+        authenticationModeM(rhs.authenticationModeM)
 {
     if (rhs.connectionCredentialsM)
         connectionCredentialsM = new Credentials(*rhs.connectionCredentialsM);
@@ -896,9 +896,18 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
 
         if (indicator)
             indicator->initProgressIndeterminate(wxT("Establishing connection..."));
-        databaseM = IBPP::DatabaseFactory("", wx2std(getConnectionString()),
-            wx2std(getUsername()), wx2std(password), wx2std(getRole()),
-            wx2std(getConnectionCharset()), "");
+
+        if (authenticationModeM == amTrustedUserAuthentication)
+        {
+            databaseM = IBPP::DatabaseFactory("", wx2std(getConnectionString()),
+                "", "", wx2std(getRole()), wx2std(getConnectionCharset()), "");
+        }
+        else
+        {
+            databaseM = IBPP::DatabaseFactory("", wx2std(getConnectionString()),
+                wx2std(getUsername()), wx2std(password), wx2std(getRole()),
+                wx2std(getConnectionCharset()), "");
+        }
 
         databaseM->Connect();
         connectedM = true;
@@ -1189,15 +1198,15 @@ wxString Database::getDecryptedPassword() const
     if (raw.IsEmpty())
         return wxEmptyString;
 
-    if (storeEncryptedPasswordM)
+    if (authenticationModeM == amSavedEncryptedPassword)
         return decryptPassword(raw, getUsername() + getConnectionString());
     else
         return raw;
 }
 //-----------------------------------------------------------------------------
-bool Database::getStoreEncryptedPassword() const
+Database::AuthenticationMode Database::getAuthenticationMode() const
 {
-    return storeEncryptedPasswordM;
+    return authenticationModeM;
 }
 //-----------------------------------------------------------------------------
 wxString Database::getRole() const
@@ -1256,7 +1265,7 @@ void Database::setEncryptedPassword(wxString value)
         return;
     }
 
-    if (storeEncryptedPasswordM)
+    if (authenticationModeM == amSavedEncryptedPassword)
     {
         credentialsM.setPassword(encryptPassword(value,
             getUsername()+getConnectionString()));
@@ -1265,9 +1274,9 @@ void Database::setEncryptedPassword(wxString value)
         credentialsM.setPassword(value);
 }
 //-----------------------------------------------------------------------------
-void Database::setStoreEncryptedPassword(bool value)
+void Database::setAuthenticationMode(AuthenticationMode mode)
 {
-    storeEncryptedPasswordM = value;
+    authenticationModeM = mode;
 }
 //-----------------------------------------------------------------------------
 void Database::setRole(wxString value)

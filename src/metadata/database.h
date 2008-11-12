@@ -151,6 +151,9 @@ public:
 //-----------------------------------------------------------------------------
 class Database: public MetadataItem
 {
+public:
+    enum AuthenticationMode { amSavedPassword, amSavedEncryptedPassword,
+        amAlwaysEnterPassword, amTrustedUserAuthentication };
 private:
     IBPP::Database databaseM;
     MetadataLoader* metadataLoaderM;
@@ -161,7 +164,7 @@ private:
     wxString pathM;
     Credentials credentialsM;
     Credentials* connectionCredentialsM;
-    bool storeEncryptedPasswordM;
+    AuthenticationMode authenticationModeM;
 
     wxMBConv* charsetConverterM;
     void createCharsetConverter();
@@ -271,7 +274,7 @@ public:
     wxString getUsername() const;
     wxString getRawPassword() const;
     wxString getDecryptedPassword() const;
-    bool getStoreEncryptedPassword() const;
+    AuthenticationMode getAuthenticationMode() const;
     wxString getRole() const;
     IBPP::Database& getIBPPDatabase();
     void setPath(wxString value);
@@ -279,7 +282,7 @@ public:
     void setUsername(wxString value);
     void setRawPassword(wxString value);
     void setEncryptedPassword(wxString value);
-    void setStoreEncryptedPassword(bool value);
+    void setAuthenticationMode(AuthenticationMode mode);
     void setRole(wxString value);
     virtual const wxString getTypeName() const;
     Server *getServer() const;

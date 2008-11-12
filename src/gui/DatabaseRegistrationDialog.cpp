@@ -83,39 +83,24 @@ void DatabaseRegistrationDialog::createControls()
         ID_textcontrol_dbpath, wxEmptyString);
     button_browse = new wxButton(getControlsPanel(), ID_button_browse,
         wxT("..."), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-    label_username = new wxStaticText(getControlsPanel(), -1, _("Username:"));
+
+    label_authentication = new wxStaticText(getControlsPanel(), -1,
+        _("Authentication:"));
+    choice_authentication = new wxChoice(getControlsPanel(),
+        ID_choice_authentication, wxDefaultPosition, wxDefaultSize,
+        getAuthenticationChoices());
+
+    label_username = new wxStaticText(getControlsPanel(), -1, _("User name:"));
     text_ctrl_username = new wxTextCtrl(getControlsPanel(),
         ID_textcontrol_username, wxEmptyString);
     label_password = new wxStaticText(getControlsPanel(), -1, _("Password:"));
     text_ctrl_password = new wxTextCtrl(getControlsPanel(),
         ID_textcontrol_password, wxEmptyString, wxDefaultPosition,
         wxDefaultSize, wxTE_PASSWORD);
-    text_ctrl_password->SetToolTip(
-        _("Leave empty if you wish to be prompted for password every time"));
-    if (!connectAsM)
-        checkbox_encrypted = new wxCheckBox(getControlsPanel(), -1, _("Encrypt password"));
-    else
-        checkbox_encrypted = 0;
+
     label_charset = new wxStaticText(getControlsPanel(), -1, _("Charset:"));
-
-    const wxString charset_choices[] = {
-        wxT("NONE"),        wxT("ASCII"),       wxT("BIG_5"),       wxT("CYRL"),
-        wxT("DOS437"),      wxT("DOS737"),      wxT("DOS775"),      wxT("DOS850"),
-        wxT("DOS852"),      wxT("DOS857"),      wxT("DOS858"),      wxT("DOS860"),
-        wxT("DOS861"),      wxT("DOS862"),      wxT("DOS863"),      wxT("DOS864"),
-        wxT("DOS865"),      wxT("DOS866"),      wxT("DOS869"),      wxT("EUCJ_0208"),
-        wxT("GB_2312"),     wxT("ISO8859_1"),   wxT("ISO8859_2"),   wxT("ISO8859_3"),
-        wxT("ISO8859_4"),   wxT("ISO8859_5"),   wxT("ISO8859_6"),   wxT("ISO8859_7"),
-        wxT("ISO8859_8"),   wxT("ISO8859_9"),   wxT("ISO8859_13"),  wxT("KSC_5601"),
-        wxT("NEXT"),        wxT("OCTETS"),      wxT("SJIS_0208"),   wxT("UNICODE_FSS"),
-        wxT("UTF8"),        wxT("WIN1250"),     wxT("WIN1251"),     wxT("WIN1252"),
-        wxT("WIN1253"),     wxT("WIN1254"),     wxT("WIN1255"),     wxT("WIN1256"),
-        wxT("WIN1257")
-    };
-
     combobox_charset = new wxComboBox(getControlsPanel(), -1, wxT("NONE"),
-        wxDefaultPosition, wxDefaultSize,
-        sizeof(charset_choices) / sizeof(wxString), charset_choices,
+        wxDefaultPosition, wxDefaultSize, getDatabaseCharsetChoices(),
         wxCB_DROPDOWN | wxCB_SORT);
 
     label_role = new wxStaticText(getControlsPanel(), -1, _("Role:"));
@@ -125,25 +110,87 @@ void DatabaseRegistrationDialog::createControls()
     {
         label_pagesize = new wxStaticText(getControlsPanel(), -1,
             _("Page size:"));
-        const wxString pagesize_choices[] = {
-            _("Default"), wxT("1024"), wxT("2048"), wxT("4096"), wxT("8192"), wxT("16384")
-        };
         choice_pagesize = new wxChoice(getControlsPanel(), -1,
-            wxDefaultPosition, wxDefaultSize,
-            sizeof(pagesize_choices) / sizeof(wxString), pagesize_choices);
+            wxDefaultPosition, wxDefaultSize, getDatabasePagesizeChoices());
         label_dialect = new wxStaticText(getControlsPanel(), -1,
-            _("SQL Dialect:"));
-        const wxString dialect_choices[] = {
-            wxT("1"), wxT("2"), wxT("3")
-        };
+            _("SQL dialect:"));
         choice_dialect = new wxChoice(getControlsPanel(), -1,
-            wxDefaultPosition, wxDefaultSize,
-            sizeof(dialect_choices) / sizeof(wxString), dialect_choices);
+            wxDefaultPosition, wxDefaultSize, getDatabaseDialectChoices());
     }
 
     button_ok = new wxButton(getControlsPanel(), wxID_SAVE,
         (createM ? _("Create") : _("Save")));
     button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
+}
+//-----------------------------------------------------------------------------
+wxArrayString DatabaseRegistrationDialog::getAuthenticationChoices() const
+{
+    wxArrayString choices;
+    if (connectAsM)
+        choices.Add(_("Enter user name and password"));
+    else
+    {
+        choices.Add(_("Use saved user name and password"));
+        choices.Add(_("Use saved user name and encrypted password"));
+        choices.Add(_("Use saved user name, but always enter password"));
+        choices.Add(_("Use trusted user authentication"));
+    }
+    return choices;
+}
+//-----------------------------------------------------------------------------
+wxArrayString DatabaseRegistrationDialog::getDatabaseCharsetChoices() const
+{
+    const wxString charset_choices[] = {
+        wxT("NONE"), wxT("ASCII"), wxT("BIG_5"), wxT("CYRL"),
+
+        wxT("DOS437"), wxT("DOS737"), wxT("DOS775"), wxT("DOS850"),
+        wxT("DOS852"), wxT("DOS857"), wxT("DOS858"), wxT("DOS860"),
+        wxT("DOS861"), wxT("DOS862"), wxT("DOS863"), wxT("DOS864"),
+        wxT("DOS865"), wxT("DOS866"), wxT("DOS869"),
+
+        wxT("EUCJ_0208"), wxT("GB_2312"),
+
+        wxT("ISO8859_1"), wxT("ISO8859_2"), wxT("ISO8859_3"), wxT("ISO8859_4"),
+        wxT("ISO8859_5"), wxT("ISO8859_6"), wxT("ISO8859_7"), wxT("ISO8859_8"),
+        wxT("ISO8859_9"), wxT("ISO8859_13"),
+
+        wxT("KSC_5601"), wxT("NEXT"), wxT("OCTETS"), wxT("SJIS_0208"),
+
+        wxT("UNICODE_FSS"), wxT("UTF8"),
+
+        wxT("WIN1250"), wxT("WIN1251"), wxT("WIN1252"), wxT("WIN1253"),
+        wxT("WIN1254"), wxT("WIN1255"), wxT("WIN1256"), wxT("WIN1257")
+    };
+    const size_t cnt = sizeof(charset_choices) / sizeof(wxString);
+
+    wxArrayString choices;
+    choices.Alloc(cnt);
+    for (size_t i = 0; i < cnt; i++)
+        choices.Add(charset_choices[i]);
+    return choices;
+}
+//-----------------------------------------------------------------------------
+wxArrayString DatabaseRegistrationDialog::getDatabaseDialectChoices() const
+{
+    wxArrayString choices;
+    choices.Alloc(2);
+    // IBPP allows only dialects 1 and 3 for database creation
+    choices.Add(_("1"));
+    choices.Add(wxT("3"));
+    return choices;
+}
+//-----------------------------------------------------------------------------
+wxArrayString DatabaseRegistrationDialog::getDatabasePagesizeChoices() const
+{
+    wxArrayString choices;
+    choices.Alloc(6);
+    choices.Add(_("Default"));
+    choices.Add(wxT("1024"));
+    choices.Add(wxT("2048"));
+    choices.Add(wxT("4096"));
+    choices.Add(wxT("8192"));
+    choices.Add(wxT("16384"));
+    return choices;
 }
 //-----------------------------------------------------------------------------
 const wxString DatabaseRegistrationDialog::getName() const
@@ -173,34 +220,29 @@ void DatabaseRegistrationDialog::layoutControls()
     sizer_r1c1_3->Add(button_browse, 0, wxLEFT | wxALIGN_CENTER_VERTICAL, styleguide().getBrowseButtonMargin());
     sizerControls->Add(sizer_r1c1_3, wxGBPosition(1, 1), wxGBSpan(1, 3), wxEXPAND);
 
+    sizerControls->Add(label_authentication, wxGBPosition(2, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+    sizerControls->Add(choice_authentication, wxGBPosition(2, 1), wxGBSpan(1, 3), wxALIGN_CENTER_VERTICAL | wxEXPAND);
+
     int dx = styleguide().getUnrelatedControlMargin(wxHORIZONTAL) - styleguide().getControlLabelMargin();
     if (dx < 0)
         dx = 0;
 
-    sizerControls->Add(label_username, wxGBPosition(2, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-    sizerControls->Add(text_ctrl_username, wxGBPosition(2, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-    sizerControls->Add(label_password, wxGBPosition(2, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
-    sizerControls->Add(text_ctrl_password, wxGBPosition(2, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    sizerControls->Add(label_username, wxGBPosition(3, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+    sizerControls->Add(text_ctrl_username, wxGBPosition(3, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    sizerControls->Add(label_password, wxGBPosition(3, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+    sizerControls->Add(text_ctrl_password, wxGBPosition(3, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
 
-    int row = 3;
-    if (!connectAsM)
-    {
-        sizerControls->Add(checkbox_encrypted, wxGBPosition(row, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-        row++;
-    }
-
-    sizerControls->Add(label_charset, wxGBPosition(row, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-    sizerControls->Add(combobox_charset, wxGBPosition(row, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-    sizerControls->Add(label_role, wxGBPosition(row, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
-    sizerControls->Add(text_ctrl_role, wxGBPosition(row, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-    row++;
+    sizerControls->Add(label_charset, wxGBPosition(4, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+    sizerControls->Add(combobox_charset, wxGBPosition(4, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    sizerControls->Add(label_role, wxGBPosition(4, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+    sizerControls->Add(text_ctrl_role, wxGBPosition(4, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
 
     if (createM)
     {
-        sizerControls->Add(label_pagesize, wxGBPosition(row, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-        sizerControls->Add(choice_pagesize, wxGBPosition(row, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-        sizerControls->Add(label_dialect, wxGBPosition(row, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
-        sizerControls->Add(choice_dialect, wxGBPosition(row, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+        sizerControls->Add(label_pagesize, wxGBPosition(5, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+        sizerControls->Add(choice_pagesize, wxGBPosition(5, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+        sizerControls->Add(label_dialect, wxGBPosition(5, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+        sizerControls->Add(choice_dialect, wxGBPosition(5, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
     }
 
     sizerControls->AddGrowableCol(1);
@@ -216,6 +258,7 @@ void DatabaseRegistrationDialog::setControlsProperties()
 {
     int wh = text_ctrl_dbpath->GetMinHeight();
     button_browse->SetSize(wh, wh);
+    choice_authentication->SetSelection(0);
     if (createM)
     {
         choice_pagesize->SetSelection(
@@ -255,17 +298,29 @@ void DatabaseRegistrationDialog::setDatabase(Database* db)
     bool isConnected = databaseM->isConnected();
     text_ctrl_dbpath->SetEditable(!connectAsM && !isConnected);
     button_browse->Enable(!connectAsM && !isConnected);
-    text_ctrl_name->SetEditable(!connectAsM);
-    text_ctrl_username->SetEditable(!isConnected);
-    text_ctrl_password->SetEditable(!isConnected);
-    if (checkbox_encrypted)
-        checkbox_encrypted->Enable(!isConnected);
+    choice_authentication->Enable(!connectAsM && !isConnected);
     combobox_charset->Enable(!isConnected);
     text_ctrl_role->SetEditable(!isConnected);
     if (connectAsM)
         button_ok->SetLabel(_("Connect"));
     else
-        checkbox_encrypted->SetValue(databaseM->getStoreEncryptedPassword());
+    {
+        int sel = 0;
+        switch (databaseM->getAuthenticationMode())
+        {
+            case Database::amSavedEncryptedPassword:
+                sel = 1;
+                break;
+            case Database::amAlwaysEnterPassword:
+                sel = 2;
+                break;
+            case Database::amTrustedUserAuthentication:
+                sel = 3;
+                break;
+        }
+        choice_authentication->SetSelection(sel);
+    }
+    updateAuthenticationMode();
     updateButtons();
     updateColors();
 }
@@ -274,6 +329,17 @@ void DatabaseRegistrationDialog::setServer(Server *s)
 {
     wxASSERT(s);
     serverM = s;
+}
+//-----------------------------------------------------------------------------
+void DatabaseRegistrationDialog::updateAuthenticationMode()
+{
+    bool isConnected = databaseM->isConnected();
+    int sel = choice_authentication->GetSelection();
+    // user name not for trusted user authentication
+    text_ctrl_username->SetEditable(!isConnected && sel < 3);
+    // password not if always to be entered
+    // password not for trusted user authentication
+    text_ctrl_password->SetEditable(!isConnected && sel < 2);
 }
 //-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::updateButtons()
@@ -302,6 +368,7 @@ BEGIN_EVENT_TABLE(DatabaseRegistrationDialog, BaseDialog)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_name, DatabaseRegistrationDialog::OnNameChange)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_password, DatabaseRegistrationDialog::OnSettingsChange)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_username, DatabaseRegistrationDialog::OnSettingsChange)
+    EVT_CHOICE(DatabaseRegistrationDialog::ID_choice_authentication, DatabaseRegistrationDialog::OnAuthenticationChange)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
@@ -318,14 +385,33 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
     if (serverM)
         databaseM->setParent(serverM);
 
+    // TODO: This needs to be reworked. If the order of method calls is important
+    //       then they must not be provided as independent methods !!!
+
     // Please note that the order of calls is important here:
     // setPath and setUsername and setStoreEncryptedPassword
     // must come before setEncryptedPassword.
     // The reason is that setEncryptedPassword uses those 3 values to determine
     // whether the password needs to be encrypted, and if it does need, it uses
     // them to calculate the key (using master key)
-    if (checkbox_encrypted)
-        databaseM->setStoreEncryptedPassword(checkbox_encrypted->IsChecked());
+    if (!connectAsM)
+    {
+        switch (choice_authentication->GetSelection())
+        {
+            case 1:
+                databaseM->setAuthenticationMode(Database::amSavedEncryptedPassword);
+                break;
+            case 2:
+                databaseM->setAuthenticationMode(Database::amAlwaysEnterPassword);
+                break;
+            case 3:
+                databaseM->setAuthenticationMode(Database::amTrustedUserAuthentication);
+                break;
+            default:
+                databaseM->setAuthenticationMode(Database::amSavedPassword);
+                break;
+        }
+    }
     databaseM->setName_(text_ctrl_name->GetValue());
     databaseM->setPath(text_ctrl_dbpath->GetValue());
     databaseM->setUsername(text_ctrl_username->GetValue());
@@ -362,11 +448,12 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
     }
     catch (...)
     {
-        wxMessageBox(_("SYSTEM ERROR!\n"), _("Error"), wxOK|wxICON_ERROR);
+        wxMessageBox(_("SYSTEM ERROR!"), _("Error"), wxOK|wxICON_ERROR);
     }
 }
 //-----------------------------------------------------------------------------
-void DatabaseRegistrationDialog::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
+void DatabaseRegistrationDialog::OnSettingsChange(
+    wxCommandEvent& WXUNUSED(event))
 {
     if (IsShown())
     {
@@ -383,6 +470,16 @@ void DatabaseRegistrationDialog::OnNameChange(wxCommandEvent& WXUNUSED(event))
     {
         updateIsDefaultName();
         updateButtons();
+    }
+}
+//-----------------------------------------------------------------------------
+void DatabaseRegistrationDialog::OnAuthenticationChange(
+    wxCommandEvent& WXUNUSED(event))
+{
+    if (IsShown())
+    {
+        updateAuthenticationMode();
+        updateColors();
     }
 }
 //-----------------------------------------------------------------------------

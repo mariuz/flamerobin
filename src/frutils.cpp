@@ -142,20 +142,19 @@ bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent, vector<wxStr
     return true;
 }
 //-----------------------------------------------------------------------------
-bool connectDatabase(Database *db, wxWindow* parent,
+bool connectDatabase(Database* db, wxWindow* parent,
     ProgressDialog* progressdialog)
 {
     wxString pass(db->getDecryptedPassword());
-    if (pass.empty())
+    if (db->getAuthenticationMode() == Database::amAlwaysEnterPassword)
     {
         UsernamePasswordDialog upd(wxGetActiveWindow(),
             _("Database Credentials"), db->getUsername(), true, // don't allow different username
             _("Please enter the the database user's password:"));
-        if (upd.ShowModal() == wxID_OK)
-            pass = upd.getPassword();
+        if (upd.ShowModal() != wxID_OK)
+            return false;
+        pass = upd.getPassword();
     }
-    if (pass.empty())
-        return false;
 
     wxString caption(wxString::Format(_("Connecting to Database \"%s\""),
         db->getName_().c_str()));
