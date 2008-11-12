@@ -49,8 +49,6 @@ void DatabaseImpl::Create(int dialect)
         throw LogicExceptionImpl("Database::Create", _("Database is already connected."));
     if (mDatabaseName.empty())
         throw LogicExceptionImpl("Database::Create", _("Unspecified database name."));
-    if (mUserName.empty())
-        throw LogicExceptionImpl("Database::Create", _("Unspecified user name."));
     if (dialect != 1 && dialect != 3)
         throw LogicExceptionImpl("Database::Create", _("Only dialects 1 and 3 are supported."));
 
@@ -60,10 +58,10 @@ void DatabaseImpl::Create(int dialect)
     if (! mServerName.empty()) create.append(mServerName).append(":");
     create.append(mDatabaseName).append("' ");
 
-    create.append("USER '").append(mUserName).append("' ");
+    if (! mUserName.empty())
+        create.append("USER '").append(mUserName).append("' ");
     if (! mUserPassword.empty())
         create.append("PASSWORD '").append(mUserPassword).append("' ");
-
     if (! mCreateParams.empty()) create.append(mCreateParams);
 
     // Call ExecuteImmediate to create the database
@@ -83,13 +81,17 @@ void DatabaseImpl::Connect()
 
     if (mDatabaseName.empty())
         throw LogicExceptionImpl("Database::Connect", _("Unspecified database name."));
-    if (mUserName.empty())
-        throw LogicExceptionImpl("Database::Connect", _("Unspecified user name."));
 
     // Build a DPB based on the properties
     DPB dpb;
-    dpb.Insert(isc_dpb_user_name, mUserName.c_str());
-    dpb.Insert(isc_dpb_password, mUserPassword.c_str());
+    if (! mUserName.empty())
+    {
+        dpb.Insert(isc_dpb_user_name, mUserName.c_str());
+        if (! mUserPassword.empty())
+            dpb.Insert(isc_dpb_password, mUserPassword.c_str());
+    }
+    else
+        dpb.Insert(isc_dpb_trusted_auth, true);
     if (! mRoleName.empty()) dpb.Insert(isc_dpb_sql_role_name, mRoleName.c_str());
     if (! mCharSet.empty()) dpb.Insert(isc_dpb_lc_ctype, mCharSet.c_str());
 

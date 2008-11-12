@@ -492,7 +492,10 @@ void MainFrame::updateStatusbarText()
     Database* d = treeMainM->getSelectedDatabase();
     if (d)
     {
-        wxString s = d->getUsername() + wxT("@") + d->getConnectionString()
+        wxString s = d->getUsername();
+        if (s.empty())
+            s = _("[Trusted user]");
+        s = s + wxT("@") + d->getConnectionString()
             + wxT(" (") + d->getConnectionCharset() + wxT(")");
         sb->SetStatusText(s);
     }

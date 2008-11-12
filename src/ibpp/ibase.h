@@ -1791,6 +1791,13 @@ int  ISC_EXPORT isc_get_client_minor_version ();
 #define isc_dpb_gfix_attach		  66
 #define isc_dpb_gstat_attach		  67
 #define isc_dpb_set_db_charset			68
+/*
+#define isc_dpb_gsec_attach               69
+#define isc_dpb_address_path              70
+#define isc_dpb_process_id                71
+#define isc_dpb_no_db_triggers            72
+*/
+#define isc_dpb_trusted_auth              73
 
 /*********************************/
 /* isc_dpb_verify specific flags */
