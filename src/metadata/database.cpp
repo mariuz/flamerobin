@@ -59,6 +59,33 @@
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------
+// CharacterSet class
+CharacterSet::CharacterSet(const wxString& name, int id, int bytesPerChar)
+    : nameM(name), idM(id), bytesPerCharM(bytesPerChar)
+{
+}
+//-----------------------------------------------------------------------------
+bool CharacterSet::operator< (const CharacterSet& other) const
+{
+    return nameM < other.nameM;
+}
+//-----------------------------------------------------------------------------
+int CharacterSet::getBytesPerChar() const
+{
+    return bytesPerCharM;
+}
+//-----------------------------------------------------------------------------
+int CharacterSet::getId() const
+{
+    return idM;
+}
+//-----------------------------------------------------------------------------
+wxString CharacterSet::getName() const
+{
+    return nameM;
+}
+//-----------------------------------------------------------------------------
+// Credentials class
 void Credentials::setCharset(wxString value)
 {
     charsetM = value;

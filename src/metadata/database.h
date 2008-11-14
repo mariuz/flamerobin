@@ -60,26 +60,12 @@ private:
     int idM;
     int bytesPerCharM;
 public:
-    CharacterSet(const wxString& name, int id = -1, int bytesPerChar = -1)
-        :nameM(name), idM(id), bytesPerCharM(bytesPerChar)
-    {
-    }
-    bool operator< (const CharacterSet& other) const
-    {
-        return nameM < other.nameM;
-    }
-    int getBytesPerChar() const
-    {
-        return bytesPerCharM;
-    }
-    int getId() const
-    {
-        return idM;
-    }
-    wxString getName() const
-    {
-        return nameM;
-    }
+    CharacterSet(const wxString& name, int id = -1, int bytesPerChar = -1);
+
+    bool operator< (const CharacterSet& other) const;
+    int getBytesPerChar() const;
+    int getId() const;
+    wxString getName() const;
 };
 //-----------------------------------------------------------------------------
 class Credentials
