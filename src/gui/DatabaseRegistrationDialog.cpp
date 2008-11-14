@@ -337,7 +337,6 @@ void DatabaseRegistrationDialog::updateButtons()
         button_ok->Enable(!text_ctrl_dbpath->GetValue().IsEmpty()
             && !text_ctrl_username->GetValue().IsEmpty()
             && !text_ctrl_name->GetValue().IsEmpty()
-            && (!connectAsM || !text_ctrl_password->GetValue().IsEmpty())
         );
     }
 }
@@ -354,7 +353,6 @@ BEGIN_EVENT_TABLE(DatabaseRegistrationDialog, BaseDialog)
     EVT_BUTTON(wxID_SAVE, DatabaseRegistrationDialog::OnOkButtonClick)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_dbpath, DatabaseRegistrationDialog::OnSettingsChange)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_name, DatabaseRegistrationDialog::OnNameChange)
-    EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_password, DatabaseRegistrationDialog::OnSettingsChange)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_username, DatabaseRegistrationDialog::OnSettingsChange)
     EVT_CHOICE(DatabaseRegistrationDialog::ID_choice_authentication, DatabaseRegistrationDialog::OnAuthenticationChange)
 END_EVENT_TABLE()

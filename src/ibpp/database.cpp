@@ -87,8 +87,7 @@ void DatabaseImpl::Connect()
     if (! mUserName.empty())
     {
         dpb.Insert(isc_dpb_user_name, mUserName.c_str());
-        if (! mUserPassword.empty())
-            dpb.Insert(isc_dpb_password, mUserPassword.c_str());
+        dpb.Insert(isc_dpb_password, mUserPassword.c_str());
     }
     else
         dpb.Insert(isc_dpb_trusted_auth, true);
