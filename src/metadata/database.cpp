@@ -221,10 +221,86 @@ void DatabaseInfo::reloadIfNecessary(const IBPP::Database database)
         load(database);
 }
 //-----------------------------------------------------------------------------
+// DatabaseAuthenticationMode class
+DatabaseAuthenticationMode::DatabaseAuthenticationMode()
+    : modeM(UseSavedPassword)
+{
+}
+//-----------------------------------------------------------------------------
+int DatabaseAuthenticationMode::getMode() const
+{
+    return int(modeM);
+}
+//-----------------------------------------------------------------------------
+void DatabaseAuthenticationMode::setMode(int mode)
+{
+    switch (mode)
+    {
+        case UseSavedPassword:
+        case UseSavedEncryptedPwd:
+        case AlwaysEnterPassword:
+        case TrustedUser:
+            modeM = Mode(mode);
+        default:
+            wxASSERT(false);
+    }
+}
+//-----------------------------------------------------------------------------
+wxString DatabaseAuthenticationMode::getConfigValue() const
+{
+    switch (modeM)
+    {
+        case UseSavedEncryptedPwd:
+            return wxT("encpwd");
+        case AlwaysEnterPassword:
+            return wxT("askpwd");
+        case TrustedUser:
+            return wxT("trusted");
+        default:
+            return wxT("pwd");
+    }
+}
+//-----------------------------------------------------------------------------
+void DatabaseAuthenticationMode::setConfigValue(const wxString& value)
+{
+    if (value == wxT("pwd"))
+        modeM = UseSavedPassword;
+    else if (value == wxT("encpwd"))
+        modeM = UseSavedEncryptedPwd;
+    else if (value == wxT("askpwd"))
+        modeM = AlwaysEnterPassword;
+    else if (value == wxT("trusted"))
+        modeM = TrustedUser;
+    else
+        wxASSERT(false);
+}
+//-----------------------------------------------------------------------------
+void DatabaseAuthenticationMode::setStoreEncryptedPassword()
+{
+    // ignore if old setting found after new mode has been set already
+    if (modeM == UseSavedPassword)
+        modeM = UseSavedEncryptedPwd;
+}
+//-----------------------------------------------------------------------------
+bool DatabaseAuthenticationMode::getAlwaysAskForPassword() const
+{
+    return modeM == AlwaysEnterPassword;
+}
+//-----------------------------------------------------------------------------
+bool DatabaseAuthenticationMode::getIgnoreUsernamePassword() const
+{
+    return modeM == TrustedUser;
+}
+//-----------------------------------------------------------------------------
+bool DatabaseAuthenticationMode::getUseEncryptedPassword() const
+{
+    return modeM == UseSavedEncryptedPwd;
+}
+//-----------------------------------------------------------------------------
+// Database class
 Database::Database()
     : MetadataItem(), metadataLoaderM(0), connectedM(false),
-        connectionCredentialsM(0), charsetConverterM(0),
-        authenticationModeM(amSavedPassword), idM(0)
+        connectionCredentialsM(0), charsetConverterM(0), idM(0)
 {
     typeM = ntDatabase;
 
@@ -924,7 +1000,7 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
         if (indicator)
             indicator->initProgressIndeterminate(wxT("Establishing connection..."));
 
-        if (authenticationModeM == amTrustedUserAuthentication)
+        if (authenticationModeM.getIgnoreUsernamePassword())
         {
             databaseM = IBPP::DatabaseFactory("", wx2std(getConnectionString()),
                 "", "", wx2std(getRole()), wx2std(getConnectionCharset()), "");
@@ -1225,13 +1301,13 @@ wxString Database::getDecryptedPassword() const
     if (raw.IsEmpty())
         return wxEmptyString;
 
-    if (authenticationModeM == amSavedEncryptedPassword)
+    if (authenticationModeM.getUseEncryptedPassword())
         return decryptPassword(raw, getUsername() + getConnectionString());
     else
         return raw;
 }
 //-----------------------------------------------------------------------------
-Database::AuthenticationMode Database::getAuthenticationMode() const
+DatabaseAuthenticationMode& Database::getAuthenticationMode()
 {
     return authenticationModeM;
 }
@@ -1280,30 +1356,17 @@ void Database::setRawPassword(wxString value)
 //-----------------------------------------------------------------------------
 void Database::setEncryptedPassword(wxString value)
 {
-    // temporary connection
+    // temporary credentials -> use password as entered
     if (connectionCredentialsM)
     {
         connectionCredentialsM->setPassword(value);
         return;
     }
-    if (value.IsEmpty())
-    {
-        credentialsM.setPassword(value);
-        return;
-    }
 
-    if (authenticationModeM == amSavedEncryptedPassword)
-    {
-        credentialsM.setPassword(encryptPassword(value,
-            getUsername()+getConnectionString()));
-    }
-    else
-        credentialsM.setPassword(value);
-}
-//-----------------------------------------------------------------------------
-void Database::setAuthenticationMode(AuthenticationMode mode)
-{
-    authenticationModeM = mode;
+    // password must not be empty to be encrypted
+    if (authenticationModeM.getUseEncryptedPassword() && !value.IsEmpty())
+        value = encryptPassword(value, getUsername() + getConnectionString());
+    credentialsM.setPassword(value);
 }
 //-----------------------------------------------------------------------------
 void Database::setRole(wxString value)

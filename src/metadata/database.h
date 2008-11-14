@@ -135,11 +135,30 @@ public:
     bool getForcedWrites() const;
 };
 //-----------------------------------------------------------------------------
-class Database: public MetadataItem
+class DatabaseAuthenticationMode
 {
 public:
-    enum AuthenticationMode { amSavedPassword, amSavedEncryptedPassword,
-        amAlwaysEnterPassword, amTrustedUserAuthentication };
+    DatabaseAuthenticationMode();
+
+    enum Mode { UseSavedPassword, UseSavedEncryptedPwd, AlwaysEnterPassword,
+        TrustedUser };
+    int getMode() const;
+    void setMode(int mode);
+
+    wxString getConfigValue() const;
+    void setConfigValue(const wxString& value);
+    // support for old "encrypted password" setting
+    void setStoreEncryptedPassword();
+
+    bool getAlwaysAskForPassword() const;
+    bool getIgnoreUsernamePassword() const;
+    bool getUseEncryptedPassword() const;
+private:
+    Mode modeM;
+};
+//-----------------------------------------------------------------------------
+class Database: public MetadataItem
+{
 private:
     IBPP::Database databaseM;
     MetadataLoader* metadataLoaderM;
@@ -150,7 +169,7 @@ private:
     wxString pathM;
     Credentials credentialsM;
     Credentials* connectionCredentialsM;
-    AuthenticationMode authenticationModeM;
+    DatabaseAuthenticationMode authenticationModeM;
 
     wxMBConv* charsetConverterM;
     void createCharsetConverter();
@@ -260,7 +279,7 @@ public:
     wxString getUsername() const;
     wxString getRawPassword() const;
     wxString getDecryptedPassword() const;
-    AuthenticationMode getAuthenticationMode() const;
+    DatabaseAuthenticationMode& getAuthenticationMode();
     wxString getRole() const;
     IBPP::Database& getIBPPDatabase();
     void setPath(wxString value);
@@ -268,7 +287,6 @@ public:
     void setUsername(wxString value);
     void setRawPassword(wxString value);
     void setEncryptedPassword(wxString value);
-    void setAuthenticationMode(AuthenticationMode mode);
     void setRole(wxString value);
     virtual const wxString getTypeName() const;
     Server *getServer() const;

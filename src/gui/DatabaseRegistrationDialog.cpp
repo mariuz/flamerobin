@@ -305,20 +305,8 @@ void DatabaseRegistrationDialog::setDatabase(Database* db)
         button_ok->SetLabel(_("Connect"));
     else
     {
-        int sel = 0;
-        switch (databaseM->getAuthenticationMode())
-        {
-            case Database::amSavedEncryptedPassword:
-                sel = 1;
-                break;
-            case Database::amAlwaysEnterPassword:
-                sel = 2;
-                break;
-            case Database::amTrustedUserAuthentication:
-                sel = 3;
-                break;
-        }
-        choice_authentication->SetSelection(sel);
+        choice_authentication->SetSelection(
+            databaseM->getAuthenticationMode().getMode());
     }
     updateAuthenticationMode();
     updateButtons();
@@ -396,21 +384,8 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
     // them to calculate the key (using master key)
     if (!connectAsM)
     {
-        switch (choice_authentication->GetSelection())
-        {
-            case 1:
-                databaseM->setAuthenticationMode(Database::amSavedEncryptedPassword);
-                break;
-            case 2:
-                databaseM->setAuthenticationMode(Database::amAlwaysEnterPassword);
-                break;
-            case 3:
-                databaseM->setAuthenticationMode(Database::amTrustedUserAuthentication);
-                break;
-            default:
-                databaseM->setAuthenticationMode(Database::amSavedPassword);
-                break;
-        }
+        int sel = choice_authentication->GetSelection();
+        databaseM->getAuthenticationMode().setMode(sel);
     }
     databaseM->setName_(text_ctrl_name->GetValue());
     databaseM->setPath(text_ctrl_dbpath->GetValue());

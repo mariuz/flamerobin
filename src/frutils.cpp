@@ -146,10 +146,11 @@ bool connectDatabase(Database* db, wxWindow* parent,
     ProgressDialog* progressdialog)
 {
     wxString pass(db->getDecryptedPassword());
-    if (db->getAuthenticationMode() == Database::amAlwaysEnterPassword)
+    if (db->getAuthenticationMode().getAlwaysAskForPassword())
     {
+        // don't allow different username here
         UsernamePasswordDialog upd(wxGetActiveWindow(),
-            _("Database Credentials"), db->getUsername(), true, // don't allow different username
+            _("Database Credentials"), db->getUsername(), true,
             _("Please enter the the database user's password:"));
         if (upd.ShowModal() != wxID_OK)
             return false;

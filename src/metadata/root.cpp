@@ -152,7 +152,6 @@ bool Root::parseDatabase(Server* server, wxXmlNode* xmln)
     Database* database = server->addDatabase(tempDb);
     SubjectLocker locker(database);
 
-    Database::AuthenticationMode authMode = Database::amSavedPassword;
     for (xmln = xmln->GetChildren(); (xmln); xmln = xmln->GetNext())
     {
         if (xmln->GetType() != wxXML_ELEMENT_NODE)
@@ -170,16 +169,9 @@ bool Root::parseDatabase(Server* server, wxXmlNode* xmln)
         else if (xmln->GetName() == wxT("password"))
             database->setRawPassword(value);
         else if (xmln->GetName() == wxT("encrypted") && value == wxT("1"))
-            authMode = Database::amSavedEncryptedPassword;
-        else if (xmln->GetName() == wxT("authenticationmode"))
-        {
-            if (value == wxT("1"))
-                authMode = Database::amSavedEncryptedPassword;
-            else if (value == wxT("2"))
-                authMode = Database::amAlwaysEnterPassword;
-            else if (value == wxT("3"))
-                authMode = Database::amTrustedUserAuthentication;
-        }
+            database->getAuthenticationMode().setStoreEncryptedPassword();
+        else if (xmln->GetName() == wxT("authentication"))
+            database->getAuthenticationMode().setConfigValue(value);
         else if (xmln->GetName() == wxT("role"))
             database->setRole(value);
         else if (xmln->GetName() == wxT("id"))
@@ -194,7 +186,6 @@ bool Root::parseDatabase(Server* server, wxXmlNode* xmln)
             }
         }
     }
-    database->setAuthenticationMode(authMode);
 
     // make sure the database has an Id before Root::save() is called,
     // otherwise a new Id will be generated then, but the generator value
@@ -349,30 +340,8 @@ bool Root::save()
             rsAddChildNode(dbn, wxT("username"), itdb->getUsername());
             rsAddChildNode(dbn, wxT("password"), itdb->getRawPassword());
             rsAddChildNode(dbn, wxT("role"), itdb->getRole());
-
-            Database::AuthenticationMode mode = itdb->getAuthenticationMode();
-            // for compatibility store "encrypted" too, can be removed later...
-            wxString value(wxT("0"));
-            if (mode == Database::amSavedEncryptedPassword)
-                value = wxT("1");
-            rsAddChildNode(dbn, wxT("encrypted"), value);
-
-            switch (mode)
-            {
-                case Database::amSavedEncryptedPassword:
-                    value = wxT("1");
-                    break;
-                case Database::amAlwaysEnterPassword:
-                    value = wxT("2");
-                    break;
-                case Database::amTrustedUserAuthentication:
-                    value = wxT("3");
-                    break;
-                default:
-                    value = wxT("0");
-                    break;
-            }
-            rsAddChildNode(dbn, wxT("authenticationmode"), value);
+            rsAddChildNode(dbn, wxT("authentication"),
+                itdb->getAuthenticationMode().getConfigValue());
         }
     }
     if (!doc.Save(getFileName()))
