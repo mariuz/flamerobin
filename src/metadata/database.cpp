@@ -241,6 +241,7 @@ void DatabaseAuthenticationMode::setMode(int mode)
         case AlwaysEnterPassword:
         case TrustedUser:
             modeM = Mode(mode);
+            break;
         default:
             wxASSERT(false);
     }
