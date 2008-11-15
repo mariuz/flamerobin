@@ -86,12 +86,15 @@ wxString IncompleteStatement::getObjectColumns(const wxString& table,
     return getColumnsForObject(sql, table, position);
 }
 //-----------------------------------------------------------------------------
+typedef std::pair<wxString, wxString> IdAlias;
+typedef std::multimap<wxString, wxString> IdAliasMap;
+
 template <class T>
-T* IncompleteStatement::findObject(std::multimap<wxString,wxString>& aliases,
-    const wxString& alias, NodeType type)
+T* IncompleteStatement::findObject(IdAliasMap& aliases, const wxString& alias,
+    NodeType type)
 {
-    for (std::multimap<wxString, wxString>::iterator i =
-        aliases.lower_bound(alias); i != aliases.upper_bound(alias); ++i)
+    for (IdAliasMap::iterator i = aliases.lower_bound(alias);
+        i != aliases.upper_bound(alias); ++i)
     {
         T* t = dynamic_cast<T *>(databaseM->findByNameAndType(type,
             (*i).second));
@@ -247,34 +250,33 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
             return wxEmptyString;
     }
 
-    std::multimap<wxString, wxString> aliases;
+    IdAliasMap aliases;
     if (!r)
     {
         SqlTokenizer tokenizer(extractBlockAtPosition(sql, cursorPos));
         SqlTokenType search[] = { kwFROM, kwJOIN, kwUPDATE, kwINSERT };
-        while (true)
+        SqlTokenType stt;
+        while (tkEOF != (stt = tokenizer.getCurrentToken()))
         {
-            SqlTokenType stt = tokenizer.getCurrentToken();
-            if (stt == tkEOF)
-                break;
-
             //wxMessageBox(wxString::Format(wxT("Tok: %d, String: %s"), stt,
             //  tokenizer.getCurrentTokenString().c_str()), wxT("TOKEN"));
 
             // find all [DELETE] FROM, JOIN, UPDATE, INSERT INTO tokens
             for (int i=0; i < sizeof(search)/sizeof(SqlTokenType); ++i)
             {
-                if (search[i] == stt)
+                if (search[i] != stt)
+                    continue;
+
+                if (stt == kwINSERT)    // find INTO
                 {
-                    if (stt == kwINSERT)    // find INTO
-                    {
-                        tokenizer.jumpToken(false);
-                        if (kwINTO != tokenizer.getCurrentToken())
-                            break;
-                    }
-                    tokenizer.jumpToken(false);  // table/view/procedure name
-                    if (tkIDENTIFIER != tokenizer.getCurrentToken())
+                    tokenizer.jumpToken(false);
+                    if (kwINTO != tokenizer.getCurrentToken())
                         break;
+                }
+                tokenizer.jumpToken(false);  // table/view/procedure name
+
+                while (tkIDENTIFIER == tokenizer.getCurrentToken())
+                {
                     Identifier id;
                     id.setFromSql(tokenizer.getCurrentTokenString());
                     wxString alias;
@@ -288,13 +290,15 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
                     else
                         alias = id.get();
                     //wxMessageBox(id.get()+wxT(" ")+alias);
-                    aliases.insert(std::pair<wxString, wxString>(alias,
-                        id.get()));
-                    break;
+                    aliases.insert(IdAlias(alias, id.get()));
+                    tokenizer.jumpToken(false);
+                    // allow for SELECT ... FROM TBL_FOO f, TBL_BAR b
+                    if (tkCOMMA != tokenizer.getCurrentToken())
+                        break;
+                    tokenizer.jumpToken(false);
                 }
-            }
-            if (tkEOF == tokenizer.getCurrentToken())
                 break;
+            }
             tokenizer.jumpToken(false);
         }
 
