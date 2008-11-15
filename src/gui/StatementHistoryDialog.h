@@ -39,7 +39,6 @@ private:
     wxString sqlM;
     bool isSearchingM;
     StatementHistory *historyM;
-    wxStatusBar *statusBarM;
     wxStaticText *m_staticText2;
     wxTextCtrl *textctrl_search;
     wxButton *button_search;

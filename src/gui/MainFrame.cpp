@@ -486,22 +486,14 @@ void MainFrame::OnWindowMenuItem(wxCommandEvent& event)
 //-----------------------------------------------------------------------------
 void MainFrame::updateStatusbarText()
 {
-    wxStatusBar *sb = GetStatusBar();
-    if (!sb)
-        return;
-
-    Database* d = treeMainM->getSelectedDatabase();
-    if (d)
+    if (wxStatusBar* sb = GetStatusBar())
     {
-        wxString s = d->getUsername();
-        if (s.empty())
-            s = _("[Trusted user]");
-        s = s + wxT("@") + d->getConnectionString()
-            + wxT(" (") + d->getConnectionCharset() + wxT(")");
-        sb->SetStatusText(s);
+        Database* d = treeMainM->getSelectedDatabase();
+        if (d)
+            sb->SetStatusText(d->getConnectionInfoString());
+        else
+            sb->SetStatusText(_("[No database selected]"));
     }
-    else
-        sb->SetStatusText(_("[No database selected]"));
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))

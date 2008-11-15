@@ -275,6 +275,7 @@ public:
     wxString getPath() const;
     wxString getDatabaseCharset() const;
     wxString getConnectionCharset() const;
+    wxString getConnectionInfoString() const;
     bool usesDifferentConnectionCharset() const;
     wxString getUsername() const;
     wxString getRawPassword() const;

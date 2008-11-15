@@ -76,11 +76,7 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
 
     Database* d = object->findDatabase();
     if (d)  // server property page doesn't have a database, so don't crash
-    {
-        wxString s = d->getUsername() + wxT("@") + d->getConnectionString()
-            + wxT(" (") + d->getConnectionCharset() + wxT(")");
-        sb->SetStatusText(s);
-    }
+        sb->SetStatusText(d->getConnectionInfoString());
     else
         sb->SetStatusText(object->getPrintableName());
 

@@ -2442,11 +2442,9 @@ void ExecuteSqlFrame::setDatabase(Database* db)
 {
     databaseM = db;
 
-    wxString s = wxString::Format(wxT("%s@%s:%s"), db->getUsername().c_str(),
-        db->getServer()->getName_().c_str(), db->getPath().c_str());
     // doesn't seem to work properly as wxToolbar overwrites it
     //statusbar_1->PushStatusText(s, 0);
-    statusbar_1->SetStatusText(s, 0);
+    statusbar_1->SetStatusText(databaseM->getConnectionInfoString(), 0);
 
     transactionM = IBPP::TransactionFactory(databaseM->getIBPPDatabase());
     db->attachObserver(this);    // observe database object

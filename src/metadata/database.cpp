@@ -1265,6 +1265,18 @@ wxString Database::getConnectionCharset() const
         return credentialsM.getCharset();
 }
 //-----------------------------------------------------------------------------
+wxString Database::getConnectionInfoString() const
+{
+    wxString info;
+    if (authenticationModeM.getIgnoreUsernamePassword())
+        info = _("[Trusted user]");
+    else
+        info = getUsername();
+    info += wxT("@") + getConnectionString() + wxT(" (")
+        + getConnectionCharset() + wxT(")");
+    return info;
+}
+//-----------------------------------------------------------------------------
 bool Database::usesDifferentConnectionCharset() const
 {
     wxString charset(getConnectionCharset().Upper());
