@@ -78,9 +78,11 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database&)
     menuM->Append(Cmds::Menu_UnRegisterDatabase, _("&Unregister database"));
 
     // the actions submenu
-    actions->Append(Cmds::Menu_DropDatabase, _("Drop database"));
     actions->Append(Cmds::Menu_Backup, _("&Backup database..."));
     actions->Append(Cmds::Menu_Restore, _("Rest&ore database..."));
+    actions->AppendSeparator();
+    actions->Append(Cmds::Menu_RecreateDatabase, _("Recreate empty database"));
+    actions->Append(Cmds::Menu_DropDatabase, _("Drop database"));
 
     // the advanced submenu
     advanced->Append(Cmds::Menu_ShowConnectedUsers, _("&Show connected users"));

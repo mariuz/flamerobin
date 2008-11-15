@@ -80,7 +80,8 @@ namespace Cmds
         Menu_DropObject, Menu_ShowGeneratorValue, Menu_SetGeneratorValue,
         Menu_AddColumn, Menu_CreateTriggerForTable, Menu_RestoreIntoNew,
         Menu_MonitorEvents, Menu_GetServerVersion, Menu_AlterObject,
-        Menu_DropDatabase, Menu_DatabaseProperties, Menu_GenerateData,
+        Menu_DropDatabase, Menu_RecreateDatabase, Menu_DatabaseProperties,
+        Menu_GenerateData,
         Menu_CreateProcedureForTable, Menu_ExtractDatabaseDDL,
 
         // view menu

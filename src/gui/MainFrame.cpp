@@ -379,6 +379,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::Menu_Disconnect, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_MENU(Cmds::Menu_Reconnect, MainFrame::OnMenuReconnect)
     EVT_UPDATE_UI(Cmds::Menu_Reconnect, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_MENU(Cmds::Menu_RecreateDatabase, MainFrame::OnMenuRecreateDatabase)
     EVT_MENU(Cmds::Menu_DropDatabase, MainFrame::OnMenuDropDatabase)
     EVT_UPDATE_UI(Cmds::Menu_DropDatabase, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_MENU(Cmds::Menu_Query, MainFrame::OnMenuQuery)
@@ -1470,6 +1471,48 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
     else if (dm)
         sql = dm->getAlterSqlTemplate();
     showSql(this, wxString(_("Alter object")), db, sql);
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuRecreateDatabase(wxCommandEvent& WXUNUSED(event))
+{
+    Database* d = treeMainM->getSelectedDatabase();
+
+    if (!checkValidDatabase(d))
+        return;
+
+    wxString msg(wxString::Format(
+        _("Are you sure you wish to recreate the database \"%s\"?"),
+        d->getName_().c_str()));
+    wxString secondary;
+    if (!d->isConnected())
+        secondary = _("First a connection to the database will be established. You may need to enter the password.\n");
+    secondary += _("The database will be dropped, and a new empty database will be created. All the data will be deleted, this is an irreversible action!");
+    if (wxOK == showQuestionDialog(this, msg, secondary,
+        AdvancedMessageDialogButtonsOkCancel(_("Recreate"))))
+    {
+        // it's unclear at this point whether the database does still exist
+        // try to connect to it, and if that succeeds then drop it
+        // ignore all errors along the way...
+        try
+        {
+            if (!d->isConnected())
+                connect();
+            if (d->isConnected())
+            {
+                d->drop();
+                d->disconnect(true);    // true = just remove the child nodes
+            }
+        }
+        catch(IBPP::Exception&) {}
+
+        // use the dialog as some information (charset and page size) is
+        // not necessarily available, and the user may want to change it too
+        DatabaseRegistrationDialog drd(this, _("Recreate Database"), true);
+        drd.setDatabase(d);
+        drd.setServer(d->getServer());
+        if (drd.ShowModal() == wxID_OK)
+            treeMainM->selectMetadataItem(d);
+    }
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDropDatabase(wxCommandEvent& WXUNUSED(event))
