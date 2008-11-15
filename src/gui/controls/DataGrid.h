@@ -46,7 +46,7 @@ public:
     ~DataGrid();
 
     DataGridTable* getDataGridTable();
-    void fetchData();
+    void fetchData(bool readonly);
 private:
     void OnContextMenu(wxContextMenuEvent& event);
     void OnGridCellRightClick(wxGridEvent& event);

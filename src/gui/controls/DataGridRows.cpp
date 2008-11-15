@@ -1375,8 +1375,8 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
 }
 //-----------------------------------------------------------------------------
 // DataGridRows class
-DataGridRows::DataGridRows(Database* db, bool readonly)
-    : bufferSizeM(0), databaseM(db), readOnlyM(readonly)
+DataGridRows::DataGridRows(Database* db)
+    : bufferSizeM(0), databaseM(db), readOnlyM(false)
 {
 }
 //-----------------------------------------------------------------------------
@@ -1810,7 +1810,7 @@ bool DataGridRows::getFieldInfo(unsigned row, unsigned col,
         return false;
     info.rowInserted = buffersM[row]->isInserted();
     info.rowDeleted = buffersM[row]->isDeleted();
-    info.fieldReadOnly = info.rowDeleted
+    info.fieldReadOnly = readOnlyM || info.rowDeleted
         || isColumnReadonly(col) || isFieldReadonly(row, col);
     info.fieldModified = !info.rowDeleted
         && buffersM[row]->isFieldModified(col);

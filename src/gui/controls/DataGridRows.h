@@ -96,7 +96,7 @@ private:
     IBPP::Statement addWhere(UniqueConstraint* uq, wxString& stm,
         const wxString& table, DataGridRowBuffer *buffer);
 public:
-    DataGridRows(Database* db, bool readonly);
+    DataGridRows(Database* db);
     ~DataGridRows();
 
     void addRow(const IBPP::Statement& statement);

@@ -136,7 +136,7 @@ void DataGrid::extendSelection(int direction)
     }
 }
 //-----------------------------------------------------------------------------
-void DataGrid::fetchData()
+void DataGrid::fetchData(bool readonly)
 {
     DataGridTable* table = getDataGridTable();
     if (!table)
@@ -144,7 +144,7 @@ void DataGrid::fetchData()
 
     wxBusyCursor bc;
     BeginBatch();
-    table->initialFetch();
+    table->initialFetch(readonly);
 
     for (int i = 0; i < table->GetNumberCols(); i++)
     {
@@ -152,7 +152,7 @@ void DataGrid::fetchData()
         ca->SetAlignment(
             (table->isNumericColumn(i)) ? wxALIGN_RIGHT : wxALIGN_LEFT,
             wxALIGN_TOP);
-        if (table->isReadonlyColumn(i))
+        if (readonly || table->isReadonlyColumn(i))
         {
             ca->SetReadOnly(true);
             ca->SetBackgroundColour(table->getReadonlyColour());

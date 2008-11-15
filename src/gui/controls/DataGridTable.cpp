@@ -198,12 +198,13 @@ void RgbHsvConversion::setValue(float value)
     }
 }
 //-----------------------------------------------------------------------------
-DataGridTable::DataGridTable(IBPP::Statement& s, Database* db, bool readonly)
+DataGridTable::DataGridTable(IBPP::Statement& s, Database* db)
     : wxGridTableBase(), statementM(s), databaseM(db), nullFlagM(false),
-      rowsM(db, readonly)
+        rowsM(db)
 {
     allRowsFetchedM = false;
     fetchAllRowsM = false;
+    readOnlyM = false;
     canInsertRowsIsSetM = false;
     canInsertRowsM = false;
     config().getValue(wxT("GridFetchAllRecords"), fetchAllRowsM);
@@ -348,9 +349,9 @@ wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
     if (!rowsM.getFieldInfo(row, col, info))
         return wxGridTableBase::GetAttr(row, col, kind);
 
-    bool useAttri = info.rowInserted || info.rowDeleted || info.fieldReadOnly
-        || info.fieldModified || info.fieldNull || info.fieldNA
-        || info.fieldNumeric;
+    bool useAttri = readOnlyM || info.rowInserted || info.rowDeleted
+        || info.fieldReadOnly || info.fieldModified || info.fieldNull
+        || info.fieldNA || info.fieldNumeric;
     if (!useAttri)
         return wxGridTableBase::GetAttr(row, col, kind);
 
@@ -370,7 +371,7 @@ wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
         bgCol = wxColour(255, 208, 208);
     else if (info.rowInserted)
         bgCol = wxColour(235, 255, 200);
-    else if (info.fieldReadOnly)
+    else if (readOnlyM || info.fieldReadOnly)
         bgCol = getReadonlyColour();
     else
         bgCol = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
@@ -647,10 +648,11 @@ wxString DataGridTable::GetValue(int row, int col)
     return cellValue;
 }
 //-----------------------------------------------------------------------------
-void DataGridTable::initialFetch()
+void DataGridTable::initialFetch(bool readonly)
 {
     Clear();
     allRowsFetchedM = false;
+    readOnlyM = readonly;
     canInsertRowsIsSetM = false;
     canInsertRowsM = false;
     maxRowToFetchM = 100;
@@ -700,7 +702,7 @@ bool DataGridTable::isNumericColumn(int col)
 //-----------------------------------------------------------------------------
 bool DataGridTable::isReadonlyColumn(int col)
 {
-    return rowsM.isColumnReadonly(col);
+    return readOnlyM || rowsM.isColumnReadonly(col);
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::isValidCellPos(int row, int col)

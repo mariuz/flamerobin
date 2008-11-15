@@ -761,8 +761,7 @@ void ExecuteSqlFrame::set_properties()
     {
         statusbar_1->SetStatusText(statusbar_fields[i], i);
     }
-    grid_data->SetTable(new DataGridTable(statementM, databaseM,
-        transactionAccessModeM == IBPP::amRead), true);
+    grid_data->SetTable(new DataGridTable(statementM, databaseM), true);
     splitter_window_1->Initialize(styled_text_ctrl_sql);
     viewModeM = vmEditor;
 
@@ -2042,6 +2041,8 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             }
             transactionM->Start();
             inTransaction(true);
+
+            grid_data->EnableEditing(transactionAccessModeM == IBPP::amWrite);
         }
 
         int fetch1 = 0, mark1 = 0, read1 = 0, write1 = 0, ins1 = 0, upd1 = 0,
@@ -2126,7 +2127,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         IBPP::STT type = statementM->Type();
         if (hasColumns)            // for select statements: show data
         {
-            grid_data->fetchData();
+            grid_data->fetchData(transactionAccessModeM == IBPP::amRead);
             setViewMode(vmGrid);
         }
 

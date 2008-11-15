@@ -56,6 +56,7 @@ private:
     bool allRowsFetchedM;
     bool fetchAllRowsM;
     unsigned maxRowToFetchM;
+    bool readOnlyM;
     bool canInsertRowsIsSetM;
     bool canInsertRowsM;
 
@@ -71,7 +72,7 @@ private:
     int getStatementColCount();
     bool isValidCellPos(int row, int col);
 public:
-    DataGridTable(IBPP::Statement& s, Database* db, bool readonly);
+    DataGridTable(IBPP::Statement& s, Database* db);
     ~DataGridTable();
 
     bool canFetchMoreRows();
@@ -91,7 +92,7 @@ public:
     void getFields(const wxString& table, FieldSet& fields);
     Database *getDatabase();
 
-    void initialFetch();
+    void initialFetch(bool readonly);
     bool isNullCell(int row, int col);
     bool isNumericColumn(int col);
     bool isReadonlyColumn(int col);
