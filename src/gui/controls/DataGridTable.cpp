@@ -198,9 +198,9 @@ void RgbHsvConversion::setValue(float value)
     }
 }
 //-----------------------------------------------------------------------------
-DataGridTable::DataGridTable(IBPP::Statement& s, Database *db)
+DataGridTable::DataGridTable(IBPP::Statement& s, Database* db, bool readonly)
     : wxGridTableBase(), statementM(s), databaseM(db), nullFlagM(false),
-      rowsM(db)
+      rowsM(db, readonly)
 {
     allRowsFetchedM = false;
     fetchAllRowsM = false;

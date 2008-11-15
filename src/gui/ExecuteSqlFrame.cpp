@@ -505,11 +505,14 @@ public:
 ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
         wxString title,
         Database *db, const wxPoint& pos, const wxSize& size, long style)
-    :BaseFrame(wxTheApp->GetTopWindow(), id, title, pos, size, style),
-    Observer(), databaseM(db)
+    : BaseFrame(wxTheApp->GetTopWindow(), id, title, pos, size, style),
+        Observer(), databaseM(db)
 {
     loadingM = true;
     updateEditorCaretPosM = true;
+
+    transactionIsolationLevelM = IBPP::ilConcurrency;
+    transactionAccessModeM = IBPP::amWrite;
 
     CommandManager cm;
     buildToolbar(cm);
@@ -690,6 +693,22 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
     statementMenu->Append(Cmds::Query_Execute_from_cursor,
         cm.getMainMenuItemText(_("Exec&ute from cursor"), Cmds::Query_Execute_from_cursor));
     statementMenu->AppendSeparator();
+
+    wxMenu* stmtPropMenu = new wxMenu();
+    stmtPropMenu->AppendRadioItem(Cmds::Query_TransactionConcurrency,
+        cm.getMainMenuItemText(_("Concurrency isolation mode"), Cmds::Query_TransactionConcurrency));
+    stmtPropMenu->AppendRadioItem(Cmds::Query_TransactionReadDirty,
+        cm.getMainMenuItemText(_("Dirty read isolation mode"), Cmds::Query_TransactionReadDirty));
+    stmtPropMenu->AppendRadioItem(Cmds::Query_TransactionReadCommitted,
+        cm.getMainMenuItemText(_("Read committed isolation mode"), Cmds::Query_TransactionReadCommitted));
+    stmtPropMenu->AppendRadioItem(Cmds::Query_TransactionConsistency,
+        cm.getMainMenuItemText(_("Consistency isolation mode"), Cmds::Query_TransactionConsistency));
+    stmtPropMenu->AppendSeparator();
+    stmtPropMenu->AppendCheckItem(Cmds::Query_TransactionReadOnly,
+        cm.getMainMenuItemText(_("Read only transaction"), Cmds::Query_TransactionReadOnly));
+    statementMenu->AppendSubMenu(stmtPropMenu, _("Transaction settings"));
+
+    statementMenu->AppendSeparator();
     statementMenu->Append(Cmds::Query_Commit,
         cm.getMainMenuItemText(_("&Commit transaction"), Cmds::Query_Commit));
     statementMenu->Append(Cmds::Query_Rollback,
@@ -742,7 +761,8 @@ void ExecuteSqlFrame::set_properties()
     {
         statusbar_1->SetStatusText(statusbar_fields[i], i);
     }
-    grid_data->SetTable(new DataGridTable(statementM, databaseM), true);
+    grid_data->SetTable(new DataGridTable(statementM, databaseM,
+        transactionAccessModeM == IBPP::amRead), true);
     splitter_window_1->Initialize(styled_text_ctrl_sql);
     viewModeM = vmEditor;
 
@@ -855,6 +875,10 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::Query_Rollback,            ExecuteSqlFrame::OnMenuRollback)
     EVT_UPDATE_UI(Cmds::Query_Commit,         ExecuteSqlFrame::OnMenuUpdateWhenInTransaction)
     EVT_UPDATE_UI(Cmds::Query_Rollback,       ExecuteSqlFrame::OnMenuUpdateWhenInTransaction)
+    EVT_MENU_RANGE(Cmds::Query_TransactionConcurrency,      Cmds::Query_TransactionConsistency, ExecuteSqlFrame::OnMenuTransactionIsolationLevel)
+    EVT_UPDATE_UI_RANGE(Cmds::Query_TransactionConcurrency, Cmds::Query_TransactionConsistency, ExecuteSqlFrame::OnMenuUpdateTransactionIsolationLevel)
+    EVT_MENU(Cmds::Query_TransactionReadOnly,               ExecuteSqlFrame::OnMenuTransactionReadOnly)
+    EVT_UPDATE_UI(Cmds::Query_TransactionReadOnly,          ExecuteSqlFrame::OnMenuUpdateTransactionReadOnly)
 
     EVT_MENU(Cmds::DataGrid_Insert_row,      ExecuteSqlFrame::OnMenuGridInsertRow)
     EVT_MENU(Cmds::DataGrid_Delete_row,      ExecuteSqlFrame::OnMenuGridDeleteRow)
@@ -2008,9 +2032,14 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
 
     try
     {
-        if (!inTransactionM)
+        if (transactionM == 0 || !transactionM->Started())
         {
             log(_("Starting transaction..."));
+            if (transactionM == 0)
+            {
+                transactionM = IBPP::TransactionFactory(databaseM->getIBPPDatabase(),
+                    transactionAccessModeM, transactionIsolationLevelM);
+            }
             transactionM->Start();
             inTransaction(true);
         }
@@ -2179,6 +2208,50 @@ void ExecuteSqlFrame::splitScreen()
         splitter_window_1->SplitHorizontally(styled_text_ctrl_sql, notebook_1);
         ::wxYield();
     }
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuTransactionIsolationLevel(wxCommandEvent& event)
+{
+    if (event.GetId() == Cmds::Query_TransactionConcurrency)
+        transactionIsolationLevelM = IBPP::ilConcurrency;
+    else if (event.GetId() == Cmds::Query_TransactionConsistency)
+        transactionIsolationLevelM = IBPP::ilConsistency;
+    else if (event.GetId() == Cmds::Query_TransactionReadCommitted)
+        transactionIsolationLevelM = IBPP::ilReadCommitted;
+    else if (event.GetId() == Cmds::Query_TransactionReadDirty)
+        transactionIsolationLevelM = IBPP::ilReadDirty;
+
+    wxCHECK_RET(transactionM == 0 || !transactionM->Started(),
+        wxT("Can't change transaction isolation level while started"));
+    transactionM = 0;
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateTransactionIsolationLevel(
+    wxUpdateUIEvent& event)
+{
+    if (event.GetId() == Cmds::Query_TransactionConcurrency)
+        event.Check(transactionIsolationLevelM == IBPP::ilConcurrency);
+    else if (event.GetId() == Cmds::Query_TransactionConsistency)
+        event.Check(transactionIsolationLevelM == IBPP::ilConsistency);
+    else if (event.GetId() == Cmds::Query_TransactionReadCommitted)
+        event.Check(transactionIsolationLevelM == IBPP::ilReadCommitted);
+    else if (event.GetId() == Cmds::Query_TransactionReadDirty)
+        event.Check(transactionIsolationLevelM == IBPP::ilReadDirty);
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuTransactionReadOnly(wxCommandEvent& event)
+{
+    transactionAccessModeM = event.IsChecked() ? IBPP::amRead : IBPP::amWrite;
+
+    wxCHECK_RET(transactionM == 0 || !transactionM->Started(),
+        wxT("Can't change transaction access mode while started"));
+    transactionM = 0;
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateTransactionReadOnly(wxUpdateUIEvent& event)
+{
+    event.Enable(transactionM == 0 || !transactionM->Started());
+    event.Check(transactionAccessModeM == IBPP::amRead);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuCommit(wxCommandEvent& WXUNUSED(event))
@@ -2441,13 +2514,11 @@ void ExecuteSqlFrame::update()
 void ExecuteSqlFrame::setDatabase(Database* db)
 {
     databaseM = db;
+    db->attachObserver(this);    // observe database object
 
     // doesn't seem to work properly as wxToolbar overwrites it
     //statusbar_1->PushStatusText(s, 0);
     statusbar_1->SetStatusText(databaseM->getConnectionInfoString(), 0);
-
-    transactionM = IBPP::TransactionFactory(databaseM->getIBPPDatabase());
-    db->attachObserver(this);    // observe database object
 
     executedStatementsM.clear();
     inTransaction(false);    // enable/disable controls

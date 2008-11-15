@@ -50,6 +50,12 @@ namespace Cmds
         Query_Execute_from_cursor,
         Query_Commit,
         Query_Rollback,
+        // next 4: order is important, because EVT_MENU_RANGE is used
+        Query_TransactionConcurrency,
+        Query_TransactionReadDirty,
+        Query_TransactionReadCommitted,
+        Query_TransactionConsistency,
+        Query_TransactionReadOnly,
 
         // SQL Data grid
         DataGrid_Insert_row,

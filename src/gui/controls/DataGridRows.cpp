@@ -1375,8 +1375,8 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
 }
 //-----------------------------------------------------------------------------
 // DataGridRows class
-DataGridRows::DataGridRows(Database *db)
-    : bufferSizeM(0), databaseM(db)
+DataGridRows::DataGridRows(Database* db, bool readonly)
+    : bufferSizeM(0), databaseM(db), readOnlyM(readonly)
 {
 }
 //-----------------------------------------------------------------------------
@@ -1601,6 +1601,12 @@ void checkColumnsPresent(const Database* database,
 void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
     bool& nullable)
 {
+    if (readOnlyM) // read-only transaction
+    {
+        readOnly = true;
+        return;
+    }
+
     if (statementM->ColumnType(col) == IBPP::sdString
         && statementM->ColumnSubtype(col) == 1) // charset OCTETS
     {                       // TODO: to make those editable, we need to

@@ -71,7 +71,7 @@ private:
     int getStatementColCount();
     bool isValidCellPos(int row, int col);
 public:
-    DataGridTable(IBPP::Statement& s, Database *db);
+    DataGridTable(IBPP::Statement& s, Database* db, bool readonly);
     ~DataGridTable();
 
     bool canFetchMoreRows();
