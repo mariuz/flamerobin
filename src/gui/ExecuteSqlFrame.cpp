@@ -976,14 +976,25 @@ bool HasWord(wxString word, wxString& wordlist)
 }
 //-----------------------------------------------------------------------------
 //! autocomplete stuff
-void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& WXUNUSED(event))
+void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& event)
 {
     int pos = styled_text_ctrl_sql->GetCurrentPos();
     if (pos == 0)
         return;
 
-    int c = styled_text_ctrl_sql->GetCharAt(pos-1);
-    if (c == '(')
+    int c = event.GetKey();
+    if (c == '\n')
+    {
+        if (config().get(wxT("sqlEditorAutoIndent"), true))
+        {
+            int lineNum = styled_text_ctrl_sql->LineFromPosition(pos - 1);
+            int indent = styled_text_ctrl_sql->GetLineIndentation(lineNum);
+            styled_text_ctrl_sql->SetLineIndentation(lineNum + 1, indent);
+            int endpos = styled_text_ctrl_sql->GetLineEndPosition(lineNum + 1);
+            styled_text_ctrl_sql->GotoPos(endpos);
+        }
+    }
+    else if (c == '(')
     {
         if (config().get(wxT("SQLEditorCalltips"), true))
         {

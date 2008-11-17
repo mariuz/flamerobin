@@ -170,6 +170,11 @@
             <key>sqlEditorSmartHomeKey</key>
             <default>1</default>
         </setting>
+        <setting type="checkbox">
+            <caption>Auto-indent new lines to same level as previous line</caption>
+            <key>sqlEditorAutoIndent</key>
+            <default>1</default>
+        </setting>
         <node>
             <caption>Code Completion</caption>
             <description>SQL Code Completion</description>
