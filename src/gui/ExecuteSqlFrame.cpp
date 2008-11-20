@@ -988,10 +988,13 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& event)
         if (config().get(wxT("sqlEditorAutoIndent"), true))
         {
             int lineNum = styled_text_ctrl_sql->LineFromPosition(pos - 1);
-            int indent = styled_text_ctrl_sql->GetLineIndentation(lineNum);
-            styled_text_ctrl_sql->SetLineIndentation(lineNum + 1, indent);
-            int endpos = styled_text_ctrl_sql->GetLineEndPosition(lineNum + 1);
-            styled_text_ctrl_sql->GotoPos(endpos);
+            int linestart = styled_text_ctrl_sql->PositionFromLine(lineNum);
+            int indpos = styled_text_ctrl_sql->GetLineIndentPosition(lineNum);
+            wxString indent(styled_text_ctrl_sql->GetTextRange(linestart,
+                indpos));
+            int selpos = styled_text_ctrl_sql->GetSelectionStart();
+            styled_text_ctrl_sql->InsertText(selpos, indent);
+            styled_text_ctrl_sql->GotoPos(selpos + indent.Length());
         }
     }
     else if (c == '(')
