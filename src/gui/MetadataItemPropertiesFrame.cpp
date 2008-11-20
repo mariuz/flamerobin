@@ -181,6 +181,8 @@ void MetadataItemPropertiesFrame::showPanel(wxWindow* panel,
         notebookM->SetSelection(pg);
 
     Show();
+    if (panel)
+        panel->SetFocus();
     Raise();
 }
 //-----------------------------------------------------------------------------
