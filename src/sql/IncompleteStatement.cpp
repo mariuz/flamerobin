@@ -211,6 +211,8 @@ wxString IncompleteStatement::extractBlockAtPosition(const wxString& sql,
         SqlTokenType stt = tk.getCurrentToken();
         if (stt == tkEOF)
             break;
+        if (stt == kwSUBSTRING) // skip FOR in: substring(x from y FOR z)
+            tk.jumpToken(true);
         int cpos = tk.getCurrentTokenPosition();
         if (stt == kwFOR || stt == kwBEGIN || stt == kwEND || stt == kwDO)
         {
@@ -260,6 +262,13 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
         {
             //wxMessageBox(wxString::Format(wxT("Tok: %d, String: %s"), stt,
             //  tokenizer.getCurrentTokenString().c_str()), wxT("TOKEN"));
+
+            // skip FROM in: substring (x FROM y for z)
+            if (stt == kwSUBSTRING)
+            {
+                tokenizer.jumpToken(true);  // skip parenthesis
+                continue;
+            }
 
             // find all [DELETE] FROM, JOIN, UPDATE, INSERT INTO tokens
             for (int i=0; i < sizeof(search)/sizeof(SqlTokenType); ++i)
