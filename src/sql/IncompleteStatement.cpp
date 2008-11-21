@@ -270,8 +270,9 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
                 continue;
             }
 
+            bool keepNextToken = false;
             // find all [DELETE] FROM, JOIN, UPDATE, INSERT INTO tokens
-            for (int i=0; i < sizeof(search)/sizeof(SqlTokenType); ++i)
+            for (int i = 0; i < sizeof(search) / sizeof(SqlTokenType); ++i)
             {
                 if (search[i] != stt)
                     continue;
@@ -303,12 +304,16 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
                     tokenizer.jumpToken(false);
                     // allow for SELECT ... FROM TBL_FOO f, TBL_BAR b
                     if (tkCOMMA != tokenizer.getCurrentToken())
+                    {
+                        keepNextToken = true;
                         break;
+                    }
                     tokenizer.jumpToken(false);
                 }
                 break;
             }
-            tokenizer.jumpToken(false);
+            if (!keepNextToken)
+                tokenizer.jumpToken(false);
         }
 
         // find TABLE or VIEW in list of ALIASES
