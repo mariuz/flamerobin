@@ -110,7 +110,7 @@
     </set>
 
     <set var="FIREBIRDFRAMEWORK">
-        <if cond="PLATFORM_MACOSX=='1'">-framework Firebird</if>  -->
+        <if cond="PLATFORM_MACOSX=='1'">-framework Firebird</if>
     </set>
     <set var="FIREBIRDLIBRARY">
         <if cond="PLATFORM_UNIX=='1'">fbclient</if>

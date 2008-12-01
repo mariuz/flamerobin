@@ -1544,7 +1544,8 @@ bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
     while (count--)
     {
         i2 = it;
-        it--;
+        if (it != buffersM.begin ())//Prevents it from going before the first one
+          it--;
         (*i2)->setIsDeleted(true);
     }
     return true;
