@@ -64,6 +64,37 @@
         <if cond="STATICRTL=='1'">static</if>
     </set>
 
+<!-- this option allows to build the application for WIN64 -->
+    <if cond="FORMAT=='msvc'">
+        <option name="TARGET_CPU">
+            <default-value>$(DOLLAR)(CPU)</default-value>
+            <description>
+The target processor architecture must be specified when it is not X86.
+This does not affect the compiler output, so you still need to make sure
+your environment is set up appropriately with the correct compiler in the
+PATH. Rather it affects some options passed to some of the common build
+utilities such as the resource compiler and the linker.
+
+Accepted values: AMD64, IA64.
+            </description>
+        </option>
+    </if>
+    <if cond="FORMAT!='msvc'">
+        <set var="TARGET_CPU"/>
+    </if>
+    <set var="DIR_SUFFIX_CPU">
+        <if cond="TARGET_CPU=='amd64'">_amd64</if>
+        <if cond="TARGET_CPU=='AMD64'">_amd64</if>
+        <if cond="TARGET_CPU=='ia64'">_ia64</if>
+        <if cond="TARGET_CPU=='IA64'">_ia64</if>
+    </set>
+    <set var="LINK_TARGET_CPU">
+        <if cond="TARGET_CPU=='amd64'">/MACHINE:AMD64</if>
+        <if cond="TARGET_CPU=='AMD64'">/MACHINE:AMD64</if>
+        <if cond="TARGET_CPU=='ia64'">/MACHINE:IA64</if>
+        <if cond="TARGET_CPU=='IA64'">/MACHINE:IA64</if>
+    </set>
+
 
     <define-tag name="headers" rules="dll,lib,exe">
         <if cond="FORMAT=='msvc6prj'">
@@ -86,7 +117,7 @@
         <if cond="FORMAT in ['msvc6prj','msvc']">
             <ldflags>/nologo</ldflags>
             <ldflags>/subsystem:windows</ldflags>
-            <ldflags>/machine:I386</ldflags>
+            <ldflags>$(LINK_TARGET_CPU)</ldflags>
         </if>
 
         <cxx-rtti>on</cxx-rtti>
@@ -95,7 +126,7 @@
     </template>
 
     <set var="BUILDDIR">
-        <if cond="TOOLSET=='win32'">$(COMPILER)$(U_OPT)$(R_OPT)$(D_OPT)</if>
+        <if cond="TOOLSET=='win32'">$(COMPILER)$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)</if>
         <if cond="TOOLSET!='win32'">.</if>
     </set>
 
@@ -167,8 +198,8 @@
             <set var="WX_VERSION">28</set>
 
             <set var="WX_LIB_DIR" make_var="1">
-                <if cond="USEDLL=='1'">$(WXDIR)/lib/$(COMPILER)_dll</if>
-                <if cond="USEDLL=='0'">$(WXDIR)/lib/$(COMPILER)_lib</if>
+                <if cond="USEDLL=='1'">$(WXDIR)/lib/$(COMPILER)$(DIR_SUFFIX_CPU)_dll</if>
+                <if cond="USEDLL=='0'">$(WXDIR)/lib/$(COMPILER)$(DIR_SUFFIX_CPU)_lib</if>
             </set>
 
             <include>$(WX_LIB_DIR)/msw$(U_OPT)$(D_OPT)</include>
