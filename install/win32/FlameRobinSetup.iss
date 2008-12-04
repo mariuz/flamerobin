@@ -21,34 +21,61 @@
 ;
 
 ;#define DEBUG
+;#define X64VERSION
 
 #include "..\..\src\frversion.h"
 #define FR_VERSION_STRING Str(FR_VERSION_MAJOR) + "." + Str(FR_VERSION_MINOR) + "." + Str(FR_VERSION_RLS)
 
 [Setup]
+#ifdef X64VERSION
+AppName=FlameRobin (x64)
+AppVerName=FlameRobin {#FR_VERSION_STRING} (x64)
+#else
 AppName=FlameRobin
 AppVerName=FlameRobin {#FR_VERSION_STRING}
+#endif
 AppPublisher=The FlameRobin Project
 AppPublisherURL=http://www.flamerobin.org
 AppSupportURL=http://www.flamerobin.org
 AppUpdatesURL=http://www.flamerobin.org
+#ifdef X64VERSION
+DefaultDirName={pf}\FlameRobin (x64)
+DefaultGroupName=FlameRobin (x64)
+#else
 DefaultDirName={pf}\FlameRobin
 DefaultGroupName=FlameRobin
+#endif
 AllowNoIcons=true
 LicenseFile=..\..\docs-src\fr_license.txt
 InfoAfterFile=
 #ifdef DEBUG
 Compression=lzma/ultra
+#ifdef X64VERSION
+OutputBaseFilename=flamerobin-{#FR_VERSION_STRING}-setup-x64-debug
+#else
 OutputBaseFilename=flamerobin-{#FR_VERSION_STRING}-setup-debug
+#endif
 #else
 Compression=lzma
+#ifdef X64VERSION
+OutputBaseFilename=flamerobin-{#FR_VERSION_STRING}-setup-x64
+#else
 OutputBaseFilename=flamerobin-{#FR_VERSION_STRING}-setup
+#endif
 #endif
 SolidCompression=true
 OutputDir=.\output
 InternalCompressLevel=ultra
 ShowLanguageDialog=yes
 PrivilegesRequired=none
+#ifdef X64VERSION
+ArchitecturesAllowed=x64
+; "ArchitecturesInstallIn64BitMode=x64" requests that the install be
+; done in "64-bit mode" on x64, meaning it should use the native
+; 64-bit Program Files directory and the 64-bit view of the registry.
+; On all other architectures it will install in "32-bit mode".
+ArchitecturesInstallIn64BitMode=x64
+#endif
 
 [Tasks]
 Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:AdditionalIcons}
@@ -56,19 +83,31 @@ Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription
 
 [Files]
 #ifdef DEBUG
-Source: ..\..\vcd\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersion: 4.0.950,0
-Source: ..\..\vcud\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersion: 0,4.0.1381
+#ifdef X64VERSION
+Source: ..\..\vcud_amd64\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; Check: Is64BitInstallMode
+Source: ..\..\vcud_amd64\flamerobin.exe.manifest; DestDir: {app}; Flags: ignoreversion; Check: Is64BitInstallMode
 #else
-Source: ..\..\vc\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersion: 4.0.950,0
-Source: ..\..\vcu\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersion: 0,4.0.1381
+Source: ..\..\vcd\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersion: 4.0.950,0; Check: not Is64BitInstallMode
+Source: ..\..\vcud\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersion: 0,4.0.1381; Check: not Is64BitInstallMode
+#endif
+#else
+#ifdef X64VERSION
+Source: ..\..\vcu_amd64\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; Check: Is64BitInstallMode
+Source: ..\..\vcu_amd64\flamerobin.exe.manifest; DestDir: {app}; Flags: ignoreversion; Check: Is64BitInstallMode
+#else
+Source: ..\..\vc\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersion: 4.0.950,0; Check: not Is64BitInstallMode
+Source: ..\..\vcu\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersion: 0,4.0.1381; Check: not Is64BitInstallMode
+#endif
 #endif
 Source: ..\..\docs\*.*; Excludes: flamerobin.1; DestDir: {app}\docs; Flags: ignoreversion
 Source: ..\..\html-templates\*.*; DestDir: {app}\html-templates; Flags: ignoreversion
 Source: ..\..\conf-defs\*.*; DestDir: {app}\conf-defs; Flags: ignoreversion
+#ifndef X64VERSION
 Source: ..\..\res\system32\msvcr71.dll; DestDir: {app}; MinVersion: 0,5.0.2195
 Source: ..\..\res\system32\msvcr71.dll; DestDir: {sys}; Flags: sharedfile uninsneveruninstall; OnlyBelowVersion: 0,5.0.2195
 Source: ..\..\res\system32\msvcp71.dll; DestDir: {app}; MinVersion: 0,5.0.2195
 Source: ..\..\res\system32\msvcp71.dll; DestDir: {sys}; Flags: sharedfile uninsneveruninstall; OnlyBelowVersion: 0,5.0.2195
+#endif
 
 [INI]
 Filename: {app}\flamerobin.url; Section: InternetShortcut; Key: URL; String: http://www.flamerobin.org
