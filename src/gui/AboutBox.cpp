@@ -123,8 +123,13 @@ void showAboutBox(wxWindow* parent)
 #endif
 
 #if wxUSE_UNICODE
-    msg += wxT(" Unicode");
+    msg += _(" Unicode");
 #endif
+
+#if defined(_WIN64)
+	msg += wxT(" (x64)");
+#endif
+
     msg += wxT("\n");
     msg += _("Database administration tool for Firebird RDBMS");
     msg += wxT("\n\n");
