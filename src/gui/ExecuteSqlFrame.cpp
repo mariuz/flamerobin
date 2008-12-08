@@ -2296,6 +2296,7 @@ bool ExecuteSqlFrame::commitTransaction()
     {
         log(_("Commiting transaction..."));
         sae.scroll();
+        statementM->Close();
         transactionM->Commit();
         log(_("Done."));
         statusbar_1->SetStatusText(_("Transaction commited"), 3);
@@ -2384,6 +2385,7 @@ bool ExecuteSqlFrame::rollbackTransaction()
     {
         log(_("Rolling back the transaction..."));
         sae.scroll();
+        statementM->Close();
         transactionM->Rollback();
         log(_("Done."));
         statusbar_1->SetStatusText(_("Transaction rolled back"), 3);
