@@ -328,16 +328,18 @@ void DatabaseRegistrationDialog::updateAuthenticationMode()
     // password not if always to be entered
     // password not for trusted user authentication
     text_ctrl_password->SetEditable(!isConnected && sel < 2);
+    updateButtons();
 }
 //-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::updateButtons()
 {
     if (button_ok->IsShown())
     {
+        bool missingUserName = text_ctrl_username->IsEditable()
+            && text_ctrl_username->GetValue().IsEmpty();
         button_ok->Enable(!text_ctrl_dbpath->GetValue().IsEmpty()
-            && !text_ctrl_username->GetValue().IsEmpty()
             && !text_ctrl_name->GetValue().IsEmpty()
-        );
+            && !missingUserName);
     }
 }
 //-----------------------------------------------------------------------------
