@@ -322,8 +322,8 @@ void DataGrid::copyToCBAsInsert()
 
         // load the (quoted if necessary) column names into an array
         wxArrayString columnNames;
-        columnNames.Alloc(GetNumberRows());
-        for (int i = 0; i < GetNumberRows(); i++)
+        columnNames.Alloc(GetNumberCols());
+        for (int i = 0; i < GetNumberCols(); i++)
         {
             Identifier colId(GetColLabelValue(i));
             columnNames.Add(colId.getQuoted());
@@ -390,8 +390,8 @@ void DataGrid::copyToCBAsUpdate()
 
         // load the (quoted if necessary) column names into an array
         wxArrayString columnNames;
-        columnNames.Alloc(GetNumberRows());
-        for (int i = 0; i < GetNumberRows(); i++)
+        columnNames.Alloc(GetNumberCols());
+        for (int i = 0; i < GetNumberCols(); i++)
         {
             Identifier colId(GetColLabelValue(i));
             columnNames.Add(colId.getQuoted());
