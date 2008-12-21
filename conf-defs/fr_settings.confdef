@@ -397,6 +397,11 @@
             <default>1</default>
         </setting>
         <setting type="checkbox">
+            <caption>Show source for all triggers</caption>
+            <key>displayTriggerSource</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
             <caption>Open in tabs</caption>
             <key>linksOpenInTabs</key>
             <default>1</default>

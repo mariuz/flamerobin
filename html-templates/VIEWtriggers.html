@@ -52,5 +52,35 @@
 href="fr://create_trigger?parent_window={%parent_window%}&amp;object_address={%object_address%}">Create new trigger</a> | <a
 href="fr://activate_triggers?parent_window={%parent_window%}&amp;object_address={%object_address%}">Activate all triggers</a> | <a
 href="fr://deactivate_triggers?parent_window={%parent_window%}&amp;object_address={%object_address%}">Deactivate all triggers</a>
+
+{%show_if_config:displayTriggerSource:true:
+    {%triggers:befor
+    <br><br>
+    <table cellspacing=1 cellpadding=2 border=0 bgcolor=black width="98%">
+    <tr bgcolor="navy">
+      <td nowrap><font color=white><b>{%object_name%}</b>
+        [<a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_address={%object_address%}"><font
+        color="yellow">edit</font></a>]</font></td>
+    </tr>
+    <tr bgcolor="#DDDDFF"><td>
+    <PRE>{%trigger_source%}</PRE>
+    </td></tr>
+    </table>
+    %}
+
+    {%triggers:after
+    <br><br>
+    <table cellspacing=1 cellpadding=2 border=0 bgcolor=black width="98%">
+    <tr bgcolor="navy">
+      <td nowrap><font color=white><b>{%object_name%}</b>
+        [<a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_address={%object_address%}"><font
+        color="yellow">edit</font></a>]</font></td>
+    </tr>
+    <tr bgcolor="#DDDDFF"><td>
+    <PRE>{%trigger_source%}</PRE>
+    </td></tr>
+    </table>
+    %}
+%}
 </body>
 </html>
