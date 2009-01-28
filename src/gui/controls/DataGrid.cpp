@@ -56,7 +56,7 @@
 #include "metadata/table.h"
 //-----------------------------------------------------------------------------
 DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
-    : wxGrid(parent, id)
+    : wxGrid(parent, id), timerM(this, TIMER_ID)
 {
     EnableEditing(true);
     SetColLabelValue(0, wxT(""));
@@ -695,13 +695,90 @@ BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_GRID_CELL_RIGHT_CLICK(DataGrid::OnGridCellRightClick)
     EVT_GRID_LABEL_RIGHT_CLICK(DataGrid::OnGridLabelRightClick)
     EVT_GRID_EDITOR_CREATED(DataGrid::OnEditorCreated)
+    EVT_GRID_SELECT_CELL(DataGrid::OnGridCellSelected)
+    EVT_GRID_RANGE_SELECT(DataGrid::OnGridRangeSelected)
     //  EVT_GRID_EDITOR_HIDDEN( DataGrid::OnEditorHidden )
     EVT_KEY_DOWN(DataGrid::OnKeyDown)
+    EVT_TIMER(DataGrid::TIMER_ID, DataGrid::OnTimer)
 #ifdef __WXGTK__
     EVT_MOUSEWHEEL(DataGrid::OnMouseWheel)
     EVT_SCROLLWIN_THUMBRELEASE(DataGrid::OnThumbRelease)
 #endif
 END_EVENT_TABLE()
+//-----------------------------------------------------------------------------
+void DataGrid::OnGridCellSelected(wxGridEvent& event)
+{
+    timerM.Start(500, wxTIMER_ONE_SHOT);
+    event.Skip();
+}
+//-----------------------------------------------------------------------------
+void DataGrid::OnGridRangeSelected(wxGridRangeSelectEvent& event)
+{
+    timerM.Start(500, wxTIMER_ONE_SHOT);
+    event.Skip();
+}
+//-----------------------------------------------------------------------------
+DEFINE_EVENT_TYPE(wxEVT_FRDG_SUM)
+void DataGrid::OnTimer(wxTimerEvent& WXUNUSED(event))
+{
+    // calculate sum for all selected fields and show in status bar
+    DataGridTable* table = getDataGridTable();
+    if (!table)
+        return;
+
+    double sum = 0;
+    bool any = false;
+    bool alert = true;
+    wxStopWatch sw;;
+    for (int j = 0; j < GetNumberCols(); j++)
+    {
+        if (!table->isNumericColumn(j))
+            continue;
+        for (int i = 0; i < GetNumberRows(); i++)
+        {
+            if (IsInSelection(i, j))
+            {
+                double d;
+                wxString val = table->getCellValue(i, j);
+                if (val.ToDouble(&d))
+                {
+                    sum += d;
+                    any = true;
+                }
+            }
+            if (alert && sw.Time() > 5000)
+            {
+/*                AdvancedMessageDialogButtons amb;
+                wxButton* createAffirmativeButton(wxWindow* parent);
+                wxButton* createAlternateButton(wxWindow* parent);
+                wxButton* createNegativeButton(wxWindow* parent);
+
+                if (wxOK != showQuestionDialog(this,
+                    _("Calculating the sum takes too long"),
+                    _("FlameRobin automatically calculates the sum of selected numeric values. However, the current calculation seems to be taking too long. Would you like to abort it?"),
+                    AdvancedMessageDialogButtonsOkCancel(_("&Continue"), _("&Abort")),
+                    ))
+                {
+                    return true;
+                }
+*/
+                alert = false;
+            }
+        }
+    }
+
+    if (any)
+    {
+        // used in frame to update status bar
+        wxCommandEvent evt(wxEVT_FRDG_SUM, GetId());
+        wxString ss = wxString::Format(wxT("Sum: %f"), sum);
+        // strip trailing zeroes
+        ss.Truncate(1 + ss.find_last_not_of(wxT("0")));
+        ss.Truncate(1 + ss.find_last_not_of(wxT(".")));
+        evt.SetString(ss);
+        wxPostEvent(this, evt);
+    }
+}
 //-----------------------------------------------------------------------------
 void DataGrid::OnEditorCreated(wxGridEditorCreatedEvent& event)
 {

@@ -103,7 +103,7 @@ public:
     bool canRemoveRow(size_t row);
 
     void setNullFlag(bool isNull);
-        
+
     // methods of wxGridTableBase
     virtual void Clear();
     virtual wxGridCellAttr* GetAttr(int row, int col,

@@ -908,6 +908,8 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
         ExecuteSqlFrame::OnGridRowCountChanged)
     EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_STATEMENT, \
         ExecuteSqlFrame::OnGridStatementExecuted)
+    EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_SUM, \
+        ExecuteSqlFrame::OnGridSum)
 
     EVT_GRID_CMD_LABEL_LEFT_DCLICK(ExecuteSqlFrame::ID_grid_data, ExecuteSqlFrame::OnGridLabelLeftDClick)
 END_EVENT_TABLE()
@@ -2489,6 +2491,11 @@ void ExecuteSqlFrame::OnGridStatementExecuted(wxCommandEvent& event)
         SqlStatement stm(event.GetString(), databaseM);
         executedStatementsM.push_back(stm);
     }
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnGridSum(wxCommandEvent& event)
+{
+    statusbar_1->SetStatusText(event.GetString(), 3);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnGridLabelLeftDClick(wxGridEvent& event)

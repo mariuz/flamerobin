@@ -32,10 +32,17 @@
 #include <wx/grid.h>
 
 class DataGridTable;
+//-----------------------------------------------------------------------------
+BEGIN_DECLARE_EVENT_TYPES()
+    // this event is sent when selection is changed and values are summed up
+    DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_SUM, 44)
+END_DECLARE_EVENT_TYPES()
 //----------------------------------------------------------------------
 class DataGrid: public wxGrid
 {
 private:
+    wxTimer timerM;
+    enum { TIMER_ID = 3333 };
     void copyToClipboard(const wxString cbText);
     void extendSelection(int direction);
     void notifyIfUnfetchedData();
@@ -50,13 +57,16 @@ public:
 private:
     void OnContextMenu(wxContextMenuEvent& event);
     void OnGridCellRightClick(wxGridEvent& event);
+    void OnGridCellSelected(wxGridEvent& event);
     void OnGridLabelRightClick(wxGridEvent& event);
+    void OnGridRangeSelected(wxGridRangeSelectEvent& event);
     void OnIdle(wxIdleEvent& event);
     void OnKeyDown(wxKeyEvent& event);
     void OnMouseWheel(wxMouseEvent& event);
     void OnThumbRelease(wxScrollWinEvent& event);
     void OnEditorCreated(wxGridEditorCreatedEvent& event);
     void OnEditorKeyDown(wxKeyEvent& event);
+    void OnTimer(wxTimerEvent& event);
     DECLARE_EVENT_TABLE()
 public:
     void copyToCB();
