@@ -43,6 +43,8 @@ class DataGrid: public wxGrid
 private:
     wxTimer timerM;
     enum { TIMER_ID = 3333 };
+    bool calculateSumM;
+
     void copyToClipboard(const wxString cbText);
     void extendSelection(int direction);
     void notifyIfUnfetchedData();

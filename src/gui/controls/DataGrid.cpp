@@ -56,7 +56,7 @@
 #include "metadata/table.h"
 //-----------------------------------------------------------------------------
 DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
-    : wxGrid(parent, id), timerM(this, TIMER_ID)
+    : wxGrid(parent, id), timerM(this, TIMER_ID), calculateSumM(true)
 {
     EnableEditing(true);
     SetColLabelValue(0, wxT(""));
@@ -723,7 +723,7 @@ void DataGrid::OnTimer(wxTimerEvent& WXUNUSED(event))
 {
     // calculate sum for all selected fields and show in status bar
     DataGridTable* table = getDataGridTable();
-    if (!table)
+    if (!table || !calculateSumM)
         return;
 
     double sum = 0;
@@ -746,22 +746,19 @@ void DataGrid::OnTimer(wxTimerEvent& WXUNUSED(event))
                     any = true;
                 }
             }
-            if (alert && sw.Time() > 5000)
+            if (alert && sw.Time() > 4000)
             {
-/*                AdvancedMessageDialogButtons amb;
-                wxButton* createAffirmativeButton(wxWindow* parent);
-                wxButton* createAlternateButton(wxWindow* parent);
-                wxButton* createNegativeButton(wxWindow* parent);
-
-                if (wxOK != showQuestionDialog(this,
+                AdvancedMessageDialogButtonsYesNoCancel amb(_("&Abort"),
+                    _("&Disable for this grid"), _("&Continue"));
+                int res = showQuestionDialog(this,
                     _("Calculating the sum takes too long"),
                     _("FlameRobin automatically calculates the sum of selected numeric values. However, the current calculation seems to be taking too long. Would you like to abort it?"),
-                    AdvancedMessageDialogButtonsOkCancel(_("&Continue"), _("&Abort")),
-                    ))
-                {
-                    return true;
-                }
-*/
+                    amb, config(), wxT("DIALOG_DisableGridSum"),
+                    _("Do not ask this question again"));
+                if (res == wxNO)
+                    calculateSumM = false;
+                if (res == wxYES || res == wxNO)
+                    return;
                 alert = false;
             }
         }

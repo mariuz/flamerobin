@@ -125,6 +125,15 @@ AdvancedMessageDialogButtonsOkCancel::AdvancedMessageDialogButtonsOkCancel(
     addNegativeButton(wxID_CANCEL, buttonCancelCaption);
 }
 //-----------------------------------------------------------------------------
+AdvancedMessageDialogButtonsYesNoCancel::
+    AdvancedMessageDialogButtonsYesNoCancel(const wxString buttonYesCaption,
+    const wxString buttonNoCaption, const wxString buttonCancelCaption)
+{
+    addAffirmativeButton(wxID_YES, buttonYesCaption);
+    addAlternateButton(wxID_NO, buttonNoCaption);
+    addNegativeButton(wxID_CANCEL, buttonCancelCaption);
+}
+//-----------------------------------------------------------------------------
 class TextWrapEngine
 {
 private:
@@ -226,7 +235,7 @@ wxSize TextWrapEngine::computeWrappedExtent(wxDC& dc, const wxString& text,
 {
     int textW = 0, textH = 0;
 
-	const wxChar* const pos = text.c_str();
+    const wxChar* const pos = text.c_str();
     const wxChar* p = text.c_str();
     const wxChar* pWrap = 0;
     const wxChar* r = p;
@@ -263,7 +272,7 @@ wxString TextWrapEngine::wrapLine(wxDC& dc, const wxString& text,
 {
     wxString result;
 
-	const wxChar* const pos = text.c_str();
+    const wxChar* const pos = text.c_str();
     const wxChar* p = text.c_str();
     const wxChar* pWrap = 0;
     const wxChar* r = p;

@@ -72,6 +72,15 @@ public:
         const wxString buttonCancelCaption = _("&Cancel"));
 };
 //-----------------------------------------------------------------------------
+class AdvancedMessageDialogButtonsYesNoCancel:
+    public AdvancedMessageDialogButtons
+{
+public:
+    AdvancedMessageDialogButtonsYesNoCancel(const wxString buttonYesCaption,
+        const wxString buttonNoCaption = _("&No"),
+        const wxString buttonCancelCaption = _("&Cancel"));
+};
+//-----------------------------------------------------------------------------
 class AdvancedMessageDialog: public BaseDialog
 {
 private:
@@ -81,7 +90,7 @@ private:
 public:
     AdvancedMessageDialog(wxWindow* parent, wxArtID iconId,
         const wxString& primaryText, const wxString& secondaryText,
-        AdvancedMessageDialogButtons& buttons, 
+        AdvancedMessageDialogButtons& buttons,
         const wxString& dontShowAgainText);
 
     bool getDontShowAgain() const;
