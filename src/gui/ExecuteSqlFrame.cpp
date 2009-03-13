@@ -2284,15 +2284,14 @@ void ExecuteSqlFrame::OnMenuCommit(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 bool ExecuteSqlFrame::commitTransaction()
 {
-    wxBusyCursor cr;
-    ScrollAtEnd sae(styled_text_ctrl_stats);
-
-    // grid_data->stopFetching();
-    if (!transactionM->Started())    // check
+    if (transactionM == 0 || !transactionM->Started())    // check
     {
         inTransaction(false);
         return true;    // nothing to commit, but it wasn't error
     }
+
+    wxBusyCursor cr;
+    ScrollAtEnd sae(styled_text_ctrl_stats);
 
     try
     {
@@ -2373,15 +2372,14 @@ void ExecuteSqlFrame::OnMenuRollback(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 bool ExecuteSqlFrame::rollbackTransaction()
 {
-    ScrollAtEnd sae(styled_text_ctrl_stats);
-
-    // grid_data->stopFetching();
-    if (!transactionM->Started())    // check
+    if (transactionM == 0 || !transactionM->Started())    // check
     {
         executedStatementsM.clear();
         inTransaction(false);
         return true;
     }
+
+    ScrollAtEnd sae(styled_text_ctrl_stats);
 
     try
     {
