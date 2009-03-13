@@ -402,8 +402,11 @@ wxString Relation::getRebuildSql()
                     for (std::vector<ForeignKey>::iterator i2 = fk->begin();
                         i2 != fk->end(); ++i2)
                     {
-                        if ((*i2).referencedTableM == getName_())
+                        if ((*i2).referencedTableM == getName_() &&
+                            t1 != (*i2).getTable())
+                        {
                             fkeys.insert(fkeys.end(), (*i2));
+                        }
                     }
                 }
             }
