@@ -305,7 +305,7 @@ void AdvancedSearchFrame::rebuildList()
     }
     // send size event
     wxSizeEvent ev(listctrl_criteria->GetSize());
-    listctrl_criteria->AddPendingEvent(ev);
+    listctrl_criteria->GetEventHandler()->AddPendingEvent(ev);
 }
 //-----------------------------------------------------------------------------
 void AdvancedSearchFrame::addResult(Database* db, MetadataItem* item)
@@ -320,7 +320,7 @@ void AdvancedSearchFrame::addResult(Database* db, MetadataItem* item)
     item->attachObserver(this);
     // send size event
     wxSizeEvent ev(listctrl_results->GetSize());
-    listctrl_results->AddPendingEvent(ev);
+    listctrl_results->GetEventHandler()->AddPendingEvent(ev);
 }
 //-----------------------------------------------------------------------------
 // returns true if "text" matches all criteria of type "type"

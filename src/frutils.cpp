@@ -130,7 +130,15 @@ bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent, vector<wxStr
         columns.Add((*it)->getName_());
 
     wxArrayInt selected_columns;
-    if (!::wxGetMultipleChoices(selected_columns, _("Select one or more fields... (use ctrl key)"),  _("Table fields"), columns, parent))
+    bool ok = 
+#if wxCHECK_VERSION(2, 9, 0)
+    ::wxGetSelectedChoices(selected_columns,
+#else
+    ::wxGetMultipleChoices(selected_columns,
+#endif
+        _("Select one or more fields... (use ctrl key)"),  _("Table Fields"),
+        columns, parent) > 0;
+    if (!ok)
         return false;
 
     for (size_t i = 0; i < selected_columns.GetCount(); ++i)
@@ -138,7 +146,6 @@ bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent, vector<wxStr
         Identifier temp(columns[selected_columns[i]]);
         list.push_back(temp.getQuoted());
     }
-
     return true;
 }
 //-----------------------------------------------------------------------------
