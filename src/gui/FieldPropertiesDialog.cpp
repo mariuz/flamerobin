@@ -680,15 +680,21 @@ void FieldPropertiesDialog::updateSqlStatement()
 
     if (checkbox_trigger->IsChecked())
     {
+        // TODO: we could use BIGINT for FB 1.5 and above
         Identifier triggername(tableM->getName_() + wxT("_BI"));
         sql += wxT("SET TERM !! ;\n");
         sql += wxT("CREATE TRIGGER ") + triggername.getQuoted() + wxT(" FOR ")
-            + tableM->getQuotedName() + wxT("\n");
-        sql += wxT("ACTIVE BEFORE INSERT POSITION 0\nAS\nBEGIN\n");
-        sql += wxT("  IF (NEW.") + fNameSql + wxT(" IS NULL) THEN\n");
-        sql += wxT("    NEW.") + fNameSql + wxT(" = GEN_ID(")
-            + generator.getQuoted() + wxT(", 1);\n");
-        sql += wxT("END!!\n");
+            + tableM->getQuotedName() + wxT("\n")
+            + wxT("ACTIVE BEFORE INSERT POSITION 0\nAS\n")
+            + wxT("DECLARE VARIABLE tmp DECIMAL(18,0);\nBEGIN\n")
+            + wxT("  IF (NEW.") + fNameSql + wxT(" IS NULL) THEN\n")
+            + wxT("    NEW.") + fNameSql + wxT(" = GEN_ID(")
+            + generator.getQuoted() + wxT(", 1);\n")
+            + wxT("  ELSE\n  BEGIN\n    tmp = GEN_ID(") +
+            + generator.getQuoted() + wxT(", 0);\n    if (tmp < new.")
+            + fNameSql + wxT(") then\n      tmp = GEN_ID(")
+            + generator.getQuoted() + wxT(", new.") + fNameSql
+            + wxT("-tmp);\n  END\nEND!!\n");
         sql += wxT("SET TERM ; !!\n");
     }
 
