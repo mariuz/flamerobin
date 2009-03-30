@@ -417,7 +417,7 @@ bool StatementImpl::Fetch()
 			_("No statement has been executed or no result set available."));
 
 	IBS status;
-	int code = (*gds.Call()->m_dsql_fetch)(status.Self(), &mHandle, 1, mOutRow->Self());
+	ISC_STATUS code = (*gds.Call()->m_dsql_fetch)(status.Self(), &mHandle, 1, mOutRow->Self());
 	if (code == 100)	// This special code means "no more rows"
 	{
 		mResultSetAvailable = false;
@@ -450,7 +450,7 @@ bool StatementImpl::Fetch(IBPP::Row& row)
 	row = rowimpl;
 
 	IBS status;
-	int code = (*gds.Call()->m_dsql_fetch)(status.Self(), &mHandle, 1,
+	ISC_STATUS code = (*gds.Call()->m_dsql_fetch)(status.Self(), &mHandle, 1,
 					rowimpl->Self());
 	if (code == 100)	// This special code means "no more rows"
 	{
