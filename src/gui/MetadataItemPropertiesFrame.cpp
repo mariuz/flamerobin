@@ -920,9 +920,9 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
             return;
 
         int64_t size = d->getInfo().getSizeInBytes();
-        const float kilo = 1024.0;
-        const float mega = kilo * kilo;
-        const float giga = kilo * mega;
+        const double kilo = 1024;
+        const double mega = kilo * kilo;
+        const double giga = kilo * mega;
         if (size >= giga)
             htmlpage += wxString::Format(wxT("%0.2fGB"), size / giga);
         else if (size >= mega)
