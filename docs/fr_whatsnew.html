@@ -8,6 +8,54 @@
 http://www.flamerobin.org/bugs.php</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.9.2 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- Allowed deleting from system tables (ex. to stop queries via MON$STATEMENTS)<br>
+- Added support for trusted authentication<br>
+- Databases can now be recreated from existing registration info<br>
+- Transaction isolation level can now be selected in SQL editor<br>
+- Win64 port<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- Fixed problems with mangled UTF8 identifiers<br>
+- Improved autoincrement triggers<br>
+- Drop FK only once for self-referencing tables in Rebuild script<br>
+- Improved management of passwords in connection dialogs<br>
+- Case insensitive DoMaIn keyword detection<br>
+- Fixed reported length of char fields in DDL extraction of system tables<br>
+- Fixed minor DDL extraction problem with BIGINT and scale<br>
+- Search words are now highlighted in advanced metadata search results<br>
+- DataGrid: sum of values of selected cells in the grid is shown in status bar<br>
+- Data grid cell editor now has a popup menu of a standard edit control<br>
+- Data of CHAR type using multibyte character set has correct padding now<br>
+- Database file size is now reported correctly for databases over 2GB<br>
+- Opening pages in tabs can now be controlled with Shift/Control keys<br>
+- Information on database property page is reloaded without reconnecting<br>
+- Fixed focus problem with property pages<br>
+- Fixed broken descriptions of system table columns in property pages<br>
+- Optionally display sources of all triggers on table property page<br>
+- Controls are now focused before their popup menus are shown<br>
+- Improved usability of menus and commands via keyboard<br>
+- SQL Editor: Improved detection of field sizes in resulting dataset<br>
+- Fixed statement parsing when SUBSTRING function is present<br>
+- Fixed column autocompletion for JOINed tables<br>
+- Fixed code completion when tables are listed in SQL89 order<br>
+- Fixed crash when opening query window and pressing F5 or F8 at once<br>
+- Improved the way views are switched in SQL editor<br>
+- Fixed completion under Mac OS X<br>
+- Other minor improvements and fixes to SQL editor<br>
+- Statement execution time is now displayed with milliseconds precision<br>
+- Minimum required version of wxWidgets is now 2.8.<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 0.9.0 ALPHA</font><br>
 <br><br>
 <font size=+1 color="#AA0000"><B>New features</B></font><br>
