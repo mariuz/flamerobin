@@ -690,7 +690,7 @@ void FieldPropertiesDialog::updateSqlStatement()
             + wxT("  IF (NEW.") + fNameSql + wxT(" IS NULL) THEN\n")
             + wxT("    NEW.") + fNameSql + wxT(" = GEN_ID(")
             + generator.getQuoted() + wxT(", 1);\n")
-            + wxT("  ELSE\n  BEGIN\n    tmp = GEN_ID(") +
+            + wxT("  ELSE\n  BEGIN\n    tmp = GEN_ID(")
             + generator.getQuoted() + wxT(", 0);\n    if (tmp < new.")
             + fNameSql + wxT(") then\n      tmp = GEN_ID(")
             + generator.getQuoted() + wxT(", new.") + fNameSql
