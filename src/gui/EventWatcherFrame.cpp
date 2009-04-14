@@ -55,15 +55,13 @@ using namespace std;
 class EventLogControl: public LogTextControl
 {
 public:
-    EventLogControl(wxWindow* parent, wxWindowID id = wxID_ANY,
-        long style = wxSUNKEN_BORDER);
+    EventLogControl(wxWindow* parent, wxWindowID id = wxID_ANY);
     void logAction(const wxString& action);
     void logEvent(const wxString& name, int count);
 };
 //-----------------------------------------------------------------------------
-EventLogControl::EventLogControl(wxWindow* parent, wxWindowID id,
-        long style)
-    : LogTextControl(parent, id, style)
+EventLogControl::EventLogControl(wxWindow* parent, wxWindowID id)
+    : LogTextControl(parent, id)
 {
 }
 //-----------------------------------------------------------------------------

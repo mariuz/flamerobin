@@ -61,8 +61,7 @@ protected:
 
     DECLARE_EVENT_TABLE()
 public:
-    TextControl(wxWindow *parent, wxWindowID id = wxID_ANY,
-        long style = wxSUNKEN_BORDER);
+    TextControl(wxWindow *parent, wxWindowID id = wxID_ANY);
 };
 //-----------------------------------------------------------------------------
 #endif

@@ -40,8 +40,8 @@
 
 #include "gui/controls/LogTextControl.h"
 //-----------------------------------------------------------------------------
-LogTextControl::LogTextControl(wxWindow *parent, wxWindowID id, long style)
-    : TextControl(parent, id, style)
+LogTextControl::LogTextControl(wxWindow *parent, wxWindowID id)
+    : TextControl(parent, id)
 {
     setDefaultStyles();
 }

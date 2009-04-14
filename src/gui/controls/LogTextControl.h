@@ -38,8 +38,7 @@ protected:
     enum LogStyle { logStyleDefault, logStyleImportant, logStyleError };
     void addStyledText(const wxString& message, LogStyle style);
 public:
-    LogTextControl(wxWindow *parent, wxWindowID id = wxID_ANY,
-        long style = wxSUNKEN_BORDER);
+    LogTextControl(wxWindow *parent, wxWindowID id = wxID_ANY);
 
     void logErrorMsg(const wxString& message);
     void logImportantMsg(const wxString& message);

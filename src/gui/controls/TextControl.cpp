@@ -40,8 +40,8 @@
 
 #include "gui/controls/TextControl.h"
 //-----------------------------------------------------------------------------
-TextControl::TextControl(wxWindow *parent, wxWindowID id, long style)
-    : wxStyledTextCtrl(parent, id, wxDefaultPosition, wxDefaultSize, style)
+TextControl::TextControl(wxWindow *parent, wxWindowID id)
+    : wxStyledTextCtrl(parent, id)
 {
     SetWrapMode(wxSTC_WRAP_WORD);
     // wxStyledTextCtrl uses black on white initially -> use system defaults

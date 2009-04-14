@@ -241,7 +241,7 @@ void BackupFrame::layoutControls()
     sizerFilename->Add(styleguide().getBrowseButtonMargin(), 0);
     sizerFilename->Add(button_browse, 0, wxALIGN_CENTER_VERTICAL);
 
-    wxGridSizer* sizerChecks = new wxGridSizer(2, 2,
+    wxGridSizer* sizerChecks = new wxGridSizer(3, 2,
         styleguide().getCheckboxSpacing(),
         styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
     sizerChecks->Add(checkbox_checksum, 0, wxEXPAND);
