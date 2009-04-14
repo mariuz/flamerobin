@@ -47,6 +47,9 @@ DefaultGroupName=FlameRobin
 #endif
 AllowNoIcons=true
 LicenseFile=..\..\docs-src\fr_license.txt
+#ifdef X64VERSION
+InfoBeforeFile=info_before_win64.rtf
+#endif
 InfoAfterFile=
 #ifdef DEBUG
 Compression=lzma/ultra
