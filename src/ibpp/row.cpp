@@ -993,7 +993,7 @@ void RowImpl::SetValue(int varnum, IITYPE ivType, const void* value, int userlen
 			if (ivType != ivDouble)
 				throw WrongTypeImpl("RowImpl::SetValue", var->sqltype, ivType,
 										_("Incompatible types."));
-			if (var->sqlscale != 0)
+			if (var->sqlscale < 0)
 			{
 				// Round to scale of NUMERIC(x,y)
 				double multiplier = consts::dscales[-var->sqlscale];
@@ -1288,7 +1288,7 @@ void* RowImpl::GetValue(int varnum, IITYPE ivType, void* retvalue)
 			if (ivType != ivDouble)
 				throw WrongTypeImpl("RowImpl::GetValue", var->sqltype, ivType,
 										_("Incompatible types."));
-			if (var->sqlscale != 0)
+			if (var->sqlscale < 0)
 			{
 				// Round to scale y of NUMERIC(x,y)
 				double multiplier = consts::dscales[-var->sqlscale];
