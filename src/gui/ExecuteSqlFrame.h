@@ -40,6 +40,7 @@
 
 #include "core/Observer.h"
 #include "core/StringUtils.h"
+#include "controls/DataGridTable.h"
 #include "gui/BaseFrame.h"
 #include "gui/FindDialog.h"
 #include "sql/SqlStatement.h"
@@ -199,6 +200,7 @@ private:
     void OnMenuUpdateGridInsertRow(wxUpdateUIEvent& event);
     void OnMenuGridDeleteRow(wxCommandEvent& event);
     void OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event);
+    void OnMenuGridEditBlob(wxCommandEvent& event);
     void OnMenuGridImportBlob(wxCommandEvent& event);
     void OnMenuGridExportBlob(wxCommandEvent& event);
     void OnMenuUpdateGridCellIsBlob(wxUpdateUIEvent& event);

@@ -66,6 +66,7 @@
 #include "gui/ExecuteSql.h"
 #include "gui/ExecuteSqlFrame.h"
 #include "gui/InsertDialog.h"
+#include "gui/EditBlobDialog.h"
 #include "gui/StatementHistoryDialog.h"
 #include "gui/StyleGuide.h"
 #include "frutils.h"
@@ -723,6 +724,7 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
     gridMenu->Append(Cmds::DataGrid_Copy_as_insert,  _("Copy &as insert statements"));
     gridMenu->Append(Cmds::DataGrid_Copy_as_update,  _("Copy as &update statements"));
     gridMenu->AppendSeparator();
+    gridMenu->Append(Cmds::DataGrid_EditBlob, _("Edit BLOB"));
     gridMenu->Append(Cmds::DataGrid_ImportBlob, _("Import BLOB from file..."));
     gridMenu->Append(Cmds::DataGrid_ExportBlob, _("Save BLOB to file..."));
     gridMenu->AppendSeparator();
@@ -881,6 +883,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
 
     EVT_MENU(Cmds::DataGrid_Insert_row,      ExecuteSqlFrame::OnMenuGridInsertRow)
     EVT_MENU(Cmds::DataGrid_Delete_row,      ExecuteSqlFrame::OnMenuGridDeleteRow)
+    EVT_MENU(Cmds::DataGrid_EditBlob,        ExecuteSqlFrame::OnMenuGridEditBlob)
     EVT_MENU(Cmds::DataGrid_ImportBlob,      ExecuteSqlFrame::OnMenuGridImportBlob)
     EVT_MENU(Cmds::DataGrid_ExportBlob,      ExecuteSqlFrame::OnMenuGridExportBlob)
     EVT_MENU(Cmds::DataGrid_Copy_as_insert,  ExecuteSqlFrame::OnMenuGridCopyAsInsert)
@@ -894,6 +897,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
 
     EVT_UPDATE_UI(Cmds::DataGrid_Insert_row,     ExecuteSqlFrame::OnMenuUpdateGridInsertRow)
     EVT_UPDATE_UI(Cmds::DataGrid_Delete_row,     ExecuteSqlFrame::OnMenuUpdateGridDeleteRow)
+    EVT_UPDATE_UI(Cmds::DataGrid_EditBlob,       ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob)
     EVT_UPDATE_UI(Cmds::DataGrid_ImportBlob,     ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob)
     EVT_UPDATE_UI(Cmds::DataGrid_ExportBlob,     ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob)
     EVT_UPDATE_UI(Cmds::DataGrid_Copy_as_insert, ExecuteSqlFrame::OnMenuUpdateGridHasData)
@@ -1584,6 +1588,30 @@ void ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob(wxUpdateUIEvent& event)
     DataGridTable* dgt = grid_data->getDataGridTable();
     event.Enable(dgt && grid_data->GetNumberRows() &&
         dgt->isBlobColumn(grid_data->GetGridCursorCol()));
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuGridEditBlob(wxCommandEvent& WXUNUSED(event))
+{
+    DataGridTable* dgt = grid_data->getDataGridTable();
+    if (!dgt || !grid_data->GetNumberRows())
+        return;
+    unsigned row = grid_data->GetGridCursorRow();
+    unsigned col = grid_data->GetGridCursorCol();
+    if (!dgt->isBlobColumn(grid_data->GetGridCursorCol()))
+        throw FRError(_("Not a BLOB column"));
+
+    wxString tableName = dgt->getTableName();
+    wxString fieldName = grid_data->GetColLabelValue(grid_data->GetGridCursorCol());
+    wxString blobName  = tableName + _(".") + fieldName;
+
+    IBPP::Blob *blob = dgt->getBlob(row,col);
+
+    EditBlobDialog *ebd = new EditBlobDialog(this,blobName,*blob,dgt,row,col);
+    if (ebd->Init())
+    {
+        ebd->Show();
+        Disable();
+    }
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridExportBlob(wxCommandEvent& WXUNUSED(event))

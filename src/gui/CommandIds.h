@@ -62,6 +62,8 @@ namespace Cmds
         DataGrid_Delete_row,
         DataGrid_FetchAll,
         DataGrid_CancelFetchAll,
+
+        DataGrid_EditBlob,
         DataGrid_ExportBlob,
         DataGrid_ImportBlob,
         DataGrid_Copy_as_insert,

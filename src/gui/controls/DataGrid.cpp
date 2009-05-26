@@ -210,6 +210,7 @@ void DataGrid::showPopupMenu(wxPoint cursorPos)
     m.Append(Cmds::DataGrid_Save_as_csv, _("Save as CSV file..."));
     m.AppendSeparator();
 
+    m.Append(Cmds::DataGrid_EditBlob, _("Edit BLOB..."));
     m.Append(Cmds::DataGrid_ImportBlob, _("Import BLOB from file..."));
     m.Append(Cmds::DataGrid_ExportBlob, _("Save BLOB to file..."));
     m.AppendSeparator();

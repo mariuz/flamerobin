@@ -742,6 +742,21 @@ void DataGridTable::setFetchAllRecords(bool fetchall)
     fetchAllRowsM = fetchall;
 }
 //-----------------------------------------------------------------------------
+IBPP::Blob* DataGridTable::getBlob(unsigned row, unsigned col)
+{
+    return rowsM.getBlob(row,col);
+}
+//-----------------------------------------------------------------------------
+DataGridRowsBlob DataGridTable::setBlobPrepare(unsigned row, unsigned col)
+{
+    return rowsM.setBlobPrepare(row,col);
+}
+//-----------------------------------------------------------------------------
+void DataGridTable::setBlob(DataGridRowsBlob &b)
+{
+    rowsM.setBlob(b);
+}
+//-----------------------------------------------------------------------------
 void DataGridTable::importBlobFile(const wxString& filename, int row, int col,
     ProgressIndicator *pi)
 {

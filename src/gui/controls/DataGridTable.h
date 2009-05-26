@@ -118,6 +118,9 @@ public:
     virtual void SetValue(int row, int col, const wxString& value);
     virtual bool DeleteRows(size_t pos, size_t numRows);
 
+    IBPP::Blob* getBlob(unsigned row, unsigned col);
+    DataGridRowsBlob setBlobPrepare(unsigned row, unsigned col);
+    void setBlob(DataGridRowsBlob &b);
     // BLOBs can be huge, so we don't use SetValue for that
     void importBlobFile(const wxString& filename, int row, int col,
         ProgressIndicator *pi = 0);

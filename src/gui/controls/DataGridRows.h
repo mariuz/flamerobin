@@ -77,6 +77,13 @@ struct DataGridFieldInfo
     bool fieldNA;
     bool fieldNumeric;
 };
+struct DataGridRowsBlob
+{
+    IBPP::Blob blob;
+    IBPP::Statement st;
+    unsigned row;
+    unsigned col;
+};
 //----------------------------------------------------------------------
 class DataGridRows
 {
@@ -126,6 +133,11 @@ public:
 
     ResultsetColumnDef* getColumnDef(unsigned col);
     void addRow(DataGridRowBuffer* buffer);
+
+    // BLOB-Stuff
+    IBPP::Blob* getBlob(unsigned row, unsigned col);
+    DataGridRowsBlob setBlobPrepare(unsigned row, unsigned col);
+    void setBlob(DataGridRowsBlob &b);
 };
 //----------------------------------------------------------------------
 #endif

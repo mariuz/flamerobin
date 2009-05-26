@@ -1949,16 +1949,66 @@ bool DataGridRows::isBlobColumn(unsigned col)
     return (0 != dynamic_cast<BlobColumnDef *>(columnDefsM[col]));
 }
 //-----------------------------------------------------------------------------
+IBPP::Blob* DataGridRows::getBlob(unsigned row, unsigned col)
+{
+    if ((row < 0) || (row >= buffersM.size()))
+      throw FRError(_("Invalid row index."));
+    if ((col < 0) || (col >= columnDefsM.size()))
+      throw FRError(_("Invalid col index."));
+    IBPP::Blob* b0 = buffersM[row]->getBlob(columnDefsM[col]->getIndex());
+    if (!b0)
+        throw FRError(_("BLOB data not valid"));
+    return b0;
+}
+//-----------------------------------------------------------------------------
+// Creates a Blob (DataGridRowBlob-struct) to save data in DataGridRowsBlob.blob
+// Finally the BLOB will be set with setBlob(...)
+DataGridRowsBlob DataGridRows::setBlobPrepare(unsigned row, unsigned col)
+{
+    wxString tn(std2wxIdentifier(statementM->ColumnTable(col + 1),
+        databaseM->getCharsetConverter()));
+    wxString cn(std2wxIdentifier(statementM->ColumnName(col + 1),
+        databaseM->getCharsetConverter()));
+
+    wxString stm = wxT("UPDATE ") + Identifier(tn).getQuoted()
+        + wxT(" SET ") + Identifier(cn).getQuoted()
+        + wxT(" = ? WHERE ");
+    std::map<wxString, UniqueConstraint *>::iterator it =
+        statementTablesM.find(tn);
+    if (it == statementTablesM.end() || (*it).second == 0)
+        throw FRError(_("Blob table not found."));
+
+    DataGridRowsBlob b;
+    b.row  = row;
+    b.col  = col;
+    b.st   = addWhere((*it).second, stm, tn, buffersM[row]);
+    b.blob = IBPP::BlobFactory(b.st->DatabasePtr(), b.st->TransactionPtr());
+    return b;
+}
+//-----------------------------------------------------------------------------
+void DataGridRows::setBlob(DataGridRowsBlob &b)
+{
+    b.st->Set(1, b.blob);
+    b.st->Execute();  // we execute before updating internal storage
+
+    buffersM[b.row]->setBlob(columnDefsM[b.col]->getIndex(), b.blob);
+    buffersM[b.row]->setFieldNull(b.col, false);
+    buffersM[b.row]->setFieldNA(b.col, false);
+    BlobColumnDef *bcd = dynamic_cast<BlobColumnDef *>(columnDefsM[b.col]);
+    if (!bcd)
+        throw FRError(_("Not a BLOB column."));
+    bcd->reset(buffersM[b.row]);  // reset cached blob data
+}
+//-----------------------------------------------------------------------------
 void DataGridRows::exportBlobFile(const wxString& filename, unsigned row,
     unsigned col, ProgressIndicator *pi)
 {
     wxFFile fl(filename, wxT("wb+"));
     if (!fl.IsOpened())
         throw FRError(_("Cannot open destination file."));
-    IBPP::Blob *b0 = buffersM[row]->getBlob(columnDefsM[col]->getIndex());
-    if (!b0)
-        throw FRError(_("BLOB data not valid"));
+    IBPP::Blob *b0 = getBlob(row,col);
     IBPP::Blob b = *b0;
+
     b->Open();
     int size;
     b->Info(&size, 0, 0);
@@ -1987,46 +2037,24 @@ void DataGridRows::importBlobFile(const wxString& filename, unsigned row,
     if (pi)
         pi->initProgress(_("Loading..."), fl.Length()); // wxFileOffset
 
-    wxString tn(std2wxIdentifier(statementM->ColumnTable(col + 1),
-        databaseM->getCharsetConverter()));
-    wxString cn(std2wxIdentifier(statementM->ColumnName(col + 1),
-        databaseM->getCharsetConverter()));
-        
-    wxString stm = wxT("UPDATE ") + Identifier(tn).getQuoted()
-        + wxT(" SET ") + Identifier(cn).getQuoted()
-        + wxT(" = ? WHERE ");
-    std::map<wxString, UniqueConstraint *>::iterator it =
-        statementTablesM.find(tn);
-    if (it == statementTablesM.end() || (*it).second == 0)
-        throw FRError(_("Blob table not found."));
-    IBPP::Statement st = addWhere((*it).second, stm, tn, buffersM[row]);
-    IBPP::Blob b = IBPP::BlobFactory(st->DatabasePtr(),
-        st->TransactionPtr());
-    b->Create();
+    DataGridRowsBlob b = setBlobPrepare(row,col);
+    b.blob->Create();
     uint8_t buffer[32768];
     while (!fl.Eof())
     {
         size_t len = fl.Read(buffer, 32767);    // slow when not 32k
         if (len < 1 || pi && pi->isCanceled())
             break;
-        b->Write(buffer, len);
+        b.blob->Write(buffer, len);
         if (pi)
             pi->stepProgress(len);
     }
     fl.Close();
-    b->Close();
+    b.blob->Close();
     if (pi && pi->isCanceled())
         return;
-    st->Set(1, b);
-    st->Execute();  // we execute before updating internal storage
 
-    buffersM[row]->setBlob(columnDefsM[col]->getIndex(), b);
-    buffersM[row]->setFieldNull(col, false);
-    buffersM[row]->setFieldNA(col, false);
-    BlobColumnDef *bcd = dynamic_cast<BlobColumnDef *>(columnDefsM[col]);
-    if (!bcd)
-        throw FRError(_("Not a BLOB column."));
-    bcd->reset(buffersM[row]);  // reset cached blob data
+    setBlob(b);
 }
 //-----------------------------------------------------------------------------
 // returns the executed SQL statement
