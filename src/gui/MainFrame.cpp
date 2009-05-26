@@ -543,7 +543,9 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
 //! handle double-click on item (or press Enter)
 void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
 {
+#ifndef __WXGTK__
     event.Skip();
+#endif
 
     wxTreeItemId item = treeMainM->GetSelection();
     if (!item.IsOk())
