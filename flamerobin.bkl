@@ -280,6 +280,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/CreateIndexDialog.h
         $(SOURCEDIR)/gui/DataGeneratorFrame.h
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.h
+        $(SOURCEDIR)/gui/EditBlobDialog.h
         $(SOURCEDIR)/gui/EventWatcherFrame.h
         $(SOURCEDIR)/gui/ExecuteSqlFrame.h
         $(SOURCEDIR)/gui/ExecuteSql.h
@@ -387,6 +388,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/CreateIndexDialog.cpp
         $(SOURCEDIR)/gui/DataGeneratorFrame.cpp
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.cpp
+        $(SOURCEDIR)/gui/EditBlobDialog.cpp
         $(SOURCEDIR)/gui/EventWatcherFrame.cpp
         $(SOURCEDIR)/gui/ExecuteSqlFrame.cpp
         $(SOURCEDIR)/gui/ExecuteSql.cpp

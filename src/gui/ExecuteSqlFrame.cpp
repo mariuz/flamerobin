@@ -1606,12 +1606,9 @@ void ExecuteSqlFrame::OnMenuGridEditBlob(wxCommandEvent& WXUNUSED(event))
 
     IBPP::Blob *blob = dgt->getBlob(row,col);
 
-    EditBlobDialog *ebd = new EditBlobDialog(this,blobName,*blob,dgt,row,col);
-    if (ebd->Init())
-    {
-        ebd->Show();
-        Disable();
-    }
+    EditBlobDialog ebd(this, blobName, *blob, dgt, row, col);
+    if (ebd.Init())
+        ebd.ShowModal();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridExportBlob(wxCommandEvent& WXUNUSED(event))

@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-  $Id: EditBlobDialog.h 1836 2009-05-10 11:22:13Z amaier $
+  $Id$
 
 */
 
@@ -106,9 +106,7 @@ private:
     void set_properties();
     void do_layout();
     // Events
-    void OnClose(wxCloseEvent& event);
     void OnSaveButtonClick(wxCommandEvent& event);
-    void OnCancelButtonClick(wxCommandEvent& event);
     void OnNotebookPageChanged(wxNotebookEvent& event);
 protected:
     wxNotebook* notebook;

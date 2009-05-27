@@ -87,6 +87,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CreateIndexDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGeneratorFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseRegistrationDialog.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_EditBlobDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_EventWatcherFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ExecuteSqlFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ExecuteSql.o \
@@ -358,6 +359,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGeneratorFrame.o: ./src/gui/DataGener
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseRegistrationDialog.o: ./src/gui/DatabaseRegistrationDialog.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_EditBlobDialog.o: ./src/gui/EditBlobDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_EventWatcherFrame.o: ./src/gui/EventWatcherFrame.cpp

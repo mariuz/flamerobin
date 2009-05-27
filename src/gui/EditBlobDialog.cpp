@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-  $Id: EditBlobDialog.cpp 1836 2009-05-10 11:22:13Z amaier $
+  $Id$
 
 */
 
@@ -214,15 +214,23 @@ bool EditBlobDialog::SaveToStream(wxOutputStream& stream, const wxString& progre
                     int dig1 = 0;
                     int dig2 = 0;
                     
-                    if (isdigit(ch1)) dig1 = ch1 - '0';
-                    else if ((ch1 >= 'A') && (ch1 <= 'F')) dig1 = ch1 - 'A' + 10;
-                    else if ((ch1 >= 'a') && (ch1 <= 'f')) dig1 = ch1 - 'a' + 10;
-                    else FRError(wxT("Wrong HEX-value: "+ch1));
+                    if (isdigit(ch1)) 
+                        dig1 = ch1 - '0';
+                    else if ((ch1 >= 'A') && (ch1 <= 'F'))
+                        dig1 = ch1 - 'A' + 10;
+                    else if ((ch1 >= 'a') && (ch1 <= 'f'))
+                        dig1 = ch1 - 'a' + 10;
+                    else
+                        throw FRError(wxT("Wrong HEX-value: "+ch1));
                     
-                    if (isdigit(ch2)) dig2 = ch2 - '0';
-                    else if ((ch2 >= 'A') && (ch2 <= 'F')) dig2 = ch2 - 'A' + 10;
-                    else if ((ch2 >= 'a') && (ch2 <= 'f')) dig2 = ch2 - 'a' + 10;
-                    else FRError(wxT("Wrong HEX-value: "+ch2));
+                    if (isdigit(ch2))
+                        dig2 = ch2 - '0';
+                    else if ((ch2 >= 'A') && (ch2 <= 'F'))
+                        dig2 = ch2 - 'A' + 10;
+                    else if ((ch2 >= 'a') && (ch2 <= 'f'))
+                        dig2 = ch2 - 'a' + 10;
+                    else
+                        throw FRError(wxT("Wrong HEX-value: "+ch2));
 
                     buffer[bufsize] = dig1*16 + dig2;
                     
@@ -249,7 +257,7 @@ bool EditBlobDialog::SaveToStream(wxOutputStream& stream, const wxString& progre
             }
             break;
         default :
-            FRError(wxT("Unknown editormode!"));
+            throw FRError(wxT("Unknown editormode!"));
     }
     pd.Hide();     
 
@@ -272,9 +280,11 @@ EditBlobDialog::~EditBlobDialog()
 
 void EditBlobDialog::set_properties()
 {
-    SetTitle(wxT("Edit BLOB: "+m_blobName));
+    SetTitle(wxT("Edit BLOB: " + m_blobName));
     blob_text->SetId(Text);
     blob_binary->SetId(Binary);
+
+    button_save->SetDefault();
 }
 
 void EditBlobDialog::do_layout()
@@ -325,20 +335,7 @@ void EditBlobDialog::do_layout()
     Centre();
 }
 
-void EditBlobDialog::OnClose(wxCloseEvent& event)
-{
-    // make sure parent window is properly activated again
-    wxWindow* p = GetParent();
-    if (p)
-    {
-        p->Enable();
-        Hide();
-        p->Raise();
-    }
-    Destroy();
-}
-
-void EditBlobDialog::OnSaveButtonClick(wxCommandEvent& event)
+void EditBlobDialog::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     // Save Editor-Data into BLOB
     DataGridRowsBlob b = m_datagridtable->setBlobPrepare(m_row,m_col);
@@ -355,11 +352,6 @@ void EditBlobDialog::OnSaveButtonClick(wxCommandEvent& event)
     Close();
 }
 
-void EditBlobDialog::OnCancelButtonClick(wxCommandEvent& event)
-{
-    Close();
-}
-
 void EditBlobDialog::OnNotebookPageChanged(wxNotebookEvent& event)
 {
     if (!m_running) 
@@ -372,7 +364,7 @@ void EditBlobDialog::OnNotebookPageChanged(wxNotebookEvent& event)
        
     int pageId = notebook->GetPage(page)->GetId();
     
-    wxMemoryOutputStream outBuf(NULL,0);
+    wxMemoryOutputStream outBuf(NULL, 0);
     if (!SaveToStream(outBuf,wxT("Switching editor-mode (Saving)")))
     {
         wxMessageBox(wxT("A error occured while switching editor-mode. (Saving)"));
@@ -395,7 +387,7 @@ void EditBlobDialog::OnNotebookPageChanged(wxNotebookEvent& event)
     }
     if (!loadOk)
     {
-        wxMessageBox(wxT("A error occured while switching editor-mode. (Loading)"));
+        wxMessageBox(wxT("An error occured while switching editor-mode. (Loading)"));
         notebook->ChangeSelection(oldpage);
         //event.Veto();
         return;
@@ -405,11 +397,8 @@ void EditBlobDialog::OnNotebookPageChanged(wxNotebookEvent& event)
 
 //! event handling
 BEGIN_EVENT_TABLE(EditBlobDialog, BaseDialog)
-    //EVT_NOTEBOOK_PAGE_CHANGED(wxID_ANY, EditBlobDialog::OnNotebookPageChanged)
     EVT_NOTEBOOK_PAGE_CHANGED(wxID_ANY, EditBlobDialog::OnNotebookPageChanged)
     EVT_BUTTON(wxID_SAVE,   EditBlobDialog::OnSaveButtonClick)
-    EVT_BUTTON(wxID_CANCEL, EditBlobDialog::OnCancelButtonClick)
-    EVT_CLOSE(EditBlobDialog::OnClose)
 END_EVENT_TABLE()
 
 

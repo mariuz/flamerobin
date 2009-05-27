@@ -556,6 +556,10 @@ SOURCE=.\src\gui\controls\DndTextControls.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\EditBlobDialog.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\EventWatcherFrame.cpp
 # End Source File
 # Begin Source File
@@ -939,6 +943,10 @@ SOURCE=.\src\gui\DatabaseRegistrationDialog.h
 # Begin Source File
 
 SOURCE=.\src\gui\controls\DndTextControls.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\EditBlobDialog.h
 # End Source File
 # Begin Source File
 

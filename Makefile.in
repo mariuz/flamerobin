@@ -78,6 +78,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_CreateIndexDialog.o \
 	flamerobin_DataGeneratorFrame.o \
 	flamerobin_DatabaseRegistrationDialog.o \
+	flamerobin_EditBlobDialog.o \
 	flamerobin_EventWatcherFrame.o \
 	flamerobin_ExecuteSqlFrame.o \
 	flamerobin_ExecuteSql.o \
@@ -400,6 +401,9 @@ flamerobin_DataGeneratorFrame.o: $(srcdir)/src/gui/DataGeneratorFrame.cpp $(FLAM
 
 flamerobin_DatabaseRegistrationDialog.o: $(srcdir)/src/gui/DatabaseRegistrationDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/DatabaseRegistrationDialog.cpp
+
+flamerobin_EditBlobDialog.o: $(srcdir)/src/gui/EditBlobDialog.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/EditBlobDialog.cpp
 
 flamerobin_EventWatcherFrame.o: $(srcdir)/src/gui/EventWatcherFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/EventWatcherFrame.cpp
