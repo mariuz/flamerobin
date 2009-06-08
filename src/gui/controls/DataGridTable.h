@@ -96,7 +96,7 @@ public:
     bool isNullCell(int row, int col);
     bool isNumericColumn(int col);
     bool isReadonlyColumn(int col);
-    bool isBlobColumn(int col);
+    bool isBlobColumn(int col, bool* pIsTextual = 0);
     bool needsMoreRowsFetched();
     void setFetchAllRecords(bool fetchall);
     bool canInsertRows();

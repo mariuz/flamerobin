@@ -28,34 +28,19 @@
 #ifndef FR_EDITBLOBDIALOG_H
 #define FR_EDITBLOBDIALOG_H
 
-#include <wx/wx.h>
+#include <wx/image.h>
+#include <wx/mstream.h>
 #include <wx/notebook.h>
 #include <wx/stc/stc.h>
-#include <wx/image.h>
 #include <wx/stream.h>
+#include <wx/wx.h>
+
+#include <set>
 
 #include <ibpp.h>
 
-#include "gui/BaseDialog.h"
 #include "controls/DataGridTable.h"
-
-// Helper-Class to solve wxNotebookEvent problem
-// with PAGE_CHAGING-EVENT under windows
-/*class wxFRNotebook : public wxNotebook
-{
-    public:
-        int m_newSelection;
-        //virtual int SetSelection(size_t page);
-        virtual int ChangeSelection(size_t page);
-        
-        wxFRNotebook(wxWindow *parent,
-                   wxWindowID id,
-                   const wxPoint& pos = wxDefaultPosition,
-                   const wxSize& size = wxDefaultSize,
-                   long style = 0,
-                   const wxString& name = wxNotebookNameStr)
-                   : wxNotebook(parent,id,pos,size,style,name) {};
-};*/
+#include "gui/BaseDialog.h"
 
 class EditBlobDialog : public BaseDialog {
 public:
@@ -64,15 +49,21 @@ public:
     virtual ~EditBlobDialog();
     bool Init();
 private:
-    typedef enum EditorMode { Binary = 1, Text = 2 };
+    typedef enum EditorMode { Binary = wxID_HIGHEST+1, Text = wxID_HIGHEST+2 };
 
-    DataGridTable *m_datagridtable;
-    wxString m_blobName;
-    unsigned m_row;
-    unsigned m_col;
-    IBPP::Blob m_blob;
-    EditorMode m_editormode;
-    bool m_running;
+    DataGridTable* dataGridTableM;
+    wxString blobNameM;
+    unsigned rowM;
+    unsigned colM;
+    IBPP::Blob blobM;
+    EditorMode editorModeM;
+    bool runningM;
+    wxString dialogCaptionM;
+    
+    std::set<EditorMode> dataValidM;
+    wxMemoryOutputStream* cacheM;
+    bool dataModifiedM;
+    bool loadingM;
     /*
     // activate later if plugin will be implemented
     // Dialog-Plugin-lib
@@ -103,11 +94,13 @@ private:
     // Saving (Blob/Stream)
     bool SaveToStream(wxOutputStream& stream, const wxString& progressTitle);
     
+    void SetDataModified(bool value);
     void set_properties();
     void do_layout();
     // Events
     void OnSaveButtonClick(wxCommandEvent& event);
     void OnNotebookPageChanged(wxNotebookEvent& event);
+    void OnDataModified(wxStyledTextEvent& event);
 protected:
     wxNotebook* notebook;
     wxStyledTextCtrl* blob_text;
@@ -118,140 +111,27 @@ protected:
 };
 
 // Helper-Class for streaming into blob / buffer
-class frInputBlobStream : public wxInputStream
+class FRInputBlobStream : public wxInputStream
 {
     public:
-        frInputBlobStream(IBPP::Blob blob);
-        virtual ~frInputBlobStream();
-        //virtual wxInputStream& Read(void *buffer, size_t size);
+        FRInputBlobStream(IBPP::Blob blob);
+        virtual ~FRInputBlobStream();
         virtual size_t GetSize() const;
     protected:
-        virtual size_t OnSysRead(void *buffer, size_t size);
-           
-    //x wxStreamError GetLastError() const { return m_lasterror; }
-    //x virtual bool IsOk() const { return GetLastError() == wxSTREAM_NO_ERROR; }
-    //x bool operator!() const { return !IsOk(); }
-
-    // reset the stream state
-    //void Reset() { m_lasterror = wxSTREAM_NO_ERROR; }
-
-    // this doesn't make sense for all streams, always test its return value
-    //virtual wxFileOffset GetLength() const { return wxInvalidOffset; }
-
-    // returns true if the streams supports seeking to arbitrary offsets
-    //virtual bool IsSeekable() const { return false; }
-    //protected:
-    //virtual wxFileOffset OnSysSeek(wxFileOffset seek, wxSeekMode mode);
-    //virtual wxFileOffset OnSysTell() const;
-
-    //size_t m_lastcount;
-    //wxStreamError m_lasterror;
-
+        virtual size_t OnSysRead(void *buffer, size_t size);          
     private:
-        IBPP::Blob m_blob;
-        int m_size;
-    /*class WXDLLIMPEXP_BASE wxStreamBase
-{
-public:
-// - = überschrieben   x = nicht überschrieben
-
-    - wxStreamBase();
-    - virtual ~wxStreamBase();
-
-    // error testing
-    x wxStreamError GetLastError() const { return m_lasterror; }
-    x virtual bool IsOk() const { return GetLastError() == wxSTREAM_NO_ERROR; }
-    x bool operator!() const { return !IsOk(); }
-
-    // reset the stream state
-    void Reset() { m_lasterror = wxSTREAM_NO_ERROR; }
-
-    // this doesn't make sense for all streams, always test its return value
-    virtual size_t GetSize() const;
-    virtual wxFileOffset GetLength() const { return wxInvalidOffset; }
-
-    // returns true if the streams supports seeking to arbitrary offsets
-    virtual bool IsSeekable() const { return false; }
-
-protected:
-    virtual wxFileOffset OnSysSeek(wxFileOffset seek, wxSeekMode mode);
-    virtual wxFileOffset OnSysTell() const;
-
-    size_t m_lastcount;
-    wxStreamError m_lasterror;
-
-    friend class wxStreamBuffer;
-
-    DECLARE_NO_COPY_CLASS(wxStreamBase)
+        IBPP::Blob blobM;
+        int sizeM;
 };
-*/
-};
-
-class frOutputBlobStream : public wxOutputStream
+class FROutputBlobStream : public wxOutputStream
 {
     public:
-        frOutputBlobStream(IBPP::Blob blob);
-        virtual ~frOutputBlobStream();
-        
-    //x wxStreamError GetLastError() const { return m_lasterror; }
-    //x virtual bool IsOk() const { return GetLastError() == wxSTREAM_NO_ERROR; }
-    //x bool operator!() const { return !IsOk(); }
-
-    // reset the stream state
-    //void Reset() { m_lasterror = wxSTREAM_NO_ERROR; }
-
-    // this doesn't make sense for all streams, always test its return value
-    //virtual size_t GetSize() const;
-    //virtual wxFileOffset GetLength() const { return wxInvalidOffset; }
-
-    // returns true if the streams supports seeking to arbitrary offsets
-    //virtual bool IsSeekable() const { return false; }
-    //protected:
-    //virtual wxFileOffset OnSysSeek(wxFileOffset seek, wxSeekMode mode);
-    //virtual wxFileOffset OnSysTell() const;
-
-    //size_t m_lastcount;
-    //wxStreamError m_lasterror;
-    
+        FROutputBlobStream(IBPP::Blob blob);
+        virtual ~FROutputBlobStream();
     protected:
         virtual size_t OnSysWrite(const void *buffer, size_t bufsize);
     private:
-        IBPP::Blob m_blob;
-    /*class WXDLLIMPEXP_BASE wxStreamBase
-{
-public:
-// - = überschrieben   x = nicht überschrieben
-
-    - wxStreamBase();
-    - virtual ~wxStreamBase();
-
-    // error testing
-    x wxStreamError GetLastError() const { return m_lasterror; }
-    x virtual bool IsOk() const { return GetLastError() == wxSTREAM_NO_ERROR; }
-    x bool operator!() const { return !IsOk(); }
-
-    // reset the stream state
-    void Reset() { m_lasterror = wxSTREAM_NO_ERROR; }
-
-    // this doesn't make sense for all streams, always test its return value
-    virtual size_t GetSize() const;
-    virtual wxFileOffset GetLength() const { return wxInvalidOffset; }
-
-    // returns true if the streams supports seeking to arbitrary offsets
-    virtual bool IsSeekable() const { return false; }
-
-protected:
-    virtual wxFileOffset OnSysSeek(wxFileOffset seek, wxSeekMode mode);
-    virtual wxFileOffset OnSysTell() const;
-
-    size_t m_lastcount;
-    wxStreamError m_lasterror;
-
-    friend class wxStreamBuffer;
-
-    DECLARE_NO_COPY_CLASS(wxStreamBase)
-};
-*/
+        IBPP::Blob blobM;
 };
 
 #endif // FR_EDITBLOBDIALOG_H

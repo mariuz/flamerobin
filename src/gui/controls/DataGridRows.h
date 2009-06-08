@@ -115,7 +115,7 @@ public:
 
     bool isColumnNumeric(unsigned col);
     bool isColumnReadonly(unsigned col);
-    bool isBlobColumn(unsigned col);
+    bool isBlobColumn(unsigned col, bool* pIsTextual = 0);
     bool getFieldInfo(unsigned row, unsigned col, DataGridFieldInfo& info);
     bool isFieldReadonly(unsigned row, unsigned col);
     bool isFieldNull(unsigned row, unsigned col);

@@ -1186,6 +1186,7 @@ public:
         const IBPP::Statement& statement, wxMBConv* converter);
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
+    bool isTextual() { return textualM; };
 };
 //-----------------------------------------------------------------------------
 BlobColumnDef::BlobColumnDef(const wxString& name, bool readOnly,
@@ -1944,9 +1945,12 @@ IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
     return st;
 }
 //-----------------------------------------------------------------------------
-bool DataGridRows::isBlobColumn(unsigned col)
+bool DataGridRows::isBlobColumn(unsigned col, bool* pIsTextual)
 {
-    return (0 != dynamic_cast<BlobColumnDef *>(columnDefsM[col]));
+    BlobColumnDef* bcd = dynamic_cast<BlobColumnDef *>(columnDefsM[col]);
+    if (pIsTextual) 
+        *pIsTextual = bcd->isTextual();
+    return (0 != bcd);
 }
 //-----------------------------------------------------------------------------
 IBPP::Blob* DataGridRows::getBlob(unsigned row, unsigned col)

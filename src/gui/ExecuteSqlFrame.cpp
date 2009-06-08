@@ -724,7 +724,7 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
     gridMenu->Append(Cmds::DataGrid_Copy_as_insert,  _("Copy &as insert statements"));
     gridMenu->Append(Cmds::DataGrid_Copy_as_update,  _("Copy as &update statements"));
     gridMenu->AppendSeparator();
-    gridMenu->Append(Cmds::DataGrid_EditBlob, _("Edit BLOB"));
+    gridMenu->Append(Cmds::DataGrid_EditBlob, _("Edit BLOB..."));
     gridMenu->Append(Cmds::DataGrid_ImportBlob, _("Import BLOB from file..."));
     gridMenu->Append(Cmds::DataGrid_ExportBlob, _("Save BLOB to file..."));
     gridMenu->AppendSeparator();
@@ -1602,7 +1602,7 @@ void ExecuteSqlFrame::OnMenuGridEditBlob(wxCommandEvent& WXUNUSED(event))
 
     wxString tableName = dgt->getTableName();
     wxString fieldName = grid_data->GetColLabelValue(grid_data->GetGridCursorCol());
-    wxString blobName  = tableName + _(".") + fieldName;
+    wxString blobName  = tableName + wxT(".") + fieldName;
 
     IBPP::Blob *blob = dgt->getBlob(row,col);
 

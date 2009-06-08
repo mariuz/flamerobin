@@ -776,9 +776,9 @@ void DataGridTable::exportBlobFile(const wxString& filename, int row, int col,
     rowsM.exportBlobFile(filename, row, col, pi);
 }
 //-----------------------------------------------------------------------------
-bool DataGridTable::isBlobColumn(int col)
+bool DataGridTable::isBlobColumn(int col, bool* pIsTextual)
 {
-    return rowsM.isBlobColumn(col);
+    return rowsM.isBlobColumn(col, pIsTextual);
 }
 //-----------------------------------------------------------------------------
 void DataGridTable::SetValue(int row, int col, const wxString& value)

@@ -39,11 +39,12 @@
 #endif
 
 #include <wx/stream.h>
-#include <wx/mstream.h>
+
+#include "AdvancedMessageDialog.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
-#include "gui/ProgressDialog.h"
 #include "gui/EditBlobDialog.h"
+#include "gui/ProgressDialog.h"
 #include "gui/StyleGuide.h"
 
 // Static members
@@ -56,42 +57,70 @@ EditBlobDialog::EditBlobDialog(wxWindow* parent, wxString& blobName, IBPP::Blob 
     DataGridTable* dgt, unsigned row, unsigned col)
     :BaseDialog(parent, -1, wxEmptyString)
 {
-    m_running = false; // disable wxNotebookPageChanged-Events
-    m_datagridtable = dgt;
-    m_blobName = blobName;
-    m_row = row;
-    m_col = col;
-    m_blob = blob;
+    runningM = false; // disable wxNotebookPageChanged-Events
+    dataModifiedM = false;
+    cacheM = 0;
+    dialogCaptionM = wxT("");
+    dataGridTableM = dgt;
+    blobNameM = blobName;
+    rowM = row;
+    colM = col;
+    blobM = blob;
+    loadingM = false;
 
     notebook      = new wxNotebook(getControlsPanel(), wxID_ANY); 
     blob_text     = new wxStyledTextCtrl(notebook, wxID_ANY);
     blob_binary   = new wxStyledTextCtrl(notebook, wxID_ANY);
     
-    button_save   = new wxButton(getControlsPanel(), wxID_SAVE, wxT("Save"));
-    button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, wxT("Cancel"));
-
+    button_save   = new wxButton(getControlsPanel(), wxID_SAVE, _("&Save"));
+    button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("&Cancel"));
+    
     set_properties();
     do_layout();
 
-    m_running = true;  // enable wxNotebookPageChanged-Events
+    runningM = true;  // enable wxNotebookPageChanged-Events
 }
 
 bool EditBlobDialog::Init()
 {
-    // Loading BLOB into Editor
-    m_blob->Open();
-    frInputBlobStream inpblob(m_blob);
-    bool res = LoadFromStreamAsBinary(inpblob,wxT("Loading BLOB into editor."));
-    m_editormode = Binary;
-    m_blob->Close();
+    // disable wxNotebookPageChanged-Events
+    runningM = false;  
     
+    bool isTextual;
+    dataGridTableM->isBlobColumn(colM, &isTextual);
+
+    // Loading BLOB into Editor
+    blobM->Open();
+    FRInputBlobStream inpblob(blobM);
+
+    bool res;
+    if (!isTextual)
+    {
+        notebook->ChangeSelection(0);
+        blob_text->Show(false);
+        res = LoadFromStreamAsBinary(inpblob, _("Loading BLOB into editor."));
+        editorModeM = Binary;
+    }
+    else
+    {
+        notebook->ChangeSelection(1);
+        res = LoadFromStreamAsText(inpblob, _("Loading BLOB into editor."));
+        editorModeM = Text;
+    }
+
+    blobM->Close();   
+    dataValidM.insert(editorModeM);
+    
+    // enable wxNotebookPageChanged-Events
+    runningM = true;  
+
     return res;
 }
 
 bool EditBlobDialog::LoadFromStreamAsText(wxInputStream& stream, const wxString& progressTitle)
 {
     int toread = stream.GetSize();
-    ProgressDialog pd(this,_(""));
+    ProgressDialog pd(this, wxT(""));
     pd.initProgress(progressTitle, toread);
     pd.Show();
     blob_text->ClearAll();
@@ -99,11 +128,11 @@ bool EditBlobDialog::LoadFromStreamAsText(wxInputStream& stream, const wxString&
     // allocate a buffer of the full size that is needed
     // for the text. So we have no troubles with splittet
     // multibyte-chars./amaier 
-    //char buffer[toread+1];    
-    char *buffer = (char*)malloc(toread+1);
+    char* buffer = (char*)malloc(toread+1);
     if (buffer == NULL)
     {        
-        wxMessageBox(wxT("Not enough Memory!"),wxT("ERROR"));
+        showErrorDialog(this, _("ERROR"), _("Not enough Memory!"), 
+            AdvancedMessageDialogButtonsOk());
         return false;
     }
     
@@ -113,7 +142,7 @@ bool EditBlobDialog::LoadFromStreamAsText(wxInputStream& stream, const wxString&
     // So we can give the user the ability to cancel.
     while ((!pd.isCanceled()) && (readed < toread))
     {
-        int nextread = std::min(32767,toread - readed);
+        int nextread = std::min(32767, toread - readed);
         stream.Read((void*)bufptr, nextread);
         int lastread = stream.LastRead();
         if (lastread < 1)
@@ -125,10 +154,18 @@ bool EditBlobDialog::LoadFromStreamAsText(wxInputStream& stream, const wxString&
     buffer[readed] = '\0';
     
     if (!pd.isCanceled())
-      blob_text->SetText(std2wx(buffer));
+    {
+        // disable OnDataModified event
+        loadingM = true;  
+        blob_text->SetText(std2wx(buffer));
+        // enable OnDataModified event
+        loadingM = false; 
+    }
       
     free(buffer);
     pd.Hide();
+    
+    SetDataModified(false);
     
     return !pd.isCanceled();
 }
@@ -136,10 +173,12 @@ bool EditBlobDialog::LoadFromStreamAsText(wxInputStream& stream, const wxString&
 bool EditBlobDialog::LoadFromStreamAsBinary(wxInputStream& stream, const wxString& progressTitle)
 {
     int size = stream.GetSize();
-    ProgressDialog pd(this,_(""));
+    ProgressDialog pd(this, wxT(""));
     pd.initProgress(progressTitle, size);
     pd.Show();
     
+    // disable OnDataModified event
+    loadingM = true;  
     // set the wxStyledTextControl to ReadOnly = false to modify the text
     blob_binary->SetReadOnly(false);
     blob_binary->ClearAll();
@@ -179,37 +218,52 @@ bool EditBlobDialog::LoadFromStreamAsBinary(wxInputStream& stream, const wxStrin
     if (!pd.isCanceled())
     {
         if (col > 0)
-            blob_binary->AppendText(txtLine);
+            blob_binary->AddText(txtLine);
+    }
+    // Set textstyling
+    blob_binary->StartStyling(0, 0xff);
+    for (int i = 0;i < blob_binary->GetLineCount();i++)
+    {
+        blob_binary->SetStyleBytes(69, "\0\0\1\1\0\0\1\1\0\0\1\1\0\0\1\1\0\0\0\1\1\0\0\1\1\0\0\1\1\0\0\1\1\0\0\0\1\1\0\0\1\1\0\0\1\1\0\0\1\1\0\0\0\1\1\0\0\1\1\0\0\1\1\0\0\1\1\0\0");
     }
     blob_binary->SetReadOnly(true);
     pd.Hide();
     
+    // enable OnDataModified event
+    loadingM = false; 
+    SetDataModified(false);
+
     return !pd.isCanceled();
 }
 
 bool EditBlobDialog::SaveToStream(wxOutputStream& stream, const wxString& progressTitle)
 {
-    ProgressDialog pd(this, progressTitle); //_("Saving Editor-Data"));
+    ProgressDialog pd(this, progressTitle); 
     pd.Show();    
-    switch (m_editormode)
+    switch (editorModeM)
     {
         case Binary :
             {
-                const int maxbufsize = 32768;
-                char buffer[maxbufsize]; 
-                int bufsize = 0;
+                const int maxBufSize = 32768;
+                char buffer[maxBufSize]; 
+                int bufSize = 0;
                 wxString txt = blob_binary->GetText();
-                int txtpos = 0;
-                while ((txtpos < txt.Length()) && (!pd.isCanceled()))
+                wxString::const_iterator txtIt;
+
+                txtIt = txt.begin();
+                while ((txtIt != txt.end()) && (!pd.isCanceled()))
                 {
-                    char ch1 = txt.GetChar(txtpos);
+                    wxChar ch1 = *txtIt; 
+                    txtIt++;
                     // skip spaces and cr
                     if ((ch1 == ' ') || (ch1 == 0x0A) || (ch1 == 0x0D))
-                    {
-                        txtpos++;
                         continue;
-                    }
-                    char ch2 = txt.GetChar(txtpos+1);
+                    // that should never happen
+                    // but it would be possible if binary data is corrupted
+                    if (txtIt == txt.end())
+                        throw FRError(_("Internal error. (Binary data seems corrupted.)"));
+                    wxChar ch2 = *txtIt;
+                    txtIt++;
                     
                     int dig1 = 0;
                     int dig2 = 0;
@@ -221,7 +275,7 @@ bool EditBlobDialog::SaveToStream(wxOutputStream& stream, const wxString& progre
                     else if ((ch1 >= 'a') && (ch1 <= 'f'))
                         dig1 = ch1 - 'a' + 10;
                     else
-                        throw FRError(wxT("Wrong HEX-value: "+ch1));
+                        throw FRError(wxString::Format(_("Wrong HEX-value: %s"), ch1));
                     
                     if (isdigit(ch2))
                         dig2 = ch2 - '0';
@@ -230,34 +284,33 @@ bool EditBlobDialog::SaveToStream(wxOutputStream& stream, const wxString& progre
                     else if ((ch2 >= 'a') && (ch2 <= 'f'))
                         dig2 = ch2 - 'a' + 10;
                     else
-                        throw FRError(wxT("Wrong HEX-value: "+ch2));
+                        throw FRError(wxString::Format(_("Wrong HEX-value: %s"), ch1));
 
-                    buffer[bufsize] = dig1*16 + dig2;
+                    buffer[bufSize] = dig1 * 16 + dig2;
                     
-                    if (bufsize >= maxbufsize-1)
+                    if (bufSize >= maxBufSize-1)
                     {
-                        stream.Write(buffer,bufsize);
-                        pd.stepProgress(bufsize);
-                        bufsize = 0;
+                        stream.Write(buffer, bufSize);
+                        pd.stepProgress(bufSize);
+                        bufSize = 0;
                     } 
-                    else bufsize++;
-                    txtpos += 2;
+                    else bufSize++;
                 };
-                if (bufsize > 0) 
+                if (bufSize > 0) 
                 {
-                    stream.Write(buffer,bufsize);
-                    pd.stepProgress(bufsize);
+                    stream.Write(buffer, bufSize);
+                    pd.stepProgress(bufSize);
                 }
             }
             break;
         case Text : 
             {
                 std::string txt = wx2std(blob_text->GetText());
-                stream.Write(txt.c_str(),txt.length());
+                stream.Write(txt.c_str(), txt.length());
             }
             break;
         default :
-            throw FRError(wxT("Unknown editormode!"));
+            throw FRError(_("Unknown editormode!"));
     }
     pd.Hide();     
 
@@ -276,61 +329,80 @@ EditBlobDialog::~EditBlobDialog()
         delete m_libEditBlob;
     }
     */
+    //delete blob_text;
+    //delete blob_binary;
+    //delete notebook; 
+    //delete button_save;
+    //delete button_cancel;
+    delete cacheM;
 }
 
 void EditBlobDialog::set_properties()
 {
-    SetTitle(wxT("Edit BLOB: " + m_blobName));
+    dialogCaptionM = wxString::Format(_("Edit BLOB: %s"), blobNameM.c_str());
+    SetTitle(dialogCaptionM);
+    int style = GetWindowStyle();
+    SetWindowStyle(style | wxMINIMIZE_BOX | wxMAXIMIZE_BOX | wxSYSTEM_MENU);
     blob_text->SetId(Text);
+    blob_text->SetModEventMask(wxSTC_MODEVENTMASKALL);
     blob_binary->SetId(Binary);
+    blob_binary->SetModEventMask(wxSTC_MODEVENTMASKALL);
 
     button_save->SetDefault();
+    button_save->Enable(false);
 }
 
 void EditBlobDialog::do_layout()
 {
     wxBoxSizer* sizerControls = new wxBoxSizer(wxVERTICAL);
+
+    // Maybe we can find a better solution to get the margin font
+    // I assume here it is the default font./amaier
+    int marginCharWidth = blob_binary->TextWidth(0, wxT("9"));
     // *** TEXT-EDIT-LAYOUT ***
     blob_text->SetSizeHints(200, 100);
     blob_text->SetSize(200, 100);
     // fixed-width font (i think it is better for showing)
-    wxFont ftxt(styleguide().getEditorFontSize(),
+    wxFont fTxt(styleguide().getEditorFontSize(),
         wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL,
         false);
-    blob_text->StyleSetFont(0,ftxt);   
+    blob_text->StyleSetFont(0, fTxt);   
     // numbering on text should be usefull
-    blob_text->SetMarginType(0,wxSTC_MARGIN_NUMBER);
-    blob_text->SetMarginWidth(0,30);
-    blob_text->SetMarginWidth(1,0);
-    blob_text->SetMarginWidth(2,0);
+    blob_text->SetMarginType(0, wxSTC_MARGIN_NUMBER);
+    blob_text->SetMarginWidth(0, marginCharWidth * 5);
+    blob_text->SetMarginWidth(1, 0);
+    blob_text->SetMarginWidth(2, 0);
 
     // *** BINARY-SHOW-LAYOUT ***
-    blob_binary->SetSizeHints(200, 100);
-    blob_binary->SetSize(200, 100);
-    blob_binary->SetReadOnly(true);
     // fixed-width font
-    wxFont fbin(styleguide().getEditorFontSize(),
+    wxFont fBin(styleguide().getEditorFontSize(),
         wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL,
         false);
-    blob_binary->StyleSetFont(0,fbin);   
+    blob_binary->StyleSetFont(0, fBin);
+    blob_binary->StyleSetFont(1, fBin);
+    blob_binary->StyleSetForeground(1, wxT("MEDIUM BLUE"));
     // set with of the viewport to avoid "empty" space after each line
     blob_binary->SetScrollWidth(600);
     // set up a left-margin for numbering lines
     // TODO - calc with of dialog to fit excact a binary line without scrolling"
-    blob_binary->SetMarginType(0,wxSTC_MARGIN_NUMBER);
-    blob_binary->SetMarginWidth(0,30);
-    blob_binary->SetMarginWidth(1,0);
-    blob_binary->SetMarginWidth(2,0);
+    blob_binary->SetMarginType(0, wxSTC_MARGIN_NUMBER);
+    blob_binary->SetMarginWidth(0, marginCharWidth * 5);
+    blob_binary->SetMarginWidth(1, 0);
+    blob_binary->SetMarginWidth(2, 0);
     
-    notebook->AddPage(blob_binary, wxT("Binary"), false);
-    notebook->AddPage(blob_text,   wxT("Text"),   false);
+    blob_binary->SetSizeHints(200, 100);
+    blob_binary->SetSize(200, 100);
+    blob_binary->SetReadOnly(true);
+    
+    notebook->AddPage(blob_binary, _("Binary"), false);
+    notebook->AddPage(blob_text, _("Text"),   false);
     
     sizerControls->Add(notebook, 1, wxEXPAND);
 
     wxSizer* sizerButtons = styleguide().createButtonSizer(button_save, button_cancel);
 
     layoutSizers(sizerControls, sizerButtons, true);
-
+    
     SetSize(620, 400);
     Centre();
 }
@@ -338,15 +410,43 @@ void EditBlobDialog::do_layout()
 void EditBlobDialog::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     // Save Editor-Data into BLOB
-    DataGridRowsBlob b = m_datagridtable->setBlobPrepare(m_row,m_col);
+    DataGridRowsBlob b = dataGridTableM->setBlobPrepare(rowM, colM);
     b.blob->Create();
-    frOutputBlobStream bs(b.blob);
-    SaveToStream(bs,wxT("Saving Data to BLOB"));
+    // if nothing was modified and the cache is createt we can
+    // directly write the cache to the blob to save time.
+    char buffer[32768];
+    bool ok = false;
+    wxString progressTitle = _("Saving editor-data.");
+    if ((!dataModifiedM) && (cacheM))
+    {
+        ProgressDialog pd(this, progressTitle); 
+        pd.Show();
+        
+        wxMemoryInputStream inBuf(*cacheM);
+
+        inBuf.Read((void*)buffer, 32767);
+        int bufLen = inBuf.LastRead();
+        while ((bufLen > 0) && (!pd.isCanceled())) 
+        {
+            b.blob->Write(buffer, bufLen);
+            inBuf.Read((void*)buffer, 32767);
+            bufLen = inBuf.LastRead();
+        }
+        ok = !pd.isCanceled();
+    }
+    else
+    {
+        FROutputBlobStream bs(b.blob);
+        ok = SaveToStream(bs, progressTitle);
+    }
     b.blob->Close();
     
-    m_datagridtable->setBlob(b);
+    if (!ok)
+        return;
     
-    m_running = false;
+    dataGridTableM->setBlob(b);
+    
+    runningM = false;
     
     // Close window
     Close();
@@ -354,112 +454,163 @@ void EditBlobDialog::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 
 void EditBlobDialog::OnNotebookPageChanged(wxNotebookEvent& event)
 {
-    if (!m_running) 
+    if (!runningM) 
         return;        
     int page = event.GetSelection();
-    int oldpage = event.GetOldSelection();
-    if ((page < 0) || (oldpage < 0))
+    int oldPage = event.GetOldSelection();
+    if ((page < 0) || (oldPage < 0))
         return;
-        
        
     int pageId = notebook->GetPage(page)->GetId();
     
-    wxMemoryOutputStream outBuf(NULL, 0);
-    if (!SaveToStream(outBuf,wxT("Switching editor-mode (Saving)")))
+    // Save data to cache
+    // We only store the data if it was changed by the user
+    if (dataModifiedM)
     {
-        wxMessageBox(wxT("A error occured while switching editor-mode. (Saving)"));
-        //event.Veto();
-        notebook->ChangeSelection(oldpage);
-        return;
+        // Maybe we have to initialize the cache (cacheM)
+        if (cacheM)
+            delete cacheM;
+        cacheM = new wxMemoryOutputStream(0, 0);
+
+        if (!SaveToStream(*cacheM, _("Switching editor-mode. (Saving)")))
+        {
+            showErrorDialog(this, _("ERROR"), 
+                _("A error occured while switching editor-mode. (Saving)"), 
+                AdvancedMessageDialogButtonsOk());
+            notebook->ChangeSelection(oldPage);
+            return;
+        }
     }
 
-    bool loadOk = false;
-    wxString loadTitle = wxT("Switching editor-mode (Loading)");
-    wxMemoryInputStream inBuf(outBuf);
-    switch (pageId)
+    EditorMode newEditorMode = (EditorMode)pageId;
+    // Load data from cache or blob - only if the data is not already loaded (valid)
+    if ((dataModifiedM) || dataValidM.find(newEditorMode) == dataValidM.end())
     {
-        case Binary :
-            loadOk = LoadFromStreamAsBinary(inBuf,loadTitle);
-            break;
-        case Text : 
-            loadOk = LoadFromStreamAsText(inBuf,loadTitle);
-            break;
+        bool loadOk = false;
+        wxString loadTitle = _("Switching editor-mode. (Loading)");
+        wxInputStream* inBuf;
+        if (cacheM)
+        {
+            inBuf = new wxMemoryInputStream(*cacheM);
+        }
+        else
+        {
+            blobM->Open();
+            inBuf = new FRInputBlobStream(blobM);
+        }
+    
+        switch (pageId)
+        {
+            case Binary :
+                loadOk = LoadFromStreamAsBinary(*inBuf, loadTitle);
+                break;
+            case Text : 
+                loadOk = LoadFromStreamAsText(*inBuf, loadTitle);
+                break;
+        }
+    
+        // close blob if data was loaded from it
+        if (!cacheM)
+            blobM->Close();
+        delete inBuf;
+    
+        if (!loadOk)
+        {
+            showErrorDialog(this, _("ERROR"), 
+                _("A error occured while switching editor-mode. (Loading)"), 
+                AdvancedMessageDialogButtonsOk());
+            notebook->ChangeSelection(oldPage);
+            //event.Veto();
+            return;
+        }
+        dataValidM.insert(newEditorMode);
     }
-    if (!loadOk)
-    {
-        wxMessageBox(wxT("An error occured while switching editor-mode. (Loading)"));
-        notebook->ChangeSelection(oldpage);
-        //event.Veto();
+    editorModeM = newEditorMode;
+}
+
+void EditBlobDialog::OnDataModified(wxStyledTextEvent& event)
+{
+    if (loadingM)
         return;
+    SetDataModified(true);
+}
+
+void EditBlobDialog::SetDataModified(bool value)
+{
+    if (dataModifiedM == value)
+        return;
+    dataModifiedM = value;
+    
+    wxString status;
+    bool canSave;
+    if ((value) || (cacheM))
+    {
+        status = wxT("*");
+        canSave = true;
     }
-    m_editormode = (EditorMode)pageId;
+    else    
+    {
+        status = wxT("");
+        canSave = false;
+    }
+    
+    SetTitle(dialogCaptionM+status);
+    button_save->Enable(canSave);
+    
+    // if the data is modified all other allready loaded data 
+    // (binary,text,http,image,...) gets invalid
+    dataValidM.clear();
+    dataValidM.insert(editorModeM);
 }
 
 //! event handling
 BEGIN_EVENT_TABLE(EditBlobDialog, BaseDialog)
     EVT_NOTEBOOK_PAGE_CHANGED(wxID_ANY, EditBlobDialog::OnNotebookPageChanged)
-    EVT_BUTTON(wxID_SAVE,   EditBlobDialog::OnSaveButtonClick)
+    EVT_BUTTON(wxID_SAVE, EditBlobDialog::OnSaveButtonClick)
+    EVT_STC_MODIFIED(EditBlobDialog::Text, EditBlobDialog::OnDataModified)
+    EVT_STC_MODIFIED(EditBlobDialog::Binary, EditBlobDialog::OnDataModified)
 END_EVENT_TABLE()
-
 
 // Helper-Class for streaming into blob / buffer
 // frInputBlobStream
-frInputBlobStream::frInputBlobStream(IBPP::Blob blob)
+FRInputBlobStream::FRInputBlobStream(IBPP::Blob blob)
     :wxInputStream()
 {
-    m_blob = blob;
-    blob->Info(&m_size, 0, 0);
+    blobM = blob;
+    blobM->Info(&sizeM, 0, 0);
 }
 
-frInputBlobStream::~frInputBlobStream()
+FRInputBlobStream::~FRInputBlobStream()
 {
 }
 
-size_t frInputBlobStream::OnSysRead(void *buffer, size_t size)
+size_t FRInputBlobStream::OnSysRead(void* buffer, size_t size)
 {
-    return m_blob->Read(buffer,size);
+    return blobM->Read(buffer, size);
 }
 
-size_t frInputBlobStream::GetSize() const
+size_t FRInputBlobStream::GetSize() const
 {
-    return m_size;
+    return sizeM;
 }
 
 // Helper-Class for streaming into blob / buffer
 // frOutputBlobStream
-frOutputBlobStream::frOutputBlobStream(IBPP::Blob blob)
+FROutputBlobStream::FROutputBlobStream(IBPP::Blob blob)
     :wxOutputStream()
 {
-    m_blob = blob;
+    blobM = blob;
 }
 
-frOutputBlobStream::~frOutputBlobStream()
+FROutputBlobStream::~FROutputBlobStream()
 {
 }
 
-size_t frOutputBlobStream::OnSysWrite(const void *buffer, size_t bufsize)
+size_t FROutputBlobStream::OnSysWrite(const void* buffer, size_t bufsize)
 {
     if (bufsize == 0)
         return 0;
         
-    m_blob->Write(buffer,bufsize);
+    blobM->Write(buffer, bufsize);
     return bufsize;
 }
-
-// Helper-Class 
-/*int wxFRNotebook::SetSelection(size_t page)
-{
-    m_newSelection = page;
-    wxString x = wxString::Format("%i",page);
-    wxMessageBox(x);
-    wxNotebook::SetSelection(page);
-}*/
-
-/*int wxFRNotebook::ChangeSelection(size_t page)
-{
-    m_newSelection = page;
-    wxString x = wxString::Format("%i",page);
-    wxMessageBox(wxT("ChangeSelection"));
-    wxNotebook::ChangeSelection(page);
-}*/
-
