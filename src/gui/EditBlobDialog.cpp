@@ -528,7 +528,7 @@ void EditBlobDialog::OnNotebookPageChanged(wxNotebookEvent& event)
     editorModeM = newEditorMode;
 }
 
-void EditBlobDialog::OnDataModified(wxStyledTextEvent& event)
+void EditBlobDialog::OnDataModified(wxStyledTextEvent& WXUNUSED(event))
 {
     if (loadingM)
         return;

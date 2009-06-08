@@ -107,15 +107,12 @@ void BaseFrame::writeConfigSettings() const
 
     // propagate call to children frames.
     const wxWindowList& children = GetChildren();
-    wxWindowListNode *node = children.GetFirst();
-    while (node)
+    for (wxWindowList::const_iterator it = children.begin();
+        it != children.end(); ++it)
     {
-        BaseFrame *f = dynamic_cast<BaseFrame *>(node->GetData());
+        BaseFrame *f = dynamic_cast<BaseFrame *>(*it);
         if (f)
-          {
-               f->writeConfigSettings();
-        }
-        node = node->GetNext();
+            f->writeConfigSettings();
     }
 
     if (config().get(wxT("FrameStorage"), false) && !IsIconized())    // don't save for minimized windows

@@ -487,10 +487,15 @@ void InsertDialog::preloadSpecialColumns()
 //-----------------------------------------------------------------------------
 //! event handling
 BEGIN_EVENT_TABLE(InsertDialog, BaseDialog)
+#if wxCHECK_VERSION(2, 9, 0)
+    EVT_GRID_CELL_CHANGED(InsertDialog::OnGridCellChange)
+    EVT_GRID_EDITOR_CREATED(InsertDialog::OnCellEditorCreated)
+#else
     EVT_GRID_CMD_CELL_CHANGE(InsertDialog::ID_Grid,
         InsertDialog::OnGridCellChange)
     EVT_GRID_CMD_EDITOR_CREATED(InsertDialog::ID_Grid,
         InsertDialog::OnCellEditorCreated)
+#endif
     EVT_BUTTON(wxID_OK, InsertDialog::OnOkButtonClick)
     EVT_BUTTON(wxID_CANCEL, InsertDialog::OnCancelButtonClick)
     EVT_CLOSE(InsertDialog::OnClose)
