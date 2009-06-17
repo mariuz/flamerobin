@@ -58,6 +58,10 @@
 DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
     : wxGrid(parent, id), timerM(this, TIMER_ID), calculateSumM(true)
 {
+    // this is necessary for wxWidgets 2.9, otherwise grid will be as wide
+    // as the sum of column widths
+    SetMinSize(wxSize(100, 50));
+
     EnableEditing(true);
     SetColLabelValue(0, wxT(""));
     SetRowLabelSize(50);
