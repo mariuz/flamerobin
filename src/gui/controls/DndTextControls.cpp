@@ -65,5 +65,9 @@ FileTextControl::FileTextControl(wxWindow* parent, wxWindowID id,
 #if wxUSE_DRAG_AND_DROP
     SetDropTarget(new DnDFilename(this));
 #endif
+
+#if wxCHECK_VERSION(2, 9, 0)
+    AutoCompleteFileNames();
+#endif
 }
 //-----------------------------------------------------------------------------
