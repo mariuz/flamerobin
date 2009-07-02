@@ -1369,8 +1369,9 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     else
     {
         wxString val(std2wx(value, converter));
+        size_t trimLen = val.Strip().Length();
         if (val.Length() > size_t(charSizeM))
-            val.Truncate(charSizeM);
+            val.Truncate(trimLen > charSizeM ? trimLen : charSizeM);
         buffer->setString(indexM, val);
     }
 }
@@ -1948,7 +1949,7 @@ IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
 bool DataGridRows::isBlobColumn(unsigned col, bool* pIsTextual)
 {
     BlobColumnDef* bcd = dynamic_cast<BlobColumnDef *>(columnDefsM[col]);
-    if (pIsTextual) 
+    if (pIsTextual)
         *pIsTextual = bcd->isTextual();
     return (0 != bcd);
 }
