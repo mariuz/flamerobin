@@ -65,6 +65,7 @@
 #include "gui/ProgressDialog.h"
 #include "gui/ExecuteSql.h"
 #include "gui/ExecuteSqlFrame.h"
+#include "gui/FRLayoutConfig.h"
 #include "gui/InsertDialog.h"
 #include "gui/EditBlobDialog.h"
 #include "gui/StatementHistoryDialog.h"
@@ -256,7 +257,7 @@ SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id)
     }
     else
     {
-        wxFont font(styleguide().getEditorFontSize(), wxMODERN, wxNORMAL, wxNORMAL);
+        wxFont font(frlayoutconfig().getEditorFontSize(), wxMODERN, wxNORMAL, wxNORMAL);
         StyleSetFont(wxSTC_STYLE_DEFAULT, font);
     }
 
@@ -406,7 +407,7 @@ void SqlEditor::setFont()
     }
     else                // if config() doesn't have it, we'll use the default
     {
-        wxFont font(styleguide().getEditorFontSize(), wxMODERN, wxNORMAL, wxNORMAL);
+        wxFont font(frlayoutconfig().getEditorFontSize(), wxMODERN, wxNORMAL, wxNORMAL);
         f2 = ::wxGetFontFromUser(this, font);
     }
 
@@ -543,6 +544,9 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
 
     statusbar_1 = CreateStatusBar(4);
     SetStatusBarPane(-1);
+    
+    timerBlobEditorM = new wxTimer(this, TIMER_ID_UPDATE_BLOB);
+    editBlobDlgM = 0;
 
     set_properties();
     do_layout();
@@ -915,7 +919,10 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_SUM, \
         ExecuteSqlFrame::OnGridSum)
 
+    EVT_GRID_CMD_SELECT_CELL(ExecuteSqlFrame::ID_grid_data, ExecuteSqlFrame::OnGridCellChange)
     EVT_GRID_CMD_LABEL_LEFT_DCLICK(ExecuteSqlFrame::ID_grid_data, ExecuteSqlFrame::OnGridLabelLeftDClick)
+    
+    EVT_TIMER(ExecuteSqlFrame::TIMER_ID_UPDATE_BLOB, ExecuteSqlFrame::OnBlobEditorUpdate)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 // Avoiding the annoying thing that you cannot click inside the selection and have it deselected and have caret there
@@ -1590,25 +1597,45 @@ void ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob(wxUpdateUIEvent& event)
         dgt->isBlobColumn(grid_data->GetGridCursorCol()));
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuGridEditBlob(wxCommandEvent& WXUNUSED(event))
+void ExecuteSqlFrame::closeBlobEditor(bool saveBlobValue)
+{
+    if ((editBlobDlgM) && (editBlobDlgM->IsShown()))
+    {
+        if (saveBlobValue)
+            editBlobDlgM->Close(); 
+        else
+            editBlobDlgM->closeDontSave(); 
+    }
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::updateBlobEditor()
 {
     DataGridTable* dgt = grid_data->getDataGridTable();
     if (!dgt || !grid_data->GetNumberRows())
         return;
     unsigned row = grid_data->GetGridCursorRow();
     unsigned col = grid_data->GetGridCursorCol();
-    if (!dgt->isBlobColumn(grid_data->GetGridCursorCol()))
-        throw FRError(_("Not a BLOB column"));
 
     wxString tableName = dgt->getTableName();
     wxString fieldName = grid_data->GetColLabelValue(grid_data->GetGridCursorCol());
     wxString blobName  = tableName + wxT(".") + fieldName;
 
-    IBPP::Blob *blob = dgt->getBlob(row,col);
-
-    EditBlobDialog ebd(this, blobName, *blob, dgt, row, col);
-    if (ebd.Init())
-        ebd.ShowModal();
+    if (editBlobDlgM->setBlob(blobName, grid_data, dgt, &statementM, row, col))
+    {
+        if (!editBlobDlgM->IsShown())
+            editBlobDlgM->Show();
+    }
+    SetFocus();
+    grid_data->SetFocus();
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuGridEditBlob(wxCommandEvent& WXUNUSED(event))
+{
+    if (!editBlobDlgM)
+    {
+        editBlobDlgM = new EditBlobDialog(this);
+    }
+    updateBlobEditor();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridExportBlob(wxCommandEvent& WXUNUSED(event))
@@ -2315,6 +2342,8 @@ bool ExecuteSqlFrame::commitTransaction()
         return true;    // nothing to commit, but it wasn't error
     }
 
+    closeBlobEditor(false);
+
     wxBusyCursor cr;
     ScrollAtEnd sae(styled_text_ctrl_stats);
 
@@ -2404,6 +2433,8 @@ bool ExecuteSqlFrame::rollbackTransaction()
         return true;
     }
 
+    closeBlobEditor(false);
+    
     ScrollAtEnd sae(styled_text_ctrl_stats);
 
     try
@@ -2477,6 +2508,18 @@ void ExecuteSqlFrame::OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event)
     }
 
     event.Enable(!colsSelected && deletableRows);
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnGridCellChange(wxGridEvent& event)
+{
+    event.Skip();
+    // Start timer-event (for updating the blob-value) only if 
+    // - the blob-dialog is created and visible AND
+    // - a different col/row is selected
+    if ((editBlobDlgM) && (editBlobDlgM->IsShown()) &&
+        ((event.GetCol() != grid_data->GetGridCursorCol()) || 
+         (event.GetRow() != grid_data->GetGridCursorRow()))) 
+        timerBlobEditorM->Start(500,true);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent& event)
@@ -2768,6 +2811,11 @@ void ExecuteSqlFrame::updateViewMode()
     {
         viewModeM = vmGrid;
     }
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnBlobEditorUpdate(wxTimerEvent& WXUNUSED(event))
+{
+    updateBlobEditor();
 }
 //-----------------------------------------------------------------------------
 //! also used to drop constraints

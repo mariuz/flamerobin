@@ -1224,7 +1224,7 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
     wxString s = buffer->getString(stringIndexM);   // already loaded?
     if (!s.IsEmpty())
         return s;
-    b->Open();
+    b->Open();      
 
     while (kb > 0)
     {
@@ -1949,19 +1949,19 @@ IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
 bool DataGridRows::isBlobColumn(unsigned col, bool* pIsTextual)
 {
     BlobColumnDef* bcd = dynamic_cast<BlobColumnDef *>(columnDefsM[col]);
-    if (pIsTextual)
+    if ((pIsTextual) && (bcd))
         *pIsTextual = bcd->isTextual();
     return (0 != bcd);
 }
 //-----------------------------------------------------------------------------
-IBPP::Blob* DataGridRows::getBlob(unsigned row, unsigned col)
+IBPP::Blob* DataGridRows::getBlob(unsigned row, unsigned col, bool validateBlob)
 {
     if ((row < 0) || (row >= buffersM.size()))
       throw FRError(_("Invalid row index."));
     if ((col < 0) || (col >= columnDefsM.size()))
       throw FRError(_("Invalid col index."));
     IBPP::Blob* b0 = buffersM[row]->getBlob(columnDefsM[col]->getIndex());
-    if (!b0)
+    if ((validateBlob) && (!b0))
         throw FRError(_("BLOB data not valid"));
     return b0;
 }
@@ -2011,7 +2011,7 @@ void DataGridRows::exportBlobFile(const wxString& filename, unsigned row,
     wxFFile fl(filename, wxT("wb+"));
     if (!fl.IsOpened())
         throw FRError(_("Cannot open destination file."));
-    IBPP::Blob *b0 = getBlob(row,col);
+    IBPP::Blob *b0 = getBlob(row,col,true);
     IBPP::Blob b = *b0;
 
     b->Open();

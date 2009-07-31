@@ -135,7 +135,7 @@ public:
     void addRow(DataGridRowBuffer* buffer);
 
     // BLOB-Stuff
-    IBPP::Blob* getBlob(unsigned row, unsigned col);
+    IBPP::Blob* getBlob(unsigned row, unsigned col, bool validateBlob);
     DataGridRowsBlob setBlobPrepare(unsigned row, unsigned col);
     void setBlob(DataGridRowsBlob &b);
 };

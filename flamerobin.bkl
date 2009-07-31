@@ -286,6 +286,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/ExecuteSql.h
         $(SOURCEDIR)/gui/FieldPropertiesDialog.h
         $(SOURCEDIR)/gui/FindDialog.h
+        $(SOURCEDIR)/gui/FRLayoutConfig.h
         $(SOURCEDIR)/gui/InsertDialog.h
         $(SOURCEDIR)/gui/MainFrame.h
         $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.h
@@ -394,6 +395,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/ExecuteSql.cpp
         $(SOURCEDIR)/gui/FieldPropertiesDialog.cpp
         $(SOURCEDIR)/gui/FindDialog.cpp
+        $(SOURCEDIR)/gui/FRLayoutConfig.cpp
         $(SOURCEDIR)/gui/InsertDialog.cpp
         $(SOURCEDIR)/gui/MainFrame.cpp
         $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.cpp

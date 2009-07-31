@@ -84,6 +84,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_ExecuteSql.o \
 	flamerobin_FieldPropertiesDialog.o \
 	flamerobin_FindDialog.o \
+	flamerobin_FRLayoutConfig.o \
 	flamerobin_InsertDialog.o \
 	flamerobin_MainFrame.o \
 	flamerobin_MetadataItemPropertiesFrame.o \
@@ -419,6 +420,9 @@ flamerobin_FieldPropertiesDialog.o: $(srcdir)/src/gui/FieldPropertiesDialog.cpp 
 
 flamerobin_FindDialog.o: $(srcdir)/src/gui/FindDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/FindDialog.cpp
+
+flamerobin_FRLayoutConfig.o: $(srcdir)/src/gui/FRLayoutConfig.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/FRLayoutConfig.cpp
 
 flamerobin_InsertDialog.o: $(srcdir)/src/gui/InsertDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/InsertDialog.cpp

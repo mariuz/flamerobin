@@ -40,26 +40,34 @@
 #include <ibpp.h>
 
 #include "controls/DataGridTable.h"
+#include "controls/DataGrid.h"
 #include "gui/BaseDialog.h"
-
+//-----------------------------------------------------------------------------
 class EditBlobDialog : public BaseDialog {
 public:
-    EditBlobDialog(wxWindow* parent, wxString& blobName, IBPP::Blob blob,
-        DataGridTable* dgt, unsigned row, unsigned col);
+    EditBlobDialog(wxWindow* parent);
     virtual ~EditBlobDialog();
-    bool Init();
+    // close without saving (for rollback-transaction)
+    void closeDontSave(); 
+    // DataGrid is needed to update a blob-cell due to blob is saved
+    bool setBlob(wxString& fieldName, DataGrid* dg, DataGridTable* dgt, 
+        IBPP::Statement* st, unsigned row, unsigned col);
 private:
-    typedef enum EditorMode { Binary = wxID_HIGHEST+1, Text = wxID_HIGHEST+2 };
+    enum EditorMode { noData = wxID_HIGHEST+1, 
+                      binary = wxID_HIGHEST+2, 
+                      text = wxID_HIGHEST+3 };
 
-    DataGridTable* dataGridTableM;
-    wxString blobNameM;
-    unsigned rowM;
-    unsigned colM;
     IBPP::Blob blobM;
-    EditorMode editorModeM;
-    bool runningM;
+    DataGridTable* dataGridTableM;
+    DataGrid* dataGridM;
     wxString dialogCaptionM;
-    
+    EditorMode editorModeM;
+    wxString fieldNameM;
+    unsigned colM;
+    unsigned rowM;
+    bool runningM;
+    IBPP::Statement* statementM; 
+
     std::set<EditorMode> dataValidM;
     wxMemoryOutputStream* cacheM;
     bool dataModifiedM;
@@ -87,29 +95,45 @@ private:
     // H o o - x x
     // I o x x - x
     // R o o x x -
-    
+
+    // cache/data-functions
+    void cacheDelete();
+    void dataSetModified(bool value);
+    void dataUpdateGUI();
+    // notebook-functions
+    void notebookAddPageById(int pageId);
+    int notebookGetPageIndexById(int pageId);
+    void notebookRemovePageById(int pageId);
+    void notebookSelectPageById(int pageId);
+    // Loading - (calls LoadFromStreamAsXXXX)
+    bool loadBlob();
     // Loading (Blob/Stream)
-    bool LoadFromStreamAsBinary(wxInputStream& stream, const wxString& progressTitle);
-    bool LoadFromStreamAsText(wxInputStream& stream, const wxString& progressTitle);
+    bool loadFromStreamAsBinary(wxInputStream& stream, const wxString& progressTitle);
+    bool loadFromStreamAsText(wxInputStream& stream, const wxString& progressTitle);
+    // Saving - (calls SaveToStream)
+    void saveBlob();
     // Saving (Blob/Stream)
-    bool SaveToStream(wxOutputStream& stream, const wxString& progressTitle);
+    bool saveToStream(wxOutputStream& stream, const wxString& progressTitle);
     
-    void SetDataModified(bool value);
     void set_properties();
     void do_layout();
     // Events
-    void OnSaveButtonClick(wxCommandEvent& event);
-    void OnNotebookPageChanged(wxNotebookEvent& event);
-    void OnDataModified(wxStyledTextEvent& event);
+    void OnDataModified(wxStyledTextEvent& WXUNUSED(event));
+    void OnNotebookPageChanged(wxNotebookEvent& WXUNUSED(event));
+    void OnClose(wxCloseEvent& event);
+    void OnResetButtonClick(wxCommandEvent& WXUNUSED(event));
+    void OnSaveButtonClick(wxCommandEvent& WXUNUSED(event));
 protected:
     wxNotebook* notebook;
     wxStyledTextCtrl* blob_text;
     wxStyledTextCtrl* blob_binary;
+    wxStaticText* blob_noDataText;
+    wxPanel* blob_noData;
+    wxButton* button_reset;
     wxButton* button_save;
-    wxButton* button_cancel;
     DECLARE_EVENT_TABLE()
 };
-
+//-----------------------------------------------------------------------------
 // Helper-Class for streaming into blob / buffer
 class FRInputBlobStream : public wxInputStream
 {
@@ -123,15 +147,18 @@ class FRInputBlobStream : public wxInputStream
         IBPP::Blob blobM;
         int sizeM;
 };
+//-----------------------------------------------------------------------------
 class FROutputBlobStream : public wxOutputStream
 {
     public:
         FROutputBlobStream(IBPP::Blob blob);
         virtual ~FROutputBlobStream();
+        
+        virtual bool Close();
     protected:
         virtual size_t OnSysWrite(const void *buffer, size_t bufsize);
     private:
         IBPP::Blob blobM;
 };
-
+//-----------------------------------------------------------------------------
 #endif // FR_EDITBLOBDIALOG_H

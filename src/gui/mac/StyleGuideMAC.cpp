@@ -60,8 +60,6 @@ public:
     virtual int getMessageBoxBetweenTextMargin();
     virtual int getRelatedControlMargin(wxOrientation orientation);
     virtual int getUnrelatedControlMargin(wxOrientation orientation);
-
-    virtual int getEditorFontSize();
 };
 //------------------------------------------------------------------------------
 StyleGuideMAC::StyleGuideMAC()
@@ -145,11 +143,6 @@ int StyleGuideMAC::getRelatedControlMargin(wxOrientation /*orientation*/)
 int StyleGuideMAC::getUnrelatedControlMargin(wxOrientation /*orientation*/)
 {
     return 16;
-}
-//------------------------------------------------------------------------------
-int StyleGuideMAC::getEditorFontSize()
-{
-    return 12;
 }
 //------------------------------------------------------------------------------
 StyleGuide& styleguide()

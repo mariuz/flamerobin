@@ -118,6 +118,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ExecuteSql.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FindDialog.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRLayoutConfig.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_InsertDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemPropertiesFrame.obj \
@@ -418,6 +419,9 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesDialog.obj: .\src\gui\Fiel
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FindDialog.obj: .\src\gui\FindDialog.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\FindDialog.cpp
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRLayoutConfig.obj: .\src\gui\FRLayoutConfig.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\FRLayoutConfig.cpp
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_InsertDialog.obj: .\src\gui\InsertDialog.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\InsertDialog.cpp

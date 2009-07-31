@@ -70,8 +70,6 @@ public:
     virtual int getMessageBoxBetweenTextMargin();
     virtual int getRelatedControlMargin(wxOrientation orientation);
     virtual int getUnrelatedControlMargin(wxOrientation orientation);
-
-    virtual int getEditorFontSize();
 };
 //-----------------------------------------------------------------------------
 StyleGuideMSW::StyleGuideMSW()
@@ -225,11 +223,6 @@ int StyleGuideMSW::getUnrelatedControlMargin(wxOrientation orientation)
         default:
             return 0;
     }
-}
-//-----------------------------------------------------------------------------
-int StyleGuideMSW::getEditorFontSize()
-{
-    return 10;
 }
 //-----------------------------------------------------------------------------
 StyleGuide& styleguide()

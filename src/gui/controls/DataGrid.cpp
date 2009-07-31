@@ -52,6 +52,7 @@
 #include "gui/CommandIds.h"
 #include "gui/controls/DataGrid.h"
 #include "gui/controls/DataGridTable.h"
+#include "gui/FRLayoutConfig.h"
 #include "metadata/database.h"
 #include "metadata/table.h"
 //-----------------------------------------------------------------------------
@@ -159,7 +160,7 @@ void DataGrid::fetchData(bool readonly)
         if (readonly || table->isReadonlyColumn(i))
         {
             ca->SetReadOnly(true);
-            ca->SetBackgroundColour(table->getReadonlyColour());
+            ca->SetBackgroundColour(frlayoutconfig().getReadonlyColour());
         }
         ca->SetOverflow(false);
         SetColAttr(i, ca);

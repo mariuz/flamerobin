@@ -83,7 +83,6 @@ public:
     wxString getCellValueForInsert(int row, int col);
     wxString getCellValueForCSV(int row, int col);
     bool getFetchAllRows();
-    wxColour getReadonlyColour();
 
     // TODO: these should be replaced with a better function that covers all
     wxString getTableName();
@@ -118,7 +117,7 @@ public:
     virtual void SetValue(int row, int col, const wxString& value);
     virtual bool DeleteRows(size_t pos, size_t numRows);
 
-    IBPP::Blob* getBlob(unsigned row, unsigned col);
+    IBPP::Blob* getBlob(unsigned row, unsigned col, bool validateBlob);
     DataGridRowsBlob setBlobPrepare(unsigned row, unsigned col);
     void setBlob(DataGridRowsBlob &b);
     // BLOBs can be huge, so we don't use SetValue for that

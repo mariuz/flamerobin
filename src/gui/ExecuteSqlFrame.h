@@ -42,6 +42,7 @@
 #include "core/StringUtils.h"
 #include "controls/DataGridTable.h"
 #include "gui/BaseFrame.h"
+#include "gui/EditBlobDialog.h"
 #include "gui/FindDialog.h"
 #include "sql/SqlStatement.h"
 #include "metadata/database.h"
@@ -137,11 +138,25 @@ private:
     void updateViewMode();
 
     bool updateEditorCaretPosM;
+    
+    // blob-editor-timer
+    enum {
+        TIMER_ID_UPDATE_BLOB = 1
+    };
+    wxTimer* timerBlobEditorM;
+    // blob-editor dialog
+    EditBlobDialog* editBlobDlgM;
+    // blob-editor event
+    void OnBlobEditorUpdate(wxTimerEvent& event);
+    // blob-editor function to update blob-editor value
+    void closeBlobEditor(bool saveBlobValue);
+    void updateBlobEditor();
 
     // events
     void OnChildFocus(wxChildFocusEvent& event);
     void OnClose(wxCloseEvent& event);
     void OnKeyDown(wxKeyEvent& event);
+    void OnGridCellChange(wxGridEvent& event);
     void OnGridRowCountChanged(wxCommandEvent& event);
     void OnGridStatementExecuted(wxCommandEvent& event);
     void OnGridSum(wxCommandEvent& event);

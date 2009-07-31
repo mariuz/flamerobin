@@ -60,8 +60,6 @@ public:
     virtual int getMessageBoxBetweenTextMargin();
     virtual int getRelatedControlMargin(wxOrientation orientation);
     virtual int getUnrelatedControlMargin(wxOrientation orientation);
-
-    virtual int getEditorFontSize();
 };
 //------------------------------------------------------------------------------
 StyleGuideGTK::StyleGuideGTK()
@@ -144,11 +142,6 @@ int StyleGuideGTK::getRelatedControlMargin(wxOrientation orientation)
 int StyleGuideGTK::getUnrelatedControlMargin(wxOrientation /*orientation*/)
 {
     return 18;
-}
-//------------------------------------------------------------------------------
-int StyleGuideGTK::getEditorFontSize()
-{
-    return 12;
 }
 //------------------------------------------------------------------------------
 StyleGuide& styleguide()

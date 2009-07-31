@@ -69,9 +69,6 @@ public:
        controls (related vs. unrelated used for control grouping) */
     virtual int getUnrelatedControlMargin(wxOrientation orientation) = 0;
 
-    /* returns the default font size for the SQL editor control
-      (to be removed as this shouldn't be hard-coded) */
-    virtual int getEditorFontSize() = 0;
 protected:
     /* class can't be instantiated, descendent classes will be */
     StyleGuide();

@@ -576,6 +576,10 @@ SOURCE=.\src\core\FRError.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\FRLayoutConfig.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\FieldPropertiesDialog.cpp
 # End Source File
 # Begin Source File
@@ -963,6 +967,10 @@ SOURCE=.\src\gui\ExecuteSqlFrame.h
 # Begin Source File
 
 SOURCE=.\src\core\FRError.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\FRLayoutConfig.h
 # End Source File
 # Begin Source File
 
