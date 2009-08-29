@@ -215,6 +215,7 @@ private:
     void OnMenuUpdateGridInsertRow(wxUpdateUIEvent& event);
     void OnMenuGridDeleteRow(wxCommandEvent& event);
     void OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event);
+    void OnMenuGridSetFieldToNULL(wxCommandEvent& event);
     void OnMenuGridEditBlob(wxCommandEvent& event);
     void OnMenuGridImportBlob(wxCommandEvent& event);
     void OnMenuGridExportBlob(wxCommandEvent& event);
@@ -231,6 +232,7 @@ private:
     void OnMenuUpdateGridHasData(wxUpdateUIEvent& event);
     void OnMenuUpdateGridFetchAll(wxUpdateUIEvent& event);
     void OnMenuUpdateGridCancelFetchAll(wxUpdateUIEvent& event);
+    void OnMenuUpdateGridCanSetFieldToNULL(wxUpdateUIEvent& event);
 
     void OnMenuFindSelectedObject(wxCommandEvent& event);
 

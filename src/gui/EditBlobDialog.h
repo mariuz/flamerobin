@@ -43,15 +43,37 @@
 #include "controls/DataGrid.h"
 #include "gui/BaseDialog.h"
 //-----------------------------------------------------------------------------
-class EditBlobDialog : public BaseDialog {
+// Helper Class of wxStyledTextCtrl to handle NULL values 
+class EditBlobDialogSTC : public wxStyledTextCtrl 
+{
+public:
+    EditBlobDialogSTC(wxWindow *parent, wxWindowID id=wxID_ANY);
+    
+    void setIsNull(bool isNull);
+    bool getIsNull() { return isNullM; }
+
+    void ClearAll();
+    void SetText(const wxString& text);
+protected:
+    void OnKeyDown(wxKeyEvent& event);
+    void OnChar(wxKeyEvent& event);
+
+    DECLARE_EVENT_TABLE()
+private:
+    bool isNullM;
+};
+//-----------------------------------------------------------------------------
+// Main Class: EditBlobDialog
+class EditBlobDialog : public BaseDialog 
+{
 public:
     EditBlobDialog(wxWindow* parent);
     virtual ~EditBlobDialog();
     // close without saving (for rollback-transaction)
     void closeDontSave(); 
     // DataGrid is needed to update a blob-cell due to blob is saved
-    bool setBlob(wxString& fieldName, DataGrid* dg, DataGridTable* dgt, 
-        IBPP::Statement* st, unsigned row, unsigned col);
+    bool setBlob(DataGrid* dg, DataGridTable* dgt, 
+        IBPP::Statement* st, unsigned row, unsigned col, bool saveOldValue = true);
 private:
     enum EditorMode { noData = wxID_HIGHEST+1, 
                       binary = wxID_HIGHEST+2, 
@@ -70,8 +92,10 @@ private:
 
     std::set<EditorMode> dataValidM;
     wxMemoryOutputStream* cacheM;
+    bool cacheIsNullM;
     bool dataModifiedM;
     bool loadingM;
+    bool readonlyM;
     /*
     // activate later if plugin will be implemented
     // Dialog-Plugin-lib
@@ -108,25 +132,29 @@ private:
     // Loading - (calls LoadFromStreamAsXXXX)
     bool loadBlob();
     // Loading (Blob/Stream)
-    bool loadFromStreamAsBinary(wxInputStream& stream, const wxString& progressTitle);
-    bool loadFromStreamAsText(wxInputStream& stream, const wxString& progressTitle);
+    bool loadFromStreamAsBinary(wxInputStream& stream, bool isNull, const wxString& progressTitle);
+    bool loadFromStreamAsText(wxInputStream& stream, bool isNull, const wxString& progressTitle);
     // Saving - (calls SaveToStream)
     void saveBlob();
     // Saving (Blob/Stream)
-    bool saveToStream(wxOutputStream& stream, const wxString& progressTitle);
+    bool saveToStream(wxOutputStream& stream, bool* isNull, const wxString& progressTitle);
     
     void set_properties();
     void do_layout();
+    
+    // misc
+    void blob_textSetReadonly(bool readonly);
+    
     // Events
-    void OnDataModified(wxStyledTextEvent& WXUNUSED(event));
+    void OnDataModified(wxStyledTextEvent& event);
     void OnNotebookPageChanged(wxNotebookEvent& WXUNUSED(event));
     void OnClose(wxCloseEvent& event);
     void OnResetButtonClick(wxCommandEvent& WXUNUSED(event));
     void OnSaveButtonClick(wxCommandEvent& WXUNUSED(event));
 protected:
     wxNotebook* notebook;
-    wxStyledTextCtrl* blob_text;
-    wxStyledTextCtrl* blob_binary;
+    EditBlobDialogSTC* blob_text;
+    EditBlobDialogSTC* blob_binary;
     wxStaticText* blob_noDataText;
     wxPanel* blob_noData;
     wxButton* button_reset;

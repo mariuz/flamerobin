@@ -522,9 +522,9 @@ bool DataGridTable::isNumericColumn(int col)
     return rowsM.isColumnNumeric(col);
 }
 //-----------------------------------------------------------------------------
-bool DataGridTable::isReadonlyColumn(int col)
+bool DataGridTable::isReadonlyColumn(int col, bool inGrid)
 {
-    return readOnlyM || rowsM.isColumnReadonly(col);
+    return readOnlyM || rowsM.isColumnReadonly(col,inGrid);
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::isValidCellPos(int row, int col)
@@ -643,6 +643,22 @@ void DataGridTable::SetValue(int row, int col, const wxString& value)
         showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()), 
             _("System error"), _("Unhandled exception"), 
             AdvancedMessageDialogButtonsOk());
+    }
+}
+//-----------------------------------------------------------------------------
+void DataGridTable::setValueToNull(int row, int col)
+{
+    setNullFlag(true);
+    SetValue(row, col, wxT("[null]"));
+    if (isBlobColumn(col,0)) 
+    {
+        // set blob to null
+        DataGridRowsBlob b;
+        b.blob = 0;
+        b.col  = col;
+        b.row  = row;
+        b.st   = statementM;
+        rowsM.setBlob(b);
     }
 }
 //-----------------------------------------------------------------------------

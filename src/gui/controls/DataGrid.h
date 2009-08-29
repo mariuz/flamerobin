@@ -30,6 +30,7 @@
 //----------------------------------------------------------------------
 #include <wx/wx.h>
 #include <wx/grid.h>
+#include <wx/listimpl.cpp>
 
 class DataGridTable;
 //-----------------------------------------------------------------------------
@@ -82,6 +83,8 @@ public:
 
     void cancelFetchAll();
     void fetchAll();
+    
+    wxGridCellCoordsArray getSelectedCells();
 };
 //----------------------------------------------------------------------
 #endif

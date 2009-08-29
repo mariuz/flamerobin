@@ -157,7 +157,7 @@ void DataGrid::fetchData(bool readonly)
         ca->SetAlignment(
             (table->isNumericColumn(i)) ? wxALIGN_RIGHT : wxALIGN_LEFT,
             wxALIGN_TOP);
-        if (readonly || table->isReadonlyColumn(i))
+        if (readonly || table->isReadonlyColumn(i,true))
         {
             ca->SetReadOnly(true);
             ca->SetBackgroundColour(frlayoutconfig().getReadonlyColour());
@@ -218,6 +218,9 @@ void DataGrid::showPopupMenu(wxPoint cursorPos)
     m.Append(Cmds::DataGrid_EditBlob, _("Edit BLOB..."));
     m.Append(Cmds::DataGrid_ImportBlob, _("Import BLOB from file..."));
     m.Append(Cmds::DataGrid_ExportBlob, _("Save BLOB to file..."));
+    m.AppendSeparator();
+
+    m.Append(Cmds::DataGrid_SetFieldToNULL, _("Set field to NULL"));
     m.AppendSeparator();
 
     m.Append(Cmds::DataGrid_Set_header_font, _("Set header font"));
@@ -694,6 +697,32 @@ void DataGrid::cancelFetchAll()
     DataGridTable* table = getDataGridTable();
     if (table)
         table->setFetchAllRecords(false);
+}
+//-----------------------------------------------------------------------------
+wxGridCellCoordsArray DataGrid::getSelectedCells()
+{
+    wxGridCellCoordsArray result;
+    result = wxGrid::GetSelectedCells();
+        
+    // add rows in selection blocks that span all columns
+    wxGridCellCoordsArray tlCells(wxGrid::GetSelectionBlockTopLeft());
+    wxGridCellCoordsArray brCells(wxGrid::GetSelectionBlockBottomRight());
+    wxASSERT(tlCells.GetCount() == brCells.GetCount());
+    for (size_t i = 0; i < tlCells.GetCount(); ++i)
+    {
+        wxGridCellCoords tl = tlCells[i];
+        wxGridCellCoords br = brCells[i];
+        for (int iCol = tl.GetCol(); iCol <= br.GetCol(); iCol++)
+        for (int iRow = tl.GetRow(); iRow <= br.GetRow(); iRow++)
+        {
+            result.Add(wxGridCellCoords(iRow,iCol));
+        }
+    }  
+    
+    if (result.size() == 0)
+        result.Add(wxGridCellCoords(wxGrid::GetCursorRow(),wxGrid::GetCursorColumn()));
+        
+    return result;
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(DataGrid, wxGrid)

@@ -114,7 +114,7 @@ public:
     bool initialize(const IBPP::Statement& statement);
 
     bool isColumnNumeric(unsigned col);
-    bool isColumnReadonly(unsigned col);
+    bool isColumnReadonly(unsigned col, bool inGrid);
     bool isBlobColumn(unsigned col, bool* pIsTextual = 0);
     bool getFieldInfo(unsigned row, unsigned col, DataGridFieldInfo& info);
     bool isFieldReadonly(unsigned row, unsigned col);

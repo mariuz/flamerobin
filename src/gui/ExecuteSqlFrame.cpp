@@ -732,6 +732,8 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
     gridMenu->Append(Cmds::DataGrid_ImportBlob, _("Import BLOB from file..."));
     gridMenu->Append(Cmds::DataGrid_ExportBlob, _("Save BLOB to file..."));
     gridMenu->AppendSeparator();
+    gridMenu->Append(Cmds::DataGrid_SetFieldToNULL,  _("Set field to &NULL"));
+    gridMenu->AppendSeparator();
     gridMenu->Append(Cmds::DataGrid_FetchAll,        _("&Fetch all records"));
     gridMenu->Append(Cmds::DataGrid_CancelFetchAll,  _("&Stop fetching all records"));
     gridMenu->AppendSeparator();
@@ -887,11 +889,12 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
 
     EVT_MENU(Cmds::DataGrid_Insert_row,      ExecuteSqlFrame::OnMenuGridInsertRow)
     EVT_MENU(Cmds::DataGrid_Delete_row,      ExecuteSqlFrame::OnMenuGridDeleteRow)
+    EVT_MENU(Cmds::DataGrid_SetFieldToNULL,  ExecuteSqlFrame::OnMenuGridSetFieldToNULL)
+    EVT_MENU(Cmds::DataGrid_Copy_as_insert,  ExecuteSqlFrame::OnMenuGridCopyAsInsert)
+    EVT_MENU(Cmds::DataGrid_Copy_as_update,  ExecuteSqlFrame::OnMenuGridCopyAsUpdate)
     EVT_MENU(Cmds::DataGrid_EditBlob,        ExecuteSqlFrame::OnMenuGridEditBlob)
     EVT_MENU(Cmds::DataGrid_ImportBlob,      ExecuteSqlFrame::OnMenuGridImportBlob)
     EVT_MENU(Cmds::DataGrid_ExportBlob,      ExecuteSqlFrame::OnMenuGridExportBlob)
-    EVT_MENU(Cmds::DataGrid_Copy_as_insert,  ExecuteSqlFrame::OnMenuGridCopyAsInsert)
-    EVT_MENU(Cmds::DataGrid_Copy_as_update,  ExecuteSqlFrame::OnMenuGridCopyAsUpdate)
     EVT_MENU(Cmds::DataGrid_Save_as_html,    ExecuteSqlFrame::OnMenuGridSaveAsHtml)
     EVT_MENU(Cmds::DataGrid_Save_as_csv,     ExecuteSqlFrame::OnMenuGridSaveAsCsv)
     EVT_MENU(Cmds::DataGrid_Set_header_font, ExecuteSqlFrame::OnMenuGridGridHeaderFont)
@@ -901,11 +904,12 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
 
     EVT_UPDATE_UI(Cmds::DataGrid_Insert_row,     ExecuteSqlFrame::OnMenuUpdateGridInsertRow)
     EVT_UPDATE_UI(Cmds::DataGrid_Delete_row,     ExecuteSqlFrame::OnMenuUpdateGridDeleteRow)
+    EVT_UPDATE_UI(Cmds::DataGrid_SetFieldToNULL, ExecuteSqlFrame::OnMenuUpdateGridCanSetFieldToNULL)
+    EVT_UPDATE_UI(Cmds::DataGrid_Copy_as_insert, ExecuteSqlFrame::OnMenuUpdateGridHasData)
+    EVT_UPDATE_UI(Cmds::DataGrid_Copy_as_update, ExecuteSqlFrame::OnMenuUpdateGridHasData)
     EVT_UPDATE_UI(Cmds::DataGrid_EditBlob,       ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob)
     EVT_UPDATE_UI(Cmds::DataGrid_ImportBlob,     ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob)
     EVT_UPDATE_UI(Cmds::DataGrid_ExportBlob,     ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob)
-    EVT_UPDATE_UI(Cmds::DataGrid_Copy_as_insert, ExecuteSqlFrame::OnMenuUpdateGridHasData)
-    EVT_UPDATE_UI(Cmds::DataGrid_Copy_as_update, ExecuteSqlFrame::OnMenuUpdateGridHasData)
     EVT_UPDATE_UI(Cmds::DataGrid_Save_as_html,   ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
     EVT_UPDATE_UI(Cmds::DataGrid_Save_as_csv,    ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
     EVT_UPDATE_UI(Cmds::DataGrid_FetchAll,       ExecuteSqlFrame::OnMenuUpdateGridFetchAll)
@@ -1616,11 +1620,7 @@ void ExecuteSqlFrame::updateBlobEditor()
     unsigned row = grid_data->GetGridCursorRow();
     unsigned col = grid_data->GetGridCursorCol();
 
-    wxString tableName = dgt->getTableName();
-    wxString fieldName = grid_data->GetColLabelValue(grid_data->GetGridCursorCol());
-    wxString blobName  = tableName + wxT(".") + fieldName;
-
-    if (editBlobDlgM->setBlob(blobName, grid_data, dgt, &statementM, row, col))
+    if (editBlobDlgM->setBlob(grid_data, dgt, &statementM, row, col))
     {
         if (!editBlobDlgM->IsShown())
             editBlobDlgM->Show();
@@ -1773,6 +1773,47 @@ void ExecuteSqlFrame::OnMenuGridDeleteRow(wxCommandEvent& WXUNUSED(event))
     // grid_data->EndBatch();   // see comment for BeginBatch above
 }
 //-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& event)
+{
+    DataGridTable* dgt = grid_data->getDataGridTable();
+    if (!dgt)
+        return;
+
+    // get selection into array (cells)
+    wxGridCellCoordsArray cells = grid_data->getSelectedCells();
+    
+    int count = cells.size();
+    if (count == 0)
+        return;
+    if (count > 1)
+    {
+        bool agreed = wxOK == showQuestionDialog(this,
+            _("Do you really want to set multiple rows to NULL?"),
+            wxString::Format(_("You have more than one row selected. Are you sure you wish to set all %d selected rows to NULL?"), count),
+            AdvancedMessageDialogButtonsOkCancel(_("NULL")));
+        if (!agreed)
+            return;
+    }
+
+    // set fields to NULL
+    for (int i = 0; i < count; i++) 
+    {
+        int row = cells[i].GetRow();
+        int col = cells[i].GetCol();
+        dgt->setValueToNull(row, col);
+    
+        // if visible, update BLOB editor
+        if ( (editBlobDlgM) &&
+             (editBlobDlgM->IsShown()) &&
+             (grid_data->GetCursorColumn() == col) &&
+             (grid_data->GetCursorRow() == row) )
+            editBlobDlgM->setBlob(grid_data, dgt, &statementM, row, col, false);
+    }
+    
+    // update GUI    
+    grid_data->ForceRefresh();
+}
+//-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridCopyAsInsert(wxCommandEvent& WXUNUSED(event))
 {
     grid_data->copyToCBAsInsert();
@@ -1820,6 +1861,37 @@ void ExecuteSqlFrame::OnMenuUpdateGridCancelFetchAll(wxUpdateUIEvent& event)
     DataGridTable* table = grid_data->getDataGridTable();
     event.Enable(table && table->canFetchMoreRows()
         && table->getFetchAllRows());
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateGridCanSetFieldToNULL(wxUpdateUIEvent& event)
+{
+    bool can = false;
+    if (grid_data->getDataGridTable()) 
+    {
+        // get selection into array (cells)
+        wxGridCellCoordsArray cells = grid_data->getSelectedCells();
+        //if (cells.size() == 0)
+        //  cells.Add(wxGridCellCoords(grid_data->GetCursorColumn,grid_data->GetCursorRow));
+        int count = cells.size();
+    
+        // generate a distinct List of cols
+        wxArrayInt cols;
+        for (int i = 0; i < count; i++)
+        {
+            int col = cells[i].GetCol();
+            int idx = cols.Index(col);
+            if (idx < 0)
+                cols.Add(col);
+        }
+    
+        // if one column in the selected area can be set to null 
+        // (no readonly) then the item will be enabled
+        for (int i = 0; i < cols.size(); i++)
+        {
+            can = can || !grid_data->getDataGridTable()->isReadonlyColumn(cols[i],false);
+        }
+    }
+    event.Enable(can);
 }
 //-----------------------------------------------------------------------------
 bool ExecuteSqlFrame::loadSqlFile(const wxString& filename)
@@ -2342,7 +2414,7 @@ bool ExecuteSqlFrame::commitTransaction()
         return true;    // nothing to commit, but it wasn't error
     }
 
-    closeBlobEditor(false);
+    closeBlobEditor(true);
 
     wxBusyCursor cr;
     ScrollAtEnd sae(styled_text_ctrl_stats);

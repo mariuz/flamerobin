@@ -94,7 +94,7 @@ public:
     void initialFetch(bool readonly);
     bool isNullCell(int row, int col);
     bool isNumericColumn(int col);
-    bool isReadonlyColumn(int col);
+    bool isReadonlyColumn(int col, bool inGrid);
     bool isBlobColumn(int col, bool* pIsTextual = 0);
     bool needsMoreRowsFetched();
     void setFetchAllRecords(bool fetchall);
@@ -120,6 +120,7 @@ public:
     IBPP::Blob* getBlob(unsigned row, unsigned col, bool validateBlob);
     DataGridRowsBlob setBlobPrepare(unsigned row, unsigned col);
     void setBlob(DataGridRowsBlob &b);
+    void setValueToNull(int row, int col);
     // BLOBs can be huge, so we don't use SetValue for that
     void importBlobFile(const wxString& filename, int row, int col,
         ProgressIndicator *pi = 0);

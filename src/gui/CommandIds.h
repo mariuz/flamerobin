@@ -60,6 +60,7 @@ namespace Cmds
         // SQL Data grid
         DataGrid_Insert_row,
         DataGrid_Delete_row,
+        DataGrid_SetFieldToNULL,
         DataGrid_FetchAll,
         DataGrid_CancelFetchAll,
 

@@ -1194,7 +1194,7 @@ BlobColumnDef::BlobColumnDef(const wxString& name, bool readOnly,
     : ResultsetColumnDef(name, readOnly, nullable), indexM(blobIndex),
       textualM(textual), stringIndexM(stringIndex)
 {
-    readOnlyM = true;   // TODO: uncomment this when we make BlobDialog
+    //readOnlyM = true;   // TODO: uncomment this when we make BlobDialog
 }
 //-----------------------------------------------------------------------------
 void BlobColumnDef::reset(DataGridRowBuffer* buffer)
@@ -1799,11 +1799,15 @@ bool DataGridRows::isColumnNumeric(unsigned col)
     return columnDefsM[col]->isNumeric();
 }
 //-----------------------------------------------------------------------------
-bool DataGridRows::isColumnReadonly(unsigned col)
+bool DataGridRows::isColumnReadonly(unsigned col, bool inGrid)
 {
     if (col >= columnDefsM.size())
         return false;
-    return columnDefsM[col]->isReadOnly();
+    // amaier: BLOB columns in grid are always readonly 
+    bool res = columnDefsM[col]->isReadOnly();
+    if (inGrid)
+        res = res || isBlobColumn(col,0);
+    return res;
 }
 //-----------------------------------------------------------------------------
 bool DataGridRows::getFieldInfo(unsigned row, unsigned col,
@@ -1814,7 +1818,7 @@ bool DataGridRows::getFieldInfo(unsigned row, unsigned col,
     info.rowInserted = buffersM[row]->isInserted();
     info.rowDeleted = buffersM[row]->isDeleted();
     info.fieldReadOnly = readOnlyM || info.rowDeleted
-        || isColumnReadonly(col) || isFieldReadonly(row, col);
+        || isColumnReadonly(col,true) || isFieldReadonly(row, col);
     info.fieldModified = !info.rowDeleted
         && buffersM[row]->isFieldModified(col);
     info.fieldNull = buffersM[row]->isFieldNull(col);
@@ -1984,20 +1988,23 @@ DataGridRowsBlob DataGridRows::setBlobPrepare(unsigned row, unsigned col)
         throw FRError(_("Blob table not found."));
 
     DataGridRowsBlob b;
-    b.row  = row;
-    b.col  = col;
-    b.st   = addWhere((*it).second, stm, tn, buffersM[row]);
+    b.row = row;
+    b.col = col;
+    b.st = addWhere((*it).second, stm, tn, buffersM[row]);
     b.blob = IBPP::BlobFactory(b.st->DatabasePtr(), b.st->TransactionPtr());
     return b;
 }
 //-----------------------------------------------------------------------------
 void DataGridRows::setBlob(DataGridRowsBlob &b)
 {
-    b.st->Set(1, b.blob);
-    b.st->Execute();  // we execute before updating internal storage
-
+    if (b.blob != 0) // b.blob is 0 if the blob is null
+    {   
+        b.st->Set(1, b.blob);
+        b.st->Execute();  // we execute before updating internal storage
+    }
+    
     buffersM[b.row]->setBlob(columnDefsM[b.col]->getIndex(), b.blob);
-    buffersM[b.row]->setFieldNull(b.col, false);
+    buffersM[b.row]->setFieldNull(b.col, (b.blob == 0));
     buffersM[b.row]->setFieldNA(b.col, false);
     BlobColumnDef *bcd = dynamic_cast<BlobColumnDef *>(columnDefsM[b.col]);
     if (!bcd)
