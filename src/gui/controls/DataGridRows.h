@@ -113,6 +113,7 @@ public:
     wxString getRowFieldName(unsigned col);
     bool initialize(const IBPP::Statement& statement);
 
+    bool isColumnNullable(unsigned col);
     bool isColumnNumeric(unsigned col);
     bool isColumnReadonly(unsigned col, bool inGrid);
     bool isBlobColumn(unsigned col, bool* pIsTextual = 0);

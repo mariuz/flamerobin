@@ -1132,7 +1132,7 @@ void ExecuteSqlFrame::OnSqlEditChanged(wxStyledTextEvent& WXUNUSED(event))
     do
     {
         SqlTokenType stt = tk.getCurrentToken();
-        for (int i=0; i<sizeof(lookfor)/sizeof(SqlTokenType); i++)
+        for (unsigned int i=0; i<sizeof(lookfor)/sizeof(SqlTokenType); i++)
         {
             if (lookfor[i] == stt)
             {
@@ -1773,7 +1773,7 @@ void ExecuteSqlFrame::OnMenuGridDeleteRow(wxCommandEvent& WXUNUSED(event))
     // grid_data->EndBatch();   // see comment for BeginBatch above
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& event)
+void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
 {
     DataGridTable* dgt = grid_data->getDataGridTable();
     if (!dgt)
@@ -1794,12 +1794,50 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& event)
         if (!agreed)
             return;
     }
-
+    
+    // check, if a selected column is readonly
+    // -> perpare - get distinct list of columns 
+    std::set<int> colsReadonly;
+    for (int i = 0; i < count; i++)
+        colsReadonly.insert(cells[i].GetCol());
+    // -> remove all fiels that are nullable and not readonly
+    std::set<int>::iterator col;
+    for (col = colsReadonly.begin(); col != colsReadonly.end(); col++)
+    {
+        if ((!dgt->isReadonlyColumn(*col, false) &&
+            (dgt->isNullableColumn(*col))))
+            colsReadonly.erase(col);
+    }
+    // generate a string for message with columnnames
+    wxString colNames = wxEmptyString;
+    for (col = colsReadonly.begin(); col != colsReadonly.end(); col++)
+    {
+        if (colNames != wxEmptyString)
+            colNames += wxT(", ");
+        colNames += dgt->GetColLabelValue(*col);
+    }
+    // -> if colNames != "" the user has readonly columns selected
+    // -> we will inform him
+    if (colNames != wxEmptyString)
+    {
+        showQuestionDialog(this,
+            _("You have readonly or not nullable fields selected!"),
+            wxString::Format(_("The following fields are readonly "\
+                               "or not not nullable:\n%s\n\n"\
+                               "They can not set to NULL!"), colNames.c_str()),
+            AdvancedMessageDialogButtonsOk());
+    }
+    
     // set fields to NULL
     for (int i = 0; i < count; i++) 
     {
         int row = cells[i].GetRow();
         int col = cells[i].GetCol();
+        
+        // do not set to null if field is not nullable or readonly
+        if (colsReadonly.find(col) != colsReadonly.end())
+            continue;
+        
         dgt->setValueToNull(row, col);
     
         // if visible, update BLOB editor
@@ -1886,7 +1924,7 @@ void ExecuteSqlFrame::OnMenuUpdateGridCanSetFieldToNULL(wxUpdateUIEvent& event)
     
         // if one column in the selected area can be set to null 
         // (no readonly) then the item will be enabled
-        for (int i = 0; i < cols.size(); i++)
+        for (unsigned int i = 0; i < cols.size(); i++)
         {
             can = can || !grid_data->getDataGridTable()->isReadonlyColumn(cols[i],false);
         }

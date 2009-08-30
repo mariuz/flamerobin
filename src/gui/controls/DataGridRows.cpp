@@ -1199,7 +1199,7 @@ BlobColumnDef::BlobColumnDef(const wxString& name, bool readOnly,
 //-----------------------------------------------------------------------------
 void BlobColumnDef::reset(DataGridRowBuffer* buffer)
 {
-    buffer->setString(stringIndexM, wxEmptyString);
+    buffer->setStringLoaded(stringIndexM, false);
 }
 //-----------------------------------------------------------------------------
 unsigned BlobColumnDef::getIndex()
@@ -1215,15 +1215,18 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
     if (!textualM && !config().get(wxT("GridShowBinaryBlobs"), false))
         return wxT("[BINARY]");
 
+    if (buffer->isStringLoaded(stringIndexM))
+    {
+        wxString s = buffer->getString(stringIndexM);
+        return s;
+    }
+
     int kb = 1024 * config().get(wxT("DataGridFetchBlobAmount"), 1);
     std::string result;
     IBPP::Blob *b0 = buffer->getBlob(indexM);
     if (!b0)
         return wxT("");
     IBPP::Blob b = *b0;
-    wxString s = buffer->getString(stringIndexM);   // already loaded?
-    if (!s.IsEmpty())
-        return s;
     b->Open();      
 
     while (kb > 0)
@@ -1792,6 +1795,13 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
     return true;
 }
 //-----------------------------------------------------------------------------
+bool DataGridRows::isColumnNullable(unsigned col)
+{
+    if (col >= columnDefsM.size())
+        return false;
+    return columnDefsM[col]->isNullable();
+}
+//-----------------------------------------------------------------------------
 bool DataGridRows::isColumnNumeric(unsigned col)
 {
     if (col >= columnDefsM.size())
@@ -1818,7 +1828,7 @@ bool DataGridRows::getFieldInfo(unsigned row, unsigned col,
     info.rowInserted = buffersM[row]->isInserted();
     info.rowDeleted = buffersM[row]->isDeleted();
     info.fieldReadOnly = readOnlyM || info.rowDeleted
-        || isColumnReadonly(col,true) || isFieldReadonly(row, col);
+        || isColumnReadonly(col, true) || isFieldReadonly(row, col);
     info.fieldModified = !info.rowDeleted
         && buffersM[row]->isFieldModified(col);
     info.fieldNull = buffersM[row]->isFieldNull(col);

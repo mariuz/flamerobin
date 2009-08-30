@@ -215,7 +215,7 @@ private:
     void OnMenuUpdateGridInsertRow(wxUpdateUIEvent& event);
     void OnMenuGridDeleteRow(wxCommandEvent& event);
     void OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event);
-    void OnMenuGridSetFieldToNULL(wxCommandEvent& event);
+    void OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event));
     void OnMenuGridEditBlob(wxCommandEvent& event);
     void OnMenuGridImportBlob(wxCommandEvent& event);
     void OnMenuGridExportBlob(wxCommandEvent& event);

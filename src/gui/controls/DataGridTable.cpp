@@ -512,6 +512,11 @@ bool DataGridTable::IsEmptyCell(int row, int col)
     return !isValidCellPos(row, col);
 }
 //-----------------------------------------------------------------------------
+bool DataGridTable::isNullableColumn(int col)
+{
+    return rowsM.isColumnNullable(col);
+}
+//-----------------------------------------------------------------------------
 bool DataGridTable::isNullCell(int row, int col)
 {
     return rowsM.isFieldNull(row, col);

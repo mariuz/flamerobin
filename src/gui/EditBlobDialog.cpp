@@ -83,15 +83,24 @@ void EditBlobDialogSTC::OnKeyDown(wxKeyEvent& event)
         setIsNull(true);
         return;
     }
-    if (kc == WXK_DELETE) 
+    if ((kc == WXK_DELETE) || 
+        (kc == WXK_RETURN) ||
+        (kc == WXK_BACK) ||
+        (kc == WXK_TAB)) 
         setIsNull(false);
+       
     event.Skip();
 }
 //-----------------------------------------------------------------------------
 void EditBlobDialogSTC::OnChar(wxKeyEvent& event)
 {
-    if (!GetReadOnly())
-        setIsNull(false);
+    if (GetReadOnly())
+    {
+        event.Skip();
+        return;
+    }
+
+    setIsNull(false);
     event.Skip();
 }
 //-----------------------------------------------------------------------------
@@ -115,16 +124,16 @@ void EditBlobDialogSTC::setIsNull(bool isNull)
     isNullM = isNull;
 }
 //-----------------------------------------------------------------------------
-void EditBlobDialogSTC::SetText(const wxString& text)
-{
-    setIsNull(false);
-    wxStyledTextCtrl::SetText(text);
-}
-//-----------------------------------------------------------------------------
 void EditBlobDialogSTC::ClearAll()
 {
     setIsNull(false);
     wxStyledTextCtrl::ClearAll();
+}
+//-----------------------------------------------------------------------------
+void EditBlobDialogSTC::SetText(const wxString& text)
+{
+    setIsNull(false);
+    wxStyledTextCtrl::SetText(text);
 }
 //-----------------------------------------------------------------------------
 //! event handling
@@ -217,7 +226,7 @@ void EditBlobDialog::notebookAddPageById(int pageId)
 //-----------------------------------------------------------------------------
 int EditBlobDialog::notebookGetPageIndexById(int pageId)
 {
-    for (int i = 0; i < notebook->GetPageCount(); i++)
+    for (unsigned int i = 0; i < notebook->GetPageCount(); i++)
         if (notebook->GetPage(i)->GetId() == pageId)
             return i;
     return -1;
@@ -331,7 +340,7 @@ bool EditBlobDialog::loadBlob()
         notebookRemovePageById(noData);
         notebookSelectPageById(editorModeM);
 
-        dataSetModified(false);
+        dataSetModified(false, editorModeM);
         button_reset->SetLabel(_("&Reset"));
         button_reset->Disable();
     }
@@ -352,7 +361,8 @@ bool EditBlobDialog::loadBlob()
         // needed to center blob_noDataText
         blob_noData->GetSizer()->Layout();
 
-        dataSetModified(false);
+        editorModeM = noData;
+        dataSetModified(false, editorModeM);
         if (isBlob)
         {
             button_reset->SetLabel(_("&Load"));
@@ -381,7 +391,7 @@ bool EditBlobDialog::loadFromStreamAsText(wxInputStream& stream, bool isNull, co
         blob_text->setIsNull(true);
         blob_text->SetReadOnly(readonlyM);
         loadingM = false;
-        dataSetModified(false);
+        dataSetModified(false, text);
         return true;
     }
 
@@ -434,7 +444,7 @@ bool EditBlobDialog::loadFromStreamAsText(wxInputStream& stream, bool isNull, co
     
     // enable OnDataModified event
     loadingM = false; 
-    dataSetModified(false);
+    dataSetModified(false, text);
     
     return !pd.isCanceled();
 }
@@ -448,7 +458,7 @@ bool EditBlobDialog::loadFromStreamAsBinary(wxInputStream& stream, bool isNull, 
         blob_binary->setIsNull(true);
         blob_binary->SetReadOnly(true);
         loadingM = false;
-        dataSetModified(false);
+        dataSetModified(false, binary);
         return true;
     }
     
@@ -511,7 +521,7 @@ bool EditBlobDialog::loadFromStreamAsBinary(wxInputStream& stream, bool isNull, 
     
     // enable OnDataModified event
     loadingM = false; 
-    dataSetModified(false);
+    dataSetModified(false, binary);
 
     return !pd.isCanceled();
 }
@@ -765,7 +775,7 @@ void EditBlobDialog::saveBlob()
 
     cacheDelete();
     
-    dataSetModified(false);
+    dataSetModified(false, editorModeM);
     dataUpdateGUI();
 }
 //-----------------------------------------------------------------------------
@@ -871,11 +881,11 @@ void EditBlobDialog::OnNotebookPageChanged(wxNotebookEvent& event)
     editorModeM = newEditorMode;
 }
 //-----------------------------------------------------------------------------
-void EditBlobDialog::OnDataModified(wxStyledTextEvent& event)
+void EditBlobDialog::OnDataModified(wxStyledTextEvent& WXUNUSED(event))
 {
     if (loadingM)
         return;
-    dataSetModified(true);
+    dataSetModified(true, editorModeM);
 }
 //-----------------------------------------------------------------------------
 void EditBlobDialog::dataUpdateGUI()
@@ -898,7 +908,7 @@ void EditBlobDialog::dataUpdateGUI()
     button_save->Enable(canSave);
 }
 //-----------------------------------------------------------------------------
-void EditBlobDialog::dataSetModified(bool value)
+void EditBlobDialog::dataSetModified(bool value, EditorMode editorMode)
 {
     if (dataModifiedM == value)
         return;
@@ -906,7 +916,7 @@ void EditBlobDialog::dataSetModified(bool value)
     // if the data is modified all other allready loaded data 
     // (binary,text,http,image,...) gets invalid
     dataValidM.clear();
-    dataValidM.insert(editorModeM);
+    dataValidM.insert(editorMode);
 
     dataUpdateGUI();
 }

@@ -49,12 +49,15 @@ DataGridRowBuffer::DataGridRowBuffer(unsigned fieldCount)
     isDeletableM = 0;
     // initialize with field count, all fields initially NULL
     // there's no need to preallocate the uint8 buffer or string array
-    nullFieldsM.resize(fieldCount, true);
+    DataGridRowBufferFieldAttr initValue;
+    initValue.isStringLoaded = false;
+    initValue.isNull = true;
+    fieldAttrM.resize(fieldCount, initValue);
 }
 //-----------------------------------------------------------------------------
 DataGridRowBuffer::DataGridRowBuffer(const DataGridRowBuffer* other)
 {
-    nullFieldsM = other->nullFieldsM;
+    fieldAttrM = other->fieldAttrM;
     dataM = other->dataM;
     stringsM = other->stringsM;
     blobsM = other->blobsM;
@@ -133,14 +136,28 @@ void DataGridRowBuffer::setFieldNA(unsigned /* num */, bool /* isNA */)
 //-----------------------------------------------------------------------------
 bool DataGridRowBuffer::isFieldNull(unsigned num)
 {
-    return (num < nullFieldsM.size() && nullFieldsM[num]);
+    return (num < fieldAttrM.size() && fieldAttrM[num].isNull);
 }
 //-----------------------------------------------------------------------------
 void DataGridRowBuffer::setFieldNull(unsigned num, bool isNull)
 {
-    if (num < nullFieldsM.size())
+    if (num < fieldAttrM.size())
     {
-        nullFieldsM[num] = isNull;
+        fieldAttrM[num].isNull = isNull;
+        invalidateIsDeletable();
+    }
+}
+//-----------------------------------------------------------------------------
+bool DataGridRowBuffer::isStringLoaded(unsigned num)
+{
+    return (num < fieldAttrM.size() && fieldAttrM[num].isStringLoaded);
+}
+//-----------------------------------------------------------------------------
+void DataGridRowBuffer::setStringLoaded(unsigned num, bool isLoaded)
+{
+    if (num < fieldAttrM.size())
+    {
+        fieldAttrM[num].isStringLoaded = isLoaded;
         invalidateIsDeletable();
     }
 }
@@ -150,6 +167,7 @@ void DataGridRowBuffer::setString(unsigned num, const wxString& value)
     if (num >= stringsM.size())
         stringsM.resize(num + 1, wxEmptyString);
     stringsM[num] = value;
+    fieldAttrM[num].isStringLoaded = true;
     invalidateIsDeletable();
 }
 //-----------------------------------------------------------------------------

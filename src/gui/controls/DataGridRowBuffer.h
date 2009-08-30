@@ -30,6 +30,18 @@
 
 #include "ibpp/ibpp.h"
 //-----------------------------------------------------------------------------
+struct DataGridRowBufferFieldAttr
+// use bits instead of bool here to save memory
+{
+    // Field is null or not
+    int isNull:1; // accesed by indexM
+    // The buffer (stringsM) is loaded or not 
+    // ATT: isStringLoaded is used with stringsM (see below)
+    //      the size of stringsM can be less than fieldCount.
+    //      It is accesed by stringIndexM.
+    int isStringLoaded:1;  // accessed by stringIndexM !!
+};
+//-----------------------------------------------------------------------------
 // DataGridRowBuffer class
 class DataGridRowBuffer
 {
@@ -40,7 +52,7 @@ private:
     int isDeletableIsSetM:1;
     int isDeletableM:1;
 protected:
-    std::vector<bool> nullFieldsM;
+    std::vector<DataGridRowBufferFieldAttr> fieldAttrM;
     std::vector<uint8_t> dataM;
     std::vector<wxString> stringsM;
     std::vector<IBPP::Blob> blobsM;
@@ -62,6 +74,8 @@ public:
     void setFieldNull(unsigned num, bool isNull);
     virtual bool isFieldNA(unsigned num);
     virtual void setFieldNA(unsigned num, bool isNA);
+    bool isStringLoaded(unsigned num);
+    void setStringLoaded(unsigned num, bool isLoaded);
     void setString(unsigned num, const wxString& value);
     void setBlob(unsigned num, IBPP::Blob b);
     void setValue(unsigned offset, double value);

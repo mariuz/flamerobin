@@ -55,8 +55,8 @@ public:
     void ClearAll();
     void SetText(const wxString& text);
 protected:
-    void OnKeyDown(wxKeyEvent& event);
     void OnChar(wxKeyEvent& event);
+    void OnKeyDown(wxKeyEvent& event);
 
     DECLARE_EVENT_TABLE()
 private:
@@ -122,7 +122,7 @@ private:
 
     // cache/data-functions
     void cacheDelete();
-    void dataSetModified(bool value);
+    void dataSetModified(bool value, EditorMode editorMode);
     void dataUpdateGUI();
     // notebook-functions
     void notebookAddPageById(int pageId);
@@ -146,7 +146,7 @@ private:
     void blob_textSetReadonly(bool readonly);
     
     // Events
-    void OnDataModified(wxStyledTextEvent& event);
+    void OnDataModified(wxStyledTextEvent& WXUNUSED(event));
     void OnNotebookPageChanged(wxNotebookEvent& WXUNUSED(event));
     void OnClose(wxCloseEvent& event);
     void OnResetButtonClick(wxCommandEvent& WXUNUSED(event));

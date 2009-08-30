@@ -92,6 +92,7 @@ public:
     Database *getDatabase();
 
     void initialFetch(bool readonly);
+    bool isNullableColumn(int col);
     bool isNullCell(int row, int col);
     bool isNumericColumn(int col);
     bool isReadonlyColumn(int col, bool inGrid);
