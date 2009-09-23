@@ -1790,7 +1790,7 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
         bool agreed = wxOK == showQuestionDialog(this,
             _("Do you really want to set multiple rows to NULL?"),
             wxString::Format(_("You have more than one row selected. Are you sure you wish to set all %d selected rows to NULL?"), count),
-            AdvancedMessageDialogButtonsOkCancel(_("NULL")));
+            AdvancedMessageDialogButtonsOkCancel(_("Set to NULL")));
         if (!agreed)
             return;
     }
@@ -1821,10 +1821,8 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
     if (colNames != wxEmptyString)
     {
         showQuestionDialog(this,
-            _("You have readonly or not nullable fields selected!"),
-            wxString::Format(_("The following fields are readonly "\
-                               "or not not nullable:\n%s\n\n"\
-                               "They can not set to NULL!"), colNames.c_str()),
+            _("You have read-only or not nullable fields selected!"),
+            wxString::Format(_("The following fields are read-only or not nullable:\n%s\n\nThey can not be set to NULL!"), colNames.c_str()),
             AdvancedMessageDialogButtonsOk());
     }
     
