@@ -110,6 +110,7 @@ protected:
     wxButton *button_replace;
     wxButton *button_replace_all;
     wxButton *button_replace_in_selection;
+    wxButton *button_close;
 
 public:
     enum { ID_button_replace_in_selection = 101 };

@@ -301,33 +301,37 @@ FindDialog::FindDialog(SearchableEditor *editor, wxWindow* parent, const wxStrin
     if (allowedFlags)
         flags = *allowedFlags;    // copy settings
 
-    label_find = new wxStaticText(getControlsPanel(), -1, _("Find:"));
+    label_find = new wxStaticText(getControlsPanel(), -1, _("Fi&nd:"));
     text_ctrl_find = new wxTextCtrl(getControlsPanel(), -1);
-    label_replace = new wxStaticText(getControlsPanel(), -1, _("Replace with:"));
+    label_replace = new wxStaticText(getControlsPanel(), -1, _("Re&place with:"));
     text_ctrl_replace = new wxTextCtrl(getControlsPanel(), -1);
 
     checkbox_wholeword = checkbox_matchcase = checkbox_regexp = checkbox_convertbs = checkbox_wrap = checkbox_fromtop = 0;
     if (flags.has(se::WHOLE_WORD))
-        checkbox_wholeword = new wxCheckBox(getControlsPanel(), -1, _("Whole word only"));
+        checkbox_wholeword = new wxCheckBox(getControlsPanel(), -1, _("Whole &word only"));
     if (flags.has(se::MATCH_CASE))
-        checkbox_matchcase = new wxCheckBox(getControlsPanel(), -1, _("Match case"));
+        checkbox_matchcase = new wxCheckBox(getControlsPanel(), -1, _("&Match case"));
     if (flags.has(se::REGULAR_EXPRESSION))
-        checkbox_regexp    = new wxCheckBox(getControlsPanel(), -1, _("Regular expression"));
+        checkbox_regexp    = new wxCheckBox(getControlsPanel(), -1, _("Regular e&xpression"));
     if (flags.has(se::CONVERT_BACKSLASH))
-        checkbox_convertbs = new wxCheckBox(getControlsPanel(), -1, _("Convert backslashes"));
+        checkbox_convertbs = new wxCheckBox(getControlsPanel(), -1, _("Convert &backslashes"));
     if (flags.has(se::WRAP))
-        checkbox_wrap      = new wxCheckBox(getControlsPanel(), -1, _("Wrap around"));
+        checkbox_wrap      = new wxCheckBox(getControlsPanel(), -1, _("Wrap ar&ound"));
     if (flags.has(se::FROM_TOP))
-        checkbox_fromtop   = new wxCheckBox(getControlsPanel(), -1, _("Start search from top"));
+        checkbox_fromtop   = new wxCheckBox(getControlsPanel(), -1, _("Start search from &top"));
 
-    button_find = new wxButton(getControlsPanel(), wxID_FIND, _("Find"));
-    button_replace = new wxButton(getControlsPanel(), wxID_REPLACE, _("Replace"));
-    button_replace_all = new wxButton(getControlsPanel(), wxID_REPLACE_ALL, _("Replace all"));
-    button_replace_in_selection = new wxButton(getControlsPanel(), ID_button_replace_in_selection, _("In selection"));
+    button_find = new wxButton(getControlsPanel(), wxID_FIND, _("&Find"));
+    button_replace = new wxButton(getControlsPanel(), wxID_REPLACE,
+        _("&Replace"));
+    button_replace_all = new wxButton(getControlsPanel(), wxID_REPLACE_ALL,
+        _("Replace &all"));
+    button_replace_in_selection = new wxButton(getControlsPanel(),
+        ID_button_replace_in_selection, _("In &selection"));
+    button_close = new wxButton(getControlsPanel(), wxID_CANCEL, _("&Close"));
 
     do_layout();
-    text_ctrl_find->SetFocus();
     button_find->SetDefault();
+    text_ctrl_find->SetFocus();
 }
 //-----------------------------------------------------------------------------
 void FindDialog::do_layout()
@@ -367,6 +371,8 @@ void FindDialog::do_layout()
     sizerButtons->Add(button_replace_all);
     sizerButtons->Add(styleguide().getBetweenButtonsMargin(wxHORIZONTAL), 0);
     sizerButtons->Add(button_replace_in_selection);
+    sizerButtons->Add(styleguide().getBetweenButtonsMargin(wxHORIZONTAL), 0);
+    sizerButtons->Add(button_close);
 
     wxBoxSizer* sizerControls = new wxBoxSizer(wxVERTICAL);
     sizerControls->Add(sizerEdits, 1, wxEXPAND);
