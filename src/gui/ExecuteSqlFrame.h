@@ -143,7 +143,7 @@ private:
     enum {
         TIMER_ID_UPDATE_BLOB = 1
     };
-    wxTimer* timerBlobEditorM;
+    wxTimer timerBlobEditorM;
     // blob-editor dialog
     EditBlobDialog* editBlobDlgM;
     // blob-editor event

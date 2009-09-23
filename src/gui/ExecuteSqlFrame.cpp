@@ -508,7 +508,8 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
         wxString title,
         Database *db, const wxPoint& pos, const wxSize& size, long style)
     : BaseFrame(wxTheApp->GetTopWindow(), id, title, pos, size, style),
-        Observer(), databaseM(db)
+        Observer(), databaseM(db),
+        timerBlobEditorM(this, TIMER_ID_UPDATE_BLOB)
 {
     loadingM = true;
     updateEditorCaretPosM = true;
@@ -544,8 +545,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
 
     statusbar_1 = CreateStatusBar(4);
     SetStatusBarPane(-1);
-    
-    timerBlobEditorM = new wxTimer(this, TIMER_ID_UPDATE_BLOB);
+
     editBlobDlgM = 0;
 
     set_properties();
@@ -2625,9 +2625,9 @@ void ExecuteSqlFrame::OnGridCellChange(wxGridEvent& event)
     // - the blob-dialog is created and visible AND
     // - a different col/row is selected
     if ((editBlobDlgM) && (editBlobDlgM->IsShown()) &&
-        ((event.GetCol() != grid_data->GetGridCursorCol()) || 
-         (event.GetRow() != grid_data->GetGridCursorRow()))) 
-        timerBlobEditorM->Start(500,true);
+        ((event.GetCol() != grid_data->GetGridCursorCol()) ||
+         (event.GetRow() != grid_data->GetGridCursorRow())))
+        timerBlobEditorM.Start(500, true);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent& event)
