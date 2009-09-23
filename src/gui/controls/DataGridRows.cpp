@@ -1374,7 +1374,7 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
         wxString val(std2wx(value, converter));
         size_t trimLen = val.Strip().Length();
         if (val.Length() > size_t(charSizeM))
-            val.Truncate(trimLen > charSizeM ? trimLen : charSizeM);
+            val.Truncate(trimLen > size_t(charSizeM) ? trimLen : charSizeM);
         buffer->setString(indexM, val);
     }
 }
