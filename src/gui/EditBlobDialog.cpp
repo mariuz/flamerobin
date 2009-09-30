@@ -510,12 +510,29 @@ bool EditBlobDialog::loadFromStreamAsBinary(wxInputStream& stream, bool isNull, 
         if (col > 0)
             blob_binary->AddText(txtLine);
     }
-    // Set textstyling
-    blob_binary->StartStyling(0, 0xff);
-    for (int i = 0;i < blob_binary->GetLineCount();i++)
+
+    // Prepare text styling data
+    const int Columns = 4;
+    const int BytesPerColumn = 8;
+    const int CharsPerColumn = 2 * BytesPerColumn;
+    // a space after each column, and one additional byte for the end-of-line
+    const int CharsPerLine = Columns * (CharsPerColumn + 1) + 1;
+    std::vector<char> styleBytes(CharsPerLine, '\0');
+    for (int col1 = 0; col1 < Columns; ++col1)
     {
-        blob_binary->SetStyleBytes(69, (char*)"\0\0\1\1\0\0\1\1\0\0\1\1\0\0\1\1\0\0\0\1\1\0\0\1\1\0\0\1\1\0\0\1\1\0\0\0\1\1\0\0\1\1\0\0\1\1\0\0\1\1\0\0\0\1\1\0\0\1\1\0\0\1\1\0\0\1\1\0\0");
+        int colStart = col1 * (CharsPerColumn + 1);
+        for (int charInCol = 1; charInCol < BytesPerColumn; charInCol += 2)
+        {
+            // the two chars of every odd byte have different color
+            styleBytes[colStart + 2 * charInCol] = '\1';
+            styleBytes[colStart + 2 * charInCol + 1] = '\1';
+        }
     }
+
+    // Set text styling
+    blob_binary->StartStyling(0, 0xff);
+    for (int i = 0; i < blob_binary->GetLineCount(); i++)
+        blob_binary->SetStyleBytes(CharsPerLine, &styleBytes[0]);
     pd.Hide();
     blob_binary->SetReadOnly(true);
 
