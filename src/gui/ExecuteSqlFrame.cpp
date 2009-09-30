@@ -508,14 +508,15 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
         wxString title,
         Database *db, const wxPoint& pos, const wxSize& size, long style)
     : BaseFrame(wxTheApp->GetTopWindow(), id, title, pos, size, style),
-        Observer(), databaseM(db),
-        timerBlobEditorM(this, TIMER_ID_UPDATE_BLOB)
+        Observer(), databaseM(db)
 {
     loadingM = true;
     updateEditorCaretPosM = true;
 
     transactionIsolationLevelM = IBPP::ilConcurrency;
     transactionAccessModeM = IBPP::amWrite;
+
+    timerBlobEditorM.SetOwner(this, TIMER_ID_UPDATE_BLOB);
 
     CommandManager cm;
     buildToolbar(cm);
