@@ -730,12 +730,15 @@ bool EditBlobDialog::loadFromStreamAsBinary(wxInputStream& stream, bool isNull, 
 
     // disable OnDataModified event
     loadingM = true;
+
+    blob_binary->Freeze();
+
     // set the wxStyledTextControl to ReadOnly = false to modify the text
     blob_binary->SetReadOnly(false);
     blob_binary->ClearAll();
     int col  = 0;
     int line = 0;
-    wxString txtLine = wxT("");
+    wxString txtLine;
 
     while (!progress->isCanceled())
     {
@@ -757,8 +760,7 @@ bool EditBlobDialog::loadFromStreamAsBinary(wxInputStream& stream, bool isNull, 
                 txtLine += wxT(" ");
             if (col >= 32)
             {
-                blob_binary->AddText(txtLine);
-                blob_binary->AddText(wxT("\n"));
+                blob_binary->AddText(txtLine + wxT("\n"));
                 txtLine = wxT("");
                 col = 0;
                 line++;
@@ -796,6 +798,8 @@ bool EditBlobDialog::loadFromStreamAsBinary(wxInputStream& stream, bool isNull, 
         blob_binary->SetStyleBytes(CharsPerLine, &styleBytes[0]);
     progressEnd();
     blob_binary->SetReadOnly(true);
+
+    blob_binary->Thaw();
 
     // enable OnDataModified event
     loadingM = false;
