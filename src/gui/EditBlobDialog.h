@@ -28,43 +28,24 @@
 #ifndef FR_EDITBLOBDIALOG_H
 #define FR_EDITBLOBDIALOG_H
 
-#include <wx/image.h>
 #include <wx/mstream.h>
 #include <wx/notebook.h>
 #include <wx/stc/stc.h>
-#include <wx/stream.h>
 #include <wx/wx.h>
 
 #include <set>
 
-#include <ibpp.h>
-
-#include "controls/DataGridTable.h"
 #include "controls/DataGrid.h"
 #include "gui/BaseDialog.h"
+#include "gui/CommandManager.h"
+
 //-----------------------------------------------------------------------------
-// Helper Class of wxStyledTextCtrl to handle NULL values 
-class EditBlobDialogSTC : public wxStyledTextCtrl 
-{
-public:
-    EditBlobDialogSTC(wxWindow *parent, wxWindowID id=wxID_ANY);
-    
-    void setIsNull(bool isNull);
-    bool getIsNull() { return isNullM; }
-
-    void ClearAll();
-    void SetText(const wxString& text);
-protected:
-    void OnChar(wxKeyEvent& event);
-    void OnKeyDown(wxKeyEvent& event);
-
-    DECLARE_EVENT_TABLE()
-private:
-    bool isNullM;
-};
+class EditBlobDialogProgressSizer; // declared in cpp
+class EditBlobDialogSTCText; // declared in cpp
+class EditBlobDialogSTC;     // declared in cpp
 //-----------------------------------------------------------------------------
 // Main Class: EditBlobDialog
-class EditBlobDialog : public BaseDialog 
+class EditBlobDialog : public BaseDialog
 {
 public:
     EditBlobDialog(wxWindow* parent);
@@ -138,55 +119,42 @@ private:
     void saveBlob();
     // Saving (Blob/Stream)
     bool saveToStream(wxOutputStream& stream, bool* isNull, const wxString& progressTitle);
-    
-    void set_properties();
+
+    // initialization
+    void buildMenus(CommandManager& cm);
     void do_layout();
+    void set_properties();
+    
+    // progress
+    void progressBegin(const wxString& progressTitle, int maxPosition, bool canCancel);
+    void progressCancel();
+    void progressEnd();
     
     // misc
     void blob_textSetReadonly(bool readonly);
     
     // Events
-    void OnDataModified(wxStyledTextEvent& WXUNUSED(event));
-    void OnNotebookPageChanged(wxNotebookEvent& WXUNUSED(event));
     void OnClose(wxCloseEvent& event);
+    void OnDataModified(wxStyledTextEvent& WXUNUSED(event));
+    void OnMenuBLOBButtonClick(wxCommandEvent& WXUNUSED(event));
+    void OnMenuBLOBLoadFromFile(wxCommandEvent& WXUNUSED(event));
+    void OnMenuBLOBSaveToFile(wxCommandEvent& WXUNUSED(event));
+    void OnNotebookPageChanged(wxNotebookEvent& WXUNUSED(event));
+    void OnProgressCancel(wxCommandEvent& WXUNUSED(event));
     void OnResetButtonClick(wxCommandEvent& WXUNUSED(event));
     void OnSaveButtonClick(wxCommandEvent& WXUNUSED(event));
 protected:
     wxNotebook* notebook;
-    EditBlobDialogSTC* blob_text;
+    EditBlobDialogSTCText* blob_text;
     EditBlobDialogSTC* blob_binary;
-    wxStaticText* blob_noDataText;
     wxPanel* blob_noData;
+    wxStaticText* blob_noDataText;
+    EditBlobDialogProgressSizer* progress;
     wxButton* button_reset;
     wxButton* button_save;
+    wxButton* button_menu_blob;
+    wxMenu* menu_blob;
     DECLARE_EVENT_TABLE()
-};
-//-----------------------------------------------------------------------------
-// Helper-Class for streaming into blob / buffer
-class FRInputBlobStream : public wxInputStream
-{
-    public:
-        FRInputBlobStream(IBPP::Blob blob);
-        virtual ~FRInputBlobStream();
-        virtual size_t GetSize() const;
-    protected:
-        virtual size_t OnSysRead(void *buffer, size_t size);          
-    private:
-        IBPP::Blob blobM;
-        int sizeM;
-};
-//-----------------------------------------------------------------------------
-class FROutputBlobStream : public wxOutputStream
-{
-    public:
-        FROutputBlobStream(IBPP::Blob blob);
-        virtual ~FROutputBlobStream();
-        
-        virtual bool Close();
-    protected:
-        virtual size_t OnSysWrite(const void *buffer, size_t bufsize);
-    private:
-        IBPP::Blob blobM;
 };
 //-----------------------------------------------------------------------------
 #endif // FR_EDITBLOBDIALOG_H

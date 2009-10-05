@@ -100,6 +100,13 @@ namespace Cmds
         Menu_CreateDomain, Menu_CreateException, Menu_CreateFunction,
         Menu_CreateGenerator, Menu_CreateProcedure, Menu_CreateRole,
         Menu_CreateTable, Menu_CreateTrigger, Menu_CreateView,
+        
+        // blob editor
+        BlobEditor_ChangeLineBreak,
+        BlobEditor_Menu_BLOB,
+        BlobEditor_Menu_BLOBSaveToFile,
+        BlobEditor_Menu_BLOBLoadFromFile,
+        BlobEditor_ProgressCancel,
 
         // for easier copy/paste of above items (no need to mess with comma
         Last_menu
