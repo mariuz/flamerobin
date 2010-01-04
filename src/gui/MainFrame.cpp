@@ -311,7 +311,7 @@ void MainFrame::do_layout()
     searchPanelSizerM->Add(treeMainM, 1, wxEXPAND);
     searchPanelSizerM->Add(searchPanelM, 0, wxEXPAND);
     mainPanelM->SetSizer(searchPanelSizerM);
-    
+
     wxBoxSizer* sizerAll = new wxBoxSizer(wxVERTICAL);
     sizerAll->Add(mainPanelM, 1, wxEXPAND, 0);
     SetAutoLayout(true);

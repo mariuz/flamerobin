@@ -98,6 +98,8 @@ public:
     virtual void unlockSubject();
 
     void getDependencies(std::vector<Dependency>& list, bool ofObject);  // load from db
+    void getDependencies(std::vector<Dependency>& list, bool ofObject,
+        const wxString& field);  // load from db
 
     // will return 0 if not database is assigned
     Database* findDatabase() const;
@@ -170,6 +172,7 @@ public:
     void getFields(std::vector<wxString>& fields) const;
     void addField(const wxString& name);
     void setFields(const std::vector<wxString>& fields);
+    bool hasField(const wxString& name) const;
     bool operator== (const Dependency& other) const;
     bool operator!= (const Dependency& other) const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);

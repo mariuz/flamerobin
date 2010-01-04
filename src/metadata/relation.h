@@ -47,7 +47,8 @@ protected:
     void loadInfo();
 
     void getDependentChecks(std::vector<CheckConstraint>& checks);
-    void getDependentViews(std::vector<Relation*>& views);
+    void getDependentViews(std::vector<Relation*>& views,
+        const wxString& forColumn = wxT(""));
 
     MetadataCollection<Column> columnsM;
     std::vector<Privilege> privilegesM;
@@ -73,7 +74,7 @@ public:
     MetadataCollection<Column>::const_iterator begin() const;
     MetadataCollection<Column>::const_iterator end() const;
 
-    wxString getRebuildSql();
+    wxString getRebuildSql(const wxString& forColumn = wxT(""));
     std::vector<Privilege>* getPrivileges();
     bool getChildren(std::vector<MetadataItem *>& temp);
     void getTriggers(std::vector<Trigger *>& list,

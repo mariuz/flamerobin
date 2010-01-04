@@ -926,7 +926,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
 
     EVT_GRID_CMD_SELECT_CELL(ExecuteSqlFrame::ID_grid_data, ExecuteSqlFrame::OnGridCellChange)
     EVT_GRID_CMD_LABEL_LEFT_DCLICK(ExecuteSqlFrame::ID_grid_data, ExecuteSqlFrame::OnGridLabelLeftDClick)
-    
+
     EVT_TIMER(ExecuteSqlFrame::TIMER_ID_UPDATE_BLOB, ExecuteSqlFrame::OnBlobEditorUpdate)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
@@ -1607,9 +1607,9 @@ void ExecuteSqlFrame::closeBlobEditor(bool saveBlobValue)
     if ((editBlobDlgM) && (editBlobDlgM->IsShown()))
     {
         if (saveBlobValue)
-            editBlobDlgM->Close(); 
+            editBlobDlgM->Close();
         else
-            editBlobDlgM->closeDontSave(); 
+            editBlobDlgM->closeDontSave();
     }
 }
 //-----------------------------------------------------------------------------
@@ -1782,7 +1782,7 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
 
     // get selection into array (cells)
     wxGridCellCoordsArray cells = grid_data->getSelectedCells();
-    
+
     int count = cells.size();
     if (count == 0)
         return;
@@ -1795,9 +1795,9 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
         if (!agreed)
             return;
     }
-    
+
     // check, if a selected column is readonly
-    // -> perpare - get distinct list of columns 
+    // -> perpare - get distinct list of columns
     std::set<int> colsReadonly;
     for (int i = 0; i < count; i++)
         colsReadonly.insert(cells[i].GetCol());
@@ -1826,19 +1826,19 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
             wxString::Format(_("The following fields are read-only or not nullable:\n%s\n\nThey can not be set to NULL!"), colNames.c_str()),
             AdvancedMessageDialogButtonsOk());
     }
-    
+
     // set fields to NULL
-    for (int i = 0; i < count; i++) 
+    for (int i = 0; i < count; i++)
     {
         int row = cells[i].GetRow();
         int col = cells[i].GetCol();
-        
+
         // do not set to null if field is not nullable or readonly
         if (colsReadonly.find(col) != colsReadonly.end())
             continue;
-        
+
         dgt->setValueToNull(row, col);
-    
+
         // if visible, update BLOB editor
         if ( (editBlobDlgM) &&
              (editBlobDlgM->IsShown()) &&
@@ -1846,8 +1846,8 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
              (grid_data->GetCursorRow() == row) )
             editBlobDlgM->setBlob(grid_data, dgt, &statementM, row, col, false);
     }
-    
-    // update GUI    
+
+    // update GUI
     grid_data->ForceRefresh();
 }
 //-----------------------------------------------------------------------------
@@ -1903,14 +1903,14 @@ void ExecuteSqlFrame::OnMenuUpdateGridCancelFetchAll(wxUpdateUIEvent& event)
 void ExecuteSqlFrame::OnMenuUpdateGridCanSetFieldToNULL(wxUpdateUIEvent& event)
 {
     bool can = false;
-    if (grid_data->getDataGridTable()) 
+    if (grid_data->getDataGridTable())
     {
         // get selection into array (cells)
         wxGridCellCoordsArray cells = grid_data->getSelectedCells();
         //if (cells.size() == 0)
         //  cells.Add(wxGridCellCoords(grid_data->GetCursorColumn,grid_data->GetCursorRow));
         int count = cells.size();
-    
+
         // generate a distinct List of cols
         wxArrayInt cols;
         for (int i = 0; i < count; i++)
@@ -1920,8 +1920,8 @@ void ExecuteSqlFrame::OnMenuUpdateGridCanSetFieldToNULL(wxUpdateUIEvent& event)
             if (idx < 0)
                 cols.Add(col);
         }
-    
-        // if one column in the selected area can be set to null 
+
+        // if one column in the selected area can be set to null
         // (no readonly) then the item will be enabled
         for (unsigned int i = 0; i < cols.size(); i++)
         {
@@ -2543,7 +2543,7 @@ bool ExecuteSqlFrame::rollbackTransaction()
     }
 
     closeBlobEditor(false);
-    
+
     ScrollAtEnd sae(styled_text_ctrl_stats);
 
     try
@@ -2622,7 +2622,7 @@ void ExecuteSqlFrame::OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event)
 void ExecuteSqlFrame::OnGridCellChange(wxGridEvent& event)
 {
     event.Skip();
-    // Start timer-event (for updating the blob-value) only if 
+    // Start timer-event (for updating the blob-value) only if
     // - the blob-dialog is created and visible AND
     // - a different col/row is selected
     if ((editBlobDlgM) && (editBlobDlgM->IsShown()) &&
@@ -3139,16 +3139,28 @@ const AlterViewHandler AlterViewHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool AlterViewHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("alter_relation"))
+    if (uri.action != wxT("alter_relation")
+        && uri.action != wxT("alter_field"))
+    {
         return false;
+    }
 
-    Relation* r = (Relation*)getObject(uri);
+    Relation* r;
+    wxString column;
+    if (uri.action == wxT("alter_relation"))
+        r = (Relation*)getObject(uri);
+    else
+    {
+        Column *c = (Column*)getObject(uri);
+        r = c->getTable();
+        column = c->getName_();
+    }
     wxWindow* w = getWindow(uri);
     if (!r || !w)
         return true;
 
-    showSql(w->GetParent(), _("Altering view"), r->findDatabase(),
-        r->getRebuildSql());
+    showSql(w->GetParent(), _("Altering dependent objects"), r->findDatabase(),
+        r->getRebuildSql(column));
     return true;
 }
 //-----------------------------------------------------------------------------

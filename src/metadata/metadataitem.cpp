@@ -184,6 +184,16 @@ Root* MetadataItem::getRoot() const
     return dynamic_cast<Root*>(getParentObjectOfType(ntRoot));
 }
 //-----------------------------------------------------------------------------
+void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject,
+    const wxString& field)
+{
+    vector<Dependency> tmp;
+    getDependencies(tmp, ofObject);
+    for (vector<Dependency>::iterator it = tmp.begin(); it != tmp.end(); ++it)
+        if ((*it).hasField(field))
+            list.push_back(*it);
+}
+//-----------------------------------------------------------------------------
 //! ofObject = true   => returns list of objects this object depends on
 //! ofObject = false  => returns list of objects that depend on this object
 void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
@@ -713,6 +723,11 @@ void Dependency::addField(const wxString& name)
 void Dependency::setFields(const std::vector<wxString>& fields)
 {
     fieldsM = fields;
+}
+//-----------------------------------------------------------------------------
+bool Dependency::hasField(const wxString& name) const
+{
+    return fieldsM.end() != std::find(fieldsM.begin(), fieldsM.end(), name);
 }
 //-----------------------------------------------------------------------------
 bool Dependency::operator== (const Dependency& other) const

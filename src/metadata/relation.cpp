@@ -199,10 +199,14 @@ void Relation::loadColumns()
 }
 //-----------------------------------------------------------------------------
 //! holds all views + self (even if it's a table)
-void Relation::getDependentViews(std::vector<Relation *>& views)
+void Relation::getDependentViews(std::vector<Relation *>& views,
+    const wxString& forColumn)
 {
     std::vector<Dependency> list;
-    getDependencies(list, false);
+    if (forColumn.IsEmpty())
+        getDependencies(list, false);
+    else
+        getDependencies(list, false, forColumn);
     for (std::vector<Dependency>::iterator it = list.begin();
         it != list.end(); ++it)
     {
@@ -294,7 +298,7 @@ void Relation::getDependentChecks(std::vector<CheckConstraint>& checks)
 //       P.S. Whoever builds a computed column based on a view, and decides
 //            to reference it in other object, deserves the pleasure of
 //            building the "rebuild" script manually ;)
-wxString Relation::getRebuildSql()
+wxString Relation::getRebuildSql(const wxString& forColumn)
 {
     // 0. prepare stuff
     std::vector<Procedure *> procedures;
@@ -304,7 +308,7 @@ wxString Relation::getRebuildSql()
 
     // 1. build view list (dependency tree) - ordered by DROP
     std::vector<Relation *> viewList;
-    getDependentViews(viewList);
+    getDependentViews(viewList, forColumn);
 
     // 2. walk the tree and add stuff
     for (std::vector<Relation *>::iterator vi = viewList.begin();
@@ -316,13 +320,18 @@ wxString Relation::getRebuildSql()
             dropViews += wxT("DROP VIEW ") + v->getQuotedName() + wxT(";\n");
             createViews = v->getCreateSql() + wxT("\n") + createViews;
         }
+        else if (!forColumn.IsEmpty() && (*vi) != this)
+            continue;
         std::vector<Dependency> list;               // procedures
         std::vector<Trigger *> trigs;
         // the following two lines are maybe not needed as own triggers should
         // be listed as dependencies as well:
-        (*vi)->getTriggers(trigs, Trigger::afterTrigger);   // own triggers
-        (*vi)->getTriggers(trigs, Trigger::beforeTrigger);
-        (*vi)->getDependencies(list, false);
+        //(*vi)->getTriggers(trigs, Trigger::afterTrigger);   // own triggers
+        //(*vi)->getTriggers(trigs, Trigger::beforeTrigger);
+        if (v || forColumn.IsEmpty())
+            (*vi)->getDependencies(list, false);
+        else
+            (*vi)->getDependencies(list, false, forColumn);
         for (std::vector<Dependency>::iterator it = list.begin();
             it != list.end(); ++it)
         {
@@ -334,13 +343,9 @@ wxString Relation::getRebuildSql()
                 procedures.push_back(p);
             }
 
-            Trigger *t = dynamic_cast<Trigger *>(
-                (*it).getDependentObject());
-            if (t && trigs.end() == std::find(trigs.begin(), trigs.end(),
-                t))
-            {
+            Trigger *t = dynamic_cast<Trigger *>((*it).getDependentObject());
+            if (t && trigs.end() == std::find(trigs.begin(), trigs.end(), t))
                 trigs.push_back(t);
-            }
         }
         (*vi)->getDependentChecks(checks);
 
@@ -382,7 +387,14 @@ wxString Relation::getRebuildSql()
         // add own check constraints as well
         std::vector<CheckConstraint> *cc = t1->getCheckConstraints();
         if (cc)
-            checks.insert(checks.end(), cc->begin(), cc->end());
+        {
+            for (std::vector<CheckConstraint>::iterator ccc = cc->begin();
+                ccc != cc->end(); ++ccc)
+            {
+                if (forColumn.IsEmpty() || (*ccc).hasColumn(forColumn))
+                    checks.push_back(*ccc);
+            }
+        }
 
         // The following must be done in this order (and reverse for CREATE):
         // a) drop and create foreign keys that reference this table
@@ -403,7 +415,8 @@ wxString Relation::getRebuildSql()
                         i2 != fk->end(); ++i2)
                     {
                         if ((*i2).referencedTableM == getName_() &&
-                            t1 != (*i2).getTable())
+                            t1 != (*i2).getTable() && (
+                            forColumn.IsEmpty() || (*i2).hasColumn(forColumn)))
                         {
                             fkeys.insert(fkeys.end(), (*i2));
                         }
@@ -413,7 +426,7 @@ wxString Relation::getRebuildSql()
         }
         // b) drop own primary and unique keys
         PrimaryKeyConstraint* pk = t1->getPrimaryKey();
-        if (pk)
+        if (pk && (forColumn.IsEmpty() || pk->hasColumn(forColumn)))
         {
             pkDrop += wxT("ALTER TABLE ") + getQuotedName() +
                 wxT(" DROP CONSTRAINT ") + pk->getQuotedName() + wxT(";\n");
@@ -426,6 +439,8 @@ wxString Relation::getRebuildSql()
         {
             for (std::vector<UniqueConstraint>::iterator it = c->begin(); it != c->end(); ++it)
             {
+                if (!forColumn.IsEmpty() && !(*it).hasColumn(forColumn))
+                    continue;
                 pkDrop += wxT("ALTER TABLE ") + getQuotedName() +
                     wxT(" DROP CONSTRAINT ") + (*it).getQuotedName() + wxT(";\n");
                 CreateDDLVisitor cdv(0);
@@ -441,6 +456,8 @@ wxString Relation::getRebuildSql()
         for (std::vector<ForeignKey>::iterator i2 = fkeys.begin();
             i2 != fkeys.end(); ++i2)
         {
+            if (!forColumn.IsEmpty() && !(*i2).hasColumn(forColumn))
+                continue;
             fkDrop += wxT("ALTER TABLE ") +
                 (*i2).getTable()->getQuotedName() +
                 wxT(" DROP CONSTRAINT ") +
@@ -455,6 +472,8 @@ wxString Relation::getRebuildSql()
     for (std::vector<CheckConstraint>::iterator it = checks.begin();
         it != checks.end(); ++it)
     {
+        if (!forColumn.IsEmpty() && !(*it).hasColumn(forColumn))
+            continue;
         wxString cname = wxT("CONSTRAINT ") + (*it).getQuotedName();
         dropChecks += wxT("ALTER TABLE ") + (*it).getTable()->getQuotedName()
             + wxT(" DROP ") + cname + wxT(";\n");

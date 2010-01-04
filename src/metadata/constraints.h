@@ -51,6 +51,7 @@ public:
     wxString getColumnList() const;
     const_iterator begin() { return columnsM.begin(); };
     const_iterator end() { return columnsM.end(); };
+    bool hasColumn(const wxString& column) const;
 };
 //-----------------------------------------------------------------------------
 //! uniques
@@ -68,7 +69,7 @@ public:
 };
 //-----------------------------------------------------------------------------
 //! checks
-class CheckConstraint: public Constraint
+class CheckConstraint: public ColumnConstraint
 {
 public:
     wxString sourceM;

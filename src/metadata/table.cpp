@@ -212,28 +212,44 @@ void Table::loadCheckConstraints()
     SubjectLocker lock(this);
 
     IBPP::Statement& st1 = loader->getStatement(
-        "select r.rdb$constraint_name, t.rdb$trigger_source "
+        "select r.rdb$constraint_name, t.rdb$trigger_source, d.rdb$field_name "
         " from rdb$relation_constraints r "
         " join rdb$check_constraints c on r.rdb$constraint_name=c.rdb$constraint_name and r.rdb$constraint_type = 'CHECK'"
         " join rdb$triggers t on c.rdb$trigger_name=t.rdb$trigger_name and t.rdb$trigger_type = 1 "
-        " where r.rdb$relation_name=?"
+        " left join rdb$dependencies d on t.rdb$trigger_name = d.rdb$dependent_name "
+        "      and d.rdb$depended_on_name = r.rdb$relation_name "
+        "      and d.rdb$depended_on_type = 0 "
+        " where r.rdb$relation_name=? "
+        " order by 1 "
     );
 
     st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
+    CheckConstraint *cc = 0;
     while (st1->Fetch())
     {
         std::string s;
         st1->Get(1, s);
         wxString cname(std2wxIdentifier(s, d->getCharsetConverter()));
-        wxString source;
-        readBlob(st1, 2, source, d->getCharsetConverter());
+        if (!cc || cname != cc->getName_()) // new constraint
+        {
+            wxString source;
+            readBlob(st1, 2, source, d->getCharsetConverter());
 
-        CheckConstraint c;
-        c.setParent(this);
-        c.setName_(cname);
-        c.sourceM = source;
-        checkConstraintsM.push_back(c);
+            CheckConstraint c;
+            c.setParent(this);
+            c.setName_(cname);
+            c.sourceM = source;
+            checkConstraintsM.push_back(c);
+            cc = &checkConstraintsM.back();
+        }
+
+        if (!st1->IsNull(3))
+        {
+            st1->Get(3, s);
+            wxString fname(std2wxIdentifier(s, d->getCharsetConverter()));
+            cc->columnsM.push_back(fname);
+        }
     }
     checkConstraintsLoadedM = true;
 }

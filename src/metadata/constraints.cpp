@@ -67,6 +67,12 @@ wxString ColumnConstraint::getColumnList() const
     return result;
 };
 //-----------------------------------------------------------------------------
+bool ColumnConstraint::hasColumn(const wxString& column) const
+{
+    return columnsM.end() != std::find(columnsM.begin(), columnsM.end(),
+        column);
+}
+//-----------------------------------------------------------------------------
 wxString ForeignKey::getReferencedColumnList() const
 {
     wxString result;
