@@ -66,6 +66,7 @@ TriggerWizardDialog::TriggerWizardDialog(wxWindow* parent, MetadataItem *item):
     do_layout();
 
     SetIcon(wxArtProvider::GetIcon(ART_Trigger, wxART_FRAME_ICON));
+    text_ctrl_1->SetFocus();
 }
 //-----------------------------------------------------------------------------
 void TriggerWizardDialog::set_properties()
