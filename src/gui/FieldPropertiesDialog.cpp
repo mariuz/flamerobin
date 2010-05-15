@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -300,10 +300,7 @@ bool FieldPropertiesDialog::getIsNewDomainSelected()
 bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
     bool justCheck)
 {
-    wxString fNameSql(Identifier::userString(textctrl_fieldname->GetValue()));
-    Identifier ftemp;
-    ftemp.setFromSql(fNameSql);
-    wxString fName = ftemp.getQuoted();
+    wxString colNameSql(Identifier::userString(textctrl_fieldname->GetValue()));
     Identifier selDomain(choice_domain->GetStringSelection());
     bool newDomain = getIsNewDomainSelected();
     wxString selDatatype = choice_datatype->GetStringSelection();
@@ -327,10 +324,17 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
     if (columnM)
     {
         // field name changed ?
-        if (columnM->getQuotedName() != fName)
+        // compare regardless of active quoting rules, so that name
+        // will remain unchanged if edit field contents haven't changed
+        if (textctrl_fieldname->GetValue() == columnM->getName_())
+        {
+            // no changes -> use original name for all other statements
+            colNameSql = columnM->getQuotedName();
+        }
+        else
         {
             statements += alterTable + wxT("ALTER ") + columnM->getQuotedName()
-                + wxT(" TO ") + fNameSql + wxT(";\n\n");
+                + wxT(" TO ") + colNameSql + wxT(";\n\n");
         }
 
         // domain changed ?
@@ -343,13 +347,13 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
         }
         if (columnM->getSource() != selDomain.get() && !newDomain)
         {   // UDD -> other UDD  or  AGD -> UDD
-            statements += alterTable + wxT("ALTER ") + fNameSql +
+            statements += alterTable + wxT("ALTER ") + colNameSql +
                 wxT(" TYPE ") + selDomain.getQuoted() + wxT(";\n\n");
         }
         else if (newDomain
             || type != selDatatype || size != dtSize || scale != dtScale)
         {   // UDD -> AGD  or  AGD -> different AGD
-            statements += alterTable + wxT("ALTER ") + fNameSql +
+            statements += alterTable + wxT("ALTER ") + colNameSql +
                 wxT(" TYPE ");
             statements += selDatatype;
             if (!dtSize.IsEmpty())
@@ -383,7 +387,7 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
     else // create new field
     {
         wxString addCollate;
-        statements += alterTable + wxT("ADD \n") + fNameSql + wxT(" ");
+        statements += alterTable + wxT("ADD \n") + colNameSql + wxT(" ");
         if (newDomain)
         {
             statements += selDatatype;
@@ -423,8 +427,8 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
             _("Enter value for existing fields containing NULL"),
             _("Update Existing NULL Values"), wxT(""), this);
         wxString sqlAdd = wxT("UPDATE ") + tableM->getQuotedName()
-            + wxT(" \nSET ") + fNameSql + wxT(" = '") + s
-            + wxT("' \nWHERE ") + fNameSql + wxT(" IS NULL;\n");
+            + wxT(" \nSET ") + colNameSql + wxT(" = '") + s
+            + wxT("' \nWHERE ") + colNameSql + wxT(" IS NULL;\n");
         if (update_not_null == unnBefore)
             statements = sqlAdd + statements;
         else
