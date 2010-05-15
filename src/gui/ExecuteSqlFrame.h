@@ -114,6 +114,7 @@ private:
     IBPP::Transaction transactionM;
     IBPP::Statement statementM;
     IBPP::TIL transactionIsolationLevelM;
+	IBPP::TLR transactionLockResolutionM;
     IBPP::TAM transactionAccessModeM;
     void inTransaction(bool started);       // changes controls (enable/disable)
     bool commitTransaction();
@@ -208,6 +209,8 @@ private:
     void OnMenuUpdateWhenExecutePossible(wxUpdateUIEvent& event);
     void OnMenuTransactionIsolationLevel(wxCommandEvent& event);
     void OnMenuUpdateTransactionIsolationLevel(wxUpdateUIEvent& event);
+	void OnMenuTransactionLockResolution(wxCommandEvent& event);
+	void OnMenuUpdateTransactionLockResolution(wxUpdateUIEvent& event);
     void OnMenuTransactionReadOnly(wxCommandEvent& event);
     void OnMenuUpdateTransactionReadOnly(wxUpdateUIEvent& event);
 

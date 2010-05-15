@@ -514,6 +514,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     updateEditorCaretPosM = true;
 
     transactionIsolationLevelM = IBPP::ilConcurrency;
+	transactionLockResolutionM = IBPP::lrWait;
     transactionAccessModeM = IBPP::amWrite;
 
     timerBlobEditorM.SetOwner(this, TIMER_ID_UPDATE_BLOB);
@@ -710,6 +711,9 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
     stmtPropMenu->AppendRadioItem(Cmds::Query_TransactionConsistency,
         cm.getMainMenuItemText(_("Consistency isolation mode"), Cmds::Query_TransactionConsistency));
     stmtPropMenu->AppendSeparator();
+	stmtPropMenu->AppendCheckItem(Cmds::Query_TransactionLockResolution,
+        cm.getMainMenuItemText(_("Wait for lock resolution"), Cmds::Query_TransactionLockResolution));
+    stmtPropMenu->AppendSeparator();
     stmtPropMenu->AppendCheckItem(Cmds::Query_TransactionReadOnly,
         cm.getMainMenuItemText(_("Read only transaction"), Cmds::Query_TransactionReadOnly));
     statementMenu->AppendSubMenu(stmtPropMenu, _("Transaction settings"));
@@ -885,8 +889,10 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::Query_Rollback,       ExecuteSqlFrame::OnMenuUpdateWhenInTransaction)
     EVT_MENU_RANGE(Cmds::Query_TransactionConcurrency,      Cmds::Query_TransactionConsistency, ExecuteSqlFrame::OnMenuTransactionIsolationLevel)
     EVT_UPDATE_UI_RANGE(Cmds::Query_TransactionConcurrency, Cmds::Query_TransactionConsistency, ExecuteSqlFrame::OnMenuUpdateTransactionIsolationLevel)
-    EVT_MENU(Cmds::Query_TransactionReadOnly,               ExecuteSqlFrame::OnMenuTransactionReadOnly)
-    EVT_UPDATE_UI(Cmds::Query_TransactionReadOnly,          ExecuteSqlFrame::OnMenuUpdateTransactionReadOnly)
+    EVT_MENU(Cmds::Query_TransactionLockResolution,         ExecuteSqlFrame::OnMenuTransactionLockResolution)
+    EVT_UPDATE_UI(Cmds::Query_TransactionLockResolution,    ExecuteSqlFrame::OnMenuUpdateTransactionLockResolution)
+    EVT_MENU(Cmds::Query_TransactionReadOnly,       ExecuteSqlFrame::OnMenuTransactionReadOnly)
+    EVT_UPDATE_UI(Cmds::Query_TransactionReadOnly,  ExecuteSqlFrame::OnMenuUpdateTransactionReadOnly)
 
     EVT_MENU(Cmds::DataGrid_Insert_row,      ExecuteSqlFrame::OnMenuGridInsertRow)
     EVT_MENU(Cmds::DataGrid_Delete_row,      ExecuteSqlFrame::OnMenuGridDeleteRow)
@@ -2214,7 +2220,8 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             if (transactionM == 0)
             {
                 transactionM = IBPP::TransactionFactory(databaseM->getIBPPDatabase(),
-                    transactionAccessModeM, transactionIsolationLevelM);
+					transactionAccessModeM, transactionIsolationLevelM, 
+					transactionLockResolutionM);
             }
             transactionM->Start();
             inTransaction(true);
@@ -2407,6 +2414,7 @@ void ExecuteSqlFrame::OnMenuTransactionIsolationLevel(wxCommandEvent& event)
 void ExecuteSqlFrame::OnMenuUpdateTransactionIsolationLevel(
     wxUpdateUIEvent& event)
 {
+    event.Enable(transactionM == 0 || !transactionM->Started());
     if (event.GetId() == Cmds::Query_TransactionConcurrency)
         event.Check(transactionIsolationLevelM == IBPP::ilConcurrency);
     else if (event.GetId() == Cmds::Query_TransactionConsistency)
@@ -2415,6 +2423,23 @@ void ExecuteSqlFrame::OnMenuUpdateTransactionIsolationLevel(
         event.Check(transactionIsolationLevelM == IBPP::ilReadCommitted);
     else if (event.GetId() == Cmds::Query_TransactionReadDirty)
         event.Check(transactionIsolationLevelM == IBPP::ilReadDirty);
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuTransactionLockResolution(wxCommandEvent& event)
+{
+    transactionLockResolutionM =
+		event.IsChecked() ? IBPP::lrWait : IBPP::lrNoWait;
+
+    wxCHECK_RET(transactionM == 0 || !transactionM->Started(),
+        wxT("Can't change transaction lock resolution while started"));
+    transactionM = 0;
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuUpdateTransactionLockResolution(
+	wxUpdateUIEvent& event)
+{
+    event.Enable(transactionM == 0 || !transactionM->Started());
+    event.Check(transactionLockResolutionM == IBPP::lrWait);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuTransactionReadOnly(wxCommandEvent& event)

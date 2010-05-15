@@ -55,6 +55,7 @@ namespace Cmds
         Query_TransactionReadDirty,
         Query_TransactionReadCommitted,
         Query_TransactionConsistency,
+		Query_TransactionLockResolution,
         Query_TransactionReadOnly,
 
         // SQL Data grid
