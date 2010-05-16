@@ -688,6 +688,10 @@ SOURCE=.\src\sql\SqlTokenizer.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\sql\StatementBuilder.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\StatementHistoryDialog.cpp
 # End Source File
 # Begin Source File
@@ -1083,6 +1087,10 @@ SOURCE=.\src\sql\SqlStatement.h
 # Begin Source File
 
 SOURCE=.\src\sql\SqlTokenizer.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\sql\StatementBuilder.h
 # End Source File
 # Begin Source File
 

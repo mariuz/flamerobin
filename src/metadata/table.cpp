@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -566,6 +566,12 @@ wxString Table::getCreateSqlTemplate() const
 const wxString Table::getTypeName() const
 {
     return wxT("TABLE");
+}
+//-----------------------------------------------------------------------------
+bool Table::addRdbKeyToSelect()
+{
+    // add DB_KEY only when table doesn't have a PK/UNQ constraint
+    return !getPrimaryKey() && getUniqueConstraints()->size() == 0;
 }
 //-----------------------------------------------------------------------------
 // find all tables from "tables" which have foreign keys with "table"

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -805,7 +805,8 @@ void MainFrame::OnMenuCreateProcedureForTable(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuExecuteProcedure(wxCommandEvent& WXUNUSED(event))
 {
-    Procedure* p = dynamic_cast<Procedure*>(treeMainM->getSelectedMetadataItem());
+    Procedure* p = dynamic_cast<Procedure*>(
+        treeMainM->getSelectedMetadataItem());
     if (!p)
         return;
 
@@ -815,38 +816,16 @@ void MainFrame::OnMenuExecuteProcedure(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
 {
-    MetadataItem* i = treeMainM->getSelectedMetadataItem();
-    if (!i)
+    Relation* r = dynamic_cast<Relation*>(
+        treeMainM->getSelectedMetadataItem());
+    if (!r)
+        return;
+    Database* d = r->findDatabase();
+    if (!d)
         return;
 
-    Relation* r = dynamic_cast<Relation*>(i);
-    Database* d = i->findDatabase();
-    if (!d || !r)
-        return;
-
-    r->checkAndLoadColumns();
-
-    wxString sql(wxT("SELECT "));
-    std::vector<MetadataItem*> temp;
-    i->getChildren(temp);
-    bool first = true;
-    for (std::vector<MetadataItem*>::const_iterator it = temp.begin();
-        it != temp.end(); ++it)
-    {
-        if (first)
-            first = false;
-        else
-            sql += wxT(", ");
-        sql += wxT("a.") + (*it)->getQuotedName();
-    }
-    // add DB_KEY only when table doesn't have a PK/UNQ constraint
-    if (Table* t = dynamic_cast<Table*>(r))
-    {
-        if (!t->getPrimaryKey() && t->getUniqueConstraints()->size() == 0)
-            sql += wxT(", a.RDB$DB_KEY");
-    }
-    sql += wxT("\nFROM ") + i->getQuotedName() + wxT(" a");
-    execSql(this, wxString(_("Execute SQL statements")), d, sql, false);
+    execSql(this, wxString(_("Executing select statement")), d,
+        r->getSelectStatement(), false);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))

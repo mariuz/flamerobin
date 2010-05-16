@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -54,6 +54,7 @@
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/procedure.h"
+#include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------
 typedef MetadataCollection <Parameter>::const_iterator ParameterCollCIter;
 //-----------------------------------------------------------------------------
@@ -104,40 +105,54 @@ wxString Procedure::getExecuteStatement()
 {
     if (!parametersLoadedM)
         loadParameters();
-    wxString columns, params;
+
+    wxArrayString columns, params;
+    columns.Alloc(parametersM.getChildrenCount());
+    params.Alloc(parametersM.getChildrenCount());
+
     for (ParameterCollCIter it = parametersM.begin(); it != parametersM.end();
         ++it)
     {
         if ((*it).isOutputParameter())
-        {
-            if (!columns.empty())
-                columns += wxT(", ");
-            columns += wxT("p.") + (*it).getQuotedName();
-        }
+            columns.Add((*it).getQuotedName());
         else
-        {
-            if (!params.empty())
-                params += wxT(", ");
-            params += (*it).getQuotedName();
-        }
+            params.Add((*it).getQuotedName());
     }
 
-    wxString sql;
+    StatementBuilder sb;
     if (!columns.empty())
     {
-        sql = wxT("SELECT ") + columns + wxT("\nFROM ")
-          + getQuotedName();
-        if (!params.empty())
-            sql += wxT("(") + params + wxT(")");
-        sql += wxT(" p");
+        sb << kwSELECT << ' ' << StatementBuilder::IncIndent;
+
+        // use "<<" only after concatenating everything
+        // that shouldn't be split apart in line wrapping calculation
+        for (size_t i = 0; i < columns.size() - 1; ++i)
+            sb << wxT("p.") + columns[i] + wxT(", ");
+        sb << wxT("p.") + columns.Last();
+
+        sb << StatementBuilder::DecIndent << StatementBuilder::NewLine
+            << kwFROM << ' ' << getQuotedName();
     }
     else
     {
-        sql = wxT("EXECUTE PROCEDURE ") + getQuotedName();
-        if (!params.empty())
-            sql += wxT("(") + params + wxT(")");
+        sb << kwEXECUTE << ' ' << kwPROCEDURE << ' ' << getQuotedName();
     }
-    return sql;
+
+    if (!params.empty())
+    {
+        sb << wxT(" (") << StatementBuilder::IncIndent;
+
+        // use "<<" only after concatenating everything
+        // that shouldn't be split apart in line wrapping calculation
+        for (size_t i = 0; i < params.size() - 1; ++i)
+            sb << params[i] + wxT(", ");
+        sb << params.Last() + wxT(")");
+
+        sb << StatementBuilder::DecIndent;
+    }
+    sb << wxT(" p");
+
+    return sb;
 }
 //-----------------------------------------------------------------------------
 void Procedure::checkAndLoadParameters(bool force)

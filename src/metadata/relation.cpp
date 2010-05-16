@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -47,6 +47,7 @@
 #include "metadata/CreateDDLVisitor.h"
 #include "metadata/database.h"
 #include "metadata/relation.h"
+#include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------
 Relation::Relation()
     :relationInfoLoadedM(false)
@@ -595,6 +596,39 @@ void Relation::getTriggers(std::vector<Trigger *>& list,
         if (t && t->getFiringTime() == beforeOrAfter)
             list.push_back(t);
     }
+}
+//-----------------------------------------------------------------------------
+wxString Relation::getSelectStatement()
+{
+    // get list of columns to SELECT
+    checkAndLoadColumns();
+    wxArrayString cols;
+    cols.Alloc(columnsM.getChildrenCount());
+    for (MetadataCollection<Column>::const_iterator it = columnsM.begin();
+        it != columnsM.end(); ++it)
+    {
+        cols.Add((*it).getQuotedName());
+    }
+    if (addRdbKeyToSelect())
+        cols.Add(wxT("r.RDB$DB_KEY"));
+
+    StatementBuilder sb;
+    sb << kwSELECT << ' ' << StatementBuilder::IncIndent;
+
+    // use "<<" only after concatenating everything
+    // that shouldn't be split apart in line wrapping calculation
+    for (size_t i = 0; i < cols.size() - 1; ++i)
+        sb << wxT("r.") + cols[i] + wxT(", ");
+    sb << wxT("r.") + cols.Last();
+
+    sb << StatementBuilder::DecIndent << StatementBuilder::NewLine
+        << kwFROM << ' ' << getQuotedName() << wxT(" r");
+    return sb;
+}
+//-----------------------------------------------------------------------------
+bool Relation::addRdbKeyToSelect()
+{
+    return false;
 }
 //-----------------------------------------------------------------------------
 bool Relation::getChildren(std::vector<MetadataItem*>& temp)

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -56,9 +56,49 @@ SqlTokenizer::SqlTokenizer(const wxString& statement)
 }
 //-----------------------------------------------------------------------------
 /*static*/
-const SqlTokenizer::KeywordMap& SqlTokenizer::getKeywordMap()
+wxString SqlTokenizer::getKeyword(SqlTokenType token, bool upperCase)
 {
-    static KeywordMap keywords;
+    if (upperCase)
+    {
+        static TokenToKeywordMap keywordsUpperCase;
+        if (keywordsUpperCase.empty())
+        {
+            const KeywordToTokenMap& keywordsMap = getKeywordToTokenMap();
+            for (KeywordToTokenMap::const_iterator it = keywordsMap.begin();
+                it != keywordsMap.end(); ++it)
+            {
+                keywordsUpperCase.insert(TokenToKeywordEntry((*it).second,
+                    (*it).first.Upper()));
+            }
+        }
+        TokenToKeywordMap::const_iterator pos = keywordsUpperCase.find(token);
+        if (pos != keywordsUpperCase.end())
+            return (*pos).second;
+    }
+    else
+    {
+        static TokenToKeywordMap keywordsLowerCase;
+        if (keywordsLowerCase.empty())
+        {
+            const KeywordToTokenMap& keywordsMap = getKeywordToTokenMap();
+            for (KeywordToTokenMap::const_iterator it = keywordsMap.begin();
+                it != keywordsMap.end(); ++it)
+            {
+                keywordsLowerCase.insert(TokenToKeywordEntry((*it).second,
+                    (*it).first.Lower()));
+            }
+        }
+        TokenToKeywordMap::const_iterator pos = keywordsLowerCase.find(token);
+        if (pos != keywordsLowerCase.end())
+            return (*pos).second;
+    }
+    return wxEmptyString;
+}
+//-----------------------------------------------------------------------------
+/*static*/
+const SqlTokenizer::KeywordToTokenMap& SqlTokenizer::getKeywordToTokenMap()
+{
+    static KeywordToTokenMap keywords;
     if (keywords.empty())
     {
         static const struct {const wxChar* name; SqlTokenType type; } entries[] =
@@ -70,8 +110,8 @@ const SqlTokenizer::KeywordMap& SqlTokenizer::getKeywordMap()
         };
         for (int i = 0; entries[i].type != tkUNKNOWN; i++)
         {
-            keywords.insert(KeywordEntry(wxString(entries[i].name).Upper(),
-                entries[i].type));
+            keywords.insert(KeywordToTokenEntry(
+                wxString(entries[i].name).Upper(), entries[i].type));
         }
     }
     return keywords;
@@ -80,13 +120,13 @@ const SqlTokenizer::KeywordMap& SqlTokenizer::getKeywordMap()
 /*static*/
 wxArrayString SqlTokenizer::getKeywords(KeywordCase kwc)
 {
-    const KeywordMap& keywordsMap = getKeywordMap();
+    const KeywordToTokenMap& keywordsMap = getKeywordToTokenMap();
     wxArrayString keywords;
     keywords.Alloc(keywordsMap.size());
 
     bool upperCase = (kwc == kwUpperCase) || (kwc == kwDefaultCase
         && config().get(wxT("SQLKeywordsUpperCase"), false));
-    for (KeywordMap::const_iterator it = keywordsMap.begin();
+    for (KeywordToTokenMap::const_iterator it = keywordsMap.begin();
         it != keywordsMap.end(); ++it)
     {
         if (upperCase)
@@ -118,8 +158,8 @@ SqlTokenType SqlTokenizer::getKeywordTokenType(const wxString& word)
     if (word.IsEmpty())
         return tkIDENTIFIER;
 
-    const KeywordMap& keywords = getKeywordMap();
-    KeywordMap::const_iterator pos = keywords.find(word);
+    const KeywordToTokenMap& keywords = getKeywordToTokenMap();
+    KeywordToTokenMap::const_iterator pos = keywords.find(word.Upper());
     if (pos != keywords.end())
         return (*pos).second;
     return tkIDENTIFIER;
@@ -131,8 +171,8 @@ bool SqlTokenizer::isReservedWord(const wxString& word)
     if (word.IsEmpty())
         return false;
 
-    const KeywordMap& keywords = getKeywordMap();
-    KeywordMap::const_iterator pos = keywords.find(word);
+    const KeywordToTokenMap& keywords = getKeywordToTokenMap();
+    KeywordToTokenMap::const_iterator pos = keywords.find(word);
     return pos != keywords.end();
 }
 //-----------------------------------------------------------------------------
@@ -272,7 +312,6 @@ void SqlTokenizer::keywordIdentifierToken()
 
     // check whether it's a keyword, and not an identifier
     wxString checkKW(sqlTokenStartM, sqlTokenEndM);
-    checkKW.UpperCase();
     SqlTokenType keywordType = getKeywordTokenType(checkKW);
     if (keywordType != tkIDENTIFIER)
         sqlTokenTypeM = keywordType;

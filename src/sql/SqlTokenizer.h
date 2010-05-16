@@ -133,8 +133,11 @@ enum SqlTokenType {
 class SqlTokenizer
 {
 private:
-    typedef std::map<wxString, SqlTokenType> KeywordMap;
-    typedef std::map<wxString, SqlTokenType>::value_type KeywordEntry;
+    typedef std::map<wxString, SqlTokenType> KeywordToTokenMap;
+    typedef std::map<wxString, SqlTokenType>::value_type KeywordToTokenEntry;
+
+    typedef std::map<SqlTokenType, wxString> TokenToKeywordMap;
+    typedef std::map<SqlTokenType, wxString>::value_type TokenToKeywordEntry;
 
     wxString sqlM;
     wxString termM;
@@ -143,7 +146,7 @@ private:
     SqlTokenType sqlTokenTypeM;
     void init();
 
-    static const KeywordMap& getKeywordMap();
+    static const KeywordToTokenMap& getKeywordToTokenMap();
 
     void defaultToken();
     void keywordIdentifierToken();
@@ -167,11 +170,13 @@ public:
     void setStatement(const wxString& statement);
 
     enum KeywordCase { kwDefaultCase, kwLowerCase, kwUpperCase };
+    // return keyword string for a given token type
+    static wxString getKeyword(SqlTokenType token, bool upperCase);
     // returns array of keyword strings
     static wxArrayString getKeywords(KeywordCase kwc);
     // returns all keywords in one string, separated by spaces
     static wxString getKeywordsString(KeywordCase kwc);
-    // returns TokenType of parameter string if possibleKeyword is a keyword,
+    // returns TokenType of parameter string if word is a keyword,
     // returns tkIdentifier otherwise
     static SqlTokenType getKeywordTokenType(const wxString& word);
     static bool isReservedWord(const wxString& word);
