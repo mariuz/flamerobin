@@ -610,7 +610,7 @@ wxString Relation::getSelectStatement()
         cols.Add((*it).getQuotedName());
     }
     if (addRdbKeyToSelect())
-        cols.Add(wxT("r.RDB$DB_KEY"));
+        cols.Add(wxT("RDB$DB_KEY"));
 
     StatementBuilder sb;
     sb << kwSELECT << ' ' << StatementBuilder::IncIndent;
