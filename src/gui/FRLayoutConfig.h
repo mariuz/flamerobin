@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-  $Id: FRLayoutConfig.h 1836 2009-02-14 11:22:13Z mghie $
+  $Id$
 
 */
 

@@ -105,7 +105,7 @@ void StatementBuilder::addNewLine()
 {
     completedLinesM += currentLineM;
     completedLinesM += wxTextBuffer::GetEOL();
-    currentLineM = wxString(' ', indentLevelM * indentCharsM);
+    currentLineM = wxString(wxChar(' '), indentLevelM * indentCharsM);
 }
 //-----------------------------------------------------------------------------
 void StatementBuilder::reset()

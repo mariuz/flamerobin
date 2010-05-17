@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-  $Id: StyleGuide.cpp 1836 2009-02-14 11:22:13Z mghie $
+  $Id$
 
 */
 
@@ -38,6 +38,7 @@
     #include "wx/wx.h"
 #endif
 
+#include <algorithm>
 #include "gui/FRLayoutConfig.h"
 //-----------------------------------------------------------------------------
 class RgbHsvConversion // used by StyleGuidFR::getReadonlyColour()
