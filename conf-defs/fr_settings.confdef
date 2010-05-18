@@ -158,12 +158,12 @@
             <caption>Show long line marker</caption>
             <description>Whether a vertical line showing the edge of text is shown</description>
             <key>sqlEditorShowEdge</key>
-            <default>0</default>
+            <default>1</default>
             <enables>
                 <setting type="int">
-                    <caption>The line is drawn at [VALUE] column.</caption>
+                    <caption>Draw long line marker after column [VALUE]</caption>
                     <key>sqlEditorEdgeColumn</key>
-                    <default>50</default>
+                    <default>80</default>
                 </setting>
             </enables>
         </setting>
