@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -61,6 +61,7 @@ class DBHTreeConfigCache: public ConfigCache
 private:
     bool allowDragM;
     bool hideDisconnectedDatabasesM;
+    bool showColumnParamCountM;
     bool showColumnsM;
     bool sortDatabasesM;
     bool sortServersM;
@@ -73,6 +74,7 @@ public:
 
     bool allowDnD();
     bool getHideDisconnectedDatabases();
+    bool getShowColumnParamCount();
     bool getShowColumns();
     bool getSortDatabases();
     bool getSortServers();
@@ -94,6 +96,8 @@ void DBHTreeConfigCache::loadFromConfig()
     allowDragM = config().get(wxT("allowDragAndDrop"), false);
     hideDisconnectedDatabasesM = config().get(wxT("HideDisconnectedDatabases"),
         false);
+    showColumnParamCountM =config().get(
+        wxT("ShowColumnAndParameterCountInTree"), false);
     showColumnsM = config().get(wxT("ShowColumnsInTree"), true);
     sortDatabasesM = config().get(wxT("OrderDatabasesInTree"), false);
     sortServersM = config().get(wxT("OrderServersInTree"), false);
@@ -109,6 +113,12 @@ bool DBHTreeConfigCache::getHideDisconnectedDatabases()
 {
     ensureCacheValid();
     return hideDisconnectedDatabasesM;
+}
+//-----------------------------------------------------------------------------
+bool DBHTreeConfigCache::getShowColumnParamCount()
+{
+    ensureCacheValid();
+    return showColumnParamCountM;
 }
 //-----------------------------------------------------------------------------
 bool DBHTreeConfigCache::getShowColumns()
@@ -396,9 +406,20 @@ void DBHTreeItemVisitor::visitGenerator(Generator& generator)
 void DBHTreeItemVisitor::visitProcedure(Procedure& procedure)
 {
     setNodeProperties(&procedure);
-    // make node caption bold when parameter data is loaded (even if no child)
-    if (procedure.isParameterInfoLoaded())
+    if (procedure.childrenLoaded())
+    {
+        // make node caption bold when parameter data is loaded
+        // (even if the procedure has no parameters at all)
         nodeTextBoldM = true;
+        // show number of parameters?
+        if (DBHTreeConfigCache::get().getShowColumnParamCount()
+            && procedure.childrenLoaded())
+        {
+            nodeTextM += wxString::Format(wxT(" (%d, %d)"),
+                procedure.getInputParamCount(),
+                procedure.getOutputParamCount());
+        }
+    }
     // show Parameter nodes if Config setting is on
     showChildrenM = DBHTreeConfigCache::get().getShowColumns();
 }
@@ -436,6 +457,17 @@ void DBHTreeItemVisitor::visitServer(Server& server)
 void DBHTreeItemVisitor::visitTable(Table& table)
 {
     setNodeProperties(&table);
+    if (table.childrenLoaded())
+    {
+        // make node caption bold when column data has been loaded
+        nodeTextBoldM = true;
+        // show number of columns?
+        if (DBHTreeConfigCache::get().getShowColumnParamCount())
+        {
+            size_t colCount = table.getColumnCount();
+            nodeTextM += wxString::Format(wxT(" (%d)"), colCount);
+        }
+    }
     // show Column nodes if Config setting is on
     showChildrenM = DBHTreeConfigCache::get().getShowColumns();
 }
@@ -448,6 +480,17 @@ void DBHTreeItemVisitor::visitTrigger(Trigger& trigger)
 void DBHTreeItemVisitor::visitView(View& view)
 {
     setNodeProperties(&view);
+    if (view.childrenLoaded())
+    {
+        // make node caption bold when column data has been loaded
+        nodeTextBoldM = true;
+        // show number of columns?
+        if (DBHTreeConfigCache::get().getShowColumnParamCount())
+        {
+            size_t colCount = view.getColumnCount();
+            nodeTextM += wxString::Format(wxT(" (%d)"), colCount);
+        }
+    }
     // show Column nodes if Config setting is on
     showChildrenM = DBHTreeConfigCache::get().getShowColumns();
 }

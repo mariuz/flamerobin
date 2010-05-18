@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -930,10 +930,10 @@ void Database::parseCommitedSql(const SqlStatement& stm)
         {
             case ntTable:
             case ntView:
-                dynamic_cast<Relation*>(object)->loadColumns();
+                dynamic_cast<Relation*>(object)->reloadChildren();
                 break;
             case ntProcedure:
-                dynamic_cast<Procedure*>(object)->checkAndLoadParameters(true); // force reload
+                dynamic_cast<Procedure*>(object)->reloadChildren();
                 dynamic_cast<Procedure*>(object)->checkDependentProcedures();
                 break;
             case ntException:

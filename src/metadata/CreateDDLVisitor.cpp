@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -483,7 +483,7 @@ void CreateDDLVisitor::visitTable(Table& t)
         preSqlM += wxT(" EXTERNAL '") + external + wxT("'");
     }
     preSqlM += wxT("\n(\n  ");
-    t.checkAndLoadColumns();
+    t.ensureChildrenLoaded();
     for (MetadataCollection<Column>::iterator it=t.begin(); it!=t.end(); ++it)
     {
         if (it != t.begin() && (*it).getComputedSource().IsEmpty())

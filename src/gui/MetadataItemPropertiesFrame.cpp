@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -477,7 +477,7 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
         if (!r)
             return;
         std::vector<MetadataItem*> tmp;
-        r->checkAndLoadColumns();
+        r->ensureChildrenLoaded();
         if (r->getChildren(tmp))
         {
             for (std::vector<MetadataItem*>::iterator it = tmp.begin(); it != tmp.end(); ++it)
@@ -743,7 +743,7 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
 
         SubjectLocker locker(p);
         std::vector<MetadataItem*> tmp;
-        p->checkAndLoadParameters();
+        p->ensureChildrenLoaded();
         if (p->getChildren(tmp))
         {
             bool parOut = (cmd == wxT("output_parameters"));
@@ -1178,7 +1178,7 @@ void MetadataItemPropertiesPanel::update()
             return;
 
         SubjectLocker locker(t);
-        t->checkAndLoadColumns();       // load column data if needed
+        t->ensureChildrenLoaded();
         std::vector<MetadataItem*> temp;
         objectM->getChildren(temp);
         std::vector<MetadataItem *>::iterator it;
@@ -1194,7 +1194,7 @@ void MetadataItemPropertiesPanel::update()
             return;
 
         SubjectLocker locker(p);
-        p->checkAndLoadParameters();        // load column data if needed
+        p->ensureChildrenLoaded();
         std::vector<MetadataItem*> temp;
         objectM->getChildren(temp);
         std::vector<MetadataItem *>::iterator it;

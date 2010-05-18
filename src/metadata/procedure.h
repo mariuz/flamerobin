@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -39,7 +39,6 @@ private:
     std::vector<Privilege> privilegesM;
     MetadataCollection<Parameter> parametersM;
     bool parametersLoadedM;
-    void loadParameters();
 protected:
     virtual void loadDescription();
     virtual void saveDescription(wxString description);
@@ -52,6 +51,9 @@ public:
 
     wxString getCreateSqlTemplate() const;   // overrides MetadataItem::getCreateSqlTemplate()
 
+    virtual bool childrenLoaded() const;
+    virtual void reloadChildren();
+
     bool getChildren(std::vector<MetadataItem *>& temp);
     Parameter *addParameter(Parameter &c);
 
@@ -62,8 +64,10 @@ public:
     MetadataCollection<Parameter>::const_iterator begin() const;
     MetadataCollection<Parameter>::const_iterator end() const;
 
-    void checkAndLoadParameters(bool force = false);
-    bool isParameterInfoLoaded() const;
+    size_t getParamCount() const;
+    size_t getInputParamCount() const;
+    size_t getOutputParamCount() const;
+
     wxString getOwner();
     wxString getSource();
     wxString getAlterSql(bool full = true);

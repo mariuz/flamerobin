@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -329,7 +329,7 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
         if (r->begin() == r->end())   // no columns, load if needed
         {
             if (config().get(wxT("autoCompleteLoadColumns"), true))
-                r->loadColumns();
+                r->ensureChildrenLoaded();
             else
                 return wxEmptyString;
         }
@@ -348,7 +348,7 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
         if (p->begin() == p->end())
         {
             if (config().get(wxT("autoCompleteLoadColumns"), true))
-                p->checkAndLoadParameters();
+                p->ensureChildrenLoaded();
             else
                 return wxEmptyString;
         }

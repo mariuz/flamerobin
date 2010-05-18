@@ -72,122 +72,20 @@ Procedure::Procedure(const Procedure& rhs)
     parametersM.setParent(this);
 }
 //-----------------------------------------------------------------------------
-bool Procedure::isParameterInfoLoaded() const
-{
-    return parametersLoadedM;
-}
-//-----------------------------------------------------------------------------
 Parameter* Procedure::addParameter(Parameter &c)
 {
-    if (!parametersLoadedM)
-        loadParameters();
+    ensureChildrenLoaded();
     Parameter *cc = parametersM.add(c);
     cc->setParent(this);
     return cc;
 }
 //-----------------------------------------------------------------------------
-bool Procedure::getChildren(std::vector<MetadataItem *>& temp)
+bool Procedure::childrenLoaded() const
 {
-    return parametersM.getChildren(temp);
+    return parametersLoadedM;
 }
 //-----------------------------------------------------------------------------
-void Procedure::lockChildren()
-{
-    parametersM.lockSubject();
-}
-//-----------------------------------------------------------------------------
-void Procedure::unlockChildren()
-{
-    parametersM.unlockSubject();
-}
-//-----------------------------------------------------------------------------
-wxString Procedure::getExecuteStatement()
-{
-    if (!parametersLoadedM)
-        loadParameters();
-
-    wxArrayString columns, params;
-    columns.Alloc(parametersM.getChildrenCount());
-    params.Alloc(parametersM.getChildrenCount());
-
-    for (ParameterCollCIter it = parametersM.begin(); it != parametersM.end();
-        ++it)
-    {
-        if ((*it).isOutputParameter())
-            columns.Add((*it).getQuotedName());
-        else
-            params.Add((*it).getQuotedName());
-    }
-
-    StatementBuilder sb;
-    if (!columns.empty())
-    {
-        sb << kwSELECT << ' ' << StatementBuilder::IncIndent;
-
-        // use "<<" only after concatenating everything
-        // that shouldn't be split apart in line wrapping calculation
-        for (size_t i = 0; i < columns.size() - 1; ++i)
-            sb << wxT("p.") + columns[i] + wxT(", ");
-        sb << wxT("p.") + columns.Last();
-
-        sb << StatementBuilder::DecIndent << StatementBuilder::NewLine
-            << kwFROM << ' ' << getQuotedName();
-    }
-    else
-    {
-        sb << kwEXECUTE << ' ' << kwPROCEDURE << ' ' << getQuotedName();
-    }
-
-    if (!params.empty())
-    {
-        sb << wxT(" (") << StatementBuilder::IncIndent;
-
-        // use "<<" only after concatenating everything
-        // that shouldn't be split apart in line wrapping calculation
-        for (size_t i = 0; i < params.size() - 1; ++i)
-            sb << params[i] + wxT(", ");
-        sb << params.Last() + wxT(")");
-
-        sb << StatementBuilder::DecIndent;
-    }
-    sb << wxT(" p");
-
-    return sb;
-}
-//-----------------------------------------------------------------------------
-void Procedure::checkAndLoadParameters(bool force)
-{
-    if (force || !parametersLoadedM)
-        loadParameters();
-}
-//-----------------------------------------------------------------------------
-MetadataCollection<Parameter>::iterator Procedure::begin()
-{
-    // please - don't load here
-    // this code is used to get columns we want to alert about changes
-    // but if there aren't any columns, we don't want to waste time
-    // loading them
-    return parametersM.begin();
-}
-//-----------------------------------------------------------------------------
-MetadataCollection<Parameter>::iterator Procedure::end()
-{
-    // please see comment for begin()
-    return parametersM.end();
-}
-//-----------------------------------------------------------------------------
-MetadataCollection<Parameter>::const_iterator Procedure::begin() const
-{
-    return parametersM.begin();
-}
-//-----------------------------------------------------------------------------
-MetadataCollection<Parameter>::const_iterator Procedure::end() const
-{
-    return parametersM.end();
-}
-//-----------------------------------------------------------------------------
-//! returns false if error occurs, and places the error text in error variable
-void Procedure::loadParameters()
+void Procedure::reloadChildren()
 {
     parametersLoadedM = false;
     parametersM.clear();
@@ -239,6 +137,128 @@ void Procedure::loadParameters()
     notifyObservers();
 }
 //-----------------------------------------------------------------------------
+bool Procedure::getChildren(std::vector<MetadataItem *>& temp)
+{
+    return parametersM.getChildren(temp);
+}
+//-----------------------------------------------------------------------------
+void Procedure::lockChildren()
+{
+    parametersM.lockSubject();
+}
+//-----------------------------------------------------------------------------
+void Procedure::unlockChildren()
+{
+    parametersM.unlockSubject();
+}
+//-----------------------------------------------------------------------------
+wxString Procedure::getExecuteStatement()
+{
+    ensureChildrenLoaded();
+
+    wxArrayString columns, params;
+    columns.Alloc(parametersM.getChildrenCount());
+    params.Alloc(parametersM.getChildrenCount());
+
+    for (ParameterCollCIter it = parametersM.begin(); it != parametersM.end();
+        ++it)
+    {
+        if ((*it).isOutputParameter())
+            columns.Add((*it).getQuotedName());
+        else
+            params.Add((*it).getQuotedName());
+    }
+
+    StatementBuilder sb;
+    if (!columns.empty())
+    {
+        sb << kwSELECT << ' ' << StatementBuilder::IncIndent;
+
+        // use "<<" only after concatenating everything
+        // that shouldn't be split apart in line wrapping calculation
+        for (size_t i = 0; i < columns.size() - 1; ++i)
+            sb << wxT("p.") + columns[i] + wxT(", ");
+        sb << wxT("p.") + columns.Last();
+
+        sb << StatementBuilder::DecIndent << StatementBuilder::NewLine
+            << kwFROM << ' ' << getQuotedName();
+    }
+    else
+    {
+        sb << kwEXECUTE << ' ' << kwPROCEDURE << ' ' << getQuotedName();
+    }
+
+    if (!params.empty())
+    {
+        sb << wxT(" (") << StatementBuilder::IncIndent;
+
+        // use "<<" only after concatenating everything
+        // that shouldn't be split apart in line wrapping calculation
+        for (size_t i = 0; i < params.size() - 1; ++i)
+            sb << params[i] + wxT(", ");
+        sb << params.Last() + wxT(")");
+
+        sb << StatementBuilder::DecIndent;
+    }
+    sb << wxT(" p");
+
+    return sb;
+}
+//-----------------------------------------------------------------------------
+MetadataCollection<Parameter>::iterator Procedure::begin()
+{
+    // please - don't load here
+    // this code is used to get columns we want to alert about changes
+    // but if there aren't any columns, we don't want to waste time
+    // loading them
+    return parametersM.begin();
+}
+//-----------------------------------------------------------------------------
+MetadataCollection<Parameter>::iterator Procedure::end()
+{
+    // please see comment for begin()
+    return parametersM.end();
+}
+//-----------------------------------------------------------------------------
+MetadataCollection<Parameter>::const_iterator Procedure::begin() const
+{
+    return parametersM.begin();
+}
+//-----------------------------------------------------------------------------
+MetadataCollection<Parameter>::const_iterator Procedure::end() const
+{
+    return parametersM.end();
+}
+//-----------------------------------------------------------------------------
+size_t Procedure::getParamCount() const
+{
+    return parametersM.getChildrenCount();
+}
+//-----------------------------------------------------------------------------
+size_t Procedure::getInputParamCount() const
+{
+    size_t count = 0;
+    for (MetadataCollection <Parameter>::const_iterator it =
+        parametersM.begin(); it != parametersM.end(); ++it)
+    {
+        if (!(*it).isOutputParameter())
+            count++;
+    }
+    return count;
+}
+//-----------------------------------------------------------------------------
+size_t Procedure::getOutputParamCount() const
+{
+    size_t count = 0;
+    for (MetadataCollection <Parameter>::const_iterator it =
+        parametersM.begin(); it != parametersM.end(); ++it)
+    {
+        if ((*it).isOutputParameter())
+            count++;
+    }
+    return count;
+}
+//-----------------------------------------------------------------------------
 wxString Procedure::getOwner()
 {
     Database* d = getDatabase(wxT("Procedure::getOwner"));
@@ -274,7 +294,7 @@ wxString Procedure::getSource()
 //-----------------------------------------------------------------------------
 wxString Procedure::getDefinition()
 {
-    checkAndLoadParameters();
+    ensureChildrenLoaded();
     wxString collist, parlist;
     MetadataCollection <Parameter>::const_iterator lastInput, lastOutput;
     for (MetadataCollection <Parameter>::const_iterator it =
@@ -318,8 +338,7 @@ wxString Procedure::getDefinition()
 //-----------------------------------------------------------------------------
 wxString Procedure::getAlterSql(bool full)
 {
-    if (!parametersLoadedM)
-        loadParameters();
+    ensureChildrenLoaded();
 
     Database* db = getDatabase(wxT("Procedure::getAlterSql"));
 
@@ -404,7 +423,7 @@ wxString Procedure::getAlterSql(bool full)
 void Procedure::checkDependentProcedures()
 {
     // check dependencies and parameters
-    checkAndLoadParameters();
+    ensureChildrenLoaded();
     std::vector<Dependency> deps;
     getDependencies(deps, false);
 

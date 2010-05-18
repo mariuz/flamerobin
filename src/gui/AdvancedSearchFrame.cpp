@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -617,12 +617,9 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
                 {
                     Relation *r = dynamic_cast<Relation *>(*it);
                     Procedure *p = dynamic_cast<Procedure *>(*it);
-                    if (r)
-                        r->checkAndLoadColumns();
-                    if (p)
-                        p->checkAndLoadParameters();
                     if (r || p)
                     {
+                        (*it)->ensureChildrenLoaded();
                         std::vector<MetadataItem *> tmpc;
                         (*it)->getChildren(tmpc);
                         bool found = false;

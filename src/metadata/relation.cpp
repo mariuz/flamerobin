@@ -64,7 +64,7 @@ Relation::Relation(const Relation& rhs)
 //-----------------------------------------------------------------------------
 Column *Relation::addColumn(Column &c)
 {
-    checkAndLoadColumns();
+    ensureChildrenLoaded();
     Column *cc = columnsM.add(c);
     cc->setParent(this);
     return cc;
@@ -93,6 +93,11 @@ MetadataCollection<Column>::const_iterator Relation::begin() const
 MetadataCollection<Column>::const_iterator Relation::end() const
 {
     return columnsM.end();
+}
+//-----------------------------------------------------------------------------
+size_t Relation::getColumnCount() const
+{
+    return columnsM.getChildrenCount();
 }
 //-----------------------------------------------------------------------------
 void Relation::loadInfo()
@@ -135,14 +140,13 @@ int Relation::getRelationType()
     return relationTypeM;
 }
 //-----------------------------------------------------------------------------
-void Relation::checkAndLoadColumns()
+bool Relation::childrenLoaded() const
 {
-    if (columnsM.empty())
-        loadColumns();
+    // relations can't have 0 columns, so column info must have been loaded
+    return columnsM.getChildrenCount() > 0;
 }
 //-----------------------------------------------------------------------------
-//! returns false if error occurs, and places the error text in error variable
-void Relation::loadColumns()
+void Relation::reloadChildren()
 {
     columnsM.clear();
 
@@ -601,7 +605,7 @@ void Relation::getTriggers(std::vector<Trigger *>& list,
 wxString Relation::getSelectStatement()
 {
     // get list of columns to SELECT
-    checkAndLoadColumns();
+    ensureChildrenLoaded();
     wxArrayString cols;
     cols.Alloc(columnsM.getChildrenCount());
     for (MetadataCollection<Column>::const_iterator it = columnsM.begin();

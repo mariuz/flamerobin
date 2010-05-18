@@ -65,32 +65,39 @@
             <related /><!-- this moves the checkbox closer to the previous one -->
         </setting>
         <setting type="checkbox">
-            <caption>Show columns and parameters in tree</caption>
-            <description>If checked the table and view columns and stored procedure parameters will be shown in the tree</description>
-            <key>ShowColumnsInTree</key>
-            <default>1</default>
-            <enables>
-                <setting type="radiobox">
-                    <caption>When table, view or stored procedure is activated</caption>
-                    <key>OnTreeActivate</key>
-                    <default>0</default>
-                    <option>
-                        <caption>Open Properties page</caption>
-                    </option>
-                    <option>
-                        <caption>Show column info</caption>
-                    </option>
-                    <option>
-                        <caption>Select from relation or execute procedure</caption>
-                    </option>
-                </setting>
-            </enables>
-        </setting>
-        <setting type="checkbox">
             <caption>Show system tables in tree</caption>
             <description>If checked the system tables will be shown in the tree by default (remember that you can deviate from this per database)</description>
             <key>ShowSystemTables</key>
             <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Show columns and parameters in tree</caption>
+            <description>If checked the table and view columns and stored procedure parameters will be shown in the tree</description>
+            <key>ShowColumnsInTree</key>
+            <default>1</default>
+            <related /><!-- this moves the checkbox closer to the previous one -->
+        </setting>
+        <setting type="checkbox">
+            <caption>Show the column/parameter count for relations/procedures</caption>
+            <description>If checked the number of relation columns and the number of stored procedure parameters will be shown in the node text</description>
+            <key>ShowColumnAndParameterCountInTree</key>
+            <default>0</default>
+            <related /><!-- this moves the checkbox closer to the previous one -->
+        </setting>
+        <setting type="radiobox">
+            <caption>When table, view or stored procedure is activated</caption>
+            <key>OnTreeActivate</key>
+            <default>0</default>
+            <option>
+                <caption>Open Properties page</caption>
+            </option>
+            <option>
+                <caption>Load relation columns and procedure parameters info only</caption>
+            </option>
+            <option>
+                <caption>Select from relation or execute procedure</caption>
+            </option>
+            <related /><!-- this moves the radiobox closer to the checkbox -->
         </setting>
         <setting type="checkbox">
             <caption>Allow drag and drop query building</caption>

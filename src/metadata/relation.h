@@ -67,8 +67,9 @@ public:
     wxString getOwner();
     int getRelationType();
 
-    void checkAndLoadColumns();
-    virtual void loadColumns();
+    virtual bool childrenLoaded() const;
+    virtual void reloadChildren();
+
     Column *addColumn(Column &c);
 
     wxString getSelectStatement();
@@ -77,6 +78,8 @@ public:
     MetadataCollection<Column>::iterator end();
     MetadataCollection<Column>::const_iterator begin() const;
     MetadataCollection<Column>::const_iterator end() const;
+
+    size_t getColumnCount() const;
 
     wxString getRebuildSql(const wxString& forColumn = wxT(""));
     std::vector<Privilege>* getPrivileges();

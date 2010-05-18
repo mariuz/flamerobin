@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -505,7 +505,7 @@ bool DataGeneratorFrame::loadColumns(const wxString& tableName, wxChoice* c)
     Table *t = dynamic_cast<Table *>(databaseM->findRelation(id));
     if (!t)
         return false;
-    t->checkAndLoadColumns();
+    t->ensureChildrenLoaded();
     c->Clear();
     for (MetadataCollection<Column>::iterator it = t->begin();
         it != t->end(); ++it)
@@ -757,7 +757,7 @@ void DataGeneratorFrame::loadSetting(wxTreeItemId newitem)
     Column *col = dynamic_cast<Column *>(m);
     showColumnSettings(col != 0);
     if (tab)
-        tab->checkAndLoadColumns();
+        tab->ensureChildrenLoaded();
     else if (col)
         tab = col->getTable();
     if (!tab)
@@ -1562,7 +1562,7 @@ void DataGeneratorFrame::generateData(std::list<Table *>& order)
         wxString ins = wxT("INSERT INTO ") + (*it)->getQuotedName()
             + wxT(" (");
         wxString params(wxT(") VALUES ("));
-        (*it)->checkAndLoadColumns();
+        (*it)->ensureChildrenLoaded();
         bool first = true;
         std::vector<GeneratorSettings *> colSet;
         for (MetadataCollection<Column>::iterator col = (*it)->begin();

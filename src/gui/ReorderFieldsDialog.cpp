@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -57,7 +57,7 @@ ReorderFieldsDialog::ReorderFieldsDialog(wxWindow* parent, Table* table)
     : BaseDialog(parent, -1, wxEmptyString)
 {
     tableM = table;
-    tableM->checkAndLoadColumns();
+    tableM->ensureChildrenLoaded();
 
     SetTitle(_("Reordering Fields of Table ") + table->getName_());
     createControls();

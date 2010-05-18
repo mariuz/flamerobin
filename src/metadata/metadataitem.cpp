@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -134,6 +134,21 @@ NodeType getTypeByName(wxString name)
         return ntException;
     else
         return ntUnknown;
+}
+//-----------------------------------------------------------------------------
+bool MetadataItem::childrenLoaded() const
+{
+    return true;
+}
+//-----------------------------------------------------------------------------
+void MetadataItem::ensureChildrenLoaded()
+{
+    if (!childrenLoaded())
+        reloadChildren();
+}
+//-----------------------------------------------------------------------------
+void MetadataItem::reloadChildren()
+{
 }
 //-----------------------------------------------------------------------------
 bool MetadataItem::getChildren(vector<MetadataItem*>& /*temp*/)

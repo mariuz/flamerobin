@@ -112,19 +112,21 @@ void Table::invalidateIndices(const wxString& forIndex)
     }
 }
 //-----------------------------------------------------------------------------
-void Table::loadColumns()           // update the keys info too
+void Table::reloadChildren()
 {
-    primaryKeyLoadedM = false;          // force info to be reloaded if asked
+    // force info to be reloaded if asked
+    primaryKeyLoadedM = false;
     foreignKeysLoadedM = false;
     checkConstraintsLoadedM = false;
     uniqueConstraintsLoadedM = false;
     indicesLoadedM = false;
-    Relation::loadColumns();
+
+    Relation::reloadChildren();
 }
 //-----------------------------------------------------------------------------
 wxString Table::getProcedureTemplate()
 {
-    checkAndLoadColumns();
+    ensureChildrenLoaded();
     wxString spname = wxT("SP_") + getName_();
     Identifier id(spname);
     wxString sql = wxT("SET TERM !! ;\nCREATE PROCEDURE ") + id.getQuoted() +
@@ -167,7 +169,7 @@ wxString Table::getProcedureTemplate()
 //-----------------------------------------------------------------------------
 wxString Table::getInsertStatement()
 {
-    checkAndLoadColumns();
+    ensureChildrenLoaded();
     wxString sql = wxT("INSERT INTO ") + getQuotedName() + wxT(" (");
     wxString collist, valist;
     for (MetadataCollection<Column>::const_iterator i = columnsM.begin();

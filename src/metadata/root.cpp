@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -88,8 +88,9 @@ void Root::disconnectAllDatabases()
     std::list<Server>::iterator its;
     for (its = serversM.begin(); its != serversM.end(); ++its)
     {
-        std::list<Database>::iterator itdb;
-        for (itdb = its->getDatabases()->begin(); itdb != its->getDatabases()->end(); ++itdb)
+        MetadataCollection<Database>* dbs = its->getDatabases();
+        MetadataCollection<Database>::iterator itdb;
+        for (itdb = dbs->begin(); itdb != dbs->end(); ++itdb)
             itdb->disconnect();
     }
 }
@@ -370,7 +371,6 @@ void Root::lockChildren()
 void Root::unlockChildren()
 {
     serversM.unlockSubject();
-
 }
 //-----------------------------------------------------------------------------
 const wxString Root::getItemPath() const

@@ -561,12 +561,6 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
     enum { showProperties = 0, showColumnInfo, selectFromOrExecute };
     int treeActivateAction = showProperties;
     config().getValue(wxT("OnTreeActivate"), treeActivateAction);
-    // if no columns in tree, then only Properties can be shown
-    if (treeActivateAction == showColumnInfo)
-    {
-        if (!config().get(wxT("ShowColumnsInTree"), true))
-            treeActivateAction = showProperties;
-    }
 
     if (treeActivateAction == showColumnInfo && (nt == ntTable
         || nt == ntSysTable || nt == ntView || nt == ntProcedure))
@@ -1257,28 +1251,17 @@ void MainFrame::showCreateTemplate(const MetadataItem* m)
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuLoadColumnsInfo(wxCommandEvent& WXUNUSED(event))
 {
-    MetadataItem* t = treeMainM->getSelectedMetadataItem();
-    if (!t)
+    MetadataItem* m = treeMainM->getSelectedMetadataItem();
+    if (!m)
         return;
 
-    switch (t->getType())
+    m->ensureChildrenLoaded();
+    Procedure* p = dynamic_cast<Procedure*>(m);
+    if (p && !p->getParamCount())
     {
-        case ntTable:
-        case ntSysTable:
-        case ntView:        ((Relation*)t)->checkAndLoadColumns();     break;
-        case ntProcedure:   ((Procedure*)t)->checkAndLoadParameters(); break;
-        default:            break;
-    };
-
-    if (t->getType() == ntProcedure)
-    {
-        std::vector<MetadataItem*> temp;
-        ((Procedure*)t)->getChildren(temp);
-        if (temp.empty())
-        {
-            ::wxMessageBox(_("This procedure doesn't have any input or output parameters."),
-               _("Information"), wxOK | wxICON_INFORMATION);
-        }
+        ::wxMessageBox(
+            _("This procedure doesn't have any input or output parameters."),
+           _("Information"), wxOK | wxICON_INFORMATION, this);
     }
 
     wxTreeItemId id = treeMainM->GetSelection();

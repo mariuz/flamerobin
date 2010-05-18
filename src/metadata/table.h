@@ -68,12 +68,12 @@ protected:
 public:
     Table();
 
-    static bool tablesRelate(const std::vector<wxString>& tables, Table *table,
-                             std::vector<ForeignKey>& list);
+    static bool tablesRelate(const std::vector<wxString>& tables,
+        Table *table, std::vector<ForeignKey>& list);
 
     virtual wxString getCreateSqlTemplate() const;
 
-    virtual void loadColumns();         // update the keys info too
+    virtual void reloadChildren();
     void invalidateIndices(const wxString& forIndex = wxEmptyString);
 
     wxString getExternalPath();
