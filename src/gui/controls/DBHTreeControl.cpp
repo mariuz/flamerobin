@@ -50,13 +50,14 @@
 #include "config/Config.h"
 #include "core/ArtProvider.h"
 #include "core/Observer.h"
+#include "core/Subject.h"
 #include "gui/ContextMenuMetadataItemVisitor.h"
 #include "gui/controls/DBHTreeControl.h"
 // nearly all headers in src/metadata would be necessary, but...
 #include "metadata/root.h"
 //-----------------------------------------------------------------------------
 // DBHTreeConfigCache: class to cache config data for tree control behaviour
-class DBHTreeConfigCache: public ConfigCache
+class DBHTreeConfigCache: public ConfigCache, public Subject
 {
 private:
     bool allowDragM;
@@ -65,24 +66,28 @@ private:
     bool showColumnsM;
     bool sortDatabasesM;
     bool sortServersM;
+    inline unsigned setValue(bool& field, bool newValue);
 protected:
     virtual void loadFromConfig();
+    virtual void update();
 public:
     DBHTreeConfigCache();
 
     static DBHTreeConfigCache& get();
 
-    bool allowDnD();
-    bool getHideDisconnectedDatabases();
-    bool getShowColumnParamCount();
-    bool getShowColumns();
-    bool getSortDatabases();
-    bool getSortServers();
+    bool allowDnD() { return allowDragM; };
+    bool getHideDisconnectedDatabases()
+        { return hideDisconnectedDatabasesM; };
+    bool getShowColumnParamCount() { return showColumnParamCountM; };
+    bool getShowColumns() { return showColumnsM; };
+    bool getSortDatabases() { return sortDatabasesM; };
+    bool getSortServers() { return sortServersM; };
 };
 //----------------------------------------------------------------------------
 DBHTreeConfigCache::DBHTreeConfigCache()
-    : ConfigCache(config())
+    : ConfigCache(config()), Subject()
 {
+    loadFromConfig();
 }
 //-----------------------------------------------------------------------------
 DBHTreeConfigCache& DBHTreeConfigCache::get()
@@ -93,50 +98,39 @@ DBHTreeConfigCache& DBHTreeConfigCache::get()
 //-----------------------------------------------------------------------------
 void DBHTreeConfigCache::loadFromConfig()
 {
-    allowDragM = config().get(wxT("allowDragAndDrop"), false);
-    hideDisconnectedDatabasesM = config().get(wxT("HideDisconnectedDatabases"),
-        false);
-    showColumnParamCountM =config().get(
-        wxT("ShowColumnAndParameterCountInTree"), false);
-    showColumnsM = config().get(wxT("ShowColumnsInTree"), true);
-    sortDatabasesM = config().get(wxT("OrderDatabasesInTree"), false);
-    sortServersM = config().get(wxT("OrderServersInTree"), false);
-}
-//----------------------------------------------------------------------------
-bool DBHTreeConfigCache::allowDnD()
-{
-    ensureCacheValid();
-    return allowDragM;
-}
-//-----------------------------------------------------------------------------
-bool DBHTreeConfigCache::getHideDisconnectedDatabases()
-{
-    ensureCacheValid();
-    return hideDisconnectedDatabasesM;
+    Config& cfg(config());
+    unsigned changes = 0;
+
+    changes += setValue(allowDragM,
+        cfg.get(wxT("allowDragAndDrop"), false));
+    changes += setValue(hideDisconnectedDatabasesM,
+        cfg.get(wxT("HideDisconnectedDatabases"), false));
+    changes += setValue(showColumnParamCountM,
+        cfg.get(wxT("ShowColumnAndParameterCountInTree"), false));
+    changes += setValue(showColumnsM,
+        cfg.get(wxT("ShowColumnsInTree"), true));
+    changes += setValue(sortDatabasesM,
+        cfg.get(wxT("OrderDatabasesInTree"), false));
+    changes += setValue(sortServersM,
+        cfg.get(wxT("OrderServersInTree"), false));
+
+    if (changes)
+        notifyObservers();
 }
 //-----------------------------------------------------------------------------
-bool DBHTreeConfigCache::getShowColumnParamCount()
+inline unsigned DBHTreeConfigCache::setValue(bool& field, bool newValue)
 {
-    ensureCacheValid();
-    return showColumnParamCountM;
+    if (field == newValue)
+        return 0;
+    field = newValue;
+    return 1;
 }
 //-----------------------------------------------------------------------------
-bool DBHTreeConfigCache::getShowColumns()
+void DBHTreeConfigCache::update()
 {
-    ensureCacheValid();
-    return showColumnsM;
-}
-//-----------------------------------------------------------------------------
-bool DBHTreeConfigCache::getSortDatabases()
-{
-    ensureCacheValid();
-    return sortDatabasesM;
-}
-//-----------------------------------------------------------------------------
-bool DBHTreeConfigCache::getSortServers()
-{
-    ensureCacheValid();
-    return sortServersM;
+    ConfigCache::update();
+    // load changed settings immediately and notify observers 
+    loadFromConfig();
 }
 //-----------------------------------------------------------------------------
 // DBHTreeImageList class
@@ -287,6 +281,7 @@ private:
     int nodeImageIndexM;
     bool showChildrenM;
     bool sortChildrenM;
+    bool nodeConfigSensitiveM;
 
     void setNodeProperties(MetadataItem* metadataItem);
 protected:
@@ -300,6 +295,7 @@ public:
     int getNodeImage() { return nodeImageIndexM; };
     bool getShowChildren() { return showChildrenM; };
     bool getSortChildren() { return sortChildrenM; };
+    bool isConfigSensitive() { return nodeConfigSensitiveM; };
 
     virtual void visitColumn(Column& column);
     virtual void visitDatabase(Database& database);
@@ -321,7 +317,8 @@ public:
 DBHTreeItemVisitor::DBHTreeItemVisitor(DBHTreeControl* tree)
     : MetadataItemVisitor(), treeM(tree), nodeVisibleM(true),
         nodeTextBoldM(false), nodeTextM(), nodeImageIndexM(-1),
-        showChildrenM(false), sortChildrenM(false)
+        showChildrenM(false), sortChildrenM(false),
+        nodeConfigSensitiveM(false)
 {
 }
 //-----------------------------------------------------------------------------
@@ -422,6 +419,8 @@ void DBHTreeItemVisitor::visitProcedure(Procedure& procedure)
     }
     // show Parameter nodes if Config setting is on
     showChildrenM = DBHTreeConfigCache::get().getShowColumns();
+    // update if settings change
+    nodeConfigSensitiveM = true;
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitParameter(Parameter& parameter)
@@ -470,6 +469,8 @@ void DBHTreeItemVisitor::visitTable(Table& table)
     }
     // show Column nodes if Config setting is on
     showChildrenM = DBHTreeConfigCache::get().getShowColumns();
+    // update if settings change
+    nodeConfigSensitiveM = true;
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitTrigger(Trigger& trigger)
@@ -493,6 +494,8 @@ void DBHTreeItemVisitor::visitView(View& view)
     }
     // show Column nodes if Config setting is on
     showChildrenM = DBHTreeConfigCache::get().getShowColumns();
+    // update if settings change
+    nodeConfigSensitiveM = true;
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitMetadataItem(MetadataItem& metadataItem)
@@ -592,6 +595,11 @@ void DBHTreeItemData::update()
                 // attachObserver() will call update() on the newly created
                 // child node.  This will correctly populate the tree
                 (*itChild)->attachObserver(newItem);
+                // tree node data objects may optionally observe the settings
+                // cache object, for example to create / delete column and
+                // parameter nodes if the "ShowColumnsInTree" setting changes
+                if (tivChild.isConfigSensitive())
+                    DBHTreeConfigCache::get().attachObserver(newItem);
             }
             else
             {
