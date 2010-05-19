@@ -974,6 +974,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
 void Database::drop()
 {
     databaseM->Drop();
+    setDisconnected();
 }
 //-----------------------------------------------------------------------------
 void Database::reconnect()
@@ -1099,13 +1100,17 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
     }
 }
 //-----------------------------------------------------------------------------
-void Database::disconnect(bool onlyDBH)
+void Database::disconnect()
 {
-    if (!connectedM && !onlyDBH)
-        return;
-
-    if (!onlyDBH)
+    if (connectedM)
+    {
         databaseM->Disconnect();
+        setDisconnected();
+    }
+}
+//-----------------------------------------------------------------------------
+void Database::setDisconnected()
+{
     delete metadataLoaderM;
     metadataLoaderM = 0;
     resetCredentials();     // "forget" temporary username/password

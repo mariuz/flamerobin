@@ -1457,10 +1457,7 @@ void MainFrame::OnMenuRecreateDatabase(wxCommandEvent& WXUNUSED(event))
             if (!d->isConnected())
                 connect();
             if (d->isConnected())
-            {
                 d->drop();
-                d->disconnect(true);    // true = just remove the child nodes
-            }
         }
         catch(IBPP::Exception&) {}
 
@@ -1488,7 +1485,6 @@ void MainFrame::OnMenuDropDatabase(wxCommandEvent& WXUNUSED(event))
     if (result == wxCANCEL)
         return;
     d->drop();
-    d->disconnect(true);    // true = just remove the child nodes
     if (result == wxNO)
     {   // unregister
         Server* s = d->getServer();

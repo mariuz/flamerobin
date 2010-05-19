@@ -187,6 +187,8 @@ private:
     MetadataCollection<Trigger> triggersM;
     MetadataCollection<View> viewsM;
 
+    void setDisconnected();
+
     std::multimap<CharacterSet, wxString> collationsM;
     void loadCollations();
     void loadObjects(NodeType type, ProgressIndicator* indicator = 0);
@@ -236,7 +238,7 @@ public:
     void clear();               // sets all values to empty wxString
     bool isConnected() const;
     void connect(wxString password, ProgressIndicator* indicator = 0);
-    void disconnect(bool onlyDBH = false);
+    void disconnect();
     void reconnect();
     void prepareTemporaryCredentials();
     void resetCredentials();
