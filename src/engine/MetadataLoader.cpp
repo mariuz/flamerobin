@@ -50,6 +50,22 @@ MetadataLoader::MetadataLoader(Database& database, unsigned maxStatements)
 void MetadataLoader::transactionStart()
 {
     ++transactionLevelM;
+
+    // fix the IBPP::LogicException "No Database is attached."
+    // which happens after a database reconnect
+    // (this action detaches the database from all its transactions)
+    if (transactionM != 0 && !transactionM->Started())
+    {
+        try
+        {
+            transactionM->Start();
+        }
+        catch (IBPP::LogicException&)
+        {
+            transactionM = 0;
+        }
+    }
+
     if (transactionM == 0)
         transactionM = IBPP::TransactionFactory(databaseM, IBPP::amRead);
     if (!transactionM->Started())
