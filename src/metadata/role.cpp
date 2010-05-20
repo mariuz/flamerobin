@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -75,7 +75,7 @@ std::vector<Privilege>* Role::getPrivileges()
         "where RDB$RELATION_NAME = ? and rdb$object_type = 13 "
         "order by rdb$user, rdb$user_type, rdb$privilege"
     );
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     std::string lastuser;
     int lasttype = -1;
@@ -112,7 +112,7 @@ wxString Role::getOwner()
 
     IBPP::Statement st1 = loader->getStatement(
         "select rdb$owner_name from rdb$roles where rdb$role_name = ?");
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     st1->Fetch();
     std::string name;

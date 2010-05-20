@@ -64,7 +64,7 @@ wxString View::getSource()
 
     IBPP::Statement st1 = loader->getStatement(
         "select rdb$view_source from rdb$relations where rdb$relation_name = ?");
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     st1->Fetch();
     wxString source;

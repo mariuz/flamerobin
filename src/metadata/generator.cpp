@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -75,13 +75,18 @@ void Generator::setValue(int64_t value)
 //-----------------------------------------------------------------------------
 void Generator::loadValue()
 {
-    Database* d = getDatabase(wxT("Generator::loadValue"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    Database* db = getDatabase(wxT("Generator::loadValue"));
+    MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 
+    // IMPORTANT: for all other loading where the name of the db object is
+    // Set() into a parameter getName_() is used, but for dynamically
+    // building the SQL statement getQuotedName() must be used!
+    std::string sqlName(wx2std(getQuotedName(), db->getCharsetConverter()));
     // do not use cached statements, because this can not be reused
     IBPP::Statement st1 = loader->createStatement(
-        "select gen_id(" + wx2std(getQuotedName()) + ", 0) from rdb$database");
+        "select gen_id(" + sqlName + ", 0) from rdb$database");
+        
     st1->Execute();
     st1->Fetch();
     int64_t value;
@@ -95,8 +100,8 @@ wxString Generator::getPrintableName()
         return getName_();
 
     std::ostringstream ss;
-    ss << wx2std(getName_()) << " = " << valueM;
-    return std2wx(ss.str());
+    ss << valueM;
+    return getName_() + wxT(" = ") + std2wx(ss.str());
 }
 //-----------------------------------------------------------------------------
 void Generator::loadDescription()

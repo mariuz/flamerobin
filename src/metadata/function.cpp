@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -118,7 +118,7 @@ void Function::loadInfo(bool force)
         " WHERE f.RDB$FUNCTION_NAME = ? "
         " ORDER BY a.RDB$ARGUMENT_POSITION"
     );
-    st1->Set(1, wx2std(getName_()));
+    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     while (st1->Fetch())
     {
