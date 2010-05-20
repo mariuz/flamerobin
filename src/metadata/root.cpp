@@ -54,6 +54,9 @@
 #include "metadata/server.h"
 //-----------------------------------------------------------------------------
 using namespace std;
+
+typedef MetadataCollection<Database> DatabaseCollection;
+typedef MetadataCollection<Server> ServerCollection;
 //-----------------------------------------------------------------------------
 //! access to the singleton root of the DBH.
 Root& getGlobalRoot()
@@ -85,11 +88,11 @@ Root::Root()
 //-----------------------------------------------------------------------------
 void Root::disconnectAllDatabases()
 {
-    std::list<Server>::iterator its;
-    for (its = serversM.begin(); its != serversM.end(); ++its)
+    for (ServerCollection::iterator its = serversM.begin();
+        its != serversM.end(); ++its)
     {
-        MetadataCollection<Database>* dbs = its->getDatabases();
-        MetadataCollection<Database>::iterator itdb;
+        DatabaseCollection* dbs = its->getDatabases();
+        DatabaseCollection::iterator itdb;
         for (itdb = dbs->begin(); itdb != dbs->end(); ++itdb)
             itdb->disconnect();
     }
@@ -311,7 +314,7 @@ bool Root::save()
 
     rsAddChildNode(rn, wxT("nextId"), wxString::Format(wxT("%d"), nextIdM));
 
-    for (std::list<Server>::iterator its = serversM.begin();
+    for (ServerCollection::iterator its = serversM.begin();
         its != serversM.end(); ++its)
     {
         // do not save the dummy server node for databases that were opened
@@ -326,7 +329,7 @@ bool Root::save()
         rsAddChildNode(srvn, wxT("host"), its->getHostname());
         rsAddChildNode(srvn, wxT("port"), its->getPort());
 
-        for (std::list<Database>::iterator itdb = its->getDatabases()->begin();
+        for (DatabaseCollection::iterator itdb = its->getDatabases()->begin();
             itdb != its->getDatabases()->end(); ++itdb)
         {
             itdb->resetCredentials();    // clean up eventual extra credentials
@@ -353,7 +356,7 @@ bool Root::save()
 //-----------------------------------------------------------------------------
 void Root::notifyAllServers()
 {
-    MetadataCollection<Server>::iterator it;
+    ServerCollection::iterator it;
     for (it = serversM.begin(); it != serversM.end(); ++it)
         (*it).notifyObservers();
 }
