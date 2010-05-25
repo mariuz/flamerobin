@@ -90,6 +90,21 @@ bool checkValidServer(Server* server)
     return false;
 }
 //-----------------------------------------------------------------------------
+Database* getDatabase(MetadataItem* mi)
+{
+    return (mi) ? mi->findDatabase() : 0;
+}
+//-----------------------------------------------------------------------------
+Server* getServer(MetadataItem* mi)
+{
+    if (!mi)
+        return 0;
+    if (Server* s = dynamic_cast<Server*>(mi))
+        return s;
+    Database* db = mi->findDatabase();
+    return (db) ? db->getServer() : 0;
+}
+//-----------------------------------------------------------------------------
 //! helper class to enable drag and drop of database files to the tree ctrl
 #if wxUSE_DRAG_AND_DROP
 class DnDDatabaseFile : public wxFileDropTarget
@@ -489,9 +504,8 @@ void MainFrame::updateStatusbarText()
 {
     if (wxStatusBar* sb = GetStatusBar())
     {
-        Database* d = treeMainM->getSelectedDatabase();
-        if (d)
-            sb->SetStatusText(d->getConnectionInfoString());
+        if (Database* db = getDatabase(treeMainM->getSelectedMetadataItem()))
+            sb->SetStatusText(db->getConnectionInfoString());
         else
             sb->SetStatusText(_("[No database selected]"));
     }
@@ -729,28 +743,28 @@ void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDatabaseExtractDDL(wxCommandEvent& WXUNUSED(event))
 {
-    MetadataItem* m = treeMainM->getSelectedDatabase();
-    if (!m)
+    MetadataItem* db = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (!db)
         return;
 
     URI uri = URI(wxT("fr://edit_ddl?parent_window=") +
         wxString::Format(wxT("%ld"), (uintptr_t)this) +
-        wxT("&object_address=") + wxString::Format(wxT("%ld"), (uintptr_t)m));
+        wxT("&object_address=") + wxString::Format(wxT("%ld"), (uintptr_t)db));
     getURIProcessor().handleURI(uri);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDatabaseProperties(wxCommandEvent& WXUNUSED(event))
 {
-    Database* d = treeMainM->getSelectedDatabase();
-    if (!d)
+    Database* db = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (!db)
         return;
 
-    frameManager().showMetadataPropertyFrame(d);
+    frameManager().showMetadataPropertyFrame(db);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))
 {
-    Database* d = treeMainM->getSelectedDatabase();
+    Database* d = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(d))
         return;
     DatabaseConfig dc(d);
@@ -766,10 +780,11 @@ void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuInsert(wxCommandEvent& WXUNUSED(event))
 {
-    Database* d = treeMainM->getSelectedDatabase();
+    MetadataItem* mi = treeMainM->getSelectedMetadataItem();
+    Database* d = getDatabase(mi);
     if (!checkValidDatabase(d))
         return;
-    Table* t = dynamic_cast<Table*>(treeMainM->getSelectedMetadataItem());
+    Table* t = dynamic_cast<Table*>(mi);
     if (!t)
         return;
 
@@ -824,7 +839,7 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 {
-    Server* s = treeMainM->getSelectedServer();
+    Server* s = getServer(treeMainM->getSelectedMetadataItem());
     if (!checkValidServer(s))
         return;
 
@@ -839,7 +854,7 @@ void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRestoreIntoNewDatabase(wxCommandEvent& WXUNUSED(event))
 {
-    Server* s = treeMainM->getSelectedServer();
+    Server* s = getServer(treeMainM->getSelectedMetadataItem());
     if (!checkValidServer(s))
         return;
 
@@ -858,7 +873,7 @@ void MainFrame::OnMenuRestoreIntoNewDatabase(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
 {
-    Database* d = treeMainM->getSelectedDatabase();
+    Database* d = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(d))
         return;
 
@@ -870,7 +885,7 @@ void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
 {
-    Server* s = treeMainM->getSelectedServer();
+    Server* s = getServer(treeMainM->getSelectedMetadataItem());
     if (!checkValidServer(s))
         return;
 
@@ -885,14 +900,14 @@ void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuManageUsers(wxCommandEvent& WXUNUSED(event))
 {
-    Server* s = treeMainM->getSelectedServer();
+    Server* s = getServer(treeMainM->getSelectedMetadataItem());
     if (checkValidServer(s))
         frameManager().showMetadataPropertyFrame(s);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUnRegisterServer(wxCommandEvent& WXUNUSED(event))
 {
-    Server* s = treeMainM->getSelectedServer();
+    Server* s = getServer(treeMainM->getSelectedMetadataItem());
     if (!checkValidServer(s))
         return;
 
@@ -901,15 +916,15 @@ void MainFrame::OnMenuUnRegisterServer(wxCommandEvent& WXUNUSED(event))
         AdvancedMessageDialogButtonsOkCancel(_("Unregister")));
     if (res == wxOK)
     {
-    Root* r = s->getRoot();
-    if (r)
-        r->removeServer(s);
+        Root* r = s->getRoot();
+        if (r)
+            r->removeServer(s);
     }
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuServerProperties(wxCommandEvent& WXUNUSED(event))
 {
-    Server* s = treeMainM->getSelectedServer();
+    Server* s = getServer(treeMainM->getSelectedMetadataItem());
     if (!checkValidServer(s))
         return;
 
@@ -934,7 +949,7 @@ void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 {
-    Database* d = treeMainM->getSelectedDatabase();
+    Database* d = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(d))
         return;
     // command should never be enabled when database is connected
@@ -954,7 +969,7 @@ void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
 {
-    Database* d = treeMainM->getSelectedDatabase();
+    Database* d = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(d))
         return;
 
@@ -969,7 +984,7 @@ void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuGetServerVersion(wxCommandEvent& WXUNUSED(event))
 {
-    Server* s = treeMainM->getSelectedServer();
+    Server* s = getServer(treeMainM->getSelectedMetadataItem());
     if (!s)
         return;
 
@@ -996,7 +1011,7 @@ void MainFrame::OnMenuGetServerVersion(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuGenerateData(wxCommandEvent& WXUNUSED(event))
 {
-    Database* db = treeMainM->getSelectedDatabase();
+    Database* db = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(db))
         return;
 
@@ -1006,7 +1021,7 @@ void MainFrame::OnMenuGenerateData(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuMonitorEvents(wxCommandEvent& WXUNUSED(event))
 {
-    Database* db = treeMainM->getSelectedDatabase();
+    Database* db = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(db))
         return;
 
@@ -1022,7 +1037,7 @@ void MainFrame::OnMenuMonitorEvents(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuBackup(wxCommandEvent& WXUNUSED(event))
 {
-    Database* db = treeMainM->getSelectedDatabase();
+    Database* db = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(db))
         return;
 
@@ -1038,7 +1053,7 @@ void MainFrame::OnMenuBackup(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRestore(wxCommandEvent& WXUNUSED(event))
 {
-    Database* db = treeMainM->getSelectedDatabase();
+    Database* db = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(db))
         return;
 
@@ -1054,7 +1069,7 @@ void MainFrame::OnMenuRestore(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuReconnect(wxCommandEvent& WXUNUSED(event))
 {
-    Database* d = treeMainM->getSelectedDatabase();
+    Database* d = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(d))
         return;
 
@@ -1064,7 +1079,7 @@ void MainFrame::OnMenuReconnect(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuConnectAs(wxCommandEvent& WXUNUSED(event))
 {
-    Database* d = treeMainM->getSelectedDatabase();
+    Database* d = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(d))
         return;
     // command should never be enabled when database is connected
@@ -1085,7 +1100,7 @@ void MainFrame::OnMenuConnect(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 bool MainFrame::connect()
 {
-    Database* db = treeMainM->getSelectedDatabase();
+    Database* db = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(db))
         return false;
     if (db->isConnected() || !connectDatabase(db, this))
@@ -1119,7 +1134,7 @@ bool MainFrame::connect()
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDisconnect(wxCommandEvent& WXUNUSED(event))
 {
-    Database* d = treeMainM->getSelectedDatabase();
+    Database* d = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(d))
         return;
 
@@ -1161,7 +1176,7 @@ void MainFrame::OnMenuSetGeneratorValue(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuShowAllGeneratorValues(wxCommandEvent& WXUNUSED(event))
 {
-    Database* d = treeMainM->getSelectedDatabase();
+    Database* d = getDatabase(treeMainM->getSelectedMetadataItem());
     if (checkValidDatabase(d))
         d->loadGeneratorValues();
 }
@@ -1238,11 +1253,12 @@ void MainFrame::showCreateTemplate(const MetadataItem* m)
     wxString sql = m->getCreateSqlTemplate();
     if (sql == wxT(""))
     {
-        wxMessageBox(_("The feature is not yet available for this type of database objects."), _("Not yet implemented"), wxOK | wxICON_INFORMATION);
+        wxMessageBox(_("The feature is not yet available for this type of database objects."),
+            _("Not yet implemented"), wxOK | wxICON_INFORMATION);
         return;
     }
 
-    Database* db = treeMainM->getSelectedDatabase();
+    Database* db = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(db))
         return;
 
@@ -1404,9 +1420,8 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
 {
-    Database *db = treeMainM->getSelectedDatabase();
-    Procedure* p = dynamic_cast<Procedure *>(
-        treeMainM->getSelectedMetadataItem());
+    MetadataItem* mi = treeMainM->getSelectedMetadataItem();
+    Procedure* p = dynamic_cast<Procedure*>(mi);
     if (p)
     {
         URI uri(wxT("fr://edit_procedure?parent_window=")
@@ -1416,9 +1431,11 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
         getURIProcessor().handleURI(uri);
         return;
     }
-    View* v = dynamic_cast<View *>(treeMainM->getSelectedMetadataItem());
-    Trigger* t = dynamic_cast<Trigger *>(treeMainM->getSelectedMetadataItem());
-    Domain *dm = dynamic_cast<Domain *>(treeMainM->getSelectedMetadataItem());
+
+    Database* db = getDatabase(mi);
+    View* v = dynamic_cast<View*>(mi);
+    Trigger* t = dynamic_cast<Trigger*>(mi);
+    Domain *dm = dynamic_cast<Domain*>(mi);
     if (!db || !p && !v && !t && !dm)
         return;
 
@@ -1434,8 +1451,7 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRecreateDatabase(wxCommandEvent& WXUNUSED(event))
 {
-    Database* d = treeMainM->getSelectedDatabase();
-
+    Database* d = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(d))
         return;
 
@@ -1473,8 +1489,7 @@ void MainFrame::OnMenuRecreateDatabase(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDropDatabase(wxCommandEvent& WXUNUSED(event))
 {
-    Database* d = treeMainM->getSelectedDatabase();
-
+    Database* d = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(d) || !confirmDropItem(d))
         return;
 
@@ -1495,25 +1510,25 @@ void MainFrame::OnMenuDropDatabase(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
 {
-    Database* d = treeMainM->getSelectedDatabase();
+    MetadataItem* mi = treeMainM->getSelectedMetadataItem();
+    if (!mi)
+        return;
+    Database* d = getDatabase(mi);
     if (!checkValidDatabase(d))
         return;
-    MetadataItem* m = treeMainM->getSelectedMetadataItem();
-    if (!m)
-        return;
-    if (!confirmDropItem(m))
+    if (!confirmDropItem(mi))
         return;
 
     // TODO: We could first check if there are some dependant objects, and offer the user to
     //       either drop dependencies, or drop those objects too. Then we should create a bunch of
     //       sql statements that do it.
-    execSql(this, wxEmptyString, d, m->getDropSqlStatement(), true);
+    execSql(this, wxEmptyString, d, mi->getDropSqlStatement(), true);
 }
 //-----------------------------------------------------------------------------
 //! create new ExecSqlFrame and attach database object to it
 void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
 {
-    Database* d = treeMainM->getSelectedDatabase();
+    Database* d = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(d))
         return;
     if (!d->isConnected())
@@ -1539,31 +1554,31 @@ const wxString MainFrame::getName() const
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateUnRegisterServer(wxUpdateUIEvent& event)
 {
-    Server* s = treeMainM->getSelectedServer();
+    Server* s = getServer(treeMainM->getSelectedMetadataItem());
     event.Enable(s != 0 && !s->hasConnectedDatabase());
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateIfServerSelected(wxUpdateUIEvent& event)
 {
-    Server* s = treeMainM->getSelectedServer();
+    Server* s = getServer(treeMainM->getSelectedMetadataItem());
     event.Enable(s != 0);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateIfDatabaseConnected(wxUpdateUIEvent& event)
 {
-    Database* d = treeMainM->getSelectedDatabase();
+    Database* d = getDatabase(treeMainM->getSelectedMetadataItem());
     event.Enable(d != 0 && d->isConnected());
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateIfDatabaseNotConnected(wxUpdateUIEvent& event)
 {
-    Database* d = treeMainM->getSelectedDatabase();
+    Database* d = getDatabase(treeMainM->getSelectedMetadataItem());
     event.Enable(d != 0 && !d->isConnected());
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateIfDatabaseSelected(wxUpdateUIEvent& event)
 {
-    Database* d = treeMainM->getSelectedDatabase();
+    Database* d = getDatabase(treeMainM->getSelectedMetadataItem());
     event.Enable(d != 0);
 }
 //-----------------------------------------------------------------------------

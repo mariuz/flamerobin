@@ -786,24 +786,6 @@ MetadataItem* DBHTreeControl::getSelectedMetadataItem()
     return getMetadataItem(GetSelection());
 }
 //-----------------------------------------------------------------------------
-//! returns the database of the object that selected wxTree node observes
-Database* DBHTreeControl::getSelectedDatabase()
-{
-    MetadataItem* m = getSelectedMetadataItem();
-    return (m) ? m->findDatabase() : 0;
-}
-//-----------------------------------------------------------------------------
-//! returns the server of the object that selected wxTree node observes
-Server* DBHTreeControl::getSelectedServer()
-{
-    MetadataItem* m = getSelectedMetadataItem();
-    Server* s = dynamic_cast<Server*>(m);
-    if (s)
-        return s;
-    Database* d = getSelectedDatabase();
-    return (d) ? d->getServer() : 0;
-}
-//-----------------------------------------------------------------------------
 //! returns the object that some wxTree node observes
 MetadataItem* DBHTreeControl::getMetadataItem(wxTreeItemId item)
 {

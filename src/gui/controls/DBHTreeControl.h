@@ -32,9 +32,6 @@
 #include <wx/treectrl.h>
 
 #include "metadata/metadataitem.h"
-
-class Database;
-class Server;
 //-----------------------------------------------------------------------------
 class DBHTreeControl: public wxTreeCtrl
 {
@@ -63,8 +60,6 @@ public:
 
     // Returns observed metadata item based on currently selected tree item
     MetadataItem *getSelectedMetadataItem();
-    Database *getSelectedDatabase();
-    Server *getSelectedServer();
 
     // Selects the tree item represented by the metadata item
     bool selectMetadataItem(MetadataItem* item);
