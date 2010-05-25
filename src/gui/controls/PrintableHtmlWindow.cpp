@@ -132,6 +132,12 @@ void PrintableHtmlWindow::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
     CopySelection();
 }
 //-----------------------------------------------------------------------------
+void notImplementedMessage(wxWindow* parent)
+{
+    ::wxMessageBox(_("Feature not yet implemented."), _("Information"),
+        wxICON_INFORMATION | wxOK, parent);
+}
+//-----------------------------------------------------------------------------
 void PrintableHtmlWindow::OnMenuNewTab(wxCommandEvent& WXUNUSED(event))
 {
     wxString addr = tempLinkM;
@@ -141,10 +147,7 @@ void PrintableHtmlWindow::OnMenuNewTab(wxCommandEvent& WXUNUSED(event))
         return;
     uri.addParam(wxT("target=new_tab"));
     if (!getURIProcessor().handleURI(uri))
-    {
-        ::wxMessageBox(_("Feature not yet implemented."), _("Information"), 
-            wxICON_INFORMATION | wxOK);
-    }
+        notImplementedMessage(this);
 }
 //-----------------------------------------------------------------------------
 void PrintableHtmlWindow::OnMenuNewWindow(wxCommandEvent& WXUNUSED(event))
@@ -156,10 +159,7 @@ void PrintableHtmlWindow::OnMenuNewWindow(wxCommandEvent& WXUNUSED(event))
         return;
     uri.addParam(wxT("target=new"));
     if (!getURIProcessor().handleURI(uri))
-    {
-        ::wxMessageBox(_("Feature not yet implemented."), _("Information"), 
-            wxICON_INFORMATION | wxOK);
-    }
+        notImplementedMessage(this);
 }
 //-----------------------------------------------------------------------------
 void PrintableHtmlWindow::OnMenuSave(wxCommandEvent& WXUNUSED(event))
@@ -236,9 +236,6 @@ void PrintableHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
         uri.addParam(wxT("target=new"));
 
     if (!getURIProcessor().handleURI(uri))
-    {
-        ::wxMessageBox(_("Feature not yet implemented."), _("Information"), 
-        wxICON_INFORMATION|wxOK);
-    }
+        notImplementedMessage(this);
 }
 //-----------------------------------------------------------------------------
