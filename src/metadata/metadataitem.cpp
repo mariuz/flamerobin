@@ -636,6 +636,14 @@ void MetadataItem::setType(NodeType type)
     typeM = type;
 }
 //-----------------------------------------------------------------------------
+void MetadataItem::setProperties(MetadataItem* parent, const wxString& name,
+    NodeType type)
+{
+    setParent(parent);
+    setType(type);
+    setName_(name);
+}
+//-----------------------------------------------------------------------------
 bool MetadataItem::isSystem() const
 {
 	wxString prefix(getName_().substr(0, 4));

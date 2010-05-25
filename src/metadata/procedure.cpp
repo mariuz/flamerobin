@@ -72,14 +72,6 @@ Procedure::Procedure(const Procedure& rhs)
     parametersM.setParent(this);
 }
 //-----------------------------------------------------------------------------
-Parameter* Procedure::addParameter(Parameter &c)
-{
-    ensureChildrenLoaded();
-    Parameter *cc = parametersM.add(c);
-    cc->setParent(this);
-    return cc;
-}
-//-----------------------------------------------------------------------------
 bool Procedure::childrenLoaded() const
 {
     return parametersLoadedM;

@@ -62,14 +62,6 @@ Relation::Relation(const Relation& rhs)
     columnsM.setParent(this);
 }
 //-----------------------------------------------------------------------------
-Column *Relation::addColumn(Column &c)
-{
-    ensureChildrenLoaded();
-    Column *cc = columnsM.add(c);
-    cc->setParent(this);
-    return cc;
-}
-//-----------------------------------------------------------------------------
 MetadataCollection<Column>::iterator Relation::begin()
 {
     // please - don't load here

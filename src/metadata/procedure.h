@@ -55,7 +55,6 @@ public:
     virtual void reloadChildren();
 
     bool getChildren(std::vector<MetadataItem *>& temp);
-    Parameter *addParameter(Parameter &c);
 
     wxString getExecuteStatement();
 

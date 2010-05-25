@@ -131,6 +131,7 @@ public:
     virtual void setName_(wxString name);
     virtual NodeType getType() const;
     void setType(NodeType type);
+    void setProperties(MetadataItem* parent, const wxString& name, NodeType type);
 
     // returns the name of the data type (f. ex. TABLE)
     virtual const wxString getTypeName() const;

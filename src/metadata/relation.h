@@ -70,8 +70,6 @@ public:
     virtual bool childrenLoaded() const;
     virtual void reloadChildren();
 
-    Column *addColumn(Column &c);
-
     wxString getSelectStatement();
 
     MetadataCollection<Column>::iterator begin();

@@ -782,9 +782,7 @@ bool Database::addObject(NodeType type, wxString name)
 
     if (!m)     // should never happen, but just in case
         return false;
-    m->setName_(name);
-    m->setParent(this);
-    m->setType(type);   // in case it doesn't have ctor to set it
+    m->setProperties(this, name, type);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -900,9 +898,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
             if (!m)     // domain does not exist in DBH
             {
                 m = domainsM.add();
-                m->setName_(domainName);
-                m->setParent(this);
-                m->setType(ntDomain);   // just in case
+                m->setProperties(this, domainName, ntDomain);
             }
             dynamic_cast<Domain*>(m)->loadInfo();
         }

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -43,13 +43,6 @@ public:
 private:
     ContainerType itemsM;
 public:
-    void setProperties(MetadataItem* parent, const wxString& name, NodeType type)
-    {
-        setParent(parent);
-        setName_(name);
-        setType(type);
-    }
-
     void remove(T *item)        // removes item from vector
     {
         if (!item)
