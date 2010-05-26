@@ -163,21 +163,15 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent)
         wxDefaultSize, 0, 0, 0);
     choice_database->Append(_("[All Connected Databases]"), (void *)0);
     Root& r = getGlobalRoot();  // add all databases
-    std::vector<MetadataItem*> servers;
-    r.getChildren(servers);
-    for (std::vector<MetadataItem*>::iterator it = servers.begin();
-        it != servers.end(); ++it)
+    for (ServerCollection::iterator its = r.begin();
+        its != r.end(); ++its)
     {
-        Server *s = dynamic_cast<Server *>(*it);
-        if (!s)
-            continue;
-        MetadataCollection<Database> *dbs = s->getDatabases();
-        for (MetadataCollection<Database>::iterator i2 = dbs->begin();
-            i2 != dbs->end(); ++i2)
+        for (DatabaseCollection::iterator itdb = its->begin();
+            itdb != its->end(); ++itdb)
         {   // we store DB pointer, so we observe in case database is removed
-            choice_database->Append((*it)->getName_() + wxT("::") +
-                (*i2).getName_(), (void *)(&(*i2)));
-            (*i2).attachObserver(this);
+            choice_database->Append((*its).getName_() + wxT("::") +
+                (*itdb).getName_(), (void *)(&(*itdb)));
+            (*itdb).attachObserver(this);
         }
     }
     choice_database->SetSelection(0);

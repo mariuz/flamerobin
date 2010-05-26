@@ -33,11 +33,13 @@
 
 class Database;
 class wxXmlNode;
+
+typedef MetadataCollection<Server> ServerCollection;
 //-----------------------------------------------------------------------------
 class Root: public MetadataItem
 {
 private:
-    MetadataCollection<Server> serversM;
+    ServerCollection serversM;
 
     Server* unregLocalDatabasesM;
 
@@ -58,6 +60,11 @@ public:
 
     Server* addServer(Server& server);
     void removeServer(Server* server);
+
+    ServerCollection::iterator begin();
+    ServerCollection::iterator end();
+    ServerCollection::const_iterator begin() const;
+    ServerCollection::const_iterator end() const;
 
     Database* addUnregisteredDatabase(Database& database);
 

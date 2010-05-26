@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -37,6 +37,7 @@
 #include "metadata/User.h"
 
 typedef std::vector<User> UserList;
+typedef MetadataCollection<Database> DatabaseCollection;
 //-----------------------------------------------------------------------------
 // this is a coupled node (in visual sense). Server equals collection of
 // YDatabases in wxTree. that's why getChildren() method just copies, since
@@ -47,7 +48,7 @@ private:
     wxString hostnameM;
     wxString portM;
 
-    MetadataCollection<Database> databasesM;
+    DatabaseCollection databasesM;
     UserList usersM;
 
     wxString serviceUserM;
@@ -64,7 +65,11 @@ public:
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
     Database* addDatabase(Database&);
     void removeDatabase(Database*);
-    MetadataCollection<Database> *getDatabases();
+
+    DatabaseCollection::iterator begin();
+    DatabaseCollection::iterator end();
+    DatabaseCollection::const_iterator begin() const;
+    DatabaseCollection::const_iterator end() const;
 
     void createDatabase(Database *db, int pagesize = 4096, int dialect = 3);
 

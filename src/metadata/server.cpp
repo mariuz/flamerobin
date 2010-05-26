@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -115,10 +115,25 @@ void Server::createDatabase(Database* db, int pagesize, int dialect)
     db1->Create(dialect);
 }
 //-----------------------------------------------------------------------------
-MetadataCollection<Database>* Server::getDatabases()
+DatabaseCollection::iterator Server::begin()
 {
-    return &databasesM;
-};
+    return databasesM.begin();
+}
+//-----------------------------------------------------------------------------
+DatabaseCollection::iterator Server::end()
+{
+    return databasesM.end();
+}
+//-----------------------------------------------------------------------------
+DatabaseCollection::const_iterator Server::begin() const
+{
+    return databasesM.begin();
+}
+//-----------------------------------------------------------------------------
+DatabaseCollection::const_iterator Server::end() const
+{
+    return databasesM.end();
+}
 //-----------------------------------------------------------------------------
 wxString Server::getHostname() const
 {
@@ -132,13 +147,10 @@ wxString Server::getPort() const
 //-----------------------------------------------------------------------------
 bool Server::hasConnectedDatabase() const
 {
-    for (MetadataCollection<Database>::const_iterator it = databasesM.begin();
-        it != databasesM.end(); ++it)
-    {
-        if ((*it).isConnected())
-            return true;
-    }
-    return false;
+    DatabaseCollection::const_iterator it = std::find_if(
+        databasesM.begin(), databasesM.end(),
+        std::mem_fun_ref<bool, Database>(&Database::isConnected));
+    return it != databasesM.end();
 }
 //-----------------------------------------------------------------------------
 void Server::setHostname(wxString hostname)
@@ -269,7 +281,7 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
     }
 
     // first try connected databases
-    for (MetadataCollection<Database>::iterator ci = databasesM.begin();
+    for (DatabaseCollection::iterator ci = databasesM.begin();
         ci != databasesM.end(); ++ci)
     {
         if (progressind && progressind->isCanceled())
@@ -307,8 +319,8 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
     }
 
     // when the operation is not canceled try to user/pass of disconnected DBs
-    for (MetadataCollection<Database>::const_iterator
-        ci = databasesM.begin(); ci != databasesM.end(); ++ci)
+    for (DatabaseCollection::const_iterator ci = databasesM.begin();
+        ci != databasesM.end(); ++ci)
     {
         if (progressind && progressind->isCanceled())
             return false;

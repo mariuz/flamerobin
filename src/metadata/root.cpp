@@ -53,11 +53,6 @@
 #include "metadata/root.h"
 #include "metadata/server.h"
 //-----------------------------------------------------------------------------
-using namespace std;
-
-typedef MetadataCollection<Database> DatabaseCollection;
-typedef MetadataCollection<Server> ServerCollection;
-//-----------------------------------------------------------------------------
 //! access to the singleton root of the DBH.
 Root& getGlobalRoot()
 {
@@ -91,10 +86,8 @@ void Root::disconnectAllDatabases()
     for (ServerCollection::iterator its = serversM.begin();
         its != serversM.end(); ++its)
     {
-        DatabaseCollection* dbs = its->getDatabases();
-        DatabaseCollection::iterator itdb;
-        for (itdb = dbs->begin(); itdb != dbs->end(); ++itdb)
-            itdb->disconnect();
+        std::for_each(its->begin(), its->end(),
+            std::mem_fun_ref<void, Database>(&Database::disconnect));
     }
 }
 //-----------------------------------------------------------------------------
@@ -329,8 +322,8 @@ bool Root::save()
         rsAddChildNode(srvn, wxT("host"), its->getHostname());
         rsAddChildNode(srvn, wxT("port"), its->getPort());
 
-        for (DatabaseCollection::iterator itdb = its->getDatabases()->begin();
-            itdb != its->getDatabases()->end(); ++itdb)
+        for (DatabaseCollection::iterator itdb = its->begin();
+            itdb != its->end(); ++itdb)
         {
             itdb->resetCredentials();    // clean up eventual extra credentials
 
@@ -361,9 +354,29 @@ void Root::notifyAllServers()
         (*it).notifyObservers();
 }
 //-----------------------------------------------------------------------------
-bool Root::getChildren(vector<MetadataItem *>& temp)
+bool Root::getChildren(std::vector<MetadataItem *>& temp)
 {
     return serversM.getChildren(temp);
+}
+//-----------------------------------------------------------------------------
+ServerCollection::iterator Root::begin()
+{
+    return serversM.begin();
+}
+//-----------------------------------------------------------------------------
+ServerCollection::iterator Root::end()
+{
+    return serversM.end();
+}
+//-----------------------------------------------------------------------------
+ServerCollection::const_iterator Root::begin() const
+{
+    return serversM.begin();
+}
+//-----------------------------------------------------------------------------
+ServerCollection::const_iterator Root::end() const
+{
+    return serversM.end();
 }
 //-----------------------------------------------------------------------------
 void Root::lockChildren()
