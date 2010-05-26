@@ -334,7 +334,8 @@ void DBHTreeItemVisitor::setNodeProperties(MetadataItem* metadataItem)
     nodeVisibleM = true;
     nodeTextBoldM = false;
     nodeTextM = metadataItem->getPrintableName();
-    nodeImageIndexM = DBHTreeImageList::get().getImageIndex(metadataItem->getType());
+    nodeImageIndexM = DBHTreeImageList::get().getImageIndex(
+        metadataItem->getType());
     showChildrenM = metadataItem->getChildrenCount() > 0;
     sortChildrenM = false;
 }
@@ -353,27 +354,33 @@ void DBHTreeItemVisitor::visitColumn(Column& column)
     // and is different for computed columns
     bool isPK = column.isPrimaryKey();
     bool isFK = column.isForeignKey();
+
+    wxArtID artInvalid = wxART_MAKE_ART_ID(ART_INVALID);
+    wxArtID artId = artInvalid;
+
     if (isPK && isFK)
-        nodeImageIndexM = DBHTreeImageList::get().getImageIndex(ART_PrimaryAndForeignKey);
+        artId = ART_PrimaryAndForeignKey;
     else if (isPK)
-        nodeImageIndexM = DBHTreeImageList::get().getImageIndex(ART_PrimaryKey);
+        artId = ART_PrimaryKey;
     else if (isFK)
-        nodeImageIndexM = DBHTreeImageList::get().getImageIndex(ART_ForeignKey);
+        artId = ART_ForeignKey;
     else if (!column.getComputedSource().IsEmpty())
-        nodeImageIndexM = DBHTreeImageList::get().getImageIndex(ART_Computed);
+        artId = ART_Computed;
+
+    if (artId != artInvalid)
+        nodeImageIndexM = DBHTreeImageList::get().getImageIndex(artId);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitDatabase(Database& database)
 {
     setNodeProperties(&database);
     // show different images for connected and disconnected databases
-    if (database.isConnected())
-        nodeImageIndexM = DBHTreeImageList::get().getImageIndex(ART_DatabaseConnected);
-    else
-        nodeImageIndexM = DBHTreeImageList::get().getImageIndex(ART_DatabaseDisconnected);
+    bool connected = database.isConnected();
+    nodeImageIndexM = DBHTreeImageList::get().getImageIndex(
+        connected ? ART_DatabaseConnected : ART_DatabaseDisconnected);
     // hide disconnected databases
     if (DBHTreeConfigCache::get().getHideDisconnectedDatabases())
-        nodeVisibleM = database.isConnected();
+        nodeVisibleM = connected;
     // show Collection nodes even though Database::getChildrenCount() returns 0
     showChildrenM = true;
 }
