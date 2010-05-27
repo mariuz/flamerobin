@@ -142,7 +142,7 @@ void Relation::reloadChildren()
 {
     columnsM.clear();
 
-    Database *d = getDatabase(wxT("Relation::loadColumns"));
+    Database *d = getDatabase(wxT("Relation::reloadChildren"));
     MetadataLoader* loader = d->getMetadataLoader();
     // first start a transaction for metadata loading, then lock the relation
     // when objects go out of scope and are destroyed, object will be unlocked

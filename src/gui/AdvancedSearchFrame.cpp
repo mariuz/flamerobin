@@ -609,22 +609,36 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
                 }
                 if (searchCriteriaM.count(CriteriaItem::ctField) > 0)
                 {
-                    Relation *r = dynamic_cast<Relation *>(*it);
-                    Procedure *p = dynamic_cast<Procedure *>(*it);
+                    Relation* r = dynamic_cast<Relation*>(*it);
+                    Procedure* p = dynamic_cast<Procedure*>(*it);
                     if (r || p)
                     {
                         (*it)->ensureChildrenLoaded();
-                        std::vector<MetadataItem *> tmpc;
-                        (*it)->getChildren(tmpc);
                         bool found = false;
-                        for (std::vector<MetadataItem *>::iterator ic =
-                            tmpc.begin(); ic != tmpc.end(); ++ic)
+                        if (r)
                         {
-                            if (match(CriteriaItem::ctField,
-                                (*ic)->getName_()))
+                            MetadataCollection<Column>::iterator it;
+                            for (it = r->begin(); it != r->end(); ++it)
                             {
-                                found = true;
-                                break;
+                                if (match(CriteriaItem::ctField,
+                                    it->getName_()))
+                                {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (p)
+                        {
+                            MetadataCollection<Parameter>::iterator it;
+                            for (it = p->begin(); it != p->end(); ++it)
+                            {
+                                if (match(CriteriaItem::ctField,
+                                    it->getName_()))
+                                {
+                                    found = true;
+                                    break;
+                                }
                             }
                         }
                         if (!found)     // object doesn't contain that field

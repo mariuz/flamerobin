@@ -82,7 +82,7 @@ void Procedure::reloadChildren()
     parametersLoadedM = false;
     parametersM.clear();
 
-    Database* d = getDatabase(wxT("Procedure::loadParameters"));
+    Database* d = getDatabase(wxT("Procedure::reloadChildren"));
     MetadataLoader* loader = d->getMetadataLoader();
     // first start a transaction for metadata loading, then lock the procedure
     // when objects go out of scope and are destroyed, procedure will be
