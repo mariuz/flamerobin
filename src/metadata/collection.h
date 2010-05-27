@@ -145,16 +145,13 @@ public:
         }
     };
 
-    virtual MetadataItem *findByName(wxString name)
+    virtual MetadataItem* findByName(wxString name)
     {
         Identifier id(name);
         for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
         {
-            MetadataItem *p = &(*it);
-            if (!p)
-                continue;
-            if (p->getName_() == id.get())
-                return p;
+            if ((*it).getIdentifier().equals(id))
+                return &(*it);
         }
         return 0;
     };

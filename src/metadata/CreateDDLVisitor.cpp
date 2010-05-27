@@ -393,24 +393,20 @@ void CreateDDLVisitor::visitProcedure(Procedure& p)
              << description << wxT("'\n  where RDB$PROCEDURE_NAME = '")
              << name << wxT("';\n");
     }
-    std::vector<MetadataItem *> params;
-    if (p.getChildren(params))
+    for (MetadataCollection<Parameter>::iterator it = p.begin();
+        it != p.end(); ++it)
     {
-        for (std::vector<MetadataItem *>::iterator it = params.begin();
-            it != params.end(); ++it)
+        wxString description = (*it).getDescription();
+        if (!description.IsEmpty())
         {
-            wxString description = (*it)->getDescription();
-            if (!description.IsEmpty())
-            {
-                wxString pname((*it)->getName_());
-                description.Replace(wxT("'"), wxT("''"));
-                pname.Replace(wxT("'"), wxT("''"));
-                temp <<
-                wxT("UPDATE RDB$PROCEDURE_PARAMETERS set RDB$DESCRIPTION = '")
-                << description << wxT("'\n  where RDB$PARAMETER_NAME = '")
-                << pname << wxT("' AND RDB$PROCEDURE_NAME = '") << name
-                << wxT("';\n");
-            }
+            wxString pname((*it).getName_());
+            description.Replace(wxT("'"), wxT("''"));
+            pname.Replace(wxT("'"), wxT("''"));
+            temp <<
+            wxT("UPDATE RDB$PROCEDURE_PARAMETERS set RDB$DESCRIPTION = '")
+            << description << wxT("'\n  where RDB$PARAMETER_NAME = '")
+            << pname << wxT("' AND RDB$PROCEDURE_NAME = '") << name
+            << wxT("';\n");
         }
     }
 
@@ -662,24 +658,20 @@ void CreateDDLVisitor::visitView(View& v)
     }
 
     // description for columns
-    std::vector<MetadataItem *> cols;
-    if (v.getChildren(cols))
+    for (MetadataCollection<Column>::iterator it = v.begin(); it != v.end();
+        ++it)
     {
-        for (std::vector<MetadataItem *>::iterator it = cols.begin();
-            it != cols.end(); ++it)
+        wxString description = (*it).getDescription();
+        if (!description.IsEmpty())
         {
-            wxString description = (*it)->getDescription();
-            if (!description.IsEmpty())
-            {
-                wxString cname((*it)->getName_());
-                description.Replace(wxT("'"), wxT("''"));
-                cname.Replace(wxT("'"), wxT("''"));
-                postSqlM <<
-                wxT("UPDATE RDB$RELATION_FIELDS set\n  RDB$DESCRIPTION = '")
-                << description << wxT("'\n  where RDB$FIELD_NAME = '") <<
-                cname << wxT("' AND RDB$RELATION_NAME = '") << name <<
-                wxT("';\n");
-            }
+            wxString cname((*it).getName_());
+            description.Replace(wxT("'"), wxT("''"));
+            cname.Replace(wxT("'"), wxT("''"));
+            postSqlM <<
+            wxT("UPDATE RDB$RELATION_FIELDS set\n  RDB$DESCRIPTION = '")
+            << description << wxT("'\n  where RDB$FIELD_NAME = '") <<
+            cname << wxT("' AND RDB$RELATION_NAME = '") << name <<
+            wxT("';\n");
         }
     }
 

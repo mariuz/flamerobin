@@ -120,14 +120,17 @@ wxString selectRelationColumns(Relation* t, wxWindow* parent)
     return retval;
 }
 //-----------------------------------------------------------------------------
-bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent, vector<wxString>& list)
+bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent,
+    vector<wxString>& list)
 {
     t->ensureChildrenLoaded();
-    vector<MetadataItem*> temp;
-    t->getChildren(temp);
-    wxArrayString columns;
-    for (vector<MetadataItem*>::const_iterator it = temp.begin(); it != temp.end(); ++it)
-        columns.Add((*it)->getName_());
+    wxArrayString colNames;
+    colNames.Alloc(t->getColumnCount());
+    for (MetadataCollection<Column>::const_iterator it = t->begin();
+        it != t->end(); ++it)
+    {
+        colNames.Add((*it).getName_());
+    }
 
     wxArrayInt selected_columns;
     bool ok = 
@@ -137,13 +140,13 @@ bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent, vector<wxStr
     ::wxGetMultipleChoices(selected_columns,
 #endif
         _("Select one or more fields... (use ctrl key)"),  _("Table Fields"),
-        columns, parent) > 0;
+        colNames, parent) > 0;
     if (!ok)
         return false;
 
     for (size_t i = 0; i < selected_columns.GetCount(); ++i)
     {
-        Identifier temp(columns[selected_columns[i]]);
+        Identifier temp(colNames[selected_columns[i]]);
         list.push_back(temp.getQuoted());
     }
     return true;

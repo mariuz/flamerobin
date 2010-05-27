@@ -476,13 +476,10 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
         Relation* r = dynamic_cast<Relation*>(object);
         if (!r)
             return;
-        std::vector<MetadataItem*> tmp;
         r->ensureChildrenLoaded();
-        if (r->getChildren(tmp))
-        {
-            for (std::vector<MetadataItem*>::iterator it = tmp.begin(); it != tmp.end(); ++it)
-                processHtmlCode(htmlpage, suffix, *it);
-        }
+        MetadataCollection<Column>::iterator it;
+        for (it = r->begin(); it != r->end(); ++it)
+            processHtmlCode(htmlpage, suffix, &(*it));
     }
 
     // table triggers,  triggers:after or triggers:befor  <- not a typo
@@ -742,17 +739,13 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
             return;
 
         SubjectLocker locker(p);
-        std::vector<MetadataItem*> tmp;
         p->ensureChildrenLoaded();
-        if (p->getChildren(tmp))
+        bool parOut = (cmd == wxT("output_parameters"));
+        for (MetadataCollection<Parameter>::iterator it = p->begin();
+            it != p->end(); ++it)
         {
-            bool parOut = (cmd == wxT("output_parameters"));
-            std::vector<MetadataItem*>::iterator it;
-            for (it = tmp.begin(); it != tmp.end(); ++it)
-            {
-                if ((dynamic_cast<Parameter*>(*it))->isOutputParameter() == parOut)
-                    processHtmlCode(htmlpage, suffix, *it);
-            }
+            if ((*it).isOutputParameter() == parOut)
+                processHtmlCode(htmlpage, suffix, &(*it));
         }
     }
 
@@ -1173,17 +1166,15 @@ void MetadataItemPropertiesPanel::update()
     // if table or view columns change, we need to reattach
     if (objectM->getType() == ntTable || objectM->getType() == ntView)  // also observe columns
     {
-        Relation* t = dynamic_cast<Relation*>(objectM);
-        if (!t)
+        Relation* r = dynamic_cast<Relation*>(objectM);
+        if (!r)
             return;
 
-        SubjectLocker locker(t);
-        t->ensureChildrenLoaded();
-        std::vector<MetadataItem*> temp;
-        objectM->getChildren(temp);
-        std::vector<MetadataItem *>::iterator it;
-        for (it = temp.begin(); it != temp.end(); ++it)
-            (*it)->attachObserver(this);
+        SubjectLocker locker(r);
+        r->ensureChildrenLoaded();
+        MetadataCollection<Column>::iterator it;
+        for (it = r->begin(); it != r->end(); ++it)
+            (*it).attachObserver(this);
     }
 
     // if description of procedure params change, we need to reattach
@@ -1195,11 +1186,9 @@ void MetadataItemPropertiesPanel::update()
 
         SubjectLocker locker(p);
         p->ensureChildrenLoaded();
-        std::vector<MetadataItem*> temp;
-        objectM->getChildren(temp);
-        std::vector<MetadataItem *>::iterator it;
-        for (it = temp.begin(); it != temp.end(); ++it)
-            (*it)->attachObserver(this);
+        MetadataCollection<Parameter>::iterator it;
+        for (it = p->begin(); it != p->end(); ++it)
+            (*it).attachObserver(this);
     }
 
     // with this set to false updates to the same page do not show the

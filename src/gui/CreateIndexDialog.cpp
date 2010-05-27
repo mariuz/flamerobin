@@ -137,16 +137,13 @@ void CreateIndexDialog::setControlsProperties()
     textctrl_name->SetValue(indexName);
 
     // fill listbox with table column names
-    // taken from frutils.cpp - why isn't there a sane method to do this?
     tableM->ensureChildrenLoaded();
-    vector<MetadataItem*> columns;
-    tableM->getChildren(columns);
-
-    wxArrayString columnNames;
-    vector<MetadataItem*>::const_iterator itColumn;
-    for (itColumn = columns.begin(); itColumn != columns.end(); ++itColumn)
-        columnNames.Add((*itColumn)->getName_());
-    listbox_columns->Set(columnNames);
+    wxArrayString colNames;
+    colNames.Alloc(tableM->getColumnCount());
+    MetadataCollection<Column>::const_iterator it;
+    for (it = tableM->begin(); it != tableM->end(); ++it)
+        colNames.Add((*it).getName_());
+    listbox_columns->Set(colNames);
 }
 //-----------------------------------------------------------------------------
 const wxString CreateIndexDialog::getName() const

@@ -146,12 +146,12 @@ void ReorderFieldsDialog::removeSubject(Subject* subject)
 //-----------------------------------------------------------------------------
 void ReorderFieldsDialog::update()
 {
-    std::vector<MetadataItem *> temp;
-    tableM->getChildren(temp);
-
-    list_box_fields->Clear();
-    for (std::vector<MetadataItem*>::iterator it = temp.begin(); it != temp.end(); ++it)
-        list_box_fields->Append((*it)->getName_());
+    wxArrayString colNames;
+    colNames.Alloc(tableM->getColumnCount());
+    MetadataCollection<Column>::const_iterator it;
+    for (it = tableM->begin(); it != tableM->end(); ++it)
+        colNames.Add(it->getName_());
+    list_box_fields->Set(colNames);
     updateButtons();
 }
 //-----------------------------------------------------------------------------
