@@ -120,6 +120,7 @@ bool Root::load()
         return false;
 
     loadingM = true;
+    SubjectLocker locker(this);
     for (wxXmlNode* xmln = doc.GetRoot()->GetChildren();
         (xmln); xmln = xmln->GetNext())
     {

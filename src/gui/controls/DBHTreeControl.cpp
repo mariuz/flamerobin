@@ -448,6 +448,8 @@ void DBHTreeItemVisitor::visitRoot(Root& root)
     // show Server nodes even though Root::getChildrenCount() returns 0
     showChildrenM = true;
     sortChildrenM = DBHTreeConfigCache::get().getSortServers();
+    // update if settings change (sort servers?)
+    nodeConfigSensitiveM = true;
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitServer(Server& server)
@@ -458,6 +460,8 @@ void DBHTreeItemVisitor::visitServer(Server& server)
     // show Database nodes even though Server::getChildrenCount() returns 0
     showChildrenM = true;
     sortChildrenM = DBHTreeConfigCache::get().getSortDatabases();
+    // update if settings change (sort databases?)
+    nodeConfigSensitiveM = true;
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitTable(Table& table)
@@ -550,6 +554,17 @@ MetadataItem* DBHTreeItemData::getObservedMetadata()
     return (dynamic_cast<MetadataItem*>(getFirstSubject()));
 }
 //-----------------------------------------------------------------------------
+struct MetadataItemSorter
+{
+    bool operator() (MetadataItem* item1, MetadataItem* item2)
+    {
+        int i = item1->getName_().CmpNoCase(item2->getName_());
+        if (i == 0)
+            i = item1->getName_().Cmp(item2->getName_());
+        return i < 0;
+    };
+};
+//-----------------------------------------------------------------------------
 //! parent nodes are responsible for "insert" / "delete"
 //! node is responsible for "update"
 void DBHTreeItemData::update()
@@ -575,6 +590,13 @@ void DBHTreeItemData::update()
     std::vector<MetadataItem*>::iterator itChild;
     if (tivObject.getShowChildren() && object->getChildren(children))
     {
+        // sort child nodes if necessary
+        if (tivObject.getSortChildren())
+        {
+            MetadataItemSorter sorter;
+            std::sort(children.begin(), children.end(), sorter);
+        }
+
         wxTreeItemId prevId;
         // create or update child nodes
         for (itChild = children.begin(); itChild != children.end(); ++itChild)
@@ -585,6 +607,18 @@ void DBHTreeItemData::update()
                 continue;
 
             wxTreeItemId childId = findSubNode(*itChild);
+            // order of child nodes may have changed
+            // since nodes can't be moved they have to be recreated
+            if (childId.IsOk())
+            {
+                wxTreeItemId prevChildId = treeM->GetPrevSibling(childId);
+                if (prevChildId != prevId)
+                {
+                    treeM->Delete(childId);
+                    childId.Unset();
+                }
+            }
+
             if (!childId.IsOk())
             {
                 DBHTreeItemData* newItem = new DBHTreeItemData(treeM);
@@ -671,8 +705,6 @@ void DBHTreeItemData::update()
 
     treeM->SetItemBold(id, tivObject.getNodeTextBold()
         || treeM->ItemHasChildren(id));
-    if (tivObject.getSortChildren())
-        treeM->SortChildren(id);
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(DBHTreeControl, wxTreeCtrl)
@@ -784,6 +816,8 @@ wxTreeItemId DBHTreeControl::addRootNode(MetadataItem* rootItem)
     DBHTreeItemData* rootdata = new DBHTreeItemData(this);
     SetItemData(id, rootdata);
     rootItem->attachObserver(rootdata);
+    // server nodes may need to be reordered
+    DBHTreeConfigCache::get().attachObserver(rootdata);
     return id;
 }
 //-----------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -102,6 +102,9 @@ void Observer::addSubject(Subject* subject)
 //-----------------------------------------------------------------------------
 void Observer::removeSubject(Subject* subject)
 {
-    subjectsM.erase(find(subjectsM.begin(), subjectsM.end(), subject));
+    std::list<Subject*>::iterator it = find(subjectsM.begin(),
+        subjectsM.end(), subject);
+    if (it != subjectsM.end())
+        subjectsM.erase(it);
 }
 //-----------------------------------------------------------------------------

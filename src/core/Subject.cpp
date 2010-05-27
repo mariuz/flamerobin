@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -61,8 +61,8 @@ Subject::~Subject()
 //-----------------------------------------------------------------------------
 void Subject::attachObserver(Observer* observer)
 {
-    if (observer && std::find(observersM.begin(), observersM.end(), observer)
-        == observersM.end())
+    if (observer && observersM.end() == std::find(observersM.begin(),
+        observersM.end(), observer))
     {
         observer->addSubject(this);
         observersM.push_back(observer);
@@ -76,18 +76,30 @@ void Subject::detachObserver(Observer* observer)
         return;
 
     observer->removeSubject(this);
-    observersM.erase(find(observersM.begin(), observersM.end(), observer));
+    std::list<Observer*>::iterator it = find(observersM.begin(),
+        observersM.end(), observer);
+    if (it != observersM.end())
+        observersM.erase(it);
 }
 //-----------------------------------------------------------------------------
 void Subject::detachAllObservers()
 {
-    for (ObserverIterator i = observersM.begin(); i != observersM.end();)
+    list<Observer*> orig(observersM);
+    // make sure there are no reentrancy problems
+    // loop over the items in the original list, but ignore all observers
+    // which have already been removed from the original list
+    for (ObserverIterator it = orig.begin(); it != orig.end(); ++it)
     {
-        Observer* o = *i;   // move the iterator to a 'safe' place because
-        ++i;                // some observers might remove themselves
-        o->removeSubject(this);
+        if (isObservedBy(*it))
+            (*it)->removeSubject(this);
     }
     observersM.clear();
+}
+//-----------------------------------------------------------------------------
+bool Subject::isObservedBy(Observer* observer) const
+{
+    return observersM.end() != std::find(observersM.begin(),
+        observersM.end(), observer);
 }
 //-----------------------------------------------------------------------------
 void Subject::notifyObservers()
@@ -96,15 +108,15 @@ void Subject::notifyObservers()
         needsNotifyObjectsM = true;
     else
     {
+        list<Observer*> orig(observersM);
         // make sure there are no reentrancy problems
-        ++locksCountM;
-        for (ObserverIterator i = observersM.begin(); i != observersM.end();)
+        // loop over the items in the original list, but ignore all observers
+        // which have already been removed from the original list
+        for (ObserverIterator it = orig.begin(); it != orig.end(); ++it)
         {
-            Observer* o = *i;   // move the iterator to a 'safe' place because
-            ++i;                // some observers might remove themselves
-            o->doUpdate();
+            if (isObservedBy(*it))
+                (*it)->doUpdate();
         }
-        --locksCountM;
         needsNotifyObjectsM = false;
     }
 }

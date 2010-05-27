@@ -998,17 +998,11 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
         if (indicator)
             indicator->initProgressIndeterminate(wxT("Establishing connection..."));
 
-        if (authenticationModeM.getIgnoreUsernamePassword())
-        {
-            databaseM = IBPP::DatabaseFactory("", wx2std(getConnectionString()),
-                "", "", wx2std(getRole()), wx2std(getConnectionCharset()), "");
-        }
-        else
-        {
-            databaseM = IBPP::DatabaseFactory("", wx2std(getConnectionString()),
-                wx2std(getUsername()), wx2std(password), wx2std(getRole()),
-                wx2std(getConnectionCharset()), "");
-        }
+        bool useUserNamePwd = !authenticationModeM.getIgnoreUsernamePassword();
+        databaseM = IBPP::DatabaseFactory("", wx2std(getConnectionString()),
+            (useUserNamePwd ? wx2std(getUsername()) : ""),
+            (useUserNamePwd ? wx2std(password) : ""),
+            wx2std(getRole()), wx2std(getConnectionCharset()), "");
 
         databaseM->Connect();
         connectedM = true;
