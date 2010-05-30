@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -37,9 +37,6 @@ private:
     int64_t valueM;
     bool valueLoadedM;
     void setValue(int64_t value);
-protected:
-    virtual void loadDescription();
-    virtual void saveDescription(wxString description);
 public:
     Generator();
     // overrides MetadataItem::getCreateSqlTemplate()

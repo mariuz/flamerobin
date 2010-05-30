@@ -37,9 +37,6 @@ class Role: public MetadataItem
 {
 private:
     std::vector<Privilege> privilegesM;
-protected:
-    virtual void loadDescription();
-    virtual void saveDescription(wxString description);
 public:
     Role();
     wxString getOwner();

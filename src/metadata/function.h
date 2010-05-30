@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -36,9 +36,6 @@ class Function: public MetadataItem
 private:
     wxString libraryNameM, entryPointM, definitionM, retstrM, paramListM;
     bool infoLoadedM;
-protected:
-    virtual void loadDescription();
-    virtual void saveDescription(wxString description);
 public:
     Function();
     void loadInfo(bool force = false);

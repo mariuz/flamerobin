@@ -39,9 +39,6 @@ private:
     std::vector<Privilege> privilegesM;
     MetadataCollection<Parameter> parametersM;
     bool parametersLoadedM;
-protected:
-    virtual void loadDescription();
-    virtual void saveDescription(wxString description);
 public:
     Procedure();
     Procedure(const Procedure& rhs);

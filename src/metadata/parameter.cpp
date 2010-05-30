@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -73,21 +73,6 @@ bool Parameter::isOutputParameter() const
 int Parameter::getMechanism() const
 {
     return parameterMechanismM;
-}
-//-----------------------------------------------------------------------------
-void Parameter::loadDescription()
-{
-    MetadataItem::loadDescription(
-        wxT("select RDB$DESCRIPTION from RDB$PROCEDURE_PARAMETERS ")
-        wxT("where RDB$PARAMETER_NAME = ? and RDB$PROCEDURE_NAME = ?"));
-}
-//-----------------------------------------------------------------------------
-void Parameter::saveDescription(wxString description)
-{
-    MetadataItem::saveDescription(
-        wxT("update RDB$PROCEDURE_PARAMETERS set RDB$DESCRIPTION = ? ")
-        wxT("where RDB$PARAMETER_NAME = ? and RDB$PROCEDURE_NAME = ?"),
-        description);
 }
 //-----------------------------------------------------------------------------
 void Parameter::acceptVisitor(MetadataItemVisitor* visitor)

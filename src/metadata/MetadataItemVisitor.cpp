@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -84,6 +84,16 @@ void MetadataItemVisitor::visitGenerator(Generator&)
     defaultAction();
 };
 //-----------------------------------------------------------------------------
+void MetadataItemVisitor::visitIndex(Index&)
+{
+    defaultAction();
+};
+//-----------------------------------------------------------------------------
+void MetadataItemVisitor::visitParameter(Parameter&)
+{
+    defaultAction();
+};
+//-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitPrimaryKeyConstraint(PrimaryKeyConstraint&)
 {
     defaultAction();
@@ -94,7 +104,7 @@ void MetadataItemVisitor::visitProcedure(Procedure&)
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visitParameter(Parameter&)
+void MetadataItemVisitor::visitRelation(Relation&)
 {
     defaultAction();
 };
@@ -114,9 +124,9 @@ void MetadataItemVisitor::visitServer(Server&)
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visitTable(Table&)
+void MetadataItemVisitor::visitTable(Table& table)
 {
-    defaultAction();
+    visitRelation(*(Relation*)&table);
 };
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitTrigger(Trigger&)
@@ -129,9 +139,9 @@ void MetadataItemVisitor::visitUniqueConstraint(UniqueConstraint&)
     defaultAction();
 };
 //-----------------------------------------------------------------------------
-void MetadataItemVisitor::visitView(View&)
+void MetadataItemVisitor::visitView(View& view)
 {
-    defaultAction();
+    visitRelation(*(Relation*)&view);
 };
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitMetadataItem(MetadataItem&)

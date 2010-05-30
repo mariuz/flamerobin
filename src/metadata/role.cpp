@@ -120,21 +120,6 @@ wxString Role::getOwner()
     return std2wx(name).Trim();
 }
 //-----------------------------------------------------------------------------
-void Role::loadDescription()
-{
-    MetadataItem::loadDescription(
-        wxT("select RDB$DESCRIPTION from RDB$ROLES ")
-        wxT("where RDB$ROLE_NAME = ?"));
-}
-//-----------------------------------------------------------------------------
-void Role::saveDescription(wxString description)
-{
-    MetadataItem::saveDescription(
-        wxT("update RDB$ROLES set RDB$DESCRIPTION = ? ")
-        wxT("where RDB$ROLE_NAME = ?"),
-        description);
-}
-//-----------------------------------------------------------------------------
 wxString Role::getCreateSqlTemplate() const
 {
     return  wxT("CREATE ROLE role_name;\n");

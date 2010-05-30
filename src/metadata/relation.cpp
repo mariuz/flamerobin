@@ -642,18 +642,3 @@ void Relation::unlockChildren()
     columnsM.unlockSubject();
 }
 //-----------------------------------------------------------------------------
-void Relation::loadDescription()
-{
-    MetadataItem::loadDescription(
-        wxT("select RDB$DESCRIPTION from RDB$RELATIONS ")
-        wxT("where RDB$RELATION_NAME = ?"));
-}
-//-----------------------------------------------------------------------------
-void Relation::saveDescription(wxString description)
-{
-    MetadataItem::saveDescription(
-        wxT("update RDB$RELATIONS set RDB$DESCRIPTION = ? ")
-        wxT("where RDB$RELATION_NAME = ?"),
-        description);
-}
-//-----------------------------------------------------------------------------

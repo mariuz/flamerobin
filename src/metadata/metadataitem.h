@@ -58,10 +58,11 @@ class MetadataItem: public Subject
 {
 private:
     MetadataItem* parentM;
+
     wxString descriptionM;
     enum DescriptionState { dsNotLoaded, dsLoaded, dsNotAvailable };
     DescriptionState descriptionLoadedM;
-    void setDescriptionM(wxString description);
+    void ensureDescriptionLoaded();
 
 protected:
     Identifier identifierM;
@@ -84,7 +85,6 @@ protected:
     MetadataItem* getParentObjectOfType(NodeType type) const;
 
     virtual void loadDescription();
-    void loadDescription(wxString loadStatement);
     virtual void saveDescription(wxString description);
     void saveDescription(wxString saveStatement, wxString description);
 
@@ -148,8 +148,9 @@ public:
     virtual const wxString getId() const;
 
     // items description (in database)
-    wxString getDescription(bool force = false);
-    bool isDescriptionAvailable();
+    wxString getDescription();
+    bool getDescription(wxString& description);
+    void invalidateDescription();
     void setDescription(wxString description);
 
     // returns true if the metadata item is a system (as opposed to user-defined) item.

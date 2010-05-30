@@ -193,21 +193,6 @@ wxString Function::getHtmlHeader()
         + entryPointM + wxT("<BR><BR>");
 }
 //-----------------------------------------------------------------------------
-void Function::loadDescription()
-{
-    MetadataItem::loadDescription(
-        wxT("select RDB$DESCRIPTION from RDB$FUNCTIONS ")
-        wxT("where RDB$FUNCTION_NAME = ?"));
-}
-//-----------------------------------------------------------------------------
-void Function::saveDescription(wxString description)
-{
-    MetadataItem::saveDescription(
-        wxT("update RDB$FUNCTIONS set rdb$description = ? ")
-        wxT("where RDB$FUNCTION_NAME = ?"),
-        description);
-}
-//-----------------------------------------------------------------------------
 void Function::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitFunction(*this);

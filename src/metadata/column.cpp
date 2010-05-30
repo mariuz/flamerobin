@@ -247,21 +247,6 @@ wxString Column::getDropSqlStatement() const
     return wxT("ALTER TABLE ") + getTable()->getQuotedName() + wxT(" DROP ") + getQuotedName();
 }
 //-----------------------------------------------------------------------------
-void Column::loadDescription()
-{
-    MetadataItem::loadDescription(
-        wxT("select RDB$DESCRIPTION from RDB$RELATION_FIELDS ")
-        wxT("where RDB$FIELD_NAME = ? and RDB$RELATION_NAME = ?"));
-}
-//-----------------------------------------------------------------------------
-void Column::saveDescription(wxString description)
-{
-    MetadataItem::saveDescription(
-        wxT("update RDB$RELATION_FIELDS set RDB$DESCRIPTION = ? ")
-        wxT("where RDB$FIELD_NAME = ? and RDB$RELATION_NAME = ?"),
-        description);
-}
-//-----------------------------------------------------------------------------
 void Column::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitColumn(*this);

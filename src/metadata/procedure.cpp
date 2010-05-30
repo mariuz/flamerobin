@@ -544,21 +544,6 @@ const wxString Procedure::getTypeName() const
     return wxT("PROCEDURE");
 }
 //-----------------------------------------------------------------------------
-void Procedure::loadDescription()
-{
-    MetadataItem::loadDescription(
-        wxT("select RDB$DESCRIPTION from RDB$PROCEDURES ")
-        wxT("where RDB$PROCEDURE_NAME = ?"));
-}
-//-----------------------------------------------------------------------------
-void Procedure::saveDescription(wxString description)
-{
-    MetadataItem::saveDescription(
-        wxT("update RDB$PROCEDURES set RDB$DESCRIPTION = ? ")
-        wxT("where RDB$PROCEDURE_NAME = ?"),
-        description);
-}
-//-----------------------------------------------------------------------------
 void Procedure::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitProcedure(*this);

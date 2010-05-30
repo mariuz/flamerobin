@@ -47,17 +47,16 @@
 #include "frutils.h"
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
+#include "metadata/MetadataItemDescriptionVisitor.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/root.h"
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------
 MetadataItem::MetadataItem()
-    : Subject()
+    : Subject(), parentM(0), descriptionLoadedM(dsNotLoaded)
 {
-    parentM = 0;
     typeM = ntUnknown;
-    descriptionLoadedM = dsNotLoaded;
 }
 //-----------------------------------------------------------------------------
 MetadataItem::~MetadataItem()
@@ -470,65 +469,55 @@ void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
     tr1->Commit();
 }
 //-----------------------------------------------------------------------------
-bool MetadataItem::isDescriptionAvailable()
+void MetadataItem::ensureDescriptionLoaded()
 {
     if (descriptionLoadedM == dsNotLoaded)
         loadDescription();
-    return descriptionLoadedM != dsNotAvailable;
 }
 //-----------------------------------------------------------------------------
-wxString MetadataItem::getDescription(bool force)
+wxString MetadataItem::getDescription()
 {
-    if (force || descriptionLoadedM == dsNotLoaded)
-        loadDescription();
+    ensureDescriptionLoaded();
     return descriptionM;
+}
+//-----------------------------------------------------------------------------
+bool MetadataItem::getDescription(wxString& description)
+{
+    ensureDescriptionLoaded();
+    description = descriptionM;
+    return descriptionLoadedM != dsNotAvailable;
+}
+
+//-----------------------------------------------------------------------------
+void MetadataItem::invalidateDescription()
+{
+    if (descriptionLoadedM != dsNotLoaded)
+    {
+        descriptionLoadedM = dsNotLoaded;
+        descriptionM = wxEmptyString;
+        // call notifyObservers(), because this is only called after
+        // the description has been changed by a committed SQL statement
+        notifyObservers();
+    }
 }
 //-----------------------------------------------------------------------------
 void MetadataItem::loadDescription()
 {
-    setDescriptionM(wxEmptyString);
-}
-//-----------------------------------------------------------------------------
-void MetadataItem::loadDescription(wxString loadStatement)
-{
-    Database* d = getDatabase(wxT("MetadataItem::loadDescription"));
-
-    wxString desc;
-    try
+    LoadDescriptionVisitor ldv;
+    acceptVisitor(&ldv);
+    // don't call notifyObservers() !
+    // since descriptions are loaded on-demand, doing so would result in 
+    // additional activity at best, and crashes or infinite loops at worst
+    if (ldv.descriptionAvailable())
     {
-        MetadataLoader* loader = d->getMetadataLoader();
-        MetadataLoaderTransaction tr(loader);
-        IBPP::Statement& st1 = loader->getStatement(
-            wx2std(loadStatement, d->getCharsetConverter()));
-        st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
-        // table/view/SP name
-        if (st1->Parameters() > 1)
-            st1->Set(2, wx2std(getParent()->getName_(), d->getCharsetConverter()));
-        st1->Execute();
-        st1->Fetch();
-
-        std::string value;
-        if (!st1->IsNull(1))
-        {
-            IBPP::Blob b = loader->createBlob();
-            st1->Get(1, b);
-            b->Load(value);
-            desc = std2wx(value, d->getCharsetConverter());
-        }
         descriptionLoadedM = dsLoaded;
+        descriptionM = ldv.getDescription();
     }
-    catch (IBPP::SQLException &e)
+    else
     {
-        // FB 2.0 supports descriptions for some objects that previous
-        // FB versions don't
-        if (e.SqlCode() != -206) // column does not belong to referenced table.
-            throw;
-        else
-            descriptionLoadedM = dsNotAvailable;
+        descriptionLoadedM = dsNotAvailable;
+        descriptionM = wxEmptyString;
     }
-
-    // set value, notify observers
-    setDescriptionM(desc);
 }
 //-----------------------------------------------------------------------------
 void MetadataItem::saveDescription(wxString WXUNUSED(description))
@@ -538,51 +527,17 @@ void MetadataItem::saveDescription(wxString WXUNUSED(description))
         getTypeName().c_str()));
 }
 //-----------------------------------------------------------------------------
-void MetadataItem::saveDescription(wxString saveStatement,
-    wxString description)
-{
-    Database* d = getDatabase(wxT("MetadataItem::saveDescription"));
-
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db);
-    tr1->Start();
-
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(wx2std(saveStatement, d->getCharsetConverter()));
-
-    if (!description.empty())
-    {
-        IBPP::Blob b = IBPP::BlobFactory(db, tr1);
-        b->Save(wx2std(description, d->getCharsetConverter()));
-        st1->Set(1, b);
-    }
-    else
-        st1->SetNull(1);
-    st1->Set(2, wx2std(getName_(), d->getCharsetConverter()));
-    if (st1->Parameters() > 2)
-        st1->Set(3, wx2std(getParent()->getName_(), d->getCharsetConverter()));
-    st1->Execute();
-    tr1->Commit();
-    // set value, notify observers
-    setDescriptionM(description);
-}
-//-----------------------------------------------------------------------------
 void MetadataItem::setDescription(wxString description)
 {
-    if (description.compare(getDescription()) != 0)
-        saveDescription(description);
-}
-//-----------------------------------------------------------------------------
-void MetadataItem::setDescriptionM(wxString description)
-{
-    if (descriptionLoadedM == dsNotLoaded || descriptionLoadedM == dsLoaded &&
-        (descriptionM.compare(description) != 0))
+    if (getDescription() != description)
     {
-        descriptionM = description;
+        SaveDescriptionVisitor sdv(description);
+        acceptVisitor(&sdv);
         descriptionLoadedM = dsLoaded;
-        // FIXME: This is correct, but leads to reentrancy problems with the
-        //        current code.  Working on it...
-        // notifyObservers();
+        descriptionM = description;
+        // call notifyObservers(), because this is only called after
+        // the description has been edited by the user
+        notifyObservers();
     }
 }
 //-----------------------------------------------------------------------------

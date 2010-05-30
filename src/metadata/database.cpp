@@ -913,8 +913,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
 
     if (stm.actionIs(actCOMMENT))
     {
-        object->getDescription(true);   // force reload
-        object->notifyObservers();
+        object->invalidateDescription();
         return;
     }
 

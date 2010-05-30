@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -40,8 +40,8 @@
 
 #include <vector>
 
-#include "Index.h"
-#include "MetadataItemVisitor.h"
+#include "metadata/Index.h"
+#include "metadata/MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 Index::Index(bool unique, bool active, bool ascending, double statistics,
     bool system, wxString expression)
@@ -60,12 +60,12 @@ bool Index::isSystem() const
     return isSystemM;
 }
 //-----------------------------------------------------------------------------
-bool Index::isActive()
+bool Index::isActive() const
 {
     return activeM;
 }
 //-----------------------------------------------------------------------------
-bool Index::isUnique()
+bool Index::isUnique() const
 {
     return uniqueFlagM;
 }
@@ -103,23 +103,13 @@ Index::IndexType Index::getIndexType()
     return indexTypeM;
 }
 //-----------------------------------------------------------------------------
-void Index::loadDescription()
-{
-    MetadataItem::loadDescription(
-        wxT("select RDB$DESCRIPTION from RDB$INDICES ")
-        wxT("where RDB$INDEX_NAME = ?"));
-}
-//-----------------------------------------------------------------------------
-void Index::saveDescription(wxString description)
-{
-    MetadataItem::saveDescription(
-        wxT("update RDB$INDICES set RDB$DESCRIPTION = ? ")
-        wxT("where RDB$INDEX_NAME = ?"),
-        description);
-}
-//-----------------------------------------------------------------------------
 wxString Index::getExpression() const
 {
 	return expressionM;
+}
+//-----------------------------------------------------------------------------
+void Index::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitIndex(*this);
 }
 //-----------------------------------------------------------------------------

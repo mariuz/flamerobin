@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -336,21 +336,6 @@ wxString Domain::getCreateSqlTemplate() const
 const wxString Domain::getTypeName() const
 {
     return wxT("DOMAIN");
-}
-//-----------------------------------------------------------------------------
-void Domain::loadDescription()
-{
-    MetadataItem::loadDescription(
-        wxT("select RDB$DESCRIPTION from RDB$FIELDS ")
-        wxT("where RDB$FIELD_NAME = ?"));
-}
-//-----------------------------------------------------------------------------
-void Domain::saveDescription(wxString description)
-{
-    MetadataItem::saveDescription(
-        wxT("update RDB$FIELDS set RDB$DESCRIPTION = ? ")
-        wxT("where RDB$FIELD_NAME = ?"),
-        description);
 }
 //-----------------------------------------------------------------------------
 void Domain::acceptVisitor(MetadataItemVisitor* visitor)

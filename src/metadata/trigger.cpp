@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -226,21 +226,6 @@ wxString Trigger::getCreateSqlTemplate() const
 const wxString Trigger::getTypeName() const
 {
     return wxT("TRIGGER");
-}
-//-----------------------------------------------------------------------------
-void Trigger::loadDescription()
-{
-    MetadataItem::loadDescription(
-        wxT("select RDB$DESCRIPTION from RDB$TRIGGERS ")
-        wxT("where RDB$TRIGGER_NAME = ?"));
-}
-//-----------------------------------------------------------------------------
-void Trigger::saveDescription(wxString description)
-{
-    MetadataItem::saveDescription(
-        wxT("update RDB$TRIGGERS set RDB$DESCRIPTION = ? ")
-        wxT("where RDB$TRIGGER_NAME = ?"),
-        description);
 }
 //-----------------------------------------------------------------------------
 void Trigger::acceptVisitor(MetadataItemVisitor* visitor)

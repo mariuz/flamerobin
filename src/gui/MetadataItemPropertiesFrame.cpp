@@ -443,12 +443,12 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
 
     else if (cmd == wxT("object_description"))
     {
-        if (object->isDescriptionAvailable())
+        wxString desc;
+        if (object->getDescription(desc))
         {
-            wxString s = object->getDescription();
-            if (s == wxT(""))
-                s = wxT("No description");
-            htmlpage += escapeHtmlChars(s);
+            if (desc.empty())
+                desc = _("No description");
+            htmlpage += escapeHtmlChars(desc);
             if (!suffix.IsEmpty())
                 processHtmlCode(htmlpage, suffix, object);
         }

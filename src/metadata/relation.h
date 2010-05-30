@@ -54,9 +54,6 @@ protected:
     std::vector<Privilege> privilegesM;
 
     virtual bool addRdbKeyToSelect();
-
-    virtual void loadDescription();
-    virtual void saveDescription(wxString description);
 public:
     Relation();
     Relation(const Relation& rhs);

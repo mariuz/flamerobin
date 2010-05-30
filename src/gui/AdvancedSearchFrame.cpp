@@ -595,7 +595,9 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
                 }
                 if (searchCriteriaM.count(CriteriaItem::ctDescription) > 0)
                 {
-                    wxString desc = (*it)->getDescription();
+                    wxString desc;
+                    if (!(*it)->getDescription(desc))
+                        continue;
                     if (!match(CriteriaItem::ctDescription, desc))
                         continue;
                 }

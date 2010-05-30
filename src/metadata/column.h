@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -39,9 +39,6 @@ class Column: public MetadataItem
 private:
     bool notnullM, computedM, hasDefaultM;
     wxString sourceM, computedSourceM, collationM, defaultM;
-protected:
-    virtual void loadDescription();
-    virtual void saveDescription(wxString description);
 public:
     Column();
     void Init(bool notnull, wxString source, wxString computedSource,
