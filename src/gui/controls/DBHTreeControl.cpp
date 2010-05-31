@@ -778,7 +778,8 @@ void DBHTreeControl::OnContextMenu(wxContextMenuEvent& event)
     ContextMenuMetadataItemVisitor cmv(&MyMenu);
     i->acceptVisitor(&cmv);
 
-    PopupMenu(&MyMenu, pos);
+    if (MyMenu.GetMenuItemCount())
+        PopupMenu(&MyMenu, pos);
 }
 //-----------------------------------------------------------------------------
 DBHTreeControl::DBHTreeControl(wxWindow* parent, const wxPoint& pos,
