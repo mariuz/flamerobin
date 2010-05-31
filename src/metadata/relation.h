@@ -40,10 +40,13 @@
 //-----------------------------------------------------------------------------
 class Relation: public MetadataItem
 {
+private:
+    bool columnsLoadedM;
+    bool columnsLoadRequestM;
+    bool relationInfoLoadedM;
 protected:
     int relationTypeM;
     wxString ownerM;
-    bool relationInfoLoadedM;
     void loadInfo();
 
     void getDependentChecks(std::vector<CheckConstraint>& checks);
@@ -53,19 +56,21 @@ protected:
     MetadataCollection<Column> columnsM;
     std::vector<Privilege> privilegesM;
 
+    virtual void loadChildren();
+    virtual void lockChildren();
+    virtual void unlockChildren();
+    virtual void lockedChanged(bool locked);
+
     virtual bool addRdbKeyToSelect();
 public:
     Relation();
     Relation(const Relation& rhs);
 
-    virtual void lockChildren();
-    virtual void unlockChildren();
-
     wxString getOwner();
     int getRelationType();
 
     virtual bool childrenLoaded() const;
-    virtual void reloadChildren();
+    virtual void invalidate();
 
     wxString getSelectStatement();
 

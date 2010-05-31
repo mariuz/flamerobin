@@ -112,7 +112,7 @@ void Table::invalidateIndices(const wxString& forIndex)
     }
 }
 //-----------------------------------------------------------------------------
-void Table::reloadChildren()
+void Table::loadChildren()
 {
     // force info to be reloaded if asked
     primaryKeyLoadedM = false;
@@ -121,7 +121,7 @@ void Table::reloadChildren()
     uniqueConstraintsLoadedM = false;
     indicesLoadedM = false;
 
-    Relation::reloadChildren();
+    Relation::loadChildren();
 }
 //-----------------------------------------------------------------------------
 wxString Table::getProcedureTemplate()

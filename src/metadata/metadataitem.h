@@ -88,6 +88,7 @@ protected:
     virtual void saveDescription(wxString description);
     void saveDescription(wxString saveStatement, wxString description);
 
+    virtual void loadChildren();
     virtual void lockChildren();
     virtual void unlockChildren();
 public:
@@ -101,15 +102,22 @@ public:
     void getDependencies(std::vector<Dependency>& list, bool ofObject,
         const wxString& field);  // load from db
 
-    // will return 0 if not database is assigned
+    // will return 0 if no database is assigned
     Database* findDatabase() const;
-    // will throw FRError if not database is assigned
+    // will throw FRError if no database is assigned
     Database* getDatabase(const wxString& callingMethod) const;
     Root* getRoot() const;
 
+    virtual void invalidate();
+
+    // items description (in database)
+    wxString getDescription();
+    bool getDescription(wxString& description);
+    void invalidateDescription();
+    void setDescription(wxString description);
+
     virtual bool childrenLoaded() const;
     void ensureChildrenLoaded();
-    virtual void reloadChildren();
 
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
     virtual size_t getChildrenCount() const { return 0; };
@@ -146,12 +154,6 @@ public:
     // returns the id of the item (to be saved in config files, etc.).
     // The predefined implementation just returns getName().
     virtual const wxString getId() const;
-
-    // items description (in database)
-    wxString getDescription();
-    bool getDescription(wxString& description);
-    void invalidateDescription();
-    void setDescription(wxString description);
 
     // returns true if the metadata item is a system (as opposed to user-defined) item.
     virtual bool isSystem() const;

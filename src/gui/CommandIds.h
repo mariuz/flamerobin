@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -85,8 +85,8 @@ namespace Cmds
         Menu_ExecuteProcedure, Menu_UnRegisterDatabase, Menu_Backup,
         Menu_Restore, Menu_Connect, Menu_Disconnect, Menu_Query,
         Menu_ShowConnectedUsers, Menu_CreateObject, Menu_DatabasePreferences,
-        Menu_ShowAllGeneratorValues, Menu_BrowseColumns,
-        Menu_Insert, Menu_LoadColumnsInfo, Menu_ObjectProperties,
+        Menu_ShowAllGeneratorValues, Menu_BrowseColumns, Menu_Insert,
+        Menu_LoadColumnsInfo, Menu_ObjectProperties, Menu_ObjectRefresh,
         Menu_DropObject, Menu_ShowGeneratorValue, Menu_SetGeneratorValue,
         Menu_AddColumn, Menu_CreateTriggerForTable, Menu_RestoreIntoNew,
         Menu_MonitorEvents, Menu_GetServerVersion, Menu_AlterObject,

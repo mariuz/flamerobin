@@ -425,6 +425,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(Cmds::Menu_AlterObject, MainFrame::OnMenuAlterObject)
     EVT_MENU(Cmds::Menu_DropObject, MainFrame::OnMenuDropObject)
     EVT_MENU(Cmds::Menu_ObjectProperties, MainFrame::OnMenuObjectProperties)
+    EVT_MENU(Cmds::Menu_ObjectRefresh, MainFrame::OnMenuObjectRefresh)
 
     EVT_MENU(Cmds::Menu_ToggleStatusBar, MainFrame::OnMenuToggleStatusBar)
     EVT_MENU(Cmds::Menu_ToggleSearchBar, MainFrame::OnMenuToggleSearchBar)
@@ -1416,6 +1417,19 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
     }
     else
         frameManager().showMetadataPropertyFrame(m);
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuObjectRefresh(wxCommandEvent& WXUNUSED(event))
+{
+    if (MetadataItem* mi = treeMainM->getSelectedMetadataItem())
+    {
+        // make sure notifyObservers() is called only once
+        SubjectLocker lock(mi);
+
+        mi->invalidate();
+        mi->invalidateDescription();
+        mi->notifyObservers();
+    }
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))

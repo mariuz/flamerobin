@@ -63,6 +63,8 @@ private:
     wxString externalPathM;
 
 protected:
+    virtual void loadChildren();
+
     virtual bool addRdbKeyToSelect();
 
 public:
@@ -73,7 +75,6 @@ public:
 
     virtual wxString getCreateSqlTemplate() const;
 
-    virtual void reloadChildren();
     void invalidateIndices(const wxString& forIndex = wxEmptyString);
 
     wxString getExternalPath();

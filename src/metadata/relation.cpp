@@ -50,13 +50,16 @@
 #include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------
 Relation::Relation()
-    :relationInfoLoadedM(false)
+    : columnsLoadedM(false), columnsLoadRequestM(false),
+      relationInfoLoadedM(false)
 {
     columnsM.setParent(this);
 }
 //-----------------------------------------------------------------------------
 Relation::Relation(const Relation& rhs)
     : MetadataItem(rhs), columnsM(rhs.columnsM),
+      columnsLoadedM(rhs.columnsLoadedM),
+      columnsLoadRequestM(rhs.columnsLoadRequestM),
       relationInfoLoadedM(rhs.relationInfoLoadedM)
 {
     columnsM.setParent(this);
@@ -134,15 +137,23 @@ int Relation::getRelationType()
 //-----------------------------------------------------------------------------
 bool Relation::childrenLoaded() const
 {
-    // relations can't have 0 columns, so column info must have been loaded
-    return columnsM.getChildrenCount() > 0;
+    return columnsLoadedM;
 }
 //-----------------------------------------------------------------------------
-void Relation::reloadChildren()
+void Relation::invalidate()
+{
+    relationInfoLoadedM = false;
+    if (columnsLoadedM)
+        columnsLoadRequestM = true;
+    columnsLoadedM = false;
+    notifyObservers();
+}
+//-----------------------------------------------------------------------------
+void Relation::loadChildren()
 {
     columnsM.clear();
 
-    Database *d = getDatabase(wxT("Relation::reloadChildren"));
+    Database *d = getDatabase(wxT("Relation::loadChildren"));
     MetadataLoader* loader = d->getMetadataLoader();
     // first start a transaction for metadata loading, then lock the relation
     // when objects go out of scope and are destroyed, object will be unlocked
@@ -192,6 +203,9 @@ void Relation::reloadChildren()
         cc->Init(!st1->IsNull(2), source,  computedSrc, collation,
             defaultSrc, !st1->IsNull(6));
     }
+
+    columnsLoadRequestM = false;
+    columnsLoadedM = true;
     notifyObservers();
 }
 //-----------------------------------------------------------------------------
@@ -640,5 +654,12 @@ void Relation::lockChildren()
 void Relation::unlockChildren()
 {
     columnsM.unlockSubject();
+}
+//-----------------------------------------------------------------------------
+void Relation::lockedChanged(bool locked)
+{
+    if (!locked && columnsLoadRequestM)
+        loadChildren();
+    MetadataItem::lockedChanged(locked);
 }
 //-----------------------------------------------------------------------------

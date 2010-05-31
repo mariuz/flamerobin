@@ -920,15 +920,11 @@ void Database::parseCommitedSql(const SqlStatement& stm)
     if (stm.actionIs(actALTER))
     {
         // TODO: this is a place where we would simply call virtual invalidate() function
-        // and object would do wherever it needs to
+        // and object would do whatever it needs to
         switch (stm.getObjectType())
         {
-            case ntTable:
-            case ntView:
-                dynamic_cast<Relation*>(object)->reloadChildren();
-                break;
             case ntProcedure:
-                dynamic_cast<Procedure*>(object)->reloadChildren();
+                object->invalidate();
                 dynamic_cast<Procedure*>(object)->checkDependentProcedures();
                 break;
             case ntException:
@@ -960,7 +956,9 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                             (*i2).notifyObservers();
                 break;
             default:
-                object->notifyObservers();
+                // calls notifyObservers() only in the base class
+                // descendent classes are free to put there whatever it takes...
+                object->invalidate();
                 break;
         }
     }

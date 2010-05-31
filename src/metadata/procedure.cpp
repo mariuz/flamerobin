@@ -59,16 +59,17 @@
 typedef MetadataCollection <Parameter>::const_iterator ParameterCollCIter;
 //-----------------------------------------------------------------------------
 Procedure::Procedure()
+    : MetadataItem(), parametersLoadedM(false), parametersLoadRequestM(false)
 {
     parametersM.setParent(this);
     typeM = ntProcedure;
-    parametersLoadedM = false;
 }
 //-----------------------------------------------------------------------------
 Procedure::Procedure(const Procedure& rhs)
-    : MetadataItem(rhs), parametersM(rhs.parametersM)
+    : MetadataItem(rhs), parametersM(rhs.parametersM),
+      parametersLoadedM(rhs.parametersLoadedM),
+      parametersLoadRequestM(rhs.parametersLoadRequestM)
 {
-    parametersLoadedM = rhs.parametersLoadedM;
     parametersM.setParent(this);
 }
 //-----------------------------------------------------------------------------
@@ -77,12 +78,20 @@ bool Procedure::childrenLoaded() const
     return parametersLoadedM;
 }
 //-----------------------------------------------------------------------------
-void Procedure::reloadChildren()
+void Procedure::invalidate()
+{
+    if (parametersLoadedM)
+        parametersLoadRequestM = true;
+    parametersLoadedM = false;
+    notifyObservers();
+}
+//-----------------------------------------------------------------------------
+void Procedure::loadChildren()
 {
     parametersLoadedM = false;
     parametersM.clear();
 
-    Database* d = getDatabase(wxT("Procedure::reloadChildren"));
+    Database* d = getDatabase(wxT("Procedure::loadChildren"));
     MetadataLoader* loader = d->getMetadataLoader();
     // first start a transaction for metadata loading, then lock the procedure
     // when objects go out of scope and are destroyed, procedure will be
@@ -125,6 +134,7 @@ void Procedure::reloadChildren()
         pp->setParent(this);
     }
 
+    parametersLoadRequestM = false;
     parametersLoadedM = true;
     notifyObservers();
 }
@@ -142,6 +152,13 @@ void Procedure::lockChildren()
 void Procedure::unlockChildren()
 {
     parametersM.unlockSubject();
+}
+//-----------------------------------------------------------------------------
+void Procedure::lockedChanged(bool locked)
+{
+    if (!locked && parametersLoadRequestM)
+        loadChildren();
+    MetadataItem::lockedChanged(locked);
 }
 //-----------------------------------------------------------------------------
 wxString Procedure::getExecuteStatement()

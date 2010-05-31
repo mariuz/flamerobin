@@ -135,6 +135,11 @@ NodeType getTypeByName(wxString name)
         return ntUnknown;
 }
 //-----------------------------------------------------------------------------
+void MetadataItem::invalidate()
+{
+    notifyObservers();
+}
+//-----------------------------------------------------------------------------
 bool MetadataItem::childrenLoaded() const
 {
     return true;
@@ -143,10 +148,10 @@ bool MetadataItem::childrenLoaded() const
 void MetadataItem::ensureChildrenLoaded()
 {
     if (!childrenLoaded())
-        reloadChildren();
+        loadChildren();
 }
 //-----------------------------------------------------------------------------
-void MetadataItem::reloadChildren()
+void MetadataItem::loadChildren()
 {
 }
 //-----------------------------------------------------------------------------
