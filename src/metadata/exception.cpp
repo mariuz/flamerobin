@@ -40,47 +40,34 @@
 
 #include <ibpp.h>
 
-#include "core/StringUtils.h"
 #include "core/FRError.h"
+#include "core/StringUtils.h"
 #include "engine/MetadataLoader.h"
 #include "metadata/database.h"
 #include "metadata/exception.h"
 #include "metadata/MetadataItemVisitor.h"
+#include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------
 Exception::Exception()
+    : MetadataItem(ntException), numberM(0)
 {
-    propertiesLoadedM = false;
-}
-//-----------------------------------------------------------------------------
-wxString Exception::getCreateSqlTemplate() const
-{
-    return  wxT("CREATE EXCEPTION name 'exception message';\n");
-}
-//-----------------------------------------------------------------------------
-const wxString Exception::getTypeName() const
-{
-    return wxT("EXCEPTION");
 }
 //-----------------------------------------------------------------------------
 wxString Exception::getMessage()
 {
-    loadProperties();
+    ensurePropertiesLoaded();
     return messageM;
 }
 //-----------------------------------------------------------------------------
 int Exception::getNumber()
 {
-    loadProperties();
+    ensurePropertiesLoaded();
     return numberM;
 }
 //-----------------------------------------------------------------------------
-void Exception::loadProperties(bool force)
+void Exception::loadProperties()
 {
-    if (!force && propertiesLoadedM)
-        return;
-
-    messageM = wxT("");
-    numberM = 0;
+    setPropertiesLoaded(false);
 
     Database* d = getDatabase(wxT("Exception::loadProperties"));
     MetadataLoader* loader = d->getMetadataLoader();
@@ -96,15 +83,32 @@ void Exception::loadProperties(bool force)
     st1->Get(1, message);
     messageM = std2wx(message);
     st1->Get(2, numberM);
-    propertiesLoadedM = true;
-    notifyObservers();
+
+    setPropertiesLoaded(true);
 }
 //-----------------------------------------------------------------------------
 wxString Exception::getAlterSql()
 {
     wxString message = getMessage();
     message.Replace(wxT("'"), wxT("''"));
-    return wxT("ALTER EXCEPTION ") + getQuotedName() + wxT(" '") + message + wxT("';");
+
+    StatementBuilder sb;
+    sb << kwALTER << ' ' << kwEXCEPTION << ' ' << getQuotedName() << wxT(" '")
+        << message << wxT("';");
+    return sb;
+}
+//-----------------------------------------------------------------------------
+wxString Exception::getCreateSqlTemplate() const
+{
+    StatementBuilder sb;
+    sb << kwCREATE << ' ' << kwEXCEPTION << wxT(" name 'exception message';")
+        << StatementBuilder::NewLine;
+    return sb;
+}
+//-----------------------------------------------------------------------------
+const wxString Exception::getTypeName() const
+{
+    return wxT("EXCEPTION");
 }
 //-----------------------------------------------------------------------------
 void Exception::acceptVisitor(MetadataItemVisitor* visitor)

@@ -52,10 +52,8 @@
 using namespace std;
 //-----------------------------------------------------------------------------
 Server::Server()
-    :MetadataItem()
+    :MetadataItem(ntServer)
 {
-    typeM = ntServer;
-
     databasesM.setParent(this);
     databasesM.setType(ntServer);
 }

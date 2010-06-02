@@ -50,14 +50,11 @@
 #include "metadata/table.h"
 //-----------------------------------------------------------------------------
 Table::Table()
+    : Relation(), primaryKeyLoadedM(false), foreignKeysLoadedM(false),
+        checkConstraintsLoadedM(false), uniqueConstraintsLoadedM(false),
+        indicesLoadedM(false), externalPathLoadedM(false)
 {
-    typeM = ntTable;
-    primaryKeyLoadedM = false;
-    foreignKeysLoadedM = false;
-    checkConstraintsLoadedM = false;
-    uniqueConstraintsLoadedM = false;
-    indicesLoadedM = false;
-    externalPathLoadedM = false;
+    setType(ntTable);
 }
 //-----------------------------------------------------------------------------
 wxString Table::getExternalPath()

@@ -410,14 +410,13 @@ void DBHTreeItemVisitor::visitGenerator(Generator& generator)
 void DBHTreeItemVisitor::visitProcedure(Procedure& procedure)
 {
     setNodeProperties(&procedure);
-    if (procedure.childrenLoaded())
+    if (procedure.parametersLoaded())
     {
         // make node caption bold when parameter data is loaded
         // (even if the procedure has no parameters at all)
         nodeTextBoldM = true;
         // show number of parameters?
-        if (DBHTreeConfigCache::get().getShowColumnParamCount()
-            && procedure.childrenLoaded())
+        if (DBHTreeConfigCache::get().getShowColumnParamCount())
         {
             nodeTextM += wxString::Format(wxT(" (%d, %d)"),
                 procedure.getInputParamCount(),
@@ -467,7 +466,7 @@ void DBHTreeItemVisitor::visitServer(Server& server)
 void DBHTreeItemVisitor::visitTable(Table& table)
 {
     setNodeProperties(&table);
-    if (table.childrenLoaded())
+    if (table.columnsLoaded())
     {
         // make node caption bold when column data has been loaded
         nodeTextBoldM = true;
@@ -492,7 +491,7 @@ void DBHTreeItemVisitor::visitTrigger(Trigger& trigger)
 void DBHTreeItemVisitor::visitView(View& view)
 {
     setNodeProperties(&view);
-    if (view.childrenLoaded())
+    if (view.columnsLoaded())
     {
         // make node caption bold when column data has been loaded
         nodeTextBoldM = true;

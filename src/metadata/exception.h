@@ -34,18 +34,20 @@
 class Exception: public MetadataItem
 {
 private:
-    bool propertiesLoadedM;
     wxString messageM;
     int numberM;
+protected:
+    virtual void loadProperties();
 public:
     Exception();
-    virtual wxString getCreateSqlTemplate() const;
-    virtual const wxString getTypeName() const;
 
     wxString getMessage();
     int getNumber();
     wxString getAlterSql();
-    void loadProperties(bool force = false);
+
+    virtual wxString getCreateSqlTemplate() const;
+
+    virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------

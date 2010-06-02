@@ -108,7 +108,7 @@ public:
 
     virtual bool isSystem() const
     {
-        return typeM == ntSysTables;
+        return getType() == ntSysTables;
     };
 
     inline const_iterator begin() const
@@ -177,7 +177,7 @@ public:
 
     virtual wxString getPrintableName()
     {
-        if (typeM != ntDomains)
+        if (getType() != ntDomains)
             return MetadataItem::getPrintableName();
 
         unsigned int n = 0;

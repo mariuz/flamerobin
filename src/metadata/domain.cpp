@@ -52,10 +52,8 @@
 #include "metadata/MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 Domain::Domain():
-    MetadataItem()
+    MetadataItem(ntDomain), infoLoadedM(false)
 {
-    typeM = ntDomain;
-    infoLoadedM = false;
 }
 //-----------------------------------------------------------------------------
 void Domain::loadInfo()

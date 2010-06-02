@@ -3252,7 +3252,7 @@ bool EditGeneratorValueHandler::handleURI(URI& uri)
     if (!g || !w)
         return true;
 
-    g->loadValue();
+    g->invalidate();
     int64_t oldvalue = g->getValue();
     Database* db = g->getDatabase(wxT("EditGeneratorValueHandler::handleURI"));
 

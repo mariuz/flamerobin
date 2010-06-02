@@ -44,15 +44,11 @@
 #include "metadata/MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 Index::Index(bool unique, bool active, bool ascending, double statistics,
-    bool system, wxString expression)
+        bool system, wxString expression)
+    : MetadataItem(ntIndex), isSystemM(system), uniqueFlagM(unique),
+        activeM(active), indexTypeM(ascending ? itAscending : itDescending),
+        statisticsM(statistics), segmentsM(), expressionM(expression)
 {
-    typeM = ntIndex;
-    uniqueFlagM = unique;
-    activeM = active;
-    indexTypeM = (ascending ? itAscending : itDescending);
-    statisticsM = statistics;
-    isSystemM = system;
-	expressionM = expression;
 }
 //-----------------------------------------------------------------------------
 bool Index::isSystem() const

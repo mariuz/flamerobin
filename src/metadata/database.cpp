@@ -300,11 +300,9 @@ bool DatabaseAuthenticationMode::getUseEncryptedPassword() const
 //-----------------------------------------------------------------------------
 // Database class
 Database::Database()
-    : MetadataItem(), metadataLoaderM(0), connectedM(false),
+    : MetadataItem(ntDatabase), metadataLoaderM(0), connectedM(false),
         connectionCredentialsM(0), charsetConverterM(0), idM(0)
 {
-    typeM = ntDatabase;
-
     // has to be here, since notify() might be called before initChildren()
     domainsM.setProperties(this, wxT("Domains"), ntDomains);
     exceptionsM.setProperties(this, wxT("Exceptions"), ntExceptions);
@@ -652,9 +650,10 @@ void Database::loadGeneratorValues()
     for (MetadataCollection<Generator>::iterator it = generatorsM.begin();
         it != generatorsM.end(); ++it)
     {
-        (*it).loadValue();
+        // make sure generator value is reloaded from database
+        (*it).invalidate();
+        (*it).ensurePropertiesLoaded();
     }
-    // generatorsM.notify() not necessary, loadValue() notifies
 }
 //-----------------------------------------------------------------------------
 //! Notify the observers that collection has changed
@@ -863,7 +862,11 @@ void Database::parseCommitedSql(const SqlStatement& stm)
         stm.actionIs(actALTER, ntGenerator))
     {
         if (Generator* g = dynamic_cast<Generator*>(object))
-            g->loadValue();
+        {
+            // make sure value is reloaded from database
+            g->invalidate();
+            g->ensurePropertiesLoaded();
+        }
         return;
     }
 
@@ -926,9 +929,6 @@ void Database::parseCommitedSql(const SqlStatement& stm)
             case ntProcedure:
                 object->invalidate();
                 dynamic_cast<Procedure*>(object)->checkDependentProcedures();
-                break;
-            case ntException:
-                dynamic_cast<Exception*>(object)->loadProperties(true);
                 break;
             case ntFunction:
                 dynamic_cast<Function*>(object)->loadInfo(true);

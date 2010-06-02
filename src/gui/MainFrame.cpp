@@ -1156,7 +1156,11 @@ void MainFrame::OnMenuDisconnect(wxCommandEvent& WXUNUSED(event))
 void MainFrame::showGeneratorValue(Generator* g)
 {
     if (g)
-        g->loadValue();
+    {
+        // make sure value is reloaded from database
+        g->invalidate();
+        g->ensurePropertiesLoaded();
+    }
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuShowGeneratorValue(wxCommandEvent& WXUNUSED(event))

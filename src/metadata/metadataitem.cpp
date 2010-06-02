@@ -54,9 +54,15 @@
 using namespace std;
 //-----------------------------------------------------------------------------
 MetadataItem::MetadataItem()
-    : Subject(), parentM(0), descriptionLoadedM(dsNotLoaded)
+    : Subject(), typeM(ntUnknown), parentM(0), childrenLoadedM(lsNotLoaded),
+        descriptionLoadedM(lsNotLoaded), propertiesLoadedM(lsNotLoaded)
 {
-    typeM = ntUnknown;
+}
+//-----------------------------------------------------------------------------
+MetadataItem::MetadataItem(NodeType type)
+    : Subject(), typeM(type), parentM(0), childrenLoadedM(lsNotLoaded),
+        descriptionLoadedM(lsNotLoaded), propertiesLoadedM(lsNotLoaded)
+{
 }
 //-----------------------------------------------------------------------------
 MetadataItem::~MetadataItem()
@@ -137,12 +143,46 @@ NodeType getTypeByName(wxString name)
 //-----------------------------------------------------------------------------
 void MetadataItem::invalidate()
 {
+    setChildrenLoaded(false);
+    setPropertiesLoaded(false);
     notifyObservers();
 }
 //-----------------------------------------------------------------------------
-bool MetadataItem::childrenLoaded() const
+void MetadataItem::ensurePropertiesLoaded()
 {
-    return true;
+    if (!propertiesLoaded())
+        loadProperties();
+}
+//-----------------------------------------------------------------------------
+bool MetadataItem::propertiesLoaded()
+{
+    if (propertiesLoadedM == lsLoadPending)
+        loadProperties();
+    return propertiesLoadedM == lsLoaded;
+}
+//-----------------------------------------------------------------------------
+void MetadataItem::loadProperties()
+{
+}
+//-----------------------------------------------------------------------------
+void MetadataItem::setPropertiesLoaded(bool loaded)
+{
+    if (loaded)
+        propertiesLoadedM = lsLoaded;
+    else
+    {
+        if (propertiesLoadedM == lsLoaded)
+            propertiesLoadedM = lsLoadPending;
+        else
+            propertiesLoadedM = lsNotLoaded;
+    }
+}
+//-----------------------------------------------------------------------------
+bool MetadataItem::childrenLoaded()
+{
+    if (childrenLoadedM == lsLoadPending)
+        loadChildren();
+    return childrenLoadedM == lsLoaded;
 }
 //-----------------------------------------------------------------------------
 void MetadataItem::ensureChildrenLoaded()
@@ -153,6 +193,19 @@ void MetadataItem::ensureChildrenLoaded()
 //-----------------------------------------------------------------------------
 void MetadataItem::loadChildren()
 {
+}
+//-----------------------------------------------------------------------------
+void MetadataItem::setChildrenLoaded(bool loaded)
+{
+    if (loaded)
+        childrenLoadedM = lsLoaded;
+    else
+    {
+        if (childrenLoadedM == lsLoaded)
+            childrenLoadedM = lsLoadPending;
+        else
+            childrenLoadedM = lsNotLoaded;
+    }
 }
 //-----------------------------------------------------------------------------
 bool MetadataItem::getChildren(vector<MetadataItem*>& /*temp*/)
@@ -476,7 +529,7 @@ void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
 //-----------------------------------------------------------------------------
 void MetadataItem::ensureDescriptionLoaded()
 {
-    if (descriptionLoadedM == dsNotLoaded)
+    if (descriptionLoadedM == lsNotLoaded)
         loadDescription();
 }
 //-----------------------------------------------------------------------------
@@ -490,15 +543,15 @@ bool MetadataItem::getDescription(wxString& description)
 {
     ensureDescriptionLoaded();
     description = descriptionM;
-    return descriptionLoadedM != dsNotAvailable;
+    return descriptionLoadedM == lsLoaded;
 }
 
 //-----------------------------------------------------------------------------
 void MetadataItem::invalidateDescription()
 {
-    if (descriptionLoadedM != dsNotLoaded)
+    if (descriptionLoadedM != lsNotLoaded)
     {
-        descriptionLoadedM = dsNotLoaded;
+        descriptionLoadedM = lsNotLoaded;
         descriptionM = wxEmptyString;
         // call notifyObservers(), because this is only called after
         // the description has been changed by a committed SQL statement
@@ -515,12 +568,12 @@ void MetadataItem::loadDescription()
     // additional activity at best, and crashes or infinite loops at worst
     if (ldv.descriptionAvailable())
     {
-        descriptionLoadedM = dsLoaded;
+        descriptionLoadedM = lsLoaded;
         descriptionM = ldv.getDescription();
     }
     else
     {
-        descriptionLoadedM = dsNotAvailable;
+        descriptionLoadedM = lsNotAvailable;
         descriptionM = wxEmptyString;
     }
 }
@@ -538,7 +591,8 @@ void MetadataItem::setDescription(wxString description)
     {
         SaveDescriptionVisitor sdv(description);
         acceptVisitor(&sdv);
-        descriptionLoadedM = dsLoaded;
+        // if previous statement didn't throw the description has been saved
+        descriptionLoadedM = lsLoaded;
         descriptionM = description;
         // call notifyObservers(), because this is only called after
         // the description has been edited by the user

@@ -49,32 +49,23 @@
 #include "metadata/database.h"
 #include "metadata/generator.h"
 #include "metadata/MetadataItemVisitor.h"
+#include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------
 Generator::Generator()
-    : MetadataItem()
+    : MetadataItem(ntGenerator)
 {
-    typeM = ntGenerator;
-    valueLoadedM = false;
 }
 //-----------------------------------------------------------------------------
 int64_t Generator::getValue()
 {
-    loadValue();
+    ensurePropertiesLoaded();
     return valueM;
 }
 //-----------------------------------------------------------------------------
-void Generator::setValue(int64_t value)
+void Generator::loadProperties()
 {
-    if (!valueLoadedM || valueM != value)
-    {
-        valueM = value;
-        valueLoadedM = true;
-        notifyObservers();
-    }
-}
-//-----------------------------------------------------------------------------
-void Generator::loadValue()
-{
+    setPropertiesLoaded(false);
+
     Database* db = getDatabase(wxT("Generator::loadValue"));
     MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
@@ -89,14 +80,15 @@ void Generator::loadValue()
         
     st1->Execute();
     st1->Fetch();
-    int64_t value;
-    st1->Get(1, &value);
-    setValue(value);
+    st1->Get(1, &valueM);
+
+    setPropertiesLoaded(true);
+    notifyObservers();
 }
 //-----------------------------------------------------------------------------
 wxString Generator::getPrintableName()
 {
-    if (!valueLoadedM)
+    if (!propertiesLoaded())
         return getName_();
 
     std::ostringstream ss;
@@ -106,8 +98,12 @@ wxString Generator::getPrintableName()
 //-----------------------------------------------------------------------------
 wxString Generator::getCreateSqlTemplate() const
 {
-    return  wxT("CREATE GENERATOR name;\n")
-            wxT("SET GENERATOR name TO value;\n");
+    StatementBuilder sb;
+    sb << kwCREATE << ' ' << kwGENERATOR << wxT(" name;")
+        << StatementBuilder::NewLine
+        << kwSET << ' ' << kwGENERATOR << wxT(" name ") << kwTO
+        << wxT(" value;") << StatementBuilder::NewLine;
+    return sb;
 }
 //-----------------------------------------------------------------------------
 const wxString Generator::getTypeName() const

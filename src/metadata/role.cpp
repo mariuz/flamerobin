@@ -49,9 +49,8 @@
 #include "metadata/role.h"
 //-----------------------------------------------------------------------------
 Role::Role()
-    : MetadataItem()
+    : MetadataItem(ntRole)
 {
-    typeM = ntRole;
 }
 //-----------------------------------------------------------------------------
 std::vector<Privilege>* Role::getPrivileges()

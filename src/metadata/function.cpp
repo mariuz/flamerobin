@@ -48,9 +48,8 @@
 #include "metadata/MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 Function::Function()
+    : MetadataItem(ntFunction), infoLoadedM(false)
 {
-    typeM = ntFunction;
-    infoLoadedM = false;
 }
 //-----------------------------------------------------------------------------
 wxString Function::getCreateSql()

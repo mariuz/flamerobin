@@ -51,8 +51,9 @@
 #include "metadata/view.h"
 //-----------------------------------------------------------------------------
 View::View()
+    : Relation()
 {
-    typeM = ntView;
+    setType(ntView);
 }
 //-----------------------------------------------------------------------------
 //! returns false if an error occurs

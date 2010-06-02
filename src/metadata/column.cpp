@@ -50,9 +50,8 @@
 //-----------------------------------------------------------------------------
 //! new undefined column
 Column::Column()
-    : MetadataItem()
+    : MetadataItem(ntColumn)
 {
-    typeM = ntColumn;
 }
 //-----------------------------------------------------------------------------
 //! initialize properties

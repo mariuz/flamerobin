@@ -74,11 +74,10 @@ static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
 }
 //-----------------------------------------------------------------------------
 Root::Root()
-    : MetadataItem(), fileNameM(wxT("")), dirtyM(false), loadingM(false), nextIdM(1)
+    : MetadataItem(ntRoot), fileNameM(wxT("")), dirtyM(false),
+        loadingM(false), nextIdM(1), unregLocalDatabasesM(0)
 {
     setName_(wxT("Home"));
-    typeM = ntRoot;
-    unregLocalDatabasesM = 0;
 }
 //-----------------------------------------------------------------------------
 void Root::disconnectAllDatabases()

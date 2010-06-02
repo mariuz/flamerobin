@@ -35,17 +35,18 @@ class Generator: public MetadataItem
 {
 private:
     int64_t valueM;
-    bool valueLoadedM;
     void setValue(int64_t value);
+protected:
+    virtual void loadProperties();
 public:
     Generator();
-    // overrides MetadataItem::getCreateSqlTemplate()
-    wxString getCreateSqlTemplate() const;
 
-    void loadValue();
     int64_t getValue();
 
     virtual wxString getPrintableName();
+
+    wxString getCreateSqlTemplate() const;
+
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };

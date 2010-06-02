@@ -50,24 +50,24 @@ Parameter::Parameter(wxString source, int parameterType, int mechanism)
     : Column(), parameterMechanismM(mechanism)
 {
     Column::Init(true, source, wxT(""), wxT(""), wxT(""), false);
-    typeM = (parameterType == 0) ? ntParameterInput : ntParameterOutput;
+    setType((parameterType == 0) ? ntParameterInput : ntParameterOutput);
 }
 //-----------------------------------------------------------------------------
 Parameter::Parameter()
     : Column()
 {
-    typeM = ntParameterInput;
+    setType(ntParameterInput);
 }
 //-----------------------------------------------------------------------------
 wxString Parameter::getPrintableName()
 {
-    return (typeM == ntParameterInput ? wxT("in ") : wxT("out "))
+    return (getType() == ntParameterInput ? wxT("in ") : wxT("out "))
         + Column::getPrintableName();
 }
 //-----------------------------------------------------------------------------
 bool Parameter::isOutputParameter() const
 {
-    return typeM == ntParameterOutput;
+    return getType() == ntParameterOutput;
 }
 //-----------------------------------------------------------------------------
 int Parameter::getMechanism() const

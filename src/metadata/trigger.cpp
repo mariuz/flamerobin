@@ -53,10 +53,8 @@
 #include "metadata/trigger.h"
 //-----------------------------------------------------------------------------
 Trigger::Trigger()
-    : MetadataItem()
+    : MetadataItem(ntTrigger), infoIsLoadedM(false)
 {
-    typeM = ntTrigger;
-    infoIsLoadedM = false;
 }
 //-----------------------------------------------------------------------------
 void Trigger::getTriggerInfo(wxString& object, bool& active, int& position,

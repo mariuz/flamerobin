@@ -58,15 +58,18 @@ class MetadataItem: public Subject
 {
 private:
     MetadataItem* parentM;
+    NodeType typeM;
+
+    enum LoadState { lsNotLoaded, lsLoadPending, lsLoaded, lsNotAvailable };
+    LoadState childrenLoadedM;
+    LoadState descriptionLoadedM;
+    LoadState propertiesLoadedM;
 
     wxString descriptionM;
-    enum DescriptionState { dsNotLoaded, dsLoaded, dsNotAvailable };
-    DescriptionState descriptionLoadedM;
     void ensureDescriptionLoaded();
 
 protected:
     Identifier identifierM;
-    NodeType typeM;
 
     template <class T>
     T* getParentObjectByType() const
@@ -88,11 +91,19 @@ protected:
     virtual void saveDescription(wxString description);
     void saveDescription(wxString saveStatement, wxString description);
 
+    virtual void loadProperties();
+    bool propertiesLoaded();
+    void setPropertiesLoaded(bool loaded);
+
+    bool childrenLoaded();
     virtual void loadChildren();
+    void setChildrenLoaded(bool loaded);
     virtual void lockChildren();
     virtual void unlockChildren();
+
 public:
     MetadataItem();
+    MetadataItem(NodeType type);
     virtual ~MetadataItem();
 
     virtual void lockSubject();
@@ -116,8 +127,8 @@ public:
     void invalidateDescription();
     void setDescription(wxString description);
 
-    virtual bool childrenLoaded() const;
     void ensureChildrenLoaded();
+    void ensurePropertiesLoaded();
 
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
     virtual size_t getChildrenCount() const { return 0; };

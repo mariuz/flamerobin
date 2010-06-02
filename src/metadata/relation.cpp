@@ -50,17 +50,13 @@
 #include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------
 Relation::Relation()
-    : columnsLoadedM(false), columnsLoadRequestM(false),
-      relationInfoLoadedM(false)
+    : MetadataItem()
 {
     columnsM.setParent(this);
 }
 //-----------------------------------------------------------------------------
 Relation::Relation(const Relation& rhs)
-    : MetadataItem(rhs), columnsM(rhs.columnsM),
-      columnsLoadedM(rhs.columnsLoadedM),
-      columnsLoadRequestM(rhs.columnsLoadRequestM),
-      relationInfoLoadedM(rhs.relationInfoLoadedM)
+    : MetadataItem(rhs), columnsM(rhs.columnsM)
 {
     columnsM.setParent(this);
 }
@@ -117,40 +113,31 @@ void Relation::loadInfo()
         st1->Get(1, name);
         ownerM = std2wxIdentifier(name, d->getCharsetConverter());
         st1->Get(2, relationTypeM);
-        relationInfoLoadedM = true;
     }
+    setPropertiesLoaded(true);
 }
 //-----------------------------------------------------------------------------
 wxString Relation::getOwner()
 {
-    if (!relationInfoLoadedM)
-        loadInfo();
+    ensurePropertiesLoaded();
     return ownerM;
 }
 //-----------------------------------------------------------------------------
 int Relation::getRelationType()
 {
-    if (!relationInfoLoadedM)
-        loadInfo();
+    ensurePropertiesLoaded();
     return relationTypeM;
 }
 //-----------------------------------------------------------------------------
-bool Relation::childrenLoaded() const
+bool Relation::columnsLoaded()
 {
-    return columnsLoadedM;
-}
-//-----------------------------------------------------------------------------
-void Relation::invalidate()
-{
-    relationInfoLoadedM = false;
-    if (columnsLoadedM)
-        columnsLoadRequestM = true;
-    columnsLoadedM = false;
-    notifyObservers();
+    return childrenLoaded();
 }
 //-----------------------------------------------------------------------------
 void Relation::loadChildren()
 {
+    // in case an exception is thrown this should be repeated
+    setChildrenLoaded(false);
     columnsM.clear();
 
     Database *d = getDatabase(wxT("Relation::loadChildren"));
@@ -204,8 +191,7 @@ void Relation::loadChildren()
             defaultSrc, !st1->IsNull(6));
     }
 
-    columnsLoadRequestM = false;
-    columnsLoadedM = true;
+    setChildrenLoaded(true);
     notifyObservers();
 }
 //-----------------------------------------------------------------------------
@@ -654,12 +640,5 @@ void Relation::lockChildren()
 void Relation::unlockChildren()
 {
     columnsM.unlockSubject();
-}
-//-----------------------------------------------------------------------------
-void Relation::lockedChanged(bool locked)
-{
-    if (!locked && columnsLoadRequestM)
-        loadChildren();
-    MetadataItem::lockedChanged(locked);
 }
 //-----------------------------------------------------------------------------

@@ -40,10 +40,6 @@
 //-----------------------------------------------------------------------------
 class Relation: public MetadataItem
 {
-private:
-    bool columnsLoadedM;
-    bool columnsLoadRequestM;
-    bool relationInfoLoadedM;
 protected:
     int relationTypeM;
     wxString ownerM;
@@ -59,7 +55,6 @@ protected:
     virtual void loadChildren();
     virtual void lockChildren();
     virtual void unlockChildren();
-    virtual void lockedChanged(bool locked);
 
     virtual bool addRdbKeyToSelect();
 public:
@@ -69,8 +64,7 @@ public:
     wxString getOwner();
     int getRelationType();
 
-    virtual bool childrenLoaded() const;
-    virtual void invalidate();
+    bool columnsLoaded();
 
     wxString getSelectStatement();
 
