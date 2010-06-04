@@ -109,9 +109,9 @@ public:
         // find insertion point to preserve alphabetical order
         iterator pos = std::find_if(itemsM.begin(), itemsM.end(),
             InsertionPosByName(name));
-        itemsM.insert(pos, new T());
+        pos = itemsM.insert(pos, new T());
 
-        T& item = itemsM.back();
+        T& item(*pos);
         for (unsigned int i = getLockCount(); i > 0; i--)
             item.lockSubject();
         item.setProperties(parent, name, type);
