@@ -504,13 +504,7 @@ Domain* Database::loadMissingDomain(wxString name)
         int c;
         st1->Get(1, c);
         if (c > 0)
-        {
-            Domain* d = domainsM.add(name); // add domain to collection
-            d->setParent(this);
-            if (name.substr(0, 4) != wxT("RDB$"))
-                refreshByType(ntDomain);
-            return d;
-        }
+            return domainsM.insert(this, name, ntDomain);
     }
     return 0;
 }
@@ -761,28 +755,41 @@ void Database::dropObject(MetadataItem* object)
     };
 }
 //-----------------------------------------------------------------------------
-bool Database::addObject(NodeType type, wxString name)
+void Database::addObject(NodeType type, wxString name)
 {
-    MetadataItem* m;
     switch (type)
     {
-        case ntTable:       m = tablesM.add(name);      break;
-        case ntSysTable:    m = sysTablesM.add(name);   break;
-        case ntView:        m = viewsM.add(name);       break;
-        case ntProcedure:   m = proceduresM.add(name);  break;
-        case ntTrigger:     m = triggersM.add(name);    break;
-        case ntRole:        m = rolesM.add(name);       break;
-        case ntGenerator:   m = generatorsM.add(name);  break;
-        case ntFunction:    m = functionsM.add(name);   break;
-        case ntDomain:      m = domainsM.add(name);     break;
-        case ntException:   m = exceptionsM.add(name);  break;
-        default:            return false;
+        case ntTable:
+            tablesM.insert(this, name, type);
+            break;
+        case ntSysTable:
+            sysTablesM.insert(this, name, type);
+            break;
+        case ntView:
+            viewsM.insert(this, name, type);
+            break;
+        case ntProcedure:
+            proceduresM.insert(this, name, type);
+            break;
+        case ntTrigger:
+            triggersM.insert(this, name, type);
+            break;
+        case ntRole:
+            rolesM.insert(this, name, type);
+            break;
+        case ntGenerator:
+            generatorsM.insert(this, name, type);
+            break;
+        case ntFunction:
+            functionsM.insert(this, name, type);
+            break;
+        case ntDomain:
+            domainsM.insert(this, name, type);
+            break;
+        case ntException:
+            exceptionsM.insert(this, name, type);
+            break;
     }
-
-    if (!m)     // should never happen, but just in case
-        return false;
-    m->setProperties(this, name, type);
-    return true;
 }
 //-----------------------------------------------------------------------------
 //! reads a DDL statement and acts accordingly
@@ -843,8 +850,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
 
     if (stm.actionIs(actCREATE) || stm.actionIs(actDECLARE))
     {
-        if (addObject(stm.getObjectType(), stm.getName()))
-            refreshByType(stm.getObjectType());
+        addObject(stm.getObjectType(), stm.getName());
         // when trigger created: force relations to update their property pages
         Relation *r = stm.getCreateTriggerRelation();
         if (r)
@@ -899,10 +905,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                 stm.getFieldName()));
             MetadataItem* m = domainsM.findByName(domainName);
             if (!m)     // domain does not exist in DBH
-            {
-                m = domainsM.add();
-                m->setProperties(this, domainName, ntDomain);
-            }
+                m = domainsM.insert(this, domainName, ntDomain);
             dynamic_cast<Domain*>(m)->loadInfo();
         }
         else

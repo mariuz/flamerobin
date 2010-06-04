@@ -258,7 +258,7 @@ public:
     Relation* findRelation(const Identifier& name);
     void refreshByType(NodeType type);
     void dropObject(MetadataItem *object);
-    bool addObject(NodeType type, wxString name);
+    void addObject(NodeType type, wxString name);
     void parseCommitedSql(const SqlStatement& stm);     // reads a DDL statement and does accordingly
 
     CharacterSet getCharsetById(int id);

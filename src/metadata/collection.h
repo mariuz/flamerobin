@@ -28,8 +28,10 @@
 #ifndef FR_COLLECTION_H
 #define FR_COLLECTION_H
 //-----------------------------------------------------------------------------
-#include <list>
+#include <algorithm>
 #include <sstream>
+
+#include <boost/ptr_container/ptr_list.hpp>
 
 #include "metadata/metadataitem.h"
 //-----------------------------------------------------------------------------
@@ -37,73 +39,84 @@ template <class T>
 class MetadataCollection: public MetadataItem
 {
 public:
-    typedef typename std::list<T> ContainerType;
-    typedef typename ContainerType::iterator iterator;
-    typedef typename ContainerType::const_iterator const_iterator;
+    typedef typename boost::ptr_list<T> CollectionType;
+    typedef typename CollectionType::iterator iterator;
+    typedef typename CollectionType::const_iterator const_iterator;
 private:
-    ContainerType itemsM;
+    CollectionType itemsM;
+
+    // helper for std::find_if()
+    struct FindByAddress
+    {
+        T* itemM;
+
+        FindByAddress(T* item) : itemM(item) {}
+        bool operator()(const T& item) { return &item == itemM; }
+    };
+
+    struct InsertionPosByName
+    {
+        wxString nameM;
+
+        InsertionPosByName(wxString name) : nameM(name) {}
+        bool operator()(const T& item) { return item.getName_() > nameM; }
+    };
+
 public:
-    void remove(T *item)        // removes item from vector
+    // removes item from list
+    void remove(T* item)
     {
         if (!item)
             return;
-
-        for (iterator pos = itemsM.begin(); pos != itemsM.end(); ++pos)
+        iterator pos = std::find_if(itemsM.begin(), itemsM.end(),
+            FindByAddress(item));
+        if (pos != itemsM.end())
         {
-            if (&(*pos) == item)
-            {
-                itemsM.erase(pos);
-                notifyObservers();
-                return;
-            }
+            itemsM.erase(pos);
+            notifyObservers();
         }
     }
 
-    virtual T* add(T& item)         // adds item to vector, returns pointer to it
+    // adds new item to end of list and returns pointer to it
+    virtual T* add(T& item)
     {
         item.setParent(this);
-        itemsM.push_back(item);
         if (isLocked())
         {
             for (unsigned int i = getLockCount(); i > 0; i--)
                 item.lockSubject();
         }
-        else
-            notifyObservers();
+        itemsM.push_back(new T(item));
+        notifyObservers();
         return &itemsM.back();
     }
 
-    //! same as add() but watches for sorting
-    virtual T* add(wxString name)            // inserts item to vector and returns pointer to it
+    // adds new item to end of list and returns pointer to it
+    virtual T* add(MetadataItem* parent, wxString name, NodeType type)
     {
-        T item;
-        item.setParent(this);
-        item.setName_(name);
+        itemsM.push_back(new T());
+        T& item = itemsM.back();
         for (unsigned int i = getLockCount(); i > 0; i--)
             item.lockSubject();
-
-        iterator pos = itemsM.begin();      // find the place
-        for (; pos != itemsM.end(); ++pos)
-        {
-            MetadataItem *p = &(*pos);
-            if (!p)
-                continue;
-            if (p->getName_() > name)
-                break;
-        }
-
-        pos = itemsM.insert(pos, item);
-        return &(*pos);
+        item.setProperties(parent, name, type);
+        notifyObservers();
+        return &item;
     }
 
-    virtual T* add()                // Creates new item, adds it and returns pointer to it.
-    {                               // notify() is *not* called since newly added object still doesn't
-        T item;                     // have its properties set, so for example getName() would return
-        item.setParent(this);       // empty wxString. It is responsibility of the caller to call notify
-        itemsM.push_back(item);     // after it has set the properties.
+    // inserts new item into list and returns pointer to it
+    virtual T* insert(MetadataItem* parent, wxString name, NodeType type)
+    {
+        // find insertion point to preserve alphabetical order
+        iterator pos = std::find_if(itemsM.begin(), itemsM.end(),
+            InsertionPosByName(name));
+        itemsM.insert(pos, new T());
+
+        T& item = itemsM.back();
         for (unsigned int i = getLockCount(); i > 0; i--)
             item.lockSubject();
-        return &itemsM.back();
+        item.setProperties(parent, name, type);
+        notifyObservers();
+        return &item;
     }
 
     virtual bool isSystem() const

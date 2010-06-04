@@ -184,9 +184,7 @@ void Relation::loadChildren()
             defaultSrc.Trim(false).Remove(0, 8);
         }
 
-        Column *cc = columnsM.add();
-        cc->setName_(fname);
-        cc->setParent(this);
+        Column* cc = columnsM.add(this, fname, ntColumn);
         cc->Init(!st1->IsNull(2), source,  computedSrc, collation,
             defaultSrc, !st1->IsNull(6));
     }

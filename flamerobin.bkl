@@ -207,6 +207,7 @@ Accepted values: AMD64, IA64.
             <include>$(WX_LIB_DIR)/msw$(U_OPT)$(D_OPT)</include>
             <include>$(WXDIR)/contrib/include</include>
             <include>$(WXDIR)/include</include>
+            <include>$(DOLLAR)(BOOST_ROOT)</include>
 
             <lib-path>$(WX_LIB_DIR)</lib-path>
 
