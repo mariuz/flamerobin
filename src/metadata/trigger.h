@@ -34,19 +34,19 @@
 class Trigger: public MetadataItem
 {
 private:
-    bool infoIsLoadedM;
     bool isDatabaseTriggerM;
     wxString objectM;
     bool activeM;
     int positionM;
     wxString triggerTypeM;
+protected:
+    virtual void loadProperties();
 public:
     Trigger();
 
     enum fireTimeType { afterTrigger, beforeTrigger, databaseTrigger };
     wxString getCreateSqlTemplate() const;  // overrides MetadataItem::getCreateSqlTemplate()
 
-    void loadInfo(bool force = false);
     void getTriggerInfo(wxString& object, bool& active, int& position,
         wxString& type, bool& isDatabaseTrigger);
     wxString getSource() const;

@@ -941,7 +941,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                     Trigger* tr = dynamic_cast<Trigger*>(object);
                     if (tr)
                     {
-                        tr->loadInfo(true);
+                        tr->invalidate();
                         Relation* r = getRelationForTrigger(tr);
                         if (r)
                             r->notifyObservers();

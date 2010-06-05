@@ -53,15 +53,14 @@
 #include "metadata/trigger.h"
 //-----------------------------------------------------------------------------
 Trigger::Trigger()
-    : MetadataItem(ntTrigger), infoIsLoadedM(false)
+    : MetadataItem(ntTrigger)
 {
 }
 //-----------------------------------------------------------------------------
 void Trigger::getTriggerInfo(wxString& object, bool& active, int& position,
     wxString& type, bool& isDatabaseTrigger)
 {
-    if (!infoIsLoadedM)
-        loadInfo();
+    ensurePropertiesLoaded();
     isDatabaseTrigger = isDatabaseTriggerM;
     object = objectM;
     active = activeM;
@@ -71,16 +70,13 @@ void Trigger::getTriggerInfo(wxString& object, bool& active, int& position,
 //-----------------------------------------------------------------------------
 wxString Trigger::getTriggerRelation()
 {
-    if (!infoIsLoadedM)
-        loadInfo();
-    if (isDatabaseTriggerM)
-        return wxEmptyString;
-    return objectM;
+    ensurePropertiesLoaded();
+    return (isDatabaseTriggerM ? wxEmptyString : objectM);
 }
 //-----------------------------------------------------------------------------
-void Trigger::loadInfo(bool force)
+void Trigger::loadProperties()
 {
-    infoIsLoadedM = false;
+    setPropertiesLoaded(false);
 
     Database* d = getDatabase(wxT("Trigger::loadInfo"));
     MetadataLoader* loader = d->getMetadataLoader();
@@ -115,15 +111,14 @@ void Trigger::loadInfo(bool force)
         int ttype;
         st1->Get(4, &ttype);
         triggerTypeM = getTriggerType(ttype);
-        infoIsLoadedM = true;
-        if (force)
-            notifyObservers();
     }
     else    // maybe trigger was dropped?
     {
         //wxMessageBox("Trigger does not exist in database");
         objectM = wxEmptyString;
     }
+
+    setPropertiesLoaded(true);
 }
 //-----------------------------------------------------------------------------
 wxString Trigger::getSource() const
@@ -172,8 +167,7 @@ wxString Trigger::getTriggerType(int type)
 //-----------------------------------------------------------------------------
 Trigger::fireTimeType Trigger::getFiringTime()
 {
-    if (!infoIsLoadedM)
-        loadInfo();
+    ensurePropertiesLoaded();
     if (isDatabaseTriggerM)
         return databaseTrigger;
     if (triggerTypeM.substr(0, 6) == wxT("BEFORE"))

@@ -68,8 +68,13 @@ public:
     {
         if (!item)
             return;
-        iterator pos = std::find_if(itemsM.begin(), itemsM.end(),
-            FindByAddress(item));
+        remove(std::find_if(itemsM.begin(), itemsM.end(), 
+            FindByAddress(item)));
+    }
+
+    // removes item pointed at from list
+    void remove(iterator pos)
+    {
         if (pos != itemsM.end())
         {
             itemsM.erase(pos);
@@ -77,8 +82,18 @@ public:
         }
     }
 
+    // removes items in range from list
+    void remove(iterator first, iterator last)
+    {
+        if (first != last)
+        {
+            itemsM.erase(first, last);
+            notifyObservers();
+        }
+    }
+
     // adds new item to end of list and returns pointer to it
-    virtual T* add(T& item)
+    T* add(T& item)
     {
         item.setParent(this);
         if (isLocked())
@@ -92,31 +107,42 @@ public:
     }
 
     // adds new item to end of list and returns pointer to it
-    virtual T* add(MetadataItem* parent, wxString name, NodeType type)
+    T* add(MetadataItem* parent, wxString name, NodeType type)
     {
-        itemsM.push_back(new T());
-        T& item = itemsM.back();
-        for (unsigned int i = getLockCount(); i > 0; i--)
-            item.lockSubject();
-        item.setProperties(parent, name, type);
-        notifyObservers();
-        return &item;
+        return insert(itemsM.end(), parent, name, type);
     }
 
-    // inserts new item into list and returns pointer to it
-    virtual T* insert(MetadataItem* parent, wxString name, NodeType type)
+    // inserts new item into list at correct position to preserve alphabetical
+    // order of item names, and returns pointer to it
+    T* insert(MetadataItem* parent, wxString name, NodeType type)
     {
-        // find insertion point to preserve alphabetical order
         iterator pos = std::find_if(itemsM.begin(), itemsM.end(),
             InsertionPosByName(name));
-        pos = itemsM.insert(pos, new T());
+        return insert(pos, parent, name, type);
+    }
 
-        T& item(*pos);
+    // inserts new item at given position into list and returns pointer to it
+    T* insert(iterator pos, MetadataItem* parent, wxString name,
+        NodeType type)
+    {
+        T* item = &(*itemsM.insert(pos, new T()));
         for (unsigned int i = getLockCount(); i > 0; i--)
-            item.lockSubject();
-        item.setProperties(parent, name, type);
+            item->lockSubject();
+        item->setProperties(parent, name, type);
         notifyObservers();
-        return &item;
+        return item;
+    }
+
+    void moveItem(iterator currentPos, iterator newPos)
+    {
+        if (currentPos != newPos)
+        {
+            boost::ptr_list<T> copied;
+            // I did not find an easier way to move the item in the list
+            copied.transfer(copied.begin(), currentPos, itemsM);
+            itemsM.transfer(newPos, copied);
+            notifyObservers();
+        }
     }
 
     virtual bool isSystem() const
@@ -158,15 +184,21 @@ public:
         }
     };
 
-    virtual MetadataItem* findByName(wxString name)
+    iterator getPosition(wxString name)
     {
         Identifier id(name);
         for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
         {
             if ((*it).getIdentifier().equals(id))
-                return &(*it);
+                return it;
         }
-        return 0;
+        return itemsM.end();
+    }
+
+    virtual MetadataItem* findByName(wxString name)
+    {
+        iterator it = getPosition(name);
+        return (it != itemsM.end()) ? &(*it) : 0;
     };
 
     virtual bool getChildren(std::vector<MetadataItem *>& temp)         // returns vector of all subnodes

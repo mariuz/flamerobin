@@ -138,7 +138,6 @@ void Relation::loadChildren()
 {
     // in case an exception is thrown this should be repeated
     setChildrenLoaded(false);
-    columnsM.clear();
 
     Database *d = getDatabase(wxT("Relation::loadChildren"));
     MetadataLoader* loader = d->getMetadataLoader();
@@ -148,6 +147,7 @@ void Relation::loadChildren()
     // can possibly use the same transaction
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(this);
+    wxMBConv* converter = d->getCharsetConverter();
 
     IBPP::Statement& st1 = loader->getStatement(
         "select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source, "
@@ -161,33 +161,57 @@ void Relation::loadChildren()
         " where r.rdb$relation_name = ?"
         " order by r.rdb$field_position"
     );
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+    st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
+
+    MetadataCollection<Column>::iterator itInsert = columnsM.begin();
     while (st1->Fetch())
     {
         std::string s, coll;
         st1->Get(1, s);
-        wxString fname(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString fname(std2wxIdentifier(s, converter));
         st1->Get(3, s);
-        wxString source(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString source(std2wxIdentifier(s, converter));
         if (!st1->IsNull(4))
             st1->Get(4, coll);
-        wxString collation(std2wxIdentifier(coll, d->getCharsetConverter()));
+        wxString collation(std2wxIdentifier(coll, converter));
         wxString computedSrc, defaultSrc;
-        readBlob(st1, 5, computedSrc, d->getCharsetConverter());
+        readBlob(st1, 5, computedSrc, converter);
         if (!st1->IsNull(6))
         {
-            readBlob(st1, 6, defaultSrc, d->getCharsetConverter());
+            readBlob(st1, 6, defaultSrc, converter);
             // Some users reported two spaces before DEFAULT word in source
             // Perhaps some other tools can put garbage here? Should we
             // parse it as SQL to clean up comments, whitespace, etc?
             defaultSrc.Trim(false).Remove(0, 8);
         }
 
-        Column* cc = columnsM.add(this, fname, ntColumn);
-        cc->Init(!st1->IsNull(2), source,  computedSrc, collation,
+        // reuse existing Column objects if possible
+        // we need to maintain an iterator for inserting new or existing Column
+        // objects at the proper location
+        Column* c = 0;
+        MetadataCollection<Column>::iterator itCurrent = columnsM.getPosition(
+            fname);
+        if (itCurrent != columnsM.end())
+        {
+            c = &(*itCurrent);
+            // position may have changed, for example if column at itInsert
+            // has been deleted
+            columnsM.moveItem(itCurrent, itInsert);
+        }
+        else
+        {
+            c = columnsM.insert(itInsert, this, fname, ntColumn);
+        }
+        c->Init(!st1->IsNull(2), source,  computedSrc, collation,
             defaultSrc, !st1->IsNull(6));
+
+        if (itInsert != columnsM.end())
+            ++itInsert;
     }
+
+    // all remaining Column objects are no longer valid, "Kill 'Em All"
+    columnsM.remove(itInsert, columnsM.end());
 
     setChildrenLoaded(true);
     notifyObservers();
@@ -224,6 +248,7 @@ void Relation::getDependentChecks(std::vector<CheckConstraint>& checks)
     // can possibly use the same transaction
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(this);
+    wxMBConv* converter = d->getCharsetConverter();
 
     IBPP::Statement& st1 = loader->getStatement(
         "select c.rdb$constraint_name, t.rdb$relation_name, "
@@ -237,18 +262,18 @@ void Relation::getDependentChecks(std::vector<CheckConstraint>& checks)
         "and t.rdb$trigger_type = 1 and d.rdb$field_name is null "
     );
 
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+    st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
     while (st1->Fetch())
     {
         std::string s;
         st1->Get(1, s);
-        wxString cname(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString cname(std2wxIdentifier(s, converter));
         st1->Get(2, s);
-        wxString table(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString table(std2wxIdentifier(s, converter));
 
         wxString source;
-        readBlob(st1, 3, source, d->getCharsetConverter());
+        readBlob(st1, 3, source, converter);
 
         Table* tab = dynamic_cast<Table*>(d->findByNameAndType(ntTable,
             table));
@@ -526,6 +551,7 @@ std::vector<Privilege>* Relation::getPrivileges()
     // can possibly use the same transaction
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(this);
+    wxMBConv* converter = d->getCharsetConverter();
 
     IBPP::Statement& st1 = loader->getStatement(
         "select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
@@ -534,7 +560,7 @@ std::vector<Privilege>* Relation::getPrivileges()
         "where RDB$RELATION_NAME = ? and rdb$object_type = 0 "
         "order by rdb$user, rdb$user_type, rdb$grant_option, rdb$privilege"
     );
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+    st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
     std::string lastuser;
     int lasttype = -1;
@@ -552,16 +578,14 @@ std::vector<Privilege>* Relation::getPrivileges()
         st1->Get(6, field);
         if (!pr || user != lastuser || usertype != lasttype)
         {
-            Privilege p(this, std2wx(user, d->getCharsetConverter()).Strip(),
-                usertype);
+            Privilege p(this, std2wx(user, converter).Strip(), usertype);
             privilegesM.push_back(p);
             pr = &privilegesM.back();
             lastuser = user;
             lasttype = usertype;
         }
-        pr->addPrivilege(privilege[0],
-            std2wxIdentifier(grantor, d->getCharsetConverter()),
-            grantoption == 1, std2wxIdentifier(field, d->getCharsetConverter()));
+        pr->addPrivilege(privilege[0], std2wxIdentifier(grantor, converter),
+            grantoption == 1, std2wxIdentifier(field, converter));
     }
     return &privilegesM;
 }
@@ -574,19 +598,20 @@ void Relation::getTriggers(std::vector<Trigger *>& list,
     Database* d = getDatabase(wxT("Relation::getTriggers"));
     MetadataLoader* loader = d->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
+    wxMBConv* converter = d->getCharsetConverter();
 
     IBPP::Statement& st1 = loader->getStatement(
         "select rdb$trigger_name from rdb$triggers where rdb$relation_name = ? "
         "order by rdb$trigger_sequence"
     );
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+    st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
     while (st1->Fetch())
     {
         std::string name;
         st1->Get(1, name);
         Trigger* t = dynamic_cast<Trigger*>(d->findByNameAndType(ntTrigger,
-            std2wxIdentifier(name, d->getCharsetConverter())));
+            std2wxIdentifier(name, converter)));
         if (t && t->getFiringTime() == beforeOrAfter)
             list.push_back(t);
     }
