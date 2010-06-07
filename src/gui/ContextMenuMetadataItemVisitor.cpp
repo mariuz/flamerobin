@@ -92,6 +92,7 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database&)
     advanced->Append(Cmds::Menu_ExtractDatabaseDDL, _("&Extract metadata DDL..."));
 
     menuM->AppendSeparator();
+    addRefreshItem();
     menuM->Append(Cmds::Menu_DatabaseProperties, _("Data&base Properties"));
 }
 //-----------------------------------------------------------------------------
@@ -117,21 +118,35 @@ void ContextMenuMetadataItemVisitor::visitGenerator(Generator&)
     addRegularObjectMenu(false, true);
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitMetadataItem(MetadataItem& metadataItem)
+void ContextMenuMetadataItemVisitor::visitMetadataItem(
+    MetadataItem& metadataItem)
 {
-    NodeType type = metadataItem.getType();
-    if (type == ntFunctions)
+    switch (metadataItem.getType())
     {
-        menuM->Append(Cmds::Menu_CreateObject, _("&Declare new..."));
-        return;
-    }
-
-    if (type == ntGenerators)
-        menuM->Append(Cmds::Menu_ShowAllGeneratorValues, _("Show &all values"));
-
-    if (type == ntGenerators || type == ntTables || type == ntViews || type == ntProcedures ||
-        type == ntTriggers || type == ntDomains || type == ntRoles || type == ntExceptions)
+        case ntFunctions:
+            menuM->Append(Cmds::Menu_CreateObject, _("&Declare new..."));
+            menuM->AppendSeparator();
+            addRefreshItem();
+            break;
+        case ntGenerators:
+            menuM->Append(Cmds::Menu_ShowAllGeneratorValues,
+                _("Show &all values"));
+            menuM->AppendSeparator();
+            // fall through
+        case ntTables:
+        case ntViews:
+        case ntProcedures:
+        case ntTriggers:
+        case ntDomains:
+        case ntRoles:
+        case ntExceptions:
             menuM->Append(Cmds::Menu_CreateObject, _("Create &new..."));
+            menuM->AppendSeparator();
+            // fall through
+        case ntSysTables:
+            addRefreshItem();
+            break;
+    }
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitProcedure(Procedure&)
@@ -198,6 +213,11 @@ void ContextMenuMetadataItemVisitor::visitView(View&)
 {
     addSelectMenu(true, false); // selectable, can not add columns
     addRegularObjectMenu(true, true); // add Alter and Drop menu
+}
+//-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::addRefreshItem()
+{
+    menuM->Append(Cmds::Menu_ObjectRefresh, _("Re&fresh"));
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::addSelectMenu(bool isSelectable,

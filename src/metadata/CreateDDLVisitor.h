@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -29,8 +29,9 @@
 #ifndef FR_CREATEDDLVISITOR_H
 #define FR_CREATEDDLVISITOR_H
 
-#include "core/ProgressIndicator.h"
 #include "metadata/MetadataItemVisitor.h"
+
+class ProgressIndicator;
 //-----------------------------------------------------------------------------
 class CreateDDLVisitor: public MetadataItemVisitor
 {

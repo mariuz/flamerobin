@@ -191,7 +191,12 @@ private:
 
     std::multimap<CharacterSet, wxString> collationsM;
     void loadCollations();
-    void loadObjects(NodeType type, ProgressIndicator* indicator = 0);
+
+    template<class T>
+    void loadCollection(ProgressIndicator* progressIndicator,
+        MetadataCollection<T>& collection, NodeType type,
+        MetadataLoader* loader,std::string loadStatement);
+    void loadCollections(ProgressIndicator* progressIndicator);
 
     // small help for parser
     wxString getTableForIndex(wxString indexName);
@@ -201,6 +206,7 @@ private:
     bool showSysTables();
 
 protected:
+    virtual void loadChildren();
     virtual void lockChildren();
     virtual void unlockChildren();
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -31,10 +31,16 @@
 
 #include <wx/wx.h>
 //-----------------------------------------------------------------------------
+class CancelProgressException
+{
+public:
+    CancelProgressException();
+};
+//-----------------------------------------------------------------------------
 class ProgressIndicator
 {
 public:
-    virtual ~ProgressIndicator() {};
+    virtual ~ProgressIndicator();
     virtual bool isCanceled() = 0;
     virtual void initProgress(wxString progressMsg,
         unsigned int maxPosition = 0, unsigned int startingPosition = 0,
@@ -48,5 +54,7 @@ public:
     virtual void stepProgress(int stepAmount = 1,
         unsigned int progressLevel = 1) = 0;
 };
+//-----------------------------------------------------------------------------
+void checkProgressIndicatorCanceled(ProgressIndicator* progressIndicator);
 //-----------------------------------------------------------------------------
 #endif // FR_PROGRESSINDICATOR_H

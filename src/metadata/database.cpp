@@ -57,8 +57,6 @@
 #include "sql/SqlStatement.h"
 #include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------
-using namespace std;
-//-----------------------------------------------------------------------------
 // CharacterSet class
 CharacterSet::CharacterSet(const wxString& name, int id, int bytesPerChar)
     : nameM(name), idM(id), bytesPerCharM(bytesPerChar)
@@ -381,44 +379,6 @@ void Database::getIdentifiers(std::vector<Identifier>& temp)
     exceptionsM.getChildrenNames(temp);
 }
 //-----------------------------------------------------------------------------
-wxString getLoadingSql(NodeType type)
-{
-    switch (type)
-    {
-        case ntTable:       return wxT("select rr.rdb$relation_name from rdb$relations rr ")
-            wxT(" where (rr.RDB$SYSTEM_FLAG = 0 or rr.RDB$SYSTEM_FLAG is null) ")
-            wxT(" and rr.RDB$VIEW_SOURCE is null order by 1");
-
-        case ntSysTable:    return wxT("select rr.rdb$relation_name from rdb$relations rr ")
-            wxT(" where (rr.RDB$SYSTEM_FLAG = 1) ")
-            wxT(" and rr.RDB$VIEW_SOURCE is null order by 1");
-
-        case ntView:        return wxT("select rr.rdb$relation_name from rdb$relations rr ")
-            wxT(" where (rr.RDB$SYSTEM_FLAG = 0 or rr.RDB$SYSTEM_FLAG is null) ")
-            wxT(" and rr.RDB$VIEW_SOURCE is not null order by 1");
-
-        case ntProcedure:   return wxT("select pp.rdb$PROCEDURE_name from rdb$procedures pp ")
-            wxT(" where (pp.RDB$SYSTEM_FLAG = 0 or pp.RDB$SYSTEM_FLAG is null) order by 1");
-
-        case ntTrigger:     return wxT("select RDB$TRIGGER_NAME from RDB$TRIGGERS where ")
-            wxT("(RDB$SYSTEM_FLAG = 0 or RDB$SYSTEM_FLAG is null) ORDER BY 1");
-
-        case ntRole:        return wxT("select RDB$ROLE_NAME from RDB$ROLES ORDER BY 1");
-
-        case ntGenerator:   return wxT("select rdb$generator_name from rdb$generators where ")
-            wxT("(RDB$SYSTEM_FLAG = 0 or RDB$SYSTEM_FLAG is null) ORDER BY 1");
-
-        case ntFunction:    return wxT("select RDB$FUNCTION_NAME from RDB$FUNCTIONS where ")
-            wxT("(RDB$SYSTEM_FLAG = 0 or RDB$SYSTEM_FLAG is null) ORDER BY 1");
-
-        case ntDomain:      return wxT("select f.rdb$field_name from rdb$fields f ")
-            wxT("left outer join rdb$types t on f.rdb$field_type=t.rdb$type ")
-            wxT("where t.rdb$field_name='RDB$FIELD_TYPE' and f.rdb$field_name not starting with 'RDB$' order by 1");
-        case ntException:   return wxT("select RDB$EXCEPTION_NAME from RDB$EXCEPTIONS ORDER BY 1");
-        default:            return wxT("");
-    };
-}
-//-----------------------------------------------------------------------------
 // This could be moved to Column class
 wxString Database::loadDomainNameForColumn(wxString table, wxString field)
 {
@@ -590,45 +550,46 @@ wxString Database::getTableForIndex(wxString indexName)
     return tableName;
 }
 //-----------------------------------------------------------------------------
-//! load list of objects of type "type" from database, and fill the DBH
-void Database::loadObjects(NodeType type, ProgressIndicator* indicator)
+template<class T>
+void Database::loadCollection(ProgressIndicator* progressIndicator,
+    MetadataCollection<T>& collection, NodeType type,
+    MetadataLoader* loader,std::string loadStatement)
 {
-    switch (type)
-    {
-        case ntTable:       tablesM.clear();        break;
-        case ntSysTable:    sysTablesM.clear();     break;
-        case ntView:        viewsM.clear();         break;
-        case ntProcedure:   proceduresM.clear();    break;
-        case ntTrigger:     triggersM.clear();      break;
-        case ntRole:        rolesM.clear();         break;
-        case ntGenerator:   generatorsM.clear();    break;
-        case ntFunction:    functionsM.clear();     break;
-        case ntDomain:      domainsM.clear();       break;
-        case ntException:   exceptionsM.clear();    break;
-        default:            return;
-    };
+    wxMBConv* converter = getCharsetConverter();
 
-    MetadataLoader* loader = getMetadataLoader();
-    // first start a transaction for metadata loading, then lock the database
-    // when objects go out of scope and are destroyed, database will be
-    // unlocked before the transaction is committed - any update() calls on
-    // observers can possibly use the same transaction
-    MetadataLoaderTransaction tr(loader);
-    SubjectLocker lock(this);
-
-    IBPP::Statement& st1 = loader->getStatement(wx2std(getLoadingSql(type),
-        getCharsetConverter()));
+    IBPP::Statement& st1 = loader->getStatement(loadStatement);
     st1->Execute();
+
+    MetadataCollection<T>::iterator itInsert = collection.begin();
     while (st1->Fetch())
     {
-        std::string name;
-        st1->Get(1, name);
-        addObject(type, std2wxIdentifier(name, getCharsetConverter()));
+        std::string s;
+        st1->Get(1, s);
+        wxString name(std2wxIdentifier(s, converter));
 
-        if (indicator && indicator->isCanceled())
-            break;
+        T* obj = 0;
+        MetadataCollection<T>::iterator itCurrent = collection.getPosition(
+            name);
+        if (itCurrent != collection.end())
+        {
+            obj = &(*itCurrent);
+            // position may have changed, for example if object at itInsert
+            // has been deleted
+            collection.moveItem(itCurrent, itInsert);
+        }
+        else
+        {
+            obj = collection.insert(itInsert, this, name, type);
+        }
+
+        if (itInsert != collection.end())
+            ++itInsert;
+
+        checkProgressIndicatorCanceled(progressIndicator);
     }
-    refreshByType(type);
+
+    // all remaining objects are no longer valid
+    collection.remove(itInsert, collection.end());
 }
 //-----------------------------------------------------------------------------
 void Database::loadGeneratorValues()
@@ -1006,23 +967,21 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
 
         databaseM->Connect();
         connectedM = true;
-        notifyObservers();
-        tablesM.setParent(this);
-        sysTablesM.setParent(this);
 
         // first start a transaction for metadata loading, then lock the
         // database
         // when objects go out of scope and are destroyed, database will be
         // unlocked before the transaction is committed - any update() calls
         // on observers can possibly use the same transaction
-        MetadataLoaderTransaction tr(getMetadataLoader());
+        MetadataLoader* loader = getMetadataLoader();
+        MetadataLoaderTransaction tr(loader);
         SubjectLocker lock(this);
 
-        bool canceled = (indicator && indicator->isCanceled());
-        if (!canceled)
+        try
         {
+            checkProgressIndicatorCanceled(indicator);
             // load database charset
-            IBPP::Statement& st1 = metadataLoaderM->getStatement(
+            IBPP::Statement& st1 = loader->getStatement(
                 "select rdb$character_set_name from rdb$database");
             st1->Execute();
             if (st1->Fetch())
@@ -1031,50 +990,21 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
                 st1->Get(1, s);
                 databaseCharsetM = std2wxIdentifier(s, getCharsetConverter());
             }
-
-            // load metadata information
-#if wxCHECK_VERSION(2, 9, 0)
-            struct NodeTypeName { NodeType type; const char* name; };
-#else
-            struct NodeTypeName { NodeType type; const wxChar* name; };
-#endif
-            static const NodeTypeName nodetypes[] = {
-                { ntTable, wxTRANSLATE("Tables") },
-                { ntSysTable, wxTRANSLATE("System tables") },
-                { ntView, wxTRANSLATE("Views") },
-                { ntProcedure, wxTRANSLATE("Procedures") },
-                { ntTrigger, wxTRANSLATE("Triggers") },
-                { ntRole, wxTRANSLATE("Roles") },
-                { ntDomain, wxTRANSLATE("Domains") },
-                { ntFunction, wxTRANSLATE("Functions") },
-                { ntGenerator, wxTRANSLATE("Generators") },
-                { ntException, wxTRANSLATE("Exceptions") }
-            };
-
-            int typeCount = sizeof(nodetypes) / sizeof(NodeTypeName);
-            for (int i = 0; i < typeCount; i++)
-            {
-                if (indicator)
-                {
-                    wxString typeName(wxGetTranslation(nodetypes[i].name));
-                    indicator->initProgress(wxString::Format(_("Loading %s..."),
-                        typeName.c_str()), typeCount, i);
-                }
-                loadObjects(nodetypes[i].type, indicator);
-                if (indicator && indicator->isCanceled())
-                {
-                    canceled = true;
-                    break;
-                }
-            }
-            if (!canceled && indicator)
-                indicator->initProgress(_("Complete"), typeCount, typeCount);
-        }
-        if (canceled)
-            disconnect();
-
-        if (connectedM)
+            checkProgressIndicatorCanceled(indicator);
+            // load database information
             databaseInfoM.load(databaseM);
+            setPropertiesLoaded(true);
+
+            // load collections of metadata objects
+            loadCollections(indicator);
+            if (indicator)
+                indicator->initProgress(_("Complete"), 100, 100);
+        }
+        catch (CancelProgressException&)
+        {
+            disconnect();
+        }
+        notifyObservers();
     }
     catch (...)
     {
@@ -1088,6 +1018,114 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
         }
         throw;
     }
+}
+//-----------------------------------------------------------------------------
+void Database::loadCollections(ProgressIndicator* progressIndicator)
+{
+    // use a small helper to cut down on the repetition...
+    struct ProgressIndicatorHelper
+    {
+    private:
+        ProgressIndicator* progressIndicatorM;
+    public:
+        ProgressIndicatorHelper(ProgressIndicator* pi)
+            : progressIndicatorM(pi) {};
+        void init(wxString collectionName, int stepsTotal, int currentStep)
+        {
+            if (progressIndicatorM)
+            {
+                wxString msg(wxString::Format(_("Loading %s..."),
+                    collectionName.c_str()));
+                progressIndicatorM->initProgress(msg, stepsTotal,
+                    currentStep, 1);
+            }
+        }
+    };
+
+    const int collectionCount = 10;
+    std::string loadStmt;
+    ProgressIndicatorHelper pih(progressIndicator);
+
+    MetadataLoader* loader = getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+    SubjectLocker lock(this);
+
+    // load tables
+    pih.init(_("tables"), collectionCount, 1);
+    loadStmt = "select rdb$relation_name from rdb$relations"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " and rdb$view_source is null order by 1";
+    loadCollection<Table>(progressIndicator, tablesM, ntTable, loader,
+        loadStmt);
+
+    // load system tables
+    pih.init(_("system tables"), collectionCount, 2);
+    loadStmt = "select rdb$relation_name from rdb$relations"
+        " where rdb$system_flag = 1"
+        " and rdb$view_source is null order by 1";
+    loadCollection<Table>(progressIndicator, sysTablesM, ntSysTable, loader,
+        loadStmt);
+
+    // load views
+    pih.init(_("views"), collectionCount, 3);
+    loadStmt = "select rdb$relation_name from rdb$relations"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " and rdb$view_source is not null order by 1";
+    loadCollection<View>(progressIndicator, viewsM, ntView, loader, loadStmt);
+
+    // load procedures
+    pih.init(_("procedures"), collectionCount, 4);
+    loadStmt = "select rdb$procedure_name from rdb$procedures"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " order by 1";
+    loadCollection<Procedure>(progressIndicator, proceduresM, ntProcedure,
+        loader, loadStmt);
+
+    // load triggers
+    pih.init(_("triggers"), collectionCount, 5);
+    loadStmt = "select rdb$trigger_name from rdb$triggers"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " order by 1";
+    loadCollection<Trigger>(progressIndicator, triggersM, ntTrigger, loader,
+        loadStmt);
+
+    // load roles
+    pih.init(_("roles"), collectionCount, 6);
+    loadStmt = "select rdb$role_name from rdb$roles order by 1";
+    loadCollection<Role>(progressIndicator, rolesM, ntRole, loader, loadStmt);
+
+    // load domains
+    pih.init(_("domains"), collectionCount, 7);
+    loadStmt = "select f.rdb$field_name from rdb$fields f"
+        " left outer join rdb$types t on f.rdb$field_type=t.rdb$type"
+        " where t.rdb$field_name='RDB$FIELD_TYPE'"
+        " and f.rdb$field_name not starting with 'RDB$'"
+        " order by 1";
+    loadCollection<Domain>(progressIndicator, domainsM, ntDomain, loader,
+        loadStmt);
+
+    // load functions
+    pih.init(_("functions"), collectionCount, 8);
+    loadStmt = "select rdb$function_name from rdb$functions"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " order by 1";
+    loadCollection<Function>(progressIndicator, functionsM, ntFunction,
+        loader, loadStmt);
+
+    // load generators
+    pih.init(_("generators"), collectionCount, 9);
+    loadStmt = "select rdb$generator_name from rdb$generators"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " order by 1";
+    loadCollection<Generator>(progressIndicator, generatorsM, ntGenerator,
+        loader, loadStmt);
+
+    // load exceptions
+    pih.init(_("exceptions"), collectionCount, 10);
+    loadStmt = "select rdb$exception_name from rdb$exceptions"
+        " order by 1";
+    loadCollection<Exception>(progressIndicator, exceptionsM, ntException,
+        loader, loadStmt);
 }
 //-----------------------------------------------------------------------------
 void Database::disconnect()
@@ -1170,6 +1208,8 @@ bool Database::getChildren(std::vector<MetadataItem*>& temp)
 // returns vector of all subitems
 void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
 {
+    ensureChildrenLoaded();
+
     temp.push_back(&domainsM);
     temp.push_back(&exceptionsM);
     temp.push_back(&functionsM);
@@ -1182,6 +1222,12 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
     temp.push_back(&tablesM);
     temp.push_back(&triggersM);
     temp.push_back(&viewsM);
+}
+//-----------------------------------------------------------------------------
+void Database::loadChildren()
+{
+    // TODO: show progress dialog while reloading child object collections?
+    loadCollections(0);
 }
 //-----------------------------------------------------------------------------
 void Database::lockChildren()

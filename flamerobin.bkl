@@ -363,6 +363,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/core/ArtProvider.cpp
         $(SOURCEDIR)/core/FRError.cpp
         $(SOURCEDIR)/core/Observer.cpp
+        $(SOURCEDIR)/core/ProgressIndicator.cpp
         $(SOURCEDIR)/core/StringUtils.cpp
         $(SOURCEDIR)/core/Subject.cpp
         $(SOURCEDIR)/core/Visitor.cpp

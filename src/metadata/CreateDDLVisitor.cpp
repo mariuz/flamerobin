@@ -41,6 +41,7 @@
 
 #include <vector>
 
+#include "core/ProgressIndicator.h"
 #include "metadata/column.h"
 #include "metadata/constraints.h"
 #include "metadata/CreateDDLVisitor.h"
@@ -142,11 +143,6 @@ void CreateDDLVisitor::visitColumn(Column& c)
     }
 }
 //-----------------------------------------------------------------------------
-class CanceledException
-{
-public:
-    CanceledException() {};
-};
 template <class T>
 void iterateit(CreateDDLVisitor* v, Database& db, ProgressIndicator* pi)
 {
@@ -160,8 +156,7 @@ void iterateit(CreateDDLVisitor* v, Database& db, ProgressIndicator* pi)
     for (typename MetadataCollection<T>::iterator it = p->begin();
         it != p->end(); ++it)
     {
-        if (pi->isCanceled())
-            throw CanceledException();
+        checkProgressIndicatorCanceled(pi);
         Domain *d = dynamic_cast<Domain *>(&(*it));
         if (d && d->isSystem())     // system domains get loaded during
             continue;               // program lifetime - so we skip them
@@ -207,7 +202,7 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         preSqlM << wxT("/******************** TRIGGERS ********************/\n\n");
         iterateit<Trigger>(this, d, progressIndicatorM);
     }
-    catch (CanceledException&)
+    catch (CancelProgressException&)
     {
         // this is expected if user cancels the extraction
         sqlM = _("Extraction canceled");

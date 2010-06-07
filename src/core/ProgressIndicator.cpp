@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -25,41 +25,32 @@
 
 */
 
-#ifndef FR_CONTEXTMENUMETADATAITEMVISITOR_H
-#define FR_CONTEXTMENUMETADATAITEMVISITOR_H
+// For compilers that support precompilation, includes "wx/wx.h".
+#include "wx/wxprec.h"
 
-#include "metadata/MetadataItemVisitor.h"
+#ifdef __BORLANDC__
+    #pragma hdrstop
+#endif
+
+// for all others, include the necessary headers (this file is usually all you
+// need because it includes almost all "standard" wxWindows headers
+#ifndef WX_PRECOMP
+    #include "wx/wx.h"
+#endif
+
+#include "core/ProgressIndicator.h"
 //-----------------------------------------------------------------------------
-class wxMenu;
-//-----------------------------------------------------------------------------
-class ContextMenuMetadataItemVisitor : public MetadataItemVisitor
+CancelProgressException::CancelProgressException()
 {
-public:
-    explicit ContextMenuMetadataItemVisitor(wxMenu* menu);
-    virtual ~ContextMenuMetadataItemVisitor();
-
-    virtual void visitColumn(Column& column);
-    virtual void visitDatabase(Database& database);
-    virtual void visitDomain(Domain& domain);
-    virtual void visitException(Exception& exception);
-    virtual void visitFunction(Function& function);
-    virtual void visitGenerator(Generator& generator);
-    virtual void visitMetadataItem(MetadataItem& metadataItem);
-    virtual void visitProcedure(Procedure& procedure);
-    virtual void visitRole(Role& role);
-    virtual void visitRoot(Root& root);
-    virtual void visitServer(Server& server);
-    virtual void visitTable(Table& table);
-    virtual void visitTrigger(Trigger& trigger);
-    virtual void visitView(View& view);
-
-private:
-    wxMenu* menuM;
-
-    void addRefreshItem();
-
-    void addRegularObjectMenu(bool addAlter, bool addDrop);
-    void addSelectMenu(bool isSelectable, bool canAddColumn);
-};
+}
 //-----------------------------------------------------------------------------
-#endif //FR_CONTEXTMENUMETADATAITEMVISITOR_H
+ProgressIndicator::~ProgressIndicator()
+{
+}
+//-----------------------------------------------------------------------------
+void checkProgressIndicatorCanceled(ProgressIndicator* progressIndicator)
+{
+    if (progressIndicator && progressIndicator->isCanceled())
+        throw CancelProgressException();
+}
+//-----------------------------------------------------------------------------

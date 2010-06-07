@@ -664,6 +664,10 @@ SOURCE=.\src\gui\ProgressDialog.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\core\ProgressIndicator.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\ReorderFieldsDialog.cpp
 # End Source File
 # Begin Source File

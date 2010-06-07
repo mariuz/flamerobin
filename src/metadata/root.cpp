@@ -253,7 +253,7 @@ void Root::removeServer(Server* server)
 //-----------------------------------------------------------------------------
 Database* Root::addUnregisteredDatabase(Database& database)
 {
-    // on-demand creation of parent node for unregistred databases
+    // on-demand creation of parent node for unregistered databases
     if (!unregLocalDatabasesM)
     {
         Server server;

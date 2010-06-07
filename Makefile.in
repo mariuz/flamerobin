@@ -50,6 +50,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_ArtProvider.o \
 	flamerobin_FRError.o \
 	flamerobin_Observer.o \
+	flamerobin_ProgressIndicator.o \
 	flamerobin_StringUtils.o \
 	flamerobin_Subject.o \
 	flamerobin_Visitor.o \
@@ -319,6 +320,9 @@ flamerobin_FRError.o: $(srcdir)/src/core/FRError.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_Observer.o: $(srcdir)/src/core/Observer.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/Observer.cpp
+
+flamerobin_ProgressIndicator.o: $(srcdir)/src/core/ProgressIndicator.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/ProgressIndicator.cpp
 
 flamerobin_StringUtils.o: $(srcdir)/src/core/StringUtils.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/StringUtils.cpp
