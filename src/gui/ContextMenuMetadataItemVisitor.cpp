@@ -103,7 +103,10 @@ void ContextMenuMetadataItemVisitor::visitDomain(Domain&)
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitException(Exception&)
 {
-    addRegularObjectMenu(false, true);
+    addDropItem();
+    menuM->AppendSeparator();
+    addRefreshItem();
+    addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitFunction(Function&)
@@ -114,8 +117,12 @@ void ContextMenuMetadataItemVisitor::visitFunction(Function&)
 void ContextMenuMetadataItemVisitor::visitGenerator(Generator&)
 {
     menuM->Append(Cmds::Menu_ShowGeneratorValue, _("Show &value"));
-    menuM->Append(Cmds::Menu_SetGeneratorValue, _("&Set value"));
-    addRegularObjectMenu(false, true);
+    menuM->Append(Cmds::Menu_SetGeneratorValue, _("&Set value..."));
+    menuM->AppendSeparator();
+    addDropItem();
+    menuM->AppendSeparator();
+    addRefreshItem();
+    addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitMetadataItem(
@@ -213,6 +220,17 @@ void ContextMenuMetadataItemVisitor::visitView(View&)
 {
     addSelectMenu(true, false); // selectable, can not add columns
     addRegularObjectMenu(true, true); // add Alter and Drop menu
+}
+//-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::addDropItem()
+{
+    // no ellipsies, as no additional data is needed to complete the action
+    menuM->Append(Cmds::Menu_DropObject, _("Dr&op"));
+}
+//-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::addPropertiesItem()
+{
+    menuM->Append(Cmds::Menu_ObjectProperties, _("P&roperties"));
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::addRefreshItem()
