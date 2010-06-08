@@ -611,25 +611,6 @@ void Database::loadGeneratorValues()
     }
 }
 //-----------------------------------------------------------------------------
-//! Notify the observers that collection has changed
-void Database::refreshByType(NodeType type)
-{
-    switch (type)
-    {
-        case ntTable:       tablesM.notifyObservers();      break;
-        case ntSysTable:    sysTablesM.notifyObservers();   break;
-        case ntView:        viewsM.notifyObservers();       break;
-        case ntProcedure:   proceduresM.notifyObservers();  break;
-        case ntTrigger:     triggersM.notifyObservers();    break;
-        case ntRole:        rolesM.notifyObservers();       break;
-        case ntGenerator:   generatorsM.notifyObservers();  break;
-        case ntFunction:    functionsM.notifyObservers();   break;
-        case ntDomain:      domainsM.notifyObservers();     break;
-        case ntException:   exceptionsM.notifyObservers();  break;
-        default:            return;
-    };
-}
-//-----------------------------------------------------------------------------
 MetadataItem* Database::findByName(wxString name)
 {
     for (int n = (int)ntTable; n < (int)ntLastType; n++)

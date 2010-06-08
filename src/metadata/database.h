@@ -262,7 +262,6 @@ public:
     MetadataItem* findByNameAndType(NodeType nt, wxString name);
     MetadataItem* findByName(wxString name);
     Relation* findRelation(const Identifier& name);
-    void refreshByType(NodeType type);
     void dropObject(MetadataItem *object);
     void addObject(NodeType type, wxString name);
     void parseCommitedSql(const SqlStatement& stm);     // reads a DDL statement and does accordingly

@@ -225,7 +225,6 @@ bool Logger::prepareDatabase(Database *db)
             st->Execute();
             tr->Commit();
             db->addObject(ntTable, wxT("FLAMEROBIN$LOG"));
-            db->refreshByType(ntTable);
         }
 
         // create generator
@@ -237,7 +236,6 @@ bool Logger::prepareDatabase(Database *db)
             st->Execute();
             tr->Commit();
             db->addObject(ntGenerator, wxT("FLAMEROBIN$LOG_GEN"));
-            db->refreshByType(ntGenerator);
         }
         return true;
     }
