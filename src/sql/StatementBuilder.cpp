@@ -44,14 +44,16 @@
 #include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------
 StatementBuilder::StatementBuilder()
-    : indentCharsM(0), indentLevelM(0), maxLineLengthM(0)
+    : indentCharsM(0), indentLevelM(0), lineWrappingM(false), maxLineLengthM(0)
 {
     keywordsUpperCaseM = config().get(wxT("SQLKeywordsUpperCase"), true);
     // take settings for line wrapping from vertical editor line settings:
     // enable wrapping only if the marker is shown, and if so wrap to the
     // same column, indent by editor tab size
+    
     if (config().get(wxT("sqlEditorShowEdge"), false))
     {
+        lineWrappingM = true;
         maxLineLengthM = config().get(wxT("sqlEditorEdgeColumn"), 80);
         indentCharsM = config().get(wxT("sqlEditorTabSize"), 4);
     }
@@ -71,6 +73,13 @@ StatementBuilder& StatementBuilder::operator<< (const ControlToken ct)
             if (indentLevelM)
                 --indentLevelM;
             break;
+        case DisableLineWrapping:
+            lineWrappingM = false;
+            break;
+        case EnableLineWrapping:
+            if (maxLineLengthM)
+                lineWrappingM = true;
+            break;
         default:
             wxASSERT(false);
             break;
@@ -80,7 +89,7 @@ StatementBuilder& StatementBuilder::operator<< (const ControlToken ct)
 //-----------------------------------------------------------------------------
 StatementBuilder& StatementBuilder::operator<< (const char c)
 {
-    if (maxLineLengthM && currentLineM.Length() + 1 > maxLineLengthM)
+    if (lineWrappingM && currentLineM.Length() + 1 > maxLineLengthM)
         addNewLine();
     currentLineM += c;
     return (*this);
@@ -88,7 +97,7 @@ StatementBuilder& StatementBuilder::operator<< (const char c)
 //-----------------------------------------------------------------------------
 StatementBuilder& StatementBuilder::operator<< (const wxString& s)
 {
-    if (maxLineLengthM && currentLineM.Length() + s.Length() > maxLineLengthM)
+    if (lineWrappingM && currentLineM.Length() + s.Length() > maxLineLengthM)
         addNewLine();
     currentLineM += s;
     return (*this);
@@ -97,7 +106,7 @@ StatementBuilder& StatementBuilder::operator<< (const wxString& s)
 StatementBuilder& StatementBuilder::operator<< (const SqlTokenType stt)
 {
     wxString kw(SqlTokenizer::getKeyword(stt, keywordsUpperCaseM));
-    if (maxLineLengthM && currentLineM.Length() + kw.Length() > maxLineLengthM)
+    if (lineWrappingM && currentLineM.Length() + kw.Length() > maxLineLengthM)
         addNewLine();
     currentLineM += kw;
     return (*this);

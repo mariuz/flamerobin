@@ -39,12 +39,14 @@ private:
     bool keywordsUpperCaseM;
     unsigned indentCharsM;
     unsigned indentLevelM;
+    bool lineWrappingM;
     unsigned maxLineLengthM;
     void addNewLine();
 public:
     StatementBuilder();
 
-    enum ControlToken { NewLine, IncIndent, DecIndent };
+    enum ControlToken { NewLine, IncIndent, DecIndent,
+        DisableLineWrapping, EnableLineWrapping };
     StatementBuilder& operator<< (const ControlToken ct);
 
     StatementBuilder& operator<< (const char c);
