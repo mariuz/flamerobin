@@ -59,10 +59,11 @@ private:
     bool indicesLoadedM;
     void loadIndices();
 
-    bool externalPathLoadedM;
     wxString externalPathM;
 
 protected:
+    virtual void setExternalFilePath(const wxString& value);
+
     virtual void loadChildren();
 
     virtual bool addRdbKeyToSelect();

@@ -43,7 +43,6 @@ class Relation: public MetadataItem
 protected:
     int relationTypeM;
     wxString ownerM;
-    void loadInfo();
 
     void getDependentChecks(std::vector<CheckConstraint>& checks);
     void getDependentViews(std::vector<Relation*>& views,
@@ -52,9 +51,16 @@ protected:
     MetadataCollection<Column> columnsM;
     std::vector<Privilege> privilegesM;
 
+    virtual void loadProperties();
     virtual void loadChildren();
     virtual void lockChildren();
     virtual void unlockChildren();
+
+    // property setters, used for either tables or views
+    // (called from loadProperties() method)
+    // this loads more data than necesary, but causes less database roundtrips
+    virtual void setExternalFilePath(const wxString& value);
+    virtual void setSource(const wxString& value);
 
     virtual bool addRdbKeyToSelect();
 public:

@@ -49,6 +49,7 @@
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/view.h"
+#include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------
 View::View()
     : Relation()
@@ -56,53 +57,51 @@ View::View()
     setType(ntView);
 }
 //-----------------------------------------------------------------------------
-//! returns false if an error occurs
 wxString View::getSource()
 {
-    Database* d = getDatabase(wxT("View::getSource"));
-    MetadataLoader* loader = d->getMetadataLoader();
-    MetadataLoaderTransaction tr(loader);
-
-    IBPP::Statement st1 = loader->getStatement(
-        "select rdb$view_source from rdb$relations where rdb$relation_name = ?");
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
-    st1->Execute();
-    st1->Fetch();
-    wxString source;
-    readBlob(st1, 1, source, d->getCharsetConverter());
-    return source;
+    ensurePropertiesLoaded();
+    return sourceM;
+}
+//-----------------------------------------------------------------------------
+void View::setSource(const wxString& value)
+{
+    sourceM = value;
 }
 //-----------------------------------------------------------------------------
 wxString View::getCreateSql()
 {
     ensureChildrenLoaded();
-    wxString src = getSource();
-    wxString sql;
-    sql += wxT("CREATE VIEW ") + getQuotedName() + wxT(" (");
 
-    bool first = true;
-    for (MetadataCollection <Column>::const_iterator it = columnsM.begin(); it != columnsM.end(); ++it)
+    StatementBuilder sb;
+    sb << kwCREATE << ' ' << kwVIEW << ' ' << getQuotedName() << wxT(" (")
+        << StatementBuilder::IncIndent;
+
+    // make sure that line breaking occurs after comma, not before
+    MetadataCollection<Column>::const_iterator it = columnsM.begin();
+    wxString colName = (*it).getQuotedName();
+    for (++it; it != columnsM.end(); ++it)
     {
-        if (first)
-            first = false;
-        else
-            sql += wxT(", ");
-        sql += (*it).getQuotedName();
+        sb << colName + wxT(", ");
+        colName = (*it).getQuotedName();
     }
-    sql += wxT(")\nAS ");
-    sql += src;
-    sql += wxT(";\n");
-    return sql;
+    sb << colName;
+
+    sb << ')' << StatementBuilder::DecIndent << StatementBuilder::NewLine
+        << kwAS << ' ' << StatementBuilder::DisableLineWrapping
+        << getSource() << ';' << StatementBuilder::NewLine;
+    return sb;
 }
 //-----------------------------------------------------------------------------
 wxString View::getCreateSqlTemplate() const
 {
-    wxString sql(
-        wxT("CREATE VIEW name ( view_column, ...)\n")
-        wxT("AS\n")
-        wxT("/* write select statement here */\n")
-        wxT("WITH CHECK OPTION;\n"));
-    return sql;
+    StatementBuilder sb;
+    sb << kwCREATE << ' ' << kwVIEW << wxT("name ( view_column, ...)")
+        << StatementBuilder::NewLine << kwAS << StatementBuilder::NewLine
+        << wxT("/* write select statement here */")
+        << StatementBuilder::NewLine
+        << kwWITH << ' ' << kwCHECK << ' ' << kwOPTION << ';'
+        << StatementBuilder::NewLine;
+    return sb;
 }
 //-----------------------------------------------------------------------------
 const wxString View::getTypeName() const

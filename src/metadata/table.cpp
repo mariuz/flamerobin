@@ -52,37 +52,20 @@
 Table::Table()
     : Relation(), primaryKeyLoadedM(false), foreignKeysLoadedM(false),
         checkConstraintsLoadedM(false), uniqueConstraintsLoadedM(false),
-        indicesLoadedM(false), externalPathLoadedM(false)
+        indicesLoadedM(false)
 {
     setType(ntTable);
 }
 //-----------------------------------------------------------------------------
 wxString Table::getExternalPath()
 {
-    if (externalPathLoadedM)
-        return externalPathM;
-
-    Database* d = getDatabase(wxT("Table::getExternalPath"));
-    MetadataLoader* loader = d->getMetadataLoader();
-    MetadataLoaderTransaction tr(loader);
-
-    IBPP::Statement& st1 = loader->getStatement(
-        " select rdb$external_file from rdb$relations "
-        " where rdb$relation_name = ?"
-    );
-
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
-    st1->Execute();
-    if (st1->Fetch() && !st1->IsNull(1))
-    {
-        std::string file;
-        st1->Get(1, file);
-        externalPathM = std2wx(file, d->getCharsetConverter());
-    }
-    else
-        externalPathM = wxEmptyString;
-    externalPathLoadedM = true;
+    ensurePropertiesLoaded();
     return externalPathM;
+}
+//-----------------------------------------------------------------------------
+void Table::setExternalFilePath(const wxString& value)
+{
+    externalPathM = value;
 }
 //-----------------------------------------------------------------------------
 void Table::invalidateIndices(const wxString& forIndex)

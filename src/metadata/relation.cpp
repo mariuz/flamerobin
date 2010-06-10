@@ -91,30 +91,66 @@ size_t Relation::getColumnCount() const
     return columnsM.getChildrenCount();
 }
 //-----------------------------------------------------------------------------
-void Relation::loadInfo()
+void Relation::loadProperties()
 {
+    setPropertiesLoaded(false);
+
     Database* d = getDatabase(wxT("Relation::loadInfo"));
     MetadataLoader* loader = d->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
+    wxMBConv* converter = d->getCharsetConverter();
 
     std::string sql("select rdb$owner_name, ");
     if (d->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
-        sql += "rdb$relation_type";
+        sql += "rdb$relation_type, ";
     else
-        sql += "0";
-    sql += " from rdb$relations where rdb$relation_name = ?";
+        sql += "0, ";
+    // for tables: path to external file as string
+    sql += "rdb$external_file, ";
+    // for views: source as blob
+    sql += "rdb$view_source ";
+    sql += "from rdb$relations where rdb$relation_name = ?";
 
     IBPP::Statement& st1 = loader->getStatement(sql);
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+    st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
     if (st1->Fetch())
     {
         std::string name;
         st1->Get(1, name);
-        ownerM = std2wxIdentifier(name, d->getCharsetConverter());
+        ownerM = std2wxIdentifier(name, converter);
         st1->Get(2, relationTypeM);
+
+        wxString value;
+        // for tables: path to external file
+        if (!st1->IsNull(3))
+        {
+            std::string s;
+            st1->Get(3, s);
+            setExternalFilePath(std2wx(s, converter));
+        }
+        else
+            setExternalFilePath(wxEmptyString);
+
+        // for views: source
+        if (!st1->IsNull(4))
+        {
+            readBlob(st1, 4, value, converter);
+            setSource(value);
+        }
+        else
+            setSource(wxEmptyString);
     }
+
     setPropertiesLoaded(true);
+}
+//-----------------------------------------------------------------------------
+void Relation::setExternalFilePath(const wxString& /*value*/)
+{
+}
+//-----------------------------------------------------------------------------
+void Relation::setSource(const wxString& /*value*/)
+{
 }
 //-----------------------------------------------------------------------------
 wxString Relation::getOwner()

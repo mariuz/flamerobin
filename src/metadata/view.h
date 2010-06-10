@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -33,9 +33,14 @@
 //-----------------------------------------------------------------------------
 class View: public Relation
 {
+private:
+    wxString sourceM;
+protected:
+    virtual void setSource(const wxString& value);
 public:
     View();
-    wxString getCreateSqlTemplate() const;  // overrides MetadataItem::getCreateSqlTemplate()
+
+    virtual wxString getCreateSqlTemplate() const;
 
     wxString getSource();
     wxString getCreateSql();
