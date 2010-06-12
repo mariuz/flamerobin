@@ -1227,16 +1227,19 @@ void Database::lockChildren()
 //-----------------------------------------------------------------------------
 void Database::unlockChildren()
 {
-    domainsM.unlockSubject();
-    exceptionsM.unlockSubject();
-    functionsM.unlockSubject();
-    generatorsM.unlockSubject();
-    proceduresM.unlockSubject();
-    rolesM.unlockSubject();
-    tablesM.unlockSubject();
-    sysTablesM.unlockSubject();
-    triggersM.unlockSubject();
+    // unlock in reverse order of locking - that way domains will still
+    // be locked when relation and procedure updates happen - that way not
+    // every added domain will cause all collection observers to update
     viewsM.unlockSubject();
+    triggersM.unlockSubject();
+    sysTablesM.unlockSubject();
+    tablesM.unlockSubject();
+    rolesM.unlockSubject();
+    proceduresM.unlockSubject();
+    generatorsM.unlockSubject();
+    functionsM.unlockSubject();
+    exceptionsM.unlockSubject();
+    domainsM.unlockSubject();
 }
 //-----------------------------------------------------------------------------
 MetadataCollection<Generator>::const_iterator Database::generatorsBegin()

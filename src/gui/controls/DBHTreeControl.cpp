@@ -67,10 +67,14 @@ private:
     bool hideDisconnectedDatabasesM;
     bool showColumnParamCountM;
     bool showColumnsM;
+    int showComputedM;
+    int showDomainsM;
+    bool showSystemTablesM;
     bool sortDatabasesM;
     bool sortServersM;
     bool sqlKeywordsUpperCaseM;
-    inline unsigned setValue(bool& field, bool newValue);
+    template<typename T>
+    unsigned setValue(T& field, T newValue);
 protected:
     virtual void loadFromConfig();
     virtual void update();
@@ -120,12 +124,21 @@ void DBHTreeConfigCache::loadFromConfig()
         cfg.get(wxT("OrderServersInTree"), false));
     changes += setValue(sqlKeywordsUpperCaseM,
         cfg.get(wxT("SQLKeywordsUpperCase"), false));
+    // these aren't surfaced by methods, but needed to cause observing tree
+    // nodes to update themselves
+    changes += setValue(showSystemTablesM,
+        cfg.get(wxT("ShowSystemTables"), true));
+    changes += setValue(showComputedM,
+        cfg.get(wxT("ShowComputed"), 1));
+    changes += setValue(showDomainsM,
+        cfg.get(wxT("ShowDomains"), 2));
 
     if (changes)
         notifyObservers();
 }
 //-----------------------------------------------------------------------------
-inline unsigned DBHTreeConfigCache::setValue(bool& field, bool newValue)
+template<typename T>
+unsigned DBHTreeConfigCache::setValue(T& field, T newValue)
 {
     if (field == newValue)
         return 0;
@@ -335,11 +348,6 @@ void DBHTreeItemVisitor::defaultAction()
     wxASSERT_MSG(false, wxT("DBHTreeItemVisitor::visit[Classname]() missing"));
 }
 //-----------------------------------------------------------------------------
-bool isSystem(MetadataItem* item)
-{
-    return item && item->isSystem();
-}
-//-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::setNodeProperties(MetadataItem* metadataItem)
 {
     wxASSERT(metadataItem);
@@ -350,10 +358,20 @@ void DBHTreeItemVisitor::setNodeProperties(MetadataItem* metadataItem)
     size_t childCount = 0;
     if (metadataItem->getType() == ntDomains)
     {
+        struct IsNotSystem
+        {
+            bool operator()(MetadataItem* item)
+            {
+                return item && !item->isSystem();
+            };
+        } isNotSystem;
+
         std::vector<MetadataItem*> children;
         if (metadataItem->getChildren(children))
-            std::remove_if(children.begin(), children.end(), &isSystem);
-        childCount = children.size();
+        {
+            childCount = std::count_if(children.begin(), children.end(),
+                isNotSystem);
+        }
     }
     else
     {
@@ -426,6 +444,8 @@ void DBHTreeItemVisitor::visitDatabase(Database& database)
         nodeVisibleM = connected;
     // show Collection nodes even though Database::getChildrenCount() returns 0
     showChildrenM = true;
+    // update if settings change: "Show system tables in tree"
+    nodeConfigSensitiveM = true;
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitDomain(Domain& domain)

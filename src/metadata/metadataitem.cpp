@@ -327,32 +327,32 @@ void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
     // but we also need mapping for column list in SELECT. These 2 queries cover it:
     if (ofObject && typeM == ntView)
     {
-		sql += wxT(" union \n")
-			wxT(" select distinct cast(0 as smallint), vr.RDB$RELATION_NAME, f.RDB$BASE_FIELD \n")
-			wxT(" from RDB$RELATION_FIELDS f \n")
-			wxT(" join RDB$VIEW_RELATIONS vr on f.RDB$VIEW_CONTEXT = vr.RDB$VIEW_CONTEXT \n")
-			wxT("   and f.RDB$RELATION_NAME = vr.RDB$VIEW_NAME \n")
-			wxT(" where f.rdb$relation_name = ? \n");
-		params++;
+        sql += wxT(" union \n")
+            wxT(" select distinct cast(0 as smallint), vr.RDB$RELATION_NAME, f.RDB$BASE_FIELD \n")
+            wxT(" from RDB$RELATION_FIELDS f \n")
+            wxT(" join RDB$VIEW_RELATIONS vr on f.RDB$VIEW_CONTEXT = vr.RDB$VIEW_CONTEXT \n")
+            wxT("   and f.RDB$RELATION_NAME = vr.RDB$VIEW_NAME \n")
+            wxT(" where f.rdb$relation_name = ? \n");
+        params++;
     }
     // views can depend on other views as well
     // we might need to add procedures here one day when Firebird gains support for it
     if (!ofObject && (typeM == ntView || typeM == ntTable || typeM == ntSysTable))
     {
-		sql += wxT(" union \n")
-			wxT(" select distinct cast(0 as smallint), f.RDB$RELATION_NAME, f.RDB$BASE_FIELD \n")
-			wxT(" from RDB$RELATION_FIELDS f \n")
-			wxT(" join RDB$VIEW_RELATIONS vr on f.RDB$VIEW_CONTEXT = vr.RDB$VIEW_CONTEXT \n")
-			wxT("   and f.RDB$RELATION_NAME = vr.RDB$VIEW_NAME \n")
-			wxT(" where vr.rdb$relation_name = ? \n");
-		params++;
+        sql += wxT(" union \n")
+            wxT(" select distinct cast(0 as smallint), f.RDB$RELATION_NAME, f.RDB$BASE_FIELD \n")
+            wxT(" from RDB$RELATION_FIELDS f \n")
+            wxT(" join RDB$VIEW_RELATIONS vr on f.RDB$VIEW_CONTEXT = vr.RDB$VIEW_CONTEXT \n")
+            wxT("   and f.RDB$RELATION_NAME = vr.RDB$VIEW_NAME \n")
+            wxT(" where vr.rdb$relation_name = ? \n");
+        params++;
     }
 
     sql += wxT(" order by 1, 2, 3");
     st1->Prepare(wx2std(sql, d->getCharsetConverter()));
     st1->Set(1, mytype);
     for (int i = 0; i < params; i++)
-		st1->Set(2 + i, wx2std(getName_(), d->getCharsetConverter()));
+        st1->Set(2 + i, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     MetadataItem* last = 0;
     Dependency* dep = 0;
@@ -651,7 +651,7 @@ void MetadataItem::setProperties(MetadataItem* parent, const wxString& name,
 //-----------------------------------------------------------------------------
 bool MetadataItem::isSystem() const
 {
-	wxString prefix(getName_().substr(0, 4));
+    wxString prefix(getName_().substr(0, 4));
     return prefix == wxT("RDB$") || prefix == wxT("MON$");
 }
 //-----------------------------------------------------------------------------

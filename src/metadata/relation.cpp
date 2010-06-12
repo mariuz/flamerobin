@@ -172,12 +172,15 @@ void Relation::loadChildren()
 
     Database *d = getDatabase(wxT("Relation::loadChildren"));
     MetadataLoader* loader = d->getMetadataLoader();
-    // first start a transaction for metadata loading, then lock the relation
+    // first start a transaction for metadata loading, then lock the database
+    // (lock the database instead of the relation itself, as loading columns
+    // will cause domains to be loaded as well, so the domain collection
+    // should be locked as well)
     // when objects go out of scope and are destroyed, object will be unlocked
     // before the transaction is committed - any update() calls on observers
     // can possibly use the same transaction
     MetadataLoaderTransaction tr(loader);
-    SubjectLocker lock(this);
+    SubjectLocker lock(d);
     wxMBConv* converter = d->getCharsetConverter();
 
     IBPP::Statement& st1 = loader->getStatement(
