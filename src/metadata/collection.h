@@ -220,25 +220,6 @@ public:
         return dummy.getCreateSqlTemplate();        // object to call the function on.
     }
 
-    virtual wxString getPrintableName()
-    {
-        if (getType() != ntDomains)
-            return MetadataItem::getPrintableName();
-
-        unsigned int n = 0;
-        for (const_iterator it = itemsM.begin(); it != itemsM.end(); ++it)
-            if (!(*it).isSystem())
-                n++;
-        if (n)
-        {
-            wxString s;
-            s << getName_() << wxT(" (") << n << wxT(")");
-            return s;
-        }
-        else
-            return getName_();
-    }
-
     virtual size_t getChildrenCount() const
     {
         return itemsM.size();
@@ -256,24 +237,5 @@ public:
             (*it).unlockSubject();
     }
 };
-//-----------------------------------------------------------------------------
-/* FIXME: from some yet unknown reason, this doesn't compile on g++ 3.3
-//! specific for domains since system-generated domains should not be counted
-template<>
-wxString MetadataCollection<Domain>::getPrintableName() const
-{
-    unsigned int n = 0;
-    for (const_iterator it = itemsM.begin(); it != itemsM.end(); ++it)
-        if (!(*it).isSystem())
-            n++;
-    if (n)
-    {
-        std::ostringstream ss;
-        ss << nameM << " (" << n << ")";
-        return ss.str();
-    }
-    else
-        return nameM;
-} */
 //-----------------------------------------------------------------------------
 #endif

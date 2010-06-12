@@ -302,14 +302,6 @@ wxString Domain::getCharset()
     return charsetM;
 }
 //-----------------------------------------------------------------------------
-wxString Domain::getPrintableName()
-{
-    wxString retval = getName_() + wxT(" ") + getDatatypeAsString();
-    if (isNotNullM)
-        retval += wxT(" not null");
-    return retval;
-}
-//-----------------------------------------------------------------------------
 wxString Domain::getAlterSqlTemplate() const
 {
     return wxT("ALTER DOMAIN ") + getQuotedName() + wxT("\n")

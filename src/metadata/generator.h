@@ -43,8 +43,6 @@ public:
 
     int64_t getValue();
 
-    virtual wxString getPrintableName();
-
     wxString getCreateSqlTemplate() const;
 
     virtual const wxString getTypeName() const;

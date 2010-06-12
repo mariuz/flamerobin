@@ -165,11 +165,6 @@ int Relation::getRelationType()
     return relationTypeM;
 }
 //-----------------------------------------------------------------------------
-bool Relation::columnsLoaded()
-{
-    return childrenLoaded();
-}
-//-----------------------------------------------------------------------------
 void Relation::loadChildren()
 {
     // in case an exception is thrown this should be repeated

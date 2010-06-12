@@ -43,7 +43,6 @@ public:
     Column();
     void Init(bool notnull, wxString source, wxString computedSource,
         wxString collation, wxString defaultValue, bool hasDefault);
-    virtual wxString getPrintableName();
     wxString getDatatype(bool useConfig = true);
     virtual const wxString getTypeName() const;
     virtual wxString getDropSqlStatement() const;

@@ -92,10 +92,8 @@ protected:
     void saveDescription(wxString saveStatement, wxString description);
 
     virtual void loadProperties();
-    bool propertiesLoaded();
     void setPropertiesLoaded(bool loaded);
 
-    bool childrenLoaded();
     virtual void loadChildren();
     void setChildrenLoaded(bool loaded);
     virtual void lockChildren();
@@ -127,8 +125,10 @@ public:
     void invalidateDescription();
     void setDescription(wxString description);
 
+    bool childrenLoaded();
     void ensureChildrenLoaded();
     void ensurePropertiesLoaded();
+    bool propertiesLoaded();
 
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
     virtual size_t getChildrenCount() const { return 0; };
@@ -145,7 +145,6 @@ public:
     void setParent(MetadataItem *parent);
     virtual wxString getName_() const;
     virtual wxString getQuotedName() const;
-    virtual wxString getPrintableName();
     virtual Identifier getIdentifier() const;
     virtual void setName_(wxString name);
     virtual NodeType getType() const;

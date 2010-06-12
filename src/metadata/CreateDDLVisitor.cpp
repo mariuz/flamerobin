@@ -149,7 +149,7 @@ void iterateit(CreateDDLVisitor* v, Database& db, ProgressIndicator* pi)
     // this doesn't work on GCC 3.3:
     //MetadataCollection<T>* p = db.getCollection<T> ();
     MetadataCollection<T>* p = db.template getCollection<T> ();
-    pi->setProgressMessage(wxT("Extracting ") + p->getPrintableName());
+    pi->setProgressMessage(wxT("Extracting ") + p->getName_());
     pi->stepProgress();
     pi->initProgress(wxEmptyString, p->getChildrenCount(), 0, 2);
 

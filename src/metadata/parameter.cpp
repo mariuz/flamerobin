@@ -59,12 +59,6 @@ Parameter::Parameter()
     setType(ntParameterInput);
 }
 //-----------------------------------------------------------------------------
-wxString Parameter::getPrintableName()
-{
-    return (getType() == ntParameterInput ? wxT("in ") : wxT("out "))
-        + Column::getPrintableName();
-}
-//-----------------------------------------------------------------------------
 bool Parameter::isOutputParameter() const
 {
     return getType() == ntParameterOutput;

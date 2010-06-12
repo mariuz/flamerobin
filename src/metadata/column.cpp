@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -178,16 +178,6 @@ bool Column::isString() const
 {
     Domain *d = getDomain();
     return (d ? d->isString() : false);
-}
-//-----------------------------------------------------------------------------
-//! printable name = column_name + column_datatype [+ not null]
-wxString Column::getPrintableName()
-{
-    wxString ret = getName_() + wxT(" ") + getDatatype();
-    Domain *d = getDomain();
-    if (notnullM || d && !d->isNullable())
-        ret += wxT(" not null");
-    return ret;
 }
 //-----------------------------------------------------------------------------
 Domain* Column::getDomain() const

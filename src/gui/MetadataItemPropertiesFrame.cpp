@@ -78,14 +78,14 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
     if (d)  // server property page doesn't have a database, so don't crash
         sb->SetStatusText(d->getConnectionInfoString());
     else
-        sb->SetStatusText(object->getPrintableName());
+        sb->SetStatusText(object->getName_());
 
     wxIcon icon;
     if (d && config().get(wxT("linksOpenInTabs"), true))
     {
         wxBitmap bmp = getImage32(d->getType());
         icon.CopyFromBitmap(bmp);
-        databaseNameM = d->getPrintableName();
+        databaseNameM = d->getName_();
     }
     else  // when linksOpenInTabs, only the server node
     {

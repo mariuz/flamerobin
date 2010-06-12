@@ -39,8 +39,6 @@
 #endif
 
 //-----------------------------------------------------------------------------
-#include <sstream>
-
 #include <ibpp.h>
 
 #include "core/FRError.h"
@@ -84,16 +82,6 @@ void Generator::loadProperties()
 
     setPropertiesLoaded(true);
     notifyObservers();
-}
-//-----------------------------------------------------------------------------
-wxString Generator::getPrintableName()
-{
-    if (!propertiesLoaded())
-        return getName_();
-
-    std::ostringstream ss;
-    ss << valueM;
-    return getName_() + wxT(" = ") + std2wx(ss.str());
 }
 //-----------------------------------------------------------------------------
 wxString Generator::getCreateSqlTemplate() const

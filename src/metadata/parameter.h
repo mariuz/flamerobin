@@ -40,7 +40,6 @@ public:
     Parameter();
     Parameter(wxString source, int parameterType, int mechanism);
     int getMechanism() const;
-    wxString getPrintableName();
     bool isOutputParameter() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };

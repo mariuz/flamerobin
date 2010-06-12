@@ -49,8 +49,6 @@ public:
 
     wxString getCreateSqlTemplate() const;   // overrides MetadataItem::getCreateSqlTemplate()
 
-    bool parametersLoaded();
-
     bool getChildren(std::vector<MetadataItem *>& temp);
 
     wxString getExecuteStatement();
