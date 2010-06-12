@@ -554,6 +554,12 @@ wxString Database::getTableForIndex(wxString indexName)
 }
 //-----------------------------------------------------------------------------
 template<class T>
+bool isNotSystemDomain(T& t)
+{
+    return (t.getType() != ntDomain || !t.isSystem());
+}
+//-----------------------------------------------------------------------------
+template<class T>
 void Database::loadCollection(ProgressIndicator* progressIndicator,
     MetadataCollection<T>& collection, NodeType type,
     MetadataLoader* loader,std::string loadStatement)
@@ -592,7 +598,14 @@ void Database::loadCollection(ProgressIndicator* progressIndicator,
     }
 
     // all remaining objects are no longer valid
-    collection.remove(itInsert, collection.end());
+    // system-generated domains are an exception though - they are invisible
+    // in the DBH, and so would be deleted here, and reloaded immediately
+    //
+    // the following is an ugly hack, maybe that's the final reason to
+    // let system domains live in their own collection?
+    //
+    // FIX THIS ANOTHER WAY!
+    std::remove_if(itInsert, collection.end(), &isNotSystemDomain<T>);
 }
 //-----------------------------------------------------------------------------
 void Database::loadGeneratorValues()
