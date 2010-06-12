@@ -37,13 +37,14 @@ private:
     short datatypeM, subtypeM, lengthM, precisionM, scaleM;
     bool isNotNullM, hasDefaultM;
     wxString charsetM, defaultM, collationM, checkM;
-    bool infoLoadedM;
+protected:
+    virtual void loadProperties();
 public:
     Domain();
-    void loadInfo();
 
-    static wxString datatype2string(short datatype, short scale,
+    static wxString dataTypeToString(short datatype, short scale,
         short precision, short subtype, short length);
+
     void getDatatypeParts(wxString& type, wxString& size, wxString& scale);
     wxString getDatatypeAsString();
     wxString getDefault();
@@ -53,9 +54,9 @@ public:
     bool isNullable();
     bool hasDefault();
     bool isString();
-    virtual const wxString getTypeName() const;
     virtual wxString getCreateSqlTemplate() const;
     wxString getAlterSqlTemplate() const;
+    virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* v);
 };
 //-----------------------------------------------------------------------------

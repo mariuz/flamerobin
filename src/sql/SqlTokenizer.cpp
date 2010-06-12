@@ -43,6 +43,33 @@
 #include "config/Config.h"
 #include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------
+// SqlTokenizerConfigCache: class to cache user preference for keyword case
+class SqlTokenizerConfigCache : public ConfigCache
+{
+private:
+    bool sqlKeywordsUpperCaseM;
+protected:
+    virtual void loadFromConfig()
+    {
+        sqlKeywordsUpperCaseM = config().get(wxT("SQLKeywordsUpperCase"),
+            false);
+    }
+public:
+    SqlTokenizerConfigCache() : ConfigCache(config()) {};
+
+    static SqlTokenizerConfigCache& get()
+    {
+        static SqlTokenizerConfigCache stcc;
+        return stcc;
+    }
+
+    bool getSqlKeywordsUpperCase()
+    {
+        ensureCacheValid();
+        return sqlKeywordsUpperCaseM;
+    }
+};
+//-----------------------------------------------------------------------------
 SqlTokenizer::SqlTokenizer()
     : termM(wxT(";"))
 {
@@ -53,6 +80,13 @@ SqlTokenizer::SqlTokenizer(const wxString& statement)
     : sqlM(statement), termM(wxT(";"))
 {
     init();
+}
+//-----------------------------------------------------------------------------
+/*static*/
+wxString SqlTokenizer::getKeyword(SqlTokenType token)
+{
+    return getKeyword(token,
+        SqlTokenizerConfigCache::get().getSqlKeywordsUpperCase());
 }
 //-----------------------------------------------------------------------------
 /*static*/

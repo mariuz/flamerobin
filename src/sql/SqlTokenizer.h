@@ -171,6 +171,7 @@ public:
 
     enum KeywordCase { kwDefaultCase, kwLowerCase, kwUpperCase };
     // return keyword string for a given token type
+    static wxString getKeyword(SqlTokenType token);
     static wxString getKeyword(SqlTokenType token, bool upperCase);
     // returns array of keyword strings
     static wxArrayString getKeywords(KeywordCase kwc);

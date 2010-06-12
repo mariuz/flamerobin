@@ -384,24 +384,26 @@ wxString Database::loadDomainNameForColumn(wxString table, wxString field)
 {
     MetadataLoader* loader = getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
+    wxMBConv* converter = getCharsetConverter();
 
     IBPP::Statement& st1 = loader->getStatement(
         "select rdb$field_source from rdb$relation_fields"
         " where rdb$relation_name = ? and rdb$field_name = ?"
     );
-    st1->Set(1, wx2std(table, getCharsetConverter()));
-    st1->Set(2, wx2std(field, getCharsetConverter()));
+    st1->Set(1, wx2std(table, converter));
+    st1->Set(2, wx2std(field, converter));
     st1->Execute();
     st1->Fetch();
     std::string domain;
     st1->Get(1, domain);
-    return std2wxIdentifier(domain, getCharsetConverter());
+    return std2wxIdentifier(domain, converter);
 }
 //-----------------------------------------------------------------------------
 void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
 {
     MetadataLoader* loader = getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
+    wxMBConv* converter = getCharsetConverter();
 
     IBPP::Statement& st1 = loader->getStatement(
         "select rdb$trigger_name from rdb$triggers "
@@ -414,7 +416,7 @@ void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
         std::string name;
         st1->Get(1, name);
         Trigger* t = dynamic_cast<Trigger*>(findByNameAndType(ntTrigger,
-            std2wxIdentifier(name, getCharsetConverter())));
+            std2wxIdentifier(name, converter)));
         if (t)
             list.push_back(t);
     }
@@ -505,6 +507,7 @@ void Database::loadCollations()
 
     MetadataLoader* loader = getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
+    wxMBConv* converter = getCharsetConverter();
 
     IBPP::Statement& st1 = loader->getStatement(
         "select c.rdb$character_set_name, k.rdb$collation_name, "
@@ -518,9 +521,9 @@ void Database::loadCollations()
     {
         std::string s;
         st1->Get(1, s);
-        wxString charset(std2wxIdentifier(s, getCharsetConverter()));
+        wxString charset(std2wxIdentifier(s, converter));
         st1->Get(2, s);
-        wxString collation(std2wxIdentifier(s, getCharsetConverter()));
+        wxString collation(std2wxIdentifier(s, converter));
         int charsetId, bytesPerChar;
         st1->Get(3, &charsetId);
         st1->Get(4, &bytesPerChar);
@@ -848,7 +851,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
             MetadataItem* m = domainsM.findByName(domainName);
             if (!m)     // domain does not exist in DBH
                 m = domainsM.insert(this, domainName, ntDomain);
-            dynamic_cast<Domain*>(m)->loadInfo();
+            m->invalidate();
         }
         else
         {
@@ -893,12 +896,18 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                     break;
                 }
             case ntDomain:
-                dynamic_cast<Domain *>(object)->loadInfo();
+                object->invalidate();
                 // notify all table columns with that domain
-                for (MetadataCollection<Table>::iterator it = tablesM.begin(); it != tablesM.end(); ++it)
-                    for (MetadataCollection<Column>::iterator i2 = (*it).begin(); i2 != (*it).end(); ++i2)
-                        if ((*i2).getSource() == stm.getName())
-                            (*i2).notifyObservers();
+                for (MetadataCollection<Table>::iterator it = tablesM.begin();
+                    it != tablesM.end(); ++it)
+                {
+                    for (MetadataCollection<Column>::iterator itColumn = (*it).begin();
+                        itColumn != (*it).end(); ++itColumn)
+                    {
+                        if ((*itColumn).getSource() == stm.getName())
+                            (*itColumn).invalidate();
+                    }
+                }
                 break;
             default:
                 // calls notifyObservers() only in the base class

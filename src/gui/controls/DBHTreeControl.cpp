@@ -90,7 +90,6 @@ public:
     bool getShowColumns() { return showColumnsM; };
     bool getSortDatabases() { return sortDatabasesM; };
     bool getSortServers() { return sortServersM; };
-    bool getSqlKeywordsUpperCase() { return sqlKeywordsUpperCaseM; };
 };
 //----------------------------------------------------------------------------
 DBHTreeConfigCache::DBHTreeConfigCache()
@@ -122,8 +121,6 @@ void DBHTreeConfigCache::loadFromConfig()
         cfg.get(wxT("OrderDatabasesInTree"), false));
     changes += setValue(sortServersM,
         cfg.get(wxT("OrderServersInTree"), false));
-    changes += setValue(sqlKeywordsUpperCaseM,
-        cfg.get(wxT("SQLKeywordsUpperCase"), false));
     // these aren't surfaced by methods, but needed to cause observing tree
     // nodes to update themselves
     changes += setValue(showSystemTablesM,
@@ -132,6 +129,8 @@ void DBHTreeConfigCache::loadFromConfig()
         cfg.get(wxT("ShowComputed"), 1));
     changes += setValue(showDomainsM,
         cfg.get(wxT("ShowDomains"), 2));
+    changes += setValue(sqlKeywordsUpperCaseM,
+        cfg.get(wxT("SQLKeywordsUpperCase"), false));
 
     if (changes)
         notifyObservers();
@@ -348,6 +347,11 @@ void DBHTreeItemVisitor::defaultAction()
     wxASSERT_MSG(false, wxT("DBHTreeItemVisitor::visit[Classname]() missing"));
 }
 //-----------------------------------------------------------------------------
+bool isNotSystem(MetadataItem* item)
+{
+    return item && !item->isSystem();
+}
+//-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::setNodeProperties(MetadataItem* metadataItem)
 {
     wxASSERT(metadataItem);
@@ -358,19 +362,11 @@ void DBHTreeItemVisitor::setNodeProperties(MetadataItem* metadataItem)
     size_t childCount = 0;
     if (metadataItem->getType() == ntDomains)
     {
-        struct IsNotSystem
-        {
-            bool operator()(MetadataItem* item)
-            {
-                return item && !item->isSystem();
-            };
-        } isNotSystem;
-
         std::vector<MetadataItem*> children;
         if (metadataItem->getChildren(children))
         {
             childCount = std::count_if(children.begin(), children.end(),
-                isNotSystem);
+                &isNotSystem);
         }
     }
     else
@@ -405,9 +401,8 @@ void DBHTreeItemVisitor::visitColumn(Column& column)
     }
     if (!column.isNullable())
     {
-        bool upperCase = DBHTreeConfigCache::get().getSqlKeywordsUpperCase();
-        nodeTextM << wxT(" ") << SqlTokenizer::getKeyword(kwNOT, upperCase)
-            << wxT(" ") << SqlTokenizer::getKeyword(kwNULL, upperCase);
+        nodeTextM << wxT(" ") << SqlTokenizer::getKeyword(kwNOT)
+            << wxT(" ") << SqlTokenizer::getKeyword(kwNULL);
     }
     // set remaining default properties, nodeTextM will not be touched
     setNodeProperties(&column);
@@ -459,9 +454,8 @@ void DBHTreeItemVisitor::visitDomain(Domain& domain)
     nodeTextM = domain.getName_() + wxT(" ") + domain.getDatatypeAsString();
     if (!domain.isNullable())
     {
-        bool upperCase = DBHTreeConfigCache::get().getSqlKeywordsUpperCase();
-        nodeTextM << wxT(" ") << SqlTokenizer::getKeyword(kwNOT, upperCase)
-            << wxT(" ") << SqlTokenizer::getKeyword(kwNULL, upperCase);
+        nodeTextM << wxT(" ") << SqlTokenizer::getKeyword(kwNOT)
+            << wxT(" ") << SqlTokenizer::getKeyword(kwNULL);
     }
     // set remaining default properties, nodeTextM will not be touched
     setNodeProperties(&domain);

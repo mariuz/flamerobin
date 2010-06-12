@@ -135,7 +135,7 @@ void Function::loadInfo(bool force)
         libraryNameM = std2wx(libraryName).Strip();
         st1->Get(10, entryPoint);
         entryPointM = std2wx(entryPoint).Strip();
-        wxString datatype = Domain::datatype2string(type, scale,
+        wxString datatype = Domain::dataTypeToString(type, scale,
             precision, subtype, length);
         if (!st1->IsNull(11))
         {

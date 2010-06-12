@@ -50,17 +50,21 @@
 #include "metadata/database.h"
 #include "metadata/domain.h"
 #include "metadata/MetadataItemVisitor.h"
+#include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------
 Domain::Domain():
-    MetadataItem(ntDomain), infoLoadedM(false)
+    MetadataItem(ntDomain)
 {
 }
 //-----------------------------------------------------------------------------
-void Domain::loadInfo()
+void Domain::loadProperties()
 {
-    Database* d = getDatabase(wxT("Domain::loadInfo"));
+    setPropertiesLoaded(false);
+
+    Database* d = getDatabase(wxT("Domain::loadProperties"));
     MetadataLoader* loader = d->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
+    wxMBConv* converter = d->getCharsetConverter();
 
     IBPP::Statement& st1 = loader->getStatement(
         "select f.rdb$field_type, f.rdb$field_sub_type, f.rdb$field_length,"
@@ -77,7 +81,7 @@ void Domain::loadInfo()
         " where f.rdb$field_name = ?"
     );
 
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+    st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
     if (!st1->Fetch())
         throw FRError(_("Domain not found: ") + getName_());
@@ -114,14 +118,14 @@ void Domain::loadInfo()
     {
         std::string s;
         st1->Get(6, s);
-        charsetM = std2wxIdentifier(s, d->getCharsetConverter());
+        charsetM = std2wxIdentifier(s, converter);
     }
     isNotNullM = !st1->IsNull(8);
 
     hasDefaultM = !st1->IsNull(9);
     if (hasDefaultM)
     {
-        readBlob(st1, 9, defaultM, d->getCharsetConverter());
+        readBlob(st1, 9, defaultM, converter);
 
         // Some users reported two spaces before DEFAULT word in source
         // Also, equals sign is also allowed in newer FB versions
@@ -138,132 +142,130 @@ void Domain::loadInfo()
     {
         std::string s;
         st1->Get(10, s);
-        collationM = std2wxIdentifier(s, d->getCharsetConverter());
+        collationM = std2wxIdentifier(s, converter);
     }
-    readBlob(st1, 11, checkM, d->getCharsetConverter());
+    readBlob(st1, 11, checkM, converter);
 
-    if (!isSystem())
-        notifyObservers();
-    infoLoadedM = true;
+    setPropertiesLoaded(true);
 }
 //-----------------------------------------------------------------------------
 bool Domain::isString()
 {
-    if (!infoLoadedM)
-        loadInfo();
+    ensurePropertiesLoaded();
     return (datatypeM == 14 || datatypeM == 10 || datatypeM == 37);
 }
 //-----------------------------------------------------------------------------
 //! returns column's datatype as human readable wxString.
 wxString Domain::getDatatypeAsString()
 {
-    if (!infoLoadedM)
-        loadInfo();
-
-    return datatype2string(datatypeM, scaleM, precisionM, subtypeM, lengthM);
+    ensurePropertiesLoaded();
+    return dataTypeToString(datatypeM, scaleM, precisionM, subtypeM, lengthM);
 }
 //-----------------------------------------------------------------------------
-wxString Domain::datatype2string(short datatype, short scale, short precision,
+/* static*/
+wxString Domain::dataTypeToString(short datatype, short scale, short precision,
     short subtype, short length)
 {
-    std::ostringstream retval;      // this will be returned
+    wxString retval;
 
     // special case (mess that some tools (ex. IBExpert) make by only
     // setting scale and not changing type)
     if (datatype == 27 && scale < 0)
     {
-        retval << "Numeric(15," << -scale << ")";
-        return std2wx(retval.str());
+        retval = SqlTokenizer::getKeyword(kwNUMERIC);
+        retval << wxT("(15,") << -scale << wxT(")");
+        return retval;
     }
 
     // INTEGER(prec=0), DECIMAL(sub_type=2), NUMERIC(sub_t=1), BIGINT(sub_t=0)
     if (datatype == 7 || datatype == 8 || datatype == 16)
     {
-        if (scale == 0 && (datatype == 7 || datatype == 8))
+        if (scale == 0)
         {
             if (datatype == 7)
-                return wxT("Smallint");
-            else
-                return wxT("Integer");
+                return SqlTokenizer::getKeyword(kwSMALLINT);
+            if (datatype == 8)
+                return SqlTokenizer::getKeyword(kwINTEGER);
         }
+
+        if (scale == 0 && subtype == 0)
+            return SqlTokenizer::getKeyword(kwBIGINT);
+
+        retval = SqlTokenizer::getKeyword(
+            (subtype == 2) ? kwDECIMAL : kwNUMERIC);
+        retval << wxT("(");
+        if (precision <= 0 || precision > 18)
+            retval << 18;
         else
-        {
-            if (scale == 0 && subtype == 0)
-                return wxT("Bigint");
-            retval << (subtype == 2 ? "Decimal(" : "Numeric(");
-            if (precision <= 0 || precision > 18)
-                retval << 18;
-            else
-                retval << precision;
-            retval << "," << -scale << ")";
-            return std2wx(retval.str());
-        }
+            retval << precision;
+        retval << wxT(",") << -scale << wxT(")");
+        return retval;
     }
 
-    wxString names[] = {
-        wxT("Char"),
-        wxT("Float"),
-        wxT("Double precision"),
-        wxT("Timestamp"),
-        wxT("Varchar"),
-        wxT("Blob"),
-        wxT("Date"),
-        wxT("Time"),
-        wxT("CSTRING")
-    };
-    short mapper[9] = { 14, 10, 27, 35, 37, 261, 12, 13, 40 };
-
-    for (int i = 0; i < 9; ++i)
+    switch (datatype)
     {
-        if (mapper[i] == datatype)
-        {
-            retval << wx2std(names[i]);
+        case 10:
+            return SqlTokenizer::getKeyword(kwFLOAT);
+        case 27:
+            return SqlTokenizer::getKeyword(kwDOUBLE) + wxT(" ")
+                + SqlTokenizer::getKeyword(kwPRECISION);
+
+        case 12:
+            return SqlTokenizer::getKeyword(kwDATE);
+        case 13:
+            return SqlTokenizer::getKeyword(kwTIME);
+        case 35:
+            return SqlTokenizer::getKeyword(kwTIMESTAMP);
+
+        // add subtype for blob
+        case 261:
+            retval = SqlTokenizer::getKeyword(kwBLOB) + wxT(" ")
+                + SqlTokenizer::getKeyword(kwSUB_TYPE) + wxT(" ");
+            retval << subtype;
+            return retval;
+
+        // add length for char, varchar and cstring
+        case 14:
+            retval = SqlTokenizer::getKeyword(kwCHAR);
             break;
-        }
+        case 37:
+            retval = SqlTokenizer::getKeyword(kwVARCHAR);
+            break;
+        case 40:
+            retval = SqlTokenizer::getKeyword(kwCSTRING);
+            break;
     }
-
-    // char, varchar & cstring, add (length)
-    if (datatype == 14 || datatype == 37 || datatype == 40)
-        retval << "(" << length << ")";
-
-    if (datatype == 261)    // blob
-        retval << " sub_type " << subtype;
-
-    return std2wx(retval.str());
+    retval << wxT("(") << length << wxT(")");
+    return retval;
 }
 //-----------------------------------------------------------------------------
 wxString Domain::getDefault()
 {
-    if (!infoLoadedM)
-        loadInfo();
+    ensurePropertiesLoaded();
     return defaultM;
 }
 //-----------------------------------------------------------------------------
 wxString Domain::getCollation()
 {
-    if (!infoLoadedM)
-        loadInfo();
+    ensurePropertiesLoaded();
     return collationM;
 }
 //-----------------------------------------------------------------------------
 wxString Domain::getCheckConstraint()
 {
-    if (!infoLoadedM)
-        loadInfo();
+    ensurePropertiesLoaded();
     return checkM;
 }
 //-----------------------------------------------------------------------------
 bool Domain::isNullable()
 {
-    if (!infoLoadedM)
-        loadInfo();
+    ensurePropertiesLoaded();
     return !isNotNullM;
 }
 //-----------------------------------------------------------------------------
 bool Domain::hasDefault()
 {
-    if (!infoLoadedM)
-        loadInfo();
+    ensurePropertiesLoaded();
     return hasDefaultM;
 }
 //-----------------------------------------------------------------------------
@@ -296,9 +298,7 @@ void Domain::getDatatypeParts(wxString& type, wxString& size, wxString& scale)
 //-----------------------------------------------------------------------------
 wxString Domain::getCharset()
 {
-    if (!infoLoadedM)
-        loadInfo();
-
+    ensurePropertiesLoaded();
     return charsetM;
 }
 //-----------------------------------------------------------------------------
