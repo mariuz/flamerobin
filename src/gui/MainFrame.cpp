@@ -1305,7 +1305,8 @@ void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuToggleDisconnected(wxCommandEvent& event)
 {
     config().setValue(wxT("HideDisconnectedDatabases"), !event.IsChecked());
-    getGlobalRoot().notifyAllServers();
+    // no need to call notifyAllServers() - DBH tree nodes observe the global
+    // config objects themselves
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuToggleStatusBar(wxCommandEvent& event)

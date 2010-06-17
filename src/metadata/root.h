@@ -74,8 +74,6 @@ public:
     bool save();
     virtual const wxString getItemPath() const;
 
-    // updates all servers (observer pattern)
-    void notifyAllServers();
     void disconnectAllDatabases();
 
     // increments the Id generator and returns the value.

@@ -86,7 +86,7 @@ void Root::disconnectAllDatabases()
         its != serversM.end(); ++its)
     {
         std::for_each(its->begin(), its->end(),
-            std::mem_fun_ref<void, Database>(&Database::disconnect));
+            std::mem_fun_ref(&Database::disconnect));
     }
 }
 //-----------------------------------------------------------------------------
@@ -345,13 +345,6 @@ bool Root::save()
         return false;
     dirtyM = false;
     return true;
-}
-//-----------------------------------------------------------------------------
-void Root::notifyAllServers()
-{
-    ServerCollection::iterator it;
-    for (it = serversM.begin(); it != serversM.end(); ++it)
-        (*it).notifyObservers();
 }
 //-----------------------------------------------------------------------------
 bool Root::getChildren(std::vector<MetadataItem *>& temp)
