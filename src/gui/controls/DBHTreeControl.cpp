@@ -503,9 +503,16 @@ void DBHTreeItemVisitor::visitProcedure(Procedure& procedure)
         // show number of parameters?
         if (DBHTreeConfigCache::get().getShowColumnParamCount())
         {
-            nodeTextM += wxString::Format(wxT(" (%d, %d)"),
-                procedure.getInputParamCount(),
-                procedure.getOutputParamCount());
+            size_t ins = 0, outs = 0;
+            for (MetadataCollection <Parameter>::const_iterator
+                it = procedure.begin(); it != procedure.end(); ++it)
+            {
+                if (it->isOutputParameter())
+                    ++outs;
+                else
+                    ++ins;
+            }
+            nodeTextM += wxString::Format(wxT(" (%d, %d)"), ins, outs);
         }
     }
     // show Parameter nodes if Config setting is on

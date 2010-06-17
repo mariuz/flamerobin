@@ -220,30 +220,6 @@ size_t Procedure::getParamCount() const
     return parametersM.getChildrenCount();
 }
 //-----------------------------------------------------------------------------
-size_t Procedure::getInputParamCount() const
-{
-    size_t count = 0;
-    for (MetadataCollection <Parameter>::const_iterator it =
-        parametersM.begin(); it != parametersM.end(); ++it)
-    {
-        if (!(*it).isOutputParameter())
-            count++;
-    }
-    return count;
-}
-//-----------------------------------------------------------------------------
-size_t Procedure::getOutputParamCount() const
-{
-    size_t count = 0;
-    for (MetadataCollection <Parameter>::const_iterator it =
-        parametersM.begin(); it != parametersM.end(); ++it)
-    {
-        if ((*it).isOutputParameter())
-            count++;
-    }
-    return count;
-}
-//-----------------------------------------------------------------------------
 wxString Procedure::getOwner()
 {
     Database* d = getDatabase(wxT("Procedure::getOwner"));

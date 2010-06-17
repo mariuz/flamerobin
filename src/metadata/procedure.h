@@ -59,8 +59,6 @@ public:
     MetadataCollection<Parameter>::const_iterator end() const;
 
     size_t getParamCount() const;
-    size_t getInputParamCount() const;
-    size_t getOutputParamCount() const;
 
     wxString getOwner();
     wxString getSource();
