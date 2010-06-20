@@ -474,6 +474,7 @@ void DBHTreeItemVisitor::visitFunction(Function& function)
 void DBHTreeItemVisitor::visitGenerator(Generator& generator)
 {
     // show generator value, but only if it has been loaded already
+    generator.loadPendingData();
     if (generator.propertiesLoaded())
     {
         std::ostringstream ss;
@@ -665,6 +666,7 @@ void DBHTreeItemData::update()
 
     // set node properties of current item
     DBHTreeItemVisitor tivObject(treeM);
+    object->loadPendingData();
     object->acceptVisitor(&tivObject);
     if (treeM->GetItemText(id) != tivObject.getNodeText())
         treeM->SetItemText(id, tivObject.getNodeText());

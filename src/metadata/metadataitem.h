@@ -94,10 +94,12 @@ protected:
     virtual void loadProperties();
     void setPropertiesLoaded(bool loaded);
 
+    virtual void doSetChildrenLoaded(bool loaded);
     virtual void loadChildren();
-    void setChildrenLoaded(bool loaded);
     virtual void lockChildren();
     virtual void unlockChildren();
+
+    void resetPendingLoadData();
 
 public:
     MetadataItem();
@@ -125,10 +127,12 @@ public:
     void invalidateDescription();
     void setDescription(wxString description);
 
-    bool childrenLoaded();
+    bool childrenLoaded() const;
     void ensureChildrenLoaded();
     void ensurePropertiesLoaded();
-    bool propertiesLoaded();
+    void loadPendingData();
+    bool propertiesLoaded() const;
+    void setChildrenLoaded(bool loaded);
 
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
     virtual size_t getChildrenCount() const { return 0; };

@@ -276,9 +276,8 @@ void MainFrame::set_properties()
     treeMainM->SetIndent(12);
 #endif
 
-    wxTreeItemId rootNode = treeMainM->addRootNode(&getGlobalRoot());
-    getGlobalRoot().load();
-    if (treeMainM->GetCount() <= 1)
+    Root& root(getGlobalRoot());
+    if (!root.load())
     {
         wxString confile = config().getDBHFileName();
         if (confile.Length() > 20)
@@ -293,8 +292,10 @@ void MainFrame::set_properties()
         Server s;
         s.setName_(wxT("Localhost"));
         s.setHostname(wxT("localhost"));
-        getGlobalRoot().addServer(s);
+        root.addServer(s);
+        root.setChildrenLoaded(true);
     }
+    wxTreeItemId rootNode = treeMainM->addRootNode(&root);
     treeMainM->Expand(rootNode);
 
     // make the first server active

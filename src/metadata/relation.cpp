@@ -689,6 +689,11 @@ bool Relation::getChildren(std::vector<MetadataItem*>& temp)
     return columnsM.getChildren(temp);
 }
 //-----------------------------------------------------------------------------
+void Relation::doSetChildrenLoaded(bool loaded)
+{
+    columnsM.setChildrenLoaded(loaded);
+}
+//-----------------------------------------------------------------------------
 void Relation::lockChildren()
 {
     columnsM.lockSubject();

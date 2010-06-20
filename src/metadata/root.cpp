@@ -78,6 +78,7 @@ Root::Root()
         loadingM(false), nextIdM(1), unregLocalDatabasesM(0)
 {
     setName_(wxT("Home"));
+    setChildrenLoaded(true);
 }
 //-----------------------------------------------------------------------------
 void Root::disconnectAllDatabases()
@@ -222,6 +223,7 @@ bool Root::parseServer(wxXmlNode* xmln)
     // backward compatibility with FR < 0.3.0
     if (server->getName_().IsEmpty())
         server->setName_(server->getConnectionString());
+    server->setChildrenLoaded(true);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -350,6 +352,11 @@ bool Root::save()
 bool Root::getChildren(std::vector<MetadataItem *>& temp)
 {
     return serversM.getChildren(temp);
+}
+//-----------------------------------------------------------------------------
+void Root::doSetChildrenLoaded(bool loaded)
+{
+    serversM.setChildrenLoaded(loaded);
 }
 //-----------------------------------------------------------------------------
 ServerCollection::iterator Root::begin()

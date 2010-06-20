@@ -192,11 +192,9 @@ private:
     std::multimap<CharacterSet, wxString> collationsM;
     void loadCollations();
 
-    template<class T>
-    void loadCollection(ProgressIndicator* progressIndicator,
-        MetadataCollection<T>& collection, NodeType type,
-        MetadataLoader* loader,std::string loadStatement);
     void loadCollections(ProgressIndicator* progressIndicator);
+    wxArrayString loadNames(ProgressIndicator* progressIndicator,
+        std::string loadStatement);
 
     // small help for parser
     wxString getTableForIndex(wxString indexName);
@@ -252,9 +250,19 @@ public:
 
     MetadataLoader* getMetadataLoader();
 
+    void loadDomains(ProgressIndicator* progressIndicator = 0);
+    void loadExceptions(ProgressIndicator* progressIndicator = 0);
+    void loadFunctions(ProgressIndicator* progressIndicator = 0);
+    void loadGenerators(ProgressIndicator* progressIndicator = 0);
+    void loadProcedures(ProgressIndicator* progressIndicator = 0);
+    void loadRoles(ProgressIndicator* progressIndicator = 0);
+    void loadSystemTables(ProgressIndicator* progressIndicator = 0);
+    void loadTables(ProgressIndicator* progressIndicator = 0);
+    void loadTriggers(ProgressIndicator* progressIndicator = 0);
+    void loadViews(ProgressIndicator* progressIndicator = 0);
+
     wxString loadDomainNameForColumn(wxString table, wxString field);
     Domain* loadMissingDomain(wxString name);
-    //wxString getLoadingSql(NodeType type);
 
     void loadGeneratorValues();
     Relation* getRelationForTrigger(Trigger* trigger);

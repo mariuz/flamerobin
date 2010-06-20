@@ -32,8 +32,11 @@
 #include <sstream>
 
 #include <boost/ptr_container/ptr_list.hpp>
+#include <boost/function.hpp>
 
 #include "metadata/metadataitem.h"
+
+class ProgressIndicator;
 //-----------------------------------------------------------------------------
 template <class T>
 class MetadataCollection: public MetadataItem
@@ -44,8 +47,9 @@ public:
     typedef typename CollectionType::const_iterator const_iterator;
 private:
     CollectionType itemsM;
+    boost::function<void (ProgressIndicator*)> loadChildrenProcM;
 
-    // helper for std::find_if()
+    // helper structs for find_if() and erase_if()
     struct FindByAddress
     {
         T* itemM;
@@ -60,6 +64,11 @@ private:
 
         InsertionPosByName(wxString name) : nameM(name) {}
         bool operator()(const T& item) { return item.getName_() > nameM; }
+    };
+
+    struct IsUserItem
+    {
+        bool operator()(const T& item) const { return !item.isSystem(); }
     };
 
 public:
@@ -145,6 +154,114 @@ public:
         }
     }
 
+    void setItems(MetadataItem* parent, NodeType type, wxArrayString names)
+    {
+        bool changed = false;
+        CollectionType newItems;
+        for (size_t i = 0; i < names.size(); ++i)
+        {
+            wxString itemName(names[i]);
+            iterator oldPos = getPosition(itemName);
+            if (oldPos == end())
+            {
+                wxLogDebug(wxT("Creating new item \"%s\""), itemName.c_str());
+                changed = true;
+
+                newItems.push_back(new T());
+                T* item = &newItems.back();
+                for (unsigned int j = getLockCount(); j > 0; j--)
+                    item->lockSubject();
+                item->setProperties(parent, names[i], type);
+            }
+            else if (oldPos == begin())
+            {
+                wxLogDebug(wxT("Keeping item \"%s\" at same position"),
+                    itemName.c_str());
+                newItems.transfer(newItems.end(), oldPos, itemsM);
+            }
+            else
+            {
+                wxLogDebug(wxT("Moving item \"%s\" to different position"),
+                    itemName.c_str());
+                changed = true;
+                newItems.transfer(newItems.end(), oldPos, itemsM);
+            }
+        }
+
+        if (!itemsM.empty())
+        {
+            wxLogDebug(wxT("Deleting all %d items in old vector"),
+                itemsM.size());
+            changed = true;
+            itemsM.clear();
+        }
+        itemsM.transfer(itemsM.begin(), newItems);
+
+        setChildrenLoaded(true);
+        // call notifyObservers() only if any items have been added, moved
+        // or deleted
+        if (changed)
+            notifyObservers();
+    }
+
+    void setUserItems(MetadataItem* parent, NodeType type, wxArrayString names)
+    {
+        bool changed = false;
+        CollectionType newItems;
+        for (size_t i = 0; i < names.size(); ++i)
+        {
+            wxString itemName(names[i]);
+            iterator oldPos = getPosition(itemName);
+            if (oldPos == end())
+            {
+                wxLogDebug(wxT("Creating new item \"%s\""), itemName.c_str());
+                changed = true;
+
+                newItems.push_back(new T());
+                T* item = &newItems.back();
+                for (unsigned int j = getLockCount(); j > 0; j--)
+                    item->lockSubject();
+                item->setProperties(parent, names[i], type);
+            }
+            else if (oldPos == begin())
+            {
+                wxLogDebug(wxT("Keeping item \"%s\" at same position"),
+                    itemName.c_str());
+                newItems.transfer(newItems.end(), oldPos, itemsM);
+            }
+            else
+            {
+                wxLogDebug(wxT("Moving item \"%s\" to different position"),
+                    itemName.c_str());
+                changed = true;
+                newItems.transfer(newItems.end(), oldPos, itemsM);
+            }
+        }
+
+        if (!itemsM.empty())
+        {
+            size_t oldCount = itemsM.size();
+            // all remaining items that are not system items must be invalid
+            // (have been deleted probably), so delete them from this list
+            IsUserItem isUserItem;
+            itemsM.erase_if(isUserItem);
+            size_t newCount = itemsM.size();
+
+            wxLogDebug(wxT("User items (%d) in old vector deleted,")
+                wxT(" %d remaining system items"),
+                oldCount - newCount, newCount);
+            if (newCount < oldCount)
+                changed = true;
+        }
+        itemsM.transfer(itemsM.begin(), newItems);
+
+        setChildrenLoaded(true);
+        // call notifyObservers() only if any items have been added, moved
+        // or deleted
+        if (changed)
+            notifyObservers();
+    }
+
     virtual bool isSystem() const
     {
         return getType() == ntSysTables;
@@ -152,6 +269,8 @@ public:
 
     inline const_iterator begin() const
     {
+        if (!childrenLoaded())
+            return itemsM.end();
         return itemsM.begin();
     };
 
@@ -162,6 +281,8 @@ public:
 
     inline iterator begin()
     {
+        if (!childrenLoaded())
+            return itemsM.end();
         return itemsM.begin();
     };
 
@@ -172,6 +293,8 @@ public:
 
     inline bool empty() const
     {
+        if (!childrenLoaded())
+            return true;
         return itemsM.empty();
     };
 
@@ -203,6 +326,8 @@ public:
 
     virtual bool getChildren(std::vector<MetadataItem *>& temp)         // returns vector of all subnodes
     {
+        if (!childrenLoaded())
+            return false;
         for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
             temp.push_back(&(*it));
         return (itemsM.size() != 0);
@@ -210,6 +335,8 @@ public:
 
     void getChildrenNames(std::vector<Identifier>& temp)
     {
+        if (!childrenLoaded())
+            return;
         for (const_iterator it = itemsM.begin(); it != itemsM.end(); ++it)
             temp.push_back((*it).getIdentifier());
     }
@@ -222,7 +349,21 @@ public:
 
     virtual size_t getChildrenCount() const
     {
+        if (!childrenLoaded())
+            return 0;
         return itemsM.size();
+    }
+
+    void setloadChildrenProc(boost::function<void (ProgressIndicator*)> proc)
+    {
+        loadChildrenProcM = proc;
+    }
+
+protected:
+    virtual void loadChildren()
+    {
+        if (!loadChildrenProcM.empty())
+            loadChildrenProcM(0);
     }
 
     virtual void lockChildren()

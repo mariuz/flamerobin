@@ -56,6 +56,7 @@ Server::Server()
 {
     databasesM.setParent(this);
     databasesM.setType(ntServer);
+    setChildrenLoaded(true);
 }
 //-----------------------------------------------------------------------------
 Server::Server(const Server& rhs)
@@ -72,6 +73,11 @@ void Server::lockChildren()
 void Server::unlockChildren()
 {
     databasesM.unlockSubject();
+}
+//-----------------------------------------------------------------------------
+void Server::doSetChildrenLoaded(bool loaded)
+{
+    databasesM.setChildrenLoaded(loaded);
 }
 //-----------------------------------------------------------------------------
 bool Server::getChildren(vector<MetadataItem*>& temp)
@@ -147,7 +153,7 @@ bool Server::hasConnectedDatabase() const
 {
     DatabaseCollection::const_iterator it = std::find_if(
         databasesM.begin(), databasesM.end(),
-        std::mem_fun_ref<bool, Database>(&Database::isConnected));
+        std::mem_fun_ref(&Database::isConnected));
     return it != databasesM.end();
 }
 //-----------------------------------------------------------------------------

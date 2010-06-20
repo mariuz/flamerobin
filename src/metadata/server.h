@@ -54,17 +54,17 @@ private:
     wxString serviceUserM;
     wxString servicePasswordM;
     wxString serviceSysdbaPasswordM;
-
+protected:
+    virtual void doSetChildrenLoaded(bool loaded);
+    virtual void lockChildren();
+    virtual void unlockChildren();
 public:
     Server();
     Server(const Server& rhs);
 
-    virtual void lockChildren();
-    virtual void unlockChildren();
-
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
-    Database* addDatabase(Database&);
-    void removeDatabase(Database*);
+    Database* addDatabase(Database& db);
+    void removeDatabase(Database* db);
 
     DatabaseCollection::iterator begin();
     DatabaseCollection::iterator end();

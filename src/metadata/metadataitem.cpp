@@ -148,16 +148,30 @@ void MetadataItem::invalidate()
     notifyObservers();
 }
 //-----------------------------------------------------------------------------
+void MetadataItem::loadPendingData()
+{
+    if (propertiesLoadedM == lsLoadPending)
+        loadProperties();
+    if (childrenLoadedM == lsLoadPending)
+        loadChildren();
+}
+//-----------------------------------------------------------------------------
+void MetadataItem::resetPendingLoadData()
+{
+    if (propertiesLoadedM == lsLoadPending)
+        propertiesLoadedM = lsNotLoaded;
+    if (childrenLoadedM == lsLoadPending)
+        childrenLoadedM = lsNotLoaded;
+}
+//-----------------------------------------------------------------------------
 void MetadataItem::ensurePropertiesLoaded()
 {
     if (!propertiesLoaded())
         loadProperties();
 }
 //-----------------------------------------------------------------------------
-bool MetadataItem::propertiesLoaded()
+bool MetadataItem::propertiesLoaded() const
 {
-    if (propertiesLoadedM == lsLoadPending)
-        loadProperties();
     return propertiesLoadedM == lsLoaded;
 }
 //-----------------------------------------------------------------------------
@@ -178,11 +192,13 @@ void MetadataItem::setPropertiesLoaded(bool loaded)
     }
 }
 //-----------------------------------------------------------------------------
-bool MetadataItem::childrenLoaded()
+bool MetadataItem::childrenLoaded() const
 {
-    if (childrenLoadedM == lsLoadPending)
-        loadChildren();
     return childrenLoadedM == lsLoaded;
+}
+//-----------------------------------------------------------------------------
+void MetadataItem::doSetChildrenLoaded(bool /*loaded*/)
+{
 }
 //-----------------------------------------------------------------------------
 void MetadataItem::ensureChildrenLoaded()
@@ -206,6 +222,7 @@ void MetadataItem::setChildrenLoaded(bool loaded)
         else
             childrenLoadedM = lsNotLoaded;
     }
+    doSetChildrenLoaded(loaded);
 }
 //-----------------------------------------------------------------------------
 bool MetadataItem::getChildren(vector<MetadataItem*>& /*temp*/)

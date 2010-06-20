@@ -41,6 +41,7 @@
 #include <wx/encconv.h>
 #include <wx/fontmap.h>
 
+#include <functional>
 #include <sstream>
 
 #include "config/Config.h"
@@ -303,17 +304,37 @@ Database::Database()
 {
     // has to be here, since notify() might be called before initChildren()
     domainsM.setProperties(this, wxT("Domains"), ntDomains);
+    domainsM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadDomains), this));
     exceptionsM.setProperties(this, wxT("Exceptions"), ntExceptions);
+    exceptionsM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadExceptions), this));
     functionsM.setProperties(this, wxT("Functions"), ntFunctions);
+    functionsM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadFunctions), this));
     generatorsM.setProperties(this, wxT("Generators"), ntGenerators);
+    generatorsM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadGenerators), this));
     proceduresM.setProperties(this, wxT("Procedures"), ntProcedures);
+    proceduresM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadProcedures), this));
     rolesM.setProperties(this, wxT("Roles"), ntRoles);
+    rolesM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadRoles), this));
     tablesM.setProperties(this, wxT("Tables"), ntTables);
+    tablesM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadTables), this));
 
     sysTablesM.setProperties(this, wxT("System tables"), ntSysTables);
+    sysTablesM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadSystemTables), this));
 
     triggersM.setProperties(this, wxT("Triggers"), ntTriggers);
+    triggersM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadTriggers), this));
     viewsM.setProperties(this, wxT("Views"), ntViews);
+    viewsM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadViews), this));
 }
 //-----------------------------------------------------------------------------
 Database::Database(const Database& rhs)
@@ -332,15 +353,37 @@ Database::Database(const Database& rhs)
         connectionCredentialsM = new Credentials(*rhs.connectionCredentialsM);
 
     domainsM.setParent(this);
+    domainsM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadDomains), this));
     exceptionsM.setParent(this);
+    exceptionsM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadExceptions), this));
     functionsM.setParent(this);
+    functionsM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadFunctions), this));
     generatorsM.setParent(this);
+    generatorsM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadGenerators), this));
     proceduresM.setParent(this);
+    proceduresM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadProcedures), this));
     rolesM.setParent(this);
+    rolesM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadRoles), this));
     tablesM.setParent(this);
+    tablesM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadTables), this));
+
     sysTablesM.setParent(this);
+    sysTablesM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadSystemTables), this));
+
     triggersM.setParent(this);
+    triggersM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadTriggers), this));
     viewsM.setParent(this);
+    viewsM.setloadChildrenProc(
+        std::bind1st(std::mem_fun(&Database::loadViews), this));
 }
 //-----------------------------------------------------------------------------
 Database::~Database()
@@ -551,61 +594,6 @@ wxString Database::getTableForIndex(wxString indexName)
         tableName = std2wxIdentifier(s, getCharsetConverter());
     }
     return tableName;
-}
-//-----------------------------------------------------------------------------
-template<class T>
-bool isNotSystemDomain(T& t)
-{
-    return (t.getType() != ntDomain || !t.isSystem());
-}
-//-----------------------------------------------------------------------------
-template<class T>
-void Database::loadCollection(ProgressIndicator* progressIndicator,
-    MetadataCollection<T>& collection, NodeType type,
-    MetadataLoader* loader,std::string loadStatement)
-{
-    wxMBConv* converter = getCharsetConverter();
-
-    IBPP::Statement& st1 = loader->getStatement(loadStatement);
-    st1->Execute();
-
-    MetadataCollection<T>::iterator itInsert = collection.begin();
-    while (st1->Fetch())
-    {
-        std::string s;
-        st1->Get(1, s);
-        wxString name(std2wxIdentifier(s, converter));
-
-        T* obj = 0;
-        MetadataCollection<T>::iterator itCurrent = collection.getPosition(
-            name);
-        if (itCurrent != collection.end())
-        {
-            obj = &(*itCurrent);
-            // position may have changed, for example if object at itInsert
-            // has been deleted
-            collection.moveItem(itCurrent, itInsert);
-        }
-        else
-        {
-            obj = collection.insert(itInsert, this, name, type);
-        }
-
-        if (itInsert != collection.end())
-            ++itInsert;
-
-        checkProgressIndicatorCanceled(progressIndicator);
-    }
-
-    // all remaining objects are no longer valid
-    // system-generated domains are an exception though - they are invisible
-    // in the DBH, and so would be deleted here, and reloaded immediately
-    //
-    // the following is an ugly hack, maybe that's the final reason to
-    // let system domains live in their own collection?
-    //
-    // FIX THIS ANOTHER WAY!
-    std::remove_if(itInsert, collection.end(), &isNotSystemDomain<T>);
 }
 //-----------------------------------------------------------------------------
 void Database::loadGeneratorValues()
@@ -995,11 +983,14 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
             }
             checkProgressIndicatorCanceled(indicator);
             // load database information
+            setPropertiesLoaded(false);
             databaseInfoM.load(databaseM);
             setPropertiesLoaded(true);
 
             // load collections of metadata objects
+            setChildrenLoaded(false);
             loadCollections(indicator);
+            setChildrenLoaded(true);
             if (indicator)
                 indicator->initProgress(_("Complete"), 100, 100);
         }
@@ -1031,8 +1022,8 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     private:
         ProgressIndicator* progressIndicatorM;
     public:
-        ProgressIndicatorHelper(ProgressIndicator* pi)
-            : progressIndicatorM(pi) {};
+        ProgressIndicatorHelper(ProgressIndicator* progressIndicator)
+            : progressIndicatorM(progressIndicator) {};
         void init(wxString collectionName, int stepsTotal, int currentStep)
         {
             if (progressIndicatorM)
@@ -1053,82 +1044,145 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(this);
 
-    // load tables
     pih.init(_("tables"), collectionCount, 1);
-    loadStmt = "select rdb$relation_name from rdb$relations"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " and rdb$view_source is null order by 1";
-    loadCollection<Table>(progressIndicator, tablesM, ntTable, loader,
-        loadStmt);
+    loadTables(progressIndicator);
 
-    // load system tables
     pih.init(_("system tables"), collectionCount, 2);
-    loadStmt = "select rdb$relation_name from rdb$relations"
-        " where rdb$system_flag = 1"
-        " and rdb$view_source is null order by 1";
-    loadCollection<Table>(progressIndicator, sysTablesM, ntSysTable, loader,
-        loadStmt);
+    loadSystemTables(progressIndicator);
 
-    // load views
     pih.init(_("views"), collectionCount, 3);
-    loadStmt = "select rdb$relation_name from rdb$relations"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " and rdb$view_source is not null order by 1";
-    loadCollection<View>(progressIndicator, viewsM, ntView, loader, loadStmt);
+    loadViews(progressIndicator);
 
-    // load procedures
     pih.init(_("procedures"), collectionCount, 4);
-    loadStmt = "select rdb$procedure_name from rdb$procedures"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " order by 1";
-    loadCollection<Procedure>(progressIndicator, proceduresM, ntProcedure,
-        loader, loadStmt);
+    loadProcedures(progressIndicator);
 
-    // load triggers
     pih.init(_("triggers"), collectionCount, 5);
-    loadStmt = "select rdb$trigger_name from rdb$triggers"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " order by 1";
-    loadCollection<Trigger>(progressIndicator, triggersM, ntTrigger, loader,
-        loadStmt);
+    loadTriggers(progressIndicator);
 
-    // load roles
     pih.init(_("roles"), collectionCount, 6);
-    loadStmt = "select rdb$role_name from rdb$roles order by 1";
-    loadCollection<Role>(progressIndicator, rolesM, ntRole, loader, loadStmt);
+    loadRoles(progressIndicator);
 
-    // load domains
     pih.init(_("domains"), collectionCount, 7);
-    loadStmt = "select f.rdb$field_name from rdb$fields f"
+    loadDomains(progressIndicator);
+
+    pih.init(_("functions"), collectionCount, 8);
+    loadFunctions(progressIndicator);
+
+    pih.init(_("generators"), collectionCount, 9);
+    loadGenerators(progressIndicator);
+
+    pih.init(_("exceptions"), collectionCount, 10);
+    loadExceptions(progressIndicator);
+}
+//-----------------------------------------------------------------------------
+wxArrayString Database::loadNames(ProgressIndicator* progressIndicator,
+    std::string loadStatement)
+{
+    MetadataLoader* loader = getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+    wxMBConv* converter = getCharsetConverter();
+
+    IBPP::Statement& st1 = loader->getStatement(loadStatement);
+    st1->Execute();
+
+    wxArrayString names;
+    while (st1->Fetch())
+    {
+        checkProgressIndicatorCanceled(progressIndicator);
+        if (!st1->IsNull(1))
+        {
+            std::string s;
+            st1->Get(1, s);
+            names.push_back(std2wxIdentifier(s, converter));
+        }
+    }
+    return names;
+}
+//-----------------------------------------------------------------------------
+void Database::loadDomains(ProgressIndicator* progressIndicator)
+{
+    std::string stmt = "select f.rdb$field_name from rdb$fields f"
         " left outer join rdb$types t on f.rdb$field_type=t.rdb$type"
         " where t.rdb$field_name='RDB$FIELD_TYPE'"
         " and f.rdb$field_name not starting with 'RDB$'"
         " order by 1";
-    loadCollection<Domain>(progressIndicator, domainsM, ntDomain, loader,
-        loadStmt);
-
-    // load functions
-    pih.init(_("functions"), collectionCount, 8);
-    loadStmt = "select rdb$function_name from rdb$functions"
+    // setUserItems() will do what setItems() does, but not delete any
+    // system items already in the list. Doing so for domains would result
+    // in them being reloaded immediately, so keep them in the list
+    // a distinct system domain collection would probably be better...
+    domainsM.setUserItems(this, ntDomain, loadNames(progressIndicator, stmt));
+}
+//-----------------------------------------------------------------------------
+void Database::loadExceptions(ProgressIndicator* progressIndicator)
+{
+    std::string stmt = "select rdb$exception_name from rdb$exceptions"
+        " order by 1";
+    exceptionsM.setItems(this, ntException,
+        loadNames(progressIndicator, stmt));
+}
+//-----------------------------------------------------------------------------
+void Database::loadFunctions(ProgressIndicator* progressIndicator)
+{
+    std::string stmt = "select rdb$function_name from rdb$functions"
         " where (rdb$system_flag = 0 or rdb$system_flag is null)"
         " order by 1";
-    loadCollection<Function>(progressIndicator, functionsM, ntFunction,
-        loader, loadStmt);
-
-    // load generators
-    pih.init(_("generators"), collectionCount, 9);
-    loadStmt = "select rdb$generator_name from rdb$generators"
+    functionsM.setItems(this, ntFunction, loadNames(progressIndicator, stmt));
+}
+//-----------------------------------------------------------------------------
+void Database::loadGenerators(ProgressIndicator* progressIndicator)
+{
+    std::string stmt = "select rdb$generator_name from rdb$generators"
         " where (rdb$system_flag = 0 or rdb$system_flag is null)"
         " order by 1";
-    loadCollection<Generator>(progressIndicator, generatorsM, ntGenerator,
-        loader, loadStmt);
-
-    // load exceptions
-    pih.init(_("exceptions"), collectionCount, 10);
-    loadStmt = "select rdb$exception_name from rdb$exceptions"
+    generatorsM.setItems(this, ntGenerator,
+        loadNames(progressIndicator, stmt));
+}
+//-----------------------------------------------------------------------------
+void Database::loadProcedures(ProgressIndicator* progressIndicator)
+{
+    std::string stmt = "select rdb$procedure_name from rdb$procedures"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
         " order by 1";
-    loadCollection<Exception>(progressIndicator, exceptionsM, ntException,
-        loader, loadStmt);
+    proceduresM.setItems(this, ntProcedure,
+        loadNames(progressIndicator, stmt));
+}
+//-----------------------------------------------------------------------------
+void Database::loadRoles(ProgressIndicator* progressIndicator)
+{
+    std::string stmt = "select rdb$role_name from rdb$roles order by 1";
+    rolesM.setItems(this, ntRole, loadNames(progressIndicator, stmt));
+}
+//-----------------------------------------------------------------------------
+void Database::loadSystemTables(ProgressIndicator* progressIndicator)
+{
+    std::string stmt = "select rdb$relation_name from rdb$relations"
+        " where rdb$system_flag = 1"
+        " and rdb$view_source is null order by 1";
+    sysTablesM.setItems(this, ntSysTable, loadNames(progressIndicator, stmt));
+}
+//-----------------------------------------------------------------------------
+void Database::loadTables(ProgressIndicator* progressIndicator)
+{
+    std::string stmt = "select rdb$relation_name from rdb$relations"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " and rdb$view_source is null order by 1";
+    tablesM.setItems(this, ntTable, loadNames(progressIndicator, stmt));
+}
+//-----------------------------------------------------------------------------
+void Database::loadTriggers(ProgressIndicator* progressIndicator)
+{
+    std::string stmt = "select rdb$trigger_name from rdb$triggers"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " order by 1";
+    triggersM.setItems(this, ntTrigger, loadNames(progressIndicator, stmt));
+}
+//-----------------------------------------------------------------------------
+void Database::loadViews(ProgressIndicator* progressIndicator)
+{
+    std::string stmt = "select rdb$relation_name from rdb$relations"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " and rdb$view_source is not null order by 1";
+    viewsM.setItems(this, ntView, loadNames(progressIndicator, stmt));
 }
 //-----------------------------------------------------------------------------
 void Database::disconnect()
@@ -1146,6 +1200,7 @@ void Database::setDisconnected()
     metadataLoaderM = 0;
     resetCredentials();     // "forget" temporary username/password
     connectedM = false;
+    resetPendingLoadData();
 
     // remove entire DBH beneath
     domainsM.clear();

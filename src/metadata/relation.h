@@ -51,6 +51,7 @@ protected:
     MetadataCollection<Column> columnsM;
     std::vector<Privilege> privilegesM;
 
+    virtual void doSetChildrenLoaded(bool loaded);
     virtual void loadProperties();
     virtual void loadChildren();
     virtual void lockChildren();
@@ -69,8 +70,6 @@ public:
 
     wxString getOwner();
     int getRelationType();
-
-    bool columnsLoaded();
 
     wxString getSelectStatement();
 

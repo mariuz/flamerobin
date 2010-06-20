@@ -39,13 +39,13 @@ private:
     std::vector<Privilege> privilegesM;
     MetadataCollection<Parameter> parametersM;
 protected:
+    virtual void doSetChildrenLoaded(bool loaded);
     virtual void loadChildren();
+    virtual void lockChildren();
+    virtual void unlockChildren();
 public:
     Procedure();
     Procedure(const Procedure& rhs);
-
-    virtual void lockChildren();
-    virtual void unlockChildren();
 
     wxString getCreateSqlTemplate() const;   // overrides MetadataItem::getCreateSqlTemplate()
 

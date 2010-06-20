@@ -70,6 +70,11 @@ Procedure::Procedure(const Procedure& rhs)
     parametersM.setParent(this);
 }
 //-----------------------------------------------------------------------------
+void Procedure::doSetChildrenLoaded(bool loaded)
+{
+    parametersM.setChildrenLoaded(loaded);
+}
+//-----------------------------------------------------------------------------
 void Procedure::loadChildren()
 {
     setChildrenLoaded(false);

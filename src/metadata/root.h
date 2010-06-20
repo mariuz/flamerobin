@@ -51,12 +51,13 @@ private:
 
     bool parseDatabase(Server* server, wxXmlNode* xmln);
     bool parseServer(wxXmlNode* xmln);
+protected:
+    virtual void doSetChildrenLoaded(bool loaded);
+    virtual void lockChildren();
+    virtual void unlockChildren();
 public:
     Root();
     ~Root();
-
-    virtual void lockChildren();
-    virtual void unlockChildren();
 
     Server* addServer(Server& server);
     void removeServer(Server* server);
