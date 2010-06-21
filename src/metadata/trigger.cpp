@@ -71,7 +71,8 @@ void Trigger::getTriggerInfo(wxString& object, bool& active, int& position,
 wxString Trigger::getTriggerRelation()
 {
     ensurePropertiesLoaded();
-    return (isDatabaseTriggerM ? wxEmptyString : objectM);
+    // gcc 4.4.3 on Ubuntu didn't accept wxEmptyString
+    return (isDatabaseTriggerM ? wxT("") : objectM);
 }
 //-----------------------------------------------------------------------------
 void Trigger::loadProperties()
