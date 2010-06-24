@@ -162,7 +162,7 @@ public:
         {
             wxString itemName(names[i]);
             iterator oldPos = getPosition(itemName);
-            if (oldPos == end())
+            if (oldPos == itemsM.end())
             {
                 wxLogDebug(wxT("Creating new item \"%s\""), itemName.c_str());
                 changed = true;
@@ -173,7 +173,7 @@ public:
                     item->lockSubject();
                 item->setProperties(parent, names[i], type);
             }
-            else if (oldPos == begin())
+            else if (oldPos == itemsM.begin())
             {
                 wxLogDebug(wxT("Keeping item \"%s\" at same position"),
                     itemName.c_str());
@@ -212,7 +212,7 @@ public:
         {
             wxString itemName(names[i]);
             iterator oldPos = getPosition(itemName);
-            if (oldPos == end())
+            if (oldPos == itemsM.end())
             {
                 wxLogDebug(wxT("Creating new item \"%s\""), itemName.c_str());
                 changed = true;
@@ -223,7 +223,7 @@ public:
                     item->lockSubject();
                 item->setProperties(parent, names[i], type);
             }
-            else if (oldPos == begin())
+            else if (oldPos == itemsM.begin())
             {
                 wxLogDebug(wxT("Keeping item \"%s\" at same position"),
                     itemName.c_str());
