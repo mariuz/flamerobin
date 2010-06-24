@@ -77,9 +77,9 @@ const wxString MetadataItem::getTypeName() const
 const wxString MetadataItem::getItemPath() const
 {
     wxString result = getTypeName() + wxT("_") + getPathId();
-    if (parentM)
+    if (MetadataItem* parent = getParent())
     {
-        wxString parentItemPath = parentM->getItemPath();
+        wxString parentItemPath = parent->getItemPath();
         if (!parentItemPath.empty())
             result = parentItemPath + wxT("/") + result;
     }
