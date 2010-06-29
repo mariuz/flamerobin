@@ -96,7 +96,7 @@ BEGIN_EVENT_TABLE(AdjustableListCtrl, wxListCtrl)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent)
-    :BaseFrame(parent, -1, _("Advanced Metadata Search"))
+    : BaseFrame(parent, -1, _("Advanced Metadata Search"))
 {
     wxBoxSizer *mainSizer;
     mainSizer = new wxBoxSizer(wxVERTICAL);
@@ -163,15 +163,14 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent)
         wxDefaultSize, 0, 0, 0);
     choice_database->Append(_("[All Connected Databases]"), (void *)0);
     Root& r = getGlobalRoot();  // add all databases
-    for (ServerCollection::iterator its = r.begin();
-        its != r.end(); ++its)
+    for (SharedServers::iterator its = r.begin(); its != r.end(); ++its)
     {
-        for (DatabaseCollection::iterator itdb = its->begin();
-            itdb != its->end(); ++itdb)
+        for (SharedDatabases::iterator itdb = (*its)->begin();
+            itdb != (*its)->end(); ++itdb)
         {   // we store DB pointer, so we observe in case database is removed
-            choice_database->Append((*its).getName_() + wxT("::") +
-                (*itdb).getName_(), (void *)(&(*itdb)));
-            (*itdb).attachObserver(this);
+            choice_database->Append((*its)->getName_() + wxT("::") +
+                (*itdb)->getName_(), (void *)(&(*itdb)));
+            (*itdb)->attachObserver(this);
         }
     }
     choice_database->SetSelection(0);

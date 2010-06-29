@@ -289,11 +289,10 @@ void MainFrame::set_properties()
             confile.c_str());
         wxMessageBox(msg, _("Configuration file not found"), wxOK|wxICON_INFORMATION);
 
-        Server s;
-        s.setName_(wxT("Localhost"));
-        s.setHostname(wxT("localhost"));
+        SharedServerPtr s(new Server());
+        s->setName_(wxT("Localhost"));
+        s->setHostname(wxT("localhost"));
         root.addServer(s);
-        root.setChildrenLoaded(true);
     }
     wxTreeItemId rootNode = treeMainM->addRootNode(&root);
     treeMainM->Expand(rootNode);
@@ -846,10 +845,10 @@ void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
     if (!checkValidServer(s))
         return;
 
-    Database db;
     DatabaseRegistrationDialog drd(this, _("Register Existing Database"));
     drd.setServer(s);
-    drd.setDatabase(&db);
+    SharedDatabasePtr db(new Database());
+    drd.setDatabase(db.get());
 
     if (drd.ShowModal() == wxID_OK)
         treeMainM->selectMetadataItem(s->addDatabase(db));
@@ -861,10 +860,10 @@ void MainFrame::OnMenuRestoreIntoNewDatabase(wxCommandEvent& WXUNUSED(event))
     if (!checkValidServer(s))
         return;
 
-    Database db;
     DatabaseRegistrationDialog drd(this, _("New database parameters"));
     drd.setServer(s);
-    drd.setDatabase(&db);
+    SharedDatabasePtr db(new Database());
+    drd.setDatabase(db.get());
     if (drd.ShowModal() != wxID_OK)
         return;
 
@@ -892,10 +891,10 @@ void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
     if (!checkValidServer(s))
         return;
 
-    Database db;
     DatabaseRegistrationDialog drd(this, _("Create New Database"), true);
-    drd.setDatabase(&db);
     drd.setServer(s);
+    SharedDatabasePtr db(new Database());
+    drd.setDatabase(db.get());
 
     if (drd.ShowModal() == wxID_OK)
         treeMainM->selectMetadataItem(s->addDatabase(db));
@@ -943,9 +942,9 @@ void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
     if (!r)
         return;
 
-    Server s;
     ServerRegistrationDialog srd(this, _("Register New Server"), true);
-    srd.setServer(&s);
+    SharedServerPtr s(new Server());
+    srd.setServer(s.get());
     if (wxID_OK == srd.ShowModal())
         treeMainM->selectMetadataItem(r->addServer(s));
 }
@@ -1623,23 +1622,23 @@ bool MainFrame::confirmDropItem(MetadataItem* item)
 //-----------------------------------------------------------------------------
 bool MainFrame::openUnregisteredDatabase(const wxString& dbpath)
 {
-    Database tempDb;
-    tempDb.setPath(dbpath);
-    tempDb.setName_(tempDb.extractNameFromConnectionString());
+    SharedDatabasePtr database(new Database());
+    database->setPath(dbpath);
+    database->setName_(database->extractNameFromConnectionString());
 
     wxString iscUser, iscPassword;
     if (!wxGetEnv(wxT("ISC_USER"), &iscUser))
         iscUser = wxT("SYSDBA");
-    tempDb.setUsername(iscUser);
+    database->setUsername(iscUser);
     if (!wxGetEnv(wxT("ISC_PASSWORD"), &iscPassword))
         iscPassword = wxEmptyString;
-    tempDb.setRawPassword(iscPassword);
+    database->setRawPassword(iscPassword);
 
     DatabaseRegistrationDialog drd(this, _("Database Connection Settings"));
-    drd.setDatabase(&tempDb);
+    drd.setDatabase(database.get());
     if (drd.ShowModal() == wxID_OK)
     {
-        Database* db = getGlobalRoot().addUnregisteredDatabase(tempDb);
+        Database* db = getGlobalRoot().addUnregisteredDatabase(database);
         treeMainM->selectMetadataItem(db);
         if (db && connectDatabase(db, this))
             return true;

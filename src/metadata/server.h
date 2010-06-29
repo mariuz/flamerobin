@@ -29,6 +29,10 @@
 #ifndef FR_SERVER_H
 #define FR_SERVER_H
 
+#include <vector>
+
+#include <boost/shared_ptr.hpp>
+
 #include <ibpp.h>
 
 #include "metadata/collection.h"
@@ -37,39 +41,37 @@
 #include "metadata/User.h"
 
 typedef std::vector<User> UserList;
-typedef MetadataCollection<Database> DatabaseCollection;
+
+typedef boost::shared_ptr<Database> SharedDatabasePtr;
+typedef std::vector<SharedDatabasePtr> SharedDatabases;
 //-----------------------------------------------------------------------------
-// this is a coupled node (in visual sense). Server equals collection of
-// YDatabases in wxTree. that's why getChildren() method just copies, since
-// wxTree item will have pointer to Server
-class Server: public MetadataItem
+class Server : public MetadataItem
 {
 private:
     wxString hostnameM;
     wxString portM;
 
-    DatabaseCollection databasesM;
+    SharedDatabases databasesM;
     UserList usersM;
 
     wxString serviceUserM;
     wxString servicePasswordM;
     wxString serviceSysdbaPasswordM;
 protected:
-    virtual void doSetChildrenLoaded(bool loaded);
     virtual void lockChildren();
     virtual void unlockChildren();
 public:
     Server();
-    Server(const Server& rhs);
 
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
-    Database* addDatabase(Database& db);
-    void removeDatabase(Database* db);
 
-    DatabaseCollection::iterator begin();
-    DatabaseCollection::iterator end();
-    DatabaseCollection::const_iterator begin() const;
-    DatabaseCollection::const_iterator end() const;
+    Database* addDatabase(SharedDatabasePtr database);
+    void removeDatabase(Database* database);
+
+    SharedDatabases::iterator begin();
+    SharedDatabases::iterator end();
+    SharedDatabases::const_iterator begin() const;
+    SharedDatabases::const_iterator end() const;
 
     void createDatabase(Database *db, int pagesize = 4096, int dialect = 3);
 

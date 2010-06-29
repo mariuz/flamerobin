@@ -52,54 +52,72 @@
 using namespace std;
 //-----------------------------------------------------------------------------
 Server::Server()
-    :MetadataItem(ntServer)
+    : MetadataItem(ntServer)
 {
-    databasesM.setParent(this);
-    databasesM.setType(ntServer);
     setChildrenLoaded(true);
-}
-//-----------------------------------------------------------------------------
-Server::Server(const Server& rhs)
-    : MetadataItem(rhs), hostnameM(rhs.hostnameM), portM(rhs.portM)
-{
-    databasesM.setParent(this);
 }
 //-----------------------------------------------------------------------------
 void Server::lockChildren()
 {
-    databasesM.lockSubject();
+    std::for_each(databasesM.begin(), databasesM.end(),
+        boost::mem_fn(&Database::lockSubject));
 }
 //-----------------------------------------------------------------------------
 void Server::unlockChildren()
 {
-    databasesM.unlockSubject();
+    std::for_each(databasesM.begin(), databasesM.end(),
+        boost::mem_fn(&Database::unlockSubject));
 }
 //-----------------------------------------------------------------------------
-void Server::doSetChildrenLoaded(bool loaded)
+template<class T>
+struct MetadataItemFromShared
 {
-    databasesM.setChildrenLoaded(loaded);
-}
+public:
+    MetadataItem* operator()(boost::shared_ptr<T> pt) { return pt.get(); };
+};
 //-----------------------------------------------------------------------------
 bool Server::getChildren(vector<MetadataItem*>& temp)
 {
-    return databasesM.getChildren(temp);
+    if (databasesM.empty())
+        return false;
+    MetadataItemFromShared<Database> getMetadataItem;
+    std::transform(databasesM.begin(), databasesM.end(),
+        std::back_inserter(temp), getMetadataItem);
+    return true;
 }
 //-----------------------------------------------------------------------------
 // returns pointer to object in vector
-Database* Server::addDatabase(Database& db)
+Database* Server::addDatabase(SharedDatabasePtr database)
 {
-    Database* temp = databasesM.add(db);
-    temp->setParent(this);                  // grab it from collection
+    if (!database)
+        return 0;
+    databasesM.push_back(database);
+    database->setParent(this);
     notifyObservers();
-    getGlobalRoot().save();
-    return temp;
+    getRoot()->save();
+    return database.get();
 }
 //-----------------------------------------------------------------------------
-void Server::removeDatabase(Database* db)
+template<class T>
+struct IsSharedPtrTo
 {
-    databasesM.remove(db);
-    notifyObservers();
-    getGlobalRoot().save();
+    T* _t;
+public:
+    IsSharedPtrTo<T>(T* t) : _t(t) {};
+    bool operator()(boost::shared_ptr<T> pt) { return pt.get() == _t; };
+};
+//-----------------------------------------------------------------------------
+void Server::removeDatabase(Database* database)
+{
+    IsSharedPtrTo<Database> isThisDatabase(database);
+    SharedDatabases::iterator itRemove = std::remove_if(databasesM.begin(),
+        databasesM.end(), isThisDatabase);
+    if (itRemove != databasesM.end())
+    {
+        databasesM.erase(itRemove, databasesM.end());
+        getRoot()->save();
+        notifyObservers();
+    }
 }
 //-----------------------------------------------------------------------------
 void Server::createDatabase(Database* db, int pagesize, int dialect)
@@ -113,28 +131,29 @@ void Server::createDatabase(Database* db, int pagesize, int dialect)
         extra_params << wxT(" DEFAULT CHARACTER SET ") << charset;
 
     IBPP::Database db1;
-    db1 = IBPP::DatabaseFactory(wx2std(getConnectionString()), wx2std(db->getPath()),
-        wx2std(db->getUsername()), wx2std(db->getDecryptedPassword()), "",
-        wx2std(charset), wx2std(extra_params));
+    db1 = IBPP::DatabaseFactory(wx2std(getConnectionString()),
+        wx2std(db->getPath()), wx2std(db->getUsername()),
+        wx2std(db->getDecryptedPassword()), "", wx2std(charset),
+        wx2std(extra_params));
     db1->Create(dialect);
 }
 //-----------------------------------------------------------------------------
-DatabaseCollection::iterator Server::begin()
+SharedDatabases::iterator Server::begin()
 {
     return databasesM.begin();
 }
 //-----------------------------------------------------------------------------
-DatabaseCollection::iterator Server::end()
+SharedDatabases::iterator Server::end()
 {
     return databasesM.end();
 }
 //-----------------------------------------------------------------------------
-DatabaseCollection::const_iterator Server::begin() const
+SharedDatabases::const_iterator Server::begin() const
 {
     return databasesM.begin();
 }
 //-----------------------------------------------------------------------------
-DatabaseCollection::const_iterator Server::end() const
+SharedDatabases::const_iterator Server::end() const
 {
     return databasesM.end();
 }
@@ -151,9 +170,9 @@ wxString Server::getPort() const
 //-----------------------------------------------------------------------------
 bool Server::hasConnectedDatabase() const
 {
-    DatabaseCollection::const_iterator it = std::find_if(
+    SharedDatabases::const_iterator it = std::find_if(
         databasesM.begin(), databasesM.end(),
-        std::mem_fun_ref(&Database::isConnected));
+        boost::mem_fn(&Database::isConnected));
     return it != databasesM.end();
 }
 //-----------------------------------------------------------------------------
@@ -236,7 +255,7 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
     if (progressind)
     {
         progressind->initProgress(_("Connecting..."),
-            databasesM.getChildrenCount() + 2, 0, 1);
+            databasesM.size() + 2, 0, 1);
     }
 
     // check if we already had some successful connections
@@ -285,22 +304,22 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
     }
 
     // first try connected databases
-    for (DatabaseCollection::iterator ci = databasesM.begin();
+    for (SharedDatabases::iterator ci = databasesM.begin();
         ci != databasesM.end(); ++ci)
     {
         if (progressind && progressind->isCanceled())
             return false;
-        if (!(*ci).isConnected())
+        if (!(*ci)->isConnected())
             continue;
         // Use the user name and password of the connected user
         // instead of the stored ones.
-        IBPP::Database& db = (*ci).getIBPPDatabase();
+        IBPP::Database& db = (*ci)->getIBPPDatabase();
         if (sysdba && std2wx(db->Username()).Upper() != wxT("SYSDBA"))
             continue;
         if (progressind)
         {
             progressind->setProgressMessage(_("Using password of: ") +
-                std2wx(db->Username()) + wxT("@") + (*ci).getName_());
+                std2wx(db->Username()) + wxT("@") + (*ci)->getName_());
             progressind->stepProgress();
         }
         try
@@ -323,21 +342,21 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
     }
 
     // when the operation is not canceled try to user/pass of disconnected DBs
-    for (DatabaseCollection::const_iterator ci = databasesM.begin();
+    for (SharedDatabases::const_iterator ci = databasesM.begin();
         ci != databasesM.end(); ++ci)
     {
         if (progressind && progressind->isCanceled())
             return false;
-        if ((*ci).isConnected())
+        if ((*ci)->isConnected())
             continue;
-        wxString user = (*ci).getUsername();
-        wxString pwd = (*ci).getDecryptedPassword();
+        wxString user = (*ci)->getUsername();
+        wxString pwd = (*ci)->getDecryptedPassword();
         if (pwd.IsEmpty() || sysdba && user.Upper() != wxT("SYSDBA"))
             continue;
         if (progressind)
         {
             progressind->setProgressMessage(_("Using password of: ") +
-                user + wxT("@") + (*ci).getName_());
+                user + wxT("@") + (*ci)->getName_());
             progressind->stepProgress();
         }
         try

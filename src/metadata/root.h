@@ -28,19 +28,23 @@
 #ifndef FR_ROOT_H
 #define FR_ROOT_H
 //-----------------------------------------------------------------------------
+#include <vector>
+
+#include <boost/shared_ptr.hpp>
+
 #include "metadata/metadataitem.h"
 #include "metadata/server.h"
 
 class Database;
 class wxXmlNode;
 
-typedef MetadataCollection<Server> ServerCollection;
+typedef boost::shared_ptr<Server> SharedServerPtr;
+typedef std::vector<SharedServerPtr> SharedServers;
 //-----------------------------------------------------------------------------
 class Root: public MetadataItem
 {
 private:
-    ServerCollection serversM;
-
+    SharedServers serversM;
     Server* unregLocalDatabasesM;
 
     wxString fileNameM;
@@ -52,22 +56,21 @@ private:
     bool parseDatabase(Server* server, wxXmlNode* xmln);
     bool parseServer(wxXmlNode* xmln);
 protected:
-    virtual void doSetChildrenLoaded(bool loaded);
     virtual void lockChildren();
     virtual void unlockChildren();
 public:
     Root();
     ~Root();
 
-    Server* addServer(Server& server);
+    Server* addServer(SharedServerPtr server);
     void removeServer(Server* server);
 
-    ServerCollection::iterator begin();
-    ServerCollection::iterator end();
-    ServerCollection::const_iterator begin() const;
-    ServerCollection::const_iterator end() const;
+    SharedServers::iterator begin();
+    SharedServers::iterator end();
+    SharedServers::const_iterator begin() const;
+    SharedServers::const_iterator end() const;
 
-    Database* addUnregisteredDatabase(Database& database);
+    Database* addUnregisteredDatabase(SharedDatabasePtr database);
 
     virtual bool getChildren(std::vector<MetadataItem*>& temp);
 

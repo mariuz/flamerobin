@@ -83,11 +83,11 @@ Root::Root()
 //-----------------------------------------------------------------------------
 void Root::disconnectAllDatabases()
 {
-    for (ServerCollection::iterator its = serversM.begin();
+    for (SharedServers::iterator its = serversM.begin();
         its != serversM.end(); ++its)
     {
-        std::for_each(its->begin(), its->end(),
-            std::mem_fun_ref(&Database::disconnect));
+        std::for_each((*its)->begin(), (*its)->end(),
+            boost::mem_fn(&Database::disconnect));
     }
 }
 //-----------------------------------------------------------------------------
@@ -146,8 +146,8 @@ bool Root::parseDatabase(Server* server, wxXmlNode* xmln)
 {
     wxASSERT(server);
     wxASSERT(xmln);
-    Database tempDb;
-    Database* database = server->addDatabase(tempDb);
+    Database* database = server->addDatabase(
+        SharedDatabasePtr(new Database()));
     SubjectLocker locker(database);
 
     for (xmln = xmln->GetChildren(); (xmln); xmln = xmln->GetNext())
@@ -198,8 +198,7 @@ bool Root::parseDatabase(Server* server, wxXmlNode* xmln)
 bool Root::parseServer(wxXmlNode* xmln)
 {
     wxASSERT(xmln);
-    Server tempSrv;
-    Server* server = addServer(tempSrv);
+    Server* server = addServer(SharedServerPtr(new Server()));
     SubjectLocker locker(server);
 
     for (xmln = xmln->GetChildren(); (xmln); xmln = xmln->GetNext())
@@ -227,49 +226,62 @@ bool Root::parseServer(wxXmlNode* xmln)
     return true;
 }
 //-----------------------------------------------------------------------------
-Server* Root::addServer(Server& server)
+Server* Root::addServer(SharedServerPtr server)
 {
-    Server* temp = serversM.add(server);
-    temp->setParent(this);                    // grab it from collection
+    if (!server)
+        return 0;
+    serversM.push_back(server);
+    server->setParent(this);
     dirtyM = true;
     notifyObservers();
     save();
-    return temp;
+    return server.get();
 }
+//-----------------------------------------------------------------------------
+template<class T>
+struct IsSharedPtrTo
+{
+    T* _t;
+public:
+    IsSharedPtrTo<T>(T* t) : _t(t) {};
+    bool operator()(boost::shared_ptr<T> pt) { return pt.get() == _t; };
+};
 //-----------------------------------------------------------------------------
 void Root::removeServer(Server* server)
 {
-    serversM.remove(server);
-    if (server == unregLocalDatabasesM)
+    IsSharedPtrTo<Server> isThisServer(server);
+    SharedServers::iterator itRemove = std::remove_if(serversM.begin(),
+        serversM.end(), isThisServer);
+    if (itRemove != serversM.end())
     {
-        unregLocalDatabasesM = 0;
+        serversM.erase(itRemove, serversM.end());
+        if (unregLocalDatabasesM == server)
+            unregLocalDatabasesM = 0;
+        else
+        {
+            dirtyM = true;
+            save();
+        }
         notifyObservers();
-    }
-    else
-    {
-        dirtyM = true;
-        notifyObservers();
-        save();
     }
 }
 //-----------------------------------------------------------------------------
-Database* Root::addUnregisteredDatabase(Database& database)
+Database* Root::addUnregisteredDatabase(SharedDatabasePtr database)
 {
     // on-demand creation of parent node for unregistered databases
     if (!unregLocalDatabasesM)
     {
-        Server server;
-        server.setName_(_("Unregistered local databases"));
-        server.setHostname(wxT("localhost"));
+        SharedServerPtr server(new Server());
+        serversM.push_back(server);
+        server->setName_(_("Unregistered local databases"));
+        server->setHostname(wxT("localhost"));
+        server->setParent(this);
 
-        unregLocalDatabasesM = serversM.add(server);
-        unregLocalDatabasesM->setParent(this);
+        unregLocalDatabasesM = server.get();
         notifyObservers();
     }
 
     Database* db = unregLocalDatabasesM->addDatabase(database);
-    db->setParent(unregLocalDatabasesM);
-    unregLocalDatabasesM->notifyObservers();
     return db;
 }
 //-----------------------------------------------------------------------------
@@ -309,38 +321,38 @@ bool Root::save()
 
     rsAddChildNode(rn, wxT("nextId"), wxString::Format(wxT("%d"), nextIdM));
 
-    for (ServerCollection::iterator its = serversM.begin();
+    for (SharedServers::iterator its = serversM.begin();
         its != serversM.end(); ++its)
     {
         // do not save the dummy server node for databases that were opened
         // either via command line switch or via drag and drop
-        if (&(*its) == unregLocalDatabasesM)
+        if ((*its).get() == unregLocalDatabasesM)
             continue;
 
         wxXmlNode* srvn = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("server"));
         rn->AddChild(srvn);
         
-        rsAddChildNode(srvn, wxT("name"), its->getName_());
-        rsAddChildNode(srvn, wxT("host"), its->getHostname());
-        rsAddChildNode(srvn, wxT("port"), its->getPort());
+        rsAddChildNode(srvn, wxT("name"), (*its)->getName_());
+        rsAddChildNode(srvn, wxT("host"), (*its)->getHostname());
+        rsAddChildNode(srvn, wxT("port"), (*its)->getPort());
 
-        for (DatabaseCollection::iterator itdb = its->begin();
-            itdb != its->end(); ++itdb)
+        for (SharedDatabases::iterator itdb = (*its)->begin();
+            itdb != (*its)->end(); ++itdb)
         {
-            itdb->resetCredentials();    // clean up eventual extra credentials
+            (*itdb)->resetCredentials();    // clean up eventual extra credentials
 
             wxXmlNode* dbn = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("database"));
             srvn->AddChild(dbn);
 
-            rsAddChildNode(dbn, wxT("id"), itdb->getId());
-            rsAddChildNode(dbn, wxT("name"), itdb->getName_());
-            rsAddChildNode(dbn, wxT("path"), itdb->getPath());
-            rsAddChildNode(dbn, wxT("charset"), itdb->getConnectionCharset());
-            rsAddChildNode(dbn, wxT("username"), itdb->getUsername());
-            rsAddChildNode(dbn, wxT("password"), itdb->getRawPassword());
-            rsAddChildNode(dbn, wxT("role"), itdb->getRole());
+            rsAddChildNode(dbn, wxT("id"), (*itdb)->getId());
+            rsAddChildNode(dbn, wxT("name"), (*itdb)->getName_());
+            rsAddChildNode(dbn, wxT("path"), (*itdb)->getPath());
+            rsAddChildNode(dbn, wxT("charset"), (*itdb)->getConnectionCharset());
+            rsAddChildNode(dbn, wxT("username"), (*itdb)->getUsername());
+            rsAddChildNode(dbn, wxT("password"), (*itdb)->getRawPassword());
+            rsAddChildNode(dbn, wxT("role"), (*itdb)->getRole());
             rsAddChildNode(dbn, wxT("authentication"),
-                itdb->getAuthenticationMode().getConfigValue());
+                (*itdb)->getAuthenticationMode().getConfigValue());
         }
     }
     if (!doc.Save(getFileName()))
@@ -349,44 +361,53 @@ bool Root::save()
     return true;
 }
 //-----------------------------------------------------------------------------
+template<class T>
+struct MetadataItemFromShared
+{
+public:
+    MetadataItem* operator()(boost::shared_ptr<T> pt) { return pt.get(); };
+};
+//-----------------------------------------------------------------------------
 bool Root::getChildren(std::vector<MetadataItem *>& temp)
 {
-    return serversM.getChildren(temp);
+    if (serversM.empty())
+        return false;
+    MetadataItemFromShared<Server> getMetadataItem;
+    std::transform(serversM.begin(), serversM.end(), std::back_inserter(temp),
+        getMetadataItem);
+    return true;
 }
 //-----------------------------------------------------------------------------
-void Root::doSetChildrenLoaded(bool loaded)
-{
-    serversM.setChildrenLoaded(loaded);
-}
-//-----------------------------------------------------------------------------
-ServerCollection::iterator Root::begin()
+SharedServers::iterator Root::begin()
 {
     return serversM.begin();
 }
 //-----------------------------------------------------------------------------
-ServerCollection::iterator Root::end()
+SharedServers::iterator Root::end()
 {
     return serversM.end();
 }
 //-----------------------------------------------------------------------------
-ServerCollection::const_iterator Root::begin() const
+SharedServers::const_iterator Root::begin() const
 {
     return serversM.begin();
 }
 //-----------------------------------------------------------------------------
-ServerCollection::const_iterator Root::end() const
+SharedServers::const_iterator Root::end() const
 {
     return serversM.end();
 }
 //-----------------------------------------------------------------------------
 void Root::lockChildren()
 {
-    serversM.lockSubject();
+    std::for_each(serversM.begin(), serversM.end(),
+        boost::mem_fn(&Server::lockSubject));
 }
 //-----------------------------------------------------------------------------
 void Root::unlockChildren()
 {
-    serversM.unlockSubject();
+    std::for_each(serversM.begin(), serversM.end(),
+        boost::mem_fn(&Server::unlockSubject));
 }
 //-----------------------------------------------------------------------------
 const wxString Root::getItemPath() const
