@@ -151,6 +151,8 @@ public:
 
     bool openUnregisteredDatabase(const wxString& dbpath);
 private:
+    SharedRootPtr rootM;
+
     bool connect();
     void showGeneratorValue(Generator* g);
     void updateStatusbarText();

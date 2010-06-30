@@ -36,8 +36,10 @@
 #include "metadata/server.h"
 
 class Database;
+class Root;
 class wxXmlNode;
 
+typedef boost::shared_ptr<Root> SharedRootPtr;
 typedef boost::shared_ptr<Server> SharedServerPtr;
 typedef std::vector<SharedServerPtr> SharedServers;
 //-----------------------------------------------------------------------------
@@ -49,11 +51,8 @@ private:
 
     wxString fileNameM;
     wxString getFileName();
-    bool dirtyM;
-    bool loadingM;
-    unsigned int nextIdM;
 
-    bool parseDatabase(Server* server, wxXmlNode* xmln);
+    bool parseDatabase(SharedServerPtr server, wxXmlNode* xmln);
     bool parseServer(wxXmlNode* xmln);
 protected:
     virtual void lockChildren();
@@ -62,15 +61,15 @@ public:
     Root();
     ~Root();
 
-    Server* addServer(SharedServerPtr server);
+    SharedServerPtr addServer();
+    void addServer(SharedServerPtr server);
     void removeServer(Server* server);
+    void addUnregisteredDatabase(SharedDatabasePtr database);
 
     SharedServers::iterator begin();
     SharedServers::iterator end();
     SharedServers::const_iterator begin() const;
     SharedServers::const_iterator end() const;
-
-    Database* addUnregisteredDatabase(SharedDatabasePtr database);
 
     virtual bool getChildren(std::vector<MetadataItem*>& temp);
 
@@ -80,12 +79,7 @@ public:
 
     void disconnectAllDatabases();
 
-    // increments the Id generator and returns the value.
-    const unsigned int getNextId();
-
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
-//-----------------------------------------------------------------------------
-Root& getGlobalRoot();
 //-----------------------------------------------------------------------------
 #endif

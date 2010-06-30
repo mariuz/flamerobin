@@ -117,7 +117,6 @@ public:
     Database* findDatabase() const;
     // will throw FRError if no database is assigned
     Database* getDatabase(const wxString& callingMethod) const;
-    Root* getRoot() const;
 
     virtual void invalidate();
 

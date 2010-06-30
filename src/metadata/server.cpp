@@ -86,16 +86,21 @@ bool Server::getChildren(vector<MetadataItem*>& temp)
     return true;
 }
 //-----------------------------------------------------------------------------
-// returns pointer to object in vector
-Database* Server::addDatabase(SharedDatabasePtr database)
+SharedDatabasePtr Server::addDatabase()
 {
-    if (!database)
-        return 0;
-    databasesM.push_back(database);
-    database->setParent(this);
-    notifyObservers();
-    getRoot()->save();
-    return database.get();
+    SharedDatabasePtr database(new Database());
+    addDatabase(database);
+    return database;
+}
+//-----------------------------------------------------------------------------
+void Server::addDatabase(SharedDatabasePtr database)
+{
+    if (database)
+    {
+        databasesM.push_back(database);
+        database->setParent(this);
+        notifyObservers();
+    }
 }
 //-----------------------------------------------------------------------------
 template<class T>
@@ -115,7 +120,6 @@ void Server::removeDatabase(Database* database)
     if (itRemove != databasesM.end())
     {
         databasesM.erase(itRemove, databasesM.end());
-        getRoot()->save();
         notifyObservers();
     }
 }

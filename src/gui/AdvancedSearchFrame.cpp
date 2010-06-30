@@ -95,7 +95,7 @@ BEGIN_EVENT_TABLE(AdjustableListCtrl, wxListCtrl)
     EVT_SIZE(AdjustableListCtrl::OnSize)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
-AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent)
+AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent, SharedRootPtr root)
     : BaseFrame(parent, -1, _("Advanced Metadata Search"))
 {
     wxBoxSizer *mainSizer;
@@ -162,8 +162,8 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent)
     choice_database = new wxChoice(mainPanel, wxID_ANY, wxDefaultPosition,
         wxDefaultSize, 0, 0, 0);
     choice_database->Append(_("[All Connected Databases]"), (void *)0);
-    Root& r = getGlobalRoot();  // add all databases
-    for (SharedServers::iterator its = r.begin(); its != r.end(); ++its)
+    for (SharedServers::iterator its = root->begin(); its != root->end();
+        ++its)
     {
         for (SharedDatabases::iterator itdb = (*its)->begin();
             itdb != (*its)->end(); ++itdb)

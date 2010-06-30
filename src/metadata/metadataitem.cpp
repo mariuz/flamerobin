@@ -187,7 +187,7 @@ void MetadataItem::setPropertiesLoaded(bool loaded)
     {
         if (propertiesLoadedM == lsLoaded)
             propertiesLoadedM = lsLoadPending;
-        else
+        else if (propertiesLoadedM != lsLoadPending)
             propertiesLoadedM = lsNotLoaded;
     }
 }
@@ -219,7 +219,7 @@ void MetadataItem::setChildrenLoaded(bool loaded)
     {
         if (childrenLoadedM == lsLoaded)
             childrenLoadedM = lsLoadPending;
-        else
+        else if (childrenLoadedM != lsLoadPending)
             childrenLoadedM = lsNotLoaded;
     }
     doSetChildrenLoaded(loaded);
@@ -266,11 +266,6 @@ Database* MetadataItem::getDatabase(const wxString& callingMethod) const
             callingMethod.c_str()));
     }
     return database;
-}
-//-----------------------------------------------------------------------------
-Root* MetadataItem::getRoot() const
-{
-    return dynamic_cast<Root*>(getParentObjectOfType(ntRoot));
 }
 //-----------------------------------------------------------------------------
 void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject,

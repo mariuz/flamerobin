@@ -65,7 +65,8 @@ public:
 
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
 
-    Database* addDatabase(SharedDatabasePtr database);
+    SharedDatabasePtr addDatabase();
+    void addDatabase(SharedDatabasePtr database);
     void removeDatabase(Database* database);
 
     SharedDatabases::iterator begin();

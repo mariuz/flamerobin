@@ -199,7 +199,7 @@ private:
     // small help for parser
     wxString getTableForIndex(wxString indexName);
 
-    mutable unsigned int idM;
+    mutable unsigned idM;
 
     bool showSysTables();
 
@@ -312,7 +312,15 @@ public:
     // path is "C:\data\database.fdb" -> returns "database".
     wxString extractNameFromConnectionString() const;
     virtual const wxString getId() const;
-    void setId(int id);
+    void setId(unsigned id);
+
+    // returns the value of the Id generator and increments it afterwards.
+    static unsigned getUniqueId();
+    // returns the current value of the Id generator.
+    static unsigned getUIDGeneratorValue();
+    // sets the current value of the Id generator.
+    static void setUIDGeneratorValue(unsigned value);
+
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 
     const DatabaseInfo& getInfo();

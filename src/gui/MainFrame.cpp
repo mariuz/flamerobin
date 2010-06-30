@@ -124,7 +124,8 @@ public:
 //-----------------------------------------------------------------------------
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title,
         const wxPoint& pos, const wxSize& size, long style)
-    : BaseFrame(parent, id, title, pos, size, style, wxT("FlameRobin_main"))
+    : BaseFrame(parent, id, title, pos, size, style, wxT("FlameRobin_main")),
+        rootM(new Root())
 {
     wxArtProvider::Push(new ArtProvider);
 
@@ -276,8 +277,7 @@ void MainFrame::set_properties()
     treeMainM->SetIndent(12);
 #endif
 
-    Root& root(getGlobalRoot());
-    if (!root.load())
+    if (!rootM->load())
     {
         wxString confile = config().getDBHFileName();
         if (confile.Length() > 20)
@@ -292,9 +292,10 @@ void MainFrame::set_properties()
         SharedServerPtr s(new Server());
         s->setName_(wxT("Localhost"));
         s->setHostname(wxT("localhost"));
-        root.addServer(s);
+        rootM->addServer(s);
+        rootM->save();
     }
-    wxTreeItemId rootNode = treeMainM->addRootNode(&root);
+    wxTreeItemId rootNode = treeMainM->addRootNode(rootM.get());
     treeMainM->Expand(rootNode);
 
     // make the first server active
@@ -677,7 +678,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
     // as it doesn't hurt for others, we can leave it all here, at least until
     // Firebird packagers for various distros figure out how to properly use NPTL
     treeMainM->Freeze();
-    getGlobalRoot().disconnectAllDatabases();
+    rootM->disconnectAllDatabases();
     wxSafeYield();
     treeMainM->Thaw();
 
@@ -851,7 +852,11 @@ void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
     drd.setDatabase(db.get());
 
     if (drd.ShowModal() == wxID_OK)
-        treeMainM->selectMetadataItem(s->addDatabase(db));
+    {
+        s->addDatabase(db);
+        rootM->save();
+        treeMainM->selectMetadataItem(db.get());
+    }
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRestoreIntoNewDatabase(wxCommandEvent& WXUNUSED(event))
@@ -867,9 +872,10 @@ void MainFrame::OnMenuRestoreIntoNewDatabase(wxCommandEvent& WXUNUSED(event))
     if (drd.ShowModal() != wxID_OK)
         return;
 
-    Database* newDB = s->addDatabase(db);
-    treeMainM->selectMetadataItem(newDB);
-    RestoreFrame* f = new RestoreFrame(this, newDB);
+    s->addDatabase(db);
+    rootM->save();
+    treeMainM->selectMetadataItem(db.get());
+    RestoreFrame* f = new RestoreFrame(this, db.get());
     f->Show();
 }
 //-----------------------------------------------------------------------------
@@ -882,7 +888,7 @@ void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
     DatabaseRegistrationDialog drd(this, _("Database Registration Info"));
     drd.setDatabase(d);
     if (drd.ShowModal())
-        getGlobalRoot().save();
+        rootM->save();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
@@ -897,7 +903,11 @@ void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
     drd.setDatabase(db.get());
 
     if (drd.ShowModal() == wxID_OK)
-        treeMainM->selectMetadataItem(s->addDatabase(db));
+    {
+        s->addDatabase(db);
+        rootM->save();
+        treeMainM->selectMetadataItem(db.get());
+    }
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuManageUsers(wxCommandEvent& WXUNUSED(event))
@@ -918,9 +928,8 @@ void MainFrame::OnMenuUnRegisterServer(wxCommandEvent& WXUNUSED(event))
         AdvancedMessageDialogButtonsOkCancel(_("Unregister")));
     if (res == wxOK)
     {
-        Root* r = s->getRoot();
-        if (r)
-            r->removeServer(s);
+        rootM->removeServer(s);
+        rootM->save();
     }
 }
 //-----------------------------------------------------------------------------
@@ -933,20 +942,20 @@ void MainFrame::OnMenuServerProperties(wxCommandEvent& WXUNUSED(event))
     ServerRegistrationDialog srd(this, _("Server Registration Info"));
     srd.setServer(s);
     if (srd.ShowModal())
-        getGlobalRoot().save();
+        rootM->save();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
 {
-    Root* r = dynamic_cast<Root*>(treeMainM->getMetadataItem(treeMainM->GetRootItem()));
-    if (!r)
-        return;
-
     ServerRegistrationDialog srd(this, _("Register New Server"), true);
     SharedServerPtr s(new Server());
     srd.setServer(s.get());
     if (wxID_OK == srd.ShowModal())
-        treeMainM->selectMetadataItem(r->addServer(s));
+    {
+        rootM->addServer(s);
+        rootM->save();
+        treeMainM->selectMetadataItem(s.get());
+    }
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
@@ -963,9 +972,11 @@ void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
         AdvancedMessageDialogButtonsOkCancel(_("Unregister")));
     if (res == wxOK)
     {
-    Server* s = d->getServer();
-    if (s)
-        s->removeDatabase(d);
+        if (Server* s = d->getServer())
+        {
+            s->removeDatabase(d);
+            rootM->save();
+        }
     }
 }
 //-----------------------------------------------------------------------------
@@ -1364,7 +1375,7 @@ void MainFrame::OnSearchBoxEnter(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnButtonSearchClick(wxCommandEvent& WXUNUSED(event))
 {
-    AdvancedSearchFrame *asf = new AdvancedSearchFrame(this);
+    AdvancedSearchFrame *asf = new AdvancedSearchFrame(this, rootM);
     asf->Show();
 }
 //-----------------------------------------------------------------------------
@@ -1522,9 +1533,11 @@ void MainFrame::OnMenuDropDatabase(wxCommandEvent& WXUNUSED(event))
     d->drop();
     if (result == wxNO)
     {   // unregister
-        Server* s = d->getServer();
-        if (s)
+        if (Server* s = d->getServer())
+        {
             s->removeDatabase(d);
+            rootM->save();
+        }
     }
 }
 //-----------------------------------------------------------------------------
@@ -1638,9 +1651,9 @@ bool MainFrame::openUnregisteredDatabase(const wxString& dbpath)
     drd.setDatabase(database.get());
     if (drd.ShowModal() == wxID_OK)
     {
-        Database* db = getGlobalRoot().addUnregisteredDatabase(database);
-        treeMainM->selectMetadataItem(db);
-        if (db && connectDatabase(db, this))
+        rootM->addUnregisteredDatabase(database);
+        treeMainM->selectMetadataItem(database.get());
+        if (connectDatabase(database.get(), this))
             return true;
     }
     return false;

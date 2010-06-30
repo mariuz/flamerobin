@@ -27,12 +27,15 @@
 #ifndef FR_ADVANCEDSEARCHFRAME_H
 #define FR_ADVANCEDSEARCHFRAME_H
 
-#include "core/Observer.h"
 #include <wx/wx.h>
 #include <wx/splitter.h>
 #include <wx/listctrl.h>
+
 #include <map>
-#include "BaseFrame.h"
+
+#include "core/Observer.h"
+#include "gui/BaseFrame.h"
+#include "metadata/root.h"
 //-----------------------------------------------------------------------------
 class CriteriaItem
 {
@@ -117,7 +120,7 @@ protected:
     wxStyledTextCtrl *stc_ddl;
 
 public:
-    AdvancedSearchFrame(MainFrame *parent);
+    AdvancedSearchFrame(MainFrame* parent, SharedRootPtr root);
     enum
     {
         ID_button_remove=100,

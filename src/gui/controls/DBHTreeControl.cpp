@@ -690,6 +690,7 @@ void DBHTreeItemData::update()
         for (itChild = children.begin(); itChild != children.end(); ++itChild)
         {
             DBHTreeItemVisitor tivChild(treeM);
+            (*itChild)->loadPendingData();
             (*itChild)->acceptVisitor(&tivChild);
             if (!tivChild.getNodeVisible())
                 continue;

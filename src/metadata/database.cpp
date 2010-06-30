@@ -1531,14 +1531,37 @@ wxString Database::extractNameFromConnectionString() const
 const wxString Database::getId() const
 {
     if (idM == 0)
-        idM = getRoot()->getNextId();
+        idM = getUniqueId();
     wxString result = wxString::Format(wxT("%d"), idM);
     return result;
 }
 //-----------------------------------------------------------------------------
-void Database::setId(int id)
+unsigned uniqueDatabaseId = 1;
+//-----------------------------------------------------------------------------
+void Database::setId(unsigned id)
 {
     idM = id;
+    // generator to be higher than ids of existing databases
+    if (id >= uniqueDatabaseId)
+        uniqueDatabaseId = id + 1;
+}
+//-----------------------------------------------------------------------------
+/*static*/
+unsigned Database::getUniqueId()
+{
+    return uniqueDatabaseId++;
+}
+//-----------------------------------------------------------------------------
+/*static*/
+unsigned Database::getUIDGeneratorValue()
+{
+    return uniqueDatabaseId;
+}
+//-----------------------------------------------------------------------------
+/*static*/
+void Database::setUIDGeneratorValue(unsigned value)
+{
+    uniqueDatabaseId = value;
 }
 //-----------------------------------------------------------------------------
 const DatabaseInfo& Database::getInfo()

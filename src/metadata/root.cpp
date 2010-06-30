@@ -74,8 +74,7 @@ static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
 }
 //-----------------------------------------------------------------------------
 Root::Root()
-    : MetadataItem(ntRoot), fileNameM(wxT("")), dirtyM(false),
-        loadingM(false), nextIdM(1), unregLocalDatabasesM(0)
+    : MetadataItem(ntRoot), fileNameM(wxT("")), unregLocalDatabasesM(0)
 {
     setName_(wxT("Home"));
     setChildrenLoaded(true);
@@ -93,8 +92,6 @@ void Root::disconnectAllDatabases()
 //-----------------------------------------------------------------------------
 Root::~Root()
 {
-    if (dirtyM)
-        save();
 }
 //-----------------------------------------------------------------------------
 //! loads fr_databases.conf file and:
@@ -119,7 +116,6 @@ bool Root::load()
     if (xmlr->GetName() != wxT("root"))
         return false;
 
-    loadingM = true;
     SubjectLocker locker(this);
     for (wxXmlNode* xmln = doc.GetRoot()->GetChildren();
         (xmln); xmln = xmln->GetNext())
@@ -133,22 +129,22 @@ bool Root::load()
             wxString value(getNodeContent(xmln, wxEmptyString));
             unsigned long l;
             // nextIdM may have been written already (database id)
-            if (!value.IsEmpty() && value.ToULong(&l) && l > nextIdM)
-                nextIdM = l;
+            if (!value.IsEmpty() && value.ToULong(&l))
+            {
+                if (Database::getUIDGeneratorValue() < l)
+                    Database::setUIDGeneratorValue(l);
+            }
         }
     }
-    dirtyM = false;
-    loadingM = false;
     return true;
 }
 //-----------------------------------------------------------------------------
-bool Root::parseDatabase(Server* server, wxXmlNode* xmln)
+bool Root::parseDatabase(SharedServerPtr server, wxXmlNode* xmln)
 {
     wxASSERT(server);
     wxASSERT(xmln);
-    Database* database = server->addDatabase(
-        SharedDatabasePtr(new Database()));
-    SubjectLocker locker(database);
+    SharedDatabasePtr database = server->addDatabase();
+    SubjectLocker locker(database.get());
 
     for (xmln = xmln->GetChildren(); (xmln); xmln = xmln->GetNext())
     {
@@ -176,12 +172,7 @@ bool Root::parseDatabase(Server* server, wxXmlNode* xmln)
         {
             unsigned long id;
             if (value.ToULong(&id))
-            {
                 database->setId(id);
-                // force nextIdM to be higher than ids of existing databases
-                if (nextIdM <= id)
-                    nextIdM = id + 1;
-            }
         }
     }
 
@@ -198,8 +189,8 @@ bool Root::parseDatabase(Server* server, wxXmlNode* xmln)
 bool Root::parseServer(wxXmlNode* xmln)
 {
     wxASSERT(xmln);
-    Server* server = addServer(SharedServerPtr(new Server()));
-    SubjectLocker locker(server);
+    SharedServerPtr server = addServer();
+    SubjectLocker locker(server.get());
 
     for (xmln = xmln->GetChildren(); (xmln); xmln = xmln->GetNext())
     {
@@ -226,16 +217,21 @@ bool Root::parseServer(wxXmlNode* xmln)
     return true;
 }
 //-----------------------------------------------------------------------------
-Server* Root::addServer(SharedServerPtr server)
+SharedServerPtr Root::addServer()
 {
-    if (!server)
-        return 0;
-    serversM.push_back(server);
-    server->setParent(this);
-    dirtyM = true;
-    notifyObservers();
-    save();
-    return server.get();
+    SharedServerPtr server(new Server());
+    addServer(server);
+    return server;
+}
+//-----------------------------------------------------------------------------
+void Root::addServer(SharedServerPtr server)
+{
+    if (server)
+    {
+        serversM.push_back(server);
+        server->setParent(this);
+        notifyObservers();
+    }
 }
 //-----------------------------------------------------------------------------
 template<class T>
@@ -257,16 +253,11 @@ void Root::removeServer(Server* server)
         serversM.erase(itRemove, serversM.end());
         if (unregLocalDatabasesM == server)
             unregLocalDatabasesM = 0;
-        else
-        {
-            dirtyM = true;
-            save();
-        }
         notifyObservers();
     }
 }
 //-----------------------------------------------------------------------------
-Database* Root::addUnregisteredDatabase(SharedDatabasePtr database)
+void Root::addUnregisteredDatabase(SharedDatabasePtr database)
 {
     // on-demand creation of parent node for unregistered databases
     if (!unregLocalDatabasesM)
@@ -281,8 +272,7 @@ Database* Root::addUnregisteredDatabase(SharedDatabasePtr database)
         notifyObservers();
     }
 
-    Database* db = unregLocalDatabasesM->addDatabase(database);
-    return db;
+    unregLocalDatabasesM->addDatabase(database);
 }
 //-----------------------------------------------------------------------------
 // helper for Root::save()
@@ -304,9 +294,6 @@ void rsAddChildNode(wxXmlNode* parentNode, const wxString nodeName,
 //
 bool Root::save()
 {
-    if (loadingM)
-        return true;
-
     // create directory if it doesn't exist yet.
     wxString dir = wxPathOnly(getFileName());
     if (!wxDirExists(dir))
@@ -319,7 +306,8 @@ bool Root::save()
     wxXmlNode* rn = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("root"));
     doc.SetRoot(rn);
 
-    rsAddChildNode(rn, wxT("nextId"), wxString::Format(wxT("%d"), nextIdM));
+    rsAddChildNode(rn, wxT("nextId"),
+        wxString::Format(wxT("%d"), Database::getUIDGeneratorValue()));
 
     for (SharedServers::iterator its = serversM.begin();
         its != serversM.end(); ++its)
@@ -355,10 +343,7 @@ bool Root::save()
                 (*itdb)->getAuthenticationMode().getConfigValue());
         }
     }
-    if (!doc.Save(getFileName()))
-        return false;
-    dirtyM = false;
-    return true;
+    return doc.Save(getFileName());
 }
 //-----------------------------------------------------------------------------
 template<class T>
@@ -421,11 +406,6 @@ wxString Root::getFileName()
     if (fileNameM.empty())
         fileNameM = config().getDBHFileName();
     return fileNameM;
-}
-//-----------------------------------------------------------------------------
-const unsigned int Root::getNextId()
-{
-    return nextIdM++;
 }
 //-----------------------------------------------------------------------------
 void Root::acceptVisitor(MetadataItemVisitor* visitor)
