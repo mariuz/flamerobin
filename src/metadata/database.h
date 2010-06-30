@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -208,9 +208,12 @@ protected:
     virtual void lockChildren();
     virtual void unlockChildren();
 
+private:
+    // copy constructor implementation removed since it's no longer needed
+    // (Server uses a vector of boost::shared_ptr<Database> now)
+    Database(const Database& rhs);
 public:
     Database();
-    Database(const Database& rhs);
     ~Database();
 
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
@@ -219,6 +222,9 @@ public:
     template<class T>
     MetadataCollection<T>* getCollection()
     {
+        // this method returns nothing, so a missing specialization
+        // will cause a build failure
+/*
         std::vector<MetadataItem *> temp;
         getCollections(temp, false);    // not system
         for (std::vector<MetadataItem *>::iterator it = temp.begin();
@@ -230,6 +236,70 @@ public:
                 return p;
         }
         return 0;
+*/
+    }
+
+    template<>
+    MetadataCollection<Domain>* getCollection()
+    {
+        domainsM.ensureChildrenLoaded();
+        return &domainsM;
+    }
+
+    template<>
+    MetadataCollection<Exception>* getCollection()
+    {
+        exceptionsM.ensureChildrenLoaded();
+        return &exceptionsM;
+    }
+
+    template<>
+    MetadataCollection<Function>* getCollection()
+    {
+        functionsM.ensureChildrenLoaded();
+        return &functionsM;
+    }
+
+    template<>
+    MetadataCollection<Generator>* getCollection()
+    {
+        generatorsM.ensureChildrenLoaded();
+        return &generatorsM;
+    }
+
+    template<>
+    MetadataCollection<Procedure>* getCollection()
+    {
+        proceduresM.ensureChildrenLoaded();
+        return &proceduresM;
+    }
+
+    template<>
+    MetadataCollection<Role>* getCollection()
+    {
+        rolesM.ensureChildrenLoaded();
+        return &rolesM;
+    }
+
+    template<>
+    MetadataCollection<Table>* getCollection()
+    {
+        tablesM.ensureChildrenLoaded();
+        return &tablesM;
+    }
+
+    template<>
+    MetadataCollection<Trigger>* getCollection()
+    {
+        triggersM.ensureChildrenLoaded();
+        return &triggersM;
+    }
+
+    template<>
+    MetadataCollection<View>* getCollection()
+    {
+        viewsM.ensureChildrenLoaded();
+        return &viewsM;
     }
 
     MetadataCollection<Generator>::const_iterator generatorsBegin();

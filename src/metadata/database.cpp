@@ -337,55 +337,6 @@ Database::Database()
         std::bind1st(std::mem_fun(&Database::loadViews), this));
 }
 //-----------------------------------------------------------------------------
-Database::Database(const Database& rhs)
-    : MetadataItem(rhs), databaseM(rhs.databaseM),
-        metadataLoaderM(0), connectedM(false), charsetConverterM(0),
-        databaseCharsetM(rhs.databaseCharsetM), pathM(rhs.pathM),
-        credentialsM(rhs.credentialsM), connectionCredentialsM(0),
-        domainsM(rhs.domainsM), exceptionsM(rhs.exceptionsM),
-        functionsM(rhs.functionsM), generatorsM(rhs.generatorsM),
-        proceduresM(rhs.proceduresM), rolesM(rhs.rolesM), tablesM(rhs.tablesM),
-        sysTablesM(rhs.sysTablesM), triggersM(rhs.triggersM),
-        viewsM(rhs.viewsM), collationsM(rhs.collationsM), idM(rhs.idM),
-        authenticationModeM(rhs.authenticationModeM)
-{
-    if (rhs.connectionCredentialsM)
-        connectionCredentialsM = new Credentials(*rhs.connectionCredentialsM);
-
-    domainsM.setParent(this);
-    domainsM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadDomains), this));
-    exceptionsM.setParent(this);
-    exceptionsM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadExceptions), this));
-    functionsM.setParent(this);
-    functionsM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadFunctions), this));
-    generatorsM.setParent(this);
-    generatorsM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadGenerators), this));
-    proceduresM.setParent(this);
-    proceduresM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadProcedures), this));
-    rolesM.setParent(this);
-    rolesM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadRoles), this));
-    tablesM.setParent(this);
-    tablesM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadTables), this));
-
-    sysTablesM.setParent(this);
-    sysTablesM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadSystemTables), this));
-
-    triggersM.setParent(this);
-    triggersM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadTriggers), this));
-    viewsM.setParent(this);
-    viewsM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadViews), this));
-}
-//-----------------------------------------------------------------------------
 Database::~Database()
 {
     resetCredentials();
