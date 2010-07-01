@@ -140,9 +140,9 @@ void CreateIndexDialog::setControlsProperties()
     tableM->ensureChildrenLoaded();
     wxArrayString colNames;
     colNames.Alloc(tableM->getColumnCount());
-    MetadataCollection<Column>::const_iterator it;
+    RelationColumns::const_iterator it;
     for (it = tableM->begin(); it != tableM->end(); ++it)
-        colNames.Add((*it).getName_());
+        colNames.Add((*it)->getName_());
     listbox_columns->Set(colNames);
 }
 //-----------------------------------------------------------------------------

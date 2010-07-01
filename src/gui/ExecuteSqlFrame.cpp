@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -2992,14 +2992,12 @@ bool DropColumnHandler::handleURI(URI& uri)
     Table *t = 0;
     if (uri.action == wxT("drop_field"))
     {
-        Column *cp = dynamic_cast<Column *>(c);
-        if (cp)
+        if (Column *cp = dynamic_cast<Column *>(c))
             t = cp->getTable();
     }
     else
     {
-        Constraint *cs = dynamic_cast<Constraint *>(c);
-        if (cs)
+        if (Constraint *cs = dynamic_cast<Constraint *>(c))
             t = cs->getTable();
     }
     if (!t)

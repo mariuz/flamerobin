@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -214,33 +214,27 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
                 databaseM->findByNameAndType(ntTable, parent.get()));
             if (r)
             {
-                for (MetadataCollection<Column>::iterator i = r->begin();
-                    i != r->end(); ++i)
+                r->ensureChildrenLoaded();
+                if (SharedColumnPtr c = r->findColumn(child.get()))
                 {
-                    if ((*i).getName_() == child.get())
-                    {
-                        objectTypeM = ntColumn;
-                        objectM = &(*i);
-                        return;
-                    }
+                    objectTypeM = ntColumn;
+                    objectM = c.get();
+                    return;
                 }
             }
         }
         if (tokensM[2] == kwPARAMETER)
         {
-            Procedure *r = dynamic_cast<Procedure *>(
+            Procedure* p = dynamic_cast<Procedure *>(
                 databaseM->findByNameAndType(ntProcedure, parent.get()));
-            if (r)
+            if (p)
             {
-                for (MetadataCollection<Parameter>::iterator i = r->begin();
-                    i != r->end(); ++i)
+                p->ensureChildrenLoaded();
+                if (SharedParameterPtr par = p->findParameter(child.get()))
                 {
-                    if ((*i).getName_() == child.get())
-                    {
-                        objectTypeM = ntParameterInput;
-                        objectM = &(*i);
-                        return;
-                    }
+                    objectTypeM = ntParameterInput;
+                    objectM = par.get();
+                    return;
                 }
             }
         }

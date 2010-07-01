@@ -356,15 +356,11 @@ void DataGridTable::getTableNames(wxArrayString& tables)
             // check if table's column is 'real'
             wxString cn(std2wxIdentifier(statementM->ColumnName(i + 1),
                 databaseM->getCharsetConverter()));
-            for (MetadataCollection<Column>::iterator it = t->begin();
-                it != t->end(); ++it)
+            SharedColumnPtr c = t->findColumn(cn);
+            if (c && c->getComputedSource().empty())
             {
-                if ((*it).getName_() == cn
-                    && (*it).getComputedSource().IsEmpty())
-                {
-                    tables.Add(tn);
-                    break;
-                }
+                tables.Add(tn);
+                break;
             }
         }
     }
@@ -377,10 +373,12 @@ void DataGridTable::getFields(const wxString& table,
     int colCount = getStatementColCount();
     if (colCount == 0)
         return;
-    Table *t = dynamic_cast<Table *>(databaseM->
-        findRelation(Identifier(table)));
+    Table *t = dynamic_cast<Table *>(databaseM->findRelation(
+        Identifier(table)));
     if (!t)
         return;
+    t->ensureChildrenLoaded();
+
     typedef std::map<Column *, std::pair<ResultsetColumnDef*,int> > TempMap;
     TempMap fields;
     for (int i = 0; i < colCount; i++)
@@ -389,19 +387,18 @@ void DataGridTable::getFields(const wxString& table,
             databaseM->getCharsetConverter()));
         if (tn != table)
             continue;
-        wxString fn(std2wxIdentifier(statementM->ColumnName(i + 1),
+        wxString cn(std2wxIdentifier(statementM->ColumnName(i + 1),
             databaseM->getCharsetConverter()));
         // check if field exists in the table (and is not computed)
-        for (MetadataCollection<Column>::iterator it = t->begin();
-            it != t->end(); ++it)
+        t->ensureChildrenLoaded();
+        if (SharedColumnPtr c = t->findColumn(cn))
         {
-            if ((*it).getName_() == fn && (*it).getComputedSource().IsEmpty())
+            if (c->getComputedSource().empty())
             {
-                // field found in table and not computed
-                if (fields.find(&(*it)) == fields.end())
+                if (fields.find(c.get()) == fields.end())
                 {
-                    std::pair<ResultsetColumnDef *, int>
-                        p(rowsM.getColumnDef(i), i);
+                    std::pair<ResultsetColumnDef *, int> p(
+                        rowsM.getColumnDef(i), i);
                     fields.insert
                     (
                         std::pair
@@ -409,11 +406,11 @@ void DataGridTable::getFields(const wxString& table,
                             Column *,
                             std::pair<ResultsetColumnDef *, int>
                         >
-                        (&(*it), p)
+                        (c.get(), p)
                     );
                 }
-                break;
             }
+            break;
         }
     }
 
@@ -455,19 +452,7 @@ wxString DataGridTable::GetValue(int row, int col)
         return wxT("N/A");
     if (rowsM.isFieldNull(row, col))
         return wxT("[null]");
-    wxString cellValue(rowsM.getFieldValue(row, col));
-
-#if 0
-    // return first line of multi-line string only
-    int nl = cellValue.Find(wxT("\n"));
-    if (nl != wxNOT_FOUND)
-    {
-        cellValue.Truncate(nl);
-        cellValue.Trim();
-        cellValue += wxT(" [...]"); // and show that there is more data...
-    }
-#endif
-    return cellValue;
+    return rowsM.getFieldValue(row, col);
 }
 //-----------------------------------------------------------------------------
 void DataGridTable::initialFetch(bool readonly)

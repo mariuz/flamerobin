@@ -31,27 +31,31 @@
 
 #include <vector>
 
+#include <boost/shared_ptr.hpp>
+
 #include "metadata/collection.h"
 #include "metadata/column.h"
 #include "metadata/constraints.h"
 #include "metadata/metadataitem.h"
 #include "metadata/privilege.h"
 #include "metadata/trigger.h"
+
+typedef boost::shared_ptr<Column> SharedColumnPtr;
+typedef std::vector<SharedColumnPtr> RelationColumns;
 //-----------------------------------------------------------------------------
 class Relation: public MetadataItem
 {
-protected:
+private:
     int relationTypeM;
     wxString ownerM;
-
+protected:
     void getDependentChecks(std::vector<CheckConstraint>& checks);
     void getDependentViews(std::vector<Relation*>& views,
         const wxString& forColumn = wxT(""));
 
-    MetadataCollection<Column> columnsM;
+    RelationColumns columnsM;
     std::vector<Privilege> privilegesM;
 
-    virtual void doSetChildrenLoaded(bool loaded);
     virtual void loadProperties();
     virtual void loadChildren();
     virtual void lockChildren();
@@ -66,19 +70,19 @@ protected:
     virtual bool addRdbKeyToSelect();
 public:
     Relation();
-    Relation(const Relation& rhs);
 
     wxString getOwner();
     int getRelationType();
 
     wxString getSelectStatement();
 
-    MetadataCollection<Column>::iterator begin();
-    MetadataCollection<Column>::iterator end();
-    MetadataCollection<Column>::const_iterator begin() const;
-    MetadataCollection<Column>::const_iterator end() const;
+    RelationColumns::iterator begin();
+    RelationColumns::iterator end();
+    RelationColumns::const_iterator begin() const;
+    RelationColumns::const_iterator end() const;
 
     size_t getColumnCount() const;
+    SharedColumnPtr findColumn(const wxString& name) const;
 
     wxString getRebuildSql(const wxString& forColumn = wxT(""));
     std::vector<Privilege>* getPrivileges();
@@ -88,4 +92,3 @@ public:
 };
 //-----------------------------------------------------------------------------
 #endif // FR_RELATION_H
-

@@ -346,13 +346,6 @@ bool Root::save()
     return doc.Save(getFileName());
 }
 //-----------------------------------------------------------------------------
-template<class T>
-struct MetadataItemFromShared
-{
-public:
-    MetadataItem* operator()(boost::shared_ptr<T> pt) { return pt.get(); };
-};
-//-----------------------------------------------------------------------------
 bool Root::getChildren(std::vector<MetadataItem *>& temp)
 {
     if (serversM.empty())

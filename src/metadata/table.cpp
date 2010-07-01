@@ -115,13 +115,13 @@ wxString Table::getProcedureTemplate()
 
     Database* db = getDatabase(wxT("Table::getProcedureTemplate"));
     wxString dbcharset = db->getDatabaseCharset();
-    for (MetadataCollection<Column>::iterator i = columnsM.begin();
-         i != columnsM.end(); ++i)
+    for (RelationColumns::iterator i = columnsM.begin();
+        i != columnsM.end(); ++i)
     {
         wxString datatype;
-        Domain *d = (*i).getDomain();
+        Domain *d = (*i)->getDomain();
         if (!d)
-            datatype = (*i).getDatatype();
+            datatype = (*i)->getDatatype();
         else
         {
             datatype = d->getDatatypeAsString();
@@ -136,9 +136,9 @@ wxString Table::getProcedureTemplate()
             collist += wxT(", ");
             parlist += wxT(",");
         }
-        parlist += wxT("\n\t") + (*i).getQuotedName() + wxT(" ") + datatype;
-        collist += wxT("a.") + (*i).getQuotedName();
-        valist += wxT(":") + (*i).getQuotedName();
+        parlist += wxT("\n\t") + (*i)->getQuotedName() + wxT(" ") + datatype;
+        collist += wxT("a.") + (*i)->getQuotedName();
+        valist += wxT(":") + (*i)->getQuotedName();
     }
     sql += parlist;
     sql += wxT(")\nAS\nBEGIN\n\tFOR SELECT ") + collist + wxT("\n\t    FROM ")
@@ -152,25 +152,25 @@ wxString Table::getInsertStatement()
     ensureChildrenLoaded();
     wxString sql = wxT("INSERT INTO ") + getQuotedName() + wxT(" (");
     wxString collist, valist;
-    for (MetadataCollection<Column>::const_iterator i = columnsM.begin();
-         i != columnsM.end(); ++i)
+    for (RelationColumns::const_iterator i = columnsM.begin();
+        i != columnsM.end(); ++i)
     {
-        if (!(*i).getComputedSource().IsEmpty())
+        if (!(*i)->getComputedSource().empty())
             continue;
         if (!collist.empty())
         {
             valist += wxT(", \n");
             collist += wxT(", ");
         }
-        collist += (*i).getQuotedName();
+        collist += (*i)->getQuotedName();
 
-        if (!(*i).isNullable() && (!(*i).hasDefault()))
+        if (!(*i)->isNullable() && (!(*i)->hasDefault()))
             valist += wxT("*");
 
-        if (!(*i).hasDefault())
-            valist += (*i).getName_();
+        if (!(*i)->hasDefault())
+            valist += (*i)->getName_();
         else
-            valist += (*i).getDefault();
+            valist += (*i)->getDefault();
 
     }
     sql += collist + wxT(")\n VALUES (\n") + valist + wxT("\n)");

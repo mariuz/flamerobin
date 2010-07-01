@@ -29,23 +29,27 @@
 #define FR_PROCEDURE_H
 
 #include <vector>
+
+#include <boost/shared_ptr.hpp>
+
 #include "metadata/metadataitem.h"
 #include "metadata/parameter.h"
 #include "metadata/privilege.h"
+
+typedef boost::shared_ptr<Parameter> SharedParameterPtr;
+typedef std::vector<SharedParameterPtr> ProcedureParameters;
 //-----------------------------------------------------------------------------
-class Procedure: public MetadataItem
+class Procedure : public MetadataItem
 {
 private:
     std::vector<Privilege> privilegesM;
-    MetadataCollection<Parameter> parametersM;
+    ProcedureParameters parametersM;
 protected:
-    virtual void doSetChildrenLoaded(bool loaded);
     virtual void loadChildren();
     virtual void lockChildren();
     virtual void unlockChildren();
 public:
     Procedure();
-    Procedure(const Procedure& rhs);
 
     wxString getCreateSqlTemplate() const;   // overrides MetadataItem::getCreateSqlTemplate()
 
@@ -53,12 +57,13 @@ public:
 
     wxString getExecuteStatement();
 
-    MetadataCollection<Parameter>::iterator begin();
-    MetadataCollection<Parameter>::iterator end();
-    MetadataCollection<Parameter>::const_iterator begin() const;
-    MetadataCollection<Parameter>::const_iterator end() const;
+    ProcedureParameters::iterator begin();
+    ProcedureParameters::iterator end();
+    ProcedureParameters::const_iterator begin() const;
+    ProcedureParameters::const_iterator end() const;
 
     size_t getParamCount() const;
+    SharedParameterPtr findParameter(const wxString& name) const;
 
     wxString getOwner();
     wxString getSource();

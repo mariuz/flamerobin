@@ -41,7 +41,8 @@ private:
     wxString sourceM, computedSourceM, collationM, defaultM;
 public:
     Column();
-    void Init(bool notnull, wxString source, wxString computedSource,
+
+    void initialize(bool notnull, wxString source, wxString computedSource,
         wxString collation, wxString defaultValue, bool hasDefault);
     wxString getDatatype(bool useConfig = true);
     virtual const wxString getTypeName() const;

@@ -48,22 +48,49 @@
 #include "domain.h"
 #include "MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
-//! new undefined column
 Column::Column()
     : MetadataItem(ntColumn)
 {
 }
 //-----------------------------------------------------------------------------
-//! initialize properties
-void Column::Init(bool notnull, wxString source, wxString computedSource,
+void Column::initialize(bool notnull, wxString source, wxString computedSource,
     wxString collation, wxString defaultValue, bool hasDefault)
 {
-    notnullM = notnull;
-    sourceM = source.Strip(wxString::both);
-    computedSourceM = computedSource;
-    collationM = collation.Strip(wxString::both);
-    defaultM = defaultValue;
-    hasDefaultM = hasDefault;
+    bool changed = false;
+    if (notnullM != notnull)
+    {
+        notnullM = notnull;
+        changed = true;
+    }
+    source = source.Strip(wxString::both);
+    if (sourceM != source)
+    {
+        sourceM = source;
+        changed = true;
+    }
+    if (computedSourceM != computedSource)
+    {
+        computedSourceM = computedSource;
+        changed = true;
+    }
+    collation = collation.Strip(wxString::both);
+    if (collationM != collation)
+    {
+        collationM = collation.Strip(wxString::both);
+        changed = true;
+    }
+    if (defaultM != defaultValue)
+    {
+        defaultM = defaultValue;
+        changed = true;
+    }
+    if (hasDefaultM != hasDefault)
+    {
+        hasDefaultM = hasDefault;
+        changed = true;
+    }
+    if (changed)
+        notifyObservers();
 }
 //-----------------------------------------------------------------------------
 bool Column::isNullable(bool checkDomain) const
@@ -72,8 +99,7 @@ bool Column::isNullable(bool checkDomain) const
         return false;
     if (!checkDomain)
         return true;
-    Domain *d = getDomain();
-    if (d)
+    if (Domain* d = getDomain())
         return d->isNullable();
     return true;
 }
@@ -84,8 +110,7 @@ bool Column::hasDefault(bool checkDomain) const
         return true;
     if (!checkDomain)
         return true;
-    Domain *d = getDomain();
-    if (d)
+    if (Domain* d = getDomain())
         return d->hasDefault();
     return false;
 }
@@ -98,9 +123,12 @@ bool Column::isPrimaryKey() const
     ColumnConstraint *key = t->getPrimaryKey();
     if (!key)
         return false;
-    for (ColumnConstraint::const_iterator it = key->begin(); it != key->end(); ++it)
+    for (ColumnConstraint::const_iterator it = key->begin(); it != key->end(); 
+        ++it)
+    {
         if ((*it) == getName_())
             return true;
+    }
     return false;
 }
 //-----------------------------------------------------------------------------
@@ -142,12 +170,8 @@ wxString Column::getDatatype(bool useConfig)
         return computedSourceM;
 
     wxString ret;
-    Domain *d = getDomain();
-    wxString datatype;
-    if (d)
-        datatype = d->getDatatypeAsString();
-    else
-        datatype = sourceM;
+    Domain* d = getDomain();
+    wxString datatype(d ? d->getDatatypeAsString() : sourceM);
 
     enum
     {

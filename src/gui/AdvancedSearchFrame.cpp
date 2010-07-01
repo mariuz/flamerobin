@@ -618,11 +618,11 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
                         bool found = false;
                         if (r)
                         {
-                            MetadataCollection<Column>::iterator it;
+                            RelationColumns::iterator it;
                             for (it = r->begin(); it != r->end(); ++it)
                             {
                                 if (match(CriteriaItem::ctField,
-                                    it->getName_()))
+                                    (*it)->getName_()))
                                 {
                                     found = true;
                                     break;
@@ -631,11 +631,11 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
                         }
                         if (p)
                         {
-                            MetadataCollection<Parameter>::iterator it;
-                            for (it = p->begin(); it != p->end(); ++it)
+                            for (ProcedureParameters::iterator it = p->begin();
+                                it != p->end(); ++it)
                             {
                                 if (match(CriteriaItem::ctField,
-                                    it->getName_()))
+                                    (*it)->getName_()))
                                 {
                                     found = true;
                                     break;

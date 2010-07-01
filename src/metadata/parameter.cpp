@@ -38,25 +38,36 @@
     #pragma hdrstop
 #endif
 
-#include <sstream>
-
 #include "core/Visitor.h"
-#include "metadata/column.h"
-#include "metadata/domain.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/parameter.h"
-//-----------------------------------------------------------------------------
-Parameter::Parameter(wxString source, int parameterType, int mechanism)
-    : Column(), parameterMechanismM(mechanism)
-{
-    Column::Init(true, source, wxT(""), wxT(""), wxT(""), false);
-    setType((parameterType == 0) ? ntParameterInput : ntParameterOutput);
-}
 //-----------------------------------------------------------------------------
 Parameter::Parameter()
     : Column()
 {
     setType(ntParameterInput);
+}
+//-----------------------------------------------------------------------------
+void Parameter::initialize(wxString source, int parameterType, int mechanism)
+{
+    SubjectLocker lock(this);
+
+    Column::initialize(false, source, wxEmptyString, wxEmptyString,
+        wxEmptyString, false);
+    bool changed = false;
+    if (parameterMechanismM != mechanism)
+    {
+        parameterMechanismM = mechanism;
+        changed= true;
+    }
+    NodeType type = parameterType == 0 ? ntParameterInput : ntParameterOutput;
+    if (getType() != type)
+    {
+        setType(type);
+        changed= true;
+    }
+    if (changed)
+        notifyObservers();
 }
 //-----------------------------------------------------------------------------
 bool Parameter::isOutputParameter() const

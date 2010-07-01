@@ -79,8 +79,7 @@ public:
     // returns *connected* service
     bool getService(IBPP::Service& svc, ProgressIndicator* progressind,
         bool sysdba);
-    void setServiceUser(const wxString& user);
-    void setServicePassword(const wxString& pass);
+    void setServiceCredentials(const wxString& user, const wxString& pass);
     void setServiceSysdbaPassword(const wxString& pass);
 
     UserList* getUsers(ProgressIndicator* progressind);

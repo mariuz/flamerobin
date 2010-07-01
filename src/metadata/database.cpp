@@ -853,11 +853,11 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                 for (MetadataCollection<Table>::iterator it = tablesM.begin();
                     it != tablesM.end(); ++it)
                 {
-                    for (MetadataCollection<Column>::iterator itColumn = (*it).begin();
+                    for (RelationColumns::iterator itColumn = (*it).begin();
                         itColumn != (*it).end(); ++itColumn)
                     {
-                        if ((*itColumn).getSource() == stm.getName())
-                            (*itColumn).invalidate();
+                        if ((*itColumn)->getSource() == stm.getName())
+                            (*itColumn)->invalidate();
                     }
                 }
                 break;

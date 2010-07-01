@@ -34,13 +34,15 @@
 
 class Parameter: public Column
 {
-protected:
+private:
     int parameterMechanismM;    // -1 none, 0 domain, 1 type_of
 public:
     Parameter();
-    Parameter(wxString source, int parameterType, int mechanism);
+
+    void initialize(wxString source, int parameterType, int mechanism);
     int getMechanism() const;
     bool isOutputParameter() const;
+
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------

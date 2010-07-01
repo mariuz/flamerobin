@@ -56,23 +56,9 @@
 #include "metadata/procedure.h"
 #include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------
-typedef MetadataCollection <Parameter>::const_iterator ParameterCollCIter;
-//-----------------------------------------------------------------------------
 Procedure::Procedure()
     : MetadataItem(ntProcedure)
 {
-    parametersM.setParent(this);
-}
-//-----------------------------------------------------------------------------
-Procedure::Procedure(const Procedure& rhs)
-    : MetadataItem(rhs), parametersM(rhs.parametersM)
-{
-    parametersM.setParent(this);
-}
-//-----------------------------------------------------------------------------
-void Procedure::doSetChildrenLoaded(bool loaded)
-{
-    parametersM.setChildrenLoaded(loaded);
 }
 //-----------------------------------------------------------------------------
 void Procedure::loadChildren()
@@ -88,6 +74,7 @@ void Procedure::loadChildren()
     // observers can possibly use the same transaction
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(this);
+    wxMBConv* converter = d->getCharsetConverter();
 
     std::string sql(
         "select p.rdb$parameter_name, p.rdb$field_source, p.rdb$parameter_type"
@@ -101,45 +88,63 @@ void Procedure::loadChildren()
             " order by p.rdb$parameter_type, rdb$PARAMETER_number ";
 
     IBPP::Statement st1 = loader->getStatement(sql);
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+    st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
 
+    ProcedureParameters parameters;
     while (st1->Fetch())
     {
         std::string s;
         st1->Get(1, s);
-        wxString column_name(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString param_name(std2wxIdentifier(s, converter));
         st1->Get(2, s);
-        wxString source(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString source(std2wxIdentifier(s, converter));
 
         short partype, mechanism = -1;
         st1->Get(3, &partype);
         if (!st1->IsNull(4))
             st1->Get(4, mechanism);
 
-        Parameter p(source, partype, mechanism);
-        p.setName_(column_name);
-        Parameter* pp = parametersM.add(p);
-        pp->setParent(this);
+        SharedParameterPtr par = findParameter(param_name);
+        if (!par)
+        {
+            par.reset(new Parameter());
+            for (unsigned i = getLockCount(); i > 0; i--)
+                par->lockSubject();
+            par->setProperties(this, param_name, ntParameterInput);
+        }
+        parameters.push_back(par);
+        par->initialize(source, partype, mechanism);
     }
 
     setChildrenLoaded(true);
-    notifyObservers();
+    if (parametersM != parameters)
+    {
+        parametersM.swap(parameters);
+        notifyObservers();
+    }
 }
 //-----------------------------------------------------------------------------
 bool Procedure::getChildren(std::vector<MetadataItem *>& temp)
 {
-    return parametersM.getChildren(temp);
+    if (parametersM.empty())
+        return false;
+    MetadataItemFromShared<Parameter> getMetadataItem;
+    std::transform(parametersM.begin(), parametersM.end(),
+        std::back_inserter(temp), getMetadataItem);
+    return true;
 }
 //-----------------------------------------------------------------------------
 void Procedure::lockChildren()
 {
-    parametersM.lockSubject();
+    std::for_each(parametersM.begin(), parametersM.end(),
+        boost::mem_fn(&Parameter::lockSubject));
 }
 //-----------------------------------------------------------------------------
 void Procedure::unlockChildren()
 {
-    parametersM.unlockSubject();
+    std::for_each(parametersM.begin(), parametersM.end(),
+        boost::mem_fn(&Parameter::unlockSubject));
 }
 //-----------------------------------------------------------------------------
 wxString Procedure::getExecuteStatement()
@@ -147,16 +152,16 @@ wxString Procedure::getExecuteStatement()
     ensureChildrenLoaded();
 
     wxArrayString columns, params;
-    columns.Alloc(parametersM.getChildrenCount());
-    params.Alloc(parametersM.getChildrenCount());
+    columns.Alloc(parametersM.size());
+    params.Alloc(parametersM.size());
 
-    for (ParameterCollCIter it = parametersM.begin(); it != parametersM.end();
-        ++it)
+    for (ProcedureParameters::iterator it = parametersM.begin();
+        it != parametersM.end(); ++it)
     {
-        if ((*it).isOutputParameter())
-            columns.Add((*it).getQuotedName());
+        if ((*it)->isOutputParameter())
+            columns.Add((*it)->getQuotedName());
         else
-            params.Add((*it).getQuotedName());
+            params.Add((*it)->getQuotedName());
     }
 
     StatementBuilder sb;
@@ -195,7 +200,7 @@ wxString Procedure::getExecuteStatement()
     return sb;
 }
 //-----------------------------------------------------------------------------
-MetadataCollection<Parameter>::iterator Procedure::begin()
+ProcedureParameters::iterator Procedure::begin()
 {
     // please - don't load here
     // this code is used to get columns we want to alert about changes
@@ -204,25 +209,36 @@ MetadataCollection<Parameter>::iterator Procedure::begin()
     return parametersM.begin();
 }
 //-----------------------------------------------------------------------------
-MetadataCollection<Parameter>::iterator Procedure::end()
+ProcedureParameters::iterator Procedure::end()
 {
     // please see comment for begin()
     return parametersM.end();
 }
 //-----------------------------------------------------------------------------
-MetadataCollection<Parameter>::const_iterator Procedure::begin() const
+ProcedureParameters::const_iterator Procedure::begin() const
 {
     return parametersM.begin();
 }
 //-----------------------------------------------------------------------------
-MetadataCollection<Parameter>::const_iterator Procedure::end() const
+ProcedureParameters::const_iterator Procedure::end() const
 {
     return parametersM.end();
 }
 //-----------------------------------------------------------------------------
+SharedParameterPtr Procedure::findParameter(const wxString& name) const
+{
+    for (ProcedureParameters::const_iterator it = parametersM.begin();
+        it != parametersM.end(); ++it)
+    {
+        if ((*it)->getName_() == name)
+            return *it;
+    }
+    return SharedParameterPtr();
+}
+//-----------------------------------------------------------------------------
 size_t Procedure::getParamCount() const
 {
-    return parametersM.getChildrenCount();
+    return parametersM.size();
 }
 //-----------------------------------------------------------------------------
 wxString Procedure::getOwner()
@@ -262,32 +278,32 @@ wxString Procedure::getDefinition()
 {
     ensureChildrenLoaded();
     wxString collist, parlist;
-    MetadataCollection <Parameter>::const_iterator lastInput, lastOutput;
-    for (MetadataCollection <Parameter>::const_iterator it =
-        parametersM.begin(); it != parametersM.end(); ++it)
+    ProcedureParameters::const_iterator lastInput, lastOutput;
+    for (ProcedureParameters::const_iterator it = parametersM.begin();
+        it != parametersM.end(); ++it)
     {
-        if ((*it).isOutputParameter())
+        if ((*it)->isOutputParameter())
             lastOutput = it;
         else
             lastInput = it;
     }
-    for (MetadataCollection <Parameter>::const_iterator it =
+    for (ProcedureParameters::const_iterator it =
         parametersM.begin(); it != parametersM.end(); ++it)
     {
         // No need to quote domains, as currently only regular datatypes can be
         // used for SP parameters
-        if ((*it).isOutputParameter())
+        if ((*it)->isOutputParameter())
         {
-            collist += wxT("    ") + (*it).getQuotedName() + wxT(" ")
-                + (*it).getDomain()->getDatatypeAsString();
+            collist += wxT("    ") + (*it)->getQuotedName() + wxT(" ")
+                + (*it)->getDomain()->getDatatypeAsString();
             if (it != lastOutput)
                 collist += wxT(",");
             collist += wxT("\n");
         }
         else
         {
-            parlist += wxT("    ") + (*it).getQuotedName() + wxT(" ")
-                + (*it).getDomain()->getDatatypeAsString();
+            parlist += wxT("    ") + (*it)->getQuotedName() + wxT(" ")
+                + (*it)->getDomain()->getDatatypeAsString();
             if (it != lastInput)
                 parlist += wxT(",");
             parlist += wxT("\n");
@@ -312,13 +328,13 @@ wxString Procedure::getAlterSql(bool full)
     if (!parametersM.empty())
     {
         wxString input, output;
-        for (MetadataCollection <Parameter>::const_iterator it =
-            parametersM.begin(); it != parametersM.end(); ++it)
+        for (ProcedureParameters::const_iterator it = parametersM.begin();
+            it != parametersM.end(); ++it)
         {
             wxString charset;
-            wxString param = (*it).getQuotedName() + wxT(" ");
-            wxString collate = (*it).getCollation();
-            Domain* dm = (*it).getDomain();
+            wxString param = (*it)->getQuotedName() + wxT(" ");
+            wxString collate = (*it)->getCollation();
+            Domain* dm = (*it)->getDomain();
             if (dm)
             {
                 if (dm->isSystem()) // autogenerated domain -> use datatype
@@ -337,19 +353,19 @@ wxString Procedure::getAlterSql(bool full)
                 }
                 else
                 {
-                    if ((*it).getMechanism() == 1)
+                    if ((*it)->getMechanism() == 1)
                         param += wxT("TYPE OF ") + dm->getQuotedName();
                     else
                         param += dm->getQuotedName();
                 }
             }
             else
-                param += (*it).getSource();
+                param += (*it)->getSource();
 
             if (!collate.IsEmpty())
                 charset += wxT(" COLLATE ") + collate;
 
-            if ((*it).isOutputParameter())
+            if ((*it)->isOutputParameter())
             {
                 if (output.empty())
                     output += wxT("\nRETURNS (\n    ");
@@ -405,10 +421,10 @@ void Procedure::checkDependentProcedures()
             ci != fields.end(); ++ci)
         {
             bool found = false;
-            for (MetadataCollection<Parameter>::iterator i2 = begin();
+            for (ProcedureParameters::iterator i2 = begin();
                 i2 != end(); ++i2)
             {
-                if ((*i2).getName_() == (*ci))
+                if ((*i2)->getName_() == (*ci))
                 {
                     found = true;
                     break;
@@ -456,6 +472,7 @@ std::vector<Privilege>* Procedure::getPrivileges()
     // observers can possibly use the same transaction
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(this);
+    wxMBConv* converter = d->getCharsetConverter();
 
     privilegesM.clear();
 
@@ -466,7 +483,7 @@ std::vector<Privilege>* Procedure::getPrivileges()
         "where RDB$RELATION_NAME = ? and rdb$object_type = 5 "
         "order by rdb$user, rdb$user_type, rdb$privilege"
     );
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+    st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
     std::string lastuser;
     int lasttype = -1;
@@ -484,15 +501,15 @@ std::vector<Privilege>* Procedure::getPrivileges()
         st1->Get(6, field);
         if (!pr || user != lastuser || usertype != lasttype)
         {
-            Privilege p(this, std2wxIdentifier(user, d->getCharsetConverter()),
+            Privilege p(this, std2wxIdentifier(user, converter),
                 usertype);
             privilegesM.push_back(p);
             pr = &privilegesM.back();
             lastuser = user;
             lasttype = usertype;
         }
-        pr->addPrivilege(privilege[0],
-            std2wx(grantor, d->getCharsetConverter()), grantoption == 1);
+        pr->addPrivilege(privilege[0], std2wx(grantor, converter),
+            grantoption == 1);
     }
     return &privilegesM;
 }

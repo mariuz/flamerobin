@@ -388,13 +388,12 @@ void CreateDDLVisitor::visitProcedure(Procedure& p)
              << description << wxT("'\n  where RDB$PROCEDURE_NAME = '")
              << name << wxT("';\n");
     }
-    for (MetadataCollection<Parameter>::iterator it = p.begin();
-        it != p.end(); ++it)
+    for (ProcedureParameters::iterator it = p.begin(); it != p.end(); ++it)
     {
-        wxString description = (*it).getDescription();
+        wxString description = (*it)->getDescription();
         if (!description.IsEmpty())
         {
-            wxString pname((*it).getName_());
+            wxString pname((*it)->getName_());
             description.Replace(wxT("'"), wxT("''"));
             pname.Replace(wxT("'"), wxT("''"));
             temp <<
@@ -475,11 +474,11 @@ void CreateDDLVisitor::visitTable(Table& t)
     }
     preSqlM += wxT("\n(\n  ");
     t.ensureChildrenLoaded();
-    for (MetadataCollection<Column>::iterator it=t.begin(); it!=t.end(); ++it)
+    for (RelationColumns::iterator it=t.begin(); it!=t.end(); ++it)
     {
-        if (it != t.begin() && (*it).getComputedSource().IsEmpty())
+        if (it != t.begin() && (*it)->getComputedSource().empty())
             preSqlM += wxT(",\n  ");
-        visitColumn(*it);
+        visitColumn(*(*it).get());
     }
 
     std::vector<Index> *ix = t.getIndices();
@@ -653,13 +652,13 @@ void CreateDDLVisitor::visitView(View& v)
     }
 
     // description for columns
-    for (MetadataCollection<Column>::iterator it = v.begin(); it != v.end();
+    for (RelationColumns::iterator it = v.begin(); it != v.end();
         ++it)
     {
-        wxString description = (*it).getDescription();
+        wxString description = (*it)->getDescription();
         if (!description.IsEmpty())
         {
-            wxString cname((*it).getName_());
+            wxString cname((*it)->getName_());
             description.Replace(wxT("'"), wxT("''"));
             cname.Replace(wxT("'"), wxT("''"));
             postSqlM <<

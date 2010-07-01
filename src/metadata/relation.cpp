@@ -52,16 +52,9 @@
 Relation::Relation()
     : MetadataItem()
 {
-    columnsM.setParent(this);
 }
 //-----------------------------------------------------------------------------
-Relation::Relation(const Relation& rhs)
-    : MetadataItem(rhs), columnsM(rhs.columnsM)
-{
-    columnsM.setParent(this);
-}
-//-----------------------------------------------------------------------------
-MetadataCollection<Column>::iterator Relation::begin()
+RelationColumns::iterator Relation::begin()
 {
     // please - don't load here
     // this code is used to get columns we want to alert about changes
@@ -70,25 +63,36 @@ MetadataCollection<Column>::iterator Relation::begin()
     return columnsM.begin();
 }
 //-----------------------------------------------------------------------------
-MetadataCollection<Column>::iterator Relation::end()
+RelationColumns::iterator Relation::end()
 {
     // please see comment for begin()
     return columnsM.end();
 }
 //-----------------------------------------------------------------------------
-MetadataCollection<Column>::const_iterator Relation::begin() const
+RelationColumns::const_iterator Relation::begin() const
 {
     return columnsM.begin();
 }
 //-----------------------------------------------------------------------------
-MetadataCollection<Column>::const_iterator Relation::end() const
+RelationColumns::const_iterator Relation::end() const
 {
     return columnsM.end();
 }
 //-----------------------------------------------------------------------------
+SharedColumnPtr Relation::findColumn(const wxString& name) const
+{
+    for (RelationColumns::const_iterator it = columnsM.begin();
+        it != columnsM.end(); ++it)
+    {
+        if ((*it)->getName_() == name)
+            return *it;
+    }
+    return SharedColumnPtr();
+}
+//-----------------------------------------------------------------------------
 size_t Relation::getColumnCount() const
 {
-    return columnsM.getChildrenCount();
+    return columnsM.size();
 }
 //-----------------------------------------------------------------------------
 void Relation::loadProperties()
@@ -198,7 +202,7 @@ void Relation::loadChildren()
     st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
 
-    MetadataCollection<Column>::iterator itInsert = columnsM.begin();
+    RelationColumns columns;
     while (st1->Fetch())
     {
         std::string s, coll;
@@ -220,35 +224,25 @@ void Relation::loadChildren()
             defaultSrc.Trim(false).Remove(0, 8);
         }
 
-        // reuse existing Column objects if possible
-        // we need to maintain an iterator for inserting new or existing Column
-        // objects at the proper location
-        Column* c = 0;
-        MetadataCollection<Column>::iterator itCurrent = columnsM.getPosition(
-            fname);
-        if (itCurrent != columnsM.end())
+        SharedColumnPtr col = findColumn(fname);
+        if (!col)
         {
-            c = &(*itCurrent);
-            // position may have changed, for example if column at itInsert
-            // has been deleted
-            columnsM.moveItem(itCurrent, itInsert);
+            col.reset(new Column());
+            for (unsigned i = getLockCount(); i > 0; i--)
+                col->lockSubject();
+            col->setProperties(this, fname, ntColumn);
         }
-        else
-        {
-            c = columnsM.insert(itInsert, this, fname, ntColumn);
-        }
-        c->Init(!st1->IsNull(2), source,  computedSrc, collation,
+        columns.push_back(col);
+        col->initialize(!st1->IsNull(2), source,  computedSrc, collation,
             defaultSrc, !st1->IsNull(6));
-
-        if (itInsert != columnsM.end())
-            ++itInsert;
     }
 
-    // all remaining Column objects are no longer valid, "Kill 'Em All"
-    columnsM.remove(itInsert, columnsM.end());
-
     setChildrenLoaded(true);
-    notifyObservers();
+    if (columnsM != columns)
+    {
+        columnsM.swap(columns);
+        notifyObservers();
+    }
 }
 //-----------------------------------------------------------------------------
 //! holds all views + self (even if it's a table)
@@ -656,11 +650,11 @@ wxString Relation::getSelectStatement()
     // get list of columns to SELECT
     ensureChildrenLoaded();
     wxArrayString cols;
-    cols.Alloc(columnsM.getChildrenCount());
-    for (MetadataCollection<Column>::const_iterator it = columnsM.begin();
+    cols.Alloc(columnsM.size());
+    for (RelationColumns::const_iterator it = columnsM.begin();
         it != columnsM.end(); ++it)
     {
-        cols.Add((*it).getQuotedName());
+        cols.Add((*it)->getQuotedName());
     }
     if (addRdbKeyToSelect())
         cols.Add(wxT("RDB$DB_KEY"));
@@ -686,21 +680,23 @@ bool Relation::addRdbKeyToSelect()
 //-----------------------------------------------------------------------------
 bool Relation::getChildren(std::vector<MetadataItem*>& temp)
 {
-    return columnsM.getChildren(temp);
-}
-//-----------------------------------------------------------------------------
-void Relation::doSetChildrenLoaded(bool loaded)
-{
-    columnsM.setChildrenLoaded(loaded);
+    if (columnsM.empty())
+        return false;
+    MetadataItemFromShared<Column> getMetadataItem;
+    std::transform(columnsM.begin(), columnsM.end(), std::back_inserter(temp),
+        getMetadataItem);
+    return true;
 }
 //-----------------------------------------------------------------------------
 void Relation::lockChildren()
 {
-    columnsM.lockSubject();
+    std::for_each(columnsM.begin(), columnsM.end(),
+        boost::mem_fn(&Column::lockSubject));
 }
 //-----------------------------------------------------------------------------
 void Relation::unlockChildren()
 {
-    columnsM.unlockSubject();
+    std::for_each(columnsM.begin(), columnsM.end(),
+        boost::mem_fn(&Column::unlockSubject));
 }
 //-----------------------------------------------------------------------------

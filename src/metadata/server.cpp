@@ -69,13 +69,6 @@ void Server::unlockChildren()
         boost::mem_fn(&Database::unlockSubject));
 }
 //-----------------------------------------------------------------------------
-template<class T>
-struct MetadataItemFromShared
-{
-public:
-    MetadataItem* operator()(boost::shared_ptr<T> pt) { return pt.get(); };
-};
-//-----------------------------------------------------------------------------
 bool Server::getChildren(vector<MetadataItem*>& temp)
 {
     if (databasesM.empty())
@@ -238,13 +231,9 @@ UserList* Server::getUsers(ProgressIndicator* progressind)
     return &usersM;
 }
 //-----------------------------------------------------------------------------
-void Server::setServiceUser(const wxString& user)
+void Server::setServiceCredentials(const wxString& user, const wxString& pass)
 {
     serviceUserM = user;
-}
-//-----------------------------------------------------------------------------
-void Server::setServicePassword(const wxString& pass)
-{
     servicePasswordM = pass;
 }
 //-----------------------------------------------------------------------------
@@ -263,7 +252,7 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
     }
 
     // check if we already had some successful connections
-    if (!serviceSysdbaPasswordM.IsEmpty())  // we have sysdba pass
+    if (!serviceSysdbaPasswordM.empty())  // we have sysdba pass
     {
         if (progressind)
         {
@@ -279,7 +268,7 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
         }
         catch(IBPP::Exception&)   // keep going if connect fails
         {
-            serviceSysdbaPasswordM.Clear();
+            serviceSysdbaPasswordM.clear();
         }
     }
     if (progressind && progressind->isCanceled())

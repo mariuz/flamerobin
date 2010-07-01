@@ -77,12 +77,12 @@ wxString View::getCreateSql()
         << StatementBuilder::IncIndent;
 
     // make sure that line breaking occurs after comma, not before
-    MetadataCollection<Column>::const_iterator it = columnsM.begin();
-    wxString colName = (*it).getQuotedName();
+    RelationColumns::const_iterator it = columnsM.begin();
+    wxString colName = (*it)->getQuotedName();
     for (++it; it != columnsM.end(); ++it)
     {
         sb << colName + wxT(", ");
-        colName = (*it).getQuotedName();
+        colName = (*it)->getQuotedName();
     }
     sb << colName;
 

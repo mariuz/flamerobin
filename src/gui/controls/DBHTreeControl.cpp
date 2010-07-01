@@ -505,10 +505,10 @@ void DBHTreeItemVisitor::visitProcedure(Procedure& procedure)
         if (DBHTreeConfigCache::get().getShowColumnParamCount())
         {
             size_t ins = 0, outs = 0;
-            for (MetadataCollection <Parameter>::const_iterator
-                it = procedure.begin(); it != procedure.end(); ++it)
+            for (ProcedureParameters::const_iterator it = procedure.begin();
+                it != procedure.end(); ++it)
             {
-                if (it->isOutputParameter())
+                if ((*it)->isOutputParameter())
                     ++outs;
                 else
                     ++ins;

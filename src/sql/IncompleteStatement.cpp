@@ -333,10 +333,10 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
             else
                 return wxEmptyString;
         }
-        for (MetadataCollection<Column>::const_iterator c = r->begin();
+        for (RelationColumns::const_iterator c = r->begin();
             c != r->end(); ++c)
         {
-            cols.push_back((*c).getQuotedName());
+            cols.push_back((*c)->getQuotedName());
         }
     }
     else    // find STORED PROCEDURE in list of ALIASES
@@ -352,11 +352,11 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
             else
                 return wxEmptyString;
         }
-        for (MetadataCollection<Parameter>::const_iterator c = p->begin();
+        for (ProcedureParameters::const_iterator c = p->begin();
             c != p->end(); ++c)
         {
-            if ((*c).isOutputParameter())
-                cols.push_back((*c).getQuotedName());
+            if ((*c)->isOutputParameter())
+                cols.push_back((*c)->getQuotedName());
         }
     }
 

@@ -34,6 +34,8 @@
 #include <algorithm>
 #include <vector>
 
+#include <boost/shared_ptr.hpp>
+
 #include "core/Subject.h"
 #include "sql/Identifier.h"
 
@@ -172,6 +174,13 @@ public:
     virtual bool isSystem() const;
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
+template<class T>
+struct MetadataItemFromShared
+{
+public:
+    MetadataItem* operator()(boost::shared_ptr<T> pt) { return pt.get(); };
 };
 //-----------------------------------------------------------------------------
 //! masks the object it points to so others see it transparently

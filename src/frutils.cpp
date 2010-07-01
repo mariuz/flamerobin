@@ -109,14 +109,13 @@ void readBlob(IBPP::Statement& st, int column, wxString& result,
 wxString selectRelationColumns(Relation* t, wxWindow* parent)
 {
     vector<wxString> list;
-    selectRelationColumnsIntoVector(t, parent, list);
-    wxString retval;
-    for (vector<wxString>::iterator it = list.begin(); it != list.end(); ++it)
-    {
-        if (it != list.begin())
-            retval += wxT(", ");
-        retval += (*it);
-    }
+    if (!selectRelationColumnsIntoVector(t, parent, list))
+        return wxEmptyString;
+
+    vector<wxString>::iterator it = list.begin();
+    wxString retval(*it);
+    while ((++it) != list.end())
+        retval += wxT(", ") + (*it);
     return retval;
 }
 //-----------------------------------------------------------------------------
@@ -126,11 +125,8 @@ bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent,
     t->ensureChildrenLoaded();
     wxArrayString colNames;
     colNames.Alloc(t->getColumnCount());
-    for (MetadataCollection<Column>::const_iterator it = t->begin();
-        it != t->end(); ++it)
-    {
-        colNames.Add((*it).getName_());
-    }
+    for (RelationColumns::const_iterator it = t->begin(); it != t->end(); ++it)
+        colNames.Add((*it)->getName_());
 
     wxArrayInt selected_columns;
     bool ok = 
@@ -215,15 +211,12 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
             if (sysdba || username.Upper() == wxT("SYSDBA"))
                 s->setServiceSysdbaPassword(password);
             else
-            {
-                s->setServiceUser(username);
-                s->setServicePassword(password);
-            }
+                s->setServiceCredentials(username, password);
         }
         catch(IBPP::Exception& e)
         {
             wxMessageBox(std2wx(e.ErrorMessage()), _("Error"),
-                wxICON_ERROR|wxOK);
+                wxICON_ERROR | wxOK);
             return false;
         }
     }

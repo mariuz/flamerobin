@@ -477,9 +477,8 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
         if (!r)
             return;
         r->ensureChildrenLoaded();
-        MetadataCollection<Column>::iterator it;
-        for (it = r->begin(); it != r->end(); ++it)
-            processHtmlCode(htmlpage, suffix, &(*it));
+        for (RelationColumns::iterator it = r->begin(); it != r->end(); ++it)
+            processHtmlCode(htmlpage, suffix, (*it).get());
     }
 
     // table triggers,  triggers:after or triggers:befor  <- not a typo
@@ -741,11 +740,11 @@ void MetadataItemPropertiesPanel::processCommand(wxString cmd, MetadataItem *obj
         SubjectLocker locker(p);
         p->ensureChildrenLoaded();
         bool parOut = (cmd == wxT("output_parameters"));
-        for (MetadataCollection<Parameter>::iterator it = p->begin();
+        for (ProcedureParameters::iterator it = p->begin();
             it != p->end(); ++it)
         {
-            if ((*it).isOutputParameter() == parOut)
-                processHtmlCode(htmlpage, suffix, &(*it));
+            if ((*it)->isOutputParameter() == parOut)
+                processHtmlCode(htmlpage, suffix, (*it).get());
         }
     }
 
@@ -1172,9 +1171,9 @@ void MetadataItemPropertiesPanel::update()
 
         SubjectLocker locker(r);
         r->ensureChildrenLoaded();
-        MetadataCollection<Column>::iterator it;
+        RelationColumns::iterator it;
         for (it = r->begin(); it != r->end(); ++it)
-            (*it).attachObserver(this);
+            (*it)->attachObserver(this);
     }
 
     // if description of procedure params change, we need to reattach
@@ -1186,9 +1185,9 @@ void MetadataItemPropertiesPanel::update()
 
         SubjectLocker locker(p);
         p->ensureChildrenLoaded();
-        MetadataCollection<Parameter>::iterator it;
+        ProcedureParameters::iterator it;
         for (it = p->begin(); it != p->end(); ++it)
-            (*it).attachObserver(this);
+            (*it)->attachObserver(this);
     }
 
     // with this set to false updates to the same page do not show the

@@ -1677,18 +1677,9 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
     {
         wxString cn(std2wxIdentifier(statementM->ColumnName(col),
             databaseM->getCharsetConverter()));
-        Column *c = 0;
         t->ensureChildrenLoaded();
-        for (MetadataCollection<Column>::iterator it = t->begin();
-            it != t->end(); ++it)
-        {
-            if ((*it).getName_() == cn)    // column found
-            {
-                c = &(*it);
-                break;
-            }
-        }
-        readOnly = (c == 0 || !c->getComputedSource().IsEmpty());
+        Column* c = t->findColumn(cn).get();
+        readOnly = (c == 0 || !c->getComputedSource().empty());
         if (!readOnly)  // it is editable, so check if nullable
             nullable = c->isNullable();
     }
