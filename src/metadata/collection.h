@@ -29,7 +29,6 @@
 #define FR_COLLECTION_H
 //-----------------------------------------------------------------------------
 #include <algorithm>
-#include <sstream>
 
 #include <boost/ptr_container/ptr_list.hpp>
 #include <boost/function.hpp>
@@ -72,68 +71,12 @@ private:
     };
 
 public:
-    // removes item from list
-    void remove(T* item)
-    {
-        if (!item)
-            return;
-        remove(std::find_if(itemsM.begin(), itemsM.end(), 
-            FindByAddress(item)));
-    }
-
-    // removes item pointed at from list
-    void remove(iterator pos)
-    {
-        if (pos != itemsM.end())
-        {
-            itemsM.erase(pos);
-            notifyObservers();
-        }
-    }
-
-    // removes items in range from list
-    void remove(iterator first, iterator last)
-    {
-        if (first != last)
-        {
-            itemsM.erase(first, last);
-            notifyObservers();
-        }
-    }
-
-    // adds new item to end of list and returns pointer to it
-    T* add(T& item)
-    {
-        item.setParent(this);
-        if (isLocked())
-        {
-            for (unsigned int i = getLockCount(); i > 0; i--)
-                item.lockSubject();
-        }
-        itemsM.push_back(new T(item));
-        notifyObservers();
-        return &itemsM.back();
-    }
-
-    // adds new item to end of list and returns pointer to it
-    T* add(MetadataItem* parent, wxString name, NodeType type)
-    {
-        return insert(itemsM.end(), parent, name, type);
-    }
-
     // inserts new item into list at correct position to preserve alphabetical
     // order of item names, and returns pointer to it
     T* insert(MetadataItem* parent, wxString name, NodeType type)
     {
         iterator pos = std::find_if(itemsM.begin(), itemsM.end(),
             InsertionPosByName(name));
-        return insert(pos, parent, name, type);
-    }
-
-    // inserts new item at given position into list and returns pointer to it
-    T* insert(iterator pos, MetadataItem* parent, wxString name,
-        NodeType type)
-    {
         T* item = &(*itemsM.insert(pos, new T()));
         for (unsigned int i = getLockCount(); i > 0; i--)
             item->lockSubject();
@@ -142,14 +85,16 @@ public:
         return item;
     }
 
-    void moveItem(iterator currentPos, iterator newPos)
+    // removes item from list
+    void remove(T* item)
     {
-        if (currentPos != newPos)
+        if (!item)
+            return;
+        iterator pos = std::find_if(itemsM.begin(), itemsM.end(),
+            FindByAddress(item));
+        if (pos != itemsM.end())
         {
-            boost::ptr_list<T> copied;
-            // I did not find an easier way to move the item in the list
-            copied.transfer(copied.begin(), currentPos, itemsM);
-            itemsM.transfer(newPos, copied);
+            itemsM.erase(pos);
             notifyObservers();
         }
     }

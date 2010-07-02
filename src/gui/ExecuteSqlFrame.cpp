@@ -514,7 +514,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     updateEditorCaretPosM = true;
 
     transactionIsolationLevelM = IBPP::ilConcurrency;
-	transactionLockResolutionM = IBPP::lrWait;
+    transactionLockResolutionM = IBPP::lrWait;
     transactionAccessModeM = IBPP::amWrite;
 
     timerBlobEditorM.SetOwner(this, TIMER_ID_UPDATE_BLOB);
@@ -711,7 +711,7 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
     stmtPropMenu->AppendRadioItem(Cmds::Query_TransactionConsistency,
         cm.getMainMenuItemText(_("Consistency isolation mode"), Cmds::Query_TransactionConsistency));
     stmtPropMenu->AppendSeparator();
-	stmtPropMenu->AppendCheckItem(Cmds::Query_TransactionLockResolution,
+    stmtPropMenu->AppendCheckItem(Cmds::Query_TransactionLockResolution,
         cm.getMainMenuItemText(_("Wait for lock resolution"), Cmds::Query_TransactionLockResolution));
     stmtPropMenu->AppendSeparator();
     stmtPropMenu->AppendCheckItem(Cmds::Query_TransactionReadOnly,
@@ -994,8 +994,10 @@ bool HasWord(wxString word, wxString& wordlist)
 
     wxStringTokenizer tkz(wordlist, wxT(" "));
     while (tkz.HasMoreTokens())
+    {
         if (tkz.GetNextToken().Upper().StartsWith(word))
             return true;
+    }
     return false;
 }
 //-----------------------------------------------------------------------------
@@ -2444,7 +2446,7 @@ void ExecuteSqlFrame::OnMenuUpdateTransactionIsolationLevel(
 void ExecuteSqlFrame::OnMenuTransactionLockResolution(wxCommandEvent& event)
 {
     transactionLockResolutionM =
-		event.IsChecked() ? IBPP::lrWait : IBPP::lrNoWait;
+        event.IsChecked() ? IBPP::lrWait : IBPP::lrNoWait;
 
     wxCHECK_RET(transactionM == 0 || !transactionM->Started(),
         wxT("Can't change transaction lock resolution while started"));
@@ -2452,7 +2454,7 @@ void ExecuteSqlFrame::OnMenuTransactionLockResolution(wxCommandEvent& event)
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUpdateTransactionLockResolution(
-	wxUpdateUIEvent& event)
+    wxUpdateUIEvent& event)
 {
     event.Enable(transactionM == 0 || !transactionM->Started());
     event.Check(transactionLockResolutionM == IBPP::lrWait);
