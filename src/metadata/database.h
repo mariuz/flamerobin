@@ -224,6 +224,9 @@ public:
     {
         // this method returns nothing, so a missing specialization
         // will cause a build failure
+        // specialization must be declared in the namespace of the class
+        // declaration see below, definitions in database.cpp
+
 /*
         std::vector<MetadataItem *> temp;
         getCollections(temp, false);    // not system
@@ -237,69 +240,6 @@ public:
         }
         return 0;
 */
-    }
-
-    template<>
-    MetadataCollection<Domain>* getCollection()
-    {
-        domainsM.ensureChildrenLoaded();
-        return &domainsM;
-    }
-
-    template<>
-    MetadataCollection<Exception>* getCollection()
-    {
-        exceptionsM.ensureChildrenLoaded();
-        return &exceptionsM;
-    }
-
-    template<>
-    MetadataCollection<Function>* getCollection()
-    {
-        functionsM.ensureChildrenLoaded();
-        return &functionsM;
-    }
-
-    template<>
-    MetadataCollection<Generator>* getCollection()
-    {
-        generatorsM.ensureChildrenLoaded();
-        return &generatorsM;
-    }
-
-    template<>
-    MetadataCollection<Procedure>* getCollection()
-    {
-        proceduresM.ensureChildrenLoaded();
-        return &proceduresM;
-    }
-
-    template<>
-    MetadataCollection<Role>* getCollection()
-    {
-        rolesM.ensureChildrenLoaded();
-        return &rolesM;
-    }
-
-    template<>
-    MetadataCollection<Table>* getCollection()
-    {
-        tablesM.ensureChildrenLoaded();
-        return &tablesM;
-    }
-
-    template<>
-    MetadataCollection<Trigger>* getCollection()
-    {
-        triggersM.ensureChildrenLoaded();
-        return &triggersM;
-    }
-
-    template<>
-    MetadataCollection<View>* getCollection()
-    {
-        viewsM.ensureChildrenLoaded();
-        return &viewsM;
     }
 
     MetadataCollection<Generator>::const_iterator generatorsBegin();
@@ -398,5 +338,23 @@ public:
 
     wxMBConv* getCharsetConverter() const;
 };
+
+template<> MetadataCollection<Domain>* Database::getCollection();
+
+template<> MetadataCollection<Exception>* Database::getCollection();
+
+template<> MetadataCollection<Function>* Database::getCollection();
+
+template<> MetadataCollection<Generator>* Database::getCollection();
+
+template<> MetadataCollection<Procedure>* Database::getCollection();
+
+template<> MetadataCollection<Role>* Database::getCollection();
+
+template<> MetadataCollection<Table>* Database::getCollection();
+
+template<> MetadataCollection<Trigger>* Database::getCollection();
+
+template<> MetadataCollection<View>* Database::getCollection();
 //----------------------------------------------------------------------------
 #endif

@@ -1214,6 +1214,69 @@ bool Database::getChildren(std::vector<MetadataItem*>& temp)
     return true;
 }
 //-----------------------------------------------------------------------------
+template<>
+MetadataCollection<Domain>* Database::getCollection()
+{
+    domainsM.ensureChildrenLoaded();
+    return &domainsM;
+}
+//-----------------------------------------------------------------------------
+template<>
+MetadataCollection<Exception>* Database::getCollection()
+{
+    exceptionsM.ensureChildrenLoaded();
+    return &exceptionsM;
+}
+//-----------------------------------------------------------------------------
+template<>
+MetadataCollection<Function>* Database::getCollection()
+{
+    functionsM.ensureChildrenLoaded();
+    return &functionsM;
+}
+//-----------------------------------------------------------------------------
+template<>
+MetadataCollection<Generator>* Database::getCollection()
+{
+    generatorsM.ensureChildrenLoaded();
+    return &generatorsM;
+}
+//-----------------------------------------------------------------------------
+template<>
+MetadataCollection<Procedure>* Database::getCollection()
+{
+    proceduresM.ensureChildrenLoaded();
+    return &proceduresM;
+}
+//-----------------------------------------------------------------------------
+template<>
+MetadataCollection<Role>* Database::getCollection()
+{
+    rolesM.ensureChildrenLoaded();
+    return &rolesM;
+}
+//-----------------------------------------------------------------------------
+template<>
+MetadataCollection<Table>* Database::getCollection()
+{
+    tablesM.ensureChildrenLoaded();
+    return &tablesM;
+}
+//-----------------------------------------------------------------------------
+template<>
+MetadataCollection<Trigger>* Database::getCollection()
+{
+    triggersM.ensureChildrenLoaded();
+    return &triggersM;
+}
+//-----------------------------------------------------------------------------
+template<>
+MetadataCollection<View>* Database::getCollection()
+{
+    viewsM.ensureChildrenLoaded();
+    return &viewsM;
+}
+//-----------------------------------------------------------------------------
 // returns vector of all subitems
 void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
 {
