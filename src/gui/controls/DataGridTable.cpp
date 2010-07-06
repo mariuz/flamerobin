@@ -452,7 +452,12 @@ wxString DataGridTable::GetValue(int row, int col)
         return wxT("N/A");
     if (rowsM.isFieldNull(row, col))
         return wxT("[null]");
-    return rowsM.getFieldValue(row, col);
+    // limit returned string to first line (speeds up output in grid)
+    wxString s(rowsM.getFieldValue(row, col));
+    size_t eol = s.find_first_of(wxT("\r\n"));
+    if (eol != wxString::npos)
+        s.erase(eol);
+    return s;
 }
 //-----------------------------------------------------------------------------
 void DataGridTable::initialFetch(bool readonly)

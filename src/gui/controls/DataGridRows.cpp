@@ -64,6 +64,8 @@ class GridCellFormats: public ConfigCache
 private:
     int precisionForDoubleM;
     wxString dateFormatM;
+    bool showBinaryBlobContentM;
+    bool showBlobContentM;
     wxString timeFormatM;
     wxString timestampFormatM;
 protected:
@@ -84,6 +86,8 @@ public:
         int& hr, int& mn, int& sc, int& ml);
     bool parseTimestamp(wxString::iterator& start, wxString::iterator end,
         int& year, int& month, int& day, int& hr, int& mn, int& sc, int& ml);
+    bool showBinaryBlobContent();
+    bool showBlobContent();
 };
 //-----------------------------------------------------------------------------
 GridCellFormats::GridCellFormats()
@@ -107,6 +111,9 @@ void GridCellFormats::loadFromConfig()
     timeFormatM = config().get(wxT("TimeFormat"), wxString(wxT("H:M:S.T")));
     timestampFormatM = config().get(wxT("TimestampFormat"),
         wxString(wxT("D.N.Y, H:M:S.T")));
+
+    showBinaryBlobContentM = config().get(wxT("GridShowBinaryBlobs"), false);
+    showBlobContentM = config().get(wxT("DataGridFetchBlobs"), true);
 }
 //-----------------------------------------------------------------------------
 wxString GridCellFormats::formatDouble(double value)
@@ -453,6 +460,18 @@ bool GridCellFormats::parseTimestamp(wxString::iterator& start,
         }
     }
     return true;
+}
+//-----------------------------------------------------------------------------
+bool GridCellFormats::showBinaryBlobContent()
+{
+    ensureCacheValid();
+    return showBinaryBlobContentM;
+}
+//-----------------------------------------------------------------------------
+bool GridCellFormats::showBlobContent()
+{
+    ensureCacheValid();
+    return showBlobContentM;
 }
 //-----------------------------------------------------------------------------
 // ResultsetColumnDef class
@@ -1210,16 +1229,13 @@ unsigned BlobColumnDef::getIndex()
 wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
-    if (!config().get(wxT("DataGridFetchBlobs"), true))
+    if (!GridCellFormats::get().showBlobContent())
         return wxT("[BLOB]");
-    if (!textualM && !config().get(wxT("GridShowBinaryBlobs"), false))
+    if (!textualM && !GridCellFormats::get().showBinaryBlobContent())
         return wxT("[BINARY]");
 
     if (buffer->isStringLoaded(stringIndexM))
-    {
-        wxString s = buffer->getString(stringIndexM);
-        return s;
-    }
+        return buffer->getString(stringIndexM);
 
     int kb = 1024 * config().get(wxT("DataGridFetchBlobAmount"), 1);
     std::string result;
