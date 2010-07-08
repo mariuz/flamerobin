@@ -98,7 +98,12 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database&)
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitDomain(Domain&)
 {
-    addRegularObjectMenu(true, true);
+    addAlterItem();
+    menuM->AppendSeparator();
+    addDropItem();
+    menuM->AppendSeparator();
+    addRefreshItem();
+    addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitException(Exception&)
@@ -220,6 +225,11 @@ void ContextMenuMetadataItemVisitor::visitView(View&)
 {
     addSelectMenu(true, false); // selectable, can not add columns
     addRegularObjectMenu(true, true); // add Alter and Drop menu
+}
+//-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::addAlterItem()
+{
+    menuM->Append(Cmds::Menu_AlterObject, _("&Alter..."));
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::addDropItem()

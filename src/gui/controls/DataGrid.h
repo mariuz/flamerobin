@@ -72,9 +72,9 @@ private:
     void OnTimer(wxTimerEvent& event);
     DECLARE_EVENT_TABLE()
 public:
-    void copyToCB();
-    void copyToCBAsInsert();
-    void copyToCBAsUpdate();
+    void copyToClipboard();
+    void copyToClipboardAsInsert();
+    void copyToClipboardAsUpdate();
     void saveAsHTML();
     void saveAsCSV();
 

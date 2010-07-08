@@ -1401,7 +1401,7 @@ void ExecuteSqlFrame::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
     if (viewModeM == vmEditor)
         styled_text_ctrl_sql->Copy();
     else if (viewModeM == vmGrid)
-        grid_data->copyToCB();
+        grid_data->copyToClipboard();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUpdateCopy(wxUpdateUIEvent& event)
@@ -1861,12 +1861,12 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridCopyAsInsert(wxCommandEvent& WXUNUSED(event))
 {
-    grid_data->copyToCBAsInsert();
+    grid_data->copyToClipboardAsInsert();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridCopyAsUpdate(wxCommandEvent& WXUNUSED(event))
 {
-    grid_data->copyToCBAsUpdate();
+    grid_data->copyToClipboardAsUpdate();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridSaveAsHtml(wxCommandEvent& WXUNUSED(event))

@@ -56,6 +56,7 @@ public:
 private:
     wxMenu* menuM;
 
+    void addAlterItem();
     void addDropItem();
     void addPropertiesItem();
     void addRefreshItem();

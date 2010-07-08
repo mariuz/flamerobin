@@ -292,7 +292,7 @@ void Domain::getDatatypeParts(wxString& type, wxString& size, wxString& scale)
         type = datatype;
         // HACK ALERT: some better fix needed, but we don't want the subtype
         if (datatypeM == 261)
-            type = wxT("Blob");
+            type = SqlTokenizer::getKeyword(kwBLOB);
     }
 }
 //-----------------------------------------------------------------------------

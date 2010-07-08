@@ -263,7 +263,7 @@ void DataGrid::setCellFont()
     }
 }
 //-----------------------------------------------------------------------------
-void DataGrid::copyToCB()
+void DataGrid::copyToClipboard()
 {
     DataGridTable* table = getDataGridTable();
     if (!table)
@@ -277,21 +277,23 @@ void DataGrid::copyToCB()
         for (int i = 0; i < GetNumberRows(); i++)
         {
             wxString sRow;
+            bool first = true;
             for (int j = 0; j < GetNumberCols(); j++)
             {
                 if (IsInSelection(i, j))
                 {
                     // TODO: - align fields in columns ?
                     //       - fields with multiline strings don't really work...
-                    if (!sRow.IsEmpty())
+                    if (!first)
                         sRow += wxT("\t");
+                    first = false;
                     sRow += table->getCellValue(i, j);
                     any = true;
                 }
                 else
                     all = false;
             }
-            if (!sRow.IsEmpty())
+            if (!first)
                 sRows += sRow + wxTextBuffer::GetEOL();
         }
         if (!sRows.IsEmpty())
@@ -307,7 +309,7 @@ void DataGrid::copyToCB()
         notifyIfUnfetchedData();
 }
 //-----------------------------------------------------------------------------
-void DataGrid::copyToCBAsInsert()
+void DataGrid::copyToClipboardAsInsert()
 {
     DataGridTable* table = getDataGridTable();
     if (!table)
@@ -376,7 +378,7 @@ void DataGrid::copyToCBAsInsert()
         notifyIfUnfetchedData();
 }
 //-----------------------------------------------------------------------------
-void DataGrid::copyToCBAsUpdate()
+void DataGrid::copyToClipboardAsUpdate()
 {
     DataGridTable* table = getDataGridTable();
     if (!table)
