@@ -44,10 +44,10 @@ STATICRTL ?= 0
 
 CPPDEPS = -MT$@ -MF$@.d -MD -MP
 FLAMEROBIN_CXXFLAGS = -mthreads $(__DEBUGINFO) $(__OPTIMIZE) -W -Wall \
-	$(____flamerobin_UNICODE_DEFINE_p) $(____flamerobin_WXDEBUG_p) \
-	$(____flamerobin_DEBUGFLAG_p) -DHAVE_W32API_H -D_WINDOWS -D__WINDOWS__ \
-	-DWINVER=0x400 -DWIN32 -D__WIN32__ -D__WIN95__ -DSTRICT -D__WXMSW__ \
-	-DwxUSE_GUI=1 -DWIN32_LEAN_AND_MEAN \
+	$(____flamerobin_WXDEBUG_p) $(____flamerobin_DEBUGFLAG_p) -DHAVE_W32API_H \
+	-D_WINDOWS -D__WINDOWS__ -DWINVER=0x400 -DWIN32 -D__WIN32__ -D__WIN95__ \
+	-DSTRICT -D__WXMSW__ -DwxUSE_GUI=1 -DwxUSE_UNICODE=$(UNICODE) \
+	-DWIN32_LEAN_AND_MEAN \
 	-I$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(U_OPT)$(D_OPT) \
 	-I$(WXDIR)\contrib\include -I$(WXDIR)\include -I$(BOOST_ROOT) \
 	-DIBPP_WINDOWS -I. -I.\src -I.\src\ibpp -I.\res $(CPPFLAGS) $(CXXFLAGS)
@@ -178,12 +178,6 @@ IBPP_OBJECTS =  \
 
 ifeq ($(STATICRTL),1)
 R_OPT = s
-endif
-ifeq ($(UNICODE),1)
-____flamerobin_UNICODE_DEFINE_p = -D_UNICODE
-endif
-ifeq ($(UNICODE),1)
-____flamerobin_UNICODE_DEFINE_p_1 = --define _UNICODE
 endif
 ifeq ($(FINAL),0)
 ____flamerobin_WXDEBUG_p = -D__WXDEBUG__
@@ -555,7 +549,7 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.o: ./src/gui/msw/StyleGuide
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o: ./res/flamerobin.rc
-	windres --use-temp-file -i$< -o$@  $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) --define HAVE_W32API_H --define _WINDOWS --define __WINDOWS__ --define WINVER=0x400 --define WIN32 --define __WIN32__ --define __WIN95__ --define STRICT --define __WXMSW__ --define wxUSE_GUI=1 --define WIN32_LEAN_AND_MEAN --include-dir $(__flamerobin_WX_LIB_DIR)/msw$(U_OPT)$(D_OPT) --include-dir $(WXDIR)/contrib/include --include-dir $(WXDIR)/include --include-dir $(BOOST_ROOT) --define IBPP_WINDOWS --include-dir . --include-dir ./src --include-dir ./src/ibpp --include-dir ./res
+	windres --use-temp-file -i$< -o$@  $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) --define HAVE_W32API_H --define _WINDOWS --define __WINDOWS__ --define WINVER=0x400 --define WIN32 --define __WIN32__ --define __WIN95__ --define STRICT --define __WXMSW__ --define wxUSE_GUI=1 --define wxUSE_UNICODE=$(UNICODE) --define WIN32_LEAN_AND_MEAN --include-dir $(__flamerobin_WX_LIB_DIR)/msw$(U_OPT)$(D_OPT) --include-dir $(WXDIR)/contrib/include --include-dir $(WXDIR)/include --include-dir $(BOOST_ROOT) --define IBPP_WINDOWS --include-dir . --include-dir ./src --include-dir ./src/ibpp --include-dir ./res
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__dpb.o: ./src/ibpp/_dpb.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<

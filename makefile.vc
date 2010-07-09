@@ -60,10 +60,10 @@ TARGET_CPU = $(CPU)
 FLAMEROBIN_CXXFLAGS = /M$(__RTL_TYPE)$(__DEBUGINFO_0) /DWIN32 $(__DEBUGINFO) \
 	$(____DEBUGINFO) \
 	/Fdvc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.pdb \
-	$(__OPTIMIZE) /W4 $(____flamerobin_UNICODE_DEFINE_p) \
-	$(____flamerobin_WXDEBUG_p) $(____flamerobin_DEBUGFLAG_p) /D_WINDOWS \
-	/D__WINDOWS__ /DWINVER=0x400 /DWIN32 /D__WIN32__ /D__WIN95__ /DSTRICT \
-	/D__WXMSW__ /DwxUSE_GUI=1 /DWIN32_LEAN_AND_MEAN \
+	$(__OPTIMIZE) /W4 $(____flamerobin_WXDEBUG_p) $(____flamerobin_DEBUGFLAG_p) \
+	/D_WINDOWS /D__WINDOWS__ /DWINVER=0x400 /DWIN32 /D__WIN32__ /D__WIN95__ \
+	/DSTRICT /D__WXMSW__ /DwxUSE_GUI=1 /DwxUSE_UNICODE=$(UNICODE) \
+	/DWIN32_LEAN_AND_MEAN \
 	/I$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(U_OPT)$(D_OPT) \
 	/I$(WXDIR)\contrib\include /I$(WXDIR)\include /I$(BOOST_ROOT) /D_WINDOWS \
 	/DIBPP_WINDOWS /I. /I.\src /I.\src\ibpp /I.\res /GR /EHsc /Yu"wx/wxprec.h" \
@@ -236,12 +236,6 @@ __DEBUGINFO_9 = $(__DEBUGINFO_8)
 !endif
 !if "$(FINAL)" == "1"
 __DEBUGINFO_9 = 
-!endif
-!if "$(UNICODE)" == "1"
-____flamerobin_UNICODE_DEFINE_p = /D_UNICODE
-!endif
-!if "$(UNICODE)" == "1"
-____flamerobin_UNICODE_DEFINE_p_1 = /d _UNICODE
 !endif
 !if "$(FINAL)" == "0"
 ____flamerobin_WXDEBUG_p = /D__WXDEBUG__
@@ -651,7 +645,7 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuideMSW.obj: .\src\
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\msw\StyleGuideMSW.cpp
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_flamerobin.res: .\res\flamerobin.rc
-	rc /fo$@  /d WIN32 $(____DEBUGINFO_6_p_1) $(____flamerobin_UNICODE_DEFINE_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) /d _WINDOWS /d __WINDOWS__ /d WINVER=0x400 /d WIN32 /d __WIN32__ /d __WIN95__ /d STRICT /d __WXMSW__ /d wxUSE_GUI=1 /d WIN32_LEAN_AND_MEAN /i $(____flamerobin_WX_LIB_DIR_FILENAMES_1)\msw$(U_OPT)$(D_OPT) /i $(WXDIR)\contrib\include /i $(WXDIR)\include /i $(BOOST_ROOT) /d _WINDOWS /d IBPP_WINDOWS /i . /i .\src /i .\src\ibpp /i .\res .\res\flamerobin.rc
+	rc /fo$@  /d WIN32 $(____DEBUGINFO_6_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) /d _WINDOWS /d __WINDOWS__ /d WINVER=0x400 /d WIN32 /d __WIN32__ /d __WIN95__ /d STRICT /d __WXMSW__ /d wxUSE_GUI=1 /d wxUSE_UNICODE=$(UNICODE) /d WIN32_LEAN_AND_MEAN /i $(____flamerobin_WX_LIB_DIR_FILENAMES_1)\msw$(U_OPT)$(D_OPT) /i $(WXDIR)\contrib\include /i $(WXDIR)\include /i $(BOOST_ROOT) /d _WINDOWS /d IBPP_WINDOWS /i . /i .\src /i .\src\ibpp /i .\res .\res\flamerobin.rc
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__dpb.obj: .\src\ibpp\_dpb.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) .\src\ibpp\_dpb.cpp

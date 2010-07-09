@@ -170,11 +170,6 @@ Accepted values: AMD64, IA64.
             <if cond="FINAL=='0'">_DEBUG</if>
         </set>
 
-        <set var="UNICODE_DEFINE">
-            <if cond="FORMAT!='autoconf' and UNICODE=='1'">_UNICODE</if>
-        </set>
-
-        <define>$(UNICODE_DEFINE)</define>
         <define>$(WXDEBUG)</define>
         <define>$(DEBUGFLAG)</define>
 
@@ -193,6 +188,7 @@ Accepted values: AMD64, IA64.
 
             <define>__WXMSW__</define>
             <define>wxUSE_GUI=1</define>
+            <define>wxUSE_UNICODE=$(UNICODE)</define>
             <define>WIN32_LEAN_AND_MEAN</define>
 
             <set var="WX_PORT">wxmsw</set>
