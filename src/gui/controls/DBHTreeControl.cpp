@@ -601,6 +601,65 @@ void DBHTreeItemVisitor::visitMetadataItem(MetadataItem& metadataItem)
     setNodeProperties(&metadataItem);
 }
 //-----------------------------------------------------------------------------
+// TreeSelectionRestorer class
+class TreeSelectionRestorer
+{
+private:
+    struct TreeSelectionData
+    {
+    private:
+        MetadataItem* itemM;
+        unsigned refCountM;
+    public:
+        TreeSelectionData() : itemM(0), refCountM(0) {};
+        TreeSelectionData(MetadataItem* item) : itemM(item), refCountM(1) {};
+        unsigned addRef() { return ++refCountM; };
+        unsigned decRef() { return (refCountM > 0) ? --refCountM : 0; };
+        MetadataItem* getSelectedItem() { return itemM; };
+    };
+
+    typedef std::map<DBHTreeControl*, TreeSelectionData> SelectionMap;
+    static SelectionMap& getSelections();
+    DBHTreeControl* treeM;
+public:
+    TreeSelectionRestorer(DBHTreeControl* tree);
+    ~TreeSelectionRestorer();
+};
+//-----------------------------------------------------------------------------
+TreeSelectionRestorer::TreeSelectionRestorer(DBHTreeControl* tree)
+    : treeM(tree)
+{
+    SelectionMap::iterator pos = getSelections().find(tree);
+    if (pos != getSelections().end())
+        (*pos).second.addRef();
+    else
+    {
+        MetadataItem* selItem = tree->getSelectedMetadataItem();
+        getSelections()[tree] = TreeSelectionData(selItem);
+    }
+}
+//-----------------------------------------------------------------------------
+TreeSelectionRestorer::~TreeSelectionRestorer()
+{
+    SelectionMap::iterator pos = getSelections().find(treeM);
+    wxCHECK_RET(pos != getSelections().end(),
+        wxT("tree selection data not found"));
+    if ((*pos).second.decRef() == 0)
+    {
+        MetadataItem* origSelItem = (*pos).second.getSelectedItem();
+        if (origSelItem != treeM->getSelectedMetadataItem())
+            treeM->selectMetadataItem(origSelItem);
+        getSelections().erase(pos);
+    }
+}
+//-----------------------------------------------------------------------------
+/*static*/
+TreeSelectionRestorer::SelectionMap& TreeSelectionRestorer::getSelections()
+{
+    static SelectionMap sm;
+    return sm;
+}
+//-----------------------------------------------------------------------------
 // DBHTreeItem is a special kind of observer, which observes special kind
 // of subjects: MetadataItem instances
 class DBHTreeItemData: public wxTreeItemData, public Observer
@@ -663,6 +722,10 @@ void DBHTreeItemData::update()
     MetadataItem* object = getObservedMetadata();
     if (!object)
         return;
+
+    // keep the currently selected item selected when this method ends,
+    // even though its position in the tree may have changed
+    TreeSelectionRestorer tsr(treeM);
 
     // set node properties of current item
     DBHTreeItemVisitor tivObject(treeM);
