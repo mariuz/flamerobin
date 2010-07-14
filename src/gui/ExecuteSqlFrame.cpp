@@ -1629,11 +1629,13 @@ void ExecuteSqlFrame::updateBlobEditor()
     unsigned row = grid_data->GetGridCursorRow();
     unsigned col = grid_data->GetGridCursorCol();
 
-    if (editBlobDlgM->setBlob(grid_data, dgt, &statementM, row, col))
+    if (!editBlobDlgM->IsShown())
     {
-        if (!editBlobDlgM->IsShown())
-            editBlobDlgM->Show();
+        editBlobDlgM->Show();
+        editBlobDlgM->Update();
     }
+
+    editBlobDlgM->setBlob(grid_data, dgt, &statementM, row, col);
     SetFocus();
     grid_data->SetFocus();
 }
