@@ -50,8 +50,6 @@ void ServiceImpl::Connect()
 {
 	if (mHandle	!= 0) return;	// Already connected
 	
-	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mUserName.empty())
 		throw LogicExceptionImpl("Service::Connect", _("Unspecified user name."));
 	if (mUserPassword.empty())
@@ -89,9 +87,6 @@ void ServiceImpl::Disconnect()
 {
 	if (mHandle	== 0) return; // Already disconnected
 	
-	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
-
 	IBS status;
 
 	// Detach from the service manager
@@ -108,8 +103,6 @@ void ServiceImpl::GetVersion(std::string& version)
 {
 	// Based on a patch provided by Torsten Martinsen (SourceForge 'bullestock')
 
-	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Service::GetVersion", _("Service is not connected."));
 
@@ -129,7 +122,7 @@ void ServiceImpl::GetVersion(std::string& version)
 
 void ServiceImpl::AddUser(const IBPP::User& user)
 {
-	if (gds.Call()->mGDSVersion >= 60 && mHandle == 0)
+	if (mHandle == 0)
 		throw LogicExceptionImpl("Service::AddUser", _("Service is not connected."));
 	if (user.username.empty())
 		throw LogicExceptionImpl("Service::AddUser", _("Username required."));
@@ -161,7 +154,7 @@ void ServiceImpl::AddUser(const IBPP::User& user)
 
 void ServiceImpl::ModifyUser(const IBPP::User& user)
 {
-	if (gds.Call()->mGDSVersion >= 60 && mHandle == 0)
+	if (mHandle == 0)
 		throw LogicExceptionImpl("Service::ModifyUser", _("Service is not connected."));
 	if (user.username.empty())
 		throw LogicExceptionImpl("Service::ModifyUser", _("Username required."));
@@ -194,7 +187,7 @@ void ServiceImpl::ModifyUser(const IBPP::User& user)
 void ServiceImpl::RemoveUser(const std::string& username)
 {
 
-	if (gds.Call()->mGDSVersion >= 60 && mHandle == 0)
+	if (mHandle == 0)
 		throw LogicExceptionImpl("Service::RemoveUser", _("Service is not connected."));
 	if (username.empty())
 		throw LogicExceptionImpl("Service::RemoveUser", _("Username required."));
@@ -214,8 +207,6 @@ void ServiceImpl::RemoveUser(const std::string& username)
 
 void ServiceImpl::GetUser(IBPP::User& user)
 {
-	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Service::GetUser", _("Service is not connected."));
 	if (user.username.empty())
@@ -285,8 +276,6 @@ void ServiceImpl::GetUser(IBPP::User& user)
 
 void ServiceImpl::GetUsers(std::vector<IBPP::User>& users)
 {
-	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle == 0)
 		throw LogicExceptionImpl("Service::GetUsers", _("Service is not connected."));
 
@@ -357,8 +346,6 @@ void ServiceImpl::GetUsers(std::vector<IBPP::User>& users)
 
 void ServiceImpl::SetPageBuffers(const std::string& dbfile, int buffers)
 {
-	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::SetPageBuffers", _("Service is not connected."));
 	if (dbfile.empty())
@@ -380,8 +367,6 @@ void ServiceImpl::SetPageBuffers(const std::string& dbfile, int buffers)
 
 void ServiceImpl::SetSweepInterval(const std::string& dbfile, int sweep)
 {
-	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::SetSweepInterval", _("Service is not connected."));
 	if (dbfile.empty())
@@ -403,8 +388,6 @@ void ServiceImpl::SetSweepInterval(const std::string& dbfile, int sweep)
 
 void ServiceImpl::SetSyncWrite(const std::string& dbfile, bool sync)
 {
-	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::SetSyncWrite", _("Service is not connected."));
 	if (dbfile.empty())
@@ -427,8 +410,6 @@ void ServiceImpl::SetSyncWrite(const std::string& dbfile, bool sync)
 
 void ServiceImpl::SetReadOnly(const std::string& dbfile, bool readonly)
 {
-	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::SetReadOnly", _("Service is not connected."));
 	if (dbfile.empty())
@@ -451,8 +432,6 @@ void ServiceImpl::SetReadOnly(const std::string& dbfile, bool readonly)
 
 void ServiceImpl::SetReserveSpace(const std::string& dbfile, bool reserve)
 {
-	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::SetReserveSpace", _("Service is not connected."));
 	if (dbfile.empty())
@@ -475,8 +454,6 @@ void ServiceImpl::SetReserveSpace(const std::string& dbfile, bool reserve)
 
 void ServiceImpl::Shutdown(const std::string& dbfile, IBPP::DSM mode, int sectimeout)
 {
-	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::Shutdown", _("Service is not connected."));
 	if (dbfile.empty())
@@ -509,8 +486,6 @@ void ServiceImpl::Shutdown(const std::string& dbfile, IBPP::DSM mode, int sectim
 
 void ServiceImpl::Restart(const std::string& dbfile)
 {
-	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::Restart", _("Service is not connected."));
 	if (dbfile.empty())
@@ -532,8 +507,6 @@ void ServiceImpl::Restart(const std::string& dbfile)
 
 void ServiceImpl::Sweep(const std::string& dbfile)
 {
-	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::Sweep", _("Service is not connected."));
 	if (dbfile.empty())
@@ -555,8 +528,6 @@ void ServiceImpl::Sweep(const std::string& dbfile)
 
 void ServiceImpl::Repair(const std::string& dbfile, IBPP::RPF flags)
 {
-	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::Repair", _("Service is not connected."));
 	if (dbfile.empty())
@@ -591,8 +562,6 @@ void ServiceImpl::Repair(const std::string& dbfile, IBPP::RPF flags)
 void ServiceImpl::StartBackup(const std::string& dbfile,
 	const std::string& bkfile, IBPP::BRF flags)
 {
-	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::Backup", _("Service is not connected."));
 	if (dbfile.empty())
@@ -625,8 +594,6 @@ void ServiceImpl::StartBackup(const std::string& dbfile,
 void ServiceImpl::StartRestore(const std::string& bkfile, const std::string& dbfile,
 	int	pagesize, IBPP::BRF flags)
 {
-	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::Restore", _("Service is not connected."));
 	if (bkfile.empty())
@@ -665,9 +632,6 @@ const char* ServiceImpl::WaitMsg()
 	SPB req;
 	RB result(1024);
 
-	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
-
 	req.Insert(isc_info_svc_line);	// Request one line of textual output
 
 	// _service_query will only block until a line of result is available
@@ -690,9 +654,6 @@ void ServiceImpl::Wait()
 	SPB spb;
 	RB result(1024);
 	std::string msg;
-
-	if (gds.Call()->mGDSVersion < 60)
-		throw LogicExceptionImpl("Service", _("Requires the version 6 of GDS32.DLL"));
 
 	spb.Insert(isc_info_svc_line);
 	for (;;)

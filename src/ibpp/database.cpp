@@ -147,15 +147,6 @@ void DatabaseImpl::Connect()
         mHandle = 0;     // Should be, but better be sure...
         throw LogicExceptionImpl("Database::Connect", _("Dialect 1 or 3 required"));
     }
-
-    // Now, verify the GDS32.DLL we are using is compatible with the server
-    if (ODS >= 10 && gds.Call()->mGDSVersion < 60)
-    {
-        status.Reset();
-        (*gds.Call()->m_detach_database)(status.Self(), &mHandle);
-        mHandle = 0;     // Should be, but better be sure...
-        throw LogicExceptionImpl("Database::Connect", _("GDS32.DLL version 5 against IBSERVER 6"));
-    }
 }
 
 void DatabaseImpl::Inactivate()

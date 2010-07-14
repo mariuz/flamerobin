@@ -194,8 +194,6 @@ GDS* GDS::Call()
 		}
 #endif
 
-		mGDSVersion = 60;
-
 		// Get the entry points that we need
 
 #ifdef IBPP_WINDOWS
@@ -265,11 +263,6 @@ namespace IBPP
 		//(void)gds.Call(); 		// Just call it to trigger the initialization
 		return (AppVersion & 0xFFFFFF00) ==
 				(IBPP::Version & 0xFFFFFF00) ? true : false;
-	}
-
-	int GDSVersion()
-	{
-		return gds.Call()->mGDSVersion;
 	}
 
 #ifdef IBPP_WINDOWS

@@ -393,7 +393,6 @@ struct GDS
 {
     // Attributes
     bool mReady;
-    int mGDSVersion;        // Version of the GDS32.DLL (50 for 5.0, 60 for 6.0)
 
 #ifdef IBPP_WINDOWS
     HMODULE mHandle;            // The GDS32.DLL HMODULE
@@ -462,7 +461,6 @@ struct GDS
     GDS()
     {
         mReady = false;
-        mGDSVersion = 0;
 #ifdef IBPP_WINDOWS
         mHandle = 0;
 #endif
