@@ -1814,11 +1814,12 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
         colsReadonly.insert(cells[i].GetCol());
     // -> remove all fiels that are nullable and not readonly
     std::set<int>::iterator col;
-    for (col = colsReadonly.begin(); col != colsReadonly.end(); col++)
+    for (col = colsReadonly.begin(); col != colsReadonly.end();)
     {
-        if ((!dgt->isReadonlyColumn(*col, false) &&
-            (dgt->isNullableColumn(*col))))
-            colsReadonly.erase(col);
+        if (!dgt->isReadonlyColumn(*col, false)&& dgt->isNullableColumn(*col))
+            colsReadonly.erase(col++);
+        else
+            ++col;
     }
     // generate a string for message with columnnames
     wxString colNames = wxEmptyString;
@@ -1851,11 +1852,12 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
         dgt->setValueToNull(row, col);
 
         // if visible, update BLOB editor
-        if ( (editBlobDlgM) &&
-             (editBlobDlgM->IsShown()) &&
-             (grid_data->GetCursorColumn() == col) &&
-             (grid_data->GetCursorRow() == row) )
+        if (editBlobDlgM && editBlobDlgM->IsShown()
+            && grid_data->GetCursorColumn() == col
+            && grid_data->GetCursorRow() == row)
+        {
             editBlobDlgM->setBlob(grid_data, dgt, &statementM, row, col, false);
+        }
     }
 
     // update GUI
@@ -1913,33 +1915,27 @@ void ExecuteSqlFrame::OnMenuUpdateGridCancelFetchAll(wxUpdateUIEvent& event)
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuUpdateGridCanSetFieldToNULL(wxUpdateUIEvent& event)
 {
-    bool can = false;
-    if (grid_data->getDataGridTable())
+    if (DataGridTable* dgt = grid_data->getDataGridTable())
     {
         // get selection into array (cells)
         wxGridCellCoordsArray cells = grid_data->getSelectedCells();
-        //if (cells.size() == 0)
-        //  cells.Add(wxGridCellCoords(grid_data->GetCursorColumn,grid_data->GetCursorRow));
-        int count = cells.size();
-
-        // generate a distinct List of cols
-        wxArrayInt cols;
-        for (int i = 0; i < count; i++)
+        // loop through cells, remember for each column whether it is r/o
+        std::set<int> readOnlyCols;
+        for (size_t i = 0; i < cells.size(); i++)
         {
             int col = cells[i].GetCol();
-            int idx = cols.Index(col);
-            if (idx < 0)
-                cols.Add(col);
-        }
-
-        // if one column in the selected area can be set to null
-        // (no readonly) then the item will be enabled
-        for (unsigned int i = 0; i < cols.size(); i++)
-        {
-            can = can || !grid_data->getDataGridTable()->isReadonlyColumn(cols[i],false);
+            if (readOnlyCols.find(col) == readOnlyCols.end())
+            {
+                if (!dgt->isReadonlyColumn(col, false))
+                {
+                    event.Enable(true);
+                    return;
+                }
+                readOnlyCols.insert(col);
+            }
         }
     }
-    event.Enable(can);
+    event.Enable(false);
 }
 //-----------------------------------------------------------------------------
 bool ExecuteSqlFrame::loadSqlFile(const wxString& filename)
