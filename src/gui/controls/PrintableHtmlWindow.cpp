@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -88,7 +88,7 @@ END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void PrintableHtmlWindow::OnRightUp(wxMouseEvent& event)
 {
-    wxMenu m(0);
+    wxMenu m;
     m.Append(wxID_NEW, _("&Open link in a new window"));
     m.Append(wxID_ADD, _("Open link in a new &tab"));
     m.Append(wxID_COPY, _("&Copy"));

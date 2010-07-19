@@ -25,19 +25,30 @@
 
 */
 
-#ifndef EXECUTESQL_H
-#define EXECUTESQL_H
+// For compilers that support precompilation, includes "wx/wx.h".
+#include "wx/wxprec.h"
+
+#ifdef __BORLANDC__
+    #pragma hdrstop
+#endif
+
+// for all others, include the necessary headers (this file is usually all you
+// need because it includes almost all "standard" wxWindows headers
+#ifndef WX_PRECOMP
+    #include "wx/wx.h"
+#endif
+
 //-----------------------------------------------------------------------------
-// These functions are used to show (and execute) sql statements
-// they are separated here since:
-// a) it is used in many places and improves compilation time a lot
-// b) it allows us to change the way it is done easily
-class ExecuteSqlFrame;
-class Database;
+wxPoint calcContextMenuPosition(const wxPoint& eventPos, wxControl* control)
+{
+    // use mouse coordinates if event is response to keyboard action
+    wxPoint menuPos(eventPos);
+    if (menuPos == wxDefaultPosition)
+        menuPos = wxGetMousePosition();
+    // make sure popup appears in the focused control
+    wxPoint menuPosClient = control->ScreenToClient(menuPos);
+    if (!control->GetClientRect().Contains(menuPosClient))
+        menuPosClient = wxPoint(0, 0);
+    return menuPosClient;
+}
 //-----------------------------------------------------------------------------
-ExecuteSqlFrame* showSql(wxWindow* parent, const wxString& title,
-    Database *database, const wxString &sql);
-void execSql(wxWindow* parent, const wxString& title, Database *database,
-    const wxString &sql, bool closeWindow);
-//-----------------------------------------------------------------------------
-#endif // EXECUTESQL_H

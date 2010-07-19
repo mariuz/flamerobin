@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -42,11 +42,12 @@
 #include <wx/wfstream.h>
 
 #include "AdvancedMessageDialog.h"
-#include "controls/DataGridTable.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "gui/CommandIds.h"
 #include "gui/CommandManager.h"
+#include "gui/controls/ControlUtils.h"
+#include "gui/controls/DataGridTable.h"
 #include "gui/EditBlobDialog.h"
 #include "gui/FRLayoutConfig.h"
 #include "gui/StyleGuide.h"
@@ -189,14 +190,14 @@ bool EditBlobDialogSTCText::hasSelection()
     return GetSelectionStart() != GetSelectionEnd();
 }
 //-----------------------------------------------------------------------------
-void EditBlobDialogSTCText::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
+void EditBlobDialogSTCText::OnContextMenu(wxContextMenuEvent& event)
 {
     if (AutoCompActive() || CallTipActive())
         return;
     SetFocus();
 
     bool isWrapModeWord = (GetWrapMode() == wxSTC_WRAP_WORD);
-    wxMenu m(0);
+    wxMenu m;
     m.Append(wxID_UNDO, _("&Undo"))->Enable(CanUndo());
     m.Append(wxID_REDO, _("&Redo"))->Enable(CanRedo());
     m.AppendSeparator();
@@ -208,7 +209,7 @@ void EditBlobDialogSTCText::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
     m.Append(wxID_SELECTALL, _("Select &All"));
     m.AppendCheckItem(Cmds::BlobEditor_ChangeLineBreak, _("Line break"))->Check(isWrapModeWord);
 
-    PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
+    PopupMenu(&m, calcContextMenuPosition(event.GetPosition(), this));
 }
 //-----------------------------------------------------------------------------
 void EditBlobDialogSTCText::OnContextMenuCmd(wxCommandEvent& event)

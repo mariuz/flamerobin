@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -38,6 +38,8 @@
     #include "wx/wx.h"
 #endif
 
+#include "gui/CommandManager.h"
+#include "gui/controls/ControlUtils.h"
 #include "gui/controls/TextControl.h"
 //-----------------------------------------------------------------------------
 TextControl::TextControl(wxWindow *parent, wxWindowID id)
@@ -158,21 +160,23 @@ void TextControl::OnCommandUpdateSelectAll(wxUpdateUIEvent& event)
     event.Enable(CanUndo());
 }
 //-----------------------------------------------------------------------------
-void TextControl::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
+void TextControl::OnContextMenu(wxContextMenuEvent& event)
 {
     SetFocus();
 
-    wxMenu m(0);
-    m.Append(wxID_UNDO, _("&Undo"));
-    m.Append(wxID_REDO, _("&Redo"));
+    CommandManager cm;
+    wxMenu m;
+    m.Append(wxID_UNDO, cm.getPopupMenuItemText(_("&Undo"), wxID_UNDO));
+    m.Append(wxID_REDO, cm.getPopupMenuItemText(_("&Redo"), wxID_REDO));
     m.AppendSeparator();
-    m.Append(wxID_CUT, _("Cu&t"));
-    m.Append(wxID_COPY, _("&Copy"));
-    m.Append(wxID_PASTE, _("&Paste"));
-    m.Append(wxID_DELETE, _("&Delete"));
+    m.Append(wxID_CUT, cm.getPopupMenuItemText(_("Cu&t"), wxID_CUT));
+    m.Append(wxID_COPY, cm.getPopupMenuItemText(_("&Copy"), wxID_COPY));
+    m.Append(wxID_PASTE, cm.getPopupMenuItemText(_("&Paste"), wxID_PASTE));
+    m.Append(wxID_DELETE, cm.getPopupMenuItemText(_("&Delete"), wxID_DELETE));
     m.AppendSeparator();
-    m.Append(wxID_SELECTALL, _("Select &All"));
+    m.Append(wxID_SELECTALL,
+        cm.getPopupMenuItemText(_("Select &all"), wxID_SELECTALL));
 
-    PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
+    PopupMenu(&m, calcContextMenuPosition(event.GetPosition(), this));
 }
 //-----------------------------------------------------------------------------

@@ -25,19 +25,12 @@
 
 */
 
-#ifndef EXECUTESQL_H
-#define EXECUTESQL_H
 //-----------------------------------------------------------------------------
-// These functions are used to show (and execute) sql statements
-// they are separated here since:
-// a) it is used in many places and improves compilation time a lot
-// b) it allows us to change the way it is done easily
-class ExecuteSqlFrame;
-class Database;
+#ifndef CONTROLUTILS_H
+#define CONTROLUTILS_H
+
+#include <wx/wx.h>
 //-----------------------------------------------------------------------------
-ExecuteSqlFrame* showSql(wxWindow* parent, const wxString& title,
-    Database *database, const wxString &sql);
-void execSql(wxWindow* parent, const wxString& title, Database *database,
-    const wxString &sql, bool closeWindow);
+wxPoint calcContextMenuPosition(const wxPoint& eventPos, wxControl* control);
 //-----------------------------------------------------------------------------
-#endif // EXECUTESQL_H
+#endif

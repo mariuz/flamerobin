@@ -921,7 +921,7 @@ void DBHTreeControl::OnContextMenu(wxContextMenuEvent& event)
         }
     }
 
-    wxMenu MyMenu(0);    // create context menu, depending on type of clicked item
+    wxMenu MyMenu;    // create context menu, depending on type of clicked item
     if (!item.IsOk())
         item = GetRootItem();
     MetadataItem* i = getMetadataItem(item);

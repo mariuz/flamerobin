@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -51,15 +51,6 @@ CommandManager::CommandManager()
 //-----------------------------------------------------------------------------
 bool CommandManager::findShortcutFor(int id, int& flags, int& keyCode)
 {
-    // standard commands
-    wxAcceleratorEntry ae(wxGetStockAccelerator(id));
-    if (ae.IsOk())
-    {
-        flags = ae.GetFlags();
-        keyCode = ae.GetKeyCode();
-        return true;
-    }
-
     // our own commands
     ShortCutDataMap::const_iterator it;
     it = shortcutsM.find(id);
@@ -68,6 +59,15 @@ bool CommandManager::findShortcutFor(int id, int& flags, int& keyCode)
         ShortCutData scd(it->second);
         flags = scd.flags;
         keyCode = scd.keyCode;
+        return true;
+    }
+
+    // standard commands
+    wxAcceleratorEntry ae(wxGetStockAccelerator(id));
+    if (ae.IsOk())
+    {
+        flags = ae.GetFlags();
+        keyCode = ae.GetKeyCode();
         return true;
     }
 
@@ -125,6 +125,21 @@ wxString CommandManager::getToolbarHint(wxString text, int id)
 void CommandManager::init()
 {
     ShortCutData scd;
+
+    // missing from the stock command list: "Select All"
+    scd.flags = wxACCEL_CTRL;
+    scd.keyCode = 'A';
+    shortcutsM.insert(ShortCutDataPair(wxID_SELECTALL, scd));
+    // missing from the stock command list / wrong shortcut for Windows:
+    // "Undo", "Redo"
+    scd.flags = wxACCEL_CTRL;
+    scd.keyCode = 'Z';
+    shortcutsM.insert(ShortCutDataPair(wxID_UNDO, scd));
+    if (wxPlatformInfo::Get().GetOperatingSystemId() & wxOS_WINDOWS)
+        scd.keyCode = 'Y';
+    else
+        scd.flags = wxACCEL_CTRL | wxACCEL_SHIFT;
+    shortcutsM.insert(ShortCutDataPair(wxID_REDO, scd));
 
     // statement execution commands
     scd.flags = wxACCEL_NORMAL;

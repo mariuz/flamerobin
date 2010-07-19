@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -70,9 +70,6 @@ bool ObjectDescriptionHandler::handleURI(URI& uri)
     {
         wxBusyCursor wait;
         m->setDescription(desc);
-        // FIXME: This can be removed when MetadataItem::setDescriptionM()
-        //        is fixed to call it without recursion.
-        m->notifyObservers();
     }
     return true;
 }

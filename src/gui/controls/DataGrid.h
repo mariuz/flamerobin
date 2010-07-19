@@ -83,7 +83,7 @@ public:
 
     void cancelFetchAll();
     void fetchAll();
-    
+
     wxGridCellCoordsArray getSelectedCells();
 };
 //----------------------------------------------------------------------

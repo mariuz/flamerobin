@@ -60,6 +60,7 @@
 #include "gui/AdvancedMessageDialog.h"
 #include "gui/CommandIds.h"
 #include "gui/CommandManager.h"
+#include "gui/controls/ControlUtils.h"
 #include "gui/controls/DataGrid.h"
 #include "gui/controls/DataGridTable.h"
 #include "gui/ProgressDialog.h"
@@ -354,13 +355,13 @@ BEGIN_EVENT_TABLE(SqlEditor, wxStyledTextCtrl)
     EVT_KILL_FOCUS(SqlEditor::OnKillFocus)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
-void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
+void SqlEditor::OnContextMenu(wxContextMenuEvent& event)
 {
     if (AutoCompActive() || CallTipActive())
         return;
     SetFocus();
 
-    wxMenu m(0);
+    wxMenu m;
     m.Append(wxID_UNDO, _("&Undo"));
     m.Append(wxID_REDO, _("&Redo"));
     m.AppendSeparator();
@@ -383,7 +384,7 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& WXUNUSED(event))
         m.Append(Cmds::Find_Selected_Object,
             _("S&how properties for ") + sel);
     }
-    PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
+    PopupMenu(&m, calcContextMenuPosition(event.GetPosition(), this));
 }
 //-----------------------------------------------------------------------------
 void SqlEditor::OnKillFocus(wxFocusEvent& event)

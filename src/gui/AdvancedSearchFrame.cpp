@@ -473,7 +473,7 @@ void AdvancedSearchFrame::OnListCtrlResultsItemSelected(wxListEvent& event)
 void AdvancedSearchFrame::OnListCtrlResultsRightClick(wxListEvent& event)
 {
     MetadataItem *m = results[event.GetIndex()];
-    wxMenu MyMenu(0);
+    wxMenu MyMenu;
     ContextMenuMetadataItemVisitor cmv(&MyMenu);
     m->acceptVisitor(&cmv);
     PopupMenu(&MyMenu, ScreenToClient(wxGetMousePosition()));

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -202,7 +202,7 @@ void DataGrid::showPopupMenu(wxPoint cursorPos)
 {
     SetFocus();
 
-    wxMenu m(0);
+    wxMenu m;
     // TODO: merge this with ExecuteSqlFrame's menu
     m.Append(Cmds::DataGrid_FetchAll, _("Fetch all records"));
     m.Append(Cmds::DataGrid_CancelFetchAll, _("Stop fetching all records"));
