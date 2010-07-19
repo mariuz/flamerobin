@@ -265,6 +265,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/CommandIds.h
         $(SOURCEDIR)/gui/CommandManager.h
         $(SOURCEDIR)/gui/ContextMenuMetadataItemVisitor.h
+        $(SOURCEDIR)/gui/controls/ControlUtils.h
         $(SOURCEDIR)/gui/controls/DataGrid.h
         $(SOURCEDIR)/gui/controls/DataGridRowBuffer.h
         $(SOURCEDIR)/gui/controls/DataGridRows.h
@@ -377,6 +378,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/BaseFrame.cpp
         $(SOURCEDIR)/gui/CommandManager.cpp
         $(SOURCEDIR)/gui/ContextMenuMetadataItemVisitor.cpp
+        $(SOURCEDIR)/gui/controls/ControlUtils.cpp
         $(SOURCEDIR)/gui/controls/DataGrid.cpp
         $(SOURCEDIR)/gui/controls/DataGridRowBuffer.cpp
         $(SOURCEDIR)/gui/controls/DataGridRows.cpp

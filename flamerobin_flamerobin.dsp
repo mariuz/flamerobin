@@ -512,6 +512,10 @@ SOURCE=.\src\gui\ContextMenuMetadataItemVisitor.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\controls\ControlUtils.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\metadata\CreateDDLVisitor.cpp
 # End Source File
 # Begin Source File
@@ -915,6 +919,10 @@ SOURCE=.\src\config\Config.h
 # Begin Source File
 
 SOURCE=.\src\gui\ContextMenuMetadataItemVisitor.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\controls\ControlUtils.h
 # End Source File
 # Begin Source File
 
