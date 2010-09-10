@@ -269,6 +269,11 @@ wxString Config::getHtmlTemplatesPath() const
     return getHomePath() + wxT("html-templates/");
 }
 //-----------------------------------------------------------------------------
+wxString Config::getSqlTemplatesPath() const
+{
+    return getHomePath() + wxT("html-templates/");
+}
+//-----------------------------------------------------------------------------
 wxString Config::getDocsPath() const
 {
     return getHomePath() + wxT("docs/");

@@ -1,0 +1,18 @@
+set term !! ;
+
+create procedure SP_{%object_name%}
+returns ( {%columns:{%notfirst:,%}
+    {%object_name%} {%column_datatype%}%}
+)
+as
+begin
+    for select {%columns:{%notfirst:, %}a.{%object_name%}%}
+        from {%object_name%} a
+        into {%columns:{%notfirst:, %}{%object_name%}%}
+    do
+    begin
+        suspend;
+    end
+end!!
+
+set term ; !!

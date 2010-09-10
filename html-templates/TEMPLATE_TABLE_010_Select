@@ -1,0 +1,2 @@
+select {%columns:{%notfirst:, %}a.{%object_name%}%}
+from {%object_name%} a

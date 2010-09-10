@@ -678,7 +678,8 @@ void DataGrid::saveAsHTML()
                 if (halign == wxALIGN_RIGHT)
                     outStr.WriteString(wxT(" align=right"));
                 outStr.WriteString(wxT(" nowrap>"));
-                outStr.WriteString(escapeHtmlChars(table->getCellValue(i, j)));
+                TemplateEngine te(0);
+                outStr.WriteString(te.escapeHtmlChars(table->getCellValue(i, j)));
             }
             outStr.WriteString(wxT("</td>"));
         }
@@ -705,7 +706,7 @@ wxGridCellCoordsArray DataGrid::getSelectedCells()
 {
     wxGridCellCoordsArray result;
     result = wxGrid::GetSelectedCells();
-        
+
     // add rows in selection blocks that span all columns
     wxGridCellCoordsArray tlCells(wxGrid::GetSelectionBlockTopLeft());
     wxGridCellCoordsArray brCells(wxGrid::GetSelectionBlockBottomRight());
@@ -719,11 +720,11 @@ wxGridCellCoordsArray DataGrid::getSelectedCells()
         {
             result.Add(wxGridCellCoords(iRow,iCol));
         }
-    }  
-    
+    }
+
     if (result.size() == 0)
         result.Add(wxGridCellCoords(wxGrid::GetCursorRow(),wxGrid::GetCursorColumn()));
-        
+
     return result;
 }
 //-----------------------------------------------------------------------------

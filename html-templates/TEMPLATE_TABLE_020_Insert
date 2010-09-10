@@ -1,0 +1,4 @@
+insert into {%object_name%} ({%columns:{%notfirst:, %}{%object_name%}%})
+values ({%columns:{%notfirst:, %}
+    '{%object_name%} {%column_nulloption%}'%}
+);

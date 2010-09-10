@@ -113,6 +113,8 @@ public:
     wxString getHomePath() const;
     // returns the path from which to load the HTML templates.
     wxString getHtmlTemplatesPath() const;
+    // returns the path from which to load the SQL templates.
+    wxString getSqlTemplatesPath() const;
     // returns the path containing the docs.
     wxString getDocsPath() const;
     // returns the path containing the confdefs.

@@ -38,6 +38,7 @@
 #include "gui/BaseFrame.h"
 #include "gui/controls/PrintableHtmlWindow.h"
 #include "metadata/metadataitem.h"
+//-----------------------------------------------------------------------------
 class MetadataItemPropertiesFrame;
 //-----------------------------------------------------------------------------
 class MetadataItemPropertiesPanel: public wxPanel, public Observer
@@ -55,10 +56,6 @@ private:
     // load page in idle handler, only request a reload in update()
     void requestLoadPage(bool showLoadingPage);
     void loadPage();
-    void processCommand(wxString cmd, MetadataItem* object,
-        wxString& htmlpage);
-    void processHtmlCode(wxString& htmlpage, wxString htmlsource,
-        MetadataItem* object = 0);
 
 protected:
     virtual void removeSubject(Subject* subject);

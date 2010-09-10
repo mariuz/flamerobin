@@ -91,8 +91,7 @@ namespace Cmds
         Menu_AddColumn, Menu_CreateTriggerForTable, Menu_RestoreIntoNew,
         Menu_MonitorEvents, Menu_GetServerVersion, Menu_AlterObject,
         Menu_DropDatabase, Menu_RecreateDatabase, Menu_DatabaseProperties,
-        Menu_GenerateData,
-        Menu_CreateProcedureForTable, Menu_ExtractDatabaseDDL,
+        Menu_GenerateData, Menu_ExtractDatabaseDDL,
 
         // view menu
         Menu_ToggleStatusBar, Menu_ToggleSearchBar, Menu_ToggleDisconnected,
@@ -101,7 +100,7 @@ namespace Cmds
         Menu_CreateDomain, Menu_CreateException, Menu_CreateFunction,
         Menu_CreateGenerator, Menu_CreateProcedure, Menu_CreateRole,
         Menu_CreateTable, Menu_CreateTrigger, Menu_CreateView,
-        
+
         // blob editor
         BlobEditor_ChangeLineBreak,
         BlobEditor_Menu_BLOB,
@@ -109,7 +108,10 @@ namespace Cmds
         BlobEditor_Menu_BLOBLoadFromFile,
         BlobEditor_ProgressCancel,
 
-        // for easier copy/paste of above items (no need to mess with comma
+        // 100 templates
+        Menu_TemplateFirst = 700, Menu_TemplateLast = 799,
+
+        // for easier copy/paste of above items (no need to mess with comma)
         Last_menu
     };
 };

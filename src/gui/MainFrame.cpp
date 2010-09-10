@@ -39,6 +39,7 @@
 #endif
 
 #include <wx/clipbrd.h>
+#include <wx/dir.h>
 #include <wx/dnd.h>
 #include <wx/tokenzr.h>
 
@@ -414,7 +415,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(Cmds::Menu_LoadColumnsInfo, MainFrame::OnMenuLoadColumnsInfo)
     EVT_MENU(Cmds::Menu_AddColumn, MainFrame::OnMenuAddColumn)
     EVT_MENU(Cmds::Menu_CreateTriggerForTable, MainFrame::OnMenuCreateTriggerForTable)
-    EVT_MENU(Cmds::Menu_CreateProcedureForTable, MainFrame::OnMenuCreateProcedureForTable)
     EVT_MENU(Cmds::Menu_ExecuteProcedure, MainFrame::OnMenuExecuteProcedure)
 
     EVT_MENU(Cmds::Menu_ShowAllGeneratorValues, MainFrame::OnMenuShowAllGeneratorValues)
@@ -448,6 +448,9 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(Cmds::Menu_CreateTable,      MainFrame::OnMenuCreateTable)
     EVT_MENU(Cmds::Menu_CreateTrigger,    MainFrame::OnMenuCreateTrigger)
     EVT_MENU(Cmds::Menu_CreateView,       MainFrame::OnMenuCreateView)
+
+    EVT_MENU_RANGE(Cmds::Menu_TemplateFirst, Cmds::Menu_TemplateLast,
+        MainFrame::OnMenuTemplate)
 
     EVT_MENU_OPEN(MainFrame::OnMainMenuOpen)
     EVT_TREE_SEL_CHANGED(DBHTreeControl::ID_tree_ctrl, MainFrame::OnTreeSelectionChanged)
@@ -806,13 +809,56 @@ void MainFrame::OnMenuCreateTriggerForTable(wxCommandEvent& WXUNUSED(event))
     getURIProcessor().handleURI(uri);
 }
 //-----------------------------------------------------------------------------
-void MainFrame::OnMenuCreateProcedureForTable(wxCommandEvent& WXUNUSED(event))
+void MainFrame::OnMenuTemplate(wxCommandEvent& event)
 {
     Table *t = dynamic_cast<Table*>(treeMainM->getSelectedMetadataItem());
     if (!t)
         return;
-    showSql(this, wxString(_("Creating procedure")), t->findDatabase(),
-        t->getProcedureTemplate());
+    Database* d = getDatabase(t);
+    if (!checkValidDatabase(d))
+        return;
+
+    wxArrayString files;
+    wxString path = config().getSqlTemplatesPath();
+    wxDir::GetAllFiles(path, &files, wxT("TEMPLATE_TABLE_*"));
+    files.Sort();
+    wxString file = files[event.GetId() - 1 - (int)Cmds::Menu_TemplateFirst];
+
+    std::vector<MetadataItem *> objects;
+    t->ensureChildrenLoaded();
+    objects.push_back(t);
+    objects.push_back(t->getPrimaryKey());
+
+    wxArrayString as;
+    for (RelationColumns::iterator it = t->begin(); it != t->end(); ++it)
+        as.Add((*it)->getName_());
+    wxArrayInt selections;
+    if (!wxGetMultipleChoices(selections, _("Select columns"),
+        file.Mid(19+path.Length()), as, this))
+    {
+        return;
+    }
+
+    int i = 0, p = 0;
+    for (RelationColumns::iterator it = t->begin(); it != t->end(); ++it, i++)
+    {
+        if (selections[p] > i)
+            continue;
+        else if (selections[p] == i)
+        {
+            objects.push_back((*it).get());
+            p++;
+            if (p >= selections.Count())
+                break;
+        }
+    }
+
+    wxString sql;
+    TemplateEngine te(t, &objects);
+    te.setPlainText(true);
+    te.processHtmlCode(sql, loadEntireFile(file), 0, this);
+
+    showSql(this, wxString(_("Execute SQL statements")), d, sql);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuExecuteProcedure(wxCommandEvent& WXUNUSED(event))

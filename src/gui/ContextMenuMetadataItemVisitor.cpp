@@ -35,6 +35,7 @@
     #include "wx/wx.h"
 #endif
 
+#include <wx/dir.h>
 #include <wx/menu.h>
 
 #include "config/Config.h"
@@ -205,14 +206,23 @@ void ContextMenuMetadataItemVisitor::visitTable(Table& table)
     bool isSystem = table.isSystem();
     if (!isSystem)
         menuM->Append(Cmds::Menu_Insert, _("&Insert into ..."));
-    addSelectMenu(true, !isSystem); // selectable, can add columns if user
+
+    wxMenu *tMenu = new wxMenu();
+    // read files named TEMPLATE_TABLE_??? from directory
+    wxArrayString files;
+    wxString path = config().getSqlTemplatesPath();
+    wxDir::GetAllFiles(path, &files, wxT("TEMPLATE_TABLE_*"));
+    files.Sort();
+    for (int i = 1; i <= files.GetCount(); i++)
+        tMenu->Append(i+(int)Cmds::Menu_TemplateFirst, files[i-1].Mid(19+path.Length()));
+    menuM->Append(Cmds::Menu_TemplateFirst, _("&Generate script for..."), tMenu);
     if (!isSystem)
     {
         menuM->Append(Cmds::Menu_CreateTriggerForTable,
             _("Create new &trigger..."));
-        menuM->Append(Cmds::Menu_CreateProcedureForTable,
-            _("Create selectable &procedure"));
     }
+
+    addSelectMenu(true, !isSystem); // selectable, can add columns if user
     addRegularObjectMenu(false, !isSystem);
 }
 //-----------------------------------------------------------------------------

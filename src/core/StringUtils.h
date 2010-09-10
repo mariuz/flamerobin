@@ -31,6 +31,7 @@
 #include <wx/string.h>
 
 #include <string>
+#include <vector>
 
 class wxMBConv;
 //-----------------------------------------------------------------------------
@@ -39,11 +40,31 @@ wxString std2wx(const std::string& input, wxMBConv* conv = wxConvCurrent);
 
 wxString std2wxIdentifier(const std::string& input, wxMBConv* conv);
 //-----------------------------------------------------------------------------
-//! converts chars that have special meaning in HTML, so they get displayed
-wxString escapeHtmlChars(const wxString& input, bool processNewlines = true);
 //-----------------------------------------------------------------------------
 //! returns string suitable for HTML META charset tag (used only if no
 //  conversion to UTF-8 is available, i.e. in non-Unicode build
 wxString getHtmlCharset();
+//-----------------------------------------------------------------------------
+class MetadataItem;
+class TemplateEngine
+{
+private:
+    MetadataItem *objectM;  // main observed object
+    std::vector<MetadataItem *> allowedObjectsM;
+    bool flagNextM;
+    bool plainTextM;
+public:
+    TemplateEngine(MetadataItem *m,
+        std::vector<MetadataItem *> *allowedObjects = 0);
+
+    void processCommand(wxString cmd, MetadataItem* object,
+        wxString& htmlpage, wxWindow *window, bool first);
+    void processHtmlCode(wxString& htmlpage, wxString htmlsource,
+        MetadataItem* object, wxWindow *window, bool first = true);
+
+    //! converts chars that have special meaning in HTML, so they get displayed
+    wxString escapeHtmlChars(const wxString& input, bool processNewlines = true);
+    void setPlainText(bool plain);
+};
 //-----------------------------------------------------------------------------
 #endif // FR_STRINGUTILS_H
