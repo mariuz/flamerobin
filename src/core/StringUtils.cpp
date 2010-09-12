@@ -170,6 +170,12 @@ void TemplateEngine::processCommand(wxString cmd, MetadataItem *object,
     if (cmd == wxT("object_name"))
         htmlpage += object->getName_();
 
+    else if (cmd == wxT("parent"))
+    {
+        if (object->getParent())
+            processHtmlCode(htmlpage, suffix, object->getParent(), window);
+    }
+
     else if (cmd == wxT("object_type"))
         htmlpage += object->getTypeName();
 
