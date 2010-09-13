@@ -5,6 +5,12 @@ Below are build instructions for FlameRobin on all supported build environments.
 Instructions assume that you have already compiled wxWidgets.
 There are some tips regarding that at the end of this file.
 
+To build FR a recent installation of the Boost libraries is also necessary,
+at the time of writing version 1.44 is the current one, but 1.43 should
+work just as well. FR uses the header-only libraries, so building the Boost
+libraries for the used compiler isn't necessary, adding the directories to
+the list of includes will be enough.
+
 --------------------------
 -- Common to all builds --
 --------------------------
@@ -22,6 +28,15 @@ Start->Control Panel->System and select the "Advanced" tab. Then, click the
 "Environment Variables" button and add WXDIR to the user or system env vars.
 If you are using Windows98, you can set the variable from the command line,
 using the "set" command.
+
+For Windows you must also set a BOOST_ROOT environment variable which points
+to the Boost root directory, see the previous section for how to do this. For
+other systems the configure script needs to be amended to search for
+installed Boost libraries and add the necessary directories to the compiler
+invocation, but unfortunately this hasn't been done yet.
+For Debian and Ubuntu at least installing Boost should make the headers
+available without any more work. But if you have problems building FR on
+platforms other than Windows, please post to the development list.
 
 -----------------------------------------
 -- MSW - Visual C++ Build Instructions --
