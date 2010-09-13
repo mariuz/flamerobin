@@ -155,6 +155,17 @@ bool Domain::isString()
     return (datatypeM == 14 || datatypeM == 10 || datatypeM == 37);
 }
 //-----------------------------------------------------------------------------
+bool Domain::isSystem() const
+{
+    wxString prefix(getName_().substr(0, 4));
+    if (prefix == wxT("MON$"))
+        return true;
+    if (prefix != wxT("RDB$"))
+        return false;
+    long l;
+    return getName_().Mid(4).ToLong(&l);    // numeric = system
+}
+//-----------------------------------------------------------------------------
 //! returns column's datatype as human readable wxString.
 wxString Domain::getDatatypeAsString()
 {
