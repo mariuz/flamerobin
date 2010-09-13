@@ -499,6 +499,13 @@ Accepted values: AMD64, IA64.
         TABLEtriggers.html
         TABLEindices.html
         TABLEprivileges.html
+        TEMPLATE_TABLE_010_Select
+        TEMPLATE_TABLE_020_Insert
+        TEMPLATE_TABLE_030_Update
+        "TEMPLATE_TABLE_040_Selectable procedure"
+        "TEMPLATE_TABLE_050_Selectable EXECUTE BLOCK"
+        "TEMPLATE_TABLE_055_Change trigger"
+        "TEMPLATE_TABLE_060_Full DDL"
         TRIGGER.html
         VIEW.html
         VIEWprivileges.html
