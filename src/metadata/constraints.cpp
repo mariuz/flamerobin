@@ -55,14 +55,15 @@ const wxString Constraint::getTypeName() const
     return wxT("CONSTRAINT");
 }
 //-----------------------------------------------------------------------------
-wxString ColumnConstraint::getColumnList() const
+wxString ColumnConstraint::getColumnList(const wxString& separator,
+    const wxString& suffix) const
 {
     wxString result;
     for (std::vector<wxString>::const_iterator it = columnsM.begin(); it != columnsM.end(); ++it)
     {
         if (it != columnsM.begin())
-            result += wxT(", ");
-        result += (*it);
+            result += separator;
+        result += (*it) + suffix;
     }
     return result;
 };

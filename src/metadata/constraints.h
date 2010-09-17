@@ -48,7 +48,8 @@ public:
     wxString indexName; // needed for DDL extraction
     std::vector<wxString> columnsM;
 
-    wxString getColumnList() const;
+    wxString getColumnList(const wxString& separator = wxT(", "),
+        const wxString& suffix = wxT("")) const;
     const_iterator begin() { return columnsM.begin(); };
     const_iterator end() { return columnsM.end(); };
     bool hasColumn(const wxString& column) const;

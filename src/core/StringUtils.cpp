@@ -545,7 +545,11 @@ void TemplateEngine::processCommand(wxString cmd, MetadataItem *object,
         ColumnConstraint* c = dynamic_cast<ColumnConstraint*>(object);
         if (!c)
             return;
-        htmlpage += c->getColumnList();
+        pos = suffix.find(':');
+        if (pos == wxString::npos)
+            htmlpage += c->getColumnList();
+        else
+            htmlpage += c->getColumnList(suffix.substr(0, pos), suffix.substr(pos + 1));
     }
 
     else if (cmd == wxT("fk_referenced_columns") || cmd == wxT("fk_table"))
