@@ -104,6 +104,7 @@ Source: ..\..\vcu\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersi
 #endif
 Source: ..\..\docs\*.*; Excludes: flamerobin.1; DestDir: {app}\docs; Flags: ignoreversion
 Source: ..\..\html-templates\*.*; DestDir: {app}\html-templates; Flags: ignoreversion
+Source: ..\..\sql-templates\*.*; DestDir: {app}\sql-templates; Flags: ignoreversion
 Source: ..\..\conf-defs\*.*; DestDir: {app}\conf-defs; Flags: ignoreversion
 #ifndef X64VERSION
 Source: ..\..\res\system32\msvcr71.dll; DestDir: {app}; MinVersion: 0,5.0.2195
