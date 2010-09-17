@@ -476,6 +476,20 @@ Accepted values: AMD64, IA64.
         html.css
     </set>
 
+    <set var="SQLTEMPLATEDIR">
+        <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/sql-templates</if>
+        <if cond="FORMAT!='autoconf'">sql-templates</if>
+    </set>
+    <set var="SQLTEMPLATEFILES">
+        TABLE_010_Select
+        TABLE_020_Insert
+        TABLE_030_Update
+        "TABLE_040_Selectable procedure"
+        "TABLE_050_Selectable EXECUTE BLOCK"
+        "TABLE_055_Change trigger"
+        "TABLE_060_Full DDL"
+    </set>
+
     <set var="HTMLTEMPLATEDIR">
         <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/html-templates</if>
         <if cond="FORMAT!='autoconf'">html-templates</if>
@@ -499,13 +513,6 @@ Accepted values: AMD64, IA64.
         TABLEtriggers.html
         TABLEindices.html
         TABLEprivileges.html
-        TEMPLATE_TABLE_010_Select
-        TEMPLATE_TABLE_020_Insert
-        TEMPLATE_TABLE_030_Update
-        "TEMPLATE_TABLE_040_Selectable procedure"
-        "TEMPLATE_TABLE_050_Selectable EXECUTE BLOCK"
-        "TEMPLATE_TABLE_055_Change trigger"
-        "TEMPLATE_TABLE_060_Full DDL"
         TRIGGER.html
         VIEW.html
         VIEWprivileges.html
@@ -553,6 +560,7 @@ Accepted values: AMD64, IA64.
                 mkdir -p $(BUNDLE)/SharedSupport/conf-defs
                 mkdir -p $(BUNDLE)/SharedSupport/docs
                 mkdir -p $(BUNDLE)/SharedSupport/html-templates
+                mkdir -p $(BUNDLE)/SharedSupport/sql-templates
 
                 <!-- PkgInfo: -->
                 echo -n "APPL????" >$(BUNDLE)/PkgInfo
@@ -573,6 +581,7 @@ Accepted values: AMD64, IA64.
                 cp -R $(DOLLAR)(srcdir)/conf-defs/* $(BUNDLE)/SharedSupport/conf-defs
                 cp -R $(DOLLAR)(srcdir)/docs/* $(BUNDLE)/SharedSupport/docs
                 cp -R $(DOLLAR)(srcdir)/html-templates/* $(BUNDLE)/SharedSupport/html-templates
+                cp -R $(DOLLAR)(srcdir)/sql-templates/* $(BUNDLE)/SharedSupport/sql-templates
             </command>
         </modify-target>
 
@@ -669,6 +678,11 @@ Accepted values: AMD64, IA64.
             <srcdir>$(HTMLTEMPLATEDIR)</srcdir>
             <files>$(HTMLTEMPLATEFILES)</files>
             <install-to>$(DATADIR)/flamerobin/html-templates</install-to>
+        </data-files>
+        <data-files>
+            <srcdir>$(SQLTEMPLATEDIR)</srcdir>
+            <files>$(SQLTEMPLATEFILES)</files>
+            <install-to>$(DATADIR)/flamerobin/sql-templates</install-to>
         </data-files>
         <data-files>
             <srcdir>$(RESOURCEDIR)</srcdir>
