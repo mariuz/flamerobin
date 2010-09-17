@@ -820,7 +820,7 @@ void MainFrame::OnMenuTemplate(wxCommandEvent& event)
 
     wxArrayString files;
     wxString path = config().getSqlTemplatesPath();
-    wxDir::GetAllFiles(path, &files, wxT("TABLE_*"));
+    wxDir::GetAllFiles(path, &files, wxT("TABLE_*"), wxDIR_FILES);
     files.Sort();
     wxString file = files[event.GetId() - 1 - (int)Cmds::Menu_TemplateFirst];
 
@@ -830,9 +830,13 @@ void MainFrame::OnMenuTemplate(wxCommandEvent& event)
     objects.push_back(t->getPrimaryKey());
 
     wxArrayString as;
-    for (RelationColumns::iterator it = t->begin(); it != t->end(); ++it)
-        as.Add((*it)->getName_());
     wxArrayInt selections;
+    int j = 0;
+    for (RelationColumns::iterator it = t->begin(); it != t->end(); ++it)
+    {
+        as.Add((*it)->getName_());
+        selections.Add(j++);
+    }
     if (!wxGetMultipleChoices(selections, _("Select columns"),
         file.Mid(19+path.Length()), as, this))
     {

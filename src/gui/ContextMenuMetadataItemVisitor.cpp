@@ -211,7 +211,7 @@ void ContextMenuMetadataItemVisitor::visitTable(Table& table)
     // read files named TABLE_??? from directory
     wxArrayString files;
     wxString path = config().getSqlTemplatesPath();
-    wxDir::GetAllFiles(path, &files, wxT("TABLE_*"));
+    wxDir::GetAllFiles(path, &files, wxT("TABLE_*"), wxDIR_FILES);
     files.Sort();
     for (int i = 1; i <= files.GetCount(); i++)
         tMenu->Append(i+(int)Cmds::Menu_TemplateFirst, files[i-1].Mid(10+path.Length()));
