@@ -188,7 +188,7 @@ void TemplateEngine::processCommand(wxString cmd, MetadataItem *object,
     else if (cmd == wxT("fr_home"))
         htmlpage += config().getHomePath();
 
-    else if (cmd == wxT("notfirst"))
+    else if (cmd == wxT("separator"))
     {
         if (!first)
             htmlpage += suffix;

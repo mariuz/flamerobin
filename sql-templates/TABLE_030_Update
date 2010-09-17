@@ -1,4 +1,4 @@
-update {%object_name%} set {%columns:{%notfirst:, %}
+update {%object_name%} set {%columns:{%separator:, %}
     {%object_name%} = '{%object_name%} {%column_nulloption%}'%}
 where {%primary_key:{%constraint_columns%}%} = '?';
 -- TODO: iterate PK columns (for multi-column PK) as selection, join with AND

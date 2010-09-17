@@ -1,2 +1,2 @@
-select {%columns:{%notfirst:, %}a.{%object_name%}%}
+select {%columns:{%separator:, %}a.{%object_name%}%}
 from {%object_name%} a

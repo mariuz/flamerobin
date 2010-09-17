@@ -1,4 +1,4 @@
-insert into {%object_name%} ({%columns:{%notfirst:, %}{%object_name%}%})
-values ({%columns:{%notfirst:, %}
+insert into {%object_name%} ({%columns:{%separator:, %}{%object_name%}%})
+values ({%columns:{%separator:, %}
     '{%object_name%} {%column_nulloption%}'%}
 );
