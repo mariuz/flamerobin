@@ -208,13 +208,13 @@ void ContextMenuMetadataItemVisitor::visitTable(Table& table)
         menuM->Append(Cmds::Menu_Insert, _("&Insert into ..."));
 
     wxMenu *tMenu = new wxMenu();
-    // read files named TEMPLATE_TABLE_??? from directory
+    // read files named TABLE_??? from directory
     wxArrayString files;
     wxString path = config().getSqlTemplatesPath();
-    wxDir::GetAllFiles(path, &files, wxT("TEMPLATE_TABLE_*"));
+    wxDir::GetAllFiles(path, &files, wxT("TABLE_*"));
     files.Sort();
     for (int i = 1; i <= files.GetCount(); i++)
-        tMenu->Append(i+(int)Cmds::Menu_TemplateFirst, files[i-1].Mid(19+path.Length()));
+        tMenu->Append(i+(int)Cmds::Menu_TemplateFirst, files[i-1].Mid(10+path.Length()));
     menuM->Append(Cmds::Menu_TemplateFirst, _("&Generate script for..."), tMenu);
     if (!isSystem)
     {

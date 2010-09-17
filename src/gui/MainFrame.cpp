@@ -820,7 +820,7 @@ void MainFrame::OnMenuTemplate(wxCommandEvent& event)
 
     wxArrayString files;
     wxString path = config().getSqlTemplatesPath();
-    wxDir::GetAllFiles(path, &files, wxT("TEMPLATE_TABLE_*"));
+    wxDir::GetAllFiles(path, &files, wxT("TABLE_*"));
     files.Sort();
     wxString file = files[event.GetId() - 1 - (int)Cmds::Menu_TemplateFirst];
 
