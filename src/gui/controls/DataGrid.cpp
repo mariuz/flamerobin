@@ -678,8 +678,7 @@ void DataGrid::saveAsHTML()
                 if (halign == wxALIGN_RIGHT)
                     outStr.WriteString(wxT(" align=right"));
                 outStr.WriteString(wxT(" nowrap>"));
-                TemplateEngine te(0);
-                outStr.WriteString(te.escapeHtmlChars(table->getCellValue(i, j)));
+                outStr.WriteString(escapeHtmlChars(table->getCellValue(i, j)));
             }
             outStr.WriteString(wxT("</td>"));
         }

@@ -96,6 +96,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FindDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRLayoutConfig.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_HtmlTemplateProcessor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_InsertDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemPropertiesFrame.o \
@@ -146,8 +147,10 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MultiStatement.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SelectStatement.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlStatement.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTemplateProcessor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementBuilder.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TemplateProcessor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_urihandler.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.o \
@@ -387,6 +390,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FindDialog.o: ./src/gui/FindDialog.cpp
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRLayoutConfig.o: ./src/gui/FRLayoutConfig.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_HtmlTemplateProcessor.o: ./src/gui/HtmlTemplateProcessor.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_InsertDialog.o: ./src/gui/InsertDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
@@ -537,10 +543,16 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SelectStatement.o: ./src/sql/SelectStatem
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlStatement.o: ./src/sql/SqlStatement.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTemplateProcessor.o: ./src/sql/SqlTemplateProcessor.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.o: ./src/sql/SqlTokenizer.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementBuilder.o: ./src/sql/StatementBuilder.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TemplateProcessor.o: ./src/TemplateProcessor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.o: ./src/statementHistory.cpp

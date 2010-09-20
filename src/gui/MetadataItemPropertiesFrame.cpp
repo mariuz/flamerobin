@@ -49,10 +49,10 @@
 
 #include "config/Config.h"
 #include "core/FRError.h"
-#include "core/StringUtils.h"
 #include "engine/MetadataLoader.h"
 #include "framemanager.h"
 #include "frutils.h"
+#include "gui/HtmlTemplateProcessor.h"
 #include "gui/MetadataItemPropertiesFrame.h"
 #include "gui/ProgressDialog.h"
 #include "images.h"
@@ -296,8 +296,8 @@ void MetadataItemPropertiesPanel::loadPage()
 void MetadataItemPropertiesPanel::processHtmlFile(wxString fileName)
 {
     wxString htmlpage;
-    TemplateEngine te(objectM);
-    te.processHtmlCode(htmlpage, loadEntireFile(fileName), 0, this);
+    HtmlTemplateProcessor tp(objectM);
+    tp.processTemplateText(htmlpage, loadEntireFile(fileName), 0, this);
 
     int x = 0, y = 0;
     html_window->GetViewStart(&x, &y);         // save scroll position

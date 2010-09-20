@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -25,49 +25,36 @@
 
 */
 
-#ifndef FR_PRIVILEGE_H
-#define FR_PRIVILEGE_H
+//-----------------------------------------------------------------------------
+#ifndef FR_TEMPLATEPROCESSOR_H
+#define FR_TEMPLATEPROCESSOR_H
 
-#include <map>
 #include <vector>
 
-class MetadataItem;
+#include "metadata/metadataitem.h"
+
 //-----------------------------------------------------------------------------
-class PrivilegeItem
-{
-public:
-    wxString grantor;
-    bool grantOption;
-    std::vector<wxString> columns;
-    PrivilegeItem(const wxString& grantorName, bool withGrantOption,
-        const wxString& fieldName);
-};
-//-----------------------------------------------------------------------------
-// Privilege class only descends from MetadataItem to be able to be used in
-// the HTML template processor.
-// Perhaps it could be changed to have a common class for that
-class Privilege: public MetadataItem
+class TemplateProcessor
 {
 private:
-    MetadataItem* parentObjectM;
-    int granteeTypeM;
-    wxString granteeM;
-
-    // type (SEL, INS, ...), privilege
-    typedef std::multimap<wxString, PrivilegeItem> PMap;
-    PMap privilegesM;
-
-    wxString getSql(bool withGrantOption) const;
-
+    MetadataItem *objectM;  // main observed object
+    std::vector<MetadataItem *> allowedObjectsM;
+    bool flagNextM;
+protected:
+	//! processes a command found in template text
+    virtual void processCommand(wxString cmdName,
+		wxString cmdParams, MetadataItem* object,
+        wxString& processedText, wxWindow *window, bool first);
+	//! processor-specific way of escaping special chars
+	virtual wxString escapeChars(const wxString& input, bool processNewlines = true) = 0;
+	TemplateProcessor(MetadataItem *m,
+        std::vector<MetadataItem *> *allowedObjects = 0);
 public:
-    Privilege(MetadataItem *parent, const wxString& grantee, int granteeType);
-    void addPrivilege(char privilege, const wxString& grantor,
-        bool withGrantOption, const wxString& field = wxEmptyString);
-
-    wxString getSql() const;
-    wxString getGrantee() const;
-    void getPrivileges(const wxString& type,
-        std::vector<PrivilegeItem>& list) const;
+	//! processes all known commands found in template text
+	//! commands are in format: {%cmdName:cmdParams%}
+	//! cmdParams field may be empty, in which case the format is {%cmdName*}
+    void processTemplateText(wxString& processedText, wxString inputText,
+        MetadataItem* object, wxWindow *window, bool first = true);
 };
 //-----------------------------------------------------------------------------
-#endif
+#endif // FR_TEMPLATEPROCESSOR_H

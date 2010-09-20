@@ -47,7 +47,8 @@
 #include "config/DatabaseConfig.h"
 #include "core/ArtProvider.h"
 #include "core/FRError.h"
-#include "core/StringUtils.h"
+#include "frtypes.h"
+#include "frutils.h"
 #include "gui/AboutBox.h"
 #include "gui/AdvancedMessageDialog.h"
 #include "gui/AdvancedSearchFrame.h"
@@ -66,11 +67,10 @@
 #include "gui/RestoreFrame.h"
 #include "gui/ServerRegistrationDialog.h"
 #include "gui/SimpleHtmlFrame.h"
-#include "frtypes.h"
 #include "main.h"
 #include "metadata/metadataitem.h"
 #include "metadata/root.h"
-#include "frutils.h"
+#include "sql/SqlTemplateProcessor.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
 bool checkValidDatabase(Database* database)
@@ -843,7 +843,8 @@ void MainFrame::OnMenuTemplate(wxCommandEvent& event)
         return;
     }
 
-    int i = 0, p = 0;
+    int i = 0;
+	unsigned int p = 0;
     for (RelationColumns::iterator it = t->begin(); it != t->end(); ++it, i++)
     {
         if (selections[p] > i)
@@ -858,9 +859,8 @@ void MainFrame::OnMenuTemplate(wxCommandEvent& event)
     }
 
     wxString sql;
-    TemplateEngine te(t, &objects);
-    te.setPlainText(true);
-    te.processHtmlCode(sql, loadEntireFile(file), 0, this);
+    SqlTemplateProcessor tp(t, &objects);
+    tp.processTemplateText(sql, loadEntireFile(file), 0, this);
 
     showSql(this, wxString(_("Execute SQL statements")), d, sql);
 }

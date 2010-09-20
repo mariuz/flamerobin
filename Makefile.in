@@ -88,6 +88,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_FieldPropertiesDialog.o \
 	flamerobin_FindDialog.o \
 	flamerobin_FRLayoutConfig.o \
+	flamerobin_HtmlTemplateProcessor.o \
 	flamerobin_InsertDialog.o \
 	flamerobin_MainFrame.o \
 	flamerobin_MetadataItemPropertiesFrame.o \
@@ -138,8 +139,10 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_MultiStatement.o \
 	flamerobin_SelectStatement.o \
 	flamerobin_SqlStatement.o \
+	flamerobin_SqlTemplateProcessor.o \
 	flamerobin_SqlTokenizer.o \
 	flamerobin_StatementBuilder.o \
+	flamerobin_TemplateProcessor.o \
 	flamerobin_statementHistory.o \
 	flamerobin_urihandler.o \
 	$(__FR_PLATFORMSPECIFICSOURCES_OBJECTS) \
@@ -441,6 +444,9 @@ flamerobin_FindDialog.o: $(srcdir)/src/gui/FindDialog.cpp $(FLAMEROBIN_ODEP)
 flamerobin_FRLayoutConfig.o: $(srcdir)/src/gui/FRLayoutConfig.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/FRLayoutConfig.cpp
 
+flamerobin_HtmlTemplateProcessor.o: $(srcdir)/src/gui/HtmlTemplateProcessor.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/HtmlTemplateProcessor.cpp
+
 flamerobin_InsertDialog.o: $(srcdir)/src/gui/InsertDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/InsertDialog.cpp
 
@@ -591,11 +597,17 @@ flamerobin_SelectStatement.o: $(srcdir)/src/sql/SelectStatement.cpp $(FLAMEROBIN
 flamerobin_SqlStatement.o: $(srcdir)/src/sql/SqlStatement.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/SqlStatement.cpp
 
+flamerobin_SqlTemplateProcessor.o: $(srcdir)/src/sql/SqlTemplateProcessor.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/SqlTemplateProcessor.cpp
+
 flamerobin_SqlTokenizer.o: $(srcdir)/src/sql/SqlTokenizer.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/SqlTokenizer.cpp
 
 flamerobin_StatementBuilder.o: $(srcdir)/src/sql/StatementBuilder.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/StatementBuilder.cpp
+
+flamerobin_TemplateProcessor.o: $(srcdir)/src/TemplateProcessor.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/TemplateProcessor.cpp
 
 flamerobin_statementHistory.o: $(srcdir)/src/statementHistory.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/statementHistory.cpp

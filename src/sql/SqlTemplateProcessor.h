@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -25,25 +25,28 @@
 
 */
 
-#ifndef FR_STRINGUTILS_H
-#define FR_STRINGUTILS_H
 //-----------------------------------------------------------------------------
+#ifndef FR_SQLTEMPLATEPROCESSOR_H
+#define FR_SQLTEMPLATEPROCESSOR_H
+
 #include <wx/string.h>
 
-#include <string>
+#include <vector>
 
-class wxMBConv;
-//-----------------------------------------------------------------------------
-std::string wx2std(const wxString& input, wxMBConv* conv = wxConvCurrent);
-wxString std2wx(const std::string& input, wxMBConv* conv = wxConvCurrent);
+#include "metadata/metadataitem.h"
+#include "TemplateProcessor.h"
 
-wxString std2wxIdentifier(const std::string& input, wxMBConv* conv);
 //-----------------------------------------------------------------------------
-//! converts chars that have special meaning in HTML, so they get displayed
-wxString escapeHtmlChars(const wxString& input, bool processNewlines = true);
+class SqlTemplateProcessor: public TemplateProcessor
+{
+protected:
+    virtual void processCommand(wxString cmdName, wxString cmdParams,
+		MetadataItem* object, wxString& processedText, wxWindow *window,
+		bool first);
+	virtual wxString escapeChars(const wxString& input, bool processNewlines = true);
+public:
+    SqlTemplateProcessor(MetadataItem *m,
+        std::vector<MetadataItem *> *allowedObjects = 0);
+};
 //-----------------------------------------------------------------------------
-//! returns string suitable for HTML META charset tag (used only if no
-//  conversion to UTF-8 is available, i.e. in non-Unicode build
-wxString getHtmlCharset();
-//-----------------------------------------------------------------------------
-#endif // FR_STRINGUTILS_H
+#endif // FR_SQLTEMPLATEPROCESSOR_H

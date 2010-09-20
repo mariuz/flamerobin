@@ -592,6 +592,10 @@ SOURCE=.\src\gui\FindDialog.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\HtmlTemplateProcessor.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\sql\Identifier.cpp
 # End Source File
 # Begin Source File
@@ -696,6 +700,10 @@ SOURCE=.\src\sql\SqlStatement.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\sql\SqlTemplateProcessor.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\sql\SqlTokenizer.cpp
 # End Source File
 # Begin Source File
@@ -721,6 +729,10 @@ SOURCE=.\src\gui\msw\StyleGuideMSW.cpp
 # Begin Source File
 
 SOURCE=.\src\core\Subject.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\TemplateProcessor.cpp
 # End Source File
 # Begin Source File
 
@@ -1002,6 +1014,10 @@ SOURCE=.\src\gui\FindDialog.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\HtmlTemplateProcessor.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\sql\Identifier.h
 # End Source File
 # Begin Source File
@@ -1106,6 +1122,10 @@ SOURCE=.\src\sql\SqlStatement.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\sql\SqlTemplateProcessor.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\sql\SqlTokenizer.h
 # End Source File
 # Begin Source File
@@ -1127,6 +1147,10 @@ SOURCE=.\src\gui\StyleGuide.h
 # Begin Source File
 
 SOURCE=.\src\core\Subject.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\TemplateProcessor.h
 # End Source File
 # Begin Source File
 

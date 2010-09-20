@@ -285,6 +285,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/FieldPropertiesDialog.h
         $(SOURCEDIR)/gui/FindDialog.h
         $(SOURCEDIR)/gui/FRLayoutConfig.h
+        $(SOURCEDIR)/gui/HtmlTemplateProcessor.h
         $(SOURCEDIR)/gui/InsertDialog.h
         $(SOURCEDIR)/gui/MainFrame.h
         $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.h
@@ -335,8 +336,10 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/sql/MultiStatement.h
         $(SOURCEDIR)/sql/SelectStatement.h
         $(SOURCEDIR)/sql/SqlStatement.h
+        $(SOURCEDIR)/sql/SqlTemplateProcessor.h
         $(SOURCEDIR)/sql/SqlTokenizer.h
         $(SOURCEDIR)/sql/StatementBuilder.h
+        $(SOURCEDIR)/TemplateProcessor.h
         $(SOURCEDIR)/statementHistory.h
         $(SOURCEDIR)/urihandler.h
     </set>
@@ -398,6 +401,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/FieldPropertiesDialog.cpp
         $(SOURCEDIR)/gui/FindDialog.cpp
         $(SOURCEDIR)/gui/FRLayoutConfig.cpp
+        $(SOURCEDIR)/gui/HtmlTemplateProcessor.cpp
         $(SOURCEDIR)/gui/InsertDialog.cpp
         $(SOURCEDIR)/gui/MainFrame.cpp
         $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.cpp
@@ -448,8 +452,10 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/sql/MultiStatement.cpp
         $(SOURCEDIR)/sql/SelectStatement.cpp
         $(SOURCEDIR)/sql/SqlStatement.cpp
+        $(SOURCEDIR)/sql/SqlTemplateProcessor.cpp
         $(SOURCEDIR)/sql/SqlTokenizer.cpp
         $(SOURCEDIR)/sql/StatementBuilder.cpp
+        $(SOURCEDIR)/TemplateProcessor.cpp
         $(SOURCEDIR)/statementHistory.cpp
         $(SOURCEDIR)/urihandler.cpp
 

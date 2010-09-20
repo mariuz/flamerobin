@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -25,49 +25,47 @@
 
 */
 
-#ifndef FR_PRIVILEGE_H
-#define FR_PRIVILEGE_H
+// For compilers that support precompilation, includes "wx/wx.h".
+#include "wx/wxprec.h"
 
-#include <map>
+#ifdef __BORLANDC__
+    #pragma hdrstop
+#endif
+
+// for all others, include the necessary headers (this file is usually all you
+// need because it includes almost all "standard" wxWindows headers
+#ifndef WX_PRECOMP
+    #include "wx/wx.h"
+#endif
+
+#include <sstream>
+#include <iomanip>
 #include <vector>
 
-class MetadataItem;
+#include "config/Config.h"
+#include "core/StringUtils.h"
+#include "frutils.h"
+#include "gui/ProgressDialog.h"
+#include "metadata/CreateDDLVisitor.h"
+#include "metadata/metadataitem.h"
+#include "metadata/server.h"
+#include "sql/SqlTemplateProcessor.h"
 //-----------------------------------------------------------------------------
-class PrivilegeItem
+SqlTemplateProcessor::SqlTemplateProcessor(MetadataItem *m,
+    std::vector<MetadataItem *> *allowedObjects)
+	: TemplateProcessor(m, allowedObjects)
 {
-public:
-    wxString grantor;
-    bool grantOption;
-    std::vector<wxString> columns;
-    PrivilegeItem(const wxString& grantorName, bool withGrantOption,
-        const wxString& fieldName);
-};
+}
 //-----------------------------------------------------------------------------
-// Privilege class only descends from MetadataItem to be able to be used in
-// the HTML template processor.
-// Perhaps it could be changed to have a common class for that
-class Privilege: public MetadataItem
+void SqlTemplateProcessor::processCommand(wxString cmdName,
+	wxString cmdParams, MetadataItem *object,
+    wxString& processedText, wxWindow *window, bool first)
 {
-private:
-    MetadataItem* parentObjectM;
-    int granteeTypeM;
-    wxString granteeM;
-
-    // type (SEL, INS, ...), privilege
-    typedef std::multimap<wxString, PrivilegeItem> PMap;
-    PMap privilegesM;
-
-    wxString getSql(bool withGrantOption) const;
-
-public:
-    Privilege(MetadataItem *parent, const wxString& grantee, int granteeType);
-    void addPrivilege(char privilege, const wxString& grantor,
-        bool withGrantOption, const wxString& field = wxEmptyString);
-
-    wxString getSql() const;
-    wxString getGrantee() const;
-    void getPrivileges(const wxString& type,
-        std::vector<PrivilegeItem>& list) const;
-};
+	TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText, window, first);
+}
 //-----------------------------------------------------------------------------
-#endif
+wxString SqlTemplateProcessor::escapeChars(const wxString& input, bool)
+{
+	return input;
+}
+//-----------------------------------------------------------------------------
