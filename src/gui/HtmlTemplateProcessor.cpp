@@ -62,7 +62,13 @@ void HtmlTemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
 {
 	TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText, window, first);
 
-    if (cmdName == wxT("header"))  // include another file
+	// TODO: It would be better if this was translated to the folder of the
+	// actual template we are processing, in order to support templates in
+	// different folders.
+	if (cmdName == wxT("template_root"))
+		processedText += config().getHtmlTemplatesPath();
+
+	else if (cmdName == wxT("header"))  // include another file
     {
         std::vector<wxString> pages;            // pages this object has
         pages.push_back(wxT("Summary"));

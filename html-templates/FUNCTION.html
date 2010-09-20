@@ -8,13 +8,25 @@
 <br><font size=+2>{%object_name%}</font><br>
 {%object_description%} [<a
  href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=FUNCTION&amp;object_name={%object_name%}">edit</a>]
-<br><br>
+<br>
+<br>
 <table cellspacing=1 cellpadding=3 border=0 width="98%" bgcolor="black">
-<tr><td bgcolor="navy"><font color=white><b>UDF info</b></font></td>
-</tr>
-<tr><td bgcolor="#DDDDFF"><font size=-1>
-<pre>{%udf_info%}
-</pre></font></td></tr>
+    <tr>
+        <td nowrap bgcolor="navy"><font color="white"><b>Library Name</b></font></td>
+        <td nowrap bgcolor="navy"><font color="white"><b>Entry Point</b></font></td>
+    </tr>
+    <tr bgcolor="#CCCCFF">
+        <td nowrap>{%udf_library%}</td>
+        <td nowrap>{%udf_entry_point%}</td>
+    </tr>
+</table>
+<table cellspacing=1 cellpadding=3 border=0 width="98%" bgcolor="black">
+  <tr>
+    <td bgcolor="navy"><font color=white><b>Source</b></font></td>
+  </tr>
+  <tr>
+    <td bgcolor="#DDDDFF"><font size=-1><pre>{%udf_definition%}</pre></font></td>
+  </tr>
 </table>
 </body>
 </html>

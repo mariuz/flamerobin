@@ -86,6 +86,18 @@ wxString Function::getDefinition()
     return definitionM;
 }
 //-----------------------------------------------------------------------------
+wxString Function::getLibraryName()
+{
+    loadInfo();
+    return libraryNameM;
+}
+//-----------------------------------------------------------------------------
+wxString Function::getEntryPoint()
+{
+    loadInfo();
+    return entryPointM;
+}
+//-----------------------------------------------------------------------------
 void Function::loadInfo(bool force)
 {
     if (infoLoadedM && !force)
@@ -183,13 +195,6 @@ void Function::loadInfo(bool force)
     infoLoadedM = true;
     if (force)
         notifyObservers();
-}
-//-----------------------------------------------------------------------------
-wxString Function::getHtmlHeader()
-{
-    loadInfo();
-    return wxT("<B>Library name:</B> ") + libraryNameM + wxT("<BR><B>Entry point:</B>  ")
-        + entryPointM + wxT("<BR><BR>");
 }
 //-----------------------------------------------------------------------------
 void Function::acceptVisitor(MetadataItemVisitor* visitor)

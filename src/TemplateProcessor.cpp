@@ -182,6 +182,41 @@ void TemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
         }
     }
 
+	else if (cmdName == wxT("ifeq"))
+	{
+		wxString::size_type poscolon1 = cmdParams.find(':');
+        if (poscolon1 != wxString::npos)
+        {
+            wxString val1;
+			processTemplateText(val1, cmdParams.substr(0, poscolon1), object, window);
+            cmdParams = cmdParams.substr(poscolon1 + 1);
+            wxString::size_type poscolon2 = cmdParams.find(':');
+            if (poscolon2 != wxString::npos)
+            {
+				wxString val2;
+				processTemplateText(val2, cmdParams.substr(0, poscolon2), object, window);
+				cmdParams = cmdParams.substr(poscolon2 + 1);
+				wxString::size_type poscolon3 = cmdParams.find(':');
+	            wxString trueText, falseText;
+
+				if (poscolon3 != wxString::npos)
+		        {
+					processTemplateText(trueText, cmdParams.substr(0, poscolon3), object, window);
+					processTemplateText(falseText, cmdParams.substr(poscolon3 + 1), object, window);
+				}
+				else
+				{
+					processTemplateText(trueText, cmdParams, object, window);
+				}
+				
+				if (val1 == val2)
+					processedText += trueText;
+				else
+					processedText += falseText;
+			}
+		}
+	}
+
     else if (cmdName == wxT("columns"))  // table and view columns
     {
         Relation* r = dynamic_cast<Relation*>(object);
@@ -473,14 +508,18 @@ void TemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
         processedText += escapeChars(e->getMessage(), false);
     }
 
-    else if (cmdName == wxT("udf_info"))
+	else if (cmdName.substr(0, 4) == wxT("udf_"))
     {
         Function* f = dynamic_cast<Function*>(object);
         if (!f)
             return;
-        wxString src = f->getDefinition();
-        // TODO move all html into the template.
-        processedText += f->getHtmlHeader() + escapeChars(src, false);
+
+        if (cmdName == wxT("udf_library"))
+			processedText += escapeChars(f->getLibraryName());
+        else if (cmdName == wxT("udf_entry_point"))
+			processedText += escapeChars(f->getEntryPoint());
+        else if (cmdName == wxT("udf_definition"))
+			processedText += escapeChars(f->getDefinition(), false);
     }
 
     else if (cmdName == wxT("varcolor"))
@@ -515,20 +554,29 @@ void TemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
         processedText += escapeChars(cdv.getSql(), false);
     }
 
-    else if (cmdName.substr(0, 5) == wxT("index"))
+	else if (cmdName == wxT("index_active"))
+	{
+        Index* i = dynamic_cast<Index*>(object);
+        if (!i)
+            return;
+		processedText += (i->isActive() ? "true" : "false");	
+	}
+
+	else if (cmdName == wxT("index_unique"))
+	{
+        Index* i = dynamic_cast<Index*>(object);
+        if (!i)
+            return;
+		processedText += (i->isUnique() ? "true" : "false");	
+	}
+
+	else if (cmdName.substr(0, 5) == wxT("index"))
     {
-        // TODO: Separate branches and move html into the template.
-        wxString okimage = wxT("<img src=\"") + config().getHtmlTemplatesPath() + wxT("ok.png\">");
-        wxString ximage = wxT("<img src=\"") + config().getHtmlTemplatesPath() + wxT("redx.png\">");
         Index* i = dynamic_cast<Index*>(object);
         if (!i)
             return;
         if (cmdName == wxT("index_type"))
             processedText += (i->getIndexType() == Index::itAscending ? wxT("ASC") : wxT("DESC"));
-        if (cmdName == wxT("index_active"))
-            processedText += (i->isActive() ? okimage : ximage);
-        if (cmdName == wxT("index_unique") && i->isUnique())
-            processedText += okimage;
         else if (cmdName == wxT("index_stats"))
         {
             std::ostringstream ss;

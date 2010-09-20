@@ -44,7 +44,8 @@ public:
     virtual wxString getDropSqlStatement() const;
     wxString getCreateSql();
     wxString getDefinition();
-    wxString getHtmlHeader();
+    wxString getLibraryName();
+	wxString getEntryPoint();
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
