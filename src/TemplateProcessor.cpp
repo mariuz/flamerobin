@@ -43,6 +43,7 @@
 #include <sstream>
 #include <iomanip>
 #include <vector>
+#include <map>
 
 #include "config/Config.h"
 #include "core/StringUtils.h"
@@ -68,6 +69,24 @@ void TemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
 {
 	if (cmdName == wxT("template_root"))
 		processedText += fileNameM.GetPathWithSep();
+
+	else if (cmdName == wxT("getvar"))
+        processedText += getVar(cmdParams);
+
+	else if (cmdName == wxT("setvar"))
+	{
+        wxString::size_type poscolon = cmdParams.find(':');
+        if (poscolon != wxString::npos)
+            setVar(cmdParams.substr(0, poscolon), cmdParams.substr(poscolon + 1));
+		else
+            clearVar(cmdParams);
+	}
+
+	else if (cmdName == wxT("clearvar"))
+        clearVar(cmdParams);
+
+	else if (cmdName == wxT("clearvars"))
+        clearVars();
 
 	else if (cmdName == wxT("object_name"))
         processedText += object->getName_();
@@ -805,5 +824,25 @@ void TemplateProcessor::processTemplateText(wxString& processedText, wxString in
 {
 	fileNameM.Clear();
 	internalProcessTemplateText(processedText, inputText, object, window, first);
+}
+//-----------------------------------------------------------------------------
+void TemplateProcessor::setVar(wxString varName, wxString varValue)
+{
+	varsM[varName] = varValue;
+}
+//-----------------------------------------------------------------------------
+wxString TemplateProcessor::getVar(wxString varName)
+{
+	return varsM[varName];
+}
+//-----------------------------------------------------------------------------
+void TemplateProcessor::clearVar(wxString varName)
+{
+	varsM.erase(varName);
+}
+//-----------------------------------------------------------------------------
+void TemplateProcessor::clearVars()
+{
+	varsM.clear();
 }
 //-----------------------------------------------------------------------------
