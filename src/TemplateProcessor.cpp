@@ -64,31 +64,36 @@ TemplateProcessor::TemplateProcessor(MetadataItem *m,
     }
 }
 //-----------------------------------------------------------------------------
-void TemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
-	MetadataItem *object, wxString& processedText, wxWindow *window, bool first)
+wxString getBooleanAsString(bool value)
 {
-	if (cmdName == wxT("template_root"))
-		processedText += fileNameM.GetPathWithSep();
+    return (value) ? wxT("true") : wxT("false");
+}
+//-----------------------------------------------------------------------------
+void TemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
+    MetadataItem *object, wxString& processedText, wxWindow *window, bool first)
+{
+    if (cmdName == wxT("template_root"))
+        processedText += fileNameM.GetPathWithSep();
 
-	else if (cmdName == wxT("getvar"))
+    else if (cmdName == wxT("getvar"))
         processedText += getVar(cmdParams);
 
-	else if (cmdName == wxT("setvar"))
-	{
+    else if (cmdName == wxT("setvar"))
+    {
         wxString::size_type poscolon = cmdParams.find(':');
         if (poscolon != wxString::npos)
             setVar(cmdParams.substr(0, poscolon), cmdParams.substr(poscolon + 1));
-		else
+        else
             clearVar(cmdParams);
-	}
+    }
 
-	else if (cmdName == wxT("clearvar"))
+    else if (cmdName == wxT("clearvar"))
         clearVar(cmdParams);
 
-	else if (cmdName == wxT("clearvars"))
+    else if (cmdName == wxT("clearvars"))
         clearVars();
 
-	else if (cmdName == wxT("object_name"))
+    else if (cmdName == wxT("object_name"))
         processedText += object->getName_();
 
     else if (cmdName == wxT("parent"))
@@ -203,40 +208,40 @@ void TemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
         }
     }
 
-	else if (cmdName == wxT("ifeq"))
-	{
-		wxString::size_type poscolon1 = cmdParams.find(':');
+    else if (cmdName == wxT("ifeq"))
+    {
+        wxString::size_type poscolon1 = cmdParams.find(':');
         if (poscolon1 != wxString::npos)
         {
             wxString val1;
-			internalProcessTemplateText(val1, cmdParams.substr(0, poscolon1), object, window);
+            internalProcessTemplateText(val1, cmdParams.substr(0, poscolon1), object, window);
             cmdParams = cmdParams.substr(poscolon1 + 1);
             wxString::size_type poscolon2 = cmdParams.find(':');
             if (poscolon2 != wxString::npos)
             {
-				wxString val2;
-				internalProcessTemplateText(val2, cmdParams.substr(0, poscolon2), object, window);
-				cmdParams = cmdParams.substr(poscolon2 + 1);
-				wxString::size_type poscolon3 = cmdParams.find(':');
-	            wxString trueText, falseText;
+                wxString val2;
+                internalProcessTemplateText(val2, cmdParams.substr(0, poscolon2), object, window);
+                cmdParams = cmdParams.substr(poscolon2 + 1);
+                wxString::size_type poscolon3 = cmdParams.find(':');
+                wxString trueText, falseText;
 
-				if (poscolon3 != wxString::npos)
-		        {
-					internalProcessTemplateText(trueText, cmdParams.substr(0, poscolon3), object, window);
-					internalProcessTemplateText(falseText, cmdParams.substr(poscolon3 + 1), object, window);
-				}
-				else
-				{
-					internalProcessTemplateText(trueText, cmdParams, object, window);
-				}
-				
-				if (val1 == val2)
-					processedText += trueText;
-				else
-					processedText += falseText;
-			}
-		}
-	}
+                if (poscolon3 != wxString::npos)
+                {
+                    internalProcessTemplateText(trueText, cmdParams.substr(0, poscolon3), object, window);
+                    internalProcessTemplateText(falseText, cmdParams.substr(poscolon3 + 1), object, window);
+                }
+                else
+                {
+                    internalProcessTemplateText(trueText, cmdParams, object, window);
+                }
+                
+                if (val1 == val2)
+                    processedText += trueText;
+                else
+                    processedText += falseText;
+            }
+        }
+    }
 
     else if (cmdName == wxT("columns"))  // table and view columns
     {
@@ -529,18 +534,18 @@ void TemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
         processedText += escapeChars(e->getMessage(), false);
     }
 
-	else if (cmdName.substr(0, 4) == wxT("udf_"))
+    else if (cmdName.substr(0, 4) == wxT("udf_"))
     {
         Function* f = dynamic_cast<Function*>(object);
         if (!f)
             return;
 
         if (cmdName == wxT("udf_library"))
-			processedText += escapeChars(f->getLibraryName());
+            processedText += escapeChars(f->getLibraryName());
         else if (cmdName == wxT("udf_entry_point"))
-			processedText += escapeChars(f->getEntryPoint());
+            processedText += escapeChars(f->getEntryPoint());
         else if (cmdName == wxT("udf_definition"))
-			processedText += escapeChars(f->getDefinition(), false);
+            processedText += escapeChars(f->getDefinition(), false);
     }
 
     else if (cmdName == wxT("varcolor"))
@@ -575,23 +580,23 @@ void TemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
         processedText += escapeChars(cdv.getSql(), false);
     }
 
-	else if (cmdName == wxT("index_active"))
-	{
+    else if (cmdName == wxT("index_active"))
+    {
         Index* i = dynamic_cast<Index*>(object);
         if (!i)
             return;
-		processedText += (i->isActive() ? "true" : "false");	
-	}
+        processedText += getBooleanAsString(i->isActive());
+    }
 
-	else if (cmdName == wxT("index_unique"))
-	{
+    else if (cmdName == wxT("index_unique"))
+    {
         Index* i = dynamic_cast<Index*>(object);
         if (!i)
             return;
-		processedText += (i->isUnique() ? "true" : "false");	
-	}
+        processedText += getBooleanAsString(i->isUnique());
+    }
 
-	else if (cmdName.substr(0, 5) == wxT("index"))
+    else if (cmdName.substr(0, 5) == wxT("index"))
     {
         Index* i = dynamic_cast<Index*>(object);
         if (!i)
@@ -655,7 +660,7 @@ void TemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
         if (!d)
             return;
 
-        processedText += (d->getInfo().getForcedWrites() ? "true" : "false");
+        processedText += getBooleanAsString(d->getInfo().getForcedWrites());
     }
     else if (cmdName == wxT("fullpath"))
     {
@@ -723,10 +728,7 @@ void TemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
         Database* d = dynamic_cast<Database*>(object);
         if (!d)
             return;
-        if (d->getInfo().getReadOnly())
-            processedText += wxT("true");
-    else
-            processedText += wxT("false");
+        processedText += getBooleanAsString(d->getInfo().getReadOnly());
     }
     else if (cmdName == wxT("sweep_interval"))
     {
@@ -795,18 +797,18 @@ void TemplateProcessor::internalProcessTemplateText(wxString& processedText, wxS
         processedText += inputText.substr(oldpos, pos - oldpos);
         wxString cmd = inputText.substr(pos + 2, endpos - pos - 2); // 2 = start_marker_len = end_marker_len
         
-		wxString::size_type colonPos = cmd.find(':');
+        wxString::size_type colonPos = cmd.find(':');
         wxString cmdName, cmdParams;
         if (colonPos != wxString::npos)
-		{
-			cmdParams = cmd.substr(colonPos + 1);
-			cmdName = cmd.substr(0, colonPos);
-		}
-		else
-		{
-			cmdName = cmd;
-		}
-   		processCommand(cmdName, cmdParams, object, processedText, window, first);
+        {
+            cmdParams = cmd.substr(colonPos + 1);
+            cmdName = cmd.substr(0, colonPos);
+        }
+        else
+        {
+            cmdName = cmd;
+        }
+        processCommand(cmdName, cmdParams, object, processedText, window, first);
 
         oldpos = pos = endpos + 2;
     }
@@ -815,34 +817,34 @@ void TemplateProcessor::internalProcessTemplateText(wxString& processedText, wxS
 void TemplateProcessor::processTemplateFile(wxString& processedText, wxFileName inputFileName,
     MetadataItem* object, wxWindow *window, bool first)
 {
-	fileNameM = inputFileName;
-	internalProcessTemplateText(processedText, loadEntireFile(fileNameM), object, window, first);
+    fileNameM = inputFileName;
+    internalProcessTemplateText(processedText, loadEntireFile(fileNameM), object, window, first);
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::processTemplateText(wxString& processedText, wxString inputText,
     MetadataItem *object, wxWindow *window, bool first)
 {
-	fileNameM.Clear();
-	internalProcessTemplateText(processedText, inputText, object, window, first);
+    fileNameM.Clear();
+    internalProcessTemplateText(processedText, inputText, object, window, first);
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::setVar(wxString varName, wxString varValue)
 {
-	varsM[varName] = varValue;
+    varsM[varName] = varValue;
 }
 //-----------------------------------------------------------------------------
 wxString TemplateProcessor::getVar(wxString varName)
 {
-	return varsM[varName];
+    return varsM[varName];
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::clearVar(wxString varName)
 {
-	varsM.erase(varName);
+    varsM.erase(varName);
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::clearVars()
 {
-	varsM.clear();
+    varsM.clear();
 }
 //-----------------------------------------------------------------------------
