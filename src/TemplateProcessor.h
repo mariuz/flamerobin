@@ -29,6 +29,8 @@
 #ifndef FR_TEMPLATEPROCESSOR_H
 #define FR_TEMPLATEPROCESSOR_H
 
+#include <wx/filename.h>
+
 #include <vector>
 
 #include "metadata/metadataitem.h"
@@ -40,6 +42,7 @@ private:
     MetadataItem *objectM;  // main observed object
     std::vector<MetadataItem *> allowedObjectsM;
     bool flagNextM;
+	wxFileName fileNameM;
 protected:
 	//! processes a command found in template text
     virtual void processCommand(wxString cmdName,
@@ -49,11 +52,18 @@ protected:
 	virtual wxString escapeChars(const wxString& input, bool processNewlines = true) = 0;
 	TemplateProcessor(MetadataItem *m,
         std::vector<MetadataItem *> *allowedObjects = 0);
+	//! processes all commands without resetting fileNameM. Should be used
+	// internally, while processTemplateText() is for external use.
+	void internalProcessTemplateText(wxString& processedText, wxString inputText,
+        MetadataItem* object, wxWindow *window, bool first = true);
 public:
 	//! processes all known commands found in template text
 	//! commands are in format: {%cmdName:cmdParams%}
 	//! cmdParams field may be empty, in which case the format is {%cmdName*}
     void processTemplateText(wxString& processedText, wxString inputText,
+        MetadataItem* object, wxWindow *window, bool first = true);
+	//! loads the contents of the specified file and calls internalProcessTemplateText().
+    void processTemplateFile(wxString& processedText, wxFileName inputFileName,
         MetadataItem* object, wxWindow *window, bool first = true);
 };
 //-----------------------------------------------------------------------------

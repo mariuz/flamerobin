@@ -297,7 +297,7 @@ void MetadataItemPropertiesPanel::processHtmlFile(wxString fileName)
 {
     wxString htmlpage;
     HtmlTemplateProcessor tp(objectM);
-    tp.processTemplateText(htmlpage, loadEntireFile(fileName), 0, this);
+    tp.processTemplateFile(htmlpage, fileName, 0, this);
 
     int x = 0, y = 0;
     html_window->GetViewStart(&x, &y);         // save scroll position

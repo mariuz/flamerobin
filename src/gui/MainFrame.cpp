@@ -860,7 +860,7 @@ void MainFrame::OnMenuTemplate(wxCommandEvent& event)
 
     wxString sql;
     SqlTemplateProcessor tp(t, &objects);
-    tp.processTemplateText(sql, loadEntireFile(file), 0, this);
+    tp.processTemplateFile(sql, file, 0, this);
 
     showSql(this, wxString(_("Execute SQL statements")), d, sql);
 }

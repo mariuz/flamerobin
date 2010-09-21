@@ -62,12 +62,6 @@ void SqlTemplateProcessor::processCommand(wxString cmdName,
     wxString& processedText, wxWindow *window, bool first)
 {
 	TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText, window, first);
-
-	// TODO: It would be better if this was translated to the folder of the
-	// actual template we are processing, in order to support templates in
-	// different folders.
-	if (cmdName == wxT("template_root"))
-		processedText += config().getSqlTemplatesPath();
 }
 //-----------------------------------------------------------------------------
 wxString SqlTemplateProcessor::escapeChars(const wxString& input, bool)
