@@ -211,36 +211,35 @@ void TemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
     else if (cmdName == wxT("ifeq"))
     {
         wxString::size_type poscolon1 = cmdParams.find(':');
-        if (poscolon1 != wxString::npos)
-        {
-            wxString val1;
-            internalProcessTemplateText(val1, cmdParams.substr(0, poscolon1), object, window);
-            cmdParams = cmdParams.substr(poscolon1 + 1);
-            wxString::size_type poscolon2 = cmdParams.find(':');
-            if (poscolon2 != wxString::npos)
-            {
-                wxString val2;
-                internalProcessTemplateText(val2, cmdParams.substr(0, poscolon2), object, window);
-                cmdParams = cmdParams.substr(poscolon2 + 1);
-                wxString::size_type poscolon3 = cmdParams.find(':');
-                wxString trueText, falseText;
+        if (poscolon1 == wxString::npos)
+            return;
+        wxString val1;
+        internalProcessTemplateText(val1, cmdParams.substr(0, poscolon1), object, window);
+        cmdParams = cmdParams.substr(poscolon1 + 1);
+        wxString::size_type poscolon2 = cmdParams.find(':');
+        if (poscolon2 == wxString::npos)
+            return;
 
-                if (poscolon3 != wxString::npos)
-                {
-                    internalProcessTemplateText(trueText, cmdParams.substr(0, poscolon3), object, window);
-                    internalProcessTemplateText(falseText, cmdParams.substr(poscolon3 + 1), object, window);
-                }
-                else
-                {
-                    internalProcessTemplateText(trueText, cmdParams, object, window);
-                }
-                
-                if (val1 == val2)
-                    processedText += trueText;
-                else
-                    processedText += falseText;
-            }
+        wxString val2;
+        internalProcessTemplateText(val2, cmdParams.substr(0, poscolon2), object, window);
+        cmdParams = cmdParams.substr(poscolon2 + 1);
+        wxString::size_type poscolon3 = cmdParams.find(':');
+        wxString trueText, falseText;
+
+        if (poscolon3 != wxString::npos)
+        {
+            internalProcessTemplateText(trueText, cmdParams.substr(0, poscolon3), object, window);
+            internalProcessTemplateText(falseText, cmdParams.substr(poscolon3 + 1), object, window);
         }
+        else
+        {
+            internalProcessTemplateText(trueText, cmdParams, object, window);
+        }
+
+        if (val1 == val2)
+            processedText += trueText;
+        else
+            processedText += falseText;
     }
 
     else if (cmdName == wxT("columns"))  // table and view columns
@@ -796,7 +795,7 @@ void TemplateProcessor::internalProcessTemplateText(wxString& processedText, wxS
 
         processedText += inputText.substr(oldpos, pos - oldpos);
         wxString cmd = inputText.substr(pos + 2, endpos - pos - 2); // 2 = start_marker_len = end_marker_len
-        
+
         wxString::size_type colonPos = cmd.find(':');
         wxString cmdName, cmdParams;
         if (colonPos != wxString::npos)
