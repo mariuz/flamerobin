@@ -34,7 +34,7 @@
         <td nowrap>Page buffers</td><td align="right" bgcolor="#CCCCFF" nowrap>{%page_buffers%}</td>
     </tr>
     <tr bgcolor="#DDDDFF">
-        <td nowrap>Read only</td><td align="right" bgcolor="#CCCCFF" nowrap>{%read_only%}</td>
+        <td nowrap>Read only</td><td align="right" bgcolor="#CCCCFF" nowrap><img src="{%template_root%}{%ifeq:{%read_only%}:true:ok.png:redx.png%}"></td>
     </tr>
   </tbody>
 </table>
@@ -58,7 +58,7 @@
     </tr>
     <tr bgcolor="#DDDDFF">
         <td nowrap>Forced writes</td>
-        <td align="right" bgcolor="#CCCCFF" nowrap><a href="fr://edit_forced_writes?parent_window={%parent_window%}&amp;object_address={%object_address%}">{%forced_writes%}</a></td>
+        <td align="center" bgcolor="#CCCCFF" nowrap><a href="fr://edit_forced_writes?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}{%ifeq:{%forced_writes%}:true:ok.png:redx.png%}"></a></td>
     </tr>
   </tbody>
 </table>

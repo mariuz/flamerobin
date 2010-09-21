@@ -82,9 +82,6 @@ void TemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
     else if (cmdName == wxT("parent_window"))
         processedText += wxString::Format(wxT("%ld"), (uintptr_t)window);
 
-    else if (cmdName == wxT("fr_home"))
-        processedText += config().getHomePath();
-
     else if (cmdName == wxT("separator"))
     {
         if (!first)
@@ -634,11 +631,7 @@ void TemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
         if (!d)
             return;
 
-        // TODO Move html into the template.
-        wxString okimage = wxT("<img src=\"") + config().getHtmlTemplatesPath() + wxT("ok.png\">");
-        wxString ximage = wxT("<img src=\"") + config().getHtmlTemplatesPath() + wxT("redx.png\">");
-
-        processedText += (d->getInfo().getForcedWrites() ? okimage : ximage);
+        processedText += (d->getInfo().getForcedWrites() ? "true" : "false");
     }
     else if (cmdName == wxT("fullpath"))
     {
