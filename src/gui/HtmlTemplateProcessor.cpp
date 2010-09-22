@@ -42,7 +42,6 @@
 #include <iomanip>
 #include <vector>
 
-#include "config/Config.h"
 #include "core/StringUtils.h"
 #include "frutils.h"
 #include "gui/ProgressDialog.h"
@@ -57,12 +56,12 @@ HtmlTemplateProcessor::HtmlTemplateProcessor(MetadataItem *m,
 {
 }
 //-----------------------------------------------------------------------------
-void HtmlTemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
+void HtmlTemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdParams,
 	MetadataItem *object, wxString& processedText, wxWindow *window, bool first)
 {
 	TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText, window, first);
 
-	if (cmdName == wxT("header"))  // include another file
+	if (cmdName == wxT("header") && !cmdParams.empty())  // include another file
     {
         std::vector<wxString> pages;            // pages this object has
         pages.push_back(wxT("Summary"));
@@ -89,8 +88,7 @@ void HtmlTemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
             case ntRole:
                 pages.push_back(wxT("DDL"));
         };
-        wxString page = loadEntireFile(config().getHtmlTemplatesPath()
-            + wxT("header.html"));
+        wxString page = loadEntireFile(getTemplatePath() + wxT("header.html"));
         bool first = true;
         while (!page.Strip().IsEmpty())
         {
@@ -112,26 +110,28 @@ void HtmlTemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
                     first = false;
                 else
                     processedText += wxT(" | ");
-                if (part.Find(wxT(">") + cmdParams + wxT("<")) != -1)
-                    processedText += cmdParams;
+                wxString allParams = cmdParams.all();
+                if (part.Find(wxT(">") + allParams + wxT("<")) != -1)
+                    processedText += allParams;
                 else
                     internalProcessTemplateText(processedText, part, object, window);
             }
 		}
 	}
 
-    else if (cmdName == wxT("privilege"))
+    // TODO: get HTML out of here.
+	else if (cmdName == wxT("privilege") && !cmdParams.empty())
     {
         Privilege* p = dynamic_cast<Privilege*>(object);
         if (!p)
             return;
         wxString okimage = wxT("<img src=\"") +
-            config().getHtmlTemplatesPath() + wxT("ok.png\">");
+            getTemplatePath() + wxT("ok.png\">");
         wxString ok2image = wxT("<img src=\"") +
-            config().getHtmlTemplatesPath() + wxT("ok2.png\">");
+            getTemplatePath() + wxT("ok2.png\">");
         // see which type
         std::vector<PrivilegeItem> list;
-        p->getPrivileges(cmdParams, list);
+        p->getPrivileges(cmdParams.all(), list);
         if (list.size())
         {
             bool brnext = false;
@@ -149,8 +149,7 @@ void HtmlTemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
                 processedText += wxT("<a href=\"info://Granted by ") + (*it).grantor
                     + wxT("\">");
 
-                processedText += wxT("<img src=\"") +
-                    config().getHtmlTemplatesPath();
+                processedText += wxT("<img src=\"") + getTemplatePath();
                 if ((*it).grantOption)
                     processedText += wxT("ok2.png\"");
                 else
@@ -174,8 +173,7 @@ void HtmlTemplateProcessor::processCommand(wxString cmdName, wxString cmdParams,
         }
         else
         {
-            processedText += wxT("<img src=\"") + config().getHtmlTemplatesPath()
-                + wxT("redx.png\">");
+            processedText += wxT("<img src=\"") + getTemplatePath() + wxT("redx.png\">");
         }
     }
 }

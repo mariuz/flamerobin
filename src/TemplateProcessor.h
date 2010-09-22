@@ -30,12 +30,33 @@
 #define FR_TEMPLATEPROCESSOR_H
 
 #include <wx/filename.h>
+#include <wx/arrstr.h>
 
 #include <vector>
 #include <map>
 
 #include "metadata/metadataitem.h"
 
+class TemplateCmdParams: public wxArrayString
+{
+public:
+    static const wxChar SEPARATOR;
+    static const wxChar ESCAPE_CHAR;
+	//!returns all params concatenated with the default separator.
+	wxString all() const;
+    
+    //!returns all params unescaped and concatenated with the
+    //!default separator.
+    wxString allUnescaped() const;
+    //!unescapes and returns param i.
+    wxString getUnescaped(wxString::size_type i) const;
+    //!returns the position of the first effective separator in s, that is the
+    //!first one not preceded by an odd number of consecutive escape characters.
+    static wxString::size_type TemplateCmdParams::findSeparator(wxString s);
+    //!removes escape characters from s and returns the result.
+	static wxString unescape(wxString s);
+};
+//-----------------------------------------------------------------------------
 typedef std::map<wxString, wxString> wxStringMap;
 //-----------------------------------------------------------------------------
 class TemplateProcessor
@@ -49,7 +70,7 @@ private:
 protected:
 	//! processes a command found in template text
     virtual void processCommand(wxString cmdName,
-		wxString cmdParams, MetadataItem* object,
+		TemplateCmdParams cmdParams, MetadataItem* object,
         wxString& processedText, wxWindow *window, bool first);
 	//! processor-specific way of escaping special chars
 	virtual wxString escapeChars(const wxString& input, bool processNewlines = true) = 0;
@@ -59,6 +80,8 @@ protected:
 	// internally, while processTemplateText() is for external use.
 	void internalProcessTemplateText(wxString& processedText, wxString inputText,
         MetadataItem* object, wxWindow *window, bool first = true);
+	//! returns the loaded file's path, including the trailing separator.
+	wxString getTemplatePath();
 public:
 	//! processes all known commands found in template text
 	//! commands are in format: {%cmdName:cmdParams%}

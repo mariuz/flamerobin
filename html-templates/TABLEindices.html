@@ -22,7 +22,7 @@
       <td valign="top"><b><font color=white>Description</font></b></td>
     </tr>
     {%indices:
-    <tr bgcolor="{%varcolor:#DDDDFF/#CCCCFF%}">
+    <tr bgcolor="{%varcolor:#DDDDFF:#CCCCFF%}">
       {%ParentNotSystem:
       <td valign="top" nowrap>
           <a href="fr://index_action?type=DROP&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}drop.png"></a>
@@ -30,13 +30,13 @@
       </td>
       %}
       <td nowrap valign="top">{%object_name%}</td>
-      <td nowrap valign="top" align="center">{%index_type%}</td>
+      <td nowrap valign="top" align="center">{%indexinfo:type%}</td>
       <td nowrap valign="top" align="center">{%ParentNotSystem:<a
-        href="fr://index_action?type=TOGGLE_ACTIVE&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">%}<img src="{%template_root%}{%ifeq:{%index_active%}:true:ok.png:redx.png%}">
+        href="fr://index_action?type=TOGGLE_ACTIVE&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">%}<img src="{%template_root%}{%ifeq:{%indexinfo\:is_active%}:true:ok.png:redx.png%}">
 {%ParentNotSystem:</a>%}</td>
-      <td nowrap valign="top" align="center"><img src="{%template_root%}{%ifeq:{%index_unique%}:true:ok.png%}"></td>
-      <td valign="top">{%index_fields%}</td>
-      <td nowrap valign="top" align="right">{%index_stats%}</td>
+      <td nowrap valign="top" align="center"><img src="{%template_root%}{%ifeq:{%indexinfo:is_unique%}:true:ok.png%}"></td>
+      <td valign="top">{%indexinfo:fields%}</td>
+      <td nowrap valign="top" align="right">{%indexinfo:stats%}</td>
       <td nowrap valign="top"><font size=-1>{%object_description%} {%ParentNotSystem:[<a
         href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=INDEX&amp;object_name={%object_name%}">edit</a>]%}</font></td>
     </tr>%}

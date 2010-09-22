@@ -40,7 +40,7 @@
 class SqlTemplateProcessor: public TemplateProcessor
 {
 protected:
-    virtual void processCommand(wxString cmdName, wxString cmdParams,
+    virtual void processCommand(wxString cmdName, TemplateCmdParams cmdParams,
 		MetadataItem* object, wxString& processedText, wxWindow *window,
 		bool first);
 	virtual wxString escapeChars(const wxString& input, bool processNewlines = true);

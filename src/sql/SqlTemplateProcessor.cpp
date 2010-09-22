@@ -58,7 +58,7 @@ SqlTemplateProcessor::SqlTemplateProcessor(MetadataItem *m,
 }
 //-----------------------------------------------------------------------------
 void SqlTemplateProcessor::processCommand(wxString cmdName,
-	wxString cmdParams, MetadataItem *object,
+	TemplateCmdParams cmdParams, MetadataItem *object,
     wxString& processedText, wxWindow *window, bool first)
 {
 	TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText, window, first);
