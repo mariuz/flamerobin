@@ -74,7 +74,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         processedText += getTemplatePath();
 
     else if (cmdName == wxT("getvar") && !cmdParams.empty())
-        processedText += getVar(cmdParams.allUnescaped());
+        processedText += getVar(cmdParams.all());
 
     else if (cmdName == wxT("setvar") && !cmdParams.empty())
     {
@@ -85,7 +85,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
     }
 
     else if (cmdName == wxT("clearvar") && !cmdParams.empty())
-        clearVar(cmdParams.allUnescaped());
+        clearVar(cmdParams.all());
 
     else if (cmdName == wxT("clearvars"))
         clearVars();
@@ -111,25 +111,11 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
     else if (cmdName == wxT("separator") && !cmdParams.empty())
     {
         if (!first)
-            processedText += cmdParams.allUnescaped();
+            processedText += cmdParams.all();
     }
 
     else if (cmdName == wxT("is_system"))
         processedText += getBooleanAsString(object->isSystem());
-
-    // TODO: remove after replacing all occurrences with is_system.
-    else if (cmdName == wxT("NotSystem") && !cmdParams.empty())
-    {
-        if (!object->isSystem())
-            internalProcessTemplateText(processedText, cmdParams.all(), object, window);
-    }
-
-    // TODO: remove after replacing all occurrences with parent + is_system.
-    else if (cmdName == wxT("ParentNotSystem") && !cmdParams.empty())
-    {
-        if (object->getParent() && !object->getParent()->isSystem())
-            internalProcessTemplateText(processedText, cmdParams.all(), object, window);
-    }
 
     else if (cmdName == wxT("users") && !cmdParams.empty())
     {
@@ -198,7 +184,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
     {
         if (cmdParams.Count() >= 2)
         {
-            if (config().get(cmdParams.getUnescaped(0), (cmdParams.getUnescaped(1) == wxT("true"))))
+            if (config().get(cmdParams[0], (cmdParams[1] == wxT("true"))))
             {
                 cmdParams.RemoveAt(0, 2);
                 internalProcessTemplateText(processedText, cmdParams.all(), object, window);
@@ -221,9 +207,9 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
             internalProcessTemplateText(falseText, cmdParams.all(), object, window);
         }
         if (val1 == val2)
-            processedText += TemplateCmdParams::unescape(trueText);
+            processedText += trueText;
         else
-            processedText += TemplateCmdParams::unescape(falseText);
+            processedText += falseText;
     }
 
     else if (cmdName == wxT("columns") && !cmdParams.empty())  // table and view columns
@@ -550,9 +536,9 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         static bool first = false;
         first = !first;
         if (first)
-            processedText += cmdParams.getUnescaped(0);
+            processedText += cmdParams[0];
         else
-            processedText += cmdParams.getUnescaped(1);
+            processedText += cmdParams[1];
     }
 
     else if (cmdName == wxT("indices"))
@@ -782,33 +768,53 @@ void TemplateProcessor::internalProcessTemplateText(wxString& processedText, wxS
         processedText += inputText.substr(oldpos, pos - oldpos);
         wxString cmd = inputText.substr(pos + 2, endpos - pos - 2); // 2 = start_marker_len = end_marker_len
         
+        // parse command name and params.
         wxString cmdName;
         TemplateCmdParams cmdParams;
         
-        // parse command params
-        wxString::size_type colonPos = TemplateCmdParams::findSeparator(cmd);
-        if (colonPos == wxString::npos)
-            cmdName = TemplateCmdParams::unescape(cmd);
-        else
+        enum TemplateCmdState
         {
-            cmdName = TemplateCmdParams::unescape(cmd.substr(0, colonPos));
-            cmd.Remove(0, colonPos + 1);
-
-            colonPos = TemplateCmdParams::findSeparator(cmd);
-            while (colonPos != wxString::npos)
+            inText,
+            inString1,
+            inString2
+        };
+        TemplateCmdState state = inText;
+        wxString buffer;
+        unsigned int nestLevel = 0;
+        for (wxString::size_type i = 0; i < cmd.Length(); i++)
+        {
+            wxChar c = cmd[i];
+            
+            if (c == wxT(':'))
             {
-                cmdParams.Add(cmd.substr(0, colonPos));
-                cmd.Remove(0, colonPos + 1);
-                colonPos = TemplateCmdParams::findSeparator(cmd);
+                if ((nestLevel == 0) && (state == inText))
+                {
+                    cmdParams.Add(buffer);
+                    buffer.Clear();
+                    continue;
+                }
             }
-            cmd = TemplateCmdParams::unescape(cmd);
-            if (!cmd.empty())
-                cmdParams.Add(cmd);
+            buffer += c;
+            
+            if ((c == wxT('{')) && (i < cmd.Length() - 1) && (cmd[i + 1] == wxT('%')))
+                nestLevel++;
+            else if ((c == wxT('}')) && (i > 0) && (cmd[i - 1] == wxT('%')))
+                nestLevel--;
+            else if (c == wxT('\''))
+                state == inString1 ? state = inText : state = inString1;
+            else if (c == wxT('"'))
+                state == inString2 ? state = inText : state = inString2;
         }
-        
-        if (!cmdName.empty())
-            processCommand(cmdName, cmdParams, object, processedText, window, first);
+        if (buffer.Length() > 0)
+            cmdParams.Add(buffer);
 
+        if (cmdParams.Count() > 0)
+        {
+            cmdName = cmdParams[0];
+            cmdParams.RemoveAt(0);
+            if (!cmdName.empty())
+                processCommand(cmdName, cmdParams, object, processedText, window, first);
+        }
         oldpos = pos = endpos + 2;
     }
 }
@@ -852,9 +858,7 @@ wxString TemplateProcessor::getTemplatePath()
     return fileNameM.GetPathWithSep();
 }
 //-----------------------------------------------------------------------------
-const wxChar TemplateCmdParams::SEPARATOR = wxChar(':');
-//-----------------------------------------------------------------------------
-const wxChar TemplateCmdParams::ESCAPE_CHAR = wxChar('\\');
+const wxChar TemplateCmdParams::SEPARATOR = wxT(':');
 //-----------------------------------------------------------------------------
 wxString TemplateCmdParams::all() const
 {
@@ -864,55 +868,8 @@ wxString TemplateCmdParams::all() const
         if (i == 0)
           result = Item(i);
         else
-          result += SEPARATOR + Item(i);
+          result += wxT(':') + Item(i);
     }
     return result;
-}
-//-----------------------------------------------------------------------------
-wxString TemplateCmdParams::allUnescaped() const
-{
-    return unescape(all());
-}
-//-----------------------------------------------------------------------------
-wxString TemplateCmdParams::getUnescaped(wxString::size_type i) const
-{
-    return unescape(Item(i));
-}
-//-----------------------------------------------------------------------------
-wxString::size_type TemplateCmdParams::findSeparator(wxString s)
-{
-    wxString::size_type startPos = 0, pos = 0;
-    
-    while (startPos < s.length())
-    {
-        pos = s.find(TemplateCmdParams::SEPARATOR, startPos);
-        if (pos == wxString::npos)
-            break;
-        else
-        {
-            int escapes = 0;
-            for (int i = pos - 1; i >= 0; i--)
-            {
-                if (s[i] == TemplateCmdParams::ESCAPE_CHAR)
-                    escapes++;
-                else
-                    break;
-            }
-            if (escapes % 2 == 0)
-                break;
-            else
-                startPos = pos + 1;
-        }
-    }
-    if (startPos >= s.length())
-        pos = wxString::npos;
-    return pos;
-}
-//-----------------------------------------------------------------------------
-wxString TemplateCmdParams::unescape(wxString s)
-{
-    s.Replace(wxString(ESCAPE_CHAR) + wxString(SEPARATOR), &SEPARATOR);
-    s.Replace(wxString(ESCAPE_CHAR) + wxString(ESCAPE_CHAR), &ESCAPE_CHAR);
-    return s;
 }
 //-----------------------------------------------------------------------------

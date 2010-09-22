@@ -10,7 +10,7 @@
 <table cellspacing=1 cellpadding=2 border=0 bgcolor=black>
   <tbody>
     <tr bgcolor="navy">
-      {%NotSystem:
+      {%ifeq:{%is_system%}:false:
       <td></td>
       %}
       <td valign="top"><b><font color=white>Index name</font></b></td>
@@ -23,27 +23,34 @@
     </tr>
     {%indices:
     <tr bgcolor="{%varcolor:#DDDDFF:#CCCCFF%}">
-      {%ParentNotSystem:
+      {%parent:{%ifeq:{%is_system%}:false:
       <td valign="top" nowrap>
           <a href="fr://index_action?type=DROP&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}drop.png"></a>
           <a href="fr://index_action?type=RECOMPUTE&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}compute.png"></a>
       </td>
-      %}
+      %}%}
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top" align="center">{%indexinfo:type%}</td>
-      <td nowrap valign="top" align="center">{%ParentNotSystem:<a
-        href="fr://index_action?type=TOGGLE_ACTIVE&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">%}<img src="{%template_root%}{%ifeq:{%indexinfo\:is_active%}:true:ok.png:redx.png%}">
-{%ParentNotSystem:</a>%}</td>
-      <td nowrap valign="top" align="center"><img src="{%template_root%}{%ifeq:{%indexinfo:is_unique%}:true:ok.png%}"></td>
+      <td nowrap valign="top" align="center">
+      {%parent:{%ifeq:{%is_system%}:false:
+        <a href="fr://index_action?type=TOGGLE_ACTIVE&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">
+      %}%}
+      <img src="{%template_root%}{%ifeq:{%indexinfo:is_active%}:true:ok.png:redx.png%}">
+      {%parent:{%ifeq:{%is_system%}:false:
+      </a>
+      %}%}
+      </td>
+      <td nowrap valign="top" align="center"><img src="{%template_root%}{%ifeq:{%indexinfo:is_unique%}:true:ok.png:redx.png%}"></td>
       <td valign="top">{%indexinfo:fields%}</td>
       <td nowrap valign="top" align="right">{%indexinfo:stats%}</td>
-      <td nowrap valign="top"><font size=-1>{%object_description%} {%ParentNotSystem:[<a
-        href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=INDEX&amp;object_name={%object_name%}">edit</a>]%}</font></td>
-    </tr>%}
+      <td nowrap valign="top"><font size=-1>{%object_description%} {%parent:{%ifeq:{%is_system%}:false:[<a
+        href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=INDEX&amp;object_name={%object_name%}">edit</a>]%}%}</font></td>
+    </tr>
+    %}
   </tbody>
 </table>
 <br><br>
-{%NotSystem:
+{%ifeq:{%is_system%}:false:
 <a
 href="fr://add_index?parent_window={%parent_window%}&amp;object_address={%object_address%}">Create new index</a> | <a
 href="fr://recompute_all?parent_window={%parent_window%}&amp;object_address={%object_address%}">Recompute

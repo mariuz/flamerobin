@@ -41,20 +41,8 @@ class TemplateCmdParams: public wxArrayString
 {
 public:
     static const wxChar SEPARATOR;
-    static const wxChar ESCAPE_CHAR;
 	//!returns all params concatenated with the default separator.
 	wxString all() const;
-    
-    //!returns all params unescaped and concatenated with the
-    //!default separator.
-    wxString allUnescaped() const;
-    //!unescapes and returns param i.
-    wxString getUnescaped(wxString::size_type i) const;
-    //!returns the position of the first effective separator in s, that is the
-    //!first one not preceded by an odd number of consecutive escape characters.
-    static wxString::size_type TemplateCmdParams::findSeparator(wxString s);
-    //!removes escape characters from s and returns the result.
-	static wxString unescape(wxString s);
 };
 //-----------------------------------------------------------------------------
 typedef std::map<wxString, wxString> wxStringMap;

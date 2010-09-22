@@ -48,7 +48,7 @@
 </table>
 <br>
 <br>
-{%NotSystem:
+{%ifeq:{%is_system%}:false:
 <a
 href="fr://create_trigger?parent_window={%parent_window%}&amp;object_address={%object_address%}">Create new trigger</a> | <a
 href="fr://activate_triggers?parent_window={%parent_window%}&amp;object_address={%object_address%}">Activate all triggers</a> | <a
