@@ -61,6 +61,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ProgressIndicator.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StringUtils.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Subject.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TemplateProcessor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Visitor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_databasehandler.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataLoader.o \
@@ -150,7 +151,6 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTemplateProcessor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementBuilder.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TemplateProcessor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_urihandler.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.o \
@@ -283,6 +283,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StringUtils.o: ./src/core/StringUtils.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Subject.o: ./src/core/Subject.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TemplateProcessor.o: ./src/core/TemplateProcessor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Visitor.o: ./src/core/Visitor.cpp
@@ -550,9 +553,6 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.o: ./src/sql/SqlTokenizer.cp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementBuilder.o: ./src/sql/StatementBuilder.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
-
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TemplateProcessor.o: ./src/TemplateProcessor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.o: ./src/statementHistory.cpp

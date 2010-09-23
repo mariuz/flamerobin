@@ -732,7 +732,7 @@ SOURCE=.\src\core\Subject.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\TemplateProcessor.cpp
+SOURCE=.\src\core\TemplateProcessor.cpp
 # End Source File
 # Begin Source File
 
@@ -1150,7 +1150,7 @@ SOURCE=.\src\core\Subject.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\TemplateProcessor.h
+SOURCE=.\src\core\TemplateProcessor.h
 # End Source File
 # Begin Source File
 

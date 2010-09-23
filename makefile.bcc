@@ -86,6 +86,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ProgressIndicator.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StringUtils.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Subject.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TemplateProcessor.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Visitor.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_databasehandler.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataLoader.obj \
@@ -175,7 +176,6 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTemplateProcessor.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementBuilder.obj \
-	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TemplateProcessor.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_urihandler.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.obj
@@ -324,6 +324,9 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StringUtils.obj: .\src\core\StringUtils.c
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Subject.obj: .\src\core\Subject.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\Subject.cpp
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TemplateProcessor.obj: .\src\core\TemplateProcessor.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\TemplateProcessor.cpp
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Visitor.obj: .\src\core\Visitor.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\Visitor.cpp
@@ -591,9 +594,6 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.obj: .\src\sql\SqlTokenizer.
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementBuilder.obj: .\src\sql\StatementBuilder.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\sql\StatementBuilder.cpp
-
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TemplateProcessor.obj: .\src\TemplateProcessor.cpp
-	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\TemplateProcessor.cpp
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.obj: .\src\statementHistory.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\statementHistory.cpp

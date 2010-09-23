@@ -53,6 +53,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_ProgressIndicator.o \
 	flamerobin_StringUtils.o \
 	flamerobin_Subject.o \
+	flamerobin_TemplateProcessor.o \
 	flamerobin_Visitor.o \
 	flamerobin_databasehandler.o \
 	flamerobin_MetadataLoader.o \
@@ -142,7 +143,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_SqlTemplateProcessor.o \
 	flamerobin_SqlTokenizer.o \
 	flamerobin_StatementBuilder.o \
-	flamerobin_TemplateProcessor.o \
 	flamerobin_statementHistory.o \
 	flamerobin_urihandler.o \
 	$(__FR_PLATFORMSPECIFICSOURCES_OBJECTS) \
@@ -338,6 +338,9 @@ flamerobin_StringUtils.o: $(srcdir)/src/core/StringUtils.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_Subject.o: $(srcdir)/src/core/Subject.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/Subject.cpp
+
+flamerobin_TemplateProcessor.o: $(srcdir)/src/core/TemplateProcessor.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/TemplateProcessor.cpp
 
 flamerobin_Visitor.o: $(srcdir)/src/core/Visitor.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/Visitor.cpp
@@ -605,9 +608,6 @@ flamerobin_SqlTokenizer.o: $(srcdir)/src/sql/SqlTokenizer.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_StatementBuilder.o: $(srcdir)/src/sql/StatementBuilder.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/StatementBuilder.cpp
-
-flamerobin_TemplateProcessor.o: $(srcdir)/src/TemplateProcessor.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/TemplateProcessor.cpp
 
 flamerobin_statementHistory.o: $(srcdir)/src/statementHistory.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/statementHistory.cpp

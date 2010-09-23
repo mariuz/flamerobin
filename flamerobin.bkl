@@ -249,6 +249,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/core/ProgressIndicator.h
         $(SOURCEDIR)/core/StringUtils.h
         $(SOURCEDIR)/core/Subject.h
+        $(SOURCEDIR)/core/TemplateProcessor.h
         $(SOURCEDIR)/core/Visitor.h
         $(SOURCEDIR)/engine/MetadataLoader.h
         $(SOURCEDIR)/framemanager.h
@@ -339,7 +340,6 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/sql/SqlTemplateProcessor.h
         $(SOURCEDIR)/sql/SqlTokenizer.h
         $(SOURCEDIR)/sql/StatementBuilder.h
-        $(SOURCEDIR)/TemplateProcessor.h
         $(SOURCEDIR)/statementHistory.h
         $(SOURCEDIR)/urihandler.h
     </set>
@@ -366,6 +366,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/core/ProgressIndicator.cpp
         $(SOURCEDIR)/core/StringUtils.cpp
         $(SOURCEDIR)/core/Subject.cpp
+        $(SOURCEDIR)/core/TemplateProcessor.cpp
         $(SOURCEDIR)/core/Visitor.cpp
         $(SOURCEDIR)/databasehandler.cpp
         $(SOURCEDIR)/engine/MetadataLoader.cpp
@@ -455,7 +456,6 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/sql/SqlTemplateProcessor.cpp
         $(SOURCEDIR)/sql/SqlTokenizer.cpp
         $(SOURCEDIR)/sql/StatementBuilder.cpp
-        $(SOURCEDIR)/TemplateProcessor.cpp
         $(SOURCEDIR)/statementHistory.cpp
         $(SOURCEDIR)/urihandler.cpp
 
