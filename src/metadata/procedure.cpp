@@ -195,7 +195,9 @@ wxString Procedure::getExecuteStatement()
 
         sb << StatementBuilder::DecIndent;
     }
-    sb << wxT(" p");
+    
+    if (!columns.empty())
+        sb << wxT(" p");
 
     return sb;
 }
