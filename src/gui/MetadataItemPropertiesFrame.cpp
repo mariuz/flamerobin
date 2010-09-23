@@ -56,7 +56,6 @@
 #include "gui/MetadataItemPropertiesFrame.h"
 #include "gui/ProgressDialog.h"
 #include "images.h"
-#include "metadata/CreateDDLVisitor.h"
 #include "metadata/database.h"
 #include "metadata/exception.h"
 #include "metadata/server.h"
@@ -295,9 +294,11 @@ void MetadataItemPropertiesPanel::loadPage()
 //! processes the given html template file
 void MetadataItemPropertiesPanel::processHtmlFile(wxString fileName)
 {
+    ProgressDialog pd = ProgressDialog(this, wxT("Processing template..."));
+
     wxString htmlpage;
     HtmlTemplateProcessor tp(objectM);
-    tp.processTemplateFile(htmlpage, fileName, 0, this);
+    tp.processTemplateFile(htmlpage, fileName, 0, this, true, &pd);
 
     int x = 0, y = 0;
     html_window->GetViewStart(&x, &y);         // save scroll position

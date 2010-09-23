@@ -1534,7 +1534,7 @@ void DataGeneratorFrame::setParam(IBPP::Statement st, int param,
 void DataGeneratorFrame::generateData(std::list<Table *>& order)
 {
     ProgressDialog pd(this, _("Generating data"), 2);
-    pd.Show();
+    pd.doShow();
     pd.initProgress(_("Inserting into tables"), order.size());
 
     // one big transaction (perhaps this should be configurable)

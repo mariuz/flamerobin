@@ -53,6 +53,9 @@ public:
         unsigned int progressLevel = 1) = 0;
     virtual void stepProgress(int stepAmount = 1,
         unsigned int progressLevel = 1) = 0;
+    virtual void doShow() = 0;
+    virtual void doHide() = 0;
+    virtual void setProgressLevelCount(unsigned int levelCount = 1) = 0;
 };
 //-----------------------------------------------------------------------------
 void checkProgressIndicatorCanceled(ProgressIndicator* progressIndicator);

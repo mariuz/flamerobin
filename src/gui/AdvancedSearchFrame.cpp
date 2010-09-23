@@ -549,7 +549,7 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
     // foreach database
     int current = 0;
     ProgressDialog pd(this, _("Searching..."), 2);
-    pd.Show();
+    pd.doShow();
     for (CriteriaCollection::const_iterator
         cid = searchCriteriaM.lower_bound(CriteriaItem::ctDB);
         cid != searchCriteriaM.upper_bound(CriteriaItem::ctDB); ++cid)

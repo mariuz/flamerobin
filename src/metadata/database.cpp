@@ -899,7 +899,10 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
         createCharsetConverter();
 
         if (indicator)
+        {
+            indicator->doShow();
             indicator->initProgressIndeterminate(wxT("Establishing connection..."));
+        }
 
         bool useUserNamePwd = !authenticationModeM.getIgnoreUsernamePassword();
         databaseM = IBPP::DatabaseFactory("", wx2std(getConnectionString()),

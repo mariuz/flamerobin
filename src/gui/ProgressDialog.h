@@ -47,6 +47,7 @@ private:
 
     wxWindowDisabler* winDisablerM;
 
+    void destroyControls();
     void createControls();
     void layoutControls();
 
@@ -80,6 +81,9 @@ public:
         unsigned int progressLevel = 1);
     virtual void stepProgress(int stepAmount = 1,
         unsigned int progressLevel = 1);
+    virtual void doShow();
+    virtual void doHide();
+    virtual void setProgressLevelCount(unsigned int levelCount = 1);
 private:
     // event handling
     void OnCancelButtonClick(wxCommandEvent& event);

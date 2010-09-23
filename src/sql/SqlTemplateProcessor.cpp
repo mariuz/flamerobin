@@ -45,8 +45,6 @@
 #include "config/Config.h"
 #include "core/StringUtils.h"
 #include "frutils.h"
-#include "gui/ProgressDialog.h"
-#include "metadata/CreateDDLVisitor.h"
 #include "metadata/metadataitem.h"
 #include "metadata/server.h"
 #include "sql/SqlTemplateProcessor.h"

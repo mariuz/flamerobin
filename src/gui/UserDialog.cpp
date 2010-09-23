@@ -274,6 +274,7 @@ bool UserPropertiesHandler::handleURI(URI& uri)
     if (d.ShowModal() == wxID_OK)
     {
         ProgressDialog pd(w, _("Connecting to Server..."), 1);
+        pd.doShow();
         IBPP::Service svc;
         if (!getService(s, svc, &pd, true)) // true = need SYSDBA password
             return true;
@@ -326,6 +327,7 @@ bool DropUserHandler::handleURI(URI& uri)
         return true;
 
     ProgressDialog pd(w, _("Connecting to Server..."), 1);
+    pd.doShow();
     IBPP::Service svc;
     if (!getService(s, svc, &pd, true)) // true = need SYSDBA password
         return true;

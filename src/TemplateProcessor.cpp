@@ -46,7 +46,7 @@
 #include "config/Config.h"
 #include "core/StringUtils.h"
 #include "frutils.h"
-#include "gui/ProgressDialog.h"
+#include "core/ProgressIndicator.h"
 #include "metadata/CreateDDLVisitor.h"
 #include "metadata/metadataitem.h"
 #include "metadata/server.h"
@@ -123,8 +123,13 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         if (!s)
             return;
 
-        ProgressDialog pd(window->GetParent(), _("Connecting to Server..."), 1);
-        UserList* usr = s->getUsers(&pd);
+        ProgressIndicator* pi = getProgressIndicator();
+        if (pi)
+        {
+            pi->initProgress(_("Connecting to Server..."));
+            pi->doShow();
+        }
+        UserList* usr = s->getUsers(pi);
         if (!usr || !usr->size())
         {
             window->Close();
@@ -555,9 +560,14 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
 
     else if (cmdName == wxT("object_ddl"))
     {
-        ProgressDialog pd(window->GetParent(), _("Extracting DDL Definitions"), 2);
-
-        CreateDDLVisitor cdv(&pd);
+        ProgressIndicator* pi = getProgressIndicator();
+        if (pi)
+        {
+            pi->setProgressLevelCount(2);
+            pi->initProgress(_("Extracting DDL Definitions"));
+            pi->doShow();
+        }
+        CreateDDLVisitor cdv(pi);
         object->acceptVisitor(&cdv);
         processedText += escapeChars(cdv.getSql(), false);
     }
@@ -813,23 +823,31 @@ void TemplateProcessor::internalProcessTemplateText(wxString& processedText, wxS
             cmdName = cmdParams[0];
             cmdParams.RemoveAt(0);
             if (!cmdName.empty())
+            {
+                // process internal commands.
                 processCommand(cmdName, cmdParams, object, processedText, window, first);
+                // call external command handlers.
+                getTemplateCmdHandlerRepository().handleTemplateCmd(this, cmdName, cmdParams,
+                    object, processedText, window, first);
+            }
         }
         oldpos = pos = endpos + 2;
     }
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::processTemplateFile(wxString& processedText, wxFileName inputFileName,
-    MetadataItem* object, wxWindow *window, bool first)
+    MetadataItem* object, wxWindow *window, bool first, ProgressIndicator* progressIndicator)
 {
     fileNameM = inputFileName;
+    progressIndicatorM = progressIndicator;
     internalProcessTemplateText(processedText, loadEntireFile(fileNameM), object, window, first);
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::processTemplateText(wxString& processedText, wxString inputText,
-    MetadataItem *object, wxWindow *window, bool first)
+    MetadataItem *object, wxWindow *window, bool first, ProgressIndicator* progressIndicator)
 {
     fileNameM.Clear();
+    progressIndicatorM = progressIndicator;
     internalProcessTemplateText(processedText, inputText, object, window, first);
 }
 //-----------------------------------------------------------------------------
@@ -871,5 +889,83 @@ wxString TemplateCmdParams::all() const
           result += wxT(':') + Item(i);
     }
     return result;
+}
+//-----------------------------------------------------------------------------
+TemplateCmdHandlerRepository& getTemplateCmdHandlerRepository()
+{
+    static TemplateCmdHandlerRepository repository;
+    return repository;
+}
+//-----------------------------------------------------------------------------
+//! needed to disallow instantiation
+TemplateCmdHandlerRepository::TemplateCmdHandlerRepository()
+    : handlerListSortedM(false)
+{
+}
+//-----------------------------------------------------------------------------
+TemplateCmdHandlerRepository::~TemplateCmdHandlerRepository()
+{
+    while (!handlersM.empty())
+        removeHandler(handlersM.front());
+}
+//-----------------------------------------------------------------------------
+//! needed in checkHandlerListSorted() to sort on objects instead of pointers
+bool templateCmdHandlerPointerLT(const TemplateCmdHandler* left, const TemplateCmdHandler* right)
+{
+    return *left < *right;
+}
+//-----------------------------------------------------------------------------
+void TemplateCmdHandlerRepository::checkHandlerListSorted()
+{
+    if (!handlerListSortedM)
+    {
+        handlersM.sort(templateCmdHandlerPointerLT);
+        handlerListSortedM = true;
+    }
+}
+//-----------------------------------------------------------------------------
+//! returns false if no suitable handler found
+void TemplateCmdHandlerRepository::handleTemplateCmd(TemplateProcessor *tp,
+    wxString cmdName, TemplateCmdParams cmdParams, MetadataItem* object,
+    wxString& processedText, wxWindow *window, bool first)
+{
+    checkHandlerListSorted();
+    for (std::list<TemplateCmdHandler*>::iterator it = handlersM.begin(); it != handlersM.end(); ++it)
+        (*it)->handleTemplateCmd(tp, cmdName, cmdParams, object, processedText, window, first);
+}
+//-----------------------------------------------------------------------------
+void TemplateCmdHandlerRepository::addHandler(TemplateCmdHandler* handler)
+{
+    // can't do ordered insert here, since the getPosition() function that
+    // serves TemplateCmdHandler::operator< is virtual, and this function (addHandler)
+    // is called in the constructor of TemplateCmdHandler.
+    // The list will be sorted on demand (see checkHandlerListSorted()).
+    handlersM.push_back(handler);
+    handler->setRepository(this);
+    handlerListSortedM = false;
+}
+//-----------------------------------------------------------------------------
+void TemplateCmdHandlerRepository::removeHandler(TemplateCmdHandler* handler)
+{
+    handlersM.erase(std::find(handlersM.begin(), handlersM.end(), handler));
+    handler->setRepository(0);
+}
+//-----------------------------------------------------------------------------
+TemplateCmdHandler::TemplateCmdHandler() :
+    repositoryM(0)
+{
+    getTemplateCmdHandlerRepository().addHandler(this);
+}
+//-----------------------------------------------------------------------------
+void TemplateCmdHandler::setRepository(TemplateCmdHandlerRepository* const repository)
+{
+    repositoryM = repository;
+}
+//-----------------------------------------------------------------------------
+//! this is currently only called on program termination
+TemplateCmdHandler::~TemplateCmdHandler()
+{
+    if (repositoryM)
+        repositoryM->removeHandler(this);
 }
 //-----------------------------------------------------------------------------

@@ -44,26 +44,25 @@
 //-----------------------------------------------------------------------------
 // ProgressDialog
 ProgressDialog::ProgressDialog(wxWindow* parent, const wxString& title,
-        unsigned int levelCount, const wxPoint& pos, const wxSize& size)
+    unsigned int levelCount, const wxPoint& pos, const wxSize& size)
     : BaseDialog(parent, wxID_ANY, title, pos, size, wxDEFAULT_DIALOG_STYLE)
 {
     canceledM = false;
-    levelCountM = levelCount;
-    SetExtraStyle(GetExtraStyle() | wxWS_EX_TRANSIENT);
-
-    createControls();
-    layoutControls();
-
     winDisablerM = 0;
-    enableOtherWindows(false);
-    Show();
-    Enable();
-    doUpdate();
+    SetExtraStyle(GetExtraStyle() | wxWS_EX_TRANSIENT);
+    setProgressLevelCount(levelCount);
 }
 //-----------------------------------------------------------------------------
 ProgressDialog::~ProgressDialog()
 {
     enableOtherWindows(true);
+}
+//-----------------------------------------------------------------------------
+void ProgressDialog::destroyControls()
+{
+    labelsM.clear();
+    gaugesM.clear();
+    getControlsPanel()->DestroyChildren();
 }
 //-----------------------------------------------------------------------------
 void ProgressDialog::createControls()
@@ -251,6 +250,31 @@ void ProgressDialog::stepProgress(int stepAmount, unsigned int progressLevel)
         int maxPos = gauge->GetRange();
         gauge->SetValue((pos < 0) ? 0 : (pos > maxPos ? maxPos : pos));
         doUpdate();
+    }
+}
+//-----------------------------------------------------------------------------
+void ProgressDialog::doShow()
+{
+    enableOtherWindows(false);
+    Show();
+    Enable();
+    doUpdate();
+}
+//-----------------------------------------------------------------------------
+void ProgressDialog::doHide()
+{
+    Hide();
+    enableOtherWindows(true);
+}
+//-----------------------------------------------------------------------------
+void ProgressDialog::setProgressLevelCount(unsigned int levelCount)
+{
+    if (levelCountM != levelCount)
+    {
+        levelCountM = levelCount;
+        destroyControls();
+        createControls();
+        layoutControls();
     }
 }
 //-----------------------------------------------------------------------------

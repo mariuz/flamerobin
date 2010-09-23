@@ -1664,7 +1664,7 @@ void ExecuteSqlFrame::OnMenuGridExportBlob(wxCommandEvent& WXUNUSED(event))
         return;
 
     ProgressDialog pd(this, _("Saving BLOB to file"));
-    pd.Show();
+    pd.doShow();
     dgt->exportBlobFile(filename, grid_data->GetGridCursorRow(),
         grid_data->GetGridCursorCol(), &pd);
 }
@@ -1683,7 +1683,7 @@ void ExecuteSqlFrame::OnMenuGridImportBlob(wxCommandEvent& WXUNUSED(event))
         return;
 
     ProgressDialog pd(this, _("Importing BLOB from file"));
-    pd.Show();
+    pd.doShow();
     dgt->importBlobFile(filename, grid_data->GetGridCursorRow(),
         grid_data->GetGridCursorCol(), &pd);
 }
@@ -3122,6 +3122,7 @@ bool EditDDLHandler::handleURI(URI& uri)
     MetadataLoaderTransaction tr((d) ? d->getMetadataLoader() : 0);
 
     ProgressDialog pd(w, _("Extracting DDL Definitions"), 2);
+    pd.doShow();
     CreateDDLVisitor cdv(&pd);
     m->acceptVisitor(&cdv);
     if (pd.isCanceled())
@@ -3133,7 +3134,7 @@ bool EditDDLHandler::handleURI(URI& uri)
     // ProgressDialog needs to be hidden before ExecuteSqlFrame is shown,
     // otherwise the HTML frame will be raised over the ExecuteSqlFrame
     // when original Z-order is restored after pd has been destroyed
-    pd.Hide();
+    pd.doHide();
     eff->Show();
     return true;
 }

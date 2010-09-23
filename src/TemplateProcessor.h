@@ -36,7 +36,9 @@
 #include <map>
 
 #include "metadata/metadataitem.h"
+#include "core/ProgressIndicator.h"
 
+//-----------------------------------------------------------------------------
 class TemplateCmdParams: public wxArrayString
 {
 public:
@@ -55,7 +57,9 @@ private:
     bool flagNextM;
 	wxFileName fileNameM;
 	wxStringMap varsM;
+	ProgressIndicator* progressIndicatorM;
 protected:
+    ProgressIndicator* getProgressIndicator() { return progressIndicatorM; };
 	//! processes a command found in template text
     virtual void processCommand(wxString cmdName,
 		TemplateCmdParams cmdParams, MetadataItem* object,
@@ -75,10 +79,12 @@ public:
 	//! commands are in format: {%cmdName:cmdParams%}
 	//! cmdParams field may be empty, in which case the format is {%cmdName*}
     void processTemplateText(wxString& processedText, wxString inputText,
-		MetadataItem* object, wxWindow *window, bool first = true);
+		MetadataItem* object, wxWindow *window, bool first = true,
+		ProgressIndicator* progressIndicator = 0);
 	//! loads the contents of the specified file and calls internalProcessTemplateText().
     void processTemplateFile(wxString& processedText, wxFileName inputFileName,
-        MetadataItem* object, wxWindow *window, bool first = true);
+        MetadataItem* object, wxWindow *window, bool first = true,
+        ProgressIndicator* progressIndicator = 0);
 	//! sets a variable value. If the variable already exists it is overwritten.
 	//! To clear a variable, set it to an empty string.
 	void setVar(wxString varName, wxString varValue);
@@ -90,4 +96,66 @@ public:
 	void clearVars();
 };
 //-----------------------------------------------------------------------------
+class TemplateCmdHandler;
+//-----------------------------------------------------------------------------
+class TemplateCmdHandlerRepository
+{
+public:
+    // interface for handler providers.
+    void addHandler(TemplateCmdHandler *handler);
+    void removeHandler(TemplateCmdHandler *handler);
+
+    // interface for consumers.
+    void handleTemplateCmd(TemplateProcessor *tp, wxString cmdName,
+        TemplateCmdParams cmdParams, MetadataItem* object, wxString& processedText,
+        wxWindow *window, bool first);
+
+    virtual ~TemplateCmdHandlerRepository();
+private:
+    std::list<TemplateCmdHandler*> handlersM;
+    bool handlerListSortedM;
+    void checkHandlerListSorted();
+
+    // only getTemplateCmdHandlerRepository() may instantiate an object of this class.
+    friend TemplateCmdHandlerRepository& getTemplateCmdHandlerRepository();
+
+    // Disable construction, copy-construction and assignment.
+    TemplateCmdHandlerRepository();
+    TemplateCmdHandlerRepository(const TemplateCmdHandlerRepository&) {};
+    TemplateCmdHandlerRepository operator==(const TemplateCmdHandlerRepository&);
+};
+//-----------------------------------------------------------------------------
+//!singleton instance of the command handler repository.
+TemplateCmdHandlerRepository& getTemplateCmdHandlerRepository();
+//-----------------------------------------------------------------------------
+//! pure virtual class, specific handlers should be derived from it
+class TemplateCmdHandler
+{
+    friend class TemplateCmdHandlerRepository;
+public:
+    TemplateCmdHandler();
+    virtual ~TemplateCmdHandler();
+
+    virtual void handleTemplateCmd(TemplateProcessor *tp, wxString cmdName,
+        TemplateCmdParams cmdParams, MetadataItem* object, wxString& processedText,
+        wxWindow *window, bool first) = 0;
+    
+    bool operator<(const TemplateCmdHandler& right) const
+    {
+        return getPosition() < right.getPosition();
+    }
+protected:
+    virtual int getPosition() const
+    {
+        // By default all handlers are walked in undefined order; override this
+        // function to force a handler to be processed earlier (return a lower
+        // number) or later (return a higher number).
+        return 1024;
+    }
+private:
+    TemplateCmdHandlerRepository* repositoryM;
+    void setRepository(TemplateCmdHandlerRepository* const repository);
+};
+//-----------------------------------------------------------------------------
+
 #endif // FR_TEMPLATEPROCESSOR_H

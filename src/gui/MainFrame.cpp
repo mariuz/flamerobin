@@ -858,10 +858,10 @@ void MainFrame::OnMenuTemplate(wxCommandEvent& event)
         }
     }
 
+    ProgressDialog pd = ProgressDialog(this, wxT("Processing template..."));
     wxString sql;
     SqlTemplateProcessor tp(t, &objects);
-    tp.processTemplateFile(sql, file, 0, this);
-
+    tp.processTemplateFile(sql, file, 0, this, true, &pd);
     showSql(this, wxString(_("Execute SQL statements")), d, sql);
 }
 //-----------------------------------------------------------------------------
@@ -1057,6 +1057,7 @@ void MainFrame::OnMenuGetServerVersion(wxCommandEvent& WXUNUSED(event))
         // progress dialog will get closed in case of fatal exception or when
         // retieving is complete
         ProgressDialog pd(this, _("Retrieving server version"), 1);
+        pd.doShow();
         IBPP::Service svc;
         if (!getService(s, svc, &pd, false))    // false = no need for sysdba
             return;
