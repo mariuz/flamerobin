@@ -704,10 +704,70 @@ struct MetadataItemSorter
 {
     bool operator() (MetadataItem* item1, MetadataItem* item2)
     {
-        int i = item1->getName_().CmpNoCase(item2->getName_());
+        wxString name1(item1->getName_());
+        wxString name2(item2->getName_());
+
+        // use (very basic) natural sort
+        // this makes sure that for example "Server10" comes after "Server2"
+        wxArrayString letterChunks1, letterChunks2;
+
+        wxString digits(wxT("0123456789"));
+        size_t start1 = 0, start2 = 0;
+        size_t len1 = name1.size(), len2 = name2.size();
+        while (start1 < len1 || start2 < len2)
+        {
+            // partial strings from consecutive non-digits
+            size_t end1 = name1.find_first_of(digits, start1);
+            size_t end2 = name2.find_first_of(digits, start2);
+            if (end1 > 0 || end2 > 0)
+            {
+                wxString chunk1(name1, start1, end1);
+                wxString chunk2(name2, start2, end2);
+                // return immediately when case-insensitive comparison
+                // gives a result
+                int i = chunk1.CmpNoCase(chunk2);
+                if (i != 0)
+                    return i < 0;
+                // otherwise store the chunks for second comparison
+                // (case-sensitive)
+                letterChunks1.push_back(chunk1);
+                letterChunks2.push_back(chunk2);
+
+                start1 = end1;
+                start2 = end2;
+            }
+
+            // partial strings from consecutive digits
+            end1 = name1.find_first_not_of(digits, start1);
+            end2 = name2.find_first_not_of(digits, start2);
+            if (end1 > 0 || end2 > 0)
+            {
+                wxString chunk1(name1, start1, end1);
+                wxString chunk2(name2, start2, end2);
+                wxLongLong_t l1, l2;
+                if (!chunk1.ToLongLong(&l1))
+                    l1 = 0;
+                if (!chunk2.ToLongLong(&l2))
+                    l2 = 0;
+                if (l1 != l2)
+                    return l1 < l2;
+                // don't store numbers: if they are equal they need not be 
+                // checked again in second loop (case-sensitive comparison)
+                start1 = end1;
+                start2 = end2;
+            }
+        }
+
+        int res = 0;
+        for (size_t i = 0; res == 0 && i < letterChunks1.size(); ++i)
+            res = letterChunks1[i].Cmp(letterChunks2[i]);
+        return res < 0;
+/*
+        int i = name1.CmpNoCase(name2);
         if (i == 0)
-            i = item1->getName_().Cmp(item2->getName_());
+            i = name1.Cmp(name2);
         return i < 0;
+*/
     };
 };
 //-----------------------------------------------------------------------------
