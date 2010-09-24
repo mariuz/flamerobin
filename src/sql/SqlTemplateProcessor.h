@@ -34,7 +34,7 @@
 #include <vector>
 
 #include "metadata/metadataitem.h"
-#include "TemplateProcessor.h"
+#include "core/TemplateProcessor.h"
 
 //-----------------------------------------------------------------------------
 class SqlTemplateProcessor: public TemplateProcessor
