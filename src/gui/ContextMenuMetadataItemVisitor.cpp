@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -213,7 +213,7 @@ void ContextMenuMetadataItemVisitor::visitTable(Table& table)
     wxString path = config().getSqlTemplatesPath();
     wxDir::GetAllFiles(path, &files, wxT("TABLE_*"), wxDIR_FILES);
     files.Sort();
-    for (int i = 1; i <= files.GetCount(); i++)
+    for (size_t i = 1; i <= files.GetCount(); i++)
         tMenu->Append(i+(int)Cmds::Menu_TemplateFirst, files[i-1].Mid(10+path.Length()));
     menuM->Append(Cmds::Menu_TemplateFirst, _("&Generate script for..."), tMenu);
     if (!isSystem)
