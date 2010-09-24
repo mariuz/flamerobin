@@ -2273,10 +2273,10 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         try
         {
             int cols = statementM->Columns();
-            for (int i = 1; i <= cols; i++)
+            hasColumns = cols > 0;
+            if (doShowStats)
             {
-                hasColumns = true;
-                if (doShowStats)
+                for (int i = 1; i <= cols; i++)
                 {
                     wxString tablename(std2wxIdentifier(statementM->ColumnTable(i),
                         databaseM->getCharsetConverter()));
@@ -2284,8 +2284,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                         databaseM->getCharsetConverter()));
                     wxString aliasname(std2wxIdentifier(statementM->ColumnAlias(i),
                         databaseM->getCharsetConverter()));
-                    log(wxString::Format(
-                        _("Field #%02d: %s.%s Alias:%s Type:%s"),
+                    log(wxString::Format(_("Field #%02d: %s.%s Alias:%s Type:%s"),
                         i, tablename.c_str(), colname.c_str(), aliasname.c_str(),
                         IBPPtype2string(
                             databaseM,
@@ -2293,7 +2292,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                             statementM->ColumnSubtype(i),
                             statementM->ColumnSize(i),
                             statementM->ColumnScale(i)).c_str()
-                    ), ttSql);
+                        ), ttSql);
                 }
             }
         }
