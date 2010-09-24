@@ -36,6 +36,7 @@
 #include <map>
 
 #include "metadata/metadataitem.h"
+#include "config/Config.h"
 #include "core/ProgressIndicator.h"
 
 //-----------------------------------------------------------------------------
@@ -58,7 +59,10 @@ private:
 	wxFileName fileNameM;
 	wxStringMap varsM;
 	ProgressIndicator* progressIndicatorM;
+	Config configM;
 protected:
+	TemplateProcessor(MetadataItem *m,
+        std::vector<MetadataItem *> *allowedObjects = 0);
     ProgressIndicator* getProgressIndicator() { return progressIndicatorM; };
 	//! processes a command found in template text
     virtual void processCommand(wxString cmdName,
@@ -66,8 +70,6 @@ protected:
         wxString& processedText, wxWindow *window, bool first);
 	//! processor-specific way of escaping special chars
 	virtual wxString escapeChars(const wxString& input, bool processNewlines = true) = 0;
-	TemplateProcessor(MetadataItem *m,
-        std::vector<MetadataItem *> *allowedObjects = 0);
 	//! processes all commands without resetting fileNameM. Should be used
 	// internally, while processTemplateText() is for external use.
 	void internalProcessTemplateText(wxString& processedText, wxString inputText,
@@ -94,6 +96,11 @@ public:
 	void clearVar(wxString varName);
 	//! clears all variables.
 	void clearVars();
+	//! the internal config object, used to store user-supplied parameters in
+	//! interactive templates.
+	Config& getConfig() { return configM; }
+    //! Name of the current template file if processTemplateFile() has been called.
+    wxFileName getCurrentTemplateFileName() { return fileNameM; }
 };
 //-----------------------------------------------------------------------------
 class TemplateCmdHandler;

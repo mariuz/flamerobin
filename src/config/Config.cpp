@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -54,9 +54,9 @@ using namespace std;
 //-----------------------------------------------------------------------------
 const wxString Config::pathSeparator = wxT("/");
 //-----------------------------------------------------------------------------
-Config& config()
+FRConfig& config()
 {
-    static Config c;
+    static FRConfig c;
     return c;
 }
 //-----------------------------------------------------------------------------
@@ -264,31 +264,6 @@ wxString Config::getHomePath() const
         return getDataDir() + wxT("/");
 }
 //-----------------------------------------------------------------------------
-wxString Config::getHtmlTemplatesPath() const
-{
-    return getHomePath() + wxT("html-templates/");
-}
-//-----------------------------------------------------------------------------
-wxString Config::getSqlTemplatesPath() const
-{
-    return getHomePath() + wxT("sql-templates/");
-}
-//-----------------------------------------------------------------------------
-wxString Config::getDocsPath() const
-{
-    return getHomePath() + wxT("docs/");
-}
-//-----------------------------------------------------------------------------
-wxString Config::getConfDefsPath() const
-{
-    return getHomePath() + wxT("conf-defs/");
-}
-//-----------------------------------------------------------------------------
-wxString Config::getImagesPath() const
-{
-    return getHomePath() + wxT("images/");
-}
-//-----------------------------------------------------------------------------
 wxString Config::getUserHomePath() const
 {
     if (!userHomePathM.empty())
@@ -297,14 +272,14 @@ wxString Config::getUserHomePath() const
         return getUserLocalDataDir() + wxT("/");
 }
 //-----------------------------------------------------------------------------
-wxString Config::getDBHFileName() const
+wxFileName Config::getConfigFileName() const
 {
-    return getUserHomePath() + wxT("fr_databases.conf");
+    return configFileNameM;
 }
 //-----------------------------------------------------------------------------
-wxString Config::getConfigFileName() const
+void Config::setConfigFileName(wxFileName fileName)
 {
-    return getUserHomePath() + wxT("fr_settings.conf");
+    configFileNameM = fileName;
 }
 //-----------------------------------------------------------------------------
 wxString Config::getDataDir() const
@@ -368,5 +343,40 @@ void ConfigCache::update()
 {
     // next call to ensureCacheValid() will reload the cached information
     cacheValidM = false;
+}
+//-----------------------------------------------------------------------------
+wxString FRConfig::getHtmlTemplatesPath() const
+{
+    return getHomePath() + wxT("html-templates/");
+}
+//-----------------------------------------------------------------------------
+wxString FRConfig::getSqlTemplatesPath() const
+{
+    return getHomePath() + wxT("sql-templates/");
+}
+//-----------------------------------------------------------------------------
+wxString FRConfig::getDocsPath() const
+{
+    return getHomePath() + wxT("docs/");
+}
+//-----------------------------------------------------------------------------
+wxString FRConfig::getConfDefsPath() const
+{
+    return getHomePath() + wxT("conf-defs/");
+}
+//-----------------------------------------------------------------------------
+wxString FRConfig::getImagesPath() const
+{
+    return getHomePath() + wxT("images/");
+}
+//-----------------------------------------------------------------------------
+wxString FRConfig::getDBHFileName() const
+{
+    return getUserHomePath() + wxT("fr_databases.conf");
+}
+//-----------------------------------------------------------------------------
+wxFileName FRConfig::getConfigFileName() const
+{
+    return wxFileName(getUserHomePath(), wxT("fr_settings.conf"));
 }
 //-----------------------------------------------------------------------------

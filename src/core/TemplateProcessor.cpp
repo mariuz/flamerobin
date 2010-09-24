@@ -90,6 +90,17 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
     else if (cmdName == wxT("clearvars"))
         clearVars();
 
+    else if (cmdName == wxT("getconf") && !cmdParams.empty())
+        processedText += configM.get(cmdParams.all(), wxString(wxT("")));
+
+    else if (cmdName == wxT("setconf") && !cmdParams.empty())
+    {
+        if (cmdParams.Count() == 1)
+            configM.setValue(cmdParams[0], wxString(wxT("")));
+        else
+            configM.setValue(cmdParams[0], cmdParams[1]);
+    }
+
     else if (cmdName == wxT("object_name"))
         processedText += object->getName_();
 
@@ -839,6 +850,8 @@ void TemplateProcessor::processTemplateFile(wxString& processedText, wxFileName 
     MetadataItem* object, wxWindow *window, bool first, ProgressIndicator* progressIndicator)
 {
     fileNameM = inputFileName;
+    inputFileName.SetExt(wxT("conf"));
+    configM.setConfigFileName(inputFileName);
     progressIndicatorM = progressIndicator;
     internalProcessTemplateText(processedText, loadEntireFile(fileNameM), object, window, first);
 }
@@ -847,6 +860,7 @@ void TemplateProcessor::processTemplateText(wxString& processedText, wxString in
     MetadataItem *object, wxWindow *window, bool first, ProgressIndicator* progressIndicator)
 {
     fileNameM.Clear();
+    configM.setConfigFileName(wxFileName(wxEmptyString));
     progressIndicatorM = progressIndicator;
     internalProcessTemplateText(processedText, inputText, object, window, first);
 }

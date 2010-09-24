@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -38,16 +38,17 @@
     #include "wx/wx.h"
 #endif
 //-----------------------------------------------------------------------------
-#include "DatabaseConfig.h"
+#include "config/Config.h"
+#include "config/DatabaseConfig.h"
 #include "metadata/database.h"
 //-----------------------------------------------------------------------------
-DatabaseConfig::DatabaseConfig(const Database *d)
-    :Config(), databaseM(d)
+DatabaseConfig::DatabaseConfig(const Database *d, Config& referenceConfig)
+    :Config(), databaseM(d), referenceConfigM(referenceConfig)
 {
     // we need to copy these settings, since they may have been modified
     // by env variables or command line params
-    setHomePath(config().getHomePath());
-    setUserHomePath(config().getUserHomePath());
+    setHomePath(referenceConfigM.getHomePath());
+    setUserHomePath(referenceConfigM.getUserHomePath());
 }
 //-----------------------------------------------------------------------------
 wxString DatabaseConfig::addPathToKey(const wxString key) const
@@ -60,16 +61,16 @@ wxString DatabaseConfig::addPathToKey(const wxString key) const
 //-----------------------------------------------------------------------------
 bool DatabaseConfig::keyExists(const wxString& key) const
 {
-    return config().keyExists(addPathToKey(key));
+    return referenceConfigM.keyExists(addPathToKey(key));
 }
 //-----------------------------------------------------------------------------
 bool DatabaseConfig::getValue(wxString key, wxString& value)
 {
-    return config().getValue(addPathToKey(key), value);
+    return referenceConfigM.getValue(addPathToKey(key), value);
 }
 //-----------------------------------------------------------------------------
 bool DatabaseConfig::setValue(wxString key, wxString value)
 {
-    return config().setValue(addPathToKey(key), value);
+    return referenceConfigM.setValue(addPathToKey(key), value);
 }
 //-----------------------------------------------------------------------------

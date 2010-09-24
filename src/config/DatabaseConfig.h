@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -43,10 +43,11 @@ class DatabaseConfig: public Config
 {
 private:
     const Database *databaseM;
+    Config& referenceConfigM;
     wxString addPathToKey(const wxString key) const;
 
 public:
-    DatabaseConfig(const Database *d);
+    DatabaseConfig(const Database *d, Config& referenceConfig);
 
     // unhides methods of base class, for details see:
     // http://www.parashift.com/c++-faq-lite/strange-inheritance.html#faq-23.7

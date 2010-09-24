@@ -49,6 +49,7 @@
 
 #include "config/Config.h"
 #include "core/ArtProvider.h"
+#include "core/FRError.h"
 #include "frutils.h"
 #include "gui/PreferencesDialog.h"
 #include "gui/StyleGuide.h"
@@ -317,12 +318,13 @@ void Optionbook::OnSize(wxSizeEvent& event)
 //-----------------------------------------------------------------------------
 // PreferencesDialog class
 PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
-        Config& config, const wxString& descriptionFileName)
-    : BaseDialog(parent, -1, title), configM(config)
+        Config& targetConfig, const wxFileName& descriptionFileName)
+    : BaseDialog(parent, -1, title), targetConfigM(targetConfig)
 {
     // we don't want this dialog centered on parent since it is very big, and
-    // some parents (ex. main frame) could even be smaller
-    configM.setValue(getName() + Config::pathSeparator + wxT("centerDialogOnParent"), false);
+    // some parents (ex. main frame) could even be smaller.
+    // Don't use targetConfig here, the setting must go in the global instance.
+    config().setValue(getStorageName() + Config::pathSeparator + wxT("centerDialogOnParent"), false);
 
     treectrl_1 = new wxTreeCtrl(getControlsPanel(), ID_treectrl_panes,
         wxDefaultPosition, wxDefaultSize,
@@ -338,7 +340,7 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
 
     // order of these is important: first create all controls, then set
     // their properties (may affect min size), then create sizer layout
-    loadDescriptionFile(wxFileName(configM.getConfDefsPath(), descriptionFileName));
+    loadDescriptionFile(descriptionFileName);
     setProperties();
     layout();
     // do this last, otherwise default button style may be lost on MSW
@@ -434,12 +436,13 @@ void PreferencesDialog::layout()
     sizerRight->Add(bookctrl_1, 1, wxEXPAND);
 
     wxBoxSizer* sizerControls = new wxBoxSizer(wxHORIZONTAL);
+    if (bookctrl_1->GetPageCount() > 1)
 #if !defined(__WXMAC__)
-    sizerControls->Add(treectrl_1, 0, wxEXPAND);
+        sizerControls->Add(treectrl_1, 0, wxEXPAND);
     sizerControls->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 0);
     sizerControls->Add(sizerRight, 1, wxEXPAND);
 #else
-    sizerControls->Add(treectrl_1, 2, wxEXPAND);
+        sizerControls->Add(treectrl_1, 2, wxEXPAND);
     sizerControls->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 0);
     sizerControls->Add(sizerRight, 5, wxEXPAND);
 #endif
@@ -493,12 +496,12 @@ void PreferencesDialog::loadDescriptionFile(const wxFileName& filename)
     loadSuccessM = true;
 }
 //-----------------------------------------------------------------------------
-bool PreferencesDialog::loadFromConfig()
+bool PreferencesDialog::loadFromTargetConfig()
 {
     std::list<PrefDlgSetting*>::iterator it;
     for (it = settingsM.begin(); it != settingsM.end(); it++)
     {
-        if (!(*it)->loadFromConfig(configM))
+        if (!(*it)->loadFromTargetConfig(targetConfigM))
             return false;
     }
     return true;
@@ -609,15 +612,15 @@ bool PreferencesDialog::parseDescriptionSetting(wxPanel* page, wxXmlNode* xmln,
     return true;
 }
 //-----------------------------------------------------------------------------
-bool PreferencesDialog::saveToConfig()
+bool PreferencesDialog::saveToTargetConfig()
 {
-    // wxFileConfig::Flush() should only be called once
-    SubjectLocker locker(&configM);
+    // Avoid flushing the config object at each write.
+    SubjectLocker locker(&targetConfigM);
 
     std::list<PrefDlgSetting*>::iterator it;
     for (it = settingsM.begin(); it != settingsM.end(); it++)
     {
-        if (!(*it)->saveToConfig(configM))
+        if (!(*it)->saveToTargetConfig(targetConfigM))
             return false;
     }
     return true;
@@ -667,7 +670,7 @@ END_EVENT_TABLE()
 void PreferencesDialog::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor wait;
-    if (saveToConfig())
+    if (saveToTargetConfig())
         EndModal(wxID_OK);
 }
 //-----------------------------------------------------------------------------
@@ -683,6 +686,43 @@ void PreferencesDialog::OnTreeSelChanged(wxTreeEvent& event)
             static_text_categ->SetLabel(bookctrl_1->GetPageText(i));
             break;
         }
+    }
+}
+//-----------------------------------------------------------------------------
+bool PreferencesDialog::Show(bool show)
+{
+    bool r = BaseDialog::Show(show);
+    if ((show) && (bookctrl_1->GetPageCount() <= 1))
+        treectrl_1->Hide();
+    return r;
+}
+//-----------------------------------------------------------------------------
+class PreferencesDialogTemplateCmdHandler: public TemplateCmdHandler
+{
+private:
+    static const PreferencesDialogTemplateCmdHandler handlerInstance; // singleton; registers itself on creation.
+public:
+    virtual void handleTemplateCmd(TemplateProcessor *tp, wxString cmdName,
+        TemplateCmdParams cmdParams, MetadataItem* object, wxString& processedText,
+        wxWindow *window, bool first);
+};
+//-----------------------------------------------------------------------------
+const PreferencesDialogTemplateCmdHandler PreferencesDialogTemplateCmdHandler::handlerInstance;
+//-----------------------------------------------------------------------------
+void PreferencesDialogTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
+    wxString cmdName, TemplateCmdParams cmdParams, MetadataItem* /*object*/,
+    wxString& /*processedText*/, wxWindow *window, bool /*first*/)
+{
+    if ((cmdName == wxT("gui")) && (!cmdParams.Count() || (cmdParams[0] == wxT("setconf"))))
+    {
+        wxString title = cmdParams.Count() > 1 ? cmdParams[1] : _("Set template configuration");
+        wxFileName defFileName = tp->getCurrentTemplateFileName();
+        defFileName.SetExt(wxT("confdef"));
+        
+        PreferencesDialog pd(window, title, tp->getConfig(), defFileName);
+        if (pd.isOk() && pd.loadFromTargetConfig())
+            if (pd.ShowModal() != wxID_OK)
+                throw FRAbort();
     }
 }
 //-----------------------------------------------------------------------------

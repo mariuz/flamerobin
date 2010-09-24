@@ -132,6 +132,10 @@ void Application::HandleEvent(wxEvtHandler* handler, wxEventFunction func,
     {
         wxAppConsole::HandleEvent(handler, func, event);
     }
+    catch (const FRAbort&)
+    {
+        // Do nothing. FRAbort is a silent exception.
+    }
     catch (const std::exception& e)
     {
         wxMessageBox(std2wx(e.what()), _("Unhandled Error in FlameRobin"),

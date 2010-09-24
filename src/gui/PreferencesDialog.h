@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -38,6 +38,8 @@
 
 #include "config/Config.h"
 #include "gui/BaseDialog.h"
+#include "metadata/metadataitem.h"
+#include "core/TemplateProcessor.h"
 //-----------------------------------------------------------------------------
 class Optionbook;
 class wxXmlNode;
@@ -61,9 +63,9 @@ public:
     int getControlLeft();
     // parent for created controls
     wxPanel* getPage() const;
-    virtual bool loadFromConfig(Config& config) = 0;
+    virtual bool loadFromTargetConfig(Config& targetConfig) = 0;
     virtual bool parseProperty(wxXmlNode* xmln);
-    virtual bool saveToConfig(Config& config) = 0;
+    virtual bool saveToTargetConfig(Config& targetConfig) = 0;
 protected:
     wxString captionM;
     wxString descriptionM;
@@ -71,7 +73,7 @@ protected:
 
     virtual void addControlsToSizer(wxSizer* sizer) = 0;
     void addEnabledSetting(PrefDlgSetting* setting);
-    bool checkConfigProperties() const;
+    bool checkTargetConfigProperties() const;
     virtual void enableControls(bool enabled) = 0;
     void enableEnabledSettings(bool enabled);
     int getControlIndentation(int level) const;
@@ -91,7 +93,8 @@ private:
 PrefDlgSetting* createPrefDlgSetting(wxPanel* page, const wxString& type,
     PrefDlgSetting* parent);
 //-----------------------------------------------------------------------------
-class PreferencesDialog: public BaseDialog {
+class PreferencesDialog: public BaseDialog
+{
 public:
     enum {
         ID_treectrl_panes = 100,
@@ -99,21 +102,22 @@ public:
     };
 
     PreferencesDialog(wxWindow* parent, const wxString& title,
-        Config& config, const wxString& descriptionFileName);
+        Config& targetConfig, const wxFileName& descriptionFileName);
     ~PreferencesDialog();
 
     int getSelectedPage();
     bool isOk();
-    bool loadFromConfig();
-    bool saveToConfig();
+    bool loadFromTargetConfig();
+    bool saveToTargetConfig();
     void selectPage(int index);
 
     void OnSaveButtonClick(wxCommandEvent& event);
     void OnTreeSelChanged(wxTreeEvent& event);
+    virtual bool Show(bool show);
 private:
     bool debugDescriptionM;
     bool loadSuccessM;
-    Config& configM;
+    Config& targetConfigM;
 
     wxImageList imageListM;
     wxArrayTreeItemIds treeItemsM;

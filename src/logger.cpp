@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -195,7 +195,7 @@ bool Logger::log2file(Config *cfg, const SqlStatement& st,
 //----------------------------------------------------------------------------
 bool Logger::logStatement(const SqlStatement& st, Database* db)
 {
-    DatabaseConfig dc(db);
+    DatabaseConfig dc(db, config());
     bool result = logStatementByConfig(&dc, st, db);
     if (!dc.get(wxT("ExcludeFromGlobalLogging"), false))
     {

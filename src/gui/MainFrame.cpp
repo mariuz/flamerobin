@@ -737,8 +737,8 @@ void MainFrame::OnMenuURLBugReport(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
 {
     PreferencesDialog pd(this, _("Preferences"), config(),
-        wxT("fr_settings.confdef"));
-    if (pd.isOk() && pd.loadFromConfig())
+        wxFileName(config().getConfDefsPath(), wxT("fr_settings.confdef")));
+    if (pd.isOk() && pd.loadFromTargetConfig())
     {
         static int pdSelection = 0;
         pd.selectPage(pdSelection);
@@ -773,11 +773,11 @@ void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))
     Database* d = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(d))
         return;
-    DatabaseConfig dc(d);
+    DatabaseConfig dc(d, config());
     PreferencesDialog pd(this,
-        wxString::Format(_("%s preferences"), d->getName_().c_str()),
-        dc, wxT("db_settings.confdef"));
-    if (pd.isOk() && pd.loadFromConfig())
+        wxString::Format(_("%s preferences"), d->getName_().c_str()), dc,
+        wxFileName(config().getConfDefsPath(), wxT("db_settings.confdef")));
+    if (pd.isOk() && pd.loadFromTargetConfig())
     {
         pd.selectPage(0);
         pd.ShowModal();
@@ -1173,7 +1173,7 @@ bool MainFrame::connect()
     {
         if (db->usesDifferentConnectionCharset())
         {
-            DatabaseConfig dc(db);
+            DatabaseConfig dc(db, config());
             if (dc.get(wxT("differentCharsetWarning"), true))
             {
                 if (wxNO == wxMessageBox(wxString::Format(

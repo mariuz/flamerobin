@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -45,6 +45,15 @@ public:
     virtual const char* what() const throw();
 
     virtual ~FRError() throw();
+};
+//-----------------------------------------------------------------------------
+//! A silent exception.
+class FRAbort: public FRError
+{
+public:
+    FRAbort();
+    
+    virtual ~FRAbort() throw();
 };
 //-----------------------------------------------------------------------------
 #endif //FR_FRERROR_H

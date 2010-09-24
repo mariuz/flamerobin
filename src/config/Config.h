@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -25,13 +25,11 @@
 
 */
 
-//! Class that handles reading/writing of configuration options
-//! and provides interface to all interested parties
-//
 #ifndef FR_CONFIG_H
 #define FR_CONFIG_H
 
 #include <wx/stdpaths.h>
+#include <wx/filename.h>
 
 #include <map>
 #include <vector>
@@ -57,6 +55,7 @@ class wxFileConfig;
     #undef FR_CONFIG_USE_PRIVATE_STDPATHS
 #endif
 
+//! Base class to be used as generic container of configuration info.
 class Config: public Subject
 {
 private:
@@ -67,14 +66,37 @@ private:
 #ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
     wxStandardPaths standardPathsM;
 #endif
-    wxString getConfigFileName() const;
     wxString homePathM;
     wxString userHomePathM;
+    wxFileName configFileNameM;
 protected:
     virtual void lockedChanged(bool locked);
 public:
     Config();
     virtual ~Config();
+
+    virtual wxFileName getConfigFileName() const;
+    void setConfigFileName(wxFileName fileName);
+
+    static const wxString pathSeparator;
+    
+    // We must use an instance of wxStandardPaths for UNIX, but must not
+    // use such an instance for things to work on Mac OS X.  Great...
+    // These methods are to work around that, use them instead of
+    // wxStandardPaths methods.
+    wxString getDataDir() const;
+    wxString getLocalDataDir() const;
+    wxString getUserLocalDataDir() const;
+
+    // returns the home path to use as the basis for the following calls.
+    wxString getHomePath() const;
+    // returns the home path to use as the basis for the following call.
+    wxString getUserHomePath() const;
+
+    // these should be called before calling the get* functions below,
+    // otherwise defaults apply.
+    void setHomePath(const wxString& homePath);
+    void setUserHomePath(const wxString& userHomePath);
 
     // return true if value exists, false if not
     virtual bool keyExists(const wxString& key) const;
@@ -96,21 +118,22 @@ public:
             return defaultValue;
     }
 
-    // We must use an instance of wxStandardPaths for UNIX, but must not
-    // use such an instance for things to work on Mac OS X.  Great...
-    // These methods are to work around that, use them instead of
-    // wxStandardPaths methods.
-    wxString getDataDir() const;
-    wxString getLocalDataDir() const;
-    wxString getUserLocalDataDir() const;
-
-    // these should be called before calling the get* functions below,
-    // otherwise defaults apply.
-    void setHomePath(const wxString& homePath);
-    void setUserHomePath(const wxString& userHomePath);
-
-    // returns the home path to use as the basis for the following calls.
-    wxString getHomePath() const;
+    // return true if value existed, false if not.
+    virtual bool setValue(wxString key, wxString value);
+    bool setValue(wxString key, int value);
+    bool setValue(wxString key, double value);
+    bool setValue(wxString key, bool value);
+    bool setValue(wxString key, StorageGranularity value);
+    bool setValue(wxString key, std::vector<wxString> value);
+};
+//-----------------------------------------------------------------------------
+//! Class used to contain all FlameRobin and database configuration info sets.
+class FRConfig: public Config
+{
+public:
+    // this class has a fixed file name - setting it through
+    // setConfigFileName() is ineffective.
+    virtual wxFileName getConfigFileName() const;
     // returns the path from which to load the HTML templates.
     wxString getHtmlTemplatesPath() const;
     // returns the path from which to load the SQL templates.
@@ -121,25 +144,12 @@ public:
     wxString getConfDefsPath() const;
     // returns the path containing the images.
     wxString getImagesPath() const;
-
-    // returns the home path to use as the basis for the following call.
-    wxString getUserHomePath() const;
     // returns the file name (with full path) of the file containing
     // registered databases.
     wxString getDBHFileName() const;
-
-    // return true if value existed, false if not.
-    virtual bool setValue(wxString key, wxString value);
-    bool setValue(wxString key, int value);
-    bool setValue(wxString key, double value);
-    bool setValue(wxString key, bool value);
-    bool setValue(wxString key, StorageGranularity value);
-    bool setValue(wxString key, std::vector<wxString> value);
-
-    static const wxString pathSeparator;
 };
 //-----------------------------------------------------------------------------
-Config& config();
+FRConfig& config();
 //-----------------------------------------------------------------------------
 // class ConfigCache
 // used to cache settings in a Config instance, observes the instance to

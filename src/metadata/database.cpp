@@ -1598,7 +1598,7 @@ bool Database::showSysTables()
     const wxString SHOW_SYSTABLES = wxT("ShowSystemTables");
 
     bool b;
-    if (!DatabaseConfig(this).getValue(SHOW_SYSTABLES, b))
+    if (!DatabaseConfig(this, config()).getValue(SHOW_SYSTABLES, b))
         b = config().get(SHOW_SYSTABLES, true);
 
     return b;
