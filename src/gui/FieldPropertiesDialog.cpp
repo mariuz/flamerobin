@@ -326,7 +326,9 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
         // field name changed ?
         // compare regardless of active quoting rules, so that name
         // will remain unchanged if edit field contents haven't changed
-        if (textctrl_fieldname->GetValue() == columnM->getName_())
+        // OR if the altered name would result in same SQL identifier
+        if (textctrl_fieldname->GetValue() == columnM->getName_()
+            || colNameSql == columnM->getQuotedName())
         {
             // no changes -> use original name for all other statements
             colNameSql = columnM->getQuotedName();
@@ -351,7 +353,7 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
                 wxT(" TYPE ") + selDomain.getQuoted() + wxT(";\n\n");
         }
         else if (newDomain
-            || type != selDatatype || size != dtSize || scale != dtScale)
+            || type.CmpNoCase(selDatatype) || size != dtSize || scale != dtScale)
         {   // UDD -> AGD  or  AGD -> different AGD
             statements += alterTable + wxT("ALTER ") + colNameSql +
                 wxT(" TYPE ");
@@ -588,7 +590,7 @@ void FieldPropertiesDialog::updateColumnControls()
 {
     if (columnM)
     {
-        textctrl_fieldname->SetValue(columnM->getName_());
+        textctrl_fieldname->SetValue(columnM->getQuotedName());
         checkbox_notnull->SetValue(!columnM->isNullable());
         choice_domain->SetSelection(
             choice_domain->FindString(columnM->getSource()));
