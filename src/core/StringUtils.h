@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -39,8 +39,9 @@ wxString std2wx(const std::string& input, wxMBConv* conv = wxConvCurrent);
 
 wxString std2wxIdentifier(const std::string& input, wxMBConv* conv);
 //-----------------------------------------------------------------------------
-//! converts chars that have special meaning in HTML, so they get displayed
+//! converts chars that have special meaning in HTML or XML, so they get displayed
 wxString escapeHtmlChars(const wxString& input, bool processNewlines = true);
+wxString escapeXmlChars(const wxString& input);
 //-----------------------------------------------------------------------------
 //! returns string suitable for HTML META charset tag (used only if no
 //  conversion to UTF-8 is available, i.e. in non-Unicode build

@@ -38,31 +38,53 @@
     #include "wx/wx.h"
 #endif
 
-#include <sstream>
-#include <iomanip>
-#include <vector>
+#include "core/TemplateProcessor.h"
+#include "metadata/relation.h"
 
-#include "config/Config.h"
-#include "core/StringUtils.h"
-#include "frutils.h"
-#include "metadata/metadataitem.h"
-#include "metadata/server.h"
-#include "sql/SqlTemplateProcessor.h"
 //-----------------------------------------------------------------------------
-SqlTemplateProcessor::SqlTemplateProcessor(MetadataItem *m, wxWindow *window)
-    : TemplateProcessor(m, window)
+class MetadataTemplateCmdHandler: public TemplateCmdHandler
 {
-}
+private:
+    static const MetadataTemplateCmdHandler handlerInstance; // singleton; registers itself on creation.
+public:
+    virtual void handleTemplateCmd(TemplateProcessor *tp, wxString cmdName,
+        TemplateCmdParams cmdParams, MetadataItem* object, wxString& processedText);
+};
 //-----------------------------------------------------------------------------
-void SqlTemplateProcessor::processCommand(wxString cmdName,
-	TemplateCmdParams cmdParams, MetadataItem *object,
+const MetadataTemplateCmdHandler MetadataTemplateCmdHandler::handlerInstance;
+//-----------------------------------------------------------------------------
+void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
+    wxString cmdName, TemplateCmdParams cmdParams, MetadataItem* object,
     wxString& processedText)
 {
-	TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText);
-}
-//-----------------------------------------------------------------------------
-wxString SqlTemplateProcessor::escapeChars(const wxString& input, bool)
-{
-	return input;
+    // {%foreach:<collection>:<separator>:<text>%}
+    // repeats <text> once for each item in <collection>, pasting a <separator>
+    // before each item except the first.
+    if ((cmdName == wxT("foreach")) && (cmdParams.Count() >= 3))
+    {
+        wxString sep;
+        tp->internalProcessTemplateText(sep, cmdParams[1], object);
+        if (cmdParams[0] == wxT("column"))
+        {
+            Relation* r = dynamic_cast<Relation*>(object);
+            if (!r)
+                return;
+            r->ensureChildrenLoaded();
+            bool firstItem = true;
+            for (RelationColumns::iterator it = r->begin(); it != r->end(); ++it)
+            {
+                wxString newText;
+                tp->internalProcessTemplateText(newText, cmdParams[2], (*it).get());
+                if ((!firstItem) && (!newText.IsEmpty()))
+                    processedText += sep;                    
+                if (!newText.IsEmpty())
+                    firstItem = false;
+                processedText += newText;
+            }
+        }
+        // add more collections here.
+        else
+            return;
+    }
 }
 //-----------------------------------------------------------------------------

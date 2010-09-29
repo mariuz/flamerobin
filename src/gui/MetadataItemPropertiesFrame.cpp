@@ -297,8 +297,8 @@ void MetadataItemPropertiesPanel::processHtmlFile(wxString fileName)
     ProgressDialog pd = ProgressDialog(this, wxT("Processing template..."));
 
     wxString htmlpage;
-    HtmlTemplateProcessor tp(objectM);
-    tp.processTemplateFile(htmlpage, fileName, 0, this, true, &pd);
+    HtmlTemplateProcessor tp(objectM, this);
+    tp.processTemplateFile(htmlpage, fileName, 0, &pd);
 
     int x = 0, y = 0;
     html_window->GetViewStart(&x, &y);         // save scroll position

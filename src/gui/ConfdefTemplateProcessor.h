@@ -25,44 +25,24 @@
 
 */
 
-// For compilers that support precompilation, includes "wx/wx.h".
-#include "wx/wxprec.h"
+//-----------------------------------------------------------------------------
+#ifndef FR_CONFDEFTEMPLATEPROCESSOR_H
+#define FR_CONFDEFTEMPLATEPROCESSOR_H
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
-
-// for all others, include the necessary headers (this file is usually all you
-// need because it includes almost all "standard" wxWindows headers
-#ifndef WX_PRECOMP
-    #include "wx/wx.h"
-#endif
-
-#include <sstream>
-#include <iomanip>
 #include <vector>
 
-#include "config/Config.h"
-#include "core/StringUtils.h"
-#include "frutils.h"
 #include "metadata/metadataitem.h"
-#include "metadata/server.h"
-#include "sql/SqlTemplateProcessor.h"
+#include "core/TemplateProcessor.h"
+
 //-----------------------------------------------------------------------------
-SqlTemplateProcessor::SqlTemplateProcessor(MetadataItem *m, wxWindow *window)
-    : TemplateProcessor(m, window)
+class ConfdefTemplateProcessor: public TemplateProcessor
 {
-}
+protected:
+    virtual void processCommand(wxString cmdName, TemplateCmdParams cmdParams,
+		MetadataItem* object, wxString& processedText);
+	virtual wxString escapeChars(const wxString& input, bool processNewlines = true);
+public:
+    ConfdefTemplateProcessor(MetadataItem *m, wxWindow *window);
+};
 //-----------------------------------------------------------------------------
-void SqlTemplateProcessor::processCommand(wxString cmdName,
-	TemplateCmdParams cmdParams, MetadataItem *object,
-    wxString& processedText)
-{
-	TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText);
-}
-//-----------------------------------------------------------------------------
-wxString SqlTemplateProcessor::escapeChars(const wxString& input, bool)
-{
-	return input;
-}
-//-----------------------------------------------------------------------------
+#endif // FR_CONFDEFTEMPLATEPROCESSOR_H

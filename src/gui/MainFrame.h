@@ -94,7 +94,7 @@ public:
     void OnMenuDropObject(wxCommandEvent& event);
     void OnMenuAlterObject(wxCommandEvent& event);
     void OnMenuCreateTriggerForTable(wxCommandEvent& event);
-    void OnMenuTemplate(wxCommandEvent& event);
+    void OnMenuGenerateScript(wxCommandEvent& event);
     void OnMenuExecuteProcedure(wxCommandEvent& event);
     void OnMenuDisconnect(wxCommandEvent& event);
     void OnMenuConnect(wxCommandEvent& event);

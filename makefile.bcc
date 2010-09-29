@@ -70,8 +70,8 @@ STATICRTL = 0
 FLAMEROBIN_CXXFLAGS = $(__RTL_TYPE) -I$(BCCDIR)\include -tWM $(__DEBUGINFO) \
 	$(__OPTIMIZE) $(____flamerobin_WXDEBUG_p) $(____flamerobin_DEBUGFLAG_p) \
 	-D_WINDOWS -D__WINDOWS__ -DWINVER=0x400 -DWIN32 -D__WIN32__ -D__WIN95__ \
-	-DSTRICT -D__WXMSW__ -DwxUSE_GUI=1 -DwxUSE_UNICODE=$(UNICODE) \
-	-DWIN32_LEAN_AND_MEAN \
+	-DSTRICT -D__WXMSW__ -DwxUSE_GUI=1 -DwxUSE_REGEX=1 \
+	-DwxUSE_UNICODE=$(UNICODE) -DWIN32_LEAN_AND_MEAN \
 	-I$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(U_OPT)$(D_OPT) \
 	-I$(WXDIR)\contrib\include -I$(WXDIR)\include -I$(BOOST_ROOT) \
 	-DIBPP_WINDOWS -I. -I.\src -I.\src\ibpp -I.\res -Hu \
@@ -101,6 +101,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseFrame.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CommandManager.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ConfdefTemplateProcessor.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ContextMenuMetadataItemVisitor.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ControlUtils.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGrid.obj \
@@ -156,6 +157,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitem.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemDescriptionVisitor.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataTemplateCmdHandler.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_parameter.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_privilege.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_procedure.obj \
@@ -173,6 +175,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MultiStatement.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SelectStatement.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlStatement.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTemplateManager.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTemplateProcessor.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementBuilder.obj \
@@ -289,7 +292,7 @@ svn-rev:
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.obj  $(FLAMEROBIN_OBJECTS) bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib  bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin.res bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib
 	ilink32 -Tpe -q  -L$(BCCDIR)\lib -L$(BCCDIR)\lib\psdk  $(__DEBUGINFO) $(______flamerobin_WX_LIB_DIR_FILENAMES_2_p) -aa $(LDFLAGS) @&&|
-	c0w32.obj $(FLAMEROBIN_OBJECTS),$@,, wxmsw28$(U_OPT)$(D_OPT)_aui.lib wxmsw28$(U_OPT)$(D_OPT)_stc.lib wxmsw28$(U_OPT)$(D_OPT)_html.lib wxmsw28$(U_OPT)$(D_OPT)_adv.lib wxmsw28$(U_OPT)$(D_OPT)_core.lib wxbase28$(U_OPT)$(D_OPT)_xml.lib wxbase28$(U_OPT)$(D_OPT).lib wxexpat$(D_OPT).lib wxtiff$(D_OPT).lib wxjpeg$(D_OPT).lib wxpng$(D_OPT).lib wxzlib$(D_OPT).lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib   import32.lib cw32mt$(__RTL_TYPE_1).lib,, bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin.res
+	c0w32.obj $(FLAMEROBIN_OBJECTS),$@,, wxmsw28$(U_OPT)$(D_OPT)_aui.lib wxmsw28$(U_OPT)$(D_OPT)_stc.lib wxmsw28$(U_OPT)$(D_OPT)_html.lib wxmsw28$(U_OPT)$(D_OPT)_adv.lib wxmsw28$(U_OPT)$(D_OPT)_core.lib wxbase28$(U_OPT)$(D_OPT)_xml.lib wxbase28$(U_OPT)$(D_OPT).lib wxexpat$(D_OPT).lib wxtiff$(D_OPT).lib wxjpeg$(D_OPT).lib wxpng$(D_OPT).lib wxzlib$(D_OPT).lib wxregex$(U_OPT)$(D_OPT).lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib   import32.lib cw32mt$(__RTL_TYPE_1).lib,, bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin.res
 |
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp.lib: bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__ibpp.obj  $(IBPP_OBJECTS)
@@ -369,6 +372,9 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseFrame.obj: .\src\gui\BaseFrame.cpp
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CommandManager.obj: .\src\gui\CommandManager.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\CommandManager.cpp
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ConfdefTemplateProcessor.obj: .\src\gui\ConfdefTemplateProcessor.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\ConfdefTemplateProcessor.cpp
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ContextMenuMetadataItemVisitor.obj: .\src\gui\ContextMenuMetadataItemVisitor.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\ContextMenuMetadataItemVisitor.cpp
@@ -535,6 +541,9 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemDescriptionVisitor.obj: .\src
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.obj: .\src\metadata\MetadataItemVisitor.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\MetadataItemVisitor.cpp
 
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataTemplateCmdHandler.obj: .\src\metadata\MetadataTemplateCmdHandler.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\MetadataTemplateCmdHandler.cpp
+
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_parameter.obj: .\src\metadata\parameter.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\parameter.cpp
 
@@ -586,6 +595,9 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SelectStatement.obj: .\src\sql\SelectStat
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlStatement.obj: .\src\sql\SqlStatement.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\sql\SqlStatement.cpp
 
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTemplateManager.obj: .\src\sql\SqlTemplateManager.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\sql\SqlTemplateManager.cpp
+
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTemplateProcessor.obj: .\src\sql\SqlTemplateProcessor.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\sql\SqlTemplateProcessor.cpp
 
@@ -605,7 +617,7 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.obj: .\src\gui\msw\StyleGui
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\msw\StyleGuideMSW.cpp
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin.res: .\res\flamerobin.rc
-	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include  $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) -d_WINDOWS -d__WINDOWS__ -dWINVER=0x400 -dWIN32 -d__WIN32__ -d__WIN95__ -dSTRICT -d__WXMSW__ -dwxUSE_GUI=1 -dwxUSE_UNICODE=$(UNICODE) -dWIN32_LEAN_AND_MEAN -i$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(U_OPT)$(D_OPT) -i$(WXDIR)\contrib\include -i$(WXDIR)\include -i$(BOOST_ROOT) -dIBPP_WINDOWS -i. -i.\src -i.\src\ibpp -i.\res .\res\flamerobin.rc
+	brcc32 -32 -r -fo$@ -i$(BCCDIR)\include  $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) -d_WINDOWS -d__WINDOWS__ -dWINVER=0x400 -dWIN32 -d__WIN32__ -d__WIN95__ -dSTRICT -d__WXMSW__ -dwxUSE_GUI=1 -dwxUSE_REGEX=1 -dwxUSE_UNICODE=$(UNICODE) -dWIN32_LEAN_AND_MEAN -i$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(U_OPT)$(D_OPT) -i$(WXDIR)\contrib\include -i$(WXDIR)\include -i$(BOOST_ROOT) -dIBPP_WINDOWS -i. -i.\src -i.\src\ibpp -i.\res .\res\flamerobin.rc
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__dpb.obj: .\src\ibpp\_dpb.cpp
 	$(CXX) -q -c -P -o$@ $(IBPP_CXXFLAGS) .\src\ibpp\_dpb.cpp

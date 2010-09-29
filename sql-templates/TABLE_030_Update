@@ -1,4 +1,0 @@
-update {%object_name%} set {%columns:{%separator:, %}
-    {%object_name%} = '{%object_name%} {%column_nulloption%}'%}
-where {%primary_key:{%constraint_columns:
-and   : = '?'%}%};

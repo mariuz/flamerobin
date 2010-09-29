@@ -41,12 +41,10 @@ class SqlTemplateProcessor: public TemplateProcessor
 {
 protected:
     virtual void processCommand(wxString cmdName, TemplateCmdParams cmdParams,
-		MetadataItem* object, wxString& processedText, wxWindow *window,
-		bool first);
+		MetadataItem* object, wxString& processedText);
 	virtual wxString escapeChars(const wxString& input, bool processNewlines = true);
 public:
-    SqlTemplateProcessor(MetadataItem *m,
-        std::vector<MetadataItem *> *allowedObjects = 0);
+    SqlTemplateProcessor(MetadataItem *m, wxWindow *window);
 };
 //-----------------------------------------------------------------------------
 #endif // FR_SQLTEMPLATEPROCESSOR_H

@@ -42,6 +42,7 @@
 #include <wx/dir.h>
 #include <wx/dnd.h>
 #include <wx/tokenzr.h>
+#include <wx/arrstr.h>
 
 #include "config/Config.h"
 #include "config/DatabaseConfig.h"
@@ -70,6 +71,7 @@
 #include "main.h"
 #include "metadata/metadataitem.h"
 #include "metadata/root.h"
+#include "sql/SqlTemplateManager.h"
 #include "sql/SqlTemplateProcessor.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
@@ -450,7 +452,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(Cmds::Menu_CreateView,       MainFrame::OnMenuCreateView)
 
     EVT_MENU_RANGE(Cmds::Menu_TemplateFirst, Cmds::Menu_TemplateLast,
-        MainFrame::OnMenuTemplate)
+        MainFrame::OnMenuGenerateScript)
 
     EVT_MENU_OPEN(MainFrame::OnMainMenuOpen)
     EVT_TREE_SEL_CHANGED(DBHTreeControl::ID_tree_ctrl, MainFrame::OnTreeSelectionChanged)
@@ -809,60 +811,31 @@ void MainFrame::OnMenuCreateTriggerForTable(wxCommandEvent& WXUNUSED(event))
     getURIProcessor().handleURI(uri);
 }
 //-----------------------------------------------------------------------------
-void MainFrame::OnMenuTemplate(wxCommandEvent& event)
+void MainFrame::OnMenuGenerateScript(wxCommandEvent& event)
 {
-    Table *t = dynamic_cast<Table*>(treeMainM->getSelectedMetadataItem());
-    if (!t)
+    MetadataItem* metadataItem = treeMainM->getSelectedMetadataItem();
+    if (!metadataItem)
         return;
-    Database* d = getDatabase(t);
-    if (!checkValidDatabase(d))
+    Database* database = getDatabase(metadataItem);
+    if (!checkValidDatabase(database))
         return;
 
-    wxArrayString files;
-    wxString path = config().getSqlTemplatesPath();
-    wxDir::GetAllFiles(path, &files, wxT("TABLE_*"), wxDIR_FILES);
-    files.Sort();
-    wxString file = files[event.GetId() - 1 - (int)Cmds::Menu_TemplateFirst];
-
-    std::vector<MetadataItem *> objects;
-    t->ensureChildrenLoaded();
-    objects.push_back(t);
-    objects.push_back(t->getPrimaryKey());
-
-    wxArrayString as;
-    wxArrayInt selections;
-    int j = 0;
-    for (RelationColumns::iterator it = t->begin(); it != t->end(); ++it)
+    SqlTemplateManager tm(*metadataItem);
+        
+    int i = (int)Cmds::Menu_TemplateFirst;
+    for (TemplateDescriptorList::const_iterator it = tm.descriptorsBegin();
+        it != tm.descriptorsEnd(); ++it, ++i)
     {
-        as.Add((*it)->getName_());
-        selections.Add(j++);
-    }
-    if (!wxGetMultipleChoices(selections, _("Select columns"),
-        file.Mid(19+path.Length()), as, this))
-    {
-        return;
-    }
-
-    int i = 0;
-	unsigned int p = 0;
-    for (RelationColumns::iterator it = t->begin(); it != t->end(); ++it, i++)
-    {
-        if (selections[p] > i)
-            continue;
-        else if (selections[p] == i)
+        if (i == event.GetId())
         {
-            objects.push_back((*it).get());
-            p++;
-            if (p >= selections.Count())
-                break;
+            ProgressDialog pd = ProgressDialog(this, wxT("Processing template..."));
+            wxString sql;
+            SqlTemplateProcessor tp(metadataItem, this);
+            tp.processTemplateFile(sql, (*it)->getTemplateFileName(), metadataItem, &pd);
+            showSql(this, wxString(_("Execute SQL statements")), database, sql);
+            break;
         }
     }
-
-    ProgressDialog pd = ProgressDialog(this, wxT("Processing template..."));
-    wxString sql;
-    SqlTemplateProcessor tp(t, &objects);
-    tp.processTemplateFile(sql, file, 0, this, true, &pd);
-    showSql(this, wxString(_("Execute SQL statements")), d, sql);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuExecuteProcedure(wxCommandEvent& WXUNUSED(event))

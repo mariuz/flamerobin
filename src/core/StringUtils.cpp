@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -153,6 +153,46 @@ wxString escapeHtmlChars(const wxString& input, bool processNewlines)
                     result += wxT("<BR>");
                 else if (c == '\r')
                     /* swallow silently */;
+                else
+                    wxASSERT_MSG(false, wxT("escape not handled"));
+                // start processing *after* the replaced character
+                ++stop;
+                start = stop;
+                break;
+            }
+            ++stop;
+        }
+        if (stop > start)
+            result += wxString(start, stop);
+        start = stop;
+    }
+    return result;
+}
+//-----------------------------------------------------------------------------
+wxString escapeXmlChars(const wxString& input)
+{
+    if (input.empty())
+        return input;
+    wxString result;
+    wxString::const_iterator start = input.begin();
+    while (start != input.end())
+    {
+        wxString::const_iterator stop = start;
+        while (stop != input.end())
+        {
+            const wxChar c = *stop;
+            if (c == '&' || c == '<' || c == '>' || c == '"')
+            {
+                if (stop > start)
+                    result += wxString(start, stop);
+                if (c == '&')
+                    result += wxT("&amp;");
+                else if (c == '<')
+                    result += wxT("&lt;");
+                else if (c == '>')
+                    result += wxT("&gt;");
+                else if (c == '"')
+                    result += wxT("&quot;");
                 else
                     wxASSERT_MSG(false, wxT("escape not handled"));
                 // start processing *after* the replaced character

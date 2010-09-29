@@ -1,2 +1,0 @@
-select {%columns:{%separator:, %}a.{%object_name%}%}
-from {%object_name%} a

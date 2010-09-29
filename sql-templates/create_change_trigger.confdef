@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <debug />
+    <node>
+        <caption>Select from table</caption>
+        <setting type="relation_columns">
+            <caption>Which column changes would you like to log?</caption>
+            <key>{%object_path%}/columnNames</key>
+            <default>*</default>
+            <relation>{%object_address%}</relation>
+        </setting>
+    </node>
+</root>

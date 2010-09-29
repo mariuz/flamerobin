@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -44,6 +44,7 @@
 #include <wx/artprov.h>
 #include <wx/bookctrl.h>
 #include <wx/tokenzr.h>
+#include <wx/sstream.h>
 #include <wx/wfstream.h>
 #include <wx/xml/xml.h>
 
@@ -51,6 +52,7 @@
 #include "core/ArtProvider.h"
 #include "core/FRError.h"
 #include "frutils.h"
+#include "gui/ConfdefTemplateProcessor.h"
 #include "gui/PreferencesDialog.h"
 #include "gui/StyleGuide.h"
 //-----------------------------------------------------------------------------
@@ -318,8 +320,26 @@ void Optionbook::OnSize(wxSizeEvent& event)
 //-----------------------------------------------------------------------------
 // PreferencesDialog class
 PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
-        Config& targetConfig, const wxFileName& descriptionFileName)
+        Config& targetConfig, const wxFileName& confDefFileName,
+        const wxString& saveButtonCaption)
     : BaseDialog(parent, -1, title), targetConfigM(targetConfig)
+{
+    initControls(saveButtonCaption);
+    loadConfDefFile(confDefFileName);
+    setControlLayout();
+}
+//-----------------------------------------------------------------------------
+PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
+        Config& targetConfig, const wxString& confDefData,
+        const wxString& saveButtonCaption)
+    : BaseDialog(parent, -1, title), targetConfigM(targetConfig)
+{
+    initControls(saveButtonCaption);
+    loadConfDef(confDefData);
+    setControlLayout();
+}
+//-----------------------------------------------------------------------------
+void PreferencesDialog::initControls(const wxString& saveButtonCaption)
 {
     // we don't want this dialog centered on parent since it is very big, and
     // some parents (ex. main frame) could even be smaller.
@@ -335,12 +355,14 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
     bookctrl_1 = new Optionbook(getControlsPanel(), ID_bookctrl_panes,
         wxDefaultPosition, wxDefaultSize);
 
-    button_save = new wxButton(getControlsPanel(), wxID_SAVE, _("Save"));
+    button_save = new wxButton(getControlsPanel(), wxID_SAVE, saveButtonCaption);
     button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
-
+}
+//-----------------------------------------------------------------------------
+void PreferencesDialog::setControlLayout()
+{
     // order of these is important: first create all controls, then set
     // their properties (may affect min size), then create sizer layout
-    loadDescriptionFile(descriptionFileName);
     setProperties();
     layout();
     // do this last, otherwise default button style may be lost on MSW
@@ -453,7 +475,7 @@ void PreferencesDialog::layout()
     layoutSizers(sizerControls, sizerButtons, true);
 }
 //-----------------------------------------------------------------------------
-void PreferencesDialog::loadDescriptionFile(const wxFileName& filename)
+void PreferencesDialog::loadConfDefFile(const wxFileName& filename)
 {
     loadSuccessM = false;
 
@@ -465,18 +487,19 @@ void PreferencesDialog::loadDescriptionFile(const wxFileName& filename)
         wxMessageBox(msg, _("Support file not found"), wxOK | wxICON_ERROR);
         return;
     }
-    wxFileInputStream stream(filename.GetFullPath());
-    if (!stream.Ok())
-        return;
-
+    loadConfDef(loadEntireFile(filename));
+}
+//-----------------------------------------------------------------------------
+void PreferencesDialog::loadConfDef(const wxString& confDefData)
+{
+    wxStringInputStream stream(confDefData);
     wxXmlDocument doc;
     if (!doc.Load(stream))
         return;
     wxXmlNode* xmlr = doc.GetRoot();
     if (xmlr->GetName() != wxT("root"))
     {
-        wxLogError(_("Invalid root node in description file \"%s\""),
-            filename.GetFullPath().c_str());
+        wxLogError(_("Invalid root node in confdef."));
         return;
     }
     processPlatformAttribute(xmlr);
@@ -703,23 +726,31 @@ private:
     static const PreferencesDialogTemplateCmdHandler handlerInstance; // singleton; registers itself on creation.
 public:
     virtual void handleTemplateCmd(TemplateProcessor *tp, wxString cmdName,
-        TemplateCmdParams cmdParams, MetadataItem* object, wxString& processedText,
-        wxWindow *window, bool first);
+        TemplateCmdParams cmdParams, MetadataItem* object, wxString& processedText);
 };
 //-----------------------------------------------------------------------------
 const PreferencesDialogTemplateCmdHandler PreferencesDialogTemplateCmdHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 void PreferencesDialogTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
-    wxString cmdName, TemplateCmdParams cmdParams, MetadataItem* /*object*/,
-    wxString& /*processedText*/, wxWindow *window, bool /*first*/)
+    wxString cmdName, TemplateCmdParams cmdParams, MetadataItem* object,
+    wxString& /*processedText*/)
 {
-    if ((cmdName == wxT("gui")) && (!cmdParams.Count() || (cmdParams[0] == wxT("setconf"))))
+    // {%confgui%} shows a gui to set config params based on <template name>.confdef.
+    // {%confgui:name%} shows a gui based on name.confdef
+    if (cmdName == wxT("confgui"))
     {
-        wxString title = cmdParams.Count() > 1 ? cmdParams[1] : _("Set template configuration");
         wxFileName defFileName = tp->getCurrentTemplateFileName();
         defFileName.SetExt(wxT("confdef"));
-        
-        PreferencesDialog pd(window, title, tp->getConfig(), defFileName);
+        if (cmdParams.Count())
+            defFileName.SetName(cmdParams[0]);
+
+        // expand commands in confdef file.
+        ConfdefTemplateProcessor ctp(object, tp->getWindow());
+        wxString confDefData;
+        ctp.processTemplateFile(confDefData, defFileName, object, tp->getProgressIndicator());
+        // show dialog for expanded confdef data.
+        PreferencesDialog pd(tp->getWindow(), _("Set template configuration"), tp->getConfig(),
+            confDefData, _("Continue"));
         if (pd.isOk() && pd.loadFromTargetConfig())
             if (pd.ShowModal() != wxID_OK)
                 throw FRAbort();

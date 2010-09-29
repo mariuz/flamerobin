@@ -39,12 +39,10 @@ class HtmlTemplateProcessor: public TemplateProcessor
 {
 protected:
     virtual void processCommand(wxString cmdName, TemplateCmdParams cmdParams,
-		MetadataItem* object, wxString& processedText, wxWindow *window,
-		bool first);
+		MetadataItem* object, wxString& processedText);
 	virtual wxString escapeChars(const wxString& input, bool processNewlines = true);
 public:
-    HtmlTemplateProcessor(MetadataItem *m,
-        std::vector<MetadataItem *> *allowedObjects = 0);
+    HtmlTemplateProcessor(MetadataItem *m, wxWindow *window);
 };
 //-----------------------------------------------------------------------------
 #endif // FR_HTMLTEMPLATEPROCESSOR_H

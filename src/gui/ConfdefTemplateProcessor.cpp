@@ -38,31 +38,23 @@
     #include "wx/wx.h"
 #endif
 
-#include <sstream>
-#include <iomanip>
-#include <vector>
-
-#include "config/Config.h"
 #include "core/StringUtils.h"
-#include "frutils.h"
 #include "metadata/metadataitem.h"
-#include "metadata/server.h"
-#include "sql/SqlTemplateProcessor.h"
+#include "gui/ConfdefTemplateProcessor.h"
 //-----------------------------------------------------------------------------
-SqlTemplateProcessor::SqlTemplateProcessor(MetadataItem *m, wxWindow *window)
+ConfdefTemplateProcessor::ConfdefTemplateProcessor(MetadataItem *m, wxWindow *window)
     : TemplateProcessor(m, window)
 {
 }
 //-----------------------------------------------------------------------------
-void SqlTemplateProcessor::processCommand(wxString cmdName,
-	TemplateCmdParams cmdParams, MetadataItem *object,
-    wxString& processedText)
+void ConfdefTemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdParams,
+	MetadataItem *object, wxString& processedText)
 {
 	TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText);
 }
 //-----------------------------------------------------------------------------
-wxString SqlTemplateProcessor::escapeChars(const wxString& input, bool)
+wxString ConfdefTemplateProcessor::escapeChars(const wxString& input, bool /*processNewlines*/)
 {
-	return input;
+	return escapeXmlChars(input);
 }
 //-----------------------------------------------------------------------------

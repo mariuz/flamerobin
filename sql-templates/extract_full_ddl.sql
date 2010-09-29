@@ -3,5 +3,4 @@
 -- TODO:
 -- * add triggers and their ddl
 -- * for each trigger, look for dependent generators via dependecies
--- * add parameter that user should not select columns in this case
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -50,7 +50,7 @@ void readBlob(IBPP::Statement& st, int column, wxString& result,
     wxMBConv* conv);
 //-----------------------------------------------------------------------------
 //! displays a list of table columns and lets user select some
-wxString selectRelationColumns(Relation* t, wxWindow* parent);
+wxString selectRelationColumns(Relation* t, wxWindow* parent, const wxString& defaultSelection = wxEmptyString);
 bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent,
     std::vector<wxString>& list);
 //-----------------------------------------------------------------------------
@@ -64,5 +64,7 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
 //! loads the file into wxString
 wxString loadEntireFile(const wxString& filename);
 wxString loadEntireFile(const wxFileName& filename);
+//! writes a wxString to a file, overwriting any existing data.
+void writeEntireFile(const wxFileName& filename, const wxString& content);
 //-----------------------------------------------------------------------------
 #endif // FRUTILS_H

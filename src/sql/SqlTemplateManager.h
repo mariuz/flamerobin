@@ -25,44 +25,53 @@
 
 */
 
-// For compilers that support precompilation, includes "wx/wx.h".
-#include "wx/wxprec.h"
+//-----------------------------------------------------------------------------
+#ifndef FR_SQLTEMPLATEMANAGER_H
+#define FR_SQLTEMPLATEMANAGER_H
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
+#include <wx/filename.h>
 
-// for all others, include the necessary headers (this file is usually all you
-// need because it includes almost all "standard" wxWindows headers
-#ifndef WX_PRECOMP
-    #include "wx/wx.h"
-#endif
-
-#include <sstream>
-#include <iomanip>
-#include <vector>
+#include <list>
 
 #include "config/Config.h"
-#include "core/StringUtils.h"
-#include "frutils.h"
 #include "metadata/metadataitem.h"
-#include "metadata/server.h"
-#include "sql/SqlTemplateProcessor.h"
+
 //-----------------------------------------------------------------------------
-SqlTemplateProcessor::SqlTemplateProcessor(MetadataItem *m, wxWindow *window)
-    : TemplateProcessor(m, window)
+//! Holds information about a single template.
+class TemplateDescriptor
 {
-}
+private:
+    wxFileName templateFileNameM;
+    Config configM;
+    void loadDescriptionFromConfigFile();
+    wxString menuCaptionM;
+    int menuPositionM;
+    wxString matchesTypeM;
+    wxString matchesNameM;
+public:
+    TemplateDescriptor(wxFileName templateFileName);
+    wxString getMenuCaption() const;
+    int getMenuPosition() const { return menuPositionM; }
+    bool operator<(const TemplateDescriptor& right) const;
+    //! returns true if the template can be run on the specified metadata item.
+    bool matches(const MetadataItem& metadataItem) const;
+    wxFileName getTemplateFileName() const { return templateFileNameM; }
+};
 //-----------------------------------------------------------------------------
-void SqlTemplateProcessor::processCommand(wxString cmdName,
-	TemplateCmdParams cmdParams, MetadataItem *object,
-    wxString& processedText)
+typedef std::list<TemplateDescriptor*> TemplateDescriptorList;
+//-----------------------------------------------------------------------------
+class SqlTemplateManager
 {
-	TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText);
-}
+private:
+    const MetadataItem& metadataItemM;
+    TemplateDescriptorList descriptorsM;
+
+    void collectDescriptors();
+public:
+    SqlTemplateManager(const MetadataItem& metadataItem);
+    TemplateDescriptorList::const_iterator descriptorsBegin() const;
+    TemplateDescriptorList::const_iterator descriptorsEnd() const;
+};
 //-----------------------------------------------------------------------------
-wxString SqlTemplateProcessor::escapeChars(const wxString& input, bool)
-{
-	return input;
-}
-//-----------------------------------------------------------------------------
+
+#endif // FR_SQLTEMPLATEMANAGER_H

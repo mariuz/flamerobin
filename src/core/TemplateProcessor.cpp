@@ -38,28 +38,26 @@
     #include "wx/wx.h"
 #endif
 
+#include <wx/tokenzr.h>
+
 #include <sstream>
 #include <iomanip>
-#include <vector>
 #include <map>
 
 #include "config/Config.h"
 #include "core/StringUtils.h"
 #include "frutils.h"
+#include "core/FRError.h"
 #include "core/ProgressIndicator.h"
 #include "metadata/CreateDDLVisitor.h"
 #include "metadata/metadataitem.h"
 #include "metadata/server.h"
 #include "TemplateProcessor.h"
+
 //-----------------------------------------------------------------------------
-TemplateProcessor::TemplateProcessor(MetadataItem *m,
-    std::vector<MetadataItem *> *allowedObjects)
-    : objectM(m), flagNextM(false)
+TemplateProcessor::TemplateProcessor(MetadataItem *m, wxWindow *window)
+    : objectM(m), windowM(window)
 {
-    if (allowedObjects) // optional vector of objects that should be processed
-    {
-        allowedObjectsM = *allowedObjects;
-    }
 }
 //-----------------------------------------------------------------------------
 wxString getBooleanAsString(bool value)
@@ -68,15 +66,19 @@ wxString getBooleanAsString(bool value)
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdParams,
-    MetadataItem *object, wxString& processedText, wxWindow *window, bool first)
+    MetadataItem *object, wxString& processedText)
 {
-    if (cmdName == wxT("template_root"))
+    if (cmdName == wxT("--"))
+        // Comment.
+        ;
+
+    else if (cmdName == wxT("template_root"))
         processedText += getTemplatePath();
 
-    else if (cmdName == wxT("getvar") && !cmdParams.empty())
+    else if (cmdName == wxT("getvar") && !cmdParams.IsEmpty())
         processedText += getVar(cmdParams.all());
 
-    else if (cmdName == wxT("setvar") && !cmdParams.empty())
+    else if (cmdName == wxT("setvar") && !cmdParams.IsEmpty())
     {
         if (cmdParams.Count() == 1)
             clearVar(cmdParams[0]);
@@ -84,16 +86,20 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
             setVar(cmdParams[0], cmdParams[1]);
     }
 
-    else if (cmdName == wxT("clearvar") && !cmdParams.empty())
+    else if (cmdName == wxT("clearvar") && !cmdParams.IsEmpty())
         clearVar(cmdParams.all());
 
     else if (cmdName == wxT("clearvars"))
         clearVars();
 
-    else if (cmdName == wxT("getconf") && !cmdParams.empty())
-        processedText += configM.get(cmdParams.all(), wxString(wxT("")));
+    else if (cmdName == wxT("getconf") && !cmdParams.IsEmpty())
+    {
+        wxString text;
+        internalProcessTemplateText(text, cmdParams.all(), object);
+        processedText += configM.get(text, wxString(wxT("")));
+    }
 
-    else if (cmdName == wxT("setconf") && !cmdParams.empty())
+    else if (cmdName == wxT("setconf") && !cmdParams.IsEmpty())
     {
         if (cmdParams.Count() == 1)
             configM.setValue(cmdParams[0], wxString(wxT("")));
@@ -101,13 +107,19 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
             configM.setValue(cmdParams[0], cmdParams[1]);
     }
 
+    else if (cmdName == wxT("abort"))
+        throw FRAbort();
+    
     else if (cmdName == wxT("object_name"))
         processedText += object->getName_();
+
+    else if (cmdName == wxT("object_path"))
+        processedText += object->getItemPath();
 
     else if (cmdName == wxT("parent"))
     {
         if (object->getParent())
-            internalProcessTemplateText(processedText, cmdParams.all(), object->getParent(), window);
+            internalProcessTemplateText(processedText, cmdParams.all(), object->getParent());
     }
 
     else if (cmdName == wxT("object_type"))
@@ -117,18 +129,12 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         processedText += wxString::Format(wxT("%ld"), (uintptr_t)object);
 
     else if (cmdName == wxT("parent_window"))
-        processedText += wxString::Format(wxT("%ld"), (uintptr_t)window);
-
-    else if (cmdName == wxT("separator") && !cmdParams.empty())
-    {
-        if (!first)
-            processedText += cmdParams.all();
-    }
+        processedText += wxString::Format(wxT("%ld"), (uintptr_t)windowM);
 
     else if (cmdName == wxT("is_system"))
         processedText += getBooleanAsString(object->isSystem());
 
-    else if (cmdName == wxT("users") && !cmdParams.empty())
+    else if (cmdName == wxT("users") && !cmdParams.IsEmpty())
     {
         Server* s = dynamic_cast<Server*>(object);
         if (!s)
@@ -143,14 +149,14 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         UserList* usr = s->getUsers(pi);
         if (!usr || !usr->size())
         {
-            window->Close();
+            windowM->Close();
             return;
         }
         for (UserList::iterator it = usr->begin(); it != usr->end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), &(*it), window);
+            internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
     }
 
-    else if (cmdName == wxT("userinfo") && !cmdParams.empty())
+    else if (cmdName == wxT("userinfo") && !cmdParams.IsEmpty())
     {
         User* u = dynamic_cast<User*>(object);
         if (!u)
@@ -178,7 +184,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
             name = p->getOwner();
         else if (Role* r = dynamic_cast<Role*>(object))
             name = r->getOwner();
-        if (!name.empty())
+        if (!name.IsEmpty())
             processedText += escapeChars(name, false);
     }
 
@@ -187,40 +193,41 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         wxString desc;
         if (object->getDescription(desc))
         {
-            if (desc.empty())
+            if (desc.IsEmpty())
                 desc = _("No description");
             processedText += escapeChars(desc);
-            if (!cmdParams.empty())
-                internalProcessTemplateText(processedText, cmdParams.all(), object, window);
+            if (!cmdParams.IsEmpty())
+                internalProcessTemplateText(processedText, cmdParams.all(), object);
         }
     }
 
     // TODO: replace with vars and ifeq?
-    else if (cmdName == wxT("show_if_config") && !cmdParams.empty())
+    else if (cmdName == wxT("show_if_config") && !cmdParams.IsEmpty())
     {
         if (cmdParams.Count() >= 2)
         {
             if (config().get(cmdParams[0], (cmdParams[1] == wxT("true"))))
             {
                 cmdParams.RemoveAt(0, 2);
-                internalProcessTemplateText(processedText, cmdParams.all(), object, window);
+                internalProcessTemplateText(processedText, cmdParams.all(), object);
             }
         }
     }
 
+    // {%ifeq:<left term>:<right term>:<output if terms equal>[:<output if terms not equal>]%}
     else if (cmdName == wxT("ifeq") && (cmdParams.Count() >= 3))
     {
         wxString val1;
-        internalProcessTemplateText(val1, cmdParams[0], object, window);
+        internalProcessTemplateText(val1, cmdParams[0], object);
         wxString val2;
-        internalProcessTemplateText(val2, cmdParams[1], object, window);
+        internalProcessTemplateText(val2, cmdParams[1], object);
         wxString trueText;
-        internalProcessTemplateText(trueText, cmdParams[2], object, window);
+        internalProcessTemplateText(trueText, cmdParams[2], object);
         wxString falseText;
         if (cmdParams.Count() >= 4)
         {
             cmdParams.RemoveAt(0, 3);
-            internalProcessTemplateText(falseText, cmdParams.all(), object, window);
+            internalProcessTemplateText(falseText, cmdParams.all(), object);
         }
         if (val1 == val2)
             processedText += trueText;
@@ -228,17 +235,41 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
             processedText += falseText;
     }
 
-    else if (cmdName == wxT("columns") && !cmdParams.empty())  // table and view columns
+    // {%ifcontains:<list>:<term>:<output if term in list>[:<output if term not in list>]%}
+    else if (cmdName == wxT("ifcontains") && (cmdParams.Count() >= 3))
+    {
+        wxString listStr;
+        internalProcessTemplateText(listStr, cmdParams[0], object);
+        wxArrayString list(wxStringTokenize(listStr, wxT(",")));
+        for (wxString::size_type i = 0; i < list.Count(); i++)
+            list[i] = list[i].Trim(true).Trim(false);
+        wxString val2;
+        internalProcessTemplateText(val2, cmdParams[1], object);
+        wxString trueText;
+        internalProcessTemplateText(trueText, cmdParams[2], object);
+        wxString falseText;
+        if (cmdParams.Count() >= 4)
+        {
+            cmdParams.RemoveAt(0, 3);
+            internalProcessTemplateText(falseText, cmdParams.all(), object);
+        }
+        if (list.Index(val2) != wxNOT_FOUND)
+            processedText += trueText;
+        else
+            processedText += falseText;
+    }
+
+    else if (cmdName == wxT("columns") && !cmdParams.IsEmpty())  // table and view columns
     {
         Relation* r = dynamic_cast<Relation*>(object);
         if (!r)
             return;
         r->ensureChildrenLoaded();
         for (RelationColumns::iterator it = r->begin(); it != r->end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), (*it).get(), window, it == r->begin());
+            internalProcessTemplateText(processedText, cmdParams.all(), (*it).get());
     }
 
-    else if (cmdName == wxT("relation_triggers") && !cmdParams.empty())
+    else if (cmdName == wxT("relation_triggers") && !cmdParams.IsEmpty())
     {
         Relation* r = dynamic_cast<Relation*>(object);
         if (!r)
@@ -251,10 +282,10 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         cmdParams.RemoveAt(0);
 
         for (std::vector<Trigger*>::iterator it = tmp.begin(); it != tmp.end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), *it, window, it == tmp.begin());
+            internalProcessTemplateText(processedText, cmdParams.all(), *it);
     }
 
-    else if (cmdName == wxT("db_triggers") && !cmdParams.empty())
+    else if (cmdName == wxT("db_triggers") && !cmdParams.IsEmpty())
     {
         Database* d = dynamic_cast<Database*>(object);
         if (!d)
@@ -262,7 +293,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         std::vector<Trigger*> tmp;
         d->getDatabaseTriggers(tmp);
         for (std::vector<Trigger*>::iterator it = tmp.begin(); it != tmp.end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), *it, window, it == tmp.begin());
+            internalProcessTemplateText(processedText, cmdParams.all(), *it);
     }
 
     else if (cmdName == wxT("depends_on") || cmdName == wxT("depend_of"))
@@ -273,7 +304,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         std::vector<Dependency> tmp;
         m->getDependencies(tmp, cmdName == wxT("depends_on"));
         for (std::vector<Dependency>::iterator it = tmp.begin(); it != tmp.end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), &(*it), window);
+            internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
     }
 
     else if (cmdName == wxT("dependency_columns"))
@@ -292,7 +323,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         PrimaryKeyConstraint* pk = t->getPrimaryKey();
         if (!pk)
             return;
-        internalProcessTemplateText(processedText, cmdParams.all(), pk, window);
+        internalProcessTemplateText(processedText, cmdParams.all(), pk);
     }
 
     else if (cmdName == wxT("foreign_keys"))
@@ -304,7 +335,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         if (!fk)
             return;
         for (std::vector<ForeignKey>::iterator it = fk->begin(); it != fk->end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), &(*it), window, it == fk->begin());
+            internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
     }
 
     else if (cmdName == wxT("check_constraints"))
@@ -316,7 +347,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         if (!c)
             return;
         for (std::vector<CheckConstraint>::iterator it = c->begin(); it != c->end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), &(*it), window, it == c->begin());
+            internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
     }
 
     else if (cmdName == wxT("unique_constraints"))
@@ -328,7 +359,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         if (!c)
             return;
         for (std::vector<UniqueConstraint>::iterator it = c->begin(); it != c->end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), &(*it), window, it == c->begin());
+            internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
     }
 
     else if (cmdName == wxT("privileges"))
@@ -346,7 +377,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         if (!p)
             return;
         for (std::vector<Privilege>::iterator it = p->begin(); it != p->end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), &(*it), window, it == p->begin());
+            internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
     }
 
     else if (cmdName == wxT("grantee_name"))
@@ -374,7 +405,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         if (!c)
             return;
 
-        if (cmdParams.empty())
+        if (cmdParams.IsEmpty())
             processedText += c->getColumnList();
         else if (cmdParams.Count() == 1)
             processedText += c->getColumnList(cmdParams[0]);
@@ -460,7 +491,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
             it != p->end(); ++it)
         {
             if ((*it)->isOutputParameter() == parOut)
-                internalProcessTemplateText(processedText, cmdParams.all(), (*it).get(), window, it == p->begin());
+                internalProcessTemplateText(processedText, cmdParams.all(), (*it).get());
         }
     }
 
@@ -533,7 +564,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         processedText += escapeChars(e->getMessage(), false);
     }
 
-    else if (cmdName == wxT("udfinfo") && !cmdParams.empty())
+    else if (cmdName == wxT("udfinfo") && !cmdParams.IsEmpty())
     {
         Function* f = dynamic_cast<Function*>(object);
         if (!f)
@@ -566,7 +597,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         if (!ix)
             return;
         for (std::vector<Index>::iterator it = ix->begin(); it != ix->end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), &(*it), window, it == ix->begin());
+            internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
     }
 
     else if (cmdName == wxT("object_ddl"))
@@ -583,7 +614,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         processedText += escapeChars(cdv.getSql(), false);
     }
 
-    else if (cmdName == wxT("indexinfo") && !cmdParams.empty())
+    else if (cmdName == wxT("indexinfo") && !cmdParams.IsEmpty())
     {
         Index* i = dynamic_cast<Index*>(object);
         if (!i)
@@ -733,23 +764,11 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::internalProcessTemplateText(wxString& processedText, wxString inputText,
-    MetadataItem *object, wxWindow *window, bool first)
+    MetadataItem *object)
 {
     if (object == 0)
         object = objectM;
 
-    if (flagNextM)  // reuse the first "flag" from skipped object (see below)
-        first = true;
-    flagNextM = false;
-
-    if (!allowedObjectsM.empty() && std::find(allowedObjectsM.begin(),
-        allowedObjectsM.end(), object) == allowedObjectsM.end())
-    {
-        if (first)  // keep the "first" flag in case current gets skipped
-            flagNextM = true;
-        return;
-    }
-    
     // parse commands
     wxString::size_type pos = 0, oldpos = 0, endpos = 0;
     while (true)
@@ -833,13 +852,13 @@ void TemplateProcessor::internalProcessTemplateText(wxString& processedText, wxS
         {
             cmdName = cmdParams[0];
             cmdParams.RemoveAt(0);
-            if (!cmdName.empty())
+            if (!cmdName.IsEmpty())
             {
                 // process internal commands.
-                processCommand(cmdName, cmdParams, object, processedText, window, first);
+                processCommand(cmdName, cmdParams, object, processedText);
                 // call external command handlers.
                 getTemplateCmdHandlerRepository().handleTemplateCmd(this, cmdName, cmdParams,
-                    object, processedText, window, first);
+                    object, processedText);
             }
         }
         oldpos = pos = endpos + 2;
@@ -847,22 +866,22 @@ void TemplateProcessor::internalProcessTemplateText(wxString& processedText, wxS
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::processTemplateFile(wxString& processedText, wxFileName inputFileName,
-    MetadataItem* object, wxWindow *window, bool first, ProgressIndicator* progressIndicator)
+    MetadataItem* object, ProgressIndicator* progressIndicator)
 {
     fileNameM = inputFileName;
     inputFileName.SetExt(wxT("conf"));
     configM.setConfigFileName(inputFileName);
     progressIndicatorM = progressIndicator;
-    internalProcessTemplateText(processedText, loadEntireFile(fileNameM), object, window, first);
+    internalProcessTemplateText(processedText, loadEntireFile(fileNameM), object);
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::processTemplateText(wxString& processedText, wxString inputText,
-    MetadataItem *object, wxWindow *window, bool first, ProgressIndicator* progressIndicator)
+    MetadataItem *object, ProgressIndicator* progressIndicator)
 {
     fileNameM.Clear();
     configM.setConfigFileName(wxFileName(wxEmptyString));
     progressIndicatorM = progressIndicator;
-    internalProcessTemplateText(processedText, inputText, object, window, first);
+    internalProcessTemplateText(processedText, inputText, object);
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::setVar(wxString varName, wxString varValue)
@@ -889,8 +908,6 @@ wxString TemplateProcessor::getTemplatePath()
 {
     return fileNameM.GetPathWithSep();
 }
-//-----------------------------------------------------------------------------
-const wxChar TemplateCmdParams::SEPARATOR = wxT(':');
 //-----------------------------------------------------------------------------
 wxString TemplateCmdParams::all() const
 {
@@ -941,11 +958,11 @@ void TemplateCmdHandlerRepository::checkHandlerListSorted()
 //! returns false if no suitable handler found
 void TemplateCmdHandlerRepository::handleTemplateCmd(TemplateProcessor *tp,
     wxString cmdName, TemplateCmdParams cmdParams, MetadataItem* object,
-    wxString& processedText, wxWindow *window, bool first)
+    wxString& processedText)
 {
     checkHandlerListSorted();
     for (std::list<TemplateCmdHandler*>::iterator it = handlersM.begin(); it != handlersM.end(); ++it)
-        (*it)->handleTemplateCmd(tp, cmdName, cmdParams, object, processedText, window, first);
+        (*it)->handleTemplateCmd(tp, cmdName, cmdParams, object, processedText);
 }
 //-----------------------------------------------------------------------------
 void TemplateCmdHandlerRepository::addHandler(TemplateCmdHandler* handler)

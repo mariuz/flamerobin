@@ -188,6 +188,7 @@ Accepted values: AMD64, IA64.
 
             <define>__WXMSW__</define>
             <define>wxUSE_GUI=1</define>
+            <define>wxUSE_REGEX=1</define>
             <define>wxUSE_UNICODE=$(UNICODE)</define>
             <define>WIN32_LEAN_AND_MEAN</define>
 
@@ -223,6 +224,7 @@ Accepted values: AMD64, IA64.
             <sys-lib>wxjpeg$(D_OPT)</sys-lib>
             <sys-lib>wxpng$(D_OPT)</sys-lib>
             <sys-lib>wxzlib$(D_OPT)</sys-lib>
+            <sys-lib>wxregex$(U_OPT)$(D_OPT)</sys-lib>
 
             <sys-lib>kernel32</sys-lib>
             <sys-lib>user32</sys-lib>
@@ -265,6 +267,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/BaseFrame.h
         $(SOURCEDIR)/gui/CommandIds.h
         $(SOURCEDIR)/gui/CommandManager.h
+        $(SOURCEDIR)/gui/ConfdefTemplateProcessor.h
         $(SOURCEDIR)/gui/ContextMenuMetadataItemVisitor.h
         $(SOURCEDIR)/gui/controls/ControlUtils.h
         $(SOURCEDIR)/gui/controls/DataGrid.h
@@ -337,6 +340,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/sql/MultiStatement.h
         $(SOURCEDIR)/sql/SelectStatement.h
         $(SOURCEDIR)/sql/SqlStatement.h
+        $(SOURCEDIR)/sql/SqlTemplateManager.h
         $(SOURCEDIR)/sql/SqlTemplateProcessor.h
         $(SOURCEDIR)/sql/SqlTokenizer.h
         $(SOURCEDIR)/sql/StatementBuilder.h
@@ -381,6 +385,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/BaseDialog.cpp
         $(SOURCEDIR)/gui/BaseFrame.cpp
         $(SOURCEDIR)/gui/CommandManager.cpp
+        $(SOURCEDIR)/gui/ConfdefTemplateProcessor.cpp
         $(SOURCEDIR)/gui/ContextMenuMetadataItemVisitor.cpp
         $(SOURCEDIR)/gui/controls/ControlUtils.cpp
         $(SOURCEDIR)/gui/controls/DataGrid.cpp
@@ -436,6 +441,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/metadata/metadataitem.cpp
         $(SOURCEDIR)/metadata/MetadataItemDescriptionVisitor.cpp
         $(SOURCEDIR)/metadata/MetadataItemVisitor.cpp
+        $(SOURCEDIR)/metadata/MetadataTemplateCmdHandler.cpp
         $(SOURCEDIR)/metadata/parameter.cpp
         $(SOURCEDIR)/metadata/privilege.cpp
         $(SOURCEDIR)/metadata/procedure.cpp
@@ -453,6 +459,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/sql/MultiStatement.cpp
         $(SOURCEDIR)/sql/SelectStatement.cpp
         $(SOURCEDIR)/sql/SqlStatement.cpp
+        $(SOURCEDIR)/sql/SqlTemplateManager.cpp
         $(SOURCEDIR)/sql/SqlTemplateProcessor.cpp
         $(SOURCEDIR)/sql/SqlTokenizer.cpp
         $(SOURCEDIR)/sql/StatementBuilder.cpp

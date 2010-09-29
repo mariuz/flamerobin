@@ -68,6 +68,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_BaseDialog.o \
 	flamerobin_BaseFrame.o \
 	flamerobin_CommandManager.o \
+	flamerobin_ConfdefTemplateProcessor.o \
 	flamerobin_ContextMenuMetadataItemVisitor.o \
 	flamerobin_ControlUtils.o \
 	flamerobin_DataGrid.o \
@@ -123,6 +124,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_metadataitem.o \
 	flamerobin_MetadataItemDescriptionVisitor.o \
 	flamerobin_MetadataItemVisitor.o \
+	flamerobin_MetadataTemplateCmdHandler.o \
 	flamerobin_parameter.o \
 	flamerobin_privilege.o \
 	flamerobin_procedure.o \
@@ -140,6 +142,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_MultiStatement.o \
 	flamerobin_SelectStatement.o \
 	flamerobin_SqlStatement.o \
+	flamerobin_SqlTemplateManager.o \
 	flamerobin_SqlTemplateProcessor.o \
 	flamerobin_SqlTokenizer.o \
 	flamerobin_StatementBuilder.o \
@@ -384,6 +387,9 @@ flamerobin_BaseFrame.o: $(srcdir)/src/gui/BaseFrame.cpp $(FLAMEROBIN_ODEP)
 flamerobin_CommandManager.o: $(srcdir)/src/gui/CommandManager.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/CommandManager.cpp
 
+flamerobin_ConfdefTemplateProcessor.o: $(srcdir)/src/gui/ConfdefTemplateProcessor.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/ConfdefTemplateProcessor.cpp
+
 flamerobin_ContextMenuMetadataItemVisitor.o: $(srcdir)/src/gui/ContextMenuMetadataItemVisitor.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/ContextMenuMetadataItemVisitor.cpp
 
@@ -549,6 +555,9 @@ flamerobin_MetadataItemDescriptionVisitor.o: $(srcdir)/src/metadata/MetadataItem
 flamerobin_MetadataItemVisitor.o: $(srcdir)/src/metadata/MetadataItemVisitor.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/MetadataItemVisitor.cpp
 
+flamerobin_MetadataTemplateCmdHandler.o: $(srcdir)/src/metadata/MetadataTemplateCmdHandler.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/MetadataTemplateCmdHandler.cpp
+
 flamerobin_parameter.o: $(srcdir)/src/metadata/parameter.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/parameter.cpp
 
@@ -599,6 +608,9 @@ flamerobin_SelectStatement.o: $(srcdir)/src/sql/SelectStatement.cpp $(FLAMEROBIN
 
 flamerobin_SqlStatement.o: $(srcdir)/src/sql/SqlStatement.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/SqlStatement.cpp
+
+flamerobin_SqlTemplateManager.o: $(srcdir)/src/sql/SqlTemplateManager.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/SqlTemplateManager.cpp
 
 flamerobin_SqlTemplateProcessor.o: $(srcdir)/src/sql/SqlTemplateProcessor.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/SqlTemplateProcessor.cpp

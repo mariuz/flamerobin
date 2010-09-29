@@ -38,6 +38,9 @@
     #include "wx/wx.h"
 #endif
 
+#include <wx/file.h>
+#include <wx/tokenzr.h>
+
 #include <fstream>
 #include <sstream>
 
@@ -106,9 +109,13 @@ void readBlob(IBPP::Statement& st, int column, wxString& result,
     b->Close();
 }
 //-----------------------------------------------------------------------------
-wxString selectRelationColumns(Relation* t, wxWindow* parent)
+wxString selectRelationColumns(Relation* t, wxWindow* parent, const wxString& defaultSelection)
 {
     vector<wxString> list;
+    wxArrayString defaultNames = ::wxStringTokenize(defaultSelection, wxT(","));
+    for (wxString::size_type i = 0; i < defaultNames.Count(); i++)
+        list.push_back(defaultNames[i].Trim(true).Trim(false));
+    
     if (!selectRelationColumnsIntoVector(t, parent, list))
         return wxEmptyString;
 
@@ -123,12 +130,21 @@ bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent,
     vector<wxString>& list)
 {
     t->ensureChildrenLoaded();
+
+    wxArrayInt selected_columns;
     wxArrayString colNames;
     colNames.Alloc(t->getColumnCount());
     for (RelationColumns::const_iterator it = t->begin(); it != t->end(); ++it)
         colNames.Add((*it)->getName_());
 
-    wxArrayInt selected_columns;
+    // set default selection.
+    for (vector<wxString>::const_iterator it = list.begin(); it != list.end(); ++it)
+    {
+        wxString::size_type i = colNames.Index((*it));
+        if (i != wxNOT_FOUND)
+            selected_columns.Add(i);
+    }    
+    
     bool ok = 
 #if wxCHECK_VERSION(2, 9, 0)
     ::wxGetSelectedChoices(selected_columns,
@@ -137,6 +153,7 @@ bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent,
 #endif
         _("Select one or more fields... (use ctrl key)"),  _("Table Fields"),
         colNames, parent) > 0;
+    list.clear();
     if (!ok)
         return false;
 
@@ -254,5 +271,11 @@ wxString loadEntireFile(const wxFileName& filename)
     wxString s(std2wx(ss.str()));
     filex.close();
     return s;
+}
+//-----------------------------------------------------------------------------
+void writeEntireFile(const wxFileName& filename, const wxString& content)
+{
+    wxFile file(filename.GetFullPath(), wxFile::write);
+    file.Write(content);
 }
 //-----------------------------------------------------------------------------

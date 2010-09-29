@@ -38,26 +38,21 @@
     #include "wx/wx.h"
 #endif
 
-#include <sstream>
-#include <iomanip>
-#include <vector>
-
 #include "core/StringUtils.h"
 #include "frutils.h"
 #include "metadata/metadataitem.h"
-#include "metadata/server.h"
+#include "metadata/privilege.h"
 #include "HtmlTemplateProcessor.h"
 //-----------------------------------------------------------------------------
-HtmlTemplateProcessor::HtmlTemplateProcessor(MetadataItem *m,
-    std::vector<MetadataItem *> *allowedObjects)
-	: TemplateProcessor(m, allowedObjects)
+HtmlTemplateProcessor::HtmlTemplateProcessor(MetadataItem *m, wxWindow *window)
+    : TemplateProcessor(m, window)
 {
 }
 //-----------------------------------------------------------------------------
 void HtmlTemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdParams,
-	MetadataItem *object, wxString& processedText, wxWindow *window, bool first)
+	MetadataItem *object, wxString& processedText)
 {
-	TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText, window, first);
+	TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText);
 
 	if (cmdName == wxT("header") && !cmdParams.empty())  // include another file
     {
@@ -112,7 +107,7 @@ void HtmlTemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams c
                 if (part.Find(wxT(">") + allParams + wxT("<")) != -1)
                     processedText += allParams;
                 else
-                    internalProcessTemplateText(processedText, part, object, window);
+                    internalProcessTemplateText(processedText, part, object);
             }
 		}
 	}

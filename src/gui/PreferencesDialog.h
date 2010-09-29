@@ -102,7 +102,11 @@ public:
     };
 
     PreferencesDialog(wxWindow* parent, const wxString& title,
-        Config& targetConfig, const wxFileName& descriptionFileName);
+        Config& targetConfig, const wxFileName& confDefFileName,
+        const wxString& saveButtonCaption = _("Save"));
+    PreferencesDialog(wxWindow* parent, const wxString& title,
+        Config& targetConfig, const wxString& confDefData,
+        const wxString& saveButtonCaption = _("Save"));
     ~PreferencesDialog();
 
     int getSelectedPage();
@@ -133,11 +137,14 @@ private:
 
     bool createControlsAndAddToSizer(wxPanel* page, wxSizer* sizerPage);
     void layout();
-    void loadDescriptionFile(const wxFileName& filename);
+    void loadConfDefFile(const wxFileName& filename);
+    void loadConfDef(const wxString& confDefData);
     bool parseDescriptionNode(wxTreeItemId parent, wxXmlNode* xmln);
     bool parseDescriptionSetting(wxPanel* page, wxXmlNode* xmln,
         PrefDlgSetting* enabledby);
     void setProperties();
+    void initControls(const wxString& saveButtonCaption);
+    void setControlLayout();
 protected:
     virtual const wxString getName() const;
 

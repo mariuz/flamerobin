@@ -38,15 +38,21 @@
     #include "wx/wx.h"
 #endif
 //-----------------------------------------------------------------------------
+#include <vector>
+
 #include <wx/filedlg.h>
 #include <wx/filename.h>
 #include <wx/fontdlg.h>
 #include <wx/spinctrl.h>
+#include <wx/tokenzr.h>
 #include <wx/xml/xml.h>
 
 #include "config/Config.h"
+#include "frutils.h"
 #include "gui/PreferencesDialog.h"
 #include "gui/StyleGuide.h"
+//-----------------------------------------------------------------------------
+using namespace std;
 //-----------------------------------------------------------------------------
 static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
 {
@@ -746,7 +752,7 @@ void PrefDlgStringEditSetting::setDefault(const wxString& defValue)
 class PrefDlgChooserSetting: public PrefDlgSetting
 {
 public:
-    enum {choosefile, choosefont};
+    enum {choosefile, choosefont, chooserelcolumns};
 
     PrefDlgChooserSetting(int style, wxPanel* page, PrefDlgSetting* parent);
     ~PrefDlgChooserSetting();
@@ -754,7 +760,7 @@ public:
     virtual bool createControl(bool ignoreerrors);
     virtual bool loadFromTargetConfig(Config& config);
     virtual bool saveToTargetConfig(Config& config);
-
+    virtual bool parseProperty(wxXmlNode* xmln);
     void OnBrowseButton(wxCommandEvent& event);
 protected:
     virtual void addControlsToSizer(wxSizer* sizer);
@@ -768,9 +774,11 @@ private:
     wxStaticText* captionBeforeM;
     wxTextCtrl* textctrlM;
     wxString defaultM;
+    Relation* relationM;
 
     void chooseFile();
     void chooseFont();
+    void chooseRelationColumns();
 
     DECLARE_EVENT_TABLE()
 };
@@ -828,6 +836,24 @@ void PrefDlgChooserSetting::chooseFont()
     wxFont font2 = ::wxGetFontFromUser(::wxGetTopLevelParent(textctrlM), font);
     if (font2.Ok())
         textctrlM->SetValue(font2.GetNativeFontInfoDesc());
+}
+//-----------------------------------------------------------------------------
+void PrefDlgChooserSetting::chooseRelationColumns()
+{
+    wxArrayString defaultNames = ::wxStringTokenize(textctrlM->GetValue(), wxT(","));
+    vector<wxString> list;
+    for (wxString::size_type i = 0; i < defaultNames.Count(); i++)
+        list.push_back(defaultNames[i].Trim(true).Trim(false));
+
+    
+    if (selectRelationColumnsIntoVector(relationM, getPage(), list))
+    {
+        vector<wxString>::iterator it = list.begin();
+        wxString retval(*it);
+        while ((++it) != list.end())
+            retval += wxT(", ") + (*it);
+        textctrlM->SetValue(retval);
+    }
 }
 //-----------------------------------------------------------------------------
 bool PrefDlgChooserSetting::createControl(bool WXUNUSED(ignoreerrors))
@@ -906,6 +932,27 @@ void PrefDlgChooserSetting::OnBrowseButton(wxCommandEvent& WXUNUSED(event))
         chooseFile();
     else if (styleM == choosefont)
         chooseFont();
+    else if (styleM == chooserelcolumns)
+        chooseRelationColumns();
+}
+//-----------------------------------------------------------------------------
+bool PrefDlgChooserSetting::parseProperty(wxXmlNode* xmln)
+{
+    if (xmln->GetType() == wxXML_ELEMENT_NODE)
+    {
+        wxString name(xmln->GetName());
+        if (name == wxT("relation"))
+        {
+            wxString value(getNodeContent(xmln, wxEmptyString));
+
+            unsigned long o;
+            if (!value.ToULong(&o))
+                relationM = 0;
+            else
+                relationM = (Relation*)o;
+        }
+    }
+    return PrefDlgSetting::parseProperty(xmln);
 }
 //-----------------------------------------------------------------------------
 // PrefDlgSetting factory
@@ -924,6 +971,8 @@ PrefDlgSetting* createPrefDlgSetting(wxPanel* page, const wxString& type,
         return new PrefDlgChooserSetting(PrefDlgChooserSetting::choosefile, page, parent);
     if (type == wxT("font"))
         return new PrefDlgChooserSetting(PrefDlgChooserSetting::choosefont, page, parent);
+    if (type == wxT("relation_columns"))
+        return new PrefDlgChooserSetting(PrefDlgChooserSetting::chooserelcolumns, page, parent);
     return 0;
 }
 //-----------------------------------------------------------------------------

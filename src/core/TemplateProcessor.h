@@ -43,50 +43,47 @@
 class TemplateCmdParams: public wxArrayString
 {
 public:
-    static const wxChar SEPARATOR;
 	//!returns all params concatenated with the default separator.
 	wxString all() const;
 };
 //-----------------------------------------------------------------------------
 typedef std::map<wxString, wxString> wxStringMap;
 //-----------------------------------------------------------------------------
+class TemplateCmdHandler;
+//-----------------------------------------------------------------------------
 class TemplateProcessor
 {
 private:
-    MetadataItem *objectM;  // main observed object
-    std::vector<MetadataItem *> allowedObjectsM;
+    MetadataItem *objectM;
     bool flagNextM;
 	wxFileName fileNameM;
 	wxStringMap varsM;
 	ProgressIndicator* progressIndicatorM;
 	Config configM;
+	wxWindow *windowM;
 protected:
-	TemplateProcessor(MetadataItem *m,
-        std::vector<MetadataItem *> *allowedObjects = 0);
-    ProgressIndicator* getProgressIndicator() { return progressIndicatorM; };
+	TemplateProcessor(MetadataItem *m, wxWindow *window);
 	//! processes a command found in template text
     virtual void processCommand(wxString cmdName,
 		TemplateCmdParams cmdParams, MetadataItem* object,
-        wxString& processedText, wxWindow *window, bool first);
+        wxString& processedText);
 	//! processor-specific way of escaping special chars
 	virtual wxString escapeChars(const wxString& input, bool processNewlines = true) = 0;
-	//! processes all commands without resetting fileNameM. Should be used
-	// internally, while processTemplateText() is for external use.
-	void internalProcessTemplateText(wxString& processedText, wxString inputText,
-        MetadataItem* object, wxWindow *window, bool first = true);
 	//! returns the loaded file's path, including the trailing separator.
 	wxString getTemplatePath();
 public:
+	wxWindow *getWindow() { return windowM; };
+    //! Returns a reference to the current progress indicator, so that
+    //! external command handlers can use it.
+    ProgressIndicator* getProgressIndicator() { return progressIndicatorM; };
 	//! processes all known commands found in template text
 	//! commands are in format: {%cmdName:cmdParams%}
 	//! cmdParams field may be empty, in which case the format is {%cmdName*}
     void processTemplateText(wxString& processedText, wxString inputText,
-		MetadataItem* object, wxWindow *window, bool first = true,
-		ProgressIndicator* progressIndicator = 0);
+		MetadataItem* object, ProgressIndicator* progressIndicator = 0);
 	//! loads the contents of the specified file and calls internalProcessTemplateText().
     void processTemplateFile(wxString& processedText, wxFileName inputFileName,
-        MetadataItem* object, wxWindow *window, bool first = true,
-        ProgressIndicator* progressIndicator = 0);
+        MetadataItem* object, ProgressIndicator* progressIndicator = 0);
 	//! sets a variable value. If the variable already exists it is overwritten.
 	//! To clear a variable, set it to an empty string.
 	void setVar(wxString varName, wxString varValue);
@@ -101,9 +98,12 @@ public:
 	Config& getConfig() { return configM; }
     //! Name of the current template file if processTemplateFile() has been called.
     wxFileName getCurrentTemplateFileName() { return fileNameM; }
+	//! processes all commands without resetting fileNameM. Should be used
+	//! internally and from command handlers, while processTemplateText()
+	//! is for external use.
+	void internalProcessTemplateText(wxString& processedText, wxString inputText,
+        MetadataItem* object);
 };
-//-----------------------------------------------------------------------------
-class TemplateCmdHandler;
 //-----------------------------------------------------------------------------
 class TemplateCmdHandlerRepository
 {
@@ -114,8 +114,7 @@ public:
 
     // interface for consumers.
     void handleTemplateCmd(TemplateProcessor *tp, wxString cmdName,
-        TemplateCmdParams cmdParams, MetadataItem* object, wxString& processedText,
-        wxWindow *window, bool first);
+        TemplateCmdParams cmdParams, MetadataItem* object, wxString& processedText);
 
     virtual ~TemplateCmdHandlerRepository();
 private:
@@ -144,8 +143,7 @@ public:
     virtual ~TemplateCmdHandler();
 
     virtual void handleTemplateCmd(TemplateProcessor *tp, wxString cmdName,
-        TemplateCmdParams cmdParams, MetadataItem* object, wxString& processedText,
-        wxWindow *window, bool first) = 0;
+        TemplateCmdParams cmdParams, MetadataItem* object, wxString& processedText) = 0;
     
     bool operator<(const TemplateCmdHandler& right) const
     {

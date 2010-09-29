@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -28,6 +28,7 @@
 #ifndef FR_CONTEXTMENUMETADATAITEMVISITOR_H
 #define FR_CONTEXTMENUMETADATAITEMVISITOR_H
 
+#include "metadata/metadataitem.h"
 #include "metadata/MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 class wxMenu;
@@ -61,8 +62,9 @@ private:
     void addPropertiesItem();
     void addRefreshItem();
 
-    void addRegularObjectMenu(bool addAlter, bool addDrop);
+    void addRegularObjectMenu(MetadataItem& metadataItem, bool addAlter, bool addDrop);
     void addSelectMenu(bool isSelectable, bool canAddColumn);
+    void addGenerateScriptMenu(MetadataItem& metadataItem);
 };
 //-----------------------------------------------------------------------------
 #endif //FR_CONTEXTMENUMETADATAITEMVISITOR_H
