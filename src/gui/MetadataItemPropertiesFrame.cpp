@@ -294,7 +294,7 @@ void MetadataItemPropertiesPanel::loadPage()
 //! processes the given html template file
 void MetadataItemPropertiesPanel::processHtmlFile(wxString fileName)
 {
-    ProgressDialog pd = ProgressDialog(this, wxT("Processing template..."));
+    ProgressDialog pd(this, wxT("Processing template..."));
 
     wxString htmlpage;
     HtmlTemplateProcessor tp(objectM, this);

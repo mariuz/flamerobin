@@ -821,14 +821,14 @@ void MainFrame::OnMenuGenerateScript(wxCommandEvent& event)
         return;
 
     SqlTemplateManager tm(*metadataItem);
-        
+
     int i = (int)Cmds::Menu_TemplateFirst;
     for (TemplateDescriptorList::const_iterator it = tm.descriptorsBegin();
         it != tm.descriptorsEnd(); ++it, ++i)
     {
         if (i == event.GetId())
         {
-            ProgressDialog pd = ProgressDialog(this, wxT("Processing template..."));
+            ProgressDialog pd(this, wxT("Processing template..."));
             wxString sql;
             SqlTemplateProcessor tp(metadataItem, this);
             tp.processTemplateFile(sql, (*it)->getTemplateFileName(), metadataItem, &pd);
