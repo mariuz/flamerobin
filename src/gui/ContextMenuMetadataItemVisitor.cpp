@@ -307,6 +307,9 @@ void ContextMenuMetadataItemVisitor::addGenerateScriptMenu(
         templatesExist = true;
     }
     if (templatesExist)
-        menuM->Append(Cmds::Menu_TemplateFirst, _("&Generate script..."), templateMenu);
+    {
+        menuM->Append(Cmds::Menu_TemplateFirst, _("&Generate script..."),
+            templateMenu);
+    }
 }
 //-----------------------------------------------------------------------------

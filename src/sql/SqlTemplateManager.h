@@ -33,6 +33,8 @@
 
 #include <list>
 
+#include <boost/shared_ptr.hpp>
+
 #include "config/Config.h"
 #include "metadata/metadataitem.h"
 
@@ -58,7 +60,8 @@ public:
     wxFileName getTemplateFileName() const { return templateFileNameM; }
 };
 //-----------------------------------------------------------------------------
-typedef std::list<TemplateDescriptor*> TemplateDescriptorList;
+typedef boost::shared_ptr<TemplateDescriptor> TemplateDescriptorPtr;
+typedef std::list<TemplateDescriptorPtr> TemplateDescriptorList;
 //-----------------------------------------------------------------------------
 class SqlTemplateManager
 {

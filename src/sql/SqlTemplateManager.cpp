@@ -111,7 +111,8 @@ wxString TemplateDescriptor::getMenuCaption() const
 }
 //-----------------------------------------------------------------------------
 //! needed in checkDescriptorsSorted() to sort on objects instead of pointers
-bool templateDescriptorPointerLT(const TemplateDescriptor* left, const TemplateDescriptor* right)
+bool templateDescriptorPointerLT(const TemplateDescriptorPtr left,
+    const TemplateDescriptorPtr right)
 {
     return *left < *right;
 }
@@ -131,19 +132,9 @@ void SqlTemplateManager::collectDescriptors()
     descriptorsM.clear();
     for (wxString::size_type i = 0; i < fileNames.Count(); i++)
     {
-        TemplateDescriptor *td = new TemplateDescriptor(fileNames[i]);
-        try
-        {
-            if (td->matches(metadataItemM))
-                descriptorsM.push_back(td);
-            else
-                delete td;
-        }
-        catch (...)
-        {
-            if (td)
-                delete td;
-        }
+        TemplateDescriptorPtr td(new TemplateDescriptor(fileNames[i]));
+        if (td->matches(metadataItemM))
+            descriptorsM.push_back(td);
     }
     descriptorsM.sort(templateDescriptorPointerLT);
 }

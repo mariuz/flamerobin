@@ -831,8 +831,10 @@ void MainFrame::OnMenuGenerateScript(wxCommandEvent& event)
             ProgressDialog pd(this, wxT("Processing template..."));
             wxString sql;
             SqlTemplateProcessor tp(metadataItem, this);
-            tp.processTemplateFile(sql, (*it)->getTemplateFileName(), metadataItem, &pd);
-            showSql(this, wxString(_("Execute SQL statements")), database, sql);
+            tp.processTemplateFile(sql, (*it)->getTemplateFileName(),
+                metadataItem, &pd);
+            showSql(this, wxString(_("Execute SQL statements")), database,
+                sql);
             break;
         }
     }
