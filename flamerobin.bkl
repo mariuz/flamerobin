@@ -494,13 +494,27 @@ Accepted values: AMD64, IA64.
         <if cond="FORMAT!='autoconf'">sql-templates</if>
     </set>
     <set var="SQLTEMPLATEFILES">
-        TABLE_010_Select
-        TABLE_020_Insert
-        TABLE_030_Update
-        "TABLE_040_Selectable procedure"
-        "TABLE_050_Selectable EXECUTE BLOCK"
-        "TABLE_055_Change trigger"
-        "TABLE_060_Full DDL"
+        common.confdef
+        create_change_trigger.conf
+        create_change_trigger.confdef
+        create_change_trigger.sql
+        create_selectable_execute_block.conf
+        create_selectable_execute_block.confdef
+        create_selectable_execute_block.sql
+        create_selectable_procedure.conf
+        create_selectable_procedure.confdef
+        create_selectable_procedure.sql
+        extract_full_ddl.conf
+        extract_full_ddl.sql
+        insert.conf
+        insert.confdef
+        insert.sql
+        select.conf
+        select.confdef
+        select.sql
+        update.conf
+        update.confdef
+        update.sql
     </set>
 
     <set var="HTMLTEMPLATEDIR">

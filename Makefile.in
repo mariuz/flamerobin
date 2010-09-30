@@ -234,7 +234,7 @@ install:
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/html-templates
 	(cd $(srcdir)/html-templates ; $(INSTALL_DATA)  ALLloading.html DATABASE.html DATABASEtriggers.html DDL.html DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html PROCEDUREprivileges.html ROLE.html ROLEprivileges.html SERVER.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TABLEprivileges.html TRIGGER.html VIEW.html VIEWprivileges.html VIEWtriggers.html dependencies.html header.html compute.png drop.png ok.png ok2.png redx.png view.png $(DESTDIR)$(datadir)/flamerobin/html-templates)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/sql-templates
-	(cd $(srcdir)/sql-templates ; $(INSTALL_DATA)  TABLE_010_Select TABLE_020_Insert TABLE_030_Update "TABLE_040_Selectable procedure" "TABLE_050_Selectable EXECUTE BLOCK" "TABLE_055_Change trigger" "TABLE_060_Full DDL" $(DESTDIR)$(datadir)/flamerobin/sql-templates)
+	(cd $(srcdir)/sql-templates ; $(INSTALL_DATA)  common.confdef create_change_trigger.conf create_change_trigger.confdef create_change_trigger.sql create_selectable_execute_block.conf create_selectable_execute_block.confdef create_selectable_execute_block.sql create_selectable_procedure.conf create_selectable_procedure.confdef create_selectable_procedure.sql extract_full_ddl.conf extract_full_ddl.sql insert.conf insert.confdef insert.sql select.conf select.confdef select.sql update.conf update.confdef update.sql $(DESTDIR)$(datadir)/flamerobin/sql-templates)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/applications
 	(cd $(srcdir)/res ; $(INSTALL_DATA)  flamerobin.desktop $(DESTDIR)$(datadir)/applications)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/pixmaps
@@ -246,7 +246,7 @@ uninstall:
 	(cd $(DESTDIR)$(datadir)/flamerobin/docs ; rm -f fr_license.html fr_manual.html fr_whatsnew.html html.css)
 	(cd $(DESTDIR)@mandir@/man1 ; rm -f flamerobin.1)
 	(cd $(DESTDIR)$(datadir)/flamerobin/html-templates ; rm -f ALLloading.html DATABASE.html DATABASEtriggers.html DDL.html DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html PROCEDUREprivileges.html ROLE.html ROLEprivileges.html SERVER.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TABLEprivileges.html TRIGGER.html VIEW.html VIEWprivileges.html VIEWtriggers.html dependencies.html header.html compute.png drop.png ok.png ok2.png redx.png view.png)
-	(cd $(DESTDIR)$(datadir)/flamerobin/sql-templates ; rm -f TABLE_010_Select TABLE_020_Insert TABLE_030_Update "TABLE_040_Selectable procedure" "TABLE_050_Selectable EXECUTE BLOCK" "TABLE_055_Change trigger" "TABLE_060_Full DDL")
+	(cd $(DESTDIR)$(datadir)/flamerobin/sql-templates ; rm -f common.confdef create_change_trigger.conf create_change_trigger.confdef create_change_trigger.sql create_selectable_execute_block.conf create_selectable_execute_block.confdef create_selectable_execute_block.sql create_selectable_procedure.conf create_selectable_procedure.confdef create_selectable_procedure.sql extract_full_ddl.conf extract_full_ddl.sql insert.conf insert.confdef insert.sql select.conf select.confdef select.sql update.conf update.confdef update.sql)
 	(cd $(DESTDIR)$(datadir)/applications ; rm -f flamerobin.desktop)
 	(cd $(DESTDIR)$(datadir)/pixmaps ; rm -f flamerobin.png)
 
