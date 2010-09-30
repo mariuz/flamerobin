@@ -209,3 +209,8 @@ wxString escapeXmlChars(const wxString& input)
     return result;
 }
 //-----------------------------------------------------------------------------
+wxString getBooleanAsString(bool value)
+{
+    return (value) ? wxT("true") : wxT("false");
+}
+//-----------------------------------------------------------------------------

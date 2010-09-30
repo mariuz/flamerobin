@@ -33,12 +33,21 @@
 
 class MetadataItem;
 //-----------------------------------------------------------------------------
-class PrivilegeItem
+using namespace std;
+//-----------------------------------------------------------------------------
+class PrivilegeItem;
+//-----------------------------------------------------------------------------
+typedef vector<PrivilegeItem> PrivilegeItems;
+//-----------------------------------------------------------------------------
+// PrivilegeItem class only descends from MetadataItem to be able to be used in
+// the HTML template processor.
+// Perhaps it could be changed to have a common class for that
+class PrivilegeItem: public MetadataItem
 {
 public:
     wxString grantor;
     bool grantOption;
-    std::vector<wxString> columns;
+    vector<wxString> columns;
     PrivilegeItem(const wxString& grantorName, bool withGrantOption,
         const wxString& fieldName);
 };
@@ -54,8 +63,8 @@ private:
     wxString granteeM;
 
     // type (SEL, INS, ...), privilege
-    typedef std::multimap<wxString, PrivilegeItem> PMap;
-    PMap privilegesM;
+    typedef multimap<wxString, PrivilegeItem> PMap;
+    PMap privilegeItemsM;
 
     wxString getSql(bool withGrantOption) const;
 
@@ -66,8 +75,7 @@ public:
 
     wxString getSql() const;
     wxString getGrantee() const;
-    void getPrivileges(const wxString& type,
-        std::vector<PrivilegeItem>& list) const;
+    void getPrivilegeItems(const wxString& type, PrivilegeItems& list) const;
 };
 //-----------------------------------------------------------------------------
 #endif

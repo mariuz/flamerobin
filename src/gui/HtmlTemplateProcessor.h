@@ -40,9 +40,9 @@ class HtmlTemplateProcessor: public TemplateProcessor
 protected:
     virtual void processCommand(wxString cmdName, TemplateCmdParams cmdParams,
 		MetadataItem* object, wxString& processedText);
-	virtual wxString escapeChars(const wxString& input, bool processNewlines = true);
 public:
     HtmlTemplateProcessor(MetadataItem *m, wxWindow *window);
+	virtual wxString escapeChars(const wxString& input, bool processNewlines = true);
 };
 //-----------------------------------------------------------------------------
 #endif // FR_HTMLTEMPLATEPROCESSOR_H

@@ -47,4 +47,7 @@ wxString escapeXmlChars(const wxString& input);
 //  conversion to UTF-8 is available, i.e. in non-Unicode build
 wxString getHtmlCharset();
 //-----------------------------------------------------------------------------
+//! Standard way to confert a boolean to a string ("true"/"false")
+wxString getBooleanAsString(bool value);
+//-----------------------------------------------------------------------------
 #endif // FR_STRINGUTILS_H

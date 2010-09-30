@@ -60,11 +60,6 @@ TemplateProcessor::TemplateProcessor(MetadataItem *m, wxWindow *window)
 {
 }
 //-----------------------------------------------------------------------------
-wxString getBooleanAsString(bool value)
-{
-    return (value) ? wxT("true") : wxT("false");
-}
-//-----------------------------------------------------------------------------
 void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdParams,
     MetadataItem *object, wxString& processedText)
 {
@@ -360,32 +355,6 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
             return;
         for (std::vector<UniqueConstraint>::iterator it = c->begin(); it != c->end(); ++it)
             internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
-    }
-
-    else if (cmdName == wxT("privileges"))
-    {
-        Relation* rel = dynamic_cast<Relation*>(object);
-        Procedure* proc = dynamic_cast<Procedure*>(object);
-        Role* role = dynamic_cast<Role*>(object);
-        std::vector<Privilege>* p = 0;
-        if (rel)
-            p = rel->getPrivileges();
-        if (proc)
-            p = proc->getPrivileges();
-        if (role)
-            p = role->getPrivileges();
-        if (!p)
-            return;
-        for (std::vector<Privilege>::iterator it = p->begin(); it != p->end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
-    }
-
-    else if (cmdName == wxT("grantee_name"))
-    {
-        Privilege* p = dynamic_cast<Privilege*>(object);
-        if (!p)
-            return;
-        processedText += escapeChars(p->getGrantee());
     }
 
     else if (cmdName == wxT("check_source"))
@@ -909,12 +878,15 @@ wxString TemplateProcessor::getTemplatePath()
     return fileNameM.GetPathWithSep();
 }
 //-----------------------------------------------------------------------------
-wxString TemplateCmdParams::all() const
+wxString TemplateCmdParams::all(size_t start) const
 {
+    if (start > Count() - 1)
+        start = Count() - 1;
+        
     wxString result;
-    for (size_t i = 0; i < Count(); i++)
+    for (size_t i = start; i < Count(); i++)
     {
-        if (i == 0)
+        if (i == start)
           result = Item(i);
         else
           result += wxT(':') + Item(i);

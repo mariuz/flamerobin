@@ -40,14 +40,17 @@
 #include "core/ProgressIndicator.h"
 
 //-----------------------------------------------------------------------------
+using namespace std;
+//-----------------------------------------------------------------------------
 class TemplateCmdParams: public wxArrayString
 {
 public:
 	//!returns all params concatenated with the default separator.
-	wxString all() const;
+	//!optionally return only params from start.
+	wxString all(size_t start = 0) const;
 };
 //-----------------------------------------------------------------------------
-typedef std::map<wxString, wxString> wxStringMap;
+typedef map<wxString, wxString> wxStringMap;
 //-----------------------------------------------------------------------------
 class TemplateCmdHandler;
 //-----------------------------------------------------------------------------
@@ -67,8 +70,6 @@ protected:
     virtual void processCommand(wxString cmdName,
 		TemplateCmdParams cmdParams, MetadataItem* object,
         wxString& processedText);
-	//! processor-specific way of escaping special chars
-	virtual wxString escapeChars(const wxString& input, bool processNewlines = true) = 0;
 	//! returns the loaded file's path, including the trailing separator.
 	wxString getTemplatePath();
 public:
@@ -103,6 +104,8 @@ public:
 	//! is for external use.
 	void internalProcessTemplateText(wxString& processedText, wxString inputText,
         MetadataItem* object);
+	//! processor-specific way of escaping special chars
+	virtual wxString escapeChars(const wxString& input, bool processNewlines = true) = 0;
 };
 //-----------------------------------------------------------------------------
 class TemplateCmdHandlerRepository
@@ -118,7 +121,7 @@ public:
 
     virtual ~TemplateCmdHandlerRepository();
 private:
-    std::list<TemplateCmdHandler*> handlersM;
+    list<TemplateCmdHandler*> handlersM;
     bool handlerListSortedM;
     void checkHandlerListSorted();
 

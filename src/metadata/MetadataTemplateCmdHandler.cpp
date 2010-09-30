@@ -38,9 +38,15 @@
     #include "wx/wx.h"
 #endif
 
+#include "core/StringUtils.h"
 #include "core/TemplateProcessor.h"
+#include "metadata/privilege.h"
+#include "metadata/procedure.h"
 #include "metadata/relation.h"
+#include "metadata/role.h"
 
+//-----------------------------------------------------------------------------
+using namespace std;
 //-----------------------------------------------------------------------------
 class MetadataTemplateCmdHandler: public TemplateCmdHandler
 {
@@ -82,9 +88,94 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                 processedText += newText;
             }
         }
+
+        // {%foreach:privilegeitem:<separator>:<type>:<text>%}
+        else if ((cmdParams[0] == wxT("privilegeitem")) && (cmdParams.Count() >= 4))
+        {
+            Privilege* p = dynamic_cast<Privilege*>(object);
+            if (!p)
+                return;
+            PrivilegeItems list;
+            p->getPrivilegeItems(cmdParams[2], list);
+            bool firstItem = true;
+            for (PrivilegeItems::iterator it = list.begin(); it != list.end(); ++it)
+            {
+                wxString newText;
+                tp->internalProcessTemplateText(newText, cmdParams[3], &(*it));
+                if ((!firstItem) && (!newText.IsEmpty()))
+                    processedText += sep;                    
+                if (!newText.IsEmpty())
+                    firstItem = false;
+                processedText += newText;
+            }
+        }
+
+        // {%foreach:privilege:<separator>:<text>%}
+        else if (cmdParams[0] == wxT("privilege"))
+        {
+            Relation* rel = dynamic_cast<Relation*>(object);
+            Procedure* proc = dynamic_cast<Procedure*>(object);
+            Role* role = dynamic_cast<Role*>(object);
+            std::vector<Privilege>* p = 0;
+            if (rel)
+                p = rel->getPrivileges();
+            if (proc)
+                p = proc->getPrivileges();
+            if (role)
+                p = role->getPrivileges();
+            if (!p)
+                return;
+            for (std::vector<Privilege>::iterator it = p->begin(); it != p->end(); ++it)
+                tp->internalProcessTemplateText(processedText, cmdParams.all(2), &(*it));
+        }
+
         // add more collections here.
         else
             return;
     }
+
+    else if (cmdName == wxT("privilegeinfo") && (cmdParams.Count() > 0)) 
+    {
+        Privilege* p = dynamic_cast<Privilege*>(object);
+        if (!p)
+            return;
+            
+        if (cmdParams[0] == wxT("grantee_name"))
+            processedText += tp->escapeChars(p->getGrantee());
+    }
+
+    // {%privilegeitemcount:type%}
+    else if ((cmdName == wxT("privilegeitemcount")) && (cmdParams.Count() >= 1))
+    {
+        Privilege* p = dynamic_cast<Privilege*>(object);
+        if (!p)
+            return;
+        PrivilegeItems list;
+        p->getPrivilegeItems(cmdParams[0], list);
+        processedText << list.size();
+    }
+    
+    // {%privilegeiteminfo:property%}
+    else if ((cmdName == wxT("privilegeiteminfo")) && (cmdParams.Count() >= 1))
+    {
+        PrivilegeItem* pi = dynamic_cast<PrivilegeItem*>(object);
+        if (!pi)
+            return;
+        
+        if (cmdParams[0] == wxT("grantor"))
+            processedText += pi->grantor;
+        else if (cmdParams[0] == wxT("grant_option"))
+            processedText += getBooleanAsString(pi->grantOption);
+        else if (cmdParams[0] == wxT("columns"))
+        {
+            for (vector<wxString>::iterator it = pi->columns.begin();
+                it != pi->columns.end(); ++it)
+            {
+                if (it != pi->columns.begin())
+                    processedText += wxT(",");
+                processedText += (*it);
+            }
+        }
+    }    
 }
 //-----------------------------------------------------------------------------

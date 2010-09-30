@@ -17,14 +17,29 @@
       <td><b><font color="white">Delete</font></b></td>
       <td><b><font color="white">Reference</font></b></td>
     </tr>
-    {%privileges:
+    {%foreach:privilege::
     <tr bgcolor="{%varcolor:#DDDDFF:#CCCCFF%}">
-      <td nowrap valign="top">{%grantee_name%}</td>
-      <td nowrap valign="top" align="center">{%privilege:SELECT%}</td>
-      <td nowrap valign="top" align="center">{%privilege:INSERT%}</td>
-      <td nowrap valign="top" align="center">{%privilege:UPDATE%}</td>
-      <td nowrap valign="top" align="center">{%privilege:DELETE%}</td>
-      <td nowrap valign="top" align="center">{%privilege:REFERENCES%}</td>
+      <td nowrap valign="top">{%privilegeinfo:grantee_name%}</td>
+      <td nowrap valign="top" align="center">{%foreach:privilegeitem:<br>:SELECT:<a href="info://Granted by {%privilegeiteminfo:grantor%}">
+          <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}
+          {%ifeq:{%privilegeitemcount:SELECT%}:0:<img src="{%template_root%}redx.png">%}
+      </td>
+      <td nowrap valign="top" align="center">{%foreach:privilegeitem:<br>:INSERT:<a href="info://Granted by {%privilegeiteminfo:grantor%}">
+          <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}
+          {%ifeq:{%privilegeitemcount:INSERT%}:0:<img src="{%template_root%}redx.png">%}
+      </td>
+      <td nowrap valign="top" align="center">{%foreach:privilegeitem:<br>:UPDATE:<a href="info://Granted by {%privilegeiteminfo:grantor%}">
+          <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}
+          {%ifeq:{%privilegeitemcount:UPDATE%}:0:<img src="{%template_root%}redx.png">%}
+      </td>
+      <td nowrap valign="top" align="center">{%foreach:privilegeitem:<br>:DELETE:<a href="info://Granted by {%privilegeiteminfo:grantor%}">
+          <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}
+          {%ifeq:{%privilegeitemcount:DELETE%}:0:<img src="{%template_root%}redx.png">%}
+      </td>
+      <td nowrap valign="top" align="center">{%foreach:privilegeitem:<br>:REFERENCES:<a href="info://Granted by {%privilegeiteminfo:grantor%}">
+          <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}
+          {%ifeq:{%privilegeitemcount:REFERENCES%}:0:<img src="{%template_root%}redx.png">%}
+      </td>
     </tr>%}
   </tbody>
 </table>

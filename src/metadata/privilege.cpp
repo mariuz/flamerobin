@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -78,8 +78,8 @@ void Privilege::addPrivilege(char privilege, const wxString& grantor,
 
     // iterate all of this type
     PMap::iterator it;
-    for (it = privilegesM.lower_bound(p);
-        it != privilegesM.upper_bound(p); ++it)
+    for (it = privilegeItemsM.lower_bound(p);
+        it != privilegeItemsM.upper_bound(p); ++it)
     {
         if ((*it).second.grantor == grantor &&
             (*it).second.grantOption == withGrantOption)    // got it
@@ -98,7 +98,7 @@ void Privilege::addPrivilege(char privilege, const wxString& grantor,
 
     // not found, so add it
     PrivilegeItem pi(grantor, withGrantOption, field);
-    privilegesM.insert(std::pair<wxString,PrivilegeItem>(p,pi));
+    privilegeItemsM.insert(std::pair<wxString,PrivilegeItem>(p,pi));
 }
 //-----------------------------------------------------------------------------
 wxString granteeTypeToString(int type)
@@ -117,8 +117,8 @@ wxString granteeTypeToString(int type)
 wxString Privilege::getSql(bool withGrantOption) const
 {
     wxString ret;
-    for (PMap::const_iterator c = privilegesM.begin();
-        c != privilegesM.end(); ++c)
+    for (PMap::const_iterator c = privilegeItemsM.begin();
+        c != privilegeItemsM.end(); ++c)
     {
         if ((*c).second.grantOption != withGrantOption)
             continue;
@@ -164,8 +164,8 @@ wxString Privilege::getSql() const
         return getSql(true) + getSql(false);
 
     wxString ret = wxT("GRANT ") + r->getQuotedName() + wxT(" TO ") + granteeM;
-    for (PMap::const_iterator c = privilegesM.begin();
-        c != privilegesM.end(); ++c)
+    for (PMap::const_iterator c = privilegeItemsM.begin();
+        c != privilegeItemsM.end(); ++c)
     {
         if ((*c).second.grantOption)
         {
@@ -185,12 +185,12 @@ wxString Privilege::getGrantee() const
     return gt + granteeM;
 }
 //-----------------------------------------------------------------------------
-void Privilege::getPrivileges(const wxString& type,
+void Privilege::getPrivilegeItems(const wxString& type,
     std::vector<PrivilegeItem>& list) const
 {
     PMap::const_iterator it;
-    for (it = privilegesM.lower_bound(type);
-        it != privilegesM.upper_bound(type); ++it)
+    for (it = privilegeItemsM.lower_bound(type);
+        it != privilegeItemsM.upper_bound(type); ++it)
     {
         list.push_back((*it).second);
     }

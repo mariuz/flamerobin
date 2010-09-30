@@ -13,10 +13,13 @@
       <td><b><font color="white">Grantee</font></b></td>
       <td><b><font color="white">MEMBERSHIP</font></b></td>
     </tr>
-    {%privileges:
+    {%foreach:privilege::
     <tr bgcolor="{%varcolor:#DDDDFF:#CCCCFF%}">
-      <td nowrap valign="top">{%grantee_name%}</td>
-      <td nowrap valign="top" align="center">{%privilege:MEMBER OF%}</td>
+      <td nowrap valign="top">{%privilegeinfo:grantee_name%}</td>
+      <td nowrap valign="top" align="center">{%foreach:privilegeitem:<br>:MEMBER OF:<a href="info://Granted by {%privilegeiteminfo:grantor%}">
+          <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}
+          {%ifeq:{%privilegeitemcount:MEMBER OF%}:0:<img src="{%template_root%}redx.png">%}
+      </td>
     </tr>%}
   </tbody>
 </table>

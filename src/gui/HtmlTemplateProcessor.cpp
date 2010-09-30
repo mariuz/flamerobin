@@ -41,8 +41,10 @@
 #include "core/StringUtils.h"
 #include "frutils.h"
 #include "metadata/metadataitem.h"
-#include "metadata/privilege.h"
 #include "HtmlTemplateProcessor.h"
+
+//-----------------------------------------------------------------------------
+using namespace std;
 //-----------------------------------------------------------------------------
 HtmlTemplateProcessor::HtmlTemplateProcessor(MetadataItem *m, wxWindow *window)
     : TemplateProcessor(m, window)
@@ -56,7 +58,7 @@ void HtmlTemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams c
 
 	if (cmdName == wxT("header") && !cmdParams.empty())  // include another file
     {
-        std::vector<wxString> pages;            // pages this object has
+        vector<wxString> pages;            // pages this object has
         pages.push_back(wxT("Summary"));
         if (object->getType() == ntRole)        // special case, roles
             pages.push_back(wxT("Privileges")); // don't have dependencies
@@ -94,7 +96,7 @@ void HtmlTemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams c
             }
             else
                 page.Clear();
-            for (std::vector<wxString>::iterator it = pages.begin(); it !=
+            for (vector<wxString>::iterator it = pages.begin(); it !=
                 pages.end(); ++it)
             {
                 if (part.Find(wxT(">")+(*it)+wxT("<")) == -1)
@@ -111,64 +113,6 @@ void HtmlTemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams c
             }
 		}
 	}
-
-    // TODO: get HTML out of here.
-	else if (cmdName == wxT("privilege") && !cmdParams.empty())
-    {
-        Privilege* p = dynamic_cast<Privilege*>(object);
-        if (!p)
-            return;
-        wxString okimage = wxT("<img src=\"") +
-            getTemplatePath() + wxT("ok.png\">");
-        wxString ok2image = wxT("<img src=\"") +
-            getTemplatePath() + wxT("ok2.png\">");
-        // see which type
-        std::vector<PrivilegeItem> list;
-        p->getPrivileges(cmdParams.all(), list);
-        if (list.size())
-        {
-            bool brnext = false;
-            for (std::vector<PrivilegeItem>::iterator it = list.begin(); it !=
-                list.end(); ++it)
-            {
-                if (brnext)
-                {
-                    processedText += wxT("<br>");
-                    brnext = false;
-                }
-
-                // wxHTML doesn't support TITLE or ALT property of IMG tag so
-                // we use our custom 'link hower' handler to show it
-                processedText += wxT("<a href=\"info://Granted by ") + (*it).grantor
-                    + wxT("\">");
-
-                processedText += wxT("<img src=\"") + getTemplatePath();
-                if ((*it).grantOption)
-                    processedText += wxT("ok2.png\"");
-                else
-                    processedText += wxT("ok.png\"");
-                processedText += wxT("\"></a>");
-
-                if ((*it).columns.size())
-                {
-                    processedText += wxT(" <font size=-1>");
-                    for (std::vector<wxString>::iterator i =
-                        (*it).columns.begin(); i != (*it).columns.end(); ++i)
-                    {
-                        if (i != (*it).columns.begin())
-                            processedText += wxT(",");
-                        processedText += (*i);
-                    }
-                    processedText += wxT("</font>");
-                    brnext = true;
-                }
-            }
-        }
-        else
-        {
-            processedText += wxT("<img src=\"") + getTemplatePath() + wxT("redx.png\">");
-        }
-    }
 }
 //-----------------------------------------------------------------------------
 wxString HtmlTemplateProcessor::escapeChars(const wxString& input, bool processNewlines)
