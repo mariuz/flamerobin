@@ -168,9 +168,10 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent, SharedRootPtr root)
         for (SharedDatabases::iterator itdb = (*its)->begin();
             itdb != (*its)->end(); ++itdb)
         {   // we store DB pointer, so we observe in case database is removed
+            Database* db = (*itdb).get();
             choice_database->Append((*its)->getName_() + wxT("::") +
-                (*itdb)->getName_(), (void *)(&(*itdb)));
-            (*itdb)->attachObserver(this);
+                db->getName_(), (void*)db);
+            db->attachObserver(this);
         }
     }
     choice_database->SetSelection(0);
@@ -682,17 +683,18 @@ void AdvancedSearchFrame::OnButtonAddFieldClick(wxCommandEvent& WXUNUSED(event))
     textctrl_field->Clear();
 }
 //-----------------------------------------------------------------------------
-void AdvancedSearchFrame::OnButtonAddDatabaseClick(wxCommandEvent& WXUNUSED(event))
+void AdvancedSearchFrame::OnButtonAddDatabaseClick(
+    wxCommandEvent& WXUNUSED(event))
 {
     if (choice_database->GetSelection() == 0)   // all connected databases
     {
-        for (int i = 1; i < (int)choice_database->GetCount(); ++i)
+        for (size_t i = 1; i < choice_database->GetCount(); ++i)
         {
-            Database *db = (Database *)choice_database->GetClientData(i);
+            Database* db = (Database *)choice_database->GetClientData(i);
             if (db && db->isConnected())
             {
                 addCriteria(CriteriaItem::ctDB, choice_database->GetString(i),
-                db);
+                    db);
             }
         }
     }
