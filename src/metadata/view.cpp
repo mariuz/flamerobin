@@ -95,7 +95,7 @@ wxString View::getCreateSql()
 wxString View::getCreateSqlTemplate() const
 {
     StatementBuilder sb;
-    sb << kwCREATE << ' ' << kwVIEW << wxT("name ( view_column, ...)")
+    sb << kwCREATE << ' ' << kwVIEW << wxT(" name ( view_column, ...)")
         << StatementBuilder::NewLine << kwAS << StatementBuilder::NewLine
         << wxT("/* write select statement here */")
         << StatementBuilder::NewLine
