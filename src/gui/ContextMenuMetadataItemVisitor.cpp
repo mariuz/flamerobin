@@ -57,7 +57,9 @@ ContextMenuMetadataItemVisitor::~ContextMenuMetadataItemVisitor()
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitColumn(Column& column)
 {
-    addRegularObjectMenu(column, false, true);
+    addGenerateScriptMenu(column, false, true);
+    addDropItem(column, false, false);
+    addPropertiesItem(true);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitDatabase(Database&)
@@ -94,44 +96,42 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database&)
 
     menuM->AppendSeparator();
     addRefreshItem();
+    menuM->AppendSeparator();
     menuM->Append(Cmds::Menu_DatabaseProperties, _("Data&base Properties"));
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitDomain(Domain& domain)
 {
+    addGenerateScriptMenu(domain, false, true);
     addAlterItem();
-    menuM->AppendSeparator();
-    addDropItem();
-    menuM->AppendSeparator();
+    addDropItem(domain, false, true);
     addRefreshItem();
-    addPropertiesItem();
-    addGenerateScriptMenu(domain);
+    addPropertiesItem(true);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitException(Exception& exception)
 {
-    addDropItem();
-    menuM->AppendSeparator();
+    addGenerateScriptMenu(exception, false, true);
+    addDropItem(exception, false, true);
     addRefreshItem();
-    addPropertiesItem();
-    addGenerateScriptMenu(exception);
+    addPropertiesItem(true);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitFunction(Function& function)
 {
-    addRegularObjectMenu(function, false, true);
+    addGenerateScriptMenu(function, false, true);
+    addDropItem(function, false, false);
+    addPropertiesItem(true);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitGenerator(Generator& generator)
 {
     menuM->Append(Cmds::Menu_ShowGeneratorValue, _("Show &value"));
     menuM->Append(Cmds::Menu_SetGeneratorValue, _("&Set value..."));
-    menuM->AppendSeparator();
-    addDropItem();
-    menuM->AppendSeparator();
+    addGenerateScriptMenu(generator, true, true);
+    addDropItem(generator, false, true);
     addRefreshItem();
-    addPropertiesItem();
-    addGenerateScriptMenu(generator);
+    addPropertiesItem(true);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitMetadataItem(
@@ -168,14 +168,18 @@ void ContextMenuMetadataItemVisitor::visitMetadataItem(
 void ContextMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
 {
     menuM->Append(Cmds::Menu_ExecuteProcedure, _("&Execute..."));
-    menuM->AppendSeparator();
-    addSelectMenu(false, false); // selectable?, can not add columns
-    addRegularObjectMenu(procedure, true, true); // add Alter and Drop menu
+    addShowColumnsItem();
+    addGenerateScriptMenu(procedure, false, true);
+    addAlterItem();
+    addDropItem(procedure, false, false);
+    addPropertiesItem(true);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitRole(Role& role)
 {
-    addRegularObjectMenu(role, false, true);
+    addGenerateScriptMenu(role, false, true);
+    addDropItem(role, false, false);
+    addPropertiesItem(true);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitRoot(Root&)
@@ -203,30 +207,36 @@ void ContextMenuMetadataItemVisitor::visitServer(Server&)
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitTable(Table& table)
 {
-    // When a system table object is visited, only the select and regular object
-    // menus should be used. No modifications should be made to system objects,
-    // at least not from FR gui.
-    bool isSystem = table.isSystem();
-    if (!isSystem)
-    {
-        menuM->Append(Cmds::Menu_Insert, _("&Insert into ..."));
+    addSelectItem(false);
+    if (!table.isSystem())
+        menuM->Append(Cmds::Menu_Insert, _("&Insert into"));
+    addGenerateScriptMenu(table, true, true);
+    if (!table.isSystem())
+        menuM->Append(Cmds::Menu_AddColumn, _("&Add column..."));
+    addShowColumnsItem();
+    if (!table.isSystem())
         menuM->Append(Cmds::Menu_CreateTriggerForTable,
             _("Create new &trigger..."));
-    }
-
-    addSelectMenu(true, !isSystem); // selectable, can add columns if user
-    addRegularObjectMenu(table, false, !isSystem);
+    addDropItem(table, false, true);
+    addPropertiesItem(false);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitTrigger(Trigger& trigger)
 {
-    addRegularObjectMenu(trigger, true, true); // add Alter and Drop menu
+    addGenerateScriptMenu(trigger, false, true);
+    addAlterItem();
+    addDropItem(trigger, false, false);
+    addPropertiesItem(true);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitView(View& view)
 {
-    addSelectMenu(true, false); // selectable, can not add columns
-    addRegularObjectMenu(view, true, true); // add Alter and Drop menu
+    addSelectItem(false);
+    addShowColumnsItem();
+    addGenerateScriptMenu(view, false, true);
+    addAlterItem();
+    addDropItem(view, false, false);
+    addPropertiesItem(true);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::addAlterItem()
@@ -234,14 +244,23 @@ void ContextMenuMetadataItemVisitor::addAlterItem()
     menuM->Append(Cmds::Menu_AlterObject, _("&Alter..."));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addDropItem()
+void ContextMenuMetadataItemVisitor::addDropItem(MetadataItem& metadataItem,
+    bool separatorBefore, bool separatorAfter)
 {
-    // no ellipsies, as no additional data is needed to complete the action
-    menuM->Append(Cmds::Menu_DropObject, _("Dr&op"));
+    if (!metadataItem.isSystem())
+    {
+        if (separatorBefore)
+            menuM->AppendSeparator();
+        menuM->Append(Cmds::Menu_DropObject, _("Dr&op"));
+        if (separatorAfter)
+            menuM->AppendSeparator();
+    }
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addPropertiesItem()
+void ContextMenuMetadataItemVisitor::addPropertiesItem(bool separatorBefore)
 {
+    if (separatorBefore)
+        menuM->AppendSeparator();
     menuM->Append(Cmds::Menu_ObjectProperties, _("P&roperties"));
 }
 //-----------------------------------------------------------------------------
@@ -250,49 +269,21 @@ void ContextMenuMetadataItemVisitor::addRefreshItem()
     menuM->Append(Cmds::Menu_ObjectRefresh, _("Re&fresh"));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addSelectMenu(bool isSelectable,
-    bool canAddColumn)
+void ContextMenuMetadataItemVisitor::addSelectItem(bool separatorAfter)
 {
-    unsigned added = 0;
-    if (isSelectable)
-    {
-        menuM->Append(Cmds::Menu_BrowseColumns, _("&Select from ..."));
-        ++added;
-    }
-    if (config().get(wxT("ShowColumnsInTree"), true))
-    {
-        if (added)
-            menuM->AppendSeparator(); // between "Select from" and this one
-        menuM->Append(Cmds::Menu_LoadColumnsInfo, _("Show columns in&fo"));
-        ++added;
-    }
-    if (canAddColumn)
-    {
-        if (isSelectable && added < 2)
-            menuM->AppendSeparator(); // between "Select from" and this one
-        menuM->Append(Cmds::Menu_AddColumn, _("&Add column..."));
-        ++added;
-    }
-    if (added)
+    menuM->Append(Cmds::Menu_BrowseColumns, _("&Select from"));
+    if (separatorAfter)
         menuM->AppendSeparator();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addRegularObjectMenu(
-    MetadataItem& metadataItem, bool addAlter, bool addDrop)
+void ContextMenuMetadataItemVisitor::addShowColumnsItem()
 {
-    if (!metadataItem.isSystem())
-    {
-        if (addAlter)
-            menuM->Append(Cmds::Menu_AlterObject, _("&Alter..."));
-        if (addDrop)
-            menuM->Append(Cmds::Menu_DropObject, _("Dr&op..."));
-        menuM->Append(Cmds::Menu_ObjectProperties, _("Show P&roperties"));
-    }
-    addGenerateScriptMenu(metadataItem);
+    if (config().get(wxT("ShowColumnsInTree"), true))
+        menuM->Append(Cmds::Menu_LoadColumnsInfo, _("Show columns in&fo"));
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::addGenerateScriptMenu(
-    MetadataItem& metadataItem)
+    MetadataItem& metadataItem, bool separatorBefore, bool separatorAfter)
 {
     wxMenu *templateMenu = new wxMenu();
 
@@ -308,8 +299,12 @@ void ContextMenuMetadataItemVisitor::addGenerateScriptMenu(
     }
     if (templatesExist)
     {
-        menuM->Append(Cmds::Menu_TemplateFirst, _("&Generate script..."),
+        if (separatorBefore)
+            menuM->AppendSeparator();
+        menuM->Append(Cmds::Menu_TemplateFirst, _("&Generate SQL"),
             templateMenu);
+        if (separatorAfter)
+            menuM->AppendSeparator();
     }
 }
 //-----------------------------------------------------------------------------

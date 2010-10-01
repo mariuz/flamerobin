@@ -56,15 +56,16 @@ public:
 
 private:
     wxMenu* menuM;
-
+	// helper member functions to add menu items
+    void addSelectItem(bool separatorAfter);
     void addAlterItem();
-    void addDropItem();
-    void addPropertiesItem();
+    void addDropItem(MetadataItem& metadataItem, bool separatorBefore,
+        bool separatorAfter);
+    void addPropertiesItem(bool separatorBefore);
     void addRefreshItem();
-
-    void addRegularObjectMenu(MetadataItem& metadataItem, bool addAlter, bool addDrop);
-    void addSelectMenu(bool isSelectable, bool canAddColumn);
-    void addGenerateScriptMenu(MetadataItem& metadataItem);
+    void addShowColumnsItem();
+    void addGenerateScriptMenu(MetadataItem& metadataItem,
+        bool separatorBefore, bool separatorAfter);
 };
 //-----------------------------------------------------------------------------
 #endif //FR_CONTEXTMENUMETADATAITEMVISITOR_H
