@@ -57,9 +57,14 @@ ContextMenuMetadataItemVisitor::~ContextMenuMetadataItemVisitor()
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitColumn(Column& column)
 {
-    addGenerateScriptMenu(column, false, true);
-    addDropItem(column, false, false);
-    addPropertiesItem(true);
+    if (!column.isSystem())
+    {
+        addGenerateScriptMenu(column);
+        addSeparator();
+        addDropItem(column);
+        addSeparator();
+        addPropertiesItem();
+    }
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitDatabase(Database&)
@@ -68,7 +73,8 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database&)
     menuM->Append(Cmds::Menu_ConnectAs, _("Connect &as..."));
     menuM->Append(Cmds::Menu_Disconnect, _("&Disconnect"));
     menuM->Append(Cmds::Menu_Reconnect, _("Reconnec&t"));
-    menuM->Append(Cmds::Menu_Query, _("&Run a query..."));
+    menuM->AppendSeparator();
+    menuM->Append(Cmds::Menu_Query, _("Execute &SQL statements"));
     menuM->AppendSeparator();
 
     wxMenu* actions = new wxMenu();
@@ -77,61 +83,73 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database&)
     wxMenu* advanced = new wxMenu();
     menuM->Append(0, _("Ad&vanced"), advanced);
 
-    menuM->Append(Cmds::Menu_DatabaseRegistrationInfo, _("Database registration &info..."));
+    menuM->Append(Cmds::Menu_DatabaseRegistrationInfo,
+        _("Database registration &info"));
     menuM->Append(Cmds::Menu_UnRegisterDatabase, _("&Unregister database"));
 
     // the actions submenu
-    actions->Append(Cmds::Menu_Backup, _("&Backup database..."));
-    actions->Append(Cmds::Menu_Restore, _("Rest&ore database..."));
+    actions->Append(Cmds::Menu_Backup, _("&Backup database"));
+    actions->Append(Cmds::Menu_Restore, _("Rest&ore database"));
     actions->AppendSeparator();
     actions->Append(Cmds::Menu_RecreateDatabase, _("Recreate empty database"));
     actions->Append(Cmds::Menu_DropDatabase, _("Drop database"));
 
     // the advanced submenu
-    advanced->Append(Cmds::Menu_ShowConnectedUsers, _("&Show connected users"));
+    advanced->Append(Cmds::Menu_ShowConnectedUsers,
+        _("&Show connected users"));
     advanced->Append(Cmds::Menu_MonitorEvents, _("&Monitor events"));
-    advanced->Append(Cmds::Menu_DatabasePreferences, _("Database &preferences..."));
-    advanced->Append(Cmds::Menu_GenerateData, _("&Test data generator..."));
-    advanced->Append(Cmds::Menu_ExtractDatabaseDDL, _("&Extract metadata DDL..."));
+    advanced->Append(Cmds::Menu_DatabasePreferences,
+        _("Database &preferences..."));
+    advanced->Append(Cmds::Menu_GenerateData, _("&Test data generator"));
+    advanced->Append(Cmds::Menu_ExtractDatabaseDDL,
+        _("&Extract metadata DDL"));
 
     menuM->AppendSeparator();
     addRefreshItem();
-    menuM->AppendSeparator();
-    menuM->Append(Cmds::Menu_DatabaseProperties, _("Data&base Properties"));
+    addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitDomain(Domain& domain)
 {
-    addGenerateScriptMenu(domain, false, true);
-    addAlterItem();
-    addDropItem(domain, false, true);
+    addGenerateScriptMenu(domain);
+    addSeparator();
+    addAlterItem(domain);
+    addDropItem(domain);
+    addSeparator();
     addRefreshItem();
-    addPropertiesItem(true);
+    addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitException(Exception& exception)
 {
-    addGenerateScriptMenu(exception, false, true);
-    addDropItem(exception, false, true);
+    addGenerateScriptMenu(exception);
+    addSeparator();
+    addDropItem(exception);
+    addSeparator();
     addRefreshItem();
-    addPropertiesItem(true);
+    addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitFunction(Function& function)
 {
-    addGenerateScriptMenu(function, false, true);
-    addDropItem(function, false, false);
-    addPropertiesItem(true);
+    addGenerateScriptMenu(function);
+    addSeparator();
+    addDropItem(function);
+    addSeparator();
+    addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitGenerator(Generator& generator)
 {
     menuM->Append(Cmds::Menu_ShowGeneratorValue, _("Show &value"));
     menuM->Append(Cmds::Menu_SetGeneratorValue, _("&Set value..."));
-    addGenerateScriptMenu(generator, true, true);
-    addDropItem(generator, false, true);
+    addSeparator();
+    addGenerateScriptMenu(generator);
+    addSeparator();
+    addDropItem(generator);
+    addSeparator();
     addRefreshItem();
-    addPropertiesItem(true);
+    addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitMetadataItem(
@@ -140,14 +158,14 @@ void ContextMenuMetadataItemVisitor::visitMetadataItem(
     switch (metadataItem.getType())
     {
         case ntFunctions:
-            menuM->Append(Cmds::Menu_CreateObject, _("&Declare new..."));
-            menuM->AppendSeparator();
+            menuM->Append(Cmds::Menu_CreateObject, _("Declare &new"));
+            addSeparator();
             addRefreshItem();
             break;
         case ntGenerators:
             menuM->Append(Cmds::Menu_ShowAllGeneratorValues,
                 _("Show &all values"));
-            menuM->AppendSeparator();
+            addSeparator();
             // fall through
         case ntTables:
         case ntViews:
@@ -156,8 +174,8 @@ void ContextMenuMetadataItemVisitor::visitMetadataItem(
         case ntDomains:
         case ntRoles:
         case ntExceptions:
-            menuM->Append(Cmds::Menu_CreateObject, _("Create &new..."));
-            menuM->AppendSeparator();
+            menuM->Append(Cmds::Menu_CreateObject, _("Create &new"));
+            addSeparator();
             // fall through
         case ntSysTables:
             addRefreshItem();
@@ -167,100 +185,125 @@ void ContextMenuMetadataItemVisitor::visitMetadataItem(
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
 {
-    menuM->Append(Cmds::Menu_ExecuteProcedure, _("&Execute..."));
+    menuM->Append(Cmds::Menu_ExecuteProcedure, _("&Execute"));
     addShowColumnsItem();
-    addGenerateScriptMenu(procedure, false, true);
-    addAlterItem();
-    addDropItem(procedure, false, false);
-    addPropertiesItem(true);
+    addGenerateScriptMenu(procedure);
+    addSeparator();
+    addAlterItem(procedure);
+    addDropItem(procedure);
+    addSeparator();
+    addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitRole(Role& role)
 {
-    addGenerateScriptMenu(role, false, true);
-    addDropItem(role, false, false);
-    addPropertiesItem(true);
+    addGenerateScriptMenu(role);
+    addSeparator();
+    addDropItem(role);
+    addSeparator();
+    addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitRoot(Root&)
 {
-    menuM->Append(Cmds::Menu_RegisterServer, _("&Register server..."));
-    menuM->AppendSeparator();
-    menuM->Append(wxID_ABOUT, _("&About FlameRobin..."));
+    menuM->Append(Cmds::Menu_RegisterServer, _("&Register server"));
+    addSeparator();
+    menuM->Append(wxID_ABOUT, _("&About FlameRobin"));
     menuM->Append(wxID_PREFERENCES, _("&Preferences..."));
-    menuM->AppendSeparator();
+    addSeparator();
     menuM->Append(wxID_EXIT, _("&Quit"));
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitServer(Server&)
 {
-    menuM->Append(Cmds::Menu_RegisterDatabase, _("&Register existing database..."));
-    menuM->Append(Cmds::Menu_CreateDatabase, _("Create &new database..."));
-    menuM->Append(Cmds::Menu_RestoreIntoNew, _("Restore bac&kup into new database..."));
-    menuM->AppendSeparator();
+    menuM->Append(Cmds::Menu_RegisterDatabase, 
+        _("&Register existing database"));
+    menuM->Append(Cmds::Menu_CreateDatabase, _("Create &new database"));
+    menuM->Append(Cmds::Menu_RestoreIntoNew,
+        _("Restore bac&kup into new database"));
+    addSeparator();
     menuM->Append(Cmds::Menu_GetServerVersion, _("Retrieve server &version"));
-    menuM->Append(Cmds::Menu_ManageUsers, _("&Manage users..."));
-    menuM->AppendSeparator();
+    menuM->Append(Cmds::Menu_ManageUsers, _("&Manage users"));
+    addSeparator();
     menuM->Append(Cmds::Menu_UnRegisterServer, _("&Unregister server"));
-    menuM->Append(Cmds::Menu_ServerProperties, _("Server registration &info..."));
+    menuM->Append(Cmds::Menu_ServerProperties,
+        _("Server registration &info"));
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitTable(Table& table)
 {
-    addSelectItem(false);
+    addSelectItem();
     if (!table.isSystem())
         menuM->Append(Cmds::Menu_Insert, _("&Insert into"));
-    addGenerateScriptMenu(table, true, true);
+    addSeparator();
+    addGenerateScriptMenu(table);
+    addSeparator();
     if (!table.isSystem())
         menuM->Append(Cmds::Menu_AddColumn, _("&Add column..."));
     addShowColumnsItem();
     if (!table.isSystem())
-        menuM->Append(Cmds::Menu_CreateTriggerForTable,
-            _("Create new &trigger..."));
-    addDropItem(table, false, true);
-    addPropertiesItem(false);
+    {
+        menuM->Append(Cmds::Menu_CreateTriggerForTable, 
+        _("Create new &trigger"));
+    }
+    addDropItem(table);
+    addSeparator();
+    addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitTrigger(Trigger& trigger)
 {
-    addGenerateScriptMenu(trigger, false, true);
-    addAlterItem();
-    addDropItem(trigger, false, false);
-    addPropertiesItem(true);
+    addGenerateScriptMenu(trigger);
+    addSeparator();
+    addAlterItem(trigger);
+    addDropItem(trigger);
+    addSeparator();
+    addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitView(View& view)
 {
-    addSelectItem(false);
+    addSelectItem();
     addShowColumnsItem();
-    addGenerateScriptMenu(view, false, true);
-    addAlterItem();
-    addDropItem(view, false, false);
-    addPropertiesItem(true);
+    addGenerateScriptMenu(view);
+    addSeparator();
+    addAlterItem(view);
+    addDropItem(view);
+    addSeparator();
+    addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addAlterItem()
-{
-    menuM->Append(Cmds::Menu_AlterObject, _("&Alter..."));
-}
-//-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addDropItem(MetadataItem& metadataItem,
-    bool separatorBefore, bool separatorAfter)
+void ContextMenuMetadataItemVisitor::addAlterItem(MetadataItem& metadataItem)
 {
     if (!metadataItem.isSystem())
-    {
-        if (separatorBefore)
-            menuM->AppendSeparator();
-        menuM->Append(Cmds::Menu_DropObject, _("Dr&op"));
-        if (separatorAfter)
-            menuM->AppendSeparator();
-    }
+        menuM->Append(Cmds::Menu_AlterObject, _("&Alter"));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addPropertiesItem(bool separatorBefore)
+void ContextMenuMetadataItemVisitor::addDropItem(MetadataItem& metadataItem)
 {
-    if (separatorBefore)
-        menuM->AppendSeparator();
+    if (!metadataItem.isSystem())
+        menuM->Append(Cmds::Menu_DropObject, _("Dr&op"));
+}
+//-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::addGenerateScriptMenu(
+    MetadataItem& metadataItem)
+{
+    SqlTemplateManager tm(metadataItem);
+    if (tm.descriptorsBegin() == tm.descriptorsEnd())
+        return;
+
+    int i = (int)Cmds::Menu_TemplateFirst;
+    wxMenu* templateMenu = new wxMenu();
+    for (TemplateDescriptorList::const_iterator it = tm.descriptorsBegin();
+        it != tm.descriptorsEnd(); ++it, ++i)
+    {
+        templateMenu->Append(i, (*it)->getMenuCaption());
+    }
+    menuM->Append(Cmds::Menu_TemplateFirst, _("&Generate SQL"), templateMenu);
+}
+//-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::addPropertiesItem()
+{
     menuM->Append(Cmds::Menu_ObjectProperties, _("P&roperties"));
 }
 //-----------------------------------------------------------------------------
@@ -269,11 +312,9 @@ void ContextMenuMetadataItemVisitor::addRefreshItem()
     menuM->Append(Cmds::Menu_ObjectRefresh, _("Re&fresh"));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addSelectItem(bool separatorAfter)
+void ContextMenuMetadataItemVisitor::addSelectItem()
 {
     menuM->Append(Cmds::Menu_BrowseColumns, _("&Select from"));
-    if (separatorAfter)
-        menuM->AppendSeparator();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::addShowColumnsItem()
@@ -282,29 +323,10 @@ void ContextMenuMetadataItemVisitor::addShowColumnsItem()
         menuM->Append(Cmds::Menu_LoadColumnsInfo, _("Show columns in&fo"));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addGenerateScriptMenu(
-    MetadataItem& metadataItem, bool separatorBefore, bool separatorAfter)
+void ContextMenuMetadataItemVisitor::addSeparator()
 {
-    wxMenu *templateMenu = new wxMenu();
-
-    SqlTemplateManager tm(metadataItem);
-        
-    bool templatesExist = false;
-    int i = (int)Cmds::Menu_TemplateFirst;
-    for (TemplateDescriptorList::const_iterator it = tm.descriptorsBegin();
-        it != tm.descriptorsEnd(); ++it, ++i)
-    {
-        templateMenu->Append(i, (*it)->getMenuCaption());
-        templatesExist = true;
-    }
-    if (templatesExist)
-    {
-        if (separatorBefore)
-            menuM->AppendSeparator();
-        menuM->Append(Cmds::Menu_TemplateFirst, _("&Generate SQL"),
-            templateMenu);
-        if (separatorAfter)
-            menuM->AppendSeparator();
-    }
+    size_t count = menuM->GetMenuItemCount();
+    if (count > 0 && !menuM->FindItemByPosition(count - 1)->IsSeparator())
+        menuM->AppendSeparator();
 }
 //-----------------------------------------------------------------------------

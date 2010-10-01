@@ -210,10 +210,10 @@ void MainFrame::buildMainMenu()
     wxMenu* serverMenu = new wxMenu();
     serverMenu->Append(Cmds::Menu_RegisterServer, _("&Register server..."));
     serverMenu->Append(Cmds::Menu_UnRegisterServer, _("&Unregister server"));
-    serverMenu->Append(Cmds::Menu_ServerProperties, _("Server registration &info..."));
+    serverMenu->Append(Cmds::Menu_ServerProperties, _("Server registration &info"));
     serverMenu->AppendSeparator();
     serverMenu->Append(Cmds::Menu_GetServerVersion, _("Retrieve server &version"));
-    serverMenu->Append(Cmds::Menu_ManageUsers, _("&Manage users..."));
+    serverMenu->Append(Cmds::Menu_ManageUsers, _("&Manage users"));
     menuBarM->Append(serverMenu, _("&Server"));
 
     objectMenuM = new wxMenu();
@@ -227,7 +227,9 @@ void MainFrame::buildMainMenu()
     newMenu->Append(Cmds::Menu_CreateTable,       _("&Table"));
     newMenu->Append(Cmds::Menu_CreateTrigger,     _("Tr&igger"));
     newMenu->Append(Cmds::Menu_CreateView,        _("&View"));
-    objectMenuM->Append(Cmds::Menu_NewObject, _("&New"), newMenu);
+    // removed accelerator from "New", any of them potentially conflicts
+    // with one of the commands in the object menu
+    objectMenuM->Append(Cmds::Menu_NewObject, _("New"), newMenu);
     menuBarM->Append(objectMenuM, _("&Object"));
 
     wxMenu* helpMenu = new wxMenu();
