@@ -49,8 +49,6 @@
 #include "metadata/root.h"
 #include "metadata/server.h"
 //-----------------------------------------------------------------------------
-using namespace std;
-//-----------------------------------------------------------------------------
 Server::Server()
     : MetadataItem(ntServer)
 {
@@ -69,7 +67,7 @@ void Server::unlockChildren()
         boost::mem_fn(&Database::unlockSubject));
 }
 //-----------------------------------------------------------------------------
-bool Server::getChildren(vector<MetadataItem*>& temp)
+bool Server::getChildren(std::vector<MetadataItem*>& temp)
 {
     if (databasesM.empty())
         return false;

@@ -32,12 +32,9 @@
 #include <vector>
 
 class MetadataItem;
-//-----------------------------------------------------------------------------
-using namespace std;
-//-----------------------------------------------------------------------------
 class PrivilegeItem;
 //-----------------------------------------------------------------------------
-typedef vector<PrivilegeItem> PrivilegeItems;
+typedef std::vector<PrivilegeItem> PrivilegeItems;
 //-----------------------------------------------------------------------------
 // PrivilegeItem class only descends from MetadataItem to be able to be used in
 // the HTML template processor.
@@ -47,7 +44,7 @@ class PrivilegeItem: public MetadataItem
 public:
     wxString grantor;
     bool grantOption;
-    vector<wxString> columns;
+    std::vector<wxString> columns;
     PrivilegeItem(const wxString& grantorName, bool withGrantOption,
         const wxString& fieldName);
 };
@@ -63,7 +60,7 @@ private:
     wxString granteeM;
 
     // type (SEL, INS, ...), privilege
-    typedef multimap<wxString, PrivilegeItem> PMap;
+    typedef std::multimap<wxString, PrivilegeItem> PMap;
     PMap privilegeItemsM;
 
     wxString getSql(bool withGrantOption) const;

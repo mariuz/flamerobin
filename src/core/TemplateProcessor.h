@@ -40,8 +40,6 @@
 #include "core/ProgressIndicator.h"
 
 //-----------------------------------------------------------------------------
-using namespace std;
-//-----------------------------------------------------------------------------
 class TemplateCmdParams: public wxArrayString
 {
 public:
@@ -50,7 +48,7 @@ public:
 	wxString all(size_t start = 0) const;
 };
 //-----------------------------------------------------------------------------
-typedef map<wxString, wxString> wxStringMap;
+typedef std::map<wxString, wxString> wxStringMap;
 //-----------------------------------------------------------------------------
 class TemplateCmdHandler;
 //-----------------------------------------------------------------------------
@@ -121,7 +119,7 @@ public:
 
     virtual ~TemplateCmdHandlerRepository();
 private:
-    list<TemplateCmdHandler*> handlersM;
+    std::list<TemplateCmdHandler*> handlersM;
     bool handlerListSortedM;
     void checkHandlerListSorted();
 
