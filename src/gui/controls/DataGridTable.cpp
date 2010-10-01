@@ -379,7 +379,8 @@ void DataGridTable::getFields(const wxString& table,
         return;
     t->ensureChildrenLoaded();
 
-    typedef std::map<Column *, std::pair<ResultsetColumnDef*,int> > TempMap;
+    typedef std::pair<ResultsetColumnDef *, int> TempPair;
+    typedef std::map<Column *, TempPair> TempMap;
     TempMap fields;
     for (int i = 0; i < colCount; i++)
     {
@@ -390,45 +391,22 @@ void DataGridTable::getFields(const wxString& table,
         wxString cn(std2wxIdentifier(statementM->ColumnName(i + 1),
             databaseM->getCharsetConverter()));
         // check if field exists in the table (and is not computed)
-        t->ensureChildrenLoaded();
-        if (SharedColumnPtr c = t->findColumn(cn))
+        SharedColumnPtr c = t->findColumn(cn);
+        if (c && c->getComputedSource().empty()
+            && fields.find(c.get()) == fields.end())
         {
-            if (c->getComputedSource().empty())
-            {
-                if (fields.find(c.get()) == fields.end())
-                {
-                    std::pair<ResultsetColumnDef *, int> p(
-                        rowsM.getColumnDef(i), i);
-                    fields.insert
-                    (
-                        std::pair
-                        <
-                            Column *,
-                            std::pair<ResultsetColumnDef *, int>
-                        >
-                        (c.get(), p)
-                    );
-                }
-            }
-            break;
+            TempPair p(rowsM.getColumnDef(i), i);
+            fields.insert(std::pair<Column *, TempPair> (c.get(), p));
         }
     }
 
     // we have item list sorted by column *, but user probably expects the
     // same order as in the grid, so we sort it
+    typedef std::pair<ResultsetColumnDef *, Column *> FinalPair;
     for (TempMap::iterator it = fields.begin(); it != fields.end(); ++it)
     {
-        std::pair<ResultsetColumnDef *, Column *> p(
-            (*it).second.first, (*it).first);
-        flds.insert
-        (
-            std::pair
-            <
-                int,
-                std::pair<ResultsetColumnDef *, Column *>
-            >
-            ((*it).second.second, p)
-        );
+        FinalPair p((*it).second.first, (*it).first);
+        flds.insert(std::pair<int,FinalPair>((*it).second.second, p));
     }
 }
 //-----------------------------------------------------------------------------
@@ -578,7 +556,7 @@ void DataGridTable::importBlobFile(const wxString& filename, int row, int col,
     ProgressIndicator *pi)
 {
     rowsM.importBlobFile(filename, row, col, pi);
-    
+
     // tell the grid it's done
     if (GetView())
     {
@@ -608,14 +586,14 @@ void DataGridTable::SetValue(int row, int col, const wxString& value)
     // UPDATE statement. See bug report #1882666 at sf.net.
     try
     {
-        wxString statement = rowsM.setFieldValue(row, col, value, 
+        wxString statement = rowsM.setFieldValue(row, col, value,
             nullFlagM);
         nullFlagM = false;  // reset
 
         // used in frame to show executed statements
         if (GetView())
         {
-            wxCommandEvent evt(wxEVT_FRDG_STATEMENT, 
+            wxCommandEvent evt(wxEVT_FRDG_STATEMENT,
                 GetView()->GetId());
             evt.SetString(statement);
             wxPostEvent(GetView(), evt);
@@ -623,20 +601,20 @@ void DataGridTable::SetValue(int row, int col, const wxString& value)
     }
     catch (const FRError& err)
     {
-        showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()), 
-            _("Invalid data"), std2wx(err.what()), 
+        showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()),
+            _("Invalid data"), std2wx(err.what()),
             AdvancedMessageDialogButtonsOk());
     }
     catch (const IBPP::Exception& e)
     {
-        showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()), 
-            _("Database error"), std2wx(e.what()), 
+        showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()),
+            _("Database error"), std2wx(e.what()),
             AdvancedMessageDialogButtonsOk());
     }
     catch (...)
     {
-        showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()), 
-            _("System error"), _("Unhandled exception"), 
+        showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()),
+            _("System error"), _("Unhandled exception"),
             AdvancedMessageDialogButtonsOk());
     }
 }
@@ -645,7 +623,7 @@ void DataGridTable::setValueToNull(int row, int col)
 {
     setNullFlag(true);
     SetValue(row, col, wxT("[null]"));
-    if (isBlobColumn(col,0)) 
+    if (isBlobColumn(col,0))
     {
         // set blob to null
         DataGridRowsBlob b;
@@ -678,16 +656,16 @@ bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
     }
     catch (const IBPP::Exception& e)
     {
-        showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()), 
-            _("Database error"), std2wx(e.what()), 
+        showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()),
+            _("Database error"), std2wx(e.what()),
             AdvancedMessageDialogButtonsOk());
     }
     catch (...)
     {
-        showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()), 
-            _("System error"), _("Unhandled exception"), 
+        showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()),
+            _("System error"), _("Unhandled exception"),
             AdvancedMessageDialogButtonsOk());
-    }   
+    }
     return false;
 }
 //-----------------------------------------------------------------------------
