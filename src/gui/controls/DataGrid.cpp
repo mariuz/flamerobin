@@ -68,6 +68,7 @@ DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
     SetRowLabelSize(50);
     DisableDragRowSize();
     SetGridLineColour(*wxLIGHT_GREY);
+    SetColLabelAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
     SetRowLabelAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
 
     wxString s;
@@ -165,7 +166,7 @@ void DataGrid::fetchData(bool readonly)
         ca->SetOverflow(false);
         SetColAttr(i, ca);
     }
-    AutoSizeColumns();
+    AutoSizeColumns(false);
     EndBatch();
 
     // event handler is only needed if not all rows have already been
@@ -493,7 +494,7 @@ void DataGrid::setHeaderFont()
         config().setValue(wxT("DataGridHeaderFont"),
             f.GetNativeFontInfoDesc());
         updateRowHeights();
-        AutoSizeColumns();
+        AutoSizeColumns(false);
         ForceRefresh();
     }
 }
