@@ -302,7 +302,8 @@ private:
     bool sortChildrenM;
     bool nodeConfigSensitiveM;
 
-    void setNodeProperties(MetadataItem* metadataItem);
+    void setNodeProperties(MetadataItem* metadataItem,
+        int overrideChildCount = -1);
 protected:
     virtual void defaultAction();
 public:
@@ -319,18 +320,27 @@ public:
     virtual void visitColumn(Column& column);
     virtual void visitDatabase(Database& database);
     virtual void visitDomain(Domain& domain);
+    virtual void visitDomains(Domains& domains);
     virtual void visitException(Exception& exception);
+    virtual void visitExceptions(Exceptions& exceptions);
     virtual void visitFunction(Function& function);
+    virtual void visitFunctions(Functions& functions);
     virtual void visitGenerator(Generator& generator);
+    virtual void visitGenerators(Generators& generators);
     virtual void visitProcedure(Procedure& procedure);
+    virtual void visitProcedures(Procedures& procedures);
     virtual void visitParameter(Parameter& parameter);
     virtual void visitRole(Role& role);
+    virtual void visitRoles(Roles& roles);
     virtual void visitRoot(Root& root);
+    virtual void visitSysTables(SysTables& sysTables);
     virtual void visitServer(Server& server);
     virtual void visitTable(Table& table);
+    virtual void visitTables(Tables& tables);
     virtual void visitTrigger(Trigger& trigger);
+    virtual void visitTriggers(Triggers& triggers);
     virtual void visitView(View& view);
-    virtual void visitMetadataItem(MetadataItem& metadataItem);
+    virtual void visitViews(Views& views);
 };
 //-----------------------------------------------------------------------------
 DBHTreeItemVisitor::DBHTreeItemVisitor(DBHTreeControl* tree)
@@ -347,32 +357,23 @@ void DBHTreeItemVisitor::defaultAction()
     wxASSERT_MSG(false, wxT("DBHTreeItemVisitor::visit[Classname]() missing"));
 }
 //-----------------------------------------------------------------------------
-bool isNotSystem(MetadataItem* item)
+bool isNotSystem(Domain& domain)
 {
-    return item && !item->isSystem();
+    return !domain.isSystem();
 }
 //-----------------------------------------------------------------------------
-void DBHTreeItemVisitor::setNodeProperties(MetadataItem* metadataItem)
+void DBHTreeItemVisitor::setNodeProperties(MetadataItem* metadataItem,
+    int overrideChildCount)
 {
     wxASSERT(metadataItem);
     nodeVisibleM = true;
     nodeTextBoldM = false;
 
-    // domain collection contains system domains that are not visible
     size_t childCount = 0;
-    if (metadataItem->getType() == ntDomains)
-    {
-        std::vector<MetadataItem*> children;
-        if (metadataItem->getChildren(children))
-        {
-            childCount = std::count_if(children.begin(), children.end(),
-                &isNotSystem);
-        }
-    }
-    else
-    {
+    if (overrideChildCount < 0)
         childCount = metadataItem->getChildrenCount();
-    }
+    else
+        childCount = overrideChildCount;
 
     // don't touch node caption if it has already been set
     if (nodeTextM.empty())
@@ -461,14 +462,31 @@ void DBHTreeItemVisitor::visitDomain(Domain& domain)
     setNodeProperties(&domain);
 }
 //-----------------------------------------------------------------------------
+void DBHTreeItemVisitor::visitDomains(Domains& domains)
+{
+    // domain collection contains system domains that are not visible
+    setNodeProperties(&domains,
+        std::count_if(domains.begin(), domains.end(), &isNotSystem));
+}
+//-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitException(Exception& exception)
 {
     setNodeProperties(&exception);
 }
 //-----------------------------------------------------------------------------
+void DBHTreeItemVisitor::visitExceptions(Exceptions& exceptions)
+{
+    setNodeProperties(&exceptions);
+}
+//-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitFunction(Function& function)
 {
     setNodeProperties(&function);
+}
+//-----------------------------------------------------------------------------
+void DBHTreeItemVisitor::visitFunctions(Functions& functions)
+{
+    setNodeProperties(&functions);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitGenerator(Generator& generator)
@@ -483,6 +501,11 @@ void DBHTreeItemVisitor::visitGenerator(Generator& generator)
     }
     // set remaining default properties, nodeTextM will not be touched
     setNodeProperties(&generator);
+}
+//-----------------------------------------------------------------------------
+void DBHTreeItemVisitor::visitGenerators(Generators& generators)
+{
+    setNodeProperties(&generators);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitParameter(Parameter& parameter)
@@ -522,9 +545,19 @@ void DBHTreeItemVisitor::visitProcedure(Procedure& procedure)
     nodeConfigSensitiveM = true;
 }
 //-----------------------------------------------------------------------------
+void DBHTreeItemVisitor::visitProcedures(Procedures& procedures)
+{
+    setNodeProperties(&procedures);
+}
+//-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitRole(Role& role)
 {
     setNodeProperties(&role);
+}
+//-----------------------------------------------------------------------------
+void DBHTreeItemVisitor::visitRoles(Roles& roles)
+{
+    setNodeProperties(&roles);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitRoot(Root& root)
@@ -551,6 +584,11 @@ void DBHTreeItemVisitor::visitServer(Server& server)
     nodeConfigSensitiveM = true;
 }
 //-----------------------------------------------------------------------------
+void DBHTreeItemVisitor::visitSysTables(SysTables& sysTables)
+{
+    setNodeProperties(&sysTables);
+}
+//-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitTable(Table& table)
 {
     setNodeProperties(&table);
@@ -571,9 +609,19 @@ void DBHTreeItemVisitor::visitTable(Table& table)
     nodeConfigSensitiveM = true;
 }
 //-----------------------------------------------------------------------------
+void DBHTreeItemVisitor::visitTables(Tables& tables)
+{
+    setNodeProperties(&tables);
+}
+//-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitTrigger(Trigger& trigger)
 {
     setNodeProperties(&trigger);
+}
+//-----------------------------------------------------------------------------
+void DBHTreeItemVisitor::visitTriggers(Triggers& triggers)
+{
+    setNodeProperties(&triggers);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitView(View& view)
@@ -596,9 +644,9 @@ void DBHTreeItemVisitor::visitView(View& view)
     nodeConfigSensitiveM = true;
 }
 //-----------------------------------------------------------------------------
-void DBHTreeItemVisitor::visitMetadataItem(MetadataItem& metadataItem)
+void DBHTreeItemVisitor::visitViews(Views& views)
 {
-    setNodeProperties(&metadataItem);
+    setNodeProperties(&views);
 }
 //-----------------------------------------------------------------------------
 // TreeSelectionRestorer class

@@ -57,9 +57,9 @@ ContextMenuMetadataItemVisitor::~ContextMenuMetadataItemVisitor()
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitColumn(Column& column)
 {
+    addGenerateScriptMenu(column);
     if (!column.isSystem())
     {
-        addGenerateScriptMenu(column);
         addSeparator();
         addDropItem(column);
         addSeparator();
@@ -120,6 +120,13 @@ void ContextMenuMetadataItemVisitor::visitDomain(Domain& domain)
     addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::visitDomains(Domains& /*domains*/)
+{
+    addCreateNewItem();
+    addSeparator();
+    addRefreshItem();
+}
+//-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitException(Exception& exception)
 {
     addGenerateScriptMenu(exception);
@@ -130,6 +137,13 @@ void ContextMenuMetadataItemVisitor::visitException(Exception& exception)
     addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::visitExceptions(Exceptions& /*exceptions*/)
+{
+    addCreateNewItem();
+    addSeparator();
+    addRefreshItem();
+}
+//-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitFunction(Function& function)
 {
     addGenerateScriptMenu(function);
@@ -137,6 +151,13 @@ void ContextMenuMetadataItemVisitor::visitFunction(Function& function)
     addDropItem(function);
     addSeparator();
     addPropertiesItem();
+}
+//-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::visitFunctions(Functions& /*functions*/)
+{
+    menuM->Append(Cmds::Menu_CreateObject, _("Declare &new"));
+    addSeparator();
+    addRefreshItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitGenerator(Generator& generator)
@@ -152,35 +173,13 @@ void ContextMenuMetadataItemVisitor::visitGenerator(Generator& generator)
     addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitMetadataItem(
-    MetadataItem& metadataItem)
+void ContextMenuMetadataItemVisitor::visitGenerators(Generators& /*generators*/)
 {
-    switch (metadataItem.getType())
-    {
-        case ntFunctions:
-            menuM->Append(Cmds::Menu_CreateObject, _("Declare &new"));
-            addSeparator();
-            addRefreshItem();
-            break;
-        case ntGenerators:
-            menuM->Append(Cmds::Menu_ShowAllGeneratorValues,
-                _("Show &all values"));
-            addSeparator();
-            // fall through
-        case ntTables:
-        case ntViews:
-        case ntProcedures:
-        case ntTriggers:
-        case ntDomains:
-        case ntRoles:
-        case ntExceptions:
-            menuM->Append(Cmds::Menu_CreateObject, _("Create &new"));
-            addSeparator();
-            // fall through
-        case ntSysTables:
-            addRefreshItem();
-            break;
-    }
+    menuM->Append(Cmds::Menu_ShowAllGeneratorValues, _("Show &all values"));
+    addSeparator();
+    addCreateNewItem();
+    addSeparator();
+    addRefreshItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
@@ -195,6 +194,13 @@ void ContextMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
     addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::visitProcedures(Procedures& /*procedures*/)
+{
+    addCreateNewItem();
+    addSeparator();
+    addRefreshItem();
+}
+//-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitRole(Role& role)
 {
     addGenerateScriptMenu(role);
@@ -202,6 +208,13 @@ void ContextMenuMetadataItemVisitor::visitRole(Role& role)
     addDropItem(role);
     addSeparator();
     addPropertiesItem();
+}
+//-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::visitRoles(Roles& /*roles*/)
+{
+    addCreateNewItem();
+    addSeparator();
+    addRefreshItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitRoot(Root&)
@@ -230,6 +243,12 @@ void ContextMenuMetadataItemVisitor::visitServer(Server&)
         _("Server registration &info"));
 }
 //-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::visitSysTables(SysTables& /*sysTables*/)
+{
+    addSeparator();
+    addRefreshItem();
+}
+//-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitTable(Table& table)
 {
     addSelectItem();
@@ -251,6 +270,13 @@ void ContextMenuMetadataItemVisitor::visitTable(Table& table)
     addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::visitTables(Tables& /*tables*/)
+{
+    addCreateNewItem();
+    addSeparator();
+    addRefreshItem();
+}
+//-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitTrigger(Trigger& trigger)
 {
     addGenerateScriptMenu(trigger);
@@ -259,6 +285,13 @@ void ContextMenuMetadataItemVisitor::visitTrigger(Trigger& trigger)
     addDropItem(trigger);
     addSeparator();
     addPropertiesItem();
+}
+//-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::visitTriggers(Triggers& /*triggers*/)
+{
+    addCreateNewItem();
+    addSeparator();
+    addRefreshItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitView(View& view)
@@ -271,6 +304,13 @@ void ContextMenuMetadataItemVisitor::visitView(View& view)
     addDropItem(view);
     addSeparator();
     addPropertiesItem();
+}
+//-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::visitViews(Views& /*views*/)
+{
+    addCreateNewItem();
+    addSeparator();
+    addRefreshItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::addAlterItem(MetadataItem& metadataItem)
@@ -321,6 +361,11 @@ void ContextMenuMetadataItemVisitor::addShowColumnsItem()
 {
     if (config().get(wxT("ShowColumnsInTree"), true))
         menuM->Append(Cmds::Menu_LoadColumnsInfo, _("Show columns in&fo"));
+}
+//-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::addCreateNewItem()
+{
+    menuM->Append(Cmds::Menu_CreateObject, _("Create &new"));
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::addSeparator()

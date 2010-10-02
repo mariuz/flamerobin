@@ -209,8 +209,8 @@ Domain* Column::getDomain() const
     Database* d = findDatabase();
     if (!d)
         return 0;
-    for (MetadataCollection<Domain>::const_iterator it = d->domainsBegin();
-        it != d->domainsEnd(); ++it)
+    for (Domains::const_iterator it = d->getDomains()->begin();
+        it != d->getDomains()->end(); ++it)
     {
         if ((*it).getName_() == sourceM)
             return (Domain *)&(*it);

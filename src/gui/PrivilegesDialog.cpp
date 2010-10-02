@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -92,9 +92,9 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         _("Trigger:"));
     fgSizer3->Add(radiobtn_trigger, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     {
-        MetadataCollection<Trigger>* tc = databaseM->getCollection<Trigger>();
+        Triggers* tc = databaseM->getTriggers();
         wxArrayString choices;
-        for (MetadataCollection<Trigger>::iterator it = tc->begin();
+        for (Triggers::iterator it = tc->begin();
             it != tc->end(); ++it)
         {
             choices.Add((*it).getName_());
@@ -111,10 +111,10 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
          _("Procedure:"));
     fgSizer3->Add(radiobtn_procedure, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     {
-        MetadataCollection<Procedure>* tc =
-            databaseM->getCollection<Procedure>();
+        Procedures* tc =
+            databaseM->getProcedures();
         wxArrayString choices;
-        for (MetadataCollection<Procedure>::iterator it = tc->begin();
+        for (Procedures::iterator it = tc->begin();
             it != tc->end(); ++it)
         {
             choices.Add((*it).getName_());
@@ -130,9 +130,9 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     radiobtn_view = new wxRadioButton(granteePanel, ID_radiobtn, _("View:"));
     fgSizer3->Add(radiobtn_view, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     {
-        MetadataCollection<View>* tc = databaseM->getCollection<View>();
+        Views* tc = databaseM->getViews();
         wxArrayString choices;
-        for (MetadataCollection<View>::iterator it = tc->begin();
+        for (Views::iterator it = tc->begin();
             it != tc->end(); ++it)
         {
             choices.Add((*it).getName_());
@@ -169,17 +169,17 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     // relations
     {
         wxArrayString choices;
-        MetadataCollection<Table>* tt = databaseM->getCollection<Table>();
+        Tables* tt = databaseM->getTables();
         size_t relation_to_select = 0;
-        for (MetadataCollection<Table>::iterator it = tt->begin();
+        for (Tables::iterator it = tt->begin();
             it != tt->end(); ++it)
         {
             if (dynamic_cast<Table *>(object) == &(*it))
                 relation_to_select = choices.GetCount();
             choices.Add((*it).getName_());
         }
-        MetadataCollection<View>* tv = databaseM->getCollection<View>();
-        for (MetadataCollection<View>::iterator it = tv->begin();
+        Views* tv = databaseM->getViews();
+        for (Views::iterator it = tv->begin();
             it != tv->end(); ++it)
         {
             if (dynamic_cast<View *>(object) == &(*it))
@@ -254,11 +254,11 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         _("Procedure"));
     fgSizer4->Add(radiobtn_execute, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     {
-        MetadataCollection<Procedure>* tc =
-            databaseM->getCollection<Procedure>();
+        Procedures* tc =
+            databaseM->getProcedures();
         wxArrayString choices;
         size_t to_select = 0;
-        for (MetadataCollection<Procedure>::iterator it = tc->begin();
+        for (Procedures::iterator it = tc->begin();
             it != tc->end(); ++it)
         {
             if (dynamic_cast<Procedure *>(object) == &(*it))
@@ -278,10 +278,10 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         _("Role"));
     fgSizer4->Add(radiobtn_memberof, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     {
-        MetadataCollection<Role>* tc = databaseM->getCollection<Role>();
+        Roles* tc = databaseM->getRoles();
         wxArrayString choices;
         size_t to_select = 0;
-        for (MetadataCollection<Role>::iterator it = tc->begin();
+        for (Roles::iterator it = tc->begin();
             it != tc->end(); ++it)
         {
             if (dynamic_cast<Role *>(object) == &(*it))

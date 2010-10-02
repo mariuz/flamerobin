@@ -157,6 +157,66 @@ private:
     Mode modeM;
 };
 //-----------------------------------------------------------------------------
+class Domains: public MetadataCollection<Domain>
+{
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
+class Exceptions: public MetadataCollection<Exception>
+{
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
+class Functions: public MetadataCollection<Function>
+{
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
+class Generators: public MetadataCollection<Generator>
+{
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
+class Procedures: public MetadataCollection<Procedure>
+{
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
+class Roles: public MetadataCollection<Role>
+{
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
+class SysTables: public MetadataCollection<Table>
+{
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
+class Tables: public MetadataCollection<Table>
+{
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
+class Triggers: public MetadataCollection<Trigger>
+{
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
+class Views: public MetadataCollection<View>
+{
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
 class Database: public MetadataItem
 {
 private:
@@ -176,16 +236,20 @@ private:
 
     DatabaseInfo databaseInfoM;
 
-    MetadataCollection<Domain> domainsM;
-    MetadataCollection<Exception> exceptionsM;
-    MetadataCollection<Function> functionsM;
-    MetadataCollection<Generator> generatorsM;
-    MetadataCollection<Procedure> proceduresM;
-    MetadataCollection<Role> rolesM;
-    MetadataCollection<Table> tablesM;
-    MetadataCollection<Table> sysTablesM;
-    MetadataCollection<Trigger> triggersM;
-    MetadataCollection<View> viewsM;
+    Domains domainsM;
+    Exceptions exceptionsM;
+    Functions functionsM;
+    Generators generatorsM;
+    Procedures proceduresM;
+    Roles rolesM;
+    SysTables sysTablesM;
+    Tables tablesM;
+    Triggers triggersM;
+    Views viewsM;
+
+    // copy constructor implementation removed since it's no longer needed
+    // (Server uses a vector of boost::shared_ptr<Database> now)
+    Database(const Database& rhs);
 
     void setDisconnected();
 
@@ -208,10 +272,6 @@ protected:
     virtual void lockChildren();
     virtual void unlockChildren();
 
-private:
-    // copy constructor implementation removed since it's no longer needed
-    // (Server uses a vector of boost::shared_ptr<Database> now)
-    Database(const Database& rhs);
 public:
     Database();
     ~Database();
@@ -219,35 +279,16 @@ public:
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
     void getCollections(std::vector<MetadataItem *>& temp, bool system);
 
-    template<class T>
-    MetadataCollection<T>* getCollection()
-    {
-        // this method returns nothing, so a missing specialization
-        // will cause a build failure
-        // specialization must be declared in the namespace of the class
-        // declaration see below, definitions in database.cpp
-
-/*
-        std::vector<MetadataItem *> temp;
-        getCollections(temp, false);    // not system
-        for (std::vector<MetadataItem *>::iterator it = temp.begin();
-            it != temp.end(); ++it)
-        {
-            MetadataCollection<T>* p =
-                dynamic_cast<MetadataCollection<T>*>(*it);
-            if (p && !p->isSystem())
-                return p;
-        }
-        return 0;
-*/
-    }
-
-    MetadataCollection<Generator>::const_iterator generatorsBegin();
-    MetadataCollection<Generator>::const_iterator generatorsEnd();
-    MetadataCollection<Domain>::const_iterator domainsBegin();
-    MetadataCollection<Domain>::const_iterator domainsEnd();
-    MetadataCollection<Table>::const_iterator tablesBegin();
-    MetadataCollection<Table>::const_iterator tablesEnd();
+    Domains* getDomains();
+    Exceptions* getExceptions();
+    Functions* getFunctions();
+    Generators* getGenerators();
+    Procedures* getProcedures();
+    Roles* getRoles();
+    Tables* getTables();
+    SysTables* getSysTables();
+    Triggers* getTriggers();
+    Views* getViews();
 
     void clear();               // sets all values to empty wxString
     bool isConnected() const;
@@ -338,23 +379,5 @@ public:
 
     wxMBConv* getCharsetConverter() const;
 };
-
-template<> MetadataCollection<Domain>* Database::getCollection();
-
-template<> MetadataCollection<Exception>* Database::getCollection();
-
-template<> MetadataCollection<Function>* Database::getCollection();
-
-template<> MetadataCollection<Generator>* Database::getCollection();
-
-template<> MetadataCollection<Procedure>* Database::getCollection();
-
-template<> MetadataCollection<Role>* Database::getCollection();
-
-template<> MetadataCollection<Table>* Database::getCollection();
-
-template<> MetadataCollection<Trigger>* Database::getCollection();
-
-template<> MetadataCollection<View>* Database::getCollection();
 //----------------------------------------------------------------------------
 #endif

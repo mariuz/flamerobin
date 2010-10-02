@@ -42,21 +42,30 @@ public:
     virtual void visitColumn(Column& column);
     virtual void visitDatabase(Database& database);
     virtual void visitDomain(Domain& domain);
+    virtual void visitDomains(Domains& domains);
     virtual void visitException(Exception& exception);
+    virtual void visitExceptions(Exceptions& exceptions);
     virtual void visitFunction(Function& function);
+    virtual void visitFunctions(Functions& functions);
     virtual void visitGenerator(Generator& generator);
-    virtual void visitMetadataItem(MetadataItem& metadataItem);
+    virtual void visitGenerators(Generators& generators);
     virtual void visitProcedure(Procedure& procedure);
+    virtual void visitProcedures(Procedures& procedures);
     virtual void visitRole(Role& role);
+    virtual void visitRoles(Roles& roles);
     virtual void visitRoot(Root& root);
+    virtual void visitSysTables(SysTables& tables);
     virtual void visitServer(Server& server);
     virtual void visitTable(Table& table);
+    virtual void visitTables(Tables& tables);
     virtual void visitTrigger(Trigger& trigger);
+    virtual void visitTriggers(Triggers& triggers);
     virtual void visitView(View& view);
+    virtual void visitViews(Views& views);
 
 private:
     wxMenu* menuM;
-    // helper member functions to add menu items
+    // helper member functions to add menu items and separators
     void addAlterItem(MetadataItem& metadataItem);
     void addDropItem(MetadataItem& metadataItem);
     void addGenerateScriptMenu(MetadataItem& metadataItem);
@@ -64,6 +73,7 @@ private:
     void addRefreshItem();
     void addSelectItem();
     void addShowColumnsItem();
+    void addCreateNewItem();
     void addSeparator();
 };
 //-----------------------------------------------------------------------------

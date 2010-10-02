@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -690,9 +690,8 @@ void InsertDialog::OnGridCellChange(wxGridEvent& event)
         {
             // select generator name and store in tx
             wxArrayString as;
-            for (MetadataCollection<Generator>::const_iterator ci =
-                databaseM->generatorsBegin(); ci != databaseM->generatorsEnd();
-                ++ci)
+            for (Generators::const_iterator ci = databaseM->getGenerators()->begin();
+                ci != databaseM->getGenerators()->end(); ++ci)
             {
                 as.Add((*ci).getQuotedName());
             }

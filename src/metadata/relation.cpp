@@ -450,24 +450,21 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
         // and return them in "list"
         Database *d = getDatabase(wxT("Relation::getRebuildSql"));
         std::vector<ForeignKey> fkeys;
-        MetadataCollection<Table> *tabs = d->getCollection<Table>();
-        if (tabs)
+        Tables* tables = d->getTables();
+        for (Tables::iterator it = tables->begin(); it !=
+            tables->end(); ++it)
         {
-            for (MetadataCollection<Table>::iterator it = tabs->begin(); it !=
-                tabs->end(); ++it)
+            std::vector<ForeignKey> *fk = (*it).getForeignKeys();
+            if (fk)
             {
-                std::vector<ForeignKey> *fk = (*it).getForeignKeys();
-                if (fk)
+                for (std::vector<ForeignKey>::iterator i2 = fk->begin();
+                    i2 != fk->end(); ++i2)
                 {
-                    for (std::vector<ForeignKey>::iterator i2 = fk->begin();
-                        i2 != fk->end(); ++i2)
+                    if ((*i2).referencedTableM == getName_() &&
+                        t1 != (*i2).getTable() && (
+                        forColumn.IsEmpty() || (*i2).hasColumn(forColumn)))
                     {
-                        if ((*i2).referencedTableM == getName_() &&
-                            t1 != (*i2).getTable() && (
-                            forColumn.IsEmpty() || (*i2).hasColumn(forColumn)))
-                        {
-                            fkeys.insert(fkeys.end(), (*i2));
-                        }
+                        fkeys.insert(fkeys.end(), (*i2));
                     }
                 }
             }

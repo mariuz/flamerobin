@@ -144,11 +144,8 @@ void CreateDDLVisitor::visitColumn(Column& c)
 }
 //-----------------------------------------------------------------------------
 template <class T>
-void iterateit(CreateDDLVisitor* v, Database& db, ProgressIndicator* pi)
+void iterateit(CreateDDLVisitor* v, MetadataCollection<T>* p, ProgressIndicator* pi)
 {
-    // this doesn't work on GCC 3.3:
-    //MetadataCollection<T>* p = db.getCollection<T> ();
-    MetadataCollection<T>* p = db.template getCollection<T> ();
     pi->setProgressMessage(wxT("Extracting ") + p->getName_());
     pi->stepProgress();
     pi->initProgress(wxEmptyString, p->getChildrenCount(), 0, 2);
@@ -174,33 +171,33 @@ void CreateDDLVisitor::visitDatabase(Database& d)
     try
     {
         preSqlM << wxT("/********************* ROLES **********************/\n\n");
-        iterateit<Role>(this, d, progressIndicatorM);
+        iterateit<Role>(this, d.getRoles(), progressIndicatorM);
 
         preSqlM << wxT("/********************* UDFS ***********************/\n\n");
-        iterateit<Function>(this, d, progressIndicatorM);
+        iterateit<Function>(this, d.getFunctions(), progressIndicatorM);
 
         preSqlM << wxT("/****************** GENERATORS ********************/\n\n");
-        iterateit<Generator>(this, d, progressIndicatorM);
+        iterateit<Generator>(this, d.getGenerators(), progressIndicatorM);
 
         preSqlM << wxT("/******************** DOMAINS *********************/\n\n");
-        iterateit<Domain>(this, d, progressIndicatorM);
+        iterateit<Domain>(this, d.getDomains(), progressIndicatorM);
 
         preSqlM << wxT("/******************* PROCEDURES ******************/\n\n");
-        iterateit<Procedure>(this, d, progressIndicatorM);
+        iterateit<Procedure>(this, d.getProcedures(), progressIndicatorM);
 
         preSqlM << wxT("/******************** TABLES **********************/\n\n");
-        iterateit<Table>(this, d, progressIndicatorM);
+        iterateit<Table>(this, d.getTables(), progressIndicatorM);
 
         preSqlM << wxT("/********************* VIEWS **********************/\n\n");
         // TODO: build dependecy tree first, and order views by it
         //       also include computed columns of tables?
-        iterateit<View>(this, d, progressIndicatorM);
+        iterateit<View>(this, d.getViews(), progressIndicatorM);
 
         preSqlM << wxT("/******************* EXCEPTIONS *******************/\n\n");
-        iterateit<Exception>(this, d, progressIndicatorM);
+        iterateit<Exception>(this, d.getExceptions(), progressIndicatorM);
 
         preSqlM << wxT("/******************** TRIGGERS ********************/\n\n");
-        iterateit<Trigger>(this, d, progressIndicatorM);
+        iterateit<Trigger>(this, d.getTriggers(), progressIndicatorM);
     }
     catch (CancelProgressException&)
     {

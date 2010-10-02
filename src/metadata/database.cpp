@@ -297,6 +297,56 @@ bool DatabaseAuthenticationMode::getUseEncryptedPassword() const
     return modeM == UseSavedEncryptedPwd;
 }
 //-----------------------------------------------------------------------------
+void Domains::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitDomains(*this);
+}
+//-----------------------------------------------------------------------------
+void Exceptions::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitExceptions(*this);
+}
+//-----------------------------------------------------------------------------
+void Functions::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitFunctions(*this);
+}
+//-----------------------------------------------------------------------------
+void Generators::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitGenerators(*this);
+}
+//-----------------------------------------------------------------------------
+void Procedures::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitProcedures(*this);
+}
+//-----------------------------------------------------------------------------
+void Roles::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitRoles(*this);
+}
+//-----------------------------------------------------------------------------
+void SysTables::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitSysTables(*this);
+}
+//-----------------------------------------------------------------------------
+void Tables::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitTables(*this);
+}
+//-----------------------------------------------------------------------------
+void Triggers::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitTriggers(*this);
+}
+//-----------------------------------------------------------------------------
+void Views::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitViews(*this);
+}
+//-----------------------------------------------------------------------------
 // Database class
 Database::Database()
     : MetadataItem(ntDatabase), metadataLoaderM(0), connectedM(false),
@@ -557,7 +607,7 @@ void Database::loadGeneratorValues()
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(this);
 
-    for (MetadataCollection<Generator>::iterator it = generatorsM.begin();
+    for (Generators::iterator it = generatorsM.begin();
         it != generatorsM.end(); ++it)
     {
         // make sure generator value is reloaded from database
@@ -598,19 +648,19 @@ MetadataItem* Database::findByNameAndType(NodeType nt, wxString name)
 //-----------------------------------------------------------------------------
 Relation* Database::findRelation(const Identifier& name)
 {
-    for (MetadataCollection<Table>::iterator it = tablesM.begin();
+    for (Tables::iterator it = tablesM.begin();
         it != tablesM.end(); ++it)
     {
         if ((*it).getIdentifier().equals(name))
             return &(*it);
     }
-    for (MetadataCollection<View>::iterator it = viewsM.begin();
+    for (Views::iterator it = viewsM.begin();
         it != viewsM.end(); ++it)
     {
         if ((*it).getIdentifier().equals(name))
             return &(*it);
     }
-    for (MetadataCollection<Table>::iterator it = sysTablesM.begin();
+    for (SysTables::iterator it = sysTablesM.begin();
         it != sysTablesM.end(); ++it)
     {
         if ((*it).getIdentifier().equals(name))
@@ -716,7 +766,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
     if (stm.actionIs(actDROP, ntIndex))
     {
         // the affected table will recognize its index (if loaded)
-        MetadataCollection<Table>::iterator it;
+        Tables::iterator it;
         for (it = tablesM.begin(); it != tablesM.end(); ++it)
             (*it).invalidateIndices(stm.getName());
         return;
@@ -736,10 +786,10 @@ void Database::parseCommitedSql(const SqlStatement& stm)
     // update all TABLEs, VIEWs and DATABASE on "DROP TRIGGER"
     if (stm.actionIs(actDROP, ntTrigger))
     {
-        MetadataCollection<Table>::iterator itt;
+        Tables::iterator itt;
         for (itt = tablesM.begin(); itt != tablesM.end(); itt++)
             (*itt).notifyObservers();
-        MetadataCollection<View>::iterator itv;
+        Views::iterator itv;
         for (itv = viewsM.begin(); itv != viewsM.end(); itv++)
             (*itv).notifyObservers();
         notifyObservers();
@@ -778,7 +828,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
         dropObject(object);
         if (stm.getObjectType() == ntTable || stm.getObjectType() == ntView)
         {
-            MetadataCollection<Trigger>::iterator it = triggersM.begin();
+            Triggers::iterator it = triggersM.begin();
             while (it != triggersM.end())
             {
                 Relation* r = getRelationForTrigger(&(*it));
@@ -850,7 +900,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
             case ntDomain:
                 object->invalidate();
                 // notify all table columns with that domain
-                for (MetadataCollection<Table>::iterator it = tablesM.begin();
+                for (Tables::iterator it = tablesM.begin();
                     it != tablesM.end(); ++it)
                 {
                     for (RelationColumns::iterator itColumn = (*it).begin();
@@ -1217,64 +1267,61 @@ bool Database::getChildren(std::vector<MetadataItem*>& temp)
     return true;
 }
 //-----------------------------------------------------------------------------
-template<>
-MetadataCollection<Domain>* Database::getCollection()
+Domains* Database::getDomains()
 {
     domainsM.ensureChildrenLoaded();
     return &domainsM;
 }
 //-----------------------------------------------------------------------------
-template<>
-MetadataCollection<Exception>* Database::getCollection()
+Exceptions* Database::getExceptions()
 {
     exceptionsM.ensureChildrenLoaded();
     return &exceptionsM;
 }
 //-----------------------------------------------------------------------------
-template<>
-MetadataCollection<Function>* Database::getCollection()
+Functions* Database::getFunctions()
 {
     functionsM.ensureChildrenLoaded();
     return &functionsM;
 }
 //-----------------------------------------------------------------------------
-template<>
-MetadataCollection<Generator>* Database::getCollection()
+Generators* Database::getGenerators()
 {
     generatorsM.ensureChildrenLoaded();
     return &generatorsM;
 }
 //-----------------------------------------------------------------------------
-template<>
-MetadataCollection<Procedure>* Database::getCollection()
+Procedures* Database::getProcedures()
 {
     proceduresM.ensureChildrenLoaded();
     return &proceduresM;
 }
 //-----------------------------------------------------------------------------
-template<>
-MetadataCollection<Role>* Database::getCollection()
+Roles* Database::getRoles()
 {
     rolesM.ensureChildrenLoaded();
     return &rolesM;
 }
 //-----------------------------------------------------------------------------
-template<>
-MetadataCollection<Table>* Database::getCollection()
+SysTables* Database::getSysTables()
+{
+    sysTablesM.ensureChildrenLoaded();
+    return &sysTablesM;
+}
+//-----------------------------------------------------------------------------
+Tables* Database::getTables()
 {
     tablesM.ensureChildrenLoaded();
     return &tablesM;
 }
 //-----------------------------------------------------------------------------
-template<>
-MetadataCollection<Trigger>* Database::getCollection()
+Triggers* Database::getTriggers()
 {
     triggersM.ensureChildrenLoaded();
     return &triggersM;
 }
 //-----------------------------------------------------------------------------
-template<>
-MetadataCollection<View>* Database::getCollection()
+Views* Database::getViews()
 {
     viewsM.ensureChildrenLoaded();
     return &viewsM;
@@ -1334,36 +1381,6 @@ void Database::unlockChildren()
     functionsM.unlockSubject();
     exceptionsM.unlockSubject();
     domainsM.unlockSubject();
-}
-//-----------------------------------------------------------------------------
-MetadataCollection<Generator>::const_iterator Database::generatorsBegin()
-{
-    return generatorsM.begin();
-}
-//-----------------------------------------------------------------------------
-MetadataCollection<Generator>::const_iterator Database::generatorsEnd()
-{
-    return generatorsM.end();
-}
-//-----------------------------------------------------------------------------
-MetadataCollection<Domain>::const_iterator Database::domainsBegin()
-{
-    return domainsM.begin();
-}
-//-----------------------------------------------------------------------------
-MetadataCollection<Domain>::const_iterator Database::domainsEnd()
-{
-    return domainsM.end();
-}
-//-----------------------------------------------------------------------------
-MetadataCollection<Table>::const_iterator Database::tablesBegin()
-{
-    return tablesM.begin();
-}
-//-----------------------------------------------------------------------------
-MetadataCollection<Table>::const_iterator Database::tablesEnd()
-{
-    return tablesM.end();
 }
 //-----------------------------------------------------------------------------
 wxString Database::getPath() const

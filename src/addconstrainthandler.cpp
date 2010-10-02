@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -64,12 +64,12 @@ const AddConstraintHandler AddConstraintHandler::handlerInstance;
 Table *AddConstraintHandler::selectTable(Database *d, wxWindow *parent) const
 {
     wxArrayString tables;
-    for (MetadataCollection<Table>::const_iterator it = d->tablesBegin(); it != d->tablesEnd(); ++it)
+    for (Tables::const_iterator it = d->getTables()->begin(); it != d->getTables()->end(); ++it)
         tables.Add((*it).getName_());
     int index = ::wxGetSingleChoiceIndex(_("Select table to reference"), _("Creating foreign key"), tables, parent);
     if (index == -1)
         return 0;
-    for (MetadataCollection<Table>::const_iterator it = d->tablesBegin(); it != d->tablesEnd(); ++it)
+    for (Tables::const_iterator it = d->getTables()->begin(); it != d->getTables()->end(); ++it)
         if ((*it).getName_() == tables[index])
             return const_cast<Table *>(&(*it));
     return 0;

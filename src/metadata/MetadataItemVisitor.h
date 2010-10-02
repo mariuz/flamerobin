@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -36,23 +36,33 @@
 class Column;
 class Database;
 class Domain;
+class Domains;
 class Exception;
+class Exceptions;
 class ForeignKey;
 class Function;
+class Functions;
 class Generator;
+class Generators;
 class Index;
 class MetadataItem;
 class Parameter;
 class PrimaryKeyConstraint;
 class Procedure;
+class Procedures;
 class Relation;
 class Role;
+class Roles;
 class Root;
 class Server;
+class SysTables;
 class Table;
+class Tables;
 class Trigger;
+class Triggers;
 class UniqueConstraint;
 class View;
+class Views;
 //-----------------------------------------------------------------------------
 class MetadataItemVisitor: public Visitor
 {
@@ -63,22 +73,32 @@ public:
     virtual void visitColumn(Column& column);
     virtual void visitDatabase(Database& database);
     virtual void visitDomain(Domain& domain);
+    virtual void visitDomains(Domains& domains);
     virtual void visitException(Exception& exception);
+    virtual void visitExceptions(Exceptions& exceptions);
     virtual void visitForeignKey(ForeignKey& fk);
     virtual void visitFunction(Function& function);
+    virtual void visitFunctions(Functions& functions);
     virtual void visitGenerator(Generator& generator);
+    virtual void visitGenerators(Generators& generators);
     virtual void visitIndex(Index& index);
     virtual void visitParameter(Parameter& parameter);
     virtual void visitPrimaryKeyConstraint(PrimaryKeyConstraint& pk);
     virtual void visitProcedure(Procedure& procedure);
+    virtual void visitProcedures(Procedures& procedures);
     virtual void visitRelation(Relation& relation);
     virtual void visitRole(Role& role);
+    virtual void visitRoles(Roles& roles);
     virtual void visitRoot(Root& root);
     virtual void visitServer(Server& server);
     virtual void visitTable(Table& table);
+    virtual void visitTables(Tables& tables);
+    virtual void visitSysTables(SysTables& sysTables);
     virtual void visitTrigger(Trigger& trigger);
+    virtual void visitTriggers(Triggers& triggers);
     virtual void visitUniqueConstraint(UniqueConstraint& unq);
     virtual void visitView(View& view);
+    virtual void visitViews(Views& views);
     virtual void visitMetadataItem(MetadataItem& metadataItem);
 };
 //-----------------------------------------------------------------------------
