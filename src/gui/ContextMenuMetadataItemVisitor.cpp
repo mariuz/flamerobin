@@ -123,7 +123,9 @@ void ContextMenuMetadataItemVisitor::visitDomain(Domain& domain)
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitDomains(Domains& /*domains*/)
 {
-    addCollectionItems();
+    addCreateItem();
+    addSeparator();
+    addRefreshItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitException(Exception& exception)
@@ -138,7 +140,9 @@ void ContextMenuMetadataItemVisitor::visitException(Exception& exception)
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitExceptions(Exceptions& /*exceptions*/)
 {
-    addCollectionItems();
+    addCreateItem();
+    addSeparator();
+    addRefreshItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitFunction(Function& function)
@@ -175,7 +179,9 @@ void ContextMenuMetadataItemVisitor::visitGenerators(Generators& /*generators*/)
 {
     menuM->Append(Cmds::Menu_ShowAllGeneratorValues, _("Show &all values"));
     addSeparator();
-    addCollectionItems();
+    addCreateItem();
+    addSeparator();
+    addRefreshItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
@@ -193,7 +199,9 @@ void ContextMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitProcedures(Procedures& /*procedures*/)
 {
-    addCollectionItems();
+    addCreateItem();
+    addSeparator();
+    addRefreshItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitRole(Role& role)
@@ -208,7 +216,9 @@ void ContextMenuMetadataItemVisitor::visitRole(Role& role)
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitRoles(Roles& /*roles*/)
 {
-    addCollectionItems();
+    addCreateItem();
+    addSeparator();
+    addRefreshItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitRoot(Root&)
@@ -266,7 +276,9 @@ void ContextMenuMetadataItemVisitor::visitTable(Table& table)
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitTables(Tables& /*tables*/)
 {
-    addCollectionItems();
+    addCreateItem();
+    addSeparator();
+    addRefreshItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitTrigger(Trigger& trigger)
@@ -282,7 +294,9 @@ void ContextMenuMetadataItemVisitor::visitTrigger(Trigger& trigger)
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitTriggers(Triggers& /*triggers*/)
 {
-    addCollectionItems();
+    addCreateItem();
+    addSeparator();
+    addRefreshItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitView(View& view)
@@ -300,7 +314,9 @@ void ContextMenuMetadataItemVisitor::visitView(View& view)
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitViews(Views& /*views*/)
 {
-    addCollectionItems();
+    addCreateItem();
+    addSeparator();
+    addRefreshItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::addAlterItem(MetadataItem& metadataItem)
@@ -309,11 +325,9 @@ void ContextMenuMetadataItemVisitor::addAlterItem(MetadataItem& metadataItem)
         menuM->Append(Cmds::Menu_AlterObject, _("&Alter"));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addCollectionItems()
+void ContextMenuMetadataItemVisitor::addCreateItem()
 {
     menuM->Append(Cmds::Menu_CreateObject, _("Create &new"));
-    addSeparator();
-    addRefreshItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::addDropItem(MetadataItem& metadataItem)

@@ -67,7 +67,7 @@ private:
     wxMenu* menuM;
     // helper member functions to add menu items and separators
     void addAlterItem(MetadataItem& metadataItem);
-    void addCollectionItems();
+    void addCreateItem();
     void addDropItem(MetadataItem& metadataItem);
     void addGenerateScriptMenu(MetadataItem& metadataItem);
     void addPropertiesItem();
