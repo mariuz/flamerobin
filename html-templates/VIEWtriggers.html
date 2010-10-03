@@ -6,13 +6,16 @@
 {%header:Triggers%}
 <br><br>
 <font size=+2>Triggers on view {%object_name%}</font>
-<br><br>
-<table cellspacing=1 cellpadding=2 border=0 bgcolor=black width="98%">
+<p><font size=+1>Before triggers</font></p>
+<br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=black>
   <tbody>
     <tr bgcolor="navy">
       <td></td>
-      <td nowrap><b><font color=white>Before triggers</font></b></td>
-      <td nowrap><b><font color=white>Trigger info</font></b></td>
+      <td nowrap><font color=white><b>Name</b></font></td>
+      <td bgcolor="navy"><font color="white"><b>Active</b></font></td>
+      <td bgcolor="navy"><font color="white"><b>Position</b></font></td>
+      <td bgcolor="navy"><font color="white"><b>Type</b></font></td>
     </tr>
     {%foreach:trigger::before:
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
@@ -22,17 +25,26 @@
       </td>
       <td nowrap valign="top"><a
           href="fr://properties?object_type=TRIGGER&amp;object_name={%object_name%}&amp;parent_window={%parent_window%}">{%object_name%}</a></td>
-      <td valign="top">{%trigger_info%}</td>
+      <td nowrap valign="top" bgcolor="#DDDDFF" align="center">
+        <a href="fr://{%ifeq:{%triggerinfo:is_active%}:true:deactivate_trigger:activate_trigger%}?parent_window={%parent_window%}&amp;object_address={%object_address%}">
+          <img src="{%template_root%}{%ifeq:{%triggerinfo:is_active%}:true:ok.png:redx.png%}">
+        </a>
+      </td>
+      <td nowrap valign="top" bgcolor="#DDDDFF" align="right">{%triggerinfo:position%}</td>
+      <td nowrap valign="top" bgcolor="#DDDDFF">{%triggerinfo:type%}</td>
     </tr>%}
   </tbody>
 </table>
-<br><br>
-<table cellspacing=1 cellpadding=2 border=0 bgcolor=black width="98%">
+<p><font size=+1>After triggers</font></p>
+<br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=black>
   <tbody>
     <tr bgcolor="navy">
       <td></td>
-      <td nowrap><b><font color=white>After triggers</font></b></td>
-      <td nowrap><b><font color=white>Trigger info</font></b></td>
+      <td nowrap><font color=white><b>Name</b></font></td>
+      <td bgcolor="navy"><font color="white"><b>Active</b></font></td>
+      <td bgcolor="navy"><font color="white"><b>Position</b></font></td>
+      <td bgcolor="navy"><font color="white"><b>Type</b></font></td>
     </tr>
       {%foreach:trigger::after:
       <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
@@ -42,9 +54,26 @@
       </td>
       <td nowrap valign="top"><a
           href="fr://properties?object_type=TRIGGER&amp;object_name={%object_name%}&amp;parent_window={%parent_window%}">{%object_name%}</a></td>
-      <td valign="top">{%trigger_info%}</td>
+      <td nowrap valign="top" bgcolor="#DDDDFF" align="center">
+        <a href="fr://{%ifeq:{%triggerinfo:is_active%}:true:deactivate_trigger:activate_trigger%}?parent_window={%parent_window%}&amp;object_address={%object_address%}">
+          <img src="{%template_root%}{%ifeq:{%triggerinfo:is_active%}:true:ok.png:redx.png%}">
+        </a>
+      </td>
+      <td nowrap valign="top" bgcolor="#DDDDFF" align="right">{%triggerinfo:position%}</td>
+      <td nowrap valign="top" bgcolor="#DDDDFF">{%triggerinfo:type%}</td>
     </tr>%}
   </tbody>
+</table>
+<br><br>
+<table border=0 cellspacing=1 cellpadding=2 bgcolor="#CCCCCC">
+    <tr bgcolor="#CCCCFF">
+        <td><B>Icon</B></td>
+        <td nowrap><B>Click to...</B></td>
+    </tr>
+    <tr><td><img src="{%template_root%}drop.png"></td><td>Drop trigger</td></tr>
+    <tr><td><img src="{%template_root%}view.png"></td><td>Alter trigger</td></tr>
+    <tr><td><img src="{%template_root%}ok.png"></td><td>Deactivate trigger</td></tr>
+    <tr><td><img src="{%template_root%}redx.png"></td><td>Activate trigger</td></tr>
 </table>
 <br>
 <br>
@@ -63,7 +92,7 @@ href="fr://deactivate_triggers?parent_window={%parent_window%}&amp;object_addres
         color="yellow">edit</font></a>]</font></td>
     </tr>
     <tr bgcolor="#DDDDFF"><td>
-    <PRE>{%trigger_source%}</PRE>
+    <PRE>{%triggerinfo:source%}</PRE>
     </td></tr>
     </table>
     %}
@@ -77,7 +106,7 @@ href="fr://deactivate_triggers?parent_window={%parent_window%}&amp;object_addres
         color="yellow">edit</font></a>]</font></td>
     </tr>
     <tr bgcolor="#DDDDFF"><td>
-    <PRE>{%trigger_source%}</PRE>
+    <PRE>{%triggerinfo:source%}</PRE>
     </td></tr>
     </table>
     %}

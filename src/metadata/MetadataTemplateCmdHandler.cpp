@@ -232,63 +232,57 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         }
     }
 
-    else if (cmdName == wxT("input_parameters") || cmdName == wxT("output_parameters"))     // SP params
-    {
-        Procedure* p = dynamic_cast<Procedure*>(object);
-        if (!p)
-            return;
-
-        SubjectLocker locker(p);
-        p->ensureChildrenLoaded();
-        bool parOut = (cmdName == wxT("output_parameters"));
-        for (ProcedureParameters::iterator it = p->begin();
-            it != p->end(); ++it)
-        {
-            if ((*it)->isOutputParameter() == parOut)
-                tp->internalProcessTemplateText(processedText, cmdParams.all(), (*it).get());
-        }
-    }
-
-    else if (cmdName == wxT("view_source"))
+    // {%viewinfo:<property>%}
+    // If the current object is a view, expands to the view's
+    // requested property.
+    else if ((cmdName == wxT("viewinfo")) && (cmdParams.Count() >= 1))
     {
         View* v = dynamic_cast<View*>(object);
         if (!v)
             return;
-        processedText += tp->escapeChars(v->getSource(), false);
+        if (cmdParams[0] == wxT("source"))
+            processedText += tp->escapeChars(v->getSource(), false);
     }
 
-    else if (cmdName == wxT("procedure_source"))
+    // {%procedureinfo:<property>%}
+    // If the current object is a procedure, expands to the procedure's
+    // requested property.
+    else if ((cmdName == wxT("procedureinfo")) && (cmdParams.Count() >= 1))
     {
         Procedure* p = dynamic_cast<Procedure*>(object);
         if (!p)
             return;
-        processedText += tp->escapeChars(p->getSource(), false);
+        if (cmdParams[0] == wxT("source"))
+            processedText += tp->escapeChars(p->getSource(), false);
     }
 
-    else if (cmdName == wxT("trigger_source"))
+    // {%triggerinfo:<property>%}
+    // If the current object is a trigger, expands to the trigger's
+    // requested property.
+    else if ((cmdName == wxT("triggerinfo")) && (cmdParams.Count() >= 1))
     {
         Trigger* t = dynamic_cast<Trigger*>(object);
         if (!t)
             return;
-        processedText += tp->escapeChars(t->getSource(), false);
-    }
-
-    // TODO: switch to separate values for a nicer grid in the property page.
-    else if (cmdName == wxT("trigger_info"))
-    {
-        Trigger* t = dynamic_cast<Trigger*>(object);
-        wxString object, type;
-        bool active, isDBtrigger;
-        int position;
-        if (!t)
-            return;
-        t->getTriggerInfo(object, active, position, type, isDBtrigger);
-        wxString s(active ? wxT("Active ") : wxT("Inactive "));
-        s << type << wxT(" trigger ");
-        if (!isDBtrigger)
-            s << wxT("for ") << object;
-        s << wxT(" at position ") << position;
-        processedText += tp->escapeChars(s);
+        if (cmdParams[0] == wxT("source"))
+            processedText += tp->escapeChars(t->getSource(), false);
+        else
+        {
+            wxString object, type;
+            bool isActive, isDBTrigger;
+            int position;
+            t->getTriggerInfo(object, isActive, position, type, isDBTrigger);
+            if (cmdParams[0] == wxT("object_name"))
+                processedText += tp->escapeChars(object);
+            else if (cmdParams[0] == wxT("is_active"))
+                processedText += tp->escapeChars(getBooleanAsString(isActive));
+            else if (cmdParams[0] == wxT("position"))
+                processedText << position;
+            else if (cmdParams[0] == wxT("type"))
+                processedText += tp->escapeChars(type);
+            else if (cmdParams[0] == wxT("is_db_trigger"))
+                processedText += tp->escapeChars(getBooleanAsString(isDBTrigger));
+        }
     }
 
     else if (cmdName == wxT("generator_value"))
@@ -611,7 +605,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         // each "before" or "after" trigger. If the current object is
         // a database, processes <text> for all database triggers and the
         // third param is ignored.
-        else if (cmdParams[0] == wxT("trigger"))
+        else if ((cmdParams[0] == wxT("trigger")) && (cmdParams.Count() >= 4))
         {
             std::vector<Trigger*> triggers;
             
@@ -638,6 +632,9 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         }
 
         // {%foreach:privilegeitem:<separator>:<type>:<text>%}
+        // If the current object is a privilege, processes <text> for each privilege item
+        // of the specified <type> (SELECT, INSERT, UPDATE, DELETE, EXECUTE, REFERENCES,
+        // MEMBER OF).
         else if ((cmdParams[0] == wxT("privilegeitem")) && (cmdParams.Count() >= 4))
         {
             Privilege* p = dynamic_cast<Privilege*>(object);
@@ -659,6 +656,8 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         }
 
         // {%foreach:privilege:<separator>:<text>%}
+        // If the current object is a relation, procedure or role,
+        // processes <text> for each privilege.
         else if (cmdParams[0] == wxT("privilege"))
         {
             Relation* rel = dynamic_cast<Relation*>(object);
@@ -690,6 +689,26 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             m->getDependencies(deps, cmdParams[0] == wxT("depends_on"));
             for (std::vector<Dependency>::iterator it = deps.begin(); it != deps.end(); ++it)
                 tp->internalProcessTemplateText(processedText, cmdParams.all(2), &(*it));
+        }
+
+        // {%foreach:parameter:<separator>:<input|output>:<text>%}
+        // If the current object is a procedure, processes <text> for
+        // each "input" or "output" parameter.
+        else if ((cmdParams[0] == wxT("parameter")) && (cmdParams.Count() >= 4))
+        {
+            Procedure* p = dynamic_cast<Procedure*>(object);
+            if (!p)
+                return;
+
+            SubjectLocker locker(p);
+            p->ensureChildrenLoaded();
+            bool isOut = (cmdParams[0] == wxT("output"));
+            for (ProcedureParameters::iterator it = p->begin();
+                it != p->end(); ++it)
+            {
+                if ((*it)->isOutputParameter() == isOut)
+                    tp->internalProcessTemplateText(processedText, cmdParams.all(3), (*it).get());
+            }
         }
 
         // add more collections here.
