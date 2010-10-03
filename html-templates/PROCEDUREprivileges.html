@@ -14,7 +14,7 @@
       <td><b><font color="white">EXECUTE</font></b></td>
     </tr>
     {%foreach:privilege::
-    <tr bgcolor="{%varcolor:#DDDDFF:#CCCCFF%}">
+    <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       <td nowrap valign="top">{%privilegeinfo:grantee_name%}</td>
       <td nowrap valign="top" align="center">{%foreach:privilegeitem:<br>:EXECUTE:<a href="info://Granted by {%privilegeiteminfo:grantor%}">
           <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}

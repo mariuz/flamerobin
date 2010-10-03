@@ -15,7 +15,7 @@
       <td nowrap><b><font color=white>Trigger info</font></b></td>
     </tr>
     {%relation_triggers:before:
-    <tr bgcolor="{%varcolor:#DDDDFF:#CCCCFF%}">
+    <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       <td valign="top" nowrap>
           <a href="fr://drop_object?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}drop.png"></a>
           <a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}view.png"></a>
@@ -35,7 +35,7 @@
       <td nowrap><b><font color=white>Trigger info</font></b></td>
     </tr>
     {%relation_triggers:after:
-    <tr bgcolor="{%varcolor:#DDDDFF:#CCCCFF%}">
+    <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       <td valign="top" nowrap>
           <a href="fr://drop_object?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}drop.png"></a>
           <a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}view.png"></a>
@@ -53,7 +53,7 @@ href="fr://create_trigger?parent_window={%parent_window%}&amp;object_address={%o
 href="fr://activate_triggers?parent_window={%parent_window%}&amp;object_address={%object_address%}">Activate all triggers</a> | <a
 href="fr://deactivate_triggers?parent_window={%parent_window%}&amp;object_address={%object_address%}">Deactivate all triggers</a>
 
-{%show_if_config:displayTriggerSource:true:
+{%ifeq:{%getglobalconf:displayTriggerSource%}:1:
     {%relation_triggers:before:
     <br><br>
     <table cellspacing=1 cellpadding=2 border=0 bgcolor=black width="98%">

@@ -40,18 +40,12 @@
 
 #include <wx/tokenzr.h>
 
-#include <sstream>
-#include <iomanip>
-#include <map>
-
 #include "config/Config.h"
 #include "core/StringUtils.h"
 #include "frutils.h"
 #include "core/FRError.h"
 #include "core/ProgressIndicator.h"
-#include "metadata/CreateDDLVisitor.h"
 #include "metadata/metadataitem.h"
-#include "metadata/server.h"
 #include "TemplateProcessor.h"
 
 //-----------------------------------------------------------------------------
@@ -66,13 +60,24 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
     if (cmdName == wxT("--"))
         // Comment.
         ;
-
+    
+    // {%template_root%}
+    // Expands to the full path of the folder containing the currently
+    // processed template, including the final path separator.
+    // May expand to a blank string if the template being processed does
+    // not come from a text file.
     else if (cmdName == wxT("template_root"))
         processedText += getTemplatePath();
 
+    // {%getvar:name%}
+    // Expands to the value of the specified string variable, or a blank
+    // string if the variable is not defined.
     else if (cmdName == wxT("getvar") && !cmdParams.IsEmpty())
         processedText += getVar(cmdParams.all());
 
+    // {%setvar:name:value%}
+    // Sets the value of the specified variable and expands to a blank string.
+    // If the variable is already defined overwrites it.
     else if (cmdName == wxT("setvar") && !cmdParams.IsEmpty())
     {
         if (cmdParams.Count() == 1)
@@ -81,12 +86,24 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
             setVar(cmdParams[0], cmdParams[1]);
     }
 
+    // {%clearvar:name%}
+    // Sets the value of the specified variable to a blank string.
+    // If the variable is not defined it does nothing.
+    // Expands to a blank string.
     else if (cmdName == wxT("clearvar") && !cmdParams.IsEmpty())
         clearVar(cmdParams.all());
 
+    // {%clearvars%}
+    // Sets all defined variables to blank strings.
+    // Expands to a blank string.
     else if (cmdName == wxT("clearvars"))
         clearVars();
 
+    // {%getconf:key%}
+    // Expands to the value of the specified local config key,
+    // or a blank string if the key is not found.
+    // The local config is associated to the template - this is
+    // not one of FlameRobin's global config files.
     else if (cmdName == wxT("getconf") && !cmdParams.IsEmpty())
     {
         wxString text;
@@ -94,6 +111,10 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         processedText += configM.get(text, wxString(wxT("")));
     }
 
+    // {%setconf:key:value%}
+    // Sets the value of the specified specified local config key.
+    // If the key is already defined overwrites it.
+    // Expands to a blank string.
     else if (cmdName == wxT("setconf") && !cmdParams.IsEmpty())
     {
         if (cmdParams.Count() == 1)
@@ -102,114 +123,47 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
             configM.setValue(cmdParams[0], cmdParams[1]);
     }
 
+    // {%getglobalconf:key%}
+    // Expands to the value of the specified global config key,
+    // or a blank string if the key is not found.
+    else if (cmdName == wxT("getglobalconf") && !cmdParams.IsEmpty())
+    {
+        wxString text;
+        internalProcessTemplateText(text, cmdParams.all(), object);
+        processedText += config().get(text, wxString(wxT("")));
+    }
+
+    // {%abort%}
+    // Throws a silent exception, interrupting the processing.
+    // Expands to a blank string.
     else if (cmdName == wxT("abort"))
         throw FRAbort();
     
-    else if (cmdName == wxT("object_name"))
-        processedText += object->getName_();
-
-    else if (cmdName == wxT("object_path"))
-        processedText += object->getItemPath();
-
+    // {%parent:text%}
+    // Switches the current object to the object's parent and
+    // processes the specified text. If the object has no parent,
+    // expands to a blank string.
     else if (cmdName == wxT("parent"))
     {
         if (object->getParent())
             internalProcessTemplateText(processedText, cmdParams.all(), object->getParent());
     }
 
-    else if (cmdName == wxT("object_type"))
-        processedText += object->getTypeName();
-
+    // {%object_address%}
+    // Expands to the current object's numeric memory address.
+    // Used to call FR's commands through URIs.
     else if (cmdName == wxT("object_address"))
         processedText += wxString::Format(wxT("%ld"), (uintptr_t)object);
 
+    // {%parent_window%}
+    // Expands to the current window's numeric memory address.
+    // Used to call FR's commands through URIs.
     else if (cmdName == wxT("parent_window"))
         processedText += wxString::Format(wxT("%ld"), (uintptr_t)windowM);
 
-    else if (cmdName == wxT("is_system"))
-        processedText += getBooleanAsString(object->isSystem());
-
-    else if (cmdName == wxT("users") && !cmdParams.IsEmpty())
-    {
-        Server* s = dynamic_cast<Server*>(object);
-        if (!s)
-            return;
-
-        ProgressIndicator* pi = getProgressIndicator();
-        if (pi)
-        {
-            pi->initProgress(_("Connecting to Server..."));
-            pi->doShow();
-        }
-        UserList* usr = s->getUsers(pi);
-        if (!usr || !usr->size())
-        {
-            windowM->Close();
-            return;
-        }
-        for (UserList::iterator it = usr->begin(); it != usr->end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
-    }
-
-    else if (cmdName == wxT("userinfo") && !cmdParams.IsEmpty())
-    {
-        User* u = dynamic_cast<User*>(object);
-        if (!u)
-            return;
-        if (cmdParams[0] == wxT("username"))
-            processedText += escapeChars(u->usernameM);
-        else if (cmdParams[0] == wxT("first_name"))
-            processedText += escapeChars(u->firstnameM);
-        else if (cmdParams[0] == wxT("middle_name"))
-            processedText += escapeChars(u->middlenameM);
-        else if (cmdParams[0] == wxT("last_name"))
-            processedText += escapeChars(u->lastnameM);
-        else if (cmdParams[0] == wxT("unix_user"))
-            processedText << u->useridM;
-        else if (cmdParams[0] == wxT("unix_group"))
-            processedText << u->groupidM;
-    }
-
-    else if (cmdName == wxT("owner_name"))
-    {
-        wxString name;
-        if (Relation* r = dynamic_cast<Relation*>(object))
-            name = r->getOwner();
-        else if (Procedure* p = dynamic_cast<Procedure*>(object))
-            name = p->getOwner();
-        else if (Role* r = dynamic_cast<Role*>(object))
-            name = r->getOwner();
-        if (!name.IsEmpty())
-            processedText += escapeChars(name, false);
-    }
-
-    else if (cmdName == wxT("object_description"))
-    {
-        wxString desc;
-        if (object->getDescription(desc))
-        {
-            if (desc.IsEmpty())
-                desc = _("No description");
-            processedText += escapeChars(desc);
-            if (!cmdParams.IsEmpty())
-                internalProcessTemplateText(processedText, cmdParams.all(), object);
-        }
-    }
-
-    // TODO: replace with vars and ifeq?
-    else if (cmdName == wxT("show_if_config") && !cmdParams.IsEmpty())
-    {
-        if (cmdParams.Count() >= 2)
-        {
-            if (config().get(cmdParams[0], (cmdParams[1] == wxT("true"))))
-            {
-                cmdParams.RemoveAt(0, 2);
-                internalProcessTemplateText(processedText, cmdParams.all(), object);
-            }
-        }
-    }
-
-    // {%ifeq:<left term>:<right term>:<output if terms equal>[:<output if terms not equal>]%}
+    // {%ifeq:<left term>:<right term>:<true output>[:<false output>]%}
+    // If <left term> equals <right term> expands to <true output>, otherwise
+    // expands to <false output> (or an empty string).
     else if (cmdName == wxT("ifeq") && (cmdParams.Count() >= 3))
     {
         wxString val1;
@@ -230,7 +184,10 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
             processedText += falseText;
     }
 
-    // {%ifcontains:<list>:<term>:<output if term in list>[:<output if term not in list>]%}
+    // {%ifcontains:<list>:<term>:<true output>[:<false output>]%}
+    // If <list> contains <term> expands to <true output>, otherwise
+    // expands to <false output> (or an empty string).
+    // <list> is a list of comma-separated values.
     else if (cmdName == wxT("ifcontains") && (cmdParams.Count() >= 3))
     {
         wxString listStr;
@@ -254,300 +211,10 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
             processedText += falseText;
     }
 
-    else if (cmdName == wxT("columns") && !cmdParams.IsEmpty())  // table and view columns
-    {
-        Relation* r = dynamic_cast<Relation*>(object);
-        if (!r)
-            return;
-        r->ensureChildrenLoaded();
-        for (RelationColumns::iterator it = r->begin(); it != r->end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), (*it).get());
-    }
-
-    else if (cmdName == wxT("relation_triggers") && !cmdParams.IsEmpty())
-    {
-        Relation* r = dynamic_cast<Relation*>(object);
-        if (!r)
-            return;
-        std::vector<Trigger*> tmp;
-        if (cmdParams[0] == wxT("after"))
-            r->getTriggers(tmp, Trigger::afterTrigger);
-        else if (cmdParams[0] == wxT("before"))
-            r->getTriggers(tmp, Trigger::beforeTrigger);
-        cmdParams.RemoveAt(0);
-
-        for (std::vector<Trigger*>::iterator it = tmp.begin(); it != tmp.end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), *it);
-    }
-
-    else if (cmdName == wxT("db_triggers") && !cmdParams.IsEmpty())
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        std::vector<Trigger*> tmp;
-        d->getDatabaseTriggers(tmp);
-        for (std::vector<Trigger*>::iterator it = tmp.begin(); it != tmp.end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), *it);
-    }
-
-    else if (cmdName == wxT("depends_on") || cmdName == wxT("depend_of"))
-    {
-        MetadataItem* m = dynamic_cast<MetadataItem*>(object);
-        if (!m)
-            return;
-        std::vector<Dependency> tmp;
-        m->getDependencies(tmp, cmdName == wxT("depends_on"));
-        for (std::vector<Dependency>::iterator it = tmp.begin(); it != tmp.end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
-    }
-
-    else if (cmdName == wxT("dependency_columns"))
-    {
-        Dependency* d = dynamic_cast<Dependency*>(object);
-        if (!d)
-            return;
-        processedText += d->getFields();
-    }
-
-    else if (cmdName == wxT("primary_key"))
-    {
-        Table* t = dynamic_cast<Table*>(object);
-        if (!t)
-            return;
-        PrimaryKeyConstraint* pk = t->getPrimaryKey();
-        if (!pk)
-            return;
-        internalProcessTemplateText(processedText, cmdParams.all(), pk);
-    }
-
-    else if (cmdName == wxT("foreign_keys"))
-    {
-        Table* t = dynamic_cast<Table*>(object);
-        if (!t)
-            return;
-        std::vector<ForeignKey>* fk = t->getForeignKeys();
-        if (!fk)
-            return;
-        for (std::vector<ForeignKey>::iterator it = fk->begin(); it != fk->end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
-    }
-
-    else if (cmdName == wxT("check_constraints"))
-    {
-        Table* t = dynamic_cast<Table*>(object);
-        if (!t)
-            return;
-        std::vector<CheckConstraint>* c = t->getCheckConstraints();
-        if (!c)
-            return;
-        for (std::vector<CheckConstraint>::iterator it = c->begin(); it != c->end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
-    }
-
-    else if (cmdName == wxT("unique_constraints"))
-    {
-        Table* t = dynamic_cast<Table*>(object);
-        if (!t)
-            return;
-        std::vector<UniqueConstraint>* c = t->getUniqueConstraints();
-        if (!c)
-            return;
-        for (std::vector<UniqueConstraint>::iterator it = c->begin(); it != c->end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
-    }
-
-    else if (cmdName == wxT("check_source"))
-    {
-        CheckConstraint* c = dynamic_cast<CheckConstraint*>(object);
-        if (!c)
-            return;
-        processedText += escapeChars(c->sourceM);
-    }
-
-    // {%constraint_columns%} (uses default separator and suffix)
-    // {%constraint_columns:separator%} (uses default suffix)
-    // {%constraint_columns:separator:suffix%}
-    else if (cmdName == wxT("constraint_columns"))
-    {
-        ColumnConstraint* c = dynamic_cast<ColumnConstraint*>(object);
-        if (!c)
-            return;
-
-        if (cmdParams.IsEmpty())
-            processedText += c->getColumnList();
-        else if (cmdParams.Count() == 1)
-            processedText += c->getColumnList(cmdParams[0]);
-        else if (cmdParams.Count() >= 2)
-            processedText += c->getColumnList(cmdParams[0], cmdParams[1]);
-    }
-
-    else if (cmdName == wxT("fk_referenced_columns"))
-    {
-        ForeignKey* fk = dynamic_cast<ForeignKey*>(object);
-        if (!fk)
-            return;
-        processedText += fk->getReferencedColumnList();
-    }
-
-    else if (cmdName == wxT("fk_table"))
-    {
-        ForeignKey* fk = dynamic_cast<ForeignKey*>(object);
-        if (!fk)
-            return;
-        processedText += fk->referencedTableM;
-    }
-
-    else if (cmdName == wxT("fk_update"))
-    {
-        ForeignKey* fk = dynamic_cast<ForeignKey*>(object);
-        if (!fk)
-            return;
-        processedText += fk->updateActionM;
-    }
-
-    else if (cmdName == wxT("fk_delete"))
-    {
-        ForeignKey* fk = dynamic_cast<ForeignKey*>(object);
-        if (!fk)
-            return;
-        processedText += fk->deleteActionM;
-    }
-
-    else if (cmdName == wxT("column_datatype"))
-    {
-        Column* c = dynamic_cast<Column*>(object);
-        if (c)
-        {   // needs newlines escaped for computed column source
-            processedText += escapeChars(c->getDatatype());
-            // TODO: make the domain name (if any) a link to the domain's property page?
-        }
-    }
-
-    else if (cmdName == wxT("column_nulloption"))
-    {
-        Column* c = dynamic_cast<Column*>(object);
-        if (c)
-            processedText += (c->isNullable() ? wxT("") : wxT("not null"));
-    }
-
-    else if (cmdName == wxT("column_default"))
-    {
-        Column* c = dynamic_cast<Column*>(object);
-        if (c)
-        {
-            wxString def(c->getDefault());
-            def.Trim(false);    // left trim
-            if (def.Upper().StartsWith(wxT("DEFAULT")))
-            {
-                def.Remove(0, 7);
-                def.Trim(false);
-            }
-            processedText += def;
-        }
-    }
-
-    else if (cmdName == wxT("input_parameters") || cmdName == wxT("output_parameters"))     // SP params
-    {
-        Procedure* p = dynamic_cast<Procedure*>(object);
-        if (!p)
-            return;
-
-        SubjectLocker locker(p);
-        p->ensureChildrenLoaded();
-        bool parOut = (cmdName == wxT("output_parameters"));
-        for (ProcedureParameters::iterator it = p->begin();
-            it != p->end(); ++it)
-        {
-            if ((*it)->isOutputParameter() == parOut)
-                internalProcessTemplateText(processedText, cmdParams.all(), (*it).get());
-        }
-    }
-
-    else if (cmdName == wxT("view_source"))
-    {
-        View* v = dynamic_cast<View*>(object);
-        if (!v)
-            return;
-        processedText += escapeChars(v->getSource(), false);
-    }
-
-    else if (cmdName == wxT("procedure_source"))
-    {
-        Procedure* p = dynamic_cast<Procedure*>(object);
-        if (!p)
-            return;
-        processedText += escapeChars(p->getSource(), false);
-    }
-
-    else if (cmdName == wxT("trigger_source"))
-    {
-        Trigger* t = dynamic_cast<Trigger*>(object);
-        if (!t)
-            return;
-        processedText += escapeChars(t->getSource(), false);
-    }
-
-    else if (cmdName == wxT("trigger_info"))
-    {
-        Trigger* t = dynamic_cast<Trigger*>(object);
-        wxString object, type;
-        bool active, isDBtrigger;
-        int position;
-        if (!t)
-            return;
-        t->getTriggerInfo(object, active, position, type, isDBtrigger);
-        wxString s(active ? wxT("Active ") : wxT("Inactive "));
-        s << type << wxT(" trigger ");
-        if (!isDBtrigger)
-            s << wxT("for ") << object;
-        s << wxT(" at position ") << position;
-        processedText += escapeChars(s, false);
-    }
-
-    else if (cmdName == wxT("generator_value"))
-    {
-        Generator* g = dynamic_cast<Generator*>(object);
-        if (!g)
-            return;
-        std::ostringstream ss;
-        ss << g->getValue();
-        processedText += escapeChars(std2wx(ss.str()), false);
-    }
-
-    else if (cmdName == wxT("exception_number"))
-    {
-        Exception* e = dynamic_cast<Exception*>(object);
-        if (!e)
-            return;
-        wxString s;
-        s << e->getNumber();
-        processedText += escapeChars(s, false);
-    }
-
-    else if (cmdName == wxT("exception_message"))
-    {
-        Exception* e = dynamic_cast<Exception*>(object);
-        if (!e)
-            return;
-        processedText += escapeChars(e->getMessage(), false);
-    }
-
-    else if (cmdName == wxT("udfinfo") && !cmdParams.IsEmpty())
-    {
-        Function* f = dynamic_cast<Function*>(object);
-        if (!f)
-            return;
-
-        if (cmdParams[0] == wxT("library"))
-            processedText += escapeChars(f->getLibraryName());
-        else if (cmdParams[0] == wxT("entry_point"))
-            processedText += escapeChars(f->getEntryPoint());
-        else if (cmdParams[0] == wxT("definition"))
-            processedText += escapeChars(f->getDefinition(), false);
-    }
-
-    else if (cmdName == wxT("varcolor") && (cmdParams.Count() >= 2))
+    // {%alternate:text1:text2%}
+    // Alternates expanding to text1 and text2 at each call, starting with text1.
+    // Used to alternate table row colours, for example.
+    else if (cmdName == wxT("alternate") && (cmdParams.Count() >= 2))
     {
         static bool first = false;
         first = !first;
@@ -555,180 +222,6 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
             processedText += cmdParams[0];
         else
             processedText += cmdParams[1];
-    }
-
-    else if (cmdName == wxT("indices"))
-    {
-        Table* t = dynamic_cast<Table*>(object);
-        if (!t)
-            return;
-        std::vector<Index>* ix = t->getIndices();
-        if (!ix)
-            return;
-        for (std::vector<Index>::iterator it = ix->begin(); it != ix->end(); ++it)
-            internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
-    }
-
-    else if (cmdName == wxT("object_ddl"))
-    {
-        ProgressIndicator* pi = getProgressIndicator();
-        if (pi)
-        {
-            pi->setProgressLevelCount(2);
-            pi->initProgress(_("Extracting DDL Definitions"));
-            pi->doShow();
-        }
-        CreateDDLVisitor cdv(pi);
-        object->acceptVisitor(&cdv);
-        processedText += escapeChars(cdv.getSql(), false);
-    }
-
-    else if (cmdName == wxT("indexinfo") && !cmdParams.IsEmpty())
-    {
-        Index* i = dynamic_cast<Index*>(object);
-        if (!i)
-            return;
-        if (cmdParams[0] == wxT("type"))
-            processedText += (i->getIndexType() == Index::itAscending ? wxT("ASC") : wxT("DESC"));
-        else if (cmdParams[0] == wxT("stats"))
-        {
-            std::ostringstream ss;
-            ss << std::fixed << std::setprecision(6) << i->getStatistics();
-            processedText += std2wx(ss.str());
-        }
-        else if (cmdParams[0] == wxT("fields"))
-            processedText += i->getFieldsAsString();
-        else if (cmdParams[0] == wxT("is_active"))
-            processedText += getBooleanAsString(i->isActive());
-        else if (cmdParams[0] == wxT("is_unique"))
-            processedText += getBooleanAsString(i->isUnique());
-    }
-
-    // TODO: group all database-related info inside a {%dbinfo:xxx%}?
-    else if (cmdName == wxT("creation_date"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += d->getInfo().getCreated();
-    }
-    
-    else if (cmdName == wxT("default_charset"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += d->getDatabaseCharset();
-    }
-    
-    else if (cmdName == wxT("dialect"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += wxString() << d->getInfo().getDialect();
-    }
-    
-    else if (cmdName == wxT("filesize"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        int64_t size = d->getInfo().getSizeInBytes();
-        const double kilo = 1024;
-        const double mega = kilo * kilo;
-        const double giga = kilo * mega;
-        if (size >= giga)
-            processedText += wxString::Format(wxT("%0.2fGB"), size / giga);
-        else if (size >= mega)
-            processedText += wxString::Format(wxT("%0.2fMB"), size / mega);
-        else
-            processedText += wxString::Format(wxT("%0.2fkB"), size / kilo);
-    }
-    
-    else if (cmdName == wxT("forced_writes"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += getBooleanAsString(d->getInfo().getForcedWrites());
-    }
-    
-    else if (cmdName == wxT("fullpath"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += d->getConnectionString();
-    }
-    
-    else if (cmdName == wxT("next_transaction"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += wxString() << d->getInfo().getNextTransaction();
-    }
-    
-    else if (cmdName == wxT("ods_version"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += wxString() << d->getInfo().getODS();
-        if (d->getInfo().getODSMinor())
-        {
-            processedText += wxT(".");
-            processedText += wxString() << d->getInfo().getODSMinor();
-        }
-    }
-    
-    else if (cmdName == wxT("oldest_transaction"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += wxString() << d->getInfo().getOldestTransaction();
-    }
-    
-    else if (cmdName == wxT("page_buffers"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += wxString() << d->getInfo().getBuffers();
-    }
-    
-    else if (cmdName == wxT("page_size"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += wxString() << d->getInfo().getPageSize();
-    }
-    
-    else if (cmdName == wxT("pages"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += wxString() << d->getInfo().getPages();
-    }
-    
-    else if (cmdName == wxT("read_only"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += getBooleanAsString(d->getInfo().getReadOnly());
-    }
-    
-    else if (cmdName == wxT("sweep_interval"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += wxString() << d->getInfo().getSweep();
     }
 }
 //-----------------------------------------------------------------------------

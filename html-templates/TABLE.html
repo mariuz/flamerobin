@@ -19,13 +19,13 @@ Owner: {%owner_name%}<br>
       <td><b><font color=white>Field</font></b></td>
       <td><b><font color=white>Type</font></b></td>
       <td><b><font color=white>NULL</font></b></td>
-      {%show_if_config:DisplayColumnDefault:true:
+      {%ifeq:{%getglobalconf:DisplayColumnDefault%}:1:
       <td><b><font color=white>Default</font></b></td>%}
-      {%show_if_config:DisplayColumnDescription:true:
+      {%ifeq:{%getglobalconf:DisplayColumnDescription%}:1:
       <td><b><font color=white>Description</font></b></td>%}
     </tr>
-    {%columns:
-    <tr bgcolor="{%varcolor:#DDDDFF:#CCCCFF%}">
+    {%relation_columns:
+    <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       {%ifeq:{%is_system%}:false:
       <td valign="top" nowrap>
           <a href="fr://drop_field?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}drop.png"></a>
@@ -36,14 +36,12 @@ Owner: {%owner_name%}<br>
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top">{%column_datatype%}</td>
       <td nowrap valign="top"><b>{%column_nulloption%}</b></td>
-      {%show_if_config:displayColumnDefault:true:
-      <td nowrap valign="top">{%column_default%}</td>
-      %}
-      {%show_if_config:displayColumnDescription:true:
+      {%ifeq:{%getglobalconf:DisplayColumnDefault%}:1:
+      <td nowrap valign="top">{%column_default%}</td>%}
+      {%ifeq:{%getglobalconf:DisplayColumnDescription%}:1:
       <td valign="top"><font size=-1>{%object_description%} {%ifeq:{%is_system%}:false:[<a
         href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font>%}
-      </td>
-      %}
+      </td>%}
     </tr>
     %}
   </tbody>
