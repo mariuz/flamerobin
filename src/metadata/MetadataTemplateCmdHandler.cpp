@@ -111,6 +111,9 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             processedText += tp->escapeChars(name);
     }
 
+    // {%object_description%}
+    // Expands to the current object's description, if available.
+    // Otherwise expands to an empty string.
     else if (cmdName == wxT("object_description"))
     {
         wxString desc;
@@ -119,60 +122,14 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             if (desc.IsEmpty())
                 desc = _("No description");
             processedText += tp->escapeChars(desc);
-            if (!cmdParams.IsEmpty())
-                tp->internalProcessTemplateText(processedText, cmdParams.all(), object);
         }
     }
 
-    else if (cmdName == wxT("relation_columns") && !cmdParams.IsEmpty())
-    {
-        Relation* r = dynamic_cast<Relation*>(object);
-        if (!r)
-            return;
-        r->ensureChildrenLoaded();
-        for (RelationColumns::iterator it = r->begin(); it != r->end(); ++it)
-            tp->internalProcessTemplateText(processedText, cmdParams.all(), (*it).get());
-    }
-
-    else if (cmdName == wxT("relation_triggers") && !cmdParams.IsEmpty())
-    {
-        Relation* r = dynamic_cast<Relation*>(object);
-        if (!r)
-            return;
-        std::vector<Trigger*> tmp;
-        if (cmdParams[0] == wxT("after"))
-            r->getTriggers(tmp, Trigger::afterTrigger);
-        else if (cmdParams[0] == wxT("before"))
-            r->getTriggers(tmp, Trigger::beforeTrigger);
-        cmdParams.RemoveAt(0);
-
-        for (std::vector<Trigger*>::iterator it = tmp.begin(); it != tmp.end(); ++it)
-            tp->internalProcessTemplateText(processedText, cmdParams.all(), *it);
-    }
-
-    else if (cmdName == wxT("db_triggers") && !cmdParams.IsEmpty())
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        std::vector<Trigger*> tmp;
-        d->getDatabaseTriggers(tmp);
-        for (std::vector<Trigger*>::iterator it = tmp.begin(); it != tmp.end(); ++it)
-            tp->internalProcessTemplateText(processedText, cmdParams.all(), *it);
-    }
-
-    else if (cmdName == wxT("depends_on") || cmdName == wxT("depend_of"))
-    {
-        MetadataItem* m = dynamic_cast<MetadataItem*>(object);
-        if (!m)
-            return;
-        std::vector<Dependency> tmp;
-        m->getDependencies(tmp, cmdName == wxT("depends_on"));
-        for (std::vector<Dependency>::iterator it = tmp.begin(); it != tmp.end(); ++it)
-            tp->internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
-    }
-
-    else if (cmdName == wxT("dependency_columns"))
+    // {%dependencyinfo:property%}
+    // If the current object is a dependency, expands to the requested
+    // property of the dependency object.
+    else if ((cmdName == wxT("dependencyinfo")) && (cmdParams.Count() >= 1)
+        && (cmdParams[0] == wxT("fields")))
     {
         Dependency* d = dynamic_cast<Dependency*>(object);
         if (!d)
@@ -180,6 +137,9 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         processedText += d->getFields();
     }
 
+    // {%primary_key:<text>%}
+    // If the current object is a table, processes <text> after switching
+    // the current object to the table's primary key.
     else if (cmdName == wxT("primary_key"))
     {
         Table* t = dynamic_cast<Table*>(object);
@@ -191,130 +151,84 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         tp->internalProcessTemplateText(processedText, cmdParams.all(), pk);
     }
 
-    else if (cmdName == wxT("foreign_keys"))
-    {
-        Table* t = dynamic_cast<Table*>(object);
-        if (!t)
-            return;
-        std::vector<ForeignKey>* fk = t->getForeignKeys();
-        if (!fk)
-            return;
-        for (std::vector<ForeignKey>::iterator it = fk->begin(); it != fk->end(); ++it)
-            tp->internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
-    }
-
-    else if (cmdName == wxT("check_constraints"))
-    {
-        Table* t = dynamic_cast<Table*>(object);
-        if (!t)
-            return;
-        std::vector<CheckConstraint>* c = t->getCheckConstraints();
-        if (!c)
-            return;
-        for (std::vector<CheckConstraint>::iterator it = c->begin(); it != c->end(); ++it)
-            tp->internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
-    }
-
-    else if (cmdName == wxT("unique_constraints"))
-    {
-        Table* t = dynamic_cast<Table*>(object);
-        if (!t)
-            return;
-        std::vector<UniqueConstraint>* c = t->getUniqueConstraints();
-        if (!c)
-            return;
-        for (std::vector<UniqueConstraint>::iterator it = c->begin(); it != c->end(); ++it)
-            tp->internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
-    }
-
-    else if (cmdName == wxT("check_source"))
+    // {%checkconstraintinfo:<property>%}
+    // If the current object is a check constraint, expands to the constraint's
+    // requested property.
+    else if ((cmdName == wxT("checkconstraintinfo")) && (cmdParams.Count() >= 1))
     {
         CheckConstraint* c = dynamic_cast<CheckConstraint*>(object);
         if (!c)
             return;
-        processedText += tp->escapeChars(c->sourceM);
+
+        if (cmdParams[0] == wxT("source"))
+            processedText += tp->escapeChars(c->getSource(), false);
     }
 
-    // {%constraint_columns%} (uses default separator and suffix)
-    // {%constraint_columns:separator%} (uses default suffix)
-    // {%constraint_columns:separator:suffix%}
-    else if (cmdName == wxT("constraint_columns"))
+    // {%constraintinfo:columns%} (uses default separator and suffix)
+    // {%constraintinfo:columns:separator%} (uses default suffix)
+    // {%constraintinfo:columns:separator:suffix%}
+    // If the current object is a column constraint (primary key, unique
+    // constraint, foreign key, check constraint), expands to
+    // a delimited list of constraint columns.
+    else if ((cmdName == wxT("constraintinfo")) && (cmdParams.Count() >= 1)
+        && (cmdParams[0] == wxT("columns")))
     {
         ColumnConstraint* c = dynamic_cast<ColumnConstraint*>(object);
         if (!c)
             return;
 
-        if (cmdParams.IsEmpty())
+        if (cmdParams.Count() == 1)
             processedText += c->getColumnList();
-        else if (cmdParams.Count() == 1)
-            processedText += c->getColumnList(cmdParams[0]);
-        else if (cmdParams.Count() >= 2)
-            processedText += c->getColumnList(cmdParams[0], cmdParams[1]);
+        else if (cmdParams.Count() == 2)
+            processedText += c->getColumnList(cmdParams[1]);
+        else if (cmdParams.Count() >= 3)
+            processedText += c->getColumnList(cmdParams[1], cmdParams.all(2));
     }
 
-    else if (cmdName == wxT("fk_referenced_columns"))
+    // {%fkinfo:<property>%}
+    // If the current object is a foreign key, expands to the foreign key's
+    // requested property.
+    else if ((cmdName == wxT("fkinfo")) && (cmdParams.Count() >= 1))
     {
         ForeignKey* fk = dynamic_cast<ForeignKey*>(object);
         if (!fk)
             return;
-        processedText += fk->getReferencedColumnList();
+
+        if (cmdParams[0] == wxT("ref_columns"))
+            processedText += tp->escapeChars(fk->getReferencedColumnList());
+        else if (cmdParams[0] == wxT("ref_table"))
+            processedText += tp->escapeChars(fk->getReferencedTable());
+        else if (cmdParams[0] == wxT("update_action"))
+            processedText += tp->escapeChars(fk->getUpdateAction());
+        else if (cmdParams[0] == wxT("delete_action"))
+            processedText += tp->escapeChars(fk->getDeleteAction());
     }
 
-    else if (cmdName == wxT("fk_table"))
-    {
-        ForeignKey* fk = dynamic_cast<ForeignKey*>(object);
-        if (!fk)
-            return;
-        processedText += fk->referencedTableM;
-    }
-
-    else if (cmdName == wxT("fk_update"))
-    {
-        ForeignKey* fk = dynamic_cast<ForeignKey*>(object);
-        if (!fk)
-            return;
-        processedText += fk->updateActionM;
-    }
-
-    else if (cmdName == wxT("fk_delete"))
-    {
-        ForeignKey* fk = dynamic_cast<ForeignKey*>(object);
-        if (!fk)
-            return;
-        processedText += fk->deleteActionM;
-    }
-
-    // TODO: change to a single columninfo command.
-    else if (cmdName == wxT("column_datatype"))
+    // {%columninfo:<property>%}
+    // If the current object is a column, expands to the column's
+    // requested property.
+    else if ((cmdName == wxT("columninfo")) && (cmdParams.Count() >= 1))
     {
         Column* c = dynamic_cast<Column*>(object);
-        if (c)
-        {   // needs newlines escaped for computed column source
+        if (!c)
+            return;
+
+        if (cmdParams[0] == wxT("datatype"))
             processedText += tp->escapeChars(c->getDatatype());
-            // TODO: make the domain name (if any) a link to the domain's property page?
-        }
-    }
-
-    else if (cmdName == wxT("column_nulloption"))
-    {
-        Column* c = dynamic_cast<Column*>(object);
-        if (c)
-            processedText += (c->isNullable() ? wxT("") : wxT("not null"));
-    }
-
-    else if (cmdName == wxT("column_default"))
-    {
-        Column* c = dynamic_cast<Column*>(object);
-        if (c)
+        else if (cmdParams[0] == wxT("is_nullable"))
+            processedText += tp->escapeChars(getBooleanAsString(c->isNullable()));
+        else if (cmdParams[0] == wxT("null_option"))
+            processedText += tp->escapeChars(c->isNullable() ? wxT("") : wxT("not null"));
+        else if (cmdParams[0] == wxT("default_expression"))
         {
             wxString def(c->getDefault());
-            def.Trim(false);    // left trim
+            def.Trim(false);
             if (def.Upper().StartsWith(wxT("DEFAULT")))
             {
                 def.Remove(0, 7);
                 def.Trim(false);
             }
-            processedText += def;
+            processedText += tp->escapeChars(def, false);
         }
     }
 
@@ -601,6 +515,9 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
     {
         wxString sep;
         tp->internalProcessTemplateText(sep, cmdParams[1], object);
+        
+        // {%foreach:column:<separator>:<text>%}
+        // If the current object is a relation, processes <text> for each column.
         if (cmdParams[0] == wxT("column"))
         {
             Relation* r = dynamic_cast<Relation*>(object);
@@ -611,12 +528,112 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             for (RelationColumns::iterator it = r->begin(); it != r->end(); ++it)
             {
                 wxString newText;
-                tp->internalProcessTemplateText(newText, cmdParams[2], (*it).get());
+                tp->internalProcessTemplateText(newText, cmdParams.all(2), (*it).get());
                 if ((!firstItem) && (!newText.IsEmpty()))
                     processedText += sep;                    
                 if (!newText.IsEmpty())
                     firstItem = false;
                 processedText += newText;
+            }
+        }
+
+        // {%foreach:foreign_key:<separator>:<text>%}
+        // If the current object is a table, processes <text> for each foreign key.
+        else if (cmdParams[0] == wxT("foreign_key"))
+        {
+            Table* t = dynamic_cast<Table*>(object);
+            if (!t)
+                return;
+            std::vector<ForeignKey>* fks = t->getForeignKeys();
+            if (!fks)
+                return;
+            bool firstItem = true;
+            for (std::vector<ForeignKey>::iterator it = fks->begin(); it != fks->end(); ++it)
+            {
+                wxString newText;
+                tp->internalProcessTemplateText(newText, cmdParams.all(2), &(*it));
+                if ((!firstItem) && (!newText.IsEmpty()))
+                    processedText += sep;                    
+                if (!newText.IsEmpty())
+                    firstItem = false;
+                processedText += newText;
+            }
+        }
+
+        // {%foreach:check_constraint:<separator>:<text>%}
+        // If the current object is a table, processes <text> for each check constraint.
+        else if (cmdParams[0] == wxT("check_constraint"))
+        {
+            Table* t = dynamic_cast<Table*>(object);
+            if (!t)
+                return;
+            std::vector<CheckConstraint>* c = t->getCheckConstraints();
+            if (!c)
+                return;
+            bool firstItem = true;
+            for (std::vector<CheckConstraint>::iterator it = c->begin(); it != c->end(); ++it)
+            {
+                wxString newText;
+                tp->internalProcessTemplateText(newText, cmdParams.all(2), &(*it));
+                if ((!firstItem) && (!newText.IsEmpty()))
+                    processedText += sep;                    
+                if (!newText.IsEmpty())
+                    firstItem = false;
+                processedText += newText;
+            }
+        }
+
+        // {%foreach:unique_constraint:<separator>:<text>%}
+        // If the current object is a table, processes <text> for each unique constraint.
+        else if (cmdParams[0] == wxT("unique_constraint"))
+        {
+            Table* t = dynamic_cast<Table*>(object);
+            if (!t)
+                return;
+            std::vector<UniqueConstraint>* c = t->getUniqueConstraints();
+            if (!c)
+                return;
+            bool firstItem = true;
+            for (std::vector<UniqueConstraint>::iterator it = c->begin(); it != c->end(); ++it)
+            {
+                wxString newText;
+                tp->internalProcessTemplateText(newText, cmdParams.all(2), &(*it));
+                if ((!firstItem) && (!newText.IsEmpty()))
+                    processedText += sep;                    
+                if (!newText.IsEmpty())
+                    firstItem = false;
+                processedText += newText;
+            }
+        }
+
+        // {%foreach:trigger:<separator>:<before|after>:<text>%}
+        // If the current object is a relation, processes <text> for
+        // each "before" or "after" trigger. If the current object is
+        // a database, processes <text> for all database triggers and the
+        // third param is ignored.
+        else if (cmdParams[0] == wxT("trigger"))
+        {
+            std::vector<Trigger*> triggers;
+            
+            Relation* r = dynamic_cast<Relation*>(object);
+            if (r)
+            {
+                if (cmdParams[2] == wxT("after"))
+                    r->getTriggers(triggers, Trigger::afterTrigger);
+                else if (cmdParams[2] == wxT("before"))
+                    r->getTriggers(triggers, Trigger::beforeTrigger);
+            }
+            else
+            {
+                Database* d = dynamic_cast<Database*>(object);
+                if (d)
+                    d->getDatabaseTriggers(triggers);
+            }
+
+            for (std::vector<Trigger*>::iterator it = triggers.begin();
+                it != triggers.end(); ++it)
+            {
+                tp->internalProcessTemplateText(processedText, cmdParams.all(3), *it);
             }
         }
 
@@ -632,7 +649,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             for (PrivilegeItems::iterator it = list.begin(); it != list.end(); ++it)
             {
                 wxString newText;
-                tp->internalProcessTemplateText(newText, cmdParams[3], &(*it));
+                tp->internalProcessTemplateText(newText, cmdParams.all(3), &(*it));
                 if ((!firstItem) && (!newText.IsEmpty()))
                     processedText += sep;                    
                 if (!newText.IsEmpty())
@@ -657,6 +674,21 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             if (!p)
                 return;
             for (std::vector<Privilege>::iterator it = p->begin(); it != p->end(); ++it)
+                tp->internalProcessTemplateText(processedText, cmdParams.all(2), &(*it));
+        }
+
+        // {%foreach:depends_on:<separator>:<text>%}
+        // Lists all objects on which the current object depends.
+        // {%foreach:dependent:<separator>:<text>%}
+        // Lists all objects that depend on the current object.
+        else if (cmdParams[0] == wxT("depends_on") || cmdParams[0] == wxT("dependent"))
+        {
+            MetadataItem* m = dynamic_cast<MetadataItem*>(object);
+            if (!m)
+                return;
+            std::vector<Dependency> deps;
+            m->getDependencies(deps, cmdParams[0] == wxT("depends_on"));
+            for (std::vector<Dependency>::iterator it = deps.begin(); it != deps.end(); ++it)
                 tp->internalProcessTemplateText(processedText, cmdParams.all(2), &(*it));
         }
 

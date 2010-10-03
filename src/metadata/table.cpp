@@ -273,7 +273,7 @@ void Table::loadPrimaryKey()
 
         primaryKeyM.setName_(cname);
         primaryKeyM.columnsM.push_back(fname);
-        primaryKeyM.indexName = ixname;
+        primaryKeyM.indexNameM = ixname;
     }
     primaryKeyM.setParent(this);
     primaryKeyLoadedM = true;
@@ -322,7 +322,7 @@ void Table::loadUniqueConstraints()
             UniqueConstraint c;
             uniqueConstraintsM.push_back(c);
             cc = &uniqueConstraintsM.back();
-            cc->indexName = ixname;
+            cc->indexNameM = ixname;
             cc->setName_(cname);
             cc->columnsM.push_back(fname);
             cc->setParent(this);
@@ -426,7 +426,7 @@ void Table::loadForeignKeys()
             fkp->setParent(this);
             fkp->updateActionM = update_rule;
             fkp->deleteActionM = delete_rule;
-            fkp->indexName = ixname;
+            fkp->indexNameM = ixname;
 
             st2->Set(1, ref_constraint);
             st2->Execute();

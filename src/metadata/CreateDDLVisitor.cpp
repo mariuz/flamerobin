@@ -272,7 +272,7 @@ void CreateDDLVisitor::visitException(Exception& e)
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visitForeignKey(ForeignKey& fk)
 {
-    Identifier reftab(fk.referencedTableM);
+    Identifier reftab(fk.getReferencedTable());
     wxString src_col, dest_col;
     for (std::vector<wxString>::const_iterator it = fk.begin(); it != fk.end(); ++it)
     {
@@ -281,10 +281,10 @@ void CreateDDLVisitor::visitForeignKey(ForeignKey& fk)
         Identifier id(*it);
         src_col += id.getQuoted();
     }
-    for (std::vector<wxString>::const_iterator it = fk.referencedColumnsM.begin();
-        it != fk.referencedColumnsM.end(); ++it)
+    for (std::vector<wxString>::const_iterator it = fk.getReferencedColumns().begin();
+        it != fk.getReferencedColumns().end(); ++it)
     {
-        if (it != fk.referencedColumnsM.begin())
+        if (it != fk.getReferencedColumns().begin())
             dest_col += wxT(",");
         Identifier id(*it);
         dest_col += id.getQuoted();
@@ -294,10 +294,10 @@ void CreateDDLVisitor::visitForeignKey(ForeignKey& fk)
         postSqlM += wxT(" CONSTRAINT ") + fk.getQuotedName();
     postSqlM += wxT("\n  FOREIGN KEY (") + src_col + wxT(") REFERENCES ")
         + reftab.getQuoted() + wxT(" (") + dest_col + wxT(")");
-    wxString upd = fk.updateActionM;
+    wxString upd = fk.getUpdateAction();
     if (!upd.IsEmpty() && upd != wxT("RESTRICT"))
         postSqlM += wxT(" ON UPDATE ") + upd;
-    wxString del = fk.deleteActionM;
+    wxString del = fk.getDeleteAction();
     if (!del.IsEmpty() && del != wxT("RESTRICT"))
         postSqlM += wxT(" ON DELETE ") + del;
     addIndex(fk.getTable()->getIndices(), postSqlM, &fk);
@@ -442,11 +442,11 @@ void CreateDDLVisitor::visitRole(Role& r)
 void addIndex(std::vector<Index> *ix, wxString& sql, ColumnConstraint *cc)
 {
     // only for FB 1.5+
-    if (!ix || cc->indexName.StartsWith(wxT("RDB$")) || cc->getName_() == cc->indexName)
+    if (!ix || cc->getIndexName().StartsWith(wxT("RDB$")) || cc->getName_() == cc->getIndexName())
         return;
     for (std::vector<Index>::iterator it = ix->begin(); it != ix->end(); ++it)
     {
-        if ((*it).getName_() == cc->indexName)
+        if ((*it).getName_() == cc->getIndexName())
         {
             sql += wxT("\n  USING ");
             if ((*it).getIndexType() == Index::itDescending)
@@ -506,7 +506,7 @@ void CreateDDLVisitor::visitTable(Table& t)
             postSqlM += wxT("ALTER TABLE ") + t.getQuotedName() + wxT(" ADD ");
             if (!(*ci).isSystem())
                 postSqlM += wxT("CONSTRAINT ") + (*ci).getQuotedName();
-            postSqlM += wxT("\n  ") + (*ci).sourceM + wxT(";\n");
+            postSqlM += wxT("\n  ") + (*ci).getSource() + wxT(";\n");
         }
     }
 

@@ -87,7 +87,7 @@ public:
     wxString getRebuildSql(const wxString& forColumn = wxT(""));
     std::vector<Privilege>* getPrivileges();
     bool getChildren(std::vector<MetadataItem *>& temp);
-    void getTriggers(std::vector<Trigger *>& list,
+    void getTriggers(std::vector<Trigger*>& list,
         Trigger::fireTimeType beforeOrAfter);
 };
 //-----------------------------------------------------------------------------

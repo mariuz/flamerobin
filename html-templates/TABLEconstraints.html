@@ -18,13 +18,13 @@
     </tr>
     {%primary_key:
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
-      {%parent:{%ifeq:{%is_system%}:false:
+      {%ifeq:{%parent:{%is_system%}%}:false:
       <td valign="top">
           <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}drop.png"></a>
       </td>
-      %}%}
+      %}
       <td nowrap valign="top">{%object_name%}</td>
-      <td nowrap valign="top">{%constraint_columns%}</td>
+      <td nowrap valign="top">{%constraintinfo:columns%}</td>
     </tr>%}
   </tbody>
 </table>
@@ -45,19 +45,19 @@
       <td nowrap><b><font color=white>On update</font></b></td>
       <td nowrap><b><font color=white>On delete</font></b></td>
     </tr>
-    {%foreign_keys:
+    {%foreach:foreign_key::
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
-      {%parent:{%ifeq:{%is_system%}:false:
+      {%ifeq:{%parent:{%is_system%}%}:false:
       <td nowrap valign="top">
           <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}drop.png"></a>
       </td>
-      %}%}
+      %}
       <td nowrap valign="top">{%object_name%}</td>
-      <td valign="top">{%constraint_columns%}</td>
-      <td nowrap valign="top"><a href="fr://properties?object_type=TABLE&amp;object_name={%fk_table%}&amp;parent_window={%parent_window%}&amp;helper_object={%object_address%}">{%fk_table%}</a></td>
-      <td valign="top">{%fk_referenced_columns%}</td>
-      <td nowrap valign="top">{%fk_update%}</td>
-      <td nowrap valign="top">{%fk_delete%}</td>
+      <td valign="top">{%constraintinfo:columns%}</td>
+      <td nowrap valign="top"><a href="fr://properties?object_type=TABLE&amp;object_name={%fkinfo:ref_table%}&amp;parent_window={%parent_window%}&amp;helper_object={%object_address%}">{%fkinfo:ref_table%}</a></td>
+      <td valign="top">{%fkinfo:ref_columns%}</td>
+      <td nowrap valign="top">{%fkinfo:update_action%}</td>
+      <td nowrap valign="top">{%fkinfo:delete_action%}</td>
     </tr>%}
   </tbody>
 </table>
@@ -75,15 +75,15 @@
       <td nowrap><b><font color=white>Unique constraint</font></b></td>
       <td nowrap><b><font color=white>On field(s)</font></b></td>
     </tr>
-    {%unique_constraints:
+    {%foreach:unique_constraint::
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
-      {%parent:{%ifeq:{%is_system%}:false:
+      {%ifeq:{%parent:{%is_system%}%}:false:
       <td nowrap valign="top">
         <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}drop.png"></a>
       </td>
-      %}%}
+      %}
       <td nowrap valign="top">{%object_name%}</td>
-      <td nowrap valign="top">{%constraint_columns%}</td>
+      <td nowrap valign="top">{%constraintinfo:columns%}</td>
     </tr>%}
   </tbody>
 </table>
@@ -101,15 +101,15 @@
       <td nowrap><b><font color=white>Check constraint</font></b></td>
       <td nowrap><b><font color=white>Source</font></b></td>
     </tr>
-    {%check_constraints:
+    {%foreach:check_constraint::
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
-      {%parent:{%ifeq:{%is_system%}:false:
+      {%ifeq:{%parent:{%is_system%}%}:false:
       <td nowrap valign="top">
         <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}drop.png"></a>
       </td>
-      %}%}
+      %}
       <td nowrap valign="top">{%object_name%}</td>
-      <td nowrap valign="top">{%check_source%}</td>
+      <td nowrap valign="top">{%checkconstraintinfo:source%}</td>
     </tr>%}
   </tbody>
 </table>

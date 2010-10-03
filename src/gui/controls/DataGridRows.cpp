@@ -1673,7 +1673,7 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
         if (!locator)   // neither PK nor UNQ found, look for RDB$DB_KEY
         {
             UniqueConstraint uc;
-            uc.columnsM.push_back(wxT("DB_KEY"));
+            uc.getColumns().push_back(wxT("DB_KEY"));
             uc.setParent(t);
             locator = &uc;
             checkColumnsPresent(databaseM, statementM, &locator);

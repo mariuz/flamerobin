@@ -100,7 +100,7 @@ public:
         for (std::vector<ForeignKey>::iterator fi = fk->begin();
             fi != fk->end(); ++fi)
         {
-            Identifier id((*fi).referencedTableM);
+            Identifier id((*fi).getReferencedTable());
             if (id.getQuoted() == t->getQuotedName())   // self reference
                 continue;
             std::map<wxString, int>::iterator it =
@@ -571,8 +571,8 @@ GeneratorSettings* DataGeneratorFrame::getSettings(Column *c)
             Identifier id(*ci);
             if (id.getQuoted() == c->getQuotedName())
             {
-                Identifier table((*fi).referencedTableM);
-                Identifier column((*fi).referencedColumnsM[cnt]);
+                Identifier table((*fi).getReferencedTable());
+                Identifier column((*fi).getReferencedColumns()[cnt]);
                 fkt = table.getQuoted();
                 fkc = column.getQuoted();
                 break;

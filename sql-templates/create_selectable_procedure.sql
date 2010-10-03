@@ -2,7 +2,7 @@
 
 create procedure SP_{%object_name%}
 returns ( {%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
-    {%object_name%} {%column_datatype%}%}%}
+    {%object_name%} {%columninfo:datatype%}%}%}
 )
 as
 begin

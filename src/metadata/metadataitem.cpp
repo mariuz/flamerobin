@@ -442,14 +442,14 @@ void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
         for (vector<ForeignKey>::const_iterator it = f->begin(); it != f->end(); ++it)
         {
             MetadataItem *table = d->findByNameAndType(ntTable,
-                (*it).referencedTableM);
+                (*it).getReferencedTable());
             if (!table)
             {
                 throw FRError(wxString::Format(_("Table %s not found."),
-                    (*it).referencedTableM.c_str()));
+                    (*it).getReferencedTable().c_str()));
             }
             Dependency de(table);
-            de.setFields((*it).referencedColumnsM);
+            de.setFields((*it).getReferencedColumns());
             list.push_back(de);
         }
 

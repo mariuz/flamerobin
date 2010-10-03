@@ -210,7 +210,7 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
             for (std::vector<ForeignKey>::iterator it = relatedTables.begin();
                 it != relatedTables.end(); ++it)
             {
-                wxString addme = (*it).referencedTableM + wxT(":  ")
+                wxString addme = (*it).getReferencedTable() + wxT(":  ")
                     + (*it).getJoin(false); // false = unquoted
                 if (as.Index(addme) == wxNOT_FOUND)
                     as.Add(addme);

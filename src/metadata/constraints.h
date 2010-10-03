@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -31,6 +31,8 @@
 #include <vector>
 
 #include "metadata/metadataitem.h"
+
+class Relation;
 class Table;
 //-----------------------------------------------------------------------------
 class Constraint: public MetadataItem
@@ -43,16 +45,21 @@ public:
 //-----------------------------------------------------------------------------
 class ColumnConstraint: public Constraint
 {
+    friend class Relation;
+    friend class Table;
 public:
     typedef std::vector<wxString>::const_iterator const_iterator;
-    wxString indexName; // needed for DDL extraction
-    std::vector<wxString> columnsM;
-
+    std::vector<wxString>::const_iterator begin() { return columnsM.begin(); };
+    std::vector<wxString>::const_iterator end() { return columnsM.end(); };
     wxString getColumnList(const wxString& separator = wxT(", "),
         const wxString& suffix = wxT("")) const;
-    const_iterator begin() { return columnsM.begin(); };
-    const_iterator end() { return columnsM.end(); };
     bool hasColumn(const wxString& column) const;
+    const wxString& getIndexName() const { return indexNameM; };
+    std::vector<wxString>& getColumns() { return columnsM; };
+protected:
+    std::vector<wxString> columnsM;
+private:
+    wxString indexNameM;
 };
 //-----------------------------------------------------------------------------
 //! uniques
@@ -72,21 +79,32 @@ public:
 //! checks
 class CheckConstraint: public ColumnConstraint
 {
+    friend class Relation;
+    friend class Table;
 public:
+    const wxString& getSource() const { return sourceM; }
+private:
     wxString sourceM;
 };
 //-----------------------------------------------------------------------------
 //! foreign keys
 class ForeignKey: public ColumnConstraint
 {
+    friend class Relation;
+    friend class Table;
 public:
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
-    wxString referencedTableM;                   // referenced table
-    std::vector<wxString> referencedColumnsM;    // referenced columns
-    wxString updateActionM;
-    wxString deleteActionM;
     wxString getReferencedColumnList() const;
     wxString getJoin(bool quoted) const;
+    const wxString& getReferencedTable() const { return referencedTableM; };
+    const wxString& getUpdateAction() const { return updateActionM; };
+    const wxString& getDeleteAction() const { return deleteActionM; };
+    const std::vector<wxString>& getReferencedColumns() const { return referencedColumnsM; };
+private:
+    wxString referencedTableM;
+    std::vector<wxString> referencedColumnsM;
+    wxString updateActionM;
+    wxString deleteActionM;
 };
 //-----------------------------------------------------------------------------
 #endif
