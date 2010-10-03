@@ -37,8 +37,13 @@
 
 class ProgressIndicator;
 //-----------------------------------------------------------------------------
+class MetadataCollectionBase : public MetadataItem
+{
+    virtual bool isSystem() const { return false; }
+};
+//-----------------------------------------------------------------------------
 template <class T>
-class MetadataCollection: public MetadataItem
+class MetadataCollection : public MetadataCollectionBase
 {
 public:
     typedef typename boost::ptr_list<T> CollectionType;
@@ -206,11 +211,6 @@ public:
         if (changed)
             notifyObservers();
     }
-
-    virtual bool isSystem() const
-    {
-        return getType() == ntSysTables;
-    };
 
     inline const_iterator begin() const
     {

@@ -197,6 +197,7 @@ class SysTables: public MetadataCollection<Table>
 {
 public:
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    virtual bool isSystem() const { return true; }
 };
 //-----------------------------------------------------------------------------
 class Tables: public MetadataCollection<Table>
