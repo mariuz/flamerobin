@@ -65,13 +65,279 @@ public:
 //-----------------------------------------------------------------------------
 const MetadataTemplateCmdHandler MetadataTemplateCmdHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
+void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
     wxString cmdName, TemplateCmdParams cmdParams, MetadataItem* object,
     wxString& processedText)
 {
+    struct Local
+    {
+        // Implements the body of all {%foreach%} loops.
+        static void foreachIteration(bool& firstItem,
+            TemplateProcessor* tp, wxString& processedText,
+            wxString separator, wxString text, MetadataItem* m)
+        {
+            wxString newText;
+            tp->internalProcessTemplateText(newText, text, m);
+            if ((!firstItem) && (!newText.IsEmpty()))
+                processedText += tp->escapeChars(separator);
+            if (!newText.IsEmpty())
+                firstItem = false;
+            processedText += newText;
+        }
+    };
+
+    // {%foreach:<collection>:<separator>:<text>%}
+    // repeats <text> once for each item in <collection>, pasting a <separator>
+    // before each item except the first.
+    if ((cmdName == wxT("foreach")) && (cmdParams.Count() >= 3))
+    {
+        wxString sep;
+        tp->internalProcessTemplateText(sep, cmdParams[1], object);
+        
+        // {%foreach:column:<separator>:<text>%}
+        // If the current object is a relation, processes <text> for each column.
+        if (cmdParams[0] == wxT("column"))
+        {
+            Relation* r = dynamic_cast<Relation*>(object);
+            if (!r)
+                return;
+            r->ensureChildrenLoaded();
+            bool firstItem = true;
+            for (RelationColumns::iterator it = r->begin(); it != r->end(); ++it)
+            {
+                Local::foreachIteration(firstItem, tp, processedText, sep,
+                    cmdParams.all(2), (*it).get());
+            }
+        }
+
+        // {%foreach:foreign_key:<separator>:<text>%}
+        // If the current object is a table, processes <text> for each foreign key.
+        else if (cmdParams[0] == wxT("foreign_key"))
+        {
+            Table* t = dynamic_cast<Table*>(object);
+            if (!t)
+                return;
+            std::vector<ForeignKey>* fks = t->getForeignKeys();
+            if (!fks)
+                return;
+            bool firstItem = true;
+            for (std::vector<ForeignKey>::iterator it = fks->begin(); it != fks->end(); ++it)
+            {
+                Local::foreachIteration(firstItem, tp, processedText, sep,
+                    cmdParams.all(2), &(*it));
+            }
+        }
+
+        // {%foreach:check_constraint:<separator>:<text>%}
+        // If the current object is a table, processes <text> for each check constraint.
+        else if (cmdParams[0] == wxT("check_constraint"))
+        {
+            Table* t = dynamic_cast<Table*>(object);
+            if (!t)
+                return;
+            std::vector<CheckConstraint>* c = t->getCheckConstraints();
+            if (!c)
+                return;
+            bool firstItem = true;
+            for (std::vector<CheckConstraint>::iterator it = c->begin(); it != c->end(); ++it)
+            {
+                Local::foreachIteration(firstItem, tp, processedText, sep,
+                    cmdParams.all(2), &(*it));
+            }
+        }
+
+        // {%foreach:unique_constraint:<separator>:<text>%}
+        // If the current object is a table, processes <text> for each unique constraint.
+        else if (cmdParams[0] == wxT("unique_constraint"))
+        {
+            Table* t = dynamic_cast<Table*>(object);
+            if (!t)
+                return;
+            std::vector<UniqueConstraint>* c = t->getUniqueConstraints();
+            if (!c)
+                return;
+            bool firstItem = true;
+            for (std::vector<UniqueConstraint>::iterator it = c->begin(); it != c->end(); ++it)
+            {
+                Local::foreachIteration(firstItem, tp, processedText, sep,
+                    cmdParams.all(2), &(*it));
+            }
+        }
+
+        // {%foreach:index:<separator>:<text>%}
+        // If the current object is a table, processes <text> for each index.
+        else if (cmdParams[0] == wxT("index"))
+        {
+            Table* t = dynamic_cast<Table*>(object);
+            if (!t)
+                return;
+            std::vector<Index>* ix = t->getIndices();
+            if (!ix)
+                return;
+            bool firstItem = true;
+            for (std::vector<Index>::iterator it = ix->begin(); it != ix->end(); ++it)
+            {
+                Local::foreachIteration(firstItem, tp, processedText, sep,
+                    cmdParams.all(2), &(*it));
+            }
+        }
+
+        // {%foreach:trigger:<separator>:<before|after>:<text>%}
+        // If the current object is a relation, processes <text> for
+        // each "before" or "after" trigger. If the current object is
+        // a database, processes <text> for all database triggers and the
+        // third param is ignored.
+        else if ((cmdParams[0] == wxT("trigger")) && (cmdParams.Count() >= 4))
+        {
+            std::vector<Trigger*> triggers;
+            
+            Relation* r = dynamic_cast<Relation*>(object);
+            if (r)
+            {
+                if (cmdParams[2] == wxT("after"))
+                    r->getTriggers(triggers, Trigger::afterTrigger);
+                else if (cmdParams[2] == wxT("before"))
+                    r->getTriggers(triggers, Trigger::beforeTrigger);
+            }
+            else
+            {
+                Database* d = dynamic_cast<Database*>(object);
+                if (d)
+                    d->getDatabaseTriggers(triggers);
+            }
+
+            bool firstItem = true;
+            for (std::vector<Trigger*>::iterator it = triggers.begin();
+                it != triggers.end(); ++it)
+            {
+                Local::foreachIteration(firstItem, tp, processedText, sep,
+                    cmdParams.all(3), *it);
+            }
+        }
+
+        // {%foreach:privilegeitem:<separator>:<type>:<text>%}
+        // If the current object is a privilege, processes <text> for each privilege item
+        // of the specified <type> (SELECT, INSERT, UPDATE, DELETE, EXECUTE, REFERENCES,
+        // MEMBER OF).
+        else if ((cmdParams[0] == wxT("privilegeitem")) && (cmdParams.Count() >= 4))
+        {
+            Privilege* p = dynamic_cast<Privilege*>(object);
+            if (!p)
+                return;
+            PrivilegeItems list;
+            p->getPrivilegeItems(cmdParams[2], list);
+            bool firstItem = true;
+            for (PrivilegeItems::iterator it = list.begin(); it != list.end(); ++it)
+            {
+                Local::foreachIteration(firstItem, tp, processedText, sep,
+                    cmdParams.all(3), &(*it));
+            }
+        }
+
+        // {%foreach:privilege:<separator>:<text>%}
+        // If the current object is a relation, procedure or role,
+        // processes <text> for each privilege.
+        else if (cmdParams[0] == wxT("privilege"))
+        {
+            Relation* rel = dynamic_cast<Relation*>(object);
+            Procedure* proc = dynamic_cast<Procedure*>(object);
+            Role* role = dynamic_cast<Role*>(object);
+            std::vector<Privilege>* p = 0;
+            if (rel)
+                p = rel->getPrivileges();
+            if (proc)
+                p = proc->getPrivileges();
+            if (role)
+                p = role->getPrivileges();
+            if (!p)
+                return;
+            bool firstItem = true;
+            for (std::vector<Privilege>::iterator it = p->begin(); it != p->end(); ++it)
+            {
+                Local::foreachIteration(firstItem, tp, processedText, sep,
+                    cmdParams.all(2), &(*it));
+            }
+        }
+
+        // {%foreach:depends_on:<separator>:<text>%}
+        // Lists all objects on which the current object depends.
+        // {%foreach:dependent:<separator>:<text>%}
+        // Lists all objects that depend on the current object.
+        else if (cmdParams[0] == wxT("depends_on") || cmdParams[0] == wxT("dependent"))
+        {
+            MetadataItem* m = dynamic_cast<MetadataItem*>(object);
+            if (!m)
+                return;
+            std::vector<Dependency> deps;
+            m->getDependencies(deps, cmdParams[0] == wxT("depends_on"));
+            bool firstItem = true;
+            for (std::vector<Dependency>::iterator it = deps.begin(); it != deps.end(); ++it)
+            {
+                Local::foreachIteration(firstItem, tp, processedText, sep,
+                    cmdParams.all(2), &(*it));
+            }
+        }
+
+        // {%foreach:parameter:<separator>:<input|output>:<text>%}
+        // If the current object is a procedure, processes <text> for
+        // each "input" or "output" parameter.
+        else if ((cmdParams[0] == wxT("parameter")) && (cmdParams.Count() >= 4))
+        {
+            Procedure* p = dynamic_cast<Procedure*>(object);
+            if (!p)
+                return;
+
+            SubjectLocker locker(p);
+            p->ensureChildrenLoaded();
+            bool isOut = (cmdParams[0] == wxT("output"));
+            bool firstItem = true;
+            for (ProcedureParameters::iterator it = p->begin();
+                it != p->end(); ++it)
+            {
+                if ((*it)->isOutputParameter() == isOut)
+                {
+                    Local::foreachIteration(firstItem, tp, processedText, sep,
+                        cmdParams.all(3), (*it).get());
+                }
+            }
+        }
+
+        // {%foreach:user:<separator>:<text>%}
+        // If the current object is a server, processes
+        // the specified text once for each defined user,
+        // switching each time the current object to the nth user.
+        else if (cmdParams[0] == wxT("user"))
+        {
+            Server* s = dynamic_cast<Server*>(object);
+            if (!s)
+                return;
+
+            ProgressIndicator* pi = tp->getProgressIndicator();
+            if (pi)
+            {
+                pi->initProgress(_("Connecting to Server..."));
+                pi->doShow();
+            }
+
+            UserList* usr = s->getUsers(pi);
+            if (!usr || !usr->size())
+                return;
+
+            bool firstItem = true;
+            for (UserList::iterator it = usr->begin(); it != usr->end(); ++it)
+            {
+                Local::foreachIteration(firstItem, tp, processedText, sep,
+                    cmdParams.all(3), &(*it));
+            }
+        }
+        // add more collections here.
+        else
+            return;
+    }
+
     // {%object_name%}
     // Expands to the current object's (non quoted) name.
-    if (cmdName == wxT("object_name"))
+    else if (cmdName == wxT("object_name"))
         processedText += object->getName_();
 
     // {%object_quoted_name%}
@@ -430,303 +696,6 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             processedText += wxString() << d->getInfo().getOldestTransaction();
         else if (cmdParams[0] == wxT("next_transaction"))
             processedText += wxString() << d->getInfo().getNextTransaction();
-    }
-
-    // {%foreach:<collection>:<separator>:<text>%}
-    // repeats <text> once for each item in <collection>, pasting a <separator>
-    // before each item except the first.
-    if ((cmdName == wxT("foreach")) && (cmdParams.Count() >= 3))
-    {
-        wxString sep;
-        tp->internalProcessTemplateText(sep, cmdParams[1], object);
-        
-        // {%foreach:column:<separator>:<text>%}
-        // If the current object is a relation, processes <text> for each column.
-        if (cmdParams[0] == wxT("column"))
-        {
-            Relation* r = dynamic_cast<Relation*>(object);
-            if (!r)
-                return;
-            r->ensureChildrenLoaded();
-            bool firstItem = true;
-            for (RelationColumns::iterator it = r->begin(); it != r->end(); ++it)
-            {
-                wxString newText;
-                tp->internalProcessTemplateText(newText, cmdParams.all(2), (*it).get());
-                if ((!firstItem) && (!newText.IsEmpty()))
-                    processedText += sep;                    
-                if (!newText.IsEmpty())
-                    firstItem = false;
-                processedText += newText;
-            }
-        }
-
-        // {%foreach:foreign_key:<separator>:<text>%}
-        // If the current object is a table, processes <text> for each foreign key.
-        else if (cmdParams[0] == wxT("foreign_key"))
-        {
-            Table* t = dynamic_cast<Table*>(object);
-            if (!t)
-                return;
-            std::vector<ForeignKey>* fks = t->getForeignKeys();
-            if (!fks)
-                return;
-            bool firstItem = true;
-            for (std::vector<ForeignKey>::iterator it = fks->begin(); it != fks->end(); ++it)
-            {
-                wxString newText;
-                tp->internalProcessTemplateText(newText, cmdParams.all(2), &(*it));
-                if ((!firstItem) && (!newText.IsEmpty()))
-                    processedText += sep;                    
-                if (!newText.IsEmpty())
-                    firstItem = false;
-                processedText += newText;
-            }
-        }
-
-        // {%foreach:check_constraint:<separator>:<text>%}
-        // If the current object is a table, processes <text> for each check constraint.
-        else if (cmdParams[0] == wxT("check_constraint"))
-        {
-            Table* t = dynamic_cast<Table*>(object);
-            if (!t)
-                return;
-            std::vector<CheckConstraint>* c = t->getCheckConstraints();
-            if (!c)
-                return;
-            bool firstItem = true;
-            for (std::vector<CheckConstraint>::iterator it = c->begin(); it != c->end(); ++it)
-            {
-                wxString newText;
-                tp->internalProcessTemplateText(newText, cmdParams.all(2), &(*it));
-                if ((!firstItem) && (!newText.IsEmpty()))
-                    processedText += sep;                    
-                if (!newText.IsEmpty())
-                    firstItem = false;
-                processedText += newText;
-            }
-        }
-
-        // {%foreach:unique_constraint:<separator>:<text>%}
-        // If the current object is a table, processes <text> for each unique constraint.
-        else if (cmdParams[0] == wxT("unique_constraint"))
-        {
-            Table* t = dynamic_cast<Table*>(object);
-            if (!t)
-                return;
-            std::vector<UniqueConstraint>* c = t->getUniqueConstraints();
-            if (!c)
-                return;
-            bool firstItem = true;
-            for (std::vector<UniqueConstraint>::iterator it = c->begin(); it != c->end(); ++it)
-            {
-                wxString newText;
-                tp->internalProcessTemplateText(newText, cmdParams.all(2), &(*it));
-                if ((!firstItem) && (!newText.IsEmpty()))
-                    processedText += sep;                    
-                if (!newText.IsEmpty())
-                    firstItem = false;
-                processedText += newText;
-            }
-        }
-
-        // {%foreach:index:<separator>:<text>%}
-        // If the current object is a table, processes <text> for each index.
-        else if (cmdParams[0] == wxT("index"))
-        {
-            Table* t = dynamic_cast<Table*>(object);
-            if (!t)
-                return;
-            std::vector<Index>* ix = t->getIndices();
-            if (!ix)
-                return;
-            bool firstItem = true;
-            for (std::vector<Index>::iterator it = ix->begin(); it != ix->end(); ++it)
-            {
-                wxString newText;
-                tp->internalProcessTemplateText(newText, cmdParams.all(2), &(*it));
-                if ((!firstItem) && (!newText.IsEmpty()))
-                    processedText += sep;                    
-                if (!newText.IsEmpty())
-                    firstItem = false;
-                processedText += newText;
-            }
-        }
-
-        // {%foreach:trigger:<separator>:<before|after>:<text>%}
-        // If the current object is a relation, processes <text> for
-        // each "before" or "after" trigger. If the current object is
-        // a database, processes <text> for all database triggers and the
-        // third param is ignored.
-        else if ((cmdParams[0] == wxT("trigger")) && (cmdParams.Count() >= 4))
-        {
-            std::vector<Trigger*> triggers;
-            
-            Relation* r = dynamic_cast<Relation*>(object);
-            if (r)
-            {
-                if (cmdParams[2] == wxT("after"))
-                    r->getTriggers(triggers, Trigger::afterTrigger);
-                else if (cmdParams[2] == wxT("before"))
-                    r->getTriggers(triggers, Trigger::beforeTrigger);
-            }
-            else
-            {
-                Database* d = dynamic_cast<Database*>(object);
-                if (d)
-                    d->getDatabaseTriggers(triggers);
-            }
-
-            for (std::vector<Trigger*>::iterator it = triggers.begin();
-                it != triggers.end(); ++it)
-            {
-                tp->internalProcessTemplateText(processedText, cmdParams.all(3), *it);
-            }
-        }
-
-        // {%foreach:privilegeitem:<separator>:<type>:<text>%}
-        // If the current object is a privilege, processes <text> for each privilege item
-        // of the specified <type> (SELECT, INSERT, UPDATE, DELETE, EXECUTE, REFERENCES,
-        // MEMBER OF).
-        else if ((cmdParams[0] == wxT("privilegeitem")) && (cmdParams.Count() >= 4))
-        {
-            Privilege* p = dynamic_cast<Privilege*>(object);
-            if (!p)
-                return;
-            PrivilegeItems list;
-            p->getPrivilegeItems(cmdParams[2], list);
-            bool firstItem = true;
-            for (PrivilegeItems::iterator it = list.begin(); it != list.end(); ++it)
-            {
-                wxString newText;
-                tp->internalProcessTemplateText(newText, cmdParams.all(3), &(*it));
-                if ((!firstItem) && (!newText.IsEmpty()))
-                    processedText += sep;                    
-                if (!newText.IsEmpty())
-                    firstItem = false;
-                processedText += newText;
-            }
-        }
-
-        // {%foreach:privilege:<separator>:<text>%}
-        // If the current object is a relation, procedure or role,
-        // processes <text> for each privilege.
-        else if (cmdParams[0] == wxT("privilege"))
-        {
-            Relation* rel = dynamic_cast<Relation*>(object);
-            Procedure* proc = dynamic_cast<Procedure*>(object);
-            Role* role = dynamic_cast<Role*>(object);
-            std::vector<Privilege>* p = 0;
-            if (rel)
-                p = rel->getPrivileges();
-            if (proc)
-                p = proc->getPrivileges();
-            if (role)
-                p = role->getPrivileges();
-            if (!p)
-                return;
-            bool firstItem = true;
-            for (std::vector<Privilege>::iterator it = p->begin(); it != p->end(); ++it)
-            {
-                wxString newText;
-                tp->internalProcessTemplateText(newText, cmdParams.all(2), &(*it));
-                if ((!firstItem) && (!newText.IsEmpty()))
-                    processedText += sep;                    
-                if (!newText.IsEmpty())
-                    firstItem = false;
-                processedText += newText;
-            }
-        }
-
-        // {%foreach:depends_on:<separator>:<text>%}
-        // Lists all objects on which the current object depends.
-        // {%foreach:dependent:<separator>:<text>%}
-        // Lists all objects that depend on the current object.
-        else if (cmdParams[0] == wxT("depends_on") || cmdParams[0] == wxT("dependent"))
-        {
-            MetadataItem* m = dynamic_cast<MetadataItem*>(object);
-            if (!m)
-                return;
-            std::vector<Dependency> deps;
-            m->getDependencies(deps, cmdParams[0] == wxT("depends_on"));
-            bool firstItem = true;
-            for (std::vector<Dependency>::iterator it = deps.begin(); it != deps.end(); ++it)
-            {
-                wxString newText;
-                tp->internalProcessTemplateText(newText, cmdParams.all(2), &(*it));
-                if ((!firstItem) && (!newText.IsEmpty()))
-                    processedText += sep;                    
-                if (!newText.IsEmpty())
-                    firstItem = false;
-                processedText += newText;
-            }
-        }
-
-        // {%foreach:parameter:<separator>:<input|output>:<text>%}
-        // If the current object is a procedure, processes <text> for
-        // each "input" or "output" parameter.
-        else if ((cmdParams[0] == wxT("parameter")) && (cmdParams.Count() >= 4))
-        {
-            Procedure* p = dynamic_cast<Procedure*>(object);
-            if (!p)
-                return;
-
-            SubjectLocker locker(p);
-            p->ensureChildrenLoaded();
-            bool isOut = (cmdParams[0] == wxT("output"));
-            bool firstItem = true;
-            for (ProcedureParameters::iterator it = p->begin();
-                it != p->end(); ++it)
-            {
-                if ((*it)->isOutputParameter() == isOut)
-                {
-                    wxString newText;
-                    tp->internalProcessTemplateText(newText, cmdParams.all(3), (*it).get());
-                    if ((!firstItem) && (!newText.IsEmpty()))
-                        processedText += sep;                    
-                    if (!newText.IsEmpty())
-                        firstItem = false;
-                    processedText += newText;
-                }
-            }
-        }
-
-        // {%foreach:user:<separator>:<text>%}
-        // If the current object is a server, processes
-        // the specified text once for each defined user,
-        // switching each time the current object to the nth user.
-        else if (cmdParams[0] == wxT("user"))
-        {
-            Server* s = dynamic_cast<Server*>(object);
-            if (!s)
-                return;
-
-            ProgressIndicator* pi = tp->getProgressIndicator();
-            if (pi)
-            {
-                pi->initProgress(_("Connecting to Server..."));
-                pi->doShow();
-            }
-
-            UserList* usr = s->getUsers(pi);
-            if (!usr || !usr->size())
-                return;
-
-            bool firstItem = true;
-            for (UserList::iterator it = usr->begin(); it != usr->end(); ++it)
-            {
-                wxString newText;
-                tp->internalProcessTemplateText(newText, cmdParams.all(3), &(*it));
-                if ((!firstItem) && (!newText.IsEmpty()))
-                    processedText += sep;                    
-                if (!newText.IsEmpty())
-                    firstItem = false;
-                processedText += newText;
-            }
-        }
-        // add more collections here.
-        else
-            return;
     }
 
     // {%privilegeinfo:<property>%}
