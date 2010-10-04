@@ -75,7 +75,7 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database&)
     menuM->Append(Cmds::Menu_Disconnect, _("&Disconnect"));
     menuM->Append(Cmds::Menu_Reconnect, _("Reconnec&t"));
     menuM->AppendSeparator();
-    menuM->Append(Cmds::Menu_Query, _("Execute &SQL statements"));
+    menuM->Append(Cmds::Menu_ExecuteStatements, _("Execute &SQL statements"));
     menuM->AppendSeparator();
 
     wxMenu* actions = new wxMenu();

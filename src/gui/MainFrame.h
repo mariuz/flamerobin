@@ -76,7 +76,7 @@ public:
     void OnMenuMonitorEvents(wxCommandEvent& event);
     void OnMenuGenerateData(wxCommandEvent& event);
     void OnMenuBackup(wxCommandEvent& event);
-    void OnMenuQuery(wxCommandEvent& event);
+    void OnMenuExecuteStatements(wxCommandEvent& event);
     void OnMenuInsert(wxCommandEvent& event);
     void OnMenuBrowseColumns(wxCommandEvent& event);
     void OnMenuRestore(wxCommandEvent& event);
@@ -101,7 +101,6 @@ public:
     void OnMenuConnectAs(wxCommandEvent& event);
     void OnMenuReconnect(wxCommandEvent& event);
     void OnMenuDatabasePreferences(wxCommandEvent& event);
-    void OnMenuDatabaseProperties(wxCommandEvent& event);
     void OnMenuDatabaseExtractDDL(wxCommandEvent& event);
 
     // create new object

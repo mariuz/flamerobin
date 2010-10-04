@@ -404,13 +404,11 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::Menu_RecreateDatabase, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_MENU(Cmds::Menu_DropDatabase, MainFrame::OnMenuDropDatabase)
     EVT_UPDATE_UI(Cmds::Menu_DropDatabase, MainFrame::OnMenuUpdateIfDatabaseConnected)
-    EVT_MENU(Cmds::Menu_Query, MainFrame::OnMenuQuery)
-    EVT_UPDATE_UI(Cmds::Menu_Query, MainFrame::OnMenuUpdateIfDatabaseSelected)
+    EVT_MENU(Cmds::Menu_ExecuteStatements, MainFrame::OnMenuExecuteStatements)
+    EVT_UPDATE_UI(Cmds::Menu_ExecuteStatements, MainFrame::OnMenuUpdateIfDatabaseSelected)
     EVT_UPDATE_UI(Cmds::Menu_NewObject, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_MENU(Cmds::Menu_DatabasePreferences, MainFrame::OnMenuDatabasePreferences)
     EVT_UPDATE_UI(Cmds::Menu_DatabasePreferences, MainFrame::OnMenuUpdateIfDatabaseSelected)
-    EVT_MENU(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuDatabaseProperties)
-    EVT_UPDATE_UI(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_MENU(Cmds::Menu_ExtractDatabaseDDL, MainFrame::OnMenuDatabaseExtractDDL)
     EVT_UPDATE_UI(Cmds::Menu_ExtractDatabaseDDL, MainFrame::OnMenuUpdateIfDatabaseConnected)
 
@@ -430,6 +428,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(Cmds::Menu_AlterObject, MainFrame::OnMenuAlterObject)
     EVT_MENU(Cmds::Menu_DropObject, MainFrame::OnMenuDropObject)
     EVT_MENU(Cmds::Menu_ObjectProperties, MainFrame::OnMenuObjectProperties)
+    EVT_UPDATE_UI(Cmds::Menu_ObjectProperties, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_MENU(Cmds::Menu_ObjectRefresh, MainFrame::OnMenuObjectRefresh)
     EVT_UPDATE_UI(Cmds::Menu_ObjectRefresh, MainFrame::OnMenuUpdateIfDatabaseConnected)
 
@@ -761,15 +760,6 @@ void MainFrame::OnMenuDatabaseExtractDDL(wxCommandEvent& WXUNUSED(event))
         wxString::Format(wxT("%ld"), (uintptr_t)this) +
         wxT("&object_address=") + wxString::Format(wxT("%ld"), (uintptr_t)db));
     getURIProcessor().handleURI(uri);
-}
-//-----------------------------------------------------------------------------
-void MainFrame::OnMenuDatabaseProperties(wxCommandEvent& WXUNUSED(event))
-{
-    Database* db = getDatabase(treeMainM->getSelectedMetadataItem());
-    if (!db)
-        return;
-
-    frameManager().showMetadataPropertyFrame(db);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))
@@ -1591,7 +1581,7 @@ void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
 }
 //-----------------------------------------------------------------------------
 //! create new ExecSqlFrame and attach database object to it
-void MainFrame::OnMenuQuery(wxCommandEvent& WXUNUSED(event))
+void MainFrame::OnMenuExecuteStatements(wxCommandEvent& WXUNUSED(event))
 {
     Database* d = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(d))

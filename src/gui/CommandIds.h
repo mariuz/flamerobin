@@ -83,14 +83,14 @@ namespace Cmds
         Menu_CreateDatabase, Menu_ManageUsers, Menu_UnRegisterServer,
         Menu_ServerProperties, Menu_Reconnect, Menu_ConnectAs,
         Menu_ExecuteProcedure, Menu_UnRegisterDatabase, Menu_Backup,
-        Menu_Restore, Menu_Connect, Menu_Disconnect, Menu_Query,
+        Menu_Restore, Menu_Connect, Menu_Disconnect, Menu_ExecuteStatements,
         Menu_ShowConnectedUsers, Menu_CreateObject, Menu_DatabasePreferences,
         Menu_ShowAllGeneratorValues, Menu_BrowseColumns, Menu_Insert,
         Menu_LoadColumnsInfo, Menu_ObjectProperties, Menu_ObjectRefresh,
         Menu_DropObject, Menu_ShowGeneratorValue, Menu_SetGeneratorValue,
         Menu_AddColumn, Menu_CreateTriggerForTable, Menu_RestoreIntoNew,
         Menu_MonitorEvents, Menu_GetServerVersion, Menu_AlterObject,
-        Menu_DropDatabase, Menu_RecreateDatabase, Menu_DatabaseProperties,
+        Menu_DropDatabase, Menu_RecreateDatabase,
         Menu_GenerateData, Menu_ExtractDatabaseDDL,
 
         // view menu
