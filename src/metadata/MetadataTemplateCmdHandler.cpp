@@ -49,7 +49,7 @@
 #include "metadata/relation.h"
 #include "metadata/role.h"
 #include "metadata/server.h"
-#include "metadata/user.h"
+#include "metadata/User.h"
 
 //-----------------------------------------------------------------------------
 using namespace std;
