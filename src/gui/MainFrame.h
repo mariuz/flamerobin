@@ -41,6 +41,7 @@
 #include "metadata/root.h"
 #include "framemanager.h"
 //-----------------------------------------------------------------------------
+class Database;
 class DBHTreeControl;
 class LabelPanel;
 //-----------------------------------------------------------------------------
@@ -151,6 +152,10 @@ public:
     bool openUnregisteredDatabase(const wxString& dbpath);
 private:
     SharedRootPtr rootM;
+
+    bool getAutoConnectDatabase();
+    bool tryAutoConnectDatabase();
+    bool tryAutoConnectDatabase(Database* database);
 
     bool connect();
     void showGeneratorValue(Generator* g);

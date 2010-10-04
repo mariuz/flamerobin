@@ -405,7 +405,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(Cmds::Menu_DropDatabase, MainFrame::OnMenuDropDatabase)
     EVT_UPDATE_UI(Cmds::Menu_DropDatabase, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_MENU(Cmds::Menu_ExecuteStatements, MainFrame::OnMenuExecuteStatements)
-    EVT_UPDATE_UI(Cmds::Menu_ExecuteStatements, MainFrame::OnMenuUpdateIfDatabaseSelected)
+    EVT_UPDATE_UI(Cmds::Menu_ExecuteStatements, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_UPDATE_UI(Cmds::Menu_NewObject, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_MENU(Cmds::Menu_DatabasePreferences, MainFrame::OnMenuDatabasePreferences)
     EVT_UPDATE_UI(Cmds::Menu_DatabasePreferences, MainFrame::OnMenuUpdateIfDatabaseSelected)
@@ -755,6 +755,8 @@ void MainFrame::OnMenuDatabaseExtractDDL(wxCommandEvent& WXUNUSED(event))
     MetadataItem* db = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!db)
         return;
+    if (!tryAutoConnectDatabase())
+        return;
 
     URI uri = URI(wxT("fr://edit_ddl?parent_window=") +
         wxString::Format(wxT("%ld"), (uintptr_t)this) +
@@ -999,17 +1001,19 @@ void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
 {
-    Database* d = getDatabase(treeMainM->getSelectedMetadataItem());
-    if (!checkValidDatabase(d))
+    Database* db = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (!checkValidDatabase(db))
+        return;
+    if (!tryAutoConnectDatabase(db))
         return;
 
     wxArrayString as;
     std::vector<std::string> users;
-    d->getIBPPDatabase()->Users(users);
+    db->getIBPPDatabase()->Users(users);
     for (std::vector<std::string>::const_iterator i = users.begin(); i != users.end(); ++i)
         as.Add(std2wx(*i));
 
-    ::wxGetSingleChoice(_("Connected users"), d->getPath(), as);
+    ::wxGetSingleChoice(_("Connected users"), db->getPath(), as);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuGetServerVersion(wxCommandEvent& WXUNUSED(event))
@@ -1045,6 +1049,8 @@ void MainFrame::OnMenuGenerateData(wxCommandEvent& WXUNUSED(event))
     Database* db = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(db))
         return;
+    if (!tryAutoConnectDatabase(db))
+        return;
 
     DataGeneratorFrame* f = new DataGeneratorFrame(this, db);
     f->Show();
@@ -1054,6 +1060,8 @@ void MainFrame::OnMenuMonitorEvents(wxCommandEvent& WXUNUSED(event))
 {
     Database* db = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(db))
+        return;
+    if (!tryAutoConnectDatabase(db))
         return;
 
     EventWatcherFrame* ewf = EventWatcherFrame::findFrameFor(db);
@@ -1127,6 +1135,35 @@ void MainFrame::OnMenuConnectAs(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuConnect(wxCommandEvent& WXUNUSED(event))
 {
     connect();
+}
+//-----------------------------------------------------------------------------
+bool MainFrame::getAutoConnectDatabase()
+{
+    int value;
+    if (config().getValue(wxT("DIALOG_ConfirmAutoConnect"), value))
+        return value == wxOK;
+    // enable all commands to show the dialog when connection is needed
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool MainFrame::tryAutoConnectDatabase()
+{
+    Database* db = getDatabase(treeMainM->getSelectedMetadataItem());
+    return checkValidDatabase(db) && tryAutoConnectDatabase(db);
+}
+//-----------------------------------------------------------------------------
+bool MainFrame::tryAutoConnectDatabase(Database* database)
+{
+    if (database->isConnected())
+        return true;
+
+    int res = showQuestionDialog(this, _("Do you want to connect to the database?"),
+        _("The database is not connected. You first have to establish a connection before you can execute SQL statements or otherwise work with the database."),
+        AdvancedMessageDialogButtonsYesNoCancel(_("C&onnect"), _("Do&n't connect")),
+        config(), wxT("DIALOG_ConfirmAutoConnect"), _("Don't ask again, &always (don't) connect"));
+    if (res == wxOK)
+        connect();
+    return database->isConnected();
 }
 //-----------------------------------------------------------------------------
 bool MainFrame::connect()
@@ -1436,11 +1473,9 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
     MetadataItem* m = treeMainM->getSelectedMetadataItem();
     if (!m)
         return;
+    if (!tryAutoConnectDatabase())
+        return;
 
-    Database* d = dynamic_cast<Database*>(m);
-    if ((d) && (!d->isConnected()))
-        connectDatabase(d, this);
-        
     Column* c = dynamic_cast<Column*>(m);
     if (c)
     {
@@ -1462,6 +1497,9 @@ void MainFrame::OnMenuObjectRefresh(wxCommandEvent& WXUNUSED(event))
 {
     if (MetadataItem* mi = treeMainM->getSelectedMetadataItem())
     {
+        if (!tryAutoConnectDatabase())
+            return;
+
         // make sure notifyObservers() is called only once
         SubjectLocker lock(mi);
 
@@ -1583,23 +1621,14 @@ void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
 //! create new ExecSqlFrame and attach database object to it
 void MainFrame::OnMenuExecuteStatements(wxCommandEvent& WXUNUSED(event))
 {
-    Database* d = getDatabase(treeMainM->getSelectedMetadataItem());
-    if (!checkValidDatabase(d))
+    Database* db = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (!checkValidDatabase(db))
         return;
-    if (!d->isConnected())
-    {
-        int res = showQuestionDialog(this, _("Do you want to connect to the database?"),
-            _("The database is not connected. You first have to establish a database connection before you can execute SQL statements."),
-            AdvancedMessageDialogButtonsOkCancel(_("C&onnect")),
-            config(), wxT("DIALOG_ConfirmConnectForQuery"), _("Always connect without asking"));
-        if (res == wxOK)
-            connect();
-    }
-    if (!d->isConnected())
+    if (!tryAutoConnectDatabase(db))
         return;
 
     wxBusyCursor bc;
-    showSql(this, wxString(_("Execute SQL statements")), d, wxEmptyString);
+    showSql(this, wxString(_("Execute SQL statements")), db, wxEmptyString);
 }
 //-----------------------------------------------------------------------------
 const wxString MainFrame::getName() const
@@ -1622,7 +1651,7 @@ void MainFrame::OnMenuUpdateIfServerSelected(wxUpdateUIEvent& event)
 void MainFrame::OnMenuUpdateIfDatabaseConnected(wxUpdateUIEvent& event)
 {
     Database* d = getDatabase(treeMainM->getSelectedMetadataItem());
-    event.Enable(d != 0 && d->isConnected());
+    event.Enable(d != 0 && (d->isConnected() || getAutoConnectDatabase()));
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateIfDatabaseNotConnected(wxUpdateUIEvent& event)
