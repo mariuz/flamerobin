@@ -112,8 +112,6 @@ private:
     void load(const IBPP::Database database);
     void reloadIfNecessary(const IBPP::Database database);
 public:
-    wxString getCreated() const;
-
     int getODS() const;
     int getODSMinor() const;
     bool getODSVersionIsHigherOrEqualTo(int versionMajor) const;
@@ -133,6 +131,7 @@ public:
 
     bool getReadOnly() const;
     bool getForcedWrites() const;
+    bool getReserve() const;
 };
 //-----------------------------------------------------------------------------
 class DatabaseAuthenticationMode

@@ -1447,6 +1447,10 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
     if (!m)
         return;
 
+    Database* d = dynamic_cast<Database*>(m);
+    if ((d) && (!d->isConnected()))
+        connectDatabase(d, this);
+        
     Column* c = dynamic_cast<Column*>(m);
     if (c)
     {

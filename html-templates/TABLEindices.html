@@ -21,24 +21,24 @@
       <td valign="top"><b><font color=white>Statistics</font></b></td>
       <td valign="top"><b><font color=white>Description</font></b></td>
     </tr>
-    {%indices:
+    {%foreach:index::
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
-      {%parent:{%ifeq:{%is_system%}:false:
+      {%ifeq:{%parent:{%is_system%}%}:false:
       <td valign="top" nowrap>
           <a href="fr://index_action?type=DROP&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}drop.png"></a>
           <a href="fr://index_action?type=RECOMPUTE&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}compute.png"></a>
       </td>
-      %}%}
+      %}
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top" align="center">{%indexinfo:type%}</td>
       <td nowrap valign="top" align="center">
-      {%parent:{%ifeq:{%is_system%}:false:
+      {%ifeq:{%parent:{%is_system%}%}:false:
         <a href="fr://index_action?type=TOGGLE_ACTIVE&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">
-      %}%}
+      %}
       <img src="{%template_root%}{%ifeq:{%indexinfo:is_active%}:true:ok.png:redx.png%}">
-      {%parent:{%ifeq:{%is_system%}:false:
+      {%ifeq:{%parent:{%is_system%}%}:false:
       </a>
-      %}%}
+      %}
       </td>
       <td nowrap valign="top" align="center"><img src="{%template_root%}{%ifeq:{%indexinfo:is_unique%}:true:ok.png:redx.png%}"></td>
       <td valign="top">{%indexinfo:fields%}</td>

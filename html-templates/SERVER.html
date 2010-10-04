@@ -16,7 +16,7 @@
       <td><b><font color=white>Unix user ID</font></b></td>
       <td><b><font color=white>Unix group ID</font></b></td>
     </tr>
-    {%users:
+    {%foreach:user::
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       <td valign="top" nowrap>
           <a href="fr://edit_user?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}view.png"></a>

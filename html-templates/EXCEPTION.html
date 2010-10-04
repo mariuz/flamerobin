@@ -10,12 +10,14 @@
 {%object_description%} [<a
  href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=TRIGGER&amp;object_name={%object_name%}">edit</a>]
 <br><br>
-<b>Exception number:</b> {%exception_number%}<br>
-<br>
 <table cellspacing=1 cellpadding=3 border=0 width="98%" bgcolor="black">
-<tr><td bgcolor="navy"><font color=white><b>Message</b> [<a href="fr://edit_exception?parent_window={%parent_window%}&amp;object_address={%object_address%}"><font color="yellow">edit</font></a>]</font></td>
+<tr>
+  <td width="20" bgcolor="navy"><font color="white"><b>Number</b></font></td>
+  <td bgcolor="navy"><font color="white"><b>Message</b> [<a href="fr://edit_exception?parent_window={%parent_window%}&amp;object_address={%object_address%}"><font color="yellow">edit</font></a>]</font></td>
 </tr>
-<tr><td bgcolor="#DDDDFF">{%exception_message%}</td></tr>
+<tr>
+  <td width="20" bgcolor="#DDDDFF" align="right">{%exceptioninfo:number%}</td></tr>
+  <td bgcolor="#DDDDFF">{%exceptioninfo:message%}</td></tr>
 </table>
 </body>
 </html>

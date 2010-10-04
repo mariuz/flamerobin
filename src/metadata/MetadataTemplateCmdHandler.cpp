@@ -272,7 +272,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             bool isActive, isDBTrigger;
             int position;
             t->getTriggerInfo(object, isActive, position, type, isDBTrigger);
-            if (cmdParams[0] == wxT("object_name"))
+            if (cmdParams[0] == wxT("name"))
                 processedText += tp->escapeChars(object);
             else if (cmdParams[0] == wxT("is_active"))
                 processedText += tp->escapeChars(getBooleanAsString(isActive));
@@ -285,36 +285,41 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         }
     }
 
-    else if (cmdName == wxT("generator_value"))
+    // {%generatorinfo:<property>%}
+    // If the current object is a generator, expands to the generator's
+    // requested property.
+    else if ((cmdName == wxT("generatorinfo")) && (cmdParams.Count() >= 1))
     {
         Generator* g = dynamic_cast<Generator*>(object);
         if (!g)
             return;
-        std::ostringstream ss;
-        ss << g->getValue();
-        processedText += tp->escapeChars(std2wx(ss.str()));
+        if (cmdParams[0] == wxT("value"))
+        {
+            std::ostringstream ss;
+            ss << g->getValue();
+            //processedText += tp->escapeChars(std2wx(ss.str()));
+            processedText << g->getValue();
+        }
     }
 
-    // TODO: switch to a single exceptioninfo command.
-    else if (cmdName == wxT("exception_number"))
+    // {%exceptioninfo:<property>%}
+    // If the current object is an exception, expands to the exception's
+    // requested property.
+    else if ((cmdName == wxT("exceptioninfo")) && (cmdParams.Count() >= 1))
     {
         Exception* e = dynamic_cast<Exception*>(object);
         if (!e)
             return;
-        wxString s;
-        s << e->getNumber();
-        processedText += tp->escapeChars(s);
+        if (cmdParams[0] == wxT("number"))
+            processedText << e->getNumber();
+        else if (cmdParams[0] == wxT("message"))
+            processedText << e->getMessage();
     }
 
-    else if (cmdName == wxT("exception_message"))
-    {
-        Exception* e = dynamic_cast<Exception*>(object);
-        if (!e)
-            return;
-        processedText += tp->escapeChars(e->getMessage());
-    }
-
-    else if (cmdName == wxT("udfinfo") && !cmdParams.IsEmpty())
+    // {%functioninfo:<property>%}
+    // If the current object is a function, expands to the function's
+    // requested property.
+    else if (cmdName == wxT("functioninfo") && !cmdParams.IsEmpty())
     {
         Function* f = dynamic_cast<Function*>(object);
         if (!f)
@@ -328,32 +333,9 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             processedText += tp->escapeChars(f->getDefinition(), false);
     }
 
-    else if (cmdName == wxT("indices"))
-    {
-        Table* t = dynamic_cast<Table*>(object);
-        if (!t)
-            return;
-        std::vector<Index>* ix = t->getIndices();
-        if (!ix)
-            return;
-        for (std::vector<Index>::iterator it = ix->begin(); it != ix->end(); ++it)
-            tp->internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
-    }
-
-    else if (cmdName == wxT("object_ddl"))
-    {
-        ProgressIndicator* pi = tp->getProgressIndicator();
-        if (pi)
-        {
-            pi->setProgressLevelCount(2);
-            pi->initProgress(_("Extracting DDL Definitions"));
-            pi->doShow();
-        }
-        CreateDDLVisitor cdv(pi);
-        object->acceptVisitor(&cdv);
-        processedText += tp->escapeChars(cdv.getSql(), false);
-    }
-
+    // {%indexinfo:<property>%}
+    // If the current object is an index, expands to the index's
+    // requested property.
     else if (cmdName == wxT("indexinfo") && !cmdParams.IsEmpty())
     {
         Index* i = dynamic_cast<Index*>(object);
@@ -373,133 +355,81 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             processedText += getBooleanAsString(i->isActive());
         else if (cmdParams[0] == wxT("is_unique"))
             processedText += getBooleanAsString(i->isUnique());
+        else if (cmdParams[0] == wxT("is_ascending"))
+            processedText += getBooleanAsString(i->getIndexType() == Index::itAscending);
     }
 
-    // TODO: group all database-related info inside a {%dbinfo:xxx%}?
-    else if (cmdName == wxT("creation_date"))
+    // {%object_ddl%}
+    // Expands to the current object's DDL definition.
+    else if (cmdName == wxT("object_ddl"))
     {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += d->getInfo().getCreated();
-    }
-    
-    else if (cmdName == wxT("default_charset"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += d->getDatabaseCharset();
-    }
-    
-    else if (cmdName == wxT("dialect"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += wxString() << d->getInfo().getDialect();
-    }
-    
-    else if (cmdName == wxT("filesize"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        int64_t size = d->getInfo().getSizeInBytes();
-        const double kilo = 1024;
-        const double mega = kilo * kilo;
-        const double giga = kilo * mega;
-        if (size >= giga)
-            processedText += wxString::Format(wxT("%0.2fGB"), size / giga);
-        else if (size >= mega)
-            processedText += wxString::Format(wxT("%0.2fMB"), size / mega);
-        else
-            processedText += wxString::Format(wxT("%0.2fkB"), size / kilo);
-    }
-    
-    else if (cmdName == wxT("forced_writes"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += getBooleanAsString(d->getInfo().getForcedWrites());
-    }
-    
-    else if (cmdName == wxT("fullpath"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += d->getConnectionString();
-    }
-    
-    else if (cmdName == wxT("next_transaction"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += wxString() << d->getInfo().getNextTransaction();
-    }
-    
-    else if (cmdName == wxT("ods_version"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += wxString() << d->getInfo().getODS();
-        if (d->getInfo().getODSMinor())
+        ProgressIndicator* pi = tp->getProgressIndicator();
+        if (pi)
         {
-            processedText += wxT(".");
-            processedText += wxString() << d->getInfo().getODSMinor();
+            pi->setProgressLevelCount(2);
+            pi->initProgress(_("Extracting DDL Definitions"));
+            pi->doShow();
         }
+        CreateDDLVisitor cdv(pi);
+        object->acceptVisitor(&cdv);
+        processedText += tp->escapeChars(cdv.getSql(), false);
     }
-    
-    else if (cmdName == wxT("oldest_transaction"))
+
+    // {%dbinfo:<property>%}
+    // If the current object is a database, expands to the database's
+    // requested property.
+    else if (cmdName == wxT("dbinfo") && !cmdParams.IsEmpty())
     {
         Database* d = dynamic_cast<Database*>(object);
         if (!d)
             return;
-        processedText += wxString() << d->getInfo().getOldestTransaction();
-    }
-    
-    else if (cmdName == wxT("page_buffers"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += wxString() << d->getInfo().getBuffers();
-    }
-    
-    else if (cmdName == wxT("page_size"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += wxString() << d->getInfo().getPageSize();
-    }
-    
-    else if (cmdName == wxT("pages"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += wxString() << d->getInfo().getPages();
-    }
-    
-    else if (cmdName == wxT("read_only"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += getBooleanAsString(d->getInfo().getReadOnly());
-    }
-    
-    else if (cmdName == wxT("sweep_interval"))
-    {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
-            return;
-        processedText += wxString() << d->getInfo().getSweep();
+
+        if (cmdParams[0] == wxT("connection_string"))
+            processedText += d->getConnectionString();
+        else if (cmdParams[0] == wxT("ods_version"))
+        {
+            processedText += wxString() << d->getInfo().getODS();
+            if (d->getInfo().getODSMinor())
+            {
+                processedText += wxT(".");
+                processedText += wxString() << d->getInfo().getODSMinor();
+            }
+        }
+        else if (cmdParams[0] == wxT("page_size"))
+            processedText += wxString() << d->getInfo().getPageSize();
+        else if (cmdParams[0] == wxT("pages"))
+            processedText += wxString() << d->getInfo().getPages();
+        else if (cmdParams[0] == wxT("size"))
+        {
+            int64_t size = d->getInfo().getSizeInBytes();
+            const double kilo = 1024;
+            const double mega = kilo * kilo;
+            const double giga = kilo * mega;
+            if (size >= giga)
+                processedText += wxString::Format(wxT("%0.2fGB"), size / giga);
+            else if (size >= mega)
+                processedText += wxString::Format(wxT("%0.2fMB"), size / mega);
+            else
+                processedText += wxString::Format(wxT("%0.2fkB"), size / kilo);
+        }
+        else if (cmdParams[0] == wxT("page_buffers"))
+            processedText += wxString() << d->getInfo().getBuffers();
+        else if (cmdParams[0] == wxT("reserve_space"))
+            processedText += getBooleanAsString(d->getInfo().getReserve());
+        else if (cmdParams[0] == wxT("is_read_only"))
+            processedText += getBooleanAsString(d->getInfo().getReadOnly());
+        else if (cmdParams[0] == wxT("sql_dialect"))
+            processedText += wxString() << d->getInfo().getDialect();
+        else if (cmdParams[0] == wxT("default_charset"))
+            processedText += d->getDatabaseCharset();
+        else if (cmdParams[0] == wxT("sweep_interval"))
+            processedText += wxString() << d->getInfo().getSweep();
+        else if (cmdParams[0] == wxT("forced_writes"))
+            processedText += getBooleanAsString(d->getInfo().getForcedWrites());
+        else if (cmdParams[0] == wxT("oldest_transaction"))
+            processedText += wxString() << d->getInfo().getOldestTransaction();
+        else if (cmdParams[0] == wxT("next_transaction"))
+            processedText += wxString() << d->getInfo().getNextTransaction();
     }
 
     // {%foreach:<collection>:<separator>:<text>%}
@@ -600,6 +530,29 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             }
         }
 
+        // {%foreach:index:<separator>:<text>%}
+        // If the current object is a table, processes <text> for each index.
+        else if (cmdParams[0] == wxT("index"))
+        {
+            Table* t = dynamic_cast<Table*>(object);
+            if (!t)
+                return;
+            std::vector<Index>* ix = t->getIndices();
+            if (!ix)
+                return;
+            bool firstItem = true;
+            for (std::vector<Index>::iterator it = ix->begin(); it != ix->end(); ++it)
+            {
+                wxString newText;
+                tp->internalProcessTemplateText(newText, cmdParams.all(2), &(*it));
+                if ((!firstItem) && (!newText.IsEmpty()))
+                    processedText += sep;                    
+                if (!newText.IsEmpty())
+                    firstItem = false;
+                processedText += newText;
+            }
+        }
+
         // {%foreach:trigger:<separator>:<before|after>:<text>%}
         // If the current object is a relation, processes <text> for
         // each "before" or "after" trigger. If the current object is
@@ -672,8 +625,17 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                 p = role->getPrivileges();
             if (!p)
                 return;
+            bool firstItem = true;
             for (std::vector<Privilege>::iterator it = p->begin(); it != p->end(); ++it)
-                tp->internalProcessTemplateText(processedText, cmdParams.all(2), &(*it));
+            {
+                wxString newText;
+                tp->internalProcessTemplateText(newText, cmdParams.all(2), &(*it));
+                if ((!firstItem) && (!newText.IsEmpty()))
+                    processedText += sep;                    
+                if (!newText.IsEmpty())
+                    firstItem = false;
+                processedText += newText;
+            }
         }
 
         // {%foreach:depends_on:<separator>:<text>%}
@@ -687,8 +649,17 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                 return;
             std::vector<Dependency> deps;
             m->getDependencies(deps, cmdParams[0] == wxT("depends_on"));
+            bool firstItem = true;
             for (std::vector<Dependency>::iterator it = deps.begin(); it != deps.end(); ++it)
-                tp->internalProcessTemplateText(processedText, cmdParams.all(2), &(*it));
+            {
+                wxString newText;
+                tp->internalProcessTemplateText(newText, cmdParams.all(2), &(*it));
+                if ((!firstItem) && (!newText.IsEmpty()))
+                    processedText += sep;                    
+                if (!newText.IsEmpty())
+                    firstItem = false;
+                processedText += newText;
+            }
         }
 
         // {%foreach:parameter:<separator>:<input|output>:<text>%}
@@ -703,19 +674,64 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             SubjectLocker locker(p);
             p->ensureChildrenLoaded();
             bool isOut = (cmdParams[0] == wxT("output"));
+            bool firstItem = true;
             for (ProcedureParameters::iterator it = p->begin();
                 it != p->end(); ++it)
             {
                 if ((*it)->isOutputParameter() == isOut)
-                    tp->internalProcessTemplateText(processedText, cmdParams.all(3), (*it).get());
+                {
+                    wxString newText;
+                    tp->internalProcessTemplateText(newText, cmdParams.all(3), (*it).get());
+                    if ((!firstItem) && (!newText.IsEmpty()))
+                        processedText += sep;                    
+                    if (!newText.IsEmpty())
+                        firstItem = false;
+                    processedText += newText;
+                }
             }
         }
 
+        // {%foreach:user:<separator>:<text>%}
+        // If the current object is a server, processes
+        // the specified text once for each defined user,
+        // switching each time the current object to the nth user.
+        else if (cmdParams[0] == wxT("user"))
+        {
+            Server* s = dynamic_cast<Server*>(object);
+            if (!s)
+                return;
+
+            ProgressIndicator* pi = tp->getProgressIndicator();
+            if (pi)
+            {
+                pi->initProgress(_("Connecting to Server..."));
+                pi->doShow();
+            }
+
+            UserList* usr = s->getUsers(pi);
+            if (!usr || !usr->size())
+                return;
+
+            bool firstItem = true;
+            for (UserList::iterator it = usr->begin(); it != usr->end(); ++it)
+            {
+                wxString newText;
+                tp->internalProcessTemplateText(newText, cmdParams.all(3), &(*it));
+                if ((!firstItem) && (!newText.IsEmpty()))
+                    processedText += sep;                    
+                if (!newText.IsEmpty())
+                    firstItem = false;
+                processedText += newText;
+            }
+        }
         // add more collections here.
         else
             return;
     }
 
+    // {%privilegeinfo:<property>%}
+    // If the current object is a privilege, expands to the privilege's
+    // requested property.
     else if (cmdName == wxT("privilegeinfo") && (cmdParams.Count() > 0)) 
     {
         Privilege* p = dynamic_cast<Privilege*>(object);
@@ -726,7 +742,9 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             processedText += tp->escapeChars(p->getGrantee());
     }
 
-    // {%privilegeitemcount:type%}
+    // {%privilegeitemcount:<type>%}
+    // If the current object is a privilege, expands to the count of
+    // privilege items of the requested <type>.
     else if ((cmdName == wxT("privilegeitemcount")) && (cmdParams.Count() >= 1))
     {
         Privilege* p = dynamic_cast<Privilege*>(object);
@@ -737,7 +755,9 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         processedText << list.size();
     }
     
-    // {%privilegeiteminfo:property%}
+    // {%privilegeiteminfo:<property>%}
+    // If the current object is a privilege item, expands to the privilege
+    // item's requested property.
     else if ((cmdName == wxT("privilegeiteminfo")) && (cmdParams.Count() >= 1))
     {
         PrivilegeItem* pi = dynamic_cast<PrivilegeItem*>(object);
@@ -758,30 +778,6 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                 processedText += (*it);
             }
         }
-    }
-
-    // {%users:text%}
-    // Processes the specified text once for each defined user,
-    // switching each time the current object to the nth user.
-    else if (cmdName == wxT("users") && !cmdParams.IsEmpty())
-    {
-        Server* s = dynamic_cast<Server*>(object);
-        if (!s)
-            return;
-
-        ProgressIndicator* pi = tp->getProgressIndicator();
-        if (pi)
-        {
-            pi->initProgress(_("Connecting to Server..."));
-            pi->doShow();
-        }
-
-        UserList* usr = s->getUsers(pi);
-        if (!usr || !usr->size())
-            return;
-
-        for (UserList::iterator it = usr->begin(); it != usr->end(); ++it)
-            tp->internalProcessTemplateText(processedText, cmdParams.all(), &(*it));
     }
 
     // {%userinfo:property%}

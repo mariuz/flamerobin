@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -56,13 +56,20 @@ const DatabaseInfoHandler DatabaseInfoHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 bool DatabaseInfoHandler::handleURI(URI& uri)
 {
-    bool isEditSweep, isEditForcedWrites;
+    bool isEditSweep, isEditForcedWrites, isEditReserve, isEditReadOnly,
+        isEditPageBuffers;
 
-    isEditSweep = (uri.action == wxT("edit_sweep_interval"));
-    isEditForcedWrites = (uri.action == wxT("edit_forced_writes"));
+    isEditSweep = (uri.action == wxT("edit_db_sweep_interval"));
+    isEditForcedWrites = (uri.action == wxT("edit_db_forced_writes"));
+    isEditReserve = (uri.action == wxT("edit_db_reserve_space"));
+    isEditReadOnly = (uri.action == wxT("edit_db_read_only"));
+    isEditPageBuffers = (uri.action == wxT("edit_db_page_buffers"));
 
-    if (!isEditSweep && !isEditForcedWrites)
+    if (!isEditSweep && !isEditForcedWrites && !isEditReserve && !isEditReadOnly
+        && !isEditPageBuffers)
+    {
         return false;
+    }
 
     Database* d = (Database*)getObject(uri);
     wxWindow* w = getWindow(uri);
@@ -79,31 +86,46 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
         db->Username(), db->UserPassword());
     svc->Connect();
 
-    if (isEditSweep)
+    if (isEditSweep || isEditPageBuffers)
     {
-        long oldSweep = d->getInfo().getSweep();
+        long oldValue;
+        wxString title, label;
+        if (isEditSweep)
+        {
+            oldValue = d->getInfo().getSweep();
+            title = _("Enter the new Sweep Interval");
+            label = _("Sweep Interval"); 
+        }
+        else if (isEditPageBuffers)
+        {
+            oldValue = d->getInfo().getBuffers();
+            title = _("Enter the new value for Page Buffers");
+            label = _("Page Buffers"); 
+        }
 
         while (true)
         {
             wxString s;
-            long sweep = oldSweep;
-            s = ::wxGetTextFromUser(_("Enter the sweep interval"),
-                _("Sweep Interval"), wxString::Format(wxT("%d"), sweep), w);
+            long value = oldValue;
+            s = ::wxGetTextFromUser(title, label,
+                wxString::Format(wxT("%d"), value), w);
 
             // return from the iteration when the entered string is empty, in
             // case of cancelling the operation.
             if (s.IsEmpty())
                 break;
-            if (!s.ToLong(&sweep))
+            if (!s.ToLong(&value))
                 continue;
             // return from the iteration when the interval has not changed
-            if (sweep == oldSweep)
+            if (value == oldValue)
                 break;
 
-            svc->SetSweepInterval(wx2std(d->getPath()), sweep);
+            if (isEditSweep)
+                svc->SetSweepInterval(wx2std(d->getPath()), value);
+            else if (isEditPageBuffers)
+                svc->SetPageBuffers(wx2std(d->getPath()), value);
 
-            // load the database info because the sweep interval has been
-            // changed. Before loading the info, re-attach to the database
+            // Before reloading the info, re-attach to the database
             // otherwise the sweep interval won't be changed for FB Classic
             // Server.
             db->Disconnect();
@@ -113,23 +135,26 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
         }
     }
 
-    if (isEditForcedWrites)
+    else if (isEditForcedWrites || isEditReserve || isEditReadOnly)
     {
-        bool forced = !d->getInfo().getForcedWrites();
+        bool fw = !d->getInfo().getForcedWrites();
+        bool reserve = !d->getInfo().getReserve();
+        bool ro = !d->getInfo().getReadOnly();
 
-        // disconnect the database before changing SyncWrites. When the
-        // database remains connected, you can set SyncWrites for about
-        // three times before the database will be locked and unavailable
-        // until the database server is restarted.
+        // setting these properties requires that the database is
+        // disconnected.
         db->Disconnect();
 
-        svc->SetSyncWrite(wx2std(d->getPath()), forced);
+        if (isEditForcedWrites)
+            svc->SetSyncWrite(wx2std(d->getPath()), fw);
+        if (isEditReserve)
+            svc->SetReserveSpace(wx2std(d->getPath()), reserve);
+        if (isEditReadOnly)
+            svc->SetReadOnly(wx2std(d->getPath()), ro);
 
-        // connect to the database again
         db->Connect();
 
-        // load the database info because the value of forced writes been
-        // changed.
+        // load the database info because the info values are changed.
         d->loadInfo();
     }
 

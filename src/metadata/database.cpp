@@ -130,11 +130,6 @@ int DatabaseInfo::getBuffers() const
     return buffersM;
 }
 //-----------------------------------------------------------------------------
-wxString DatabaseInfo::getCreated() const
-{
-    return wxT("not supported");
-}
-//-----------------------------------------------------------------------------
 int DatabaseInfo::getDialect() const
 {
     return dialectM;
@@ -143,6 +138,11 @@ int DatabaseInfo::getDialect() const
 bool DatabaseInfo::getForcedWrites() const
 {
     return forcedWritesM;
+}
+//-----------------------------------------------------------------------------
+bool DatabaseInfo::getReserve() const
+{
+    return reserveM;
 }
 //-----------------------------------------------------------------------------
 int DatabaseInfo::getNextTransaction() const
