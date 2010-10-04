@@ -29,7 +29,10 @@
 #define FR_GENERATOR_H
 
 #include "frtypes.h"
+#include "metadata/collection.h"
 #include "metadata/metadataitem.h"
+
+class ProgressIndicator;
 //-----------------------------------------------------------------------------
 class Generator: public MetadataItem
 {
@@ -47,6 +50,15 @@ public:
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
+class Generators: public MetadataCollection<Generator>
+{
+protected:
+    virtual void loadChildren();
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
 };
 //-----------------------------------------------------------------------------
 #endif

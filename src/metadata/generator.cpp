@@ -104,3 +104,24 @@ void Generator::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitGenerator(*this);
 }
 //-----------------------------------------------------------------------------
+// Generators collection
+void Generators::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitGenerators(*this);
+}
+//-----------------------------------------------------------------------------
+void Generators::load(ProgressIndicator* progressIndicator)
+{
+    Database* db = getDatabase(wxT("Generators::load"));
+
+    std::string stmt = "select rdb$generator_name from rdb$generators"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " order by 1";
+    setItems(db, ntGenerator, db->loadIdentifiers(progressIndicator, stmt));
+}
+//-----------------------------------------------------------------------------
+void Generators::loadChildren()
+{
+    load(0);
+}
+//-----------------------------------------------------------------------------

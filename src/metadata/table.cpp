@@ -42,7 +42,6 @@
 
 #include "core/FRError.h"
 #include "core/StringUtils.h"
-#include "core/Visitor.h"
 #include "engine/MetadataLoader.h"
 #include "frutils.h"
 #include "metadata/database.h"
@@ -609,5 +608,52 @@ bool Table::tablesRelate(const std::vector<wxString>& tables, Table* table,
 void Table::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitTable(*this);
+}
+//-----------------------------------------------------------------------------
+// System tables collection
+void SysTables::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitSysTables(*this);
+}
+//-----------------------------------------------------------------------------
+bool SysTables::isSystem() const
+{
+    return true;
+}
+//-----------------------------------------------------------------------------
+void SysTables::load(ProgressIndicator* progressIndicator)
+{
+    Database* db = getDatabase(wxT("SysTables::load"));
+
+    std::string stmt = "select rdb$relation_name from rdb$relations"
+        " where rdb$system_flag = 1"
+        " and rdb$view_source is null order by 1";
+    setItems(db, ntSysTable, db->loadIdentifiers(progressIndicator, stmt));
+}
+//-----------------------------------------------------------------------------
+void SysTables::loadChildren()
+{
+    load(0);
+}
+//-----------------------------------------------------------------------------
+// Tables collection
+void Tables::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitTables(*this);
+}
+//-----------------------------------------------------------------------------
+void Tables::load(ProgressIndicator* progressIndicator)
+{
+    Database* db = getDatabase(wxT("Tables::load"));
+
+    std::string stmt = "select rdb$relation_name from rdb$relations"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " and rdb$view_source is null order by 1";
+    setItems(db, ntTable, db->loadIdentifiers(progressIndicator, stmt));
+}
+//-----------------------------------------------------------------------------
+void Tables::loadChildren()
+{
+    load(0);
 }
 //-----------------------------------------------------------------------------

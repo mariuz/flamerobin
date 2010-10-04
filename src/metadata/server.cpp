@@ -40,10 +40,11 @@
 
 #include <algorithm>
 
+#include <boost/function.hpp>
+
 #include "config/Config.h"
 #include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
-#include "core/Visitor.h"
 #include "frutils.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/root.h"

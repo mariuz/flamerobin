@@ -116,3 +116,23 @@ void Exception::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitException(*this);
 }
 //-----------------------------------------------------------------------------
+// Exceptions collection
+void Exceptions::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitExceptions(*this);
+}
+//-----------------------------------------------------------------------------
+void Exceptions::load(ProgressIndicator* progressIndicator)
+{
+    Database* db = getDatabase(wxT("Exceptions::load"));
+
+    std::string stmt = "select rdb$exception_name from rdb$exceptions"
+        " order by 1";
+    setItems(db, ntException, db->loadIdentifiers(progressIndicator, stmt));
+}
+//-----------------------------------------------------------------------------
+void Exceptions::loadChildren()
+{
+    load(0);
+}
+//-----------------------------------------------------------------------------

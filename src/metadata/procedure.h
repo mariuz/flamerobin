@@ -32,9 +32,12 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "metadata/collection.h"
 #include "metadata/metadataitem.h"
 #include "metadata/parameter.h"
 #include "metadata/privilege.h"
+
+class ProgressIndicator;
 
 typedef boost::shared_ptr<Parameter> SharedParameterPtr;
 typedef std::vector<SharedParameterPtr> ProcedureParameters;
@@ -75,6 +78,15 @@ public:
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
+class Procedures: public MetadataCollection<Procedure>
+{
+protected:
+    virtual void loadChildren();
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
 };
 //-----------------------------------------------------------------------------
 #endif

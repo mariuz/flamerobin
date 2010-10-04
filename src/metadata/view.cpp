@@ -38,14 +38,6 @@
     #pragma hdrstop
 #endif
 
-#include <ibpp.h>
-
-#include "core/FRError.h"
-#include "core/StringUtils.h"
-#include "core/Visitor.h"
-#include "engine/MetadataLoader.h"
-#include "frutils.h"
-#include "metadata/collection.h"
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/view.h"
@@ -112,5 +104,26 @@ const wxString View::getTypeName() const
 void View::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitView(*this);
+}
+//-----------------------------------------------------------------------------
+// Views collection
+void Views::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitViews(*this);
+}
+//-----------------------------------------------------------------------------
+void Views::load(ProgressIndicator* progressIndicator)
+{
+    Database* db = getDatabase(wxT("Views::load"));
+
+    std::string stmt = "select rdb$relation_name from rdb$relations"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " and rdb$view_source is not null order by 1";
+    setItems(db, ntView, db->loadIdentifiers(progressIndicator, stmt));
+}
+//-----------------------------------------------------------------------------
+void Views::loadChildren()
+{
+    load(0);
 }
 //-----------------------------------------------------------------------------

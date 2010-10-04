@@ -46,6 +46,8 @@
 #include <fstream>
 #include <sstream>
 
+#include <boost/function.hpp>
+
 #include "config/Config.h"
 #include "core/StringUtils.h"
 #include "metadata/database.h"

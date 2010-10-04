@@ -156,67 +156,6 @@ private:
     Mode modeM;
 };
 //-----------------------------------------------------------------------------
-class Domains: public MetadataCollection<Domain>
-{
-public:
-    virtual void acceptVisitor(MetadataItemVisitor* visitor);
-};
-//-----------------------------------------------------------------------------
-class Exceptions: public MetadataCollection<Exception>
-{
-public:
-    virtual void acceptVisitor(MetadataItemVisitor* visitor);
-};
-//-----------------------------------------------------------------------------
-class Functions: public MetadataCollection<Function>
-{
-public:
-    virtual void acceptVisitor(MetadataItemVisitor* visitor);
-};
-//-----------------------------------------------------------------------------
-class Generators: public MetadataCollection<Generator>
-{
-public:
-    virtual void acceptVisitor(MetadataItemVisitor* visitor);
-};
-//-----------------------------------------------------------------------------
-class Procedures: public MetadataCollection<Procedure>
-{
-public:
-    virtual void acceptVisitor(MetadataItemVisitor* visitor);
-};
-//-----------------------------------------------------------------------------
-class Roles: public MetadataCollection<Role>
-{
-public:
-    virtual void acceptVisitor(MetadataItemVisitor* visitor);
-};
-//-----------------------------------------------------------------------------
-class SysTables: public MetadataCollection<Table>
-{
-public:
-    virtual void acceptVisitor(MetadataItemVisitor* visitor);
-    virtual bool isSystem() const { return true; }
-};
-//-----------------------------------------------------------------------------
-class Tables: public MetadataCollection<Table>
-{
-public:
-    virtual void acceptVisitor(MetadataItemVisitor* visitor);
-};
-//-----------------------------------------------------------------------------
-class Triggers: public MetadataCollection<Trigger>
-{
-public:
-    virtual void acceptVisitor(MetadataItemVisitor* visitor);
-};
-//-----------------------------------------------------------------------------
-class Views: public MetadataCollection<View>
-{
-public:
-    virtual void acceptVisitor(MetadataItemVisitor* visitor);
-};
-//-----------------------------------------------------------------------------
 class Database: public MetadataItem
 {
 private:
@@ -257,8 +196,6 @@ private:
     void loadCollations();
 
     void loadCollections(ProgressIndicator* progressIndicator);
-    wxArrayString loadNames(ProgressIndicator* progressIndicator,
-        std::string loadStatement);
 
     // small help for parser
     wxString getTableForIndex(wxString indexName);
@@ -301,16 +238,10 @@ public:
 
     MetadataLoader* getMetadataLoader();
 
-    void loadDomains(ProgressIndicator* progressIndicator = 0);
-    void loadExceptions(ProgressIndicator* progressIndicator = 0);
-    void loadFunctions(ProgressIndicator* progressIndicator = 0);
-    void loadGenerators(ProgressIndicator* progressIndicator = 0);
-    void loadProcedures(ProgressIndicator* progressIndicator = 0);
-    void loadRoles(ProgressIndicator* progressIndicator = 0);
-    void loadSystemTables(ProgressIndicator* progressIndicator = 0);
-    void loadTables(ProgressIndicator* progressIndicator = 0);
-    void loadTriggers(ProgressIndicator* progressIndicator = 0);
-    void loadViews(ProgressIndicator* progressIndicator = 0);
+    wxArrayString loadIdentifiers(const wxString& loadStatement);
+    wxArrayString loadIdentifiers(std::string loadStatement);
+    wxArrayString loadIdentifiers(ProgressIndicator* progressIndicator,
+        std::string loadStatement);
 
     wxString loadDomainNameForColumn(wxString table, wxString field);
     Domain* loadMissingDomain(wxString name);
@@ -331,9 +262,6 @@ public:
 
     //! fill vector with names of all tables, views, etc.
     void getIdentifiers(std::vector<Identifier>& temp);
-
-    //! fill vector with result of sql statement
-    void fillVector(std::vector<wxString>& list, wxString sql);
 
     //! gets the database triggers (FB2.1+)
     void getDatabaseTriggers(std::vector<Trigger *>& list);

@@ -29,7 +29,10 @@
 #ifndef FR_EXCEPTION_H
 #define FR_EXCEPTION_H
 
+#include "metadata/collection.h"
 #include "metadata/metadataitem.h"
+
+class ProgressIndicator;
 //-----------------------------------------------------------------------------
 class Exception: public MetadataItem
 {
@@ -49,6 +52,15 @@ public:
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
+class Exceptions : public MetadataCollection<Exception>
+{
+protected:
+    virtual void loadChildren();
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
 };
 //-----------------------------------------------------------------------------
 #endif // FR_EXCEPTION_H

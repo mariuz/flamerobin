@@ -29,7 +29,10 @@
 #ifndef FR_DOMAIN_H
 #define FR_DOMAIN_H
 
+#include "metadata/collection.h"
 #include "metadata/metadataitem.h"
+
+class ProgressIndicator;
 //-----------------------------------------------------------------------------
 class Domain: public MetadataItem
 {
@@ -59,6 +62,15 @@ public:
     wxString getAlterSqlTemplate() const;
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* v);
+};
+//-----------------------------------------------------------------------------
+class Domains: public MetadataCollection<Domain>
+{
+protected:
+    virtual void loadChildren();
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
 };
 //-----------------------------------------------------------------------------
 #endif

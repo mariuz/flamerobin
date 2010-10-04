@@ -29,7 +29,10 @@
 #ifndef FR_TRIGGER_H
 #define FR_TRIGGER_H
 
+#include "metadata/collection.h"
 #include "metadata/metadataitem.h"
+
+class ProgressIndicator;
 //-----------------------------------------------------------------------------
 class Trigger: public MetadataItem
 {
@@ -57,6 +60,15 @@ public:
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
+class Triggers: public MetadataCollection<Trigger>
+{
+protected:
+    virtual void loadChildren();
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
 };
 //-----------------------------------------------------------------------------
 #endif

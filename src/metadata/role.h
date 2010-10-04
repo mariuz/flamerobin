@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 The FlameRobin Development Team
+  Copyright (c) 2004-2010 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -30,9 +30,13 @@
 #define FR_ROLE_H
 
 #include <vector>
+
+#include "metadata/collection.h"
 #include "metadata/metadataitem.h"
 #include "metadata/privilege.h"
 
+class ProgressIndicator;
+//-----------------------------------------------------------------------------
 class Role: public MetadataItem
 {
 private:
@@ -44,6 +48,15 @@ public:
     virtual wxString getCreateSqlTemplate() const;
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
+class Roles: public MetadataCollection<Role>
+{
+protected:
+    virtual void loadChildren();
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
 };
 //-----------------------------------------------------------------------------
 #endif // FR_ROLE_H

@@ -45,7 +45,6 @@
 
 #include "core/FRError.h"
 #include "core/StringUtils.h"
-#include "core/Visitor.h"
 #include "engine/MetadataLoader.h"
 #include "frutils.h"
 #include "metadata/database.h"
@@ -224,5 +223,26 @@ const wxString Trigger::getTypeName() const
 void Trigger::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitTrigger(*this);
+}
+//-----------------------------------------------------------------------------
+// Triggers collection
+void Triggers::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitTriggers(*this);
+}
+//-----------------------------------------------------------------------------
+void Triggers::load(ProgressIndicator* progressIndicator)
+{
+    Database* db = getDatabase(wxT("Triggers::load"));
+
+    std::string stmt = "select rdb$trigger_name from rdb$triggers"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " order by 1";
+    setItems(db, ntTrigger, db->loadIdentifiers(progressIndicator, stmt));
+}
+//-----------------------------------------------------------------------------
+void Triggers::loadChildren()
+{
+    load(0);
 }
 //-----------------------------------------------------------------------------

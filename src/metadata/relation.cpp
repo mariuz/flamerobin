@@ -38,6 +38,8 @@
     #pragma hdrstop
 #endif
 
+#include <boost/function.hpp>
+
 #include <ibpp.h>
 
 #include "core/StringUtils.h"

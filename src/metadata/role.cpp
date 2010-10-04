@@ -42,7 +42,6 @@
 
 #include "core/FRError.h"
 #include "core/StringUtils.h"
-#include "core/Visitor.h"
 #include "engine/MetadataLoader.h"
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
@@ -129,8 +128,27 @@ const wxString Role::getTypeName() const
     return wxT("ROLE");
 }
 //-----------------------------------------------------------------------------
-void Role::acceptVisitor(MetadataItemVisitor *visitor)
+void Role::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitRole(*this);
+}
+//-----------------------------------------------------------------------------
+// Roles collection
+void Roles::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitRoles(*this);
+}
+//-----------------------------------------------------------------------------
+void Roles::load(ProgressIndicator* progressIndicator)
+{
+    Database* db = getDatabase(wxT("Roles::load"));
+
+    std::string stmt = "select rdb$role_name from rdb$roles order by 1";
+    setItems(db, ntRole, db->loadIdentifiers(progressIndicator, stmt));
+}
+//-----------------------------------------------------------------------------
+void Roles::loadChildren()
+{
+    load(0);
 }
 //-----------------------------------------------------------------------------

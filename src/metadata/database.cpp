@@ -297,56 +297,6 @@ bool DatabaseAuthenticationMode::getUseEncryptedPassword() const
     return modeM == UseSavedEncryptedPwd;
 }
 //-----------------------------------------------------------------------------
-void Domains::acceptVisitor(MetadataItemVisitor* visitor)
-{
-    visitor->visitDomains(*this);
-}
-//-----------------------------------------------------------------------------
-void Exceptions::acceptVisitor(MetadataItemVisitor* visitor)
-{
-    visitor->visitExceptions(*this);
-}
-//-----------------------------------------------------------------------------
-void Functions::acceptVisitor(MetadataItemVisitor* visitor)
-{
-    visitor->visitFunctions(*this);
-}
-//-----------------------------------------------------------------------------
-void Generators::acceptVisitor(MetadataItemVisitor* visitor)
-{
-    visitor->visitGenerators(*this);
-}
-//-----------------------------------------------------------------------------
-void Procedures::acceptVisitor(MetadataItemVisitor* visitor)
-{
-    visitor->visitProcedures(*this);
-}
-//-----------------------------------------------------------------------------
-void Roles::acceptVisitor(MetadataItemVisitor* visitor)
-{
-    visitor->visitRoles(*this);
-}
-//-----------------------------------------------------------------------------
-void SysTables::acceptVisitor(MetadataItemVisitor* visitor)
-{
-    visitor->visitSysTables(*this);
-}
-//-----------------------------------------------------------------------------
-void Tables::acceptVisitor(MetadataItemVisitor* visitor)
-{
-    visitor->visitTables(*this);
-}
-//-----------------------------------------------------------------------------
-void Triggers::acceptVisitor(MetadataItemVisitor* visitor)
-{
-    visitor->visitTriggers(*this);
-}
-//-----------------------------------------------------------------------------
-void Views::acceptVisitor(MetadataItemVisitor* visitor)
-{
-    visitor->visitViews(*this);
-}
-//-----------------------------------------------------------------------------
 // Database class
 Database::Database()
     : MetadataItem(ntDatabase), metadataLoaderM(0), connectedM(false),
@@ -354,37 +304,17 @@ Database::Database()
 {
     // has to be here, since notify() might be called before initChildren()
     domainsM.setProperties(this, wxT("Domains"), ntDomains);
-    domainsM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadDomains), this));
     exceptionsM.setProperties(this, wxT("Exceptions"), ntExceptions);
-    exceptionsM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadExceptions), this));
     functionsM.setProperties(this, wxT("Functions"), ntFunctions);
-    functionsM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadFunctions), this));
     generatorsM.setProperties(this, wxT("Generators"), ntGenerators);
-    generatorsM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadGenerators), this));
     proceduresM.setProperties(this, wxT("Procedures"), ntProcedures);
-    proceduresM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadProcedures), this));
     rolesM.setProperties(this, wxT("Roles"), ntRoles);
-    rolesM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadRoles), this));
     tablesM.setProperties(this, wxT("Tables"), ntTables);
-    tablesM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadTables), this));
 
     sysTablesM.setProperties(this, wxT("System tables"), ntSysTables);
-    sysTablesM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadSystemTables), this));
 
     triggersM.setProperties(this, wxT("Triggers"), ntTriggers);
-    triggersM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadTriggers), this));
     viewsM.setProperties(this, wxT("Views"), ntViews);
-    viewsM.setloadChildrenProc(
-        std::bind1st(std::mem_fun(&Database::loadViews), this));
 }
 //-----------------------------------------------------------------------------
 Database::~Database()
@@ -513,24 +443,6 @@ Domain* Database::loadMissingDomain(wxString name)
             return domainsM.insert(this, name, ntDomain);
     }
     return 0;
-}
-//-----------------------------------------------------------------------------
-//! small helper function, reads sql and fills the vector with values
-// this can be made template function in future
-void Database::fillVector(std::vector<wxString>& list, wxString sql)
-{
-    MetadataLoader* loader = getMetadataLoader();
-    MetadataLoaderTransaction tr(loader);
-
-    IBPP::Statement& st1 = loader->getStatement(wx2std(sql,
-        getCharsetConverter()));
-    st1->Execute();
-    while (st1->Fetch())
-    {
-        std::string s;
-        st1->Get(1, s);
-        list.push_back(std2wxIdentifier(s, getCharsetConverter()));
-    }
 }
 //-----------------------------------------------------------------------------
 bool Database::isDefaultCollation(const wxString& charset,
@@ -1049,37 +961,47 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     SubjectLocker lock(this);
 
     pih.init(_("tables"), collectionCount, 1);
-    loadTables(progressIndicator);
+    tablesM.load(progressIndicator);
 
     pih.init(_("system tables"), collectionCount, 2);
-    loadSystemTables(progressIndicator);
+    sysTablesM.load(progressIndicator);
 
     pih.init(_("views"), collectionCount, 3);
-    loadViews(progressIndicator);
+    viewsM.load(progressIndicator);
 
     pih.init(_("procedures"), collectionCount, 4);
-    loadProcedures(progressIndicator);
+    proceduresM.load(progressIndicator);
 
     pih.init(_("triggers"), collectionCount, 5);
-    loadTriggers(progressIndicator);
+    triggersM.load(progressIndicator);
 
     pih.init(_("roles"), collectionCount, 6);
-    loadRoles(progressIndicator);
+    rolesM.load(progressIndicator);
 
     pih.init(_("domains"), collectionCount, 7);
-    loadDomains(progressIndicator);
+    domainsM.load(progressIndicator);
 
     pih.init(_("functions"), collectionCount, 8);
-    loadFunctions(progressIndicator);
+    functionsM.load(progressIndicator);
 
     pih.init(_("generators"), collectionCount, 9);
-    loadGenerators(progressIndicator);
+    generatorsM.load(progressIndicator);
 
     pih.init(_("exceptions"), collectionCount, 10);
-    loadExceptions(progressIndicator);
+    exceptionsM.load(progressIndicator);
 }
 //-----------------------------------------------------------------------------
-wxArrayString Database::loadNames(ProgressIndicator* progressIndicator,
+wxArrayString Database::loadIdentifiers(const wxString& loadStatement)
+{
+    return loadIdentifiers(0, wx2std(loadStatement, getCharsetConverter()));
+}
+//-----------------------------------------------------------------------------
+wxArrayString Database::loadIdentifiers(std::string loadStatement)
+{
+    return loadIdentifiers(0, loadStatement);
+}
+//-----------------------------------------------------------------------------
+wxArrayString Database::loadIdentifiers(ProgressIndicator* progressIndicator,
     std::string loadStatement)
 {
     MetadataLoader* loader = getMetadataLoader();
@@ -1101,92 +1023,6 @@ wxArrayString Database::loadNames(ProgressIndicator* progressIndicator,
         }
     }
     return names;
-}
-//-----------------------------------------------------------------------------
-void Database::loadDomains(ProgressIndicator* progressIndicator)
-{
-    std::string stmt = "select f.rdb$field_name from rdb$fields f"
-        " left outer join rdb$types t on f.rdb$field_type=t.rdb$type"
-        " where t.rdb$field_name='RDB$FIELD_TYPE'"
-        " and f.rdb$field_name not starting with 'RDB$'"
-        " order by 1";
-    // setUserItems() will do what setItems() does, but not delete any
-    // system items already in the list. Doing so for domains would result
-    // in them being reloaded immediately, so keep them in the list
-    // a distinct system domain collection would probably be better...
-    domainsM.setUserItems(this, ntDomain, loadNames(progressIndicator, stmt));
-}
-//-----------------------------------------------------------------------------
-void Database::loadExceptions(ProgressIndicator* progressIndicator)
-{
-    std::string stmt = "select rdb$exception_name from rdb$exceptions"
-        " order by 1";
-    exceptionsM.setItems(this, ntException,
-        loadNames(progressIndicator, stmt));
-}
-//-----------------------------------------------------------------------------
-void Database::loadFunctions(ProgressIndicator* progressIndicator)
-{
-    std::string stmt = "select rdb$function_name from rdb$functions"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " order by 1";
-    functionsM.setItems(this, ntFunction, loadNames(progressIndicator, stmt));
-}
-//-----------------------------------------------------------------------------
-void Database::loadGenerators(ProgressIndicator* progressIndicator)
-{
-    std::string stmt = "select rdb$generator_name from rdb$generators"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " order by 1";
-    generatorsM.setItems(this, ntGenerator,
-        loadNames(progressIndicator, stmt));
-}
-//-----------------------------------------------------------------------------
-void Database::loadProcedures(ProgressIndicator* progressIndicator)
-{
-    std::string stmt = "select rdb$procedure_name from rdb$procedures"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " order by 1";
-    proceduresM.setItems(this, ntProcedure,
-        loadNames(progressIndicator, stmt));
-}
-//-----------------------------------------------------------------------------
-void Database::loadRoles(ProgressIndicator* progressIndicator)
-{
-    std::string stmt = "select rdb$role_name from rdb$roles order by 1";
-    rolesM.setItems(this, ntRole, loadNames(progressIndicator, stmt));
-}
-//-----------------------------------------------------------------------------
-void Database::loadSystemTables(ProgressIndicator* progressIndicator)
-{
-    std::string stmt = "select rdb$relation_name from rdb$relations"
-        " where rdb$system_flag = 1"
-        " and rdb$view_source is null order by 1";
-    sysTablesM.setItems(this, ntSysTable, loadNames(progressIndicator, stmt));
-}
-//-----------------------------------------------------------------------------
-void Database::loadTables(ProgressIndicator* progressIndicator)
-{
-    std::string stmt = "select rdb$relation_name from rdb$relations"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " and rdb$view_source is null order by 1";
-    tablesM.setItems(this, ntTable, loadNames(progressIndicator, stmt));
-}
-//-----------------------------------------------------------------------------
-void Database::loadTriggers(ProgressIndicator* progressIndicator)
-{
-    std::string stmt = "select rdb$trigger_name from rdb$triggers"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " order by 1";
-    triggersM.setItems(this, ntTrigger, loadNames(progressIndicator, stmt));
-}
-//-----------------------------------------------------------------------------
-void Database::loadViews(ProgressIndicator* progressIndicator)
-{
-    std::string stmt = "select rdb$relation_name from rdb$relations"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " and rdb$view_source is not null order by 1";
-    viewsM.setItems(this, ntView, loadNames(progressIndicator, stmt));
 }
 //-----------------------------------------------------------------------------
 void Database::disconnect()

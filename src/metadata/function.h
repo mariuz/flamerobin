@@ -29,7 +29,10 @@
 #ifndef FR_FUNCTION_H
 #define FR_FUNCTION_H
 
+#include "metadata/collection.h"
 #include "metadata/metadataitem.h"
+
+class ProgressIndicator;
 //-----------------------------------------------------------------------------
 class Function: public MetadataItem
 {
@@ -47,6 +50,15 @@ public:
     wxString getLibraryName();
 	wxString getEntryPoint();
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
+class Functions: public MetadataCollection<Function>
+{
+protected:
+    virtual void loadChildren();
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
 };
 //-----------------------------------------------------------------------------
 #endif

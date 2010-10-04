@@ -38,7 +38,6 @@
     #pragma hdrstop
 #endif
 
-#include "core/Visitor.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/parameter.h"
 //-----------------------------------------------------------------------------

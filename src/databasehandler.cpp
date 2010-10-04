@@ -88,7 +88,7 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
 
     if (isEditSweep || isEditPageBuffers)
     {
-        long oldValue;
+        long oldValue = 0;
         wxString title, label;
         if (isEditSweep)
         {

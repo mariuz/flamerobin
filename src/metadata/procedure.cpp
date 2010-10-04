@@ -43,6 +43,8 @@
 
 #include <string>
 
+#include <boost/function.hpp>
+
 #include <ibpp.h>
 
 #include "core/StringUtils.h"
@@ -50,7 +52,6 @@
 #include "engine/MetadataLoader.h"
 #include "frutils.h"
 #include "gui/AdvancedMessageDialog.h"
-#include "metadata/collection.h"
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/procedure.h"
@@ -540,5 +541,26 @@ const wxString Procedure::getTypeName() const
 void Procedure::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitProcedure(*this);
+}
+//-----------------------------------------------------------------------------
+// Procedures collection
+void Procedures::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitProcedures(*this);
+}
+//-----------------------------------------------------------------------------
+void Procedures::load(ProgressIndicator* progressIndicator)
+{
+    Database* db = getDatabase(wxT("Procedures::load"));
+
+    std::string stmt = "select rdb$procedure_name from rdb$procedures"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " order by 1";
+    setItems(db, ntProcedure, db->loadIdentifiers(progressIndicator, stmt));
+}
+//-----------------------------------------------------------------------------
+void Procedures::loadChildren()
+{
+    load(0);
 }
 //-----------------------------------------------------------------------------

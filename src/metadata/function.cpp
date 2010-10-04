@@ -202,3 +202,24 @@ void Function::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitFunction(*this);
 }
 //-----------------------------------------------------------------------------
+// Functions collection
+void Functions::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitFunctions(*this);
+}
+//-----------------------------------------------------------------------------
+void Functions::load(ProgressIndicator* progressIndicator)
+{
+    Database* db = getDatabase(wxT("Functions::load"));
+
+    std::string stmt = "select rdb$function_name from rdb$functions"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " order by 1";
+    setItems(db, ntFunction, db->loadIdentifiers(progressIndicator, stmt));
+}
+//-----------------------------------------------------------------------------
+void Functions::loadChildren()
+{
+    load(0);
+}
+//-----------------------------------------------------------------------------

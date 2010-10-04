@@ -29,7 +29,10 @@
 #ifndef FR_VIEW_H
 #define FR_VIEW_H
 
+#include "metadata/collection.h"
 #include "metadata/relation.h"
+
+class ProgressIndicator;
 //-----------------------------------------------------------------------------
 class View: public Relation
 {
@@ -46,6 +49,15 @@ public:
     wxString getCreateSql();
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
+class Views: public MetadataCollection<View>
+{
+protected:
+    virtual void loadChildren();
+public:
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
 };
 //-----------------------------------------------------------------------------
 #endif

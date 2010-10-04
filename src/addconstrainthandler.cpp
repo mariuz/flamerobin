@@ -103,21 +103,20 @@ bool AddConstraintHandler::handleURI(URI& uri)
 
     // Find first available constraint name:
     Database* db = t->getDatabase(wxT("AddConstraintHandler::handleURI"));
-    wxString default_value;
     wxString prefix = type + wxT("_") + t->getName_();
-    std::vector<wxString> cnames;
-    db->fillVector(cnames,
+    wxString stmt(
         wxT("select rdb$constraint_name from rdb$relation_constraints ")
         wxT("where rdb$relation_name = '") + t->getName_()
         + wxT("' and rdb$constraint_name starting with '") + prefix
         + wxT("' order by 1"));
-    int i = 0;
-    do
+    wxString default_value;
+    wxArrayString constraintNames(db->loadIdentifiers(stmt));
+    for (int i = 0; ; ++i)
     {
-        i++;
         default_value = prefix + wxString::Format(wxT("_%d"), i);
+        if (constraintNames.Index(default_value, false) == wxNOT_FOUND)
+            break;
     }
-    while (std::find(cnames.begin(), cnames.end(), default_value) != cnames.end());
 
     wxString cname = ::wxGetTextFromUser(_("Enter constraint name"),
         _("Adding new table constraint"), default_value, w);

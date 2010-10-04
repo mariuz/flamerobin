@@ -31,14 +31,12 @@
 #include <algorithm>
 
 #include <boost/ptr_container/ptr_list.hpp>
-#include <boost/function.hpp>
 
 #include "metadata/metadataitem.h"
-
-class ProgressIndicator;
 //-----------------------------------------------------------------------------
 class MetadataCollectionBase : public MetadataItem
 {
+public:
     virtual bool isSystem() const { return false; }
 };
 //-----------------------------------------------------------------------------
@@ -51,7 +49,6 @@ public:
     typedef typename CollectionType::const_iterator const_iterator;
 private:
     CollectionType itemsM;
-    boost::function<void (ProgressIndicator*)> loadChildrenProcM;
 
     // helper structs for find_if() and erase_if()
     struct FindByAddress
@@ -299,18 +296,7 @@ public:
         return itemsM.size();
     }
 
-    void setloadChildrenProc(boost::function<void (ProgressIndicator*)> proc)
-    {
-        loadChildrenProcM = proc;
-    }
-
 protected:
-    virtual void loadChildren()
-    {
-        if (!loadChildrenProcM.empty())
-            loadChildrenProcM(0);
-    }
-
     virtual void lockChildren()
     {
         for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)

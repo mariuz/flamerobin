@@ -456,10 +456,9 @@ void FieldPropertiesDialog::loadCharsets()
     Database* db = (tableM) ? tableM->findDatabase() : 0;
     if (tableM && db)
     {
-        vector<wxString> charsets;
-        db->fillVector(charsets,
-            wxT("select rdb$character_set_name from rdb$character_sets order by 1"));
-        for (vector<wxString>::iterator it = charsets.begin();
+        wxArrayString charsets(db->loadIdentifiers(
+            "select rdb$character_set_name from rdb$character_sets order by 1"));
+        for (wxArrayString::const_iterator it = charsets.begin();
             it != charsets.end(); ++it)
         {
             if ((*it) != wxT("NONE"))
