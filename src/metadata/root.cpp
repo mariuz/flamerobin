@@ -43,8 +43,7 @@
 #include <wx/wfstream.h>
 #include <wx/xml/xml.h>
 
-#include <fstream>
-#include <sstream>
+#include <algorithm>
 
 #include <boost/function.hpp>
 
@@ -54,13 +53,6 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/root.h"
 #include "metadata/server.h"
-//-----------------------------------------------------------------------------
-//! access to the singleton root of the DBH.
-Root& getGlobalRoot()
-{
-    static Root globalRoot;
-    return globalRoot;
-}
 //-----------------------------------------------------------------------------
 static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
 {
