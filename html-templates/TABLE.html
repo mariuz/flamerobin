@@ -8,7 +8,7 @@
 <font size=+2>{%object_name%}</font><br>
 Owner: {%owner_name%}<br>
 {%object_description%} {%ifeq:{%is_system%}:false:[<a
- href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=TABLE&amp;object_name={%object_name%}">edit</a>]%}
+ href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=TABLE&amp;object_name={%object_name%}">edit</a>]%}
 <br><br>
 <table cellspacing=1 cellpadding=2 border=0 bgcolor=black>
   <tbody>
@@ -28,9 +28,9 @@ Owner: {%owner_name%}<br>
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       {%ifeq:{%is_system%}:false:
       <td valign="top" nowrap>
-          <a href="fr://drop_field?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}drop.png"></a>
-          <a href="fr://edit_field?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}view.png"></a>
-          <a href="fr://alter_field?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}compute.png"></a>
+          <a href="fr://drop_field?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}drop.png"></a>
+          <a href="fr://edit_field?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}view.png"></a>
+          <a href="fr://alter_field?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}compute.png"></a>
       </td>
       %}
       <td nowrap valign="top">{%object_name%}</td>
@@ -40,7 +40,7 @@ Owner: {%owner_name%}<br>
       <td nowrap valign="top">{%columninfo:default_expression%}</td>%}
       {%ifeq:{%getglobalconf:DisplayColumnDescription%}:1:
       <td valign="top"><font size=-1>{%object_description%} {%ifeq:{%is_system%}:false:[<a
-        href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font>%}
+        href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font>%}
       </td>%}
     </tr>
     %}
@@ -48,10 +48,10 @@ Owner: {%owner_name%}<br>
 </table>
 <br><br>
 {%ifeq:{%is_system%}:false:
-    <a href="fr://add_field?parent_window={%parent_window%}&amp;object_address={%object_address%}">Add field</a> | <a
- href="fr://reorder_fields?parent_window={%parent_window%}&amp;object_address={%object_address%}">Reorder fields</a> | <a
- href="fr://drop_fields?parent_window={%parent_window%}&amp;object_address={%object_address%}">Drop fields</a> | <a
- href="fr://alter_relation?parent_window={%parent_window%}&amp;object_address={%object_address%}">Generate rebuild script</a>
+    <a href="fr://add_field?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Add field</a> | <a
+ href="fr://reorder_fields?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Reorder fields</a> | <a
+ href="fr://drop_fields?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Drop fields</a> | <a
+ href="fr://alter_relation?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Generate rebuild script</a>
 %}
 <br>
 </body>

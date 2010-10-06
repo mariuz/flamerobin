@@ -154,6 +154,11 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
     // Used to call FR's commands through URIs.
     else if (cmdName == wxT("object_address"))
         processedText += wxString::Format(wxT("%ld"), (uintptr_t)object);
+    // {%object_handle%}
+    // Expands to the current object's unique numeric handle.
+    // Used to call FR's commands through URIs.
+    else if (cmdName == wxT("object_handle"))
+        processedText += wxString::Format(wxT("%d"), object->getHandle());
 
     // {%parent_window%}
     // Expands to the current window's numeric memory address.

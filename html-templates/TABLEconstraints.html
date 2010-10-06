@@ -20,7 +20,7 @@
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       {%ifeq:{%parent:{%is_system%}%}:false:
       <td valign="top">
-          <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}drop.png"></a>
+          <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}drop.png"></a>
       </td>
       %}
       <td nowrap valign="top">{%object_name%}</td>
@@ -30,7 +30,7 @@
 </table>
 <br>
 {%ifeq:{%is_system%}:false:
-  <a href="fr://add_constraint?type=PK&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">Add primary key</a>
+  <a href="fr://add_constraint?type=PK&amp;parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Add primary key</a>
 %}
 <br><br>
 <table cellspacing=1 cellpadding=2 border=0 bgcolor=black>
@@ -49,12 +49,12 @@
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       {%ifeq:{%parent:{%is_system%}%}:false:
       <td nowrap valign="top">
-          <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}drop.png"></a>
+          <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}drop.png"></a>
       </td>
       %}
       <td nowrap valign="top">{%object_name%}</td>
       <td valign="top">{%constraintinfo:columns%}</td>
-      <td nowrap valign="top"><a href="fr://properties?object_type=TABLE&amp;object_name={%fkinfo:ref_table%}&amp;parent_window={%parent_window%}&amp;helper_object={%object_address%}">{%fkinfo:ref_table%}</a></td>
+      <td nowrap valign="top"><a href="fr://properties?object_type=TABLE&amp;object_name={%fkinfo:ref_table%}&amp;parent_window={%parent_window%}&amp;helper_object={%object_handle%}">{%fkinfo:ref_table%}</a></td>
       <td valign="top">{%fkinfo:ref_columns%}</td>
       <td nowrap valign="top">{%fkinfo:update_action%}</td>
       <td nowrap valign="top">{%fkinfo:delete_action%}</td>
@@ -63,7 +63,7 @@
 </table>
 <br>
 {%ifeq:{%is_system%}:false:
-  <a href="fr://add_constraint?type=FK&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">Add foreign key</a>
+  <a href="fr://add_constraint?type=FK&amp;parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Add foreign key</a>
 %}
 <br><br>
 <table cellspacing=1 cellpadding=2 border=0 bgcolor=black>
@@ -79,7 +79,7 @@
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       {%ifeq:{%parent:{%is_system%}%}:false:
       <td nowrap valign="top">
-        <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}drop.png"></a>
+        <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}drop.png"></a>
       </td>
       %}
       <td nowrap valign="top">{%object_name%}</td>
@@ -89,7 +89,7 @@
 </table>
 <br>
 {%ifeq:{%is_system%}:false:
-  <a href="fr://add_constraint?type=UNQ&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">Add unique</a>
+  <a href="fr://add_constraint?type=UNQ&amp;parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Add unique</a>
 %}
 <br><br>
 <table cellspacing=1 cellpadding=2 border=0 bgcolor=black>
@@ -105,7 +105,7 @@
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       {%ifeq:{%parent:{%is_system%}%}:false:
       <td nowrap valign="top">
-        <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}drop.png"></a>
+        <a href="fr://drop_constraint?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}drop.png"></a>
       </td>
       %}
       <td nowrap valign="top">{%object_name%}</td>
@@ -115,7 +115,7 @@
 </table>
 <br>
 {%ifeq:{%is_system%}:false:
-<a href="fr://add_constraint?type=CHK&amp;parent_window={%parent_window%}&amp;object_address={%object_address%}">Add check</a>
+<a href="fr://add_constraint?type=CHK&amp;parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Add check</a>
 %}
 <br>
 </body>

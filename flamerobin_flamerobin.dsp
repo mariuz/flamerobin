@@ -1090,6 +1090,10 @@ SOURCE=.\src\gui\MultilineEnterDialog.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\core\ObjectWithHandle.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\core\Observer.h
 # End Source File
 # Begin Source File

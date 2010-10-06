@@ -20,13 +20,13 @@
     {%foreach:trigger::before:
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       <td valign="top" nowrap>
-          <a href="fr://drop_object?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}drop.png"></a>
-          <a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}view.png"></a>
+          <a href="fr://drop_object?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}drop.png"></a>
+          <a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}view.png"></a>
       </td>
       <td nowrap valign="top"><a
           href="fr://properties?object_type=TRIGGER&amp;object_name={%object_name%}&amp;parent_window={%parent_window%}">{%object_name%}</a></td>
       <td nowrap valign="top" bgcolor="#DDDDFF" align="center">
-        <a href="fr://{%ifeq:{%triggerinfo:is_active%}:true:deactivate_trigger:activate_trigger%}?parent_window={%parent_window%}&amp;object_address={%object_address%}">
+        <a href="fr://{%ifeq:{%triggerinfo:is_active%}:true:deactivate_trigger:activate_trigger%}?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">
           <img src="{%template_root%}{%ifeq:{%triggerinfo:is_active%}:true:ok.png:redx.png%}">
         </a>
       </td>
@@ -49,13 +49,13 @@
     {%foreach:trigger::after:
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       <td valign="top" nowrap>
-          <a href="fr://drop_object?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}drop.png"></a>
-          <a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}view.png"></a>
+          <a href="fr://drop_object?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}drop.png"></a>
+          <a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}view.png"></a>
       </td>
       <td nowrap valign="top"><a
           href="fr://properties?object_type=TRIGGER&amp;object_name={%object_name%}&amp;parent_window={%parent_window%}">{%object_name%}</a></td>
       <td nowrap valign="top" bgcolor="#DDDDFF" align="center">
-        <a href="fr://{%ifeq:{%triggerinfo:is_active%}:true:deactivate_trigger:activate_trigger%}?parent_window={%parent_window%}&amp;object_address={%object_address%}">
+        <a href="fr://{%ifeq:{%triggerinfo:is_active%}:true:deactivate_trigger:activate_trigger%}?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">
           <img src="{%template_root%}{%ifeq:{%triggerinfo:is_active%}:true:ok.png:redx.png%}">
         </a>
       </td>
@@ -79,9 +79,9 @@
 <br>
 {%ifeq:{%is_system%}:false:
 <a
-href="fr://create_trigger?parent_window={%parent_window%}&amp;object_address={%object_address%}">Create new trigger</a> | <a
-href="fr://activate_triggers?parent_window={%parent_window%}&amp;object_address={%object_address%}">Activate all triggers</a> | <a
-href="fr://deactivate_triggers?parent_window={%parent_window%}&amp;object_address={%object_address%}">Deactivate all triggers</a>
+href="fr://create_trigger?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Create new trigger</a> | <a
+href="fr://activate_triggers?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Activate all triggers</a> | <a
+href="fr://deactivate_triggers?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Deactivate all triggers</a>
 %}
 {%ifeq:{%getglobalconf:displayTriggerSource%}:1:
     {%foreach:trigger::before:
@@ -89,7 +89,7 @@ href="fr://deactivate_triggers?parent_window={%parent_window%}&amp;object_addres
     <table cellspacing=1 cellpadding=2 border=0 bgcolor=black width="98%">
     <tr bgcolor="navy">
       <td nowrap><font color=white><b>{%object_name%}</b>
-        [<a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_address={%object_address%}"><font
+        [<a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><font
         color="yellow">edit</font></a>]</font></td>
     </tr>
     <tr bgcolor="#DDDDFF"><td>
@@ -103,7 +103,7 @@ href="fr://deactivate_triggers?parent_window={%parent_window%}&amp;object_addres
     <table cellspacing=1 cellpadding=2 border=0 bgcolor=black width="98%">
     <tr bgcolor="navy">
       <td nowrap><font color=white><b>{%object_name%}</b>
-        [<a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_address={%object_address%}"><font
+        [<a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><font
         color="yellow">edit</font></a>]</font></td>
     </tr>
     <tr bgcolor="#DDDDFF"><td>

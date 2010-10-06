@@ -52,6 +52,9 @@
 #include "metadata/root.h"
 //-----------------------------------------------------------------------------
 using namespace std;
+
+ObjectWithHandle<MetadataItem>::HandleMap ObjectWithHandle<MetadataItem>::handleMap;
+ObjectWithHandle<MetadataItem>::Handle ObjectWithHandle<MetadataItem>::nextHandle = 0;
 //-----------------------------------------------------------------------------
 MetadataItem::MetadataItem()
     : Subject(), typeM(ntUnknown), parentM(0), childrenLoadedM(lsNotLoaded),

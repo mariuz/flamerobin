@@ -247,6 +247,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/config/DatabaseConfig.h
         $(SOURCEDIR)/core/ArtProvider.h
         $(SOURCEDIR)/core/FRError.h
+        $(SOURCEDIR)/core/ObjectWithHandle.h
         $(SOURCEDIR)/core/Observer.h
         $(SOURCEDIR)/core/ProgressIndicator.h
         $(SOURCEDIR)/core/StringUtils.h

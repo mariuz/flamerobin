@@ -41,6 +41,7 @@
 #include <list>
 #include <algorithm>
 
+#include "metadata/metadataitem.h"
 #include "urihandler.h"
 //-----------------------------------------------------------------------------
 URI::URI()
@@ -194,10 +195,10 @@ wxWindow* URIHandler::getWindow(const URI& uri)
 //-----------------------------------------------------------------------------
 void* URIHandler::getObject(const URI& uri)
 {
-    wxString ms = uri.getParam(wxT("object_address"));      // object
+    wxString ms = uri.getParam(wxT("object_handle"));      // object
     unsigned long mo;
     if (!ms.ToULong(&mo))
         return 0;
-    return (void*)mo;
+    return MetadataItem::getFromHandle(mo);
 }
 //-----------------------------------------------------------------------------

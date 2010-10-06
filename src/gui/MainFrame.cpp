@@ -760,7 +760,7 @@ void MainFrame::OnMenuDatabaseExtractDDL(wxCommandEvent& WXUNUSED(event))
 
     URI uri = URI(wxT("fr://edit_ddl?parent_window=") +
         wxString::Format(wxT("%ld"), (uintptr_t)this) +
-        wxT("&object_address=") + wxString::Format(wxT("%ld"), (uintptr_t)db));
+        wxT("&object_handle=") + wxString::Format(wxT("%d"), db->getHandle()));
     getURIProcessor().handleURI(uri);
 }
 //-----------------------------------------------------------------------------
@@ -801,7 +801,7 @@ void MainFrame::OnMenuCreateTriggerForTable(wxCommandEvent& WXUNUSED(event))
         return;
     URI uri = URI(wxT("fr://create_trigger?parent_window=") +
         wxString::Format(wxT("%ld"), (uintptr_t)this) +
-        wxT("&object_address=") + wxString::Format(wxT("%ld"), (uintptr_t)i));
+        wxT("&object_handle=") + wxString::Format(wxT("%d"), i->getHandle()));
     getURIProcessor().handleURI(uri);
 }
 //-----------------------------------------------------------------------------
@@ -1242,7 +1242,7 @@ void MainFrame::OnMenuSetGeneratorValue(wxCommandEvent& WXUNUSED(event))
         return;
 
     URI uri = URI(wxT("fr://edit_generator_value?parent_window=") + wxString::Format(wxT("%ld"), (uintptr_t)this)
-        + wxT("&object_address=") + wxString::Format(wxT("%ld"), (uintptr_t)g));
+        + wxT("&object_handle=") + wxString::Format(wxT("%d"), g->getHandle()));
     getURIProcessor().handleURI(uri);
 }
 //-----------------------------------------------------------------------------
@@ -1364,7 +1364,7 @@ void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))
         return;
 
     URI uri = URI(wxT("fr://add_field?parent_window=") + wxString::Format(wxT("%ld"), (uintptr_t)this)
-        + wxT("&object_address=") + wxString::Format(wxT("%ld"), (uintptr_t)t));
+        + wxT("&object_handle=") + wxString::Format(wxT("%d"), t->getHandle()));
     getURIProcessor().handleURI(uri);
 }
 //-----------------------------------------------------------------------------
@@ -1485,8 +1485,7 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
 
         URI uri = URI(wxT("fr://edit_field?parent_window=")
             + wxString::Format(wxT("%ld"), (uintptr_t)this)
-            + wxT("&object_address=") + wxString::Format(wxT("%ld"),
-            (uintptr_t)c));
+            + wxT("&object_handle=") + wxString::Format(wxT("%ld"), c->getHandle()));
         getURIProcessor().handleURI(uri);
     }
     else
@@ -1517,8 +1516,7 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
     {
         URI uri(wxT("fr://edit_procedure?parent_window=")
             + wxString::Format(wxT("%ld"), (uintptr_t)this)
-            + wxT("&object_address=")
-            + wxString::Format(wxT("%ld"), (uintptr_t)p));
+            + wxT("&object_handle=") + wxString::Format(wxT("%ld"), p->getHandle()));
         getURIProcessor().handleURI(uri);
         return;
     }

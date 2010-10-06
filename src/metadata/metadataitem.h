@@ -36,6 +36,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "core/ObjectWithHandle.h"
 #include "core/Subject.h"
 #include "sql/Identifier.h"
 
@@ -56,7 +57,7 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
 NodeType getTypeByName(wxString name);
 wxString getNameOfType(NodeType type);
 //-----------------------------------------------------------------------------
-class MetadataItem: public Subject
+class MetadataItem: public Subject, public ObjectWithHandle<MetadataItem>
 {
 private:
     MetadataItem* parentM;

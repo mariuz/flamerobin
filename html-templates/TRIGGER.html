@@ -7,7 +7,7 @@
 <br>
 <br><font size=+2>{%object_name%}</font><br>
 {%object_description%} [<a
- href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=TRIGGER&amp;object_name={%object_name%}">edit</a>]
+ href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=TRIGGER&amp;object_name={%object_name%}">edit</a>]
 <br><br>
 <table cellspacing=1 cellpadding=2 border=0 bgcolor="black">
 <tbody>
@@ -19,10 +19,10 @@
 </tr>
 <tr>
   <td valign="top" nowrap bgcolor="#DDDDFF">
-    <a href="fr://drop_object?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}drop.png"></a>
+    <a href="fr://drop_object?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}drop.png"></a>
   </td>
   <td nowrap valign="top" bgcolor="#DDDDFF" align="center">
-    <a href="fr://{%ifeq:{%triggerinfo:is_active%}:true:deactivate_trigger:activate_trigger%}?parent_window={%parent_window%}&amp;object_address={%object_address%}">
+    <a href="fr://{%ifeq:{%triggerinfo:is_active%}:true:deactivate_trigger:activate_trigger%}?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">
       <img src="{%template_root%}{%ifeq:{%triggerinfo:is_active%}:true:ok.png:redx.png%}">
     </a>
   </td>
@@ -35,7 +35,7 @@
 <table cellspacing=1 cellpadding=2 border=0 width="98%" bgcolor="black">
 <tbody>
 <tr>
-  <td colspan="4" bgcolor="navy"><font color=white><b>Source</b> [<a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_address={%object_address%}"><font color="yellow">edit</font></a>]</font></td>
+  <td colspan="4" bgcolor="navy"><font color=white><b>Source</b> [<a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><font color="yellow">edit</font></a>]</font></td>
 </tr>
 <tr>
   <td colspan="4" bgcolor="#DDDDFF"><font size=-1><pre>{%triggerinfo:source%}</pre></font></td>

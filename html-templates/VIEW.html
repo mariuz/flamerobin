@@ -8,7 +8,7 @@
 <br><font size=+2>{%object_name%}</font><br>
 Owner: {%owner_name%}<br>
 {%object_description%} [<a
- href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=VIEW&amp;object_name={%object_name%}">edit</a>]
+ href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=VIEW&amp;object_name={%object_name%}">edit</a>]
 <br><br>
 <table cellspacing=1 cellpadding=2 border=0 bgcolor=black>
   <tbody>
@@ -21,14 +21,14 @@ Owner: {%owner_name%}<br>
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top">{%columninfo:datatype%}</td>
-      <td valign="top"><font size=-1>{%object_description%} [<a href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>
+      <td valign="top"><font size=-1>{%object_description%} [<a href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>
     </tr>%}
   </tbody>
 </table>
 <br><br>
 <table cellspacing=1 cellpadding=3 border=0 width="98%" bgcolor="black">
 <tr><td bgcolor="navy"><font color=white><b>Source</b> [<a
-    href="fr://alter_relation?parent_window={%parent_window%}&amp;object_address={%object_address%}"><font color="yellow">alter</font></a>]</font></td>
+    href="fr://alter_relation?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><font color="yellow">alter</font></a>]</font></td>
 </tr>
 <tr><td bgcolor="#DDDDFF"><font size=-1><pre>{%viewinfo:source%}</pre></font></td></tr>
 </table>

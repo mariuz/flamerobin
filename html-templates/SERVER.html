@@ -19,8 +19,8 @@
     {%foreach:user::
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       <td valign="top" nowrap>
-          <a href="fr://edit_user?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}view.png"></a>
-          {%ifeq:{%is_system%}:false:<a href="fr://drop_user?parent_window={%parent_window%}&amp;object_address={%object_address%}"><img src="{%template_root%}drop.png"></a>%}
+          <a href="fr://edit_user?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}view.png"></a>
+          {%ifeq:{%is_system%}:false:<a href="fr://drop_user?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}drop.png"></a>%}
       </td>
       <td nowrap valign="top">{%userinfo:username%}</td>
       <td nowrap valign="top">{%userinfo:first_name%}</td>
@@ -32,7 +32,7 @@
   </tbody>
 </table>
 <br><br>
-<a href="fr://add_user?parent_window={%parent_window%}&amp;object_address={%object_address%}">Add user</a>
+<a href="fr://add_user?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Add user</a>
 <br>
 </body>
 </html>

@@ -9,7 +9,7 @@
 <font size=+2>{%object_name%}</font><br>
 Owner: {%owner_name%}<br>
 {%object_description%} [<a
- href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=PROCEDURE&amp;object_name={%object_name%}">edit</a>]
+ href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=PROCEDURE&amp;object_name={%object_name%}">edit</a>]
 <br><br>
 <table cellspacing=1 cellpadding=2 border=0 bgcolor=black width="98%">
   <tbody>
@@ -23,7 +23,7 @@ Owner: {%owner_name%}<br>
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top">{%columninfo:datatype%}</td>
       <td valign="top"><font size=-1>{%object_description%} [<a
-        href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>
+        href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>
     </tr>%}
   </tbody>
 </table>
@@ -40,14 +40,14 @@ Owner: {%owner_name%}<br>
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top">{%columninfo:datatype%}</td>
       <td valign="top"><font size=-1>{%object_description%} [<a
-        href="fr://edit_description?parent_window={%parent_window%}&amp;object_address={%object_address%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>
+        href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>
     </tr>%}
   </tbody>
 </table>
 <br><br>
 <table cellspacing=1 cellpadding=3 border=0 width="98%" bgcolor="black">
 <tr><td bgcolor="navy"><font color=white><b>Source</b> [<a
-    href="fr://edit_procedure?parent_window={%parent_window%}&amp;object_address={%object_address%}"><font
+    href="fr://edit_procedure?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><font
     color="yellow">edit</font></a>]</font></td>
 </tr>
 <tr><td bgcolor="#DDDDFF"><font size=-1><pre>{%procedureinfo:source%}</pre></font></td></tr>
