@@ -1141,7 +1141,7 @@ bool MainFrame::getAutoConnectDatabase()
 {
     int value;
     if (config().getValue(wxT("DIALOG_ConfirmAutoConnect"), value))
-        return value == wxOK;
+        return value == wxYES;
     // enable all commands to show the dialog when connection is needed
     return true;
 }
@@ -1161,7 +1161,7 @@ bool MainFrame::tryAutoConnectDatabase(Database* database)
         _("The database is not connected. You first have to establish a connection before you can execute SQL statements or otherwise work with the database."),
         AdvancedMessageDialogButtonsYesNoCancel(_("C&onnect"), _("Do&n't connect")),
         config(), wxT("DIALOG_ConfirmAutoConnect"), _("Don't ask again, &always (don't) connect"));
-    if (res == wxOK)
+    if (res == wxYES)
         connect();
     return database->isConnected();
 }
