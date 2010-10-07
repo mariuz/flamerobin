@@ -1211,7 +1211,7 @@ public:
 BlobColumnDef::BlobColumnDef(const wxString& name, bool readOnly,
     bool nullable, unsigned stringIndex, unsigned blobIndex, bool textual)
     : ResultsetColumnDef(name, readOnly, nullable), indexM(blobIndex),
-      textualM(textual), stringIndexM(stringIndex)
+      textualM(textual), stringIndexM(stringIndex), converterM(0)
 {
     //readOnlyM = true;   // TODO: uncomment this when we make BlobDialog
 }
@@ -1243,7 +1243,7 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
     if (!b0)
         return wxT("");
     IBPP::Blob b = *b0;
-    b->Open();      
+    b->Open();
 
     while (kb > 0)
     {
