@@ -758,9 +758,9 @@ void MainFrame::OnMenuDatabaseExtractDDL(wxCommandEvent& WXUNUSED(event))
     if (!tryAutoConnectDatabase())
         return;
 
-    URI uri = URI(wxT("fr://edit_ddl?parent_window=") +
-        wxString::Format(wxT("%ld"), (uintptr_t)this) +
-        wxT("&object_handle=") + wxString::Format(wxT("%d"), db->getHandle()));
+    URI uri(wxT("fr://edit_ddl"));
+    uri.addParam(wxString::Format(wxT("parent_window=%ld"), (uintptr_t)this));
+    uri.addParam(wxString::Format(wxT("object_handle=%d"), db->getHandle()));
     getURIProcessor().handleURI(uri);
 }
 //-----------------------------------------------------------------------------
@@ -799,9 +799,10 @@ void MainFrame::OnMenuCreateTriggerForTable(wxCommandEvent& WXUNUSED(event))
     MetadataItem* i = treeMainM->getSelectedMetadataItem();
     if (!i)
         return;
-    URI uri = URI(wxT("fr://create_trigger?parent_window=") +
-        wxString::Format(wxT("%ld"), (uintptr_t)this) +
-        wxT("&object_handle=") + wxString::Format(wxT("%d"), i->getHandle()));
+
+    URI uri(wxT("fr://create_trigger"));
+    uri.addParam(wxString::Format(wxT("parent_window=%ld"), (uintptr_t)this));
+    uri.addParam(wxString::Format(wxT("object_handle=%d"), i->getHandle()));
     getURIProcessor().handleURI(uri);
 }
 //-----------------------------------------------------------------------------
@@ -1241,8 +1242,9 @@ void MainFrame::OnMenuSetGeneratorValue(wxCommandEvent& WXUNUSED(event))
     if (!g)
         return;
 
-    URI uri = URI(wxT("fr://edit_generator_value?parent_window=") + wxString::Format(wxT("%ld"), (uintptr_t)this)
-        + wxT("&object_handle=") + wxString::Format(wxT("%d"), g->getHandle()));
+    URI uri(wxT("fr://edit_generator_value"));
+    uri.addParam(wxString::Format(wxT("parent_window=%ld"), (uintptr_t)this));
+    uri.addParam(wxString::Format(wxT("object_handle=%d"), g->getHandle()));
     getURIProcessor().handleURI(uri);
 }
 //-----------------------------------------------------------------------------
@@ -1363,8 +1365,9 @@ void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))
     if (!t)
         return;
 
-    URI uri = URI(wxT("fr://add_field?parent_window=") + wxString::Format(wxT("%ld"), (uintptr_t)this)
-        + wxT("&object_handle=") + wxString::Format(wxT("%d"), t->getHandle()));
+    URI uri(wxT("fr://add_field"));
+    uri.addParam(wxString::Format(wxT("parent_window=%ld"), (uintptr_t)this));
+    uri.addParam(wxString::Format(wxT("object_handle=%d"), t->getHandle()));
     getURIProcessor().handleURI(uri);
 }
 //-----------------------------------------------------------------------------
@@ -1483,9 +1486,9 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
         if (c->isSystem() || !c->getTable())
             return;
 
-        URI uri = URI(wxT("fr://edit_field?parent_window=")
-            + wxString::Format(wxT("%ld"), (uintptr_t)this)
-            + wxT("&object_handle=") + wxString::Format(wxT("%ld"), c->getHandle()));
+        URI uri(wxT("fr://edit_field"));
+        uri.addParam(wxString::Format(wxT("parent_window=%ld"), (uintptr_t)this));
+        uri.addParam(wxString::Format(wxT("object_handle=%d"), c->getHandle()));
         getURIProcessor().handleURI(uri);
     }
     else
@@ -1514,9 +1517,9 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
     Procedure* p = dynamic_cast<Procedure*>(mi);
     if (p)
     {
-        URI uri(wxT("fr://edit_procedure?parent_window=")
-            + wxString::Format(wxT("%ld"), (uintptr_t)this)
-            + wxT("&object_handle=") + wxString::Format(wxT("%ld"), p->getHandle()));
+        URI uri(wxT("fr://edit_procedure"));
+        uri.addParam(wxString::Format(wxT("parent_window=%ld"), (uintptr_t)this));
+        uri.addParam(wxString::Format(wxT("object_handle=%d"), p->getHandle()));
         getURIProcessor().handleURI(uri);
         return;
     }
