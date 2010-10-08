@@ -322,6 +322,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/metadata/function.h
         $(SOURCEDIR)/metadata/generator.h
         $(SOURCEDIR)/metadata/Index.h
+        $(SOURCEDIR)/metadata/MetadataClasses.h
         $(SOURCEDIR)/metadata/metadataitem.h
         $(SOURCEDIR)/metadata/MetadataItemDescriptionVisitor.h
         $(SOURCEDIR)/metadata/MetadataItemVisitor.h

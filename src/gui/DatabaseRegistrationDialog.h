@@ -31,11 +31,9 @@
 #include <wx/wx.h>
 
 #include "gui/BaseDialog.h"
+#include "metadata/MetadataClasses.h"
 
 class FileTextControl;
-
-class Server;
-class Database;
 //-----------------------------------------------------------------------------
 class DatabaseRegistrationDialog: public BaseDialog {
 private:

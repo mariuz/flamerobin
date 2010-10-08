@@ -33,12 +33,10 @@
 #include <wx/thread.h>
 
 #include "gui/BaseFrame.h"
+#include "metadata/MetadataClasses.h"
 
 class FileTextControl;
 class LogTextControl;
-
-class Server;
-class Database;
 //-----------------------------------------------------------------------------
 class BackupRestoreBaseFrame: public BaseFrame {
 public:

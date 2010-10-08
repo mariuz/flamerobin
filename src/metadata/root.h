@@ -30,29 +30,21 @@
 //-----------------------------------------------------------------------------
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
+#include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
-#include "metadata/server.h"
 
-class Database;
-class Root;
 class wxXmlNode;
-
-typedef boost::shared_ptr<Root> SharedRootPtr;
-typedef boost::shared_ptr<Server> SharedServerPtr;
-typedef std::vector<SharedServerPtr> SharedServers;
 //-----------------------------------------------------------------------------
 class Root: public MetadataItem
 {
 private:
-    SharedServers serversM;
-    Server* unregLocalDatabasesM;
+    ServerPtrs serversM;
+    ServerPtr unregLocalDatabasesM;
 
     wxString fileNameM;
     wxString getFileName();
 
-    bool parseDatabase(SharedServerPtr server, wxXmlNode* xmln);
+    bool parseDatabase(ServerPtr server, wxXmlNode* xmln);
     bool parseServer(wxXmlNode* xmln);
 protected:
     virtual void lockChildren();
@@ -61,15 +53,15 @@ public:
     Root();
     ~Root();
 
-    SharedServerPtr addServer();
-    void addServer(SharedServerPtr server);
-    void removeServer(Server* server);
-    void addUnregisteredDatabase(SharedDatabasePtr database);
+    ServerPtr addServer();
+    void addServer(ServerPtr server);
+    void removeServer(ServerPtr server);
+    void addUnregisteredDatabase(DatabasePtr database);
 
-    SharedServers::iterator begin();
-    SharedServers::iterator end();
-    SharedServers::const_iterator begin() const;
-    SharedServers::const_iterator end() const;
+    ServerPtrs::iterator begin();
+    ServerPtrs::iterator end();
+    ServerPtrs::const_iterator begin() const;
+    ServerPtrs::const_iterator end() const;
 
     virtual bool getChildren(std::vector<MetadataItem*>& temp);
 

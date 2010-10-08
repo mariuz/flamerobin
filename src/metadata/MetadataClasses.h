@@ -25,38 +25,56 @@
 
 */
 
-//! This class is interface between Config and Database classes
-//  Preferences dialog takes Config class as parameter, so interface like this
-//  is needed
-//
-#ifndef FR_DATABASE_CONFIG_H
-#define FR_DATABASE_CONFIG_H
+//-----------------------------------------------------------------------------
+#ifndef FR_METADATACLASSES_H
+#define FR_METADATACLASSES_H
 
-#include <map>
 #include <vector>
 
-#include "config/Config.h"
-#include "metadata/MetadataClasses.h"
+#include <boost/shared_ptr.hpp>
+
+class Column;
+
+class Database;
+typedef boost::shared_ptr<Database> DatabasePtr;
+typedef std::vector<DatabasePtr> DatabasePtrs;
+
+class Domain;
+class Domains;
+class Exception;
+class Exceptions;
+class ForeignKey;
+class Function;
+class Functions;
+class Generator;
+class Generators;
+class Index;
+
+class MetadataItem;
+typedef boost::shared_ptr<MetadataItem> MetadataItemPtr;
+
+class Parameter;
+class PrimaryKeyConstraint;
+class Procedure;
+class Procedures;
+class Relation;
+class Role;
+class Roles;
+
+class Root;
+typedef boost::shared_ptr<Root> RootPtr;
+
+class Server;
+typedef boost::shared_ptr<Server> ServerPtr;
+typedef std::vector<ServerPtr> ServerPtrs;
+
+class SysTables;
+class Table;
+class Tables;
+class Trigger;
+class Triggers;
+class UniqueConstraint;
+class View;
+class Views;
 //-----------------------------------------------------------------------------
-class DatabaseConfig: public Config
-{
-private:
-    const Database *databaseM;
-    Config& referenceConfigM;
-    wxString addPathToKey(const wxString key) const;
-
-public:
-    DatabaseConfig(const Database *d, Config& referenceConfig);
-
-    // unhides methods of base class, for details see:
-    // http://www.parashift.com/c++-faq-lite/strange-inheritance.html#faq-23.7
-    using Config::getValue;
-    using Config::setValue;
-
-    // transform the key based on Database, and call regular config
-    virtual bool keyExists(const wxString& key) const;
-    virtual bool getValue(wxString key, wxString& value);
-    virtual bool setValue(wxString key, wxString value);
-};
-//-----------------------------------------------------------------------------
-#endif
+#endif // FR_METADATACLASSES_H

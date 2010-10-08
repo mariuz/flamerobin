@@ -68,7 +68,7 @@ static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
 }
 //-----------------------------------------------------------------------------
 Root::Root()
-    : MetadataItem(ntRoot), fileNameM(wxT("")), unregLocalDatabasesM(0)
+    : MetadataItem(ntRoot)
 {
     setName_(wxT("Home"));
     setChildrenLoaded(true);
@@ -76,7 +76,7 @@ Root::Root()
 //-----------------------------------------------------------------------------
 void Root::disconnectAllDatabases()
 {
-    for (SharedServers::iterator its = serversM.begin();
+    for (ServerPtrs::iterator its = serversM.begin();
         its != serversM.end(); ++its)
     {
         std::for_each((*its)->begin(), (*its)->end(),
@@ -133,11 +133,11 @@ bool Root::load()
     return true;
 }
 //-----------------------------------------------------------------------------
-bool Root::parseDatabase(SharedServerPtr server, wxXmlNode* xmln)
+bool Root::parseDatabase(ServerPtr server, wxXmlNode* xmln)
 {
     wxASSERT(server);
     wxASSERT(xmln);
-    SharedDatabasePtr database = server->addDatabase();
+    DatabasePtr database = server->addDatabase();
     SubjectLocker locker(database.get());
 
     for (xmln = xmln->GetChildren(); (xmln); xmln = xmln->GetNext())
@@ -183,7 +183,7 @@ bool Root::parseDatabase(SharedServerPtr server, wxXmlNode* xmln)
 bool Root::parseServer(wxXmlNode* xmln)
 {
     wxASSERT(xmln);
-    SharedServerPtr server = addServer();
+    ServerPtr server = addServer();
     SubjectLocker locker(server.get());
 
     for (xmln = xmln->GetChildren(); (xmln); xmln = xmln->GetNext())
@@ -211,14 +211,14 @@ bool Root::parseServer(wxXmlNode* xmln)
     return true;
 }
 //-----------------------------------------------------------------------------
-SharedServerPtr Root::addServer()
+ServerPtr Root::addServer()
 {
-    SharedServerPtr server(new Server());
+    ServerPtr server(new Server());
     addServer(server);
     return server;
 }
 //-----------------------------------------------------------------------------
-void Root::addServer(SharedServerPtr server)
+void Root::addServer(ServerPtr server)
 {
     if (server)
     {
@@ -228,41 +228,32 @@ void Root::addServer(SharedServerPtr server)
     }
 }
 //-----------------------------------------------------------------------------
-template<class T>
-struct IsSharedPtrTo
+void Root::removeServer(ServerPtr server)
 {
-    T* _t;
-public:
-    IsSharedPtrTo<T>(T* t) : _t(t) {};
-    bool operator()(boost::shared_ptr<T> pt) { return pt.get() == _t; };
-};
-//-----------------------------------------------------------------------------
-void Root::removeServer(Server* server)
-{
-    IsSharedPtrTo<Server> isThisServer(server);
-    SharedServers::iterator itRemove = std::remove_if(serversM.begin(),
-        serversM.end(), isThisServer);
-    if (itRemove != serversM.end())
+    if (unregLocalDatabasesM == server)
+        unregLocalDatabasesM.reset();
+
+    ServerPtrs::iterator it = std::remove(serversM.begin(), serversM.end(),
+        server);
+    if (it != serversM.end())
     {
-        serversM.erase(itRemove, serversM.end());
-        if (unregLocalDatabasesM == server)
-            unregLocalDatabasesM = 0;
+        serversM.erase(it, serversM.end());
         notifyObservers();
     }
 }
 //-----------------------------------------------------------------------------
-void Root::addUnregisteredDatabase(SharedDatabasePtr database)
+void Root::addUnregisteredDatabase(DatabasePtr database)
 {
     // on-demand creation of parent node for unregistered databases
     if (!unregLocalDatabasesM)
     {
-        SharedServerPtr server(new Server());
+        ServerPtr server(new Server());
         serversM.push_back(server);
         server->setName_(_("Unregistered local databases"));
         server->setHostname(wxT("localhost"));
         server->setParent(this);
 
-        unregLocalDatabasesM = server.get();
+        unregLocalDatabasesM = server;
         notifyObservers();
     }
 
@@ -303,12 +294,12 @@ bool Root::save()
     rsAddChildNode(rn, wxT("nextId"),
         wxString::Format(wxT("%d"), Database::getUIDGeneratorValue()));
 
-    for (SharedServers::iterator its = serversM.begin();
+    for (ServerPtrs::iterator its = serversM.begin();
         its != serversM.end(); ++its)
     {
         // do not save the dummy server node for databases that were opened
         // either via command line switch or via drag and drop
-        if ((*its).get() == unregLocalDatabasesM)
+        if ((*its) == unregLocalDatabasesM)
             continue;
 
         wxXmlNode* srvn = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("server"));
@@ -318,7 +309,7 @@ bool Root::save()
         rsAddChildNode(srvn, wxT("host"), (*its)->getHostname());
         rsAddChildNode(srvn, wxT("port"), (*its)->getPort());
 
-        for (SharedDatabases::iterator itdb = (*its)->begin();
+        for (DatabasePtrs::iterator itdb = (*its)->begin();
             itdb != (*its)->end(); ++itdb)
         {
             (*itdb)->resetCredentials();    // clean up eventual extra credentials
@@ -350,22 +341,22 @@ bool Root::getChildren(std::vector<MetadataItem *>& temp)
     return true;
 }
 //-----------------------------------------------------------------------------
-SharedServers::iterator Root::begin()
+ServerPtrs::iterator Root::begin()
 {
     return serversM.begin();
 }
 //-----------------------------------------------------------------------------
-SharedServers::iterator Root::end()
+ServerPtrs::iterator Root::end()
 {
     return serversM.end();
 }
 //-----------------------------------------------------------------------------
-SharedServers::const_iterator Root::begin() const
+ServerPtrs::const_iterator Root::begin() const
 {
     return serversM.begin();
 }
 //-----------------------------------------------------------------------------
-SharedServers::const_iterator Root::end() const
+ServerPtrs::const_iterator Root::end() const
 {
     return serversM.end();
 }

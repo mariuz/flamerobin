@@ -36,9 +36,8 @@
 
 #include <ibpp.h>
 
-class Relation;
-class Database;
-class Server;
+#include "metadata/MetadataClasses.h"
+
 class ProgressDialog;
 class ProgressIndicator;
 //-----------------------------------------------------------------------------

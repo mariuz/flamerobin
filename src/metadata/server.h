@@ -37,13 +37,11 @@
 
 #include "metadata/collection.h"
 #include "metadata/database.h"
+#include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
 #include "metadata/User.h"
 
 typedef std::vector<User> UserList;
-
-typedef boost::shared_ptr<Database> SharedDatabasePtr;
-typedef std::vector<SharedDatabasePtr> SharedDatabases;
 //-----------------------------------------------------------------------------
 class Server : public MetadataItem
 {
@@ -51,7 +49,7 @@ private:
     wxString hostnameM;
     wxString portM;
 
-    SharedDatabases databasesM;
+    DatabasePtrs databasesM;
     UserList usersM;
 
     wxString serviceUserM;
@@ -65,14 +63,14 @@ public:
 
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
 
-    SharedDatabasePtr addDatabase();
-    void addDatabase(SharedDatabasePtr database);
-    void removeDatabase(Database* database);
+    DatabasePtr addDatabase();
+    void addDatabase(DatabasePtr database);
+    void removeDatabase(DatabasePtr database);
 
-    SharedDatabases::iterator begin();
-    SharedDatabases::iterator end();
-    SharedDatabases::const_iterator begin() const;
-    SharedDatabases::const_iterator end() const;
+    DatabasePtrs::iterator begin();
+    DatabasePtrs::iterator end();
+    DatabasePtrs::const_iterator begin() const;
+    DatabasePtrs::const_iterator end() const;
 
     void createDatabase(Database *db, int pagesize = 4096, int dialect = 3);
 

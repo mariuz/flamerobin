@@ -55,8 +55,9 @@
 #include "core/Subject.h"
 #include "gui/ContextMenuMetadataItemVisitor.h"
 #include "gui/controls/DBHTreeControl.h"
-// nearly all headers in src/metadata would be necessary, but...
+#include "metadata/database.h"
 #include "metadata/root.h"
+#include "metadata/server.h"
 #include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------
 // DBHTreeConfigCache: class to cache config data for tree control behaviour

@@ -1066,6 +1066,10 @@ SOURCE=.\src\MasterPassword.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\metadata\MetadataClasses.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\metadata\MetadataItemDescriptionVisitor.h
 # End Source File
 # Begin Source File

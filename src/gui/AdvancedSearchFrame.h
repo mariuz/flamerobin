@@ -120,7 +120,7 @@ protected:
     wxStyledTextCtrl *stc_ddl;
 
 public:
-    AdvancedSearchFrame(MainFrame* parent, SharedRootPtr root);
+    AdvancedSearchFrame(MainFrame* parent, RootPtr root);
     enum
     {
         ID_button_remove=100,

@@ -78,14 +78,14 @@ bool Server::getChildren(std::vector<MetadataItem*>& temp)
     return true;
 }
 //-----------------------------------------------------------------------------
-SharedDatabasePtr Server::addDatabase()
+DatabasePtr Server::addDatabase()
 {
-    SharedDatabasePtr database(new Database());
+    DatabasePtr database(new Database());
     addDatabase(database);
     return database;
 }
 //-----------------------------------------------------------------------------
-void Server::addDatabase(SharedDatabasePtr database)
+void Server::addDatabase(DatabasePtr database)
 {
     if (database)
     {
@@ -95,23 +95,13 @@ void Server::addDatabase(SharedDatabasePtr database)
     }
 }
 //-----------------------------------------------------------------------------
-template<class T>
-struct IsSharedPtrTo
+void Server::removeDatabase(DatabasePtr database)
 {
-    T* _t;
-public:
-    IsSharedPtrTo<T>(T* t) : _t(t) {};
-    bool operator()(boost::shared_ptr<T> pt) { return pt.get() == _t; };
-};
-//-----------------------------------------------------------------------------
-void Server::removeDatabase(Database* database)
-{
-    IsSharedPtrTo<Database> isThisDatabase(database);
-    SharedDatabases::iterator itRemove = std::remove_if(databasesM.begin(),
-        databasesM.end(), isThisDatabase);
-    if (itRemove != databasesM.end())
+    DatabasePtrs::iterator it = std::remove(databasesM.begin(),
+        databasesM.end(), database);
+    if (it != databasesM.end())
     {
-        databasesM.erase(itRemove, databasesM.end());
+        databasesM.erase(it, databasesM.end());
         notifyObservers();
     }
 }
@@ -134,22 +124,22 @@ void Server::createDatabase(Database* db, int pagesize, int dialect)
     db1->Create(dialect);
 }
 //-----------------------------------------------------------------------------
-SharedDatabases::iterator Server::begin()
+DatabasePtrs::iterator Server::begin()
 {
     return databasesM.begin();
 }
 //-----------------------------------------------------------------------------
-SharedDatabases::iterator Server::end()
+DatabasePtrs::iterator Server::end()
 {
     return databasesM.end();
 }
 //-----------------------------------------------------------------------------
-SharedDatabases::const_iterator Server::begin() const
+DatabasePtrs::const_iterator Server::begin() const
 {
     return databasesM.begin();
 }
 //-----------------------------------------------------------------------------
-SharedDatabases::const_iterator Server::end() const
+DatabasePtrs::const_iterator Server::end() const
 {
     return databasesM.end();
 }
@@ -166,7 +156,7 @@ wxString Server::getPort() const
 //-----------------------------------------------------------------------------
 bool Server::hasConnectedDatabase() const
 {
-    SharedDatabases::const_iterator it = std::find_if(
+    DatabasePtrs::const_iterator it = std::find_if(
         databasesM.begin(), databasesM.end(),
         boost::mem_fn(&Database::isConnected));
     return it != databasesM.end();
@@ -296,7 +286,7 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
     }
 
     // first try connected databases
-    for (SharedDatabases::iterator ci = databasesM.begin();
+    for (DatabasePtrs::iterator ci = databasesM.begin();
         ci != databasesM.end(); ++ci)
     {
         if (progressind && progressind->isCanceled())
@@ -334,7 +324,7 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
     }
 
     // when the operation is not canceled try to user/pass of disconnected DBs
-    for (SharedDatabases::const_iterator ci = databasesM.begin();
+    for (DatabasePtrs::const_iterator ci = databasesM.begin();
         ci != databasesM.end(); ++ci)
     {
         if (progressind && progressind->isCanceled())

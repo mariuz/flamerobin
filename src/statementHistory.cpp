@@ -44,12 +44,7 @@
 
 #include "config/Config.h"
 #include "metadata/database.h"
-#include "metadata/server.h"
 #include "statementHistory.h"
-
-class Server;
-//-----------------------------------------------------------------------------
-using namespace std;
 //-----------------------------------------------------------------------------
 wxString StatementHistory::getFilename(StatementHistory::Position item)
 {
@@ -94,22 +89,22 @@ StatementHistory& StatementHistory::get(Database* db)
 
     else if (hg == hgPerDatabaseName)
     {
-        static map<wxString, StatementHistory> stm;
+        static std::map<wxString, StatementHistory> stm;
         if (stm.find(db->getName_()) == stm.end())
         {
             StatementHistory st(wxT("DATABASENAME") + db->getName_());
-            stm.insert(pair<wxString, StatementHistory>(db->getName_(), st));
+            stm.insert(std::pair<wxString, StatementHistory>(db->getName_(), st));
         }
         return (*(stm.find(db->getName_()))).second;
     }
 
     else // (hg == hgPerDatabase)
     {
-        static map<Database*, StatementHistory> stm;
+        static std::map<Database*, StatementHistory> stm;
         if (stm.find(db) == stm.end())
         {
             StatementHistory st(wxT("DATABASE") + db->getId());
-            stm.insert(pair<Database*, StatementHistory>(db, st));
+            stm.insert(std::pair<Database*, StatementHistory>(db, st));
         }
         return (*(stm.find(db))).second;
     }

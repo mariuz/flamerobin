@@ -40,6 +40,7 @@
 #include "metadata/exception.h"
 #include "metadata/function.h"
 #include "metadata/generator.h"
+#include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
 #include "metadata/procedure.h"
 #include "metadata/role.h"
@@ -50,7 +51,6 @@
 class Database;
 class MetadataLoader;
 class ProgressIndicator;
-class Server;
 class SqlStatement;
 //-----------------------------------------------------------------------------
 class CharacterSet

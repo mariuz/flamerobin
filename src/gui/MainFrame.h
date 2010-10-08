@@ -151,11 +151,13 @@ public:
 
     bool openUnregisteredDatabase(const wxString& dbpath);
 private:
-    SharedRootPtr rootM;
+    RootPtr rootM;
 
     bool getAutoConnectDatabase();
     bool tryAutoConnectDatabase();
     bool tryAutoConnectDatabase(Database* database);
+
+    void unregisterDatabase(Database* database);
 
     bool connect();
     void showGeneratorValue(Generator* g);

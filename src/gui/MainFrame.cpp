@@ -69,8 +69,8 @@
 #include "gui/ServerRegistrationDialog.h"
 #include "gui/SimpleHtmlFrame.h"
 #include "main.h"
-#include "metadata/metadataitem.h"
 #include "metadata/root.h"
+#include "metadata/server.h"
 #include "sql/SqlTemplateManager.h"
 #include "sql/SqlTemplateProcessor.h"
 #include "urihandler.h"
@@ -294,7 +294,7 @@ void MainFrame::set_properties()
             confile.c_str());
         wxMessageBox(msg, _("Configuration file not found"), wxOK|wxICON_INFORMATION);
 
-        SharedServerPtr s(new Server());
+        ServerPtr s(new Server());
         s->setName_(wxT("Localhost"));
         s->setHostname(wxT("localhost"));
         rootM->addServer(s);
@@ -868,7 +868,7 @@ void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 
     DatabaseRegistrationDialog drd(this, _("Register Existing Database"));
     drd.setServer(s);
-    SharedDatabasePtr db(new Database());
+    DatabasePtr db(new Database());
     drd.setDatabase(db.get());
 
     if (drd.ShowModal() == wxID_OK)
@@ -887,7 +887,7 @@ void MainFrame::OnMenuRestoreIntoNewDatabase(wxCommandEvent& WXUNUSED(event))
 
     DatabaseRegistrationDialog drd(this, _("New database parameters"));
     drd.setServer(s);
-    SharedDatabasePtr db(new Database());
+    DatabasePtr db(new Database());
     drd.setDatabase(db.get());
     if (drd.ShowModal() != wxID_OK)
         return;
@@ -919,7 +919,7 @@ void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
 
     DatabaseRegistrationDialog drd(this, _("Create New Database"), true);
     drd.setServer(s);
-    SharedDatabasePtr db(new Database());
+    DatabasePtr db(new Database());
     drd.setDatabase(db.get());
 
     if (drd.ShowModal() == wxID_OK)
@@ -943,12 +943,16 @@ void MainFrame::OnMenuUnRegisterServer(wxCommandEvent& WXUNUSED(event))
     if (!checkValidServer(s))
         return;
 
+    // FIXME: get shared pointer to concrete metadataitem class
+    ServerPtr srv(boost::static_pointer_cast<Server, MetadataItem>(
+        s->shared_from_this()));
+
     int res = showQuestionDialog(this, _("Do you really want to unregister this server?"),
         _("The registration information for the server and all its registered databases will be deleted. This operation can not be undone."),
         AdvancedMessageDialogButtonsOkCancel(_("Unregister")));
     if (res == wxOK)
     {
-        rootM->removeServer(s);
+        rootM->removeServer(srv);
         rootM->save();
     }
 }
@@ -968,7 +972,7 @@ void MainFrame::OnMenuServerProperties(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
 {
     ServerRegistrationDialog srd(this, _("Register New Server"), true);
-    SharedServerPtr s(new Server());
+    ServerPtr s(new Server());
     srd.setServer(s.get());
     if (wxID_OK == srd.ShowModal())
     {
@@ -991,13 +995,26 @@ void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
         _("The registration information for the database will be deleted. This operation can not be undone."),
         AdvancedMessageDialogButtonsOkCancel(_("Unregister")));
     if (res == wxOK)
-    {
-        if (Server* s = d->getServer())
-        {
-            s->removeDatabase(d);
-            rootM->save();
-        }
-    }
+        unregisterDatabase(d);
+}
+//-----------------------------------------------------------------------------
+void MainFrame::unregisterDatabase(Database* database)
+{
+    wxCHECK_RET(database,
+        wxT("Cannot unregister unassigned database"));
+
+    Server* server = database->getServer();
+    wxCHECK_RET(server,
+        wxT("Cannot unregister database without server"));
+
+    // FIXME: get shared pointer to concrete metadataitem classes
+    DatabasePtr db(boost::static_pointer_cast<Database, MetadataItem>(
+        database->shared_from_this()));
+    ServerPtr srv(boost::static_pointer_cast<Server, MetadataItem>(
+        server->shared_from_this()));
+
+    srv->removeDatabase(db);
+    rootM->save();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
@@ -1593,13 +1610,7 @@ void MainFrame::OnMenuDropDatabase(wxCommandEvent& WXUNUSED(event))
         return;
     d->drop();
     if (result == wxNO)
-    {   // unregister
-        if (Server* s = d->getServer())
-        {
-            s->removeDatabase(d);
-            rootM->save();
-        }
-    }
+        unregisterDatabase(d);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
@@ -1687,7 +1698,7 @@ bool MainFrame::confirmDropItem(MetadataItem* item)
 //-----------------------------------------------------------------------------
 bool MainFrame::openUnregisteredDatabase(const wxString& dbpath)
 {
-    SharedDatabasePtr database(new Database());
+    DatabasePtr database(new Database());
     database->setPath(dbpath);
     database->setName_(database->extractNameFromConnectionString());
 

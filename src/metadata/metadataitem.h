@@ -34,14 +34,14 @@
 #include <algorithm>
 #include <vector>
 
+#include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "core/ObjectWithHandle.h"
 #include "core/Subject.h"
+#include "metadata/MetadataClasses.h"
 #include "sql/Identifier.h"
 
-class Root;
-class Database;
 class Dependency;
 class MetadataItemVisitor;
 //-----------------------------------------------------------------------------
@@ -57,7 +57,8 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
 NodeType getTypeByName(wxString name);
 wxString getNameOfType(NodeType type);
 //-----------------------------------------------------------------------------
-class MetadataItem: public Subject, public ObjectWithHandle<MetadataItem>
+class MetadataItem: public Subject, public ObjectWithHandle<MetadataItem>,
+    public boost::enable_shared_from_this<MetadataItem>
 {
 private:
     MetadataItem* parentM;

@@ -55,6 +55,7 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/parameter.h"
 #include "metadata/root.h"
+#include "metadata/server.h"
 #include "sql/SqlStatement.h"
 #include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------

@@ -32,37 +32,7 @@
 // [GoF] Visitor pattern. Abstract Visitor for metadata items.
 
 #include "core/Visitor.h"
-//-----------------------------------------------------------------------------
-class Column;
-class Database;
-class Domain;
-class Domains;
-class Exception;
-class Exceptions;
-class ForeignKey;
-class Function;
-class Functions;
-class Generator;
-class Generators;
-class Index;
-class MetadataItem;
-class Parameter;
-class PrimaryKeyConstraint;
-class Procedure;
-class Procedures;
-class Relation;
-class Role;
-class Roles;
-class Root;
-class Server;
-class SysTables;
-class Table;
-class Tables;
-class Trigger;
-class Triggers;
-class UniqueConstraint;
-class View;
-class Views;
+#include "metadata/MetadataClasses.h"
 //-----------------------------------------------------------------------------
 class MetadataItemVisitor: public Visitor
 {

@@ -95,7 +95,7 @@ BEGIN_EVENT_TABLE(AdjustableListCtrl, wxListCtrl)
     EVT_SIZE(AdjustableListCtrl::OnSize)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
-AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent, SharedRootPtr root)
+AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent, RootPtr root)
     : BaseFrame(parent, -1, _("Advanced Metadata Search"))
 {
     wxBoxSizer *mainSizer;
@@ -162,10 +162,10 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent, SharedRootPtr root)
     choice_database = new wxChoice(mainPanel, wxID_ANY, wxDefaultPosition,
         wxDefaultSize, 0, 0, 0);
     choice_database->Append(_("[All Connected Databases]"), (void *)0);
-    for (SharedServers::iterator its = root->begin(); its != root->end();
+    for (ServerPtrs::iterator its = root->begin(); its != root->end();
         ++its)
     {
-        for (SharedDatabases::iterator itdb = (*its)->begin();
+        for (DatabasePtrs::iterator itdb = (*its)->begin();
             itdb != (*its)->end(); ++itdb)
         {   // we store DB pointer, so we observe in case database is removed
             Database* db = (*itdb).get();
