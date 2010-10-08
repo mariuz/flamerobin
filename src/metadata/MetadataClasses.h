@@ -79,6 +79,7 @@ class Tables;
 class Trigger;
 class Triggers;
 class UniqueConstraint;
+class User;
 class View;
 class Views;
 //-----------------------------------------------------------------------------

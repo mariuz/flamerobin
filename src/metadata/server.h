@@ -86,6 +86,8 @@ public:
     // returns the server-related portion of the connection wxString,
     // that is server name and port number if specified.
     wxString getConnectionString() const;
+    static wxString makeConnectionString(const wxString& hostname,
+        const wxString& port);
 
     void setHostname(wxString hostname);
     void setPort(wxString port);

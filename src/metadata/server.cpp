@@ -182,14 +182,19 @@ void Server::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitServer(*this);
 }
 //-----------------------------------------------------------------------------
-wxString Server::getConnectionString() const
+/* static */
+wxString Server::makeConnectionString(const wxString& hostname,
+    const wxString& port)
 {
-    wxString hostname = getHostname();
-    wxString port = getPort();
     if (!hostname.empty() && !port.empty())
         return hostname + wxT("/") + port;
     else
         return hostname;
+}
+//-----------------------------------------------------------------------------
+wxString Server::getConnectionString() const
+{
+    return makeConnectionString(getHostname(), getPort());
 }
 //-----------------------------------------------------------------------------
 const wxString Server::getItemPath() const

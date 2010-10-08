@@ -31,14 +31,12 @@
 #include <wx/wx.h>
 
 #include "gui/BaseDialog.h"
-
-class Server;
+#include "metadata/MetadataClasses.h"
 //-----------------------------------------------------------------------------
 class ServerRegistrationDialog: public BaseDialog {
 private:
-    Server* serverM;
+    ServerPtr serverM;
     bool isDefaultNameM;
-    bool isNewServerM;
 
     wxStaticText* label_name;
     wxTextCtrl* text_ctrl_name;
@@ -50,7 +48,8 @@ private:
     wxButton* button_cancel;
 
     const wxString buildDefaultName() const;
-    void createControls();
+    void connectEvents();
+    void createControls(bool registerServer);
     void layoutControls();
     void setControlsProperties();
     void updateButtons();
@@ -58,23 +57,15 @@ private:
 protected:
     virtual const wxString getName() const;
 public:
+    ServerRegistrationDialog(wxWindow* parent, const wxString& title);
     ServerRegistrationDialog(wxWindow* parent, const wxString& title,
-        bool registerServer = false);
+        ServerPtr server);
 
-    void setServer(Server* s);
+    ServerPtr getServer() const;
 private:
-    // event handling
-    enum {
-        ID_textctrl_name = 100,
-        ID_textctrl_hostname,
-        ID_textctrl_portnumber
-    };
-
     void OnNameChange(wxCommandEvent& event);
     void OnOkButtonClick(wxCommandEvent& event);
     void OnSettingsChange(wxCommandEvent& event);
-
-    DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
 #endif // SERVERREGISTRATIONDIALOG_H

@@ -963,19 +963,21 @@ void MainFrame::OnMenuServerProperties(wxCommandEvent& WXUNUSED(event))
     if (!checkValidServer(s))
         return;
 
-    ServerRegistrationDialog srd(this, _("Server Registration Info"));
-    srd.setServer(s);
-    if (srd.ShowModal())
+    // FIXME: get shared pointer to concrete metadataitem class
+    ServerPtr srv(boost::static_pointer_cast<Server, MetadataItem>(
+        s->shared_from_this()));
+
+    ServerRegistrationDialog srd(this, _("Server Registration Info"), srv);
+    if (srd.ShowModal() == wxID_OK)
         rootM->save();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
 {
-    ServerRegistrationDialog srd(this, _("Register New Server"), true);
-    ServerPtr s(new Server());
-    srd.setServer(s.get());
-    if (wxID_OK == srd.ShowModal())
+    ServerRegistrationDialog srd(this, _("Register New Server"));
+    if (srd.ShowModal() == wxID_OK)
     {
+        ServerPtr s = srd.getServer();
         rootM->addServer(s);
         rootM->save();
         treeMainM->selectMetadataItem(s.get());
