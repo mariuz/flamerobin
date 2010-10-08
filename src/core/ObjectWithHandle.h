@@ -60,7 +60,7 @@ protected:
     }
 public:
     // destructor declared as abstract to make this an abstract base class
-    virtual ~ObjectWithHandle() = 0
+    virtual ~ObjectWithHandle()
     {
         handleMap.erase(handleM);
     }
@@ -80,7 +80,7 @@ public:
 
     static bool findObjectFromHandle(Handle handle, T*& obj)
     {
-        HandleMap::iterator it = handleMap.find(handle);
+        typename HandleMap::iterator it = handleMap.find(handle);
         if (it == handleMap.end())
         {
             obj = 0;
