@@ -56,7 +56,7 @@ Relation::Relation()
 {
 }
 //-----------------------------------------------------------------------------
-RelationColumns::iterator Relation::begin()
+ColumnPtrs::iterator Relation::begin()
 {
     // please - don't load here
     // this code is used to get columns we want to alert about changes
@@ -65,31 +65,31 @@ RelationColumns::iterator Relation::begin()
     return columnsM.begin();
 }
 //-----------------------------------------------------------------------------
-RelationColumns::iterator Relation::end()
+ColumnPtrs::iterator Relation::end()
 {
     // please see comment for begin()
     return columnsM.end();
 }
 //-----------------------------------------------------------------------------
-RelationColumns::const_iterator Relation::begin() const
+ColumnPtrs::const_iterator Relation::begin() const
 {
     return columnsM.begin();
 }
 //-----------------------------------------------------------------------------
-RelationColumns::const_iterator Relation::end() const
+ColumnPtrs::const_iterator Relation::end() const
 {
     return columnsM.end();
 }
 //-----------------------------------------------------------------------------
-SharedColumnPtr Relation::findColumn(const wxString& name) const
+ColumnPtr Relation::findColumn(const wxString& name) const
 {
-    for (RelationColumns::const_iterator it = columnsM.begin();
+    for (ColumnPtrs::const_iterator it = columnsM.begin();
         it != columnsM.end(); ++it)
     {
         if ((*it)->getName_() == name)
             return *it;
     }
-    return SharedColumnPtr();
+    return ColumnPtr();
 }
 //-----------------------------------------------------------------------------
 size_t Relation::getColumnCount() const
@@ -204,7 +204,7 @@ void Relation::loadChildren()
     st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
 
-    RelationColumns columns;
+    ColumnPtrs columns;
     while (st1->Fetch())
     {
         std::string s, coll;
@@ -226,7 +226,7 @@ void Relation::loadChildren()
             defaultSrc.Trim(false).Remove(0, 8);
         }
 
-        SharedColumnPtr col = findColumn(fname);
+        ColumnPtr col = findColumn(fname);
         if (!col)
         {
             col.reset(new Column());
@@ -650,7 +650,7 @@ wxString Relation::getSelectStatement()
     ensureChildrenLoaded();
     wxArrayString cols;
     cols.Alloc(columnsM.size());
-    for (RelationColumns::const_iterator it = columnsM.begin();
+    for (ColumnPtrs::const_iterator it = columnsM.begin();
         it != columnsM.end(); ++it)
     {
         cols.Add((*it)->getQuotedName());

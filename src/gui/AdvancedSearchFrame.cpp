@@ -619,7 +619,7 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
                         bool found = false;
                         if (r)
                         {
-                            RelationColumns::iterator it;
+                            ColumnPtrs::iterator it;
                             for (it = r->begin(); it != r->end(); ++it)
                             {
                                 if (match(CriteriaItem::ctField,
@@ -632,7 +632,7 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
                         }
                         if (p)
                         {
-                            for (ProcedureParameters::iterator it = p->begin();
+                            for (ParameterPtrs::iterator it = p->begin();
                                 it != p->end(); ++it)
                             {
                                 if (match(CriteriaItem::ctField,

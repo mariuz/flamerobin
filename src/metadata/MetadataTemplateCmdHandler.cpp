@@ -103,7 +103,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
                 return;
             r->ensureChildrenLoaded();
             bool firstItem = true;
-            for (RelationColumns::iterator it = r->begin(); it != r->end(); ++it)
+            for (ColumnPtrs::iterator it = r->begin(); it != r->end(); ++it)
             {
                 Local::foreachIteration(firstItem, tp, processedText, sep,
                     cmdParams.all(2), (*it).get());
@@ -291,8 +291,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
             p->ensureChildrenLoaded();
             bool isOut = (cmdParams[0] == wxT("output"));
             bool firstItem = true;
-            for (ProcedureParameters::iterator it = p->begin();
-                it != p->end(); ++it)
+            for (ParameterPtrs::iterator it = p->begin(); it != p->end(); ++it)
             {
                 if ((*it)->isOutputParameter() == isOut)
                 {

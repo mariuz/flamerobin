@@ -31,17 +31,13 @@
 
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
 #include "metadata/collection.h"
 #include "metadata/column.h"
 #include "metadata/constraints.h"
+#include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
 #include "metadata/privilege.h"
 #include "metadata/trigger.h"
-
-typedef boost::shared_ptr<Column> SharedColumnPtr;
-typedef std::vector<SharedColumnPtr> RelationColumns;
 //-----------------------------------------------------------------------------
 class Relation: public MetadataItem
 {
@@ -53,7 +49,7 @@ protected:
     void getDependentViews(std::vector<Relation*>& views,
         const wxString& forColumn = wxT(""));
 
-    RelationColumns columnsM;
+    ColumnPtrs columnsM;
     std::vector<Privilege> privilegesM;
 
     virtual void loadProperties();
@@ -76,13 +72,13 @@ public:
 
     wxString getSelectStatement();
 
-    RelationColumns::iterator begin();
-    RelationColumns::iterator end();
-    RelationColumns::const_iterator begin() const;
-    RelationColumns::const_iterator end() const;
+    ColumnPtrs::iterator begin();
+    ColumnPtrs::iterator end();
+    ColumnPtrs::const_iterator begin() const;
+    ColumnPtrs::const_iterator end() const;
 
     size_t getColumnCount() const;
-    SharedColumnPtr findColumn(const wxString& name) const;
+    ColumnPtr findColumn(const wxString& name) const;
 
     wxString getRebuildSql(const wxString& forColumn = wxT(""));
     std::vector<Privilege>* getPrivileges();

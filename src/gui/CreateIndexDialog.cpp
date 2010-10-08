@@ -140,7 +140,7 @@ void CreateIndexDialog::setControlsProperties()
     tableM->ensureChildrenLoaded();
     wxArrayString colNames;
     colNames.Alloc(tableM->getColumnCount());
-    RelationColumns::const_iterator it;
+    ColumnPtrs::const_iterator it;
     for (it = tableM->begin(); it != tableM->end(); ++it)
         colNames.Add((*it)->getName_());
     listbox_columns->Set(colNames);

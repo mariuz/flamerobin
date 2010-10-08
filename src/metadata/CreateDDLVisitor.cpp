@@ -385,7 +385,7 @@ void CreateDDLVisitor::visitProcedure(Procedure& p)
              << description << wxT("'\n  where RDB$PROCEDURE_NAME = '")
              << name << wxT("';\n");
     }
-    for (ProcedureParameters::iterator it = p.begin(); it != p.end(); ++it)
+    for (ParameterPtrs::iterator it = p.begin(); it != p.end(); ++it)
     {
         wxString description = (*it)->getDescription();
         if (!description.IsEmpty())
@@ -471,7 +471,7 @@ void CreateDDLVisitor::visitTable(Table& t)
     }
     preSqlM += wxT("\n(\n  ");
     t.ensureChildrenLoaded();
-    for (RelationColumns::iterator it=t.begin(); it!=t.end(); ++it)
+    for (ColumnPtrs::iterator it=t.begin(); it!=t.end(); ++it)
     {
         if (it != t.begin() && (*it)->getComputedSource().empty())
             preSqlM += wxT(",\n  ");
@@ -649,7 +649,7 @@ void CreateDDLVisitor::visitView(View& v)
     }
 
     // description for columns
-    for (RelationColumns::iterator it = v.begin(); it != v.end();
+    for (ColumnPtrs::iterator it = v.begin(); it != v.end();
         ++it)
     {
         wxString description = (*it)->getDescription();

@@ -356,7 +356,7 @@ void DataGridTable::getTableNames(wxArrayString& tables)
             // check if table's column is 'real'
             wxString cn(std2wxIdentifier(statementM->ColumnName(i + 1),
                 databaseM->getCharsetConverter()));
-            SharedColumnPtr c = t->findColumn(cn);
+            ColumnPtr c = t->findColumn(cn);
             if (c && c->getComputedSource().empty())
             {
                 tables.Add(tn);
@@ -391,7 +391,7 @@ void DataGridTable::getFields(const wxString& table,
         wxString cn(std2wxIdentifier(statementM->ColumnName(i + 1),
             databaseM->getCharsetConverter()));
         // check if field exists in the table (and is not computed)
-        SharedColumnPtr c = t->findColumn(cn);
+        ColumnPtr c = t->findColumn(cn);
         if (c && c->getComputedSource().empty()
             && fields.find(c.get()) == fields.end())
         {

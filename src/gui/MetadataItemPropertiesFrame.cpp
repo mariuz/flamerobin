@@ -402,8 +402,7 @@ void MetadataItemPropertiesPanel::update()
 
         SubjectLocker locker(r);
         r->ensureChildrenLoaded();
-        RelationColumns::iterator it;
-        for (it = r->begin(); it != r->end(); ++it)
+        for (ColumnPtrs::iterator it = r->begin(); it != r->end(); ++it)
             (*it)->attachObserver(this);
     }
 
@@ -416,8 +415,7 @@ void MetadataItemPropertiesPanel::update()
 
         SubjectLocker locker(p);
         p->ensureChildrenLoaded();
-        ProcedureParameters::iterator it;
-        for (it = p->begin(); it != p->end(); ++it)
+        for (ParameterPtrs::iterator it = p->begin(); it != p->end(); ++it)
             (*it)->attachObserver(this);
     }
 

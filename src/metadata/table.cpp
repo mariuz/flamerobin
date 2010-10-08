@@ -114,7 +114,7 @@ wxString Table::getProcedureTemplate()
 
     Database* db = getDatabase(wxT("Table::getProcedureTemplate"));
     wxString dbcharset = db->getDatabaseCharset();
-    for (RelationColumns::iterator i = columnsM.begin();
+    for (ColumnPtrs::iterator i = columnsM.begin();
         i != columnsM.end(); ++i)
     {
         wxString datatype;
@@ -151,7 +151,7 @@ wxString Table::getInsertStatement()
     ensureChildrenLoaded();
     wxString sql = wxT("INSERT INTO ") + getQuotedName() + wxT(" (");
     wxString collist, valist;
-    for (RelationColumns::const_iterator i = columnsM.begin();
+    for (ColumnPtrs::const_iterator i = columnsM.begin();
         i != columnsM.end(); ++i)
     {
         if (!(*i)->getComputedSource().empty())

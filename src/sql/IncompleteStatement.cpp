@@ -333,7 +333,7 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
             else
                 return wxEmptyString;
         }
-        for (RelationColumns::const_iterator c = r->begin();
+        for (ColumnPtrs::const_iterator c = r->begin();
             c != r->end(); ++c)
         {
             cols.push_back((*c)->getQuotedName());
@@ -352,7 +352,7 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
             else
                 return wxEmptyString;
         }
-        for (ProcedureParameters::const_iterator c = p->begin();
+        for (ParameterPtrs::const_iterator c = p->begin();
             c != p->end(); ++c)
         {
             if ((*c)->isOutputParameter())

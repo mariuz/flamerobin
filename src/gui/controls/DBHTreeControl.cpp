@@ -529,7 +529,7 @@ void DBHTreeItemVisitor::visitProcedure(Procedure& procedure)
         if (DBHTreeConfigCache::get().getShowColumnParamCount())
         {
             size_t ins = 0, outs = 0;
-            for (ProcedureParameters::const_iterator it = procedure.begin();
+            for (ParameterPtrs::const_iterator it = procedure.begin();
                 it != procedure.end(); ++it)
             {
                 if ((*it)->isOutputParameter())

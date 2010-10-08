@@ -92,7 +92,7 @@ void Procedure::loadChildren()
     st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
 
-    ProcedureParameters parameters;
+    ParameterPtrs parameters;
     while (st1->Fetch())
     {
         std::string s;
@@ -106,7 +106,7 @@ void Procedure::loadChildren()
         if (!st1->IsNull(4))
             st1->Get(4, mechanism);
 
-        SharedParameterPtr par = findParameter(param_name);
+        ParameterPtr par = findParameter(param_name);
         if (!par)
         {
             par.reset(new Parameter());
@@ -156,7 +156,7 @@ wxString Procedure::getExecuteStatement()
     columns.Alloc(parametersM.size());
     params.Alloc(parametersM.size());
 
-    for (ProcedureParameters::iterator it = parametersM.begin();
+    for (ParameterPtrs::iterator it = parametersM.begin();
         it != parametersM.end(); ++it)
     {
         if ((*it)->isOutputParameter())
@@ -203,7 +203,7 @@ wxString Procedure::getExecuteStatement()
     return sb;
 }
 //-----------------------------------------------------------------------------
-ProcedureParameters::iterator Procedure::begin()
+ParameterPtrs::iterator Procedure::begin()
 {
     // please - don't load here
     // this code is used to get columns we want to alert about changes
@@ -212,31 +212,31 @@ ProcedureParameters::iterator Procedure::begin()
     return parametersM.begin();
 }
 //-----------------------------------------------------------------------------
-ProcedureParameters::iterator Procedure::end()
+ParameterPtrs::iterator Procedure::end()
 {
     // please see comment for begin()
     return parametersM.end();
 }
 //-----------------------------------------------------------------------------
-ProcedureParameters::const_iterator Procedure::begin() const
+ParameterPtrs::const_iterator Procedure::begin() const
 {
     return parametersM.begin();
 }
 //-----------------------------------------------------------------------------
-ProcedureParameters::const_iterator Procedure::end() const
+ParameterPtrs::const_iterator Procedure::end() const
 {
     return parametersM.end();
 }
 //-----------------------------------------------------------------------------
-SharedParameterPtr Procedure::findParameter(const wxString& name) const
+ParameterPtr Procedure::findParameter(const wxString& name) const
 {
-    for (ProcedureParameters::const_iterator it = parametersM.begin();
+    for (ParameterPtrs::const_iterator it = parametersM.begin();
         it != parametersM.end(); ++it)
     {
         if ((*it)->getName_() == name)
             return *it;
     }
-    return SharedParameterPtr();
+    return ParameterPtr();
 }
 //-----------------------------------------------------------------------------
 size_t Procedure::getParamCount() const
@@ -281,8 +281,8 @@ wxString Procedure::getDefinition()
 {
     ensureChildrenLoaded();
     wxString collist, parlist;
-    ProcedureParameters::const_iterator lastInput, lastOutput;
-    for (ProcedureParameters::const_iterator it = parametersM.begin();
+    ParameterPtrs::const_iterator lastInput, lastOutput;
+    for (ParameterPtrs::const_iterator it = parametersM.begin();
         it != parametersM.end(); ++it)
     {
         if ((*it)->isOutputParameter())
@@ -290,7 +290,7 @@ wxString Procedure::getDefinition()
         else
             lastInput = it;
     }
-    for (ProcedureParameters::const_iterator it =
+    for (ParameterPtrs::const_iterator it =
         parametersM.begin(); it != parametersM.end(); ++it)
     {
         // No need to quote domains, as currently only regular datatypes can be
@@ -331,7 +331,7 @@ wxString Procedure::getAlterSql(bool full)
     if (!parametersM.empty())
     {
         wxString input, output;
-        for (ProcedureParameters::const_iterator it = parametersM.begin();
+        for (ParameterPtrs::const_iterator it = parametersM.begin();
             it != parametersM.end(); ++it)
         {
             wxString charset;
@@ -424,7 +424,7 @@ void Procedure::checkDependentProcedures()
             ci != fields.end(); ++ci)
         {
             bool found = false;
-            for (ProcedureParameters::iterator i2 = begin();
+            for (ParameterPtrs::iterator i2 = begin();
                 i2 != end(); ++i2)
             {
                 if ((*i2)->getName_() == (*ci))

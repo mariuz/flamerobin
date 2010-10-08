@@ -31,8 +31,6 @@
 
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
 #include <ibpp.h>
 
 #include "metadata/collection.h"

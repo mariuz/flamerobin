@@ -37,7 +37,6 @@
 
 #include "config/Config.h"
 #include "metadata/metadataitem.h"
-
 //-----------------------------------------------------------------------------
 //! Holds information about a single template.
 class TemplateDescriptor

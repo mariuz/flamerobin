@@ -215,7 +215,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             if (r)
             {
                 r->ensureChildrenLoaded();
-                if (SharedColumnPtr c = r->findColumn(child.get()))
+                if (ColumnPtr c = r->findColumn(child.get()))
                 {
                     objectTypeM = ntColumn;
                     objectM = c.get();
@@ -230,7 +230,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             if (p)
             {
                 p->ensureChildrenLoaded();
-                if (SharedParameterPtr par = p->findParameter(child.get()))
+                if (ParameterPtr par = p->findParameter(child.get()))
                 {
                     objectTypeM = ntParameterInput;
                     objectM = par.get();

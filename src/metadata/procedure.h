@@ -30,23 +30,19 @@
 
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
 #include "metadata/collection.h"
+#include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
 #include "metadata/parameter.h"
 #include "metadata/privilege.h"
 
 class ProgressIndicator;
-
-typedef boost::shared_ptr<Parameter> SharedParameterPtr;
-typedef std::vector<SharedParameterPtr> ProcedureParameters;
 //-----------------------------------------------------------------------------
 class Procedure : public MetadataItem
 {
 private:
     std::vector<Privilege> privilegesM;
-    ProcedureParameters parametersM;
+    ParameterPtrs parametersM;
 protected:
     virtual void loadChildren();
     virtual void lockChildren();
@@ -60,13 +56,13 @@ public:
 
     wxString getExecuteStatement();
 
-    ProcedureParameters::iterator begin();
-    ProcedureParameters::iterator end();
-    ProcedureParameters::const_iterator begin() const;
-    ProcedureParameters::const_iterator end() const;
+    ParameterPtrs::iterator begin();
+    ParameterPtrs::iterator end();
+    ParameterPtrs::const_iterator begin() const;
+    ParameterPtrs::const_iterator end() const;
 
     size_t getParamCount() const;
-    SharedParameterPtr findParameter(const wxString& name) const;
+    ParameterPtr findParameter(const wxString& name) const;
 
     wxString getOwner();
     wxString getSource();

@@ -69,7 +69,7 @@ wxString View::getCreateSql()
         << StatementBuilder::IncIndent;
 
     // make sure that line breaking occurs after comma, not before
-    RelationColumns::const_iterator it = columnsM.begin();
+    ColumnPtrs::const_iterator it = columnsM.begin();
     wxString colName = (*it)->getQuotedName();
     for (++it; it != columnsM.end(); ++it)
     {

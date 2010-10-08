@@ -134,7 +134,7 @@ bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent,
     wxArrayInt selected_columns;
     wxArrayString colNames;
     colNames.Alloc(t->getColumnCount());
-    for (RelationColumns::const_iterator it = t->begin(); it != t->end(); ++it)
+    for (ColumnPtrs::const_iterator it = t->begin(); it != t->end(); ++it)
         colNames.Add((*it)->getName_());
 
     // set default selection.

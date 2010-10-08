@@ -148,7 +148,7 @@ void ReorderFieldsDialog::update()
 {
     wxArrayString colNames;
     colNames.Alloc(tableM->getColumnCount());
-    RelationColumns::const_iterator it;
+    ColumnPtrs::const_iterator it;
     for (it = tableM->begin(); it != tableM->end(); ++it)
         colNames.Add((*it)->getName_());
     list_box_fields->Set(colNames);

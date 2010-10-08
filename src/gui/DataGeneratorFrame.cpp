@@ -507,7 +507,7 @@ bool DataGeneratorFrame::loadColumns(const wxString& tableName, wxChoice* c)
         return false;
     t->ensureChildrenLoaded();
     c->Clear();
-    for (RelationColumns::iterator it = t->begin(); it != t->end(); ++it)
+    for (ColumnPtrs::iterator it = t->begin(); it != t->end(); ++it)
         c->Append((*it)->getQuotedName());
     return true;
 }
@@ -1562,7 +1562,7 @@ void DataGeneratorFrame::generateData(std::list<Table *>& order)
         (*it)->ensureChildrenLoaded();
         bool first = true;
         std::vector<GeneratorSettings *> colSet;
-        for (RelationColumns::iterator col = (*it)->begin();
+        for (ColumnPtrs::iterator col = (*it)->begin();
             col != (*it)->end(); ++col)
         {
             GeneratorSettings *gs = getSettings((*col).get());   // load or create

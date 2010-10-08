@@ -816,7 +816,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                 for (Tables::iterator it = tablesM.begin();
                     it != tablesM.end(); ++it)
                 {
-                    for (RelationColumns::iterator itColumn = (*it).begin();
+                    for (ColumnPtrs::iterator itColumn = (*it).begin();
                         itColumn != (*it).end(); ++itColumn)
                     {
                         if ((*itColumn)->getSource() == stm.getName())

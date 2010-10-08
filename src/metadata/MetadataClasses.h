@@ -34,6 +34,8 @@
 #include <boost/shared_ptr.hpp>
 
 class Column;
+typedef boost::shared_ptr<Column> ColumnPtr;
+typedef std::vector<ColumnPtr> ColumnPtrs;
 
 class Database;
 typedef boost::shared_ptr<Database> DatabasePtr;
@@ -54,6 +56,9 @@ class MetadataItem;
 typedef boost::shared_ptr<MetadataItem> MetadataItemPtr;
 
 class Parameter;
+typedef boost::shared_ptr<Parameter> ParameterPtr;
+typedef std::vector<ParameterPtr> ParameterPtrs;
+
 class PrimaryKeyConstraint;
 class Procedure;
 class Procedures;
