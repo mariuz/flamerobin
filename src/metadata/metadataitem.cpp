@@ -53,7 +53,9 @@
 //-----------------------------------------------------------------------------
 using namespace std;
 
+template<>
 ObjectWithHandle<MetadataItem>::HandleMap ObjectWithHandle<MetadataItem>::handleMap;
+template<>
 ObjectWithHandle<MetadataItem>::Handle ObjectWithHandle<MetadataItem>::nextHandle = 0;
 //-----------------------------------------------------------------------------
 MetadataItem::MetadataItem()
