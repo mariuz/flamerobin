@@ -199,6 +199,6 @@ void* URIHandler::getObject(const URI& uri)
     unsigned long mo;
     if (!ms.ToULong(&mo))
         return 0;
-    return MetadataItem::getFromHandle(mo);
+    return MetadataItem::getObjectFromHandle(mo);
 }
 //-----------------------------------------------------------------------------

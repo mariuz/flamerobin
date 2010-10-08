@@ -78,7 +78,7 @@ public:
          return handleM;
     }
 
-    static bool findFromHandle(Handle handle, T*& obj)
+    static bool findObjectFromHandle(Handle handle, T*& obj)
     {
         HandleMap::iterator it = handleMap.find(handle);
         if (it == handleMap.end())
@@ -90,10 +90,10 @@ public:
         return true;
     }
 
-    static T* getFromHandle(Handle handle)
+    static T* getObjectFromHandle(Handle handle)
     {
         T* obj;
-        return findFromHandle(handle, obj) ? obj : 0;
+        return findObjectFromHandle(handle, obj) ? obj : 0;
     }
 };
 //-----------------------------------------------------------------------------
