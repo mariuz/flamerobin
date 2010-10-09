@@ -51,10 +51,8 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/root.h"
 //-----------------------------------------------------------------------------
-using namespace std;
-
 template<>
-ObjectWithHandle<MetadataItem>::HandleMap ObjectWithHandle<MetadataItem>::handleMap;
+ObjectWithHandle<MetadataItem>::HandleMap ObjectWithHandle<MetadataItem>::handleMap = ObjectWithHandle<MetadataItem>::HandleMap();
 template<>
 ObjectWithHandle<MetadataItem>::Handle ObjectWithHandle<MetadataItem>::nextHandle = 0;
 //-----------------------------------------------------------------------------
@@ -230,7 +228,7 @@ void MetadataItem::setChildrenLoaded(bool loaded)
     doSetChildrenLoaded(loaded);
 }
 //-----------------------------------------------------------------------------
-bool MetadataItem::getChildren(vector<MetadataItem*>& /*temp*/)
+bool MetadataItem::getChildren(std::vector<MetadataItem*>& /*temp*/)
 {
     return false;
 }
@@ -238,10 +236,15 @@ bool MetadataItem::getChildren(vector<MetadataItem*>& /*temp*/)
 //! removes its children (by calling drop() for each) and notifies its parent
 void MetadataItem::drop()
 {
-    vector<MetadataItem* >temp;
+    std::vector<MetadataItem* >temp;
     if (getChildren(temp))
-        for (vector<MetadataItem*>::iterator it = temp.begin(); it != temp.end(); ++it)
+    {
+        for (std::vector<MetadataItem*>::iterator it = temp.begin();
+            it != temp.end(); ++it)
+        {
             (*it)->drop();
+        }
+    }
 
     // TODO: perhaps the whole DBH needs to be reconsidered
     // we could write: if (parentM) parentM->remove(this);
@@ -273,19 +276,23 @@ Database* MetadataItem::getDatabase(const wxString& callingMethod) const
     return database;
 }
 //-----------------------------------------------------------------------------
-void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject,
-    const wxString& field)
+void MetadataItem::getDependencies(std::vector<Dependency>& list,
+    bool ofObject, const wxString& field)
 {
-    vector<Dependency> tmp;
+    std::vector<Dependency> tmp;
     getDependencies(tmp, ofObject);
-    for (vector<Dependency>::iterator it = tmp.begin(); it != tmp.end(); ++it)
+    for (std::vector<Dependency>::iterator it = tmp.begin();
+        it != tmp.end(); ++it)
+    {
         if ((*it).hasField(field))
             list.push_back(*it);
+    }
 }
 //-----------------------------------------------------------------------------
 //! ofObject = true   => returns list of objects this object depends on
 //! ofObject = false  => returns list of objects that depend on this object
-void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
+void MetadataItem::getDependencies(std::vector<Dependency>& list,
+    bool ofObject)
 {
     Database* d = getDatabase(wxT("MetadataItem::getDependencies"));
 
@@ -443,8 +450,9 @@ void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
     if ((typeM == ntTable || typeM == ntSysTable) && ofObject)   // foreign keys of this table + computed columns
     {
         Table *t = dynamic_cast<Table *>(this);
-        vector<ForeignKey> *f = t->getForeignKeys();
-        for (vector<ForeignKey>::const_iterator it = f->begin(); it != f->end(); ++it)
+        std::vector<ForeignKey> *f = t->getForeignKeys();
+        for (std::vector<ForeignKey>::const_iterator it = f->begin();
+            it != f->end(); ++it)
         {
             MetadataItem *table = d->findByNameAndType(ntTable,
                 (*it).getReferencedTable());
@@ -470,7 +478,7 @@ void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
         );
         st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
         st1->Execute();
-        vector<Dependency> tempdep;
+        std::vector<Dependency> tempdep;
         while (st1->Fetch())
         {
             std::string s;
@@ -484,7 +492,8 @@ void MetadataItem::getDependencies(vector<Dependency>& list, bool ofObject)
         while (true)
         {
             std::vector<Dependency>::iterator to_remove = tempdep.end();
-            for (std::vector<Dependency>::iterator it = tempdep.begin(); it != tempdep.end(); ++it)
+            for (std::vector<Dependency>::iterator it = tempdep.begin();
+                it != tempdep.end(); ++it)
             {
                 if ((*it).getDependentObject() == this)
                 {

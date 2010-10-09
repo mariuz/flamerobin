@@ -38,9 +38,11 @@
     #include "wx/wx.h"
 #endif
 
+#include "metadata/metadataitem.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
 //-----------------------------------------------------------------------------
-MetadataItem* MetadataItemURIHandlerHelper::extractMetadataItemFromURI(const URI& uri)
+MetadataItem* MetadataItemURIHandlerHelper::extractMetadataItemFromURI(
+    const URI& uri)
 {
     wxString ms = uri.getParam(wxT("object_handle"));
     unsigned long mo;

@@ -28,10 +28,8 @@
 #ifndef FR_METADATAITEMURIHANDLERHELPER_H
 #define FR_METADATAITEMURIHANDLERHELPER_H
 //-----------------------------------------------------------------------------
-
 #include "core/URIProcessor.h"
-#include "metadata/MetadataItem.h"
-
+#include "metadata/MetadataClasses.h"
 //-----------------------------------------------------------------------------
 // URI parsing helper for metadata-related URIHandlers.
 class MetadataItemURIHandlerHelper
