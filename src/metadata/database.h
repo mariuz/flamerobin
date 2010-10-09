@@ -238,10 +238,8 @@ public:
 
     MetadataLoader* getMetadataLoader();
 
-    wxArrayString loadIdentifiers(const wxString& loadStatement);
-    wxArrayString loadIdentifiers(std::string loadStatement);
-    wxArrayString loadIdentifiers(ProgressIndicator* progressIndicator,
-        std::string loadStatement);
+    wxArrayString loadIdentifiers(const wxString& loadStatement,
+        ProgressIndicator* progressIndicator = 0);
 
     wxString loadDomainNameForColumn(wxString table, wxString field);
     Domain* loadMissingDomain(wxString name);

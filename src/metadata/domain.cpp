@@ -354,16 +354,16 @@ void Domains::load(ProgressIndicator* progressIndicator)
 {
     Database* db = getDatabase(wxT("Domains::load"));
 
-    std::string stmt = "select f.rdb$field_name from rdb$fields f"
-        " left outer join rdb$types t on f.rdb$field_type=t.rdb$type"
-        " where t.rdb$field_name='RDB$FIELD_TYPE'"
-        " and f.rdb$field_name not starting with 'RDB$'"
-        " order by 1";
+    wxString stmt = wxT("select f.rdb$field_name from rdb$fields f")
+        wxT(" left outer join rdb$types t on f.rdb$field_type=t.rdb$type")
+        wxT(" where t.rdb$field_name='RDB$FIELD_TYPE'")
+        wxT(" and f.rdb$field_name not starting with 'RDB$'")
+        wxT(" order by 1");
     // setUserItems() will do what setItems() does, but not delete any
     // system items already in the list. Doing so for domains would result
     // in them being reloaded immediately, so keep them in the list
     // a distinct system domain collection would probably be better...
-    setUserItems(db, ntDomain, db->loadIdentifiers(progressIndicator, stmt));
+    setUserItems(db, ntDomain, db->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void Domains::loadChildren()

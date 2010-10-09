@@ -126,9 +126,9 @@ void Exceptions::load(ProgressIndicator* progressIndicator)
 {
     Database* db = getDatabase(wxT("Exceptions::load"));
 
-    std::string stmt = "select rdb$exception_name from rdb$exceptions"
-        " order by 1";
-    setItems(db, ntException, db->loadIdentifiers(progressIndicator, stmt));
+    wxString stmt = wxT("select rdb$exception_name from rdb$exceptions")
+        wxT(" order by 1");
+    setItems(db, ntException, db->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void Exceptions::loadChildren()

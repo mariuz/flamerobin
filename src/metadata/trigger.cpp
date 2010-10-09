@@ -235,10 +235,10 @@ void Triggers::load(ProgressIndicator* progressIndicator)
 {
     Database* db = getDatabase(wxT("Triggers::load"));
 
-    std::string stmt = "select rdb$trigger_name from rdb$triggers"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " order by 1";
-    setItems(db, ntTrigger, db->loadIdentifiers(progressIndicator, stmt));
+    wxString stmt = wxT("select rdb$trigger_name from rdb$triggers")
+        wxT(" where (rdb$system_flag = 0 or rdb$system_flag is null)")
+        wxT(" order by 1");
+    setItems(db, ntTrigger, db->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void Triggers::loadChildren()

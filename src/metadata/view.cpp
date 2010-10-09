@@ -116,10 +116,10 @@ void Views::load(ProgressIndicator* progressIndicator)
 {
     Database* db = getDatabase(wxT("Views::load"));
 
-    std::string stmt = "select rdb$relation_name from rdb$relations"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " and rdb$view_source is not null order by 1";
-    setItems(db, ntView, db->loadIdentifiers(progressIndicator, stmt));
+    wxString stmt = wxT("select rdb$relation_name from rdb$relations")
+        wxT(" where (rdb$system_flag = 0 or rdb$system_flag is null)")
+        wxT(" and rdb$view_source is not null order by 1");
+    setItems(db, ntView, db->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void Views::loadChildren()

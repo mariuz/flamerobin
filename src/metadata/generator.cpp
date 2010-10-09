@@ -114,10 +114,10 @@ void Generators::load(ProgressIndicator* progressIndicator)
 {
     Database* db = getDatabase(wxT("Generators::load"));
 
-    std::string stmt = "select rdb$generator_name from rdb$generators"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " order by 1";
-    setItems(db, ntGenerator, db->loadIdentifiers(progressIndicator, stmt));
+    wxString stmt = wxT("select rdb$generator_name from rdb$generators")
+        wxT(" where (rdb$system_flag = 0 or rdb$system_flag is null)")
+        wxT(" order by 1");
+    setItems(db, ntGenerator, db->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void Generators::loadChildren()

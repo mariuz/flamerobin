@@ -625,10 +625,10 @@ void SysTables::load(ProgressIndicator* progressIndicator)
 {
     Database* db = getDatabase(wxT("SysTables::load"));
 
-    std::string stmt = "select rdb$relation_name from rdb$relations"
-        " where rdb$system_flag = 1"
-        " and rdb$view_source is null order by 1";
-    setItems(db, ntSysTable, db->loadIdentifiers(progressIndicator, stmt));
+    wxString stmt = wxT("select rdb$relation_name from rdb$relations")
+        wxT(" where rdb$system_flag = 1")
+        wxT(" and rdb$view_source is null order by 1");
+    setItems(db, ntSysTable, db->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void SysTables::loadChildren()
@@ -646,10 +646,10 @@ void Tables::load(ProgressIndicator* progressIndicator)
 {
     Database* db = getDatabase(wxT("Tables::load"));
 
-    std::string stmt = "select rdb$relation_name from rdb$relations"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " and rdb$view_source is null order by 1";
-    setItems(db, ntTable, db->loadIdentifiers(progressIndicator, stmt));
+    wxString stmt = wxT("select rdb$relation_name from rdb$relations")
+        wxT(" where (rdb$system_flag = 0 or rdb$system_flag is null)")
+        wxT(" and rdb$view_source is null order by 1");
+    setItems(db, ntTable, db->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void Tables::loadChildren()

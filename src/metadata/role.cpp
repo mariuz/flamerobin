@@ -143,8 +143,8 @@ void Roles::load(ProgressIndicator* progressIndicator)
 {
     Database* db = getDatabase(wxT("Roles::load"));
 
-    std::string stmt = "select rdb$role_name from rdb$roles order by 1";
-    setItems(db, ntRole, db->loadIdentifiers(progressIndicator, stmt));
+    wxString stmt = wxT("select rdb$role_name from rdb$roles order by 1");
+    setItems(db, ntRole, db->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void Roles::loadChildren()

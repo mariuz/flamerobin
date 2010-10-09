@@ -992,24 +992,15 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     exceptionsM.load(progressIndicator);
 }
 //-----------------------------------------------------------------------------
-wxArrayString Database::loadIdentifiers(const wxString& loadStatement)
-{
-    return loadIdentifiers(0, wx2std(loadStatement, getCharsetConverter()));
-}
-//-----------------------------------------------------------------------------
-wxArrayString Database::loadIdentifiers(std::string loadStatement)
-{
-    return loadIdentifiers(0, loadStatement);
-}
-//-----------------------------------------------------------------------------
-wxArrayString Database::loadIdentifiers(ProgressIndicator* progressIndicator,
-    std::string loadStatement)
+wxArrayString Database::loadIdentifiers(const wxString& loadStatement,
+    ProgressIndicator* progressIndicator)
 {
     MetadataLoader* loader = getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
     wxMBConv* converter = getCharsetConverter();
 
-    IBPP::Statement& st1 = loader->getStatement(loadStatement);
+    IBPP::Statement& st1 = loader->getStatement(
+        wx2std(loadStatement, getCharsetConverter()));
     st1->Execute();
 
     wxArrayString names;

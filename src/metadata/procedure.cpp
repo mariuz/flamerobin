@@ -553,10 +553,10 @@ void Procedures::load(ProgressIndicator* progressIndicator)
 {
     Database* db = getDatabase(wxT("Procedures::load"));
 
-    std::string stmt = "select rdb$procedure_name from rdb$procedures"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " order by 1";
-    setItems(db, ntProcedure, db->loadIdentifiers(progressIndicator, stmt));
+    wxString stmt = wxT("select rdb$procedure_name from rdb$procedures")
+        wxT(" where (rdb$system_flag = 0 or rdb$system_flag is null)")
+        wxT(" order by 1");
+    setItems(db, ntProcedure, db->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void Procedures::loadChildren()

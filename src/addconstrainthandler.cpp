@@ -106,9 +106,9 @@ bool AddConstraintHandler::handleURI(URI& uri)
     wxString prefix = type + wxT("_") + t->getName_();
     wxString stmt(
         wxT("select rdb$constraint_name from rdb$relation_constraints ")
-        wxT("where rdb$relation_name = '") + t->getName_()
-        + wxT("' and rdb$constraint_name starting with '") + prefix
-        + wxT("' order by 1"));
+        wxT("where rdb$relation_name = '") + t->getName_() +
+        wxT("' and rdb$constraint_name starting with '") + prefix +
+        wxT("' order by 1"));
     wxString default_value;
     wxArrayString constraintNames(db->loadIdentifiers(stmt));
     for (int i = 0; ; ++i)

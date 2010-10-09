@@ -456,8 +456,8 @@ void FieldPropertiesDialog::loadCharsets()
     Database* db = (tableM) ? tableM->findDatabase() : 0;
     if (tableM && db)
     {
-        std::string stmt = "select rdb$character_set_name"
-            " from rdb$character_sets order by 1";
+        wxString stmt = wxT("select rdb$character_set_name")
+            wxT(" from rdb$character_sets order by 1");
         wxArrayString charsets(db->loadIdentifiers(stmt));
         for (wxArrayString::const_iterator it = charsets.begin();
             it != charsets.end(); ++it)
