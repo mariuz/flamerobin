@@ -43,7 +43,7 @@
 #include <wx/filedlg.h>
 #include <wx/platform.h>
 
-#include "urihandler.h"
+#include "core/URIProcessor.h"
 
 #include "core/FRError.h"
 #include "gui/controls/PrintableHtmlWindow.h"

@@ -25,13 +25,13 @@
 
 */
 
-#ifndef FR_URIHANDLER_H
-#define FR_URIHANDLER_H
+#ifndef FR_URIPROCESSOR_H
+#define FR_URIPROCESSOR_H
 
 #include <list>
 #include <map>
+
 //-----------------------------------------------------------------------------
-//! almost like a struct, but with few helper functions
 class URI
 {
 public:
@@ -100,15 +100,10 @@ protected:
         */
         return 1024;
     }
-
-    // some helper functions
-    wxWindow *getWindow(const URI& uri);
-    void *getObject(const URI& uri);
-
 private:
     URIProcessor* processorM;
     void setProcessor(URIProcessor* const processor);
 };
 //-----------------------------------------------------------------------------
 
-#endif
+#endif // FR_URIPROCESSOR_H

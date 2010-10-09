@@ -38,12 +38,15 @@
     #include "wx/wx.h"
 #endif
 //-----------------------------------------------------------------------------
+#include "gui/GUIURIHandlerHelper.h"
 #include "gui/MultilineEnterDialog.h"
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
-#include "urihandler.h"
-
-class ObjectDescriptionHandler: public URIHandler
+#include "metadata/MetadataItemURIHandlerHelper.h"
+#include "core/URIProcessor.h"
+//-----------------------------------------------------------------------------
+class ObjectDescriptionHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -59,8 +62,8 @@ bool ObjectDescriptionHandler::handleURI(URI& uri)
     if (uri.action != wxT("edit_description"))
         return false;
 
-    MetadataItem* m = (MetadataItem*)getObject(uri);
-    wxWindow* w = getWindow(uri);
+    MetadataItem* m = extractMetadataItemFromURI(uri);
+    wxWindow* w = getParentWindow(uri);
     if (!m || !w)
         return true;
 

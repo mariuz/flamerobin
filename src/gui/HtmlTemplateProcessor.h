@@ -29,9 +29,6 @@
 #ifndef FR_HTMLTEMPLATEPROCESSOR_H
 #define FR_HTMLTEMPLATEPROCESSOR_H
 
-#include <vector>
-
-#include "metadata/metadataitem.h"
 #include "core/TemplateProcessor.h"
 
 //-----------------------------------------------------------------------------
@@ -39,9 +36,9 @@ class HtmlTemplateProcessor: public TemplateProcessor
 {
 protected:
     virtual void processCommand(wxString cmdName, TemplateCmdParams cmdParams,
-		MetadataItem* object, wxString& processedText);
+		ProcessableObject* object, wxString& processedText);
 public:
-    HtmlTemplateProcessor(MetadataItem *m, wxWindow *window);
+    HtmlTemplateProcessor(ProcessableObject* object, wxWindow* window);
 	virtual wxString escapeChars(const wxString& input, bool processNewlines = true);
 };
 //-----------------------------------------------------------------------------

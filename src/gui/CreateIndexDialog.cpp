@@ -42,9 +42,11 @@
 
 #include "gui/CreateIndexDialog.h"
 #include "gui/ExecuteSql.h"
+#include "gui/GUIURIHandlerHelper.h"
 #include "gui/StyleGuide.h"
+#include "metadata/MetadataItemURIHandlerHelper.h"
 #include "metadata/table.h"
-#include "urihandler.h"
+#include "core/URIProcessor.h"
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------
@@ -203,7 +205,8 @@ void CreateIndexDialog::OnControlChange(wxCommandEvent& WXUNUSED(event))
     updateButtons();
 }
 //-----------------------------------------------------------------------------
-class TableIndicesHandler: public URIHandler
+class TableIndicesHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -219,8 +222,8 @@ bool TableIndicesHandler::handleURI(URI& uri)
     if (uri.action != wxT("add_index") && uri.action != wxT("recompute_all"))
         return false;
 
-    Table* t = (Table*)getObject(uri);
-    wxWindow* w = getWindow(uri);
+    Table* t = (Table*)extractMetadataItemFromURI(uri);
+    wxWindow* w = getParentWindow(uri);
     if (!t || !w)
         return true;
 

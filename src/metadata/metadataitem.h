@@ -38,6 +38,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "core/ObjectWithHandle.h"
+#include "core/ProcessableObject.h"
 #include "core/Subject.h"
 #include "metadata/MetadataClasses.h"
 #include "sql/Identifier.h"
@@ -58,7 +59,8 @@ NodeType getTypeByName(wxString name);
 wxString getNameOfType(NodeType type);
 //-----------------------------------------------------------------------------
 class MetadataItem: public Subject, public ObjectWithHandle<MetadataItem>,
-    public boost::enable_shared_from_this<MetadataItem>
+    public boost::enable_shared_from_this<MetadataItem>,
+    public ProcessableObject
 {
 private:
     MetadataItem* parentM;

@@ -25,37 +25,20 @@
 
 */
 
-// For compilers that support precompilation, includes "wx/wx.h".
-#include "wx/wxprec.h"
+#ifndef FR_GUIURIHANDLERHELPER_H
+#define FR_GUIURIHANDLERHELPER_H
+//-----------------------------------------------------------------------------
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
+#include <wx/wx.h>
 
-// for all others, include the necessary headers (this file is usually all you
-// need because it includes almost all "standard" wxWindows headers
-#ifndef WX_PRECOMP
-    #include "wx/wx.h"
-#endif
-
-#include "sql/SqlTemplateProcessor.h"
+#include "core/URIProcessor.h"
 
 //-----------------------------------------------------------------------------
-SqlTemplateProcessor::SqlTemplateProcessor(ProcessableObject*object,
-    wxWindow* window)
-    : TemplateProcessor(object, window)
+// URI parsing helper for GUI-related URIHandlers.
+class GUIURIHandlerHelper
 {
-}
+protected:
+    wxWindow* getParentWindow(const URI& uri);
+};
 //-----------------------------------------------------------------------------
-void SqlTemplateProcessor::processCommand(wxString cmdName,
-	TemplateCmdParams cmdParams, ProcessableObject* object,
-    wxString& processedText)
-{
-	TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText);
-}
-//-----------------------------------------------------------------------------
-wxString SqlTemplateProcessor::escapeChars(const wxString& input, bool)
-{
-	return input;
-}
-//-----------------------------------------------------------------------------
+#endif // FR_GUIURIHANDLERHELPER_H

@@ -45,11 +45,14 @@
 #ifdef __WXGTK__
     #include "gui/AdvancedMessageDialog.h"
 #endif
+
+#include "gui/GUIURIHandlerHelper.h"
 #include "gui/ProgressDialog.h"
 #include "gui/StyleGuide.h"
 #include "gui/UserDialog.h"
+#include "metadata/MetadataItemURIHandlerHelper.h"
 #include "metadata/server.h"
-#include "urihandler.h"
+#include "core/URIProcessor.h"
 //-----------------------------------------------------------------------------
 UserDialog::UserDialog(wxWindow* parent, const wxString& title, bool isNewUser)
     : BaseDialog(parent, wxID_ANY, title), isNewUserM(isNewUser), userM(0)
@@ -219,7 +222,8 @@ void UserDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
     EndModal(wxID_OK);
 }
 //-----------------------------------------------------------------------------
-class UserPropertiesHandler: public URIHandler
+class UserPropertiesHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -237,18 +241,18 @@ bool UserPropertiesHandler::handleURI(URI& uri)
     if (!addUser && !editUser)
         return false;
 
-    wxWindow* w = getWindow(uri);
+    wxWindow* w = getParentWindow(uri);
     User* u = 0;
     Server* s;
     wxString title(_("Modify User"));
     if (addUser)
     {
-        s = (Server *)getObject(uri);
+        s = (Server *)extractMetadataItemFromURI(uri);
         title = _("Create New User");
     }
     else
     {
-        u = (User *)getObject(uri);
+        u = (User *)extractMetadataItemFromURI(uri);
         if (!u)
             return true;
 #ifdef __WXGTK__
@@ -298,7 +302,8 @@ bool UserPropertiesHandler::handleURI(URI& uri)
     return true;
 }
 //-----------------------------------------------------------------------------
-class DropUserHandler: public URIHandler
+class DropUserHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -314,8 +319,8 @@ bool DropUserHandler::handleURI(URI& uri)
     if (uri.action != wxT("drop_user"))
         return false;
 
-    wxWindow* w = getWindow(uri);
-    User* u = (User*)getObject(uri);
+    wxWindow* w = getParentWindow(uri);
+    User* u = (User*)extractMetadataItemFromURI(uri);
     if (!u || !w)
         return true;
     Server* s = dynamic_cast<Server*>(u->getParent());

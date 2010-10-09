@@ -54,6 +54,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_StringUtils.o \
 	flamerobin_Subject.o \
 	flamerobin_TemplateProcessor.o \
+	flamerobin_URIProcessor.o \
 	flamerobin_Visitor.o \
 	flamerobin_databasehandler.o \
 	flamerobin_MetadataLoader.o \
@@ -90,6 +91,8 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_FieldPropertiesDialog.o \
 	flamerobin_FindDialog.o \
 	flamerobin_FRLayoutConfig.o \
+	flamerobin_GUIURIHandlerHelper.o \
+	flamerobin_HtmlHeaderMetadataItemVisitor.o \
 	flamerobin_HtmlTemplateProcessor.o \
 	flamerobin_InsertDialog.o \
 	flamerobin_MainFrame.o \
@@ -123,6 +126,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_Index.o \
 	flamerobin_metadataitem.o \
 	flamerobin_MetadataItemDescriptionVisitor.o \
+	flamerobin_MetadataItemURIHandlerHelper.o \
 	flamerobin_MetadataItemVisitor.o \
 	flamerobin_MetadataTemplateCmdHandler.o \
 	flamerobin_parameter.o \
@@ -147,7 +151,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_SqlTokenizer.o \
 	flamerobin_StatementBuilder.o \
 	flamerobin_statementHistory.o \
-	flamerobin_urihandler.o \
 	$(__FR_PLATFORMSPECIFICSOURCES_OBJECTS) \
 	$(__flamerobin___win32rc)
 FLAMEROBIN_ODEP =  $(_____pch_flamerobin_wx_wxprec_h_gch___depname)
@@ -345,6 +348,9 @@ flamerobin_Subject.o: $(srcdir)/src/core/Subject.cpp $(FLAMEROBIN_ODEP)
 flamerobin_TemplateProcessor.o: $(srcdir)/src/core/TemplateProcessor.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/TemplateProcessor.cpp
 
+flamerobin_URIProcessor.o: $(srcdir)/src/core/URIProcessor.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/URIProcessor.cpp
+
 flamerobin_Visitor.o: $(srcdir)/src/core/Visitor.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/Visitor.cpp
 
@@ -453,6 +459,12 @@ flamerobin_FindDialog.o: $(srcdir)/src/gui/FindDialog.cpp $(FLAMEROBIN_ODEP)
 flamerobin_FRLayoutConfig.o: $(srcdir)/src/gui/FRLayoutConfig.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/FRLayoutConfig.cpp
 
+flamerobin_GUIURIHandlerHelper.o: $(srcdir)/src/gui/GUIURIHandlerHelper.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/GUIURIHandlerHelper.cpp
+
+flamerobin_HtmlHeaderMetadataItemVisitor.o: $(srcdir)/src/gui/HtmlHeaderMetadataItemVisitor.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/HtmlHeaderMetadataItemVisitor.cpp
+
 flamerobin_HtmlTemplateProcessor.o: $(srcdir)/src/gui/HtmlTemplateProcessor.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/HtmlTemplateProcessor.cpp
 
@@ -552,6 +564,9 @@ flamerobin_metadataitem.o: $(srcdir)/src/metadata/metadataitem.cpp $(FLAMEROBIN_
 flamerobin_MetadataItemDescriptionVisitor.o: $(srcdir)/src/metadata/MetadataItemDescriptionVisitor.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/MetadataItemDescriptionVisitor.cpp
 
+flamerobin_MetadataItemURIHandlerHelper.o: $(srcdir)/src/metadata/MetadataItemURIHandlerHelper.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/MetadataItemURIHandlerHelper.cpp
+
 flamerobin_MetadataItemVisitor.o: $(srcdir)/src/metadata/MetadataItemVisitor.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/MetadataItemVisitor.cpp
 
@@ -623,9 +638,6 @@ flamerobin_StatementBuilder.o: $(srcdir)/src/sql/StatementBuilder.cpp $(FLAMEROB
 
 flamerobin_statementHistory.o: $(srcdir)/src/statementHistory.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/statementHistory.cpp
-
-flamerobin_urihandler.o: $(srcdir)/src/urihandler.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/urihandler.cpp
 
 flamerobin_StyleGuideGTK.o: $(srcdir)/src/gui/gtk/StyleGuideGTK.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/gtk/StyleGuideGTK.cpp

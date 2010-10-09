@@ -38,14 +38,16 @@
 #include <wx/gbsizer.h>
 
 #include "gui/ExecuteSql.h"
+#include "gui/GUIURIHandlerHelper.h"
 #include "gui/PrivilegesDialog.h"
 #include "gui/StyleGuide.h"
 #include "metadata/collection.h"
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
+#include "metadata/MetadataItemURIHandlerHelper.h"
 #include "metadata/trigger.h"
 #include "frutils.h"
-#include "urihandler.h"
+#include "core/URIProcessor.h"
 
 //-----------------------------------------------------------------------------
 PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
@@ -580,7 +582,8 @@ void PrivilegesDialog::OnSettingChanged(wxCommandEvent& WXUNUSED(event))
     updateControls();
 }
 //-----------------------------------------------------------------------------
-class ManagePrivilegesHandler: public URIHandler
+class ManagePrivilegesHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -596,8 +599,8 @@ bool ManagePrivilegesHandler::handleURI(URI& uri)
     if (uri.action != wxT("manage_privileges"))
         return false;
 
-    wxWindow* w = getWindow(uri);
-    MetadataItem *m = (MetadataItem *)getObject(uri);
+    wxWindow* w = getParentWindow(uri);
+    MetadataItem *m = extractMetadataItemFromURI(uri);
     if (!m || !w)
         return true;
 

@@ -25,37 +25,19 @@
 
 */
 
-// For compilers that support precompilation, includes "wx/wx.h".
-#include "wx/wxprec.h"
+#ifndef FR_METADATAITEMURIHANDLERHELPER_H
+#define FR_METADATAITEMURIHANDLERHELPER_H
+//-----------------------------------------------------------------------------
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
-
-// for all others, include the necessary headers (this file is usually all you
-// need because it includes almost all "standard" wxWindows headers
-#ifndef WX_PRECOMP
-    #include "wx/wx.h"
-#endif
-
-#include "sql/SqlTemplateProcessor.h"
+#include "core/URIProcessor.h"
+#include "metadata/MetadataItem.h"
 
 //-----------------------------------------------------------------------------
-SqlTemplateProcessor::SqlTemplateProcessor(ProcessableObject*object,
-    wxWindow* window)
-    : TemplateProcessor(object, window)
+// URI parsing helper for metadata-related URIHandlers.
+class MetadataItemURIHandlerHelper
 {
-}
+protected:
+    MetadataItem* extractMetadataItemFromURI(const URI& uri);
+};
 //-----------------------------------------------------------------------------
-void SqlTemplateProcessor::processCommand(wxString cmdName,
-	TemplateCmdParams cmdParams, ProcessableObject* object,
-    wxString& processedText)
-{
-	TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText);
-}
-//-----------------------------------------------------------------------------
-wxString SqlTemplateProcessor::escapeChars(const wxString& input, bool)
-{
-	return input;
-}
-//-----------------------------------------------------------------------------
+#endif // FR_METADATAITEMURIHANDLERHELPER_H

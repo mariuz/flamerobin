@@ -42,10 +42,12 @@
 
 #include "core/ArtProvider.h"
 #include "gui/ExecuteSql.h"
+#include "gui/GUIURIHandlerHelper.h"
 #include "gui/ReorderFieldsDialog.h"
 #include "gui/StyleGuide.h"
+#include "metadata/MetadataItemURIHandlerHelper.h"
 #include "metadata/table.h"
-#include "urihandler.h"
+#include "core/URIProcessor.h"
 
 //! included xpm files, so that icons are compiled into executable
 namespace reorder_icons {
@@ -212,7 +214,8 @@ void ReorderFieldsDialog::OnUpButtonClick(wxCommandEvent& WXUNUSED(event))
     moveSelected(-1);
 }
 //-----------------------------------------------------------------------------
-class ReorderFieldsHandler: public URIHandler
+class ReorderFieldsHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -228,8 +231,8 @@ bool ReorderFieldsHandler::handleURI(URI& uri)
     if (uri.action != wxT("reorder_fields"))
         return false;
 
-    Table* t = (Table*)getObject(uri);
-    wxWindow* w = getWindow(uri);
+    Table* t = (Table*)extractMetadataItemFromURI(uri);
+    wxWindow* w = getParentWindow(uri);
     if (!t || !w)
         return true;
 

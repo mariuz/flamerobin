@@ -43,12 +43,15 @@
 
 #include "frutils.h"
 #include "gui/ExecuteSql.h"
+#include "gui/GUIURIHandlerHelper.h"
 #include "gui/MultilineEnterDialog.h"
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
-#include "urihandler.h"
+#include "metadata/MetadataItemURIHandlerHelper.h"
+#include "core/URIProcessor.h"
 //-----------------------------------------------------------------------------
-class AddConstraintHandler: public URIHandler
+class AddConstraintHandler: public URIHandler, private GUIURIHandlerHelper,
+    private MetadataItemURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -96,8 +99,8 @@ bool AddConstraintHandler::handleURI(URI& uri)
         return false;
 
     wxString type = uri.getParam(wxT("type"));    // pk, fk, check, unique
-    Table *t = (Table *)getObject(uri);
-    wxWindow *w = getWindow(uri);
+    Table* t = (Table*)extractMetadataItemFromURI(uri);
+    wxWindow* w = getParentWindow(uri);
     if (!t || !w)
         return true;
 

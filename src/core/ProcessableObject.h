@@ -25,21 +25,15 @@
 
 */
 
+#ifndef FR_PROCESSABLEOBJECT_H
+#define FR_PROCESSABLEOBJECT_H
 //-----------------------------------------------------------------------------
-#ifndef FR_SQLTEMPLATEPROCESSOR_H
-#define FR_SQLTEMPLATEPROCESSOR_H
-
-#include "core/TemplateProcessor.h"
-
-//-----------------------------------------------------------------------------
-class SqlTemplateProcessor: public TemplateProcessor
+// base class for objects handled by template processors.
+class ProcessableObject
 {
-protected:
-    virtual void processCommand(wxString cmdName, TemplateCmdParams cmdParams,
-		ProcessableObject* object, wxString& processedText);
 public:
-    SqlTemplateProcessor(ProcessableObject *object, wxWindow *window);
-	virtual wxString escapeChars(const wxString& input, bool processNewlines = true);
+    // virtual destructor makes this a polymorphic type.
+    virtual ~ProcessableObject() {}
 };
 //-----------------------------------------------------------------------------
-#endif // FR_SQLTEMPLATEPROCESSOR_H
+#endif // FR_PROCESSABLEOBJECT_H

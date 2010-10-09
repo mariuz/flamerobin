@@ -11,7 +11,7 @@
 
     <!-- List of output formats to generate: -->
     <add-formats>
-        autoconf,borland,mingw,msvc,msvc6prj
+        autoconf,borland,mingw,msvc,msvc6prj,msvs2008prj
     </add-formats>
 
     <!-- Default flags (for all formats and bakefiles): -->

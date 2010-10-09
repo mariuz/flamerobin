@@ -39,21 +39,24 @@
 #endif
 
 #include "core/StringUtils.h"
-#include "metadata/metadataitem.h"
 #include "gui/ConfdefTemplateProcessor.h"
 //-----------------------------------------------------------------------------
-ConfdefTemplateProcessor::ConfdefTemplateProcessor(MetadataItem *m, wxWindow *window)
-    : TemplateProcessor(m, window)
+ConfdefTemplateProcessor::ConfdefTemplateProcessor(ProcessableObject* object,
+    wxWindow*window)
+    : TemplateProcessor(object, window)
 {
 }
 //-----------------------------------------------------------------------------
-void ConfdefTemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdParams,
-	MetadataItem *object, wxString& processedText)
+void ConfdefTemplateProcessor::processCommand(wxString cmdName,
+    TemplateCmdParams cmdParams, ProcessableObject* object,
+    wxString& processedText)
 {
-	TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText);
+	TemplateProcessor::processCommand(cmdName, cmdParams, object,
+        processedText);
 }
 //-----------------------------------------------------------------------------
-wxString ConfdefTemplateProcessor::escapeChars(const wxString& input, bool /*processNewlines*/)
+wxString ConfdefTemplateProcessor::escapeChars(const wxString& input,
+    bool /*processNewlines*/)
 {
 	return escapeXmlChars(input);
 }

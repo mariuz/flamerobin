@@ -73,7 +73,7 @@
 #include "metadata/server.h"
 #include "sql/SqlTemplateManager.h"
 #include "sql/SqlTemplateProcessor.h"
-#include "urihandler.h"
+#include "core/URIProcessor.h"
 //-----------------------------------------------------------------------------
 bool checkValidDatabase(Database* database)
 {

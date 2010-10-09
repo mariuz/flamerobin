@@ -38,24 +38,14 @@
     #include "wx/wx.h"
 #endif
 
-#include "sql/SqlTemplateProcessor.h"
-
+#include "metadata/MetadataItemURIHandlerHelper.h"
 //-----------------------------------------------------------------------------
-SqlTemplateProcessor::SqlTemplateProcessor(ProcessableObject*object,
-    wxWindow* window)
-    : TemplateProcessor(object, window)
+MetadataItem* MetadataItemURIHandlerHelper::extractMetadataItemFromURI(const URI& uri)
 {
-}
-//-----------------------------------------------------------------------------
-void SqlTemplateProcessor::processCommand(wxString cmdName,
-	TemplateCmdParams cmdParams, ProcessableObject* object,
-    wxString& processedText)
-{
-	TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText);
-}
-//-----------------------------------------------------------------------------
-wxString SqlTemplateProcessor::escapeChars(const wxString& input, bool)
-{
-	return input;
+    wxString ms = uri.getParam(wxT("object_handle"));
+    unsigned long mo;
+    if (!ms.ToULong(&mo))
+        return 0;
+    return MetadataItem::getObjectFromHandle(mo);
 }
 //-----------------------------------------------------------------------------

@@ -40,10 +40,12 @@
 
 #include "core/ArtProvider.h"
 #include "gui/ExecuteSql.h"
+#include "gui/GUIURIHandlerHelper.h"
 #include "gui/StyleGuide.h"
 #include "gui/TriggerWizardDialog.h"
+#include "metadata/MetadataItemURIHandlerHelper.h"
 #include "metadata/table.h"
-#include "urihandler.h"
+#include "core/URIProcessor.h"
 //-----------------------------------------------------------------------------
 TriggerWizardDialog::TriggerWizardDialog(wxWindow* parent, MetadataItem *item):
     BaseDialog(parent, -1, wxEmptyString)
@@ -176,7 +178,8 @@ wxString TriggerWizardDialog::getSqlStatement() const
     return sql;
 }
 //-----------------------------------------------------------------------------
-class CreateTriggerHandler: public URIHandler
+class CreateTriggerHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -191,8 +194,8 @@ bool CreateTriggerHandler::handleURI(URI& uri)
     if (uri.action != wxT("create_trigger"))
         return false;
 
-    Table* t = (Table*)getObject(uri);
-    wxWindow* w = getWindow(uri);
+    Table* t = (Table*)extractMetadataItemFromURI(uri);
+    wxWindow* w = getParentWindow(uri);
     if (!t || !w)
         return true;
 

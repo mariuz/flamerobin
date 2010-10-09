@@ -62,6 +62,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StringUtils.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Subject.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TemplateProcessor.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_URIProcessor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Visitor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_databasehandler.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataLoader.o \
@@ -98,6 +99,8 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FindDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRLayoutConfig.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_GUIURIHandlerHelper.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_HtmlHeaderMetadataItemVisitor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_HtmlTemplateProcessor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_InsertDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.o \
@@ -131,6 +134,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Index.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitem.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemDescriptionVisitor.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemURIHandlerHelper.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataTemplateCmdHandler.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_parameter.o \
@@ -155,7 +159,6 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementBuilder.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_urihandler.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o
 IBPP_CXXFLAGS = -mthreads $(__DEBUGINFO) $(__OPTIMIZE) -W -Wall -DIBPP_WINDOWS \
@@ -291,6 +294,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Subject.o: ./src/core/Subject.cpp
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TemplateProcessor.o: ./src/core/TemplateProcessor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_URIProcessor.o: ./src/core/URIProcessor.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Visitor.o: ./src/core/Visitor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
@@ -399,6 +405,12 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FindDialog.o: ./src/gui/FindDialog.cpp
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRLayoutConfig.o: ./src/gui/FRLayoutConfig.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_GUIURIHandlerHelper.o: ./src/gui/GUIURIHandlerHelper.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_HtmlHeaderMetadataItemVisitor.o: ./src/gui/HtmlHeaderMetadataItemVisitor.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_HtmlTemplateProcessor.o: ./src/gui/HtmlTemplateProcessor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
@@ -498,6 +510,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitem.o: ./src/metadata/metadatait
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemDescriptionVisitor.o: ./src/metadata/MetadataItemDescriptionVisitor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemURIHandlerHelper.o: ./src/metadata/MetadataItemURIHandlerHelper.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.o: ./src/metadata/MetadataItemVisitor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
@@ -568,9 +583,6 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementBuilder.o: ./src/sql/StatementBu
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.o: ./src/statementHistory.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
-
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_urihandler.o: ./src/urihandler.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.o: ./src/gui/msw/StyleGuideMSW.cpp

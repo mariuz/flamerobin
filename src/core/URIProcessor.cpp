@@ -41,8 +41,7 @@
 #include <list>
 #include <algorithm>
 
-#include "metadata/metadataitem.h"
-#include "urihandler.h"
+#include "core/URIProcessor.h"
 //-----------------------------------------------------------------------------
 URI::URI()
 {
@@ -182,23 +181,5 @@ URIHandler::~URIHandler()
 {
     if (processorM)
         processorM->removeHandler(this);
-}
-//-----------------------------------------------------------------------------
-wxWindow* URIHandler::getWindow(const URI& uri)
-{
-    wxString ms = uri.getParam(wxT("parent_window"));       // window
-    unsigned long mo;
-    if (!ms.ToULong(&mo))
-        return 0;
-    return (wxWindow*)mo;
-}
-//-----------------------------------------------------------------------------
-void* URIHandler::getObject(const URI& uri)
-{
-    wxString ms = uri.getParam(wxT("object_handle"));      // object
-    unsigned long mo;
-    if (!ms.ToULong(&mo))
-        return 0;
-    return MetadataItem::getObjectFromHandle(mo);
 }
 //-----------------------------------------------------------------------------

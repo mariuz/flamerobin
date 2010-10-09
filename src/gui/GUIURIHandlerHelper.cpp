@@ -38,24 +38,14 @@
     #include "wx/wx.h"
 #endif
 
-#include "sql/SqlTemplateProcessor.h"
-
+#include "gui/GUIURIHandlerHelper.h"
 //-----------------------------------------------------------------------------
-SqlTemplateProcessor::SqlTemplateProcessor(ProcessableObject*object,
-    wxWindow* window)
-    : TemplateProcessor(object, window)
+wxWindow* GUIURIHandlerHelper::getParentWindow(const URI& uri)
 {
-}
-//-----------------------------------------------------------------------------
-void SqlTemplateProcessor::processCommand(wxString cmdName,
-	TemplateCmdParams cmdParams, ProcessableObject* object,
-    wxString& processedText)
-{
-	TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText);
-}
-//-----------------------------------------------------------------------------
-wxString SqlTemplateProcessor::escapeChars(const wxString& input, bool)
-{
-	return input;
+    wxString ms = uri.getParam(wxT("parent_window"));
+    unsigned long mo;
+    if (!ms.ToULong(&mo))
+        return 0;
+    return (wxWindow*)mo;
 }
 //-----------------------------------------------------------------------------

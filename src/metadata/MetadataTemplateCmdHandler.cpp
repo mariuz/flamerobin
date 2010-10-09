@@ -42,6 +42,7 @@
 #include <iomanip>
 
 #include "core/StringUtils.h"
+#include "core/ProcessableObject.h"
 #include "core/TemplateProcessor.h"
 #include "metadata/CreateDDLVisitor.h"
 #include "metadata/privilege.h"
@@ -60,13 +61,13 @@ private:
     static const MetadataTemplateCmdHandler handlerInstance; // singleton; registers itself on creation.
 public:
     virtual void handleTemplateCmd(TemplateProcessor *tp, wxString cmdName,
-        TemplateCmdParams cmdParams, MetadataItem* object, wxString& processedText);
+        TemplateCmdParams cmdParams, ProcessableObject* object, wxString& processedText);
 };
 //-----------------------------------------------------------------------------
 const MetadataTemplateCmdHandler MetadataTemplateCmdHandler::handlerInstance;
 //-----------------------------------------------------------------------------
 void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
-    wxString cmdName, TemplateCmdParams cmdParams, MetadataItem* object,
+    wxString cmdName, TemplateCmdParams cmdParams, ProcessableObject* object,
     wxString& processedText)
 {
     struct Local
@@ -74,10 +75,10 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
         // Implements the body of all {%foreach%} loops.
         static void foreachIteration(bool& firstItem,
             TemplateProcessor* tp, wxString& processedText,
-            wxString separator, wxString text, MetadataItem* m)
+            wxString separator, wxString text, ProcessableObject* object)
         {
             wxString newText;
-            tp->internalProcessTemplateText(newText, text, m);
+            tp->internalProcessTemplateText(newText, text, object);
             if ((!firstItem) && (!newText.IsEmpty()))
                 processedText += tp->escapeChars(separator);
             if (!newText.IsEmpty())
@@ -86,10 +87,52 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
         }
     };
 
+    MetadataItem* metadataItem = dynamic_cast<MetadataItem*>(object);
+
+    // {%parent:text%}
+    // Switches the current object to the object's parent and
+    // processes the specified text. If the object has no parent,
+    // expands to a blank string.
+    if ((cmdName == wxT("parent")) && metadataItem && metadataItem->getParent())
+            tp->internalProcessTemplateText(processedText, cmdParams.all(),
+                metadataItem->getParent());
+
+    // {%object_handle%}
+    // Expands to the current object's unique numeric handle.
+    // Used to call FR's commands through URIs.
+    else if ((cmdName == wxT("object_handle")) && metadataItem)
+        processedText += wxString::Format(wxT("%d"), metadataItem->getHandle());
+
+    // {%object_name%}
+    // Expands to the current object's (non quoted) name.
+    else if ((cmdName == wxT("object_name")) && metadataItem)
+        processedText += metadataItem->getName_();
+
+    // {%object_quoted_name%}
+    // Expands to the current object's quoted name.
+    else if ((cmdName == wxT("object_quoted_name")) && metadataItem)
+        processedText += metadataItem->getQuotedName();
+
+    // {%object_path%}
+    // Expands to the current object's full path in the DBH.
+    else if ((cmdName == wxT("object_path")) && metadataItem)
+        processedText += metadataItem->getItemPath();
+
+    // {%object_type%}
+    // Expands to the current object's type name.
+    else if ((cmdName == wxT("object_type")) && metadataItem)
+        processedText += metadataItem->getTypeName();
+
+    // {%is_system%}
+    // Expands to "true" if the current object is a system object,
+    // and to "false" otherwise.
+    else if ((cmdName == wxT("is_system")) && metadataItem)
+        processedText += getBooleanAsString(metadataItem->isSystem());
+
     // {%foreach:<collection>:<separator>:<text>%}
     // repeats <text> once for each item in <collection>, pasting a <separator>
     // before each item except the first.
-    if ((cmdName == wxT("foreach")) && (cmdParams.Count() >= 3))
+    else if ((cmdName == wxT("foreach")) && (cmdParams.Count() >= 3))
     {
         wxString sep;
         tp->internalProcessTemplateText(sep, cmdParams[1], object);
@@ -265,11 +308,11 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
         // Lists all objects that depend on the current object.
         else if (cmdParams[0] == wxT("depends_on") || cmdParams[0] == wxT("dependent"))
         {
-            MetadataItem* m = dynamic_cast<MetadataItem*>(object);
-            if (!m)
+            if (!metadataItem)
                 return;
+
             std::vector<Dependency> deps;
-            m->getDependencies(deps, cmdParams[0] == wxT("depends_on"));
+            metadataItem->getDependencies(deps, cmdParams[0] == wxT("depends_on"));
             bool firstItem = true;
             for (std::vector<Dependency>::iterator it = deps.begin(); it != deps.end(); ++it)
             {
@@ -334,32 +377,6 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
             return;
     }
 
-    // {%object_name%}
-    // Expands to the current object's (non quoted) name.
-    else if (cmdName == wxT("object_name"))
-        processedText += object->getName_();
-
-    // {%object_quoted_name%}
-    // Expands to the current object's quoted name.
-    else if (cmdName == wxT("object_quoted_name"))
-        processedText += object->getQuotedName();
-
-    // {%object_path%}
-    // Expands to the current object's full path in the DBH.
-    else if (cmdName == wxT("object_path"))
-        processedText += object->getItemPath();
-
-    // {%object_type%}
-    // Expands to the current object's type name.
-    else if (cmdName == wxT("object_type"))
-        processedText += object->getTypeName();
-
-    // {%is_system%}
-    // Expands to "true" if the current object is a system object,
-    // and to "false" otherwise.
-    else if (cmdName == wxT("is_system"))
-        processedText += getBooleanAsString(object->isSystem());
-
     // {%owner_name%}
     // If the current object is a procedure, relation or role
     // expands to the owner's name.
@@ -379,10 +396,10 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
     // {%object_description%}
     // Expands to the current object's description, if available.
     // Otherwise expands to an empty string.
-    else if (cmdName == wxT("object_description"))
+    else if ((cmdName == wxT("object_description")) && metadataItem)
     {
         wxString desc;
-        if (object->getDescription(desc))
+        if (metadataItem->getDescription(desc))
         {
             if (desc.IsEmpty())
                 desc = _("No description");
@@ -399,6 +416,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
         Dependency* d = dynamic_cast<Dependency*>(object);
         if (!d)
             return;
+
         processedText += d->getFields();
     }
 
@@ -410,9 +428,11 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
         Table* t = dynamic_cast<Table*>(object);
         if (!t)
             return;
+
         PrimaryKeyConstraint* pk = t->getPrimaryKey();
         if (!pk)
             return;
+
         tp->internalProcessTemplateText(processedText, cmdParams.all(), pk);
     }
 
@@ -505,6 +525,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
         View* v = dynamic_cast<View*>(object);
         if (!v)
             return;
+
         if (cmdParams[0] == wxT("source"))
             processedText += tp->escapeChars(v->getSource(), false);
     }
@@ -517,6 +538,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
         Procedure* p = dynamic_cast<Procedure*>(object);
         if (!p)
             return;
+
         if (cmdParams[0] == wxT("source"))
             processedText += tp->escapeChars(p->getSource(), false);
     }
@@ -529,6 +551,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
         Trigger* t = dynamic_cast<Trigger*>(object);
         if (!t)
             return;
+
         if (cmdParams[0] == wxT("source"))
             processedText += tp->escapeChars(t->getSource(), false);
         else
@@ -558,13 +581,9 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
         Generator* g = dynamic_cast<Generator*>(object);
         if (!g)
             return;
+
         if (cmdParams[0] == wxT("value"))
-        {
-            std::ostringstream ss;
-            ss << g->getValue();
-            //processedText += tp->escapeChars(std2wx(ss.str()));
             processedText << g->getValue();
-        }
     }
 
     // {%exceptioninfo:<property>%}
@@ -575,6 +594,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
         Exception* e = dynamic_cast<Exception*>(object);
         if (!e)
             return;
+
         if (cmdParams[0] == wxT("number"))
             processedText << e->getNumber();
         else if (cmdParams[0] == wxT("message"))
@@ -606,6 +626,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
         Index* i = dynamic_cast<Index*>(object);
         if (!i)
             return;
+
         if (cmdParams[0] == wxT("type"))
             processedText += (i->getIndexType() == Index::itAscending ? wxT("ASC") : wxT("DESC"));
         else if (cmdParams[0] == wxT("stats"))
@@ -626,7 +647,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
 
     // {%object_ddl%}
     // Expands to the current object's DDL definition.
-    else if (cmdName == wxT("object_ddl"))
+    else if ((cmdName == wxT("object_ddl")) && metadataItem)
     {
         ProgressIndicator* pi = tp->getProgressIndicator();
         if (pi)
@@ -636,7 +657,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
             pi->doShow();
         }
         CreateDDLVisitor cdv(pi);
-        object->acceptVisitor(&cdv);
+        metadataItem->acceptVisitor(&cdv);
         processedText += tp->escapeChars(cdv.getSql(), false);
     }
 
@@ -718,6 +739,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
         Privilege* p = dynamic_cast<Privilege*>(object);
         if (!p)
             return;
+
         PrivilegeItems list;
         p->getPrivilegeItems(cmdParams[0], list);
         processedText << list.size();

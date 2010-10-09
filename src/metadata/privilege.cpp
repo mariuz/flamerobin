@@ -54,8 +54,8 @@ PrivilegeItem::PrivilegeItem(const wxString& grantorName,
 //-----------------------------------------------------------------------------
 Privilege::Privilege(MetadataItem *parent, const wxString& grantee,
     int granteeType)
-    :parentObjectM(parent), granteeM(grantee), granteeTypeM(granteeType),
-     MetadataItem()
+    : parentObjectM(parent), granteeM(grantee), granteeTypeM(granteeType),
+     ProcessableObject()
 {
 }
 //-----------------------------------------------------------------------------

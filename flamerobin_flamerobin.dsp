@@ -596,6 +596,14 @@ SOURCE=.\src\gui\FindDialog.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\GUIURIHandlerHelper.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\HtmlHeaderMetadataItemVisitor.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\HtmlTemplateProcessor.cpp
 # End Source File
 # Begin Source File
@@ -633,6 +641,10 @@ SOURCE=.\src\metadata\MetadataItemDescriptionVisitor.cpp
 # Begin Source File
 
 SOURCE=.\src\gui\MetadataItemPropertiesFrame.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\metadata\MetadataItemURIHandlerHelper.cpp
 # End Source File
 # Begin Source File
 
@@ -753,6 +765,10 @@ SOURCE=.\src\gui\controls\TextControl.cpp
 # Begin Source File
 
 SOURCE=.\src\gui\TriggerWizardDialog.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\core\URIProcessor.cpp
 # End Source File
 # Begin Source File
 
@@ -883,10 +899,6 @@ SOURCE=.\src\metadata\table.cpp
 # Begin Source File
 
 SOURCE=.\src\metadata\trigger.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\urihandler.cpp
 # End Source File
 # Begin Source File
 
@@ -1030,6 +1042,14 @@ SOURCE=.\src\gui\FindDialog.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\GUIURIHandlerHelper.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gui\HtmlHeaderMetadataItemVisitor.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\HtmlTemplateProcessor.h
 # End Source File
 # Begin Source File
@@ -1078,6 +1098,10 @@ SOURCE=.\src\gui\MetadataItemPropertiesFrame.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\metadata\MetadataItemURIHandlerHelper.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\metadata\MetadataItemVisitor.h
 # End Source File
 # Begin Source File
@@ -1111,6 +1135,10 @@ SOURCE=.\src\gui\controls\PrintableHtmlWindow.h
 # Begin Source File
 
 SOURCE=.\src\gui\PrivilegesDialog.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\core\ProcessableObject.h
 # End Source File
 # Begin Source File
 
@@ -1187,6 +1215,10 @@ SOURCE=.\src\gui\controls\TextControl.h
 # Begin Source File
 
 SOURCE=.\src\gui\TriggerWizardDialog.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\core\URIProcessor.h
 # End Source File
 # Begin Source File
 
@@ -1307,10 +1339,6 @@ SOURCE=.\src\metadata\table.h
 # Begin Source File
 
 SOURCE=.\src\metadata\trigger.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\urihandler.h
 # End Source File
 # Begin Source File
 

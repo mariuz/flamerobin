@@ -40,49 +40,34 @@
 
 #include "core/StringUtils.h"
 #include "frutils.h"
+#include "gui/HtmlHeaderMetadataItemVisitor.h"
 #include "metadata/metadataitem.h"
 #include "HtmlTemplateProcessor.h"
 
 //-----------------------------------------------------------------------------
-using namespace std;
+class ProcessableObject;
 //-----------------------------------------------------------------------------
-HtmlTemplateProcessor::HtmlTemplateProcessor(MetadataItem *m, wxWindow *window)
-    : TemplateProcessor(m, window)
+HtmlTemplateProcessor::HtmlTemplateProcessor(ProcessableObject* object,
+    wxWindow* window)
+    : TemplateProcessor(object, window)
 {
 }
 //-----------------------------------------------------------------------------
 void HtmlTemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdParams,
-	MetadataItem *object, wxString& processedText)
+	ProcessableObject* object, wxString& processedText)
 {
 	TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText);
 
+    MetadataItem* metadataItem = dynamic_cast<MetadataItem*>(object);
+    if (!metadataItem)
+        return;
+
 	if (cmdName == wxT("header") && !cmdParams.empty())  // include another file
     {
-        vector<wxString> pages;            // pages this object has
-        pages.push_back(wxT("Summary"));
-        if (object->getType() == ntRole)        // special case, roles
-            pages.push_back(wxT("Privileges")); // don't have dependencies
-        if (object->getType() == ntDatabase)
-            pages.push_back(wxT("Triggers"));   // FB 2.1
-        switch (object->getType())
-        {
-            case ntSysTable:
-            case ntTable:
-                pages.push_back(wxT("Constraints"));
-                pages.push_back(wxT("Indices"));
-            case ntView:
-                pages.push_back(wxT("Triggers"));
-            case ntProcedure:
-                pages.push_back(wxT("Privileges"));
-            case ntTrigger:
-            case ntException:
-            case ntFunction:
-            case ntGenerator:
-                pages.push_back(wxT("Dependencies"));
-            case ntDatabase:
-            case ntRole:
-                pages.push_back(wxT("DDL"));
-        };
+        std::vector<wxString> pages;
+        HtmlHeaderMetadataItemVisitor v(pages);
+        metadataItem->acceptVisitor(&v);
+
         wxString page = loadEntireFile(getTemplatePath() + wxT("header.html"));
         bool first = true;
         while (!page.Strip().IsEmpty())
@@ -96,7 +81,7 @@ void HtmlTemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams c
             }
             else
                 page.Clear();
-            for (vector<wxString>::iterator it = pages.begin(); it !=
+            for (std::vector<wxString>::iterator it = pages.begin(); it !=
                 pages.end(); ++it)
             {
                 if (part.Find(wxT(">")+(*it)+wxT("<")) == -1)

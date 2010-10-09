@@ -31,15 +31,13 @@
 #include <map>
 #include <vector>
 
-class MetadataItem;
+#include "core/ProcessableObject.h"
+
 class PrivilegeItem;
 //-----------------------------------------------------------------------------
 typedef std::vector<PrivilegeItem> PrivilegeItems;
 //-----------------------------------------------------------------------------
-// PrivilegeItem class only descends from MetadataItem to be able to be used in
-// the HTML template processor.
-// Perhaps it could be changed to have a common class for that
-class PrivilegeItem: public MetadataItem
+class PrivilegeItem: public ProcessableObject
 {
 public:
     wxString grantor;
@@ -49,10 +47,7 @@ public:
         const wxString& fieldName);
 };
 //-----------------------------------------------------------------------------
-// Privilege class only descends from MetadataItem to be able to be used in
-// the HTML template processor.
-// Perhaps it could be changed to have a common class for that
-class Privilege: public MetadataItem
+class Privilege: public ProcessableObject
 {
 private:
     MetadataItem* parentObjectM;

@@ -63,6 +63,7 @@
 #include "gui/controls/ControlUtils.h"
 #include "gui/controls/DataGrid.h"
 #include "gui/controls/DataGridTable.h"
+#include "gui/GUIURIHandlerHelper.h"
 #include "gui/ProgressDialog.h"
 #include "gui/ExecuteSql.h"
 #include "gui/ExecuteSqlFrame.h"
@@ -74,6 +75,7 @@
 #include "frutils.h"
 #include "logger.h"
 #include "metadata/CreateDDLVisitor.h"
+#include "metadata/MetadataItemURIHandlerHelper.h"
 #include "metadata/procedure.h"
 #include "metadata/server.h"
 #include "metadata/view.h"
@@ -83,7 +85,7 @@
 #include "sql/SelectStatement.h"
 #include "sql/SqlStatement.h"
 #include "statementHistory.h"
-#include "urihandler.h"
+#include "core/URIProcessor.h"
 //-----------------------------------------------------------------------------
 class SqlEditorDropTarget : public wxDropTarget
 {
@@ -2969,7 +2971,8 @@ void ExecuteSqlFrame::OnBlobEditorUpdate(wxTimerEvent& WXUNUSED(event))
 }
 //-----------------------------------------------------------------------------
 //! also used to drop constraints
-class DropColumnHandler: public URIHandler
+class DropColumnHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -2984,8 +2987,8 @@ bool DropColumnHandler::handleURI(URI& uri)
     if (uri.action != wxT("drop_field") && uri.action != wxT("drop_constraint"))
         return false;
 
-    MetadataItem* c = (MetadataItem*)getObject(uri);
-    wxWindow* w = getWindow(uri);
+    MetadataItem* c = extractMetadataItemFromURI(uri);
+    wxWindow* w = getParentWindow(uri);
     if (!c || !w)
         return true;
 
@@ -3024,7 +3027,8 @@ bool DropColumnHandler::handleURI(URI& uri)
 }
 //-----------------------------------------------------------------------------
 //! drop multiple columns
-class DropColumnsHandler: public URIHandler
+class DropColumnsHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -3039,8 +3043,8 @@ bool DropColumnsHandler::handleURI(URI& uri)
     if (uri.action != wxT("drop_fields"))
         return false;
 
-    Table* t = (Table*)getObject(uri);
-    wxWindow* w = getWindow(uri);
+    Table* t = (Table*)extractMetadataItemFromURI(uri);
+    wxWindow* w = getParentWindow(uri);
     if (!t || !w)
         return true;
 
@@ -3060,7 +3064,8 @@ bool DropColumnsHandler::handleURI(URI& uri)
 }
 //-----------------------------------------------------------------------------
 //! drop any metadata item
-class DropObjectHandler: public URIHandler
+class DropObjectHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -3075,8 +3080,8 @@ bool DropObjectHandler::handleURI(URI& uri)
     if (uri.action != wxT("drop_object"))
         return false;
 
-    MetadataItem* m = (MetadataItem*)getObject(uri);
-    wxWindow* w = getWindow(uri);
+    MetadataItem* m = extractMetadataItemFromURI(uri);
+    wxWindow* w = getParentWindow(uri);
     if (!m || !w)
         return true;
 
@@ -3096,7 +3101,8 @@ bool DropObjectHandler::handleURI(URI& uri)
 }
 //-----------------------------------------------------------------------------
 //! show DDL in SQL editor
-class EditDDLHandler: public URIHandler
+class EditDDLHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -3111,8 +3117,8 @@ bool EditDDLHandler::handleURI(URI& uri)
     if (uri.action != wxT("edit_ddl"))
         return false;
 
-    MetadataItem* m = (MetadataItem*)getObject(uri);
-    wxWindow* w = getWindow(uri);
+    MetadataItem* m = extractMetadataItemFromURI(uri);
+    wxWindow* w = getParentWindow(uri);
     if (!m || !w)
         return true;
 
@@ -3138,7 +3144,8 @@ bool EditDDLHandler::handleURI(URI& uri)
     return true;
 }
 //-----------------------------------------------------------------------------
-class EditProcedureHandler: public URIHandler
+class EditProcedureHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -3154,8 +3161,8 @@ bool EditProcedureHandler::handleURI(URI& uri)
     if (uri.action != wxT("edit_procedure"))
         return false;
 
-    Procedure* p = (Procedure*)getObject(uri);
-    wxWindow* w = getWindow(uri);
+    Procedure* p = (Procedure*)extractMetadataItemFromURI(uri);
+    wxWindow* w = getParentWindow(uri);
     if (!p || !w)
         return true;
 
@@ -3166,7 +3173,8 @@ bool EditProcedureHandler::handleURI(URI& uri)
     return true;
 }
 //-----------------------------------------------------------------------------
-class AlterViewHandler: public URIHandler
+class AlterViewHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -3188,14 +3196,14 @@ bool AlterViewHandler::handleURI(URI& uri)
     Relation* r;
     wxString column;
     if (uri.action == wxT("alter_relation"))
-        r = (Relation*)getObject(uri);
+        r = (Relation*)extractMetadataItemFromURI(uri);
     else
     {
-        Column *c = (Column*)getObject(uri);
+        Column *c = (Column*)extractMetadataItemFromURI(uri);
         r = c->getTable();
         column = c->getName_();
     }
-    wxWindow* w = getWindow(uri);
+    wxWindow* w = getParentWindow(uri);
     if (!r || !w)
         return true;
 
@@ -3204,7 +3212,8 @@ bool AlterViewHandler::handleURI(URI& uri)
     return true;
 }
 //-----------------------------------------------------------------------------
-class EditTriggerHandler: public URIHandler
+class EditTriggerHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -3220,8 +3229,8 @@ bool EditTriggerHandler::handleURI(URI& uri)
     if (uri.action != wxT("edit_trigger"))
         return false;
 
-    Trigger* t = (Trigger*)getObject(uri);
-    wxWindow* w = getWindow(uri);
+    Trigger* t = (Trigger*)extractMetadataItemFromURI(uri);
+    wxWindow* w = getParentWindow(uri);
     if (!t || !w)
         return true;
 
@@ -3230,7 +3239,8 @@ bool EditTriggerHandler::handleURI(URI& uri)
     return true;
 }
 //-----------------------------------------------------------------------------
-class EditGeneratorValueHandler: public URIHandler
+class EditGeneratorValueHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -3246,8 +3256,8 @@ bool EditGeneratorValueHandler::handleURI(URI& uri)
     if (uri.action != wxT("edit_generator_value"))
         return false;
 
-    Generator* g = (Generator*)getObject(uri);
-    wxWindow* w = getWindow(uri);
+    Generator* g = (Generator*)extractMetadataItemFromURI(uri);
+    wxWindow* w = getParentWindow(uri);
     if (!g || !w)
         return true;
 
@@ -3272,7 +3282,8 @@ bool EditGeneratorValueHandler::handleURI(URI& uri)
     return true;
 }
 //-----------------------------------------------------------------------------
-class EditExceptionHandler: public URIHandler
+class EditExceptionHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -3288,8 +3299,8 @@ bool EditExceptionHandler::handleURI(URI& uri)
     if (uri.action != wxT("edit_exception"))
         return false;
 
-    Exception* e = (Exception*)getObject(uri);
-    wxWindow* w = getWindow(uri);
+    Exception* e = (Exception*)extractMetadataItemFromURI(uri);
+    wxWindow* w = getParentWindow(uri);
     if (!e || !w)
         return true;
 
@@ -3298,7 +3309,8 @@ bool EditExceptionHandler::handleURI(URI& uri)
     return true;
 }
 //-----------------------------------------------------------------------------
-class IndexActionHandler: public URIHandler
+class IndexActionHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -3314,8 +3326,8 @@ bool IndexActionHandler::handleURI(URI& uri)
     if (uri.action != wxT("index_action"))
         return false;
 
-    Index* i = (Index*)getObject(uri);
-    wxWindow* w = getWindow(uri);
+    Index* i = (Index*)extractMetadataItemFromURI(uri);
+    wxWindow* w = getParentWindow(uri);
     if (!i || !w)
         return true;
 
@@ -3344,7 +3356,8 @@ bool IndexActionHandler::handleURI(URI& uri)
     return true;
 }
 //-----------------------------------------------------------------------------
-class ActivateTriggersHandler: public URIHandler
+class ActivateTriggersHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -3362,10 +3375,10 @@ bool ActivateTriggersHandler::handleURI(URI& uri)
         return false;
     }
 
-    MetadataItem *m = (MetadataItem *)getObject(uri);
+    MetadataItem *m = extractMetadataItemFromURI(uri);
     Table* t = dynamic_cast<Table*>(m);
     Database* d = dynamic_cast<Database*>(m);
-    wxWindow* w = getWindow(uri);
+    wxWindow* w = getParentWindow(uri);
     if ((!t && !d) || !w)
         return true;
 
@@ -3391,7 +3404,8 @@ bool ActivateTriggersHandler::handleURI(URI& uri)
     return true;
 }
 //-----------------------------------------------------------------------------
-class ActivateTriggerHandler: public URIHandler
+class ActivateTriggerHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -3406,8 +3420,8 @@ bool ActivateTriggerHandler::handleURI(URI& uri)
     if (uri.action != wxT("activate_trigger") && uri.action != wxT("deactivate_trigger"))
         return false;
 
-    Trigger* t = (Trigger*)getObject(uri);
-    wxWindow* w = getWindow(uri);
+    Trigger* t = (Trigger*)extractMetadataItemFromURI(uri);
+    wxWindow* w = getParentWindow(uri);
     if (!t || !w)
         return true;
 

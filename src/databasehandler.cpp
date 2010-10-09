@@ -39,11 +39,14 @@
 #endif
 
 #include "core/StringUtils.h"
+#include "core/URIProcessor.h"
+#include "gui/GUIURIHandlerHelper.h"
 #include "metadata/server.h"
 #include "metadata/database.h"
-#include "urihandler.h"
+#include "metadata/MetadataItemURIHandlerHelper.h"
 //-----------------------------------------------------------------------------
-class DatabaseInfoHandler: public URIHandler
+class DatabaseInfoHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -71,8 +74,8 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
         return false;
     }
 
-    Database* d = (Database*)getObject(uri);
-    wxWindow* w = getWindow(uri);
+    Database* d = (Database*)extractMetadataItemFromURI(uri);
+    wxWindow* w = getParentWindow(uri);
 
     // when either the database or the window does not exist
     // return immediately. Because this function returns whether

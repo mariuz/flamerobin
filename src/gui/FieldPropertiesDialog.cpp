@@ -43,10 +43,12 @@
 #include "core/ArtProvider.h"
 #include "gui/ExecuteSql.h"
 #include "gui/FieldPropertiesDialog.h"
+#include "gui/GUIURIHandlerHelper.h"
 #include "gui/StyleGuide.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
-#include "urihandler.h"
+#include "metadata/MetadataItemURIHandlerHelper.h"
+#include "core/URIProcessor.h"
 //-----------------------------------------------------------------------------
 using namespace std;
 //-----------------------------------------------------------------------------
@@ -819,7 +821,8 @@ void FieldPropertiesDialog::OnTextFieldnameUpdate(wxCommandEvent&
     updateSqlStatement();
 }
 //-----------------------------------------------------------------------------
-class ColumnPropertiesHandler: public URIHandler
+class ColumnPropertiesHandler: public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -837,8 +840,8 @@ bool ColumnPropertiesHandler::handleURI(URI& uri)
     if (!addField && !editField)
         return false;
 
-    wxWindow* w = getWindow(uri);
-    void* mo = getObject(uri);
+    wxWindow* w = getParentWindow(uri);
+    MetadataItem* mo = extractMetadataItemFromURI(uri);
     if (!mo || !w)
         return true;
 

@@ -44,18 +44,18 @@
 #include "core/StringUtils.h"
 #include "frutils.h"
 #include "core/FRError.h"
+#include "core/ProcessableObject.h"
 #include "core/ProgressIndicator.h"
-#include "metadata/metadataitem.h"
 #include "TemplateProcessor.h"
 
 //-----------------------------------------------------------------------------
-TemplateProcessor::TemplateProcessor(MetadataItem *m, wxWindow *window)
-    : objectM(m), windowM(window)
+TemplateProcessor::TemplateProcessor(ProcessableObject* object, wxWindow* window)
+    : objectM(object), windowM(window)
 {
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdParams,
-    MetadataItem *object, wxString& processedText)
+    ProcessableObject* object, wxString& processedText)
 {
     if (cmdName == wxT("--"))
         // Comment.
@@ -139,27 +139,6 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
     else if (cmdName == wxT("abort"))
         throw FRAbort();
     
-    // {%parent:text%}
-    // Switches the current object to the object's parent and
-    // processes the specified text. If the object has no parent,
-    // expands to a blank string.
-    else if (cmdName == wxT("parent"))
-    {
-        if (object->getParent())
-            internalProcessTemplateText(processedText, cmdParams.all(), object->getParent());
-    }
-
-    // {%object_address%}
-    // Expands to the current object's numeric memory address.
-    // Used to call FR's commands through URIs.
-    else if (cmdName == wxT("object_address"))
-        processedText += wxString::Format(wxT("%ld"), (uintptr_t)object);
-    // {%object_handle%}
-    // Expands to the current object's unique numeric handle.
-    // Used to call FR's commands through URIs.
-    else if (cmdName == wxT("object_handle"))
-        processedText += wxString::Format(wxT("%d"), object->getHandle());
-
     // {%parent_window%}
     // Expands to the current window's numeric memory address.
     // Used to call FR's commands through URIs.
@@ -231,7 +210,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::internalProcessTemplateText(wxString& processedText, wxString inputText,
-    MetadataItem *object)
+    ProcessableObject* object)
 {
     if (object == 0)
         object = objectM;
@@ -333,7 +312,7 @@ void TemplateProcessor::internalProcessTemplateText(wxString& processedText, wxS
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::processTemplateFile(wxString& processedText, wxFileName inputFileName,
-    MetadataItem* object, ProgressIndicator* progressIndicator)
+    ProcessableObject* object, ProgressIndicator* progressIndicator)
 {
     fileNameM = inputFileName;
     inputFileName.SetExt(wxT("conf"));
@@ -343,7 +322,7 @@ void TemplateProcessor::processTemplateFile(wxString& processedText, wxFileName 
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::processTemplateText(wxString& processedText, wxString inputText,
-    MetadataItem *object, ProgressIndicator* progressIndicator)
+    ProcessableObject* object, ProgressIndicator* progressIndicator)
 {
     fileNameM.Clear();
     configM.setConfigFileName(wxFileName(wxEmptyString));
@@ -427,7 +406,7 @@ void TemplateCmdHandlerRepository::checkHandlerListSorted()
 //-----------------------------------------------------------------------------
 //! returns false if no suitable handler found
 void TemplateCmdHandlerRepository::handleTemplateCmd(TemplateProcessor *tp,
-    wxString cmdName, TemplateCmdParams cmdParams, MetadataItem* object,
+    wxString cmdName, TemplateCmdParams cmdParams, ProcessableObject* object,
     wxString& processedText)
 {
     checkHandlerListSorted();

@@ -29,9 +29,6 @@
 #ifndef FR_CONFDEFTEMPLATEPROCESSOR_H
 #define FR_CONFDEFTEMPLATEPROCESSOR_H
 
-#include <vector>
-
-#include "metadata/metadataitem.h"
 #include "core/TemplateProcessor.h"
 
 //-----------------------------------------------------------------------------
@@ -39,9 +36,9 @@ class ConfdefTemplateProcessor: public TemplateProcessor
 {
 protected:
     virtual void processCommand(wxString cmdName, TemplateCmdParams cmdParams,
-		MetadataItem* object, wxString& processedText);
+		ProcessableObject* object, wxString& processedText);
 public:
-    ConfdefTemplateProcessor(MetadataItem *m, wxWindow *window);
+    ConfdefTemplateProcessor(ProcessableObject* object, wxWindow* window);
 	virtual wxString escapeChars(const wxString& input, bool processNewlines = true);
 };
 //-----------------------------------------------------------------------------

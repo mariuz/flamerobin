@@ -67,7 +67,7 @@
     </set>
 
 <!-- this option allows to build the application for WIN64 -->
-    <if cond="FORMAT=='msvc'">
+    <if cond="FORMAT in ['msvc','msvc6prj','msvs2008prj']">
         <option name="TARGET_CPU">
             <default-value>$(DOLLAR)(CPU)</default-value>
             <description>
@@ -81,7 +81,7 @@ Accepted values: AMD64, IA64.
             </description>
         </option>
     </if>
-    <if cond="FORMAT!='msvc'">
+    <if cond="not (FORMAT in ['msvc','msvc6prj','msvs2008'])">
         <set var="TARGET_CPU"/>
     </if>
     <set var="DIR_SUFFIX_CPU">
@@ -99,7 +99,7 @@ Accepted values: AMD64, IA64.
 
 
     <define-tag name="headers" rules="dll,lib,exe">
-        <if cond="FORMAT=='msvc6prj'">
+        <if cond="FORMAT in ['msvc6prj','msvs2008prj']">
             <msvc-project-files>
                 $(value)
             </msvc-project-files>
@@ -116,7 +116,7 @@ Accepted values: AMD64, IA64.
         <debug-info>$(DEBUGINFO)</debug-info>
         <optimize>$(OPTIMIZE)</optimize>
 
-        <if cond="FORMAT in ['msvc6prj','msvc']">
+        <if cond="FORMAT in ['msvc6prj','msvc','msvs2008prj']">
             <ldflags>/nologo</ldflags>
             <ldflags>/subsystem:windows</ldflags>
             <ldflags>$(LINK_TARGET_CPU)</ldflags>
@@ -177,7 +177,7 @@ Accepted values: AMD64, IA64.
             <define>HAVE_W32API_H</define>
         </if>
 
-        <if cond="FORMAT in ['borland','mingw','msvc6prj','msvc']">
+        <if cond="FORMAT in ['borland','mingw','msvc6prj','msvc','msvs2008prj']">
             <define>_WINDOWS</define>
             <define>__WINDOWS__</define>
             <define>WINVER=0x400</define>
@@ -249,10 +249,12 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/core/FRError.h
         $(SOURCEDIR)/core/ObjectWithHandle.h
         $(SOURCEDIR)/core/Observer.h
+        $(SOURCEDIR)/core/ProcessableObject.h
         $(SOURCEDIR)/core/ProgressIndicator.h
         $(SOURCEDIR)/core/StringUtils.h
         $(SOURCEDIR)/core/Subject.h
         $(SOURCEDIR)/core/TemplateProcessor.h
+        $(SOURCEDIR)/core/URIProcessor.h
         $(SOURCEDIR)/core/Visitor.h
         $(SOURCEDIR)/engine/MetadataLoader.h
         $(SOURCEDIR)/framemanager.h
@@ -290,7 +292,9 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/FieldPropertiesDialog.h
         $(SOURCEDIR)/gui/FindDialog.h
         $(SOURCEDIR)/gui/FRLayoutConfig.h
+        $(SOURCEDIR)/gui/HtmlHeaderMetadataItemVisitor.h
         $(SOURCEDIR)/gui/HtmlTemplateProcessor.h
+        $(SOURCEDIR)/gui/GUIURIHandlerHelper.h
         $(SOURCEDIR)/gui/InsertDialog.h
         $(SOURCEDIR)/gui/MainFrame.h
         $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.h
@@ -325,6 +329,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/metadata/MetadataClasses.h
         $(SOURCEDIR)/metadata/metadataitem.h
         $(SOURCEDIR)/metadata/MetadataItemDescriptionVisitor.h
+        $(SOURCEDIR)/metadata/MetadataItemURIHandlerHelper.h
         $(SOURCEDIR)/metadata/MetadataItemVisitor.h
         $(SOURCEDIR)/metadata/parameter.h
         $(SOURCEDIR)/metadata/privilege.h
@@ -347,7 +352,6 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/sql/SqlTokenizer.h
         $(SOURCEDIR)/sql/StatementBuilder.h
         $(SOURCEDIR)/statementHistory.h
-        $(SOURCEDIR)/urihandler.h
     </set>
 
     <set var="FR_PLATFORMSPECIFICSOURCES">
@@ -373,6 +377,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/core/StringUtils.cpp
         $(SOURCEDIR)/core/Subject.cpp
         $(SOURCEDIR)/core/TemplateProcessor.cpp
+        $(SOURCEDIR)/core/URIProcessor.cpp
         $(SOURCEDIR)/core/Visitor.cpp
         $(SOURCEDIR)/databasehandler.cpp
         $(SOURCEDIR)/engine/MetadataLoader.cpp
@@ -409,6 +414,8 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/FieldPropertiesDialog.cpp
         $(SOURCEDIR)/gui/FindDialog.cpp
         $(SOURCEDIR)/gui/FRLayoutConfig.cpp
+        $(SOURCEDIR)/gui/GUIURIHandlerHelper.cpp
+        $(SOURCEDIR)/gui/HtmlHeaderMetadataItemVisitor.cpp
         $(SOURCEDIR)/gui/HtmlTemplateProcessor.cpp
         $(SOURCEDIR)/gui/InsertDialog.cpp
         $(SOURCEDIR)/gui/MainFrame.cpp
@@ -442,6 +449,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/metadata/Index.cpp
         $(SOURCEDIR)/metadata/metadataitem.cpp
         $(SOURCEDIR)/metadata/MetadataItemDescriptionVisitor.cpp
+        $(SOURCEDIR)/metadata/MetadataItemURIHandlerHelper.cpp
         $(SOURCEDIR)/metadata/MetadataItemVisitor.cpp
         $(SOURCEDIR)/metadata/MetadataTemplateCmdHandler.cpp
         $(SOURCEDIR)/metadata/parameter.cpp
@@ -466,7 +474,6 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/sql/SqlTokenizer.cpp
         $(SOURCEDIR)/sql/StatementBuilder.cpp
         $(SOURCEDIR)/statementHistory.cpp
-        $(SOURCEDIR)/urihandler.cpp
 
         $(FR_PLATFORMSPECIFICSOURCES)
     </set>
@@ -628,7 +635,7 @@ Accepted values: AMD64, IA64.
         </modify-target>
     </define-tag>
 
-    <if cond="FORMAT!='msvc6prj'">
+    <if cond="not (FORMAT in ['msvc6prj','msvs2008prj'])">
         <set var="SVN_REV_SCRIPT">
             <if cond="FORMAT=='autoconf'">cd $(DOLLAR)(srcdir) &amp;&amp; ./update-svn-rev.sh</if>
             <if cond="FORMAT!='autoconf'">update-svn-rev.cmd</if>

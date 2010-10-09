@@ -52,6 +52,7 @@
 #include "engine/MetadataLoader.h"
 #include "framemanager.h"
 #include "frutils.h"
+#include "gui/GUIURIHandlerHelper.h"
 #include "gui/HtmlTemplateProcessor.h"
 #include "gui/MetadataItemPropertiesFrame.h"
 #include "gui/ProgressDialog.h"
@@ -61,7 +62,7 @@
 #include "metadata/server.h"
 #include "metadata/table.h"
 #include "metadata/view.h"
-#include "urihandler.h"
+#include "core/URIProcessor.h"
 //-----------------------------------------------------------------------------
 //! MetadataItemPropertiesFrame class
 MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
@@ -504,7 +505,7 @@ void MetadataItemPropertiesPanel::OnHtmlCellHover(wxHtmlCellEvent& event)
 }
 //-----------------------------------------------------------------------------
 //! PageHandler class
-class PageHandler: public URIHandler
+class PageHandler: public URIHandler, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -519,7 +520,7 @@ bool PageHandler::handleURI(URI& uri)
         return false;
 
     MetadataItemPropertiesPanel* mpp = dynamic_cast<
-        MetadataItemPropertiesPanel*>(getWindow(uri));
+        MetadataItemPropertiesPanel*>(getParentWindow(uri));
     if (!mpp)
         return true;
 
@@ -541,7 +542,7 @@ bool PageHandler::handleURI(URI& uri)
 }
 //-----------------------------------------------------------------------------
 //! PropertiesHandler class
-class PropertiesHandler: public URIHandler
+class PropertiesHandler: public URIHandler, private GUIURIHandlerHelper
 {
 public:
     bool handleURI(URI& uri);
@@ -556,7 +557,7 @@ bool PropertiesHandler::handleURI(URI& uri)
         return false;
 
     MetadataItemPropertiesPanel* parent = dynamic_cast<
-        MetadataItemPropertiesPanel*>(getWindow(uri));
+        MetadataItemPropertiesPanel*>(getParentWindow(uri));
     if (!parent)
         return true;
     Database* d = parent->getObservedObject()->findDatabase();

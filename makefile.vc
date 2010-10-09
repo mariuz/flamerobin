@@ -80,6 +80,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StringUtils.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Subject.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_TemplateProcessor.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_URIProcessor.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Visitor.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_databasehandler.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataLoader.obj \
@@ -116,6 +117,8 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FieldPropertiesDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FindDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FRLayoutConfig.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_GUIURIHandlerHelper.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_HtmlHeaderMetadataItemVisitor.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_HtmlTemplateProcessor.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_InsertDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MainFrame.obj \
@@ -149,6 +152,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Index.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_metadataitem.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemDescriptionVisitor.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemURIHandlerHelper.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemVisitor.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataTemplateCmdHandler.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_parameter.obj \
@@ -173,7 +177,6 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SqlTokenizer.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StatementBuilder.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_statementHistory.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_urihandler.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuideMSW.obj
 FLAMEROBIN_RESOURCES =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_flamerobin.res
@@ -387,6 +390,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Subject.obj: .\src\core\S
 vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_TemplateProcessor.obj: .\src\core\TemplateProcessor.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\TemplateProcessor.cpp
 
+vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_URIProcessor.obj: .\src\core\URIProcessor.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\URIProcessor.cpp
+
 vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Visitor.obj: .\src\core\Visitor.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\Visitor.cpp
 
@@ -495,6 +501,12 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FindDialog.obj: .\src\gui
 vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FRLayoutConfig.obj: .\src\gui\FRLayoutConfig.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\FRLayoutConfig.cpp
 
+vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_GUIURIHandlerHelper.obj: .\src\gui\GUIURIHandlerHelper.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\GUIURIHandlerHelper.cpp
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_HtmlHeaderMetadataItemVisitor.obj: .\src\gui\HtmlHeaderMetadataItemVisitor.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\HtmlHeaderMetadataItemVisitor.cpp
+
 vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_HtmlTemplateProcessor.obj: .\src\gui\HtmlTemplateProcessor.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\HtmlTemplateProcessor.cpp
 
@@ -594,6 +606,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_metadataitem.obj: .\src\m
 vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemDescriptionVisitor.obj: .\src\metadata\MetadataItemDescriptionVisitor.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\MetadataItemDescriptionVisitor.cpp
 
+vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemURIHandlerHelper.obj: .\src\metadata\MetadataItemURIHandlerHelper.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\MetadataItemURIHandlerHelper.cpp
+
 vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemVisitor.obj: .\src\metadata\MetadataItemVisitor.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\MetadataItemVisitor.cpp
 
@@ -665,9 +680,6 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StatementBuilder.obj: .\s
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_statementHistory.obj: .\src\statementHistory.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\statementHistory.cpp
-
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_urihandler.obj: .\src\urihandler.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\urihandler.cpp
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuideMSW.obj: .\src\gui\msw\StyleGuideMSW.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\msw\StyleGuideMSW.cpp
