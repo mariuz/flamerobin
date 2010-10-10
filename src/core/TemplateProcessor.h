@@ -43,9 +43,9 @@
 class TemplateCmdParams: public wxArrayString
 {
 public:
-	// returns all params concatenated with the default separator.
-	// optionally return only params from start.
-	wxString all(size_t start = 0) const;
+    // returns all params concatenated with the default separator.
+    // optionally return only params from start.
+    wxString all(size_t start = 0) const;
 };
 //-----------------------------------------------------------------------------
 typedef std::map<wxString, wxString> wxStringMap;
@@ -57,53 +57,53 @@ class TemplateProcessor
 private:
     ProcessableObject* objectM;
     bool flagNextM;
-	wxFileName fileNameM;
-	wxStringMap varsM;
-	ProgressIndicator* progressIndicatorM;
-	Config configM;
-	wxWindow* windowM;
+    wxFileName fileNameM;
+    wxStringMap varsM;
+    ProgressIndicator* progressIndicatorM;
+    Config configM;
+    wxWindow* windowM;
 protected:
-	TemplateProcessor(ProcessableObject* object, wxWindow* window);
-	// Processes a command found in template text
+    TemplateProcessor(ProcessableObject* object, wxWindow* window);
+    // Processes a command found in template text
     virtual void processCommand(wxString cmdName,
-		TemplateCmdParams cmdParams, ProcessableObject* object,
+        TemplateCmdParams cmdParams, ProcessableObject* object,
         wxString& processedText);
-	// Returns the loaded file's path, including the trailing separator.
-	wxString getTemplatePath();
+    // Returns the loaded file's path, including the trailing separator.
+    wxString getTemplatePath();
 public:
-	wxWindow *getWindow() { return windowM; };
+    wxWindow *getWindow() { return windowM; };
     // Returns a reference to the current progress indicator, so that
     // external command handlers can use it.
     ProgressIndicator* getProgressIndicator() { return progressIndicatorM; };
-	// Processes all known commands found in template text
-	// commands are in format: {%cmdName:cmdParams%}
-	// cmdParams field may be empty, in which case the format is {%cmdName*}
+    // Processes all known commands found in template text
+    // commands are in format: {%cmdName:cmdParams%}
+    // cmdParams field may be empty, in which case the format is {%cmdName*}
     void processTemplateText(wxString& processedText, wxString inputText,
-		ProcessableObject* object, ProgressIndicator* progressIndicator = 0);
-	// Loads the contents of the specified file and calls internalProcessTemplateText().
+        ProcessableObject* object, ProgressIndicator* progressIndicator = 0);
+    // Loads the contents of the specified file and calls internalProcessTemplateText().
     void processTemplateFile(wxString& processedText, wxFileName inputFileName,
         ProcessableObject* object, ProgressIndicator* progressIndicator = 0);
-	// Sets a variable value. If the variable already exists it is overwritten.
-	// To clear a variable, set it to an empty string.
-	void setVar(wxString varName, wxString varValue);
-	// Gets a variable value. If the variable doesn't exist, an empty string is returned.
-	wxString getVar(wxString varName);
-	// Clears the specified variable.
-	void clearVar(wxString varName);
-	// Clears all variables.
-	void clearVars();
-	// The internal config object, used to store user-supplied parameters in
-	// interactive templates.
-	Config& getConfig() { return configM; }
+    // Sets a variable value. If the variable already exists it is overwritten.
+    // To clear a variable, set it to an empty string.
+    void setVar(wxString varName, wxString varValue);
+    // Gets a variable value. If the variable doesn't exist, an empty string is returned.
+    wxString getVar(wxString varName);
+    // Clears the specified variable.
+    void clearVar(wxString varName);
+    // Clears all variables.
+    void clearVars();
+    // The internal config object, used to store user-supplied parameters in
+    // interactive templates.
+    Config& getConfig() { return configM; }
     // Name of the current template file if processTemplateFile() has been called.
     wxFileName getCurrentTemplateFileName() { return fileNameM; }
-	// Processes all commands without resetting fileNameM. Should be used
-	// internally and from command handlers, while processTemplateText()
-	// is for external use.
-	void internalProcessTemplateText(wxString& processedText, wxString inputText,
+    // Processes all commands without resetting fileNameM. Should be used
+    // internally and from command handlers, while processTemplateText()
+    // is for external use.
+    void internalProcessTemplateText(wxString& processedText, wxString inputText,
         ProcessableObject* object);
-	// Processor-specific way of escaping special chars
-	virtual wxString escapeChars(const wxString& input, bool processNewlines = true) = 0;
+    // Processor-specific way of escaping special chars
+    virtual wxString escapeChars(const wxString& input, bool processNewlines = true) = 0;
 };
 //-----------------------------------------------------------------------------
 class TemplateCmdHandlerRepository

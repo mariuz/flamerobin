@@ -48,14 +48,15 @@ SqlTemplateProcessor::SqlTemplateProcessor(ProcessableObject*object,
 }
 //-----------------------------------------------------------------------------
 void SqlTemplateProcessor::processCommand(wxString cmdName,
-	TemplateCmdParams cmdParams, ProcessableObject* object,
+    TemplateCmdParams cmdParams, ProcessableObject* object,
     wxString& processedText)
 {
-	TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText);
+    TemplateProcessor::processCommand(cmdName, cmdParams, object,
+        processedText);
 }
 //-----------------------------------------------------------------------------
 wxString SqlTemplateProcessor::escapeChars(const wxString& input, bool)
 {
-	return input;
+    return input;
 }
 //-----------------------------------------------------------------------------

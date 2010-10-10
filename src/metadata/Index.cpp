@@ -79,19 +79,19 @@ std::vector<wxString> *Index::getSegments()
 wxString Index::getFieldsAsString()
 {
     if (!expressionM.IsEmpty())
-		return expressionM;
-	else
-	{
-	    wxString retval;
-		for (std::vector<wxString>::iterator it = segmentsM.begin(); 
-			it != segmentsM.end(); ++it)
-	    {
-		    if (!retval.empty())
-			    retval += wxT(", ");
-	        retval += (*it);
-		}
-		return retval;
-	}
+        return expressionM;
+    else
+    {
+        wxString retval;
+        for (std::vector<wxString>::iterator it = segmentsM.begin(); 
+            it != segmentsM.end(); ++it)
+        {
+            if (!retval.empty())
+                retval += wxT(", ");
+            retval += (*it);
+        }
+        return retval;
+    }
 }
 //-----------------------------------------------------------------------------
 Index::IndexType Index::getIndexType()
@@ -101,7 +101,7 @@ Index::IndexType Index::getIndexType()
 //-----------------------------------------------------------------------------
 wxString Index::getExpression() const
 {
-	return expressionM;
+    return expressionM;
 }
 //-----------------------------------------------------------------------------
 void Index::acceptVisitor(MetadataItemVisitor* visitor)

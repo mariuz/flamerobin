@@ -51,13 +51,13 @@ void ConfdefTemplateProcessor::processCommand(wxString cmdName,
     TemplateCmdParams cmdParams, ProcessableObject* object,
     wxString& processedText)
 {
-	TemplateProcessor::processCommand(cmdName, cmdParams, object,
+    TemplateProcessor::processCommand(cmdName, cmdParams, object,
         processedText);
 }
 //-----------------------------------------------------------------------------
 wxString ConfdefTemplateProcessor::escapeChars(const wxString& input,
     bool /*processNewlines*/)
 {
-	return escapeXmlChars(input);
+    return escapeXmlChars(input);
 }
 //-----------------------------------------------------------------------------

@@ -48,7 +48,7 @@ public:
     wxString getCreateSql();
     wxString getDefinition();
     wxString getLibraryName();
-	wxString getEntryPoint();
+    wxString getEntryPoint();
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------

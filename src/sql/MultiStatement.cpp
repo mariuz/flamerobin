@@ -46,19 +46,19 @@
 SingleStatement::SingleStatement(const wxString& sql, bool valid)
     :sqlM(sql), isValidM(valid), typeM(stOther), thirdStringM(wxEmptyString)
 {
-	SqlTokenType tkn[3] = { tkEOF, tkEOF, tkEOF };
-	SqlTokenizer tk(sql);
-	for (int i = 0; i < 3; tk.nextToken())
-	{
-		SqlTokenType stt = tk.getCurrentToken();
-		if (stt == tkWHITESPACE || stt == tkCOMMENT)
-			continue;
-		if (stt == tkEOF)
-			break;
-		if (i == 2)
-			thirdStringM = tk.getCurrentTokenString();
-		tkn[i++] = stt;
-	}
+    SqlTokenType tkn[3] = { tkEOF, tkEOF, tkEOF };
+    SqlTokenizer tk(sql);
+    for (int i = 0; i < 3; tk.nextToken())
+    {
+        SqlTokenType stt = tk.getCurrentToken();
+        if (stt == tkWHITESPACE || stt == tkCOMMENT)
+            continue;
+        if (stt == tkEOF)
+            break;
+        if (i == 2)
+            thirdStringM = tk.getCurrentTokenString();
+        tkn[i++] = stt;
+    }
     if (tkn[0] == kwCOMMIT)
         typeM = stCommit;
     else if (tkn[0] == kwROLLBACK)

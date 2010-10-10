@@ -54,15 +54,15 @@ HtmlTemplateProcessor::HtmlTemplateProcessor(ProcessableObject* object,
 }
 //-----------------------------------------------------------------------------
 void HtmlTemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdParams,
-	ProcessableObject* object, wxString& processedText)
+    ProcessableObject* object, wxString& processedText)
 {
-	TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText);
+    TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText);
 
     MetadataItem* metadataItem = dynamic_cast<MetadataItem*>(object);
     if (!metadataItem)
         return;
 
-	if (cmdName == wxT("header") && !cmdParams.empty())  // include another file
+    if (cmdName == wxT("header") && !cmdParams.empty())  // include another file
     {
         std::vector<wxString> pages;
         HtmlHeaderMetadataItemVisitor v(pages);
@@ -96,12 +96,12 @@ void HtmlTemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams c
                 else
                     internalProcessTemplateText(processedText, part, object);
             }
-		}
-	}
+        }
+    }
 }
 //-----------------------------------------------------------------------------
 wxString HtmlTemplateProcessor::escapeChars(const wxString& input, bool processNewlines)
 {
-	return escapeHtmlChars(input, processNewlines);
+    return escapeHtmlChars(input, processNewlines);
 }
 //-----------------------------------------------------------------------------

@@ -46,7 +46,7 @@ private:
     IndexType indexTypeM;
     double statisticsM;
     std::vector<wxString> segmentsM;
-	wxString expressionM;
+    wxString expressionM;
 public:
     Index(bool unique, bool active, bool ascending, double statistics,
         bool system, wxString expression);
@@ -55,10 +55,10 @@ public:
     bool isActive() const;
     bool isUnique() const;
     double getStatistics();
-	wxString getExpression() const;
+    wxString getExpression() const;
     IndexType getIndexType();
-	// Returns a list of index fields, or the expression source if
-	// the index is an expression-based index.
+    // Returns a list of index fields, or the expression source if
+    // the index is an expression-based index.
     wxString getFieldsAsString();
     std::vector<wxString> *getSegments();
 

@@ -54,11 +54,11 @@ void showAboutBox(wxWindow* parent)
     wxUnusedVar(parent);
 
     wxAboutDialogInfo info;
-	
+
     info.SetName(wxT("FlameRobin"));
-	
+
     info.SetCopyright(_("Copyright (c) 2004-2010 FlameRobin Development Team"));
-	
+
     wxString ver;
 #ifdef FR_VERSION_SVN
     ver.Printf(_("%d.%d.%d.%d"),
@@ -85,7 +85,7 @@ void showAboutBox(wxWindow* parent)
     wxString msg(_("Database Administration Tool for Firebird RDBMS"));
     msg += wxT("\n\n");
     msg += ib;
-	info.SetDescription(msg);
+    info.SetDescription(msg);
 
     // the following would prohibit the native dialog on Mac OS X
 #if defined __WXGTK__
@@ -99,7 +99,7 @@ void showAboutBox(wxWindow* parent)
 #endif
 
     wxAboutBox(info);
-	
+
 #else
 
     wxString ib;
@@ -127,7 +127,7 @@ void showAboutBox(wxWindow* parent)
 #endif
 
 #if defined(_WIN64)
-	msg += wxT(" (x64)");
+    msg += wxT(" (x64)");
 #endif
 
     msg += wxT("\n");
