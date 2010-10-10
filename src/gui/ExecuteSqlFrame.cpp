@@ -2987,7 +2987,7 @@ bool DropColumnHandler::handleURI(URI& uri)
     if (uri.action != wxT("drop_field") && uri.action != wxT("drop_constraint"))
         return false;
 
-    MetadataItem* c = extractMetadataItemFromURI(uri);
+    MetadataItem* c = extractMetadataItemFromURI<MetadataItem>(uri);
     wxWindow* w = getParentWindow(uri);
     if (!c || !w)
         return true;
@@ -3043,7 +3043,7 @@ bool DropColumnsHandler::handleURI(URI& uri)
     if (uri.action != wxT("drop_fields"))
         return false;
 
-    Table* t = (Table*)extractMetadataItemFromURI(uri);
+    Table* t = extractMetadataItemFromURI<Table>(uri);
     wxWindow* w = getParentWindow(uri);
     if (!t || !w)
         return true;
@@ -3080,7 +3080,7 @@ bool DropObjectHandler::handleURI(URI& uri)
     if (uri.action != wxT("drop_object"))
         return false;
 
-    MetadataItem* m = extractMetadataItemFromURI(uri);
+    MetadataItem* m = extractMetadataItemFromURI<MetadataItem>(uri);
     wxWindow* w = getParentWindow(uri);
     if (!m || !w)
         return true;
@@ -3117,7 +3117,7 @@ bool EditDDLHandler::handleURI(URI& uri)
     if (uri.action != wxT("edit_ddl"))
         return false;
 
-    MetadataItem* m = extractMetadataItemFromURI(uri);
+    MetadataItem* m = extractMetadataItemFromURI<MetadataItem>(uri);
     wxWindow* w = getParentWindow(uri);
     if (!m || !w)
         return true;
@@ -3161,7 +3161,7 @@ bool EditProcedureHandler::handleURI(URI& uri)
     if (uri.action != wxT("edit_procedure"))
         return false;
 
-    Procedure* p = (Procedure*)extractMetadataItemFromURI(uri);
+    Procedure* p = extractMetadataItemFromURI<Procedure>(uri);
     wxWindow* w = getParentWindow(uri);
     if (!p || !w)
         return true;
@@ -3196,10 +3196,10 @@ bool AlterViewHandler::handleURI(URI& uri)
     Relation* r;
     wxString column;
     if (uri.action == wxT("alter_relation"))
-        r = (Relation*)extractMetadataItemFromURI(uri);
+        r = extractMetadataItemFromURI<Relation>(uri);
     else
     {
-        Column *c = (Column*)extractMetadataItemFromURI(uri);
+        Column* c = extractMetadataItemFromURI<Column>(uri);
         r = c->getTable();
         column = c->getName_();
     }
@@ -3229,7 +3229,7 @@ bool EditTriggerHandler::handleURI(URI& uri)
     if (uri.action != wxT("edit_trigger"))
         return false;
 
-    Trigger* t = (Trigger*)extractMetadataItemFromURI(uri);
+    Trigger* t = extractMetadataItemFromURI<Trigger>(uri);
     wxWindow* w = getParentWindow(uri);
     if (!t || !w)
         return true;
@@ -3256,7 +3256,7 @@ bool EditGeneratorValueHandler::handleURI(URI& uri)
     if (uri.action != wxT("edit_generator_value"))
         return false;
 
-    Generator* g = (Generator*)extractMetadataItemFromURI(uri);
+    Generator* g = extractMetadataItemFromURI<Generator>(uri);
     wxWindow* w = getParentWindow(uri);
     if (!g || !w)
         return true;
@@ -3299,7 +3299,7 @@ bool EditExceptionHandler::handleURI(URI& uri)
     if (uri.action != wxT("edit_exception"))
         return false;
 
-    Exception* e = (Exception*)extractMetadataItemFromURI(uri);
+    Exception* e = extractMetadataItemFromURI<Exception>(uri);
     wxWindow* w = getParentWindow(uri);
     if (!e || !w)
         return true;
@@ -3326,7 +3326,7 @@ bool IndexActionHandler::handleURI(URI& uri)
     if (uri.action != wxT("index_action"))
         return false;
 
-    Index* i = (Index*)extractMetadataItemFromURI(uri);
+    Index* i = extractMetadataItemFromURI<Index>(uri);
     wxWindow* w = getParentWindow(uri);
     if (!i || !w)
         return true;
@@ -3375,7 +3375,7 @@ bool ActivateTriggersHandler::handleURI(URI& uri)
         return false;
     }
 
-    MetadataItem *m = extractMetadataItemFromURI(uri);
+    MetadataItem *m = extractMetadataItemFromURI<MetadataItem>(uri);
     Table* t = dynamic_cast<Table*>(m);
     Database* d = dynamic_cast<Database*>(m);
     wxWindow* w = getParentWindow(uri);
@@ -3420,7 +3420,7 @@ bool ActivateTriggerHandler::handleURI(URI& uri)
     if (uri.action != wxT("activate_trigger") && uri.action != wxT("deactivate_trigger"))
         return false;
 
-    Trigger* t = (Trigger*)extractMetadataItemFromURI(uri);
+    Trigger* t = extractMetadataItemFromURI<Trigger>(uri);
     wxWindow* w = getParentWindow(uri);
     if (!t || !w)
         return true;

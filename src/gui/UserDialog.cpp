@@ -247,12 +247,12 @@ bool UserPropertiesHandler::handleURI(URI& uri)
     wxString title(_("Modify User"));
     if (addUser)
     {
-        s = (Server *)extractMetadataItemFromURI(uri);
+        s = extractMetadataItemFromURI<Server>(uri);
         title = _("Create New User");
     }
     else
     {
-        u = (User *)extractMetadataItemFromURI(uri);
+        u = extractMetadataItemFromURI<User>(uri);
         if (!u)
             return true;
 #ifdef __WXGTK__
@@ -320,7 +320,7 @@ bool DropUserHandler::handleURI(URI& uri)
         return false;
 
     wxWindow* w = getParentWindow(uri);
-    User* u = (User*)extractMetadataItemFromURI(uri);
+    User* u = extractMetadataItemFromURI<User>(uri);
     if (!u || !w)
         return true;
     Server* s = dynamic_cast<Server*>(u->getParent());

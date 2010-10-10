@@ -30,12 +30,43 @@
 //-----------------------------------------------------------------------------
 #include "core/URIProcessor.h"
 #include "metadata/MetadataClasses.h"
+#include "metadata/metadataitem.h"
 //-----------------------------------------------------------------------------
 // URI parsing helper for metadata-related URIHandlers.
 class MetadataItemURIHandlerHelper
 {
+private:
+    MetadataItem* doExtractMetadataItemFromURI(const URI& uri);
 protected:
-    MetadataItem* extractMetadataItemFromURI(const URI& uri);
+    template<class T>
+    inline T* extractMetadataItemFromURI(const URI& uri)
+    {
+        return dynamic_cast<T*>(doExtractMetadataItemFromURI(uri));
+    }
+
+    template<>
+    inline MetadataItem* extractMetadataItemFromURI(const URI& uri)
+    {
+        return doExtractMetadataItemFromURI(uri);
+    }
+
+    template<class T>
+    boost::shared_ptr<T> extractMetadataItemPtrFromURI(const URI& uri)
+    {
+        MetadataItem* mi = doExtractMetadataItemFromURI(uri);
+        if (mi == 0)
+            return boost::shared_ptr<T>();
+        return boost::dynamic_pointer_cast<T>(mi->shared_from_this());
+    }
+
+    template<>
+    MetadataItemPtr extractMetadataItemPtrFromURI(const URI& uri)
+    {
+        MetadataItem* mi = doExtractMetadataItemFromURI(uri);
+        if (mi == 0)
+            return MetadataItemPtr();
+        return mi->shared_from_this();
+    }
 };
 //-----------------------------------------------------------------------------
 #endif // FR_METADATAITEMURIHANDLERHELPER_H

@@ -115,6 +115,16 @@ public:
     virtual void lockSubject();
     virtual void unlockSubject();
 
+    template <class T>
+    boost::shared_ptr<T> getObjectPtrFromHandle(Handle handle)
+    {
+        typename HandleMap::iterator it = handleMap.find(handle);
+        if (it == handleMap.end())
+            return boost::shared_ptr<T>();
+        MetadataItem* mi = it->second;
+        return boost::dynamic_pointer_cast<T>(mi->shared_from_this());
+    }
+
     void getDependencies(std::vector<Dependency>& list, bool ofObject);  // load from db
     void getDependencies(std::vector<Dependency>& list, bool ofObject,
         const wxString& field);  // load from db

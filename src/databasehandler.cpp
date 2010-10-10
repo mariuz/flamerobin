@@ -68,13 +68,13 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
     isEditReadOnly = (uri.action == wxT("edit_db_read_only"));
     isEditPageBuffers = (uri.action == wxT("edit_db_page_buffers"));
 
-    if (!isEditSweep && !isEditForcedWrites && !isEditReserve && !isEditReadOnly
-        && !isEditPageBuffers)
+    if (!isEditSweep && !isEditForcedWrites && !isEditReserve
+        && !isEditReadOnly && !isEditPageBuffers)
     {
         return false;
     }
 
-    Database* d = (Database*)extractMetadataItemFromURI(uri);
+    DatabasePtr d = extractMetadataItemPtrFromURI<Database>(uri);
     wxWindow* w = getParentWindow(uri);
 
     // when either the database or the window does not exist

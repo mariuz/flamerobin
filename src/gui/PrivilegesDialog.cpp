@@ -600,7 +600,7 @@ bool ManagePrivilegesHandler::handleURI(URI& uri)
         return false;
 
     wxWindow* w = getParentWindow(uri);
-    MetadataItem *m = extractMetadataItemFromURI(uri);
+    MetadataItem *m = extractMetadataItemFromURI<MetadataItem>(uri);
     if (!m || !w)
         return true;
 

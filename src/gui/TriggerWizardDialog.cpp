@@ -194,7 +194,7 @@ bool CreateTriggerHandler::handleURI(URI& uri)
     if (uri.action != wxT("create_trigger"))
         return false;
 
-    Table* t = (Table*)extractMetadataItemFromURI(uri);
+    Table* t = extractMetadataItemFromURI<Table>(uri);
     wxWindow* w = getParentWindow(uri);
     if (!t || !w)
         return true;

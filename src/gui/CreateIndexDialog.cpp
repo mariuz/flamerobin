@@ -222,7 +222,7 @@ bool TableIndicesHandler::handleURI(URI& uri)
     if (uri.action != wxT("add_index") && uri.action != wxT("recompute_all"))
         return false;
 
-    Table* t = (Table*)extractMetadataItemFromURI(uri);
+    Table* t = extractMetadataItemFromURI<Table>(uri);
     wxWindow* w = getParentWindow(uri);
     if (!t || !w)
         return true;

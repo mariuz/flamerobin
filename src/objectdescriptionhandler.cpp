@@ -62,7 +62,7 @@ bool ObjectDescriptionHandler::handleURI(URI& uri)
     if (uri.action != wxT("edit_description"))
         return false;
 
-    MetadataItem* m = extractMetadataItemFromURI(uri);
+    MetadataItem* m = extractMetadataItemFromURI<MetadataItem>(uri);
     wxWindow* w = getParentWindow(uri);
     if (!m || !w)
         return true;

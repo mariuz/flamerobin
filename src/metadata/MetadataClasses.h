@@ -74,7 +74,10 @@ typedef boost::shared_ptr<Server> ServerPtr;
 typedef std::vector<ServerPtr> ServerPtrs;
 
 class SysTables;
+
 class Table;
+typedef boost::shared_ptr<Table> TablePtr;
+
 class Tables;
 class Trigger;
 class Triggers;

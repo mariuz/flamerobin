@@ -231,7 +231,7 @@ bool ReorderFieldsHandler::handleURI(URI& uri)
     if (uri.action != wxT("reorder_fields"))
         return false;
 
-    Table* t = (Table*)extractMetadataItemFromURI(uri);
+    Table* t = extractMetadataItemFromURI<Table>(uri);
     wxWindow* w = getParentWindow(uri);
     if (!t || !w)
         return true;

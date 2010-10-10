@@ -99,7 +99,7 @@ bool AddConstraintHandler::handleURI(URI& uri)
         return false;
 
     wxString type = uri.getParam(wxT("type"));    // pk, fk, check, unique
-    Table* t = (Table*)extractMetadataItemFromURI(uri);
+    Table* t = extractMetadataItemFromURI<Table>(uri);
     wxWindow* w = getParentWindow(uri);
     if (!t || !w)
         return true;

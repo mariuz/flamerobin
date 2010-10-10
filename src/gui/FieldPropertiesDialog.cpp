@@ -841,7 +841,7 @@ bool ColumnPropertiesHandler::handleURI(URI& uri)
         return false;
 
     wxWindow* w = getParentWindow(uri);
-    MetadataItem* mo = extractMetadataItemFromURI(uri);
+    MetadataItem* mo = extractMetadataItemFromURI<MetadataItem>(uri);
     if (!mo || !w)
         return true;
 
