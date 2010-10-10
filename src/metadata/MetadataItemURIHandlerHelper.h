@@ -44,29 +44,22 @@ protected:
         return dynamic_cast<T*>(doExtractMetadataItemFromURI(uri));
     }
 
-    template<>
-    inline MetadataItem* extractMetadataItemFromURI(const URI& uri)
-    {
-        return doExtractMetadataItemFromURI(uri);
-    }
-
     template<class T>
     boost::shared_ptr<T> extractMetadataItemPtrFromURI(const URI& uri)
     {
-        MetadataItem* mi = doExtractMetadataItemFromURI(uri);
-        if (mi == 0)
-            return boost::shared_ptr<T>();
-        return boost::dynamic_pointer_cast<T>(mi->shared_from_this());
-    }
-
-    template<>
-    MetadataItemPtr extractMetadataItemPtrFromURI(const URI& uri)
-    {
-        MetadataItem* mi = doExtractMetadataItemFromURI(uri);
-        if (mi == 0)
-            return MetadataItemPtr();
-        return mi->shared_from_this();
+        if (MetadataItem* mi = doExtractMetadataItemFromURI(uri))
+            return boost::dynamic_pointer_cast<T>(mi->shared_from_this());
+        return boost::shared_ptr<T>();
     }
 };
+//-----------------------------------------------------------------------------
+/* FIXME: Get this specialization to compile and build on gcc
+template<>
+inline MetadataItem* MetadataItemURIHandlerHelper::extractMetadataItemFromURI(
+    const URI& uri);
+template<>
+inline MetadataItemPtr MetadataItemURIHandlerHelper::extractMetadataItemPtrFromURI(
+    const URI& uri);
+*/
 //-----------------------------------------------------------------------------
 #endif // FR_METADATAITEMURIHANDLERHELPER_H
