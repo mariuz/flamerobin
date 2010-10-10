@@ -48,6 +48,10 @@
 #include "core/FRError.h"
 #include "gui/controls/PrintableHtmlWindow.h"
 //-----------------------------------------------------------------------------
+#ifdef _DEBUG
+    enum { CmdCopyAllHtml = wxID_HIGHEST + 1 };
+#endif
+//-----------------------------------------------------------------------------
 HtmlPrinter::HtmlPrinter()
 {
     prnM = new wxHtmlEasyPrinting(_("Printing"));
@@ -79,6 +83,9 @@ PrintableHtmlWindow::PrintableHtmlWindow(wxWindow* parent, wxWindowID id)
 BEGIN_EVENT_TABLE(PrintableHtmlWindow, wxHtmlWindow)
     EVT_RIGHT_UP(PrintableHtmlWindow::OnRightUp)
     EVT_MENU(wxID_COPY, PrintableHtmlWindow::OnMenuCopy)
+    #ifdef _DEBUG
+        EVT_MENU(CmdCopyAllHtml, PrintableHtmlWindow::OnMenuCopyAllHtml)
+    #endif
     EVT_MENU(wxID_NEW, PrintableHtmlWindow::OnMenuNewWindow)
     EVT_MENU(wxID_ADD, PrintableHtmlWindow::OnMenuNewTab)
     EVT_MENU(wxID_SAVE, PrintableHtmlWindow::OnMenuSave)
@@ -92,6 +99,10 @@ void PrintableHtmlWindow::OnRightUp(wxMouseEvent& event)
     m.Append(wxID_NEW, _("&Open link in a new window"));
     m.Append(wxID_ADD, _("Open link in a new &tab"));
     m.Append(wxID_COPY, _("&Copy"));
+    #ifdef _DEBUG
+        m.AppendSeparator();
+        m.Append(CmdCopyAllHtml, _("Copy &HTML code"));
+    #endif
     m.AppendSeparator();
     m.Append(wxID_SAVE, _("&Save as HTML file..."));
     m.Append(wxID_PREVIEW, _("Print pre&view..."));
@@ -130,6 +141,15 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
 void PrintableHtmlWindow::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
 {
     CopySelection();
+}
+//-----------------------------------------------------------------------------
+void PrintableHtmlWindow::OnMenuCopyAllHtml(wxCommandEvent& WXUNUSED(event))
+{
+    if (wxTheClipboard->Open())
+    {
+        wxTheClipboard->SetData(new wxTextDataObject(pageSourceM));
+        wxTheClipboard->Close();
+    }
 }
 //-----------------------------------------------------------------------------
 void notImplementedMessage(wxWindow* parent)
