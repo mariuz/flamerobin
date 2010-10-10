@@ -195,13 +195,13 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
             processedText += falseText;
     }
 
-    // {%foreach:<list>:<separator>:<text>%}
+    // {%forall:<list>:<separator>:<text>%}
     // Repeats <text> once for each string in <list>, pasting a <separator>
     // before each item except the first.
     // <list> is a list of comma-separated values.
     // Inside <text> use the placeholder %%current_value%% to
     // mean the current string in the list.
-    else if (cmdName == wxT("foreach") && (cmdParams.Count() >= 3))
+    else if (cmdName == wxT("forall") && (cmdParams.Count() >= 3))
     {
         wxString listStr;
         internalProcessTemplateText(listStr, cmdParams[0], object);
@@ -238,6 +238,11 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         else
             processedText += cmdParams[1];
     }
+
+    // Only if no internal commands are recognized, call external command handlers.
+    else
+        getTemplateCmdHandlerRepository().handleTemplateCmd(this, cmdName, cmdParams,
+            object, processedText);
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::internalProcessTemplateText(wxString& processedText, wxString inputText,
@@ -330,13 +335,7 @@ void TemplateProcessor::internalProcessTemplateText(wxString& processedText, wxS
             cmdName = cmdParams[0];
             cmdParams.RemoveAt(0);
             if (!cmdName.IsEmpty())
-            {
-                // process internal commands.
                 processCommand(cmdName, cmdParams, object, processedText);
-                // call external command handlers.
-                getTemplateCmdHandlerRepository().handleTemplateCmd(this, cmdName, cmdParams,
-                    object, processedText);
-            }
         }
         oldpos = pos = endpos + 2;
     }

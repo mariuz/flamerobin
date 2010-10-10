@@ -76,7 +76,7 @@
     <tr bgcolor="navy">
        <td nowrap><b><font color=white>Connected users</font></b></td>
     </tr>
-    {%foreach:{%dbinfo:connected_users%}::
+    {%forall:{%dbinfo:connected_users%}::
     <tr bgcolor="#DDDDFF">
         <td bgcolor="#CCCCFF" nowrap>%%current_value%%</td>
     </tr>
