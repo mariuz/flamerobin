@@ -7,7 +7,7 @@
             <caption>Which columns would you like to select?</caption>
             <key>columnNames</key>
             <default>*</default>
-            <relation>{%object_address%}</relation>
+            <relation>{%object_handle%}</relation>
         </setting>
     </node>
 </root>
