@@ -409,6 +409,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::Menu_NewObject, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_MENU(Cmds::Menu_DatabasePreferences, MainFrame::OnMenuDatabasePreferences)
     EVT_UPDATE_UI(Cmds::Menu_DatabasePreferences, MainFrame::OnMenuUpdateIfDatabaseSelected)
+    EVT_MENU(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuDatabaseProperties)
+    EVT_UPDATE_UI(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_MENU(Cmds::Menu_ExtractDatabaseDDL, MainFrame::OnMenuDatabaseExtractDDL)
     EVT_UPDATE_UI(Cmds::Menu_ExtractDatabaseDDL, MainFrame::OnMenuUpdateIfDatabaseConnected)
 
@@ -762,6 +764,17 @@ void MainFrame::OnMenuDatabaseExtractDDL(wxCommandEvent& WXUNUSED(event))
     uri.addParam(wxString::Format(wxT("parent_window=%ld"), (uintptr_t)this));
     uri.addParam(wxString::Format(wxT("object_handle=%d"), db->getHandle()));
     getURIProcessor().handleURI(uri);
+}
+ //-----------------------------------------------------------------------------
+void MainFrame::OnMenuDatabaseProperties(wxCommandEvent& WXUNUSED(event))
+{
+    Database* db = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (!db)
+        return;
+    if (!tryAutoConnectDatabase())
+        return;
+
+    frameManager().showMetadataPropertyFrame(db);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))

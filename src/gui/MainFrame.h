@@ -102,6 +102,7 @@ public:
     void OnMenuConnectAs(wxCommandEvent& event);
     void OnMenuReconnect(wxCommandEvent& event);
     void OnMenuDatabasePreferences(wxCommandEvent& event);
+    void OnMenuDatabaseProperties(wxCommandEvent& event);
     void OnMenuDatabaseExtractDDL(wxCommandEvent& event);
 
     // create new object

@@ -107,7 +107,7 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database&)
 
     menuM->AppendSeparator();
     addRefreshItem();
-    addPropertiesItem();
+    menuM->Append(Cmds::Menu_DatabaseProperties, _("P&roperties"));
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitDomain(Domain& domain)
