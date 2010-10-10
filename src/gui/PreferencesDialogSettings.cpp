@@ -51,8 +51,7 @@
 #include "frutils.h"
 #include "gui/PreferencesDialog.h"
 #include "gui/StyleGuide.h"
-//-----------------------------------------------------------------------------
-using namespace std;
+#include "metadata/relation.h"
 //-----------------------------------------------------------------------------
 static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
 {
@@ -841,14 +840,14 @@ void PrefDlgChooserSetting::chooseFont()
 void PrefDlgChooserSetting::chooseRelationColumns()
 {
     wxArrayString defaultNames = ::wxStringTokenize(textctrlM->GetValue(), wxT(","));
-    vector<wxString> list;
+    std::vector<wxString> list;
     for (wxString::size_type i = 0; i < defaultNames.Count(); i++)
         list.push_back(defaultNames[i].Trim(true).Trim(false));
 
     
     if (selectRelationColumnsIntoVector(relationM, getPage(), list))
     {
-        vector<wxString>::iterator it = list.begin();
+        std::vector<wxString>::iterator it = list.begin();
         wxString retval(*it);
         while ((++it) != list.end())
             retval += wxT(", ") + (*it);
@@ -880,7 +879,12 @@ void PrefDlgChooserSetting::enableControls(bool enabled)
     if (textctrlM)
         textctrlM->Enable(enabled);
     if (browsebtnM)
-        browsebtnM->Enable(enabled);
+    {
+        if ((styleM == chooserelcolumns) && !relationM)
+            browsebtnM->Enable(false);
+        else
+            browsebtnM->Enable(enabled);
+    }
 }
 //-----------------------------------------------------------------------------
 wxStaticText* PrefDlgChooserSetting::getLabel()
@@ -903,6 +907,7 @@ bool PrefDlgChooserSetting::loadFromTargetConfig(Config& config)
         config.getValue(keyM, value);
         textctrlM->SetValue(value);
     }
+    enableControls(true);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -944,12 +949,14 @@ bool PrefDlgChooserSetting::parseProperty(wxXmlNode* xmln)
         if (name == wxT("relation"))
         {
             wxString value(getNodeContent(xmln, wxEmptyString));
-
             unsigned long o;
-            if (!value.ToULong(&o))
-                relationM = 0;
+            if (value.ToULong(&o))
+            {
+                MetadataItem* m = MetadataItem::getObjectFromHandle(o);
+                relationM = dynamic_cast<Relation*>(m);
+            }
             else
-                relationM = (Relation*)o;
+                relationM = 0;
         }
     }
     return PrefDlgSetting::parseProperty(xmln);
