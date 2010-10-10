@@ -40,7 +40,7 @@
 </table>
 <!-- left table end-->
 </td><td> &nbsp; </td><td>
-<!-- right table -->
+<!-- middle table -->
 <table cellspacing=1 cellpadding=2 border=0 bgcolor="black">
   <tbody>
     <tr bgcolor="navy">
@@ -66,6 +66,21 @@
         <td nowrap>Read-Only</td>
         <td align="center" bgcolor="#CCCCFF" nowrap><a href="fr://edit_db_read_only?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}{%ifeq:{%dbinfo:is_read_only%}:true:ok.png:redx.png%}"></a></td>
     </tr>
+  </tbody>
+</table>
+<!-- middle table end -->
+</td><td> &nbsp; </td><td>
+<!-- right table -->
+<table cellspacing=1 cellpadding=2 border=0 bgcolor="black">
+  <tbody>
+    <tr bgcolor="navy">
+       <td nowrap><b><font color=white>Connected users</font></b></td>
+    </tr>
+    {%foreach:{%dbinfo:connected_users%}::
+    <tr bgcolor="#DDDDFF">
+        <td bgcolor="#CCCCFF" nowrap>%%current_value%%</td>
+    </tr>
+    %}
   </tbody>
 </table>
 <!-- right table end -->

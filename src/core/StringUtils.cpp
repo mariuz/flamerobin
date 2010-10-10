@@ -40,7 +40,6 @@
 
 #include "core/StringUtils.h"
 //-----------------------------------------------------------------------------
-//! converts wxString to std::string
 std::string wx2std(const wxString& input, wxMBConv* conv)
 {
     if (input.empty())
@@ -55,7 +54,6 @@ std::string wx2std(const wxString& input, wxMBConv* conv)
     return std::string(buf);
 }
 //-----------------------------------------------------------------------------
-//! converts std:string to wxString
 wxString std2wx(const std::string& input, wxMBConv* conv)
 {
     if (input.empty())
@@ -77,8 +75,6 @@ wxString std2wxIdentifier(const std::string& input, wxMBConv* conv)
         (last == std::string::npos) ? std::string::npos : last + 1);
 }
 //-----------------------------------------------------------------------------
-//! returns string suitable for HTML META charset tag (used only if no
-//  conversion to UTF-8 is available, i.e. in non-Unicode build
 wxString getHtmlCharset()
 {
 #if !wxUSE_UNICODE
@@ -212,5 +208,19 @@ wxString escapeXmlChars(const wxString& input)
 wxString getBooleanAsString(bool value)
 {
     return (value) ? wxT("true") : wxT("false");
+}
+//-----------------------------------------------------------------------------
+wxString wxArrayToString(const wxArrayString& arrayStr, const wxString& delimiter)
+{
+    wxString result;
+    for (wxArrayString::const_iterator it = arrayStr.begin();
+        it != arrayStr.end(); ++it)
+    {
+        if (result.IsEmpty())
+            result << *(it);
+        else
+            result << delimiter << *(it);
+    }
+    return result;
 }
 //-----------------------------------------------------------------------------

@@ -1500,3 +1500,17 @@ wxMBConv* Database::getCharsetConverter() const
     return wxConvCurrent;
 }
 //-----------------------------------------------------------------------------
+void Database::getConnectedUsers(wxArrayString& users) const
+{
+    if (databaseM != 0 && databaseM->Connected())
+    {
+        std::vector<std::string> userNames;
+        databaseM->Users(userNames);
+        for (std::vector<std::string>::const_iterator i = userNames.begin();
+            i != userNames.end(); ++i)
+        {
+            users.Add(std2wx(*i));
+        }
+    }
+}
+//-----------------------------------------------------------------------------

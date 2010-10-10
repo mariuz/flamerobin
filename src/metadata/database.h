@@ -303,6 +303,8 @@ public:
     const DatabaseInfo& getInfo();
     void loadInfo();
 
+    void getConnectedUsers(wxArrayString& users) const;
+
     wxMBConv* getCharsetConverter() const;
 };
 //----------------------------------------------------------------------------

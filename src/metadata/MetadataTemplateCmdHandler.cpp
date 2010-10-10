@@ -41,8 +41,8 @@
 #include <sstream>
 #include <iomanip>
 
-#include "core/StringUtils.h"
 #include "core/ProcessableObject.h"
+#include "core/StringUtils.h"
 #include "core/TemplateProcessor.h"
 #include "metadata/CreateDDLVisitor.h"
 #include "metadata/privilege.h"
@@ -130,7 +130,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
         processedText += getBooleanAsString(metadataItem->isSystem());
 
     // {%foreach:<collection>:<separator>:<text>%}
-    // repeats <text> once for each item in <collection>, pasting a <separator>
+    // Repeats <text> once for each item in <collection>, pasting a <separator>
     // before each item except the first.
     else if ((cmdName == wxT("foreach")) && (cmdParams.Count() >= 3))
     {
@@ -369,7 +369,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
             for (UserList::iterator it = usr->begin(); it != usr->end(); ++it)
             {
                 Local::foreachIteration(firstItem, tp, processedText, sep,
-                    cmdParams.all(3), &(*it));
+                    cmdParams.all(2), &(*it));
             }
         }
         // add more collections here.
@@ -666,28 +666,28 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
     // requested property.
     else if (cmdName == wxT("dbinfo") && !cmdParams.IsEmpty())
     {
-        Database* d = dynamic_cast<Database*>(object);
-        if (!d)
+        Database* db = dynamic_cast<Database*>(object);
+        if (!db)
             return;
 
         if (cmdParams[0] == wxT("connection_string"))
-            processedText += d->getConnectionString();
+            processedText += db->getConnectionString();
         else if (cmdParams[0] == wxT("ods_version"))
         {
-            processedText += wxString() << d->getInfo().getODS();
-            if (d->getInfo().getODSMinor())
+            processedText += wxString() << db->getInfo().getODS();
+            if (db->getInfo().getODSMinor())
             {
                 processedText += wxT(".");
-                processedText += wxString() << d->getInfo().getODSMinor();
+                processedText += wxString() << db->getInfo().getODSMinor();
             }
         }
         else if (cmdParams[0] == wxT("page_size"))
-            processedText += wxString() << d->getInfo().getPageSize();
+            processedText += wxString() << db->getInfo().getPageSize();
         else if (cmdParams[0] == wxT("pages"))
-            processedText += wxString() << d->getInfo().getPages();
+            processedText += wxString() << db->getInfo().getPages();
         else if (cmdParams[0] == wxT("size"))
         {
-            int64_t size = d->getInfo().getSizeInBytes();
+            int64_t size = db->getInfo().getSizeInBytes();
             const double kilo = 1024;
             const double mega = kilo * kilo;
             const double giga = kilo * mega;
@@ -699,23 +699,29 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
                 processedText += wxString::Format(wxT("%0.2fkB"), size / kilo);
         }
         else if (cmdParams[0] == wxT("page_buffers"))
-            processedText += wxString() << d->getInfo().getBuffers();
+            processedText += wxString() << db->getInfo().getBuffers();
         else if (cmdParams[0] == wxT("reserve_space"))
-            processedText += getBooleanAsString(d->getInfo().getReserve());
+            processedText += getBooleanAsString(db->getInfo().getReserve());
         else if (cmdParams[0] == wxT("is_read_only"))
-            processedText += getBooleanAsString(d->getInfo().getReadOnly());
+            processedText += getBooleanAsString(db->getInfo().getReadOnly());
         else if (cmdParams[0] == wxT("sql_dialect"))
-            processedText += wxString() << d->getInfo().getDialect();
+            processedText += wxString() << db->getInfo().getDialect();
         else if (cmdParams[0] == wxT("default_charset"))
-            processedText += d->getDatabaseCharset();
+            processedText += db->getDatabaseCharset();
         else if (cmdParams[0] == wxT("sweep_interval"))
-            processedText += wxString() << d->getInfo().getSweep();
+            processedText += wxString() << db->getInfo().getSweep();
         else if (cmdParams[0] == wxT("forced_writes"))
-            processedText += getBooleanAsString(d->getInfo().getForcedWrites());
+            processedText += getBooleanAsString(db->getInfo().getForcedWrites());
         else if (cmdParams[0] == wxT("oldest_transaction"))
-            processedText += wxString() << d->getInfo().getOldestTransaction();
+            processedText += wxString() << db->getInfo().getOldestTransaction();
         else if (cmdParams[0] == wxT("next_transaction"))
-            processedText += wxString() << d->getInfo().getNextTransaction();
+            processedText += wxString() << db->getInfo().getNextTransaction();
+        else if (cmdParams[0] == wxT("connected_users"))
+        {
+            wxArrayString users;
+            db->getConnectedUsers(users);
+            processedText += wxArrayToString(users, wxT(","));
+        }
     }
 
     // {%privilegeinfo:<property>%}

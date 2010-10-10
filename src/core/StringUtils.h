@@ -39,15 +39,20 @@ wxString std2wx(const std::string& input, wxMBConv* conv = wxConvCurrent);
 
 wxString std2wxIdentifier(const std::string& input, wxMBConv* conv);
 //-----------------------------------------------------------------------------
-//! converts chars that have special meaning in HTML or XML, so they get displayed
+// Converts chars that have special meaning in HTML or XML, so they get
+// displayed.
 wxString escapeHtmlChars(const wxString& input, bool processNewlines = true);
 wxString escapeXmlChars(const wxString& input);
 //-----------------------------------------------------------------------------
-//! returns string suitable for HTML META charset tag (used only if no
-//  conversion to UTF-8 is available, i.e. in non-Unicode build
+// Returns string suitable for HTML META charset tag (used only if no
+// conversion to UTF-8 is available, i.e. in non-Unicode build.
 wxString getHtmlCharset();
 //-----------------------------------------------------------------------------
-//! Standard way to confert a boolean to a string ("true"/"false")
+// Standard way to confert a boolean to a string ("true"/"false").
 wxString getBooleanAsString(bool value);
 //-----------------------------------------------------------------------------
+// Converts a wxArrayString to a delimited string of values.
+wxString wxArrayToString(const wxArrayString& arrayStr, const wxString& delimiter);
+//-----------------------------------------------------------------------------
+
 #endif // FR_STRINGUTILS_H

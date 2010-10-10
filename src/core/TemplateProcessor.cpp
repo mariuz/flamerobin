@@ -195,6 +195,37 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
             processedText += falseText;
     }
 
+    // {%foreach:<list>:<separator>:<text>%}
+    // Repeats <text> once for each string in <list>, pasting a <separator>
+    // before each item except the first.
+    // <list> is a list of comma-separated values.
+    // Inside <text> use the placeholder %%current_value%% to
+    // mean the current string in the list.
+    else if (cmdName == wxT("foreach") && (cmdParams.Count() >= 3))
+    {
+        wxString listStr;
+        internalProcessTemplateText(listStr, cmdParams[0], object);
+        wxArrayString list(wxStringTokenize(listStr, wxT(",")));
+        for (wxString::size_type i = 0; i < list.Count(); i++)
+            list[i] = list[i].Trim(true).Trim(false);
+
+        wxString separator;
+        internalProcessTemplateText(separator, cmdParams[1], object);
+
+        bool firstItem = true;
+        for (wxArrayString::iterator it = list.begin(); it != list.end(); ++it)
+        {
+            wxString newText;
+            internalProcessTemplateText(newText, cmdParams.all(2), object);
+            newText.Replace(wxT("%%current_value%%"), *(it));
+            if ((!firstItem) && (!newText.IsEmpty()))
+                processedText += escapeChars(separator);
+            if (!newText.IsEmpty())
+                firstItem = false;
+            processedText += newText;
+        }
+    }
+
     // {%alternate:text1:text2%}
     // Alternates expanding to text1 and text2 at each call, starting with text1.
     // Used to alternate table row colours, for example.
