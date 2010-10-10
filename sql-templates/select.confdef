@@ -5,7 +5,7 @@
         <caption>Select from table</caption>
         <setting type="relation_columns">
             <caption>Which columns would you like to select?</caption>
-            <key>columnNames</key>
+            <key>{%object_path%}/columnNames</key>
             <default>*</default>
             <relation>{%object_handle%}</relation>
         </setting>
