@@ -50,13 +50,14 @@ MetadataItem* MetadataItemURIHandlerHelper::doExtractMetadataItemFromURI(
     return MetadataItem::getObjectFromHandle(mo);
 }
 //-----------------------------------------------------------------------------
-/* FIXME: Get this specialization to compile and build on gcc
 template<>
-inline MetadataItem* MetadataItemURIHandlerHelper::extractMetadataItemFromURI(
+inline MetadataItem* MetadataItemURIHandlerHelper::extractMetadataItemFromURI<MetadataItem>(
     const URI& uri)
 {
     return doExtractMetadataItemFromURI(uri);
 }
+//-----------------------------------------------------------------------------
+/* FIXME: Get this specialization to compile and build on gcc
 template<>
 inline MetadataItemPtr MetadataItemURIHandlerHelper::extractMetadataItemPtrFromURI(
     const URI& uri)
