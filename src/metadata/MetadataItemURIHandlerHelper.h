@@ -53,10 +53,22 @@ protected:
     }
 };
 //-----------------------------------------------------------------------------
-/* FIXME: Get this specialization to compile and build on gcc
 template<>
-inline MetadataItemPtr MetadataItemURIHandlerHelper::extractMetadataItemPtrFromURI(
-    const URI& uri);
-*/
+inline MetadataItem*
+MetadataItemURIHandlerHelper::extractMetadataItemFromURI<MetadataItem>(
+    const URI& uri)
+{
+    return doExtractMetadataItemFromURI(uri);
+}
+//-----------------------------------------------------------------------------
+template<>
+inline MetadataItemPtr
+MetadataItemURIHandlerHelper::extractMetadataItemPtrFromURI<MetadataItem>(
+    const URI& uri)
+{
+    if (MetadataItem* mi = doExtractMetadataItemFromURI(uri))
+        return mi->shared_from_this();
+    return MetadataItemPtr();
+}
 //-----------------------------------------------------------------------------
 #endif // FR_METADATAITEMURIHANDLERHELPER_H
