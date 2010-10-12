@@ -1029,11 +1029,7 @@ void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
         return;
 
     wxArrayString as;
-    std::vector<std::string> users;
-    db->getIBPPDatabase()->Users(users);
-    for (std::vector<std::string>::const_iterator i = users.begin(); i != users.end(); ++i)
-        as.Add(std2wx(*i));
-
+    db->getConnectedUsers(as);
     ::wxGetSingleChoice(_("Connected users"), db->getPath(), as);
 }
 //-----------------------------------------------------------------------------
