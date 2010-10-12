@@ -368,7 +368,10 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
 //-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    databaseM->setServer(serverM);
+    // FIXME: implement a better interface than separate setServer()
+    // and setDatabase() methods
+    if (serverM)
+        databaseM->setServer(serverM);
 
     // TODO: This needs to be reworked. If the order of method calls is important
     //       then they must not be provided as independent methods !!!

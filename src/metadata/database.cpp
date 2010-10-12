@@ -1371,6 +1371,7 @@ ServerPtr Database::getServer() const
 //-----------------------------------------------------------------------------
 void Database::setServer(ServerPtr server)
 {
+    wxASSERT(server);
     serverM = server;
     setParent(server.get());
 }
