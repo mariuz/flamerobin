@@ -40,8 +40,6 @@
 #include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
 #include "metadata/User.h"
-
-typedef std::vector<User> UserList;
 //-----------------------------------------------------------------------------
 class Server : public MetadataItem,
     public boost::enable_shared_from_this<Server>
@@ -51,6 +49,7 @@ private:
     wxString portM;
 
     DatabasePtrs databasesM;
+    UserPtrs usersM;
 
     wxString serviceUserM;
     wxString servicePasswordM;
@@ -80,7 +79,7 @@ public:
     void setServiceCredentials(const wxString& user, const wxString& pass);
     void setServiceSysdbaPassword(const wxString& pass);
 
-    UserList getUsers(ProgressIndicator* progressind);
+    UserPtrs getUsers(ProgressIndicator* progressind);
 
     // setters/getters
     wxString getHostname() const;

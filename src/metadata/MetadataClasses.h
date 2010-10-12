@@ -82,7 +82,11 @@ class Tables;
 class Trigger;
 class Triggers;
 class UniqueConstraint;
+
 class User;
+typedef boost::shared_ptr<User> UserPtr;
+typedef std::vector<UserPtr> UserPtrs;
+
 class View;
 class Views;
 //-----------------------------------------------------------------------------

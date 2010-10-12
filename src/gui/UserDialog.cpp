@@ -55,7 +55,7 @@
 #include "core/URIProcessor.h"
 //-----------------------------------------------------------------------------
 UserDialog::UserDialog(wxWindow* parent, const wxString& title, bool isNewUser)
-    : BaseDialog(parent, wxID_ANY, title), isNewUserM(isNewUser), userM(0)
+    : BaseDialog(parent, wxID_ANY, title), isNewUserM(isNewUser)
 {
     createControls();
     setControlsProperties();
@@ -167,20 +167,20 @@ void UserDialog::setControlsProperties()
     buttonOkM->SetDefault();
 }
 //-----------------------------------------------------------------------------
-void UserDialog::setUser(User* u)
+void UserDialog::setUser(UserPtr user)
 {
-    wxASSERT(u != 0);
-    userM = u;
+    wxASSERT(user);
+    userM = user;
     if (!isNewUserM)
     {
-        textUserNameM->SetValue(u->usernameM);
-        textFirstNameM->SetValue(u->firstnameM);
-        textMiddleNameM->SetValue(u->middlenameM);
-        textLastNameM->SetValue(u->lastnameM);
-        textPasswordM->SetValue(u->passwordM);
-        textConfirmPasswordM->SetValue(u->passwordM);
-        spinctrlGroupIdM->SetValue(u->groupidM);
-        spinctrlUserIdM->SetValue(u->useridM);
+        textUserNameM->SetValue(user->getUsername());
+        textFirstNameM->SetValue(user->getFirstName());
+        textMiddleNameM->SetValue(user->getMiddleName());
+        textLastNameM->SetValue(user->getLastName());
+        textPasswordM->SetValue(user->getPassword());
+        textConfirmPasswordM->SetValue(user->getPassword());
+        spinctrlGroupIdM->SetValue(user->getGroupId());
+        spinctrlUserIdM->SetValue(user->getUserId());
     }
 
     updateButtons();
@@ -212,13 +212,14 @@ void UserDialog::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void UserDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    userM->usernameM = textUserNameM->GetValue();
-    userM->firstnameM = textFirstNameM->GetValue();
-    userM->middlenameM = textMiddleNameM->GetValue();
-    userM->lastnameM = textLastNameM->GetValue();
-    userM->passwordM = textPasswordM->GetValue();
-    userM->groupidM = spinctrlGroupIdM->GetValue();
-    userM->useridM = spinctrlUserIdM->GetValue();
+    SubjectLocker locker(userM.get());
+    userM->setUsername(textUserNameM->GetValue());
+    userM->setFirstName(textFirstNameM->GetValue());
+    userM->setMiddleName(textMiddleNameM->GetValue());
+    userM->setLastName(textLastNameM->GetValue());
+    userM->setPassword(textPasswordM->GetValue());
+    userM->setGroupId(spinctrlGroupIdM->GetValue());
+    userM->setUserId(spinctrlUserIdM->GetValue());
     EndModal(wxID_OK);
 }
 //-----------------------------------------------------------------------------
@@ -242,21 +243,24 @@ bool UserPropertiesHandler::handleURI(URI& uri)
         return false;
 
     wxWindow* w = getParentWindow(uri);
-    User* u = 0;
-    Server* s;
+    ServerPtr server;
+    UserPtr user;
     wxString title(_("Modify User"));
     if (addUser)
     {
-        s = extractMetadataItemFromURI<Server>(uri);
+        server = extractMetadataItemPtrFromURI<Server>(uri);
+        if (!server)
+            return true;
         title = _("Create New User");
+        user.reset(new User(server));
     }
     else
     {
-        u = extractMetadataItemFromURI<User>(uri);
-        if (!u)
+        user = extractMetadataItemPtrFromURI<User>(uri);
+        if (!user)
             return true;
 #ifdef __WXGTK__
-        if (u->usernameM == wxT("SYSDBA"))
+        if (user->usernameM == wxT("SYSDBA"))
         {
             showWarningDialog(w, _("The password for the SYSDBA user should not be changed here."),
                 _("The appropriate way to change the password of the SYSDBA user is to run the changeDBAPassword.sh script in Firebird's bin directory.\n\nOtherwise the scripts will not be updated."),
@@ -264,34 +268,30 @@ bool UserPropertiesHandler::handleURI(URI& uri)
                 _("Do not show this information again"));
         }
 #endif
-        s = dynamic_cast<Server *>(u->getParent());
+        server = user->getServer();
+        if (!server)
+            return true;
     }
-    if (!s)
-        return true;
-
-    User tempusr(s);
-    if (addUser)
-        u = &tempusr;
 
     UserDialog d(w, title, addUser);
-    d.setUser(u);
+    d.setUser(user);
     if (d.ShowModal() == wxID_OK)
     {
         ProgressDialog pd(w, _("Connecting to Server..."), 1);
         pd.doShow();
         IBPP::Service svc;
-        if (!getService(s, svc, &pd, true)) // true = need SYSDBA password
+        if (!getService(server.get(), svc, &pd, true)) // true = need SYSDBA password
             return true;
 
         try
         {
-            IBPP::User user;
-            u->setIBPP(user);
+            IBPP::User u;
+            user->assignTo(u);
             if (addUser)
-                svc->AddUser(user);
+                svc->AddUser(u);
             else
-                svc->ModifyUser(user);
-            s->notifyObservers();
+                svc->ModifyUser(u);
+            server->notifyObservers();
         }
         catch(IBPP::Exception& e)
         {
@@ -320,10 +320,10 @@ bool DropUserHandler::handleURI(URI& uri)
         return false;
 
     wxWindow* w = getParentWindow(uri);
-    User* u = extractMetadataItemFromURI<User>(uri);
+    UserPtr u = extractMetadataItemPtrFromURI<User>(uri);
     if (!u || !w)
         return true;
-    Server* s = dynamic_cast<Server*>(u->getParent());
+    ServerPtr s = u->getServer();
     if (!s)
         return true;
 
@@ -334,12 +334,12 @@ bool DropUserHandler::handleURI(URI& uri)
     ProgressDialog pd(w, _("Connecting to Server..."), 1);
     pd.doShow();
     IBPP::Service svc;
-    if (!getService(s, svc, &pd, true)) // true = need SYSDBA password
+    if (!getService(s.get(), svc, &pd, true)) // true = need SYSDBA password
         return true;
 
     try
     {
-        svc->RemoveUser(wx2std(u->usernameM));
+        svc->RemoveUser(wx2std(u->getUsername()));
         s->notifyObservers();
     }
     catch(IBPP::Exception& e)

@@ -30,18 +30,15 @@
 #define FR_USER_H
 
 #include <ibpp.h>
+
+#include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
 
-class Server;
-
-class User: public MetadataItem
+class User: public MetadataItem,
+    public boost::enable_shared_from_this<User>
 {
-public:
-    User(Server *parent);
-    User(const IBPP::User& src, Server *parent);
-    void setIBPP(IBPP::User& dest) const;
-    bool operator<(const User& rhs) const;
-    virtual bool isSystem() const;
+private:
+    boost::weak_ptr<Server> serverM;
 
     wxString usernameM;
     wxString passwordM;
@@ -50,6 +47,30 @@ public:
     wxString lastnameM;
     uint32_t useridM;
     uint32_t groupidM;
+public:
+    User(ServerPtr server);
+    User(ServerPtr server, const IBPP::User& src);
+
+    ServerPtr getServer() const;
+    virtual bool isSystem() const;
+
+    wxString getUsername() const;
+    wxString getPassword() const;
+    wxString getFirstName() const;
+    wxString getMiddleName() const;
+    wxString getLastName() const;
+    uint32_t getUserId() const;
+    uint32_t getGroupId() const;
+
+    void setUsername(const wxString& value);
+    void setPassword(const wxString& value);
+    void setFirstName(const wxString& value);
+    void setMiddleName(const wxString& value);
+    void setLastName(const wxString& value);
+    void setUserId(uint32_t value);
+    void setGroupId(uint32_t value);
+
+    void assignTo(IBPP::User& dest) const;
 };
 //-----------------------------------------------------------------------------
 #endif

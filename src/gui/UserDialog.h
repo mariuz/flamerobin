@@ -32,14 +32,13 @@
 #include <wx/spinctrl.h>
 
 #include "gui/BaseDialog.h"
-
-class User;
+#include "metadata/MetadataClasses.h"
 //-----------------------------------------------------------------------------
 class UserDialog: public BaseDialog
 {
 private:
+    UserPtr userM;
     bool isNewUserM;
-    User* userM;
 
     wxStaticText* labelUserNameM;
     wxTextCtrl* textUserNameM;
@@ -69,7 +68,7 @@ protected:
 public:
     UserDialog(wxWindow* parent, const wxString& title, bool isNewUser);
 
-    void setUser(User* u);
+    void setUser(UserPtr user);
 private:
     // event handling
     enum {

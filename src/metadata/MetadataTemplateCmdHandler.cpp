@@ -361,16 +361,16 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
                 pi->doShow();
             }
 
-            UserList users = s->getUsers(pi);
+            UserPtrs users = s->getUsers(pi);
             if (users.empty())
                 return;
 
             bool firstItem = true;
-            for (UserList::iterator it = users.begin(); it != users.end();
+            for (UserPtrs::iterator it = users.begin(); it != users.end();
                 ++it)
             {
                 Local::foreachIteration(firstItem, tp, processedText, sep,
-                    cmdParams.all(2), &(*it));
+                    cmdParams.all(2), (*it).get());
             }
         }
         // add more collections here.
@@ -786,17 +786,17 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
             return;
 
         if (cmdParams[0] == wxT("username"))
-            processedText += tp->escapeChars(u->usernameM);
+            processedText += tp->escapeChars(u->getUsername());
         else if (cmdParams[0] == wxT("first_name"))
-            processedText += tp->escapeChars(u->firstnameM);
+            processedText += tp->escapeChars(u->getFirstName());
         else if (cmdParams[0] == wxT("middle_name"))
-            processedText += tp->escapeChars(u->middlenameM);
+            processedText += tp->escapeChars(u->getMiddleName());
         else if (cmdParams[0] == wxT("last_name"))
-            processedText += tp->escapeChars(u->lastnameM);
+            processedText += tp->escapeChars(u->getLastName());
         else if (cmdParams[0] == wxT("unix_user"))
-            processedText << u->useridM;
+            processedText << u->getUserId();
         else if (cmdParams[0] == wxT("unix_group"))
-            processedText << u->groupidM;
+            processedText << u->getGroupId();
     }
 }
 //-----------------------------------------------------------------------------

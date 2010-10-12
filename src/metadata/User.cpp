@@ -42,16 +42,18 @@
 #include "metadata/server.h"
 #include "metadata/User.h"
 //-----------------------------------------------------------------------------
-User::User(Server *parent)
+User::User(ServerPtr server)
     :MetadataItem()
 {
-    setParent((MetadataItem *)parent);
+    serverM = server;
+    setParent(server.get());
 }
 //-----------------------------------------------------------------------------
-User::User(const IBPP::User& src, Server *parent)
-    :MetadataItem(), useridM(src.userid), groupidM(src.groupid)
+User::User(ServerPtr server, const IBPP::User& src)
+    : MetadataItem(), useridM(src.userid), groupidM(src.groupid)
 {
-    setParent((MetadataItem *)parent);
+    serverM = server;
+    setParent(server.get());
     usernameM = std2wx(src.username);
     passwordM = std2wx(src.password);
     firstnameM = std2wx(src.firstname);
@@ -59,7 +61,110 @@ User::User(const IBPP::User& src, Server *parent)
     lastnameM = std2wx(src.lastname);
 }
 //-----------------------------------------------------------------------------
-void User::setIBPP(IBPP::User& dest) const
+ServerPtr User::getServer() const
+{
+    return serverM.lock();
+}
+//-----------------------------------------------------------------------------
+wxString User::getUsername() const
+{
+    return usernameM;
+}
+//-----------------------------------------------------------------------------
+wxString User::getPassword() const
+{
+    return passwordM;
+}
+//-----------------------------------------------------------------------------
+wxString User::getFirstName() const
+{
+    return firstnameM;
+}
+//-----------------------------------------------------------------------------
+wxString User::getMiddleName() const
+{
+    return middlenameM;
+}
+//-----------------------------------------------------------------------------
+wxString User::getLastName() const
+{
+    return lastnameM;
+}
+//-----------------------------------------------------------------------------
+uint32_t User::getUserId() const
+{
+    return useridM;
+}
+//-----------------------------------------------------------------------------
+uint32_t User::getGroupId() const
+{
+    return groupidM;
+}
+//-----------------------------------------------------------------------------
+void User::setUsername(const wxString& value)
+{
+    if (usernameM != value)
+    {
+        usernameM = value;
+        notifyObservers();
+    }
+}
+//-----------------------------------------------------------------------------
+void User::setPassword(const wxString& value)
+{
+    if (passwordM != value)
+    {
+        passwordM = value;
+        notifyObservers();
+    }
+}
+//-----------------------------------------------------------------------------
+void User::setFirstName(const wxString& value)
+{
+    if (firstnameM != value)
+    {
+        firstnameM = value;
+        notifyObservers();
+    }
+}
+//-----------------------------------------------------------------------------
+void User::setMiddleName(const wxString& value)
+{
+    if (middlenameM != value)
+    {
+        middlenameM = value;
+        notifyObservers();
+    }
+}
+//-----------------------------------------------------------------------------
+void User::setLastName(const wxString& value)
+{
+    if (lastnameM != value)
+    {
+        lastnameM = value;
+        notifyObservers();
+    }
+}
+//-----------------------------------------------------------------------------
+void User::setUserId(uint32_t value)
+{
+    if (useridM != value)
+    {
+        useridM = value;
+        notifyObservers();
+    }
+}
+//-----------------------------------------------------------------------------
+void User::setGroupId(uint32_t value)
+{
+    if (groupidM != value)
+    {
+        groupidM = value;
+        notifyObservers();
+    }
+}
+//-----------------------------------------------------------------------------
+void User::assignTo(IBPP::User& dest) const
 {
     dest.username = wx2std(usernameM);
     dest.password = wx2std(passwordM);
@@ -68,11 +173,6 @@ void User::setIBPP(IBPP::User& dest) const
     dest.middlename = wx2std(middlenameM);
     dest.userid = useridM;
     dest.groupid = groupidM;
-}
-//-----------------------------------------------------------------------------
-bool User::operator<(const User& rhs) const
-{
-    return usernameM < rhs.usernameM;
 }
 //-----------------------------------------------------------------------------
 bool User::isSystem() const
