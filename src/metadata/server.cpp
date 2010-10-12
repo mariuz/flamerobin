@@ -204,12 +204,12 @@ const wxString Server::getItemPath() const
     return wxT("");
 }
 //-----------------------------------------------------------------------------
-UserList* Server::getUsers(ProgressIndicator* progressind)
+UserList Server::getUsers(ProgressIndicator* progressind)
 {
-    usersM.clear();
+    UserList users;
     IBPP::Service svc;
     if (!::getService(this, svc, progressind, true))   // true = SYSDBA
-        return 0;
+        return users;
 
     std::vector<IBPP::User> usr;
     svc->GetUsers(usr);
@@ -217,11 +217,11 @@ UserList* Server::getUsers(ProgressIndicator* progressind)
         it != usr.end(); ++it)
     {
         User u(*it, this);
-        usersM.push_back(u);
+        users.push_back(u);
     }
 
-    std::sort(usersM.begin(), usersM.end());
-    return &usersM;
+    std::sort(users.begin(), users.end());
+    return users;
 }
 //-----------------------------------------------------------------------------
 void Server::setServiceCredentials(const wxString& user, const wxString& pass)

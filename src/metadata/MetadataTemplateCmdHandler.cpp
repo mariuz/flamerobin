@@ -361,12 +361,13 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
                 pi->doShow();
             }
 
-            UserList* usr = s->getUsers(pi);
-            if (!usr || !usr->size())
+            UserList users = s->getUsers(pi);
+            if (users.empty())
                 return;
 
             bool firstItem = true;
-            for (UserList::iterator it = usr->begin(); it != usr->end(); ++it)
+            for (UserList::iterator it = users.begin(); it != users.end();
+                ++it)
             {
                 Local::foreachIteration(firstItem, tp, processedText, sep,
                     cmdParams.all(2), &(*it));

@@ -51,7 +51,6 @@ private:
     wxString portM;
 
     DatabasePtrs databasesM;
-    UserList usersM;
 
     wxString serviceUserM;
     wxString servicePasswordM;
@@ -81,7 +80,7 @@ public:
     void setServiceCredentials(const wxString& user, const wxString& pass);
     void setServiceSysdbaPassword(const wxString& pass);
 
-    UserList* getUsers(ProgressIndicator* progressind);
+    UserList getUsers(ProgressIndicator* progressind);
 
     // setters/getters
     wxString getHostname() const;
