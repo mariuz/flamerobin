@@ -948,15 +948,9 @@ bool PrefDlgChooserSetting::parseProperty(wxXmlNode* xmln)
         wxString name(xmln->GetName());
         if (name == wxT("relation"))
         {
-            wxString value(getNodeContent(xmln, wxEmptyString));
-            unsigned long o;
-            if (value.ToULong(&o))
-            {
-                MetadataItem* m = MetadataItem::getObjectFromHandle(o);
-                relationM = dynamic_cast<Relation*>(m);
-            }
-            else
-                relationM = 0;
+            wxString handle(getNodeContent(xmln, wxEmptyString));
+            relationM = dynamic_cast<Relation*>(
+                MetadataItem::getObjectFromHandle(handle));
         }
     }
     return PrefDlgSetting::parseProperty(xmln);

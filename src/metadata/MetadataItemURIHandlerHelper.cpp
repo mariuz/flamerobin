@@ -43,10 +43,7 @@
 MetadataItem* MetadataItemURIHandlerHelper::doExtractMetadataItemFromURI(
     const URI& uri)
 {
-    wxString ms = uri.getParam(wxT("object_handle"));
-    unsigned long mo;
-    if (!ms.ToULong(&mo))
-        return 0;
-    return MetadataItem::getObjectFromHandle(mo);
+    return MetadataItem::getObjectFromHandle(
+        uri.getParam(wxT("object_handle")));
 }
 //-----------------------------------------------------------------------------

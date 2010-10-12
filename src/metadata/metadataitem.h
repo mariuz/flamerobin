@@ -34,9 +34,6 @@
 #include <algorithm>
 #include <vector>
 
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/shared_ptr.hpp>
-
 #include "core/ObjectWithHandle.h"
 #include "core/ProcessableObject.h"
 #include "core/Subject.h"
@@ -59,7 +56,6 @@ NodeType getTypeByName(wxString name);
 wxString getNameOfType(NodeType type);
 //-----------------------------------------------------------------------------
 class MetadataItem: public Subject, public ObjectWithHandle<MetadataItem>,
-    public boost::enable_shared_from_this<MetadataItem>,
     public ProcessableObject
 {
 private:
@@ -114,16 +110,6 @@ public:
 
     virtual void lockSubject();
     virtual void unlockSubject();
-
-    template <class T>
-    boost::shared_ptr<T> getObjectPtrFromHandle(Handle handle)
-    {
-        typename HandleMap::iterator it = handleMap.find(handle);
-        if (it == handleMap.end())
-            return boost::shared_ptr<T>();
-        MetadataItem* mi = it->second;
-        return boost::dynamic_pointer_cast<T>(mi->shared_from_this());
-    }
 
     void getDependencies(std::vector<Dependency>& list, bool ofObject);  // load from db
     void getDependencies(std::vector<Dependency>& list, bool ofObject,

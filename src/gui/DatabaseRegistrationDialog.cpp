@@ -52,8 +52,6 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent,
         const wxString& title, bool createDB, bool connectAs)
     : BaseDialog(parent, wxID_ANY, title)
 {
-    serverM = 0;
-    databaseM = 0;
     createM = createDB;
     connectAsM = connectAs;
     isDefaultNameM = true;
@@ -268,7 +266,7 @@ void DatabaseRegistrationDialog::setControlsProperties()
     button_ok->SetDefault();
 }
 //-----------------------------------------------------------------------------
-void DatabaseRegistrationDialog::setDatabase(Database* db)
+void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
 {
     wxASSERT(db);
     databaseM = db;
@@ -313,7 +311,7 @@ void DatabaseRegistrationDialog::setDatabase(Database* db)
     updateColors();
 }
 //-----------------------------------------------------------------------------
-void DatabaseRegistrationDialog::setServer(Server *s)
+void DatabaseRegistrationDialog::setServer(ServerPtr s)
 {
     wxASSERT(s);
     serverM = s;
@@ -370,8 +368,7 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
 //-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    if (serverM)
-        databaseM->setParent(serverM);
+    databaseM->setServer(serverM);
 
     // TODO: This needs to be reworked. If the order of method calls is important
     //       then they must not be provided as independent methods !!!

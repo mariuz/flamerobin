@@ -72,9 +72,8 @@ bool Server::getChildren(std::vector<MetadataItem*>& temp)
 {
     if (databasesM.empty())
         return false;
-    MetadataItemFromShared<Database> getMetadataItem;
     std::transform(databasesM.begin(), databasesM.end(),
-        std::back_inserter(temp), getMetadataItem);
+        std::back_inserter(temp), MetadataItemFromShared<Database>());
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -90,7 +89,7 @@ void Server::addDatabase(DatabasePtr database)
     if (database)
     {
         databasesM.push_back(database);
-        database->setParent(this);
+        database->setServer(shared_from_this());
         notifyObservers();
     }
 }
@@ -106,7 +105,7 @@ void Server::removeDatabase(DatabasePtr database)
     }
 }
 //-----------------------------------------------------------------------------
-void Server::createDatabase(Database* db, int pagesize, int dialect)
+void Server::createDatabase(DatabasePtr db, int pagesize, int dialect)
 {
     wxString extra_params;
     if (pagesize)

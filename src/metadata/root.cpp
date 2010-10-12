@@ -335,9 +335,8 @@ bool Root::getChildren(std::vector<MetadataItem *>& temp)
 {
     if (serversM.empty())
         return false;
-    MetadataItemFromShared<Server> getMetadataItem;
     std::transform(serversM.begin(), serversM.end(), std::back_inserter(temp),
-        getMetadataItem);
+        MetadataItemFromShared<Server>());
     return true;
 }
 //-----------------------------------------------------------------------------

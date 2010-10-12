@@ -47,8 +47,8 @@ protected:
     template<class T>
     boost::shared_ptr<T> extractMetadataItemPtrFromURI(const URI& uri)
     {
-        if (MetadataItem* mi = doExtractMetadataItemFromURI(uri))
-            return boost::dynamic_pointer_cast<T>(mi->shared_from_this());
+        if (T* t = extractMetadataItemFromURI<T>(uri))
+            return t->shared_from_this();
         return boost::shared_ptr<T>();
     }
 };
@@ -59,16 +59,6 @@ MetadataItemURIHandlerHelper::extractMetadataItemFromURI<MetadataItem>(
     const URI& uri)
 {
     return doExtractMetadataItemFromURI(uri);
-}
-//-----------------------------------------------------------------------------
-template<>
-inline MetadataItemPtr
-MetadataItemURIHandlerHelper::extractMetadataItemPtrFromURI<MetadataItem>(
-    const URI& uri)
-{
-    if (MetadataItem* mi = doExtractMetadataItemFromURI(uri))
-        return mi->shared_from_this();
-    return MetadataItemPtr();
 }
 //-----------------------------------------------------------------------------
 #endif // FR_METADATAITEMURIHANDLERHELPER_H

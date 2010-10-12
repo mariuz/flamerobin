@@ -28,13 +28,15 @@
 #ifndef FR_OBJECTWITHHANDLE_H
 #define FR_OBJECTWITHHANDLE_H
 //-----------------------------------------------------------------------------
+#include <wx/string.h>
+
 #include <map>
 
 template<class T>
 class ObjectWithHandle
 {
 public:
-    typedef unsigned Handle;
+    typedef unsigned long Handle;
 private:
     const Handle handleM;
 
@@ -94,6 +96,14 @@ public:
     {
         T* obj;
         return findObjectFromHandle(handle, obj) ? obj : 0;
+    }
+
+    static T* getObjectFromHandle(const wxString& handle)
+    {
+        Handle hv;
+        if (handle.ToULong(&hv))
+            return getObjectFromHandle(hv);
+        return 0;
     }
 };
 //-----------------------------------------------------------------------------

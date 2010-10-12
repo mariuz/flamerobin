@@ -31,6 +31,8 @@
 
 #include <vector>
 
+#include <boost/enable_shared_from_this.hpp>
+
 #include <ibpp.h>
 
 #include "metadata/collection.h"
@@ -41,7 +43,8 @@
 
 typedef std::vector<User> UserList;
 //-----------------------------------------------------------------------------
-class Server : public MetadataItem
+class Server : public MetadataItem,
+    public boost::enable_shared_from_this<Server>
 {
 private:
     wxString hostnameM;
@@ -70,7 +73,7 @@ public:
     DatabasePtrs::const_iterator begin() const;
     DatabasePtrs::const_iterator end() const;
 
-    void createDatabase(Database *db, int pagesize = 4096, int dialect = 3);
+    void createDatabase(DatabasePtr db, int pagesize = 4096, int dialect = 3);
 
     // returns *connected* service
     bool getService(IBPP::Service& svc, ProgressIndicator* progressind,

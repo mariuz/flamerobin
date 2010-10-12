@@ -32,6 +32,8 @@
 
 #include <map>
 
+#include <boost/enable_shared_from_this.hpp>
+
 #include <ibpp.h>
 
 #include "frtypes.h"
@@ -156,9 +158,11 @@ private:
     Mode modeM;
 };
 //-----------------------------------------------------------------------------
-class Database: public MetadataItem
+class Database: public MetadataItem,
+    public boost::enable_shared_from_this<Database>
 {
 private:
+    boost::weak_ptr<Server> serverM;
     IBPP::Database databaseM;
     MetadataLoader* metadataLoaderM;
 
@@ -282,7 +286,8 @@ public:
     void setEncryptedPassword(wxString value);
     void setRole(wxString value);
     virtual const wxString getTypeName() const;
-    Server *getServer() const;
+    ServerPtr getServer() const;
+    void setServer(ServerPtr server);
     // returns the complete connection wxString.
     wxString getConnectionString() const;
     // returns a candidate name based on the connection wxString. Example:

@@ -37,8 +37,8 @@ class FileTextControl;
 //-----------------------------------------------------------------------------
 class DatabaseRegistrationDialog: public BaseDialog {
 private:
-    Server* serverM;
-    Database* databaseM;
+    ServerPtr serverM;
+    DatabasePtr databaseM;
     bool createM;
     bool connectAsM;
     bool isDefaultNameM;
@@ -86,8 +86,8 @@ public:
         // a temporary solution, as we'll change the entire login scheme soon
         bool connectAs = false);
 
-    void setServer(Server* s); // needed to create new db
-    void setDatabase(Database* db);
+    void setServer(ServerPtr s); // needed to create new db
+    void setDatabase(DatabasePtr db);
 private:
     // event handling
     enum {

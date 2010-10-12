@@ -84,7 +84,7 @@ bool checkValidDatabase(Database* database)
     return false;
 }
 //-----------------------------------------------------------------------------
-bool checkValidServer(Server* server)
+bool checkValidServer(ServerPtr server)
 {
     if (server)
         return true;
@@ -98,14 +98,16 @@ Database* getDatabase(MetadataItem* mi)
     return (mi) ? mi->findDatabase() : 0;
 }
 //-----------------------------------------------------------------------------
-Server* getServer(MetadataItem* mi)
+ServerPtr getServer(MetadataItem* mi)
 {
-    if (!mi)
-        return 0;
-    if (Server* s = dynamic_cast<Server*>(mi))
-        return s;
-    Database* db = mi->findDatabase();
-    return (db) ? db->getServer() : 0;
+    if (mi)
+    {
+        if (Server* s = dynamic_cast<Server*>(mi))
+            return s->shared_from_this();
+        if (Database* db = mi->findDatabase())
+            return db->getServer();
+    }
+    return ServerPtr();
 }
 //-----------------------------------------------------------------------------
 //! helper class to enable drag and drop of database files to the tree ctrl
@@ -875,14 +877,14 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 {
-    Server* s = getServer(treeMainM->getSelectedMetadataItem());
+    ServerPtr s = getServer(treeMainM->getSelectedMetadataItem());
     if (!checkValidServer(s))
         return;
 
     DatabaseRegistrationDialog drd(this, _("Register Existing Database"));
     drd.setServer(s);
     DatabasePtr db(new Database());
-    drd.setDatabase(db.get());
+    drd.setDatabase(db);
 
     if (drd.ShowModal() == wxID_OK)
     {
@@ -894,14 +896,14 @@ void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRestoreIntoNewDatabase(wxCommandEvent& WXUNUSED(event))
 {
-    Server* s = getServer(treeMainM->getSelectedMetadataItem());
+    ServerPtr s = getServer(treeMainM->getSelectedMetadataItem());
     if (!checkValidServer(s))
         return;
 
     DatabaseRegistrationDialog drd(this, _("New database parameters"));
     drd.setServer(s);
     DatabasePtr db(new Database());
-    drd.setDatabase(db.get());
+    drd.setDatabase(db);
     if (drd.ShowModal() != wxID_OK)
         return;
 
@@ -919,21 +921,21 @@ void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
         return;
 
     DatabaseRegistrationDialog drd(this, _("Database Registration Info"));
-    drd.setDatabase(d);
+    drd.setDatabase(d->shared_from_this());
     if (drd.ShowModal())
         rootM->save();
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
 {
-    Server* s = getServer(treeMainM->getSelectedMetadataItem());
+    ServerPtr s = getServer(treeMainM->getSelectedMetadataItem());
     if (!checkValidServer(s))
         return;
 
     DatabaseRegistrationDialog drd(this, _("Create New Database"), true);
     drd.setServer(s);
     DatabasePtr db(new Database());
-    drd.setDatabase(db.get());
+    drd.setDatabase(db);
 
     if (drd.ShowModal() == wxID_OK)
     {
@@ -945,42 +947,34 @@ void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuManageUsers(wxCommandEvent& WXUNUSED(event))
 {
-    Server* s = getServer(treeMainM->getSelectedMetadataItem());
+    ServerPtr s = getServer(treeMainM->getSelectedMetadataItem());
     if (checkValidServer(s))
-        frameManager().showMetadataPropertyFrame(s);
+        frameManager().showMetadataPropertyFrame(s.get());
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUnRegisterServer(wxCommandEvent& WXUNUSED(event))
 {
-    Server* s = getServer(treeMainM->getSelectedMetadataItem());
+    ServerPtr s = getServer(treeMainM->getSelectedMetadataItem());
     if (!checkValidServer(s))
         return;
-
-    // FIXME: get shared pointer to concrete metadataitem class
-    ServerPtr srv(boost::static_pointer_cast<Server, MetadataItem>(
-        s->shared_from_this()));
 
     int res = showQuestionDialog(this, _("Do you really want to unregister this server?"),
         _("The registration information for the server and all its registered databases will be deleted. This operation can not be undone."),
         AdvancedMessageDialogButtonsOkCancel(_("Unregister")));
     if (res == wxOK)
     {
-        rootM->removeServer(srv);
+        rootM->removeServer(s);
         rootM->save();
     }
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuServerProperties(wxCommandEvent& WXUNUSED(event))
 {
-    Server* s = getServer(treeMainM->getSelectedMetadataItem());
+    ServerPtr s = getServer(treeMainM->getSelectedMetadataItem());
     if (!checkValidServer(s))
         return;
 
-    // FIXME: get shared pointer to concrete metadataitem class
-    ServerPtr srv(boost::static_pointer_cast<Server, MetadataItem>(
-        s->shared_from_this()));
-
-    ServerRegistrationDialog srd(this, _("Server Registration Info"), srv);
+    ServerRegistrationDialog srd(this, _("Server Registration Info"), s);
     if (srd.ShowModal() == wxID_OK)
         rootM->save();
 }
@@ -1018,17 +1012,11 @@ void MainFrame::unregisterDatabase(Database* database)
     wxCHECK_RET(database,
         wxT("Cannot unregister unassigned database"));
 
-    Server* server = database->getServer();
+    ServerPtr server = database->getServer();
     wxCHECK_RET(server,
         wxT("Cannot unregister database without server"));
 
-    // FIXME: get shared pointer to concrete metadataitem classes
-    DatabasePtr db(boost::static_pointer_cast<Database, MetadataItem>(
-        database->shared_from_this()));
-    ServerPtr srv(boost::static_pointer_cast<Server, MetadataItem>(
-        server->shared_from_this()));
-
-    srv->removeDatabase(db);
+    server->removeDatabase(database->shared_from_this());
     rootM->save();
 }
 //-----------------------------------------------------------------------------
@@ -1051,8 +1039,8 @@ void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuGetServerVersion(wxCommandEvent& WXUNUSED(event))
 {
-    Server* s = getServer(treeMainM->getSelectedMetadataItem());
-    if (!s)
+    ServerPtr s = getServer(treeMainM->getSelectedMetadataItem());
+    if (!checkValidServer(s))
         return;
 
     std::string version;
@@ -1063,7 +1051,7 @@ void MainFrame::OnMenuGetServerVersion(wxCommandEvent& WXUNUSED(event))
         ProgressDialog pd(this, _("Retrieving server version"), 1);
         pd.doShow();
         IBPP::Service svc;
-        if (!getService(s, svc, &pd, false))    // false = no need for sysdba
+        if (!getService(s.get(), svc, &pd, false))    // false = no need for sysdba
             return;
         svc->GetVersion(version);
     }
@@ -1160,7 +1148,7 @@ void MainFrame::OnMenuConnectAs(wxCommandEvent& WXUNUSED(event))
 
     DatabaseRegistrationDialog drd(this, _("Connect as..."), false, true);
     d->prepareTemporaryCredentials();
-    drd.setDatabase(d);
+    drd.setDatabase(d->shared_from_this());
     if (wxID_OK != drd.ShowModal() || !connect())
         d->resetCredentials();
 }
@@ -1604,7 +1592,7 @@ void MainFrame::OnMenuRecreateDatabase(wxCommandEvent& WXUNUSED(event))
         // use the dialog as some information (charset and page size) is
         // not necessarily available, and the user may want to change it too
         DatabaseRegistrationDialog drd(this, _("Recreate Database"), true);
-        drd.setDatabase(d);
+        drd.setDatabase(d->shared_from_this());
         drd.setServer(d->getServer());
         if (drd.ShowModal() == wxID_OK)
             treeMainM->selectMetadataItem(d);
@@ -1665,13 +1653,13 @@ const wxString MainFrame::getName() const
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateUnRegisterServer(wxUpdateUIEvent& event)
 {
-    Server* s = getServer(treeMainM->getSelectedMetadataItem());
+    ServerPtr s = getServer(treeMainM->getSelectedMetadataItem());
     event.Enable(s != 0 && !s->hasConnectedDatabase());
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateIfServerSelected(wxUpdateUIEvent& event)
 {
-    Server* s = getServer(treeMainM->getSelectedMetadataItem());
+    ServerPtr s = getServer(treeMainM->getSelectedMetadataItem());
     event.Enable(s != 0);
 }
 //-----------------------------------------------------------------------------
@@ -1726,7 +1714,7 @@ bool MainFrame::openUnregisteredDatabase(const wxString& dbpath)
     database->setRawPassword(iscPassword);
 
     DatabaseRegistrationDialog drd(this, _("Database Connection Settings"));
-    drd.setDatabase(database.get());
+    drd.setDatabase(database);
     if (drd.ShowModal() == wxID_OK)
     {
         rootM->addUnregisteredDatabase(database);

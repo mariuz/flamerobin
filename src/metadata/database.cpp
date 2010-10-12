@@ -1364,9 +1364,15 @@ void Database::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitDatabase(*this);
 }
 //-----------------------------------------------------------------------------
-Server* Database::getServer() const
+ServerPtr Database::getServer() const
 {
-    return dynamic_cast<Server*>(getParentObjectOfType(ntServer));
+    return serverM.lock();
+}
+//-----------------------------------------------------------------------------
+void Database::setServer(ServerPtr server)
+{
+    serverM = server;
+    setParent(server.get());
 }
 //-----------------------------------------------------------------------------
 wxString Database::getConnectionString() const

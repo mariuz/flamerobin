@@ -681,9 +681,8 @@ bool Relation::getChildren(std::vector<MetadataItem*>& temp)
 {
     if (columnsM.empty())
         return false;
-    MetadataItemFromShared<Column> getMetadataItem;
     std::transform(columnsM.begin(), columnsM.end(), std::back_inserter(temp),
-        getMetadataItem);
+        MetadataItemFromShared<Column>());
     return true;
 }
 //-----------------------------------------------------------------------------
