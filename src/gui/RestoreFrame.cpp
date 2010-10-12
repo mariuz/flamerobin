@@ -331,7 +331,7 @@ void RestoreFrame::doReadConfigSettings(const wxString& prefix)
     // select default pagesize of 1024 if invalid selindex
     choice_pagesize->SetSelection(selindex >= 0 ? selindex : 0);
 
-    std::vector<wxString> flags;
+    wxArrayString flags;
     config().getValue(prefix + Config::pathSeparator + wxT("options"), flags);
     if (!flags.empty())
     {
@@ -357,7 +357,7 @@ void RestoreFrame::doWriteConfigSettings(const wxString& prefix) const
     config().setValue(prefix + Config::pathSeparator + wxT("pagesize"),
         choice_pagesize->GetStringSelection());
 
-    std::vector<wxString> flags;
+    wxArrayString flags;
     if (checkbox_replace->IsChecked())
         flags.push_back(wxT("replace"));
     if (checkbox_deactivate->IsChecked())

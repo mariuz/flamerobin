@@ -297,7 +297,7 @@ void BackupFrame::updateControls()
 void BackupFrame::doReadConfigSettings(const wxString& prefix)
 {
     BackupRestoreBaseFrame::doReadConfigSettings(prefix);
-    std::vector<wxString> flags;
+    wxArrayString flags;
     config().getValue(prefix + Config::pathSeparator + wxT("options"), flags);
     if (!flags.empty())
     {
@@ -320,7 +320,7 @@ void BackupFrame::doReadConfigSettings(const wxString& prefix)
 void BackupFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BackupRestoreBaseFrame::doWriteConfigSettings(prefix);
-    std::vector<wxString> flags;
+    wxArrayString flags;
     if (checkbox_checksum->IsChecked())
         flags.push_back(wxT("ignore_checksums"));
     if (checkbox_limbo->IsChecked())

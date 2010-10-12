@@ -28,6 +28,7 @@
 #ifndef FR_CONFIG_H
 #define FR_CONFIG_H
 
+#include "wx/arrstr.h"
 #include <wx/stdpaths.h>
 #include <wx/filename.h>
 
@@ -105,7 +106,7 @@ public:
     bool getValue(wxString key, double& value);
     bool getValue(wxString key, bool& value);
     bool getValue(wxString key, StorageGranularity& value);
-    bool getValue(wxString key, std::vector<wxString>& value);
+    bool getValue(wxString key, wxArrayString& value);
 
     // returns the value for key if it exists, or default value if it doesn't.
     template <typename T>
@@ -124,7 +125,7 @@ public:
     bool setValue(wxString key, double value);
     bool setValue(wxString key, bool value);
     bool setValue(wxString key, StorageGranularity value);
-    bool setValue(wxString key, std::vector<wxString> value);
+    bool setValue(wxString key, const wxArrayString& value);
 };
 //-----------------------------------------------------------------------------
 //! Class used to contain all FlameRobin and database configuration info sets.

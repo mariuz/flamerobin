@@ -42,6 +42,7 @@
 #include <wx/ffile.h>
 #include <wx/file.h>
 
+#include "config/Config.h"
 #include "controls/LogTextControl.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
@@ -49,8 +50,6 @@
 #include "gui/MultilineEnterDialog.h"
 #include "gui/StyleGuide.h"
 #include "metadata/database.h"
-//-----------------------------------------------------------------------------
-using namespace std;
 //-----------------------------------------------------------------------------
 class EventLogControl: public LogTextControl
 {
@@ -81,10 +80,9 @@ void EventLogControl::logEvent(const wxString& name, int count)
 }
 //-----------------------------------------------------------------------------
 EventWatcherFrame::EventWatcherFrame(wxWindow *parent, Database *db)
-    : BaseFrame(parent, -1, wxEmptyString), databaseM(db)
+    : BaseFrame(parent, -1, wxEmptyString), databaseM(db), eventsM(0)
 {
     timerM.SetOwner(this, ID_timer);
-    eventsM = 0;
 
     setIdString(this, getFrameId(db));
     db->attachObserver(this);    // observe database object
@@ -225,12 +223,12 @@ void EventWatcherFrame::defineMonitoredEvents()
         setTimerActive(false);
 
         // get a list of events to be monitored
-        vector<string> events;
+        std::vector<std::string> events;
         for (int i = 0; i < (int)listbox_monitored->GetCount(); i++)
             events.push_back(wx2std(listbox_monitored->GetString(i)));
 
         eventsM->Clear();
-        vector<string>::const_iterator it;
+        std::vector<std::string>::const_iterator it;
         for (it = events.begin(); it != events.end(); it++)
         {
             eventsM->Add(*it, this);
@@ -292,6 +290,22 @@ void EventWatcherFrame::update()
 {
     if (!databaseM->isConnected())
         Close();
+}
+//-----------------------------------------------------------------------------
+void EventWatcherFrame::doReadConfigSettings(const wxString& prefix)
+{
+    BaseFrame::doReadConfigSettings(prefix);
+    wxArrayString events;
+    config().getValue(prefix + Config::pathSeparator + wxT("events"), events);
+    listbox_monitored->Append(events);
+    updateControls();
+}
+//-----------------------------------------------------------------------------
+void EventWatcherFrame::doWriteConfigSettings(const wxString& prefix) const
+{
+    BaseFrame::doWriteConfigSettings(prefix);
+    config().setValue(prefix + Config::pathSeparator + wxT("events"),
+        listbox_monitored->GetStrings());
 }
 //-----------------------------------------------------------------------------
 const wxString EventWatcherFrame::getName() const

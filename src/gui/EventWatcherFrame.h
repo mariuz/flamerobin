@@ -45,7 +45,9 @@
 class Database;
 class EventLogControl;
 //-----------------------------------------------------------------------------
-class EventWatcherFrame : public BaseFrame, public IBPP::EventInterface, public Observer
+class EventWatcherFrame : public BaseFrame,
+    public IBPP::EventInterface,
+    public Observer
 {
 private:
     Database* databaseM;
@@ -73,9 +75,11 @@ private:
     bool setTimerActive(bool active);
     void updateMonitoringActive();
 
-    virtual void ibppEventHandler(IBPP::Events events, const std::string& name,
-        int count);
+    virtual void ibppEventHandler(IBPP::Events events,
+        const std::string& name, int count);
 protected:
+    virtual void doReadConfigSettings(const wxString& prefix);
+    virtual void doWriteConfigSettings(const wxString& prefix) const;
     virtual const wxString getName() const;
     virtual void update();
 public:

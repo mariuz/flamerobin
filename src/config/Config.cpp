@@ -42,9 +42,6 @@
 #include "wx/fileconf.h"
 #include "wx/filename.h"
 
-#include <fstream>
-#include <sstream>
-
 #include "config/Config.h"
 #ifdef HAVE_FRCONFIG_H
     #include "frconfig.h"
@@ -128,8 +125,10 @@ bool Config::getValue(wxString key, wxString& value)
         if (separatorPosInPath == wxString::npos)
             return getValue(keyPart, value);
         else
+        {
             return getValue(pathPart.substr(0, separatorPosInPath) +
                 pathSeparator + keyPart, value);
+        }
     }
 }
 //-----------------------------------------------------------------------------
@@ -181,7 +180,7 @@ bool Config::getValue(wxString key, StorageGranularity& value)
     return ret;
 }
 //-----------------------------------------------------------------------------
-bool Config::getValue(wxString key, vector<wxString>& value)
+bool Config::getValue(wxString key, wxArrayString& value)
 {
     wxString s;
     if (!getValue(key, s))
@@ -241,10 +240,11 @@ bool Config::setValue(wxString key, StorageGranularity value)
     return setValue(key, int(value));
 }
 //-----------------------------------------------------------------------------
-bool Config::setValue(wxString key, vector<wxString> value)
+bool Config::setValue(wxString key, const wxArrayString& value)
 {
     wxString s;
-    for (vector<wxString>::iterator it = value.begin(); it != value.end(); it++)
+    for (wxArrayString::const_iterator it = value.begin(); it != value.end();
+        it++)
     {
         if (it != value.begin())
             s += wxT(",");
