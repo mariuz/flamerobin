@@ -47,9 +47,7 @@ private:
     enum { ptSummary, ptConstraints, ptDependencies, ptTriggers,
         ptTableIndices, ptDDL, ptPrivileges } pageTypeM;
 
-    enum { HtmlWindowID = 42 };
-
-    MetadataItem *objectM;
+    MetadataItem* objectM;
     bool htmlReloadRequestedM;
     PrintableHtmlWindow* html_window;
 
@@ -69,13 +67,13 @@ public:
     void processHtmlFile(wxString fileName);
     void setPage(const wxString& type);
     void showIt();
-    MetadataItemPropertiesFrame *getParentFrame();
+    MetadataItemPropertiesFrame* getParentFrame();
 private:
     // event handling
-    void OnIdle(wxIdleEvent& event);
-
+    void OnCloseFrame(wxCommandEvent& event);
     void OnHtmlCellHover(wxHtmlCellEvent &event);
-    DECLARE_EVENT_TABLE()
+    void OnIdle(wxIdleEvent& event);
+    void OnRefresh(wxCommandEvent& event);
 };
 //-----------------------------------------------------------------------------
 class MetadataItemPropertiesFrame: public BaseFrame
@@ -99,22 +97,19 @@ public:
         auiManagerM.UnInit();
     }
 
-    enum { ID_notebook = 43 };
-
     void showPanel(wxWindow *panel, const wxString& title);
     void removePanel(wxWindow *panel);
     void setTabTitle(wxWindow *panel, const wxString& title);
 
     //MetadataItemPropertiesPanel *getItemPanel(MetadataItem *item);
-
-    void OnClose(wxCloseEvent& event);
-    void OnNotebookPageClose(wxAuiNotebookEvent& event);
-    void OnNotebookPageChanged(wxAuiNotebookEvent& event);
 private:
     wxAuiManager auiManagerM;
     wxAuiNotebook* notebookM;
 
-    DECLARE_EVENT_TABLE()
+    // event handling
+    void OnClose(wxCloseEvent& event);
+    void OnNotebookPageClose(wxAuiNotebookEvent& event);
+    void OnNotebookPageChanged(wxAuiNotebookEvent& event);
 };
 //-----------------------------------------------------------------------------
 #endif // FR_METADATAITEMPROPERTIESFRAME_H

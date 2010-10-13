@@ -41,6 +41,7 @@
 #include <wx/clipbrd.h>
 #include <wx/file.h>
 #include <wx/filedlg.h>
+#include <wx/platform.h>
 #include <wx/tipwin.h>
 
 #include <fstream>
@@ -94,15 +95,17 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
     }
     SetIcon(icon);
 
-    notebookM = new wxAuiNotebook(this, ID_notebook, wxDefaultPosition,
+    notebookM = new wxAuiNotebook(this, wxID_ANY, wxDefaultPosition,
         wxDefaultSize, wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_WINDOWLIST_BUTTON
-        | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER );
+        | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
 
     auiManagerM.SetManagedWindow(this);
     auiManagerM.AddPane(notebookM,
         wxAuiPaneInfo().CenterPane().PaneBorder(false));
     auiManagerM.Update();
 
+    Connect(wxEVT_CLOSE_WINDOW,
+        wxCloseEventHandler(MetadataItemPropertiesFrame::OnClose));
     Connect(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CLOSE, wxAuiNotebookEventHandler(
         MetadataItemPropertiesFrame::OnNotebookPageClose), NULL, this);
     Connect(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGED, wxAuiNotebookEventHandler(
@@ -200,7 +203,7 @@ MetadataItemPropertiesPanel::MetadataItemPropertiesPanel(
         return;
     }
 
-    html_window = new PrintableHtmlWindow(this, HtmlWindowID);
+    html_window = new PrintableHtmlWindow(this, wxID_ANY);
     parent->SetTitle(object->getName_());
 
     wxBoxSizer* bSizer2 = new wxBoxSizer( wxVERTICAL );
@@ -216,6 +219,25 @@ MetadataItemPropertiesPanel::MetadataItemPropertiesPanel(
     // request initial rendering
     requestLoadPage(true);
     objectM->attachObserver(this);
+
+    wxAcceleratorEntry entries[4];
+    entries[0].Set(wxACCEL_CMD, (int) 'W', wxID_CLOSE_FRAME);
+    entries[1].Set(wxACCEL_CMD, (int) 'R', wxID_REFRESH);
+    // MSW only
+    entries[2].Set(wxACCEL_CTRL, WXK_F4, wxID_CLOSE_FRAME);
+    entries[3].Set(wxACCEL_NORMAL, WXK_F5, wxID_REFRESH);
+
+    bool isMSW =
+        (wxPlatformInfo::Get().GetOperatingSystemId() & wxOS_WINDOWS) != 0;
+    wxAcceleratorTable acct(isMSW ? 4 : 2, entries);
+    SetAcceleratorTable(acct);
+
+    Connect(wxID_CLOSE_FRAME, wxEVT_COMMAND_MENU_SELECTED,
+        wxCommandEventHandler(MetadataItemPropertiesPanel::OnCloseFrame));
+    Connect(wxID_ANY, wxEVT_COMMAND_HTML_CELL_HOVER,
+        wxHtmlCellEventHandler(MetadataItemPropertiesPanel::OnHtmlCellHover));
+    Connect(wxID_REFRESH, wxEVT_COMMAND_MENU_SELECTED,
+        wxCommandEventHandler(MetadataItemPropertiesPanel::OnRefresh));
 }
 //-----------------------------------------------------------------------------
 MetadataItemPropertiesPanel::~MetadataItemPropertiesPanel()
@@ -225,8 +247,7 @@ MetadataItemPropertiesPanel::~MetadataItemPropertiesPanel()
 //-----------------------------------------------------------------------------
 void MetadataItemPropertiesPanel::showIt()
 {
-    MetadataItemPropertiesFrame *f = getParentFrame();
-    if (f)
+    if (MetadataItemPropertiesFrame* f = getParentFrame())
         f->showPanel(this, objectM->getName_());
 }
 //-----------------------------------------------------------------------------
@@ -296,6 +317,7 @@ void MetadataItemPropertiesPanel::loadPage()
 void MetadataItemPropertiesPanel::processHtmlFile(wxString fileName)
 {
     ProgressDialog pd(this, wxT("Processing template..."));
+    pd.doShow();
 
     wxString htmlpage;
     HtmlTemplateProcessor tp(objectM, this);
@@ -307,9 +329,9 @@ void MetadataItemPropertiesPanel::processHtmlFile(wxString fileName)
     html_window->Scroll(x, y);                 // restore scroll position
 
     // set title
-    if (getParentFrame())
+    if (MetadataItemPropertiesFrame* pf = getParentFrame())
     {
-        getParentFrame()->setTabTitle(this, objectM->getName_() + wxT(": ")
+        pf->setTabTitle(this, objectM->getName_() + wxT(": ")
             + html_window->GetOpenedPageTitle());
     }
 }
@@ -322,20 +344,20 @@ void MetadataItemPropertiesPanel::removeSubject(Subject* subject)
     if (subject == objectM)
     {
         objectM = 0;
-        MetadataItemPropertiesFrame *f = getParentFrame();
-        if (f)
+        if (MetadataItemPropertiesFrame* f = getParentFrame())
             f->removePanel(this);
     }
 }
 //-----------------------------------------------------------------------------
 MetadataItemPropertiesFrame* MetadataItemPropertiesPanel::getParentFrame()
 {
-    for (wxWindow *w = GetParent(); w; w = w->GetParent())
+    for (wxWindow* w = GetParent(); w; w = w->GetParent())
     {
-        MetadataItemPropertiesFrame *f = dynamic_cast<
-            MetadataItemPropertiesFrame *>(w);
-        if (f)
+        if (MetadataItemPropertiesFrame* f =
+            dynamic_cast<MetadataItemPropertiesFrame*>(w))
+        {
             return f;
+        }
     }
     return 0;
 }
@@ -381,8 +403,7 @@ void MetadataItemPropertiesPanel::update()
     if (db && !db->isConnected())
     {
         objectM = 0;
-        MetadataItemPropertiesFrame* f = getParentFrame();
-        if (f)
+        if (MetadataItemPropertiesFrame* f = getParentFrame())
             f->Close();
 
             // MB: This code used to use:
@@ -426,14 +447,15 @@ void MetadataItemPropertiesPanel::update()
     requestLoadPage(false);
 }
 //-----------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(MetadataItemPropertiesPanel, wxPanel)
-    EVT_HTML_CELL_HOVER(MetadataItemPropertiesPanel::HtmlWindowID,
-        MetadataItemPropertiesPanel::OnHtmlCellHover)
-END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(MetadataItemPropertiesFrame, BaseFrame)
-    EVT_CLOSE(MetadataItemPropertiesFrame::OnClose)
-END_EVENT_TABLE()
+void MetadataItemPropertiesFrame::OnClose(wxCloseEvent& event)
+{
+    Disconnect(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CLOSE, wxAuiNotebookEventHandler(
+        MetadataItemPropertiesFrame::OnNotebookPageClose), NULL, this);
+    Disconnect(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGED,
+        wxAuiNotebookEventHandler(
+        MetadataItemPropertiesFrame::OnNotebookPageChanged), NULL, this);
+    BaseFrame::OnClose(event);
+}
 //-----------------------------------------------------------------------------
 // when last tab is closed, close the frame
 void MetadataItemPropertiesFrame::OnNotebookPageClose(wxAuiNotebookEvent&
@@ -458,22 +480,10 @@ void MetadataItemPropertiesFrame::OnNotebookPageChanged(wxAuiNotebookEvent&
         SetTitle(databaseNameM + wxT(" - ") + notebookM->GetPageText(sel));
 }
 //-----------------------------------------------------------------------------
-void MetadataItemPropertiesFrame::OnClose(wxCloseEvent& event)
+void MetadataItemPropertiesPanel::OnCloseFrame(wxCommandEvent& WXUNUSED(event))
 {
-    Disconnect(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CLOSE, wxAuiNotebookEventHandler(
-        MetadataItemPropertiesFrame::OnNotebookPageClose), NULL, this);
-    Disconnect(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGED,
-        wxAuiNotebookEventHandler(
-        MetadataItemPropertiesFrame::OnNotebookPageChanged), NULL, this);
-    BaseFrame::OnClose(event);
-}
-//-----------------------------------------------------------------------------
-void MetadataItemPropertiesPanel::OnIdle(wxIdleEvent& WXUNUSED(event))
-{
-    Disconnect(wxID_ANY, wxEVT_IDLE);
-    wxBusyCursor bc;
-    htmlReloadRequestedM = false;
-    loadPage();
+    if (MetadataItemPropertiesFrame* f = getParentFrame())
+        f->removePanel(this);
 }
 //-----------------------------------------------------------------------------
 void MetadataItemPropertiesPanel::OnHtmlCellHover(wxHtmlCellEvent& event)
@@ -502,6 +512,25 @@ void MetadataItemPropertiesPanel::OnHtmlCellHover(wxHtmlCellEvent& event)
         wxTipWindow *tw = new wxTipWindow(this, uri.action);
         tw->SetBoundingRect(r);
     }
+}
+//-----------------------------------------------------------------------------
+void MetadataItemPropertiesPanel::OnIdle(wxIdleEvent& WXUNUSED(event))
+{
+    Disconnect(wxID_ANY, wxEVT_IDLE);
+    wxBusyCursor bc;
+    htmlReloadRequestedM = false;
+    loadPage();
+}
+//-----------------------------------------------------------------------------
+void MetadataItemPropertiesPanel::OnRefresh(wxCommandEvent& WXUNUSED(event))
+{
+    if (objectM)
+        objectM->invalidate();
+    // with this set to false updates to the same page do not show the
+    // "Please wait while the data is being loaded..." temporary page
+    // this results in less flicker, but may also seem less responsive
+    requestLoadPage(false);
+    SetFocus();
 }
 //-----------------------------------------------------------------------------
 //! PageHandler class
