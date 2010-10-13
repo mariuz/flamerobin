@@ -332,7 +332,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
 
             SubjectLocker locker(p);
             p->ensureChildrenLoaded();
-            bool isOut = (cmdParams[0] == wxT("output"));
+            bool isOut = (cmdParams[2] == wxT("output"));
             bool firstItem = true;
             for (ParameterPtrs::iterator it = p->begin(); it != p->end(); ++it)
             {
