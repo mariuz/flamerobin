@@ -260,7 +260,7 @@ bool UserPropertiesHandler::handleURI(URI& uri)
         if (!user)
             return true;
 #ifdef __WXGTK__
-        if (user->usernameM == wxT("SYSDBA"))
+        if (user->getUsername() == wxT("SYSDBA"))
         {
             showWarningDialog(w, _("The password for the SYSDBA user should not be changed here."),
                 _("The appropriate way to change the password of the SYSDBA user is to run the changeDBAPassword.sh script in Firebird's bin directory.\n\nOtherwise the scripts will not be updated."),

@@ -204,6 +204,13 @@ const wxString Server::getItemPath() const
     return wxT("");
 }
 //-----------------------------------------------------------------------------
+struct SortUsers
+{
+    bool operator() (UserPtr user1, UserPtr user2)
+    {
+        return user1->getUsername() < user2->getUsername();
+    }
+};
 UserPtrs Server::getUsers(ProgressIndicator* progressind)
 {
     usersM.clear();
@@ -220,13 +227,6 @@ UserPtrs Server::getUsers(ProgressIndicator* progressind)
         usersM.push_back(u);
     }
 
-    struct SortUsers
-    {
-        bool operator() (UserPtr user1, UserPtr user2)
-        {
-            return user1->getUsername() < user2->getUsername();
-        }
-    };
 
     std::sort(usersM.begin(), usersM.end(), SortUsers());
     return usersM;
