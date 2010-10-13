@@ -179,15 +179,15 @@ void BackupThread::logProgress(wxString& msg)
         frameM->threadOutputMsg(msg, BackupRestoreBaseFrame::progress_message);
 }
 //-----------------------------------------------------------------------------
-BackupFrame::BackupFrame(wxWindow* parent, Database* db)
+BackupFrame::BackupFrame(wxWindow* parent, DatabasePtr db)
     : BackupRestoreBaseFrame(parent, db)
 {
     setIdString(this, getFrameId(db));
 
-    wxString s;
-    s.Printf(_("Backup Database \"%s:%s\""),
-        serverM->getName_().c_str(), databaseM->getName_().c_str());
-    SetTitle(s);
+    wxString databaseName(db->getName_());
+    wxString serverName(db->getServer()->getName_());
+    SetTitle(wxString::Format(_("Backup Database \"%s:%s\""),
+        serverName.c_str(), databaseName.c_str()));
 
     createControls();
     layoutControls();
@@ -282,7 +282,7 @@ void BackupFrame::layoutControls()
 //-----------------------------------------------------------------------------
 void BackupFrame::updateControls()
 {
-    bool running = threadM != 0;
+    bool running = getThreadRunning();
     button_browse->Enable(!running);
     text_ctrl_filename->Enable(!running);
     checkbox_checksum->Enable(!running);
@@ -341,7 +341,8 @@ const wxString BackupFrame::getName() const
     return wxT("BackupFrame");
 }
 //-----------------------------------------------------------------------------
-wxString BackupFrame::getFrameId(Database* db)
+/*static*/
+wxString BackupFrame::getFrameId(DatabasePtr db)
 {
     if (db)
         return wxString(wxT("BackupFrame/") + db->getItemPath());
@@ -349,7 +350,7 @@ wxString BackupFrame::getFrameId(Database* db)
         return wxEmptyString;
 }
 //-----------------------------------------------------------------------------
-BackupFrame* BackupFrame::findFrameFor(Database* db)
+BackupFrame* BackupFrame::findFrameFor(DatabasePtr db)
 {
     BaseFrame* bf = frameFromIdString(getFrameId(db));
     if (!bf)
@@ -379,8 +380,15 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     verboseMsgsM = checkbox_showlog->IsChecked();
     clearLog();
 
-    wxString username = databaseM->getUsername();
-    wxString password = databaseM->getDecryptedPassword();
+    DatabasePtr database = getDatabase();
+    wxCHECK_RET(database,
+        wxT("Cannot backup unassigned database"));
+    ServerPtr server = database->getServer();
+    wxCHECK_RET(server,
+        wxT("Cannot backup database without assigned server"));
+
+    wxString username = database->getUsername();
+    wxString password = database->getDecryptedPassword();
     if (password.empty())
     {
         UsernamePasswordDialog upd(this, _("Database Credentials"),
@@ -409,10 +417,10 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     if (checkbox_extern->IsChecked())
         flags |= (int)IBPP::brConvertExtTables;
 
-    BackupThread* thread = new BackupThread(this,
-        serverM->getConnectionString(), username, password,
-        databaseM->getPath(), text_ctrl_filename->GetValue(),
-        (IBPP::BRF)flags);
+    std::auto_ptr<wxThread> thread(new BackupThread(this,
+        server->getConnectionString(), username, password,
+        database->getPath(), text_ctrl_filename->GetValue(),
+        (IBPP::BRF)flags));
     startThread(thread);
     updateControls();
 }

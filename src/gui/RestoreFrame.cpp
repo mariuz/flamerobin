@@ -182,15 +182,15 @@ void RestoreThread::logProgress(wxString& msg)
         frameM->threadOutputMsg(msg, BackupRestoreBaseFrame::progress_message);
 }
 //-----------------------------------------------------------------------------
-RestoreFrame::RestoreFrame(wxWindow* parent, Database* db)
+RestoreFrame::RestoreFrame(wxWindow* parent, DatabasePtr db)
     : BackupRestoreBaseFrame(parent, db)
 {
     setIdString(this, getFrameId(db));
 
-    wxString s;
-    s.Printf(_("Restore Database \"%s:%s\""),
-        serverM->getName_().c_str(), databaseM->getName_().c_str());
-    SetTitle(s);
+    wxString databaseName(db->getName_());
+    wxString serverName(db->getServer()->getName_());
+    SetTitle(wxString::Format(_("Restore Database \"%s:%s\""),
+        serverName.c_str(), databaseName.c_str()));
 
     createControls();
     layoutControls();
@@ -306,7 +306,7 @@ void RestoreFrame::layoutControls()
 //-----------------------------------------------------------------------------
 void RestoreFrame::updateControls()
 {
-    bool running = threadM != 0;
+    bool running = getThreadRunning();
     button_browse->Enable(!running);
     text_ctrl_filename->Enable(!running);
     checkbox_replace->Enable(!running);
@@ -316,7 +316,9 @@ void RestoreFrame::updateControls()
     checkbox_commit->Enable(!running);
     checkbox_space->Enable(!running);
     choice_pagesize->Enable(!running);
-    button_start->Enable(!running && !text_ctrl_filename->GetValue().empty());
+    DatabasePtr db = getDatabase();
+    button_start->Enable(!running && !text_ctrl_filename->GetValue().empty()
+        && db && !db->isConnected());
 }
 //-----------------------------------------------------------------------------
 void RestoreFrame::doReadConfigSettings(const wxString& prefix)
@@ -378,7 +380,8 @@ const wxString RestoreFrame::getName() const
     return wxT("RestoreFrame");
 }
 //-----------------------------------------------------------------------------
-wxString RestoreFrame::getFrameId(Database* db)
+/*static*/
+wxString RestoreFrame::getFrameId(DatabasePtr db)
 {
     if (db)
         return wxString(wxT("RestoreFrame/") + db->getItemPath());
@@ -386,7 +389,7 @@ wxString RestoreFrame::getFrameId(Database* db)
         return wxEmptyString;
 }
 //-----------------------------------------------------------------------------
-RestoreFrame* RestoreFrame::findFrameFor(Database* db)
+RestoreFrame* RestoreFrame::findFrameFor(DatabasePtr db)
 {
     BaseFrame* bf = frameFromIdString(getFrameId(db));
     if (!bf)
@@ -415,8 +418,15 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     verboseMsgsM = checkbox_showlog->IsChecked();
     clearLog();
 
-    wxString username = databaseM->getUsername();
-    wxString password = databaseM->getDecryptedPassword();
+    DatabasePtr database = getDatabase();
+    wxCHECK_RET(database,
+        wxT("Cannot restore unassigned database"));
+    ServerPtr server = database->getServer();
+    wxCHECK_RET(server,
+        wxT("Cannot restore database without assigned server"));
+
+    wxString username = database->getUsername();
+    wxString password = database->getDecryptedPassword();
     if (password.empty())
     {
         UsernamePasswordDialog upd(this, _("Database Credentials"),
@@ -449,9 +459,10 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     if (!choice_pagesize->GetStringSelection().ToULong(&pagesize))
         pagesize = 0;
 
-    RestoreThread* thread = new RestoreThread(this, serverM->getConnectionString(),
-        username, password, text_ctrl_filename->GetValue(),
-        databaseM->getPath(), pagesize, (IBPP::BRF)flags);
+    std::auto_ptr<wxThread> thread(new RestoreThread(this,
+        server->getConnectionString(), username, password,
+        text_ctrl_filename->GetValue(), database->getPath(), pagesize,
+        (IBPP::BRF)flags));
     startThread(thread);
     updateControls();
 }

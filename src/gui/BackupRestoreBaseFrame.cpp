@@ -48,14 +48,14 @@
 #include "metadata/database.h"
 #include "metadata/server.h"
 //-----------------------------------------------------------------------------
-BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent, Database* db)
-    : BaseFrame(parent, -1, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-        wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE)
+BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent,
+        DatabasePtr db)
+    : BaseFrame(parent, wxID_ANY, wxEmptyString), threadM(0)
 {
+    wxASSERT(db);
     databaseM = db;
-    serverM = db->getServer().get();
+    db.get()->attachObserver(this);
 
-    threadM = 0;
     threadMsgTimeMillisM = 0;
     verboseMsgsM = true;
     storageNameM = wxT("unassigned");
@@ -137,6 +137,11 @@ void BackupRestoreBaseFrame::doWriteConfigSettings(const wxString& prefix) const
         text_ctrl_filename->GetValue());
 }
 //-----------------------------------------------------------------------------
+DatabasePtr BackupRestoreBaseFrame::getDatabase() const
+{
+    return databaseM.lock();
+}
+//-----------------------------------------------------------------------------
 const wxString BackupRestoreBaseFrame::getStorageName() const
 {
     if (storageNameM == wxT("unassigned"))
@@ -150,7 +155,9 @@ const wxString BackupRestoreBaseFrame::getStorageName() const
             storageNameM = getName();
             break;
         case sgObject:
-            storageNameM = getName() + Config::pathSeparator + databaseM->getItemPath();
+            storageNameM = getName();
+            if (DatabasePtr db = getDatabase())
+                storageNameM += Config::pathSeparator + db->getItemPath();
             break;
         default:
             storageNameM = wxT("");
@@ -160,22 +167,35 @@ const wxString BackupRestoreBaseFrame::getStorageName() const
     return storageNameM;
 }
 //-----------------------------------------------------------------------------
-bool BackupRestoreBaseFrame::startThread(wxThread* thread)
+bool BackupRestoreBaseFrame::getThreadRunning() const
+{
+    return threadM != 0;
+}
+//-----------------------------------------------------------------------------
+void BackupRestoreBaseFrame::removeSubject(Subject* subject)
+{
+    Observer::removeSubject(subject);
+    DatabasePtr db = getDatabase();
+    if (!db || !db->isConnected() || subject == db.get())
+        Close();
+}
+//-----------------------------------------------------------------------------
+bool BackupRestoreBaseFrame::startThread(std::auto_ptr<wxThread> thread)
 {
     wxASSERT(threadM == 0);
     if (wxTHREAD_NO_ERROR != thread->Create())
     {
-        ::wxMessageBox(_("Error creating thread!"), _("Error"), wxOK|wxICON_ERROR);
-        delete thread;
+        ::wxMessageBox(_("Error creating thread!"), _("Error"),
+            wxOK | wxICON_ERROR);
         return false;
     }
     if (wxTHREAD_NO_ERROR != thread->Run())
     {
-        ::wxMessageBox(_("Error starting thread!"), _("Error"), wxOK|wxICON_ERROR);
-        delete thread;
+        ::wxMessageBox(_("Error starting thread!"), _("Error"),
+            wxOK | wxICON_ERROR);
         return false;
     }
-    threadM = thread;
+    threadM = thread.release();
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -204,6 +224,21 @@ void BackupRestoreBaseFrame::threadOutputMsg(const wxString msg, MsgKind kind)
         wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, ID_thread_output);
         wxPostEvent(this, event);
     }
+}
+//-----------------------------------------------------------------------------
+void BackupRestoreBaseFrame::update()
+{
+    DatabasePtr db = getDatabase();
+    if (db)
+        updateControls();
+    else
+        Close();
+}
+//-----------------------------------------------------------------------------
+void BackupRestoreBaseFrame::updateControls()
+{
+    // empty implementation to allow this to be called from update()
+    // which will happen inside the attachObserver() call in the constructor
 }
 //-----------------------------------------------------------------------------
 void BackupRestoreBaseFrame::updateMessages(size_t firstmsg, size_t lastmsg)

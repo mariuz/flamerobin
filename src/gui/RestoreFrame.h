@@ -50,15 +50,15 @@ private:
     void layoutControls();
     virtual void updateControls();
 
-    static wxString getFrameId(Database* db);
+    static wxString getFrameId(DatabasePtr db);
 protected:
     virtual void doReadConfigSettings(const wxString& prefix);
     virtual void doWriteConfigSettings(const wxString& prefix) const;
     virtual const wxString getName() const;
 public:
-    RestoreFrame(wxWindow* parent, Database* db);
+    RestoreFrame(wxWindow* parent, DatabasePtr db);
 
-    static RestoreFrame* findFrameFor(Database* db);
+    static RestoreFrame* findFrameFor(DatabasePtr db);
 private:
     // event handling
     void OnBrowseButtonClick(wxCommandEvent& event);

@@ -910,7 +910,7 @@ void MainFrame::OnMenuRestoreIntoNewDatabase(wxCommandEvent& WXUNUSED(event))
     s->addDatabase(db);
     rootM->save();
     treeMainM->selectMetadataItem(db.get());
-    RestoreFrame* f = new RestoreFrame(this, db.get());
+    RestoreFrame* f = new RestoreFrame(this, db);
     f->Show();
 }
 //-----------------------------------------------------------------------------
@@ -1096,14 +1096,15 @@ void MainFrame::OnMenuBackup(wxCommandEvent& WXUNUSED(event))
     Database* db = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(db))
         return;
+    DatabasePtr database = db->shared_from_this();
 
-    BackupFrame* bf = BackupFrame::findFrameFor(db);
+    BackupFrame* bf = BackupFrame::findFrameFor(database);
     if (bf)
     {
         bf->Raise();
         return;
     }
-    bf = new BackupFrame(this, db);
+    bf = new BackupFrame(this, database);
     bf->Show();
 }
 //-----------------------------------------------------------------------------
@@ -1112,14 +1113,15 @@ void MainFrame::OnMenuRestore(wxCommandEvent& WXUNUSED(event))
     Database* db = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(db))
         return;
+    DatabasePtr database = db->shared_from_this();
 
-    RestoreFrame* rf = RestoreFrame::findFrameFor(db);
+    RestoreFrame* rf = RestoreFrame::findFrameFor(database);
     if (rf)
     {
         rf->Raise();
         return;
     }
-    rf = new RestoreFrame(this, db);
+    rf = new RestoreFrame(this, database);
     rf->Show();
 }
 //-----------------------------------------------------------------------------

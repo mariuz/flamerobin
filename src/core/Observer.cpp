@@ -97,7 +97,8 @@ Subject* Observer::getFirstSubject()
 //-----------------------------------------------------------------------------
 void Observer::addSubject(Subject* subject)
 {
-    subjectsM.push_back(subject);
+    if (subject)
+        subjectsM.push_back(subject);
 }
 //-----------------------------------------------------------------------------
 void Observer::removeSubject(Subject* subject)

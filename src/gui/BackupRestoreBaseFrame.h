@@ -32,19 +32,65 @@
 #include <wx/wx.h>
 #include <wx/thread.h>
 
+#include <memory>
+
+#include "core/Observer.h"
 #include "gui/BaseFrame.h"
-#include "metadata/MetadataClasses.h"
+#include "metadata/database.h"
 
 class FileTextControl;
 class LogTextControl;
 //-----------------------------------------------------------------------------
-class BackupRestoreBaseFrame: public BaseFrame {
+class BackupRestoreBaseFrame: public BaseFrame, public Observer
+{
 public:
     enum MsgKind {
         progress_message,
         important_message,
         error_message
     };
+
+    enum {
+        ID_thread_output = 500,
+        ID_thread_finished
+    };
+
+    // make sure that thread gets deleted
+    virtual bool Destroy();
+    virtual void removeSubject(Subject* subject);
+protected:
+    mutable wxString storageNameM;
+
+    wxArrayString msgsM;
+    wxArrayInt msgKindsM;
+    bool verboseMsgsM;
+
+    DatabasePtr getDatabase() const;
+    virtual void update();
+
+    void cancelBackupRestore();
+    void clearLog();
+    virtual void doReadConfigSettings(const wxString& prefix);
+    virtual void doWriteConfigSettings(const wxString& prefix) const;
+    virtual const wxString getStorageName() const;
+    // set threadM if thread was successfully created and started,
+    // otherwise delete the thread
+    bool startThread(std::auto_ptr<wxThread> thread);
+    bool getThreadRunning() const;
+
+    void threadOutputMsg(const wxString msg, MsgKind kind);
+    virtual void updateControls();
+    BackupRestoreBaseFrame(wxWindow* parent, DatabasePtr db);
+private:
+    boost::weak_ptr<Database> databaseM;
+    wxThread* threadM;
+
+    wxCriticalSection critsectM;
+    wxArrayString threadMsgsM;
+    wxLongLong threadMsgTimeMillisM;
+    void addThreadMsg(const wxString msg, bool& notificationNeeded);
+    void updateMessages(size_t firstmsg, size_t lastmsg);
+protected:
     enum {
         ID_text_ctrl_filename = 101,
         ID_button_browse,
@@ -52,46 +98,8 @@ public:
         ID_text_ctrl_log,
         ID_checkbox_showlog,
         ID_button_start,
-
-        ID_thread_output = 500,
-        ID_thread_finished
     };
-    // events
-    void OnSettingsChange(wxCommandEvent& event);
-    void OnThreadFinished(wxCommandEvent& event);
-    void OnThreadOutput(wxCommandEvent& event);
-    void OnVerboseLogChange(wxCommandEvent& event);
 
-    // make sure that thread gets deleted
-    virtual bool Destroy();
-protected:
-    mutable wxString storageNameM;
-
-    Server* serverM;
-    Database *databaseM;
-
-    wxThread* threadM;
-    wxArrayString msgsM;
-    wxArrayInt msgKindsM;
-    bool verboseMsgsM;
-
-    void cancelBackupRestore();
-    void clearLog();
-    virtual void doReadConfigSettings(const wxString& prefix);
-    virtual void doWriteConfigSettings(const wxString& prefix) const;
-    virtual const wxString getStorageName() const;
-    // set threadM if thread was successfully created and started, otherwise delete thread
-    bool startThread(wxThread* thread);
-    void threadOutputMsg(const wxString msg, MsgKind kind);
-    virtual void updateControls() = 0;
-    BackupRestoreBaseFrame(wxWindow* parent, Database* db);
-private:
-    wxCriticalSection critsectM;
-    wxArrayString threadMsgsM;
-    wxLongLong threadMsgTimeMillisM;
-    void addThreadMsg(const wxString msg, bool& notificationNeeded);
-    void updateMessages(size_t firstmsg, size_t lastmsg);
-protected:
     wxPanel* panel_controls;
     wxStaticText* label_filename;
     FileTextControl* text_ctrl_filename;
@@ -100,6 +108,12 @@ protected:
     wxButton* button_start;
     LogTextControl* text_ctrl_log;
     void setupControls();
+private:
+    // event handling
+    void OnSettingsChange(wxCommandEvent& event);
+    void OnThreadFinished(wxCommandEvent& event);
+    void OnThreadOutput(wxCommandEvent& event);
+    void OnVerboseLogChange(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()
 };
