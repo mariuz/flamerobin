@@ -866,6 +866,8 @@ public:
     void Info(int* ODSMajor, int* ODSMinor,
         int* PageSize, int* Pages, int* Buffers, int* Sweep,
         bool* SyncWrites, bool* Reserve, bool* ReadOnly);
+    void TransactionInfo(int* Oldest, int* OldestActive,
+        int* OldestSnapshot, int* Next);
     void Statistics(int* Fetches, int* Marks, int* Reads, int* Writes, int* CurrentMemory);
     void Counts(int* Insert, int* Update, int* Delete,
         int* ReadIdx, int* ReadSeq);

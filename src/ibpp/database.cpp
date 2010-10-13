@@ -261,6 +261,36 @@ void DatabaseImpl::Info(int* ODSMajor, int* ODSMinor,
         *ReadOnly = result.GetValue(isc_info_db_read_only) == 1 ? true : false;
 }
 
+void DatabaseImpl::TransactionInfo(int* Oldest, int* OldestActive,
+    int* OldestSnapshot, int* Next)
+{
+    if (mHandle == 0)
+        throw LogicExceptionImpl("Database::TransactionInfo", _("Database is not connected."));
+
+    char items[] = {isc_info_oldest_transaction,
+                    isc_info_oldest_active,
+                    isc_info_oldest_snapshot,
+                    isc_info_next_transaction,
+                    isc_info_end};
+    IBS status;
+    RB result(256);
+
+    status.Reset();
+    (*gds.Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
+        result.Size(), result.Self());
+    if (status.Errors())
+        throw SQLExceptionImpl(status, "Database::TransactionInfo", _("isc_database_info failed"));
+
+    if (Oldest != 0)
+        *Oldest = result.GetValue(isc_info_oldest_transaction);
+    if (OldestActive != 0)
+        *OldestActive = result.GetValue(isc_info_oldest_active);
+    if (OldestSnapshot != 0)
+        *OldestSnapshot = result.GetValue(isc_info_oldest_snapshot);
+    if (Next != 0)
+        *Next = result.GetValue(isc_info_next_transaction);
+}
+
 void DatabaseImpl::Statistics(int* Fetches, int* Marks, int* Reads, int* Writes, int* CurrentMemory)
 {
     if (mHandle == 0)

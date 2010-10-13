@@ -173,6 +173,16 @@ bool DatabaseInfo::getODSVersionIsHigherOrEqualTo(int versionMajor,
         || (odsM == versionMajor && odsMinorM >= versionMinor);
 }
 //-----------------------------------------------------------------------------
+int DatabaseInfo::getOldestActiveTransaction() const
+{
+    return oldestActiveTransactionM;
+}
+//-----------------------------------------------------------------------------
+int DatabaseInfo::getOldestSnapshot() const
+{
+    return oldestSnapshotM;
+}
+//-----------------------------------------------------------------------------
 int DatabaseInfo::getOldestTransaction() const
 {
     return oldestTransactionM;
@@ -207,6 +217,8 @@ void DatabaseInfo::load(const IBPP::Database database)
 {
     database->Info(&odsM, &odsMinorM, &pageSizeM, &pagesM,
         &buffersM, &sweepM, &forcedWritesM, &reserveM, &readOnlyM);
+    database->TransactionInfo(&oldestTransactionM, &oldestActiveTransactionM,
+        &oldestSnapshotM, &nextTransactionM);
     dialectM = database->Dialect();
     loadTimeMillisM = ::wxGetLocalTimeMillis();
 }

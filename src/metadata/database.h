@@ -102,6 +102,8 @@ private:
     int pagesM;
 
     int oldestTransactionM;
+    int oldestActiveTransactionM;
+    int oldestSnapshotM;
     int nextTransactionM;
 
     int sweepM;
@@ -127,6 +129,8 @@ public:
     int64_t getSizeInBytes() const;
 
     int getOldestTransaction() const;
+    int getOldestActiveTransaction() const;
+    int getOldestSnapshot() const;
     int getNextTransaction() const;
 
     int getSweep() const;

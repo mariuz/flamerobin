@@ -715,6 +715,10 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
             processedText += getBooleanAsString(db->getInfo().getForcedWrites());
         else if (cmdParams[0] == wxT("oldest_transaction"))
             processedText += wxString() << db->getInfo().getOldestTransaction();
+        else if (cmdParams[0] == wxT("oldest_active_transaction"))
+            processedText += wxString() << db->getInfo().getOldestActiveTransaction();
+        else if (cmdParams[0] == wxT("oldest_snapshot"))
+            processedText += wxString() << db->getInfo().getOldestSnapshot();
         else if (cmdParams[0] == wxT("next_transaction"))
             processedText += wxString() << db->getInfo().getNextTransaction();
         else if (cmdParams[0] == wxT("connected_users"))
