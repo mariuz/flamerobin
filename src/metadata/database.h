@@ -166,7 +166,7 @@ class Database: public MetadataItem,
     public boost::enable_shared_from_this<Database>
 {
 private:
-    boost::weak_ptr<Server> serverM;
+    WeakServerPtr serverM;
     IBPP::Database databaseM;
     MetadataLoader* metadataLoaderM;
 

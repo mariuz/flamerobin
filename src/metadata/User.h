@@ -38,7 +38,7 @@ class User: public MetadataItem,
     public boost::enable_shared_from_this<User>
 {
 private:
-    boost::weak_ptr<Server> serverM;
+    WeakServerPtr serverM;
 
     wxString usernameM;
     wxString passwordM;

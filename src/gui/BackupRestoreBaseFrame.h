@@ -37,6 +37,7 @@
 #include "core/Observer.h"
 #include "gui/BaseFrame.h"
 #include "metadata/database.h"
+#include "metadata/MetadataClasses.h"
 
 class FileTextControl;
 class LogTextControl;
@@ -82,7 +83,7 @@ protected:
     virtual void updateControls();
     BackupRestoreBaseFrame(wxWindow* parent, DatabasePtr db);
 private:
-    boost::weak_ptr<Database> databaseM;
+    WeakDatabasePtr databaseM;
     wxThread* threadM;
 
     wxCriticalSection critsectM;

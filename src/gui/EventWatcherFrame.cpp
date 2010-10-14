@@ -79,9 +79,10 @@ void EventLogControl::logEvent(const wxString& name, int count)
     addStyledText(wxString::Format(wxT(" (%d)\n"), count), logStyleError);
 }
 //-----------------------------------------------------------------------------
-EventWatcherFrame::EventWatcherFrame(wxWindow *parent, Database *db)
+EventWatcherFrame::EventWatcherFrame(wxWindow* parent, DatabasePtr db)
     : BaseFrame(parent, -1, wxEmptyString), databaseM(db), eventsM(0)
 {
+    wxASSERT(db);
     timerM.SetOwner(this, ID_timer);
 
     setIdString(this, getFrameId(db));
@@ -242,6 +243,11 @@ void EventWatcherFrame::defineMonitoredEvents()
     }
 }
 //-----------------------------------------------------------------------------
+DatabasePtr EventWatcherFrame::getDatabase() const
+{
+    return databaseM.lock();
+}
+//-----------------------------------------------------------------------------
 bool EventWatcherFrame::setTimerActive(bool active)
 {
     if (active && !timerM.Start(100))
@@ -282,13 +288,15 @@ void EventWatcherFrame::ibppEventHandler(IBPP::Events events,
 void EventWatcherFrame::removeSubject(Subject* subject)
 {
     Observer::removeSubject(subject);
-    if (subject == databaseM)
+    DatabasePtr db = getDatabase();
+    if (!db || !db->isConnected() || subject == db.get())
         Close();
 }
 //-----------------------------------------------------------------------------
 void EventWatcherFrame::update()
 {
-    if (!databaseM->isConnected())
+    DatabasePtr db = getDatabase();
+    if (!db || !db->isConnected())
         Close();
 }
 //-----------------------------------------------------------------------------
@@ -313,7 +321,7 @@ const wxString EventWatcherFrame::getName() const
     return wxT("EventWatcherFrame");
 }
 //-----------------------------------------------------------------------------
-wxString EventWatcherFrame::getFrameId(Database* db)
+wxString EventWatcherFrame::getFrameId(DatabasePtr db)
 {
     if (db)
         return wxString(wxT("EventWatcherFrame/") + db->getItemPath());
@@ -321,7 +329,7 @@ wxString EventWatcherFrame::getFrameId(Database* db)
         return wxEmptyString;
 }
 //-----------------------------------------------------------------------------
-EventWatcherFrame* EventWatcherFrame::findFrameFor(Database* db)
+EventWatcherFrame* EventWatcherFrame::findFrameFor(DatabasePtr db)
 {
     BaseFrame* bf = frameFromIdString(getFrameId(db));
     if (!bf)
@@ -416,7 +424,13 @@ void EventWatcherFrame::OnButtonStartStopClick(wxCommandEvent& WXUNUSED(event))
         eventsM.clear();
     else
     {
-        IBPP::Database db(databaseM->getIBPPDatabase());
+        DatabasePtr database = getDatabase();
+        if (!database)
+        {
+            Close();
+            return;
+        }
+        IBPP::Database db(database->getIBPPDatabase());
         eventsM = IBPP::EventsFactory(db);
         defineMonitoredEvents();
     }

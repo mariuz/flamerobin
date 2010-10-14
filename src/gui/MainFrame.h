@@ -156,9 +156,9 @@ private:
 
     bool getAutoConnectDatabase();
     bool tryAutoConnectDatabase();
-    bool tryAutoConnectDatabase(Database* database);
+    bool tryAutoConnectDatabase(DatabasePtr database);
 
-    void unregisterDatabase(Database* database);
+    void unregisterDatabase(DatabasePtr database);
 
     bool connect();
     void showGeneratorValue(Generator* g);

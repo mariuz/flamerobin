@@ -41,8 +41,9 @@
 #include "core/Observer.h"
 #include "controls/LogTextControl.h"
 #include "gui/BaseFrame.h"
+#include "metadata/database.h"
+#include "metadata/MetadataClasses.h"
 
-class Database;
 class EventLogControl;
 //-----------------------------------------------------------------------------
 class EventWatcherFrame : public BaseFrame,
@@ -50,7 +51,7 @@ class EventWatcherFrame : public BaseFrame,
     public Observer
 {
 private:
-    Database* databaseM;
+    WeakDatabasePtr databaseM;
     wxTimer timerM;
     IBPP::Events eventsM;
 
@@ -68,10 +69,11 @@ private:
     void layoutControls();
     void updateControls();
 
-    static wxString getFrameId(Database* db);
+    static wxString getFrameId(DatabasePtr db);
 
     void addEvents(wxString& s);    // multiline allowed
     void defineMonitoredEvents();
+    DatabasePtr getDatabase() const;
     bool setTimerActive(bool active);
     void updateMonitoringActive();
 
@@ -83,10 +85,10 @@ protected:
     virtual const wxString getName() const;
     virtual void update();
 public:
-    EventWatcherFrame(wxWindow* parent, Database* db);
+    EventWatcherFrame(wxWindow* parent, DatabasePtr db);
 
     void removeSubject(Subject* subject);
-    static EventWatcherFrame* findFrameFor(Database* db);
+    static EventWatcherFrame* findFrameFor(DatabasePtr db);
 private:
     // event handling
     enum

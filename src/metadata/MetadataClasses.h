@@ -40,6 +40,7 @@ typedef std::vector<ColumnPtr> ColumnPtrs;
 class Database;
 typedef boost::shared_ptr<Database> DatabasePtr;
 typedef std::vector<DatabasePtr> DatabasePtrs;
+typedef boost::weak_ptr<Database> WeakDatabasePtr;
 
 class Domain;
 class Domains;
@@ -72,6 +73,7 @@ typedef boost::shared_ptr<Root> RootPtr;
 class Server;
 typedef boost::shared_ptr<Server> ServerPtr;
 typedef std::vector<ServerPtr> ServerPtrs;
+typedef boost::weak_ptr<Server> WeakServerPtr;
 
 class SysTables;
 
