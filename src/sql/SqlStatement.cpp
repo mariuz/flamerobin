@@ -232,7 +232,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
                 p->ensureChildrenLoaded();
                 if (ParameterPtr par = p->findParameter(child.get()))
                 {
-                    objectTypeM = ntParameterInput;
+                    objectTypeM = ntParameter;
                     objectM = par.get();
                     return;
                 }

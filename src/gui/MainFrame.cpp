@@ -488,13 +488,11 @@ void MainFrame::OnMainMenuOpen(wxMenuEvent& event)
         return;
     }
 
-    static NodeType nt = ntUnknown;
-    if (m->getType() == nt)
+    if (m->getType() == ntUnknown)
     {
         event.Skip();
         return;
     }
-    nt = m->getType();
 
     // rebuild object menu
     while (objectMenuM->GetMenuItemCount() > 2)

@@ -48,7 +48,7 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
     ntTable, ntTables, ntView, ntViews, ntProcedure, ntProcedures,
     ntTrigger, ntTriggers, ntGenerator, ntGenerators, ntFunction, ntFunctions,
     ntSysTable, ntSysTables, ntException, ntExceptions, ntDomain, ntDomains,
-    ntRole, ntRoles, ntColumn, ntParameterInput, ntParameterOutput, ntIndex,
+    ntRole, ntRoles, ntColumn, ntParameter, ntIndex,
     ntLastType
 } NodeType;
 //-----------------------------------------------------------------------------

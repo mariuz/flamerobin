@@ -112,7 +112,7 @@ void Procedure::loadChildren()
             par.reset(new Parameter());
             for (unsigned i = getLockCount(); i > 0; i--)
                 par->lockSubject();
-            par->setProperties(this, param_name, ntParameterInput);
+            par->setProperties(this, param_name, ntParameter);
         }
         parameters.push_back(par);
         par->initialize(source, partype, mechanism);

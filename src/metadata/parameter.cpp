@@ -42,9 +42,9 @@
 #include "metadata/parameter.h"
 //-----------------------------------------------------------------------------
 Parameter::Parameter()
-    : Column()
+    : Column(), outputParameterM(false), parameterMechanismM(-1)
 {
-    setType(ntParameterInput);
+    setType(ntParameter);
 }
 //-----------------------------------------------------------------------------
 void Parameter::initialize(wxString source, int parameterType, int mechanism)
@@ -59,10 +59,10 @@ void Parameter::initialize(wxString source, int parameterType, int mechanism)
         parameterMechanismM = mechanism;
         changed= true;
     }
-    NodeType type = parameterType == 0 ? ntParameterInput : ntParameterOutput;
-    if (getType() != type)
+    bool outputParam = parameterType != 0;
+    if (outputParameterM != outputParam)
     {
-        setType(type);
+        outputParameterM = outputParam;
         changed= true;
     }
     if (changed)
@@ -71,7 +71,7 @@ void Parameter::initialize(wxString source, int parameterType, int mechanism)
 //-----------------------------------------------------------------------------
 bool Parameter::isOutputParameter() const
 {
-    return getType() == ntParameterOutput;
+    return outputParameterM;
 }
 //-----------------------------------------------------------------------------
 int Parameter::getMechanism() const

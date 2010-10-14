@@ -35,6 +35,7 @@
 class Parameter: public Column
 {
 private:
+    bool outputParameterM;
     int parameterMechanismM;    // -1 none, 0 domain, 1 type_of
 public:
     Parameter();
