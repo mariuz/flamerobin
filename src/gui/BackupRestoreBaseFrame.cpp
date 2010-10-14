@@ -39,6 +39,7 @@
 #endif
 
 #include <wx/timer.h>
+#include <wx/wupdlock.h>
 
 #include "config/Config.h"
 #include "core/ArtProvider.h"
@@ -322,9 +323,9 @@ void BackupRestoreBaseFrame::OnVerboseLogChange(wxCommandEvent& WXUNUSED(event))
     wxBusyCursor wait;
     verboseMsgsM = checkbox_showlog->IsChecked();
 
-    text_ctrl_log->Freeze();
+    wxWindowUpdateLocker freeze(text_ctrl_log);
+
     text_ctrl_log->ClearAll();
     updateMessages(0, msgsM.GetCount());
-    text_ctrl_log->Thaw();
 }
 //-----------------------------------------------------------------------------

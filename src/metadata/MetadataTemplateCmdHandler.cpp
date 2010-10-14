@@ -53,8 +53,6 @@
 #include "metadata/User.h"
 
 //-----------------------------------------------------------------------------
-using namespace std;
-//-----------------------------------------------------------------------------
 class MetadataTemplateCmdHandler: public TemplateCmdHandler
 {
 private:
@@ -771,7 +769,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
             processedText += getBooleanAsString(pi->grantOption);
         else if (cmdParams[0] == wxT("columns"))
         {
-            for (vector<wxString>::iterator it = pi->columns.begin();
+            for (std::vector<wxString>::iterator it = pi->columns.begin();
                 it != pi->columns.end(); ++it)
             {
                 if (it != pi->columns.begin())

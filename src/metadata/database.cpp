@@ -425,15 +425,15 @@ CharacterSet Database::getCharsetById(int id)
 }
 //-----------------------------------------------------------------------------
 //! returns all collations for a given charset
-std::vector<wxString> Database::getCollations(const wxString& charset)
+wxArrayString Database::getCollations(const wxString& charset)
 {
     loadCollations();
-    std::vector<wxString> temp;
+    wxArrayString collations;
     std::multimap<CharacterSet, wxString>::iterator low, high;
     high = collationsM.upper_bound(charset);
     for (low = collationsM.lower_bound(charset); low != high; ++low)
-        temp.push_back((*low).second);
-    return temp;
+        collations.push_back((*low).second);
+    return collations;
 }
 //-----------------------------------------------------------------------------
 Domain* Database::loadMissingDomain(wxString name)

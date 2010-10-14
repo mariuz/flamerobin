@@ -73,7 +73,6 @@ wxString URI::getParam(const wxString& name) const
 //-----------------------------------------------------------------------------
 bool URI::parseURI(const wxString& uri)
 {
-    using namespace std;
     wxString::size_type p = uri.find(wxT("://"));               // find ://
     if (p == wxString::npos)
         return false;

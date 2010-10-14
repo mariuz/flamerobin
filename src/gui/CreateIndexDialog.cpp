@@ -48,8 +48,6 @@
 #include "metadata/table.h"
 #include "core/URIProcessor.h"
 //-----------------------------------------------------------------------------
-using namespace std;
-//-----------------------------------------------------------------------------
 CreateIndexDialog::CreateIndexDialog(wxWindow* parent, Table* table)
     : BaseDialog(parent, -1, wxEmptyString)
 {

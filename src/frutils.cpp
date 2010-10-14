@@ -54,21 +54,21 @@
 #include "metadata/relation.h"
 #include "metadata/server.h"
 //-----------------------------------------------------------------------------
-using namespace std;
-//-----------------------------------------------------------------------------
-void adjustControlsMinWidth(list<wxWindow*> controls)
+void adjustControlsMinWidth(std::list<wxWindow*> controls)
 {
     int w = 0;
     wxSize sz;
     // find widest control
-    for (list<wxWindow*>::iterator it = controls.begin(); it != controls.end(); ++it)
+    for (std::list<wxWindow*>::iterator it = controls.begin();
+        it != controls.end(); ++it)
     {
         wxASSERT(*it != 0);
         sz = (*it)->GetSize();
-        w = max(w, sz.GetWidth());
+        w = std::max(w, sz.GetWidth());
     }
     // set minimum width of all controls
-    for (list<wxWindow*>::iterator it = controls.begin(); it != controls.end(); ++it)
+    for (std::list<wxWindow*>::iterator it = controls.begin();
+        it != controls.end(); ++it)
     {
         sz = (*it)->GetSize();
         (*it)->SetSize(w, sz.GetHeight());
@@ -109,9 +109,10 @@ void readBlob(IBPP::Statement& st, int column, wxString& result,
     b->Close();
 }
 //-----------------------------------------------------------------------------
-wxString selectRelationColumns(Relation* t, wxWindow* parent, const wxString& defaultSelection)
+wxString selectRelationColumns(Relation* t, wxWindow* parent,
+    const wxString& defaultSelection)
 {
-    vector<wxString> list;
+    std::vector<wxString> list;
     wxArrayString defaultNames = ::wxStringTokenize(defaultSelection, wxT(","));
     for (wxString::size_type i = 0; i < defaultNames.Count(); i++)
         list.push_back(defaultNames[i].Trim(true).Trim(false));
@@ -119,7 +120,7 @@ wxString selectRelationColumns(Relation* t, wxWindow* parent, const wxString& de
     if (!selectRelationColumnsIntoVector(t, parent, list))
         return wxEmptyString;
 
-    vector<wxString>::iterator it = list.begin();
+    std::vector<wxString>::iterator it = list.begin();
     wxString retval(*it);
     while ((++it) != list.end())
         retval += wxT(", ") + (*it);
@@ -127,7 +128,7 @@ wxString selectRelationColumns(Relation* t, wxWindow* parent, const wxString& de
 }
 //-----------------------------------------------------------------------------
 bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent,
-    vector<wxString>& list)
+    std::vector<wxString>& list)
 {
     t->ensureChildrenLoaded();
 
@@ -138,7 +139,8 @@ bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent,
         colNames.Add((*it)->getName_());
 
     // set default selection.
-    for (vector<wxString>::const_iterator it = list.begin(); it != list.end(); ++it)
+    for (std::vector<wxString>::const_iterator it = list.begin();
+        it != list.end(); ++it)
     {
         wxString::size_type i = colNames.Index((*it));
         if (i != wxNOT_FOUND)

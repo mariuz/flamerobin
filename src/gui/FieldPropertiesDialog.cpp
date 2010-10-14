@@ -39,6 +39,7 @@
 #endif
 
 #include <wx/gbsizer.h>
+#include <wx/wupdlock.h>
 
 #include "core/ArtProvider.h"
 #include "gui/ExecuteSql.h"
@@ -49,8 +50,6 @@
 #include "metadata/database.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
 #include "core/URIProcessor.h"
-//-----------------------------------------------------------------------------
-using namespace std;
 //-----------------------------------------------------------------------------
 struct DatatypeProperties
 {
@@ -451,48 +450,40 @@ const wxString FieldPropertiesDialog::getStatementsToExecute()
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::loadCharsets()
 {
-    choice_charset->Freeze();
+    wxWindowUpdateLocker freeze(choice_charset);
+
     choice_charset->Clear();
     choice_charset->Append(wxT("NONE"));
-
     Database* db = (tableM) ? tableM->findDatabase() : 0;
     if (tableM && db)
     {
         wxString stmt = wxT("select rdb$character_set_name")
             wxT(" from rdb$character_sets order by 1");
         wxArrayString charsets(db->loadIdentifiers(stmt));
-        for (wxArrayString::const_iterator it = charsets.begin();
-            it != charsets.end(); ++it)
-        {
-            if ((*it) != wxT("NONE"))
-                choice_charset->Append(*it);
-        }
+        charsets.Remove(wxT("NONE"));
+        choice_charset->Append(charsets);
     }
-    choice_charset->Thaw();
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::loadCollations()
 {
-    choice_collate->Freeze();
-    choice_collate->Clear();
+    wxWindowUpdateLocker freeze(choice_collate);
 
+    choice_collate->Clear();
     Database* db = (tableM) ? tableM->findDatabase() : 0;
     if (tableM && db)
     {
         wxString charset(choice_charset->GetStringSelection());
-        vector<wxString> cols = db->getCollations(charset);
-        for (vector<wxString>::iterator it = cols.begin(); it != cols.end(); it++)
-            choice_collate->Append(*it);
+        choice_collate->Append(db->getCollations(charset));
     }
-    choice_collate->Thaw();
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::loadDomains()
 {
-    choice_domain->Freeze();
-    choice_domain->Clear();
+    wxWindowUpdateLocker freeze(choice_domain);
 
-    if (columnM == 0 ||columnM->getSource().substr(0,4) != wxT("RDB$"))
+    choice_domain->Clear();
+    if (columnM == 0 || columnM->getSource().substr(0,4) != wxT("RDB$"))
     {
         choice_domain->Append(_("[Create new]"));
         if (!columnM)
@@ -513,14 +504,13 @@ void FieldPropertiesDialog::loadDomains()
                 choice_domain->Append(name);
         }
     }
-    choice_domain->Thaw();
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::loadGeneratorNames()
 {
-    choice_generator->Freeze();
-    choice_generator->Clear();
+    wxWindowUpdateLocker freeze(choice_generator);
 
+    choice_generator->Clear();
     Database* db = (tableM) ? tableM->findDatabase() : 0;
     if (tableM && db)
     {
@@ -528,7 +518,6 @@ void FieldPropertiesDialog::loadGeneratorNames()
         for (it = db->getGenerators()->begin(); it != db->getGenerators()->end(); ++it)
             choice_generator->Append((*it).getName_());
     }
-    choice_generator->Thaw();
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::setColumnM(Column* column)

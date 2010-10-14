@@ -44,9 +44,7 @@
 #include "core/Observer.h"
 #include "core/Subject.h"
 //-----------------------------------------------------------------------------
-using namespace std;
-
-typedef list<Observer*>::iterator ObserverIterator;
+typedef std::list<Observer*> ObserverList;
 //-----------------------------------------------------------------------------
 Subject::Subject()
 {
@@ -76,19 +74,19 @@ void Subject::detachObserver(Observer* observer)
         return;
 
     observer->removeSubject(this);
-    std::list<Observer*>::iterator it = find(observersM.begin(),
-        observersM.end(), observer);
+    ObserverList::iterator it = find(observersM.begin(), observersM.end(),
+        observer);
     if (it != observersM.end())
         observersM.erase(it);
 }
 //-----------------------------------------------------------------------------
 void Subject::detachAllObservers()
 {
-    list<Observer*> orig(observersM);
+    ObserverList orig(observersM);
     // make sure there are no reentrancy problems
     // loop over the items in the original list, but ignore all observers
     // which have already been removed from the original list
-    for (ObserverIterator it = orig.begin(); it != orig.end(); ++it)
+    for (ObserverList::iterator it = orig.begin(); it != orig.end(); ++it)
     {
         if (isObservedBy(*it))
             (*it)->removeSubject(this);
@@ -108,11 +106,11 @@ void Subject::notifyObservers()
         needsNotifyObjectsM = true;
     else
     {
-        list<Observer*> orig(observersM);
+        ObserverList orig(observersM);
         // make sure there are no reentrancy problems
         // loop over the items in the original list, but ignore all observers
         // which have already been removed from the original list
-        for (ObserverIterator it = orig.begin(); it != orig.end(); ++it)
+        for (ObserverList::iterator it = orig.begin(); it != orig.end(); ++it)
         {
             if (isObservedBy(*it))
                 (*it)->doUpdate();

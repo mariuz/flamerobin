@@ -263,7 +263,7 @@ public:
     void parseCommitedSql(const SqlStatement& stm);     // reads a DDL statement and does accordingly
 
     CharacterSet getCharsetById(int id);
-    std::vector<wxString> getCollations(const wxString& charset);
+    wxArrayString getCollations(const wxString& charset);
     bool isDefaultCollation(const wxString& charset, const wxString& collate);
 
     //! fill vector with names of all tables, views, etc.
