@@ -164,7 +164,6 @@ public:
 
     static DBHTreeImageList& get();
     int getImageIndex(const wxArtID& id);
-    int getImageIndex(NodeType type);
 };
 //-----------------------------------------------------------------------------
 DBHTreeImageList::DBHTreeImageList()
@@ -228,67 +227,6 @@ int DBHTreeImageList::getImageIndex(const wxArtID& id)
     return -1;
 }
 //-----------------------------------------------------------------------------
-int DBHTreeImageList::getImageIndex(NodeType type)
-{
-    wxArtID id(ART_Object);
-    switch (type)
-    {
-        case ntColumn:
-            id = ART_Column; break;
-        case ntDatabase:
-            id = ART_DatabaseConnected; break;
-        case ntDomain:
-            id = ART_Domain; break;
-        case ntDomains:
-            id = ART_Domains; break;
-        case ntException:
-            id = ART_Exception; break;
-        case ntExceptions:
-            id = ART_Exceptions; break;
-        case ntFunction:
-            id = ART_Function; break;
-        case ntFunctions:
-            id = ART_Functions; break;
-        case ntGenerator:
-            id = ART_Generator; break;
-        case ntGenerators:
-            id = ART_Generators; break;
-        case ntParameterInput:
-            id = ART_ParameterInput; break;
-        case ntParameterOutput:
-            id = ART_ParameterOutput; break;
-        case ntProcedure:
-            id = ART_Procedure; break;
-        case ntProcedures:
-            id = ART_Procedures; break;
-        case ntRole:
-            id = ART_Role; break;
-        case ntRoles:
-            id = ART_Roles; break;
-        case ntRoot:
-            id = ART_Root; break;
-        case ntServer:
-            id = ART_Server; break;
-        case ntSysTable:
-            id = ART_SystemTable; break;
-        case ntSysTables:
-            id = ART_SystemTables; break;
-        case ntTable:
-            id = ART_Table; break;
-        case ntTables:
-            id = ART_Tables; break;
-        case ntTrigger:
-            id = ART_Trigger; break;
-        case ntTriggers:
-            id = ART_Triggers; break;
-        case ntView:
-            id = ART_View; break;
-        case ntViews:
-            id = ART_Views; break;
-    }
-    return getImageIndex(id);
-}
-//-----------------------------------------------------------------------------
 // DBHTreeItemVisitor class
 class DBHTreeItemVisitor: public MetadataItemVisitor
 {
@@ -303,7 +241,7 @@ private:
     bool sortChildrenM;
     bool nodeConfigSensitiveM;
 
-    void setNodeProperties(MetadataItem* metadataItem,
+    void setNodeProperties(MetadataItem* metadataItem, const wxArtID& artId,
         int overrideChildCount = -1);
 protected:
     virtual void defaultAction();
@@ -364,11 +302,13 @@ bool isNotSystem(Domain& domain)
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::setNodeProperties(MetadataItem* metadataItem,
-    int overrideChildCount)
+    const wxArtID& artId, int overrideChildCount)
 {
     wxASSERT(metadataItem);
     nodeVisibleM = true;
     nodeTextBoldM = false;
+
+    nodeImageIndexM = DBHTreeImageList::get().getImageIndex(artId);
 
     size_t childCount = 0;
     if (overrideChildCount < 0)
@@ -384,8 +324,6 @@ void DBHTreeItemVisitor::setNodeProperties(MetadataItem* metadataItem,
             nodeTextM << wxT(" (") << childCount << wxT(")");
     }
 
-    nodeImageIndexM = DBHTreeImageList::get().getImageIndex(
-        metadataItem->getType());
     showChildrenM = childCount > 0;
     sortChildrenM = false;
 }
@@ -406,16 +344,13 @@ void DBHTreeItemVisitor::visitColumn(Column& column)
         nodeTextM << wxT(" ") << SqlTokenizer::getKeyword(kwNOT)
             << wxT(" ") << SqlTokenizer::getKeyword(kwNULL);
     }
-    // set remaining default properties, nodeTextM will not be touched
-    setNodeProperties(&column);
+
     // image index depends on participation in primary and foreign keys
     // and is different for computed columns
     bool isPK = column.isPrimaryKey();
     bool isFK = column.isForeignKey();
 
-    wxArtID artInvalid = wxART_MAKE_ART_ID(ART_INVALID);
-    wxArtID artId = artInvalid;
-
+    wxArtID artId = ART_Column;
     if (isPK && isFK)
         artId = ART_PrimaryAndForeignKey;
     else if (isPK)
@@ -425,17 +360,18 @@ void DBHTreeItemVisitor::visitColumn(Column& column)
     else if (!column.getComputedSource().IsEmpty())
         artId = ART_Computed;
 
-    if (artId != artInvalid)
-        nodeImageIndexM = DBHTreeImageList::get().getImageIndex(artId);
+    // set remaining default properties, nodeTextM will not be touched
+    setNodeProperties(&column, artId);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitDatabase(Database& database)
 {
-    setNodeProperties(&database);
     // show different images for connected and disconnected databases
     bool connected = database.isConnected();
-    nodeImageIndexM = DBHTreeImageList::get().getImageIndex(
-        connected ? ART_DatabaseConnected : ART_DatabaseDisconnected);
+    wxArtID artId = connected ?
+        ART_DatabaseConnected : ART_DatabaseDisconnected;
+    setNodeProperties(&database, artId);
+
     // hide disconnected databases
     if (DBHTreeConfigCache::get().getHideDisconnectedDatabases())
         nodeVisibleM = connected;
@@ -460,34 +396,34 @@ void DBHTreeItemVisitor::visitDomain(Domain& domain)
             << wxT(" ") << SqlTokenizer::getKeyword(kwNULL);
     }
     // set remaining default properties, nodeTextM will not be touched
-    setNodeProperties(&domain);
+    setNodeProperties(&domain, ART_Domain);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitDomains(Domains& domains)
 {
     // domain collection contains system domains that are not visible
-    setNodeProperties(&domains,
+    setNodeProperties(&domains, ART_Domains,
         std::count_if(domains.begin(), domains.end(), &isNotSystem));
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitException(Exception& exception)
 {
-    setNodeProperties(&exception);
+    setNodeProperties(&exception, ART_Exception);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitExceptions(Exceptions& exceptions)
 {
-    setNodeProperties(&exceptions);
+    setNodeProperties(&exceptions, ART_Exceptions);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitFunction(Function& function)
 {
-    setNodeProperties(&function);
+    setNodeProperties(&function, ART_Function);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitFunctions(Functions& functions)
 {
-    setNodeProperties(&functions);
+    setNodeProperties(&functions, ART_Functions);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitGenerator(Generator& generator)
@@ -501,25 +437,27 @@ void DBHTreeItemVisitor::visitGenerator(Generator& generator)
         nodeTextM = generator.getName_() + wxT(" = ") + std2wx(ss.str());
     }
     // set remaining default properties, nodeTextM will not be touched
-    setNodeProperties(&generator);
+    setNodeProperties(&generator, ART_Generator);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitGenerators(Generators& generators)
 {
-    setNodeProperties(&generators);
+    setNodeProperties(&generators, ART_Generators);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitParameter(Parameter& parameter)
 {
-    nodeTextM = (parameter.isOutputParameter() ? wxT("out ") : wxT("in "))
+    bool isOutput = parameter.isOutputParameter();
+    nodeTextM = (isOutput ? wxT("out ") : wxT("in "))
         + parameter.getName_() + wxT(" ") + parameter.getDatatype();
     // set remaining default properties, nodeTextM will not be touched
-    setNodeProperties(&parameter);
+    setNodeProperties(&parameter,
+        isOutput ? ART_ParameterOutput : ART_ParameterInput);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitProcedure(Procedure& procedure)
 {
-    setNodeProperties(&procedure);
+    setNodeProperties(&procedure, ART_Procedure);
     if (procedure.childrenLoaded())
     {
         // make node caption bold when parameter data is loaded
@@ -548,22 +486,22 @@ void DBHTreeItemVisitor::visitProcedure(Procedure& procedure)
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitProcedures(Procedures& procedures)
 {
-    setNodeProperties(&procedures);
+    setNodeProperties(&procedures, ART_Procedures);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitRole(Role& role)
 {
-    setNodeProperties(&role);
+    setNodeProperties(&role, ART_Role);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitRoles(Roles& roles)
 {
-    setNodeProperties(&roles);
+    setNodeProperties(&roles, ART_Roles);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitRoot(Root& root)
 {
-    setNodeProperties(&root);
+    setNodeProperties(&root, ART_Root);
     // make root node caption bold even if it has no registered servers
     nodeTextBoldM = true;
     // show Server nodes even though Root::getChildrenCount() returns 0
@@ -575,7 +513,7 @@ void DBHTreeItemVisitor::visitRoot(Root& root)
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitServer(Server& server)
 {
-    setNodeProperties(&server);
+    setNodeProperties(&server, ART_Server);
     // make server node caption bold even if it has no registered databases
     nodeTextBoldM = true;
     // show Database nodes even though Server::getChildrenCount() returns 0
@@ -587,12 +525,14 @@ void DBHTreeItemVisitor::visitServer(Server& server)
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitSysTables(SysTables& sysTables)
 {
-    setNodeProperties(&sysTables);
+    setNodeProperties(&sysTables, ART_SystemTables);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitTable(Table& table)
 {
-    setNodeProperties(&table);
+    setNodeProperties(&table,
+        table.isSystem() ? ART_SystemTable : ART_Table);
+
     if (table.childrenLoaded())
     {
         // make node caption bold when column data has been loaded
@@ -612,22 +552,22 @@ void DBHTreeItemVisitor::visitTable(Table& table)
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitTables(Tables& tables)
 {
-    setNodeProperties(&tables);
+    setNodeProperties(&tables, ART_Tables);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitTrigger(Trigger& trigger)
 {
-    setNodeProperties(&trigger);
+    setNodeProperties(&trigger, ART_Trigger);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitTriggers(Triggers& triggers)
 {
-    setNodeProperties(&triggers);
+    setNodeProperties(&triggers, ART_Triggers);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitView(View& view)
 {
-    setNodeProperties(&view);
+    setNodeProperties(&view, ART_View);
     if (view.childrenLoaded())
     {
         // make node caption bold when column data has been loaded
@@ -647,7 +587,7 @@ void DBHTreeItemVisitor::visitView(View& view)
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitViews(Views& views)
 {
-    setNodeProperties(&views);
+    setNodeProperties(&views, ART_Views);
 }
 //-----------------------------------------------------------------------------
 // TreeSelectionRestorer class
@@ -1120,10 +1060,7 @@ bool DBHTreeControl::findMetadataItem(MetadataItem *item, wxTreeItemId parent)
 //-----------------------------------------------------------------------------
 bool DBHTreeControl::selectMetadataItem(MetadataItem* item)
 {
-    if (item == 0)
-        return false;
-
-    return findMetadataItem(item, GetRootItem());
+    return item && findMetadataItem(item, GetRootItem());
 }
 //----------------------------------------------------------------------------
 //! recursively get the last child of item
