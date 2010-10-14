@@ -111,6 +111,7 @@ void HtmlHeaderMetadataItemVisitor::visitTable(Table& /*table*/)
     emptyTitles();
     addSummary();
     addConstraints();
+    addIndices();
     addTriggers();
     addPrivileges();
     addDependencies();
