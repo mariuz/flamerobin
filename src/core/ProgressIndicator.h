@@ -42,20 +42,19 @@ class ProgressIndicator
 public:
     virtual ~ProgressIndicator();
     virtual bool isCanceled() = 0;
-    virtual void initProgress(wxString progressMsg,
-        unsigned int maxPosition = 0, unsigned int startingPosition = 0,
-        unsigned int progressLevel = 1) = 0;
+    virtual void initProgress(wxString progressMsg, size_t maxPosition = 0,
+        size_t startingPosition = 0, size_t progressLevel = 1) = 0;
     virtual void initProgressIndeterminate(wxString progressMsg,
-        unsigned int progressLevel = 1) = 0;
+        size_t progressLevel = 1) = 0;
     virtual void setProgressMessage(wxString progressMsg,
-        unsigned int progressLevel = 1) = 0;
-    virtual void setProgressPosition(unsigned int currentPosition,
-        unsigned int progressLevel = 1) = 0;
+        size_t progressLevel = 1) = 0;
+    virtual void setProgressPosition(size_t currentPosition,
+        size_t progressLevel = 1) = 0;
     virtual void stepProgress(int stepAmount = 1,
-        unsigned int progressLevel = 1) = 0;
+        size_t progressLevel = 1) = 0;
     virtual void doShow() = 0;
     virtual void doHide() = 0;
-    virtual void setProgressLevelCount(unsigned int levelCount = 1) = 0;
+    virtual void setProgressLevelCount(size_t levelCount = 1) = 0;
 };
 //-----------------------------------------------------------------------------
 void checkProgressIndicatorCanceled(ProgressIndicator* progressIndicator);

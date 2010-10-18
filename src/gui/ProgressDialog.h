@@ -40,7 +40,7 @@ class ProgressDialog: public BaseDialog, public ProgressIndicator
 {
 private:
     bool canceledM;
-    unsigned int levelCountM;
+    size_t levelCountM;
     std::vector<wxStaticText*> labelsM;
     std::vector<wxGauge*> gaugesM;
     wxButton* button_cancel;
@@ -55,15 +55,14 @@ private:
     void enableOtherWindows(bool enable);
     void setCanceled();
 
-    wxGauge* getGaugeForLevel(unsigned int progressLevel);
-    wxStaticText* getLabelForLevel(unsigned int progressLevel);
-    bool isValidProgressLevel(unsigned int progressLevel);
+    wxGauge* getGaugeForLevel(size_t progressLevel);
+    wxStaticText* getLabelForLevel(size_t progressLevel);
+    bool isValidProgressLevel(size_t progressLevel);
     void setGaugeIndeterminate(wxGauge* gauge, bool indeterminate);
 
 public:
     ProgressDialog(wxWindow* parent, const wxString& title,
-        unsigned int levelCount = 1, const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize);
+        size_t levelCount = 1);
     ~ProgressDialog();
 
    virtual bool Show(bool show = true);
@@ -71,19 +70,19 @@ public:
     // ProgressIndicator methods
     virtual bool isCanceled();
     virtual void initProgress(wxString progressMsg,
-        unsigned int maxPosition = 0, unsigned int startingPosition = 0,
-        unsigned int progressLevel = 1);
+        size_t maxPosition = 0, size_t startingPosition = 0,
+        size_t progressLevel = 1);
     virtual void initProgressIndeterminate(wxString progressMsg,
-        unsigned int progressLevel = 1);
+        size_t progressLevel = 1);
     virtual void setProgressMessage(wxString progressMsg,
-        unsigned int progressLevel = 1);
-    virtual void setProgressPosition(unsigned int currentPosition,
-        unsigned int progressLevel = 1);
+        size_t progressLevel = 1);
+    virtual void setProgressPosition(size_t currentPosition,
+        size_t progressLevel = 1);
     virtual void stepProgress(int stepAmount = 1,
-        unsigned int progressLevel = 1);
+        size_t progressLevel = 1);
     virtual void doShow();
     virtual void doHide();
-    virtual void setProgressLevelCount(unsigned int levelCount = 1);
+    virtual void setProgressLevelCount(size_t levelCount = 1);
 private:
     // event handling
     void OnCancelButtonClick(wxCommandEvent& event);

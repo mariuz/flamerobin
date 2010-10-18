@@ -172,12 +172,12 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     {
         wxArrayString choices;
         Tables* tt = databaseM->getTables();
-        size_t relation_to_select = 0;
+        size_t to_select = 0;
         for (Tables::iterator it = tt->begin();
             it != tt->end(); ++it)
         {
             if (dynamic_cast<Table *>(object) == &(*it))
-                relation_to_select = choices.GetCount();
+                to_select = choices.GetCount();
             choices.Add((*it).getName_());
         }
         Views* tv = databaseM->getViews();
@@ -185,13 +185,13 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
             it != tv->end(); ++it)
         {
             if (dynamic_cast<View *>(object) == &(*it))
-                relation_to_select = choices.GetCount();
+                to_select = choices.GetCount();
             choices.Add((*it).getName_());
         }
         choice_relations = new wxChoice(privilegesPanel, ID_choice,
             wxDefaultPosition, wxDefaultSize, choices);
         if (!choices.IsEmpty())
-            choice_relations->SetSelection(relation_to_select);
+            choice_relations->SetSelection(static_cast<int>(to_select));
     }
     choice_relations->Enable(false);
     fgSizer4->Add(choice_relations, 0, wxALIGN_CENTER_VERTICAL|wxEXPAND, 0);
@@ -270,7 +270,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         choice_execute = new wxChoice(privilegesPanel, ID_choice,
             wxDefaultPosition, wxDefaultSize, choices);
         if (!choices.IsEmpty())
-            choice_execute->SetSelection(to_select);
+            choice_execute->SetSelection(static_cast<int>(to_select));
     }
     choice_execute->Enable(false);
     fgSizer4->Add(choice_execute, 0, wxEXPAND, 0);
@@ -293,7 +293,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         choice_memberof = new wxChoice(privilegesPanel, ID_choice,
             wxDefaultPosition, wxDefaultSize, choices);
         if (!choices.IsEmpty())
-            choice_memberof->SetSelection(to_select);
+            choice_memberof->SetSelection(static_cast<int>(to_select));
     }
     choice_memberof->Enable(false);
     fgSizer4->Add(choice_memberof, 0, wxEXPAND, 0);
