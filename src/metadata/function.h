@@ -43,7 +43,6 @@ public:
     Function();
     void loadInfo(bool force = false);
     virtual const wxString getTypeName() const;
-    virtual wxString getCreateSqlTemplate() const;
     virtual wxString getDropSqlStatement() const;
     wxString getCreateSql();
     wxString getDefinition();

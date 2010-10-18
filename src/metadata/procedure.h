@@ -50,8 +50,6 @@ protected:
 public:
     Procedure();
 
-    wxString getCreateSqlTemplate() const;   // overrides MetadataItem::getCreateSqlTemplate()
-
     bool getChildren(std::vector<MetadataItem *>& temp);
 
     wxString getExecuteStatement();

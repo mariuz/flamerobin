@@ -1696,6 +1696,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\metadata\MetadataItemCreateStatementVisitor.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\metadata\MetadataItemDescriptionVisitor.cpp"
 				>
 			</File>
@@ -2271,6 +2275,10 @@
 			</File>
 			<File
 				RelativePath=".\src\metadata\MetadataClasses.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\metadata\MetadataItemCreateStatementVisitor.h"
 				>
 			</File>
 			<File

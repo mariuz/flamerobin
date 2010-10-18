@@ -528,22 +528,6 @@ void Table::loadIndices()
     indicesLoadedM = true;
 }
 //-----------------------------------------------------------------------------
-wxString Table::getCreateSqlTemplate() const
-{
-    return  wxT("CREATE TABLE table_name\n")
-            wxT("(\n")
-            wxT("    column_name {< datatype> | COMPUTED BY (< expr>) | domain}\n")
-            wxT("        [DEFAULT { literal | NULL | USER}] [NOT NULL]\n")
-            wxT("    ...\n")
-            wxT("    CONSTRAINT constraint_name\n")
-            wxT("        PRIMARY KEY (column_list),\n")
-            wxT("        UNIQUE      (column_list),\n")
-            wxT("        FOREIGN KEY (column_list) REFERENCES other_table (column_list),\n")
-            wxT("        CHECK       (condition),\n")
-            wxT("    ...\n")
-            wxT(");\n");
-}
-//-----------------------------------------------------------------------------
 const wxString Table::getTypeName() const
 {
     return wxT("TABLE");

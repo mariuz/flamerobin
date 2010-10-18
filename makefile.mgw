@@ -133,6 +133,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_generator.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Index.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitem.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemCreateStatementVisitor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemDescriptionVisitor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemURIHandlerHelper.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.o \
@@ -505,6 +506,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Index.o: ./src/metadata/Index.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitem.o: ./src/metadata/metadataitem.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemCreateStatementVisitor.o: ./src/metadata/MetadataItemCreateStatementVisitor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemDescriptionVisitor.o: ./src/metadata/MetadataItemDescriptionVisitor.cpp

@@ -98,14 +98,6 @@ wxString Exception::getAlterSql()
     return sb;
 }
 //-----------------------------------------------------------------------------
-wxString Exception::getCreateSqlTemplate() const
-{
-    StatementBuilder sb;
-    sb << kwCREATE << ' ' << kwEXCEPTION << wxT(" name 'exception message';")
-        << StatementBuilder::NewLine;
-    return sb;
-}
-//-----------------------------------------------------------------------------
 const wxString Exception::getTypeName() const
 {
     return wxT("EXCEPTION");

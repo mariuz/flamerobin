@@ -62,14 +62,6 @@ wxString Function::getCreateSql()
     return ret;
 }
 //-----------------------------------------------------------------------------
-wxString Function::getCreateSqlTemplate() const
-{
-    return wxT("DECLARE EXTERNAL FUNCTION name [datatype | CSTRING (int) [, datatype | CSTRING (int) ...]]\n")
-           wxT("RETURNS {datatype [BY VALUE] | CSTRING (int)} [FREE_IT]\n")
-           wxT("ENTRY_POINT 'entryname'\n")
-           wxT("MODULE_NAME 'modulename';\n");
-}
-//-----------------------------------------------------------------------------
 const wxString Function::getTypeName() const
 {
     return wxT("FUNCTION");

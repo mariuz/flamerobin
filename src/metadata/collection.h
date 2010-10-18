@@ -50,6 +50,17 @@ public:
 private:
     CollectionType itemsM;
 
+    iterator getPosition(wxString name)
+    {
+        Identifier id(name);
+        for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
+        {
+            if ((*it).getIdentifier().equals(id))
+                return it;
+        }
+        return itemsM.end();
+    }
+
     // helper structs for find_if() and erase_if()
     struct FindByAddress
     {
@@ -209,18 +220,6 @@ public:
             notifyObservers();
     }
 
-    inline const_iterator begin() const
-    {
-        if (!childrenLoaded())
-            return itemsM.end();
-        return itemsM.begin();
-    };
-
-    inline const_iterator end() const
-    {
-        return itemsM.end();
-    };
-
     inline iterator begin()
     {
         if (!childrenLoaded())
@@ -249,17 +248,6 @@ public:
         }
     };
 
-    iterator getPosition(wxString name)
-    {
-        Identifier id(name);
-        for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
-        {
-            if ((*it).getIdentifier().equals(id))
-                return it;
-        }
-        return itemsM.end();
-    }
-
     T* findByName(wxString name)
     {
         iterator it = getPosition(name);
@@ -273,12 +261,6 @@ public:
         for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
             temp.push_back(&(*it));
         return (itemsM.size() != 0);
-    }
-
-    wxString getCreateSqlTemplate() const        // this could be done better, but I haven't got the idea
-    {                                               // function looks like it could be static, but then it
-        T dummy;                                    // can't be virtual, and vice versa. So I just create a dummy
-        return dummy.getCreateSqlTemplate();        // object to call the function on.
     }
 
     virtual size_t getChildrenCount() const

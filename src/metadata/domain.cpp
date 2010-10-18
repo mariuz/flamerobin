@@ -324,16 +324,6 @@ wxString Domain::getAlterSqlTemplate() const
         wxT("  | TYPE new_datatype;\n");
 }
 //-----------------------------------------------------------------------------
-wxString Domain::getCreateSqlTemplate() const
-{
-    return  wxT("CREATE DOMAIN domain_name\n")
-            wxT("AS datatype [CHARACTER SET charset]\n")
-            wxT("DEFAULT {literal | NULL | USER}\n")
-            wxT("[NOT NULL]\n")
-            wxT("[CHECK (dom_search_condition)]\n")
-            wxT("COLLATE collation;\n");
-}
-//-----------------------------------------------------------------------------
 const wxString Domain::getTypeName() const
 {
     return wxT("DOMAIN");

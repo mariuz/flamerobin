@@ -158,6 +158,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_generator.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Index.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitem.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemCreateStatementVisitor.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemDescriptionVisitor.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemURIHandlerHelper.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.obj \
@@ -546,6 +547,9 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Index.obj: .\src\metadata\Index.cpp
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitem.obj: .\src\metadata\metadataitem.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\metadataitem.cpp
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemCreateStatementVisitor.obj: .\src\metadata\MetadataItemCreateStatementVisitor.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\MetadataItemCreateStatementVisitor.cpp
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemDescriptionVisitor.obj: .\src\metadata\MetadataItemDescriptionVisitor.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\MetadataItemDescriptionVisitor.cpp

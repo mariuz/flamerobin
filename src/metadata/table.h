@@ -72,8 +72,6 @@ public:
     static bool tablesRelate(const std::vector<wxString>& tables,
         Table *table, std::vector<ForeignKey>& list);
 
-    virtual wxString getCreateSqlTemplate() const;
-
     void invalidateIndices(const wxString& forIndex = wxEmptyString);
 
     wxString getExternalPath();

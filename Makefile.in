@@ -125,6 +125,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_generator.o \
 	flamerobin_Index.o \
 	flamerobin_metadataitem.o \
+	flamerobin_MetadataItemCreateStatementVisitor.o \
 	flamerobin_MetadataItemDescriptionVisitor.o \
 	flamerobin_MetadataItemURIHandlerHelper.o \
 	flamerobin_MetadataItemVisitor.o \
@@ -560,6 +561,9 @@ flamerobin_Index.o: $(srcdir)/src/metadata/Index.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_metadataitem.o: $(srcdir)/src/metadata/metadataitem.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/metadataitem.cpp
+
+flamerobin_MetadataItemCreateStatementVisitor.o: $(srcdir)/src/metadata/MetadataItemCreateStatementVisitor.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/MetadataItemCreateStatementVisitor.cpp
 
 flamerobin_MetadataItemDescriptionVisitor.o: $(srcdir)/src/metadata/MetadataItemDescriptionVisitor.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/MetadataItemDescriptionVisitor.cpp

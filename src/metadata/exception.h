@@ -48,8 +48,6 @@ public:
     int getNumber();
     wxString getAlterSql();
 
-    virtual wxString getCreateSqlTemplate() const;
-
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };

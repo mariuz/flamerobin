@@ -636,6 +636,10 @@ SOURCE=.\src\MasterPassword.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\metadata\MetadataItemCreateStatementVisitor.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\metadata\MetadataItemDescriptionVisitor.cpp
 # End Source File
 # Begin Source File
@@ -1087,6 +1091,10 @@ SOURCE=.\src\MasterPassword.h
 # Begin Source File
 
 SOURCE=.\src\metadata\MetadataClasses.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\metadata\MetadataItemCreateStatementVisitor.h
 # End Source File
 # Begin Source File
 

@@ -516,22 +516,6 @@ std::vector<Privilege>* Procedure::getPrivileges()
     return &privilegesM;
 }
 //-----------------------------------------------------------------------------
-wxString Procedure::getCreateSqlTemplate() const
-{
-    wxString s(wxT("SET TERM ^ ;\n\n")
-            wxT("CREATE PROCEDURE name \n")
-            wxT(" ( input_parameter_name < datatype>, ... ) \n")
-            wxT("RETURNS \n")
-            wxT(" ( output_parameter_name < datatype>, ... )\n")
-            wxT("AS \n")
-            wxT("DECLARE VARIABLE variable_name < datatype>; \n")
-            wxT("BEGIN\n")
-            wxT("  /* write your code here */ \n")
-            wxT("END^\n\n")
-            wxT("SET TERM ; ^\n"));
-    return s;
-}
-//-----------------------------------------------------------------------------
 const wxString Procedure::getTypeName() const
 {
     return wxT("PROCEDURE");

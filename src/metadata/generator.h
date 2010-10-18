@@ -46,8 +46,6 @@ public:
 
     int64_t getValue();
 
-    wxString getCreateSqlTemplate() const;
-
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };

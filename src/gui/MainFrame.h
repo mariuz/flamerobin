@@ -106,7 +106,7 @@ public:
     void OnMenuDatabaseExtractDDL(wxCommandEvent& event);
 
     // create new object
-    void showCreateTemplate(const MetadataItem *m);
+    void showCreateTemplate(const wxString& statement);
     void OnMenuCreateDomain(wxCommandEvent& event);
     void OnMenuCreateException(wxCommandEvent& event);
     void OnMenuCreateFunction(wxCommandEvent& event);

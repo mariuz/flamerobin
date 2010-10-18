@@ -199,22 +199,6 @@ wxString Trigger::getAlterSql()
     return sql;
 }
 //-----------------------------------------------------------------------------
-wxString Trigger::getCreateSqlTemplate() const
-{
-    return
-    wxT("SET TERM ^ ;\n\n")
-    wxT("CREATE TRIGGER name [FOR table/view] \n")
-    wxT(" [IN]ACTIVE \n")
-    wxT(" [ON {[DIS]CONNECT | TRANSACTION {START | COMMIT | ROLLBACK}} ] \n")
-    wxT(" [{BEFORE | AFTER} INSERT OR UPDATE OR DELETE] \n")
-    wxT(" POSITION number \n")
-    wxT("AS \n")
-    wxT("BEGIN \n")
-    wxT("    /* enter trigger code here */ \n")
-    wxT("END^\n\n")
-    wxT("SET TERM ; ^\n");
-}
-//-----------------------------------------------------------------------------
 const wxString Trigger::getTypeName() const
 {
     return wxT("TRIGGER");

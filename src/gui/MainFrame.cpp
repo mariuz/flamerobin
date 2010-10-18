@@ -69,6 +69,7 @@
 #include "gui/ServerRegistrationDialog.h"
 #include "gui/SimpleHtmlFrame.h"
 #include "main.h"
+#include "metadata/MetadataItemCreateStatementVisitor.h"
 #include "metadata/root.h"
 #include "metadata/server.h"
 #include "sql/SqlTemplateManager.h"
@@ -1276,56 +1277,56 @@ void MainFrame::OnMenuShowAllGeneratorValues(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateDomain(wxCommandEvent& WXUNUSED(event))
 {
-    Domain d;
-    showCreateTemplate(&d);
+    showCreateTemplate(
+        MetadataItemCreateStatementVisitor::getCreateDomainStatement());
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateException(wxCommandEvent& WXUNUSED(event))
 {
-    Exception e;
-    showCreateTemplate(&e);
+    showCreateTemplate(
+        MetadataItemCreateStatementVisitor::getCreateExceptionStatement());
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateFunction(wxCommandEvent& WXUNUSED(event))
 {
-    Function x;
-    showCreateTemplate(&x);
+    showCreateTemplate(
+        MetadataItemCreateStatementVisitor::getCreateFunctionStatement());
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateGenerator(wxCommandEvent& WXUNUSED(event))
 {
-    Generator x;
-    showCreateTemplate(&x);
+    showCreateTemplate(
+        MetadataItemCreateStatementVisitor::getCreateGeneratorStatement());
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateProcedure(wxCommandEvent& WXUNUSED(event))
 {
-    Procedure x;
-    showCreateTemplate(&x);
+    showCreateTemplate(
+        MetadataItemCreateStatementVisitor::getCreateProcedureStatement());
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateRole(wxCommandEvent& WXUNUSED(event))
 {
-    Role x;
-    showCreateTemplate(&x);
+    showCreateTemplate(
+        MetadataItemCreateStatementVisitor::getCreateRoleStatement());
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateTable(wxCommandEvent& WXUNUSED(event))
 {
-    Table x;
-    showCreateTemplate(&x);
+    showCreateTemplate(
+        MetadataItemCreateStatementVisitor::getCreateTableStatement());
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateTrigger(wxCommandEvent& WXUNUSED(event))
 {
-    Trigger x;
-    showCreateTemplate(&x);
+    showCreateTemplate(
+        MetadataItemCreateStatementVisitor::getCreateTriggerStatement());
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateView(wxCommandEvent& WXUNUSED(event))
 {
-    View x;
-    showCreateTemplate(&x);
+    showCreateTemplate(
+        MetadataItemCreateStatementVisitor::getCreateViewStatement());
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateObject(wxCommandEvent& WXUNUSED(event))
@@ -1333,18 +1334,20 @@ void MainFrame::OnMenuCreateObject(wxCommandEvent& WXUNUSED(event))
     MetadataItem* item = treeMainM->getSelectedMetadataItem();
     if (!item)
         return;
-    showCreateTemplate(item);
+
+    MetadataItemCreateStatementVisitor csv;
+    item->acceptVisitor(&csv);
+    showCreateTemplate(csv.getStatement());
 }
 //-----------------------------------------------------------------------------
-void MainFrame::showCreateTemplate(const MetadataItem* m)
+void MainFrame::showCreateTemplate(const wxString& statement)
 {
     // TODO: add a call for wizards. For example, we can have NewTableWizard which is a frame with grid in which
     // user can enter column data for new table (name, datatype, null option, collation, default, etc.) and also
     // enter a name for new table, etc. Wizard should return a bunch of DDL statements as a wxString which would we
     // pass to ExecSqlFrame.
 
-    wxString sql = m->getCreateSqlTemplate();
-    if (sql == wxT(""))
+    if (statement == wxEmptyString)
     {
         wxMessageBox(_("The feature is not yet available for this type of database objects."),
             _("Not yet implemented"), wxOK | wxICON_INFORMATION);
@@ -1355,7 +1358,7 @@ void MainFrame::showCreateTemplate(const MetadataItem* m)
     if (!checkValidDatabase(db))
         return;
 
-    showSql(this, wxEmptyString, db.get(), sql);
+    showSql(this, wxEmptyString, db.get(), statement);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuLoadColumnsInfo(wxCommandEvent& WXUNUSED(event))

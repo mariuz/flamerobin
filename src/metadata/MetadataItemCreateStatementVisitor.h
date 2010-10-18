@@ -25,37 +25,37 @@
 
 */
 
-//-----------------------------------------------------------------------------
-#ifndef FR_VIEW_H
-#define FR_VIEW_H
+#ifndef FR_METADATAITEMCREATESTATEMENTVISITOR_H
+#define FR_METADATAITEMCREATESTATEMENTVISITOR_H
 
-#include "metadata/collection.h"
-#include "metadata/relation.h"
-
-class ProgressIndicator;
+#include "metadata/MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
-class View: public Relation
+class MetadataItemCreateStatementVisitor : public MetadataItemVisitor
 {
 private:
-    wxString sourceM;
-protected:
-    virtual void setSource(const wxString& value);
+    wxString statementM;
 public:
-    View();
+    static wxString getCreateDomainStatement();
+    static wxString getCreateExceptionStatement();
+    static wxString getCreateFunctionStatement();
+    static wxString getCreateGeneratorStatement();
+    static wxString getCreateProcedureStatement();
+    static wxString getCreateRoleStatement();
+    static wxString getCreateTableStatement();
+    static wxString getCreateTriggerStatement();
+    static wxString getCreateViewStatement();
 
-    wxString getSource();
-    wxString getCreateSql();
-    virtual const wxString getTypeName() const;
-    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    virtual void visitDomains(Domains& domains);
+    virtual void visitExceptions(Exceptions& exceptions);
+    virtual void visitFunctions(Functions& functions);
+    virtual void visitGenerators(Generators& generators);
+    virtual void visitProcedures(Procedures& procedures);
+    virtual void visitRoles(Roles& roles);
+    virtual void visitTables(Tables& tables);
+    virtual void visitTriggers(Triggers& triggers);
+    virtual void visitViews(Views& views);
+
+    wxString getStatement() const;
 };
 //-----------------------------------------------------------------------------
-class Views: public MetadataCollection<View>
-{
-protected:
-    virtual void loadChildren();
-public:
-    virtual void acceptVisitor(MetadataItemVisitor* visitor);
-    void load(ProgressIndicator* progressIndicator);
-};
-//-----------------------------------------------------------------------------
-#endif
+#endif // FR_METADATAITEMCREATESTATEMENTVISITOR_H

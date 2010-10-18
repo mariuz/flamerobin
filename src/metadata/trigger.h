@@ -48,7 +48,6 @@ public:
     Trigger();
 
     enum fireTimeType { afterTrigger, beforeTrigger, databaseTrigger };
-    wxString getCreateSqlTemplate() const;  // overrides MetadataItem::getCreateSqlTemplate()
 
     void getTriggerInfo(wxString& object, bool& active, int& position,
         wxString& type, bool& isDatabaseTrigger);

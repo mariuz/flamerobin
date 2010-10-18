@@ -118,11 +118,6 @@ wxString Role::getOwner()
     return std2wx(name).Trim();
 }
 //-----------------------------------------------------------------------------
-wxString Role::getCreateSqlTemplate() const
-{
-    return  wxT("CREATE ROLE role_name;\n");
-}
-//-----------------------------------------------------------------------------
 const wxString Role::getTypeName() const
 {
     return wxT("ROLE");

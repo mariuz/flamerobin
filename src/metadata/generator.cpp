@@ -84,16 +84,6 @@ void Generator::loadProperties()
     notifyObservers();
 }
 //-----------------------------------------------------------------------------
-wxString Generator::getCreateSqlTemplate() const
-{
-    StatementBuilder sb;
-    sb << kwCREATE << ' ' << kwGENERATOR << wxT(" name;")
-        << StatementBuilder::NewLine
-        << kwSET << ' ' << kwGENERATOR << wxT(" name ") << kwTO
-        << wxT(" value;") << StatementBuilder::NewLine;
-    return sb;
-}
-//-----------------------------------------------------------------------------
 const wxString Generator::getTypeName() const
 {
     return wxT("GENERATOR");

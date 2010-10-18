@@ -58,7 +58,6 @@ public:
     bool hasDefault();
     bool isString();
     bool isSystem() const;
-    virtual wxString getCreateSqlTemplate() const;
     wxString getAlterSqlTemplate() const;
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* v);
