@@ -79,7 +79,8 @@ void Root::disconnectAllDatabases()
     for (ServerPtrs::iterator its = serversM.begin();
         its != serversM.end(); ++its)
     {
-        std::for_each((*its)->begin(), (*its)->end(),
+        DatabasePtrs databases((*its)->getDatabases());
+        std::for_each(databases.begin(), databases.end(),
             boost::mem_fn(&Database::disconnect));
     }
 }
@@ -309,8 +310,9 @@ bool Root::save()
         rsAddChildNode(srvn, wxT("host"), (*its)->getHostname());
         rsAddChildNode(srvn, wxT("port"), (*its)->getPort());
 
-        for (DatabasePtrs::iterator itdb = (*its)->begin();
-            itdb != (*its)->end(); ++itdb)
+        DatabasePtrs databases((*its)->getDatabases());
+        for (DatabasePtrs::iterator itdb = databases.begin();
+            itdb != databases.end(); ++itdb)
         {
             (*itdb)->resetCredentials();    // clean up eventual extra credentials
 
@@ -331,33 +333,18 @@ bool Root::save()
     return doc.Save(getFileName());
 }
 //-----------------------------------------------------------------------------
+ServerPtrs Root::getServers() const
+{
+    return serversM;
+}
+//-----------------------------------------------------------------------------
 bool Root::getChildren(std::vector<MetadataItem *>& temp)
 {
     if (serversM.empty())
         return false;
     std::transform(serversM.begin(), serversM.end(), std::back_inserter(temp),
-        MetadataItemFromShared<Server>());
+        boost::mem_fn(&ServerPtr::get));
     return true;
-}
-//-----------------------------------------------------------------------------
-ServerPtrs::iterator Root::begin()
-{
-    return serversM.begin();
-}
-//-----------------------------------------------------------------------------
-ServerPtrs::iterator Root::end()
-{
-    return serversM.end();
-}
-//-----------------------------------------------------------------------------
-ServerPtrs::const_iterator Root::begin() const
-{
-    return serversM.begin();
-}
-//-----------------------------------------------------------------------------
-ServerPtrs::const_iterator Root::end() const
-{
-    return serversM.end();
 }
 //-----------------------------------------------------------------------------
 void Root::lockChildren()

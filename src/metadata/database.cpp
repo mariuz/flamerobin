@@ -41,8 +41,11 @@
 #include <wx/encconv.h>
 #include <wx/fontmap.h>
 
+#include <algorithm>
 #include <functional>
 #include <sstream>
+
+#include <boost/function.hpp>
 
 #include "config/Config.h"
 #include "config/DatabaseConfig.h"
@@ -351,19 +354,29 @@ void Database::resetCredentials()
         connectionCredentialsM = 0;
     }
 }
-//-----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 void Database::getIdentifiers(std::vector<Identifier>& temp)
 {
-    tablesM.getChildrenNames(temp);
-    sysTablesM.getChildrenNames(temp);
-    viewsM.getChildrenNames(temp);
-    proceduresM.getChildrenNames(temp);
-    triggersM.getChildrenNames(temp);
-    rolesM.getChildrenNames(temp);
-    generatorsM.getChildrenNames(temp);
-    functionsM.getChildrenNames(temp);
-    domainsM.getChildrenNames(temp);
-    exceptionsM.getChildrenNames(temp);
+    std::transform(tablesM.begin(), tablesM.end(),
+        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(sysTablesM.begin(), sysTablesM.end(),
+        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(viewsM.begin(), viewsM.end(),
+        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(proceduresM.begin(), proceduresM.end(),
+        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(triggersM.begin(), triggersM.end(),
+        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(rolesM.begin(), rolesM.end(),
+        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(generatorsM.begin(), generatorsM.end(),
+        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(functionsM.begin(), functionsM.end(),
+        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(domainsM.begin(), domainsM.end(),
+        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(exceptionsM.begin(), exceptionsM.end(),
+        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
 }
 //-----------------------------------------------------------------------------
 // This could be moved to Column class
@@ -1107,64 +1120,64 @@ bool Database::getChildren(std::vector<MetadataItem*>& temp)
     return true;
 }
 //-----------------------------------------------------------------------------
-Domains* Database::getDomains()
+Domains& Database::getDomains()
 {
     domainsM.ensureChildrenLoaded();
-    return &domainsM;
+    return domainsM;
 }
 //-----------------------------------------------------------------------------
-Exceptions* Database::getExceptions()
+Exceptions& Database::getExceptions()
 {
     exceptionsM.ensureChildrenLoaded();
-    return &exceptionsM;
+    return exceptionsM;
 }
 //-----------------------------------------------------------------------------
-Functions* Database::getFunctions()
+Functions& Database::getFunctions()
 {
     functionsM.ensureChildrenLoaded();
-    return &functionsM;
+    return functionsM;
 }
 //-----------------------------------------------------------------------------
-Generators* Database::getGenerators()
+Generators& Database::getGenerators()
 {
     generatorsM.ensureChildrenLoaded();
-    return &generatorsM;
+    return generatorsM;
 }
 //-----------------------------------------------------------------------------
-Procedures* Database::getProcedures()
+Procedures& Database::getProcedures()
 {
     proceduresM.ensureChildrenLoaded();
-    return &proceduresM;
+    return proceduresM;
 }
 //-----------------------------------------------------------------------------
-Roles* Database::getRoles()
+Roles& Database::getRoles()
 {
     rolesM.ensureChildrenLoaded();
-    return &rolesM;
+    return rolesM;
 }
 //-----------------------------------------------------------------------------
-SysTables* Database::getSysTables()
+SysTables& Database::getSysTables()
 {
     sysTablesM.ensureChildrenLoaded();
-    return &sysTablesM;
+    return sysTablesM;
 }
 //-----------------------------------------------------------------------------
-Tables* Database::getTables()
+Tables& Database::getTables()
 {
     tablesM.ensureChildrenLoaded();
-    return &tablesM;
+    return tablesM;
 }
 //-----------------------------------------------------------------------------
-Triggers* Database::getTriggers()
+Triggers& Database::getTriggers()
 {
     triggersM.ensureChildrenLoaded();
-    return &triggersM;
+    return triggersM;
 }
 //-----------------------------------------------------------------------------
-Views* Database::getViews()
+Views& Database::getViews()
 {
     viewsM.ensureChildrenLoaded();
-    return &viewsM;
+    return viewsM;
 }
 //-----------------------------------------------------------------------------
 // returns vector of all subitems

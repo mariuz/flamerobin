@@ -275,14 +275,6 @@ public:
         return (itemsM.size() != 0);
     }
 
-    void getChildrenNames(std::vector<Identifier>& temp)
-    {
-        if (!childrenLoaded())
-            return;
-        for (const_iterator it = itemsM.begin(); it != itemsM.end(); ++it)
-            temp.push_back((*it).getIdentifier());
-    }
-
     wxString getCreateSqlTemplate() const        // this could be done better, but I haven't got the idea
     {                                               // function looks like it could be static, but then it
         T dummy;                                    // can't be virtual, and vice versa. So I just create a dummy

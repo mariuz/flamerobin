@@ -272,8 +272,8 @@ bool FieldPropertiesDialog::getDomainInfo(const wxString& domain,
     Database* db = tableM->findDatabase();
     if (db)
     {
-        Domains::const_iterator it;
-        for (it = db->getDomains()->begin(); it != db->getDomains()->end(); ++it)
+        Domains& ds(db->getDomains());
+        for (Domains::const_iterator it = ds.begin(); it != ds.end(); ++it)
         {
             if (domain == (*it).getName_())
             {
@@ -493,8 +493,8 @@ void FieldPropertiesDialog::loadDomains()
     Database* db = (tableM) ? tableM->findDatabase() : 0;
     if (tableM && db)
     {
-        Domains::const_iterator it;
-        for (it = db->getDomains()->begin(); it != db->getDomains()->end(); ++it)
+        Domains& ds(db->getDomains());
+        for (Domains::const_iterator it = ds.begin(); it != ds.end(); ++it)
         {
             wxString name = (*it).getName_();
             // ignore RDB$XXX domains unless it's the one columnM uses
@@ -514,8 +514,8 @@ void FieldPropertiesDialog::loadGeneratorNames()
     Database* db = (tableM) ? tableM->findDatabase() : 0;
     if (tableM && db)
     {
-        Generators::const_iterator it;
-        for (it = db->getGenerators()->begin(); it != db->getGenerators()->end(); ++it)
+        Generators& gs(db->getGenerators());
+        for (Generators::const_iterator it = gs.begin(); it != gs.end(); ++it)
             choice_generator->Append((*it).getName_());
     }
 }

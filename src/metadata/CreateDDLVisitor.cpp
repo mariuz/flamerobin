@@ -144,21 +144,51 @@ void CreateDDLVisitor::visitColumn(Column& c)
 }
 //-----------------------------------------------------------------------------
 template <class T>
-void iterateit(CreateDDLVisitor* v, MetadataCollection<T>* p, ProgressIndicator* pi)
+void iterateit(CreateDDLVisitor* v, MetadataCollection<T>& mc,
+    ProgressIndicator* pi)
 {
-    pi->setProgressMessage(wxT("Extracting ") + p->getName_());
-    pi->stepProgress();
-    pi->initProgress(wxEmptyString, p->getChildrenCount(), 0, 2);
-
-    for (typename MetadataCollection<T>::iterator it = p->begin();
-        it != p->end(); ++it)
+    if (pi)
     {
-        checkProgressIndicatorCanceled(pi);
-        Domain *d = dynamic_cast<Domain *>(&(*it));
-        if (d && d->isSystem())     // system domains get loaded during
+        pi->setProgressMessage(wxT("Extracting ") + mc.getName_());
+        pi->stepProgress();
+        pi->initProgress(wxEmptyString, mc.getChildrenCount(), 0, 2);
+    }
+
+    for (typename MetadataCollection<T>::iterator it = mc.begin();
+        it != mc.end(); ++it)
+    {
+        if (pi)
+        {
+            checkProgressIndicatorCanceled(pi);
+            pi->setProgressMessage(wxT("Extracting ") + (*it).getName_(), 2);
+            pi->stepProgress(1, 2);
+        }
+        (*it).acceptVisitor(v);
+    }
+}
+//-----------------------------------------------------------------------------
+template <>
+void iterateit(CreateDDLVisitor* v, MetadataCollection<Domain>& mc,
+    ProgressIndicator* pi)
+{
+    if (pi)
+    {
+        pi->setProgressMessage(wxT("Extracting ") + mc.getName_());
+        pi->stepProgress();
+        pi->initProgress(wxEmptyString, mc.getChildrenCount(), 0, 2);
+    }
+
+    for (MetadataCollection<Domain>::iterator it = mc.begin();
+        it != mc.end(); ++it)
+    {
+        if (it->isSystem())         // system domains get loaded during
             continue;               // program lifetime - so we skip them
-        pi->setProgressMessage(wxT("Extracting ") + (*it).getName_(), 2);
-        pi->stepProgress(1, 2);
+        if (pi)
+        {
+            checkProgressIndicatorCanceled(pi);
+            pi->setProgressMessage(wxT("Extracting ") + (*it).getName_(), 2);
+            pi->stepProgress(1, 2);
+        }
         (*it).acceptVisitor(v);
     }
 }

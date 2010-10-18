@@ -94,13 +94,10 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         _("Trigger:"));
     fgSizer3->Add(radiobtn_trigger, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     {
-        Triggers* tc = databaseM->getTriggers();
+        Triggers& tc(databaseM->getTriggers());
         wxArrayString choices;
-        for (Triggers::iterator it = tc->begin();
-            it != tc->end(); ++it)
-        {
+        for (Triggers::iterator it = tc.begin(); it != tc.end(); ++it)
             choices.Add((*it).getName_());
-        }
         choice_trigger = new wxChoice(granteePanel, ID_choice,
             wxDefaultPosition, wxDefaultSize, choices);
         if (!choices.IsEmpty())
@@ -113,14 +110,10 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
          _("Procedure:"));
     fgSizer3->Add(radiobtn_procedure, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     {
-        Procedures* tc =
-            databaseM->getProcedures();
+        Procedures& tc(databaseM->getProcedures());
         wxArrayString choices;
-        for (Procedures::iterator it = tc->begin();
-            it != tc->end(); ++it)
-        {
+        for (Procedures::iterator it = tc.begin(); it != tc.end(); ++it)
             choices.Add((*it).getName_());
-        }
         choice_procedure = new wxChoice(granteePanel, ID_choice,
             wxDefaultPosition, wxDefaultSize, choices);
         if (!choices.IsEmpty())
@@ -132,13 +125,10 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     radiobtn_view = new wxRadioButton(granteePanel, ID_radiobtn, _("View:"));
     fgSizer3->Add(radiobtn_view, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     {
-        Views* tc = databaseM->getViews();
+        Views& tc(databaseM->getViews());
         wxArrayString choices;
-        for (Views::iterator it = tc->begin();
-            it != tc->end(); ++it)
-        {
+        for (Views::iterator it = tc.begin(); it != tc.end(); ++it)
             choices.Add((*it).getName_());
-        }
         choice_view = new wxChoice(granteePanel, ID_choice, wxDefaultPosition,
             wxDefaultSize, choices);
         if (!choices.IsEmpty())
@@ -171,18 +161,16 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     // relations
     {
         wxArrayString choices;
-        Tables* tt = databaseM->getTables();
+        Tables& tt(databaseM->getTables());
         size_t to_select = 0;
-        for (Tables::iterator it = tt->begin();
-            it != tt->end(); ++it)
+        for (Tables::iterator it = tt.begin(); it != tt.end(); ++it)
         {
             if (dynamic_cast<Table *>(object) == &(*it))
                 to_select = choices.GetCount();
             choices.Add((*it).getName_());
         }
-        Views* tv = databaseM->getViews();
-        for (Views::iterator it = tv->begin();
-            it != tv->end(); ++it)
+        Views& tv(databaseM->getViews());
+        for (Views::iterator it = tv.begin(); it != tv.end(); ++it)
         {
             if (dynamic_cast<View *>(object) == &(*it))
                 to_select = choices.GetCount();
@@ -256,12 +244,10 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         _("Procedure"));
     fgSizer4->Add(radiobtn_execute, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     {
-        Procedures* tc =
-            databaseM->getProcedures();
+        Procedures& tc = databaseM->getProcedures();
         wxArrayString choices;
         size_t to_select = 0;
-        for (Procedures::iterator it = tc->begin();
-            it != tc->end(); ++it)
+        for (Procedures::iterator it = tc.begin(); it != tc.end(); ++it)
         {
             if (dynamic_cast<Procedure *>(object) == &(*it))
                 to_select = choices.GetCount();
@@ -280,11 +266,10 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         _("Role"));
     fgSizer4->Add(radiobtn_memberof, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     {
-        Roles* tc = databaseM->getRoles();
+        Roles& tc(databaseM->getRoles());
         wxArrayString choices;
         size_t to_select = 0;
-        for (Roles::iterator it = tc->begin();
-            it != tc->end(); ++it)
+        for (Roles::iterator it = tc.begin(); it != tc.end(); ++it)
         {
             if (dynamic_cast<Role *>(object) == &(*it))
                 to_select = choices.GetCount();

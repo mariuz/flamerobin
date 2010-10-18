@@ -224,16 +224,16 @@ public:
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
     void getCollections(std::vector<MetadataItem *>& temp, bool system);
 
-    Domains* getDomains();
-    Exceptions* getExceptions();
-    Functions* getFunctions();
-    Generators* getGenerators();
-    Procedures* getProcedures();
-    Roles* getRoles();
-    Tables* getTables();
-    SysTables* getSysTables();
-    Triggers* getTriggers();
-    Views* getViews();
+    Domains& getDomains();
+    Exceptions& getExceptions();
+    Functions& getFunctions();
+    Generators& getGenerators();
+    Procedures& getProcedures();
+    Roles& getRoles();
+    Tables& getTables();
+    SysTables& getSysTables();
+    Triggers& getTriggers();
+    Views& getViews();
 
     void clear();               // sets all values to empty wxString
     bool isConnected() const;

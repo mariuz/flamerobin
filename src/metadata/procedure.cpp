@@ -131,7 +131,7 @@ bool Procedure::getChildren(std::vector<MetadataItem *>& temp)
     if (parametersM.empty())
         return false;
     std::transform(parametersM.begin(), parametersM.end(),
-        std::back_inserter(temp), MetadataItemFromShared<Parameter>());
+        std::back_inserter(temp), boost::mem_fn(&ParameterPtr::get));
     return true;
 }
 //-----------------------------------------------------------------------------

@@ -28,8 +28,6 @@
 #ifndef FR_ROOT_H
 #define FR_ROOT_H
 //-----------------------------------------------------------------------------
-#include <vector>
-
 #include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
 
@@ -58,11 +56,7 @@ public:
     void removeServer(ServerPtr server);
     void addUnregisteredDatabase(DatabasePtr database);
 
-    ServerPtrs::iterator begin();
-    ServerPtrs::iterator end();
-    ServerPtrs::const_iterator begin() const;
-    ServerPtrs::const_iterator end() const;
-
+    ServerPtrs getServers() const;
     virtual bool getChildren(std::vector<MetadataItem*>& temp);
 
     bool load();

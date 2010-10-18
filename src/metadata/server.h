@@ -29,8 +29,6 @@
 #ifndef FR_SERVER_H
 #define FR_SERVER_H
 
-#include <vector>
-
 #include <boost/enable_shared_from_this.hpp>
 
 #include <ibpp.h>
@@ -60,16 +58,12 @@ protected:
 public:
     Server();
 
+    DatabasePtrs getDatabases() const;
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
 
     DatabasePtr addDatabase();
     void addDatabase(DatabasePtr database);
     void removeDatabase(DatabasePtr database);
-
-    DatabasePtrs::iterator begin();
-    DatabasePtrs::iterator end();
-    DatabasePtrs::const_iterator begin() const;
-    DatabasePtrs::const_iterator end() const;
 
     void createDatabase(DatabasePtr db, int pagesize = 4096, int dialect = 3);
 

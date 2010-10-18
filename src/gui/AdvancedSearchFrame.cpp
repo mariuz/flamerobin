@@ -162,11 +162,13 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent, RootPtr root)
     choice_database = new wxChoice(mainPanel, wxID_ANY, wxDefaultPosition,
         wxDefaultSize, 0, 0, 0);
     choice_database->Append(_("[All Connected Databases]"), (void *)0);
-    for (ServerPtrs::iterator its = root->begin(); its != root->end();
+    ServerPtrs servers(root->getServers());
+    for (ServerPtrs::iterator its = servers.begin(); its != servers.end();
         ++its)
     {
-        for (DatabasePtrs::iterator itdb = (*its)->begin();
-            itdb != (*its)->end(); ++itdb)
+        DatabasePtrs databases((*its)->getDatabases());
+        for (DatabasePtrs::iterator itdb = databases.begin();
+            itdb != databases.end(); ++itdb)
         {   // we store DB pointer, so we observe in case database is removed
             Database* db = (*itdb).get();
             choice_database->Append((*its)->getName_() + wxT("::") +

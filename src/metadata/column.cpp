@@ -206,17 +206,15 @@ bool Column::isString() const
 //-----------------------------------------------------------------------------
 Domain* Column::getDomain() const
 {
-    Database* d = findDatabase();
-    if (!d)
+    Database* db = findDatabase();
+    if (!db)
         return 0;
-    for (Domains::const_iterator it = d->getDomains()->begin();
-        it != d->getDomains()->end(); ++it)
-    {
-        if ((*it).getName_() == sourceM)
-            return (Domain *)&(*it);
-    }
+
+    Domains& ds(db->getDomains());
+    if (Domain* d = dynamic_cast<Domain*>(ds.findByName(sourceM)))
+        return d;
     // since we haven't found the domain, check the database
-    return d->loadMissingDomain(sourceM);
+    return db->loadMissingDomain(sourceM);
 }
 //-----------------------------------------------------------------------------
 Table* Column::getTable() const

@@ -690,10 +690,11 @@ void InsertDialog::OnGridCellChange(wxGridEvent& event)
         {
             // select generator name and store in tx
             wxArrayString as;
-            for (Generators::const_iterator ci = databaseM->getGenerators()->begin();
-                ci != databaseM->getGenerators()->end(); ++ci)
+            Generators& gs(databaseM->getGenerators());
+            for (Generators::const_iterator it = gs.begin(); it != gs.end();
+                ++it)
             {
-                as.Add((*ci).getQuotedName());
+                as.Add((*it).getQuotedName());
             }
             wxString s(::wxGetSingleChoice(_("Select a generator"),
                 _("Generator"), as, this));

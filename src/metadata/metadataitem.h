@@ -176,13 +176,6 @@ public:
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
-template<class T>
-struct MetadataItemFromShared
-{
-public:
-    MetadataItem* operator()(boost::shared_ptr<T> pt) { return pt.get(); };
-};
-//-----------------------------------------------------------------------------
 //! masks the object it points to so others see it transparently
 class Dependency: public MetadataItem
 {

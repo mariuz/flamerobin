@@ -56,6 +56,11 @@ Server::Server()
     setChildrenLoaded(true);
 }
 //-----------------------------------------------------------------------------
+DatabasePtrs Server::getDatabases() const
+{
+    return databasesM;
+}
+//-----------------------------------------------------------------------------
 void Server::lockChildren()
 {
     std::for_each(databasesM.begin(), databasesM.end(),
@@ -73,7 +78,7 @@ bool Server::getChildren(std::vector<MetadataItem*>& temp)
     if (databasesM.empty())
         return false;
     std::transform(databasesM.begin(), databasesM.end(),
-        std::back_inserter(temp), MetadataItemFromShared<Database>());
+        std::back_inserter(temp), boost::mem_fn(&DatabasePtr::get));
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -121,26 +126,6 @@ void Server::createDatabase(DatabasePtr db, int pagesize, int dialect)
         wx2std(db->getDecryptedPassword()), "", wx2std(charset),
         wx2std(extra_params));
     db1->Create(dialect);
-}
-//-----------------------------------------------------------------------------
-DatabasePtrs::iterator Server::begin()
-{
-    return databasesM.begin();
-}
-//-----------------------------------------------------------------------------
-DatabasePtrs::iterator Server::end()
-{
-    return databasesM.end();
-}
-//-----------------------------------------------------------------------------
-DatabasePtrs::const_iterator Server::begin() const
-{
-    return databasesM.begin();
-}
-//-----------------------------------------------------------------------------
-DatabasePtrs::const_iterator Server::end() const
-{
-    return databasesM.end();
 }
 //-----------------------------------------------------------------------------
 wxString Server::getHostname() const

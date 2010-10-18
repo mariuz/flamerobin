@@ -452,9 +452,8 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
         // and return them in "list"
         Database *d = getDatabase(wxT("Relation::getRebuildSql"));
         std::vector<ForeignKey> fkeys;
-        Tables* tables = d->getTables();
-        for (Tables::iterator it = tables->begin(); it !=
-            tables->end(); ++it)
+        Tables& tables(d->getTables());
+        for (Tables::iterator it = tables.begin(); it != tables.end(); ++it)
         {
             std::vector<ForeignKey> *fk = (*it).getForeignKeys();
             if (fk)
@@ -682,7 +681,7 @@ bool Relation::getChildren(std::vector<MetadataItem*>& temp)
     if (columnsM.empty())
         return false;
     std::transform(columnsM.begin(), columnsM.end(), std::back_inserter(temp),
-        MetadataItemFromShared<Column>());
+        boost::mem_fn(&ColumnPtr::get));
     return true;
 }
 //-----------------------------------------------------------------------------
