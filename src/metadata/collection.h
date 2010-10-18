@@ -260,7 +260,7 @@ public:
         return itemsM.end();
     }
 
-    virtual MetadataItem* findByName(wxString name)
+    T* findByName(wxString name)
     {
         iterator it = getPosition(name);
         return (it != itemsM.end()) ? &(*it) : 0;

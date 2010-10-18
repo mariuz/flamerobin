@@ -211,7 +211,7 @@ Domain* Column::getDomain() const
         return 0;
 
     Domains& ds(db->getDomains());
-    if (Domain* d = dynamic_cast<Domain*>(ds.findByName(sourceM)))
+    if (Domain* d = ds.findByName(sourceM))
         return d;
     // since we haven't found the domain, check the database
     return db->loadMissingDomain(sourceM);

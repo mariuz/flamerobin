@@ -74,7 +74,7 @@ Table* AddConstraintHandler::selectTable(Database *d, wxWindow *parent) const
         _("Creating foreign key"), tables, parent);
     if (index == -1)
         return 0;
-    return dynamic_cast<Table*>(ts.findByName(tables[index]));
+    return ts.findByName(tables[index]);
 }
 //-----------------------------------------------------------------------------
 wxString AddConstraintHandler::selectAction(const wxString& label, wxWindow *parent) const
