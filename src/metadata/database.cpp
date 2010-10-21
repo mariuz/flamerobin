@@ -619,8 +619,6 @@ Relation* Database::getRelationForTrigger(Trigger* trigger)
 //-----------------------------------------------------------------------------
 void Database::dropObject(MetadataItem* object)
 {
-    object->drop();     // alert the children if any
-
     // find the collection that contains it, and remove it
     NodeType nt = object->getType();
     switch (nt)

@@ -137,7 +137,6 @@ public:
 
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
     virtual size_t getChildrenCount() const { return 0; };
-    void drop();    // removes its children (by calling drop() for each) and notifies it's parent
 
     // returns complete DROP SQL statement
     virtual wxString getDropSqlStatement() const;

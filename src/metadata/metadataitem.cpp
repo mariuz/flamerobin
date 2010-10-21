@@ -233,25 +233,6 @@ bool MetadataItem::getChildren(std::vector<MetadataItem*>& /*temp*/)
     return false;
 }
 //-----------------------------------------------------------------------------
-//! removes its children (by calling drop() for each) and notifies its parent
-void MetadataItem::drop()
-{
-    std::vector<MetadataItem* >temp;
-    if (getChildren(temp))
-    {
-        for (std::vector<MetadataItem*>::iterator it = temp.begin();
-            it != temp.end(); ++it)
-        {
-            (*it)->drop();
-        }
-    }
-
-    // TODO: perhaps the whole DBH needs to be reconsidered
-    // we could write: if (parentM) parentM->remove(this);
-    // but we can't, since parent might not be a collection!
-    // ie. currently it is a Database object
-}
-//-----------------------------------------------------------------------------
 MetadataItem* MetadataItem::getParentObjectOfType(NodeType type) const
 {
     MetadataItem* m = const_cast<MetadataItem*>(this);
