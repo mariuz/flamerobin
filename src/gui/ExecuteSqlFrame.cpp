@@ -2071,8 +2071,17 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
         else if (ss.getSql().length() && !execute(ss.getSql(),
             ms.getTerminator(), prepareOnly))
         {
-            styled_text_ctrl_sql->markText(selectionOffset + ms.getStart(),
-                selectionOffset + ms.getEnd());
+            int stmtStart = selectionOffset + ms.getStart();
+#if wxUSE_UNICODE
+            // STC uses UTF-8 internally in Unicode build
+            // account for possible differences in string length
+            // if system charset != UTF-8
+            std::string stmt(wx2std(ss.getSql(), &wxConvUTF8));
+            int stmtEnd = stmtStart + stmt.size();
+#else
+            int stmtEnd = selectionOffset + ms.getEnd();
+#endif
+            styled_text_ctrl_sql->markText(stmtStart, stmtEnd);
             styled_text_ctrl_sql->SetFocus();
             return false;
         }
