@@ -64,6 +64,12 @@ wxString LoadDescriptionVisitor::getDescription() const
 void LoadDescriptionVisitor::loadDescription(MetadataItem* object,
     const std::string& statement)
 {
+    loadDescription(object, 0, statement);
+}
+//-----------------------------------------------------------------------------
+void LoadDescriptionVisitor::loadDescription(MetadataItem* object,
+    MetadataItem* parent, const std::string& statement)
+{
     descriptionM = wxEmptyString;
     availableM = false;
 
@@ -80,12 +86,8 @@ void LoadDescriptionVisitor::loadDescription(MetadataItem* object,
 
         st1->Set(1, wx2std(object->getName_(), csConverter));
         // relation column or SP parameter?
-        if (st1->Parameters() > 1)
-        {
-            // TODO: use getRelation() and getProcedure() instead !
-            st1->Set(2, wx2std(object->getParent()->getName_(),
-                csConverter));
-        }
+        if (parent)
+            st1->Set(2, wx2std(parent->getName_(), csConverter));
         st1->Execute();
         st1->Fetch();
 
@@ -112,7 +114,8 @@ void LoadDescriptionVisitor::loadDescription(MetadataItem* object,
 //-----------------------------------------------------------------------------
 void LoadDescriptionVisitor::visitColumn(Column& column)
 {
-    loadDescription(&column,
+    // TODO: use Column::GetRelation() / Column::getProcedure() instead
+    loadDescription(&column, column.getParent(),
         "select RDB$DESCRIPTION from RDB$RELATION_FIELDS "
         "where RDB$FIELD_NAME = ? and RDB$RELATION_NAME = ?");
 }
@@ -154,7 +157,8 @@ void LoadDescriptionVisitor::visitIndex(Index& index)
 //-----------------------------------------------------------------------------
 void LoadDescriptionVisitor::visitParameter(Parameter& parameter)
 {
-    loadDescription(&parameter,
+    // TODO: use Parameter::getProcedure() instead
+    loadDescription(&parameter, parameter.getParent(),
         "select RDB$DESCRIPTION from RDB$PROCEDURE_PARAMETERS "
         "where RDB$PARAMETER_NAME = ? and RDB$PROCEDURE_NAME = ?");
 }
@@ -196,6 +200,12 @@ SaveDescriptionVisitor::SaveDescriptionVisitor(wxString description)
 void SaveDescriptionVisitor::saveDescription(MetadataItem* object,
     const std::string& statement)
 {
+    saveDescription(object, 0, statement);
+}
+//-----------------------------------------------------------------------------
+void SaveDescriptionVisitor::saveDescription(MetadataItem* object,
+    MetadataItem* parent, const std::string& statement)
+{
     wxASSERT(object);
     Database* d = object->getDatabase(
         wxT("SaveDescriptionVisitor::saveDescription"));
@@ -217,12 +227,9 @@ void SaveDescriptionVisitor::saveDescription(MetadataItem* object,
     else
         st1->SetNull(1);
     st1->Set(2, wx2std(object->getName_(), csConverter));
-    if (st1->Parameters() > 2)
-    {
-        // TODO: use getRelation() and getProcedure() instead !
-        st1->Set(3, wx2std(object->getParent()->getName_(),
-            csConverter));
-    }
+    // relation column or SP parameter?
+    if (parent)
+        st1->Set(3, wx2std(parent->getName_(), csConverter));
 
     st1->Execute();
     tr1->Commit();
@@ -230,7 +237,8 @@ void SaveDescriptionVisitor::saveDescription(MetadataItem* object,
 //-----------------------------------------------------------------------------
 void SaveDescriptionVisitor::visitColumn(Column& column)
 {
-    saveDescription(&column,
+    // TODO: use Column::GetRelation() / Column::getProcedure() instead
+    saveDescription(&column, column.getParent(),
         "update RDB$RELATION_FIELDS set RDB$DESCRIPTION = ? "
         "where RDB$FIELD_NAME = ? and RDB$RELATION_NAME = ?");
 }
@@ -272,7 +280,8 @@ void SaveDescriptionVisitor::visitIndex(Index& index)
 //-----------------------------------------------------------------------------
 void SaveDescriptionVisitor::visitParameter(Parameter& parameter)
 {
-    saveDescription(&parameter,
+    // TODO: use Parameter::getProcedure() instead
+    saveDescription(&parameter, parameter.getParent(),
         "update RDB$PROCEDURE_PARAMETERS set RDB$DESCRIPTION = ? "
         "where RDB$PARAMETER_NAME = ? and RDB$PROCEDURE_NAME = ?");
 }

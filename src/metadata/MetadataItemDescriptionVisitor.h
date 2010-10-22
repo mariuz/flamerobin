@@ -36,6 +36,8 @@ private:
     wxString descriptionM;
     bool availableM;
     void loadDescription(MetadataItem* object, const std::string& statement);
+    void loadDescription(MetadataItem* object, MetadataItem* parent,
+        const std::string& statement);
 public:
     LoadDescriptionVisitor();
 
@@ -60,6 +62,8 @@ class SaveDescriptionVisitor : public MetadataItemVisitor
 private:
     wxString descriptionM;
     void saveDescription(MetadataItem* object, const std::string& statement);
+    void saveDescription(MetadataItem* object, MetadataItem* parent,
+        const std::string& statement);
 public:
     SaveDescriptionVisitor(wxString description);
 
