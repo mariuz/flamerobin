@@ -62,9 +62,11 @@ MetadataItem::MetadataItem()
 {
 }
 //-----------------------------------------------------------------------------
-MetadataItem::MetadataItem(NodeType type)
-    : Subject(), typeM(type), parentM(0), childrenLoadedM(lsNotLoaded),
-        descriptionLoadedM(lsNotLoaded), propertiesLoadedM(lsNotLoaded)
+MetadataItem::MetadataItem(NodeType type, MetadataItem* parent,
+        const wxString& name)
+    : Subject(), typeM(type), parentM(parent), identifierM(name),
+        childrenLoadedM(lsNotLoaded), descriptionLoadedM(lsNotLoaded),
+        propertiesLoadedM(lsNotLoaded)
 {
 }
 //-----------------------------------------------------------------------------
@@ -464,9 +466,8 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
         {
             std::string s;
             st1->Get(1, s);
-            Trigger t;
-            t.setName_(std2wxIdentifier(s, d->getCharsetConverter()));
-            t.setParent(d);
+            Trigger t(d->shared_from_this(),
+                std2wxIdentifier(s, d->getCharsetConverter()));
             t.getDependencies(tempdep, true);
         }
         // remove duplicates, and self-references from "tempdep"
@@ -646,14 +647,6 @@ NodeType MetadataItem::getType() const
 void MetadataItem::setType(NodeType type)
 {
     typeM = type;
-}
-//-----------------------------------------------------------------------------
-void MetadataItem::setProperties(MetadataItem* parent, const wxString& name,
-    NodeType type)
-{
-    setParent(parent);
-    setType(type);
-    setName_(name);
 }
 //-----------------------------------------------------------------------------
 bool MetadataItem::isSystem() const

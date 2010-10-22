@@ -690,8 +690,8 @@ void InsertDialog::OnGridCellChange(wxGridEvent& event)
         {
             // select generator name and store in tx
             wxArrayString as;
-            Generators& gs(databaseM->getGenerators());
-            for (Generators::const_iterator it = gs.begin(); it != gs.end();
+            GeneratorsPtr gs(databaseM->getGenerators());
+            for (Generators::const_iterator it = gs->begin(); it != gs->end();
                 ++it)
             {
                 as.Add((*it).getQuotedName());

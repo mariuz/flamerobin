@@ -57,8 +57,8 @@
 #include "metadata/procedure.h"
 #include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------
-Procedure::Procedure()
-    : MetadataItem(ntProcedure)
+Procedure::Procedure(DatabasePtr database, const wxString& name)
+    : MetadataItem(ntProcedure, database.get(), name)
 {
 }
 //-----------------------------------------------------------------------------
@@ -109,10 +109,9 @@ void Procedure::loadChildren()
         ParameterPtr par = findParameter(param_name);
         if (!par)
         {
-            par.reset(new Parameter());
+            par.reset(new Parameter(this, param_name));
             for (unsigned i = getLockCount(); i > 0; i--)
                 par->lockSubject();
-            par->setProperties(this, param_name, ntParameter);
         }
         parameters.push_back(par);
         par->initialize(source, partype, mechanism);
@@ -527,6 +526,11 @@ void Procedure::acceptVisitor(MetadataItemVisitor* visitor)
 }
 //-----------------------------------------------------------------------------
 // Procedures collection
+Procedures::Procedures(DatabasePtr database)
+    : MetadataCollection<Procedure>(ntProcedures, database, _("Procedures"))
+{
+}
+//-----------------------------------------------------------------------------
 void Procedures::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitProcedures(*this);
@@ -534,12 +538,10 @@ void Procedures::acceptVisitor(MetadataItemVisitor* visitor)
 //-----------------------------------------------------------------------------
 void Procedures::load(ProgressIndicator* progressIndicator)
 {
-    Database* db = getDatabase(wxT("Procedures::load"));
-
     wxString stmt = wxT("select rdb$procedure_name from rdb$procedures")
         wxT(" where (rdb$system_flag = 0 or rdb$system_flag is null)")
         wxT(" order by 1");
-    setItems(db, ntProcedure, db->loadIdentifiers(stmt, progressIndicator));
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void Procedures::loadChildren()

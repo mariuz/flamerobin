@@ -40,7 +40,7 @@ private:
     bool notnullM, computedM, hasDefaultM;
     wxString sourceM, computedSourceM, collationM, defaultM;
 public:
-    Column();
+    Column(MetadataItem* parent, const wxString& name);
 
     void initialize(bool notnull, wxString source, wxString computedSource,
         wxString collation, wxString defaultValue, bool hasDefault);

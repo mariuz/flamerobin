@@ -38,8 +38,6 @@
     #include "wx/wx.h"
 #endif
 //-----------------------------------------------------------------------------
-#include <vector>
-
 #include <wx/filedlg.h>
 #include <wx/filename.h>
 #include <wx/fontdlg.h>
@@ -47,10 +45,13 @@
 #include <wx/tokenzr.h>
 #include <wx/xml/xml.h>
 
+#include <vector>
+
 #include "config/Config.h"
 #include "frutils.h"
 #include "gui/PreferencesDialog.h"
 #include "gui/StyleGuide.h"
+#include "metadata/database.h"
 #include "metadata/relation.h"
 //-----------------------------------------------------------------------------
 static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)

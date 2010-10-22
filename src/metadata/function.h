@@ -40,7 +40,7 @@ private:
     wxString libraryNameM, entryPointM, definitionM, retstrM, paramListM;
     bool infoLoadedM;
 public:
-    Function();
+    Function(DatabasePtr database, const wxString& name);
     void loadInfo(bool force = false);
     virtual const wxString getTypeName() const;
     virtual wxString getDropSqlStatement() const;
@@ -56,6 +56,8 @@ class Functions: public MetadataCollection<Function>
 protected:
     virtual void loadChildren();
 public:
+    Functions(DatabasePtr database);
+
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);
 };

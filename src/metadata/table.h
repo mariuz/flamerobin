@@ -67,7 +67,7 @@ protected:
     virtual bool addRdbKeyToSelect();
 
 public:
-    Table();
+    Table(DatabasePtr database, const wxString& name);
 
     static bool tablesRelate(const std::vector<wxString>& tables,
         Table *table, std::vector<ForeignKey>& list);
@@ -95,6 +95,8 @@ class SysTables: public MetadataCollection<Table>
 protected:
     virtual void loadChildren();
 public:
+    SysTables(DatabasePtr database);
+
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     virtual bool isSystem() const;
     void load(ProgressIndicator* progressIndicator);
@@ -105,6 +107,8 @@ class Tables: public MetadataCollection<Table>
 protected:
     virtual void loadChildren();
 public:
+    Tables(DatabasePtr database);
+
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);
 };

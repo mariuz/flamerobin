@@ -67,17 +67,18 @@ const AddConstraintHandler AddConstraintHandler::handlerInstance;
 Table* AddConstraintHandler::selectTable(Database *d, wxWindow *parent) const
 {
     wxArrayString tables;
-    Tables& ts(d->getTables());
-    for (Tables::const_iterator it = ts.begin(); it != ts.end(); ++it)
+    TablesPtr ts(d->getTables());
+    for (Tables::const_iterator it = ts->begin(); it != ts->end(); ++it)
         tables.Add((*it).getName_());
     int index = ::wxGetSingleChoiceIndex(_("Select table to reference"),
         _("Creating foreign key"), tables, parent);
     if (index == -1)
         return 0;
-    return ts.findByName(tables[index]);
+    return ts->findByName(tables[index]);
 }
 //-----------------------------------------------------------------------------
-wxString AddConstraintHandler::selectAction(const wxString& label, wxWindow *parent) const
+wxString AddConstraintHandler::selectAction(const wxString& label,
+    wxWindow *parent) const
 {
     wxArrayString actions;
     actions.Add(wxT("RESTRICT"));

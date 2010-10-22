@@ -43,17 +43,14 @@
 #include "metadata/User.h"
 //-----------------------------------------------------------------------------
 User::User(ServerPtr server)
-    :MetadataItem()
+    : MetadataItem(ntUnknown, server.get()), serverM(server)
 {
-    serverM = server;
-    setParent(server.get());
 }
 //-----------------------------------------------------------------------------
 User::User(ServerPtr server, const IBPP::User& src)
-    : MetadataItem(), useridM(src.userid), groupidM(src.groupid)
+    : MetadataItem(ntUnknown, server.get()), serverM(server),
+        useridM(src.userid), groupidM(src.groupid)
 {
-    serverM = server;
-    setParent(server.get());
     usernameM = std2wx(src.username);
     passwordM = std2wx(src.password);
     firstnameM = std2wx(src.firstname);

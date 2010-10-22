@@ -40,13 +40,14 @@
 
 #include <vector>
 
+#include "core/URIProcessor.h"
 #include "gui/CreateIndexDialog.h"
 #include "gui/ExecuteSql.h"
 #include "gui/GUIURIHandlerHelper.h"
 #include "gui/StyleGuide.h"
+#include "metadata/database.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
 #include "metadata/table.h"
-#include "core/URIProcessor.h"
 //-----------------------------------------------------------------------------
 CreateIndexDialog::CreateIndexDialog(wxWindow* parent, Table* table)
     : BaseDialog(parent, -1, wxEmptyString)

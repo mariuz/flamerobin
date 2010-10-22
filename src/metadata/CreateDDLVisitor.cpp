@@ -143,50 +143,51 @@ void CreateDDLVisitor::visitColumn(Column& c)
     }
 }
 //-----------------------------------------------------------------------------
-template <class T>
-void iterateit(CreateDDLVisitor* v, MetadataCollection<T>& mc,
-    ProgressIndicator* pi)
+template <class C, class M>
+void iterateit(CreateDDLVisitor* v, C mc, ProgressIndicator* pi)
 {
+    wxASSERT(mc);
+
     if (pi)
     {
-        pi->setProgressMessage(wxT("Extracting ") + mc.getName_());
+        pi->setProgressMessage(_("Extracting ") + mc->getName_());
         pi->stepProgress();
-        pi->initProgress(wxEmptyString, mc.getChildrenCount(), 0, 2);
+        pi->initProgress(wxEmptyString, mc->getChildrenCount(), 0, 2);
     }
 
-    for (typename MetadataCollection<T>::iterator it = mc.begin();
-        it != mc.end(); ++it)
+    for (typename MetadataCollection<M>::iterator it = mc->begin();
+        it != mc->end(); ++it)
     {
         if (pi)
         {
             checkProgressIndicatorCanceled(pi);
-            pi->setProgressMessage(wxT("Extracting ") + (*it).getName_(), 2);
+            pi->setProgressMessage(_("Extracting ") + (*it).getName_(), 2);
             pi->stepProgress(1, 2);
         }
         (*it).acceptVisitor(v);
     }
 }
 //-----------------------------------------------------------------------------
-template <>
-void iterateit(CreateDDLVisitor* v, MetadataCollection<Domain>& mc,
-    ProgressIndicator* pi)
+void iterateit(CreateDDLVisitor* v, DomainsPtr dc, ProgressIndicator* pi)
 {
+    wxASSERT(dc);
+
     if (pi)
     {
-        pi->setProgressMessage(wxT("Extracting ") + mc.getName_());
+        pi->setProgressMessage(_("Extracting ") + dc->getName_());
         pi->stepProgress();
-        pi->initProgress(wxEmptyString, mc.getChildrenCount(), 0, 2);
+        pi->initProgress(wxEmptyString, dc->getChildrenCount(), 0, 2);
     }
 
-    for (MetadataCollection<Domain>::iterator it = mc.begin();
-        it != mc.end(); ++it)
+    for (MetadataCollection<Domain>::iterator it = dc->begin();
+        it != dc->end(); ++it)
     {
         if (it->isSystem())         // system domains get loaded during
             continue;               // program lifetime - so we skip them
         if (pi)
         {
             checkProgressIndicatorCanceled(pi);
-            pi->setProgressMessage(wxT("Extracting ") + (*it).getName_(), 2);
+            pi->setProgressMessage(_("Extracting ") + (*it).getName_(), 2);
             pi->stepProgress(1, 2);
         }
         (*it).acceptVisitor(v);
@@ -201,33 +202,38 @@ void CreateDDLVisitor::visitDatabase(Database& d)
     try
     {
         preSqlM << wxT("/********************* ROLES **********************/\n\n");
-        iterateit<Role>(this, d.getRoles(), progressIndicatorM);
+        iterateit<RolesPtr, Role>(this, d.getRoles(), progressIndicatorM);
 
         preSqlM << wxT("/********************* UDFS ***********************/\n\n");
-        iterateit<Function>(this, d.getFunctions(), progressIndicatorM);
+        iterateit<FunctionsPtr, Function>(this, d.getFunctions(),
+            progressIndicatorM);
 
         preSqlM << wxT("/****************** GENERATORS ********************/\n\n");
-        iterateit<Generator>(this, d.getGenerators(), progressIndicatorM);
+        iterateit<GeneratorsPtr, Generator>(this, d.getGenerators(),
+            progressIndicatorM);
 
         preSqlM << wxT("/******************** DOMAINS *********************/\n\n");
-        iterateit<Domain>(this, d.getDomains(), progressIndicatorM);
+        iterateit(this, d.getDomains(), progressIndicatorM);
 
         preSqlM << wxT("/******************* PROCEDURES ******************/\n\n");
-        iterateit<Procedure>(this, d.getProcedures(), progressIndicatorM);
+        iterateit<ProceduresPtr, Procedure>(this, d.getProcedures(),
+            progressIndicatorM);
 
         preSqlM << wxT("/******************** TABLES **********************/\n\n");
-        iterateit<Table>(this, d.getTables(), progressIndicatorM);
+        iterateit<TablesPtr, Table>(this, d.getTables(), progressIndicatorM);
 
         preSqlM << wxT("/********************* VIEWS **********************/\n\n");
         // TODO: build dependecy tree first, and order views by it
         //       also include computed columns of tables?
-        iterateit<View>(this, d.getViews(), progressIndicatorM);
+        iterateit<ViewsPtr, View>(this, d.getViews(), progressIndicatorM);
 
         preSqlM << wxT("/******************* EXCEPTIONS *******************/\n\n");
-        iterateit<Exception>(this, d.getExceptions(), progressIndicatorM);
+        iterateit<ExceptionsPtr, Exception>(this, d.getExceptions(),
+            progressIndicatorM);
 
         preSqlM << wxT("/******************** TRIGGERS ********************/\n\n");
-        iterateit<Trigger>(this, d.getTriggers(), progressIndicatorM);
+        iterateit<TriggersPtr, Trigger>(this, d.getTriggers(),
+            progressIndicatorM);
     }
     catch (CancelProgressException&)
     {

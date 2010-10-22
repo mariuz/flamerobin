@@ -28,18 +28,17 @@
 #ifndef PREFERENCESDIALOG_H
 #define PREFERENCESDIALOG_H
 //-----------------------------------------------------------------------------
-#include <list>
-
 #include <wx/wx.h>
 #include <wx/event.h>
 #include <wx/filename.h>
 #include <wx/treectrl.h>
 #include <wx/imaglist.h>
 
+#include <list>
+
 #include "config/Config.h"
-#include "gui/BaseDialog.h"
-#include "metadata/metadataitem.h"
 #include "core/TemplateProcessor.h"
+#include "gui/BaseDialog.h"
 //-----------------------------------------------------------------------------
 class Optionbook;
 class wxXmlNode;

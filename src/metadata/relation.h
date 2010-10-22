@@ -31,9 +31,9 @@
 
 #include <vector>
 
-#include "metadata/collection.h"
 #include "metadata/column.h"
 #include "metadata/constraints.h"
+#include "metadata/database.h"
 #include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
 #include "metadata/privilege.h"
@@ -65,7 +65,7 @@ protected:
 
     virtual bool addRdbKeyToSelect();
 public:
-    Relation();
+    Relation(NodeType type, MetadataItem* parent, const wxString& name);
 
     wxString getOwner();
     int getRelationType();

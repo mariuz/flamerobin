@@ -33,6 +33,7 @@
 
 #include "core/ProcessableObject.h"
 
+class MetadataItem;
 class PrivilegeItem;
 //-----------------------------------------------------------------------------
 typedef std::vector<PrivilegeItem> PrivilegeItems;

@@ -43,14 +43,31 @@ typedef std::vector<DatabasePtr> DatabasePtrs;
 typedef boost::weak_ptr<Database> WeakDatabasePtr;
 
 class Domain;
+typedef boost::shared_ptr<Domain> DomainPtr;
+typedef std::vector<DomainPtr> DomainPtrs;
 class Domains;
+typedef boost::shared_ptr<Domains> DomainsPtr;
+
 class Exception;
+typedef boost::shared_ptr<Exception> ExceptionPtr;
+typedef std::vector<ExceptionPtr> ExceptionPtrs;
 class Exceptions;
+typedef boost::shared_ptr<Exceptions> ExceptionsPtr;
+
 class ForeignKey;
+
 class Function;
+typedef boost::shared_ptr<Function> FunctionPtr;
+typedef std::vector<FunctionPtr> FunctionPtrs;
 class Functions;
+typedef boost::shared_ptr<Functions> FunctionsPtr;
+
 class Generator;
+typedef boost::shared_ptr<Generator> GeneratorPtr;
+typedef std::vector<GeneratorPtr> GeneratorPtrs;
 class Generators;
+typedef boost::shared_ptr<Generators> GeneratorsPtr;
+
 class Index;
 
 class MetadataItem;
@@ -61,11 +78,20 @@ typedef boost::shared_ptr<Parameter> ParameterPtr;
 typedef std::vector<ParameterPtr> ParameterPtrs;
 
 class PrimaryKeyConstraint;
+
 class Procedure;
+typedef boost::shared_ptr<Procedure> ProcedurePtr;
+typedef std::vector<ProcedurePtr> ProcedurePtrs;
 class Procedures;
+typedef boost::shared_ptr<Procedures> ProceduresPtr;
+
 class Relation;
+
 class Role;
+typedef boost::shared_ptr<Role> RolePtr;
+typedef std::vector<RolePtr> RolePtrs;
 class Roles;
+typedef boost::shared_ptr<Roles> RolesPtr;
 
 class Root;
 typedef boost::shared_ptr<Root> RootPtr;
@@ -76,13 +102,20 @@ typedef std::vector<ServerPtr> ServerPtrs;
 typedef boost::weak_ptr<Server> WeakServerPtr;
 
 class SysTables;
+typedef boost::shared_ptr<SysTables> SysTablesPtr;
 
 class Table;
 typedef boost::shared_ptr<Table> TablePtr;
-
+typedef std::vector<TablePtr> TablePtrs;
 class Tables;
+typedef boost::shared_ptr<Tables> TablesPtr;
+
 class Trigger;
+typedef boost::shared_ptr<Trigger> TriggerPtr;
+typedef std::vector<TriggerPtr> TriggerPtrs;
 class Triggers;
+typedef boost::shared_ptr<Triggers> TriggersPtr;
+
 class UniqueConstraint;
 
 class User;
@@ -90,6 +123,9 @@ typedef boost::shared_ptr<User> UserPtr;
 typedef std::vector<UserPtr> UserPtrs;
 
 class View;
+typedef boost::shared_ptr<View> ViewPtr;
+typedef std::vector<ViewPtr> ViewPtrs;
 class Views;
+typedef boost::shared_ptr<Views> ViewsPtr;
 //-----------------------------------------------------------------------------
 #endif // FR_METADATACLASSES_H

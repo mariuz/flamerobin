@@ -105,7 +105,8 @@ protected:
 
 public:
     MetadataItem();
-    MetadataItem(NodeType type);
+    MetadataItem(NodeType type, MetadataItem* parent = 0,
+        const wxString& name = wxEmptyString);
     virtual ~MetadataItem();
 
     virtual void lockSubject();
@@ -150,7 +151,6 @@ public:
     virtual void setName_(wxString name);
     virtual NodeType getType() const;
     void setType(NodeType type);
-    void setProperties(MetadataItem* parent, const wxString& name, NodeType type);
 
     // returns the name of the data type (f. ex. TABLE)
     virtual const wxString getTypeName() const;

@@ -31,8 +31,7 @@
 #include <vector>
 
 #include "metadata/collection.h"
-#include "metadata/MetadataClasses.h"
-#include "metadata/metadataitem.h"
+#include "metadata/database.h"
 #include "metadata/parameter.h"
 #include "metadata/privilege.h"
 
@@ -48,7 +47,7 @@ protected:
     virtual void lockChildren();
     virtual void unlockChildren();
 public:
-    Procedure();
+    Procedure(DatabasePtr database, const wxString& name);
 
     bool getChildren(std::vector<MetadataItem *>& temp);
 
@@ -79,6 +78,8 @@ class Procedures: public MetadataCollection<Procedure>
 protected:
     virtual void loadChildren();
 public:
+    Procedures(DatabasePtr database);
+
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);
 };

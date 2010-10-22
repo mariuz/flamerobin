@@ -40,9 +40,11 @@
 
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/parameter.h"
+#include "metadata/procedure.h"
 //-----------------------------------------------------------------------------
-Parameter::Parameter()
-    : Column(), outputParameterM(false), parameterMechanismM(-1)
+// TODO: pass ProcedurePtr instead of Procedure*
+Parameter::Parameter(Procedure* procedure, const wxString& name)
+    : Column(procedure, name), outputParameterM(false), parameterMechanismM(-1)
 {
     setType(ntParameter);
 }

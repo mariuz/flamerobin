@@ -318,19 +318,6 @@ Database::Database()
     : MetadataItem(ntDatabase), metadataLoaderM(0), connectedM(false),
         connectionCredentialsM(0), charsetConverterM(0), idM(0)
 {
-    // has to be here, since notify() might be called before initChildren()
-    domainsM.setProperties(this, wxT("Domains"), ntDomains);
-    exceptionsM.setProperties(this, wxT("Exceptions"), ntExceptions);
-    functionsM.setProperties(this, wxT("Functions"), ntFunctions);
-    generatorsM.setProperties(this, wxT("Generators"), ntGenerators);
-    proceduresM.setProperties(this, wxT("Procedures"), ntProcedures);
-    rolesM.setProperties(this, wxT("Roles"), ntRoles);
-    tablesM.setProperties(this, wxT("Tables"), ntTables);
-
-    sysTablesM.setProperties(this, wxT("System tables"), ntSysTables);
-
-    triggersM.setProperties(this, wxT("Triggers"), ntTriggers);
-    viewsM.setProperties(this, wxT("Views"), ntViews);
 }
 //-----------------------------------------------------------------------------
 Database::~Database()
@@ -357,25 +344,25 @@ void Database::resetCredentials()
 //----------------------------------------------------------------------------
 void Database::getIdentifiers(std::vector<Identifier>& temp)
 {
-    std::transform(tablesM.begin(), tablesM.end(),
+    std::transform(tablesM->begin(), tablesM->end(),
         std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
-    std::transform(sysTablesM.begin(), sysTablesM.end(),
+    std::transform(sysTablesM->begin(), sysTablesM->end(),
         std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
-    std::transform(viewsM.begin(), viewsM.end(),
+    std::transform(viewsM->begin(), viewsM->end(),
         std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
-    std::transform(proceduresM.begin(), proceduresM.end(),
+    std::transform(proceduresM->begin(), proceduresM->end(),
         std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
-    std::transform(triggersM.begin(), triggersM.end(),
+    std::transform(triggersM->begin(), triggersM->end(),
         std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
-    std::transform(rolesM.begin(), rolesM.end(),
+    std::transform(rolesM->begin(), rolesM->end(),
         std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
-    std::transform(generatorsM.begin(), generatorsM.end(),
+    std::transform(generatorsM->begin(), generatorsM->end(),
         std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
-    std::transform(functionsM.begin(), functionsM.end(),
+    std::transform(functionsM->begin(), functionsM->end(),
         std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
-    std::transform(domainsM.begin(), domainsM.end(),
+    std::transform(domainsM->begin(), domainsM->end(),
         std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
-    std::transform(exceptionsM.begin(), exceptionsM.end(),
+    std::transform(exceptionsM->begin(), exceptionsM->end(),
         std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
 }
 //-----------------------------------------------------------------------------
@@ -466,7 +453,7 @@ Domain* Database::loadMissingDomain(wxString name)
         int c;
         st1->Get(1, c);
         if (c > 0)
-            return domainsM.insert(this, name, ntDomain);
+            return domainsM->insert(name);
     }
     return 0;
 }
@@ -545,8 +532,8 @@ void Database::loadGeneratorValues()
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(this);
 
-    for (Generators::iterator it = generatorsM.begin();
-        it != generatorsM.end(); ++it)
+    for (Generators::iterator it = generatorsM->begin();
+        it != generatorsM->end(); ++it)
     {
         // make sure generator value is reloaded from database
         (*it).invalidate();
@@ -556,6 +543,9 @@ void Database::loadGeneratorValues()
 //-----------------------------------------------------------------------------
 MetadataItem* Database::findByName(wxString name)
 {
+    if (!isConnected())
+        return 0;
+
     for (int n = (int)ntTable; n < (int)ntLastType; n++)
     {
         MetadataItem* m = findByNameAndType((NodeType)n, name);
@@ -567,18 +557,21 @@ MetadataItem* Database::findByName(wxString name)
 //-----------------------------------------------------------------------------
 MetadataItem* Database::findByNameAndType(NodeType nt, wxString name)
 {
+    if (!isConnected())
+        return 0;
+
     switch (nt)
     {
-        case ntTable:       return tablesM.findByName(name);     break;
-        case ntSysTable:    return sysTablesM.findByName(name);  break;
-        case ntView:        return viewsM.findByName(name);      break;
-        case ntTrigger:     return triggersM.findByName(name);   break;
-        case ntProcedure:   return proceduresM.findByName(name); break;
-        case ntFunction:    return functionsM.findByName(name);  break;
-        case ntGenerator:   return generatorsM.findByName(name); break;
-        case ntRole:        return rolesM.findByName(name);      break;
-        case ntDomain:      return domainsM.findByName(name);    break;
-        case ntException:   return exceptionsM.findByName(name); break;
+        case ntTable:       return tablesM->findByName(name);     break;
+        case ntSysTable:    return sysTablesM->findByName(name);  break;
+        case ntView:        return viewsM->findByName(name);      break;
+        case ntTrigger:     return triggersM->findByName(name);   break;
+        case ntProcedure:   return proceduresM->findByName(name); break;
+        case ntFunction:    return functionsM->findByName(name);  break;
+        case ntGenerator:   return generatorsM->findByName(name); break;
+        case ntRole:        return rolesM->findByName(name);      break;
+        case ntDomain:      return domainsM->findByName(name);    break;
+        case ntException:   return exceptionsM->findByName(name); break;
         default:
             return 0;
     };
@@ -586,24 +579,13 @@ MetadataItem* Database::findByNameAndType(NodeType nt, wxString name)
 //-----------------------------------------------------------------------------
 Relation* Database::findRelation(const Identifier& name)
 {
-    for (Tables::iterator it = tablesM.begin();
-        it != tablesM.end(); ++it)
-    {
-        if ((*it).getIdentifier().equals(name))
-            return &(*it);
-    }
-    for (Views::iterator it = viewsM.begin();
-        it != viewsM.end(); ++it)
-    {
-        if ((*it).getIdentifier().equals(name))
-            return &(*it);
-    }
-    for (SysTables::iterator it = sysTablesM.begin();
-        it != sysTablesM.end(); ++it)
-    {
-        if ((*it).getIdentifier().equals(name))
-            return &(*it);
-    }
+    wxString s(name.get());
+    if (Table* t = tablesM->findByName(s))
+        return t;
+    if (View* v = viewsM->findByName(s))
+        return v;
+    if (Table* t = sysTablesM->findByName(s))
+        return t;
     return 0;
 }
 //-----------------------------------------------------------------------------
@@ -623,16 +605,16 @@ void Database::dropObject(MetadataItem* object)
     NodeType nt = object->getType();
     switch (nt)
     {
-        case ntTable:       tablesM.remove((Table*)object);            break;
-        case ntSysTable:    sysTablesM.remove((Table*)object);         break;
-        case ntView:        viewsM.remove((View*)object);              break;
-        case ntTrigger:     triggersM.remove((Trigger*)object);        break;
-        case ntProcedure:   proceduresM.remove((Procedure*)object);    break;
-        case ntFunction:    functionsM.remove((Function*)object);      break;
-        case ntGenerator:   generatorsM.remove((Generator*)object);    break;
-        case ntRole:        rolesM.remove((Role*)object);              break;
-        case ntDomain:      domainsM.remove((Domain*)object);          break;
-        case ntException:   exceptionsM.remove((Exception*)object);    break;
+        case ntTable:       tablesM->remove((Table*)object);            break;
+        case ntSysTable:    sysTablesM->remove((Table*)object);         break;
+        case ntView:        viewsM->remove((View*)object);              break;
+        case ntTrigger:     triggersM->remove((Trigger*)object);        break;
+        case ntProcedure:   proceduresM->remove((Procedure*)object);    break;
+        case ntFunction:    functionsM->remove((Function*)object);      break;
+        case ntGenerator:   generatorsM->remove((Generator*)object);    break;
+        case ntRole:        rolesM->remove((Role*)object);              break;
+        case ntDomain:      domainsM->remove((Domain*)object);          break;
+        case ntException:   exceptionsM->remove((Exception*)object);    break;
         default:
             return;
     };
@@ -643,34 +625,34 @@ void Database::addObject(NodeType type, wxString name)
     switch (type)
     {
         case ntTable:
-            tablesM.insert(this, name, type);
+            tablesM->insert(name);
             break;
         case ntSysTable:
-            sysTablesM.insert(this, name, type);
+            sysTablesM->insert(name);
             break;
         case ntView:
-            viewsM.insert(this, name, type);
+            viewsM->insert(name);
             break;
         case ntProcedure:
-            proceduresM.insert(this, name, type);
+            proceduresM->insert(name);
             break;
         case ntTrigger:
-            triggersM.insert(this, name, type);
+            triggersM->insert(name);
             break;
         case ntRole:
-            rolesM.insert(this, name, type);
+            rolesM->insert(name);
             break;
         case ntGenerator:
-            generatorsM.insert(this, name, type);
+            generatorsM->insert(name);
             break;
         case ntFunction:
-            functionsM.insert(this, name, type);
+            functionsM->insert(name);
             break;
         case ntDomain:
-            domainsM.insert(this, name, type);
+            domainsM->insert(name);
             break;
         case ntException:
-            exceptionsM.insert(this, name, type);
+            exceptionsM->insert(name);
             break;
     }
 }
@@ -703,7 +685,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
     {
         // the affected table will recognize its index (if loaded)
         Tables::iterator it;
-        for (it = tablesM.begin(); it != tablesM.end(); ++it)
+        for (it = tablesM->begin(); it != tablesM->end(); ++it)
             (*it).invalidateIndices(stm.getName());
         return;
     }
@@ -723,10 +705,10 @@ void Database::parseCommitedSql(const SqlStatement& stm)
     if (stm.actionIs(actDROP, ntTrigger))
     {
         Tables::iterator itt;
-        for (itt = tablesM.begin(); itt != tablesM.end(); itt++)
+        for (itt = tablesM->begin(); itt != tablesM->end(); itt++)
             (*itt).notifyObservers();
         Views::iterator itv;
-        for (itv = viewsM.begin(); itv != viewsM.end(); itv++)
+        for (itv = viewsM->begin(); itv != viewsM->end(); itv++)
             (*itv).notifyObservers();
         notifyObservers();
     }
@@ -764,14 +746,14 @@ void Database::parseCommitedSql(const SqlStatement& stm)
         dropObject(object);
         if (stm.getObjectType() == ntTable || stm.getObjectType() == ntView)
         {
-            Triggers::iterator it = triggersM.begin();
-            while (it != triggersM.end())
+            Triggers::iterator it = triggersM->begin();
+            while (it != triggersM->end())
             {
                 Relation* r = getRelationForTrigger(&(*it));
                 if (!r || r->getIdentifier().equals(stm.getIdentifier()))
                 {
                     dropObject(&(*it));
-                    it = triggersM.begin();
+                    it = triggersM->begin();
                 }
                 else
                     it++;
@@ -786,9 +768,9 @@ void Database::parseCommitedSql(const SqlStatement& stm)
         {
             wxString domainName(loadDomainNameForColumn(stm.getName(),
                 stm.getFieldName()));
-            MetadataItem* m = domainsM.findByName(domainName);
+            MetadataItem* m = domainsM->findByName(domainName);
             if (!m)     // domain does not exist in DBH
-                m = domainsM.insert(this, domainName, ntDomain);
+                m = domainsM->insert(domainName);
             m->invalidate();
         }
         else
@@ -836,8 +818,8 @@ void Database::parseCommitedSql(const SqlStatement& stm)
             case ntDomain:
                 object->invalidate();
                 // notify all table columns with that domain
-                for (Tables::iterator it = tablesM.begin();
-                    it != tablesM.end(); ++it)
+                for (Tables::iterator it = tablesM->begin();
+                    it != tablesM->end(); ++it)
                 {
                     for (ColumnPtrs::iterator itColumn = (*it).begin();
                         itColumn != (*it).end(); ++itColumn)
@@ -889,6 +871,18 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
             indicator->doShow();
             indicator->initProgressIndeterminate(wxT("Establishing connection..."));
         }
+
+        DatabasePtr me(shared_from_this());
+        domainsM.reset(new Domains(me));
+        exceptionsM.reset(new Exceptions(me));
+        functionsM.reset(new Functions(me));
+        generatorsM.reset(new Generators(me));
+        proceduresM.reset(new Procedures(me));
+        rolesM.reset(new Roles(me));
+        triggersM.reset(new Triggers(me));
+        sysTablesM.reset(new SysTables(me));
+        tablesM.reset(new Tables(me));
+        viewsM.reset(new Views(me));
 
         bool useUserNamePwd = !authenticationModeM.getIgnoreUsernamePassword();
         databaseM = IBPP::DatabaseFactory("", wx2std(getConnectionString()),
@@ -985,34 +979,34 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     SubjectLocker lock(this);
 
     pih.init(_("tables"), collectionCount, 1);
-    tablesM.load(progressIndicator);
+    tablesM->load(progressIndicator);
 
     pih.init(_("system tables"), collectionCount, 2);
-    sysTablesM.load(progressIndicator);
+    sysTablesM->load(progressIndicator);
 
     pih.init(_("views"), collectionCount, 3);
-    viewsM.load(progressIndicator);
+    viewsM->load(progressIndicator);
 
     pih.init(_("procedures"), collectionCount, 4);
-    proceduresM.load(progressIndicator);
+    proceduresM->load(progressIndicator);
 
     pih.init(_("triggers"), collectionCount, 5);
-    triggersM.load(progressIndicator);
+    triggersM->load(progressIndicator);
 
     pih.init(_("roles"), collectionCount, 6);
-    rolesM.load(progressIndicator);
+    rolesM->load(progressIndicator);
 
     pih.init(_("domains"), collectionCount, 7);
-    domainsM.load(progressIndicator);
+    domainsM->load(progressIndicator);
 
     pih.init(_("functions"), collectionCount, 8);
-    functionsM.load(progressIndicator);
+    functionsM->load(progressIndicator);
 
     pih.init(_("generators"), collectionCount, 9);
-    generatorsM.load(progressIndicator);
+    generatorsM->load(progressIndicator);
 
     pih.init(_("exceptions"), collectionCount, 10);
-    exceptionsM.load(progressIndicator);
+    exceptionsM->load(progressIndicator);
 }
 //-----------------------------------------------------------------------------
 wxArrayString Database::loadIdentifiers(const wxString& loadStatement,
@@ -1058,30 +1052,16 @@ void Database::setDisconnected()
     resetPendingLoadData();
 
     // remove entire DBH beneath
-    domainsM.clear();
-    functionsM.clear();
-    generatorsM.clear();
-    proceduresM.clear();
-    rolesM.clear();
-    sysTablesM.clear();
-    tablesM.clear();
-    triggersM.clear();
-    viewsM.clear();
-    exceptionsM.clear();
-
-    // this a special case for Database only since it doesn't destroy its subitems
-    // but only hides them (i.e. getChildren returns nothing, but items are present)
-    // so observers must get removed
-    domainsM.detachAllObservers();
-    functionsM.detachAllObservers();
-    generatorsM.detachAllObservers();
-    proceduresM.detachAllObservers();
-    rolesM.detachAllObservers();
-    sysTablesM.detachAllObservers();
-    tablesM.detachAllObservers();
-    triggersM.detachAllObservers();
-    viewsM.detachAllObservers();
-    exceptionsM.detachAllObservers();
+    domainsM.reset();
+    functionsM.reset();
+    generatorsM.reset();
+    proceduresM.reset();
+    rolesM.reset();
+    sysTablesM.reset();
+    tablesM.reset();
+    triggersM.reset();
+    viewsM.reset();
+    exceptionsM.reset();
 
     if (config().get(wxT("HideDisconnectedDatabases"), false))
         getServer()->notifyObservers();
@@ -1118,83 +1098,96 @@ bool Database::getChildren(std::vector<MetadataItem*>& temp)
     return true;
 }
 //-----------------------------------------------------------------------------
-Domains& Database::getDomains()
+DomainsPtr Database::getDomains()
 {
-    domainsM.ensureChildrenLoaded();
+    wxASSERT(domainsM);
+    domainsM->ensureChildrenLoaded();
     return domainsM;
 }
 //-----------------------------------------------------------------------------
-Exceptions& Database::getExceptions()
+ExceptionsPtr Database::getExceptions()
 {
-    exceptionsM.ensureChildrenLoaded();
+    wxASSERT(exceptionsM);
+    exceptionsM->ensureChildrenLoaded();
     return exceptionsM;
 }
 //-----------------------------------------------------------------------------
-Functions& Database::getFunctions()
+FunctionsPtr Database::getFunctions()
 {
-    functionsM.ensureChildrenLoaded();
+    wxASSERT(functionsM);
+    functionsM->ensureChildrenLoaded();
     return functionsM;
 }
 //-----------------------------------------------------------------------------
-Generators& Database::getGenerators()
+GeneratorsPtr Database::getGenerators()
 {
-    generatorsM.ensureChildrenLoaded();
+    wxASSERT(generatorsM);
+    generatorsM->ensureChildrenLoaded();
     return generatorsM;
 }
 //-----------------------------------------------------------------------------
-Procedures& Database::getProcedures()
+ProceduresPtr Database::getProcedures()
 {
-    proceduresM.ensureChildrenLoaded();
+    wxASSERT(proceduresM);
+    proceduresM->ensureChildrenLoaded();
     return proceduresM;
 }
 //-----------------------------------------------------------------------------
-Roles& Database::getRoles()
+RolesPtr Database::getRoles()
 {
-    rolesM.ensureChildrenLoaded();
+    wxASSERT(rolesM);
+    rolesM->ensureChildrenLoaded();
     return rolesM;
 }
 //-----------------------------------------------------------------------------
-SysTables& Database::getSysTables()
+SysTablesPtr Database::getSysTables()
 {
-    sysTablesM.ensureChildrenLoaded();
+    wxASSERT(sysTablesM);
+    sysTablesM->ensureChildrenLoaded();
     return sysTablesM;
 }
 //-----------------------------------------------------------------------------
-Tables& Database::getTables()
+TablesPtr Database::getTables()
 {
-    tablesM.ensureChildrenLoaded();
+    wxASSERT(tablesM);
+    tablesM->ensureChildrenLoaded();
     return tablesM;
 }
 //-----------------------------------------------------------------------------
-Triggers& Database::getTriggers()
+TriggersPtr Database::getTriggers()
 {
-    triggersM.ensureChildrenLoaded();
+    wxASSERT(triggersM);
+    triggersM->ensureChildrenLoaded();
     return triggersM;
 }
 //-----------------------------------------------------------------------------
-Views& Database::getViews()
+ViewsPtr Database::getViews()
 {
-    viewsM.ensureChildrenLoaded();
+    wxASSERT(viewsM);
+    viewsM->ensureChildrenLoaded();
     return viewsM;
 }
 //-----------------------------------------------------------------------------
 // returns vector of all subitems
 void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
 {
+    if (!isConnected())
+        return;
+
     ensureChildrenLoaded();
 
-    temp.push_back(&domainsM);
-    temp.push_back(&exceptionsM);
-    temp.push_back(&functionsM);
-    temp.push_back(&generatorsM);
-    temp.push_back(&proceduresM);
-    temp.push_back(&rolesM);
+    temp.push_back(domainsM.get());
+    temp.push_back(exceptionsM.get());
+    temp.push_back(functionsM.get());
+    temp.push_back(generatorsM.get());
+    temp.push_back(proceduresM.get());
+    temp.push_back(rolesM.get());
     // Only push back system tables when they should be shown
     if (system && showSysTables())
-        temp.push_back(&sysTablesM);
-    temp.push_back(&tablesM);
-    temp.push_back(&triggersM);
-    temp.push_back(&viewsM);
+        temp.push_back(sysTablesM.get());
+    temp.push_back(tablesM.get());
+    temp.push_back(triggersM.get());
+    temp.push_back(viewsM.get());
 }
 //-----------------------------------------------------------------------------
 void Database::loadChildren()
@@ -1205,16 +1198,19 @@ void Database::loadChildren()
 //-----------------------------------------------------------------------------
 void Database::lockChildren()
 {
-    domainsM.lockSubject();
-    exceptionsM.lockSubject();
-    functionsM.lockSubject();
-    generatorsM.lockSubject();
-    proceduresM.lockSubject();
-    rolesM.lockSubject();
-    tablesM.lockSubject();
-    sysTablesM.lockSubject();
-    triggersM.lockSubject();
-    viewsM.lockSubject();
+    if (isConnected())
+    {
+        domainsM->lockSubject();
+        exceptionsM->lockSubject();
+        functionsM->lockSubject();
+        generatorsM->lockSubject();
+        proceduresM->lockSubject();
+        rolesM->lockSubject();
+        tablesM->lockSubject();
+        sysTablesM->lockSubject();
+        triggersM->lockSubject();
+        viewsM->lockSubject();
+    }
 }
 //-----------------------------------------------------------------------------
 void Database::unlockChildren()
@@ -1222,16 +1218,19 @@ void Database::unlockChildren()
     // unlock in reverse order of locking - that way domains will still
     // be locked when relation and procedure updates happen - that way not
     // every added domain will cause all collection observers to update
-    viewsM.unlockSubject();
-    triggersM.unlockSubject();
-    sysTablesM.unlockSubject();
-    tablesM.unlockSubject();
-    rolesM.unlockSubject();
-    proceduresM.unlockSubject();
-    generatorsM.unlockSubject();
-    functionsM.unlockSubject();
-    exceptionsM.unlockSubject();
-    domainsM.unlockSubject();
+    if (isConnected())
+    {
+        viewsM->unlockSubject();
+        triggersM->unlockSubject();
+        sysTablesM->unlockSubject();
+        tablesM->unlockSubject();
+        rolesM->unlockSubject();
+        proceduresM->unlockSubject();
+        generatorsM->unlockSubject();
+        functionsM->unlockSubject();
+        exceptionsM->unlockSubject();
+        domainsM->unlockSubject();
+    }
 }
 //-----------------------------------------------------------------------------
 wxString Database::getPath() const

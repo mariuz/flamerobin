@@ -48,8 +48,8 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------
-Exception::Exception()
-    : MetadataItem(ntException), numberM(0)
+Exception::Exception(DatabasePtr database, const wxString& name)
+    : MetadataItem(ntException, database.get(), name), numberM(0)
 {
 }
 //-----------------------------------------------------------------------------
@@ -109,6 +109,11 @@ void Exception::acceptVisitor(MetadataItemVisitor* visitor)
 }
 //-----------------------------------------------------------------------------
 // Exceptions collection
+Exceptions::Exceptions(DatabasePtr database)
+    : MetadataCollection<Exception>(ntExceptions, database, _("Exceptions"))
+{
+}
+//-----------------------------------------------------------------------------
 void Exceptions::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitExceptions(*this);
@@ -116,11 +121,9 @@ void Exceptions::acceptVisitor(MetadataItemVisitor* visitor)
 //-----------------------------------------------------------------------------
 void Exceptions::load(ProgressIndicator* progressIndicator)
 {
-    Database* db = getDatabase(wxT("Exceptions::load"));
-
     wxString stmt = wxT("select rdb$exception_name from rdb$exceptions")
         wxT(" order by 1");
-    setItems(db, ntException, db->loadIdentifiers(stmt, progressIndicator));
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void Exceptions::loadChildren()

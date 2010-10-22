@@ -38,11 +38,11 @@
     #pragma hdrstop
 #endif
 
-#include "relation.h"
-#include "procedure.h"
-#include "role.h"
+#include "metadata/privilege.h"
+#include "metadata/procedure.h"
+#include "metadata/relation.h"
+#include "metadata/role.h"
 
-#include "privilege.h"
 //-----------------------------------------------------------------------------
 PrivilegeItem::PrivilegeItem(const wxString& grantorName,
     bool withGrantOption, const wxString& fieldName)

@@ -50,7 +50,6 @@
 #include "metadata/trigger.h"
 #include "metadata/view.h"
 //-----------------------------------------------------------------------------
-class Database;
 class MetadataLoader;
 class ProgressIndicator;
 class SqlStatement;
@@ -183,16 +182,16 @@ private:
 
     DatabaseInfo databaseInfoM;
 
-    Domains domainsM;
-    Exceptions exceptionsM;
-    Functions functionsM;
-    Generators generatorsM;
-    Procedures proceduresM;
-    Roles rolesM;
-    SysTables sysTablesM;
-    Tables tablesM;
-    Triggers triggersM;
-    Views viewsM;
+    DomainsPtr domainsM;
+    ExceptionsPtr exceptionsM;
+    FunctionsPtr functionsM;
+    GeneratorsPtr generatorsM;
+    ProceduresPtr proceduresM;
+    RolesPtr rolesM;
+    SysTablesPtr sysTablesM;
+    TablesPtr tablesM;
+    TriggersPtr triggersM;
+    ViewsPtr viewsM;
 
     // copy constructor implementation removed since it's no longer needed
     // (Server uses a vector of boost::shared_ptr<Database> now)
@@ -224,16 +223,16 @@ public:
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
     void getCollections(std::vector<MetadataItem *>& temp, bool system);
 
-    Domains& getDomains();
-    Exceptions& getExceptions();
-    Functions& getFunctions();
-    Generators& getGenerators();
-    Procedures& getProcedures();
-    Roles& getRoles();
-    Tables& getTables();
-    SysTables& getSysTables();
-    Triggers& getTriggers();
-    Views& getViews();
+    DomainsPtr getDomains();
+    ExceptionsPtr getExceptions();
+    FunctionsPtr getFunctions();
+    GeneratorsPtr getGenerators();
+    ProceduresPtr getProcedures();
+    RolesPtr getRoles();
+    TablesPtr getTables();
+    SysTablesPtr getSysTables();
+    TriggersPtr getTriggers();
+    ViewsPtr getViews();
 
     void clear();               // sets all values to empty wxString
     bool isConnected() const;

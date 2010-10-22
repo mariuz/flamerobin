@@ -41,7 +41,7 @@ private:
 protected:
     virtual void setSource(const wxString& value);
 public:
-    View();
+    View(DatabasePtr database, const wxString& name);
 
     wxString getSource();
     wxString getCreateSql();
@@ -54,6 +54,8 @@ class Views: public MetadataCollection<View>
 protected:
     virtual void loadChildren();
 public:
+    Views(DatabasePtr database);
+
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);
 };

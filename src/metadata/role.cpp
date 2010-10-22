@@ -47,8 +47,8 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/role.h"
 //-----------------------------------------------------------------------------
-Role::Role()
-    : MetadataItem(ntRole)
+Role::Role(DatabasePtr database, const wxString& name)
+    : MetadataItem(ntRole, database.get(), name)
 {
 }
 //-----------------------------------------------------------------------------
@@ -129,6 +129,11 @@ void Role::acceptVisitor(MetadataItemVisitor* visitor)
 }
 //-----------------------------------------------------------------------------
 // Roles collection
+Roles::Roles(DatabasePtr database)
+    : MetadataCollection<Role>(ntRoles, database, _("Roles"))
+{
+}
+//-----------------------------------------------------------------------------
 void Roles::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitRoles(*this);
@@ -136,10 +141,8 @@ void Roles::acceptVisitor(MetadataItemVisitor* visitor)
 //-----------------------------------------------------------------------------
 void Roles::load(ProgressIndicator* progressIndicator)
 {
-    Database* db = getDatabase(wxT("Roles::load"));
-
     wxString stmt = wxT("select rdb$role_name from rdb$roles order by 1");
-    setItems(db, ntRole, db->loadIdentifiers(stmt, progressIndicator));
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void Roles::loadChildren()

@@ -49,8 +49,8 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------
-Generator::Generator()
-    : MetadataItem(ntGenerator)
+Generator::Generator(DatabasePtr database, const wxString& name)
+    : MetadataItem(ntGenerator, database.get(), name)
 {
 }
 //-----------------------------------------------------------------------------
@@ -95,6 +95,11 @@ void Generator::acceptVisitor(MetadataItemVisitor* visitor)
 }
 //-----------------------------------------------------------------------------
 // Generators collection
+Generators::Generators(DatabasePtr database)
+    : MetadataCollection<Generator>(ntGenerators, database, _("Generators"))
+{
+}
+//-----------------------------------------------------------------------------
 void Generators::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitGenerators(*this);
@@ -102,12 +107,10 @@ void Generators::acceptVisitor(MetadataItemVisitor* visitor)
 //-----------------------------------------------------------------------------
 void Generators::load(ProgressIndicator* progressIndicator)
 {
-    Database* db = getDatabase(wxT("Generators::load"));
-
     wxString stmt = wxT("select rdb$generator_name from rdb$generators")
         wxT(" where (rdb$system_flag = 0 or rdb$system_flag is null)")
         wxT(" order by 1");
-    setItems(db, ntGenerator, db->loadIdentifiers(stmt, progressIndicator));
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void Generators::loadChildren()

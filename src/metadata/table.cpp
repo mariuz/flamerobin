@@ -48,12 +48,11 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/table.h"
 //-----------------------------------------------------------------------------
-Table::Table()
-    : Relation(), primaryKeyLoadedM(false), foreignKeysLoadedM(false),
-        checkConstraintsLoadedM(false), uniqueConstraintsLoadedM(false),
-        indicesLoadedM(false)
+Table::Table(DatabasePtr database, const wxString& name)
+    : Relation(ntTable, database.get(), name), primaryKeyLoadedM(false),
+        foreignKeysLoadedM(false), checkConstraintsLoadedM(false),
+        uniqueConstraintsLoadedM(false), indicesLoadedM(false)
 {
-    setType(ntTable);
 }
 //-----------------------------------------------------------------------------
 wxString Table::getExternalPath()
@@ -595,6 +594,11 @@ void Table::acceptVisitor(MetadataItemVisitor* visitor)
 }
 //-----------------------------------------------------------------------------
 // System tables collection
+SysTables::SysTables(DatabasePtr database)
+    : MetadataCollection<Table>(ntSysTables, database, _("System tables"))
+{
+}
+//-----------------------------------------------------------------------------
 void SysTables::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitSysTables(*this);
@@ -607,12 +611,10 @@ bool SysTables::isSystem() const
 //-----------------------------------------------------------------------------
 void SysTables::load(ProgressIndicator* progressIndicator)
 {
-    Database* db = getDatabase(wxT("SysTables::load"));
-
     wxString stmt = wxT("select rdb$relation_name from rdb$relations")
         wxT(" where rdb$system_flag = 1")
         wxT(" and rdb$view_source is null order by 1");
-    setItems(db, ntSysTable, db->loadIdentifiers(stmt, progressIndicator));
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void SysTables::loadChildren()
@@ -621,6 +623,11 @@ void SysTables::loadChildren()
 }
 //-----------------------------------------------------------------------------
 // Tables collection
+Tables::Tables(DatabasePtr database)
+    : MetadataCollection<Table>(ntTables, database, _("Tables"))
+{
+}
+//-----------------------------------------------------------------------------
 void Tables::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitTables(*this);
@@ -628,12 +635,10 @@ void Tables::acceptVisitor(MetadataItemVisitor* visitor)
 //-----------------------------------------------------------------------------
 void Tables::load(ProgressIndicator* progressIndicator)
 {
-    Database* db = getDatabase(wxT("Tables::load"));
-
     wxString stmt = wxT("select rdb$relation_name from rdb$relations")
         wxT(" where (rdb$system_flag = 0 or rdb$system_flag is null)")
         wxT(" and rdb$view_source is null order by 1");
-    setItems(db, ntTable, db->loadIdentifiers(stmt, progressIndicator));
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void Tables::loadChildren()

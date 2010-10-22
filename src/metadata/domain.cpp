@@ -52,8 +52,8 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------
-Domain::Domain():
-    MetadataItem(ntDomain)
+Domain::Domain(DatabasePtr database, const wxString& name)
+    : MetadataItem(ntDomain, database.get(), name)
 {
 }
 //-----------------------------------------------------------------------------
@@ -335,6 +335,11 @@ void Domain::acceptVisitor(MetadataItemVisitor* visitor)
 }
 //-----------------------------------------------------------------------------
 // Domains collection
+Domains::Domains(DatabasePtr database)
+    : MetadataCollection<Domain>(ntDomains, database, _("Domains"))
+{
+}
+//-----------------------------------------------------------------------------
 void Domains::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitDomains(*this);
@@ -342,8 +347,6 @@ void Domains::acceptVisitor(MetadataItemVisitor* visitor)
 //-----------------------------------------------------------------------------
 void Domains::load(ProgressIndicator* progressIndicator)
 {
-    Database* db = getDatabase(wxT("Domains::load"));
-
     wxString stmt = wxT("select f.rdb$field_name from rdb$fields f")
         wxT(" left outer join rdb$types t on f.rdb$field_type=t.rdb$type")
         wxT(" where t.rdb$field_name='RDB$FIELD_TYPE'")
@@ -353,7 +356,7 @@ void Domains::load(ProgressIndicator* progressIndicator)
     // system items already in the list. Doing so for domains would result
     // in them being reloaded immediately, so keep them in the list
     // a distinct system domain collection would probably be better...
-    setUserItems(db, ntDomain, db->loadIdentifiers(stmt, progressIndicator));
+    setUserItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void Domains::loadChildren()

@@ -41,13 +41,14 @@
 #include <string>
 
 #include "core/ArtProvider.h"
+#include "core/URIProcessor.h"
 #include "gui/ExecuteSql.h"
 #include "gui/GUIURIHandlerHelper.h"
 #include "gui/ReorderFieldsDialog.h"
 #include "gui/StyleGuide.h"
+#include "metadata/database.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
 #include "metadata/table.h"
-#include "core/URIProcessor.h"
 
 //! included xpm files, so that icons are compiled into executable
 namespace reorder_icons {

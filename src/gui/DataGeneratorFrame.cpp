@@ -354,8 +354,8 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     flexSizer->Add( radioColumn, 0, wxALIGN_CENTER_VERTICAL, 5 );
 
     wxArrayString tables;
-    Tables& t(db->getTables());
-    for (Tables::iterator it = t.begin(); it != t.end(); ++it)
+    TablesPtr t(db->getTables());
+    for (Tables::iterator it = t->begin(); it != t->end(); ++it)
         tables.Add((*it).getQuotedName());
     tables.Sort();
     wxArrayString empty;
@@ -452,7 +452,8 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     mainSplitter->UpdateSize();
 
     mainTree->allowContextMenu(false);
-    wxTreeItemId rootNode = mainTree->addRootNode(&db->getTables());
+    TablesPtr ts(db->getTables());
+    wxTreeItemId rootNode = mainTree->addRootNode(ts.get());
 
     loadingM = false;
 
@@ -992,8 +993,8 @@ bool DataGeneratorFrame::sortTables(std::list<Table *>& order)
     // That's why we just search for existing tables that are
     // also present in tableRecordsM
     std::list<TableDep *> deps;
-    Tables& t = databaseM->getTables();
-    for (Tables::iterator it = t.begin(); it != t.end(); ++it)
+    TablesPtr t = databaseM->getTables();
+    for (Tables::iterator it = t->begin(); it != t->end(); ++it)
     {
         std::map<wxString, int>::iterator i2 =
             tableRecordsM.find((*it).getQuotedName());

@@ -41,6 +41,7 @@
 #include <vector>
 
 #include "metadata/constraints.h"
+#include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/table.h"
 //-----------------------------------------------------------------------------

@@ -51,8 +51,8 @@
 #include "metadata/relation.h"
 #include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------
-Relation::Relation()
-    : MetadataItem()
+Relation::Relation(NodeType type, MetadataItem* parent, const wxString& name)
+    : MetadataItem(type, parent, name)
 {
 }
 //-----------------------------------------------------------------------------
@@ -229,10 +229,9 @@ void Relation::loadChildren()
         ColumnPtr col = findColumn(fname);
         if (!col)
         {
-            col.reset(new Column());
+            col.reset(new Column(this, fname));
             for (unsigned i = getLockCount(); i > 0; i--)
                 col->lockSubject();
-            col->setProperties(this, fname, ntColumn);
         }
         columns.push_back(col);
         col->initialize(!st1->IsNull(2), source,  computedSrc, collation,
@@ -452,8 +451,8 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
         // and return them in "list"
         Database *d = getDatabase(wxT("Relation::getRebuildSql"));
         std::vector<ForeignKey> fkeys;
-        Tables& tables(d->getTables());
-        for (Tables::iterator it = tables.begin(); it != tables.end(); ++it)
+        TablesPtr tables(d->getTables());
+        for (Tables::iterator it = tables->begin(); it != tables->end(); ++it)
         {
             std::vector<ForeignKey> *fk = (*it).getForeignKeys();
             if (fk)

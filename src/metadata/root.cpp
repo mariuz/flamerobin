@@ -68,9 +68,8 @@ static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
 }
 //-----------------------------------------------------------------------------
 Root::Root()
-    : MetadataItem(ntRoot)
+    : MetadataItem(ntRoot, 0, _("Home"))
 {
-    setName_(wxT("Home"));
     setChildrenLoaded(true);
 }
 //-----------------------------------------------------------------------------

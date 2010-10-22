@@ -30,7 +30,7 @@
 #define FR_TRIGGER_H
 
 #include "metadata/collection.h"
-#include "metadata/metadataitem.h"
+#include "metadata/database.h"
 
 class ProgressIndicator;
 //-----------------------------------------------------------------------------
@@ -45,7 +45,7 @@ private:
 protected:
     virtual void loadProperties();
 public:
-    Trigger();
+    Trigger(DatabasePtr database, const wxString& name);
 
     enum fireTimeType { afterTrigger, beforeTrigger, databaseTrigger };
 
@@ -66,6 +66,8 @@ class Triggers: public MetadataCollection<Trigger>
 protected:
     virtual void loadChildren();
 public:
+    Triggers(DatabasePtr database);
+
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);
 };

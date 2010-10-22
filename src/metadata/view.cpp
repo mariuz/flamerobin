@@ -43,10 +43,9 @@
 #include "metadata/view.h"
 #include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------
-View::View()
-    : Relation()
+View::View(DatabasePtr database, const wxString& name)
+    : Relation(ntView, database.get(), name)
 {
-    setType(ntView);
 }
 //-----------------------------------------------------------------------------
 wxString View::getSource()
@@ -95,6 +94,11 @@ void View::acceptVisitor(MetadataItemVisitor* visitor)
 }
 //-----------------------------------------------------------------------------
 // Views collection
+Views::Views(DatabasePtr database)
+    : MetadataCollection<View>(ntViews, database, _("Views"))
+{
+}
+//-----------------------------------------------------------------------------
 void Views::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitViews(*this);
@@ -102,12 +106,10 @@ void Views::acceptVisitor(MetadataItemVisitor* visitor)
 //-----------------------------------------------------------------------------
 void Views::load(ProgressIndicator* progressIndicator)
 {
-    Database* db = getDatabase(wxT("Views::load"));
-
     wxString stmt = wxT("select rdb$relation_name from rdb$relations")
         wxT(" where (rdb$system_flag = 0 or rdb$system_flag is null)")
         wxT(" and rdb$view_source is not null order by 1");
-    setItems(db, ntView, db->loadIdentifiers(stmt, progressIndicator));
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void Views::loadChildren()

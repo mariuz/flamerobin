@@ -51,8 +51,8 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/trigger.h"
 //-----------------------------------------------------------------------------
-Trigger::Trigger()
-    : MetadataItem(ntTrigger)
+Trigger::Trigger(DatabasePtr database, const wxString& name)
+    : MetadataItem(ntTrigger, database.get(), name)
 {
 }
 //-----------------------------------------------------------------------------
@@ -210,6 +210,11 @@ void Trigger::acceptVisitor(MetadataItemVisitor* visitor)
 }
 //-----------------------------------------------------------------------------
 // Triggers collection
+Triggers::Triggers(DatabasePtr database)
+    : MetadataCollection<Trigger>(ntTriggers, database, _("Triggers"))
+{
+}
+//-----------------------------------------------------------------------------
 void Triggers::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitTriggers(*this);
@@ -217,12 +222,10 @@ void Triggers::acceptVisitor(MetadataItemVisitor* visitor)
 //-----------------------------------------------------------------------------
 void Triggers::load(ProgressIndicator* progressIndicator)
 {
-    Database* db = getDatabase(wxT("Triggers::load"));
-
     wxString stmt = wxT("select rdb$trigger_name from rdb$triggers")
         wxT(" where (rdb$system_flag = 0 or rdb$system_flag is null)")
         wxT(" order by 1");
-    setItems(db, ntTrigger, db->loadIdentifiers(stmt, progressIndicator));
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void Triggers::loadChildren()

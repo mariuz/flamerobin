@@ -30,7 +30,7 @@
 
 #include "frtypes.h"
 #include "metadata/collection.h"
-#include "metadata/metadataitem.h"
+#include "metadata/database.h"
 
 class ProgressIndicator;
 //-----------------------------------------------------------------------------
@@ -42,7 +42,7 @@ private:
 protected:
     virtual void loadProperties();
 public:
-    Generator();
+    Generator(DatabasePtr database, const wxString& name);
 
     int64_t getValue();
 
@@ -55,6 +55,8 @@ class Generators: public MetadataCollection<Generator>
 protected:
     virtual void loadChildren();
 public:
+    Generators(DatabasePtr database);
+
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);
 };

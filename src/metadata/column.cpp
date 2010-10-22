@@ -48,8 +48,8 @@
 #include "domain.h"
 #include "MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
-Column::Column()
-    : MetadataItem(ntColumn)
+Column::Column(MetadataItem* parent, const wxString& name)
+    : MetadataItem(ntColumn, parent, name)
 {
 }
 //-----------------------------------------------------------------------------
@@ -210,8 +210,8 @@ Domain* Column::getDomain() const
     if (!db)
         return 0;
 
-    Domains& ds(db->getDomains());
-    if (Domain* d = ds.findByName(sourceM))
+    DomainsPtr ds(db->getDomains());
+    if (Domain* d = ds->findByName(sourceM))
         return d;
     // since we haven't found the domain, check the database
     return db->loadMissingDomain(sourceM);

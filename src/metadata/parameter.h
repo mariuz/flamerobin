@@ -38,7 +38,7 @@ private:
     bool outputParameterM;
     int parameterMechanismM;    // -1 none, 0 domain, 1 type_of
 public:
-    Parameter();
+    Parameter(Procedure* procedure, const wxString& name);
 
     void initialize(wxString source, int parameterType, int mechanism);
     int getMechanism() const;

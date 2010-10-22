@@ -47,8 +47,8 @@
 #include "metadata/function.h"
 #include "metadata/MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
-Function::Function()
-    : MetadataItem(ntFunction), infoLoadedM(false)
+Function::Function(DatabasePtr database, const wxString& name)
+    : MetadataItem(ntFunction, database.get(), name), infoLoadedM(false)
 {
 }
 //-----------------------------------------------------------------------------
@@ -195,6 +195,11 @@ void Function::acceptVisitor(MetadataItemVisitor* visitor)
 }
 //-----------------------------------------------------------------------------
 // Functions collection
+Functions::Functions(DatabasePtr database)
+    : MetadataCollection<Function>(ntFunctions, database, _("Functions"))
+{
+}
+//-----------------------------------------------------------------------------
 void Functions::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitFunctions(*this);
@@ -202,12 +207,10 @@ void Functions::acceptVisitor(MetadataItemVisitor* visitor)
 //-----------------------------------------------------------------------------
 void Functions::load(ProgressIndicator* progressIndicator)
 {
-    Database* db = getDatabase(wxT("Functions::load"));
-
     wxString stmt = wxT("select rdb$function_name from rdb$functions")
         wxT(" where (rdb$system_flag = 0 or rdb$system_flag is null)")
         wxT(" order by 1");
-    setItems(db, ntFunction, db->loadIdentifiers(stmt, progressIndicator));
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void Functions::loadChildren()

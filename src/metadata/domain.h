@@ -43,7 +43,7 @@ private:
 protected:
     virtual void loadProperties();
 public:
-    Domain();
+    Domain(DatabasePtr database, const wxString& name);
 
     static wxString dataTypeToString(short datatype, short scale,
         short precision, short subtype, short length);
@@ -68,6 +68,8 @@ class Domains: public MetadataCollection<Domain>
 protected:
     virtual void loadChildren();
 public:
+    Domains(DatabasePtr database);
+
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);
 };

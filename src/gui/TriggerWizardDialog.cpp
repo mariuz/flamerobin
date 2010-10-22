@@ -39,13 +39,14 @@
 #endif
 
 #include "core/ArtProvider.h"
+#include "core/URIProcessor.h"
 #include "gui/ExecuteSql.h"
 #include "gui/GUIURIHandlerHelper.h"
 #include "gui/StyleGuide.h"
 #include "gui/TriggerWizardDialog.h"
+#include "metadata/database.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
 #include "metadata/table.h"
-#include "core/URIProcessor.h"
 //-----------------------------------------------------------------------------
 TriggerWizardDialog::TriggerWizardDialog(wxWindow* parent, MetadataItem *item):
     BaseDialog(parent, -1, wxEmptyString)

@@ -32,11 +32,18 @@
 
 #include <boost/ptr_container/ptr_list.hpp>
 
+#include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
 //-----------------------------------------------------------------------------
 class MetadataCollectionBase : public MetadataItem
 {
 public:
+    MetadataCollectionBase(NodeType type, MetadataItem* parent,
+            const wxString& name)
+        : MetadataItem(type, parent, name)
+    {
+    }
+
     virtual bool isSystem() const { return false; }
 };
 //-----------------------------------------------------------------------------
@@ -48,6 +55,7 @@ public:
     typedef typename CollectionType::iterator iterator;
     typedef typename CollectionType::const_iterator const_iterator;
 private:
+    WeakDatabasePtr databaseM;
     CollectionType itemsM;
 
     iterator getPosition(wxString name)
@@ -84,16 +92,27 @@ private:
     };
 
 public:
+    MetadataCollection<T>(NodeType type, DatabasePtr database,
+            const wxString& name)
+        : MetadataCollectionBase(type, database.get(), name),
+            databaseM(database)
+    {
+    }
+
+    DatabasePtr getDatabase() const
+    {
+        return databaseM.lock();
+    }
+
     // inserts new item into list at correct position to preserve alphabetical
     // order of item names, and returns pointer to it
-    T* insert(MetadataItem* parent, wxString name, NodeType type)
+    T* insert(wxString name)
     {
         iterator pos = std::find_if(itemsM.begin(), itemsM.end(),
             InsertionPosByName(name));
-        T* item = &(*itemsM.insert(pos, new T()));
+        T* item = &(*itemsM.insert(pos, new T(getDatabase(), name)));
         for (unsigned int i = getLockCount(); i > 0; i--)
             item->lockSubject();
-        item->setProperties(parent, name, type);
         notifyObservers();
         return item;
     }
@@ -112,7 +131,7 @@ public:
         }
     }
 
-    void setItems(MetadataItem* parent, NodeType type, wxArrayString names)
+    void setItems(wxArrayString names)
     {
         bool changed = false;
         CollectionType newItems;
@@ -125,11 +144,10 @@ public:
                 wxLogDebug(wxT("Creating new item \"%s\""), itemName.c_str());
                 changed = true;
 
-                newItems.push_back(new T());
+                newItems.push_back(new T(getDatabase(), names[i]));
                 T* item = &newItems.back();
                 for (unsigned int j = getLockCount(); j > 0; j--)
                     item->lockSubject();
-                item->setProperties(parent, names[i], type);
             }
             else if (oldPos == itemsM.begin())
             {
@@ -162,7 +180,7 @@ public:
             notifyObservers();
     }
 
-    void setUserItems(MetadataItem* parent, NodeType type, wxArrayString names)
+    void setUserItems(wxArrayString names)
     {
         bool changed = false;
         CollectionType newItems;
@@ -175,11 +193,10 @@ public:
                 wxLogDebug(wxT("Creating new item \"%s\""), itemName.c_str());
                 changed = true;
 
-                newItems.push_back(new T());
+                newItems.push_back(new T(getDatabase(), names[i]));
                 T* item = &newItems.back();
                 for (unsigned int j = getLockCount(); j > 0; j--)
                     item->lockSubject();
-                item->setProperties(parent, names[i], type);
             }
             else if (oldPos == itemsM.begin())
             {

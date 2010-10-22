@@ -42,7 +42,7 @@ class Role: public MetadataItem
 private:
     std::vector<Privilege> privilegesM;
 public:
-    Role();
+    Role(DatabasePtr database, const wxString& name);
     wxString getOwner();
     std::vector<Privilege>* getPrivileges();
     virtual const wxString getTypeName() const;
@@ -54,6 +54,8 @@ class Roles: public MetadataCollection<Role>
 protected:
     virtual void loadChildren();
 public:
+    Roles(DatabasePtr database);
+
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);
 };

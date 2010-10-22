@@ -42,7 +42,7 @@ private:
 protected:
     virtual void loadProperties();
 public:
-    Exception();
+    Exception(DatabasePtr database, const wxString& name);
 
     wxString getMessage();
     int getNumber();
@@ -57,6 +57,8 @@ class Exceptions : public MetadataCollection<Exception>
 protected:
     virtual void loadChildren();
 public:
+    Exceptions(DatabasePtr database);
+
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);
 };
