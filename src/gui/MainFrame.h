@@ -36,12 +36,12 @@
 #include <vector>
 
 #include "gui/BaseFrame.h"
+#include "metadata/database.h"
 #include "metadata/generator.h"
 #include "metadata/metadataitem.h"
 #include "metadata/root.h"
 #include "framemanager.h"
 //-----------------------------------------------------------------------------
-class Database;
 class DBHTreeControl;
 class LabelPanel;
 //-----------------------------------------------------------------------------

@@ -40,13 +40,13 @@
 
 #include <sstream>
 
-#include "collection.h"
-#include "column.h"
 #include "config/Config.h"
-#include "constraints.h"
-#include "database.h"
-#include "domain.h"
-#include "MetadataItemVisitor.h"
+#include "metadata/database.h"
+#include "metadata/collection.h"
+#include "metadata/column.h"
+#include "metadata/constraints.h"
+#include "metadata/domain.h"
+#include "metadata/MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 Column::Column(MetadataItem* parent, const wxString& name)
     : MetadataItem(ntColumn, parent, name)

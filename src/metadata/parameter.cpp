@@ -38,6 +38,7 @@
     #pragma hdrstop
 #endif
 
+#include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/parameter.h"
 #include "metadata/procedure.h"

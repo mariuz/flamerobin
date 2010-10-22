@@ -38,6 +38,7 @@
     #pragma hdrstop
 #endif
 
+#include "metadata/database.h"
 #include "metadata/privilege.h"
 #include "metadata/procedure.h"
 #include "metadata/relation.h"

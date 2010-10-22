@@ -45,6 +45,7 @@
 #include "core/StringUtils.h"
 #include "core/TemplateProcessor.h"
 #include "metadata/CreateDDLVisitor.h"
+#include "metadata/database.h"
 #include "metadata/privilege.h"
 #include "metadata/procedure.h"
 #include "metadata/relation.h"
