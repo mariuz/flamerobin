@@ -51,11 +51,11 @@
 //-----------------------------------------------------------------------------
 BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent,
         DatabasePtr db)
-    : BaseFrame(parent, wxID_ANY, wxEmptyString), threadM(0)
+    : BaseFrame(parent, wxID_ANY, wxEmptyString),
+        MetadataItemLink<Database>(db), threadM(0)
 {
     wxASSERT(db);
-    databaseM = db;
-    db.get()->attachObserver(this);
+    db->attachObserver(this);
 
     threadMsgTimeMillisM = 0;
     verboseMsgsM = true;
@@ -140,7 +140,7 @@ void BackupRestoreBaseFrame::doWriteConfigSettings(const wxString& prefix) const
 //-----------------------------------------------------------------------------
 DatabasePtr BackupRestoreBaseFrame::getDatabase() const
 {
-    return databaseM.lock();
+    return MetadataItemLink<Database>::getLink();
 }
 //-----------------------------------------------------------------------------
 const wxString BackupRestoreBaseFrame::getStorageName() const

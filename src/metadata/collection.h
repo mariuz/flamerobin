@@ -32,7 +32,6 @@
 
 #include <boost/ptr_container/ptr_list.hpp>
 
-#include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
 //-----------------------------------------------------------------------------
 class MetadataCollectionBase : public MetadataItem
@@ -48,14 +47,14 @@ public:
 };
 //-----------------------------------------------------------------------------
 template <class T>
-class MetadataCollection : public MetadataCollectionBase
+class MetadataCollection : public MetadataCollectionBase,
+    public MetadataItemLink<Database>
 {
 public:
     typedef typename boost::ptr_list<T> CollectionType;
     typedef typename CollectionType::iterator iterator;
     typedef typename CollectionType::const_iterator const_iterator;
 private:
-    WeakDatabasePtr databaseM;
     CollectionType itemsM;
 
     iterator getPosition(wxString name)
@@ -95,13 +94,13 @@ public:
     MetadataCollection<T>(NodeType type, DatabasePtr database,
             const wxString& name)
         : MetadataCollectionBase(type, database.get(), name),
-            databaseM(database)
+            MetadataItemLink<Database>(database)
     {
     }
 
     DatabasePtr getDatabase() const
     {
-        return databaseM.lock();
+        return MetadataItemLink<Database>::getLink();
     }
 
     // inserts new item into list at correct position to preserve alphabetical

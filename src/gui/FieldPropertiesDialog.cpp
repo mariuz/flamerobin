@@ -273,15 +273,12 @@ bool FieldPropertiesDialog::getDomainInfo(const wxString& domain,
     if (db)
     {
         DomainsPtr ds(db->getDomains());
-        for (Domains::const_iterator it = ds->begin(); it != ds->end(); ++it)
+        Domain* d = ds->findByName(domain);
+        if (d)
         {
-            if (domain == (*it).getName_())
-            {
-                Domain* d = (Domain*)&(*it);
-                d->getDatatypeParts(type, size, scale);
-                charset = d->getCharset();
-                return true;
-            }
+            d->getDatatypeParts(type, size, scale);
+            charset = d->getCharset();
+            return true;
         }
     }
     return false;

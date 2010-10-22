@@ -162,10 +162,10 @@ private:
 };
 //-----------------------------------------------------------------------------
 class Database: public MetadataItem,
+    private MetadataItemLink<Server>,
     public boost::enable_shared_from_this<Database>
 {
 private:
-    WeakServerPtr serverM;
     IBPP::Database databaseM;
     MetadataLoader* metadataLoaderM;
 
@@ -177,7 +177,7 @@ private:
     Credentials* connectionCredentialsM;
     DatabaseAuthenticationMode authenticationModeM;
 
-    wxMBConv* charsetConverterM;
+    std::auto_ptr<wxMBConv> charsetConverterM;
     void createCharsetConverter();
 
     DatabaseInfo databaseInfoM;

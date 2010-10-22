@@ -46,12 +46,10 @@
 
 class EventLogControl;
 //-----------------------------------------------------------------------------
-class EventWatcherFrame : public BaseFrame,
-    public IBPP::EventInterface,
-    public Observer
+class EventWatcherFrame : public BaseFrame, public Observer,
+    public IBPP::EventInterface, public MetadataItemLink<Database>
 {
 private:
-    WeakDatabasePtr databaseM;
     wxTimer timerM;
     IBPP::Events eventsM;
 

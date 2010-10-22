@@ -123,7 +123,7 @@ bool Column::isPrimaryKey() const
     ColumnConstraint *key = t->getPrimaryKey();
     if (!key)
         return false;
-    for (ColumnConstraint::const_iterator it = key->begin(); it != key->end(); 
+    for (ColumnConstraint::const_iterator it = key->begin(); it != key->end();
         ++it)
     {
         if ((*it) == getName_())

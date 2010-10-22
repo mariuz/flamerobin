@@ -80,7 +80,8 @@ void EventLogControl::logEvent(const wxString& name, int count)
 }
 //-----------------------------------------------------------------------------
 EventWatcherFrame::EventWatcherFrame(wxWindow* parent, DatabasePtr db)
-    : BaseFrame(parent, -1, wxEmptyString), databaseM(db), eventsM(0)
+    : BaseFrame(parent, -1, wxEmptyString), MetadataItemLink<Database>(db),
+        eventsM(0)
 {
     wxASSERT(db);
     timerM.SetOwner(this, ID_timer);
@@ -245,7 +246,7 @@ void EventWatcherFrame::defineMonitoredEvents()
 //-----------------------------------------------------------------------------
 DatabasePtr EventWatcherFrame::getDatabase() const
 {
-    return databaseM.lock();
+    return MetadataItemLink<Database>::getLink();
 }
 //-----------------------------------------------------------------------------
 bool EventWatcherFrame::setTimerActive(bool active)

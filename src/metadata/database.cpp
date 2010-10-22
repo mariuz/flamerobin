@@ -315,7 +315,8 @@ bool DatabaseAuthenticationMode::getUseEncryptedPassword() const
 //-----------------------------------------------------------------------------
 // Database class
 Database::Database()
-    : MetadataItem(ntDatabase), metadataLoaderM(0), connectedM(false),
+    : MetadataItem(ntDatabase), MetadataItemLink<Server>(),
+        metadataLoaderM(0), connectedM(false),
         connectionCredentialsM(0), charsetConverterM(0), idM(0)
 {
 }
@@ -323,7 +324,6 @@ Database::Database()
 Database::~Database()
 {
     resetCredentials();
-    delete charsetConverterM;
 }
 //-----------------------------------------------------------------------------
 void Database::prepareTemporaryCredentials()
@@ -1388,13 +1388,13 @@ void Database::acceptVisitor(MetadataItemVisitor* visitor)
 //-----------------------------------------------------------------------------
 ServerPtr Database::getServer() const
 {
-    return serverM.lock();
+    return MetadataItemLink<Server>::getLink();
 }
 //-----------------------------------------------------------------------------
 void Database::setServer(ServerPtr server)
 {
     wxASSERT(server);
-    serverM = server;
+    MetadataItemLink<Server>::setLink(server);
     setParent(server.get());
 }
 //-----------------------------------------------------------------------------
@@ -1513,19 +1513,18 @@ wxString mapConnectionCharsetToSystemCharset(const wxString& connectionCharset)
 //-----------------------------------------------------------------------------
 void Database::createCharsetConverter()
 {
-    delete charsetConverterM;
-    charsetConverterM = 0;
+    charsetConverterM.reset();
 
     wxString cs(mapConnectionCharsetToSystemCharset(getConnectionCharset()));
     wxFontEncoding fe = wxFontMapperBase::Get()->CharsetToEncoding(cs, false);
     if (fe != wxFONTENCODING_SYSTEM)
-        charsetConverterM = new wxCSConv(fe);
+        charsetConverterM.reset(new wxCSConv(fe));
 }
 //-----------------------------------------------------------------------------
 wxMBConv* Database::getCharsetConverter() const
 {
-    if (charsetConverterM)
-        return charsetConverterM;
+    if (wxMBConv* conv = charsetConverterM.get())
+        return conv;
     return wxConvCurrent;
 }
 //-----------------------------------------------------------------------------
