@@ -241,8 +241,7 @@ private:
     bool sortChildrenM;
     bool nodeConfigSensitiveM;
 
-    void setNodeProperties(MetadataItem* metadataItem, const wxArtID& artId,
-        int overrideChildCount = -1);
+    void setNodeProperties(MetadataItem* metadataItem, const wxArtID& artId);
 protected:
     virtual void defaultAction();
 public:
@@ -296,13 +295,8 @@ void DBHTreeItemVisitor::defaultAction()
     wxASSERT_MSG(false, wxT("DBHTreeItemVisitor::visit[Classname]() missing"));
 }
 //-----------------------------------------------------------------------------
-bool isNotSystem(Domain& domain)
-{
-    return !domain.isSystem();
-}
-//-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::setNodeProperties(MetadataItem* metadataItem,
-    const wxArtID& artId, int overrideChildCount)
+    const wxArtID& artId)
 {
     wxASSERT(metadataItem);
     nodeVisibleM = true;
@@ -310,12 +304,7 @@ void DBHTreeItemVisitor::setNodeProperties(MetadataItem* metadataItem,
 
     nodeImageIndexM = DBHTreeImageList::get().getImageIndex(artId);
 
-    size_t childCount = 0;
-    if (overrideChildCount < 0)
-        childCount = metadataItem->getChildrenCount();
-    else
-        childCount = overrideChildCount;
-
+    size_t childCount = metadataItem->getChildrenCount();
     // don't touch node caption if it has already been set
     if (nodeTextM.empty())
     {
@@ -402,8 +391,7 @@ void DBHTreeItemVisitor::visitDomain(Domain& domain)
 void DBHTreeItemVisitor::visitDomains(Domains& domains)
 {
     // domain collection contains system domains that are not visible
-    setNodeProperties(&domains, ART_Domains,
-        std::count_if(domains.begin(), domains.end(), &isNotSystem));
+    setNodeProperties(&domains, ART_Domains);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitException(Exception& exception)

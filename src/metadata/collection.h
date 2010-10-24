@@ -179,63 +179,6 @@ public:
             notifyObservers();
     }
 
-    void setUserItems(wxArrayString names)
-    {
-        bool changed = false;
-        CollectionType newItems;
-        for (size_t i = 0; i < names.size(); ++i)
-        {
-            wxString itemName(names[i]);
-            iterator oldPos = getPosition(itemName);
-            if (oldPos == itemsM.end())
-            {
-                wxLogDebug(wxT("Creating new item \"%s\""), itemName.c_str());
-                changed = true;
-
-                newItems.push_back(new T(getDatabase(), names[i]));
-                T* item = &newItems.back();
-                for (unsigned int j = getLockCount(); j > 0; j--)
-                    item->lockSubject();
-            }
-            else if (oldPos == itemsM.begin())
-            {
-                wxLogDebug(wxT("Keeping item \"%s\" at same position"),
-                    itemName.c_str());
-                newItems.transfer(newItems.end(), oldPos, itemsM);
-            }
-            else
-            {
-                wxLogDebug(wxT("Moving item \"%s\" to different position"),
-                    itemName.c_str());
-                changed = true;
-                newItems.transfer(newItems.end(), oldPos, itemsM);
-            }
-        }
-
-        if (!itemsM.empty())
-        {
-            size_t oldCount = itemsM.size();
-            // all remaining items that are not system items must be invalid
-            // (have been deleted probably), so delete them from this list
-            IsUserItem isUserItem;
-            itemsM.erase_if(isUserItem);
-            size_t newCount = itemsM.size();
-
-            wxLogDebug(wxT("User items (%d) in old vector deleted,")
-                wxT(" %d remaining system items"),
-                oldCount - newCount, newCount);
-            if (newCount < oldCount)
-                changed = true;
-        }
-        itemsM.transfer(itemsM.begin(), newItems);
-
-        setChildrenLoaded(true);
-        // call notifyObservers() only if any items have been added, moved
-        // or deleted
-        if (changed)
-            notifyObservers();
-    }
-
     inline iterator begin()
     {
         if (!childrenLoaded())

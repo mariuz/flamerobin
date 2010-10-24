@@ -168,31 +168,6 @@ void iterateit(CreateDDLVisitor* v, C mc, ProgressIndicator* pi)
     }
 }
 //-----------------------------------------------------------------------------
-void iterateit(CreateDDLVisitor* v, DomainsPtr dc, ProgressIndicator* pi)
-{
-    wxASSERT(dc);
-
-    if (pi)
-    {
-        pi->setProgressMessage(_("Extracting ") + dc->getName_());
-        pi->stepProgress();
-        pi->initProgress(wxEmptyString, dc->getChildrenCount(), 0, 2);
-    }
-
-    for (MetadataCollection<Domain>::iterator it = dc->begin();
-        it != dc->end(); ++it)
-    {
-        if (it->isSystem())         // system domains get loaded during
-            continue;               // program lifetime - so we skip them
-        if (pi)
-        {
-            checkProgressIndicatorCanceled(pi);
-            pi->setProgressMessage(_("Extracting ") + (*it).getName_(), 2);
-            pi->stepProgress(1, 2);
-        }
-        (*it).acceptVisitor(v);
-    }
-}
 // build the sql script for entire database
 void CreateDDLVisitor::visitDatabase(Database& d)
 {
@@ -213,7 +188,8 @@ void CreateDDLVisitor::visitDatabase(Database& d)
             progressIndicatorM);
 
         preSqlM << wxT("/******************** DOMAINS *********************/\n\n");
-        iterateit(this, d.getDomains(), progressIndicatorM);
+        iterateit<DomainsPtr, Domain>(this, d.getDomains(),
+            progressIndicatorM);
 
         preSqlM << wxT("/******************* PROCEDURES ******************/\n\n");
         iterateit<ProceduresPtr, Procedure>(this, d.getProcedures(),

@@ -353,11 +353,7 @@ void Domains::load(ProgressIndicator* progressIndicator)
         wxT(" where t.rdb$field_name='RDB$FIELD_TYPE'")
         wxT(" and f.rdb$field_name not starting with 'RDB$'")
         wxT(" order by 1");
-    // setUserItems() will do what setItems() does, but not delete any
-    // system items already in the list. Doing so for domains would result
-    // in them being reloaded immediately, so keep them in the list
-    // a distinct system domain collection would probably be better...
-    setUserItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
 void Domains::loadChildren()
