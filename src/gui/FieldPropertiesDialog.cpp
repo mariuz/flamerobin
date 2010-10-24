@@ -272,9 +272,7 @@ bool FieldPropertiesDialog::getDomainInfo(const wxString& domain,
     Database* db = tableM->findDatabase();
     if (db)
     {
-        DomainsPtr ds(db->getDomains());
-        Domain* d = ds->findByName(domain);
-        if (d)
+        if (Domain* d = db->getDomain(domain))
         {
             d->getDatatypeParts(type, size, scale);
             charset = d->getCharset();
@@ -480,7 +478,7 @@ void FieldPropertiesDialog::loadDomains()
     wxWindowUpdateLocker freeze(choice_domain);
 
     choice_domain->Clear();
-    if (columnM == 0 || columnM->getSource().substr(0,4) != wxT("RDB$"))
+    if (columnM == 0 || !MetadataItem::hasSystemPrefix(columnM->getSource()))
     {
         choice_domain->Append(_("[Create new]"));
         if (!columnM)
@@ -490,16 +488,16 @@ void FieldPropertiesDialog::loadDomains()
     Database* db = (tableM) ? tableM->findDatabase() : 0;
     if (tableM && db)
     {
-        DomainsPtr ds(db->getDomains());
-        for (Domains::const_iterator it = ds->begin(); it != ds->end(); ++it)
+        if (columnM)
         {
-            wxString name = (*it).getName_();
-            // ignore RDB$XXX domains unless it's the one columnM uses
-            bool addDomain = name.substr(0, 4) != wxT("RDB$")
-                || (columnM && columnM->getSource() == name);
-            if (addDomain)
+            wxString name(columnM->getSource());
+            if (!name.empty())
                 choice_domain->Append(name);
         }
+
+        DomainsPtr ds(db->getDomains());
+        for (Domains::const_iterator it = ds->begin(); it != ds->end(); ++it)
+            choice_domain->Append((*it).getName_());
     }
 }
 //-----------------------------------------------------------------------------

@@ -44,6 +44,7 @@ public:
     virtual void visitDatabase(Database& database);
     virtual void visitDomain(Domain& domain);
     virtual void visitDomains(Domains& domains);
+    virtual void visitSysDomains(SysDomains& domains);
     virtual void visitException(Exception& exception);
     virtual void visitExceptions(Exceptions& exceptions);
     virtual void visitForeignKey(ForeignKey& fk);

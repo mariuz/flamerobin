@@ -360,7 +360,7 @@ void Database::getIdentifiers(std::vector<Identifier>& temp)
         std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
     std::transform(functionsM->begin(), functionsM->end(),
         std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
-    std::transform(domainsM->begin(), domainsM->end(),
+    std::transform(userDomainsM->begin(), userDomainsM->end(),
         std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
     std::transform(exceptionsM->begin(), exceptionsM->end(),
         std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
@@ -436,8 +436,20 @@ wxArrayString Database::getCollations(const wxString& charset)
     return collations;
 }
 //-----------------------------------------------------------------------------
-Domain* Database::loadMissingDomain(wxString name)
+Domain* Database::getDomain(const wxString& name)
 {
+    // return domain if already loaded
+    if (MetadataItem::hasSystemPrefix(name))
+    {
+        if (Domain* domain = sysDomainsM->findByName(name))
+            return domain;
+    }
+    else
+    {
+        if (Domain* domain = userDomainsM->findByName(name))
+            return domain;
+    }
+
     MetadataLoader* loader = getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 
@@ -453,7 +465,12 @@ Domain* Database::loadMissingDomain(wxString name)
         int c;
         st1->Get(1, c);
         if (c > 0)
-            return domainsM->insert(name);
+        {
+            if (MetadataItem::hasSystemPrefix(name))
+                return sysDomainsM->insert(name);
+            else
+                return userDomainsM->insert(name);
+        }
     }
     return 0;
 }
@@ -570,7 +587,8 @@ MetadataItem* Database::findByNameAndType(NodeType nt, wxString name)
         case ntFunction:    return functionsM->findByName(name);  break;
         case ntGenerator:   return generatorsM->findByName(name); break;
         case ntRole:        return rolesM->findByName(name);      break;
-        case ntDomain:      return domainsM->findByName(name);    break;
+        case ntDomain:      return userDomainsM->findByName(name); break;
+        case ntSysDomain:   return sysDomainsM->findByName(name); break;
         case ntException:   return exceptionsM->findByName(name); break;
         default:
             return 0;
@@ -613,7 +631,8 @@ void Database::dropObject(MetadataItem* object)
         case ntFunction:    functionsM->remove((Function*)object);      break;
         case ntGenerator:   generatorsM->remove((Generator*)object);    break;
         case ntRole:        rolesM->remove((Role*)object);              break;
-        case ntDomain:      domainsM->remove((Domain*)object);          break;
+        case ntDomain:      userDomainsM->remove((Domain*)object);      break;
+        case ntSysDomain:   sysDomainsM->remove((Domain*)object);       break;
         case ntException:   exceptionsM->remove((Exception*)object);    break;
         default:
             return;
@@ -649,7 +668,10 @@ void Database::addObject(NodeType type, wxString name)
             functionsM->insert(name);
             break;
         case ntDomain:
-            domainsM->insert(name);
+            userDomainsM->insert(name);
+            break;
+        case ntSysDomain:
+            sysDomainsM->insert(name);
             break;
         case ntException:
             exceptionsM->insert(name);
@@ -768,10 +790,20 @@ void Database::parseCommitedSql(const SqlStatement& stm)
         {
             wxString domainName(loadDomainNameForColumn(stm.getName(),
                 stm.getFieldName()));
-            MetadataItem* m = domainsM->findByName(domainName);
-            if (!m)     // domain does not exist in DBH
-                m = domainsM->insert(domainName);
-            m->invalidate();
+            if (MetadataItem::hasSystemPrefix(domainName))
+            {
+                MetadataItem* m = sysDomainsM->findByName(domainName);
+                if (!m)     // domain does not exist in DBH
+                    m = sysDomainsM->insert(domainName);
+                m->invalidate();
+            }
+            else
+            {
+                MetadataItem* m = userDomainsM->findByName(domainName);
+                if (!m)     // domain does not exist in DBH
+                    m = userDomainsM->insert(domainName);
+                m->invalidate();
+            }
         }
         else
         {
@@ -873,15 +905,16 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
         }
 
         DatabasePtr me(shared_from_this());
-        domainsM.reset(new Domains(me));
+        userDomainsM.reset(new Domains(me));
+        sysDomainsM.reset(new SysDomains(me));
         exceptionsM.reset(new Exceptions(me));
         functionsM.reset(new Functions(me));
         generatorsM.reset(new Generators(me));
         proceduresM.reset(new Procedures(me));
         rolesM.reset(new Roles(me));
         triggersM.reset(new Triggers(me));
-        sysTablesM.reset(new SysTables(me));
         tablesM.reset(new Tables(me));
+        sysTablesM.reset(new SysTables(me));
         viewsM.reset(new Views(me));
 
         bool useUserNamePwd = !authenticationModeM.getIgnoreUsernamePassword();
@@ -997,7 +1030,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     rolesM->load(progressIndicator);
 
     pih.init(_("domains"), collectionCount, 7);
-    domainsM->load(progressIndicator);
+    userDomainsM->load(progressIndicator);
 
     pih.init(_("functions"), collectionCount, 8);
     functionsM->load(progressIndicator);
@@ -1052,13 +1085,14 @@ void Database::setDisconnected()
     resetPendingLoadData();
 
     // remove entire DBH beneath
-    domainsM.reset();
+    userDomainsM.reset();
+    sysDomainsM.reset();
     functionsM.reset();
     generatorsM.reset();
     proceduresM.reset();
     rolesM.reset();
-    sysTablesM.reset();
     tablesM.reset();
+    sysTablesM.reset();
     triggersM.reset();
     viewsM.reset();
     exceptionsM.reset();
@@ -1100,9 +1134,16 @@ bool Database::getChildren(std::vector<MetadataItem*>& temp)
 //-----------------------------------------------------------------------------
 DomainsPtr Database::getDomains()
 {
-    wxASSERT(domainsM);
-    domainsM->ensureChildrenLoaded();
-    return domainsM;
+    wxASSERT(userDomainsM);
+    userDomainsM->ensureChildrenLoaded();
+    return userDomainsM;
+}
+//-----------------------------------------------------------------------------
+SysDomainsPtr Database::getSysDomains()
+{
+    wxASSERT(sysDomainsM);
+    sysDomainsM->ensureChildrenLoaded();
+    return sysDomainsM;
 }
 //-----------------------------------------------------------------------------
 ExceptionsPtr Database::getExceptions()
@@ -1176,7 +1217,7 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
 
     ensureChildrenLoaded();
 
-    temp.push_back(domainsM.get());
+    temp.push_back(userDomainsM.get());
     temp.push_back(exceptionsM.get());
     temp.push_back(functionsM.get());
     temp.push_back(generatorsM.get());
@@ -1200,7 +1241,8 @@ void Database::lockChildren()
 {
     if (isConnected())
     {
-        domainsM->lockSubject();
+        userDomainsM->lockSubject();
+        sysDomainsM->lockSubject();
         exceptionsM->lockSubject();
         functionsM->lockSubject();
         generatorsM->lockSubject();
@@ -1229,7 +1271,8 @@ void Database::unlockChildren()
         generatorsM->unlockSubject();
         functionsM->unlockSubject();
         exceptionsM->unlockSubject();
-        domainsM->unlockSubject();
+        sysDomainsM->unlockSubject();
+        userDomainsM->unlockSubject();
     }
 }
 //-----------------------------------------------------------------------------

@@ -207,14 +207,7 @@ bool Column::isString() const
 Domain* Column::getDomain() const
 {
     Database* db = findDatabase();
-    if (!db)
-        return 0;
-
-    DomainsPtr ds(db->getDomains());
-    if (Domain* d = ds->findByName(sourceM))
-        return d;
-    // since we haven't found the domain, check the database
-    return db->loadMissingDomain(sourceM);
+    return (db) ? db->getDomain(sourceM) : 0;
 }
 //-----------------------------------------------------------------------------
 Table* Column::getTable() const

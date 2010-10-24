@@ -47,7 +47,8 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
     // each item type and (if applicable) its parent type
     ntTable, ntTables, ntView, ntViews, ntProcedure, ntProcedures,
     ntTrigger, ntTriggers, ntGenerator, ntGenerators, ntFunction, ntFunctions,
-    ntSysTable, ntSysTables, ntException, ntExceptions, ntDomain, ntDomains,
+    ntSysTable, ntSysTables, ntException, ntExceptions,
+    ntDomain, ntDomains, ntSysDomain, ntSysDomains,
     ntRole, ntRoles, ntColumn, ntParameter, ntIndex,
     ntLastType
 } NodeType;

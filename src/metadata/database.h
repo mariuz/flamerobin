@@ -182,14 +182,15 @@ private:
 
     DatabaseInfo databaseInfoM;
 
-    DomainsPtr domainsM;
+    DomainsPtr userDomainsM;
+    SysDomainsPtr sysDomainsM;
     ExceptionsPtr exceptionsM;
     FunctionsPtr functionsM;
     GeneratorsPtr generatorsM;
     ProceduresPtr proceduresM;
     RolesPtr rolesM;
-    SysTablesPtr sysTablesM;
     TablesPtr tablesM;
+    SysTablesPtr sysTablesM;
     TriggersPtr triggersM;
     ViewsPtr viewsM;
 
@@ -224,6 +225,7 @@ public:
     void getCollections(std::vector<MetadataItem *>& temp, bool system);
 
     DomainsPtr getDomains();
+    SysDomainsPtr getSysDomains();
     ExceptionsPtr getExceptions();
     FunctionsPtr getFunctions();
     GeneratorsPtr getGenerators();
@@ -249,7 +251,7 @@ public:
         ProgressIndicator* progressIndicator = 0);
 
     wxString loadDomainNameForColumn(wxString table, wxString field);
-    Domain* loadMissingDomain(wxString name);
+    Domain* getDomain(const wxString& name);
 
     void loadGeneratorValues();
     Relation* getRelationForTrigger(Trigger* trigger);

@@ -53,7 +53,8 @@
 #include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------
 Domain::Domain(DatabasePtr database, const wxString& name)
-    : MetadataItem(ntDomain, database.get(), name)
+    : MetadataItem((hasSystemPrefix(name) ? ntSysDomain : ntDomain),
+        database.get(), name)
 {
 }
 //-----------------------------------------------------------------------------
@@ -362,5 +363,16 @@ void Domains::load(ProgressIndicator* progressIndicator)
 void Domains::loadChildren()
 {
     load(0);
+}
+//-----------------------------------------------------------------------------
+// System domains collection
+SysDomains::SysDomains(DatabasePtr database)
+    : MetadataCollection<Domain>(ntSysDomains, database, _("System domains"))
+{
+}
+//-----------------------------------------------------------------------------
+void SysDomains::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitSysDomains(*this);
 }
 //-----------------------------------------------------------------------------

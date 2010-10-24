@@ -154,6 +154,11 @@ void MetadataItemVisitor::visitServer(Server&)
     defaultAction();
 };
 //-----------------------------------------------------------------------------
+void MetadataItemVisitor::visitSysDomains(SysDomains&)
+{
+    defaultAction();
+};
+//-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitSysTables(SysTables&)
 {
     defaultAction();

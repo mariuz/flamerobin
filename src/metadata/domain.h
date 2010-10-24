@@ -74,4 +74,12 @@ public:
     void load(ProgressIndicator* progressIndicator);
 };
 //-----------------------------------------------------------------------------
+class SysDomains: public MetadataCollection<Domain>
+{
+public:
+    SysDomains(DatabasePtr database);
+
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+//-----------------------------------------------------------------------------
 #endif
