@@ -154,6 +154,7 @@ public:
 
     // returns true if the metadata item is a system (as opposed to user-defined) item.
     virtual bool isSystem() const;
+    static bool hasSystemPrefix(const wxString& name);
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };

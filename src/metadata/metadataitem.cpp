@@ -651,7 +651,13 @@ void MetadataItem::setType(NodeType type)
 //-----------------------------------------------------------------------------
 bool MetadataItem::isSystem() const
 {
-    wxString prefix(getName_().substr(0, 4));
+    return hasSystemPrefix(getName_());
+}
+//-----------------------------------------------------------------------------
+/*static*/
+bool MetadataItem::hasSystemPrefix(const wxString& name)
+{
+    wxString prefix(name.substr(0, 4));
     return prefix == wxT("RDB$") || prefix == wxT("MON$");
 }
 //-----------------------------------------------------------------------------

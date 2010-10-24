@@ -49,9 +49,10 @@
 #include "metadata/table.h"
 //-----------------------------------------------------------------------------
 Table::Table(DatabasePtr database, const wxString& name)
-    : Relation(ntTable, database.get(), name), primaryKeyLoadedM(false),
-        foreignKeysLoadedM(false), checkConstraintsLoadedM(false),
-        uniqueConstraintsLoadedM(false), indicesLoadedM(false)
+    : Relation((hasSystemPrefix(name) ? ntSysTable : ntTable), database, name),
+        primaryKeyLoadedM(false), foreignKeysLoadedM(false),
+        checkConstraintsLoadedM(false), uniqueConstraintsLoadedM(false),
+        indicesLoadedM(false)
 {
 }
 //-----------------------------------------------------------------------------

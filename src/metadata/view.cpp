@@ -44,7 +44,7 @@
 #include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------
 View::View(DatabasePtr database, const wxString& name)
-    : Relation(ntView, database.get(), name)
+    : Relation(ntView, database, name)
 {
 }
 //-----------------------------------------------------------------------------

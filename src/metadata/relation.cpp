@@ -51,8 +51,8 @@
 #include "metadata/relation.h"
 #include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------
-Relation::Relation(NodeType type, MetadataItem* parent, const wxString& name)
-    : MetadataItem(type, parent, name)
+Relation::Relation(NodeType type, DatabasePtr database, const wxString& name)
+    : MetadataItem(type, database.get(), name)
 {
 }
 //-----------------------------------------------------------------------------

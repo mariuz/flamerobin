@@ -65,7 +65,7 @@ protected:
 
     virtual bool addRdbKeyToSelect();
 public:
-    Relation(NodeType type, MetadataItem* parent, const wxString& name);
+    Relation(NodeType type, DatabasePtr database, const wxString& name);
 
     wxString getOwner();
     int getRelationType();
