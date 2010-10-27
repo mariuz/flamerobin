@@ -112,6 +112,11 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
         MetadataItemPropertiesFrame::OnNotebookPageChanged), NULL, this);
 }
 //-----------------------------------------------------------------------------
+MetadataItemPropertiesFrame::~MetadataItemPropertiesFrame()
+{
+    auiManagerM.UnInit();
+}
+//-----------------------------------------------------------------------------
 const wxRect MetadataItemPropertiesFrame::getDefaultRect() const
 {
     return wxRect(-1, -1, 600, 420);
@@ -263,9 +268,8 @@ void MetadataItemPropertiesPanel::requestLoadPage(bool showLoadingPage)
     {
         if (showLoadingPage)
         {
-            wxBusyCursor bc;
-            wxString path(config().getHtmlTemplatesPath());
-            processHtmlFile(path + wxT("ALLloading.html"));
+            html_window->LoadFile(config().getHtmlTemplatesPath()
+                + wxT("ALLloading.html"));
         }
 
         Connect(wxID_ANY, wxEVT_IDLE,
@@ -314,7 +318,7 @@ void MetadataItemPropertiesPanel::loadPage()
 }
 //-----------------------------------------------------------------------------
 //! processes the given html template file
-void MetadataItemPropertiesPanel::processHtmlFile(wxString fileName)
+void MetadataItemPropertiesPanel::processHtmlFile(const wxString& fileName)
 {
     ProgressDialog pd(this, wxT("Processing template..."));
     pd.doShow();

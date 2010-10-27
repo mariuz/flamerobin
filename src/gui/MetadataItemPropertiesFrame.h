@@ -64,10 +64,10 @@ public:
     virtual ~MetadataItemPropertiesPanel();
 
     MetadataItem* getObservedObject() const;
-    void processHtmlFile(wxString fileName);
+    MetadataItemPropertiesFrame* getParentFrame();
+    void processHtmlFile(const wxString& fileName);
     void setPage(const wxString& type);
     void showIt();
-    MetadataItemPropertiesFrame* getParentFrame();
 private:
     // event handling
     void OnCloseFrame(wxCommandEvent& event);
@@ -92,10 +92,7 @@ protected:
     virtual const wxRect getDefaultRect() const;
 public:
     MetadataItemPropertiesFrame(wxWindow* parent, MetadataItem *object);
-    virtual ~MetadataItemPropertiesFrame()
-    {
-        auiManagerM.UnInit();
-    }
+    virtual ~MetadataItemPropertiesFrame();
 
     void showPanel(wxWindow *panel, const wxString& title);
     void removePanel(wxWindow *panel);
