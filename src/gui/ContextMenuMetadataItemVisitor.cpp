@@ -96,8 +96,6 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database&)
     actions->Append(Cmds::Menu_DropDatabase, _("Drop database"));
 
     // the advanced submenu
-    advanced->Append(Cmds::Menu_ShowConnectedUsers,
-        _("&Show connected users"));
     advanced->Append(Cmds::Menu_MonitorEvents, _("&Monitor events"));
     advanced->Append(Cmds::Menu_DatabasePreferences,
         _("Database &preferences..."));

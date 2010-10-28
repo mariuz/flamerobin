@@ -386,8 +386,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 
     EVT_MENU(Cmds::Menu_UnRegisterDatabase, MainFrame::OnMenuUnRegisterDatabase)
     EVT_UPDATE_UI(Cmds::Menu_UnRegisterDatabase, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
-    EVT_MENU(Cmds::Menu_ShowConnectedUsers, MainFrame::OnMenuShowConnectedUsers)
-    EVT_UPDATE_UI(Cmds::Menu_ShowConnectedUsers, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_MENU(Cmds::Menu_GetServerVersion, MainFrame::OnMenuGetServerVersion)
     EVT_UPDATE_UI(Cmds::Menu_GetServerVersion, MainFrame::OnMenuUpdateIfServerSelected)
     EVT_MENU(Cmds::Menu_MonitorEvents, MainFrame::OnMenuMonitorEvents)
@@ -1022,19 +1020,6 @@ void MainFrame::unregisterDatabase(DatabasePtr database)
 
     server->removeDatabase(database);
     rootM->save();
-}
-//-----------------------------------------------------------------------------
-void MainFrame::OnMenuShowConnectedUsers(wxCommandEvent& WXUNUSED(event))
-{
-    DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
-    if (!checkValidDatabase(db))
-        return;
-    if (!tryAutoConnectDatabase(db))
-        return;
-
-    wxArrayString as;
-    db->getConnectedUsers(as);
-    ::wxGetSingleChoice(_("Connected users"), db->getPath(), as);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuGetServerVersion(wxCommandEvent& WXUNUSED(event))

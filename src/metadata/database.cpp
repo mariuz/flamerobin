@@ -1577,10 +1577,22 @@ void Database::getConnectedUsers(wxArrayString& users) const
     {
         std::vector<std::string> userNames;
         databaseM->Users(userNames);
-        for (std::vector<std::string>::const_iterator i = userNames.begin();
-            i != userNames.end(); ++i)
+
+        // replace multiple occurences of same user name by "username (N)"
+        std::map<std::string, size_t> counts;
+        for (std::vector<std::string>::const_iterator it = userNames.begin();
+            it != userNames.end(); ++it)
         {
-            users.Add(std2wx(*i));
+            counts[*it] += 1;
+        }
+
+        for (std::map<std::string, size_t>::iterator it = counts.begin();
+            it != counts.end(); ++it)
+        {
+            wxString name(std2wx((*it).first));
+            if ((*it).second > 1)
+                name += wxString::Format(wxT(" (%d)"), (*it).second);
+            users.Add(name);
         }
     }
 }

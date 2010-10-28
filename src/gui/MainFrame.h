@@ -72,7 +72,6 @@ public:
     void OnMenuUnRegisterServer(wxCommandEvent& event);
     void OnMenuServerProperties(wxCommandEvent& event);
     void OnMenuUnRegisterDatabase(wxCommandEvent& event);
-    void OnMenuShowConnectedUsers(wxCommandEvent& event);
     void OnMenuGetServerVersion(wxCommandEvent& event);
     void OnMenuMonitorEvents(wxCommandEvent& event);
     void OnMenuGenerateData(wxCommandEvent& event);
