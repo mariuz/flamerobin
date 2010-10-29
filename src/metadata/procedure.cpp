@@ -47,13 +47,14 @@
 
 #include <ibpp.h>
 
-#include "core/StringUtils.h"
 #include "core/FRError.h"
+#include "core/StringUtils.h"
 #include "engine/MetadataLoader.h"
 #include "frutils.h"
 #include "gui/AdvancedMessageDialog.h"
-#include "metadata/database.h"
+#include "metadata/domain.h"
 #include "metadata/MetadataItemVisitor.h"
+#include "metadata/parameter.h"
 #include "metadata/procedure.h"
 #include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------

@@ -41,9 +41,21 @@
 
 #include "core/StringUtils.h"
 #include "engine/MetadataLoader.h"
+#include "metadata/column.h"
 #include "metadata/database.h"
+#include "metadata/domain.h"
+#include "metadata/exception.h"
+#include "metadata/function.h"
+#include "metadata/generator.h"
+#include "metadata/Index.h"
 #include "metadata/metadataitem.h"
 #include "metadata/MetadataItemDescriptionVisitor.h"
+#include "metadata/parameter.h"
+#include "metadata/procedure.h"
+#include "metadata/relation.h"
+#include "metadata/role.h"
+#include "metadata/trigger.h"
+
 //-----------------------------------------------------------------------------
 // class LoadDescriptionVisitor
 LoadDescriptionVisitor::LoadDescriptionVisitor()

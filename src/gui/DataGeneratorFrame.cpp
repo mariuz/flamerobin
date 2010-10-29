@@ -57,7 +57,10 @@
 #include "gui/controls/DBHTreeControl.h"
 #include "gui/DataGeneratorFrame.h"
 #include "gui/ProgressDialog.h"
+#include "metadata/column.h"
 #include "metadata/database.h"
+#include "metadata/domain.h"
+#include "metadata/table.h"
 //-----------------------------------------------------------------------------
 // returns a value between 0 and (maxval-1)
 // I wrote this as I don't know how much is rand from stdlib portable

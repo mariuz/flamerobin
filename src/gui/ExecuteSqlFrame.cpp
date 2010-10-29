@@ -48,13 +48,13 @@
 
 #include <algorithm>
 #include <map>
-#include <sstream>
 #include <vector>
 
 #include "config/Config.h"
 #include "core/ArtProvider.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
+#include "core/URIProcessor.h"
 #include "engine/MetadataLoader.h"
 #include "framemanager.h"
 #include "gui/AdvancedMessageDialog.h"
@@ -74,10 +74,16 @@
 #include "gui/StyleGuide.h"
 #include "frutils.h"
 #include "logger.h"
+#include "metadata/column.h"
 #include "metadata/CreateDDLVisitor.h"
+#include "metadata/database.h"
+#include "metadata/exception.h"
+#include "metadata/function.h"
+#include "metadata/generator.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
 #include "metadata/procedure.h"
 #include "metadata/server.h"
+#include "metadata/table.h"
 #include "metadata/view.h"
 #include "sql/Identifier.h"
 #include "sql/IncompleteStatement.h"
@@ -85,7 +91,6 @@
 #include "sql/SelectStatement.h"
 #include "sql/SqlStatement.h"
 #include "statementHistory.h"
-#include "core/URIProcessor.h"
 //-----------------------------------------------------------------------------
 class SqlEditorDropTarget : public wxDropTarget
 {

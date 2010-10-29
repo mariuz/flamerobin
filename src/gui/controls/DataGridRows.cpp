@@ -56,7 +56,9 @@
 #include "frtypes.h"
 #include "gui/controls/DataGridRowBuffer.h"
 #include "gui/controls/DataGridRows.h"
+#include "metadata/column.h"
 #include "metadata/database.h"
+#include "metadata/table.h"
 //-----------------------------------------------------------------------------
 // GridCellFormats: class to cache config data for cell formatting
 class GridCellFormats: public ConfigCache

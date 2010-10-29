@@ -45,6 +45,7 @@
 #include "gui/ExecuteSql.h"
 #include "gui/GUIURIHandlerHelper.h"
 #include "gui/StyleGuide.h"
+#include "metadata/column.h"
 #include "metadata/database.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
 #include "metadata/table.h"

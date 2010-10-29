@@ -38,20 +38,27 @@
     #include "wx/wx.h"
 #endif
 
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
 #include "core/ProcessableObject.h"
 #include "core/StringUtils.h"
 #include "core/TemplateProcessor.h"
 #include "metadata/CreateDDLVisitor.h"
+#include "metadata/column.h"
 #include "metadata/database.h"
+#include "metadata/exception.h"
+#include "metadata/function.h"
+#include "metadata/generator.h"
+#include "metadata/parameter.h"
 #include "metadata/privilege.h"
 #include "metadata/procedure.h"
 #include "metadata/relation.h"
 #include "metadata/role.h"
 #include "metadata/server.h"
+#include "metadata/table.h"
 #include "metadata/User.h"
+#include "metadata/view.h"
 
 //-----------------------------------------------------------------------------
 class MetadataTemplateCmdHandler: public TemplateCmdHandler
@@ -60,7 +67,8 @@ private:
     static const MetadataTemplateCmdHandler handlerInstance; // singleton; registers itself on creation.
 public:
     virtual void handleTemplateCmd(TemplateProcessor *tp, wxString cmdName,
-        TemplateCmdParams cmdParams, ProcessableObject* object, wxString& processedText);
+        TemplateCmdParams cmdParams, ProcessableObject* object,
+        wxString& processedText);
 };
 //-----------------------------------------------------------------------------
 const MetadataTemplateCmdHandler MetadataTemplateCmdHandler::handlerInstance;

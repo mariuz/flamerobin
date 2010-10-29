@@ -39,17 +39,24 @@
 #endif
 
 #include <wx/ffile.h>
+
 #include <set>
 
 #include "core/ArtProvider.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
-#include "metadata/column.h"
-#include "metadata/database.h"
 #include "gui/controls/DataGridRowBuffer.h"
 #include "gui/controls/DataGridTable.h"
-#include "gui/StyleGuide.h"
 #include "gui/InsertDialog.h"
+#include "gui/StyleGuide.h"
+#include "metadata/column.h"
+#include "metadata/database.h"
+#include "metadata/generator.h"
+#include "metadata/procedure.h"
+#include "metadata/table.h"
+#include "metadata/trigger.h"
+#include "metadata/view.h"
+
 /*
     The dialog creates a DataGridRowBuffer, and uses ResultsetColumnDefs from
     the active grid to format the values. I.e. new potential row is created

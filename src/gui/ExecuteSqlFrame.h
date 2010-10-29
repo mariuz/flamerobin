@@ -45,10 +45,10 @@
 #include "gui/EditBlobDialog.h"
 #include "gui/FindDialog.h"
 #include "sql/SqlStatement.h"
-#include "metadata/database.h"
 #include "statementHistory.h"
 //-----------------------------------------------------------------------------
 class CommandManager;
+class Database;
 class DataGrid;
 class ExecuteSqlFrame;
 //-----------------------------------------------------------------------------

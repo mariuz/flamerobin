@@ -32,7 +32,7 @@
 
 #include <boost/ptr_container/ptr_list.hpp>
 
-#include "metadata/metadataitem.h"
+#include "metadata/database.h"
 //-----------------------------------------------------------------------------
 class MetadataCollectionBase : public MetadataItem
 {

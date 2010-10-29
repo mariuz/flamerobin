@@ -39,7 +39,9 @@
 #endif
 
 #include "config/Config.h"
+#include "metadata/column.h"
 #include "metadata/database.h"
+#include "metadata/parameter.h"
 #include "metadata/procedure.h"
 #include "metadata/relation.h"
 #include "sql/Identifier.h"

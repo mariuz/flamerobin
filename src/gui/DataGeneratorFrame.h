@@ -28,12 +28,7 @@
 #define FR_DATAGENERATORFRAME_H
 //-----------------------------------------------------------------------------
 #include <wx/wx.h>
-#include <wx/treectrl.h>
-#include <wx/panel.h>
 #include <wx/spinctrl.h>
-#include <wx/radiobut.h>
-#include <wx/choice.h>
-#include <wx/button.h>
 #include <wx/splitter.h>
 
 #include <map>
@@ -49,7 +44,6 @@ class Column;
 class Table;
 class DBHTreeControl;
 class GeneratorSettings;
-//class TableDep;
 //-----------------------------------------------------------------------------
 class DataGeneratorFrame: public BaseFrame, public Observer
 {

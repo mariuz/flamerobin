@@ -29,9 +29,10 @@
 #define FR_PRIVILEGESDIALOG_H
 
 #include <wx/statline.h>
-#include "gui/BaseDialog.h"
-#include "metadata/database.h"
 
+#include "gui/BaseDialog.h"
+
+class Database;
 //-----------------------------------------------------------------------------
 class PrivilegesDialog : public BaseDialog
 {

@@ -49,8 +49,7 @@
 #include "frutils.h"
 #include "gui/ProgressDialog.h"
 #include "gui/UsernamePasswordDialog.h"
-#include "metadata/database.h"
-#include "metadata/metadataitem.h"
+#include "metadata/column.h"
 #include "metadata/relation.h"
 #include "metadata/server.h"
 //-----------------------------------------------------------------------------

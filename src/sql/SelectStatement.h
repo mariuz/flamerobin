@@ -29,6 +29,7 @@
 #define FR_SELECT_STATEMENT_H
 
 #include <vector>
+
 #include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------
 //! Should provide a way to:

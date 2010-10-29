@@ -33,12 +33,12 @@
 #include <wx/aui/aui.h>
 #include <wx/html/htmlwin.h>
 
-#include "framemanager.h"
 #include "core/Observer.h"
+#include "framemanager.h"
 #include "gui/BaseFrame.h"
 #include "gui/controls/PrintableHtmlWindow.h"
-#include "metadata/metadataitem.h"
 //-----------------------------------------------------------------------------
+class MetadataItem;
 class MetadataItemPropertiesFrame;
 //-----------------------------------------------------------------------------
 class MetadataItemPropertiesPanel: public wxPanel, public Observer

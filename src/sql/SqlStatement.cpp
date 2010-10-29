@@ -40,6 +40,11 @@
 
 #include "metadata/database.h"
 #include "SqlStatement.h"
+#include "metadata/parameter.h"
+#include "metadata/procedure.h"
+#include "metadata/relation.h"
+#include "sql/SqlStatement.h"
+
 //-----------------------------------------------------------------------------
 // TOKEN LIST - a helper class
 //-----------------------------------------------------------------------------

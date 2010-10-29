@@ -44,12 +44,9 @@
 #include <wx/platform.h>
 #include <wx/tipwin.h>
 
-#include <fstream>
-#include <iomanip>
-#include <sstream>
-
 #include "config/Config.h"
 #include "core/FRError.h"
+#include "core/URIProcessor.h"
 #include "engine/MetadataLoader.h"
 #include "framemanager.h"
 #include "frutils.h"
@@ -58,12 +55,14 @@
 #include "gui/MetadataItemPropertiesFrame.h"
 #include "gui/ProgressDialog.h"
 #include "images.h"
+#include "metadata/column.h"
 #include "metadata/database.h"
 #include "metadata/exception.h"
+#include "metadata/parameter.h"
+#include "metadata/procedure.h"
 #include "metadata/server.h"
 #include "metadata/table.h"
 #include "metadata/view.h"
-#include "core/URIProcessor.h"
 //-----------------------------------------------------------------------------
 //! MetadataItemPropertiesFrame class
 MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,

@@ -48,6 +48,7 @@
 #include "config/DatabaseConfig.h"
 #include "core/ArtProvider.h"
 #include "core/FRError.h"
+#include "core/URIProcessor.h"
 #include "frtypes.h"
 #include "frutils.h"
 #include "gui/AboutBox.h"
@@ -69,12 +70,18 @@
 #include "gui/ServerRegistrationDialog.h"
 #include "gui/SimpleHtmlFrame.h"
 #include "main.h"
+#include "metadata/column.h"
+#include "metadata/domain.h"
+#include "metadata/generator.h"
 #include "metadata/MetadataItemCreateStatementVisitor.h"
+#include "metadata/procedure.h"
 #include "metadata/root.h"
 #include "metadata/server.h"
+#include "metadata/table.h"
+#include "metadata/trigger.h"
+#include "metadata/view.h"
 #include "sql/SqlTemplateManager.h"
 #include "sql/SqlTemplateProcessor.h"
-#include "core/URIProcessor.h"
 //-----------------------------------------------------------------------------
 bool checkValidDatabase(DatabasePtr database)
 {

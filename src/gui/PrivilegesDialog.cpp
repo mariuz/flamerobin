@@ -37,17 +37,20 @@
 
 #include <wx/gbsizer.h>
 
+#include "core/URIProcessor.h"
+#include "frutils.h"
 #include "gui/ExecuteSql.h"
 #include "gui/GUIURIHandlerHelper.h"
 #include "gui/PrivilegesDialog.h"
 #include "gui/StyleGuide.h"
 #include "metadata/collection.h"
 #include "metadata/database.h"
-#include "metadata/metadataitem.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
+#include "metadata/procedure.h"
+#include "metadata/role.h"
+#include "metadata/table.h"
 #include "metadata/trigger.h"
-#include "frutils.h"
-#include "core/URIProcessor.h"
+#include "metadata/view.h"
 
 //-----------------------------------------------------------------------------
 PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,

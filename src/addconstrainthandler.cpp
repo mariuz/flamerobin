@@ -38,17 +38,14 @@
     #include "wx/wx.h"
 #endif
 
-#include <algorithm>
-#include <sstream>
-
+#include "core/URIProcessor.h"
 #include "frutils.h"
 #include "gui/ExecuteSql.h"
 #include "gui/GUIURIHandlerHelper.h"
 #include "gui/MultilineEnterDialog.h"
-#include "metadata/database.h"
-#include "metadata/metadataitem.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
-#include "core/URIProcessor.h"
+#include "metadata/table.h"
+
 //-----------------------------------------------------------------------------
 class AddConstraintHandler: public URIHandler, private GUIURIHandlerHelper,
     private MetadataItemURIHandlerHelper

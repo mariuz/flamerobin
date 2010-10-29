@@ -38,15 +38,14 @@
     #pragma hdrstop
 #endif
 
-#include <sstream>
-
 #include "config/Config.h"
-#include "metadata/database.h"
 #include "metadata/collection.h"
 #include "metadata/column.h"
 #include "metadata/constraints.h"
 #include "metadata/domain.h"
 #include "metadata/MetadataItemVisitor.h"
+#include "metadata/table.h"
+
 //-----------------------------------------------------------------------------
 Column::Column(MetadataItem* parent, const wxString& name)
     : MetadataItem(ntColumn, parent, name)

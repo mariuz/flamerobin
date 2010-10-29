@@ -31,9 +31,7 @@
 
 #include <vector>
 
-#include "metadata/column.h"
 #include "metadata/constraints.h"
-#include "metadata/database.h"
 #include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
 #include "metadata/privilege.h"

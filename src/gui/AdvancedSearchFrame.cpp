@@ -35,9 +35,9 @@
     #include <wx/wx.h>
 #endif
 
-#include <set>
-
 #include <wx/stc/stc.h>
+
+#include <set>
 
 #include "frutils.h"
 #include "gui/AdvancedSearchFrame.h"
@@ -45,11 +45,17 @@
 #include "gui/controls/DBHTreeControl.h"
 #include "gui/MainFrame.h"
 #include "gui/ProgressDialog.h"
+#include "metadata/column.h"
 #include "metadata/CreateDDLVisitor.h"
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
+#include "metadata/domain.h"
+#include "metadata/parameter.h"
+#include "metadata/procedure.h"
 #include "metadata/root.h"
 #include "metadata/server.h"
+#include "metadata/table.h"
+#include "metadata/view.h"
 //-----------------------------------------------------------------------------
 // derived class since we need to catch size event
 class AdjustableListCtrl: public wxListCtrl

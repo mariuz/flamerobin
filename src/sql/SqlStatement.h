@@ -30,10 +30,12 @@
 
 #include <vector>
 #include <map>
+
 #include "metadata/metadataitem.h"
-#include "SqlTokenizer.h"
-class Relation;
+#include "sql/SqlTokenizer.h"
+
 class Database;
+class Relation;
 //-----------------------------------------------------------------------------
 typedef enum
 {
@@ -54,7 +56,7 @@ public:
 class SqlStatement
 {
 public:
-    SqlStatement(const wxString& sql, Database *db,
+    SqlStatement(const wxString& sql, Database* db,
         const wxString& terminator = wxT(";"));
 
     bool isDDL() const;
@@ -76,8 +78,8 @@ protected:
     size_t identifierTokenIndexM;
     std::map<int, wxString> tokenStringsM;
 
-    MetadataItem *objectM;
-    Database *databaseM;
+    MetadataItem* objectM;
+    Database* databaseM;
     NodeType objectTypeM;
     SqlAction actionM;
     Identifier nameM;

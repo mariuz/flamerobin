@@ -29,6 +29,8 @@
 #define FR_DATAGRIDROWBUFFER_H
 
 #include "ibpp/ibpp.h"
+
+#include "frtypes.h"
 //-----------------------------------------------------------------------------
 struct DataGridRowBufferFieldAttr
 // use bits instead of bool here to save memory

@@ -38,8 +38,6 @@
     #pragma hdrstop
 #endif
 
-#include <sstream>
-
 #include "config/Config.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
@@ -50,6 +48,9 @@
 #include "metadata/MetadataItemDescriptionVisitor.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/root.h"
+#include "metadata/table.h"
+#include "metadata/trigger.h"
+#include "metadata/view.h"
 //-----------------------------------------------------------------------------
 template<>
 ObjectWithHandle<MetadataItem>::HandleMap ObjectWithHandle<MetadataItem>::handleMap = ObjectWithHandle<MetadataItem>::HandleMap();

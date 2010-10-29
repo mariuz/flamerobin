@@ -43,7 +43,6 @@
 
 #include <algorithm>
 #include <functional>
-#include <sstream>
 
 #include <boost/function.hpp>
 
@@ -54,11 +53,21 @@
 #include "core/StringUtils.h"
 #include "engine/MetadataLoader.h"
 #include "MasterPassword.h"
+#include "metadata/column.h"
 #include "metadata/database.h"
+#include "metadata/domain.h"
+#include "metadata/exception.h"
+#include "metadata/function.h"
+#include "metadata/generator.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/parameter.h"
+#include "metadata/procedure.h"
+#include "metadata/role.h"
 #include "metadata/root.h"
 #include "metadata/server.h"
+#include "metadata/table.h"
+#include "metadata/trigger.h"
+#include "metadata/view.h"
 #include "sql/SqlStatement.h"
 #include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------
@@ -675,6 +684,8 @@ void Database::addObject(NodeType type, wxString name)
             break;
         case ntException:
             exceptionsM->insert(name);
+            break;
+        default:
             break;
     }
 }

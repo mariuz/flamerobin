@@ -38,7 +38,7 @@
     #pragma hdrstop
 #endif
 
-#include "metadata/database.h"
+#include "metadata/column.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/view.h"
 #include "sql/StatementBuilder.h"

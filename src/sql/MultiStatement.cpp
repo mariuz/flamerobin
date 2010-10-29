@@ -38,7 +38,6 @@
     #include "wx/wx.h"
 #endif
 
-#include <sstream>
 #include "core/StringUtils.h"
 #include "sql/MultiStatement.h"
 #include "sql/SqlTokenizer.h"

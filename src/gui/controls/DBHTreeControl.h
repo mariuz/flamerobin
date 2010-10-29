@@ -31,7 +31,7 @@
 #include <wx/wx.h>
 #include <wx/treectrl.h>
 
-#include "metadata/metadataitem.h"
+class MetadataItem;
 //-----------------------------------------------------------------------------
 class DBHTreeControl: public wxTreeCtrl
 {

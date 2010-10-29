@@ -68,6 +68,8 @@ wxBitmap getImage32(NodeType type)
             return wxArtProvider::GetIcon(ART_Trigger, wxART_OTHER, sz);
         case ntView:
             return wxArtProvider::GetIcon(ART_View, wxART_OTHER, sz);
+        default:
+            break;
     }
     return wxArtProvider::GetIcon(ART_FlameRobin, wxART_OTHER, sz);
 }

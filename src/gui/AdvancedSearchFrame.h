@@ -28,14 +28,13 @@
 #define FR_ADVANCEDSEARCHFRAME_H
 
 #include <wx/wx.h>
-#include <wx/splitter.h>
 #include <wx/listctrl.h>
+#include <wx/splitter.h>
 
 #include <map>
 
 #include "core/Observer.h"
 #include "gui/BaseFrame.h"
-#include "metadata/root.h"
 //-----------------------------------------------------------------------------
 class CriteriaItem
 {
@@ -66,7 +65,11 @@ public:
         return wxEmptyString;
     }
 };
+//-----------------------------------------------------------------------------
+class Database;
 class MetadataItem;
+class Root;
+
 class AdjustableListCtrl;   // declaration in cpp file
 class MainFrame;
 class wxStyledTextCtrl;

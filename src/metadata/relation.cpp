@@ -46,9 +46,12 @@
 #include "core/FRError.h"
 #include "engine/MetadataLoader.h"
 #include "frutils.h"
+#include "metadata/column.h"
 #include "metadata/CreateDDLVisitor.h"
 #include "metadata/database.h"
-#include "metadata/relation.h"
+#include "metadata/procedure.h"
+#include "metadata/table.h"
+#include "metadata/view.h"
 #include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------
 Relation::Relation(NodeType type, DatabasePtr database, const wxString& name)

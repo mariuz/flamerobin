@@ -42,14 +42,17 @@
 #include <wx/wupdlock.h>
 
 #include "core/ArtProvider.h"
+#include "core/URIProcessor.h"
 #include "gui/ExecuteSql.h"
 #include "gui/FieldPropertiesDialog.h"
 #include "gui/GUIURIHandlerHelper.h"
 #include "gui/StyleGuide.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
+#include "metadata/domain.h"
+#include "metadata/generator.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
-#include "core/URIProcessor.h"
+#include "metadata/table.h"
 //-----------------------------------------------------------------------------
 struct DatatypeProperties
 {

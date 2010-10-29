@@ -44,7 +44,8 @@
 #include "core/StringUtils.h"
 #include "engine/MetadataLoader.h"
 #include "frutils.h"
-#include "metadata/database.h"
+#include "metadata/column.h"
+#include "metadata/domain.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/table.h"
 //-----------------------------------------------------------------------------

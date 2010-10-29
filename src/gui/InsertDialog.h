@@ -34,10 +34,11 @@
 #include <ibpp.h>
 
 #include "gui/BaseDialog.h"
+
+class Column;
 class Database;
 class DataGridTable;
 class InsertedGridRowBuffer;
-class Column;
 class ResultsetColumnDef;
 // link all column info in the same place:
 class InsertColumnInfo

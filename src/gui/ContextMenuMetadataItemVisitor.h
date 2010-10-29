@@ -28,7 +28,7 @@
 #ifndef FR_CONTEXTMENUMETADATAITEMVISITOR_H
 #define FR_CONTEXTMENUMETADATAITEMVISITOR_H
 
-#include "metadata/metadataitem.h"
+#include "metadata/MetadataClasses.h"
 #include "metadata/MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 class wxMenu;

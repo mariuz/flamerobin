@@ -29,6 +29,7 @@
 #define FR_INCOMPLETE_STATEMENT_H
 
 class Database;
+class Relation;
 //-----------------------------------------------------------------------------
 //! Provides various information for incomplete (partial) sql statements
 //! Used mostly for autocomplete stuff
@@ -38,18 +39,18 @@ private:
     Database* databaseM;
     wxString sqlM;
 
-    Relation *getCreateTriggerRelation(const wxString& sql);
-    Relation *getAlterTriggerRelation(const wxString& sql);
+    Relation* getCreateTriggerRelation(const wxString& sql);
+    Relation* getAlterTriggerRelation(const wxString& sql);
     wxString getColumnsForObject(const wxString& sql,
         const wxString& objectAlias, int cursorPos);
     wxString extractBlockAtPosition(const wxString& sql, int pos) const;
 
     template <class T>
-    T* findObject(std::multimap<wxString,wxString>& aliases,
+    T* findObject(std::multimap<wxString, wxString>& aliases,
         const wxString& alias, NodeType type);
 
 public:
-    IncompleteStatement(Database *db, const wxString& sql);
+    IncompleteStatement(Database* db, const wxString& sql);
 
     // position is offset at which user typed the dot character
     wxString getObjectColumns(const wxString& table, int position);

@@ -41,8 +41,17 @@
 #include "config/Config.h"
 #include "gui/CommandIds.h"
 #include "gui/ContextMenuMetadataItemVisitor.h"
+#include "metadata/column.h"
+#include "metadata/domain.h"
 #include "metadata/database.h"
+#include "metadata/exception.h"
+#include "metadata/function.h"
+#include "metadata/generator.h"
+#include "metadata/procedure.h"
+#include "metadata/role.h"
 #include "metadata/table.h"
+#include "metadata/trigger.h"
+#include "metadata/view.h"
 #include "sql/SqlTemplateManager.h"
 
 //-----------------------------------------------------------------------------

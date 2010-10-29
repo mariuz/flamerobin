@@ -39,8 +39,6 @@
 #endif
 
 //-----------------------------------------------------------------------------
-#include <sstream>
-
 #include <ibpp.h>
 
 #include "core/FRError.h"

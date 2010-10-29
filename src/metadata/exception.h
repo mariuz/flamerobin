@@ -30,7 +30,6 @@
 #define FR_EXCEPTION_H
 
 #include "metadata/collection.h"
-#include "metadata/metadataitem.h"
 
 class ProgressIndicator;
 //-----------------------------------------------------------------------------

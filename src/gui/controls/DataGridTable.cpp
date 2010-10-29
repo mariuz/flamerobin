@@ -50,7 +50,9 @@
 #include "gui/controls/DataGridTable.h"
 #include "gui/AdvancedMessageDialog.h"
 #include "gui/FRLayoutConfig.h"
+#include "metadata/column.h"
 #include "metadata/database.h"
+#include "metadata/table.h"
 //-----------------------------------------------------------------------------
 DataGridTable::DataGridTable(IBPP::Statement& s, Database* db)
     : wxGridTableBase(), statementM(s), databaseM(db), nullFlagM(false),

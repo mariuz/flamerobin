@@ -31,8 +31,6 @@
 #include <vector>
 
 #include "metadata/collection.h"
-#include "metadata/database.h"
-#include "metadata/parameter.h"
 #include "metadata/privilege.h"
 
 class ProgressIndicator;

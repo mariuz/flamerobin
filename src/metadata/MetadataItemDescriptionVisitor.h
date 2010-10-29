@@ -28,6 +28,7 @@
 #ifndef FR_DESCRIPTIONVISITOR_H
 #define FR_DESCRIPTIONVISITOR_H
 
+#include "metadata/MetadataClasses.h"
 #include "metadata/MetadataItemVisitor.h"
 //-----------------------------------------------------------------------------
 class LoadDescriptionVisitor : public MetadataItemVisitor

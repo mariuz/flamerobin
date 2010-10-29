@@ -37,18 +37,8 @@
 #include <ibpp.h>
 
 #include "frtypes.h"
-#include "metadata/collection.h"
-#include "metadata/domain.h"
-#include "metadata/exception.h"
-#include "metadata/function.h"
-#include "metadata/generator.h"
 #include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
-#include "metadata/procedure.h"
-#include "metadata/role.h"
-#include "metadata/table.h"
-#include "metadata/trigger.h"
-#include "metadata/view.h"
 //-----------------------------------------------------------------------------
 class MetadataLoader;
 class ProgressIndicator;
