@@ -35,10 +35,10 @@
 #include "metadata/metadataitem.h"
 
 class User: public MetadataItem,
-    private MetadataItemLink<Server>,
     public boost::enable_shared_from_this<User>
 {
 private:
+    ServerWeakPtr serverM;
     wxString usernameM;
     wxString passwordM;
     wxString firstnameM;

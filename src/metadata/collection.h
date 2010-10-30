@@ -47,14 +47,14 @@ public:
 };
 //-----------------------------------------------------------------------------
 template <class T>
-class MetadataCollection : public MetadataCollectionBase,
-    public MetadataItemLink<Database>
+class MetadataCollection : public MetadataCollectionBase
 {
 public:
     typedef typename boost::ptr_list<T> CollectionType;
     typedef typename CollectionType::iterator iterator;
     typedef typename CollectionType::const_iterator const_iterator;
 private:
+    DatabaseWeakPtr databaseM;
     CollectionType itemsM;
 
     iterator getPosition(wxString name)
@@ -94,13 +94,13 @@ public:
     MetadataCollection<T>(NodeType type, DatabasePtr database,
             const wxString& name)
         : MetadataCollectionBase(type, database.get(), name),
-            MetadataItemLink<Database>(database)
+            databaseM(database)
     {
     }
 
     DatabasePtr getDatabase() const
     {
-        return MetadataItemLink<Database>::getLink();
+        return DatabasePtr(databaseM);
     }
 
     // inserts new item into list at correct position to preserve alphabetical

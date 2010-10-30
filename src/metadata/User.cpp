@@ -43,12 +43,12 @@
 #include "metadata/User.h"
 //-----------------------------------------------------------------------------
 User::User(ServerPtr server)
-    : MetadataItem(ntUnknown, server.get()), MetadataItemLink<Server>(server)
+    : MetadataItem(ntUnknown, server.get()), serverM(server)
 {
 }
 //-----------------------------------------------------------------------------
 User::User(ServerPtr server, const IBPP::User& src)
-    : MetadataItem(ntUnknown, server.get()), MetadataItemLink<Server>(server),
+    : MetadataItem(ntUnknown, server.get()), serverM(server),
         useridM(src.userid), groupidM(src.groupid)
 {
     usernameM = std2wx(src.username);
@@ -60,7 +60,7 @@ User::User(ServerPtr server, const IBPP::User& src)
 //-----------------------------------------------------------------------------
 ServerPtr User::getServer() const
 {
-    return MetadataItemLink<Server>::getLink();
+    return ServerPtr(serverM);
 }
 //-----------------------------------------------------------------------------
 wxString User::getUsername() const

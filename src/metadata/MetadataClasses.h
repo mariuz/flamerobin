@@ -39,6 +39,7 @@ typedef std::vector<ColumnPtr> ColumnPtrs;
 
 class Database;
 typedef boost::shared_ptr<Database> DatabasePtr;
+typedef boost::weak_ptr<Database> DatabaseWeakPtr;
 typedef std::vector<DatabasePtr> DatabasePtrs;
 
 class Domain;
@@ -97,6 +98,7 @@ typedef boost::shared_ptr<Root> RootPtr;
 
 class Server;
 typedef boost::shared_ptr<Server> ServerPtr;
+typedef boost::weak_ptr<Server> ServerWeakPtr;
 typedef std::vector<ServerPtr> ServerPtrs;
 
 class SysDomains;
@@ -128,25 +130,5 @@ typedef boost::shared_ptr<View> ViewPtr;
 typedef std::vector<ViewPtr> ViewPtrs;
 class Views;
 typedef boost::shared_ptr<Views> ViewsPtr;
-//-----------------------------------------------------------------------------
-template<class T>
-class MetadataItemLink
-{
-private:
-    boost::weak_ptr<T> linkM;
-protected:
-    MetadataItemLink<T>() {}
-    MetadataItemLink<T>(boost::shared_ptr<T> link) : linkM(link) {}
-
-    boost::shared_ptr<T> getLink() const
-    {
-        return boost::shared_ptr<T>(linkM);
-    }
-
-    void setLink(boost::shared_ptr<T> link)
-    {
-        linkM = link;
-    }
-};
 //-----------------------------------------------------------------------------
 #endif // FR_METADATACLASSES_H

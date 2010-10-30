@@ -42,8 +42,7 @@
 class FileTextControl;
 class LogTextControl;
 //-----------------------------------------------------------------------------
-class BackupRestoreBaseFrame: public BaseFrame, public Observer,
-    private MetadataItemLink<Database>
+class BackupRestoreBaseFrame: public BaseFrame, public Observer
 {
 public:
     enum MsgKind {
@@ -84,6 +83,7 @@ protected:
     virtual void updateControls();
     BackupRestoreBaseFrame(wxWindow* parent, DatabasePtr db);
 private:
+    DatabaseWeakPtr databaseM;
     wxThread* threadM;
 
     wxCriticalSection critsectM;

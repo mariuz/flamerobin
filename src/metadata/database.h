@@ -152,10 +152,10 @@ private:
 };
 //-----------------------------------------------------------------------------
 class Database: public MetadataItem,
-    private MetadataItemLink<Server>,
     public boost::enable_shared_from_this<Database>
 {
 private:
+    ServerWeakPtr serverM;
     IBPP::Database databaseM;
     MetadataLoader* metadataLoaderM;
 

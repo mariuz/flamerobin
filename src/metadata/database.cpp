@@ -324,8 +324,7 @@ bool DatabaseAuthenticationMode::getUseEncryptedPassword() const
 //-----------------------------------------------------------------------------
 // Database class
 Database::Database()
-    : MetadataItem(ntDatabase), MetadataItemLink<Server>(),
-        metadataLoaderM(0), connectedM(false),
+    : MetadataItem(ntDatabase), metadataLoaderM(0), connectedM(false),
         connectionCredentialsM(0), charsetConverterM(0), idM(0)
 {
 }
@@ -1442,13 +1441,13 @@ void Database::acceptVisitor(MetadataItemVisitor* visitor)
 //-----------------------------------------------------------------------------
 ServerPtr Database::getServer() const
 {
-    return MetadataItemLink<Server>::getLink();
+    return ServerPtr(serverM);
 }
 //-----------------------------------------------------------------------------
 void Database::setServer(ServerPtr server)
 {
     wxASSERT(server);
-    MetadataItemLink<Server>::setLink(server);
+    serverM = server;
     setParent(server.get());
 }
 //-----------------------------------------------------------------------------
