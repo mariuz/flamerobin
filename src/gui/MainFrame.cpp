@@ -396,9 +396,9 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(Cmds::Menu_GetServerVersion, MainFrame::OnMenuGetServerVersion)
     EVT_UPDATE_UI(Cmds::Menu_GetServerVersion, MainFrame::OnMenuUpdateIfServerSelected)
     EVT_MENU(Cmds::Menu_MonitorEvents, MainFrame::OnMenuMonitorEvents)
-    EVT_UPDATE_UI(Cmds::Menu_MonitorEvents, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_UPDATE_UI(Cmds::Menu_MonitorEvents, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
     EVT_MENU(Cmds::Menu_GenerateData, MainFrame::OnMenuGenerateData)
-    EVT_UPDATE_UI(Cmds::Menu_GenerateData, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_UPDATE_UI(Cmds::Menu_GenerateData, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
     EVT_MENU(Cmds::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuDatabaseRegistrationInfo)
     EVT_UPDATE_UI(Cmds::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuUpdateIfDatabaseSelected)
     EVT_MENU(Cmds::Menu_Backup, MainFrame::OnMenuBackup)
@@ -414,18 +414,18 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(Cmds::Menu_Reconnect, MainFrame::OnMenuReconnect)
     EVT_UPDATE_UI(Cmds::Menu_Reconnect, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_MENU(Cmds::Menu_RecreateDatabase, MainFrame::OnMenuRecreateDatabase)
-    EVT_UPDATE_UI(Cmds::Menu_RecreateDatabase, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_UPDATE_UI(Cmds::Menu_RecreateDatabase, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
     EVT_MENU(Cmds::Menu_DropDatabase, MainFrame::OnMenuDropDatabase)
-    EVT_UPDATE_UI(Cmds::Menu_DropDatabase, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_UPDATE_UI(Cmds::Menu_DropDatabase, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
     EVT_MENU(Cmds::Menu_ExecuteStatements, MainFrame::OnMenuExecuteStatements)
-    EVT_UPDATE_UI(Cmds::Menu_ExecuteStatements, MainFrame::OnMenuUpdateIfDatabaseConnected)
-    EVT_UPDATE_UI(Cmds::Menu_NewObject, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_UPDATE_UI(Cmds::Menu_ExecuteStatements, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
+    EVT_UPDATE_UI(Cmds::Menu_NewObject, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
     EVT_MENU(Cmds::Menu_DatabasePreferences, MainFrame::OnMenuDatabasePreferences)
     EVT_UPDATE_UI(Cmds::Menu_DatabasePreferences, MainFrame::OnMenuUpdateIfDatabaseSelected)
     EVT_MENU(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuDatabaseProperties)
-    EVT_UPDATE_UI(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_UPDATE_UI(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
     EVT_MENU(Cmds::Menu_ExtractDatabaseDDL, MainFrame::OnMenuDatabaseExtractDDL)
-    EVT_UPDATE_UI(Cmds::Menu_ExtractDatabaseDDL, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_UPDATE_UI(Cmds::Menu_ExtractDatabaseDDL, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
 
     EVT_MENU(Cmds::Menu_Insert, MainFrame::OnMenuInsert)
     EVT_MENU(Cmds::Menu_BrowseColumns, MainFrame::OnMenuBrowseColumns)
@@ -443,7 +443,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(Cmds::Menu_AlterObject, MainFrame::OnMenuAlterObject)
     EVT_MENU(Cmds::Menu_DropObject, MainFrame::OnMenuDropObject)
     EVT_MENU(Cmds::Menu_ObjectProperties, MainFrame::OnMenuObjectProperties)
-    EVT_UPDATE_UI(Cmds::Menu_ObjectProperties, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_UPDATE_UI(Cmds::Menu_ObjectProperties, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
     EVT_MENU(Cmds::Menu_ObjectRefresh, MainFrame::OnMenuObjectRefresh)
     EVT_UPDATE_UI(Cmds::Menu_ObjectRefresh, MainFrame::OnMenuUpdateIfDatabaseConnected)
 
@@ -1349,6 +1349,8 @@ void MainFrame::showCreateTemplate(const wxString& statement)
     DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(db))
         return;
+    if (!tryAutoConnectDatabase(db))
+        return;
 
     showSql(this, wxEmptyString, db.get(), statement);
 }
@@ -1660,6 +1662,13 @@ void MainFrame::OnMenuUpdateIfServerSelected(wxUpdateUIEvent& event)
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUpdateIfDatabaseConnected(wxUpdateUIEvent& event)
+{
+    DatabasePtr d = getDatabase(treeMainM->getSelectedMetadataItem());
+    event.Enable(d != 0 && d->isConnected());
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect(
+    wxUpdateUIEvent& event)
 {
     DatabasePtr d = getDatabase(treeMainM->getSelectedMetadataItem());
     event.Enable(d != 0 && (d->isConnected() || getAutoConnectDatabase()));

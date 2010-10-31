@@ -117,6 +117,7 @@ public:
     void OnMenuUpdateUnRegisterServer(wxUpdateUIEvent& event);
     void OnMenuUpdateIfServerSelected(wxUpdateUIEvent& event);
     void OnMenuUpdateIfDatabaseConnected(wxUpdateUIEvent& event);
+    void OnMenuUpdateIfDatabaseConnectedOrAutoConnect(wxUpdateUIEvent& event);
     void OnMenuUpdateIfDatabaseNotConnected(wxUpdateUIEvent& event);
     void OnMenuUpdateIfDatabaseSelected(wxUpdateUIEvent& event);
     void OnMenuUpdateIfMetadataItemHasChildren(wxUpdateUIEvent& event);
