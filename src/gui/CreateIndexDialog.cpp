@@ -209,6 +209,7 @@ class TableIndicesHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
+    TableIndicesHandler() {};
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.

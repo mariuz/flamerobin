@@ -2989,6 +2989,7 @@ class DropColumnHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
+    DropColumnHandler() {};
     bool handleURI(URI& uri);
 private:
     static const DropColumnHandler handlerInstance;
@@ -3045,6 +3046,7 @@ class DropColumnsHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
+    DropColumnsHandler() {};
     bool handleURI(URI& uri);
 private:
     static const DropColumnsHandler handlerInstance;
@@ -3082,6 +3084,7 @@ class DropObjectHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
+    DropObjectHandler() {};
     bool handleURI(URI& uri);
 private:
     static const DropObjectHandler handlerInstance;
@@ -3119,6 +3122,7 @@ class EditDDLHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
+    EditDDLHandler() {};
     bool handleURI(URI& uri);
 private:
     static const EditDDLHandler handlerInstance;
@@ -3162,6 +3166,7 @@ class EditProcedureHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
+    EditProcedureHandler() {};
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
@@ -3191,6 +3196,7 @@ class AlterViewHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
+    AlterViewHandler() {};
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
@@ -3230,6 +3236,7 @@ class EditTriggerHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
+    EditTriggerHandler() {};
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
@@ -3257,6 +3264,7 @@ class EditGeneratorValueHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
+    EditGeneratorValueHandler() {};
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
@@ -3300,6 +3308,7 @@ class EditExceptionHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
+    EditExceptionHandler() {};
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
@@ -3327,6 +3336,7 @@ class IndexActionHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
+    IndexActionHandler() {};
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
@@ -3374,6 +3384,7 @@ class ActivateTriggersHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
+    ActivateTriggersHandler() {};
     bool handleURI(URI& uri);
 private:
     static const ActivateTriggersHandler handlerInstance;
@@ -3422,6 +3433,7 @@ class ActivateTriggerHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
+    ActivateTriggerHandler() {};
     bool handleURI(URI& uri);
 private:
     static const ActivateTriggerHandler handlerInstance;

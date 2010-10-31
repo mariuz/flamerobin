@@ -574,6 +574,7 @@ class ManagePrivilegesHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
+    ManagePrivilegesHandler() {};
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.

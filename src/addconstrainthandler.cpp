@@ -51,6 +51,7 @@ class AddConstraintHandler: public URIHandler, private GUIURIHandlerHelper,
     private MetadataItemURIHandlerHelper
 {
 public:
+    AddConstraintHandler() {};
     bool handleURI(URI& uri);
 private:
     static const AddConstraintHandler handlerInstance;    // singleton; registers itself on creation.

@@ -227,6 +227,7 @@ class UserPropertiesHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
+    UserPropertiesHandler() {};
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
@@ -306,6 +307,7 @@ class DropUserHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
+    DropUserHandler() {};
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.

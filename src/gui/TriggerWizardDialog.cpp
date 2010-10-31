@@ -183,6 +183,7 @@ class CreateTriggerHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
+    CreateTriggerHandler() {};
     bool handleURI(URI& uri);
 private:
     static const CreateTriggerHandler handlerInstance;

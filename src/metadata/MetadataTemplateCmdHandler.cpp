@@ -66,6 +66,7 @@ class MetadataTemplateCmdHandler: public TemplateCmdHandler
 private:
     static const MetadataTemplateCmdHandler handlerInstance; // singleton; registers itself on creation.
 public:
+    MetadataTemplateCmdHandler() {};
     virtual void handleTemplateCmd(TemplateProcessor *tp, wxString cmdName,
         TemplateCmdParams cmdParams, ProcessableObject* object,
         wxString& processedText);

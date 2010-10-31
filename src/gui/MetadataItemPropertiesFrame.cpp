@@ -540,6 +540,7 @@ void MetadataItemPropertiesPanel::OnRefresh(wxCommandEvent& WXUNUSED(event))
 class PageHandler: public URIHandler, private GUIURIHandlerHelper
 {
 public:
+    PageHandler() {};
     bool handleURI(URI& uri);
 private:
     static const PageHandler handlerInstance;   // singleton; registers itself on creation.
@@ -577,6 +578,7 @@ bool PageHandler::handleURI(URI& uri)
 class PropertiesHandler: public URIHandler, private GUIURIHandlerHelper
 {
 public:
+    PropertiesHandler() {};
     bool handleURI(URI& uri);
 private:
     static const PropertiesHandler handlerInstance; // singleton; registers itself on creation.

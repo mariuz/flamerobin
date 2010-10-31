@@ -815,6 +815,7 @@ class ColumnPropertiesHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
+    ColumnPropertiesHandler() {};
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.

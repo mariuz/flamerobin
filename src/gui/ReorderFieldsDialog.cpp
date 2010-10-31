@@ -220,6 +220,7 @@ class ReorderFieldsHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
+    ReorderFieldsHandler() {};
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.

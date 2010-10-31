@@ -725,6 +725,7 @@ class PreferencesDialogTemplateCmdHandler: public TemplateCmdHandler
 private:
     static const PreferencesDialogTemplateCmdHandler handlerInstance; // singleton; registers itself on creation.
 public:
+    PreferencesDialogTemplateCmdHandler() {};
     virtual void handleTemplateCmd(TemplateProcessor *tp, wxString cmdName,
         TemplateCmdParams cmdParams, ProcessableObject* object, wxString& processedText);
 };
