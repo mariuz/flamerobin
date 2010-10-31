@@ -2564,7 +2564,8 @@ bool ExecuteSqlFrame::commitTransaction()
     catch (IBPP::Exception &e)
     {
         splitScreen();
-        log(std2wx(e.ErrorMessage()), ttError);
+        log(std2wx(e.ErrorMessage(), databaseM->getCharsetConverter()),
+            ttError);
         return false;
     }
     catch (std::exception &se)
@@ -2624,7 +2625,8 @@ bool ExecuteSqlFrame::rollbackTransaction()
     catch (IBPP::Exception &e)
     {
         splitScreen();
-        log(std2wx(e.ErrorMessage()), ttError);
+        log(std2wx(e.ErrorMessage(), databaseM->getCharsetConverter()),
+            ttError);
         return false;
     }
     catch (...)
