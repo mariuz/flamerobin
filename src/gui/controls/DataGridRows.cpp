@@ -44,8 +44,6 @@
 
 #include <algorithm>
 #include <bitset>
-#include <iomanip>
-#include <sstream>
 #include <string>
 
 #include "config/Config.h"
@@ -122,12 +120,9 @@ wxString GridCellFormats::formatDouble(double value)
 {
     ensureCacheValid();
 
-    std::ostringstream oss;
-    oss << std::fixed;
     if (precisionForDoubleM >= 0 && precisionForDoubleM <= 18)
-        oss << std::setprecision(precisionForDoubleM);
-    oss << value;
-    return std2wx(oss.str());
+        return wxString::Format(wxT("%.*f"), precisionForDoubleM, value);
+    return wxString::Format(wxT("%.f"), value);
 }
 //-----------------------------------------------------------------------------
 wxString GridCellFormats::formatDate(int year, int month, int day)
@@ -1086,9 +1081,7 @@ wxString FloatColumnDef::getAsString(DataGridRowBuffer* buffer)
     if (!buffer->getValue(offsetM, value))
         return wxEmptyString;
 
-    std::ostringstream oss;
-    oss << std::fixed << value;
-    return std2wx(oss.str());
+    return wxString::Format(wxT("%f"), value);
 }
 //-----------------------------------------------------------------------------
 void FloatColumnDef::setFromString(DataGridRowBuffer* buffer,
@@ -1153,11 +1146,7 @@ wxString DoubleColumnDef::getAsString(DataGridRowBuffer* buffer)
         return wxEmptyString;
 
     if (scaleM)
-    {
-        std::ostringstream oss;
-        oss << std::fixed << std::setprecision(scaleM) << value;
-        return std2wx(oss.str());
-    }
+        return wxString::Format(wxT("%.*f"), scaleM, value);
     return GridCellFormats::get().formatDouble(value);
 }
 //-----------------------------------------------------------------------------

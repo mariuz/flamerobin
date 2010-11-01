@@ -38,9 +38,6 @@
     #include "wx/wx.h"
 #endif
 
-#include <iomanip>
-#include <sstream>
-
 #include "core/ProcessableObject.h"
 #include "core/StringUtils.h"
 #include "core/TemplateProcessor.h"
@@ -639,11 +636,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
         if (cmdParams[0] == wxT("type"))
             processedText += (i->getIndexType() == Index::itAscending ? wxT("ASC") : wxT("DESC"));
         else if (cmdParams[0] == wxT("stats"))
-        {
-            std::ostringstream ss;
-            ss << std::fixed << std::setprecision(6) << i->getStatistics();
-            processedText += std2wx(ss.str());
-        }
+            processedText += wxString::Format(wxT("%.6f"), i->getStatistics());
         else if (cmdParams[0] == wxT("fields"))
             processedText += i->getFieldsAsString();
         else if (cmdParams[0] == wxT("is_active"))

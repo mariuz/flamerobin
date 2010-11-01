@@ -45,7 +45,6 @@
 
 #include <algorithm>
 #include <map>
-#include <sstream>
 #include <vector>
 
 #include "config/Config.h"
@@ -430,9 +429,8 @@ void DBHTreeItemVisitor::visitGenerator(Generator& generator)
     generator.loadPendingData();
     if (generator.propertiesLoaded())
     {
-        std::ostringstream ss;
-        ss << generator.getValue();
-        nodeTextM = generator.getName_() + wxT(" = ") + std2wx(ss.str());
+        nodeTextM = generator.getName_() + wxT(" = ");
+        nodeTextM << generator.getValue();
     }
     // set remaining default properties, nodeTextM will not be touched
     setNodeProperties(&generator, ART_Generator);
