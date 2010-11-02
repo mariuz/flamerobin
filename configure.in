@@ -31,7 +31,11 @@ AM_PATH_WXCONFIG([2.8.0], [], [
      	   'wx-config --libs' command) is in LD_LIBRARY_PATH or
      	   equivalent variable and wxWindows version is 2.8.0 or above.
         ])], [aui,stc,std])
-        
+AC_LANG_PUSH([C++])
+AC_CHECK_HEADER(boost/shared_ptr.hpp, [],
+       [AC_MSG_ERROR(boost/shared_ptr.hpp not found. install libboost-dev Boost C++ Libraries development files)], [])
+AC_CHECK_HEADER(boost/function.hpp, [],
+       [AC_MSG_ERROR(boost/function.hpp not found. install libboost-dev Boost C++ Libraries development files)], [])        
 CPPFLAGS="$CPPFLAGS $WX_CXXFLAGS"
 LDFLAGS="$LDFLAGS $WX_LDFLAGS $WX_LIBS"
 
