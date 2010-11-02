@@ -33,9 +33,9 @@ AM_PATH_WXCONFIG([2.8.0], [], [
         ])], [aui,stc,std])
 AC_LANG_PUSH([C++])
 AC_CHECK_HEADER(boost/shared_ptr.hpp, [],
-       [AC_MSG_ERROR(boost/shared_ptr.hpp not found. install libboost-dev Boost C++ Libraries development files)], [])
+       [AC_MSG_ERROR(boost/shared_ptr.hpp not found. install libboost-dev Boost C++ Libraries development files , In Debian/Ubuntu sudo apt-get install libboost-dev)], [])
 AC_CHECK_HEADER(boost/function.hpp, [],
-       [AC_MSG_ERROR(boost/function.hpp not found. install libboost-dev Boost C++ Libraries development files)], [])        
+       [AC_MSG_ERROR(boost/function.hpp not found. install libboost-dev Boost C++ Libraries development files,In Debian/Ubuntu sudo apt-get install libboost-dev)], [])        
 CPPFLAGS="$CPPFLAGS $WX_CXXFLAGS"
 LDFLAGS="$LDFLAGS $WX_LDFLAGS $WX_LIBS"
 
