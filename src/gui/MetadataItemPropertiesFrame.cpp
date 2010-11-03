@@ -43,6 +43,7 @@
 #include <wx/filedlg.h>
 #include <wx/platform.h>
 #include <wx/tipwin.h>
+#include <wx/wupdlock.h>
 
 #include "config/Config.h"
 #include "core/FRError.h"
@@ -319,13 +320,16 @@ void MetadataItemPropertiesPanel::loadPage()
 //! processes the given html template file
 void MetadataItemPropertiesPanel::processHtmlFile(const wxString& fileName)
 {
-    ProgressDialog pd(this, wxT("Processing template..."));
+    ProgressDialog pd(this, _("Processing template..."));
     pd.doShow();
 
     wxString htmlpage;
     HtmlTemplateProcessor tp(objectM, this);
     tp.processTemplateFile(htmlpage, fileName, 0, &pd);
 
+    pd.SetTitle(_("Rendering page..."));
+
+    wxWindowUpdateLocker freeze(html_window);
     int x = 0, y = 0;
     html_window->GetViewStart(&x, &y);         // save scroll position
     html_window->setPageSource(htmlpage);
@@ -447,7 +451,8 @@ void MetadataItemPropertiesPanel::update()
     // with this set to false updates to the same page do not show the
     // "Please wait while the data is being loaded..." temporary page
     // this results in less flicker, but may also seem less responsive
-    requestLoadPage(false);
+    if (!htmlReloadRequestedM)
+        requestLoadPage(false);
 }
 //-----------------------------------------------------------------------------
 void MetadataItemPropertiesFrame::OnClose(wxCloseEvent& event)
@@ -521,8 +526,8 @@ void MetadataItemPropertiesPanel::OnIdle(wxIdleEvent& WXUNUSED(event))
 {
     Disconnect(wxID_ANY, wxEVT_IDLE);
     wxBusyCursor bc;
-    htmlReloadRequestedM = false;
     loadPage();
+    htmlReloadRequestedM = false;
 }
 //-----------------------------------------------------------------------------
 void MetadataItemPropertiesPanel::OnRefresh(wxCommandEvent& WXUNUSED(event))

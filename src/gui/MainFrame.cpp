@@ -847,7 +847,7 @@ void MainFrame::OnMenuGenerateScript(wxCommandEvent& event)
     {
         if (i == event.GetId())
         {
-            ProgressDialog pd(this, wxT("Processing template..."));
+            ProgressDialog pd(this, _("Processing template..."));
             wxString sql;
             SqlTemplateProcessor tp(mi, this);
             tp.processTemplateFile(sql, (*it)->getTemplateFileName(),
