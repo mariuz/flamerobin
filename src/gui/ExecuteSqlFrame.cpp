@@ -56,7 +56,6 @@
 #include "core/StringUtils.h"
 #include "core/URIProcessor.h"
 #include "engine/MetadataLoader.h"
-#include "framemanager.h"
 #include "gui/AdvancedMessageDialog.h"
 #include "gui/CommandIds.h"
 #include "gui/CommandManager.h"
@@ -64,12 +63,13 @@
 #include "gui/controls/DataGrid.h"
 #include "gui/controls/DataGridTable.h"
 #include "gui/GUIURIHandlerHelper.h"
+#include "gui/MetadataItemPropertiesFrame.h"
 #include "gui/ProgressDialog.h"
+#include "gui/EditBlobDialog.h"
 #include "gui/ExecuteSql.h"
 #include "gui/ExecuteSqlFrame.h"
 #include "gui/FRLayoutConfig.h"
 #include "gui/InsertDialog.h"
-#include "gui/EditBlobDialog.h"
 #include "gui/StatementHistoryDialog.h"
 #include "gui/StyleGuide.h"
 #include "frutils.h"
@@ -821,7 +821,7 @@ void ExecuteSqlFrame::showProperties(wxString objectName)
 
     if (m)
     {
-        frameManager().showMetadataPropertyFrame(m);
+        MetadataItemPropertiesFrame::showPropertyPage(m);
         return;
     }
 

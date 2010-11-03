@@ -257,7 +257,6 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/core/URIProcessor.h
         $(SOURCEDIR)/core/Visitor.h
         $(SOURCEDIR)/engine/MetadataLoader.h
-        $(SOURCEDIR)/framemanager.h
         $(SOURCEDIR)/frtypes.h
         $(SOURCEDIR)/frutils.h
         $(SOURCEDIR)/frversion.h
@@ -382,7 +381,6 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/core/Visitor.cpp
         $(SOURCEDIR)/databasehandler.cpp
         $(SOURCEDIR)/engine/MetadataLoader.cpp
-        $(SOURCEDIR)/framemanager.cpp
         $(SOURCEDIR)/frprec.cpp
         $(SOURCEDIR)/frutils.cpp
         $(SOURCEDIR)/gui/AboutBox.cpp

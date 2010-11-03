@@ -34,47 +34,11 @@
 #include <wx/html/htmlwin.h>
 
 #include "core/Observer.h"
-#include "framemanager.h"
 #include "gui/BaseFrame.h"
 #include "gui/controls/PrintableHtmlWindow.h"
-//-----------------------------------------------------------------------------
+
 class MetadataItem;
-class MetadataItemPropertiesFrame;
-//-----------------------------------------------------------------------------
-class MetadataItemPropertiesPanel: public wxPanel, public Observer
-{
-private:
-    enum { ptSummary, ptConstraints, ptDependencies, ptTriggers,
-        ptTableIndices, ptDDL, ptPrivileges } pageTypeM;
-
-    MetadataItem* objectM;
-    bool htmlReloadRequestedM;
-    PrintableHtmlWindow* html_window;
-
-    // load page in idle handler, only request a reload in update()
-    void requestLoadPage(bool showLoadingPage);
-    void loadPage();
-
-protected:
-    virtual void removeSubject(Subject* subject);
-    virtual void update();
-public:
-    MetadataItemPropertiesPanel(MetadataItemPropertiesFrame* parent,
-        MetadataItem *object);
-    virtual ~MetadataItemPropertiesPanel();
-
-    MetadataItem* getObservedObject() const;
-    MetadataItemPropertiesFrame* getParentFrame();
-    void processHtmlFile(const wxString& fileName);
-    void setPage(const wxString& type);
-    void showIt();
-private:
-    // event handling
-    void OnCloseFrame(wxCommandEvent& event);
-    void OnHtmlCellHover(wxHtmlCellEvent &event);
-    void OnIdle(wxIdleEvent& event);
-    void OnRefresh(wxCommandEvent& event);
-};
+class MetadataItemPropertiesPanel;
 //-----------------------------------------------------------------------------
 class MetadataItemPropertiesFrame: public BaseFrame
 {
@@ -85,23 +49,33 @@ private:
     // needed because it's not possible to access objectM
     // (see getStorageName()) after detaching from it.
     mutable wxString storageNameM;
-    void setStorageName(MetadataItem *object);
+    void setStorageName(MetadataItem* object);
 protected:
     virtual const wxString getName() const;
     virtual const wxString getStorageName() const;
     virtual const wxRect getDefaultRect() const;
 public:
-    MetadataItemPropertiesFrame(wxWindow* parent, MetadataItem *object);
+    MetadataItemPropertiesFrame(wxWindow* parent, MetadataItem* object);
     virtual ~MetadataItemPropertiesFrame();
 
-    void showPanel(wxWindow *panel, const wxString& title);
-    void removePanel(wxWindow *panel);
-    void setTabTitle(wxWindow *panel, const wxString& title);
+    static MetadataItemPropertiesPanel* openNewPropertyPageInFrame(
+        MetadataItem* object);
+    static MetadataItemPropertiesPanel* openNewPropertyPageInTab(
+        MetadataItem* object, MetadataItemPropertiesFrame* parentFrame);
+    static MetadataItemPropertiesPanel* showPropertyPage(
+        MetadataItem* object);
 
-    //MetadataItemPropertiesPanel *getItemPanel(MetadataItem *item);
 private:
     wxAuiManager auiManagerM;
     wxAuiNotebook* notebookM;
+
+    friend class MetadataItemPropertiesPanel;
+
+    void removePanel(MetadataItemPropertiesPanel* panel);
+    void setTabTitle(MetadataItemPropertiesPanel* panel,
+        const wxString& title);
+    void showPanel(MetadataItemPropertiesPanel* panel,
+        const wxString& title);
 
     // event handling
     void OnClose(wxCloseEvent& event);

@@ -84,7 +84,6 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Visitor.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_databasehandler.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataLoader.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_framemanager.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_frprec.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_frutils.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_AboutBox.obj \
@@ -402,9 +401,6 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_databasehandler.obj: .\sr
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataLoader.obj: .\src\engine\MetadataLoader.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\engine\MetadataLoader.cpp
-
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_framemanager.obj: .\src\framemanager.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\framemanager.cpp
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_frprec.obj: .\src\frprec.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) /Ycwx/wxprec.h .\src\frprec.cpp

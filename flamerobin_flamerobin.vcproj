@@ -1880,10 +1880,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\framemanager.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\frprec.cpp"
 				>
 				<FileConfiguration
@@ -2451,10 +2447,6 @@
 			</File>
 			<File
 				RelativePath=".\src\metadata\exception.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\framemanager.h"
 				>
 			</File>
 			<File

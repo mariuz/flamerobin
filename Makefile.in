@@ -58,7 +58,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_Visitor.o \
 	flamerobin_databasehandler.o \
 	flamerobin_MetadataLoader.o \
-	flamerobin_framemanager.o \
 	flamerobin_frprec.o \
 	flamerobin_frutils.o \
 	flamerobin_AboutBox.o \
@@ -360,9 +359,6 @@ flamerobin_databasehandler.o: $(srcdir)/src/databasehandler.cpp $(FLAMEROBIN_ODE
 
 flamerobin_MetadataLoader.o: $(srcdir)/src/engine/MetadataLoader.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/engine/MetadataLoader.cpp
-
-flamerobin_framemanager.o: $(srcdir)/src/framemanager.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/framemanager.cpp
 
 flamerobin_frprec.o: $(srcdir)/src/frprec.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/frprec.cpp

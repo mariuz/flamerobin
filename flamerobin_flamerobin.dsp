@@ -824,10 +824,6 @@ SOURCE=.\res\flamerobin.rc
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\framemanager.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\frprec.cpp
 # ADD BASE CPP /Yc"wx/wxprec.h"
 # ADD CPP /Yc"wx/wxprec.h"
@@ -1267,10 +1263,6 @@ SOURCE=.\src\metadata\domain.h
 # Begin Source File
 
 SOURCE=.\src\metadata\exception.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\framemanager.h
 # End Source File
 # Begin Source File
 

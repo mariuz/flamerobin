@@ -43,7 +43,6 @@
 #endif
 
 #include "config/Config.h"
-#include "framemanager.h"
 #include "gui/BaseFrame.h"
 //-----------------------------------------------------------------------------
 BaseFrame::FrameIdMap BaseFrame::frameIdsM;

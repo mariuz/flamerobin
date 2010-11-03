@@ -517,11 +517,6 @@ void MainFrame::OnMainMenuOpen(wxMenuEvent& event)
     event.Skip();
 }
 //-----------------------------------------------------------------------------
-void MainFrame::OnWindowMenuItem(wxCommandEvent& event)
-{
-    frameManager().bringOnTop(event.GetId());
-}
-//-----------------------------------------------------------------------------
 void MainFrame::updateStatusbarText()
 {
     if (wxStatusBar* sb = GetStatusBar())
@@ -785,7 +780,7 @@ void MainFrame::OnMenuDatabaseProperties(wxCommandEvent& WXUNUSED(event))
     if (!tryAutoConnectDatabase())
         return;
 
-    frameManager().showMetadataPropertyFrame(db.get());
+    MetadataItemPropertiesFrame::showPropertyPage(db.get());
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))
@@ -958,7 +953,7 @@ void MainFrame::OnMenuManageUsers(wxCommandEvent& WXUNUSED(event))
 {
     ServerPtr s = getServer(treeMainM->getSelectedMetadataItem());
     if (checkValidServer(s))
-        frameManager().showMetadataPropertyFrame(s.get());
+        MetadataItemPropertiesFrame::showPropertyPage(s.get());
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuUnRegisterServer(wxCommandEvent& WXUNUSED(event))
@@ -1503,12 +1498,14 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
             return;
 
         URI uri(wxT("fr://edit_field"));
-        uri.addParam(wxString::Format(wxT("parent_window=%ld"), (uintptr_t)this));
-        uri.addParam(wxString::Format(wxT("object_handle=%d"), c->getHandle()));
+        uri.addParam(wxString::Format(wxT("parent_window=%ld"),
+            (uintptr_t)this));
+        uri.addParam(wxString::Format(wxT("object_handle=%d"),
+            c->getHandle()));
         getURIProcessor().handleURI(uri);
     }
     else
-        frameManager().showMetadataPropertyFrame(m);
+        MetadataItemPropertiesFrame::showPropertyPage(m);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuObjectRefresh(wxCommandEvent& WXUNUSED(event))

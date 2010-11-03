@@ -36,7 +36,6 @@
 #include <vector>
 
 #include "gui/BaseFrame.h"
-#include "framemanager.h"
 #include "metadata/MetadataClasses.h"
 //-----------------------------------------------------------------------------
 class DBHTreeControl;
@@ -123,7 +122,6 @@ public:
     void OnMenuUpdateIfMetadataItemHasChildren(wxUpdateUIEvent& event);
 
     // other events
-    void OnWindowMenuItem(wxCommandEvent& event);
     void OnMainMenuOpen(wxMenuEvent& event);
     void OnTreeSelectionChanged(wxTreeEvent& event);
     void OnTreeItemActivate(wxTreeEvent& event);
