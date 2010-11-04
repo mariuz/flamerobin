@@ -56,7 +56,6 @@
 #include "gui/HtmlTemplateProcessor.h"
 #include "gui/MetadataItemPropertiesFrame.h"
 #include "gui/ProgressDialog.h"
-#include "images.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
 #include "metadata/parameter.h"
