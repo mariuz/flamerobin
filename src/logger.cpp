@@ -51,6 +51,8 @@
 //----------------------------------------------------------------------------
 bool Logger::log2database(Config *cfg, const SqlStatement& stm, Database* db)
 {
+    wxMBConv* conv = db->getCharsetConverter();
+
     IBPP::Transaction tr = IBPP::TransactionFactory(db->getIBPPDatabase());
     try
     {
@@ -64,7 +66,7 @@ bool Logger::log2database(Config *cfg, const SqlStatement& stm, Database* db)
             sql = cfg->get(wxT("LoggingCustomSelect"),
                 wxString(wxT("SELECT 1+MAX(ID) FROM FLAMEROBIN$LOG")));
         }
-        st->Prepare(wx2std(sql));
+        st->Prepare(wx2std(sql, conv));
         st->Execute();
         int cnt = 1;
         if (st->Fetch() && !st->IsNull(1))
@@ -75,8 +77,8 @@ bool Logger::log2database(Config *cfg, const SqlStatement& stm, Database* db)
         st->Set(1, cnt);
         if (stm.isDDL())
         {
-            st->Set(2, wx2std(getNameOfType(stm.getObjectType())));
-            st->Set(3, wx2std(stm.getName()));
+            st->Set(2, wx2std(getNameOfType(stm.getObjectType()), conv));
+            st->Set(3, wx2std(stm.getName(), conv));
         }
         else
         {
@@ -84,7 +86,7 @@ bool Logger::log2database(Config *cfg, const SqlStatement& stm, Database* db)
             st->SetNull(3);
         }
         IBPP::Blob bl = IBPP::BlobFactory(st->DatabasePtr(), tr);
-        bl->Save(wx2std(stm.getStatement()));
+        bl->Save(wx2std(stm.getStatement(), conv));
         st->Set(4, bl);
         st->Execute();
         tr->Commit();
@@ -93,7 +95,7 @@ bool Logger::log2database(Config *cfg, const SqlStatement& stm, Database* db)
     catch (IBPP::Exception &e)
     {
         showWarningDialog(0, _("Logging to database failed"),
-            std2wx(e.ErrorMessage()), AdvancedMessageDialogButtonsOk());
+            std2wx(e.ErrorMessage(), conv), AdvancedMessageDialogButtonsOk());
     }
     catch (...)
     {
