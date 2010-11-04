@@ -2024,10 +2024,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\images.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\logger.cpp"
 				>
 			</File>
@@ -2467,10 +2463,6 @@
 			</File>
 			<File
 				RelativePath=".\src\metadata\generator.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\images.h"
 				>
 			</File>
 			<File

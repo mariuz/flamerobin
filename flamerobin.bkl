@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <makefile>
 
-    <requires version="0.2.5"/>
+    <requires version="0.2.8"/>
     <using module="datafiles"/>
 
 <!-- necessary if wx-config can not be used -->
@@ -310,7 +310,6 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/TriggerWizardDialog.h
         $(SOURCEDIR)/gui/UserDialog.h
         $(SOURCEDIR)/gui/UsernamePasswordDialog.h
-        $(SOURCEDIR)/images.h
         $(SOURCEDIR)/Isaac.h
         $(SOURCEDIR)/logger.h
         $(SOURCEDIR)/main.h
@@ -433,7 +432,6 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/TriggerWizardDialog.cpp
         $(SOURCEDIR)/gui/UserDialog.cpp
         $(SOURCEDIR)/gui/UsernamePasswordDialog.cpp
-        $(SOURCEDIR)/images.cpp
         $(SOURCEDIR)/logger.cpp
         $(SOURCEDIR)/main.cpp
         $(SOURCEDIR)/MasterPassword.cpp

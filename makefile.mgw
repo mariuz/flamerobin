@@ -118,7 +118,6 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TriggerWizardDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UserDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UsernamePasswordDialog.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MasterPassword.o \
@@ -460,9 +459,6 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UserDialog.o: ./src/gui/UserDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UsernamePasswordDialog.o: ./src/gui/UsernamePasswordDialog.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
-
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.o: ./src/images.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.o: ./src/logger.cpp

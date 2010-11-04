@@ -143,7 +143,6 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TriggerWizardDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UserDialog.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UsernamePasswordDialog.obj \
-	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MasterPassword.obj \
@@ -501,9 +500,6 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UserDialog.obj: .\src\gui\UserDialog.cpp
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UsernamePasswordDialog.obj: .\src\gui\UsernamePasswordDialog.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\UsernamePasswordDialog.cpp
-
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_images.obj: .\src\images.cpp
-	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\images.cpp
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.obj: .\src\logger.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\logger.cpp

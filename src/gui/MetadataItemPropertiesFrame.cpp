@@ -48,6 +48,7 @@
 #include <list>
 
 #include "config/Config.h"
+#include "core/ArtProvider.h"
 #include "core/FRError.h"
 #include "core/URIProcessor.h"
 #include "engine/MetadataLoader.h"
@@ -379,6 +380,40 @@ void MetadataItemPropertiesPanel::OnRefresh(wxCommandEvent& WXUNUSED(event))
     SetFocus();
 }
 //-----------------------------------------------------------------------------
+// TODO: replace this with a nice generic property page icon for all types
+wxIcon getMetadataItemIcon(NodeType type)
+{
+    wxSize sz(32, 32);
+    switch (type)
+    {
+        case ntColumn:
+            return wxArtProvider::GetIcon(ART_Column, wxART_OTHER, sz);
+        case ntDatabase:
+            return wxArtProvider::GetIcon(ART_DatabaseConnected, wxART_OTHER, sz);
+        case ntDomain:
+            return wxArtProvider::GetIcon(ART_Domain, wxART_OTHER, sz);
+        case ntFunction:
+            return wxArtProvider::GetIcon(ART_Function, wxART_OTHER, sz);
+        case ntGenerator:
+            return wxArtProvider::GetIcon(ART_Generator, wxART_OTHER, sz);
+        case ntProcedure:
+            return wxArtProvider::GetIcon(ART_Procedure, wxART_OTHER, sz);
+        case ntServer:
+            return wxArtProvider::GetIcon(ART_Server, wxART_OTHER, sz);
+        case ntSysTable:
+            return wxArtProvider::GetIcon(ART_SystemTable, wxART_OTHER, sz);
+        case ntTable:
+            return wxArtProvider::GetIcon(ART_Table, wxART_OTHER, sz);
+        case ntTrigger:
+            return wxArtProvider::GetIcon(ART_Trigger, wxART_OTHER, sz);
+        case ntView:
+            return wxArtProvider::GetIcon(ART_View, wxART_OTHER, sz);
+        default:
+            break;
+    }
+    return wxArtProvider::GetIcon(ART_FlameRobin, wxART_OTHER, sz);
+}
+//-----------------------------------------------------------------------------
 //! MetadataItemPropertiesFrame class
 MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
         MetadataItem* object)
@@ -395,19 +430,16 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
     else
         sb->SetStatusText(object->getName_());
 
-    wxIcon icon;
     if (d && config().get(wxT("linksOpenInTabs"), true))
     {
-        wxBitmap bmp = getImage32(d->getType());
-        icon.CopyFromBitmap(bmp);
+        SetIcon(wxArtProvider::GetIcon(ART_DatabaseConnected,
+            wxART_FRAME_ICON));
         databaseNameM = d->getName_();
     }
     else  // when linksOpenInTabs, only the server node
     {
-        wxBitmap bmp = getImage32(object->getType());
-        icon.CopyFromBitmap(bmp);
+        SetIcon(getMetadataItemIcon(object->getType()));
     }
-    SetIcon(icon);
 
     notebookM = new wxAuiNotebook(this, wxID_ANY, wxDefaultPosition,
         wxDefaultSize, wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_WINDOWLIST_BUTTON
