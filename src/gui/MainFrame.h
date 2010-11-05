@@ -126,6 +126,7 @@ public:
     void OnTreeSelectionChanged(wxTreeEvent& event);
     void OnTreeItemActivate(wxTreeEvent& event);
     void OnClose(wxCloseEvent& event);
+    void OnSetFocus(wxFocusEvent& event);
 
     // search stuff (IDs 600+ are taken!)
     enum {

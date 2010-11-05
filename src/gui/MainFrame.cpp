@@ -475,6 +475,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_TREE_ITEM_ACTIVATED(DBHTreeControl::ID_tree_ctrl, MainFrame::OnTreeItemActivate)
 
     EVT_CLOSE(MainFrame::OnClose)
+    EVT_SET_FOCUS(MainFrame::OnSetFocus)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void MainFrame::OnMainMenuOpen(wxMenuEvent& event)
@@ -1725,5 +1726,13 @@ bool MainFrame::openUnregisteredDatabase(const wxString& dbpath)
             return true;
     }
     return false;
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnSetFocus(wxFocusEvent& event)
+{
+    // fix an annoying bug where closing a MetadataItemPropertyFrame does
+    // focus the main frame instead of its previously focused control
+    mainPanelM->SetFocus();
+    event.Skip();
 }
 //-----------------------------------------------------------------------------
