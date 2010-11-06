@@ -38,7 +38,8 @@ private:
          stOther } typeM;
 
 public:
-    SingleStatement(const wxString& sql, bool valid = true);
+    SingleStatement();
+    SingleStatement(const wxString& sql);
 
     bool isCommitStatement() const;
     bool isRollbackStatement() const;
@@ -52,9 +53,9 @@ public:
 class MultiStatement
 {
 private:
-    wxString::size_type oldPosM;
-    wxString::size_type searchPosM;
-    wxString::size_type lastPosM;
+    wxString::const_iterator oldPosM;
+    wxString::const_iterator searchPosM;
+    wxString::const_iterator lastPosM;
 
     bool atEndM;
     wxString sqlM;
@@ -63,7 +64,12 @@ public:
     MultiStatement(const wxString& sql, const wxString& terminator = wxT(";"));
 
     SingleStatement getNextStatement();
-    SingleStatement getStatementAt(int position, int* offset = 0);
+    SingleStatement getStatementAt(int position)
+    {
+        int offset;
+        return getStatementAt(position, offset);
+    }
+    SingleStatement getStatementAt(int position, int& offset);
 
     // get positions of last statement retrieved
     int getStart() const;

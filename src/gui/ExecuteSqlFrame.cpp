@@ -2040,7 +2040,7 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
     bool closeWhenDone, bool prepareOnly, int selectionOffset)
 {
     wxBusyCursor cr;
-    MultiStatement ms(statements, wxT(";"));
+    MultiStatement ms(statements);
     while (true)
     {
         SingleStatement ss = ms.getNextStatement();

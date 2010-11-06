@@ -38,14 +38,20 @@
     #include "wx/wx.h"
 #endif
 
+#include <algorithm>
+
 #include "core/StringUtils.h"
 #include "sql/MultiStatement.h"
 #include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------
-SingleStatement::SingleStatement(const wxString& sql, bool valid)
-    :sqlM(sql), isValidM(valid), typeM(stOther), thirdStringM(wxEmptyString)
+SingleStatement::SingleStatement()
+    : isValidM(false), typeM(stOther)
 {
-    SqlTokenType tkn[3] = { tkEOF, tkEOF, tkEOF };
+}
+//-----------------------------------------------------------------------------
+SingleStatement::SingleStatement(const wxString& sql)
+    : sqlM(sql), isValidM(true), typeM(stOther)
+{
     SqlTokenizer tk(sql);
     for (int i = 0; i < 3; tk.nextToken())
     {
@@ -54,20 +60,36 @@ SingleStatement::SingleStatement(const wxString& sql, bool valid)
             continue;
         if (stt == tkEOF)
             break;
-        if (i == 2)
-            thirdStringM = tk.getCurrentTokenString();
-        tkn[i++] = stt;
+
+        switch (i)
+        {
+            case 0:
+                // exit as soon as possible if token type not recognized
+                if (stt != kwSET)
+                {
+                    if (stt == kwCOMMIT)
+                        typeM = stCommit;
+                    else if (stt == kwROLLBACK)
+                        typeM = stRollback;
+                    return;
+                }
+                break;
+            case 1:
+                if (stt == kwTERMINATOR)
+                    typeM = stSetTerm;
+                else if (stt == kwAUTO || stt == kwAUTODDL)
+                    typeM = stSetAutoDDL;
+                else
+                    return;
+                break;
+            case 2:
+                thirdStringM = tk.getCurrentTokenString();
+                break;
+            default:
+                break;
+        }
+        ++i;
     }
-    if (tkn[0] == kwCOMMIT)
-        typeM = stCommit;
-    else if (tkn[0] == kwROLLBACK)
-        typeM = stRollback;
-    else if (tkn[0] == kwSET && tkn[1] == kwTERMINATOR)
-        typeM = stSetTerm;
-    else if (tkn[0] == kwSET && (tkn[1] == kwAUTO || tkn[1] == kwAUTODDL))
-        typeM = stSetAutoDDL;
-    else
-        typeM = stOther;
 }
 //-----------------------------------------------------------------------------
 bool SingleStatement::isCommitStatement() const
@@ -110,81 +132,96 @@ wxString SingleStatement::getSql() const
     return sqlM;
 }
 //-----------------------------------------------------------------------------
+//! MultiStatement class
 MultiStatement::MultiStatement(const wxString& sql, const wxString& terminator)
-    :sqlM(sql), terminatorM(terminator), atEndM(false)
+    : sqlM(sql), terminatorM(terminator), atEndM(false)
 {
-    oldPosM = searchPosM = 0;
+    oldPosM = searchPosM = sqlM.begin();
 }
 //-----------------------------------------------------------------------------
 SingleStatement MultiStatement::getNextStatement()
 {
     if (atEndM)    // end marked in previous iteration
-    {
-        SingleStatement is(wxEmptyString, false);   // false = invalid
-        return is;
-    }
+        return SingleStatement();
+
+    wxString interesting(wxT("'/-"));
+    if (!terminatorM.empty())
+        interesting += *terminatorM.begin();
+    wxString::const_iterator searchEnd = sqlM.end();
 
     oldPosM = searchPosM;
     while (true)
     {
-        wxString::size_type pos = sqlM.find(terminatorM, searchPosM);
-        wxString::size_type quote = sqlM.find(wxT("'"), searchPosM);
-        wxString::size_type comment1 = sqlM.find(wxT("/*"), searchPosM);
-        wxString::size_type comment2 = sqlM.find(wxT("--"), searchPosM);
-
-        // check if terminator is maybe inside quotes or comments
-        if (pos != wxString::npos)            // terminator found
+        lastPosM = searchEnd;
+        wxString::const_iterator p = std::find_first_of(searchPosM, searchEnd,
+            interesting.begin(), interesting.end());
+        if (p != searchEnd)
         {
-            // find the closest (check for quotes first)
-            if (quote != wxString::npos && quote < pos &&
-                (comment1 == wxString::npos || quote < comment1) &&
-                (comment2 == wxString::npos || quote < comment2))
+            // scan over embedded quotes
+            if (*p == '\'')
             {
-                searchPosM = sqlM.find(wxT("'"), quote+1);     // end quote
-                if (searchPosM++ != wxString::npos)
+                searchPosM = std::find(p + 1, searchEnd, '\'');
+                if (searchPosM != searchEnd)
+                {
+                    ++searchPosM;
                     continue;
-                pos = wxString::npos;
+                }
             }
-
-            // check for comment1
-            if (pos != wxString::npos &&
-                comment1 != wxString::npos && comment1 < pos &&
-                (comment2 == wxString::npos || comment1 < comment2))
+            // scan over single-line comment
+            else if (*p == '-' && p + 1 != searchEnd && *(p + 1) == '-')
             {
-                searchPosM = sqlM.find(wxT("*/"), comment1 + 1); // end comment
-                if (searchPosM++ != wxString::npos)
+                searchPosM = std::find(p + 2, searchEnd, '\n');
+                if (searchPosM != searchEnd)
+                {
+                    ++searchPosM;
                     continue;
-                pos = wxString::npos;
+                }
             }
-
-            // check for comment2
-            if (pos != wxString::npos &&
-                comment2 != wxString::npos && comment2 < pos)
+            // scan over multi-line comment
+            else if (*p == '/' && p + 1 != searchEnd && *(p + 1) == '*')
             {
-                searchPosM = sqlM.find(wxT("\n"), comment2 + 1); // end comment
-                if (searchPosM++ != wxString::npos)
+                wxString commentEnd(wxT("*/"));
+                searchPosM = std::search(p + 2, searchEnd, commentEnd.begin(),
+                    commentEnd.end());
+                if (searchPosM != searchEnd)
+                {
+                    searchPosM += commentEnd.size();
                     continue;
-                pos = wxString::npos;
+                }
+            }
+            // ignore partial matches with terminator
+            else
+            {
+#ifdef __VISUALC__
+    #pragma warning(disable:4996)
+#endif
+                if (!std::equal(terminatorM.begin(), terminatorM.end(), p))
+                {
+                    searchPosM = p + 1;
+                    continue;
+                }
+                lastPosM = p;
+                searchPosM = p + terminatorM.size();
             }
         }
 
-        lastPosM = (pos == wxString::npos ? sqlM.length() : pos);
-        SingleStatement ss(sqlM.Mid(oldPosM, lastPosM - oldPosM));
-        searchPosM = lastPosM + terminatorM.length();
-        if (pos == wxString::npos)      // last statement
-            atEndM = true;              // mark the end (for next call)
+        if (searchPosM == searchEnd)
+            atEndM = true;
+
+        wxString sql(oldPosM, lastPosM);
+        SingleStatement ss(sql);
 
         wxString newTerm;                   // change terminator
         if (ss.isSetTermStatement(newTerm))
         {
             terminatorM = newTerm;
-            if (newTerm.IsEmpty())  // the caller should decide what to do as
+            if (newTerm.empty())    // the caller should decide what to do as
                 return ss;          // we don't want to popup msgbox from here
             if (atEndM)             // terminator is the last statement
-            {
-                SingleStatement is(wxEmptyString, false);   // false = invalid
-                return is;
-            }
+                return SingleStatement();
+
+            interesting = wxT("'/-");
+            interesting += *terminatorM.begin();
             oldPosM = searchPosM;
             continue;
         }
@@ -192,17 +229,15 @@ SingleStatement MultiStatement::getNextStatement()
     }
 }
 //-----------------------------------------------------------------------------
-// optionally place the statement offset (start) into "offset" variable
-SingleStatement MultiStatement::getStatementAt(int position, int* offset)
+SingleStatement MultiStatement::getStatementAt(int position, int& offset)
 {
-    oldPosM = searchPosM = 0;
+    oldPosM = searchPosM = sqlM.begin();
     while (true)
     {
         SingleStatement s = getNextStatement();
-        if (!s.isValid() || (int)lastPosM >= position)   // found or at end
+        if (!s.isValid() || lastPosM - sqlM.begin() >= position)
         {
-            if (offset)
-                *offset = oldPosM;
+            offset = oldPosM - sqlM.begin();
             return s;
         }
     }
@@ -220,12 +255,11 @@ wxString MultiStatement::getTerminator() const
 //-----------------------------------------------------------------------------
 int MultiStatement::getStart() const
 {
-    return oldPosM;
+    return oldPosM - sqlM.begin();
 }
 //-----------------------------------------------------------------------------
 int MultiStatement::getEnd() const
 {
-    return lastPosM;
+    return lastPosM - sqlM.begin();
 }
 //-----------------------------------------------------------------------------
-

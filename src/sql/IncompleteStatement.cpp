@@ -60,7 +60,7 @@ wxString IncompleteStatement::getObjectColumns(const wxString& table,
 {
     MultiStatement ms(sqlM);
     int offset;
-    SingleStatement st = ms.getStatementAt(position, &offset);
+    SingleStatement st = ms.getStatementAt(position, offset);
     if (!st.isValid())
         return wxEmptyString;
 
