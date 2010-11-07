@@ -155,7 +155,11 @@ SingleStatement MultiStatement::getNextStatement()
         lastPosM = searchEnd;
         wxString::const_iterator p = std::find_first_of(searchPosM, searchEnd,
             interesting.begin(), interesting.end());
-        if (p != searchEnd)
+        if (p == searchEnd)
+        {
+            atEndM = true;
+        }
+        else
         {
             // scan over embedded quotes
             if (*p == '\'')
@@ -203,10 +207,9 @@ SingleStatement MultiStatement::getNextStatement()
                 lastPosM = p;
                 searchPosM = p + terminatorM.size();
             }
+            if (searchPosM == searchEnd)
+                atEndM = true;
         }
-
-        if (searchPosM == searchEnd)
-            atEndM = true;
 
         wxString sql(oldPosM, lastPosM);
         SingleStatement ss(sql);
