@@ -79,15 +79,16 @@ void Procedure::loadChildren()
     wxMBConv* converter = d->getCharsetConverter();
 
     std::string sql(
-        "select p.rdb$parameter_name, p.rdb$field_source, p.rdb$parameter_type"
+        "select p.rdb$parameter_name, p.rdb$field_source, "
+        "p.rdb$parameter_type, p.rdb$default_source, "
     );
     if (d->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
-        sql += ", RDB$PARAMETER_MECHANISM ";
+        sql += "p.rdb$parameter_mechanism ";
     else
-        sql += ", -1 ";
-    sql +=  " from rdb$procedure_parameters p"
-            " where p.rdb$PROCEDURE_name = ? "
-            " order by p.rdb$parameter_type, rdb$PARAMETER_number ";
+        sql += "-1 ";
+    sql +=  "from rdb$procedure_parameters p "
+            "where p.rdb$PROCEDURE_name = ? "
+            "order by p.rdb$parameter_type, p.rdb$PARAMETER_number";
 
     IBPP::Statement st1 = loader->getStatement(sql);
     st1->Set(1, wx2std(getName_(), converter));
@@ -104,8 +105,16 @@ void Procedure::loadChildren()
 
         short partype, mechanism = -1;
         st1->Get(3, &partype);
+        bool hasDefault = false;
+        wxString defaultSrc;
         if (!st1->IsNull(4))
-            st1->Get(4, mechanism);
+        {
+            hasDefault = true;
+            st1->Get(4, s);
+            defaultSrc = std2wxIdentifier(s, converter);
+        }
+        if (!st1->IsNull(5))
+            st1->Get(5, mechanism);
 
         ParameterPtr par = findParameter(param_name);
         if (!par)
@@ -115,7 +124,7 @@ void Procedure::loadChildren()
                 par->lockSubject();
         }
         parameters.push_back(par);
-        par->initialize(source, partype, mechanism);
+        par->initialize(source, partype, mechanism, defaultSrc, hasDefault);
     }
 
     setChildrenLoaded(true);
@@ -335,7 +344,6 @@ wxString Procedure::getAlterSql(bool full)
         {
             wxString charset;
             wxString param = (*it)->getQuotedName() + wxT(" ");
-            wxString collate = (*it)->getCollation();
             Domain* dm = (*it)->getDomain();
             if (dm)
             {
@@ -350,8 +358,6 @@ wxString Procedure::getAlterSql(bool full)
                         else
                             charset = wxT("");
                     }
-                    if (db->isDefaultCollation(charset, collate))
-                        collate.clear();    // don't show default collations
                 }
                 else
                 {
@@ -363,9 +369,6 @@ wxString Procedure::getAlterSql(bool full)
             }
             else
                 param += (*it)->getSource();
-
-            if (!collate.IsEmpty())
-                charset += wxT(" COLLATE ") + collate;
 
             if ((*it)->isOutputParameter())
             {
@@ -382,10 +385,8 @@ wxString Procedure::getAlterSql(bool full)
                 else
                     input += wxT(",\n    ");
                 input += param;
-                //if (!(*it).isNullable(false))   // false = don't check domain
-                //    input += wxT(" NOT NULL");
-                if (dm && dm->hasDefault())
-                    input += wxT(" DEFAULT ") + dm->getDefault();
+                if ((*it)->hasDefault())
+                    input += wxT(" ") + (*it)->getDefault();
                 input += charset;
             }
         }

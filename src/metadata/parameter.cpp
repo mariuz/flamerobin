@@ -38,24 +38,27 @@
     #pragma hdrstop
 #endif
 
+#include "config/Config.h"
 #include "metadata/database.h"
+#include "metadata/domain.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/parameter.h"
 #include "metadata/procedure.h"
 //-----------------------------------------------------------------------------
 // TODO: pass ProcedurePtr instead of Procedure*
 Parameter::Parameter(Procedure* procedure, const wxString& name)
-    : Column(procedure, name), outputParameterM(false), parameterMechanismM(-1)
+    : ColumnBase(ntParameter, procedure, name), outputParameterM(false),
+        parameterMechanismM(-1)
 {
-    setType(ntParameter);
 }
 //-----------------------------------------------------------------------------
-void Parameter::initialize(wxString source, int parameterType, int mechanism)
+void Parameter::initialize(const wxString& source, int parameterType,
+    int mechanism, const wxString& defaultValue, bool hasDefault)
 {
     SubjectLocker lock(this);
 
-    Column::initialize(false, source, wxEmptyString, wxEmptyString,
-        wxEmptyString, false);
+    ColumnBase::initialize(source, defaultValue, hasDefault);
+
     bool changed = false;
     if (parameterMechanismM != mechanism)
     {
@@ -80,6 +83,11 @@ bool Parameter::isOutputParameter() const
 int Parameter::getMechanism() const
 {
     return parameterMechanismM;
+}
+//-----------------------------------------------------------------------------
+const wxString Parameter::getTypeName() const
+{
+    return wxT("PARAMETER");
 }
 //-----------------------------------------------------------------------------
 void Parameter::acceptVisitor(MetadataItemVisitor* visitor)

@@ -34,30 +34,48 @@
 class Domain;
 class Table;
 //-----------------------------------------------------------------------------
-class Column: public MetadataItem
+class ColumnBase: public MetadataItem
 {
 private:
-    bool notnullM, computedM, hasDefaultM;
-    wxString sourceM, computedSourceM, collationM, defaultM;
+    bool hasDefaultM;
+    wxString defaultM;
+    wxString sourceM;
+protected:
+    virtual wxString getComputedSource() const;
+    void initialize(const wxString& source, const wxString& defaultValue,
+        bool hasDefault);
+public:
+    ColumnBase(NodeType type, MetadataItem* parent, const wxString& name);
+
+    wxString getDatatype(bool useConfig = true);
+    Domain* getDomain() const;
+    virtual wxString getDefault() const;
+    virtual bool hasDefault() const;
+    wxString getSource() const;
+};
+//-----------------------------------------------------------------------------
+class Column: public ColumnBase
+{
+private:
+    bool notnullM, computedM;
+    wxString sourceM, computedSourceM, collationM;
 public:
     Column(MetadataItem* parent, const wxString& name);
 
-    void initialize(bool notnull, wxString source, wxString computedSource,
-        wxString collation, wxString defaultValue, bool hasDefault);
-    wxString getDatatype(bool useConfig = true);
+    void initialize(bool notnull, const wxString& source,
+        const wxString& computedSource, const wxString& collation,
+        const wxString& defaultValue, bool hasDefault);
     virtual const wxString getTypeName() const;
     virtual wxString getDropSqlStatement() const;
 
     bool isNullable(bool checkDomain = true) const;
-    bool hasDefault(bool checkDomain = true) const;
+    virtual bool hasDefault() const;
     bool isForeignKey() const;
     bool isPrimaryKey() const;
     bool isString() const;
-    wxString getComputedSource() const;
-    wxString getSource() const;
+    virtual wxString getComputedSource() const;
     wxString getCollation() const;
-    wxString getDefault() const;
-    Domain* getDomain() const;
+    virtual wxString getDefault() const;
     Table* getTable() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };

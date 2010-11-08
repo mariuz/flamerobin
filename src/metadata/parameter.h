@@ -30,9 +30,8 @@
 #define FR_PARAMETER_H
 
 #include "metadata/column.h"
-#include "metadata/metadataitem.h"
 
-class Parameter: public Column
+class Parameter: public ColumnBase
 {
 private:
     bool outputParameterM;
@@ -40,10 +39,12 @@ private:
 public:
     Parameter(Procedure* procedure, const wxString& name);
 
-    void initialize(wxString source, int parameterType, int mechanism);
+    void initialize(const wxString& source, int parameterType, int mechanism,
+        const wxString& defaultValue, bool hasDefault);
     int getMechanism() const;
     bool isOutputParameter() const;
 
+    virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------

@@ -47,35 +47,91 @@
 #include "metadata/table.h"
 
 //-----------------------------------------------------------------------------
-Column::Column(MetadataItem* parent, const wxString& name)
-    : MetadataItem(ntColumn, parent, name)
+ColumnBase::ColumnBase(NodeType type, MetadataItem* parent,
+        const wxString& name)
+    : MetadataItem(type, parent, name), hasDefaultM(false)
 {
 }
 //-----------------------------------------------------------------------------
-void Column::initialize(bool notnull, wxString source, wxString computedSource,
-    wxString collation, wxString defaultValue, bool hasDefault)
+wxString ColumnBase::getComputedSource() const
+{
+    return wxEmptyString;
+}
+//-----------------------------------------------------------------------------
+//! retrieve datatype from domain if possible
+wxString ColumnBase::getDatatype(bool useConfig)
+{
+    enum
+    {
+        showType = 0,
+        showFormula,
+        showAll
+    };
+    int flag = (useConfig ? showFormula : showType);
+    if (useConfig)
+        config().getValue(wxT("ShowComputed"), flag);
+    // view columns are all computed and have their source empty
+    if (flag == showFormula && !getComputedSource().empty())
+        return getComputedSource();
+
+    wxString ret;
+    Domain* d = getDomain();
+    wxString datatype(d ? d->getDatatypeAsString() : sourceM);
+
+    enum
+    {
+        showDatatype = 0,
+        showDomain,
+        showBoth
+    };
+    int show = (useConfig ? showBoth : showDatatype);
+    if (useConfig)
+        config().getValue(wxT("ShowDomains"), show);
+
+    if (!d || d->isSystem() || show == showBoth || show == showDatatype)
+        ret += datatype;
+
+    if (d && !d->isSystem() && (show == showBoth || show == showDomain))
+    {
+        if (!ret.empty())
+            ret += wxT(" ");
+        ret += wxT("(") + d->getName_() + wxT(")");
+    }
+
+    if (flag == showAll && !getComputedSource().empty())
+        ret += wxT(" (") + getComputedSource() + wxT(")");
+    return ret;
+}
+//-----------------------------------------------------------------------------
+Domain* ColumnBase::getDomain() const
+{
+    Database* db = findDatabase();
+    return (db) ? db->getDomain(sourceM) : 0;
+}
+//-----------------------------------------------------------------------------
+wxString ColumnBase::getDefault() const
+{
+    return defaultM;
+}
+//-----------------------------------------------------------------------------
+bool ColumnBase::hasDefault() const
+{
+    return hasDefaultM;
+}
+//-----------------------------------------------------------------------------
+wxString ColumnBase::getSource() const
+{
+    return sourceM;
+}
+//-----------------------------------------------------------------------------
+void ColumnBase::initialize(const wxString& source,
+    const wxString& defaultValue, bool hasDefault)
 {
     bool changed = false;
-    if (notnullM != notnull)
+    wxString strippedSrc = source.Strip(wxString::both);
+    if (sourceM != strippedSrc)
     {
-        notnullM = notnull;
-        changed = true;
-    }
-    source = source.Strip(wxString::both);
-    if (sourceM != source)
-    {
-        sourceM = source;
-        changed = true;
-    }
-    if (computedSourceM != computedSource)
-    {
-        computedSourceM = computedSource;
-        changed = true;
-    }
-    collation = collation.Strip(wxString::both);
-    if (collationM != collation)
-    {
-        collationM = collation.Strip(wxString::both);
+        sourceM = strippedSrc;
         changed = true;
     }
     if (defaultM != defaultValue)
@@ -86,6 +142,40 @@ void Column::initialize(bool notnull, wxString source, wxString computedSource,
     if (hasDefaultM != hasDefault)
     {
         hasDefaultM = hasDefault;
+        changed = true;
+    }
+    if (changed)
+        notifyObservers();
+}
+//-----------------------------------------------------------------------------
+Column::Column(MetadataItem* parent, const wxString& name)
+    : ColumnBase(ntColumn, parent, name)
+{
+}
+//-----------------------------------------------------------------------------
+void Column::initialize(bool notnull, const wxString& source,
+    const wxString& computedSource, const wxString& collation,
+    const wxString& defaultValue, bool hasDefault)
+{
+    SubjectLocker lock(this);
+
+    ColumnBase::initialize(source, defaultValue, hasDefault);
+
+    bool changed = false;
+    if (notnullM != notnull)
+    {
+        notnullM = notnull;
+        changed = true;
+    }
+    if (computedSourceM != computedSource)
+    {
+        computedSourceM = computedSource;
+        changed = true;
+    }
+    wxString strippedColl = collation.Strip(wxString::both);
+    if (collationM != strippedColl)
+    {
+        collationM = strippedColl;
         changed = true;
     }
     if (changed)
@@ -103,11 +193,9 @@ bool Column::isNullable(bool checkDomain) const
     return true;
 }
 //-----------------------------------------------------------------------------
-bool Column::hasDefault(bool checkDomain) const
+bool Column::hasDefault() const
 {
-    if (hasDefaultM)
-        return true;
-    if (!checkDomain)
+    if (ColumnBase::hasDefault())
         return true;
     if (Domain* d = getDomain())
         return d->hasDefault();
@@ -152,61 +240,10 @@ bool Column::isForeignKey() const
     return false;
 }
 //-----------------------------------------------------------------------------
-//! retrieve datatype from domain if possible
-wxString Column::getDatatype(bool useConfig)
-{
-    enum
-    {
-        showType = 0,
-        showFormula,
-        showAll
-    };
-    int flag = (useConfig ? showFormula : showType);
-    if (useConfig)
-        config().getValue(wxT("ShowComputed"), flag);
-    // view columns are all computed and have their source empty
-    if (flag == showFormula && !computedSourceM.empty())
-        return computedSourceM;
-
-    wxString ret;
-    Domain* d = getDomain();
-    wxString datatype(d ? d->getDatatypeAsString() : sourceM);
-
-    enum
-    {
-        showDatatype = 0,
-        showDomain,
-        showBoth
-    };
-    int show = (useConfig ? showBoth : showDatatype);
-    if (useConfig)
-        config().getValue(wxT("ShowDomains"), show);
-
-    if (!d || d->isSystem() || show == showBoth || show == showDatatype)
-        ret += datatype;
-
-    if (d && !d->isSystem() && (show == showBoth || show == showDomain))
-    {
-        if (!ret.empty())
-            ret += wxT(" ");
-        ret += wxT("(") + d->getName_() + wxT(")");
-    }
-
-    if (flag == showAll && !computedSourceM.empty())
-        ret += wxT(" (") + computedSourceM + wxT(")");
-    return ret;
-}
-//-----------------------------------------------------------------------------
 bool Column::isString() const
 {
     Domain *d = getDomain();
     return (d ? d->isString() : false);
-}
-//-----------------------------------------------------------------------------
-Domain* Column::getDomain() const
-{
-    Database* db = findDatabase();
-    return (db) ? db->getDomain(sourceM) : 0;
 }
 //-----------------------------------------------------------------------------
 Table* Column::getTable() const
@@ -219,11 +256,6 @@ wxString Column::getComputedSource() const
     return computedSourceM;
 }
 //-----------------------------------------------------------------------------
-wxString Column::getSource() const
-{
-    return sourceM;
-}
-//-----------------------------------------------------------------------------
 wxString Column::getCollation() const
 {
     return collationM;
@@ -231,13 +263,12 @@ wxString Column::getCollation() const
 //-----------------------------------------------------------------------------
 wxString Column::getDefault() const
 {
-    if (defaultM.IsEmpty())
+    if (!ColumnBase::hasDefault())
     {
-        Domain *d = getDomain();
-        if (d)
+        if (Domain *d = getDomain())
             return d->getDefault();
     }
-    return defaultM;
+    return ColumnBase::getDefault();
 }
 //-----------------------------------------------------------------------------
 const wxString Column::getTypeName() const
