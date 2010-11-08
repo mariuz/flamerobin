@@ -223,7 +223,7 @@ bool Logger::prepareDatabase(Database *db)
                 object_name char(31), \
                 sql_statement blob sub_type 1, \
                 executed_at timestamp default current_timestamp, \
-                user_name char(8) default current_user )");
+                user_name char(31) default current_user )");
             st->Execute();
             tr->Commit();
             db->addObject(ntTable, wxT("FLAMEROBIN$LOG"));
