@@ -65,8 +65,8 @@ Procedure::Procedure(DatabasePtr database, const wxString& name)
 //-----------------------------------------------------------------------------
 void Procedure::loadChildren()
 {
+    // in case an exception is thrown this should be repeated
     setChildrenLoaded(false);
-    parametersM.clear();
 
     Database* d = getDatabase(wxT("Procedure::loadChildren"));
     MetadataLoader* loader = d->getMetadataLoader();
@@ -74,8 +74,11 @@ void Procedure::loadChildren()
     // when objects go out of scope and are destroyed, procedure will be
     // unlocked before the transaction is committed - any update() calls on
     // observers can possibly use the same transaction
+    // when objects go out of scope and are destroyed, object will be unlocked
+    // before the transaction is committed - any update() calls on observers
+    // can possibly use the same transaction
     MetadataLoaderTransaction tr(loader);
-    SubjectLocker lock(this);
+    SubjectLocker lock(d);
     wxMBConv* converter = d->getCharsetConverter();
 
     std::string sql(
