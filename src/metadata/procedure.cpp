@@ -83,12 +83,12 @@ void Procedure::loadChildren()
 
     std::string sql(
         "select p.rdb$parameter_name, p.rdb$field_source, "
-        "p.rdb$parameter_type, p.rdb$default_source, "
+        "p.rdb$parameter_type, "
     );
     if (d->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
-        sql += "p.rdb$parameter_mechanism ";
+        sql += "p.rdb$default_source, p.rdb$parameter_mechanism ";
     else
-        sql += "-1 ";
+        sql += "null, -1 ";
     sql +=  "from rdb$procedure_parameters p "
             "where p.rdb$PROCEDURE_name = ? "
             "order by p.rdb$parameter_type, p.rdb$PARAMETER_number";
