@@ -217,7 +217,7 @@ bool DatabaseInfo::getReadOnly() const
 //-----------------------------------------------------------------------------
 int64_t DatabaseInfo::getSizeInBytes() const
 {
-    return (int64_t)getPages() * (int64_t)getPageSize();
+    return static_cast<int64_t>(getPages()) * getPageSize();
 }
 //-----------------------------------------------------------------------------
 int DatabaseInfo::getSweep() const

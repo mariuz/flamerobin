@@ -591,7 +591,7 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
         IBPP::Blob b = IBPP::BlobFactory(st1->DatabasePtr(),
             st1->TransactionPtr());
         b->Create();
-        uint8_t buffer[32768];
+        boost::uint8_t buffer[32768];
         while (!fl.Eof())
         {
             size_t len = fl.Read(buffer, 32767);    // slow when not 32k

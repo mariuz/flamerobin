@@ -1262,10 +1262,6 @@ SOURCE=.\src\metadata\exception.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\frtypes.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\frutils.h
 # End Source File
 # Begin Source File

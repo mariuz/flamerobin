@@ -38,7 +38,6 @@
     #include "wx/wx.h"
 #endif
 
-#include "frtypes.h"
 #include "gui/controls/DataGridRowBuffer.h"
 //-----------------------------------------------------------------------------
 DataGridRowBuffer::DataGridRowBuffer(unsigned fieldCount)

@@ -49,7 +49,6 @@
 #include "core/ArtProvider.h"
 #include "core/FRError.h"
 #include "core/URIProcessor.h"
-#include "frtypes.h"
 #include "frutils.h"
 #include "gui/AboutBox.h"
 #include "gui/AdvancedMessageDialog.h"

@@ -257,7 +257,6 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/core/URIProcessor.h
         $(SOURCEDIR)/core/Visitor.h
         $(SOURCEDIR)/engine/MetadataLoader.h
-        $(SOURCEDIR)/frtypes.h
         $(SOURCEDIR)/frutils.h
         $(SOURCEDIR)/frversion.h
         $(SOURCEDIR)/gui/AboutBox.h

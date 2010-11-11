@@ -28,7 +28,6 @@
 #ifndef FR_GENERATOR_H
 #define FR_GENERATOR_H
 
-#include "frtypes.h"
 #include "metadata/collection.h"
 #include "metadata/database.h"
 

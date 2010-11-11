@@ -33,7 +33,6 @@
 
 #include <ibpp.h>
 
-#include "frtypes.h"
 #include "gui/controls/DataGridRows.h"
 //-----------------------------------------------------------------------------
 class Column;

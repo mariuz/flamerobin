@@ -2446,10 +2446,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\frtypes.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\frutils.h"
 				>
 			</File>

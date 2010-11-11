@@ -36,7 +36,6 @@
 
 #include <ibpp.h>
 
-#include "frtypes.h"
 #include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
 //-----------------------------------------------------------------------------

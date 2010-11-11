@@ -36,7 +36,7 @@
 
 #include <string>
 
-#include "ibpp.h"
+#include <ibpp.h>
 
 #include "core/Observer.h"
 #include "controls/LogTextControl.h"
