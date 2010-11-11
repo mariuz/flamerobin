@@ -359,7 +359,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     wxArrayString tables;
     TablesPtr t(db->getTables());
     for (Tables::iterator it = t->begin(); it != t->end(); ++it)
-        tables.Add((*it).getQuotedName());
+        tables.Add((*it)->getQuotedName());
     tables.Sort();
     wxArrayString empty;
 
@@ -629,7 +629,7 @@ GeneratorSettings* DataGeneratorFrame::getSettings(Column *c)
     gs->randomValues = !isUnique;
     gs->nullPercent = (c->isNullable() ? 50 : 0);
     gs->valueType = GeneratorSettings::vtRange;
-    gs->range = getDefaultRange(c->getDomain());
+    gs->range = getDefaultRange(c->getDomain().get());
     if (!c->getComputedSource().IsEmpty())
         gs->valueType = GeneratorSettings::vtSkip;
     else if (!fkc.IsEmpty())
@@ -1000,10 +1000,10 @@ bool DataGeneratorFrame::sortTables(std::list<Table *>& order)
     for (Tables::iterator it = t->begin(); it != t->end(); ++it)
     {
         std::map<wxString, int>::iterator i2 =
-            tableRecordsM.find((*it).getQuotedName());
+            tableRecordsM.find((*it)->getQuotedName());
         if (i2 != tableRecordsM.end() && (*i2).second > 0)
         {
-            TableDep *td = new TableDep(&(*it), tableRecordsM);
+            TableDep *td = new TableDep((*it).get(), tableRecordsM);
             deps.push_back(td);
         }
     }

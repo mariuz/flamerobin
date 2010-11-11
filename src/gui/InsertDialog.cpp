@@ -701,7 +701,7 @@ void InsertDialog::OnGridCellChange(wxGridEvent& event)
             for (Generators::const_iterator it = gs->begin(); it != gs->end();
                 ++it)
             {
-                as.Add((*it).getQuotedName());
+                as.Add((*it)->getQuotedName());
             }
             wxString s(::wxGetSingleChoice(_("Select a generator"),
                 _("Generator"), as, this));

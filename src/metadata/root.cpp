@@ -343,7 +343,7 @@ bool Root::getChildren(std::vector<MetadataItem *>& temp)
         return false;
     std::transform(serversM.begin(), serversM.end(), std::back_inserter(temp),
         boost::mem_fn(&ServerPtr::get));
-    return true;
+    return !serversM.empty();
 }
 //-----------------------------------------------------------------------------
 void Root::lockChildren()

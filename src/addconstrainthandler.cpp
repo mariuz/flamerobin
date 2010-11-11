@@ -56,22 +56,22 @@ public:
 private:
     static const AddConstraintHandler handlerInstance;    // singleton; registers itself on creation.
 
-    Table *selectTable(Database *d, wxWindow *parent) const;
-    wxString selectAction(const wxString& label, wxWindow *parent) const;
+    TablePtr selectTable(Database* d, wxWindow* parent) const;
+    wxString selectAction(const wxString& label, wxWindow* parent) const;
 };
 //-----------------------------------------------------------------------------
 const AddConstraintHandler AddConstraintHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-Table* AddConstraintHandler::selectTable(Database *d, wxWindow *parent) const
+TablePtr AddConstraintHandler::selectTable(Database* d, wxWindow* parent) const
 {
     wxArrayString tables;
     TablesPtr ts(d->getTables());
     for (Tables::const_iterator it = ts->begin(); it != ts->end(); ++it)
-        tables.Add((*it).getName_());
+        tables.Add((*it)->getName_());
     int index = ::wxGetSingleChoiceIndex(_("Select table to reference"),
         _("Creating foreign key"), tables, parent);
     if (index == -1)
-        return 0;
+        return TablePtr();
     return ts->findByName(tables[index]);
 }
 //-----------------------------------------------------------------------------
@@ -139,10 +139,10 @@ bool AddConstraintHandler::handleURI(URI& uri)
         wxString columnlist = selectRelationColumns(t, w);
         if (columnlist == wxT(""))
             return true;
-        Table* ref = selectTable(t->findDatabase(), w);
+        TablePtr ref = selectTable(t->findDatabase(), w);
         if (!ref)
             return true;
-        wxString refcolumnlist = selectRelationColumns(ref, w);
+        wxString refcolumnlist = selectRelationColumns(ref.get(), w);
         if (refcolumnlist == wxT(""))
             return true;
         sql += wxT("\nforeign key (") + columnlist + wxT(") \nreferences ") + ref->getQuotedName()

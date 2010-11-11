@@ -48,7 +48,7 @@ public:
     ColumnBase(NodeType type, MetadataItem* parent, const wxString& name);
 
     wxString getDatatype(bool useConfig = true);
-    Domain* getDomain() const;
+    DomainPtr getDomain() const;
     virtual wxString getDefault() const;
     virtual bool hasDefault() const;
     wxString getSource() const;

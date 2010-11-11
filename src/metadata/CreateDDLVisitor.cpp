@@ -101,8 +101,7 @@ void CreateDDLVisitor::visitColumn(Column& c)
 
     preSqlM << c.getQuotedName() << wxT(" ");
     wxString collate = c.getCollation();
-    Domain *d = c.getDomain();
-    if (d)
+    if (DomainPtr d = c.getDomain())
     {
         if (d->isSystem())
         {
@@ -165,10 +164,10 @@ void iterateit(CreateDDLVisitor* v, C mc, ProgressIndicator* pi)
         if (pi)
         {
             checkProgressIndicatorCanceled(pi);
-            pi->setProgressMessage(_("Extracting ") + (*it).getName_(), 2);
+            pi->setProgressMessage(_("Extracting ") + (*it)->getName_(), 2);
             pi->stepProgress(1, 2);
         }
-        (*it).acceptVisitor(v);
+        (*it)->acceptVisitor(v);
     }
 }
 //-----------------------------------------------------------------------------

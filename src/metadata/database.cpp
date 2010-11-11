@@ -444,17 +444,17 @@ wxArrayString Database::getCollations(const wxString& charset)
     return collations;
 }
 //-----------------------------------------------------------------------------
-Domain* Database::getDomain(const wxString& name)
+DomainPtr Database::getDomain(const wxString& name)
 {
     // return domain if already loaded
     if (MetadataItem::hasSystemPrefix(name))
     {
-        if (Domain* domain = sysDomainsM->findByName(name))
+        if (DomainPtr domain = sysDomainsM->findByName(name))
             return domain;
     }
     else
     {
-        if (Domain* domain = userDomainsM->findByName(name))
+        if (DomainPtr domain = userDomainsM->findByName(name))
             return domain;
     }
 
@@ -480,7 +480,7 @@ Domain* Database::getDomain(const wxString& name)
                 return userDomainsM->insert(name);
         }
     }
-    return 0;
+    return DomainPtr();
 }
 //-----------------------------------------------------------------------------
 bool Database::isDefaultCollation(const wxString& charset,
@@ -561,8 +561,8 @@ void Database::loadGeneratorValues()
         it != generatorsM->end(); ++it)
     {
         // make sure generator value is reloaded from database
-        (*it).invalidate();
-        (*it).ensurePropertiesLoaded();
+        (*it)->invalidate();
+        (*it)->ensurePropertiesLoaded();
     }
 }
 //-----------------------------------------------------------------------------
@@ -587,17 +587,39 @@ MetadataItem* Database::findByNameAndType(NodeType nt, wxString name)
 
     switch (nt)
     {
-        case ntTable:       return tablesM->findByName(name);     break;
-        case ntSysTable:    return sysTablesM->findByName(name);  break;
-        case ntView:        return viewsM->findByName(name);      break;
-        case ntTrigger:     return triggersM->findByName(name);   break;
-        case ntProcedure:   return proceduresM->findByName(name); break;
-        case ntFunction:    return functionsM->findByName(name);  break;
-        case ntGenerator:   return generatorsM->findByName(name); break;
-        case ntRole:        return rolesM->findByName(name);      break;
-        case ntDomain:      return userDomainsM->findByName(name); break;
-        case ntSysDomain:   return sysDomainsM->findByName(name); break;
-        case ntException:   return exceptionsM->findByName(name); break;
+        case ntTable:
+            return tablesM->findByName(name).get();
+            break;
+        case ntSysTable:
+            return sysTablesM->findByName(name).get();
+            break;
+        case ntView:
+            return viewsM->findByName(name).get();
+            break;
+        case ntTrigger:
+            return triggersM->findByName(name).get();
+            break;
+        case ntProcedure:
+            return proceduresM->findByName(name).get();
+            break;
+        case ntFunction:
+            return functionsM->findByName(name).get();
+            break;
+        case ntGenerator:
+            return generatorsM->findByName(name).get();
+            break;
+        case ntRole:
+            return rolesM->findByName(name).get();
+            break;
+        case ntDomain:
+            return userDomainsM->findByName(name).get();
+            break;
+        case ntSysDomain:
+            return sysDomainsM->findByName(name).get();
+            break;
+        case ntException:
+            return exceptionsM->findByName(name).get();
+            break;
         default:
             return 0;
     };
@@ -606,12 +628,12 @@ MetadataItem* Database::findByNameAndType(NodeType nt, wxString name)
 Relation* Database::findRelation(const Identifier& name)
 {
     wxString s(name.get());
-    if (Table* t = tablesM->findByName(s))
-        return t;
-    if (View* v = viewsM->findByName(s))
-        return v;
-    if (Table* t = sysTablesM->findByName(s))
-        return t;
+    if (TablePtr t = tablesM->findByName(s))
+        return t.get();
+    if (ViewPtr v = viewsM->findByName(s))
+        return v.get();
+    if (TablePtr t = sysTablesM->findByName(s))
+        return t.get();
     return 0;
 }
 //-----------------------------------------------------------------------------
@@ -631,17 +653,39 @@ void Database::dropObject(MetadataItem* object)
     NodeType nt = object->getType();
     switch (nt)
     {
-        case ntTable:       tablesM->remove((Table*)object);            break;
-        case ntSysTable:    sysTablesM->remove((Table*)object);         break;
-        case ntView:        viewsM->remove((View*)object);              break;
-        case ntTrigger:     triggersM->remove((Trigger*)object);        break;
-        case ntProcedure:   proceduresM->remove((Procedure*)object);    break;
-        case ntFunction:    functionsM->remove((Function*)object);      break;
-        case ntGenerator:   generatorsM->remove((Generator*)object);    break;
-        case ntRole:        rolesM->remove((Role*)object);              break;
-        case ntDomain:      userDomainsM->remove((Domain*)object);      break;
-        case ntSysDomain:   sysDomainsM->remove((Domain*)object);       break;
-        case ntException:   exceptionsM->remove((Exception*)object);    break;
+        case ntTable:
+            tablesM->remove((Table*)object);
+            break;
+        case ntSysTable:
+            sysTablesM->remove((Table*)object);
+            break;
+        case ntView:
+            viewsM->remove((View*)object);
+            break;
+        case ntTrigger:
+            triggersM->remove((Trigger*)object);
+            break;
+        case ntProcedure:
+            proceduresM->remove((Procedure*)object);
+            break;
+        case ntFunction:
+            functionsM->remove((Function*)object);
+            break;
+        case ntGenerator:
+            generatorsM->remove((Generator*)object);
+            break;
+        case ntRole:
+            rolesM->remove((Role*)object);
+            break;
+        case ntDomain:
+            userDomainsM->remove((Domain*)object);
+            break;
+        case ntSysDomain:
+            sysDomainsM->remove((Domain*)object);
+            break;
+        case ntException:
+            exceptionsM->remove((Exception*)object);
+            break;
         default:
             return;
     };
@@ -718,7 +762,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
         // the affected table will recognize its index (if loaded)
         Tables::iterator it;
         for (it = tablesM->begin(); it != tablesM->end(); ++it)
-            (*it).invalidateIndices(stm.getName());
+            (*it)->invalidateIndices(stm.getName());
         return;
     }
 
@@ -738,10 +782,10 @@ void Database::parseCommitedSql(const SqlStatement& stm)
     {
         Tables::iterator itt;
         for (itt = tablesM->begin(); itt != tablesM->end(); itt++)
-            (*itt).notifyObservers();
+            (*itt)->notifyObservers();
         Views::iterator itv;
         for (itv = viewsM->begin(); itv != viewsM->end(); itv++)
-            (*itv).notifyObservers();
+            (*itv)->notifyObservers();
         notifyObservers();
     }
 
@@ -781,10 +825,10 @@ void Database::parseCommitedSql(const SqlStatement& stm)
             Triggers::iterator it = triggersM->begin();
             while (it != triggersM->end())
             {
-                Relation* r = getRelationForTrigger(&(*it));
+                Relation* r = getRelationForTrigger((*it).get());
                 if (!r || r->getIdentifier().equals(stm.getIdentifier()))
                 {
-                    dropObject(&(*it));
+                    dropObject((*it).get());
                     it = triggersM->begin();
                 }
                 else
@@ -802,17 +846,17 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                 stm.getFieldName()));
             if (MetadataItem::hasSystemPrefix(domainName))
             {
-                MetadataItem* m = sysDomainsM->findByName(domainName);
-                if (!m)     // domain does not exist in DBH
-                    m = sysDomainsM->insert(domainName);
-                m->invalidate();
+                DomainPtr d = sysDomainsM->findByName(domainName);
+                if (!d)     // domain does not exist in DBH
+                    d = sysDomainsM->insert(domainName);
+                d->invalidate();
             }
             else
             {
-                MetadataItem* m = userDomainsM->findByName(domainName);
-                if (!m)     // domain does not exist in DBH
-                    m = userDomainsM->insert(domainName);
-                m->invalidate();
+                DomainPtr d = userDomainsM->findByName(domainName);
+                if (!d)     // domain does not exist in DBH
+                    d = userDomainsM->insert(domainName);
+                d->invalidate();
             }
         }
         else
@@ -863,8 +907,8 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                 for (Tables::iterator it = tablesM->begin();
                     it != tablesM->end(); ++it)
                 {
-                    for (ColumnPtrs::iterator itColumn = (*it).begin();
-                        itColumn != (*it).end(); ++itColumn)
+                    for (ColumnPtrs::iterator itColumn = (*it)->begin();
+                        itColumn != (*it)->end(); ++itColumn)
                     {
                         if ((*itColumn)->getSource() == stm.getName())
                             (*itColumn)->invalidate();

@@ -587,9 +587,6 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
                 if (!types.empty() &&
                     types.find((*it)->getType()) == types.end())
                     break;
-                Domain *dmn = dynamic_cast<Domain *>(*it);
-                if (dmn && dmn->isSystem()) // System domains get loaded in
-                    continue;               // program lifetime. Skip them.
                 pd.setProgressMessage(_("Searching ") + (*col)->getName_() +
                     wxT(": ") + (*it)->getName_(), 2);
                 pd.stepProgress(1, 2);

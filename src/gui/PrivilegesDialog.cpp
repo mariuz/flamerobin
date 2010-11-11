@@ -100,7 +100,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         TriggersPtr tc(databaseM->getTriggers());
         wxArrayString choices;
         for (Triggers::iterator it = tc->begin(); it != tc->end(); ++it)
-            choices.Add((*it).getName_());
+            choices.Add((*it)->getName_());
         choice_trigger = new wxChoice(granteePanel, ID_choice,
             wxDefaultPosition, wxDefaultSize, choices);
         if (!choices.IsEmpty())
@@ -116,7 +116,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         ProceduresPtr tc(databaseM->getProcedures());
         wxArrayString choices;
         for (Procedures::iterator it = tc->begin(); it != tc->end(); ++it)
-            choices.Add((*it).getName_());
+            choices.Add((*it)->getName_());
         choice_procedure = new wxChoice(granteePanel, ID_choice,
             wxDefaultPosition, wxDefaultSize, choices);
         if (!choices.IsEmpty())
@@ -131,7 +131,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         ViewsPtr tc(databaseM->getViews());
         wxArrayString choices;
         for (Views::iterator it = tc->begin(); it != tc->end(); ++it)
-            choices.Add((*it).getName_());
+            choices.Add((*it)->getName_());
         choice_view = new wxChoice(granteePanel, ID_choice, wxDefaultPosition,
             wxDefaultSize, choices);
         if (!choices.IsEmpty())
@@ -168,16 +168,16 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         size_t to_select = 0;
         for (Tables::iterator it = tt->begin(); it != tt->end(); ++it)
         {
-            if (dynamic_cast<Table *>(object) == &(*it))
+            if (dynamic_cast<Table *>(object) == (*it).get())
                 to_select = choices.GetCount();
-            choices.Add((*it).getName_());
+            choices.Add((*it)->getName_());
         }
         ViewsPtr tv(databaseM->getViews());
         for (Views::iterator it = tv->begin(); it != tv->end(); ++it)
         {
-            if (dynamic_cast<View *>(object) == &(*it))
+            if (dynamic_cast<View *>(object) == (*it).get())
                 to_select = choices.GetCount();
-            choices.Add((*it).getName_());
+            choices.Add((*it)->getName_());
         }
         choice_relations = new wxChoice(privilegesPanel, ID_choice,
             wxDefaultPosition, wxDefaultSize, choices);
@@ -252,9 +252,9 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         size_t to_select = 0;
         for (Procedures::iterator it = tc->begin(); it != tc->end(); ++it)
         {
-            if (dynamic_cast<Procedure *>(object) == &(*it))
+            if (dynamic_cast<Procedure *>(object) == (*it).get())
                 to_select = choices.GetCount();
-            choices.Add((*it).getName_());
+            choices.Add((*it)->getName_());
         }
         choice_execute = new wxChoice(privilegesPanel, ID_choice,
             wxDefaultPosition, wxDefaultSize, choices);
@@ -274,9 +274,9 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         size_t to_select = 0;
         for (Roles::iterator it = tc->begin(); it != tc->end(); ++it)
         {
-            if (dynamic_cast<Role *>(object) == &(*it))
+            if (dynamic_cast<Role *>(object) == (*it).get())
                 to_select = choices.GetCount();
-            choices.Add((*it).getName_());
+            choices.Add((*it)->getName_());
         }
         choice_memberof = new wxChoice(privilegesPanel, ID_choice,
             wxDefaultPosition, wxDefaultSize, choices);

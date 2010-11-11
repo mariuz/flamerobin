@@ -29,8 +29,10 @@
 #define FR_COLLECTION_H
 //-----------------------------------------------------------------------------
 #include <algorithm>
+#include <vector>
 
-#include <boost/ptr_container/ptr_list.hpp>
+#include <boost/function.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "metadata/database.h"
 //-----------------------------------------------------------------------------
@@ -50,7 +52,8 @@ template <class T>
 class MetadataCollection : public MetadataCollectionBase
 {
 public:
-    typedef typename boost::ptr_list<T> CollectionType;
+    typedef typename boost::shared_ptr<T> ItemType;
+    typedef typename std::vector<ItemType> CollectionType;
     typedef typename CollectionType::iterator iterator;
     typedef typename CollectionType::const_iterator const_iterator;
 private:
@@ -62,19 +65,19 @@ private:
         Identifier id(name);
         for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
         {
-            if ((*it).getIdentifier().equals(id))
+            if ((*it)->getIdentifier().equals(id))
                 return it;
         }
         return itemsM.end();
     }
 
-    // helper structs for find_if() and erase_if()
+    // helper structs for find_if()
     struct FindByAddress
     {
-        T* itemM;
+        MetadataItem* itemM;
 
-        FindByAddress(T* item) : itemM(item) {}
-        bool operator()(const T& item) { return &item == itemM; }
+        FindByAddress(MetadataItem* item) : itemM(item) {}
+        bool operator()(const ItemType& item) { return item.get() == itemM; }
     };
 
     struct InsertionPosByName
@@ -82,12 +85,10 @@ private:
         wxString nameM;
 
         InsertionPosByName(wxString name) : nameM(name) {}
-        bool operator()(const T& item) { return item.getName_() > nameM; }
-    };
-
-    struct IsUserItem
-    {
-        bool operator()(const T& item) const { return !item.isSystem(); }
+        bool operator()(const ItemType item)
+        {
+            return item->getName_() > nameM;
+        }
     };
 
 public:
@@ -105,19 +106,20 @@ public:
 
     // inserts new item into list at correct position to preserve alphabetical
     // order of item names, and returns pointer to it
-    T* insert(wxString name)
+    ItemType insert(wxString name)
     {
         iterator pos = std::find_if(itemsM.begin(), itemsM.end(),
             InsertionPosByName(name));
-        T* item = &(*itemsM.insert(pos, new T(getDatabase(), name)));
+        ItemType item(new T(getDatabase(), name));
         for (unsigned int i = getLockCount(); i > 0; i--)
             item->lockSubject();
+        itemsM.insert(pos, item);
         notifyObservers();
         return item;
     }
 
     // removes item from list
-    void remove(T* item)
+    void remove(MetadataItem* item)
     {
         if (!item)
             return;
@@ -132,7 +134,6 @@ public:
 
     void setItems(wxArrayString names)
     {
-        bool changed = false;
         CollectionType newItems;
         for (size_t i = 0; i < names.size(); ++i)
         {
@@ -140,43 +141,21 @@ public:
             iterator oldPos = getPosition(itemName);
             if (oldPos == itemsM.end())
             {
-                wxLogDebug(wxT("Creating new item \"%s\""), itemName.c_str());
-                changed = true;
-
-                newItems.push_back(new T(getDatabase(), names[i]));
-                T* item = &newItems.back();
+                ItemType item(new T(getDatabase(), names[i]));
+                newItems.push_back(item);
                 for (unsigned int j = getLockCount(); j > 0; j--)
                     item->lockSubject();
             }
-            else if (oldPos == itemsM.begin())
-            {
-                wxLogDebug(wxT("Keeping item \"%s\" at same position"),
-                    itemName.c_str());
-                newItems.transfer(newItems.end(), oldPos, itemsM);
-            }
             else
-            {
-                wxLogDebug(wxT("Moving item \"%s\" to different position"),
-                    itemName.c_str());
-                changed = true;
-                newItems.transfer(newItems.end(), oldPos, itemsM);
-            }
+                newItems.push_back(*oldPos);
         }
 
-        if (!itemsM.empty())
+        if (itemsM != newItems)
         {
-            wxLogDebug(wxT("Deleting all %d items in old vector"),
-                itemsM.size());
-            changed = true;
-            itemsM.clear();
-        }
-        itemsM.transfer(itemsM.begin(), newItems);
-
-        setChildrenLoaded(true);
-        // call notifyObservers() only if any items have been added, moved
-        // or deleted
-        if (changed)
+            itemsM = newItems;
             notifyObservers();
+        }
+        setChildrenLoaded(true);
     }
 
     inline iterator begin()
@@ -207,19 +186,19 @@ public:
         }
     };
 
-    T* findByName(wxString name)
+    ItemType findByName(wxString name)
     {
         iterator it = getPosition(name);
-        return (it != itemsM.end()) ? &(*it) : 0;
+        return (it != itemsM.end()) ? (*it) : ItemType();
     };
 
     virtual bool getChildren(std::vector<MetadataItem *>& temp)         // returns vector of all subnodes
     {
         if (!childrenLoaded())
             return false;
-        for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
-            temp.push_back(&(*it));
-        return (itemsM.size() != 0);
+        std::transform(itemsM.begin(), itemsM.end(),
+            std::back_inserter(temp), boost::mem_fn(&ItemType::get));
+        return !itemsM.empty();
     }
 
     virtual size_t getChildrenCount() const
@@ -233,13 +212,13 @@ protected:
     virtual void lockChildren()
     {
         for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
-            (*it).lockSubject();
+            (*it)->lockSubject();
     }
 
     virtual void unlockChildren()
     {
         for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
-            (*it).unlockSubject();
+            (*it)->unlockSubject();
     }
 };
 //-----------------------------------------------------------------------------

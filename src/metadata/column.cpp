@@ -75,7 +75,7 @@ wxString ColumnBase::getDatatype(bool useConfig)
         return getComputedSource();
 
     wxString ret;
-    Domain* d = getDomain();
+    DomainPtr d = getDomain();
     wxString datatype(d ? d->getDatatypeAsString() : sourceM);
 
     enum
@@ -103,10 +103,10 @@ wxString ColumnBase::getDatatype(bool useConfig)
     return ret;
 }
 //-----------------------------------------------------------------------------
-Domain* ColumnBase::getDomain() const
+DomainPtr ColumnBase::getDomain() const
 {
     Database* db = findDatabase();
-    return (db) ? db->getDomain(sourceM) : 0;
+    return (db) ? db->getDomain(sourceM) : DomainPtr();
 }
 //-----------------------------------------------------------------------------
 wxString ColumnBase::getDefault() const
@@ -188,7 +188,7 @@ bool Column::isNullable(bool checkDomain) const
         return false;
     if (!checkDomain)
         return true;
-    if (Domain* d = getDomain())
+    if (DomainPtr d = getDomain())
         return d->isNullable();
     return true;
 }
@@ -197,7 +197,7 @@ bool Column::hasDefault() const
 {
     if (ColumnBase::hasDefault())
         return true;
-    if (Domain* d = getDomain())
+    if (DomainPtr d = getDomain())
         return d->hasDefault();
     return false;
 }
@@ -242,7 +242,7 @@ bool Column::isForeignKey() const
 //-----------------------------------------------------------------------------
 bool Column::isString() const
 {
-    Domain *d = getDomain();
+    DomainPtr d = getDomain();
     return (d ? d->isString() : false);
 }
 //-----------------------------------------------------------------------------
@@ -265,7 +265,7 @@ wxString Column::getDefault() const
 {
     if (!ColumnBase::hasDefault())
     {
-        if (Domain *d = getDomain())
+        if (DomainPtr d = getDomain())
             return d->getDefault();
     }
     return ColumnBase::getDefault();

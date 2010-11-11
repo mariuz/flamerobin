@@ -79,7 +79,7 @@ bool Server::getChildren(std::vector<MetadataItem*>& temp)
         return false;
     std::transform(databasesM.begin(), databasesM.end(),
         std::back_inserter(temp), boost::mem_fn(&DatabasePtr::get));
-    return true;
+    return !databasesM.empty();
 }
 //-----------------------------------------------------------------------------
 DatabasePtr Server::addDatabase()

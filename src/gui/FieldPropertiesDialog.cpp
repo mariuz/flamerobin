@@ -275,10 +275,10 @@ bool FieldPropertiesDialog::getDomainInfo(const wxString& domain,
     Database* db = tableM->findDatabase();
     if (db)
     {
-        if (Domain* d = db->getDomain(domain))
+        if (DomainPtr dm = db->getDomain(domain))
         {
-            d->getDatatypeParts(type, size, scale);
-            charset = d->getCharset();
+            dm->getDatatypeParts(type, size, scale);
+            charset = dm->getCharset();
             return true;
         }
     }
@@ -500,7 +500,7 @@ void FieldPropertiesDialog::loadDomains()
 
         DomainsPtr ds(db->getDomains());
         for (Domains::const_iterator it = ds->begin(); it != ds->end(); ++it)
-            choice_domain->Append((*it).getName_());
+            choice_domain->Append((*it)->getName_());
     }
 }
 //-----------------------------------------------------------------------------
@@ -516,7 +516,7 @@ void FieldPropertiesDialog::loadGeneratorNames()
         for (Generators::const_iterator it = gs->begin(); it != gs->end();
             ++it)
         {
-            choice_generator->Append((*it).getName_());
+            choice_generator->Append((*it)->getName_());
         }
     }
 }

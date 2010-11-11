@@ -457,7 +457,7 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
         TablesPtr tables(d->getTables());
         for (Tables::iterator it = tables->begin(); it != tables->end(); ++it)
         {
-            std::vector<ForeignKey> *fk = (*it).getForeignKeys();
+            std::vector<ForeignKey> *fk = (*it)->getForeignKeys();
             if (fk)
             {
                 for (std::vector<ForeignKey>::iterator i2 = fk->begin();
@@ -684,7 +684,7 @@ bool Relation::getChildren(std::vector<MetadataItem*>& temp)
         return false;
     std::transform(columnsM.begin(), columnsM.end(), std::back_inserter(temp),
         boost::mem_fn(&ColumnPtr::get));
-    return true;
+    return !columnsM.empty();
 }
 //-----------------------------------------------------------------------------
 void Relation::lockChildren()

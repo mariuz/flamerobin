@@ -241,7 +241,7 @@ public:
         ProgressIndicator* progressIndicator = 0);
 
     wxString loadDomainNameForColumn(wxString table, wxString field);
-    Domain* getDomain(const wxString& name);
+    DomainPtr getDomain(const wxString& name);
 
     void loadGeneratorValues();
     Relation* getRelationForTrigger(Trigger* trigger);

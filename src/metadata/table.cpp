@@ -119,7 +119,7 @@ wxString Table::getProcedureTemplate()
         i != columnsM.end(); ++i)
     {
         wxString datatype;
-        Domain *d = (*i)->getDomain();
+        DomainPtr d = (*i)->getDomain();
         if (!d)
             datatype = (*i)->getDatatype();
         else
