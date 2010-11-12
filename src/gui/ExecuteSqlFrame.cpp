@@ -520,6 +520,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
 {
     loadingM = true;
     updateEditorCaretPosM = true;
+    updateFrameTitleM = true;
 
     transactionIsolationLevelM = IBPP::ilConcurrency;
     transactionLockResolutionM = IBPP::lrWait;
@@ -767,7 +768,6 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::set_properties()
 {
-    SetTitle(_("Execute SQL statements"));
     SetSize(wxSize(628, 488));
     int statusbar_widths[] = { -2, 100, 60, -1 };
     statusbar_1->SetStatusWidths(4, statusbar_widths);
@@ -962,15 +962,9 @@ void ExecuteSqlFrame::OnSqlEditUpdateUI(wxStyledTextEvent& WXUNUSED(event))
     if (loadingM)
         return;
 
-    // print x:y coordinates in status bar
-    updateEditorCaretPosM = true;
     // mghie: do not update the statusbar from here, because that slows
     //        everything down a lot on Mac OS X
-/*
-    int row = styled_text_ctrl_sql->GetCurrentLine();
-    int col = p - styled_text_ctrl_sql->PositionFromLine(row);
-    statusbar_1->SetStatusText(wxString::Format(wxT("%d : %d"), row+1, col+1), 2);
-*/
+    updateEditorCaretPosM = true;
 
     // check for braces, and highlight
     int p = styled_text_ctrl_sql->GetCurrentPos();
@@ -988,8 +982,11 @@ void ExecuteSqlFrame::OnSqlEditUpdateUI(wxStyledTextEvent& WXUNUSED(event))
             styled_text_ctrl_sql->BraceHighlight(sp, q);
 
         // remove calltip if needed
-        if (styled_text_ctrl_sql->CallTipActive() && (c1==')' || c2==')') && q == styled_text_ctrl_sql->CallTipPosAtStart() - 1)
+        if (styled_text_ctrl_sql->CallTipActive() && (c1==')' || c2==')')
+            && q == styled_text_ctrl_sql->CallTipPosAtStart() - 1)
+        {
             styled_text_ctrl_sql->CallTipCancel();
+        }
     }
     else
         styled_text_ctrl_sql->BraceBadLight(wxSTC_INVALID_POSITION);    // remove light
@@ -1099,92 +1096,7 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& event)
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnSqlEditChanged(wxStyledTextEvent& WXUNUSED(event))
 {
-    if (filenameM.IsOk())
-        return;
-    if (styled_text_ctrl_sql->GetTextLength() < 1)
-    {
-        SetTitle(_("Execute SQL statements"));
-        return;
-    }
-
-    const wxString& txt = styled_text_ctrl_sql->GetText();
-    size_t p = txt.find(wxT("@FR-TITLE@"));
-    if (p != wxString::npos)
-    {
-        size_t q = txt.find(wxT("*/"), p);
-        if (q == wxString::npos)
-            q = txt.find_first_of(wxT("\n\r"), p);
-        if (q != wxString::npos)
-            SetTitle(txt.substr(p+11, q - p - 11));
-        else
-            SetTitle(txt.substr(p+11));
-        return;
-    }
-
-    SqlTokenizer tk(styled_text_ctrl_sql->GetText());
-    const SqlTokenType lookfor[] = {
-        kwALTER, kwCREATE, kwDECLARE, kwDROP, kwEXECUTE, kwINSERT,
-        kwRECREATE, kwREVOKE, kwGRANT, kwSELECT, kwUPDATE, kwDELETE,
-        tkIDENTIFIER
-    };
-    const wxString namesShort[] = {
-        wxT("alt"), wxT("cre"), wxT("dclr"), wxT("drop"), wxT("exec"),
-        wxT("ins"), wxT("recr"), wxT("rvk"), wxT("grnt"), wxT("sel"),
-        wxT("upd"), wxT("del")
-    };
-    const wxString namesVeryShort[] = {
-        wxT("a"), wxT("c"), wxT("decl"), wxT("drop"), wxT("x"),
-        wxT("i"), wxT("recr"), wxT("rev"), wxT("grnt"), wxT("s"),
-        wxT("u"), wxT("del")
-    };
-    const wxString* names = 0;
-    int setting = config().get(wxT("sqlEditorWindowKeywords"), 1);
-    if (setting == 1)
-        names = &namesShort[0];
-    else if (setting == 2)
-        names = &namesVeryShort[0];
-
-    int cnt = 0;
-    wxString title;
-    do
-    {
-        SqlTokenType stt = tk.getCurrentToken();
-        for (unsigned int i=0; i<sizeof(lookfor)/sizeof(SqlTokenType); i++)
-        {
-            if (lookfor[i] == stt)
-            {
-                if (setting == 3)   // entire statement till end of line
-                {
-                    p = tk.getCurrentTokenPosition();
-                    size_t q = txt.find_first_of(wxT("\n\r;"), p);
-                    if (q == wxString::npos)
-                        title = txt.substr(p);
-                    else
-                        title = txt.substr(p, q-p);
-                    cnt = 10;   // flag to exit outer do..while loop
-                    break;
-                }
-                if (cnt == 1)
-                    title += wxT(" ");
-                if (stt == tkIDENTIFIER || setting == 0)
-                    title += tk.getCurrentTokenString();
-                else
-                    title += names[i];
-                if (stt == kwSELECT)    // special case, find table name
-                    while (tk.getCurrentToken() != kwFROM)
-                        if (!tk.jumpToken(true))
-                            break;
-                if (stt == kwGRANT || stt == kwREVOKE)   // find grantee
-                    while (tk.getCurrentToken() != kwON)
-                        if (!tk.jumpToken(true))
-                            break;
-                if (++cnt == 2) // use 2 tokens for title
-                    break;
-            }
-        }
-    }
-    while (cnt < 2 && tk.jumpToken(true /* skip parenthesis */));
-    SetTitle(title);
+    updateFrameTitleM = true;
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::autoCompleteColumns(int pos, int len)
@@ -1323,6 +1235,11 @@ void ExecuteSqlFrame::OnIdle(wxIdleEvent& event)
         statusbar_1->SetStatusText(wxString::Format(wxT("%d : %d"),
             row + 1, col + 1), 2);
     }
+    if (updateFrameTitleM)
+    {
+        updateFrameTitleM = false;
+        updateFrameTitle();
+    }
     event.Skip();
 }
 //-----------------------------------------------------------------------------
@@ -1331,6 +1248,38 @@ void ExecuteSqlFrame::OnClose(wxCloseEvent& event)
     // prevent editor from updating the invalid dataset
     if (grid_data->IsCellEditControlEnabled())
         grid_data->EnableCellEditControl(false);
+
+    if (event.CanVeto())
+    {
+        bool doVeto = false;
+        if (filenameM.IsOk() && styled_text_ctrl_sql->GetModify())
+        {
+            Raise();
+            int res = showQuestionDialog(this, _("Do you want to save changes to the file?"),
+                wxString::Format(_("You have made changes to the file\n\n%s\n\nwhich will be lost if you close without saving."),
+                filenameM.GetFullPath().c_str()),
+                AdvancedMessageDialogButtonsYesNoCancel(_("&Save"), _("Do&n't Save")));
+            doVeto = res != wxYES && res != wxNO;
+            if (res == wxYES)
+                doVeto = !styled_text_ctrl_sql->SaveFile(filenameM.GetFullPath());
+        }
+        if (!doVeto && inTransactionM)
+        {
+            Raise();
+            int res = showQuestionDialog(this, _("Do you want to commit the active transaction?"),
+                _("If you don't commit the transaction then it will be automatically rolled back, and all changes made by statements executed in this transaction will be lost."),
+                AdvancedMessageDialogButtonsYesNoCancel(_("&Commit Transaction"), _("Rollback Transaction")),
+                config(), wxT("DIALOG_ActiveTransaction"), _("Don't ask again, &always commit/rollback"));
+            doVeto = res != wxYES && res != wxNO;
+            if (res == wxYES)
+                doVeto = !commitTransaction();
+        }
+        if (doVeto)
+        {
+            event.Veto();
+            return;
+        }
+    }
     BaseFrame::OnClose(event);
 }
 //-----------------------------------------------------------------------------
@@ -1371,7 +1320,7 @@ void ExecuteSqlFrame::OnMenuSaveOrSaveAs(wxCommandEvent& event)
         if (filename.compare(filenameM.GetFullPath()) != 0)
         {
             filenameM = filename;
-            SetTitle(filename);
+            updateFrameTitleM = true;
         }
         statusbar_1->SetStatusText((_("File saved")), 2);
     }
@@ -1950,7 +1899,7 @@ bool ExecuteSqlFrame::loadSqlFile(const wxString& filename)
     if (!styled_text_ctrl_sql->LoadFile(filename))
         return false;
     filenameM = filename;
-    SetTitle(filename);
+    updateFrameTitleM = true;
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -2987,6 +2936,103 @@ void ExecuteSqlFrame::updateViewMode()
     {
         viewModeM = vmGrid;
     }
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::updateFrameTitle()
+{
+    if (filenameM.IsOk())
+    {
+        wxString title(filenameM.GetFullName());
+        if (styled_text_ctrl_sql->GetModify())
+            title += wxT("*");
+        SetTitle(title);
+        return;
+    }
+
+    const wxString text(styled_text_ctrl_sql->GetText());
+    if (text.empty())
+    {
+        SetTitle(_("Execute SQL Statements"));
+        return;
+    }
+
+    size_t p = text.find(wxT("@FR-TITLE@"));
+    if (p != wxString::npos)
+    {
+        size_t q = text.find(wxT("*/"), p);
+        if (q == wxString::npos)
+            q = text.find_first_of(wxT("\n\r"), p);
+        if (q != wxString::npos)
+            SetTitle(text.substr(p+11, q - p - 11));
+        else
+            SetTitle(text.substr(p+11));
+        return;
+    }
+
+    SqlTokenizer tk(text);
+    const SqlTokenType lookfor[] = {
+        kwALTER, kwCREATE, kwDECLARE, kwDROP, kwEXECUTE, kwINSERT,
+        kwRECREATE, kwREVOKE, kwGRANT, kwSELECT, kwUPDATE, kwDELETE,
+        tkIDENTIFIER
+    };
+    const wxString namesShort[] = {
+        wxT("alt"), wxT("cre"), wxT("dclr"), wxT("drop"), wxT("exec"),
+        wxT("ins"), wxT("recr"), wxT("rvk"), wxT("grnt"), wxT("sel"),
+        wxT("upd"), wxT("del")
+    };
+    const wxString namesVeryShort[] = {
+        wxT("a"), wxT("c"), wxT("decl"), wxT("drop"), wxT("x"),
+        wxT("i"), wxT("recr"), wxT("rev"), wxT("grnt"), wxT("s"),
+        wxT("u"), wxT("del")
+    };
+    const wxString* names = 0;
+    int setting = config().get(wxT("sqlEditorWindowKeywords"), 1);
+    if (setting == 1)
+        names = &namesShort[0];
+    else if (setting == 2)
+        names = &namesVeryShort[0];
+
+    int cnt = 0;
+    wxString title;
+    do
+    {
+        SqlTokenType stt = tk.getCurrentToken();
+        for (unsigned int i=0; i<sizeof(lookfor)/sizeof(SqlTokenType); i++)
+        {
+            if (lookfor[i] == stt)
+            {
+                if (setting == 3)   // entire statement till end of line
+                {
+                    p = tk.getCurrentTokenPosition();
+                    size_t q = text.find_first_of(wxT("\n\r;"), p);
+                    if (q == wxString::npos)
+                        title = text.substr(p);
+                    else
+                        title = text.substr(p, q-p);
+                    cnt = 10;   // flag to exit outer do..while loop
+                    break;
+                }
+                if (cnt == 1)
+                    title += wxT(" ");
+                if (stt == tkIDENTIFIER || setting == 0)
+                    title += tk.getCurrentTokenString();
+                else
+                    title += names[i];
+                if (stt == kwSELECT)    // special case, find table name
+                    while (tk.getCurrentToken() != kwFROM)
+                        if (!tk.jumpToken(true))
+                            break;
+                if (stt == kwGRANT || stt == kwREVOKE)   // find grantee
+                    while (tk.getCurrentToken() != kwON)
+                        if (!tk.jumpToken(true))
+                            break;
+                if (++cnt == 2) // use 2 tokens for title
+                    break;
+            }
+        }
+    }
+    while (cnt < 2 && tk.jumpToken(true /* skip parenthesis */));
+    SetTitle(title);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnBlobEditorUpdate(wxTimerEvent& WXUNUSED(event))

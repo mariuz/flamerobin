@@ -139,7 +139,9 @@ private:
     void updateViewMode();
 
     bool updateEditorCaretPosM;
-    
+    bool updateFrameTitleM;
+    void updateFrameTitle();
+
     // blob-editor-timer
     enum {
         TIMER_ID_UPDATE_BLOB = 1
