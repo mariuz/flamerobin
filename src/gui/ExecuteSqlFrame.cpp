@@ -2400,7 +2400,15 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             }
         }
     }
-    catch (std::exception &e)
+    catch(IBPP::Exception& e)
+    {
+        splitScreen();
+        wxString msg(std2wx(e.ErrorMessage(),
+            databaseM->getCharsetConverter()));
+        log(_("Error: ") + msg + wxT("\n"), ttError);
+        retval = false;
+    }
+    catch (std::exception& e)
     {
         splitScreen();
         log(_("Error: ") + std2wx(e.what()) + wxT("\n"), ttError);
