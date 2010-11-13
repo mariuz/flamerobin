@@ -121,7 +121,7 @@ wxString GridCellFormats::formatDouble(double value)
 
     if (precisionForDoubleM >= 0 && precisionForDoubleM <= 18)
         return wxString::Format(wxT("%.*f"), precisionForDoubleM, value);
-    return wxString::Format(wxT("%.f"), value);
+    return wxString::Format(wxT("%f"), value);
 }
 //-----------------------------------------------------------------------------
 wxString GridCellFormats::formatDate(int year, int month, int day)
