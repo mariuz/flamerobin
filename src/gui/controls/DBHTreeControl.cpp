@@ -832,12 +832,12 @@ void DBHTreeItemData::update()
                 }
                 // attachObserver() will call update() on the newly created
                 // child node.  This will correctly populate the tree
-                (*itChild)->attachObserver(newItem);
+                (*itChild)->attachObserver(newItem, true);
                 // tree node data objects may optionally observe the settings
                 // cache object, for example to create / delete column and
                 // parameter nodes if the "ShowColumnsInTree" setting changes
                 if (tivChild.isConfigSensitive())
-                    DBHTreeConfigCache::get().attachObserver(newItem);
+                    DBHTreeConfigCache::get().attachObserver(newItem, false);
             }
             else
             {
@@ -1008,14 +1008,14 @@ void DBHTreeControl::SetSpacing(short spacing)
 wxTreeItemId DBHTreeControl::addRootNode(MetadataItem* rootItem)
 {
     wxASSERT(rootItem);
-    // no need to set node text and image index, because
-    // rootItem->attachObserver() will call DBHTreeItemData::update()
-    wxTreeItemId id = AddRoot(wxEmptyString, -1);
+    // no need to set node text and image index,
+    // because DBHTreeItemData::update() will do it (and create child nodes)
+    wxTreeItemId id = AddRoot(wxEmptyString);
     DBHTreeItemData* rootdata = new DBHTreeItemData(this);
     SetItemData(id, rootdata);
-    rootItem->attachObserver(rootdata);
+    rootItem->attachObserver(rootdata, true);
     // server nodes may need to be reordered
-    DBHTreeConfigCache::get().attachObserver(rootdata);
+    DBHTreeConfigCache::get().attachObserver(rootdata, false);
     return id;
 }
 //-----------------------------------------------------------------------------

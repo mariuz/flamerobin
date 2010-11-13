@@ -57,14 +57,15 @@ Subject::~Subject()
     detachAllObservers();
 }
 //-----------------------------------------------------------------------------
-void Subject::attachObserver(Observer* observer)
+void Subject::attachObserver(Observer* observer, bool callUpdate)
 {
     if (observer && observersM.end() == std::find(observersM.begin(),
         observersM.end(), observer))
     {
         observer->addSubject(this);
         observersM.push_back(observer);
-        observer->doUpdate();
+        if (callUpdate)
+            observer->doUpdate();
     }
 }
 //-----------------------------------------------------------------------------

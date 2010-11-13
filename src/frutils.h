@@ -49,7 +49,7 @@ void readBlob(IBPP::Statement& st, int column, wxString& result,
     wxMBConv* conv);
 //-----------------------------------------------------------------------------
 //! displays a list of table columns and lets user select some
-wxString selectRelationColumns(Relation* t, wxWindow* parent, const wxString& defaultSelection = wxEmptyString);
+wxString selectRelationColumns(Relation* t, wxWindow* parent);
 bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent,
     std::vector<wxString>& list);
 //-----------------------------------------------------------------------------
@@ -61,9 +61,6 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
     bool sysdba);
 //-----------------------------------------------------------------------------
 //! loads the file into wxString
-wxString loadEntireFile(const wxString& filename);
 wxString loadEntireFile(const wxFileName& filename);
-//! writes a wxString to a file, overwriting any existing data.
-void writeEntireFile(const wxFileName& filename, const wxString& content);
 //-----------------------------------------------------------------------------
 #endif // FRUTILS_H

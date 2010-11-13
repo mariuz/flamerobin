@@ -179,7 +179,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent, RootPtr root)
             Database* db = (*itdb).get();
             choice_database->Append((*its)->getName_() + wxT("::") +
                 db->getName_(), (void*)db);
-            db->attachObserver(this);
+            db->attachObserver(this, false);
         }
     }
     choice_database->SetSelection(0);
@@ -319,7 +319,7 @@ void AdvancedSearchFrame::addResult(Database* db, MetadataItem* item)
     listctrl_results->SetItem(index, 2, item->getName_());
     results.push_back(item);
     // become observer for that Item in case it gets dropped/deleted...
-    item->attachObserver(this);
+    item->attachObserver(this, false);
     // send size event
     wxSizeEvent ev(listctrl_results->GetSize());
     listctrl_results->GetEventHandler()->AddPendingEvent(ev);

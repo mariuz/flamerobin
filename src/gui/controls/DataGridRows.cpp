@@ -812,8 +812,7 @@ void DateColumnDef::setFromString(DataGridRowBuffer* buffer,
     int d = idt.Day();
 
     wxString temp(source);
-    temp.Trim(true);
-    temp.Trim(false);
+    temp.Trim(true).Trim(false);
 
     if (temp.CmpNoCase(wxT("TOMORROW")) == 0)
         idt.Add(1);
@@ -904,8 +903,7 @@ void TimeColumnDef::setFromString(DataGridRowBuffer* buffer,
     itm.Now();
 
     wxString temp(source);
-    temp.Trim(true);
-    temp.Trim(false);
+    temp.Trim(true).Trim(false);
 
     if (temp.CmpNoCase(wxT("TIME")) != 0 && temp.CmpNoCase(wxT("NOW")) != 0)
     {
@@ -1003,8 +1001,7 @@ void TimestampColumnDef::setFromString(DataGridRowBuffer* buffer,
     its.Today(); // defaults to no time
 
     wxString temp(source);
-    temp.Trim(true);
-    temp.Trim(false);
+    temp.Trim(true).Trim(false);
 
     if (temp.CmpNoCase(wxT("TOMORROW")) == 0)
         its.Add(1);

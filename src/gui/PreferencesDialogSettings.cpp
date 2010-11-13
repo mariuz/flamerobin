@@ -840,12 +840,12 @@ void PrefDlgChooserSetting::chooseFont()
 //-----------------------------------------------------------------------------
 void PrefDlgChooserSetting::chooseRelationColumns()
 {
-    wxArrayString defaultNames = ::wxStringTokenize(textctrlM->GetValue(), wxT(","));
+    wxArrayString defaultNames = ::wxStringTokenize(textctrlM->GetValue(),
+        wxT(","));
     std::vector<wxString> list;
     for (wxString::size_type i = 0; i < defaultNames.Count(); i++)
         list.push_back(defaultNames[i].Trim(true).Trim(false));
 
-    
     if (selectRelationColumnsIntoVector(relationM, getPage(), list))
     {
         std::vector<wxString>::iterator it = list.begin();

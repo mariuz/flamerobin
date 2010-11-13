@@ -53,7 +53,7 @@ public:
     virtual void lockSubject();
     virtual void unlockSubject();
 
-    void attachObserver(Observer* observer);
+    void attachObserver(Observer* observer, bool callUpdate);
     void detachObserver(Observer* observer);
     void detachAllObservers();
     bool isObservedBy(Observer* observer) const;

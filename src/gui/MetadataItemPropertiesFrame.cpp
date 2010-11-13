@@ -139,7 +139,7 @@ MetadataItemPropertiesPanel::MetadataItemPropertiesPanel(
 
     // request initial rendering
     requestLoadPage(true);
-    objectM->attachObserver(this);
+    objectM->attachObserver(this, true);
 }
 //-----------------------------------------------------------------------------
 MetadataItemPropertiesPanel::~MetadataItemPropertiesPanel()
@@ -303,7 +303,7 @@ void MetadataItemPropertiesPanel::update()
         SubjectLocker locker(r);
         r->ensureChildrenLoaded();
         for (ColumnPtrs::iterator it = r->begin(); it != r->end(); ++it)
-            (*it)->attachObserver(this);
+            (*it)->attachObserver(this, false);
     }
 
     // if description of procedure params change, we need to reattach
@@ -316,7 +316,7 @@ void MetadataItemPropertiesPanel::update()
         SubjectLocker locker(p);
         p->ensureChildrenLoaded();
         for (ParameterPtrs::iterator it = p->begin(); it != p->end(); ++it)
-            (*it)->attachObserver(this);
+            (*it)->attachObserver(this, false);
     }
 
     // with this set to false updates to the same page do not show the

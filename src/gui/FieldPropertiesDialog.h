@@ -81,9 +81,7 @@ private:
     void loadCollations();
     void loadDomains();
     void loadGeneratorNames();
-    void setColumnM(Column* column);
     void setControlsProperties();
-    void setTableM(Table* table);
     void updateColumnControls();
     void updateControls();
     void updateDatatypeInfo();

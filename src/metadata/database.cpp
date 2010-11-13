@@ -746,9 +746,6 @@ void Database::parseCommitedSql(const SqlStatement& stm)
     if (!stm.isDDL())
         return;    // return false only on IBPP exception
 
-    // TODO: check that there are no unwanted side-effects to this
-    // SubjectLocker locker(this);
-
     if (stm.actionIs(actGRANT))
     {
         MetadataItem *obj = stm.getObject();
@@ -1577,8 +1574,7 @@ bool Database::showSysTables()
 //-----------------------------------------------------------------------------
 wxString mapConnectionCharsetToSystemCharset(const wxString& connectionCharset)
 {
-    wxString charset(connectionCharset.Upper().Trim());
-    charset.Trim(false);
+    wxString charset(connectionCharset.Upper().Trim(true).Trim(false));
 
     // fixes hang when character set name empty (invalid encoding is returned)
     if (charset.empty())

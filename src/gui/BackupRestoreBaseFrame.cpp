@@ -54,7 +54,7 @@ BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent,
     : BaseFrame(parent, wxID_ANY, wxEmptyString), databaseM(db), threadM(0)
 {
     wxASSERT(db);
-    db->attachObserver(this);
+    db->attachObserver(this, false);
 
     threadMsgTimeMillisM = 0;
     verboseMsgsM = true;
@@ -238,7 +238,8 @@ void BackupRestoreBaseFrame::update()
 void BackupRestoreBaseFrame::updateControls()
 {
     // empty implementation to allow this to be called from update()
-    // which will happen inside the attachObserver() call in the constructor
+    // which could happen in the constructor, when descendant isn't
+    // completely initialized yet
 }
 //-----------------------------------------------------------------------------
 void BackupRestoreBaseFrame::updateMessages(size_t firstmsg, size_t lastmsg)

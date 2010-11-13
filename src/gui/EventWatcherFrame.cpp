@@ -86,7 +86,8 @@ EventWatcherFrame::EventWatcherFrame(wxWindow* parent, DatabasePtr db)
     timerM.SetOwner(this, ID_timer);
 
     setIdString(this, getFrameId(db));
-    db->attachObserver(this);    // observe database object
+    // observe database object to close on disconnect / destruction
+    db->attachObserver(this, false);
     SetTitle(wxString::Format(_("Event Monitor for Database: %s"),
         db->getName_().c_str()));
 

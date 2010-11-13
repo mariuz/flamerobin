@@ -1268,7 +1268,7 @@ void ExecuteSqlFrame::OnClose(wxCloseEvent& event)
             Raise();
             int res = showQuestionDialog(this, _("Do you want to commit the active transaction?"),
                 _("If you don't commit the transaction then it will be automatically rolled back, and all changes made by statements executed in this transaction will be lost."),
-                AdvancedMessageDialogButtonsYesNoCancel(_("&Commit Transaction"), _("Rollback Transaction")),
+                AdvancedMessageDialogButtonsYesNoCancel(_("&Commit Transaction"), _("&Rollback Transaction")),
                 config(), wxT("DIALOG_ActiveTransaction"), _("Don't ask again, &always commit/rollback"));
             doVeto = res != wxYES && res != wxNO;
             if (res == wxYES)
@@ -2729,7 +2729,8 @@ void ExecuteSqlFrame::update()
 void ExecuteSqlFrame::setDatabase(Database* db)
 {
     databaseM = db;
-    db->attachObserver(this);    // observe database object
+    // observe database object to close on disconnect / destruction
+    db->attachObserver(this, false);
 
     // doesn't seem to work properly as wxToolbar overwrites it
     //statusbar_1->PushStatusText(s, 0);
@@ -3125,10 +3126,12 @@ bool DropColumnsHandler::handleURI(URI& uri)
     std::vector<wxString> list;
     if (selectRelationColumnsIntoVector(t, w, list))
     {
-        for (std::vector<wxString>::iterator it = list.begin(); it != list.end(); ++it)
+        for (std::vector<wxString>::iterator it = list.begin();
+            it != list.end(); ++it)
         {
             Identifier temp(*it);
-            sql += wxT("ALTER TABLE ") + t->getQuotedName() + wxT(" DROP ") + temp.getQuoted() + wxT(";\n");
+            sql += wxT("ALTER TABLE ") + t->getQuotedName() + wxT(" DROP ")
+                + temp.getQuoted() + wxT(";\n");
         }
         execSql(w, _("Dropping fields"), t->findDatabase(), sql, true);
     }

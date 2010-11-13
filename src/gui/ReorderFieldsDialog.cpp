@@ -66,7 +66,7 @@ ReorderFieldsDialog::ReorderFieldsDialog(wxWindow* parent, Table* table)
     SetTitle(_("Reordering Fields of Table ") + table->getName_());
     createControls();
     layoutControls();
-    tableM->attachObserver(this);
+    tableM->attachObserver(this, true);
     button_ok->SetDefault();
 }
 //-----------------------------------------------------------------------------

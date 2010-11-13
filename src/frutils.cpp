@@ -108,14 +108,9 @@ void readBlob(IBPP::Statement& st, int column, wxString& result,
     b->Close();
 }
 //-----------------------------------------------------------------------------
-wxString selectRelationColumns(Relation* t, wxWindow* parent,
-    const wxString& defaultSelection)
+wxString selectRelationColumns(Relation* t, wxWindow* parent)
 {
     std::vector<wxString> list;
-    wxArrayString defaultNames = ::wxStringTokenize(defaultSelection, wxT(","));
-    for (wxString::size_type i = 0; i < defaultNames.Count(); i++)
-        list.push_back(defaultNames[i].Trim(true).Trim(false));
-    
     if (!selectRelationColumnsIntoVector(t, parent, list))
         return wxEmptyString;
 
@@ -241,12 +236,6 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
     return true;
 }
 //-----------------------------------------------------------------------------
-wxString loadEntireFile(const wxString& filename)
-{
-    wxFileName localFileName = filename;
-    return loadEntireFile(localFileName);
-}
-//-----------------------------------------------------------------------------
 wxString loadEntireFile(const wxFileName& filename)
 {
     if (!filename.FileExists())
@@ -272,11 +261,5 @@ wxString loadEntireFile(const wxFileName& filename)
     wxString s(std2wx(ss.str()));
     filex.close();
     return s;
-}
-//-----------------------------------------------------------------------------
-void writeEntireFile(const wxFileName& filename, const wxString& content)
-{
-    wxFile file(filename.GetFullPath(), wxFile::write);
-    file.Write(content);
 }
 //-----------------------------------------------------------------------------

@@ -321,7 +321,7 @@ void Config::setUserHomePath(const wxString& userHomePath)
 ConfigCache::ConfigCache(Config& config)
     : Observer(), cacheValidM(false)
 {
-    config.attachObserver(this);
+    config.attachObserver(this, false);
 }
 //-----------------------------------------------------------------------------
 void ConfigCache::ensureCacheValid()

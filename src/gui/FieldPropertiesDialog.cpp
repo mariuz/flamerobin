@@ -85,17 +85,18 @@ const size_t datatypescnt = sizeof(datatypes) / sizeof(DatatypeProperties);
 //-----------------------------------------------------------------------------
 FieldPropertiesDialog::FieldPropertiesDialog(wxWindow* parent, Table* table,
         Column* column)
-    : BaseDialog(parent, wxID_ANY, wxEmptyString)
+    : BaseDialog(parent, wxID_ANY, wxEmptyString), columnM(column),
+        tableM(table)
 {
     // can't do anything if no table is given
     wxASSERT(table);
 
-    tableM = 0;
-    columnM = 0;
+    if (table)
+        table->attachObserver(this, false);
+    if (columnM)
+        columnM->attachObserver(this, false);
 
     createControls();
-    setTableM(table);
-    setColumnM(column);
     setControlsProperties();
     updateControls();
     layoutControls();
@@ -256,10 +257,7 @@ void FieldPropertiesDialog::removeSubject(Subject* subject)
     Observer::removeSubject(subject);
     if ((subject) && ((subject == tableM) || (subject == columnM)))
     {
-        if (subject == tableM)
-            setTableM(0);
-        if (subject == columnM)
-            setColumnM(0);
+        subject->detachObserver(this);
         EndModal(wxID_CANCEL);
     }
 }
@@ -521,18 +519,6 @@ void FieldPropertiesDialog::loadGeneratorNames()
     }
 }
 //-----------------------------------------------------------------------------
-void FieldPropertiesDialog::setColumnM(Column* column)
-{
-    if (columnM != column)
-    {
-        if (columnM)
-            columnM->detachObserver(this);
-        columnM = column;
-        if (columnM)
-            columnM->attachObserver(this);
-    }
-}
-//-----------------------------------------------------------------------------
 void FieldPropertiesDialog::setControlsProperties()
 {
     // set dialog title
@@ -564,18 +550,6 @@ void FieldPropertiesDialog::setControlsProperties()
 
     button_ok->SetDefault();
     button_cancel->SetFocus();
-}
-//-----------------------------------------------------------------------------
-void FieldPropertiesDialog::setTableM(Table* table)
-{
-    if (tableM != table)
-    {
-        if (tableM)
-            tableM->detachObserver(this);
-        tableM = table;
-        if (tableM)
-            tableM->attachObserver(this);
-    }
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::updateColumnControls()
