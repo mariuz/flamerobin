@@ -158,7 +158,7 @@ void ContextMenuMetadataItemVisitor::visitFunction(Function& function)
     addSeparator();
     addDropItem(function);
     addSeparator();
-    // TODO: addRefreshItem();
+    addRefreshItem();
     addPropertiesItem();
 }
 //-----------------------------------------------------------------------------

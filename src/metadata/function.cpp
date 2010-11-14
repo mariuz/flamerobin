@@ -38,6 +38,9 @@
     #pragma hdrstop
 #endif
 
+// needed for platform independent EOL
+#include <wx/textbuf.h>
+
 #include <ibpp.h>
 
 #include "core/StringUtils.h"
@@ -46,20 +49,26 @@
 #include "metadata/domain.h"
 #include "metadata/function.h"
 #include "metadata/MetadataItemVisitor.h"
+#include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------
 Function::Function(DatabasePtr database, const wxString& name)
-    : MetadataItem(ntFunction, database.get(), name), infoLoadedM(false)
+    : MetadataItem(ntFunction, database.get(), name)
 {
 }
 //-----------------------------------------------------------------------------
 wxString Function::getCreateSql()
 {
-    loadInfo();
-    wxString ret(wxT("DECLARE EXTERNAL FUNCTION "));
-    ret += getQuotedName() + wxT("\n") + paramListM
-        + wxT("\nRETURNS ") + retstrM + wxT("\nENTRY_POINT '") + entryPointM
-        + wxT("'\nMODULE_NAME '") + libraryNameM + wxT("';\n");
-    return ret;
+    ensurePropertiesLoaded();
+    StatementBuilder sb;
+    sb << kwDECLARE << ' ' << kwEXTERNAL << ' ' << kwFUNCTION << ' '
+        << getQuotedName() << StatementBuilder::NewLine
+        << paramListM  << StatementBuilder::NewLine
+        << kwRETURNS << ' ' << retstrM << StatementBuilder::NewLine
+        << kwENTRY_POINT << wxT(" '") << entryPointM << '\''
+        << StatementBuilder::NewLine
+        << kwMODULE_NAME << wxT(" '") << libraryNameM << wxT("\';")
+        << StatementBuilder::NewLine;
+    return sb;
 }
 //-----------------------------------------------------------------------------
 const wxString Function::getTypeName() const
@@ -69,37 +78,34 @@ const wxString Function::getTypeName() const
 //-----------------------------------------------------------------------------
 wxString Function::getDropSqlStatement() const
 {
-    return wxT("DROP EXTERNAL FUNCTION ") + getQuotedName() + wxT(";");
+    StatementBuilder sb;
+    sb << kwDROP << ' ' << kwEXTERNAL << ' ' << kwFUNCTION << ' '
+        << getQuotedName() << ';';
+    return sb;
 }
 //-----------------------------------------------------------------------------
 wxString Function::getDefinition()
 {
-    loadInfo();
+    ensurePropertiesLoaded();
     return definitionM;
 }
 //-----------------------------------------------------------------------------
 wxString Function::getLibraryName()
 {
-    loadInfo();
+    ensurePropertiesLoaded();
     return libraryNameM;
 }
 //-----------------------------------------------------------------------------
 wxString Function::getEntryPoint()
 {
-    loadInfo();
+    ensurePropertiesLoaded();
     return entryPointM;
 }
 //-----------------------------------------------------------------------------
-void Function::loadInfo(bool force)
+void Function::loadProperties()
 {
-    if (infoLoadedM && !force)
-        return;
+    setPropertiesLoaded(false);
 
-    bool first = true;
-    paramListM = wxEmptyString;
-    wxString retstr;
-    definitionM = getName_() + wxT("(\n");
-        
     wxString mechanismNames[] = { wxT("value"), wxT("reference"),
         wxT("descriptor"), wxT("blob descriptor"), wxT("scalar array"),
         wxT("null"), wxEmptyString };
@@ -107,25 +113,35 @@ void Function::loadInfo(bool force)
         wxT(" BY DESCRIPTOR "), wxEmptyString, wxT(" BY SCALAR ARRAY "),
         wxT(" NULL "), wxEmptyString };
 
-    Database* d = getDatabase(wxT("Function::loadInfo"));
+    bool first = true;
+    wxString retstr;
+    definitionM = getName_() + wxT("(") + wxTextBuffer::GetEOL();
+    paramListM = wxEmptyString;
+
+    Database* d = getDatabase(wxT("Function::loadProperties"));
     MetadataLoader* loader = d->getMetadataLoader();
+    wxMBConv* converter = d->getCharsetConverter();
     MetadataLoaderTransaction tr(loader);
 
     IBPP::Statement& st1 = loader->getStatement(
-        "SELECT f.RDB$RETURN_ARGUMENT, a.RDB$MECHANISM, a.RDB$ARGUMENT_POSITION, "
-        " a.RDB$FIELD_TYPE, a.RDB$FIELD_SCALE, a.RDB$FIELD_LENGTH, a.RDB$FIELD_SUB_TYPE, a.RDB$FIELD_PRECISION,"
+        "SELECT f.RDB$RETURN_ARGUMENT, a.RDB$MECHANISM,"
+        " a.RDB$ARGUMENT_POSITION, a.RDB$FIELD_TYPE, a.RDB$FIELD_SCALE,"
+        " a.RDB$FIELD_LENGTH, a.RDB$FIELD_SUB_TYPE, a.RDB$FIELD_PRECISION,"
         " f.RDB$MODULE_NAME, f.RDB$ENTRYPOINT, c.RDB$CHARACTER_SET_NAME "
         " FROM RDB$FUNCTIONS f"
-        " LEFT OUTER JOIN RDB$FUNCTION_ARGUMENTS a ON f.RDB$FUNCTION_NAME = a.RDB$FUNCTION_NAME"
-        " LEFT OUTER JOIN RDB$CHARACTER_SETS c ON a.RDB$CHARACTER_SET_ID = c.RDB$CHARACTER_SET_ID"
+        " LEFT OUTER JOIN RDB$FUNCTION_ARGUMENTS a"
+        " ON f.RDB$FUNCTION_NAME = a.RDB$FUNCTION_NAME"
+        " LEFT OUTER JOIN RDB$CHARACTER_SETS c"
+        " ON a.RDB$CHARACTER_SET_ID = c.RDB$CHARACTER_SET_ID"
         " WHERE f.RDB$FUNCTION_NAME = ? "
         " ORDER BY a.RDB$ARGUMENT_POSITION"
     );
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+    st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
     while (st1->Fetch())
     {
-        short returnarg, mechanism, type, scale, length, subtype, precision, retpos;
+        short returnarg, mechanism, type, scale, length, subtype, precision,
+            retpos;
         std::string libraryName, entryPoint, charset;
         st1->Get(1, returnarg);
         st1->Get(2, mechanism);
@@ -136,35 +152,40 @@ void Function::loadInfo(bool force)
         st1->Get(7, subtype);
         st1->Get(8, precision);
         st1->Get(9, libraryName);
-        libraryNameM = std2wx(libraryName).Strip();
+        libraryNameM = std2wx(libraryName, converter).Strip();
         st1->Get(10, entryPoint);
-        entryPointM = std2wx(entryPoint).Strip();
+        entryPointM = std2wx(entryPoint, converter).Strip();
         wxString datatype = Domain::dataTypeToString(type, scale,
             precision, subtype, length);
         if (!st1->IsNull(11))
         {
             st1->Get(11, charset);
-            wxString chset(std2wx(charset).Strip());
+            wxString chset(std2wx(charset, converter).Strip());
             if (d->getDatabaseCharset() != chset)
-                datatype += wxT(" CHARACTER SET ") + chset;
+            {
+                datatype += wxT(" ") + SqlTokenizer::getKeyword(kwCHARACTER)
+                    + wxT(" ") + SqlTokenizer::getKeyword(kwSET)
+                    + wxT(" ") + chset;
+            }
         }
         if (type == 261)    // avoid subtype information for BLOB
-            datatype = wxT("blob");
+            datatype = SqlTokenizer::getKeyword(kwBLOB);
 
         int mechIndex = (mechanism < 0 ? -mechanism : mechanism);
         if (mechIndex >= (sizeof(mechanismNames)/sizeof(wxString)))
             mechIndex = (sizeof(mechanismNames)/sizeof(wxString)) - 1;
-        wxString param = wxT("    ") + datatype + wxT(" by ")
+        wxString param = wxT("    ") + datatype + wxT(" ")
+            + SqlTokenizer::getKeyword(kwBY) + wxT(" ")
             + mechanismNames[mechIndex];
         if (mechanism < 0)
-            param += wxT(" FREE_IT");
+            param += wxString(wxT(" ")) + SqlTokenizer::getKeyword(kwFREE_IT);
         if (returnarg == retpos)    // output
         {
             retstr = param;
             retstrM = datatype + mechanismDDL[mechIndex];
             if (retpos != 0)
             {
-                retstrM = wxT("PARAMETER ");
+                retstrM = SqlTokenizer::getKeyword(kwPARAMETER) + wxT(" ");
                 retstrM << retpos;
                 if (!paramListM.IsEmpty())
                     paramListM += wxT(", ");
@@ -176,17 +197,18 @@ void Function::loadInfo(bool force)
             if (first)
                 first = false;
             else
-                definitionM += wxT(",\n");
+                definitionM += wxString(wxT(",")) + wxTextBuffer::GetEOL();
             definitionM += param;
-            if (!paramListM.IsEmpty())
+            if (!paramListM.empty())
                 paramListM += wxT(", ");
             paramListM += datatype + mechanismDDL[mechIndex];
         }
     }
-    definitionM += wxT("\n)\nreturns:\n") + retstr;
-    infoLoadedM = true;
-    if (force)
-        notifyObservers();
+    definitionM += wxString(wxTextBuffer::GetEOL()) + wxT(")")
+        + wxTextBuffer::GetEOL() + SqlTokenizer::getKeyword(kwRETURNS)
+        + wxT(":") + wxTextBuffer::GetEOL() + retstr;
+
+    setPropertiesLoaded(true);
 }
 //-----------------------------------------------------------------------------
 void Function::acceptVisitor(MetadataItemVisitor* visitor)

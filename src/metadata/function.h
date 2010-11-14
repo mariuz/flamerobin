@@ -37,10 +37,10 @@ class Function: public MetadataItem
 {
 private:
     wxString libraryNameM, entryPointM, definitionM, retstrM, paramListM;
-    bool infoLoadedM;
+protected:
+    virtual void loadProperties();
 public:
     Function(DatabasePtr database, const wxString& name);
-    void loadInfo(bool force = false);
     virtual const wxString getTypeName() const;
     virtual wxString getDropSqlStatement() const;
     wxString getCreateSql();

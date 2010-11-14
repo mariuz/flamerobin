@@ -881,9 +881,6 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                 object->invalidate();
                 dynamic_cast<Procedure*>(object)->checkDependentProcedures();
                 break;
-            case ntFunction:
-                dynamic_cast<Function*>(object)->loadInfo(true);
-                break;
             case ntTrigger:
                 {
                     Trigger* tr = dynamic_cast<Trigger*>(object);

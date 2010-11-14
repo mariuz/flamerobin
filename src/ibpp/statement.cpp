@@ -1067,7 +1067,7 @@ const IBPP::Value StatementImpl::Get(const std::string& name)
 int StatementImpl::Columns()
 {
 	if (mOutRow == 0)
-		throw LogicExceptionImpl("Statement::Columns", _("The row is not initialized."));
+		return 0;
 
 	return mOutRow->Columns();
 }
