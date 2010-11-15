@@ -90,6 +90,7 @@
 #include "sql/MultiStatement.h"
 #include "sql/SelectStatement.h"
 #include "sql/SqlStatement.h"
+#include "sql/StatementBuilder.h"
 #include "statementHistory.h"
 //-----------------------------------------------------------------------------
 class SqlEditorDropTarget : public wxDropTarget
@@ -169,19 +170,13 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
         return false;
     }
 
+    wxString columns;
     Table* t = 0;
-    wxString column_list;
-    if (m->getType() == ntColumn)
-    {
-        t = dynamic_cast<Table*>(m->getParent());
-        column_list = t->getQuotedName() + wxT(".") + m->getQuotedName();
-    }
-    if ((m->getType() == ntTable) || (m->getType() == ntSysTable))
-    {
+    Column* c = dynamic_cast<Column*>(m);
+    if (c)
+        t = c->getTable();
+    else
         t = dynamic_cast<Table*>(m);
-        // TODO: add all columns so that user can remove them easily
-        column_list = t->getQuotedName() + wxT(".*");
-    }
     if (t == 0)
     {
         wxMessageBox(_("Only tables and table columns can be dropped."),
@@ -192,22 +187,32 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
     SelectStatement sstm(editorM->GetText());
     if (!sstm.isValidSelectStatement())
     {
-        // question("Invalid SELECT statement, do you wish to overwrite?");
-        // if wxNO then
-        //  return true;
-        // else
-            sstm.setStatement(wxT("SELECT FROM ")); // blank statement
+        StatementBuilder sb;
+        sb << kwSELECT << ' ' << kwFROM << ' '; // blank statement
+        sstm.setStatement(sb);
     }
 
     // add the column(s)
-    sstm.addColumn(column_list);
+    if (c)
+    {
+        sstm.addColumn(t->getQuotedName() + wxT(".") + c->getQuotedName());
+    }
+    else
+    {
+        t->ensureChildrenLoaded();
+        for (ColumnPtrs::const_iterator it = t->begin(); it != t->end(); ++it)
+        {
+            sstm.addColumn(
+                t->getQuotedName() + wxT(".") + (*it)->getQuotedName());
+        }
+    }
 
     // read in the table names, and find position where FROM clause ends
     std::vector<wxString> tableNames;
     sstm.getTables(tableNames);
 
     // if table is not there, add it
-    if (std::find(tableNames.begin(), tableNames.end(), t->getName_())
+    if (std::find(tableNames.begin(), tableNames.end(), t->getQuotedName())
         == tableNames.end())
     {
         std::vector<ForeignKey> relatedTables;
