@@ -26,6 +26,10 @@
 #include "..\..\src\frversion.h"
 #define FR_VERSION_STRING Str(FR_VERSION_MAJOR) + "." + Str(FR_VERSION_MINOR) + "." + Str(FR_VERSION_RLS)
 
+#if defined(FR_VERSION_SVN) && (FR_VERSION_RLS % 2 == 1)
+  #define FR_VERSION_STRING FR_VERSION_STRING + "." + Str(FR_VERSION_SVN)
+#endif
+
 [Setup]
 #ifdef X64VERSION
 AppName=FlameRobin (x64)
