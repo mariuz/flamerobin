@@ -61,7 +61,7 @@
 class GridCellFormats: public ConfigCache
 {
 private:
-    int precisionForDoubleM;
+    int floatingPointPrecisionM;
     wxString dateFormatM;
     bool showBinaryBlobContentM;
     bool showBlobContentM;
@@ -74,7 +74,8 @@ public:
 
     static GridCellFormats& get();
 
-    wxString formatDouble(double value);
+    template<typename T>
+    wxString format(T value);
     wxString formatDate(int year, int month, int day);
     wxString formatTime(int hour, int minute, int second, int milliSecond);
     wxString formatTimestamp(int year, int month, int day,
@@ -102,9 +103,9 @@ GridCellFormats& GridCellFormats::get()
 //-----------------------------------------------------------------------------
 void GridCellFormats::loadFromConfig()
 {
-    precisionForDoubleM = config().get(wxT("NumberPrecision"), 2);
+    floatingPointPrecisionM = config().get(wxT("NumberPrecision"), 2);
     if (!config().get(wxT("ReformatNumbers"), false))
-        precisionForDoubleM = -1;
+        floatingPointPrecisionM = -1;
 
     dateFormatM = config().get(wxT("DateFormat"), wxString(wxT("D.M.Y")));
     timeFormatM = config().get(wxT("TimeFormat"), wxString(wxT("H:M:S.T")));
@@ -115,12 +116,13 @@ void GridCellFormats::loadFromConfig()
     showBlobContentM = config().get(wxT("DataGridFetchBlobs"), true);
 }
 //-----------------------------------------------------------------------------
-wxString GridCellFormats::formatDouble(double value)
+template<typename T>
+wxString GridCellFormats::format(T value)
 {
     ensureCacheValid();
 
-    if (precisionForDoubleM >= 0 && precisionForDoubleM <= 18)
-        return wxString::Format(wxT("%.*f"), precisionForDoubleM, value);
+    if (floatingPointPrecisionM >= 0 && floatingPointPrecisionM <= 18)
+        return wxString::Format(wxT("%.*f"), floatingPointPrecisionM, value);
     return wxString::Format(wxT("%f"), value);
 }
 //-----------------------------------------------------------------------------
@@ -129,9 +131,10 @@ wxString GridCellFormats::formatDate(int year, int month, int day)
     ensureCacheValid();
 
     wxString result;
-    for (wxString::iterator c = dateFormatM.begin(); c != dateFormatM.end(); c++)
+    for (wxString::const_iterator c = dateFormatM.begin();
+        c != dateFormatM.end(); c++)
     {
-        switch ((wxChar)*c)
+        switch (wxChar(*c))
         {
             case 'd':
                 result += wxString::Format(wxT("%d"), day);
@@ -1065,7 +1068,7 @@ public:
 };
 //-----------------------------------------------------------------------------
 FloatColumnDef::FloatColumnDef(const wxString& name, unsigned offset,
-    bool readOnly, bool nullable)
+        bool readOnly, bool nullable)
     : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
 {
 }
@@ -1077,11 +1080,11 @@ wxString FloatColumnDef::getAsString(DataGridRowBuffer* buffer)
     if (!buffer->getValue(offsetM, value))
         return wxEmptyString;
 
-    return wxString::Format(wxT("%f"), value);
+    return GridCellFormats::get().format<float>(value);
 }
 //-----------------------------------------------------------------------------
 void FloatColumnDef::setFromString(DataGridRowBuffer* buffer,
-        const wxString& source)
+    const wxString& source)
 {
     wxASSERT(buffer);
     double d;
@@ -1128,9 +1131,9 @@ public:
 };
 //-----------------------------------------------------------------------------
 DoubleColumnDef::DoubleColumnDef(const wxString& name, unsigned offset,
-    bool readOnly, bool nullable, short scale)
+        bool readOnly, bool nullable, short scale)
     : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset),
-      scaleM(scale)
+        scaleM(scale)
 {
 }
 //-----------------------------------------------------------------------------
@@ -1143,11 +1146,11 @@ wxString DoubleColumnDef::getAsString(DataGridRowBuffer* buffer)
 
     if (scaleM)
         return wxString::Format(wxT("%.*f"), scaleM, value);
-    return GridCellFormats::get().formatDouble(value);
+    return GridCellFormats::get().format<double>(value);
 }
 //-----------------------------------------------------------------------------
 void DoubleColumnDef::setFromString(DataGridRowBuffer* buffer,
-        const wxString& source)
+    const wxString& source)
 {
     wxASSERT(buffer);
     double d;
@@ -1196,9 +1199,9 @@ public:
 };
 //-----------------------------------------------------------------------------
 BlobColumnDef::BlobColumnDef(const wxString& name, bool readOnly,
-    bool nullable, unsigned stringIndex, unsigned blobIndex, bool textual)
+        bool nullable, unsigned stringIndex, unsigned blobIndex, bool textual)
     : ResultsetColumnDef(name, readOnly, nullable), indexM(blobIndex),
-      textualM(textual), stringIndexM(stringIndex), converterM(0)
+        textualM(textual), stringIndexM(stringIndex), converterM(0)
 {
     //readOnlyM = true;   // TODO: uncomment this when we make BlobDialog
 }
