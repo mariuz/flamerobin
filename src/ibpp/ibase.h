@@ -337,7 +337,10 @@ typedef struct paramvary {
 #define dtype_blob      17
 #define dtype_array     18
 #define dtype_int64     19
-#define DTYPE_TYPE_MAX  20
+#define dtype_dbkey     20
+#define dtype_boolean   21
+#define DTYPE_TYPE_MAX  22
+
 
 #define ISC_TIME_SECONDS_PRECISION              10000
 #define ISC_TIME_SECONDS_PRECISION_SCALE        (-4)
@@ -404,6 +407,7 @@ typedef struct
 #define SQL_TYPE_TIME                      560
 #define SQL_TYPE_DATE                      570
 #define SQL_INT64                          580
+#define SQL_BOOLEAN                      32764
 
 #define SQL_DATE                           SQL_TIMESTAMP
 
