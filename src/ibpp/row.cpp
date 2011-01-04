@@ -707,6 +707,7 @@ IBPP::SDT RowImpl::ColumnType(int varnum)
 		case SQL_TYPE_TIME : value = IBPP::sdTime;      break;
 		case SQL_BLOB :      value = IBPP::sdBlob;      break;
 		case SQL_ARRAY :     value = IBPP::sdArray;     break;
+		case SQL_BOOLEAN :   value = IBPP::sdString;     break;
 		default : throw LogicExceptionImpl("Row::ColumnType",
 						_("Found an unknown sqltype !"));
 	}
