@@ -294,6 +294,7 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     // enable controls depending on operation and database connection status
     // use SetEditable() for edit controls to allow copying text to clipboard
     bool isConnected = databaseM->isConnected();
+    text_ctrl_name->SetEditable(!connectAsM);
     text_ctrl_dbpath->SetEditable(!connectAsM && !isConnected);
     button_browse->Enable(!connectAsM && !isConnected);
     choice_authentication->Enable(!connectAsM && !isConnected);
