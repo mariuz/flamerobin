@@ -621,10 +621,9 @@ void FieldPropertiesDialog::updateDomainControls()
         textctrl_scale->SetEditable(false);
         choice_collate->Enable(false);
         updateColors();
+        // charset is editable only for new fields with new domain
+        choice_charset->Enable(columnM == 0 && newDomain);
     }
-
-    // charset is editable only for new fields with new domain
-    choice_charset->Enable(columnM == 0 && newDomain);
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::updateDomainInfo(const wxString& domain)
