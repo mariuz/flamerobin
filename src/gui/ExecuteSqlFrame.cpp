@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2010 The FlameRobin Development Team
+  Copyright (c) 2004-2011 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -1322,11 +1322,8 @@ void ExecuteSqlFrame::OnMenuSaveOrSaveAs(wxCommandEvent& event)
 
     if (styled_text_ctrl_sql->SaveFile(filename))
     {
-        if (filename.compare(filenameM.GetFullPath()) != 0)
-        {
-            filenameM = filename;
-            updateFrameTitleM = true;
-        }
+        filenameM = filename;
+        updateFrameTitleM = true;
         statusbar_1->SetStatusText((_("File saved")), 2);
     }
 }
