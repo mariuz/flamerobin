@@ -917,6 +917,19 @@ void DataGrid::OnKeyDown(wxKeyEvent& event)
             return;
         }
     }
+
+#if !wxCHECK_VERSION(2, 9, 0)
+    if ((event.GetKeyCode() == WXK_HOME || event.GetKeyCode() == WXK_END)
+        && !event.ControlDown())
+    {
+        wxGridCellCoords c(GetGridCursorRow(),
+            (event.GetKeyCode() == WXK_END) ? GetNumberCols() - 1 : 0);
+        SetCurrentCell(c);
+        MakeCellVisible(c);
+        return;
+    }
+#endif
+
     event.Skip();
 }
 //-----------------------------------------------------------------------------
