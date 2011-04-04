@@ -594,7 +594,10 @@ void CreateDDLVisitor::visitTrigger(Trigger& t)
 
     preSqlM << wxT("SET TERM ^ ;\nCREATE TRIGGER ") << t.getQuotedName();
     if (!db)
-        preSqlM << wxT(" FOR ") << relation;
+    {
+        Identifier id(relation);
+        preSqlM << wxT(" FOR ") << id.getQuoted();
+    }
     if (active)
         preSqlM << wxT(" ACTIVE\n");
     else
