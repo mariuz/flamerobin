@@ -188,8 +188,7 @@ wxString Trigger::getAlterSql()
         sql << wxT(" ACTIVE\n");
     else
         sql << wxT(" INACTIVE\n");
-    if (!db)
-        sql << type;
+    sql << type;
     sql << wxT(" POSITION ");
     sql << position << wxT("\n");
     sql << source;
