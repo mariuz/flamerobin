@@ -78,6 +78,8 @@ private:
     wxArrayString getDatabaseDialectChoices() const;
     wxArrayString getDatabasePagesizeChoices() const;
 protected:
+    virtual void doReadConfigSettings(const wxString& prefix);
+    virtual void doWriteConfigSettings(const wxString& prefix) const;
     virtual const wxString getName() const;
     virtual bool getConfigStoresHeight() const;
 public:

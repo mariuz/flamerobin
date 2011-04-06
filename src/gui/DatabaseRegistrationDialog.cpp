@@ -41,6 +41,7 @@
 #include <wx/filename.h>
 #include <wx/gbsizer.h>
 
+#include "config/Config.h"
 #include "core/StringUtils.h"
 #include "gui/controls/DndTextControls.h"
 #include "gui/DatabaseRegistrationDialog.h"
@@ -191,6 +192,65 @@ wxArrayString DatabaseRegistrationDialog::getDatabasePagesizeChoices() const
     return choices;
 }
 //-----------------------------------------------------------------------------
+void DatabaseRegistrationDialog::doReadConfigSettings(const wxString& prefix)
+{
+    BaseDialog::doReadConfigSettings(prefix);
+
+    choice_authentication->SetSelection(0);
+    combobox_charset->SetStringSelection(wxT("NONE"));
+    choice_pagesize->SetStringSelection(wxT("4096"));
+    choice_dialect->SetStringSelection(wxT("3"));
+
+    if (createM)
+    {
+        wxString selection, empty;
+        selection = config().get(
+            prefix + Config::pathSeparator + wxT("createDialogAuthentication"),
+            empty);
+        if (!selection.empty())
+            choice_authentication->SetStringSelection(selection);
+
+        selection = config().get(
+            prefix + Config::pathSeparator + wxT("createDialogCharset"),
+            empty);
+        if (!selection.empty())
+            combobox_charset->SetStringSelection(selection);
+
+        selection = config().get(
+            prefix + Config::pathSeparator + wxT("createDialogPageSize"),
+            empty);
+        if (!selection.empty())
+            choice_pagesize->SetStringSelection(selection);
+
+        selection = config().get(
+            prefix + Config::pathSeparator + wxT("createDialogDialect"),
+            empty);
+        if (!selection.empty())
+            choice_dialect->SetStringSelection(selection);
+    }
+}
+//-----------------------------------------------------------------------------
+void DatabaseRegistrationDialog::doWriteConfigSettings(
+    const wxString& prefix) const
+{
+    BaseDialog::doWriteConfigSettings(prefix);
+    if (createM && GetReturnCode() == wxID_OK)
+    {
+        config().setValue(
+            prefix + Config::pathSeparator + wxT("createDialogAuthentication"),
+            choice_authentication->GetStringSelection());
+        config().setValue(
+            prefix + Config::pathSeparator + wxT("createDialogCharset"),
+            combobox_charset->GetStringSelection());
+        config().setValue(
+            prefix + Config::pathSeparator + wxT("createDialogPageSize"),
+            choice_pagesize->GetStringSelection());
+        config().setValue(
+            prefix + Config::pathSeparator + wxT("createDialogDialect"),
+            choice_dialect->GetStringSelection());
+    }
+}
+//-----------------------------------------------------------------------------
 const wxString DatabaseRegistrationDialog::getName() const
 {
     // don't use different names here, force minimal height instead
@@ -256,13 +316,6 @@ void DatabaseRegistrationDialog::setControlsProperties()
 {
     int wh = text_ctrl_dbpath->GetMinHeight();
     button_browse->SetSize(wh, wh);
-    choice_authentication->SetSelection(0);
-    if (createM)
-    {
-        choice_pagesize->SetSelection(
-            choice_pagesize->FindString(wxT("4096")));
-        choice_dialect->SetSelection(choice_dialect->FindString(wxT("3")));
-    }
     button_ok->SetDefault();
 }
 //-----------------------------------------------------------------------------
@@ -280,13 +333,9 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     text_ctrl_password->SetValue(databaseM->getDecryptedPassword());
     text_ctrl_role->SetValue(databaseM->getRole());
     wxString charset(databaseM->getConnectionCharset());
-    if (charset.IsEmpty())
+    if (charset.empty())
         charset = wxT("NONE");
-    int selection = combobox_charset->FindString(charset);
-    if (selection < 0)
-        combobox_charset->SetValue(charset);
-    else
-        combobox_charset->SetSelection(selection);
+    combobox_charset->SetStringSelection(charset);
     // see whether the database has an empty or default name; knowing that will be
     // useful to keep the name in sync when other attributes change.
     updateIsDefaultName();
