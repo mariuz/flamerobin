@@ -1595,7 +1595,9 @@ void MainFrame::OnMenuRecreateDatabase(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuDropDatabase(wxCommandEvent& WXUNUSED(event))
 {
     DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
-    if (!checkValidDatabase(db) || !confirmDropItem(db.get()))
+    if (!checkValidDatabase(db) || !tryAutoConnectDatabase(db))
+        return;
+    if (!confirmDropItem(db.get()))
         return;
 
     int result = wxMessageBox(
