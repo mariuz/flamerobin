@@ -196,11 +196,6 @@ void DatabaseRegistrationDialog::doReadConfigSettings(const wxString& prefix)
 {
     BaseDialog::doReadConfigSettings(prefix);
 
-    choice_authentication->SetSelection(0);
-    combobox_charset->SetStringSelection(wxT("NONE"));
-    choice_pagesize->SetStringSelection(wxT("4096"));
-    choice_dialect->SetStringSelection(wxT("3"));
-
     if (createM)
     {
         wxString selection, empty;
@@ -316,6 +311,15 @@ void DatabaseRegistrationDialog::setControlsProperties()
 {
     int wh = text_ctrl_dbpath->GetMinHeight();
     button_browse->SetSize(wh, wh);
+
+    choice_authentication->SetSelection(0);
+    combobox_charset->SetStringSelection(wxT("NONE"));
+    if (createM)
+    {
+        choice_pagesize->SetStringSelection(wxT("4096"));
+        choice_dialect->SetStringSelection(wxT("3"));
+    }
+
     button_ok->SetDefault();
 }
 //-----------------------------------------------------------------------------
