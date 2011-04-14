@@ -642,6 +642,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             case ntTrigger:
             case ntException:
             case ntRole:
+            case ntSysRole:
                 {
                     wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
                         Cmds::Menu_ObjectProperties);

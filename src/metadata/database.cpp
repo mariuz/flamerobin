@@ -611,6 +611,9 @@ MetadataItem* Database::findByNameAndType(NodeType nt, wxString name)
         case ntRole:
             return rolesM->findByName(name).get();
             break;
+        case ntSysRole:
+            return sysRolesM->findByName(name).get();
+            break;
         case ntDomain:
             return userDomainsM->findByName(name).get();
             break;
@@ -677,6 +680,9 @@ void Database::dropObject(MetadataItem* object)
         case ntRole:
             rolesM->remove((Role*)object);
             break;
+        case ntSysRole:
+            sysRolesM->remove((Role*)object);
+            break;
         case ntDomain:
             userDomainsM->remove((Domain*)object);
             break;
@@ -712,6 +718,9 @@ void Database::addObject(NodeType type, wxString name)
             break;
         case ntRole:
             rolesM->insert(name);
+            break;
+        case ntSysRole:
+            sysRolesM->insert(name);
             break;
         case ntGenerator:
             generatorsM->insert(name);
