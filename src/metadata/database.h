@@ -178,6 +178,7 @@ private:
     GeneratorsPtr generatorsM;
     ProceduresPtr proceduresM;
     RolesPtr rolesM;
+    SysRolesPtr sysRolesM;
     TablesPtr tablesM;
     SysTablesPtr sysTablesM;
     TriggersPtr triggersM;
@@ -199,7 +200,8 @@ private:
 
     mutable unsigned idM;
 
-    bool showSysTables();
+    bool showSystemRoles();
+    bool showSystemTables();
 
 protected:
     virtual void loadChildren();
@@ -220,6 +222,7 @@ public:
     GeneratorsPtr getGenerators();
     ProceduresPtr getProcedures();
     RolesPtr getRoles();
+    SysRolesPtr getSysRoles();
     TablesPtr getTables();
     SysTablesPtr getSysTables();
     TriggersPtr getTriggers();

@@ -960,6 +960,7 @@ void Database::connect(wxString password, ProgressIndicator* indicator)
         generatorsM.reset(new Generators(me));
         proceduresM.reset(new Procedures(me));
         rolesM.reset(new Roles(me));
+        sysRolesM.reset(new SysRoles(me));
         triggersM.reset(new Triggers(me));
         tablesM.reset(new Tables(me));
         sysTablesM.reset(new SysTables(me));
@@ -1051,7 +1052,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
         }
     };
 
-    const int collectionCount = 10;
+    const int collectionCount = 11;
     std::string loadStmt;
     ProgressIndicatorHelper pih(progressIndicator);
 
@@ -1059,23 +1060,26 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(this);
 
-    pih.init(_("tables"), collectionCount, 1);
+    pih.init(_("tables"), collectionCount, 0);
     tablesM->load(progressIndicator);
 
-    pih.init(_("system tables"), collectionCount, 2);
+    pih.init(_("system tables"), collectionCount, 1);
     sysTablesM->load(progressIndicator);
 
-    pih.init(_("views"), collectionCount, 3);
+    pih.init(_("views"), collectionCount, 2);
     viewsM->load(progressIndicator);
 
-    pih.init(_("procedures"), collectionCount, 4);
+    pih.init(_("procedures"), collectionCount, 3);
     proceduresM->load(progressIndicator);
 
-    pih.init(_("triggers"), collectionCount, 5);
+    pih.init(_("triggers"), collectionCount, 4);
     triggersM->load(progressIndicator);
 
-    pih.init(_("roles"), collectionCount, 6);
+    pih.init(_("roles"), collectionCount, 5);
     rolesM->load(progressIndicator);
+
+    pih.init(_("system roles"), collectionCount, 6);
+    sysRolesM->load(progressIndicator);
 
     pih.init(_("domains"), collectionCount, 7);
     userDomainsM->load(progressIndicator);
@@ -1229,6 +1233,13 @@ RolesPtr Database::getRoles()
     return rolesM;
 }
 //-----------------------------------------------------------------------------
+SysRolesPtr Database::getSysRoles()
+{
+    wxASSERT(sysRolesM);
+    sysRolesM->ensureChildrenLoaded();
+    return sysRolesM;
+}
+//-----------------------------------------------------------------------------
 SysTablesPtr Database::getSysTables()
 {
     wxASSERT(sysTablesM);
@@ -1271,8 +1282,10 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
     temp.push_back(generatorsM.get());
     temp.push_back(proceduresM.get());
     temp.push_back(rolesM.get());
-    // Only push back system tables when they should be shown
-    if (system && showSysTables())
+    // Only push back system objects when they should be shown
+    if (system && showSystemRoles())
+        temp.push_back(sysRolesM.get());
+    if (system && showSystemTables())
         temp.push_back(sysTablesM.get());
     temp.push_back(tablesM.get());
     temp.push_back(triggersM.get());
@@ -1558,7 +1571,21 @@ void Database::loadInfo()
     notifyObservers();
 }
 //-----------------------------------------------------------------------------
-bool Database::showSysTables()
+bool Database::showSystemRoles()
+{
+    if (!getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+        return false;
+
+    const wxString SHOW_SYSROLES = wxT("ShowSystemRoles");
+
+    bool b;
+    if (!DatabaseConfig(this, config()).getValue(SHOW_SYSROLES, b))
+        b = config().get(SHOW_SYSROLES, false);
+
+    return b;
+}
+//-----------------------------------------------------------------------------
+bool Database::showSystemTables()
 {
     const wxString SHOW_SYSTABLES = wxT("ShowSystemTables");
 

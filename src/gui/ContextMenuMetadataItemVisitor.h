@@ -53,11 +53,12 @@ public:
     virtual void visitProcedures(Procedures& procedures);
     virtual void visitRole(Role& role);
     virtual void visitRoles(Roles& roles);
+    virtual void visitSysRoles(SysRoles& roles);
     virtual void visitRoot(Root& root);
-    virtual void visitSysTables(SysTables& tables);
     virtual void visitServer(Server& server);
     virtual void visitTable(Table& table);
     virtual void visitTables(Tables& tables);
+    virtual void visitSysTables(SysTables& tables);
     virtual void visitTrigger(Trigger& trigger);
     virtual void visitTriggers(Triggers& triggers);
     virtual void visitView(View& view);

@@ -49,6 +49,18 @@ public:
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 //-----------------------------------------------------------------------------
+class SysRoles: public MetadataCollection<Role>
+{
+protected:
+    virtual void loadChildren();
+public:
+    SysRoles(DatabasePtr database);
+
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    virtual bool isSystem() const;
+    void load(ProgressIndicator* progressIndicator);
+};
+//-----------------------------------------------------------------------------
 class Roles: public MetadataCollection<Role>
 {
 protected:

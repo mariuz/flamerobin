@@ -104,6 +104,9 @@ typedef std::vector<ServerPtr> ServerPtrs;
 class SysDomains;
 typedef boost::shared_ptr<SysDomains> SysDomainsPtr;
 
+class SysRoles;
+typedef boost::shared_ptr<SysRoles> SysRolesPtr;
+
 class SysTables;
 typedef boost::shared_ptr<SysTables> SysTablesPtr;
 

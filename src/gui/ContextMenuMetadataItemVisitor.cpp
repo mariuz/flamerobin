@@ -228,6 +228,11 @@ void ContextMenuMetadataItemVisitor::visitRoles(Roles& /*roles*/)
     addRefreshItem();
 }
 //-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::visitSysRoles(SysRoles& /*roles*/)
+{
+    addRefreshItem();
+}
+//-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitRoot(Root&)
 {
     menuM->Append(Cmds::Menu_RegisterServer, _("&Register server"));
@@ -252,11 +257,6 @@ void ContextMenuMetadataItemVisitor::visitServer(Server&)
     menuM->Append(Cmds::Menu_UnRegisterServer, _("&Unregister server"));
     menuM->Append(Cmds::Menu_ServerProperties,
         _("Server registration &info"));
-}
-//-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitSysTables(SysTables& /*sysTables*/)
-{
-    addRefreshItem();
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitTable(Table& table)
@@ -285,6 +285,11 @@ void ContextMenuMetadataItemVisitor::visitTables(Tables& /*tables*/)
 {
     addCreateItem();
     addSeparator();
+    addRefreshItem();
+}
+//-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::visitSysTables(SysTables& /*sysTables*/)
+{
     addRefreshItem();
 }
 //-----------------------------------------------------------------------------

@@ -58,6 +58,8 @@
 #define ART_Roles                   wxART_MAKE_ART_ID(ART_Roles)
 #define ART_Root                    wxART_MAKE_ART_ID(ART_Root)
 #define ART_Server                  wxART_MAKE_ART_ID(ART_Server)
+#define ART_SystemRole              wxART_MAKE_ART_ID(ART_SystemRole)
+#define ART_SystemRoles             wxART_MAKE_ART_ID(ART_SystemRoles)
 #define ART_SystemTable             wxART_MAKE_ART_ID(ART_SystemTable)
 #define ART_SystemTables            wxART_MAKE_ART_ID(ART_SystemTables)
 #define ART_Table                   wxART_MAKE_ART_ID(ART_Table)

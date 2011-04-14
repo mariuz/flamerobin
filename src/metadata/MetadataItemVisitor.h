@@ -60,6 +60,7 @@ public:
     virtual void visitRelation(Relation& relation);
     virtual void visitRole(Role& role);
     virtual void visitRoles(Roles& roles);
+    virtual void visitSysRoles(SysRoles& sysRoles);
     virtual void visitRoot(Root& root);
     virtual void visitServer(Server& server);
     virtual void visitTable(Table& table);

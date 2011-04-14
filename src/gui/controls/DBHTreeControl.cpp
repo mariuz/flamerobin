@@ -79,6 +79,7 @@ private:
     bool showColumnsM;
     int showComputedM;
     int showDomainsM;
+    bool showSystemRolesM;
     bool showSystemTablesM;
     bool sortDatabasesM;
     bool sortServersM;
@@ -133,6 +134,8 @@ void DBHTreeConfigCache::loadFromConfig()
         cfg.get(wxT("OrderServersInTree"), false));
     // these aren't surfaced by methods, but needed to cause observing tree
     // nodes to update themselves
+    changes += setValue(showSystemRolesM,
+        cfg.get(wxT("ShowSystemRoles"), false));
     changes += setValue(showSystemTablesM,
         cfg.get(wxT("ShowSystemTables"), true));
     changes += setValue(showComputedM,
@@ -202,6 +205,8 @@ DBHTreeImageList::DBHTreeImageList()
     addImage(ART_Roles);
     addImage(ART_Root);
     addImage(ART_Server);
+    addImage(ART_SystemRole);
+    addImage(ART_SystemRoles);
     addImage(ART_SystemTable);
     addImage(ART_SystemTables);
     addImage(ART_Table);
@@ -279,11 +284,12 @@ public:
     virtual void visitParameter(Parameter& parameter);
     virtual void visitRole(Role& role);
     virtual void visitRoles(Roles& roles);
+    virtual void visitSysRoles(SysRoles& roles);
     virtual void visitRoot(Root& root);
-    virtual void visitSysTables(SysTables& sysTables);
     virtual void visitServer(Server& server);
     virtual void visitTable(Table& table);
     virtual void visitTables(Tables& tables);
+    virtual void visitSysTables(SysTables& tables);
     virtual void visitTrigger(Trigger& trigger);
     virtual void visitTriggers(Triggers& triggers);
     virtual void visitView(View& view);
@@ -375,7 +381,7 @@ void DBHTreeItemVisitor::visitDatabase(Database& database)
         nodeVisibleM = connected;
     // show Collection nodes even though Database::getChildrenCount() returns 0
     showChildrenM = true;
-    // update if settings change: "Show system tables in tree"
+    // update if settings change: "Show system roles/tables in tree"
     nodeConfigSensitiveM = true;
 }
 //-----------------------------------------------------------------------------
@@ -487,12 +493,18 @@ void DBHTreeItemVisitor::visitProcedures(Procedures& procedures)
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitRole(Role& role)
 {
-    setNodeProperties(&role, ART_Role);
+    setNodeProperties(&role,
+        role.isSystem() ? ART_SystemRole : ART_Role);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitRoles(Roles& roles)
 {
     setNodeProperties(&roles, ART_Roles);
+}
+//-----------------------------------------------------------------------------
+void DBHTreeItemVisitor::visitSysRoles(SysRoles& roles)
+{
+    setNodeProperties(&roles, ART_SystemRoles);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitRoot(Root& root)
@@ -519,9 +531,9 @@ void DBHTreeItemVisitor::visitServer(Server& server)
     nodeConfigSensitiveM = true;
 }
 //-----------------------------------------------------------------------------
-void DBHTreeItemVisitor::visitSysTables(SysTables& sysTables)
+void DBHTreeItemVisitor::visitSysTables(SysTables& tables)
 {
-    setNodeProperties(&sysTables, ART_SystemTables);
+    setNodeProperties(&tables, ART_SystemTables);
 }
 //-----------------------------------------------------------------------------
 void DBHTreeItemVisitor::visitTable(Table& table)

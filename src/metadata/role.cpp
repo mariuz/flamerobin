@@ -48,7 +48,8 @@
 #include "metadata/role.h"
 //-----------------------------------------------------------------------------
 Role::Role(DatabasePtr database, const wxString& name)
-    : MetadataItem(ntRole, database.get(), name)
+    : MetadataItem(hasSystemPrefix(name) ? ntSysRole : ntRole, database.get(),
+        name)
 {
 }
 //-----------------------------------------------------------------------------
@@ -128,6 +129,38 @@ void Role::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitRole(*this);
 }
 //-----------------------------------------------------------------------------
+// System roles collection
+SysRoles::SysRoles(DatabasePtr database)
+    : MetadataCollection<Role>(ntSysRoles, database, _("System roles"))
+{
+}
+//-----------------------------------------------------------------------------
+void SysRoles::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitSysRoles(*this);
+}
+//-----------------------------------------------------------------------------
+bool SysRoles::isSystem() const
+{
+    return true;
+}
+//-----------------------------------------------------------------------------
+void SysRoles::load(ProgressIndicator* progressIndicator)
+{
+    DatabasePtr db = getDatabase();
+    if (db && db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+    {
+        wxString stmt = wxT("select rdb$role_name from rdb$roles")
+            wxT(" where (rdb$system_flag > 0) order by 1");
+        setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+    }
+}
+//-----------------------------------------------------------------------------
+void SysRoles::loadChildren()
+{
+    load(0);
+}
+//-----------------------------------------------------------------------------
 // Roles collection
 Roles::Roles(DatabasePtr database)
     : MetadataCollection<Role>(ntRoles, database, _("Roles"))
@@ -141,7 +174,11 @@ void Roles::acceptVisitor(MetadataItemVisitor* visitor)
 //-----------------------------------------------------------------------------
 void Roles::load(ProgressIndicator* progressIndicator)
 {
-    wxString stmt = wxT("select rdb$role_name from rdb$roles order by 1");
+    wxString stmt = wxT("select rdb$role_name from rdb$roles");
+    DatabasePtr db = getDatabase();
+    if (db && db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+        stmt += wxT(" where (rdb$system_flag = 0 or rdb$system_flag is null)");
+    stmt += wxT(" order by 1");
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 //-----------------------------------------------------------------------------
