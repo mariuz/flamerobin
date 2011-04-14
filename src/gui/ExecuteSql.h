@@ -32,12 +32,13 @@
 // they are separated here since:
 // a) it is used in many places and improves compilation time a lot
 // b) it allows us to change the way it is done easily
+#include "metadata/MetadataClasses.h"
+
 class ExecuteSqlFrame;
-class Database;
 //-----------------------------------------------------------------------------
 ExecuteSqlFrame* showSql(wxWindow* parent, const wxString& title,
-    Database *database, const wxString &sql);
-void execSql(wxWindow* parent, const wxString& title, Database *database,
+    DatabasePtr database, const wxString &sql);
+void execSql(wxWindow* parent, const wxString& title, DatabasePtr database,
     const wxString &sql, bool closeWindow);
 //-----------------------------------------------------------------------------
 #endif // EXECUTESQL_H

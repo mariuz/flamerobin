@@ -162,8 +162,8 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
         return false;
     MetadataItem *m = (MetadataItem *)address;
 
-    Database* db = m->findDatabase();
-    if (db != databaseM)
+    DatabasePtr db = m->getDatabase();
+    if (db.get() != databaseM)
     {
         wxMessageBox(_("Cannot use objects from different databases."),
             _("Wrong database."), wxOK | wxICON_WARNING);
@@ -519,10 +519,12 @@ public:
 //     parent sometime.
 ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
         wxString title,
-        Database *db, const wxPoint& pos, const wxSize& size, long style)
+        DatabasePtr db, const wxPoint& pos, const wxSize& size, long style)
     : BaseFrame(wxTheApp->GetTopWindow(), id, title, pos, size, style),
-        Observer(), databaseM(db)
+        Observer(), databaseM(db.get())
 {
+    wxASSERT(db);
+
     loadingM = true;
     updateEditorCaretPosM = true;
     updateFrameTitleM = true;
@@ -561,12 +563,26 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
 
     statusbar_1 = CreateStatusBar(4);
     SetStatusBarPane(-1);
+    statusbar_1->SetStatusText(databaseM->getConnectionInfoString(), 0);
 
     editBlobDlgM = 0;
 
     set_properties();
     do_layout();
-    setDatabase(db);    // must come after set_properties
+
+    // observe database object to close on disconnect / destruction
+    databaseM->attachObserver(this, false);
+
+    executedStatementsM.clear();
+    inTransaction(false);    // enable/disable controls
+    setKeywords();           // set words for autocomplete feature
+
+    historyPositionM = StatementHistory::get(databaseM).size();
+
+    // set drop target for DnD
+    styled_text_ctrl_sql->SetDropTarget(
+        new SqlEditorDropTarget(this, styled_text_ctrl_sql, databaseM));
+
     setViewMode(false, vmEditor);
     loadingM = false;
 }
@@ -1291,7 +1307,7 @@ void ExecuteSqlFrame::OnClose(wxCloseEvent& event)
 void ExecuteSqlFrame::OnMenuNew(wxCommandEvent& WXUNUSED(event))
 {
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(GetParent(), -1,
-        _("Execute SQL statements"), databaseM);
+        _("Execute SQL statements"), databaseM->shared_from_this());
     eff->setSql(styled_text_ctrl_sql->GetSelectedText());
     eff->Show();
 }
@@ -2728,27 +2744,6 @@ void ExecuteSqlFrame::update()
         Close();
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::setDatabase(Database* db)
-{
-    databaseM = db;
-    // observe database object to close on disconnect / destruction
-    db->attachObserver(this, false);
-
-    // doesn't seem to work properly as wxToolbar overwrites it
-    //statusbar_1->PushStatusText(s, 0);
-    statusbar_1->SetStatusText(databaseM->getConnectionInfoString(), 0);
-
-    executedStatementsM.clear();
-    inTransaction(false);    // enable/disable controls
-    setKeywords();           // set words for autocomplete feature
-
-    historyPositionM = StatementHistory::get(databaseM).size();
-
-    // set drop target for DnD
-    styled_text_ctrl_sql->SetDropTarget(
-        new SqlEditorDropTarget(this, styled_text_ctrl_sql, databaseM));
-}
-//-----------------------------------------------------------------------------
 //! closes window if database is removed (unregistered)
 void ExecuteSqlFrame::removeSubject(Subject* subject)
 {
@@ -3096,7 +3091,7 @@ bool DropColumnHandler::handleURI(URI& uri)
     {
         return true;
     }
-    execSql(w, _("Dropping field"), c->findDatabase(), sql, true);
+    execSql(w, _("Dropping field"), c->getDatabase(), sql, true);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -3135,7 +3130,7 @@ bool DropColumnsHandler::handleURI(URI& uri)
             sql += wxT("ALTER TABLE ") + t->getQuotedName() + wxT(" DROP ")
                 + temp.getQuoted() + wxT(";\n");
         }
-        execSql(w, _("Dropping fields"), t->findDatabase(), sql, true);
+        execSql(w, _("Dropping fields"), t->getDatabase(), sql, true);
     }
     return true;
 }
@@ -3174,7 +3169,7 @@ bool DropObjectHandler::handleURI(URI& uri)
     {
         return true;
     }
-    execSql(w, _("DROP"), m->findDatabase(), m->getDropSqlStatement(), true);
+    execSql(w, _("DROP"), m->getDatabase(), m->getDropSqlStatement(), true);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -3202,8 +3197,8 @@ bool EditDDLHandler::handleURI(URI& uri)
         return true;
 
     // use a single read-only transaction for metadata loading
-    Database* d = m->getDatabase(wxT("EditDDLHandler::handleURI"));
-    MetadataLoaderTransaction tr((d) ? d->getMetadataLoader() : 0);
+    DatabasePtr db = m->getDatabase();
+    MetadataLoaderTransaction tr(db->getMetadataLoader());
 
     ProgressDialog pd(w, _("Extracting DDL Definitions"), 2);
     pd.doShow();
@@ -3213,7 +3208,7 @@ bool EditDDLHandler::handleURI(URI& uri)
         return true;
 
     ExecuteSqlFrame* eff = new ExecuteSqlFrame(wxTheApp->GetTopWindow(), -1,
-        wxT("DDL"), m->findDatabase());
+        wxT("DDL"), db);
     eff->setSql(cdv.getSql());
     // ProgressDialog needs to be hidden before ExecuteSqlFrame is shown,
     // otherwise the HTML frame will be raised over the ExecuteSqlFrame
@@ -3248,7 +3243,7 @@ bool EditProcedureHandler::handleURI(URI& uri)
 
     CreateDDLVisitor cdv;
     p->acceptVisitor(&cdv);
-    showSql(w->GetParent(), _("Editing stored procedure"), p->findDatabase(),
+    showSql(w->GetParent(), _("Editing stored procedure"), p->getDatabase(),
         cdv.getSuffixSql());
     return true;
 }
@@ -3288,7 +3283,7 @@ bool AlterViewHandler::handleURI(URI& uri)
     if (!r || !w)
         return true;
 
-    showSql(w->GetParent(), _("Altering dependent objects"), r->findDatabase(),
+    showSql(w->GetParent(), _("Altering dependent objects"), r->getDatabase(),
         r->getRebuildSql(column));
     return true;
 }
@@ -3316,7 +3311,7 @@ bool EditTriggerHandler::handleURI(URI& uri)
     if (!t || !w)
         return true;
 
-    showSql(w->GetParent(), _("Editing trigger"), t->findDatabase(),
+    showSql(w->GetParent(), _("Editing trigger"), t->getDatabase(),
         t->getAlterSql());
     return true;
 }
@@ -3346,9 +3341,10 @@ bool EditGeneratorValueHandler::handleURI(URI& uri)
 
     g->invalidate();
     int64_t oldvalue = g->getValue();
-    Database* db = g->getDatabase(wxT("EditGeneratorValueHandler::handleURI"));
+    DatabasePtr db = g->getDatabase();
 
-    wxString value = wxGetTextFromUser(_("Changing generator value"), _("Enter new value"),
+    wxString value = wxGetTextFromUser(_("Changing generator value"),
+        _("Enter new value"),
 #ifndef wxLongLong
     // MH: I have no idea if this works on all systems... but it should be better
     // MB: we'll use wxLongLong wherever it is available
@@ -3359,7 +3355,8 @@ bool EditGeneratorValueHandler::handleURI(URI& uri)
 
     if (value != wxT(""))
     {
-        wxString sql = wxT("SET GENERATOR ") + g->getQuotedName() + wxT(" TO ") + value + wxT(";");
+        wxString sql = wxT("SET GENERATOR ") + g->getQuotedName()
+            + wxT(" TO ") + value + wxT(";");
         execSql(w, sql, db, sql, true);
     }
     return true;
@@ -3388,7 +3385,7 @@ bool EditExceptionHandler::handleURI(URI& uri)
     if (!e || !w)
         return true;
 
-    showSql(w->GetParent(), _("Editing exception"), e->findDatabase(),
+    showSql(w->GetParent(), _("Editing exception"), e->getDatabase(),
         e->getAlterSql());
     return true;
 }
@@ -3437,7 +3434,7 @@ bool IndexActionHandler::handleURI(URI& uri)
     else if (type == wxT("TOGGLE_ACTIVE"))
         sql = wxT("ALTER INDEX ") + i->getQuotedName() + (i->isActive() ? wxT(" INACTIVE") : wxT(" ACTIVE"));
 
-    execSql(w, wxEmptyString, i->findDatabase(), sql, true);
+    execSql(w, wxEmptyString, i->getDatabase(), sql, true);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -3486,7 +3483,8 @@ bool ActivateTriggersHandler::handleURI(URI& uri)
         sql += wxT("ACTIVE;\n");
     }
 
-    execSql(w, wxEmptyString, d ? d : t->findDatabase(), sql, true);
+    execSql(w, wxEmptyString, d ? d->shared_from_this() : t->getDatabase(),
+        sql, true);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -3517,7 +3515,7 @@ bool ActivateTriggerHandler::handleURI(URI& uri)
         sql += wxT("IN");
     sql += wxT("ACTIVE;\n");
 
-    execSql(w, wxEmptyString, t->findDatabase(), sql, true);
+    execSql(w, wxEmptyString, t->getDatabase(), sql, true);
     return true;
 }
 //-----------------------------------------------------------------------------

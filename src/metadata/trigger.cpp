@@ -76,8 +76,8 @@ void Trigger::loadProperties()
 {
     setPropertiesLoaded(false);
 
-    Database* d = getDatabase(wxT("Trigger::loadInfo"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 
     IBPP::Statement& st1 = loader->getStatement(
@@ -86,7 +86,7 @@ void Trigger::loadProperties()
         "from rdb$triggers t where rdb$trigger_name = ? "
     );
 
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+    st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
     st1->Execute();
     if (st1->Fetch())
     {
@@ -95,7 +95,7 @@ void Trigger::loadProperties()
         {
             std::string objname;
             st1->Get(1, objname);
-            objectM = std2wxIdentifier(objname, d->getCharsetConverter());
+            objectM = std2wxIdentifier(objname, db->getCharsetConverter());
         }
         st1->Get(2, &positionM);
 
@@ -121,17 +121,18 @@ void Trigger::loadProperties()
 //-----------------------------------------------------------------------------
 wxString Trigger::getSource() const
 {
-    Database* d = getDatabase(wxT("Trigger::getSource"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 
     IBPP::Statement& st1 = loader->getStatement(
-        "select rdb$trigger_source from rdb$triggers where rdb$trigger_name = ?");
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+        "select rdb$trigger_source from rdb$triggers"
+        " where rdb$trigger_name = ?");
+    st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
     st1->Execute();
     st1->Fetch();
     wxString source;
-    readBlob(st1, 1, source, d->getCharsetConverter());
+    readBlob(st1, 1, source, db->getCharsetConverter());
     return source;
 }
 //-----------------------------------------------------------------------------

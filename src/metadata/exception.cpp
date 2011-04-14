@@ -69,14 +69,14 @@ void Exception::loadProperties()
 {
     setPropertiesLoaded(false);
 
-    Database* d = getDatabase(wxT("Exception::loadProperties"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 
     IBPP::Statement& st1 = loader->getStatement(
         "select RDB$MESSAGE, RDB$EXCEPTION_NUMBER from RDB$EXCEPTIONS"
         " where RDB$EXCEPTION_NAME = ?");
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+    st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
     st1->Execute();
     st1->Fetch();
     std::string message;

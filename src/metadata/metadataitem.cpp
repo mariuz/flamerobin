@@ -236,28 +236,11 @@ bool MetadataItem::getChildren(std::vector<MetadataItem*>& /*temp*/)
     return false;
 }
 //-----------------------------------------------------------------------------
-MetadataItem* MetadataItem::getParentObjectOfType(NodeType type) const
+DatabasePtr MetadataItem::getDatabase() const
 {
-    MetadataItem* m = const_cast<MetadataItem*>(this);
-    while (m && m->getType() != type)
-        m = m->getParent();
-    return m;
-}
-//-----------------------------------------------------------------------------
-Database* MetadataItem::findDatabase() const
-{
-    return dynamic_cast<Database*>(getParentObjectOfType(ntDatabase));
-}
-//-----------------------------------------------------------------------------
-Database* MetadataItem::getDatabase(const wxString& callingMethod) const
-{
-    Database* database = findDatabase();
-    if (!database)
-    {
-        throw FRError(wxString::Format(_("%s - no database assigned"),
-            callingMethod.c_str()));
-    }
-    return database;
+    if (MetadataItem* m = getParent())
+        return m->getDatabase();
+    return DatabasePtr();
 }
 //-----------------------------------------------------------------------------
 void MetadataItem::getDependencies(std::vector<Dependency>& list,
@@ -278,7 +261,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
 void MetadataItem::getDependencies(std::vector<Dependency>& list,
     bool ofObject)
 {
-    Database* d = getDatabase(wxT("MetadataItem::getDependencies"));
+    DatabasePtr d = getDatabase();
 
     int mytype = -1;            // map DBH type to RDB$DEPENDENT TYPE
     NodeType dep_types[] = {    ntTable,    ntView,     ntTrigger,  ntUnknown,  ntUnknown,

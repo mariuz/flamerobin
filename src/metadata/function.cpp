@@ -118,9 +118,9 @@ void Function::loadProperties()
     definitionM = getName_() + wxT("(") + wxTextBuffer::GetEOL();
     paramListM = wxEmptyString;
 
-    Database* d = getDatabase(wxT("Function::loadProperties"));
-    MetadataLoader* loader = d->getMetadataLoader();
-    wxMBConv* converter = d->getCharsetConverter();
+    DatabasePtr db = getDatabase();
+    MetadataLoader* loader = db->getMetadataLoader();
+    wxMBConv* converter = db->getCharsetConverter();
     MetadataLoaderTransaction tr(loader);
 
     IBPP::Statement& st1 = loader->getStatement(
@@ -161,7 +161,7 @@ void Function::loadProperties()
         {
             st1->Get(11, charset);
             wxString chset(std2wx(charset, converter).Strip());
-            if (d->getDatabaseCharset() != chset)
+            if (db->getDatabaseCharset() != chset)
             {
                 datatype += wxT(" ") + SqlTokenizer::getKeyword(kwCHARACTER)
                     + wxT(" ") + SqlTokenizer::getKeyword(kwSET)

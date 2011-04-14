@@ -201,8 +201,8 @@ void MetadataItemPropertiesPanel::loadPage()
     wxBusyCursor bc;
 
     // start a transaction for metadata loading and lock the object
-    Database* d = objectM->findDatabase();
-    MetadataLoaderTransaction tr((d) ? d->getMetadataLoader() : 0);
+    DatabasePtr db = objectM->getDatabase();
+    MetadataLoaderTransaction tr((db) ? db->getMetadataLoader() : 0);
     SubjectLocker lock(objectM);
 
     ProgressDialog pd(this, _("Processing template..."));
@@ -423,17 +423,17 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
 
     wxStatusBar* sb = CreateStatusBar();
 
-    Database* d = object->findDatabase();
-    if (d)  // server property page doesn't have a database, so don't crash
-        sb->SetStatusText(d->getConnectionInfoString());
+    DatabasePtr db = object->getDatabase();
+    if (db)  // server property page doesn't have a database, so don't crash
+        sb->SetStatusText(db->getConnectionInfoString());
     else
         sb->SetStatusText(object->getName_());
 
-    if (d && config().get(wxT("linksOpenInTabs"), true))
+    if (db && config().get(wxT("linksOpenInTabs"), true))
     {
         SetIcon(wxArtProvider::GetIcon(ART_DatabaseConnected,
             wxART_FRAME_ICON));
-        databaseNameM = d->getName_();
+        databaseNameM = db->getName_();
     }
     else  // when linksOpenInTabs, only the server node
     {
@@ -480,18 +480,21 @@ MetadataItemPropertiesFrame::openNewPropertyPageInTab(MetadataItem* object,
 {
     // find frame showing the same database
     MetadataItemPropertiesFrame* mf = 0;
-    Database* db = (object != 0) ? object->findDatabase() : 0;
-    if (db)
+    if (object)
     {
-        for (MIPPanels::iterator it = mipPanels.begin();
-            it != mipPanels.end(); ++it)
+        DatabasePtr db = object->getDatabase();
+        if (db)
         {
-            MetadataItem* mi = (*it)->getObservedObject();
-            if (mi && mi->findDatabase() == db)
+            for (MIPPanels::iterator it = mipPanels.begin();
+                it != mipPanels.end(); ++it)
             {
-                mf = (*it)->getParentFrame();
-                if (parentFrame == 0 || parentFrame == mf)
-                    break;
+                MetadataItem* mi = (*it)->getObservedObject();
+                if (mi && mi->getDatabase() == db)
+                {
+                    mf = (*it)->getParentFrame();
+                    if (parentFrame == 0 || parentFrame == mf)
+                        break;
+                }
             }
         }
     }
@@ -694,11 +697,11 @@ bool PropertiesHandler::handleURI(URI& uri)
         MetadataItemPropertiesPanel*>(getParentWindow(uri));
     if (!parent)
         return true;
-    Database* d = parent->getObservedObject()->findDatabase();
-    if (!d)
+    DatabasePtr db = parent->getObservedObject()->getDatabase();
+    if (!db)
         return true;
     NodeType n = getTypeByName(uri.getParam(wxT("object_type")));
-    MetadataItem* object = d->findByNameAndType(n,
+    MetadataItem* object = db->findByNameAndType(n,
         uri.getParam(wxT("object_name")));
     if (!object)
     {

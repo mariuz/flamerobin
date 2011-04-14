@@ -103,10 +103,7 @@ bool checkValidServer(ServerPtr server)
 DatabasePtr getDatabase(MetadataItem* mi)
 {
     if (mi)
-    {
-        if (Database* db = mi->findDatabase())
-            return db->shared_from_this();
-    }
+        return mi->getDatabase();
     return DatabasePtr();
 }
 //-----------------------------------------------------------------------------
@@ -116,7 +113,7 @@ ServerPtr getServer(MetadataItem* mi)
     {
         if (Server* s = dynamic_cast<Server*>(mi))
             return s->shared_from_this();
-        if (Database* db = mi->findDatabase())
+        if (DatabasePtr db = mi->getDatabase())
             return db->getServer();
     }
     return ServerPtr();
@@ -506,7 +503,9 @@ void MainFrame::OnMainMenuOpen(wxMenuEvent& event)
     if (objectMenuM->GetMenuItemCount() == 1)
         objectMenuM->AppendSeparator();
 
-    if (m->findDatabase() != 0 && dynamic_cast<Database*>(m) == 0)  // has to be subitem of database
+    // object has to be subitem of database
+    DatabasePtr db = m->getDatabase();
+    if (db && db.get() != m)
     {
         ContextMenuMetadataItemVisitor cmv(objectMenuM);
         m->acceptVisitor(&cmv);
@@ -810,7 +809,7 @@ void MainFrame::OnMenuInsert(wxCommandEvent& WXUNUSED(event))
     if (!t)
         return;
 
-    showSql(this, wxString(_("Execute SQL statements")), db.get(),
+    showSql(this, wxString(_("Execute SQL statements")), db,
         t->getInsertStatement());
 }
 //-----------------------------------------------------------------------------
@@ -849,7 +848,7 @@ void MainFrame::OnMenuGenerateScript(wxCommandEvent& event)
             tp.processTemplateFile(sql, (*it)->getTemplateFileName(),
                 mi, &pd);
             showSql(this, wxString(_("Execute SQL statements")),
-                database.get(), sql);
+                database, sql);
             break;
         }
     }
@@ -862,7 +861,7 @@ void MainFrame::OnMenuExecuteProcedure(wxCommandEvent& WXUNUSED(event))
     if (!p)
         return;
 
-    showSql(this, wxString(_("Executing procedure")), p->findDatabase(),
+    showSql(this, wxString(_("Executing procedure")), p->getDatabase(),
         p->getExecuteStatement());
 }
 //-----------------------------------------------------------------------------
@@ -872,7 +871,7 @@ void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
         treeMainM->getSelectedMetadataItem());
     if (!r)
         return;
-    Database* d = r->findDatabase();
+    DatabasePtr d = r->getDatabase();
     if (!d)
         return;
 
@@ -1348,7 +1347,7 @@ void MainFrame::showCreateTemplate(const wxString& statement)
     if (!tryAutoConnectDatabase(db))
         return;
 
-    showSql(this, wxEmptyString, db.get(), statement);
+    showSql(this, wxEmptyString, db, statement);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuLoadColumnsInfo(wxCommandEvent& WXUNUSED(event))
@@ -1552,7 +1551,7 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
         sql = t->getAlterSql();
     else if (dm)
         sql = dm->getAlterSqlTemplate();
-    showSql(this, wxString(_("Alter object")), db.get(), sql);
+    showSql(this, wxString(_("Alter object")), db, sql);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRecreateDatabase(wxCommandEvent& WXUNUSED(event))
@@ -1627,7 +1626,7 @@ void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
     //       and offer the user to either drop dependencies, or drop those
     //       objects too.
     //       Then we should create a bunch of sql statements that do it.
-    execSql(this, wxEmptyString, db.get(), mi->getDropSqlStatement(), true);
+    execSql(this, wxEmptyString, db, mi->getDropSqlStatement(), true);
 }
 //-----------------------------------------------------------------------------
 //! create new ExecSqlFrame and attach database object to it
@@ -1640,8 +1639,7 @@ void MainFrame::OnMenuExecuteStatements(wxCommandEvent& WXUNUSED(event))
         return;
 
     wxBusyCursor bc;
-    showSql(this, wxString(_("Execute SQL statements")), db.get(),
-        wxEmptyString);
+    showSql(this, wxString(_("Execute SQL statements")), db, wxEmptyString);
 }
 //-----------------------------------------------------------------------------
 const wxString MainFrame::getName() const

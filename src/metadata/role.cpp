@@ -56,8 +56,8 @@ Role::Role(DatabasePtr database, const wxString& name)
 std::vector<Privilege>* Role::getPrivileges()
 {
     // load privileges from database and return the pointer to collection
-    Database* d = getDatabase(wxT("Role::getPrivileges"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    MetadataLoader* loader = db->getMetadataLoader();
     // first start a transaction for metadata loading, then lock the role
     // when objects go out of scope and are destroyed, role will be
     // unlocked before the transaction is committed - any update() calls on
@@ -74,7 +74,7 @@ std::vector<Privilege>* Role::getPrivileges()
         "where RDB$RELATION_NAME = ? and rdb$object_type = 13 "
         "order by rdb$user, rdb$user_type, rdb$privilege"
     );
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+    st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
     st1->Execute();
     std::string lastuser;
     int lasttype = -1;
@@ -105,13 +105,13 @@ std::vector<Privilege>* Role::getPrivileges()
 //-----------------------------------------------------------------------------
 wxString Role::getOwner()
 {
-    Database* d = getDatabase(wxT("Role::getOwner"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 
     IBPP::Statement st1 = loader->getStatement(
         "select rdb$owner_name from rdb$roles where rdb$role_name = ?");
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+    st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
     st1->Execute();
     st1->Fetch();
     std::string name;

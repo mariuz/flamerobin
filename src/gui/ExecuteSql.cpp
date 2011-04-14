@@ -41,7 +41,7 @@
 #include "gui/ExecuteSqlFrame.h"
 //-----------------------------------------------------------------------------
 ExecuteSqlFrame* showSql(wxWindow* parent, const wxString& title,
-    Database *database, const wxString &sql)
+    DatabasePtr database, const wxString &sql)
 {
     ExecuteSqlFrame* eff = new ExecuteSqlFrame(parent, -1, title, database);
     eff->Show();
@@ -49,10 +49,10 @@ ExecuteSqlFrame* showSql(wxWindow* parent, const wxString& title,
     return eff;
 }
 //-----------------------------------------------------------------------------
-void execSql(wxWindow* parent, const wxString& title, Database *database,
+void execSql(wxWindow* parent, const wxString& title, DatabasePtr database,
     const wxString &sql, bool closeWindow)
 {
-    ExecuteSqlFrame *eff = showSql(parent, title, database, sql);
+    ExecuteSqlFrame* eff = showSql(parent, title, database, sql);
     eff->Update();
     eff->executeAllStatements(closeWindow);
 }

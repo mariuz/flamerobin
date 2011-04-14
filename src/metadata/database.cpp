@@ -566,6 +566,11 @@ void Database::loadGeneratorValues()
     }
 }
 //-----------------------------------------------------------------------------
+DatabasePtr Database::getDatabase() const
+{
+    return (const_cast<Database*>(this))->shared_from_this();
+}
+//-----------------------------------------------------------------------------
 MetadataItem* Database::findByName(wxString name)
 {
     if (!isConnected())

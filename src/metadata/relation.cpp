@@ -104,13 +104,13 @@ void Relation::loadProperties()
 {
     setPropertiesLoaded(false);
 
-    Database* d = getDatabase(wxT("Relation::loadInfo"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
-    wxMBConv* converter = d->getCharsetConverter();
+    wxMBConv* converter = db->getCharsetConverter();
 
     std::string sql("select rdb$owner_name, ");
-    if (d->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+    if (db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
         sql += "rdb$relation_type, ";
     else
         sql += "0, ";
@@ -179,8 +179,8 @@ void Relation::loadChildren()
     // in case an exception is thrown this should be repeated
     setChildrenLoaded(false);
 
-    Database *d = getDatabase(wxT("Relation::loadChildren"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    MetadataLoader* loader = db->getMetadataLoader();
     // first start a transaction for metadata loading, then lock the database
     // (lock the database instead of the relation itself, as loading columns
     // will cause domains to be loaded as well, so the domain collection
@@ -189,8 +189,8 @@ void Relation::loadChildren()
     // before the transaction is committed - any update() calls on observers
     // can possibly use the same transaction
     MetadataLoaderTransaction tr(loader);
-    SubjectLocker lock(d);
-    wxMBConv* converter = d->getCharsetConverter();
+    SubjectLocker lock(db.get());
+    wxMBConv* converter = db->getCharsetConverter();
 
     IBPP::Statement& st1 = loader->getStatement(
         "select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source, "
@@ -272,15 +272,15 @@ void Relation::getDependentViews(std::vector<Relation *>& views,
 //-----------------------------------------------------------------------------
 void Relation::getDependentChecks(std::vector<CheckConstraint>& checks)
 {
-    Database* d = getDatabase(wxT("Relation::getDependentChecks"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    MetadataLoader* loader = db->getMetadataLoader();
     // first start a transaction for metadata loading, then lock the relation
     // when objects go out of scope and are destroyed, object will be unlocked
     // before the transaction is committed - any update() calls on observers
     // can possibly use the same transaction
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(this);
-    wxMBConv* converter = d->getCharsetConverter();
+    wxMBConv* converter = db->getCharsetConverter();
 
     IBPP::Statement& st1 = loader->getStatement(
         "select c.rdb$constraint_name, t.rdb$relation_name, "
@@ -307,7 +307,7 @@ void Relation::getDependentChecks(std::vector<CheckConstraint>& checks)
         wxString source;
         readBlob(st1, 3, source, converter);
 
-        Table* tab = dynamic_cast<Table*>(d->findByNameAndType(ntTable,
+        Table* tab = dynamic_cast<Table*>(db->findByNameAndType(ntTable,
             table));
         if (!tab)
             continue;
@@ -452,9 +452,9 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
         // a) drop and create foreign keys that reference this table
         // find all tables from "tables" which have foreign keys with "table"
         // and return them in "list"
-        Database *d = getDatabase(wxT("Relation::getRebuildSql"));
+        DatabasePtr db = getDatabase();
         std::vector<ForeignKey> fkeys;
-        TablesPtr tables(d->getTables());
+        TablesPtr tables(db->getTables());
         for (Tables::iterator it = tables->begin(); it != tables->end(); ++it)
         {
             std::vector<ForeignKey> *fk = (*it)->getForeignKeys();
@@ -568,8 +568,8 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
 std::vector<Privilege>* Relation::getPrivileges()
 {
     // load privileges from database and return the pointer to collection
-    Database* d = getDatabase(wxT("Relation::getPrivileges"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    MetadataLoader* loader = db->getMetadataLoader();
 
     privilegesM.clear();
 
@@ -579,7 +579,7 @@ std::vector<Privilege>* Relation::getPrivileges()
     // can possibly use the same transaction
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(this);
-    wxMBConv* converter = d->getCharsetConverter();
+    wxMBConv* converter = db->getCharsetConverter();
 
     IBPP::Statement& st1 = loader->getStatement(
         "select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
@@ -623,14 +623,15 @@ std::vector<Privilege>* Relation::getPrivileges()
 void Relation::getTriggers(std::vector<Trigger *>& list,
     Trigger::fireTimeType beforeOrAfter)
 {
-    Database* d = getDatabase(wxT("Relation::getTriggers"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
-    wxMBConv* converter = d->getCharsetConverter();
+    wxMBConv* converter = db->getCharsetConverter();
 
     IBPP::Statement& st1 = loader->getStatement(
-        "select rdb$trigger_name from rdb$triggers where rdb$relation_name = ? "
-        "order by rdb$trigger_sequence"
+        "select rdb$trigger_name from rdb$triggers"
+        " where rdb$relation_name = ?"
+        " order by rdb$trigger_sequence"
     );
     st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
@@ -638,7 +639,7 @@ void Relation::getTriggers(std::vector<Trigger *>& list,
     {
         std::string name;
         st1->Get(1, name);
-        Trigger* t = dynamic_cast<Trigger*>(d->findByNameAndType(ntTrigger,
+        Trigger* t = dynamic_cast<Trigger*>(db->findByNameAndType(ntTrigger,
             std2wxIdentifier(name, converter)));
         if (t && t->getFiringTime() == beforeOrAfter)
             list.push_back(t);

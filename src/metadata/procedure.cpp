@@ -68,8 +68,8 @@ void Procedure::loadChildren()
     // in case an exception is thrown this should be repeated
     setChildrenLoaded(false);
 
-    Database* d = getDatabase(wxT("Procedure::loadChildren"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    MetadataLoader* loader = db->getMetadataLoader();
     // first start a transaction for metadata loading, then lock the procedure
     // when objects go out of scope and are destroyed, procedure will be
     // unlocked before the transaction is committed - any update() calls on
@@ -78,14 +78,14 @@ void Procedure::loadChildren()
     // before the transaction is committed - any update() calls on observers
     // can possibly use the same transaction
     MetadataLoaderTransaction tr(loader);
-    SubjectLocker lock(d);
-    wxMBConv* converter = d->getCharsetConverter();
+    SubjectLocker lock(db.get());
+    wxMBConv* converter = db->getCharsetConverter();
 
     std::string sql(
         "select p.rdb$parameter_name, p.rdb$field_source, "
         "p.rdb$parameter_type, "
     );
-    if (d->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+    if (db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
         sql += "p.rdb$default_source, p.rdb$parameter_mechanism ";
     else
         sql += "null, -1 ";
@@ -257,33 +257,34 @@ size_t Procedure::getParamCount() const
 //-----------------------------------------------------------------------------
 wxString Procedure::getOwner()
 {
-    Database* d = getDatabase(wxT("Procedure::getOwner"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 
     IBPP::Statement st1 = loader->getStatement(
         "select rdb$owner_name from rdb$procedures where rdb$procedure_name = ?");
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+    st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
     st1->Execute();
     st1->Fetch();
     std::string name;
     st1->Get(1, name);
-    return std2wxIdentifier(name, d->getCharsetConverter());
+    return std2wxIdentifier(name, db->getCharsetConverter());
 }
 //-----------------------------------------------------------------------------
 wxString Procedure::getSource()
 {
-    Database* d = getDatabase(wxT("Procedure::getSource"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 
     IBPP::Statement st1 = loader->getStatement(
-        "select rdb$procedure_source from rdb$procedures where rdb$procedure_name = ?");
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+        "select rdb$procedure_source from rdb$procedures"
+        " where rdb$procedure_name = ?");
+    st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
     st1->Execute();
     st1->Fetch();
     wxString source;
-    readBlob(st1, 1, source, d->getCharsetConverter());
+    readBlob(st1, 1, source, db->getCharsetConverter());
     source.Trim(false);     // remove leading whitespace
     return source;
 }
@@ -336,7 +337,7 @@ wxString Procedure::getAlterSql(bool full)
 {
     ensureChildrenLoaded();
 
-    Database* db = getDatabase(wxT("Procedure::getAlterSql"));
+    DatabasePtr db = getDatabase();
 
     wxString sql = wxT("SET TERM ^ ;\nALTER PROCEDURE ") + getQuotedName();
     if (!parametersM.empty())
@@ -469,15 +470,15 @@ void Procedure::checkDependentProcedures()
 std::vector<Privilege>* Procedure::getPrivileges()
 {
     // load privileges from database and return the pointer to collection
-    Database* d = getDatabase(wxT("Procedure::getPrivileges"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    MetadataLoader* loader = db->getMetadataLoader();
     // first start a transaction for metadata loading, then lock the procedure
     // when objects go out of scope and are destroyed, procedure will be
     // unlocked before the transaction is committed - any update() calls on
     // observers can possibly use the same transaction
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(this);
-    wxMBConv* converter = d->getCharsetConverter();
+    wxMBConv* converter = db->getCharsetConverter();
 
     privilegesM.clear();
 

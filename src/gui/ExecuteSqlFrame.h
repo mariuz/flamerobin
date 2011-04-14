@@ -72,7 +72,7 @@ public:
 class ExecuteSqlFrame: public BaseFrame, public Observer
 {
 public:
-    ExecuteSqlFrame(wxWindow* parent, int id, wxString title, Database *db,
+    ExecuteSqlFrame(wxWindow* parent, int id, wxString title, DatabasePtr db,
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxDEFAULT_FRAME_STYLE);
@@ -104,7 +104,6 @@ private:
 
     void splitScreen();
     Database* databaseM;
-    void setDatabase(Database* db);
 
     StatementHistory::Position historyPositionM;
     wxString localBuffer;

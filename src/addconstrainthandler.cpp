@@ -56,16 +56,17 @@ public:
 private:
     static const AddConstraintHandler handlerInstance;    // singleton; registers itself on creation.
 
-    TablePtr selectTable(Database* d, wxWindow* parent) const;
+    TablePtr selectTable(DatabasePtr db, wxWindow* parent) const;
     wxString selectAction(const wxString& label, wxWindow* parent) const;
 };
 //-----------------------------------------------------------------------------
 const AddConstraintHandler AddConstraintHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-TablePtr AddConstraintHandler::selectTable(Database* d, wxWindow* parent) const
+TablePtr AddConstraintHandler::selectTable(DatabasePtr db,
+    wxWindow* parent) const
 {
     wxArrayString tables;
-    TablesPtr ts(d->getTables());
+    TablesPtr ts(db->getTables());
     for (Tables::const_iterator it = ts->begin(); it != ts->end(); ++it)
         tables.Add((*it)->getName_());
     int index = ::wxGetSingleChoiceIndex(_("Select table to reference"),
@@ -103,7 +104,7 @@ bool AddConstraintHandler::handleURI(URI& uri)
         return true;
 
     // Find first available constraint name:
-    Database* db = t->getDatabase(wxT("AddConstraintHandler::handleURI"));
+    DatabasePtr db = t->getDatabase();
     wxString prefix = type + wxT("_") + t->getName_();
     wxString stmt(
         wxT("select rdb$constraint_name from rdb$relation_constraints ")
@@ -139,7 +140,7 @@ bool AddConstraintHandler::handleURI(URI& uri)
         wxString columnlist = selectRelationColumns(t, w);
         if (columnlist == wxT(""))
             return true;
-        TablePtr ref = selectTable(t->findDatabase(), w);
+        TablePtr ref = selectTable(t->getDatabase(), w);
         if (!ref)
             return true;
         wxString refcolumnlist = selectRelationColumns(ref.get(), w);
@@ -179,7 +180,7 @@ bool AddConstraintHandler::handleURI(URI& uri)
         return true;
     }
 
-    execSql(w, wxT(""),db, sql, true);  // true = commit + close at once
+    execSql(w, wxT(""), db, sql, true);  // true = commit + close at once
     return true;
 }
 //-----------------------------------------------------------------------------

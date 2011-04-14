@@ -105,7 +105,7 @@ wxString ColumnBase::getDatatype(bool useConfig)
 //-----------------------------------------------------------------------------
 DomainPtr ColumnBase::getDomain() const
 {
-    Database* db = findDatabase();
+    DatabasePtr db = getDatabase();
     return (db) ? db->getDomain(sourceM) : DomainPtr();
 }
 //-----------------------------------------------------------------------------
@@ -148,8 +148,8 @@ void ColumnBase::initialize(const wxString& source,
         notifyObservers();
 }
 //-----------------------------------------------------------------------------
-Column::Column(MetadataItem* parent, const wxString& name)
-    : ColumnBase(ntColumn, parent, name)
+Column::Column(Relation* relation, const wxString& name)
+    : ColumnBase(ntColumn, relation, name)
 {
 }
 //-----------------------------------------------------------------------------
@@ -248,7 +248,7 @@ bool Column::isString() const
 //-----------------------------------------------------------------------------
 Table* Column::getTable() const
 {
-    return dynamic_cast<Table*>(getParentObjectOfType(ntTable));
+    return dynamic_cast<Table*>(getParent());
 }
 //-----------------------------------------------------------------------------
 wxString Column::getComputedSource() const

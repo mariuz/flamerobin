@@ -113,7 +113,7 @@ wxString Table::getProcedureTemplate()
         wxT("\nRETURNS (");
     wxString collist, valist, parlist;
 
-    Database* db = getDatabase(wxT("Table::getProcedureTemplate"));
+    DatabasePtr db = getDatabase();
     wxString dbcharset = db->getDatabaseCharset();
     for (ColumnPtrs::iterator i = columnsM.begin();
         i != columnsM.end(); ++i)
@@ -184,8 +184,9 @@ void Table::loadCheckConstraints()
         return;
     checkConstraintsM.clear();
 
-    Database* d = getDatabase(wxT("Table::loadCheckConstraints"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    wxMBConv* conv = db->getCharsetConverter();
+    MetadataLoader* loader = db->getMetadataLoader();
     // first start a transaction for metadata loading, then lock the table
     // when objects go out of scope and are destroyed, table will be unlocked
     // before the transaction is committed - any update() calls on observers
@@ -205,18 +206,18 @@ void Table::loadCheckConstraints()
         " order by 1 "
     );
 
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+    st1->Set(1, wx2std(getName_(), conv));
     st1->Execute();
     CheckConstraint *cc = 0;
     while (st1->Fetch())
     {
         std::string s;
         st1->Get(1, s);
-        wxString cname(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString cname(std2wxIdentifier(s, conv));
         if (!cc || cname != cc->getName_()) // new constraint
         {
             wxString source;
-            readBlob(st1, 2, source, d->getCharsetConverter());
+            readBlob(st1, 2, source, conv);
 
             CheckConstraint c;
             c.setParent(this);
@@ -229,7 +230,7 @@ void Table::loadCheckConstraints()
         if (!st1->IsNull(3))
         {
             st1->Get(3, s);
-            wxString fname(std2wxIdentifier(s, d->getCharsetConverter()));
+            wxString fname(std2wxIdentifier(s, conv));
             cc->columnsM.push_back(fname);
         }
     }
@@ -243,8 +244,9 @@ void Table::loadPrimaryKey()
         return;
     primaryKeyM.columnsM.clear();
 
-    Database* d = getDatabase(wxT("Table::loadPrimaryKey"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    wxMBConv* conv = db->getCharsetConverter();
+    MetadataLoader* loader = db->getMetadataLoader();
     // first start a transaction for metadata loading, then lock the table
     // when objects go out of scope and are destroyed, table will be unlocked
     // before the transaction is committed - any update() calls on observers
@@ -259,17 +261,17 @@ void Table::loadPrimaryKey()
         "(r.rdb$constraint_type='PRIMARY KEY') order by r.rdb$constraint_name, i.rdb$field_position"
     );
 
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+    st1->Set(1, wx2std(getName_(), conv));
     st1->Execute();
     while (st1->Fetch())
     {
         std::string s;
         st1->Get(1, s);
-        wxString cname(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString cname(std2wxIdentifier(s, conv));
         st1->Get(2, s);
-        wxString fname(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString fname(std2wxIdentifier(s, conv));
         st1->Get(3, s);
-        wxString ixname(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString ixname(std2wxIdentifier(s, conv));
 
         primaryKeyM.setName_(cname);
         primaryKeyM.columnsM.push_back(fname);
@@ -286,8 +288,9 @@ void Table::loadUniqueConstraints()
         return;
     uniqueConstraintsM.clear();
 
-    Database* d = getDatabase(wxT("Table::loadUniqueConstraints"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    wxMBConv* conv = db->getCharsetConverter();
+    MetadataLoader* loader = db->getMetadataLoader();
     // first start a transaction for metadata loading, then lock the table
     // when objects go out of scope and are destroyed, table will be unlocked
     // before the transaction is committed - any update() calls on observers
@@ -302,18 +305,18 @@ void Table::loadUniqueConstraints()
         "(r.rdb$constraint_type='UNIQUE') order by r.rdb$constraint_name, i.rdb$field_position"
     );
 
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+    st1->Set(1, wx2std(getName_(), conv));
     st1->Execute();
     UniqueConstraint *cc = 0;
     while (st1->Fetch())
     {
         std::string s;
         st1->Get(1, s);
-        wxString cname(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString cname(std2wxIdentifier(s, conv));
         st1->Get(2, s);
-        wxString fname(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString fname(std2wxIdentifier(s, conv));
         st1->Get(3, s);
-        wxString ixname(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString ixname(std2wxIdentifier(s, conv));
 
         if (cc && cc->getName_() == cname)
             cc->columnsM.push_back(fname);
@@ -370,8 +373,9 @@ void Table::loadForeignKeys()
         return;
     foreignKeysM.clear();
 
-    Database* d = getDatabase(wxT("Table::loadForeignKeys"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    wxMBConv* conv = db->getCharsetConverter();
+    MetadataLoader* loader = db->getMetadataLoader();
     // first start a transaction for metadata loading, then lock the table
     // when objects go out of scope and are destroyed, table will be unlocked
     // before the transaction is committed - any update() calls on observers
@@ -396,24 +400,24 @@ void Table::loadForeignKeys()
         " order by i.rdb$field_position "
     );
 
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+    st1->Set(1, wx2std(getName_(), conv));
     st1->Execute();
     ForeignKey *fkp = 0;
     while (st1->Fetch())
     {
         std::string s;
         st1->Get(1, s);
-        wxString cname(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString cname(std2wxIdentifier(s, conv));
         st1->Get(2, s);
-        wxString fname(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString fname(std2wxIdentifier(s, conv));
         st1->Get(3, s);
-        wxString update_rule(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString update_rule(std2wxIdentifier(s, conv));
         st1->Get(4, s);
-        wxString delete_rule(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString delete_rule(std2wxIdentifier(s, conv));
         std::string ref_constraint;
         st1->Get(5, ref_constraint);
         st1->Get(6, s);
-        wxString ixname(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString ixname(std2wxIdentifier(s, conv));
 
         if (fkp && fkp->getName_() == cname) // add column
             fkp->columnsM.push_back(fname);
@@ -435,11 +439,9 @@ void Table::loadForeignKeys()
             {
                 st2->Get(1, rtable);
                 st2->Get(2, s);
-                fkp->referencedColumnsM.push_back(
-                    std2wxIdentifier(s, d->getCharsetConverter()));
+                fkp->referencedColumnsM.push_back(std2wxIdentifier(s, conv));
             }
-            fkp->referencedTableM = std2wxIdentifier(rtable,
-                d->getCharsetConverter());
+            fkp->referencedTableM = std2wxIdentifier(rtable, conv);
             fkp->columnsM.push_back(fname);
         }
     }
@@ -453,8 +455,9 @@ void Table::loadIndices()
         return;
     indicesM.clear();
 
-    Database* d = getDatabase(wxT("Table::loadIndices"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    wxMBConv* conv = db->getCharsetConverter();
+    MetadataLoader* loader = db->getMetadataLoader();
     // first start a transaction for metadata loading, then lock the table
     // when objects go out of scope and are destroyed, table will be unlocked
     // before the transaction is committed - any update() calls on observers
@@ -474,14 +477,14 @@ void Table::loadIndices()
         " order by i.rdb$index_name, s.rdb$field_position "
     );
 
-    st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
+    st1->Set(1, wx2std(getName_(), conv));
     st1->Execute();
     Index* i = 0;
     while (st1->Fetch())
     {
         std::string s;
         st1->Get(1, s);
-        wxString ixname(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString ixname(std2wxIdentifier(s, conv));
 
         short unq, inactive, type;
         if (st1->IsNull(2))     // null = non-unique
@@ -503,9 +506,9 @@ void Table::loadIndices()
             st1->Get(5, statistics);
 
         st1->Get(6, s);
-        wxString fname(std2wxIdentifier(s, d->getCharsetConverter()));
+        wxString fname(std2wxIdentifier(s, conv));
         wxString expression;
-        readBlob(st1, 8, expression, d->getCharsetConverter());
+        readBlob(st1, 8, expression, conv);
 
         if (i && i->getName_() == ixname)
             i->getSegments()->push_back(fname);
@@ -567,8 +570,8 @@ bool Table::tablesRelate(const std::vector<wxString>& tables, Table* table,
                 if ((*i2) == (*it).getName_())
                 {
                     // find foreign keys for that table
-                    Database* d = table->getDatabase(wxT("Table::tablesRelate"));
-                    Table* other_table = dynamic_cast<Table*>(d->findByNameAndType(ntTable, (*i2)));
+                    DatabasePtr db = table->getDatabase();
+                    Table* other_table = dynamic_cast<Table*>(db->findByNameAndType(ntTable, (*i2)));
                     if (!other_table)
                         break;
 

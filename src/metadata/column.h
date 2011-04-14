@@ -30,9 +30,6 @@
 #define FR_COLUMN_H
 
 #include "metadata/metadataitem.h"
-
-class Domain;
-class Table;
 //-----------------------------------------------------------------------------
 class ColumnBase: public MetadataItem
 {
@@ -60,7 +57,7 @@ private:
     bool notnullM, computedM;
     wxString sourceM, computedSourceM, collationM;
 public:
-    Column(MetadataItem* parent, const wxString& name);
+    Column(Relation* relation, const wxString& name);
 
     void initialize(bool notnull, const wxString& source,
         const wxString& computedSource, const wxString& collation,

@@ -248,6 +248,7 @@ public:
     void loadGeneratorValues();
     Relation* getRelationForTrigger(Trigger* trigger);
 
+    virtual DatabasePtr getDatabase() const;
     MetadataItem* findByNameAndType(NodeType nt, wxString name);
     MetadataItem* findByName(wxString name);
     Relation* findRelation(const Identifier& name);

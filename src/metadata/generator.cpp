@@ -64,7 +64,7 @@ void Generator::loadProperties()
 {
     setPropertiesLoaded(false);
 
-    Database* db = getDatabase(wxT("Generator::loadValue"));
+    DatabasePtr db = getDatabase();
     MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 

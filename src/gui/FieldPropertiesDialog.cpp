@@ -270,8 +270,7 @@ void FieldPropertiesDialog::update()
 bool FieldPropertiesDialog::getDomainInfo(const wxString& domain,
     wxString& type, wxString& size, wxString& scale, wxString& charset)
 {
-    Database* db = tableM->findDatabase();
-    if (db)
+    if (DatabasePtr db = tableM->getDatabase())
     {
         if (DomainPtr dm = db->getDomain(domain))
         {
@@ -450,8 +449,7 @@ void FieldPropertiesDialog::loadCharsets()
 
     choice_charset->Clear();
     choice_charset->Append(wxT("NONE"));
-    Database* db = (tableM) ? tableM->findDatabase() : 0;
-    if (tableM && db)
+    if (DatabasePtr db = tableM->getDatabase())
     {
         wxString stmt = wxT("select rdb$character_set_name")
             wxT(" from rdb$character_sets order by 1");
@@ -466,8 +464,7 @@ void FieldPropertiesDialog::loadCollations()
     wxWindowUpdateLocker freeze(choice_collate);
 
     choice_collate->Clear();
-    Database* db = (tableM) ? tableM->findDatabase() : 0;
-    if (tableM && db)
+    if (DatabasePtr db = tableM->getDatabase())
     {
         wxString charset(choice_charset->GetStringSelection());
         choice_collate->Append(db->getCollations(charset));
@@ -486,8 +483,7 @@ void FieldPropertiesDialog::loadDomains()
             choice_domain->SetSelection(0);
     }
 
-    Database* db = (tableM) ? tableM->findDatabase() : 0;
-    if (tableM && db)
+    if (DatabasePtr db = tableM->getDatabase())
     {
         if (columnM)
         {
@@ -507,8 +503,7 @@ void FieldPropertiesDialog::loadGeneratorNames()
     wxWindowUpdateLocker freeze(choice_generator);
 
     choice_generator->Clear();
-    Database* db = (tableM) ? tableM->findDatabase() : 0;
-    if (tableM && db)
+    if (DatabasePtr db = tableM->getDatabase())
     {
         GeneratorsPtr gs(db->getGenerators());
         for (Generators::const_iterator it = gs->begin(); it != gs->end();
@@ -713,18 +708,17 @@ void FieldPropertiesDialog::OnButtonEditDomainClick(wxCommandEvent&
 
     // Currently we just open the SQL editor and close this dialog
     wxString domain = choice_domain->GetStringSelection();
-    Database* db = tableM->getDatabase(
-        wxT("FieldPropertiesDialog::OnButtonEditDomainClick"));
-    Domain *d = dynamic_cast<Domain *>(db->findByNameAndType(ntDomain,
-        domain));
-    if (!d)
+    if (DatabasePtr db = tableM->getDatabase())
     {
-        // domain not found
-        return;
+        Domain* d = dynamic_cast<Domain*>(db->findByNameAndType(ntDomain,
+            domain));
+        if (d)
+        {
+            showSql(GetParent(), _("Alter domain"), db,
+                d->getAlterSqlTemplate());
+            EndModal(wxID_CANCEL);
+        }
     }
-
-    showSql(GetParent(), _("Alter domain"), db, d->getAlterSqlTemplate());
-    EndModal(wxID_CANCEL);
 }
 //-----------------------------------------------------------------------------
 void FieldPropertiesDialog::OnButtonOkClick(wxCommandEvent& WXUNUSED(event))
@@ -837,7 +831,7 @@ bool ColumnPropertiesHandler::handleURI(URI& uri)
     }
 
     if (!statements.IsEmpty())
-        execSql(w, title, t->findDatabase(), statements, true);
+        execSql(w, title, t->getDatabase(), statements, true);
     return true;
 }
 //-----------------------------------------------------------------------------

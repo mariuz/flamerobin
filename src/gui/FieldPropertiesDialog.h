@@ -40,6 +40,7 @@ class Column;
 //-----------------------------------------------------------------------------
 class FieldPropertiesDialog: public BaseDialog, public Observer {
 private:
+    DatabasePtr databaseM;
     Table* tableM;
     Column* columnM;
 
@@ -72,6 +73,7 @@ private:
     wxButton* button_cancel;
 
     void createControls();
+
     bool getDomainInfo(const wxString& domain,
         wxString& type, wxString& size, wxString& scale, wxString& charset);
     bool getIsNewDomainSelected();

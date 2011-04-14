@@ -60,10 +60,10 @@ void Domain::loadProperties()
 {
     setPropertiesLoaded(false);
 
-    Database* d = getDatabase(wxT("Domain::loadProperties"));
-    MetadataLoader* loader = d->getMetadataLoader();
+    DatabasePtr db = getDatabase();
+    MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
-    wxMBConv* converter = d->getCharsetConverter();
+    wxMBConv* converter = db->getCharsetConverter();
 
     IBPP::Statement& st1 = loader->getStatement(
         "select f.rdb$field_type, f.rdb$field_sub_type, f.rdb$field_length,"

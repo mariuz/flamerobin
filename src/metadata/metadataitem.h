@@ -74,8 +74,6 @@ private:
 protected:
     Identifier identifierM;
 
-    MetadataItem* getParentObjectOfType(NodeType type) const;
-
     virtual void loadDescription();
     virtual void saveDescription(wxString description);
     void saveDescription(wxString saveStatement, wxString description);
@@ -103,10 +101,8 @@ public:
     void getDependencies(std::vector<Dependency>& list, bool ofObject,
         const wxString& field);  // load from db
 
-    // will return 0 if no database is assigned
-    Database* findDatabase() const;
-    // will throw FRError if no database is assigned
-    Database* getDatabase(const wxString& callingMethod) const;
+    // returned shared ptr may be unassigned
+    virtual DatabasePtr getDatabase() const;
 
     virtual void invalidate();
 

@@ -247,7 +247,7 @@ bool ReorderFieldsHandler::handleURI(URI& uri)
     //       the parent frame over the newly created sql execution frame
     if (rfd.ShowModal() == wxID_OK)
     {
-        execSql(w, rfd.GetTitle(), t->findDatabase(),
+        execSql(w, rfd.GetTitle(), t->getDatabase(),
             rfd.getStatementsToExecute(), true);
     }
     return true;

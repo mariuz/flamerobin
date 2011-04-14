@@ -86,13 +86,12 @@ void LoadDescriptionVisitor::loadDescription(MetadataItem* object,
     availableM = false;
 
     wxASSERT(object);
-    Database* d = object->getDatabase(
-        wxT("LoadDescriptionVisitor::loadDescription"));
-    wxMBConv* csConverter = d->getCharsetConverter();
+    DatabasePtr db = object->getDatabase();
+    wxMBConv* csConverter = db->getCharsetConverter();
 
     try
     {
-        MetadataLoader* loader = d->getMetadataLoader();
+        MetadataLoader* loader = db->getMetadataLoader();
         MetadataLoaderTransaction tr(loader);
         IBPP::Statement& st1 = loader->getStatement(statement);
 
@@ -219,8 +218,7 @@ void SaveDescriptionVisitor::saveDescription(MetadataItem* object,
     MetadataItem* parent, const std::string& statement)
 {
     wxASSERT(object);
-    Database* d = object->getDatabase(
-        wxT("SaveDescriptionVisitor::saveDescription"));
+    DatabasePtr d = object->getDatabase();
     wxMBConv* csConverter = d->getCharsetConverter();
 
     IBPP::Database& db = d->getIBPPDatabase();

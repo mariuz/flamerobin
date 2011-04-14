@@ -38,11 +38,18 @@
 //-----------------------------------------------------------------------------
 class MetadataCollectionBase : public MetadataItem
 {
+private:
+    DatabaseWeakPtr databaseM;
 public:
-    MetadataCollectionBase(NodeType type, MetadataItem* parent,
+    MetadataCollectionBase(NodeType type, DatabasePtr database,
             const wxString& name)
-        : MetadataItem(type, parent, name)
+        : MetadataItem(type, database.get(), name), databaseM(database)
     {
+    }
+
+    virtual DatabasePtr getDatabase() const
+    {
+        return DatabasePtr(databaseM);
     }
 
     virtual bool isSystem() const { return false; }
@@ -57,7 +64,6 @@ public:
     typedef typename CollectionType::iterator iterator;
     typedef typename CollectionType::const_iterator const_iterator;
 private:
-    DatabaseWeakPtr databaseM;
     CollectionType itemsM;
 
     iterator getPosition(wxString name)
@@ -94,14 +100,8 @@ private:
 public:
     MetadataCollection<T>(NodeType type, DatabasePtr database,
             const wxString& name)
-        : MetadataCollectionBase(type, database.get(), name),
-            databaseM(database)
+        : MetadataCollectionBase(type, database, name)
     {
-    }
-
-    DatabasePtr getDatabase() const
-    {
-        return DatabasePtr(databaseM);
     }
 
     // inserts new item into list at correct position to preserve alphabetical
