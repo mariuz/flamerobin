@@ -139,7 +139,7 @@ void BackupRestoreBaseFrame::doWriteConfigSettings(const wxString& prefix) const
 //-----------------------------------------------------------------------------
 DatabasePtr BackupRestoreBaseFrame::getDatabase() const
 {
-    return DatabasePtr(databaseM);
+    return databaseM.lock();
 }
 //-----------------------------------------------------------------------------
 const wxString BackupRestoreBaseFrame::getStorageName() const

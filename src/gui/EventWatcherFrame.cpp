@@ -246,7 +246,7 @@ void EventWatcherFrame::defineMonitoredEvents()
 //-----------------------------------------------------------------------------
 DatabasePtr EventWatcherFrame::getDatabase() const
 {
-    return DatabasePtr(databaseM);
+    return databaseM.lock();
 }
 //-----------------------------------------------------------------------------
 bool EventWatcherFrame::setTimerActive(bool active)
