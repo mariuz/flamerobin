@@ -383,10 +383,7 @@ void DatabaseImpl::Users(std::vector<std::string>& users)
     (*gds.Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
         result.Size(), result.Self());
     if (status.Errors())
-    {
-        status.Reset();
         throw SQLExceptionImpl(status, "Database::Users", _("isc_database_info failed"));
-    }
 
     users.clear();
     char* p = result.Self();
