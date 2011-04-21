@@ -275,7 +275,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     outerSizer = new wxBoxSizer( wxVERTICAL );
 
     outerPanel = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-        wxTAB_TRAVERSAL | wxCLIP_CHILDREN | wxNO_FULL_REPAINT_ON_RESIZE);
+        wxTAB_TRAVERSAL | wxCLIP_CHILDREN);
     wxBoxSizer* innerSizer;
     innerSizer = new wxBoxSizer( wxVERTICAL );
 
@@ -298,7 +298,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
         // doesn't seem to work on MSW when root is hidden
         wxTR_NO_LINES | wxTR_HIDE_ROOT |
 #endif
-        wxTR_HAS_BUTTONS | wxSUNKEN_BORDER );
+        wxTR_HAS_BUTTONS | wxBORDER_THEME);
     leftPanelSizer->Add( mainTree, 1, wxALL|wxEXPAND, 5 );
 
     leftPanel->SetSizer( leftPanelSizer );

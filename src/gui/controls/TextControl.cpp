@@ -43,7 +43,8 @@
 #include "gui/controls/TextControl.h"
 //-----------------------------------------------------------------------------
 TextControl::TextControl(wxWindow *parent, wxWindowID id)
-    : wxStyledTextCtrl(parent, id)
+    : wxStyledTextCtrl(parent, id, wxDefaultPosition, wxDefaultSize,
+        wxBORDER_THEME)
 {
     SetWrapMode(wxSTC_WRAP_WORD);
     // wxStyledTextCtrl uses black on white initially -> use system defaults

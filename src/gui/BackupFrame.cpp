@@ -199,8 +199,8 @@ BackupFrame::BackupFrame(wxWindow* parent, DatabasePtr db)
 //! implementation details
 void BackupFrame::createControls()
 {
-    panel_controls = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-        wxTAB_TRAVERSAL | wxCLIP_CHILDREN | wxNO_FULL_REPAINT_ON_RESIZE);
+    panel_controls = new wxPanel(this, wxID_ANY, wxDefaultPosition,
+        wxDefaultSize, wxTAB_TRAVERSAL | wxCLIP_CHILDREN);
     label_filename = new wxStaticText(panel_controls, wxID_ANY,
         _("Backup file:"));
     text_ctrl_filename = new FileTextControl(panel_controls,

@@ -168,7 +168,7 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
     // 500 should be reasonable for enough rows on the screen, but not too much
     gridM = new wxGrid(getControlsPanel(), ID_Grid, wxDefaultPosition,
         fields.size() < 12 ? wxDefaultSize : wxSize(-1, 500),
-        wxWANTS_CHARS | wxSUNKEN_BORDER);
+        wxWANTS_CHARS | wxBORDER_THEME);
     gridM->SetRowLabelSize(50);
     gridM->DisableDragRowSize();
     gridM->SetRowLabelAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);

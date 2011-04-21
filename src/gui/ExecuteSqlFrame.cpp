@@ -540,18 +540,15 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     buildMainMenu(cm);
 
     panel_contents = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize,
-        wxTAB_TRAVERSAL
-#ifdef __WXGTK12__
-        | wxSUNKEN_BORDER
-#endif
-    );
+        wxTAB_TRAVERSAL);
     splitter_window_1 = new wxSplitterWindow(panel_contents, -1);
     styled_text_ctrl_sql = new SqlEditor(splitter_window_1, ID_stc_sql);
 
     notebook_1 = new wxNotebook(splitter_window_1, -1, wxDefaultPosition,
         wxDefaultSize, 0);
     notebook_pane_1 = new wxPanel(notebook_1, -1);
-    styled_text_ctrl_stats = new wxStyledTextCtrl(notebook_pane_1, -1);
+    styled_text_ctrl_stats = new wxStyledTextCtrl(notebook_pane_1, wxID_ANY,
+        wxDefaultPosition, wxDefaultSize, wxBORDER_THEME);
     styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
     styled_text_ctrl_stats->StyleSetForeground(1, *wxRED);
     styled_text_ctrl_stats->StyleSetForeground(2, *wxBLUE);

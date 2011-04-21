@@ -44,10 +44,10 @@
 //-----------------------------------------------------------------------------
 BaseDialog::BaseDialog(wxWindow* parent, int id, const wxString& title,
         const wxPoint& pos, const wxSize& size, long style)
-    : wxDialog(parent, id, title, pos, size, style|wxNO_FULL_REPAINT_ON_RESIZE)
+    : wxDialog(parent, id, title, pos, size, style)
 {
-    panel_controls = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-        wxTAB_TRAVERSAL|wxCLIP_CHILDREN|wxNO_BORDER|wxNO_FULL_REPAINT_ON_RESIZE);
+    panel_controls = new wxPanel(this, wxID_ANY, wxDefaultPosition,
+        wxDefaultSize, wxTAB_TRAVERSAL | wxCLIP_CHILDREN | wxNO_BORDER);
 }
 //-----------------------------------------------------------------------------
 wxPanel* BaseDialog::getControlsPanel()

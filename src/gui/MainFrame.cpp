@@ -149,12 +149,12 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title,
 #if defined __WXGTK20__ || defined __WXMAC__
         wxTR_NO_LINES |
 #endif
-        wxTR_HAS_BUTTONS | wxSUNKEN_BORDER);
+        wxTR_HAS_BUTTONS | wxBORDER_THEME);
 
     wxArrayString choices;  // load from config?
 
     searchPanelM = new wxPanel(mainPanelM, -1, wxDefaultPosition, wxDefaultSize,
-        wxTAB_TRAVERSAL | wxSUNKEN_BORDER);
+        wxTAB_TRAVERSAL | wxBORDER_THEME);
     searchBoxM = new wxComboBox(searchPanelM, ID_search_box, wxEmptyString,
         wxDefaultPosition, wxDefaultSize, choices,
         wxCB_DROPDOWN | wxCB_SORT | wxTE_PROCESS_ENTER);

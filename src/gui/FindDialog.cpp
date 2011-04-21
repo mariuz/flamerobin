@@ -102,9 +102,9 @@ FindFlags& FindFlags::operator= (const FindFlags& source)
 //-----------------------------------------------------------------------------
 //! wxStyledTextCtrl with Search&Replace capability
 SearchableEditor::SearchableEditor(wxWindow *parent, wxWindowID id)
-    : wxStyledTextCtrl(parent, id)
+    : wxStyledTextCtrl(parent, id, wxDefaultPosition, wxDefaultSize,
+        wxBORDER_THEME), fd(0)
 {
-    fd = 0;
 }
 //-----------------------------------------------------------------------------
 wxString SearchableEditor::convertBackslashes(const wxString& source)

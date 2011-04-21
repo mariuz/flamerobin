@@ -202,9 +202,10 @@ RestoreFrame::RestoreFrame(wxWindow* parent, DatabasePtr db)
 //! implementation details
 void RestoreFrame::createControls()
 {
-    panel_controls = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-        wxTAB_TRAVERSAL | wxCLIP_CHILDREN | wxNO_FULL_REPAINT_ON_RESIZE);
-    label_filename = new wxStaticText(panel_controls, wxID_ANY, _("Backup file:"));
+    panel_controls = new wxPanel(this, wxID_ANY, wxDefaultPosition,
+        wxDefaultSize, wxTAB_TRAVERSAL | wxCLIP_CHILDREN);
+    label_filename = new wxStaticText(panel_controls, wxID_ANY,
+        _("Backup file:"));
     text_ctrl_filename = new FileTextControl(panel_controls,
         ID_text_ctrl_filename, wxEmptyString);
     button_browse = new wxButton(panel_controls, ID_button_browse, _("..."),

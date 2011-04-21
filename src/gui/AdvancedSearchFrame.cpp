@@ -190,7 +190,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent, RootPtr root)
     leftSizer->Add(fgSizer1, 0, wxEXPAND, 5);
 
     listctrl_criteria = new AdjustableListCtrl(mainPanel, ID_listctrl_criteria,
-        wxLC_REPORT|wxLC_VRULES|wxSUNKEN_BORDER);
+        wxLC_REPORT | wxLC_VRULES | wxBORDER_THEME);
     listctrl_criteria->InsertColumn(0, _("Search criteria"));
     listctrl_criteria->InsertColumn(1, _("Value"));
     leftSizer->Add(listctrl_criteria, 1, wxALL|wxEXPAND, 5);
@@ -227,7 +227,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent, RootPtr root)
         wxDefaultSize, wxTAB_TRAVERSAL);
     wxBoxSizer *top_splitter_sizer = new wxBoxSizer(wxVERTICAL);
     listctrl_results = new AdjustableListCtrl(top_splitter_panel,
-        ID_listctrl_results, wxLC_REPORT|wxLC_VRULES|wxSUNKEN_BORDER);
+        ID_listctrl_results, wxLC_REPORT | wxLC_VRULES | wxBORDER_THEME);
     listctrl_results->InsertColumn(0, _("Database"));
     listctrl_results->InsertColumn(1, _("Type"));
     listctrl_results->InsertColumn(2, _("Name"));
@@ -238,7 +238,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent, RootPtr root)
         wxDefaultSize, wxTAB_TRAVERSAL);
     wxBoxSizer *bottom_splitter_sizer = new wxBoxSizer(wxVERTICAL);
     stc_ddl = new wxStyledTextCtrl(bottom_splitter_panel, wxID_ANY,
-        wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
+        wxDefaultPosition, wxDefaultSize, wxBORDER_THEME);
     stc_ddl->SetWrapMode(wxSTC_WRAP_WORD);
     stc_ddl->SetMarginWidth(1, 0);  // turn off the folding margin
     stc_ddl->StyleSetForeground(1, *wxWHITE);

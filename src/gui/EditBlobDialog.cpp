@@ -80,9 +80,9 @@ private:
 };
 //-----------------------------------------------------------------------------
 EditBlobDialogSTC::EditBlobDialogSTC(wxWindow *parent, wxWindowID id)
-    : wxStyledTextCtrl(parent,id)
+    : wxStyledTextCtrl(parent, id, wxDefaultPosition, wxDefaultSize,
+        wxBORDER_THEME), isNullM(false)
 {
-    isNullM = false;
     wxFont fontNull(frlayoutconfig().getEditorFontSize(),
         wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL,
         false);

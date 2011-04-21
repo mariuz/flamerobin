@@ -348,9 +348,9 @@ void PreferencesDialog::initControls(const wxString& saveButtonCaption)
 
     treectrl_1 = new wxTreeCtrl(getControlsPanel(), ID_treectrl_panes,
         wxDefaultPosition, wxDefaultSize,
-        wxSUNKEN_BORDER | wxTR_DEFAULT_STYLE | wxTR_HAS_BUTTONS | wxTR_HIDE_ROOT);
+        wxBORDER_THEME | wxTR_DEFAULT_STYLE | wxTR_HAS_BUTTONS | wxTR_HIDE_ROOT);
     panel_categ = new wxPanel(getControlsPanel(), wxID_ANY, wxDefaultPosition,
-        wxDefaultSize, wxSUNKEN_BORDER);
+        wxDefaultSize, wxBORDER_THEME);
     static_text_categ = new wxStaticText(panel_categ, wxID_ANY, wxT("Dummy min size text"));
     bookctrl_1 = new Optionbook(getControlsPanel(), ID_bookctrl_panes,
         wxDefaultPosition, wxDefaultSize);

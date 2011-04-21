@@ -107,7 +107,7 @@ EventWatcherFrame::EventWatcherFrame(wxWindow* parent, DatabasePtr db)
 void EventWatcherFrame::createControls()
 {
     panel_controls = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize,
-        wxTAB_TRAVERSAL | wxCLIP_CHILDREN | wxNO_FULL_REPAINT_ON_RESIZE);
+        wxTAB_TRAVERSAL | wxCLIP_CHILDREN);
     static_text_monitored = new wxStaticText(panel_controls, wxID_ANY,
         _("Monitored events"));
     static_text_received = new wxStaticText(panel_controls, wxID_ANY,

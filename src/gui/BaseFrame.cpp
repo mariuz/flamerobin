@@ -48,8 +48,9 @@
 BaseFrame::FrameIdMap BaseFrame::frameIdsM;
 //-----------------------------------------------------------------------------
 BaseFrame::BaseFrame(wxWindow* parent, int id, const wxString& title,
-        const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-    : wxFrame(parent, id, title, pos, size, style | wxNO_FULL_REPAINT_ON_RESIZE, name)
+        const wxPoint& pos, const wxSize& size, long style,
+        const wxString& name)
+    : wxFrame(parent, id, title, pos, size, style, name)
 {
     frameIdsM.insert(FrameIdPair(this, wxEmptyString));
 }
