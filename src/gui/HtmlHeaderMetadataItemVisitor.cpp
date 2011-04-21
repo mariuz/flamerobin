@@ -36,6 +36,7 @@
 #endif
 
 #include "gui/HtmlHeaderMetadataItemVisitor.h"
+#include "metadata/database.h"
 
 //-----------------------------------------------------------------------------
 HtmlHeaderMetadataItemVisitor::HtmlHeaderMetadataItemVisitor(
@@ -48,11 +49,13 @@ HtmlHeaderMetadataItemVisitor::~HtmlHeaderMetadataItemVisitor()
 {
 }
 //-----------------------------------------------------------------------------
-void HtmlHeaderMetadataItemVisitor::visitDatabase(Database& /*database*/)
+void HtmlHeaderMetadataItemVisitor::visitDatabase(Database& database)
 {
     emptyTitles();
     addSummary();
-    addTriggers();
+    // database triggers have been introduced in Firebird 2.1 (ODS 11.1)
+    if (database.getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+        addTriggers();
     addDDL();
 }
 //-----------------------------------------------------------------------------
