@@ -48,22 +48,31 @@
 #include "metadata/MetadataItemURIHandlerHelper.h"
 #include "metadata/table.h"
 //-----------------------------------------------------------------------------
-TriggerWizardDialog::TriggerWizardDialog(wxWindow* parent, MetadataItem *item):
-    BaseDialog(parent, -1, wxEmptyString)
+TriggerWizardDialog::TriggerWizardDialog(wxWindow* parent, Relation* relation)
+    : BaseDialog(parent, wxID_ANY, wxEmptyString)
 {
-    relationM = item;
-    label_1 = new wxStaticText(getControlsPanel(), -1, _("Trigger name"));
-    text_ctrl_1 = new wxTextCtrl(getControlsPanel(), -1, wxT(""));
-    checkbox_1_copy = new wxCheckBox(getControlsPanel(), -1, wxT("Active"));
+    relationM = relation;
+    label_1 = new wxStaticText(getControlsPanel(), wxID_ANY,
+        _("Trigger name"));
+    text_ctrl_1 = new wxTextCtrl(getControlsPanel(), wxID_ANY, wxT(""));
+    checkbox_1_copy = new wxCheckBox(getControlsPanel(), wxID_ANY,
+        wxT("Active"));
     const wxString radio_box_1_copy_choices[] = { wxT("Before"), wxT("After") };
-    radio_box_1_copy = new wxRadioBox(getControlsPanel(), -1, _("Trigger type"), wxDefaultPosition, wxDefaultSize, 2, radio_box_1_copy_choices, 0, wxRA_SPECIFY_ROWS);
-    checkbox_insert = new wxCheckBox(getControlsPanel(), -1, wxT("INSERT"));
-    checkbox_update = new wxCheckBox(getControlsPanel(), -1, wxT("UPDATE"));
-    checkbox_delete = new wxCheckBox(getControlsPanel(), -1, wxT("DELETE"));
-    label_2 = new wxStaticText(getControlsPanel(), -1, _("Position"));
-    spin_ctrl_1 = new wxSpinCtrl(getControlsPanel(), -1, wxT("0"), wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100);
+    radio_box_1_copy = new wxRadioBox(getControlsPanel(), wxID_ANY,
+        _("Trigger type"), wxDefaultPosition, wxDefaultSize, 2,
+        radio_box_1_copy_choices, 0, wxRA_SPECIFY_ROWS);
+    checkbox_insert = new wxCheckBox(getControlsPanel(), wxID_ANY,
+        wxT("INSERT"));
+    checkbox_update = new wxCheckBox(getControlsPanel(), wxID_ANY,
+        wxT("UPDATE"));
+    checkbox_delete = new wxCheckBox(getControlsPanel(), wxID_ANY,
+        wxT("DELETE"));
+    label_2 = new wxStaticText(getControlsPanel(), wxID_ANY, _("Position"));
+    spin_ctrl_1 = new wxSpinCtrl(getControlsPanel(), wxID_ANY, wxT("0"),
+        wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100);
     button_ok = new wxButton(getControlsPanel(), wxID_OK, _("&OK"));
-    button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("&Cancel"));
+    button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL,
+        _("&Cancel"));
 
     set_properties();
     do_layout();
@@ -196,12 +205,12 @@ bool CreateTriggerHandler::handleURI(URI& uri)
     if (uri.action != wxT("create_trigger"))
         return false;
 
-    Table* t = extractMetadataItemFromURI<Table>(uri);
+    Relation* r = extractMetadataItemFromURI<Relation>(uri);
     wxWindow* w = getParentWindow(uri);
-    if (!t || !w)
+    if (!r || !w)
         return true;
 
-    TriggerWizardDialog twd(w, t);
+    TriggerWizardDialog twd(w, r);
     // NOTE: this has been moved here from OnOkButtonClick() to make frame
     //       activation work properly.  Basically activation of another
     //       frame has to happen outside wxDialog::ShowModal(), because it
@@ -211,7 +220,7 @@ bool CreateTriggerHandler::handleURI(URI& uri)
     {
         wxString statement(twd.getSqlStatement());
         if (!statement.IsEmpty())
-            showSql(w, _("Creating new trigger"), t->getDatabase(), statement);
+            showSql(w, _("Creating new trigger"), r->getDatabase(), statement);
     }
     return true;
 }

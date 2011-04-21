@@ -3458,21 +3458,25 @@ bool ActivateTriggersHandler::handleURI(URI& uri)
         return false;
     }
 
-    MetadataItem *m = extractMetadataItemFromURI<MetadataItem>(uri);
-    Table* t = dynamic_cast<Table*>(m);
-    Database* d = dynamic_cast<Database*>(m);
+    MetadataItem* mi = extractMetadataItemFromURI<MetadataItem>(uri);
+    Relation* r = dynamic_cast<Relation*>(mi);
+    Database* d = dynamic_cast<Database*>(mi);
     wxWindow* w = getParentWindow(uri);
-    if ((!t && !d) || !w)
+    if ((!r && !d) || !w)
         return true;
 
     std::vector<Trigger*> list;
-    if (t)
+    if (r)
     {
-        t->getTriggers(list, Trigger::afterTrigger);
-        t->getTriggers(list, Trigger::beforeTrigger);
+        r->getTriggers(list, Trigger::afterTrigger);
+        r->getTriggers(list, Trigger::beforeTrigger);
     }
     else
         d->getDatabaseTriggers(list);
+    // don't show empty SQL editor if no triggers found
+    if (list.empty())
+        return true;
+
     wxString sql;
     for (std::vector<Trigger*>::iterator it = list.begin(); it != list.end();
         ++it)
@@ -3483,8 +3487,7 @@ bool ActivateTriggersHandler::handleURI(URI& uri)
         sql += wxT("ACTIVE;\n");
     }
 
-    execSql(w, wxEmptyString, d ? d->shared_from_this() : t->getDatabase(),
-        sql, true);
+    execSql(w, wxEmptyString, mi->getDatabase(), sql, true);
     return true;
 }
 //-----------------------------------------------------------------------------

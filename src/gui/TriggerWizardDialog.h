@@ -34,17 +34,16 @@
 
 #include "gui/BaseDialog.h"
 //-----------------------------------------------------------------------------
-class MetadataItem;
+class Relation;
 //-----------------------------------------------------------------------------
 class TriggerWizardDialog: public BaseDialog
 {
 public:
-    TriggerWizardDialog(wxWindow* parent, MetadataItem *item);
-    void OnOkButtonClick(wxCommandEvent& event);
+    TriggerWizardDialog(wxWindow* parent, Relation* relation);
     wxString getSqlStatement() const;
 
 private:
-    MetadataItem *relationM;
+    Relation* relationM;
     void set_properties();
     void do_layout();
 
@@ -61,6 +60,8 @@ protected:
     wxButton* button_ok;
     wxButton* button_cancel;
     virtual const wxString getName() const;
+private:
+    void OnOkButtonClick(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()
 };
