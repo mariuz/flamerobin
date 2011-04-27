@@ -198,13 +198,15 @@ void DatabaseRegistrationDialog::doReadConfigSettings(const wxString& prefix)
 
     if (createM)
     {
-        wxString selection, empty;
-        selection = config().get(
+        int idx = config().get(
             prefix + Config::pathSeparator + wxT("createDialogAuthentication"),
-            empty);
-        if (!selection.empty())
-            choice_authentication->SetStringSelection(selection);
+            wxNOT_FOUND);
+        bool indexValid = idx >= 0
+            && idx < static_cast<int>(choice_authentication->GetCount());
+        if (indexValid)
+            choice_authentication->SetSelection(idx);
 
+        wxString selection, empty;
         selection = config().get(
             prefix + Config::pathSeparator + wxT("createDialogCharset"),
             empty);
@@ -233,7 +235,7 @@ void DatabaseRegistrationDialog::doWriteConfigSettings(
     {
         config().setValue(
             prefix + Config::pathSeparator + wxT("createDialogAuthentication"),
-            choice_authentication->GetStringSelection());
+            choice_authentication->GetSelection());
         config().setValue(
             prefix + Config::pathSeparator + wxT("createDialogCharset"),
             combobox_charset->GetStringSelection());
