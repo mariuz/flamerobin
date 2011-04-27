@@ -228,7 +228,6 @@ public:
     TriggersPtr getTriggers();
     ViewsPtr getViews();
 
-    void clear();               // sets all values to empty wxString
     bool isConnected() const;
     void connect(wxString password, ProgressIndicator* indicator = 0);
     void disconnect();
@@ -290,7 +289,7 @@ public:
     wxString getConnectionString() const;
     // returns a candidate name based on the connection wxString. Example:
     // path is "C:\data\database.fdb" -> returns "database".
-    wxString extractNameFromConnectionString() const;
+    static wxString extractNameFromConnectionString(const wxString& path);
     virtual const wxString getId() const;
     void setId(unsigned id);
 

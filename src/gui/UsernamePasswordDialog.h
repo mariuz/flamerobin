@@ -48,8 +48,8 @@ private:
     void OnSettingsChange(wxCommandEvent& event);
 public:
     UsernamePasswordDialog(wxWindow* parent, const wxString& title,
-        const wxString& username, bool usernameIsFixed = true,
-        const wxString& description = wxEmptyString);
+        const wxString& username, bool usernameIsFixed,
+        const wxString& description);
 
     wxString getUsername();
     wxString getPassword();

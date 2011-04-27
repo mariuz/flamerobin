@@ -58,7 +58,6 @@ BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent,
 
     threadMsgTimeMillisM = 0;
     verboseMsgsM = true;
-    storageNameM = wxT("unassigned");
 
     // create controls in constructor of descendant class (correct tab order)
     panel_controls = 0;
@@ -144,27 +143,9 @@ DatabasePtr BackupRestoreBaseFrame::getDatabase() const
 //-----------------------------------------------------------------------------
 const wxString BackupRestoreBaseFrame::getStorageName() const
 {
-    if (storageNameM == wxT("unassigned"))
-    {
-        StorageGranularity g = sgObject;
-        config().getValue(getName() + wxT("StorageGranularity"), g);
-
-        switch (g)
-        {
-        case sgFrame:
-            storageNameM = getName();
-            break;
-        case sgObject:
-            storageNameM = getName();
-            if (DatabasePtr db = getDatabase())
-                storageNameM += Config::pathSeparator + db->getItemPath();
-            break;
-        default:
-            storageNameM = wxT("");
-            break;
-        }
-    }
-    return storageNameM;
+    if (DatabasePtr db = getDatabase())
+        return getName() + Config::pathSeparator + db->getItemPath();
+    return wxEmptyString;
 }
 //-----------------------------------------------------------------------------
 bool BackupRestoreBaseFrame::getThreadRunning() const

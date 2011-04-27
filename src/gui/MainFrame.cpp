@@ -1707,7 +1707,7 @@ bool MainFrame::openUnregisteredDatabase(const wxString& dbpath)
 {
     DatabasePtr database(new Database());
     database->setPath(dbpath);
-    database->setName_(database->extractNameFromConnectionString());
+    database->setName_(Database::extractNameFromConnectionString(dbpath));
 
     wxString iscUser, iscPassword;
     if (!wxGetEnv(wxT("ISC_USER"), &iscUser))

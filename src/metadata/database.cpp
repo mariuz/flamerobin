@@ -1168,15 +1168,6 @@ void Database::setDisconnected()
     notifyObservers();
 }
 //-----------------------------------------------------------------------------
-void Database::clear()
-{
-    setPath(wxT(""));
-    setConnectionCharset(wxT(""));
-    setUsername(wxT(""));
-    setRawPassword(wxT(""));
-    setRole(wxT(""));
-}
-//-----------------------------------------------------------------------------
 bool Database::isConnected() const
 {
     return connectedM;
@@ -1525,9 +1516,10 @@ wxString Database::getConnectionString() const
         return pathM;
 }
 //-----------------------------------------------------------------------------
-wxString Database::extractNameFromConnectionString() const
+/* static */
+wxString Database::extractNameFromConnectionString(const wxString& path)
 {
-    wxString name = pathM;
+    wxString name = path;
     wxString::size_type p = name.find_last_of(wxT("/\\:"));
     if (p != wxString::npos)
         name.erase(0, p + 1);

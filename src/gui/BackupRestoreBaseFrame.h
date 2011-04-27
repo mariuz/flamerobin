@@ -60,8 +60,6 @@ public:
     virtual bool Destroy();
     virtual void removeSubject(Subject* subject);
 protected:
-    mutable wxString storageNameM;
-
     wxArrayString msgsM;
     wxArrayInt msgKindsM;
     bool verboseMsgsM;

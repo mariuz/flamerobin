@@ -560,7 +560,6 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
 
     statusbar_1 = CreateStatusBar(4);
     SetStatusBarPane(-1);
-    statusbar_1->SetStatusText(databaseM->getConnectionInfoString(), 0);
 
     editBlobDlgM = 0;
 
@@ -787,26 +786,21 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
 void ExecuteSqlFrame::set_properties()
 {
     SetSize(wxSize(628, 488));
+
     int statusbar_widths[] = { -2, 100, 60, -1 };
     statusbar_1->SetStatusWidths(4, statusbar_widths);
-    const wxString statusbar_fields[] =
-    {
-        wxT("user @ database"),
-        wxT("rows fetched"),
-        wxT("cursor position"),
-        wxT("Transaction status")
-    };
-    for(int i = 0; i < statusbar_1->GetFieldsCount(); ++i)
-    {
-        statusbar_1->SetStatusText(statusbar_fields[i], i);
-    }
+
+    statusbar_1->SetStatusText(databaseM->getConnectionInfoString(), 0);
+    statusbar_1->SetStatusText(wxT("Rows fetched"), 1);
+    statusbar_1->SetStatusText(wxT("Cursor position"), 2);
+    statusbar_1->SetStatusText(wxT("Transaction status"), 3);
+
     grid_data->SetTable(new DataGridTable(statementM, databaseM), true);
     splitter_window_1->Initialize(styled_text_ctrl_sql);
     viewModeM = vmEditor;
 
     SetIcon(wxArtProvider::GetIcon(ART_ExecuteSqlFrame, wxART_FRAME_ICON));
 
-    keywordsM = wxT("");
     closeWhenTransactionDoneM = false;
     autoCommitM = config().get(wxT("autoCommitDDL"), false);
 }
@@ -2668,7 +2662,7 @@ void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent& event)
 {
     wxString s;
     long rowsFetched = event.GetExtraLong();
-    s.Printf(_("%d rows fetched"), rowsFetched);
+    s.Printf(_("%d row(s) fetched"), rowsFetched);
     statusbar_1->SetStatusText(s, 1);
 
     // TODO: we could make some bool flag, so that this happens only once per execute()

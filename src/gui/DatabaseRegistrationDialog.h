@@ -65,13 +65,13 @@ private:
     wxButton* button_ok;
     wxButton* button_cancel;
 
-    const wxString buildName(const wxString& dbPath) const;
     void createControls();
     void layoutControls();
     void setControlsProperties();
     void updateAuthenticationMode();
     void updateButtons();
-    void updateIsDefaultName();
+    wxString getDefaultDatabaseName() const;
+    void updateIsDefaultDatabaseName();
 
     wxArrayString getAuthenticationChoices() const;
     wxArrayString getDatabaseCharsetChoices() const;

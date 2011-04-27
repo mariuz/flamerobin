@@ -65,7 +65,7 @@ public:
     void addDatabase(DatabasePtr database);
     void removeDatabase(DatabasePtr database);
 
-    void createDatabase(DatabasePtr db, int pagesize = 4096, int dialect = 3);
+    void createDatabase(DatabasePtr db, int pagesize, int dialect);
 
     // returns *connected* service
     bool getService(IBPP::Service& svc, ProgressIndicator* progressind,

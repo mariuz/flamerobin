@@ -174,9 +174,6 @@ bool Root::parseDatabase(ServerPtr server, wxXmlNode* xmln)
     // otherwise a new Id will be generated then, but the generator value
     // will not be stored because it's at the beginning of the file.
     database->getId();
-    // backward compatibility with FR < 0.3.0
-    if (database->getName_().IsEmpty())
-        database->setName_(database->extractNameFromConnectionString());
     return true;
 }
 //-----------------------------------------------------------------------------

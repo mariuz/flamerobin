@@ -64,13 +64,6 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent,
 }
 //-----------------------------------------------------------------------------
 //! implementation details
-const wxString DatabaseRegistrationDialog::buildName(const wxString& dbPath) const
-{
-    Database helper;
-    helper.setPath(dbPath);
-    return helper.extractNameFromConnectionString();
-}
-//-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::createControls()
 {
     label_name = new wxStaticText(getControlsPanel(), -1, _("Display name:"));
@@ -344,7 +337,7 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     combobox_charset->SetStringSelection(charset);
     // see whether the database has an empty or default name; knowing that will be
     // useful to keep the name in sync when other attributes change.
-    updateIsDefaultName();
+    updateIsDefaultDatabaseName();
 
     // enable controls depending on operation and database connection status
     // use SetEditable() for edit controls to allow copying text to clipboard
@@ -397,10 +390,16 @@ void DatabaseRegistrationDialog::updateButtons()
     }
 }
 //-----------------------------------------------------------------------------
-void DatabaseRegistrationDialog::updateIsDefaultName()
+wxString DatabaseRegistrationDialog::getDefaultDatabaseName() const
 {
-    isDefaultNameM = ((text_ctrl_name->GetValue().IsEmpty() ||
-        text_ctrl_name->GetValue() == buildName(text_ctrl_dbpath->GetValue())));
+    return Database::extractNameFromConnectionString(
+        text_ctrl_dbpath->GetValue());
+}
+//-----------------------------------------------------------------------------
+void DatabaseRegistrationDialog::updateIsDefaultDatabaseName()
+{
+    wxString name(text_ctrl_name->GetValue());
+    isDefaultNameM = name.empty() || name == getDefaultDatabaseName();
 }
 //-----------------------------------------------------------------------------
 //! event handling
@@ -489,8 +488,8 @@ void DatabaseRegistrationDialog::OnSettingsChange(
     if (IsShown())
     {
         if (isDefaultNameM)
-            text_ctrl_name->SetValue(buildName(text_ctrl_dbpath->GetValue()));
-        updateIsDefaultName();
+            text_ctrl_name->SetValue(getDefaultDatabaseName());
+        updateIsDefaultDatabaseName();
         updateButtons();
     }
 }
@@ -499,7 +498,7 @@ void DatabaseRegistrationDialog::OnNameChange(wxCommandEvent& WXUNUSED(event))
 {
     if (IsShown())
     {
-        updateIsDefaultName();
+        updateIsDefaultDatabaseName();
         updateButtons();
     }
 }
