@@ -84,6 +84,8 @@ public:
     virtual bool Show(bool show = TRUE);
     virtual bool Destroy();
 
+    static std::vector<BaseFrame*> getFrames();
+
 protected:
     // event handling
     void OnClose(wxCloseEvent& event);

@@ -1298,6 +1298,8 @@ void ExecuteSqlFrame::OnClose(wxCloseEvent& event)
             return;
         }
     }
+    // make sure that update() will not call Close() again
+    databaseM = 0;
     BaseFrame::OnClose(event);
 }
 //-----------------------------------------------------------------------------
@@ -2737,7 +2739,7 @@ void ExecuteSqlFrame::OnSplitterUnsplit(wxSplitterEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::update()
 {
-    if (!databaseM->isConnected())
+    if (databaseM && !databaseM->isConnected())
         Close();
 }
 //-----------------------------------------------------------------------------

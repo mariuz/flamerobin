@@ -63,8 +63,6 @@ public:
     void OnMenuDropDatabase(wxCommandEvent& event);
     void OnMenuRestoreIntoNewDatabase(wxCommandEvent& event);
     void OnMenuManageUsers(wxCommandEvent& event);
-    void OnMenuRestartServer(wxCommandEvent& event);
-    void OnMenuStopServer(wxCommandEvent& event);
     void OnMenuUnRegisterServer(wxCommandEvent& event);
     void OnMenuServerProperties(wxCommandEvent& event);
     void OnMenuUnRegisterDatabase(wxCommandEvent& event);

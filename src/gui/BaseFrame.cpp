@@ -166,6 +166,7 @@ const wxRect BaseFrame::getDefaultRect() const
     return wxRect(wxDefaultPosition, wxDefaultSize);
 }
 //-----------------------------------------------------------------------------
+/* static */
 void BaseFrame::setIdString(BaseFrame* frame, const wxString& id)
 {
     FrameIdMap::iterator it = frameIdsM.find(frame);
@@ -173,6 +174,7 @@ void BaseFrame::setIdString(BaseFrame* frame, const wxString& id)
         (*it).second = id;
 }
 //-----------------------------------------------------------------------------
+/* static */
 BaseFrame* BaseFrame::frameFromIdString(const wxString& id)
 {
     if (!id.IsEmpty())
@@ -185,6 +187,16 @@ BaseFrame* BaseFrame::frameFromIdString(const wxString& id)
         }
     }
     return 0;
+}
+//-----------------------------------------------------------------------------
+/* static */
+std::vector<BaseFrame*> BaseFrame::getFrames()
+{
+    std::vector<BaseFrame*> frames;
+    FrameIdMap::iterator it;
+    for (it = frameIdsM.begin(); it != frameIdsM.end(); it++)
+        frames.push_back((*it).first);
+    return frames;
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(BaseFrame, wxFrame)

@@ -669,19 +669,20 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
 //-----------------------------------------------------------------------------
 void MainFrame::OnClose(wxCloseEvent& event)
 {
-    Raise();
     if (event.CanVeto())
     {
-        int res = showQuestionDialog(this, _("Do you really want to quit FlameRobin?"),
-            _("All uncommitted transactions will be rolled back, and any uncommitted changes will be lost."),
-            AdvancedMessageDialogButtonsOkCancel(_("&Quit")),
-            config(), wxT("DIALOG_ConfirmQuit"), _("Always quit without asking"));
-        if (res != wxOK)
+        std::vector<BaseFrame*> frames(BaseFrame::getFrames());
+        for (std::vector<BaseFrame*>::iterator it = frames.begin();
+            it != frames.end(); it++)
         {
-            event.Veto();
-            return;
+            if ((*it) != this && !(*it)->Close())
+            {
+                event.Veto();
+                return;
+            }
         }
     }
+    Raise();
     //frameManager().setWindowMenu(0);    // tell it not to update menus anymore
 
     // the next few lines fix the (threading?) problem on some Linux distributions
