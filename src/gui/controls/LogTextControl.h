@@ -40,9 +40,18 @@ protected:
 public:
     LogTextControl(wxWindow *parent, wxWindowID id = wxID_ANY);
 
+    void ClearAll();
+
     void logErrorMsg(const wxString& message);
     void logImportantMsg(const wxString& message);
     void logMsg(const wxString& message);
+protected:
+    void OnCommandClearAll(wxCommandEvent& event);
+    void OnCommandUpdate(wxUpdateUIEvent& event);
+
+    void OnContextMenu(wxContextMenuEvent& event);
+
+    DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
 #endif

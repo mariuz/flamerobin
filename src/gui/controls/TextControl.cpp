@@ -88,7 +88,6 @@ BEGIN_EVENT_TABLE(TextControl, wxStyledTextCtrl)
     EVT_UPDATE_UI(wxID_COPY, TextControl::OnCommandUpdateCopy)
     EVT_UPDATE_UI(wxID_PASTE, TextControl::OnCommandUpdatePaste)
     EVT_UPDATE_UI(wxID_DELETE, TextControl::OnCommandUpdateDelete)
-    EVT_UPDATE_UI(wxID_SELECTALL, TextControl::OnCommandUpdateSelectAll)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void TextControl::OnCommandUndo(wxCommandEvent& WXUNUSED(event))
@@ -154,11 +153,6 @@ void TextControl::OnCommandUpdatePaste(wxUpdateUIEvent& event)
 void TextControl::OnCommandUpdateDelete(wxUpdateUIEvent& event)
 {
     event.Enable(!GetReadOnly() && GetSelectionStart() != GetSelectionEnd());
-}
-//-----------------------------------------------------------------------------
-void TextControl::OnCommandUpdateSelectAll(wxUpdateUIEvent& event)
-{
-    event.Enable(CanUndo());
 }
 //-----------------------------------------------------------------------------
 void TextControl::OnContextMenu(wxContextMenuEvent& event)
