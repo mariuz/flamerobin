@@ -500,19 +500,29 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
     // requested property.
     else if ((cmdName == wxT("columninfo")) && (cmdParams.Count() >= 1))
     {
-        Column* c = dynamic_cast<Column*>(object);
-        if (!c)
+        ColumnBase* cb = dynamic_cast<ColumnBase*>(object);
+        if (!cb)
             return;
 
         if (cmdParams[0] == wxT("datatype"))
-            processedText += tp->escapeChars(c->getDatatype());
+            processedText += tp->escapeChars(cb->getDatatype());
         else if (cmdParams[0] == wxT("is_nullable"))
-            processedText += tp->escapeChars(getBooleanAsString(c->isNullable()));
+        {
+            if (Column* c = dynamic_cast<Column*>(object))
+            {
+                processedText += tp->escapeChars(getBooleanAsString(
+                    c->isNullable()));
+            }
+        }
         else if (cmdParams[0] == wxT("null_option"))
-            processedText += tp->escapeChars(c->isNullable() ? wxT("") : wxT("not null"));
+        {
+            Column* c = dynamic_cast<Column*>(object);
+            if (c && !c->isNullable())
+                processedText += tp->escapeChars(wxT("not null"));
+        }
         else if (cmdParams[0] == wxT("default_expression"))
         {
-            wxString def(c->getDefault());
+            wxString def(cb->getDefault());
             def.Trim(false);
             if (def.Upper().StartsWith(wxT("DEFAULT")))
             {
