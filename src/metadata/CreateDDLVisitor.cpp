@@ -125,7 +125,7 @@ void CreateDDLVisitor::visitColumn(Column& c)
     wxString defaultVal = c.getDefault();
     if (!defaultVal.IsEmpty())
         preSqlM << wxT(" DEFAULT ") << defaultVal;
-    if (!c.isNullable(false))               // false = don't check domain
+    if (c.hasNotNullConstraint())
         preSqlM << wxT(" NOT NULL");
     if (!collate.IsEmpty())
     {

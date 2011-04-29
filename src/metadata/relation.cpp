@@ -237,7 +237,7 @@ void Relation::loadChildren()
                 col->lockSubject();
         }
         columns.push_back(col);
-        col->initialize(!st1->IsNull(2), source,  computedSrc, collation,
+        col->initialize(!st1->IsNull(2), source, computedSrc, collation,
             defaultSrc, !st1->IsNull(6));
     }
 

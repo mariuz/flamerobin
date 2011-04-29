@@ -49,6 +49,7 @@ public:
     virtual wxString getDefault() const;
     virtual bool hasDefault() const;
     wxString getSource() const;
+    virtual bool isNullable() const;
 };
 //-----------------------------------------------------------------------------
 class Column: public ColumnBase
@@ -65,7 +66,10 @@ public:
     virtual const wxString getTypeName() const;
     virtual wxString getDropSqlStatement() const;
 
-    bool isNullable(bool checkDomain = true) const;
+    // isNullable() checks the underlying domain (if any) as well,
+    // while hasNotNullConstraint() doesn't (necessary for DDL creation)
+    virtual bool isNullable() const;
+    bool hasNotNullConstraint() const;
     virtual bool hasDefault() const;
     bool isForeignKey() const;
     bool isPrimaryKey() const;

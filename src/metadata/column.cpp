@@ -148,6 +148,11 @@ void ColumnBase::initialize(const wxString& source,
         notifyObservers();
 }
 //-----------------------------------------------------------------------------
+bool ColumnBase::isNullable() const
+{
+    return true;
+}
+//-----------------------------------------------------------------------------
 Column::Column(Relation* relation, const wxString& name)
     : ColumnBase(ntColumn, relation, name)
 {
@@ -182,15 +187,18 @@ void Column::initialize(bool notnull, const wxString& source,
         notifyObservers();
 }
 //-----------------------------------------------------------------------------
-bool Column::isNullable(bool checkDomain) const
+bool Column::isNullable() const
 {
     if (notnullM)
         return false;
-    if (!checkDomain)
-        return true;
     if (DomainPtr d = getDomain())
         return d->isNullable();
     return true;
+}
+//-----------------------------------------------------------------------------
+bool Column::hasNotNullConstraint() const
+{
+    return notnullM;
 }
 //-----------------------------------------------------------------------------
 bool Column::hasDefault() const

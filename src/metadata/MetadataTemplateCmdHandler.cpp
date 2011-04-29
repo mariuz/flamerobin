@@ -508,16 +508,12 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
             processedText += tp->escapeChars(cb->getDatatype());
         else if (cmdParams[0] == wxT("is_nullable"))
         {
-            if (Column* c = dynamic_cast<Column*>(object))
-            {
-                processedText += tp->escapeChars(getBooleanAsString(
-                    c->isNullable()));
-            }
+            processedText += tp->escapeChars(getBooleanAsString(
+                cb->isNullable()));
         }
         else if (cmdParams[0] == wxT("null_option"))
         {
-            Column* c = dynamic_cast<Column*>(object);
-            if (c && !c->isNullable())
+            if (!cb->isNullable())
                 processedText += tp->escapeChars(wxT("not null"));
         }
         else if (cmdParams[0] == wxT("default_expression"))
