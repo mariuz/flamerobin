@@ -20,22 +20,62 @@ else
   FINAL=1
 fi
 
-# Check for wxWindows
+# Check for wxWidgets
 AM_PATH_WXCONFIG([2.8.0], [], [
         AC_MSG_ERROR([
-     	   wxWindows must be installed on your system
-     	   but wx-config script couldn't be found.
+           wxWidgets must be installed on your system
+           but wx-config script couldn't be found.
      
-     	   Please check that wx-config is in path, the directory
-     	   where wxWindows libraries are installed (returned by
-     	   'wx-config --libs' command) is in LD_LIBRARY_PATH or
-     	   equivalent variable and wxWindows version is 2.8.0 or above.
+           Please check that wx-config is in path, the directory
+           where wxWidgets libraries are installed (returned by
+           'wx-config --libs' command) is in LD_LIBRARY_PATH or
+           equivalent variable and wxWidgets version is 2.8.0 or above.
         ])], [aui,stc,std])
+
 AC_LANG_PUSH([C++])
-AC_CHECK_HEADER(boost/shared_ptr.hpp, [],
-       [AC_MSG_ERROR(boost/shared_ptr.hpp not found. install libboost-dev Boost C++ Libraries development files , In Debian/Ubuntu sudo apt-get install libboost-dev)], [])
-AC_CHECK_HEADER(boost/function.hpp, [],
-       [AC_MSG_ERROR(boost/function.hpp not found. install libboost-dev Boost C++ Libraries development files,In Debian/Ubuntu sudo apt-get install libboost-dev)], [])        
+
+# Check for Boost headers
+AC_ARG_WITH([boost-include-path],
+  [AS_HELP_STRING([--with-boost-include-path],
+    [Location of the Boost library headers (optional)])],
+  [BOOSTINCLUDEPATH=$withval], [])
+AS_IF([test "x$BOOSTINCLUDEPATH" != "x"],
+  [CPPFLAGS="$CPPFLAGS -I$BOOSTINCLUDEPATH"])
+
+AC_CHECK_HEADER([boost/shared_ptr.hpp], [],
+       [AC_MSG_ERROR([
+           boost/shared_ptr.hpp not found.
+           Install libboost-dev Boost C++ Libraries development files.
+           In Debian/Ubuntu 'sudo apt-get install libboost-dev'
+       ])], [])
+AC_CHECK_HEADER([boost/function.hpp], [],
+       [AC_MSG_ERROR([
+           boost/function.hpp not found.
+           Install libboost-dev Boost C++ Libraries development files.
+           In Debian/Ubuntu 'sudo apt-get install libboost-dev'
+       ])], [])
+
+# Link to Firebird client library
+case "${host}" in
+    *-*-cygwin* | *-*-mingw32* )
+        dnl Windows builds dynamically link to the Firebird client library
+    ;;
+
+    *-*-darwin* )
+        dnl Mac OS X uses the Firebird framework
+        LIBS="$LIBS -framework Firebird"
+    ;;
+
+    * )
+        AC_SEARCH_LIBS([isc_attach_database], [fbclient fbembed], [],
+          [AC_MSG_ERROR([
+           Firebird client library not found
+           Install Firebird server development files.
+           In Debian/Ubuntu 'sudo apt-get install firebird2.5-dev'
+          ])])
+  esac
+
+
 CPPFLAGS="$CPPFLAGS $WX_CXXFLAGS"
 LDFLAGS="$LDFLAGS $WX_LDFLAGS $WX_LIBS"
 
@@ -78,3 +118,4 @@ AC_CONFIG_HEADERS([ frconfig.h:frconfig.h.in ])
 AC_CONFIG_FILES([ Makefile ])
 
 AC_OUTPUT
+

@@ -142,14 +142,6 @@ Accepted values: AMD64, IA64.
         <if cond="PLATFORM_WIN32=='1'">IBPP_WINDOWS</if>
     </set>
 
-    <set var="FIREBIRDFRAMEWORK">
-        <if cond="PLATFORM_MACOSX=='1'">-framework Firebird</if>
-    </set>
-    <set var="FIREBIRDLIBRARY">
-        <if cond="PLATFORM_UNIX=='1'">fbclient</if>
-        <!-- PLATFORM_WIN32: ibpp library loads firebird DLL dynamically -->
-    </set>
-
 
 <!-- build FlameRobin executable -->
 
@@ -675,8 +667,6 @@ Accepted values: AMD64, IA64.
 
         <win32-res>$(RESDIR)/flamerobin.rc</win32-res>
         <library>ibpp</library>
-        <ldlibs>$(FIREBIRDFRAMEWORK)</ldlibs>
-        <sys-lib>$(FIREBIRDLIBRARY)</sys-lib>
 
         <if cond="FORMAT=='autoconf'">
             <mac-app-bundle>$(id)</mac-app-bundle>
