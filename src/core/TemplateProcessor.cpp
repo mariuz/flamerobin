@@ -341,14 +341,26 @@ void TemplateProcessor::internalProcessTemplateText(wxString& processedText, wxS
     }
 }
 //-----------------------------------------------------------------------------
-void TemplateProcessor::processTemplateFile(wxString& processedText, wxFileName inputFileName,
-    ProcessableObject* object, ProgressIndicator* progressIndicator)
+void TemplateProcessor::processTemplateFile(wxString& processedText,
+    const wxFileName&  inputFileName, ProcessableObject* object,
+    ProgressIndicator* progressIndicator)
 {
     fileNameM = inputFileName;
-    inputFileName.SetExt(wxT("conf"));
-    configM.setConfigFileName(inputFileName);
+    // put settings file in user writable directory
+    // FIXME:
+    // actually this is just a short-cut, assuming that there won't be
+    // template files with same names in different paths (which holds true
+    // for now, all template files come from $(FR_HOME)/sql-templates)
+    //
+    // much better would be to strip $(FR_HOME) if it is the first part of
+    // the file path, and add the remaining part to getUserHomePath()
+    wxFileName confFileName(config().getUserHomePath(),
+        inputFileName.GetName(), wxT("conf"));
+    confFileName.AppendDir(wxT("template-data"));
+    configM.setConfigFileName(confFileName);
     progressIndicatorM = progressIndicator;
-    internalProcessTemplateText(processedText, loadEntireFile(fileNameM), object);
+    internalProcessTemplateText(processedText, loadEntireFile(fileNameM),
+        object);
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::processTemplateText(wxString& processedText, wxString inputText,

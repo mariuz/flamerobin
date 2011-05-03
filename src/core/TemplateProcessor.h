@@ -81,8 +81,9 @@ public:
     void processTemplateText(wxString& processedText, wxString inputText,
         ProcessableObject* object, ProgressIndicator* progressIndicator = 0);
     // Loads the contents of the specified file and calls internalProcessTemplateText().
-    void processTemplateFile(wxString& processedText, wxFileName inputFileName,
-        ProcessableObject* object, ProgressIndicator* progressIndicator = 0);
+    void processTemplateFile(wxString& processedText,
+        const wxFileName& inputFileName, ProcessableObject* object,
+        ProgressIndicator* progressIndicator = 0);
     // Sets a variable value. If the variable already exists it is overwritten.
     // To clear a variable, set it to an empty string.
     void setVar(wxString varName, wxString varValue);
