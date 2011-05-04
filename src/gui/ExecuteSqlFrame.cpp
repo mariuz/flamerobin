@@ -583,6 +583,11 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     loadingM = false;
 }
 //-----------------------------------------------------------------------------
+Database* ExecuteSqlFrame::getDatabase() const
+{
+    return databaseM;
+}
+//-----------------------------------------------------------------------------
 void ExecuteSqlFrame::buildToolbar(CommandManager& cm)
 {
     //toolBarM = CreateToolBar( wxTB_FLAT|wxTB_HORIZONTAL|wxTB_TEXT, wxID_ANY );
@@ -825,6 +830,48 @@ void ExecuteSqlFrame::do_layout()
     sizerContents->SetSizeHints(this);
 }
 //-----------------------------------------------------------------------------
+bool ExecuteSqlFrame::doCanClose()
+{
+    bool saveFile = false;
+    if (filenameM.IsOk() && styled_text_ctrl_sql->GetModify())
+    {
+        Raise();
+        int res = showQuestionDialog(this, _("Do you want to save changes to the file?"),
+            wxString::Format(_("You have made changes to the file\n\n%s\n\nwhich will be lost if you close without saving."),
+            filenameM.GetFullPath().c_str()),
+            AdvancedMessageDialogButtonsYesNoCancel(_("&Save"), _("Do&n't Save")));
+        if (res != wxYES && res != wxNO)
+            return false;
+        saveFile = res == wxYES;
+    }
+
+    if (transactionM != 0 && transactionM->Started())
+    {
+        Raise();
+        int res = showQuestionDialog(this, _("Do you want to commit the active transaction?"),
+            _("If you don't commit the transaction then it will be automatically rolled back, and all changes made by statements executed in this transaction will be lost."),
+            AdvancedMessageDialogButtonsYesNoCancel(_("&Commit Transaction"), _("&Rollback Transaction")),
+            config(), wxT("DIALOG_ActiveTransaction"), _("Don't ask again, &always commit/rollback"));
+        if (res != wxYES && res != wxNO)
+            return false;
+        if (res == wxYES && !commitTransaction())
+            return false;
+    }
+
+    if (saveFile && !styled_text_ctrl_sql->SaveFile(filenameM.GetFullPath()))
+        return false;
+    return true;
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::doBeforeDestroy()
+{
+    // prevent editor from updating the invalid dataset
+    if (grid_data->IsCellEditControlEnabled())
+        grid_data->EnableCellEditControl(false);
+    // make sure that further calls to update() will not call Close() again
+    databaseM = 0;
+}
+//-----------------------------------------------------------------------------
 void ExecuteSqlFrame::showProperties(wxString objectName)
 {
     MetadataItem *m = databaseM->findByName(objectName);
@@ -851,7 +898,6 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_SPLITTER_UNSPLIT(wxID_ANY, ExecuteSqlFrame::OnSplitterUnsplit)
     EVT_CHAR_HOOK(ExecuteSqlFrame::OnKeyDown)
     EVT_CHILD_FOCUS(ExecuteSqlFrame::OnChildFocus)
-    EVT_CLOSE(ExecuteSqlFrame::OnClose)
     EVT_IDLE(ExecuteSqlFrame::OnIdle)
 
     EVT_MENU(wxID_NEW,      ExecuteSqlFrame::OnMenuNew)
@@ -1253,48 +1299,6 @@ void ExecuteSqlFrame::OnIdle(wxIdleEvent& event)
         updateFrameTitle();
     }
     event.Skip();
-}
-//-----------------------------------------------------------------------------
-void ExecuteSqlFrame::OnClose(wxCloseEvent& event)
-{
-    // prevent editor from updating the invalid dataset
-    if (grid_data->IsCellEditControlEnabled())
-        grid_data->EnableCellEditControl(false);
-
-    if (event.CanVeto())
-    {
-        bool doVeto = false;
-        if (filenameM.IsOk() && styled_text_ctrl_sql->GetModify())
-        {
-            Raise();
-            int res = showQuestionDialog(this, _("Do you want to save changes to the file?"),
-                wxString::Format(_("You have made changes to the file\n\n%s\n\nwhich will be lost if you close without saving."),
-                filenameM.GetFullPath().c_str()),
-                AdvancedMessageDialogButtonsYesNoCancel(_("&Save"), _("Do&n't Save")));
-            doVeto = res != wxYES && res != wxNO;
-            if (res == wxYES)
-                doVeto = !styled_text_ctrl_sql->SaveFile(filenameM.GetFullPath());
-        }
-        if (!doVeto && inTransactionM)
-        {
-            Raise();
-            int res = showQuestionDialog(this, _("Do you want to commit the active transaction?"),
-                _("If you don't commit the transaction then it will be automatically rolled back, and all changes made by statements executed in this transaction will be lost."),
-                AdvancedMessageDialogButtonsYesNoCancel(_("&Commit Transaction"), _("&Rollback Transaction")),
-                config(), wxT("DIALOG_ActiveTransaction"), _("Don't ask again, &always commit/rollback"));
-            doVeto = res != wxYES && res != wxNO;
-            if (res == wxYES)
-                doVeto = !commitTransaction();
-        }
-        if (doVeto)
-        {
-            event.Veto();
-            return;
-        }
-    }
-    // make sure that update() will not call Close() again
-    databaseM = 0;
-    BaseFrame::OnClose(event);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuNew(wxCommandEvent& WXUNUSED(event))

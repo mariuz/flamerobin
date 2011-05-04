@@ -61,6 +61,7 @@
 #include "gui/DatabaseRegistrationDialog.h"
 #include "gui/EventWatcherFrame.h"
 #include "gui/ExecuteSql.h"
+#include "gui/ExecuteSqlFrame.h"
 #include "gui/MainFrame.h"
 #include "gui/MetadataItemPropertiesFrame.h"
 #include "gui/PreferencesDialog.h"
@@ -470,7 +471,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_TREE_SEL_CHANGED(DBHTreeControl::ID_tree_ctrl, MainFrame::OnTreeSelectionChanged)
     EVT_TREE_ITEM_ACTIVATED(DBHTreeControl::ID_tree_ctrl, MainFrame::OnTreeItemActivate)
 
-    EVT_CLOSE(MainFrame::OnClose)
     EVT_SET_FOCUS(MainFrame::OnSetFocus)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
@@ -667,21 +667,20 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
 #endif
 }
 //-----------------------------------------------------------------------------
-void MainFrame::OnClose(wxCloseEvent& event)
+bool MainFrame::doCanClose()
 {
-    if (event.CanVeto())
+    std::vector<BaseFrame*> frames(BaseFrame::getFrames());
+    for (std::vector<BaseFrame*>::iterator it = frames.begin();
+        it != frames.end(); it++)
     {
-        std::vector<BaseFrame*> frames(BaseFrame::getFrames());
-        for (std::vector<BaseFrame*>::iterator it = frames.begin();
-            it != frames.end(); it++)
-        {
-            if ((*it) != this && !(*it)->Close())
-            {
-                event.Veto();
-                return;
-            }
-        }
+        if ((*it) != this && !(*it)->Close())
+            return false;
     }
+    return true;
+}
+//-----------------------------------------------------------------------------
+void MainFrame::doBeforeDestroy()
+{
     Raise();
     //frameManager().setWindowMenu(0);    // tell it not to update menus anymore
 
@@ -698,7 +697,6 @@ void MainFrame::OnClose(wxCloseEvent& event)
     treeMainM->Thaw();
 
     wxTheClipboard->Flush();
-    BaseFrame::OnClose(event);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuQuit(wxCommandEvent& WXUNUSED(event))
@@ -1214,6 +1212,17 @@ void MainFrame::OnMenuDisconnect(wxCommandEvent& WXUNUSED(event))
     DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(db))
         return;
+
+    // give SQL editor windows with active transactions a chance to commit
+    // or even cancel this action
+    std::vector<BaseFrame*> frames(BaseFrame::getFrames());
+    for (std::vector<BaseFrame*>::iterator it = frames.begin();
+        it != frames.end(); it++)
+    {
+        ExecuteSqlFrame* esf = dynamic_cast<ExecuteSqlFrame*>(*it);
+        if (esf && esf->getDatabase() == db.get() && !esf->canClose())
+            return;
+    }
 
     treeMainM->Freeze();
     try

@@ -78,7 +78,6 @@ private:
         const wxString& title);
 
     // event handling
-    void OnClose(wxCloseEvent& event);
     void OnNotebookPageClose(wxAuiNotebookEvent& event);
     void OnNotebookPageChanged(wxAuiNotebookEvent& event);
 };

@@ -449,8 +449,6 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
         wxAuiPaneInfo().CenterPane().PaneBorder(false));
     auiManagerM.Update();
 
-    Connect(wxEVT_CLOSE_WINDOW,
-        wxCloseEventHandler(MetadataItemPropertiesFrame::OnClose));
     Connect(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CLOSE, wxAuiNotebookEventHandler(
         MetadataItemPropertiesFrame::OnNotebookPageClose), NULL, this);
     Connect(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGED, wxAuiNotebookEventHandler(
@@ -605,16 +603,6 @@ void MetadataItemPropertiesFrame::showPanel(MetadataItemPropertiesPanel* panel,
     if (panel)
         panel->SetFocus();
     Raise();
-}
-//-----------------------------------------------------------------------------
-void MetadataItemPropertiesFrame::OnClose(wxCloseEvent& event)
-{
-    Disconnect(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CLOSE, wxAuiNotebookEventHandler(
-        MetadataItemPropertiesFrame::OnNotebookPageClose), NULL, this);
-    Disconnect(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGED,
-        wxAuiNotebookEventHandler(
-        MetadataItemPropertiesFrame::OnNotebookPageChanged), NULL, this);
-    BaseFrame::OnClose(event);
 }
 //-----------------------------------------------------------------------------
 // when last tab is closed, close the frame

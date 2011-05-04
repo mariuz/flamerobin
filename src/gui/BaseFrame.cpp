@@ -53,6 +53,8 @@ BaseFrame::BaseFrame(wxWindow* parent, int id, const wxString& title,
     : wxFrame(parent, id, title, pos, size, style, name)
 {
     frameIdsM.insert(FrameIdPair(this, wxEmptyString));
+
+    Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(BaseFrame::OnClose));
 }
 //-----------------------------------------------------------------------------
 BaseFrame::~BaseFrame()
@@ -71,6 +73,20 @@ bool BaseFrame::Destroy()
 {
     writeConfigSettings();
     return wxFrame::Destroy();
+}
+//-----------------------------------------------------------------------------
+bool BaseFrame::canClose()
+{
+    return doCanClose();
+}
+//-----------------------------------------------------------------------------
+bool BaseFrame::doCanClose()
+{
+    return true;
+}
+//-----------------------------------------------------------------------------
+void BaseFrame::doBeforeDestroy()
+{
 }
 //-----------------------------------------------------------------------------
 void BaseFrame::readConfigSettings()
@@ -177,7 +193,7 @@ void BaseFrame::setIdString(BaseFrame* frame, const wxString& id)
 /* static */
 BaseFrame* BaseFrame::frameFromIdString(const wxString& id)
 {
-    if (!id.IsEmpty())
+    if (!id.empty())
     {
         FrameIdMap::iterator it;
         for (it = frameIdsM.begin(); it != frameIdsM.end(); it++)
@@ -199,12 +215,15 @@ std::vector<BaseFrame*> BaseFrame::getFrames()
     return frames;
 }
 //-----------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(BaseFrame, wxFrame)
-    EVT_CLOSE(BaseFrame::OnClose)
-END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
-void BaseFrame::OnClose(wxCloseEvent& WXUNUSED(event))
+// event handling
+void BaseFrame::OnClose(wxCloseEvent& event)
 {
+    if (event.CanVeto() && !doCanClose())
+    {
+        event.Veto();
+        return;
+    }
+    doBeforeDestroy();
     Destroy();
 }
 //-----------------------------------------------------------------------------

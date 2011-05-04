@@ -123,7 +123,6 @@ public:
     void OnMainMenuOpen(wxMenuEvent& event);
     void OnTreeSelectionChanged(wxTreeEvent& event);
     void OnTreeItemActivate(wxTreeEvent& event);
-    void OnClose(wxCloseEvent& event);
     void OnSetFocus(wxFocusEvent& event);
 
     // search stuff (IDs 600+ are taken!)
@@ -147,6 +146,9 @@ public:
     bool openUnregisteredDatabase(const wxString& dbpath);
 private:
     RootPtr rootM;
+
+    virtual bool doCanClose();
+    virtual void doBeforeDestroy();
 
     bool getAutoConnectDatabase();
     bool tryAutoConnectDatabase();

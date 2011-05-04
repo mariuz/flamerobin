@@ -83,7 +83,12 @@ public:
     void executeAllStatements(bool autoExecute = false);
 
     virtual bool Show(bool show = TRUE);
+
+    Database* getDatabase() const;
 private:
+    virtual bool doCanClose();
+    virtual void doBeforeDestroy();
+
     // query parsing and execution
     void prepareAndExecute(bool prepareOnly = false);
     bool parseStatements(const wxString& statements, bool autoExecute = false,
@@ -156,7 +161,6 @@ private:
 
     // events
     void OnChildFocus(wxChildFocusEvent& event);
-    void OnClose(wxCloseEvent& event);
     void OnKeyDown(wxKeyEvent& event);
     void OnGridCellChange(wxGridEvent& event);
     void OnGridRowCountChanged(wxCommandEvent& event);

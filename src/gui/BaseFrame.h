@@ -40,6 +40,12 @@ private:
     typedef std::map<BaseFrame*, wxString> FrameIdMap;
     typedef FrameIdMap::value_type FrameIdPair;
     static FrameIdMap frameIdsM;
+
+    // Override to implement checks and show confirmation dialogs to prevent
+    // closing of the frame if necessary.
+    virtual bool doCanClose();
+    // Override to execute code immediately before frame is destroyed.
+    virtual void doBeforeDestroy();
 protected:
     // Reads any settings from config. The predefined implementation reads
     // size and position of the frame based on getStorageName(). No need to call
@@ -78,19 +84,25 @@ protected:
     // one frame can exist for a given id string.
     static BaseFrame* frameFromIdString(const wxString& id);
 public:
-    BaseFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE, const wxString& name = wxT("FlameRobin"));
+    BaseFrame(wxWindow* parent, int id, const wxString& title,
+        const wxPoint& pos = wxDefaultPosition,
+        const wxSize& size = wxDefaultSize,
+        long style = wxDEFAULT_FRAME_STYLE,
+        const wxString& name = wxT("FlameRobin"));
     virtual ~BaseFrame();
     virtual bool Show(bool show = TRUE);
     virtual bool Destroy();
 
+    // Returns whether the frame can be closed, potentially showing
+    // confirmation dialogs to the user
+    // Override doCanClose() in descendent classes to implement this
+    bool canClose();
+
     static std::vector<BaseFrame*> getFrames();
 
-protected:
+private:
     // event handling
     void OnClose(wxCloseEvent& event);
-
-    DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------
 #endif // BASEFRAME_H
