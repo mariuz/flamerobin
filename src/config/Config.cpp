@@ -56,7 +56,7 @@ FRConfig& config()
 }
 //-----------------------------------------------------------------------------
 Config::Config()
-    : homePathM(wxT("")), userHomePathM(wxT("")), configM(0), needsFlushM(false)
+    : configM(0), needsFlushM(false)
 {
 #ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
     standardPathsM.SetInstallPrefix(wxT(FR_INSTALL_PREFIX));
@@ -257,17 +257,17 @@ bool Config::setValue(wxString key, const wxArrayString& value)
 wxString Config::getHomePath() const
 {
     if (!homePathM.empty())
-        return homePathM + wxT("/");
+        return homePathM + wxFileName::GetPathSeparator();
     else
-        return getDataDir() + wxT("/");
+        return getDataDir() + wxFileName::GetPathSeparator();
 }
 //-----------------------------------------------------------------------------
 wxString Config::getUserHomePath() const
 {
     if (!userHomePathM.empty())
-        return userHomePathM + wxT("/");
+        return userHomePathM + wxFileName::GetPathSeparator();
     else
-        return getUserLocalDataDir() + wxT("/");
+        return getUserLocalDataDir() + wxFileName::GetPathSeparator();
 }
 //-----------------------------------------------------------------------------
 wxFileName Config::getConfigFileName() const
@@ -345,27 +345,29 @@ void ConfigCache::update()
 //-----------------------------------------------------------------------------
 wxString FRConfig::getHtmlTemplatesPath() const
 {
-    return getHomePath() + wxT("html-templates/");
+    return getHomePath() + wxT("html-templates")
+        + wxFileName::GetPathSeparator();
 }
 //-----------------------------------------------------------------------------
 wxString FRConfig::getSqlTemplatesPath() const
 {
-    return getHomePath() + wxT("sql-templates/");
+    return getHomePath() + wxT("sql-templates")
+        + wxFileName::GetPathSeparator();
 }
 //-----------------------------------------------------------------------------
 wxString FRConfig::getDocsPath() const
 {
-    return getHomePath() + wxT("docs/");
+    return getHomePath() + wxT("docs") + wxFileName::GetPathSeparator();
 }
 //-----------------------------------------------------------------------------
 wxString FRConfig::getConfDefsPath() const
 {
-    return getHomePath() + wxT("conf-defs/");
+    return getHomePath() + wxT("conf-defs") + wxFileName::GetPathSeparator();
 }
 //-----------------------------------------------------------------------------
 wxString FRConfig::getImagesPath() const
 {
-    return getHomePath() + wxT("images/");
+    return getHomePath() + wxT("images") + wxFileName::GetPathSeparator();
 }
 //-----------------------------------------------------------------------------
 wxString FRConfig::getDBHFileName() const
