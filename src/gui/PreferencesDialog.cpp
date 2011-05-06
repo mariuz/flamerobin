@@ -458,19 +458,25 @@ void PreferencesDialog::layout()
     sizerRight->Add(bookctrl_1, 1, wxEXPAND);
 
     wxBoxSizer* sizerControls = new wxBoxSizer(wxHORIZONTAL);
+    int bookProportion = 1;
     if (bookctrl_1->GetPageCount() > 1)
-#if !defined(__WXMAC__)
-        sizerControls->Add(treectrl_1, 0, wxEXPAND);
-    sizerControls->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 0);
-    sizerControls->Add(sizerRight, 1, wxEXPAND);
-#else
-        sizerControls->Add(treectrl_1, 2, wxEXPAND);
-    sizerControls->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 0);
-    sizerControls->Add(sizerRight, 5, wxEXPAND);
-#endif
+    {
+        int treeProportion = 0;
+        // for some reason the tree width isn't calculated correctly on the Mac
+        // use proportional widths for tree and book controls there
+        if (wxPlatformInfo::Get().GetOperatingSystemId() & wxOS_MAC)
+        {
+            treeProportion = 2;
+            bookProportion = 5;
+        }
+        sizerControls->Add(treectrl_1, treeProportion, wxEXPAND);
+        sizerControls->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 0);
+    }
+    sizerControls->Add(sizerRight, bookProportion, wxEXPAND);
 
     // create sizer for buttons -> styleguide class will align it correctly
-    wxSizer* sizerButtons = styleguide().createButtonSizer(button_save, button_cancel);
+    wxSizer* sizerButtons = styleguide().createButtonSizer(button_save,
+        button_cancel);
     // use method in base class to set everything up
     layoutSizers(sizerControls, sizerButtons, true);
 }
