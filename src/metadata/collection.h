@@ -29,6 +29,7 @@
 #define FR_COLLECTION_H
 //-----------------------------------------------------------------------------
 #include <algorithm>
+#include <iterator>
 #include <vector>
 
 #include <boost/function.hpp>
