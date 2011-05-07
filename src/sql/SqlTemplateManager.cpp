@@ -57,7 +57,7 @@ TemplateDescriptor::TemplateDescriptor(wxFileName templateFileName)
 void TemplateDescriptor::loadDescriptionFromConfigFile()
 {
     wxFileName confFileName(templateFileNameM);
-    confFileName.SetExt(wxT("conf"));
+    confFileName.SetExt(wxT("info"));
     if (confFileName.FileExists())
     {
         configM.setConfigFileName(confFileName);

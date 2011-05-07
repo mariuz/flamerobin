@@ -6,7 +6,7 @@
         <setting type="relation_columns">
             <caption>Which columns would you like to select?</caption>
             <key>{%object_path%}/columnNames</key>
-            <default>*</default>
+            <default>{%foreach:column:, :{%object_name%}%}</default>
             <relation>{%object_handle%}</relation>
         </setting>
     </node>

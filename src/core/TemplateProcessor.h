@@ -61,6 +61,7 @@ private:
     wxStringMap varsM;
     ProgressIndicator* progressIndicatorM;
     Config configM;
+    Config infoM;
     wxWindow* windowM;
 protected:
     TemplateProcessor(ProcessableObject* object, wxWindow* window);
@@ -78,7 +79,7 @@ public:
     // Processes all known commands found in template text
     // commands are in format: {%cmdName:cmdParams%}
     // cmdParams field may be empty, in which case the format is {%cmdName*}
-    void processTemplateText(wxString& processedText, wxString inputText,
+    void processTemplateText(wxString& processedText, const wxString inputText,
         ProcessableObject* object, ProgressIndicator* progressIndicator = 0);
     // Loads the contents of the specified file and calls internalProcessTemplateText().
     void processTemplateFile(wxString& processedText,
@@ -96,12 +97,15 @@ public:
     // The internal config object, used to store user-supplied parameters in
     // interactive templates.
     Config& getConfig() { return configM; }
+    // The template info config object, used to store template metadata such as
+    // title, position in menu, etc.
+    Config& getInfo() { return infoM; }
     // Name of the current template file if processTemplateFile() has been called.
     wxFileName getCurrentTemplateFileName() { return fileNameM; }
     // Processes all commands without resetting fileNameM. Should be used
     // internally and from command handlers, while processTemplateText()
     // is for external use.
-    void internalProcessTemplateText(wxString& processedText, wxString inputText,
+    void internalProcessTemplateText(wxString& processedText, const wxString inputText,
         ProcessableObject* object);
     // Processor-specific way of escaping special chars
     virtual wxString escapeChars(const wxString& input, bool processNewlines = true) = 0;

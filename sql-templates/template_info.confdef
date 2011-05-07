@@ -2,7 +2,7 @@
 <root>
     <debug />
     <node>
-        <caption>Common template parameters</caption>
+        <caption>Edit template metadata</caption>
         <setting type="string">
             <caption>Menu item caption</caption>
             <key>templateInfo/menuCaption</key>

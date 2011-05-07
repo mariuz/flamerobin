@@ -742,22 +742,31 @@ void PreferencesDialogTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* t
     wxString cmdName, TemplateCmdParams cmdParams, ProcessableObject* object,
     wxString& /*processedText*/)
 {
-    // {%confgui%} shows a gui to set config params based on <template name>.confdef.
-    // {%confgui:name%} shows a gui based on name.confdef
-    if (cmdName == wxT("confgui"))
+    // {%edit_conf%} shows a gui to set config params based on <template name>.confdef.
+    // {%edit_info%} shows a gui to set template info based on template_info.confdef
+    if (cmdName == wxT("edit_conf") || cmdName == wxT("edit_info"))
     {
         wxFileName defFileName = tp->getCurrentTemplateFileName();
         defFileName.SetExt(wxT("confdef"));
-        if (cmdParams.Count())
-            defFileName.SetName(cmdParams[0]);
+        if (cmdName == wxT("infogui"))
+            defFileName.SetName(wxT("template_info"));
 
-        // expand commands in confdef file.
+        // Expand commands in confdef file.
         ConfdefTemplateProcessor ctp(object, tp->getWindow());
         wxString confDefData;
         ctp.processTemplateFile(confDefData, defFileName, object, tp->getProgressIndicator());
-        // show dialog for expanded confdef data.
-        PreferencesDialog pd(tp->getWindow(), _("Set template configuration"), tp->getConfig(),
-            confDefData, _("Continue"));
+        
+        // Show dialog for expanded confdef data.
+        wxString dialogTitle(_("Set template metadata"));
+        Config& config(tp->getConfig());
+        if (cmdName == wxT("infogui"))
+        {
+            dialogTitle = _("Set template metadata");
+            config = tp->getInfo(); 
+        }
+        PreferencesDialog pd(tp->getWindow(), dialogTitle,
+            config, confDefData, _("Continue"));
+
         if (pd.isOk() && pd.loadFromTargetConfig())
             if (pd.ShowModal() != wxID_OK)
                 throw FRAbort();

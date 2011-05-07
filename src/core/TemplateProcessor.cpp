@@ -99,7 +99,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
     else if (cmdName == wxT("clearvars"))
         clearVars();
 
-    // {%getconf:key%}
+    // {%getconf:key:default%}
     // Expands to the value of the specified local config key,
     // or a blank string if the key is not found.
     // The local config is associated to the template - this is
@@ -107,8 +107,11 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
     else if (cmdName == wxT("getconf") && !cmdParams.IsEmpty())
     {
         wxString text;
-        internalProcessTemplateText(text, cmdParams.all(), object);
-        processedText += configM.get(text, wxString(wxT("")));
+        internalProcessTemplateText(text, cmdParams[0], object);
+        if (cmdParams.Count() > 1)
+            processedText += configM.get(text, cmdParams.all(1));
+        else
+            processedText += configM.get(text, wxString(wxT("")));
     }
 
     // {%setconf:key:value%}
@@ -245,8 +248,8 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
             object, processedText);
 }
 //-----------------------------------------------------------------------------
-void TemplateProcessor::internalProcessTemplateText(wxString& processedText, wxString inputText,
-    ProcessableObject* object)
+void TemplateProcessor::internalProcessTemplateText(wxString& processedText,
+    const wxString inputText, ProcessableObject* object)
 {
     if (object == 0)
         object = objectM;
@@ -346,25 +349,25 @@ void TemplateProcessor::processTemplateFile(wxString& processedText,
     ProgressIndicator* progressIndicator)
 {
     fileNameM = inputFileName;
+    
+    wxFileName infoFileName(inputFileName);
+    infoFileName.SetExt(wxT("info"));
+    infoM.setConfigFileName(infoFileName);
     // put settings file in user writable directory
-    // FIXME:
-    // actually this is just a short-cut, assuming that there won't be
-    // template files with same names in different paths (which holds true
-    // for now, all template files come from $(FR_HOME)/sql-templates)
-    //
-    // much better would be to strip $(FR_HOME) if it is the first part of
-    // the file path, and add the remaining part to getUserHomePath()
-    wxFileName confFileName(config().getUserHomePath(),
-        inputFileName.GetName(), wxT("conf"));
-    confFileName.AppendDir(wxT("template-data"));
+    wxString confFileNameStr(inputFileName.GetFullPath());
+    confFileNameStr.Replace(config().getHomePath(),
+        config().getUserHomePath(), false);
+    wxFileName confFileName(confFileNameStr);
+    confFileName.SetExt(wxT("conf"));
     configM.setConfigFileName(confFileName);
     progressIndicatorM = progressIndicator;
     internalProcessTemplateText(processedText, loadEntireFile(fileNameM),
         object);
 }
 //-----------------------------------------------------------------------------
-void TemplateProcessor::processTemplateText(wxString& processedText, wxString inputText,
-    ProcessableObject* object, ProgressIndicator* progressIndicator)
+void TemplateProcessor::processTemplateText(wxString& processedText,
+    const wxString inputText, ProcessableObject* object,
+    ProgressIndicator* progressIndicator)
 {
     fileNameM.Clear();
     configM.setConfigFileName(wxFileName(wxEmptyString));
@@ -432,7 +435,8 @@ TemplateCmdHandlerRepository::~TemplateCmdHandlerRepository()
 }
 //-----------------------------------------------------------------------------
 //! needed in checkHandlerListSorted() to sort on objects instead of pointers
-bool templateCmdHandlerPointerLT(const TemplateCmdHandler* left, const TemplateCmdHandler* right)
+bool templateCmdHandlerPointerLT(const TemplateCmdHandler* left,
+    const TemplateCmdHandler* right)
 {
     return *left < *right;
 }
