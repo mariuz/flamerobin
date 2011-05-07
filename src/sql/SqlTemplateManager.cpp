@@ -126,17 +126,48 @@ SqlTemplateManager::SqlTemplateManager(const MetadataItem& metadataItem)
 void SqlTemplateManager::collectDescriptors()
 {
     wxArrayString fileNames;
-    wxString path = config().getSqlTemplatesPath();
-    wxDir::GetAllFiles(path, &fileNames, wxT("*.sql"), wxDIR_FILES);
-    
+    // Collect predefined and user-defined template descriptors.
+    // A user-defined descriptor will supercede a predefined one with the same
+    // base name.
+    // A user may also remove a predefined template by overriding it with one
+    // that does not match any object.
+    wxDir::GetAllFiles(config().getSqlTemplatesPath(), &fileNames,
+        wxT("*.sql"), wxDIR_FILES);
+    wxString userPath = config().getUserSqlTemplatesPath();
+    if (wxDir::Exists(userPath))
+        wxDir::GetAllFiles(userPath, &fileNames, wxT("*.sql"), wxDIR_FILES);
     descriptorsM.clear();
     for (wxString::size_type i = 0; i < fileNames.Count(); i++)
     {
-        TemplateDescriptorPtr td(new TemplateDescriptor(fileNames[i]));
-        if (td->matches(metadataItemM))
-            descriptorsM.push_back(td);
+        wxFileName fileName(fileNames[i]);
+        TemplateDescriptor* td = findDescriptor(fileName.GetName());
+        if (td)
+        {
+            // Present already - override it (and re-check matching).
+            td->setTemplateFileName(fileName);
+            if (!td->matches(metadataItemM))
+                descriptorsM.remove(TemplateDescriptorPtr(td));
+        }
+        else
+        {
+            TemplateDescriptorPtr tdp(new TemplateDescriptor(fileName));
+            if (tdp->matches(metadataItemM))
+                descriptorsM.push_back(tdp);
+        }
     }
+    // Sort everything by menu position.
     descriptorsM.sort(templateDescriptorPointerLT);
+}
+//-----------------------------------------------------------------------------
+TemplateDescriptor* SqlTemplateManager::findDescriptor(wxString baseFileName) const
+{
+    for (TemplateDescriptorList::const_iterator it = descriptorsBegin();
+        it != descriptorsEnd(); ++it)
+    {
+        if ((*it)->getBaseFileName() == baseFileName)
+            return it->get();
+    }
+    return 0;
 }
 //-----------------------------------------------------------------------------
 TemplateDescriptorList::const_iterator SqlTemplateManager::descriptorsBegin() const

@@ -135,10 +135,12 @@ public:
     // this class has a fixed file name - setting it through
     // setConfigFileName() is ineffective.
     virtual wxFileName getConfigFileName() const;
-    // returns the path from which to load the HTML templates.
+    // returns the path from which to load HTML templates.
     wxString getHtmlTemplatesPath() const;
-    // returns the path from which to load the SQL templates.
+    // returns the path from which to load SQL templates.
     wxString getSqlTemplatesPath() const;
+    // returns the path from which to load user SQL templates and overrides.
+    wxString getUserSqlTemplatesPath() const;
     // returns the path containing the docs.
     wxString getDocsPath() const;
     // returns the path containing the confdefs.

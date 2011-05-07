@@ -112,7 +112,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
     }
 
     // {%setconf:key:value%}
-    // Sets the value of the specified specified local config key.
+    // Sets the value of the specified local config key.
     // If the key is already defined overwrites it.
     // Expands to a blank string.
     else if (cmdName == wxT("setconf") && !cmdParams.IsEmpty())

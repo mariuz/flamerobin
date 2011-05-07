@@ -57,6 +57,8 @@ public:
     //! returns true if the template can be run on the specified metadata item.
     bool matches(const MetadataItem& metadataItem) const;
     wxFileName getTemplateFileName() const { return templateFileNameM; }
+    void setTemplateFileName(wxFileName value) { templateFileNameM = value; }
+    wxString getBaseFileName() const { return templateFileNameM.GetName(); }
 };
 //-----------------------------------------------------------------------------
 typedef boost::shared_ptr<TemplateDescriptor> TemplateDescriptorPtr;
@@ -69,6 +71,8 @@ private:
     TemplateDescriptorList descriptorsM;
 
     void collectDescriptors();
+    // Returns a pointer to the first descriptor with the specified base name, or 0.
+    TemplateDescriptor* findDescriptor(wxString baseFileName) const;
 public:
     SqlTemplateManager(const MetadataItem& metadataItem);
     TemplateDescriptorList::const_iterator descriptorsBegin() const;

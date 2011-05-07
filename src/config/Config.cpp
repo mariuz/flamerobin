@@ -355,6 +355,12 @@ wxString FRConfig::getSqlTemplatesPath() const
         + wxFileName::GetPathSeparator();
 }
 //-----------------------------------------------------------------------------
+wxString FRConfig::getUserSqlTemplatesPath() const
+{
+    return getUserHomePath() + wxT("sql-templates")
+        + wxFileName::GetPathSeparator();
+}
+//-----------------------------------------------------------------------------
 wxString FRConfig::getDocsPath() const
 {
     return getHomePath() + wxT("docs") + wxFileName::GetPathSeparator();
