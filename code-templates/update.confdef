@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <node>
+        <caption>Update table</caption>
+        <setting type="relation_columns">
+            <caption>Columns to insert</caption>
+            <key>{%object_path%}/columnNames</key>
+            <default>{%foreach:column:, :{%object_name%}%}</default>
+            <relation>{%object_handle%}</relation>
+        </setting>
+    </node>
+</root>

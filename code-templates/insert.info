@@ -1,0 +1,5 @@
+[templateInfo]
+menuCaption=Insert into ...
+menuPosition=20
+matchesType=TABLE
+matchesName=^((?!RDB\$).)*$

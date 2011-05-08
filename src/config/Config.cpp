@@ -349,15 +349,15 @@ wxString FRConfig::getHtmlTemplatesPath() const
         + wxFileName::GetPathSeparator();
 }
 //-----------------------------------------------------------------------------
-wxString FRConfig::getSqlTemplatesPath() const
+wxString FRConfig::getCodeTemplatesPath() const
 {
-    return getHomePath() + wxT("sql-templates")
+    return getHomePath() + wxT("code-templates")
         + wxFileName::GetPathSeparator();
 }
 //-----------------------------------------------------------------------------
-wxString FRConfig::getUserSqlTemplatesPath() const
+wxString FRConfig::getUserCodeTemplatesPath() const
 {
-    return getUserHomePath() + wxT("sql-templates")
+    return getUserHomePath() + wxT("code-templates")
         + wxFileName::GetPathSeparator();
 }
 //-----------------------------------------------------------------------------

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <node>
+        <caption>Select from table</caption>
+        <setting type="relation_columns">
+            <caption>Which column changes would you like to log?</caption>
+            <key>{%object_path%}/columnNames</key>
+            <default>{%foreach:column:, :{%object_name%}%}</default>
+            <relation>{%object_handle%}</relation>
+        </setting>
+        <setting type="int">
+            <caption>Trigger position (0..32767)</caption>
+            <key>{%object_path%}/triggerPosition</key>
+            <default>99</default>
+            <relation>{%object_handle%}</relation>
+        </setting>
+    </node>
+</root>

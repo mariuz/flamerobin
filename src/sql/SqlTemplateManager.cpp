@@ -131,11 +131,11 @@ void SqlTemplateManager::collectDescriptors()
     // base name.
     // A user may also remove a predefined template by overriding it with one
     // that does not match any object.
-    wxDir::GetAllFiles(config().getSqlTemplatesPath(), &fileNames,
-        wxT("*.sql"), wxDIR_FILES);
-    wxString userPath = config().getUserSqlTemplatesPath();
+    wxDir::GetAllFiles(config().getCodeTemplatesPath(), &fileNames,
+        wxT("*.template"), wxDIR_FILES);
+    wxString userPath = config().getUserCodeTemplatesPath();
     if (wxDir::Exists(userPath))
-        wxDir::GetAllFiles(userPath, &fileNames, wxT("*.sql"), wxDIR_FILES);
+        wxDir::GetAllFiles(userPath, &fileNames, wxT("*.template"), wxDIR_FILES);
     descriptorsM.clear();
     for (wxString::size_type i = 0; i < fileNames.Count(); i++)
     {

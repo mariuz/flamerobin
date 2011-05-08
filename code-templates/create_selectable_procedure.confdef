@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <node>
+        <caption>Select from table</caption>
+        <setting type="relation_columns">
+            <caption>Selected columns</caption>
+            <key>{%object_path%}/columnNames</key>
+            <default>{%foreach:column:, :{%object_name%}%}</default>
+            <relation>{%object_handle%}</relation>
+        </setting>
+    </node>
+</root>
