@@ -70,7 +70,7 @@ private:
     void addAlterItem(MetadataItem& metadataItem);
     void addCreateItem();
     void addDropItem(MetadataItem& metadataItem);
-    void addGenerateScriptMenu(MetadataItem& metadataItem);
+    void addGenerateCodeMenu(MetadataItem& metadataItem);
     void addPropertiesItem();
     void addRefreshItem();
     void addSelectItem();

@@ -231,3 +231,8 @@ void Triggers::loadChildren()
     load(0);
 }
 //-----------------------------------------------------------------------------
+const wxString Triggers::getTypeName() const
+{
+    return wxT("TRIGGER_COLLECTION");
+}
+//-----------------------------------------------------------------------------

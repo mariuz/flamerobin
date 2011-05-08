@@ -373,3 +373,8 @@ void Root::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitRoot(*this);
 }
 //-----------------------------------------------------------------------------
+const wxString Root::getTypeName() const
+{
+    return wxT("ROOT");
+}
+//-----------------------------------------------------------------------------

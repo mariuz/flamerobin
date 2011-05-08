@@ -71,6 +71,7 @@ public:
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);
+    virtual const wxString getTypeName() const;
 };
 //-----------------------------------------------------------------------------
 class SysDomains: public MetadataCollection<Domain>
@@ -79,6 +80,7 @@ public:
     SysDomains(DatabasePtr database);
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    virtual const wxString getTypeName() const;
 };
 //-----------------------------------------------------------------------------
 #endif

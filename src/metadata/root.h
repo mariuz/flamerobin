@@ -66,6 +66,7 @@ public:
     void disconnectAllDatabases();
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    virtual const wxString getTypeName() const;
 };
 //-----------------------------------------------------------------------------
 #endif

@@ -100,6 +100,7 @@ public:
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     virtual bool isSystem() const;
     void load(ProgressIndicator* progressIndicator);
+    virtual const wxString getTypeName() const;
 };
 //-----------------------------------------------------------------------------
 class Tables: public MetadataCollection<Table>
@@ -111,6 +112,7 @@ public:
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);
+    virtual const wxString getTypeName() const;
 };
 //-----------------------------------------------------------------------------
 #endif

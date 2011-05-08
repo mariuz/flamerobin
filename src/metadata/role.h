@@ -59,6 +59,7 @@ public:
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     virtual bool isSystem() const;
     void load(ProgressIndicator* progressIndicator);
+    virtual const wxString getTypeName() const;
 };
 //-----------------------------------------------------------------------------
 class Roles: public MetadataCollection<Role>
@@ -70,6 +71,7 @@ public:
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);
+    virtual const wxString getTypeName() const;
 };
 //-----------------------------------------------------------------------------
 #endif // FR_ROLE_H

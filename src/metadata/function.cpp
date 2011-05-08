@@ -240,3 +240,8 @@ void Functions::loadChildren()
     load(0);
 }
 //-----------------------------------------------------------------------------
+const wxString Functions::getTypeName() const
+{
+    return wxT("FUNCTION_COLLECTION");
+}
+//-----------------------------------------------------------------------------

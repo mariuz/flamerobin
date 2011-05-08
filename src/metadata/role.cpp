@@ -161,6 +161,11 @@ void SysRoles::loadChildren()
     load(0);
 }
 //-----------------------------------------------------------------------------
+const wxString SysRoles::getTypeName() const
+{
+    return wxT("SYSROLE_COLLECTION");
+}
+//-----------------------------------------------------------------------------
 // Roles collection
 Roles::Roles(DatabasePtr database)
     : MetadataCollection<Role>(ntRoles, database, _("Roles"))
@@ -185,5 +190,10 @@ void Roles::load(ProgressIndicator* progressIndicator)
 void Roles::loadChildren()
 {
     load(0);
+}
+//-----------------------------------------------------------------------------
+const wxString Roles::getTypeName() const
+{
+    return wxT("ROLE_COLLECTION");
 }
 //-----------------------------------------------------------------------------

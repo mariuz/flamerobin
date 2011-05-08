@@ -118,3 +118,8 @@ void Generators::loadChildren()
     load(0);
 }
 //-----------------------------------------------------------------------------
+const wxString Generators::getTypeName() const
+{
+    return wxT("GENERATOR_COLLECTION");
+}
+//-----------------------------------------------------------------------------

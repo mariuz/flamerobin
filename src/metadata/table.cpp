@@ -627,6 +627,11 @@ void SysTables::loadChildren()
     load(0);
 }
 //-----------------------------------------------------------------------------
+const wxString SysTables::getTypeName() const
+{
+    return wxT("SYSTABLE_COLLECTION");
+}
+//-----------------------------------------------------------------------------
 // Tables collection
 Tables::Tables(DatabasePtr database)
     : MetadataCollection<Table>(ntTables, database, _("Tables"))
@@ -649,5 +654,10 @@ void Tables::load(ProgressIndicator* progressIndicator)
 void Tables::loadChildren()
 {
     load(0);
+}
+//-----------------------------------------------------------------------------
+const wxString Tables::getTypeName() const
+{
+    return wxT("TABLE_COLLECTION");
 }
 //-----------------------------------------------------------------------------

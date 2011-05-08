@@ -131,3 +131,8 @@ void Exceptions::loadChildren()
     load(0);
 }
 //-----------------------------------------------------------------------------
+const wxString Exceptions::getTypeName() const
+{
+    return wxT("EXCEPTION_COLLECTION");
+}
+//-----------------------------------------------------------------------------

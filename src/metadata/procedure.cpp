@@ -554,3 +554,8 @@ void Procedures::loadChildren()
     load(0);
 }
 //-----------------------------------------------------------------------------
+const wxString Procedures::getTypeName() const
+{
+    return wxT("PROCEDURE_COLLECTION");
+}
+//-----------------------------------------------------------------------------

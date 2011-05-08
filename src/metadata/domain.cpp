@@ -359,6 +359,11 @@ void Domains::loadChildren()
     load(0);
 }
 //-----------------------------------------------------------------------------
+const wxString Domains::getTypeName() const
+{
+    return wxT("DOMAIN_COLLECTION");
+}
+//-----------------------------------------------------------------------------
 // System domains collection
 SysDomains::SysDomains(DatabasePtr database)
     : MetadataCollection<Domain>(ntSysDomains, database, _("System domains"))
@@ -368,5 +373,10 @@ SysDomains::SysDomains(DatabasePtr database)
 void SysDomains::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitSysDomains(*this);
+}
+//-----------------------------------------------------------------------------
+const wxString SysDomains::getTypeName() const
+{
+    return wxT("SYSDOMAIN_COLLECTION");
 }
 //-----------------------------------------------------------------------------
