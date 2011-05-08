@@ -140,13 +140,13 @@ void SqlTemplateManager::collectDescriptors()
     for (wxString::size_type i = 0; i < fileNames.Count(); i++)
     {
         wxFileName fileName(fileNames[i]);
-        TemplateDescriptor* td = findDescriptor(fileName.GetName());
+        TemplateDescriptorPtr td = findDescriptor(fileName.GetName());
         if (td)
         {
             // Present already - override it (and re-check matching).
             td->setTemplateFileName(fileName);
             if (!td->matches(metadataItemM))
-                descriptorsM.remove(TemplateDescriptorPtr(td));
+                descriptorsM.remove(td);
         }
         else
         {
@@ -159,15 +159,15 @@ void SqlTemplateManager::collectDescriptors()
     descriptorsM.sort(templateDescriptorPointerLT);
 }
 //-----------------------------------------------------------------------------
-TemplateDescriptor* SqlTemplateManager::findDescriptor(wxString baseFileName) const
+TemplateDescriptorPtr SqlTemplateManager::findDescriptor(wxString baseFileName) const
 {
     for (TemplateDescriptorList::const_iterator it = descriptorsBegin();
         it != descriptorsEnd(); ++it)
     {
         if ((*it)->getBaseFileName() == baseFileName)
-            return it->get();
+            return (*it);
     }
-    return 0;
+    return TemplateDescriptorPtr();
 }
 //-----------------------------------------------------------------------------
 TemplateDescriptorList::const_iterator SqlTemplateManager::descriptorsBegin() const

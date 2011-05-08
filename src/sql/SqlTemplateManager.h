@@ -72,7 +72,7 @@ private:
 
     void collectDescriptors();
     // Returns a pointer to the first descriptor with the specified base name, or 0.
-    TemplateDescriptor* findDescriptor(wxString baseFileName) const;
+    TemplateDescriptorPtr findDescriptor(wxString baseFileName) const;
 public:
     SqlTemplateManager(const MetadataItem& metadataItem);
     TemplateDescriptorList::const_iterator descriptorsBegin() const;
