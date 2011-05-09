@@ -1,4 +1,4 @@
-;Copyright (c) 2004-2010 The FlameRobin Development Team
+;Copyright (c) 2004-2011 The FlameRobin Development Team
 ;
 ;Permission is hereby granted, free of charge, to any person obtaining
 ;a copy of this software and associated documentation files (the
@@ -107,8 +107,8 @@ Source: ..\..\vcu\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersi
 #endif
 #endif
 Source: ..\..\docs\*.*; Excludes: flamerobin.1; DestDir: {app}\docs; Flags: ignoreversion
+Source: ..\..\code-templates\*.*; DestDir: {app}\code-templates; Flags: ignoreversion
 Source: ..\..\html-templates\*.*; DestDir: {app}\html-templates; Flags: ignoreversion
-Source: ..\..\sql-templates\*.*; DestDir: {app}\sql-templates; Flags: ignoreversion
 Source: ..\..\conf-defs\*.*; DestDir: {app}\conf-defs; Flags: ignoreversion
 #ifndef X64VERSION
 Source: ..\..\res\system32\msvcr71.dll; DestDir: {app}; MinVersion: 0,5.0.2195
