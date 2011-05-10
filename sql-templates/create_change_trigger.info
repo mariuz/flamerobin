@@ -1,5 +1,0 @@
-[templateInfo]
-menuCaption=Create change trigger
-menuPosition=40
-matchesType=TABLE
-matchesName=^((?!RDB\$).)*$

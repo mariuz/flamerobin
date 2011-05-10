@@ -487,32 +487,32 @@ Accepted values: AMD64, IA64.
         html.css
     </set>
 
-    <set var="SQLTEMPLATEDIR">
-        <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/sql-templates</if>
-        <if cond="FORMAT!='autoconf'">sql-templates</if>
+    <set var="CODETEMPLATEDIR">
+        <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/code-templates</if>
+        <if cond="FORMAT!='autoconf'">code-templates</if>
     </set>
-    <set var="SQLTEMPLATEFILES">
-        common.confdef
-        create_change_trigger.conf
+    <set var="CODETEMPLATEFILES">
         create_change_trigger.confdef
-        create_change_trigger.sql
-        create_selectable_execute_block.conf
+        create_change_trigger.info
+        create_change_trigger.template
         create_selectable_execute_block.confdef
-        create_selectable_execute_block.sql
-        create_selectable_procedure.conf
+        create_selectable_execute_block.info
+        create_selectable_execute_block.template
         create_selectable_procedure.confdef
-        create_selectable_procedure.sql
-        extract_full_ddl.conf
-        extract_full_ddl.sql
-        insert.conf
+        create_selectable_procedure.info
+        create_selectable_procedure.template
+        extract_full_ddl.info
+        extract_full_ddl.template
         insert.confdef
-        insert.sql
-        select.conf
+        insert.info
+        insert.template
         select.confdef
-        select.sql
-        update.conf
+        select.info
+        select.template
+		template_info.confdef
         update.confdef
-        update.sql
+        update.info
+        update.template
     </set>
 
     <set var="HTMLTEMPLATEDIR">
@@ -582,10 +582,10 @@ Accepted values: AMD64, IA64.
                 mkdir -p $(BUNDLE)/MacOS
                 mkdir -p $(BUNDLE)/Resources
                 mkdir -p $(BUNDLE)/SharedSupport
+                mkdir -p $(BUNDLE)/SharedSupport/code-templates
                 mkdir -p $(BUNDLE)/SharedSupport/conf-defs
                 mkdir -p $(BUNDLE)/SharedSupport/docs
                 mkdir -p $(BUNDLE)/SharedSupport/html-templates
-                mkdir -p $(BUNDLE)/SharedSupport/sql-templates
 
                 <!-- PkgInfo: -->
                 echo -n "APPL????" >$(BUNDLE)/PkgInfo
@@ -603,10 +603,10 @@ Accepted values: AMD64, IA64.
 
                 <!-- and copy resources and icons -->
                 cp -f $(BUNDLE_ICONS) $(BUNDLE)/Resources
+                cp -R $(DOLLAR)(srcdir)/code-templates/* $(BUNDLE)/SharedSupport/code-templates
                 cp -R $(DOLLAR)(srcdir)/conf-defs/* $(BUNDLE)/SharedSupport/conf-defs
                 cp -R $(DOLLAR)(srcdir)/docs/* $(BUNDLE)/SharedSupport/docs
                 cp -R $(DOLLAR)(srcdir)/html-templates/* $(BUNDLE)/SharedSupport/html-templates
-                cp -R $(DOLLAR)(srcdir)/sql-templates/* $(BUNDLE)/SharedSupport/sql-templates
             </command>
         </modify-target>
 
@@ -683,6 +683,11 @@ Accepted values: AMD64, IA64.
         </script-files>
 
         <data-files>
+            <srcdir>$(CODETEMPLATEDIR)</srcdir>
+            <files>$(CODETEMPLATEFILES)</files>
+            <install-to>$(DATADIR)/flamerobin/code-templates</install-to>
+        </data-files>
+        <data-files>
             <srcdir>$(CONFIGOPTIONSDIR)</srcdir>
             <files>$(CONFIGOPTIONSFILES)</files>
             <install-to>$(DATADIR)/flamerobin/conf-defs</install-to>
@@ -701,11 +706,6 @@ Accepted values: AMD64, IA64.
             <srcdir>$(HTMLTEMPLATEDIR)</srcdir>
             <files>$(HTMLTEMPLATEFILES)</files>
             <install-to>$(DATADIR)/flamerobin/html-templates</install-to>
-        </data-files>
-        <data-files>
-            <srcdir>$(SQLTEMPLATEDIR)</srcdir>
-            <files>$(SQLTEMPLATEFILES)</files>
-            <install-to>$(DATADIR)/flamerobin/sql-templates</install-to>
         </data-files>
         <data-files>
             <srcdir>$(RESOURCEDIR)</srcdir>

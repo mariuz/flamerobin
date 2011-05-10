@@ -1,5 +1,0 @@
-[templateInfo]
-menuCaption=Extract full DDL
-menuPosition=70
-matchesType=.*
-matchesName=^((?!RDB\$).)*$

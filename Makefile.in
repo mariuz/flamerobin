@@ -225,6 +225,8 @@ all: svn-rev flamerobin$(EXEEXT) $(__flamerobin_bundle___depname) $(LIBPREFIX)ib
 install: 
 	$(INSTALL_DIR) $(DESTDIR)$(bindir)
 	(cd . ; $(INSTALL_PROGRAM)  flamerobin$(EXEEXT) $(DESTDIR)$(bindir))
+	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/code-templates
+	(cd $(srcdir)/code-templates ; $(INSTALL_DATA)  create_change_trigger.confdef create_change_trigger.info create_change_trigger.template create_selectable_execute_block.confdef create_selectable_execute_block.info create_selectable_execute_block.template create_selectable_procedure.confdef create_selectable_procedure.info create_selectable_procedure.template extract_full_ddl.info extract_full_ddl.template insert.confdef insert.info insert.template select.confdef select.info select.template template_info.confdef update.confdef update.info update.template $(DESTDIR)$(datadir)/flamerobin/code-templates)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/conf-defs
 	(cd $(srcdir)/conf-defs ; $(INSTALL_DATA)  fr_settings.confdef db_settings.confdef $(DESTDIR)$(datadir)/flamerobin/conf-defs)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/docs
@@ -233,8 +235,6 @@ install:
 	(cd $(srcdir)/docs ; $(INSTALL_DATA)  flamerobin.1 $(DESTDIR)@mandir@/man1)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/html-templates
 	(cd $(srcdir)/html-templates ; $(INSTALL_DATA)  ALLloading.html DATABASE.html DATABASEtriggers.html DDL.html DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html PROCEDUREprivileges.html ROLE.html ROLEprivileges.html SERVER.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TABLEprivileges.html TRIGGER.html VIEW.html VIEWprivileges.html VIEWtriggers.html dependencies.html header.html compute.png drop.png ok.png ok2.png redx.png view.png $(DESTDIR)$(datadir)/flamerobin/html-templates)
-	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/sql-templates
-	(cd $(srcdir)/sql-templates ; $(INSTALL_DATA)  common.confdef create_change_trigger.conf create_change_trigger.confdef create_change_trigger.sql create_selectable_execute_block.conf create_selectable_execute_block.confdef create_selectable_execute_block.sql create_selectable_procedure.conf create_selectable_procedure.confdef create_selectable_procedure.sql extract_full_ddl.conf extract_full_ddl.sql insert.conf insert.confdef insert.sql select.conf select.confdef select.sql update.conf update.confdef update.sql $(DESTDIR)$(datadir)/flamerobin/sql-templates)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/applications
 	(cd $(srcdir)/res ; $(INSTALL_DATA)  flamerobin.desktop $(DESTDIR)$(datadir)/applications)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/pixmaps
@@ -242,11 +242,11 @@ install:
 
 uninstall: 
 	(cd $(DESTDIR)$(bindir) ; rm -f flamerobin$(EXEEXT))
+	(cd $(DESTDIR)$(datadir)/flamerobin/code-templates ; rm -f create_change_trigger.confdef create_change_trigger.info create_change_trigger.template create_selectable_execute_block.confdef create_selectable_execute_block.info create_selectable_execute_block.template create_selectable_procedure.confdef create_selectable_procedure.info create_selectable_procedure.template extract_full_ddl.info extract_full_ddl.template insert.confdef insert.info insert.template select.confdef select.info select.template template_info.confdef update.confdef update.info update.template)
 	(cd $(DESTDIR)$(datadir)/flamerobin/conf-defs ; rm -f fr_settings.confdef db_settings.confdef)
 	(cd $(DESTDIR)$(datadir)/flamerobin/docs ; rm -f fr_license.html fr_manual.html fr_whatsnew.html html.css)
 	(cd $(DESTDIR)@mandir@/man1 ; rm -f flamerobin.1)
 	(cd $(DESTDIR)$(datadir)/flamerobin/html-templates ; rm -f ALLloading.html DATABASE.html DATABASEtriggers.html DDL.html DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html PROCEDUREprivileges.html ROLE.html ROLEprivileges.html SERVER.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TABLEprivileges.html TRIGGER.html VIEW.html VIEWprivileges.html VIEWtriggers.html dependencies.html header.html compute.png drop.png ok.png ok2.png redx.png view.png)
-	(cd $(DESTDIR)$(datadir)/flamerobin/sql-templates ; rm -f common.confdef create_change_trigger.conf create_change_trigger.confdef create_change_trigger.sql create_selectable_execute_block.conf create_selectable_execute_block.confdef create_selectable_execute_block.sql create_selectable_procedure.conf create_selectable_procedure.confdef create_selectable_procedure.sql extract_full_ddl.conf extract_full_ddl.sql insert.conf insert.confdef insert.sql select.conf select.confdef select.sql update.conf update.confdef update.sql)
 	(cd $(DESTDIR)$(datadir)/applications ; rm -f flamerobin.desktop)
 	(cd $(DESTDIR)$(datadir)/pixmaps ; rm -f flamerobin.png)
 
@@ -279,10 +279,10 @@ FlameRobin.app/Contents/PkgInfo: flamerobin$(EXEEXT) $(srcdir)/res/flamerobin.In
 	mkdir -p FlameRobin.app/Contents/MacOS
 	mkdir -p FlameRobin.app/Contents/Resources
 	mkdir -p FlameRobin.app/Contents/SharedSupport
+	mkdir -p FlameRobin.app/Contents/SharedSupport/code-templates
 	mkdir -p FlameRobin.app/Contents/SharedSupport/conf-defs
 	mkdir -p FlameRobin.app/Contents/SharedSupport/docs
 	mkdir -p FlameRobin.app/Contents/SharedSupport/html-templates
-	mkdir -p FlameRobin.app/Contents/SharedSupport/sql-templates
 	
 	
 	echo -n "APPL????" >FlameRobin.app/Contents/PkgInfo
@@ -300,10 +300,10 @@ FlameRobin.app/Contents/PkgInfo: flamerobin$(EXEEXT) $(srcdir)/res/flamerobin.In
 	
 	
 	cp -f $(srcdir)/res/flamerobin.icns FlameRobin.app/Contents/Resources
+	cp -R $(srcdir)/code-templates/* FlameRobin.app/Contents/SharedSupport/code-templates
 	cp -R $(srcdir)/conf-defs/* FlameRobin.app/Contents/SharedSupport/conf-defs
 	cp -R $(srcdir)/docs/* FlameRobin.app/Contents/SharedSupport/docs
 	cp -R $(srcdir)/html-templates/* FlameRobin.app/Contents/SharedSupport/html-templates
-	cp -R $(srcdir)/sql-templates/* FlameRobin.app/Contents/SharedSupport/sql-templates
 
 @COND_PLATFORM_MACOSX_1@flamerobin_bundle: $(____flamerobin_BUNDLE_TGT_REF_DEP)
 

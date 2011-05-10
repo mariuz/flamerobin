@@ -1,5 +1,0 @@
-[templateInfo]
-menuCaption=Update ... set ...
-menuPosition=30
-matchesType=TABLE
-matchesName=^((?!RDB\$).)*$

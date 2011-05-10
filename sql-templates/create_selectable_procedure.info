@@ -1,5 +1,0 @@
-[templateInfo]
-menuCaption=Create selectable stored procedure
-menuPosition=50
-matchesType=TABLE
-matchesName=.*
