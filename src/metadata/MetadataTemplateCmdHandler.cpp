@@ -64,16 +64,16 @@ private:
     static const MetadataTemplateCmdHandler handlerInstance; // singleton; registers itself on creation.
 public:
     MetadataTemplateCmdHandler() {};
-    virtual void handleTemplateCmd(TemplateProcessor *tp, wxString cmdName,
-        TemplateCmdParams cmdParams, ProcessableObject* object,
-        wxString& processedText);
+    virtual void handleTemplateCmd(TemplateProcessor *tp,
+        const wxString& cmdName, const TemplateCmdParams& cmdParams,
+        ProcessableObject* object, wxString& processedText);
 };
 //-----------------------------------------------------------------------------
 const MetadataTemplateCmdHandler MetadataTemplateCmdHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
-    wxString cmdName, TemplateCmdParams cmdParams, ProcessableObject* object,
-    wxString& processedText)
+void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
+    const wxString& cmdName, const TemplateCmdParams& cmdParams,
+    ProcessableObject* object, wxString& processedText)
 {
     struct Local
     {

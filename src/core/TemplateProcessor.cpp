@@ -54,8 +54,9 @@ TemplateProcessor::TemplateProcessor(ProcessableObject* object, wxWindow* window
 {
 }
 //-----------------------------------------------------------------------------
-void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdParams,
-    ProcessableObject* object, wxString& processedText)
+void TemplateProcessor::processCommand(const wxString& cmdName,
+    const TemplateCmdParams& cmdParams, ProcessableObject* object,
+    wxString& processedText)
 {
     if (cmdName == wxT("--"))
         // Comment.
@@ -161,10 +162,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         internalProcessTemplateText(trueText, cmdParams[2], object);
         wxString falseText;
         if (cmdParams.Count() >= 4)
-        {
-            cmdParams.RemoveAt(0, 3);
-            internalProcessTemplateText(falseText, cmdParams.all(), object);
-        }
+            internalProcessTemplateText(falseText, cmdParams.all(3), object);
         if (val1 == val2)
             processedText += trueText;
         else
@@ -188,10 +186,7 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
         internalProcessTemplateText(trueText, cmdParams[2], object);
         wxString falseText;
         if (cmdParams.Count() >= 4)
-        {
-            cmdParams.RemoveAt(0, 3);
-            internalProcessTemplateText(falseText, cmdParams.all(), object);
-        }
+            internalProcessTemplateText(falseText, cmdParams.all(3), object);
         if (list.Index(val2) != wxNOT_FOUND)
             processedText += trueText;
         else
@@ -244,8 +239,10 @@ void TemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdPa
 
     // Only if no internal commands are recognized, call external command handlers.
     else
-        getTemplateCmdHandlerRepository().handleTemplateCmd(this, cmdName, cmdParams,
-            object, processedText);
+    {
+        getTemplateCmdHandlerRepository().handleTemplateCmd(this, cmdName,
+           cmdParams, object, processedText);
+    }
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::internalProcessTemplateText(wxString& processedText,
@@ -452,12 +449,16 @@ void TemplateCmdHandlerRepository::checkHandlerListSorted()
 //-----------------------------------------------------------------------------
 //! returns false if no suitable handler found
 void TemplateCmdHandlerRepository::handleTemplateCmd(TemplateProcessor *tp,
-    wxString cmdName, TemplateCmdParams cmdParams, ProcessableObject* object,
-    wxString& processedText)
+    const wxString& cmdName, const TemplateCmdParams& cmdParams,
+    ProcessableObject* object, wxString& processedText)
 {
     checkHandlerListSorted();
-    for (std::list<TemplateCmdHandler*>::iterator it = handlersM.begin(); it != handlersM.end(); ++it)
-        (*it)->handleTemplateCmd(tp, cmdName, cmdParams, object, processedText);
+    for (std::list<TemplateCmdHandler*>::iterator it = handlersM.begin();
+        it != handlersM.end(); ++it)
+    {
+        (*it)->handleTemplateCmd(tp, cmdName, cmdParams, object,
+            processedText);
+    }
 }
 //-----------------------------------------------------------------------------
 void TemplateCmdHandlerRepository::addHandler(TemplateCmdHandler* handler)

@@ -53,10 +53,12 @@ HtmlTemplateProcessor::HtmlTemplateProcessor(ProcessableObject* object,
 {
 }
 //-----------------------------------------------------------------------------
-void HtmlTemplateProcessor::processCommand(wxString cmdName, TemplateCmdParams cmdParams,
-    ProcessableObject* object, wxString& processedText)
+void HtmlTemplateProcessor::processCommand(const wxString& cmdName,
+    const TemplateCmdParams& cmdParams, ProcessableObject* object,
+    wxString& processedText)
 {
-    TemplateProcessor::processCommand(cmdName, cmdParams, object, processedText);
+    TemplateProcessor::processCommand(cmdName, cmdParams, object,
+        processedText);
 
     MetadataItem* metadataItem = dynamic_cast<MetadataItem*>(object);
     if (!metadataItem)

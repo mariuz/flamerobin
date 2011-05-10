@@ -732,15 +732,16 @@ private:
     static const PreferencesDialogTemplateCmdHandler handlerInstance; // singleton; registers itself on creation.
 public:
     PreferencesDialogTemplateCmdHandler() {};
-    virtual void handleTemplateCmd(TemplateProcessor *tp, wxString cmdName,
-        TemplateCmdParams cmdParams, ProcessableObject* object, wxString& processedText);
+    virtual void handleTemplateCmd(TemplateProcessor *tp,
+        const wxString& cmdName, const TemplateCmdParams& cmdParams,
+        ProcessableObject* object, wxString& processedText);
 };
 //-----------------------------------------------------------------------------
 const PreferencesDialogTemplateCmdHandler PreferencesDialogTemplateCmdHandler::handlerInstance;
 //-----------------------------------------------------------------------------
-void PreferencesDialogTemplateCmdHandler::handleTemplateCmd(TemplateProcessor* tp,
-    wxString cmdName, TemplateCmdParams cmdParams, ProcessableObject* object,
-    wxString& /*processedText*/)
+void PreferencesDialogTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
+    const wxString& cmdName, const TemplateCmdParams& /*cmdParams*/,
+    ProcessableObject* object, wxString& /*processedText*/)
 {
     // {%edit_conf%} shows a gui to set config params based on <template name>.confdef.
     // {%edit_info%} shows a gui to set template info based on template_info.confdef

@@ -35,8 +35,9 @@
 class ConfdefTemplateProcessor: public TemplateProcessor
 {
 protected:
-    virtual void processCommand(wxString cmdName, TemplateCmdParams cmdParams,
-        ProcessableObject* object, wxString& processedText);
+    virtual void processCommand(const wxString& cmdName,
+        const TemplateCmdParams& cmdParams, ProcessableObject* object,
+        wxString& processedText);
 public:
     ConfdefTemplateProcessor(ProcessableObject* object, wxWindow* window);
     virtual wxString escapeChars(const wxString& input,

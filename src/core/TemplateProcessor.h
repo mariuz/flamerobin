@@ -66,13 +66,13 @@ private:
 protected:
     TemplateProcessor(ProcessableObject* object, wxWindow* window);
     // Processes a command found in template text
-    virtual void processCommand(wxString cmdName,
-        TemplateCmdParams cmdParams, ProcessableObject* object,
+    virtual void processCommand(const wxString& cmdName,
+        const TemplateCmdParams& cmdParams, ProcessableObject* object,
         wxString& processedText);
     // Returns the loaded file's path, including the trailing separator.
     wxString getTemplatePath();
 public:
-    wxWindow *getWindow() { return windowM; };
+    wxWindow* getWindow() { return windowM; };
     // Returns a reference to the current progress indicator, so that
     // external command handlers can use it.
     ProgressIndicator* getProgressIndicator() { return progressIndicatorM; };
@@ -119,8 +119,9 @@ public:
     void removeHandler(TemplateCmdHandler *handler);
 
     // interface for consumers.
-    void handleTemplateCmd(TemplateProcessor *tp, wxString cmdName,
-        TemplateCmdParams cmdParams, ProcessableObject* object, wxString& processedText);
+    void handleTemplateCmd(TemplateProcessor *tp, const wxString& cmdName,
+        const TemplateCmdParams& cmdParams, ProcessableObject* object,
+        wxString& processedText);
 
     virtual ~TemplateCmdHandlerRepository();
 private:
@@ -148,9 +149,10 @@ public:
     TemplateCmdHandler();
     virtual ~TemplateCmdHandler();
 
-    virtual void handleTemplateCmd(TemplateProcessor *tp, wxString cmdName,
-        TemplateCmdParams cmdParams, ProcessableObject* object, wxString& processedText) = 0;
-    
+    virtual void handleTemplateCmd(TemplateProcessor *tp,
+        const wxString& cmdName, const TemplateCmdParams& cmdParams,
+        ProcessableObject* object, wxString& processedText) = 0;
+
     bool operator<(const TemplateCmdHandler& right) const
     {
         return getPosition() < right.getPosition();

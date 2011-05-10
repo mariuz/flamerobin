@@ -47,8 +47,8 @@ SqlTemplateProcessor::SqlTemplateProcessor(ProcessableObject*object,
 {
 }
 //-----------------------------------------------------------------------------
-void SqlTemplateProcessor::processCommand(wxString cmdName,
-    TemplateCmdParams cmdParams, ProcessableObject* object,
+void SqlTemplateProcessor::processCommand(const wxString& cmdName,
+    const TemplateCmdParams& cmdParams, ProcessableObject* object,
     wxString& processedText)
 {
     TemplateProcessor::processCommand(cmdName, cmdParams, object,

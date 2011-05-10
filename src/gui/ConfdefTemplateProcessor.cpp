@@ -47,8 +47,8 @@ ConfdefTemplateProcessor::ConfdefTemplateProcessor(ProcessableObject* object,
 {
 }
 //-----------------------------------------------------------------------------
-void ConfdefTemplateProcessor::processCommand(wxString cmdName,
-    TemplateCmdParams cmdParams, ProcessableObject* object,
+void ConfdefTemplateProcessor::processCommand(const wxString& cmdName,
+    const TemplateCmdParams& cmdParams, ProcessableObject* object,
     wxString& processedText)
 {
     TemplateProcessor::processCommand(cmdName, cmdParams, object,
