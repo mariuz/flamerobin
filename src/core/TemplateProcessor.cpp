@@ -109,10 +109,10 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     {
         wxString text;
         internalProcessTemplateText(text, cmdParams[0], object);
+        wxString defValue;
         if (cmdParams.Count() > 1)
-            processedText += configM.get(text, cmdParams.all(1));
-        else
-            processedText += configM.get(text, wxString(wxT("")));
+            defValue = cmdParams.from(1);
+        processedText += configM.get(text, defValue);
     }
 
     // {%setconf:key:value%}
@@ -162,7 +162,7 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
         internalProcessTemplateText(trueText, cmdParams[2], object);
         wxString falseText;
         if (cmdParams.Count() >= 4)
-            internalProcessTemplateText(falseText, cmdParams.all(3), object);
+            internalProcessTemplateText(falseText, cmdParams.from(3), object);
         if (val1 == val2)
             processedText += trueText;
         else
@@ -186,7 +186,7 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
         internalProcessTemplateText(trueText, cmdParams[2], object);
         wxString falseText;
         if (cmdParams.Count() >= 4)
-            internalProcessTemplateText(falseText, cmdParams.all(3), object);
+            internalProcessTemplateText(falseText, cmdParams.from(3), object);
         if (list.Index(val2) != wxNOT_FOUND)
             processedText += trueText;
         else
@@ -214,7 +214,7 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
         for (wxArrayString::iterator it = list.begin(); it != list.end(); ++it)
         {
             wxString newText;
-            internalProcessTemplateText(newText, cmdParams.all(2), object);
+            internalProcessTemplateText(newText, cmdParams.from(2), object);
             newText.Replace(wxT("%%current_value%%"), *(it));
             if ((!firstItem) && (!newText.IsEmpty()))
                 processedText += escapeChars(separator);
@@ -397,18 +397,19 @@ wxString TemplateProcessor::getTemplatePath()
     return fileNameM.GetPathWithSep();
 }
 //-----------------------------------------------------------------------------
-wxString TemplateCmdParams::all(size_t start) const
+wxString TemplateCmdParams::all() const
 {
-    if (start > Count() - 1)
-        start = Count() - 1;
-        
+    return from(0);
+}
+//-----------------------------------------------------------------------------
+wxString TemplateCmdParams::from(size_t start) const
+{
     wxString result;
-    for (size_t i = start; i < Count(); i++)
+    if (start < Count())
     {
-        if (i == start)
-          result = Item(i);
-        else
-          result += wxT(':') + Item(i);
+        result = Item(start);
+        for (size_t i = start + 1; i < Count(); i++)
+            result += wxT(':') + Item(i);
     }
     return result;
 }

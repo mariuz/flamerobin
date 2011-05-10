@@ -154,7 +154,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             for (ColumnPtrs::iterator it = r->begin(); it != r->end(); ++it)
             {
                 Local::foreachIteration(firstItem, tp, processedText, sep,
-                    cmdParams.all(2), (*it).get());
+                    cmdParams.from(2), (*it).get());
             }
         }
 
@@ -172,7 +172,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             for (std::vector<ForeignKey>::iterator it = fks->begin(); it != fks->end(); ++it)
             {
                 Local::foreachIteration(firstItem, tp, processedText, sep,
-                    cmdParams.all(2), &(*it));
+                    cmdParams.from(2), &(*it));
             }
         }
 
@@ -190,7 +190,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             for (std::vector<CheckConstraint>::iterator it = c->begin(); it != c->end(); ++it)
             {
                 Local::foreachIteration(firstItem, tp, processedText, sep,
-                    cmdParams.all(2), &(*it));
+                    cmdParams.from(2), &(*it));
             }
         }
 
@@ -208,7 +208,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             for (std::vector<UniqueConstraint>::iterator it = c->begin(); it != c->end(); ++it)
             {
                 Local::foreachIteration(firstItem, tp, processedText, sep,
-                    cmdParams.all(2), &(*it));
+                    cmdParams.from(2), &(*it));
             }
         }
 
@@ -226,7 +226,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             for (std::vector<Index>::iterator it = ix->begin(); it != ix->end(); ++it)
             {
                 Local::foreachIteration(firstItem, tp, processedText, sep,
-                    cmdParams.all(2), &(*it));
+                    cmdParams.from(2), &(*it));
             }
         }
 
@@ -259,7 +259,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                 it != triggers.end(); ++it)
             {
                 Local::foreachIteration(firstItem, tp, processedText, sep,
-                    cmdParams.all(3), *it);
+                    cmdParams.from(3), *it);
             }
         }
 
@@ -278,7 +278,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             for (PrivilegeItems::iterator it = list.begin(); it != list.end(); ++it)
             {
                 Local::foreachIteration(firstItem, tp, processedText, sep,
-                    cmdParams.all(3), &(*it));
+                    cmdParams.from(3), &(*it));
             }
         }
 
@@ -303,7 +303,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             for (std::vector<Privilege>::iterator it = p->begin(); it != p->end(); ++it)
             {
                 Local::foreachIteration(firstItem, tp, processedText, sep,
-                    cmdParams.all(2), &(*it));
+                    cmdParams.from(2), &(*it));
             }
         }
 
@@ -322,7 +322,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             for (std::vector<Dependency>::iterator it = deps.begin(); it != deps.end(); ++it)
             {
                 Local::foreachIteration(firstItem, tp, processedText, sep,
-                    cmdParams.all(2), &(*it));
+                    cmdParams.from(2), &(*it));
             }
         }
 
@@ -344,7 +344,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                 if ((*it)->isOutputParameter() == isOut)
                 {
                     Local::foreachIteration(firstItem, tp, processedText, sep,
-                        cmdParams.all(3), (*it).get());
+                        cmdParams.from(3), (*it).get());
                 }
             }
         }
@@ -375,7 +375,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                 ++it)
             {
                 Local::foreachIteration(firstItem, tp, processedText, sep,
-                    cmdParams.all(2), (*it).get());
+                    cmdParams.from(2), (*it).get());
             }
         }
         // add more collections here.
@@ -473,7 +473,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         else if (cmdParams.Count() == 2)
             processedText += c->getColumnList(cmdParams[1]);
         else if (cmdParams.Count() >= 3)
-            processedText += c->getColumnList(cmdParams[1], cmdParams.all(2));
+            processedText += c->getColumnList(cmdParams[1], cmdParams.from(2));
     }
 
     // {%fkinfo:<property>%}

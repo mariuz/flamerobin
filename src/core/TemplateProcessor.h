@@ -44,8 +44,9 @@ class TemplateCmdParams: public wxArrayString
 {
 public:
     // returns all params concatenated with the default separator.
-    // optionally return only params from start.
-    wxString all(size_t start = 0) const;
+    wxString all() const;
+    // returns all params from start, concatenated with the default separator.
+    wxString from(size_t start) const;
 };
 //-----------------------------------------------------------------------------
 typedef std::map<wxString, wxString> wxStringMap;
