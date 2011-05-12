@@ -70,13 +70,11 @@ static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
 //-----------------------------------------------------------------------------
 // PrefDlgSetting class
 PrefDlgSetting::PrefDlgSetting(wxPanel* page, PrefDlgSetting* parent)
+    : pageM(page), parentM(parent), relatedM(false), alignmentGroupM(-1),
+        sizerProportionM(0)
 {
-    pageM = page;
-    parentM = parent;
     if (parent)
         parent->addEnabledSetting(this);
-    relatedM = false;
-    alignmentGroupM = -1;
 }
 //-----------------------------------------------------------------------------
 PrefDlgSetting::~PrefDlgSetting()
@@ -109,7 +107,7 @@ bool PrefDlgSetting::addToSizer(wxSizer* sizer, PrefDlgSetting* previous)
             margin = styleguide().getUnrelatedControlMargin(wxVERTICAL);
         sizer->Add(0, margin);
     }
-    sizer->Add(hsizer, 0, wxEXPAND | wxFIXED_MINSIZE);
+    sizer->Add(hsizer, getSizerProportion(), wxEXPAND | wxFIXED_MINSIZE);
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -189,6 +187,11 @@ wxPanel* PrefDlgSetting::getPage() const
     return pageM;
 }
 //-----------------------------------------------------------------------------
+int PrefDlgSetting::getSizerProportion() const
+{
+    return sizerProportionM;
+}
+//-----------------------------------------------------------------------------
 bool PrefDlgSetting::isRelatedTo(PrefDlgSetting* prevSetting) const
 {
     if (!prevSetting)
@@ -224,6 +227,12 @@ bool PrefDlgSetting::parseProperty(wxXmlNode* xmln)
             long l;
             if (value.ToLong(&l) && l > 0)
                 alignmentGroupM = l;
+        }
+        else if (name == wxT("proportion"))
+        {
+            long l;
+            if (value.ToLong(&l) && l >= 0)
+                sizerProportionM = l;
         }
     }
     return true;
@@ -958,8 +967,9 @@ bool PrefDlgChooserSetting::parseProperty(wxXmlNode* xmln)
 }
 //-----------------------------------------------------------------------------
 // PrefDlgSetting factory
-PrefDlgSetting* createPrefDlgSetting(wxPanel* page, const wxString& type,
-    PrefDlgSetting* parent)
+/* static */
+PrefDlgSetting* PrefDlgSetting::createPrefDlgSetting(wxPanel* page,
+    const wxString& type, PrefDlgSetting* parent)
 {
     if (type == wxT("checkbox"))
         return new PrefDlgCheckboxSetting(page, parent);

@@ -48,6 +48,10 @@ class PrefDlgSetting: public wxEvtHandler
 protected:
     PrefDlgSetting(wxPanel* page, PrefDlgSetting* parent);
 public:
+    // factory
+    static PrefDlgSetting* createPrefDlgSetting(wxPanel* page,
+        const wxString& type, PrefDlgSetting* parent);
+
     virtual ~PrefDlgSetting();
 
     // returns true if anything has been added to sizer
@@ -78,6 +82,7 @@ protected:
     int getControlIndentation(int level) const;
     virtual wxStaticText* getLabel();
     int getLevel() const;
+    int getSizerProportion() const;
     virtual bool hasControls() const = 0;
     virtual bool isRelatedTo(PrefDlgSetting* prevSetting) const;
     virtual void setDefault(const wxString& defValue);
@@ -87,10 +92,8 @@ private:
     std::list<PrefDlgSetting*> enabledSettingsM;
     bool relatedM;
     int alignmentGroupM;
+    int sizerProportionM;
 };
-
-PrefDlgSetting* createPrefDlgSetting(wxPanel* page, const wxString& type,
-    PrefDlgSetting* parent);
 //-----------------------------------------------------------------------------
 class PreferencesDialog: public BaseDialog
 {

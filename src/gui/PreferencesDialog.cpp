@@ -603,7 +603,8 @@ bool PreferencesDialog::parseDescriptionSetting(wxPanel* page, wxXmlNode* xmln,
 #else
     wxString type(xmln->GetPropVal(wxT("type"), wxEmptyString));
 #endif
-    PrefDlgSetting* setting = createPrefDlgSetting(page, type, enabledby);
+    PrefDlgSetting* setting = PrefDlgSetting::createPrefDlgSetting(page,
+        type, enabledby);
     // ignore unknown settings unless debug mode is active
     if (setting == 0)
     {
