@@ -77,7 +77,7 @@ public:
     virtual ~Config();
 
     virtual wxFileName getConfigFileName() const;
-    void setConfigFileName(wxFileName fileName);
+    void setConfigFileName(const wxFileName& fileName);
 
     static const wxString pathSeparator;
     
@@ -101,16 +101,16 @@ public:
 
     // return true if value exists, false if not
     virtual bool keyExists(const wxString& key) const;
-    virtual bool getValue(wxString key, wxString& value);
-    bool getValue(wxString key, int& value);
-    bool getValue(wxString key, double& value);
-    bool getValue(wxString key, bool& value);
-    bool getValue(wxString key, StorageGranularity& value);
-    bool getValue(wxString key, wxArrayString& value);
+    virtual bool getValue(const wxString& key, wxString& value);
+    bool getValue(const wxString& key, int& value);
+    bool getValue(const wxString& key, double& value);
+    bool getValue(const wxString& key, bool& value);
+    bool getValue(const wxString& key, StorageGranularity& value);
+    bool getValue(const wxString& key, wxArrayString& value);
 
     // returns the value for key if it exists, or default value if it doesn't.
     template <typename T>
-    T get(wxString key, const T& defaultValue)
+    T get(const wxString& key, const T& defaultValue)
     {
         T temp;
         if (getValue(key, temp))
@@ -120,12 +120,12 @@ public:
     }
 
     // return true if value existed, false if not.
-    virtual bool setValue(wxString key, wxString value);
-    bool setValue(wxString key, int value);
-    bool setValue(wxString key, double value);
-    bool setValue(wxString key, bool value);
-    bool setValue(wxString key, StorageGranularity value);
-    bool setValue(wxString key, const wxArrayString& value);
+    virtual bool setValue(const wxString& key, const wxString& value);
+    bool setValue(const wxString& key, int value);
+    bool setValue(const wxString& key, double value);
+    bool setValue(const wxString& key, bool value);
+    bool setValue(const wxString& key, StorageGranularity value);
+    bool setValue(const wxString& key, const wxArrayString& value);
 };
 //-----------------------------------------------------------------------------
 //! Class used to contain all FlameRobin and database configuration info sets.

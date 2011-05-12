@@ -246,7 +246,7 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::internalProcessTemplateText(wxString& processedText,
-    const wxString inputText, ProcessableObject* object)
+    const wxString& inputText, ProcessableObject* object)
 {
     if (object == 0)
         object = objectM;
@@ -363,7 +363,7 @@ void TemplateProcessor::processTemplateFile(wxString& processedText,
 }
 //-----------------------------------------------------------------------------
 void TemplateProcessor::processTemplateText(wxString& processedText,
-    const wxString inputText, ProcessableObject* object,
+    const wxString& inputText, ProcessableObject* object,
     ProgressIndicator* progressIndicator)
 {
     fileNameM.Clear();
@@ -372,17 +372,18 @@ void TemplateProcessor::processTemplateText(wxString& processedText,
     internalProcessTemplateText(processedText, inputText, object);
 }
 //-----------------------------------------------------------------------------
-void TemplateProcessor::setVar(wxString varName, wxString varValue)
+void TemplateProcessor::setVar(const wxString& varName,
+    const wxString& varValue)
 {
     varsM[varName] = varValue;
 }
 //-----------------------------------------------------------------------------
-wxString TemplateProcessor::getVar(wxString varName)
+wxString TemplateProcessor::getVar(const wxString& varName)
 {
     return varsM[varName];
 }
 //-----------------------------------------------------------------------------
-void TemplateProcessor::clearVar(wxString varName)
+void TemplateProcessor::clearVar(const wxString& varName)
 {
     varsM.erase(varName);
 }

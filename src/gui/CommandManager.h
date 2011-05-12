@@ -49,9 +49,9 @@ private:
 public:
     CommandManager();
 
-    wxString getMainMenuItemText(wxString text, int id);
-    wxString getPopupMenuItemText(wxString text, int id);
-    wxString getToolbarHint(wxString text, int id);
+    wxString getMainMenuItemText(const wxString& text, int id);
+    wxString getPopupMenuItemText(const wxString& text, int id);
+    wxString getToolbarHint(const wxString& text, int id);
 };
 //----------------------------------------------------------------------------
 #endif // FR_COMMANDMANAGER_H

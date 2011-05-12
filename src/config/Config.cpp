@@ -99,7 +99,7 @@ bool Config::keyExists(const wxString& key) const
 }
 //-----------------------------------------------------------------------------
 //! return true if value exists, false if not
-bool Config::getValue(wxString key, wxString& value)
+bool Config::getValue(const wxString& key, wxString& value)
 {
     // if complete key is found, then return (recursion exit condition).
     wxString configValue;
@@ -130,7 +130,7 @@ bool Config::getValue(wxString key, wxString& value)
     }
 }
 //-----------------------------------------------------------------------------
-bool Config::getValue(wxString key, int& value)
+bool Config::getValue(const wxString& key, int& value)
 {
     wxString s;
     if (!getValue(key, s))
@@ -147,7 +147,7 @@ bool Config::getValue(wxString key, int& value)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool Config::getValue(wxString key, double& value)
+bool Config::getValue(const wxString& key, double& value)
 {
     wxString s;
     if (!getValue(key, s))
@@ -159,7 +159,7 @@ bool Config::getValue(wxString key, double& value)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool Config::getValue(wxString key, bool& value)
+bool Config::getValue(const wxString& key, bool& value)
 {
     wxString s;
     if (!getValue(key, s))
@@ -169,7 +169,7 @@ bool Config::getValue(wxString key, bool& value)
     return true;
 }
 //-----------------------------------------------------------------------------
-bool Config::getValue(wxString key, StorageGranularity& value)
+bool Config::getValue(const wxString& key, StorageGranularity& value)
 {
     int intValue = 0;
     bool ret = getValue(key, intValue);
@@ -178,7 +178,7 @@ bool Config::getValue(wxString key, StorageGranularity& value)
     return ret;
 }
 //-----------------------------------------------------------------------------
-bool Config::getValue(wxString key, wxArrayString& value)
+bool Config::getValue(const wxString& key, wxArrayString& value)
 {
     wxString s;
     if (!getValue(key, s))
@@ -200,7 +200,7 @@ bool Config::getValue(wxString key, wxArrayString& value)
 }
 //-----------------------------------------------------------------------------
 //! return true if value existed, false if not
-bool Config::setValue(wxString key, wxString value)
+bool Config::setValue(const wxString& key, const wxString& value)
 {
     bool result = getConfig()->Write(key, value);
     if (!isLocked())
@@ -211,21 +211,21 @@ bool Config::setValue(wxString key, wxString value)
     return result;
 }
 //-----------------------------------------------------------------------------
-bool Config::setValue(wxString key, int value)
+bool Config::setValue(const wxString& key, int value)
 {
     wxString s;
     s << value;
     return setValue(key, s);
 }
 //-----------------------------------------------------------------------------
-bool Config::setValue(wxString key, double value)
+bool Config::setValue(const wxString& key, double value)
 {
     wxString s;
     s << value;
     return setValue(key, s);
 }
 //-----------------------------------------------------------------------------
-bool Config::setValue(wxString key, bool value)
+bool Config::setValue(const wxString& key, bool value)
 {
     if (value)
         return setValue(key, wxString(wxT("1")));
@@ -233,12 +233,12 @@ bool Config::setValue(wxString key, bool value)
         return setValue(key, wxString(wxT("0")));
 }
 //-----------------------------------------------------------------------------
-bool Config::setValue(wxString key, StorageGranularity value)
+bool Config::setValue(const wxString& key, StorageGranularity value)
 {
     return setValue(key, int(value));
 }
 //-----------------------------------------------------------------------------
-bool Config::setValue(wxString key, const wxArrayString& value)
+bool Config::setValue(const wxString& key, const wxArrayString& value)
 {
     wxString s;
     for (wxArrayString::const_iterator it = value.begin(); it != value.end();
@@ -275,7 +275,7 @@ wxFileName Config::getConfigFileName() const
     return configFileNameM;
 }
 //-----------------------------------------------------------------------------
-void Config::setConfigFileName(wxFileName fileName)
+void Config::setConfigFileName(const wxFileName& fileName)
 {
     configFileNameM = fileName;
 }

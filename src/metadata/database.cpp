@@ -98,22 +98,22 @@ wxString CharacterSet::getName() const
 }
 //-----------------------------------------------------------------------------
 // Credentials class
-void Credentials::setCharset(wxString value)
+void Credentials::setCharset(const wxString& value)
 {
     charsetM = value;
 }
 //-----------------------------------------------------------------------------
-void Credentials::setUsername(wxString value)
+void Credentials::setUsername(const wxString& value)
 {
     usernameM = value;
 }
 //-----------------------------------------------------------------------------
-void Credentials::setPassword(wxString value)
+void Credentials::setPassword(const wxString& value)
 {
     passwordM = value;
 }
 //-----------------------------------------------------------------------------
-void Credentials::setRole(wxString value)
+void Credentials::setRole(const wxString& value)
 {
     roleM = value;
 }
@@ -375,7 +375,8 @@ void Database::getIdentifiers(std::vector<Identifier>& temp)
 }
 //-----------------------------------------------------------------------------
 // This could be moved to Column class
-wxString Database::loadDomainNameForColumn(wxString table, wxString field)
+wxString Database::loadDomainNameForColumn(const wxString& table,
+    const wxString& field)
 {
     MetadataLoader* loader = getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
@@ -527,7 +528,7 @@ void Database::loadCollations()
     }
 }
 //-----------------------------------------------------------------------------
-wxString Database::getTableForIndex(wxString indexName)
+wxString Database::getTableForIndex(const wxString& indexName)
 {
     MetadataLoader* loader = getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
@@ -571,7 +572,7 @@ DatabasePtr Database::getDatabase() const
     return (const_cast<Database*>(this))->shared_from_this();
 }
 //-----------------------------------------------------------------------------
-MetadataItem* Database::findByName(wxString name)
+MetadataItem* Database::findByName(const wxString& name)
 {
     if (!isConnected())
         return 0;
@@ -585,7 +586,7 @@ MetadataItem* Database::findByName(wxString name)
     return 0;
 }
 //-----------------------------------------------------------------------------
-MetadataItem* Database::findByNameAndType(NodeType nt, wxString name)
+MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
 {
     if (!isConnected())
         return 0;
@@ -702,7 +703,7 @@ void Database::dropObject(MetadataItem* object)
     };
 }
 //-----------------------------------------------------------------------------
-void Database::addObject(NodeType type, wxString name)
+void Database::addObject(NodeType type, const wxString& name)
 {
     switch (type)
     {
@@ -951,7 +952,7 @@ void Database::reconnect()
 // the caller of this function should check whether the database object has the
 // password set, and if it does not, it should provide the password
 //               and if it does, just provide that password
-void Database::connect(wxString password, ProgressIndicator* indicator)
+void Database::connect(const wxString& password, ProgressIndicator* indicator)
 {
     if (connectedM)
         return;
@@ -1433,12 +1434,12 @@ IBPP::Database& Database::getIBPPDatabase()
     return databaseM;
 }
 //-----------------------------------------------------------------------------
-void Database::setPath(wxString value)
+void Database::setPath(const wxString& value)
 {
     pathM = value;
 }
 //-----------------------------------------------------------------------------
-void Database::setConnectionCharset(wxString value)
+void Database::setConnectionCharset(const wxString& value)
 {
     if (connectionCredentialsM)
         connectionCredentialsM->setCharset(value);
@@ -1446,7 +1447,7 @@ void Database::setConnectionCharset(wxString value)
         credentialsM.setCharset(value);
 }
 //-----------------------------------------------------------------------------
-void Database::setUsername(wxString value)
+void Database::setUsername(const wxString& value)
 {
     if (connectionCredentialsM)
         connectionCredentialsM->setUsername(value);
@@ -1454,7 +1455,7 @@ void Database::setUsername(wxString value)
         credentialsM.setUsername(value);
 }
 //-----------------------------------------------------------------------------
-void Database::setRawPassword(wxString value)
+void Database::setRawPassword(const wxString& value)
 {
     if (connectionCredentialsM)
         connectionCredentialsM->setPassword(value);
@@ -1462,7 +1463,7 @@ void Database::setRawPassword(wxString value)
         credentialsM.setPassword(value);
 }
 //-----------------------------------------------------------------------------
-void Database::setEncryptedPassword(wxString value)
+void Database::setEncryptedPassword(const wxString& value)
 {
     // temporary credentials -> use password as entered
     if (connectionCredentialsM)
@@ -1472,12 +1473,19 @@ void Database::setEncryptedPassword(wxString value)
     }
 
     // password must not be empty to be encrypted
-    if (authenticationModeM.getUseEncryptedPassword() && !value.IsEmpty())
-        value = encryptPassword(value, getUsername() + getConnectionString());
-    credentialsM.setPassword(value);
+
+    if (authenticationModeM.getUseEncryptedPassword() && !value.empty())
+    {
+        credentialsM.setPassword(
+            encryptPassword(value, getUsername() + getConnectionString()));
+    }
+    else
+    {
+        credentialsM.setPassword(value);
+    }
 }
 //-----------------------------------------------------------------------------
-void Database::setRole(wxString value)
+void Database::setRole(const wxString& value)
 {
     if (connectionCredentialsM)
         connectionCredentialsM->setRole(value);

@@ -43,7 +43,7 @@ class DatabaseConfig: public Config
 private:
     const Database *databaseM;
     Config& referenceConfigM;
-    wxString addPathToKey(const wxString key) const;
+    wxString addPathToKey(const wxString& key) const;
 
 public:
     DatabaseConfig(const Database *d, Config& referenceConfig);
@@ -55,8 +55,8 @@ public:
 
     // transform the key based on Database, and call regular config
     virtual bool keyExists(const wxString& key) const;
-    virtual bool getValue(wxString key, wxString& value);
-    virtual bool setValue(wxString key, wxString value);
+    virtual bool getValue(const wxString& key, wxString& value);
+    virtual bool setValue(const wxString& key, const wxString& value);
 };
 //-----------------------------------------------------------------------------
 #endif

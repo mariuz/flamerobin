@@ -53,7 +53,7 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
     ntLastType
 } NodeType;
 //-----------------------------------------------------------------------------
-NodeType getTypeByName(wxString name);
+NodeType getTypeByName(const wxString& name);
 wxString getNameOfType(NodeType type);
 //-----------------------------------------------------------------------------
 class MetadataItem: public Subject, public ObjectWithHandle<MetadataItem>,
@@ -75,8 +75,9 @@ protected:
     Identifier identifierM;
 
     virtual void loadDescription();
-    virtual void saveDescription(wxString description);
-    void saveDescription(wxString saveStatement, wxString description);
+    virtual void saveDescription(const wxString& description);
+    void saveDescription(const wxString& saveStatement,
+        const wxString& description);
 
     virtual void loadProperties();
     void setPropertiesLoaded(bool loaded);
@@ -110,7 +111,7 @@ public:
     wxString getDescription();
     bool getDescription(wxString& description);
     void invalidateDescription();
-    void setDescription(wxString description);
+    void setDescription(const wxString& description);
 
     bool childrenLoaded() const;
     void ensureChildrenLoaded();
@@ -126,12 +127,12 @@ public:
     virtual wxString getDropSqlStatement() const;
 
     // getters/setters
-    virtual MetadataItem *getParent() const;
-    void setParent(MetadataItem *parent);
+    virtual MetadataItem* getParent() const;
+    void setParent(MetadataItem* parent);
     virtual wxString getName_() const;
     virtual wxString getQuotedName() const;
     virtual Identifier getIdentifier() const;
-    virtual void setName_(wxString name);
+    virtual void setName_(const wxString& name);
     virtual NodeType getType() const;
     void setType(NodeType type);
 

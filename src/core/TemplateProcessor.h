@@ -80,7 +80,7 @@ public:
     // Processes all known commands found in template text
     // commands are in format: {%cmdName:cmdParams%}
     // cmdParams field may be empty, in which case the format is {%cmdName*}
-    void processTemplateText(wxString& processedText, const wxString inputText,
+    void processTemplateText(wxString& processedText, const wxString& inputText,
         ProcessableObject* object, ProgressIndicator* progressIndicator = 0);
     // Loads the contents of the specified file and calls internalProcessTemplateText().
     void processTemplateFile(wxString& processedText,
@@ -88,11 +88,11 @@ public:
         ProgressIndicator* progressIndicator = 0);
     // Sets a variable value. If the variable already exists it is overwritten.
     // To clear a variable, set it to an empty string.
-    void setVar(wxString varName, wxString varValue);
+    void setVar(const wxString& varName, const wxString& varValue);
     // Gets a variable value. If the variable doesn't exist, an empty string is returned.
-    wxString getVar(wxString varName);
+    wxString getVar(const wxString& varName);
     // Clears the specified variable.
-    void clearVar(wxString varName);
+    void clearVar(const wxString& varName);
     // Clears all variables.
     void clearVars();
     // The internal config object, used to store user-supplied parameters in
@@ -106,10 +106,11 @@ public:
     // Processes all commands without resetting fileNameM. Should be used
     // internally and from command handlers, while processTemplateText()
     // is for external use.
-    void internalProcessTemplateText(wxString& processedText, const wxString inputText,
-        ProcessableObject* object);
+    void internalProcessTemplateText(wxString& processedText,
+        const wxString& inputText, ProcessableObject* object);
     // Processor-specific way of escaping special chars
-    virtual wxString escapeChars(const wxString& input, bool processNewlines = true) = 0;
+    virtual wxString escapeChars(const wxString& input,
+        bool processNewlines = true) = 0;
 };
 //-----------------------------------------------------------------------------
 class TemplateCmdHandlerRepository

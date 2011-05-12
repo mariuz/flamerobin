@@ -50,14 +50,14 @@ private:
     wxString matchesTypeM;
     wxString matchesNameM;
 public:
-    TemplateDescriptor(wxFileName templateFileName);
+    TemplateDescriptor(const wxFileName& templateFileName);
     wxString getMenuCaption() const;
     int getMenuPosition() const { return menuPositionM; }
     bool operator<(const TemplateDescriptor& right) const;
     //! returns true if the template can be run on the specified metadata item.
     bool matches(const MetadataItem& metadataItem) const;
     wxFileName getTemplateFileName() const { return templateFileNameM; }
-    void setTemplateFileName(wxFileName value) { templateFileNameM = value; }
+    void setTemplateFileName(const wxFileName& value) { templateFileNameM = value; }
     wxString getBaseFileName() const { return templateFileNameM.GetName(); }
 };
 //-----------------------------------------------------------------------------
@@ -72,7 +72,7 @@ private:
 
     void collectDescriptors();
     // Returns a pointer to the first descriptor with the specified base name, or 0.
-    TemplateDescriptorPtr findDescriptor(wxString baseFileName) const;
+    TemplateDescriptorPtr findDescriptor(const wxString& baseFileName) const;
 public:
     SqlTemplateManager(const MetadataItem& metadataItem);
     TemplateDescriptorList::const_iterator descriptorsBegin() const;

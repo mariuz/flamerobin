@@ -121,7 +121,7 @@ wxString getNameOfType(NodeType type)
     }
 }
 //-----------------------------------------------------------------------------
-NodeType getTypeByName(wxString name)
+NodeType getTypeByName(const wxString& name)
 {
     if (name == wxT("TABLE"))
         return ntTable;
@@ -570,14 +570,14 @@ void MetadataItem::loadDescription()
     }
 }
 //-----------------------------------------------------------------------------
-void MetadataItem::saveDescription(wxString WXUNUSED(description))
+void MetadataItem::saveDescription(const wxString& WXUNUSED(description))
 {
     throw FRError(wxString::Format(
         wxT("Objects of type %s do not support descriptions"),
         getTypeName().c_str()));
 }
 //-----------------------------------------------------------------------------
-void MetadataItem::setDescription(wxString description)
+void MetadataItem::setDescription(const wxString& description)
 {
     if (getDescription() != description)
     {
@@ -617,7 +617,7 @@ Identifier MetadataItem::getIdentifier() const
     return identifierM;
 }
 //-----------------------------------------------------------------------------
-void MetadataItem::setName_(wxString name)
+void MetadataItem::setName_(const wxString& name)
 {
     identifierM.setText(name);
     notifyObservers();

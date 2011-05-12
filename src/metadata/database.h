@@ -71,10 +71,10 @@ public:
     wxString getUsername() const;
     wxString getPassword() const;
     wxString getRole() const;
-    void setCharset(wxString value);
-    void setUsername(wxString value);
-    void setPassword(wxString value);
-    void setRole(wxString value);
+    void setCharset(const wxString& value);
+    void setUsername(const wxString& value);
+    void setPassword(const wxString& value);
+    void setRole(const wxString& value);
 };
 //-----------------------------------------------------------------------------
 class DatabaseInfo
@@ -196,7 +196,7 @@ private:
     void loadCollections(ProgressIndicator* progressIndicator);
 
     // small help for parser
-    wxString getTableForIndex(wxString indexName);
+    wxString getTableForIndex(const wxString& indexName);
 
     mutable unsigned idM;
 
@@ -229,7 +229,7 @@ public:
     ViewsPtr getViews();
 
     bool isConnected() const;
-    void connect(wxString password, ProgressIndicator* indicator = 0);
+    void connect(const wxString& password, ProgressIndicator* indicator = 0);
     void disconnect();
     void reconnect();
     void prepareTemporaryCredentials();
@@ -241,18 +241,19 @@ public:
     wxArrayString loadIdentifiers(const wxString& loadStatement,
         ProgressIndicator* progressIndicator = 0);
 
-    wxString loadDomainNameForColumn(wxString table, wxString field);
+    wxString loadDomainNameForColumn(const wxString& table,
+        const wxString& field);
     DomainPtr getDomain(const wxString& name);
 
     void loadGeneratorValues();
     Relation* getRelationForTrigger(Trigger* trigger);
 
     virtual DatabasePtr getDatabase() const;
-    MetadataItem* findByNameAndType(NodeType nt, wxString name);
-    MetadataItem* findByName(wxString name);
+    MetadataItem* findByNameAndType(NodeType nt, const wxString& name);
+    MetadataItem* findByName(const wxString& name);
     Relation* findRelation(const Identifier& name);
     void dropObject(MetadataItem *object);
-    void addObject(NodeType type, wxString name);
+    void addObject(NodeType type, const wxString& name);
     void parseCommitedSql(const SqlStatement& stm);     // reads a DDL statement and does accordingly
 
     CharacterSet getCharsetById(int id);
@@ -276,12 +277,12 @@ public:
     DatabaseAuthenticationMode& getAuthenticationMode();
     wxString getRole() const;
     IBPP::Database& getIBPPDatabase();
-    void setPath(wxString value);
-    void setConnectionCharset(wxString value);
-    void setUsername(wxString value);
-    void setRawPassword(wxString value);
-    void setEncryptedPassword(wxString value);
-    void setRole(wxString value);
+    void setPath(const wxString& value);
+    void setConnectionCharset(const wxString& value);
+    void setUsername(const wxString& value);
+    void setRawPassword(const wxString& value);
+    void setEncryptedPassword(const wxString& value);
+    void setRole(const wxString& value);
     virtual const wxString getTypeName() const;
     ServerPtr getServer() const;
     void setServer(ServerPtr server);

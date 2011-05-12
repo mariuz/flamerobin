@@ -95,13 +95,13 @@ wxString CommandManager::getShortcutText(int id)
     return wxEmptyString;
 }
 //-----------------------------------------------------------------------------
-wxString CommandManager::getMainMenuItemText(wxString text, int id)
+wxString CommandManager::getMainMenuItemText(const wxString& text, int id)
 {
     wxString shortcut(getShortcutText(id));
     return (shortcut.empty() ? text : text + wxT("\t") + shortcut);
 }
 //-----------------------------------------------------------------------------
-wxString CommandManager::getPopupMenuItemText(wxString text, int id)
+wxString CommandManager::getPopupMenuItemText(const wxString& text, int id)
 {
     bool appendShortcuts = false;
     // user interface guidelines state that popup menus should not
@@ -116,7 +116,7 @@ wxString CommandManager::getPopupMenuItemText(wxString text, int id)
     return text;
 }
 //-----------------------------------------------------------------------------
-wxString CommandManager::getToolbarHint(wxString text, int id)
+wxString CommandManager::getToolbarHint(const wxString& text, int id)
 {
     wxString shortcut(getShortcutText(id));
     return (shortcut.empty() ? text : text + wxT(" (") + shortcut + wxT(")"));

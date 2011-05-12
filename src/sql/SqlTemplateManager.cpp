@@ -48,7 +48,7 @@
 #include "sql/SqlTemplateManager.h"
 
 //-----------------------------------------------------------------------------
-TemplateDescriptor::TemplateDescriptor(wxFileName templateFileName)
+TemplateDescriptor::TemplateDescriptor(const wxFileName& templateFileName)
     : templateFileNameM(templateFileName), menuPositionM(0)
 {
     loadDescriptionFromConfigFile();
@@ -61,7 +61,8 @@ void TemplateDescriptor::loadDescriptionFromConfigFile()
     if (confFileName.FileExists())
     {
         configM.setConfigFileName(confFileName);
-        menuCaptionM = configM.get(wxT("templateInfo/menuCaption"), templateFileNameM.GetName());
+        menuCaptionM = configM.get(wxT("templateInfo/menuCaption"),
+            templateFileNameM.GetName());
         menuPositionM = configM.get(wxT("templateInfo/menuPosition"), 0);
         if (!configM.getValue(wxT("templateInfo/matchesType"), matchesTypeM))
             matchesTypeM = wxT(".*");
@@ -140,17 +141,17 @@ void SqlTemplateManager::collectDescriptors()
     for (wxString::size_type i = 0; i < fileNames.Count(); i++)
     {
         wxFileName fileName(fileNames[i]);
-        TemplateDescriptorPtr td = findDescriptor(fileName.GetName());
-        if (td)
+        TemplateDescriptorPtr tdp = findDescriptor(fileName.GetName());
+        if (tdp)
         {
             // Present already - override it (and re-check matching).
-            td->setTemplateFileName(fileName);
-            if (!td->matches(metadataItemM))
-                descriptorsM.remove(td);
+            tdp->setTemplateFileName(fileName);
+            if (!tdp->matches(metadataItemM))
+                descriptorsM.remove(tdp);
         }
         else
         {
-            TemplateDescriptorPtr tdp(new TemplateDescriptor(fileName));
+            tdp.reset(new TemplateDescriptor(fileName));
             if (tdp->matches(metadataItemM))
                 descriptorsM.push_back(tdp);
         }
@@ -159,7 +160,8 @@ void SqlTemplateManager::collectDescriptors()
     descriptorsM.sort(templateDescriptorPointerLT);
 }
 //-----------------------------------------------------------------------------
-TemplateDescriptorPtr SqlTemplateManager::findDescriptor(wxString baseFileName) const
+TemplateDescriptorPtr SqlTemplateManager::findDescriptor(
+    const wxString& baseFileName) const
 {
     for (TemplateDescriptorList::const_iterator it = descriptorsBegin();
         it != descriptorsEnd(); ++it)

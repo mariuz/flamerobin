@@ -65,7 +65,7 @@ static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
         else if (type == wxXML_ELEMENT_NODE && n->GetName() == wxT("br"))
             content += wxT("\n");
     }
-    return content.IsEmpty() ? defvalue : content;
+    return content.empty() ? defvalue : content;
 }
 //-----------------------------------------------------------------------------
 // PrefDlgSetting class
@@ -288,7 +288,7 @@ void PrefDlgCheckboxSetting::addControlsToSizer(wxSizer* sizer)
 bool PrefDlgCheckboxSetting::createControl(bool WXUNUSED(ignoreerrors))
 {
     checkboxM = new wxCheckBox(getPage(), wxID_ANY, captionM);
-    if (!descriptionM.IsEmpty())
+    if (!descriptionM.empty())
         checkboxM->SetToolTip(descriptionM);
     checkboxM->PushEventHandler(this);
     return true;
@@ -389,7 +389,7 @@ bool PrefDlgRadioboxSetting::createControl(bool ignoreerrors)
     }
     radioboxM = new wxRadioBox(getPage(), wxID_ANY, captionM,
         wxDefaultPosition, wxDefaultSize, choicesM, 1);
-    if (!descriptionM.IsEmpty())
+    if (!descriptionM.empty())
         radioboxM->SetToolTip(descriptionM);
     return true;
 }
@@ -439,7 +439,7 @@ bool PrefDlgRadioboxSetting::parseProperty(wxXmlNode* xmln)
 */
         }
         // for the time being values are the index of the caption in the array
-        if (!optcaption.IsEmpty())
+        if (!optcaption.empty())
             choicesM.Add(optcaption);
     }
     return PrefDlgSetting::parseProperty(xmln);
@@ -528,14 +528,14 @@ bool PrefDlgIntEditSetting::createControl(bool WXUNUSED(ignoreerrors))
         caption2 = captionM.Mid(pos + 7).Trim(false);
     }
 
-    if (!caption1.IsEmpty())
+    if (!caption1.empty())
         captionBeforeM = new wxStaticText(getPage(), wxID_ANY, caption1);
     spinctrlM = new wxSpinCtrl(getPage(), wxID_ANY);
     spinctrlM->SetRange(minValueM, maxValueM);
-    if (!caption2.IsEmpty())
+    if (!caption2.empty())
         captionAfterM = new wxStaticText(getPage(), wxID_ANY, caption2);
 
-    if (!descriptionM.IsEmpty())
+    if (!descriptionM.empty())
     {
         spinctrlM->SetToolTip(descriptionM);
         if (captionBeforeM)
@@ -589,7 +589,7 @@ bool PrefDlgIntEditSetting::parseProperty(wxXmlNode* xmln)
         {
             wxString value(getNodeContent(xmln, wxEmptyString));
             long l;
-            if (!value.IsEmpty() && value.ToLong(&l))
+            if (!value.empty() && value.ToLong(&l))
             {
                 if (name == wxT("maxvalue"))
                     maxValueM = l;
@@ -681,13 +681,13 @@ bool PrefDlgStringEditSetting::createControl(bool WXUNUSED(ignoreerrors))
         caption2 = captionM.Mid(pos + 7).Trim(false);
     }
 
-    if (!caption1.IsEmpty())
+    if (!caption1.empty())
         captionBeforeM = new wxStaticText(getPage(), wxID_ANY, caption1);
     textctrlM = new wxTextCtrl(getPage(), wxID_ANY);
-    if (!caption2.IsEmpty())
+    if (!caption2.empty())
         captionAfterM = new wxStaticText(getPage(), wxID_ANY, caption2);
 
-    if (!descriptionM.IsEmpty())
+    if (!descriptionM.empty())
     {
         textctrlM->SetToolTip(descriptionM);
         if (captionBeforeM)
@@ -736,7 +736,7 @@ bool PrefDlgStringEditSetting::parseProperty(wxXmlNode* xmln)
         {
             wxString value(getNodeContent(xmln, wxEmptyString));
             long l;
-            if (!value.IsEmpty() && value.ToLong(&l))
+            if (!value.empty() && value.ToLong(&l))
                 expandM = l;
         }
     }
@@ -760,44 +760,39 @@ void PrefDlgStringEditSetting::setDefault(const wxString& defValue)
 // PrefDlgChooserSetting class
 class PrefDlgChooserSetting: public PrefDlgSetting
 {
+protected:
+    PrefDlgChooserSetting(wxPanel* page, PrefDlgSetting* parent);
 public:
-    enum {choosefile, choosefont, chooserelcolumns};
-
-    PrefDlgChooserSetting(int style, wxPanel* page, PrefDlgSetting* parent);
     ~PrefDlgChooserSetting();
 
     virtual bool createControl(bool ignoreerrors);
     virtual bool loadFromTargetConfig(Config& config);
     virtual bool saveToTargetConfig(Config& config);
-    virtual bool parseProperty(wxXmlNode* xmln);
-    void OnBrowseButton(wxCommandEvent& event);
 protected:
+    wxTextCtrl* textctrlM;
+
     virtual void addControlsToSizer(wxSizer* sizer);
     virtual void enableControls(bool enabled);
     virtual wxStaticText* getLabel();
     virtual bool hasControls() const;
     virtual void setDefault(const wxString& defValue);
 private:
-    const int styleM;
     wxButton* browsebtnM;
     wxStaticText* captionBeforeM;
-    wxTextCtrl* textctrlM;
     wxString defaultM;
-    Relation* relationM;
 
-    void chooseFile();
-    void chooseFont();
-    void chooseRelationColumns();
+    virtual void choose() = 0;
 
-    DECLARE_EVENT_TABLE()
+private:
+    // event handling
+    void OnBrowseButton(wxCommandEvent& event);
 };
 //-----------------------------------------------------------------------------
-PrefDlgChooserSetting::PrefDlgChooserSetting(int style, wxPanel* page, PrefDlgSetting* parent)
-    : PrefDlgSetting(page, parent), styleM(style)
+PrefDlgChooserSetting::PrefDlgChooserSetting(wxPanel* page,
+        PrefDlgSetting* parent)
+    : PrefDlgSetting(page, parent), browsebtnM(0), captionBeforeM(0),
+        textctrlM(0)
 {
-    browsebtnM = 0;
-    captionBeforeM = 0;
-    textctrlM = 0;
 }
 //-----------------------------------------------------------------------------
 PrefDlgChooserSetting::~PrefDlgChooserSetting()
@@ -824,29 +819,7 @@ void PrefDlgChooserSetting::addControlsToSizer(wxSizer* sizer)
     }
 }
 //-----------------------------------------------------------------------------
-void PrefDlgChooserSetting::chooseFile()
-{
-    wxString path;
-    wxFileName::SplitPath(textctrlM->GetValue(), &path, 0, 0);
-
-    wxString filename = ::wxFileSelector(_("Select File"), path,
-        wxEmptyString, wxEmptyString, _("All files (*.*)|*.*"),
-        wxFD_SAVE, ::wxGetTopLevelParent(textctrlM));
-    if (!filename.IsEmpty())
-        textctrlM->SetValue(filename);
-}
-//-----------------------------------------------------------------------------
-void PrefDlgChooserSetting::chooseFont()
-{
-    wxFont font;
-    wxString fontdesc = textctrlM->GetValue();
-    if (!fontdesc.IsEmpty())
-        font.SetNativeFontInfo(fontdesc);
-    wxFont font2 = ::wxGetFontFromUser(::wxGetTopLevelParent(textctrlM), font);
-    if (font2.Ok())
-        textctrlM->SetValue(font2.GetNativeFontInfoDesc());
-}
-//-----------------------------------------------------------------------------
+/*
 void PrefDlgChooserSetting::chooseRelationColumns()
 {
     wxArrayString defaultNames = ::wxStringTokenize(textctrlM->GetValue(),
@@ -864,16 +837,20 @@ void PrefDlgChooserSetting::chooseRelationColumns()
         textctrlM->SetValue(retval);
     }
 }
+*/
 //-----------------------------------------------------------------------------
 bool PrefDlgChooserSetting::createControl(bool WXUNUSED(ignoreerrors))
 {
-    if (!captionM.IsEmpty())
+    if (!captionM.empty())
         captionBeforeM = new wxStaticText(getPage(), wxID_ANY, captionM);
     textctrlM = new wxTextCtrl(getPage(), wxID_ANY);
     browsebtnM = new wxButton(getPage(), wxID_ANY, _("Select..."));
     browsebtnM->PushEventHandler(this);
 
-    if (!descriptionM.IsEmpty())
+    Connect(browsebtnM->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
+        wxCommandEventHandler(PrefDlgChooserSetting::OnBrowseButton));
+
+    if (!descriptionM.empty())
     {
         if (captionBeforeM)
             captionBeforeM->SetToolTip(descriptionM);
@@ -889,12 +866,7 @@ void PrefDlgChooserSetting::enableControls(bool enabled)
     if (textctrlM)
         textctrlM->Enable(enabled);
     if (browsebtnM)
-    {
-        if ((styleM == chooserelcolumns) && !relationM)
-            browsebtnM->Enable(false);
-        else
-            browsebtnM->Enable(enabled);
-    }
+        browsebtnM->Enable(enabled);
 }
 //-----------------------------------------------------------------------------
 wxStaticText* PrefDlgChooserSetting::getLabel()
@@ -935,35 +907,63 @@ void PrefDlgChooserSetting::setDefault(const wxString& defValue)
     defaultM = defValue;
 }
 //-----------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(PrefDlgChooserSetting, wxEvtHandler)
-    EVT_BUTTON(wxID_ANY, PrefDlgChooserSetting::OnBrowseButton)
-END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
 void PrefDlgChooserSetting::OnBrowseButton(wxCommandEvent& WXUNUSED(event))
 {
-    if (textctrlM == 0)
-        return;
-    if (styleM == choosefile)
-        chooseFile();
-    else if (styleM == choosefont)
-        chooseFont();
-    else if (styleM == chooserelcolumns)
-        chooseRelationColumns();
+    if (textctrlM)
+        choose();
 }
 //-----------------------------------------------------------------------------
-bool PrefDlgChooserSetting::parseProperty(wxXmlNode* xmln)
+// PrefDlgFileChooserSetting class
+class PrefDlgFileChooserSetting: public PrefDlgChooserSetting
 {
-    if (xmln->GetType() == wxXML_ELEMENT_NODE)
-    {
-        wxString name(xmln->GetName());
-        if (name == wxT("relation"))
-        {
-            wxString handle(getNodeContent(xmln, wxEmptyString));
-            relationM = dynamic_cast<Relation*>(
-                MetadataItem::getObjectFromHandle(handle));
-        }
-    }
-    return PrefDlgSetting::parseProperty(xmln);
+public:
+    PrefDlgFileChooserSetting(wxPanel* page, PrefDlgSetting* parent);
+private:
+    virtual void choose();
+};
+//-----------------------------------------------------------------------------
+PrefDlgFileChooserSetting::PrefDlgFileChooserSetting(wxPanel* page,
+        PrefDlgSetting* parent)
+    : PrefDlgChooserSetting(page, parent)
+{
+}
+//-----------------------------------------------------------------------------
+void PrefDlgFileChooserSetting::choose()
+{
+    wxString path;
+    wxFileName::SplitPath(textctrlM->GetValue(), &path, 0, 0);
+
+    wxString filename = ::wxFileSelector(_("Select File"), path,
+        wxEmptyString, wxEmptyString, _("All files (*.*)|*.*"),
+        wxFD_SAVE, ::wxGetTopLevelParent(textctrlM));
+    if (!filename.empty())
+        textctrlM->SetValue(filename);
+}
+//-----------------------------------------------------------------------------
+// PrefDlgFontChooserSetting class
+class PrefDlgFontChooserSetting: public PrefDlgChooserSetting
+{
+public:
+    PrefDlgFontChooserSetting(wxPanel* page, PrefDlgSetting* parent);
+private:
+    virtual void choose();
+};
+//-----------------------------------------------------------------------------
+PrefDlgFontChooserSetting::PrefDlgFontChooserSetting(wxPanel* page,
+        PrefDlgSetting* parent)
+    : PrefDlgChooserSetting(page, parent)
+{
+}
+//-----------------------------------------------------------------------------
+void PrefDlgFontChooserSetting::choose()
+{
+    wxFont font;
+    wxString fontdesc = textctrlM->GetValue();
+    if (!fontdesc.empty())
+        font.SetNativeFontInfo(fontdesc);
+    wxFont font2 = ::wxGetFontFromUser(::wxGetTopLevelParent(textctrlM), font);
+    if (font2.Ok())
+        textctrlM->SetValue(font2.GetNativeFontInfoDesc());
 }
 //-----------------------------------------------------------------------------
 // PrefDlgSetting factory
@@ -980,11 +980,13 @@ PrefDlgSetting* PrefDlgSetting::createPrefDlgSetting(wxPanel* page,
     if (type == wxT("string"))
         return new PrefDlgStringEditSetting(page, parent);
     if (type == wxT("file"))
-        return new PrefDlgChooserSetting(PrefDlgChooserSetting::choosefile, page, parent);
+        return new PrefDlgFileChooserSetting(page, parent);
     if (type == wxT("font"))
-        return new PrefDlgChooserSetting(PrefDlgChooserSetting::choosefont, page, parent);
+        return new PrefDlgFontChooserSetting(page, parent);
+/*
     if (type == wxT("relation_columns"))
-        return new PrefDlgChooserSetting(PrefDlgChooserSetting::chooserelcolumns, page, parent);
+        return new PrefDlgRelationColumnsChooserSetting(page, parent);
+*/
     return 0;
 }
 //-----------------------------------------------------------------------------

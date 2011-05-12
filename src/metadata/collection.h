@@ -67,7 +67,7 @@ public:
 private:
     CollectionType itemsM;
 
-    iterator getPosition(wxString name)
+    iterator getPosition(const wxString& name)
     {
         Identifier id(name);
         for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
@@ -91,7 +91,7 @@ private:
     {
         wxString nameM;
 
-        InsertionPosByName(wxString name) : nameM(name) {}
+        InsertionPosByName(const wxString& name) : nameM(name) {}
         bool operator()(const ItemType item)
         {
             return item->getName_() > nameM;
@@ -107,7 +107,7 @@ public:
 
     // inserts new item into list at correct position to preserve alphabetical
     // order of item names, and returns pointer to it
-    ItemType insert(wxString name)
+    ItemType insert(const wxString& name)
     {
         iterator pos = std::find_if(itemsM.begin(), itemsM.end(),
             InsertionPosByName(name));
@@ -187,13 +187,14 @@ public:
         }
     };
 
-    ItemType findByName(wxString name)
+    ItemType findByName(const wxString& name)
     {
         iterator it = getPosition(name);
         return (it != itemsM.end()) ? (*it) : ItemType();
     };
 
-    virtual bool getChildren(std::vector<MetadataItem *>& temp)         // returns vector of all subnodes
+    // returns vector of all subnodes
+    virtual bool getChildren(std::vector<MetadataItem *>& temp)
     {
         if (!childrenLoaded())
             return false;
