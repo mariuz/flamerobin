@@ -32,7 +32,7 @@
 #include <wx/filename.h>
 #include <wx/arrstr.h>
 
-#include <vector>
+#include <list>
 #include <map>
 
 #include "config/Config.h"

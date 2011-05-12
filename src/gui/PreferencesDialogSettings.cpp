@@ -770,6 +770,7 @@ public:
     virtual bool saveToTargetConfig(Config& config);
 protected:
     wxTextCtrl* textctrlM;
+    wxButton* browsebtnM;
 
     virtual void addControlsToSizer(wxSizer* sizer);
     virtual void enableControls(bool enabled);
@@ -777,7 +778,6 @@ protected:
     virtual bool hasControls() const;
     virtual void setDefault(const wxString& defValue);
 private:
-    wxButton* browsebtnM;
     wxStaticText* captionBeforeM;
     wxString defaultM;
 
@@ -818,26 +818,6 @@ void PrefDlgChooserSetting::addControlsToSizer(wxSizer* sizer)
         }
     }
 }
-//-----------------------------------------------------------------------------
-/*
-void PrefDlgChooserSetting::chooseRelationColumns()
-{
-    wxArrayString defaultNames = ::wxStringTokenize(textctrlM->GetValue(),
-        wxT(","));
-    std::vector<wxString> list;
-    for (wxString::size_type i = 0; i < defaultNames.Count(); i++)
-        list.push_back(defaultNames[i].Trim(true).Trim(false));
-
-    if (selectRelationColumnsIntoVector(relationM, getPage(), list))
-    {
-        std::vector<wxString>::iterator it = list.begin();
-        wxString retval(*it);
-        while ((++it) != list.end())
-            retval += wxT(", ") + (*it);
-        textctrlM->SetValue(retval);
-    }
-}
-*/
 //-----------------------------------------------------------------------------
 bool PrefDlgChooserSetting::createControl(bool WXUNUSED(ignoreerrors))
 {
@@ -966,6 +946,64 @@ void PrefDlgFontChooserSetting::choose()
         textctrlM->SetValue(font2.GetNativeFontInfoDesc());
 }
 //-----------------------------------------------------------------------------
+// PrefDlgRelationColumnsChooserSetting class
+class PrefDlgRelationColumnsChooserSetting: public PrefDlgChooserSetting
+{
+public:
+    PrefDlgRelationColumnsChooserSetting(wxPanel* page,
+        PrefDlgSetting* parent);
+protected:
+    virtual void enableControls(bool enabled);
+    virtual bool parseProperty(wxXmlNode* xmln);
+private:
+    Relation* relationM;
+    virtual void choose();
+};
+//-----------------------------------------------------------------------------
+PrefDlgRelationColumnsChooserSetting::PrefDlgRelationColumnsChooserSetting(
+        wxPanel* page, PrefDlgSetting* parent)
+    : PrefDlgChooserSetting(page, parent), relationM(0)
+{
+}
+//-----------------------------------------------------------------------------
+void PrefDlgRelationColumnsChooserSetting::choose()
+{
+    wxArrayString defaultNames = ::wxStringTokenize(textctrlM->GetValue(),
+        wxT(","));
+    std::vector<wxString> list;
+    for (size_t i = 0; i < defaultNames.Count(); i++)
+        list.push_back(defaultNames[i].Trim(true).Trim(false));
+
+    if (selectRelationColumnsIntoVector(relationM, getPage(), list))
+    {
+        std::vector<wxString>::iterator it = list.begin();
+        wxString retval(*it);
+        while ((++it) != list.end())
+            retval += wxT(", ") + (*it);
+        textctrlM->SetValue(retval);
+    }
+}
+//-----------------------------------------------------------------------------
+void PrefDlgRelationColumnsChooserSetting::enableControls(bool enabled)
+{
+    if (textctrlM)
+        textctrlM->Enable(enabled);
+    if (browsebtnM)
+        browsebtnM->Enable(enabled && relationM);
+}
+//-----------------------------------------------------------------------------
+bool PrefDlgRelationColumnsChooserSetting::parseProperty(wxXmlNode* xmln)
+{
+    if (xmln->GetType() == wxXML_ELEMENT_NODE
+        && xmln->GetName() == wxT("relation"))
+    {
+        wxString handle(getNodeContent(xmln, wxEmptyString));
+        MetadataItem* mi = MetadataItem::getObjectFromHandle(handle);
+        relationM = dynamic_cast<Relation*>(mi);
+    }
+    return PrefDlgChooserSetting::parseProperty(xmln);
+}
+//-----------------------------------------------------------------------------
 // PrefDlgSetting factory
 /* static */
 PrefDlgSetting* PrefDlgSetting::createPrefDlgSetting(wxPanel* page,
@@ -983,10 +1021,8 @@ PrefDlgSetting* PrefDlgSetting::createPrefDlgSetting(wxPanel* page,
         return new PrefDlgFileChooserSetting(page, parent);
     if (type == wxT("font"))
         return new PrefDlgFontChooserSetting(page, parent);
-/*
     if (type == wxT("relation_columns"))
         return new PrefDlgRelationColumnsChooserSetting(page, parent);
-*/
     return 0;
 }
 //-----------------------------------------------------------------------------

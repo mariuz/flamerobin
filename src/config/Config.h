@@ -32,9 +32,6 @@
 #include <wx/stdpaths.h>
 #include <wx/filename.h>
 
-#include <map>
-#include <vector>
-
 #include "core/Observer.h"
 #include "core/Subject.h"
 //-----------------------------------------------------------------------------

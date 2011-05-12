@@ -79,5 +79,4 @@ public:
     TemplateDescriptorList::const_iterator descriptorsEnd() const;
 };
 //-----------------------------------------------------------------------------
-
 #endif // FR_SQLTEMPLATEMANAGER_H

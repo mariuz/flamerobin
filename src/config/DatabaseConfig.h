@@ -32,16 +32,13 @@
 #ifndef FR_DATABASE_CONFIG_H
 #define FR_DATABASE_CONFIG_H
 
-#include <map>
-#include <vector>
-
 #include "config/Config.h"
 #include "metadata/MetadataClasses.h"
 //-----------------------------------------------------------------------------
 class DatabaseConfig: public Config
 {
 private:
-    const Database *databaseM;
+    const Database* databaseM;
     Config& referenceConfigM;
     wxString addPathToKey(const wxString& key) const;
 

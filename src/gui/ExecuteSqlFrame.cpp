@@ -41,7 +41,6 @@
 #include <wx/artprov.h>
 #include <wx/dnd.h>
 #include <wx/file.h>
-//#include <wx/fontmap.h>
 #include <wx/fontdlg.h>
 #include <wx/stopwatch.h>
 #include <wx/tokenzr.h>
