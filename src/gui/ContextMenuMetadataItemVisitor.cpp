@@ -85,9 +85,9 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database& database)
     menuM->Append(Cmds::Menu_ConnectAs, _("Connect &as..."));
     menuM->Append(Cmds::Menu_Disconnect, _("&Disconnect"));
     menuM->Append(Cmds::Menu_Reconnect, _("Reconnec&t"));
-    menuM->AppendSeparator();
+    addSeparator();
     menuM->Append(Cmds::Menu_ExecuteStatements, _("Execute &SQL statements"));
-    menuM->AppendSeparator();
+    addSeparator();
 
     wxMenu* actions = new wxMenu();
     menuM->Append(0, _("Acti&ons"), actions);
@@ -102,7 +102,7 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database& database)
     // the actions submenu
     actions->Append(Cmds::Menu_Backup, _("&Backup database"));
     actions->Append(Cmds::Menu_Restore, _("Rest&ore database"));
-    actions->AppendSeparator();
+    addSeparator();
     actions->Append(Cmds::Menu_RecreateDatabase, _("Recreate empty database"));
     addSeparator();
     addGenerateCodeMenu(database);
@@ -117,7 +117,7 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database& database)
     advanced->Append(Cmds::Menu_ExtractDatabaseDDL,
         _("&Extract metadata DDL"));
 
-    menuM->AppendSeparator();
+    addSeparator();
     addRefreshItem();
     menuM->Append(Cmds::Menu_DatabaseProperties, _("P&roperties"));
 }
