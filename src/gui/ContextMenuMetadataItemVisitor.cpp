@@ -39,6 +39,7 @@
 #include <wx/menu.h>
 
 #include "config/Config.h"
+#include "core/CodeTemplateManager.h"
 #include "gui/CommandIds.h"
 #include "gui/ContextMenuMetadataItemVisitor.h"
 #include "metadata/column.h"
@@ -54,7 +55,6 @@
 #include "metadata/table.h"
 #include "metadata/trigger.h"
 #include "metadata/view.h"
-#include "sql/SqlTemplateManager.h"
 
 //-----------------------------------------------------------------------------
 ContextMenuMetadataItemVisitor::ContextMenuMetadataItemVisitor(wxMenu* menu)
@@ -384,7 +384,7 @@ void ContextMenuMetadataItemVisitor::addDropItem(MetadataItem& metadataItem)
 void ContextMenuMetadataItemVisitor::addGenerateCodeMenu(
     MetadataItem& metadataItem)
 {
-    SqlTemplateManager tm(metadataItem);
+    CodeTemplateManager tm(metadataItem);
     if (tm.descriptorsBegin() == tm.descriptorsEnd())
         return;
 

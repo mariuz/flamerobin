@@ -56,6 +56,8 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Config.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CodeTemplateManager.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CodeTemplateProcessor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRError.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Observer.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ProgressIndicator.o \
@@ -153,8 +155,6 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MultiStatement.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SelectStatement.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlStatement.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTemplateManager.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTemplateProcessor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementBuilder.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.o \
@@ -273,6 +273,12 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.o: ./src/config/DatabaseCo
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.o: ./src/core/ArtProvider.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CodeTemplateManager.o: ./src/core/CodeTemplateManager.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CodeTemplateProcessor.o: ./src/core/CodeTemplateProcessor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRError.o: ./src/core/FRError.cpp
@@ -564,12 +570,6 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SelectStatement.o: ./src/sql/SelectStatem
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlStatement.o: ./src/sql/SqlStatement.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
-
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTemplateManager.o: ./src/sql/SqlTemplateManager.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
-
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTemplateProcessor.o: ./src/sql/SqlTemplateProcessor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.o: ./src/sql/SqlTokenizer.cpp

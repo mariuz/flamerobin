@@ -47,6 +47,8 @@
 #include "config/Config.h"
 #include "config/DatabaseConfig.h"
 #include "core/ArtProvider.h"
+#include "core/CodeTemplateManager.h"
+#include "core/CodeTemplateProcessor.h"
 #include "core/FRError.h"
 #include "core/URIProcessor.h"
 #include "frutils.h"
@@ -80,8 +82,7 @@
 #include "metadata/table.h"
 #include "metadata/trigger.h"
 #include "metadata/view.h"
-#include "sql/SqlTemplateManager.h"
-#include "sql/SqlTemplateProcessor.h"
+
 //-----------------------------------------------------------------------------
 bool checkValidDatabase(DatabasePtr database)
 {
@@ -833,7 +834,7 @@ void MainFrame::OnMenuGenerateScript(wxCommandEvent& event)
     if (!checkValidDatabase(database))
         return;
 
-    SqlTemplateManager tm(*mi);
+    CodeTemplateManager tm(*mi);
 
     int i = (int)Cmds::Menu_TemplateFirst;
     for (TemplateDescriptorList::const_iterator it = tm.descriptorsBegin();
@@ -843,7 +844,7 @@ void MainFrame::OnMenuGenerateScript(wxCommandEvent& event)
         {
             ProgressDialog pd(this, _("Processing template..."));
             wxString sql;
-            SqlTemplateProcessor tp(mi, this);
+            CodeTemplateProcessor tp(mi, this);
             tp.processTemplateFile(sql, (*it)->getTemplateFileName(),
                 mi, &pd);
             showSql(this, wxString(_("Execute SQL statements")),

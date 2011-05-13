@@ -1560,6 +1560,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\core\CodeTemplateManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\core\CodeTemplateProcessor.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\gui\CommandManager.cpp"
 				>
 			</File>
@@ -1781,14 +1789,6 @@
 			</File>
 			<File
 				RelativePath=".\src\sql\SqlStatement.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\sql\SqlTemplateManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\sql\SqlTemplateProcessor.cpp"
 				>
 			</File>
 			<File
@@ -2122,6 +2122,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\core\CodeTemplateManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\core\CodeTemplateProcessor.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\gui\CommandIds.h"
 				>
 			</File>
@@ -2355,14 +2363,6 @@
 			</File>
 			<File
 				RelativePath=".\src\sql\SqlStatement.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\sql\SqlTemplateManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\sql\SqlTemplateProcessor.h"
 				>
 			</File>
 			<File

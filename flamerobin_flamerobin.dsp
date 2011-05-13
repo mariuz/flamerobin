@@ -500,6 +500,14 @@ SOURCE=.\src\gui\BaseFrame.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\core\CodeTemplateManager.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\core\CodeTemplateProcessor.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\CommandManager.cpp
 # End Source File
 # Begin Source File
@@ -724,14 +732,6 @@ SOURCE=.\src\sql\SqlStatement.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\sql\SqlTemplateManager.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\sql\SqlTemplateProcessor.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\sql\SqlTokenizer.cpp
 # End Source File
 # Begin Source File
@@ -935,6 +935,14 @@ SOURCE=.\src\gui\BaseDialog.h
 # Begin Source File
 
 SOURCE=.\src\gui\BaseFrame.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\core\CodeTemplateManager.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\core\CodeTemplateProcessor.h
 # End Source File
 # Begin Source File
 
@@ -1171,14 +1179,6 @@ SOURCE=.\src\gui\SimpleHtmlFrame.h
 # Begin Source File
 
 SOURCE=.\src\sql\SqlStatement.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\sql\SqlTemplateManager.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\sql\SqlTemplateProcessor.h
 # End Source File
 # Begin Source File
 

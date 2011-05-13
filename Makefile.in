@@ -48,6 +48,8 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_Config.o \
 	flamerobin_DatabaseConfig.o \
 	flamerobin_ArtProvider.o \
+	flamerobin_CodeTemplateManager.o \
+	flamerobin_CodeTemplateProcessor.o \
 	flamerobin_FRError.o \
 	flamerobin_Observer.o \
 	flamerobin_ProgressIndicator.o \
@@ -145,8 +147,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_MultiStatement.o \
 	flamerobin_SelectStatement.o \
 	flamerobin_SqlStatement.o \
-	flamerobin_SqlTemplateManager.o \
-	flamerobin_SqlTemplateProcessor.o \
 	flamerobin_SqlTokenizer.o \
 	flamerobin_StatementBuilder.o \
 	flamerobin_statementHistory.o \
@@ -326,6 +326,12 @@ flamerobin_DatabaseConfig.o: $(srcdir)/src/config/DatabaseConfig.cpp $(FLAMEROBI
 
 flamerobin_ArtProvider.o: $(srcdir)/src/core/ArtProvider.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/ArtProvider.cpp
+
+flamerobin_CodeTemplateManager.o: $(srcdir)/src/core/CodeTemplateManager.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/CodeTemplateManager.cpp
+
+flamerobin_CodeTemplateProcessor.o: $(srcdir)/src/core/CodeTemplateProcessor.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/CodeTemplateProcessor.cpp
 
 flamerobin_FRError.o: $(srcdir)/src/core/FRError.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/FRError.cpp
@@ -617,12 +623,6 @@ flamerobin_SelectStatement.o: $(srcdir)/src/sql/SelectStatement.cpp $(FLAMEROBIN
 
 flamerobin_SqlStatement.o: $(srcdir)/src/sql/SqlStatement.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/SqlStatement.cpp
-
-flamerobin_SqlTemplateManager.o: $(srcdir)/src/sql/SqlTemplateManager.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/SqlTemplateManager.cpp
-
-flamerobin_SqlTemplateProcessor.o: $(srcdir)/src/sql/SqlTemplateProcessor.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/SqlTemplateProcessor.cpp
 
 flamerobin_SqlTokenizer.o: $(srcdir)/src/sql/SqlTokenizer.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/sql/SqlTokenizer.cpp

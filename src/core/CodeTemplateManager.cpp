@@ -43,9 +43,9 @@
 #include <wx/regex.h>
 
 #include "config/Config.h"
+#include "core/CodeTemplateManager.h"
 #include "core/FRError.h"
 #include "metadata/metadataitem.h"
-#include "sql/SqlTemplateManager.h"
 
 //-----------------------------------------------------------------------------
 TemplateDescriptor::TemplateDescriptor(const wxFileName& templateFileName)
@@ -118,13 +118,13 @@ bool templateDescriptorPointerLT(const TemplateDescriptorPtr left,
     return *left < *right;
 }
 //-----------------------------------------------------------------------------
-SqlTemplateManager::SqlTemplateManager(const MetadataItem& metadataItem)
+CodeTemplateManager::CodeTemplateManager(const MetadataItem& metadataItem)
     : metadataItemM(metadataItem)
 {
     collectDescriptors();
 }
 //-----------------------------------------------------------------------------
-void SqlTemplateManager::collectDescriptors()
+void CodeTemplateManager::collectDescriptors()
 {
     wxArrayString fileNames;
     // Collect predefined and user-defined template descriptors.
@@ -160,7 +160,7 @@ void SqlTemplateManager::collectDescriptors()
     descriptorsM.sort(templateDescriptorPointerLT);
 }
 //-----------------------------------------------------------------------------
-TemplateDescriptorPtr SqlTemplateManager::findDescriptor(
+TemplateDescriptorPtr CodeTemplateManager::findDescriptor(
     const wxString& baseFileName) const
 {
     for (TemplateDescriptorList::const_iterator it = descriptorsBegin();
@@ -172,12 +172,12 @@ TemplateDescriptorPtr SqlTemplateManager::findDescriptor(
     return TemplateDescriptorPtr();
 }
 //-----------------------------------------------------------------------------
-TemplateDescriptorList::const_iterator SqlTemplateManager::descriptorsBegin() const
+TemplateDescriptorList::const_iterator CodeTemplateManager::descriptorsBegin() const
 {
     return descriptorsM.begin();
 }
 //-----------------------------------------------------------------------------
-TemplateDescriptorList::const_iterator SqlTemplateManager::descriptorsEnd() const
+TemplateDescriptorList::const_iterator CodeTemplateManager::descriptorsEnd() const
 {
     return descriptorsM.end();
 }

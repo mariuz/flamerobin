@@ -64,7 +64,7 @@ public:
 typedef boost::shared_ptr<TemplateDescriptor> TemplateDescriptorPtr;
 typedef std::list<TemplateDescriptorPtr> TemplateDescriptorList;
 //-----------------------------------------------------------------------------
-class SqlTemplateManager
+class CodeTemplateManager
 {
 private:
     const MetadataItem& metadataItemM;
@@ -74,7 +74,7 @@ private:
     // Returns a pointer to the first descriptor with the specified base name, or 0.
     TemplateDescriptorPtr findDescriptor(const wxString& baseFileName) const;
 public:
-    SqlTemplateManager(const MetadataItem& metadataItem);
+    CodeTemplateManager(const MetadataItem& metadataItem);
     TemplateDescriptorList::const_iterator descriptorsBegin() const;
     TemplateDescriptorList::const_iterator descriptorsEnd() const;
 };
