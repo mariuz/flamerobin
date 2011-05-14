@@ -178,10 +178,10 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     {
         wxString input;
         internalProcessTemplateText(input, cmdParams[0], object);
-        if (input == wxT("true"))
-            processedText += wxT("false");
-        else if (input == wxT("false"))
-            processedText += wxT("true");
+        if (input == getBooleanAsString(true))
+            processedText += getBooleanAsString(false);
+        else if (input == getBooleanAsString(false))
+            processedText += getBooleanAsString(true);
         else
             processedText += input;
     }
