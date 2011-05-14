@@ -196,10 +196,16 @@ SingleStatement MultiStatement::getNextStatement()
             // ignore partial matches with terminator
             else
             {
-#ifdef __VISUALC__
-    #pragma warning(disable:4996)
-#endif
-                if (!std::equal(terminatorM.begin(), terminatorM.end(), p))
+                wxString::const_iterator p1 = terminatorM.begin();
+                wxString::const_iterator p2 = p;
+                while (p1 != terminatorM.end() && p2 != interesting.end())
+                {
+                    if (*p1 != *p2)
+                        break;
+                    p1++;
+                    p2++;
+                }
+                if (p1 != terminatorM.end())
                 {
                     searchPosM = p + 1;
                     continue;
